@@ -40,6 +40,390 @@ void unmarshal_extension_struct(
     void* structExtension_out);
 
 #ifdef VK_VERSION_1_0
+void marshal_VkExtent2D(
+    VulkanStream* vkStream,
+    const VkExtent2D* forMarshaling)
+{
+    vkStream->write((uint32_t*)&forMarshaling->width, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->height, sizeof(uint32_t));
+}
+
+void unmarshal_VkExtent2D(
+    VulkanStream* vkStream,
+    VkExtent2D* forUnmarshaling)
+{
+    vkStream->read((uint32_t*)&forUnmarshaling->width, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->height, sizeof(uint32_t));
+}
+
+void marshal_VkExtent3D(
+    VulkanStream* vkStream,
+    const VkExtent3D* forMarshaling)
+{
+    vkStream->write((uint32_t*)&forMarshaling->width, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->height, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->depth, sizeof(uint32_t));
+}
+
+void unmarshal_VkExtent3D(
+    VulkanStream* vkStream,
+    VkExtent3D* forUnmarshaling)
+{
+    vkStream->read((uint32_t*)&forUnmarshaling->width, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->height, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->depth, sizeof(uint32_t));
+}
+
+void marshal_VkOffset2D(
+    VulkanStream* vkStream,
+    const VkOffset2D* forMarshaling)
+{
+    vkStream->write((int32_t*)&forMarshaling->x, sizeof(int32_t));
+    vkStream->write((int32_t*)&forMarshaling->y, sizeof(int32_t));
+}
+
+void unmarshal_VkOffset2D(
+    VulkanStream* vkStream,
+    VkOffset2D* forUnmarshaling)
+{
+    vkStream->read((int32_t*)&forUnmarshaling->x, sizeof(int32_t));
+    vkStream->read((int32_t*)&forUnmarshaling->y, sizeof(int32_t));
+}
+
+void marshal_VkOffset3D(
+    VulkanStream* vkStream,
+    const VkOffset3D* forMarshaling)
+{
+    vkStream->write((int32_t*)&forMarshaling->x, sizeof(int32_t));
+    vkStream->write((int32_t*)&forMarshaling->y, sizeof(int32_t));
+    vkStream->write((int32_t*)&forMarshaling->z, sizeof(int32_t));
+}
+
+void unmarshal_VkOffset3D(
+    VulkanStream* vkStream,
+    VkOffset3D* forUnmarshaling)
+{
+    vkStream->read((int32_t*)&forUnmarshaling->x, sizeof(int32_t));
+    vkStream->read((int32_t*)&forUnmarshaling->y, sizeof(int32_t));
+    vkStream->read((int32_t*)&forUnmarshaling->z, sizeof(int32_t));
+}
+
+void marshal_VkRect2D(
+    VulkanStream* vkStream,
+    const VkRect2D* forMarshaling)
+{
+    marshal_VkOffset2D(vkStream, (VkOffset2D*)(&forMarshaling->offset));
+    marshal_VkExtent2D(vkStream, (VkExtent2D*)(&forMarshaling->extent));
+}
+
+void unmarshal_VkRect2D(
+    VulkanStream* vkStream,
+    VkRect2D* forUnmarshaling)
+{
+    unmarshal_VkOffset2D(vkStream, (VkOffset2D*)(&forUnmarshaling->offset));
+    unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->extent));
+}
+
+void marshal_VkBaseInStructure(
+    VulkanStream* vkStream,
+    const VkBaseInStructure* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+}
+
+void unmarshal_VkBaseInStructure(
+    VulkanStream* vkStream,
+    VkBaseInStructure* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((VkBaseInStructure*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+}
+
+void marshal_VkBaseOutStructure(
+    VulkanStream* vkStream,
+    const VkBaseOutStructure* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+}
+
+void unmarshal_VkBaseOutStructure(
+    VulkanStream* vkStream,
+    VkBaseOutStructure* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((VkBaseOutStructure*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+}
+
+void marshal_VkBufferMemoryBarrier(
+    VulkanStream* vkStream,
+    const VkBufferMemoryBarrier* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkAccessFlags*)&forMarshaling->srcAccessMask, sizeof(VkAccessFlags));
+    vkStream->write((VkAccessFlags*)&forMarshaling->dstAccessMask, sizeof(VkAccessFlags));
+    vkStream->write((uint32_t*)&forMarshaling->srcQueueFamilyIndex, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->dstQueueFamilyIndex, sizeof(uint32_t));
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->buffer, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->write((VkDeviceSize*)&forMarshaling->offset, sizeof(VkDeviceSize));
+    vkStream->write((VkDeviceSize*)&forMarshaling->size, sizeof(VkDeviceSize));
+}
+
+void unmarshal_VkBufferMemoryBarrier(
+    VulkanStream* vkStream,
+    VkBufferMemoryBarrier* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkAccessFlags*)&forUnmarshaling->srcAccessMask, sizeof(VkAccessFlags));
+    vkStream->read((VkAccessFlags*)&forUnmarshaling->dstAccessMask, sizeof(VkAccessFlags));
+    vkStream->read((uint32_t*)&forUnmarshaling->srcQueueFamilyIndex, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->dstQueueFamilyIndex, sizeof(uint32_t));
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_0, (VkBuffer*)&forUnmarshaling->buffer, 1);
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->offset, sizeof(VkDeviceSize));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->size, sizeof(VkDeviceSize));
+}
+
+void marshal_VkDispatchIndirectCommand(
+    VulkanStream* vkStream,
+    const VkDispatchIndirectCommand* forMarshaling)
+{
+    vkStream->write((uint32_t*)&forMarshaling->x, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->y, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->z, sizeof(uint32_t));
+}
+
+void unmarshal_VkDispatchIndirectCommand(
+    VulkanStream* vkStream,
+    VkDispatchIndirectCommand* forUnmarshaling)
+{
+    vkStream->read((uint32_t*)&forUnmarshaling->x, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->y, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->z, sizeof(uint32_t));
+}
+
+void marshal_VkDrawIndexedIndirectCommand(
+    VulkanStream* vkStream,
+    const VkDrawIndexedIndirectCommand* forMarshaling)
+{
+    vkStream->write((uint32_t*)&forMarshaling->indexCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->instanceCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->firstIndex, sizeof(uint32_t));
+    vkStream->write((int32_t*)&forMarshaling->vertexOffset, sizeof(int32_t));
+    vkStream->write((uint32_t*)&forMarshaling->firstInstance, sizeof(uint32_t));
+}
+
+void unmarshal_VkDrawIndexedIndirectCommand(
+    VulkanStream* vkStream,
+    VkDrawIndexedIndirectCommand* forUnmarshaling)
+{
+    vkStream->read((uint32_t*)&forUnmarshaling->indexCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->instanceCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->firstIndex, sizeof(uint32_t));
+    vkStream->read((int32_t*)&forUnmarshaling->vertexOffset, sizeof(int32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->firstInstance, sizeof(uint32_t));
+}
+
+void marshal_VkDrawIndirectCommand(
+    VulkanStream* vkStream,
+    const VkDrawIndirectCommand* forMarshaling)
+{
+    vkStream->write((uint32_t*)&forMarshaling->vertexCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->instanceCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->firstVertex, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->firstInstance, sizeof(uint32_t));
+}
+
+void unmarshal_VkDrawIndirectCommand(
+    VulkanStream* vkStream,
+    VkDrawIndirectCommand* forUnmarshaling)
+{
+    vkStream->read((uint32_t*)&forUnmarshaling->vertexCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->instanceCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->firstVertex, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->firstInstance, sizeof(uint32_t));
+}
+
+void marshal_VkImageSubresourceRange(
+    VulkanStream* vkStream,
+    const VkImageSubresourceRange* forMarshaling)
+{
+    vkStream->write((VkImageAspectFlags*)&forMarshaling->aspectMask, sizeof(VkImageAspectFlags));
+    vkStream->write((uint32_t*)&forMarshaling->baseMipLevel, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->levelCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->baseArrayLayer, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->layerCount, sizeof(uint32_t));
+}
+
+void unmarshal_VkImageSubresourceRange(
+    VulkanStream* vkStream,
+    VkImageSubresourceRange* forUnmarshaling)
+{
+    vkStream->read((VkImageAspectFlags*)&forUnmarshaling->aspectMask, sizeof(VkImageAspectFlags));
+    vkStream->read((uint32_t*)&forUnmarshaling->baseMipLevel, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->levelCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->baseArrayLayer, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->layerCount, sizeof(uint32_t));
+}
+
+void marshal_VkImageMemoryBarrier(
+    VulkanStream* vkStream,
+    const VkImageMemoryBarrier* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkAccessFlags*)&forMarshaling->srcAccessMask, sizeof(VkAccessFlags));
+    vkStream->write((VkAccessFlags*)&forMarshaling->dstAccessMask, sizeof(VkAccessFlags));
+    vkStream->write((VkImageLayout*)&forMarshaling->oldLayout, sizeof(VkImageLayout));
+    vkStream->write((VkImageLayout*)&forMarshaling->newLayout, sizeof(VkImageLayout));
+    vkStream->write((uint32_t*)&forMarshaling->srcQueueFamilyIndex, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->dstQueueFamilyIndex, sizeof(uint32_t));
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkImage_u64(&forMarshaling->image, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    marshal_VkImageSubresourceRange(vkStream, (VkImageSubresourceRange*)(&forMarshaling->subresourceRange));
+}
+
+void unmarshal_VkImageMemoryBarrier(
+    VulkanStream* vkStream,
+    VkImageMemoryBarrier* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkAccessFlags*)&forUnmarshaling->srcAccessMask, sizeof(VkAccessFlags));
+    vkStream->read((VkAccessFlags*)&forUnmarshaling->dstAccessMask, sizeof(VkAccessFlags));
+    vkStream->read((VkImageLayout*)&forUnmarshaling->oldLayout, sizeof(VkImageLayout));
+    vkStream->read((VkImageLayout*)&forUnmarshaling->newLayout, sizeof(VkImageLayout));
+    vkStream->read((uint32_t*)&forUnmarshaling->srcQueueFamilyIndex, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->dstQueueFamilyIndex, sizeof(uint32_t));
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_0, (VkImage*)&forUnmarshaling->image, 1);
+    unmarshal_VkImageSubresourceRange(vkStream, (VkImageSubresourceRange*)(&forUnmarshaling->subresourceRange));
+}
+
+void marshal_VkMemoryBarrier(
+    VulkanStream* vkStream,
+    const VkMemoryBarrier* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkAccessFlags*)&forMarshaling->srcAccessMask, sizeof(VkAccessFlags));
+    vkStream->write((VkAccessFlags*)&forMarshaling->dstAccessMask, sizeof(VkAccessFlags));
+}
+
+void unmarshal_VkMemoryBarrier(
+    VulkanStream* vkStream,
+    VkMemoryBarrier* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkAccessFlags*)&forUnmarshaling->srcAccessMask, sizeof(VkAccessFlags));
+    vkStream->read((VkAccessFlags*)&forUnmarshaling->dstAccessMask, sizeof(VkAccessFlags));
+}
+
+void marshal_VkAllocationCallbacks(
+    VulkanStream* vkStream,
+    const VkAllocationCallbacks* forMarshaling)
+{
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pUserData;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->pUserData)
+    {
+        vkStream->write((void*)forMarshaling->pUserData, sizeof(uint8_t));
+    }
+    uint64_t cgen_var_1 = (uint64_t)forMarshaling->pfnAllocation;
+    vkStream->putBe64(cgen_var_1);
+    uint64_t cgen_var_2 = (uint64_t)forMarshaling->pfnReallocation;
+    vkStream->putBe64(cgen_var_2);
+    uint64_t cgen_var_3 = (uint64_t)forMarshaling->pfnFree;
+    vkStream->putBe64(cgen_var_3);
+    uint64_t cgen_var_4 = (uint64_t)forMarshaling->pfnInternalAllocation;
+    vkStream->putBe64(cgen_var_4);
+    uint64_t cgen_var_5 = (uint64_t)forMarshaling->pfnInternalFree;
+    vkStream->putBe64(cgen_var_5);
+}
+
+void unmarshal_VkAllocationCallbacks(
+    VulkanStream* vkStream,
+    VkAllocationCallbacks* forUnmarshaling)
+{
+    // WARNING PTR CHECK
+    forUnmarshaling->pUserData = (void*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pUserData)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pUserData, sizeof(uint8_t));
+        vkStream->read((void*)forUnmarshaling->pUserData, sizeof(uint8_t));
+    }
+    forUnmarshaling->pfnAllocation = (PFN_vkAllocationFunction)vkStream->getBe64();
+    forUnmarshaling->pfnReallocation = (PFN_vkReallocationFunction)vkStream->getBe64();
+    forUnmarshaling->pfnFree = (PFN_vkFreeFunction)vkStream->getBe64();
+    forUnmarshaling->pfnInternalAllocation = (PFN_vkInternalAllocationNotification)vkStream->getBe64();
+    forUnmarshaling->pfnInternalFree = (PFN_vkInternalFreeNotification)vkStream->getBe64();
+}
+
 void marshal_VkApplicationInfo(
     VulkanStream* vkStream,
     const VkApplicationInfo* forMarshaling)
@@ -127,6 +511,46 @@ void unmarshal_VkApplicationInfo(
     vkStream->read((uint32_t*)&forUnmarshaling->apiVersion, sizeof(uint32_t));
 }
 
+void marshal_VkFormatProperties(
+    VulkanStream* vkStream,
+    const VkFormatProperties* forMarshaling)
+{
+    vkStream->write((VkFormatFeatureFlags*)&forMarshaling->linearTilingFeatures, sizeof(VkFormatFeatureFlags));
+    vkStream->write((VkFormatFeatureFlags*)&forMarshaling->optimalTilingFeatures, sizeof(VkFormatFeatureFlags));
+    vkStream->write((VkFormatFeatureFlags*)&forMarshaling->bufferFeatures, sizeof(VkFormatFeatureFlags));
+}
+
+void unmarshal_VkFormatProperties(
+    VulkanStream* vkStream,
+    VkFormatProperties* forUnmarshaling)
+{
+    vkStream->read((VkFormatFeatureFlags*)&forUnmarshaling->linearTilingFeatures, sizeof(VkFormatFeatureFlags));
+    vkStream->read((VkFormatFeatureFlags*)&forUnmarshaling->optimalTilingFeatures, sizeof(VkFormatFeatureFlags));
+    vkStream->read((VkFormatFeatureFlags*)&forUnmarshaling->bufferFeatures, sizeof(VkFormatFeatureFlags));
+}
+
+void marshal_VkImageFormatProperties(
+    VulkanStream* vkStream,
+    const VkImageFormatProperties* forMarshaling)
+{
+    marshal_VkExtent3D(vkStream, (VkExtent3D*)(&forMarshaling->maxExtent));
+    vkStream->write((uint32_t*)&forMarshaling->maxMipLevels, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxArrayLayers, sizeof(uint32_t));
+    vkStream->write((VkSampleCountFlags*)&forMarshaling->sampleCounts, sizeof(VkSampleCountFlags));
+    vkStream->write((VkDeviceSize*)&forMarshaling->maxResourceSize, sizeof(VkDeviceSize));
+}
+
+void unmarshal_VkImageFormatProperties(
+    VulkanStream* vkStream,
+    VkImageFormatProperties* forUnmarshaling)
+{
+    unmarshal_VkExtent3D(vkStream, (VkExtent3D*)(&forUnmarshaling->maxExtent));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxMipLevels, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxArrayLayers, sizeof(uint32_t));
+    vkStream->read((VkSampleCountFlags*)&forUnmarshaling->sampleCounts, sizeof(VkSampleCountFlags));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->maxResourceSize, sizeof(VkDeviceSize));
+}
+
 void marshal_VkInstanceCreateInfo(
     VulkanStream* vkStream,
     const VkInstanceCreateInfo* forMarshaling)
@@ -178,45 +602,36 @@ void unmarshal_VkInstanceCreateInfo(
     vkStream->loadStringArrayInPlace((char***)&forUnmarshaling->ppEnabledExtensionNames);
 }
 
-void marshal_VkAllocationCallbacks(
+void marshal_VkMemoryHeap(
     VulkanStream* vkStream,
-    const VkAllocationCallbacks* forMarshaling)
+    const VkMemoryHeap* forMarshaling)
 {
-    // WARNING PTR CHECK
-    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pUserData;
-    vkStream->putBe64(cgen_var_0);
-    if (forMarshaling->pUserData)
-    {
-        vkStream->write((void*)forMarshaling->pUserData, sizeof(uint8_t));
-    }
-    uint64_t cgen_var_1 = (uint64_t)forMarshaling->pfnAllocation;
-    vkStream->putBe64(cgen_var_1);
-    uint64_t cgen_var_2 = (uint64_t)forMarshaling->pfnReallocation;
-    vkStream->putBe64(cgen_var_2);
-    uint64_t cgen_var_3 = (uint64_t)forMarshaling->pfnFree;
-    vkStream->putBe64(cgen_var_3);
-    uint64_t cgen_var_4 = (uint64_t)forMarshaling->pfnInternalAllocation;
-    vkStream->putBe64(cgen_var_4);
-    uint64_t cgen_var_5 = (uint64_t)forMarshaling->pfnInternalFree;
-    vkStream->putBe64(cgen_var_5);
+    vkStream->write((VkDeviceSize*)&forMarshaling->size, sizeof(VkDeviceSize));
+    vkStream->write((VkMemoryHeapFlags*)&forMarshaling->flags, sizeof(VkMemoryHeapFlags));
 }
 
-void unmarshal_VkAllocationCallbacks(
+void unmarshal_VkMemoryHeap(
     VulkanStream* vkStream,
-    VkAllocationCallbacks* forUnmarshaling)
+    VkMemoryHeap* forUnmarshaling)
 {
-    // WARNING PTR CHECK
-    forUnmarshaling->pUserData = (void*)(uintptr_t)vkStream->getBe64();
-    if (forUnmarshaling->pUserData)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pUserData, sizeof(uint8_t));
-        vkStream->read((void*)forUnmarshaling->pUserData, sizeof(uint8_t));
-    }
-    forUnmarshaling->pfnAllocation = (PFN_vkAllocationFunction)vkStream->getBe64();
-    forUnmarshaling->pfnReallocation = (PFN_vkReallocationFunction)vkStream->getBe64();
-    forUnmarshaling->pfnFree = (PFN_vkFreeFunction)vkStream->getBe64();
-    forUnmarshaling->pfnInternalAllocation = (PFN_vkInternalAllocationNotification)vkStream->getBe64();
-    forUnmarshaling->pfnInternalFree = (PFN_vkInternalFreeNotification)vkStream->getBe64();
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->size, sizeof(VkDeviceSize));
+    vkStream->read((VkMemoryHeapFlags*)&forUnmarshaling->flags, sizeof(VkMemoryHeapFlags));
+}
+
+void marshal_VkMemoryType(
+    VulkanStream* vkStream,
+    const VkMemoryType* forMarshaling)
+{
+    vkStream->write((VkMemoryPropertyFlags*)&forMarshaling->propertyFlags, sizeof(VkMemoryPropertyFlags));
+    vkStream->write((uint32_t*)&forMarshaling->heapIndex, sizeof(uint32_t));
+}
+
+void unmarshal_VkMemoryType(
+    VulkanStream* vkStream,
+    VkMemoryType* forUnmarshaling)
+{
+    vkStream->read((VkMemoryPropertyFlags*)&forUnmarshaling->propertyFlags, sizeof(VkMemoryPropertyFlags));
+    vkStream->read((uint32_t*)&forUnmarshaling->heapIndex, sizeof(uint32_t));
 }
 
 void marshal_VkPhysicalDeviceFeatures(
@@ -339,64 +754,6 @@ void unmarshal_VkPhysicalDeviceFeatures(
     vkStream->read((VkBool32*)&forUnmarshaling->sparseResidencyAliased, sizeof(VkBool32));
     vkStream->read((VkBool32*)&forUnmarshaling->variableMultisampleRate, sizeof(VkBool32));
     vkStream->read((VkBool32*)&forUnmarshaling->inheritedQueries, sizeof(VkBool32));
-}
-
-void marshal_VkFormatProperties(
-    VulkanStream* vkStream,
-    const VkFormatProperties* forMarshaling)
-{
-    vkStream->write((VkFormatFeatureFlags*)&forMarshaling->linearTilingFeatures, sizeof(VkFormatFeatureFlags));
-    vkStream->write((VkFormatFeatureFlags*)&forMarshaling->optimalTilingFeatures, sizeof(VkFormatFeatureFlags));
-    vkStream->write((VkFormatFeatureFlags*)&forMarshaling->bufferFeatures, sizeof(VkFormatFeatureFlags));
-}
-
-void unmarshal_VkFormatProperties(
-    VulkanStream* vkStream,
-    VkFormatProperties* forUnmarshaling)
-{
-    vkStream->read((VkFormatFeatureFlags*)&forUnmarshaling->linearTilingFeatures, sizeof(VkFormatFeatureFlags));
-    vkStream->read((VkFormatFeatureFlags*)&forUnmarshaling->optimalTilingFeatures, sizeof(VkFormatFeatureFlags));
-    vkStream->read((VkFormatFeatureFlags*)&forUnmarshaling->bufferFeatures, sizeof(VkFormatFeatureFlags));
-}
-
-void marshal_VkExtent3D(
-    VulkanStream* vkStream,
-    const VkExtent3D* forMarshaling)
-{
-    vkStream->write((uint32_t*)&forMarshaling->width, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->height, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->depth, sizeof(uint32_t));
-}
-
-void unmarshal_VkExtent3D(
-    VulkanStream* vkStream,
-    VkExtent3D* forUnmarshaling)
-{
-    vkStream->read((uint32_t*)&forUnmarshaling->width, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->height, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->depth, sizeof(uint32_t));
-}
-
-void marshal_VkImageFormatProperties(
-    VulkanStream* vkStream,
-    const VkImageFormatProperties* forMarshaling)
-{
-    marshal_VkExtent3D(vkStream, (VkExtent3D*)(&forMarshaling->maxExtent));
-    vkStream->write((uint32_t*)&forMarshaling->maxMipLevels, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxArrayLayers, sizeof(uint32_t));
-    vkStream->write((VkSampleCountFlags*)&forMarshaling->sampleCounts, sizeof(VkSampleCountFlags));
-    vkStream->write((VkDeviceSize*)&forMarshaling->maxResourceSize, sizeof(VkDeviceSize));
-}
-
-void unmarshal_VkImageFormatProperties(
-    VulkanStream* vkStream,
-    VkImageFormatProperties* forUnmarshaling)
-{
-    unmarshal_VkExtent3D(vkStream, (VkExtent3D*)(&forUnmarshaling->maxExtent));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxMipLevels, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxArrayLayers, sizeof(uint32_t));
-    vkStream->read((VkSampleCountFlags*)&forUnmarshaling->sampleCounts, sizeof(VkSampleCountFlags));
-    vkStream->read((VkDeviceSize*)&forUnmarshaling->maxResourceSize, sizeof(VkDeviceSize));
 }
 
 void marshal_VkPhysicalDeviceLimits(
@@ -624,6 +981,38 @@ void unmarshal_VkPhysicalDeviceLimits(
     vkStream->read((VkDeviceSize*)&forUnmarshaling->nonCoherentAtomSize, sizeof(VkDeviceSize));
 }
 
+void marshal_VkPhysicalDeviceMemoryProperties(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceMemoryProperties* forMarshaling)
+{
+    vkStream->write((uint32_t*)&forMarshaling->memoryTypeCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)VK_MAX_MEMORY_TYPES; ++i)
+    {
+        marshal_VkMemoryType(vkStream, (VkMemoryType*)(forMarshaling->memoryTypes + i));
+    }
+    vkStream->write((uint32_t*)&forMarshaling->memoryHeapCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)VK_MAX_MEMORY_HEAPS; ++i)
+    {
+        marshal_VkMemoryHeap(vkStream, (VkMemoryHeap*)(forMarshaling->memoryHeaps + i));
+    }
+}
+
+void unmarshal_VkPhysicalDeviceMemoryProperties(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceMemoryProperties* forUnmarshaling)
+{
+    vkStream->read((uint32_t*)&forUnmarshaling->memoryTypeCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)VK_MAX_MEMORY_TYPES; ++i)
+    {
+        unmarshal_VkMemoryType(vkStream, (VkMemoryType*)(forUnmarshaling->memoryTypes + i));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->memoryHeapCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)VK_MAX_MEMORY_HEAPS; ++i)
+    {
+        unmarshal_VkMemoryHeap(vkStream, (VkMemoryHeap*)(forUnmarshaling->memoryHeaps + i));
+    }
+}
+
 void marshal_VkPhysicalDeviceSparseProperties(
     VulkanStream* vkStream,
     const VkPhysicalDeviceSparseProperties* forMarshaling)
@@ -694,70 +1083,6 @@ void unmarshal_VkQueueFamilyProperties(
     vkStream->read((uint32_t*)&forUnmarshaling->queueCount, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->timestampValidBits, sizeof(uint32_t));
     unmarshal_VkExtent3D(vkStream, (VkExtent3D*)(&forUnmarshaling->minImageTransferGranularity));
-}
-
-void marshal_VkMemoryType(
-    VulkanStream* vkStream,
-    const VkMemoryType* forMarshaling)
-{
-    vkStream->write((VkMemoryPropertyFlags*)&forMarshaling->propertyFlags, sizeof(VkMemoryPropertyFlags));
-    vkStream->write((uint32_t*)&forMarshaling->heapIndex, sizeof(uint32_t));
-}
-
-void unmarshal_VkMemoryType(
-    VulkanStream* vkStream,
-    VkMemoryType* forUnmarshaling)
-{
-    vkStream->read((VkMemoryPropertyFlags*)&forUnmarshaling->propertyFlags, sizeof(VkMemoryPropertyFlags));
-    vkStream->read((uint32_t*)&forUnmarshaling->heapIndex, sizeof(uint32_t));
-}
-
-void marshal_VkMemoryHeap(
-    VulkanStream* vkStream,
-    const VkMemoryHeap* forMarshaling)
-{
-    vkStream->write((VkDeviceSize*)&forMarshaling->size, sizeof(VkDeviceSize));
-    vkStream->write((VkMemoryHeapFlags*)&forMarshaling->flags, sizeof(VkMemoryHeapFlags));
-}
-
-void unmarshal_VkMemoryHeap(
-    VulkanStream* vkStream,
-    VkMemoryHeap* forUnmarshaling)
-{
-    vkStream->read((VkDeviceSize*)&forUnmarshaling->size, sizeof(VkDeviceSize));
-    vkStream->read((VkMemoryHeapFlags*)&forUnmarshaling->flags, sizeof(VkMemoryHeapFlags));
-}
-
-void marshal_VkPhysicalDeviceMemoryProperties(
-    VulkanStream* vkStream,
-    const VkPhysicalDeviceMemoryProperties* forMarshaling)
-{
-    vkStream->write((uint32_t*)&forMarshaling->memoryTypeCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)VK_MAX_MEMORY_TYPES; ++i)
-    {
-        marshal_VkMemoryType(vkStream, (VkMemoryType*)(forMarshaling->memoryTypes + i));
-    }
-    vkStream->write((uint32_t*)&forMarshaling->memoryHeapCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)VK_MAX_MEMORY_HEAPS; ++i)
-    {
-        marshal_VkMemoryHeap(vkStream, (VkMemoryHeap*)(forMarshaling->memoryHeaps + i));
-    }
-}
-
-void unmarshal_VkPhysicalDeviceMemoryProperties(
-    VulkanStream* vkStream,
-    VkPhysicalDeviceMemoryProperties* forUnmarshaling)
-{
-    vkStream->read((uint32_t*)&forUnmarshaling->memoryTypeCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)VK_MAX_MEMORY_TYPES; ++i)
-    {
-        unmarshal_VkMemoryType(vkStream, (VkMemoryType*)(forUnmarshaling->memoryTypes + i));
-    }
-    vkStream->read((uint32_t*)&forUnmarshaling->memoryHeapCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)VK_MAX_MEMORY_HEAPS; ++i)
-    {
-        unmarshal_VkMemoryHeap(vkStream, (VkMemoryHeap*)(forUnmarshaling->memoryHeaps + i));
-    }
 }
 
 void marshal_VkDeviceQueueCreateInfo(
@@ -975,37 +1300,6 @@ void unmarshal_VkSubmitInfo(
     }
 }
 
-void marshal_VkMemoryAllocateInfo(
-    VulkanStream* vkStream,
-    const VkMemoryAllocateInfo* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkDeviceSize*)&forMarshaling->allocationSize, sizeof(VkDeviceSize));
-    vkStream->write((uint32_t*)&forMarshaling->memoryTypeIndex, sizeof(uint32_t));
-}
-
-void unmarshal_VkMemoryAllocateInfo(
-    VulkanStream* vkStream,
-    VkMemoryAllocateInfo* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((VkDeviceSize*)&forUnmarshaling->allocationSize, sizeof(VkDeviceSize));
-    vkStream->read((uint32_t*)&forUnmarshaling->memoryTypeIndex, sizeof(uint32_t));
-}
-
 void marshal_VkMappedMemoryRange(
     VulkanStream* vkStream,
     const VkMappedMemoryRange* forMarshaling)
@@ -1043,6 +1337,37 @@ void unmarshal_VkMappedMemoryRange(
     vkStream->read((VkDeviceSize*)&forUnmarshaling->size, sizeof(VkDeviceSize));
 }
 
+void marshal_VkMemoryAllocateInfo(
+    VulkanStream* vkStream,
+    const VkMemoryAllocateInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkDeviceSize*)&forMarshaling->allocationSize, sizeof(VkDeviceSize));
+    vkStream->write((uint32_t*)&forMarshaling->memoryTypeIndex, sizeof(uint32_t));
+}
+
+void unmarshal_VkMemoryAllocateInfo(
+    VulkanStream* vkStream,
+    VkMemoryAllocateInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->allocationSize, sizeof(VkDeviceSize));
+    vkStream->read((uint32_t*)&forUnmarshaling->memoryTypeIndex, sizeof(uint32_t));
+}
+
 void marshal_VkMemoryRequirements(
     VulkanStream* vkStream,
     const VkMemoryRequirements* forMarshaling)
@@ -1059,46 +1384,6 @@ void unmarshal_VkMemoryRequirements(
     vkStream->read((VkDeviceSize*)&forUnmarshaling->size, sizeof(VkDeviceSize));
     vkStream->read((VkDeviceSize*)&forUnmarshaling->alignment, sizeof(VkDeviceSize));
     vkStream->read((uint32_t*)&forUnmarshaling->memoryTypeBits, sizeof(uint32_t));
-}
-
-void marshal_VkSparseImageFormatProperties(
-    VulkanStream* vkStream,
-    const VkSparseImageFormatProperties* forMarshaling)
-{
-    vkStream->write((VkImageAspectFlags*)&forMarshaling->aspectMask, sizeof(VkImageAspectFlags));
-    marshal_VkExtent3D(vkStream, (VkExtent3D*)(&forMarshaling->imageGranularity));
-    vkStream->write((VkSparseImageFormatFlags*)&forMarshaling->flags, sizeof(VkSparseImageFormatFlags));
-}
-
-void unmarshal_VkSparseImageFormatProperties(
-    VulkanStream* vkStream,
-    VkSparseImageFormatProperties* forUnmarshaling)
-{
-    vkStream->read((VkImageAspectFlags*)&forUnmarshaling->aspectMask, sizeof(VkImageAspectFlags));
-    unmarshal_VkExtent3D(vkStream, (VkExtent3D*)(&forUnmarshaling->imageGranularity));
-    vkStream->read((VkSparseImageFormatFlags*)&forUnmarshaling->flags, sizeof(VkSparseImageFormatFlags));
-}
-
-void marshal_VkSparseImageMemoryRequirements(
-    VulkanStream* vkStream,
-    const VkSparseImageMemoryRequirements* forMarshaling)
-{
-    marshal_VkSparseImageFormatProperties(vkStream, (VkSparseImageFormatProperties*)(&forMarshaling->formatProperties));
-    vkStream->write((uint32_t*)&forMarshaling->imageMipTailFirstLod, sizeof(uint32_t));
-    vkStream->write((VkDeviceSize*)&forMarshaling->imageMipTailSize, sizeof(VkDeviceSize));
-    vkStream->write((VkDeviceSize*)&forMarshaling->imageMipTailOffset, sizeof(VkDeviceSize));
-    vkStream->write((VkDeviceSize*)&forMarshaling->imageMipTailStride, sizeof(VkDeviceSize));
-}
-
-void unmarshal_VkSparseImageMemoryRequirements(
-    VulkanStream* vkStream,
-    VkSparseImageMemoryRequirements* forUnmarshaling)
-{
-    unmarshal_VkSparseImageFormatProperties(vkStream, (VkSparseImageFormatProperties*)(&forUnmarshaling->formatProperties));
-    vkStream->read((uint32_t*)&forUnmarshaling->imageMipTailFirstLod, sizeof(uint32_t));
-    vkStream->read((VkDeviceSize*)&forUnmarshaling->imageMipTailSize, sizeof(VkDeviceSize));
-    vkStream->read((VkDeviceSize*)&forUnmarshaling->imageMipTailOffset, sizeof(VkDeviceSize));
-    vkStream->read((VkDeviceSize*)&forUnmarshaling->imageMipTailStride, sizeof(VkDeviceSize));
 }
 
 void marshal_VkSparseMemoryBind(
@@ -1201,24 +1486,6 @@ void unmarshal_VkImageSubresource(
     vkStream->read((VkImageAspectFlags*)&forUnmarshaling->aspectMask, sizeof(VkImageAspectFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->mipLevel, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->arrayLayer, sizeof(uint32_t));
-}
-
-void marshal_VkOffset3D(
-    VulkanStream* vkStream,
-    const VkOffset3D* forMarshaling)
-{
-    vkStream->write((int32_t*)&forMarshaling->x, sizeof(int32_t));
-    vkStream->write((int32_t*)&forMarshaling->y, sizeof(int32_t));
-    vkStream->write((int32_t*)&forMarshaling->z, sizeof(int32_t));
-}
-
-void unmarshal_VkOffset3D(
-    VulkanStream* vkStream,
-    VkOffset3D* forUnmarshaling)
-{
-    vkStream->read((int32_t*)&forUnmarshaling->x, sizeof(int32_t));
-    vkStream->read((int32_t*)&forUnmarshaling->y, sizeof(int32_t));
-    vkStream->read((int32_t*)&forUnmarshaling->z, sizeof(int32_t));
 }
 
 void marshal_VkSparseImageMemoryBind(
@@ -1370,6 +1637,46 @@ void unmarshal_VkBindSparseInfo(
         vkStream->read((uint64_t*)cgen_var_1, forUnmarshaling->signalSemaphoreCount * 8);
         vkStream->handleMapping()->mapHandles_u64_VkSemaphore(cgen_var_1, (VkSemaphore*)forUnmarshaling->pSignalSemaphores, forUnmarshaling->signalSemaphoreCount);
     }
+}
+
+void marshal_VkSparseImageFormatProperties(
+    VulkanStream* vkStream,
+    const VkSparseImageFormatProperties* forMarshaling)
+{
+    vkStream->write((VkImageAspectFlags*)&forMarshaling->aspectMask, sizeof(VkImageAspectFlags));
+    marshal_VkExtent3D(vkStream, (VkExtent3D*)(&forMarshaling->imageGranularity));
+    vkStream->write((VkSparseImageFormatFlags*)&forMarshaling->flags, sizeof(VkSparseImageFormatFlags));
+}
+
+void unmarshal_VkSparseImageFormatProperties(
+    VulkanStream* vkStream,
+    VkSparseImageFormatProperties* forUnmarshaling)
+{
+    vkStream->read((VkImageAspectFlags*)&forUnmarshaling->aspectMask, sizeof(VkImageAspectFlags));
+    unmarshal_VkExtent3D(vkStream, (VkExtent3D*)(&forUnmarshaling->imageGranularity));
+    vkStream->read((VkSparseImageFormatFlags*)&forUnmarshaling->flags, sizeof(VkSparseImageFormatFlags));
+}
+
+void marshal_VkSparseImageMemoryRequirements(
+    VulkanStream* vkStream,
+    const VkSparseImageMemoryRequirements* forMarshaling)
+{
+    marshal_VkSparseImageFormatProperties(vkStream, (VkSparseImageFormatProperties*)(&forMarshaling->formatProperties));
+    vkStream->write((uint32_t*)&forMarshaling->imageMipTailFirstLod, sizeof(uint32_t));
+    vkStream->write((VkDeviceSize*)&forMarshaling->imageMipTailSize, sizeof(VkDeviceSize));
+    vkStream->write((VkDeviceSize*)&forMarshaling->imageMipTailOffset, sizeof(VkDeviceSize));
+    vkStream->write((VkDeviceSize*)&forMarshaling->imageMipTailStride, sizeof(VkDeviceSize));
+}
+
+void unmarshal_VkSparseImageMemoryRequirements(
+    VulkanStream* vkStream,
+    VkSparseImageMemoryRequirements* forUnmarshaling)
+{
+    unmarshal_VkSparseImageFormatProperties(vkStream, (VkSparseImageFormatProperties*)(&forUnmarshaling->formatProperties));
+    vkStream->read((uint32_t*)&forUnmarshaling->imageMipTailFirstLod, sizeof(uint32_t));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->imageMipTailSize, sizeof(VkDeviceSize));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->imageMipTailOffset, sizeof(VkDeviceSize));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->imageMipTailStride, sizeof(VkDeviceSize));
 }
 
 void marshal_VkFenceCreateInfo(
@@ -1693,28 +2000,6 @@ void unmarshal_VkComponentMapping(
     vkStream->read((VkComponentSwizzle*)&forUnmarshaling->a, sizeof(VkComponentSwizzle));
 }
 
-void marshal_VkImageSubresourceRange(
-    VulkanStream* vkStream,
-    const VkImageSubresourceRange* forMarshaling)
-{
-    vkStream->write((VkImageAspectFlags*)&forMarshaling->aspectMask, sizeof(VkImageAspectFlags));
-    vkStream->write((uint32_t*)&forMarshaling->baseMipLevel, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->levelCount, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->baseArrayLayer, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->layerCount, sizeof(uint32_t));
-}
-
-void unmarshal_VkImageSubresourceRange(
-    VulkanStream* vkStream,
-    VkImageSubresourceRange* forUnmarshaling)
-{
-    vkStream->read((VkImageAspectFlags*)&forUnmarshaling->aspectMask, sizeof(VkImageAspectFlags));
-    vkStream->read((uint32_t*)&forUnmarshaling->baseMipLevel, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->levelCount, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->baseArrayLayer, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->layerCount, sizeof(uint32_t));
-}
-
 void marshal_VkImageViewCreateInfo(
     VulkanStream* vkStream,
     const VkImageViewCreateInfo* forMarshaling)
@@ -1929,6 +2214,51 @@ void unmarshal_VkPipelineShaderStageCreateInfo(
     }
 }
 
+void marshal_VkComputePipelineCreateInfo(
+    VulkanStream* vkStream,
+    const VkComputePipelineCreateInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkPipelineCreateFlags*)&forMarshaling->flags, sizeof(VkPipelineCreateFlags));
+    marshal_VkPipelineShaderStageCreateInfo(vkStream, (VkPipelineShaderStageCreateInfo*)(&forMarshaling->stage));
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkPipelineLayout_u64(&forMarshaling->layout, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    uint64_t cgen_var_1;
+    vkStream->handleMapping()->mapHandles_VkPipeline_u64(&forMarshaling->basePipelineHandle, &cgen_var_1, 1);
+    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->write((int32_t*)&forMarshaling->basePipelineIndex, sizeof(int32_t));
+}
+
+void unmarshal_VkComputePipelineCreateInfo(
+    VulkanStream* vkStream,
+    VkComputePipelineCreateInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkPipelineCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineCreateFlags));
+    unmarshal_VkPipelineShaderStageCreateInfo(vkStream, (VkPipelineShaderStageCreateInfo*)(&forUnmarshaling->stage));
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkPipelineLayout(&cgen_var_0, (VkPipelineLayout*)&forUnmarshaling->layout, 1);
+    uint64_t cgen_var_1;
+    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkPipeline(&cgen_var_1, (VkPipeline*)&forUnmarshaling->basePipelineHandle, 1);
+    vkStream->read((int32_t*)&forUnmarshaling->basePipelineIndex, sizeof(int32_t));
+}
+
 void marshal_VkVertexInputBindingDescription(
     VulkanStream* vkStream,
     const VkVertexInputBindingDescription* forMarshaling)
@@ -2104,54 +2434,6 @@ void unmarshal_VkViewport(
     vkStream->read((float*)&forUnmarshaling->height, sizeof(float));
     vkStream->read((float*)&forUnmarshaling->minDepth, sizeof(float));
     vkStream->read((float*)&forUnmarshaling->maxDepth, sizeof(float));
-}
-
-void marshal_VkOffset2D(
-    VulkanStream* vkStream,
-    const VkOffset2D* forMarshaling)
-{
-    vkStream->write((int32_t*)&forMarshaling->x, sizeof(int32_t));
-    vkStream->write((int32_t*)&forMarshaling->y, sizeof(int32_t));
-}
-
-void unmarshal_VkOffset2D(
-    VulkanStream* vkStream,
-    VkOffset2D* forUnmarshaling)
-{
-    vkStream->read((int32_t*)&forUnmarshaling->x, sizeof(int32_t));
-    vkStream->read((int32_t*)&forUnmarshaling->y, sizeof(int32_t));
-}
-
-void marshal_VkExtent2D(
-    VulkanStream* vkStream,
-    const VkExtent2D* forMarshaling)
-{
-    vkStream->write((uint32_t*)&forMarshaling->width, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->height, sizeof(uint32_t));
-}
-
-void unmarshal_VkExtent2D(
-    VulkanStream* vkStream,
-    VkExtent2D* forUnmarshaling)
-{
-    vkStream->read((uint32_t*)&forUnmarshaling->width, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->height, sizeof(uint32_t));
-}
-
-void marshal_VkRect2D(
-    VulkanStream* vkStream,
-    const VkRect2D* forMarshaling)
-{
-    marshal_VkOffset2D(vkStream, (VkOffset2D*)(&forMarshaling->offset));
-    marshal_VkExtent2D(vkStream, (VkExtent2D*)(&forMarshaling->extent));
-}
-
-void unmarshal_VkRect2D(
-    VulkanStream* vkStream,
-    VkRect2D* forUnmarshaling)
-{
-    unmarshal_VkOffset2D(vkStream, (VkOffset2D*)(&forUnmarshaling->offset));
-    unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->extent));
 }
 
 void marshal_VkPipelineViewportStateCreateInfo(
@@ -2790,51 +3072,6 @@ void unmarshal_VkGraphicsPipelineCreateInfo(
     vkStream->read((int32_t*)&forUnmarshaling->basePipelineIndex, sizeof(int32_t));
 }
 
-void marshal_VkComputePipelineCreateInfo(
-    VulkanStream* vkStream,
-    const VkComputePipelineCreateInfo* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkPipelineCreateFlags*)&forMarshaling->flags, sizeof(VkPipelineCreateFlags));
-    marshal_VkPipelineShaderStageCreateInfo(vkStream, (VkPipelineShaderStageCreateInfo*)(&forMarshaling->stage));
-    uint64_t cgen_var_0;
-    vkStream->handleMapping()->mapHandles_VkPipelineLayout_u64(&forMarshaling->layout, &cgen_var_0, 1);
-    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
-    uint64_t cgen_var_1;
-    vkStream->handleMapping()->mapHandles_VkPipeline_u64(&forMarshaling->basePipelineHandle, &cgen_var_1, 1);
-    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
-    vkStream->write((int32_t*)&forMarshaling->basePipelineIndex, sizeof(int32_t));
-}
-
-void unmarshal_VkComputePipelineCreateInfo(
-    VulkanStream* vkStream,
-    VkComputePipelineCreateInfo* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((VkPipelineCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineCreateFlags));
-    unmarshal_VkPipelineShaderStageCreateInfo(vkStream, (VkPipelineShaderStageCreateInfo*)(&forUnmarshaling->stage));
-    uint64_t cgen_var_0;
-    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkPipelineLayout(&cgen_var_0, (VkPipelineLayout*)&forUnmarshaling->layout, 1);
-    uint64_t cgen_var_1;
-    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkPipeline(&cgen_var_1, (VkPipeline*)&forUnmarshaling->basePipelineHandle, 1);
-    vkStream->read((int32_t*)&forUnmarshaling->basePipelineIndex, sizeof(int32_t));
-}
-
 void marshal_VkPushConstantRange(
     VulkanStream* vkStream,
     const VkPushConstantRange* forMarshaling)
@@ -2969,69 +3206,28 @@ void unmarshal_VkSamplerCreateInfo(
     vkStream->read((VkBool32*)&forUnmarshaling->unnormalizedCoordinates, sizeof(VkBool32));
 }
 
-void marshal_VkDescriptorSetLayoutBinding(
+void marshal_VkCopyDescriptorSet(
     VulkanStream* vkStream,
-    const VkDescriptorSetLayoutBinding* forMarshaling)
-{
-    vkStream->write((uint32_t*)&forMarshaling->binding, sizeof(uint32_t));
-    vkStream->write((VkDescriptorType*)&forMarshaling->descriptorType, sizeof(VkDescriptorType));
-    vkStream->write((uint32_t*)&forMarshaling->descriptorCount, sizeof(uint32_t));
-    vkStream->write((VkShaderStageFlags*)&forMarshaling->stageFlags, sizeof(VkShaderStageFlags));
-    // WARNING PTR CHECK
-    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pImmutableSamplers;
-    vkStream->putBe64(cgen_var_0);
-    if (forMarshaling->pImmutableSamplers)
-    {
-        if (forMarshaling->descriptorCount)
-        {
-            uint64_t* cgen_var_0_0;
-            vkStream->alloc((void**)&cgen_var_0_0, forMarshaling->descriptorCount * 8);
-            vkStream->handleMapping()->mapHandles_VkSampler_u64(forMarshaling->pImmutableSamplers, cgen_var_0_0, forMarshaling->descriptorCount);
-            vkStream->write((uint64_t*)cgen_var_0_0, forMarshaling->descriptorCount * 8);
-        }
-    }
-}
-
-void unmarshal_VkDescriptorSetLayoutBinding(
-    VulkanStream* vkStream,
-    VkDescriptorSetLayoutBinding* forUnmarshaling)
-{
-    vkStream->read((uint32_t*)&forUnmarshaling->binding, sizeof(uint32_t));
-    vkStream->read((VkDescriptorType*)&forUnmarshaling->descriptorType, sizeof(VkDescriptorType));
-    vkStream->read((uint32_t*)&forUnmarshaling->descriptorCount, sizeof(uint32_t));
-    vkStream->read((VkShaderStageFlags*)&forUnmarshaling->stageFlags, sizeof(VkShaderStageFlags));
-    // WARNING PTR CHECK
-    forUnmarshaling->pImmutableSamplers = (const VkSampler*)(uintptr_t)vkStream->getBe64();
-    if (forUnmarshaling->pImmutableSamplers)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pImmutableSamplers, forUnmarshaling->descriptorCount * sizeof(const VkSampler));
-        if (forUnmarshaling->descriptorCount)
-        {
-            uint64_t* cgen_var_0_0;
-            vkStream->alloc((void**)&cgen_var_0_0, forUnmarshaling->descriptorCount * 8);
-            vkStream->read((uint64_t*)cgen_var_0_0, forUnmarshaling->descriptorCount * 8);
-            vkStream->handleMapping()->mapHandles_u64_VkSampler(cgen_var_0_0, (VkSampler*)forUnmarshaling->pImmutableSamplers, forUnmarshaling->descriptorCount);
-        }
-    }
-}
-
-void marshal_VkDescriptorSetLayoutCreateInfo(
-    VulkanStream* vkStream,
-    const VkDescriptorSetLayoutCreateInfo* forMarshaling)
+    const VkCopyDescriptorSet* forMarshaling)
 {
     vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
     marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkDescriptorSetLayoutCreateFlags*)&forMarshaling->flags, sizeof(VkDescriptorSetLayoutCreateFlags));
-    vkStream->write((uint32_t*)&forMarshaling->bindingCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->bindingCount; ++i)
-    {
-        marshal_VkDescriptorSetLayoutBinding(vkStream, (const VkDescriptorSetLayoutBinding*)(forMarshaling->pBindings + i));
-    }
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkDescriptorSet_u64(&forMarshaling->srcSet, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->write((uint32_t*)&forMarshaling->srcBinding, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->srcArrayElement, sizeof(uint32_t));
+    uint64_t cgen_var_1;
+    vkStream->handleMapping()->mapHandles_VkDescriptorSet_u64(&forMarshaling->dstSet, &cgen_var_1, 1);
+    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->write((uint32_t*)&forMarshaling->dstBinding, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->dstArrayElement, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->descriptorCount, sizeof(uint32_t));
 }
 
-void unmarshal_VkDescriptorSetLayoutCreateInfo(
+void unmarshal_VkCopyDescriptorSet(
     VulkanStream* vkStream,
-    VkDescriptorSetLayoutCreateInfo* forUnmarshaling)
+    VkCopyDescriptorSet* forUnmarshaling)
 {
     vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
     size_t pNext_size;
@@ -3046,13 +3242,65 @@ void unmarshal_VkDescriptorSetLayoutCreateInfo(
         *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
-    vkStream->read((VkDescriptorSetLayoutCreateFlags*)&forUnmarshaling->flags, sizeof(VkDescriptorSetLayoutCreateFlags));
-    vkStream->read((uint32_t*)&forUnmarshaling->bindingCount, sizeof(uint32_t));
-    vkStream->alloc((void**)&forUnmarshaling->pBindings, forUnmarshaling->bindingCount * sizeof(const VkDescriptorSetLayoutBinding));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->bindingCount; ++i)
-    {
-        unmarshal_VkDescriptorSetLayoutBinding(vkStream, (VkDescriptorSetLayoutBinding*)(forUnmarshaling->pBindings + i));
-    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkDescriptorSet(&cgen_var_0, (VkDescriptorSet*)&forUnmarshaling->srcSet, 1);
+    vkStream->read((uint32_t*)&forUnmarshaling->srcBinding, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->srcArrayElement, sizeof(uint32_t));
+    uint64_t cgen_var_1;
+    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkDescriptorSet(&cgen_var_1, (VkDescriptorSet*)&forUnmarshaling->dstSet, 1);
+    vkStream->read((uint32_t*)&forUnmarshaling->dstBinding, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->dstArrayElement, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->descriptorCount, sizeof(uint32_t));
+}
+
+void marshal_VkDescriptorBufferInfo(
+    VulkanStream* vkStream,
+    const VkDescriptorBufferInfo* forMarshaling)
+{
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->buffer, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->write((VkDeviceSize*)&forMarshaling->offset, sizeof(VkDeviceSize));
+    vkStream->write((VkDeviceSize*)&forMarshaling->range, sizeof(VkDeviceSize));
+}
+
+void unmarshal_VkDescriptorBufferInfo(
+    VulkanStream* vkStream,
+    VkDescriptorBufferInfo* forUnmarshaling)
+{
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_0, (VkBuffer*)&forUnmarshaling->buffer, 1);
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->offset, sizeof(VkDeviceSize));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->range, sizeof(VkDeviceSize));
+}
+
+void marshal_VkDescriptorImageInfo(
+    VulkanStream* vkStream,
+    const VkDescriptorImageInfo* forMarshaling)
+{
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkSampler_u64(&forMarshaling->sampler, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    uint64_t cgen_var_1;
+    vkStream->handleMapping()->mapHandles_VkImageView_u64(&forMarshaling->imageView, &cgen_var_1, 1);
+    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->write((VkImageLayout*)&forMarshaling->imageLayout, sizeof(VkImageLayout));
+}
+
+void unmarshal_VkDescriptorImageInfo(
+    VulkanStream* vkStream,
+    VkDescriptorImageInfo* forUnmarshaling)
+{
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkSampler(&cgen_var_0, (VkSampler*)&forUnmarshaling->sampler, 1);
+    uint64_t cgen_var_1;
+    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkImageView(&cgen_var_1, (VkImageView*)&forUnmarshaling->imageView, 1);
+    vkStream->read((VkImageLayout*)&forUnmarshaling->imageLayout, sizeof(VkImageLayout));
 }
 
 void marshal_VkDescriptorPoolSize(
@@ -3163,52 +3411,90 @@ void unmarshal_VkDescriptorSetAllocateInfo(
     }
 }
 
-void marshal_VkDescriptorImageInfo(
+void marshal_VkDescriptorSetLayoutBinding(
     VulkanStream* vkStream,
-    const VkDescriptorImageInfo* forMarshaling)
+    const VkDescriptorSetLayoutBinding* forMarshaling)
 {
-    uint64_t cgen_var_0;
-    vkStream->handleMapping()->mapHandles_VkSampler_u64(&forMarshaling->sampler, &cgen_var_0, 1);
-    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
-    uint64_t cgen_var_1;
-    vkStream->handleMapping()->mapHandles_VkImageView_u64(&forMarshaling->imageView, &cgen_var_1, 1);
-    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
-    vkStream->write((VkImageLayout*)&forMarshaling->imageLayout, sizeof(VkImageLayout));
+    vkStream->write((uint32_t*)&forMarshaling->binding, sizeof(uint32_t));
+    vkStream->write((VkDescriptorType*)&forMarshaling->descriptorType, sizeof(VkDescriptorType));
+    vkStream->write((uint32_t*)&forMarshaling->descriptorCount, sizeof(uint32_t));
+    vkStream->write((VkShaderStageFlags*)&forMarshaling->stageFlags, sizeof(VkShaderStageFlags));
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pImmutableSamplers;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->pImmutableSamplers)
+    {
+        if (forMarshaling->descriptorCount)
+        {
+            uint64_t* cgen_var_0_0;
+            vkStream->alloc((void**)&cgen_var_0_0, forMarshaling->descriptorCount * 8);
+            vkStream->handleMapping()->mapHandles_VkSampler_u64(forMarshaling->pImmutableSamplers, cgen_var_0_0, forMarshaling->descriptorCount);
+            vkStream->write((uint64_t*)cgen_var_0_0, forMarshaling->descriptorCount * 8);
+        }
+    }
 }
 
-void unmarshal_VkDescriptorImageInfo(
+void unmarshal_VkDescriptorSetLayoutBinding(
     VulkanStream* vkStream,
-    VkDescriptorImageInfo* forUnmarshaling)
+    VkDescriptorSetLayoutBinding* forUnmarshaling)
 {
-    uint64_t cgen_var_0;
-    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkSampler(&cgen_var_0, (VkSampler*)&forUnmarshaling->sampler, 1);
-    uint64_t cgen_var_1;
-    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkImageView(&cgen_var_1, (VkImageView*)&forUnmarshaling->imageView, 1);
-    vkStream->read((VkImageLayout*)&forUnmarshaling->imageLayout, sizeof(VkImageLayout));
+    vkStream->read((uint32_t*)&forUnmarshaling->binding, sizeof(uint32_t));
+    vkStream->read((VkDescriptorType*)&forUnmarshaling->descriptorType, sizeof(VkDescriptorType));
+    vkStream->read((uint32_t*)&forUnmarshaling->descriptorCount, sizeof(uint32_t));
+    vkStream->read((VkShaderStageFlags*)&forUnmarshaling->stageFlags, sizeof(VkShaderStageFlags));
+    // WARNING PTR CHECK
+    forUnmarshaling->pImmutableSamplers = (const VkSampler*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pImmutableSamplers)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pImmutableSamplers, forUnmarshaling->descriptorCount * sizeof(const VkSampler));
+        if (forUnmarshaling->descriptorCount)
+        {
+            uint64_t* cgen_var_0_0;
+            vkStream->alloc((void**)&cgen_var_0_0, forUnmarshaling->descriptorCount * 8);
+            vkStream->read((uint64_t*)cgen_var_0_0, forUnmarshaling->descriptorCount * 8);
+            vkStream->handleMapping()->mapHandles_u64_VkSampler(cgen_var_0_0, (VkSampler*)forUnmarshaling->pImmutableSamplers, forUnmarshaling->descriptorCount);
+        }
+    }
 }
 
-void marshal_VkDescriptorBufferInfo(
+void marshal_VkDescriptorSetLayoutCreateInfo(
     VulkanStream* vkStream,
-    const VkDescriptorBufferInfo* forMarshaling)
+    const VkDescriptorSetLayoutCreateInfo* forMarshaling)
 {
-    uint64_t cgen_var_0;
-    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->buffer, &cgen_var_0, 1);
-    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->write((VkDeviceSize*)&forMarshaling->offset, sizeof(VkDeviceSize));
-    vkStream->write((VkDeviceSize*)&forMarshaling->range, sizeof(VkDeviceSize));
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkDescriptorSetLayoutCreateFlags*)&forMarshaling->flags, sizeof(VkDescriptorSetLayoutCreateFlags));
+    vkStream->write((uint32_t*)&forMarshaling->bindingCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->bindingCount; ++i)
+    {
+        marshal_VkDescriptorSetLayoutBinding(vkStream, (const VkDescriptorSetLayoutBinding*)(forMarshaling->pBindings + i));
+    }
 }
 
-void unmarshal_VkDescriptorBufferInfo(
+void unmarshal_VkDescriptorSetLayoutCreateInfo(
     VulkanStream* vkStream,
-    VkDescriptorBufferInfo* forUnmarshaling)
+    VkDescriptorSetLayoutCreateInfo* forUnmarshaling)
 {
-    uint64_t cgen_var_0;
-    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_0, (VkBuffer*)&forUnmarshaling->buffer, 1);
-    vkStream->read((VkDeviceSize*)&forUnmarshaling->offset, sizeof(VkDeviceSize));
-    vkStream->read((VkDeviceSize*)&forUnmarshaling->range, sizeof(VkDeviceSize));
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkDescriptorSetLayoutCreateFlags*)&forUnmarshaling->flags, sizeof(VkDescriptorSetLayoutCreateFlags));
+    vkStream->read((uint32_t*)&forUnmarshaling->bindingCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pBindings, forUnmarshaling->bindingCount * sizeof(const VkDescriptorSetLayoutBinding));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->bindingCount; ++i)
+    {
+        unmarshal_VkDescriptorSetLayoutBinding(vkStream, (VkDescriptorSetLayoutBinding*)(forUnmarshaling->pBindings + i));
+    }
 }
 
 void marshal_VkWriteDescriptorSet(
@@ -3348,53 +3634,50 @@ void unmarshal_VkWriteDescriptorSet(
     }
 }
 
-void marshal_VkCopyDescriptorSet(
+void marshal_VkAttachmentDescription(
     VulkanStream* vkStream,
-    const VkCopyDescriptorSet* forMarshaling)
+    const VkAttachmentDescription* forMarshaling)
 {
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    uint64_t cgen_var_0;
-    vkStream->handleMapping()->mapHandles_VkDescriptorSet_u64(&forMarshaling->srcSet, &cgen_var_0, 1);
-    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->write((uint32_t*)&forMarshaling->srcBinding, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->srcArrayElement, sizeof(uint32_t));
-    uint64_t cgen_var_1;
-    vkStream->handleMapping()->mapHandles_VkDescriptorSet_u64(&forMarshaling->dstSet, &cgen_var_1, 1);
-    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
-    vkStream->write((uint32_t*)&forMarshaling->dstBinding, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->dstArrayElement, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->descriptorCount, sizeof(uint32_t));
+    vkStream->write((VkAttachmentDescriptionFlags*)&forMarshaling->flags, sizeof(VkAttachmentDescriptionFlags));
+    vkStream->write((VkFormat*)&forMarshaling->format, sizeof(VkFormat));
+    vkStream->write((VkSampleCountFlagBits*)&forMarshaling->samples, sizeof(VkSampleCountFlagBits));
+    vkStream->write((VkAttachmentLoadOp*)&forMarshaling->loadOp, sizeof(VkAttachmentLoadOp));
+    vkStream->write((VkAttachmentStoreOp*)&forMarshaling->storeOp, sizeof(VkAttachmentStoreOp));
+    vkStream->write((VkAttachmentLoadOp*)&forMarshaling->stencilLoadOp, sizeof(VkAttachmentLoadOp));
+    vkStream->write((VkAttachmentStoreOp*)&forMarshaling->stencilStoreOp, sizeof(VkAttachmentStoreOp));
+    vkStream->write((VkImageLayout*)&forMarshaling->initialLayout, sizeof(VkImageLayout));
+    vkStream->write((VkImageLayout*)&forMarshaling->finalLayout, sizeof(VkImageLayout));
 }
 
-void unmarshal_VkCopyDescriptorSet(
+void unmarshal_VkAttachmentDescription(
     VulkanStream* vkStream,
-    VkCopyDescriptorSet* forUnmarshaling)
+    VkAttachmentDescription* forUnmarshaling)
 {
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    uint64_t cgen_var_0;
-    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkDescriptorSet(&cgen_var_0, (VkDescriptorSet*)&forUnmarshaling->srcSet, 1);
-    vkStream->read((uint32_t*)&forUnmarshaling->srcBinding, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->srcArrayElement, sizeof(uint32_t));
-    uint64_t cgen_var_1;
-    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkDescriptorSet(&cgen_var_1, (VkDescriptorSet*)&forUnmarshaling->dstSet, 1);
-    vkStream->read((uint32_t*)&forUnmarshaling->dstBinding, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->dstArrayElement, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->descriptorCount, sizeof(uint32_t));
+    vkStream->read((VkAttachmentDescriptionFlags*)&forUnmarshaling->flags, sizeof(VkAttachmentDescriptionFlags));
+    vkStream->read((VkFormat*)&forUnmarshaling->format, sizeof(VkFormat));
+    vkStream->read((VkSampleCountFlagBits*)&forUnmarshaling->samples, sizeof(VkSampleCountFlagBits));
+    vkStream->read((VkAttachmentLoadOp*)&forUnmarshaling->loadOp, sizeof(VkAttachmentLoadOp));
+    vkStream->read((VkAttachmentStoreOp*)&forUnmarshaling->storeOp, sizeof(VkAttachmentStoreOp));
+    vkStream->read((VkAttachmentLoadOp*)&forUnmarshaling->stencilLoadOp, sizeof(VkAttachmentLoadOp));
+    vkStream->read((VkAttachmentStoreOp*)&forUnmarshaling->stencilStoreOp, sizeof(VkAttachmentStoreOp));
+    vkStream->read((VkImageLayout*)&forUnmarshaling->initialLayout, sizeof(VkImageLayout));
+    vkStream->read((VkImageLayout*)&forUnmarshaling->finalLayout, sizeof(VkImageLayout));
+}
+
+void marshal_VkAttachmentReference(
+    VulkanStream* vkStream,
+    const VkAttachmentReference* forMarshaling)
+{
+    vkStream->write((uint32_t*)&forMarshaling->attachment, sizeof(uint32_t));
+    vkStream->write((VkImageLayout*)&forMarshaling->layout, sizeof(VkImageLayout));
+}
+
+void unmarshal_VkAttachmentReference(
+    VulkanStream* vkStream,
+    VkAttachmentReference* forUnmarshaling)
+{
+    vkStream->read((uint32_t*)&forUnmarshaling->attachment, sizeof(uint32_t));
+    vkStream->read((VkImageLayout*)&forUnmarshaling->layout, sizeof(VkImageLayout));
 }
 
 void marshal_VkFramebufferCreateInfo(
@@ -3453,52 +3736,6 @@ void unmarshal_VkFramebufferCreateInfo(
     vkStream->read((uint32_t*)&forUnmarshaling->width, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->height, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->layers, sizeof(uint32_t));
-}
-
-void marshal_VkAttachmentDescription(
-    VulkanStream* vkStream,
-    const VkAttachmentDescription* forMarshaling)
-{
-    vkStream->write((VkAttachmentDescriptionFlags*)&forMarshaling->flags, sizeof(VkAttachmentDescriptionFlags));
-    vkStream->write((VkFormat*)&forMarshaling->format, sizeof(VkFormat));
-    vkStream->write((VkSampleCountFlagBits*)&forMarshaling->samples, sizeof(VkSampleCountFlagBits));
-    vkStream->write((VkAttachmentLoadOp*)&forMarshaling->loadOp, sizeof(VkAttachmentLoadOp));
-    vkStream->write((VkAttachmentStoreOp*)&forMarshaling->storeOp, sizeof(VkAttachmentStoreOp));
-    vkStream->write((VkAttachmentLoadOp*)&forMarshaling->stencilLoadOp, sizeof(VkAttachmentLoadOp));
-    vkStream->write((VkAttachmentStoreOp*)&forMarshaling->stencilStoreOp, sizeof(VkAttachmentStoreOp));
-    vkStream->write((VkImageLayout*)&forMarshaling->initialLayout, sizeof(VkImageLayout));
-    vkStream->write((VkImageLayout*)&forMarshaling->finalLayout, sizeof(VkImageLayout));
-}
-
-void unmarshal_VkAttachmentDescription(
-    VulkanStream* vkStream,
-    VkAttachmentDescription* forUnmarshaling)
-{
-    vkStream->read((VkAttachmentDescriptionFlags*)&forUnmarshaling->flags, sizeof(VkAttachmentDescriptionFlags));
-    vkStream->read((VkFormat*)&forUnmarshaling->format, sizeof(VkFormat));
-    vkStream->read((VkSampleCountFlagBits*)&forUnmarshaling->samples, sizeof(VkSampleCountFlagBits));
-    vkStream->read((VkAttachmentLoadOp*)&forUnmarshaling->loadOp, sizeof(VkAttachmentLoadOp));
-    vkStream->read((VkAttachmentStoreOp*)&forUnmarshaling->storeOp, sizeof(VkAttachmentStoreOp));
-    vkStream->read((VkAttachmentLoadOp*)&forUnmarshaling->stencilLoadOp, sizeof(VkAttachmentLoadOp));
-    vkStream->read((VkAttachmentStoreOp*)&forUnmarshaling->stencilStoreOp, sizeof(VkAttachmentStoreOp));
-    vkStream->read((VkImageLayout*)&forUnmarshaling->initialLayout, sizeof(VkImageLayout));
-    vkStream->read((VkImageLayout*)&forUnmarshaling->finalLayout, sizeof(VkImageLayout));
-}
-
-void marshal_VkAttachmentReference(
-    VulkanStream* vkStream,
-    const VkAttachmentReference* forMarshaling)
-{
-    vkStream->write((uint32_t*)&forMarshaling->attachment, sizeof(uint32_t));
-    vkStream->write((VkImageLayout*)&forMarshaling->layout, sizeof(VkImageLayout));
-}
-
-void unmarshal_VkAttachmentReference(
-    VulkanStream* vkStream,
-    VkAttachmentReference* forUnmarshaling)
-{
-    vkStream->read((uint32_t*)&forUnmarshaling->attachment, sizeof(uint32_t));
-    vkStream->read((VkImageLayout*)&forUnmarshaling->layout, sizeof(VkImageLayout));
 }
 
 void marshal_VkSubpassDescription(
@@ -3862,60 +4099,6 @@ void unmarshal_VkImageSubresourceLayers(
     vkStream->read((uint32_t*)&forUnmarshaling->layerCount, sizeof(uint32_t));
 }
 
-void marshal_VkImageCopy(
-    VulkanStream* vkStream,
-    const VkImageCopy* forMarshaling)
-{
-    marshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forMarshaling->srcSubresource));
-    marshal_VkOffset3D(vkStream, (VkOffset3D*)(&forMarshaling->srcOffset));
-    marshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forMarshaling->dstSubresource));
-    marshal_VkOffset3D(vkStream, (VkOffset3D*)(&forMarshaling->dstOffset));
-    marshal_VkExtent3D(vkStream, (VkExtent3D*)(&forMarshaling->extent));
-}
-
-void unmarshal_VkImageCopy(
-    VulkanStream* vkStream,
-    VkImageCopy* forUnmarshaling)
-{
-    unmarshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forUnmarshaling->srcSubresource));
-    unmarshal_VkOffset3D(vkStream, (VkOffset3D*)(&forUnmarshaling->srcOffset));
-    unmarshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forUnmarshaling->dstSubresource));
-    unmarshal_VkOffset3D(vkStream, (VkOffset3D*)(&forUnmarshaling->dstOffset));
-    unmarshal_VkExtent3D(vkStream, (VkExtent3D*)(&forUnmarshaling->extent));
-}
-
-void marshal_VkImageBlit(
-    VulkanStream* vkStream,
-    const VkImageBlit* forMarshaling)
-{
-    marshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forMarshaling->srcSubresource));
-    for (uint32_t i = 0; i < (uint32_t)2; ++i)
-    {
-        marshal_VkOffset3D(vkStream, (VkOffset3D*)(forMarshaling->srcOffsets + i));
-    }
-    marshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forMarshaling->dstSubresource));
-    for (uint32_t i = 0; i < (uint32_t)2; ++i)
-    {
-        marshal_VkOffset3D(vkStream, (VkOffset3D*)(forMarshaling->dstOffsets + i));
-    }
-}
-
-void unmarshal_VkImageBlit(
-    VulkanStream* vkStream,
-    VkImageBlit* forUnmarshaling)
-{
-    unmarshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forUnmarshaling->srcSubresource));
-    for (uint32_t i = 0; i < (uint32_t)2; ++i)
-    {
-        unmarshal_VkOffset3D(vkStream, (VkOffset3D*)(forUnmarshaling->srcOffsets + i));
-    }
-    unmarshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forUnmarshaling->dstSubresource));
-    for (uint32_t i = 0; i < (uint32_t)2; ++i)
-    {
-        unmarshal_VkOffset3D(vkStream, (VkOffset3D*)(forUnmarshaling->dstOffsets + i));
-    }
-}
-
 void marshal_VkBufferImageCopy(
     VulkanStream* vkStream,
     const VkBufferImageCopy* forMarshaling)
@@ -4020,6 +4203,60 @@ void unmarshal_VkClearRect(
     vkStream->read((uint32_t*)&forUnmarshaling->layerCount, sizeof(uint32_t));
 }
 
+void marshal_VkImageBlit(
+    VulkanStream* vkStream,
+    const VkImageBlit* forMarshaling)
+{
+    marshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forMarshaling->srcSubresource));
+    for (uint32_t i = 0; i < (uint32_t)2; ++i)
+    {
+        marshal_VkOffset3D(vkStream, (VkOffset3D*)(forMarshaling->srcOffsets + i));
+    }
+    marshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forMarshaling->dstSubresource));
+    for (uint32_t i = 0; i < (uint32_t)2; ++i)
+    {
+        marshal_VkOffset3D(vkStream, (VkOffset3D*)(forMarshaling->dstOffsets + i));
+    }
+}
+
+void unmarshal_VkImageBlit(
+    VulkanStream* vkStream,
+    VkImageBlit* forUnmarshaling)
+{
+    unmarshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forUnmarshaling->srcSubresource));
+    for (uint32_t i = 0; i < (uint32_t)2; ++i)
+    {
+        unmarshal_VkOffset3D(vkStream, (VkOffset3D*)(forUnmarshaling->srcOffsets + i));
+    }
+    unmarshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forUnmarshaling->dstSubresource));
+    for (uint32_t i = 0; i < (uint32_t)2; ++i)
+    {
+        unmarshal_VkOffset3D(vkStream, (VkOffset3D*)(forUnmarshaling->dstOffsets + i));
+    }
+}
+
+void marshal_VkImageCopy(
+    VulkanStream* vkStream,
+    const VkImageCopy* forMarshaling)
+{
+    marshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forMarshaling->srcSubresource));
+    marshal_VkOffset3D(vkStream, (VkOffset3D*)(&forMarshaling->srcOffset));
+    marshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forMarshaling->dstSubresource));
+    marshal_VkOffset3D(vkStream, (VkOffset3D*)(&forMarshaling->dstOffset));
+    marshal_VkExtent3D(vkStream, (VkExtent3D*)(&forMarshaling->extent));
+}
+
+void unmarshal_VkImageCopy(
+    VulkanStream* vkStream,
+    VkImageCopy* forUnmarshaling)
+{
+    unmarshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forUnmarshaling->srcSubresource));
+    unmarshal_VkOffset3D(vkStream, (VkOffset3D*)(&forUnmarshaling->srcOffset));
+    unmarshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forUnmarshaling->dstSubresource));
+    unmarshal_VkOffset3D(vkStream, (VkOffset3D*)(&forUnmarshaling->dstOffset));
+    unmarshal_VkExtent3D(vkStream, (VkExtent3D*)(&forUnmarshaling->extent));
+}
+
 void marshal_VkImageResolve(
     VulkanStream* vkStream,
     const VkImageResolve* forMarshaling)
@@ -4040,129 +4277,6 @@ void unmarshal_VkImageResolve(
     unmarshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forUnmarshaling->dstSubresource));
     unmarshal_VkOffset3D(vkStream, (VkOffset3D*)(&forUnmarshaling->dstOffset));
     unmarshal_VkExtent3D(vkStream, (VkExtent3D*)(&forUnmarshaling->extent));
-}
-
-void marshal_VkMemoryBarrier(
-    VulkanStream* vkStream,
-    const VkMemoryBarrier* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkAccessFlags*)&forMarshaling->srcAccessMask, sizeof(VkAccessFlags));
-    vkStream->write((VkAccessFlags*)&forMarshaling->dstAccessMask, sizeof(VkAccessFlags));
-}
-
-void unmarshal_VkMemoryBarrier(
-    VulkanStream* vkStream,
-    VkMemoryBarrier* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((VkAccessFlags*)&forUnmarshaling->srcAccessMask, sizeof(VkAccessFlags));
-    vkStream->read((VkAccessFlags*)&forUnmarshaling->dstAccessMask, sizeof(VkAccessFlags));
-}
-
-void marshal_VkBufferMemoryBarrier(
-    VulkanStream* vkStream,
-    const VkBufferMemoryBarrier* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkAccessFlags*)&forMarshaling->srcAccessMask, sizeof(VkAccessFlags));
-    vkStream->write((VkAccessFlags*)&forMarshaling->dstAccessMask, sizeof(VkAccessFlags));
-    vkStream->write((uint32_t*)&forMarshaling->srcQueueFamilyIndex, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->dstQueueFamilyIndex, sizeof(uint32_t));
-    uint64_t cgen_var_0;
-    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->buffer, &cgen_var_0, 1);
-    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->write((VkDeviceSize*)&forMarshaling->offset, sizeof(VkDeviceSize));
-    vkStream->write((VkDeviceSize*)&forMarshaling->size, sizeof(VkDeviceSize));
-}
-
-void unmarshal_VkBufferMemoryBarrier(
-    VulkanStream* vkStream,
-    VkBufferMemoryBarrier* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((VkAccessFlags*)&forUnmarshaling->srcAccessMask, sizeof(VkAccessFlags));
-    vkStream->read((VkAccessFlags*)&forUnmarshaling->dstAccessMask, sizeof(VkAccessFlags));
-    vkStream->read((uint32_t*)&forUnmarshaling->srcQueueFamilyIndex, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->dstQueueFamilyIndex, sizeof(uint32_t));
-    uint64_t cgen_var_0;
-    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_0, (VkBuffer*)&forUnmarshaling->buffer, 1);
-    vkStream->read((VkDeviceSize*)&forUnmarshaling->offset, sizeof(VkDeviceSize));
-    vkStream->read((VkDeviceSize*)&forUnmarshaling->size, sizeof(VkDeviceSize));
-}
-
-void marshal_VkImageMemoryBarrier(
-    VulkanStream* vkStream,
-    const VkImageMemoryBarrier* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkAccessFlags*)&forMarshaling->srcAccessMask, sizeof(VkAccessFlags));
-    vkStream->write((VkAccessFlags*)&forMarshaling->dstAccessMask, sizeof(VkAccessFlags));
-    vkStream->write((VkImageLayout*)&forMarshaling->oldLayout, sizeof(VkImageLayout));
-    vkStream->write((VkImageLayout*)&forMarshaling->newLayout, sizeof(VkImageLayout));
-    vkStream->write((uint32_t*)&forMarshaling->srcQueueFamilyIndex, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->dstQueueFamilyIndex, sizeof(uint32_t));
-    uint64_t cgen_var_0;
-    vkStream->handleMapping()->mapHandles_VkImage_u64(&forMarshaling->image, &cgen_var_0, 1);
-    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
-    marshal_VkImageSubresourceRange(vkStream, (VkImageSubresourceRange*)(&forMarshaling->subresourceRange));
-}
-
-void unmarshal_VkImageMemoryBarrier(
-    VulkanStream* vkStream,
-    VkImageMemoryBarrier* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((VkAccessFlags*)&forUnmarshaling->srcAccessMask, sizeof(VkAccessFlags));
-    vkStream->read((VkAccessFlags*)&forUnmarshaling->dstAccessMask, sizeof(VkAccessFlags));
-    vkStream->read((VkImageLayout*)&forUnmarshaling->oldLayout, sizeof(VkImageLayout));
-    vkStream->read((VkImageLayout*)&forUnmarshaling->newLayout, sizeof(VkImageLayout));
-    vkStream->read((uint32_t*)&forUnmarshaling->srcQueueFamilyIndex, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->dstQueueFamilyIndex, sizeof(uint32_t));
-    uint64_t cgen_var_0;
-    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_0, (VkImage*)&forUnmarshaling->image, 1);
-    unmarshal_VkImageSubresourceRange(vkStream, (VkImageSubresourceRange*)(&forUnmarshaling->subresourceRange));
 }
 
 void marshal_VkRenderPassBeginInfo(
@@ -4225,120 +4339,6 @@ void unmarshal_VkRenderPassBeginInfo(
         {
             unmarshal_VkClearValue(vkStream, (VkClearValue*)(forUnmarshaling->pClearValues + i));
         }
-    }
-}
-
-void marshal_VkDispatchIndirectCommand(
-    VulkanStream* vkStream,
-    const VkDispatchIndirectCommand* forMarshaling)
-{
-    vkStream->write((uint32_t*)&forMarshaling->x, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->y, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->z, sizeof(uint32_t));
-}
-
-void unmarshal_VkDispatchIndirectCommand(
-    VulkanStream* vkStream,
-    VkDispatchIndirectCommand* forUnmarshaling)
-{
-    vkStream->read((uint32_t*)&forUnmarshaling->x, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->y, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->z, sizeof(uint32_t));
-}
-
-void marshal_VkDrawIndexedIndirectCommand(
-    VulkanStream* vkStream,
-    const VkDrawIndexedIndirectCommand* forMarshaling)
-{
-    vkStream->write((uint32_t*)&forMarshaling->indexCount, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->instanceCount, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->firstIndex, sizeof(uint32_t));
-    vkStream->write((int32_t*)&forMarshaling->vertexOffset, sizeof(int32_t));
-    vkStream->write((uint32_t*)&forMarshaling->firstInstance, sizeof(uint32_t));
-}
-
-void unmarshal_VkDrawIndexedIndirectCommand(
-    VulkanStream* vkStream,
-    VkDrawIndexedIndirectCommand* forUnmarshaling)
-{
-    vkStream->read((uint32_t*)&forUnmarshaling->indexCount, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->instanceCount, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->firstIndex, sizeof(uint32_t));
-    vkStream->read((int32_t*)&forUnmarshaling->vertexOffset, sizeof(int32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->firstInstance, sizeof(uint32_t));
-}
-
-void marshal_VkDrawIndirectCommand(
-    VulkanStream* vkStream,
-    const VkDrawIndirectCommand* forMarshaling)
-{
-    vkStream->write((uint32_t*)&forMarshaling->vertexCount, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->instanceCount, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->firstVertex, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->firstInstance, sizeof(uint32_t));
-}
-
-void unmarshal_VkDrawIndirectCommand(
-    VulkanStream* vkStream,
-    VkDrawIndirectCommand* forUnmarshaling)
-{
-    vkStream->read((uint32_t*)&forUnmarshaling->vertexCount, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->instanceCount, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->firstVertex, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->firstInstance, sizeof(uint32_t));
-}
-
-void marshal_VkBaseOutStructure(
-    VulkanStream* vkStream,
-    const VkBaseOutStructure* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-}
-
-void unmarshal_VkBaseOutStructure(
-    VulkanStream* vkStream,
-    VkBaseOutStructure* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((VkBaseOutStructure*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-}
-
-void marshal_VkBaseInStructure(
-    VulkanStream* vkStream,
-    const VkBaseInStructure* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-}
-
-void unmarshal_VkBaseInStructure(
-    VulkanStream* vkStream,
-    VkBaseInStructure* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((VkBaseInStructure*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
 }
 
@@ -5574,9 +5574,9 @@ void unmarshal_VkPhysicalDeviceMultiviewProperties(
     vkStream->read((uint32_t*)&forUnmarshaling->maxMultiviewInstanceIndex, sizeof(uint32_t));
 }
 
-void marshal_VkPhysicalDeviceVariablePointerFeatures(
+void marshal_VkPhysicalDeviceVariablePointersFeatures(
     VulkanStream* vkStream,
-    const VkPhysicalDeviceVariablePointerFeatures* forMarshaling)
+    const VkPhysicalDeviceVariablePointersFeatures* forMarshaling)
 {
     vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
     marshal_extension_struct(vkStream, forMarshaling->pNext);
@@ -5584,9 +5584,9 @@ void marshal_VkPhysicalDeviceVariablePointerFeatures(
     vkStream->write((VkBool32*)&forMarshaling->variablePointers, sizeof(VkBool32));
 }
 
-void unmarshal_VkPhysicalDeviceVariablePointerFeatures(
+void unmarshal_VkPhysicalDeviceVariablePointersFeatures(
     VulkanStream* vkStream,
-    VkPhysicalDeviceVariablePointerFeatures* forUnmarshaling)
+    VkPhysicalDeviceVariablePointersFeatures* forUnmarshaling)
 {
     vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
     size_t pNext_size;
@@ -6505,18 +6505,18 @@ void unmarshal_VkDescriptorSetLayoutSupport(
     vkStream->read((VkBool32*)&forUnmarshaling->supported, sizeof(VkBool32));
 }
 
-void marshal_VkPhysicalDeviceShaderDrawParameterFeatures(
+void marshal_VkPhysicalDeviceShaderDrawParametersFeatures(
     VulkanStream* vkStream,
-    const VkPhysicalDeviceShaderDrawParameterFeatures* forMarshaling)
+    const VkPhysicalDeviceShaderDrawParametersFeatures* forMarshaling)
 {
     vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((VkBool32*)&forMarshaling->shaderDrawParameters, sizeof(VkBool32));
 }
 
-void unmarshal_VkPhysicalDeviceShaderDrawParameterFeatures(
+void unmarshal_VkPhysicalDeviceShaderDrawParametersFeatures(
     VulkanStream* vkStream,
-    VkPhysicalDeviceShaderDrawParameterFeatures* forUnmarshaling)
+    VkPhysicalDeviceShaderDrawParametersFeatures* forUnmarshaling)
 {
     vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
     size_t pNext_size;
@@ -6532,6 +6532,2142 @@ void unmarshal_VkPhysicalDeviceShaderDrawParameterFeatures(
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->shaderDrawParameters, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_VERSION_1_2
+void marshal_VkPhysicalDeviceVulkan11Features(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceVulkan11Features* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->storageBuffer16BitAccess, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->uniformAndStorageBuffer16BitAccess, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->storagePushConstant16, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->storageInputOutput16, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->multiview, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->multiviewGeometryShader, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->multiviewTessellationShader, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->variablePointersStorageBuffer, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->variablePointers, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->protectedMemory, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->samplerYcbcrConversion, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderDrawParameters, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceVulkan11Features(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceVulkan11Features* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->storageBuffer16BitAccess, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->uniformAndStorageBuffer16BitAccess, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->storagePushConstant16, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->storageInputOutput16, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->multiview, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->multiviewGeometryShader, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->multiviewTessellationShader, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->variablePointersStorageBuffer, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->variablePointers, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->protectedMemory, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->samplerYcbcrConversion, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderDrawParameters, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceVulkan11Properties(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceVulkan11Properties* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint8_t*)forMarshaling->deviceUUID, VK_UUID_SIZE * sizeof(uint8_t));
+    vkStream->write((uint8_t*)forMarshaling->driverUUID, VK_UUID_SIZE * sizeof(uint8_t));
+    vkStream->write((uint8_t*)forMarshaling->deviceLUID, VK_LUID_SIZE * sizeof(uint8_t));
+    vkStream->write((uint32_t*)&forMarshaling->deviceNodeMask, sizeof(uint32_t));
+    vkStream->write((VkBool32*)&forMarshaling->deviceLUIDValid, sizeof(VkBool32));
+    vkStream->write((uint32_t*)&forMarshaling->subgroupSize, sizeof(uint32_t));
+    vkStream->write((VkShaderStageFlags*)&forMarshaling->subgroupSupportedStages, sizeof(VkShaderStageFlags));
+    vkStream->write((VkSubgroupFeatureFlags*)&forMarshaling->subgroupSupportedOperations, sizeof(VkSubgroupFeatureFlags));
+    vkStream->write((VkBool32*)&forMarshaling->subgroupQuadOperationsInAllStages, sizeof(VkBool32));
+    vkStream->write((VkPointClippingBehavior*)&forMarshaling->pointClippingBehavior, sizeof(VkPointClippingBehavior));
+    vkStream->write((uint32_t*)&forMarshaling->maxMultiviewViewCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxMultiviewInstanceIndex, sizeof(uint32_t));
+    vkStream->write((VkBool32*)&forMarshaling->protectedNoFault, sizeof(VkBool32));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerSetDescriptors, sizeof(uint32_t));
+    vkStream->write((VkDeviceSize*)&forMarshaling->maxMemoryAllocationSize, sizeof(VkDeviceSize));
+}
+
+void unmarshal_VkPhysicalDeviceVulkan11Properties(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceVulkan11Properties* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint8_t*)forUnmarshaling->deviceUUID, VK_UUID_SIZE * sizeof(uint8_t));
+    vkStream->read((uint8_t*)forUnmarshaling->driverUUID, VK_UUID_SIZE * sizeof(uint8_t));
+    vkStream->read((uint8_t*)forUnmarshaling->deviceLUID, VK_LUID_SIZE * sizeof(uint8_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->deviceNodeMask, sizeof(uint32_t));
+    vkStream->read((VkBool32*)&forUnmarshaling->deviceLUIDValid, sizeof(VkBool32));
+    vkStream->read((uint32_t*)&forUnmarshaling->subgroupSize, sizeof(uint32_t));
+    vkStream->read((VkShaderStageFlags*)&forUnmarshaling->subgroupSupportedStages, sizeof(VkShaderStageFlags));
+    vkStream->read((VkSubgroupFeatureFlags*)&forUnmarshaling->subgroupSupportedOperations, sizeof(VkSubgroupFeatureFlags));
+    vkStream->read((VkBool32*)&forUnmarshaling->subgroupQuadOperationsInAllStages, sizeof(VkBool32));
+    vkStream->read((VkPointClippingBehavior*)&forUnmarshaling->pointClippingBehavior, sizeof(VkPointClippingBehavior));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxMultiviewViewCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxMultiviewInstanceIndex, sizeof(uint32_t));
+    vkStream->read((VkBool32*)&forUnmarshaling->protectedNoFault, sizeof(VkBool32));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerSetDescriptors, sizeof(uint32_t));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->maxMemoryAllocationSize, sizeof(VkDeviceSize));
+}
+
+void marshal_VkPhysicalDeviceVulkan12Features(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceVulkan12Features* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->samplerMirrorClampToEdge, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->drawIndirectCount, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->storageBuffer8BitAccess, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->uniformAndStorageBuffer8BitAccess, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->storagePushConstant8, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderBufferInt64Atomics, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSharedInt64Atomics, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderFloat16, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderInt8, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderInputAttachmentArrayDynamicIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderUniformTexelBufferArrayDynamicIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderStorageTexelBufferArrayDynamicIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderUniformBufferArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSampledImageArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderStorageBufferArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderStorageImageArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderInputAttachmentArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderUniformTexelBufferArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderStorageTexelBufferArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingUniformBufferUpdateAfterBind, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingSampledImageUpdateAfterBind, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingStorageImageUpdateAfterBind, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingStorageBufferUpdateAfterBind, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingUniformTexelBufferUpdateAfterBind, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingStorageTexelBufferUpdateAfterBind, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingUpdateUnusedWhilePending, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingPartiallyBound, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingVariableDescriptorCount, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->runtimeDescriptorArray, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->samplerFilterMinmax, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->scalarBlockLayout, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->imagelessFramebuffer, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->uniformBufferStandardLayout, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSubgroupExtendedTypes, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->separateDepthStencilLayouts, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->hostQueryReset, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->timelineSemaphore, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->bufferDeviceAddress, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->bufferDeviceAddressCaptureReplay, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->bufferDeviceAddressMultiDevice, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->vulkanMemoryModel, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->vulkanMemoryModelDeviceScope, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->vulkanMemoryModelAvailabilityVisibilityChains, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderOutputViewportIndex, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderOutputLayer, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->subgroupBroadcastDynamicId, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceVulkan12Features(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceVulkan12Features* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->samplerMirrorClampToEdge, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->drawIndirectCount, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->storageBuffer8BitAccess, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->uniformAndStorageBuffer8BitAccess, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->storagePushConstant8, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderBufferInt64Atomics, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSharedInt64Atomics, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderFloat16, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderInt8, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderInputAttachmentArrayDynamicIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderUniformTexelBufferArrayDynamicIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderStorageTexelBufferArrayDynamicIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderUniformBufferArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSampledImageArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderStorageBufferArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderStorageImageArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderInputAttachmentArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderUniformTexelBufferArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderStorageTexelBufferArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingUniformBufferUpdateAfterBind, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingSampledImageUpdateAfterBind, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingStorageImageUpdateAfterBind, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingStorageBufferUpdateAfterBind, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingUniformTexelBufferUpdateAfterBind, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingStorageTexelBufferUpdateAfterBind, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingUpdateUnusedWhilePending, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingPartiallyBound, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingVariableDescriptorCount, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->runtimeDescriptorArray, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->samplerFilterMinmax, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->scalarBlockLayout, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->imagelessFramebuffer, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->uniformBufferStandardLayout, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSubgroupExtendedTypes, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->separateDepthStencilLayouts, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->hostQueryReset, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->timelineSemaphore, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->bufferDeviceAddress, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->bufferDeviceAddressCaptureReplay, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->bufferDeviceAddressMultiDevice, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->vulkanMemoryModel, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->vulkanMemoryModelDeviceScope, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->vulkanMemoryModelAvailabilityVisibilityChains, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderOutputViewportIndex, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderOutputLayer, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->subgroupBroadcastDynamicId, sizeof(VkBool32));
+}
+
+void marshal_VkConformanceVersion(
+    VulkanStream* vkStream,
+    const VkConformanceVersion* forMarshaling)
+{
+    vkStream->write((uint8_t*)&forMarshaling->major, sizeof(uint8_t));
+    vkStream->write((uint8_t*)&forMarshaling->minor, sizeof(uint8_t));
+    vkStream->write((uint8_t*)&forMarshaling->subminor, sizeof(uint8_t));
+    vkStream->write((uint8_t*)&forMarshaling->patch, sizeof(uint8_t));
+}
+
+void unmarshal_VkConformanceVersion(
+    VulkanStream* vkStream,
+    VkConformanceVersion* forUnmarshaling)
+{
+    vkStream->read((uint8_t*)&forUnmarshaling->major, sizeof(uint8_t));
+    vkStream->read((uint8_t*)&forUnmarshaling->minor, sizeof(uint8_t));
+    vkStream->read((uint8_t*)&forUnmarshaling->subminor, sizeof(uint8_t));
+    vkStream->read((uint8_t*)&forUnmarshaling->patch, sizeof(uint8_t));
+}
+
+void marshal_VkPhysicalDeviceVulkan12Properties(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceVulkan12Properties* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkDriverId*)&forMarshaling->driverID, sizeof(VkDriverId));
+    vkStream->write((char*)forMarshaling->driverName, VK_MAX_DRIVER_NAME_SIZE * sizeof(char));
+    vkStream->write((char*)forMarshaling->driverInfo, VK_MAX_DRIVER_INFO_SIZE * sizeof(char));
+    marshal_VkConformanceVersion(vkStream, (VkConformanceVersion*)(&forMarshaling->conformanceVersion));
+    vkStream->write((VkShaderFloatControlsIndependence*)&forMarshaling->denormBehaviorIndependence, sizeof(VkShaderFloatControlsIndependence));
+    vkStream->write((VkShaderFloatControlsIndependence*)&forMarshaling->roundingModeIndependence, sizeof(VkShaderFloatControlsIndependence));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSignedZeroInfNanPreserveFloat16, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSignedZeroInfNanPreserveFloat32, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSignedZeroInfNanPreserveFloat64, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderDenormPreserveFloat16, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderDenormPreserveFloat32, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderDenormPreserveFloat64, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderDenormFlushToZeroFloat16, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderDenormFlushToZeroFloat32, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderDenormFlushToZeroFloat64, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderRoundingModeRTEFloat16, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderRoundingModeRTEFloat32, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderRoundingModeRTEFloat64, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderRoundingModeRTZFloat16, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderRoundingModeRTZFloat32, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderRoundingModeRTZFloat64, sizeof(VkBool32));
+    vkStream->write((uint32_t*)&forMarshaling->maxUpdateAfterBindDescriptorsInAllPools, sizeof(uint32_t));
+    vkStream->write((VkBool32*)&forMarshaling->shaderUniformBufferArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSampledImageArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderStorageBufferArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderStorageImageArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderInputAttachmentArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->robustBufferAccessUpdateAfterBind, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->quadDivergentImplicitLod, sizeof(VkBool32));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindSamplers, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindUniformBuffers, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindStorageBuffers, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindSampledImages, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindStorageImages, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindInputAttachments, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerStageUpdateAfterBindResources, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindSamplers, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindUniformBuffers, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindUniformBuffersDynamic, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindStorageBuffers, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindStorageBuffersDynamic, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindSampledImages, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindStorageImages, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindInputAttachments, sizeof(uint32_t));
+    vkStream->write((VkResolveModeFlags*)&forMarshaling->supportedDepthResolveModes, sizeof(VkResolveModeFlags));
+    vkStream->write((VkResolveModeFlags*)&forMarshaling->supportedStencilResolveModes, sizeof(VkResolveModeFlags));
+    vkStream->write((VkBool32*)&forMarshaling->independentResolveNone, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->independentResolve, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->filterMinmaxSingleComponentFormats, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->filterMinmaxImageComponentMapping, sizeof(VkBool32));
+    vkStream->write((uint64_t*)&forMarshaling->maxTimelineSemaphoreValueDifference, sizeof(uint64_t));
+    vkStream->write((VkSampleCountFlags*)&forMarshaling->framebufferIntegerColorSampleCounts, sizeof(VkSampleCountFlags));
+}
+
+void unmarshal_VkPhysicalDeviceVulkan12Properties(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceVulkan12Properties* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkDriverId*)&forUnmarshaling->driverID, sizeof(VkDriverId));
+    vkStream->read((char*)forUnmarshaling->driverName, VK_MAX_DRIVER_NAME_SIZE * sizeof(char));
+    vkStream->read((char*)forUnmarshaling->driverInfo, VK_MAX_DRIVER_INFO_SIZE * sizeof(char));
+    unmarshal_VkConformanceVersion(vkStream, (VkConformanceVersion*)(&forUnmarshaling->conformanceVersion));
+    vkStream->read((VkShaderFloatControlsIndependence*)&forUnmarshaling->denormBehaviorIndependence, sizeof(VkShaderFloatControlsIndependence));
+    vkStream->read((VkShaderFloatControlsIndependence*)&forUnmarshaling->roundingModeIndependence, sizeof(VkShaderFloatControlsIndependence));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSignedZeroInfNanPreserveFloat16, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSignedZeroInfNanPreserveFloat32, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSignedZeroInfNanPreserveFloat64, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderDenormPreserveFloat16, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderDenormPreserveFloat32, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderDenormPreserveFloat64, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderDenormFlushToZeroFloat16, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderDenormFlushToZeroFloat32, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderDenormFlushToZeroFloat64, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderRoundingModeRTEFloat16, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderRoundingModeRTEFloat32, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderRoundingModeRTEFloat64, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderRoundingModeRTZFloat16, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderRoundingModeRTZFloat32, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderRoundingModeRTZFloat64, sizeof(VkBool32));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxUpdateAfterBindDescriptorsInAllPools, sizeof(uint32_t));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderUniformBufferArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSampledImageArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderStorageBufferArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderStorageImageArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderInputAttachmentArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->robustBufferAccessUpdateAfterBind, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->quadDivergentImplicitLod, sizeof(VkBool32));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindSamplers, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindUniformBuffers, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindStorageBuffers, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindSampledImages, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindStorageImages, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindInputAttachments, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageUpdateAfterBindResources, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindSamplers, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindUniformBuffers, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindUniformBuffersDynamic, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindStorageBuffers, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindStorageBuffersDynamic, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindSampledImages, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindStorageImages, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindInputAttachments, sizeof(uint32_t));
+    vkStream->read((VkResolveModeFlags*)&forUnmarshaling->supportedDepthResolveModes, sizeof(VkResolveModeFlags));
+    vkStream->read((VkResolveModeFlags*)&forUnmarshaling->supportedStencilResolveModes, sizeof(VkResolveModeFlags));
+    vkStream->read((VkBool32*)&forUnmarshaling->independentResolveNone, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->independentResolve, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->filterMinmaxSingleComponentFormats, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->filterMinmaxImageComponentMapping, sizeof(VkBool32));
+    vkStream->read((uint64_t*)&forUnmarshaling->maxTimelineSemaphoreValueDifference, sizeof(uint64_t));
+    vkStream->read((VkSampleCountFlags*)&forUnmarshaling->framebufferIntegerColorSampleCounts, sizeof(VkSampleCountFlags));
+}
+
+void marshal_VkImageFormatListCreateInfo(
+    VulkanStream* vkStream,
+    const VkImageFormatListCreateInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->viewFormatCount, sizeof(uint32_t));
+    vkStream->write((const VkFormat*)forMarshaling->pViewFormats, forMarshaling->viewFormatCount * sizeof(const VkFormat));
+}
+
+void unmarshal_VkImageFormatListCreateInfo(
+    VulkanStream* vkStream,
+    VkImageFormatListCreateInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->viewFormatCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pViewFormats, forUnmarshaling->viewFormatCount * sizeof(const VkFormat));
+    vkStream->read((VkFormat*)forUnmarshaling->pViewFormats, forUnmarshaling->viewFormatCount * sizeof(const VkFormat));
+}
+
+void marshal_VkAttachmentDescription2(
+    VulkanStream* vkStream,
+    const VkAttachmentDescription2* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkAttachmentDescriptionFlags*)&forMarshaling->flags, sizeof(VkAttachmentDescriptionFlags));
+    vkStream->write((VkFormat*)&forMarshaling->format, sizeof(VkFormat));
+    vkStream->write((VkSampleCountFlagBits*)&forMarshaling->samples, sizeof(VkSampleCountFlagBits));
+    vkStream->write((VkAttachmentLoadOp*)&forMarshaling->loadOp, sizeof(VkAttachmentLoadOp));
+    vkStream->write((VkAttachmentStoreOp*)&forMarshaling->storeOp, sizeof(VkAttachmentStoreOp));
+    vkStream->write((VkAttachmentLoadOp*)&forMarshaling->stencilLoadOp, sizeof(VkAttachmentLoadOp));
+    vkStream->write((VkAttachmentStoreOp*)&forMarshaling->stencilStoreOp, sizeof(VkAttachmentStoreOp));
+    vkStream->write((VkImageLayout*)&forMarshaling->initialLayout, sizeof(VkImageLayout));
+    vkStream->write((VkImageLayout*)&forMarshaling->finalLayout, sizeof(VkImageLayout));
+}
+
+void unmarshal_VkAttachmentDescription2(
+    VulkanStream* vkStream,
+    VkAttachmentDescription2* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkAttachmentDescriptionFlags*)&forUnmarshaling->flags, sizeof(VkAttachmentDescriptionFlags));
+    vkStream->read((VkFormat*)&forUnmarshaling->format, sizeof(VkFormat));
+    vkStream->read((VkSampleCountFlagBits*)&forUnmarshaling->samples, sizeof(VkSampleCountFlagBits));
+    vkStream->read((VkAttachmentLoadOp*)&forUnmarshaling->loadOp, sizeof(VkAttachmentLoadOp));
+    vkStream->read((VkAttachmentStoreOp*)&forUnmarshaling->storeOp, sizeof(VkAttachmentStoreOp));
+    vkStream->read((VkAttachmentLoadOp*)&forUnmarshaling->stencilLoadOp, sizeof(VkAttachmentLoadOp));
+    vkStream->read((VkAttachmentStoreOp*)&forUnmarshaling->stencilStoreOp, sizeof(VkAttachmentStoreOp));
+    vkStream->read((VkImageLayout*)&forUnmarshaling->initialLayout, sizeof(VkImageLayout));
+    vkStream->read((VkImageLayout*)&forUnmarshaling->finalLayout, sizeof(VkImageLayout));
+}
+
+void marshal_VkAttachmentReference2(
+    VulkanStream* vkStream,
+    const VkAttachmentReference2* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->attachment, sizeof(uint32_t));
+    vkStream->write((VkImageLayout*)&forMarshaling->layout, sizeof(VkImageLayout));
+    vkStream->write((VkImageAspectFlags*)&forMarshaling->aspectMask, sizeof(VkImageAspectFlags));
+}
+
+void unmarshal_VkAttachmentReference2(
+    VulkanStream* vkStream,
+    VkAttachmentReference2* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->attachment, sizeof(uint32_t));
+    vkStream->read((VkImageLayout*)&forUnmarshaling->layout, sizeof(VkImageLayout));
+    vkStream->read((VkImageAspectFlags*)&forUnmarshaling->aspectMask, sizeof(VkImageAspectFlags));
+}
+
+void marshal_VkSubpassDescription2(
+    VulkanStream* vkStream,
+    const VkSubpassDescription2* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkSubpassDescriptionFlags*)&forMarshaling->flags, sizeof(VkSubpassDescriptionFlags));
+    vkStream->write((VkPipelineBindPoint*)&forMarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
+    vkStream->write((uint32_t*)&forMarshaling->viewMask, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->inputAttachmentCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->inputAttachmentCount; ++i)
+    {
+        marshal_VkAttachmentReference2(vkStream, (const VkAttachmentReference2*)(forMarshaling->pInputAttachments + i));
+    }
+    vkStream->write((uint32_t*)&forMarshaling->colorAttachmentCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->colorAttachmentCount; ++i)
+    {
+        marshal_VkAttachmentReference2(vkStream, (const VkAttachmentReference2*)(forMarshaling->pColorAttachments + i));
+    }
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pResolveAttachments;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->pResolveAttachments)
+    {
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->colorAttachmentCount; ++i)
+        {
+            marshal_VkAttachmentReference2(vkStream, (const VkAttachmentReference2*)(forMarshaling->pResolveAttachments + i));
+        }
+    }
+    // WARNING PTR CHECK
+    uint64_t cgen_var_1 = (uint64_t)(uintptr_t)forMarshaling->pDepthStencilAttachment;
+    vkStream->putBe64(cgen_var_1);
+    if (forMarshaling->pDepthStencilAttachment)
+    {
+        marshal_VkAttachmentReference2(vkStream, (const VkAttachmentReference2*)(forMarshaling->pDepthStencilAttachment));
+    }
+    vkStream->write((uint32_t*)&forMarshaling->preserveAttachmentCount, sizeof(uint32_t));
+    vkStream->write((const uint32_t*)forMarshaling->pPreserveAttachments, forMarshaling->preserveAttachmentCount * sizeof(const uint32_t));
+}
+
+void unmarshal_VkSubpassDescription2(
+    VulkanStream* vkStream,
+    VkSubpassDescription2* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkSubpassDescriptionFlags*)&forUnmarshaling->flags, sizeof(VkSubpassDescriptionFlags));
+    vkStream->read((VkPipelineBindPoint*)&forUnmarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
+    vkStream->read((uint32_t*)&forUnmarshaling->viewMask, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->inputAttachmentCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pInputAttachments, forUnmarshaling->inputAttachmentCount * sizeof(const VkAttachmentReference2));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->inputAttachmentCount; ++i)
+    {
+        unmarshal_VkAttachmentReference2(vkStream, (VkAttachmentReference2*)(forUnmarshaling->pInputAttachments + i));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->colorAttachmentCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pColorAttachments, forUnmarshaling->colorAttachmentCount * sizeof(const VkAttachmentReference2));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->colorAttachmentCount; ++i)
+    {
+        unmarshal_VkAttachmentReference2(vkStream, (VkAttachmentReference2*)(forUnmarshaling->pColorAttachments + i));
+    }
+    // WARNING PTR CHECK
+    forUnmarshaling->pResolveAttachments = (const VkAttachmentReference2*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pResolveAttachments)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pResolveAttachments, forUnmarshaling->colorAttachmentCount * sizeof(const VkAttachmentReference2));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->colorAttachmentCount; ++i)
+        {
+            unmarshal_VkAttachmentReference2(vkStream, (VkAttachmentReference2*)(forUnmarshaling->pResolveAttachments + i));
+        }
+    }
+    // WARNING PTR CHECK
+    forUnmarshaling->pDepthStencilAttachment = (const VkAttachmentReference2*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pDepthStencilAttachment)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pDepthStencilAttachment, sizeof(const VkAttachmentReference2));
+        unmarshal_VkAttachmentReference2(vkStream, (VkAttachmentReference2*)(forUnmarshaling->pDepthStencilAttachment));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->preserveAttachmentCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pPreserveAttachments, forUnmarshaling->preserveAttachmentCount * sizeof(const uint32_t));
+    vkStream->read((uint32_t*)forUnmarshaling->pPreserveAttachments, forUnmarshaling->preserveAttachmentCount * sizeof(const uint32_t));
+}
+
+void marshal_VkSubpassDependency2(
+    VulkanStream* vkStream,
+    const VkSubpassDependency2* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->srcSubpass, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->dstSubpass, sizeof(uint32_t));
+    vkStream->write((VkPipelineStageFlags*)&forMarshaling->srcStageMask, sizeof(VkPipelineStageFlags));
+    vkStream->write((VkPipelineStageFlags*)&forMarshaling->dstStageMask, sizeof(VkPipelineStageFlags));
+    vkStream->write((VkAccessFlags*)&forMarshaling->srcAccessMask, sizeof(VkAccessFlags));
+    vkStream->write((VkAccessFlags*)&forMarshaling->dstAccessMask, sizeof(VkAccessFlags));
+    vkStream->write((VkDependencyFlags*)&forMarshaling->dependencyFlags, sizeof(VkDependencyFlags));
+    vkStream->write((int32_t*)&forMarshaling->viewOffset, sizeof(int32_t));
+}
+
+void unmarshal_VkSubpassDependency2(
+    VulkanStream* vkStream,
+    VkSubpassDependency2* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->srcSubpass, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->dstSubpass, sizeof(uint32_t));
+    vkStream->read((VkPipelineStageFlags*)&forUnmarshaling->srcStageMask, sizeof(VkPipelineStageFlags));
+    vkStream->read((VkPipelineStageFlags*)&forUnmarshaling->dstStageMask, sizeof(VkPipelineStageFlags));
+    vkStream->read((VkAccessFlags*)&forUnmarshaling->srcAccessMask, sizeof(VkAccessFlags));
+    vkStream->read((VkAccessFlags*)&forUnmarshaling->dstAccessMask, sizeof(VkAccessFlags));
+    vkStream->read((VkDependencyFlags*)&forUnmarshaling->dependencyFlags, sizeof(VkDependencyFlags));
+    vkStream->read((int32_t*)&forUnmarshaling->viewOffset, sizeof(int32_t));
+}
+
+void marshal_VkRenderPassCreateInfo2(
+    VulkanStream* vkStream,
+    const VkRenderPassCreateInfo2* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkRenderPassCreateFlags*)&forMarshaling->flags, sizeof(VkRenderPassCreateFlags));
+    vkStream->write((uint32_t*)&forMarshaling->attachmentCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->attachmentCount; ++i)
+    {
+        marshal_VkAttachmentDescription2(vkStream, (const VkAttachmentDescription2*)(forMarshaling->pAttachments + i));
+    }
+    vkStream->write((uint32_t*)&forMarshaling->subpassCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->subpassCount; ++i)
+    {
+        marshal_VkSubpassDescription2(vkStream, (const VkSubpassDescription2*)(forMarshaling->pSubpasses + i));
+    }
+    vkStream->write((uint32_t*)&forMarshaling->dependencyCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->dependencyCount; ++i)
+    {
+        marshal_VkSubpassDependency2(vkStream, (const VkSubpassDependency2*)(forMarshaling->pDependencies + i));
+    }
+    vkStream->write((uint32_t*)&forMarshaling->correlatedViewMaskCount, sizeof(uint32_t));
+    vkStream->write((const uint32_t*)forMarshaling->pCorrelatedViewMasks, forMarshaling->correlatedViewMaskCount * sizeof(const uint32_t));
+}
+
+void unmarshal_VkRenderPassCreateInfo2(
+    VulkanStream* vkStream,
+    VkRenderPassCreateInfo2* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkRenderPassCreateFlags*)&forUnmarshaling->flags, sizeof(VkRenderPassCreateFlags));
+    vkStream->read((uint32_t*)&forUnmarshaling->attachmentCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pAttachments, forUnmarshaling->attachmentCount * sizeof(const VkAttachmentDescription2));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->attachmentCount; ++i)
+    {
+        unmarshal_VkAttachmentDescription2(vkStream, (VkAttachmentDescription2*)(forUnmarshaling->pAttachments + i));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->subpassCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pSubpasses, forUnmarshaling->subpassCount * sizeof(const VkSubpassDescription2));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->subpassCount; ++i)
+    {
+        unmarshal_VkSubpassDescription2(vkStream, (VkSubpassDescription2*)(forUnmarshaling->pSubpasses + i));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->dependencyCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pDependencies, forUnmarshaling->dependencyCount * sizeof(const VkSubpassDependency2));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->dependencyCount; ++i)
+    {
+        unmarshal_VkSubpassDependency2(vkStream, (VkSubpassDependency2*)(forUnmarshaling->pDependencies + i));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->correlatedViewMaskCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pCorrelatedViewMasks, forUnmarshaling->correlatedViewMaskCount * sizeof(const uint32_t));
+    vkStream->read((uint32_t*)forUnmarshaling->pCorrelatedViewMasks, forUnmarshaling->correlatedViewMaskCount * sizeof(const uint32_t));
+}
+
+void marshal_VkSubpassBeginInfo(
+    VulkanStream* vkStream,
+    const VkSubpassBeginInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkSubpassContents*)&forMarshaling->contents, sizeof(VkSubpassContents));
+}
+
+void unmarshal_VkSubpassBeginInfo(
+    VulkanStream* vkStream,
+    VkSubpassBeginInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkSubpassContents*)&forUnmarshaling->contents, sizeof(VkSubpassContents));
+}
+
+void marshal_VkSubpassEndInfo(
+    VulkanStream* vkStream,
+    const VkSubpassEndInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+}
+
+void unmarshal_VkSubpassEndInfo(
+    VulkanStream* vkStream,
+    VkSubpassEndInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+}
+
+void marshal_VkPhysicalDevice8BitStorageFeatures(
+    VulkanStream* vkStream,
+    const VkPhysicalDevice8BitStorageFeatures* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->storageBuffer8BitAccess, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->uniformAndStorageBuffer8BitAccess, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->storagePushConstant8, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDevice8BitStorageFeatures(
+    VulkanStream* vkStream,
+    VkPhysicalDevice8BitStorageFeatures* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->storageBuffer8BitAccess, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->uniformAndStorageBuffer8BitAccess, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->storagePushConstant8, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceDriverProperties(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceDriverProperties* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkDriverId*)&forMarshaling->driverID, sizeof(VkDriverId));
+    vkStream->write((char*)forMarshaling->driverName, VK_MAX_DRIVER_NAME_SIZE * sizeof(char));
+    vkStream->write((char*)forMarshaling->driverInfo, VK_MAX_DRIVER_INFO_SIZE * sizeof(char));
+    marshal_VkConformanceVersion(vkStream, (VkConformanceVersion*)(&forMarshaling->conformanceVersion));
+}
+
+void unmarshal_VkPhysicalDeviceDriverProperties(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceDriverProperties* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkDriverId*)&forUnmarshaling->driverID, sizeof(VkDriverId));
+    vkStream->read((char*)forUnmarshaling->driverName, VK_MAX_DRIVER_NAME_SIZE * sizeof(char));
+    vkStream->read((char*)forUnmarshaling->driverInfo, VK_MAX_DRIVER_INFO_SIZE * sizeof(char));
+    unmarshal_VkConformanceVersion(vkStream, (VkConformanceVersion*)(&forUnmarshaling->conformanceVersion));
+}
+
+void marshal_VkPhysicalDeviceShaderAtomicInt64Features(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceShaderAtomicInt64Features* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->shaderBufferInt64Atomics, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSharedInt64Atomics, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceShaderAtomicInt64Features(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceShaderAtomicInt64Features* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderBufferInt64Atomics, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSharedInt64Atomics, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceShaderFloat16Int8Features(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceShaderFloat16Int8Features* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->shaderFloat16, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderInt8, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceShaderFloat16Int8Features(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceShaderFloat16Int8Features* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderFloat16, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderInt8, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceFloatControlsProperties(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceFloatControlsProperties* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkShaderFloatControlsIndependence*)&forMarshaling->denormBehaviorIndependence, sizeof(VkShaderFloatControlsIndependence));
+    vkStream->write((VkShaderFloatControlsIndependence*)&forMarshaling->roundingModeIndependence, sizeof(VkShaderFloatControlsIndependence));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSignedZeroInfNanPreserveFloat16, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSignedZeroInfNanPreserveFloat32, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSignedZeroInfNanPreserveFloat64, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderDenormPreserveFloat16, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderDenormPreserveFloat32, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderDenormPreserveFloat64, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderDenormFlushToZeroFloat16, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderDenormFlushToZeroFloat32, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderDenormFlushToZeroFloat64, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderRoundingModeRTEFloat16, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderRoundingModeRTEFloat32, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderRoundingModeRTEFloat64, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderRoundingModeRTZFloat16, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderRoundingModeRTZFloat32, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderRoundingModeRTZFloat64, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceFloatControlsProperties(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceFloatControlsProperties* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkShaderFloatControlsIndependence*)&forUnmarshaling->denormBehaviorIndependence, sizeof(VkShaderFloatControlsIndependence));
+    vkStream->read((VkShaderFloatControlsIndependence*)&forUnmarshaling->roundingModeIndependence, sizeof(VkShaderFloatControlsIndependence));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSignedZeroInfNanPreserveFloat16, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSignedZeroInfNanPreserveFloat32, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSignedZeroInfNanPreserveFloat64, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderDenormPreserveFloat16, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderDenormPreserveFloat32, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderDenormPreserveFloat64, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderDenormFlushToZeroFloat16, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderDenormFlushToZeroFloat32, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderDenormFlushToZeroFloat64, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderRoundingModeRTEFloat16, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderRoundingModeRTEFloat32, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderRoundingModeRTEFloat64, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderRoundingModeRTZFloat16, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderRoundingModeRTZFloat32, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderRoundingModeRTZFloat64, sizeof(VkBool32));
+}
+
+void marshal_VkDescriptorSetLayoutBindingFlagsCreateInfo(
+    VulkanStream* vkStream,
+    const VkDescriptorSetLayoutBindingFlagsCreateInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->bindingCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pBindingFlags;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->pBindingFlags)
+    {
+        vkStream->write((const VkDescriptorBindingFlags*)forMarshaling->pBindingFlags, forMarshaling->bindingCount * sizeof(const VkDescriptorBindingFlags));
+    }
+}
+
+void unmarshal_VkDescriptorSetLayoutBindingFlagsCreateInfo(
+    VulkanStream* vkStream,
+    VkDescriptorSetLayoutBindingFlagsCreateInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->bindingCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    forUnmarshaling->pBindingFlags = (const VkDescriptorBindingFlags*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pBindingFlags)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pBindingFlags, forUnmarshaling->bindingCount * sizeof(const VkDescriptorBindingFlags));
+        vkStream->read((VkDescriptorBindingFlags*)forUnmarshaling->pBindingFlags, forUnmarshaling->bindingCount * sizeof(const VkDescriptorBindingFlags));
+    }
+}
+
+void marshal_VkPhysicalDeviceDescriptorIndexingFeatures(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceDescriptorIndexingFeatures* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->shaderInputAttachmentArrayDynamicIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderUniformTexelBufferArrayDynamicIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderStorageTexelBufferArrayDynamicIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderUniformBufferArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSampledImageArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderStorageBufferArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderStorageImageArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderInputAttachmentArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderUniformTexelBufferArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderStorageTexelBufferArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingUniformBufferUpdateAfterBind, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingSampledImageUpdateAfterBind, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingStorageImageUpdateAfterBind, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingStorageBufferUpdateAfterBind, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingUniformTexelBufferUpdateAfterBind, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingStorageTexelBufferUpdateAfterBind, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingUpdateUnusedWhilePending, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingPartiallyBound, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingVariableDescriptorCount, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->runtimeDescriptorArray, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceDescriptorIndexingFeatures(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceDescriptorIndexingFeatures* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderInputAttachmentArrayDynamicIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderUniformTexelBufferArrayDynamicIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderStorageTexelBufferArrayDynamicIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderUniformBufferArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSampledImageArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderStorageBufferArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderStorageImageArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderInputAttachmentArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderUniformTexelBufferArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderStorageTexelBufferArrayNonUniformIndexing, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingUniformBufferUpdateAfterBind, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingSampledImageUpdateAfterBind, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingStorageImageUpdateAfterBind, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingStorageBufferUpdateAfterBind, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingUniformTexelBufferUpdateAfterBind, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingStorageTexelBufferUpdateAfterBind, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingUpdateUnusedWhilePending, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingPartiallyBound, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingVariableDescriptorCount, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->runtimeDescriptorArray, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceDescriptorIndexingProperties(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceDescriptorIndexingProperties* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->maxUpdateAfterBindDescriptorsInAllPools, sizeof(uint32_t));
+    vkStream->write((VkBool32*)&forMarshaling->shaderUniformBufferArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSampledImageArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderStorageBufferArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderStorageImageArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderInputAttachmentArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->robustBufferAccessUpdateAfterBind, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->quadDivergentImplicitLod, sizeof(VkBool32));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindSamplers, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindUniformBuffers, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindStorageBuffers, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindSampledImages, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindStorageImages, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindInputAttachments, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerStageUpdateAfterBindResources, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindSamplers, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindUniformBuffers, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindUniformBuffersDynamic, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindStorageBuffers, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindStorageBuffersDynamic, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindSampledImages, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindStorageImages, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindInputAttachments, sizeof(uint32_t));
+}
+
+void unmarshal_VkPhysicalDeviceDescriptorIndexingProperties(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceDescriptorIndexingProperties* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->maxUpdateAfterBindDescriptorsInAllPools, sizeof(uint32_t));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderUniformBufferArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSampledImageArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderStorageBufferArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderStorageImageArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderInputAttachmentArrayNonUniformIndexingNative, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->robustBufferAccessUpdateAfterBind, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->quadDivergentImplicitLod, sizeof(VkBool32));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindSamplers, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindUniformBuffers, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindStorageBuffers, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindSampledImages, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindStorageImages, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindInputAttachments, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageUpdateAfterBindResources, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindSamplers, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindUniformBuffers, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindUniformBuffersDynamic, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindStorageBuffers, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindStorageBuffersDynamic, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindSampledImages, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindStorageImages, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindInputAttachments, sizeof(uint32_t));
+}
+
+void marshal_VkDescriptorSetVariableDescriptorCountAllocateInfo(
+    VulkanStream* vkStream,
+    const VkDescriptorSetVariableDescriptorCountAllocateInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->descriptorSetCount, sizeof(uint32_t));
+    vkStream->write((const uint32_t*)forMarshaling->pDescriptorCounts, forMarshaling->descriptorSetCount * sizeof(const uint32_t));
+}
+
+void unmarshal_VkDescriptorSetVariableDescriptorCountAllocateInfo(
+    VulkanStream* vkStream,
+    VkDescriptorSetVariableDescriptorCountAllocateInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->descriptorSetCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pDescriptorCounts, forUnmarshaling->descriptorSetCount * sizeof(const uint32_t));
+    vkStream->read((uint32_t*)forUnmarshaling->pDescriptorCounts, forUnmarshaling->descriptorSetCount * sizeof(const uint32_t));
+}
+
+void marshal_VkDescriptorSetVariableDescriptorCountLayoutSupport(
+    VulkanStream* vkStream,
+    const VkDescriptorSetVariableDescriptorCountLayoutSupport* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->maxVariableDescriptorCount, sizeof(uint32_t));
+}
+
+void unmarshal_VkDescriptorSetVariableDescriptorCountLayoutSupport(
+    VulkanStream* vkStream,
+    VkDescriptorSetVariableDescriptorCountLayoutSupport* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->maxVariableDescriptorCount, sizeof(uint32_t));
+}
+
+void marshal_VkSubpassDescriptionDepthStencilResolve(
+    VulkanStream* vkStream,
+    const VkSubpassDescriptionDepthStencilResolve* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkResolveModeFlagBits*)&forMarshaling->depthResolveMode, sizeof(VkResolveModeFlagBits));
+    vkStream->write((VkResolveModeFlagBits*)&forMarshaling->stencilResolveMode, sizeof(VkResolveModeFlagBits));
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pDepthStencilResolveAttachment;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->pDepthStencilResolveAttachment)
+    {
+        marshal_VkAttachmentReference2(vkStream, (const VkAttachmentReference2*)(forMarshaling->pDepthStencilResolveAttachment));
+    }
+}
+
+void unmarshal_VkSubpassDescriptionDepthStencilResolve(
+    VulkanStream* vkStream,
+    VkSubpassDescriptionDepthStencilResolve* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkResolveModeFlagBits*)&forUnmarshaling->depthResolveMode, sizeof(VkResolveModeFlagBits));
+    vkStream->read((VkResolveModeFlagBits*)&forUnmarshaling->stencilResolveMode, sizeof(VkResolveModeFlagBits));
+    // WARNING PTR CHECK
+    forUnmarshaling->pDepthStencilResolveAttachment = (const VkAttachmentReference2*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pDepthStencilResolveAttachment)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pDepthStencilResolveAttachment, sizeof(const VkAttachmentReference2));
+        unmarshal_VkAttachmentReference2(vkStream, (VkAttachmentReference2*)(forUnmarshaling->pDepthStencilResolveAttachment));
+    }
+}
+
+void marshal_VkPhysicalDeviceDepthStencilResolveProperties(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceDepthStencilResolveProperties* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkResolveModeFlags*)&forMarshaling->supportedDepthResolveModes, sizeof(VkResolveModeFlags));
+    vkStream->write((VkResolveModeFlags*)&forMarshaling->supportedStencilResolveModes, sizeof(VkResolveModeFlags));
+    vkStream->write((VkBool32*)&forMarshaling->independentResolveNone, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->independentResolve, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceDepthStencilResolveProperties(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceDepthStencilResolveProperties* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkResolveModeFlags*)&forUnmarshaling->supportedDepthResolveModes, sizeof(VkResolveModeFlags));
+    vkStream->read((VkResolveModeFlags*)&forUnmarshaling->supportedStencilResolveModes, sizeof(VkResolveModeFlags));
+    vkStream->read((VkBool32*)&forUnmarshaling->independentResolveNone, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->independentResolve, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceScalarBlockLayoutFeatures(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceScalarBlockLayoutFeatures* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->scalarBlockLayout, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceScalarBlockLayoutFeatures(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceScalarBlockLayoutFeatures* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->scalarBlockLayout, sizeof(VkBool32));
+}
+
+void marshal_VkImageStencilUsageCreateInfo(
+    VulkanStream* vkStream,
+    const VkImageStencilUsageCreateInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkImageUsageFlags*)&forMarshaling->stencilUsage, sizeof(VkImageUsageFlags));
+}
+
+void unmarshal_VkImageStencilUsageCreateInfo(
+    VulkanStream* vkStream,
+    VkImageStencilUsageCreateInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkImageUsageFlags*)&forUnmarshaling->stencilUsage, sizeof(VkImageUsageFlags));
+}
+
+void marshal_VkSamplerReductionModeCreateInfo(
+    VulkanStream* vkStream,
+    const VkSamplerReductionModeCreateInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkSamplerReductionMode*)&forMarshaling->reductionMode, sizeof(VkSamplerReductionMode));
+}
+
+void unmarshal_VkSamplerReductionModeCreateInfo(
+    VulkanStream* vkStream,
+    VkSamplerReductionModeCreateInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkSamplerReductionMode*)&forUnmarshaling->reductionMode, sizeof(VkSamplerReductionMode));
+}
+
+void marshal_VkPhysicalDeviceSamplerFilterMinmaxProperties(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceSamplerFilterMinmaxProperties* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->filterMinmaxSingleComponentFormats, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->filterMinmaxImageComponentMapping, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceSamplerFilterMinmaxProperties(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceSamplerFilterMinmaxProperties* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->filterMinmaxSingleComponentFormats, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->filterMinmaxImageComponentMapping, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceVulkanMemoryModelFeatures(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceVulkanMemoryModelFeatures* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->vulkanMemoryModel, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->vulkanMemoryModelDeviceScope, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->vulkanMemoryModelAvailabilityVisibilityChains, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceVulkanMemoryModelFeatures(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceVulkanMemoryModelFeatures* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->vulkanMemoryModel, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->vulkanMemoryModelDeviceScope, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->vulkanMemoryModelAvailabilityVisibilityChains, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceImagelessFramebufferFeatures(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceImagelessFramebufferFeatures* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->imagelessFramebuffer, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceImagelessFramebufferFeatures(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceImagelessFramebufferFeatures* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->imagelessFramebuffer, sizeof(VkBool32));
+}
+
+void marshal_VkFramebufferAttachmentImageInfo(
+    VulkanStream* vkStream,
+    const VkFramebufferAttachmentImageInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkImageCreateFlags*)&forMarshaling->flags, sizeof(VkImageCreateFlags));
+    vkStream->write((VkImageUsageFlags*)&forMarshaling->usage, sizeof(VkImageUsageFlags));
+    vkStream->write((uint32_t*)&forMarshaling->width, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->height, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->layerCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->viewFormatCount, sizeof(uint32_t));
+    vkStream->write((const VkFormat*)forMarshaling->pViewFormats, forMarshaling->viewFormatCount * sizeof(const VkFormat));
+}
+
+void unmarshal_VkFramebufferAttachmentImageInfo(
+    VulkanStream* vkStream,
+    VkFramebufferAttachmentImageInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkImageCreateFlags*)&forUnmarshaling->flags, sizeof(VkImageCreateFlags));
+    vkStream->read((VkImageUsageFlags*)&forUnmarshaling->usage, sizeof(VkImageUsageFlags));
+    vkStream->read((uint32_t*)&forUnmarshaling->width, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->height, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->layerCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->viewFormatCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pViewFormats, forUnmarshaling->viewFormatCount * sizeof(const VkFormat));
+    vkStream->read((VkFormat*)forUnmarshaling->pViewFormats, forUnmarshaling->viewFormatCount * sizeof(const VkFormat));
+}
+
+void marshal_VkFramebufferAttachmentsCreateInfo(
+    VulkanStream* vkStream,
+    const VkFramebufferAttachmentsCreateInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->attachmentImageInfoCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->attachmentImageInfoCount; ++i)
+    {
+        marshal_VkFramebufferAttachmentImageInfo(vkStream, (const VkFramebufferAttachmentImageInfo*)(forMarshaling->pAttachmentImageInfos + i));
+    }
+}
+
+void unmarshal_VkFramebufferAttachmentsCreateInfo(
+    VulkanStream* vkStream,
+    VkFramebufferAttachmentsCreateInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->attachmentImageInfoCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pAttachmentImageInfos, forUnmarshaling->attachmentImageInfoCount * sizeof(const VkFramebufferAttachmentImageInfo));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->attachmentImageInfoCount; ++i)
+    {
+        unmarshal_VkFramebufferAttachmentImageInfo(vkStream, (VkFramebufferAttachmentImageInfo*)(forUnmarshaling->pAttachmentImageInfos + i));
+    }
+}
+
+void marshal_VkRenderPassAttachmentBeginInfo(
+    VulkanStream* vkStream,
+    const VkRenderPassAttachmentBeginInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->attachmentCount, sizeof(uint32_t));
+    if (forMarshaling->attachmentCount)
+    {
+        uint64_t* cgen_var_0;
+        vkStream->alloc((void**)&cgen_var_0, forMarshaling->attachmentCount * 8);
+        vkStream->handleMapping()->mapHandles_VkImageView_u64(forMarshaling->pAttachments, cgen_var_0, forMarshaling->attachmentCount);
+        vkStream->write((uint64_t*)cgen_var_0, forMarshaling->attachmentCount * 8);
+    }
+}
+
+void unmarshal_VkRenderPassAttachmentBeginInfo(
+    VulkanStream* vkStream,
+    VkRenderPassAttachmentBeginInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->attachmentCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pAttachments, forUnmarshaling->attachmentCount * sizeof(const VkImageView));
+    if (forUnmarshaling->attachmentCount)
+    {
+        uint64_t* cgen_var_0;
+        vkStream->alloc((void**)&cgen_var_0, forUnmarshaling->attachmentCount * 8);
+        vkStream->read((uint64_t*)cgen_var_0, forUnmarshaling->attachmentCount * 8);
+        vkStream->handleMapping()->mapHandles_u64_VkImageView(cgen_var_0, (VkImageView*)forUnmarshaling->pAttachments, forUnmarshaling->attachmentCount);
+    }
+}
+
+void marshal_VkPhysicalDeviceUniformBufferStandardLayoutFeatures(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceUniformBufferStandardLayoutFeatures* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->uniformBufferStandardLayout, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceUniformBufferStandardLayoutFeatures(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceUniformBufferStandardLayoutFeatures* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->uniformBufferStandardLayout, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->shaderSubgroupExtendedTypes, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSubgroupExtendedTypes, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->separateDepthStencilLayouts, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->separateDepthStencilLayouts, sizeof(VkBool32));
+}
+
+void marshal_VkAttachmentReferenceStencilLayout(
+    VulkanStream* vkStream,
+    const VkAttachmentReferenceStencilLayout* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkImageLayout*)&forMarshaling->stencilLayout, sizeof(VkImageLayout));
+}
+
+void unmarshal_VkAttachmentReferenceStencilLayout(
+    VulkanStream* vkStream,
+    VkAttachmentReferenceStencilLayout* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkImageLayout*)&forUnmarshaling->stencilLayout, sizeof(VkImageLayout));
+}
+
+void marshal_VkAttachmentDescriptionStencilLayout(
+    VulkanStream* vkStream,
+    const VkAttachmentDescriptionStencilLayout* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkImageLayout*)&forMarshaling->stencilInitialLayout, sizeof(VkImageLayout));
+    vkStream->write((VkImageLayout*)&forMarshaling->stencilFinalLayout, sizeof(VkImageLayout));
+}
+
+void unmarshal_VkAttachmentDescriptionStencilLayout(
+    VulkanStream* vkStream,
+    VkAttachmentDescriptionStencilLayout* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkImageLayout*)&forUnmarshaling->stencilInitialLayout, sizeof(VkImageLayout));
+    vkStream->read((VkImageLayout*)&forUnmarshaling->stencilFinalLayout, sizeof(VkImageLayout));
+}
+
+void marshal_VkPhysicalDeviceHostQueryResetFeatures(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceHostQueryResetFeatures* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->hostQueryReset, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceHostQueryResetFeatures(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceHostQueryResetFeatures* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->hostQueryReset, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceTimelineSemaphoreFeatures(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceTimelineSemaphoreFeatures* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->timelineSemaphore, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceTimelineSemaphoreFeatures(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceTimelineSemaphoreFeatures* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->timelineSemaphore, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceTimelineSemaphoreProperties(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceTimelineSemaphoreProperties* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint64_t*)&forMarshaling->maxTimelineSemaphoreValueDifference, sizeof(uint64_t));
+}
+
+void unmarshal_VkPhysicalDeviceTimelineSemaphoreProperties(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceTimelineSemaphoreProperties* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint64_t*)&forUnmarshaling->maxTimelineSemaphoreValueDifference, sizeof(uint64_t));
+}
+
+void marshal_VkSemaphoreTypeCreateInfo(
+    VulkanStream* vkStream,
+    const VkSemaphoreTypeCreateInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkSemaphoreType*)&forMarshaling->semaphoreType, sizeof(VkSemaphoreType));
+    vkStream->write((uint64_t*)&forMarshaling->initialValue, sizeof(uint64_t));
+}
+
+void unmarshal_VkSemaphoreTypeCreateInfo(
+    VulkanStream* vkStream,
+    VkSemaphoreTypeCreateInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkSemaphoreType*)&forUnmarshaling->semaphoreType, sizeof(VkSemaphoreType));
+    vkStream->read((uint64_t*)&forUnmarshaling->initialValue, sizeof(uint64_t));
+}
+
+void marshal_VkTimelineSemaphoreSubmitInfo(
+    VulkanStream* vkStream,
+    const VkTimelineSemaphoreSubmitInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->waitSemaphoreValueCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pWaitSemaphoreValues;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->pWaitSemaphoreValues)
+    {
+        vkStream->write((const uint64_t*)forMarshaling->pWaitSemaphoreValues, forMarshaling->waitSemaphoreValueCount * sizeof(const uint64_t));
+    }
+    vkStream->write((uint32_t*)&forMarshaling->signalSemaphoreValueCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    uint64_t cgen_var_1 = (uint64_t)(uintptr_t)forMarshaling->pSignalSemaphoreValues;
+    vkStream->putBe64(cgen_var_1);
+    if (forMarshaling->pSignalSemaphoreValues)
+    {
+        vkStream->write((const uint64_t*)forMarshaling->pSignalSemaphoreValues, forMarshaling->signalSemaphoreValueCount * sizeof(const uint64_t));
+    }
+}
+
+void unmarshal_VkTimelineSemaphoreSubmitInfo(
+    VulkanStream* vkStream,
+    VkTimelineSemaphoreSubmitInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->waitSemaphoreValueCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    forUnmarshaling->pWaitSemaphoreValues = (const uint64_t*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pWaitSemaphoreValues)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pWaitSemaphoreValues, forUnmarshaling->waitSemaphoreValueCount * sizeof(const uint64_t));
+        vkStream->read((uint64_t*)forUnmarshaling->pWaitSemaphoreValues, forUnmarshaling->waitSemaphoreValueCount * sizeof(const uint64_t));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->signalSemaphoreValueCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    forUnmarshaling->pSignalSemaphoreValues = (const uint64_t*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pSignalSemaphoreValues)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pSignalSemaphoreValues, forUnmarshaling->signalSemaphoreValueCount * sizeof(const uint64_t));
+        vkStream->read((uint64_t*)forUnmarshaling->pSignalSemaphoreValues, forUnmarshaling->signalSemaphoreValueCount * sizeof(const uint64_t));
+    }
+}
+
+void marshal_VkSemaphoreWaitInfo(
+    VulkanStream* vkStream,
+    const VkSemaphoreWaitInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkSemaphoreWaitFlags*)&forMarshaling->flags, sizeof(VkSemaphoreWaitFlags));
+    vkStream->write((uint32_t*)&forMarshaling->semaphoreCount, sizeof(uint32_t));
+    if (forMarshaling->semaphoreCount)
+    {
+        uint64_t* cgen_var_0;
+        vkStream->alloc((void**)&cgen_var_0, forMarshaling->semaphoreCount * 8);
+        vkStream->handleMapping()->mapHandles_VkSemaphore_u64(forMarshaling->pSemaphores, cgen_var_0, forMarshaling->semaphoreCount);
+        vkStream->write((uint64_t*)cgen_var_0, forMarshaling->semaphoreCount * 8);
+    }
+    vkStream->write((const uint64_t*)forMarshaling->pValues, forMarshaling->semaphoreCount * sizeof(const uint64_t));
+}
+
+void unmarshal_VkSemaphoreWaitInfo(
+    VulkanStream* vkStream,
+    VkSemaphoreWaitInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkSemaphoreWaitFlags*)&forUnmarshaling->flags, sizeof(VkSemaphoreWaitFlags));
+    vkStream->read((uint32_t*)&forUnmarshaling->semaphoreCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pSemaphores, forUnmarshaling->semaphoreCount * sizeof(const VkSemaphore));
+    if (forUnmarshaling->semaphoreCount)
+    {
+        uint64_t* cgen_var_0;
+        vkStream->alloc((void**)&cgen_var_0, forUnmarshaling->semaphoreCount * 8);
+        vkStream->read((uint64_t*)cgen_var_0, forUnmarshaling->semaphoreCount * 8);
+        vkStream->handleMapping()->mapHandles_u64_VkSemaphore(cgen_var_0, (VkSemaphore*)forUnmarshaling->pSemaphores, forUnmarshaling->semaphoreCount);
+    }
+    vkStream->alloc((void**)&forUnmarshaling->pValues, forUnmarshaling->semaphoreCount * sizeof(const uint64_t));
+    vkStream->read((uint64_t*)forUnmarshaling->pValues, forUnmarshaling->semaphoreCount * sizeof(const uint64_t));
+}
+
+void marshal_VkSemaphoreSignalInfo(
+    VulkanStream* vkStream,
+    const VkSemaphoreSignalInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkSemaphore_u64(&forMarshaling->semaphore, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->write((uint64_t*)&forMarshaling->value, sizeof(uint64_t));
+}
+
+void unmarshal_VkSemaphoreSignalInfo(
+    VulkanStream* vkStream,
+    VkSemaphoreSignalInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkSemaphore(&cgen_var_0, (VkSemaphore*)&forUnmarshaling->semaphore, 1);
+    vkStream->read((uint64_t*)&forUnmarshaling->value, sizeof(uint64_t));
+}
+
+void marshal_VkPhysicalDeviceBufferDeviceAddressFeatures(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceBufferDeviceAddressFeatures* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->bufferDeviceAddress, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->bufferDeviceAddressCaptureReplay, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->bufferDeviceAddressMultiDevice, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceBufferDeviceAddressFeatures(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceBufferDeviceAddressFeatures* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->bufferDeviceAddress, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->bufferDeviceAddressCaptureReplay, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->bufferDeviceAddressMultiDevice, sizeof(VkBool32));
+}
+
+void marshal_VkBufferDeviceAddressInfo(
+    VulkanStream* vkStream,
+    const VkBufferDeviceAddressInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->buffer, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+}
+
+void unmarshal_VkBufferDeviceAddressInfo(
+    VulkanStream* vkStream,
+    VkBufferDeviceAddressInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_0, (VkBuffer*)&forUnmarshaling->buffer, 1);
+}
+
+void marshal_VkBufferOpaqueCaptureAddressCreateInfo(
+    VulkanStream* vkStream,
+    const VkBufferOpaqueCaptureAddressCreateInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint64_t*)&forMarshaling->opaqueCaptureAddress, sizeof(uint64_t));
+}
+
+void unmarshal_VkBufferOpaqueCaptureAddressCreateInfo(
+    VulkanStream* vkStream,
+    VkBufferOpaqueCaptureAddressCreateInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint64_t*)&forUnmarshaling->opaqueCaptureAddress, sizeof(uint64_t));
+}
+
+void marshal_VkMemoryOpaqueCaptureAddressAllocateInfo(
+    VulkanStream* vkStream,
+    const VkMemoryOpaqueCaptureAddressAllocateInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint64_t*)&forMarshaling->opaqueCaptureAddress, sizeof(uint64_t));
+}
+
+void unmarshal_VkMemoryOpaqueCaptureAddressAllocateInfo(
+    VulkanStream* vkStream,
+    VkMemoryOpaqueCaptureAddressAllocateInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint64_t*)&forUnmarshaling->opaqueCaptureAddress, sizeof(uint64_t));
+}
+
+void marshal_VkDeviceMemoryOpaqueCaptureAddressInfo(
+    VulkanStream* vkStream,
+    const VkDeviceMemoryOpaqueCaptureAddressInfo* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkDeviceMemory_u64(&forMarshaling->memory, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+}
+
+void unmarshal_VkDeviceMemoryOpaqueCaptureAddressInfo(
+    VulkanStream* vkStream,
+    VkDeviceMemoryOpaqueCaptureAddressInfo* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_0, (VkDeviceMemory*)&forUnmarshaling->memory, 1);
 }
 
 #endif
@@ -6956,36 +9092,6 @@ void unmarshal_VkDeviceGroupSwapchainCreateInfoKHR(
 
 #endif
 #ifdef VK_KHR_display
-void marshal_VkDisplayPropertiesKHR(
-    VulkanStream* vkStream,
-    const VkDisplayPropertiesKHR* forMarshaling)
-{
-    uint64_t cgen_var_0;
-    vkStream->handleMapping()->mapHandles_VkDisplayKHR_u64(&forMarshaling->display, &cgen_var_0, 1);
-    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->putString(forMarshaling->displayName);
-    marshal_VkExtent2D(vkStream, (VkExtent2D*)(&forMarshaling->physicalDimensions));
-    marshal_VkExtent2D(vkStream, (VkExtent2D*)(&forMarshaling->physicalResolution));
-    vkStream->write((VkSurfaceTransformFlagsKHR*)&forMarshaling->supportedTransforms, sizeof(VkSurfaceTransformFlagsKHR));
-    vkStream->write((VkBool32*)&forMarshaling->planeReorderPossible, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->persistentContent, sizeof(VkBool32));
-}
-
-void unmarshal_VkDisplayPropertiesKHR(
-    VulkanStream* vkStream,
-    VkDisplayPropertiesKHR* forUnmarshaling)
-{
-    uint64_t cgen_var_0;
-    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkDisplayKHR(&cgen_var_0, (VkDisplayKHR*)&forUnmarshaling->display, 1);
-    vkStream->loadStringInPlace((char**)&forUnmarshaling->displayName);
-    unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->physicalDimensions));
-    unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->physicalResolution));
-    vkStream->read((VkSurfaceTransformFlagsKHR*)&forUnmarshaling->supportedTransforms, sizeof(VkSurfaceTransformFlagsKHR));
-    vkStream->read((VkBool32*)&forUnmarshaling->planeReorderPossible, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->persistentContent, sizeof(VkBool32));
-}
-
 void marshal_VkDisplayModeParametersKHR(
     VulkanStream* vkStream,
     const VkDisplayModeParametersKHR* forMarshaling)
@@ -7000,26 +9106,6 @@ void unmarshal_VkDisplayModeParametersKHR(
 {
     unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->visibleRegion));
     vkStream->read((uint32_t*)&forUnmarshaling->refreshRate, sizeof(uint32_t));
-}
-
-void marshal_VkDisplayModePropertiesKHR(
-    VulkanStream* vkStream,
-    const VkDisplayModePropertiesKHR* forMarshaling)
-{
-    uint64_t cgen_var_0;
-    vkStream->handleMapping()->mapHandles_VkDisplayModeKHR_u64(&forMarshaling->displayMode, &cgen_var_0, 1);
-    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
-    marshal_VkDisplayModeParametersKHR(vkStream, (VkDisplayModeParametersKHR*)(&forMarshaling->parameters));
-}
-
-void unmarshal_VkDisplayModePropertiesKHR(
-    VulkanStream* vkStream,
-    VkDisplayModePropertiesKHR* forUnmarshaling)
-{
-    uint64_t cgen_var_0;
-    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkDisplayModeKHR(&cgen_var_0, (VkDisplayModeKHR*)&forUnmarshaling->displayMode, 1);
-    unmarshal_VkDisplayModeParametersKHR(vkStream, (VkDisplayModeParametersKHR*)(&forUnmarshaling->parameters));
 }
 
 void marshal_VkDisplayModeCreateInfoKHR(
@@ -7050,6 +9136,26 @@ void unmarshal_VkDisplayModeCreateInfoKHR(
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkDisplayModeCreateFlagsKHR*)&forUnmarshaling->flags, sizeof(VkDisplayModeCreateFlagsKHR));
+    unmarshal_VkDisplayModeParametersKHR(vkStream, (VkDisplayModeParametersKHR*)(&forUnmarshaling->parameters));
+}
+
+void marshal_VkDisplayModePropertiesKHR(
+    VulkanStream* vkStream,
+    const VkDisplayModePropertiesKHR* forMarshaling)
+{
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkDisplayModeKHR_u64(&forMarshaling->displayMode, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    marshal_VkDisplayModeParametersKHR(vkStream, (VkDisplayModeParametersKHR*)(&forMarshaling->parameters));
+}
+
+void unmarshal_VkDisplayModePropertiesKHR(
+    VulkanStream* vkStream,
+    VkDisplayModePropertiesKHR* forUnmarshaling)
+{
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkDisplayModeKHR(&cgen_var_0, (VkDisplayModeKHR*)&forUnmarshaling->displayMode, 1);
     unmarshal_VkDisplayModeParametersKHR(vkStream, (VkDisplayModeParametersKHR*)(&forUnmarshaling->parameters));
 }
 
@@ -7101,6 +9207,36 @@ void unmarshal_VkDisplayPlanePropertiesKHR(
     vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
     vkStream->handleMapping()->mapHandles_u64_VkDisplayKHR(&cgen_var_0, (VkDisplayKHR*)&forUnmarshaling->currentDisplay, 1);
     vkStream->read((uint32_t*)&forUnmarshaling->currentStackIndex, sizeof(uint32_t));
+}
+
+void marshal_VkDisplayPropertiesKHR(
+    VulkanStream* vkStream,
+    const VkDisplayPropertiesKHR* forMarshaling)
+{
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkDisplayKHR_u64(&forMarshaling->display, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->putString(forMarshaling->displayName);
+    marshal_VkExtent2D(vkStream, (VkExtent2D*)(&forMarshaling->physicalDimensions));
+    marshal_VkExtent2D(vkStream, (VkExtent2D*)(&forMarshaling->physicalResolution));
+    vkStream->write((VkSurfaceTransformFlagsKHR*)&forMarshaling->supportedTransforms, sizeof(VkSurfaceTransformFlagsKHR));
+    vkStream->write((VkBool32*)&forMarshaling->planeReorderPossible, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->persistentContent, sizeof(VkBool32));
+}
+
+void unmarshal_VkDisplayPropertiesKHR(
+    VulkanStream* vkStream,
+    VkDisplayPropertiesKHR* forUnmarshaling)
+{
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkDisplayKHR(&cgen_var_0, (VkDisplayKHR*)&forUnmarshaling->display, 1);
+    vkStream->loadStringInPlace((char**)&forUnmarshaling->displayName);
+    unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->physicalDimensions));
+    unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->physicalResolution));
+    vkStream->read((VkSurfaceTransformFlagsKHR*)&forUnmarshaling->supportedTransforms, sizeof(VkSurfaceTransformFlagsKHR));
+    vkStream->read((VkBool32*)&forUnmarshaling->planeReorderPossible, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->persistentContent, sizeof(VkBool32));
 }
 
 void marshal_VkDisplaySurfaceCreateInfoKHR(
@@ -7335,65 +9471,6 @@ void unmarshal_VkWaylandSurfaceCreateInfoKHR(
     {
         vkStream->alloc((void**)&forUnmarshaling->surface, sizeof(wl_surface));
         vkStream->read((wl_surface*)forUnmarshaling->surface, sizeof(wl_surface));
-    }
-}
-
-#endif
-#ifdef VK_KHR_mir_surface
-void marshal_VkMirSurfaceCreateInfoKHR(
-    VulkanStream* vkStream,
-    const VkMirSurfaceCreateInfoKHR* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkMirSurfaceCreateFlagsKHR*)&forMarshaling->flags, sizeof(VkMirSurfaceCreateFlagsKHR));
-    // WARNING PTR CHECK
-    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->connection;
-    vkStream->putBe64(cgen_var_0);
-    if (forMarshaling->connection)
-    {
-        vkStream->write((MirConnection*)forMarshaling->connection, sizeof(MirConnection));
-    }
-    // WARNING PTR CHECK
-    uint64_t cgen_var_1 = (uint64_t)(uintptr_t)forMarshaling->mirSurface;
-    vkStream->putBe64(cgen_var_1);
-    if (forMarshaling->mirSurface)
-    {
-        vkStream->write((MirSurface*)forMarshaling->mirSurface, sizeof(MirSurface));
-    }
-}
-
-void unmarshal_VkMirSurfaceCreateInfoKHR(
-    VulkanStream* vkStream,
-    VkMirSurfaceCreateInfoKHR* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((VkMirSurfaceCreateFlagsKHR*)&forUnmarshaling->flags, sizeof(VkMirSurfaceCreateFlagsKHR));
-    // WARNING PTR CHECK
-    forUnmarshaling->connection = (MirConnection*)(uintptr_t)vkStream->getBe64();
-    if (forUnmarshaling->connection)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->connection, sizeof(MirConnection));
-        vkStream->read((MirConnection*)forUnmarshaling->connection, sizeof(MirConnection));
-    }
-    // WARNING PTR CHECK
-    forUnmarshaling->mirSurface = (MirSurface*)(uintptr_t)vkStream->getBe64();
-    if (forUnmarshaling->mirSurface)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->mirSurface, sizeof(MirSurface));
-        vkStream->read((MirSurface*)forUnmarshaling->mirSurface, sizeof(MirSurface));
     }
 }
 
@@ -8102,6 +10179,8 @@ void unmarshal_VkPhysicalDevicePushDescriptorPropertiesKHR(
 }
 
 #endif
+#ifdef VK_KHR_shader_float16_int8
+#endif
 #ifdef VK_KHR_16bit_storage
 #endif
 #ifdef VK_KHR_incremental_present
@@ -8209,345 +10288,9 @@ void unmarshal_VkPresentRegionsKHR(
 #endif
 #ifdef VK_KHR_descriptor_update_template
 #endif
+#ifdef VK_KHR_imageless_framebuffer
+#endif
 #ifdef VK_KHR_create_renderpass2
-void marshal_VkAttachmentDescription2KHR(
-    VulkanStream* vkStream,
-    const VkAttachmentDescription2KHR* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkAttachmentDescriptionFlags*)&forMarshaling->flags, sizeof(VkAttachmentDescriptionFlags));
-    vkStream->write((VkFormat*)&forMarshaling->format, sizeof(VkFormat));
-    vkStream->write((VkSampleCountFlagBits*)&forMarshaling->samples, sizeof(VkSampleCountFlagBits));
-    vkStream->write((VkAttachmentLoadOp*)&forMarshaling->loadOp, sizeof(VkAttachmentLoadOp));
-    vkStream->write((VkAttachmentStoreOp*)&forMarshaling->storeOp, sizeof(VkAttachmentStoreOp));
-    vkStream->write((VkAttachmentLoadOp*)&forMarshaling->stencilLoadOp, sizeof(VkAttachmentLoadOp));
-    vkStream->write((VkAttachmentStoreOp*)&forMarshaling->stencilStoreOp, sizeof(VkAttachmentStoreOp));
-    vkStream->write((VkImageLayout*)&forMarshaling->initialLayout, sizeof(VkImageLayout));
-    vkStream->write((VkImageLayout*)&forMarshaling->finalLayout, sizeof(VkImageLayout));
-}
-
-void unmarshal_VkAttachmentDescription2KHR(
-    VulkanStream* vkStream,
-    VkAttachmentDescription2KHR* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((VkAttachmentDescriptionFlags*)&forUnmarshaling->flags, sizeof(VkAttachmentDescriptionFlags));
-    vkStream->read((VkFormat*)&forUnmarshaling->format, sizeof(VkFormat));
-    vkStream->read((VkSampleCountFlagBits*)&forUnmarshaling->samples, sizeof(VkSampleCountFlagBits));
-    vkStream->read((VkAttachmentLoadOp*)&forUnmarshaling->loadOp, sizeof(VkAttachmentLoadOp));
-    vkStream->read((VkAttachmentStoreOp*)&forUnmarshaling->storeOp, sizeof(VkAttachmentStoreOp));
-    vkStream->read((VkAttachmentLoadOp*)&forUnmarshaling->stencilLoadOp, sizeof(VkAttachmentLoadOp));
-    vkStream->read((VkAttachmentStoreOp*)&forUnmarshaling->stencilStoreOp, sizeof(VkAttachmentStoreOp));
-    vkStream->read((VkImageLayout*)&forUnmarshaling->initialLayout, sizeof(VkImageLayout));
-    vkStream->read((VkImageLayout*)&forUnmarshaling->finalLayout, sizeof(VkImageLayout));
-}
-
-void marshal_VkAttachmentReference2KHR(
-    VulkanStream* vkStream,
-    const VkAttachmentReference2KHR* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((uint32_t*)&forMarshaling->attachment, sizeof(uint32_t));
-    vkStream->write((VkImageLayout*)&forMarshaling->layout, sizeof(VkImageLayout));
-    vkStream->write((VkImageAspectFlags*)&forMarshaling->aspectMask, sizeof(VkImageAspectFlags));
-}
-
-void unmarshal_VkAttachmentReference2KHR(
-    VulkanStream* vkStream,
-    VkAttachmentReference2KHR* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((uint32_t*)&forUnmarshaling->attachment, sizeof(uint32_t));
-    vkStream->read((VkImageLayout*)&forUnmarshaling->layout, sizeof(VkImageLayout));
-    vkStream->read((VkImageAspectFlags*)&forUnmarshaling->aspectMask, sizeof(VkImageAspectFlags));
-}
-
-void marshal_VkSubpassDescription2KHR(
-    VulkanStream* vkStream,
-    const VkSubpassDescription2KHR* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkSubpassDescriptionFlags*)&forMarshaling->flags, sizeof(VkSubpassDescriptionFlags));
-    vkStream->write((VkPipelineBindPoint*)&forMarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
-    vkStream->write((uint32_t*)&forMarshaling->viewMask, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->inputAttachmentCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->inputAttachmentCount; ++i)
-    {
-        marshal_VkAttachmentReference2KHR(vkStream, (const VkAttachmentReference2KHR*)(forMarshaling->pInputAttachments + i));
-    }
-    vkStream->write((uint32_t*)&forMarshaling->colorAttachmentCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->colorAttachmentCount; ++i)
-    {
-        marshal_VkAttachmentReference2KHR(vkStream, (const VkAttachmentReference2KHR*)(forMarshaling->pColorAttachments + i));
-    }
-    // WARNING PTR CHECK
-    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pResolveAttachments;
-    vkStream->putBe64(cgen_var_0);
-    if (forMarshaling->pResolveAttachments)
-    {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->colorAttachmentCount; ++i)
-        {
-            marshal_VkAttachmentReference2KHR(vkStream, (const VkAttachmentReference2KHR*)(forMarshaling->pResolveAttachments + i));
-        }
-    }
-    // WARNING PTR CHECK
-    uint64_t cgen_var_1 = (uint64_t)(uintptr_t)forMarshaling->pDepthStencilAttachment;
-    vkStream->putBe64(cgen_var_1);
-    if (forMarshaling->pDepthStencilAttachment)
-    {
-        marshal_VkAttachmentReference2KHR(vkStream, (const VkAttachmentReference2KHR*)(forMarshaling->pDepthStencilAttachment));
-    }
-    vkStream->write((uint32_t*)&forMarshaling->preserveAttachmentCount, sizeof(uint32_t));
-    vkStream->write((const uint32_t*)forMarshaling->pPreserveAttachments, forMarshaling->preserveAttachmentCount * sizeof(const uint32_t));
-}
-
-void unmarshal_VkSubpassDescription2KHR(
-    VulkanStream* vkStream,
-    VkSubpassDescription2KHR* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((VkSubpassDescriptionFlags*)&forUnmarshaling->flags, sizeof(VkSubpassDescriptionFlags));
-    vkStream->read((VkPipelineBindPoint*)&forUnmarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
-    vkStream->read((uint32_t*)&forUnmarshaling->viewMask, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->inputAttachmentCount, sizeof(uint32_t));
-    vkStream->alloc((void**)&forUnmarshaling->pInputAttachments, forUnmarshaling->inputAttachmentCount * sizeof(const VkAttachmentReference2KHR));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->inputAttachmentCount; ++i)
-    {
-        unmarshal_VkAttachmentReference2KHR(vkStream, (VkAttachmentReference2KHR*)(forUnmarshaling->pInputAttachments + i));
-    }
-    vkStream->read((uint32_t*)&forUnmarshaling->colorAttachmentCount, sizeof(uint32_t));
-    vkStream->alloc((void**)&forUnmarshaling->pColorAttachments, forUnmarshaling->colorAttachmentCount * sizeof(const VkAttachmentReference2KHR));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->colorAttachmentCount; ++i)
-    {
-        unmarshal_VkAttachmentReference2KHR(vkStream, (VkAttachmentReference2KHR*)(forUnmarshaling->pColorAttachments + i));
-    }
-    // WARNING PTR CHECK
-    forUnmarshaling->pResolveAttachments = (const VkAttachmentReference2KHR*)(uintptr_t)vkStream->getBe64();
-    if (forUnmarshaling->pResolveAttachments)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pResolveAttachments, forUnmarshaling->colorAttachmentCount * sizeof(const VkAttachmentReference2KHR));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->colorAttachmentCount; ++i)
-        {
-            unmarshal_VkAttachmentReference2KHR(vkStream, (VkAttachmentReference2KHR*)(forUnmarshaling->pResolveAttachments + i));
-        }
-    }
-    // WARNING PTR CHECK
-    forUnmarshaling->pDepthStencilAttachment = (const VkAttachmentReference2KHR*)(uintptr_t)vkStream->getBe64();
-    if (forUnmarshaling->pDepthStencilAttachment)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pDepthStencilAttachment, sizeof(const VkAttachmentReference2KHR));
-        unmarshal_VkAttachmentReference2KHR(vkStream, (VkAttachmentReference2KHR*)(forUnmarshaling->pDepthStencilAttachment));
-    }
-    vkStream->read((uint32_t*)&forUnmarshaling->preserveAttachmentCount, sizeof(uint32_t));
-    vkStream->alloc((void**)&forUnmarshaling->pPreserveAttachments, forUnmarshaling->preserveAttachmentCount * sizeof(const uint32_t));
-    vkStream->read((uint32_t*)forUnmarshaling->pPreserveAttachments, forUnmarshaling->preserveAttachmentCount * sizeof(const uint32_t));
-}
-
-void marshal_VkSubpassDependency2KHR(
-    VulkanStream* vkStream,
-    const VkSubpassDependency2KHR* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((uint32_t*)&forMarshaling->srcSubpass, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->dstSubpass, sizeof(uint32_t));
-    vkStream->write((VkPipelineStageFlags*)&forMarshaling->srcStageMask, sizeof(VkPipelineStageFlags));
-    vkStream->write((VkPipelineStageFlags*)&forMarshaling->dstStageMask, sizeof(VkPipelineStageFlags));
-    vkStream->write((VkAccessFlags*)&forMarshaling->srcAccessMask, sizeof(VkAccessFlags));
-    vkStream->write((VkAccessFlags*)&forMarshaling->dstAccessMask, sizeof(VkAccessFlags));
-    vkStream->write((VkDependencyFlags*)&forMarshaling->dependencyFlags, sizeof(VkDependencyFlags));
-    vkStream->write((int32_t*)&forMarshaling->viewOffset, sizeof(int32_t));
-}
-
-void unmarshal_VkSubpassDependency2KHR(
-    VulkanStream* vkStream,
-    VkSubpassDependency2KHR* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((uint32_t*)&forUnmarshaling->srcSubpass, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->dstSubpass, sizeof(uint32_t));
-    vkStream->read((VkPipelineStageFlags*)&forUnmarshaling->srcStageMask, sizeof(VkPipelineStageFlags));
-    vkStream->read((VkPipelineStageFlags*)&forUnmarshaling->dstStageMask, sizeof(VkPipelineStageFlags));
-    vkStream->read((VkAccessFlags*)&forUnmarshaling->srcAccessMask, sizeof(VkAccessFlags));
-    vkStream->read((VkAccessFlags*)&forUnmarshaling->dstAccessMask, sizeof(VkAccessFlags));
-    vkStream->read((VkDependencyFlags*)&forUnmarshaling->dependencyFlags, sizeof(VkDependencyFlags));
-    vkStream->read((int32_t*)&forUnmarshaling->viewOffset, sizeof(int32_t));
-}
-
-void marshal_VkRenderPassCreateInfo2KHR(
-    VulkanStream* vkStream,
-    const VkRenderPassCreateInfo2KHR* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkRenderPassCreateFlags*)&forMarshaling->flags, sizeof(VkRenderPassCreateFlags));
-    vkStream->write((uint32_t*)&forMarshaling->attachmentCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->attachmentCount; ++i)
-    {
-        marshal_VkAttachmentDescription2KHR(vkStream, (const VkAttachmentDescription2KHR*)(forMarshaling->pAttachments + i));
-    }
-    vkStream->write((uint32_t*)&forMarshaling->subpassCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->subpassCount; ++i)
-    {
-        marshal_VkSubpassDescription2KHR(vkStream, (const VkSubpassDescription2KHR*)(forMarshaling->pSubpasses + i));
-    }
-    vkStream->write((uint32_t*)&forMarshaling->dependencyCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->dependencyCount; ++i)
-    {
-        marshal_VkSubpassDependency2KHR(vkStream, (const VkSubpassDependency2KHR*)(forMarshaling->pDependencies + i));
-    }
-    vkStream->write((uint32_t*)&forMarshaling->correlatedViewMaskCount, sizeof(uint32_t));
-    vkStream->write((const uint32_t*)forMarshaling->pCorrelatedViewMasks, forMarshaling->correlatedViewMaskCount * sizeof(const uint32_t));
-}
-
-void unmarshal_VkRenderPassCreateInfo2KHR(
-    VulkanStream* vkStream,
-    VkRenderPassCreateInfo2KHR* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((VkRenderPassCreateFlags*)&forUnmarshaling->flags, sizeof(VkRenderPassCreateFlags));
-    vkStream->read((uint32_t*)&forUnmarshaling->attachmentCount, sizeof(uint32_t));
-    vkStream->alloc((void**)&forUnmarshaling->pAttachments, forUnmarshaling->attachmentCount * sizeof(const VkAttachmentDescription2KHR));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->attachmentCount; ++i)
-    {
-        unmarshal_VkAttachmentDescription2KHR(vkStream, (VkAttachmentDescription2KHR*)(forUnmarshaling->pAttachments + i));
-    }
-    vkStream->read((uint32_t*)&forUnmarshaling->subpassCount, sizeof(uint32_t));
-    vkStream->alloc((void**)&forUnmarshaling->pSubpasses, forUnmarshaling->subpassCount * sizeof(const VkSubpassDescription2KHR));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->subpassCount; ++i)
-    {
-        unmarshal_VkSubpassDescription2KHR(vkStream, (VkSubpassDescription2KHR*)(forUnmarshaling->pSubpasses + i));
-    }
-    vkStream->read((uint32_t*)&forUnmarshaling->dependencyCount, sizeof(uint32_t));
-    vkStream->alloc((void**)&forUnmarshaling->pDependencies, forUnmarshaling->dependencyCount * sizeof(const VkSubpassDependency2KHR));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->dependencyCount; ++i)
-    {
-        unmarshal_VkSubpassDependency2KHR(vkStream, (VkSubpassDependency2KHR*)(forUnmarshaling->pDependencies + i));
-    }
-    vkStream->read((uint32_t*)&forUnmarshaling->correlatedViewMaskCount, sizeof(uint32_t));
-    vkStream->alloc((void**)&forUnmarshaling->pCorrelatedViewMasks, forUnmarshaling->correlatedViewMaskCount * sizeof(const uint32_t));
-    vkStream->read((uint32_t*)forUnmarshaling->pCorrelatedViewMasks, forUnmarshaling->correlatedViewMaskCount * sizeof(const uint32_t));
-}
-
-void marshal_VkSubpassBeginInfoKHR(
-    VulkanStream* vkStream,
-    const VkSubpassBeginInfoKHR* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkSubpassContents*)&forMarshaling->contents, sizeof(VkSubpassContents));
-}
-
-void unmarshal_VkSubpassBeginInfoKHR(
-    VulkanStream* vkStream,
-    VkSubpassBeginInfoKHR* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((VkSubpassContents*)&forUnmarshaling->contents, sizeof(VkSubpassContents));
-}
-
-void marshal_VkSubpassEndInfoKHR(
-    VulkanStream* vkStream,
-    const VkSubpassEndInfoKHR* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-}
-
-void unmarshal_VkSubpassEndInfoKHR(
-    VulkanStream* vkStream,
-    VkSubpassEndInfoKHR* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-}
-
 #endif
 #ifdef VK_KHR_shared_presentable_image
 void marshal_VkSharedPresentSurfaceCapabilitiesKHR(
@@ -8780,6 +10523,246 @@ void unmarshal_VkFenceGetFdInfoKHR(
     vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
     vkStream->handleMapping()->mapHandles_u64_VkFence(&cgen_var_0, (VkFence*)&forUnmarshaling->fence, 1);
     vkStream->read((VkExternalFenceHandleTypeFlagBits*)&forUnmarshaling->handleType, sizeof(VkExternalFenceHandleTypeFlagBits));
+}
+
+#endif
+#ifdef VK_KHR_performance_query
+void marshal_VkPhysicalDevicePerformanceQueryFeaturesKHR(
+    VulkanStream* vkStream,
+    const VkPhysicalDevicePerformanceQueryFeaturesKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->performanceCounterQueryPools, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->performanceCounterMultipleQueryPools, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDevicePerformanceQueryFeaturesKHR(
+    VulkanStream* vkStream,
+    VkPhysicalDevicePerformanceQueryFeaturesKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->performanceCounterQueryPools, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->performanceCounterMultipleQueryPools, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDevicePerformanceQueryPropertiesKHR(
+    VulkanStream* vkStream,
+    const VkPhysicalDevicePerformanceQueryPropertiesKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->allowCommandBufferQueryCopies, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDevicePerformanceQueryPropertiesKHR(
+    VulkanStream* vkStream,
+    VkPhysicalDevicePerformanceQueryPropertiesKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->allowCommandBufferQueryCopies, sizeof(VkBool32));
+}
+
+void marshal_VkPerformanceCounterKHR(
+    VulkanStream* vkStream,
+    const VkPerformanceCounterKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkPerformanceCounterUnitKHR*)&forMarshaling->unit, sizeof(VkPerformanceCounterUnitKHR));
+    vkStream->write((VkPerformanceCounterScopeKHR*)&forMarshaling->scope, sizeof(VkPerformanceCounterScopeKHR));
+    vkStream->write((VkPerformanceCounterStorageKHR*)&forMarshaling->storage, sizeof(VkPerformanceCounterStorageKHR));
+    vkStream->write((uint8_t*)forMarshaling->uuid, VK_UUID_SIZE * sizeof(uint8_t));
+}
+
+void unmarshal_VkPerformanceCounterKHR(
+    VulkanStream* vkStream,
+    VkPerformanceCounterKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkPerformanceCounterUnitKHR*)&forUnmarshaling->unit, sizeof(VkPerformanceCounterUnitKHR));
+    vkStream->read((VkPerformanceCounterScopeKHR*)&forUnmarshaling->scope, sizeof(VkPerformanceCounterScopeKHR));
+    vkStream->read((VkPerformanceCounterStorageKHR*)&forUnmarshaling->storage, sizeof(VkPerformanceCounterStorageKHR));
+    vkStream->read((uint8_t*)forUnmarshaling->uuid, VK_UUID_SIZE * sizeof(uint8_t));
+}
+
+void marshal_VkPerformanceCounterDescriptionKHR(
+    VulkanStream* vkStream,
+    const VkPerformanceCounterDescriptionKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkPerformanceCounterDescriptionFlagsKHR*)&forMarshaling->flags, sizeof(VkPerformanceCounterDescriptionFlagsKHR));
+    vkStream->write((char*)forMarshaling->name, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    vkStream->write((char*)forMarshaling->category, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    vkStream->write((char*)forMarshaling->description, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+}
+
+void unmarshal_VkPerformanceCounterDescriptionKHR(
+    VulkanStream* vkStream,
+    VkPerformanceCounterDescriptionKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkPerformanceCounterDescriptionFlagsKHR*)&forUnmarshaling->flags, sizeof(VkPerformanceCounterDescriptionFlagsKHR));
+    vkStream->read((char*)forUnmarshaling->name, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    vkStream->read((char*)forUnmarshaling->category, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    vkStream->read((char*)forUnmarshaling->description, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+}
+
+void marshal_VkQueryPoolPerformanceCreateInfoKHR(
+    VulkanStream* vkStream,
+    const VkQueryPoolPerformanceCreateInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->queueFamilyIndex, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->counterIndexCount, sizeof(uint32_t));
+    vkStream->write((const uint32_t*)forMarshaling->pCounterIndices, forMarshaling->counterIndexCount * sizeof(const uint32_t));
+}
+
+void unmarshal_VkQueryPoolPerformanceCreateInfoKHR(
+    VulkanStream* vkStream,
+    VkQueryPoolPerformanceCreateInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->queueFamilyIndex, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->counterIndexCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pCounterIndices, forUnmarshaling->counterIndexCount * sizeof(const uint32_t));
+    vkStream->read((uint32_t*)forUnmarshaling->pCounterIndices, forUnmarshaling->counterIndexCount * sizeof(const uint32_t));
+}
+
+void marshal_VkPerformanceCounterResultKHR(
+    VulkanStream* vkStream,
+    const VkPerformanceCounterResultKHR* forMarshaling)
+{
+    vkStream->write((int32_t*)&forMarshaling->int32, sizeof(int32_t));
+}
+
+void unmarshal_VkPerformanceCounterResultKHR(
+    VulkanStream* vkStream,
+    VkPerformanceCounterResultKHR* forUnmarshaling)
+{
+    vkStream->read((int32_t*)&forUnmarshaling->int32, sizeof(int32_t));
+}
+
+void marshal_VkAcquireProfilingLockInfoKHR(
+    VulkanStream* vkStream,
+    const VkAcquireProfilingLockInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkAcquireProfilingLockFlagsKHR*)&forMarshaling->flags, sizeof(VkAcquireProfilingLockFlagsKHR));
+    vkStream->write((uint64_t*)&forMarshaling->timeout, sizeof(uint64_t));
+}
+
+void unmarshal_VkAcquireProfilingLockInfoKHR(
+    VulkanStream* vkStream,
+    VkAcquireProfilingLockInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkAcquireProfilingLockFlagsKHR*)&forUnmarshaling->flags, sizeof(VkAcquireProfilingLockFlagsKHR));
+    vkStream->read((uint64_t*)&forUnmarshaling->timeout, sizeof(uint64_t));
+}
+
+void marshal_VkPerformanceQuerySubmitInfoKHR(
+    VulkanStream* vkStream,
+    const VkPerformanceQuerySubmitInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->counterPassIndex, sizeof(uint32_t));
+}
+
+void unmarshal_VkPerformanceQuerySubmitInfoKHR(
+    VulkanStream* vkStream,
+    VkPerformanceQuerySubmitInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->counterPassIndex, sizeof(uint32_t));
 }
 
 #endif
@@ -9042,62 +11025,123 @@ void unmarshal_VkDisplayPlaneCapabilities2KHR(
 #ifdef VK_KHR_get_memory_requirements2
 #endif
 #ifdef VK_KHR_image_format_list
-void marshal_VkImageFormatListCreateInfoKHR(
-    VulkanStream* vkStream,
-    const VkImageFormatListCreateInfoKHR* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((uint32_t*)&forMarshaling->viewFormatCount, sizeof(uint32_t));
-    vkStream->write((const VkFormat*)forMarshaling->pViewFormats, forMarshaling->viewFormatCount * sizeof(const VkFormat));
-}
-
-void unmarshal_VkImageFormatListCreateInfoKHR(
-    VulkanStream* vkStream,
-    VkImageFormatListCreateInfoKHR* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((uint32_t*)&forUnmarshaling->viewFormatCount, sizeof(uint32_t));
-    vkStream->alloc((void**)&forUnmarshaling->pViewFormats, forUnmarshaling->viewFormatCount * sizeof(const VkFormat));
-    vkStream->read((VkFormat*)forUnmarshaling->pViewFormats, forUnmarshaling->viewFormatCount * sizeof(const VkFormat));
-}
-
 #endif
 #ifdef VK_KHR_sampler_ycbcr_conversion
 #endif
 #ifdef VK_KHR_bind_memory2
 #endif
+#ifdef VK_KHR_portability_subset
+void marshal_VkPhysicalDevicePortabilitySubsetFeaturesKHR(
+    VulkanStream* vkStream,
+    const VkPhysicalDevicePortabilitySubsetFeaturesKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->constantAlphaColorBlendFactors, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->events, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->imageViewFormatReinterpretation, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->imageViewFormatSwizzle, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->imageView2DOn3DImage, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->multisampleArrayImage, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->mutableComparisonSamplers, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->pointPolygons, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->samplerMipLodBias, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->separateStencilMaskRef, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSampleRateInterpolationFunctions, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->tessellationIsolines, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->tessellationPointMode, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->triangleFans, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->vertexAttributeAccessBeyondStride, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDevicePortabilitySubsetFeaturesKHR(
+    VulkanStream* vkStream,
+    VkPhysicalDevicePortabilitySubsetFeaturesKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->constantAlphaColorBlendFactors, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->events, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->imageViewFormatReinterpretation, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->imageViewFormatSwizzle, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->imageView2DOn3DImage, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->multisampleArrayImage, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->mutableComparisonSamplers, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->pointPolygons, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->samplerMipLodBias, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->separateStencilMaskRef, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSampleRateInterpolationFunctions, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->tessellationIsolines, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->tessellationPointMode, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->triangleFans, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->vertexAttributeAccessBeyondStride, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDevicePortabilitySubsetPropertiesKHR(
+    VulkanStream* vkStream,
+    const VkPhysicalDevicePortabilitySubsetPropertiesKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->minVertexInputBindingStrideAlignment, sizeof(uint32_t));
+}
+
+void unmarshal_VkPhysicalDevicePortabilitySubsetPropertiesKHR(
+    VulkanStream* vkStream,
+    VkPhysicalDevicePortabilitySubsetPropertiesKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->minVertexInputBindingStrideAlignment, sizeof(uint32_t));
+}
+
+#endif
 #ifdef VK_KHR_maintenance3
 #endif
 #ifdef VK_KHR_draw_indirect_count
 #endif
+#ifdef VK_KHR_shader_subgroup_extended_types
+#endif
 #ifdef VK_KHR_8bit_storage
-void marshal_VkPhysicalDevice8BitStorageFeaturesKHR(
+#endif
+#ifdef VK_KHR_shader_atomic_int64
+#endif
+#ifdef VK_KHR_shader_clock
+void marshal_VkPhysicalDeviceShaderClockFeaturesKHR(
     VulkanStream* vkStream,
-    const VkPhysicalDevice8BitStorageFeaturesKHR* forMarshaling)
+    const VkPhysicalDeviceShaderClockFeaturesKHR* forMarshaling)
 {
     vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
     marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkBool32*)&forMarshaling->storageBuffer8BitAccess, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->uniformAndStorageBuffer8BitAccess, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->storagePushConstant8, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSubgroupClock, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderDeviceClock, sizeof(VkBool32));
 }
 
-void unmarshal_VkPhysicalDevice8BitStorageFeaturesKHR(
+void unmarshal_VkPhysicalDeviceShaderClockFeaturesKHR(
     VulkanStream* vkStream,
-    VkPhysicalDevice8BitStorageFeaturesKHR* forUnmarshaling)
+    VkPhysicalDeviceShaderClockFeaturesKHR* forUnmarshaling)
 {
     vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
     size_t pNext_size;
@@ -9112,26 +11156,36 @@ void unmarshal_VkPhysicalDevice8BitStorageFeaturesKHR(
         *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
-    vkStream->read((VkBool32*)&forUnmarshaling->storageBuffer8BitAccess, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->uniformAndStorageBuffer8BitAccess, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->storagePushConstant8, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSubgroupClock, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderDeviceClock, sizeof(VkBool32));
 }
 
 #endif
-#ifdef VK_KHR_shader_float16_int8
-void marshal_VkPhysicalDeviceShaderFloat16Int8Features(
+#ifdef VK_KHR_driver_properties
+#endif
+#ifdef VK_KHR_shader_float_controls
+#endif
+#ifdef VK_KHR_depth_stencil_resolve
+#endif
+#ifdef VK_KHR_swapchain_mutable_format
+#endif
+#ifdef VK_KHR_timeline_semaphore
+#endif
+#ifdef VK_KHR_vulkan_memory_model
+#endif
+#ifdef VK_KHR_shader_terminate_invocation
+void marshal_VkPhysicalDeviceShaderTerminateInvocationFeaturesKHR(
     VulkanStream* vkStream,
-    const VkPhysicalDeviceShaderFloat16Int8Features* forMarshaling)
+    const VkPhysicalDeviceShaderTerminateInvocationFeaturesKHR* forMarshaling)
 {
     vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
     marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkBool32*)&forMarshaling->shaderFloat16, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->shaderInt8, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderTerminateInvocation, sizeof(VkBool32));
 }
 
-void unmarshal_VkPhysicalDeviceShaderFloat16Int8Features(
+void unmarshal_VkPhysicalDeviceShaderTerminateInvocationFeaturesKHR(
     VulkanStream* vkStream,
-    VkPhysicalDeviceShaderFloat16Int8Features* forUnmarshaling)
+    VkPhysicalDeviceShaderTerminateInvocationFeaturesKHR* forUnmarshaling)
 {
     vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
     size_t pNext_size;
@@ -9146,8 +11200,1032 @@ void unmarshal_VkPhysicalDeviceShaderFloat16Int8Features(
         *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
-    vkStream->read((VkBool32*)&forUnmarshaling->shaderFloat16, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->shaderInt8, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderTerminateInvocation, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_KHR_fragment_shading_rate
+void marshal_VkFragmentShadingRateAttachmentInfoKHR(
+    VulkanStream* vkStream,
+    const VkFragmentShadingRateAttachmentInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    marshal_VkAttachmentReference2(vkStream, (const VkAttachmentReference2*)(forMarshaling->pFragmentShadingRateAttachment));
+    marshal_VkExtent2D(vkStream, (VkExtent2D*)(&forMarshaling->shadingRateAttachmentTexelSize));
+}
+
+void unmarshal_VkFragmentShadingRateAttachmentInfoKHR(
+    VulkanStream* vkStream,
+    VkFragmentShadingRateAttachmentInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->alloc((void**)&forUnmarshaling->pFragmentShadingRateAttachment, sizeof(const VkAttachmentReference2));
+    unmarshal_VkAttachmentReference2(vkStream, (VkAttachmentReference2*)(forUnmarshaling->pFragmentShadingRateAttachment));
+    unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->shadingRateAttachmentTexelSize));
+}
+
+void marshal_VkPipelineFragmentShadingRateStateCreateInfoKHR(
+    VulkanStream* vkStream,
+    const VkPipelineFragmentShadingRateStateCreateInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    marshal_VkExtent2D(vkStream, (VkExtent2D*)(&forMarshaling->fragmentSize));
+    vkStream->write((VkFragmentShadingRateCombinerOpKHR*)forMarshaling->combinerOps, 2 * sizeof(VkFragmentShadingRateCombinerOpKHR));
+}
+
+void unmarshal_VkPipelineFragmentShadingRateStateCreateInfoKHR(
+    VulkanStream* vkStream,
+    VkPipelineFragmentShadingRateStateCreateInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->fragmentSize));
+    vkStream->read((VkFragmentShadingRateCombinerOpKHR*)forUnmarshaling->combinerOps, 2 * sizeof(VkFragmentShadingRateCombinerOpKHR));
+}
+
+void marshal_VkPhysicalDeviceFragmentShadingRateFeaturesKHR(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceFragmentShadingRateFeaturesKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->pipelineFragmentShadingRate, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->primitiveFragmentShadingRate, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->attachmentFragmentShadingRate, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceFragmentShadingRateFeaturesKHR(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceFragmentShadingRateFeaturesKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->pipelineFragmentShadingRate, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->primitiveFragmentShadingRate, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->attachmentFragmentShadingRate, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceFragmentShadingRatePropertiesKHR(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceFragmentShadingRatePropertiesKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    marshal_VkExtent2D(vkStream, (VkExtent2D*)(&forMarshaling->minFragmentShadingRateAttachmentTexelSize));
+    marshal_VkExtent2D(vkStream, (VkExtent2D*)(&forMarshaling->maxFragmentShadingRateAttachmentTexelSize));
+    vkStream->write((uint32_t*)&forMarshaling->maxFragmentShadingRateAttachmentTexelSizeAspectRatio, sizeof(uint32_t));
+    vkStream->write((VkBool32*)&forMarshaling->primitiveFragmentShadingRateWithMultipleViewports, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->layeredShadingRateAttachments, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->fragmentShadingRateNonTrivialCombinerOps, sizeof(VkBool32));
+    marshal_VkExtent2D(vkStream, (VkExtent2D*)(&forMarshaling->maxFragmentSize));
+    vkStream->write((uint32_t*)&forMarshaling->maxFragmentSizeAspectRatio, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxFragmentShadingRateCoverageSamples, sizeof(uint32_t));
+    vkStream->write((VkSampleCountFlagBits*)&forMarshaling->maxFragmentShadingRateRasterizationSamples, sizeof(VkSampleCountFlagBits));
+    vkStream->write((VkBool32*)&forMarshaling->fragmentShadingRateWithShaderDepthStencilWrites, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->fragmentShadingRateWithSampleMask, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->fragmentShadingRateWithShaderSampleMask, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->fragmentShadingRateWithConservativeRasterization, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->fragmentShadingRateWithFragmentShaderInterlock, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->fragmentShadingRateWithCustomSampleLocations, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->fragmentShadingRateStrictMultiplyCombiner, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceFragmentShadingRatePropertiesKHR(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceFragmentShadingRatePropertiesKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->minFragmentShadingRateAttachmentTexelSize));
+    unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->maxFragmentShadingRateAttachmentTexelSize));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxFragmentShadingRateAttachmentTexelSizeAspectRatio, sizeof(uint32_t));
+    vkStream->read((VkBool32*)&forUnmarshaling->primitiveFragmentShadingRateWithMultipleViewports, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->layeredShadingRateAttachments, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->fragmentShadingRateNonTrivialCombinerOps, sizeof(VkBool32));
+    unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->maxFragmentSize));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxFragmentSizeAspectRatio, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxFragmentShadingRateCoverageSamples, sizeof(uint32_t));
+    vkStream->read((VkSampleCountFlagBits*)&forUnmarshaling->maxFragmentShadingRateRasterizationSamples, sizeof(VkSampleCountFlagBits));
+    vkStream->read((VkBool32*)&forUnmarshaling->fragmentShadingRateWithShaderDepthStencilWrites, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->fragmentShadingRateWithSampleMask, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->fragmentShadingRateWithShaderSampleMask, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->fragmentShadingRateWithConservativeRasterization, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->fragmentShadingRateWithFragmentShaderInterlock, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->fragmentShadingRateWithCustomSampleLocations, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->fragmentShadingRateStrictMultiplyCombiner, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceFragmentShadingRateKHR(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceFragmentShadingRateKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkSampleCountFlags*)&forMarshaling->sampleCounts, sizeof(VkSampleCountFlags));
+    marshal_VkExtent2D(vkStream, (VkExtent2D*)(&forMarshaling->fragmentSize));
+}
+
+void unmarshal_VkPhysicalDeviceFragmentShadingRateKHR(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceFragmentShadingRateKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkSampleCountFlags*)&forUnmarshaling->sampleCounts, sizeof(VkSampleCountFlags));
+    unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->fragmentSize));
+}
+
+#endif
+#ifdef VK_KHR_spirv_1_4
+#endif
+#ifdef VK_KHR_surface_protected_capabilities
+void marshal_VkSurfaceProtectedCapabilitiesKHR(
+    VulkanStream* vkStream,
+    const VkSurfaceProtectedCapabilitiesKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->supportsProtected, sizeof(VkBool32));
+}
+
+void unmarshal_VkSurfaceProtectedCapabilitiesKHR(
+    VulkanStream* vkStream,
+    VkSurfaceProtectedCapabilitiesKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->supportsProtected, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_KHR_separate_depth_stencil_layouts
+#endif
+#ifdef VK_KHR_uniform_buffer_standard_layout
+#endif
+#ifdef VK_KHR_buffer_device_address
+#endif
+#ifdef VK_KHR_deferred_host_operations
+#endif
+#ifdef VK_KHR_pipeline_executable_properties
+void marshal_VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR(
+    VulkanStream* vkStream,
+    const VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->pipelineExecutableInfo, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR(
+    VulkanStream* vkStream,
+    VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->pipelineExecutableInfo, sizeof(VkBool32));
+}
+
+void marshal_VkPipelineInfoKHR(
+    VulkanStream* vkStream,
+    const VkPipelineInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkPipeline_u64(&forMarshaling->pipeline, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+}
+
+void unmarshal_VkPipelineInfoKHR(
+    VulkanStream* vkStream,
+    VkPipelineInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkPipeline(&cgen_var_0, (VkPipeline*)&forUnmarshaling->pipeline, 1);
+}
+
+void marshal_VkPipelineExecutablePropertiesKHR(
+    VulkanStream* vkStream,
+    const VkPipelineExecutablePropertiesKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkShaderStageFlags*)&forMarshaling->stages, sizeof(VkShaderStageFlags));
+    vkStream->write((char*)forMarshaling->name, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    vkStream->write((char*)forMarshaling->description, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    vkStream->write((uint32_t*)&forMarshaling->subgroupSize, sizeof(uint32_t));
+}
+
+void unmarshal_VkPipelineExecutablePropertiesKHR(
+    VulkanStream* vkStream,
+    VkPipelineExecutablePropertiesKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkShaderStageFlags*)&forUnmarshaling->stages, sizeof(VkShaderStageFlags));
+    vkStream->read((char*)forUnmarshaling->name, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    vkStream->read((char*)forUnmarshaling->description, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    vkStream->read((uint32_t*)&forUnmarshaling->subgroupSize, sizeof(uint32_t));
+}
+
+void marshal_VkPipelineExecutableInfoKHR(
+    VulkanStream* vkStream,
+    const VkPipelineExecutableInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkPipeline_u64(&forMarshaling->pipeline, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->write((uint32_t*)&forMarshaling->executableIndex, sizeof(uint32_t));
+}
+
+void unmarshal_VkPipelineExecutableInfoKHR(
+    VulkanStream* vkStream,
+    VkPipelineExecutableInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkPipeline(&cgen_var_0, (VkPipeline*)&forUnmarshaling->pipeline, 1);
+    vkStream->read((uint32_t*)&forUnmarshaling->executableIndex, sizeof(uint32_t));
+}
+
+void marshal_VkPipelineExecutableStatisticValueKHR(
+    VulkanStream* vkStream,
+    const VkPipelineExecutableStatisticValueKHR* forMarshaling)
+{
+    vkStream->write((VkBool32*)&forMarshaling->b32, sizeof(VkBool32));
+}
+
+void unmarshal_VkPipelineExecutableStatisticValueKHR(
+    VulkanStream* vkStream,
+    VkPipelineExecutableStatisticValueKHR* forUnmarshaling)
+{
+    vkStream->read((VkBool32*)&forUnmarshaling->b32, sizeof(VkBool32));
+}
+
+void marshal_VkPipelineExecutableStatisticKHR(
+    VulkanStream* vkStream,
+    const VkPipelineExecutableStatisticKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((char*)forMarshaling->name, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    vkStream->write((char*)forMarshaling->description, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    vkStream->write((VkPipelineExecutableStatisticFormatKHR*)&forMarshaling->format, sizeof(VkPipelineExecutableStatisticFormatKHR));
+    marshal_VkPipelineExecutableStatisticValueKHR(vkStream, (VkPipelineExecutableStatisticValueKHR*)(&forMarshaling->value));
+}
+
+void unmarshal_VkPipelineExecutableStatisticKHR(
+    VulkanStream* vkStream,
+    VkPipelineExecutableStatisticKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((char*)forUnmarshaling->name, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    vkStream->read((char*)forUnmarshaling->description, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    vkStream->read((VkPipelineExecutableStatisticFormatKHR*)&forUnmarshaling->format, sizeof(VkPipelineExecutableStatisticFormatKHR));
+    unmarshal_VkPipelineExecutableStatisticValueKHR(vkStream, (VkPipelineExecutableStatisticValueKHR*)(&forUnmarshaling->value));
+}
+
+void marshal_VkPipelineExecutableInternalRepresentationKHR(
+    VulkanStream* vkStream,
+    const VkPipelineExecutableInternalRepresentationKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((char*)forMarshaling->name, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    vkStream->write((char*)forMarshaling->description, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    vkStream->write((VkBool32*)&forMarshaling->isText, sizeof(VkBool32));
+    uint64_t cgen_var_0 = (uint64_t)forMarshaling->dataSize;
+    vkStream->putBe64(cgen_var_0);
+    // WARNING PTR CHECK
+    uint64_t cgen_var_1 = (uint64_t)(uintptr_t)forMarshaling->pData;
+    vkStream->putBe64(cgen_var_1);
+    if (forMarshaling->pData)
+    {
+        vkStream->write((void*)forMarshaling->pData, forMarshaling->dataSize * sizeof(uint8_t));
+    }
+}
+
+void unmarshal_VkPipelineExecutableInternalRepresentationKHR(
+    VulkanStream* vkStream,
+    VkPipelineExecutableInternalRepresentationKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((char*)forUnmarshaling->name, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    vkStream->read((char*)forUnmarshaling->description, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    vkStream->read((VkBool32*)&forUnmarshaling->isText, sizeof(VkBool32));
+    forUnmarshaling->dataSize = (size_t)vkStream->getBe64();
+    // WARNING PTR CHECK
+    forUnmarshaling->pData = (void*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pData)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pData, forUnmarshaling->dataSize * sizeof(uint8_t));
+        vkStream->read((void*)forUnmarshaling->pData, forUnmarshaling->dataSize * sizeof(uint8_t));
+    }
+}
+
+#endif
+#ifdef VK_KHR_pipeline_library
+void marshal_VkPipelineLibraryCreateInfoKHR(
+    VulkanStream* vkStream,
+    const VkPipelineLibraryCreateInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->libraryCount, sizeof(uint32_t));
+    if (forMarshaling->libraryCount)
+    {
+        uint64_t* cgen_var_0;
+        vkStream->alloc((void**)&cgen_var_0, forMarshaling->libraryCount * 8);
+        vkStream->handleMapping()->mapHandles_VkPipeline_u64(forMarshaling->pLibraries, cgen_var_0, forMarshaling->libraryCount);
+        vkStream->write((uint64_t*)cgen_var_0, forMarshaling->libraryCount * 8);
+    }
+}
+
+void unmarshal_VkPipelineLibraryCreateInfoKHR(
+    VulkanStream* vkStream,
+    VkPipelineLibraryCreateInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->libraryCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pLibraries, forUnmarshaling->libraryCount * sizeof(const VkPipeline));
+    if (forUnmarshaling->libraryCount)
+    {
+        uint64_t* cgen_var_0;
+        vkStream->alloc((void**)&cgen_var_0, forUnmarshaling->libraryCount * 8);
+        vkStream->read((uint64_t*)cgen_var_0, forUnmarshaling->libraryCount * 8);
+        vkStream->handleMapping()->mapHandles_u64_VkPipeline(cgen_var_0, (VkPipeline*)forUnmarshaling->pLibraries, forUnmarshaling->libraryCount);
+    }
+}
+
+#endif
+#ifdef VK_KHR_shader_non_semantic_info
+#endif
+#ifdef VK_KHR_copy_commands2
+void marshal_VkBufferCopy2KHR(
+    VulkanStream* vkStream,
+    const VkBufferCopy2KHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkDeviceSize*)&forMarshaling->srcOffset, sizeof(VkDeviceSize));
+    vkStream->write((VkDeviceSize*)&forMarshaling->dstOffset, sizeof(VkDeviceSize));
+    vkStream->write((VkDeviceSize*)&forMarshaling->size, sizeof(VkDeviceSize));
+}
+
+void unmarshal_VkBufferCopy2KHR(
+    VulkanStream* vkStream,
+    VkBufferCopy2KHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->srcOffset, sizeof(VkDeviceSize));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->dstOffset, sizeof(VkDeviceSize));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->size, sizeof(VkDeviceSize));
+}
+
+void marshal_VkCopyBufferInfo2KHR(
+    VulkanStream* vkStream,
+    const VkCopyBufferInfo2KHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->srcBuffer, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    uint64_t cgen_var_1;
+    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->dstBuffer, &cgen_var_1, 1);
+    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->write((uint32_t*)&forMarshaling->regionCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->regionCount; ++i)
+    {
+        marshal_VkBufferCopy2KHR(vkStream, (const VkBufferCopy2KHR*)(forMarshaling->pRegions + i));
+    }
+}
+
+void unmarshal_VkCopyBufferInfo2KHR(
+    VulkanStream* vkStream,
+    VkCopyBufferInfo2KHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_0, (VkBuffer*)&forUnmarshaling->srcBuffer, 1);
+    uint64_t cgen_var_1;
+    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_1, (VkBuffer*)&forUnmarshaling->dstBuffer, 1);
+    vkStream->read((uint32_t*)&forUnmarshaling->regionCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pRegions, forUnmarshaling->regionCount * sizeof(const VkBufferCopy2KHR));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->regionCount; ++i)
+    {
+        unmarshal_VkBufferCopy2KHR(vkStream, (VkBufferCopy2KHR*)(forUnmarshaling->pRegions + i));
+    }
+}
+
+void marshal_VkImageCopy2KHR(
+    VulkanStream* vkStream,
+    const VkImageCopy2KHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    marshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forMarshaling->srcSubresource));
+    marshal_VkOffset3D(vkStream, (VkOffset3D*)(&forMarshaling->srcOffset));
+    marshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forMarshaling->dstSubresource));
+    marshal_VkOffset3D(vkStream, (VkOffset3D*)(&forMarshaling->dstOffset));
+    marshal_VkExtent3D(vkStream, (VkExtent3D*)(&forMarshaling->extent));
+}
+
+void unmarshal_VkImageCopy2KHR(
+    VulkanStream* vkStream,
+    VkImageCopy2KHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    unmarshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forUnmarshaling->srcSubresource));
+    unmarshal_VkOffset3D(vkStream, (VkOffset3D*)(&forUnmarshaling->srcOffset));
+    unmarshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forUnmarshaling->dstSubresource));
+    unmarshal_VkOffset3D(vkStream, (VkOffset3D*)(&forUnmarshaling->dstOffset));
+    unmarshal_VkExtent3D(vkStream, (VkExtent3D*)(&forUnmarshaling->extent));
+}
+
+void marshal_VkCopyImageInfo2KHR(
+    VulkanStream* vkStream,
+    const VkCopyImageInfo2KHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkImage_u64(&forMarshaling->srcImage, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->write((VkImageLayout*)&forMarshaling->srcImageLayout, sizeof(VkImageLayout));
+    uint64_t cgen_var_1;
+    vkStream->handleMapping()->mapHandles_VkImage_u64(&forMarshaling->dstImage, &cgen_var_1, 1);
+    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->write((VkImageLayout*)&forMarshaling->dstImageLayout, sizeof(VkImageLayout));
+    vkStream->write((uint32_t*)&forMarshaling->regionCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->regionCount; ++i)
+    {
+        marshal_VkImageCopy2KHR(vkStream, (const VkImageCopy2KHR*)(forMarshaling->pRegions + i));
+    }
+}
+
+void unmarshal_VkCopyImageInfo2KHR(
+    VulkanStream* vkStream,
+    VkCopyImageInfo2KHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_0, (VkImage*)&forUnmarshaling->srcImage, 1);
+    vkStream->read((VkImageLayout*)&forUnmarshaling->srcImageLayout, sizeof(VkImageLayout));
+    uint64_t cgen_var_1;
+    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_1, (VkImage*)&forUnmarshaling->dstImage, 1);
+    vkStream->read((VkImageLayout*)&forUnmarshaling->dstImageLayout, sizeof(VkImageLayout));
+    vkStream->read((uint32_t*)&forUnmarshaling->regionCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pRegions, forUnmarshaling->regionCount * sizeof(const VkImageCopy2KHR));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->regionCount; ++i)
+    {
+        unmarshal_VkImageCopy2KHR(vkStream, (VkImageCopy2KHR*)(forUnmarshaling->pRegions + i));
+    }
+}
+
+void marshal_VkBufferImageCopy2KHR(
+    VulkanStream* vkStream,
+    const VkBufferImageCopy2KHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkDeviceSize*)&forMarshaling->bufferOffset, sizeof(VkDeviceSize));
+    vkStream->write((uint32_t*)&forMarshaling->bufferRowLength, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->bufferImageHeight, sizeof(uint32_t));
+    marshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forMarshaling->imageSubresource));
+    marshal_VkOffset3D(vkStream, (VkOffset3D*)(&forMarshaling->imageOffset));
+    marshal_VkExtent3D(vkStream, (VkExtent3D*)(&forMarshaling->imageExtent));
+}
+
+void unmarshal_VkBufferImageCopy2KHR(
+    VulkanStream* vkStream,
+    VkBufferImageCopy2KHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->bufferOffset, sizeof(VkDeviceSize));
+    vkStream->read((uint32_t*)&forUnmarshaling->bufferRowLength, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->bufferImageHeight, sizeof(uint32_t));
+    unmarshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forUnmarshaling->imageSubresource));
+    unmarshal_VkOffset3D(vkStream, (VkOffset3D*)(&forUnmarshaling->imageOffset));
+    unmarshal_VkExtent3D(vkStream, (VkExtent3D*)(&forUnmarshaling->imageExtent));
+}
+
+void marshal_VkCopyBufferToImageInfo2KHR(
+    VulkanStream* vkStream,
+    const VkCopyBufferToImageInfo2KHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->srcBuffer, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    uint64_t cgen_var_1;
+    vkStream->handleMapping()->mapHandles_VkImage_u64(&forMarshaling->dstImage, &cgen_var_1, 1);
+    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->write((VkImageLayout*)&forMarshaling->dstImageLayout, sizeof(VkImageLayout));
+    vkStream->write((uint32_t*)&forMarshaling->regionCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->regionCount; ++i)
+    {
+        marshal_VkBufferImageCopy2KHR(vkStream, (const VkBufferImageCopy2KHR*)(forMarshaling->pRegions + i));
+    }
+}
+
+void unmarshal_VkCopyBufferToImageInfo2KHR(
+    VulkanStream* vkStream,
+    VkCopyBufferToImageInfo2KHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_0, (VkBuffer*)&forUnmarshaling->srcBuffer, 1);
+    uint64_t cgen_var_1;
+    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_1, (VkImage*)&forUnmarshaling->dstImage, 1);
+    vkStream->read((VkImageLayout*)&forUnmarshaling->dstImageLayout, sizeof(VkImageLayout));
+    vkStream->read((uint32_t*)&forUnmarshaling->regionCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pRegions, forUnmarshaling->regionCount * sizeof(const VkBufferImageCopy2KHR));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->regionCount; ++i)
+    {
+        unmarshal_VkBufferImageCopy2KHR(vkStream, (VkBufferImageCopy2KHR*)(forUnmarshaling->pRegions + i));
+    }
+}
+
+void marshal_VkCopyImageToBufferInfo2KHR(
+    VulkanStream* vkStream,
+    const VkCopyImageToBufferInfo2KHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkImage_u64(&forMarshaling->srcImage, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->write((VkImageLayout*)&forMarshaling->srcImageLayout, sizeof(VkImageLayout));
+    uint64_t cgen_var_1;
+    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->dstBuffer, &cgen_var_1, 1);
+    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->write((uint32_t*)&forMarshaling->regionCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->regionCount; ++i)
+    {
+        marshal_VkBufferImageCopy2KHR(vkStream, (const VkBufferImageCopy2KHR*)(forMarshaling->pRegions + i));
+    }
+}
+
+void unmarshal_VkCopyImageToBufferInfo2KHR(
+    VulkanStream* vkStream,
+    VkCopyImageToBufferInfo2KHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_0, (VkImage*)&forUnmarshaling->srcImage, 1);
+    vkStream->read((VkImageLayout*)&forUnmarshaling->srcImageLayout, sizeof(VkImageLayout));
+    uint64_t cgen_var_1;
+    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_1, (VkBuffer*)&forUnmarshaling->dstBuffer, 1);
+    vkStream->read((uint32_t*)&forUnmarshaling->regionCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pRegions, forUnmarshaling->regionCount * sizeof(const VkBufferImageCopy2KHR));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->regionCount; ++i)
+    {
+        unmarshal_VkBufferImageCopy2KHR(vkStream, (VkBufferImageCopy2KHR*)(forUnmarshaling->pRegions + i));
+    }
+}
+
+void marshal_VkImageBlit2KHR(
+    VulkanStream* vkStream,
+    const VkImageBlit2KHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    marshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forMarshaling->srcSubresource));
+    for (uint32_t i = 0; i < (uint32_t)2; ++i)
+    {
+        marshal_VkOffset3D(vkStream, (VkOffset3D*)(forMarshaling->srcOffsets + i));
+    }
+    marshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forMarshaling->dstSubresource));
+    for (uint32_t i = 0; i < (uint32_t)2; ++i)
+    {
+        marshal_VkOffset3D(vkStream, (VkOffset3D*)(forMarshaling->dstOffsets + i));
+    }
+}
+
+void unmarshal_VkImageBlit2KHR(
+    VulkanStream* vkStream,
+    VkImageBlit2KHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    unmarshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forUnmarshaling->srcSubresource));
+    for (uint32_t i = 0; i < (uint32_t)2; ++i)
+    {
+        unmarshal_VkOffset3D(vkStream, (VkOffset3D*)(forUnmarshaling->srcOffsets + i));
+    }
+    unmarshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forUnmarshaling->dstSubresource));
+    for (uint32_t i = 0; i < (uint32_t)2; ++i)
+    {
+        unmarshal_VkOffset3D(vkStream, (VkOffset3D*)(forUnmarshaling->dstOffsets + i));
+    }
+}
+
+void marshal_VkBlitImageInfo2KHR(
+    VulkanStream* vkStream,
+    const VkBlitImageInfo2KHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkImage_u64(&forMarshaling->srcImage, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->write((VkImageLayout*)&forMarshaling->srcImageLayout, sizeof(VkImageLayout));
+    uint64_t cgen_var_1;
+    vkStream->handleMapping()->mapHandles_VkImage_u64(&forMarshaling->dstImage, &cgen_var_1, 1);
+    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->write((VkImageLayout*)&forMarshaling->dstImageLayout, sizeof(VkImageLayout));
+    vkStream->write((uint32_t*)&forMarshaling->regionCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->regionCount; ++i)
+    {
+        marshal_VkImageBlit2KHR(vkStream, (const VkImageBlit2KHR*)(forMarshaling->pRegions + i));
+    }
+    vkStream->write((VkFilter*)&forMarshaling->filter, sizeof(VkFilter));
+}
+
+void unmarshal_VkBlitImageInfo2KHR(
+    VulkanStream* vkStream,
+    VkBlitImageInfo2KHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_0, (VkImage*)&forUnmarshaling->srcImage, 1);
+    vkStream->read((VkImageLayout*)&forUnmarshaling->srcImageLayout, sizeof(VkImageLayout));
+    uint64_t cgen_var_1;
+    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_1, (VkImage*)&forUnmarshaling->dstImage, 1);
+    vkStream->read((VkImageLayout*)&forUnmarshaling->dstImageLayout, sizeof(VkImageLayout));
+    vkStream->read((uint32_t*)&forUnmarshaling->regionCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pRegions, forUnmarshaling->regionCount * sizeof(const VkImageBlit2KHR));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->regionCount; ++i)
+    {
+        unmarshal_VkImageBlit2KHR(vkStream, (VkImageBlit2KHR*)(forUnmarshaling->pRegions + i));
+    }
+    vkStream->read((VkFilter*)&forUnmarshaling->filter, sizeof(VkFilter));
+}
+
+void marshal_VkImageResolve2KHR(
+    VulkanStream* vkStream,
+    const VkImageResolve2KHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    marshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forMarshaling->srcSubresource));
+    marshal_VkOffset3D(vkStream, (VkOffset3D*)(&forMarshaling->srcOffset));
+    marshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forMarshaling->dstSubresource));
+    marshal_VkOffset3D(vkStream, (VkOffset3D*)(&forMarshaling->dstOffset));
+    marshal_VkExtent3D(vkStream, (VkExtent3D*)(&forMarshaling->extent));
+}
+
+void unmarshal_VkImageResolve2KHR(
+    VulkanStream* vkStream,
+    VkImageResolve2KHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    unmarshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forUnmarshaling->srcSubresource));
+    unmarshal_VkOffset3D(vkStream, (VkOffset3D*)(&forUnmarshaling->srcOffset));
+    unmarshal_VkImageSubresourceLayers(vkStream, (VkImageSubresourceLayers*)(&forUnmarshaling->dstSubresource));
+    unmarshal_VkOffset3D(vkStream, (VkOffset3D*)(&forUnmarshaling->dstOffset));
+    unmarshal_VkExtent3D(vkStream, (VkExtent3D*)(&forUnmarshaling->extent));
+}
+
+void marshal_VkResolveImageInfo2KHR(
+    VulkanStream* vkStream,
+    const VkResolveImageInfo2KHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkImage_u64(&forMarshaling->srcImage, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->write((VkImageLayout*)&forMarshaling->srcImageLayout, sizeof(VkImageLayout));
+    uint64_t cgen_var_1;
+    vkStream->handleMapping()->mapHandles_VkImage_u64(&forMarshaling->dstImage, &cgen_var_1, 1);
+    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->write((VkImageLayout*)&forMarshaling->dstImageLayout, sizeof(VkImageLayout));
+    vkStream->write((uint32_t*)&forMarshaling->regionCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->regionCount; ++i)
+    {
+        marshal_VkImageResolve2KHR(vkStream, (const VkImageResolve2KHR*)(forMarshaling->pRegions + i));
+    }
+}
+
+void unmarshal_VkResolveImageInfo2KHR(
+    VulkanStream* vkStream,
+    VkResolveImageInfo2KHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_0, (VkImage*)&forUnmarshaling->srcImage, 1);
+    vkStream->read((VkImageLayout*)&forUnmarshaling->srcImageLayout, sizeof(VkImageLayout));
+    uint64_t cgen_var_1;
+    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_1, (VkImage*)&forUnmarshaling->dstImage, 1);
+    vkStream->read((VkImageLayout*)&forUnmarshaling->dstImageLayout, sizeof(VkImageLayout));
+    vkStream->read((uint32_t*)&forUnmarshaling->regionCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pRegions, forUnmarshaling->regionCount * sizeof(const VkImageResolve2KHR));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->regionCount; ++i)
+    {
+        unmarshal_VkImageResolve2KHR(vkStream, (VkImageResolve2KHR*)(forUnmarshaling->pRegions + i));
+    }
 }
 
 #endif
@@ -9499,6 +12577,191 @@ void unmarshal_VkDedicatedAllocationMemoryAllocateInfoNV(
 }
 
 #endif
+#ifdef VK_EXT_transform_feedback
+void marshal_VkPhysicalDeviceTransformFeedbackFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceTransformFeedbackFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->transformFeedback, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->geometryStreams, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceTransformFeedbackFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceTransformFeedbackFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->transformFeedback, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->geometryStreams, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceTransformFeedbackPropertiesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceTransformFeedbackPropertiesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->maxTransformFeedbackStreams, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxTransformFeedbackBuffers, sizeof(uint32_t));
+    vkStream->write((VkDeviceSize*)&forMarshaling->maxTransformFeedbackBufferSize, sizeof(VkDeviceSize));
+    vkStream->write((uint32_t*)&forMarshaling->maxTransformFeedbackStreamDataSize, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxTransformFeedbackBufferDataSize, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxTransformFeedbackBufferDataStride, sizeof(uint32_t));
+    vkStream->write((VkBool32*)&forMarshaling->transformFeedbackQueries, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->transformFeedbackStreamsLinesTriangles, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->transformFeedbackRasterizationStreamSelect, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->transformFeedbackDraw, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceTransformFeedbackPropertiesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceTransformFeedbackPropertiesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->maxTransformFeedbackStreams, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxTransformFeedbackBuffers, sizeof(uint32_t));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->maxTransformFeedbackBufferSize, sizeof(VkDeviceSize));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxTransformFeedbackStreamDataSize, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxTransformFeedbackBufferDataSize, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxTransformFeedbackBufferDataStride, sizeof(uint32_t));
+    vkStream->read((VkBool32*)&forUnmarshaling->transformFeedbackQueries, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->transformFeedbackStreamsLinesTriangles, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->transformFeedbackRasterizationStreamSelect, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->transformFeedbackDraw, sizeof(VkBool32));
+}
+
+void marshal_VkPipelineRasterizationStateStreamCreateInfoEXT(
+    VulkanStream* vkStream,
+    const VkPipelineRasterizationStateStreamCreateInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkPipelineRasterizationStateStreamCreateFlagsEXT*)&forMarshaling->flags, sizeof(VkPipelineRasterizationStateStreamCreateFlagsEXT));
+    vkStream->write((uint32_t*)&forMarshaling->rasterizationStream, sizeof(uint32_t));
+}
+
+void unmarshal_VkPipelineRasterizationStateStreamCreateInfoEXT(
+    VulkanStream* vkStream,
+    VkPipelineRasterizationStateStreamCreateInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkPipelineRasterizationStateStreamCreateFlagsEXT*)&forUnmarshaling->flags, sizeof(VkPipelineRasterizationStateStreamCreateFlagsEXT));
+    vkStream->read((uint32_t*)&forUnmarshaling->rasterizationStream, sizeof(uint32_t));
+}
+
+#endif
+#ifdef VK_NVX_image_view_handle
+void marshal_VkImageViewHandleInfoNVX(
+    VulkanStream* vkStream,
+    const VkImageViewHandleInfoNVX* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkImageView_u64(&forMarshaling->imageView, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->write((VkDescriptorType*)&forMarshaling->descriptorType, sizeof(VkDescriptorType));
+    uint64_t cgen_var_1;
+    vkStream->handleMapping()->mapHandles_VkSampler_u64(&forMarshaling->sampler, &cgen_var_1, 1);
+    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
+}
+
+void unmarshal_VkImageViewHandleInfoNVX(
+    VulkanStream* vkStream,
+    VkImageViewHandleInfoNVX* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkImageView(&cgen_var_0, (VkImageView*)&forUnmarshaling->imageView, 1);
+    vkStream->read((VkDescriptorType*)&forUnmarshaling->descriptorType, sizeof(VkDescriptorType));
+    uint64_t cgen_var_1;
+    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkSampler(&cgen_var_1, (VkSampler*)&forUnmarshaling->sampler, 1);
+}
+
+void marshal_VkImageViewAddressPropertiesNVX(
+    VulkanStream* vkStream,
+    const VkImageViewAddressPropertiesNVX* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkDeviceAddress*)&forMarshaling->deviceAddress, sizeof(VkDeviceAddress));
+    vkStream->write((VkDeviceSize*)&forMarshaling->size, sizeof(VkDeviceSize));
+}
+
+void unmarshal_VkImageViewAddressPropertiesNVX(
+    VulkanStream* vkStream,
+    VkImageViewAddressPropertiesNVX* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkDeviceAddress*)&forUnmarshaling->deviceAddress, sizeof(VkDeviceAddress));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->size, sizeof(VkDeviceSize));
+}
+
+#endif
 #ifdef VK_AMD_draw_indirect_count
 #endif
 #ifdef VK_AMD_negative_viewport_height
@@ -9591,6 +12854,70 @@ void unmarshal_VkShaderStatisticsInfoAMD(
 
 #endif
 #ifdef VK_AMD_shader_image_load_store_lod
+#endif
+#ifdef VK_GGP_stream_descriptor_surface
+void marshal_VkStreamDescriptorSurfaceCreateInfoGGP(
+    VulkanStream* vkStream,
+    const VkStreamDescriptorSurfaceCreateInfoGGP* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkStreamDescriptorSurfaceCreateFlagsGGP*)&forMarshaling->flags, sizeof(VkStreamDescriptorSurfaceCreateFlagsGGP));
+    vkStream->write((GgpStreamDescriptor*)&forMarshaling->streamDescriptor, sizeof(GgpStreamDescriptor));
+}
+
+void unmarshal_VkStreamDescriptorSurfaceCreateInfoGGP(
+    VulkanStream* vkStream,
+    VkStreamDescriptorSurfaceCreateInfoGGP* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkStreamDescriptorSurfaceCreateFlagsGGP*)&forUnmarshaling->flags, sizeof(VkStreamDescriptorSurfaceCreateFlagsGGP));
+    vkStream->read((GgpStreamDescriptor*)&forUnmarshaling->streamDescriptor, sizeof(GgpStreamDescriptor));
+}
+
+#endif
+#ifdef VK_NV_corner_sampled_image
+void marshal_VkPhysicalDeviceCornerSampledImageFeaturesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceCornerSampledImageFeaturesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->cornerSampledImage, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceCornerSampledImageFeaturesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceCornerSampledImageFeaturesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->cornerSampledImage, sizeof(VkBool32));
+}
+
 #endif
 #ifdef VK_IMG_format_pvrtc
 #endif
@@ -9907,6 +13234,97 @@ void unmarshal_VkViSurfaceCreateInfoNN(
 #endif
 #ifdef VK_EXT_shader_subgroup_vote
 #endif
+#ifdef VK_EXT_texture_compression_astc_hdr
+void marshal_VkPhysicalDeviceTextureCompressionASTCHDRFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceTextureCompressionASTCHDRFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->textureCompressionASTC_HDR, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceTextureCompressionASTCHDRFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceTextureCompressionASTCHDRFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->textureCompressionASTC_HDR, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_EXT_astc_decode_mode
+void marshal_VkImageViewASTCDecodeModeEXT(
+    VulkanStream* vkStream,
+    const VkImageViewASTCDecodeModeEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkFormat*)&forMarshaling->decodeMode, sizeof(VkFormat));
+}
+
+void unmarshal_VkImageViewASTCDecodeModeEXT(
+    VulkanStream* vkStream,
+    VkImageViewASTCDecodeModeEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkFormat*)&forUnmarshaling->decodeMode, sizeof(VkFormat));
+}
+
+void marshal_VkPhysicalDeviceASTCDecodeFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceASTCDecodeFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->decodeModeSharedExponent, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceASTCDecodeFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceASTCDecodeFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->decodeModeSharedExponent, sizeof(VkBool32));
+}
+
+#endif
 #ifdef VK_EXT_conditional_rendering
 void marshal_VkConditionalRenderingBeginInfoEXT(
     VulkanStream* vkStream,
@@ -10003,457 +13421,6 @@ void unmarshal_VkCommandBufferInheritanceConditionalRenderingInfoEXT(
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
     vkStream->read((VkBool32*)&forUnmarshaling->conditionalRenderingEnable, sizeof(VkBool32));
-}
-
-#endif
-#ifdef VK_NVX_device_generated_commands
-void marshal_VkDeviceGeneratedCommandsFeaturesNVX(
-    VulkanStream* vkStream,
-    const VkDeviceGeneratedCommandsFeaturesNVX* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkBool32*)&forMarshaling->computeBindingPointSupport, sizeof(VkBool32));
-}
-
-void unmarshal_VkDeviceGeneratedCommandsFeaturesNVX(
-    VulkanStream* vkStream,
-    VkDeviceGeneratedCommandsFeaturesNVX* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((VkBool32*)&forUnmarshaling->computeBindingPointSupport, sizeof(VkBool32));
-}
-
-void marshal_VkDeviceGeneratedCommandsLimitsNVX(
-    VulkanStream* vkStream,
-    const VkDeviceGeneratedCommandsLimitsNVX* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((uint32_t*)&forMarshaling->maxIndirectCommandsLayoutTokenCount, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxObjectEntryCounts, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->minSequenceCountBufferOffsetAlignment, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->minSequenceIndexBufferOffsetAlignment, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->minCommandsTokenBufferOffsetAlignment, sizeof(uint32_t));
-}
-
-void unmarshal_VkDeviceGeneratedCommandsLimitsNVX(
-    VulkanStream* vkStream,
-    VkDeviceGeneratedCommandsLimitsNVX* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((uint32_t*)&forUnmarshaling->maxIndirectCommandsLayoutTokenCount, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxObjectEntryCounts, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->minSequenceCountBufferOffsetAlignment, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->minSequenceIndexBufferOffsetAlignment, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->minCommandsTokenBufferOffsetAlignment, sizeof(uint32_t));
-}
-
-void marshal_VkIndirectCommandsTokenNVX(
-    VulkanStream* vkStream,
-    const VkIndirectCommandsTokenNVX* forMarshaling)
-{
-    vkStream->write((VkIndirectCommandsTokenTypeNVX*)&forMarshaling->tokenType, sizeof(VkIndirectCommandsTokenTypeNVX));
-    uint64_t cgen_var_0;
-    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->buffer, &cgen_var_0, 1);
-    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->write((VkDeviceSize*)&forMarshaling->offset, sizeof(VkDeviceSize));
-}
-
-void unmarshal_VkIndirectCommandsTokenNVX(
-    VulkanStream* vkStream,
-    VkIndirectCommandsTokenNVX* forUnmarshaling)
-{
-    vkStream->read((VkIndirectCommandsTokenTypeNVX*)&forUnmarshaling->tokenType, sizeof(VkIndirectCommandsTokenTypeNVX));
-    uint64_t cgen_var_0;
-    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_0, (VkBuffer*)&forUnmarshaling->buffer, 1);
-    vkStream->read((VkDeviceSize*)&forUnmarshaling->offset, sizeof(VkDeviceSize));
-}
-
-void marshal_VkIndirectCommandsLayoutTokenNVX(
-    VulkanStream* vkStream,
-    const VkIndirectCommandsLayoutTokenNVX* forMarshaling)
-{
-    vkStream->write((VkIndirectCommandsTokenTypeNVX*)&forMarshaling->tokenType, sizeof(VkIndirectCommandsTokenTypeNVX));
-    vkStream->write((uint32_t*)&forMarshaling->bindingUnit, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->dynamicCount, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->divisor, sizeof(uint32_t));
-}
-
-void unmarshal_VkIndirectCommandsLayoutTokenNVX(
-    VulkanStream* vkStream,
-    VkIndirectCommandsLayoutTokenNVX* forUnmarshaling)
-{
-    vkStream->read((VkIndirectCommandsTokenTypeNVX*)&forUnmarshaling->tokenType, sizeof(VkIndirectCommandsTokenTypeNVX));
-    vkStream->read((uint32_t*)&forUnmarshaling->bindingUnit, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->dynamicCount, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->divisor, sizeof(uint32_t));
-}
-
-void marshal_VkIndirectCommandsLayoutCreateInfoNVX(
-    VulkanStream* vkStream,
-    const VkIndirectCommandsLayoutCreateInfoNVX* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkPipelineBindPoint*)&forMarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
-    vkStream->write((VkIndirectCommandsLayoutUsageFlagsNVX*)&forMarshaling->flags, sizeof(VkIndirectCommandsLayoutUsageFlagsNVX));
-    vkStream->write((uint32_t*)&forMarshaling->tokenCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->tokenCount; ++i)
-    {
-        marshal_VkIndirectCommandsLayoutTokenNVX(vkStream, (const VkIndirectCommandsLayoutTokenNVX*)(forMarshaling->pTokens + i));
-    }
-}
-
-void unmarshal_VkIndirectCommandsLayoutCreateInfoNVX(
-    VulkanStream* vkStream,
-    VkIndirectCommandsLayoutCreateInfoNVX* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((VkPipelineBindPoint*)&forUnmarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
-    vkStream->read((VkIndirectCommandsLayoutUsageFlagsNVX*)&forUnmarshaling->flags, sizeof(VkIndirectCommandsLayoutUsageFlagsNVX));
-    vkStream->read((uint32_t*)&forUnmarshaling->tokenCount, sizeof(uint32_t));
-    vkStream->alloc((void**)&forUnmarshaling->pTokens, forUnmarshaling->tokenCount * sizeof(const VkIndirectCommandsLayoutTokenNVX));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->tokenCount; ++i)
-    {
-        unmarshal_VkIndirectCommandsLayoutTokenNVX(vkStream, (VkIndirectCommandsLayoutTokenNVX*)(forUnmarshaling->pTokens + i));
-    }
-}
-
-void marshal_VkCmdProcessCommandsInfoNVX(
-    VulkanStream* vkStream,
-    const VkCmdProcessCommandsInfoNVX* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    uint64_t cgen_var_0;
-    vkStream->handleMapping()->mapHandles_VkObjectTableNVX_u64(&forMarshaling->objectTable, &cgen_var_0, 1);
-    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
-    uint64_t cgen_var_1;
-    vkStream->handleMapping()->mapHandles_VkIndirectCommandsLayoutNVX_u64(&forMarshaling->indirectCommandsLayout, &cgen_var_1, 1);
-    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
-    vkStream->write((uint32_t*)&forMarshaling->indirectCommandsTokenCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->indirectCommandsTokenCount; ++i)
-    {
-        marshal_VkIndirectCommandsTokenNVX(vkStream, (const VkIndirectCommandsTokenNVX*)(forMarshaling->pIndirectCommandsTokens + i));
-    }
-    vkStream->write((uint32_t*)&forMarshaling->maxSequencesCount, sizeof(uint32_t));
-    uint64_t cgen_var_2;
-    vkStream->handleMapping()->mapHandles_VkCommandBuffer_u64(&forMarshaling->targetCommandBuffer, &cgen_var_2, 1);
-    vkStream->write((uint64_t*)&cgen_var_2, 1 * 8);
-    uint64_t cgen_var_3;
-    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->sequencesCountBuffer, &cgen_var_3, 1);
-    vkStream->write((uint64_t*)&cgen_var_3, 1 * 8);
-    vkStream->write((VkDeviceSize*)&forMarshaling->sequencesCountOffset, sizeof(VkDeviceSize));
-    uint64_t cgen_var_4;
-    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->sequencesIndexBuffer, &cgen_var_4, 1);
-    vkStream->write((uint64_t*)&cgen_var_4, 1 * 8);
-    vkStream->write((VkDeviceSize*)&forMarshaling->sequencesIndexOffset, sizeof(VkDeviceSize));
-}
-
-void unmarshal_VkCmdProcessCommandsInfoNVX(
-    VulkanStream* vkStream,
-    VkCmdProcessCommandsInfoNVX* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    uint64_t cgen_var_0;
-    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkObjectTableNVX(&cgen_var_0, (VkObjectTableNVX*)&forUnmarshaling->objectTable, 1);
-    uint64_t cgen_var_1;
-    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkIndirectCommandsLayoutNVX(&cgen_var_1, (VkIndirectCommandsLayoutNVX*)&forUnmarshaling->indirectCommandsLayout, 1);
-    vkStream->read((uint32_t*)&forUnmarshaling->indirectCommandsTokenCount, sizeof(uint32_t));
-    vkStream->alloc((void**)&forUnmarshaling->pIndirectCommandsTokens, forUnmarshaling->indirectCommandsTokenCount * sizeof(const VkIndirectCommandsTokenNVX));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->indirectCommandsTokenCount; ++i)
-    {
-        unmarshal_VkIndirectCommandsTokenNVX(vkStream, (VkIndirectCommandsTokenNVX*)(forUnmarshaling->pIndirectCommandsTokens + i));
-    }
-    vkStream->read((uint32_t*)&forUnmarshaling->maxSequencesCount, sizeof(uint32_t));
-    uint64_t cgen_var_2;
-    vkStream->read((uint64_t*)&cgen_var_2, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkCommandBuffer(&cgen_var_2, (VkCommandBuffer*)&forUnmarshaling->targetCommandBuffer, 1);
-    uint64_t cgen_var_3;
-    vkStream->read((uint64_t*)&cgen_var_3, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_3, (VkBuffer*)&forUnmarshaling->sequencesCountBuffer, 1);
-    vkStream->read((VkDeviceSize*)&forUnmarshaling->sequencesCountOffset, sizeof(VkDeviceSize));
-    uint64_t cgen_var_4;
-    vkStream->read((uint64_t*)&cgen_var_4, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_4, (VkBuffer*)&forUnmarshaling->sequencesIndexBuffer, 1);
-    vkStream->read((VkDeviceSize*)&forUnmarshaling->sequencesIndexOffset, sizeof(VkDeviceSize));
-}
-
-void marshal_VkCmdReserveSpaceForCommandsInfoNVX(
-    VulkanStream* vkStream,
-    const VkCmdReserveSpaceForCommandsInfoNVX* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    uint64_t cgen_var_0;
-    vkStream->handleMapping()->mapHandles_VkObjectTableNVX_u64(&forMarshaling->objectTable, &cgen_var_0, 1);
-    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
-    uint64_t cgen_var_1;
-    vkStream->handleMapping()->mapHandles_VkIndirectCommandsLayoutNVX_u64(&forMarshaling->indirectCommandsLayout, &cgen_var_1, 1);
-    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
-    vkStream->write((uint32_t*)&forMarshaling->maxSequencesCount, sizeof(uint32_t));
-}
-
-void unmarshal_VkCmdReserveSpaceForCommandsInfoNVX(
-    VulkanStream* vkStream,
-    VkCmdReserveSpaceForCommandsInfoNVX* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    uint64_t cgen_var_0;
-    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkObjectTableNVX(&cgen_var_0, (VkObjectTableNVX*)&forUnmarshaling->objectTable, 1);
-    uint64_t cgen_var_1;
-    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkIndirectCommandsLayoutNVX(&cgen_var_1, (VkIndirectCommandsLayoutNVX*)&forUnmarshaling->indirectCommandsLayout, 1);
-    vkStream->read((uint32_t*)&forUnmarshaling->maxSequencesCount, sizeof(uint32_t));
-}
-
-void marshal_VkObjectTableCreateInfoNVX(
-    VulkanStream* vkStream,
-    const VkObjectTableCreateInfoNVX* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((uint32_t*)&forMarshaling->objectCount, sizeof(uint32_t));
-    vkStream->write((const VkObjectEntryTypeNVX*)forMarshaling->pObjectEntryTypes, forMarshaling->objectCount * sizeof(const VkObjectEntryTypeNVX));
-    vkStream->write((const uint32_t*)forMarshaling->pObjectEntryCounts, forMarshaling->objectCount * sizeof(const uint32_t));
-    vkStream->write((const VkObjectEntryUsageFlagsNVX*)forMarshaling->pObjectEntryUsageFlags, forMarshaling->objectCount * sizeof(const VkObjectEntryUsageFlagsNVX));
-    vkStream->write((uint32_t*)&forMarshaling->maxUniformBuffersPerDescriptor, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxStorageBuffersPerDescriptor, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxStorageImagesPerDescriptor, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxSampledImagesPerDescriptor, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxPipelineLayouts, sizeof(uint32_t));
-}
-
-void unmarshal_VkObjectTableCreateInfoNVX(
-    VulkanStream* vkStream,
-    VkObjectTableCreateInfoNVX* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((uint32_t*)&forUnmarshaling->objectCount, sizeof(uint32_t));
-    vkStream->alloc((void**)&forUnmarshaling->pObjectEntryTypes, forUnmarshaling->objectCount * sizeof(const VkObjectEntryTypeNVX));
-    vkStream->read((VkObjectEntryTypeNVX*)forUnmarshaling->pObjectEntryTypes, forUnmarshaling->objectCount * sizeof(const VkObjectEntryTypeNVX));
-    vkStream->alloc((void**)&forUnmarshaling->pObjectEntryCounts, forUnmarshaling->objectCount * sizeof(const uint32_t));
-    vkStream->read((uint32_t*)forUnmarshaling->pObjectEntryCounts, forUnmarshaling->objectCount * sizeof(const uint32_t));
-    vkStream->alloc((void**)&forUnmarshaling->pObjectEntryUsageFlags, forUnmarshaling->objectCount * sizeof(const VkObjectEntryUsageFlagsNVX));
-    vkStream->read((VkObjectEntryUsageFlagsNVX*)forUnmarshaling->pObjectEntryUsageFlags, forUnmarshaling->objectCount * sizeof(const VkObjectEntryUsageFlagsNVX));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxUniformBuffersPerDescriptor, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxStorageBuffersPerDescriptor, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxStorageImagesPerDescriptor, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxSampledImagesPerDescriptor, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxPipelineLayouts, sizeof(uint32_t));
-}
-
-void marshal_VkObjectTableEntryNVX(
-    VulkanStream* vkStream,
-    const VkObjectTableEntryNVX* forMarshaling)
-{
-    vkStream->write((VkObjectEntryTypeNVX*)&forMarshaling->type, sizeof(VkObjectEntryTypeNVX));
-    vkStream->write((VkObjectEntryUsageFlagsNVX*)&forMarshaling->flags, sizeof(VkObjectEntryUsageFlagsNVX));
-}
-
-void unmarshal_VkObjectTableEntryNVX(
-    VulkanStream* vkStream,
-    VkObjectTableEntryNVX* forUnmarshaling)
-{
-    vkStream->read((VkObjectEntryTypeNVX*)&forUnmarshaling->type, sizeof(VkObjectEntryTypeNVX));
-    vkStream->read((VkObjectEntryUsageFlagsNVX*)&forUnmarshaling->flags, sizeof(VkObjectEntryUsageFlagsNVX));
-}
-
-void marshal_VkObjectTablePipelineEntryNVX(
-    VulkanStream* vkStream,
-    const VkObjectTablePipelineEntryNVX* forMarshaling)
-{
-    vkStream->write((VkObjectEntryTypeNVX*)&forMarshaling->type, sizeof(VkObjectEntryTypeNVX));
-    vkStream->write((VkObjectEntryUsageFlagsNVX*)&forMarshaling->flags, sizeof(VkObjectEntryUsageFlagsNVX));
-    uint64_t cgen_var_0;
-    vkStream->handleMapping()->mapHandles_VkPipeline_u64(&forMarshaling->pipeline, &cgen_var_0, 1);
-    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
-}
-
-void unmarshal_VkObjectTablePipelineEntryNVX(
-    VulkanStream* vkStream,
-    VkObjectTablePipelineEntryNVX* forUnmarshaling)
-{
-    vkStream->read((VkObjectEntryTypeNVX*)&forUnmarshaling->type, sizeof(VkObjectEntryTypeNVX));
-    vkStream->read((VkObjectEntryUsageFlagsNVX*)&forUnmarshaling->flags, sizeof(VkObjectEntryUsageFlagsNVX));
-    uint64_t cgen_var_0;
-    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkPipeline(&cgen_var_0, (VkPipeline*)&forUnmarshaling->pipeline, 1);
-}
-
-void marshal_VkObjectTableDescriptorSetEntryNVX(
-    VulkanStream* vkStream,
-    const VkObjectTableDescriptorSetEntryNVX* forMarshaling)
-{
-    vkStream->write((VkObjectEntryTypeNVX*)&forMarshaling->type, sizeof(VkObjectEntryTypeNVX));
-    vkStream->write((VkObjectEntryUsageFlagsNVX*)&forMarshaling->flags, sizeof(VkObjectEntryUsageFlagsNVX));
-    uint64_t cgen_var_0;
-    vkStream->handleMapping()->mapHandles_VkPipelineLayout_u64(&forMarshaling->pipelineLayout, &cgen_var_0, 1);
-    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
-    uint64_t cgen_var_1;
-    vkStream->handleMapping()->mapHandles_VkDescriptorSet_u64(&forMarshaling->descriptorSet, &cgen_var_1, 1);
-    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
-}
-
-void unmarshal_VkObjectTableDescriptorSetEntryNVX(
-    VulkanStream* vkStream,
-    VkObjectTableDescriptorSetEntryNVX* forUnmarshaling)
-{
-    vkStream->read((VkObjectEntryTypeNVX*)&forUnmarshaling->type, sizeof(VkObjectEntryTypeNVX));
-    vkStream->read((VkObjectEntryUsageFlagsNVX*)&forUnmarshaling->flags, sizeof(VkObjectEntryUsageFlagsNVX));
-    uint64_t cgen_var_0;
-    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkPipelineLayout(&cgen_var_0, (VkPipelineLayout*)&forUnmarshaling->pipelineLayout, 1);
-    uint64_t cgen_var_1;
-    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkDescriptorSet(&cgen_var_1, (VkDescriptorSet*)&forUnmarshaling->descriptorSet, 1);
-}
-
-void marshal_VkObjectTableVertexBufferEntryNVX(
-    VulkanStream* vkStream,
-    const VkObjectTableVertexBufferEntryNVX* forMarshaling)
-{
-    vkStream->write((VkObjectEntryTypeNVX*)&forMarshaling->type, sizeof(VkObjectEntryTypeNVX));
-    vkStream->write((VkObjectEntryUsageFlagsNVX*)&forMarshaling->flags, sizeof(VkObjectEntryUsageFlagsNVX));
-    uint64_t cgen_var_0;
-    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->buffer, &cgen_var_0, 1);
-    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
-}
-
-void unmarshal_VkObjectTableVertexBufferEntryNVX(
-    VulkanStream* vkStream,
-    VkObjectTableVertexBufferEntryNVX* forUnmarshaling)
-{
-    vkStream->read((VkObjectEntryTypeNVX*)&forUnmarshaling->type, sizeof(VkObjectEntryTypeNVX));
-    vkStream->read((VkObjectEntryUsageFlagsNVX*)&forUnmarshaling->flags, sizeof(VkObjectEntryUsageFlagsNVX));
-    uint64_t cgen_var_0;
-    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_0, (VkBuffer*)&forUnmarshaling->buffer, 1);
-}
-
-void marshal_VkObjectTableIndexBufferEntryNVX(
-    VulkanStream* vkStream,
-    const VkObjectTableIndexBufferEntryNVX* forMarshaling)
-{
-    vkStream->write((VkObjectEntryTypeNVX*)&forMarshaling->type, sizeof(VkObjectEntryTypeNVX));
-    vkStream->write((VkObjectEntryUsageFlagsNVX*)&forMarshaling->flags, sizeof(VkObjectEntryUsageFlagsNVX));
-    uint64_t cgen_var_0;
-    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->buffer, &cgen_var_0, 1);
-    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->write((VkIndexType*)&forMarshaling->indexType, sizeof(VkIndexType));
-}
-
-void unmarshal_VkObjectTableIndexBufferEntryNVX(
-    VulkanStream* vkStream,
-    VkObjectTableIndexBufferEntryNVX* forUnmarshaling)
-{
-    vkStream->read((VkObjectEntryTypeNVX*)&forUnmarshaling->type, sizeof(VkObjectEntryTypeNVX));
-    vkStream->read((VkObjectEntryUsageFlagsNVX*)&forUnmarshaling->flags, sizeof(VkObjectEntryUsageFlagsNVX));
-    uint64_t cgen_var_0;
-    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_0, (VkBuffer*)&forUnmarshaling->buffer, 1);
-    vkStream->read((VkIndexType*)&forUnmarshaling->indexType, sizeof(VkIndexType));
-}
-
-void marshal_VkObjectTablePushConstantEntryNVX(
-    VulkanStream* vkStream,
-    const VkObjectTablePushConstantEntryNVX* forMarshaling)
-{
-    vkStream->write((VkObjectEntryTypeNVX*)&forMarshaling->type, sizeof(VkObjectEntryTypeNVX));
-    vkStream->write((VkObjectEntryUsageFlagsNVX*)&forMarshaling->flags, sizeof(VkObjectEntryUsageFlagsNVX));
-    uint64_t cgen_var_0;
-    vkStream->handleMapping()->mapHandles_VkPipelineLayout_u64(&forMarshaling->pipelineLayout, &cgen_var_0, 1);
-    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->write((VkShaderStageFlags*)&forMarshaling->stageFlags, sizeof(VkShaderStageFlags));
-}
-
-void unmarshal_VkObjectTablePushConstantEntryNVX(
-    VulkanStream* vkStream,
-    VkObjectTablePushConstantEntryNVX* forUnmarshaling)
-{
-    vkStream->read((VkObjectEntryTypeNVX*)&forUnmarshaling->type, sizeof(VkObjectEntryTypeNVX));
-    vkStream->read((VkObjectEntryUsageFlagsNVX*)&forUnmarshaling->flags, sizeof(VkObjectEntryUsageFlagsNVX));
-    uint64_t cgen_var_0;
-    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
-    vkStream->handleMapping()->mapHandles_u64_VkPipelineLayout(&cgen_var_0, (VkPipelineLayout*)&forUnmarshaling->pipelineLayout, 1);
-    vkStream->read((VkShaderStageFlags*)&forUnmarshaling->stageFlags, sizeof(VkShaderStageFlags));
 }
 
 #endif
@@ -11076,6 +14043,68 @@ void unmarshal_VkPipelineRasterizationConservativeStateCreateInfoEXT(
 }
 
 #endif
+#ifdef VK_EXT_depth_clip_enable
+void marshal_VkPhysicalDeviceDepthClipEnableFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceDepthClipEnableFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->depthClipEnable, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceDepthClipEnableFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceDepthClipEnableFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->depthClipEnable, sizeof(VkBool32));
+}
+
+void marshal_VkPipelineRasterizationDepthClipStateCreateInfoEXT(
+    VulkanStream* vkStream,
+    const VkPipelineRasterizationDepthClipStateCreateInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkPipelineRasterizationDepthClipStateCreateFlagsEXT*)&forMarshaling->flags, sizeof(VkPipelineRasterizationDepthClipStateCreateFlagsEXT));
+    vkStream->write((VkBool32*)&forMarshaling->depthClipEnable, sizeof(VkBool32));
+}
+
+void unmarshal_VkPipelineRasterizationDepthClipStateCreateInfoEXT(
+    VulkanStream* vkStream,
+    VkPipelineRasterizationDepthClipStateCreateInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkPipelineRasterizationDepthClipStateCreateFlagsEXT*)&forUnmarshaling->flags, sizeof(VkPipelineRasterizationDepthClipStateCreateFlagsEXT));
+    vkStream->read((VkBool32*)&forUnmarshaling->depthClipEnable, sizeof(VkBool32));
+}
+
+#endif
 #ifdef VK_EXT_swapchain_colorspace
 #endif
 #ifdef VK_EXT_hdr_metadata
@@ -11229,11 +14258,44 @@ void unmarshal_VkMacOSSurfaceCreateInfoMVK(
 }
 
 #endif
+#ifdef VK_MVK_moltenvk
+#endif
 #ifdef VK_EXT_external_memory_dma_buf
 #endif
 #ifdef VK_EXT_queue_family_foreign
 #endif
 #ifdef VK_EXT_debug_utils
+void marshal_VkDebugUtilsLabelEXT(
+    VulkanStream* vkStream,
+    const VkDebugUtilsLabelEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->putString(forMarshaling->pLabelName);
+    vkStream->write((float*)forMarshaling->color, 4 * sizeof(float));
+}
+
+void unmarshal_VkDebugUtilsLabelEXT(
+    VulkanStream* vkStream,
+    VkDebugUtilsLabelEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->loadStringInPlace((char**)&forUnmarshaling->pLabelName);
+    vkStream->read((float*)forUnmarshaling->color, 4 * sizeof(float));
+}
+
 void marshal_VkDebugUtilsObjectNameInfoEXT(
     VulkanStream* vkStream,
     const VkDebugUtilsObjectNameInfoEXT* forMarshaling)
@@ -11290,76 +14352,6 @@ void unmarshal_VkDebugUtilsObjectNameInfoEXT(
     {
         vkStream->loadStringInPlace((char**)&forUnmarshaling->pObjectName);
     }
-}
-
-void marshal_VkDebugUtilsObjectTagInfoEXT(
-    VulkanStream* vkStream,
-    const VkDebugUtilsObjectTagInfoEXT* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkObjectType*)&forMarshaling->objectType, sizeof(VkObjectType));
-    vkStream->write((uint64_t*)&forMarshaling->objectHandle, sizeof(uint64_t));
-    vkStream->write((uint64_t*)&forMarshaling->tagName, sizeof(uint64_t));
-    uint64_t cgen_var_0 = (uint64_t)forMarshaling->tagSize;
-    vkStream->putBe64(cgen_var_0);
-    vkStream->write((const void*)forMarshaling->pTag, forMarshaling->tagSize * sizeof(const uint8_t));
-}
-
-void unmarshal_VkDebugUtilsObjectTagInfoEXT(
-    VulkanStream* vkStream,
-    VkDebugUtilsObjectTagInfoEXT* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((VkObjectType*)&forUnmarshaling->objectType, sizeof(VkObjectType));
-    vkStream->read((uint64_t*)&forUnmarshaling->objectHandle, sizeof(uint64_t));
-    vkStream->read((uint64_t*)&forUnmarshaling->tagName, sizeof(uint64_t));
-    forUnmarshaling->tagSize = (size_t)vkStream->getBe64();
-    vkStream->alloc((void**)&forUnmarshaling->pTag, forUnmarshaling->tagSize * sizeof(const uint8_t));
-    vkStream->read((void*)forUnmarshaling->pTag, forUnmarshaling->tagSize * sizeof(const uint8_t));
-}
-
-void marshal_VkDebugUtilsLabelEXT(
-    VulkanStream* vkStream,
-    const VkDebugUtilsLabelEXT* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->putString(forMarshaling->pLabelName);
-    vkStream->write((float*)forMarshaling->color, 4 * sizeof(float));
-}
-
-void unmarshal_VkDebugUtilsLabelEXT(
-    VulkanStream* vkStream,
-    VkDebugUtilsLabelEXT* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->loadStringInPlace((char**)&forUnmarshaling->pLabelName);
-    vkStream->read((float*)forUnmarshaling->color, 4 * sizeof(float));
 }
 
 void marshal_VkDebugUtilsMessengerCallbackDataEXT(
@@ -11536,6 +14528,45 @@ void unmarshal_VkDebugUtilsMessengerCreateInfoEXT(
         vkStream->alloc((void**)&forUnmarshaling->pUserData, sizeof(uint8_t));
         vkStream->read((void*)forUnmarshaling->pUserData, sizeof(uint8_t));
     }
+}
+
+void marshal_VkDebugUtilsObjectTagInfoEXT(
+    VulkanStream* vkStream,
+    const VkDebugUtilsObjectTagInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkObjectType*)&forMarshaling->objectType, sizeof(VkObjectType));
+    vkStream->write((uint64_t*)&forMarshaling->objectHandle, sizeof(uint64_t));
+    vkStream->write((uint64_t*)&forMarshaling->tagName, sizeof(uint64_t));
+    uint64_t cgen_var_0 = (uint64_t)forMarshaling->tagSize;
+    vkStream->putBe64(cgen_var_0);
+    vkStream->write((const void*)forMarshaling->pTag, forMarshaling->tagSize * sizeof(const uint8_t));
+}
+
+void unmarshal_VkDebugUtilsObjectTagInfoEXT(
+    VulkanStream* vkStream,
+    VkDebugUtilsObjectTagInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkObjectType*)&forUnmarshaling->objectType, sizeof(VkObjectType));
+    vkStream->read((uint64_t*)&forUnmarshaling->objectHandle, sizeof(uint64_t));
+    vkStream->read((uint64_t*)&forUnmarshaling->tagName, sizeof(uint64_t));
+    forUnmarshaling->tagSize = (size_t)vkStream->getBe64();
+    vkStream->alloc((void**)&forUnmarshaling->pTag, forUnmarshaling->tagSize * sizeof(const uint8_t));
+    vkStream->read((void*)forUnmarshaling->pTag, forUnmarshaling->tagSize * sizeof(const uint8_t));
 }
 
 #endif
@@ -11737,72 +14768,143 @@ void unmarshal_VkExternalFormatANDROID(
 
 #endif
 #ifdef VK_EXT_sampler_filter_minmax
-void marshal_VkSamplerReductionModeCreateInfoEXT(
-    VulkanStream* vkStream,
-    const VkSamplerReductionModeCreateInfoEXT* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkSamplerReductionModeEXT*)&forMarshaling->reductionMode, sizeof(VkSamplerReductionModeEXT));
-}
-
-void unmarshal_VkSamplerReductionModeCreateInfoEXT(
-    VulkanStream* vkStream,
-    VkSamplerReductionModeCreateInfoEXT* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((VkSamplerReductionModeEXT*)&forUnmarshaling->reductionMode, sizeof(VkSamplerReductionModeEXT));
-}
-
-void marshal_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT(
-    VulkanStream* vkStream,
-    const VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkBool32*)&forMarshaling->filterMinmaxSingleComponentFormats, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->filterMinmaxImageComponentMapping, sizeof(VkBool32));
-}
-
-void unmarshal_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT(
-    VulkanStream* vkStream,
-    VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
-    }
-    vkStream->read((VkBool32*)&forUnmarshaling->filterMinmaxSingleComponentFormats, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->filterMinmaxImageComponentMapping, sizeof(VkBool32));
-}
-
 #endif
 #ifdef VK_AMD_gpu_shader_int16
 #endif
 #ifdef VK_AMD_mixed_attachment_samples
 #endif
 #ifdef VK_AMD_shader_fragment_mask
+#endif
+#ifdef VK_EXT_inline_uniform_block
+void marshal_VkPhysicalDeviceInlineUniformBlockFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceInlineUniformBlockFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->inlineUniformBlock, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingInlineUniformBlockUpdateAfterBind, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceInlineUniformBlockFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceInlineUniformBlockFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->inlineUniformBlock, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingInlineUniformBlockUpdateAfterBind, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceInlineUniformBlockPropertiesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceInlineUniformBlockPropertiesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->maxInlineUniformBlockSize, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorInlineUniformBlocks, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindInlineUniformBlocks, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetInlineUniformBlocks, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindInlineUniformBlocks, sizeof(uint32_t));
+}
+
+void unmarshal_VkPhysicalDeviceInlineUniformBlockPropertiesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceInlineUniformBlockPropertiesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->maxInlineUniformBlockSize, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorInlineUniformBlocks, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindInlineUniformBlocks, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetInlineUniformBlocks, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindInlineUniformBlocks, sizeof(uint32_t));
+}
+
+void marshal_VkWriteDescriptorSetInlineUniformBlockEXT(
+    VulkanStream* vkStream,
+    const VkWriteDescriptorSetInlineUniformBlockEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->dataSize, sizeof(uint32_t));
+    vkStream->write((const void*)forMarshaling->pData, forMarshaling->dataSize * sizeof(const uint8_t));
+}
+
+void unmarshal_VkWriteDescriptorSetInlineUniformBlockEXT(
+    VulkanStream* vkStream,
+    VkWriteDescriptorSetInlineUniformBlockEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->dataSize, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pData, forUnmarshaling->dataSize * sizeof(const uint8_t));
+    vkStream->read((void*)forUnmarshaling->pData, forUnmarshaling->dataSize * sizeof(const uint8_t));
+}
+
+void marshal_VkDescriptorPoolInlineUniformBlockCreateInfoEXT(
+    VulkanStream* vkStream,
+    const VkDescriptorPoolInlineUniformBlockCreateInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->maxInlineUniformBlockBindings, sizeof(uint32_t));
+}
+
+void unmarshal_VkDescriptorPoolInlineUniformBlockCreateInfoEXT(
+    VulkanStream* vkStream,
+    VkDescriptorPoolInlineUniformBlockCreateInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->maxInlineUniformBlockBindings, sizeof(uint32_t));
+}
+
 #endif
 #ifdef VK_EXT_shader_stencil_export
 #endif
@@ -12235,7 +15337,286 @@ void unmarshal_VkPipelineCoverageModulationStateCreateInfoNV(
 #endif
 #ifdef VK_NV_fill_rectangle
 #endif
+#ifdef VK_NV_shader_sm_builtins
+void marshal_VkPhysicalDeviceShaderSMBuiltinsPropertiesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceShaderSMBuiltinsPropertiesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->shaderSMCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->shaderWarpsPerSM, sizeof(uint32_t));
+}
+
+void unmarshal_VkPhysicalDeviceShaderSMBuiltinsPropertiesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceShaderSMBuiltinsPropertiesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->shaderSMCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->shaderWarpsPerSM, sizeof(uint32_t));
+}
+
+void marshal_VkPhysicalDeviceShaderSMBuiltinsFeaturesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceShaderSMBuiltinsFeaturesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->shaderSMBuiltins, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceShaderSMBuiltinsFeaturesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceShaderSMBuiltinsFeaturesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSMBuiltins, sizeof(VkBool32));
+}
+
+#endif
 #ifdef VK_EXT_post_depth_coverage
+#endif
+#ifdef VK_EXT_image_drm_format_modifier
+void marshal_VkDrmFormatModifierPropertiesEXT(
+    VulkanStream* vkStream,
+    const VkDrmFormatModifierPropertiesEXT* forMarshaling)
+{
+    vkStream->write((uint64_t*)&forMarshaling->drmFormatModifier, sizeof(uint64_t));
+    vkStream->write((uint32_t*)&forMarshaling->drmFormatModifierPlaneCount, sizeof(uint32_t));
+    vkStream->write((VkFormatFeatureFlags*)&forMarshaling->drmFormatModifierTilingFeatures, sizeof(VkFormatFeatureFlags));
+}
+
+void unmarshal_VkDrmFormatModifierPropertiesEXT(
+    VulkanStream* vkStream,
+    VkDrmFormatModifierPropertiesEXT* forUnmarshaling)
+{
+    vkStream->read((uint64_t*)&forUnmarshaling->drmFormatModifier, sizeof(uint64_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->drmFormatModifierPlaneCount, sizeof(uint32_t));
+    vkStream->read((VkFormatFeatureFlags*)&forUnmarshaling->drmFormatModifierTilingFeatures, sizeof(VkFormatFeatureFlags));
+}
+
+void marshal_VkDrmFormatModifierPropertiesListEXT(
+    VulkanStream* vkStream,
+    const VkDrmFormatModifierPropertiesListEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->drmFormatModifierCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pDrmFormatModifierProperties;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->pDrmFormatModifierProperties)
+    {
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->drmFormatModifierCount; ++i)
+        {
+            marshal_VkDrmFormatModifierPropertiesEXT(vkStream, (VkDrmFormatModifierPropertiesEXT*)(forMarshaling->pDrmFormatModifierProperties + i));
+        }
+    }
+}
+
+void unmarshal_VkDrmFormatModifierPropertiesListEXT(
+    VulkanStream* vkStream,
+    VkDrmFormatModifierPropertiesListEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->drmFormatModifierCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    forUnmarshaling->pDrmFormatModifierProperties = (VkDrmFormatModifierPropertiesEXT*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pDrmFormatModifierProperties)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pDrmFormatModifierProperties, forUnmarshaling->drmFormatModifierCount * sizeof(VkDrmFormatModifierPropertiesEXT));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->drmFormatModifierCount; ++i)
+        {
+            unmarshal_VkDrmFormatModifierPropertiesEXT(vkStream, (VkDrmFormatModifierPropertiesEXT*)(forUnmarshaling->pDrmFormatModifierProperties + i));
+        }
+    }
+}
+
+void marshal_VkPhysicalDeviceImageDrmFormatModifierInfoEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceImageDrmFormatModifierInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint64_t*)&forMarshaling->drmFormatModifier, sizeof(uint64_t));
+    vkStream->write((VkSharingMode*)&forMarshaling->sharingMode, sizeof(VkSharingMode));
+    vkStream->write((uint32_t*)&forMarshaling->queueFamilyIndexCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pQueueFamilyIndices;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->pQueueFamilyIndices)
+    {
+        vkStream->write((const uint32_t*)forMarshaling->pQueueFamilyIndices, forMarshaling->queueFamilyIndexCount * sizeof(const uint32_t));
+    }
+}
+
+void unmarshal_VkPhysicalDeviceImageDrmFormatModifierInfoEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceImageDrmFormatModifierInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint64_t*)&forUnmarshaling->drmFormatModifier, sizeof(uint64_t));
+    vkStream->read((VkSharingMode*)&forUnmarshaling->sharingMode, sizeof(VkSharingMode));
+    vkStream->read((uint32_t*)&forUnmarshaling->queueFamilyIndexCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    forUnmarshaling->pQueueFamilyIndices = (const uint32_t*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pQueueFamilyIndices)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pQueueFamilyIndices, forUnmarshaling->queueFamilyIndexCount * sizeof(const uint32_t));
+        vkStream->read((uint32_t*)forUnmarshaling->pQueueFamilyIndices, forUnmarshaling->queueFamilyIndexCount * sizeof(const uint32_t));
+    }
+}
+
+void marshal_VkImageDrmFormatModifierListCreateInfoEXT(
+    VulkanStream* vkStream,
+    const VkImageDrmFormatModifierListCreateInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->drmFormatModifierCount, sizeof(uint32_t));
+    vkStream->write((const uint64_t*)forMarshaling->pDrmFormatModifiers, forMarshaling->drmFormatModifierCount * sizeof(const uint64_t));
+}
+
+void unmarshal_VkImageDrmFormatModifierListCreateInfoEXT(
+    VulkanStream* vkStream,
+    VkImageDrmFormatModifierListCreateInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->drmFormatModifierCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pDrmFormatModifiers, forUnmarshaling->drmFormatModifierCount * sizeof(const uint64_t));
+    vkStream->read((uint64_t*)forUnmarshaling->pDrmFormatModifiers, forUnmarshaling->drmFormatModifierCount * sizeof(const uint64_t));
+}
+
+void marshal_VkImageDrmFormatModifierExplicitCreateInfoEXT(
+    VulkanStream* vkStream,
+    const VkImageDrmFormatModifierExplicitCreateInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint64_t*)&forMarshaling->drmFormatModifier, sizeof(uint64_t));
+    vkStream->write((uint32_t*)&forMarshaling->drmFormatModifierPlaneCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->drmFormatModifierPlaneCount; ++i)
+    {
+        marshal_VkSubresourceLayout(vkStream, (const VkSubresourceLayout*)(forMarshaling->pPlaneLayouts + i));
+    }
+}
+
+void unmarshal_VkImageDrmFormatModifierExplicitCreateInfoEXT(
+    VulkanStream* vkStream,
+    VkImageDrmFormatModifierExplicitCreateInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint64_t*)&forUnmarshaling->drmFormatModifier, sizeof(uint64_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->drmFormatModifierPlaneCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pPlaneLayouts, forUnmarshaling->drmFormatModifierPlaneCount * sizeof(const VkSubresourceLayout));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->drmFormatModifierPlaneCount; ++i)
+    {
+        unmarshal_VkSubresourceLayout(vkStream, (VkSubresourceLayout*)(forUnmarshaling->pPlaneLayouts + i));
+    }
+}
+
+void marshal_VkImageDrmFormatModifierPropertiesEXT(
+    VulkanStream* vkStream,
+    const VkImageDrmFormatModifierPropertiesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint64_t*)&forMarshaling->drmFormatModifier, sizeof(uint64_t));
+}
+
+void unmarshal_VkImageDrmFormatModifierPropertiesEXT(
+    VulkanStream* vkStream,
+    VkImageDrmFormatModifierPropertiesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint64_t*)&forUnmarshaling->drmFormatModifier, sizeof(uint64_t));
+}
+
 #endif
 #ifdef VK_EXT_validation_cache
 void marshal_VkValidationCacheCreateInfoEXT(
@@ -12308,19 +15689,50 @@ void unmarshal_VkShaderModuleValidationCacheCreateInfoEXT(
 
 #endif
 #ifdef VK_EXT_descriptor_indexing
-void marshal_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT(
+#endif
+#ifdef VK_EXT_shader_viewport_index_layer
+#endif
+#ifdef VK_NV_shading_rate_image
+void marshal_VkShadingRatePaletteNV(
     VulkanStream* vkStream,
-    const VkDescriptorSetLayoutBindingFlagsCreateInfoEXT* forMarshaling)
+    const VkShadingRatePaletteNV* forMarshaling)
+{
+    vkStream->write((uint32_t*)&forMarshaling->shadingRatePaletteEntryCount, sizeof(uint32_t));
+    vkStream->write((const VkShadingRatePaletteEntryNV*)forMarshaling->pShadingRatePaletteEntries, forMarshaling->shadingRatePaletteEntryCount * sizeof(const VkShadingRatePaletteEntryNV));
+}
+
+void unmarshal_VkShadingRatePaletteNV(
+    VulkanStream* vkStream,
+    VkShadingRatePaletteNV* forUnmarshaling)
+{
+    vkStream->read((uint32_t*)&forUnmarshaling->shadingRatePaletteEntryCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pShadingRatePaletteEntries, forUnmarshaling->shadingRatePaletteEntryCount * sizeof(const VkShadingRatePaletteEntryNV));
+    vkStream->read((VkShadingRatePaletteEntryNV*)forUnmarshaling->pShadingRatePaletteEntries, forUnmarshaling->shadingRatePaletteEntryCount * sizeof(const VkShadingRatePaletteEntryNV));
+}
+
+void marshal_VkPipelineViewportShadingRateImageStateCreateInfoNV(
+    VulkanStream* vkStream,
+    const VkPipelineViewportShadingRateImageStateCreateInfoNV* forMarshaling)
 {
     vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
     marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((uint32_t*)&forMarshaling->bindingCount, sizeof(uint32_t));
-    vkStream->write((const VkDescriptorBindingFlagsEXT*)forMarshaling->pBindingFlags, forMarshaling->bindingCount * sizeof(const VkDescriptorBindingFlagsEXT));
+    vkStream->write((VkBool32*)&forMarshaling->shadingRateImageEnable, sizeof(VkBool32));
+    vkStream->write((uint32_t*)&forMarshaling->viewportCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pShadingRatePalettes;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->pShadingRatePalettes)
+    {
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->viewportCount; ++i)
+        {
+            marshal_VkShadingRatePaletteNV(vkStream, (const VkShadingRatePaletteNV*)(forMarshaling->pShadingRatePalettes + i));
+        }
+    }
 }
 
-void unmarshal_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT(
+void unmarshal_VkPipelineViewportShadingRateImageStateCreateInfoNV(
     VulkanStream* vkStream,
-    VkDescriptorSetLayoutBindingFlagsCreateInfoEXT* forUnmarshaling)
+    VkPipelineViewportShadingRateImageStateCreateInfoNV* forUnmarshaling)
 {
     vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
     size_t pNext_size;
@@ -12335,42 +15747,33 @@ void unmarshal_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT(
         *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
-    vkStream->read((uint32_t*)&forUnmarshaling->bindingCount, sizeof(uint32_t));
-    vkStream->alloc((void**)&forUnmarshaling->pBindingFlags, forUnmarshaling->bindingCount * sizeof(const VkDescriptorBindingFlagsEXT));
-    vkStream->read((VkDescriptorBindingFlagsEXT*)forUnmarshaling->pBindingFlags, forUnmarshaling->bindingCount * sizeof(const VkDescriptorBindingFlagsEXT));
+    vkStream->read((VkBool32*)&forUnmarshaling->shadingRateImageEnable, sizeof(VkBool32));
+    vkStream->read((uint32_t*)&forUnmarshaling->viewportCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    forUnmarshaling->pShadingRatePalettes = (const VkShadingRatePaletteNV*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pShadingRatePalettes)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pShadingRatePalettes, forUnmarshaling->viewportCount * sizeof(const VkShadingRatePaletteNV));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->viewportCount; ++i)
+        {
+            unmarshal_VkShadingRatePaletteNV(vkStream, (VkShadingRatePaletteNV*)(forUnmarshaling->pShadingRatePalettes + i));
+        }
+    }
 }
 
-void marshal_VkPhysicalDeviceDescriptorIndexingFeaturesEXT(
+void marshal_VkPhysicalDeviceShadingRateImageFeaturesNV(
     VulkanStream* vkStream,
-    const VkPhysicalDeviceDescriptorIndexingFeaturesEXT* forMarshaling)
+    const VkPhysicalDeviceShadingRateImageFeaturesNV* forMarshaling)
 {
     vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
     marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((VkBool32*)&forMarshaling->shaderInputAttachmentArrayDynamicIndexing, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->shaderUniformTexelBufferArrayDynamicIndexing, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->shaderStorageTexelBufferArrayDynamicIndexing, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->shaderUniformBufferArrayNonUniformIndexing, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->shaderSampledImageArrayNonUniformIndexing, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->shaderStorageBufferArrayNonUniformIndexing, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->shaderStorageImageArrayNonUniformIndexing, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->shaderInputAttachmentArrayNonUniformIndexing, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->shaderUniformTexelBufferArrayNonUniformIndexing, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->shaderStorageTexelBufferArrayNonUniformIndexing, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingUniformBufferUpdateAfterBind, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingSampledImageUpdateAfterBind, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingStorageImageUpdateAfterBind, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingStorageBufferUpdateAfterBind, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingUniformTexelBufferUpdateAfterBind, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingStorageTexelBufferUpdateAfterBind, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingUpdateUnusedWhilePending, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingPartiallyBound, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingVariableDescriptorCount, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->runtimeDescriptorArray, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shadingRateImage, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shadingRateCoarseSampleOrder, sizeof(VkBool32));
 }
 
-void unmarshal_VkPhysicalDeviceDescriptorIndexingFeaturesEXT(
+void unmarshal_VkPhysicalDeviceShadingRateImageFeaturesNV(
     VulkanStream* vkStream,
-    VkPhysicalDeviceDescriptorIndexingFeaturesEXT* forUnmarshaling)
+    VkPhysicalDeviceShadingRateImageFeaturesNV* forUnmarshaling)
 {
     vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
     size_t pNext_size;
@@ -12385,62 +15788,24 @@ void unmarshal_VkPhysicalDeviceDescriptorIndexingFeaturesEXT(
         *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
-    vkStream->read((VkBool32*)&forUnmarshaling->shaderInputAttachmentArrayDynamicIndexing, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->shaderUniformTexelBufferArrayDynamicIndexing, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->shaderStorageTexelBufferArrayDynamicIndexing, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->shaderUniformBufferArrayNonUniformIndexing, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->shaderSampledImageArrayNonUniformIndexing, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->shaderStorageBufferArrayNonUniformIndexing, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->shaderStorageImageArrayNonUniformIndexing, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->shaderInputAttachmentArrayNonUniformIndexing, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->shaderUniformTexelBufferArrayNonUniformIndexing, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->shaderStorageTexelBufferArrayNonUniformIndexing, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingUniformBufferUpdateAfterBind, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingSampledImageUpdateAfterBind, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingStorageImageUpdateAfterBind, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingStorageBufferUpdateAfterBind, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingUniformTexelBufferUpdateAfterBind, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingStorageTexelBufferUpdateAfterBind, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingUpdateUnusedWhilePending, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingPartiallyBound, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingVariableDescriptorCount, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->runtimeDescriptorArray, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shadingRateImage, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shadingRateCoarseSampleOrder, sizeof(VkBool32));
 }
 
-void marshal_VkPhysicalDeviceDescriptorIndexingPropertiesEXT(
+void marshal_VkPhysicalDeviceShadingRateImagePropertiesNV(
     VulkanStream* vkStream,
-    const VkPhysicalDeviceDescriptorIndexingPropertiesEXT* forMarshaling)
+    const VkPhysicalDeviceShadingRateImagePropertiesNV* forMarshaling)
 {
     vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
     marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((uint32_t*)&forMarshaling->maxUpdateAfterBindDescriptorsInAllPools, sizeof(uint32_t));
-    vkStream->write((VkBool32*)&forMarshaling->shaderUniformBufferArrayNonUniformIndexingNative, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->shaderSampledImageArrayNonUniformIndexingNative, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->shaderStorageBufferArrayNonUniformIndexingNative, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->shaderStorageImageArrayNonUniformIndexingNative, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->shaderInputAttachmentArrayNonUniformIndexingNative, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->robustBufferAccessUpdateAfterBind, sizeof(VkBool32));
-    vkStream->write((VkBool32*)&forMarshaling->quadDivergentImplicitLod, sizeof(VkBool32));
-    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindSamplers, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindUniformBuffers, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindStorageBuffers, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindSampledImages, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindStorageImages, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindInputAttachments, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxPerStageUpdateAfterBindResources, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindSamplers, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindUniformBuffers, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindUniformBuffersDynamic, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindStorageBuffers, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindStorageBuffersDynamic, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindSampledImages, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindStorageImages, sizeof(uint32_t));
-    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindInputAttachments, sizeof(uint32_t));
+    marshal_VkExtent2D(vkStream, (VkExtent2D*)(&forMarshaling->shadingRateTexelSize));
+    vkStream->write((uint32_t*)&forMarshaling->shadingRatePaletteSize, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->shadingRateMaxCoarseSamples, sizeof(uint32_t));
 }
 
-void unmarshal_VkPhysicalDeviceDescriptorIndexingPropertiesEXT(
+void unmarshal_VkPhysicalDeviceShadingRateImagePropertiesNV(
     VulkanStream* vkStream,
-    VkPhysicalDeviceDescriptorIndexingPropertiesEXT* forUnmarshaling)
+    VkPhysicalDeviceShadingRateImagePropertiesNV* forUnmarshaling)
 {
     vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
     size_t pNext_size;
@@ -12455,44 +15820,73 @@ void unmarshal_VkPhysicalDeviceDescriptorIndexingPropertiesEXT(
         *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
-    vkStream->read((uint32_t*)&forUnmarshaling->maxUpdateAfterBindDescriptorsInAllPools, sizeof(uint32_t));
-    vkStream->read((VkBool32*)&forUnmarshaling->shaderUniformBufferArrayNonUniformIndexingNative, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->shaderSampledImageArrayNonUniformIndexingNative, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->shaderStorageBufferArrayNonUniformIndexingNative, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->shaderStorageImageArrayNonUniformIndexingNative, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->shaderInputAttachmentArrayNonUniformIndexingNative, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->robustBufferAccessUpdateAfterBind, sizeof(VkBool32));
-    vkStream->read((VkBool32*)&forUnmarshaling->quadDivergentImplicitLod, sizeof(VkBool32));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindSamplers, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindUniformBuffers, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindStorageBuffers, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindSampledImages, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindStorageImages, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindInputAttachments, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageUpdateAfterBindResources, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindSamplers, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindUniformBuffers, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindUniformBuffersDynamic, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindStorageBuffers, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindStorageBuffersDynamic, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindSampledImages, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindStorageImages, sizeof(uint32_t));
-    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindInputAttachments, sizeof(uint32_t));
+    unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->shadingRateTexelSize));
+    vkStream->read((uint32_t*)&forUnmarshaling->shadingRatePaletteSize, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->shadingRateMaxCoarseSamples, sizeof(uint32_t));
 }
 
-void marshal_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT(
+void marshal_VkCoarseSampleLocationNV(
     VulkanStream* vkStream,
-    const VkDescriptorSetVariableDescriptorCountAllocateInfoEXT* forMarshaling)
+    const VkCoarseSampleLocationNV* forMarshaling)
+{
+    vkStream->write((uint32_t*)&forMarshaling->pixelX, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->pixelY, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->sample, sizeof(uint32_t));
+}
+
+void unmarshal_VkCoarseSampleLocationNV(
+    VulkanStream* vkStream,
+    VkCoarseSampleLocationNV* forUnmarshaling)
+{
+    vkStream->read((uint32_t*)&forUnmarshaling->pixelX, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->pixelY, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->sample, sizeof(uint32_t));
+}
+
+void marshal_VkCoarseSampleOrderCustomNV(
+    VulkanStream* vkStream,
+    const VkCoarseSampleOrderCustomNV* forMarshaling)
+{
+    vkStream->write((VkShadingRatePaletteEntryNV*)&forMarshaling->shadingRate, sizeof(VkShadingRatePaletteEntryNV));
+    vkStream->write((uint32_t*)&forMarshaling->sampleCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->sampleLocationCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->sampleLocationCount; ++i)
+    {
+        marshal_VkCoarseSampleLocationNV(vkStream, (const VkCoarseSampleLocationNV*)(forMarshaling->pSampleLocations + i));
+    }
+}
+
+void unmarshal_VkCoarseSampleOrderCustomNV(
+    VulkanStream* vkStream,
+    VkCoarseSampleOrderCustomNV* forUnmarshaling)
+{
+    vkStream->read((VkShadingRatePaletteEntryNV*)&forUnmarshaling->shadingRate, sizeof(VkShadingRatePaletteEntryNV));
+    vkStream->read((uint32_t*)&forUnmarshaling->sampleCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->sampleLocationCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pSampleLocations, forUnmarshaling->sampleLocationCount * sizeof(const VkCoarseSampleLocationNV));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->sampleLocationCount; ++i)
+    {
+        unmarshal_VkCoarseSampleLocationNV(vkStream, (VkCoarseSampleLocationNV*)(forUnmarshaling->pSampleLocations + i));
+    }
+}
+
+void marshal_VkPipelineViewportCoarseSampleOrderStateCreateInfoNV(
+    VulkanStream* vkStream,
+    const VkPipelineViewportCoarseSampleOrderStateCreateInfoNV* forMarshaling)
 {
     vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
     marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((uint32_t*)&forMarshaling->descriptorSetCount, sizeof(uint32_t));
-    vkStream->write((const uint32_t*)forMarshaling->pDescriptorCounts, forMarshaling->descriptorSetCount * sizeof(const uint32_t));
+    vkStream->write((VkCoarseSampleOrderTypeNV*)&forMarshaling->sampleOrderType, sizeof(VkCoarseSampleOrderTypeNV));
+    vkStream->write((uint32_t*)&forMarshaling->customSampleOrderCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->customSampleOrderCount; ++i)
+    {
+        marshal_VkCoarseSampleOrderCustomNV(vkStream, (const VkCoarseSampleOrderCustomNV*)(forMarshaling->pCustomSampleOrders + i));
+    }
 }
 
-void unmarshal_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT(
+void unmarshal_VkPipelineViewportCoarseSampleOrderStateCreateInfoNV(
     VulkanStream* vkStream,
-    VkDescriptorSetVariableDescriptorCountAllocateInfoEXT* forUnmarshaling)
+    VkPipelineViewportCoarseSampleOrderStateCreateInfoNV* forUnmarshaling)
 {
     vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
     size_t pNext_size;
@@ -12507,42 +15901,672 @@ void unmarshal_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT(
         *(VkStructureType*)forUnmarshaling->pNext = extType;
         unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
     }
-    vkStream->read((uint32_t*)&forUnmarshaling->descriptorSetCount, sizeof(uint32_t));
-    vkStream->alloc((void**)&forUnmarshaling->pDescriptorCounts, forUnmarshaling->descriptorSetCount * sizeof(const uint32_t));
-    vkStream->read((uint32_t*)forUnmarshaling->pDescriptorCounts, forUnmarshaling->descriptorSetCount * sizeof(const uint32_t));
-}
-
-void marshal_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT(
-    VulkanStream* vkStream,
-    const VkDescriptorSetVariableDescriptorCountLayoutSupportEXT* forMarshaling)
-{
-    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
-    marshal_extension_struct(vkStream, forMarshaling->pNext);
-    vkStream->write((uint32_t*)&forMarshaling->maxVariableDescriptorCount, sizeof(uint32_t));
-}
-
-void unmarshal_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT(
-    VulkanStream* vkStream,
-    VkDescriptorSetVariableDescriptorCountLayoutSupportEXT* forUnmarshaling)
-{
-    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
-    size_t pNext_size;
-    pNext_size = vkStream->getBe32();
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
+    vkStream->read((VkCoarseSampleOrderTypeNV*)&forUnmarshaling->sampleOrderType, sizeof(VkCoarseSampleOrderTypeNV));
+    vkStream->read((uint32_t*)&forUnmarshaling->customSampleOrderCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pCustomSampleOrders, forUnmarshaling->customSampleOrderCount * sizeof(const VkCoarseSampleOrderCustomNV));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->customSampleOrderCount; ++i)
     {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+        unmarshal_VkCoarseSampleOrderCustomNV(vkStream, (VkCoarseSampleOrderCustomNV*)(forUnmarshaling->pCustomSampleOrders + i));
     }
-    vkStream->read((uint32_t*)&forUnmarshaling->maxVariableDescriptorCount, sizeof(uint32_t));
 }
 
 #endif
-#ifdef VK_EXT_shader_viewport_index_layer
+#ifdef VK_NV_ray_tracing
+void marshal_VkRayTracingShaderGroupCreateInfoNV(
+    VulkanStream* vkStream,
+    const VkRayTracingShaderGroupCreateInfoNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkRayTracingShaderGroupTypeKHR*)&forMarshaling->type, sizeof(VkRayTracingShaderGroupTypeKHR));
+    vkStream->write((uint32_t*)&forMarshaling->generalShader, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->closestHitShader, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->anyHitShader, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->intersectionShader, sizeof(uint32_t));
+}
+
+void unmarshal_VkRayTracingShaderGroupCreateInfoNV(
+    VulkanStream* vkStream,
+    VkRayTracingShaderGroupCreateInfoNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkRayTracingShaderGroupTypeKHR*)&forUnmarshaling->type, sizeof(VkRayTracingShaderGroupTypeKHR));
+    vkStream->read((uint32_t*)&forUnmarshaling->generalShader, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->closestHitShader, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->anyHitShader, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->intersectionShader, sizeof(uint32_t));
+}
+
+void marshal_VkRayTracingPipelineCreateInfoNV(
+    VulkanStream* vkStream,
+    const VkRayTracingPipelineCreateInfoNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkPipelineCreateFlags*)&forMarshaling->flags, sizeof(VkPipelineCreateFlags));
+    vkStream->write((uint32_t*)&forMarshaling->stageCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->stageCount; ++i)
+    {
+        marshal_VkPipelineShaderStageCreateInfo(vkStream, (const VkPipelineShaderStageCreateInfo*)(forMarshaling->pStages + i));
+    }
+    vkStream->write((uint32_t*)&forMarshaling->groupCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->groupCount; ++i)
+    {
+        marshal_VkRayTracingShaderGroupCreateInfoNV(vkStream, (const VkRayTracingShaderGroupCreateInfoNV*)(forMarshaling->pGroups + i));
+    }
+    vkStream->write((uint32_t*)&forMarshaling->maxRecursionDepth, sizeof(uint32_t));
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkPipelineLayout_u64(&forMarshaling->layout, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    uint64_t cgen_var_1;
+    vkStream->handleMapping()->mapHandles_VkPipeline_u64(&forMarshaling->basePipelineHandle, &cgen_var_1, 1);
+    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->write((int32_t*)&forMarshaling->basePipelineIndex, sizeof(int32_t));
+}
+
+void unmarshal_VkRayTracingPipelineCreateInfoNV(
+    VulkanStream* vkStream,
+    VkRayTracingPipelineCreateInfoNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkPipelineCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineCreateFlags));
+    vkStream->read((uint32_t*)&forUnmarshaling->stageCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pStages, forUnmarshaling->stageCount * sizeof(const VkPipelineShaderStageCreateInfo));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->stageCount; ++i)
+    {
+        unmarshal_VkPipelineShaderStageCreateInfo(vkStream, (VkPipelineShaderStageCreateInfo*)(forUnmarshaling->pStages + i));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->groupCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pGroups, forUnmarshaling->groupCount * sizeof(const VkRayTracingShaderGroupCreateInfoNV));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->groupCount; ++i)
+    {
+        unmarshal_VkRayTracingShaderGroupCreateInfoNV(vkStream, (VkRayTracingShaderGroupCreateInfoNV*)(forUnmarshaling->pGroups + i));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->maxRecursionDepth, sizeof(uint32_t));
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkPipelineLayout(&cgen_var_0, (VkPipelineLayout*)&forUnmarshaling->layout, 1);
+    uint64_t cgen_var_1;
+    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkPipeline(&cgen_var_1, (VkPipeline*)&forUnmarshaling->basePipelineHandle, 1);
+    vkStream->read((int32_t*)&forUnmarshaling->basePipelineIndex, sizeof(int32_t));
+}
+
+void marshal_VkGeometryTrianglesNV(
+    VulkanStream* vkStream,
+    const VkGeometryTrianglesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->vertexData, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->write((VkDeviceSize*)&forMarshaling->vertexOffset, sizeof(VkDeviceSize));
+    vkStream->write((uint32_t*)&forMarshaling->vertexCount, sizeof(uint32_t));
+    vkStream->write((VkDeviceSize*)&forMarshaling->vertexStride, sizeof(VkDeviceSize));
+    vkStream->write((VkFormat*)&forMarshaling->vertexFormat, sizeof(VkFormat));
+    uint64_t cgen_var_1;
+    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->indexData, &cgen_var_1, 1);
+    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->write((VkDeviceSize*)&forMarshaling->indexOffset, sizeof(VkDeviceSize));
+    vkStream->write((uint32_t*)&forMarshaling->indexCount, sizeof(uint32_t));
+    vkStream->write((VkIndexType*)&forMarshaling->indexType, sizeof(VkIndexType));
+    uint64_t cgen_var_2;
+    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->transformData, &cgen_var_2, 1);
+    vkStream->write((uint64_t*)&cgen_var_2, 1 * 8);
+    vkStream->write((VkDeviceSize*)&forMarshaling->transformOffset, sizeof(VkDeviceSize));
+}
+
+void unmarshal_VkGeometryTrianglesNV(
+    VulkanStream* vkStream,
+    VkGeometryTrianglesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_0, (VkBuffer*)&forUnmarshaling->vertexData, 1);
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->vertexOffset, sizeof(VkDeviceSize));
+    vkStream->read((uint32_t*)&forUnmarshaling->vertexCount, sizeof(uint32_t));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->vertexStride, sizeof(VkDeviceSize));
+    vkStream->read((VkFormat*)&forUnmarshaling->vertexFormat, sizeof(VkFormat));
+    uint64_t cgen_var_1;
+    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_1, (VkBuffer*)&forUnmarshaling->indexData, 1);
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->indexOffset, sizeof(VkDeviceSize));
+    vkStream->read((uint32_t*)&forUnmarshaling->indexCount, sizeof(uint32_t));
+    vkStream->read((VkIndexType*)&forUnmarshaling->indexType, sizeof(VkIndexType));
+    uint64_t cgen_var_2;
+    vkStream->read((uint64_t*)&cgen_var_2, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_2, (VkBuffer*)&forUnmarshaling->transformData, 1);
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->transformOffset, sizeof(VkDeviceSize));
+}
+
+void marshal_VkGeometryAABBNV(
+    VulkanStream* vkStream,
+    const VkGeometryAABBNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->aabbData, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->write((uint32_t*)&forMarshaling->numAABBs, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->stride, sizeof(uint32_t));
+    vkStream->write((VkDeviceSize*)&forMarshaling->offset, sizeof(VkDeviceSize));
+}
+
+void unmarshal_VkGeometryAABBNV(
+    VulkanStream* vkStream,
+    VkGeometryAABBNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_0, (VkBuffer*)&forUnmarshaling->aabbData, 1);
+    vkStream->read((uint32_t*)&forUnmarshaling->numAABBs, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->stride, sizeof(uint32_t));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->offset, sizeof(VkDeviceSize));
+}
+
+void marshal_VkGeometryDataNV(
+    VulkanStream* vkStream,
+    const VkGeometryDataNV* forMarshaling)
+{
+    marshal_VkGeometryTrianglesNV(vkStream, (VkGeometryTrianglesNV*)(&forMarshaling->triangles));
+    marshal_VkGeometryAABBNV(vkStream, (VkGeometryAABBNV*)(&forMarshaling->aabbs));
+}
+
+void unmarshal_VkGeometryDataNV(
+    VulkanStream* vkStream,
+    VkGeometryDataNV* forUnmarshaling)
+{
+    unmarshal_VkGeometryTrianglesNV(vkStream, (VkGeometryTrianglesNV*)(&forUnmarshaling->triangles));
+    unmarshal_VkGeometryAABBNV(vkStream, (VkGeometryAABBNV*)(&forUnmarshaling->aabbs));
+}
+
+void marshal_VkGeometryNV(
+    VulkanStream* vkStream,
+    const VkGeometryNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkGeometryTypeKHR*)&forMarshaling->geometryType, sizeof(VkGeometryTypeKHR));
+    marshal_VkGeometryDataNV(vkStream, (VkGeometryDataNV*)(&forMarshaling->geometry));
+    vkStream->write((VkGeometryFlagsKHR*)&forMarshaling->flags, sizeof(VkGeometryFlagsKHR));
+}
+
+void unmarshal_VkGeometryNV(
+    VulkanStream* vkStream,
+    VkGeometryNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkGeometryTypeKHR*)&forUnmarshaling->geometryType, sizeof(VkGeometryTypeKHR));
+    unmarshal_VkGeometryDataNV(vkStream, (VkGeometryDataNV*)(&forUnmarshaling->geometry));
+    vkStream->read((VkGeometryFlagsKHR*)&forUnmarshaling->flags, sizeof(VkGeometryFlagsKHR));
+}
+
+void marshal_VkAccelerationStructureInfoNV(
+    VulkanStream* vkStream,
+    const VkAccelerationStructureInfoNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkAccelerationStructureTypeNV*)&forMarshaling->type, sizeof(VkAccelerationStructureTypeNV));
+    vkStream->write((VkBuildAccelerationStructureFlagsNV*)&forMarshaling->flags, sizeof(VkBuildAccelerationStructureFlagsNV));
+    vkStream->write((uint32_t*)&forMarshaling->instanceCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->geometryCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->geometryCount; ++i)
+    {
+        marshal_VkGeometryNV(vkStream, (const VkGeometryNV*)(forMarshaling->pGeometries + i));
+    }
+}
+
+void unmarshal_VkAccelerationStructureInfoNV(
+    VulkanStream* vkStream,
+    VkAccelerationStructureInfoNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkAccelerationStructureTypeNV*)&forUnmarshaling->type, sizeof(VkAccelerationStructureTypeNV));
+    vkStream->read((VkBuildAccelerationStructureFlagsNV*)&forUnmarshaling->flags, sizeof(VkBuildAccelerationStructureFlagsNV));
+    vkStream->read((uint32_t*)&forUnmarshaling->instanceCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->geometryCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pGeometries, forUnmarshaling->geometryCount * sizeof(const VkGeometryNV));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->geometryCount; ++i)
+    {
+        unmarshal_VkGeometryNV(vkStream, (VkGeometryNV*)(forUnmarshaling->pGeometries + i));
+    }
+}
+
+void marshal_VkAccelerationStructureCreateInfoNV(
+    VulkanStream* vkStream,
+    const VkAccelerationStructureCreateInfoNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkDeviceSize*)&forMarshaling->compactedSize, sizeof(VkDeviceSize));
+    marshal_VkAccelerationStructureInfoNV(vkStream, (VkAccelerationStructureInfoNV*)(&forMarshaling->info));
+}
+
+void unmarshal_VkAccelerationStructureCreateInfoNV(
+    VulkanStream* vkStream,
+    VkAccelerationStructureCreateInfoNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->compactedSize, sizeof(VkDeviceSize));
+    unmarshal_VkAccelerationStructureInfoNV(vkStream, (VkAccelerationStructureInfoNV*)(&forUnmarshaling->info));
+}
+
+void marshal_VkBindAccelerationStructureMemoryInfoNV(
+    VulkanStream* vkStream,
+    const VkBindAccelerationStructureMemoryInfoNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkAccelerationStructureNV_u64(&forMarshaling->accelerationStructure, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    uint64_t cgen_var_1;
+    vkStream->handleMapping()->mapHandles_VkDeviceMemory_u64(&forMarshaling->memory, &cgen_var_1, 1);
+    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->write((VkDeviceSize*)&forMarshaling->memoryOffset, sizeof(VkDeviceSize));
+    vkStream->write((uint32_t*)&forMarshaling->deviceIndexCount, sizeof(uint32_t));
+    vkStream->write((const uint32_t*)forMarshaling->pDeviceIndices, forMarshaling->deviceIndexCount * sizeof(const uint32_t));
+}
+
+void unmarshal_VkBindAccelerationStructureMemoryInfoNV(
+    VulkanStream* vkStream,
+    VkBindAccelerationStructureMemoryInfoNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkAccelerationStructureNV(&cgen_var_0, (VkAccelerationStructureNV*)&forUnmarshaling->accelerationStructure, 1);
+    uint64_t cgen_var_1;
+    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkDeviceMemory(&cgen_var_1, (VkDeviceMemory*)&forUnmarshaling->memory, 1);
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->memoryOffset, sizeof(VkDeviceSize));
+    vkStream->read((uint32_t*)&forUnmarshaling->deviceIndexCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pDeviceIndices, forUnmarshaling->deviceIndexCount * sizeof(const uint32_t));
+    vkStream->read((uint32_t*)forUnmarshaling->pDeviceIndices, forUnmarshaling->deviceIndexCount * sizeof(const uint32_t));
+}
+
+void marshal_VkWriteDescriptorSetAccelerationStructureNV(
+    VulkanStream* vkStream,
+    const VkWriteDescriptorSetAccelerationStructureNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->accelerationStructureCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pAccelerationStructures;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->pAccelerationStructures)
+    {
+        if (forMarshaling->accelerationStructureCount)
+        {
+            uint64_t* cgen_var_0_0;
+            vkStream->alloc((void**)&cgen_var_0_0, forMarshaling->accelerationStructureCount * 8);
+            vkStream->handleMapping()->mapHandles_VkAccelerationStructureNV_u64(forMarshaling->pAccelerationStructures, cgen_var_0_0, forMarshaling->accelerationStructureCount);
+            vkStream->write((uint64_t*)cgen_var_0_0, forMarshaling->accelerationStructureCount * 8);
+        }
+    }
+}
+
+void unmarshal_VkWriteDescriptorSetAccelerationStructureNV(
+    VulkanStream* vkStream,
+    VkWriteDescriptorSetAccelerationStructureNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->accelerationStructureCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    forUnmarshaling->pAccelerationStructures = (const VkAccelerationStructureNV*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pAccelerationStructures)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pAccelerationStructures, forUnmarshaling->accelerationStructureCount * sizeof(const VkAccelerationStructureNV));
+        if (forUnmarshaling->accelerationStructureCount)
+        {
+            uint64_t* cgen_var_0_0;
+            vkStream->alloc((void**)&cgen_var_0_0, forUnmarshaling->accelerationStructureCount * 8);
+            vkStream->read((uint64_t*)cgen_var_0_0, forUnmarshaling->accelerationStructureCount * 8);
+            vkStream->handleMapping()->mapHandles_u64_VkAccelerationStructureNV(cgen_var_0_0, (VkAccelerationStructureNV*)forUnmarshaling->pAccelerationStructures, forUnmarshaling->accelerationStructureCount);
+        }
+    }
+}
+
+void marshal_VkAccelerationStructureMemoryRequirementsInfoNV(
+    VulkanStream* vkStream,
+    const VkAccelerationStructureMemoryRequirementsInfoNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkAccelerationStructureMemoryRequirementsTypeNV*)&forMarshaling->type, sizeof(VkAccelerationStructureMemoryRequirementsTypeNV));
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkAccelerationStructureNV_u64(&forMarshaling->accelerationStructure, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+}
+
+void unmarshal_VkAccelerationStructureMemoryRequirementsInfoNV(
+    VulkanStream* vkStream,
+    VkAccelerationStructureMemoryRequirementsInfoNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkAccelerationStructureMemoryRequirementsTypeNV*)&forUnmarshaling->type, sizeof(VkAccelerationStructureMemoryRequirementsTypeNV));
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkAccelerationStructureNV(&cgen_var_0, (VkAccelerationStructureNV*)&forUnmarshaling->accelerationStructure, 1);
+}
+
+void marshal_VkPhysicalDeviceRayTracingPropertiesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceRayTracingPropertiesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->shaderGroupHandleSize, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxRecursionDepth, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxShaderGroupStride, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->shaderGroupBaseAlignment, sizeof(uint32_t));
+    vkStream->write((uint64_t*)&forMarshaling->maxGeometryCount, sizeof(uint64_t));
+    vkStream->write((uint64_t*)&forMarshaling->maxInstanceCount, sizeof(uint64_t));
+    vkStream->write((uint64_t*)&forMarshaling->maxTriangleCount, sizeof(uint64_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetAccelerationStructures, sizeof(uint32_t));
+}
+
+void unmarshal_VkPhysicalDeviceRayTracingPropertiesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceRayTracingPropertiesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->shaderGroupHandleSize, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxRecursionDepth, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxShaderGroupStride, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->shaderGroupBaseAlignment, sizeof(uint32_t));
+    vkStream->read((uint64_t*)&forUnmarshaling->maxGeometryCount, sizeof(uint64_t));
+    vkStream->read((uint64_t*)&forUnmarshaling->maxInstanceCount, sizeof(uint64_t));
+    vkStream->read((uint64_t*)&forUnmarshaling->maxTriangleCount, sizeof(uint64_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetAccelerationStructures, sizeof(uint32_t));
+}
+
+void marshal_VkAabbPositionsKHR(
+    VulkanStream* vkStream,
+    const VkAabbPositionsKHR* forMarshaling)
+{
+    vkStream->write((float*)&forMarshaling->minX, sizeof(float));
+    vkStream->write((float*)&forMarshaling->minY, sizeof(float));
+    vkStream->write((float*)&forMarshaling->minZ, sizeof(float));
+    vkStream->write((float*)&forMarshaling->maxX, sizeof(float));
+    vkStream->write((float*)&forMarshaling->maxY, sizeof(float));
+    vkStream->write((float*)&forMarshaling->maxZ, sizeof(float));
+}
+
+void unmarshal_VkAabbPositionsKHR(
+    VulkanStream* vkStream,
+    VkAabbPositionsKHR* forUnmarshaling)
+{
+    vkStream->read((float*)&forUnmarshaling->minX, sizeof(float));
+    vkStream->read((float*)&forUnmarshaling->minY, sizeof(float));
+    vkStream->read((float*)&forUnmarshaling->minZ, sizeof(float));
+    vkStream->read((float*)&forUnmarshaling->maxX, sizeof(float));
+    vkStream->read((float*)&forUnmarshaling->maxY, sizeof(float));
+    vkStream->read((float*)&forUnmarshaling->maxZ, sizeof(float));
+}
+
+#endif
+#ifdef VK_NV_representative_fragment_test
+void marshal_VkPhysicalDeviceRepresentativeFragmentTestFeaturesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceRepresentativeFragmentTestFeaturesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->representativeFragmentTest, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceRepresentativeFragmentTestFeaturesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceRepresentativeFragmentTestFeaturesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->representativeFragmentTest, sizeof(VkBool32));
+}
+
+void marshal_VkPipelineRepresentativeFragmentTestStateCreateInfoNV(
+    VulkanStream* vkStream,
+    const VkPipelineRepresentativeFragmentTestStateCreateInfoNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->representativeFragmentTestEnable, sizeof(VkBool32));
+}
+
+void unmarshal_VkPipelineRepresentativeFragmentTestStateCreateInfoNV(
+    VulkanStream* vkStream,
+    VkPipelineRepresentativeFragmentTestStateCreateInfoNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->representativeFragmentTestEnable, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_EXT_filter_cubic
+void marshal_VkPhysicalDeviceImageViewImageFormatInfoEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceImageViewImageFormatInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkImageViewType*)&forMarshaling->imageViewType, sizeof(VkImageViewType));
+}
+
+void unmarshal_VkPhysicalDeviceImageViewImageFormatInfoEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceImageViewImageFormatInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkImageViewType*)&forUnmarshaling->imageViewType, sizeof(VkImageViewType));
+}
+
+void marshal_VkFilterCubicImageViewImageFormatPropertiesEXT(
+    VulkanStream* vkStream,
+    const VkFilterCubicImageViewImageFormatPropertiesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->filterCubic, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->filterCubicMinmax, sizeof(VkBool32));
+}
+
+void unmarshal_VkFilterCubicImageViewImageFormatPropertiesEXT(
+    VulkanStream* vkStream,
+    VkFilterCubicImageViewImageFormatPropertiesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->filterCubic, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->filterCubicMinmax, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_QCOM_render_pass_shader_resolve
 #endif
 #ifdef VK_EXT_global_priority
 void marshal_VkDeviceQueueGlobalPriorityCreateInfoEXT(
@@ -12680,6 +16704,68 @@ void unmarshal_VkPhysicalDeviceExternalMemoryHostPropertiesEXT(
 #endif
 #ifdef VK_AMD_buffer_marker
 #endif
+#ifdef VK_AMD_pipeline_compiler_control
+void marshal_VkPipelineCompilerControlCreateInfoAMD(
+    VulkanStream* vkStream,
+    const VkPipelineCompilerControlCreateInfoAMD* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkPipelineCompilerControlFlagsAMD*)&forMarshaling->compilerControlFlags, sizeof(VkPipelineCompilerControlFlagsAMD));
+}
+
+void unmarshal_VkPipelineCompilerControlCreateInfoAMD(
+    VulkanStream* vkStream,
+    VkPipelineCompilerControlCreateInfoAMD* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkPipelineCompilerControlFlagsAMD*)&forUnmarshaling->compilerControlFlags, sizeof(VkPipelineCompilerControlFlagsAMD));
+}
+
+#endif
+#ifdef VK_EXT_calibrated_timestamps
+void marshal_VkCalibratedTimestampInfoEXT(
+    VulkanStream* vkStream,
+    const VkCalibratedTimestampInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkTimeDomainEXT*)&forMarshaling->timeDomain, sizeof(VkTimeDomainEXT));
+}
+
+void unmarshal_VkCalibratedTimestampInfoEXT(
+    VulkanStream* vkStream,
+    VkCalibratedTimestampInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkTimeDomainEXT*)&forUnmarshaling->timeDomain, sizeof(VkTimeDomainEXT));
+}
+
+#endif
 #ifdef VK_AMD_shader_core_properties
 void marshal_VkPhysicalDeviceShaderCorePropertiesAMD(
     VulkanStream* vkStream,
@@ -12734,6 +16820,37 @@ void unmarshal_VkPhysicalDeviceShaderCorePropertiesAMD(
     vkStream->read((uint32_t*)&forUnmarshaling->minVgprAllocation, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->maxVgprAllocation, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->vgprAllocationGranularity, sizeof(uint32_t));
+}
+
+#endif
+#ifdef VK_AMD_memory_overallocation_behavior
+void marshal_VkDeviceMemoryOverallocationCreateInfoAMD(
+    VulkanStream* vkStream,
+    const VkDeviceMemoryOverallocationCreateInfoAMD* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkMemoryOverallocationBehaviorAMD*)&forMarshaling->overallocationBehavior, sizeof(VkMemoryOverallocationBehaviorAMD));
+}
+
+void unmarshal_VkDeviceMemoryOverallocationCreateInfoAMD(
+    VulkanStream* vkStream,
+    VkDeviceMemoryOverallocationCreateInfoAMD* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkMemoryOverallocationBehaviorAMD*)&forUnmarshaling->overallocationBehavior, sizeof(VkMemoryOverallocationBehaviorAMD));
 }
 
 #endif
@@ -12821,8 +16938,406 @@ void unmarshal_VkPipelineVertexInputDivisorStateCreateInfoEXT(
     }
 }
 
+void marshal_VkPhysicalDeviceVertexAttributeDivisorFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceVertexAttributeDivisorFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->vertexAttributeInstanceRateDivisor, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->vertexAttributeInstanceRateZeroDivisor, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceVertexAttributeDivisorFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceVertexAttributeDivisorFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->vertexAttributeInstanceRateDivisor, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->vertexAttributeInstanceRateZeroDivisor, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_GGP_frame_token
+void marshal_VkPresentFrameTokenGGP(
+    VulkanStream* vkStream,
+    const VkPresentFrameTokenGGP* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((GgpFrameToken*)&forMarshaling->frameToken, sizeof(GgpFrameToken));
+}
+
+void unmarshal_VkPresentFrameTokenGGP(
+    VulkanStream* vkStream,
+    VkPresentFrameTokenGGP* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((GgpFrameToken*)&forUnmarshaling->frameToken, sizeof(GgpFrameToken));
+}
+
+#endif
+#ifdef VK_EXT_pipeline_creation_feedback
+void marshal_VkPipelineCreationFeedbackEXT(
+    VulkanStream* vkStream,
+    const VkPipelineCreationFeedbackEXT* forMarshaling)
+{
+    vkStream->write((VkPipelineCreationFeedbackFlagsEXT*)&forMarshaling->flags, sizeof(VkPipelineCreationFeedbackFlagsEXT));
+    vkStream->write((uint64_t*)&forMarshaling->duration, sizeof(uint64_t));
+}
+
+void unmarshal_VkPipelineCreationFeedbackEXT(
+    VulkanStream* vkStream,
+    VkPipelineCreationFeedbackEXT* forUnmarshaling)
+{
+    vkStream->read((VkPipelineCreationFeedbackFlagsEXT*)&forUnmarshaling->flags, sizeof(VkPipelineCreationFeedbackFlagsEXT));
+    vkStream->read((uint64_t*)&forUnmarshaling->duration, sizeof(uint64_t));
+}
+
+void marshal_VkPipelineCreationFeedbackCreateInfoEXT(
+    VulkanStream* vkStream,
+    const VkPipelineCreationFeedbackCreateInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    marshal_VkPipelineCreationFeedbackEXT(vkStream, (VkPipelineCreationFeedbackEXT*)(forMarshaling->pPipelineCreationFeedback));
+    vkStream->write((uint32_t*)&forMarshaling->pipelineStageCreationFeedbackCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->pipelineStageCreationFeedbackCount; ++i)
+    {
+        marshal_VkPipelineCreationFeedbackEXT(vkStream, (VkPipelineCreationFeedbackEXT*)(forMarshaling->pPipelineStageCreationFeedbacks + i));
+    }
+}
+
+void unmarshal_VkPipelineCreationFeedbackCreateInfoEXT(
+    VulkanStream* vkStream,
+    VkPipelineCreationFeedbackCreateInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->alloc((void**)&forUnmarshaling->pPipelineCreationFeedback, sizeof(VkPipelineCreationFeedbackEXT));
+    unmarshal_VkPipelineCreationFeedbackEXT(vkStream, (VkPipelineCreationFeedbackEXT*)(forUnmarshaling->pPipelineCreationFeedback));
+    vkStream->read((uint32_t*)&forUnmarshaling->pipelineStageCreationFeedbackCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pPipelineStageCreationFeedbacks, forUnmarshaling->pipelineStageCreationFeedbackCount * sizeof(VkPipelineCreationFeedbackEXT));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->pipelineStageCreationFeedbackCount; ++i)
+    {
+        unmarshal_VkPipelineCreationFeedbackEXT(vkStream, (VkPipelineCreationFeedbackEXT*)(forUnmarshaling->pPipelineStageCreationFeedbacks + i));
+    }
+}
+
 #endif
 #ifdef VK_NV_shader_subgroup_partitioned
+#endif
+#ifdef VK_NV_compute_shader_derivatives
+void marshal_VkPhysicalDeviceComputeShaderDerivativesFeaturesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceComputeShaderDerivativesFeaturesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->computeDerivativeGroupQuads, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->computeDerivativeGroupLinear, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceComputeShaderDerivativesFeaturesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceComputeShaderDerivativesFeaturesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->computeDerivativeGroupQuads, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->computeDerivativeGroupLinear, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_NV_mesh_shader
+void marshal_VkPhysicalDeviceMeshShaderFeaturesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceMeshShaderFeaturesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->taskShader, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->meshShader, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceMeshShaderFeaturesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceMeshShaderFeaturesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->taskShader, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->meshShader, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceMeshShaderPropertiesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceMeshShaderPropertiesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->maxDrawMeshTasksCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxTaskWorkGroupInvocations, sizeof(uint32_t));
+    vkStream->write((uint32_t*)forMarshaling->maxTaskWorkGroupSize, 3 * sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxTaskTotalMemorySize, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxTaskOutputCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxMeshWorkGroupInvocations, sizeof(uint32_t));
+    vkStream->write((uint32_t*)forMarshaling->maxMeshWorkGroupSize, 3 * sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxMeshTotalMemorySize, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxMeshOutputVertices, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxMeshOutputPrimitives, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxMeshMultiviewViewCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->meshOutputPerVertexGranularity, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->meshOutputPerPrimitiveGranularity, sizeof(uint32_t));
+}
+
+void unmarshal_VkPhysicalDeviceMeshShaderPropertiesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceMeshShaderPropertiesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDrawMeshTasksCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxTaskWorkGroupInvocations, sizeof(uint32_t));
+    vkStream->read((uint32_t*)forUnmarshaling->maxTaskWorkGroupSize, 3 * sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxTaskTotalMemorySize, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxTaskOutputCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxMeshWorkGroupInvocations, sizeof(uint32_t));
+    vkStream->read((uint32_t*)forUnmarshaling->maxMeshWorkGroupSize, 3 * sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxMeshTotalMemorySize, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxMeshOutputVertices, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxMeshOutputPrimitives, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxMeshMultiviewViewCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->meshOutputPerVertexGranularity, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->meshOutputPerPrimitiveGranularity, sizeof(uint32_t));
+}
+
+void marshal_VkDrawMeshTasksIndirectCommandNV(
+    VulkanStream* vkStream,
+    const VkDrawMeshTasksIndirectCommandNV* forMarshaling)
+{
+    vkStream->write((uint32_t*)&forMarshaling->taskCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->firstTask, sizeof(uint32_t));
+}
+
+void unmarshal_VkDrawMeshTasksIndirectCommandNV(
+    VulkanStream* vkStream,
+    VkDrawMeshTasksIndirectCommandNV* forUnmarshaling)
+{
+    vkStream->read((uint32_t*)&forUnmarshaling->taskCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->firstTask, sizeof(uint32_t));
+}
+
+#endif
+#ifdef VK_NV_fragment_shader_barycentric
+void marshal_VkPhysicalDeviceFragmentShaderBarycentricFeaturesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceFragmentShaderBarycentricFeaturesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->fragmentShaderBarycentric, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceFragmentShaderBarycentricFeaturesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceFragmentShaderBarycentricFeaturesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->fragmentShaderBarycentric, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_NV_shader_image_footprint
+void marshal_VkPhysicalDeviceShaderImageFootprintFeaturesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceShaderImageFootprintFeaturesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->imageFootprint, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceShaderImageFootprintFeaturesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceShaderImageFootprintFeaturesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->imageFootprint, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_NV_scissor_exclusive
+void marshal_VkPipelineViewportExclusiveScissorStateCreateInfoNV(
+    VulkanStream* vkStream,
+    const VkPipelineViewportExclusiveScissorStateCreateInfoNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->exclusiveScissorCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pExclusiveScissors;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->pExclusiveScissors)
+    {
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->exclusiveScissorCount; ++i)
+        {
+            marshal_VkRect2D(vkStream, (const VkRect2D*)(forMarshaling->pExclusiveScissors + i));
+        }
+    }
+}
+
+void unmarshal_VkPipelineViewportExclusiveScissorStateCreateInfoNV(
+    VulkanStream* vkStream,
+    VkPipelineViewportExclusiveScissorStateCreateInfoNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->exclusiveScissorCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    forUnmarshaling->pExclusiveScissors = (const VkRect2D*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pExclusiveScissors)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pExclusiveScissors, forUnmarshaling->exclusiveScissorCount * sizeof(const VkRect2D));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->exclusiveScissorCount; ++i)
+        {
+            unmarshal_VkRect2D(vkStream, (VkRect2D*)(forUnmarshaling->pExclusiveScissors + i));
+        }
+    }
+}
+
+void marshal_VkPhysicalDeviceExclusiveScissorFeaturesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceExclusiveScissorFeaturesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->exclusiveScissor, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceExclusiveScissorFeaturesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceExclusiveScissorFeaturesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->exclusiveScissor, sizeof(VkBool32));
+}
+
 #endif
 #ifdef VK_NV_device_diagnostic_checkpoints
 void marshal_VkQueueFamilyCheckpointPropertiesNV(
@@ -12898,7 +17413,433 @@ void unmarshal_VkCheckpointDataNV(
 }
 
 #endif
-#ifdef VK_GOOGLE_address_space
+#ifdef VK_INTEL_shader_integer_functions2
+void marshal_VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->shaderIntegerFunctions2, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderIntegerFunctions2, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_INTEL_performance_query
+void marshal_VkPerformanceValueDataINTEL(
+    VulkanStream* vkStream,
+    const VkPerformanceValueDataINTEL* forMarshaling)
+{
+    vkStream->write((uint32_t*)&forMarshaling->value32, sizeof(uint32_t));
+}
+
+void unmarshal_VkPerformanceValueDataINTEL(
+    VulkanStream* vkStream,
+    VkPerformanceValueDataINTEL* forUnmarshaling)
+{
+    vkStream->read((uint32_t*)&forUnmarshaling->value32, sizeof(uint32_t));
+}
+
+void marshal_VkPerformanceValueINTEL(
+    VulkanStream* vkStream,
+    const VkPerformanceValueINTEL* forMarshaling)
+{
+    vkStream->write((VkPerformanceValueTypeINTEL*)&forMarshaling->type, sizeof(VkPerformanceValueTypeINTEL));
+    marshal_VkPerformanceValueDataINTEL(vkStream, (VkPerformanceValueDataINTEL*)(&forMarshaling->data));
+}
+
+void unmarshal_VkPerformanceValueINTEL(
+    VulkanStream* vkStream,
+    VkPerformanceValueINTEL* forUnmarshaling)
+{
+    vkStream->read((VkPerformanceValueTypeINTEL*)&forUnmarshaling->type, sizeof(VkPerformanceValueTypeINTEL));
+    unmarshal_VkPerformanceValueDataINTEL(vkStream, (VkPerformanceValueDataINTEL*)(&forUnmarshaling->data));
+}
+
+void marshal_VkInitializePerformanceApiInfoINTEL(
+    VulkanStream* vkStream,
+    const VkInitializePerformanceApiInfoINTEL* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pUserData;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->pUserData)
+    {
+        vkStream->write((void*)forMarshaling->pUserData, sizeof(uint8_t));
+    }
+}
+
+void unmarshal_VkInitializePerformanceApiInfoINTEL(
+    VulkanStream* vkStream,
+    VkInitializePerformanceApiInfoINTEL* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    // WARNING PTR CHECK
+    forUnmarshaling->pUserData = (void*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pUserData)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pUserData, sizeof(uint8_t));
+        vkStream->read((void*)forUnmarshaling->pUserData, sizeof(uint8_t));
+    }
+}
+
+void marshal_VkQueryPoolPerformanceQueryCreateInfoINTEL(
+    VulkanStream* vkStream,
+    const VkQueryPoolPerformanceQueryCreateInfoINTEL* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkQueryPoolSamplingModeINTEL*)&forMarshaling->performanceCountersSampling, sizeof(VkQueryPoolSamplingModeINTEL));
+}
+
+void unmarshal_VkQueryPoolPerformanceQueryCreateInfoINTEL(
+    VulkanStream* vkStream,
+    VkQueryPoolPerformanceQueryCreateInfoINTEL* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkQueryPoolSamplingModeINTEL*)&forUnmarshaling->performanceCountersSampling, sizeof(VkQueryPoolSamplingModeINTEL));
+}
+
+void marshal_VkPerformanceMarkerInfoINTEL(
+    VulkanStream* vkStream,
+    const VkPerformanceMarkerInfoINTEL* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint64_t*)&forMarshaling->marker, sizeof(uint64_t));
+}
+
+void unmarshal_VkPerformanceMarkerInfoINTEL(
+    VulkanStream* vkStream,
+    VkPerformanceMarkerInfoINTEL* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint64_t*)&forUnmarshaling->marker, sizeof(uint64_t));
+}
+
+void marshal_VkPerformanceStreamMarkerInfoINTEL(
+    VulkanStream* vkStream,
+    const VkPerformanceStreamMarkerInfoINTEL* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->marker, sizeof(uint32_t));
+}
+
+void unmarshal_VkPerformanceStreamMarkerInfoINTEL(
+    VulkanStream* vkStream,
+    VkPerformanceStreamMarkerInfoINTEL* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->marker, sizeof(uint32_t));
+}
+
+void marshal_VkPerformanceOverrideInfoINTEL(
+    VulkanStream* vkStream,
+    const VkPerformanceOverrideInfoINTEL* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkPerformanceOverrideTypeINTEL*)&forMarshaling->type, sizeof(VkPerformanceOverrideTypeINTEL));
+    vkStream->write((VkBool32*)&forMarshaling->enable, sizeof(VkBool32));
+    vkStream->write((uint64_t*)&forMarshaling->parameter, sizeof(uint64_t));
+}
+
+void unmarshal_VkPerformanceOverrideInfoINTEL(
+    VulkanStream* vkStream,
+    VkPerformanceOverrideInfoINTEL* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkPerformanceOverrideTypeINTEL*)&forUnmarshaling->type, sizeof(VkPerformanceOverrideTypeINTEL));
+    vkStream->read((VkBool32*)&forUnmarshaling->enable, sizeof(VkBool32));
+    vkStream->read((uint64_t*)&forUnmarshaling->parameter, sizeof(uint64_t));
+}
+
+void marshal_VkPerformanceConfigurationAcquireInfoINTEL(
+    VulkanStream* vkStream,
+    const VkPerformanceConfigurationAcquireInfoINTEL* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkPerformanceConfigurationTypeINTEL*)&forMarshaling->type, sizeof(VkPerformanceConfigurationTypeINTEL));
+}
+
+void unmarshal_VkPerformanceConfigurationAcquireInfoINTEL(
+    VulkanStream* vkStream,
+    VkPerformanceConfigurationAcquireInfoINTEL* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkPerformanceConfigurationTypeINTEL*)&forUnmarshaling->type, sizeof(VkPerformanceConfigurationTypeINTEL));
+}
+
+#endif
+#ifdef VK_EXT_pci_bus_info
+void marshal_VkPhysicalDevicePCIBusInfoPropertiesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDevicePCIBusInfoPropertiesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->pciDomain, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->pciBus, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->pciDevice, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->pciFunction, sizeof(uint32_t));
+}
+
+void unmarshal_VkPhysicalDevicePCIBusInfoPropertiesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDevicePCIBusInfoPropertiesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->pciDomain, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->pciBus, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->pciDevice, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->pciFunction, sizeof(uint32_t));
+}
+
+#endif
+#ifdef VK_AMD_display_native_hdr
+void marshal_VkDisplayNativeHdrSurfaceCapabilitiesAMD(
+    VulkanStream* vkStream,
+    const VkDisplayNativeHdrSurfaceCapabilitiesAMD* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->localDimmingSupport, sizeof(VkBool32));
+}
+
+void unmarshal_VkDisplayNativeHdrSurfaceCapabilitiesAMD(
+    VulkanStream* vkStream,
+    VkDisplayNativeHdrSurfaceCapabilitiesAMD* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->localDimmingSupport, sizeof(VkBool32));
+}
+
+void marshal_VkSwapchainDisplayNativeHdrCreateInfoAMD(
+    VulkanStream* vkStream,
+    const VkSwapchainDisplayNativeHdrCreateInfoAMD* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->localDimmingEnable, sizeof(VkBool32));
+}
+
+void unmarshal_VkSwapchainDisplayNativeHdrCreateInfoAMD(
+    VulkanStream* vkStream,
+    VkSwapchainDisplayNativeHdrCreateInfoAMD* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->localDimmingEnable, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_FUCHSIA_imagepipe_surface
+void marshal_VkImagePipeSurfaceCreateInfoFUCHSIA(
+    VulkanStream* vkStream,
+    const VkImagePipeSurfaceCreateInfoFUCHSIA* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkImagePipeSurfaceCreateFlagsFUCHSIA*)&forMarshaling->flags, sizeof(VkImagePipeSurfaceCreateFlagsFUCHSIA));
+    vkStream->write((zx_handle_t*)&forMarshaling->imagePipeHandle, sizeof(zx_handle_t));
+}
+
+void unmarshal_VkImagePipeSurfaceCreateInfoFUCHSIA(
+    VulkanStream* vkStream,
+    VkImagePipeSurfaceCreateInfoFUCHSIA* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkImagePipeSurfaceCreateFlagsFUCHSIA*)&forUnmarshaling->flags, sizeof(VkImagePipeSurfaceCreateFlagsFUCHSIA));
+    vkStream->read((zx_handle_t*)&forUnmarshaling->imagePipeHandle, sizeof(zx_handle_t));
+}
+
+#endif
+#ifdef VK_EXT_metal_surface
+void marshal_VkMetalSurfaceCreateInfoEXT(
+    VulkanStream* vkStream,
+    const VkMetalSurfaceCreateInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkMetalSurfaceCreateFlagsEXT*)&forMarshaling->flags, sizeof(VkMetalSurfaceCreateFlagsEXT));
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pLayer;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->pLayer)
+    {
+        vkStream->write((const CAMetalLayer*)forMarshaling->pLayer, sizeof(const CAMetalLayer));
+    }
+}
+
+void unmarshal_VkMetalSurfaceCreateInfoEXT(
+    VulkanStream* vkStream,
+    VkMetalSurfaceCreateInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkMetalSurfaceCreateFlagsEXT*)&forUnmarshaling->flags, sizeof(VkMetalSurfaceCreateFlagsEXT));
+    // WARNING PTR CHECK
+    forUnmarshaling->pLayer = (const CAMetalLayer*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pLayer)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pLayer, sizeof(const CAMetalLayer));
+        vkStream->read((CAMetalLayer*)forUnmarshaling->pLayer, sizeof(const CAMetalLayer));
+    }
+}
+
 #endif
 #ifdef VK_GOOGLE_color_buffer
 void marshal_VkImportColorBufferGOOGLE(
@@ -12997,6 +17938,2522 @@ void unmarshal_VkImportPhysicalAddressGOOGLE(
 }
 
 #endif
+#ifdef VK_EXT_scalar_block_layout
+#endif
+#ifdef VK_GOOGLE_hlsl_functionality1
+#endif
+#ifdef VK_GOOGLE_decorate_string
+#endif
+#ifdef VK_EXT_subgroup_size_control
+void marshal_VkPhysicalDeviceSubgroupSizeControlFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceSubgroupSizeControlFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->subgroupSizeControl, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->computeFullSubgroups, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceSubgroupSizeControlFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceSubgroupSizeControlFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->subgroupSizeControl, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->computeFullSubgroups, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceSubgroupSizeControlPropertiesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceSubgroupSizeControlPropertiesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->minSubgroupSize, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxSubgroupSize, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxComputeWorkgroupSubgroups, sizeof(uint32_t));
+    vkStream->write((VkShaderStageFlags*)&forMarshaling->requiredSubgroupSizeStages, sizeof(VkShaderStageFlags));
+}
+
+void unmarshal_VkPhysicalDeviceSubgroupSizeControlPropertiesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceSubgroupSizeControlPropertiesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->minSubgroupSize, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxSubgroupSize, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxComputeWorkgroupSubgroups, sizeof(uint32_t));
+    vkStream->read((VkShaderStageFlags*)&forUnmarshaling->requiredSubgroupSizeStages, sizeof(VkShaderStageFlags));
+}
+
+void marshal_VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT(
+    VulkanStream* vkStream,
+    const VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->requiredSubgroupSize, sizeof(uint32_t));
+}
+
+void unmarshal_VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT(
+    VulkanStream* vkStream,
+    VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->requiredSubgroupSize, sizeof(uint32_t));
+}
+
+#endif
+#ifdef VK_AMD_shader_core_properties2
+void marshal_VkPhysicalDeviceShaderCoreProperties2AMD(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceShaderCoreProperties2AMD* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkShaderCorePropertiesFlagsAMD*)&forMarshaling->shaderCoreFeatures, sizeof(VkShaderCorePropertiesFlagsAMD));
+    vkStream->write((uint32_t*)&forMarshaling->activeComputeUnitCount, sizeof(uint32_t));
+}
+
+void unmarshal_VkPhysicalDeviceShaderCoreProperties2AMD(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceShaderCoreProperties2AMD* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkShaderCorePropertiesFlagsAMD*)&forUnmarshaling->shaderCoreFeatures, sizeof(VkShaderCorePropertiesFlagsAMD));
+    vkStream->read((uint32_t*)&forUnmarshaling->activeComputeUnitCount, sizeof(uint32_t));
+}
+
+#endif
+#ifdef VK_AMD_device_coherent_memory
+void marshal_VkPhysicalDeviceCoherentMemoryFeaturesAMD(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceCoherentMemoryFeaturesAMD* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->deviceCoherentMemory, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceCoherentMemoryFeaturesAMD(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceCoherentMemoryFeaturesAMD* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->deviceCoherentMemory, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_EXT_shader_image_atomic_int64
+void marshal_VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->shaderImageInt64Atomics, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->sparseImageInt64Atomics, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderImageInt64Atomics, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->sparseImageInt64Atomics, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_EXT_memory_budget
+void marshal_VkPhysicalDeviceMemoryBudgetPropertiesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceMemoryBudgetPropertiesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkDeviceSize*)forMarshaling->heapBudget, VK_MAX_MEMORY_HEAPS * sizeof(VkDeviceSize));
+    vkStream->write((VkDeviceSize*)forMarshaling->heapUsage, VK_MAX_MEMORY_HEAPS * sizeof(VkDeviceSize));
+}
+
+void unmarshal_VkPhysicalDeviceMemoryBudgetPropertiesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceMemoryBudgetPropertiesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkDeviceSize*)forUnmarshaling->heapBudget, VK_MAX_MEMORY_HEAPS * sizeof(VkDeviceSize));
+    vkStream->read((VkDeviceSize*)forUnmarshaling->heapUsage, VK_MAX_MEMORY_HEAPS * sizeof(VkDeviceSize));
+}
+
+#endif
+#ifdef VK_EXT_memory_priority
+void marshal_VkPhysicalDeviceMemoryPriorityFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceMemoryPriorityFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->memoryPriority, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceMemoryPriorityFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceMemoryPriorityFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->memoryPriority, sizeof(VkBool32));
+}
+
+void marshal_VkMemoryPriorityAllocateInfoEXT(
+    VulkanStream* vkStream,
+    const VkMemoryPriorityAllocateInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((float*)&forMarshaling->priority, sizeof(float));
+}
+
+void unmarshal_VkMemoryPriorityAllocateInfoEXT(
+    VulkanStream* vkStream,
+    VkMemoryPriorityAllocateInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((float*)&forUnmarshaling->priority, sizeof(float));
+}
+
+#endif
+#ifdef VK_NV_dedicated_allocation_image_aliasing
+void marshal_VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->dedicatedAllocationImageAliasing, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->dedicatedAllocationImageAliasing, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_EXT_buffer_device_address
+void marshal_VkPhysicalDeviceBufferDeviceAddressFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceBufferDeviceAddressFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->bufferDeviceAddress, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->bufferDeviceAddressCaptureReplay, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->bufferDeviceAddressMultiDevice, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceBufferDeviceAddressFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceBufferDeviceAddressFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->bufferDeviceAddress, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->bufferDeviceAddressCaptureReplay, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->bufferDeviceAddressMultiDevice, sizeof(VkBool32));
+}
+
+void marshal_VkBufferDeviceAddressCreateInfoEXT(
+    VulkanStream* vkStream,
+    const VkBufferDeviceAddressCreateInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkDeviceAddress*)&forMarshaling->deviceAddress, sizeof(VkDeviceAddress));
+}
+
+void unmarshal_VkBufferDeviceAddressCreateInfoEXT(
+    VulkanStream* vkStream,
+    VkBufferDeviceAddressCreateInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkDeviceAddress*)&forUnmarshaling->deviceAddress, sizeof(VkDeviceAddress));
+}
+
+#endif
+#ifdef VK_EXT_tooling_info
+void marshal_VkPhysicalDeviceToolPropertiesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceToolPropertiesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((char*)forMarshaling->name, VK_MAX_EXTENSION_NAME_SIZE * sizeof(char));
+    vkStream->write((char*)forMarshaling->version, VK_MAX_EXTENSION_NAME_SIZE * sizeof(char));
+    vkStream->write((VkToolPurposeFlagsEXT*)&forMarshaling->purposes, sizeof(VkToolPurposeFlagsEXT));
+    vkStream->write((char*)forMarshaling->description, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    vkStream->write((char*)forMarshaling->layer, VK_MAX_EXTENSION_NAME_SIZE * sizeof(char));
+}
+
+void unmarshal_VkPhysicalDeviceToolPropertiesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceToolPropertiesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((char*)forUnmarshaling->name, VK_MAX_EXTENSION_NAME_SIZE * sizeof(char));
+    vkStream->read((char*)forUnmarshaling->version, VK_MAX_EXTENSION_NAME_SIZE * sizeof(char));
+    vkStream->read((VkToolPurposeFlagsEXT*)&forUnmarshaling->purposes, sizeof(VkToolPurposeFlagsEXT));
+    vkStream->read((char*)forUnmarshaling->description, VK_MAX_DESCRIPTION_SIZE * sizeof(char));
+    vkStream->read((char*)forUnmarshaling->layer, VK_MAX_EXTENSION_NAME_SIZE * sizeof(char));
+}
+
+#endif
+#ifdef VK_EXT_separate_stencil_usage
+#endif
+#ifdef VK_EXT_validation_features
+void marshal_VkValidationFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkValidationFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->enabledValidationFeatureCount, sizeof(uint32_t));
+    vkStream->write((const VkValidationFeatureEnableEXT*)forMarshaling->pEnabledValidationFeatures, forMarshaling->enabledValidationFeatureCount * sizeof(const VkValidationFeatureEnableEXT));
+    vkStream->write((uint32_t*)&forMarshaling->disabledValidationFeatureCount, sizeof(uint32_t));
+    vkStream->write((const VkValidationFeatureDisableEXT*)forMarshaling->pDisabledValidationFeatures, forMarshaling->disabledValidationFeatureCount * sizeof(const VkValidationFeatureDisableEXT));
+}
+
+void unmarshal_VkValidationFeaturesEXT(
+    VulkanStream* vkStream,
+    VkValidationFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->enabledValidationFeatureCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pEnabledValidationFeatures, forUnmarshaling->enabledValidationFeatureCount * sizeof(const VkValidationFeatureEnableEXT));
+    vkStream->read((VkValidationFeatureEnableEXT*)forUnmarshaling->pEnabledValidationFeatures, forUnmarshaling->enabledValidationFeatureCount * sizeof(const VkValidationFeatureEnableEXT));
+    vkStream->read((uint32_t*)&forUnmarshaling->disabledValidationFeatureCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pDisabledValidationFeatures, forUnmarshaling->disabledValidationFeatureCount * sizeof(const VkValidationFeatureDisableEXT));
+    vkStream->read((VkValidationFeatureDisableEXT*)forUnmarshaling->pDisabledValidationFeatures, forUnmarshaling->disabledValidationFeatureCount * sizeof(const VkValidationFeatureDisableEXT));
+}
+
+#endif
+#ifdef VK_NV_cooperative_matrix
+void marshal_VkCooperativeMatrixPropertiesNV(
+    VulkanStream* vkStream,
+    const VkCooperativeMatrixPropertiesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->MSize, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->NSize, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->KSize, sizeof(uint32_t));
+    vkStream->write((VkComponentTypeNV*)&forMarshaling->AType, sizeof(VkComponentTypeNV));
+    vkStream->write((VkComponentTypeNV*)&forMarshaling->BType, sizeof(VkComponentTypeNV));
+    vkStream->write((VkComponentTypeNV*)&forMarshaling->CType, sizeof(VkComponentTypeNV));
+    vkStream->write((VkComponentTypeNV*)&forMarshaling->DType, sizeof(VkComponentTypeNV));
+    vkStream->write((VkScopeNV*)&forMarshaling->scope, sizeof(VkScopeNV));
+}
+
+void unmarshal_VkCooperativeMatrixPropertiesNV(
+    VulkanStream* vkStream,
+    VkCooperativeMatrixPropertiesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->MSize, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->NSize, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->KSize, sizeof(uint32_t));
+    vkStream->read((VkComponentTypeNV*)&forUnmarshaling->AType, sizeof(VkComponentTypeNV));
+    vkStream->read((VkComponentTypeNV*)&forUnmarshaling->BType, sizeof(VkComponentTypeNV));
+    vkStream->read((VkComponentTypeNV*)&forUnmarshaling->CType, sizeof(VkComponentTypeNV));
+    vkStream->read((VkComponentTypeNV*)&forUnmarshaling->DType, sizeof(VkComponentTypeNV));
+    vkStream->read((VkScopeNV*)&forUnmarshaling->scope, sizeof(VkScopeNV));
+}
+
+void marshal_VkPhysicalDeviceCooperativeMatrixFeaturesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceCooperativeMatrixFeaturesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->cooperativeMatrix, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->cooperativeMatrixRobustBufferAccess, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceCooperativeMatrixFeaturesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceCooperativeMatrixFeaturesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->cooperativeMatrix, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->cooperativeMatrixRobustBufferAccess, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceCooperativeMatrixPropertiesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceCooperativeMatrixPropertiesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkShaderStageFlags*)&forMarshaling->cooperativeMatrixSupportedStages, sizeof(VkShaderStageFlags));
+}
+
+void unmarshal_VkPhysicalDeviceCooperativeMatrixPropertiesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceCooperativeMatrixPropertiesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkShaderStageFlags*)&forUnmarshaling->cooperativeMatrixSupportedStages, sizeof(VkShaderStageFlags));
+}
+
+#endif
+#ifdef VK_NV_coverage_reduction_mode
+void marshal_VkPhysicalDeviceCoverageReductionModeFeaturesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceCoverageReductionModeFeaturesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->coverageReductionMode, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceCoverageReductionModeFeaturesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceCoverageReductionModeFeaturesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->coverageReductionMode, sizeof(VkBool32));
+}
+
+void marshal_VkPipelineCoverageReductionStateCreateInfoNV(
+    VulkanStream* vkStream,
+    const VkPipelineCoverageReductionStateCreateInfoNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkPipelineCoverageReductionStateCreateFlagsNV*)&forMarshaling->flags, sizeof(VkPipelineCoverageReductionStateCreateFlagsNV));
+    vkStream->write((VkCoverageReductionModeNV*)&forMarshaling->coverageReductionMode, sizeof(VkCoverageReductionModeNV));
+}
+
+void unmarshal_VkPipelineCoverageReductionStateCreateInfoNV(
+    VulkanStream* vkStream,
+    VkPipelineCoverageReductionStateCreateInfoNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkPipelineCoverageReductionStateCreateFlagsNV*)&forUnmarshaling->flags, sizeof(VkPipelineCoverageReductionStateCreateFlagsNV));
+    vkStream->read((VkCoverageReductionModeNV*)&forUnmarshaling->coverageReductionMode, sizeof(VkCoverageReductionModeNV));
+}
+
+void marshal_VkFramebufferMixedSamplesCombinationNV(
+    VulkanStream* vkStream,
+    const VkFramebufferMixedSamplesCombinationNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkCoverageReductionModeNV*)&forMarshaling->coverageReductionMode, sizeof(VkCoverageReductionModeNV));
+    vkStream->write((VkSampleCountFlagBits*)&forMarshaling->rasterizationSamples, sizeof(VkSampleCountFlagBits));
+    vkStream->write((VkSampleCountFlags*)&forMarshaling->depthStencilSamples, sizeof(VkSampleCountFlags));
+    vkStream->write((VkSampleCountFlags*)&forMarshaling->colorSamples, sizeof(VkSampleCountFlags));
+}
+
+void unmarshal_VkFramebufferMixedSamplesCombinationNV(
+    VulkanStream* vkStream,
+    VkFramebufferMixedSamplesCombinationNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkCoverageReductionModeNV*)&forUnmarshaling->coverageReductionMode, sizeof(VkCoverageReductionModeNV));
+    vkStream->read((VkSampleCountFlagBits*)&forUnmarshaling->rasterizationSamples, sizeof(VkSampleCountFlagBits));
+    vkStream->read((VkSampleCountFlags*)&forUnmarshaling->depthStencilSamples, sizeof(VkSampleCountFlags));
+    vkStream->read((VkSampleCountFlags*)&forUnmarshaling->colorSamples, sizeof(VkSampleCountFlags));
+}
+
+#endif
+#ifdef VK_EXT_fragment_shader_interlock
+void marshal_VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->fragmentShaderSampleInterlock, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->fragmentShaderPixelInterlock, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->fragmentShaderShadingRateInterlock, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->fragmentShaderSampleInterlock, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->fragmentShaderPixelInterlock, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->fragmentShaderShadingRateInterlock, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_EXT_ycbcr_image_arrays
+void marshal_VkPhysicalDeviceYcbcrImageArraysFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceYcbcrImageArraysFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->ycbcrImageArrays, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceYcbcrImageArraysFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceYcbcrImageArraysFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->ycbcrImageArrays, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_EXT_full_screen_exclusive
+void marshal_VkSurfaceFullScreenExclusiveInfoEXT(
+    VulkanStream* vkStream,
+    const VkSurfaceFullScreenExclusiveInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkFullScreenExclusiveEXT*)&forMarshaling->fullScreenExclusive, sizeof(VkFullScreenExclusiveEXT));
+}
+
+void unmarshal_VkSurfaceFullScreenExclusiveInfoEXT(
+    VulkanStream* vkStream,
+    VkSurfaceFullScreenExclusiveInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkFullScreenExclusiveEXT*)&forUnmarshaling->fullScreenExclusive, sizeof(VkFullScreenExclusiveEXT));
+}
+
+void marshal_VkSurfaceCapabilitiesFullScreenExclusiveEXT(
+    VulkanStream* vkStream,
+    const VkSurfaceCapabilitiesFullScreenExclusiveEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->fullScreenExclusiveSupported, sizeof(VkBool32));
+}
+
+void unmarshal_VkSurfaceCapabilitiesFullScreenExclusiveEXT(
+    VulkanStream* vkStream,
+    VkSurfaceCapabilitiesFullScreenExclusiveEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->fullScreenExclusiveSupported, sizeof(VkBool32));
+}
+
+void marshal_VkSurfaceFullScreenExclusiveWin32InfoEXT(
+    VulkanStream* vkStream,
+    const VkSurfaceFullScreenExclusiveWin32InfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((HMONITOR*)&forMarshaling->hmonitor, sizeof(HMONITOR));
+}
+
+void unmarshal_VkSurfaceFullScreenExclusiveWin32InfoEXT(
+    VulkanStream* vkStream,
+    VkSurfaceFullScreenExclusiveWin32InfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((HMONITOR*)&forUnmarshaling->hmonitor, sizeof(HMONITOR));
+}
+
+#endif
+#ifdef VK_EXT_headless_surface
+void marshal_VkHeadlessSurfaceCreateInfoEXT(
+    VulkanStream* vkStream,
+    const VkHeadlessSurfaceCreateInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkHeadlessSurfaceCreateFlagsEXT*)&forMarshaling->flags, sizeof(VkHeadlessSurfaceCreateFlagsEXT));
+}
+
+void unmarshal_VkHeadlessSurfaceCreateInfoEXT(
+    VulkanStream* vkStream,
+    VkHeadlessSurfaceCreateInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkHeadlessSurfaceCreateFlagsEXT*)&forUnmarshaling->flags, sizeof(VkHeadlessSurfaceCreateFlagsEXT));
+}
+
+#endif
+#ifdef VK_EXT_line_rasterization
+void marshal_VkPhysicalDeviceLineRasterizationFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceLineRasterizationFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->rectangularLines, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->bresenhamLines, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->smoothLines, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->stippledRectangularLines, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->stippledBresenhamLines, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->stippledSmoothLines, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceLineRasterizationFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceLineRasterizationFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->rectangularLines, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->bresenhamLines, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->smoothLines, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->stippledRectangularLines, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->stippledBresenhamLines, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->stippledSmoothLines, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceLineRasterizationPropertiesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceLineRasterizationPropertiesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->lineSubPixelPrecisionBits, sizeof(uint32_t));
+}
+
+void unmarshal_VkPhysicalDeviceLineRasterizationPropertiesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceLineRasterizationPropertiesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->lineSubPixelPrecisionBits, sizeof(uint32_t));
+}
+
+void marshal_VkPipelineRasterizationLineStateCreateInfoEXT(
+    VulkanStream* vkStream,
+    const VkPipelineRasterizationLineStateCreateInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkLineRasterizationModeEXT*)&forMarshaling->lineRasterizationMode, sizeof(VkLineRasterizationModeEXT));
+    vkStream->write((VkBool32*)&forMarshaling->stippledLineEnable, sizeof(VkBool32));
+    vkStream->write((uint32_t*)&forMarshaling->lineStippleFactor, sizeof(uint32_t));
+    vkStream->write((uint16_t*)&forMarshaling->lineStipplePattern, sizeof(uint16_t));
+}
+
+void unmarshal_VkPipelineRasterizationLineStateCreateInfoEXT(
+    VulkanStream* vkStream,
+    VkPipelineRasterizationLineStateCreateInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkLineRasterizationModeEXT*)&forUnmarshaling->lineRasterizationMode, sizeof(VkLineRasterizationModeEXT));
+    vkStream->read((VkBool32*)&forUnmarshaling->stippledLineEnable, sizeof(VkBool32));
+    vkStream->read((uint32_t*)&forUnmarshaling->lineStippleFactor, sizeof(uint32_t));
+    vkStream->read((uint16_t*)&forUnmarshaling->lineStipplePattern, sizeof(uint16_t));
+}
+
+#endif
+#ifdef VK_EXT_shader_atomic_float
+void marshal_VkPhysicalDeviceShaderAtomicFloatFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceShaderAtomicFloatFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->shaderBufferFloat32Atomics, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderBufferFloat32AtomicAdd, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderBufferFloat64Atomics, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderBufferFloat64AtomicAdd, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSharedFloat32Atomics, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSharedFloat32AtomicAdd, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSharedFloat64Atomics, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderSharedFloat64AtomicAdd, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderImageFloat32Atomics, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->shaderImageFloat32AtomicAdd, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->sparseImageFloat32Atomics, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->sparseImageFloat32AtomicAdd, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceShaderAtomicFloatFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceShaderAtomicFloatFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderBufferFloat32Atomics, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderBufferFloat32AtomicAdd, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderBufferFloat64Atomics, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderBufferFloat64AtomicAdd, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSharedFloat32Atomics, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSharedFloat32AtomicAdd, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSharedFloat64Atomics, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderSharedFloat64AtomicAdd, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderImageFloat32Atomics, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderImageFloat32AtomicAdd, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->sparseImageFloat32Atomics, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->sparseImageFloat32AtomicAdd, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_EXT_host_query_reset
+#endif
+#ifdef VK_EXT_index_type_uint8
+void marshal_VkPhysicalDeviceIndexTypeUint8FeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceIndexTypeUint8FeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->indexTypeUint8, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceIndexTypeUint8FeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceIndexTypeUint8FeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->indexTypeUint8, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+void marshal_VkPhysicalDeviceExtendedDynamicStateFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceExtendedDynamicStateFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->extendedDynamicState, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceExtendedDynamicStateFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceExtendedDynamicStateFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->extendedDynamicState, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_EXT_shader_demote_to_helper_invocation
+void marshal_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->shaderDemoteToHelperInvocation, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->shaderDemoteToHelperInvocation, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_NV_device_generated_commands
+void marshal_VkPhysicalDeviceDeviceGeneratedCommandsPropertiesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceDeviceGeneratedCommandsPropertiesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->maxGraphicsShaderGroupCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxIndirectSequenceCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxIndirectCommandsTokenCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxIndirectCommandsStreamCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxIndirectCommandsTokenOffset, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxIndirectCommandsStreamStride, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->minSequencesCountBufferOffsetAlignment, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->minSequencesIndexBufferOffsetAlignment, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->minIndirectCommandsBufferOffsetAlignment, sizeof(uint32_t));
+}
+
+void unmarshal_VkPhysicalDeviceDeviceGeneratedCommandsPropertiesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceDeviceGeneratedCommandsPropertiesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->maxGraphicsShaderGroupCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxIndirectSequenceCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxIndirectCommandsTokenCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxIndirectCommandsStreamCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxIndirectCommandsTokenOffset, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxIndirectCommandsStreamStride, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->minSequencesCountBufferOffsetAlignment, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->minSequencesIndexBufferOffsetAlignment, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->minIndirectCommandsBufferOffsetAlignment, sizeof(uint32_t));
+}
+
+void marshal_VkPhysicalDeviceDeviceGeneratedCommandsFeaturesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceDeviceGeneratedCommandsFeaturesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->deviceGeneratedCommands, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceDeviceGeneratedCommandsFeaturesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceDeviceGeneratedCommandsFeaturesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->deviceGeneratedCommands, sizeof(VkBool32));
+}
+
+void marshal_VkGraphicsShaderGroupCreateInfoNV(
+    VulkanStream* vkStream,
+    const VkGraphicsShaderGroupCreateInfoNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->stageCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->stageCount; ++i)
+    {
+        marshal_VkPipelineShaderStageCreateInfo(vkStream, (const VkPipelineShaderStageCreateInfo*)(forMarshaling->pStages + i));
+    }
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pVertexInputState;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->pVertexInputState)
+    {
+        marshal_VkPipelineVertexInputStateCreateInfo(vkStream, (const VkPipelineVertexInputStateCreateInfo*)(forMarshaling->pVertexInputState));
+    }
+    // WARNING PTR CHECK
+    uint64_t cgen_var_1 = (uint64_t)(uintptr_t)forMarshaling->pTessellationState;
+    vkStream->putBe64(cgen_var_1);
+    if (forMarshaling->pTessellationState)
+    {
+        marshal_VkPipelineTessellationStateCreateInfo(vkStream, (const VkPipelineTessellationStateCreateInfo*)(forMarshaling->pTessellationState));
+    }
+}
+
+void unmarshal_VkGraphicsShaderGroupCreateInfoNV(
+    VulkanStream* vkStream,
+    VkGraphicsShaderGroupCreateInfoNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->stageCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pStages, forUnmarshaling->stageCount * sizeof(const VkPipelineShaderStageCreateInfo));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->stageCount; ++i)
+    {
+        unmarshal_VkPipelineShaderStageCreateInfo(vkStream, (VkPipelineShaderStageCreateInfo*)(forUnmarshaling->pStages + i));
+    }
+    // WARNING PTR CHECK
+    forUnmarshaling->pVertexInputState = (const VkPipelineVertexInputStateCreateInfo*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pVertexInputState)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pVertexInputState, sizeof(const VkPipelineVertexInputStateCreateInfo));
+        unmarshal_VkPipelineVertexInputStateCreateInfo(vkStream, (VkPipelineVertexInputStateCreateInfo*)(forUnmarshaling->pVertexInputState));
+    }
+    // WARNING PTR CHECK
+    forUnmarshaling->pTessellationState = (const VkPipelineTessellationStateCreateInfo*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pTessellationState)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pTessellationState, sizeof(const VkPipelineTessellationStateCreateInfo));
+        unmarshal_VkPipelineTessellationStateCreateInfo(vkStream, (VkPipelineTessellationStateCreateInfo*)(forUnmarshaling->pTessellationState));
+    }
+}
+
+void marshal_VkGraphicsPipelineShaderGroupsCreateInfoNV(
+    VulkanStream* vkStream,
+    const VkGraphicsPipelineShaderGroupsCreateInfoNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->groupCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->groupCount; ++i)
+    {
+        marshal_VkGraphicsShaderGroupCreateInfoNV(vkStream, (const VkGraphicsShaderGroupCreateInfoNV*)(forMarshaling->pGroups + i));
+    }
+    vkStream->write((uint32_t*)&forMarshaling->pipelineCount, sizeof(uint32_t));
+    if (forMarshaling->pipelineCount)
+    {
+        uint64_t* cgen_var_0;
+        vkStream->alloc((void**)&cgen_var_0, forMarshaling->pipelineCount * 8);
+        vkStream->handleMapping()->mapHandles_VkPipeline_u64(forMarshaling->pPipelines, cgen_var_0, forMarshaling->pipelineCount);
+        vkStream->write((uint64_t*)cgen_var_0, forMarshaling->pipelineCount * 8);
+    }
+}
+
+void unmarshal_VkGraphicsPipelineShaderGroupsCreateInfoNV(
+    VulkanStream* vkStream,
+    VkGraphicsPipelineShaderGroupsCreateInfoNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->groupCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pGroups, forUnmarshaling->groupCount * sizeof(const VkGraphicsShaderGroupCreateInfoNV));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->groupCount; ++i)
+    {
+        unmarshal_VkGraphicsShaderGroupCreateInfoNV(vkStream, (VkGraphicsShaderGroupCreateInfoNV*)(forUnmarshaling->pGroups + i));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->pipelineCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pPipelines, forUnmarshaling->pipelineCount * sizeof(const VkPipeline));
+    if (forUnmarshaling->pipelineCount)
+    {
+        uint64_t* cgen_var_0;
+        vkStream->alloc((void**)&cgen_var_0, forUnmarshaling->pipelineCount * 8);
+        vkStream->read((uint64_t*)cgen_var_0, forUnmarshaling->pipelineCount * 8);
+        vkStream->handleMapping()->mapHandles_u64_VkPipeline(cgen_var_0, (VkPipeline*)forUnmarshaling->pPipelines, forUnmarshaling->pipelineCount);
+    }
+}
+
+void marshal_VkBindShaderGroupIndirectCommandNV(
+    VulkanStream* vkStream,
+    const VkBindShaderGroupIndirectCommandNV* forMarshaling)
+{
+    vkStream->write((uint32_t*)&forMarshaling->groupIndex, sizeof(uint32_t));
+}
+
+void unmarshal_VkBindShaderGroupIndirectCommandNV(
+    VulkanStream* vkStream,
+    VkBindShaderGroupIndirectCommandNV* forUnmarshaling)
+{
+    vkStream->read((uint32_t*)&forUnmarshaling->groupIndex, sizeof(uint32_t));
+}
+
+void marshal_VkBindIndexBufferIndirectCommandNV(
+    VulkanStream* vkStream,
+    const VkBindIndexBufferIndirectCommandNV* forMarshaling)
+{
+    vkStream->write((VkDeviceAddress*)&forMarshaling->bufferAddress, sizeof(VkDeviceAddress));
+    vkStream->write((uint32_t*)&forMarshaling->size, sizeof(uint32_t));
+    vkStream->write((VkIndexType*)&forMarshaling->indexType, sizeof(VkIndexType));
+}
+
+void unmarshal_VkBindIndexBufferIndirectCommandNV(
+    VulkanStream* vkStream,
+    VkBindIndexBufferIndirectCommandNV* forUnmarshaling)
+{
+    vkStream->read((VkDeviceAddress*)&forUnmarshaling->bufferAddress, sizeof(VkDeviceAddress));
+    vkStream->read((uint32_t*)&forUnmarshaling->size, sizeof(uint32_t));
+    vkStream->read((VkIndexType*)&forUnmarshaling->indexType, sizeof(VkIndexType));
+}
+
+void marshal_VkBindVertexBufferIndirectCommandNV(
+    VulkanStream* vkStream,
+    const VkBindVertexBufferIndirectCommandNV* forMarshaling)
+{
+    vkStream->write((VkDeviceAddress*)&forMarshaling->bufferAddress, sizeof(VkDeviceAddress));
+    vkStream->write((uint32_t*)&forMarshaling->size, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->stride, sizeof(uint32_t));
+}
+
+void unmarshal_VkBindVertexBufferIndirectCommandNV(
+    VulkanStream* vkStream,
+    VkBindVertexBufferIndirectCommandNV* forUnmarshaling)
+{
+    vkStream->read((VkDeviceAddress*)&forUnmarshaling->bufferAddress, sizeof(VkDeviceAddress));
+    vkStream->read((uint32_t*)&forUnmarshaling->size, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->stride, sizeof(uint32_t));
+}
+
+void marshal_VkSetStateFlagsIndirectCommandNV(
+    VulkanStream* vkStream,
+    const VkSetStateFlagsIndirectCommandNV* forMarshaling)
+{
+    vkStream->write((uint32_t*)&forMarshaling->data, sizeof(uint32_t));
+}
+
+void unmarshal_VkSetStateFlagsIndirectCommandNV(
+    VulkanStream* vkStream,
+    VkSetStateFlagsIndirectCommandNV* forUnmarshaling)
+{
+    vkStream->read((uint32_t*)&forUnmarshaling->data, sizeof(uint32_t));
+}
+
+void marshal_VkIndirectCommandsStreamNV(
+    VulkanStream* vkStream,
+    const VkIndirectCommandsStreamNV* forMarshaling)
+{
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->buffer, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->write((VkDeviceSize*)&forMarshaling->offset, sizeof(VkDeviceSize));
+}
+
+void unmarshal_VkIndirectCommandsStreamNV(
+    VulkanStream* vkStream,
+    VkIndirectCommandsStreamNV* forUnmarshaling)
+{
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_0, (VkBuffer*)&forUnmarshaling->buffer, 1);
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->offset, sizeof(VkDeviceSize));
+}
+
+void marshal_VkIndirectCommandsLayoutTokenNV(
+    VulkanStream* vkStream,
+    const VkIndirectCommandsLayoutTokenNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkIndirectCommandsTokenTypeNV*)&forMarshaling->tokenType, sizeof(VkIndirectCommandsTokenTypeNV));
+    vkStream->write((uint32_t*)&forMarshaling->stream, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->offset, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->vertexBindingUnit, sizeof(uint32_t));
+    vkStream->write((VkBool32*)&forMarshaling->vertexDynamicStride, sizeof(VkBool32));
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkPipelineLayout_u64(&forMarshaling->pushconstantPipelineLayout, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->write((VkShaderStageFlags*)&forMarshaling->pushconstantShaderStageFlags, sizeof(VkShaderStageFlags));
+    vkStream->write((uint32_t*)&forMarshaling->pushconstantOffset, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->pushconstantSize, sizeof(uint32_t));
+    vkStream->write((VkIndirectStateFlagsNV*)&forMarshaling->indirectStateFlags, sizeof(VkIndirectStateFlagsNV));
+    vkStream->write((uint32_t*)&forMarshaling->indexTypeCount, sizeof(uint32_t));
+    vkStream->write((const VkIndexType*)forMarshaling->pIndexTypes, forMarshaling->indexTypeCount * sizeof(const VkIndexType));
+    vkStream->write((const uint32_t*)forMarshaling->pIndexTypeValues, forMarshaling->indexTypeCount * sizeof(const uint32_t));
+}
+
+void unmarshal_VkIndirectCommandsLayoutTokenNV(
+    VulkanStream* vkStream,
+    VkIndirectCommandsLayoutTokenNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkIndirectCommandsTokenTypeNV*)&forUnmarshaling->tokenType, sizeof(VkIndirectCommandsTokenTypeNV));
+    vkStream->read((uint32_t*)&forUnmarshaling->stream, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->offset, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->vertexBindingUnit, sizeof(uint32_t));
+    vkStream->read((VkBool32*)&forUnmarshaling->vertexDynamicStride, sizeof(VkBool32));
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkPipelineLayout(&cgen_var_0, (VkPipelineLayout*)&forUnmarshaling->pushconstantPipelineLayout, 1);
+    vkStream->read((VkShaderStageFlags*)&forUnmarshaling->pushconstantShaderStageFlags, sizeof(VkShaderStageFlags));
+    vkStream->read((uint32_t*)&forUnmarshaling->pushconstantOffset, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->pushconstantSize, sizeof(uint32_t));
+    vkStream->read((VkIndirectStateFlagsNV*)&forUnmarshaling->indirectStateFlags, sizeof(VkIndirectStateFlagsNV));
+    vkStream->read((uint32_t*)&forUnmarshaling->indexTypeCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pIndexTypes, forUnmarshaling->indexTypeCount * sizeof(const VkIndexType));
+    vkStream->read((VkIndexType*)forUnmarshaling->pIndexTypes, forUnmarshaling->indexTypeCount * sizeof(const VkIndexType));
+    vkStream->alloc((void**)&forUnmarshaling->pIndexTypeValues, forUnmarshaling->indexTypeCount * sizeof(const uint32_t));
+    vkStream->read((uint32_t*)forUnmarshaling->pIndexTypeValues, forUnmarshaling->indexTypeCount * sizeof(const uint32_t));
+}
+
+void marshal_VkIndirectCommandsLayoutCreateInfoNV(
+    VulkanStream* vkStream,
+    const VkIndirectCommandsLayoutCreateInfoNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkIndirectCommandsLayoutUsageFlagsNV*)&forMarshaling->flags, sizeof(VkIndirectCommandsLayoutUsageFlagsNV));
+    vkStream->write((VkPipelineBindPoint*)&forMarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
+    vkStream->write((uint32_t*)&forMarshaling->tokenCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->tokenCount; ++i)
+    {
+        marshal_VkIndirectCommandsLayoutTokenNV(vkStream, (const VkIndirectCommandsLayoutTokenNV*)(forMarshaling->pTokens + i));
+    }
+    vkStream->write((uint32_t*)&forMarshaling->streamCount, sizeof(uint32_t));
+    vkStream->write((const uint32_t*)forMarshaling->pStreamStrides, forMarshaling->streamCount * sizeof(const uint32_t));
+}
+
+void unmarshal_VkIndirectCommandsLayoutCreateInfoNV(
+    VulkanStream* vkStream,
+    VkIndirectCommandsLayoutCreateInfoNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkIndirectCommandsLayoutUsageFlagsNV*)&forUnmarshaling->flags, sizeof(VkIndirectCommandsLayoutUsageFlagsNV));
+    vkStream->read((VkPipelineBindPoint*)&forUnmarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
+    vkStream->read((uint32_t*)&forUnmarshaling->tokenCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pTokens, forUnmarshaling->tokenCount * sizeof(const VkIndirectCommandsLayoutTokenNV));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->tokenCount; ++i)
+    {
+        unmarshal_VkIndirectCommandsLayoutTokenNV(vkStream, (VkIndirectCommandsLayoutTokenNV*)(forUnmarshaling->pTokens + i));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->streamCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pStreamStrides, forUnmarshaling->streamCount * sizeof(const uint32_t));
+    vkStream->read((uint32_t*)forUnmarshaling->pStreamStrides, forUnmarshaling->streamCount * sizeof(const uint32_t));
+}
+
+void marshal_VkGeneratedCommandsInfoNV(
+    VulkanStream* vkStream,
+    const VkGeneratedCommandsInfoNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkPipelineBindPoint*)&forMarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkPipeline_u64(&forMarshaling->pipeline, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    uint64_t cgen_var_1;
+    vkStream->handleMapping()->mapHandles_VkIndirectCommandsLayoutNV_u64(&forMarshaling->indirectCommandsLayout, &cgen_var_1, 1);
+    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->write((uint32_t*)&forMarshaling->streamCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->streamCount; ++i)
+    {
+        marshal_VkIndirectCommandsStreamNV(vkStream, (const VkIndirectCommandsStreamNV*)(forMarshaling->pStreams + i));
+    }
+    vkStream->write((uint32_t*)&forMarshaling->sequencesCount, sizeof(uint32_t));
+    uint64_t cgen_var_2;
+    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->preprocessBuffer, &cgen_var_2, 1);
+    vkStream->write((uint64_t*)&cgen_var_2, 1 * 8);
+    vkStream->write((VkDeviceSize*)&forMarshaling->preprocessOffset, sizeof(VkDeviceSize));
+    vkStream->write((VkDeviceSize*)&forMarshaling->preprocessSize, sizeof(VkDeviceSize));
+    uint64_t cgen_var_3;
+    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->sequencesCountBuffer, &cgen_var_3, 1);
+    vkStream->write((uint64_t*)&cgen_var_3, 1 * 8);
+    vkStream->write((VkDeviceSize*)&forMarshaling->sequencesCountOffset, sizeof(VkDeviceSize));
+    uint64_t cgen_var_4;
+    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->sequencesIndexBuffer, &cgen_var_4, 1);
+    vkStream->write((uint64_t*)&cgen_var_4, 1 * 8);
+    vkStream->write((VkDeviceSize*)&forMarshaling->sequencesIndexOffset, sizeof(VkDeviceSize));
+}
+
+void unmarshal_VkGeneratedCommandsInfoNV(
+    VulkanStream* vkStream,
+    VkGeneratedCommandsInfoNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkPipelineBindPoint*)&forUnmarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkPipeline(&cgen_var_0, (VkPipeline*)&forUnmarshaling->pipeline, 1);
+    uint64_t cgen_var_1;
+    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkIndirectCommandsLayoutNV(&cgen_var_1, (VkIndirectCommandsLayoutNV*)&forUnmarshaling->indirectCommandsLayout, 1);
+    vkStream->read((uint32_t*)&forUnmarshaling->streamCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pStreams, forUnmarshaling->streamCount * sizeof(const VkIndirectCommandsStreamNV));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->streamCount; ++i)
+    {
+        unmarshal_VkIndirectCommandsStreamNV(vkStream, (VkIndirectCommandsStreamNV*)(forUnmarshaling->pStreams + i));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->sequencesCount, sizeof(uint32_t));
+    uint64_t cgen_var_2;
+    vkStream->read((uint64_t*)&cgen_var_2, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_2, (VkBuffer*)&forUnmarshaling->preprocessBuffer, 1);
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->preprocessOffset, sizeof(VkDeviceSize));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->preprocessSize, sizeof(VkDeviceSize));
+    uint64_t cgen_var_3;
+    vkStream->read((uint64_t*)&cgen_var_3, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_3, (VkBuffer*)&forUnmarshaling->sequencesCountBuffer, 1);
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->sequencesCountOffset, sizeof(VkDeviceSize));
+    uint64_t cgen_var_4;
+    vkStream->read((uint64_t*)&cgen_var_4, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_4, (VkBuffer*)&forUnmarshaling->sequencesIndexBuffer, 1);
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->sequencesIndexOffset, sizeof(VkDeviceSize));
+}
+
+void marshal_VkGeneratedCommandsMemoryRequirementsInfoNV(
+    VulkanStream* vkStream,
+    const VkGeneratedCommandsMemoryRequirementsInfoNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkPipelineBindPoint*)&forMarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkPipeline_u64(&forMarshaling->pipeline, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    uint64_t cgen_var_1;
+    vkStream->handleMapping()->mapHandles_VkIndirectCommandsLayoutNV_u64(&forMarshaling->indirectCommandsLayout, &cgen_var_1, 1);
+    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->write((uint32_t*)&forMarshaling->maxSequencesCount, sizeof(uint32_t));
+}
+
+void unmarshal_VkGeneratedCommandsMemoryRequirementsInfoNV(
+    VulkanStream* vkStream,
+    VkGeneratedCommandsMemoryRequirementsInfoNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkPipelineBindPoint*)&forUnmarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkPipeline(&cgen_var_0, (VkPipeline*)&forUnmarshaling->pipeline, 1);
+    uint64_t cgen_var_1;
+    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkIndirectCommandsLayoutNV(&cgen_var_1, (VkIndirectCommandsLayoutNV*)&forUnmarshaling->indirectCommandsLayout, 1);
+    vkStream->read((uint32_t*)&forUnmarshaling->maxSequencesCount, sizeof(uint32_t));
+}
+
+#endif
+#ifdef VK_EXT_texel_buffer_alignment
+void marshal_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->texelBufferAlignment, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->texelBufferAlignment, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkDeviceSize*)&forMarshaling->storageTexelBufferOffsetAlignmentBytes, sizeof(VkDeviceSize));
+    vkStream->write((VkBool32*)&forMarshaling->storageTexelBufferOffsetSingleTexelAlignment, sizeof(VkBool32));
+    vkStream->write((VkDeviceSize*)&forMarshaling->uniformTexelBufferOffsetAlignmentBytes, sizeof(VkDeviceSize));
+    vkStream->write((VkBool32*)&forMarshaling->uniformTexelBufferOffsetSingleTexelAlignment, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->storageTexelBufferOffsetAlignmentBytes, sizeof(VkDeviceSize));
+    vkStream->read((VkBool32*)&forUnmarshaling->storageTexelBufferOffsetSingleTexelAlignment, sizeof(VkBool32));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->uniformTexelBufferOffsetAlignmentBytes, sizeof(VkDeviceSize));
+    vkStream->read((VkBool32*)&forUnmarshaling->uniformTexelBufferOffsetSingleTexelAlignment, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_QCOM_render_pass_transform
+void marshal_VkRenderPassTransformBeginInfoQCOM(
+    VulkanStream* vkStream,
+    const VkRenderPassTransformBeginInfoQCOM* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkSurfaceTransformFlagBitsKHR*)&forMarshaling->transform, sizeof(VkSurfaceTransformFlagBitsKHR));
+}
+
+void unmarshal_VkRenderPassTransformBeginInfoQCOM(
+    VulkanStream* vkStream,
+    VkRenderPassTransformBeginInfoQCOM* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkSurfaceTransformFlagBitsKHR*)&forUnmarshaling->transform, sizeof(VkSurfaceTransformFlagBitsKHR));
+}
+
+void marshal_VkCommandBufferInheritanceRenderPassTransformInfoQCOM(
+    VulkanStream* vkStream,
+    const VkCommandBufferInheritanceRenderPassTransformInfoQCOM* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkSurfaceTransformFlagBitsKHR*)&forMarshaling->transform, sizeof(VkSurfaceTransformFlagBitsKHR));
+    marshal_VkRect2D(vkStream, (VkRect2D*)(&forMarshaling->renderArea));
+}
+
+void unmarshal_VkCommandBufferInheritanceRenderPassTransformInfoQCOM(
+    VulkanStream* vkStream,
+    VkCommandBufferInheritanceRenderPassTransformInfoQCOM* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkSurfaceTransformFlagBitsKHR*)&forUnmarshaling->transform, sizeof(VkSurfaceTransformFlagBitsKHR));
+    unmarshal_VkRect2D(vkStream, (VkRect2D*)(&forUnmarshaling->renderArea));
+}
+
+#endif
+#ifdef VK_EXT_device_memory_report
+void marshal_VkPhysicalDeviceDeviceMemoryReportFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceDeviceMemoryReportFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->deviceMemoryReport, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceDeviceMemoryReportFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceDeviceMemoryReportFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->deviceMemoryReport, sizeof(VkBool32));
+}
+
+void marshal_VkDeviceMemoryReportCallbackDataEXT(
+    VulkanStream* vkStream,
+    const VkDeviceMemoryReportCallbackDataEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkDeviceMemoryReportFlagsEXT*)&forMarshaling->flags, sizeof(VkDeviceMemoryReportFlagsEXT));
+    vkStream->write((VkDeviceMemoryReportEventTypeEXT*)&forMarshaling->type, sizeof(VkDeviceMemoryReportEventTypeEXT));
+    vkStream->write((uint64_t*)&forMarshaling->memoryObjectId, sizeof(uint64_t));
+    vkStream->write((VkDeviceSize*)&forMarshaling->size, sizeof(VkDeviceSize));
+    vkStream->write((VkObjectType*)&forMarshaling->objectType, sizeof(VkObjectType));
+    vkStream->write((uint64_t*)&forMarshaling->objectHandle, sizeof(uint64_t));
+    vkStream->write((uint32_t*)&forMarshaling->heapIndex, sizeof(uint32_t));
+}
+
+void unmarshal_VkDeviceMemoryReportCallbackDataEXT(
+    VulkanStream* vkStream,
+    VkDeviceMemoryReportCallbackDataEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkDeviceMemoryReportFlagsEXT*)&forUnmarshaling->flags, sizeof(VkDeviceMemoryReportFlagsEXT));
+    vkStream->read((VkDeviceMemoryReportEventTypeEXT*)&forUnmarshaling->type, sizeof(VkDeviceMemoryReportEventTypeEXT));
+    vkStream->read((uint64_t*)&forUnmarshaling->memoryObjectId, sizeof(uint64_t));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->size, sizeof(VkDeviceSize));
+    vkStream->read((VkObjectType*)&forUnmarshaling->objectType, sizeof(VkObjectType));
+    vkStream->read((uint64_t*)&forUnmarshaling->objectHandle, sizeof(uint64_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->heapIndex, sizeof(uint32_t));
+}
+
+void marshal_VkDeviceDeviceMemoryReportCreateInfoEXT(
+    VulkanStream* vkStream,
+    const VkDeviceDeviceMemoryReportCreateInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkDeviceMemoryReportFlagsEXT*)&forMarshaling->flags, sizeof(VkDeviceMemoryReportFlagsEXT));
+    uint64_t cgen_var_0 = (uint64_t)forMarshaling->pfnUserCallback;
+    vkStream->putBe64(cgen_var_0);
+    vkStream->write((void*)forMarshaling->pUserData, sizeof(uint8_t));
+}
+
+void unmarshal_VkDeviceDeviceMemoryReportCreateInfoEXT(
+    VulkanStream* vkStream,
+    VkDeviceDeviceMemoryReportCreateInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkDeviceMemoryReportFlagsEXT*)&forUnmarshaling->flags, sizeof(VkDeviceMemoryReportFlagsEXT));
+    forUnmarshaling->pfnUserCallback = (PFN_vkDeviceMemoryReportCallbackEXT)vkStream->getBe64();
+    vkStream->alloc((void**)&forUnmarshaling->pUserData, sizeof(uint8_t));
+    vkStream->read((void*)forUnmarshaling->pUserData, sizeof(uint8_t));
+}
+
+#endif
+#ifdef VK_EXT_robustness2
+void marshal_VkPhysicalDeviceRobustness2FeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceRobustness2FeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->robustBufferAccess2, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->robustImageAccess2, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->nullDescriptor, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceRobustness2FeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceRobustness2FeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->robustBufferAccess2, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->robustImageAccess2, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->nullDescriptor, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceRobustness2PropertiesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceRobustness2PropertiesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkDeviceSize*)&forMarshaling->robustStorageBufferAccessSizeAlignment, sizeof(VkDeviceSize));
+    vkStream->write((VkDeviceSize*)&forMarshaling->robustUniformBufferAccessSizeAlignment, sizeof(VkDeviceSize));
+}
+
+void unmarshal_VkPhysicalDeviceRobustness2PropertiesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceRobustness2PropertiesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->robustStorageBufferAccessSizeAlignment, sizeof(VkDeviceSize));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->robustUniformBufferAccessSizeAlignment, sizeof(VkDeviceSize));
+}
+
+#endif
+#ifdef VK_EXT_custom_border_color
+void marshal_VkSamplerCustomBorderColorCreateInfoEXT(
+    VulkanStream* vkStream,
+    const VkSamplerCustomBorderColorCreateInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    marshal_VkClearColorValue(vkStream, (VkClearColorValue*)(&forMarshaling->customBorderColor));
+    vkStream->write((VkFormat*)&forMarshaling->format, sizeof(VkFormat));
+}
+
+void unmarshal_VkSamplerCustomBorderColorCreateInfoEXT(
+    VulkanStream* vkStream,
+    VkSamplerCustomBorderColorCreateInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    unmarshal_VkClearColorValue(vkStream, (VkClearColorValue*)(&forUnmarshaling->customBorderColor));
+    vkStream->read((VkFormat*)&forUnmarshaling->format, sizeof(VkFormat));
+}
+
+void marshal_VkPhysicalDeviceCustomBorderColorPropertiesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceCustomBorderColorPropertiesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->maxCustomBorderColorSamplers, sizeof(uint32_t));
+}
+
+void unmarshal_VkPhysicalDeviceCustomBorderColorPropertiesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceCustomBorderColorPropertiesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->maxCustomBorderColorSamplers, sizeof(uint32_t));
+}
+
+void marshal_VkPhysicalDeviceCustomBorderColorFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceCustomBorderColorFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->customBorderColors, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->customBorderColorWithoutFormat, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceCustomBorderColorFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceCustomBorderColorFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->customBorderColors, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->customBorderColorWithoutFormat, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_GOOGLE_user_type
+#endif
+#ifdef VK_EXT_private_data
+void marshal_VkPhysicalDevicePrivateDataFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDevicePrivateDataFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->privateData, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDevicePrivateDataFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDevicePrivateDataFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->privateData, sizeof(VkBool32));
+}
+
+void marshal_VkDevicePrivateDataCreateInfoEXT(
+    VulkanStream* vkStream,
+    const VkDevicePrivateDataCreateInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->privateDataSlotRequestCount, sizeof(uint32_t));
+}
+
+void unmarshal_VkDevicePrivateDataCreateInfoEXT(
+    VulkanStream* vkStream,
+    VkDevicePrivateDataCreateInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->privateDataSlotRequestCount, sizeof(uint32_t));
+}
+
+void marshal_VkPrivateDataSlotCreateInfoEXT(
+    VulkanStream* vkStream,
+    const VkPrivateDataSlotCreateInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkPrivateDataSlotCreateFlagsEXT*)&forMarshaling->flags, sizeof(VkPrivateDataSlotCreateFlagsEXT));
+}
+
+void unmarshal_VkPrivateDataSlotCreateInfoEXT(
+    VulkanStream* vkStream,
+    VkPrivateDataSlotCreateInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkPrivateDataSlotCreateFlagsEXT*)&forUnmarshaling->flags, sizeof(VkPrivateDataSlotCreateFlagsEXT));
+}
+
+#endif
+#ifdef VK_EXT_pipeline_creation_cache_control
+void marshal_VkPhysicalDevicePipelineCreationCacheControlFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDevicePipelineCreationCacheControlFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->pipelineCreationCacheControl, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDevicePipelineCreationCacheControlFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDevicePipelineCreationCacheControlFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->pipelineCreationCacheControl, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_NV_device_diagnostics_config
+void marshal_VkPhysicalDeviceDiagnosticsConfigFeaturesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceDiagnosticsConfigFeaturesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->diagnosticsConfig, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceDiagnosticsConfigFeaturesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceDiagnosticsConfigFeaturesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->diagnosticsConfig, sizeof(VkBool32));
+}
+
+void marshal_VkDeviceDiagnosticsConfigCreateInfoNV(
+    VulkanStream* vkStream,
+    const VkDeviceDiagnosticsConfigCreateInfoNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkDeviceDiagnosticsConfigFlagsNV*)&forMarshaling->flags, sizeof(VkDeviceDiagnosticsConfigFlagsNV));
+}
+
+void unmarshal_VkDeviceDiagnosticsConfigCreateInfoNV(
+    VulkanStream* vkStream,
+    VkDeviceDiagnosticsConfigCreateInfoNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkDeviceDiagnosticsConfigFlagsNV*)&forUnmarshaling->flags, sizeof(VkDeviceDiagnosticsConfigFlagsNV));
+}
+
+#endif
+#ifdef VK_QCOM_render_pass_store_ops
+#endif
+#ifdef VK_NV_fragment_shading_rate_enums
+void marshal_VkPhysicalDeviceFragmentShadingRateEnumsFeaturesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceFragmentShadingRateEnumsFeaturesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->fragmentShadingRateEnums, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->supersampleFragmentShadingRates, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->noInvocationFragmentShadingRates, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceFragmentShadingRateEnumsFeaturesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceFragmentShadingRateEnumsFeaturesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->fragmentShadingRateEnums, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->supersampleFragmentShadingRates, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->noInvocationFragmentShadingRates, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceFragmentShadingRateEnumsPropertiesNV(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceFragmentShadingRateEnumsPropertiesNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkSampleCountFlagBits*)&forMarshaling->maxFragmentShadingRateInvocationCount, sizeof(VkSampleCountFlagBits));
+}
+
+void unmarshal_VkPhysicalDeviceFragmentShadingRateEnumsPropertiesNV(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceFragmentShadingRateEnumsPropertiesNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkSampleCountFlagBits*)&forUnmarshaling->maxFragmentShadingRateInvocationCount, sizeof(VkSampleCountFlagBits));
+}
+
+void marshal_VkPipelineFragmentShadingRateEnumStateCreateInfoNV(
+    VulkanStream* vkStream,
+    const VkPipelineFragmentShadingRateEnumStateCreateInfoNV* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkFragmentShadingRateTypeNV*)&forMarshaling->shadingRateType, sizeof(VkFragmentShadingRateTypeNV));
+    vkStream->write((VkFragmentShadingRateNV*)&forMarshaling->shadingRate, sizeof(VkFragmentShadingRateNV));
+    vkStream->write((VkFragmentShadingRateCombinerOpKHR*)forMarshaling->combinerOps, 2 * sizeof(VkFragmentShadingRateCombinerOpKHR));
+}
+
+void unmarshal_VkPipelineFragmentShadingRateEnumStateCreateInfoNV(
+    VulkanStream* vkStream,
+    VkPipelineFragmentShadingRateEnumStateCreateInfoNV* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkFragmentShadingRateTypeNV*)&forUnmarshaling->shadingRateType, sizeof(VkFragmentShadingRateTypeNV));
+    vkStream->read((VkFragmentShadingRateNV*)&forUnmarshaling->shadingRate, sizeof(VkFragmentShadingRateNV));
+    vkStream->read((VkFragmentShadingRateCombinerOpKHR*)forUnmarshaling->combinerOps, 2 * sizeof(VkFragmentShadingRateCombinerOpKHR));
+}
+
+#endif
+#ifdef VK_EXT_fragment_density_map2
+void marshal_VkPhysicalDeviceFragmentDensityMap2FeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceFragmentDensityMap2FeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->fragmentDensityMapDeferred, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceFragmentDensityMap2FeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceFragmentDensityMap2FeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->fragmentDensityMapDeferred, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceFragmentDensityMap2PropertiesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceFragmentDensityMap2PropertiesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->subsampledLoads, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->subsampledCoarseReconstructionEarlyAccess, sizeof(VkBool32));
+    vkStream->write((uint32_t*)&forMarshaling->maxSubsampledArrayLayers, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetSubsampledSamplers, sizeof(uint32_t));
+}
+
+void unmarshal_VkPhysicalDeviceFragmentDensityMap2PropertiesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceFragmentDensityMap2PropertiesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->subsampledLoads, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->subsampledCoarseReconstructionEarlyAccess, sizeof(VkBool32));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxSubsampledArrayLayers, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetSubsampledSamplers, sizeof(uint32_t));
+}
+
+#endif
+#ifdef VK_QCOM_rotated_copy_commands
+void marshal_VkCopyCommandTransformInfoQCOM(
+    VulkanStream* vkStream,
+    const VkCopyCommandTransformInfoQCOM* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkSurfaceTransformFlagBitsKHR*)&forMarshaling->transform, sizeof(VkSurfaceTransformFlagBitsKHR));
+}
+
+void unmarshal_VkCopyCommandTransformInfoQCOM(
+    VulkanStream* vkStream,
+    VkCopyCommandTransformInfoQCOM* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkSurfaceTransformFlagBitsKHR*)&forUnmarshaling->transform, sizeof(VkSurfaceTransformFlagBitsKHR));
+}
+
+#endif
+#ifdef VK_EXT_image_robustness
+void marshal_VkPhysicalDeviceImageRobustnessFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceImageRobustnessFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->robustImageAccess, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceImageRobustnessFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceImageRobustnessFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->robustImageAccess, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_EXT_4444_formats
+void marshal_VkPhysicalDevice4444FormatsFeaturesEXT(
+    VulkanStream* vkStream,
+    const VkPhysicalDevice4444FormatsFeaturesEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->formatA4R4G4B4, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->formatA4B4G4R4, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDevice4444FormatsFeaturesEXT(
+    VulkanStream* vkStream,
+    VkPhysicalDevice4444FormatsFeaturesEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->formatA4R4G4B4, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->formatA4B4G4R4, sizeof(VkBool32));
+}
+
+#endif
+#ifdef VK_EXT_directfb_surface
+void marshal_VkDirectFBSurfaceCreateInfoEXT(
+    VulkanStream* vkStream,
+    const VkDirectFBSurfaceCreateInfoEXT* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkDirectFBSurfaceCreateFlagsEXT*)&forMarshaling->flags, sizeof(VkDirectFBSurfaceCreateFlagsEXT));
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->dfb;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->dfb)
+    {
+        vkStream->write((IDirectFB*)forMarshaling->dfb, sizeof(IDirectFB));
+    }
+    // WARNING PTR CHECK
+    uint64_t cgen_var_1 = (uint64_t)(uintptr_t)forMarshaling->surface;
+    vkStream->putBe64(cgen_var_1);
+    if (forMarshaling->surface)
+    {
+        vkStream->write((IDirectFBSurface*)forMarshaling->surface, sizeof(IDirectFBSurface));
+    }
+}
+
+void unmarshal_VkDirectFBSurfaceCreateInfoEXT(
+    VulkanStream* vkStream,
+    VkDirectFBSurfaceCreateInfoEXT* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkDirectFBSurfaceCreateFlagsEXT*)&forUnmarshaling->flags, sizeof(VkDirectFBSurfaceCreateFlagsEXT));
+    // WARNING PTR CHECK
+    forUnmarshaling->dfb = (IDirectFB*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->dfb)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->dfb, sizeof(IDirectFB));
+        vkStream->read((IDirectFB*)forUnmarshaling->dfb, sizeof(IDirectFB));
+    }
+    // WARNING PTR CHECK
+    forUnmarshaling->surface = (IDirectFBSurface*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->surface)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->surface, sizeof(IDirectFBSurface));
+        vkStream->read((IDirectFBSurface*)forUnmarshaling->surface, sizeof(IDirectFBSurface));
+    }
+}
+
+#endif
+#ifdef VK_GOOGLE_address_space
+#endif
 #ifdef VK_GOOGLE_sized_descriptor_update_template
 #endif
 #ifdef VK_GOOGLE_async_command_buffers
@@ -13011,9 +20468,1005 @@ void unmarshal_VkImportPhysicalAddressGOOGLE(
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
 #endif
-#ifdef VK_MVK_moltenvk
-#endif
 #ifdef VK_GOOGLE_queue_submit_with_commands
+#endif
+#ifdef VK_KHR_acceleration_structure
+void marshal_VkDeviceOrHostAddressKHR(
+    VulkanStream* vkStream,
+    const VkDeviceOrHostAddressKHR* forMarshaling)
+{
+    vkStream->write((VkDeviceAddress*)&forMarshaling->deviceAddress, sizeof(VkDeviceAddress));
+}
+
+void unmarshal_VkDeviceOrHostAddressKHR(
+    VulkanStream* vkStream,
+    VkDeviceOrHostAddressKHR* forUnmarshaling)
+{
+    vkStream->read((VkDeviceAddress*)&forUnmarshaling->deviceAddress, sizeof(VkDeviceAddress));
+}
+
+void marshal_VkDeviceOrHostAddressConstKHR(
+    VulkanStream* vkStream,
+    const VkDeviceOrHostAddressConstKHR* forMarshaling)
+{
+    vkStream->write((VkDeviceAddress*)&forMarshaling->deviceAddress, sizeof(VkDeviceAddress));
+}
+
+void unmarshal_VkDeviceOrHostAddressConstKHR(
+    VulkanStream* vkStream,
+    VkDeviceOrHostAddressConstKHR* forUnmarshaling)
+{
+    vkStream->read((VkDeviceAddress*)&forUnmarshaling->deviceAddress, sizeof(VkDeviceAddress));
+}
+
+void marshal_VkAccelerationStructureBuildRangeInfoKHR(
+    VulkanStream* vkStream,
+    const VkAccelerationStructureBuildRangeInfoKHR* forMarshaling)
+{
+    vkStream->write((uint32_t*)&forMarshaling->primitiveCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->primitiveOffset, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->firstVertex, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->transformOffset, sizeof(uint32_t));
+}
+
+void unmarshal_VkAccelerationStructureBuildRangeInfoKHR(
+    VulkanStream* vkStream,
+    VkAccelerationStructureBuildRangeInfoKHR* forUnmarshaling)
+{
+    vkStream->read((uint32_t*)&forUnmarshaling->primitiveCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->primitiveOffset, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->firstVertex, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->transformOffset, sizeof(uint32_t));
+}
+
+void marshal_VkAccelerationStructureGeometryTrianglesDataKHR(
+    VulkanStream* vkStream,
+    const VkAccelerationStructureGeometryTrianglesDataKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkFormat*)&forMarshaling->vertexFormat, sizeof(VkFormat));
+    marshal_VkDeviceOrHostAddressConstKHR(vkStream, (VkDeviceOrHostAddressConstKHR*)(&forMarshaling->vertexData));
+    vkStream->write((VkDeviceSize*)&forMarshaling->vertexStride, sizeof(VkDeviceSize));
+    vkStream->write((uint32_t*)&forMarshaling->maxVertex, sizeof(uint32_t));
+    vkStream->write((VkIndexType*)&forMarshaling->indexType, sizeof(VkIndexType));
+    marshal_VkDeviceOrHostAddressConstKHR(vkStream, (VkDeviceOrHostAddressConstKHR*)(&forMarshaling->indexData));
+    marshal_VkDeviceOrHostAddressConstKHR(vkStream, (VkDeviceOrHostAddressConstKHR*)(&forMarshaling->transformData));
+}
+
+void unmarshal_VkAccelerationStructureGeometryTrianglesDataKHR(
+    VulkanStream* vkStream,
+    VkAccelerationStructureGeometryTrianglesDataKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkFormat*)&forUnmarshaling->vertexFormat, sizeof(VkFormat));
+    unmarshal_VkDeviceOrHostAddressConstKHR(vkStream, (VkDeviceOrHostAddressConstKHR*)(&forUnmarshaling->vertexData));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->vertexStride, sizeof(VkDeviceSize));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxVertex, sizeof(uint32_t));
+    vkStream->read((VkIndexType*)&forUnmarshaling->indexType, sizeof(VkIndexType));
+    unmarshal_VkDeviceOrHostAddressConstKHR(vkStream, (VkDeviceOrHostAddressConstKHR*)(&forUnmarshaling->indexData));
+    unmarshal_VkDeviceOrHostAddressConstKHR(vkStream, (VkDeviceOrHostAddressConstKHR*)(&forUnmarshaling->transformData));
+}
+
+void marshal_VkAccelerationStructureGeometryAabbsDataKHR(
+    VulkanStream* vkStream,
+    const VkAccelerationStructureGeometryAabbsDataKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    marshal_VkDeviceOrHostAddressConstKHR(vkStream, (VkDeviceOrHostAddressConstKHR*)(&forMarshaling->data));
+    vkStream->write((VkDeviceSize*)&forMarshaling->stride, sizeof(VkDeviceSize));
+}
+
+void unmarshal_VkAccelerationStructureGeometryAabbsDataKHR(
+    VulkanStream* vkStream,
+    VkAccelerationStructureGeometryAabbsDataKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    unmarshal_VkDeviceOrHostAddressConstKHR(vkStream, (VkDeviceOrHostAddressConstKHR*)(&forUnmarshaling->data));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->stride, sizeof(VkDeviceSize));
+}
+
+void marshal_VkAccelerationStructureGeometryInstancesDataKHR(
+    VulkanStream* vkStream,
+    const VkAccelerationStructureGeometryInstancesDataKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->arrayOfPointers, sizeof(VkBool32));
+    marshal_VkDeviceOrHostAddressConstKHR(vkStream, (VkDeviceOrHostAddressConstKHR*)(&forMarshaling->data));
+}
+
+void unmarshal_VkAccelerationStructureGeometryInstancesDataKHR(
+    VulkanStream* vkStream,
+    VkAccelerationStructureGeometryInstancesDataKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->arrayOfPointers, sizeof(VkBool32));
+    unmarshal_VkDeviceOrHostAddressConstKHR(vkStream, (VkDeviceOrHostAddressConstKHR*)(&forUnmarshaling->data));
+}
+
+void marshal_VkAccelerationStructureGeometryDataKHR(
+    VulkanStream* vkStream,
+    const VkAccelerationStructureGeometryDataKHR* forMarshaling)
+{
+    marshal_VkAccelerationStructureGeometryTrianglesDataKHR(vkStream, (VkAccelerationStructureGeometryTrianglesDataKHR*)(&forMarshaling->triangles));
+}
+
+void unmarshal_VkAccelerationStructureGeometryDataKHR(
+    VulkanStream* vkStream,
+    VkAccelerationStructureGeometryDataKHR* forUnmarshaling)
+{
+    unmarshal_VkAccelerationStructureGeometryTrianglesDataKHR(vkStream, (VkAccelerationStructureGeometryTrianglesDataKHR*)(&forUnmarshaling->triangles));
+}
+
+void marshal_VkAccelerationStructureGeometryKHR(
+    VulkanStream* vkStream,
+    const VkAccelerationStructureGeometryKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkGeometryTypeKHR*)&forMarshaling->geometryType, sizeof(VkGeometryTypeKHR));
+    marshal_VkAccelerationStructureGeometryDataKHR(vkStream, (VkAccelerationStructureGeometryDataKHR*)(&forMarshaling->geometry));
+    vkStream->write((VkGeometryFlagsKHR*)&forMarshaling->flags, sizeof(VkGeometryFlagsKHR));
+}
+
+void unmarshal_VkAccelerationStructureGeometryKHR(
+    VulkanStream* vkStream,
+    VkAccelerationStructureGeometryKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkGeometryTypeKHR*)&forUnmarshaling->geometryType, sizeof(VkGeometryTypeKHR));
+    unmarshal_VkAccelerationStructureGeometryDataKHR(vkStream, (VkAccelerationStructureGeometryDataKHR*)(&forUnmarshaling->geometry));
+    vkStream->read((VkGeometryFlagsKHR*)&forUnmarshaling->flags, sizeof(VkGeometryFlagsKHR));
+}
+
+void marshal_VkAccelerationStructureBuildGeometryInfoKHR(
+    VulkanStream* vkStream,
+    const VkAccelerationStructureBuildGeometryInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkAccelerationStructureTypeKHR*)&forMarshaling->type, sizeof(VkAccelerationStructureTypeKHR));
+    vkStream->write((VkBuildAccelerationStructureFlagsKHR*)&forMarshaling->flags, sizeof(VkBuildAccelerationStructureFlagsKHR));
+    vkStream->write((VkBuildAccelerationStructureModeKHR*)&forMarshaling->mode, sizeof(VkBuildAccelerationStructureModeKHR));
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkAccelerationStructureKHR_u64(&forMarshaling->srcAccelerationStructure, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    uint64_t cgen_var_1;
+    vkStream->handleMapping()->mapHandles_VkAccelerationStructureKHR_u64(&forMarshaling->dstAccelerationStructure, &cgen_var_1, 1);
+    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->write((uint32_t*)&forMarshaling->geometryCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    uint64_t cgen_var_2 = (uint64_t)(uintptr_t)forMarshaling->pGeometries;
+    vkStream->putBe64(cgen_var_2);
+    if (forMarshaling->pGeometries)
+    {
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->geometryCount; ++i)
+        {
+            marshal_VkAccelerationStructureGeometryKHR(vkStream, (const VkAccelerationStructureGeometryKHR*)(forMarshaling->pGeometries + i));
+        }
+    }
+    marshal_VkDeviceOrHostAddressKHR(vkStream, (VkDeviceOrHostAddressKHR*)(&forMarshaling->scratchData));
+}
+
+void unmarshal_VkAccelerationStructureBuildGeometryInfoKHR(
+    VulkanStream* vkStream,
+    VkAccelerationStructureBuildGeometryInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkAccelerationStructureTypeKHR*)&forUnmarshaling->type, sizeof(VkAccelerationStructureTypeKHR));
+    vkStream->read((VkBuildAccelerationStructureFlagsKHR*)&forUnmarshaling->flags, sizeof(VkBuildAccelerationStructureFlagsKHR));
+    vkStream->read((VkBuildAccelerationStructureModeKHR*)&forUnmarshaling->mode, sizeof(VkBuildAccelerationStructureModeKHR));
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkAccelerationStructureKHR(&cgen_var_0, (VkAccelerationStructureKHR*)&forUnmarshaling->srcAccelerationStructure, 1);
+    uint64_t cgen_var_1;
+    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkAccelerationStructureKHR(&cgen_var_1, (VkAccelerationStructureKHR*)&forUnmarshaling->dstAccelerationStructure, 1);
+    vkStream->read((uint32_t*)&forUnmarshaling->geometryCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    forUnmarshaling->pGeometries = (const VkAccelerationStructureGeometryKHR*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pGeometries)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pGeometries, forUnmarshaling->geometryCount * sizeof(const VkAccelerationStructureGeometryKHR));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->geometryCount; ++i)
+        {
+            unmarshal_VkAccelerationStructureGeometryKHR(vkStream, (VkAccelerationStructureGeometryKHR*)(forUnmarshaling->pGeometries + i));
+        }
+    }
+    unmarshal_VkDeviceOrHostAddressKHR(vkStream, (VkDeviceOrHostAddressKHR*)(&forUnmarshaling->scratchData));
+}
+
+void marshal_VkAccelerationStructureCreateInfoKHR(
+    VulkanStream* vkStream,
+    const VkAccelerationStructureCreateInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkAccelerationStructureCreateFlagsKHR*)&forMarshaling->createFlags, sizeof(VkAccelerationStructureCreateFlagsKHR));
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->buffer, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->write((VkDeviceSize*)&forMarshaling->offset, sizeof(VkDeviceSize));
+    vkStream->write((VkDeviceSize*)&forMarshaling->size, sizeof(VkDeviceSize));
+    vkStream->write((VkAccelerationStructureTypeKHR*)&forMarshaling->type, sizeof(VkAccelerationStructureTypeKHR));
+    vkStream->write((VkDeviceAddress*)&forMarshaling->deviceAddress, sizeof(VkDeviceAddress));
+}
+
+void unmarshal_VkAccelerationStructureCreateInfoKHR(
+    VulkanStream* vkStream,
+    VkAccelerationStructureCreateInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkAccelerationStructureCreateFlagsKHR*)&forUnmarshaling->createFlags, sizeof(VkAccelerationStructureCreateFlagsKHR));
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_0, (VkBuffer*)&forUnmarshaling->buffer, 1);
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->offset, sizeof(VkDeviceSize));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->size, sizeof(VkDeviceSize));
+    vkStream->read((VkAccelerationStructureTypeKHR*)&forUnmarshaling->type, sizeof(VkAccelerationStructureTypeKHR));
+    vkStream->read((VkDeviceAddress*)&forUnmarshaling->deviceAddress, sizeof(VkDeviceAddress));
+}
+
+void marshal_VkWriteDescriptorSetAccelerationStructureKHR(
+    VulkanStream* vkStream,
+    const VkWriteDescriptorSetAccelerationStructureKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->accelerationStructureCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pAccelerationStructures;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->pAccelerationStructures)
+    {
+        if (forMarshaling->accelerationStructureCount)
+        {
+            uint64_t* cgen_var_0_0;
+            vkStream->alloc((void**)&cgen_var_0_0, forMarshaling->accelerationStructureCount * 8);
+            vkStream->handleMapping()->mapHandles_VkAccelerationStructureKHR_u64(forMarshaling->pAccelerationStructures, cgen_var_0_0, forMarshaling->accelerationStructureCount);
+            vkStream->write((uint64_t*)cgen_var_0_0, forMarshaling->accelerationStructureCount * 8);
+        }
+    }
+}
+
+void unmarshal_VkWriteDescriptorSetAccelerationStructureKHR(
+    VulkanStream* vkStream,
+    VkWriteDescriptorSetAccelerationStructureKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->accelerationStructureCount, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    forUnmarshaling->pAccelerationStructures = (const VkAccelerationStructureKHR*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pAccelerationStructures)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pAccelerationStructures, forUnmarshaling->accelerationStructureCount * sizeof(const VkAccelerationStructureKHR));
+        if (forUnmarshaling->accelerationStructureCount)
+        {
+            uint64_t* cgen_var_0_0;
+            vkStream->alloc((void**)&cgen_var_0_0, forUnmarshaling->accelerationStructureCount * 8);
+            vkStream->read((uint64_t*)cgen_var_0_0, forUnmarshaling->accelerationStructureCount * 8);
+            vkStream->handleMapping()->mapHandles_u64_VkAccelerationStructureKHR(cgen_var_0_0, (VkAccelerationStructureKHR*)forUnmarshaling->pAccelerationStructures, forUnmarshaling->accelerationStructureCount);
+        }
+    }
+}
+
+void marshal_VkPhysicalDeviceAccelerationStructureFeaturesKHR(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceAccelerationStructureFeaturesKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->accelerationStructure, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->accelerationStructureCaptureReplay, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->accelerationStructureIndirectBuild, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->accelerationStructureHostCommands, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->descriptorBindingAccelerationStructureUpdateAfterBind, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceAccelerationStructureFeaturesKHR(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceAccelerationStructureFeaturesKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->accelerationStructure, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->accelerationStructureCaptureReplay, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->accelerationStructureIndirectBuild, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->accelerationStructureHostCommands, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->descriptorBindingAccelerationStructureUpdateAfterBind, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceAccelerationStructurePropertiesKHR(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceAccelerationStructurePropertiesKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint64_t*)&forMarshaling->maxGeometryCount, sizeof(uint64_t));
+    vkStream->write((uint64_t*)&forMarshaling->maxInstanceCount, sizeof(uint64_t));
+    vkStream->write((uint64_t*)&forMarshaling->maxPrimitiveCount, sizeof(uint64_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorAccelerationStructures, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxPerStageDescriptorUpdateAfterBindAccelerationStructures, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetAccelerationStructures, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxDescriptorSetUpdateAfterBindAccelerationStructures, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->minAccelerationStructureScratchOffsetAlignment, sizeof(uint32_t));
+}
+
+void unmarshal_VkPhysicalDeviceAccelerationStructurePropertiesKHR(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceAccelerationStructurePropertiesKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint64_t*)&forUnmarshaling->maxGeometryCount, sizeof(uint64_t));
+    vkStream->read((uint64_t*)&forUnmarshaling->maxInstanceCount, sizeof(uint64_t));
+    vkStream->read((uint64_t*)&forUnmarshaling->maxPrimitiveCount, sizeof(uint64_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorAccelerationStructures, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPerStageDescriptorUpdateAfterBindAccelerationStructures, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetAccelerationStructures, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetUpdateAfterBindAccelerationStructures, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->minAccelerationStructureScratchOffsetAlignment, sizeof(uint32_t));
+}
+
+void marshal_VkAccelerationStructureDeviceAddressInfoKHR(
+    VulkanStream* vkStream,
+    const VkAccelerationStructureDeviceAddressInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkAccelerationStructureKHR_u64(&forMarshaling->accelerationStructure, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+}
+
+void unmarshal_VkAccelerationStructureDeviceAddressInfoKHR(
+    VulkanStream* vkStream,
+    VkAccelerationStructureDeviceAddressInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkAccelerationStructureKHR(&cgen_var_0, (VkAccelerationStructureKHR*)&forUnmarshaling->accelerationStructure, 1);
+}
+
+void marshal_VkAccelerationStructureVersionInfoKHR(
+    VulkanStream* vkStream,
+    const VkAccelerationStructureVersionInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((const uint8_t*)forMarshaling->pVersionData, 2*VK_UUID_SIZE * sizeof(const uint8_t));
+}
+
+void unmarshal_VkAccelerationStructureVersionInfoKHR(
+    VulkanStream* vkStream,
+    VkAccelerationStructureVersionInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->alloc((void**)&forUnmarshaling->pVersionData, 2*VK_UUID_SIZE * sizeof(const uint8_t));
+    vkStream->read((uint8_t*)forUnmarshaling->pVersionData, 2*VK_UUID_SIZE * sizeof(const uint8_t));
+}
+
+void marshal_VkCopyAccelerationStructureToMemoryInfoKHR(
+    VulkanStream* vkStream,
+    const VkCopyAccelerationStructureToMemoryInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkAccelerationStructureKHR_u64(&forMarshaling->src, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    marshal_VkDeviceOrHostAddressKHR(vkStream, (VkDeviceOrHostAddressKHR*)(&forMarshaling->dst));
+    vkStream->write((VkCopyAccelerationStructureModeKHR*)&forMarshaling->mode, sizeof(VkCopyAccelerationStructureModeKHR));
+}
+
+void unmarshal_VkCopyAccelerationStructureToMemoryInfoKHR(
+    VulkanStream* vkStream,
+    VkCopyAccelerationStructureToMemoryInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkAccelerationStructureKHR(&cgen_var_0, (VkAccelerationStructureKHR*)&forUnmarshaling->src, 1);
+    unmarshal_VkDeviceOrHostAddressKHR(vkStream, (VkDeviceOrHostAddressKHR*)(&forUnmarshaling->dst));
+    vkStream->read((VkCopyAccelerationStructureModeKHR*)&forUnmarshaling->mode, sizeof(VkCopyAccelerationStructureModeKHR));
+}
+
+void marshal_VkCopyMemoryToAccelerationStructureInfoKHR(
+    VulkanStream* vkStream,
+    const VkCopyMemoryToAccelerationStructureInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    marshal_VkDeviceOrHostAddressConstKHR(vkStream, (VkDeviceOrHostAddressConstKHR*)(&forMarshaling->src));
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkAccelerationStructureKHR_u64(&forMarshaling->dst, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->write((VkCopyAccelerationStructureModeKHR*)&forMarshaling->mode, sizeof(VkCopyAccelerationStructureModeKHR));
+}
+
+void unmarshal_VkCopyMemoryToAccelerationStructureInfoKHR(
+    VulkanStream* vkStream,
+    VkCopyMemoryToAccelerationStructureInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    unmarshal_VkDeviceOrHostAddressConstKHR(vkStream, (VkDeviceOrHostAddressConstKHR*)(&forUnmarshaling->src));
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkAccelerationStructureKHR(&cgen_var_0, (VkAccelerationStructureKHR*)&forUnmarshaling->dst, 1);
+    vkStream->read((VkCopyAccelerationStructureModeKHR*)&forUnmarshaling->mode, sizeof(VkCopyAccelerationStructureModeKHR));
+}
+
+void marshal_VkCopyAccelerationStructureInfoKHR(
+    VulkanStream* vkStream,
+    const VkCopyAccelerationStructureInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    uint64_t cgen_var_0;
+    vkStream->handleMapping()->mapHandles_VkAccelerationStructureKHR_u64(&forMarshaling->src, &cgen_var_0, 1);
+    vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
+    uint64_t cgen_var_1;
+    vkStream->handleMapping()->mapHandles_VkAccelerationStructureKHR_u64(&forMarshaling->dst, &cgen_var_1, 1);
+    vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->write((VkCopyAccelerationStructureModeKHR*)&forMarshaling->mode, sizeof(VkCopyAccelerationStructureModeKHR));
+}
+
+void unmarshal_VkCopyAccelerationStructureInfoKHR(
+    VulkanStream* vkStream,
+    VkCopyAccelerationStructureInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    uint64_t cgen_var_0;
+    vkStream->read((uint64_t*)&cgen_var_0, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkAccelerationStructureKHR(&cgen_var_0, (VkAccelerationStructureKHR*)&forUnmarshaling->src, 1);
+    uint64_t cgen_var_1;
+    vkStream->read((uint64_t*)&cgen_var_1, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkAccelerationStructureKHR(&cgen_var_1, (VkAccelerationStructureKHR*)&forUnmarshaling->dst, 1);
+    vkStream->read((VkCopyAccelerationStructureModeKHR*)&forUnmarshaling->mode, sizeof(VkCopyAccelerationStructureModeKHR));
+}
+
+void marshal_VkAccelerationStructureBuildSizesInfoKHR(
+    VulkanStream* vkStream,
+    const VkAccelerationStructureBuildSizesInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkDeviceSize*)&forMarshaling->accelerationStructureSize, sizeof(VkDeviceSize));
+    vkStream->write((VkDeviceSize*)&forMarshaling->updateScratchSize, sizeof(VkDeviceSize));
+    vkStream->write((VkDeviceSize*)&forMarshaling->buildScratchSize, sizeof(VkDeviceSize));
+}
+
+void unmarshal_VkAccelerationStructureBuildSizesInfoKHR(
+    VulkanStream* vkStream,
+    VkAccelerationStructureBuildSizesInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->accelerationStructureSize, sizeof(VkDeviceSize));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->updateScratchSize, sizeof(VkDeviceSize));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->buildScratchSize, sizeof(VkDeviceSize));
+}
+
+#endif
+#ifdef VK_KHR_ray_tracing_pipeline
+void marshal_VkRayTracingShaderGroupCreateInfoKHR(
+    VulkanStream* vkStream,
+    const VkRayTracingShaderGroupCreateInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkRayTracingShaderGroupTypeKHR*)&forMarshaling->type, sizeof(VkRayTracingShaderGroupTypeKHR));
+    vkStream->write((uint32_t*)&forMarshaling->generalShader, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->closestHitShader, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->anyHitShader, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->intersectionShader, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pShaderGroupCaptureReplayHandle;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->pShaderGroupCaptureReplayHandle)
+    {
+        vkStream->write((const void*)forMarshaling->pShaderGroupCaptureReplayHandle, sizeof(const uint8_t));
+    }
+}
+
+void unmarshal_VkRayTracingShaderGroupCreateInfoKHR(
+    VulkanStream* vkStream,
+    VkRayTracingShaderGroupCreateInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkRayTracingShaderGroupTypeKHR*)&forUnmarshaling->type, sizeof(VkRayTracingShaderGroupTypeKHR));
+    vkStream->read((uint32_t*)&forUnmarshaling->generalShader, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->closestHitShader, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->anyHitShader, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->intersectionShader, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    forUnmarshaling->pShaderGroupCaptureReplayHandle = (const void*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pShaderGroupCaptureReplayHandle)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pShaderGroupCaptureReplayHandle, sizeof(const uint8_t));
+        vkStream->read((void*)forUnmarshaling->pShaderGroupCaptureReplayHandle, sizeof(const uint8_t));
+    }
+}
+
+void marshal_VkRayTracingPipelineInterfaceCreateInfoKHR(
+    VulkanStream* vkStream,
+    const VkRayTracingPipelineInterfaceCreateInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->maxPipelineRayPayloadSize, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxPipelineRayHitAttributeSize, sizeof(uint32_t));
+}
+
+void unmarshal_VkRayTracingPipelineInterfaceCreateInfoKHR(
+    VulkanStream* vkStream,
+    VkRayTracingPipelineInterfaceCreateInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPipelineRayPayloadSize, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPipelineRayHitAttributeSize, sizeof(uint32_t));
+}
+
+void marshal_VkRayTracingPipelineCreateInfoKHR(
+    VulkanStream* vkStream,
+    const VkRayTracingPipelineCreateInfoKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkPipelineCreateFlags*)&forMarshaling->flags, sizeof(VkPipelineCreateFlags));
+    vkStream->write((uint32_t*)&forMarshaling->stageCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->stageCount; ++i)
+    {
+        marshal_VkPipelineShaderStageCreateInfo(vkStream, (const VkPipelineShaderStageCreateInfo*)(forMarshaling->pStages + i));
+    }
+    vkStream->write((uint32_t*)&forMarshaling->groupCount, sizeof(uint32_t));
+    for (uint32_t i = 0; i < (uint32_t)forMarshaling->groupCount; ++i)
+    {
+        marshal_VkRayTracingShaderGroupCreateInfoKHR(vkStream, (const VkRayTracingShaderGroupCreateInfoKHR*)(forMarshaling->pGroups + i));
+    }
+    vkStream->write((uint32_t*)&forMarshaling->maxPipelineRayRecursionDepth, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pLibraryInfo;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->pLibraryInfo)
+    {
+        marshal_VkPipelineLibraryCreateInfoKHR(vkStream, (const VkPipelineLibraryCreateInfoKHR*)(forMarshaling->pLibraryInfo));
+    }
+    // WARNING PTR CHECK
+    uint64_t cgen_var_1 = (uint64_t)(uintptr_t)forMarshaling->pLibraryInterface;
+    vkStream->putBe64(cgen_var_1);
+    if (forMarshaling->pLibraryInterface)
+    {
+        marshal_VkRayTracingPipelineInterfaceCreateInfoKHR(vkStream, (const VkRayTracingPipelineInterfaceCreateInfoKHR*)(forMarshaling->pLibraryInterface));
+    }
+    // WARNING PTR CHECK
+    uint64_t cgen_var_2 = (uint64_t)(uintptr_t)forMarshaling->pDynamicState;
+    vkStream->putBe64(cgen_var_2);
+    if (forMarshaling->pDynamicState)
+    {
+        marshal_VkPipelineDynamicStateCreateInfo(vkStream, (const VkPipelineDynamicStateCreateInfo*)(forMarshaling->pDynamicState));
+    }
+    uint64_t cgen_var_3;
+    vkStream->handleMapping()->mapHandles_VkPipelineLayout_u64(&forMarshaling->layout, &cgen_var_3, 1);
+    vkStream->write((uint64_t*)&cgen_var_3, 1 * 8);
+    uint64_t cgen_var_4;
+    vkStream->handleMapping()->mapHandles_VkPipeline_u64(&forMarshaling->basePipelineHandle, &cgen_var_4, 1);
+    vkStream->write((uint64_t*)&cgen_var_4, 1 * 8);
+    vkStream->write((int32_t*)&forMarshaling->basePipelineIndex, sizeof(int32_t));
+}
+
+void unmarshal_VkRayTracingPipelineCreateInfoKHR(
+    VulkanStream* vkStream,
+    VkRayTracingPipelineCreateInfoKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkPipelineCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineCreateFlags));
+    vkStream->read((uint32_t*)&forUnmarshaling->stageCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pStages, forUnmarshaling->stageCount * sizeof(const VkPipelineShaderStageCreateInfo));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->stageCount; ++i)
+    {
+        unmarshal_VkPipelineShaderStageCreateInfo(vkStream, (VkPipelineShaderStageCreateInfo*)(forUnmarshaling->pStages + i));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->groupCount, sizeof(uint32_t));
+    vkStream->alloc((void**)&forUnmarshaling->pGroups, forUnmarshaling->groupCount * sizeof(const VkRayTracingShaderGroupCreateInfoKHR));
+    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->groupCount; ++i)
+    {
+        unmarshal_VkRayTracingShaderGroupCreateInfoKHR(vkStream, (VkRayTracingShaderGroupCreateInfoKHR*)(forUnmarshaling->pGroups + i));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->maxPipelineRayRecursionDepth, sizeof(uint32_t));
+    // WARNING PTR CHECK
+    forUnmarshaling->pLibraryInfo = (const VkPipelineLibraryCreateInfoKHR*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pLibraryInfo)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pLibraryInfo, sizeof(const VkPipelineLibraryCreateInfoKHR));
+        unmarshal_VkPipelineLibraryCreateInfoKHR(vkStream, (VkPipelineLibraryCreateInfoKHR*)(forUnmarshaling->pLibraryInfo));
+    }
+    // WARNING PTR CHECK
+    forUnmarshaling->pLibraryInterface = (const VkRayTracingPipelineInterfaceCreateInfoKHR*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pLibraryInterface)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pLibraryInterface, sizeof(const VkRayTracingPipelineInterfaceCreateInfoKHR));
+        unmarshal_VkRayTracingPipelineInterfaceCreateInfoKHR(vkStream, (VkRayTracingPipelineInterfaceCreateInfoKHR*)(forUnmarshaling->pLibraryInterface));
+    }
+    // WARNING PTR CHECK
+    forUnmarshaling->pDynamicState = (const VkPipelineDynamicStateCreateInfo*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pDynamicState)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pDynamicState, sizeof(const VkPipelineDynamicStateCreateInfo));
+        unmarshal_VkPipelineDynamicStateCreateInfo(vkStream, (VkPipelineDynamicStateCreateInfo*)(forUnmarshaling->pDynamicState));
+    }
+    uint64_t cgen_var_3;
+    vkStream->read((uint64_t*)&cgen_var_3, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkPipelineLayout(&cgen_var_3, (VkPipelineLayout*)&forUnmarshaling->layout, 1);
+    uint64_t cgen_var_4;
+    vkStream->read((uint64_t*)&cgen_var_4, 1 * 8);
+    vkStream->handleMapping()->mapHandles_u64_VkPipeline(&cgen_var_4, (VkPipeline*)&forUnmarshaling->basePipelineHandle, 1);
+    vkStream->read((int32_t*)&forUnmarshaling->basePipelineIndex, sizeof(int32_t));
+}
+
+void marshal_VkPhysicalDeviceRayTracingPipelineFeaturesKHR(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceRayTracingPipelineFeaturesKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->rayTracingPipeline, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->rayTracingPipelineShaderGroupHandleCaptureReplay, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->rayTracingPipelineShaderGroupHandleCaptureReplayMixed, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->rayTracingPipelineTraceRaysIndirect, sizeof(VkBool32));
+    vkStream->write((VkBool32*)&forMarshaling->rayTraversalPrimitiveCulling, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceRayTracingPipelineFeaturesKHR(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceRayTracingPipelineFeaturesKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->rayTracingPipeline, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->rayTracingPipelineShaderGroupHandleCaptureReplay, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->rayTracingPipelineShaderGroupHandleCaptureReplayMixed, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->rayTracingPipelineTraceRaysIndirect, sizeof(VkBool32));
+    vkStream->read((VkBool32*)&forUnmarshaling->rayTraversalPrimitiveCulling, sizeof(VkBool32));
+}
+
+void marshal_VkPhysicalDeviceRayTracingPipelinePropertiesKHR(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceRayTracingPipelinePropertiesKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((uint32_t*)&forMarshaling->shaderGroupHandleSize, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxRayRecursionDepth, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxShaderGroupStride, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->shaderGroupBaseAlignment, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->shaderGroupHandleCaptureReplaySize, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxRayDispatchInvocationCount, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->shaderGroupHandleAlignment, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->maxRayHitAttributeSize, sizeof(uint32_t));
+}
+
+void unmarshal_VkPhysicalDeviceRayTracingPipelinePropertiesKHR(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceRayTracingPipelinePropertiesKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((uint32_t*)&forUnmarshaling->shaderGroupHandleSize, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxRayRecursionDepth, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxShaderGroupStride, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->shaderGroupBaseAlignment, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->shaderGroupHandleCaptureReplaySize, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxRayDispatchInvocationCount, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->shaderGroupHandleAlignment, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->maxRayHitAttributeSize, sizeof(uint32_t));
+}
+
+void marshal_VkStridedDeviceAddressRegionKHR(
+    VulkanStream* vkStream,
+    const VkStridedDeviceAddressRegionKHR* forMarshaling)
+{
+    vkStream->write((VkDeviceAddress*)&forMarshaling->deviceAddress, sizeof(VkDeviceAddress));
+    vkStream->write((VkDeviceSize*)&forMarshaling->stride, sizeof(VkDeviceSize));
+    vkStream->write((VkDeviceSize*)&forMarshaling->size, sizeof(VkDeviceSize));
+}
+
+void unmarshal_VkStridedDeviceAddressRegionKHR(
+    VulkanStream* vkStream,
+    VkStridedDeviceAddressRegionKHR* forUnmarshaling)
+{
+    vkStream->read((VkDeviceAddress*)&forUnmarshaling->deviceAddress, sizeof(VkDeviceAddress));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->stride, sizeof(VkDeviceSize));
+    vkStream->read((VkDeviceSize*)&forUnmarshaling->size, sizeof(VkDeviceSize));
+}
+
+void marshal_VkTraceRaysIndirectCommandKHR(
+    VulkanStream* vkStream,
+    const VkTraceRaysIndirectCommandKHR* forMarshaling)
+{
+    vkStream->write((uint32_t*)&forMarshaling->width, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->height, sizeof(uint32_t));
+    vkStream->write((uint32_t*)&forMarshaling->depth, sizeof(uint32_t));
+}
+
+void unmarshal_VkTraceRaysIndirectCommandKHR(
+    VulkanStream* vkStream,
+    VkTraceRaysIndirectCommandKHR* forUnmarshaling)
+{
+    vkStream->read((uint32_t*)&forUnmarshaling->width, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->height, sizeof(uint32_t));
+    vkStream->read((uint32_t*)&forUnmarshaling->depth, sizeof(uint32_t));
+}
+
+#endif
+#ifdef VK_KHR_ray_query
+void marshal_VkPhysicalDeviceRayQueryFeaturesKHR(
+    VulkanStream* vkStream,
+    const VkPhysicalDeviceRayQueryFeaturesKHR* forMarshaling)
+{
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    marshal_extension_struct(vkStream, forMarshaling->pNext);
+    vkStream->write((VkBool32*)&forMarshaling->rayQuery, sizeof(VkBool32));
+}
+
+void unmarshal_VkPhysicalDeviceRayQueryFeaturesKHR(
+    VulkanStream* vkStream,
+    VkPhysicalDeviceRayQueryFeaturesKHR* forUnmarshaling)
+{
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkBool32*)&forUnmarshaling->rayQuery, sizeof(VkBool32));
+}
+
 #endif
 void marshal_extension_struct(
     VulkanStream* vkStream,
@@ -13146,9 +21599,9 @@ void marshal_extension_struct(
             marshal_VkPhysicalDeviceMultiviewProperties(vkStream, reinterpret_cast<const VkPhysicalDeviceMultiviewProperties*>(structExtension));
             break;
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VARIABLE_POINTER_FEATURES:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VARIABLE_POINTERS_FEATURES:
         {
-            marshal_VkPhysicalDeviceVariablePointerFeatures(vkStream, reinterpret_cast<const VkPhysicalDeviceVariablePointerFeatures*>(structExtension));
+            marshal_VkPhysicalDeviceVariablePointersFeatures(vkStream, reinterpret_cast<const VkPhysicalDeviceVariablePointersFeatures*>(structExtension));
             break;
         }
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROTECTED_MEMORY_FEATURES:
@@ -13236,9 +21689,201 @@ void marshal_extension_struct(
             marshal_VkPhysicalDeviceMaintenance3Properties(vkStream, reinterpret_cast<const VkPhysicalDeviceMaintenance3Properties*>(structExtension));
             break;
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETER_FEATURES:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES:
         {
-            marshal_VkPhysicalDeviceShaderDrawParameterFeatures(vkStream, reinterpret_cast<const VkPhysicalDeviceShaderDrawParameterFeatures*>(structExtension));
+            marshal_VkPhysicalDeviceShaderDrawParametersFeatures(vkStream, reinterpret_cast<const VkPhysicalDeviceShaderDrawParametersFeatures*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_VERSION_1_2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES:
+        {
+            marshal_VkPhysicalDeviceVulkan11Features(vkStream, reinterpret_cast<const VkPhysicalDeviceVulkan11Features*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_PROPERTIES:
+        {
+            marshal_VkPhysicalDeviceVulkan11Properties(vkStream, reinterpret_cast<const VkPhysicalDeviceVulkan11Properties*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES:
+        {
+            marshal_VkPhysicalDeviceVulkan12Features(vkStream, reinterpret_cast<const VkPhysicalDeviceVulkan12Features*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_PROPERTIES:
+        {
+            marshal_VkPhysicalDeviceVulkan12Properties(vkStream, reinterpret_cast<const VkPhysicalDeviceVulkan12Properties*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO:
+        {
+            marshal_VkImageFormatListCreateInfo(vkStream, reinterpret_cast<const VkImageFormatListCreateInfo*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES:
+        {
+            marshal_VkPhysicalDevice8BitStorageFeatures(vkStream, reinterpret_cast<const VkPhysicalDevice8BitStorageFeatures*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES:
+        {
+            marshal_VkPhysicalDeviceDriverProperties(vkStream, reinterpret_cast<const VkPhysicalDeviceDriverProperties*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_INT64_FEATURES:
+        {
+            marshal_VkPhysicalDeviceShaderAtomicInt64Features(vkStream, reinterpret_cast<const VkPhysicalDeviceShaderAtomicInt64Features*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES:
+        {
+            marshal_VkPhysicalDeviceShaderFloat16Int8Features(vkStream, reinterpret_cast<const VkPhysicalDeviceShaderFloat16Int8Features*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FLOAT_CONTROLS_PROPERTIES:
+        {
+            marshal_VkPhysicalDeviceFloatControlsProperties(vkStream, reinterpret_cast<const VkPhysicalDeviceFloatControlsProperties*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO:
+        {
+            marshal_VkDescriptorSetLayoutBindingFlagsCreateInfo(vkStream, reinterpret_cast<const VkDescriptorSetLayoutBindingFlagsCreateInfo*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES:
+        {
+            marshal_VkPhysicalDeviceDescriptorIndexingFeatures(vkStream, reinterpret_cast<const VkPhysicalDeviceDescriptorIndexingFeatures*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES:
+        {
+            marshal_VkPhysicalDeviceDescriptorIndexingProperties(vkStream, reinterpret_cast<const VkPhysicalDeviceDescriptorIndexingProperties*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO:
+        {
+            marshal_VkDescriptorSetVariableDescriptorCountAllocateInfo(vkStream, reinterpret_cast<const VkDescriptorSetVariableDescriptorCountAllocateInfo*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_LAYOUT_SUPPORT:
+        {
+            marshal_VkDescriptorSetVariableDescriptorCountLayoutSupport(vkStream, reinterpret_cast<const VkDescriptorSetVariableDescriptorCountLayoutSupport*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_DEPTH_STENCIL_RESOLVE:
+        {
+            marshal_VkSubpassDescriptionDepthStencilResolve(vkStream, reinterpret_cast<const VkSubpassDescriptionDepthStencilResolve*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_STENCIL_RESOLVE_PROPERTIES:
+        {
+            marshal_VkPhysicalDeviceDepthStencilResolveProperties(vkStream, reinterpret_cast<const VkPhysicalDeviceDepthStencilResolveProperties*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCALAR_BLOCK_LAYOUT_FEATURES:
+        {
+            marshal_VkPhysicalDeviceScalarBlockLayoutFeatures(vkStream, reinterpret_cast<const VkPhysicalDeviceScalarBlockLayoutFeatures*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMAGE_STENCIL_USAGE_CREATE_INFO:
+        {
+            marshal_VkImageStencilUsageCreateInfo(vkStream, reinterpret_cast<const VkImageStencilUsageCreateInfo*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_SAMPLER_REDUCTION_MODE_CREATE_INFO:
+        {
+            marshal_VkSamplerReductionModeCreateInfo(vkStream, reinterpret_cast<const VkSamplerReductionModeCreateInfo*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_FILTER_MINMAX_PROPERTIES:
+        {
+            marshal_VkPhysicalDeviceSamplerFilterMinmaxProperties(vkStream, reinterpret_cast<const VkPhysicalDeviceSamplerFilterMinmaxProperties*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_MEMORY_MODEL_FEATURES:
+        {
+            marshal_VkPhysicalDeviceVulkanMemoryModelFeatures(vkStream, reinterpret_cast<const VkPhysicalDeviceVulkanMemoryModelFeatures*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGELESS_FRAMEBUFFER_FEATURES:
+        {
+            marshal_VkPhysicalDeviceImagelessFramebufferFeatures(vkStream, reinterpret_cast<const VkPhysicalDeviceImagelessFramebufferFeatures*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_FRAMEBUFFER_ATTACHMENTS_CREATE_INFO:
+        {
+            marshal_VkFramebufferAttachmentsCreateInfo(vkStream, reinterpret_cast<const VkFramebufferAttachmentsCreateInfo*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_RENDER_PASS_ATTACHMENT_BEGIN_INFO:
+        {
+            marshal_VkRenderPassAttachmentBeginInfo(vkStream, reinterpret_cast<const VkRenderPassAttachmentBeginInfo*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES:
+        {
+            marshal_VkPhysicalDeviceUniformBufferStandardLayoutFeatures(vkStream, reinterpret_cast<const VkPhysicalDeviceUniformBufferStandardLayoutFeatures*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SUBGROUP_EXTENDED_TYPES_FEATURES:
+        {
+            marshal_VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures(vkStream, reinterpret_cast<const VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SEPARATE_DEPTH_STENCIL_LAYOUTS_FEATURES:
+        {
+            marshal_VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures(vkStream, reinterpret_cast<const VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_STENCIL_LAYOUT:
+        {
+            marshal_VkAttachmentReferenceStencilLayout(vkStream, reinterpret_cast<const VkAttachmentReferenceStencilLayout*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_STENCIL_LAYOUT:
+        {
+            marshal_VkAttachmentDescriptionStencilLayout(vkStream, reinterpret_cast<const VkAttachmentDescriptionStencilLayout*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_QUERY_RESET_FEATURES:
+        {
+            marshal_VkPhysicalDeviceHostQueryResetFeatures(vkStream, reinterpret_cast<const VkPhysicalDeviceHostQueryResetFeatures*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES:
+        {
+            marshal_VkPhysicalDeviceTimelineSemaphoreFeatures(vkStream, reinterpret_cast<const VkPhysicalDeviceTimelineSemaphoreFeatures*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_PROPERTIES:
+        {
+            marshal_VkPhysicalDeviceTimelineSemaphoreProperties(vkStream, reinterpret_cast<const VkPhysicalDeviceTimelineSemaphoreProperties*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO:
+        {
+            marshal_VkSemaphoreTypeCreateInfo(vkStream, reinterpret_cast<const VkSemaphoreTypeCreateInfo*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO:
+        {
+            marshal_VkTimelineSemaphoreSubmitInfo(vkStream, reinterpret_cast<const VkTimelineSemaphoreSubmitInfo*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES:
+        {
+            marshal_VkPhysicalDeviceBufferDeviceAddressFeatures(vkStream, reinterpret_cast<const VkPhysicalDeviceBufferDeviceAddressFeatures*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_BUFFER_OPAQUE_CAPTURE_ADDRESS_CREATE_INFO:
+        {
+            marshal_VkBufferOpaqueCaptureAddressCreateInfo(vkStream, reinterpret_cast<const VkBufferOpaqueCaptureAddressCreateInfo*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_MEMORY_OPAQUE_CAPTURE_ADDRESS_ALLOCATE_INFO:
+        {
+            marshal_VkMemoryOpaqueCaptureAddressAllocateInfo(vkStream, reinterpret_cast<const VkMemoryOpaqueCaptureAddressAllocateInfo*>(structExtension));
             break;
         }
 #endif
@@ -13337,24 +21982,87 @@ void marshal_extension_struct(
             break;
         }
 #endif
-#ifdef VK_KHR_image_format_list
-        case VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO_KHR:
+#ifdef VK_KHR_performance_query
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_FEATURES_KHR:
         {
-            marshal_VkImageFormatListCreateInfoKHR(vkStream, reinterpret_cast<const VkImageFormatListCreateInfoKHR*>(structExtension));
+            marshal_VkPhysicalDevicePerformanceQueryFeaturesKHR(vkStream, reinterpret_cast<const VkPhysicalDevicePerformanceQueryFeaturesKHR*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_PROPERTIES_KHR:
+        {
+            marshal_VkPhysicalDevicePerformanceQueryPropertiesKHR(vkStream, reinterpret_cast<const VkPhysicalDevicePerformanceQueryPropertiesKHR*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_QUERY_POOL_PERFORMANCE_CREATE_INFO_KHR:
+        {
+            marshal_VkQueryPoolPerformanceCreateInfoKHR(vkStream, reinterpret_cast<const VkQueryPoolPerformanceCreateInfoKHR*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PERFORMANCE_QUERY_SUBMIT_INFO_KHR:
+        {
+            marshal_VkPerformanceQuerySubmitInfoKHR(vkStream, reinterpret_cast<const VkPerformanceQuerySubmitInfoKHR*>(structExtension));
             break;
         }
 #endif
-#ifdef VK_KHR_8bit_storage
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR:
+#ifdef VK_KHR_portability_subset
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PORTABILITY_SUBSET_FEATURES_KHR:
         {
-            marshal_VkPhysicalDevice8BitStorageFeaturesKHR(vkStream, reinterpret_cast<const VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension));
+            marshal_VkPhysicalDevicePortabilitySubsetFeaturesKHR(vkStream, reinterpret_cast<const VkPhysicalDevicePortabilitySubsetFeaturesKHR*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PORTABILITY_SUBSET_PROPERTIES_KHR:
+        {
+            marshal_VkPhysicalDevicePortabilitySubsetPropertiesKHR(vkStream, reinterpret_cast<const VkPhysicalDevicePortabilitySubsetPropertiesKHR*>(structExtension));
             break;
         }
 #endif
-#ifdef VK_KHR_shader_float16_int8
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES:
+#ifdef VK_KHR_shader_clock
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CLOCK_FEATURES_KHR:
         {
-            marshal_VkPhysicalDeviceShaderFloat16Int8Features(vkStream, reinterpret_cast<const VkPhysicalDeviceShaderFloat16Int8Features*>(structExtension));
+            marshal_VkPhysicalDeviceShaderClockFeaturesKHR(vkStream, reinterpret_cast<const VkPhysicalDeviceShaderClockFeaturesKHR*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_KHR_shader_terminate_invocation
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_TERMINATE_INVOCATION_FEATURES_KHR:
+        {
+            marshal_VkPhysicalDeviceShaderTerminateInvocationFeaturesKHR(vkStream, reinterpret_cast<const VkPhysicalDeviceShaderTerminateInvocationFeaturesKHR*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_KHR_fragment_shading_rate
+        case VK_STRUCTURE_TYPE_FRAGMENT_SHADING_RATE_ATTACHMENT_INFO_KHR:
+        {
+            marshal_VkFragmentShadingRateAttachmentInfoKHR(vkStream, reinterpret_cast<const VkFragmentShadingRateAttachmentInfoKHR*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_FRAGMENT_SHADING_RATE_STATE_CREATE_INFO_KHR:
+        {
+            marshal_VkPipelineFragmentShadingRateStateCreateInfoKHR(vkStream, reinterpret_cast<const VkPipelineFragmentShadingRateStateCreateInfoKHR*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_FEATURES_KHR:
+        {
+            marshal_VkPhysicalDeviceFragmentShadingRateFeaturesKHR(vkStream, reinterpret_cast<const VkPhysicalDeviceFragmentShadingRateFeaturesKHR*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_PROPERTIES_KHR:
+        {
+            marshal_VkPhysicalDeviceFragmentShadingRatePropertiesKHR(vkStream, reinterpret_cast<const VkPhysicalDeviceFragmentShadingRatePropertiesKHR*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_KHR_surface_protected_capabilities
+        case VK_STRUCTURE_TYPE_SURFACE_PROTECTED_CAPABILITIES_KHR:
+        {
+            marshal_VkSurfaceProtectedCapabilitiesKHR(vkStream, reinterpret_cast<const VkSurfaceProtectedCapabilitiesKHR*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_KHR_pipeline_executable_properties
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_EXECUTABLE_PROPERTIES_FEATURES_KHR:
+        {
+            marshal_VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR(vkStream, reinterpret_cast<const VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR*>(structExtension));
             break;
         }
 #endif
@@ -13396,10 +22104,34 @@ void marshal_extension_struct(
             break;
         }
 #endif
+#ifdef VK_EXT_transform_feedback
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TRANSFORM_FEEDBACK_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceTransformFeedbackFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceTransformFeedbackFeaturesEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TRANSFORM_FEEDBACK_PROPERTIES_EXT:
+        {
+            marshal_VkPhysicalDeviceTransformFeedbackPropertiesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceTransformFeedbackPropertiesEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_STREAM_CREATE_INFO_EXT:
+        {
+            marshal_VkPipelineRasterizationStateStreamCreateInfoEXT(vkStream, reinterpret_cast<const VkPipelineRasterizationStateStreamCreateInfoEXT*>(structExtension));
+            break;
+        }
+#endif
 #ifdef VK_AMD_texture_gather_bias_lod
         case VK_STRUCTURE_TYPE_TEXTURE_LOD_GATHER_FORMAT_PROPERTIES_AMD:
         {
             marshal_VkTextureLODGatherFormatPropertiesAMD(vkStream, reinterpret_cast<const VkTextureLODGatherFormatPropertiesAMD*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_NV_corner_sampled_image
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CORNER_SAMPLED_IMAGE_FEATURES_NV:
+        {
+            marshal_VkPhysicalDeviceCornerSampledImageFeaturesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceCornerSampledImageFeaturesNV*>(structExtension));
             break;
         }
 #endif
@@ -13438,6 +22170,25 @@ void marshal_extension_struct(
         case VK_STRUCTURE_TYPE_VALIDATION_FLAGS_EXT:
         {
             marshal_VkValidationFlagsEXT(vkStream, reinterpret_cast<const VkValidationFlagsEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_texture_compression_astc_hdr
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TEXTURE_COMPRESSION_ASTC_HDR_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceTextureCompressionASTCHDRFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceTextureCompressionASTCHDRFeaturesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_astc_decode_mode
+        case VK_STRUCTURE_TYPE_IMAGE_VIEW_ASTC_DECODE_MODE_EXT:
+        {
+            marshal_VkImageViewASTCDecodeModeEXT(vkStream, reinterpret_cast<const VkImageViewASTCDecodeModeEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ASTC_DECODE_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceASTCDecodeFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceASTCDecodeFeaturesEXT*>(structExtension));
             break;
         }
 #endif
@@ -13512,6 +22263,18 @@ void marshal_extension_struct(
             break;
         }
 #endif
+#ifdef VK_EXT_depth_clip_enable
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_CLIP_ENABLE_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceDepthClipEnableFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceDepthClipEnableFeaturesEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_DEPTH_CLIP_STATE_CREATE_INFO_EXT:
+        {
+            marshal_VkPipelineRasterizationDepthClipStateCreateInfoEXT(vkStream, reinterpret_cast<const VkPipelineRasterizationDepthClipStateCreateInfoEXT*>(structExtension));
+            break;
+        }
+#endif
 #ifdef VK_EXT_debug_utils
         case VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT:
         {
@@ -13541,15 +22304,25 @@ void marshal_extension_struct(
             break;
         }
 #endif
-#ifdef VK_EXT_sampler_filter_minmax
-        case VK_STRUCTURE_TYPE_SAMPLER_REDUCTION_MODE_CREATE_INFO_EXT:
+#ifdef VK_EXT_inline_uniform_block
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INLINE_UNIFORM_BLOCK_FEATURES_EXT:
         {
-            marshal_VkSamplerReductionModeCreateInfoEXT(vkStream, reinterpret_cast<const VkSamplerReductionModeCreateInfoEXT*>(structExtension));
+            marshal_VkPhysicalDeviceInlineUniformBlockFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceInlineUniformBlockFeaturesEXT*>(structExtension));
             break;
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_FILTER_MINMAX_PROPERTIES_EXT:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INLINE_UNIFORM_BLOCK_PROPERTIES_EXT:
         {
-            marshal_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT*>(structExtension));
+            marshal_VkPhysicalDeviceInlineUniformBlockPropertiesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceInlineUniformBlockPropertiesEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_INLINE_UNIFORM_BLOCK_EXT:
+        {
+            marshal_VkWriteDescriptorSetInlineUniformBlockEXT(vkStream, reinterpret_cast<const VkWriteDescriptorSetInlineUniformBlockEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_INLINE_UNIFORM_BLOCK_CREATE_INFO_EXT:
+        {
+            marshal_VkDescriptorPoolInlineUniformBlockCreateInfoEXT(vkStream, reinterpret_cast<const VkDescriptorPoolInlineUniformBlockCreateInfoEXT*>(structExtension));
             break;
         }
 #endif
@@ -13606,6 +22379,40 @@ void marshal_extension_struct(
             break;
         }
 #endif
+#ifdef VK_NV_shader_sm_builtins
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SM_BUILTINS_PROPERTIES_NV:
+        {
+            marshal_VkPhysicalDeviceShaderSMBuiltinsPropertiesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceShaderSMBuiltinsPropertiesNV*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SM_BUILTINS_FEATURES_NV:
+        {
+            marshal_VkPhysicalDeviceShaderSMBuiltinsFeaturesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceShaderSMBuiltinsFeaturesNV*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_image_drm_format_modifier
+        case VK_STRUCTURE_TYPE_DRM_FORMAT_MODIFIER_PROPERTIES_LIST_EXT:
+        {
+            marshal_VkDrmFormatModifierPropertiesListEXT(vkStream, reinterpret_cast<const VkDrmFormatModifierPropertiesListEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_DRM_FORMAT_MODIFIER_INFO_EXT:
+        {
+            marshal_VkPhysicalDeviceImageDrmFormatModifierInfoEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceImageDrmFormatModifierInfoEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_LIST_CREATE_INFO_EXT:
+        {
+            marshal_VkImageDrmFormatModifierListCreateInfoEXT(vkStream, reinterpret_cast<const VkImageDrmFormatModifierListCreateInfoEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_EXPLICIT_CREATE_INFO_EXT:
+        {
+            marshal_VkImageDrmFormatModifierExplicitCreateInfoEXT(vkStream, reinterpret_cast<const VkImageDrmFormatModifierExplicitCreateInfoEXT*>(structExtension));
+            break;
+        }
+#endif
 #ifdef VK_EXT_validation_cache
         case VK_STRUCTURE_TYPE_SHADER_MODULE_VALIDATION_CACHE_CREATE_INFO_EXT:
         {
@@ -13613,30 +22420,61 @@ void marshal_extension_struct(
             break;
         }
 #endif
-#ifdef VK_EXT_descriptor_indexing
-        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT:
+#ifdef VK_NV_shading_rate_image
+        case VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_SHADING_RATE_IMAGE_STATE_CREATE_INFO_NV:
         {
-            marshal_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT(vkStream, reinterpret_cast<const VkDescriptorSetLayoutBindingFlagsCreateInfoEXT*>(structExtension));
+            marshal_VkPipelineViewportShadingRateImageStateCreateInfoNV(vkStream, reinterpret_cast<const VkPipelineViewportShadingRateImageStateCreateInfoNV*>(structExtension));
             break;
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADING_RATE_IMAGE_FEATURES_NV:
         {
-            marshal_VkPhysicalDeviceDescriptorIndexingFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceDescriptorIndexingFeaturesEXT*>(structExtension));
+            marshal_VkPhysicalDeviceShadingRateImageFeaturesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceShadingRateImageFeaturesNV*>(structExtension));
             break;
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES_EXT:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADING_RATE_IMAGE_PROPERTIES_NV:
         {
-            marshal_VkPhysicalDeviceDescriptorIndexingPropertiesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceDescriptorIndexingPropertiesEXT*>(structExtension));
+            marshal_VkPhysicalDeviceShadingRateImagePropertiesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceShadingRateImagePropertiesNV*>(structExtension));
             break;
         }
-        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT:
+        case VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_COARSE_SAMPLE_ORDER_STATE_CREATE_INFO_NV:
         {
-            marshal_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT(vkStream, reinterpret_cast<const VkDescriptorSetVariableDescriptorCountAllocateInfoEXT*>(structExtension));
+            marshal_VkPipelineViewportCoarseSampleOrderStateCreateInfoNV(vkStream, reinterpret_cast<const VkPipelineViewportCoarseSampleOrderStateCreateInfoNV*>(structExtension));
             break;
         }
-        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_LAYOUT_SUPPORT_EXT:
+#endif
+#ifdef VK_NV_ray_tracing
+        case VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_NV:
         {
-            marshal_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT(vkStream, reinterpret_cast<const VkDescriptorSetVariableDescriptorCountLayoutSupportEXT*>(structExtension));
+            marshal_VkWriteDescriptorSetAccelerationStructureNV(vkStream, reinterpret_cast<const VkWriteDescriptorSetAccelerationStructureNV*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PROPERTIES_NV:
+        {
+            marshal_VkPhysicalDeviceRayTracingPropertiesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceRayTracingPropertiesNV*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_NV_representative_fragment_test
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_REPRESENTATIVE_FRAGMENT_TEST_FEATURES_NV:
+        {
+            marshal_VkPhysicalDeviceRepresentativeFragmentTestFeaturesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceRepresentativeFragmentTestFeaturesNV*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_REPRESENTATIVE_FRAGMENT_TEST_STATE_CREATE_INFO_NV:
+        {
+            marshal_VkPipelineRepresentativeFragmentTestStateCreateInfoNV(vkStream, reinterpret_cast<const VkPipelineRepresentativeFragmentTestStateCreateInfoNV*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_filter_cubic
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_VIEW_IMAGE_FORMAT_INFO_EXT:
+        {
+            marshal_VkPhysicalDeviceImageViewImageFormatInfoEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceImageViewImageFormatInfoEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_FILTER_CUBIC_IMAGE_VIEW_IMAGE_FORMAT_PROPERTIES_EXT:
+        {
+            marshal_VkFilterCubicImageViewImageFormatPropertiesEXT(vkStream, reinterpret_cast<const VkFilterCubicImageViewImageFormatPropertiesEXT*>(structExtension));
             break;
         }
 #endif
@@ -13659,10 +22497,24 @@ void marshal_extension_struct(
             break;
         }
 #endif
+#ifdef VK_AMD_pipeline_compiler_control
+        case VK_STRUCTURE_TYPE_PIPELINE_COMPILER_CONTROL_CREATE_INFO_AMD:
+        {
+            marshal_VkPipelineCompilerControlCreateInfoAMD(vkStream, reinterpret_cast<const VkPipelineCompilerControlCreateInfoAMD*>(structExtension));
+            break;
+        }
+#endif
 #ifdef VK_AMD_shader_core_properties
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CORE_PROPERTIES_AMD:
         {
             marshal_VkPhysicalDeviceShaderCorePropertiesAMD(vkStream, reinterpret_cast<const VkPhysicalDeviceShaderCorePropertiesAMD*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_AMD_memory_overallocation_behavior
+        case VK_STRUCTURE_TYPE_DEVICE_MEMORY_OVERALLOCATION_CREATE_INFO_AMD:
+        {
+            marshal_VkDeviceMemoryOverallocationCreateInfoAMD(vkStream, reinterpret_cast<const VkDeviceMemoryOverallocationCreateInfoAMD*>(structExtension));
             break;
         }
 #endif
@@ -13677,11 +22529,108 @@ void marshal_extension_struct(
             marshal_VkPipelineVertexInputDivisorStateCreateInfoEXT(vkStream, reinterpret_cast<const VkPipelineVertexInputDivisorStateCreateInfoEXT*>(structExtension));
             break;
         }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_ATTRIBUTE_DIVISOR_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceVertexAttributeDivisorFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceVertexAttributeDivisorFeaturesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_GGP_frame_token
+        case VK_STRUCTURE_TYPE_PRESENT_FRAME_TOKEN_GGP:
+        {
+            marshal_VkPresentFrameTokenGGP(vkStream, reinterpret_cast<const VkPresentFrameTokenGGP*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_pipeline_creation_feedback
+        case VK_STRUCTURE_TYPE_PIPELINE_CREATION_FEEDBACK_CREATE_INFO_EXT:
+        {
+            marshal_VkPipelineCreationFeedbackCreateInfoEXT(vkStream, reinterpret_cast<const VkPipelineCreationFeedbackCreateInfoEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_NV_compute_shader_derivatives
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COMPUTE_SHADER_DERIVATIVES_FEATURES_NV:
+        {
+            marshal_VkPhysicalDeviceComputeShaderDerivativesFeaturesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceComputeShaderDerivativesFeaturesNV*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_NV_mesh_shader
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV:
+        {
+            marshal_VkPhysicalDeviceMeshShaderFeaturesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceMeshShaderFeaturesNV*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_NV:
+        {
+            marshal_VkPhysicalDeviceMeshShaderPropertiesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceMeshShaderPropertiesNV*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_NV_fragment_shader_barycentric
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADER_BARYCENTRIC_FEATURES_NV:
+        {
+            marshal_VkPhysicalDeviceFragmentShaderBarycentricFeaturesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceFragmentShaderBarycentricFeaturesNV*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_NV_shader_image_footprint
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_FOOTPRINT_FEATURES_NV:
+        {
+            marshal_VkPhysicalDeviceShaderImageFootprintFeaturesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceShaderImageFootprintFeaturesNV*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_NV_scissor_exclusive
+        case VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_EXCLUSIVE_SCISSOR_STATE_CREATE_INFO_NV:
+        {
+            marshal_VkPipelineViewportExclusiveScissorStateCreateInfoNV(vkStream, reinterpret_cast<const VkPipelineViewportExclusiveScissorStateCreateInfoNV*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXCLUSIVE_SCISSOR_FEATURES_NV:
+        {
+            marshal_VkPhysicalDeviceExclusiveScissorFeaturesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceExclusiveScissorFeaturesNV*>(structExtension));
+            break;
+        }
 #endif
 #ifdef VK_NV_device_diagnostic_checkpoints
         case VK_STRUCTURE_TYPE_QUEUE_FAMILY_CHECKPOINT_PROPERTIES_NV:
         {
             marshal_VkQueueFamilyCheckpointPropertiesNV(vkStream, reinterpret_cast<const VkQueueFamilyCheckpointPropertiesNV*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_INTEL_shader_integer_functions2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INTEGER_FUNCTIONS_2_FEATURES_INTEL:
+        {
+            marshal_VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL(vkStream, reinterpret_cast<const VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_INTEL_performance_query
+        case VK_STRUCTURE_TYPE_QUERY_POOL_PERFORMANCE_QUERY_CREATE_INFO_INTEL:
+        {
+            marshal_VkQueryPoolPerformanceQueryCreateInfoINTEL(vkStream, reinterpret_cast<const VkQueryPoolPerformanceQueryCreateInfoINTEL*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_pci_bus_info
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PCI_BUS_INFO_PROPERTIES_EXT:
+        {
+            marshal_VkPhysicalDevicePCIBusInfoPropertiesEXT(vkStream, reinterpret_cast<const VkPhysicalDevicePCIBusInfoPropertiesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_AMD_display_native_hdr
+        case VK_STRUCTURE_TYPE_DISPLAY_NATIVE_HDR_SURFACE_CAPABILITIES_AMD:
+        {
+            marshal_VkDisplayNativeHdrSurfaceCapabilitiesAMD(vkStream, reinterpret_cast<const VkDisplayNativeHdrSurfaceCapabilitiesAMD*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_SWAPCHAIN_DISPLAY_NATIVE_HDR_CREATE_INFO_AMD:
+        {
+            marshal_VkSwapchainDisplayNativeHdrCreateInfoAMD(vkStream, reinterpret_cast<const VkSwapchainDisplayNativeHdrCreateInfoAMD*>(structExtension));
             break;
         }
 #endif
@@ -13699,6 +22648,388 @@ void marshal_extension_struct(
         case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
         {
             marshal_VkImportPhysicalAddressGOOGLE(vkStream, reinterpret_cast<const VkImportPhysicalAddressGOOGLE*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_subgroup_size_control
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceSubgroupSizeControlFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceSubgroupSizeControlFeaturesEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_PROPERTIES_EXT:
+        {
+            marshal_VkPhysicalDeviceSubgroupSizeControlPropertiesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceSubgroupSizeControlPropertiesEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_REQUIRED_SUBGROUP_SIZE_CREATE_INFO_EXT:
+        {
+            marshal_VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT(vkStream, reinterpret_cast<const VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_AMD_shader_core_properties2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CORE_PROPERTIES_2_AMD:
+        {
+            marshal_VkPhysicalDeviceShaderCoreProperties2AMD(vkStream, reinterpret_cast<const VkPhysicalDeviceShaderCoreProperties2AMD*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_AMD_device_coherent_memory
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COHERENT_MEMORY_FEATURES_AMD:
+        {
+            marshal_VkPhysicalDeviceCoherentMemoryFeaturesAMD(vkStream, reinterpret_cast<const VkPhysicalDeviceCoherentMemoryFeaturesAMD*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_shader_image_atomic_int64
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_ATOMIC_INT64_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_memory_budget
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT:
+        {
+            marshal_VkPhysicalDeviceMemoryBudgetPropertiesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceMemoryBudgetPropertiesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_memory_priority
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PRIORITY_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceMemoryPriorityFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceMemoryPriorityFeaturesEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_MEMORY_PRIORITY_ALLOCATE_INFO_EXT:
+        {
+            marshal_VkMemoryPriorityAllocateInfoEXT(vkStream, reinterpret_cast<const VkMemoryPriorityAllocateInfoEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_NV_dedicated_allocation_image_aliasing
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEDICATED_ALLOCATION_IMAGE_ALIASING_FEATURES_NV:
+        {
+            marshal_VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_buffer_device_address
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceBufferDeviceAddressFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceBufferDeviceAddressFeaturesEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_CREATE_INFO_EXT:
+        {
+            marshal_VkBufferDeviceAddressCreateInfoEXT(vkStream, reinterpret_cast<const VkBufferDeviceAddressCreateInfoEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_validation_features
+        case VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT:
+        {
+            marshal_VkValidationFeaturesEXT(vkStream, reinterpret_cast<const VkValidationFeaturesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_NV_cooperative_matrix
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_FEATURES_NV:
+        {
+            marshal_VkPhysicalDeviceCooperativeMatrixFeaturesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceCooperativeMatrixFeaturesNV*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_PROPERTIES_NV:
+        {
+            marshal_VkPhysicalDeviceCooperativeMatrixPropertiesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceCooperativeMatrixPropertiesNV*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_NV_coverage_reduction_mode
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COVERAGE_REDUCTION_MODE_FEATURES_NV:
+        {
+            marshal_VkPhysicalDeviceCoverageReductionModeFeaturesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceCoverageReductionModeFeaturesNV*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_COVERAGE_REDUCTION_STATE_CREATE_INFO_NV:
+        {
+            marshal_VkPipelineCoverageReductionStateCreateInfoNV(vkStream, reinterpret_cast<const VkPipelineCoverageReductionStateCreateInfoNV*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_fragment_shader_interlock
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADER_INTERLOCK_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_ycbcr_image_arrays
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_YCBCR_IMAGE_ARRAYS_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceYcbcrImageArraysFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceYcbcrImageArraysFeaturesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_full_screen_exclusive
+        case VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_INFO_EXT:
+        {
+            marshal_VkSurfaceFullScreenExclusiveInfoEXT(vkStream, reinterpret_cast<const VkSurfaceFullScreenExclusiveInfoEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_SURFACE_CAPABILITIES_FULL_SCREEN_EXCLUSIVE_EXT:
+        {
+            marshal_VkSurfaceCapabilitiesFullScreenExclusiveEXT(vkStream, reinterpret_cast<const VkSurfaceCapabilitiesFullScreenExclusiveEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_WIN32_INFO_EXT:
+        {
+            marshal_VkSurfaceFullScreenExclusiveWin32InfoEXT(vkStream, reinterpret_cast<const VkSurfaceFullScreenExclusiveWin32InfoEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_line_rasterization
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LINE_RASTERIZATION_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceLineRasterizationFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceLineRasterizationFeaturesEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LINE_RASTERIZATION_PROPERTIES_EXT:
+        {
+            marshal_VkPhysicalDeviceLineRasterizationPropertiesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceLineRasterizationPropertiesEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_LINE_STATE_CREATE_INFO_EXT:
+        {
+            marshal_VkPipelineRasterizationLineStateCreateInfoEXT(vkStream, reinterpret_cast<const VkPipelineRasterizationLineStateCreateInfoEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_shader_atomic_float
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceShaderAtomicFloatFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceShaderAtomicFloatFeaturesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_index_type_uint8
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INDEX_TYPE_UINT8_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceIndexTypeUint8FeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceIndexTypeUint8FeaturesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceExtendedDynamicStateFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceExtendedDynamicStateFeaturesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_shader_demote_to_helper_invocation
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DEMOTE_TO_HELPER_INVOCATION_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_NV_device_generated_commands
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_GENERATED_COMMANDS_PROPERTIES_NV:
+        {
+            marshal_VkPhysicalDeviceDeviceGeneratedCommandsPropertiesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceDeviceGeneratedCommandsPropertiesNV*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_GENERATED_COMMANDS_FEATURES_NV:
+        {
+            marshal_VkPhysicalDeviceDeviceGeneratedCommandsFeaturesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceDeviceGeneratedCommandsFeaturesNV*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_SHADER_GROUPS_CREATE_INFO_NV:
+        {
+            marshal_VkGraphicsPipelineShaderGroupsCreateInfoNV(vkStream, reinterpret_cast<const VkGraphicsPipelineShaderGroupsCreateInfoNV*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_texel_buffer_alignment
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TEXEL_BUFFER_ALIGNMENT_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TEXEL_BUFFER_ALIGNMENT_PROPERTIES_EXT:
+        {
+            marshal_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_QCOM_render_pass_transform
+        case VK_STRUCTURE_TYPE_RENDER_PASS_TRANSFORM_BEGIN_INFO_QCOM:
+        {
+            marshal_VkRenderPassTransformBeginInfoQCOM(vkStream, reinterpret_cast<const VkRenderPassTransformBeginInfoQCOM*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_RENDER_PASS_TRANSFORM_INFO_QCOM:
+        {
+            marshal_VkCommandBufferInheritanceRenderPassTransformInfoQCOM(vkStream, reinterpret_cast<const VkCommandBufferInheritanceRenderPassTransformInfoQCOM*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_device_memory_report
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_MEMORY_REPORT_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceDeviceMemoryReportFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceDeviceMemoryReportFeaturesEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_DEVICE_MEMORY_REPORT_CREATE_INFO_EXT:
+        {
+            marshal_VkDeviceDeviceMemoryReportCreateInfoEXT(vkStream, reinterpret_cast<const VkDeviceDeviceMemoryReportCreateInfoEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_robustness2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceRobustness2FeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceRobustness2FeaturesEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_PROPERTIES_EXT:
+        {
+            marshal_VkPhysicalDeviceRobustness2PropertiesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceRobustness2PropertiesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_custom_border_color
+        case VK_STRUCTURE_TYPE_SAMPLER_CUSTOM_BORDER_COLOR_CREATE_INFO_EXT:
+        {
+            marshal_VkSamplerCustomBorderColorCreateInfoEXT(vkStream, reinterpret_cast<const VkSamplerCustomBorderColorCreateInfoEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CUSTOM_BORDER_COLOR_PROPERTIES_EXT:
+        {
+            marshal_VkPhysicalDeviceCustomBorderColorPropertiesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceCustomBorderColorPropertiesEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CUSTOM_BORDER_COLOR_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceCustomBorderColorFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceCustomBorderColorFeaturesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_private_data
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRIVATE_DATA_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDevicePrivateDataFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDevicePrivateDataFeaturesEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_PRIVATE_DATA_CREATE_INFO_EXT:
+        {
+            marshal_VkDevicePrivateDataCreateInfoEXT(vkStream, reinterpret_cast<const VkDevicePrivateDataCreateInfoEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_pipeline_creation_cache_control
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_CREATION_CACHE_CONTROL_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDevicePipelineCreationCacheControlFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDevicePipelineCreationCacheControlFeaturesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_NV_device_diagnostics_config
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DIAGNOSTICS_CONFIG_FEATURES_NV:
+        {
+            marshal_VkPhysicalDeviceDiagnosticsConfigFeaturesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceDiagnosticsConfigFeaturesNV*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_DIAGNOSTICS_CONFIG_CREATE_INFO_NV:
+        {
+            marshal_VkDeviceDiagnosticsConfigCreateInfoNV(vkStream, reinterpret_cast<const VkDeviceDiagnosticsConfigCreateInfoNV*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_NV_fragment_shading_rate_enums
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_ENUMS_FEATURES_NV:
+        {
+            marshal_VkPhysicalDeviceFragmentShadingRateEnumsFeaturesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceFragmentShadingRateEnumsFeaturesNV*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_ENUMS_PROPERTIES_NV:
+        {
+            marshal_VkPhysicalDeviceFragmentShadingRateEnumsPropertiesNV(vkStream, reinterpret_cast<const VkPhysicalDeviceFragmentShadingRateEnumsPropertiesNV*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_FRAGMENT_SHADING_RATE_ENUM_STATE_CREATE_INFO_NV:
+        {
+            marshal_VkPipelineFragmentShadingRateEnumStateCreateInfoNV(vkStream, reinterpret_cast<const VkPipelineFragmentShadingRateEnumStateCreateInfoNV*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_fragment_density_map2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_2_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceFragmentDensityMap2FeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceFragmentDensityMap2FeaturesEXT*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_2_PROPERTIES_EXT:
+        {
+            marshal_VkPhysicalDeviceFragmentDensityMap2PropertiesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceFragmentDensityMap2PropertiesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_QCOM_rotated_copy_commands
+        case VK_STRUCTURE_TYPE_COPY_COMMAND_TRANSFORM_INFO_QCOM:
+        {
+            marshal_VkCopyCommandTransformInfoQCOM(vkStream, reinterpret_cast<const VkCopyCommandTransformInfoQCOM*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_image_robustness
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_ROBUSTNESS_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDeviceImageRobustnessFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDeviceImageRobustnessFeaturesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_EXT_4444_formats
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_4444_FORMATS_FEATURES_EXT:
+        {
+            marshal_VkPhysicalDevice4444FormatsFeaturesEXT(vkStream, reinterpret_cast<const VkPhysicalDevice4444FormatsFeaturesEXT*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_KHR_acceleration_structure
+        case VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR:
+        {
+            marshal_VkWriteDescriptorSetAccelerationStructureKHR(vkStream, reinterpret_cast<const VkWriteDescriptorSetAccelerationStructureKHR*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR:
+        {
+            marshal_VkPhysicalDeviceAccelerationStructureFeaturesKHR(vkStream, reinterpret_cast<const VkPhysicalDeviceAccelerationStructureFeaturesKHR*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR:
+        {
+            marshal_VkPhysicalDeviceAccelerationStructurePropertiesKHR(vkStream, reinterpret_cast<const VkPhysicalDeviceAccelerationStructurePropertiesKHR*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_KHR_ray_tracing_pipeline
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR:
+        {
+            marshal_VkPhysicalDeviceRayTracingPipelineFeaturesKHR(vkStream, reinterpret_cast<const VkPhysicalDeviceRayTracingPipelineFeaturesKHR*>(structExtension));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR:
+        {
+            marshal_VkPhysicalDeviceRayTracingPipelinePropertiesKHR(vkStream, reinterpret_cast<const VkPhysicalDeviceRayTracingPipelinePropertiesKHR*>(structExtension));
+            break;
+        }
+#endif
+#ifdef VK_KHR_ray_query
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR:
+        {
+            marshal_VkPhysicalDeviceRayQueryFeaturesKHR(vkStream, reinterpret_cast<const VkPhysicalDeviceRayQueryFeaturesKHR*>(structExtension));
             break;
         }
 #endif
@@ -13839,9 +23170,9 @@ void unmarshal_extension_struct(
             unmarshal_VkPhysicalDeviceMultiviewProperties(vkStream, reinterpret_cast<VkPhysicalDeviceMultiviewProperties*>(structExtension_out));
             break;
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VARIABLE_POINTER_FEATURES:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VARIABLE_POINTERS_FEATURES:
         {
-            unmarshal_VkPhysicalDeviceVariablePointerFeatures(vkStream, reinterpret_cast<VkPhysicalDeviceVariablePointerFeatures*>(structExtension_out));
+            unmarshal_VkPhysicalDeviceVariablePointersFeatures(vkStream, reinterpret_cast<VkPhysicalDeviceVariablePointersFeatures*>(structExtension_out));
             break;
         }
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROTECTED_MEMORY_FEATURES:
@@ -13929,9 +23260,201 @@ void unmarshal_extension_struct(
             unmarshal_VkPhysicalDeviceMaintenance3Properties(vkStream, reinterpret_cast<VkPhysicalDeviceMaintenance3Properties*>(structExtension_out));
             break;
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETER_FEATURES:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES:
         {
-            unmarshal_VkPhysicalDeviceShaderDrawParameterFeatures(vkStream, reinterpret_cast<VkPhysicalDeviceShaderDrawParameterFeatures*>(structExtension_out));
+            unmarshal_VkPhysicalDeviceShaderDrawParametersFeatures(vkStream, reinterpret_cast<VkPhysicalDeviceShaderDrawParametersFeatures*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_VERSION_1_2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES:
+        {
+            unmarshal_VkPhysicalDeviceVulkan11Features(vkStream, reinterpret_cast<VkPhysicalDeviceVulkan11Features*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_PROPERTIES:
+        {
+            unmarshal_VkPhysicalDeviceVulkan11Properties(vkStream, reinterpret_cast<VkPhysicalDeviceVulkan11Properties*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES:
+        {
+            unmarshal_VkPhysicalDeviceVulkan12Features(vkStream, reinterpret_cast<VkPhysicalDeviceVulkan12Features*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_PROPERTIES:
+        {
+            unmarshal_VkPhysicalDeviceVulkan12Properties(vkStream, reinterpret_cast<VkPhysicalDeviceVulkan12Properties*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO:
+        {
+            unmarshal_VkImageFormatListCreateInfo(vkStream, reinterpret_cast<VkImageFormatListCreateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES:
+        {
+            unmarshal_VkPhysicalDevice8BitStorageFeatures(vkStream, reinterpret_cast<VkPhysicalDevice8BitStorageFeatures*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES:
+        {
+            unmarshal_VkPhysicalDeviceDriverProperties(vkStream, reinterpret_cast<VkPhysicalDeviceDriverProperties*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_INT64_FEATURES:
+        {
+            unmarshal_VkPhysicalDeviceShaderAtomicInt64Features(vkStream, reinterpret_cast<VkPhysicalDeviceShaderAtomicInt64Features*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES:
+        {
+            unmarshal_VkPhysicalDeviceShaderFloat16Int8Features(vkStream, reinterpret_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FLOAT_CONTROLS_PROPERTIES:
+        {
+            unmarshal_VkPhysicalDeviceFloatControlsProperties(vkStream, reinterpret_cast<VkPhysicalDeviceFloatControlsProperties*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO:
+        {
+            unmarshal_VkDescriptorSetLayoutBindingFlagsCreateInfo(vkStream, reinterpret_cast<VkDescriptorSetLayoutBindingFlagsCreateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES:
+        {
+            unmarshal_VkPhysicalDeviceDescriptorIndexingFeatures(vkStream, reinterpret_cast<VkPhysicalDeviceDescriptorIndexingFeatures*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES:
+        {
+            unmarshal_VkPhysicalDeviceDescriptorIndexingProperties(vkStream, reinterpret_cast<VkPhysicalDeviceDescriptorIndexingProperties*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO:
+        {
+            unmarshal_VkDescriptorSetVariableDescriptorCountAllocateInfo(vkStream, reinterpret_cast<VkDescriptorSetVariableDescriptorCountAllocateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_LAYOUT_SUPPORT:
+        {
+            unmarshal_VkDescriptorSetVariableDescriptorCountLayoutSupport(vkStream, reinterpret_cast<VkDescriptorSetVariableDescriptorCountLayoutSupport*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_DEPTH_STENCIL_RESOLVE:
+        {
+            unmarshal_VkSubpassDescriptionDepthStencilResolve(vkStream, reinterpret_cast<VkSubpassDescriptionDepthStencilResolve*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_STENCIL_RESOLVE_PROPERTIES:
+        {
+            unmarshal_VkPhysicalDeviceDepthStencilResolveProperties(vkStream, reinterpret_cast<VkPhysicalDeviceDepthStencilResolveProperties*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCALAR_BLOCK_LAYOUT_FEATURES:
+        {
+            unmarshal_VkPhysicalDeviceScalarBlockLayoutFeatures(vkStream, reinterpret_cast<VkPhysicalDeviceScalarBlockLayoutFeatures*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMAGE_STENCIL_USAGE_CREATE_INFO:
+        {
+            unmarshal_VkImageStencilUsageCreateInfo(vkStream, reinterpret_cast<VkImageStencilUsageCreateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_SAMPLER_REDUCTION_MODE_CREATE_INFO:
+        {
+            unmarshal_VkSamplerReductionModeCreateInfo(vkStream, reinterpret_cast<VkSamplerReductionModeCreateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_FILTER_MINMAX_PROPERTIES:
+        {
+            unmarshal_VkPhysicalDeviceSamplerFilterMinmaxProperties(vkStream, reinterpret_cast<VkPhysicalDeviceSamplerFilterMinmaxProperties*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_MEMORY_MODEL_FEATURES:
+        {
+            unmarshal_VkPhysicalDeviceVulkanMemoryModelFeatures(vkStream, reinterpret_cast<VkPhysicalDeviceVulkanMemoryModelFeatures*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGELESS_FRAMEBUFFER_FEATURES:
+        {
+            unmarshal_VkPhysicalDeviceImagelessFramebufferFeatures(vkStream, reinterpret_cast<VkPhysicalDeviceImagelessFramebufferFeatures*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_FRAMEBUFFER_ATTACHMENTS_CREATE_INFO:
+        {
+            unmarshal_VkFramebufferAttachmentsCreateInfo(vkStream, reinterpret_cast<VkFramebufferAttachmentsCreateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_RENDER_PASS_ATTACHMENT_BEGIN_INFO:
+        {
+            unmarshal_VkRenderPassAttachmentBeginInfo(vkStream, reinterpret_cast<VkRenderPassAttachmentBeginInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES:
+        {
+            unmarshal_VkPhysicalDeviceUniformBufferStandardLayoutFeatures(vkStream, reinterpret_cast<VkPhysicalDeviceUniformBufferStandardLayoutFeatures*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SUBGROUP_EXTENDED_TYPES_FEATURES:
+        {
+            unmarshal_VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures(vkStream, reinterpret_cast<VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SEPARATE_DEPTH_STENCIL_LAYOUTS_FEATURES:
+        {
+            unmarshal_VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures(vkStream, reinterpret_cast<VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_STENCIL_LAYOUT:
+        {
+            unmarshal_VkAttachmentReferenceStencilLayout(vkStream, reinterpret_cast<VkAttachmentReferenceStencilLayout*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_STENCIL_LAYOUT:
+        {
+            unmarshal_VkAttachmentDescriptionStencilLayout(vkStream, reinterpret_cast<VkAttachmentDescriptionStencilLayout*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_QUERY_RESET_FEATURES:
+        {
+            unmarshal_VkPhysicalDeviceHostQueryResetFeatures(vkStream, reinterpret_cast<VkPhysicalDeviceHostQueryResetFeatures*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES:
+        {
+            unmarshal_VkPhysicalDeviceTimelineSemaphoreFeatures(vkStream, reinterpret_cast<VkPhysicalDeviceTimelineSemaphoreFeatures*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_PROPERTIES:
+        {
+            unmarshal_VkPhysicalDeviceTimelineSemaphoreProperties(vkStream, reinterpret_cast<VkPhysicalDeviceTimelineSemaphoreProperties*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO:
+        {
+            unmarshal_VkSemaphoreTypeCreateInfo(vkStream, reinterpret_cast<VkSemaphoreTypeCreateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO:
+        {
+            unmarshal_VkTimelineSemaphoreSubmitInfo(vkStream, reinterpret_cast<VkTimelineSemaphoreSubmitInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES:
+        {
+            unmarshal_VkPhysicalDeviceBufferDeviceAddressFeatures(vkStream, reinterpret_cast<VkPhysicalDeviceBufferDeviceAddressFeatures*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_BUFFER_OPAQUE_CAPTURE_ADDRESS_CREATE_INFO:
+        {
+            unmarshal_VkBufferOpaqueCaptureAddressCreateInfo(vkStream, reinterpret_cast<VkBufferOpaqueCaptureAddressCreateInfo*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_MEMORY_OPAQUE_CAPTURE_ADDRESS_ALLOCATE_INFO:
+        {
+            unmarshal_VkMemoryOpaqueCaptureAddressAllocateInfo(vkStream, reinterpret_cast<VkMemoryOpaqueCaptureAddressAllocateInfo*>(structExtension_out));
             break;
         }
 #endif
@@ -14030,24 +23553,87 @@ void unmarshal_extension_struct(
             break;
         }
 #endif
-#ifdef VK_KHR_image_format_list
-        case VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO_KHR:
+#ifdef VK_KHR_performance_query
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_FEATURES_KHR:
         {
-            unmarshal_VkImageFormatListCreateInfoKHR(vkStream, reinterpret_cast<VkImageFormatListCreateInfoKHR*>(structExtension_out));
+            unmarshal_VkPhysicalDevicePerformanceQueryFeaturesKHR(vkStream, reinterpret_cast<VkPhysicalDevicePerformanceQueryFeaturesKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_PROPERTIES_KHR:
+        {
+            unmarshal_VkPhysicalDevicePerformanceQueryPropertiesKHR(vkStream, reinterpret_cast<VkPhysicalDevicePerformanceQueryPropertiesKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_QUERY_POOL_PERFORMANCE_CREATE_INFO_KHR:
+        {
+            unmarshal_VkQueryPoolPerformanceCreateInfoKHR(vkStream, reinterpret_cast<VkQueryPoolPerformanceCreateInfoKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PERFORMANCE_QUERY_SUBMIT_INFO_KHR:
+        {
+            unmarshal_VkPerformanceQuerySubmitInfoKHR(vkStream, reinterpret_cast<VkPerformanceQuerySubmitInfoKHR*>(structExtension_out));
             break;
         }
 #endif
-#ifdef VK_KHR_8bit_storage
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR:
+#ifdef VK_KHR_portability_subset
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PORTABILITY_SUBSET_FEATURES_KHR:
         {
-            unmarshal_VkPhysicalDevice8BitStorageFeaturesKHR(vkStream, reinterpret_cast<VkPhysicalDevice8BitStorageFeaturesKHR*>(structExtension_out));
+            unmarshal_VkPhysicalDevicePortabilitySubsetFeaturesKHR(vkStream, reinterpret_cast<VkPhysicalDevicePortabilitySubsetFeaturesKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PORTABILITY_SUBSET_PROPERTIES_KHR:
+        {
+            unmarshal_VkPhysicalDevicePortabilitySubsetPropertiesKHR(vkStream, reinterpret_cast<VkPhysicalDevicePortabilitySubsetPropertiesKHR*>(structExtension_out));
             break;
         }
 #endif
-#ifdef VK_KHR_shader_float16_int8
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES:
+#ifdef VK_KHR_shader_clock
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CLOCK_FEATURES_KHR:
         {
-            unmarshal_VkPhysicalDeviceShaderFloat16Int8Features(vkStream, reinterpret_cast<VkPhysicalDeviceShaderFloat16Int8Features*>(structExtension_out));
+            unmarshal_VkPhysicalDeviceShaderClockFeaturesKHR(vkStream, reinterpret_cast<VkPhysicalDeviceShaderClockFeaturesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_shader_terminate_invocation
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_TERMINATE_INVOCATION_FEATURES_KHR:
+        {
+            unmarshal_VkPhysicalDeviceShaderTerminateInvocationFeaturesKHR(vkStream, reinterpret_cast<VkPhysicalDeviceShaderTerminateInvocationFeaturesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_fragment_shading_rate
+        case VK_STRUCTURE_TYPE_FRAGMENT_SHADING_RATE_ATTACHMENT_INFO_KHR:
+        {
+            unmarshal_VkFragmentShadingRateAttachmentInfoKHR(vkStream, reinterpret_cast<VkFragmentShadingRateAttachmentInfoKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_FRAGMENT_SHADING_RATE_STATE_CREATE_INFO_KHR:
+        {
+            unmarshal_VkPipelineFragmentShadingRateStateCreateInfoKHR(vkStream, reinterpret_cast<VkPipelineFragmentShadingRateStateCreateInfoKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_FEATURES_KHR:
+        {
+            unmarshal_VkPhysicalDeviceFragmentShadingRateFeaturesKHR(vkStream, reinterpret_cast<VkPhysicalDeviceFragmentShadingRateFeaturesKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_PROPERTIES_KHR:
+        {
+            unmarshal_VkPhysicalDeviceFragmentShadingRatePropertiesKHR(vkStream, reinterpret_cast<VkPhysicalDeviceFragmentShadingRatePropertiesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_surface_protected_capabilities
+        case VK_STRUCTURE_TYPE_SURFACE_PROTECTED_CAPABILITIES_KHR:
+        {
+            unmarshal_VkSurfaceProtectedCapabilitiesKHR(vkStream, reinterpret_cast<VkSurfaceProtectedCapabilitiesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_pipeline_executable_properties
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_EXECUTABLE_PROPERTIES_FEATURES_KHR:
+        {
+            unmarshal_VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR(vkStream, reinterpret_cast<VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR*>(structExtension_out));
             break;
         }
 #endif
@@ -14089,10 +23675,34 @@ void unmarshal_extension_struct(
             break;
         }
 #endif
+#ifdef VK_EXT_transform_feedback
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TRANSFORM_FEEDBACK_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceTransformFeedbackFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceTransformFeedbackFeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TRANSFORM_FEEDBACK_PROPERTIES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceTransformFeedbackPropertiesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceTransformFeedbackPropertiesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_STREAM_CREATE_INFO_EXT:
+        {
+            unmarshal_VkPipelineRasterizationStateStreamCreateInfoEXT(vkStream, reinterpret_cast<VkPipelineRasterizationStateStreamCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
 #ifdef VK_AMD_texture_gather_bias_lod
         case VK_STRUCTURE_TYPE_TEXTURE_LOD_GATHER_FORMAT_PROPERTIES_AMD:
         {
             unmarshal_VkTextureLODGatherFormatPropertiesAMD(vkStream, reinterpret_cast<VkTextureLODGatherFormatPropertiesAMD*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_corner_sampled_image
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CORNER_SAMPLED_IMAGE_FEATURES_NV:
+        {
+            unmarshal_VkPhysicalDeviceCornerSampledImageFeaturesNV(vkStream, reinterpret_cast<VkPhysicalDeviceCornerSampledImageFeaturesNV*>(structExtension_out));
             break;
         }
 #endif
@@ -14131,6 +23741,25 @@ void unmarshal_extension_struct(
         case VK_STRUCTURE_TYPE_VALIDATION_FLAGS_EXT:
         {
             unmarshal_VkValidationFlagsEXT(vkStream, reinterpret_cast<VkValidationFlagsEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_texture_compression_astc_hdr
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TEXTURE_COMPRESSION_ASTC_HDR_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceTextureCompressionASTCHDRFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceTextureCompressionASTCHDRFeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_astc_decode_mode
+        case VK_STRUCTURE_TYPE_IMAGE_VIEW_ASTC_DECODE_MODE_EXT:
+        {
+            unmarshal_VkImageViewASTCDecodeModeEXT(vkStream, reinterpret_cast<VkImageViewASTCDecodeModeEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ASTC_DECODE_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceASTCDecodeFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceASTCDecodeFeaturesEXT*>(structExtension_out));
             break;
         }
 #endif
@@ -14205,6 +23834,18 @@ void unmarshal_extension_struct(
             break;
         }
 #endif
+#ifdef VK_EXT_depth_clip_enable
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_CLIP_ENABLE_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceDepthClipEnableFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceDepthClipEnableFeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_DEPTH_CLIP_STATE_CREATE_INFO_EXT:
+        {
+            unmarshal_VkPipelineRasterizationDepthClipStateCreateInfoEXT(vkStream, reinterpret_cast<VkPipelineRasterizationDepthClipStateCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
 #ifdef VK_EXT_debug_utils
         case VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT:
         {
@@ -14234,15 +23875,25 @@ void unmarshal_extension_struct(
             break;
         }
 #endif
-#ifdef VK_EXT_sampler_filter_minmax
-        case VK_STRUCTURE_TYPE_SAMPLER_REDUCTION_MODE_CREATE_INFO_EXT:
+#ifdef VK_EXT_inline_uniform_block
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INLINE_UNIFORM_BLOCK_FEATURES_EXT:
         {
-            unmarshal_VkSamplerReductionModeCreateInfoEXT(vkStream, reinterpret_cast<VkSamplerReductionModeCreateInfoEXT*>(structExtension_out));
+            unmarshal_VkPhysicalDeviceInlineUniformBlockFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceInlineUniformBlockFeaturesEXT*>(structExtension_out));
             break;
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_FILTER_MINMAX_PROPERTIES_EXT:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INLINE_UNIFORM_BLOCK_PROPERTIES_EXT:
         {
-            unmarshal_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT*>(structExtension_out));
+            unmarshal_VkPhysicalDeviceInlineUniformBlockPropertiesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceInlineUniformBlockPropertiesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_INLINE_UNIFORM_BLOCK_EXT:
+        {
+            unmarshal_VkWriteDescriptorSetInlineUniformBlockEXT(vkStream, reinterpret_cast<VkWriteDescriptorSetInlineUniformBlockEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_INLINE_UNIFORM_BLOCK_CREATE_INFO_EXT:
+        {
+            unmarshal_VkDescriptorPoolInlineUniformBlockCreateInfoEXT(vkStream, reinterpret_cast<VkDescriptorPoolInlineUniformBlockCreateInfoEXT*>(structExtension_out));
             break;
         }
 #endif
@@ -14299,6 +23950,40 @@ void unmarshal_extension_struct(
             break;
         }
 #endif
+#ifdef VK_NV_shader_sm_builtins
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SM_BUILTINS_PROPERTIES_NV:
+        {
+            unmarshal_VkPhysicalDeviceShaderSMBuiltinsPropertiesNV(vkStream, reinterpret_cast<VkPhysicalDeviceShaderSMBuiltinsPropertiesNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SM_BUILTINS_FEATURES_NV:
+        {
+            unmarshal_VkPhysicalDeviceShaderSMBuiltinsFeaturesNV(vkStream, reinterpret_cast<VkPhysicalDeviceShaderSMBuiltinsFeaturesNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_image_drm_format_modifier
+        case VK_STRUCTURE_TYPE_DRM_FORMAT_MODIFIER_PROPERTIES_LIST_EXT:
+        {
+            unmarshal_VkDrmFormatModifierPropertiesListEXT(vkStream, reinterpret_cast<VkDrmFormatModifierPropertiesListEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_DRM_FORMAT_MODIFIER_INFO_EXT:
+        {
+            unmarshal_VkPhysicalDeviceImageDrmFormatModifierInfoEXT(vkStream, reinterpret_cast<VkPhysicalDeviceImageDrmFormatModifierInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_LIST_CREATE_INFO_EXT:
+        {
+            unmarshal_VkImageDrmFormatModifierListCreateInfoEXT(vkStream, reinterpret_cast<VkImageDrmFormatModifierListCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_EXPLICIT_CREATE_INFO_EXT:
+        {
+            unmarshal_VkImageDrmFormatModifierExplicitCreateInfoEXT(vkStream, reinterpret_cast<VkImageDrmFormatModifierExplicitCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
 #ifdef VK_EXT_validation_cache
         case VK_STRUCTURE_TYPE_SHADER_MODULE_VALIDATION_CACHE_CREATE_INFO_EXT:
         {
@@ -14306,30 +23991,61 @@ void unmarshal_extension_struct(
             break;
         }
 #endif
-#ifdef VK_EXT_descriptor_indexing
-        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT:
+#ifdef VK_NV_shading_rate_image
+        case VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_SHADING_RATE_IMAGE_STATE_CREATE_INFO_NV:
         {
-            unmarshal_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT(vkStream, reinterpret_cast<VkDescriptorSetLayoutBindingFlagsCreateInfoEXT*>(structExtension_out));
+            unmarshal_VkPipelineViewportShadingRateImageStateCreateInfoNV(vkStream, reinterpret_cast<VkPipelineViewportShadingRateImageStateCreateInfoNV*>(structExtension_out));
             break;
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADING_RATE_IMAGE_FEATURES_NV:
         {
-            unmarshal_VkPhysicalDeviceDescriptorIndexingFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceDescriptorIndexingFeaturesEXT*>(structExtension_out));
+            unmarshal_VkPhysicalDeviceShadingRateImageFeaturesNV(vkStream, reinterpret_cast<VkPhysicalDeviceShadingRateImageFeaturesNV*>(structExtension_out));
             break;
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES_EXT:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADING_RATE_IMAGE_PROPERTIES_NV:
         {
-            unmarshal_VkPhysicalDeviceDescriptorIndexingPropertiesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceDescriptorIndexingPropertiesEXT*>(structExtension_out));
+            unmarshal_VkPhysicalDeviceShadingRateImagePropertiesNV(vkStream, reinterpret_cast<VkPhysicalDeviceShadingRateImagePropertiesNV*>(structExtension_out));
             break;
         }
-        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT:
+        case VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_COARSE_SAMPLE_ORDER_STATE_CREATE_INFO_NV:
         {
-            unmarshal_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT(vkStream, reinterpret_cast<VkDescriptorSetVariableDescriptorCountAllocateInfoEXT*>(structExtension_out));
+            unmarshal_VkPipelineViewportCoarseSampleOrderStateCreateInfoNV(vkStream, reinterpret_cast<VkPipelineViewportCoarseSampleOrderStateCreateInfoNV*>(structExtension_out));
             break;
         }
-        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_LAYOUT_SUPPORT_EXT:
+#endif
+#ifdef VK_NV_ray_tracing
+        case VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_NV:
         {
-            unmarshal_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT(vkStream, reinterpret_cast<VkDescriptorSetVariableDescriptorCountLayoutSupportEXT*>(structExtension_out));
+            unmarshal_VkWriteDescriptorSetAccelerationStructureNV(vkStream, reinterpret_cast<VkWriteDescriptorSetAccelerationStructureNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PROPERTIES_NV:
+        {
+            unmarshal_VkPhysicalDeviceRayTracingPropertiesNV(vkStream, reinterpret_cast<VkPhysicalDeviceRayTracingPropertiesNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_representative_fragment_test
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_REPRESENTATIVE_FRAGMENT_TEST_FEATURES_NV:
+        {
+            unmarshal_VkPhysicalDeviceRepresentativeFragmentTestFeaturesNV(vkStream, reinterpret_cast<VkPhysicalDeviceRepresentativeFragmentTestFeaturesNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_REPRESENTATIVE_FRAGMENT_TEST_STATE_CREATE_INFO_NV:
+        {
+            unmarshal_VkPipelineRepresentativeFragmentTestStateCreateInfoNV(vkStream, reinterpret_cast<VkPipelineRepresentativeFragmentTestStateCreateInfoNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_filter_cubic
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_VIEW_IMAGE_FORMAT_INFO_EXT:
+        {
+            unmarshal_VkPhysicalDeviceImageViewImageFormatInfoEXT(vkStream, reinterpret_cast<VkPhysicalDeviceImageViewImageFormatInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_FILTER_CUBIC_IMAGE_VIEW_IMAGE_FORMAT_PROPERTIES_EXT:
+        {
+            unmarshal_VkFilterCubicImageViewImageFormatPropertiesEXT(vkStream, reinterpret_cast<VkFilterCubicImageViewImageFormatPropertiesEXT*>(structExtension_out));
             break;
         }
 #endif
@@ -14352,10 +24068,24 @@ void unmarshal_extension_struct(
             break;
         }
 #endif
+#ifdef VK_AMD_pipeline_compiler_control
+        case VK_STRUCTURE_TYPE_PIPELINE_COMPILER_CONTROL_CREATE_INFO_AMD:
+        {
+            unmarshal_VkPipelineCompilerControlCreateInfoAMD(vkStream, reinterpret_cast<VkPipelineCompilerControlCreateInfoAMD*>(structExtension_out));
+            break;
+        }
+#endif
 #ifdef VK_AMD_shader_core_properties
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CORE_PROPERTIES_AMD:
         {
             unmarshal_VkPhysicalDeviceShaderCorePropertiesAMD(vkStream, reinterpret_cast<VkPhysicalDeviceShaderCorePropertiesAMD*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_AMD_memory_overallocation_behavior
+        case VK_STRUCTURE_TYPE_DEVICE_MEMORY_OVERALLOCATION_CREATE_INFO_AMD:
+        {
+            unmarshal_VkDeviceMemoryOverallocationCreateInfoAMD(vkStream, reinterpret_cast<VkDeviceMemoryOverallocationCreateInfoAMD*>(structExtension_out));
             break;
         }
 #endif
@@ -14370,11 +24100,108 @@ void unmarshal_extension_struct(
             unmarshal_VkPipelineVertexInputDivisorStateCreateInfoEXT(vkStream, reinterpret_cast<VkPipelineVertexInputDivisorStateCreateInfoEXT*>(structExtension_out));
             break;
         }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_ATTRIBUTE_DIVISOR_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceVertexAttributeDivisorFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceVertexAttributeDivisorFeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_GGP_frame_token
+        case VK_STRUCTURE_TYPE_PRESENT_FRAME_TOKEN_GGP:
+        {
+            unmarshal_VkPresentFrameTokenGGP(vkStream, reinterpret_cast<VkPresentFrameTokenGGP*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_pipeline_creation_feedback
+        case VK_STRUCTURE_TYPE_PIPELINE_CREATION_FEEDBACK_CREATE_INFO_EXT:
+        {
+            unmarshal_VkPipelineCreationFeedbackCreateInfoEXT(vkStream, reinterpret_cast<VkPipelineCreationFeedbackCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_compute_shader_derivatives
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COMPUTE_SHADER_DERIVATIVES_FEATURES_NV:
+        {
+            unmarshal_VkPhysicalDeviceComputeShaderDerivativesFeaturesNV(vkStream, reinterpret_cast<VkPhysicalDeviceComputeShaderDerivativesFeaturesNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_mesh_shader
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV:
+        {
+            unmarshal_VkPhysicalDeviceMeshShaderFeaturesNV(vkStream, reinterpret_cast<VkPhysicalDeviceMeshShaderFeaturesNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_NV:
+        {
+            unmarshal_VkPhysicalDeviceMeshShaderPropertiesNV(vkStream, reinterpret_cast<VkPhysicalDeviceMeshShaderPropertiesNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_fragment_shader_barycentric
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADER_BARYCENTRIC_FEATURES_NV:
+        {
+            unmarshal_VkPhysicalDeviceFragmentShaderBarycentricFeaturesNV(vkStream, reinterpret_cast<VkPhysicalDeviceFragmentShaderBarycentricFeaturesNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_shader_image_footprint
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_FOOTPRINT_FEATURES_NV:
+        {
+            unmarshal_VkPhysicalDeviceShaderImageFootprintFeaturesNV(vkStream, reinterpret_cast<VkPhysicalDeviceShaderImageFootprintFeaturesNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_scissor_exclusive
+        case VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_EXCLUSIVE_SCISSOR_STATE_CREATE_INFO_NV:
+        {
+            unmarshal_VkPipelineViewportExclusiveScissorStateCreateInfoNV(vkStream, reinterpret_cast<VkPipelineViewportExclusiveScissorStateCreateInfoNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXCLUSIVE_SCISSOR_FEATURES_NV:
+        {
+            unmarshal_VkPhysicalDeviceExclusiveScissorFeaturesNV(vkStream, reinterpret_cast<VkPhysicalDeviceExclusiveScissorFeaturesNV*>(structExtension_out));
+            break;
+        }
 #endif
 #ifdef VK_NV_device_diagnostic_checkpoints
         case VK_STRUCTURE_TYPE_QUEUE_FAMILY_CHECKPOINT_PROPERTIES_NV:
         {
             unmarshal_VkQueueFamilyCheckpointPropertiesNV(vkStream, reinterpret_cast<VkQueueFamilyCheckpointPropertiesNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_INTEL_shader_integer_functions2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INTEGER_FUNCTIONS_2_FEATURES_INTEL:
+        {
+            unmarshal_VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL(vkStream, reinterpret_cast<VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_INTEL_performance_query
+        case VK_STRUCTURE_TYPE_QUERY_POOL_PERFORMANCE_QUERY_CREATE_INFO_INTEL:
+        {
+            unmarshal_VkQueryPoolPerformanceQueryCreateInfoINTEL(vkStream, reinterpret_cast<VkQueryPoolPerformanceQueryCreateInfoINTEL*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_pci_bus_info
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PCI_BUS_INFO_PROPERTIES_EXT:
+        {
+            unmarshal_VkPhysicalDevicePCIBusInfoPropertiesEXT(vkStream, reinterpret_cast<VkPhysicalDevicePCIBusInfoPropertiesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_AMD_display_native_hdr
+        case VK_STRUCTURE_TYPE_DISPLAY_NATIVE_HDR_SURFACE_CAPABILITIES_AMD:
+        {
+            unmarshal_VkDisplayNativeHdrSurfaceCapabilitiesAMD(vkStream, reinterpret_cast<VkDisplayNativeHdrSurfaceCapabilitiesAMD*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_SWAPCHAIN_DISPLAY_NATIVE_HDR_CREATE_INFO_AMD:
+        {
+            unmarshal_VkSwapchainDisplayNativeHdrCreateInfoAMD(vkStream, reinterpret_cast<VkSwapchainDisplayNativeHdrCreateInfoAMD*>(structExtension_out));
             break;
         }
 #endif
@@ -14392,6 +24219,388 @@ void unmarshal_extension_struct(
         case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
         {
             unmarshal_VkImportPhysicalAddressGOOGLE(vkStream, reinterpret_cast<VkImportPhysicalAddressGOOGLE*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_subgroup_size_control
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceSubgroupSizeControlFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceSubgroupSizeControlFeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_PROPERTIES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceSubgroupSizeControlPropertiesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceSubgroupSizeControlPropertiesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_REQUIRED_SUBGROUP_SIZE_CREATE_INFO_EXT:
+        {
+            unmarshal_VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT(vkStream, reinterpret_cast<VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_AMD_shader_core_properties2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CORE_PROPERTIES_2_AMD:
+        {
+            unmarshal_VkPhysicalDeviceShaderCoreProperties2AMD(vkStream, reinterpret_cast<VkPhysicalDeviceShaderCoreProperties2AMD*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_AMD_device_coherent_memory
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COHERENT_MEMORY_FEATURES_AMD:
+        {
+            unmarshal_VkPhysicalDeviceCoherentMemoryFeaturesAMD(vkStream, reinterpret_cast<VkPhysicalDeviceCoherentMemoryFeaturesAMD*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_shader_image_atomic_int64
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_ATOMIC_INT64_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_memory_budget
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceMemoryBudgetPropertiesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceMemoryBudgetPropertiesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_memory_priority
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PRIORITY_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceMemoryPriorityFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceMemoryPriorityFeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_MEMORY_PRIORITY_ALLOCATE_INFO_EXT:
+        {
+            unmarshal_VkMemoryPriorityAllocateInfoEXT(vkStream, reinterpret_cast<VkMemoryPriorityAllocateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_dedicated_allocation_image_aliasing
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEDICATED_ALLOCATION_IMAGE_ALIASING_FEATURES_NV:
+        {
+            unmarshal_VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV(vkStream, reinterpret_cast<VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_buffer_device_address
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceBufferDeviceAddressFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceBufferDeviceAddressFeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_CREATE_INFO_EXT:
+        {
+            unmarshal_VkBufferDeviceAddressCreateInfoEXT(vkStream, reinterpret_cast<VkBufferDeviceAddressCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_validation_features
+        case VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT:
+        {
+            unmarshal_VkValidationFeaturesEXT(vkStream, reinterpret_cast<VkValidationFeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_cooperative_matrix
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_FEATURES_NV:
+        {
+            unmarshal_VkPhysicalDeviceCooperativeMatrixFeaturesNV(vkStream, reinterpret_cast<VkPhysicalDeviceCooperativeMatrixFeaturesNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_PROPERTIES_NV:
+        {
+            unmarshal_VkPhysicalDeviceCooperativeMatrixPropertiesNV(vkStream, reinterpret_cast<VkPhysicalDeviceCooperativeMatrixPropertiesNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_coverage_reduction_mode
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COVERAGE_REDUCTION_MODE_FEATURES_NV:
+        {
+            unmarshal_VkPhysicalDeviceCoverageReductionModeFeaturesNV(vkStream, reinterpret_cast<VkPhysicalDeviceCoverageReductionModeFeaturesNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_COVERAGE_REDUCTION_STATE_CREATE_INFO_NV:
+        {
+            unmarshal_VkPipelineCoverageReductionStateCreateInfoNV(vkStream, reinterpret_cast<VkPipelineCoverageReductionStateCreateInfoNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_fragment_shader_interlock
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADER_INTERLOCK_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_ycbcr_image_arrays
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_YCBCR_IMAGE_ARRAYS_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceYcbcrImageArraysFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceYcbcrImageArraysFeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_full_screen_exclusive
+        case VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_INFO_EXT:
+        {
+            unmarshal_VkSurfaceFullScreenExclusiveInfoEXT(vkStream, reinterpret_cast<VkSurfaceFullScreenExclusiveInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_SURFACE_CAPABILITIES_FULL_SCREEN_EXCLUSIVE_EXT:
+        {
+            unmarshal_VkSurfaceCapabilitiesFullScreenExclusiveEXT(vkStream, reinterpret_cast<VkSurfaceCapabilitiesFullScreenExclusiveEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_WIN32_INFO_EXT:
+        {
+            unmarshal_VkSurfaceFullScreenExclusiveWin32InfoEXT(vkStream, reinterpret_cast<VkSurfaceFullScreenExclusiveWin32InfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_line_rasterization
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LINE_RASTERIZATION_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceLineRasterizationFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceLineRasterizationFeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LINE_RASTERIZATION_PROPERTIES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceLineRasterizationPropertiesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceLineRasterizationPropertiesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_LINE_STATE_CREATE_INFO_EXT:
+        {
+            unmarshal_VkPipelineRasterizationLineStateCreateInfoEXT(vkStream, reinterpret_cast<VkPipelineRasterizationLineStateCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_shader_atomic_float
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceShaderAtomicFloatFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceShaderAtomicFloatFeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_index_type_uint8
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INDEX_TYPE_UINT8_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceIndexTypeUint8FeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceIndexTypeUint8FeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceExtendedDynamicStateFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceExtendedDynamicStateFeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_shader_demote_to_helper_invocation
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DEMOTE_TO_HELPER_INVOCATION_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_device_generated_commands
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_GENERATED_COMMANDS_PROPERTIES_NV:
+        {
+            unmarshal_VkPhysicalDeviceDeviceGeneratedCommandsPropertiesNV(vkStream, reinterpret_cast<VkPhysicalDeviceDeviceGeneratedCommandsPropertiesNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_GENERATED_COMMANDS_FEATURES_NV:
+        {
+            unmarshal_VkPhysicalDeviceDeviceGeneratedCommandsFeaturesNV(vkStream, reinterpret_cast<VkPhysicalDeviceDeviceGeneratedCommandsFeaturesNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_SHADER_GROUPS_CREATE_INFO_NV:
+        {
+            unmarshal_VkGraphicsPipelineShaderGroupsCreateInfoNV(vkStream, reinterpret_cast<VkGraphicsPipelineShaderGroupsCreateInfoNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_texel_buffer_alignment
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TEXEL_BUFFER_ALIGNMENT_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TEXEL_BUFFER_ALIGNMENT_PROPERTIES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_QCOM_render_pass_transform
+        case VK_STRUCTURE_TYPE_RENDER_PASS_TRANSFORM_BEGIN_INFO_QCOM:
+        {
+            unmarshal_VkRenderPassTransformBeginInfoQCOM(vkStream, reinterpret_cast<VkRenderPassTransformBeginInfoQCOM*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_RENDER_PASS_TRANSFORM_INFO_QCOM:
+        {
+            unmarshal_VkCommandBufferInheritanceRenderPassTransformInfoQCOM(vkStream, reinterpret_cast<VkCommandBufferInheritanceRenderPassTransformInfoQCOM*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_device_memory_report
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_MEMORY_REPORT_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceDeviceMemoryReportFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceDeviceMemoryReportFeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_DEVICE_MEMORY_REPORT_CREATE_INFO_EXT:
+        {
+            unmarshal_VkDeviceDeviceMemoryReportCreateInfoEXT(vkStream, reinterpret_cast<VkDeviceDeviceMemoryReportCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_robustness2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceRobustness2FeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceRobustness2FeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_PROPERTIES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceRobustness2PropertiesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceRobustness2PropertiesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_custom_border_color
+        case VK_STRUCTURE_TYPE_SAMPLER_CUSTOM_BORDER_COLOR_CREATE_INFO_EXT:
+        {
+            unmarshal_VkSamplerCustomBorderColorCreateInfoEXT(vkStream, reinterpret_cast<VkSamplerCustomBorderColorCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CUSTOM_BORDER_COLOR_PROPERTIES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceCustomBorderColorPropertiesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceCustomBorderColorPropertiesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CUSTOM_BORDER_COLOR_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceCustomBorderColorFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceCustomBorderColorFeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_private_data
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRIVATE_DATA_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDevicePrivateDataFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDevicePrivateDataFeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_PRIVATE_DATA_CREATE_INFO_EXT:
+        {
+            unmarshal_VkDevicePrivateDataCreateInfoEXT(vkStream, reinterpret_cast<VkDevicePrivateDataCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_pipeline_creation_cache_control
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_CREATION_CACHE_CONTROL_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDevicePipelineCreationCacheControlFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDevicePipelineCreationCacheControlFeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_device_diagnostics_config
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DIAGNOSTICS_CONFIG_FEATURES_NV:
+        {
+            unmarshal_VkPhysicalDeviceDiagnosticsConfigFeaturesNV(vkStream, reinterpret_cast<VkPhysicalDeviceDiagnosticsConfigFeaturesNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_DIAGNOSTICS_CONFIG_CREATE_INFO_NV:
+        {
+            unmarshal_VkDeviceDiagnosticsConfigCreateInfoNV(vkStream, reinterpret_cast<VkDeviceDiagnosticsConfigCreateInfoNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_fragment_shading_rate_enums
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_ENUMS_FEATURES_NV:
+        {
+            unmarshal_VkPhysicalDeviceFragmentShadingRateEnumsFeaturesNV(vkStream, reinterpret_cast<VkPhysicalDeviceFragmentShadingRateEnumsFeaturesNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_ENUMS_PROPERTIES_NV:
+        {
+            unmarshal_VkPhysicalDeviceFragmentShadingRateEnumsPropertiesNV(vkStream, reinterpret_cast<VkPhysicalDeviceFragmentShadingRateEnumsPropertiesNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_FRAGMENT_SHADING_RATE_ENUM_STATE_CREATE_INFO_NV:
+        {
+            unmarshal_VkPipelineFragmentShadingRateEnumStateCreateInfoNV(vkStream, reinterpret_cast<VkPipelineFragmentShadingRateEnumStateCreateInfoNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_fragment_density_map2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_2_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceFragmentDensityMap2FeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceFragmentDensityMap2FeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_2_PROPERTIES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceFragmentDensityMap2PropertiesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceFragmentDensityMap2PropertiesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_QCOM_rotated_copy_commands
+        case VK_STRUCTURE_TYPE_COPY_COMMAND_TRANSFORM_INFO_QCOM:
+        {
+            unmarshal_VkCopyCommandTransformInfoQCOM(vkStream, reinterpret_cast<VkCopyCommandTransformInfoQCOM*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_image_robustness
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_ROBUSTNESS_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDeviceImageRobustnessFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDeviceImageRobustnessFeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_4444_formats
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_4444_FORMATS_FEATURES_EXT:
+        {
+            unmarshal_VkPhysicalDevice4444FormatsFeaturesEXT(vkStream, reinterpret_cast<VkPhysicalDevice4444FormatsFeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_acceleration_structure
+        case VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR:
+        {
+            unmarshal_VkWriteDescriptorSetAccelerationStructureKHR(vkStream, reinterpret_cast<VkWriteDescriptorSetAccelerationStructureKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR:
+        {
+            unmarshal_VkPhysicalDeviceAccelerationStructureFeaturesKHR(vkStream, reinterpret_cast<VkPhysicalDeviceAccelerationStructureFeaturesKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR:
+        {
+            unmarshal_VkPhysicalDeviceAccelerationStructurePropertiesKHR(vkStream, reinterpret_cast<VkPhysicalDeviceAccelerationStructurePropertiesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_ray_tracing_pipeline
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR:
+        {
+            unmarshal_VkPhysicalDeviceRayTracingPipelineFeaturesKHR(vkStream, reinterpret_cast<VkPhysicalDeviceRayTracingPipelineFeaturesKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR:
+        {
+            unmarshal_VkPhysicalDeviceRayTracingPipelinePropertiesKHR(vkStream, reinterpret_cast<VkPhysicalDeviceRayTracingPipelinePropertiesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_ray_query
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR:
+        {
+            unmarshal_VkPhysicalDeviceRayQueryFeaturesKHR(vkStream, reinterpret_cast<VkPhysicalDeviceRayQueryFeaturesKHR*>(structExtension_out));
             break;
         }
 #endif
@@ -15198,16 +25407,6 @@ const char* api_opcode_to_string(
             return "OP_vkGetPhysicalDeviceWaylandPresentationSupportKHR";
         }
 #endif
-#ifdef VK_KHR_mir_surface
-        case OP_vkCreateMirSurfaceKHR:
-        {
-            return "OP_vkCreateMirSurfaceKHR";
-        }
-        case OP_vkGetPhysicalDeviceMirPresentationSupportKHR:
-        {
-            return "OP_vkGetPhysicalDeviceMirPresentationSupportKHR";
-        }
-#endif
 #ifdef VK_KHR_android_surface
         case OP_vkCreateAndroidSurfaceKHR:
         {
@@ -15578,44 +25777,6 @@ const char* api_opcode_to_string(
             return "OP_vkCmdEndConditionalRenderingEXT";
         }
 #endif
-#ifdef VK_NVX_device_generated_commands
-        case OP_vkCmdProcessCommandsNVX:
-        {
-            return "OP_vkCmdProcessCommandsNVX";
-        }
-        case OP_vkCmdReserveSpaceForCommandsNVX:
-        {
-            return "OP_vkCmdReserveSpaceForCommandsNVX";
-        }
-        case OP_vkCreateIndirectCommandsLayoutNVX:
-        {
-            return "OP_vkCreateIndirectCommandsLayoutNVX";
-        }
-        case OP_vkDestroyIndirectCommandsLayoutNVX:
-        {
-            return "OP_vkDestroyIndirectCommandsLayoutNVX";
-        }
-        case OP_vkCreateObjectTableNVX:
-        {
-            return "OP_vkCreateObjectTableNVX";
-        }
-        case OP_vkDestroyObjectTableNVX:
-        {
-            return "OP_vkDestroyObjectTableNVX";
-        }
-        case OP_vkRegisterObjectsNVX:
-        {
-            return "OP_vkRegisterObjectsNVX";
-        }
-        case OP_vkUnregisterObjectsNVX:
-        {
-            return "OP_vkUnregisterObjectsNVX";
-        }
-        case OP_vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX:
-        {
-            return "OP_vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX";
-        }
-#endif
 #ifdef VK_NV_clip_space_w_scaling
         case OP_vkCmdSetViewportWScalingNV:
         {
@@ -15918,6 +26079,840 @@ const char* api_opcode_to_string(
         case OP_vkQueueFlushCommandsGOOGLE:
         {
             return "OP_vkQueueFlushCommandsGOOGLE";
+        }
+#endif
+#ifdef VK_EXT_full_screen_exclusive
+        case OP_vkAcquireFullScreenExclusiveModeEXT:
+        {
+            return "OP_vkAcquireFullScreenExclusiveModeEXT";
+        }
+#endif
+#ifdef VK_NV_ray_tracing
+        case OP_vkBindAccelerationStructureMemoryNV:
+        {
+            return "OP_vkBindAccelerationStructureMemoryNV";
+        }
+#endif
+#ifdef VK_INTEL_performance_query
+        case OP_vkInitializePerformanceApiINTEL:
+        {
+            return "OP_vkInitializePerformanceApiINTEL";
+        }
+#endif
+#ifdef VK_KHR_deferred_host_operations
+        case OP_vkGetDeferredOperationMaxConcurrencyKHR:
+        {
+            return "OP_vkGetDeferredOperationMaxConcurrencyKHR";
+        }
+#endif
+#ifdef VK_EXT_calibrated_timestamps
+        case OP_vkGetCalibratedTimestampsEXT:
+        {
+            return "OP_vkGetCalibratedTimestampsEXT";
+        }
+#endif
+#ifdef VK_NV_ray_tracing
+        case OP_vkCreateRayTracingPipelinesNV:
+        {
+            return "OP_vkCreateRayTracingPipelinesNV";
+        }
+#endif
+#ifdef VK_KHR_acceleration_structure
+        case OP_vkCmdCopyMemoryToAccelerationStructureKHR:
+        {
+            return "OP_vkCmdCopyMemoryToAccelerationStructureKHR";
+        }
+#endif
+#ifdef VK_KHR_fragment_shading_rate
+        case OP_vkCmdSetFragmentShadingRateKHR:
+        {
+            return "OP_vkCmdSetFragmentShadingRateKHR";
+        }
+#endif
+#ifdef VK_NVX_image_view_handle
+        case OP_vkGetImageViewHandleNVX:
+        {
+            return "OP_vkGetImageViewHandleNVX";
+        }
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+        case OP_vkCmdSetScissorWithCountEXT:
+        {
+            return "OP_vkCmdSetScissorWithCountEXT";
+        }
+#endif
+#ifdef VK_KHR_ray_tracing_pipeline
+        case OP_vkGetRayTracingShaderGroupStackSizeKHR:
+        {
+            return "OP_vkGetRayTracingShaderGroupStackSizeKHR";
+        }
+#endif
+#ifdef VK_EXT_full_screen_exclusive
+        case OP_vkGetDeviceGroupSurfacePresentModes2EXT:
+        {
+            return "OP_vkGetDeviceGroupSurfacePresentModes2EXT";
+        }
+#endif
+#ifdef VK_NV_mesh_shader
+        case OP_vkCmdDrawMeshTasksNV:
+        {
+            return "OP_vkCmdDrawMeshTasksNV";
+        }
+#endif
+#ifdef VK_NV_ray_tracing
+        case OP_vkCmdWriteAccelerationStructuresPropertiesNV:
+        {
+            return "OP_vkCmdWriteAccelerationStructuresPropertiesNV";
+        }
+#endif
+#ifdef VK_EXT_private_data
+        case OP_vkDestroyPrivateDataSlotEXT:
+        {
+            return "OP_vkDestroyPrivateDataSlotEXT";
+        }
+#endif
+#ifdef VK_NV_ray_tracing
+        case OP_vkCmdTraceRaysNV:
+        {
+            return "OP_vkCmdTraceRaysNV";
+        }
+#endif
+#ifdef VK_NVX_image_view_handle
+        case OP_vkGetImageViewAddressNVX:
+        {
+            return "OP_vkGetImageViewAddressNVX";
+        }
+#endif
+#ifdef VK_NV_ray_tracing
+        case OP_vkCmdCopyAccelerationStructureNV:
+        {
+            return "OP_vkCmdCopyAccelerationStructureNV";
+        }
+#endif
+#ifdef VK_KHR_ray_tracing_pipeline
+        case OP_vkCmdTraceRaysIndirectKHR:
+        {
+            return "OP_vkCmdTraceRaysIndirectKHR";
+        }
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+        case OP_vkCmdSetFrontFaceEXT:
+        {
+            return "OP_vkCmdSetFrontFaceEXT";
+        }
+#endif
+#ifdef VK_INTEL_performance_query
+        case OP_vkGetPerformanceParameterINTEL:
+        {
+            return "OP_vkGetPerformanceParameterINTEL";
+        }
+#endif
+#ifdef VK_KHR_ray_tracing_pipeline
+        case OP_vkCmdTraceRaysKHR:
+        {
+            return "OP_vkCmdTraceRaysKHR";
+        }
+#endif
+#ifdef VK_NV_shading_rate_image
+        case OP_vkCmdSetViewportShadingRatePaletteNV:
+        {
+            return "OP_vkCmdSetViewportShadingRatePaletteNV";
+        }
+#endif
+#ifdef VK_KHR_deferred_host_operations
+        case OP_vkDestroyDeferredOperationKHR:
+        {
+            return "OP_vkDestroyDeferredOperationKHR";
+        }
+        case OP_vkDeferredOperationJoinKHR:
+        {
+            return "OP_vkDeferredOperationJoinKHR";
+        }
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+        case OP_vkCmdSetDepthWriteEnableEXT:
+        {
+            return "OP_vkCmdSetDepthWriteEnableEXT";
+        }
+#endif
+#ifdef VK_KHR_buffer_device_address
+        case OP_vkGetBufferDeviceAddressKHR:
+        {
+            return "OP_vkGetBufferDeviceAddressKHR";
+        }
+#endif
+#ifdef VK_KHR_acceleration_structure
+        case OP_vkGetAccelerationStructureBuildSizesKHR:
+        {
+            return "OP_vkGetAccelerationStructureBuildSizesKHR";
+        }
+#endif
+#ifdef VK_NV_ray_tracing
+        case OP_vkGetAccelerationStructureMemoryRequirementsNV:
+        {
+            return "OP_vkGetAccelerationStructureMemoryRequirementsNV";
+        }
+#endif
+#ifdef VK_EXT_directfb_surface
+        case OP_vkCreateDirectFBSurfaceEXT:
+        {
+            return "OP_vkCreateDirectFBSurfaceEXT";
+        }
+#endif
+#ifdef VK_VERSION_1_2
+        case OP_vkCmdEndRenderPass2:
+        {
+            return "OP_vkCmdEndRenderPass2";
+        }
+#endif
+#ifdef VK_KHR_ray_tracing_pipeline
+        case OP_vkGetRayTracingCaptureReplayShaderGroupHandlesKHR:
+        {
+            return "OP_vkGetRayTracingCaptureReplayShaderGroupHandlesKHR";
+        }
+#endif
+#ifdef VK_VERSION_1_2
+        case OP_vkGetBufferDeviceAddress:
+        {
+            return "OP_vkGetBufferDeviceAddress";
+        }
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+        case OP_vkCmdSetDepthBoundsTestEnableEXT:
+        {
+            return "OP_vkCmdSetDepthBoundsTestEnableEXT";
+        }
+#endif
+#ifdef VK_KHR_acceleration_structure
+        case OP_vkGetAccelerationStructureDeviceAddressKHR:
+        {
+            return "OP_vkGetAccelerationStructureDeviceAddressKHR";
+        }
+        case OP_vkCmdCopyAccelerationStructureToMemoryKHR:
+        {
+            return "OP_vkCmdCopyAccelerationStructureToMemoryKHR";
+        }
+#endif
+#ifdef VK_NV_mesh_shader
+        case OP_vkCmdDrawMeshTasksIndirectCountNV:
+        {
+            return "OP_vkCmdDrawMeshTasksIndirectCountNV";
+        }
+#endif
+#ifdef VK_KHR_performance_query
+        case OP_vkReleaseProfilingLockKHR:
+        {
+            return "OP_vkReleaseProfilingLockKHR";
+        }
+#endif
+#ifdef VK_KHR_acceleration_structure
+        case OP_vkDestroyAccelerationStructureKHR:
+        {
+            return "OP_vkDestroyAccelerationStructureKHR";
+        }
+#endif
+#ifdef VK_EXT_buffer_device_address
+        case OP_vkGetBufferDeviceAddressEXT:
+        {
+            return "OP_vkGetBufferDeviceAddressEXT";
+        }
+#endif
+#ifdef VK_VERSION_1_2
+        case OP_vkWaitSemaphores:
+        {
+            return "OP_vkWaitSemaphores";
+        }
+#endif
+#ifdef VK_EXT_private_data
+        case OP_vkSetPrivateDataEXT:
+        {
+            return "OP_vkSetPrivateDataEXT";
+        }
+#endif
+#ifdef VK_NV_scissor_exclusive
+        case OP_vkCmdSetExclusiveScissorNV:
+        {
+            return "OP_vkCmdSetExclusiveScissorNV";
+        }
+#endif
+#ifdef VK_KHR_copy_commands2
+        case OP_vkCmdCopyImage2KHR:
+        {
+            return "OP_vkCmdCopyImage2KHR";
+        }
+#endif
+#ifdef VK_KHR_timeline_semaphore
+        case OP_vkGetSemaphoreCounterValueKHR:
+        {
+            return "OP_vkGetSemaphoreCounterValueKHR";
+        }
+#endif
+#ifdef VK_NV_ray_tracing
+        case OP_vkGetRayTracingShaderGroupHandlesNV:
+        {
+            return "OP_vkGetRayTracingShaderGroupHandlesNV";
+        }
+#endif
+#ifdef VK_VERSION_1_2
+        case OP_vkGetBufferOpaqueCaptureAddress:
+        {
+            return "OP_vkGetBufferOpaqueCaptureAddress";
+        }
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+        case OP_vkCmdSetDepthTestEnableEXT:
+        {
+            return "OP_vkCmdSetDepthTestEnableEXT";
+        }
+#endif
+#ifdef VK_NV_device_generated_commands
+        case OP_vkCmdExecuteGeneratedCommandsNV:
+        {
+            return "OP_vkCmdExecuteGeneratedCommandsNV";
+        }
+#endif
+#ifdef VK_VERSION_1_2
+        case OP_vkCmdBeginRenderPass2:
+        {
+            return "OP_vkCmdBeginRenderPass2";
+        }
+#endif
+#ifdef VK_EXT_private_data
+        case OP_vkCreatePrivateDataSlotEXT:
+        {
+            return "OP_vkCreatePrivateDataSlotEXT";
+        }
+#endif
+#ifdef VK_NV_shading_rate_image
+        case OP_vkCmdSetCoarseSampleOrderNV:
+        {
+            return "OP_vkCmdSetCoarseSampleOrderNV";
+        }
+        case OP_vkCmdBindShadingRateImageNV:
+        {
+            return "OP_vkCmdBindShadingRateImageNV";
+        }
+#endif
+#ifdef VK_KHR_performance_query
+        case OP_vkAcquireProfilingLockKHR:
+        {
+            return "OP_vkAcquireProfilingLockKHR";
+        }
+#endif
+#ifdef VK_KHR_acceleration_structure
+        case OP_vkCopyAccelerationStructureKHR:
+        {
+            return "OP_vkCopyAccelerationStructureKHR";
+        }
+#endif
+#ifdef VK_GGP_stream_descriptor_surface
+        case OP_vkCreateStreamDescriptorSurfaceGGP:
+        {
+            return "OP_vkCreateStreamDescriptorSurfaceGGP";
+        }
+#endif
+#ifdef VK_KHR_acceleration_structure
+        case OP_vkBuildAccelerationStructuresKHR:
+        {
+            return "OP_vkBuildAccelerationStructuresKHR";
+        }
+#endif
+#ifdef VK_EXT_host_query_reset
+        case OP_vkResetQueryPoolEXT:
+        {
+            return "OP_vkResetQueryPoolEXT";
+        }
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+        case OP_vkCmdBindVertexBuffers2EXT:
+        {
+            return "OP_vkCmdBindVertexBuffers2EXT";
+        }
+#endif
+#ifdef VK_VERSION_1_2
+        case OP_vkCmdNextSubpass2:
+        {
+            return "OP_vkCmdNextSubpass2";
+        }
+        case OP_vkCmdDrawIndexedIndirectCount:
+        {
+            return "OP_vkCmdDrawIndexedIndirectCount";
+        }
+#endif
+#ifdef VK_INTEL_performance_query
+        case OP_vkAcquirePerformanceConfigurationINTEL:
+        {
+            return "OP_vkAcquirePerformanceConfigurationINTEL";
+        }
+#endif
+#ifdef VK_KHR_ray_tracing_pipeline
+        case OP_vkCreateRayTracingPipelinesKHR:
+        {
+            return "OP_vkCreateRayTracingPipelinesKHR";
+        }
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+        case OP_vkCmdSetDepthCompareOpEXT:
+        {
+            return "OP_vkCmdSetDepthCompareOpEXT";
+        }
+#endif
+#ifdef VK_KHR_copy_commands2
+        case OP_vkCmdCopyBuffer2KHR:
+        {
+            return "OP_vkCmdCopyBuffer2KHR";
+        }
+        case OP_vkCmdCopyBufferToImage2KHR:
+        {
+            return "OP_vkCmdCopyBufferToImage2KHR";
+        }
+#endif
+#ifdef VK_NV_device_generated_commands
+        case OP_vkGetGeneratedCommandsMemoryRequirementsNV:
+        {
+            return "OP_vkGetGeneratedCommandsMemoryRequirementsNV";
+        }
+#endif
+#ifdef VK_EXT_image_drm_format_modifier
+        case OP_vkGetImageDrmFormatModifierPropertiesEXT:
+        {
+            return "OP_vkGetImageDrmFormatModifierPropertiesEXT";
+        }
+#endif
+#ifdef VK_INTEL_performance_query
+        case OP_vkCmdSetPerformanceOverrideINTEL:
+        {
+            return "OP_vkCmdSetPerformanceOverrideINTEL";
+        }
+#endif
+#ifdef VK_VERSION_1_2
+        case OP_vkResetQueryPool:
+        {
+            return "OP_vkResetQueryPool";
+        }
+#endif
+#ifdef VK_KHR_copy_commands2
+        case OP_vkCmdCopyImageToBuffer2KHR:
+        {
+            return "OP_vkCmdCopyImageToBuffer2KHR";
+        }
+#endif
+#ifdef VK_NV_ray_tracing
+        case OP_vkDestroyAccelerationStructureNV:
+        {
+            return "OP_vkDestroyAccelerationStructureNV";
+        }
+#endif
+#ifdef VK_INTEL_performance_query
+        case OP_vkReleasePerformanceConfigurationINTEL:
+        {
+            return "OP_vkReleasePerformanceConfigurationINTEL";
+        }
+#endif
+#ifdef VK_KHR_copy_commands2
+        case OP_vkCmdResolveImage2KHR:
+        {
+            return "OP_vkCmdResolveImage2KHR";
+        }
+#endif
+#ifdef VK_EXT_metal_surface
+        case OP_vkCreateMetalSurfaceEXT:
+        {
+            return "OP_vkCreateMetalSurfaceEXT";
+        }
+#endif
+#ifdef VK_KHR_acceleration_structure
+        case OP_vkCopyAccelerationStructureToMemoryKHR:
+        {
+            return "OP_vkCopyAccelerationStructureToMemoryKHR";
+        }
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+        case OP_vkCmdSetViewportWithCountEXT:
+        {
+            return "OP_vkCmdSetViewportWithCountEXT";
+        }
+#endif
+#ifdef VK_EXT_full_screen_exclusive
+        case OP_vkReleaseFullScreenExclusiveModeEXT:
+        {
+            return "OP_vkReleaseFullScreenExclusiveModeEXT";
+        }
+#endif
+#ifdef VK_KHR_acceleration_structure
+        case OP_vkCmdBuildAccelerationStructuresIndirectKHR:
+        {
+            return "OP_vkCmdBuildAccelerationStructuresIndirectKHR";
+        }
+        case OP_vkCreateAccelerationStructureKHR:
+        {
+            return "OP_vkCreateAccelerationStructureKHR";
+        }
+#endif
+#ifdef VK_NV_ray_tracing
+        case OP_vkCreateAccelerationStructureNV:
+        {
+            return "OP_vkCreateAccelerationStructureNV";
+        }
+#endif
+#ifdef VK_KHR_copy_commands2
+        case OP_vkCmdBlitImage2KHR:
+        {
+            return "OP_vkCmdBlitImage2KHR";
+        }
+#endif
+#ifdef VK_KHR_ray_tracing_pipeline
+        case OP_vkCmdSetRayTracingPipelineStackSizeKHR:
+        {
+            return "OP_vkCmdSetRayTracingPipelineStackSizeKHR";
+        }
+#endif
+#ifdef VK_VERSION_1_2
+        case OP_vkGetDeviceMemoryOpaqueCaptureAddress:
+        {
+            return "OP_vkGetDeviceMemoryOpaqueCaptureAddress";
+        }
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+        case OP_vkCmdSetPrimitiveTopologyEXT:
+        {
+            return "OP_vkCmdSetPrimitiveTopologyEXT";
+        }
+#endif
+#ifdef VK_INTEL_performance_query
+        case OP_vkCmdSetPerformanceStreamMarkerINTEL:
+        {
+            return "OP_vkCmdSetPerformanceStreamMarkerINTEL";
+        }
+#endif
+#ifdef VK_KHR_acceleration_structure
+        case OP_vkCopyMemoryToAccelerationStructureKHR:
+        {
+            return "OP_vkCopyMemoryToAccelerationStructureKHR";
+        }
+#endif
+#ifdef VK_FUCHSIA_imagepipe_surface
+        case OP_vkCreateImagePipeSurfaceFUCHSIA:
+        {
+            return "OP_vkCreateImagePipeSurfaceFUCHSIA";
+        }
+#endif
+#ifdef VK_KHR_deferred_host_operations
+        case OP_vkGetDeferredOperationResultKHR:
+        {
+            return "OP_vkGetDeferredOperationResultKHR";
+        }
+#endif
+#ifdef VK_EXT_line_rasterization
+        case OP_vkCmdSetLineStippleEXT:
+        {
+            return "OP_vkCmdSetLineStippleEXT";
+        }
+#endif
+#ifdef VK_KHR_timeline_semaphore
+        case OP_vkWaitSemaphoresKHR:
+        {
+            return "OP_vkWaitSemaphoresKHR";
+        }
+#endif
+#ifdef VK_NV_fragment_shading_rate_enums
+        case OP_vkCmdSetFragmentShadingRateEnumNV:
+        {
+            return "OP_vkCmdSetFragmentShadingRateEnumNV";
+        }
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+        case OP_vkCmdSetCullModeEXT:
+        {
+            return "OP_vkCmdSetCullModeEXT";
+        }
+#endif
+#ifdef VK_KHR_acceleration_structure
+        case OP_vkGetDeviceAccelerationStructureCompatibilityKHR:
+        {
+            return "OP_vkGetDeviceAccelerationStructureCompatibilityKHR";
+        }
+#endif
+#ifdef VK_VERSION_1_2
+        case OP_vkGetSemaphoreCounterValue:
+        {
+            return "OP_vkGetSemaphoreCounterValue";
+        }
+#endif
+#ifdef VK_AMD_display_native_hdr
+        case OP_vkSetLocalDimmingAMD:
+        {
+            return "OP_vkSetLocalDimmingAMD";
+        }
+#endif
+#ifdef VK_EXT_transform_feedback
+        case OP_vkCmdBindTransformFeedbackBuffersEXT:
+        {
+            return "OP_vkCmdBindTransformFeedbackBuffersEXT";
+        }
+#endif
+#ifdef VK_EXT_full_screen_exclusive
+        case OP_vkGetPhysicalDeviceSurfacePresentModes2EXT:
+        {
+            return "OP_vkGetPhysicalDeviceSurfacePresentModes2EXT";
+        }
+#endif
+#ifdef VK_NV_ray_tracing
+        case OP_vkCmdBuildAccelerationStructureNV:
+        {
+            return "OP_vkCmdBuildAccelerationStructureNV";
+        }
+#endif
+#ifdef VK_KHR_pipeline_executable_properties
+        case OP_vkGetPipelineExecutablePropertiesKHR:
+        {
+            return "OP_vkGetPipelineExecutablePropertiesKHR";
+        }
+#endif
+#ifdef VK_NV_ray_tracing
+        case OP_vkGetAccelerationStructureHandleNV:
+        {
+            return "OP_vkGetAccelerationStructureHandleNV";
+        }
+#endif
+#ifdef VK_KHR_timeline_semaphore
+        case OP_vkSignalSemaphoreKHR:
+        {
+            return "OP_vkSignalSemaphoreKHR";
+        }
+#endif
+#ifdef VK_INTEL_performance_query
+        case OP_vkCmdSetPerformanceMarkerINTEL:
+        {
+            return "OP_vkCmdSetPerformanceMarkerINTEL";
+        }
+#endif
+#ifdef VK_NV_device_generated_commands
+        case OP_vkCmdBindPipelineShaderGroupNV:
+        {
+            return "OP_vkCmdBindPipelineShaderGroupNV";
+        }
+#endif
+#ifdef VK_VERSION_1_2
+        case OP_vkSignalSemaphore:
+        {
+            return "OP_vkSignalSemaphore";
+        }
+#endif
+#ifdef VK_KHR_pipeline_executable_properties
+        case OP_vkGetPipelineExecutableStatisticsKHR:
+        {
+            return "OP_vkGetPipelineExecutableStatisticsKHR";
+        }
+#endif
+#ifdef VK_KHR_acceleration_structure
+        case OP_vkCmdWriteAccelerationStructuresPropertiesKHR:
+        {
+            return "OP_vkCmdWriteAccelerationStructuresPropertiesKHR";
+        }
+#endif
+#ifdef VK_NV_ray_tracing
+        case OP_vkGetRayTracingShaderGroupHandlesKHR:
+        {
+            return "OP_vkGetRayTracingShaderGroupHandlesKHR";
+        }
+#endif
+#ifdef VK_EXT_transform_feedback
+        case OP_vkCmdEndTransformFeedbackEXT:
+        {
+            return "OP_vkCmdEndTransformFeedbackEXT";
+        }
+#endif
+#ifdef VK_KHR_acceleration_structure
+        case OP_vkCmdBuildAccelerationStructuresKHR:
+        {
+            return "OP_vkCmdBuildAccelerationStructuresKHR";
+        }
+#endif
+#ifdef VK_KHR_fragment_shading_rate
+        case OP_vkGetPhysicalDeviceFragmentShadingRatesKHR:
+        {
+            return "OP_vkGetPhysicalDeviceFragmentShadingRatesKHR";
+        }
+#endif
+#ifdef VK_NV_mesh_shader
+        case OP_vkCmdDrawMeshTasksIndirectNV:
+        {
+            return "OP_vkCmdDrawMeshTasksIndirectNV";
+        }
+#endif
+#ifdef VK_KHR_pipeline_executable_properties
+        case OP_vkGetPipelineExecutableInternalRepresentationsKHR:
+        {
+            return "OP_vkGetPipelineExecutableInternalRepresentationsKHR";
+        }
+#endif
+#ifdef VK_KHR_deferred_host_operations
+        case OP_vkCreateDeferredOperationKHR:
+        {
+            return "OP_vkCreateDeferredOperationKHR";
+        }
+#endif
+#ifdef VK_EXT_transform_feedback
+        case OP_vkCmdBeginQueryIndexedEXT:
+        {
+            return "OP_vkCmdBeginQueryIndexedEXT";
+        }
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+        case OP_vkCmdSetStencilOpEXT:
+        {
+            return "OP_vkCmdSetStencilOpEXT";
+        }
+#endif
+#ifdef VK_NV_ray_tracing
+        case OP_vkCompileDeferredNV:
+        {
+            return "OP_vkCompileDeferredNV";
+        }
+#endif
+#ifdef VK_KHR_acceleration_structure
+        case OP_vkCmdCopyAccelerationStructureKHR:
+        {
+            return "OP_vkCmdCopyAccelerationStructureKHR";
+        }
+#endif
+#ifdef VK_VERSION_1_2
+        case OP_vkCreateRenderPass2:
+        {
+            return "OP_vkCreateRenderPass2";
+        }
+#endif
+#ifdef VK_EXT_transform_feedback
+        case OP_vkCmdEndQueryIndexedEXT:
+        {
+            return "OP_vkCmdEndQueryIndexedEXT";
+        }
+#endif
+#ifdef VK_KHR_performance_query
+        case OP_vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR:
+        {
+            return "OP_vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR";
+        }
+#endif
+#ifdef VK_EXT_tooling_info
+        case OP_vkGetPhysicalDeviceToolPropertiesEXT:
+        {
+            return "OP_vkGetPhysicalDeviceToolPropertiesEXT";
+        }
+#endif
+#ifdef VK_VERSION_1_2
+        case OP_vkCmdDrawIndirectCount:
+        {
+            return "OP_vkCmdDrawIndirectCount";
+        }
+#endif
+#ifdef VK_EXT_transform_feedback
+        case OP_vkCmdDrawIndirectByteCountEXT:
+        {
+            return "OP_vkCmdDrawIndirectByteCountEXT";
+        }
+#endif
+#ifdef VK_NV_device_generated_commands
+        case OP_vkCreateIndirectCommandsLayoutNV:
+        {
+            return "OP_vkCreateIndirectCommandsLayoutNV";
+        }
+#endif
+#ifdef VK_EXT_directfb_surface
+        case OP_vkGetPhysicalDeviceDirectFBPresentationSupportEXT:
+        {
+            return "OP_vkGetPhysicalDeviceDirectFBPresentationSupportEXT";
+        }
+#endif
+#ifdef VK_KHR_buffer_device_address
+        case OP_vkGetBufferOpaqueCaptureAddressKHR:
+        {
+            return "OP_vkGetBufferOpaqueCaptureAddressKHR";
+        }
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+        case OP_vkCmdSetStencilTestEnableEXT:
+        {
+            return "OP_vkCmdSetStencilTestEnableEXT";
+        }
+#endif
+#ifdef VK_NV_cooperative_matrix
+        case OP_vkGetPhysicalDeviceCooperativeMatrixPropertiesNV:
+        {
+            return "OP_vkGetPhysicalDeviceCooperativeMatrixPropertiesNV";
+        }
+#endif
+#ifdef VK_KHR_acceleration_structure
+        case OP_vkWriteAccelerationStructuresPropertiesKHR:
+        {
+            return "OP_vkWriteAccelerationStructuresPropertiesKHR";
+        }
+#endif
+#ifdef VK_EXT_private_data
+        case OP_vkGetPrivateDataEXT:
+        {
+            return "OP_vkGetPrivateDataEXT";
+        }
+#endif
+#ifdef VK_NV_coverage_reduction_mode
+        case OP_vkGetPhysicalDeviceSupportedFramebufferMixedSamplesCombinationsNV:
+        {
+            return "OP_vkGetPhysicalDeviceSupportedFramebufferMixedSamplesCombinationsNV";
+        }
+#endif
+#ifdef VK_NV_device_generated_commands
+        case OP_vkDestroyIndirectCommandsLayoutNV:
+        {
+            return "OP_vkDestroyIndirectCommandsLayoutNV";
+        }
+#endif
+#ifdef VK_EXT_transform_feedback
+        case OP_vkCmdBeginTransformFeedbackEXT:
+        {
+            return "OP_vkCmdBeginTransformFeedbackEXT";
+        }
+#endif
+#ifdef VK_KHR_buffer_device_address
+        case OP_vkGetDeviceMemoryOpaqueCaptureAddressKHR:
+        {
+            return "OP_vkGetDeviceMemoryOpaqueCaptureAddressKHR";
+        }
+#endif
+#ifdef VK_INTEL_performance_query
+        case OP_vkQueueSetPerformanceConfigurationINTEL:
+        {
+            return "OP_vkQueueSetPerformanceConfigurationINTEL";
+        }
+#endif
+#ifdef VK_EXT_calibrated_timestamps
+        case OP_vkGetPhysicalDeviceCalibrateableTimeDomainsEXT:
+        {
+            return "OP_vkGetPhysicalDeviceCalibrateableTimeDomainsEXT";
+        }
+#endif
+#ifdef VK_INTEL_performance_query
+        case OP_vkUninitializePerformanceApiINTEL:
+        {
+            return "OP_vkUninitializePerformanceApiINTEL";
+        }
+#endif
+#ifdef VK_NV_device_generated_commands
+        case OP_vkCmdPreprocessGeneratedCommandsNV:
+        {
+            return "OP_vkCmdPreprocessGeneratedCommandsNV";
+        }
+#endif
+#ifdef VK_EXT_headless_surface
+        case OP_vkCreateHeadlessSurfaceEXT:
+        {
+            return "OP_vkCreateHeadlessSurfaceEXT";
+        }
+#endif
+#ifdef VK_KHR_performance_query
+        case OP_vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR:
+        {
+            return "OP_vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR";
         }
 #endif
         default:
