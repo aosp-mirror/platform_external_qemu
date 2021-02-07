@@ -7965,6 +7965,14 @@ void checkEqual_VkPhysicalDeviceRayTracingPropertiesNV(
     if (!((a->maxDescriptorSetAccelerationStructures) == (b->maxDescriptorSetAccelerationStructures))) { onFail("a->maxDescriptorSetAccelerationStructures (Error: Value not equal)"); };
 }
 
+void checkEqual_VkTransformMatrixKHR(
+    const VkTransformMatrixKHR* a,
+    const VkTransformMatrixKHR* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((memcmp(a->matrix, b->matrix, ((3)*(4)) * sizeof(float)) == 0))) { onFail("a->matrix (Error: Unequal static array)"); };
+}
+
 void checkEqual_VkAabbPositionsKHR(
     const VkAabbPositionsKHR* a,
     const VkAabbPositionsKHR* b,
@@ -7976,6 +7984,19 @@ void checkEqual_VkAabbPositionsKHR(
     if (!((a->maxX) == (b->maxX))) { onFail("a->maxX (Error: Value not equal)"); };
     if (!((a->maxY) == (b->maxY))) { onFail("a->maxY (Error: Value not equal)"); };
     if (!((a->maxZ) == (b->maxZ))) { onFail("a->maxZ (Error: Value not equal)"); };
+}
+
+void checkEqual_VkAccelerationStructureInstanceKHR(
+    const VkAccelerationStructureInstanceKHR* a,
+    const VkAccelerationStructureInstanceKHR* b,
+    OnFailCompareFunc onFail)
+{
+    checkEqual_VkTransformMatrixKHR(&a->transform, &b->transform, onFail);
+    if (!((a->instanceCustomIndex) == (b->instanceCustomIndex))) { onFail("a->instanceCustomIndex (Error: Value not equal)"); };
+    if (!((a->mask) == (b->mask))) { onFail("a->mask (Error: Value not equal)"); };
+    if (!((a->instanceShaderBindingTableRecordOffset) == (b->instanceShaderBindingTableRecordOffset))) { onFail("a->instanceShaderBindingTableRecordOffset (Error: Value not equal)"); };
+    if (!((a->flags) == (b->flags))) { onFail("a->flags (Error: Value not equal)"); };
+    if (!((a->accelerationStructureReference) == (b->accelerationStructureReference))) { onFail("a->accelerationStructureReference (Error: Value not equal)"); };
 }
 
 #endif

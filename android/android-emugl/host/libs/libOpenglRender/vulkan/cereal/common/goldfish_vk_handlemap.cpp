@@ -6018,12 +6018,29 @@ void handlemap_VkPhysicalDeviceRayTracingPropertiesNV(
     }
 }
 
+void handlemap_VkTransformMatrixKHR(
+    VulkanHandleMapping* handlemap,
+    VkTransformMatrixKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+}
+
 void handlemap_VkAabbPositionsKHR(
     VulkanHandleMapping* handlemap,
     VkAabbPositionsKHR* toMap)
 {
     (void)handlemap;
     (void)toMap;
+}
+
+void handlemap_VkAccelerationStructureInstanceKHR(
+    VulkanHandleMapping* handlemap,
+    VkAccelerationStructureInstanceKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    handlemap_VkTransformMatrixKHR(handlemap, (VkTransformMatrixKHR*)(&toMap->transform));
 }
 
 #endif

@@ -624,6 +624,8 @@ void handlemap_VkPhysicalDeviceVariablePointersFeatures(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceVariablePointersFeatures* toMap);
 
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceVariablePointersFeatures, handlemap_VkPhysicalDeviceVariablePointerFeatures);
+
 void handlemap_VkPhysicalDeviceProtectedMemoryFeatures(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceProtectedMemoryFeatures* toMap);
@@ -743,6 +745,8 @@ void handlemap_VkDescriptorSetLayoutSupport(
 void handlemap_VkPhysicalDeviceShaderDrawParametersFeatures(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceShaderDrawParametersFeatures* toMap);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceShaderDrawParametersFeatures, handlemap_VkPhysicalDeviceShaderDrawParameterFeatures);
 
 #endif
 #ifdef VK_VERSION_1_2
@@ -1064,20 +1068,80 @@ void handlemap_VkWin32SurfaceCreateInfoKHR(
 #ifdef VK_KHR_sampler_mirror_clamp_to_edge
 #endif
 #ifdef VK_KHR_multiview
+DEFINE_ALIAS_FUNCTION(handlemap_VkRenderPassMultiviewCreateInfo, handlemap_VkRenderPassMultiviewCreateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceMultiviewFeatures, handlemap_VkPhysicalDeviceMultiviewFeaturesKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceMultiviewProperties, handlemap_VkPhysicalDeviceMultiviewPropertiesKHR);
+
 #endif
 #ifdef VK_KHR_get_physical_device_properties2
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceFeatures2, handlemap_VkPhysicalDeviceFeatures2KHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceProperties2, handlemap_VkPhysicalDeviceProperties2KHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkFormatProperties2, handlemap_VkFormatProperties2KHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkImageFormatProperties2, handlemap_VkImageFormatProperties2KHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceImageFormatInfo2, handlemap_VkPhysicalDeviceImageFormatInfo2KHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkQueueFamilyProperties2, handlemap_VkQueueFamilyProperties2KHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceMemoryProperties2, handlemap_VkPhysicalDeviceMemoryProperties2KHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkSparseImageFormatProperties2, handlemap_VkSparseImageFormatProperties2KHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceSparseImageFormatInfo2, handlemap_VkPhysicalDeviceSparseImageFormatInfo2KHR);
+
 #endif
 #ifdef VK_KHR_device_group
+DEFINE_ALIAS_FUNCTION(handlemap_VkMemoryAllocateFlagsInfo, handlemap_VkMemoryAllocateFlagsInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkDeviceGroupRenderPassBeginInfo, handlemap_VkDeviceGroupRenderPassBeginInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkDeviceGroupCommandBufferBeginInfo, handlemap_VkDeviceGroupCommandBufferBeginInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkDeviceGroupSubmitInfo, handlemap_VkDeviceGroupSubmitInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkDeviceGroupBindSparseInfo, handlemap_VkDeviceGroupBindSparseInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkBindBufferMemoryDeviceGroupInfo, handlemap_VkBindBufferMemoryDeviceGroupInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkBindImageMemoryDeviceGroupInfo, handlemap_VkBindImageMemoryDeviceGroupInfoKHR);
+
 #endif
 #ifdef VK_KHR_shader_draw_parameters
 #endif
 #ifdef VK_KHR_maintenance1
 #endif
 #ifdef VK_KHR_device_group_creation
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceGroupProperties, handlemap_VkPhysicalDeviceGroupPropertiesKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkDeviceGroupDeviceCreateInfo, handlemap_VkDeviceGroupDeviceCreateInfoKHR);
+
 #endif
 #ifdef VK_KHR_external_memory_capabilities
+DEFINE_ALIAS_FUNCTION(handlemap_VkExternalMemoryProperties, handlemap_VkExternalMemoryPropertiesKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceExternalImageFormatInfo, handlemap_VkPhysicalDeviceExternalImageFormatInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkExternalImageFormatProperties, handlemap_VkExternalImageFormatPropertiesKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceExternalBufferInfo, handlemap_VkPhysicalDeviceExternalBufferInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkExternalBufferProperties, handlemap_VkExternalBufferPropertiesKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceIDProperties, handlemap_VkPhysicalDeviceIDPropertiesKHR);
+
 #endif
 #ifdef VK_KHR_external_memory
+DEFINE_ALIAS_FUNCTION(handlemap_VkExternalMemoryImageCreateInfo, handlemap_VkExternalMemoryImageCreateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkExternalMemoryBufferCreateInfo, handlemap_VkExternalMemoryBufferCreateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkExportMemoryAllocateInfo, handlemap_VkExportMemoryAllocateInfoKHR);
+
 #endif
 #ifdef VK_KHR_external_memory_win32
 void handlemap_VkImportMemoryWin32HandleInfoKHR(
@@ -1118,8 +1182,14 @@ void handlemap_VkWin32KeyedMutexAcquireReleaseInfoKHR(
 
 #endif
 #ifdef VK_KHR_external_semaphore_capabilities
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceExternalSemaphoreInfo, handlemap_VkPhysicalDeviceExternalSemaphoreInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkExternalSemaphoreProperties, handlemap_VkExternalSemaphorePropertiesKHR);
+
 #endif
 #ifdef VK_KHR_external_semaphore
+DEFINE_ALIAS_FUNCTION(handlemap_VkExportSemaphoreCreateInfo, handlemap_VkExportSemaphoreCreateInfoKHR);
+
 #endif
 #ifdef VK_KHR_external_semaphore_win32
 void handlemap_VkImportSemaphoreWin32HandleInfoKHR(
@@ -1156,8 +1226,14 @@ void handlemap_VkPhysicalDevicePushDescriptorPropertiesKHR(
 
 #endif
 #ifdef VK_KHR_shader_float16_int8
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceShaderFloat16Int8Features, handlemap_VkPhysicalDeviceShaderFloat16Int8FeaturesKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceShaderFloat16Int8Features, handlemap_VkPhysicalDeviceFloat16Int8FeaturesKHR);
+
 #endif
 #ifdef VK_KHR_16bit_storage
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDevice16BitStorageFeatures, handlemap_VkPhysicalDevice16BitStorageFeaturesKHR);
+
 #endif
 #ifdef VK_KHR_incremental_present
 void handlemap_VkRectLayerKHR(
@@ -1174,10 +1250,36 @@ void handlemap_VkPresentRegionsKHR(
 
 #endif
 #ifdef VK_KHR_descriptor_update_template
+DEFINE_ALIAS_FUNCTION(handlemap_VkDescriptorUpdateTemplateEntry, handlemap_VkDescriptorUpdateTemplateEntryKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkDescriptorUpdateTemplateCreateInfo, handlemap_VkDescriptorUpdateTemplateCreateInfoKHR);
+
 #endif
 #ifdef VK_KHR_imageless_framebuffer
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceImagelessFramebufferFeatures, handlemap_VkPhysicalDeviceImagelessFramebufferFeaturesKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkFramebufferAttachmentsCreateInfo, handlemap_VkFramebufferAttachmentsCreateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkFramebufferAttachmentImageInfo, handlemap_VkFramebufferAttachmentImageInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkRenderPassAttachmentBeginInfo, handlemap_VkRenderPassAttachmentBeginInfoKHR);
+
 #endif
 #ifdef VK_KHR_create_renderpass2
+DEFINE_ALIAS_FUNCTION(handlemap_VkRenderPassCreateInfo2, handlemap_VkRenderPassCreateInfo2KHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkAttachmentDescription2, handlemap_VkAttachmentDescription2KHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkAttachmentReference2, handlemap_VkAttachmentReference2KHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkSubpassDescription2, handlemap_VkSubpassDescription2KHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkSubpassDependency2, handlemap_VkSubpassDependency2KHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkSubpassBeginInfo, handlemap_VkSubpassBeginInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkSubpassEndInfo, handlemap_VkSubpassEndInfoKHR);
+
 #endif
 #ifdef VK_KHR_shared_presentable_image
 void handlemap_VkSharedPresentSurfaceCapabilitiesKHR(
@@ -1186,8 +1288,14 @@ void handlemap_VkSharedPresentSurfaceCapabilitiesKHR(
 
 #endif
 #ifdef VK_KHR_external_fence_capabilities
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceExternalFenceInfo, handlemap_VkPhysicalDeviceExternalFenceInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkExternalFenceProperties, handlemap_VkExternalFencePropertiesKHR);
+
 #endif
 #ifdef VK_KHR_external_fence
+DEFINE_ALIAS_FUNCTION(handlemap_VkExportFenceCreateInfo, handlemap_VkExportFenceCreateInfoKHR);
+
 #endif
 #ifdef VK_KHR_external_fence_win32
 void handlemap_VkImportFenceWin32HandleInfoKHR(
@@ -1248,6 +1356,16 @@ void handlemap_VkPerformanceQuerySubmitInfoKHR(
 
 #endif
 #ifdef VK_KHR_maintenance2
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDevicePointClippingProperties, handlemap_VkPhysicalDevicePointClippingPropertiesKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkRenderPassInputAttachmentAspectCreateInfo, handlemap_VkRenderPassInputAttachmentAspectCreateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkInputAttachmentAspectReference, handlemap_VkInputAttachmentAspectReferenceKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkImageViewUsageCreateInfo, handlemap_VkImageViewUsageCreateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPipelineTessellationDomainOriginStateCreateInfo, handlemap_VkPipelineTessellationDomainOriginStateCreateInfoKHR);
+
 #endif
 #ifdef VK_KHR_get_surface_capabilities2
 void handlemap_VkPhysicalDeviceSurfaceInfo2KHR(
@@ -1264,6 +1382,10 @@ void handlemap_VkSurfaceFormat2KHR(
 
 #endif
 #ifdef VK_KHR_variable_pointers
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceVariablePointersFeatures, handlemap_VkPhysicalDeviceVariablePointerFeaturesKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceVariablePointersFeatures, handlemap_VkPhysicalDeviceVariablePointersFeaturesKHR);
+
 #endif
 #ifdef VK_KHR_get_display_properties2
 void handlemap_VkDisplayProperties2KHR(
@@ -1288,18 +1410,50 @@ void handlemap_VkDisplayPlaneCapabilities2KHR(
 
 #endif
 #ifdef VK_KHR_dedicated_allocation
+DEFINE_ALIAS_FUNCTION(handlemap_VkMemoryDedicatedRequirements, handlemap_VkMemoryDedicatedRequirementsKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkMemoryDedicatedAllocateInfo, handlemap_VkMemoryDedicatedAllocateInfoKHR);
+
 #endif
 #ifdef VK_KHR_storage_buffer_storage_class
 #endif
 #ifdef VK_KHR_relaxed_block_layout
 #endif
 #ifdef VK_KHR_get_memory_requirements2
+DEFINE_ALIAS_FUNCTION(handlemap_VkBufferMemoryRequirementsInfo2, handlemap_VkBufferMemoryRequirementsInfo2KHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkImageMemoryRequirementsInfo2, handlemap_VkImageMemoryRequirementsInfo2KHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkImageSparseMemoryRequirementsInfo2, handlemap_VkImageSparseMemoryRequirementsInfo2KHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkMemoryRequirements2, handlemap_VkMemoryRequirements2KHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkSparseImageMemoryRequirements2, handlemap_VkSparseImageMemoryRequirements2KHR);
+
 #endif
 #ifdef VK_KHR_image_format_list
+DEFINE_ALIAS_FUNCTION(handlemap_VkImageFormatListCreateInfo, handlemap_VkImageFormatListCreateInfoKHR);
+
 #endif
 #ifdef VK_KHR_sampler_ycbcr_conversion
+DEFINE_ALIAS_FUNCTION(handlemap_VkSamplerYcbcrConversionCreateInfo, handlemap_VkSamplerYcbcrConversionCreateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkSamplerYcbcrConversionInfo, handlemap_VkSamplerYcbcrConversionInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkBindImagePlaneMemoryInfo, handlemap_VkBindImagePlaneMemoryInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkImagePlaneMemoryRequirementsInfo, handlemap_VkImagePlaneMemoryRequirementsInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceSamplerYcbcrConversionFeatures, handlemap_VkPhysicalDeviceSamplerYcbcrConversionFeaturesKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkSamplerYcbcrConversionImageFormatProperties, handlemap_VkSamplerYcbcrConversionImageFormatPropertiesKHR);
+
 #endif
 #ifdef VK_KHR_bind_memory2
+DEFINE_ALIAS_FUNCTION(handlemap_VkBindBufferMemoryInfo, handlemap_VkBindBufferMemoryInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkBindImageMemoryInfo, handlemap_VkBindImageMemoryInfoKHR);
+
 #endif
 #ifdef VK_KHR_portability_subset
 void handlemap_VkPhysicalDevicePortabilitySubsetFeaturesKHR(
@@ -1312,14 +1466,24 @@ void handlemap_VkPhysicalDevicePortabilitySubsetPropertiesKHR(
 
 #endif
 #ifdef VK_KHR_maintenance3
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceMaintenance3Properties, handlemap_VkPhysicalDeviceMaintenance3PropertiesKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkDescriptorSetLayoutSupport, handlemap_VkDescriptorSetLayoutSupportKHR);
+
 #endif
 #ifdef VK_KHR_draw_indirect_count
 #endif
 #ifdef VK_KHR_shader_subgroup_extended_types
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures, handlemap_VkPhysicalDeviceShaderSubgroupExtendedTypesFeaturesKHR);
+
 #endif
 #ifdef VK_KHR_8bit_storage
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDevice8BitStorageFeatures, handlemap_VkPhysicalDevice8BitStorageFeaturesKHR);
+
 #endif
 #ifdef VK_KHR_shader_atomic_int64
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceShaderAtomicInt64Features, handlemap_VkPhysicalDeviceShaderAtomicInt64FeaturesKHR);
+
 #endif
 #ifdef VK_KHR_shader_clock
 void handlemap_VkPhysicalDeviceShaderClockFeaturesKHR(
@@ -1328,16 +1492,40 @@ void handlemap_VkPhysicalDeviceShaderClockFeaturesKHR(
 
 #endif
 #ifdef VK_KHR_driver_properties
+DEFINE_ALIAS_FUNCTION(handlemap_VkConformanceVersion, handlemap_VkConformanceVersionKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceDriverProperties, handlemap_VkPhysicalDeviceDriverPropertiesKHR);
+
 #endif
 #ifdef VK_KHR_shader_float_controls
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceFloatControlsProperties, handlemap_VkPhysicalDeviceFloatControlsPropertiesKHR);
+
 #endif
 #ifdef VK_KHR_depth_stencil_resolve
+DEFINE_ALIAS_FUNCTION(handlemap_VkSubpassDescriptionDepthStencilResolve, handlemap_VkSubpassDescriptionDepthStencilResolveKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceDepthStencilResolveProperties, handlemap_VkPhysicalDeviceDepthStencilResolvePropertiesKHR);
+
 #endif
 #ifdef VK_KHR_swapchain_mutable_format
 #endif
 #ifdef VK_KHR_timeline_semaphore
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceTimelineSemaphoreFeatures, handlemap_VkPhysicalDeviceTimelineSemaphoreFeaturesKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceTimelineSemaphoreProperties, handlemap_VkPhysicalDeviceTimelineSemaphorePropertiesKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkSemaphoreTypeCreateInfo, handlemap_VkSemaphoreTypeCreateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkTimelineSemaphoreSubmitInfo, handlemap_VkTimelineSemaphoreSubmitInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkSemaphoreWaitInfo, handlemap_VkSemaphoreWaitInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkSemaphoreSignalInfo, handlemap_VkSemaphoreSignalInfoKHR);
+
 #endif
 #ifdef VK_KHR_vulkan_memory_model
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceVulkanMemoryModelFeatures, handlemap_VkPhysicalDeviceVulkanMemoryModelFeaturesKHR);
+
 #endif
 #ifdef VK_KHR_shader_terminate_invocation
 void handlemap_VkPhysicalDeviceShaderTerminateInvocationFeaturesKHR(
@@ -1376,10 +1564,28 @@ void handlemap_VkSurfaceProtectedCapabilitiesKHR(
 
 #endif
 #ifdef VK_KHR_separate_depth_stencil_layouts
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures, handlemap_VkPhysicalDeviceSeparateDepthStencilLayoutsFeaturesKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkAttachmentReferenceStencilLayout, handlemap_VkAttachmentReferenceStencilLayoutKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkAttachmentDescriptionStencilLayout, handlemap_VkAttachmentDescriptionStencilLayoutKHR);
+
 #endif
 #ifdef VK_KHR_uniform_buffer_standard_layout
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceUniformBufferStandardLayoutFeatures, handlemap_VkPhysicalDeviceUniformBufferStandardLayoutFeaturesKHR);
+
 #endif
 #ifdef VK_KHR_buffer_device_address
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceBufferDeviceAddressFeatures, handlemap_VkPhysicalDeviceBufferDeviceAddressFeaturesKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkBufferDeviceAddressInfo, handlemap_VkBufferDeviceAddressInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkBufferOpaqueCaptureAddressCreateInfo, handlemap_VkBufferOpaqueCaptureAddressCreateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkMemoryOpaqueCaptureAddressAllocateInfo, handlemap_VkMemoryOpaqueCaptureAddressAllocateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkDeviceMemoryOpaqueCaptureAddressInfo, handlemap_VkDeviceMemoryOpaqueCaptureAddressInfoKHR);
+
 #endif
 #ifdef VK_KHR_deferred_host_operations
 #endif
@@ -1854,6 +2060,10 @@ void handlemap_VkExternalFormatANDROID(
 
 #endif
 #ifdef VK_EXT_sampler_filter_minmax
+DEFINE_ALIAS_FUNCTION(handlemap_VkSamplerReductionModeCreateInfo, handlemap_VkSamplerReductionModeCreateInfoEXT);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceSamplerFilterMinmaxProperties, handlemap_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT);
+
 #endif
 #ifdef VK_AMD_gpu_shader_int16
 #endif
@@ -1992,6 +2202,16 @@ void handlemap_VkShaderModuleValidationCacheCreateInfoEXT(
 
 #endif
 #ifdef VK_EXT_descriptor_indexing
+DEFINE_ALIAS_FUNCTION(handlemap_VkDescriptorSetLayoutBindingFlagsCreateInfo, handlemap_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceDescriptorIndexingFeatures, handlemap_VkPhysicalDeviceDescriptorIndexingFeaturesEXT);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceDescriptorIndexingProperties, handlemap_VkPhysicalDeviceDescriptorIndexingPropertiesEXT);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkDescriptorSetVariableDescriptorCountAllocateInfo, handlemap_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkDescriptorSetVariableDescriptorCountLayoutSupport, handlemap_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT);
+
 #endif
 #ifdef VK_EXT_shader_viewport_index_layer
 #endif
@@ -2074,9 +2294,23 @@ void handlemap_VkPhysicalDeviceRayTracingPropertiesNV(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceRayTracingPropertiesNV* toMap);
 
+void handlemap_VkTransformMatrixKHR(
+    VulkanHandleMapping* handlemap,
+    VkTransformMatrixKHR* toMap);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkTransformMatrixKHR, handlemap_VkTransformMatrixNV);
+
 void handlemap_VkAabbPositionsKHR(
     VulkanHandleMapping* handlemap,
     VkAabbPositionsKHR* toMap);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkAabbPositionsKHR, handlemap_VkAabbPositionsNV);
+
+void handlemap_VkAccelerationStructureInstanceKHR(
+    VulkanHandleMapping* handlemap,
+    VkAccelerationStructureInstanceKHR* toMap);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkAccelerationStructureInstanceKHR, handlemap_VkAccelerationStructureInstanceNV);
 
 #endif
 #ifdef VK_NV_representative_fragment_test
@@ -2258,6 +2492,8 @@ void handlemap_VkQueryPoolPerformanceQueryCreateInfoINTEL(
     VulkanHandleMapping* handlemap,
     VkQueryPoolPerformanceQueryCreateInfoINTEL* toMap);
 
+DEFINE_ALIAS_FUNCTION(handlemap_VkQueryPoolPerformanceQueryCreateInfoINTEL, handlemap_VkQueryPoolCreateInfoINTEL);
+
 void handlemap_VkPerformanceMarkerInfoINTEL(
     VulkanHandleMapping* handlemap,
     VkPerformanceMarkerInfoINTEL* toMap);
@@ -2318,6 +2554,8 @@ void handlemap_VkImportPhysicalAddressGOOGLE(
 
 #endif
 #ifdef VK_EXT_scalar_block_layout
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceScalarBlockLayoutFeatures, handlemap_VkPhysicalDeviceScalarBlockLayoutFeaturesEXT);
+
 #endif
 #ifdef VK_GOOGLE_hlsl_functionality1
 #endif
@@ -2382,6 +2620,10 @@ void handlemap_VkPhysicalDeviceBufferDeviceAddressFeaturesEXT(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceBufferDeviceAddressFeaturesEXT* toMap);
 
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceBufferDeviceAddressFeaturesEXT, handlemap_VkPhysicalDeviceBufferAddressFeaturesEXT);
+
+DEFINE_ALIAS_FUNCTION(handlemap_VkBufferDeviceAddressInfo, handlemap_VkBufferDeviceAddressInfoEXT);
+
 void handlemap_VkBufferDeviceAddressCreateInfoEXT(
     VulkanHandleMapping* handlemap,
     VkBufferDeviceAddressCreateInfoEXT* toMap);
@@ -2394,6 +2636,8 @@ void handlemap_VkPhysicalDeviceToolPropertiesEXT(
 
 #endif
 #ifdef VK_EXT_separate_stencil_usage
+DEFINE_ALIAS_FUNCTION(handlemap_VkImageStencilUsageCreateInfo, handlemap_VkImageStencilUsageCreateInfoEXT);
+
 #endif
 #ifdef VK_EXT_validation_features
 void handlemap_VkValidationFeaturesEXT(
@@ -2482,6 +2726,8 @@ void handlemap_VkPhysicalDeviceShaderAtomicFloatFeaturesEXT(
 
 #endif
 #ifdef VK_EXT_host_query_reset
+DEFINE_ALIAS_FUNCTION(handlemap_VkPhysicalDeviceHostQueryResetFeatures, handlemap_VkPhysicalDeviceHostQueryResetFeaturesEXT);
+
 #endif
 #ifdef VK_EXT_index_type_uint8
 void handlemap_VkPhysicalDeviceIndexTypeUint8FeaturesEXT(

@@ -8077,6 +8077,16 @@ void deepcopy_VkPhysicalDeviceRayTracingPropertiesNV(
     }
 }
 
+void deepcopy_VkTransformMatrixKHR(
+    BumpPool* pool,
+    const VkTransformMatrixKHR* from,
+    VkTransformMatrixKHR* to)
+{
+    (void)pool;
+    *to = *from;
+    memcpy(to->matrix, from->matrix, ((3)*(4)) * sizeof(float));
+}
+
 void deepcopy_VkAabbPositionsKHR(
     BumpPool* pool,
     const VkAabbPositionsKHR* from,
@@ -8084,6 +8094,16 @@ void deepcopy_VkAabbPositionsKHR(
 {
     (void)pool;
     *to = *from;
+}
+
+void deepcopy_VkAccelerationStructureInstanceKHR(
+    BumpPool* pool,
+    const VkAccelerationStructureInstanceKHR* from,
+    VkAccelerationStructureInstanceKHR* to)
+{
+    (void)pool;
+    *to = *from;
+    deepcopy_VkTransformMatrixKHR(pool, &from->transform, (VkTransformMatrixKHR*)(&to->transform));
 }
 
 #endif

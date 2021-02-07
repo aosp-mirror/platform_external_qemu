@@ -4800,7 +4800,7 @@ void vkGetAccelerationStructureMemoryRequirementsNV(
     android::base::BumpPool* pool,
     VkDevice device,
     const VkAccelerationStructureMemoryRequirementsInfoNV* pInfo,
-    VkMemoryRequirements2* pMemoryRequirements)
+    VkMemoryRequirements2KHR* pMemoryRequirements)
 {
     // TODO: Implement
 }
@@ -10974,7 +10974,7 @@ void VkDecoderSnapshot::vkGetAccelerationStructureMemoryRequirementsNV(
     android::base::BumpPool* pool,
     VkDevice device,
     const VkAccelerationStructureMemoryRequirementsInfoNV* pInfo,
-    VkMemoryRequirements2* pMemoryRequirements)
+    VkMemoryRequirements2KHR* pMemoryRequirements)
 {
     mImpl->vkGetAccelerationStructureMemoryRequirementsNV(snapshotTraceBegin, snapshotTraceBytes, pool, device, pInfo, pMemoryRequirements);
 }

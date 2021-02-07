@@ -13877,6 +13877,15 @@ void reservedunmarshal_VkPhysicalDeviceRayTracingPropertiesNV(
     *ptr += sizeof(uint32_t);
 }
 
+void reservedunmarshal_VkTransformMatrixKHR(
+    VulkanStream* vkStream,
+    VkTransformMatrixKHR* forUnmarshaling,
+    uint8_t** ptr)
+{
+    memcpy((float*)forUnmarshaling->matrix, *ptr, ((3)*(4)) * sizeof(float));
+    *ptr += ((3)*(4)) * sizeof(float);
+}
+
 void reservedunmarshal_VkAabbPositionsKHR(
     VulkanStream* vkStream,
     VkAabbPositionsKHR* forUnmarshaling,
@@ -13894,6 +13903,29 @@ void reservedunmarshal_VkAabbPositionsKHR(
     *ptr += sizeof(float);
     memcpy((float*)&forUnmarshaling->maxZ, *ptr, sizeof(float));
     *ptr += sizeof(float);
+}
+
+void reservedunmarshal_VkAccelerationStructureInstanceKHR(
+    VulkanStream* vkStream,
+    VkAccelerationStructureInstanceKHR* forUnmarshaling,
+    uint8_t** ptr)
+{
+    
+    typedef struct VkAccelerationStructureInstanceKHRWithoutBitFields {
+        VkTransformMatrixKHR          transform;
+        uint32_t                      dwords[2];
+        uint64_t                      accelerationStructureReference;
+    } VkAccelerationStructureInstanceKHRWithoutBitFields;
+    
+    VkAccelerationStructureInstanceKHRWithoutBitFields* forUnmarshaling_new = (VkAccelerationStructureInstanceKHRWithoutBitFields*)(forUnmarshaling);
+    reservedunmarshal_VkTransformMatrixKHR(vkStream, (VkTransformMatrixKHR*)(&forUnmarshaling_new->transform), ptr);
+    for (uint32_t i = 0; i < 2; i++) {
+        memcpy((uint32_t*)&(forUnmarshaling_new->dwords[i]), *ptr, sizeof(uint32_t));
+        *ptr += sizeof(uint32_t);
+    }
+    memcpy((uint64_t*)&forUnmarshaling_new->accelerationStructureReference, *ptr, sizeof(uint64_t));
+    *ptr += sizeof(uint64_t);
+    
 }
 
 #endif

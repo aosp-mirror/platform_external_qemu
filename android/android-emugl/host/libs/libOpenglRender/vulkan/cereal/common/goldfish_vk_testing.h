@@ -773,6 +773,8 @@ void checkEqual_VkPhysicalDeviceVariablePointersFeatures(
     const VkPhysicalDeviceVariablePointersFeatures* b,
     OnFailCompareFunc onFail);
 
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceVariablePointersFeatures, checkEqual_VkPhysicalDeviceVariablePointerFeatures);
+
 void checkEqual_VkPhysicalDeviceProtectedMemoryFeatures(
     const VkPhysicalDeviceProtectedMemoryFeatures* a,
     const VkPhysicalDeviceProtectedMemoryFeatures* b,
@@ -922,6 +924,8 @@ void checkEqual_VkPhysicalDeviceShaderDrawParametersFeatures(
     const VkPhysicalDeviceShaderDrawParametersFeatures* a,
     const VkPhysicalDeviceShaderDrawParametersFeatures* b,
     OnFailCompareFunc onFail);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceShaderDrawParametersFeatures, checkEqual_VkPhysicalDeviceShaderDrawParameterFeatures);
 
 #endif
 #ifdef VK_VERSION_1_2
@@ -1317,20 +1321,80 @@ void checkEqual_VkWin32SurfaceCreateInfoKHR(
 #ifdef VK_KHR_sampler_mirror_clamp_to_edge
 #endif
 #ifdef VK_KHR_multiview
+DEFINE_ALIAS_FUNCTION(checkEqual_VkRenderPassMultiviewCreateInfo, checkEqual_VkRenderPassMultiviewCreateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceMultiviewFeatures, checkEqual_VkPhysicalDeviceMultiviewFeaturesKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceMultiviewProperties, checkEqual_VkPhysicalDeviceMultiviewPropertiesKHR);
+
 #endif
 #ifdef VK_KHR_get_physical_device_properties2
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceFeatures2, checkEqual_VkPhysicalDeviceFeatures2KHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceProperties2, checkEqual_VkPhysicalDeviceProperties2KHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkFormatProperties2, checkEqual_VkFormatProperties2KHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkImageFormatProperties2, checkEqual_VkImageFormatProperties2KHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceImageFormatInfo2, checkEqual_VkPhysicalDeviceImageFormatInfo2KHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkQueueFamilyProperties2, checkEqual_VkQueueFamilyProperties2KHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceMemoryProperties2, checkEqual_VkPhysicalDeviceMemoryProperties2KHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSparseImageFormatProperties2, checkEqual_VkSparseImageFormatProperties2KHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceSparseImageFormatInfo2, checkEqual_VkPhysicalDeviceSparseImageFormatInfo2KHR);
+
 #endif
 #ifdef VK_KHR_device_group
+DEFINE_ALIAS_FUNCTION(checkEqual_VkMemoryAllocateFlagsInfo, checkEqual_VkMemoryAllocateFlagsInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDeviceGroupRenderPassBeginInfo, checkEqual_VkDeviceGroupRenderPassBeginInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDeviceGroupCommandBufferBeginInfo, checkEqual_VkDeviceGroupCommandBufferBeginInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDeviceGroupSubmitInfo, checkEqual_VkDeviceGroupSubmitInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDeviceGroupBindSparseInfo, checkEqual_VkDeviceGroupBindSparseInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkBindBufferMemoryDeviceGroupInfo, checkEqual_VkBindBufferMemoryDeviceGroupInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkBindImageMemoryDeviceGroupInfo, checkEqual_VkBindImageMemoryDeviceGroupInfoKHR);
+
 #endif
 #ifdef VK_KHR_shader_draw_parameters
 #endif
 #ifdef VK_KHR_maintenance1
 #endif
 #ifdef VK_KHR_device_group_creation
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceGroupProperties, checkEqual_VkPhysicalDeviceGroupPropertiesKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDeviceGroupDeviceCreateInfo, checkEqual_VkDeviceGroupDeviceCreateInfoKHR);
+
 #endif
 #ifdef VK_KHR_external_memory_capabilities
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalMemoryProperties, checkEqual_VkExternalMemoryPropertiesKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceExternalImageFormatInfo, checkEqual_VkPhysicalDeviceExternalImageFormatInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalImageFormatProperties, checkEqual_VkExternalImageFormatPropertiesKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceExternalBufferInfo, checkEqual_VkPhysicalDeviceExternalBufferInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalBufferProperties, checkEqual_VkExternalBufferPropertiesKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceIDProperties, checkEqual_VkPhysicalDeviceIDPropertiesKHR);
+
 #endif
 #ifdef VK_KHR_external_memory
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalMemoryImageCreateInfo, checkEqual_VkExternalMemoryImageCreateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalMemoryBufferCreateInfo, checkEqual_VkExternalMemoryBufferCreateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExportMemoryAllocateInfo, checkEqual_VkExportMemoryAllocateInfoKHR);
+
 #endif
 #ifdef VK_KHR_external_memory_win32
 void checkEqual_VkImportMemoryWin32HandleInfoKHR(
@@ -1379,8 +1443,14 @@ void checkEqual_VkWin32KeyedMutexAcquireReleaseInfoKHR(
 
 #endif
 #ifdef VK_KHR_external_semaphore_capabilities
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceExternalSemaphoreInfo, checkEqual_VkPhysicalDeviceExternalSemaphoreInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalSemaphoreProperties, checkEqual_VkExternalSemaphorePropertiesKHR);
+
 #endif
 #ifdef VK_KHR_external_semaphore
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExportSemaphoreCreateInfo, checkEqual_VkExportSemaphoreCreateInfoKHR);
+
 #endif
 #ifdef VK_KHR_external_semaphore_win32
 void checkEqual_VkImportSemaphoreWin32HandleInfoKHR(
@@ -1424,8 +1494,14 @@ void checkEqual_VkPhysicalDevicePushDescriptorPropertiesKHR(
 
 #endif
 #ifdef VK_KHR_shader_float16_int8
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceShaderFloat16Int8Features, checkEqual_VkPhysicalDeviceShaderFloat16Int8FeaturesKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceShaderFloat16Int8Features, checkEqual_VkPhysicalDeviceFloat16Int8FeaturesKHR);
+
 #endif
 #ifdef VK_KHR_16bit_storage
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDevice16BitStorageFeatures, checkEqual_VkPhysicalDevice16BitStorageFeaturesKHR);
+
 #endif
 #ifdef VK_KHR_incremental_present
 void checkEqual_VkRectLayerKHR(
@@ -1445,10 +1521,36 @@ void checkEqual_VkPresentRegionsKHR(
 
 #endif
 #ifdef VK_KHR_descriptor_update_template
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDescriptorUpdateTemplateEntry, checkEqual_VkDescriptorUpdateTemplateEntryKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDescriptorUpdateTemplateCreateInfo, checkEqual_VkDescriptorUpdateTemplateCreateInfoKHR);
+
 #endif
 #ifdef VK_KHR_imageless_framebuffer
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceImagelessFramebufferFeatures, checkEqual_VkPhysicalDeviceImagelessFramebufferFeaturesKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkFramebufferAttachmentsCreateInfo, checkEqual_VkFramebufferAttachmentsCreateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkFramebufferAttachmentImageInfo, checkEqual_VkFramebufferAttachmentImageInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkRenderPassAttachmentBeginInfo, checkEqual_VkRenderPassAttachmentBeginInfoKHR);
+
 #endif
 #ifdef VK_KHR_create_renderpass2
+DEFINE_ALIAS_FUNCTION(checkEqual_VkRenderPassCreateInfo2, checkEqual_VkRenderPassCreateInfo2KHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkAttachmentDescription2, checkEqual_VkAttachmentDescription2KHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkAttachmentReference2, checkEqual_VkAttachmentReference2KHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSubpassDescription2, checkEqual_VkSubpassDescription2KHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSubpassDependency2, checkEqual_VkSubpassDependency2KHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSubpassBeginInfo, checkEqual_VkSubpassBeginInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSubpassEndInfo, checkEqual_VkSubpassEndInfoKHR);
+
 #endif
 #ifdef VK_KHR_shared_presentable_image
 void checkEqual_VkSharedPresentSurfaceCapabilitiesKHR(
@@ -1458,8 +1560,14 @@ void checkEqual_VkSharedPresentSurfaceCapabilitiesKHR(
 
 #endif
 #ifdef VK_KHR_external_fence_capabilities
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceExternalFenceInfo, checkEqual_VkPhysicalDeviceExternalFenceInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalFenceProperties, checkEqual_VkExternalFencePropertiesKHR);
+
 #endif
 #ifdef VK_KHR_external_fence
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExportFenceCreateInfo, checkEqual_VkExportFenceCreateInfoKHR);
+
 #endif
 #ifdef VK_KHR_external_fence_win32
 void checkEqual_VkImportFenceWin32HandleInfoKHR(
@@ -1533,6 +1641,16 @@ void checkEqual_VkPerformanceQuerySubmitInfoKHR(
 
 #endif
 #ifdef VK_KHR_maintenance2
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDevicePointClippingProperties, checkEqual_VkPhysicalDevicePointClippingPropertiesKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkRenderPassInputAttachmentAspectCreateInfo, checkEqual_VkRenderPassInputAttachmentAspectCreateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkInputAttachmentAspectReference, checkEqual_VkInputAttachmentAspectReferenceKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkImageViewUsageCreateInfo, checkEqual_VkImageViewUsageCreateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPipelineTessellationDomainOriginStateCreateInfo, checkEqual_VkPipelineTessellationDomainOriginStateCreateInfoKHR);
+
 #endif
 #ifdef VK_KHR_get_surface_capabilities2
 void checkEqual_VkPhysicalDeviceSurfaceInfo2KHR(
@@ -1552,6 +1670,10 @@ void checkEqual_VkSurfaceFormat2KHR(
 
 #endif
 #ifdef VK_KHR_variable_pointers
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceVariablePointersFeatures, checkEqual_VkPhysicalDeviceVariablePointerFeaturesKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceVariablePointersFeatures, checkEqual_VkPhysicalDeviceVariablePointersFeaturesKHR);
+
 #endif
 #ifdef VK_KHR_get_display_properties2
 void checkEqual_VkDisplayProperties2KHR(
@@ -1581,18 +1703,50 @@ void checkEqual_VkDisplayPlaneCapabilities2KHR(
 
 #endif
 #ifdef VK_KHR_dedicated_allocation
+DEFINE_ALIAS_FUNCTION(checkEqual_VkMemoryDedicatedRequirements, checkEqual_VkMemoryDedicatedRequirementsKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkMemoryDedicatedAllocateInfo, checkEqual_VkMemoryDedicatedAllocateInfoKHR);
+
 #endif
 #ifdef VK_KHR_storage_buffer_storage_class
 #endif
 #ifdef VK_KHR_relaxed_block_layout
 #endif
 #ifdef VK_KHR_get_memory_requirements2
+DEFINE_ALIAS_FUNCTION(checkEqual_VkBufferMemoryRequirementsInfo2, checkEqual_VkBufferMemoryRequirementsInfo2KHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkImageMemoryRequirementsInfo2, checkEqual_VkImageMemoryRequirementsInfo2KHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkImageSparseMemoryRequirementsInfo2, checkEqual_VkImageSparseMemoryRequirementsInfo2KHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkMemoryRequirements2, checkEqual_VkMemoryRequirements2KHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSparseImageMemoryRequirements2, checkEqual_VkSparseImageMemoryRequirements2KHR);
+
 #endif
 #ifdef VK_KHR_image_format_list
+DEFINE_ALIAS_FUNCTION(checkEqual_VkImageFormatListCreateInfo, checkEqual_VkImageFormatListCreateInfoKHR);
+
 #endif
 #ifdef VK_KHR_sampler_ycbcr_conversion
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSamplerYcbcrConversionCreateInfo, checkEqual_VkSamplerYcbcrConversionCreateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSamplerYcbcrConversionInfo, checkEqual_VkSamplerYcbcrConversionInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkBindImagePlaneMemoryInfo, checkEqual_VkBindImagePlaneMemoryInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkImagePlaneMemoryRequirementsInfo, checkEqual_VkImagePlaneMemoryRequirementsInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceSamplerYcbcrConversionFeatures, checkEqual_VkPhysicalDeviceSamplerYcbcrConversionFeaturesKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSamplerYcbcrConversionImageFormatProperties, checkEqual_VkSamplerYcbcrConversionImageFormatPropertiesKHR);
+
 #endif
 #ifdef VK_KHR_bind_memory2
+DEFINE_ALIAS_FUNCTION(checkEqual_VkBindBufferMemoryInfo, checkEqual_VkBindBufferMemoryInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkBindImageMemoryInfo, checkEqual_VkBindImageMemoryInfoKHR);
+
 #endif
 #ifdef VK_KHR_portability_subset
 void checkEqual_VkPhysicalDevicePortabilitySubsetFeaturesKHR(
@@ -1607,14 +1761,24 @@ void checkEqual_VkPhysicalDevicePortabilitySubsetPropertiesKHR(
 
 #endif
 #ifdef VK_KHR_maintenance3
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceMaintenance3Properties, checkEqual_VkPhysicalDeviceMaintenance3PropertiesKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDescriptorSetLayoutSupport, checkEqual_VkDescriptorSetLayoutSupportKHR);
+
 #endif
 #ifdef VK_KHR_draw_indirect_count
 #endif
 #ifdef VK_KHR_shader_subgroup_extended_types
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures, checkEqual_VkPhysicalDeviceShaderSubgroupExtendedTypesFeaturesKHR);
+
 #endif
 #ifdef VK_KHR_8bit_storage
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDevice8BitStorageFeatures, checkEqual_VkPhysicalDevice8BitStorageFeaturesKHR);
+
 #endif
 #ifdef VK_KHR_shader_atomic_int64
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceShaderAtomicInt64Features, checkEqual_VkPhysicalDeviceShaderAtomicInt64FeaturesKHR);
+
 #endif
 #ifdef VK_KHR_shader_clock
 void checkEqual_VkPhysicalDeviceShaderClockFeaturesKHR(
@@ -1624,16 +1788,40 @@ void checkEqual_VkPhysicalDeviceShaderClockFeaturesKHR(
 
 #endif
 #ifdef VK_KHR_driver_properties
+DEFINE_ALIAS_FUNCTION(checkEqual_VkConformanceVersion, checkEqual_VkConformanceVersionKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceDriverProperties, checkEqual_VkPhysicalDeviceDriverPropertiesKHR);
+
 #endif
 #ifdef VK_KHR_shader_float_controls
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceFloatControlsProperties, checkEqual_VkPhysicalDeviceFloatControlsPropertiesKHR);
+
 #endif
 #ifdef VK_KHR_depth_stencil_resolve
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSubpassDescriptionDepthStencilResolve, checkEqual_VkSubpassDescriptionDepthStencilResolveKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceDepthStencilResolveProperties, checkEqual_VkPhysicalDeviceDepthStencilResolvePropertiesKHR);
+
 #endif
 #ifdef VK_KHR_swapchain_mutable_format
 #endif
 #ifdef VK_KHR_timeline_semaphore
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceTimelineSemaphoreFeatures, checkEqual_VkPhysicalDeviceTimelineSemaphoreFeaturesKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceTimelineSemaphoreProperties, checkEqual_VkPhysicalDeviceTimelineSemaphorePropertiesKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSemaphoreTypeCreateInfo, checkEqual_VkSemaphoreTypeCreateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkTimelineSemaphoreSubmitInfo, checkEqual_VkTimelineSemaphoreSubmitInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSemaphoreWaitInfo, checkEqual_VkSemaphoreWaitInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSemaphoreSignalInfo, checkEqual_VkSemaphoreSignalInfoKHR);
+
 #endif
 #ifdef VK_KHR_vulkan_memory_model
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceVulkanMemoryModelFeatures, checkEqual_VkPhysicalDeviceVulkanMemoryModelFeaturesKHR);
+
 #endif
 #ifdef VK_KHR_shader_terminate_invocation
 void checkEqual_VkPhysicalDeviceShaderTerminateInvocationFeaturesKHR(
@@ -1679,10 +1867,28 @@ void checkEqual_VkSurfaceProtectedCapabilitiesKHR(
 
 #endif
 #ifdef VK_KHR_separate_depth_stencil_layouts
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures, checkEqual_VkPhysicalDeviceSeparateDepthStencilLayoutsFeaturesKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkAttachmentReferenceStencilLayout, checkEqual_VkAttachmentReferenceStencilLayoutKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkAttachmentDescriptionStencilLayout, checkEqual_VkAttachmentDescriptionStencilLayoutKHR);
+
 #endif
 #ifdef VK_KHR_uniform_buffer_standard_layout
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceUniformBufferStandardLayoutFeatures, checkEqual_VkPhysicalDeviceUniformBufferStandardLayoutFeaturesKHR);
+
 #endif
 #ifdef VK_KHR_buffer_device_address
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceBufferDeviceAddressFeatures, checkEqual_VkPhysicalDeviceBufferDeviceAddressFeaturesKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkBufferDeviceAddressInfo, checkEqual_VkBufferDeviceAddressInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkBufferOpaqueCaptureAddressCreateInfo, checkEqual_VkBufferOpaqueCaptureAddressCreateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkMemoryOpaqueCaptureAddressAllocateInfo, checkEqual_VkMemoryOpaqueCaptureAddressAllocateInfoKHR);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDeviceMemoryOpaqueCaptureAddressInfo, checkEqual_VkDeviceMemoryOpaqueCaptureAddressInfoKHR);
+
 #endif
 #ifdef VK_KHR_deferred_host_operations
 #endif
@@ -2244,6 +2450,10 @@ void checkEqual_VkExternalFormatANDROID(
 
 #endif
 #ifdef VK_EXT_sampler_filter_minmax
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSamplerReductionModeCreateInfo, checkEqual_VkSamplerReductionModeCreateInfoEXT);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceSamplerFilterMinmaxProperties, checkEqual_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT);
+
 #endif
 #ifdef VK_AMD_gpu_shader_int16
 #endif
@@ -2409,6 +2619,16 @@ void checkEqual_VkShaderModuleValidationCacheCreateInfoEXT(
 
 #endif
 #ifdef VK_EXT_descriptor_indexing
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDescriptorSetLayoutBindingFlagsCreateInfo, checkEqual_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceDescriptorIndexingFeatures, checkEqual_VkPhysicalDeviceDescriptorIndexingFeaturesEXT);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceDescriptorIndexingProperties, checkEqual_VkPhysicalDeviceDescriptorIndexingPropertiesEXT);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDescriptorSetVariableDescriptorCountAllocateInfo, checkEqual_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDescriptorSetVariableDescriptorCountLayoutSupport, checkEqual_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT);
+
 #endif
 #ifdef VK_EXT_shader_viewport_index_layer
 #endif
@@ -2510,10 +2730,26 @@ void checkEqual_VkPhysicalDeviceRayTracingPropertiesNV(
     const VkPhysicalDeviceRayTracingPropertiesNV* b,
     OnFailCompareFunc onFail);
 
+void checkEqual_VkTransformMatrixKHR(
+    const VkTransformMatrixKHR* a,
+    const VkTransformMatrixKHR* b,
+    OnFailCompareFunc onFail);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkTransformMatrixKHR, checkEqual_VkTransformMatrixNV);
+
 void checkEqual_VkAabbPositionsKHR(
     const VkAabbPositionsKHR* a,
     const VkAabbPositionsKHR* b,
     OnFailCompareFunc onFail);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkAabbPositionsKHR, checkEqual_VkAabbPositionsNV);
+
+void checkEqual_VkAccelerationStructureInstanceKHR(
+    const VkAccelerationStructureInstanceKHR* a,
+    const VkAccelerationStructureInstanceKHR* b,
+    OnFailCompareFunc onFail);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkAccelerationStructureInstanceKHR, checkEqual_VkAccelerationStructureInstanceNV);
 
 #endif
 #ifdef VK_NV_representative_fragment_test
@@ -2729,6 +2965,8 @@ void checkEqual_VkQueryPoolPerformanceQueryCreateInfoINTEL(
     const VkQueryPoolPerformanceQueryCreateInfoINTEL* b,
     OnFailCompareFunc onFail);
 
+DEFINE_ALIAS_FUNCTION(checkEqual_VkQueryPoolPerformanceQueryCreateInfoINTEL, checkEqual_VkQueryPoolCreateInfoINTEL);
+
 void checkEqual_VkPerformanceMarkerInfoINTEL(
     const VkPerformanceMarkerInfoINTEL* a,
     const VkPerformanceMarkerInfoINTEL* b,
@@ -2801,6 +3039,8 @@ void checkEqual_VkImportPhysicalAddressGOOGLE(
 
 #endif
 #ifdef VK_EXT_scalar_block_layout
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceScalarBlockLayoutFeatures, checkEqual_VkPhysicalDeviceScalarBlockLayoutFeaturesEXT);
+
 #endif
 #ifdef VK_GOOGLE_hlsl_functionality1
 #endif
@@ -2876,6 +3116,10 @@ void checkEqual_VkPhysicalDeviceBufferDeviceAddressFeaturesEXT(
     const VkPhysicalDeviceBufferDeviceAddressFeaturesEXT* b,
     OnFailCompareFunc onFail);
 
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceBufferDeviceAddressFeaturesEXT, checkEqual_VkPhysicalDeviceBufferAddressFeaturesEXT);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkBufferDeviceAddressInfo, checkEqual_VkBufferDeviceAddressInfoEXT);
+
 void checkEqual_VkBufferDeviceAddressCreateInfoEXT(
     const VkBufferDeviceAddressCreateInfoEXT* a,
     const VkBufferDeviceAddressCreateInfoEXT* b,
@@ -2890,6 +3134,8 @@ void checkEqual_VkPhysicalDeviceToolPropertiesEXT(
 
 #endif
 #ifdef VK_EXT_separate_stencil_usage
+DEFINE_ALIAS_FUNCTION(checkEqual_VkImageStencilUsageCreateInfo, checkEqual_VkImageStencilUsageCreateInfoEXT);
+
 #endif
 #ifdef VK_EXT_validation_features
 void checkEqual_VkValidationFeaturesEXT(
@@ -2995,6 +3241,8 @@ void checkEqual_VkPhysicalDeviceShaderAtomicFloatFeaturesEXT(
 
 #endif
 #ifdef VK_EXT_host_query_reset
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceHostQueryResetFeatures, checkEqual_VkPhysicalDeviceHostQueryResetFeaturesEXT);
+
 #endif
 #ifdef VK_EXT_index_type_uint8
 void checkEqual_VkPhysicalDeviceIndexTypeUint8FeaturesEXT(

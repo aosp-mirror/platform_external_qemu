@@ -11369,6 +11369,22 @@ void transform_fromhost_VkPhysicalDeviceRayTracingPropertiesNV(
     }
 }
 
+void transform_tohost_VkTransformMatrixKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkTransformMatrixKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+}
+
+void transform_fromhost_VkTransformMatrixKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkTransformMatrixKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+}
+
 void transform_tohost_VkAabbPositionsKHR(
     VkDecoderGlobalState* resourceTracker,
     VkAabbPositionsKHR* toTransform)
@@ -11383,6 +11399,24 @@ void transform_fromhost_VkAabbPositionsKHR(
 {
     (void)resourceTracker;
     (void)toTransform;
+}
+
+void transform_tohost_VkAccelerationStructureInstanceKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkAccelerationStructureInstanceKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    transform_tohost_VkTransformMatrixKHR(resourceTracker, (VkTransformMatrixKHR*)(&toTransform->transform));
+}
+
+void transform_fromhost_VkAccelerationStructureInstanceKHR(
+    VkDecoderGlobalState* resourceTracker,
+    VkAccelerationStructureInstanceKHR* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    transform_fromhost_VkTransformMatrixKHR(resourceTracker, (VkTransformMatrixKHR*)(&toTransform->transform));
 }
 
 #endif

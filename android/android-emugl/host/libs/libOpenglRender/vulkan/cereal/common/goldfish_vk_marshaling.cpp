@@ -16419,6 +16419,20 @@ void unmarshal_VkPhysicalDeviceRayTracingPropertiesNV(
     vkStream->read((uint32_t*)&forUnmarshaling->maxDescriptorSetAccelerationStructures, sizeof(uint32_t));
 }
 
+void marshal_VkTransformMatrixKHR(
+    VulkanStream* vkStream,
+    const VkTransformMatrixKHR* forMarshaling)
+{
+    vkStream->write((float*)forMarshaling->matrix, ((3)*(4)) * sizeof(float));
+}
+
+void unmarshal_VkTransformMatrixKHR(
+    VulkanStream* vkStream,
+    VkTransformMatrixKHR* forUnmarshaling)
+{
+    vkStream->read((float*)forUnmarshaling->matrix, ((3)*(4)) * sizeof(float));
+}
+
 void marshal_VkAabbPositionsKHR(
     VulkanStream* vkStream,
     const VkAabbPositionsKHR* forMarshaling)
@@ -16441,6 +16455,46 @@ void unmarshal_VkAabbPositionsKHR(
     vkStream->read((float*)&forUnmarshaling->maxX, sizeof(float));
     vkStream->read((float*)&forUnmarshaling->maxY, sizeof(float));
     vkStream->read((float*)&forUnmarshaling->maxZ, sizeof(float));
+}
+
+void marshal_VkAccelerationStructureInstanceKHR(
+    VulkanStream* vkStream,
+    const VkAccelerationStructureInstanceKHR* forMarshaling)
+{
+    
+    typedef struct VkAccelerationStructureInstanceKHRWithoutBitFields {
+        VkTransformMatrixKHR          transform;
+        uint32_t                      dwords[2];
+        uint64_t                      accelerationStructureReference;
+    } VkAccelerationStructureInstanceKHRWithoutBitFields;
+    
+    const VkAccelerationStructureInstanceKHRWithoutBitFields* forMarshaling_new = (const VkAccelerationStructureInstanceKHRWithoutBitFields*)(forMarshaling);
+    marshal_VkTransformMatrixKHR(vkStream, (VkTransformMatrixKHR*)(&forMarshaling_new->transform));
+    for (uint32_t i = 0; i < 2; i++) {
+        vkStream->write((uint32_t*)&(forMarshaling_new->dwords[i]), sizeof(uint32_t));
+    }
+    vkStream->write((uint64_t*)&forMarshaling_new->accelerationStructureReference, sizeof(uint64_t));
+    
+}
+
+void unmarshal_VkAccelerationStructureInstanceKHR(
+    VulkanStream* vkStream,
+    VkAccelerationStructureInstanceKHR* forUnmarshaling)
+{
+    
+    typedef struct VkAccelerationStructureInstanceKHRWithoutBitFields {
+        VkTransformMatrixKHR          transform;
+        uint32_t                      dwords[2];
+        uint64_t                      accelerationStructureReference;
+    } VkAccelerationStructureInstanceKHRWithoutBitFields;
+    
+    VkAccelerationStructureInstanceKHRWithoutBitFields* forUnmarshaling_new = (VkAccelerationStructureInstanceKHRWithoutBitFields*)(forUnmarshaling);
+    unmarshal_VkTransformMatrixKHR(vkStream, (VkTransformMatrixKHR*)(&forUnmarshaling_new->transform));
+    for (uint32_t i = 0; i < 2; i++) {
+        vkStream->read((uint32_t*)&(forUnmarshaling_new->dwords[i]), sizeof(uint32_t));
+    }
+    vkStream->read((uint64_t*)&forUnmarshaling_new->accelerationStructureReference, sizeof(uint64_t));
+    
 }
 
 #endif

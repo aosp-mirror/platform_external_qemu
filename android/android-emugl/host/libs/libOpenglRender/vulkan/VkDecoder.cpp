@@ -19728,7 +19728,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 android::base::beginTrace("vkGetAccelerationStructureMemoryRequirementsNV decode");
                 VkDevice device;
                 const VkAccelerationStructureMemoryRequirementsInfoNV* pInfo;
-                VkMemoryRequirements2* pMemoryRequirements;
+                VkMemoryRequirements2KHR* pMemoryRequirements;
                 // Begin non wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_0;
                 memcpy((uint64_t*)&cgen_var_0, *readStreamPtrPtr, 1 * 8);
@@ -19741,15 +19741,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 reservedunmarshal_VkAccelerationStructureMemoryRequirementsInfoNV(vkReadStream, (VkAccelerationStructureMemoryRequirementsInfoNV*)(pInfo), readStreamPtrPtr);
                 // Begin manual dispatchable handle unboxing for pMemoryRequirements;
                 vkReadStream->unsetHandleMapping();
-                vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements2));
-                reservedunmarshal_VkMemoryRequirements2(vkReadStream, (VkMemoryRequirements2*)(pMemoryRequirements), readStreamPtrPtr);
+                vkReadStream->alloc((void**)&pMemoryRequirements, sizeof(VkMemoryRequirements2KHR));
+                reservedunmarshal_VkMemoryRequirements2KHR(vkReadStream, (VkMemoryRequirements2KHR*)(pMemoryRequirements), readStreamPtrPtr);
                 if (pInfo)
                 {
                     transform_tohost_VkAccelerationStructureMemoryRequirementsInfoNV(m_state, (VkAccelerationStructureMemoryRequirementsInfoNV*)(pInfo));
                 }
                 if (pMemoryRequirements)
                 {
-                    transform_tohost_VkMemoryRequirements2(m_state, (VkMemoryRequirements2*)(pMemoryRequirements));
+                    transform_tohost_VkMemoryRequirements2KHR(m_state, (VkMemoryRequirements2KHR*)(pMemoryRequirements));
                 }
                 if (m_logCalls)
                 {
@@ -19759,9 +19759,9 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->unsetHandleMapping();
                 if (pMemoryRequirements)
                 {
-                    transform_fromhost_VkMemoryRequirements2(m_state, (VkMemoryRequirements2*)(pMemoryRequirements));
+                    transform_fromhost_VkMemoryRequirements2KHR(m_state, (VkMemoryRequirements2KHR*)(pMemoryRequirements));
                 }
-                marshal_VkMemoryRequirements2(vkStream, (VkMemoryRequirements2*)(pMemoryRequirements));
+                marshal_VkMemoryRequirements2KHR(vkStream, (VkMemoryRequirements2KHR*)(pMemoryRequirements));
                 vkStream->commitWrite();
                 vkReadStream->setReadPos((uintptr_t)(*readStreamPtrPtr) - (uintptr_t)snapshotTraceBegin);
                 size_t snapshotTraceBytes = vkReadStream->endTrace();

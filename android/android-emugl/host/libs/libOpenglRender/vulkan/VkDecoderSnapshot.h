@@ -3258,7 +3258,7 @@ public:
         android::base::BumpPool* pool,
         VkDevice device,
         const VkAccelerationStructureMemoryRequirementsInfoNV* pInfo,
-        VkMemoryRequirements2* pMemoryRequirements);
+        VkMemoryRequirements2KHR* pMemoryRequirements);
     void vkBindAccelerationStructureMemoryNV(
     const uint8_t* snapshotTraceBegin,
         size_t snapshotTraceBytes,
