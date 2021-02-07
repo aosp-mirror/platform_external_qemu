@@ -274,4 +274,10 @@ bool arrayany(const T* arr, uint32_t begin, uint32_t end, const F& func) {
     return std::find_if(arr + begin, e, func) != e;
 }
 
+#define DEFINE_ALIAS_FUNCTION(ORIGINAL_FN, ALIAS_FN) \
+template <typename... Args> \
+inline auto ALIAS_FN(Args&&... args) -> decltype(ORIGINAL_FN(std::forward<Args>(args)...)) { \
+  return ORIGINAL_FN(std::forward<Args>(args)...); \
+}
+
 #endif
