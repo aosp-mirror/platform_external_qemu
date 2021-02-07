@@ -234,6 +234,14 @@ RenderChannelPtr RendererImpl::createRenderChannel(
     return channel;
 }
 
+ void RendererImpl::addListener(FrameBufferChangeEventListener* listener) {
+    mRenderWindow->addListener(listener);
+ }
+
+void RendererImpl::removeListener(FrameBufferChangeEventListener* listener) {
+    mRenderWindow->removeListener(listener);
+}
+
 void* RendererImpl::addressSpaceGraphicsConsumerCreate(
     struct asg_context context,
     android::base::Stream* loadStream,
