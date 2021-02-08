@@ -18,6 +18,7 @@
 ANDROID_BEGIN_HEADER
 
 typedef struct QAndroidMultiDisplayAgent {
+    bool (*notifyDisplayChanges)();
     int (*setMultiDisplay)(uint32_t id,
                            int32_t x,
                            int32_t y,

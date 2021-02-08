@@ -3118,6 +3118,7 @@ bool EmulatorQtWindow::getMultiDisplay(uint32_t id,
             uiAgent->multiDisplay->getMultiDisplay(id, x, y, w, h, dpi, flag, enabled));
 }
 
+
 int EmulatorQtWindow::switchMultiDisplay(bool enabled,
                                           uint32_t id,
                                           int32_t x,

@@ -22,6 +22,7 @@
 #include "android/base/synchronization/Lock.h"              // for Lock, Aut...
 #include "android/emulation/control/record_screen_agent.h"  // for QAndroidR...
 #include "android/emulation/control/window_agent.h"         // for QAndroidE...
+#include "android/base/EventNotificationSupport.h"
 
 namespace android {
 namespace base {
@@ -45,7 +46,19 @@ struct MultiDisplayInfo {
 
 };
 
-class MultiDisplay {
+ enum class DisplayChange {
+    DisplayChanged = 0,
+    DisplayAdded,
+    DisplayRemoved,
+    DisplayTransactionCompleted,
+};
+
+struct DisplayChangeEvent {
+    DisplayChange change;
+    uint32_t displayId;
+};
+
+class MultiDisplay :  public base::EventNotificationSupport<MultiDisplay, DisplayChangeEvent> {
 public:
     MultiDisplay(const QAndroidEmulatorWindowAgent* const windowAgent,
                  const QAndroidRecordScreenAgent* const recordAgent,
@@ -103,6 +116,8 @@ public:
     void loadConfig();
     void onSave(base::Stream* stream);
     void onLoad(base::Stream* stream);
+
+    bool notifyDisplayChanges();
 
     // 0 for default Android display
     // 1-5 for Emulator UI

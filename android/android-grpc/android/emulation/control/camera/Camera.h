@@ -13,8 +13,9 @@
 // limitations under the License.
 #pragma once
 
-#include <atomic>
+#include <atomic>                                         // for atomic
 
+#include "android/base/EventNotificationSupport.h"        // for EventNotifi...
 #include "android/emulation/control/utils/EventWaiter.h"  // for EventWaiter
 
 namespace android {
@@ -23,7 +24,7 @@ namespace control {
 
 // The Camera will register a callback with the camera qemud service and
 // will get notified when camera is connected or disconnected.
-class Camera {
+class Camera : public base::EventNotificationSupport<Camera, bool> {
 public:
     Camera();
     bool isVirtualSceneConnected() const { return mVirtualSceneConnected; };
