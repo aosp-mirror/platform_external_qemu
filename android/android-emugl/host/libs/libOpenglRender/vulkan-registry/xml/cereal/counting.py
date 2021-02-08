@@ -505,6 +505,12 @@ class VulkanCounting(VulkanWrapperGenerator):
 
         category = self.typeInfo.categoryOf(name)
 
+        if category in ["struct", "union"] and alias:
+            # TODO(liyl): might not work if freeParams != []
+            self.module.appendHeader(
+                self.codegen.makeFuncAlias(self.countingPrefix + name,
+                                           self.countingPrefix + alias))
+
         if category in ["struct", "union"] and not alias:
 
             structInfo = self.typeInfo.structs[name]

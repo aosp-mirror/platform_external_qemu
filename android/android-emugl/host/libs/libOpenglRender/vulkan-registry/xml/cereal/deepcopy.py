@@ -274,6 +274,11 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
 
         category = self.typeInfo.categoryOf(name)
 
+        if category in ["struct", "union"] and alias:
+            self.module.appendHeader(
+                self.codegen.makeFuncAlias(self.deepcopyPrefix + name,
+                                           self.deepcopyPrefix + alias))
+
         if category in ["struct", "union"] and not alias:
 
             structInfo = self.typeInfo.structs[name]

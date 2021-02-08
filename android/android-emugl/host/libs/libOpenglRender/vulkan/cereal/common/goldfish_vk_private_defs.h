@@ -221,6 +221,7 @@ typedef void (VKAPI_PTR *PFN_vkGetIOSurfaceMVK)(VkImage image, void**  pIOSurfac
 #define VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT (1 << 1)
 #define VULKAN_STREAM_FEATURE_SHADER_FLOAT16_INT8_BIT (1 << 2)
 
+#ifndef VK_KHR_shader_float16_int8
 // Stuff we advertised but didn't define the structs for it yet because
 // we also needed to update our vulkan headers and xml
 typedef struct VkPhysicalDeviceShaderFloat16Int8Features {
@@ -244,6 +245,7 @@ typedef struct VkPhysicalDeviceShaderFloat16Int8Features {
 #define VK_KHR_SHADER_FLOAT16_INT8_EXTENSION_NAME "VK_KHR_shader_float16_int8"
 typedef VkPhysicalDeviceShaderFloat16Int8Features VkPhysicalDeviceShaderFloat16Int8FeaturesKHR;
 typedef VkPhysicalDeviceShaderFloat16Int8Features VkPhysicalDeviceFloat16Int8FeaturesKHR;
+#endif  // VK_KHR_shader_float16_int8
 
 #define VK_GOOGLE_async_queue_submit 1
 
@@ -272,6 +274,12 @@ template<class T, typename F>
 bool arrayany(const T* arr, uint32_t begin, uint32_t end, const F& func) {
     const T* e = arr + end;
     return std::find_if(arr + begin, e, func) != e;
+}
+
+#define DEFINE_ALIAS_FUNCTION(ORIGINAL_FN, ALIAS_FN) \
+template <typename... Args> \
+inline auto ALIAS_FN(Args&&... args) -> decltype(ORIGINAL_FN(std::forward<Args>(args)...)) { \
+  return ORIGINAL_FN(std::forward<Args>(args)...); \
 }
 
 #endif

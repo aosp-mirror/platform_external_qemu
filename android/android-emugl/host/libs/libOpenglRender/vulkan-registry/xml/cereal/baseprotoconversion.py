@@ -466,6 +466,14 @@ class VulkanBaseProtoConversion(VulkanWrapperGenerator):
 
         category = self.typeInfo.categoryOf(name)
 
+        if category in ["struct", "union"] and alias:
+            self.module.appendHeader(
+                self.cgenHeader.makeFuncAlias(TO_PROTO_PREFIX + name,
+                                              TO_PROTO_PREFIX + alias))
+            self.module.appendHeader(
+                self.cgenHeader.makeFuncAlias(FROM_PROTO_PREFIX + name,
+                                              FROM_PROTO_PREFIX + alias))
+
         if category in ["struct", "union"] and not alias:
             self.knownStructs[name] = 1
 

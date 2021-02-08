@@ -176,11 +176,11 @@ class CodeGen(object):
     def __init__(self,):
         self.code = ""
         self.indentLevel = 0
-        self.gensymCounter = 0
+        self.gensymCounter = [-1]
 
     def var(self, prefix="cgen_var"):
-        res = "%s_%d" % (prefix, self.gensymCounter)
-        self.gensymCounter += 1
+        self.gensymCounter[-1] += 1
+        res = "%s_%s" % (prefix, '_'.join(str(i) for i in self.gensymCounter if i >= 0))
         return res
 
     def swapCode(self,):
@@ -202,11 +202,13 @@ class CodeGen(object):
         if bracketPrint:
             self.code += self.indent() + "{\n"
         self.indentLevel += 1
+        self.gensymCounter.append(-1)
 
     def endBlock(self,bracketPrint=True):
         self.indentLevel -= 1
         if bracketPrint:
             self.code += self.indent() + "}\n"
+        del self.gensymCounter[-1]
 
     def beginIf(self, cond):
         self.code += self.indent() + "if (" + cond + ")\n"
@@ -366,6 +368,9 @@ class CodeGen(object):
 
         return protoBegin + protoParams
 
+    def makeFuncAlias(self, nameDst, nameSrc):
+        return "DEFINE_ALIAS_FUNCTION({}, {});\n\n".format(nameSrc, nameDst)
+
     def makeFuncDecl(self, vulkanApi):
         return self.makeFuncProto(vulkanApi) + ";\n\n"
 
@@ -433,6 +438,12 @@ class CodeGen(object):
                     "field": "pSampleMask",
                     "lenExprMember": "rasterizationSamples",
                     "postprocess": lambda expr: "(((%s) + 31) / 32)" % expr
+                },
+                {
+                    "structName": "VkAccelerationStructureVersionInfoKHR",
+                    "field": "pVersionData",
+                    "lenExprMember": "",
+                    "postprocess": lambda _: "2*VK_UUID_SIZE"
                 },
             ]
 

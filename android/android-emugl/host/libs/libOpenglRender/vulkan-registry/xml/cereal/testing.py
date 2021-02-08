@@ -321,6 +321,11 @@ class VulkanTesting(VulkanWrapperGenerator):
 
         category = self.typeInfo.categoryOf(name)
 
+        if category in ["struct", "union"] and alias:
+            self.module.appendHeader(
+                self.codegen.makeFuncAlias(API_PREFIX_EQUALITY + name,
+                                           API_PREFIX_EQUALITY + alias))
+
         if category in ["struct", "union"] and not alias:
 
             structInfo = self.typeInfo.structs[name]

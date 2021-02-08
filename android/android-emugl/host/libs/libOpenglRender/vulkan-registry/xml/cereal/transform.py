@@ -265,6 +265,12 @@ class VulkanTransform(VulkanWrapperGenerator):
 
         category = self.typeInfo.categoryOf(name)
 
+        if category in ["struct", "union"] and alias:
+            for variant in self.variants:
+                self.module.appendHeader(
+                    self.codegen.makeFuncAlias(self.transformPrefix + variant + "_" + name,
+                                               self.transformPrefix + variant + "_" + alias))
+
         if category in ["struct", "union"] and not alias:
             structInfo = self.typeInfo.structs[name]
             self.knownStructs[name] = structInfo

@@ -32,6 +32,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_VERSION_1_1
 #endif
+#ifdef VK_VERSION_1_2
+#endif
 #ifdef VK_KHR_surface
 #endif
 #ifdef VK_KHR_swapchain
@@ -45,8 +47,6 @@ namespace goldfish_vk {
 #ifdef VK_KHR_xcb_surface
 #endif
 #ifdef VK_KHR_wayland_surface
-#endif
-#ifdef VK_KHR_mir_surface
 #endif
 #ifdef VK_KHR_android_surface
 #endif
@@ -86,11 +86,15 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_KHR_push_descriptor
 #endif
+#ifdef VK_KHR_shader_float16_int8
+#endif
 #ifdef VK_KHR_16bit_storage
 #endif
 #ifdef VK_KHR_incremental_present
 #endif
 #ifdef VK_KHR_descriptor_update_template
+#endif
+#ifdef VK_KHR_imageless_framebuffer
 #endif
 #ifdef VK_KHR_create_renderpass2
 #endif
@@ -103,6 +107,8 @@ namespace goldfish_vk {
 #ifdef VK_KHR_external_fence_win32
 #endif
 #ifdef VK_KHR_external_fence_fd
+#endif
+#ifdef VK_KHR_performance_query
 #endif
 #ifdef VK_KHR_maintenance2
 #endif
@@ -126,13 +132,55 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_KHR_bind_memory2
 #endif
+#ifdef VK_KHR_portability_subset
+#endif
 #ifdef VK_KHR_maintenance3
 #endif
 #ifdef VK_KHR_draw_indirect_count
 #endif
+#ifdef VK_KHR_shader_subgroup_extended_types
+#endif
 #ifdef VK_KHR_8bit_storage
 #endif
-#ifdef VK_KHR_shader_float16_int8
+#ifdef VK_KHR_shader_atomic_int64
+#endif
+#ifdef VK_KHR_shader_clock
+#endif
+#ifdef VK_KHR_driver_properties
+#endif
+#ifdef VK_KHR_shader_float_controls
+#endif
+#ifdef VK_KHR_depth_stencil_resolve
+#endif
+#ifdef VK_KHR_swapchain_mutable_format
+#endif
+#ifdef VK_KHR_timeline_semaphore
+#endif
+#ifdef VK_KHR_vulkan_memory_model
+#endif
+#ifdef VK_KHR_shader_terminate_invocation
+#endif
+#ifdef VK_KHR_fragment_shading_rate
+#endif
+#ifdef VK_KHR_spirv_1_4
+#endif
+#ifdef VK_KHR_surface_protected_capabilities
+#endif
+#ifdef VK_KHR_separate_depth_stencil_layouts
+#endif
+#ifdef VK_KHR_uniform_buffer_standard_layout
+#endif
+#ifdef VK_KHR_buffer_device_address
+#endif
+#ifdef VK_KHR_deferred_host_operations
+#endif
+#ifdef VK_KHR_pipeline_executable_properties
+#endif
+#ifdef VK_KHR_pipeline_library
+#endif
+#ifdef VK_KHR_shader_non_semantic_info
+#endif
+#ifdef VK_KHR_copy_commands2
 #endif
 #ifdef VK_ANDROID_native_buffer
 #endif
@@ -156,6 +204,10 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_NV_dedicated_allocation
 #endif
+#ifdef VK_EXT_transform_feedback
+#endif
+#ifdef VK_NVX_image_view_handle
+#endif
 #ifdef VK_AMD_draw_indirect_count
 #endif
 #ifdef VK_AMD_negative_viewport_height
@@ -169,6 +221,10 @@ namespace goldfish_vk {
 #ifdef VK_AMD_shader_info
 #endif
 #ifdef VK_AMD_shader_image_load_store_lod
+#endif
+#ifdef VK_GGP_stream_descriptor_surface
+#endif
+#ifdef VK_NV_corner_sampled_image
 #endif
 #ifdef VK_IMG_format_pvrtc
 #endif
@@ -188,9 +244,11 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_EXT_shader_subgroup_vote
 #endif
-#ifdef VK_EXT_conditional_rendering
+#ifdef VK_EXT_texture_compression_astc_hdr
 #endif
-#ifdef VK_NVX_device_generated_commands
+#ifdef VK_EXT_astc_decode_mode
+#endif
+#ifdef VK_EXT_conditional_rendering
 #endif
 #ifdef VK_NV_clip_space_w_scaling
 #endif
@@ -218,6 +276,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_EXT_conservative_rasterization
 #endif
+#ifdef VK_EXT_depth_clip_enable
+#endif
 #ifdef VK_EXT_swapchain_colorspace
 #endif
 #ifdef VK_EXT_hdr_metadata
@@ -225,6 +285,8 @@ namespace goldfish_vk {
 #ifdef VK_MVK_ios_surface
 #endif
 #ifdef VK_MVK_macos_surface
+#endif
+#ifdef VK_MVK_moltenvk
 #endif
 #ifdef VK_EXT_external_memory_dma_buf
 #endif
@@ -242,6 +304,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_AMD_shader_fragment_mask
 #endif
+#ifdef VK_EXT_inline_uniform_block
+#endif
 #ifdef VK_EXT_shader_stencil_export
 #endif
 #ifdef VK_EXT_sample_locations
@@ -254,7 +318,11 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_NV_fill_rectangle
 #endif
+#ifdef VK_NV_shader_sm_builtins
+#endif
 #ifdef VK_EXT_post_depth_coverage
+#endif
+#ifdef VK_EXT_image_drm_format_modifier
 #endif
 #ifdef VK_EXT_validation_cache
 #endif
@@ -262,23 +330,151 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_EXT_shader_viewport_index_layer
 #endif
+#ifdef VK_NV_shading_rate_image
+#endif
+#ifdef VK_NV_ray_tracing
+#endif
+#ifdef VK_NV_representative_fragment_test
+#endif
+#ifdef VK_EXT_filter_cubic
+#endif
+#ifdef VK_QCOM_render_pass_shader_resolve
+#endif
 #ifdef VK_EXT_global_priority
 #endif
 #ifdef VK_EXT_external_memory_host
 #endif
 #ifdef VK_AMD_buffer_marker
 #endif
+#ifdef VK_AMD_pipeline_compiler_control
+#endif
+#ifdef VK_EXT_calibrated_timestamps
+#endif
 #ifdef VK_AMD_shader_core_properties
+#endif
+#ifdef VK_AMD_memory_overallocation_behavior
 #endif
 #ifdef VK_EXT_vertex_attribute_divisor
 #endif
+#ifdef VK_GGP_frame_token
+#endif
+#ifdef VK_EXT_pipeline_creation_feedback
+#endif
 #ifdef VK_NV_shader_subgroup_partitioned
+#endif
+#ifdef VK_NV_compute_shader_derivatives
+#endif
+#ifdef VK_NV_mesh_shader
+#endif
+#ifdef VK_NV_fragment_shader_barycentric
+#endif
+#ifdef VK_NV_shader_image_footprint
+#endif
+#ifdef VK_NV_scissor_exclusive
 #endif
 #ifdef VK_NV_device_diagnostic_checkpoints
 #endif
-#ifdef VK_GOOGLE_address_space
+#ifdef VK_INTEL_shader_integer_functions2
+#endif
+#ifdef VK_INTEL_performance_query
+#endif
+#ifdef VK_EXT_pci_bus_info
+#endif
+#ifdef VK_AMD_display_native_hdr
+#endif
+#ifdef VK_FUCHSIA_imagepipe_surface
+#endif
+#ifdef VK_EXT_metal_surface
 #endif
 #ifdef VK_GOOGLE_color_buffer
+#endif
+#ifdef VK_EXT_scalar_block_layout
+#endif
+#ifdef VK_GOOGLE_hlsl_functionality1
+#endif
+#ifdef VK_GOOGLE_decorate_string
+#endif
+#ifdef VK_EXT_subgroup_size_control
+#endif
+#ifdef VK_AMD_shader_core_properties2
+#endif
+#ifdef VK_AMD_device_coherent_memory
+#endif
+#ifdef VK_EXT_shader_image_atomic_int64
+#endif
+#ifdef VK_EXT_memory_budget
+#endif
+#ifdef VK_EXT_memory_priority
+#endif
+#ifdef VK_NV_dedicated_allocation_image_aliasing
+#endif
+#ifdef VK_EXT_buffer_device_address
+#endif
+#ifdef VK_EXT_tooling_info
+#endif
+#ifdef VK_EXT_separate_stencil_usage
+#endif
+#ifdef VK_EXT_validation_features
+#endif
+#ifdef VK_NV_cooperative_matrix
+#endif
+#ifdef VK_NV_coverage_reduction_mode
+#endif
+#ifdef VK_EXT_fragment_shader_interlock
+#endif
+#ifdef VK_EXT_ycbcr_image_arrays
+#endif
+#ifdef VK_EXT_full_screen_exclusive
+#endif
+#ifdef VK_EXT_headless_surface
+#endif
+#ifdef VK_EXT_line_rasterization
+#endif
+#ifdef VK_EXT_shader_atomic_float
+#endif
+#ifdef VK_EXT_host_query_reset
+#endif
+#ifdef VK_EXT_index_type_uint8
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+#endif
+#ifdef VK_EXT_shader_demote_to_helper_invocation
+#endif
+#ifdef VK_NV_device_generated_commands
+#endif
+#ifdef VK_EXT_texel_buffer_alignment
+#endif
+#ifdef VK_QCOM_render_pass_transform
+#endif
+#ifdef VK_EXT_device_memory_report
+#endif
+#ifdef VK_EXT_robustness2
+#endif
+#ifdef VK_EXT_custom_border_color
+#endif
+#ifdef VK_GOOGLE_user_type
+#endif
+#ifdef VK_EXT_private_data
+#endif
+#ifdef VK_EXT_pipeline_creation_cache_control
+#endif
+#ifdef VK_NV_device_diagnostics_config
+#endif
+#ifdef VK_QCOM_render_pass_store_ops
+#endif
+#ifdef VK_NV_fragment_shading_rate_enums
+#endif
+#ifdef VK_EXT_fragment_density_map2
+#endif
+#ifdef VK_QCOM_rotated_copy_commands
+#endif
+#ifdef VK_EXT_image_robustness
+#endif
+#ifdef VK_EXT_4444_formats
+#endif
+#ifdef VK_EXT_directfb_surface
+#endif
+#ifdef VK_GOOGLE_address_space
 #endif
 #ifdef VK_GOOGLE_sized_descriptor_update_template
 #endif
@@ -294,9 +490,13 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_GOOGLE_linear_image_layout
 #endif
-#ifdef VK_MVK_moltenvk
-#endif
 #ifdef VK_GOOGLE_queue_submit_with_commands
+#endif
+#ifdef VK_KHR_acceleration_structure
+#endif
+#ifdef VK_KHR_ray_tracing_pipeline
+#endif
+#ifdef VK_KHR_ray_query
 #endif
 uint32_t goldfish_vk_struct_type(
     const void* structExtension)
@@ -396,9 +596,9 @@ size_t goldfish_vk_extension_struct_size(
         {
             return sizeof(VkPhysicalDeviceMultiviewProperties);
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VARIABLE_POINTER_FEATURES:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VARIABLE_POINTERS_FEATURES:
         {
-            return sizeof(VkPhysicalDeviceVariablePointerFeatures);
+            return sizeof(VkPhysicalDeviceVariablePointersFeatures);
         }
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROTECTED_MEMORY_FEATURES:
         {
@@ -468,9 +668,163 @@ size_t goldfish_vk_extension_struct_size(
         {
             return sizeof(VkPhysicalDeviceMaintenance3Properties);
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETER_FEATURES:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES:
         {
-            return sizeof(VkPhysicalDeviceShaderDrawParameterFeatures);
+            return sizeof(VkPhysicalDeviceShaderDrawParametersFeatures);
+        }
+#endif
+#ifdef VK_VERSION_1_2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceVulkan11Features);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_PROPERTIES:
+        {
+            return sizeof(VkPhysicalDeviceVulkan11Properties);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceVulkan12Features);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_PROPERTIES:
+        {
+            return sizeof(VkPhysicalDeviceVulkan12Properties);
+        }
+        case VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO:
+        {
+            return sizeof(VkImageFormatListCreateInfo);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES:
+        {
+            return sizeof(VkPhysicalDevice8BitStorageFeatures);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES:
+        {
+            return sizeof(VkPhysicalDeviceDriverProperties);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_INT64_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceShaderAtomicInt64Features);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceShaderFloat16Int8Features);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FLOAT_CONTROLS_PROPERTIES:
+        {
+            return sizeof(VkPhysicalDeviceFloatControlsProperties);
+        }
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO:
+        {
+            return sizeof(VkDescriptorSetLayoutBindingFlagsCreateInfo);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceDescriptorIndexingFeatures);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES:
+        {
+            return sizeof(VkPhysicalDeviceDescriptorIndexingProperties);
+        }
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO:
+        {
+            return sizeof(VkDescriptorSetVariableDescriptorCountAllocateInfo);
+        }
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_LAYOUT_SUPPORT:
+        {
+            return sizeof(VkDescriptorSetVariableDescriptorCountLayoutSupport);
+        }
+        case VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_DEPTH_STENCIL_RESOLVE:
+        {
+            return sizeof(VkSubpassDescriptionDepthStencilResolve);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_STENCIL_RESOLVE_PROPERTIES:
+        {
+            return sizeof(VkPhysicalDeviceDepthStencilResolveProperties);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCALAR_BLOCK_LAYOUT_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceScalarBlockLayoutFeatures);
+        }
+        case VK_STRUCTURE_TYPE_IMAGE_STENCIL_USAGE_CREATE_INFO:
+        {
+            return sizeof(VkImageStencilUsageCreateInfo);
+        }
+        case VK_STRUCTURE_TYPE_SAMPLER_REDUCTION_MODE_CREATE_INFO:
+        {
+            return sizeof(VkSamplerReductionModeCreateInfo);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_FILTER_MINMAX_PROPERTIES:
+        {
+            return sizeof(VkPhysicalDeviceSamplerFilterMinmaxProperties);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_MEMORY_MODEL_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceVulkanMemoryModelFeatures);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGELESS_FRAMEBUFFER_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceImagelessFramebufferFeatures);
+        }
+        case VK_STRUCTURE_TYPE_FRAMEBUFFER_ATTACHMENTS_CREATE_INFO:
+        {
+            return sizeof(VkFramebufferAttachmentsCreateInfo);
+        }
+        case VK_STRUCTURE_TYPE_RENDER_PASS_ATTACHMENT_BEGIN_INFO:
+        {
+            return sizeof(VkRenderPassAttachmentBeginInfo);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceUniformBufferStandardLayoutFeatures);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SUBGROUP_EXTENDED_TYPES_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SEPARATE_DEPTH_STENCIL_LAYOUTS_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures);
+        }
+        case VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_STENCIL_LAYOUT:
+        {
+            return sizeof(VkAttachmentReferenceStencilLayout);
+        }
+        case VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_STENCIL_LAYOUT:
+        {
+            return sizeof(VkAttachmentDescriptionStencilLayout);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_QUERY_RESET_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceHostQueryResetFeatures);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceTimelineSemaphoreFeatures);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_PROPERTIES:
+        {
+            return sizeof(VkPhysicalDeviceTimelineSemaphoreProperties);
+        }
+        case VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO:
+        {
+            return sizeof(VkSemaphoreTypeCreateInfo);
+        }
+        case VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO:
+        {
+            return sizeof(VkTimelineSemaphoreSubmitInfo);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceBufferDeviceAddressFeatures);
+        }
+        case VK_STRUCTURE_TYPE_BUFFER_OPAQUE_CAPTURE_ADDRESS_CREATE_INFO:
+        {
+            return sizeof(VkBufferOpaqueCaptureAddressCreateInfo);
+        }
+        case VK_STRUCTURE_TYPE_MEMORY_OPAQUE_CAPTURE_ADDRESS_ALLOCATE_INFO:
+        {
+            return sizeof(VkMemoryOpaqueCaptureAddressAllocateInfo);
         }
 #endif
 #ifdef VK_KHR_swapchain
@@ -553,22 +907,74 @@ size_t goldfish_vk_extension_struct_size(
             return sizeof(VkExportFenceWin32HandleInfoKHR);
         }
 #endif
-#ifdef VK_KHR_image_format_list
-        case VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO_KHR:
+#ifdef VK_KHR_performance_query
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_FEATURES_KHR:
         {
-            return sizeof(VkImageFormatListCreateInfoKHR);
+            return sizeof(VkPhysicalDevicePerformanceQueryFeaturesKHR);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_PROPERTIES_KHR:
+        {
+            return sizeof(VkPhysicalDevicePerformanceQueryPropertiesKHR);
+        }
+        case VK_STRUCTURE_TYPE_QUERY_POOL_PERFORMANCE_CREATE_INFO_KHR:
+        {
+            return sizeof(VkQueryPoolPerformanceCreateInfoKHR);
+        }
+        case VK_STRUCTURE_TYPE_PERFORMANCE_QUERY_SUBMIT_INFO_KHR:
+        {
+            return sizeof(VkPerformanceQuerySubmitInfoKHR);
         }
 #endif
-#ifdef VK_KHR_8bit_storage
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR:
+#ifdef VK_KHR_portability_subset
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PORTABILITY_SUBSET_FEATURES_KHR:
         {
-            return sizeof(VkPhysicalDevice8BitStorageFeaturesKHR);
+            return sizeof(VkPhysicalDevicePortabilitySubsetFeaturesKHR);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PORTABILITY_SUBSET_PROPERTIES_KHR:
+        {
+            return sizeof(VkPhysicalDevicePortabilitySubsetPropertiesKHR);
         }
 #endif
-#ifdef VK_KHR_shader_float16_int8
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES:
+#ifdef VK_KHR_shader_clock
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CLOCK_FEATURES_KHR:
         {
-            return sizeof(VkPhysicalDeviceShaderFloat16Int8Features);
+            return sizeof(VkPhysicalDeviceShaderClockFeaturesKHR);
+        }
+#endif
+#ifdef VK_KHR_shader_terminate_invocation
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_TERMINATE_INVOCATION_FEATURES_KHR:
+        {
+            return sizeof(VkPhysicalDeviceShaderTerminateInvocationFeaturesKHR);
+        }
+#endif
+#ifdef VK_KHR_fragment_shading_rate
+        case VK_STRUCTURE_TYPE_FRAGMENT_SHADING_RATE_ATTACHMENT_INFO_KHR:
+        {
+            return sizeof(VkFragmentShadingRateAttachmentInfoKHR);
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_FRAGMENT_SHADING_RATE_STATE_CREATE_INFO_KHR:
+        {
+            return sizeof(VkPipelineFragmentShadingRateStateCreateInfoKHR);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_FEATURES_KHR:
+        {
+            return sizeof(VkPhysicalDeviceFragmentShadingRateFeaturesKHR);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_PROPERTIES_KHR:
+        {
+            return sizeof(VkPhysicalDeviceFragmentShadingRatePropertiesKHR);
+        }
+#endif
+#ifdef VK_KHR_surface_protected_capabilities
+        case VK_STRUCTURE_TYPE_SURFACE_PROTECTED_CAPABILITIES_KHR:
+        {
+            return sizeof(VkSurfaceProtectedCapabilitiesKHR);
+        }
+#endif
+#ifdef VK_KHR_pipeline_executable_properties
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_EXECUTABLE_PROPERTIES_FEATURES_KHR:
+        {
+            return sizeof(VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR);
         }
 #endif
 #ifdef VK_ANDROID_native_buffer
@@ -603,10 +1009,30 @@ size_t goldfish_vk_extension_struct_size(
             return sizeof(VkDedicatedAllocationMemoryAllocateInfoNV);
         }
 #endif
+#ifdef VK_EXT_transform_feedback
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TRANSFORM_FEEDBACK_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceTransformFeedbackFeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TRANSFORM_FEEDBACK_PROPERTIES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceTransformFeedbackPropertiesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_STREAM_CREATE_INFO_EXT:
+        {
+            return sizeof(VkPipelineRasterizationStateStreamCreateInfoEXT);
+        }
+#endif
 #ifdef VK_AMD_texture_gather_bias_lod
         case VK_STRUCTURE_TYPE_TEXTURE_LOD_GATHER_FORMAT_PROPERTIES_AMD:
         {
             return sizeof(VkTextureLODGatherFormatPropertiesAMD);
+        }
+#endif
+#ifdef VK_NV_corner_sampled_image
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CORNER_SAMPLED_IMAGE_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceCornerSampledImageFeaturesNV);
         }
 #endif
 #ifdef VK_NV_external_memory
@@ -639,6 +1065,22 @@ size_t goldfish_vk_extension_struct_size(
         case VK_STRUCTURE_TYPE_VALIDATION_FLAGS_EXT:
         {
             return sizeof(VkValidationFlagsEXT);
+        }
+#endif
+#ifdef VK_EXT_texture_compression_astc_hdr
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TEXTURE_COMPRESSION_ASTC_HDR_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceTextureCompressionASTCHDRFeaturesEXT);
+        }
+#endif
+#ifdef VK_EXT_astc_decode_mode
+        case VK_STRUCTURE_TYPE_IMAGE_VIEW_ASTC_DECODE_MODE_EXT:
+        {
+            return sizeof(VkImageViewASTCDecodeModeEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ASTC_DECODE_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceASTCDecodeFeaturesEXT);
         }
 #endif
 #ifdef VK_EXT_conditional_rendering
@@ -701,6 +1143,16 @@ size_t goldfish_vk_extension_struct_size(
             return sizeof(VkPipelineRasterizationConservativeStateCreateInfoEXT);
         }
 #endif
+#ifdef VK_EXT_depth_clip_enable
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_CLIP_ENABLE_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceDepthClipEnableFeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_DEPTH_CLIP_STATE_CREATE_INFO_EXT:
+        {
+            return sizeof(VkPipelineRasterizationDepthClipStateCreateInfoEXT);
+        }
+#endif
 #ifdef VK_EXT_debug_utils
         case VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT:
         {
@@ -725,14 +1177,22 @@ size_t goldfish_vk_extension_struct_size(
             return sizeof(VkExternalFormatANDROID);
         }
 #endif
-#ifdef VK_EXT_sampler_filter_minmax
-        case VK_STRUCTURE_TYPE_SAMPLER_REDUCTION_MODE_CREATE_INFO_EXT:
+#ifdef VK_EXT_inline_uniform_block
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INLINE_UNIFORM_BLOCK_FEATURES_EXT:
         {
-            return sizeof(VkSamplerReductionModeCreateInfoEXT);
+            return sizeof(VkPhysicalDeviceInlineUniformBlockFeaturesEXT);
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_FILTER_MINMAX_PROPERTIES_EXT:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INLINE_UNIFORM_BLOCK_PROPERTIES_EXT:
         {
-            return sizeof(VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT);
+            return sizeof(VkPhysicalDeviceInlineUniformBlockPropertiesEXT);
+        }
+        case VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_INLINE_UNIFORM_BLOCK_EXT:
+        {
+            return sizeof(VkWriteDescriptorSetInlineUniformBlockEXT);
+        }
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_INLINE_UNIFORM_BLOCK_CREATE_INFO_EXT:
+        {
+            return sizeof(VkDescriptorPoolInlineUniformBlockCreateInfoEXT);
         }
 #endif
 #ifdef VK_EXT_sample_locations
@@ -779,32 +1239,86 @@ size_t goldfish_vk_extension_struct_size(
             return sizeof(VkPipelineCoverageModulationStateCreateInfoNV);
         }
 #endif
+#ifdef VK_NV_shader_sm_builtins
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SM_BUILTINS_PROPERTIES_NV:
+        {
+            return sizeof(VkPhysicalDeviceShaderSMBuiltinsPropertiesNV);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SM_BUILTINS_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceShaderSMBuiltinsFeaturesNV);
+        }
+#endif
+#ifdef VK_EXT_image_drm_format_modifier
+        case VK_STRUCTURE_TYPE_DRM_FORMAT_MODIFIER_PROPERTIES_LIST_EXT:
+        {
+            return sizeof(VkDrmFormatModifierPropertiesListEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_DRM_FORMAT_MODIFIER_INFO_EXT:
+        {
+            return sizeof(VkPhysicalDeviceImageDrmFormatModifierInfoEXT);
+        }
+        case VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_LIST_CREATE_INFO_EXT:
+        {
+            return sizeof(VkImageDrmFormatModifierListCreateInfoEXT);
+        }
+        case VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_EXPLICIT_CREATE_INFO_EXT:
+        {
+            return sizeof(VkImageDrmFormatModifierExplicitCreateInfoEXT);
+        }
+#endif
 #ifdef VK_EXT_validation_cache
         case VK_STRUCTURE_TYPE_SHADER_MODULE_VALIDATION_CACHE_CREATE_INFO_EXT:
         {
             return sizeof(VkShaderModuleValidationCacheCreateInfoEXT);
         }
 #endif
-#ifdef VK_EXT_descriptor_indexing
-        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT:
+#ifdef VK_NV_shading_rate_image
+        case VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_SHADING_RATE_IMAGE_STATE_CREATE_INFO_NV:
         {
-            return sizeof(VkDescriptorSetLayoutBindingFlagsCreateInfoEXT);
+            return sizeof(VkPipelineViewportShadingRateImageStateCreateInfoNV);
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADING_RATE_IMAGE_FEATURES_NV:
         {
-            return sizeof(VkPhysicalDeviceDescriptorIndexingFeaturesEXT);
+            return sizeof(VkPhysicalDeviceShadingRateImageFeaturesNV);
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES_EXT:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADING_RATE_IMAGE_PROPERTIES_NV:
         {
-            return sizeof(VkPhysicalDeviceDescriptorIndexingPropertiesEXT);
+            return sizeof(VkPhysicalDeviceShadingRateImagePropertiesNV);
         }
-        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT:
+        case VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_COARSE_SAMPLE_ORDER_STATE_CREATE_INFO_NV:
         {
-            return sizeof(VkDescriptorSetVariableDescriptorCountAllocateInfoEXT);
+            return sizeof(VkPipelineViewportCoarseSampleOrderStateCreateInfoNV);
         }
-        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_LAYOUT_SUPPORT_EXT:
+#endif
+#ifdef VK_NV_ray_tracing
+        case VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_NV:
         {
-            return sizeof(VkDescriptorSetVariableDescriptorCountLayoutSupportEXT);
+            return sizeof(VkWriteDescriptorSetAccelerationStructureNV);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PROPERTIES_NV:
+        {
+            return sizeof(VkPhysicalDeviceRayTracingPropertiesNV);
+        }
+#endif
+#ifdef VK_NV_representative_fragment_test
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_REPRESENTATIVE_FRAGMENT_TEST_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceRepresentativeFragmentTestFeaturesNV);
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_REPRESENTATIVE_FRAGMENT_TEST_STATE_CREATE_INFO_NV:
+        {
+            return sizeof(VkPipelineRepresentativeFragmentTestStateCreateInfoNV);
+        }
+#endif
+#ifdef VK_EXT_filter_cubic
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_VIEW_IMAGE_FORMAT_INFO_EXT:
+        {
+            return sizeof(VkPhysicalDeviceImageViewImageFormatInfoEXT);
+        }
+        case VK_STRUCTURE_TYPE_FILTER_CUBIC_IMAGE_VIEW_IMAGE_FORMAT_PROPERTIES_EXT:
+        {
+            return sizeof(VkFilterCubicImageViewImageFormatPropertiesEXT);
         }
 #endif
 #ifdef VK_EXT_global_priority
@@ -823,10 +1337,22 @@ size_t goldfish_vk_extension_struct_size(
             return sizeof(VkPhysicalDeviceExternalMemoryHostPropertiesEXT);
         }
 #endif
+#ifdef VK_AMD_pipeline_compiler_control
+        case VK_STRUCTURE_TYPE_PIPELINE_COMPILER_CONTROL_CREATE_INFO_AMD:
+        {
+            return sizeof(VkPipelineCompilerControlCreateInfoAMD);
+        }
+#endif
 #ifdef VK_AMD_shader_core_properties
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CORE_PROPERTIES_AMD:
         {
             return sizeof(VkPhysicalDeviceShaderCorePropertiesAMD);
+        }
+#endif
+#ifdef VK_AMD_memory_overallocation_behavior
+        case VK_STRUCTURE_TYPE_DEVICE_MEMORY_OVERALLOCATION_CREATE_INFO_AMD:
+        {
+            return sizeof(VkDeviceMemoryOverallocationCreateInfoAMD);
         }
 #endif
 #ifdef VK_EXT_vertex_attribute_divisor
@@ -838,11 +1364,93 @@ size_t goldfish_vk_extension_struct_size(
         {
             return sizeof(VkPipelineVertexInputDivisorStateCreateInfoEXT);
         }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_ATTRIBUTE_DIVISOR_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceVertexAttributeDivisorFeaturesEXT);
+        }
+#endif
+#ifdef VK_GGP_frame_token
+        case VK_STRUCTURE_TYPE_PRESENT_FRAME_TOKEN_GGP:
+        {
+            return sizeof(VkPresentFrameTokenGGP);
+        }
+#endif
+#ifdef VK_EXT_pipeline_creation_feedback
+        case VK_STRUCTURE_TYPE_PIPELINE_CREATION_FEEDBACK_CREATE_INFO_EXT:
+        {
+            return sizeof(VkPipelineCreationFeedbackCreateInfoEXT);
+        }
+#endif
+#ifdef VK_NV_compute_shader_derivatives
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COMPUTE_SHADER_DERIVATIVES_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceComputeShaderDerivativesFeaturesNV);
+        }
+#endif
+#ifdef VK_NV_mesh_shader
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceMeshShaderFeaturesNV);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_NV:
+        {
+            return sizeof(VkPhysicalDeviceMeshShaderPropertiesNV);
+        }
+#endif
+#ifdef VK_NV_fragment_shader_barycentric
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADER_BARYCENTRIC_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceFragmentShaderBarycentricFeaturesNV);
+        }
+#endif
+#ifdef VK_NV_shader_image_footprint
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_FOOTPRINT_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceShaderImageFootprintFeaturesNV);
+        }
+#endif
+#ifdef VK_NV_scissor_exclusive
+        case VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_EXCLUSIVE_SCISSOR_STATE_CREATE_INFO_NV:
+        {
+            return sizeof(VkPipelineViewportExclusiveScissorStateCreateInfoNV);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXCLUSIVE_SCISSOR_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceExclusiveScissorFeaturesNV);
+        }
 #endif
 #ifdef VK_NV_device_diagnostic_checkpoints
         case VK_STRUCTURE_TYPE_QUEUE_FAMILY_CHECKPOINT_PROPERTIES_NV:
         {
             return sizeof(VkQueueFamilyCheckpointPropertiesNV);
+        }
+#endif
+#ifdef VK_INTEL_shader_integer_functions2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INTEGER_FUNCTIONS_2_FEATURES_INTEL:
+        {
+            return sizeof(VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL);
+        }
+#endif
+#ifdef VK_INTEL_performance_query
+        case VK_STRUCTURE_TYPE_QUERY_POOL_PERFORMANCE_QUERY_CREATE_INFO_INTEL:
+        {
+            return sizeof(VkQueryPoolPerformanceQueryCreateInfoINTEL);
+        }
+#endif
+#ifdef VK_EXT_pci_bus_info
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PCI_BUS_INFO_PROPERTIES_EXT:
+        {
+            return sizeof(VkPhysicalDevicePCIBusInfoPropertiesEXT);
+        }
+#endif
+#ifdef VK_AMD_display_native_hdr
+        case VK_STRUCTURE_TYPE_DISPLAY_NATIVE_HDR_SURFACE_CAPABILITIES_AMD:
+        {
+            return sizeof(VkDisplayNativeHdrSurfaceCapabilitiesAMD);
+        }
+        case VK_STRUCTURE_TYPE_SWAPCHAIN_DISPLAY_NATIVE_HDR_CREATE_INFO_AMD:
+        {
+            return sizeof(VkSwapchainDisplayNativeHdrCreateInfoAMD);
         }
 #endif
 #ifdef VK_GOOGLE_color_buffer
@@ -857,6 +1465,326 @@ size_t goldfish_vk_extension_struct_size(
         case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
         {
             return sizeof(VkImportPhysicalAddressGOOGLE);
+        }
+#endif
+#ifdef VK_EXT_subgroup_size_control
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceSubgroupSizeControlFeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_PROPERTIES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceSubgroupSizeControlPropertiesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_REQUIRED_SUBGROUP_SIZE_CREATE_INFO_EXT:
+        {
+            return sizeof(VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT);
+        }
+#endif
+#ifdef VK_AMD_shader_core_properties2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CORE_PROPERTIES_2_AMD:
+        {
+            return sizeof(VkPhysicalDeviceShaderCoreProperties2AMD);
+        }
+#endif
+#ifdef VK_AMD_device_coherent_memory
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COHERENT_MEMORY_FEATURES_AMD:
+        {
+            return sizeof(VkPhysicalDeviceCoherentMemoryFeaturesAMD);
+        }
+#endif
+#ifdef VK_EXT_shader_image_atomic_int64
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_ATOMIC_INT64_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT);
+        }
+#endif
+#ifdef VK_EXT_memory_budget
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceMemoryBudgetPropertiesEXT);
+        }
+#endif
+#ifdef VK_EXT_memory_priority
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PRIORITY_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceMemoryPriorityFeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_MEMORY_PRIORITY_ALLOCATE_INFO_EXT:
+        {
+            return sizeof(VkMemoryPriorityAllocateInfoEXT);
+        }
+#endif
+#ifdef VK_NV_dedicated_allocation_image_aliasing
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEDICATED_ALLOCATION_IMAGE_ALIASING_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV);
+        }
+#endif
+#ifdef VK_EXT_buffer_device_address
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceBufferDeviceAddressFeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_CREATE_INFO_EXT:
+        {
+            return sizeof(VkBufferDeviceAddressCreateInfoEXT);
+        }
+#endif
+#ifdef VK_EXT_validation_features
+        case VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT:
+        {
+            return sizeof(VkValidationFeaturesEXT);
+        }
+#endif
+#ifdef VK_NV_cooperative_matrix
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceCooperativeMatrixFeaturesNV);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_PROPERTIES_NV:
+        {
+            return sizeof(VkPhysicalDeviceCooperativeMatrixPropertiesNV);
+        }
+#endif
+#ifdef VK_NV_coverage_reduction_mode
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COVERAGE_REDUCTION_MODE_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceCoverageReductionModeFeaturesNV);
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_COVERAGE_REDUCTION_STATE_CREATE_INFO_NV:
+        {
+            return sizeof(VkPipelineCoverageReductionStateCreateInfoNV);
+        }
+#endif
+#ifdef VK_EXT_fragment_shader_interlock
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADER_INTERLOCK_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT);
+        }
+#endif
+#ifdef VK_EXT_ycbcr_image_arrays
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_YCBCR_IMAGE_ARRAYS_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceYcbcrImageArraysFeaturesEXT);
+        }
+#endif
+#ifdef VK_EXT_full_screen_exclusive
+        case VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_INFO_EXT:
+        {
+            return sizeof(VkSurfaceFullScreenExclusiveInfoEXT);
+        }
+        case VK_STRUCTURE_TYPE_SURFACE_CAPABILITIES_FULL_SCREEN_EXCLUSIVE_EXT:
+        {
+            return sizeof(VkSurfaceCapabilitiesFullScreenExclusiveEXT);
+        }
+        case VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_WIN32_INFO_EXT:
+        {
+            return sizeof(VkSurfaceFullScreenExclusiveWin32InfoEXT);
+        }
+#endif
+#ifdef VK_EXT_line_rasterization
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LINE_RASTERIZATION_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceLineRasterizationFeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LINE_RASTERIZATION_PROPERTIES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceLineRasterizationPropertiesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_LINE_STATE_CREATE_INFO_EXT:
+        {
+            return sizeof(VkPipelineRasterizationLineStateCreateInfoEXT);
+        }
+#endif
+#ifdef VK_EXT_shader_atomic_float
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceShaderAtomicFloatFeaturesEXT);
+        }
+#endif
+#ifdef VK_EXT_index_type_uint8
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INDEX_TYPE_UINT8_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceIndexTypeUint8FeaturesEXT);
+        }
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceExtendedDynamicStateFeaturesEXT);
+        }
+#endif
+#ifdef VK_EXT_shader_demote_to_helper_invocation
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DEMOTE_TO_HELPER_INVOCATION_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT);
+        }
+#endif
+#ifdef VK_NV_device_generated_commands
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_GENERATED_COMMANDS_PROPERTIES_NV:
+        {
+            return sizeof(VkPhysicalDeviceDeviceGeneratedCommandsPropertiesNV);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_GENERATED_COMMANDS_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceDeviceGeneratedCommandsFeaturesNV);
+        }
+        case VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_SHADER_GROUPS_CREATE_INFO_NV:
+        {
+            return sizeof(VkGraphicsPipelineShaderGroupsCreateInfoNV);
+        }
+#endif
+#ifdef VK_EXT_texel_buffer_alignment
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TEXEL_BUFFER_ALIGNMENT_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TEXEL_BUFFER_ALIGNMENT_PROPERTIES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT);
+        }
+#endif
+#ifdef VK_QCOM_render_pass_transform
+        case VK_STRUCTURE_TYPE_RENDER_PASS_TRANSFORM_BEGIN_INFO_QCOM:
+        {
+            return sizeof(VkRenderPassTransformBeginInfoQCOM);
+        }
+        case VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_RENDER_PASS_TRANSFORM_INFO_QCOM:
+        {
+            return sizeof(VkCommandBufferInheritanceRenderPassTransformInfoQCOM);
+        }
+#endif
+#ifdef VK_EXT_device_memory_report
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_MEMORY_REPORT_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceDeviceMemoryReportFeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_DEVICE_MEMORY_REPORT_CREATE_INFO_EXT:
+        {
+            return sizeof(VkDeviceDeviceMemoryReportCreateInfoEXT);
+        }
+#endif
+#ifdef VK_EXT_robustness2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceRobustness2FeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_PROPERTIES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceRobustness2PropertiesEXT);
+        }
+#endif
+#ifdef VK_EXT_custom_border_color
+        case VK_STRUCTURE_TYPE_SAMPLER_CUSTOM_BORDER_COLOR_CREATE_INFO_EXT:
+        {
+            return sizeof(VkSamplerCustomBorderColorCreateInfoEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CUSTOM_BORDER_COLOR_PROPERTIES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceCustomBorderColorPropertiesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CUSTOM_BORDER_COLOR_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceCustomBorderColorFeaturesEXT);
+        }
+#endif
+#ifdef VK_EXT_private_data
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRIVATE_DATA_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDevicePrivateDataFeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_PRIVATE_DATA_CREATE_INFO_EXT:
+        {
+            return sizeof(VkDevicePrivateDataCreateInfoEXT);
+        }
+#endif
+#ifdef VK_EXT_pipeline_creation_cache_control
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_CREATION_CACHE_CONTROL_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDevicePipelineCreationCacheControlFeaturesEXT);
+        }
+#endif
+#ifdef VK_NV_device_diagnostics_config
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DIAGNOSTICS_CONFIG_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceDiagnosticsConfigFeaturesNV);
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_DIAGNOSTICS_CONFIG_CREATE_INFO_NV:
+        {
+            return sizeof(VkDeviceDiagnosticsConfigCreateInfoNV);
+        }
+#endif
+#ifdef VK_NV_fragment_shading_rate_enums
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_ENUMS_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceFragmentShadingRateEnumsFeaturesNV);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_ENUMS_PROPERTIES_NV:
+        {
+            return sizeof(VkPhysicalDeviceFragmentShadingRateEnumsPropertiesNV);
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_FRAGMENT_SHADING_RATE_ENUM_STATE_CREATE_INFO_NV:
+        {
+            return sizeof(VkPipelineFragmentShadingRateEnumStateCreateInfoNV);
+        }
+#endif
+#ifdef VK_EXT_fragment_density_map2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_2_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceFragmentDensityMap2FeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_2_PROPERTIES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceFragmentDensityMap2PropertiesEXT);
+        }
+#endif
+#ifdef VK_QCOM_rotated_copy_commands
+        case VK_STRUCTURE_TYPE_COPY_COMMAND_TRANSFORM_INFO_QCOM:
+        {
+            return sizeof(VkCopyCommandTransformInfoQCOM);
+        }
+#endif
+#ifdef VK_EXT_image_robustness
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_ROBUSTNESS_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceImageRobustnessFeaturesEXT);
+        }
+#endif
+#ifdef VK_EXT_4444_formats
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_4444_FORMATS_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDevice4444FormatsFeaturesEXT);
+        }
+#endif
+#ifdef VK_KHR_acceleration_structure
+        case VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR:
+        {
+            return sizeof(VkWriteDescriptorSetAccelerationStructureKHR);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR:
+        {
+            return sizeof(VkPhysicalDeviceAccelerationStructureFeaturesKHR);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR:
+        {
+            return sizeof(VkPhysicalDeviceAccelerationStructurePropertiesKHR);
+        }
+#endif
+#ifdef VK_KHR_ray_tracing_pipeline
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR:
+        {
+            return sizeof(VkPhysicalDeviceRayTracingPipelineFeaturesKHR);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR:
+        {
+            return sizeof(VkPhysicalDeviceRayTracingPipelinePropertiesKHR);
+        }
+#endif
+#ifdef VK_KHR_ray_query
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR:
+        {
+            return sizeof(VkPhysicalDeviceRayQueryFeaturesKHR);
         }
 #endif
         default:
@@ -958,9 +1886,9 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
         {
             return sizeof(VkPhysicalDeviceMultiviewProperties);
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VARIABLE_POINTER_FEATURES:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VARIABLE_POINTERS_FEATURES:
         {
-            return sizeof(VkPhysicalDeviceVariablePointerFeatures);
+            return sizeof(VkPhysicalDeviceVariablePointersFeatures);
         }
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROTECTED_MEMORY_FEATURES:
         {
@@ -1030,9 +1958,170 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
         {
             return sizeof(VkPhysicalDeviceMaintenance3Properties);
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETER_FEATURES:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES:
         {
-            return sizeof(VkPhysicalDeviceShaderDrawParameterFeatures);
+            return sizeof(VkPhysicalDeviceShaderDrawParametersFeatures);
+        }
+#endif
+#ifdef VK_VERSION_1_2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceVulkan11Features);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_PROPERTIES:
+        {
+            return sizeof(VkPhysicalDeviceVulkan11Properties);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceVulkan12Features);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_PROPERTIES:
+        {
+            return sizeof(VkPhysicalDeviceVulkan12Properties);
+        }
+        case VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO:
+        {
+            return sizeof(VkImageFormatListCreateInfo);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES:
+        {
+            return sizeof(VkPhysicalDevice8BitStorageFeatures);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES:
+        {
+            return sizeof(VkPhysicalDeviceDriverProperties);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_INT64_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceShaderAtomicInt64Features);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES:
+        {
+            if (streamFeatures & VULKAN_STREAM_FEATURE_SHADER_FLOAT16_INT8_BIT)
+            {
+                return sizeof(VkPhysicalDeviceShaderFloat16Int8Features);
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FLOAT_CONTROLS_PROPERTIES:
+        {
+            return sizeof(VkPhysicalDeviceFloatControlsProperties);
+        }
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO:
+        {
+            return sizeof(VkDescriptorSetLayoutBindingFlagsCreateInfo);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceDescriptorIndexingFeatures);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES:
+        {
+            return sizeof(VkPhysicalDeviceDescriptorIndexingProperties);
+        }
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO:
+        {
+            return sizeof(VkDescriptorSetVariableDescriptorCountAllocateInfo);
+        }
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_LAYOUT_SUPPORT:
+        {
+            return sizeof(VkDescriptorSetVariableDescriptorCountLayoutSupport);
+        }
+        case VK_STRUCTURE_TYPE_SUBPASS_DESCRIPTION_DEPTH_STENCIL_RESOLVE:
+        {
+            return sizeof(VkSubpassDescriptionDepthStencilResolve);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_STENCIL_RESOLVE_PROPERTIES:
+        {
+            return sizeof(VkPhysicalDeviceDepthStencilResolveProperties);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCALAR_BLOCK_LAYOUT_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceScalarBlockLayoutFeatures);
+        }
+        case VK_STRUCTURE_TYPE_IMAGE_STENCIL_USAGE_CREATE_INFO:
+        {
+            return sizeof(VkImageStencilUsageCreateInfo);
+        }
+        case VK_STRUCTURE_TYPE_SAMPLER_REDUCTION_MODE_CREATE_INFO:
+        {
+            return sizeof(VkSamplerReductionModeCreateInfo);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_FILTER_MINMAX_PROPERTIES:
+        {
+            return sizeof(VkPhysicalDeviceSamplerFilterMinmaxProperties);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_MEMORY_MODEL_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceVulkanMemoryModelFeatures);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGELESS_FRAMEBUFFER_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceImagelessFramebufferFeatures);
+        }
+        case VK_STRUCTURE_TYPE_FRAMEBUFFER_ATTACHMENTS_CREATE_INFO:
+        {
+            return sizeof(VkFramebufferAttachmentsCreateInfo);
+        }
+        case VK_STRUCTURE_TYPE_RENDER_PASS_ATTACHMENT_BEGIN_INFO:
+        {
+            return sizeof(VkRenderPassAttachmentBeginInfo);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceUniformBufferStandardLayoutFeatures);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SUBGROUP_EXTENDED_TYPES_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SEPARATE_DEPTH_STENCIL_LAYOUTS_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures);
+        }
+        case VK_STRUCTURE_TYPE_ATTACHMENT_REFERENCE_STENCIL_LAYOUT:
+        {
+            return sizeof(VkAttachmentReferenceStencilLayout);
+        }
+        case VK_STRUCTURE_TYPE_ATTACHMENT_DESCRIPTION_STENCIL_LAYOUT:
+        {
+            return sizeof(VkAttachmentDescriptionStencilLayout);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_QUERY_RESET_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceHostQueryResetFeatures);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceTimelineSemaphoreFeatures);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_PROPERTIES:
+        {
+            return sizeof(VkPhysicalDeviceTimelineSemaphoreProperties);
+        }
+        case VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO:
+        {
+            return sizeof(VkSemaphoreTypeCreateInfo);
+        }
+        case VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO:
+        {
+            return sizeof(VkTimelineSemaphoreSubmitInfo);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES:
+        {
+            return sizeof(VkPhysicalDeviceBufferDeviceAddressFeatures);
+        }
+        case VK_STRUCTURE_TYPE_BUFFER_OPAQUE_CAPTURE_ADDRESS_CREATE_INFO:
+        {
+            return sizeof(VkBufferOpaqueCaptureAddressCreateInfo);
+        }
+        case VK_STRUCTURE_TYPE_MEMORY_OPAQUE_CAPTURE_ADDRESS_ALLOCATE_INFO:
+        {
+            return sizeof(VkMemoryOpaqueCaptureAddressAllocateInfo);
         }
 #endif
 #ifdef VK_KHR_swapchain
@@ -1115,29 +2204,74 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
             return sizeof(VkExportFenceWin32HandleInfoKHR);
         }
 #endif
-#ifdef VK_KHR_image_format_list
-        case VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO_KHR:
+#ifdef VK_KHR_performance_query
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_FEATURES_KHR:
         {
-            return sizeof(VkImageFormatListCreateInfoKHR);
+            return sizeof(VkPhysicalDevicePerformanceQueryFeaturesKHR);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_PROPERTIES_KHR:
+        {
+            return sizeof(VkPhysicalDevicePerformanceQueryPropertiesKHR);
+        }
+        case VK_STRUCTURE_TYPE_QUERY_POOL_PERFORMANCE_CREATE_INFO_KHR:
+        {
+            return sizeof(VkQueryPoolPerformanceCreateInfoKHR);
+        }
+        case VK_STRUCTURE_TYPE_PERFORMANCE_QUERY_SUBMIT_INFO_KHR:
+        {
+            return sizeof(VkPerformanceQuerySubmitInfoKHR);
         }
 #endif
-#ifdef VK_KHR_8bit_storage
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR:
+#ifdef VK_KHR_portability_subset
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PORTABILITY_SUBSET_FEATURES_KHR:
         {
-            return sizeof(VkPhysicalDevice8BitStorageFeaturesKHR);
+            return sizeof(VkPhysicalDevicePortabilitySubsetFeaturesKHR);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PORTABILITY_SUBSET_PROPERTIES_KHR:
+        {
+            return sizeof(VkPhysicalDevicePortabilitySubsetPropertiesKHR);
         }
 #endif
-#ifdef VK_KHR_shader_float16_int8
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES:
+#ifdef VK_KHR_shader_clock
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CLOCK_FEATURES_KHR:
         {
-            if (streamFeatures & VULKAN_STREAM_FEATURE_SHADER_FLOAT16_INT8_BIT)
-            {
-                return sizeof(VkPhysicalDeviceShaderFloat16Int8Features);
-            }
-            else
-            {
-                return 0;
-            }
+            return sizeof(VkPhysicalDeviceShaderClockFeaturesKHR);
+        }
+#endif
+#ifdef VK_KHR_shader_terminate_invocation
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_TERMINATE_INVOCATION_FEATURES_KHR:
+        {
+            return sizeof(VkPhysicalDeviceShaderTerminateInvocationFeaturesKHR);
+        }
+#endif
+#ifdef VK_KHR_fragment_shading_rate
+        case VK_STRUCTURE_TYPE_FRAGMENT_SHADING_RATE_ATTACHMENT_INFO_KHR:
+        {
+            return sizeof(VkFragmentShadingRateAttachmentInfoKHR);
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_FRAGMENT_SHADING_RATE_STATE_CREATE_INFO_KHR:
+        {
+            return sizeof(VkPipelineFragmentShadingRateStateCreateInfoKHR);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_FEATURES_KHR:
+        {
+            return sizeof(VkPhysicalDeviceFragmentShadingRateFeaturesKHR);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_PROPERTIES_KHR:
+        {
+            return sizeof(VkPhysicalDeviceFragmentShadingRatePropertiesKHR);
+        }
+#endif
+#ifdef VK_KHR_surface_protected_capabilities
+        case VK_STRUCTURE_TYPE_SURFACE_PROTECTED_CAPABILITIES_KHR:
+        {
+            return sizeof(VkSurfaceProtectedCapabilitiesKHR);
+        }
+#endif
+#ifdef VK_KHR_pipeline_executable_properties
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_EXECUTABLE_PROPERTIES_FEATURES_KHR:
+        {
+            return sizeof(VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR);
         }
 #endif
 #ifdef VK_ANDROID_native_buffer
@@ -1172,10 +2306,30 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
             return sizeof(VkDedicatedAllocationMemoryAllocateInfoNV);
         }
 #endif
+#ifdef VK_EXT_transform_feedback
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TRANSFORM_FEEDBACK_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceTransformFeedbackFeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TRANSFORM_FEEDBACK_PROPERTIES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceTransformFeedbackPropertiesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_STREAM_CREATE_INFO_EXT:
+        {
+            return sizeof(VkPipelineRasterizationStateStreamCreateInfoEXT);
+        }
+#endif
 #ifdef VK_AMD_texture_gather_bias_lod
         case VK_STRUCTURE_TYPE_TEXTURE_LOD_GATHER_FORMAT_PROPERTIES_AMD:
         {
             return sizeof(VkTextureLODGatherFormatPropertiesAMD);
+        }
+#endif
+#ifdef VK_NV_corner_sampled_image
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CORNER_SAMPLED_IMAGE_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceCornerSampledImageFeaturesNV);
         }
 #endif
 #ifdef VK_NV_external_memory
@@ -1208,6 +2362,22 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
         case VK_STRUCTURE_TYPE_VALIDATION_FLAGS_EXT:
         {
             return sizeof(VkValidationFlagsEXT);
+        }
+#endif
+#ifdef VK_EXT_texture_compression_astc_hdr
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TEXTURE_COMPRESSION_ASTC_HDR_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceTextureCompressionASTCHDRFeaturesEXT);
+        }
+#endif
+#ifdef VK_EXT_astc_decode_mode
+        case VK_STRUCTURE_TYPE_IMAGE_VIEW_ASTC_DECODE_MODE_EXT:
+        {
+            return sizeof(VkImageViewASTCDecodeModeEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ASTC_DECODE_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceASTCDecodeFeaturesEXT);
         }
 #endif
 #ifdef VK_EXT_conditional_rendering
@@ -1270,6 +2440,16 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
             return sizeof(VkPipelineRasterizationConservativeStateCreateInfoEXT);
         }
 #endif
+#ifdef VK_EXT_depth_clip_enable
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_CLIP_ENABLE_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceDepthClipEnableFeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_DEPTH_CLIP_STATE_CREATE_INFO_EXT:
+        {
+            return sizeof(VkPipelineRasterizationDepthClipStateCreateInfoEXT);
+        }
+#endif
 #ifdef VK_EXT_debug_utils
         case VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT:
         {
@@ -1294,14 +2474,22 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
             return sizeof(VkExternalFormatANDROID);
         }
 #endif
-#ifdef VK_EXT_sampler_filter_minmax
-        case VK_STRUCTURE_TYPE_SAMPLER_REDUCTION_MODE_CREATE_INFO_EXT:
+#ifdef VK_EXT_inline_uniform_block
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INLINE_UNIFORM_BLOCK_FEATURES_EXT:
         {
-            return sizeof(VkSamplerReductionModeCreateInfoEXT);
+            return sizeof(VkPhysicalDeviceInlineUniformBlockFeaturesEXT);
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_FILTER_MINMAX_PROPERTIES_EXT:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INLINE_UNIFORM_BLOCK_PROPERTIES_EXT:
         {
-            return sizeof(VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT);
+            return sizeof(VkPhysicalDeviceInlineUniformBlockPropertiesEXT);
+        }
+        case VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_INLINE_UNIFORM_BLOCK_EXT:
+        {
+            return sizeof(VkWriteDescriptorSetInlineUniformBlockEXT);
+        }
+        case VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_INLINE_UNIFORM_BLOCK_CREATE_INFO_EXT:
+        {
+            return sizeof(VkDescriptorPoolInlineUniformBlockCreateInfoEXT);
         }
 #endif
 #ifdef VK_EXT_sample_locations
@@ -1348,32 +2536,86 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
             return sizeof(VkPipelineCoverageModulationStateCreateInfoNV);
         }
 #endif
+#ifdef VK_NV_shader_sm_builtins
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SM_BUILTINS_PROPERTIES_NV:
+        {
+            return sizeof(VkPhysicalDeviceShaderSMBuiltinsPropertiesNV);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SM_BUILTINS_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceShaderSMBuiltinsFeaturesNV);
+        }
+#endif
+#ifdef VK_EXT_image_drm_format_modifier
+        case VK_STRUCTURE_TYPE_DRM_FORMAT_MODIFIER_PROPERTIES_LIST_EXT:
+        {
+            return sizeof(VkDrmFormatModifierPropertiesListEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_DRM_FORMAT_MODIFIER_INFO_EXT:
+        {
+            return sizeof(VkPhysicalDeviceImageDrmFormatModifierInfoEXT);
+        }
+        case VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_LIST_CREATE_INFO_EXT:
+        {
+            return sizeof(VkImageDrmFormatModifierListCreateInfoEXT);
+        }
+        case VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_EXPLICIT_CREATE_INFO_EXT:
+        {
+            return sizeof(VkImageDrmFormatModifierExplicitCreateInfoEXT);
+        }
+#endif
 #ifdef VK_EXT_validation_cache
         case VK_STRUCTURE_TYPE_SHADER_MODULE_VALIDATION_CACHE_CREATE_INFO_EXT:
         {
             return sizeof(VkShaderModuleValidationCacheCreateInfoEXT);
         }
 #endif
-#ifdef VK_EXT_descriptor_indexing
-        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT:
+#ifdef VK_NV_shading_rate_image
+        case VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_SHADING_RATE_IMAGE_STATE_CREATE_INFO_NV:
         {
-            return sizeof(VkDescriptorSetLayoutBindingFlagsCreateInfoEXT);
+            return sizeof(VkPipelineViewportShadingRateImageStateCreateInfoNV);
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADING_RATE_IMAGE_FEATURES_NV:
         {
-            return sizeof(VkPhysicalDeviceDescriptorIndexingFeaturesEXT);
+            return sizeof(VkPhysicalDeviceShadingRateImageFeaturesNV);
         }
-        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES_EXT:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADING_RATE_IMAGE_PROPERTIES_NV:
         {
-            return sizeof(VkPhysicalDeviceDescriptorIndexingPropertiesEXT);
+            return sizeof(VkPhysicalDeviceShadingRateImagePropertiesNV);
         }
-        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT:
+        case VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_COARSE_SAMPLE_ORDER_STATE_CREATE_INFO_NV:
         {
-            return sizeof(VkDescriptorSetVariableDescriptorCountAllocateInfoEXT);
+            return sizeof(VkPipelineViewportCoarseSampleOrderStateCreateInfoNV);
         }
-        case VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_LAYOUT_SUPPORT_EXT:
+#endif
+#ifdef VK_NV_ray_tracing
+        case VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_NV:
         {
-            return sizeof(VkDescriptorSetVariableDescriptorCountLayoutSupportEXT);
+            return sizeof(VkWriteDescriptorSetAccelerationStructureNV);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PROPERTIES_NV:
+        {
+            return sizeof(VkPhysicalDeviceRayTracingPropertiesNV);
+        }
+#endif
+#ifdef VK_NV_representative_fragment_test
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_REPRESENTATIVE_FRAGMENT_TEST_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceRepresentativeFragmentTestFeaturesNV);
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_REPRESENTATIVE_FRAGMENT_TEST_STATE_CREATE_INFO_NV:
+        {
+            return sizeof(VkPipelineRepresentativeFragmentTestStateCreateInfoNV);
+        }
+#endif
+#ifdef VK_EXT_filter_cubic
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_VIEW_IMAGE_FORMAT_INFO_EXT:
+        {
+            return sizeof(VkPhysicalDeviceImageViewImageFormatInfoEXT);
+        }
+        case VK_STRUCTURE_TYPE_FILTER_CUBIC_IMAGE_VIEW_IMAGE_FORMAT_PROPERTIES_EXT:
+        {
+            return sizeof(VkFilterCubicImageViewImageFormatPropertiesEXT);
         }
 #endif
 #ifdef VK_EXT_global_priority
@@ -1392,10 +2634,22 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
             return sizeof(VkPhysicalDeviceExternalMemoryHostPropertiesEXT);
         }
 #endif
+#ifdef VK_AMD_pipeline_compiler_control
+        case VK_STRUCTURE_TYPE_PIPELINE_COMPILER_CONTROL_CREATE_INFO_AMD:
+        {
+            return sizeof(VkPipelineCompilerControlCreateInfoAMD);
+        }
+#endif
 #ifdef VK_AMD_shader_core_properties
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CORE_PROPERTIES_AMD:
         {
             return sizeof(VkPhysicalDeviceShaderCorePropertiesAMD);
+        }
+#endif
+#ifdef VK_AMD_memory_overallocation_behavior
+        case VK_STRUCTURE_TYPE_DEVICE_MEMORY_OVERALLOCATION_CREATE_INFO_AMD:
+        {
+            return sizeof(VkDeviceMemoryOverallocationCreateInfoAMD);
         }
 #endif
 #ifdef VK_EXT_vertex_attribute_divisor
@@ -1407,11 +2661,93 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
         {
             return sizeof(VkPipelineVertexInputDivisorStateCreateInfoEXT);
         }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_ATTRIBUTE_DIVISOR_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceVertexAttributeDivisorFeaturesEXT);
+        }
+#endif
+#ifdef VK_GGP_frame_token
+        case VK_STRUCTURE_TYPE_PRESENT_FRAME_TOKEN_GGP:
+        {
+            return sizeof(VkPresentFrameTokenGGP);
+        }
+#endif
+#ifdef VK_EXT_pipeline_creation_feedback
+        case VK_STRUCTURE_TYPE_PIPELINE_CREATION_FEEDBACK_CREATE_INFO_EXT:
+        {
+            return sizeof(VkPipelineCreationFeedbackCreateInfoEXT);
+        }
+#endif
+#ifdef VK_NV_compute_shader_derivatives
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COMPUTE_SHADER_DERIVATIVES_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceComputeShaderDerivativesFeaturesNV);
+        }
+#endif
+#ifdef VK_NV_mesh_shader
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceMeshShaderFeaturesNV);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_NV:
+        {
+            return sizeof(VkPhysicalDeviceMeshShaderPropertiesNV);
+        }
+#endif
+#ifdef VK_NV_fragment_shader_barycentric
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADER_BARYCENTRIC_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceFragmentShaderBarycentricFeaturesNV);
+        }
+#endif
+#ifdef VK_NV_shader_image_footprint
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_FOOTPRINT_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceShaderImageFootprintFeaturesNV);
+        }
+#endif
+#ifdef VK_NV_scissor_exclusive
+        case VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_EXCLUSIVE_SCISSOR_STATE_CREATE_INFO_NV:
+        {
+            return sizeof(VkPipelineViewportExclusiveScissorStateCreateInfoNV);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXCLUSIVE_SCISSOR_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceExclusiveScissorFeaturesNV);
+        }
 #endif
 #ifdef VK_NV_device_diagnostic_checkpoints
         case VK_STRUCTURE_TYPE_QUEUE_FAMILY_CHECKPOINT_PROPERTIES_NV:
         {
             return sizeof(VkQueueFamilyCheckpointPropertiesNV);
+        }
+#endif
+#ifdef VK_INTEL_shader_integer_functions2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INTEGER_FUNCTIONS_2_FEATURES_INTEL:
+        {
+            return sizeof(VkPhysicalDeviceShaderIntegerFunctions2FeaturesINTEL);
+        }
+#endif
+#ifdef VK_INTEL_performance_query
+        case VK_STRUCTURE_TYPE_QUERY_POOL_PERFORMANCE_QUERY_CREATE_INFO_INTEL:
+        {
+            return sizeof(VkQueryPoolPerformanceQueryCreateInfoINTEL);
+        }
+#endif
+#ifdef VK_EXT_pci_bus_info
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PCI_BUS_INFO_PROPERTIES_EXT:
+        {
+            return sizeof(VkPhysicalDevicePCIBusInfoPropertiesEXT);
+        }
+#endif
+#ifdef VK_AMD_display_native_hdr
+        case VK_STRUCTURE_TYPE_DISPLAY_NATIVE_HDR_SURFACE_CAPABILITIES_AMD:
+        {
+            return sizeof(VkDisplayNativeHdrSurfaceCapabilitiesAMD);
+        }
+        case VK_STRUCTURE_TYPE_SWAPCHAIN_DISPLAY_NATIVE_HDR_CREATE_INFO_AMD:
+        {
+            return sizeof(VkSwapchainDisplayNativeHdrCreateInfoAMD);
         }
 #endif
 #ifdef VK_GOOGLE_color_buffer
@@ -1426,6 +2762,326 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
         case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
         {
             return sizeof(VkImportPhysicalAddressGOOGLE);
+        }
+#endif
+#ifdef VK_EXT_subgroup_size_control
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceSubgroupSizeControlFeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_PROPERTIES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceSubgroupSizeControlPropertiesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_REQUIRED_SUBGROUP_SIZE_CREATE_INFO_EXT:
+        {
+            return sizeof(VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT);
+        }
+#endif
+#ifdef VK_AMD_shader_core_properties2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CORE_PROPERTIES_2_AMD:
+        {
+            return sizeof(VkPhysicalDeviceShaderCoreProperties2AMD);
+        }
+#endif
+#ifdef VK_AMD_device_coherent_memory
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COHERENT_MEMORY_FEATURES_AMD:
+        {
+            return sizeof(VkPhysicalDeviceCoherentMemoryFeaturesAMD);
+        }
+#endif
+#ifdef VK_EXT_shader_image_atomic_int64
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_IMAGE_ATOMIC_INT64_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceShaderImageAtomicInt64FeaturesEXT);
+        }
+#endif
+#ifdef VK_EXT_memory_budget
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceMemoryBudgetPropertiesEXT);
+        }
+#endif
+#ifdef VK_EXT_memory_priority
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PRIORITY_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceMemoryPriorityFeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_MEMORY_PRIORITY_ALLOCATE_INFO_EXT:
+        {
+            return sizeof(VkMemoryPriorityAllocateInfoEXT);
+        }
+#endif
+#ifdef VK_NV_dedicated_allocation_image_aliasing
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEDICATED_ALLOCATION_IMAGE_ALIASING_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceDedicatedAllocationImageAliasingFeaturesNV);
+        }
+#endif
+#ifdef VK_EXT_buffer_device_address
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceBufferDeviceAddressFeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_CREATE_INFO_EXT:
+        {
+            return sizeof(VkBufferDeviceAddressCreateInfoEXT);
+        }
+#endif
+#ifdef VK_EXT_validation_features
+        case VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT:
+        {
+            return sizeof(VkValidationFeaturesEXT);
+        }
+#endif
+#ifdef VK_NV_cooperative_matrix
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceCooperativeMatrixFeaturesNV);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_PROPERTIES_NV:
+        {
+            return sizeof(VkPhysicalDeviceCooperativeMatrixPropertiesNV);
+        }
+#endif
+#ifdef VK_NV_coverage_reduction_mode
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COVERAGE_REDUCTION_MODE_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceCoverageReductionModeFeaturesNV);
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_COVERAGE_REDUCTION_STATE_CREATE_INFO_NV:
+        {
+            return sizeof(VkPipelineCoverageReductionStateCreateInfoNV);
+        }
+#endif
+#ifdef VK_EXT_fragment_shader_interlock
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADER_INTERLOCK_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceFragmentShaderInterlockFeaturesEXT);
+        }
+#endif
+#ifdef VK_EXT_ycbcr_image_arrays
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_YCBCR_IMAGE_ARRAYS_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceYcbcrImageArraysFeaturesEXT);
+        }
+#endif
+#ifdef VK_EXT_full_screen_exclusive
+        case VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_INFO_EXT:
+        {
+            return sizeof(VkSurfaceFullScreenExclusiveInfoEXT);
+        }
+        case VK_STRUCTURE_TYPE_SURFACE_CAPABILITIES_FULL_SCREEN_EXCLUSIVE_EXT:
+        {
+            return sizeof(VkSurfaceCapabilitiesFullScreenExclusiveEXT);
+        }
+        case VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_WIN32_INFO_EXT:
+        {
+            return sizeof(VkSurfaceFullScreenExclusiveWin32InfoEXT);
+        }
+#endif
+#ifdef VK_EXT_line_rasterization
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LINE_RASTERIZATION_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceLineRasterizationFeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LINE_RASTERIZATION_PROPERTIES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceLineRasterizationPropertiesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_LINE_STATE_CREATE_INFO_EXT:
+        {
+            return sizeof(VkPipelineRasterizationLineStateCreateInfoEXT);
+        }
+#endif
+#ifdef VK_EXT_shader_atomic_float
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceShaderAtomicFloatFeaturesEXT);
+        }
+#endif
+#ifdef VK_EXT_index_type_uint8
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INDEX_TYPE_UINT8_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceIndexTypeUint8FeaturesEXT);
+        }
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceExtendedDynamicStateFeaturesEXT);
+        }
+#endif
+#ifdef VK_EXT_shader_demote_to_helper_invocation
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DEMOTE_TO_HELPER_INVOCATION_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT);
+        }
+#endif
+#ifdef VK_NV_device_generated_commands
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_GENERATED_COMMANDS_PROPERTIES_NV:
+        {
+            return sizeof(VkPhysicalDeviceDeviceGeneratedCommandsPropertiesNV);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_GENERATED_COMMANDS_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceDeviceGeneratedCommandsFeaturesNV);
+        }
+        case VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_SHADER_GROUPS_CREATE_INFO_NV:
+        {
+            return sizeof(VkGraphicsPipelineShaderGroupsCreateInfoNV);
+        }
+#endif
+#ifdef VK_EXT_texel_buffer_alignment
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TEXEL_BUFFER_ALIGNMENT_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TEXEL_BUFFER_ALIGNMENT_PROPERTIES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceTexelBufferAlignmentPropertiesEXT);
+        }
+#endif
+#ifdef VK_QCOM_render_pass_transform
+        case VK_STRUCTURE_TYPE_RENDER_PASS_TRANSFORM_BEGIN_INFO_QCOM:
+        {
+            return sizeof(VkRenderPassTransformBeginInfoQCOM);
+        }
+        case VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_RENDER_PASS_TRANSFORM_INFO_QCOM:
+        {
+            return sizeof(VkCommandBufferInheritanceRenderPassTransformInfoQCOM);
+        }
+#endif
+#ifdef VK_EXT_device_memory_report
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_MEMORY_REPORT_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceDeviceMemoryReportFeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_DEVICE_MEMORY_REPORT_CREATE_INFO_EXT:
+        {
+            return sizeof(VkDeviceDeviceMemoryReportCreateInfoEXT);
+        }
+#endif
+#ifdef VK_EXT_robustness2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceRobustness2FeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_PROPERTIES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceRobustness2PropertiesEXT);
+        }
+#endif
+#ifdef VK_EXT_custom_border_color
+        case VK_STRUCTURE_TYPE_SAMPLER_CUSTOM_BORDER_COLOR_CREATE_INFO_EXT:
+        {
+            return sizeof(VkSamplerCustomBorderColorCreateInfoEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CUSTOM_BORDER_COLOR_PROPERTIES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceCustomBorderColorPropertiesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CUSTOM_BORDER_COLOR_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceCustomBorderColorFeaturesEXT);
+        }
+#endif
+#ifdef VK_EXT_private_data
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRIVATE_DATA_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDevicePrivateDataFeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_PRIVATE_DATA_CREATE_INFO_EXT:
+        {
+            return sizeof(VkDevicePrivateDataCreateInfoEXT);
+        }
+#endif
+#ifdef VK_EXT_pipeline_creation_cache_control
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_CREATION_CACHE_CONTROL_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDevicePipelineCreationCacheControlFeaturesEXT);
+        }
+#endif
+#ifdef VK_NV_device_diagnostics_config
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DIAGNOSTICS_CONFIG_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceDiagnosticsConfigFeaturesNV);
+        }
+        case VK_STRUCTURE_TYPE_DEVICE_DIAGNOSTICS_CONFIG_CREATE_INFO_NV:
+        {
+            return sizeof(VkDeviceDiagnosticsConfigCreateInfoNV);
+        }
+#endif
+#ifdef VK_NV_fragment_shading_rate_enums
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_ENUMS_FEATURES_NV:
+        {
+            return sizeof(VkPhysicalDeviceFragmentShadingRateEnumsFeaturesNV);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_ENUMS_PROPERTIES_NV:
+        {
+            return sizeof(VkPhysicalDeviceFragmentShadingRateEnumsPropertiesNV);
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_FRAGMENT_SHADING_RATE_ENUM_STATE_CREATE_INFO_NV:
+        {
+            return sizeof(VkPipelineFragmentShadingRateEnumStateCreateInfoNV);
+        }
+#endif
+#ifdef VK_EXT_fragment_density_map2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_2_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceFragmentDensityMap2FeaturesEXT);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_2_PROPERTIES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceFragmentDensityMap2PropertiesEXT);
+        }
+#endif
+#ifdef VK_QCOM_rotated_copy_commands
+        case VK_STRUCTURE_TYPE_COPY_COMMAND_TRANSFORM_INFO_QCOM:
+        {
+            return sizeof(VkCopyCommandTransformInfoQCOM);
+        }
+#endif
+#ifdef VK_EXT_image_robustness
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_ROBUSTNESS_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDeviceImageRobustnessFeaturesEXT);
+        }
+#endif
+#ifdef VK_EXT_4444_formats
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_4444_FORMATS_FEATURES_EXT:
+        {
+            return sizeof(VkPhysicalDevice4444FormatsFeaturesEXT);
+        }
+#endif
+#ifdef VK_KHR_acceleration_structure
+        case VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR:
+        {
+            return sizeof(VkWriteDescriptorSetAccelerationStructureKHR);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR:
+        {
+            return sizeof(VkPhysicalDeviceAccelerationStructureFeaturesKHR);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_PROPERTIES_KHR:
+        {
+            return sizeof(VkPhysicalDeviceAccelerationStructurePropertiesKHR);
+        }
+#endif
+#ifdef VK_KHR_ray_tracing_pipeline
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR:
+        {
+            return sizeof(VkPhysicalDeviceRayTracingPipelineFeaturesKHR);
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR:
+        {
+            return sizeof(VkPhysicalDeviceRayTracingPipelinePropertiesKHR);
+        }
+#endif
+#ifdef VK_KHR_ray_query
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR:
+        {
+            return sizeof(VkPhysicalDeviceRayQueryFeaturesKHR);
         }
 #endif
         default:
