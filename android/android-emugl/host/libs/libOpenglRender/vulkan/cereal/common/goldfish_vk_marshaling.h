@@ -5855,6 +5855,8 @@ void unmarshal_VkDirectFBSurfaceCreateInfoEXT(
 #define OP_vkQueueBindSparseAsyncGOOGLE 20332
 #define OP_vkGetLinearImageLayoutGOOGLE 20333
 #define OP_vkQueueFlushCommandsGOOGLE 20340
+#define OP_vkQueueCommitDescriptorSetUpdatesGOOGLE 267932433
+#define OP_vkCollectDescriptorPoolIdsGOOGLE 213659202
 #endif
 #ifdef VK_KHR_acceleration_structure
 void marshal_VkDeviceOrHostAddressKHR(

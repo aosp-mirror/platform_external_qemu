@@ -599,7 +599,7 @@ void transform_tohost_VkDeviceCreateInfo(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pQueueCreateInfos)
         {
@@ -625,7 +625,7 @@ void transform_fromhost_VkDeviceCreateInfo(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pQueueCreateInfos)
         {
@@ -791,7 +791,7 @@ void transform_tohost_VkSparseBufferMemoryBindInfo(
 {
     (void)resourceTracker;
     (void)toTransform;
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pBinds)
         {
@@ -809,7 +809,7 @@ void transform_fromhost_VkSparseBufferMemoryBindInfo(
 {
     (void)resourceTracker;
     (void)toTransform;
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pBinds)
         {
@@ -827,7 +827,7 @@ void transform_tohost_VkSparseImageOpaqueMemoryBindInfo(
 {
     (void)resourceTracker;
     (void)toTransform;
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pBinds)
         {
@@ -845,7 +845,7 @@ void transform_fromhost_VkSparseImageOpaqueMemoryBindInfo(
 {
     (void)resourceTracker;
     (void)toTransform;
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pBinds)
         {
@@ -903,7 +903,7 @@ void transform_tohost_VkSparseImageMemoryBindInfo(
 {
     (void)resourceTracker;
     (void)toTransform;
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pBinds)
         {
@@ -921,7 +921,7 @@ void transform_fromhost_VkSparseImageMemoryBindInfo(
 {
     (void)resourceTracker;
     (void)toTransform;
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pBinds)
         {
@@ -943,7 +943,7 @@ void transform_tohost_VkBindSparseInfo(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pBufferBinds)
         {
@@ -953,7 +953,7 @@ void transform_tohost_VkBindSparseInfo(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pImageOpaqueBinds)
         {
@@ -963,7 +963,7 @@ void transform_tohost_VkBindSparseInfo(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pImageBinds)
         {
@@ -985,7 +985,7 @@ void transform_fromhost_VkBindSparseInfo(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pBufferBinds)
         {
@@ -995,7 +995,7 @@ void transform_fromhost_VkBindSparseInfo(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pImageOpaqueBinds)
         {
@@ -1005,7 +1005,7 @@ void transform_fromhost_VkBindSparseInfo(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pImageBinds)
         {
@@ -1353,7 +1353,7 @@ void transform_tohost_VkSpecializationInfo(
 {
     (void)resourceTracker;
     (void)toTransform;
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pMapEntries)
         {
@@ -1371,7 +1371,7 @@ void transform_fromhost_VkSpecializationInfo(
 {
     (void)resourceTracker;
     (void)toTransform;
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pMapEntries)
         {
@@ -1483,7 +1483,7 @@ void transform_tohost_VkPipelineVertexInputStateCreateInfo(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pVertexBindingDescriptions)
         {
@@ -1493,7 +1493,7 @@ void transform_tohost_VkPipelineVertexInputStateCreateInfo(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pVertexAttributeDescriptions)
         {
@@ -1515,7 +1515,7 @@ void transform_fromhost_VkPipelineVertexInputStateCreateInfo(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pVertexBindingDescriptions)
         {
@@ -1525,7 +1525,7 @@ void transform_fromhost_VkPipelineVertexInputStateCreateInfo(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pVertexAttributeDescriptions)
         {
@@ -1611,7 +1611,7 @@ void transform_tohost_VkPipelineViewportStateCreateInfo(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pViewports)
         {
@@ -1621,7 +1621,7 @@ void transform_tohost_VkPipelineViewportStateCreateInfo(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pScissors)
         {
@@ -1643,7 +1643,7 @@ void transform_fromhost_VkPipelineViewportStateCreateInfo(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pViewports)
         {
@@ -1653,7 +1653,7 @@ void transform_fromhost_VkPipelineViewportStateCreateInfo(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pScissors)
         {
@@ -1783,7 +1783,7 @@ void transform_tohost_VkPipelineColorBlendStateCreateInfo(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pAttachments)
         {
@@ -1805,7 +1805,7 @@ void transform_fromhost_VkPipelineColorBlendStateCreateInfo(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pAttachments)
         {
@@ -1851,7 +1851,7 @@ void transform_tohost_VkGraphicsPipelineCreateInfo(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pStages)
         {
@@ -1909,7 +1909,7 @@ void transform_fromhost_VkGraphicsPipelineCreateInfo(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pStages)
         {
@@ -1983,7 +1983,7 @@ void transform_tohost_VkPipelineLayoutCreateInfo(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pPushConstantRanges)
         {
@@ -2005,7 +2005,7 @@ void transform_fromhost_VkPipelineLayoutCreateInfo(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pPushConstantRanges)
         {
@@ -2123,7 +2123,7 @@ void transform_tohost_VkDescriptorPoolCreateInfo(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pPoolSizes)
         {
@@ -2145,7 +2145,7 @@ void transform_fromhost_VkDescriptorPoolCreateInfo(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pPoolSizes)
         {
@@ -2207,7 +2207,7 @@ void transform_tohost_VkDescriptorSetLayoutCreateInfo(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pBindings)
         {
@@ -2229,7 +2229,7 @@ void transform_fromhost_VkDescriptorSetLayoutCreateInfo(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pBindings)
         {
@@ -2251,7 +2251,7 @@ void transform_tohost_VkWriteDescriptorSet(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pImageInfo)
         {
@@ -2261,7 +2261,7 @@ void transform_tohost_VkWriteDescriptorSet(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pBufferInfo)
         {
@@ -2283,7 +2283,7 @@ void transform_fromhost_VkWriteDescriptorSet(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pImageInfo)
         {
@@ -2293,7 +2293,7 @@ void transform_fromhost_VkWriteDescriptorSet(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pBufferInfo)
         {
@@ -2367,7 +2367,7 @@ void transform_tohost_VkSubpassDescription(
 {
     (void)resourceTracker;
     (void)toTransform;
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pInputAttachments)
         {
@@ -2377,7 +2377,7 @@ void transform_tohost_VkSubpassDescription(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pColorAttachments)
         {
@@ -2387,7 +2387,7 @@ void transform_tohost_VkSubpassDescription(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pResolveAttachments)
         {
@@ -2409,7 +2409,7 @@ void transform_fromhost_VkSubpassDescription(
 {
     (void)resourceTracker;
     (void)toTransform;
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pInputAttachments)
         {
@@ -2419,7 +2419,7 @@ void transform_fromhost_VkSubpassDescription(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pColorAttachments)
         {
@@ -2429,7 +2429,7 @@ void transform_fromhost_VkSubpassDescription(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pResolveAttachments)
         {
@@ -2471,7 +2471,7 @@ void transform_tohost_VkRenderPassCreateInfo(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pAttachments)
         {
@@ -2481,7 +2481,7 @@ void transform_tohost_VkRenderPassCreateInfo(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pSubpasses)
         {
@@ -2491,7 +2491,7 @@ void transform_tohost_VkRenderPassCreateInfo(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pDependencies)
         {
@@ -2513,7 +2513,7 @@ void transform_fromhost_VkRenderPassCreateInfo(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pAttachments)
         {
@@ -2523,7 +2523,7 @@ void transform_fromhost_VkRenderPassCreateInfo(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pSubpasses)
         {
@@ -2533,7 +2533,7 @@ void transform_fromhost_VkRenderPassCreateInfo(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pDependencies)
         {
@@ -2890,7 +2890,7 @@ void transform_tohost_VkRenderPassBeginInfo(
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
     transform_tohost_VkRect2D(resourceTracker, (VkRect2D*)(&toTransform->renderArea));
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pClearValues)
         {
@@ -2913,7 +2913,7 @@ void transform_fromhost_VkRenderPassBeginInfo(
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
     transform_fromhost_VkRect2D(resourceTracker, (VkRect2D*)(&toTransform->renderArea));
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pClearValues)
         {
@@ -3109,7 +3109,7 @@ void transform_tohost_VkDeviceGroupRenderPassBeginInfo(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pDeviceRenderAreas)
         {
@@ -3131,7 +3131,7 @@ void transform_fromhost_VkDeviceGroupRenderPassBeginInfo(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pDeviceRenderAreas)
         {
@@ -3249,7 +3249,7 @@ void transform_tohost_VkBindImageMemoryDeviceGroupInfo(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pSplitInstanceBindRegions)
         {
@@ -3271,7 +3271,7 @@ void transform_fromhost_VkBindImageMemoryDeviceGroupInfo(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pSplitInstanceBindRegions)
         {
@@ -3735,7 +3735,7 @@ void transform_tohost_VkRenderPassInputAttachmentAspectCreateInfo(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pAspectReferences)
         {
@@ -3757,7 +3757,7 @@ void transform_fromhost_VkRenderPassInputAttachmentAspectCreateInfo(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pAspectReferences)
         {
@@ -4181,7 +4181,7 @@ void transform_tohost_VkDescriptorUpdateTemplateCreateInfo(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pDescriptorUpdateEntries)
         {
@@ -4203,7 +4203,7 @@ void transform_fromhost_VkDescriptorUpdateTemplateCreateInfo(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pDescriptorUpdateEntries)
         {
@@ -4845,7 +4845,7 @@ void transform_tohost_VkSubpassDescription2(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pInputAttachments)
         {
@@ -4855,7 +4855,7 @@ void transform_tohost_VkSubpassDescription2(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pColorAttachments)
         {
@@ -4865,7 +4865,7 @@ void transform_tohost_VkSubpassDescription2(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pResolveAttachments)
         {
@@ -4891,7 +4891,7 @@ void transform_fromhost_VkSubpassDescription2(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pInputAttachments)
         {
@@ -4901,7 +4901,7 @@ void transform_fromhost_VkSubpassDescription2(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pColorAttachments)
         {
@@ -4911,7 +4911,7 @@ void transform_fromhost_VkSubpassDescription2(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pResolveAttachments)
         {
@@ -4961,7 +4961,7 @@ void transform_tohost_VkRenderPassCreateInfo2(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pAttachments)
         {
@@ -4971,7 +4971,7 @@ void transform_tohost_VkRenderPassCreateInfo2(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pSubpasses)
         {
@@ -4981,7 +4981,7 @@ void transform_tohost_VkRenderPassCreateInfo2(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pDependencies)
         {
@@ -5003,7 +5003,7 @@ void transform_fromhost_VkRenderPassCreateInfo2(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pAttachments)
         {
@@ -5013,7 +5013,7 @@ void transform_fromhost_VkRenderPassCreateInfo2(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pSubpasses)
         {
@@ -5023,7 +5023,7 @@ void transform_fromhost_VkRenderPassCreateInfo2(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pDependencies)
         {
@@ -5559,7 +5559,7 @@ void transform_tohost_VkFramebufferAttachmentsCreateInfo(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pAttachmentImageInfos)
         {
@@ -5581,7 +5581,7 @@ void transform_fromhost_VkFramebufferAttachmentsCreateInfo(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pAttachmentImageInfos)
         {
@@ -7017,7 +7017,7 @@ void transform_tohost_VkPresentRegionKHR(
 {
     (void)resourceTracker;
     (void)toTransform;
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pRectangles)
         {
@@ -7035,7 +7035,7 @@ void transform_fromhost_VkPresentRegionKHR(
 {
     (void)resourceTracker;
     (void)toTransform;
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pRectangles)
         {
@@ -7057,7 +7057,7 @@ void transform_tohost_VkPresentRegionsKHR(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pRegions)
         {
@@ -7079,7 +7079,7 @@ void transform_fromhost_VkPresentRegionsKHR(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pRegions)
         {
@@ -8193,7 +8193,7 @@ void transform_tohost_VkCopyBufferInfo2KHR(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pRegions)
         {
@@ -8215,7 +8215,7 @@ void transform_fromhost_VkCopyBufferInfo2KHR(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pRegions)
         {
@@ -8271,7 +8271,7 @@ void transform_tohost_VkCopyImageInfo2KHR(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pRegions)
         {
@@ -8293,7 +8293,7 @@ void transform_fromhost_VkCopyImageInfo2KHR(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pRegions)
         {
@@ -8345,7 +8345,7 @@ void transform_tohost_VkCopyBufferToImageInfo2KHR(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pRegions)
         {
@@ -8367,7 +8367,7 @@ void transform_fromhost_VkCopyBufferToImageInfo2KHR(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pRegions)
         {
@@ -8389,7 +8389,7 @@ void transform_tohost_VkCopyImageToBufferInfo2KHR(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pRegions)
         {
@@ -8411,7 +8411,7 @@ void transform_fromhost_VkCopyImageToBufferInfo2KHR(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pRegions)
         {
@@ -8477,7 +8477,7 @@ void transform_tohost_VkBlitImageInfo2KHR(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pRegions)
         {
@@ -8499,7 +8499,7 @@ void transform_fromhost_VkBlitImageInfo2KHR(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pRegions)
         {
@@ -8555,7 +8555,7 @@ void transform_tohost_VkResolveImageInfo2KHR(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pRegions)
         {
@@ -8577,7 +8577,7 @@ void transform_fromhost_VkResolveImageInfo2KHR(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pRegions)
         {
@@ -9459,7 +9459,7 @@ void transform_tohost_VkPipelineViewportWScalingStateCreateInfoNV(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pViewportWScalings)
         {
@@ -9481,7 +9481,7 @@ void transform_fromhost_VkPipelineViewportWScalingStateCreateInfoNV(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pViewportWScalings)
         {
@@ -9687,7 +9687,7 @@ void transform_tohost_VkPresentTimesInfoGOOGLE(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pTimes)
         {
@@ -9709,7 +9709,7 @@ void transform_fromhost_VkPresentTimesInfoGOOGLE(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pTimes)
         {
@@ -9781,7 +9781,7 @@ void transform_tohost_VkPipelineViewportSwizzleStateCreateInfoNV(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pViewportSwizzles)
         {
@@ -9803,7 +9803,7 @@ void transform_fromhost_VkPipelineViewportSwizzleStateCreateInfoNV(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pViewportSwizzles)
         {
@@ -9851,7 +9851,7 @@ void transform_tohost_VkPipelineDiscardRectangleStateCreateInfoEXT(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pDiscardRectangles)
         {
@@ -9873,7 +9873,7 @@ void transform_fromhost_VkPipelineDiscardRectangleStateCreateInfoEXT(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pDiscardRectangles)
         {
@@ -10155,7 +10155,7 @@ void transform_tohost_VkDebugUtilsMessengerCallbackDataEXT(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pQueueLabels)
         {
@@ -10165,7 +10165,7 @@ void transform_tohost_VkDebugUtilsMessengerCallbackDataEXT(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pCmdBufLabels)
         {
@@ -10175,7 +10175,7 @@ void transform_tohost_VkDebugUtilsMessengerCallbackDataEXT(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pObjects)
         {
@@ -10197,7 +10197,7 @@ void transform_fromhost_VkDebugUtilsMessengerCallbackDataEXT(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pQueueLabels)
         {
@@ -10207,7 +10207,7 @@ void transform_fromhost_VkDebugUtilsMessengerCallbackDataEXT(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pCmdBufLabels)
         {
@@ -10217,7 +10217,7 @@ void transform_fromhost_VkDebugUtilsMessengerCallbackDataEXT(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pObjects)
         {
@@ -10566,7 +10566,7 @@ void transform_tohost_VkSampleLocationsInfoEXT(
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
     transform_tohost_VkExtent2D(resourceTracker, (VkExtent2D*)(&toTransform->sampleLocationGridSize));
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pSampleLocations)
         {
@@ -10589,7 +10589,7 @@ void transform_fromhost_VkSampleLocationsInfoEXT(
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
     transform_fromhost_VkExtent2D(resourceTracker, (VkExtent2D*)(&toTransform->sampleLocationGridSize));
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pSampleLocations)
         {
@@ -10647,7 +10647,7 @@ void transform_tohost_VkRenderPassSampleLocationsBeginInfoEXT(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pAttachmentInitialSampleLocations)
         {
@@ -10657,7 +10657,7 @@ void transform_tohost_VkRenderPassSampleLocationsBeginInfoEXT(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pPostSubpassSampleLocations)
         {
@@ -10679,7 +10679,7 @@ void transform_fromhost_VkRenderPassSampleLocationsBeginInfoEXT(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pAttachmentInitialSampleLocations)
         {
@@ -10689,7 +10689,7 @@ void transform_fromhost_VkRenderPassSampleLocationsBeginInfoEXT(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pPostSubpassSampleLocations)
         {
@@ -10987,7 +10987,7 @@ void transform_tohost_VkDrmFormatModifierPropertiesListEXT(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pDrmFormatModifierProperties)
         {
@@ -11009,7 +11009,7 @@ void transform_fromhost_VkDrmFormatModifierPropertiesListEXT(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pDrmFormatModifierProperties)
         {
@@ -11079,7 +11079,7 @@ void transform_tohost_VkImageDrmFormatModifierExplicitCreateInfoEXT(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pPlaneLayouts)
         {
@@ -11101,7 +11101,7 @@ void transform_fromhost_VkImageDrmFormatModifierExplicitCreateInfoEXT(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pPlaneLayouts)
         {
@@ -11219,7 +11219,7 @@ void transform_tohost_VkPipelineViewportShadingRateImageStateCreateInfoNV(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pShadingRatePalettes)
         {
@@ -11241,7 +11241,7 @@ void transform_fromhost_VkPipelineViewportShadingRateImageStateCreateInfoNV(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pShadingRatePalettes)
         {
@@ -11325,7 +11325,7 @@ void transform_tohost_VkCoarseSampleOrderCustomNV(
 {
     (void)resourceTracker;
     (void)toTransform;
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pSampleLocations)
         {
@@ -11343,7 +11343,7 @@ void transform_fromhost_VkCoarseSampleOrderCustomNV(
 {
     (void)resourceTracker;
     (void)toTransform;
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pSampleLocations)
         {
@@ -11365,7 +11365,7 @@ void transform_tohost_VkPipelineViewportCoarseSampleOrderStateCreateInfoNV(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pCustomSampleOrders)
         {
@@ -11387,7 +11387,7 @@ void transform_fromhost_VkPipelineViewportCoarseSampleOrderStateCreateInfoNV(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pCustomSampleOrders)
         {
@@ -11435,7 +11435,7 @@ void transform_tohost_VkRayTracingPipelineCreateInfoNV(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pStages)
         {
@@ -11445,7 +11445,7 @@ void transform_tohost_VkRayTracingPipelineCreateInfoNV(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pGroups)
         {
@@ -11467,7 +11467,7 @@ void transform_fromhost_VkRayTracingPipelineCreateInfoNV(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pStages)
         {
@@ -11477,7 +11477,7 @@ void transform_fromhost_VkRayTracingPipelineCreateInfoNV(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pGroups)
         {
@@ -11593,7 +11593,7 @@ void transform_tohost_VkAccelerationStructureInfoNV(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pGeometries)
         {
@@ -11615,7 +11615,7 @@ void transform_fromhost_VkAccelerationStructureInfoNV(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pGeometries)
         {
@@ -12163,7 +12163,7 @@ void transform_tohost_VkPipelineVertexInputDivisorStateCreateInfoEXT(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pVertexBindingDivisors)
         {
@@ -12185,7 +12185,7 @@ void transform_fromhost_VkPipelineVertexInputDivisorStateCreateInfoEXT(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pVertexBindingDivisors)
         {
@@ -12279,7 +12279,7 @@ void transform_tohost_VkPipelineCreationFeedbackCreateInfoEXT(
     {
         transform_tohost_VkPipelineCreationFeedbackEXT(resourceTracker, (VkPipelineCreationFeedbackEXT*)(toTransform->pPipelineCreationFeedback));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pPipelineStageCreationFeedbacks)
         {
@@ -12305,7 +12305,7 @@ void transform_fromhost_VkPipelineCreationFeedbackCreateInfoEXT(
     {
         transform_fromhost_VkPipelineCreationFeedbackEXT(resourceTracker, (VkPipelineCreationFeedbackEXT*)(toTransform->pPipelineCreationFeedback));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pPipelineStageCreationFeedbacks)
         {
@@ -12475,7 +12475,7 @@ void transform_tohost_VkPipelineViewportExclusiveScissorStateCreateInfoNV(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pExclusiveScissors)
         {
@@ -12497,7 +12497,7 @@ void transform_fromhost_VkPipelineViewportExclusiveScissorStateCreateInfoNV(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pExclusiveScissors)
         {
@@ -13895,7 +13895,7 @@ void transform_tohost_VkGraphicsShaderGroupCreateInfoNV(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pStages)
         {
@@ -13925,7 +13925,7 @@ void transform_fromhost_VkGraphicsShaderGroupCreateInfoNV(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pStages)
         {
@@ -13955,7 +13955,7 @@ void transform_tohost_VkGraphicsPipelineShaderGroupsCreateInfoNV(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pGroups)
         {
@@ -13977,7 +13977,7 @@ void transform_fromhost_VkGraphicsPipelineShaderGroupsCreateInfoNV(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pGroups)
         {
@@ -14103,7 +14103,7 @@ void transform_tohost_VkIndirectCommandsLayoutCreateInfoNV(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pTokens)
         {
@@ -14125,7 +14125,7 @@ void transform_fromhost_VkIndirectCommandsLayoutCreateInfoNV(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pTokens)
         {
@@ -14147,7 +14147,7 @@ void transform_tohost_VkGeneratedCommandsInfoNV(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pStreams)
         {
@@ -14169,7 +14169,7 @@ void transform_fromhost_VkGeneratedCommandsInfoNV(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pStreams)
         {
@@ -15081,7 +15081,7 @@ void transform_tohost_VkAccelerationStructureBuildGeometryInfoKHR(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pGeometries)
         {
@@ -15104,7 +15104,7 @@ void transform_fromhost_VkAccelerationStructureBuildGeometryInfoKHR(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pGeometries)
         {
@@ -15421,7 +15421,7 @@ void transform_tohost_VkRayTracingPipelineCreateInfoKHR(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pStages)
         {
@@ -15431,7 +15431,7 @@ void transform_tohost_VkRayTracingPipelineCreateInfoKHR(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pGroups)
         {
@@ -15465,7 +15465,7 @@ void transform_fromhost_VkRayTracingPipelineCreateInfoKHR(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pStages)
         {
@@ -15475,7 +15475,7 @@ void transform_fromhost_VkRayTracingPipelineCreateInfoKHR(
             }
         }
     }
-    if ((toTransform) != nullptr)
+    if (toTransform)
     {
         if (toTransform->pGroups)
         {
