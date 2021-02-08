@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3313e0a6_42578bbe",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-02-08T19:06:27Z",
+      "side": 1,
+      "message": "This should result in improved performance for external UIs as well.",
+      "revId": "3cec8d5f32afb7995f88a565d3f72c59d7d97755",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
