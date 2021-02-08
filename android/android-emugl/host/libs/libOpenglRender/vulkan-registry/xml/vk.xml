@@ -9420,6 +9420,20 @@ typedef void <name>CAMetalLayer</name>;
             <param len="pBuildInfo-&gt;geometryCount">const <type>uint32_t</type>*  <name>pMaxPrimitiveCounts</name></param>
             <param><type>VkAccelerationStructureBuildSizesInfoKHR</type>*           <name>pSizeInfo</name></param>
         </command>
+        <command>
+            <proto><type>void</type> <name>vkQueueCommitDescriptorSetUpdatesGOOGLE</name></proto>
+            <param externsync="true"><type>VkQueue</type> <name>queue</name></param>
+            <param externsync="true"><type>uint32_t</type> <name>descriptorPoolCount</name></param>
+            <param len="descriptorPoolCount" externsync="true">const <type>VkDescriptorPool</type>* <name>pDescriptorPools</name></param>
+            <param externsync="true"><type>uint32_t</type> <name>descriptorSetCount</name></param>
+            <param len="descriptorSetCount" externsync="true">const <type>VkDescriptorSetLayout</type>* <name>pSetLayouts</name></param>
+            <param len="descriptorSetCount" externsync="true">const <type>uint32_t</type>* <name>pDescriptorSetPoolIds</name></param>
+            <param len="descriptorSetCount" externsync="true">const <type>uint32_t</type>* <name>pDescriptorSetWhichPool</name></param>
+            <param len="descriptorSetCount" externsync="true">const <type>uint32_t</type>* <name>pDescriptorSetPendingAllocation</name></param>
+            <param len="descriptorSetCount" externsync="true">const <type>uint32_t</type>* <name>pDescriptorWriteStartingIndices</name></param>
+            <param externsync="true"><type>uint32_t</type> <name>pendingDescriptorWriteCount</name></param>
+            <param len="pendingDescriptorWriteCount" externsync="true">const <type>VkWriteDescriptorSet</type>* <name>pPendingDescriptorWrites</name></param>
+        </command>
     </commands>
 
     <feature api="vulkan" name="VK_VERSION_1_0" number="1.0" comment="Vulkan core API interface definitions">
@@ -14767,6 +14781,7 @@ typedef void <name>CAMetalLayer</name>;
                 <enum value="383"                                           name="VK_GOOGLE_QUEUE_SUBMIT_WITH_COMMANDS_NUMBER"/>
                 <enum value="&quot;VK_GOOGLE_queue_submit_with_commands&quot;"            name="VK_GOOGLE_QUEUE_SUBMIT_WITH_COMMANDS_EXTENSION_NAME"/>
                 <command name="vkQueueFlushCommandsGOOGLE"/>
+                <command name="vkQueueCommitDescriptorSetUpdatesGOOGLE"/>
             </require>
         </extension>
     </extensions>

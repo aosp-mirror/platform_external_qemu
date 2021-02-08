@@ -4115,6 +4115,21 @@ public:
         VkCommandBuffer commandBuffer,
         VkDeviceSize dataSize,
         const void* pData);
+    void vkQueueCommitDescriptorSetUpdatesGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::BumpPool* pool,
+        VkQueue queue,
+        uint32_t descriptorPoolCount,
+        const VkDescriptorPool* pDescriptorPools,
+        uint32_t descriptorSetCount,
+        const VkDescriptorSetLayout* pSetLayouts,
+        const uint32_t* pDescriptorSetPoolIds,
+        const uint32_t* pDescriptorSetWhichPool,
+        const uint32_t* pDescriptorSetPendingAllocation,
+        const uint32_t* pDescriptorWriteStartingIndices,
+        uint32_t pendingDescriptorWriteCount,
+        const VkWriteDescriptorSet* pPendingDescriptorWrites);
 #endif
 #ifdef VK_KHR_acceleration_structure
     void vkCreateAccelerationStructureKHR(

@@ -26705,6 +26705,12 @@ const char* api_opcode_to_string(
             return "OP_vkCmdBindTransformFeedbackBuffersEXT";
         }
 #endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
+        case OP_vkQueueCommitDescriptorSetUpdatesGOOGLE:
+        {
+            return "OP_vkQueueCommitDescriptorSetUpdatesGOOGLE";
+        }
+#endif
 #ifdef VK_EXT_full_screen_exclusive
         case OP_vkGetPhysicalDeviceSurfacePresentModes2EXT:
         {

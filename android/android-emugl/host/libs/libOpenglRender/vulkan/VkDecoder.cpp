@@ -24250,6 +24250,97 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 android::base::endTrace();
                 break;
             }
+            case OP_vkQueueCommitDescriptorSetUpdatesGOOGLE:
+            {
+                android::base::beginTrace("vkQueueCommitDescriptorSetUpdatesGOOGLE decode");
+                VkQueue queue;
+                uint32_t descriptorPoolCount;
+                const VkDescriptorPool* pDescriptorPools;
+                uint32_t descriptorSetCount;
+                const VkDescriptorSetLayout* pSetLayouts;
+                const uint32_t* pDescriptorSetPoolIds;
+                const uint32_t* pDescriptorSetWhichPool;
+                const uint32_t* pDescriptorSetPendingAllocation;
+                const uint32_t* pDescriptorWriteStartingIndices;
+                uint32_t pendingDescriptorWriteCount;
+                const VkWriteDescriptorSet* pPendingDescriptorWrites;
+                // Begin non wrapped dispatchable handle unboxing for queue;
+                uint64_t cgen_var_0;
+                memcpy((uint64_t*)&cgen_var_0, *readStreamPtrPtr, 1 * 8);
+                *readStreamPtrPtr += 1 * 8;
+                *(VkQueue*)&queue = (VkQueue)(VkQueue)((VkQueue)(*&cgen_var_0));
+                auto unboxed_queue = unbox_VkQueue(queue);
+                auto vk = dispatch_VkQueue(queue);
+                // End manual dispatchable handle unboxing for queue;
+                memcpy((uint32_t*)&descriptorPoolCount, *readStreamPtrPtr, sizeof(uint32_t));
+                *readStreamPtrPtr += sizeof(uint32_t);
+                vkReadStream->alloc((void**)&pDescriptorPools, ((descriptorPoolCount)) * sizeof(const VkDescriptorPool));
+                if (((descriptorPoolCount)))
+                {
+                    uint8_t* cgen_var_1_ptr = (uint8_t*)(*readStreamPtrPtr);
+                    *readStreamPtrPtr += 8 * ((descriptorPoolCount));
+                    for (uint32_t k = 0; k < ((descriptorPoolCount)); ++k)
+                    {
+                        uint64_t tmpval; memcpy(&tmpval, cgen_var_1_ptr + k * 8, sizeof(uint64_t));
+                        *(((VkDescriptorPool*)pDescriptorPools) + k) = (VkDescriptorPool)unbox_VkDescriptorPool((VkDescriptorPool)tmpval);
+                    }
+                }
+                memcpy((uint32_t*)&descriptorSetCount, *readStreamPtrPtr, sizeof(uint32_t));
+                *readStreamPtrPtr += sizeof(uint32_t);
+                vkReadStream->alloc((void**)&pSetLayouts, ((descriptorSetCount)) * sizeof(const VkDescriptorSetLayout));
+                if (((descriptorSetCount)))
+                {
+                    uint8_t* cgen_var_2_ptr = (uint8_t*)(*readStreamPtrPtr);
+                    *readStreamPtrPtr += 8 * ((descriptorSetCount));
+                    for (uint32_t k = 0; k < ((descriptorSetCount)); ++k)
+                    {
+                        uint64_t tmpval; memcpy(&tmpval, cgen_var_2_ptr + k * 8, sizeof(uint64_t));
+                        *(((VkDescriptorSetLayout*)pSetLayouts) + k) = (VkDescriptorSetLayout)unbox_VkDescriptorSetLayout((VkDescriptorSetLayout)tmpval);
+                    }
+                }
+                vkReadStream->alloc((void**)&pDescriptorSetPoolIds, ((descriptorSetCount)) * sizeof(const uint32_t));
+                memcpy((uint32_t*)pDescriptorSetPoolIds, *readStreamPtrPtr, ((descriptorSetCount)) * sizeof(const uint32_t));
+                *readStreamPtrPtr += ((descriptorSetCount)) * sizeof(const uint32_t);
+                vkReadStream->alloc((void**)&pDescriptorSetWhichPool, ((descriptorSetCount)) * sizeof(const uint32_t));
+                memcpy((uint32_t*)pDescriptorSetWhichPool, *readStreamPtrPtr, ((descriptorSetCount)) * sizeof(const uint32_t));
+                *readStreamPtrPtr += ((descriptorSetCount)) * sizeof(const uint32_t);
+                vkReadStream->alloc((void**)&pDescriptorSetPendingAllocation, ((descriptorSetCount)) * sizeof(const uint32_t));
+                memcpy((uint32_t*)pDescriptorSetPendingAllocation, *readStreamPtrPtr, ((descriptorSetCount)) * sizeof(const uint32_t));
+                *readStreamPtrPtr += ((descriptorSetCount)) * sizeof(const uint32_t);
+                vkReadStream->alloc((void**)&pDescriptorWriteStartingIndices, ((descriptorSetCount)) * sizeof(const uint32_t));
+                memcpy((uint32_t*)pDescriptorWriteStartingIndices, *readStreamPtrPtr, ((descriptorSetCount)) * sizeof(const uint32_t));
+                *readStreamPtrPtr += ((descriptorSetCount)) * sizeof(const uint32_t);
+                memcpy((uint32_t*)&pendingDescriptorWriteCount, *readStreamPtrPtr, sizeof(uint32_t));
+                *readStreamPtrPtr += sizeof(uint32_t);
+                vkReadStream->alloc((void**)&pPendingDescriptorWrites, ((pendingDescriptorWriteCount)) * sizeof(const VkWriteDescriptorSet));
+                for (uint32_t i = 0; i < (uint32_t)((pendingDescriptorWriteCount)); ++i)
+                {
+                    reservedunmarshal_VkWriteDescriptorSet(vkReadStream, (VkWriteDescriptorSet*)(pPendingDescriptorWrites + i), readStreamPtrPtr);
+                }
+                if (pPendingDescriptorWrites)
+                {
+                    for (uint32_t i = 0; i < (uint32_t)((pendingDescriptorWriteCount)); ++i)
+                    {
+                        transform_tohost_VkWriteDescriptorSet(m_state, (VkWriteDescriptorSet*)(pPendingDescriptorWrites + i));
+                    }
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkQueueCommitDescriptorSetUpdatesGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)queue, (unsigned long long)descriptorPoolCount, (unsigned long long)pDescriptorPools, (unsigned long long)descriptorSetCount, (unsigned long long)pSetLayouts, (unsigned long long)pDescriptorSetPoolIds, (unsigned long long)pDescriptorSetWhichPool, (unsigned long long)pDescriptorSetPendingAllocation, (unsigned long long)pDescriptorWriteStartingIndices, (unsigned long long)pendingDescriptorWriteCount, (unsigned long long)pPendingDescriptorWrites);
+                }
+                vk->vkQueueCommitDescriptorSetUpdatesGOOGLE(unboxed_queue, descriptorPoolCount, pDescriptorPools, descriptorSetCount, pSetLayouts, pDescriptorSetPoolIds, pDescriptorSetWhichPool, pDescriptorSetPendingAllocation, pDescriptorWriteStartingIndices, pendingDescriptorWriteCount, pPendingDescriptorWrites);
+                vkStream->unsetHandleMapping();
+                vkReadStream->setReadPos((uintptr_t)(*readStreamPtrPtr) - (uintptr_t)snapshotTraceBegin);
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                if (m_state->snapshotsEnabled())
+                {
+                    m_state->snapshot()->vkQueueCommitDescriptorSetUpdatesGOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, queue, descriptorPoolCount, pDescriptorPools, descriptorSetCount, pSetLayouts, pDescriptorSetPoolIds, pDescriptorSetWhichPool, pDescriptorSetPendingAllocation, pDescriptorWriteStartingIndices, pendingDescriptorWriteCount, pPendingDescriptorWrites);
+                }
+                vkReadStream->clearPool();
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                android::base::endTrace();
+                break;
+            }
 #endif
 #ifdef VK_KHR_acceleration_structure
             case OP_vkCreateAccelerationStructureKHR:

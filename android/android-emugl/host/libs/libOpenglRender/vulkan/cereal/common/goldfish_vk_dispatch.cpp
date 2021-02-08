@@ -1179,6 +1179,7 @@ void init_vulkan_dispatch_from_system_loader(
 #endif
 #ifdef VK_GOOGLE_queue_submit_with_commands
     out->vkQueueFlushCommandsGOOGLE = (PFN_vkQueueFlushCommandsGOOGLE)dlSymFunc(lib, "vkQueueFlushCommandsGOOGLE");
+    out->vkQueueCommitDescriptorSetUpdatesGOOGLE = (PFN_vkQueueCommitDescriptorSetUpdatesGOOGLE)dlSymFunc(lib, "vkQueueCommitDescriptorSetUpdatesGOOGLE");
 #endif
 #ifdef VK_KHR_acceleration_structure
     out->vkCreateAccelerationStructureKHR = (PFN_vkCreateAccelerationStructureKHR)dlSymFunc(lib, "vkCreateAccelerationStructureKHR");
@@ -1890,6 +1891,7 @@ void init_vulkan_dispatch_from_instance(
 #endif
 #ifdef VK_GOOGLE_queue_submit_with_commands
     out->vkQueueFlushCommandsGOOGLE = (PFN_vkQueueFlushCommandsGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueFlushCommandsGOOGLE");
+    out->vkQueueCommitDescriptorSetUpdatesGOOGLE = (PFN_vkQueueCommitDescriptorSetUpdatesGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueCommitDescriptorSetUpdatesGOOGLE");
 #endif
 #ifdef VK_KHR_acceleration_structure
     out->vkCreateAccelerationStructureKHR = (PFN_vkCreateAccelerationStructureKHR)vk->vkGetInstanceProcAddr(instance, "vkCreateAccelerationStructureKHR");
@@ -2593,6 +2595,7 @@ void init_vulkan_dispatch_from_device(
 #endif
 #ifdef VK_GOOGLE_queue_submit_with_commands
     out->vkQueueFlushCommandsGOOGLE = (PFN_vkQueueFlushCommandsGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueFlushCommandsGOOGLE");
+    out->vkQueueCommitDescriptorSetUpdatesGOOGLE = (PFN_vkQueueCommitDescriptorSetUpdatesGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueCommitDescriptorSetUpdatesGOOGLE");
 #endif
 #ifdef VK_KHR_acceleration_structure
     out->vkCreateAccelerationStructureKHR = (PFN_vkCreateAccelerationStructureKHR)vk->vkGetDeviceProcAddr(device, "vkCreateAccelerationStructureKHR");

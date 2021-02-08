@@ -5964,6 +5964,24 @@ void vkQueueFlushCommandsGOOGLE(
 {
     // TODO: Implement
 }
+void vkQueueCommitDescriptorSetUpdatesGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::BumpPool* pool,
+    VkQueue queue,
+    uint32_t descriptorPoolCount,
+    const VkDescriptorPool* pDescriptorPools,
+    uint32_t descriptorSetCount,
+    const VkDescriptorSetLayout* pSetLayouts,
+    const uint32_t* pDescriptorSetPoolIds,
+    const uint32_t* pDescriptorSetWhichPool,
+    const uint32_t* pDescriptorSetPendingAllocation,
+    const uint32_t* pDescriptorWriteStartingIndices,
+    uint32_t pendingDescriptorWriteCount,
+    const VkWriteDescriptorSet* pPendingDescriptorWrites)
+{
+    // TODO: Implement
+}
 #endif
 #ifdef VK_KHR_acceleration_structure
 void vkCreateAccelerationStructureKHR(
@@ -12105,6 +12123,26 @@ void VkDecoderSnapshot::vkQueueFlushCommandsGOOGLE(
     const void* pData)
 {
     mImpl->vkQueueFlushCommandsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, queue, commandBuffer, dataSize, pData);
+}
+#endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
+void VkDecoderSnapshot::vkQueueCommitDescriptorSetUpdatesGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::BumpPool* pool,
+    VkQueue queue,
+    uint32_t descriptorPoolCount,
+    const VkDescriptorPool* pDescriptorPools,
+    uint32_t descriptorSetCount,
+    const VkDescriptorSetLayout* pSetLayouts,
+    const uint32_t* pDescriptorSetPoolIds,
+    const uint32_t* pDescriptorSetWhichPool,
+    const uint32_t* pDescriptorSetPendingAllocation,
+    const uint32_t* pDescriptorWriteStartingIndices,
+    uint32_t pendingDescriptorWriteCount,
+    const VkWriteDescriptorSet* pPendingDescriptorWrites)
+{
+    mImpl->vkQueueCommitDescriptorSetUpdatesGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, queue, descriptorPoolCount, pDescriptorPools, descriptorSetCount, pSetLayouts, pDescriptorSetPoolIds, pDescriptorSetWhichPool, pDescriptorSetPendingAllocation, pDescriptorWriteStartingIndices, pendingDescriptorWriteCount, pPendingDescriptorWrites);
 }
 #endif
 #ifdef VK_KHR_acceleration_structure
