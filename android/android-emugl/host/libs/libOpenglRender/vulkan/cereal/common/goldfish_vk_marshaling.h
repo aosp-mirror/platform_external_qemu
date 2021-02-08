@@ -5871,6 +5871,8 @@ void unmarshal_VkDirectFBSurfaceCreateInfoEXT(
 #endif
 #ifdef VK_GOOGLE_queue_submit_with_commands
 #define OP_vkQueueFlushCommandsGOOGLE 20340
+#define OP_vkQueueCommitDescriptorSetUpdatesGOOGLE 267932433
+#define OP_vkCollectDescriptorPoolIdsGOOGLE 213659202
 #endif
 #ifdef VK_KHR_acceleration_structure
 void marshal_VkDeviceOrHostAddressKHR(

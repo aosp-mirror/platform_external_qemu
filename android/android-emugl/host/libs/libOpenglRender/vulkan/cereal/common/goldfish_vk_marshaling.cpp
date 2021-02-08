@@ -26261,6 +26261,12 @@ const char* api_opcode_to_string(
             return "OP_vkGetPerformanceParameterINTEL";
         }
 #endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
+        case OP_vkCollectDescriptorPoolIdsGOOGLE:
+        {
+            return "OP_vkCollectDescriptorPoolIdsGOOGLE";
+        }
+#endif
 #ifdef VK_KHR_ray_tracing_pipeline
         case OP_vkCmdTraceRaysKHR:
         {
@@ -26703,6 +26709,12 @@ const char* api_opcode_to_string(
         case OP_vkCmdBindTransformFeedbackBuffersEXT:
         {
             return "OP_vkCmdBindTransformFeedbackBuffersEXT";
+        }
+#endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
+        case OP_vkQueueCommitDescriptorSetUpdatesGOOGLE:
+        {
+            return "OP_vkQueueCommitDescriptorSetUpdatesGOOGLE";
         }
 #endif
 #ifdef VK_EXT_full_screen_exclusive
