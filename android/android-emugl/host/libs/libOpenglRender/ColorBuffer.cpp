@@ -339,8 +339,6 @@ ColorBuffer::ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper)
 ColorBuffer::~ColorBuffer() {
     RecursiveScopedHelperContext context(m_helper);
 
-    m_helper->releaseDisplayImport(getHndl());
-
     if (m_blitEGLImage) {
         s_egl.eglDestroyImageKHR(m_display, m_blitEGLImage);
     }
@@ -1006,15 +1004,14 @@ void ColorBuffer::postLayer(ComposeLayer* l, int frameWidth, int frameHeight) {
 
 bool ColorBuffer::importMemory(
 #ifdef _WIN32
-        void* handle,
+    void* handle,
 #else
-        int handle,
+    int handle,
 #endif
-        uint64_t size,
-        bool dedicated,
-        bool linearTiling,
-        bool vulkanOnly) {
+    uint64_t size, bool dedicated, bool linearTiling, bool vulkanOnly,
+    std::shared_ptr<DisplayVk::DisplayBufferInfo> displayBufferVk) {
     RecursiveScopedHelperContext context(m_helper);
+    m_displayBufferVk = std::move(displayBufferVk);
     s_gles2.glCreateMemoryObjectsEXT(1, &m_memoryObject);
     if (dedicated) {
         static const GLint DEDICATED_FLAG = GL_TRUE;

@@ -3,10 +3,8 @@
 #include <functional>
 #include <unordered_map>
 #include <memory>
-#include <optional>
 #include <unordered_map>
 
-#include "ColorBuffer.h"
 #include "CompositorVk.h"
 #include "RenderContext.h"
 #include "SwapChainStateVk.h"
@@ -17,17 +15,39 @@
 
 class DisplayVk {
    public:
+    class DisplayBufferInfo {
+       public:
+        ~DisplayBufferInfo();
+
+       private:
+        DisplayBufferInfo(const goldfish_vk::VulkanDispatch &, VkDevice,
+                          uint32_t width, uint32_t height, VkFormat, VkImage);
+
+        const goldfish_vk::VulkanDispatch &m_vk;
+        VkDevice m_vkDevice;
+        uint32_t m_width;
+        uint32_t m_height;
+        VkFormat m_vkFormat;
+
+        VkImageView m_vkImageView;
+
+        friend class DisplayVk;
+    };
     DisplayVk(const goldfish_vk::VulkanDispatch &, VkPhysicalDevice,
               uint32_t swapChainQueueFamilyIndex,
               uint32_t compositorQueueFamilyIndex, VkDevice,
               VkQueue compositorVkQueue, VkQueue swapChainVkQueue);
     ~DisplayVk();
     void bindToSurface(VkSurfaceKHR, uint32_t width, uint32_t height);
-    void importVkImage(HandleType id, VkImage, VkFormat, uint32_t width,
-                       uint32_t height);
-    void releaseImport(HandleType id);
-    // To display a colorbuffer, first import it by calling importVkImage
-    void post(HandleType id);
+    // The caller is responsible to make sure the VkImage lives longer than the
+    // DisplayBufferInfo created here. However, given that DisplayBufferInfo
+    // lives in a shared_ptr, the potential lifetime of DisplayBufferInfo is
+    // aligned to DisplayVk when DisplayVk::m_surfaceState::m_prevDisplayBuffer
+    // is locked and upgraded to a shared_ptr in DisplayVk::post.
+    std::shared_ptr<DisplayBufferInfo> createDisplayBuffer(VkImage, VkFormat,
+                                                           uint32_t width,
+                                                           uint32_t height);
+    void post(const std::shared_ptr<DisplayBufferInfo> &);
 
    private:
     bool canComposite(VkFormat);
@@ -46,23 +66,13 @@ class DisplayVk {
     VkSemaphore m_imageReadySem;
     VkSemaphore m_frameDrawCompleteSem;
 
-    struct ColorBufferInfo {
-        uint32_t m_width;
-        uint32_t m_height;
-        VkFormat m_vkFormat;
-        VkImageView m_vkImageView;
-    };
-    // This map won't automatically relaase all the created VkImageView. The
-    // client is responsible for calling releaseImport on all imported ids
-    // before this object is released.
-    std::unordered_map<HandleType, ColorBufferInfo> m_colorBuffers;
-
     std::unique_ptr<SwapChainStateVk> m_swapChainStateVk;
     std::unique_ptr<CompositorVk> m_compositorVk;
     struct SurfaceState {
         uint32_t m_width = 0;
         uint32_t m_height = 0;
-        std::optional<HandleType> m_prevColorBuffer = std::nullopt;
+        std::weak_ptr<DisplayBufferInfo> m_prevDisplayBuffer =
+            std::weak_ptr<DisplayBufferInfo>();
     };
     std::unique_ptr<SurfaceState> m_surfaceState;
     std::unordered_map<VkFormat, bool> m_canComposite;

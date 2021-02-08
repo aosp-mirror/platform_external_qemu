@@ -227,10 +227,10 @@ TEST_F(DisplayVkTest, PostWithoutSurfaceShouldntCrash) {
                                          textureWidth, textureHeight);
     std::vector<uint32_t> pixels(textureWidth * textureHeight, 0);
     ASSERT_TRUE(texture->write(pixels));
-    displayVk.importVkImage(0, texture->m_vkImage, RenderTexture::k_vkFormat,
-                            textureWidth, textureHeight);
-    displayVk.post(0);
-    displayVk.releaseImport(0);
+    auto cbvk = displayVk.createDisplayBuffer(texture->m_vkImage,
+                                              RenderTexture::k_vkFormat,
+                                              textureWidth, textureHeight);
+    displayVk.post(cbvk);
 }
 
 TEST_F(DisplayVkTest, SimplePost) {
@@ -251,12 +251,12 @@ TEST_F(DisplayVkTest, SimplePost) {
         }
     }
     ASSERT_TRUE(texture->write(pixels));
-    m_displayVk->importVkImage(0, texture->m_vkImage, texture->k_vkFormat,
-                               texture->m_width, texture->m_height);
+    auto cbvk = m_displayVk->createDisplayBuffer(
+        texture->m_vkImage, texture->k_vkFormat, texture->m_width,
+        texture->m_height);
     for (uint32_t i = 0; i < 10; i++) {
-        m_displayVk->post(0);
+        m_displayVk->post(cbvk);
     }
-    m_displayVk->releaseImport(0);
 }
 
 TEST_F(DisplayVkTest, PostTwoColorBuffers) {
@@ -274,15 +274,14 @@ TEST_F(DisplayVkTest, PostTwoColorBuffers) {
     std::vector<uint32_t> greenPixels(textureWidth * textureHeight, green);
     ASSERT_TRUE(redTexture->write(redPixels));
     ASSERT_TRUE(greenTexture->write(greenPixels));
-    m_displayVk->importVkImage(0, redTexture->m_vkImage, redTexture->k_vkFormat,
-                               redTexture->m_width, redTexture->m_height);
-    m_displayVk->importVkImage(1, greenTexture->m_vkImage,
-                               greenTexture->k_vkFormat, greenTexture->m_width,
-                               greenTexture->m_height);
+    auto redCbvk = m_displayVk->createDisplayBuffer(
+        redTexture->m_vkImage, redTexture->k_vkFormat, redTexture->m_width,
+        redTexture->m_height);
+    auto greenCbvk = m_displayVk->createDisplayBuffer(
+        greenTexture->m_vkImage, greenTexture->k_vkFormat,
+        greenTexture->m_width, greenTexture->m_height);
     for (uint32_t i = 0; i < 10; i++) {
-        m_displayVk->post(0);
-        m_displayVk->post(1);
+        m_displayVk->post(redCbvk);
+        m_displayVk->post(greenCbvk);
     }
-    m_displayVk->releaseImport(0);
-    m_displayVk->releaseImport(1);
 }

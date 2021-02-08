@@ -1,10 +1,9 @@
 #include "DisplayVk.h"
 
-#include "ErrorLog.h"
-#include "NativeSubWindow.h"
-
 #include <glm/glm.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
+#include "ErrorLog.h"
+#include "NativeSubWindow.h"
 
 static void repaintCallback(void *) {}
 
@@ -110,55 +109,21 @@ void DisplayVk::bindToSurface(VkSurfaceKHR surface, uint32_t width,
     m_surfaceState = std::move(surfaceState);
 }
 
-void DisplayVk::importVkImage(HandleType id, VkImage image, VkFormat format,
-                              uint32_t width, uint32_t height) {
-    if (m_colorBuffers.find(id) != m_colorBuffers.end()) {
-        ERR("%s(%s:%d): DisplayVk can't import VkImage with duplicate id = "
-            "%" PRIu64 ".\n",
-            __FUNCTION__, __FILE__, static_cast<int>(__LINE__),
-            static_cast<uint64_t>(id));
-        ::abort();
-    }
-    ColorBufferInfo cbInfo = {};
-    cbInfo.m_width = width;
-    cbInfo.m_height = height;
-    cbInfo.m_vkFormat = format;
-
-    VkImageViewCreateInfo imageViewCi = {};
-    imageViewCi.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    imageViewCi.image = image;
-    imageViewCi.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    imageViewCi.format = format;
-    imageViewCi.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCi.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCi.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCi.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCi.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    imageViewCi.subresourceRange.baseMipLevel = 0;
-    imageViewCi.subresourceRange.levelCount = 1;
-    imageViewCi.subresourceRange.baseArrayLayer = 0;
-    imageViewCi.subresourceRange.layerCount = 1;
-    VK_CHECK(m_vk.vkCreateImageView(m_vkDevice, &imageViewCi, nullptr,
-                                    &cbInfo.m_vkImageView));
-    m_colorBuffers.emplace(id, cbInfo);
+std::shared_ptr<DisplayVk::DisplayBufferInfo> DisplayVk::createDisplayBuffer(
+    VkImage image, VkFormat format, uint32_t width, uint32_t height) {
+    return std::shared_ptr<DisplayBufferInfo>(
+        new DisplayBufferInfo(m_vk, m_vkDevice, width, height, format, image));
 }
 
-void DisplayVk::releaseImport(HandleType id) {
-    auto it = m_colorBuffers.find(id);
-    if (it == m_colorBuffers.end()) {
-        return;
-    }
-    m_vk.vkDestroyImageView(m_vkDevice, it->second.m_vkImageView, nullptr);
-    m_colorBuffers.erase(it);
-}
-
-void DisplayVk::post(HandleType id) {
+void DisplayVk::post(
+    const std::shared_ptr<DisplayBufferInfo> &displayBufferPtr) {
     if (m_swapChainStateVk == nullptr || m_compositorVk == nullptr) {
         ERR("%s(%s:%d): Haven't bound to a surface, can't post color buffer.\n",
             __FUNCTION__, __FILE__, static_cast<int>(__LINE__));
         return;
     }
-    const auto &surfaceState = *m_surfaceState;
+    auto &surfaceState = *m_surfaceState;
+    const auto &db = *displayBufferPtr;
 
     VK_CHECK(m_vk.vkWaitForFences(m_vkDevice, 1, &m_frameDrawCompleteFence,
                                   VK_TRUE, UINT64_MAX));
@@ -166,26 +131,26 @@ void DisplayVk::post(HandleType id) {
     VK_CHECK(m_vk.vkAcquireNextImageKHR(
         m_vkDevice, m_swapChainStateVk->getSwapChain(), UINT64_MAX,
         m_imageReadySem, VK_NULL_HANDLE, &imageIndex));
-    if (!surfaceState.m_prevColorBuffer.has_value() ||
-        surfaceState.m_prevColorBuffer.value() != id) {
-        const auto &cb = m_colorBuffers.at(id);
-        if (!canComposite(cb.m_vkFormat)) {
-            ERR("%s(%s:%d): Can't composite the ColorBuffer(id = %" PRIu64
+    auto maybePrevDisplayBuffer = surfaceState.m_prevDisplayBuffer.lock();
+    if (!maybePrevDisplayBuffer || maybePrevDisplayBuffer != displayBufferPtr) {
+        if (!canComposite(db.m_vkFormat)) {
+            ERR("%s(%s:%d): Can't composite the DisplayBuffer(0x%" PRIxPTR
                 "). The image(VkFormat = %" PRIu64 ") can be sampled from.\n",
                 __FUNCTION__, __FILE__, static_cast<int>(__LINE__),
-                static_cast<uint64_t>(id),
-                static_cast<uint64_t>(cb.m_vkFormat));
+                reinterpret_cast<uintptr_t>(displayBufferPtr.get()),
+                static_cast<uint64_t>(db.m_vkFormat));
             return;
         }
         auto composition = std::make_unique<Composition>(
-            cb.m_vkImageView, m_compositionVkSampler, cb.m_width, cb.m_height);
+            db.m_vkImageView, m_compositionVkSampler, db.m_width, db.m_height);
         composition->m_transform =
             glm::scale(glm::mat3(1.0),
                        glm::vec2(static_cast<float>(surfaceState.m_width) /
-                                     static_cast<float>(cb.m_width),
+                                     static_cast<float>(db.m_width),
                                  static_cast<float>(surfaceState.m_height) /
-                                     static_cast<float>(cb.m_height)));
+                                     static_cast<float>(db.m_height)));
         m_compositorVk->setComposition(imageIndex, std::move(composition));
+        surfaceState.m_prevDisplayBuffer = displayBufferPtr;
     }
 
     auto cmdBuff = m_compositorVk->getCommandBuffer(imageIndex);
@@ -224,8 +189,41 @@ bool DisplayVk::canComposite(VkFormat format) {
         return it->second;
     }
     VkFormatProperties formatProps = {};
-    m_vk.vkGetPhysicalDeviceFormatProperties(m_vkPhysicalDevice, format, &formatProps);
-    bool res = formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT;
-    m_canComposite[format] = res;
+    m_vk.vkGetPhysicalDeviceFormatProperties(m_vkPhysicalDevice, format,
+                                             &formatProps);
+    bool res =
+        formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT;
+    m_canComposite.emplace(format, res);
     return res;
+}
+
+DisplayVk::DisplayBufferInfo::DisplayBufferInfo(
+    const goldfish_vk::VulkanDispatch &vk, VkDevice vkDevice, uint32_t width,
+    uint32_t height, VkFormat format, VkImage image)
+    : m_vk(vk),
+      m_vkDevice(vkDevice),
+      m_width(width),
+      m_height(height),
+      m_vkFormat(format),
+      m_vkImageView(VK_NULL_HANDLE) {
+    VkImageViewCreateInfo imageViewCi = {};
+    imageViewCi.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    imageViewCi.image = image;
+    imageViewCi.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    imageViewCi.format = format;
+    imageViewCi.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+    imageViewCi.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+    imageViewCi.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+    imageViewCi.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+    imageViewCi.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageViewCi.subresourceRange.baseMipLevel = 0;
+    imageViewCi.subresourceRange.levelCount = 1;
+    imageViewCi.subresourceRange.baseArrayLayer = 0;
+    imageViewCi.subresourceRange.layerCount = 1;
+    VK_CHECK(m_vk.vkCreateImageView(m_vkDevice, &imageViewCi, nullptr,
+                                    &m_vkImageView));
+}
+
+DisplayVk::DisplayBufferInfo::~DisplayBufferInfo() {
+    m_vk.vkDestroyImageView(m_vkDevice, m_vkImageView, nullptr);
 }
