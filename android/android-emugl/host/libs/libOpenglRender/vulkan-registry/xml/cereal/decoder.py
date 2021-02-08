@@ -665,6 +665,7 @@ custom_decodes = {
 
     # VK_GOOGLE_queue_submit_with_commands
     "vkQueueFlushCommandsGOOGLE" : emit_global_state_wrapped_decoding,
+    "vkQueueCommitDescriptorSetUpdatesGOOGLE" : emit_global_state_wrapped_decoding,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):

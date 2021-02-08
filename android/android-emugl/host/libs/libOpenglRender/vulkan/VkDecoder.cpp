@@ -24264,14 +24264,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 const uint32_t* pDescriptorWriteStartingIndices;
                 uint32_t pendingDescriptorWriteCount;
                 const VkWriteDescriptorSet* pPendingDescriptorWrites;
-                // Begin non wrapped dispatchable handle unboxing for queue;
+                // Begin global wrapped dispatchable handle unboxing for queue;
                 uint64_t cgen_var_0;
                 memcpy((uint64_t*)&cgen_var_0, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
                 *(VkQueue*)&queue = (VkQueue)(VkQueue)((VkQueue)(*&cgen_var_0));
-                auto unboxed_queue = unbox_VkQueue(queue);
-                auto vk = dispatch_VkQueue(queue);
-                // End manual dispatchable handle unboxing for queue;
                 memcpy((uint32_t*)&descriptorPoolCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vkReadStream->alloc((void**)&pDescriptorPools, ((descriptorPoolCount)) * sizeof(const VkDescriptorPool));
@@ -24328,7 +24325,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     fprintf(stderr, "stream %p: call vkQueueCommitDescriptorSetUpdatesGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)queue, (unsigned long long)descriptorPoolCount, (unsigned long long)pDescriptorPools, (unsigned long long)descriptorSetCount, (unsigned long long)pSetLayouts, (unsigned long long)pDescriptorSetPoolIds, (unsigned long long)pDescriptorSetWhichPool, (unsigned long long)pDescriptorSetPendingAllocation, (unsigned long long)pDescriptorWriteStartingIndices, (unsigned long long)pendingDescriptorWriteCount, (unsigned long long)pPendingDescriptorWrites);
                 }
-                vk->vkQueueCommitDescriptorSetUpdatesGOOGLE(unboxed_queue, descriptorPoolCount, pDescriptorPools, descriptorSetCount, pSetLayouts, pDescriptorSetPoolIds, pDescriptorSetWhichPool, pDescriptorSetPendingAllocation, pDescriptorWriteStartingIndices, pendingDescriptorWriteCount, pPendingDescriptorWrites);
+                m_state->on_vkQueueCommitDescriptorSetUpdatesGOOGLE(&m_pool, queue, descriptorPoolCount, pDescriptorPools, descriptorSetCount, pSetLayouts, pDescriptorSetPoolIds, pDescriptorSetWhichPool, pDescriptorSetPendingAllocation, pDescriptorWriteStartingIndices, pendingDescriptorWriteCount, pPendingDescriptorWrites);
                 vkStream->unsetHandleMapping();
                 vkReadStream->setReadPos((uintptr_t)(*readStreamPtrPtr) - (uintptr_t)snapshotTraceBegin);
                 size_t snapshotTraceBytes = vkReadStream->endTrace();

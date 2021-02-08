@@ -1989,6 +1989,8 @@ public:
         for (auto& pool : info->pools) {
             pool.used = 0;
         }
+
+        info->virtualizedSetsByIdInfo.clear();
     }
 
     void on_vkDestroyDescriptorPool(
@@ -4203,6 +4205,137 @@ public:
         subDecode(readStream, vk, boxed_commandBuffer, commandBuffer, dataSize, pData);
     }
 
+    VkDescriptorSet getOrAllocateDescriptorSetFromPoolAndId(
+        VulkanDispatch* vk,
+        VkDevice device,
+        VkDescriptorPool pool,
+        VkDescriptorSetLayout setLayout,
+        uint32_t poolId,
+        uint32_t pendingAlloc) {
+
+        auto poolInfo = android::base::find(mDescriptorPoolInfo, pool);
+        if (!poolInfo) {
+            fprintf(stderr, "%s: FATAL: descriptor pool %p not found\n", __func__, pool);
+            abort();
+        }
+
+        auto setInfo = poolInfo->virtualizedSetsByIdInfo.get(poolId);
+
+        if (setInfo) { // There's already a descriptor set. We may have to free it.
+            VkDescriptorSet allocedSet = setInfo->set;
+            VkDescriptorSetLayout allocedSetLayout = setInfo->setLayout;
+
+            if (pendingAlloc) {
+                vk->vkFreeDescriptorSets(device, pool, 1, &allocedSet);
+                VkDescriptorSetAllocateInfo dsAi = {
+                    VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO, 0,
+                    pool,
+                    1,
+                    &setLayout,
+                };
+                vk->vkAllocateDescriptorSets(device, &dsAi, &allocedSet);
+                setInfo->set = allocedSet;
+                setInfo->setLayout = allocedSetLayout;
+            } else {
+                // Sanity check that the set layout has not changed.
+                if (allocedSetLayout != setLayout) {
+                    fprintf(stderr, "%s: FATAL: descriptor pool %p wanted to get set with id %u but set layouts didn't match. aloced layout: %p wanted layout: %p\n", __func__, pool, poolId, allocedSetLayout, setLayout);
+                    abort();
+                }
+            }
+
+            return allocedSet;
+        } else { // The set has not been allocated. Sanity check that this was intended, and allocate it.
+            if (!pendingAlloc) {
+                fprintf(stderr, "%s: FATAL: descriptor pool %p wanted to get set with id %u but it wasn't allocated\n", __func__,
+                        pool, poolId);
+                abort();
+            }
+            VkDescriptorSet allocedSet;
+            VkDescriptorSetAllocateInfo dsAi = {
+                VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO, 0,
+                pool,
+                1,
+                &setLayout,
+            };
+            vk->vkAllocateDescriptorSets(device, &dsAi, &allocedSet);
+            DescriptorPoolInfo::VirtualizedDescriptorSetInfo virtInfo = {
+                allocedSet,
+                setLayout,
+            };
+            poolInfo->virtualizedSetsByIdInfo.addFixed(poolId, virtInfo, 0x1);
+            return allocedSet;
+        }
+    }
+
+    void on_vkQueueCommitDescriptorSetUpdatesGOOGLE(
+        android::base::BumpPool* pool,
+        VkQueue boxed_queue,
+        uint32_t descriptorPoolCount,
+        const VkDescriptorPool* pDescriptorPools,
+        uint32_t descriptorSetCount,
+        const VkDescriptorSetLayout* pDescriptorSetLayouts,
+        const uint32_t* pDescriptorSetPoolIds,
+        const uint32_t* pDescriptorSetWhichPool,
+        const uint32_t* pDescriptorSetPendingAllocation,
+        const uint32_t* pDescriptorWriteStartingIndices,
+        uint32_t pendingDescriptorWriteCount,
+        const VkWriteDescriptorSet* pPendingDescriptorWrites) {
+
+        (void)pool;
+
+        AutoLock lock(mLock);
+
+        VkDevice device;
+
+        auto queue = unbox_VkQueue(boxed_queue);
+        auto vk = dispatch_VkQueue(boxed_queue);
+
+        auto queueInfo = android::base::find(mQueueInfo, queue);
+        if (queueInfo) {
+            device = queueInfo->device;
+        } else {
+            fprintf(stderr, "%s: FATAL: queue %p (boxed: %p) with no device registered\n", __func__,
+                    queue, boxed_queue);
+            abort();
+        }
+
+        std::vector<VkDescriptorSet> setsToUpdate(descriptorSetCount, nullptr);
+
+        for (uint32_t i = 0; i < descriptorSetCount; ++i) {
+            uint32_t poolId = pDescriptorSetPoolIds[i];
+            uint32_t whichPool = pDescriptorSetWhichPool[i];
+            uint32_t pendingAlloc = pDescriptorSetPendingAllocation[i];
+            setsToUpdate[i] = getOrAllocateDescriptorSetFromPoolAndId(
+                vk, device,
+                pDescriptorPools[whichPool],
+                pDescriptorSetLayouts[i],
+                poolId,
+                pendingAlloc);
+        }
+
+        std::vector<VkWriteDescriptorSet> descWrites(pendingDescriptorWriteCount);
+
+        for (uint32_t i = 0; i < descriptorSetCount; ++i) {
+            uint32_t descWriteCount;
+            uint32_t startingIndex = pDescriptorWriteStartingIndices[i];
+            if (i == descriptorSetCount - 1) {
+                descWriteCount = pendingDescriptorWriteCount - startingIndex;
+            } else {
+                descWriteCount = pDescriptorWriteStartingIndices[i + 1] - startingIndex;
+            }
+
+            for (uint32_t j = 0; j < descWriteCount; ++j) {
+                uint32_t k = i + j;
+                descWrites[k] = pPendingDescriptorWrites[k];
+                descWrites[k].dstSet = setsToUpdate[i];
+            }
+
+            vk->vkUpdateDescriptorSets(device, descWriteCount, descWrites.data() + startingIndex, 0, nullptr);
+        }
+
+    }
+
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA)
 
     // Transforms
@@ -5959,6 +6092,11 @@ private:
         std::vector<PoolState> pools;
 
         std::unordered_map<VkDescriptorSet, VkDescriptorSet> allocedSetsToBoxed;
+        struct VirtualizedDescriptorSetInfo {
+            VkDescriptorSet set;
+            VkDescriptorSetLayout setLayout;
+        };
+        android::base::EntityManager<32, 16, 16, VirtualizedDescriptorSetInfo> virtualizedSetsByIdInfo;
     };
 
     struct DescriptorSetInfo {
@@ -7103,6 +7241,22 @@ void VkDecoderGlobalState::on_vkQueueFlushCommandsGOOGLE(
     VkDeviceSize dataSize,
     const void* pData) {
     mImpl->on_vkQueueFlushCommandsGOOGLE(pool, queue, commandBuffer, dataSize, pData);
+}
+
+void VkDecoderGlobalState::on_vkQueueCommitDescriptorSetUpdatesGOOGLE(
+    android::base::BumpPool* pool,
+    VkQueue queue,
+    uint32_t descriptorPoolCount,
+    const VkDescriptorPool* pDescriptorPools,
+    uint32_t descriptorSetCount,
+    const VkDescriptorSetLayout* pDescriptorSetLayouts,
+    const uint32_t* pDescriptorSetPoolIds,
+    const uint32_t* pDescriptorSetWhichPool,
+    const uint32_t* pDescriptorSetPendingAllocation,
+    const uint32_t* pDescriptorWriteStartingIndices,
+    uint32_t pendingDescriptorWriteCount,
+    const VkWriteDescriptorSet* pPendingDescriptorWrites) {
+    mImpl->on_vkQueueCommitDescriptorSetUpdatesGOOGLE(pool, queue, descriptorPoolCount, pDescriptorPools, descriptorSetCount, pDescriptorSetLayouts, pDescriptorSetPoolIds, pDescriptorSetWhichPool, pDescriptorSetPendingAllocation, pDescriptorWriteStartingIndices, pendingDescriptorWriteCount, pPendingDescriptorWrites);
 }
 
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(
