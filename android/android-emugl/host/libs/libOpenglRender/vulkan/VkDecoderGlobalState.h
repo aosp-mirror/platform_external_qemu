@@ -730,6 +730,25 @@ public:
         VkCommandBuffer commandBuffer,
         VkDeviceSize dataSize,
         const void* pData);
+    void on_vkQueueCommitDescriptorSetUpdatesGOOGLE(
+        android::base::BumpPool* pool,
+        VkQueue queue,
+        uint32_t descriptorPoolCount,
+        const VkDescriptorPool* pDescriptorPools,
+        uint32_t descriptorSetCount,
+        const VkDescriptorSetLayout* pDescriptorSetLayouts,
+        const uint64_t* pDescriptorSetPoolIds,
+        const uint32_t* pDescriptorSetWhichPool,
+        const uint32_t* pDescriptorSetPendingAllocation,
+        const uint32_t* pDescriptorWriteStartingIndices,
+        uint32_t pendingDescriptorWriteCount,
+        const VkWriteDescriptorSet* pPendingDescriptorWrites);
+    void on_vkCollectDescriptorPoolIdsGOOGLE(
+        android::base::BumpPool* pool,
+        VkDevice device,
+        VkDescriptorPool descriptorPool,
+        uint32_t* pPoolIdCount,
+        uint64_t* pPoolIds);
 
     // Transformations
     void deviceMemoryTransform_tohost(

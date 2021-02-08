@@ -2001,6 +2001,320 @@ TEST_P(VulkanHalTest, SecondaryCommandBuffers) {
     vk->vkDestroyDescriptorPool(mDevice, pool, nullptr);
 }
 
+// Secondary command buffers.
+TEST_P(VulkanHalTest, SecondaryCommandBuffersWithDescriptorSetUpdate) {
+    constexpr uint32_t kThreadCount = 1;
+    VkDescriptorPool pool;
+    VkDescriptorSetLayout setLayout;
+
+    // Setup descriptor sets
+    uint32_t maxSetsTotal = 4;
+
+    std::vector<VkDescriptorSet> sets(maxSetsTotal);
+
+    VkSampler sampler;
+    VkBuffer buffers[2];
+
+    VkSamplerCreateInfo samplerCi = {
+        VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO, 0, 0,
+        VK_FILTER_NEAREST,
+        VK_FILTER_NEAREST,
+        VK_SAMPLER_MIPMAP_MODE_NEAREST,
+        VK_SAMPLER_ADDRESS_MODE_REPEAT,
+        VK_SAMPLER_ADDRESS_MODE_REPEAT,
+        VK_SAMPLER_ADDRESS_MODE_REPEAT,
+        0.0f,
+        VK_FALSE,
+        1.0f,
+        VK_FALSE,
+        VK_COMPARE_OP_NEVER,
+        0.0f,
+        1.0f,
+        VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK,
+        VK_FALSE,
+    };
+
+    VkBufferCreateInfo bufCi = {
+        VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, 0, 0,
+        4096,
+        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+        VK_SHARING_MODE_EXCLUSIVE,
+        0, nullptr,
+    };
+
+    EXPECT_EQ(VK_SUCCESS,
+        vk->vkCreateSampler(
+            mDevice, &samplerCi, nullptr, &sampler));
+
+    EXPECT_EQ(VK_SUCCESS,
+        vk->vkCreateBuffer(mDevice, &bufCi, nullptr, &buffers[0]));
+
+    EXPECT_EQ(VK_SUCCESS,
+        vk->vkCreateBuffer(mDevice, &bufCi, nullptr, &buffers[1]));
+
+    VkDescriptorPoolSize poolSizes[] = {
+        { VK_DESCRIPTOR_TYPE_SAMPLER, 1 * maxSetsTotal, },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 8 * maxSetsTotal, },
+    };
+
+    VkDescriptorPoolCreateInfo dpCi = {
+        VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO, 0,
+        VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
+        maxSetsTotal /* maxSets */,
+        2 /* poolSizeCount */,
+        poolSizes,
+    };
+
+    EXPECT_EQ(VK_SUCCESS, vk->vkCreateDescriptorPool(mDevice, &dpCi, nullptr, &pool));
+
+    VkDescriptorSetLayoutBinding bindings[] = {
+        { 0, VK_DESCRIPTOR_TYPE_SAMPLER, 1, VK_SHADER_STAGE_VERTEX_BIT, &sampler, }, /* immutable sampler */
+        { 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 6, VK_SHADER_STAGE_VERTEX_BIT, nullptr, },
+        { 10, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 2, VK_SHADER_STAGE_VERTEX_BIT, nullptr, },
+    };
+
+    VkDescriptorSetLayoutCreateInfo setLayoutCi = {
+        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO, 0, 0,
+        sizeof(bindings) / sizeof(VkDescriptorSetLayoutBinding),
+        bindings,
+    };
+
+    EXPECT_EQ(VK_SUCCESS, vk->vkCreateDescriptorSetLayout(
+                mDevice, &setLayoutCi, nullptr, &setLayout));
+
+    std::vector<VkDescriptorSetLayout> setLayouts(maxSetsTotal, setLayout);
+
+    VkDescriptorSetAllocateInfo setAi = {
+        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO, 0,
+        pool, maxSetsTotal, setLayouts.data(),
+    };
+
+    EXPECT_EQ(VK_SUCCESS, vk->vkAllocateDescriptorSets(
+                mDevice, &setAi, sets.data()));
+
+    EXPECT_EQ(VK_SUCCESS, vk->vkResetDescriptorPool(
+        mDevice, pool, 0));
+
+    EXPECT_EQ(VK_SUCCESS, vk->vkAllocateDescriptorSets(
+                mDevice, &setAi, sets.data()));
+
+    VkPipelineLayout pipelineLayout;
+
+    VkPipelineLayoutCreateInfo pipelineLayoutCi = {
+        VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO, 0, 0,
+        1, &setLayout,
+        0, nullptr,
+    };
+    vk->vkCreatePipelineLayout(mDevice, &pipelineLayoutCi, nullptr, &pipelineLayout);
+
+    // Setup command buffers
+    VkCommandPoolCreateInfo poolCi = {
+        VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO, 0, 0, mGraphicsQueueFamily,
+    };
+
+    VkCommandPool commandPool;
+    vk->vkCreateCommandPool(mDevice, &poolCi, nullptr, &commandPool);
+
+    VkCommandBuffer cbs[kThreadCount];
+    VkCommandBuffer cbs2[kThreadCount * 2];
+
+    VkCommandBufferAllocateInfo cbAi = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO, 0,
+        commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, kThreadCount,
+    };
+
+    vk->vkAllocateCommandBuffers(mDevice, &cbAi, cbs);
+
+    VkCommandBufferAllocateInfo cbAi2 = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO, 0,
+        commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, kThreadCount * 2,
+    };
+
+    vk->vkAllocateCommandBuffers(mDevice, &cbAi2, cbs2);
+
+    std::vector<FunctorThread*> threads;
+
+    constexpr uint32_t kRecordsPerThread = 4;
+    constexpr uint32_t kRepeatSubmits = 2;
+    constexpr uint32_t kTotalRecords = kThreadCount * kRecordsPerThread * kRepeatSubmits;
+
+    for (uint32_t i = 0; i < kThreadCount; ++i) {
+        FunctorThread* thread = new FunctorThread([this, maxSetsTotal, buffers, cbs, cbs2, sets, pipelineLayout, i]() {
+            VkCommandBufferInheritanceInfo inheritanceInfo = {
+                VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO, 0,
+                VK_NULL_HANDLE, 0,
+                VK_NULL_HANDLE,
+                VK_FALSE,
+                0,
+                0,
+            };
+
+            VkCommandBufferBeginInfo secondaryBeginInfo = {
+                VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO, 0,
+                VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT, &inheritanceInfo,
+            };
+
+            VkCommandBufferBeginInfo primaryBeginInfo = {
+                VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO, 0,
+                VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT, 0,
+            };
+
+            for (uint32_t k = 0; k < kRepeatSubmits; ++k) {
+                // Secondaries
+                {
+                    VkCommandBuffer first = cbs2[2 * i];
+                    VkCommandBuffer second = cbs2[2 * i + 1];
+
+                    vk->vkBeginCommandBuffer(first, &secondaryBeginInfo);
+                    for (uint32_t j = 0; j < kRecordsPerThread / 2; ++j) {
+                        for (uint32_t l = 0; l < maxSetsTotal; ++l) {
+                            VkDescriptorImageInfo immutableSamplerImageInfos[] = {
+                                { (VkSampler)0xdeadbeef, VK_NULL_HANDLE, VK_IMAGE_LAYOUT_GENERAL, },
+                                { (VkSampler)0xdeadbeef, VK_NULL_HANDLE, VK_IMAGE_LAYOUT_GENERAL, },
+                            };
+
+                            VkDescriptorBufferInfo bufferInfos[] = {
+                                { buffers[0], 0, 16, },
+                                { buffers[1], 16, 32, },
+                                { buffers[0], 1024, 4096, },
+                                { buffers[1], 256, 512, },
+                                { buffers[0], 0, 512, },
+                                { buffers[1], 8, 48, },
+                            };
+
+                            VkWriteDescriptorSet descWrites[] = {
+                                {
+                                    VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET, 0, sets[l],
+                                    0, 0, 1,
+                                    VK_DESCRIPTOR_TYPE_SAMPLER,
+                                    immutableSamplerImageInfos,
+                                    bufferInfos,
+                                    nullptr,
+                                },
+
+                                {
+                                    VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET, 0, sets[l],
+                                    1, 0, 2,
+                                    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                    immutableSamplerImageInfos,
+                                    bufferInfos,
+                                    nullptr,
+                                },
+
+                                {
+                                    VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET, 0, sets[l],
+                                    1, 4, 2,
+                                    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                    immutableSamplerImageInfos,
+                                    bufferInfos,
+                                    nullptr,
+                                },
+
+                                {
+                                    VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET, 0, sets[l],
+                                    10, 0, 2,
+                                    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                    immutableSamplerImageInfos,
+                                    bufferInfos + 2,
+                                    nullptr,
+                                },
+                            };
+
+                            VkCopyDescriptorSet descCopies[] = {
+                                {
+                                    VK_STRUCTURE_TYPE_COPY_DESCRIPTOR_SET, 0,
+                                    sets[l], 10, 0,
+                                    sets[l], 1, 2,
+                                    2,
+                                },
+                                {
+                                    VK_STRUCTURE_TYPE_COPY_DESCRIPTOR_SET, 0,
+                                    sets[l], 1, 0,
+                                    sets[l], 10, 0,
+                                    2,
+                                },
+                            };
+
+                            vk->vkUpdateDescriptorSets(
+                                mDevice,
+                                sizeof(descWrites) / sizeof(VkWriteDescriptorSet), descWrites,
+                                sizeof(descCopies) / sizeof(VkCopyDescriptorSet), descCopies);
+                        }
+                        vk->vkCmdBindDescriptorSets(
+                            first,
+                            VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            pipelineLayout, 0, maxSetsTotal, &sets[0], 0, nullptr);
+                    }
+                    vk->vkEndCommandBuffer(first);
+
+                    vk->vkBeginCommandBuffer(second, &secondaryBeginInfo);
+                    for (uint32_t j = 0; j < kRecordsPerThread / 2; ++j) {
+                        vk->vkCmdBindDescriptorSets(
+                            second,
+                            VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            pipelineLayout, 0, 1, &sets[i], 0, nullptr);
+                    }
+                    vk->vkEndCommandBuffer(second);
+                }
+
+                vk->vkBeginCommandBuffer(cbs[i], &primaryBeginInfo);
+                vk->vkCmdExecuteCommands(cbs[i], 2, cbs2 + 2 * i);
+                vk->vkEndCommandBuffer(cbs[i]);
+
+                VkSubmitInfo si = {
+                    VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
+                    0, 0,
+                    0,
+                    1, &cbs[i],
+                    0, 0,
+                };
+
+                vk->vkQueueSubmit(mQueue, 1, &si, 0);
+                vk->vkQueueWaitIdle(mQueue);
+            }
+            VkPhysicalDeviceMemoryProperties memProps;
+            vk->vkGetPhysicalDeviceMemoryProperties(mPhysicalDevice, &memProps);
+            return 0;
+        });
+        threads.push_back(thread);
+    }
+
+    auto cpuTimeStart = System::cpuTime();
+
+    for (uint32_t i = 0; i < kThreadCount; ++i) {
+        threads[i]->start();
+    }
+
+    for (uint32_t i = 0; i < kThreadCount; ++i) {
+        threads[i]->wait();
+        delete threads[i];
+    }
+
+    vk->vkQueueWaitIdle(mQueue);
+    vk->vkDeviceWaitIdle(mDevice);
+
+    auto cpuTime = System::cpuTime() - cpuTimeStart;
+
+    uint64_t duration_us = cpuTime.wall_time_us;
+    uint64_t duration_cpu_us = cpuTime.usageUs();
+
+    float ms = duration_us / 1000.0f;
+    float sec = duration_us / 1000000.0f;
+
+    float submitHz = (float)kTotalRecords / sec;
+
+    printf("Record %u times in %f ms. Rate: %f Hz per thread: %f Hz\n", kTotalRecords, ms, submitHz, (float)submitHz / (float)kThreadCount);
+
+    vk->vkFreeCommandBuffers(mDevice, commandPool, kThreadCount * 2, cbs2);
+    vk->vkFreeCommandBuffers(mDevice, commandPool, kThreadCount, cbs);
+    vk->vkDestroyCommandPool(mDevice, commandPool, nullptr);
+
+    EXPECT_EQ(VK_SUCCESS, vk->vkFreeDescriptorSets(
+        mDevice, pool, maxSetsTotal, sets.data()));
+
+    vk->vkDestroyDescriptorPool(mDevice, pool, nullptr);
+}
+
 INSTANTIATE_TEST_SUITE_P(
     MultipleTransports,
     VulkanHalTest,
