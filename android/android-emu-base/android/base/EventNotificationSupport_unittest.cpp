@@ -21,7 +21,7 @@
 namespace android {
 namespace base {
 
-class SimpleEvent : public EventNotificationSupport<SimpleEvent, int> {
+class SimpleEvent : public EventNotificationSupport<int> {
 public:
     void setValue(int val) {
         mValue = val;
@@ -34,8 +34,8 @@ public:
 TEST(EventNotificationSupport, willFireEvent) {
     SimpleEvent evt;
     int val = 0;
-    std::function<void(SimpleEvent*, const int)> listener =
-            [&val](auto src, int newVal) { val = newVal; };
+    std::function<void(const int)> listener =
+            [&val](int newVal) { val = newVal; };
     evt.addListener(&listener);
     evt.setValue(10);
     EXPECT_EQ(10, val);
@@ -50,7 +50,7 @@ TEST(EventNotificationSupport, raiUnregisters) {
     {
         // Should fire an event, as we have registed a listener
         RaiiEventListener<SimpleEvent, int> listener(
-                &evt, [&val](auto src, int newVal) { val = newVal; });
+                &evt, [&val](const int newVal) { val = newVal; });
         evt.setValue(10);
         EXPECT_EQ(10, val);
     }
