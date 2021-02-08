@@ -9420,6 +9420,27 @@ typedef void <name>CAMetalLayer</name>;
             <param len="pBuildInfo-&gt;geometryCount">const <type>uint32_t</type>*  <name>pMaxPrimitiveCounts</name></param>
             <param><type>VkAccelerationStructureBuildSizesInfoKHR</type>*           <name>pSizeInfo</name></param>
         </command>
+        <command>
+            <proto><type>void</type> <name>vkQueueCommitDescriptorSetUpdatesGOOGLE</name></proto>
+            <param externsync="true"><type>VkQueue</type> <name>queue</name></param>
+            <param externsync="true"><type>uint32_t</type> <name>descriptorPoolCount</name></param>
+            <param len="descriptorPoolCount" externsync="true">const <type>VkDescriptorPool</type>* <name>pDescriptorPools</name></param>
+            <param externsync="true"><type>uint32_t</type> <name>descriptorSetCount</name></param>
+            <param len="descriptorSetCount" externsync="true">const <type>VkDescriptorSetLayout</type>* <name>pSetLayouts</name></param>
+            <param len="descriptorSetCount" externsync="true">const <type>uint64_t</type>* <name>pDescriptorSetPoolIds</name></param>
+            <param len="descriptorSetCount" externsync="true">const <type>uint32_t</type>* <name>pDescriptorSetWhichPool</name></param>
+            <param len="descriptorSetCount" externsync="true">const <type>uint32_t</type>* <name>pDescriptorSetPendingAllocation</name></param>
+            <param len="descriptorSetCount" externsync="true">const <type>uint32_t</type>* <name>pDescriptorWriteStartingIndices</name></param>
+            <param externsync="true"><type>uint32_t</type> <name>pendingDescriptorWriteCount</name></param>
+            <param len="pendingDescriptorWriteCount" externsync="true">const <type>VkWriteDescriptorSet</type>* <name>pPendingDescriptorWrites</name></param>
+        </command>
+        <command>
+            <proto><type>void</type> <name>vkCollectDescriptorPoolIdsGOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param externsync="true"><type>VkDescriptorPool</type> <name>descriptorPool</name></param>
+            <param optiona="false,true"><type>uint32_t</type>* <name>pPoolIdCount</name></param>
+            <param optional="true" len="pPoolIdCount"><type>uint64_t</type>* <name>pPoolIds</name></param>
+        </command>
     </commands>
 
     <feature api="vulkan" name="VK_VERSION_1_0" number="1.0" comment="Vulkan core API interface definitions">
@@ -14711,6 +14732,8 @@ typedef void <name>CAMetalLayer</name>;
                 <command name="vkQueueBindSparseAsyncGOOGLE"/>
                 <command name="vkGetLinearImageLayoutGOOGLE"/>
                 <command name="vkQueueFlushCommandsGOOGLE"/>
+                <command name="vkQueueCommitDescriptorSetUpdatesGOOGLE"/>
+                <command name="vkCollectDescriptorPoolIdsGOOGLE"/>
             </require>
         </extension>
     </extensions>

@@ -101,7 +101,7 @@ void vkEnumeratePhysicalDevices(
     auto apiHandle = mReconstruction.createApiInfo();
     auto apiInfo = mReconstruction.getApiInfo(apiHandle);
     mReconstruction.setApiTrace(apiInfo, OP_vkEnumeratePhysicalDevices, snapshotTraceBegin, snapshotTraceBytes);
-    if ((pPhysicalDeviceCount) != nullptr)
+    if (pPhysicalDeviceCount)
     {
         mReconstruction.forEachHandleAddApi((const uint64_t*)pPhysicalDevices, (*(pPhysicalDeviceCount)), apiHandle);
         mReconstruction.setCreatedHandlesForApi(apiHandle, (const uint64_t*)pPhysicalDevices, (*(pPhysicalDeviceCount)));
@@ -5948,6 +5948,35 @@ void vkQueueFlushCommandsGOOGLE(
     VkCommandBuffer commandBuffer,
     VkDeviceSize dataSize,
     const void* pData)
+{
+    // TODO: Implement
+}
+void vkQueueCommitDescriptorSetUpdatesGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::BumpPool* pool,
+    VkQueue queue,
+    uint32_t descriptorPoolCount,
+    const VkDescriptorPool* pDescriptorPools,
+    uint32_t descriptorSetCount,
+    const VkDescriptorSetLayout* pSetLayouts,
+    const uint64_t* pDescriptorSetPoolIds,
+    const uint32_t* pDescriptorSetWhichPool,
+    const uint32_t* pDescriptorSetPendingAllocation,
+    const uint32_t* pDescriptorWriteStartingIndices,
+    uint32_t pendingDescriptorWriteCount,
+    const VkWriteDescriptorSet* pPendingDescriptorWrites)
+{
+    // TODO: Implement
+}
+void vkCollectDescriptorPoolIdsGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::BumpPool* pool,
+    VkDevice device,
+    VkDescriptorPool descriptorPool,
+    uint32_t* pPoolIdCount,
+    uint64_t* pPoolIds)
 {
     // TODO: Implement
 }
@@ -12092,6 +12121,39 @@ void VkDecoderSnapshot::vkQueueFlushCommandsGOOGLE(
     const void* pData)
 {
     mImpl->vkQueueFlushCommandsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, queue, commandBuffer, dataSize, pData);
+}
+#endif
+#ifdef VK_GOOGLE_gfxstream
+void VkDecoderSnapshot::vkQueueCommitDescriptorSetUpdatesGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::BumpPool* pool,
+    VkQueue queue,
+    uint32_t descriptorPoolCount,
+    const VkDescriptorPool* pDescriptorPools,
+    uint32_t descriptorSetCount,
+    const VkDescriptorSetLayout* pSetLayouts,
+    const uint64_t* pDescriptorSetPoolIds,
+    const uint32_t* pDescriptorSetWhichPool,
+    const uint32_t* pDescriptorSetPendingAllocation,
+    const uint32_t* pDescriptorWriteStartingIndices,
+    uint32_t pendingDescriptorWriteCount,
+    const VkWriteDescriptorSet* pPendingDescriptorWrites)
+{
+    mImpl->vkQueueCommitDescriptorSetUpdatesGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, queue, descriptorPoolCount, pDescriptorPools, descriptorSetCount, pSetLayouts, pDescriptorSetPoolIds, pDescriptorSetWhichPool, pDescriptorSetPendingAllocation, pDescriptorWriteStartingIndices, pendingDescriptorWriteCount, pPendingDescriptorWrites);
+}
+#endif
+#ifdef VK_GOOGLE_gfxstream
+void VkDecoderSnapshot::vkCollectDescriptorPoolIdsGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::BumpPool* pool,
+    VkDevice device,
+    VkDescriptorPool descriptorPool,
+    uint32_t* pPoolIdCount,
+    uint64_t* pPoolIds)
+{
+    mImpl->vkCollectDescriptorPoolIdsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, device, descriptorPool, pPoolIdCount, pPoolIds);
 }
 #endif
 #ifdef VK_KHR_acceleration_structure
