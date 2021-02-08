@@ -4709,10 +4709,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     m_state->snapshot()->vkFreeDescriptorSets(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkFreeDescriptorSets_VkResult_return, device, descriptorPool, descriptorSetCount, boxed_pDescriptorSets_preserve);
                 }
-                for (uint32_t i = 0; i < ((descriptorSetCount)); ++i)
-                {
-                    delete_VkDescriptorSet(boxed_pDescriptorSets_preserve[i]);
-                }
+                // Skipping handle cleanup for vkFreeDescriptorSets
                 vkReadStream->clearPool();
                 if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
                 android::base::endTrace();
@@ -24264,14 +24261,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 const uint32_t* pDescriptorWriteStartingIndices;
                 uint32_t pendingDescriptorWriteCount;
                 const VkWriteDescriptorSet* pPendingDescriptorWrites;
-                // Begin non wrapped dispatchable handle unboxing for queue;
+                // Begin global wrapped dispatchable handle unboxing for queue;
                 uint64_t cgen_var_0;
                 memcpy((uint64_t*)&cgen_var_0, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
                 *(VkQueue*)&queue = (VkQueue)(VkQueue)((VkQueue)(*&cgen_var_0));
-                auto unboxed_queue = unbox_VkQueue(queue);
-                auto vk = dispatch_VkQueue(queue);
-                // End manual dispatchable handle unboxing for queue;
                 memcpy((uint32_t*)&descriptorPoolCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vkReadStream->alloc((void**)&pDescriptorPools, ((descriptorPoolCount)) * sizeof(const VkDescriptorPool));
@@ -24328,7 +24322,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     fprintf(stderr, "stream %p: call vkQueueCommitDescriptorSetUpdatesGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)queue, (unsigned long long)descriptorPoolCount, (unsigned long long)pDescriptorPools, (unsigned long long)descriptorSetCount, (unsigned long long)pSetLayouts, (unsigned long long)pDescriptorSetPoolIds, (unsigned long long)pDescriptorSetWhichPool, (unsigned long long)pDescriptorSetPendingAllocation, (unsigned long long)pDescriptorWriteStartingIndices, (unsigned long long)pendingDescriptorWriteCount, (unsigned long long)pPendingDescriptorWrites);
                 }
-                vk->vkQueueCommitDescriptorSetUpdatesGOOGLE(unboxed_queue, descriptorPoolCount, pDescriptorPools, descriptorSetCount, pSetLayouts, pDescriptorSetPoolIds, pDescriptorSetWhichPool, pDescriptorSetPendingAllocation, pDescriptorWriteStartingIndices, pendingDescriptorWriteCount, pPendingDescriptorWrites);
+                m_state->on_vkQueueCommitDescriptorSetUpdatesGOOGLE(&m_pool, queue, descriptorPoolCount, pDescriptorPools, descriptorSetCount, pSetLayouts, pDescriptorSetPoolIds, pDescriptorSetWhichPool, pDescriptorSetPendingAllocation, pDescriptorWriteStartingIndices, pendingDescriptorWriteCount, pPendingDescriptorWrites);
                 vkStream->unsetHandleMapping();
                 vkReadStream->setReadPos((uintptr_t)(*readStreamPtrPtr) - (uintptr_t)snapshotTraceBegin);
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
@@ -24348,14 +24342,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 VkDescriptorPool descriptorPool;
                 uint32_t* pPoolIdCount;
                 uint64_t* pPoolIds;
-                // Begin non wrapped dispatchable handle unboxing for device;
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_0;
                 memcpy((uint64_t*)&cgen_var_0, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
                 *(VkDevice*)&device = (VkDevice)(VkDevice)((VkDevice)(*&cgen_var_0));
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                // End manual dispatchable handle unboxing for device;
                 uint64_t cgen_var_1;
                 memcpy((uint64_t*)&cgen_var_1, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
@@ -24381,7 +24372,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     fprintf(stderr, "stream %p: call vkCollectDescriptorPoolIdsGOOGLE 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)descriptorPool, (unsigned long long)pPoolIdCount, (unsigned long long)pPoolIds);
                 }
-                vk->vkCollectDescriptorPoolIdsGOOGLE(unboxed_device, descriptorPool, pPoolIdCount, pPoolIds);
+                m_state->on_vkCollectDescriptorPoolIdsGOOGLE(&m_pool, device, descriptorPool, pPoolIdCount, pPoolIds);
                 vkStream->unsetHandleMapping();
                 vkStream->write((uint32_t*)pPoolIdCount, sizeof(uint32_t));
                 // WARNING PTR CHECK
