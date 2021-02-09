@@ -66,6 +66,7 @@ RESOURCE_TRACKER_ENTRIES = [
     "vkCreateDescriptorSetLayout",
     "vkUpdateDescriptorSets",
     "vkCmdExecuteCommands",
+    "vkCmdBindDescriptorSets",
 ]
 
 SUCCESS_VAL = {
