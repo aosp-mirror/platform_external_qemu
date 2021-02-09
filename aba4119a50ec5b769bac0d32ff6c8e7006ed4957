@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "163bd640_3ba4526e",
+        "filename": "hw/usb/host-libusb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1791310
+      },
+      "writtenOn": "2021-02-09T13:40:51Z",
+      "side": 1,
+      "message": "my CL already went in (with a new patch), so you can delete this.",
+      "revId": "aba4119a50ec5b769bac0d32ff6c8e7006ed4957",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}

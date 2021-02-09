@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "28f5c020_bbff7e07",
+        "filename": "hw/usb/host-libusb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 893,
+      "author": {
+        "id": 1791310
+      },
+      "writtenOn": "2021-02-09T13:40:51Z",
+      "side": 0,
+      "message": "same here, this is my CL that already went in. leave this as is from here to line 908 (usb_host_speed_compat(s, maxspeed);",
+      "revId": "bab09e9fbf542c2aaf306c1894ddb9b114d086bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
