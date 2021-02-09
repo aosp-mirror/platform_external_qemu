@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9f3fb71a_bef19385",
+        "filename": "android/android-grpc/docs/python/sample/virtual_scene_camera.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-02-09T14:38:31Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "cbd5fd32_83b5a990",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 12
+      },
+      "revId": "2b2d9afd02827e7a1c4ae1177038405f990a9176",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ac9aa06f_81bbf4ac",
@@ -41,6 +65,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "798f8261_8189f69d",
+        "filename": "android/android-grpc/docs/python/sample/virtual_scene_camera.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-02-09T14:38:31Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "ac9aa06f_81bbf4ac",
+      "revId": "2b2d9afd02827e7a1c4ae1177038405f990a9176",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "30a34e17_837a4b31",
@@ -54,6 +96,30 @@
       "writtenOn": "2021-02-09T05:42:49Z",
       "side": 1,
       "message": "The method should probably be called setVirtualSceneCameraVelocity.",
+      "range": {
+        "startLine": 202,
+        "startChar": 6,
+        "endLine": 202,
+        "endChar": 12
+      },
+      "revId": "2b2d9afd02827e7a1c4ae1177038405f990a9176",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5f703221_879a4256",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 3
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-02-09T14:38:31Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "30a34e17_837a4b31",
       "range": {
         "startLine": 202,
         "startChar": 6,
