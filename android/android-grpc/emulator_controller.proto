@@ -989,7 +989,7 @@ message DisplayConfiguration {
 
   // The pixel density (dpi).
   // See https://developer.android.com/training/multiscreen/screendensities
-  // for details. This value shoud be in the range [120, ..., 640]
+  // for details. This value should be in the range [120, ..., 640]
   uint32 dpi = 3;
 
   // A combination of virtual display flags. These flags can be constructed
