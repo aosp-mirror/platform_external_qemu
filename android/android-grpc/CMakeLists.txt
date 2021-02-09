@@ -50,7 +50,7 @@ android_add_library(
   SRC # cmake-format: sortable
       ${EMULATOR_GRPC_SRC}
       android/emulation/control/adb/AdbService.cpp
-      android/emulation/control/camera/Camera.cpp
+      android/emulation/control/camera/VirtualSceneCamera.cpp
       android/emulation/control/clipboard/Clipboard.cpp
       android/emulation/control/EmulatorService.cpp
       android/emulation/control/GrpcServices.cpp

@@ -27,14 +27,10 @@ static inline size_t toIndex(ControlKey key) {
 static const float kAmbientMotionExtentMeters = 0.005f;
 static const float kMovementVelocityMetersPerSecond = 1.0f;
 
-WASDInputHandler::WASDInputHandler(const QAndroidSensorsAgent* sensorsAgent)
+PhysicalModel::PhysicalModel(const QAndroidSensorsAgent* sensorsAgent)
     : mSensorsAgent(sensorsAgent) {}
 
-void WASDInputHandler::enable() {
-    CHECK(!mEnabled);
-
-    mEnabled = true;
-
+void PhysicalModel::onEnable() {
     // Get the starting rotation.
     glm::vec3 eulerDegrees;
     mSensorsAgent->getPhysicalParameter(
@@ -65,6 +61,60 @@ void WASDInputHandler::enable() {
             0.0f, PHYSICAL_INTERPOLATION_SMOOTH);
 }
 
+void PhysicalModel::onDisable() {
+    mVelocity = {0.0f, 0.0f, 0.0f};
+    mSensorsAgent->setPhysicalParameterTarget(PHYSICAL_PARAMETER_AMBIENT_MOTION,
+                                              0.0f, 0.0f, 0.0f,
+                                              PHYSICAL_INTERPOLATION_SMOOTH);
+}
+
+// radianDelta is in XYZ order.
+void PhysicalModel::updateRotation(glm::vec3 radianDelta) {
+    mEulerRotationRadians.x += radianDelta.y;
+    mEulerRotationRadians.y += radianDelta.x;
+
+    // Clamp up/down rotation to -80 and +80 degrees, like a FPS camera.
+    if (mEulerRotationRadians.x < glm::radians(kMinVerticalRotationDegrees)) {
+        mEulerRotationRadians.x = glm::radians(kMinVerticalRotationDegrees);
+    } else if (mEulerRotationRadians.x >
+               glm::radians(kMaxVerticalRotationDegrees)) {
+        mEulerRotationRadians.x = glm::radians(kMaxVerticalRotationDegrees);
+    }
+
+    // Rotations applied in the Y X Z order, but we need to convert to X
+    // Y Z order for the physical model.
+    const glm::vec3 rotationDegrees = glm::degrees(
+            toEulerAnglesXYZ(fromEulerAnglesYXZ(mEulerRotationRadians)));
+
+    mSensorsAgent->setPhysicalParameterTarget(
+            PHYSICAL_PARAMETER_ROTATION, rotationDegrees.x, rotationDegrees.y,
+            rotationDegrees.z, PHYSICAL_INTERPOLATION_SMOOTH);
+}
+
+void PhysicalModel::updateVelocity(glm::vec3 baseVelocity) {
+    const glm::vec3 velocity = glm::angleAxis(mEulerRotationRadians.y,
+                                              glm::vec3(0.0f, 1.0f, 0.0f)) *
+                               baseVelocity;
+
+    if (velocity != mVelocity) {
+        mVelocity = velocity;
+
+        mSensorsAgent->setPhysicalParameterTarget(
+                PHYSICAL_PARAMETER_VELOCITY, velocity.x, velocity.y, velocity.z,
+                PHYSICAL_INTERPOLATION_SMOOTH);
+    }
+}
+
+WASDInputHandler::WASDInputHandler(const QAndroidSensorsAgent* sensorsAgent)
+    : mModel(sensorsAgent) {}
+
+void WASDInputHandler::enable() {
+    CHECK(!mEnabled);
+
+    mEnabled = true;
+    mModel.onEnable();
+}
+
 void WASDInputHandler::disable() {
     CHECK(mEnabled);
 
@@ -74,12 +124,7 @@ void WASDInputHandler::disable() {
     for (bool& pressed : mKeysHeld) {
         pressed = false;
     }
-
-    mSensorsAgent->setPhysicalParameterTarget(PHYSICAL_PARAMETER_AMBIENT_MOTION,
-                                              0.0f, 0.0f, 0.0f,
-                                              PHYSICAL_INTERPOLATION_SMOOTH);
-
-    updateVelocity();
+    mModel.onDisable();
 }
 
 void WASDInputHandler::keyDown(ControlKey key) {
@@ -104,30 +149,11 @@ void WASDInputHandler::mouseMove(int offsetX, int offsetY) {
     if (!mEnabled) {
         return;
     }
-
+    // Angles are measured counter clock-wise while in mouselook, offsets are
+    // measured the opposite way.
     if (offsetX != 0 || offsetY != 0) {
-        mEulerRotationRadians.x -= offsetY * kPixelsToRotationRadians;
-        mEulerRotationRadians.y -= offsetX * kPixelsToRotationRadians;
-
-        // Clamp up/down rotation to -80 and +80 degrees, like a FPS camera.
-        if (mEulerRotationRadians.x <
-            glm::radians(kMinVerticalRotationDegrees)) {
-            mEulerRotationRadians.x = glm::radians(kMinVerticalRotationDegrees);
-        } else if (mEulerRotationRadians.x >
-                   glm::radians(kMaxVerticalRotationDegrees)) {
-            mEulerRotationRadians.x = glm::radians(kMaxVerticalRotationDegrees);
-        }
-
-        // Rotations applied in the Y X Z order, but we need to convert to X
-        // Y Z order for the physical model.
-        const glm::vec3 rotationDegrees = glm::degrees(
-                toEulerAnglesXYZ(fromEulerAnglesYXZ(mEulerRotationRadians)));
-
-        mSensorsAgent->setPhysicalParameterTarget(
-                PHYSICAL_PARAMETER_ROTATION, rotationDegrees.x,
-                rotationDegrees.y, rotationDegrees.z,
-                PHYSICAL_INTERPOLATION_SMOOTH);
-
+        mModel.updateRotation({-offsetX * kPixelsToRotationRadians,
+                               -offsetY * kPixelsToRotationRadians, 0.0f});
         updateVelocity();
     }
 }
@@ -143,19 +169,8 @@ void WASDInputHandler::updateVelocity() {
                     (mKeysHeld[toIndex(ControlKey::E)] ? 1.0f : 0.0f),
             (mKeysHeld[toIndex(ControlKey::W)] ? -1.0f : 0.0f) +
                     (mKeysHeld[toIndex(ControlKey::S)] ? 1.0f : 0.0f));
-
-    const glm::vec3 velocity = glm::angleAxis(mEulerRotationRadians.y,
-                                              glm::vec3(0.0f, 1.0f, 0.0f)) *
-                               lookDirectionBaseVelocity *
-                               kMovementVelocityMetersPerSecond;
-
-    if (velocity != mVelocity) {
-        mVelocity = velocity;
-
-        mSensorsAgent->setPhysicalParameterTarget(
-                PHYSICAL_PARAMETER_VELOCITY, velocity.x, velocity.y, velocity.z,
-                PHYSICAL_INTERPOLATION_SMOOTH);
-    }
+    mModel.updateVelocity(lookDirectionBaseVelocity *
+                          kMovementVelocityMetersPerSecond);
 }
 
 }  // namespace virtualscene
