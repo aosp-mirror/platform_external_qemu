@@ -49,5 +49,11 @@ void ModemLegacy::set_voice_registration(AModem modem,
     amodem_set_voice_registration(modem, state);
 }
 
+void ModemLegacy::set_notification_callback_vx(AModem modem,
+                                               ModemCallback callbackFunc,
+                                               void* userData) {
+    amodem_set_notification_callback(modem, callbackFunc, userData);
+}
+
 }  // namespace modem
 }  // namespace android
