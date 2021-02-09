@@ -16,6 +16,24 @@
       "message": "my CL already went in (with a new patch), so you can delete this.",
       "revId": "aba4119a50ec5b769bac0d32ff6c8e7006ed4957",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bf179f56_ff25bb9e",
+        "filename": "hw/usb/host-libusb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1795390
+      },
+      "writtenOn": "2021-02-09T15:53:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "163bd640_3ba4526e",
+      "revId": "aba4119a50ec5b769bac0d32ff6c8e7006ed4957",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }

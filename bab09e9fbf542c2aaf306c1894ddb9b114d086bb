@@ -16,6 +16,24 @@
       "message": "same here, this is my CL that already went in. leave this as is from here to line 908 (usb_host_speed_compat(s, maxspeed);",
       "revId": "bab09e9fbf542c2aaf306c1894ddb9b114d086bb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a282a71e_cf604e68",
+        "filename": "hw/usb/host-libusb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 893,
+      "author": {
+        "id": 1795390
+      },
+      "writtenOn": "2021-02-09T15:53:53Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "28f5c020_bbff7e07",
+      "revId": "bab09e9fbf542c2aaf306c1894ddb9b114d086bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
