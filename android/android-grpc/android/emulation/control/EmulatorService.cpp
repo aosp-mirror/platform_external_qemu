@@ -56,7 +56,7 @@
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/ServiceUtils.h"
 #include "android/emulation/control/battery_agent.h"
-#include "android/emulation/control/camera/Camera.h"
+#include "android/emulation/control/camera/VirtualSceneCamera.h"
 #include "android/emulation/control/clipboard/Clipboard.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
@@ -129,7 +129,7 @@ public:
           mLogcatBuffer(k128KB),
           mKeyEventSender(agents),
           mTouchEventSender(agents),
-          mCamera(Camera::getCamera()),
+          mCamera(agents->sensors),
           mClipboard(Clipboard::getClipboard(agents->clipboard)),
           mLooper(android::base::ThreadLooper::get()) {
         // the logcat pipe will take ownership of the created stream, and writes
@@ -978,7 +978,7 @@ public:
 
     Notification getCameraNotificationEvent() {
         Notification reply;
-        if (mCamera->isVirtualSceneConnected()) {
+        if (mCamera.isConnected()) {
             reply.set_event(Notification::VIRTUAL_SCENE_CAMERA_ACTIVE);
         } else {
             reply.set_event(Notification::VIRTUAL_SCENE_CAMERA_INACTIVE);
@@ -1004,8 +1004,8 @@ public:
         std::mutex notificationLock;
 
         // Register temporary listeners for multi display & camera changes.
-        RaiiEventListener<Camera, bool> cameraListener(
-                mCamera, [&](auto state) {
+        RaiiEventListener<VirtualSceneCamera, bool> cameraListener(
+                &mCamera, [&](auto state) {
                     std::lock_guard<std::mutex> lock(notificationLock);
                     activeNotifications.push_back(getCameraNotificationEvent());
                     notifier.newEvent();
@@ -1058,6 +1058,22 @@ public:
         return Status::OK;
     }
 
+    Status rotateVirtualSceneCamera(ServerContext* context,
+                                    const RotationRadian* request,
+                                    ::google::protobuf::Empty* reply) override {
+        mCamera.rotate({request->x(), request->y(), request->z()});
+        return Status::OK;
+    }
+
+    Status setVirtualSceneCameraVelocity(
+            ServerContext* context,
+            const Velocity* request,
+            ::google::protobuf::Empty* reply) override {
+        mCamera.setVelocity({request->x(), request->y(), request->z()});
+
+        return Status::OK;
+    }
+
 private:
     const AndroidConsoleAgents* mAgents;
     keyboard::EmulatorKeyEventSender mKeyEventSender;
@@ -1065,7 +1081,7 @@ private:
     SharedMemoryLibrary mSharedMemoryLibrary;
     EventWaiter mNotificationWaiter;
 
-    Camera* mCamera;
+    VirtualSceneCamera mCamera;
     Clipboard* mClipboard;
     Looper* mLooper;
     RingStreambuf
