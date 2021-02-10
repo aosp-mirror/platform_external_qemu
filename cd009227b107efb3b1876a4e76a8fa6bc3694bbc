@@ -46,6 +46,30 @@
       },
       "revId": "cd009227b107efb3b1876a4e76a8fa6bc3694bbc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7d7f4440_8cb0d6a3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1046923
+      },
+      "writtenOn": "2021-02-10T23:49:53Z",
+      "side": 1,
+      "message": "And to confirm, that won\u0027t ever change if I rename a snapshot or change other properties of it?\n\nWhat is that key, exactly? I\u0027ve been assuming it\u0027s a snapshot directory name. Will I be able to map it to a snapshot directory? And given a snapshot directory, is there a way to extract that key?\n\nThanks!",
+      "parentUuid": "37e5c00d_f5df1383",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 13
+      },
+      "revId": "cd009227b107efb3b1876a4e76a8fa6bc3694bbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
