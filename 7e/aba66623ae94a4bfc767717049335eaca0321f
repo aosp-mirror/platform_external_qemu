@@ -1,0 +1,7 @@
+Presubmit-Verified+2: Treehugger Robot <treehugger-gerrit@google.com>
+Code-Review+2: Ji Soo Shin <jisshin@google.com>
+Submitted-by: Ji Soo Shin <jisshin@google.com>
+Submitted-at: Wed, 10 Feb 2021 14:06:25 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/qemu/+/1580924
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
