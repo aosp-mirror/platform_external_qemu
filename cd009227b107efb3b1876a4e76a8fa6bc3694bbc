@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e813335e_d8fa221f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1046923
+      },
+      "writtenOn": "2021-02-10T23:34:33Z",
+      "side": 1,
+      "message": "I would be fine with this but can this be a full path to a snapshot directory? For consistency with adb emu avd path.\n\nBut more importantly, whatever gets spit out should be the same regardless of how a user mutates a snapshot. Let\u0027s say I take a snapshot and run adb emu avd snapshot get. It will output whatever. And then I open the extended controls and change the snapshot name. Or the description. And save it. Whatever adb emu avd snapshot outputs subsequently should be the same.\n\nI\u0027m treating this as an entity key\n\nThanks!",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 13
+      },
+      "revId": "cd009227b107efb3b1876a4e76a8fa6bc3694bbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
