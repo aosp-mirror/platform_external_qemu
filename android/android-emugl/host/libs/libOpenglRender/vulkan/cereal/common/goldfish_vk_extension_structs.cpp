@@ -474,23 +474,7 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_EXT_directfb_surface
 #endif
-#ifdef VK_GOOGLE_address_space
-#endif
-#ifdef VK_GOOGLE_sized_descriptor_update_template
-#endif
-#ifdef VK_GOOGLE_async_command_buffers
-#endif
-#ifdef VK_GOOGLE_create_resources_with_requirements
-#endif
-#ifdef VK_GOOGLE_address_space_info
-#endif
-#ifdef VK_GOOGLE_free_memory_sync
-#endif
-#ifdef VK_GOOGLE_async_queue_submit
-#endif
-#ifdef VK_GOOGLE_linear_image_layout
-#endif
-#ifdef VK_GOOGLE_queue_submit_with_commands
+#ifdef VK_GOOGLE_gfxstream
 #endif
 #ifdef VK_KHR_acceleration_structure
 #endif

@@ -478,23 +478,7 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_EXT_directfb_surface
 #endif
-#ifdef VK_GOOGLE_address_space
-#endif
-#ifdef VK_GOOGLE_sized_descriptor_update_template
-#endif
-#ifdef VK_GOOGLE_async_command_buffers
-#endif
-#ifdef VK_GOOGLE_create_resources_with_requirements
-#endif
-#ifdef VK_GOOGLE_address_space_info
-#endif
-#ifdef VK_GOOGLE_free_memory_sync
-#endif
-#ifdef VK_GOOGLE_async_queue_submit
-#endif
-#ifdef VK_GOOGLE_linear_image_layout
-#endif
-#ifdef VK_GOOGLE_queue_submit_with_commands
+#ifdef VK_GOOGLE_gfxstream
 #endif
 #ifdef VK_KHR_acceleration_structure
 #endif
@@ -1146,38 +1130,22 @@ void init_vulkan_dispatch_from_system_loader(
 #ifdef VK_EXT_directfb_surface
     out->vkGetPhysicalDeviceDirectFBPresentationSupportEXT = (PFN_vkGetPhysicalDeviceDirectFBPresentationSupportEXT)dlSymFunc(lib, "vkGetPhysicalDeviceDirectFBPresentationSupportEXT");
 #endif
-#ifdef VK_GOOGLE_address_space
+#ifdef VK_GOOGLE_gfxstream
     out->vkMapMemoryIntoAddressSpaceGOOGLE = (PFN_vkMapMemoryIntoAddressSpaceGOOGLE)dlSymFunc(lib, "vkMapMemoryIntoAddressSpaceGOOGLE");
-#endif
-#ifdef VK_GOOGLE_sized_descriptor_update_template
     out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)dlSymFunc(lib, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
-#endif
-#ifdef VK_GOOGLE_async_command_buffers
     out->vkBeginCommandBufferAsyncGOOGLE = (PFN_vkBeginCommandBufferAsyncGOOGLE)dlSymFunc(lib, "vkBeginCommandBufferAsyncGOOGLE");
     out->vkEndCommandBufferAsyncGOOGLE = (PFN_vkEndCommandBufferAsyncGOOGLE)dlSymFunc(lib, "vkEndCommandBufferAsyncGOOGLE");
     out->vkResetCommandBufferAsyncGOOGLE = (PFN_vkResetCommandBufferAsyncGOOGLE)dlSymFunc(lib, "vkResetCommandBufferAsyncGOOGLE");
     out->vkCommandBufferHostSyncGOOGLE = (PFN_vkCommandBufferHostSyncGOOGLE)dlSymFunc(lib, "vkCommandBufferHostSyncGOOGLE");
-#endif
-#ifdef VK_GOOGLE_create_resources_with_requirements
     out->vkCreateImageWithRequirementsGOOGLE = (PFN_vkCreateImageWithRequirementsGOOGLE)dlSymFunc(lib, "vkCreateImageWithRequirementsGOOGLE");
     out->vkCreateBufferWithRequirementsGOOGLE = (PFN_vkCreateBufferWithRequirementsGOOGLE)dlSymFunc(lib, "vkCreateBufferWithRequirementsGOOGLE");
-#endif
-#ifdef VK_GOOGLE_address_space_info
     out->vkGetMemoryHostAddressInfoGOOGLE = (PFN_vkGetMemoryHostAddressInfoGOOGLE)dlSymFunc(lib, "vkGetMemoryHostAddressInfoGOOGLE");
-#endif
-#ifdef VK_GOOGLE_free_memory_sync
     out->vkFreeMemorySyncGOOGLE = (PFN_vkFreeMemorySyncGOOGLE)dlSymFunc(lib, "vkFreeMemorySyncGOOGLE");
-#endif
-#ifdef VK_GOOGLE_async_queue_submit
     out->vkQueueHostSyncGOOGLE = (PFN_vkQueueHostSyncGOOGLE)dlSymFunc(lib, "vkQueueHostSyncGOOGLE");
     out->vkQueueSubmitAsyncGOOGLE = (PFN_vkQueueSubmitAsyncGOOGLE)dlSymFunc(lib, "vkQueueSubmitAsyncGOOGLE");
     out->vkQueueWaitIdleAsyncGOOGLE = (PFN_vkQueueWaitIdleAsyncGOOGLE)dlSymFunc(lib, "vkQueueWaitIdleAsyncGOOGLE");
     out->vkQueueBindSparseAsyncGOOGLE = (PFN_vkQueueBindSparseAsyncGOOGLE)dlSymFunc(lib, "vkQueueBindSparseAsyncGOOGLE");
-#endif
-#ifdef VK_GOOGLE_linear_image_layout
     out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)dlSymFunc(lib, "vkGetLinearImageLayoutGOOGLE");
-#endif
-#ifdef VK_GOOGLE_queue_submit_with_commands
     out->vkQueueFlushCommandsGOOGLE = (PFN_vkQueueFlushCommandsGOOGLE)dlSymFunc(lib, "vkQueueFlushCommandsGOOGLE");
 #endif
 #ifdef VK_KHR_acceleration_structure
@@ -1857,38 +1825,22 @@ void init_vulkan_dispatch_from_instance(
 #ifdef VK_EXT_directfb_surface
     out->vkGetPhysicalDeviceDirectFBPresentationSupportEXT = (PFN_vkGetPhysicalDeviceDirectFBPresentationSupportEXT)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceDirectFBPresentationSupportEXT");
 #endif
-#ifdef VK_GOOGLE_address_space
+#ifdef VK_GOOGLE_gfxstream
     out->vkMapMemoryIntoAddressSpaceGOOGLE = (PFN_vkMapMemoryIntoAddressSpaceGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkMapMemoryIntoAddressSpaceGOOGLE");
-#endif
-#ifdef VK_GOOGLE_sized_descriptor_update_template
     out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
-#endif
-#ifdef VK_GOOGLE_async_command_buffers
     out->vkBeginCommandBufferAsyncGOOGLE = (PFN_vkBeginCommandBufferAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkBeginCommandBufferAsyncGOOGLE");
     out->vkEndCommandBufferAsyncGOOGLE = (PFN_vkEndCommandBufferAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkEndCommandBufferAsyncGOOGLE");
     out->vkResetCommandBufferAsyncGOOGLE = (PFN_vkResetCommandBufferAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkResetCommandBufferAsyncGOOGLE");
     out->vkCommandBufferHostSyncGOOGLE = (PFN_vkCommandBufferHostSyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkCommandBufferHostSyncGOOGLE");
-#endif
-#ifdef VK_GOOGLE_create_resources_with_requirements
     out->vkCreateImageWithRequirementsGOOGLE = (PFN_vkCreateImageWithRequirementsGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkCreateImageWithRequirementsGOOGLE");
     out->vkCreateBufferWithRequirementsGOOGLE = (PFN_vkCreateBufferWithRequirementsGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkCreateBufferWithRequirementsGOOGLE");
-#endif
-#ifdef VK_GOOGLE_address_space_info
     out->vkGetMemoryHostAddressInfoGOOGLE = (PFN_vkGetMemoryHostAddressInfoGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkGetMemoryHostAddressInfoGOOGLE");
-#endif
-#ifdef VK_GOOGLE_free_memory_sync
     out->vkFreeMemorySyncGOOGLE = (PFN_vkFreeMemorySyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkFreeMemorySyncGOOGLE");
-#endif
-#ifdef VK_GOOGLE_async_queue_submit
     out->vkQueueHostSyncGOOGLE = (PFN_vkQueueHostSyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueHostSyncGOOGLE");
     out->vkQueueSubmitAsyncGOOGLE = (PFN_vkQueueSubmitAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueSubmitAsyncGOOGLE");
     out->vkQueueWaitIdleAsyncGOOGLE = (PFN_vkQueueWaitIdleAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueWaitIdleAsyncGOOGLE");
     out->vkQueueBindSparseAsyncGOOGLE = (PFN_vkQueueBindSparseAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueBindSparseAsyncGOOGLE");
-#endif
-#ifdef VK_GOOGLE_linear_image_layout
     out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkGetLinearImageLayoutGOOGLE");
-#endif
-#ifdef VK_GOOGLE_queue_submit_with_commands
     out->vkQueueFlushCommandsGOOGLE = (PFN_vkQueueFlushCommandsGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueFlushCommandsGOOGLE");
 #endif
 #ifdef VK_KHR_acceleration_structure
@@ -2560,38 +2512,22 @@ void init_vulkan_dispatch_from_device(
 #ifdef VK_EXT_directfb_surface
     out->vkGetPhysicalDeviceDirectFBPresentationSupportEXT = (PFN_vkGetPhysicalDeviceDirectFBPresentationSupportEXT)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceDirectFBPresentationSupportEXT");
 #endif
-#ifdef VK_GOOGLE_address_space
+#ifdef VK_GOOGLE_gfxstream
     out->vkMapMemoryIntoAddressSpaceGOOGLE = (PFN_vkMapMemoryIntoAddressSpaceGOOGLE)vk->vkGetDeviceProcAddr(device, "vkMapMemoryIntoAddressSpaceGOOGLE");
-#endif
-#ifdef VK_GOOGLE_sized_descriptor_update_template
     out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)vk->vkGetDeviceProcAddr(device, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
-#endif
-#ifdef VK_GOOGLE_async_command_buffers
     out->vkBeginCommandBufferAsyncGOOGLE = (PFN_vkBeginCommandBufferAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkBeginCommandBufferAsyncGOOGLE");
     out->vkEndCommandBufferAsyncGOOGLE = (PFN_vkEndCommandBufferAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkEndCommandBufferAsyncGOOGLE");
     out->vkResetCommandBufferAsyncGOOGLE = (PFN_vkResetCommandBufferAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkResetCommandBufferAsyncGOOGLE");
     out->vkCommandBufferHostSyncGOOGLE = (PFN_vkCommandBufferHostSyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkCommandBufferHostSyncGOOGLE");
-#endif
-#ifdef VK_GOOGLE_create_resources_with_requirements
     out->vkCreateImageWithRequirementsGOOGLE = (PFN_vkCreateImageWithRequirementsGOOGLE)vk->vkGetDeviceProcAddr(device, "vkCreateImageWithRequirementsGOOGLE");
     out->vkCreateBufferWithRequirementsGOOGLE = (PFN_vkCreateBufferWithRequirementsGOOGLE)vk->vkGetDeviceProcAddr(device, "vkCreateBufferWithRequirementsGOOGLE");
-#endif
-#ifdef VK_GOOGLE_address_space_info
     out->vkGetMemoryHostAddressInfoGOOGLE = (PFN_vkGetMemoryHostAddressInfoGOOGLE)vk->vkGetDeviceProcAddr(device, "vkGetMemoryHostAddressInfoGOOGLE");
-#endif
-#ifdef VK_GOOGLE_free_memory_sync
     out->vkFreeMemorySyncGOOGLE = (PFN_vkFreeMemorySyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkFreeMemorySyncGOOGLE");
-#endif
-#ifdef VK_GOOGLE_async_queue_submit
     out->vkQueueHostSyncGOOGLE = (PFN_vkQueueHostSyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueHostSyncGOOGLE");
     out->vkQueueSubmitAsyncGOOGLE = (PFN_vkQueueSubmitAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueSubmitAsyncGOOGLE");
     out->vkQueueWaitIdleAsyncGOOGLE = (PFN_vkQueueWaitIdleAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueWaitIdleAsyncGOOGLE");
     out->vkQueueBindSparseAsyncGOOGLE = (PFN_vkQueueBindSparseAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueBindSparseAsyncGOOGLE");
-#endif
-#ifdef VK_GOOGLE_linear_image_layout
     out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)vk->vkGetDeviceProcAddr(device, "vkGetLinearImageLayoutGOOGLE");
-#endif
-#ifdef VK_GOOGLE_queue_submit_with_commands
     out->vkQueueFlushCommandsGOOGLE = (PFN_vkQueueFlushCommandsGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueFlushCommandsGOOGLE");
 #endif
 #ifdef VK_KHR_acceleration_structure

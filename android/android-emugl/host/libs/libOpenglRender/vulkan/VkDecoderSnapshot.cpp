@@ -5736,7 +5736,7 @@ void vkGetPhysicalDeviceDirectFBPresentationSupportEXT(
     // TODO: Implement
 }
 #endif
-#ifdef VK_GOOGLE_address_space
+#ifdef VK_GOOGLE_gfxstream
 void vkMapMemoryIntoAddressSpaceGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -5758,8 +5758,6 @@ void vkMapMemoryIntoAddressSpaceGOOGLE(
         mReconstruction.forEachHandleAddModifyApi((const uint64_t*)(&boxed), 1, apiHandle);
     }
 }
-#endif
-#ifdef VK_GOOGLE_sized_descriptor_update_template
 void vkUpdateDescriptorSetWithTemplateSizedGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -5779,8 +5777,6 @@ void vkUpdateDescriptorSetWithTemplateSizedGOOGLE(
 {
     // TODO: Implement
 }
-#endif
-#ifdef VK_GOOGLE_async_command_buffers
 void vkBeginCommandBufferAsyncGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -5817,8 +5813,6 @@ void vkCommandBufferHostSyncGOOGLE(
 {
     // TODO: Implement
 }
-#endif
-#ifdef VK_GOOGLE_create_resources_with_requirements
 void vkCreateImageWithRequirementsGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -5865,8 +5859,6 @@ void vkCreateBufferWithRequirementsGOOGLE(
     mReconstruction.forEachHandleAddApi((const uint64_t*)pBuffer, 1, apiHandle);
     mReconstruction.setCreatedHandlesForApi(apiHandle, (const uint64_t*)pBuffer, 1);
 }
-#endif
-#ifdef VK_GOOGLE_address_space_info
 void vkGetMemoryHostAddressInfoGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -5880,8 +5872,6 @@ void vkGetMemoryHostAddressInfoGOOGLE(
 {
     // TODO: Implement
 }
-#endif
-#ifdef VK_GOOGLE_free_memory_sync
 void vkFreeMemorySyncGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -5896,8 +5886,6 @@ void vkFreeMemorySyncGOOGLE(
     // memory destroy
     mReconstruction.removeHandles((const uint64_t*)(&memory), 1);
 }
-#endif
-#ifdef VK_GOOGLE_async_queue_submit
 void vkQueueHostSyncGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -5938,8 +5926,6 @@ void vkQueueBindSparseAsyncGOOGLE(
 {
     // TODO: Implement
 }
-#endif
-#ifdef VK_GOOGLE_linear_image_layout
 void vkGetLinearImageLayoutGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -5951,8 +5937,6 @@ void vkGetLinearImageLayoutGOOGLE(
 {
     // TODO: Implement
 }
-#endif
-#ifdef VK_GOOGLE_queue_submit_with_commands
 void vkQueueFlushCommandsGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -11897,7 +11881,7 @@ void VkDecoderSnapshot::vkGetPhysicalDeviceDirectFBPresentationSupportEXT(
     mImpl->vkGetPhysicalDeviceDirectFBPresentationSupportEXT(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, physicalDevice, queueFamilyIndex, dfb);
 }
 #endif
-#ifdef VK_GOOGLE_address_space
+#ifdef VK_GOOGLE_gfxstream
 void VkDecoderSnapshot::vkMapMemoryIntoAddressSpaceGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -11910,7 +11894,7 @@ void VkDecoderSnapshot::vkMapMemoryIntoAddressSpaceGOOGLE(
     mImpl->vkMapMemoryIntoAddressSpaceGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, memory, pAddress);
 }
 #endif
-#ifdef VK_GOOGLE_sized_descriptor_update_template
+#ifdef VK_GOOGLE_gfxstream
 void VkDecoderSnapshot::vkUpdateDescriptorSetWithTemplateSizedGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -11931,7 +11915,7 @@ void VkDecoderSnapshot::vkUpdateDescriptorSetWithTemplateSizedGOOGLE(
     mImpl->vkUpdateDescriptorSetWithTemplateSizedGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, device, descriptorSet, descriptorUpdateTemplate, imageInfoCount, bufferInfoCount, bufferViewCount, pImageInfoEntryIndices, pBufferInfoEntryIndices, pBufferViewEntryIndices, pImageInfos, pBufferInfos, pBufferViews);
 }
 #endif
-#ifdef VK_GOOGLE_async_command_buffers
+#ifdef VK_GOOGLE_gfxstream
 void VkDecoderSnapshot::vkBeginCommandBufferAsyncGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -11942,7 +11926,7 @@ void VkDecoderSnapshot::vkBeginCommandBufferAsyncGOOGLE(
     mImpl->vkBeginCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, commandBuffer, pBeginInfo);
 }
 #endif
-#ifdef VK_GOOGLE_async_command_buffers
+#ifdef VK_GOOGLE_gfxstream
 void VkDecoderSnapshot::vkEndCommandBufferAsyncGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -11952,7 +11936,7 @@ void VkDecoderSnapshot::vkEndCommandBufferAsyncGOOGLE(
     mImpl->vkEndCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, commandBuffer);
 }
 #endif
-#ifdef VK_GOOGLE_async_command_buffers
+#ifdef VK_GOOGLE_gfxstream
 void VkDecoderSnapshot::vkResetCommandBufferAsyncGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -11963,7 +11947,7 @@ void VkDecoderSnapshot::vkResetCommandBufferAsyncGOOGLE(
     mImpl->vkResetCommandBufferAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, commandBuffer, flags);
 }
 #endif
-#ifdef VK_GOOGLE_async_command_buffers
+#ifdef VK_GOOGLE_gfxstream
 void VkDecoderSnapshot::vkCommandBufferHostSyncGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -11975,7 +11959,7 @@ void VkDecoderSnapshot::vkCommandBufferHostSyncGOOGLE(
     mImpl->vkCommandBufferHostSyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, commandBuffer, needHostSync, sequenceNumber);
 }
 #endif
-#ifdef VK_GOOGLE_create_resources_with_requirements
+#ifdef VK_GOOGLE_gfxstream
 void VkDecoderSnapshot::vkCreateImageWithRequirementsGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -11990,7 +11974,7 @@ void VkDecoderSnapshot::vkCreateImageWithRequirementsGOOGLE(
     mImpl->vkCreateImageWithRequirementsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, pCreateInfo, pAllocator, pImage, pMemoryRequirements);
 }
 #endif
-#ifdef VK_GOOGLE_create_resources_with_requirements
+#ifdef VK_GOOGLE_gfxstream
 void VkDecoderSnapshot::vkCreateBufferWithRequirementsGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -12005,7 +11989,7 @@ void VkDecoderSnapshot::vkCreateBufferWithRequirementsGOOGLE(
     mImpl->vkCreateBufferWithRequirementsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, pCreateInfo, pAllocator, pBuffer, pMemoryRequirements);
 }
 #endif
-#ifdef VK_GOOGLE_address_space_info
+#ifdef VK_GOOGLE_gfxstream
 void VkDecoderSnapshot::vkGetMemoryHostAddressInfoGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -12020,7 +12004,7 @@ void VkDecoderSnapshot::vkGetMemoryHostAddressInfoGOOGLE(
     mImpl->vkGetMemoryHostAddressInfoGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, memory, pAddress, pSize, pHostmemId);
 }
 #endif
-#ifdef VK_GOOGLE_free_memory_sync
+#ifdef VK_GOOGLE_gfxstream
 void VkDecoderSnapshot::vkFreeMemorySyncGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -12033,7 +12017,7 @@ void VkDecoderSnapshot::vkFreeMemorySyncGOOGLE(
     mImpl->vkFreeMemorySyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, memory, pAllocator);
 }
 #endif
-#ifdef VK_GOOGLE_async_queue_submit
+#ifdef VK_GOOGLE_gfxstream
 void VkDecoderSnapshot::vkQueueHostSyncGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -12045,7 +12029,7 @@ void VkDecoderSnapshot::vkQueueHostSyncGOOGLE(
     mImpl->vkQueueHostSyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, queue, needHostSync, sequenceNumber);
 }
 #endif
-#ifdef VK_GOOGLE_async_queue_submit
+#ifdef VK_GOOGLE_gfxstream
 void VkDecoderSnapshot::vkQueueSubmitAsyncGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -12058,7 +12042,7 @@ void VkDecoderSnapshot::vkQueueSubmitAsyncGOOGLE(
     mImpl->vkQueueSubmitAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, queue, submitCount, pSubmits, fence);
 }
 #endif
-#ifdef VK_GOOGLE_async_queue_submit
+#ifdef VK_GOOGLE_gfxstream
 void VkDecoderSnapshot::vkQueueWaitIdleAsyncGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -12068,7 +12052,7 @@ void VkDecoderSnapshot::vkQueueWaitIdleAsyncGOOGLE(
     mImpl->vkQueueWaitIdleAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, queue);
 }
 #endif
-#ifdef VK_GOOGLE_async_queue_submit
+#ifdef VK_GOOGLE_gfxstream
 void VkDecoderSnapshot::vkQueueBindSparseAsyncGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -12081,7 +12065,7 @@ void VkDecoderSnapshot::vkQueueBindSparseAsyncGOOGLE(
     mImpl->vkQueueBindSparseAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, queue, bindInfoCount, pBindInfo, fence);
 }
 #endif
-#ifdef VK_GOOGLE_linear_image_layout
+#ifdef VK_GOOGLE_gfxstream
 void VkDecoderSnapshot::vkGetLinearImageLayoutGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -12094,7 +12078,7 @@ void VkDecoderSnapshot::vkGetLinearImageLayoutGOOGLE(
     mImpl->vkGetLinearImageLayoutGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, device, format, pOffset, pRowPitchAlignment);
 }
 #endif
-#ifdef VK_GOOGLE_queue_submit_with_commands
+#ifdef VK_GOOGLE_gfxstream
 void VkDecoderSnapshot::vkQueueFlushCommandsGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,

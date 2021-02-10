@@ -14672,14 +14672,6 @@ typedef void <name>CAMetalLayer</name>;
                 <enum bitpos="15" extends="VkImageCreateFlagBits"       name="VK_IMAGE_CREATE_RESERVED_15_BIT_NV"/>
             </require>
         </extension>
-        <extension name="VK_GOOGLE_address_space" number="373" author="GOOGLE" contact="Roman Kiryanov @rkir,Lingfeng Yang @frank" supported="vulkan">
-            <require>
-                <enum value="0"                                             name="VK_GOOGLE_ADDRESS_SPACE_SPEC_VERSION"/>
-                <enum value="373"                                           name="VK_GOOGLE_ADDRESS_SPACE_NUMBER"/>
-                <enum value="&quot;VK_GOOGLE_address_space&quot;"           name="VK_GOOGLE_ADDRESS_SPACE_EXTENSION_NAME"/>
-                <command name="vkMapMemoryIntoAddressSpaceGOOGLE"/>
-            </require>
-        </extension>
         <!-- TODO(liyl): This extension number (219) collides with VK_EXT_fragment_density_map, though we have a few extension -->
         <!-- IDs / struct type IDs hardcoded in goldfish Vulkan ICD. Thus we kept the number and changed -->
         <!-- the extension number of VK_EXT_fragment_density_map to 919. -->
@@ -14698,74 +14690,26 @@ typedef void <name>CAMetalLayer</name>;
                 <command name="vkRegisterBufferColorBufferGOOGLE"/>
             </require>
         </extension>
-        <extension name="VK_GOOGLE_sized_descriptor_update_template" number="375" author="GOOGLE" contact="Lingfeng Yang @frank" supported="vulkan">
+        <extension name="VK_GOOGLE_gfxstream" number="386" author="GOOGLE" contact="Lingfeng Yang @frank,Roman Kiryanov @rkir,Yilong Li @liyl_google" supported="vulkan">
             <require>
-                <enum value="0"                                             name="VK_GOOGLE_SIZED_DESCRIPTOR_UPDATE_TEMPLATE_SPEC_VERSION"/>
-                <enum value="375"                                           name="VK_GOOGLE_SIZED_DESCRIPTOR_UPDATE_TEMPLATE_NUMBER"/>
-                <enum value="&quot;VK_GOOGLE_color_buffer&quot;"            name="VK_GOOGLE_SIZED_DESCRIPTOR_UPDATE_TEMPLATE_EXTENSION_NAME"/>
+                <enum value="0"                                             name="VK_GOOGLE_GFXSTREAM_SPEC_VERSION"/>
+                <enum value="386"                                           name="VK_GOOGLE_GFXSTREAM_NUMBER"/>
+                <enum value="&quot;VK_GOOGLE_gfxstream&quot;"               name="VK_GOOGLE_GFXSTREAM_EXTENSION_NAME"/>
+                <command name="vkMapMemoryIntoAddressSpaceGOOGLE"/>
                 <command name="vkUpdateDescriptorSetWithTemplateSizedGOOGLE"/>
-            </require>
-        </extension>
-        <extension name="VK_GOOGLE_async_command_buffers" number="376" author="GOOGLE" contact="Lingfeng Yang @frank" supported="vulkan">
-            <require>
-                <enum value="0"                                             name="VK_GOOGLE_ASYNC_COMMAND_BUFFERS_SPEC_VERSION"/>
-                <enum value="376"                                           name="VK_GOOGLE_ASYNC_COMMAND_BUFFERS_NUMBER"/>
-                <enum value="&quot;VK_GOOGLE_async_command_buffers&quot;"            name="VK_GOOGLE_ASYNC_COMMAND_BUFFERS_EXTENSION_NAME"/>
                 <command name="vkBeginCommandBufferAsyncGOOGLE"/>
                 <command name="vkEndCommandBufferAsyncGOOGLE"/>
                 <command name="vkResetCommandBufferAsyncGOOGLE"/>
                 <command name="vkCommandBufferHostSyncGOOGLE"/>
-            </require>
-        </extension>
-        <extension name="VK_GOOGLE_create_resources_with_requirements" number="377" author="GOOGLE" contact="Lingfeng Yang @frank" supported="vulkan">
-            <require>
-                <enum value="0"                                             name="VK_GOOGLE_CREATE_RESOURCES_WITH_REQUIREMENTS"/>
-                <enum value="377"                                           name="VK_GOOGLE_CREATE_RESOURCES_WITH_REQUIREMENTS_NUMBER"/>
-                <enum value="&quot;VK_GOOGLE_create_resources_with_requirements&quot;"            name="VK_GOOGLE_CREATE_RESOURCES_WITH_REQUIREMNTS_EXTENSION_NAME"/>
                 <command name="vkCreateImageWithRequirementsGOOGLE"/>
                 <command name="vkCreateBufferWithRequirementsGOOGLE"/>
-            </require>
-        </extension>
-        <extension name="VK_GOOGLE_address_space_info" number="378" author="GOOGLE" contact="Roman Kiryanov @rkir,Lingfeng Yang @frank" supported="vulkan">
-            <require>
-                <enum value="0"                                             name="VK_GOOGLE_ADDRESS_SPACE_INFO_SPEC_VERSION"/>
-                <enum value="378"                                           name="VK_GOOGLE_ADDRESS_SPACE_INFO_NUMBER"/>
-                <enum value="&quot;VK_GOOGLE_address_space_info&quot;"           name="VK_GOOGLE_ADDRESS_SPACE_INFO_EXTENSION_NAME"/>
                 <command name="vkGetMemoryHostAddressInfoGOOGLE"/>
-            </require>
-        </extension>
-        <extension name="VK_GOOGLE_free_memory_sync" number="379" author="GOOGLE" contact="Lingfeng Yang @frank" supported="vulkan">
-            <require>
-                <enum value="0"                                             name="VK_GOOGLE_FREE_MEMORY_SYNC_SPEC_VERSION"/>
-                <enum value="379"                                           name="VK_GOOGLE_FREE_MEMORY_SYNC_NUMBER"/>
-                <enum value="&quot;VK_GOOGLE_free_memory_sync&quot;"           name="VK_GOOGLE_FREE_MEMORY_SYNC_EXTENSION_NAME"/>
                 <command name="vkFreeMemorySyncGOOGLE"/>
-            </require>
-        </extension>
-        <extension name="VK_GOOGLE_async_queue_submit" number="381" author="GOOGLE" contact="Lingfeng Yang @frank" supported="vulkan">
-            <require>
-                <enum value="0"                                             name="VK_GOOGLE_ASYNC_QUEUE_SUBMIT_SPEC_VERSION"/>
-                <enum value="381"                                           name="VK_GOOGLE_ASYNC_QUEUE_SUBMIT_NUMBER"/>
-                <enum value="&quot;VK_GOOGLE_async_queue_submit&quot;"            name="VK_GOOGLE_QUEUE_SUBMIT_EXTENSION_NAME"/>
                 <command name="vkQueueHostSyncGOOGLE"/>
                 <command name="vkQueueSubmitAsyncGOOGLE"/>
                 <command name="vkQueueWaitIdleAsyncGOOGLE"/>
                 <command name="vkQueueBindSparseAsyncGOOGLE"/>
-            </require>
-        </extension>
-        <extension name="VK_GOOGLE_linear_image_layout" number="382" author="GOOGLE" contact="Yilong Li @gnoliyil" supported="vulkan">
-            <require>
-                <enum value="0"                                             name="VK_GOOGLE_LINEAR_IMAGE_LAYOUT_SUBMIT_SPEC_VERSION"/>
-                <enum value="382"                                           name="VK_GOOGLE_LINEAR_IMAGE_LAYOUT_SUBMIT_NUMBER"/>
-                <enum value="&quot;VK_GOOGLE_linear_image_layout&quot;"     name="VK_GOOGLE_LINEAR_IMAGE_LAYOUT_SUBMIT_EXTENSION_NAME"/>
                 <command name="vkGetLinearImageLayoutGOOGLE"/>
-            </require>
-        </extension>
-        <extension name="VK_GOOGLE_queue_submit_with_commands" number="383" author="GOOGLE" contact="Lingfeng Yang @framk" supported="vulkan">
-            <require>
-                <enum value="0"                                             name="VK_GOOGLE_QUEUE_SUBMIT_WITH_COMMANDS_SPEC_VERSION"/>
-                <enum value="383"                                           name="VK_GOOGLE_QUEUE_SUBMIT_WITH_COMMANDS_NUMBER"/>
-                <enum value="&quot;VK_GOOGLE_queue_submit_with_commands&quot;"            name="VK_GOOGLE_QUEUE_SUBMIT_WITH_COMMANDS_EXTENSION_NAME"/>
                 <command name="vkQueueFlushCommandsGOOGLE"/>
             </require>
         </extension>

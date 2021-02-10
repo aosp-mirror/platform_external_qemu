@@ -3968,7 +3968,7 @@ public:
         uint32_t queueFamilyIndex,
         IDirectFB* dfb);
 #endif
-#ifdef VK_GOOGLE_address_space
+#ifdef VK_GOOGLE_gfxstream
     void vkMapMemoryIntoAddressSpaceGOOGLE(
     const uint8_t* snapshotTraceBegin,
         size_t snapshotTraceBytes,
@@ -3977,8 +3977,6 @@ public:
         VkDevice device,
         VkDeviceMemory memory,
         uint64_t* pAddress);
-#endif
-#ifdef VK_GOOGLE_sized_descriptor_update_template
     void vkUpdateDescriptorSetWithTemplateSizedGOOGLE(
     const uint8_t* snapshotTraceBegin,
         size_t snapshotTraceBytes,
@@ -3995,8 +3993,6 @@ public:
         const VkDescriptorImageInfo* pImageInfos,
         const VkDescriptorBufferInfo* pBufferInfos,
         const VkBufferView* pBufferViews);
-#endif
-#ifdef VK_GOOGLE_async_command_buffers
     void vkBeginCommandBufferAsyncGOOGLE(
     const uint8_t* snapshotTraceBegin,
         size_t snapshotTraceBytes,
@@ -4021,8 +4017,6 @@ public:
         VkCommandBuffer commandBuffer,
         uint32_t needHostSync,
         uint32_t sequenceNumber);
-#endif
-#ifdef VK_GOOGLE_create_resources_with_requirements
     void vkCreateImageWithRequirementsGOOGLE(
     const uint8_t* snapshotTraceBegin,
         size_t snapshotTraceBytes,
@@ -4043,8 +4037,6 @@ public:
         const VkAllocationCallbacks* pAllocator,
         VkBuffer* pBuffer,
         VkMemoryRequirements* pMemoryRequirements);
-#endif
-#ifdef VK_GOOGLE_address_space_info
     void vkGetMemoryHostAddressInfoGOOGLE(
     const uint8_t* snapshotTraceBegin,
         size_t snapshotTraceBytes,
@@ -4055,8 +4047,6 @@ public:
         uint64_t* pAddress,
         uint64_t* pSize,
         uint64_t* pHostmemId);
-#endif
-#ifdef VK_GOOGLE_free_memory_sync
     void vkFreeMemorySyncGOOGLE(
     const uint8_t* snapshotTraceBegin,
         size_t snapshotTraceBytes,
@@ -4065,8 +4055,6 @@ public:
         VkDevice device,
         VkDeviceMemory memory,
         const VkAllocationCallbacks* pAllocator);
-#endif
-#ifdef VK_GOOGLE_async_queue_submit
     void vkQueueHostSyncGOOGLE(
     const uint8_t* snapshotTraceBegin,
         size_t snapshotTraceBytes,
@@ -4095,8 +4083,6 @@ public:
         uint32_t bindInfoCount,
         const VkBindSparseInfo* pBindInfo,
         VkFence fence);
-#endif
-#ifdef VK_GOOGLE_linear_image_layout
     void vkGetLinearImageLayoutGOOGLE(
     const uint8_t* snapshotTraceBegin,
         size_t snapshotTraceBytes,
@@ -4105,8 +4091,6 @@ public:
         VkFormat format,
         VkDeviceSize* pOffset,
         VkDeviceSize* pRowPitchAlignment);
-#endif
-#ifdef VK_GOOGLE_queue_submit_with_commands
     void vkQueueFlushCommandsGOOGLE(
     const uint8_t* snapshotTraceBegin,
         size_t snapshotTraceBytes,

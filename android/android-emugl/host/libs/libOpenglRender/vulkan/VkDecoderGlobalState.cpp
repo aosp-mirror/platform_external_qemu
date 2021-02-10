@@ -6758,7 +6758,7 @@ VkResult VkDecoderGlobalState::on_vkQueueSignalReleaseImageANDROID(
         image, pNativeFenceFd);
 }
 
-// VK_GOOGLE_address_space
+// VK_GOOGLE_gfxstream
 VkResult VkDecoderGlobalState::on_vkMapMemoryIntoAddressSpaceGOOGLE(
     android::base::BumpPool* pool,
     VkDevice device, VkDeviceMemory memory, uint64_t* pAddress) {
@@ -6773,7 +6773,7 @@ VkResult VkDecoderGlobalState::on_vkGetMemoryHostAddressInfoGOOGLE(
         pool, device, memory, pAddress, pSize, pHostmemId);
 }
 
-// VK_GOOGLE_free_memory_sync
+// VK_GOOGLE_gfxstream
 VkResult VkDecoderGlobalState::on_vkFreeMemorySyncGOOGLE(
     android::base::BumpPool* pool,
     VkDevice device,

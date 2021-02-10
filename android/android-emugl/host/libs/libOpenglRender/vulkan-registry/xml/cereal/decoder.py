@@ -627,10 +627,8 @@ custom_decodes = {
     "vkImportSemaphoreFdKHR" : emit_global_state_wrapped_decoding,
     "vkDestroySemaphore" : emit_global_state_wrapped_decoding,
 
-    # VK_GOOGLE_free_memory_sync
+    # VK_GOOGLE_gfxstream
     "vkFreeMemorySyncGOOGLE" : emit_global_state_wrapped_decoding,
-
-    # VK_GOOGLE_address_space
     "vkMapMemoryIntoAddressSpaceGOOGLE" : emit_global_state_wrapped_decoding,
     "vkGetMemoryHostAddressInfoGOOGLE" : emit_global_state_wrapped_decoding,
 
@@ -645,25 +643,18 @@ custom_decodes = {
     "vkDestroyDescriptorUpdateTemplateKHR" : emit_global_state_wrapped_decoding,
     "vkUpdateDescriptorSetWithTemplateSizedGOOGLE" : emit_global_state_wrapped_decoding,
 
-    # VK_GOOGLE_async_command_buffer
+    # VK_GOOGLE_gfxstream
     "vkBeginCommandBufferAsyncGOOGLE" : emit_global_state_wrapped_decoding,
     "vkEndCommandBufferAsyncGOOGLE" : emit_global_state_wrapped_decoding,
     "vkResetCommandBufferAsyncGOOGLE" : emit_global_state_wrapped_decoding,
     "vkCommandBufferHostSyncGOOGLE" : emit_global_state_wrapped_decoding,
-
-    # VK_GOOGLE_create_resources_with_requirements
     "vkCreateImageWithRequirementsGOOGLE" : emit_global_state_wrapped_decoding,
     "vkCreateBufferWithRequirementsGOOGLE" : emit_global_state_wrapped_decoding,
-
-    # VK_GOOGLE_async_queue_submit
     "vkQueueHostSyncGOOGLE" : emit_global_state_wrapped_decoding,
     "vkQueueSubmitAsyncGOOGLE" : emit_global_state_wrapped_decoding,
     "vkQueueWaitIdleAsyncGOOGLE" : emit_global_state_wrapped_decoding,
     "vkQueueBindSparseAsyncGOOGLE" : emit_global_state_wrapped_decoding,
-
     "vkGetLinearImageLayoutGOOGLE" : emit_global_state_wrapped_decoding,
-
-    # VK_GOOGLE_queue_submit_with_commands
     "vkQueueFlushCommandsGOOGLE" : emit_global_state_wrapped_decoding,
 }
 
