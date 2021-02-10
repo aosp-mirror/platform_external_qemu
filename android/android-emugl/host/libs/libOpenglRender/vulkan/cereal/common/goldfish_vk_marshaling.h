@@ -5838,38 +5838,22 @@ void unmarshal_VkDirectFBSurfaceCreateInfoEXT(
 #define OP_vkCreateDirectFBSurfaceEXT 220792403
 #define OP_vkGetPhysicalDeviceDirectFBPresentationSupportEXT 285441990
 #endif
-#ifdef VK_GOOGLE_address_space
+#ifdef VK_GOOGLE_gfxstream
 #define OP_vkMapMemoryIntoAddressSpaceGOOGLE 20317
-#endif
-#ifdef VK_GOOGLE_sized_descriptor_update_template
 #define OP_vkUpdateDescriptorSetWithTemplateSizedGOOGLE 20320
-#endif
-#ifdef VK_GOOGLE_async_command_buffers
 #define OP_vkBeginCommandBufferAsyncGOOGLE 20321
 #define OP_vkEndCommandBufferAsyncGOOGLE 20322
 #define OP_vkResetCommandBufferAsyncGOOGLE 20323
 #define OP_vkCommandBufferHostSyncGOOGLE 20324
-#endif
-#ifdef VK_GOOGLE_create_resources_with_requirements
 #define OP_vkCreateImageWithRequirementsGOOGLE 20325
 #define OP_vkCreateBufferWithRequirementsGOOGLE 20326
-#endif
-#ifdef VK_GOOGLE_address_space_info
 #define OP_vkGetMemoryHostAddressInfoGOOGLE 20327
-#endif
-#ifdef VK_GOOGLE_free_memory_sync
 #define OP_vkFreeMemorySyncGOOGLE 20328
-#endif
-#ifdef VK_GOOGLE_async_queue_submit
 #define OP_vkQueueHostSyncGOOGLE 20329
 #define OP_vkQueueSubmitAsyncGOOGLE 20330
 #define OP_vkQueueWaitIdleAsyncGOOGLE 20331
 #define OP_vkQueueBindSparseAsyncGOOGLE 20332
-#endif
-#ifdef VK_GOOGLE_linear_image_layout
 #define OP_vkGetLinearImageLayoutGOOGLE 20333
-#endif
-#ifdef VK_GOOGLE_queue_submit_with_commands
 #define OP_vkQueueFlushCommandsGOOGLE 20340
 #endif
 #ifdef VK_KHR_acceleration_structure

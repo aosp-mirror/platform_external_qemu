@@ -124,7 +124,7 @@ class CerealGenerator(OutputGenerator):
 
         self.host_cmake_generator = lambda cppFiles: """%s
 android_add_library(TARGET OpenglRender_vulkan_cereal LICENSE Apache-2.0 SRC %s)
-target_compile_definitions(OpenglRender_vulkan_cereal PRIVATE -DVK_ANDROID_native_buffer -DVK_GOOGLE_address_space)
+target_compile_definitions(OpenglRender_vulkan_cereal PRIVATE -DVK_ANDROID_native_buffer -DVK_GOOGLE_gfxstream)
 android_target_compile_definitions(OpenglRender_vulkan_cereal windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
 target_link_libraries(OpenglRender_vulkan_cereal PRIVATE emugl_base)
 target_link_libraries(OpenglRender_vulkan_cereal PUBLIC android-emu-base)
