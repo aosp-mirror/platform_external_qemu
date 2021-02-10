@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0407f61a_938c7789",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan-registry/xml/vk.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 14693,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-02-10T17:26:22Z",
+      "side": 1,
+      "message": "Can this be VK_GOOGLE_gfxstream?",
+      "range": {
+        "startLine": 14693,
+        "startChar": 25,
+        "endLine": 14693,
+        "endChar": 51
+      },
+      "revId": "4222f4b9f19bd5a439bdb6785227d5849b5c7286",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
