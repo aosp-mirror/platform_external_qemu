@@ -70,6 +70,30 @@
       },
       "revId": "cd009227b107efb3b1876a4e76a8fa6bc3694bbc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "35f0e7fd_613d37e0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2021-02-10T23:58:50Z",
+      "side": 1,
+      "message": "That won\u0027t. My impression was the renaming code is in the UI part which does not have direct impact on the underlying snapshot, but I would need to double check to confirm.\n\nThe key is a snapshot ID if you save/load snapshot from command line, or if you boot the emulator with snapshot parameters. There is a snapshot directory and the directories have the same name with this key. But I would not recommend you to directly operate on the directory. The reason is the directory only contains the RAM, GPU and some metadata of the snapshot. But the disk snapshots are in elsewhere (encoded in those big qcow2 files).\n\nDo you want to delete snapshots or do something funny with them? If so, we probably need another meeting to discuss a more appropriate API.",
+      "parentUuid": "7d7f4440_8cb0d6a3",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 13
+      },
+      "revId": "cd009227b107efb3b1876a4e76a8fa6bc3694bbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
