@@ -22,6 +22,30 @@
       },
       "revId": "cd009227b107efb3b1876a4e76a8fa6bc3694bbc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "37e5c00d_f5df1383",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2021-02-10T23:44:31Z",
+      "side": 1,
+      "message": "Juan, this is the key that would be accepted if you call \"adb emu avd snapshot load/save snapshot_name\" or \"./emulator @avd -snapshot snapshot_name\".",
+      "parentUuid": "e813335e_d8fa221f",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 13
+      },
+      "revId": "cd009227b107efb3b1876a4e76a8fa6bc3694bbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
