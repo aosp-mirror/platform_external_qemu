@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b9823902_45c27d19",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2021-02-10T09:37:24Z",
+      "side": 1,
+      "message": "Ready for review.\n\nWe need to land aosp/1581172 aosp/1582869 aosp/1579624 before submitting this change.",
+      "revId": "1e1db8fb25d5a4336a3970e2f611560be1c9eaa4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
