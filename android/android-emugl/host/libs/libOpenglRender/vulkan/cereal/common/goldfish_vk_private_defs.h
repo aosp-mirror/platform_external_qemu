@@ -247,6 +247,8 @@ typedef VkPhysicalDeviceShaderFloat16Int8Features VkPhysicalDeviceShaderFloat16I
 typedef VkPhysicalDeviceShaderFloat16Int8Features VkPhysicalDeviceFloat16Int8FeaturesKHR;
 #endif  // VK_KHR_shader_float16_int8
 
+#define VK_GOOGLE_gfxstream 1
+
 #define VK_GOOGLE_async_queue_submit 1
 
 typedef void (VKAPI_PTR *PFN_vkQueueHostSyncGOOGLE)(

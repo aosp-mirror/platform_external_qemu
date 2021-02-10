@@ -5785,6 +5785,7 @@ void transform_tohost_VkDeviceMemoryOpaqueCaptureAddressInfo(
 {
     (void)resourceTracker;
     (void)toTransform;
+    resourceTracker->deviceMemoryTransform_tohost((VkDeviceMemory*)&toTransform->memory, 1, (VkDeviceSize*)nullptr, 0, (VkDeviceSize*)nullptr, 0, (uint32_t*)nullptr, 0, (uint32_t*)nullptr, 0);
     if (toTransform->pNext)
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
@@ -5797,6 +5798,7 @@ void transform_fromhost_VkDeviceMemoryOpaqueCaptureAddressInfo(
 {
     (void)resourceTracker;
     (void)toTransform;
+    resourceTracker->deviceMemoryTransform_fromhost((VkDeviceMemory*)&toTransform->memory, 1, (VkDeviceSize*)nullptr, 0, (VkDeviceSize*)nullptr, 0, (uint32_t*)nullptr, 0, (uint32_t*)nullptr, 0);
     if (toTransform->pNext)
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
@@ -11279,6 +11281,7 @@ void transform_tohost_VkBindAccelerationStructureMemoryInfoNV(
 {
     (void)resourceTracker;
     (void)toTransform;
+    resourceTracker->deviceMemoryTransform_tohost((VkDeviceMemory*)&toTransform->memory, 1, (VkDeviceSize*)&toTransform->memoryOffset, 1, (VkDeviceSize*)nullptr, 0, (uint32_t*)nullptr, 0, (uint32_t*)nullptr, 0);
     if (toTransform->pNext)
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
@@ -11291,6 +11294,7 @@ void transform_fromhost_VkBindAccelerationStructureMemoryInfoNV(
 {
     (void)resourceTracker;
     (void)toTransform;
+    resourceTracker->deviceMemoryTransform_fromhost((VkDeviceMemory*)&toTransform->memory, 1, (VkDeviceSize*)&toTransform->memoryOffset, 1, (VkDeviceSize*)nullptr, 0, (uint32_t*)nullptr, 0, (uint32_t*)nullptr, 0);
     if (toTransform->pNext)
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
@@ -14466,23 +14470,7 @@ void transform_fromhost_VkDirectFBSurfaceCreateInfoEXT(
 }
 
 #endif
-#ifdef VK_GOOGLE_address_space
-#endif
-#ifdef VK_GOOGLE_sized_descriptor_update_template
-#endif
-#ifdef VK_GOOGLE_async_command_buffers
-#endif
-#ifdef VK_GOOGLE_create_resources_with_requirements
-#endif
-#ifdef VK_GOOGLE_address_space_info
-#endif
-#ifdef VK_GOOGLE_free_memory_sync
-#endif
-#ifdef VK_GOOGLE_async_queue_submit
-#endif
-#ifdef VK_GOOGLE_linear_image_layout
-#endif
-#ifdef VK_GOOGLE_queue_submit_with_commands
+#ifdef VK_GOOGLE_gfxstream
 #endif
 #ifdef VK_KHR_acceleration_structure
 void transform_tohost_VkDeviceOrHostAddressKHR(
