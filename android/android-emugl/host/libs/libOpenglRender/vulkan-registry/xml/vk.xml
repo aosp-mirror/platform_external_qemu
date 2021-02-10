@@ -3864,8 +3864,8 @@ typedef void <name>CAMetalLayer</name>;
             <member values="VK_STRUCTURE_TYPE_BIND_ACCELERATION_STRUCTURE_MEMORY_INFO_NV"><type>VkStructureType</type> <name>sType</name></member>
             <member optional="true">const <type>void</type>*     <name>pNext</name></member>
             <member><type>VkAccelerationStructureNV</type>       <name>accelerationStructure</name></member>
-            <member><type>VkDeviceMemory</type>                   <name>memory</name></member>
-            <member><type>VkDeviceSize</type>                     <name>memoryOffset</name></member>
+            <member devicememoryhandle="1"><type>VkDeviceMemory</type>                   <name>memory</name></member>
+            <member devicememoryoffset="1"><type>VkDeviceSize</type>                     <name>memoryOffset</name></member>
             <member optional="true"><type>uint32_t</type>         <name>deviceIndexCount</name></member>
             <member len="deviceIndexCount">const <type>uint32_t</type>*  <name>pDeviceIndices</name></member>
         </type>
@@ -4501,7 +4501,7 @@ typedef void <name>CAMetalLayer</name>;
         <type category="struct" name="VkDeviceMemoryOpaqueCaptureAddressInfo">
             <member values="VK_STRUCTURE_TYPE_DEVICE_MEMORY_OPAQUE_CAPTURE_ADDRESS_INFO"><type>VkStructureType</type> <name>sType</name></member>
             <member optional="true">const <type>void</type>*                      <name>pNext</name></member>
-            <member><type>VkDeviceMemory</type>                   <name>memory</name></member>
+            <member devicememoryhandle="1"><type>VkDeviceMemory</type>                   <name>memory</name></member>
         </type>
         <type category="struct" name="VkDeviceMemoryOpaqueCaptureAddressInfoKHR"               alias="VkDeviceMemoryOpaqueCaptureAddressInfo"/>
         <type category="struct" name="VkPhysicalDeviceLineRasterizationFeaturesEXT" structextends="VkPhysicalDeviceFeatures2,VkDeviceCreateInfo">
