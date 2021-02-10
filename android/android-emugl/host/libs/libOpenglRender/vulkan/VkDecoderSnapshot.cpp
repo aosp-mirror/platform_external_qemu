@@ -101,8 +101,11 @@ void vkEnumeratePhysicalDevices(
     auto apiHandle = mReconstruction.createApiInfo();
     auto apiInfo = mReconstruction.getApiInfo(apiHandle);
     mReconstruction.setApiTrace(apiInfo, OP_vkEnumeratePhysicalDevices, snapshotTraceBegin, snapshotTraceBytes);
-    mReconstruction.forEachHandleAddApi((const uint64_t*)pPhysicalDevices, (*(pPhysicalDeviceCount)), apiHandle);
-    mReconstruction.setCreatedHandlesForApi(apiHandle, (const uint64_t*)pPhysicalDevices, (*(pPhysicalDeviceCount)));
+    if ((pPhysicalDeviceCount) != nullptr)
+    {
+        mReconstruction.forEachHandleAddApi((const uint64_t*)pPhysicalDevices, (*(pPhysicalDeviceCount)), apiHandle);
+        mReconstruction.setCreatedHandlesForApi(apiHandle, (const uint64_t*)pPhysicalDevices, (*(pPhysicalDeviceCount)));
+    }
 }
 void vkGetPhysicalDeviceFeatures(
     const uint8_t* snapshotTraceBegin,

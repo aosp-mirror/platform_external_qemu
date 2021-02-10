@@ -1129,9 +1129,12 @@ void marshal_VkDeviceCreateInfo(
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((VkDeviceCreateFlags*)&forMarshaling->flags, sizeof(VkDeviceCreateFlags));
     vkStream->write((uint32_t*)&forMarshaling->queueCreateInfoCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->queueCreateInfoCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkDeviceQueueCreateInfo(vkStream, (const VkDeviceQueueCreateInfo*)(forMarshaling->pQueueCreateInfos + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->queueCreateInfoCount; ++i)
+        {
+            marshal_VkDeviceQueueCreateInfo(vkStream, (const VkDeviceQueueCreateInfo*)(forMarshaling->pQueueCreateInfos + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->enabledLayerCount, sizeof(uint32_t));
     saveStringArray(vkStream, forMarshaling->ppEnabledLayerNames, forMarshaling->enabledLayerCount);
@@ -1166,9 +1169,12 @@ void unmarshal_VkDeviceCreateInfo(
     vkStream->read((VkDeviceCreateFlags*)&forUnmarshaling->flags, sizeof(VkDeviceCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->queueCreateInfoCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pQueueCreateInfos, forUnmarshaling->queueCreateInfoCount * sizeof(const VkDeviceQueueCreateInfo));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->queueCreateInfoCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkDeviceQueueCreateInfo(vkStream, (VkDeviceQueueCreateInfo*)(forUnmarshaling->pQueueCreateInfos + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->queueCreateInfoCount; ++i)
+        {
+            unmarshal_VkDeviceQueueCreateInfo(vkStream, (VkDeviceQueueCreateInfo*)(forUnmarshaling->pQueueCreateInfos + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->enabledLayerCount, sizeof(uint32_t));
     vkStream->loadStringArrayInPlace((char***)&forUnmarshaling->ppEnabledLayerNames);
@@ -1420,9 +1426,12 @@ void marshal_VkSparseBufferMemoryBindInfo(
     vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->buffer, &cgen_var_0, 1);
     vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
     vkStream->write((uint32_t*)&forMarshaling->bindCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->bindCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkSparseMemoryBind(vkStream, (const VkSparseMemoryBind*)(forMarshaling->pBinds + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->bindCount; ++i)
+        {
+            marshal_VkSparseMemoryBind(vkStream, (const VkSparseMemoryBind*)(forMarshaling->pBinds + i));
+        }
     }
 }
 
@@ -1435,9 +1444,12 @@ void unmarshal_VkSparseBufferMemoryBindInfo(
     vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_0, (VkBuffer*)&forUnmarshaling->buffer, 1);
     vkStream->read((uint32_t*)&forUnmarshaling->bindCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pBinds, forUnmarshaling->bindCount * sizeof(const VkSparseMemoryBind));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->bindCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkSparseMemoryBind(vkStream, (VkSparseMemoryBind*)(forUnmarshaling->pBinds + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->bindCount; ++i)
+        {
+            unmarshal_VkSparseMemoryBind(vkStream, (VkSparseMemoryBind*)(forUnmarshaling->pBinds + i));
+        }
     }
 }
 
@@ -1449,9 +1461,12 @@ void marshal_VkSparseImageOpaqueMemoryBindInfo(
     vkStream->handleMapping()->mapHandles_VkImage_u64(&forMarshaling->image, &cgen_var_0, 1);
     vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
     vkStream->write((uint32_t*)&forMarshaling->bindCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->bindCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkSparseMemoryBind(vkStream, (const VkSparseMemoryBind*)(forMarshaling->pBinds + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->bindCount; ++i)
+        {
+            marshal_VkSparseMemoryBind(vkStream, (const VkSparseMemoryBind*)(forMarshaling->pBinds + i));
+        }
     }
 }
 
@@ -1464,9 +1479,12 @@ void unmarshal_VkSparseImageOpaqueMemoryBindInfo(
     vkStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_0, (VkImage*)&forUnmarshaling->image, 1);
     vkStream->read((uint32_t*)&forUnmarshaling->bindCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pBinds, forUnmarshaling->bindCount * sizeof(const VkSparseMemoryBind));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->bindCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkSparseMemoryBind(vkStream, (VkSparseMemoryBind*)(forUnmarshaling->pBinds + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->bindCount; ++i)
+        {
+            unmarshal_VkSparseMemoryBind(vkStream, (VkSparseMemoryBind*)(forUnmarshaling->pBinds + i));
+        }
     }
 }
 
@@ -1524,9 +1542,12 @@ void marshal_VkSparseImageMemoryBindInfo(
     vkStream->handleMapping()->mapHandles_VkImage_u64(&forMarshaling->image, &cgen_var_0, 1);
     vkStream->write((uint64_t*)&cgen_var_0, 1 * 8);
     vkStream->write((uint32_t*)&forMarshaling->bindCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->bindCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkSparseImageMemoryBind(vkStream, (const VkSparseImageMemoryBind*)(forMarshaling->pBinds + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->bindCount; ++i)
+        {
+            marshal_VkSparseImageMemoryBind(vkStream, (const VkSparseImageMemoryBind*)(forMarshaling->pBinds + i));
+        }
     }
 }
 
@@ -1539,9 +1560,12 @@ void unmarshal_VkSparseImageMemoryBindInfo(
     vkStream->handleMapping()->mapHandles_u64_VkImage(&cgen_var_0, (VkImage*)&forUnmarshaling->image, 1);
     vkStream->read((uint32_t*)&forUnmarshaling->bindCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pBinds, forUnmarshaling->bindCount * sizeof(const VkSparseImageMemoryBind));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->bindCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkSparseImageMemoryBind(vkStream, (VkSparseImageMemoryBind*)(forUnmarshaling->pBinds + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->bindCount; ++i)
+        {
+            unmarshal_VkSparseImageMemoryBind(vkStream, (VkSparseImageMemoryBind*)(forUnmarshaling->pBinds + i));
+        }
     }
 }
 
@@ -1560,19 +1584,28 @@ void marshal_VkBindSparseInfo(
         vkStream->write((uint64_t*)cgen_var_0, forMarshaling->waitSemaphoreCount * 8);
     }
     vkStream->write((uint32_t*)&forMarshaling->bufferBindCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->bufferBindCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkSparseBufferMemoryBindInfo(vkStream, (const VkSparseBufferMemoryBindInfo*)(forMarshaling->pBufferBinds + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->bufferBindCount; ++i)
+        {
+            marshal_VkSparseBufferMemoryBindInfo(vkStream, (const VkSparseBufferMemoryBindInfo*)(forMarshaling->pBufferBinds + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->imageOpaqueBindCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->imageOpaqueBindCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkSparseImageOpaqueMemoryBindInfo(vkStream, (const VkSparseImageOpaqueMemoryBindInfo*)(forMarshaling->pImageOpaqueBinds + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->imageOpaqueBindCount; ++i)
+        {
+            marshal_VkSparseImageOpaqueMemoryBindInfo(vkStream, (const VkSparseImageOpaqueMemoryBindInfo*)(forMarshaling->pImageOpaqueBinds + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->imageBindCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->imageBindCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkSparseImageMemoryBindInfo(vkStream, (const VkSparseImageMemoryBindInfo*)(forMarshaling->pImageBinds + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->imageBindCount; ++i)
+        {
+            marshal_VkSparseImageMemoryBindInfo(vkStream, (const VkSparseImageMemoryBindInfo*)(forMarshaling->pImageBinds + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->signalSemaphoreCount, sizeof(uint32_t));
     if (forMarshaling->signalSemaphoreCount)
@@ -1612,21 +1645,30 @@ void unmarshal_VkBindSparseInfo(
     }
     vkStream->read((uint32_t*)&forUnmarshaling->bufferBindCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pBufferBinds, forUnmarshaling->bufferBindCount * sizeof(const VkSparseBufferMemoryBindInfo));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->bufferBindCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkSparseBufferMemoryBindInfo(vkStream, (VkSparseBufferMemoryBindInfo*)(forUnmarshaling->pBufferBinds + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->bufferBindCount; ++i)
+        {
+            unmarshal_VkSparseBufferMemoryBindInfo(vkStream, (VkSparseBufferMemoryBindInfo*)(forUnmarshaling->pBufferBinds + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->imageOpaqueBindCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pImageOpaqueBinds, forUnmarshaling->imageOpaqueBindCount * sizeof(const VkSparseImageOpaqueMemoryBindInfo));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->imageOpaqueBindCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkSparseImageOpaqueMemoryBindInfo(vkStream, (VkSparseImageOpaqueMemoryBindInfo*)(forUnmarshaling->pImageOpaqueBinds + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->imageOpaqueBindCount; ++i)
+        {
+            unmarshal_VkSparseImageOpaqueMemoryBindInfo(vkStream, (VkSparseImageOpaqueMemoryBindInfo*)(forUnmarshaling->pImageOpaqueBinds + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->imageBindCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pImageBinds, forUnmarshaling->imageBindCount * sizeof(const VkSparseImageMemoryBindInfo));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->imageBindCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkSparseImageMemoryBindInfo(vkStream, (VkSparseImageMemoryBindInfo*)(forUnmarshaling->pImageBinds + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->imageBindCount; ++i)
+        {
+            unmarshal_VkSparseImageMemoryBindInfo(vkStream, (VkSparseImageMemoryBindInfo*)(forUnmarshaling->pImageBinds + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->signalSemaphoreCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pSignalSemaphores, forUnmarshaling->signalSemaphoreCount * sizeof(const VkSemaphore));
@@ -2137,9 +2179,12 @@ void marshal_VkSpecializationInfo(
     const VkSpecializationInfo* forMarshaling)
 {
     vkStream->write((uint32_t*)&forMarshaling->mapEntryCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->mapEntryCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkSpecializationMapEntry(vkStream, (const VkSpecializationMapEntry*)(forMarshaling->pMapEntries + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->mapEntryCount; ++i)
+        {
+            marshal_VkSpecializationMapEntry(vkStream, (const VkSpecializationMapEntry*)(forMarshaling->pMapEntries + i));
+        }
     }
     uint64_t cgen_var_0 = (uint64_t)forMarshaling->dataSize;
     vkStream->putBe64(cgen_var_0);
@@ -2152,9 +2197,12 @@ void unmarshal_VkSpecializationInfo(
 {
     vkStream->read((uint32_t*)&forUnmarshaling->mapEntryCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pMapEntries, forUnmarshaling->mapEntryCount * sizeof(const VkSpecializationMapEntry));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->mapEntryCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkSpecializationMapEntry(vkStream, (VkSpecializationMapEntry*)(forUnmarshaling->pMapEntries + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->mapEntryCount; ++i)
+        {
+            unmarshal_VkSpecializationMapEntry(vkStream, (VkSpecializationMapEntry*)(forUnmarshaling->pMapEntries + i));
+        }
     }
     forUnmarshaling->dataSize = (size_t)vkStream->getBe64();
     vkStream->alloc((void**)&forUnmarshaling->pData, forUnmarshaling->dataSize * sizeof(const uint8_t));
@@ -2305,14 +2353,20 @@ void marshal_VkPipelineVertexInputStateCreateInfo(
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((VkPipelineVertexInputStateCreateFlags*)&forMarshaling->flags, sizeof(VkPipelineVertexInputStateCreateFlags));
     vkStream->write((uint32_t*)&forMarshaling->vertexBindingDescriptionCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->vertexBindingDescriptionCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkVertexInputBindingDescription(vkStream, (const VkVertexInputBindingDescription*)(forMarshaling->pVertexBindingDescriptions + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->vertexBindingDescriptionCount; ++i)
+        {
+            marshal_VkVertexInputBindingDescription(vkStream, (const VkVertexInputBindingDescription*)(forMarshaling->pVertexBindingDescriptions + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->vertexAttributeDescriptionCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->vertexAttributeDescriptionCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkVertexInputAttributeDescription(vkStream, (const VkVertexInputAttributeDescription*)(forMarshaling->pVertexAttributeDescriptions + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->vertexAttributeDescriptionCount; ++i)
+        {
+            marshal_VkVertexInputAttributeDescription(vkStream, (const VkVertexInputAttributeDescription*)(forMarshaling->pVertexAttributeDescriptions + i));
+        }
     }
 }
 
@@ -2336,15 +2390,21 @@ void unmarshal_VkPipelineVertexInputStateCreateInfo(
     vkStream->read((VkPipelineVertexInputStateCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineVertexInputStateCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->vertexBindingDescriptionCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pVertexBindingDescriptions, forUnmarshaling->vertexBindingDescriptionCount * sizeof(const VkVertexInputBindingDescription));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->vertexBindingDescriptionCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkVertexInputBindingDescription(vkStream, (VkVertexInputBindingDescription*)(forUnmarshaling->pVertexBindingDescriptions + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->vertexBindingDescriptionCount; ++i)
+        {
+            unmarshal_VkVertexInputBindingDescription(vkStream, (VkVertexInputBindingDescription*)(forUnmarshaling->pVertexBindingDescriptions + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->vertexAttributeDescriptionCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pVertexAttributeDescriptions, forUnmarshaling->vertexAttributeDescriptionCount * sizeof(const VkVertexInputAttributeDescription));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->vertexAttributeDescriptionCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkVertexInputAttributeDescription(vkStream, (VkVertexInputAttributeDescription*)(forUnmarshaling->pVertexAttributeDescriptions + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->vertexAttributeDescriptionCount; ++i)
+        {
+            unmarshal_VkVertexInputAttributeDescription(vkStream, (VkVertexInputAttributeDescription*)(forUnmarshaling->pVertexAttributeDescriptions + i));
+        }
     }
 }
 
@@ -2449,9 +2509,12 @@ void marshal_VkPipelineViewportStateCreateInfo(
     vkStream->putBe64(cgen_var_0);
     if (forMarshaling->pViewports)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->viewportCount; ++i)
+        if ((forMarshaling) != nullptr)
         {
-            marshal_VkViewport(vkStream, (const VkViewport*)(forMarshaling->pViewports + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->viewportCount; ++i)
+            {
+                marshal_VkViewport(vkStream, (const VkViewport*)(forMarshaling->pViewports + i));
+            }
         }
     }
     vkStream->write((uint32_t*)&forMarshaling->scissorCount, sizeof(uint32_t));
@@ -2460,9 +2523,12 @@ void marshal_VkPipelineViewportStateCreateInfo(
     vkStream->putBe64(cgen_var_1);
     if (forMarshaling->pScissors)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->scissorCount; ++i)
+        if ((forMarshaling) != nullptr)
         {
-            marshal_VkRect2D(vkStream, (const VkRect2D*)(forMarshaling->pScissors + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->scissorCount; ++i)
+            {
+                marshal_VkRect2D(vkStream, (const VkRect2D*)(forMarshaling->pScissors + i));
+            }
         }
     }
 }
@@ -2491,9 +2557,12 @@ void unmarshal_VkPipelineViewportStateCreateInfo(
     if (forUnmarshaling->pViewports)
     {
         vkStream->alloc((void**)&forUnmarshaling->pViewports, forUnmarshaling->viewportCount * sizeof(const VkViewport));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->viewportCount; ++i)
+        if ((forUnmarshaling) != nullptr)
         {
-            unmarshal_VkViewport(vkStream, (VkViewport*)(forUnmarshaling->pViewports + i));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->viewportCount; ++i)
+            {
+                unmarshal_VkViewport(vkStream, (VkViewport*)(forUnmarshaling->pViewports + i));
+            }
         }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->scissorCount, sizeof(uint32_t));
@@ -2502,9 +2571,12 @@ void unmarshal_VkPipelineViewportStateCreateInfo(
     if (forUnmarshaling->pScissors)
     {
         vkStream->alloc((void**)&forUnmarshaling->pScissors, forUnmarshaling->scissorCount * sizeof(const VkRect2D));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->scissorCount; ++i)
+        if ((forUnmarshaling) != nullptr)
         {
-            unmarshal_VkRect2D(vkStream, (VkRect2D*)(forUnmarshaling->pScissors + i));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->scissorCount; ++i)
+            {
+                unmarshal_VkRect2D(vkStream, (VkRect2D*)(forUnmarshaling->pScissors + i));
+            }
         }
     }
 }
@@ -2722,9 +2794,12 @@ void marshal_VkPipelineColorBlendStateCreateInfo(
     vkStream->write((VkBool32*)&forMarshaling->logicOpEnable, sizeof(VkBool32));
     vkStream->write((VkLogicOp*)&forMarshaling->logicOp, sizeof(VkLogicOp));
     vkStream->write((uint32_t*)&forMarshaling->attachmentCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->attachmentCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkPipelineColorBlendAttachmentState(vkStream, (const VkPipelineColorBlendAttachmentState*)(forMarshaling->pAttachments + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->attachmentCount; ++i)
+        {
+            marshal_VkPipelineColorBlendAttachmentState(vkStream, (const VkPipelineColorBlendAttachmentState*)(forMarshaling->pAttachments + i));
+        }
     }
     vkStream->write((float*)forMarshaling->blendConstants, 4 * sizeof(float));
 }
@@ -2751,9 +2826,12 @@ void unmarshal_VkPipelineColorBlendStateCreateInfo(
     vkStream->read((VkLogicOp*)&forUnmarshaling->logicOp, sizeof(VkLogicOp));
     vkStream->read((uint32_t*)&forUnmarshaling->attachmentCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pAttachments, forUnmarshaling->attachmentCount * sizeof(const VkPipelineColorBlendAttachmentState));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->attachmentCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkPipelineColorBlendAttachmentState(vkStream, (VkPipelineColorBlendAttachmentState*)(forUnmarshaling->pAttachments + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->attachmentCount; ++i)
+        {
+            unmarshal_VkPipelineColorBlendAttachmentState(vkStream, (VkPipelineColorBlendAttachmentState*)(forUnmarshaling->pAttachments + i));
+        }
     }
     vkStream->read((float*)forUnmarshaling->blendConstants, 4 * sizeof(float));
 }
@@ -2814,9 +2892,12 @@ void marshal_VkGraphicsPipelineCreateInfo(
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((VkPipelineCreateFlags*)&forMarshaling->flags, sizeof(VkPipelineCreateFlags));
     vkStream->write((uint32_t*)&forMarshaling->stageCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->stageCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkPipelineShaderStageCreateInfo(vkStream, (const VkPipelineShaderStageCreateInfo*)(forMarshaling->pStages + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->stageCount; ++i)
+        {
+            marshal_VkPipelineShaderStageCreateInfo(vkStream, (const VkPipelineShaderStageCreateInfo*)(forMarshaling->pStages + i));
+        }
     }
     // WARNING PTR CHECK
     if (vkStream->getFeatureBits() & VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT)
@@ -2948,9 +3029,12 @@ void unmarshal_VkGraphicsPipelineCreateInfo(
     vkStream->read((VkPipelineCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->stageCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pStages, forUnmarshaling->stageCount * sizeof(const VkPipelineShaderStageCreateInfo));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->stageCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkPipelineShaderStageCreateInfo(vkStream, (VkPipelineShaderStageCreateInfo*)(forUnmarshaling->pStages + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->stageCount; ++i)
+        {
+            unmarshal_VkPipelineShaderStageCreateInfo(vkStream, (VkPipelineShaderStageCreateInfo*)(forUnmarshaling->pStages + i));
+        }
     }
     // WARNING PTR CHECK
     if (vkStream->getFeatureBits() & VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT)
@@ -3106,9 +3190,12 @@ void marshal_VkPipelineLayoutCreateInfo(
         vkStream->write((uint64_t*)cgen_var_0, forMarshaling->setLayoutCount * 8);
     }
     vkStream->write((uint32_t*)&forMarshaling->pushConstantRangeCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->pushConstantRangeCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkPushConstantRange(vkStream, (const VkPushConstantRange*)(forMarshaling->pPushConstantRanges + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->pushConstantRangeCount; ++i)
+        {
+            marshal_VkPushConstantRange(vkStream, (const VkPushConstantRange*)(forMarshaling->pPushConstantRanges + i));
+        }
     }
 }
 
@@ -3141,9 +3228,12 @@ void unmarshal_VkPipelineLayoutCreateInfo(
     }
     vkStream->read((uint32_t*)&forUnmarshaling->pushConstantRangeCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pPushConstantRanges, forUnmarshaling->pushConstantRangeCount * sizeof(const VkPushConstantRange));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->pushConstantRangeCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkPushConstantRange(vkStream, (VkPushConstantRange*)(forUnmarshaling->pPushConstantRanges + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->pushConstantRangeCount; ++i)
+        {
+            unmarshal_VkPushConstantRange(vkStream, (VkPushConstantRange*)(forUnmarshaling->pPushConstantRanges + i));
+        }
     }
 }
 
@@ -3328,9 +3418,12 @@ void marshal_VkDescriptorPoolCreateInfo(
     vkStream->write((VkDescriptorPoolCreateFlags*)&forMarshaling->flags, sizeof(VkDescriptorPoolCreateFlags));
     vkStream->write((uint32_t*)&forMarshaling->maxSets, sizeof(uint32_t));
     vkStream->write((uint32_t*)&forMarshaling->poolSizeCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->poolSizeCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkDescriptorPoolSize(vkStream, (const VkDescriptorPoolSize*)(forMarshaling->pPoolSizes + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->poolSizeCount; ++i)
+        {
+            marshal_VkDescriptorPoolSize(vkStream, (const VkDescriptorPoolSize*)(forMarshaling->pPoolSizes + i));
+        }
     }
 }
 
@@ -3355,9 +3448,12 @@ void unmarshal_VkDescriptorPoolCreateInfo(
     vkStream->read((uint32_t*)&forUnmarshaling->maxSets, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->poolSizeCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pPoolSizes, forUnmarshaling->poolSizeCount * sizeof(const VkDescriptorPoolSize));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->poolSizeCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkDescriptorPoolSize(vkStream, (VkDescriptorPoolSize*)(forUnmarshaling->pPoolSizes + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->poolSizeCount; ++i)
+        {
+            unmarshal_VkDescriptorPoolSize(vkStream, (VkDescriptorPoolSize*)(forUnmarshaling->pPoolSizes + i));
+        }
     }
 }
 
@@ -3465,9 +3561,12 @@ void marshal_VkDescriptorSetLayoutCreateInfo(
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((VkDescriptorSetLayoutCreateFlags*)&forMarshaling->flags, sizeof(VkDescriptorSetLayoutCreateFlags));
     vkStream->write((uint32_t*)&forMarshaling->bindingCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->bindingCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkDescriptorSetLayoutBinding(vkStream, (const VkDescriptorSetLayoutBinding*)(forMarshaling->pBindings + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->bindingCount; ++i)
+        {
+            marshal_VkDescriptorSetLayoutBinding(vkStream, (const VkDescriptorSetLayoutBinding*)(forMarshaling->pBindings + i));
+        }
     }
 }
 
@@ -3491,9 +3590,12 @@ void unmarshal_VkDescriptorSetLayoutCreateInfo(
     vkStream->read((VkDescriptorSetLayoutCreateFlags*)&forUnmarshaling->flags, sizeof(VkDescriptorSetLayoutCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->bindingCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pBindings, forUnmarshaling->bindingCount * sizeof(const VkDescriptorSetLayoutBinding));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->bindingCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkDescriptorSetLayoutBinding(vkStream, (VkDescriptorSetLayoutBinding*)(forUnmarshaling->pBindings + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->bindingCount; ++i)
+        {
+            unmarshal_VkDescriptorSetLayoutBinding(vkStream, (VkDescriptorSetLayoutBinding*)(forUnmarshaling->pBindings + i));
+        }
     }
 }
 
@@ -3517,9 +3619,12 @@ void marshal_VkWriteDescriptorSet(
     {
         if ((!(vkStream->getFeatureBits() & VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT) || ((VK_DESCRIPTOR_TYPE_SAMPLER == forMarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER == forMarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE == forMarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_STORAGE_IMAGE == forMarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT == forMarshaling->descriptorType))))
         {
-            for (uint32_t i = 0; i < (uint32_t)forMarshaling->descriptorCount; ++i)
+            if ((forMarshaling) != nullptr)
             {
-                marshal_VkDescriptorImageInfo(vkStream, (const VkDescriptorImageInfo*)(forMarshaling->pImageInfo + i));
+                for (uint32_t i = 0; i < (uint32_t)forMarshaling->descriptorCount; ++i)
+                {
+                    marshal_VkDescriptorImageInfo(vkStream, (const VkDescriptorImageInfo*)(forMarshaling->pImageInfo + i));
+                }
             }
         }
     }
@@ -3530,9 +3635,12 @@ void marshal_VkWriteDescriptorSet(
     {
         if ((!(vkStream->getFeatureBits() & VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT) || ((VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER == forMarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC == forMarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_STORAGE_BUFFER == forMarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC == forMarshaling->descriptorType))))
         {
-            for (uint32_t i = 0; i < (uint32_t)forMarshaling->descriptorCount; ++i)
+            if ((forMarshaling) != nullptr)
             {
-                marshal_VkDescriptorBufferInfo(vkStream, (const VkDescriptorBufferInfo*)(forMarshaling->pBufferInfo + i));
+                for (uint32_t i = 0; i < (uint32_t)forMarshaling->descriptorCount; ++i)
+                {
+                    marshal_VkDescriptorBufferInfo(vkStream, (const VkDescriptorBufferInfo*)(forMarshaling->pBufferInfo + i));
+                }
             }
         }
     }
@@ -3585,9 +3693,12 @@ void unmarshal_VkWriteDescriptorSet(
         if ((!(vkStream->getFeatureBits() & VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT) || ((VK_DESCRIPTOR_TYPE_SAMPLER == forUnmarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER == forUnmarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE == forUnmarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_STORAGE_IMAGE == forUnmarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT == forUnmarshaling->descriptorType))))
         {
             vkStream->alloc((void**)&forUnmarshaling->pImageInfo, forUnmarshaling->descriptorCount * sizeof(const VkDescriptorImageInfo));
-            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->descriptorCount; ++i)
+            if ((forUnmarshaling) != nullptr)
             {
-                unmarshal_VkDescriptorImageInfo(vkStream, (VkDescriptorImageInfo*)(forUnmarshaling->pImageInfo + i));
+                for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->descriptorCount; ++i)
+                {
+                    unmarshal_VkDescriptorImageInfo(vkStream, (VkDescriptorImageInfo*)(forUnmarshaling->pImageInfo + i));
+                }
             }
         }
         else
@@ -3602,9 +3713,12 @@ void unmarshal_VkWriteDescriptorSet(
         if ((!(vkStream->getFeatureBits() & VULKAN_STREAM_FEATURE_IGNORED_HANDLES_BIT) || ((VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER == forUnmarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC == forUnmarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_STORAGE_BUFFER == forUnmarshaling->descriptorType) || (VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC == forUnmarshaling->descriptorType))))
         {
             vkStream->alloc((void**)&forUnmarshaling->pBufferInfo, forUnmarshaling->descriptorCount * sizeof(const VkDescriptorBufferInfo));
-            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->descriptorCount; ++i)
+            if ((forUnmarshaling) != nullptr)
             {
-                unmarshal_VkDescriptorBufferInfo(vkStream, (VkDescriptorBufferInfo*)(forUnmarshaling->pBufferInfo + i));
+                for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->descriptorCount; ++i)
+                {
+                    unmarshal_VkDescriptorBufferInfo(vkStream, (VkDescriptorBufferInfo*)(forUnmarshaling->pBufferInfo + i));
+                }
             }
         }
         else
@@ -3745,23 +3859,32 @@ void marshal_VkSubpassDescription(
     vkStream->write((VkSubpassDescriptionFlags*)&forMarshaling->flags, sizeof(VkSubpassDescriptionFlags));
     vkStream->write((VkPipelineBindPoint*)&forMarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
     vkStream->write((uint32_t*)&forMarshaling->inputAttachmentCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->inputAttachmentCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkAttachmentReference(vkStream, (const VkAttachmentReference*)(forMarshaling->pInputAttachments + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->inputAttachmentCount; ++i)
+        {
+            marshal_VkAttachmentReference(vkStream, (const VkAttachmentReference*)(forMarshaling->pInputAttachments + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->colorAttachmentCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->colorAttachmentCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkAttachmentReference(vkStream, (const VkAttachmentReference*)(forMarshaling->pColorAttachments + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->colorAttachmentCount; ++i)
+        {
+            marshal_VkAttachmentReference(vkStream, (const VkAttachmentReference*)(forMarshaling->pColorAttachments + i));
+        }
     }
     // WARNING PTR CHECK
     uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pResolveAttachments;
     vkStream->putBe64(cgen_var_0);
     if (forMarshaling->pResolveAttachments)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->colorAttachmentCount; ++i)
+        if ((forMarshaling) != nullptr)
         {
-            marshal_VkAttachmentReference(vkStream, (const VkAttachmentReference*)(forMarshaling->pResolveAttachments + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->colorAttachmentCount; ++i)
+            {
+                marshal_VkAttachmentReference(vkStream, (const VkAttachmentReference*)(forMarshaling->pResolveAttachments + i));
+            }
         }
     }
     // WARNING PTR CHECK
@@ -3783,24 +3906,33 @@ void unmarshal_VkSubpassDescription(
     vkStream->read((VkPipelineBindPoint*)&forUnmarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
     vkStream->read((uint32_t*)&forUnmarshaling->inputAttachmentCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pInputAttachments, forUnmarshaling->inputAttachmentCount * sizeof(const VkAttachmentReference));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->inputAttachmentCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkAttachmentReference(vkStream, (VkAttachmentReference*)(forUnmarshaling->pInputAttachments + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->inputAttachmentCount; ++i)
+        {
+            unmarshal_VkAttachmentReference(vkStream, (VkAttachmentReference*)(forUnmarshaling->pInputAttachments + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->colorAttachmentCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pColorAttachments, forUnmarshaling->colorAttachmentCount * sizeof(const VkAttachmentReference));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->colorAttachmentCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkAttachmentReference(vkStream, (VkAttachmentReference*)(forUnmarshaling->pColorAttachments + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->colorAttachmentCount; ++i)
+        {
+            unmarshal_VkAttachmentReference(vkStream, (VkAttachmentReference*)(forUnmarshaling->pColorAttachments + i));
+        }
     }
     // WARNING PTR CHECK
     forUnmarshaling->pResolveAttachments = (const VkAttachmentReference*)(uintptr_t)vkStream->getBe64();
     if (forUnmarshaling->pResolveAttachments)
     {
         vkStream->alloc((void**)&forUnmarshaling->pResolveAttachments, forUnmarshaling->colorAttachmentCount * sizeof(const VkAttachmentReference));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->colorAttachmentCount; ++i)
+        if ((forUnmarshaling) != nullptr)
         {
-            unmarshal_VkAttachmentReference(vkStream, (VkAttachmentReference*)(forUnmarshaling->pResolveAttachments + i));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->colorAttachmentCount; ++i)
+            {
+                unmarshal_VkAttachmentReference(vkStream, (VkAttachmentReference*)(forUnmarshaling->pResolveAttachments + i));
+            }
         }
     }
     // WARNING PTR CHECK
@@ -3849,19 +3981,28 @@ void marshal_VkRenderPassCreateInfo(
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((VkRenderPassCreateFlags*)&forMarshaling->flags, sizeof(VkRenderPassCreateFlags));
     vkStream->write((uint32_t*)&forMarshaling->attachmentCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->attachmentCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkAttachmentDescription(vkStream, (const VkAttachmentDescription*)(forMarshaling->pAttachments + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->attachmentCount; ++i)
+        {
+            marshal_VkAttachmentDescription(vkStream, (const VkAttachmentDescription*)(forMarshaling->pAttachments + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->subpassCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->subpassCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkSubpassDescription(vkStream, (const VkSubpassDescription*)(forMarshaling->pSubpasses + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->subpassCount; ++i)
+        {
+            marshal_VkSubpassDescription(vkStream, (const VkSubpassDescription*)(forMarshaling->pSubpasses + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->dependencyCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->dependencyCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkSubpassDependency(vkStream, (const VkSubpassDependency*)(forMarshaling->pDependencies + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->dependencyCount; ++i)
+        {
+            marshal_VkSubpassDependency(vkStream, (const VkSubpassDependency*)(forMarshaling->pDependencies + i));
+        }
     }
 }
 
@@ -3885,21 +4026,30 @@ void unmarshal_VkRenderPassCreateInfo(
     vkStream->read((VkRenderPassCreateFlags*)&forUnmarshaling->flags, sizeof(VkRenderPassCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->attachmentCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pAttachments, forUnmarshaling->attachmentCount * sizeof(const VkAttachmentDescription));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->attachmentCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkAttachmentDescription(vkStream, (VkAttachmentDescription*)(forUnmarshaling->pAttachments + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->attachmentCount; ++i)
+        {
+            unmarshal_VkAttachmentDescription(vkStream, (VkAttachmentDescription*)(forUnmarshaling->pAttachments + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->subpassCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pSubpasses, forUnmarshaling->subpassCount * sizeof(const VkSubpassDescription));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->subpassCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkSubpassDescription(vkStream, (VkSubpassDescription*)(forUnmarshaling->pSubpasses + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->subpassCount; ++i)
+        {
+            unmarshal_VkSubpassDescription(vkStream, (VkSubpassDescription*)(forUnmarshaling->pSubpasses + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->dependencyCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pDependencies, forUnmarshaling->dependencyCount * sizeof(const VkSubpassDependency));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->dependencyCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkSubpassDependency(vkStream, (VkSubpassDependency*)(forUnmarshaling->pDependencies + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->dependencyCount; ++i)
+        {
+            unmarshal_VkSubpassDependency(vkStream, (VkSubpassDependency*)(forUnmarshaling->pDependencies + i));
+        }
     }
 }
 
@@ -4298,9 +4448,12 @@ void marshal_VkRenderPassBeginInfo(
     vkStream->putBe64(cgen_var_2);
     if (forMarshaling->pClearValues)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->clearValueCount; ++i)
+        if ((forMarshaling) != nullptr)
         {
-            marshal_VkClearValue(vkStream, (const VkClearValue*)(forMarshaling->pClearValues + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->clearValueCount; ++i)
+            {
+                marshal_VkClearValue(vkStream, (const VkClearValue*)(forMarshaling->pClearValues + i));
+            }
         }
     }
 }
@@ -4335,9 +4488,12 @@ void unmarshal_VkRenderPassBeginInfo(
     if (forUnmarshaling->pClearValues)
     {
         vkStream->alloc((void**)&forUnmarshaling->pClearValues, forUnmarshaling->clearValueCount * sizeof(const VkClearValue));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->clearValueCount; ++i)
+        if ((forUnmarshaling) != nullptr)
         {
-            unmarshal_VkClearValue(vkStream, (VkClearValue*)(forUnmarshaling->pClearValues + i));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->clearValueCount; ++i)
+            {
+                unmarshal_VkClearValue(vkStream, (VkClearValue*)(forUnmarshaling->pClearValues + i));
+            }
         }
     }
 }
@@ -4605,9 +4761,12 @@ void marshal_VkDeviceGroupRenderPassBeginInfo(
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((uint32_t*)&forMarshaling->deviceMask, sizeof(uint32_t));
     vkStream->write((uint32_t*)&forMarshaling->deviceRenderAreaCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->deviceRenderAreaCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkRect2D(vkStream, (const VkRect2D*)(forMarshaling->pDeviceRenderAreas + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->deviceRenderAreaCount; ++i)
+        {
+            marshal_VkRect2D(vkStream, (const VkRect2D*)(forMarshaling->pDeviceRenderAreas + i));
+        }
     }
 }
 
@@ -4631,9 +4790,12 @@ void unmarshal_VkDeviceGroupRenderPassBeginInfo(
     vkStream->read((uint32_t*)&forUnmarshaling->deviceMask, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->deviceRenderAreaCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pDeviceRenderAreas, forUnmarshaling->deviceRenderAreaCount * sizeof(const VkRect2D));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->deviceRenderAreaCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkRect2D(vkStream, (VkRect2D*)(forUnmarshaling->pDeviceRenderAreas + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->deviceRenderAreaCount; ++i)
+        {
+            unmarshal_VkRect2D(vkStream, (VkRect2D*)(forUnmarshaling->pDeviceRenderAreas + i));
+        }
     }
 }
 
@@ -4780,9 +4942,12 @@ void marshal_VkBindImageMemoryDeviceGroupInfo(
     vkStream->write((uint32_t*)&forMarshaling->deviceIndexCount, sizeof(uint32_t));
     vkStream->write((const uint32_t*)forMarshaling->pDeviceIndices, forMarshaling->deviceIndexCount * sizeof(const uint32_t));
     vkStream->write((uint32_t*)&forMarshaling->splitInstanceBindRegionCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->splitInstanceBindRegionCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkRect2D(vkStream, (const VkRect2D*)(forMarshaling->pSplitInstanceBindRegions + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->splitInstanceBindRegionCount; ++i)
+        {
+            marshal_VkRect2D(vkStream, (const VkRect2D*)(forMarshaling->pSplitInstanceBindRegions + i));
+        }
     }
 }
 
@@ -4808,9 +4973,12 @@ void unmarshal_VkBindImageMemoryDeviceGroupInfo(
     vkStream->read((uint32_t*)forUnmarshaling->pDeviceIndices, forUnmarshaling->deviceIndexCount * sizeof(const uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->splitInstanceBindRegionCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pSplitInstanceBindRegions, forUnmarshaling->splitInstanceBindRegionCount * sizeof(const VkRect2D));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->splitInstanceBindRegionCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkRect2D(vkStream, (VkRect2D*)(forUnmarshaling->pSplitInstanceBindRegions + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->splitInstanceBindRegionCount; ++i)
+        {
+            unmarshal_VkRect2D(vkStream, (VkRect2D*)(forUnmarshaling->pSplitInstanceBindRegions + i));
+        }
     }
 }
 
@@ -5379,9 +5547,12 @@ void marshal_VkRenderPassInputAttachmentAspectCreateInfo(
     vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((uint32_t*)&forMarshaling->aspectReferenceCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->aspectReferenceCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkInputAttachmentAspectReference(vkStream, (const VkInputAttachmentAspectReference*)(forMarshaling->pAspectReferences + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->aspectReferenceCount; ++i)
+        {
+            marshal_VkInputAttachmentAspectReference(vkStream, (const VkInputAttachmentAspectReference*)(forMarshaling->pAspectReferences + i));
+        }
     }
 }
 
@@ -5404,9 +5575,12 @@ void unmarshal_VkRenderPassInputAttachmentAspectCreateInfo(
     }
     vkStream->read((uint32_t*)&forUnmarshaling->aspectReferenceCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pAspectReferences, forUnmarshaling->aspectReferenceCount * sizeof(const VkInputAttachmentAspectReference));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->aspectReferenceCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkInputAttachmentAspectReference(vkStream, (VkInputAttachmentAspectReference*)(forUnmarshaling->pAspectReferences + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->aspectReferenceCount; ++i)
+        {
+            unmarshal_VkInputAttachmentAspectReference(vkStream, (VkInputAttachmentAspectReference*)(forUnmarshaling->pAspectReferences + i));
+        }
     }
 }
 
@@ -5951,9 +6125,12 @@ void marshal_VkDescriptorUpdateTemplateCreateInfo(
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((VkDescriptorUpdateTemplateCreateFlags*)&forMarshaling->flags, sizeof(VkDescriptorUpdateTemplateCreateFlags));
     vkStream->write((uint32_t*)&forMarshaling->descriptorUpdateEntryCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->descriptorUpdateEntryCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkDescriptorUpdateTemplateEntry(vkStream, (const VkDescriptorUpdateTemplateEntry*)(forMarshaling->pDescriptorUpdateEntries + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->descriptorUpdateEntryCount; ++i)
+        {
+            marshal_VkDescriptorUpdateTemplateEntry(vkStream, (const VkDescriptorUpdateTemplateEntry*)(forMarshaling->pDescriptorUpdateEntries + i));
+        }
     }
     vkStream->write((VkDescriptorUpdateTemplateType*)&forMarshaling->templateType, sizeof(VkDescriptorUpdateTemplateType));
     uint64_t cgen_var_0;
@@ -5986,9 +6163,12 @@ void unmarshal_VkDescriptorUpdateTemplateCreateInfo(
     vkStream->read((VkDescriptorUpdateTemplateCreateFlags*)&forUnmarshaling->flags, sizeof(VkDescriptorUpdateTemplateCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->descriptorUpdateEntryCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pDescriptorUpdateEntries, forUnmarshaling->descriptorUpdateEntryCount * sizeof(const VkDescriptorUpdateTemplateEntry));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->descriptorUpdateEntryCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkDescriptorUpdateTemplateEntry(vkStream, (VkDescriptorUpdateTemplateEntry*)(forUnmarshaling->pDescriptorUpdateEntries + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->descriptorUpdateEntryCount; ++i)
+        {
+            unmarshal_VkDescriptorUpdateTemplateEntry(vkStream, (VkDescriptorUpdateTemplateEntry*)(forUnmarshaling->pDescriptorUpdateEntries + i));
+        }
     }
     vkStream->read((VkDescriptorUpdateTemplateType*)&forUnmarshaling->templateType, sizeof(VkDescriptorUpdateTemplateType));
     uint64_t cgen_var_0;
@@ -7036,23 +7216,32 @@ void marshal_VkSubpassDescription2(
     vkStream->write((VkPipelineBindPoint*)&forMarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
     vkStream->write((uint32_t*)&forMarshaling->viewMask, sizeof(uint32_t));
     vkStream->write((uint32_t*)&forMarshaling->inputAttachmentCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->inputAttachmentCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkAttachmentReference2(vkStream, (const VkAttachmentReference2*)(forMarshaling->pInputAttachments + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->inputAttachmentCount; ++i)
+        {
+            marshal_VkAttachmentReference2(vkStream, (const VkAttachmentReference2*)(forMarshaling->pInputAttachments + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->colorAttachmentCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->colorAttachmentCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkAttachmentReference2(vkStream, (const VkAttachmentReference2*)(forMarshaling->pColorAttachments + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->colorAttachmentCount; ++i)
+        {
+            marshal_VkAttachmentReference2(vkStream, (const VkAttachmentReference2*)(forMarshaling->pColorAttachments + i));
+        }
     }
     // WARNING PTR CHECK
     uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pResolveAttachments;
     vkStream->putBe64(cgen_var_0);
     if (forMarshaling->pResolveAttachments)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->colorAttachmentCount; ++i)
+        if ((forMarshaling) != nullptr)
         {
-            marshal_VkAttachmentReference2(vkStream, (const VkAttachmentReference2*)(forMarshaling->pResolveAttachments + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->colorAttachmentCount; ++i)
+            {
+                marshal_VkAttachmentReference2(vkStream, (const VkAttachmentReference2*)(forMarshaling->pResolveAttachments + i));
+            }
         }
     }
     // WARNING PTR CHECK
@@ -7088,24 +7277,33 @@ void unmarshal_VkSubpassDescription2(
     vkStream->read((uint32_t*)&forUnmarshaling->viewMask, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->inputAttachmentCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pInputAttachments, forUnmarshaling->inputAttachmentCount * sizeof(const VkAttachmentReference2));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->inputAttachmentCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkAttachmentReference2(vkStream, (VkAttachmentReference2*)(forUnmarshaling->pInputAttachments + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->inputAttachmentCount; ++i)
+        {
+            unmarshal_VkAttachmentReference2(vkStream, (VkAttachmentReference2*)(forUnmarshaling->pInputAttachments + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->colorAttachmentCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pColorAttachments, forUnmarshaling->colorAttachmentCount * sizeof(const VkAttachmentReference2));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->colorAttachmentCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkAttachmentReference2(vkStream, (VkAttachmentReference2*)(forUnmarshaling->pColorAttachments + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->colorAttachmentCount; ++i)
+        {
+            unmarshal_VkAttachmentReference2(vkStream, (VkAttachmentReference2*)(forUnmarshaling->pColorAttachments + i));
+        }
     }
     // WARNING PTR CHECK
     forUnmarshaling->pResolveAttachments = (const VkAttachmentReference2*)(uintptr_t)vkStream->getBe64();
     if (forUnmarshaling->pResolveAttachments)
     {
         vkStream->alloc((void**)&forUnmarshaling->pResolveAttachments, forUnmarshaling->colorAttachmentCount * sizeof(const VkAttachmentReference2));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->colorAttachmentCount; ++i)
+        if ((forUnmarshaling) != nullptr)
         {
-            unmarshal_VkAttachmentReference2(vkStream, (VkAttachmentReference2*)(forUnmarshaling->pResolveAttachments + i));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->colorAttachmentCount; ++i)
+            {
+                unmarshal_VkAttachmentReference2(vkStream, (VkAttachmentReference2*)(forUnmarshaling->pResolveAttachments + i));
+            }
         }
     }
     // WARNING PTR CHECK
@@ -7171,19 +7369,28 @@ void marshal_VkRenderPassCreateInfo2(
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((VkRenderPassCreateFlags*)&forMarshaling->flags, sizeof(VkRenderPassCreateFlags));
     vkStream->write((uint32_t*)&forMarshaling->attachmentCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->attachmentCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkAttachmentDescription2(vkStream, (const VkAttachmentDescription2*)(forMarshaling->pAttachments + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->attachmentCount; ++i)
+        {
+            marshal_VkAttachmentDescription2(vkStream, (const VkAttachmentDescription2*)(forMarshaling->pAttachments + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->subpassCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->subpassCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkSubpassDescription2(vkStream, (const VkSubpassDescription2*)(forMarshaling->pSubpasses + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->subpassCount; ++i)
+        {
+            marshal_VkSubpassDescription2(vkStream, (const VkSubpassDescription2*)(forMarshaling->pSubpasses + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->dependencyCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->dependencyCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkSubpassDependency2(vkStream, (const VkSubpassDependency2*)(forMarshaling->pDependencies + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->dependencyCount; ++i)
+        {
+            marshal_VkSubpassDependency2(vkStream, (const VkSubpassDependency2*)(forMarshaling->pDependencies + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->correlatedViewMaskCount, sizeof(uint32_t));
     vkStream->write((const uint32_t*)forMarshaling->pCorrelatedViewMasks, forMarshaling->correlatedViewMaskCount * sizeof(const uint32_t));
@@ -7209,21 +7416,30 @@ void unmarshal_VkRenderPassCreateInfo2(
     vkStream->read((VkRenderPassCreateFlags*)&forUnmarshaling->flags, sizeof(VkRenderPassCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->attachmentCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pAttachments, forUnmarshaling->attachmentCount * sizeof(const VkAttachmentDescription2));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->attachmentCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkAttachmentDescription2(vkStream, (VkAttachmentDescription2*)(forUnmarshaling->pAttachments + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->attachmentCount; ++i)
+        {
+            unmarshal_VkAttachmentDescription2(vkStream, (VkAttachmentDescription2*)(forUnmarshaling->pAttachments + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->subpassCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pSubpasses, forUnmarshaling->subpassCount * sizeof(const VkSubpassDescription2));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->subpassCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkSubpassDescription2(vkStream, (VkSubpassDescription2*)(forUnmarshaling->pSubpasses + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->subpassCount; ++i)
+        {
+            unmarshal_VkSubpassDescription2(vkStream, (VkSubpassDescription2*)(forUnmarshaling->pSubpasses + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->dependencyCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pDependencies, forUnmarshaling->dependencyCount * sizeof(const VkSubpassDependency2));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->dependencyCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkSubpassDependency2(vkStream, (VkSubpassDependency2*)(forUnmarshaling->pDependencies + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->dependencyCount; ++i)
+        {
+            unmarshal_VkSubpassDependency2(vkStream, (VkSubpassDependency2*)(forUnmarshaling->pDependencies + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->correlatedViewMaskCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pCorrelatedViewMasks, forUnmarshaling->correlatedViewMaskCount * sizeof(const uint32_t));
@@ -8030,9 +8246,12 @@ void marshal_VkFramebufferAttachmentsCreateInfo(
     vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((uint32_t*)&forMarshaling->attachmentImageInfoCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->attachmentImageInfoCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkFramebufferAttachmentImageInfo(vkStream, (const VkFramebufferAttachmentImageInfo*)(forMarshaling->pAttachmentImageInfos + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->attachmentImageInfoCount; ++i)
+        {
+            marshal_VkFramebufferAttachmentImageInfo(vkStream, (const VkFramebufferAttachmentImageInfo*)(forMarshaling->pAttachmentImageInfos + i));
+        }
     }
 }
 
@@ -8055,9 +8274,12 @@ void unmarshal_VkFramebufferAttachmentsCreateInfo(
     }
     vkStream->read((uint32_t*)&forUnmarshaling->attachmentImageInfoCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pAttachmentImageInfos, forUnmarshaling->attachmentImageInfoCount * sizeof(const VkFramebufferAttachmentImageInfo));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->attachmentImageInfoCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkFramebufferAttachmentImageInfo(vkStream, (VkFramebufferAttachmentImageInfo*)(forUnmarshaling->pAttachmentImageInfos + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->attachmentImageInfoCount; ++i)
+        {
+            unmarshal_VkFramebufferAttachmentImageInfo(vkStream, (VkFramebufferAttachmentImageInfo*)(forUnmarshaling->pAttachmentImageInfos + i));
+        }
     }
 }
 
@@ -10212,9 +10434,12 @@ void marshal_VkPresentRegionKHR(
     vkStream->putBe64(cgen_var_0);
     if (forMarshaling->pRectangles)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->rectangleCount; ++i)
+        if ((forMarshaling) != nullptr)
         {
-            marshal_VkRectLayerKHR(vkStream, (const VkRectLayerKHR*)(forMarshaling->pRectangles + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->rectangleCount; ++i)
+            {
+                marshal_VkRectLayerKHR(vkStream, (const VkRectLayerKHR*)(forMarshaling->pRectangles + i));
+            }
         }
     }
 }
@@ -10229,9 +10454,12 @@ void unmarshal_VkPresentRegionKHR(
     if (forUnmarshaling->pRectangles)
     {
         vkStream->alloc((void**)&forUnmarshaling->pRectangles, forUnmarshaling->rectangleCount * sizeof(const VkRectLayerKHR));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->rectangleCount; ++i)
+        if ((forUnmarshaling) != nullptr)
         {
-            unmarshal_VkRectLayerKHR(vkStream, (VkRectLayerKHR*)(forUnmarshaling->pRectangles + i));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->rectangleCount; ++i)
+            {
+                unmarshal_VkRectLayerKHR(vkStream, (VkRectLayerKHR*)(forUnmarshaling->pRectangles + i));
+            }
         }
     }
 }
@@ -10248,9 +10476,12 @@ void marshal_VkPresentRegionsKHR(
     vkStream->putBe64(cgen_var_0);
     if (forMarshaling->pRegions)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->swapchainCount; ++i)
+        if ((forMarshaling) != nullptr)
         {
-            marshal_VkPresentRegionKHR(vkStream, (const VkPresentRegionKHR*)(forMarshaling->pRegions + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->swapchainCount; ++i)
+            {
+                marshal_VkPresentRegionKHR(vkStream, (const VkPresentRegionKHR*)(forMarshaling->pRegions + i));
+            }
         }
     }
 }
@@ -10278,9 +10509,12 @@ void unmarshal_VkPresentRegionsKHR(
     if (forUnmarshaling->pRegions)
     {
         vkStream->alloc((void**)&forUnmarshaling->pRegions, forUnmarshaling->swapchainCount * sizeof(const VkPresentRegionKHR));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->swapchainCount; ++i)
+        if ((forUnmarshaling) != nullptr)
         {
-            unmarshal_VkPresentRegionKHR(vkStream, (VkPresentRegionKHR*)(forUnmarshaling->pRegions + i));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->swapchainCount; ++i)
+            {
+                unmarshal_VkPresentRegionKHR(vkStream, (VkPresentRegionKHR*)(forUnmarshaling->pRegions + i));
+            }
         }
     }
 }
@@ -11763,9 +11997,12 @@ void marshal_VkCopyBufferInfo2KHR(
     vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->dstBuffer, &cgen_var_1, 1);
     vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
     vkStream->write((uint32_t*)&forMarshaling->regionCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->regionCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkBufferCopy2KHR(vkStream, (const VkBufferCopy2KHR*)(forMarshaling->pRegions + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->regionCount; ++i)
+        {
+            marshal_VkBufferCopy2KHR(vkStream, (const VkBufferCopy2KHR*)(forMarshaling->pRegions + i));
+        }
     }
 }
 
@@ -11794,9 +12031,12 @@ void unmarshal_VkCopyBufferInfo2KHR(
     vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_1, (VkBuffer*)&forUnmarshaling->dstBuffer, 1);
     vkStream->read((uint32_t*)&forUnmarshaling->regionCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pRegions, forUnmarshaling->regionCount * sizeof(const VkBufferCopy2KHR));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->regionCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkBufferCopy2KHR(vkStream, (VkBufferCopy2KHR*)(forUnmarshaling->pRegions + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->regionCount; ++i)
+        {
+            unmarshal_VkBufferCopy2KHR(vkStream, (VkBufferCopy2KHR*)(forUnmarshaling->pRegions + i));
+        }
     }
 }
 
@@ -11852,9 +12092,12 @@ void marshal_VkCopyImageInfo2KHR(
     vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
     vkStream->write((VkImageLayout*)&forMarshaling->dstImageLayout, sizeof(VkImageLayout));
     vkStream->write((uint32_t*)&forMarshaling->regionCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->regionCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkImageCopy2KHR(vkStream, (const VkImageCopy2KHR*)(forMarshaling->pRegions + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->regionCount; ++i)
+        {
+            marshal_VkImageCopy2KHR(vkStream, (const VkImageCopy2KHR*)(forMarshaling->pRegions + i));
+        }
     }
 }
 
@@ -11885,9 +12128,12 @@ void unmarshal_VkCopyImageInfo2KHR(
     vkStream->read((VkImageLayout*)&forUnmarshaling->dstImageLayout, sizeof(VkImageLayout));
     vkStream->read((uint32_t*)&forUnmarshaling->regionCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pRegions, forUnmarshaling->regionCount * sizeof(const VkImageCopy2KHR));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->regionCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkImageCopy2KHR(vkStream, (VkImageCopy2KHR*)(forUnmarshaling->pRegions + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->regionCount; ++i)
+        {
+            unmarshal_VkImageCopy2KHR(vkStream, (VkImageCopy2KHR*)(forUnmarshaling->pRegions + i));
+        }
     }
 }
 
@@ -11944,9 +12190,12 @@ void marshal_VkCopyBufferToImageInfo2KHR(
     vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
     vkStream->write((VkImageLayout*)&forMarshaling->dstImageLayout, sizeof(VkImageLayout));
     vkStream->write((uint32_t*)&forMarshaling->regionCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->regionCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkBufferImageCopy2KHR(vkStream, (const VkBufferImageCopy2KHR*)(forMarshaling->pRegions + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->regionCount; ++i)
+        {
+            marshal_VkBufferImageCopy2KHR(vkStream, (const VkBufferImageCopy2KHR*)(forMarshaling->pRegions + i));
+        }
     }
 }
 
@@ -11976,9 +12225,12 @@ void unmarshal_VkCopyBufferToImageInfo2KHR(
     vkStream->read((VkImageLayout*)&forUnmarshaling->dstImageLayout, sizeof(VkImageLayout));
     vkStream->read((uint32_t*)&forUnmarshaling->regionCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pRegions, forUnmarshaling->regionCount * sizeof(const VkBufferImageCopy2KHR));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->regionCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkBufferImageCopy2KHR(vkStream, (VkBufferImageCopy2KHR*)(forUnmarshaling->pRegions + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->regionCount; ++i)
+        {
+            unmarshal_VkBufferImageCopy2KHR(vkStream, (VkBufferImageCopy2KHR*)(forUnmarshaling->pRegions + i));
+        }
     }
 }
 
@@ -11996,9 +12248,12 @@ void marshal_VkCopyImageToBufferInfo2KHR(
     vkStream->handleMapping()->mapHandles_VkBuffer_u64(&forMarshaling->dstBuffer, &cgen_var_1, 1);
     vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
     vkStream->write((uint32_t*)&forMarshaling->regionCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->regionCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkBufferImageCopy2KHR(vkStream, (const VkBufferImageCopy2KHR*)(forMarshaling->pRegions + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->regionCount; ++i)
+        {
+            marshal_VkBufferImageCopy2KHR(vkStream, (const VkBufferImageCopy2KHR*)(forMarshaling->pRegions + i));
+        }
     }
 }
 
@@ -12028,9 +12283,12 @@ void unmarshal_VkCopyImageToBufferInfo2KHR(
     vkStream->handleMapping()->mapHandles_u64_VkBuffer(&cgen_var_1, (VkBuffer*)&forUnmarshaling->dstBuffer, 1);
     vkStream->read((uint32_t*)&forUnmarshaling->regionCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pRegions, forUnmarshaling->regionCount * sizeof(const VkBufferImageCopy2KHR));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->regionCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkBufferImageCopy2KHR(vkStream, (VkBufferImageCopy2KHR*)(forUnmarshaling->pRegions + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->regionCount; ++i)
+        {
+            unmarshal_VkBufferImageCopy2KHR(vkStream, (VkBufferImageCopy2KHR*)(forUnmarshaling->pRegions + i));
+        }
     }
 }
 
@@ -12096,9 +12354,12 @@ void marshal_VkBlitImageInfo2KHR(
     vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
     vkStream->write((VkImageLayout*)&forMarshaling->dstImageLayout, sizeof(VkImageLayout));
     vkStream->write((uint32_t*)&forMarshaling->regionCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->regionCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkImageBlit2KHR(vkStream, (const VkImageBlit2KHR*)(forMarshaling->pRegions + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->regionCount; ++i)
+        {
+            marshal_VkImageBlit2KHR(vkStream, (const VkImageBlit2KHR*)(forMarshaling->pRegions + i));
+        }
     }
     vkStream->write((VkFilter*)&forMarshaling->filter, sizeof(VkFilter));
 }
@@ -12130,9 +12391,12 @@ void unmarshal_VkBlitImageInfo2KHR(
     vkStream->read((VkImageLayout*)&forUnmarshaling->dstImageLayout, sizeof(VkImageLayout));
     vkStream->read((uint32_t*)&forUnmarshaling->regionCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pRegions, forUnmarshaling->regionCount * sizeof(const VkImageBlit2KHR));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->regionCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkImageBlit2KHR(vkStream, (VkImageBlit2KHR*)(forUnmarshaling->pRegions + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->regionCount; ++i)
+        {
+            unmarshal_VkImageBlit2KHR(vkStream, (VkImageBlit2KHR*)(forUnmarshaling->pRegions + i));
+        }
     }
     vkStream->read((VkFilter*)&forUnmarshaling->filter, sizeof(VkFilter));
 }
@@ -12189,9 +12453,12 @@ void marshal_VkResolveImageInfo2KHR(
     vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
     vkStream->write((VkImageLayout*)&forMarshaling->dstImageLayout, sizeof(VkImageLayout));
     vkStream->write((uint32_t*)&forMarshaling->regionCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->regionCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkImageResolve2KHR(vkStream, (const VkImageResolve2KHR*)(forMarshaling->pRegions + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->regionCount; ++i)
+        {
+            marshal_VkImageResolve2KHR(vkStream, (const VkImageResolve2KHR*)(forMarshaling->pRegions + i));
+        }
     }
 }
 
@@ -12222,9 +12489,12 @@ void unmarshal_VkResolveImageInfo2KHR(
     vkStream->read((VkImageLayout*)&forUnmarshaling->dstImageLayout, sizeof(VkImageLayout));
     vkStream->read((uint32_t*)&forUnmarshaling->regionCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pRegions, forUnmarshaling->regionCount * sizeof(const VkImageResolve2KHR));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->regionCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkImageResolve2KHR(vkStream, (VkImageResolve2KHR*)(forUnmarshaling->pRegions + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->regionCount; ++i)
+        {
+            unmarshal_VkImageResolve2KHR(vkStream, (VkImageResolve2KHR*)(forUnmarshaling->pRegions + i));
+        }
     }
 }
 
@@ -13454,9 +13724,12 @@ void marshal_VkPipelineViewportWScalingStateCreateInfoNV(
     vkStream->putBe64(cgen_var_0);
     if (forMarshaling->pViewportWScalings)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->viewportCount; ++i)
+        if ((forMarshaling) != nullptr)
         {
-            marshal_VkViewportWScalingNV(vkStream, (const VkViewportWScalingNV*)(forMarshaling->pViewportWScalings + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->viewportCount; ++i)
+            {
+                marshal_VkViewportWScalingNV(vkStream, (const VkViewportWScalingNV*)(forMarshaling->pViewportWScalings + i));
+            }
         }
     }
 }
@@ -13485,9 +13758,12 @@ void unmarshal_VkPipelineViewportWScalingStateCreateInfoNV(
     if (forUnmarshaling->pViewportWScalings)
     {
         vkStream->alloc((void**)&forUnmarshaling->pViewportWScalings, forUnmarshaling->viewportCount * sizeof(const VkViewportWScalingNV));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->viewportCount; ++i)
+        if ((forUnmarshaling) != nullptr)
         {
-            unmarshal_VkViewportWScalingNV(vkStream, (VkViewportWScalingNV*)(forUnmarshaling->pViewportWScalings + i));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->viewportCount; ++i)
+            {
+                unmarshal_VkViewportWScalingNV(vkStream, (VkViewportWScalingNV*)(forUnmarshaling->pViewportWScalings + i));
+            }
         }
     }
 }
@@ -13731,9 +14007,12 @@ void marshal_VkPresentTimesInfoGOOGLE(
     vkStream->putBe64(cgen_var_0);
     if (forMarshaling->pTimes)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->swapchainCount; ++i)
+        if ((forMarshaling) != nullptr)
         {
-            marshal_VkPresentTimeGOOGLE(vkStream, (const VkPresentTimeGOOGLE*)(forMarshaling->pTimes + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->swapchainCount; ++i)
+            {
+                marshal_VkPresentTimeGOOGLE(vkStream, (const VkPresentTimeGOOGLE*)(forMarshaling->pTimes + i));
+            }
         }
     }
 }
@@ -13761,9 +14040,12 @@ void unmarshal_VkPresentTimesInfoGOOGLE(
     if (forUnmarshaling->pTimes)
     {
         vkStream->alloc((void**)&forUnmarshaling->pTimes, forUnmarshaling->swapchainCount * sizeof(const VkPresentTimeGOOGLE));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->swapchainCount; ++i)
+        if ((forUnmarshaling) != nullptr)
         {
-            unmarshal_VkPresentTimeGOOGLE(vkStream, (VkPresentTimeGOOGLE*)(forUnmarshaling->pTimes + i));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->swapchainCount; ++i)
+            {
+                unmarshal_VkPresentTimeGOOGLE(vkStream, (VkPresentTimeGOOGLE*)(forUnmarshaling->pTimes + i));
+            }
         }
     }
 }
@@ -13840,9 +14122,12 @@ void marshal_VkPipelineViewportSwizzleStateCreateInfoNV(
     vkStream->putBe64(cgen_var_0);
     if (forMarshaling->pViewportSwizzles)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->viewportCount; ++i)
+        if ((forMarshaling) != nullptr)
         {
-            marshal_VkViewportSwizzleNV(vkStream, (const VkViewportSwizzleNV*)(forMarshaling->pViewportSwizzles + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->viewportCount; ++i)
+            {
+                marshal_VkViewportSwizzleNV(vkStream, (const VkViewportSwizzleNV*)(forMarshaling->pViewportSwizzles + i));
+            }
         }
     }
 }
@@ -13871,9 +14156,12 @@ void unmarshal_VkPipelineViewportSwizzleStateCreateInfoNV(
     if (forUnmarshaling->pViewportSwizzles)
     {
         vkStream->alloc((void**)&forUnmarshaling->pViewportSwizzles, forUnmarshaling->viewportCount * sizeof(const VkViewportSwizzleNV));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->viewportCount; ++i)
+        if ((forUnmarshaling) != nullptr)
         {
-            unmarshal_VkViewportSwizzleNV(vkStream, (VkViewportSwizzleNV*)(forUnmarshaling->pViewportSwizzles + i));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->viewportCount; ++i)
+            {
+                unmarshal_VkViewportSwizzleNV(vkStream, (VkViewportSwizzleNV*)(forUnmarshaling->pViewportSwizzles + i));
+            }
         }
     }
 }
@@ -13923,9 +14211,12 @@ void marshal_VkPipelineDiscardRectangleStateCreateInfoEXT(
     vkStream->putBe64(cgen_var_0);
     if (forMarshaling->pDiscardRectangles)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->discardRectangleCount; ++i)
+        if ((forMarshaling) != nullptr)
         {
-            marshal_VkRect2D(vkStream, (const VkRect2D*)(forMarshaling->pDiscardRectangles + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->discardRectangleCount; ++i)
+            {
+                marshal_VkRect2D(vkStream, (const VkRect2D*)(forMarshaling->pDiscardRectangles + i));
+            }
         }
     }
 }
@@ -13955,9 +14246,12 @@ void unmarshal_VkPipelineDiscardRectangleStateCreateInfoEXT(
     if (forUnmarshaling->pDiscardRectangles)
     {
         vkStream->alloc((void**)&forUnmarshaling->pDiscardRectangles, forUnmarshaling->discardRectangleCount * sizeof(const VkRect2D));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->discardRectangleCount; ++i)
+        if ((forUnmarshaling) != nullptr)
         {
-            unmarshal_VkRect2D(vkStream, (VkRect2D*)(forUnmarshaling->pDiscardRectangles + i));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->discardRectangleCount; ++i)
+            {
+                unmarshal_VkRect2D(vkStream, (VkRect2D*)(forUnmarshaling->pDiscardRectangles + i));
+            }
         }
     }
 }
@@ -14383,9 +14677,12 @@ void marshal_VkDebugUtilsMessengerCallbackDataEXT(
     vkStream->putBe64(cgen_var_0);
     if (forMarshaling->pQueueLabels)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->queueLabelCount; ++i)
+        if ((forMarshaling) != nullptr)
         {
-            marshal_VkDebugUtilsLabelEXT(vkStream, (VkDebugUtilsLabelEXT*)(forMarshaling->pQueueLabels + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->queueLabelCount; ++i)
+            {
+                marshal_VkDebugUtilsLabelEXT(vkStream, (VkDebugUtilsLabelEXT*)(forMarshaling->pQueueLabels + i));
+            }
         }
     }
     vkStream->write((uint32_t*)&forMarshaling->cmdBufLabelCount, sizeof(uint32_t));
@@ -14394,9 +14691,12 @@ void marshal_VkDebugUtilsMessengerCallbackDataEXT(
     vkStream->putBe64(cgen_var_1);
     if (forMarshaling->pCmdBufLabels)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->cmdBufLabelCount; ++i)
+        if ((forMarshaling) != nullptr)
         {
-            marshal_VkDebugUtilsLabelEXT(vkStream, (VkDebugUtilsLabelEXT*)(forMarshaling->pCmdBufLabels + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->cmdBufLabelCount; ++i)
+            {
+                marshal_VkDebugUtilsLabelEXT(vkStream, (VkDebugUtilsLabelEXT*)(forMarshaling->pCmdBufLabels + i));
+            }
         }
     }
     vkStream->write((uint32_t*)&forMarshaling->objectCount, sizeof(uint32_t));
@@ -14405,9 +14705,12 @@ void marshal_VkDebugUtilsMessengerCallbackDataEXT(
     vkStream->putBe64(cgen_var_2);
     if (forMarshaling->pObjects)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->objectCount; ++i)
+        if ((forMarshaling) != nullptr)
         {
-            marshal_VkDebugUtilsObjectNameInfoEXT(vkStream, (VkDebugUtilsObjectNameInfoEXT*)(forMarshaling->pObjects + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->objectCount; ++i)
+            {
+                marshal_VkDebugUtilsObjectNameInfoEXT(vkStream, (VkDebugUtilsObjectNameInfoEXT*)(forMarshaling->pObjects + i));
+            }
         }
     }
 }
@@ -14451,9 +14754,12 @@ void unmarshal_VkDebugUtilsMessengerCallbackDataEXT(
     if (forUnmarshaling->pQueueLabels)
     {
         vkStream->alloc((void**)&forUnmarshaling->pQueueLabels, forUnmarshaling->queueLabelCount * sizeof(VkDebugUtilsLabelEXT));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->queueLabelCount; ++i)
+        if ((forUnmarshaling) != nullptr)
         {
-            unmarshal_VkDebugUtilsLabelEXT(vkStream, (VkDebugUtilsLabelEXT*)(forUnmarshaling->pQueueLabels + i));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->queueLabelCount; ++i)
+            {
+                unmarshal_VkDebugUtilsLabelEXT(vkStream, (VkDebugUtilsLabelEXT*)(forUnmarshaling->pQueueLabels + i));
+            }
         }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->cmdBufLabelCount, sizeof(uint32_t));
@@ -14462,9 +14768,12 @@ void unmarshal_VkDebugUtilsMessengerCallbackDataEXT(
     if (forUnmarshaling->pCmdBufLabels)
     {
         vkStream->alloc((void**)&forUnmarshaling->pCmdBufLabels, forUnmarshaling->cmdBufLabelCount * sizeof(VkDebugUtilsLabelEXT));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->cmdBufLabelCount; ++i)
+        if ((forUnmarshaling) != nullptr)
         {
-            unmarshal_VkDebugUtilsLabelEXT(vkStream, (VkDebugUtilsLabelEXT*)(forUnmarshaling->pCmdBufLabels + i));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->cmdBufLabelCount; ++i)
+            {
+                unmarshal_VkDebugUtilsLabelEXT(vkStream, (VkDebugUtilsLabelEXT*)(forUnmarshaling->pCmdBufLabels + i));
+            }
         }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->objectCount, sizeof(uint32_t));
@@ -14473,9 +14782,12 @@ void unmarshal_VkDebugUtilsMessengerCallbackDataEXT(
     if (forUnmarshaling->pObjects)
     {
         vkStream->alloc((void**)&forUnmarshaling->pObjects, forUnmarshaling->objectCount * sizeof(VkDebugUtilsObjectNameInfoEXT));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->objectCount; ++i)
+        if ((forUnmarshaling) != nullptr)
         {
-            unmarshal_VkDebugUtilsObjectNameInfoEXT(vkStream, (VkDebugUtilsObjectNameInfoEXT*)(forUnmarshaling->pObjects + i));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->objectCount; ++i)
+            {
+                unmarshal_VkDebugUtilsObjectNameInfoEXT(vkStream, (VkDebugUtilsObjectNameInfoEXT*)(forUnmarshaling->pObjects + i));
+            }
         }
     }
 }
@@ -14934,9 +15246,12 @@ void marshal_VkSampleLocationsInfoEXT(
     vkStream->write((VkSampleCountFlagBits*)&forMarshaling->sampleLocationsPerPixel, sizeof(VkSampleCountFlagBits));
     marshal_VkExtent2D(vkStream, (VkExtent2D*)(&forMarshaling->sampleLocationGridSize));
     vkStream->write((uint32_t*)&forMarshaling->sampleLocationsCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->sampleLocationsCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkSampleLocationEXT(vkStream, (const VkSampleLocationEXT*)(forMarshaling->pSampleLocations + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->sampleLocationsCount; ++i)
+        {
+            marshal_VkSampleLocationEXT(vkStream, (const VkSampleLocationEXT*)(forMarshaling->pSampleLocations + i));
+        }
     }
 }
 
@@ -14961,9 +15276,12 @@ void unmarshal_VkSampleLocationsInfoEXT(
     unmarshal_VkExtent2D(vkStream, (VkExtent2D*)(&forUnmarshaling->sampleLocationGridSize));
     vkStream->read((uint32_t*)&forUnmarshaling->sampleLocationsCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pSampleLocations, forUnmarshaling->sampleLocationsCount * sizeof(const VkSampleLocationEXT));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->sampleLocationsCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkSampleLocationEXT(vkStream, (VkSampleLocationEXT*)(forUnmarshaling->pSampleLocations + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->sampleLocationsCount; ++i)
+        {
+            unmarshal_VkSampleLocationEXT(vkStream, (VkSampleLocationEXT*)(forUnmarshaling->pSampleLocations + i));
+        }
     }
 }
 
@@ -15006,14 +15324,20 @@ void marshal_VkRenderPassSampleLocationsBeginInfoEXT(
     vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((uint32_t*)&forMarshaling->attachmentInitialSampleLocationsCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->attachmentInitialSampleLocationsCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkAttachmentSampleLocationsEXT(vkStream, (const VkAttachmentSampleLocationsEXT*)(forMarshaling->pAttachmentInitialSampleLocations + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->attachmentInitialSampleLocationsCount; ++i)
+        {
+            marshal_VkAttachmentSampleLocationsEXT(vkStream, (const VkAttachmentSampleLocationsEXT*)(forMarshaling->pAttachmentInitialSampleLocations + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->postSubpassSampleLocationsCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->postSubpassSampleLocationsCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkSubpassSampleLocationsEXT(vkStream, (const VkSubpassSampleLocationsEXT*)(forMarshaling->pPostSubpassSampleLocations + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->postSubpassSampleLocationsCount; ++i)
+        {
+            marshal_VkSubpassSampleLocationsEXT(vkStream, (const VkSubpassSampleLocationsEXT*)(forMarshaling->pPostSubpassSampleLocations + i));
+        }
     }
 }
 
@@ -15036,15 +15360,21 @@ void unmarshal_VkRenderPassSampleLocationsBeginInfoEXT(
     }
     vkStream->read((uint32_t*)&forUnmarshaling->attachmentInitialSampleLocationsCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pAttachmentInitialSampleLocations, forUnmarshaling->attachmentInitialSampleLocationsCount * sizeof(const VkAttachmentSampleLocationsEXT));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->attachmentInitialSampleLocationsCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkAttachmentSampleLocationsEXT(vkStream, (VkAttachmentSampleLocationsEXT*)(forUnmarshaling->pAttachmentInitialSampleLocations + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->attachmentInitialSampleLocationsCount; ++i)
+        {
+            unmarshal_VkAttachmentSampleLocationsEXT(vkStream, (VkAttachmentSampleLocationsEXT*)(forUnmarshaling->pAttachmentInitialSampleLocations + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->postSubpassSampleLocationsCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pPostSubpassSampleLocations, forUnmarshaling->postSubpassSampleLocationsCount * sizeof(const VkSubpassSampleLocationsEXT));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->postSubpassSampleLocationsCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkSubpassSampleLocationsEXT(vkStream, (VkSubpassSampleLocationsEXT*)(forUnmarshaling->pPostSubpassSampleLocations + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->postSubpassSampleLocationsCount; ++i)
+        {
+            unmarshal_VkSubpassSampleLocationsEXT(vkStream, (VkSubpassSampleLocationsEXT*)(forUnmarshaling->pPostSubpassSampleLocations + i));
+        }
     }
 }
 
@@ -15432,9 +15762,12 @@ void marshal_VkDrmFormatModifierPropertiesListEXT(
     vkStream->putBe64(cgen_var_0);
     if (forMarshaling->pDrmFormatModifierProperties)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->drmFormatModifierCount; ++i)
+        if ((forMarshaling) != nullptr)
         {
-            marshal_VkDrmFormatModifierPropertiesEXT(vkStream, (VkDrmFormatModifierPropertiesEXT*)(forMarshaling->pDrmFormatModifierProperties + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->drmFormatModifierCount; ++i)
+            {
+                marshal_VkDrmFormatModifierPropertiesEXT(vkStream, (VkDrmFormatModifierPropertiesEXT*)(forMarshaling->pDrmFormatModifierProperties + i));
+            }
         }
     }
 }
@@ -15462,9 +15795,12 @@ void unmarshal_VkDrmFormatModifierPropertiesListEXT(
     if (forUnmarshaling->pDrmFormatModifierProperties)
     {
         vkStream->alloc((void**)&forUnmarshaling->pDrmFormatModifierProperties, forUnmarshaling->drmFormatModifierCount * sizeof(VkDrmFormatModifierPropertiesEXT));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->drmFormatModifierCount; ++i)
+        if ((forUnmarshaling) != nullptr)
         {
-            unmarshal_VkDrmFormatModifierPropertiesEXT(vkStream, (VkDrmFormatModifierPropertiesEXT*)(forUnmarshaling->pDrmFormatModifierProperties + i));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->drmFormatModifierCount; ++i)
+            {
+                unmarshal_VkDrmFormatModifierPropertiesEXT(vkStream, (VkDrmFormatModifierPropertiesEXT*)(forUnmarshaling->pDrmFormatModifierProperties + i));
+            }
         }
     }
 }
@@ -15556,9 +15892,12 @@ void marshal_VkImageDrmFormatModifierExplicitCreateInfoEXT(
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((uint64_t*)&forMarshaling->drmFormatModifier, sizeof(uint64_t));
     vkStream->write((uint32_t*)&forMarshaling->drmFormatModifierPlaneCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->drmFormatModifierPlaneCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkSubresourceLayout(vkStream, (const VkSubresourceLayout*)(forMarshaling->pPlaneLayouts + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->drmFormatModifierPlaneCount; ++i)
+        {
+            marshal_VkSubresourceLayout(vkStream, (const VkSubresourceLayout*)(forMarshaling->pPlaneLayouts + i));
+        }
     }
 }
 
@@ -15582,9 +15921,12 @@ void unmarshal_VkImageDrmFormatModifierExplicitCreateInfoEXT(
     vkStream->read((uint64_t*)&forUnmarshaling->drmFormatModifier, sizeof(uint64_t));
     vkStream->read((uint32_t*)&forUnmarshaling->drmFormatModifierPlaneCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pPlaneLayouts, forUnmarshaling->drmFormatModifierPlaneCount * sizeof(const VkSubresourceLayout));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->drmFormatModifierPlaneCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkSubresourceLayout(vkStream, (VkSubresourceLayout*)(forUnmarshaling->pPlaneLayouts + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->drmFormatModifierPlaneCount; ++i)
+        {
+            unmarshal_VkSubresourceLayout(vkStream, (VkSubresourceLayout*)(forUnmarshaling->pPlaneLayouts + i));
+        }
     }
 }
 
@@ -15723,9 +16065,12 @@ void marshal_VkPipelineViewportShadingRateImageStateCreateInfoNV(
     vkStream->putBe64(cgen_var_0);
     if (forMarshaling->pShadingRatePalettes)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->viewportCount; ++i)
+        if ((forMarshaling) != nullptr)
         {
-            marshal_VkShadingRatePaletteNV(vkStream, (const VkShadingRatePaletteNV*)(forMarshaling->pShadingRatePalettes + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->viewportCount; ++i)
+            {
+                marshal_VkShadingRatePaletteNV(vkStream, (const VkShadingRatePaletteNV*)(forMarshaling->pShadingRatePalettes + i));
+            }
         }
     }
 }
@@ -15754,9 +16099,12 @@ void unmarshal_VkPipelineViewportShadingRateImageStateCreateInfoNV(
     if (forUnmarshaling->pShadingRatePalettes)
     {
         vkStream->alloc((void**)&forUnmarshaling->pShadingRatePalettes, forUnmarshaling->viewportCount * sizeof(const VkShadingRatePaletteNV));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->viewportCount; ++i)
+        if ((forUnmarshaling) != nullptr)
         {
-            unmarshal_VkShadingRatePaletteNV(vkStream, (VkShadingRatePaletteNV*)(forUnmarshaling->pShadingRatePalettes + i));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->viewportCount; ++i)
+            {
+                unmarshal_VkShadingRatePaletteNV(vkStream, (VkShadingRatePaletteNV*)(forUnmarshaling->pShadingRatePalettes + i));
+            }
         }
     }
 }
@@ -15850,9 +16198,12 @@ void marshal_VkCoarseSampleOrderCustomNV(
     vkStream->write((VkShadingRatePaletteEntryNV*)&forMarshaling->shadingRate, sizeof(VkShadingRatePaletteEntryNV));
     vkStream->write((uint32_t*)&forMarshaling->sampleCount, sizeof(uint32_t));
     vkStream->write((uint32_t*)&forMarshaling->sampleLocationCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->sampleLocationCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkCoarseSampleLocationNV(vkStream, (const VkCoarseSampleLocationNV*)(forMarshaling->pSampleLocations + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->sampleLocationCount; ++i)
+        {
+            marshal_VkCoarseSampleLocationNV(vkStream, (const VkCoarseSampleLocationNV*)(forMarshaling->pSampleLocations + i));
+        }
     }
 }
 
@@ -15864,9 +16215,12 @@ void unmarshal_VkCoarseSampleOrderCustomNV(
     vkStream->read((uint32_t*)&forUnmarshaling->sampleCount, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->sampleLocationCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pSampleLocations, forUnmarshaling->sampleLocationCount * sizeof(const VkCoarseSampleLocationNV));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->sampleLocationCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkCoarseSampleLocationNV(vkStream, (VkCoarseSampleLocationNV*)(forUnmarshaling->pSampleLocations + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->sampleLocationCount; ++i)
+        {
+            unmarshal_VkCoarseSampleLocationNV(vkStream, (VkCoarseSampleLocationNV*)(forUnmarshaling->pSampleLocations + i));
+        }
     }
 }
 
@@ -15878,9 +16232,12 @@ void marshal_VkPipelineViewportCoarseSampleOrderStateCreateInfoNV(
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((VkCoarseSampleOrderTypeNV*)&forMarshaling->sampleOrderType, sizeof(VkCoarseSampleOrderTypeNV));
     vkStream->write((uint32_t*)&forMarshaling->customSampleOrderCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->customSampleOrderCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkCoarseSampleOrderCustomNV(vkStream, (const VkCoarseSampleOrderCustomNV*)(forMarshaling->pCustomSampleOrders + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->customSampleOrderCount; ++i)
+        {
+            marshal_VkCoarseSampleOrderCustomNV(vkStream, (const VkCoarseSampleOrderCustomNV*)(forMarshaling->pCustomSampleOrders + i));
+        }
     }
 }
 
@@ -15904,9 +16261,12 @@ void unmarshal_VkPipelineViewportCoarseSampleOrderStateCreateInfoNV(
     vkStream->read((VkCoarseSampleOrderTypeNV*)&forUnmarshaling->sampleOrderType, sizeof(VkCoarseSampleOrderTypeNV));
     vkStream->read((uint32_t*)&forUnmarshaling->customSampleOrderCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pCustomSampleOrders, forUnmarshaling->customSampleOrderCount * sizeof(const VkCoarseSampleOrderCustomNV));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->customSampleOrderCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkCoarseSampleOrderCustomNV(vkStream, (VkCoarseSampleOrderCustomNV*)(forUnmarshaling->pCustomSampleOrders + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->customSampleOrderCount; ++i)
+        {
+            unmarshal_VkCoarseSampleOrderCustomNV(vkStream, (VkCoarseSampleOrderCustomNV*)(forUnmarshaling->pCustomSampleOrders + i));
+        }
     }
 }
 
@@ -15957,14 +16317,20 @@ void marshal_VkRayTracingPipelineCreateInfoNV(
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((VkPipelineCreateFlags*)&forMarshaling->flags, sizeof(VkPipelineCreateFlags));
     vkStream->write((uint32_t*)&forMarshaling->stageCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->stageCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkPipelineShaderStageCreateInfo(vkStream, (const VkPipelineShaderStageCreateInfo*)(forMarshaling->pStages + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->stageCount; ++i)
+        {
+            marshal_VkPipelineShaderStageCreateInfo(vkStream, (const VkPipelineShaderStageCreateInfo*)(forMarshaling->pStages + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->groupCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->groupCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkRayTracingShaderGroupCreateInfoNV(vkStream, (const VkRayTracingShaderGroupCreateInfoNV*)(forMarshaling->pGroups + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->groupCount; ++i)
+        {
+            marshal_VkRayTracingShaderGroupCreateInfoNV(vkStream, (const VkRayTracingShaderGroupCreateInfoNV*)(forMarshaling->pGroups + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->maxRecursionDepth, sizeof(uint32_t));
     uint64_t cgen_var_0;
@@ -15996,15 +16362,21 @@ void unmarshal_VkRayTracingPipelineCreateInfoNV(
     vkStream->read((VkPipelineCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->stageCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pStages, forUnmarshaling->stageCount * sizeof(const VkPipelineShaderStageCreateInfo));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->stageCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkPipelineShaderStageCreateInfo(vkStream, (VkPipelineShaderStageCreateInfo*)(forUnmarshaling->pStages + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->stageCount; ++i)
+        {
+            unmarshal_VkPipelineShaderStageCreateInfo(vkStream, (VkPipelineShaderStageCreateInfo*)(forUnmarshaling->pStages + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->groupCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pGroups, forUnmarshaling->groupCount * sizeof(const VkRayTracingShaderGroupCreateInfoNV));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->groupCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkRayTracingShaderGroupCreateInfoNV(vkStream, (VkRayTracingShaderGroupCreateInfoNV*)(forUnmarshaling->pGroups + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->groupCount; ++i)
+        {
+            unmarshal_VkRayTracingShaderGroupCreateInfoNV(vkStream, (VkRayTracingShaderGroupCreateInfoNV*)(forUnmarshaling->pGroups + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->maxRecursionDepth, sizeof(uint32_t));
     uint64_t cgen_var_0;
@@ -16175,9 +16547,12 @@ void marshal_VkAccelerationStructureInfoNV(
     vkStream->write((VkBuildAccelerationStructureFlagsNV*)&forMarshaling->flags, sizeof(VkBuildAccelerationStructureFlagsNV));
     vkStream->write((uint32_t*)&forMarshaling->instanceCount, sizeof(uint32_t));
     vkStream->write((uint32_t*)&forMarshaling->geometryCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->geometryCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkGeometryNV(vkStream, (const VkGeometryNV*)(forMarshaling->pGeometries + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->geometryCount; ++i)
+        {
+            marshal_VkGeometryNV(vkStream, (const VkGeometryNV*)(forMarshaling->pGeometries + i));
+        }
     }
 }
 
@@ -16203,9 +16578,12 @@ void unmarshal_VkAccelerationStructureInfoNV(
     vkStream->read((uint32_t*)&forUnmarshaling->instanceCount, sizeof(uint32_t));
     vkStream->read((uint32_t*)&forUnmarshaling->geometryCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pGeometries, forUnmarshaling->geometryCount * sizeof(const VkGeometryNV));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->geometryCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkGeometryNV(vkStream, (VkGeometryNV*)(forUnmarshaling->pGeometries + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->geometryCount; ++i)
+        {
+            unmarshal_VkGeometryNV(vkStream, (VkGeometryNV*)(forUnmarshaling->pGeometries + i));
+        }
     }
 }
 
@@ -16961,9 +17339,12 @@ void marshal_VkPipelineVertexInputDivisorStateCreateInfoEXT(
     vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((uint32_t*)&forMarshaling->vertexBindingDivisorCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->vertexBindingDivisorCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkVertexInputBindingDivisorDescriptionEXT(vkStream, (const VkVertexInputBindingDivisorDescriptionEXT*)(forMarshaling->pVertexBindingDivisors + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->vertexBindingDivisorCount; ++i)
+        {
+            marshal_VkVertexInputBindingDivisorDescriptionEXT(vkStream, (const VkVertexInputBindingDivisorDescriptionEXT*)(forMarshaling->pVertexBindingDivisors + i));
+        }
     }
 }
 
@@ -16986,9 +17367,12 @@ void unmarshal_VkPipelineVertexInputDivisorStateCreateInfoEXT(
     }
     vkStream->read((uint32_t*)&forUnmarshaling->vertexBindingDivisorCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pVertexBindingDivisors, forUnmarshaling->vertexBindingDivisorCount * sizeof(const VkVertexInputBindingDivisorDescriptionEXT));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->vertexBindingDivisorCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkVertexInputBindingDivisorDescriptionEXT(vkStream, (VkVertexInputBindingDivisorDescriptionEXT*)(forUnmarshaling->pVertexBindingDivisors + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->vertexBindingDivisorCount; ++i)
+        {
+            unmarshal_VkVertexInputBindingDivisorDescriptionEXT(vkStream, (VkVertexInputBindingDivisorDescriptionEXT*)(forUnmarshaling->pVertexBindingDivisors + i));
+        }
     }
 }
 
@@ -17080,9 +17464,12 @@ void marshal_VkPipelineCreationFeedbackCreateInfoEXT(
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     marshal_VkPipelineCreationFeedbackEXT(vkStream, (VkPipelineCreationFeedbackEXT*)(forMarshaling->pPipelineCreationFeedback));
     vkStream->write((uint32_t*)&forMarshaling->pipelineStageCreationFeedbackCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->pipelineStageCreationFeedbackCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkPipelineCreationFeedbackEXT(vkStream, (VkPipelineCreationFeedbackEXT*)(forMarshaling->pPipelineStageCreationFeedbacks + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->pipelineStageCreationFeedbackCount; ++i)
+        {
+            marshal_VkPipelineCreationFeedbackEXT(vkStream, (VkPipelineCreationFeedbackEXT*)(forMarshaling->pPipelineStageCreationFeedbacks + i));
+        }
     }
 }
 
@@ -17107,9 +17494,12 @@ void unmarshal_VkPipelineCreationFeedbackCreateInfoEXT(
     unmarshal_VkPipelineCreationFeedbackEXT(vkStream, (VkPipelineCreationFeedbackEXT*)(forUnmarshaling->pPipelineCreationFeedback));
     vkStream->read((uint32_t*)&forUnmarshaling->pipelineStageCreationFeedbackCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pPipelineStageCreationFeedbacks, forUnmarshaling->pipelineStageCreationFeedbackCount * sizeof(VkPipelineCreationFeedbackEXT));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->pipelineStageCreationFeedbackCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkPipelineCreationFeedbackEXT(vkStream, (VkPipelineCreationFeedbackEXT*)(forUnmarshaling->pPipelineStageCreationFeedbacks + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->pipelineStageCreationFeedbackCount; ++i)
+        {
+            unmarshal_VkPipelineCreationFeedbackEXT(vkStream, (VkPipelineCreationFeedbackEXT*)(forUnmarshaling->pPipelineStageCreationFeedbacks + i));
+        }
     }
 }
 
@@ -17326,9 +17716,12 @@ void marshal_VkPipelineViewportExclusiveScissorStateCreateInfoNV(
     vkStream->putBe64(cgen_var_0);
     if (forMarshaling->pExclusiveScissors)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->exclusiveScissorCount; ++i)
+        if ((forMarshaling) != nullptr)
         {
-            marshal_VkRect2D(vkStream, (const VkRect2D*)(forMarshaling->pExclusiveScissors + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->exclusiveScissorCount; ++i)
+            {
+                marshal_VkRect2D(vkStream, (const VkRect2D*)(forMarshaling->pExclusiveScissors + i));
+            }
         }
     }
 }
@@ -17356,9 +17749,12 @@ void unmarshal_VkPipelineViewportExclusiveScissorStateCreateInfoNV(
     if (forUnmarshaling->pExclusiveScissors)
     {
         vkStream->alloc((void**)&forUnmarshaling->pExclusiveScissors, forUnmarshaling->exclusiveScissorCount * sizeof(const VkRect2D));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->exclusiveScissorCount; ++i)
+        if ((forUnmarshaling) != nullptr)
         {
-            unmarshal_VkRect2D(vkStream, (VkRect2D*)(forUnmarshaling->pExclusiveScissors + i));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->exclusiveScissorCount; ++i)
+            {
+                unmarshal_VkRect2D(vkStream, (VkRect2D*)(forUnmarshaling->pExclusiveScissors + i));
+            }
         }
     }
 }
@@ -19183,9 +19579,12 @@ void marshal_VkGraphicsShaderGroupCreateInfoNV(
     vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((uint32_t*)&forMarshaling->stageCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->stageCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkPipelineShaderStageCreateInfo(vkStream, (const VkPipelineShaderStageCreateInfo*)(forMarshaling->pStages + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->stageCount; ++i)
+        {
+            marshal_VkPipelineShaderStageCreateInfo(vkStream, (const VkPipelineShaderStageCreateInfo*)(forMarshaling->pStages + i));
+        }
     }
     // WARNING PTR CHECK
     uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pVertexInputState;
@@ -19222,9 +19621,12 @@ void unmarshal_VkGraphicsShaderGroupCreateInfoNV(
     }
     vkStream->read((uint32_t*)&forUnmarshaling->stageCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pStages, forUnmarshaling->stageCount * sizeof(const VkPipelineShaderStageCreateInfo));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->stageCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkPipelineShaderStageCreateInfo(vkStream, (VkPipelineShaderStageCreateInfo*)(forUnmarshaling->pStages + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->stageCount; ++i)
+        {
+            unmarshal_VkPipelineShaderStageCreateInfo(vkStream, (VkPipelineShaderStageCreateInfo*)(forUnmarshaling->pStages + i));
+        }
     }
     // WARNING PTR CHECK
     forUnmarshaling->pVertexInputState = (const VkPipelineVertexInputStateCreateInfo*)(uintptr_t)vkStream->getBe64();
@@ -19249,9 +19651,12 @@ void marshal_VkGraphicsPipelineShaderGroupsCreateInfoNV(
     vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((uint32_t*)&forMarshaling->groupCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->groupCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkGraphicsShaderGroupCreateInfoNV(vkStream, (const VkGraphicsShaderGroupCreateInfoNV*)(forMarshaling->pGroups + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->groupCount; ++i)
+        {
+            marshal_VkGraphicsShaderGroupCreateInfoNV(vkStream, (const VkGraphicsShaderGroupCreateInfoNV*)(forMarshaling->pGroups + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->pipelineCount, sizeof(uint32_t));
     if (forMarshaling->pipelineCount)
@@ -19282,9 +19687,12 @@ void unmarshal_VkGraphicsPipelineShaderGroupsCreateInfoNV(
     }
     vkStream->read((uint32_t*)&forUnmarshaling->groupCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pGroups, forUnmarshaling->groupCount * sizeof(const VkGraphicsShaderGroupCreateInfoNV));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->groupCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkGraphicsShaderGroupCreateInfoNV(vkStream, (VkGraphicsShaderGroupCreateInfoNV*)(forUnmarshaling->pGroups + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->groupCount; ++i)
+        {
+            unmarshal_VkGraphicsShaderGroupCreateInfoNV(vkStream, (VkGraphicsShaderGroupCreateInfoNV*)(forUnmarshaling->pGroups + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->pipelineCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pPipelines, forUnmarshaling->pipelineCount * sizeof(const VkPipeline));
@@ -19449,9 +19857,12 @@ void marshal_VkIndirectCommandsLayoutCreateInfoNV(
     vkStream->write((VkIndirectCommandsLayoutUsageFlagsNV*)&forMarshaling->flags, sizeof(VkIndirectCommandsLayoutUsageFlagsNV));
     vkStream->write((VkPipelineBindPoint*)&forMarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
     vkStream->write((uint32_t*)&forMarshaling->tokenCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->tokenCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkIndirectCommandsLayoutTokenNV(vkStream, (const VkIndirectCommandsLayoutTokenNV*)(forMarshaling->pTokens + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->tokenCount; ++i)
+        {
+            marshal_VkIndirectCommandsLayoutTokenNV(vkStream, (const VkIndirectCommandsLayoutTokenNV*)(forMarshaling->pTokens + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->streamCount, sizeof(uint32_t));
     vkStream->write((const uint32_t*)forMarshaling->pStreamStrides, forMarshaling->streamCount * sizeof(const uint32_t));
@@ -19478,9 +19889,12 @@ void unmarshal_VkIndirectCommandsLayoutCreateInfoNV(
     vkStream->read((VkPipelineBindPoint*)&forUnmarshaling->pipelineBindPoint, sizeof(VkPipelineBindPoint));
     vkStream->read((uint32_t*)&forUnmarshaling->tokenCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pTokens, forUnmarshaling->tokenCount * sizeof(const VkIndirectCommandsLayoutTokenNV));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->tokenCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkIndirectCommandsLayoutTokenNV(vkStream, (VkIndirectCommandsLayoutTokenNV*)(forUnmarshaling->pTokens + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->tokenCount; ++i)
+        {
+            unmarshal_VkIndirectCommandsLayoutTokenNV(vkStream, (VkIndirectCommandsLayoutTokenNV*)(forUnmarshaling->pTokens + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->streamCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pStreamStrides, forUnmarshaling->streamCount * sizeof(const uint32_t));
@@ -19501,9 +19915,12 @@ void marshal_VkGeneratedCommandsInfoNV(
     vkStream->handleMapping()->mapHandles_VkIndirectCommandsLayoutNV_u64(&forMarshaling->indirectCommandsLayout, &cgen_var_1, 1);
     vkStream->write((uint64_t*)&cgen_var_1, 1 * 8);
     vkStream->write((uint32_t*)&forMarshaling->streamCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->streamCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkIndirectCommandsStreamNV(vkStream, (const VkIndirectCommandsStreamNV*)(forMarshaling->pStreams + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->streamCount; ++i)
+        {
+            marshal_VkIndirectCommandsStreamNV(vkStream, (const VkIndirectCommandsStreamNV*)(forMarshaling->pStreams + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->sequencesCount, sizeof(uint32_t));
     uint64_t cgen_var_2;
@@ -19547,9 +19964,12 @@ void unmarshal_VkGeneratedCommandsInfoNV(
     vkStream->handleMapping()->mapHandles_u64_VkIndirectCommandsLayoutNV(&cgen_var_1, (VkIndirectCommandsLayoutNV*)&forUnmarshaling->indirectCommandsLayout, 1);
     vkStream->read((uint32_t*)&forUnmarshaling->streamCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pStreams, forUnmarshaling->streamCount * sizeof(const VkIndirectCommandsStreamNV));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->streamCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkIndirectCommandsStreamNV(vkStream, (VkIndirectCommandsStreamNV*)(forUnmarshaling->pStreams + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->streamCount; ++i)
+        {
+            unmarshal_VkIndirectCommandsStreamNV(vkStream, (VkIndirectCommandsStreamNV*)(forUnmarshaling->pStreams + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->sequencesCount, sizeof(uint32_t));
     uint64_t cgen_var_2;
@@ -20728,9 +21148,12 @@ void marshal_VkAccelerationStructureBuildGeometryInfoKHR(
     vkStream->putBe64(cgen_var_2);
     if (forMarshaling->pGeometries)
     {
-        for (uint32_t i = 0; i < (uint32_t)forMarshaling->geometryCount; ++i)
+        if ((forMarshaling) != nullptr)
         {
-            marshal_VkAccelerationStructureGeometryKHR(vkStream, (const VkAccelerationStructureGeometryKHR*)(forMarshaling->pGeometries + i));
+            for (uint32_t i = 0; i < (uint32_t)forMarshaling->geometryCount; ++i)
+            {
+                marshal_VkAccelerationStructureGeometryKHR(vkStream, (const VkAccelerationStructureGeometryKHR*)(forMarshaling->pGeometries + i));
+            }
         }
     }
     marshal_VkDeviceOrHostAddressKHR(vkStream, (VkDeviceOrHostAddressKHR*)(&forMarshaling->scratchData));
@@ -20768,9 +21191,12 @@ void unmarshal_VkAccelerationStructureBuildGeometryInfoKHR(
     if (forUnmarshaling->pGeometries)
     {
         vkStream->alloc((void**)&forUnmarshaling->pGeometries, forUnmarshaling->geometryCount * sizeof(const VkAccelerationStructureGeometryKHR));
-        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->geometryCount; ++i)
+        if ((forUnmarshaling) != nullptr)
         {
-            unmarshal_VkAccelerationStructureGeometryKHR(vkStream, (VkAccelerationStructureGeometryKHR*)(forUnmarshaling->pGeometries + i));
+            for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->geometryCount; ++i)
+            {
+                unmarshal_VkAccelerationStructureGeometryKHR(vkStream, (VkAccelerationStructureGeometryKHR*)(forUnmarshaling->pGeometries + i));
+            }
         }
     }
     unmarshal_VkDeviceOrHostAddressKHR(vkStream, (VkDeviceOrHostAddressKHR*)(&forUnmarshaling->scratchData));
@@ -21257,14 +21683,20 @@ void marshal_VkRayTracingPipelineCreateInfoKHR(
     marshal_extension_struct(vkStream, forMarshaling->pNext);
     vkStream->write((VkPipelineCreateFlags*)&forMarshaling->flags, sizeof(VkPipelineCreateFlags));
     vkStream->write((uint32_t*)&forMarshaling->stageCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->stageCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkPipelineShaderStageCreateInfo(vkStream, (const VkPipelineShaderStageCreateInfo*)(forMarshaling->pStages + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->stageCount; ++i)
+        {
+            marshal_VkPipelineShaderStageCreateInfo(vkStream, (const VkPipelineShaderStageCreateInfo*)(forMarshaling->pStages + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->groupCount, sizeof(uint32_t));
-    for (uint32_t i = 0; i < (uint32_t)forMarshaling->groupCount; ++i)
+    if ((forMarshaling) != nullptr)
     {
-        marshal_VkRayTracingShaderGroupCreateInfoKHR(vkStream, (const VkRayTracingShaderGroupCreateInfoKHR*)(forMarshaling->pGroups + i));
+        for (uint32_t i = 0; i < (uint32_t)forMarshaling->groupCount; ++i)
+        {
+            marshal_VkRayTracingShaderGroupCreateInfoKHR(vkStream, (const VkRayTracingShaderGroupCreateInfoKHR*)(forMarshaling->pGroups + i));
+        }
     }
     vkStream->write((uint32_t*)&forMarshaling->maxPipelineRayRecursionDepth, sizeof(uint32_t));
     // WARNING PTR CHECK
@@ -21317,15 +21749,21 @@ void unmarshal_VkRayTracingPipelineCreateInfoKHR(
     vkStream->read((VkPipelineCreateFlags*)&forUnmarshaling->flags, sizeof(VkPipelineCreateFlags));
     vkStream->read((uint32_t*)&forUnmarshaling->stageCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pStages, forUnmarshaling->stageCount * sizeof(const VkPipelineShaderStageCreateInfo));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->stageCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkPipelineShaderStageCreateInfo(vkStream, (VkPipelineShaderStageCreateInfo*)(forUnmarshaling->pStages + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->stageCount; ++i)
+        {
+            unmarshal_VkPipelineShaderStageCreateInfo(vkStream, (VkPipelineShaderStageCreateInfo*)(forUnmarshaling->pStages + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->groupCount, sizeof(uint32_t));
     vkStream->alloc((void**)&forUnmarshaling->pGroups, forUnmarshaling->groupCount * sizeof(const VkRayTracingShaderGroupCreateInfoKHR));
-    for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->groupCount; ++i)
+    if ((forUnmarshaling) != nullptr)
     {
-        unmarshal_VkRayTracingShaderGroupCreateInfoKHR(vkStream, (VkRayTracingShaderGroupCreateInfoKHR*)(forUnmarshaling->pGroups + i));
+        for (uint32_t i = 0; i < (uint32_t)forUnmarshaling->groupCount; ++i)
+        {
+            unmarshal_VkRayTracingShaderGroupCreateInfoKHR(vkStream, (VkRayTracingShaderGroupCreateInfoKHR*)(forUnmarshaling->pGroups + i));
+        }
     }
     vkStream->read((uint32_t*)&forUnmarshaling->maxPipelineRayRecursionDepth, sizeof(uint32_t));
     // WARNING PTR CHECK
