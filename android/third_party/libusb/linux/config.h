@@ -5,7 +5,7 @@
 #define DEFAULT_VISIBILITY __attribute__ ((visibility ("default")))
 
 /* Define to 1 to start with debug message logging enabled. */
-/* #undef ENABLE_DEBUG_LOGGING */
+/* #define ENABLE_DEBUG_LOGGING 1 */
 
 /* Define to 1 to enable message logging. */
 #define ENABLE_LOGGING 1
@@ -16,22 +16,33 @@
 /* Define to 1 if you have the `clock_gettime' function. */
 #define HAVE_CLOCK_GETTIME 1
 
+/* Define to 1 if you have the declaration of `EFD_CLOEXEC', and to 0 if you
+   don't. */
+/* #undef HAVE_DECL_EFD_CLOEXEC */
+
+/* Define to 1 if you have the declaration of `EFD_NONBLOCK', and to 0 if you
+   don't. */
+/* #undef HAVE_DECL_EFD_NONBLOCK */
+
 /* Define to 1 if you have the declaration of `TFD_CLOEXEC', and to 0 if you
    don't. */
-#define HAVE_DECL_TFD_CLOEXEC 1
+/* #undef HAVE_DECL_TFD_CLOEXEC */
 
 /* Define to 1 if you have the declaration of `TFD_NONBLOCK', and to 0 if you
    don't. */
-#define HAVE_DECL_TFD_NONBLOCK 1
+/* #undef HAVE_DECL_TFD_NONBLOCK */
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
+
+/* Define to 1 if the system has eventfd functionality. */
+/* #undef HAVE_EVENTFD */
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
 /* Define to 1 if you have the `udev' library (-ludev). */
-// #define HAVE_LIBUDEV 1
+/* #undef HAVE_LIBUDEV */
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
@@ -40,13 +51,16 @@
 #define HAVE_NFDS_T 1
 
 /* Define to 1 if you have the `pipe2' function. */
-#define HAVE_PIPE2 1
+/* #undef HAVE_PIPE2 */
+
+/* Define to 1 if you have the `pthread_condattr_setclock' function. */
+/* #undef HAVE_PTHREAD_CONDATTR_SETCLOCK */
 
 /* Define to 1 if you have the `pthread_setname_np' function. */
-#define HAVE_PTHREAD_SETNAME_NP 1
+/* #undef HAVE_PTHREAD_SETNAME_NP */
 
 /* Define to 1 if you have the `pthread_threadid_np' function. */
-/* #undef HAVE_PTHREAD_THREADID_NP */
+#define HAVE_PTHREAD_THREADID_NP 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
@@ -76,7 +90,7 @@
 #define HAVE_SYS_TYPES_H 1
 
 /* Define to 1 if the system has timerfd functionality. */
-#define HAVE_TIMERFD 1
+/* #undef HAVE_TIMERFD */
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
@@ -87,26 +101,42 @@
 /* Name of package */
 #define PACKAGE "libusb-1.0"
 
-/* Define to 1 if using the POSIX poll() implementation. */
-#define POLL_POSIX 1
+/* Define to the address where bug reports for this package should be sent. */
+#define PACKAGE_BUGREPORT "libusb-devel@lists.sourceforge.net"
 
-/* Define to 1 if using the Windows poll() implementation. */
-/* #undef POLL_WINDOWS */
+/* Define to the full name of this package. */
+#define PACKAGE_NAME "libusb-1.0"
+
+/* Define to the full name and version of this package. */
+#define PACKAGE_STRING "libusb-1.0 1.0.24"
+
+/* Define to the one symbol short name of this package. */
+#define PACKAGE_TARNAME "libusb-1.0"
+
+/* Define to the home page for this package. */
+#define PACKAGE_URL "http://libusb.info"
+
+/* Define to the version of this package. */
+#define PACKAGE_VERSION "1.0.24"
+
+/* Define to 1 if compiling for a POSIX platform. */
+#define PLATFORM_POSIX 1
+
+/* Define to 1 if compiling for a Windows platform. */
+/* #undef PLATFORM_WINDOWS */
+
+/* Define to the attribute for enabling parameter checks on printf-like
+   functions. */
+#define PRINTF_FORMAT(a, b) __attribute__ ((__format__ (__printf__, a, b)))
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
-
-/* Define to 1 if using POSIX threads. */
-#define THREADS_POSIX 1
-
-/* Define to 1 if using Windows threads. */
-/* #undef THREADS_WINDOWS */
 
 /* Define to 1 to output logging messages to the systemwide log. */
 /* #undef USE_SYSTEM_LOGGING_FACILITY */
 
 /* Version number of package */
-#define VERSION "1.0.23"
+#define VERSION "1.0.24"
 
 /* Enable GNU extensions. */
 #define _GNU_SOURCE 1
