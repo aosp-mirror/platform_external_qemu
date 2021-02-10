@@ -584,7 +584,7 @@ PFN_vkCmdWriteBufferMarkerAMD vkCmdWriteBufferMarkerAMD;
 PFN_vkCmdSetCheckpointNV vkCmdSetCheckpointNV;
 PFN_vkGetQueueCheckpointDataNV vkGetQueueCheckpointDataNV;
 #endif
-#ifdef VK_GOOGLE_address_space
+#if defined(VK_GOOGLE_android_emulator) || defined(VK_GOOGLE_address_space)
 PFN_vkMapMemoryIntoAddressSpaceGOOGLE vkMapMemoryIntoAddressSpaceGOOGLE;
 #endif
 };
