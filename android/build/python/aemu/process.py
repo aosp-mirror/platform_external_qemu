@@ -65,8 +65,10 @@ def get_system_env():
     if _CACHED_ENV != None:
         return _CACHED_ENV
 
-    local_env = os.environ.copy()
+    local_env = {} 
     if platform.system() == "Windows":
+        for key in os.environ:
+            local_env[key.upper()] = os.environ[key]
         vs = get_visual_studio()
         env_lines = subprocess.check_output([vs, "&&", "set"]).splitlines()
         for env_line in env_lines:
@@ -78,6 +80,7 @@ def get_system_env():
         if not expect_in(["VSINSTALLDIR", "VCTOOLSINSTALLDIR"], local_env):
             raise Exception("Missing required environment variable")
     else:
+        local_env = os.environ.copy()
         local_env["PATH"] = (
             os.path.join(
                 get_qemu_root(), "android", "third_party", "chromium", "depot_tools"
