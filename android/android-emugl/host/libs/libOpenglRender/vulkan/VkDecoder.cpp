@@ -270,10 +270,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     {
                         uint8_t* cgen_var_2_0_ptr = (uint8_t*)(*readStreamPtrPtr);
                         *readStreamPtrPtr += 8 * (*(pPhysicalDeviceCount));
-                        for (uint32_t k = 0; k < (*(pPhysicalDeviceCount)); ++k)
+                        if ((pPhysicalDeviceCount) != nullptr)
                         {
-                            uint64_t tmpval; memcpy(&tmpval, cgen_var_2_0_ptr + k * 8, sizeof(uint64_t));
-                            *(((VkPhysicalDevice*)pPhysicalDevices) + k) = (VkPhysicalDevice)(VkPhysicalDevice)((VkPhysicalDevice)tmpval);
+                            for (uint32_t k = 0; k < (*(pPhysicalDeviceCount)); ++k)
+                            {
+                                uint64_t tmpval; memcpy(&tmpval, cgen_var_2_0_ptr + k * 8, sizeof(uint64_t));
+                                *(((VkPhysicalDevice*)pPhysicalDevices) + k) = (VkPhysicalDevice)(VkPhysicalDevice)((VkPhysicalDevice)tmpval);
+                            }
                         }
                     }
                 }
@@ -542,11 +545,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkQueueFamilyProperties(vkReadStream, (VkQueueFamilyProperties*)(pQueueFamilyProperties + i), readStreamPtrPtr);
                     }
                 }
-                if (pQueueFamilyProperties)
+                if ((pQueueFamilyPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
+                    if (pQueueFamilyProperties)
                     {
-                        transform_tohost_VkQueueFamilyProperties(m_state, (VkQueueFamilyProperties*)(pQueueFamilyProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
+                        {
+                            transform_tohost_VkQueueFamilyProperties(m_state, (VkQueueFamilyProperties*)(pQueueFamilyProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -562,11 +568,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pQueueFamilyPropertyCount, sizeof(uint32_t));
                 }
-                if (pQueueFamilyProperties)
+                if ((pQueueFamilyPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
+                    if (pQueueFamilyProperties)
                     {
-                        transform_fromhost_VkQueueFamilyProperties(m_state, (VkQueueFamilyProperties*)(pQueueFamilyProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
+                        {
+                            transform_fromhost_VkQueueFamilyProperties(m_state, (VkQueueFamilyProperties*)(pQueueFamilyProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -574,9 +583,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pQueueFamilyProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
+                    if ((pQueueFamilyPropertyCount) != nullptr)
                     {
-                        marshal_VkQueueFamilyProperties(vkStream, (VkQueueFamilyProperties*)(pQueueFamilyProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
+                        {
+                            marshal_VkQueueFamilyProperties(vkStream, (VkQueueFamilyProperties*)(pQueueFamilyProperties + i));
+                        }
                     }
                 }
                 vkStream->commitWrite();
@@ -849,11 +861,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkExtensionProperties(vkReadStream, (VkExtensionProperties*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_tohost_VkExtensionProperties(m_state, (VkExtensionProperties*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_tohost_VkExtensionProperties(m_state, (VkExtensionProperties*)(pProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -870,11 +885,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_fromhost_VkExtensionProperties(m_state, (VkExtensionProperties*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_fromhost_VkExtensionProperties(m_state, (VkExtensionProperties*)(pProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -882,9 +900,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_3);
                 if (pProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if ((pPropertyCount) != nullptr)
                     {
-                        marshal_VkExtensionProperties(vkStream, (VkExtensionProperties*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            marshal_VkExtensionProperties(vkStream, (VkExtensionProperties*)(pProperties + i));
+                        }
                     }
                 }
                 vkStream->write(&vkEnumerateInstanceExtensionProperties_VkResult_return, sizeof(VkResult));
@@ -953,11 +974,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkExtensionProperties(vkReadStream, (VkExtensionProperties*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_tohost_VkExtensionProperties(m_state, (VkExtensionProperties*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_tohost_VkExtensionProperties(m_state, (VkExtensionProperties*)(pProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -974,11 +998,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_fromhost_VkExtensionProperties(m_state, (VkExtensionProperties*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_fromhost_VkExtensionProperties(m_state, (VkExtensionProperties*)(pProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -986,9 +1013,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if ((pPropertyCount) != nullptr)
                     {
-                        marshal_VkExtensionProperties(vkStream, (VkExtensionProperties*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            marshal_VkExtensionProperties(vkStream, (VkExtensionProperties*)(pProperties + i));
+                        }
                     }
                 }
                 vkStream->write(&vkEnumerateDeviceExtensionProperties_VkResult_return, sizeof(VkResult));
@@ -1035,11 +1065,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkLayerProperties(vkReadStream, (VkLayerProperties*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_tohost_VkLayerProperties(m_state, (VkLayerProperties*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_tohost_VkLayerProperties(m_state, (VkLayerProperties*)(pProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -1056,11 +1089,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_fromhost_VkLayerProperties(m_state, (VkLayerProperties*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_fromhost_VkLayerProperties(m_state, (VkLayerProperties*)(pProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -1068,9 +1104,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_3);
                 if (pProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if ((pPropertyCount) != nullptr)
                     {
-                        marshal_VkLayerProperties(vkStream, (VkLayerProperties*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            marshal_VkLayerProperties(vkStream, (VkLayerProperties*)(pProperties + i));
+                        }
                     }
                 }
                 vkStream->write(&vkEnumerateInstanceLayerProperties_VkResult_return, sizeof(VkResult));
@@ -1126,11 +1165,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkLayerProperties(vkReadStream, (VkLayerProperties*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_tohost_VkLayerProperties(m_state, (VkLayerProperties*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_tohost_VkLayerProperties(m_state, (VkLayerProperties*)(pProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -1147,11 +1189,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_fromhost_VkLayerProperties(m_state, (VkLayerProperties*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_fromhost_VkLayerProperties(m_state, (VkLayerProperties*)(pProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -1159,9 +1204,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if ((pPropertyCount) != nullptr)
                     {
-                        marshal_VkLayerProperties(vkStream, (VkLayerProperties*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            marshal_VkLayerProperties(vkStream, (VkLayerProperties*)(pProperties + i));
+                        }
                     }
                 }
                 vkStream->write(&vkEnumerateDeviceLayerProperties_VkResult_return, sizeof(VkResult));
@@ -1940,11 +1988,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkSparseImageMemoryRequirements(vkReadStream, (VkSparseImageMemoryRequirements*)(pSparseMemoryRequirements + i), readStreamPtrPtr);
                     }
                 }
-                if (pSparseMemoryRequirements)
+                if ((pSparseMemoryRequirementCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
+                    if (pSparseMemoryRequirements)
                     {
-                        transform_tohost_VkSparseImageMemoryRequirements(m_state, (VkSparseImageMemoryRequirements*)(pSparseMemoryRequirements + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
+                        {
+                            transform_tohost_VkSparseImageMemoryRequirements(m_state, (VkSparseImageMemoryRequirements*)(pSparseMemoryRequirements + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -1960,11 +2011,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pSparseMemoryRequirementCount, sizeof(uint32_t));
                 }
-                if (pSparseMemoryRequirements)
+                if ((pSparseMemoryRequirementCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
+                    if (pSparseMemoryRequirements)
                     {
-                        transform_fromhost_VkSparseImageMemoryRequirements(m_state, (VkSparseImageMemoryRequirements*)(pSparseMemoryRequirements + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
+                        {
+                            transform_fromhost_VkSparseImageMemoryRequirements(m_state, (VkSparseImageMemoryRequirements*)(pSparseMemoryRequirements + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -1972,9 +2026,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_5);
                 if (pSparseMemoryRequirements)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
+                    if ((pSparseMemoryRequirementCount) != nullptr)
                     {
-                        marshal_VkSparseImageMemoryRequirements(vkStream, (VkSparseImageMemoryRequirements*)(pSparseMemoryRequirements + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
+                        {
+                            marshal_VkSparseImageMemoryRequirements(vkStream, (VkSparseImageMemoryRequirements*)(pSparseMemoryRequirements + i));
+                        }
                     }
                 }
                 vkStream->commitWrite();
@@ -2044,11 +2101,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkSparseImageFormatProperties(vkReadStream, (VkSparseImageFormatProperties*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_tohost_VkSparseImageFormatProperties(m_state, (VkSparseImageFormatProperties*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_tohost_VkSparseImageFormatProperties(m_state, (VkSparseImageFormatProperties*)(pProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -2064,11 +2124,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_fromhost_VkSparseImageFormatProperties(m_state, (VkSparseImageFormatProperties*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_fromhost_VkSparseImageFormatProperties(m_state, (VkSparseImageFormatProperties*)(pProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -2076,9 +2139,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if ((pPropertyCount) != nullptr)
                     {
-                        marshal_VkSparseImageFormatProperties(vkStream, (VkSparseImageFormatProperties*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            marshal_VkSparseImageFormatProperties(vkStream, (VkSparseImageFormatProperties*)(pProperties + i));
+                        }
                     }
                 }
                 vkStream->commitWrite();
@@ -4709,9 +4775,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     m_state->snapshot()->vkFreeDescriptorSets(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkFreeDescriptorSets_VkResult_return, device, descriptorPool, descriptorSetCount, boxed_pDescriptorSets_preserve);
                 }
-                for (uint32_t i = 0; i < ((descriptorSetCount)); ++i)
+                if (((descriptorSetCount)))
                 {
-                    delete_VkDescriptorSet(boxed_pDescriptorSets_preserve[i]);
+                    for (uint32_t i = 0; i < ((descriptorSetCount)); ++i)
+                    {
+                        delete_VkDescriptorSet(boxed_pDescriptorSets_preserve[i]);
+                    }
                 }
                 vkReadStream->clearPool();
                 if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
@@ -5332,9 +5401,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     m_state->snapshot()->vkFreeCommandBuffers(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, commandPool, commandBufferCount, boxed_pCommandBuffers_preserve);
                 }
-                for (uint32_t i = 0; i < ((commandBufferCount)); ++i)
+                if (((commandBufferCount)))
                 {
-                    delete_VkCommandBuffer(boxed_pCommandBuffers_preserve[i]);
+                    for (uint32_t i = 0; i < ((commandBufferCount)); ++i)
+                    {
+                        delete_VkCommandBuffer(boxed_pCommandBuffers_preserve[i]);
+                    }
                 }
                 vkReadStream->clearPool();
                 if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
@@ -7769,11 +7841,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkPhysicalDeviceGroupProperties(vkReadStream, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i), readStreamPtrPtr);
                     }
                 }
-                if (pPhysicalDeviceGroupProperties)
+                if ((pPhysicalDeviceGroupCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPhysicalDeviceGroupCount)); ++i)
+                    if (pPhysicalDeviceGroupProperties)
                     {
-                        transform_tohost_VkPhysicalDeviceGroupProperties(m_state, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPhysicalDeviceGroupCount)); ++i)
+                        {
+                            transform_tohost_VkPhysicalDeviceGroupProperties(m_state, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -7790,11 +7865,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pPhysicalDeviceGroupCount, sizeof(uint32_t));
                 }
-                if (pPhysicalDeviceGroupProperties)
+                if ((pPhysicalDeviceGroupCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPhysicalDeviceGroupCount)); ++i)
+                    if (pPhysicalDeviceGroupProperties)
                     {
-                        transform_fromhost_VkPhysicalDeviceGroupProperties(m_state, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPhysicalDeviceGroupCount)); ++i)
+                        {
+                            transform_fromhost_VkPhysicalDeviceGroupProperties(m_state, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -7802,9 +7880,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pPhysicalDeviceGroupProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPhysicalDeviceGroupCount)); ++i)
+                    if ((pPhysicalDeviceGroupCount) != nullptr)
                     {
-                        marshal_VkPhysicalDeviceGroupProperties(vkStream, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPhysicalDeviceGroupCount)); ++i)
+                        {
+                            marshal_VkPhysicalDeviceGroupProperties(vkStream, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i));
+                        }
                     }
                 }
                 vkStream->write(&vkEnumeratePhysicalDeviceGroups_VkResult_return, sizeof(VkResult));
@@ -7966,11 +8047,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     transform_tohost_VkImageSparseMemoryRequirementsInfo2(m_state, (VkImageSparseMemoryRequirementsInfo2*)(pInfo));
                 }
-                if (pSparseMemoryRequirements)
+                if ((pSparseMemoryRequirementCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
+                    if (pSparseMemoryRequirements)
                     {
-                        transform_tohost_VkSparseImageMemoryRequirements2(m_state, (VkSparseImageMemoryRequirements2*)(pSparseMemoryRequirements + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
+                        {
+                            transform_tohost_VkSparseImageMemoryRequirements2(m_state, (VkSparseImageMemoryRequirements2*)(pSparseMemoryRequirements + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -7986,11 +8070,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pSparseMemoryRequirementCount, sizeof(uint32_t));
                 }
-                if (pSparseMemoryRequirements)
+                if ((pSparseMemoryRequirementCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
+                    if (pSparseMemoryRequirements)
                     {
-                        transform_fromhost_VkSparseImageMemoryRequirements2(m_state, (VkSparseImageMemoryRequirements2*)(pSparseMemoryRequirements + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
+                        {
+                            transform_fromhost_VkSparseImageMemoryRequirements2(m_state, (VkSparseImageMemoryRequirements2*)(pSparseMemoryRequirements + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -7998,9 +8085,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pSparseMemoryRequirements)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
+                    if ((pSparseMemoryRequirementCount) != nullptr)
                     {
-                        marshal_VkSparseImageMemoryRequirements2(vkStream, (VkSparseImageMemoryRequirements2*)(pSparseMemoryRequirements + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
+                        {
+                            marshal_VkSparseImageMemoryRequirements2(vkStream, (VkSparseImageMemoryRequirements2*)(pSparseMemoryRequirements + i));
+                        }
                     }
                 }
                 vkStream->commitWrite();
@@ -8231,11 +8321,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkQueueFamilyProperties2(vkReadStream, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i), readStreamPtrPtr);
                     }
                 }
-                if (pQueueFamilyProperties)
+                if ((pQueueFamilyPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
+                    if (pQueueFamilyProperties)
                     {
-                        transform_tohost_VkQueueFamilyProperties2(m_state, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
+                        {
+                            transform_tohost_VkQueueFamilyProperties2(m_state, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -8251,11 +8344,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pQueueFamilyPropertyCount, sizeof(uint32_t));
                 }
-                if (pQueueFamilyProperties)
+                if ((pQueueFamilyPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
+                    if (pQueueFamilyProperties)
                     {
-                        transform_fromhost_VkQueueFamilyProperties2(m_state, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
+                        {
+                            transform_fromhost_VkQueueFamilyProperties2(m_state, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -8263,9 +8359,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pQueueFamilyProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
+                    if ((pQueueFamilyPropertyCount) != nullptr)
                     {
-                        marshal_VkQueueFamilyProperties2(vkStream, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
+                        {
+                            marshal_VkQueueFamilyProperties2(vkStream, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i));
+                        }
                     }
                 }
                 vkStream->commitWrite();
@@ -8368,11 +8467,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     transform_tohost_VkPhysicalDeviceSparseImageFormatInfo2(m_state, (VkPhysicalDeviceSparseImageFormatInfo2*)(pFormatInfo));
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_tohost_VkSparseImageFormatProperties2(m_state, (VkSparseImageFormatProperties2*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_tohost_VkSparseImageFormatProperties2(m_state, (VkSparseImageFormatProperties2*)(pProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -8388,11 +8490,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_fromhost_VkSparseImageFormatProperties2(m_state, (VkSparseImageFormatProperties2*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_fromhost_VkSparseImageFormatProperties2(m_state, (VkSparseImageFormatProperties2*)(pProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -8400,9 +8505,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if ((pPropertyCount) != nullptr)
                     {
-                        marshal_VkSparseImageFormatProperties2(vkStream, (VkSparseImageFormatProperties2*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            marshal_VkSparseImageFormatProperties2(vkStream, (VkSparseImageFormatProperties2*)(pProperties + i));
+                        }
                     }
                 }
                 vkStream->commitWrite();
@@ -9764,11 +9872,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkSurfaceFormatKHR(vkReadStream, (VkSurfaceFormatKHR*)(pSurfaceFormats + i), readStreamPtrPtr);
                     }
                 }
-                if (pSurfaceFormats)
+                if ((pSurfaceFormatCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pSurfaceFormatCount)); ++i)
+                    if (pSurfaceFormats)
                     {
-                        transform_tohost_VkSurfaceFormatKHR(m_state, (VkSurfaceFormatKHR*)(pSurfaceFormats + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pSurfaceFormatCount)); ++i)
+                        {
+                            transform_tohost_VkSurfaceFormatKHR(m_state, (VkSurfaceFormatKHR*)(pSurfaceFormats + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -9785,11 +9896,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pSurfaceFormatCount, sizeof(uint32_t));
                 }
-                if (pSurfaceFormats)
+                if ((pSurfaceFormatCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pSurfaceFormatCount)); ++i)
+                    if (pSurfaceFormats)
                     {
-                        transform_fromhost_VkSurfaceFormatKHR(m_state, (VkSurfaceFormatKHR*)(pSurfaceFormats + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pSurfaceFormatCount)); ++i)
+                        {
+                            transform_fromhost_VkSurfaceFormatKHR(m_state, (VkSurfaceFormatKHR*)(pSurfaceFormats + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -9797,9 +9911,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_5);
                 if (pSurfaceFormats)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pSurfaceFormatCount)); ++i)
+                    if ((pSurfaceFormatCount) != nullptr)
                     {
-                        marshal_VkSurfaceFormatKHR(vkStream, (VkSurfaceFormatKHR*)(pSurfaceFormats + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pSurfaceFormatCount)); ++i)
+                        {
+                            marshal_VkSurfaceFormatKHR(vkStream, (VkSurfaceFormatKHR*)(pSurfaceFormats + i));
+                        }
                     }
                 }
                 vkStream->write(&vkGetPhysicalDeviceSurfaceFormatsKHR_VkResult_return, sizeof(VkResult));
@@ -10060,10 +10177,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     {
                         uint8_t* cgen_var_3_0_ptr = (uint8_t*)(*readStreamPtrPtr);
                         *readStreamPtrPtr += 8 * (*(pSwapchainImageCount));
-                        for (uint32_t k = 0; k < (*(pSwapchainImageCount)); ++k)
+                        if ((pSwapchainImageCount) != nullptr)
                         {
-                            uint64_t tmpval; memcpy(&tmpval, cgen_var_3_0_ptr + k * 8, sizeof(uint64_t));
-                            *(((VkImage*)pSwapchainImages) + k) = (VkImage)(VkImage)((VkImage)tmpval);
+                            for (uint32_t k = 0; k < (*(pSwapchainImageCount)); ++k)
+                            {
+                                uint64_t tmpval; memcpy(&tmpval, cgen_var_3_0_ptr + k * 8, sizeof(uint64_t));
+                                *(((VkImage*)pSwapchainImages) + k) = (VkImage)(VkImage)((VkImage)tmpval);
+                            }
                         }
                     }
                 }
@@ -10351,11 +10471,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkRect2D(vkReadStream, (VkRect2D*)(pRects + i), readStreamPtrPtr);
                     }
                 }
-                if (pRects)
+                if ((pRectCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pRectCount)); ++i)
+                    if (pRects)
                     {
-                        transform_tohost_VkRect2D(m_state, (VkRect2D*)(pRects + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pRectCount)); ++i)
+                        {
+                            transform_tohost_VkRect2D(m_state, (VkRect2D*)(pRects + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -10372,11 +10495,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pRectCount, sizeof(uint32_t));
                 }
-                if (pRects)
+                if ((pRectCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pRectCount)); ++i)
+                    if (pRects)
                     {
-                        transform_fromhost_VkRect2D(m_state, (VkRect2D*)(pRects + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pRectCount)); ++i)
+                        {
+                            transform_fromhost_VkRect2D(m_state, (VkRect2D*)(pRects + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -10384,9 +10510,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_5);
                 if (pRects)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pRectCount)); ++i)
+                    if ((pRectCount) != nullptr)
                     {
-                        marshal_VkRect2D(vkStream, (VkRect2D*)(pRects + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pRectCount)); ++i)
+                        {
+                            marshal_VkRect2D(vkStream, (VkRect2D*)(pRects + i));
+                        }
                     }
                 }
                 vkStream->write(&vkGetPhysicalDevicePresentRectanglesKHR_VkResult_return, sizeof(VkResult));
@@ -10490,11 +10619,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkDisplayPropertiesKHR(vkReadStream, (VkDisplayPropertiesKHR*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_tohost_VkDisplayPropertiesKHR(m_state, (VkDisplayPropertiesKHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_tohost_VkDisplayPropertiesKHR(m_state, (VkDisplayPropertiesKHR*)(pProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -10511,11 +10643,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_fromhost_VkDisplayPropertiesKHR(m_state, (VkDisplayPropertiesKHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_fromhost_VkDisplayPropertiesKHR(m_state, (VkDisplayPropertiesKHR*)(pProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -10523,9 +10658,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if ((pPropertyCount) != nullptr)
                     {
-                        marshal_VkDisplayPropertiesKHR(vkStream, (VkDisplayPropertiesKHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            marshal_VkDisplayPropertiesKHR(vkStream, (VkDisplayPropertiesKHR*)(pProperties + i));
+                        }
                     }
                 }
                 vkStream->write(&vkGetPhysicalDeviceDisplayPropertiesKHR_VkResult_return, sizeof(VkResult));
@@ -10581,11 +10719,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkDisplayPlanePropertiesKHR(vkReadStream, (VkDisplayPlanePropertiesKHR*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_tohost_VkDisplayPlanePropertiesKHR(m_state, (VkDisplayPlanePropertiesKHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_tohost_VkDisplayPlanePropertiesKHR(m_state, (VkDisplayPlanePropertiesKHR*)(pProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -10602,11 +10743,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_fromhost_VkDisplayPlanePropertiesKHR(m_state, (VkDisplayPlanePropertiesKHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_fromhost_VkDisplayPlanePropertiesKHR(m_state, (VkDisplayPlanePropertiesKHR*)(pProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -10614,9 +10758,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if ((pPropertyCount) != nullptr)
                     {
-                        marshal_VkDisplayPlanePropertiesKHR(vkStream, (VkDisplayPlanePropertiesKHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            marshal_VkDisplayPlanePropertiesKHR(vkStream, (VkDisplayPlanePropertiesKHR*)(pProperties + i));
+                        }
                     }
                 }
                 vkStream->write(&vkGetPhysicalDeviceDisplayPlanePropertiesKHR_VkResult_return, sizeof(VkResult));
@@ -10674,10 +10821,13 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     {
                         uint8_t* cgen_var_2_0_ptr = (uint8_t*)(*readStreamPtrPtr);
                         *readStreamPtrPtr += 8 * (*(pDisplayCount));
-                        for (uint32_t k = 0; k < (*(pDisplayCount)); ++k)
+                        if ((pDisplayCount) != nullptr)
                         {
-                            uint64_t tmpval; memcpy(&tmpval, cgen_var_2_0_ptr + k * 8, sizeof(uint64_t));
-                            *(((VkDisplayKHR*)pDisplays) + k) = (VkDisplayKHR)(VkDisplayKHR)((VkDisplayKHR)tmpval);
+                            for (uint32_t k = 0; k < (*(pDisplayCount)); ++k)
+                            {
+                                uint64_t tmpval; memcpy(&tmpval, cgen_var_2_0_ptr + k * 8, sizeof(uint64_t));
+                                *(((VkDisplayKHR*)pDisplays) + k) = (VkDisplayKHR)(VkDisplayKHR)((VkDisplayKHR)tmpval);
+                            }
                         }
                     }
                 }
@@ -10766,11 +10916,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkDisplayModePropertiesKHR(vkReadStream, (VkDisplayModePropertiesKHR*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_tohost_VkDisplayModePropertiesKHR(m_state, (VkDisplayModePropertiesKHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_tohost_VkDisplayModePropertiesKHR(m_state, (VkDisplayModePropertiesKHR*)(pProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -10787,11 +10940,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_fromhost_VkDisplayModePropertiesKHR(m_state, (VkDisplayModePropertiesKHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_fromhost_VkDisplayModePropertiesKHR(m_state, (VkDisplayModePropertiesKHR*)(pProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -10799,9 +10955,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_5);
                 if (pProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if ((pPropertyCount) != nullptr)
                     {
-                        marshal_VkDisplayModePropertiesKHR(vkStream, (VkDisplayModePropertiesKHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            marshal_VkDisplayModePropertiesKHR(vkStream, (VkDisplayModePropertiesKHR*)(pProperties + i));
+                        }
                     }
                 }
                 vkStream->write(&vkGetDisplayModePropertiesKHR_VkResult_return, sizeof(VkResult));
@@ -11813,11 +11972,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkQueueFamilyProperties2(vkReadStream, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i), readStreamPtrPtr);
                     }
                 }
-                if (pQueueFamilyProperties)
+                if ((pQueueFamilyPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
+                    if (pQueueFamilyProperties)
                     {
-                        transform_tohost_VkQueueFamilyProperties2(m_state, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
+                        {
+                            transform_tohost_VkQueueFamilyProperties2(m_state, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -11833,11 +11995,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pQueueFamilyPropertyCount, sizeof(uint32_t));
                 }
-                if (pQueueFamilyProperties)
+                if ((pQueueFamilyPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
+                    if (pQueueFamilyProperties)
                     {
-                        transform_fromhost_VkQueueFamilyProperties2(m_state, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
+                        {
+                            transform_fromhost_VkQueueFamilyProperties2(m_state, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -11845,9 +12010,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pQueueFamilyProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
+                    if ((pQueueFamilyPropertyCount) != nullptr)
                     {
-                        marshal_VkQueueFamilyProperties2(vkStream, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pQueueFamilyPropertyCount)); ++i)
+                        {
+                            marshal_VkQueueFamilyProperties2(vkStream, (VkQueueFamilyProperties2*)(pQueueFamilyProperties + i));
+                        }
                     }
                 }
                 vkStream->commitWrite();
@@ -11950,11 +12118,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     transform_tohost_VkPhysicalDeviceSparseImageFormatInfo2(m_state, (VkPhysicalDeviceSparseImageFormatInfo2*)(pFormatInfo));
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_tohost_VkSparseImageFormatProperties2(m_state, (VkSparseImageFormatProperties2*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_tohost_VkSparseImageFormatProperties2(m_state, (VkSparseImageFormatProperties2*)(pProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -11970,11 +12141,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_fromhost_VkSparseImageFormatProperties2(m_state, (VkSparseImageFormatProperties2*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_fromhost_VkSparseImageFormatProperties2(m_state, (VkSparseImageFormatProperties2*)(pProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -11982,9 +12156,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if ((pPropertyCount) != nullptr)
                     {
-                        marshal_VkSparseImageFormatProperties2(vkStream, (VkSparseImageFormatProperties2*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            marshal_VkSparseImageFormatProperties2(vkStream, (VkSparseImageFormatProperties2*)(pProperties + i));
+                        }
                     }
                 }
                 vkStream->commitWrite();
@@ -12209,11 +12386,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkPhysicalDeviceGroupProperties(vkReadStream, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i), readStreamPtrPtr);
                     }
                 }
-                if (pPhysicalDeviceGroupProperties)
+                if ((pPhysicalDeviceGroupCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPhysicalDeviceGroupCount)); ++i)
+                    if (pPhysicalDeviceGroupProperties)
                     {
-                        transform_tohost_VkPhysicalDeviceGroupProperties(m_state, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPhysicalDeviceGroupCount)); ++i)
+                        {
+                            transform_tohost_VkPhysicalDeviceGroupProperties(m_state, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -12230,11 +12410,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pPhysicalDeviceGroupCount, sizeof(uint32_t));
                 }
-                if (pPhysicalDeviceGroupProperties)
+                if ((pPhysicalDeviceGroupCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPhysicalDeviceGroupCount)); ++i)
+                    if (pPhysicalDeviceGroupProperties)
                     {
-                        transform_fromhost_VkPhysicalDeviceGroupProperties(m_state, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPhysicalDeviceGroupCount)); ++i)
+                        {
+                            transform_fromhost_VkPhysicalDeviceGroupProperties(m_state, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -12242,9 +12425,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pPhysicalDeviceGroupProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPhysicalDeviceGroupCount)); ++i)
+                    if ((pPhysicalDeviceGroupCount) != nullptr)
                     {
-                        marshal_VkPhysicalDeviceGroupProperties(vkStream, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPhysicalDeviceGroupCount)); ++i)
+                        {
+                            marshal_VkPhysicalDeviceGroupProperties(vkStream, (VkPhysicalDeviceGroupProperties*)(pPhysicalDeviceGroupProperties + i));
+                        }
                     }
                 }
                 vkStream->write(&vkEnumeratePhysicalDeviceGroupsKHR_VkResult_return, sizeof(VkResult));
@@ -13543,18 +13729,24 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkPerformanceCounterDescriptionKHR(vkReadStream, (VkPerformanceCounterDescriptionKHR*)(pCounterDescriptions + i), readStreamPtrPtr);
                     }
                 }
-                if (pCounters)
+                if ((pCounterCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pCounterCount)); ++i)
+                    if (pCounters)
                     {
-                        transform_tohost_VkPerformanceCounterKHR(m_state, (VkPerformanceCounterKHR*)(pCounters + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pCounterCount)); ++i)
+                        {
+                            transform_tohost_VkPerformanceCounterKHR(m_state, (VkPerformanceCounterKHR*)(pCounters + i));
+                        }
                     }
                 }
-                if (pCounterDescriptions)
+                if ((pCounterCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pCounterCount)); ++i)
+                    if (pCounterDescriptions)
                     {
-                        transform_tohost_VkPerformanceCounterDescriptionKHR(m_state, (VkPerformanceCounterDescriptionKHR*)(pCounterDescriptions + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pCounterCount)); ++i)
+                        {
+                            transform_tohost_VkPerformanceCounterDescriptionKHR(m_state, (VkPerformanceCounterDescriptionKHR*)(pCounterDescriptions + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -13571,11 +13763,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pCounterCount, sizeof(uint32_t));
                 }
-                if (pCounters)
+                if ((pCounterCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pCounterCount)); ++i)
+                    if (pCounters)
                     {
-                        transform_fromhost_VkPerformanceCounterKHR(m_state, (VkPerformanceCounterKHR*)(pCounters + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pCounterCount)); ++i)
+                        {
+                            transform_fromhost_VkPerformanceCounterKHR(m_state, (VkPerformanceCounterKHR*)(pCounters + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -13583,16 +13778,22 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_5);
                 if (pCounters)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pCounterCount)); ++i)
+                    if ((pCounterCount) != nullptr)
                     {
-                        marshal_VkPerformanceCounterKHR(vkStream, (VkPerformanceCounterKHR*)(pCounters + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pCounterCount)); ++i)
+                        {
+                            marshal_VkPerformanceCounterKHR(vkStream, (VkPerformanceCounterKHR*)(pCounters + i));
+                        }
                     }
                 }
-                if (pCounterDescriptions)
+                if ((pCounterCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pCounterCount)); ++i)
+                    if (pCounterDescriptions)
                     {
-                        transform_fromhost_VkPerformanceCounterDescriptionKHR(m_state, (VkPerformanceCounterDescriptionKHR*)(pCounterDescriptions + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pCounterCount)); ++i)
+                        {
+                            transform_fromhost_VkPerformanceCounterDescriptionKHR(m_state, (VkPerformanceCounterDescriptionKHR*)(pCounterDescriptions + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -13600,9 +13801,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_6);
                 if (pCounterDescriptions)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pCounterCount)); ++i)
+                    if ((pCounterCount) != nullptr)
                     {
-                        marshal_VkPerformanceCounterDescriptionKHR(vkStream, (VkPerformanceCounterDescriptionKHR*)(pCounterDescriptions + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pCounterCount)); ++i)
+                        {
+                            marshal_VkPerformanceCounterDescriptionKHR(vkStream, (VkPerformanceCounterDescriptionKHR*)(pCounterDescriptions + i));
+                        }
                     }
                 }
                 vkStream->write(&vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR_VkResult_return, sizeof(VkResult));
@@ -13834,11 +14038,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     transform_tohost_VkPhysicalDeviceSurfaceInfo2KHR(m_state, (VkPhysicalDeviceSurfaceInfo2KHR*)(pSurfaceInfo));
                 }
-                if (pSurfaceFormats)
+                if ((pSurfaceFormatCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pSurfaceFormatCount)); ++i)
+                    if (pSurfaceFormats)
                     {
-                        transform_tohost_VkSurfaceFormat2KHR(m_state, (VkSurfaceFormat2KHR*)(pSurfaceFormats + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pSurfaceFormatCount)); ++i)
+                        {
+                            transform_tohost_VkSurfaceFormat2KHR(m_state, (VkSurfaceFormat2KHR*)(pSurfaceFormats + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -13855,11 +14062,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pSurfaceFormatCount, sizeof(uint32_t));
                 }
-                if (pSurfaceFormats)
+                if ((pSurfaceFormatCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pSurfaceFormatCount)); ++i)
+                    if (pSurfaceFormats)
                     {
-                        transform_fromhost_VkSurfaceFormat2KHR(m_state, (VkSurfaceFormat2KHR*)(pSurfaceFormats + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pSurfaceFormatCount)); ++i)
+                        {
+                            transform_fromhost_VkSurfaceFormat2KHR(m_state, (VkSurfaceFormat2KHR*)(pSurfaceFormats + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -13867,9 +14077,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pSurfaceFormats)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pSurfaceFormatCount)); ++i)
+                    if ((pSurfaceFormatCount) != nullptr)
                     {
-                        marshal_VkSurfaceFormat2KHR(vkStream, (VkSurfaceFormat2KHR*)(pSurfaceFormats + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pSurfaceFormatCount)); ++i)
+                        {
+                            marshal_VkSurfaceFormat2KHR(vkStream, (VkSurfaceFormat2KHR*)(pSurfaceFormats + i));
+                        }
                     }
                 }
                 vkStream->write(&vkGetPhysicalDeviceSurfaceFormats2KHR_VkResult_return, sizeof(VkResult));
@@ -13929,11 +14142,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkDisplayProperties2KHR(vkReadStream, (VkDisplayProperties2KHR*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_tohost_VkDisplayProperties2KHR(m_state, (VkDisplayProperties2KHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_tohost_VkDisplayProperties2KHR(m_state, (VkDisplayProperties2KHR*)(pProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -13950,11 +14166,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_fromhost_VkDisplayProperties2KHR(m_state, (VkDisplayProperties2KHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_fromhost_VkDisplayProperties2KHR(m_state, (VkDisplayProperties2KHR*)(pProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -13962,9 +14181,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if ((pPropertyCount) != nullptr)
                     {
-                        marshal_VkDisplayProperties2KHR(vkStream, (VkDisplayProperties2KHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            marshal_VkDisplayProperties2KHR(vkStream, (VkDisplayProperties2KHR*)(pProperties + i));
+                        }
                     }
                 }
                 vkStream->write(&vkGetPhysicalDeviceDisplayProperties2KHR_VkResult_return, sizeof(VkResult));
@@ -14020,11 +14242,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkDisplayPlaneProperties2KHR(vkReadStream, (VkDisplayPlaneProperties2KHR*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_tohost_VkDisplayPlaneProperties2KHR(m_state, (VkDisplayPlaneProperties2KHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_tohost_VkDisplayPlaneProperties2KHR(m_state, (VkDisplayPlaneProperties2KHR*)(pProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -14041,11 +14266,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_fromhost_VkDisplayPlaneProperties2KHR(m_state, (VkDisplayPlaneProperties2KHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_fromhost_VkDisplayPlaneProperties2KHR(m_state, (VkDisplayPlaneProperties2KHR*)(pProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -14053,9 +14281,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if ((pPropertyCount) != nullptr)
                     {
-                        marshal_VkDisplayPlaneProperties2KHR(vkStream, (VkDisplayPlaneProperties2KHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            marshal_VkDisplayPlaneProperties2KHR(vkStream, (VkDisplayPlaneProperties2KHR*)(pProperties + i));
+                        }
                     }
                 }
                 vkStream->write(&vkGetPhysicalDeviceDisplayPlaneProperties2KHR_VkResult_return, sizeof(VkResult));
@@ -14116,11 +14347,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkDisplayModeProperties2KHR(vkReadStream, (VkDisplayModeProperties2KHR*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_tohost_VkDisplayModeProperties2KHR(m_state, (VkDisplayModeProperties2KHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_tohost_VkDisplayModeProperties2KHR(m_state, (VkDisplayModeProperties2KHR*)(pProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -14137,11 +14371,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_fromhost_VkDisplayModeProperties2KHR(m_state, (VkDisplayModeProperties2KHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_fromhost_VkDisplayModeProperties2KHR(m_state, (VkDisplayModeProperties2KHR*)(pProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -14149,9 +14386,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_5);
                 if (pProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if ((pPropertyCount) != nullptr)
                     {
-                        marshal_VkDisplayModeProperties2KHR(vkStream, (VkDisplayModeProperties2KHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            marshal_VkDisplayModeProperties2KHR(vkStream, (VkDisplayModeProperties2KHR*)(pProperties + i));
+                        }
                     }
                 }
                 vkStream->write(&vkGetDisplayModeProperties2KHR_VkResult_return, sizeof(VkResult));
@@ -14374,11 +14614,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     transform_tohost_VkImageSparseMemoryRequirementsInfo2(m_state, (VkImageSparseMemoryRequirementsInfo2*)(pInfo));
                 }
-                if (pSparseMemoryRequirements)
+                if ((pSparseMemoryRequirementCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
+                    if (pSparseMemoryRequirements)
                     {
-                        transform_tohost_VkSparseImageMemoryRequirements2(m_state, (VkSparseImageMemoryRequirements2*)(pSparseMemoryRequirements + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
+                        {
+                            transform_tohost_VkSparseImageMemoryRequirements2(m_state, (VkSparseImageMemoryRequirements2*)(pSparseMemoryRequirements + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -14394,11 +14637,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pSparseMemoryRequirementCount, sizeof(uint32_t));
                 }
-                if (pSparseMemoryRequirements)
+                if ((pSparseMemoryRequirementCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
+                    if (pSparseMemoryRequirements)
                     {
-                        transform_fromhost_VkSparseImageMemoryRequirements2(m_state, (VkSparseImageMemoryRequirements2*)(pSparseMemoryRequirements + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
+                        {
+                            transform_fromhost_VkSparseImageMemoryRequirements2(m_state, (VkSparseImageMemoryRequirements2*)(pSparseMemoryRequirements + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -14406,9 +14652,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pSparseMemoryRequirements)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
+                    if ((pSparseMemoryRequirementCount) != nullptr)
                     {
-                        marshal_VkSparseImageMemoryRequirements2(vkStream, (VkSparseImageMemoryRequirements2*)(pSparseMemoryRequirements + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pSparseMemoryRequirementCount)); ++i)
+                        {
+                            marshal_VkSparseImageMemoryRequirements2(vkStream, (VkSparseImageMemoryRequirements2*)(pSparseMemoryRequirements + i));
+                        }
                     }
                 }
                 vkStream->commitWrite();
@@ -14992,11 +15241,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkPhysicalDeviceFragmentShadingRateKHR(vkReadStream, (VkPhysicalDeviceFragmentShadingRateKHR*)(pFragmentShadingRates + i), readStreamPtrPtr);
                     }
                 }
-                if (pFragmentShadingRates)
+                if ((pFragmentShadingRateCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pFragmentShadingRateCount)); ++i)
+                    if (pFragmentShadingRates)
                     {
-                        transform_tohost_VkPhysicalDeviceFragmentShadingRateKHR(m_state, (VkPhysicalDeviceFragmentShadingRateKHR*)(pFragmentShadingRates + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pFragmentShadingRateCount)); ++i)
+                        {
+                            transform_tohost_VkPhysicalDeviceFragmentShadingRateKHR(m_state, (VkPhysicalDeviceFragmentShadingRateKHR*)(pFragmentShadingRates + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -15013,11 +15265,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pFragmentShadingRateCount, sizeof(uint32_t));
                 }
-                if (pFragmentShadingRates)
+                if ((pFragmentShadingRateCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pFragmentShadingRateCount)); ++i)
+                    if (pFragmentShadingRates)
                     {
-                        transform_fromhost_VkPhysicalDeviceFragmentShadingRateKHR(m_state, (VkPhysicalDeviceFragmentShadingRateKHR*)(pFragmentShadingRates + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pFragmentShadingRateCount)); ++i)
+                        {
+                            transform_fromhost_VkPhysicalDeviceFragmentShadingRateKHR(m_state, (VkPhysicalDeviceFragmentShadingRateKHR*)(pFragmentShadingRates + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -15025,9 +15280,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pFragmentShadingRates)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pFragmentShadingRateCount)); ++i)
+                    if ((pFragmentShadingRateCount) != nullptr)
                     {
-                        marshal_VkPhysicalDeviceFragmentShadingRateKHR(vkStream, (VkPhysicalDeviceFragmentShadingRateKHR*)(pFragmentShadingRates + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pFragmentShadingRateCount)); ++i)
+                        {
+                            marshal_VkPhysicalDeviceFragmentShadingRateKHR(vkStream, (VkPhysicalDeviceFragmentShadingRateKHR*)(pFragmentShadingRates + i));
+                        }
                     }
                 }
                 vkStream->write(&vkGetPhysicalDeviceFragmentShadingRatesKHR_VkResult_return, sizeof(VkResult));
@@ -15470,11 +15728,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     transform_tohost_VkPipelineInfoKHR(m_state, (VkPipelineInfoKHR*)(pPipelineInfo));
                 }
-                if (pProperties)
+                if ((pExecutableCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pExecutableCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_tohost_VkPipelineExecutablePropertiesKHR(m_state, (VkPipelineExecutablePropertiesKHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pExecutableCount)); ++i)
+                        {
+                            transform_tohost_VkPipelineExecutablePropertiesKHR(m_state, (VkPipelineExecutablePropertiesKHR*)(pProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -15491,11 +15752,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pExecutableCount, sizeof(uint32_t));
                 }
-                if (pProperties)
+                if ((pExecutableCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pExecutableCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_fromhost_VkPipelineExecutablePropertiesKHR(m_state, (VkPipelineExecutablePropertiesKHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pExecutableCount)); ++i)
+                        {
+                            transform_fromhost_VkPipelineExecutablePropertiesKHR(m_state, (VkPipelineExecutablePropertiesKHR*)(pProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -15503,9 +15767,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pExecutableCount)); ++i)
+                    if ((pExecutableCount) != nullptr)
                     {
-                        marshal_VkPipelineExecutablePropertiesKHR(vkStream, (VkPipelineExecutablePropertiesKHR*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pExecutableCount)); ++i)
+                        {
+                            marshal_VkPipelineExecutablePropertiesKHR(vkStream, (VkPipelineExecutablePropertiesKHR*)(pProperties + i));
+                        }
                     }
                 }
                 vkStream->write(&vkGetPipelineExecutablePropertiesKHR_VkResult_return, sizeof(VkResult));
@@ -15568,11 +15835,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     transform_tohost_VkPipelineExecutableInfoKHR(m_state, (VkPipelineExecutableInfoKHR*)(pExecutableInfo));
                 }
-                if (pStatistics)
+                if ((pStatisticCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pStatisticCount)); ++i)
+                    if (pStatistics)
                     {
-                        transform_tohost_VkPipelineExecutableStatisticKHR(m_state, (VkPipelineExecutableStatisticKHR*)(pStatistics + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pStatisticCount)); ++i)
+                        {
+                            transform_tohost_VkPipelineExecutableStatisticKHR(m_state, (VkPipelineExecutableStatisticKHR*)(pStatistics + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -15589,11 +15859,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pStatisticCount, sizeof(uint32_t));
                 }
-                if (pStatistics)
+                if ((pStatisticCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pStatisticCount)); ++i)
+                    if (pStatistics)
                     {
-                        transform_fromhost_VkPipelineExecutableStatisticKHR(m_state, (VkPipelineExecutableStatisticKHR*)(pStatistics + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pStatisticCount)); ++i)
+                        {
+                            transform_fromhost_VkPipelineExecutableStatisticKHR(m_state, (VkPipelineExecutableStatisticKHR*)(pStatistics + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -15601,9 +15874,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pStatistics)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pStatisticCount)); ++i)
+                    if ((pStatisticCount) != nullptr)
                     {
-                        marshal_VkPipelineExecutableStatisticKHR(vkStream, (VkPipelineExecutableStatisticKHR*)(pStatistics + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pStatisticCount)); ++i)
+                        {
+                            marshal_VkPipelineExecutableStatisticKHR(vkStream, (VkPipelineExecutableStatisticKHR*)(pStatistics + i));
+                        }
                     }
                 }
                 vkStream->write(&vkGetPipelineExecutableStatisticsKHR_VkResult_return, sizeof(VkResult));
@@ -15666,11 +15942,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     transform_tohost_VkPipelineExecutableInfoKHR(m_state, (VkPipelineExecutableInfoKHR*)(pExecutableInfo));
                 }
-                if (pInternalRepresentations)
+                if ((pInternalRepresentationCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pInternalRepresentationCount)); ++i)
+                    if (pInternalRepresentations)
                     {
-                        transform_tohost_VkPipelineExecutableInternalRepresentationKHR(m_state, (VkPipelineExecutableInternalRepresentationKHR*)(pInternalRepresentations + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pInternalRepresentationCount)); ++i)
+                        {
+                            transform_tohost_VkPipelineExecutableInternalRepresentationKHR(m_state, (VkPipelineExecutableInternalRepresentationKHR*)(pInternalRepresentations + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -15687,11 +15966,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pInternalRepresentationCount, sizeof(uint32_t));
                 }
-                if (pInternalRepresentations)
+                if ((pInternalRepresentationCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pInternalRepresentationCount)); ++i)
+                    if (pInternalRepresentations)
                     {
-                        transform_fromhost_VkPipelineExecutableInternalRepresentationKHR(m_state, (VkPipelineExecutableInternalRepresentationKHR*)(pInternalRepresentations + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pInternalRepresentationCount)); ++i)
+                        {
+                            transform_fromhost_VkPipelineExecutableInternalRepresentationKHR(m_state, (VkPipelineExecutableInternalRepresentationKHR*)(pInternalRepresentations + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -15699,9 +15981,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pInternalRepresentations)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pInternalRepresentationCount)); ++i)
+                    if ((pInternalRepresentationCount) != nullptr)
                     {
-                        marshal_VkPipelineExecutableInternalRepresentationKHR(vkStream, (VkPipelineExecutableInternalRepresentationKHR*)(pInternalRepresentations + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pInternalRepresentationCount)); ++i)
+                        {
+                            marshal_VkPipelineExecutableInternalRepresentationKHR(vkStream, (VkPipelineExecutableInternalRepresentationKHR*)(pInternalRepresentations + i));
+                        }
                     }
                 }
                 vkStream->write(&vkGetPipelineExecutableInternalRepresentationsKHR_VkResult_return, sizeof(VkResult));
@@ -17979,11 +18264,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkPastPresentationTimingGOOGLE(vkReadStream, (VkPastPresentationTimingGOOGLE*)(pPresentationTimings + i), readStreamPtrPtr);
                     }
                 }
-                if (pPresentationTimings)
+                if ((pPresentationTimingCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPresentationTimingCount)); ++i)
+                    if (pPresentationTimings)
                     {
-                        transform_tohost_VkPastPresentationTimingGOOGLE(m_state, (VkPastPresentationTimingGOOGLE*)(pPresentationTimings + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPresentationTimingCount)); ++i)
+                        {
+                            transform_tohost_VkPastPresentationTimingGOOGLE(m_state, (VkPastPresentationTimingGOOGLE*)(pPresentationTimings + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -18000,11 +18288,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pPresentationTimingCount, sizeof(uint32_t));
                 }
-                if (pPresentationTimings)
+                if ((pPresentationTimingCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPresentationTimingCount)); ++i)
+                    if (pPresentationTimings)
                     {
-                        transform_fromhost_VkPastPresentationTimingGOOGLE(m_state, (VkPastPresentationTimingGOOGLE*)(pPresentationTimings + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPresentationTimingCount)); ++i)
+                        {
+                            transform_fromhost_VkPastPresentationTimingGOOGLE(m_state, (VkPastPresentationTimingGOOGLE*)(pPresentationTimings + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -18012,9 +18303,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_5);
                 if (pPresentationTimings)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPresentationTimingCount)); ++i)
+                    if ((pPresentationTimingCount) != nullptr)
                     {
-                        marshal_VkPastPresentationTimingGOOGLE(vkStream, (VkPastPresentationTimingGOOGLE*)(pPresentationTimings + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPresentationTimingCount)); ++i)
+                        {
+                            marshal_VkPastPresentationTimingGOOGLE(vkStream, (VkPastPresentationTimingGOOGLE*)(pPresentationTimings + i));
+                        }
                     }
                 }
                 vkStream->write(&vkGetPastPresentationTimingGOOGLE_VkResult_return, sizeof(VkResult));
@@ -20881,11 +21175,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkCheckpointDataNV(vkReadStream, (VkCheckpointDataNV*)(pCheckpointData + i), readStreamPtrPtr);
                     }
                 }
-                if (pCheckpointData)
+                if ((pCheckpointDataCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pCheckpointDataCount)); ++i)
+                    if (pCheckpointData)
                     {
-                        transform_tohost_VkCheckpointDataNV(m_state, (VkCheckpointDataNV*)(pCheckpointData + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pCheckpointDataCount)); ++i)
+                        {
+                            transform_tohost_VkCheckpointDataNV(m_state, (VkCheckpointDataNV*)(pCheckpointData + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -20901,11 +21198,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pCheckpointDataCount, sizeof(uint32_t));
                 }
-                if (pCheckpointData)
+                if ((pCheckpointDataCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pCheckpointDataCount)); ++i)
+                    if (pCheckpointData)
                     {
-                        transform_fromhost_VkCheckpointDataNV(m_state, (VkCheckpointDataNV*)(pCheckpointData + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pCheckpointDataCount)); ++i)
+                        {
+                            transform_fromhost_VkCheckpointDataNV(m_state, (VkCheckpointDataNV*)(pCheckpointData + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -20913,9 +21213,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pCheckpointData)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pCheckpointDataCount)); ++i)
+                    if ((pCheckpointDataCount) != nullptr)
                     {
-                        marshal_VkCheckpointDataNV(vkStream, (VkCheckpointDataNV*)(pCheckpointData + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pCheckpointDataCount)); ++i)
+                        {
+                            marshal_VkCheckpointDataNV(vkStream, (VkCheckpointDataNV*)(pCheckpointData + i));
+                        }
                     }
                 }
                 vkStream->commitWrite();
@@ -21640,11 +21943,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkPhysicalDeviceToolPropertiesEXT(vkReadStream, (VkPhysicalDeviceToolPropertiesEXT*)(pToolProperties + i), readStreamPtrPtr);
                     }
                 }
-                if (pToolProperties)
+                if ((pToolCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pToolCount)); ++i)
+                    if (pToolProperties)
                     {
-                        transform_tohost_VkPhysicalDeviceToolPropertiesEXT(m_state, (VkPhysicalDeviceToolPropertiesEXT*)(pToolProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pToolCount)); ++i)
+                        {
+                            transform_tohost_VkPhysicalDeviceToolPropertiesEXT(m_state, (VkPhysicalDeviceToolPropertiesEXT*)(pToolProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -21661,11 +21967,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pToolCount, sizeof(uint32_t));
                 }
-                if (pToolProperties)
+                if ((pToolCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pToolCount)); ++i)
+                    if (pToolProperties)
                     {
-                        transform_fromhost_VkPhysicalDeviceToolPropertiesEXT(m_state, (VkPhysicalDeviceToolPropertiesEXT*)(pToolProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pToolCount)); ++i)
+                        {
+                            transform_fromhost_VkPhysicalDeviceToolPropertiesEXT(m_state, (VkPhysicalDeviceToolPropertiesEXT*)(pToolProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -21673,9 +21982,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pToolProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pToolCount)); ++i)
+                    if ((pToolCount) != nullptr)
                     {
-                        marshal_VkPhysicalDeviceToolPropertiesEXT(vkStream, (VkPhysicalDeviceToolPropertiesEXT*)(pToolProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pToolCount)); ++i)
+                        {
+                            marshal_VkPhysicalDeviceToolPropertiesEXT(vkStream, (VkPhysicalDeviceToolPropertiesEXT*)(pToolProperties + i));
+                        }
                     }
                 }
                 vkStream->write(&vkGetPhysicalDeviceToolPropertiesEXT_VkResult_return, sizeof(VkResult));
@@ -21737,11 +22049,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkCooperativeMatrixPropertiesNV(vkReadStream, (VkCooperativeMatrixPropertiesNV*)(pProperties + i), readStreamPtrPtr);
                     }
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_tohost_VkCooperativeMatrixPropertiesNV(m_state, (VkCooperativeMatrixPropertiesNV*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_tohost_VkCooperativeMatrixPropertiesNV(m_state, (VkCooperativeMatrixPropertiesNV*)(pProperties + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -21758,11 +22073,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pPropertyCount, sizeof(uint32_t));
                 }
-                if (pProperties)
+                if ((pPropertyCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if (pProperties)
                     {
-                        transform_fromhost_VkCooperativeMatrixPropertiesNV(m_state, (VkCooperativeMatrixPropertiesNV*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            transform_fromhost_VkCooperativeMatrixPropertiesNV(m_state, (VkCooperativeMatrixPropertiesNV*)(pProperties + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -21770,9 +22088,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pProperties)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                    if ((pPropertyCount) != nullptr)
                     {
-                        marshal_VkCooperativeMatrixPropertiesNV(vkStream, (VkCooperativeMatrixPropertiesNV*)(pProperties + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pPropertyCount)); ++i)
+                        {
+                            marshal_VkCooperativeMatrixPropertiesNV(vkStream, (VkCooperativeMatrixPropertiesNV*)(pProperties + i));
+                        }
                     }
                 }
                 vkStream->write(&vkGetPhysicalDeviceCooperativeMatrixPropertiesNV_VkResult_return, sizeof(VkResult));
@@ -21830,11 +22151,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         reservedunmarshal_VkFramebufferMixedSamplesCombinationNV(vkReadStream, (VkFramebufferMixedSamplesCombinationNV*)(pCombinations + i), readStreamPtrPtr);
                     }
                 }
-                if (pCombinations)
+                if ((pCombinationCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pCombinationCount)); ++i)
+                    if (pCombinations)
                     {
-                        transform_tohost_VkFramebufferMixedSamplesCombinationNV(m_state, (VkFramebufferMixedSamplesCombinationNV*)(pCombinations + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pCombinationCount)); ++i)
+                        {
+                            transform_tohost_VkFramebufferMixedSamplesCombinationNV(m_state, (VkFramebufferMixedSamplesCombinationNV*)(pCombinations + i));
+                        }
                     }
                 }
                 if (m_logCalls)
@@ -21851,11 +22175,14 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     vkStream->write((uint32_t*)pCombinationCount, sizeof(uint32_t));
                 }
-                if (pCombinations)
+                if ((pCombinationCount) != nullptr)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pCombinationCount)); ++i)
+                    if (pCombinations)
                     {
-                        transform_fromhost_VkFramebufferMixedSamplesCombinationNV(m_state, (VkFramebufferMixedSamplesCombinationNV*)(pCombinations + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pCombinationCount)); ++i)
+                        {
+                            transform_fromhost_VkFramebufferMixedSamplesCombinationNV(m_state, (VkFramebufferMixedSamplesCombinationNV*)(pCombinations + i));
+                        }
                     }
                 }
                 // WARNING PTR CHECK
@@ -21863,9 +22190,12 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 vkStream->putBe64(cgen_var_4);
                 if (pCombinations)
                 {
-                    for (uint32_t i = 0; i < (uint32_t)(*(pCombinationCount)); ++i)
+                    if ((pCombinationCount) != nullptr)
                     {
-                        marshal_VkFramebufferMixedSamplesCombinationNV(vkStream, (VkFramebufferMixedSamplesCombinationNV*)(pCombinations + i));
+                        for (uint32_t i = 0; i < (uint32_t)(*(pCombinationCount)); ++i)
+                        {
+                            marshal_VkFramebufferMixedSamplesCombinationNV(vkStream, (VkFramebufferMixedSamplesCombinationNV*)(pCombinations + i));
+                        }
                     }
                 }
                 vkStream->write(&vkGetPhysicalDeviceSupportedFramebufferMixedSamplesCombinationsNV_VkResult_return, sizeof(VkResult));

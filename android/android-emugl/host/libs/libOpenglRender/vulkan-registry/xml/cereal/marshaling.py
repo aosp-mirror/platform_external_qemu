@@ -61,6 +61,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         self.exprValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = False)
         self.exprPrimitiveValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = False)
         self.lenAccessor = lambda t: self.cgen.generalLengthAccess(t, parentVarName = self.inputVarName)
+        self.lenAccessorGuard = lambda t: self.cgen.generalLengthAccessGuard(
+            t, parentVarName=self.inputVarName)
         self.filterVarAccessor = lambda t: self.cgen.filterVarAccess(t, parentVarName = self.inputVarName)
 
         self.dynAlloc = dynAlloc
@@ -401,6 +403,7 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
 
         access = self.exprAccessor(vulkanType)
         lenAccess = self.lenAccessor(vulkanType)
+        lenAccessGuard = self.lenAccessorGuard(vulkanType)
 
         self.beginFilterGuard(vulkanType)
 
@@ -408,6 +411,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
             self.doAllocSpace(vulkanType)
 
         if lenAccess is not None:
+            if lenAccessGuard is not None:
+                self.cgen.beginIf(lenAccessGuard)
             loopVar = "i"
             access = "%s + %s" % (access, loopVar)
             forInit = "uint32_t %s = 0" % loopVar
@@ -428,6 +433,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
 
         if lenAccess is not None:
             self.cgen.endFor()
+            if lenAccessGuard is not None:
+                self.cgen.endIf()
 
         if self.direction == "read":
             self.endFilterGuard(vulkanType, "%s = 0" % self.exprAccessor(vulkanType))
@@ -510,7 +517,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         access = self.exprAccessor(vulkanType)
 
         lenAccess = self.lenAccessor(vulkanType)
-
+        lenAccessGuard = self.lenAccessorGuard(vulkanType)
+    
         self.beginFilterGuard(vulkanType)
         self.doAllocSpace(vulkanType)
 
@@ -522,9 +530,13 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         else:
             if self.typeInfo.isNonAbiPortableType(vulkanType.typeName):
                 if lenAccess is not None:
+                    if lenAccessGuard is not None:
+                        self.cgen.beginIf(lenAccessGuard)
                     self.cgen.beginFor("uint32_t i = 0", "i < (uint32_t)%s" % lenAccess, "++i")
                     self.genPrimitiveStreamCall(vulkanType.getForValueAccess(), "%s[i]" % access)
                     self.cgen.endFor()
+                    if lenAccessGuard is not None:
+                        self.cgen.endIf()
                 else:
                     self.genPrimitiveStreamCall(vulkanType.getForValueAccess(), "(*%s)" % access)
             else:
