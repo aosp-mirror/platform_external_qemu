@@ -2481,6 +2481,12 @@ static int do_snapshot_remap(ControlClient client, char* args) {
     return true;
 }
 
+static int do_snapshot_last_loaded(ControlClient client, char* args) {
+    bool success = vmopers(client)->snapshotLastLoaded(client, control_write_out_cb,
+                                                       control_write_err_cb);
+    return success ? 0 : -1;
+}
+
 static const CommandDefRec  snapshot_commands[] =
 {
     { "list", "list available state snapshots",
@@ -2520,6 +2526,11 @@ static const CommandDefRec  snapshot_commands[] =
     "  commands will then repeatedly rewind to that checkpoint.\r\n"
     "  Issuing 'avd snapshot remap 1' after that will rewind again but activate auto-saving.\r\n",
     NULL, do_snapshot_remap, NULL },
+
+    { "get", "print the name of the snapshot loaded into the current session",
+    "'avd snapshot get' will print the name of the snapshot loaded into the current session\r\n"
+    "It will print (null) if no snapshot has been loaded.",
+    NULL, do_snapshot_last_loaded, NULL },
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };

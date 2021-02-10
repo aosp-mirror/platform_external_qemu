@@ -66,6 +66,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
             return android::MockAndroidVmOperations::mock->snapshotExport(
                     snapshot, dest, opaque, errConsumer);
         },
+        .snapshotLastLoaded = nullptr,
         .setSnapshotCallbacks =
                 [](void* opaque, const SnapshotCallbacks* callbacks) {
                     CHECK(android::MockAndroidVmOperations::mock);
