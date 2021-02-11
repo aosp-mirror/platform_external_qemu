@@ -33,9 +33,13 @@ class HandleMapCodegen(VulkanTypeIterator):
         def makeLengthAccess(varName):
             return lambda t: self.cgen.generalLengthAccess(t, parentVarName = varName)
 
+        def makeLengthAccessGuard(varName):
+            return lambda t: self.cgen.generalLengthAccessGuard(t, parentVarName=varName)
+
         self.exprAccessor = makeAccess(self.inputVar)
         self.exprAccessorValue = makeAccess(self.inputVar, asPtr = False)
         self.lenAccessor = makeLengthAccess(self.inputVar)
+        self.lenAccessorGuard = makeLengthAccessGuard(self.inputVar)
 
         self.checked = False
         self.isHandleFunc = isHandleFunc
@@ -70,8 +74,12 @@ class HandleMapCodegen(VulkanTypeIterator):
             return
         access = self.exprAccessor(vulkanType)
         lenAccess = self.lenAccessor(vulkanType)
+        lenAccessGuard = self.lenAccessorGuard(vulkanType)
 
         isPtr = vulkanType.pointerIndirectionLevels > 0
+
+        if lenAccessGuard is not None:
+            self.cgen.beginIf(lenAccessGuard)
 
         if isPtr:
             self.cgen.beginIf(access)
@@ -85,7 +93,7 @@ class HandleMapCodegen(VulkanTypeIterator):
             forIncr = "++%s" % loopVar
 
             self.cgen.beginFor(forInit, forCond, forIncr)
-
+            
         accessCasted = self.asNonConstCast(access, vulkanType)
         self.cgen.funcCall(None, self.prefix + vulkanType.typeName,
                            [self.handlemapVarName, accessCasted])
@@ -94,6 +102,9 @@ class HandleMapCodegen(VulkanTypeIterator):
             self.cgen.endFor()
 
         if isPtr:
+            self.cgen.endIf()
+
+        if lenAccessGuard is not None:
             self.cgen.endIf()
 
     def onString(self, vulkanType):

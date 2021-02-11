@@ -1048,10 +1048,13 @@ void reservedunmarshal_VkSubmitInfo(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->waitSemaphoreCount;
-        for (uint32_t k = 0; k < forUnmarshaling->waitSemaphoreCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
-            *(((VkSemaphore*)forUnmarshaling->pWaitSemaphores) + k) = (VkSemaphore)unbox_VkSemaphore((VkSemaphore)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->waitSemaphoreCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
+                *(((VkSemaphore*)forUnmarshaling->pWaitSemaphores) + k) = (VkSemaphore)unbox_VkSemaphore((VkSemaphore)tmpval);
+            }
         }
     }
     vkStream->alloc((void**)&forUnmarshaling->pWaitDstStageMask, forUnmarshaling->waitSemaphoreCount * sizeof(const VkPipelineStageFlags));
@@ -1064,10 +1067,13 @@ void reservedunmarshal_VkSubmitInfo(
     {
         uint8_t* cgen_var_1_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->commandBufferCount;
-        for (uint32_t k = 0; k < forUnmarshaling->commandBufferCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_1_ptr + k * 8, sizeof(uint64_t));
-            *(((VkCommandBuffer*)forUnmarshaling->pCommandBuffers) + k) = (VkCommandBuffer)unbox_VkCommandBuffer((VkCommandBuffer)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->commandBufferCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_1_ptr + k * 8, sizeof(uint64_t));
+                *(((VkCommandBuffer*)forUnmarshaling->pCommandBuffers) + k) = (VkCommandBuffer)unbox_VkCommandBuffer((VkCommandBuffer)tmpval);
+            }
         }
     }
     memcpy((uint32_t*)&forUnmarshaling->signalSemaphoreCount, *ptr, sizeof(uint32_t));
@@ -1077,10 +1083,13 @@ void reservedunmarshal_VkSubmitInfo(
     {
         uint8_t* cgen_var_2_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->signalSemaphoreCount;
-        for (uint32_t k = 0; k < forUnmarshaling->signalSemaphoreCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_2_ptr + k * 8, sizeof(uint64_t));
-            *(((VkSemaphore*)forUnmarshaling->pSignalSemaphores) + k) = (VkSemaphore)unbox_VkSemaphore((VkSemaphore)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->signalSemaphoreCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_2_ptr + k * 8, sizeof(uint64_t));
+                *(((VkSemaphore*)forUnmarshaling->pSignalSemaphores) + k) = (VkSemaphore)unbox_VkSemaphore((VkSemaphore)tmpval);
+            }
         }
     }
 }
@@ -1291,10 +1300,13 @@ void reservedunmarshal_VkBindSparseInfo(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->waitSemaphoreCount;
-        for (uint32_t k = 0; k < forUnmarshaling->waitSemaphoreCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
-            *(((VkSemaphore*)forUnmarshaling->pWaitSemaphores) + k) = (VkSemaphore)unbox_VkSemaphore((VkSemaphore)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->waitSemaphoreCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
+                *(((VkSemaphore*)forUnmarshaling->pWaitSemaphores) + k) = (VkSemaphore)unbox_VkSemaphore((VkSemaphore)tmpval);
+            }
         }
     }
     memcpy((uint32_t*)&forUnmarshaling->bufferBindCount, *ptr, sizeof(uint32_t));
@@ -1325,10 +1337,13 @@ void reservedunmarshal_VkBindSparseInfo(
     {
         uint8_t* cgen_var_1_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->signalSemaphoreCount;
-        for (uint32_t k = 0; k < forUnmarshaling->signalSemaphoreCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_1_ptr + k * 8, sizeof(uint64_t));
-            *(((VkSemaphore*)forUnmarshaling->pSignalSemaphores) + k) = (VkSemaphore)unbox_VkSemaphore((VkSemaphore)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->signalSemaphoreCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_1_ptr + k * 8, sizeof(uint64_t));
+                *(((VkSemaphore*)forUnmarshaling->pSignalSemaphores) + k) = (VkSemaphore)unbox_VkSemaphore((VkSemaphore)tmpval);
+            }
         }
     }
 }
@@ -2532,10 +2547,13 @@ void reservedunmarshal_VkPipelineLayoutCreateInfo(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->setLayoutCount;
-        for (uint32_t k = 0; k < forUnmarshaling->setLayoutCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
-            *(((VkDescriptorSetLayout*)forUnmarshaling->pSetLayouts) + k) = (VkDescriptorSetLayout)unbox_VkDescriptorSetLayout((VkDescriptorSetLayout)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->setLayoutCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
+                *(((VkDescriptorSetLayout*)forUnmarshaling->pSetLayouts) + k) = (VkDescriptorSetLayout)unbox_VkDescriptorSetLayout((VkDescriptorSetLayout)tmpval);
+            }
         }
     }
     memcpy((uint32_t*)&forUnmarshaling->pushConstantRangeCount, *ptr, sizeof(uint32_t));
@@ -2756,10 +2774,13 @@ void reservedunmarshal_VkDescriptorSetAllocateInfo(
     {
         uint8_t* cgen_var_1_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->descriptorSetCount;
-        for (uint32_t k = 0; k < forUnmarshaling->descriptorSetCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_1_ptr + k * 8, sizeof(uint64_t));
-            *(((VkDescriptorSetLayout*)forUnmarshaling->pSetLayouts) + k) = (VkDescriptorSetLayout)unbox_VkDescriptorSetLayout((VkDescriptorSetLayout)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->descriptorSetCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_1_ptr + k * 8, sizeof(uint64_t));
+                *(((VkDescriptorSetLayout*)forUnmarshaling->pSetLayouts) + k) = (VkDescriptorSetLayout)unbox_VkDescriptorSetLayout((VkDescriptorSetLayout)tmpval);
+            }
         }
     }
 }
@@ -2788,10 +2809,13 @@ void reservedunmarshal_VkDescriptorSetLayoutBinding(
         {
             uint8_t* cgen_var_0_0_ptr = (uint8_t*)(*ptr);
             *ptr += 8 * forUnmarshaling->descriptorCount;
-            for (uint32_t k = 0; k < forUnmarshaling->descriptorCount; ++k)
+            if ((forUnmarshaling) != nullptr)
             {
-                uint64_t tmpval; memcpy(&tmpval, cgen_var_0_0_ptr + k * 8, sizeof(uint64_t));
-                *(((VkSampler*)forUnmarshaling->pImmutableSamplers) + k) = (VkSampler)unbox_VkSampler((VkSampler)tmpval);
+                for (uint32_t k = 0; k < forUnmarshaling->descriptorCount; ++k)
+                {
+                    uint64_t tmpval; memcpy(&tmpval, cgen_var_0_0_ptr + k * 8, sizeof(uint64_t));
+                    *(((VkSampler*)forUnmarshaling->pImmutableSamplers) + k) = (VkSampler)unbox_VkSampler((VkSampler)tmpval);
+                }
             }
         }
     }
@@ -2915,10 +2939,13 @@ void reservedunmarshal_VkWriteDescriptorSet(
             {
                 uint8_t* cgen_var_3_0_ptr = (uint8_t*)(*ptr);
                 *ptr += 8 * forUnmarshaling->descriptorCount;
-                for (uint32_t k = 0; k < forUnmarshaling->descriptorCount; ++k)
+                if ((forUnmarshaling) != nullptr)
                 {
-                    uint64_t tmpval; memcpy(&tmpval, cgen_var_3_0_ptr + k * 8, sizeof(uint64_t));
-                    *(((VkBufferView*)forUnmarshaling->pTexelBufferView) + k) = (VkBufferView)unbox_VkBufferView((VkBufferView)tmpval);
+                    for (uint32_t k = 0; k < forUnmarshaling->descriptorCount; ++k)
+                    {
+                        uint64_t tmpval; memcpy(&tmpval, cgen_var_3_0_ptr + k * 8, sizeof(uint64_t));
+                        *(((VkBufferView*)forUnmarshaling->pTexelBufferView) + k) = (VkBufferView)unbox_VkBufferView((VkBufferView)tmpval);
+                    }
                 }
             }
         }
@@ -3000,10 +3027,13 @@ void reservedunmarshal_VkFramebufferCreateInfo(
     {
         uint8_t* cgen_var_1_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->attachmentCount;
-        for (uint32_t k = 0; k < forUnmarshaling->attachmentCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_1_ptr + k * 8, sizeof(uint64_t));
-            *(((VkImageView*)forUnmarshaling->pAttachments) + k) = (VkImageView)unbox_VkImageView((VkImageView)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->attachmentCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_1_ptr + k * 8, sizeof(uint64_t));
+                *(((VkImageView*)forUnmarshaling->pAttachments) + k) = (VkImageView)unbox_VkImageView((VkImageView)tmpval);
+            }
         }
     }
     memcpy((uint32_t*)&forUnmarshaling->width, *ptr, sizeof(uint32_t));
@@ -3924,10 +3954,13 @@ void reservedunmarshal_VkDeviceGroupDeviceCreateInfo(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->physicalDeviceCount;
-        for (uint32_t k = 0; k < forUnmarshaling->physicalDeviceCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
-            *(((VkPhysicalDevice*)forUnmarshaling->pPhysicalDevices) + k) = (VkPhysicalDevice)unbox_VkPhysicalDevice((VkPhysicalDevice)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->physicalDeviceCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
+                *(((VkPhysicalDevice*)forUnmarshaling->pPhysicalDevices) + k) = (VkPhysicalDevice)unbox_VkPhysicalDevice((VkPhysicalDevice)tmpval);
+            }
         }
     }
 }
@@ -6785,10 +6818,13 @@ void reservedunmarshal_VkRenderPassAttachmentBeginInfo(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->attachmentCount;
-        for (uint32_t k = 0; k < forUnmarshaling->attachmentCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
-            *(((VkImageView*)forUnmarshaling->pAttachments) + k) = (VkImageView)unbox_VkImageView((VkImageView)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->attachmentCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
+                *(((VkImageView*)forUnmarshaling->pAttachments) + k) = (VkImageView)unbox_VkImageView((VkImageView)tmpval);
+            }
         }
     }
 }
@@ -7110,10 +7146,13 @@ void reservedunmarshal_VkSemaphoreWaitInfo(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->semaphoreCount;
-        for (uint32_t k = 0; k < forUnmarshaling->semaphoreCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
-            *(((VkSemaphore*)forUnmarshaling->pSemaphores) + k) = (VkSemaphore)unbox_VkSemaphore((VkSemaphore)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->semaphoreCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
+                *(((VkSemaphore*)forUnmarshaling->pSemaphores) + k) = (VkSemaphore)unbox_VkSemaphore((VkSemaphore)tmpval);
+            }
         }
     }
     vkStream->alloc((void**)&forUnmarshaling->pValues, forUnmarshaling->semaphoreCount * sizeof(const uint64_t));
@@ -7424,10 +7463,13 @@ void reservedunmarshal_VkPresentInfoKHR(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->waitSemaphoreCount;
-        for (uint32_t k = 0; k < forUnmarshaling->waitSemaphoreCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
-            *(((VkSemaphore*)forUnmarshaling->pWaitSemaphores) + k) = (VkSemaphore)unbox_VkSemaphore((VkSemaphore)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->waitSemaphoreCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
+                *(((VkSemaphore*)forUnmarshaling->pWaitSemaphores) + k) = (VkSemaphore)unbox_VkSemaphore((VkSemaphore)tmpval);
+            }
         }
     }
     memcpy((uint32_t*)&forUnmarshaling->swapchainCount, *ptr, sizeof(uint32_t));
@@ -7437,10 +7479,13 @@ void reservedunmarshal_VkPresentInfoKHR(
     {
         uint8_t* cgen_var_1_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->swapchainCount;
-        for (uint32_t k = 0; k < forUnmarshaling->swapchainCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_1_ptr + k * 8, sizeof(uint64_t));
-            *(((VkSwapchainKHR*)forUnmarshaling->pSwapchains) + k) = (VkSwapchainKHR)unbox_VkSwapchainKHR((VkSwapchainKHR)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->swapchainCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_1_ptr + k * 8, sizeof(uint64_t));
+                *(((VkSwapchainKHR*)forUnmarshaling->pSwapchains) + k) = (VkSwapchainKHR)unbox_VkSwapchainKHR((VkSwapchainKHR)tmpval);
+            }
         }
     }
     vkStream->alloc((void**)&forUnmarshaling->pImageIndices, forUnmarshaling->swapchainCount * sizeof(const uint32_t));
@@ -8272,10 +8317,13 @@ void reservedunmarshal_VkWin32KeyedMutexAcquireReleaseInfoKHR(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->acquireCount;
-        for (uint32_t k = 0; k < forUnmarshaling->acquireCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
-            *(((VkDeviceMemory*)forUnmarshaling->pAcquireSyncs) + k) = (VkDeviceMemory)unbox_VkDeviceMemory((VkDeviceMemory)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->acquireCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
+                *(((VkDeviceMemory*)forUnmarshaling->pAcquireSyncs) + k) = (VkDeviceMemory)unbox_VkDeviceMemory((VkDeviceMemory)tmpval);
+            }
         }
     }
     vkStream->alloc((void**)&forUnmarshaling->pAcquireKeys, forUnmarshaling->acquireCount * sizeof(const uint64_t));
@@ -8291,10 +8339,13 @@ void reservedunmarshal_VkWin32KeyedMutexAcquireReleaseInfoKHR(
     {
         uint8_t* cgen_var_1_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->releaseCount;
-        for (uint32_t k = 0; k < forUnmarshaling->releaseCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_1_ptr + k * 8, sizeof(uint64_t));
-            *(((VkDeviceMemory*)forUnmarshaling->pReleaseSyncs) + k) = (VkDeviceMemory)unbox_VkDeviceMemory((VkDeviceMemory)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->releaseCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_1_ptr + k * 8, sizeof(uint64_t));
+                *(((VkDeviceMemory*)forUnmarshaling->pReleaseSyncs) + k) = (VkDeviceMemory)unbox_VkDeviceMemory((VkDeviceMemory)tmpval);
+            }
         }
     }
     vkStream->alloc((void**)&forUnmarshaling->pReleaseKeys, forUnmarshaling->releaseCount * sizeof(const uint64_t));
@@ -9884,10 +9935,13 @@ void reservedunmarshal_VkPipelineLibraryCreateInfoKHR(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->libraryCount;
-        for (uint32_t k = 0; k < forUnmarshaling->libraryCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
-            *(((VkPipeline*)forUnmarshaling->pLibraries) + k) = (VkPipeline)unbox_VkPipeline((VkPipeline)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->libraryCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
+                *(((VkPipeline*)forUnmarshaling->pLibraries) + k) = (VkPipeline)unbox_VkPipeline((VkPipeline)tmpval);
+            }
         }
     }
 }
@@ -11082,10 +11136,13 @@ void reservedunmarshal_VkWin32KeyedMutexAcquireReleaseInfoNV(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->acquireCount;
-        for (uint32_t k = 0; k < forUnmarshaling->acquireCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
-            *(((VkDeviceMemory*)forUnmarshaling->pAcquireSyncs) + k) = (VkDeviceMemory)unbox_VkDeviceMemory((VkDeviceMemory)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->acquireCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
+                *(((VkDeviceMemory*)forUnmarshaling->pAcquireSyncs) + k) = (VkDeviceMemory)unbox_VkDeviceMemory((VkDeviceMemory)tmpval);
+            }
         }
     }
     vkStream->alloc((void**)&forUnmarshaling->pAcquireKeys, forUnmarshaling->acquireCount * sizeof(const uint64_t));
@@ -11101,10 +11158,13 @@ void reservedunmarshal_VkWin32KeyedMutexAcquireReleaseInfoNV(
     {
         uint8_t* cgen_var_1_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->releaseCount;
-        for (uint32_t k = 0; k < forUnmarshaling->releaseCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_1_ptr + k * 8, sizeof(uint64_t));
-            *(((VkDeviceMemory*)forUnmarshaling->pReleaseSyncs) + k) = (VkDeviceMemory)unbox_VkDeviceMemory((VkDeviceMemory)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->releaseCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_1_ptr + k * 8, sizeof(uint64_t));
+                *(((VkDeviceMemory*)forUnmarshaling->pReleaseSyncs) + k) = (VkDeviceMemory)unbox_VkDeviceMemory((VkDeviceMemory)tmpval);
+            }
         }
     }
     vkStream->alloc((void**)&forUnmarshaling->pReleaseKeys, forUnmarshaling->releaseCount * sizeof(const uint64_t));
@@ -13798,10 +13858,13 @@ void reservedunmarshal_VkWriteDescriptorSetAccelerationStructureNV(
         {
             uint8_t* cgen_var_0_0_ptr = (uint8_t*)(*ptr);
             *ptr += 8 * forUnmarshaling->accelerationStructureCount;
-            for (uint32_t k = 0; k < forUnmarshaling->accelerationStructureCount; ++k)
+            if ((forUnmarshaling) != nullptr)
             {
-                uint64_t tmpval; memcpy(&tmpval, cgen_var_0_0_ptr + k * 8, sizeof(uint64_t));
-                *(((VkAccelerationStructureNV*)forUnmarshaling->pAccelerationStructures) + k) = (VkAccelerationStructureNV)unbox_VkAccelerationStructureNV((VkAccelerationStructureNV)tmpval);
+                for (uint32_t k = 0; k < forUnmarshaling->accelerationStructureCount; ++k)
+                {
+                    uint64_t tmpval; memcpy(&tmpval, cgen_var_0_0_ptr + k * 8, sizeof(uint64_t));
+                    *(((VkAccelerationStructureNV*)forUnmarshaling->pAccelerationStructures) + k) = (VkAccelerationStructureNV)unbox_VkAccelerationStructureNV((VkAccelerationStructureNV)tmpval);
+                }
             }
         }
     }
@@ -16405,10 +16468,13 @@ void reservedunmarshal_VkGraphicsPipelineShaderGroupsCreateInfoNV(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->pipelineCount;
-        for (uint32_t k = 0; k < forUnmarshaling->pipelineCount; ++k)
+        if ((forUnmarshaling) != nullptr)
         {
-            uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
-            *(((VkPipeline*)forUnmarshaling->pPipelines) + k) = (VkPipeline)unbox_VkPipeline((VkPipeline)tmpval);
+            for (uint32_t k = 0; k < forUnmarshaling->pipelineCount; ++k)
+            {
+                uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
+                *(((VkPipeline*)forUnmarshaling->pPipelines) + k) = (VkPipeline)unbox_VkPipeline((VkPipeline)tmpval);
+            }
         }
     }
 }
@@ -17756,10 +17822,13 @@ void reservedunmarshal_VkWriteDescriptorSetAccelerationStructureKHR(
         {
             uint8_t* cgen_var_0_0_ptr = (uint8_t*)(*ptr);
             *ptr += 8 * forUnmarshaling->accelerationStructureCount;
-            for (uint32_t k = 0; k < forUnmarshaling->accelerationStructureCount; ++k)
+            if ((forUnmarshaling) != nullptr)
             {
-                uint64_t tmpval; memcpy(&tmpval, cgen_var_0_0_ptr + k * 8, sizeof(uint64_t));
-                *(((VkAccelerationStructureKHR*)forUnmarshaling->pAccelerationStructures) + k) = (VkAccelerationStructureKHR)unbox_VkAccelerationStructureKHR((VkAccelerationStructureKHR)tmpval);
+                for (uint32_t k = 0; k < forUnmarshaling->accelerationStructureCount; ++k)
+                {
+                    uint64_t tmpval; memcpy(&tmpval, cgen_var_0_0_ptr + k * 8, sizeof(uint64_t));
+                    *(((VkAccelerationStructureKHR*)forUnmarshaling->pAccelerationStructures) + k) = (VkAccelerationStructureKHR)unbox_VkAccelerationStructureKHR((VkAccelerationStructureKHR)tmpval);
+                }
             }
         }
     }

@@ -63,6 +63,8 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
         self.exprValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = False)
         self.exprPrimitiveValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = False)
         self.lenAccessor = lambda t: self.cgen.generalLengthAccess(t, parentVarName = self.inputVarName)
+        self.lenAccessorGuard = lambda t: self.cgen.generalLengthAccessGuard(
+            t, parentVarName=self.inputVarName)
         self.filterVarAccessor = lambda t: self.cgen.filterVarAccess(t, parentVarName = self.inputVarName)
 
         self.dynAlloc = dynAlloc
@@ -142,7 +144,7 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
             self.typeInfo,
             vulkanType)))
 
-    def genHandleMappingCall(self, vulkanType, access, lenAccess):
+    def genHandleMappingCall(self, vulkanType, access, lenAccess, lenAccessGuard):
 
         if lenAccess is None:
             lenAccess = "1"
@@ -179,19 +181,27 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
                     self.cgen.stmt("*%s = (%s)%s(*%s)" % (access, vulkanType.typeName, mapFunc, access))
                     self.genStreamCall(vulkanType, access, "8 * %s" % lenAccess)
                 else:
+                    if lenAccessGuard is not None:
+                        self.cgen.beginIf(lenAccessGuard)
                     self.cgen.beginFor("uint32_t k = 0", "k < %s" % lenAccess, "++k")
                     self.cgen.stmt("%s[k] = (%s)%s(%s[k])" % (access, vulkanType.typeName, mapFunc, access))
                     self.cgen.endFor()
+                    if lenAccessGuard is not None:
+                        self.cgen.endIf()
                     self.genPtrIncr("8 * %s" % lenAccess)
             else:
                 if "1" == lenAccess:
                     self.cgen.stmt("*%s = %s((*%s))" % (handle64VarAccess, mapFunc64, access))
                     self.genStreamCall(handle64VarType, handle64VarAccess, handle64Bytes)
                 else:
+                    if lenAccessGuard is not None:
+                        self.cgen.beginIf(lenAccessGuard)
                     self.cgen.beginFor("uint32_t k = 0", "k < %s" % lenAccess, "++k")
                     self.cgen.stmt("uint64_t tmpval = %s(%s[k])" % (mapFunc64, access))
                     self.cgen.stmt("memcpy(%s_ptr + k * 8, &tmpval, sizeof(uint64_t))" % (handle64Var))
                     self.cgen.endFor()
+                    if lenAccessGuard is not None:
+                        self.cgen.endIf()
                     self.genPtrIncr("8 * %s" % lenAccess)
         else:
             if "1" == lenAccess:
@@ -201,11 +211,15 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
                     vulkanType.typeName,mapFunc, vulkanType.typeName, handle64VarAccess))
             else:
                 self.genPtrIncr("8 * %s" % lenAccess)
+                if lenAccessGuard is not None:
+                    self.cgen.beginIf(lenAccessGuard)
                 self.cgen.beginFor("uint32_t k = 0", "k < %s" % lenAccess, "++k")
                 self.cgen.stmt("uint64_t tmpval; memcpy(&tmpval, %s_ptr + k * 8, sizeof(uint64_t))" % handle64Var)
                 self.cgen.stmt("*((%s%s) + k) = (%s)%s((%s)tmpval)" % (
                     self.makeCastExpr(vulkanType.getForNonConstAccess()), access,
                     vulkanType.typeName, mapFunc, vulkanType.typeName))
+                if lenAccessGuard is not None:
+                    self.cgen.endIf()
                 self.cgen.endFor()
 
         if lenAccess != "1":
@@ -528,11 +542,17 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
     def onStringArray(self, vulkanType):
         access = self.exprAccessor(vulkanType)
         lenAccess = self.lenAccessor(vulkanType)
+        lenAccessGuard = self.lenAccessorGuard(vulkanType)
 
         if self.direction == "write":
             self.cgen.beginBlock()
 
-            self.cgen.stmt("uint32_t c = %s" % (lenAccess))
+            self.cgen.stmt("uint32_t c = 0")
+            if lenAccessGuard is not None:
+                self.cgen.beginIf(lenAccessGuard)
+            self.cgen.stmt("c = %s" % (lenAccess))
+            if lenAccessGuard is not None:
+                self.cgen.endIf()
             self.genMemcpyAndIncr(self.ptrVar, "(uint32_t*)" ,"&c", "sizeof(uint32_t)", toBe = True, actualSize = 4)
 
             self.cgen.beginFor("uint32_t i = 0", "i < c", "++i")
@@ -597,6 +617,7 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
         access = self.exprAccessor(vulkanType)
 
         lenAccess = self.lenAccessor(vulkanType)
+        lenAccessGuard = self.lenAccessorGuard(vulkanType)
 
         self.beginFilterGuard(vulkanType)
         self.doAllocSpace(vulkanType)
@@ -605,13 +626,18 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
             print("onPointer Needs filter: %s filterVar %s" % (access, vulkanType.filterVar))
 
         if vulkanType.isHandleType() and self.mapHandles:
-            self.genHandleMappingCall(vulkanType, access, lenAccess)
+            self.genHandleMappingCall(
+                vulkanType, access, lenAccess, lenAccessGuard)
         else:
             if self.typeInfo.isNonAbiPortableType(vulkanType.typeName):
                 if lenAccess is not None:
+                    if lenAccessGuard is not None:
+                        self.cgen.beginIf(lenAccessGuard)
                     self.cgen.beginFor("uint32_t i = 0", "i < (uint32_t)%s" % lenAccess, "++i")
                     self.genPrimitiveStreamCall(vulkanType.getForValueAccess(), "%s[i]" % access)
                     self.cgen.endFor()
+                    if lenAccessGuard is not None:
+                        self.cgen.endIf()
                 else:
                     self.genPrimitiveStreamCall(vulkanType.getForValueAccess(), "(*%s)" % access)
             else:
@@ -636,7 +662,7 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
             if vulkanType.filterVar != None:
                 print("onValue Needs filter: %s filterVar %s" % (access, vulkanType.filterVar))
             self.genHandleMappingCall(
-                vulkanType.getForAddressAccess(), access, "1")
+                vulkanType.getForAddressAccess(), access, "1", None)
         elif self.typeInfo.isNonAbiPortableType(vulkanType.typeName):
             access = self.exprPrimitiveValueAccessor(vulkanType)
             self.genPrimitiveStreamCall(vulkanType, access)

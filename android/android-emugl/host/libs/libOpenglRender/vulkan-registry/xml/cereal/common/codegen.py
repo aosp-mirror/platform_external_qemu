@@ -411,12 +411,12 @@ class CodeGen(object):
         lenExpr = vulkanType.getLengthExpression()
 
         if not lenExpr:
-            return None
+            return None, None
 
         if lenExpr == "null-terminated":
-            return "strlen(%s)" % vulkanType.paramName
+            return "strlen(%s)" % vulkanType.paramName, None
 
-        return lenExpr
+        return lenExpr, None
 
     def makeLengthAccessFromStruct(self,
                                    structInfo,
@@ -451,33 +451,37 @@ class CodeGen(object):
                 if (structInfo.name, vulkanType.paramName) == (c["structName"],
                                                                c["field"]):
                     deref = "->" if asPtr else "."
-                    expr = "%s%s%s" % (structVarName, deref, c["lenExprMember"])
-                    return c["postprocess"](expr)
+                    expr = "%s%s%s" % (structVarName, deref,
+                                       c["lenExprMember"])
+                    lenAccessGuardExpr = "%s" % structVarName
+                    return c["postprocess"](expr), lenAccessGuardExpr
 
-            return None
+            return None, None
 
         specialCaseAccess = \
-            handleSpecialCases( \
+            handleSpecialCases(
                 structInfo, vulkanType, structVarName, asPtr)
 
-        if specialCaseAccess is not None:
+        if specialCaseAccess != (None, None):
             return specialCaseAccess
 
         lenExpr = vulkanType.getLengthExpression()
 
         if not lenExpr:
-            return None
+            return None, None
 
         deref = "->" if asPtr else "."
-
+        lenAccessGuardExpr = "%s" % (
+            
+            structVarName) if deref else None
         if lenExpr == "null-terminated":
             return "strlen(%s%s%s)" % (structVarName, deref,
-                                       vulkanType.paramName)
+                                       vulkanType.paramName), lenAccessGuardExpr
 
         if not structInfo.getMember(lenExpr):
             return self.makeRawLengthAccess(vulkanType)
 
-        return "%s%s%s" % (structVarName, deref, lenExpr)
+        return "%s%s%s" % (structVarName, deref, lenExpr), lenAccessGuardExpr
 
     def makeLengthAccessFromApi(self, api, vulkanType):
         # Handle special cases first
@@ -486,22 +490,23 @@ class CodeGen(object):
             lenExpr = vulkanType.getLengthExpression()
 
             if lenExpr is None:
-                return None
+                return None, None
 
             if "::" in lenExpr:
                 structVarName, memberVarName = lenExpr.split("::")
-                return "%s->%s" % (structVarName, memberVarName)
-            return None
+                lenAccessGuardExpr = "%s" % (structVarName)
+                return "%s->%s" % (structVarName, memberVarName), lenAccessGuardExpr
+            return None, None
 
         specialCaseAccess = handleSpecialCases(vulkanType)
 
-        if specialCaseAccess is not None:
+        if specialCaseAccess != (None, None):
             return specialCaseAccess
 
         lenExpr = vulkanType.getLengthExpression()
 
         if not lenExpr:
-            return None
+            return None, None
 
         lenExprInfo = api.getParameter(lenExpr)
 
@@ -509,10 +514,11 @@ class CodeGen(object):
             return self.makeRawLengthAccess(vulkanType)
 
         if lenExpr == "null-terminated":
-            return "strlen(%s)" % vulkanType.paramName()
+            return "strlen(%s)" % vulkanType.paramName(), None
         else:
             deref = "*" if lenExprInfo.pointerIndirectionLevels > 0 else ""
-            return "(%s(%s))" % (deref, lenExpr)
+            lenAccessGuardExpr = "%s" % lenExpr if deref else None
+            return "(%s(%s))" % (deref, lenExpr), lenAccessGuardExpr
 
     def accessParameter(self, param, asPtr=True):
         if asPtr:
@@ -551,8 +557,7 @@ class CodeGen(object):
         os.abort("Could not find a way to access Vulkan type %s" %
                  vulkanType.name)
 
-
-    def generalLengthAccess(self, vulkanType, parentVarName="parent"):
+    def makeLengthAccess(self, vulkanType, parentVarName="parent"):
         if vulkanType.parent is None:
             return self.makeRawLengthAccess(vulkanType)
 
@@ -565,6 +570,12 @@ class CodeGen(object):
 
         os.abort("Could not find a way to access length of Vulkan type %s" %
                  vulkanType.name)
+
+    def generalLengthAccess(self, vulkanType, parentVarName="parent"):
+        return self.makeLengthAccess(vulkanType, parentVarName)[0]
+
+    def generalLengthAccessGuard(self, vulkanType, parentVarName="parent"):
+        return self.makeLengthAccess(vulkanType, parentVarName)[1]
 
     def vkApiCall(self, api, customPrefix="", customParameters=None, retVarDecl=True):
         callLhs = None
@@ -674,17 +685,18 @@ class CodeGen(object):
         ptrCast = "(uintptr_t)" if needPtrCast else ""
 
         if direction == "read":
-            self.stmt("%s = (%s)%s%s->%s()" % \
-                (accessExpr,
-                 accessCast,
-                 ptrCast,
-                 streamVar,
-                 streamMethod))
+            self.stmt("%s = (%s)%s%s->%s()" %
+                      (accessExpr,
+                       accessCast,
+                       ptrCast,
+                       streamVar,
+                       streamMethod))
         else:
             self.stmt("%s %s = (%s)%s%s" %
                       (streamStorageVarType, streamStorageVar,
                        streamStorageVarType, ptrCast, accessExpr))
-            self.stmt("%s->%s(%s)" % (streamVar, streamMethod, streamStorageVar))
+            self.stmt("%s->%s(%s)" %
+                      (streamVar, streamMethod, streamStorageVar))
 
     def memcpyPrimitive(self, typeInfo, streamVar, accessExpr, accessType, direction="write"):
         accessTypeName = accessType.typeName
@@ -720,16 +732,17 @@ class CodeGen(object):
         accessCast = self.makeRichCTypeDecl(accessType, useParamName=False)
 
         if direction == "read":
-            accessCast = self.makeRichCTypeDecl(accessType.getForNonConstAccess(), useParamName=False)
+            accessCast = self.makeRichCTypeDecl(
+                accessType.getForNonConstAccess(), useParamName=False)
 
         ptrCast = "(uintptr_t)" if needPtrCast else ""
 
         if direction == "read":
             self.stmt("memcpy((%s*)&%s, %s, %s)" %
-                (accessCast,
-                 accessExpr,
-                 streamVar,
-                 str(streamSize)))
+                      (accessCast,
+                       accessExpr,
+                       streamVar,
+                       str(streamSize)))
             self.stmt("android::base::Stream::%s((uint8_t*)&%s)" % (
                 streamMethod,
                 accessExpr))
@@ -737,7 +750,8 @@ class CodeGen(object):
             self.stmt("%s %s = (%s)%s%s" %
                       (streamStorageVarType, streamStorageVar,
                        streamStorageVarType, ptrCast, accessExpr))
-            self.stmt("memcpy(%s, &%s, %s)" % (streamVar, streamStorageVar, str(streamSize)))
+            self.stmt("memcpy(%s, &%s, %s)" %
+                      (streamVar, streamStorageVar, str(streamSize)))
             self.stmt("android::base::Stream::%s((uint8_t*)%s)" % (
                 streamMethod,
                 streamVar))

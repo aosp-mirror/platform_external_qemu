@@ -34,6 +34,9 @@ class DeepcopyCodegen(VulkanTypeIterator):
         def makeLengthAccess(varName):
             return lambda t: self.cgen.generalLengthAccess(t, parentVarName = varName)
 
+        def makeLengthAccessGuard(varName):
+            return lambda t: self.cgen.generalLengthAccessGuard(t, parentVarName=varName)
+
         self.exprAccessorLhs = makeAccess(self.inputVars[0])
         self.exprAccessorRhs = makeAccess(self.inputVars[1])
 
@@ -42,6 +45,9 @@ class DeepcopyCodegen(VulkanTypeIterator):
 
         self.lenAccessorLhs = makeLengthAccess(self.inputVars[0])
         self.lenAccessorRhs = makeLengthAccess(self.inputVars[1])
+
+        self.lenAccessorGuardLhs = makeLengthAccessGuard(self.inputVars[0])
+        self.lenAccessorGuardRhs = makeLengthAccessGuard(self.inputVars[1])
 
         self.checked = False
 
@@ -90,7 +96,13 @@ class DeepcopyCodegen(VulkanTypeIterator):
         lenAccessLhs = self.lenAccessorLhs(vulkanType)
         lenAccessRhs = self.lenAccessorRhs(vulkanType)
 
+        lenAccessorGuardLhs = self.lenAccessorGuardLhs(vulkanType)
+        lenAccessorGuardRhs = self.lenAccessorGuardRhs(vulkanType)
+
         isPtr = vulkanType.pointerIndirectionLevels > 0
+
+        if lenAccessorGuardLhs is not None:
+            self.cgen.beginIf(lenAccessorGuardLhs)
 
         if isPtr:
             self.cgen.stmt("%s = nullptr" % accessRhs)
@@ -127,6 +139,9 @@ class DeepcopyCodegen(VulkanTypeIterator):
             self.cgen.endFor()
 
         if isPtr:
+            self.cgen.endIf()
+
+        if lenAccessorGuardLhs is not None:
             self.cgen.endIf()
 
     def onString(self, vulkanType):
