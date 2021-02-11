@@ -266,7 +266,8 @@ struct VirtIOVSockDev {
         while (true) {
             const auto b = stream->hostToGuestBufPeek();
             if (b.second == 0) {
-                return false;  // stream is exhausted
+                // either the stream is empty or the other party is full
+                return false;
             }
 
             const struct virtio_vsock_hdr hdr = {
