@@ -94,6 +94,30 @@
       },
       "revId": "cd009227b107efb3b1876a4e76a8fa6bc3694bbc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a01184be_a90185ad",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2021-02-11T00:07:29Z",
+      "side": 1,
+      "message": "Just checked. This name should be used as the only identifier of the snapshot and will not change even if you rename the snapshot through the emulator Qt UI. The name in the emulator Qt UI is a display name in the snapshot protocol which should not be used as the identifier.",
+      "parentUuid": "35f0e7fd_613d37e0",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 13
+      },
+      "revId": "cd009227b107efb3b1876a4e76a8fa6bc3694bbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
