@@ -345,6 +345,7 @@ struct VirtIOVSockDev {
         request.dst_cid = hostCid;
         request.src_port = guestPort;
         request.dst_port = hostPort;
+        request.buf_alloc = 0;  // the guest has not sent us this value yet
         const auto stream = createStreamLocked(&request, callbacks);
 
         return stream ? makeStreamKey(request.src_port, request.dst_port) : uint64_t(0);
