@@ -53,7 +53,7 @@ namespace emulation {
 AdbVsockPipe::Service::Service(AdbHostAgent* hostAgent)
     : mHostAgent(hostAgent)
     , mGuestAdbdPollingThread(&AdbVsockPipe::Service::pollGuestAdbdThreadLoop, this)
-    , mDestroyPipesThread(&AdbVsockPipe::Service::pollGuestAdbdThreadLoop, this)
+    , mDestroyPipesThread(&AdbVsockPipe::Service::destroyPipesThreadLoop, this)
 {}
 
 AdbVsockPipe::Service::~Service() {
