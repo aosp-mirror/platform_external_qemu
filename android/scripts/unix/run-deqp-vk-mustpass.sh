@@ -60,6 +60,7 @@ export VULKAN_SDK=$AOSP_DIR/prebuilts/android-emulator-build/common/vulkan/linux
 fi
 
 DEQP_VK_EXEC_NAME="./deqp-vk $DEQP_CASES $DEQP_VALIDATION --deqp-log-filename=$DEQP_TESTLOG_DST"
+GDB_DEQP_VK_EXEC_NAME="gdb --args ./deqp-vk $DEQP_CASES $DEQP_VALIDATION --deqp-log-filename=$DEQP_TESTLOG_DST"
 
 cd $DEQP_VK_EXEC_DIR
 
@@ -83,6 +84,6 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
     esac
 done
 
-$DEQP_VK_EXEC_NAME
+$GDB_DEQP_VK_EXEC_NAME
 
 log "Done running dEQP."
