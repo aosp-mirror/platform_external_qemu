@@ -256,6 +256,10 @@ public:
     void snapshotOperationCallback(
             android::snapshot::Snapshotter::Operation op,
             android::snapshot::Snapshotter::Stage stage) {}
+
+    void addListener(FrameBufferChangeEventListener* listener) override {};
+    void removeListener(FrameBufferChangeEventListener* listener)  override {};
+
 private:
     bool mHasValidScreenshot = false;
     bool mGuestPostedAFrame = false;
