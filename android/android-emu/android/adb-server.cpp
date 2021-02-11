@@ -48,6 +48,8 @@ struct Globals {
     // Register adb pipe service.
     void registerServices() {
         if (feature_is_enabled(kFeature_VirtioVsockPipe)) {
+            fprintf(stderr, "rkir555 %s:%s:%d\n", "Globals", __func__, __LINE__);
+
             auto service = new AdbVsockPipe::Service(&hostListener);
             hostListener.setGuestAgent(service);
             adbGuestAgent = service;

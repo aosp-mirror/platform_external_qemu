@@ -110,12 +110,17 @@ struct VSockStream {
         , mHostPort(host_port)
         , mGuestBufAlloc(guest_buf_alloc)
         , mGuestFwdCnt(guest_fwd_cnt) {
+        fprintf(stderr, "%s:%s:%d this=%p hostCallbacks=%p guest_buf_alloc=%u guest_fwd_cnt=%u\n",
+                "VSockStream", __func__, __LINE__, this, hostCallbacks, guest_buf_alloc, guest_fwd_cnt);
+
         if (!hostCallbacks) {
             mPipe = android_pipe_guest_open_with_flags(this, ANDROID_PIPE_VIRTIO_VSOCK_BIT);
         }
     }
 
     ~VSockStream() {
+        fprintf(stderr, "%s:%s:%d this=%p\n", "VSockStream", __func__, __LINE__, this);
+
         if (mPipe) {
             android_pipe_guest_close(mPipe, PIPE_CLOSE_GRACEFUL);
         }
@@ -129,6 +134,12 @@ struct VSockStream {
     }
 
     void setGuestPos(uint32_t buf_alloc, uint32_t fwd_cnt) {
+        fprintf(stderr, "%s:%s:%d this=%p mGuestBufAlloc=%u mGuestFwdCnt=%u buf_alloc=%u fwd_cnt=%u\n",
+                "VSockStream", __func__, __LINE__, this, mGuestBufAlloc, mGuestFwdCnt, buf_alloc, fwd_cnt);
+
+        if (mGuestBufAlloc) {
+            hostToGuestBufConsume(uint32_t(fwd_cnt - mGuestFwdCnt));
+        }
         mGuestBufAlloc = buf_alloc;
         mGuestFwdCnt = fwd_cnt;
     }
@@ -160,6 +171,9 @@ struct VSockStream {
     }
 
     void hostToGuestBufConsume(size_t size) {
+        fprintf(stderr, "%s:%s:%d this=%p size=%zu\n",
+                "VSockStream", __func__, __LINE__, this, size);
+
         mHostToGuestBuf.consume(size);
         mHostSentCnt += size;
     }
@@ -271,8 +285,6 @@ struct VirtIOVSockDev {
 
             const bool isVqFull = sendRWHostToGuestImpl(stream, b.first, b.second);
 
-            stream->hostToGuestBufConsume(b.second);
-
             if (isVqFull) {
                 return true;
             }
@@ -302,8 +314,6 @@ struct VirtIOVSockDev {
 
     void vqRecvGuestToHost(VirtQueueElement *e) {
         const size_t sz = iov_size(e->out_sg, e->out_num);
-
-        std::lock_guard<std::mutex> lock(mMtx);
 
         const size_t currentSize = mVqGuestToHostBuf.size();
         mVqGuestToHostBuf.resize(currentSize + sz);
@@ -433,6 +443,8 @@ struct VirtIOVSockDev {
 
 private:
     void resetDeviceLocked() {
+        fprintf(stderr, "rkir555 %s:%s:%d\n", "VirtIOVSockDev", __func__, __LINE__);
+
         mStreams.clear();
         mVqGuestToHostBuf.clear();
         mVqHostToGuestBuf.clear();
@@ -585,7 +597,26 @@ private:
     }
 
     void vqParseGuestToHostRequest(const struct virtio_vsock_hdr *request) {
+        fprintf(stderr, "%s:%d type=%d op=%d src_port=%u dst_port=%u len=%u buf_alloc=%u fwd_cnt=%u\n",
+                __func__, __LINE__,
+                request->type, request->op,
+                request->src_port, request->dst_port,
+                request->len,
+                request->buf_alloc, request->fwd_cnt);
+
         if (request->type != VIRTIO_VSOCK_TYPE_STREAM) {
+            for (auto &kv : mStreams) {
+                auto* stream = &*kv.second;
+
+                const struct virtio_vsock_hdr request2 = {
+                    .src_cid = stream->mGuestCid,
+                    .dst_cid = stream->mHostCid,
+                    .src_port = stream->mGuestPort,
+                    .dst_port = stream->mHostPort,
+                };
+
+                vqWriteReplyOpHostToGuest(&request2, VIRTIO_VSOCK_OP_CREDIT_UPDATE, stream);
+            }
             return;
         }
 
@@ -704,6 +735,7 @@ private:
     SocketBuffer mVqHostToGuestBuf;
     uint32_t mSrcHostPortI = kSrcHostPortMin;
 
+public:
     mutable std::mutex mMtx;
 };
 
@@ -746,6 +778,8 @@ void virtio_vsock_handle_host_to_guest(VirtIODevice *dev, VirtQueue *vq) {
 void virtio_vsock_handle_guest_to_host(VirtIODevice *dev, VirtQueue *vq) {
     VirtIOVSock *s = VIRTIO_VSOCK(dev);
     VirtIOVSockDev *impl = static_cast<VirtIOVSockDev *>(s->impl);
+
+    std::lock_guard<std::mutex> lock(impl->mMtx);
 
     while (true) {
         VirtQueueElement *e = static_cast<VirtQueueElement *>(
