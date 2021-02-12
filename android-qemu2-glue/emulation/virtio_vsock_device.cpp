@@ -269,35 +269,29 @@ struct VirtIOVSockDev {
                 return false;  // stream is exhausted
             }
 
-            const bool isVqFull = sendRWHostToGuestImpl(stream, b.first, b.second);
+            const struct virtio_vsock_hdr hdr = {
+                .src_cid = stream->mHostCid,
+                .dst_cid = stream->mGuestCid,
+                .src_port = stream->mHostPort,
+                .dst_port = stream->mGuestPort,
+                .len = static_cast<uint32_t>(b.second),
+                .type = VIRTIO_VSOCK_TYPE_STREAM,
+                .op = static_cast<uint16_t>(VIRTIO_VSOCK_OP_RW),
+                .flags = 0,
+                .buf_alloc = kHostBufAlloc,
+                .fwd_cnt = stream->mHostFwdCnt,
+            };
+
+            std::vector<uint8_t> packet(sizeof(hdr) + b.second);
+            memcpy(&packet[0], &hdr, sizeof(hdr));
+            memcpy(&packet[sizeof(hdr)], b.first, b.second);
 
             stream->hostToGuestBufConsume(b.second);
 
-            if (isVqFull) {
+            if (vqWriteHostToGuest(packet.data(), packet.size())) {
                 return true;
             }
         }
-    }
-
-    bool sendRWHostToGuestImpl(VSockStream *stream, const void *data, size_t size) {
-        const struct virtio_vsock_hdr hdr = {
-            .src_cid = stream->mHostCid,
-            .dst_cid = stream->mGuestCid,
-            .src_port = stream->mHostPort,
-            .dst_port = stream->mGuestPort,
-            .len = static_cast<uint32_t>(size),
-            .type = VIRTIO_VSOCK_TYPE_STREAM,
-            .op = static_cast<uint16_t>(VIRTIO_VSOCK_OP_RW),
-            .flags = 0,
-            .buf_alloc = kHostBufAlloc,
-            .fwd_cnt = stream->mHostFwdCnt,
-        };
-
-        std::vector<uint8_t> packet(sizeof(hdr) + size);
-        memcpy(&packet[0], &hdr, sizeof(hdr));
-        memcpy(&packet[sizeof(hdr)], data, size);
-
-        return vqWriteHostToGuest(packet.data(), packet.size());
     }
 
     void vqRecvGuestToHost(VirtQueueElement *e) {
@@ -379,7 +373,8 @@ struct VirtIOVSockDev {
 
         const auto stream = findStreamLocked(key);
         if (stream) {
-            sendRWHostToGuestImpl(&*stream, data, size);
+            stream->hostToGuestBufAppend(data, size);
+            sendRWHostToGuest(&*stream);
             return size;
         } else {
             return 0;
