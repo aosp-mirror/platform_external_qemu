@@ -170,7 +170,7 @@ struct VSockStream {
         }
     }
 
-    bool signalWake();
+    void signalWake();
 
     void save(android::base::Stream *stream) const {
         android_pipe_guest_save(mPipe, asCStream(stream));
@@ -724,7 +724,7 @@ private:
     mutable std::mutex mMtx;
 };
 
-bool VSockStream::signalWake() {
+void VSockStream::signalWake() {
     if (mPipe) {
         while (true) {
             uint8_t data[1024];
@@ -740,9 +740,9 @@ bool VSockStream::signalWake() {
             }
         }
 
-        return mDev->sendRWHostToGuestLocked(this);
+        mDev->sendRWHostToGuestLocked(this);
     } else if (mHostCallbacks) {
-        return false; // the vq buffer is not full (not affected)
+        // nothing
     } else {
         ::crashhandler_die("%s:%d: No data source", __func__, __LINE__);
     }
