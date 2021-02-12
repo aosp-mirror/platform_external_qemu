@@ -33,6 +33,52 @@
       "message": "Sorry for the much-delayed response... Will review now.",
       "revId": "d6967c3c622e05f0550a84389e1bb8bb31d9d195",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "06f37a04_0bf9f9f3",
+        "filename": "android/android-webrtc/videobridge/emulator/webrtc/Participant.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2021-02-12T23:50:56Z",
+      "side": 1,
+      "message": "nit: std::move(rtcConfig) to avoid copy",
+      "range": {
+        "startLine": 231,
+        "startChar": 17,
+        "endLine": 231,
+        "endChar": 26
+      },
+      "revId": "d6967c3c622e05f0550a84389e1bb8bb31d9d195",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5640f466_70162cb2",
+        "filename": "android/android-webrtc/videobridge/emulator/webrtc/Participant.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2021-02-12T23:50:56Z",
+      "side": 1,
+      "message": "this",
+      "range": {
+        "startLine": 308,
+        "startChar": 57,
+        "endLine": 308,
+        "endChar": 58
+      },
+      "revId": "d6967c3c622e05f0550a84389e1bb8bb31d9d195",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
