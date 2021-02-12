@@ -2083,17 +2083,19 @@ extern "C" int main(int argc, char** argv) {
     if (feature_is_enabled(kFeature_ModemSimulator)) {
         if (create_modem_simulator_configs_if_needed(hw)) {
             init_modem_simulator();
+            bool isIpv4 = false;
             // start modem now, so qemu can proceed with virtioport setup
             int modem_simulator_guest_port =
-                    cuttlefish::start_android_modem_simulator_detached();
+                    cuttlefish::start_android_modem_simulator_detached(isIpv4);
 
             args.add("-device");
             args.add("virtio-serial");
             args.add("-chardev");
             args.addFormat(
-                    "socket,port=%d,host=::1,nowait,nodelay,ipv6,id="
+                    "socket,port=%d,host=%s,nowait,nodelay,%s,id="
                     "modem",
-                    modem_simulator_guest_port);
+                    modem_simulator_guest_port, isIpv4 ? "127.0.0.1" : "::1",
+                    isIpv4 ? "ipv4" : "ipv6");
             args.add("-device");
             args.add("virtserialport,chardev=modem,name=modem");
         } else {

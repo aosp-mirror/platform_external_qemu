@@ -352,15 +352,19 @@ SharedFD SharedFD::SocketLocalClient(const std::string& name,
 }
 
 SharedFD SharedFD::SocketLocalServer(int port) {
+    bool isIpv4 = false;
     int fd = android::base::socketTcp6LoopbackServer(port);
     if (fd == -1) {
         fd = android::base::socketTcp4LoopbackServer(port);
+        isIpv4 = true;
     }
     if (fd == -1) {
         return SharedFD();
     }
     android::base::socketSetNoDelay(fd);
-    return SharedFD(std::shared_ptr<FileInstance>(new FileInstance(fd, 0)));
+    auto sfd = SharedFD(std::shared_ptr<FileInstance>(new FileInstance(fd, 0)));
+    sfd.isIpv4_ = isIpv4;
+    return sfd;
 }
 
 std::shared_ptr<FileInstance> FileInstance::ClosedInstance() {
