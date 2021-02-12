@@ -324,9 +324,15 @@ struct VirtIOVSockDev {
         virtio_notify(dev, vq);
     }
 
+    // the host to guest vq has space in it
     void vqHostToGuestCallback() {
         std::lock_guard<std::mutex> lock(mMtx);
-        vqHostToGuestImpl();
+
+        for (auto &kv : mStreams) {
+            if (sendRWHostToGuestLocked(&*kv.second)) {
+                break;
+            }
+        }
     }
 
     uint64_t hostToGuestOpen(const uint32_t guestPort,
@@ -454,14 +460,6 @@ private:
     void resetDevice() {
         std::lock_guard<std::mutex> lock(mMtx);
         resetDeviceLocked();
-    }
-
-    void vqHostToGuestImpl() {
-        for (auto &kv : mStreams) {
-            if (kv.second->signalWake()) {
-                break;
-            }
-        }
     }
 
     std::shared_ptr<VSockStream> createStreamLocked(const struct virtio_vsock_hdr *request,
@@ -618,7 +616,13 @@ private:
                 break;
 
             case DstPort::Ping:
-                vqHostToGuestImpl();
+                for (auto &kv : mStreams) {
+                    if (kv.second->mPipe) {
+                        if (sendRWHostToGuestLocked(&*kv.second)) {
+                            break;
+                        }
+                    }
+                }
                 vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_RST, nullptr);
                 break;
 
