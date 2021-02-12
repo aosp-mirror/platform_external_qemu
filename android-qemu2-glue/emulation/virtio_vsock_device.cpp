@@ -258,11 +258,11 @@ constexpr uint32_t kSrcHostPortMin = 50000;
 struct VirtIOVSockDev {
     VirtIOVSockDev(VirtIOVSock *s) : mS(s) {}
 
-    void closeStreamFromHost(VSockStream *streamWeak) {
+    void closeStreamFromHostLocked(VSockStream *streamWeak) {
         closeStreamLocked(streamWeak->mGuestPort, streamWeak->mHostPort);
     }
 
-    bool sendRWHostToGuest(VSockStream *stream) {
+    bool sendRWHostToGuestLocked(VSockStream *stream) {
         while (true) {
             const auto b = stream->hostToGuestBufPeek();
             if (b.second == 0) {
@@ -374,7 +374,7 @@ struct VirtIOVSockDev {
         const auto stream = findStreamLocked(key);
         if (stream) {
             stream->hostToGuestBufAppend(data, size);
-            sendRWHostToGuest(&*stream);
+            sendRWHostToGuestLocked(&*stream);
             return size;
         } else {
             return 0;
@@ -636,7 +636,7 @@ private:
 
                 case VIRTIO_VSOCK_OP_CREDIT_UPDATE:
                     stream->setGuestPos(request->buf_alloc, request->fwd_cnt);
-                    sendRWHostToGuest(&*stream);
+                    sendRWHostToGuestLocked(&*stream);
                     break;
 
                 case VIRTIO_VSOCK_OP_CREDIT_REQUEST:
@@ -718,7 +718,7 @@ bool VSockStream::signalWake() {
             }
         }
 
-        return mDev->sendRWHostToGuest(this);
+        return mDev->sendRWHostToGuestLocked(this);
     } else if (mHostCallbacks) {
         return false; // the vq buffer is not full (not affected)
     } else {
@@ -729,7 +729,7 @@ bool VSockStream::signalWake() {
 void VSockStream::closeFromHostCallback(void* that) {
     VSockStream *stream = static_cast<VSockStream*>(that);
     stream->mPipe = nullptr; // TODO: already closed?
-    stream->mDev->closeStreamFromHost(stream);
+    stream->mDev->closeStreamFromHostLocked(stream);
 }
 }  // namespace
 
