@@ -53,10 +53,15 @@ namespace emulation {
 AdbVsockPipe::Service::Service(AdbHostAgent* hostAgent)
     : mHostAgent(hostAgent)
     , mGuestAdbdPollingThread(&AdbVsockPipe::Service::pollGuestAdbdThreadLoop, this)
-    , mDestroyPipesThread(&AdbVsockPipe::Service::destroyPipesThreadLoop, this)
-{}
+    , mDestroyPipesThread(&AdbVsockPipe::Service::destroyPipesThreadLoop, this) {
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p\n",
+            "AdbVsockPipe::Service", __func__, __LINE__, this);
+}
 
 AdbVsockPipe::Service::~Service() {
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p\n",
+            "AdbVsockPipe::Service", __func__, __LINE__, this);
+
     mGuestAdbdPollingThreadRunning = false;
     mPipesToDestroy.stop();
     mGuestAdbdPollingThread.join();
@@ -66,6 +71,9 @@ AdbVsockPipe::Service::~Service() {
 
 void AdbVsockPipe::Service::onHostConnection(android::base::ScopedSocket&& socket,
                                              AdbPortType portType) {
+    fprintf(stderr, "rkir555 %s:%s:%d portType=%d\n", "AdbVsockPipe::Service",
+            __func__, __LINE__, static_cast<int>(portType));
+
     auto pipe = AdbVsockPipe::create(this, std::move(socket), portType);
     if (pipe) {
         std::unique_lock<std::mutex> guard(mPipesMtx);
@@ -132,8 +140,14 @@ bool AdbVsockPipe::Service::checkIfGuestAdbdAlive() {
         std::promise<void> isConnected;
     };
 
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p before open\n",
+            "AdbVsockPipe::Service", __func__, __LINE__, this);
+
     PollVsockHostCallbacks callbacks;
     callbacks.streamKey = (*g_vsock_ops->open)(kGuestAdbdPort, &callbacks);
+
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p after open\n",
+            "AdbVsockPipe::Service", __func__, __LINE__, this);
 
     using namespace std::chrono_literals;
     return callbacks.streamKey && callbacks.waitConnected(100ms);
@@ -146,11 +160,13 @@ void AdbVsockPipe::Service::resetActiveGuestPipeConnection() {
 
 AdbVsockPipe::AdbVsockPipe(AdbVsockPipe::Service *service,
                            android::base::ScopedSocket socket,
-                           AdbPortType portType)
+                           const AdbPortType portType)
         : mService(service)
         , mPortType(portType)
         , mSocket(std::move(socket))
         , mVsockCallbacks(this) {
+    fprintf(stderr, "rkir555 %s:%s:%d\n", "AdbVsockPipe", __func__, __LINE__);
+
     mVsockCallbacks.streamKey = (*g_vsock_ops->open)(kGuestAdbdPort, &mVsockCallbacks);
     if (!mVsockCallbacks.streamKey) {
         ::crashhandler_die("%s:%d: streamKey==0", __func__, __LINE__);
@@ -163,13 +179,24 @@ AdbVsockPipe::AdbVsockPipe(AdbVsockPipe::Service *service,
         },
         this));
 
+    if (portType == AdbPortType::Jdwp) {
+        fprintf(stderr, "rkir555 %s:%s:%d Jdwp\n", "AdbVsockPipe", __func__, __LINE__);
+        mAdbHub = std::make_unique<AdbHub>();
+    } else {
+        fprintf(stderr, "rkir555 %s:%s:%d regular\n", "AdbVsockPipe", __func__, __LINE__);
+    }
+
     mConnectThread = std::thread([this](){
+        fprintf(stderr, "rkir555 %s:%s:%d\n", "AdbVsockPipe", __func__, __LINE__);
+
         using namespace std::chrono_literals;
 
         // you cannot run blocking functions in the calling thread
         if (mVsockCallbacks.waitConnected(1000ms)) {
+            fprintf(stderr, "rkir555 %s:%s:%d\n", "AdbVsockPipe", __func__, __LINE__);
             mSocketWatcher->wantRead();
         } else {
+            fprintf(stderr, "rkir555 %s:%s:%d\n", "AdbVsockPipe", __func__, __LINE__);
             mService->destroyPipe(this);
         }
     });
@@ -188,7 +215,7 @@ std::unique_ptr<AdbVsockPipe> AdbVsockPipe::create(AdbVsockPipe::Service *servic
     return std::make_unique<AdbVsockPipe>(service, std::move(socket), portType);
 }
 
-void AdbVsockPipe::onHostSocketEvent(unsigned events) {
+void AdbVsockPipe::onHostSocketEventSimple(unsigned events) {
     char buf[2048];
 
     if (events & FdWatch::kEventRead) {
@@ -196,16 +223,37 @@ void AdbVsockPipe::onHostSocketEvent(unsigned events) {
             const size_t received = android::base::socketRecv(mSocket.fd(),
                                                               buf, sizeof(buf));
             if (!received) {
+                fprintf(stderr, "rkir555 %s:%s:%d disconnected\n",
+                        "AdbVsockPipe", __func__, __LINE__);
+
                 // mSocket is diconnected
                 mService->destroyPipe(this);
                 return;
             }
 
+            if (~received == 0) {
+                fprintf(stderr, "rkir555 %s:%s:%d socketRecv error\n",
+                        "AdbVsockPipe", __func__, __LINE__);
+                break;
+            }
+
             if (received > sizeof(buf)) {
+                fprintf(stderr, "rkir555 %s:%s:%d bad received=%zu\n",
+                        "AdbVsockPipe", __func__, __LINE__, received);
+
                 break; // retry later
             }
 
-            if ((*g_vsock_ops->send)(mVsockCallbacks.streamKey, buf, received) != received) {
+            const uint32_t p1 = uint32_t(mVsockCallbacks.streamKey & 0xFFFFFFFF);
+            const uint32_t p2 = uint32_t(mVsockCallbacks.streamKey >> 32);
+
+            fprintf(stderr, "rkir555 %s:%s:%d received=%zu p1=%u p2=%u\n",
+                    "AdbVsockPipe", __func__, __LINE__, received, p1, p2);
+
+            const size_t sent = (*g_vsock_ops->send)(mVsockCallbacks.streamKey, buf, received);
+            if (sent != received) {
+                fprintf(stderr, "rkir555 %s:%s:%d received=%zu sent=%zu p1=%u p2=%u\n",
+                        "AdbVsockPipe", __func__, __LINE__, received, sent, p1, p2);
                 break;  // streamKey is closed
             }
         }
@@ -229,6 +277,9 @@ void AdbVsockPipe::onHostSocketEvent(unsigned events) {
             }
 
             const size_t sent = android::base::socketSend(mSocket.fd(), buf, sz);
+            fprintf(stderr, "rkir555 %s:%s:%d sz=%zu sent=%zu\n",
+                    "AdbVsockPipe", __func__, __LINE__, sz, sent);
+
             if (!sent || (sent > sz)) {
                 break;
             }
@@ -239,11 +290,81 @@ void AdbVsockPipe::onHostSocketEvent(unsigned events) {
     }
 }
 
-void AdbVsockPipe::onGuestSend(const void *data, size_t size) {
-    std::lock_guard<std::mutex> guard(mGuestToHostMutex);
+void AdbVsockPipe::onHostSocketEventTranslated(unsigned events) {
+    fprintf(stderr, "rkir555 %s:%s:%d\n", "AdbVsockPipe", __func__, __LINE__);
 
-    mGuestToHost.append(data, size);
-    mSocketWatcher->wantWrite();
+    bool isOpen = true;
+
+    mAdbHub->onHostSocketEvent(mSocketWatcher->fd(), events, [this, &isOpen]() {
+        mService->destroyPipe(this);
+        isOpen = false;
+    });
+
+    if (isOpen) {
+        uint8_t buf[2048];
+        AndroidPipeBuffer abuf;
+        abuf.data = buf;
+        abuf.size = sizeof(buf);
+
+        while (true) {
+            fprintf(stderr, "rkir555 %s:%s:%d onGuestRecvData\n", "AdbVsockPipe", __func__, __LINE__);
+            const int sz = mAdbHub->onGuestRecvData(&abuf, 1);
+            if (sz > 0) {
+                fprintf(stderr, "rkir555 %s:%s:%d sz=%d\n", "AdbVsockPipe", __func__, __LINE__, sz);
+
+                if ((*g_vsock_ops->send)(mVsockCallbacks.streamKey, buf, sz) != sz) {
+                    break;  // streamKey is closed
+                }
+            } else {
+                fprintf(stderr, "rkir555 %s:%s:%d onGuestRecvData failed\n", "AdbVsockPipe", __func__, __LINE__);
+                break;
+            }
+        }
+
+        if (mAdbHub->socketWantRead()) {
+            mSocketWatcher->wantRead();
+        } else {
+            mSocketWatcher->dontWantRead();
+        }
+
+        if (mAdbHub->socketWantWrite()) {
+            mSocketWatcher->wantWrite();
+        } else {
+            mSocketWatcher->dontWantWrite();
+        }
+    }
+}
+
+void AdbVsockPipe::onHostSocketEvent(unsigned events) {
+    if (mAdbHub) {
+        onHostSocketEventTranslated(events);
+    } else {
+        onHostSocketEventSimple(events);
+    }
+}
+
+void AdbVsockPipe::onGuestSend(const void *data, size_t size) {
+    if (mAdbHub) {
+        AndroidPipeBuffer abuf;
+        abuf.data = static_cast<uint8_t *>(const_cast<void *>(data));
+        abuf.size = size;
+
+        fprintf(stderr, "rkir555 %s:%s:%d size=%zu\n", "AdbVsockPipe", __func__, __LINE__, size);
+
+        mAdbHub->onGuestSendData(&abuf, 1);
+        if (mAdbHub->socketWantWrite()) {
+            mSocketWatcher->wantWrite();
+        } else {
+            mSocketWatcher->dontWantWrite();
+        }
+    } else {
+        fprintf(stderr, "rkir555 %s:%s:%d size=%zu\n",
+                "AdbVsockPipe", __func__, __LINE__, size);
+
+        std::lock_guard<std::mutex> guard(mGuestToHostMutex);
+        mGuestToHost.append(data, size);
+        mSocketWatcher->wantWrite();
+    }
 }
 
 void AdbVsockPipe::onGuestClose() {
