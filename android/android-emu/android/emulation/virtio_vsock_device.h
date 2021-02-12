@@ -14,22 +14,46 @@
 #include <stdint.h>
 
 struct SocketBuffer {
+    SocketBuffer() {
+        fprintf(stderr, "%s:%s:%d this=%p\n", "SocketBuffer", __func__, __LINE__, this);
+    }
+
+    ~SocketBuffer() {
+        fprintf(stderr, "%s:%s:%d this=%p\n", "SocketBuffer", __func__, __LINE__, this);
+    }
+
     bool isEmpty() const { return mBuf.empty(); }
 
     void append(const void *data, size_t size) {
+        const size_t before = mBuf.size();
         const uint8_t *data8 = static_cast<const uint8_t *>(data);
         mBuf.insert(mBuf.end(), data8, data8 + size);
+        const size_t after = mBuf.size();
+
+        fprintf(stderr, "%s:%s:%d this=%p before=%zu size=%zu after=%zu\n",
+                "SocketBuffer", __func__, __LINE__, this, before, size, after);
     }
 
     std::pair<const void*, size_t> peek() const {
+        fprintf(stderr, "%s:%s:%d this=%p mBuf.size()=%zu\n",
+                "SocketBuffer", __func__, __LINE__, this, mBuf.size());
+
         return {mBuf.data(), mBuf.size()};
     }
 
     void consume(size_t size) {
-        mBuf.erase(mBuf.begin(), mBuf.begin() + size);
+        if (size < mBuf.size()) {
+            mBuf.erase(mBuf.begin(), mBuf.begin() + size);
+        } else if (size == mBuf.size()) {
+            mBuf.clear();
+        } else {
+            fprintf(stderr, "BAD! %s:%s:%d this=%p size=%zu mBuf.size()=%zu BAD\n",
+                    "SocketBuffer", __func__, __LINE__, this, size, mBuf.size());
+        }
     }
 
     void clear() {
+        fprintf(stderr, "%s:%s:%d this=%p\n", "SocketBuffer", __func__, __LINE__, this);
         mBuf.clear();
     }
 
