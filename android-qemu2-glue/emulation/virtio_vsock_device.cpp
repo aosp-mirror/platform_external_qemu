@@ -298,13 +298,30 @@ struct VirtIOVSockDev {
     void vqRecvGuestToHost(VirtQueueElement *e) {
         const size_t sz = iov_size(e->out_sg, e->out_num);
 
-        std::lock_guard<std::mutex> lock(mMtx);
-
         const size_t currentSize = mVqGuestToHostBuf.size();
         mVqGuestToHostBuf.resize(currentSize + sz);
         iov_to_buf(e->out_sg, e->out_num, 0, &mVqGuestToHostBuf[currentSize], sz);
 
         vqParseGuestToHost();
+    }
+
+    void vqGuestToHostCallback(VirtIODevice *dev, VirtQueue *vq) {
+        std::lock_guard<std::mutex> lock(mMtx);
+
+        while (true) {
+            VirtQueueElement *e = static_cast<VirtQueueElement *>(
+                virtqueue_pop(vq, sizeof(VirtQueueElement)));
+            if (!e) {
+                break;
+            }
+
+            vqRecvGuestToHost(e);
+
+            virtqueue_push(vq, e, 0);
+            g_free(e);
+        }
+
+        virtio_notify(dev, vq);
     }
 
     void vqHostToGuestCallback() {
@@ -741,22 +758,7 @@ void virtio_vsock_handle_host_to_guest(VirtIODevice *dev, VirtQueue *vq) {
 
 void virtio_vsock_handle_guest_to_host(VirtIODevice *dev, VirtQueue *vq) {
     VirtIOVSock *s = VIRTIO_VSOCK(dev);
-    VirtIOVSockDev *impl = static_cast<VirtIOVSockDev *>(s->impl);
-
-    while (true) {
-        VirtQueueElement *e = static_cast<VirtQueueElement *>(
-            virtqueue_pop(vq, sizeof(VirtQueueElement)));
-        if (!e) {
-            break;
-        }
-
-        impl->vqRecvGuestToHost(e);
-
-        virtqueue_push(vq, e, 0);
-        g_free(e);
-    }
-
-    virtio_notify(dev, vq);
+    static_cast<VirtIOVSockDev *>(s->impl)->vqGuestToHostCallback(dev, vq);
 }
 
 void virtio_vsock_handle_event_to_guest(VirtIODevice *dev, VirtQueue *vq) {
