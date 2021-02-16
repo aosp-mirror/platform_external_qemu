@@ -106,6 +106,7 @@ using android::snapshot::Snapshot;
 using json = nlohmann::json;
 
 static const char* kImportSuffix = "_import.qcow2";
+static std::string sLastLoadedSnapshot = "";
 
 static bool qemu_vm_stop() {
     vm_stop(RUN_STATE_PAUSED);
@@ -199,6 +200,21 @@ static bool qemu_snapshot_list(void* opaque,
     android::RecursiveScopedVmLock vmlock;
     return qemu_listvms(nullptr, nullptr,
                         MessageCallback(opaque, outConsumer, errConsumer)) == 0;
+}
+
+static bool qemu_snapshot_last_loaded(void* opaque,
+                               LineConsumerCallback outConsumer,
+                               LineConsumerCallback errConsumer) {
+    android::RecursiveScopedVmLock vmlock;
+    if (sLastLoadedSnapshot == "") {
+        const char* kNullSnapshot = "(null)";
+        outConsumer(opaque, kNullSnapshot, strlen(kNullSnapshot));
+    } else {
+        outConsumer(opaque, sLastLoadedSnapshot.c_str(), sLastLoadedSnapshot.length());
+    }
+    const char* kNewLine = "\r\n";
+    outConsumer(opaque, kNewLine, strlen(kNewLine));
+    return true;
 }
 
 static bool qemu_snapshot_save(const char* name,
@@ -488,7 +504,10 @@ static bool qemu_snapshot_load(const char* name,
         }
     }
 
-    if (!failed) {
+    if (failed) {
+        sLastLoadedSnapshot = "";
+    } else {
+        sLastLoadedSnapshot = name;
         guest_boot_completed = 1;
     }
 
@@ -1082,6 +1101,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .snapshotDelete = qemu_snapshot_delete,
         .snapshotRemap = qemu_snapshot_remap,
         .snapshotExport = qemu_snapshot_export_qcow,
+        .snapshotLastLoaded = qemu_snapshot_last_loaded,
         .setSnapshotCallbacks = set_snapshot_callbacks,
         .mapUserBackedRam = map_user_backed_ram,
         .unmapUserBackedRam = unmap_user_backed_ram,
