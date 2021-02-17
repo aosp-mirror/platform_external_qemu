@@ -570,6 +570,7 @@ private:
                 // mVqHostToGuestBuf has data
                 const size_t sz = vqWriteHostToGuestImpl(static_cast<const uint8_t *>(b.first),
                                                          b.second);
+
                 if (sz > 0) {
                     mVqHostToGuestBuf.consume(sz);
                 } else {
