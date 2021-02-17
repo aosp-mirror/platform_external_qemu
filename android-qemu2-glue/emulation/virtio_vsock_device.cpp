@@ -89,6 +89,8 @@ bool loadSocketBuffer(SocketBuffer *buf, android::base::Stream *stream) {
 struct VirtIOVSockDev;
 
 struct VSockStream {
+    enum class StreamState { Created, Connected, Closed };
+
     struct ForSnapshotLoad {};
 
     VSockStream(ForSnapshotLoad, struct VirtIOVSockDev *d) : vtblPtr(&vtblNoWake), mDev(d) {}
@@ -165,6 +167,7 @@ struct VSockStream {
     }
 
     void guestConnected() {
+        mState = StreamState::Connected;
         if (mHostCallbacks) {
             mHostCallbacks->onConnect();
         }
@@ -236,6 +239,7 @@ struct VSockStream {
     uint32_t mHostSentCnt = 0;    // how much the host sent
     uint32_t mHostFwdCnt = 0;     // how much the host received
     SocketBuffer mHostToGuestBuf;
+    StreamState mState = StreamState::Created;
 
     static const AndroidPipeHwFuncs vtblMain;
     static const AndroidPipeHwFuncs vtblNoWake;
@@ -263,6 +267,10 @@ struct VirtIOVSockDev {
     }
 
     bool sendRWHostToGuestLocked(VSockStream *stream) {
+        if (stream->mState != VSockStream::StreamState::Connected) {
+            return false;
+        }
+
         while (true) {
             const void *data;
             size_t dataSize;
@@ -370,7 +378,9 @@ struct VirtIOVSockDev {
         request.src_port = guestPort;
         request.dst_port = hostPort;
         request.buf_alloc = 0;  // the guest has not sent us this value yet
-        const auto stream = createStreamLocked(&request, callbacks);
+        const auto stream = createStreamLocked(&request,
+                                               callbacks,
+                                               VSockStream::StreamState::Created);
 
         return stream ? makeStreamKey(request.src_port, request.dst_port) : uint64_t(0);
     }
@@ -469,7 +479,8 @@ private:
     }
 
     std::shared_ptr<VSockStream> createStreamLocked(const struct virtio_vsock_hdr *request,
-                                                    IVsockHostCallbacks *callbacks) {
+                                                    IVsockHostCallbacks *callbacks,
+                                                    const VSockStream::StreamState state) {
         auto stream = std::make_shared<VSockStream>(this,
                                                     callbacks,
                                                     request->src_cid,
@@ -483,6 +494,7 @@ private:
                                                           request->dst_port), {}});
             if (r.second) {
                 r.first->second = stream;
+                stream->mState = state;
                 return stream;
             } else {
                 return nullptr;
@@ -506,7 +518,14 @@ private:
     }
 
     bool closeStreamLocked(const uint64_t key) {
-        return mStreams.erase(key) > 0;
+        const auto i = mStreams.find(key);
+        if (i != mStreams.end()) {
+            i->second->mState = VSockStream::StreamState::Closed;
+            mStreams.erase(i);
+            return true;
+        } else {
+            return false;;
+        }
     }
 
 
@@ -597,7 +616,9 @@ private:
         if (request->op == VIRTIO_VSOCK_OP_REQUEST) {
             switch (static_cast<DstPort>(request->dst_port)) {
             case DstPort::Data: {
-                    auto stream = createStreamLocked(request, nullptr);
+                    auto stream = createStreamLocked(request,
+                                                     nullptr,
+                                                     VSockStream::StreamState::Connected);
                     if (stream) {
                         vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_RESPONSE, &*stream);
                     } else {
