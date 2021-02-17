@@ -623,6 +623,8 @@ private:
                         }
                     }
                 }
+
+                // this port is not intended to be open
                 vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_RST, nullptr);
                 break;
 
