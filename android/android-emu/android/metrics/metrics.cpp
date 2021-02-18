@@ -474,7 +474,9 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
         case android::featurecontrol::VulkanQueueSubmitWithCommands:
             return android_studio::EmulatorFeatureFlagState::VULKAN_QUEUE_SUBMIT_WITH_COMMANDS;
         case android::featurecontrol::VulkanBatchedDescriptorSetUpdate:
-            return android_studio::EmulatorFeatureFlagState::VULKAN_BATCHED_DESCRIPTOR_SET_UPDATE;;
+            return android_studio::EmulatorFeatureFlagState::VULKAN_BATCHED_DESCRIPTOR_SET_UPDATE;
+        case android::featurecontrol::NoDraw:
+            return android_studio::EmulatorFeatureFlagState::NO_DRAW;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
