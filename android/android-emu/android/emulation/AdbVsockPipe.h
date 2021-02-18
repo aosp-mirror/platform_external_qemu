@@ -100,6 +100,8 @@ private:
     friend DataVsockCallbacks;
 
     void onHostSocketEvent(unsigned events);
+    void onHostSocketEventSimple(unsigned events);
+    void onHostSocketEventTranslated(unsigned events);
     void onGuestSend(const void *data, size_t size);
     void onGuestClose();
 
@@ -108,8 +110,8 @@ private:
     CrossSessionSocket mSocket;
     SocketBuffer mGuestToHost;
     DataVsockCallbacks mVsockCallbacks;
-    // TODO(rkir): add support for jdwp
     std::unique_ptr<android::base::Looper::FdWatch> mSocketWatcher;
+    std::unique_ptr<AdbHub> mAdbHub;
     std::thread mConnectThread;
     mutable std::mutex mGuestToHostMutex;
 };
