@@ -590,6 +590,8 @@ private:
             android::featurecontrol::GuestUsesAngle, false);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::VulkanQueueSubmitWithCommands, true);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::VulkanBatchedDescriptorSetUpdate, true);
 
         android_hw->hw_gltransport_asg_writeBufferSize = 262144;
         android_hw->hw_gltransport_asg_writeStepSize = 8192;

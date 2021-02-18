@@ -1048,7 +1048,7 @@ void reservedunmarshal_VkSubmitInfo(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->waitSemaphoreCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->waitSemaphoreCount; ++k)
             {
@@ -1067,7 +1067,7 @@ void reservedunmarshal_VkSubmitInfo(
     {
         uint8_t* cgen_var_1_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->commandBufferCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->commandBufferCount; ++k)
             {
@@ -1083,7 +1083,7 @@ void reservedunmarshal_VkSubmitInfo(
     {
         uint8_t* cgen_var_2_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->signalSemaphoreCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->signalSemaphoreCount; ++k)
             {
@@ -1300,7 +1300,7 @@ void reservedunmarshal_VkBindSparseInfo(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->waitSemaphoreCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->waitSemaphoreCount; ++k)
             {
@@ -1337,7 +1337,7 @@ void reservedunmarshal_VkBindSparseInfo(
     {
         uint8_t* cgen_var_1_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->signalSemaphoreCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->signalSemaphoreCount; ++k)
             {
@@ -2547,7 +2547,7 @@ void reservedunmarshal_VkPipelineLayoutCreateInfo(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->setLayoutCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->setLayoutCount; ++k)
             {
@@ -2774,7 +2774,7 @@ void reservedunmarshal_VkDescriptorSetAllocateInfo(
     {
         uint8_t* cgen_var_1_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->descriptorSetCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->descriptorSetCount; ++k)
             {
@@ -2809,7 +2809,7 @@ void reservedunmarshal_VkDescriptorSetLayoutBinding(
         {
             uint8_t* cgen_var_0_0_ptr = (uint8_t*)(*ptr);
             *ptr += 8 * forUnmarshaling->descriptorCount;
-            if ((forUnmarshaling) != nullptr)
+            if (forUnmarshaling)
             {
                 for (uint32_t k = 0; k < forUnmarshaling->descriptorCount; ++k)
                 {
@@ -2939,7 +2939,7 @@ void reservedunmarshal_VkWriteDescriptorSet(
             {
                 uint8_t* cgen_var_3_0_ptr = (uint8_t*)(*ptr);
                 *ptr += 8 * forUnmarshaling->descriptorCount;
-                if ((forUnmarshaling) != nullptr)
+                if (forUnmarshaling)
                 {
                     for (uint32_t k = 0; k < forUnmarshaling->descriptorCount; ++k)
                     {
@@ -3027,7 +3027,7 @@ void reservedunmarshal_VkFramebufferCreateInfo(
     {
         uint8_t* cgen_var_1_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->attachmentCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->attachmentCount; ++k)
             {
@@ -3954,7 +3954,7 @@ void reservedunmarshal_VkDeviceGroupDeviceCreateInfo(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->physicalDeviceCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->physicalDeviceCount; ++k)
             {
@@ -6818,7 +6818,7 @@ void reservedunmarshal_VkRenderPassAttachmentBeginInfo(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->attachmentCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->attachmentCount; ++k)
             {
@@ -7146,7 +7146,7 @@ void reservedunmarshal_VkSemaphoreWaitInfo(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->semaphoreCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->semaphoreCount; ++k)
             {
@@ -7463,7 +7463,7 @@ void reservedunmarshal_VkPresentInfoKHR(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->waitSemaphoreCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->waitSemaphoreCount; ++k)
             {
@@ -7479,7 +7479,7 @@ void reservedunmarshal_VkPresentInfoKHR(
     {
         uint8_t* cgen_var_1_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->swapchainCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->swapchainCount; ++k)
             {
@@ -8317,7 +8317,7 @@ void reservedunmarshal_VkWin32KeyedMutexAcquireReleaseInfoKHR(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->acquireCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->acquireCount; ++k)
             {
@@ -8339,7 +8339,7 @@ void reservedunmarshal_VkWin32KeyedMutexAcquireReleaseInfoKHR(
     {
         uint8_t* cgen_var_1_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->releaseCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->releaseCount; ++k)
             {
@@ -9935,7 +9935,7 @@ void reservedunmarshal_VkPipelineLibraryCreateInfoKHR(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->libraryCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->libraryCount; ++k)
             {
@@ -11136,7 +11136,7 @@ void reservedunmarshal_VkWin32KeyedMutexAcquireReleaseInfoNV(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->acquireCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->acquireCount; ++k)
             {
@@ -11158,7 +11158,7 @@ void reservedunmarshal_VkWin32KeyedMutexAcquireReleaseInfoNV(
     {
         uint8_t* cgen_var_1_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->releaseCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->releaseCount; ++k)
             {
@@ -13858,7 +13858,7 @@ void reservedunmarshal_VkWriteDescriptorSetAccelerationStructureNV(
         {
             uint8_t* cgen_var_0_0_ptr = (uint8_t*)(*ptr);
             *ptr += 8 * forUnmarshaling->accelerationStructureCount;
-            if ((forUnmarshaling) != nullptr)
+            if (forUnmarshaling)
             {
                 for (uint32_t k = 0; k < forUnmarshaling->accelerationStructureCount; ++k)
                 {
@@ -16468,7 +16468,7 @@ void reservedunmarshal_VkGraphicsPipelineShaderGroupsCreateInfoNV(
     {
         uint8_t* cgen_var_0_ptr = (uint8_t*)(*ptr);
         *ptr += 8 * forUnmarshaling->pipelineCount;
-        if ((forUnmarshaling) != nullptr)
+        if (forUnmarshaling)
         {
             for (uint32_t k = 0; k < forUnmarshaling->pipelineCount; ++k)
             {
@@ -17822,7 +17822,7 @@ void reservedunmarshal_VkWriteDescriptorSetAccelerationStructureKHR(
         {
             uint8_t* cgen_var_0_0_ptr = (uint8_t*)(*ptr);
             *ptr += 8 * forUnmarshaling->accelerationStructureCount;
-            if ((forUnmarshaling) != nullptr)
+            if (forUnmarshaling)
             {
                 for (uint32_t k = 0; k < forUnmarshaling->accelerationStructureCount; ++k)
                 {

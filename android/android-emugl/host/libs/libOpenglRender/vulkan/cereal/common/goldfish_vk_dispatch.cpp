@@ -1147,6 +1147,8 @@ void init_vulkan_dispatch_from_system_loader(
     out->vkQueueBindSparseAsyncGOOGLE = (PFN_vkQueueBindSparseAsyncGOOGLE)dlSymFunc(lib, "vkQueueBindSparseAsyncGOOGLE");
     out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)dlSymFunc(lib, "vkGetLinearImageLayoutGOOGLE");
     out->vkQueueFlushCommandsGOOGLE = (PFN_vkQueueFlushCommandsGOOGLE)dlSymFunc(lib, "vkQueueFlushCommandsGOOGLE");
+    out->vkQueueCommitDescriptorSetUpdatesGOOGLE = (PFN_vkQueueCommitDescriptorSetUpdatesGOOGLE)dlSymFunc(lib, "vkQueueCommitDescriptorSetUpdatesGOOGLE");
+    out->vkCollectDescriptorPoolIdsGOOGLE = (PFN_vkCollectDescriptorPoolIdsGOOGLE)dlSymFunc(lib, "vkCollectDescriptorPoolIdsGOOGLE");
 #endif
 #ifdef VK_KHR_acceleration_structure
     out->vkCreateAccelerationStructureKHR = (PFN_vkCreateAccelerationStructureKHR)dlSymFunc(lib, "vkCreateAccelerationStructureKHR");
@@ -1842,6 +1844,8 @@ void init_vulkan_dispatch_from_instance(
     out->vkQueueBindSparseAsyncGOOGLE = (PFN_vkQueueBindSparseAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueBindSparseAsyncGOOGLE");
     out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkGetLinearImageLayoutGOOGLE");
     out->vkQueueFlushCommandsGOOGLE = (PFN_vkQueueFlushCommandsGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueFlushCommandsGOOGLE");
+    out->vkQueueCommitDescriptorSetUpdatesGOOGLE = (PFN_vkQueueCommitDescriptorSetUpdatesGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueCommitDescriptorSetUpdatesGOOGLE");
+    out->vkCollectDescriptorPoolIdsGOOGLE = (PFN_vkCollectDescriptorPoolIdsGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkCollectDescriptorPoolIdsGOOGLE");
 #endif
 #ifdef VK_KHR_acceleration_structure
     out->vkCreateAccelerationStructureKHR = (PFN_vkCreateAccelerationStructureKHR)vk->vkGetInstanceProcAddr(instance, "vkCreateAccelerationStructureKHR");
@@ -2529,6 +2533,8 @@ void init_vulkan_dispatch_from_device(
     out->vkQueueBindSparseAsyncGOOGLE = (PFN_vkQueueBindSparseAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueBindSparseAsyncGOOGLE");
     out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)vk->vkGetDeviceProcAddr(device, "vkGetLinearImageLayoutGOOGLE");
     out->vkQueueFlushCommandsGOOGLE = (PFN_vkQueueFlushCommandsGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueFlushCommandsGOOGLE");
+    out->vkQueueCommitDescriptorSetUpdatesGOOGLE = (PFN_vkQueueCommitDescriptorSetUpdatesGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueCommitDescriptorSetUpdatesGOOGLE");
+    out->vkCollectDescriptorPoolIdsGOOGLE = (PFN_vkCollectDescriptorPoolIdsGOOGLE)vk->vkGetDeviceProcAddr(device, "vkCollectDescriptorPoolIdsGOOGLE");
 #endif
 #ifdef VK_KHR_acceleration_structure
     out->vkCreateAccelerationStructureKHR = (PFN_vkCreateAccelerationStructureKHR)vk->vkGetDeviceProcAddr(device, "vkCreateAccelerationStructureKHR");
