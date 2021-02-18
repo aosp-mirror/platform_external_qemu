@@ -885,6 +885,9 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
 GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data){
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::textureTargetEx(ctx, target),GL_INVALID_ENUM);
+    if (ctx->drawDisabled()) {
+        return;
+    }
     if (ctx->shareGroup().get()) {
         TextureData* texData = getTextureTargetData(target);
         if (texData) {
@@ -1481,7 +1484,9 @@ GL_APICALL void  GL_APIENTRY glDrawArrays(GLenum mode, GLint first, GLsizei coun
     GET_CTX_V2();
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!GLESv2Validate::drawMode(mode),GL_INVALID_ENUM);
-
+    if (ctx->drawDisabled()) {
+        return;
+    }
     if (ctx->vertexAttributesBufferBacked()) {
         s_glDrawPre(ctx, mode);
         ctx->dispatcher().glDrawArrays(mode,first,count);
@@ -1498,7 +1503,9 @@ GL_APICALL void  GL_APIENTRY glDrawArraysNullAEMU(GLenum mode, GLint first, GLsi
     GET_CTX_V2();
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!GLESv2Validate::drawMode(mode),GL_INVALID_ENUM);
-
+    if (ctx->drawDisabled()) {
+        return;
+    }
     if (ctx->vertexAttributesBufferBacked()) {
         s_glDrawPre(ctx, mode);
         // No host driver draw
@@ -1516,7 +1523,9 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
     GET_CTX_V2();
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!(GLESv2Validate::drawMode(mode) && GLESv2Validate::drawType(type)),GL_INVALID_ENUM);
-
+    if (ctx->drawDisabled()) {
+        return;
+    }
     if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
         ctx->vertexAttributesBufferBacked()) {
         s_glDrawPre(ctx, mode, type);
@@ -1534,7 +1543,9 @@ GL_APICALL void  GL_APIENTRY glDrawElementsNullAEMU(GLenum mode, GLsizei count, 
     GET_CTX_V2();
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!(GLESv2Validate::drawMode(mode) && GLESv2Validate::drawType(type)),GL_INVALID_ENUM);
-
+    if (ctx->drawDisabled()) {
+        return;
+    }
     if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
         ctx->vertexAttributesBufferBacked()) {
         s_glDrawPre(ctx, mode, type);
@@ -3618,6 +3629,9 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
     // set an error if level < 0 or level > log 2 max
     SET_ERROR_IF(level < 0 || 1<<level > ctx->getMaxTexSize(), GL_INVALID_VALUE);
     SET_ERROR_IF(xoffset < 0 || yoffset < 0 || width < 0 || height < 0, GL_INVALID_VALUE);
+    if (ctx->drawDisabled()) {
+        return;
+    }
     TextureData *texData = getTextureTargetData(target);
     if (texData) {
         SET_ERROR_IF(xoffset + width > (GLint)texData->width ||
