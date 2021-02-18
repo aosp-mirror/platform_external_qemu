@@ -34,6 +34,24 @@
       "parentUuid": "b0f7fe7e_d1ff4f39",
       "revId": "e72dc6412210a302d52fb67fe227299f54b4a355",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f985a13f_a20918d1",
+        "filename": "android-qemu2-glue/emulation/virtio_vsock_device.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 739,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-02-18T18:15:10Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "ec6c2198_70bef091",
+      "revId": "e72dc6412210a302d52fb67fe227299f54b4a355",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
