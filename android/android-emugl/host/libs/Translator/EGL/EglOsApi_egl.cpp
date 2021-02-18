@@ -74,7 +74,7 @@ static const char* kGLES2LibName = "libGLESv2.dylib";
     X(const char*, eglQueryString,                                             \
       (EGLDisplay dpy, EGLint id))                                             \
     X(EGLDisplay, eglGetPlatformDisplay,                                    \
-      (EGLenum platform, void *native_display, const EGLint *attrib_list))     \
+      (EGLenum platform, void *native_display, const EGLAttrib *attrib_list))  \
     X(EGLDisplay, eglGetPlatformDisplayEXT,                                    \
       (EGLenum platform, void *native_display, const EGLint *attrib_list))     \
     X(EGLBoolean, eglBindAPI,                                    \
