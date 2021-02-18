@@ -516,7 +516,7 @@ public:
 
     void setShuttingDown() { m_shuttingDown = true; }
     bool isShuttingDown() const { return m_shuttingDown; }
-    bool compose(uint32_t bufferSize, void* buffer);
+    bool compose(uint32_t bufferSize, void* buffer, bool post = true);
 
     ~FrameBuffer();
 
