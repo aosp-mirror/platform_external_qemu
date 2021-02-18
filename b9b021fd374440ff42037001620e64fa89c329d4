@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d6a1ea7d_d27cd52f",
+        "filename": "android-qemu2-glue/emulation/virtio_vsock_device.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 802,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-02-18T17:11:36Z",
+      "side": 1,
+      "message": "Possible we send only one packet of a certain op when we needed more than one?",
+      "revId": "b9b021fd374440ff42037001620e64fa89c329d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}

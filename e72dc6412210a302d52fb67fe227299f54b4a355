@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b0f7fe7e_d1ff4f39",
+        "filename": "android-qemu2-glue/emulation/virtio_vsock_device.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 739,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-02-18T17:11:36Z",
+      "side": 0,
+      "message": "should we still send traffic here?",
+      "revId": "e72dc6412210a302d52fb67fe227299f54b4a355",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
