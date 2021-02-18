@@ -10,6 +10,7 @@
  * GNU General Public License for more details.
 */
 
+#include <deque>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
@@ -165,11 +166,13 @@ struct VSockStream {
     }
 
     void guestConnected() {
+        mIsConnected = true;
         if (mHostCallbacks) {
             mHostCallbacks->onConnect();
         }
     }
 
+    void sendOp(enum virtio_vsock_op op);
     void signalWake();
 
     void save(android::base::Stream *stream) const {
@@ -227,6 +230,7 @@ struct VSockStream {
     struct VirtIOVSockDev *const mDev;
     IVsockHostCallbacks *mHostCallbacks = nullptr;
     void *mPipe = nullptr;
+    uint32_t mSendOpMask = 0;     // bitmask of OPs to send
     uint64_t mGuestCid = 0;
     uint64_t mHostCid = 0;
     uint32_t mGuestPort = 0;
@@ -236,6 +240,7 @@ struct VSockStream {
     uint32_t mHostSentCnt = 0;    // how much the host sent
     uint32_t mHostFwdCnt = 0;     // how much the host received
     SocketBuffer mHostToGuestBuf;
+    bool mIsConnected = false;
 
     static const AndroidPipeHwFuncs vtblMain;
     static const AndroidPipeHwFuncs vtblNoWake;
@@ -253,7 +258,27 @@ const AndroidPipeHwFuncs VSockStream::vtblNoWake = {
     &getPipeIdCallback,
 };
 
+namespace {
 constexpr uint32_t kSrcHostPortMin = 50000;
+
+struct virtio_vsock_hdr prepareFrameHeader(const VSockStream *stream,
+                                           const enum virtio_vsock_op op,
+                                           const uint32_t len) {
+    struct virtio_vsock_hdr hdr = {
+        .src_cid = stream->mHostCid,
+        .dst_cid = stream->mGuestCid,
+        .src_port = stream->mHostPort,
+        .dst_port = stream->mGuestPort,
+        .len = len,
+        .type = VIRTIO_VSOCK_TYPE_STREAM,
+        .op = static_cast<uint16_t>(op),
+        .flags = 0,
+        .buf_alloc = kHostBufAlloc,
+        .fwd_cnt = stream->mHostFwdCnt,
+    };
+    return hdr;
+}
+}  // namespace
 
 struct VirtIOVSockDev {
     VirtIOVSockDev(VirtIOVSock *s) : mS(s) {}
@@ -262,140 +287,67 @@ struct VirtIOVSockDev {
         closeStreamLocked(streamWeak->mGuestPort, streamWeak->mHostPort);
     }
 
-    bool sendRWHostToGuestLocked(VSockStream *stream) {
-        while (true) {
-            const void *data;
-            size_t dataSize;
-            size_t bufferSize;
-            std::tie(data, dataSize, bufferSize) = stream->hostToGuestBufPeek();
-            if (dataSize == 0) {
-                return false;
-            } else {
-                const size_t len = std::min(dataSize, size_t(4096));
-
-                const struct virtio_vsock_hdr hdr = {
-                    .src_cid = stream->mHostCid,
-                    .dst_cid = stream->mGuestCid,
-                    .src_port = stream->mHostPort,
-                    .dst_port = stream->mGuestPort,
-                    .len = static_cast<uint32_t>(len),
-                    .type = VIRTIO_VSOCK_TYPE_STREAM,
-                    .op = static_cast<uint16_t>(VIRTIO_VSOCK_OP_RW),
-                    .flags = 0,
-                    .buf_alloc = kHostBufAlloc,
-                    .fwd_cnt = stream->mHostFwdCnt,
-                };
-
-                std::vector<uint8_t> packet(sizeof(hdr) + len);
-                memcpy(&packet[0], &hdr, sizeof(hdr));
-                memcpy(&packet[sizeof(hdr)], data, len);
-
-                stream->hostToGuestBufConsume(len);
-
-                if (vqWriteHostToGuest(packet.data(), packet.size())) {
-                    return true;
-                }
-            }
-        }
-    }
-
-    void vqRecvGuestToHost(VirtQueueElement *e) {
-        const size_t sz = iov_size(e->out_sg, e->out_num);
-
-        const size_t currentSize = mVqGuestToHostBuf.size();
-        mVqGuestToHostBuf.resize(currentSize + sz);
-        iov_to_buf(e->out_sg, e->out_num, 0, &mVqGuestToHostBuf[currentSize], sz);
-
-        vqParseGuestToHost();
-    }
-
+    // guest to host vq has data in it
     void vqGuestToHostCallback(VirtIODevice *dev, VirtQueue *vq) {
         std::lock_guard<std::mutex> lock(mMtx);
+        vqReadGuestToHostLocked(dev, vq);
+        vqWriteHostToGuestLocked();
+    }
 
-        while (true) {
-            VirtQueueElement *e = static_cast<VirtQueueElement *>(
-                virtqueue_pop(vq, sizeof(VirtQueueElement)));
-            if (!e) {
-                break;
-            }
+    void vqWriteHostToGuestLocked() {
+        VirtQueue *vq = mS->host_to_guest_vq;
 
-            vqRecvGuestToHost(e);
+        vqWriteHostToGuestStreamControlFramesLocked(vq)
+            || vqWriteHostToGuestStreamRWFramesLocked(vq)
+            || vqWriteHostToGuestOrphanFramesLocked(vq);
 
-            virtqueue_push(vq, e, 0);
-            g_free(e);
+        if (virtio_queue_ready(vq)) {
+            virtio_notify(&mS->parent, vq);
         }
-
-        virtio_notify(dev, vq);
     }
 
     // the host to guest vq has space in it
     void vqHostToGuestCallback() {
         std::lock_guard<std::mutex> lock(mMtx);
-
-        for (auto &kv : mStreams) {
-            if (sendRWHostToGuestLocked(&*kv.second)) {
-                return;
-            }
-        }
-
-        vqFlushHostToGuestBuffer();
+        vqWriteHostToGuestLocked();
     }
 
     uint64_t hostToGuestOpen(const uint32_t guestPort,
                              IVsockHostCallbacks *callbacks) {
         std::lock_guard<std::mutex> lock(mMtx);
 
-        const uint64_t hostCid = VMADDR_CID_HOST;
-        const uint64_t guestCid = mS->guest_cid;
-        const uint32_t hostPort = getNextSrcHostPort();
-
-        struct virtio_vsock_hdr request = {
-            .src_cid = hostCid,
-            .dst_cid = guestCid,
-            .src_port = hostPort,
-            .dst_port = guestPort,
-            .len = 0,
-            .type = VIRTIO_VSOCK_TYPE_STREAM,
-            .op = static_cast<uint16_t>(VIRTIO_VSOCK_OP_REQUEST),
-            .flags = 0,
-            .buf_alloc = kHostBufAlloc,
-            .fwd_cnt = 0,
+        // this is what we will hear when the guest replies
+        const struct virtio_vsock_hdr request = {
+            .src_cid = mS->guest_cid,
+            .dst_cid = VMADDR_CID_HOST,
+            .src_port = guestPort,
+            .dst_port = getNextSrcHostPort(),
+            .buf_alloc = 0,  // the guest has not sent us this value yet
         };
 
-        vqWriteHostToGuest(&request, sizeof(request));
-
-        // this is what we will hear when the guest replies
-        request.src_cid = guestCid;
-        request.dst_cid = hostCid;
-        request.src_port = guestPort;
-        request.dst_port = hostPort;
-        request.buf_alloc = 0;  // the guest has not sent us this value yet
         const auto stream = createStreamLocked(&request, callbacks);
-
-        return stream ? makeStreamKey(request.src_port, request.dst_port) : uint64_t(0);
+        if (stream) {
+            stream->sendOp(VIRTIO_VSOCK_OP_REQUEST);
+            vqWriteHostToGuestLocked();
+            return makeStreamKey(request.src_port, request.dst_port);
+        } else {
+            return 0;
+        }
     }
 
     bool hostToGuestClose(const uint64_t key) {
         std::lock_guard<std::mutex> lock(mMtx);
 
         auto stream = findStreamLocked(key);
-        if (!stream) {
+        if (stream) {
+            stream->mHostCallbacks = nullptr;  // to prevent recursion in dctor
+            stream->sendOp(VIRTIO_VSOCK_OP_SHUTDOWN);
+            closeStreamLocked(std::move(stream));
+            vqWriteHostToGuestLocked();
+            return true;
+        } else {
             return false;   // it was closed by the guest side
         }
-
-        const struct virtio_vsock_hdr request = {
-            .src_cid = stream->mHostCid,
-            .dst_cid = stream->mGuestCid,
-            .src_port = stream->mHostPort,
-            .dst_port = stream->mGuestPort,
-        };
-
-        vqWriteReplyOpHostToGuest(&request, VIRTIO_VSOCK_OP_SHUTDOWN, &*stream);
-
-        stream->mHostCallbacks = nullptr;  // to prevent recursion in dctor
-
-        closeStreamLocked(std::move(stream));
-        return true;
     }
 
     size_t hostToGuestSend(const uint64_t key, const void *data, size_t size) {
@@ -404,7 +356,7 @@ struct VirtIOVSockDev {
         const auto stream = findStreamLocked(key);
         if (stream) {
             stream->hostToGuestBufAppend(data, size);
-            sendRWHostToGuestLocked(&*stream);
+            vqWriteHostToGuestLocked();
             return size;
         } else {
             return 0;
@@ -412,18 +364,18 @@ struct VirtIOVSockDev {
     }
 
     void save(android::base::Stream *stream) const {
-        std::lock_guard<std::mutex> lock(mMtx);
+/*        std::lock_guard<std::mutex> lock(mMtx);
 
         stream->putBe32(mStreams.size());
         for (const auto &kv : mStreams) {
             kv.second->save(stream);
         }
         saveVector(mVqGuestToHostBuf, stream);
-        saveSocketBuffer(mVqHostToGuestBuf, stream);
+        saveSocketBuffer(mVqHostToGuestBuf, stream);*/
     }
 
     bool load(android::base::Stream *stream) {
-        std::lock_guard<std::mutex> lock(mMtx);
+/*        std::lock_guard<std::mutex> lock(mMtx);
 
         resetDeviceLocked();
 
@@ -445,7 +397,7 @@ struct VirtIOVSockDev {
 
         if (!loadSocketBuffer(&mVqHostToGuestBuf, stream)) {
             return false;
-        }
+        }*/
 
         return true;
     }
@@ -456,11 +408,165 @@ struct VirtIOVSockDev {
         }
     }
 
+    void queueOrphanFrameHostToGuestLocked(const struct virtio_vsock_hdr &hdr) {
+        mHostToGuestOrphanFrames.push_back(hdr);
+    }
+
+    void queueOrphanFrameHostToGuestLocked(const struct virtio_vsock_hdr *request,
+                                           const enum virtio_vsock_op op) {
+        const struct virtio_vsock_hdr response = {
+            .src_cid = request->dst_cid,
+            .dst_cid = request->src_cid,
+            .src_port = request->dst_port,
+            .dst_port = request->src_port,
+            .len = 0,
+            .type = VIRTIO_VSOCK_TYPE_STREAM,
+            .op = static_cast<uint16_t>(op),
+            .flags = 0,
+            .buf_alloc = 0,
+            .fwd_cnt = 0,
+        };
+
+        queueOrphanFrameHostToGuestLocked(response);
+    }
+
 private:
+    void vqConsumeVirtQueueElement(VirtQueue *vq, VirtQueueElement *e, size_t size) {
+        virtqueue_push(vq, e, size);
+        g_free(e);
+    }
+
+    void vqWriteControlFrame(VirtQueue *vq,
+                             VirtQueueElement *e,
+                             VSockStream *stream,
+                             const enum virtio_vsock_op op) {
+        const struct virtio_vsock_hdr hdr = prepareFrameHeader(stream, op, 0);
+        iov_from_buf(e->in_sg, e->in_num, 0, &hdr, sizeof(hdr));
+        vqConsumeVirtQueueElement(vq, e, sizeof(hdr));
+        stream->mSendOpMask &= ~(1u << op);
+    }
+
+    bool vqWriteHostToGuestStreamControlFramesLocked(VirtQueue *vq) {
+        for (auto &kv : mStreams) {
+            auto stream = &*kv.second;
+
+            while (stream->mSendOpMask) {
+                if (!virtio_queue_ready(vq)) {
+                    return true;
+                }
+
+                VirtQueueElement *e = static_cast<VirtQueueElement *>(
+                    virtqueue_pop(vq, sizeof(VirtQueueElement)));
+                if (!e) {
+                    return true;
+                }
+
+                const size_t eSize = iov_size(e->in_sg, e->in_num);
+                if (eSize < sizeof(struct virtio_vsock_hdr)) {
+                    vqConsumeVirtQueueElement(vq, e, 0);
+                    return true;
+                }
+
+                if (stream->mSendOpMask & (1u << VIRTIO_VSOCK_OP_REQUEST)) {
+                    vqWriteControlFrame(vq, e, stream, VIRTIO_VSOCK_OP_REQUEST);
+                } else if (stream->mSendOpMask & (1u << VIRTIO_VSOCK_OP_RESPONSE)) {
+                    vqWriteControlFrame(vq, e, stream, VIRTIO_VSOCK_OP_RESPONSE);
+                    stream->mIsConnected = true;
+                } else if (stream->mSendOpMask & (1u << VIRTIO_VSOCK_OP_CREDIT_UPDATE)) {
+                    vqWriteControlFrame(vq, e, stream, VIRTIO_VSOCK_OP_CREDIT_UPDATE);
+                } else if (stream->mSendOpMask & (1u << VIRTIO_VSOCK_OP_CREDIT_REQUEST)) {
+                    vqWriteControlFrame(vq, e, stream, VIRTIO_VSOCK_OP_CREDIT_REQUEST);
+                } else {
+                    ::crashhandler_die("%s:%d unexpected mSendOpMask=%x\n",
+                                       __func__, __LINE__, stream->mSendOpMask);
+                }
+            }
+        }
+
+        return false;
+    }
+
+    bool vqWriteHostToGuestStreamRWFramesLocked(VirtQueue *vq) {
+        for (auto &kv : mStreams) {
+            auto stream = &*kv.second;
+
+            if (stream->mIsConnected) {
+                while (true) {
+                    if (!virtio_queue_ready(vq)) {
+                        return true;
+                    }
+
+                    VirtQueueElement *e = static_cast<VirtQueueElement *>(
+                        virtqueue_pop(vq, sizeof(VirtQueueElement)));
+                    if (!e) {
+                        return true;
+                    }
+
+                    const size_t eSize = iov_size(e->in_sg, e->in_num);
+                    if (eSize < sizeof(struct virtio_vsock_hdr)) {
+                        vqConsumeVirtQueueElement(vq, e, 0);
+                        return true;
+                    }
+
+                    const void *data;
+                    size_t dataSize;
+                    size_t bufferSize;
+                    std::tie(data, dataSize, bufferSize) = stream->hostToGuestBufPeek();
+                    if (dataSize > 0) {
+                        const struct virtio_vsock_hdr hdr =
+                            prepareFrameHeader(
+                                stream, VIRTIO_VSOCK_OP_RW,
+                                std::min(dataSize,
+                                         eSize - sizeof(struct virtio_vsock_hdr)));
+
+                        iov_from_buf(e->in_sg, e->in_num, 0, &hdr, sizeof(hdr));
+                        iov_from_buf(e->in_sg, e->in_num, sizeof(hdr), data, hdr.len);
+                        stream->hostToGuestBufConsume(hdr.len);
+
+                        vqConsumeVirtQueueElement(vq, e, sizeof(hdr) + hdr.len);
+                    } else {
+                        vqConsumeVirtQueueElement(vq, e, 0);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    bool vqWriteHostToGuestOrphanFramesLocked(VirtQueue *vq) {
+        while (!mHostToGuestOrphanFrames.empty()) {
+            if (!virtio_queue_ready(vq)) {
+                return true;
+            }
+
+            VirtQueueElement *e = static_cast<VirtQueueElement *>(
+                virtqueue_pop(vq, sizeof(VirtQueueElement)));
+            if (!e) {
+                return true;
+            }
+
+            const size_t eSize = iov_size(e->in_sg, e->in_num);
+            if (eSize < sizeof(struct virtio_vsock_hdr)) {
+                vqConsumeVirtQueueElement(vq, e, 0);
+                return true;
+            }
+
+            const struct virtio_vsock_hdr &hdr = mHostToGuestOrphanFrames.front();
+            iov_from_buf(e->in_sg, e->in_num, 0, &hdr, sizeof(hdr));
+            vqConsumeVirtQueueElement(vq, e, sizeof(hdr));
+
+            mHostToGuestOrphanFrames.pop_front();
+        }
+
+        return false;
+    }
+
     void resetDeviceLocked() {
         mStreams.clear();
         mVqGuestToHostBuf.clear();
-        mVqHostToGuestBuf.clear();
+        mHostToGuestOrphanFrames.clear();
     }
 
     void resetDevice() {
@@ -518,78 +624,7 @@ private:
         closeStreamLocked(stream->mGuestPort, stream->mHostPort);
     }
 
-    size_t vqWriteHostToGuestImpl(const uint8_t *buf8, size_t size) {
-        VirtQueue *vq = mS->host_to_guest_vq;
-        size_t rem = size;
-
-        while ((rem > 0) && virtio_queue_ready(vq)) {
-            VirtQueueElement *e = static_cast<VirtQueueElement *>(
-                virtqueue_pop(vq, sizeof(VirtQueueElement)));
-            if (!e) {
-                break;
-            }
-
-            const size_t sz = iov_from_buf(e->in_sg, e->in_num, 0, buf8, rem);
-            virtqueue_push(vq, e, sz);
-            g_free(e);
-
-            buf8 += sz;
-            rem -= sz;
-        }
-
-        if (virtio_queue_ready(vq)) {
-            virtio_notify(&mS->parent, vq);
-        }
-
-        return size - rem;
-    }
-
-    bool vqFlushHostToGuestBuffer() {
-        while (true) {
-            const auto b = mVqHostToGuestBuf.peek();
-            if (b.second > 0) {
-                // mVqHostToGuestBuf has data
-                const size_t sz = vqWriteHostToGuestImpl(static_cast<const uint8_t *>(b.first),
-                                                         b.second);
-                if (sz > 0) {
-                    mVqHostToGuestBuf.consume(sz);
-                } else {
-                    return true;  // vq is full
-                }
-            } else {
-                return false;  // mVqHostToGuestBuf is empty
-            }
-        }
-    }
-
-    bool vqWriteHostToGuest(const void *buf, size_t size) {
-        mVqHostToGuestBuf.append(buf, size);
-        return vqFlushHostToGuestBuffer();
-    }
-
-    void vqWriteReplyOpHostToGuest(const struct virtio_vsock_hdr *request,
-                                   const enum virtio_vsock_op op,
-                                   const VSockStream *stream) {
-        const uint32_t flags = (op == VIRTIO_VSOCK_OP_SHUTDOWN) ?
-            (VIRTIO_VSOCK_SHUTDOWN_RCV | VIRTIO_VSOCK_SHUTDOWN_SEND) : 0;
-
-        const struct virtio_vsock_hdr response = {
-            .src_cid = request->dst_cid,
-            .dst_cid = request->src_cid,
-            .src_port = request->dst_port,
-            .dst_port = request->src_port,
-            .len = 0,
-            .type = VIRTIO_VSOCK_TYPE_STREAM,
-            .op = static_cast<uint16_t>(op),
-            .flags = flags,
-            .buf_alloc = (stream ? kHostBufAlloc : 0),
-            .fwd_cnt = (stream ? stream->mHostFwdCnt : 0),
-        };
-
-        vqWriteHostToGuest(&response, sizeof(response));
-    }
-
-    void vqParseGuestToHostRequest(const struct virtio_vsock_hdr *request) {
+    void vqParseGuestToHostRequestLocked(const struct virtio_vsock_hdr *request) {
         if (request->type != VIRTIO_VSOCK_TYPE_STREAM) {
             return;
         }
@@ -599,34 +634,26 @@ private:
             case DstPort::Data: {
                     auto stream = createStreamLocked(request, nullptr);
                     if (stream) {
-                        vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_RESPONSE, &*stream);
+                        stream->sendOp(VIRTIO_VSOCK_OP_RESPONSE);
                     } else {
                         fprintf(stderr, "%s:%d {src_port=%u dst_port=%u} could not create "
                                 "the stream - already exists\n",
                                 __func__, __LINE__, request->src_port, request->dst_port);
-                        vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_RST, nullptr);
+                        queueOrphanFrameHostToGuestLocked(request, VIRTIO_VSOCK_OP_RST);
                     }
                 }
                 break;
 
             case DstPort::Ping:
-                for (auto &kv : mStreams) {
-                    if (kv.second->mPipe) {
-                        if (sendRWHostToGuestLocked(&*kv.second)) {
-                            break;
-                        }
-                    }
-                }
-
                 // this port is not intended to be open
-                vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_RST, nullptr);
+                queueOrphanFrameHostToGuestLocked(request, VIRTIO_VSOCK_OP_RST);
                 break;
 
             default:
                 fprintf(stderr, "%s:%d {src_port=%u dst_port=%u} unexpected dst_port\n",
                         __func__, __LINE__, request->src_port, request->dst_port);
 
-                vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_RST, nullptr);
+                queueOrphanFrameHostToGuestLocked(request, VIRTIO_VSOCK_OP_RST);
                 break;
             }
         } else {
@@ -634,7 +661,7 @@ private:
             if (stream) {
                 switch (request->op) {
                 case VIRTIO_VSOCK_OP_SHUTDOWN:
-                    vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_SHUTDOWN, &*stream);
+                    stream->sendOp(VIRTIO_VSOCK_OP_SHUTDOWN);
                     closeStreamLocked(std::move(stream));
                     break;
 
@@ -645,7 +672,7 @@ private:
                 case VIRTIO_VSOCK_OP_RW:
                     stream->setGuestPos(request->buf_alloc, request->fwd_cnt);
                     stream->writeGuestToHost(request + 1, request->len);
-                    vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_CREDIT_UPDATE, &*stream);
+                    stream->sendOp(VIRTIO_VSOCK_OP_CREDIT_UPDATE);
                     break;
 
                 case VIRTIO_VSOCK_OP_RESPONSE:
@@ -654,12 +681,11 @@ private:
 
                 case VIRTIO_VSOCK_OP_CREDIT_UPDATE:
                     stream->setGuestPos(request->buf_alloc, request->fwd_cnt);
-                    sendRWHostToGuestLocked(&*stream);
                     break;
 
                 case VIRTIO_VSOCK_OP_CREDIT_REQUEST:
                     stream->setGuestPos(request->buf_alloc, request->fwd_cnt);
-                    vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_CREDIT_UPDATE, &*stream);
+                    stream->sendOp(VIRTIO_VSOCK_OP_CREDIT_UPDATE);
                     break;
 
                 default:
@@ -667,21 +693,30 @@ private:
                             __func__, __LINE__,
                             op2str(request->op), request->op);
 
-                    vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_RST, &*stream);
+                    stream->sendOp(VIRTIO_VSOCK_OP_RST);
                     closeStreamLocked(std::move(stream));
                     break;
                 }
-            } else if (request->op != VIRTIO_VSOCK_OP_RST) {
-                fprintf(stderr, "%s:%d {src_port=%u dst_port=%u} stream not found for op=%s (%d)\n",
-                        __func__, __LINE__,
-                        request->src_port, request->dst_port, op2str(request->op), request->op);
+            } else {
+                switch (request->op) {
+                case VIRTIO_VSOCK_OP_RST:
+                case VIRTIO_VSOCK_OP_SHUTDOWN:
+                    break;  // ignore those
 
-                vqWriteReplyOpHostToGuest(request, VIRTIO_VSOCK_OP_RST, nullptr);
+                default:
+                    fprintf(stderr, "%s:%d {src_port=%u dst_port=%u} stream "
+                            "not found for op=%s (%d)\n",
+                            __func__, __LINE__,
+                            request->src_port, request->dst_port,
+                            op2str(request->op), request->op);
+
+                    queueOrphanFrameHostToGuestLocked(request, VIRTIO_VSOCK_OP_RST);
+                }
             }
         }
     }
 
-    void vqParseGuestToHost() {
+    void vqParseGuestToHostLocked() {
         while (true) {
             if (mVqGuestToHostBuf.size() < sizeof(struct virtio_vsock_hdr)) {
                 break;
@@ -694,7 +729,7 @@ private:
                 break;
             }
 
-            vqParseGuestToHostRequest(request);
+            vqParseGuestToHostRequestLocked(request);
 
             if (requestSize == mVqGuestToHostBuf.size()) {
                 mVqGuestToHostBuf.clear();
@@ -702,6 +737,33 @@ private:
                 mVqGuestToHostBuf.erase(mVqGuestToHostBuf.begin(),
                                         mVqGuestToHostBuf.begin() + requestSize);
             }
+        }
+    }
+
+    void vqReadGuestToHostLockedImpl(VirtQueueElement *e) {
+        const size_t sz = iov_size(e->out_sg, e->out_num);
+
+        const size_t currentSize = mVqGuestToHostBuf.size();
+        mVqGuestToHostBuf.resize(currentSize + sz);
+        iov_to_buf(e->out_sg, e->out_num, 0, &mVqGuestToHostBuf[currentSize], sz);
+
+        vqParseGuestToHostLocked();
+    }
+
+    void vqReadGuestToHostLocked(VirtIODevice *dev, VirtQueue *vq) {
+        while (virtio_queue_ready(vq)) {
+            VirtQueueElement *e = static_cast<VirtQueueElement *>(
+                virtqueue_pop(vq, sizeof(VirtQueueElement)));
+            if (e) {
+                vqReadGuestToHostLockedImpl(e);
+                vqConsumeVirtQueueElement(vq, e, 0);
+            } else {
+                break;
+            }
+        }
+
+        if (virtio_queue_ready(vq)) {
+            virtio_notify(dev, vq);
         }
     }
 
@@ -714,11 +776,33 @@ private:
     VirtIOVSock *const mS;
     std::unordered_map<uint64_t, std::shared_ptr<VSockStream>> mStreams;
     std::vector<uint8_t> mVqGuestToHostBuf;
-    SocketBuffer mVqHostToGuestBuf;
+    std::deque<struct virtio_vsock_hdr> mHostToGuestOrphanFrames;
     uint32_t mSrcHostPortI = kSrcHostPortMin;
 
     mutable std::mutex mMtx;
 };
+
+void VSockStream::sendOp(enum virtio_vsock_op op) {
+    switch (op) {
+    case VIRTIO_VSOCK_OP_SHUTDOWN:
+        if (mIsConnected) {
+            struct virtio_vsock_hdr hdr =
+                prepareFrameHeader(this, VIRTIO_VSOCK_OP_SHUTDOWN, 0);
+            hdr.flags = VIRTIO_VSOCK_SHUTDOWN_RCV | VIRTIO_VSOCK_SHUTDOWN_SEND;
+            mDev->queueOrphanFrameHostToGuestLocked(hdr);
+        }
+        break;
+
+    case VIRTIO_VSOCK_OP_RST:
+        mDev->queueOrphanFrameHostToGuestLocked(
+            prepareFrameHeader(this, VIRTIO_VSOCK_OP_RST, 0));
+        break;
+
+    default:
+        mSendOpMask |= (1u << op);
+        break;
+    }
+}
 
 void VSockStream::signalWake() {
     if (mPipe) {
@@ -735,13 +819,12 @@ void VSockStream::signalWake() {
                 break;
             }
         }
-
-        mDev->sendRWHostToGuestLocked(this);
     } else if (mHostCallbacks) {
         // nothing
     } else {
         ::crashhandler_die("%s:%d: No data source", __func__, __LINE__);
     }
+    mDev->vqWriteHostToGuestLocked();
 }
 
 void VSockStream::closeFromHostCallback(void* that) {
