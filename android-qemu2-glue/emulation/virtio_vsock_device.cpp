@@ -153,10 +153,10 @@ struct VSockStream {
         mHostToGuestBuf.append(data, size);
     }
 
-    std::pair<const void*, size_t> hostToGuestBufPeek() const {
+    std::tuple<const void*, size_t, size_t> hostToGuestBufPeek() const {
         const size_t guestSpaceAvailable = mGuestBufAlloc - (mHostSentCnt - mGuestFwdCnt);
         const auto b = mHostToGuestBuf.peek();
-        return {b.first, std::min(guestSpaceAvailable, b.second)};
+        return {b.first, std::min(guestSpaceAvailable, b.second), b.second};
     }
 
     void hostToGuestBufConsume(size_t size) {
@@ -264,33 +264,37 @@ struct VirtIOVSockDev {
 
     bool sendRWHostToGuestLocked(VSockStream *stream) {
         while (true) {
-            const auto b = stream->hostToGuestBufPeek();
-            if (b.second == 0) {
-                // either the stream is empty or the other party is full
+            const void *data;
+            size_t dataSize;
+            size_t bufferSize;
+            std::tie(data, dataSize, bufferSize) = stream->hostToGuestBufPeek();
+            if (dataSize == 0) {
                 return false;
-            }
+            } else {
+                const size_t len = std::min(dataSize, size_t(4096));
 
-            const struct virtio_vsock_hdr hdr = {
-                .src_cid = stream->mHostCid,
-                .dst_cid = stream->mGuestCid,
-                .src_port = stream->mHostPort,
-                .dst_port = stream->mGuestPort,
-                .len = static_cast<uint32_t>(b.second),
-                .type = VIRTIO_VSOCK_TYPE_STREAM,
-                .op = static_cast<uint16_t>(VIRTIO_VSOCK_OP_RW),
-                .flags = 0,
-                .buf_alloc = kHostBufAlloc,
-                .fwd_cnt = stream->mHostFwdCnt,
-            };
+                const struct virtio_vsock_hdr hdr = {
+                    .src_cid = stream->mHostCid,
+                    .dst_cid = stream->mGuestCid,
+                    .src_port = stream->mHostPort,
+                    .dst_port = stream->mGuestPort,
+                    .len = static_cast<uint32_t>(len),
+                    .type = VIRTIO_VSOCK_TYPE_STREAM,
+                    .op = static_cast<uint16_t>(VIRTIO_VSOCK_OP_RW),
+                    .flags = 0,
+                    .buf_alloc = kHostBufAlloc,
+                    .fwd_cnt = stream->mHostFwdCnt,
+                };
 
-            std::vector<uint8_t> packet(sizeof(hdr) + b.second);
-            memcpy(&packet[0], &hdr, sizeof(hdr));
-            memcpy(&packet[sizeof(hdr)], b.first, b.second);
+                std::vector<uint8_t> packet(sizeof(hdr) + len);
+                memcpy(&packet[0], &hdr, sizeof(hdr));
+                memcpy(&packet[sizeof(hdr)], data, len);
 
-            stream->hostToGuestBufConsume(b.second);
+                stream->hostToGuestBufConsume(len);
 
-            if (vqWriteHostToGuest(packet.data(), packet.size())) {
-                return true;
+                if (vqWriteHostToGuest(packet.data(), packet.size())) {
+                    return true;
+                }
             }
         }
     }
@@ -330,9 +334,11 @@ struct VirtIOVSockDev {
 
         for (auto &kv : mStreams) {
             if (sendRWHostToGuestLocked(&*kv.second)) {
-                break;
+                return;
             }
         }
+
+        vqFlushHostToGuestBuffer();
     }
 
     uint64_t hostToGuestOpen(const uint32_t guestPort,
@@ -538,9 +544,7 @@ private:
         return size - rem;
     }
 
-    bool vqWriteHostToGuest(const void *buf, size_t size) {
-        bool isVqFull = false;
-
+    bool vqFlushHostToGuestBuffer() {
         while (true) {
             const auto b = mVqHostToGuestBuf.peek();
             if (b.second > 0) {
@@ -549,28 +553,18 @@ private:
                                                          b.second);
                 if (sz > 0) {
                     mVqHostToGuestBuf.consume(sz);
-                }
-                if (sz < b.second) {
-                    isVqFull = true;
-                    break;
+                } else {
+                    return true;  // vq is full
                 }
             } else {
-                break;  // mVqHostToGuestBuf is empty
+                return false;  // mVqHostToGuestBuf is empty
             }
         }
+    }
 
-        const uint8_t *buf8 = static_cast<const uint8_t *>(buf);
-        if (!isVqFull && (size > 0)) {
-            const size_t sz = vqWriteHostToGuestImpl(buf8, size);
-            buf8 += sz;
-            size -= sz;
-        }
-        if (size > 0) {
-            mVqHostToGuestBuf.append(buf8, size);
-            isVqFull = true;
-        }
-
-        return isVqFull;
+    bool vqWriteHostToGuest(const void *buf, size_t size) {
+        mVqHostToGuestBuf.append(buf, size);
+        return vqFlushHostToGuestBuffer();
     }
 
     void vqWriteReplyOpHostToGuest(const struct virtio_vsock_hdr *request,
