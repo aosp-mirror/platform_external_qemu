@@ -35,11 +35,14 @@ extern "C" {
 #include <android/android-emu/android/emulation/android_pipe_common.h>
 #include <android/android-emu/android/emulation/android_pipe_device.h>
 #include <android/android-emu/android/emulation/virtio_vsock_device.h>
+#include <android/android-emu/android/emulation/SocketBuffer.h>
 #include <android/android-emu/android/featurecontrol/feature_control.h>
 #include <android/crashreport/crash-handler.h>
 #include <android-qemu2-glue/base/files/QemuFileStream.h>
 
 namespace {
+using android::emulation::SocketBuffer;
+
 constexpr uint32_t VMADDR_CID_HOST = 2;
 constexpr uint32_t kHostBufAlloc = 1024 * 1024;
 constexpr uint32_t kSrcHostPortMin = 50000;
@@ -78,14 +81,6 @@ void saveVector(const std::vector<uint8_t> &v, android::base::Stream *stream) {
 bool loadVector(std::vector<uint8_t> *v, android::base::Stream *stream) {
     v->resize(stream->getBe32());
     return stream->read(v->data(), v->size()) == v->size();
-}
-
-void saveSocketBuffer(const SocketBuffer &buf, android::base::Stream *stream) {
-    saveVector(buf.mBuf, stream);
-}
-
-bool loadSocketBuffer(SocketBuffer *buf, android::base::Stream *stream) {
-    return loadVector(&buf->mBuf, stream);
 }
 
 struct VirtIOVSockDev;
@@ -189,7 +184,7 @@ struct VSockStream {
         stream->putBe32(mHostSentCnt);
         stream->putBe32(mHostFwdCnt);
 
-        saveSocketBuffer(mHostToGuestBuf, stream);
+        mHostToGuestBuf.save(stream);
     }
 
     bool load(android::base::Stream *stream) {
@@ -211,7 +206,7 @@ struct VSockStream {
         mHostSentCnt = stream->getBe32();
         mHostFwdCnt = stream->getBe32();
 
-        return loadSocketBuffer(&mHostToGuestBuf, stream);
+        return mHostToGuestBuf.load(stream);
     }
 
     static void closeFromHostCallback(void* that);
