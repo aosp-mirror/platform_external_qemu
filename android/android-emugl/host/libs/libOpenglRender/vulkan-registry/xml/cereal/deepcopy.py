@@ -193,8 +193,18 @@ class DeepcopyCodegen(VulkanTypeIterator):
 
         rhsExpr = "(%s)(%s)" % ("void*", rhs)
 
+        nextVar = "from_%s" % vulkanType.paramName
         sizeVar = "%s_size" % vulkanType.paramName
-        self.cgen.stmt("size_t %s = %s(%s)" % (sizeVar, EXTENSION_SIZE_API_NAME, lhs))
+
+        self.cgen.stmt("const void* %s = %s" % (nextVar, self.inputVars[0]))
+        self.cgen.stmt("size_t %s = 0u" % sizeVar)
+        self.cgen.beginWhile("!%s && %s" % (sizeVar, nextVar))
+        self.cgen.stmt("%s = static_cast<const vk_struct_common*>(%s)->%s" % (
+            nextVar, nextVar, vulkanType.paramName
+        ))
+        self.cgen.stmt("%s = %s(%s)" % (sizeVar, EXTENSION_SIZE_API_NAME, nextVar))
+        self.cgen.endWhile()
+        
         self.cgen.stmt("%s = nullptr" % rhs)
 
         self.cgen.beginIf(sizeVar)
@@ -205,7 +215,7 @@ class DeepcopyCodegen(VulkanTypeIterator):
             self.poolVarName, sizeVar))
 
         self.cgen.funcCall(None, self.prefix + "extension_struct",
-                           [self.poolVarName, lhs, rhsExpr])
+                           [self.poolVarName, nextVar, rhsExpr])
 
         self.cgen.endIf()
 

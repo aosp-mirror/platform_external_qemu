@@ -31,6 +31,8 @@
 #include "android/base/BumpPool.h"
 using android::base::BumpPool;
 
+        #include "vk_util.h"
+
 
 namespace goldfish_vk {
 

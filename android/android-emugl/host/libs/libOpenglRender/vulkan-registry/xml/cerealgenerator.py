@@ -249,6 +249,9 @@ using android::base::BumpPool;
         transformImplInclude = """
 #include "VkDecoderGlobalState.h"
 """
+        deepcopyInclude = """
+        #include "vk_util.h"
+"""
         poolIncludeGuest = """
 #include "goldfish_vk_private_defs.h"
 #include "android/base/BumpPool.h"
@@ -404,7 +407,7 @@ class BumpPool;
                                    extraHeader=commonCerealIncludesGuest + reservedmarshalIncludeGuest,
                                    extraImpl=commonCerealImplIncludesGuest + reservedmarshalImplIncludeGuest)
         self.addGuestEncoderModule("goldfish_vk_deepcopy_guest",
-                                   extraHeader=commonCerealIncludesGuest + poolIncludeGuest,
+                                   extraHeader=commonCerealIncludesGuest + poolIncludeGuest + deepcopyInclude,
                                    extraImpl=commonCerealImplIncludesGuest)
         self.addGuestEncoderModule("goldfish_vk_counting_guest",
                                    extraHeader=countingIncludes,
@@ -430,7 +433,7 @@ class BumpPool;
                        extraHeader=testingInclude,
                        extraImpl=commonCerealImplIncludes)
         self.addModule("common", "goldfish_vk_deepcopy",
-                       extraHeader=poolInclude,
+                       extraHeader=poolInclude + deepcopyInclude,
                        extraImpl=commonCerealImplIncludes)
         self.addModule("common", "goldfish_vk_handlemap",
                        extraHeader=handleMapInclude,
