@@ -286,7 +286,27 @@ private:
 EglOsEglDisplay::EglOsEglDisplay() {
     mVerbose = System::getEnvironmentVariable("ANDROID_EMUGL_VERBOSE") == "1";
 
-    mDisplay = mDispatcher.eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if (System::getEnvironmentVariable("ANDROID_EMUGL_EXPERIMENTAL_FAST_PATH") == "1") {
+        const EGLAttrib attr[] = {
+            EGL_PLATFORM_ANGLE_TYPE_ANGLE,
+            EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE,
+            EGL_EXPERIMENTAL_PRESENT_PATH_ANGLE,
+            EGL_EXPERIMENTAL_PRESENT_PATH_FAST_ANGLE,
+            EGL_NONE
+        };
+
+        mDisplay = mDispatcher.eglGetPlatformDisplay(EGL_PLATFORM_ANGLE_ANGLE,
+            (void*)EGL_DEFAULT_DISPLAY,
+            attr);
+
+        if (mDisplay == EGL_NO_DISPLAY) {
+            fprintf(stderr, "%s: no display found that supports the requested extensions\n", __func__);
+        }
+    }
+    else {
+        mDisplay = mDispatcher.eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    }
+
     mDispatcher.eglInitialize(mDisplay, nullptr, nullptr);
     mDispatcher.eglSwapInterval(mDisplay, 0);
     auto clientExts = mDispatcher.eglQueryString(mDisplay, EGL_EXTENSIONS);
