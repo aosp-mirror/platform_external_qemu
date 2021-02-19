@@ -1770,6 +1770,15 @@ public:
         VkSemaphoreCreateInfo localCreateInfo = vk_make_orphan_copy(*pCreateInfo);
         vk_struct_chain_iterator structChainIter = vk_make_chain_iterator(&localCreateInfo);
 
+        VkSemaphoreTypeCreateInfoKHR localSemaphoreTypeCreateInfo;
+        if (const VkSemaphoreTypeCreateInfoKHR* semaphoreTypeCiPtr =
+                    vk_find_struct<VkSemaphoreTypeCreateInfoKHR>(pCreateInfo);
+            semaphoreTypeCiPtr) {
+            localSemaphoreTypeCreateInfo =
+                    vk_make_orphan_copy(*semaphoreTypeCiPtr);
+            vk_append_struct(&structChainIter, &localSemaphoreTypeCreateInfo);
+        }
+
         const VkExportSemaphoreCreateInfoKHR* exportCiPtr =
             vk_find_struct<VkExportSemaphoreCreateInfoKHR>(pCreateInfo);
         VkExportSemaphoreCreateInfoKHR localSemaphoreCreateInfo;
