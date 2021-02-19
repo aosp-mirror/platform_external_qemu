@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bd5473fc_eca59ef1",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/GLEScmImp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 918,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-02-19T17:09:19Z",
+      "side": 1,
+      "message": "for perf reasons, since this is on draw, should we cache this as a member of the GLEScontext class?",
+      "revId": "9ece61210d838eb9125fac7a1be44728b1af79bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
