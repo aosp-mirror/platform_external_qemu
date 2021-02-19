@@ -1460,7 +1460,8 @@ message EmulatorFeatureFlagState {
     VULKAN_QUEUE_SUBMIT_WITH_COMMANDS = 76;
     VULKAN_BATCHED_DESCRIPTOR_SET_UPDATE = 77;
     MINIGBM = 78;
-    // Next tag: 79
+    NO_DRAW = 79;
+    // Next tag: 80
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

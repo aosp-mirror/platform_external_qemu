@@ -761,6 +761,9 @@ GL_API void GL_APIENTRY  glCompressedTexSubImage2D( GLenum target, GLint level, 
     SET_ERROR_IF(level < 0 || level > log2(ctx->getMaxTexSize()),GL_INVALID_VALUE)
     SET_ERROR_IF(!data,GL_INVALID_OPERATION);
 
+    if (ctx->drawDisabled()) {
+        return;
+    }
     if (shouldPassthroughCompressedFormat(ctx, format)) {
         doCompressedTexSubImage2DNative(ctx, target, level, xoffset, yoffset, width,
                                              height, format, imageSize, data);
@@ -909,7 +912,9 @@ GL_API void GL_APIENTRY  glDrawArrays( GLenum mode, GLint first, GLsizei count) 
     GLES_CM_TRACE()
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!GLEScmValidate::drawMode(mode),GL_INVALID_ENUM)
-
+    if (ctx->drawDisabled()) {
+        return;
+    }
     ctx->drawArrays(mode, first, count);
 }
 
@@ -918,7 +923,9 @@ GL_API void GL_APIENTRY  glDrawElements( GLenum mode, GLsizei count, GLenum type
     GLES_CM_TRACE()
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF((!GLEScmValidate::drawMode(mode) || !GLEScmValidate::drawType(type)),GL_INVALID_ENUM)
-
+    if (ctx->drawDisabled()) {
+        return;
+    }
     ctx->drawElements(mode, count, type, elementsIndices);
 }
 
@@ -2153,6 +2160,10 @@ GL_API void GL_APIENTRY  glTexSubImage2D( GLenum target, GLint level, GLint xoff
     // set an error if level < 0 or level > log 2 max
     SET_ERROR_IF(level < 0 || 1<<level > ctx->getMaxTexSize(), GL_INVALID_VALUE);
     SET_ERROR_IF(xoffset < 0 || yoffset < 0 || width < 0 || height < 0, GL_INVALID_VALUE);
+
+    if (ctx->drawDisabled()) {
+        return;
+    }
     if (ctx->shareGroup().get()) {
         TextureData *texData = getTextureTargetData(target);
         SET_ERROR_IF(!texData, GL_INVALID_OPERATION);
@@ -2873,6 +2884,9 @@ void glDrawTexOES (T x, T y, T z, T width, T height) {
     GLES_CM_TRACE()
 
     SET_ERROR_IF((width<=0 || height<=0),GL_INVALID_VALUE);
+    if (ctx->drawDisabled()) {
+        return;
+    }
 
     ctx->drawValidate();
     ctx->drawTexOES((float)x, (float)y, (float)z, (float)width, (float)height);
