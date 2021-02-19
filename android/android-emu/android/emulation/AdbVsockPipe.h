@@ -12,6 +12,7 @@
 #pragma once
 
 #include "android/base/async/Looper.h"
+#include "android/base/files/Stream.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/emulation/AdbTypes.h"
 #include "android/emulation/AdbHub.h"
@@ -42,6 +43,10 @@ public:
 
         void resetActiveGuestPipeConnection() override;
 
+        static void save(base::Stream* stream);
+        static bool load(base::Stream* stream);
+        static IVsockHostCallbacks* getHostCallbacks(uint64_t key);
+
     private:
         friend AdbVsockPipe;
 
@@ -50,6 +55,10 @@ public:
 
         void pollGuestAdbdThreadLoop();
         bool checkIfGuestAdbdAlive();
+
+        void reset();
+        void saveImpl(base::Stream* stream) const;
+        bool loadImpl(base::Stream* stream);
 
         AdbHostAgent* mHostAgent;
         std::atomic<bool> mGuestAdbdPollingThreadRunning = true;
@@ -64,6 +73,8 @@ public:
         Service *service,
         android::base::ScopedSocket socket,
         AdbPortType portType);
+
+    AdbVsockPipe(Service *service);
 
     AdbVsockPipe(Service *service,
                  android::base::ScopedSocket socket,
@@ -106,8 +117,11 @@ private:
     void onGuestSend(const void *data, size_t size);
     void onGuestClose();
 
+    void save(base::Stream* stream) const;
+    bool loadImpl(base::Stream* stream);
+    static std::unique_ptr<AdbVsockPipe> load(Service* service, base::Stream* stream);
+
     Service *const mService;
-    const AdbPortType mPortType;
     CrossSessionSocket mSocket;
     SocketBuffer mGuestToHost;
     DataVsockCallbacks mVsockCallbacks;

@@ -16,6 +16,7 @@
 #include <chrono>
 #include <future>
 
+namespace {
 using FdWatch = android::base::Looper::FdWatch;
 
 uint64_t empty_virtio_vsock_device_stream_open(uint32_t guest_port,
@@ -40,6 +41,9 @@ const virtio_vsock_device_ops_t empty_ops = {
 
 const virtio_vsock_device_ops_t *g_vsock_ops = &empty_ops;
 
+android::emulation::AdbVsockPipe::Service *g_service = nullptr;
+}  // namespace
+
 const virtio_vsock_device_ops_t *
 virtio_vsock_device_set_ops(const virtio_vsock_device_ops_t *ops) {
     const virtio_vsock_device_ops_t *old = g_vsock_ops;
@@ -54,9 +58,14 @@ AdbVsockPipe::Service::Service(AdbHostAgent* hostAgent)
     : mHostAgent(hostAgent)
     , mGuestAdbdPollingThread(&AdbVsockPipe::Service::pollGuestAdbdThreadLoop, this)
     , mDestroyPipesThread(&AdbVsockPipe::Service::destroyPipesThreadLoop, this)
-{}
+{
+    fprintf(stderr, "%s:%s:%d this=%p\n", "AdbVsockPipe::Service", __func__, __LINE__, this);
+    g_service = this;
+}
 
 AdbVsockPipe::Service::~Service() {
+    g_service = nullptr;
+    fprintf(stderr, "%s:%s:%d this=%p\n", "AdbVsockPipe::Service", __func__, __LINE__, this);
     mGuestAdbdPollingThreadRunning = false;
     mPipesToDestroy.stop();
     mGuestAdbdPollingThread.join();
@@ -144,11 +153,50 @@ void AdbVsockPipe::Service::resetActiveGuestPipeConnection() {
     mPipes.clear();
 }
 
+void AdbVsockPipe::Service::reset() {
+}
+
+void AdbVsockPipe::Service::saveImpl(base::Stream* stream) const {
+    stream->putBe32(mPipes.size());
+    for (const auto& p : mPipes) {
+        p->save(stream);
+    }
+}
+
+bool AdbVsockPipe::Service::loadImpl(base::Stream* stream) {
+    reset();
+    for (uint32_t n = stream->getBe32(); n > 0; --n) {
+        
+    }
+    return true;
+}
+
+void AdbVsockPipe::Service::save(base::Stream* stream) {
+    fprintf(stderr, "%s:%s:%d g_service=%p\n",
+            "AdbVsockPipe::Service", __func__, __LINE__, g_service);
+    g_service->saveImpl(stream);
+}
+
+bool AdbVsockPipe::Service::load(base::Stream* stream) {
+    fprintf(stderr, "%s:%s:%d g_service=%p\n",
+            "AdbVsockPipe::Service", __func__, __LINE__, g_service);
+    return g_service->loadImpl(stream);
+}
+
+IVsockHostCallbacks* AdbVsockPipe::Service::getHostCallbacks(uint64_t key) {
+    fprintf(stderr, "%s:%s:%d key=%llu\n", "AdbVsockPipe::Service",
+            __func__, __LINE__, (unsigned long long)key);
+    return nullptr;
+}
+
+AdbVsockPipe::AdbVsockPipe(Service *service)
+        : mService(service)
+        , mVsockCallbacks(this) {}
+
 AdbVsockPipe::AdbVsockPipe(AdbVsockPipe::Service *service,
                            android::base::ScopedSocket socket,
                            const AdbPortType portType)
         : mService(service)
-        , mPortType(portType)
         , mSocket(std::move(socket))
         , mVsockCallbacks(this) {
     mVsockCallbacks.streamKey = (*g_vsock_ops->open)(kGuestAdbdPort, &mVsockCallbacks);
@@ -313,6 +361,40 @@ void AdbVsockPipe::onGuestSend(const void *data, size_t size) {
 void AdbVsockPipe::onGuestClose() {
     mVsockCallbacks.streamKey = 0;  // to prevent recursion in dctor
     mService->destroyPipe(this);
+}
+
+void AdbVsockPipe::save(base::Stream* stream) const {
+    mSocket.onSave(stream);
+    mGuestToHost.save(stream);
+    if (mAdbHub) {
+        stream->putByte(1);
+        mAdbHub->onSave(stream);
+    } else {
+        stream->putByte(0);
+    }
+}
+
+bool AdbVsockPipe::loadImpl(base::Stream* stream) {
+    mSocket.onLoad(stream);
+    if (!mGuestToHost.load(stream)) {
+        return false;
+    }
+    if (stream->getByte()) {
+        mAdbHub = std::make_unique<AdbHub>();
+        mAdbHub->onLoad(stream);
+    }
+
+    return true;
+}
+
+std::unique_ptr<AdbVsockPipe> AdbVsockPipe::load(AdbVsockPipe::Service* service,
+                                                 base::Stream* stream) {
+    auto pipe = std::make_unique<AdbVsockPipe>(service);
+    if (pipe->loadImpl(stream)) {
+        return std::move(pipe);
+    } else {
+        return nullptr;
+    }
 }
 
 AdbVsockPipe::DataVsockCallbacks::~DataVsockCallbacks() {
