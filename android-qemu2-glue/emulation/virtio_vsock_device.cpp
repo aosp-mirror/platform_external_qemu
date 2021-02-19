@@ -42,6 +42,7 @@ extern "C" {
 namespace {
 constexpr uint32_t VMADDR_CID_HOST = 2;
 constexpr uint32_t kHostBufAlloc = 1024 * 1024;
+constexpr uint32_t kSrcHostPortMin = 50000;
 
 enum class DstPort {
     Data = 5000,
@@ -104,7 +105,7 @@ struct VSockStream {
                 uint32_t guest_fwd_cnt)
         : vtblPtr(&vtblMain)
         , mDev(d)
-        , mHostCallbacks(std::move(hostCallbacks))
+        , mHostCallbacks(hostCallbacks)
         , mGuestCid(guest_cid)
         , mHostCid(host_cid)
         , mGuestPort(guest_port)
@@ -144,7 +145,8 @@ struct VSockStream {
         } else if (mHostCallbacks) {
             mHostCallbacks->onReceive(buf, size);
         } else {
-            ::crashhandler_die("%s:%d: No data sink", __func__, __LINE__);
+            ::crashhandler_die("%s:%s:%d: No data sink",
+                               "VSockStream", __func__, __LINE__);
         }
 
         mHostFwdCnt += size;
@@ -258,9 +260,6 @@ const AndroidPipeHwFuncs VSockStream::vtblNoWake = {
     &getPipeIdCallback,
 };
 
-namespace {
-constexpr uint32_t kSrcHostPortMin = 50000;
-
 struct virtio_vsock_hdr prepareFrameHeader(const VSockStream *stream,
                                            const enum virtio_vsock_op op,
                                            const uint32_t len) {
@@ -278,7 +277,6 @@ struct virtio_vsock_hdr prepareFrameHeader(const VSockStream *stream,
     };
     return hdr;
 }
-}  // namespace
 
 struct VirtIOVSockDev {
     VirtIOVSockDev(VirtIOVSock *s) : mS(s) {}
@@ -477,8 +475,8 @@ private:
                 } else if (stream->mSendOpMask & (1u << VIRTIO_VSOCK_OP_CREDIT_REQUEST)) {
                     vqWriteControlFrame(vq, e, stream, VIRTIO_VSOCK_OP_CREDIT_REQUEST);
                 } else {
-                    ::crashhandler_die("%s:%d unexpected mSendOpMask=%x\n",
-                                       __func__, __LINE__, stream->mSendOpMask);
+                    ::crashhandler_die("%s:%s:%d unexpected mSendOpMask=%x",
+                                       "VirtIOVSockDev", __func__, __LINE__, stream->mSendOpMask);
                 }
             }
         }
