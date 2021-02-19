@@ -16,6 +16,7 @@
 #include "android/emulation/AdbTypes.h"
 #include "android/emulation/AdbHub.h"
 #include "android/emulation/CrossSessionSocket.h"
+#include "android/emulation/SocketBuffer.h"
 #include "android/emulation/virtio_vsock_device.h"
 
 #include <atomic>

@@ -13,29 +13,6 @@
 
 #include <stdint.h>
 
-struct SocketBuffer {
-    bool isEmpty() const { return mBuf.empty(); }
-
-    void append(const void *data, size_t size) {
-        const uint8_t *data8 = static_cast<const uint8_t *>(data);
-        mBuf.insert(mBuf.end(), data8, data8 + size);
-    }
-
-    std::pair<const void*, size_t> peek() const {
-        return {mBuf.data(), mBuf.size()};
-    }
-
-    void consume(size_t size) {
-        mBuf.erase(mBuf.begin(), mBuf.begin() + size);
-    }
-
-    void clear() {
-        mBuf.clear();
-    }
-
-    std::vector<uint8_t> mBuf;
-};
-
 struct IVsockHostCallbacks {
     virtual ~IVsockHostCallbacks() {}
     virtual void onConnect() = 0;
