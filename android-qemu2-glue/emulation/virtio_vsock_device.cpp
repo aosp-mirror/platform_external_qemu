@@ -31,6 +31,7 @@ extern "C" {
 #include <hw/virtio/virtio-vsock.h>
 }  // extern "C"
 
+#include <android/android-emu/android/emulation/AdbVsockPipe.h>
 #include <android/android-emu/android/emulation/android_pipe_base.h>
 #include <android/android-emu/android/emulation/android_pipe_common.h>
 #include <android/android-emu/android/emulation/android_pipe_device.h>
@@ -41,6 +42,7 @@ extern "C" {
 #include <android-qemu2-glue/base/files/QemuFileStream.h>
 
 namespace {
+using android::emulation::AdbVsockPipe;
 using android::emulation::SocketBuffer;
 
 constexpr uint32_t VMADDR_CID_HOST = 2;
@@ -173,8 +175,7 @@ struct VSockStream {
     void signalWake();
 
     void save(android::base::Stream *stream) const {
-        android_pipe_guest_save(mPipe, asCStream(stream));
-
+        stream->putBe64(mSendOpMask);
         stream->putBe64(mGuestCid);
         stream->putBe64(mHostCid);
         stream->putBe32(mGuestPort);
@@ -183,20 +184,23 @@ struct VSockStream {
         stream->putBe32(mGuestFwdCnt);
         stream->putBe32(mHostSentCnt);
         stream->putBe32(mHostFwdCnt);
+        stream->putByte(mIsConnected);
+
+        if (mPipe) {
+            stream->putByte(1);
+            android_pipe_guest_save(mPipe, asCStream(stream));
+        } else if (mHostCallbacks) {
+            stream->putByte(2);  // see `load` below
+        } else {
+            ::crashhandler_die("%s:%s:%d unexpected stream state",
+                               "VSockStream", __func__, __LINE__);
+        }
 
         mHostToGuestBuf.save(stream);
     }
 
     bool load(android::base::Stream *stream) {
-        char force_close = 0;
-        mPipe = android_pipe_guest_load(asCStream(stream), this, &force_close);
-
-        if (!mPipe || force_close) {
-            return false;
-        } else {
-            vtblPtr = &vtblMain;
-        }
-
+        mSendOpMask = stream->getBe64();
         mGuestCid = stream->getBe64();
         mHostCid = stream->getBe64();
         mGuestPort = stream->getBe32();
@@ -205,6 +209,35 @@ struct VSockStream {
         mGuestFwdCnt = stream->getBe32();
         mHostSentCnt = stream->getBe32();
         mHostFwdCnt = stream->getBe32();
+        mIsConnected = stream->getByte();
+
+        switch (stream->getByte()) {  // see `save` above
+        case 1: {
+                char force_close = 0;
+                mPipe = android_pipe_guest_load(asCStream(stream), this, &force_close);
+                if (!mPipe || force_close) {
+                    return false;
+                } else {
+                    vtblPtr = &vtblMain;
+                }
+            }
+            break;
+
+        case 2:
+            mHostCallbacks = AdbVsockPipe::Service::getHostCallbacks(
+                makeStreamKey(mGuestPort, mHostPort));
+
+            fprintf(stderr, "%s:%d mHostCallbacks=%p mGuestPort=%u mHostPort=%u\n",
+                    __func__, __LINE__, mHostCallbacks, mGuestPort, mHostPort);
+
+            if (!mHostCallbacks) {
+                return false;
+            }
+            break;
+
+        default:
+            return false;
+        }
 
         return mHostToGuestBuf.load(stream);
     }
@@ -357,18 +390,25 @@ struct VirtIOVSockDev {
     }
 
     void save(android::base::Stream *stream) const {
-/*        std::lock_guard<std::mutex> lock(mMtx);
+        std::lock_guard<std::mutex> lock(mMtx);
 
         stream->putBe32(mStreams.size());
         for (const auto &kv : mStreams) {
             kv.second->save(stream);
         }
+
         saveVector(mVqGuestToHostBuf, stream);
-        saveSocketBuffer(mVqHostToGuestBuf, stream);*/
+
+        stream->putBe32(mHostToGuestOrphanFrames.size());
+        for (const auto &f : mHostToGuestOrphanFrames) {
+            stream->write(&f, sizeof(f));
+        }
+
+        stream->putBe32(mSrcHostPortI);
     }
 
     bool load(android::base::Stream *stream) {
-/*        std::lock_guard<std::mutex> lock(mMtx);
+        std::lock_guard<std::mutex> lock(mMtx);
 
         resetDeviceLocked();
 
@@ -388,9 +428,16 @@ struct VirtIOVSockDev {
             return false;
         }
 
-        if (!loadSocketBuffer(&mVqHostToGuestBuf, stream)) {
-            return false;
-        }*/
+        for (uint32_t n = stream->getBe32(); n > 0; --n) {
+            struct virtio_vsock_hdr hdr;
+            if (stream->read(&hdr, sizeof(hdr)) == sizeof(hdr)) {
+                mHostToGuestOrphanFrames.push_back(hdr);
+            } else {
+                return false;
+            }
+        }
+
+        mSrcHostPortI = stream->getBe32();
 
         return true;
     }
@@ -861,11 +908,13 @@ void virtio_vsock_set_status(VirtIODevice *dev, uint8_t status) {
 
 void virtio_vsock_impl_save(QEMUFile *f, const void *impl) {
     android::qemu::QemuFileStream qstream(f);
+    AdbVsockPipe::Service::save(&qstream);
     static_cast<const VirtIOVSockDev *>(impl)->save(&qstream);
 }
 
 int virtio_vsock_impl_load(QEMUFile *f, void *impl) {
     android::qemu::QemuFileStream qstream(f);
+    AdbVsockPipe::Service::load(&qstream);
     return static_cast<VirtIOVSockDev *>(impl)->load(&qstream) ? 0 : 1;
 }
 
