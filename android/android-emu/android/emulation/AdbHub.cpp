@@ -36,7 +36,7 @@ static const size_t kHeaderSize = sizeof(android::emulation::amessage);
 
 namespace android {
 namespace emulation {
-void AdbHub::onSave(android::base::Stream* stream) {
+void AdbHub::onSave(android::base::Stream* stream) const {
     stream->putBe32(mJdwpProxies.size());
     for (const auto& proxy : mJdwpProxies) {
         proxy.second->onSave(stream);
