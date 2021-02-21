@@ -70,8 +70,8 @@ void PhysicalModel::onDisable() {
 
 // radianDelta is in XYZ order.
 void PhysicalModel::updateRotation(glm::vec3 radianDelta) {
-    mEulerRotationRadians.x += radianDelta.y;
-    mEulerRotationRadians.y += radianDelta.x;
+    mEulerRotationRadians.x += radianDelta.x;
+    mEulerRotationRadians.y += radianDelta.y;
 
     // Clamp up/down rotation to -80 and +80 degrees, like a FPS camera.
     if (mEulerRotationRadians.x < glm::radians(kMinVerticalRotationDegrees)) {
@@ -152,8 +152,8 @@ void WASDInputHandler::mouseMove(int offsetX, int offsetY) {
     // Angles are measured counter clock-wise while in mouselook, offsets are
     // measured the opposite way.
     if (offsetX != 0 || offsetY != 0) {
-        mModel.updateRotation({-offsetX * kPixelsToRotationRadians,
-                               -offsetY * kPixelsToRotationRadians, 0.0f});
+        mModel.updateRotation({-offsetY * kPixelsToRotationRadians,
+                               -offsetX * kPixelsToRotationRadians, 0.0f});
         updateVelocity();
     }
 }
