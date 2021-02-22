@@ -16,6 +16,23 @@
       "message": "Sorry for the late response. I should have done this earlier before. I am also gonna attach the binaries so that you can also verify if it works on your machine locally. ",
       "revId": "7b09fc5e980a20e10cd2ae5e3296bbc6c9e9cbb0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d3aec275_9336f37f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-02-22T20:00:01Z",
+      "side": 1,
+      "message": "The mac build can be downloaded here https://android-build.googleplex.com/builds/build-details/P19994431/targets/sdk_tools_cross_darwin",
+      "revId": "7b09fc5e980a20e10cd2ae5e3296bbc6c9e9cbb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
