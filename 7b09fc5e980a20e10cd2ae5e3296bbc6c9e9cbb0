@@ -50,6 +50,24 @@
       "message": "The buildbot in emu-master-dev is red hence the presubmit failed.",
       "revId": "7b09fc5e980a20e10cd2ae5e3296bbc6c9e9cbb0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d2514f1e_25987fd9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-02-22T20:27:24Z",
+      "side": 1,
+      "message": "I\u0027m having trouble with the Mac build due to security protection on Mac. Is it possible to get a Linux build?",
+      "parentUuid": "d3aec275_9336f37f",
+      "revId": "7b09fc5e980a20e10cd2ae5e3296bbc6c9e9cbb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
