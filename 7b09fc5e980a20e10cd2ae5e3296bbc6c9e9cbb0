@@ -86,6 +86,24 @@
       "parentUuid": "d2514f1e_25987fd9",
       "revId": "7b09fc5e980a20e10cd2ae5e3296bbc6c9e9cbb0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fd42bdd7_a12c3e98",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-02-22T20:51:42Z",
+      "side": 1,
+      "message": "Let me use the studio build. emu-master-dev Linux is broken by some CL for now.",
+      "parentUuid": "eef34cfe_1236d480",
+      "revId": "7b09fc5e980a20e10cd2ae5e3296bbc6c9e9cbb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
