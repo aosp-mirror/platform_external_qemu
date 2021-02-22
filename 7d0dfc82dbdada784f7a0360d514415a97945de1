@@ -22,6 +22,30 @@
       },
       "revId": "7d0dfc82dbdada784f7a0360d514415a97945de1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "22da42a9_3b13e9b9",
+        "filename": "android/android-ui/qt/emulator-qt-window.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-02-22T23:04:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "64da2293_de68b07d",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 27
+      },
+      "revId": "7d0dfc82dbdada784f7a0360d514415a97945de1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
