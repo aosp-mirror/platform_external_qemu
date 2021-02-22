@@ -104,6 +104,23 @@
       "parentUuid": "eef34cfe_1236d480",
       "revId": "7b09fc5e980a20e10cd2ae5e3296bbc6c9e9cbb0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "eb241aba_f3060cd6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-02-22T22:52:48Z",
+      "side": 1,
+      "message": "Is it working correctly with Studio?",
+      "revId": "7b09fc5e980a20e10cd2ae5e3296bbc6c9e9cbb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
