@@ -157,6 +157,24 @@
       "parentUuid": "dac9d546_060b237e",
       "revId": "7b09fc5e980a20e10cd2ae5e3296bbc6c9e9cbb0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "12eb655e_56a28b6e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-02-22T23:13:00Z",
+      "side": 1,
+      "message": "Do you have access to https://android-build.googleplex.com/builds/submitted/7163304/studio_linux/latest/artifacts/android-studio.mac.zip ?",
+      "parentUuid": "dac9d546_060b237e",
+      "revId": "7b09fc5e980a20e10cd2ae5e3296bbc6c9e9cbb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
