@@ -121,6 +121,24 @@
       "message": "Is it working correctly with Studio?",
       "revId": "7b09fc5e980a20e10cd2ae5e3296bbc6c9e9cbb0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "dac9d546_060b237e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-02-22T23:08:54Z",
+      "side": 1,
+      "message": "I just tried the link and I don\u0027t access to it.",
+      "parentUuid": "eb241aba_f3060cd6",
+      "revId": "7b09fc5e980a20e10cd2ae5e3296bbc6c9e9cbb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
