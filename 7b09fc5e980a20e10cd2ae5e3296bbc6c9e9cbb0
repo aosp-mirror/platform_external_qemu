@@ -33,6 +33,23 @@
       "message": "The mac build can be downloaded here https://android-build.googleplex.com/builds/build-details/P19994431/targets/sdk_tools_cross_darwin",
       "revId": "7b09fc5e980a20e10cd2ae5e3296bbc6c9e9cbb0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a13d958d_42d2f541",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-02-22T20:01:00Z",
+      "side": 1,
+      "message": "The buildbot in emu-master-dev is red hence the presubmit failed.",
+      "revId": "7b09fc5e980a20e10cd2ae5e3296bbc6c9e9cbb0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
