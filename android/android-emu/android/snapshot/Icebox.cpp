@@ -40,7 +40,9 @@
 #include "android/emulation/apacket_utils.h"                 // for apacket
 #include "android/emulation/control/vm_operations.h"         // for QAndroid...
 #include "android/jdwp/Jdwp.h"                               // for JdwpComm...
+#include "android/metrics/MetricsReporter.h"
 #include "android/snapshot/interface.h"                      // for androidS...
+#include "android/snapshot/Snapshotter.h"
 #include "openssl/base.h"                                    // for RSA
 #include "openssl/nid.h"                                     // for NID_sha1
 
@@ -333,6 +335,7 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
         fprintf(stderr, "adb port uninitialized\n");
         return false;
     }
+    metrics::MetricsReporter* reporter = &metrics::MetricsReporter::get();
 
     uint32_t local_id = s_id.fetch_add(1);
     uint32_t remote_id = 0;
@@ -618,9 +621,10 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
                 snapshot_num++;
                 android::base::ThreadLooper::
                         runOnMainLooperAndWaitForCompletion(
-                                [&new_snapshot_name]() {
+                                [&new_snapshot_name, reporter]() {
                                     D("ready to take snapshot");
                                     getConsoleAgents()->vm->vmStop();
+                                    const auto startMs = android::base::System::get()->getHighResTimeUs() / 1000;
                                     bool snapshotSkipped =
                                             getConsoleAgents()
                                                     ->vm
@@ -641,6 +645,20 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
                                     if (snapshotSkipped) {
                                         getConsoleAgents()
                                                 ->vm->setSkipSnapshotSave(true);
+                                    } else {
+                                        if (reporter->isReportingEnabled()) {
+                                            const auto endMs = android::base::System::get()->getHighResTimeUs() / 1000;
+                                            const auto duration = startMs - endMs;
+                                            snapshot::Snapshotter::SnapshotOperationStats stats = snapshot::Snapshotter::get().getSaveStats(new_snapshot_name.c_str(), duration);
+                                            reporter->report([stats](pb::AndroidStudioEvent* event) {
+                                                auto icebox = event->mutable_emulator_details()->mutable_icebox();
+                                                load->set_state(
+                                                        pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_SUCCEEDED);
+                                                load->set_duration_ms(stats.durationMs);
+                                                load->set_on_demand_ram_enabled(stats.onDemandRamEnabled);
+                                                Snapshotter::fillSnapshotMetrics(event, stats);
+                                            });
+                                        }
                                     }
                                     getConsoleAgents()->vm->vmStart();
                                     D("Snapshot thread done");
