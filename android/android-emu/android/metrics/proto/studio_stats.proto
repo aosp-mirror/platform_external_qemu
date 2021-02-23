@@ -1925,6 +1925,24 @@ message EmulatorGrpc {
   optional PercentileEstimator duration = 6;
 }
 
+// Metrics for Icebox invocations.
+message EmulatorIcebox {
+  message StartIcebox {
+    optional int32 max_snapshot_number = 1;
+  }
+  message TakeSnapshot {
+    optional EmulatorSnapshot snapshot = 1;
+  }
+  message FinishIcebox {
+
+  }
+  oneof kind {
+    StartIcebox start_icebox = 1;
+    TakeSnapshot take_snapshot = 2;
+    FinishIcebox finish_icebox = 3;
+  }
+}
+
 // Metrics related to the Emulator.
 message EmulatorDetails {
   // Cpu architecture of the guest.
@@ -1991,7 +2009,9 @@ message EmulatorDetails {
   optional EmulatorLocationV2 location_v2 = 33;
   // Metrics for streamScreenshot
   optional EmulatorStreamScreenshot screenshot = 34;
-  // Next tag: 35
+  // Metrics for Icebox
+  repeated EmulatorIcebox icebox = 35;
+  // Next tag: 36
 
 
   // Emulator instance liveness as determined via adb connectivity.
