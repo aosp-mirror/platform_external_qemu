@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8b095868_c5aaa6e9",
+        "filename": "android/android-emu/android/emulation/AdbVsockPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-02-23T00:33:24Z",
+      "side": 1,
+      "message": "I notice that AdbGuestPipe has a mReuseFromSnapshot case. Do we need this? What about if there\u0027s an AdbHub?",
+      "revId": "3852f652312b0051f7cd1d363230b3ee644afab4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
