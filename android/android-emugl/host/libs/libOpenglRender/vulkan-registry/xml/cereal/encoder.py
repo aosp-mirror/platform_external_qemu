@@ -14,6 +14,7 @@ from .transform import TransformCodegen, genTransformsForVulkanType
 from .wrapperdefs import API_PREFIX_RESERVEDMARSHAL
 from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
+from .wrapperdefs import ROOT_TYPE_DEFAULT_VALUE
 from .wrapperdefs import VULKAN_STREAM_TYPE_GUEST
 
 encoder_decl_preamble = """
@@ -157,7 +158,7 @@ def emit_count_marshal(typeInfo, param, cgen):
         iterateVulkanType(
             typeInfo, param,
             VulkanCountingCodegen( \
-               cgen, "sFeatureBits", param.paramName, "countPtr",
+                cgen, "sFeatureBits", param.paramName, "countPtr", ROOT_TYPE_DEFAULT_VALUE,
                "count_"))
     if not res:
         cgen.stmt("(void)%s" % param.paramName)
@@ -171,7 +172,7 @@ def emit_marshal(typeInfo, param, cgen):
         iterateVulkanType(
             typeInfo, param,
             VulkanReservedMarshalingCodegen( \
-               cgen, STREAM, param.paramName, "streamPtrPtr",
+                cgen, STREAM, ROOT_TYPE_DEFAULT_VALUE, param.paramName, "streamPtrPtr",
                API_PREFIX_RESERVEDMARSHAL,
                "" if forOutput else "get_host_u64_",
                direction="write"))
@@ -185,13 +186,13 @@ def emit_unmarshal(typeInfo, param, cgen):
     iterateVulkanType(
         typeInfo, param,
         VulkanMarshalingCodegen( \
-           cgen, STREAM, param.paramName,
+            cgen, STREAM, ROOT_TYPE_DEFAULT_VALUE, param.paramName,
            API_PREFIX_UNMARSHAL, direction="read"))
 
 def emit_deepcopy(typeInfo, param, cgen):
     res = \
         iterateVulkanType(typeInfo, param, DeepcopyCodegen(
-            cgen, [param.paramName, "local_" + param.paramName], "pool", "deepcopy_"))
+            cgen, [param.paramName, "local_" + param.paramName], "pool", ROOT_TYPE_DEFAULT_VALUE, "deepcopy_"))
     if not res:
         cgen.stmt("(void)%s" % param.paramName)
 
