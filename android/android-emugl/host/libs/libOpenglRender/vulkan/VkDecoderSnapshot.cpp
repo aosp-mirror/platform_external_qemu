@@ -5236,29 +5236,7 @@ void vkCreateMetalSurfaceEXT(
     // TODO: Implement
 }
 #endif
-#ifdef VK_GOOGLE_color_buffer
-void vkRegisterImageColorBufferGOOGLE(
-    const uint8_t* snapshotTraceBegin,
-    size_t snapshotTraceBytes,
-    android::base::BumpPool* pool,
-    VkResult input_result,
-    VkDevice device,
-    VkImage image,
-    uint32_t colorBuffer)
-{
-    // TODO: Implement
-}
-void vkRegisterBufferColorBufferGOOGLE(
-    const uint8_t* snapshotTraceBegin,
-    size_t snapshotTraceBytes,
-    android::base::BumpPool* pool,
-    VkResult input_result,
-    VkDevice device,
-    VkBuffer buffer,
-    uint32_t colorBuffer)
-{
-    // TODO: Implement
-}
+#ifdef VK_EXT_fragment_density_map
 #endif
 #ifdef VK_EXT_scalar_block_layout
 #endif
@@ -5977,6 +5955,30 @@ void vkCollectDescriptorPoolIdsGOOGLE(
     VkDescriptorPool descriptorPool,
     uint32_t* pPoolIdCount,
     uint64_t* pPoolIds)
+{
+    // TODO: Implement
+}
+#endif
+#ifdef VK_GOOGLE_color_buffer
+void vkRegisterImageColorBufferGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::BumpPool* pool,
+    VkResult input_result,
+    VkDevice device,
+    VkImage image,
+    uint32_t colorBuffer)
+{
+    // TODO: Implement
+}
+void vkRegisterBufferColorBufferGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::BumpPool* pool,
+    VkResult input_result,
+    VkDevice device,
+    VkBuffer buffer,
+    uint32_t colorBuffer)
 {
     // TODO: Implement
 }
@@ -11435,32 +11437,6 @@ void VkDecoderSnapshot::vkCreateMetalSurfaceEXT(
     mImpl->vkCreateMetalSurfaceEXT(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, instance, pCreateInfo, pAllocator, pSurface);
 }
 #endif
-#ifdef VK_GOOGLE_color_buffer
-void VkDecoderSnapshot::vkRegisterImageColorBufferGOOGLE(
-    const uint8_t* snapshotTraceBegin,
-    size_t snapshotTraceBytes,
-    android::base::BumpPool* pool,
-    VkResult input_result,
-    VkDevice device,
-    VkImage image,
-    uint32_t colorBuffer)
-{
-    mImpl->vkRegisterImageColorBufferGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, image, colorBuffer);
-}
-#endif
-#ifdef VK_GOOGLE_color_buffer
-void VkDecoderSnapshot::vkRegisterBufferColorBufferGOOGLE(
-    const uint8_t* snapshotTraceBegin,
-    size_t snapshotTraceBytes,
-    android::base::BumpPool* pool,
-    VkResult input_result,
-    VkDevice device,
-    VkBuffer buffer,
-    uint32_t colorBuffer)
-{
-    mImpl->vkRegisterBufferColorBufferGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, buffer, colorBuffer);
-}
-#endif
 #ifdef VK_EXT_buffer_device_address
 void VkDecoderSnapshot::vkGetBufferDeviceAddressEXT(
     const uint8_t* snapshotTraceBegin,
@@ -12154,6 +12130,32 @@ void VkDecoderSnapshot::vkCollectDescriptorPoolIdsGOOGLE(
     uint64_t* pPoolIds)
 {
     mImpl->vkCollectDescriptorPoolIdsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, device, descriptorPool, pPoolIdCount, pPoolIds);
+}
+#endif
+#ifdef VK_GOOGLE_color_buffer
+void VkDecoderSnapshot::vkRegisterImageColorBufferGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::BumpPool* pool,
+    VkResult input_result,
+    VkDevice device,
+    VkImage image,
+    uint32_t colorBuffer)
+{
+    mImpl->vkRegisterImageColorBufferGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, image, colorBuffer);
+}
+#endif
+#ifdef VK_GOOGLE_color_buffer
+void VkDecoderSnapshot::vkRegisterBufferColorBufferGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::BumpPool* pool,
+    VkResult input_result,
+    VkDevice device,
+    VkBuffer buffer,
+    uint32_t colorBuffer)
+{
+    mImpl->vkRegisterBufferColorBufferGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, input_result, device, buffer, colorBuffer);
 }
 #endif
 #ifdef VK_KHR_acceleration_structure

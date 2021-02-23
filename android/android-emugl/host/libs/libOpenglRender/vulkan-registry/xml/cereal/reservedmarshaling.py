@@ -26,6 +26,7 @@ from .wrapperdefs import MARSHAL_INPUT_VAR_NAME
 from .wrapperdefs import UNMARSHAL_INPUT_VAR_NAME
 from .wrapperdefs import PARAMETERS_MARSHALING
 from .wrapperdefs import PARAMETERS_MARSHALING_GUEST
+from .wrapperdefs import STYPE_OVERRIDE
 from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE, EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME
 from .wrapperdefs import API_PREFIX_RESERVEDMARSHAL
 from .wrapperdefs import API_PREFIX_RESERVEDUNMARSHAL
@@ -581,7 +582,24 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
         finalLenExpr = "%s * %s" % (lenAccess, self.cgen.sizeofExpr(vulkanType))
         self.genStreamCall(vulkanType, access, finalLenExpr)
 
+    # Old version VkEncoder may have some sType values conflict with VkDecoder
+    # of new versions. For host decoder, it should not carry the incorrect old
+    # sType values to the |forUnmarshaling| struct. Instead it should overwrite
+    # the sType value.
+    def overwriteSType(self, vulkanType):
+        if self.direction == "read":
+            sTypeParam = copy(vulkanType)
+            sTypeParam.paramName = "sType"
+            sTypeAccess = self.exprAccessor(sTypeParam)
+
+            typeName = vulkanType.parent.typeName
+            if typeName in STYPE_OVERRIDE:
+                self.cgen.stmt("%s = %s" %
+                               (sTypeAccess, STYPE_OVERRIDE[typeName]))
+
     def onStructExtension(self, vulkanType):
+        self.overwriteSType(vulkanType)
+
         sTypeParam = copy(vulkanType)
         sTypeParam.paramName = "sType"
 
