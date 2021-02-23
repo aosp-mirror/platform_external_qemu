@@ -23,14 +23,14 @@ PI = math.pi
 # Create a client
 stub = get_default_emulator().get_emulator_controller()
 #turn left and turn back
-stub.rotateVirtualSceneCamera(RotationRadian(x = PI/2, y = 0.0, z = 0.0))
+stub.rotateVirtualSceneCamera(RotationRadian(x = 0.0, y = PI/2, z = 0.0))
 time.sleep(1)
-stub.rotateVirtualSceneCamera(RotationRadian(x = -PI/2, y = 0.0, z = 0.0))
+stub.rotateVirtualSceneCamera(RotationRadian(x = 0.0, y = -PI/2, z = 0.0))
 time.sleep(1)
 #turn right and turn back
-stub.rotateVirtualSceneCamera(RotationRadian(x = -PI/2, y = 0.0, z = 0.0))
+stub.rotateVirtualSceneCamera(RotationRadian(x = 0.0, y = -PI/2, z = 0.0))
 time.sleep(1)
-stub.rotateVirtualSceneCamera(RotationRadian(x = PI/2, y = 0.0, z = 0.0))
+stub.rotateVirtualSceneCamera(RotationRadian(x = 0.0, y = PI/2, z = 0.0))
 time.sleep(1)
 #move forward and move backward
 stub.setVirtualSceneCameraVelocity(Velocity(x = 0.0, y = 0.0, z = -1.0))
