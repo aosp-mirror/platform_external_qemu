@@ -34,6 +34,24 @@
       "parentUuid": "8b095868_c5aaa6e9",
       "revId": "3852f652312b0051f7cd1d363230b3ee644afab4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e3538a81_87ecccd8",
+        "filename": "android/android-emu/android/emulation/AdbVsockPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-02-23T00:57:18Z",
+      "side": 1,
+      "message": "I realized I need to add an adb state machine here otherwise the guest could be in the middle of receiving of a packet when we decide to save a snapshot.",
+      "parentUuid": "8635db15_96cbb163",
+      "revId": "3852f652312b0051f7cd1d363230b3ee644afab4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
