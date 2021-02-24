@@ -1243,7 +1243,13 @@ extern "C" int main(int argc, char** argv) {
                 return startEmulatorWithMinConfig(
                     args.size(),
                     args.array(),
-                    "custom", 25, "x86_64", "x86_64", true, AVD_PHONE,
+                    "custom", 25,
+#ifdef __aarch64__
+                    "arm64-v8a", "arm64",
+#else
+                    "x86_64", "x86_64",
+#endif
+                    true, AVD_PHONE,
                     opts->gpu ? opts->gpu : "host", opts->no_window, lcdWidth, lcdHeight,
                     // LCD DPI, orientation
                     96, "landscape",
