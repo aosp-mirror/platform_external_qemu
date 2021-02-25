@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "dbbbfe5c_fcafcece",
+        "filename": "android/android-emu-base/android/base/IOVector.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-02-25T17:53:34Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "cd2628c0_a164b79f",
+      "range": {
+        "startLine": 72,
+        "startChar": 65,
+        "endLine": 72,
+        "endChar": 70
+      },
+      "revId": "39eca18ff11b158a0aa5c62fadc010d9cf933a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "08182a66_0a32af7e",
