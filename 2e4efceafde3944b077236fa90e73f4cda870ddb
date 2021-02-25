@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f68a090d_080a6be3",
+        "filename": "android-qemu2-glue/emulation/VirtioWifiForwarder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2021-02-25T19:01:46Z",
+      "side": 1,
+      "message": "Can we just do ```hwsim_tx_rate rates[Ieee80211Frame::TX_MAX_RATES] \u003d {};``` remove the memset in the constructor?",
+      "revId": "2e4efceafde3944b077236fa90e73f4cda870ddb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "617e8dda_769a0b2b",
+        "filename": "android-qemu2-glue/emulation/virtio-wifi.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2021-02-25T19:01:46Z",
+      "side": 1,
+      "message": "Should we return here?",
+      "revId": "2e4efceafde3944b077236fa90e73f4cda870ddb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
