@@ -207,28 +207,44 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
             params.addFormat("ndns=%d", dnsCount);
         }
     }
-
-    if (isQemu2 &&
-            android::featurecontrol::isEnabled(android::featurecontrol::Wifi)) {
-        params.add("qemu.wifi=1");
-        // Enable multiple channels so the kernel can scan on one channel while
-        // communicating the other. This speeds up scanning significantly. This
-        // does not work if WiFi Direct is enabled starting with Q images so
-        // only set this option if WiFi Direct support is not enabled.
-        if (apiLevel < 29) {
-            params.add("mac80211_hwsim.channels=2");
-        } else if (!opts->wifi_client_port && !opts->wifi_server_port) {
-            params.add("mac80211_hwsim.channels=2");
+    // mac80211_hwsim
+    if (isQemu2) {
+        if (android::featurecontrol::isEnabled(
+                                     android::featurecontrol::VirtioWifi)) {
+#ifndef AEMU_GFXSTREAM_BACKEND
+            if (apiLevel >= 30) {
+                params.add("qemu.virtiowifi=1");
+                params.add("mac80211_hwsim.radios=1");
+                // TODO(wdu@) Figure out why mac80211_create_radios is in conflict.
+                // Set Mac80211hwsimUserspaceManaged to false by default unless
+                // overriden
+                android::featurecontrol::setIfNotOverriden(
+                        android::featurecontrol::Mac80211hwsimUserspaceManaged,
+                        false);
+                android::featurecontrol::setIfNotOverriden(
+                        android::featurecontrol::Wifi,
+                        false);
+            } else {
+                dwarning("VirtioWifi is only support on API level 30 and above.");
+            }
+#endif
+        } else if (android::featurecontrol::isEnabled(
+                           android::featurecontrol::Wifi)) {
+            params.add("qemu.wifi=1");
+            params.add("mac80211_hwsim.radios=2");
+            // Enable multiple channels so the kernel can scan on one channel
+            // while communicating the other. This speeds up scanning
+            // significantly. This does not work if WiFi Direct is enabled
+            // starting with Q images so only set this option if WiFi Direct
+            // support is not enabled.
+            if (apiLevel < 29) {
+                params.add("mac80211_hwsim.channels=2");
+            } else if (!opts->wifi_client_port && !opts->wifi_server_port) {
+                params.add("mac80211_hwsim.channels=2");
+            }
         }
     }
-#ifndef AEMU_GFXSTREAM_BACKEND
-    if (isQemu2 &&
-            android::featurecontrol::isEnabled(android::featurecontrol::VirtioWifi)) {
-        params.add("qemu.virtiowifi=1");
-        // Turn off hwsim when virtio wifi is in use.
-        params.add("mac80211_hwsim.radios=0");
-    }
-#endif
+
     const bool isDynamicPartition = android::featurecontrol::isEnabled(android::featurecontrol::DynamicPartition);
     if (isQemu2 && isX86ish && !isDynamicPartition) {
         // x86 and x86_64 platforms use an alternative Android DT directory that
