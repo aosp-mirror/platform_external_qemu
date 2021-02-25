@@ -41,6 +41,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6e21ec21_7cff8efe",
+        "filename": "android/android-emu/android/network/GenericNetlinkMessage.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-02-25T18:49:19Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "c6c11c73_48151975",
+      "range": {
+        "startLine": 1,
+        "startChar": 13,
+        "endLine": 1,
+        "endChar": 17
+      },
+      "revId": "48ef50d0b4e945c16556e1a9618424e74efbb157",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8acd1f4d_0043575d",
@@ -54,6 +78,30 @@
       "writtenOn": "2021-02-25T18:44:00Z",
       "side": 1,
       "message": "Can we just make src and dest mandatory?",
+      "range": {
+        "startLine": 120,
+        "startChar": 0,
+        "endLine": 123,
+        "endChar": 5
+      },
+      "revId": "48ef50d0b4e945c16556e1a9618424e74efbb157",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "01ae40db_678496df",
+        "filename": "android/android-emu/android/network/GenericNetlinkMessage.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-02-25T18:49:19Z",
+      "side": 1,
+      "message": "The static functions here are adapted from libgenl. I think it\u0027s a good idea to make sure the src and dst are not null. I will update it.",
+      "parentUuid": "8acd1f4d_0043575d",
       "range": {
         "startLine": 120,
         "startChar": 0,
@@ -81,6 +129,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "128f8958_8fae8c3f",
+        "filename": "android/android-emu/android/network/GenericNetlinkMessage.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-02-25T18:49:19Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "b69e1698_94141845",
+      "revId": "48ef50d0b4e945c16556e1a9618424e74efbb157",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8e00f4fe_2bbc94b7",
@@ -94,6 +160,24 @@
       "writtenOn": "2021-02-25T18:44:00Z",
       "side": 1,
       "message": "check src?",
+      "revId": "48ef50d0b4e945c16556e1a9618424e74efbb157",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f7bff48e_09c7e73b",
+        "filename": "android/android-emu/android/network/GenericNetlinkMessage.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-02-25T18:49:19Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "8e00f4fe_2bbc94b7",
       "revId": "48ef50d0b4e945c16556e1a9618424e74efbb157",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
