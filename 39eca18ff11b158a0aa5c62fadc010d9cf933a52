@@ -22,6 +22,30 @@
       },
       "revId": "39eca18ff11b158a0aa5c62fadc010d9cf933a52",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8ce3a7b8_5cbb302c",
+        "filename": "android/android-emu/android/network/Ieee80211Frame.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-02-25T17:45:21Z",
+      "side": 1,
+      "message": "I think it\u0027s used by android-qemu2-glue/emulation/VirtioWifiForwarder.cpp",
+      "parentUuid": "08182a66_0a32af7e",
+      "range": {
+        "startLine": 33,
+        "startChar": 11,
+        "endLine": 33,
+        "endChar": 20
+      },
+      "revId": "39eca18ff11b158a0aa5c62fadc010d9cf933a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
