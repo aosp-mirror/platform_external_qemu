@@ -58,7 +58,6 @@ const VMStateInfo vmstate_info_virtio_vsock_impl = {
     .put = &vmstate_info_virtio_vsock_impl_save,
 };
 
-/*
 static const VMStateDescription vmstate_virtio_vsock = {
     .name = TYPE_VIRTIO_VSOCK,
     .minimum_version_id = 0,
@@ -70,7 +69,6 @@ static const VMStateDescription vmstate_virtio_vsock = {
         VMSTATE_END_OF_LIST()
     },
 };
-*/
 
 static void virtio_vsock_device_realize(DeviceState *dev, Error **errp) {
     VirtIOVSock *s = VIRTIO_VSOCK(dev);
@@ -139,7 +137,7 @@ static void virtio_vsock_instance_init(Object* obj) {
 static void virtio_vsock_class_init(ObjectClass *klass, void *data) {
     DeviceClass *dc = DEVICE_CLASS(klass);
     dc->props = (Property*)virtio_vsock_properties;
-    /*dc->vmsd = &vmstate_virtio_vsock;*/
+    dc->vmsd = &vmstate_virtio_vsock;
     set_bit(DEVICE_CATEGORY_MISC, dc->categories);
 
     VirtioDeviceClass *vdc = VIRTIO_DEVICE_CLASS(klass);
