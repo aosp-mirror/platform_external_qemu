@@ -70,6 +70,24 @@
       "parentUuid": "e3538a81_87ecccd8",
       "revId": "3852f652312b0051f7cd1d363230b3ee644afab4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e603b25c_edcdb616",
+        "filename": "android/android-emu/android/emulation/AdbVsockPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-02-25T17:30:29Z",
+      "side": 1,
+      "message": "Here the guest side does not notify the host side that it is ready to talk.",
+      "parentUuid": "da624e74_d5b91f46",
+      "revId": "3852f652312b0051f7cd1d363230b3ee644afab4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
