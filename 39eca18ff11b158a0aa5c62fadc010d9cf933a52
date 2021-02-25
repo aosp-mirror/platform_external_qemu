@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "08182a66_0a32af7e",
+        "filename": "android/android-emu/android/network/Ieee80211Frame.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-02-25T17:40:09Z",
+      "side": 1,
+      "message": "Is this required here?",
+      "range": {
+        "startLine": 33,
+        "startChar": 11,
+        "endLine": 33,
+        "endChar": 20
+      },
+      "revId": "39eca18ff11b158a0aa5c62fadc010d9cf933a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
