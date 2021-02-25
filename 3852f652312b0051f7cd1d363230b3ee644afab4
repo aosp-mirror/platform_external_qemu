@@ -88,6 +88,24 @@
       "parentUuid": "da624e74_d5b91f46",
       "revId": "3852f652312b0051f7cd1d363230b3ee644afab4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fa5ad8e6_98c25c71",
+        "filename": "android/android-emu/android/emulation/AdbVsockPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2021-02-25T19:50:59Z",
+      "side": 1,
+      "message": "It could not notify the host here.\n\nTalked to Roman offline, here are something we should be concerned about:\n1. the old implementation supports offworld, icebox and regular adb (regular adb just closes on load). The new implementation could drop support for offworld because we have no real use case for it. With such, we can focus on icebox snapshot and simplify the logic a lot: a. Feature::SnapshotAdb is a flag for offworld only, the new implementation could ignore it; b. CrossSessionSocket is also for offworld only and can be replaced by the simple socket fd; c. we could assume all old host connections are killed between snapshot save and load (because emulator might reboot between them), thus we could avoid a lot of concurrency issues.\n\nJust please note that for the icebox connection specifically, after snapshot load the host connection is reset, but we still cheat the guest to make it think it is connected. The next new host connection will be plugged into the existing guest pipe. This is what mReuseFromSnapshot is used for.",
+      "parentUuid": "e603b25c_edcdb616",
+      "revId": "3852f652312b0051f7cd1d363230b3ee644afab4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
