@@ -69,7 +69,7 @@ public:
     // Copy data from IOVector to destination, starting at the
     // offset in IOVector with the specified size.
     // Return the number of bytes copied.
-    size_t copyTo(void* destination, size_t offset, size_t size);
+    size_t copyTo(void* destination, size_t offset, size_t size) const;
     // Copy data to IOVector from source, starting at the offset
     // in IOVector and copying specified size.
     // Return the number of bytes copied.
@@ -77,7 +77,9 @@ public:
     // Append new iovecs from this IOVector to destination IOVector,
     // starting at the offset in this IOVector.
     // Return the number of bytes capacity added to the destination. .
-    size_t appendEntriesTo(IOVector* destination, size_t offset, size_t size);
+    size_t appendEntriesTo(IOVector* destination,
+                           size_t offset,
+                           size_t size) const;
 
     size_t summedLength() const {
         return std::accumulate(
