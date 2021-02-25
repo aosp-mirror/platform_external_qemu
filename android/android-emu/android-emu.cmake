@@ -185,6 +185,7 @@ set(android-emu-common
     android/network/WifiForwardPeer.cpp
     android/network/WifiForwardPipe.cpp
     android/network/WifiForwardServer.cpp
+    android/network/GenericNetlinkMessage.cpp
     android/opengl/emugl_config.cpp
     android/opengl/EmuglBackendList.cpp
     android/opengl/EmuglBackendScanner.cpp
@@ -883,6 +884,7 @@ if(NOT LINUX_AARCH64)
       android/network/constants_unittest.cpp
       android/network/control_unittest.cpp
       android/network/MacAddress_unittest.cpp
+      android/network/GenericNetlinkMessage_unittest.cpp
       android/offworld/OffworldPipe_unittest.cpp
       android/opengl/emugl_config_unittest.cpp
       android/opengl/EmuglBackendList_unittest.cpp
