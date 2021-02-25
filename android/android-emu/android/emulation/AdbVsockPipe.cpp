@@ -10,12 +10,15 @@
 // GNU General Public License for more details.
 
 #include "android/base/async/ThreadLooper.h"
+#include "android/emulation/AdbHub.h"
 #include "android/emulation/AdbVsockPipe.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/crashreport/crash-handler.h"
 
 #include <chrono>
 #include <future>
 
+namespace {
 using FdWatch = android::base::Looper::FdWatch;
 
 uint64_t empty_virtio_vsock_device_stream_open(uint32_t guest_port,
@@ -40,6 +43,9 @@ const virtio_vsock_device_ops_t empty_ops = {
 
 const virtio_vsock_device_ops_t *g_vsock_ops = &empty_ops;
 
+android::emulation::AdbVsockPipe::Service *g_service = nullptr;
+}  // namespace
+
 const virtio_vsock_device_ops_t *
 virtio_vsock_device_set_ops(const virtio_vsock_device_ops_t *ops) {
     const virtio_vsock_device_ops_t *old = g_vsock_ops;
@@ -49,14 +55,167 @@ virtio_vsock_device_set_ops(const virtio_vsock_device_ops_t *ops) {
 
 namespace android {
 namespace emulation {
+namespace {
+
+struct VsockAdbProxy : public AdbVsockPipe::Proxy {
+    AdbPortType portType() const override { return AdbPortType::RegularAdb; }
+
+    EventBits onHostSocketEvent(const int hostFd,
+                                const uint64_t guestKey,
+                                const unsigned events) override {
+        char buf[2048];
+
+        EventBits result = EventBits::None;
+
+        if (events & FdWatch::kEventRead) {
+            while (true) {
+                const size_t received = android::base::socketRecv(hostFd, buf, sizeof(buf));
+                if (!received) {
+                    result |= EventBits::CloseSocket;  // hostFd is closed
+                    break;
+                }
+
+                if (received > sizeof(buf)) {
+                    break; // retry later
+                }
+
+                const size_t sent = (*g_vsock_ops->send)(guestKey, buf, received);
+                if (sent != received) {
+                    result |= EventBits::CloseSocket;  // guestKey is closed
+                    break;
+                }
+            }
+        }
+
+        if (events & FdWatch::kEventWrite) {
+            while (true) {
+                size_t sz;
+
+                {
+                    // we can't run android::base::socketSend under this lock
+                    std::lock_guard<std::mutex> guard(mGuestToHostMutex);
+                    const auto chunk = mGuestToHost.peek();
+                    if (chunk.second) {
+                        sz = std::min(sizeof(buf), chunk.second);
+                        memcpy(buf, chunk.first, sz);
+                    } else {
+                        result |= EventBits::DontWantWrite;
+                        break;
+                    }
+                }
+
+                const size_t sent = android::base::socketSend(hostFd, buf, sz);
+                if (!sent || (sent > sz)) {
+                    break;
+                }
+
+                std::lock_guard<std::mutex> guard(mGuestToHostMutex);
+                mGuestToHost.consume(sent);
+            }
+        }
+
+        return result;
+    }
+
+    EventBits onGuestSend(const void *data, size_t size) override {
+        std::lock_guard<std::mutex> guard(mGuestToHostMutex);
+        mGuestToHost.append(data, size);
+        return EventBits::WantWrite;
+    }
+
+    static std::unique_ptr<VsockAdbProxy> load(base::Stream* stream) {
+        return nullptr;  // not supported
+    }
+
+    SocketBuffer mGuestToHost;
+    mutable std::mutex mGuestToHostMutex;
+};
+
+struct VsockJdwpProxy : public AdbVsockPipe::Proxy {
+    AdbPortType portType() const override { return AdbPortType::Jdwp; }
+
+    EventBits onHostSocketEvent(const int hostFd,
+                                const uint64_t guestKey,
+                                const unsigned events) override {
+        EventBits result = EventBits::None;
+
+        mAdbHub.onHostSocketEvent(hostFd, events, [this, &result]() {
+            result = EventBits::CloseSocket;
+        });
+
+        if (result == EventBits::None) {
+            uint8_t buf[2048];
+            AndroidPipeBuffer abuf;
+            abuf.data = buf;
+            abuf.size = sizeof(buf);
+
+            while (true) {
+                const int sz = mAdbHub.onGuestRecvData(&abuf, 1);
+                if (sz > 0) {
+                    if ((*g_vsock_ops->send)(guestKey, buf, sz) != sz) {
+                        result |= EventBits::CloseSocket;  // guestKey is closed
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            if (mAdbHub.socketWantRead()) {
+                result |= EventBits::WantRead;
+            } else {
+                result |= EventBits::DontWantRead;
+            }
+
+            if (mAdbHub.socketWantWrite()) {
+                result |= EventBits::WantWrite;
+            } else {
+                result |= EventBits::DontWantWrite;
+            }
+        }
+
+        return result;
+    }
+
+    EventBits onGuestSend(const void *data, size_t size) override {
+        AndroidPipeBuffer abuf;
+        abuf.data = static_cast<uint8_t *>(const_cast<void *>(data));
+        abuf.size = size;
+
+        mAdbHub.onGuestSendData(&abuf, 1);
+
+        return mAdbHub.socketWantWrite()
+            ? EventBits::WantWrite : EventBits::DontWantWrite;
+    }
+
+    bool canSave() const override { return true; }
+
+    void onSave(base::Stream* stream) const override {
+        mAdbHub.onSave(stream);
+    }
+
+    static std::unique_ptr<VsockJdwpProxy> load(base::Stream* stream) {
+        auto proxy = std::make_unique<VsockJdwpProxy>();
+        proxy->mAdbHub.onLoad(stream);
+        return proxy;
+    }
+
+    AdbHub mAdbHub;
+};
+
+}  // namespace
+
 
 AdbVsockPipe::Service::Service(AdbHostAgent* hostAgent)
     : mHostAgent(hostAgent)
     , mGuestAdbdPollingThread(&AdbVsockPipe::Service::pollGuestAdbdThreadLoop, this)
     , mDestroyPipesThread(&AdbVsockPipe::Service::destroyPipesThreadLoop, this)
-{}
+{
+    g_service = this;
+}
 
 AdbVsockPipe::Service::~Service() {
+    g_service = nullptr;
     mGuestAdbdPollingThreadRunning = false;
     mPipesToDestroy.stop();
     mGuestAdbdPollingThread.join();
@@ -66,6 +225,22 @@ AdbVsockPipe::Service::~Service() {
 
 void AdbVsockPipe::Service::onHostConnection(android::base::ScopedSocket&& socket,
                                              AdbPortType portType) {
+    {
+        std::unique_lock<std::mutex> guard(mPipesMtx);
+
+        const auto i = std::find_if(mPipes.begin(), mPipes.end(),
+                                    [portType](const std::unique_ptr<AdbVsockPipe>& p){
+            return p->mFromSnapshot && p->mProxy && (p->mProxy->portType() == portType);
+        });
+
+        if (i != mPipes.end()) {
+            AdbVsockPipe* pipe = &**i;
+            pipe->mSocket = std::move(socket);
+            pipe->mFromSnapshot = false;
+            return;
+        }
+    }
+
     auto pipe = AdbVsockPipe::create(this, std::move(socket), portType);
     if (pipe) {
         std::unique_lock<std::mutex> guard(mPipesMtx);
@@ -144,11 +319,62 @@ void AdbVsockPipe::Service::resetActiveGuestPipeConnection() {
     mPipes.clear();
 }
 
+void AdbVsockPipe::Service::saveImpl(base::Stream* stream) const {
+    if (featurecontrol::isEnabled(featurecontrol::Feature::SnapshotAdb)) {
+        std::unique_lock<std::mutex> guard(mPipesMtx);
+        stream->putBe32(mPipes.size());
+        for (const auto& p : mPipes) {
+            p->save(stream);
+        }
+    } else {
+        stream->putBe32(0);
+    }
+}
+
+bool AdbVsockPipe::Service::loadImpl(base::Stream* stream) {
+    std::unique_lock<std::mutex> guard(mPipesMtx);
+    mPipes.clear();
+    for (uint32_t n = stream->getBe32(); n > 0; --n) {
+        auto p = AdbVsockPipe::load(this, stream);
+        if (p) {
+            mPipes.push_back(std::move(p));
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
+
+IVsockHostCallbacks* AdbVsockPipe::Service::getHostCallbacksImpl(uint64_t key) const {
+    std::unique_lock<std::mutex> guard(mPipesMtx);
+    for (const auto& p : mPipes) {
+        if (p->mVsockCallbacks.streamKey == key) {
+            return &p->mVsockCallbacks;
+        }
+    }
+    return nullptr;
+}
+
+void AdbVsockPipe::Service::save(base::Stream* stream) {
+    g_service->saveImpl(stream);
+}
+
+bool AdbVsockPipe::Service::load(base::Stream* stream) {
+    return g_service->loadImpl(stream);
+}
+
+IVsockHostCallbacks* AdbVsockPipe::Service::getHostCallbacks(uint64_t key) {
+    return g_service->getHostCallbacksImpl(key);
+}
+
+AdbVsockPipe::AdbVsockPipe(Service *service)
+        : mService(service)
+        , mVsockCallbacks(this) {}
+
 AdbVsockPipe::AdbVsockPipe(AdbVsockPipe::Service *service,
                            android::base::ScopedSocket socket,
                            const AdbPortType portType)
         : mService(service)
-        , mPortType(portType)
         , mSocket(std::move(socket))
         , mVsockCallbacks(this) {
     mVsockCallbacks.streamKey = (*g_vsock_ops->open)(kGuestAdbdPort, &mVsockCallbacks);
@@ -163,24 +389,34 @@ AdbVsockPipe::AdbVsockPipe(AdbVsockPipe::Service *service,
         },
         this));
 
-    if (portType == AdbPortType::Jdwp) {
-        mAdbHub = std::make_unique<AdbHub>();
+    switch (portType) {
+    case AdbPortType::RegularAdb:
+        mProxy = std::make_unique<VsockAdbProxy>();
+        break;
+
+    case AdbPortType::Jdwp:
+        mProxy = std::make_unique<VsockJdwpProxy>();
+        break;
+
+    default:
+        ::crashhandler_die("%s:%d: unexpected portType", __func__, __LINE__);
+        break;
     }
 
-    mConnectThread = std::thread([this](){
-        using namespace std::chrono_literals;
-
-        // you cannot run blocking functions in the calling thread
-        if (mVsockCallbacks.waitConnected(1000ms)) {
-            mSocketWatcher->wantRead();
-        } else {
-            mService->destroyPipe(this);
-        }
-    });
+    mSocketWatcher->wantRead();
 }
 
 AdbVsockPipe::~AdbVsockPipe() {
-    mConnectThread.join();
+    mVsockCallbacks.close();
+
+    if (mSocketWatcher) {
+        mSocketWatcher->dontWantWrite();
+        mSocketWatcher->dontWantRead();
+    }
+
+    if (mProxy && mProxy->canSave()) {
+        CrossSessionSocket::recycleSocket(std::move(mSocket));
+    }
 }
 
 std::unique_ptr<AdbVsockPipe> AdbVsockPipe::create(AdbVsockPipe::Service *service,
@@ -192,132 +428,119 @@ std::unique_ptr<AdbVsockPipe> AdbVsockPipe::create(AdbVsockPipe::Service *servic
     return std::make_unique<AdbVsockPipe>(service, std::move(socket), portType);
 }
 
-void AdbVsockPipe::onHostSocketEventSimple(unsigned events) {
-    char buf[2048];
-
-    if (events & FdWatch::kEventRead) {
-        while (true) {
-            const size_t received = android::base::socketRecv(mSocket.fd(),
-                                                              buf, sizeof(buf));
-            if (!received) {
-                // mSocket is diconnected
-                mService->destroyPipe(this);
-                return;
-            }
-
-            if (received > sizeof(buf)) {
-                break; // retry later
-            }
-
-            const size_t sent = (*g_vsock_ops->send)(mVsockCallbacks.streamKey, buf, received);
-            if (sent != received) {
-                break;  // streamKey is closed
-            }
-        }
-    }
-
-    if (events & FdWatch::kEventWrite) {
-        while (true) {
-            size_t sz;
-
-            {
-                // we can't run android::base::socketSend under this lock
-                std::lock_guard<std::mutex> guard(mGuestToHostMutex);
-                const auto chunk = mGuestToHost.peek();
-                if (chunk.second) {
-                    sz = std::min(sizeof(buf), chunk.second);
-                    memcpy(buf, chunk.first, sz);
-                } else {
-                    mSocketWatcher->dontWantWrite();
-                    break;
-                }
-            }
-
-            const size_t sent = android::base::socketSend(mSocket.fd(), buf, sz);
-            if (!sent || (sent > sz)) {
-                break;
-            }
-
-            std::lock_guard<std::mutex> guard(mGuestToHostMutex);
-            mGuestToHost.consume(sent);
-        }
-    }
-}
-
-void AdbVsockPipe::onHostSocketEventTranslated(unsigned events) {
-    bool isOpen = true;
-
-    mAdbHub->onHostSocketEvent(mSocketWatcher->fd(), events, [this, &isOpen]() {
-        mService->destroyPipe(this);
-        isOpen = false;
-    });
-
-    if (isOpen) {
-        uint8_t buf[2048];
-        AndroidPipeBuffer abuf;
-        abuf.data = buf;
-        abuf.size = sizeof(buf);
-
-        while (true) {
-            const int sz = mAdbHub->onGuestRecvData(&abuf, 1);
-            if (sz > 0) {
-                if ((*g_vsock_ops->send)(mVsockCallbacks.streamKey, buf, sz) != sz) {
-                    break;  // streamKey is closed
-                }
-            } else {
-                break;
-            }
-        }
-
-        if (mAdbHub->socketWantRead()) {
-            mSocketWatcher->wantRead();
-        } else {
-            mSocketWatcher->dontWantRead();
-        }
-
-        if (mAdbHub->socketWantWrite()) {
-            mSocketWatcher->wantWrite();
-        } else {
-            mSocketWatcher->dontWantWrite();
-        }
-    }
-}
-
 void AdbVsockPipe::onHostSocketEvent(unsigned events) {
-    if (mAdbHub) {
-        onHostSocketEventTranslated(events);
-    } else {
-        onHostSocketEventSimple(events);
-    }
+    processProxyEventBits(mProxy->onHostSocketEvent(mSocket.fd(),
+                                                    mVsockCallbacks.streamKey,
+                                                    events));
 }
 
 void AdbVsockPipe::onGuestSend(const void *data, size_t size) {
-    if (mAdbHub) {
-        AndroidPipeBuffer abuf;
-        abuf.data = static_cast<uint8_t *>(const_cast<void *>(data));
-        abuf.size = size;
-
-        mAdbHub->onGuestSendData(&abuf, 1);
-        if (mAdbHub->socketWantWrite()) {
-            mSocketWatcher->wantWrite();
-        } else {
-            mSocketWatcher->dontWantWrite();
-        }
-    } else {
-        std::lock_guard<std::mutex> guard(mGuestToHostMutex);
-        mGuestToHost.append(data, size);
-        mSocketWatcher->wantWrite();
-    }
+    processProxyEventBits(mProxy->onGuestSend(data, size));
 }
 
 void AdbVsockPipe::onGuestClose() {
-    mVsockCallbacks.streamKey = 0;  // to prevent recursion in dctor
+    mVsockCallbacks.reset();
     mService->destroyPipe(this);
+}
+
+void AdbVsockPipe::processProxyEventBits(const Proxy::EventBits bits) {
+    if (nonzero(bits & Proxy::EventBits::CloseSocket)) {
+        mService->destroyPipe(this);
+    } else if (mSocketWatcher) {
+        if (nonzero(bits & Proxy::EventBits::WantWrite)) {
+            mSocketWatcher->wantWrite();
+        }
+        if (nonzero(bits & Proxy::EventBits::DontWantWrite)) {
+            mSocketWatcher->dontWantWrite();
+        }
+        if (nonzero(bits & Proxy::EventBits::WantRead)) {
+            mSocketWatcher->wantRead();
+        }
+        if (nonzero(bits & Proxy::EventBits::DontWantRead)) {
+            mSocketWatcher->dontWantRead();
+        }
+    }
+}
+
+bool AdbVsockPipe::canSave() const {
+    return mProxy && mProxy->canSave()
+           && mSocket.valid()
+           && mVsockCallbacks.isValid();
+}
+
+void AdbVsockPipe::save(base::Stream* stream) const {
+    if (!canSave()) {
+        stream->putByte(0);
+        return;
+    }
+
+    stream->putByte(1);
+    stream->putBe32(mSocket.fd());
+    mSocket.onSave(stream);
+    stream->putBe64(mVsockCallbacks.streamKey);
+    stream->putByte(static_cast<uint8_t>(mProxy->portType()));
+    mProxy->onSave(stream);
+    CrossSessionSocket::registerForRecycle(mSocket.fd());
+}
+
+bool AdbVsockPipe::loadImpl(base::Stream* stream) {
+    if (!stream->getByte()) {
+        return false;
+    }
+
+    mSocket = CrossSessionSocket::reclaimSocket(stream->getBe32());
+    mSocket.onLoad(stream);
+
+    mVsockCallbacks.streamKey = stream->getBe64();
+
+    switch (static_cast<AdbPortType>(stream->getByte())) {
+    case AdbPortType::RegularAdb:
+        mProxy = VsockAdbProxy::load(stream);
+        break;
+
+    case AdbPortType::Jdwp:
+        mProxy = VsockJdwpProxy::load(stream);
+        break;
+
+    default:
+        return false;
+    }
+
+    if (!mVsockCallbacks.isValid() || !mProxy) {
+        return false;
+    }
+
+    mSocketWatcher.reset(android::base::ThreadLooper::get()->createFdWatch(
+        mSocket.fd(),
+        [](void* opaque, int fd, unsigned events) {
+            static_cast<AdbVsockPipe*>(opaque)->onHostSocketEvent(events);
+        },
+        this));
+
+    return true;
+}
+
+std::unique_ptr<AdbVsockPipe> AdbVsockPipe::load(AdbVsockPipe::Service* service,
+                                                 base::Stream* stream) {
+    auto pipe = std::make_unique<AdbVsockPipe>(service);
+    if (pipe->loadImpl(stream)) {
+        pipe->mFromSnapshot = true;
+        return pipe;
+    } else {
+        return nullptr;
+    }
+}
+
+void AdbVsockPipe::DataVsockCallbacks::close() {
+    if (streamKey) {
+        (*g_vsock_ops->close)(streamKey);
+        reset();
+    }
 }
 
 AdbVsockPipe::DataVsockCallbacks::~DataVsockCallbacks() {
     if (streamKey) {
-        (*g_vsock_ops->close)(streamKey);
+        ::crashhandler_die("%s:%d: streamKey is not zero", __func__, __LINE__);
     }
 }
 
