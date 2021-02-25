@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fa763d91_94e946ab",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-02-25T17:17:02Z",
+      "side": 1,
+      "message": "The presubmit failure seems to be related to builtbot tests. Let me run it again.",
+      "revId": "48ef50d0b4e945c16556e1a9618424e74efbb157",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
