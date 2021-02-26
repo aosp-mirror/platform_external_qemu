@@ -13,16 +13,18 @@
 // limitations under the License.
 #include "android/emulation/control/utils/ScreenshotUtils.h"
 
-#include <assert.h>                                   // for assert
-#include <math.h>                                     // for fabs
-#include <array>                                      // for array
-#include <ostream>                                    // for operator<<, bas...
-#include <utility>                                    // for make_pair, pair
+#include <assert.h>  // for assert
+#include <math.h>    // for fabs
+#include <array>     // for array
+#include <ostream>   // for operator<<, bas...
+#include <utility>   // for make_pair, pair
 
-#include "android/base/Log.h"                         // for LogStreamVoidify
+#include "android/base/Log.h"  // for LogStreamVoidify
+#include "android/console.h"
 #include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
 #include "android/hw-sensors.h"                       // for ANDROID_SENSOR_...
-#include "android/physics/GlmHelpers.h"               // for vecNearEqual
+#include "android/opengles.h"
+#include "android/physics/GlmHelpers.h"  // for vecNearEqual
 
 namespace android {
 namespace emulation {
@@ -142,6 +144,50 @@ bool ScreenshotUtils::equals(const DisplayConfiguration& a,
 
 int ScreenshotUtils::getBytesPerPixel(const ImageFormat& fmt) {
     return fmt.format() == ImageFormat::RGB888 ? 3 : 4;
+}
+
+bool ScreenshotUtils::hasOpenGles() {
+    return android_getOpenglesRenderer().get() != nullptr;
+}
+
+bool ScreenshotUtils::getScreenshot(int displayId,
+                                    const ImageFormat_ImgFormat format,
+                                    const Rotation_SkinRotation rotation,
+                                    const uint32_t desiredWidth,
+                                    const uint32_t desiredHeight,
+                                    uint8_t* pixels,
+                                    size_t* cPixels,
+                                    uint32_t* finalWidth,
+                                    uint32_t* finalHeight) {
+    // Screenshots can come from either the gl renderer, or the guest.
+    const auto& renderer = android_getOpenglesRenderer();
+    android::emulation::ImageFormat desiredFormat =
+            ScreenshotUtils::translate(format);
+    SkinRotation desiredRotation = ScreenshotUtils::translate(rotation);
+
+    if (renderer.get() &&
+        (format == ImageFormat::RGB888 || format == ImageFormat::RGBA8888)) {
+        unsigned int bpp = (format == ImageFormat::RGB888 ? 3 : 4);
+        return renderer.get()->getScreenshot(bpp, finalWidth, finalHeight,
+                                             pixels, cPixels, displayId,
+                                             desiredWidth, desiredHeight) == 0;
+    } else {
+        // oh, oh slow path.
+        android::emulation::Image img = android::emulation::takeScreenshot(
+                desiredFormat, desiredRotation, nullptr,
+                getConsoleAgents()->display->getFrameBuffer, displayId,
+                desiredWidth, desiredHeight);
+        if (img.getPixelCount() > *cPixels) {
+            *cPixels = img.getPixelCount();
+            return false;
+        }
+        *cPixels = img.getPixelCount();
+        memcpy(pixels, img.getPixelBuf(), *cPixels);
+        *finalWidth = img.getWidth();
+        *finalHeight = img.getHeight();
+    }
+
+    return true;
 }
 }  // namespace control
 }  // namespace emulation
