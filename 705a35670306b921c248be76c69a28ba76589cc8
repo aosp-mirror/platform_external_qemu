@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "187427bc_e8d718e4",
+        "filename": "android/android-emu/android/network/GenericNetlinkMessage.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2021-02-26T16:26:32Z",
+      "side": 1,
+      "message": "Sorry, I meant make this mandatory (crash if null), unless null params are allowable in nla_memcpy.\n\nActually, if you want to make it mandatory, you can just remove this check, as std::memcpy will crash anyway if you pass invalid parameters.",
+      "range": {
+        "startLine": 120,
+        "startChar": 0,
+        "endLine": 122,
+        "endChar": 5
+      },
+      "revId": "705a35670306b921c248be76c69a28ba76589cc8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5e806bcf_b9509e3f",
+        "filename": "android/android-emu/android/network/GenericNetlinkMessage.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2021-02-26T16:26:32Z",
+      "side": 1,
+      "message": "nit: extra spaces",
+      "range": {
+        "startLine": 277,
+        "startChar": 14,
+        "endLine": 277,
+        "endChar": 16
+      },
+      "revId": "705a35670306b921c248be76c69a28ba76589cc8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "517d18a2_87b92e26",
+        "filename": "android/android-emu/android/network/GenericNetlinkMessage_unittest.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2021-02-26T16:26:32Z",
+      "side": 1,
+      "message": "2021",
+      "range": {
+        "startLine": 1,
+        "startChar": 13,
+        "endLine": 1,
+        "endChar": 17
+      },
+      "revId": "705a35670306b921c248be76c69a28ba76589cc8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
