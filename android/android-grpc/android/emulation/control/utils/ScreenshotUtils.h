@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include <tuple>                                       // for tuple
+#include <tuple>  // for tuple
 
 #include "android/emulation/control/ScreenCapturer.h"  // for ImageFormat
 #include "android/emulation/control/sensors_agent.h"   // for QAndroidSensor...
@@ -40,7 +40,8 @@ public:
     static SkinRotation translate(Rotation_SkinRotation x);
 
     // Derives the current device rotation from the sensor state
-    static Rotation_SkinRotation deriveRotation(const QAndroidSensorsAgent* sensorAgent);
+    static Rotation_SkinRotation deriveRotation(
+            const QAndroidSensorsAgent* sensorAgent);
 
     // Calculates a resize from (w,h) -> (desiredWidth, desiredHeight) while
     // maintaining the aspect ratio. Returns a tuple with the resulting (w,h)
@@ -50,10 +51,39 @@ public:
                                                       double desiredWidth,
                                                       double desiredHeight);
 
-    static bool equals(const DisplayConfiguration& a, const DisplayConfiguration& b);
+    static bool equals(const DisplayConfiguration& a,
+                       const DisplayConfiguration& b);
 
     // Gets the bytes per pixel for the given format.
     static int getBytesPerPixel(const ImageFormat& fmt);
+
+    // Returns true if we have the host side open gles renderer
+    static bool hasOpenGles();
+
+    // Takes a screenshot from the given display id
+    // in the desired format, rotation, width, height and
+    // place it in the pre allocated pixel buffer, with the final computed width
+    // and height.
+    //
+    // If this function returns false and *cPixels != 0 then the pixel buffer
+    // needs to be resized to at least cPixels bytes.
+    //
+    // The usual use of this is to use the first call to figure out how much
+    // memory needs to be allocated, and the subsequent call to actually fetch the
+    // image once the memory is allocated.
+    //
+    // Note: This function can be very expensive under the following circumstances:
+    //   - You are requesting the PNG format.
+    //   - You are running on an older api level without a host renderer
+    static bool getScreenshot(int displayId,
+                              const ImageFormat_ImgFormat format,
+                              const Rotation_SkinRotation rotation,
+                              const uint32_t desiredWidth,
+                              const uint32_t desiredHeight,
+                              uint8_t* pixels,
+                              size_t* cPixels,
+                              uint32_t* finalWidth,
+                              uint32_t* finalHeight);
 };
 
 }  // namespace control

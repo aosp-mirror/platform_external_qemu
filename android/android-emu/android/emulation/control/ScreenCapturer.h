@@ -14,12 +14,12 @@
 
 #pragma once
 
-#include <stddef.h>                   // for NULL
-#include <cstdint>                    // for uint8_t, uint16_t, uint32_t
-#include <functional>                 // for function
-#include <string>                     // for string
-#include <utility>                    // for move
-#include <vector>                     // for vector
+#include <stddef.h>    // for NULL
+#include <cstdint>     // for uint8_t, uint16_t, uint32_t
+#include <functional>  // for function
+#include <string>      // for string
+#include <utility>     // for move
+#include <vector>      // for vector
 
 #include "android/base/StringView.h"  // for StringView
 #include "android/skin/rect.h"        // for SkinRotation
@@ -39,15 +39,27 @@ public:
           uint16_t h,
           uint8_t channels,
           ImageFormat format,
-          std::vector<uint8_t> pixels)
+          uint8_t* pixels,
+          size_t cPixels)
         : m_Width(w),
           m_Height(h),
           m_NChannels(channels),
           m_Format(format),
-          m_Pixels(std::move(pixels)) {}
+          m_PixelBuffer(pixels),
+          m_cPixelBuffer(cPixels){
 
-    uint8_t* getPixelBuf() { return m_Pixels.data(); }
-    uint64_t getPixelCount() { return m_Pixels.size(); }
+          };
+    Image(uint16_t w,
+          uint16_t h,
+          uint8_t channels,
+          ImageFormat format,
+          std::vector<uint8_t> pixels)
+        : Image(w, h, channels, format, pixels.data(), pixels.size()) {
+        m_Pixels = std::move(pixels);
+    }
+
+    uint8_t* getPixelBuf() { return m_PixelBuffer; }
+    uint64_t getPixelCount() { return m_cPixelBuffer; }
     uint16_t getWidth() { return m_Width; }
     uint16_t getHeight() { return m_Height; }
     uint8_t getChannels() { return m_NChannels; }
@@ -64,6 +76,8 @@ private:
     uint8_t m_NChannels;
     ImageFormat m_Format;
     std::vector<uint8_t> m_Pixels;
+    uint8_t* m_PixelBuffer;
+    size_t m_cPixelBuffer;
 };
 
 // Capture a screenshot using the Render (if set) or framebuffer callback.
@@ -80,8 +94,7 @@ Image takeScreenshot(
                            uint8_t** frameBufferData)> getFrameBuffer,
         int displayId = 0,
         int desiredWidth = 0,
-        int desiredHeight = 0
-        );
+        int desiredHeight = 0);
 
 bool captureScreenshot(android::base::StringView outputDirectoryPath,
                        std::string* outputFilepath = NULL,
