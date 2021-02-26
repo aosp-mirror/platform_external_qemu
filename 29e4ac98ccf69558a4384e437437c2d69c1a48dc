@@ -20,6 +20,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "98d2ef6e_1556c67d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 10
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2021-02-26T00:06:01Z",
+      "side": 1,
+      "message": "mistakenly marked it as resolved...",
+      "parentUuid": "15710bd1_7e8245ae",
+      "revId": "29e4ac98ccf69558a4384e437437c2d69c1a48dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "80785056_8a78c0ac",
         "filename": "android/android-emu/android/emulation/AdbVsockPipe.cpp",
         "patchSetId": 10
