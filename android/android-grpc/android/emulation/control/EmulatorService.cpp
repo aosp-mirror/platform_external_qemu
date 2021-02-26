@@ -45,6 +45,7 @@
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
 #include "android/base/Stopwatch.h"
+#include "android/base/Tracing.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/memory/SharedMemory.h"
 #include "android/base/synchronization/MessageChannel.h"
@@ -619,6 +620,7 @@ public:
     Status getScreenshot(ServerContext* context,
                          const ImageFormat* request,
                          Image* reply) override {
+        AEMU_SCOPED_TRACE_CALL();
         uint32_t width, height;
         bool enabled;
         bool multiDisplayQueryWorks = mAgents->emu->getMultiDisplay(
