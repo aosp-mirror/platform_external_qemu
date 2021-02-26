@@ -98,13 +98,10 @@
             },
             "osx": {
                 "args": [
-                    "@Q",
+                    "@R",
                     "-verbose",
                     "-feature",
-                    "-HVF",
-                    "-qt-hide-window",
-                    "-gpu",
-                    "auto-no-window"
+                    "-HVF"
                 ],
                 "env": {
                     // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
