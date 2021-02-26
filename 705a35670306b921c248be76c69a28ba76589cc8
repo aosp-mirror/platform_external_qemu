@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9a006384_906e8ab9",
+        "filename": "android/android-emu/android/network/GenericNetlinkMessage.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-02-26T17:46:58Z",
+      "side": 1,
+      "message": "Yeah that\u0027s true. I will just remove the check here.",
+      "parentUuid": "187427bc_e8d718e4",
+      "range": {
+        "startLine": 120,
+        "startChar": 0,
+        "endLine": 122,
+        "endChar": 5
+      },
+      "revId": "705a35670306b921c248be76c69a28ba76589cc8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5e806bcf_b9509e3f",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-02-26T16:26:32Z",
       "side": 1,
       "message": "nit: extra spaces",
+      "range": {
+        "startLine": 277,
+        "startChar": 14,
+        "endLine": 277,
+        "endChar": 16
+      },
+      "revId": "705a35670306b921c248be76c69a28ba76589cc8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b77fbe7b_5e784e7b",
+        "filename": "android/android-emu/android/network/GenericNetlinkMessage.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-02-26T17:46:58Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "5e806bcf_b9509e3f",
       "range": {
         "startLine": 277,
         "startChar": 14,
