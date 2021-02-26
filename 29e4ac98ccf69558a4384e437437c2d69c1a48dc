@@ -57,6 +57,30 @@
       },
       "revId": "29e4ac98ccf69558a4384e437437c2d69c1a48dc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e6e32a9d_cba18d06",
+        "filename": "android/android-emu/android/emulation/AdbVsockPipe.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-02-26T01:48:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "80785056_8a78c0ac",
+      "range": {
+        "startLine": 233,
+        "startChar": 55,
+        "endLine": 233,
+        "endChar": 90
+      },
+      "revId": "29e4ac98ccf69558a4384e437437c2d69c1a48dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
