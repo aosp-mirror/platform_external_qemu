@@ -260,6 +260,30 @@
       },
       "revId": "82c99f4c579e950d388aece2c6726039d85f4972",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "37218a28_06dbe072",
+        "filename": "android/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-03-01T20:16:20Z",
+      "side": 1,
+      "message": "Yes, it would work the same as with std::vector. If the getScreenshot api takes a std::string then implementors of that api must know that std::string is basically a container of fixed size.  If they mistakenly call resize on the string we could run into issues.\n\nThe std::string on the protobuf Image message is already being reused across calls from streamScreenshot.",
+      "parentUuid": "4c78d64c_efb40245",
+      "range": {
+        "startLine": 284,
+        "startChar": 16,
+        "endLine": 284,
+        "endChar": 29
+      },
+      "revId": "82c99f4c579e950d388aece2c6726039d85f4972",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
