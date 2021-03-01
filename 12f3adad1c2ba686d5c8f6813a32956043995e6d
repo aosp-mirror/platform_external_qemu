@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6fe45a19_e7f4c72c",
+        "filename": "android/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-01T20:22:20Z",
+      "side": 1,
+      "message": "This sentence repeats the previous one.",
+      "range": {
+        "startLine": 279,
+        "startChar": 7,
+        "endLine": 280,
+        "endChar": 33
+      },
+      "revId": "12f3adad1c2ba686d5c8f6813a32956043995e6d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
