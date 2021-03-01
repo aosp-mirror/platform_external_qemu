@@ -2627,7 +2627,7 @@ int  FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
                                                                      nullptr,
                                                                      nullptr,
                                                                      &w,
-                                                                     &h,
+                                                                                                                                                                &h,
                                                                      nullptr,
                                                                      nullptr,
                                                                      nullptr)) {
@@ -2683,24 +2683,6 @@ int  FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
 
     sendPostWorkerCmd(scrCmd);
     return 0;
-}
-
-
-void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
-        unsigned int* height, std::vector<unsigned char>& pixels, int displayId,
-        int desiredWidth, int desiredHeight, SkinRotation desiredRotation) {
-
-    size_t size = pixels.size();
-    if (!getScreenshot(nChannels, width, height, pixels.data(), &size, displayId, desiredWidth, desiredHeight, desiredRotation))  {
-        if (size == 0) {
-            // Fatal error..
-            return;
-        }
-
-        // Buffer to small, increase the vector size.
-        pixels.resize(size);
-        getScreenshot(nChannels, width, height, pixels.data(), &size, displayId, desiredWidth, desiredHeight, desiredRotation);
-    }
 }
 
 void FrameBuffer::onLastColorBufferRef(uint32_t handle) {
