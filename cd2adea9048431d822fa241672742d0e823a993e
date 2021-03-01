@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "108a1177_49f8bbf5",
+        "filename": "android/android-emu/android/opengl/OpenglEsPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-01T22:57:21Z",
+      "side": 1,
+      "message": "Don\u0027t we know width and height from other sources? If so, this call can be avoided.",
+      "range": {
+        "startLine": 207,
+        "startChar": 12,
+        "endLine": 207,
+        "endChar": 81
+      },
+      "revId": "cd2adea9048431d822fa241672742d0e823a993e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
