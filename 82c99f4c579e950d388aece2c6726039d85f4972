@@ -188,6 +188,30 @@
       },
       "revId": "82c99f4c579e950d388aece2c6726039d85f4972",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "99f4db2e_c7812f4b",
+        "filename": "android/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-01T18:50:54Z",
+      "side": 1,
+      "message": "Can we replace sdt::vector with std::string and use a single method instead of two?",
+      "parentUuid": "16a7f12d_e131b286",
+      "range": {
+        "startLine": 284,
+        "startChar": 16,
+        "endLine": 284,
+        "endChar": 29
+      },
+      "revId": "82c99f4c579e950d388aece2c6726039d85f4972",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
