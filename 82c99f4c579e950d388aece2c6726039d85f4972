@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "fc407313_9d60c562",
+        "filename": "android/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-03-01T17:44:17Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "17ed6e58_14980a3b",
+      "range": {
+        "startLine": 259,
+        "startChar": 7,
+        "endLine": 259,
+        "endChar": 11
+      },
+      "revId": "82c99f4c579e950d388aece2c6726039d85f4972",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4b2e9a47_027911a5",
@@ -47,6 +71,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "895e5852_05013696",
+        "filename": "android/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-03-01T17:44:17Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "4b2e9a47_027911a5",
+      "range": {
+        "startLine": 279,
+        "startChar": 7,
+        "endLine": 280,
+        "endChar": 23
+      },
+      "revId": "82c99f4c579e950d388aece2c6726039d85f4972",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d8be2731_c84ce8b7",
@@ -60,6 +108,30 @@
       "writtenOn": "2021-02-27T22:14:53Z",
       "side": 1,
       "message": "Can the std::vector\u003cunsigned char\u003e-based method be used instead as long as the vector is preallocated?",
+      "range": {
+        "startLine": 284,
+        "startChar": 16,
+        "endLine": 284,
+        "endChar": 29
+      },
+      "revId": "82c99f4c579e950d388aece2c6726039d85f4972",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "84b6b779_033e5cce",
+        "filename": "android/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-03-01T17:44:17Z",
+      "side": 1,
+      "message": "Technically this is possible with a custom allocator that points to our pre-allocated memory region. (There is no other way of doing this with std::vector). This would be rather risky since our allocator would technically not really allocate or de-allocate memory (it is not conform to the specification). \n\nThis can cause issues when calling resize. Now the user of this type of vector must be aware of these restrictions, which are not expressed in the type of std::vector.\n\nThis confusion does not exist with the raw pointer, where memory ownership is clear and we do not have to make any assumptions about the behavior and usage of std::vector.",
+      "parentUuid": "d8be2731_c84ce8b7",
       "range": {
         "startLine": 284,
         "startChar": 16,
