@@ -236,6 +236,30 @@
       },
       "revId": "82c99f4c579e950d388aece2c6726039d85f4972",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4c78d64c_efb40245",
+        "filename": "android/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-01T19:17:37Z",
+      "side": 1,
+      "message": "It should be possible to construct an std::string backed by the given memory region using a constructor that takes  an allocator_type parameter, shouldn\u0027t it? This string can then be reused between calls.",
+      "parentUuid": "f2bcc959_e1523116",
+      "range": {
+        "startLine": 284,
+        "startChar": 16,
+        "endLine": 284,
+        "endChar": 29
+      },
+      "revId": "82c99f4c579e950d388aece2c6726039d85f4972",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
