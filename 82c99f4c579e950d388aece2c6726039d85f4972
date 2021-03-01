@@ -140,6 +140,30 @@
       },
       "revId": "82c99f4c579e950d388aece2c6726039d85f4972",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9f906aef_3daea033",
+        "filename": "android/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-01T17:53:46Z",
+      "side": 1,
+      "message": "Why can\u0027t the vector be allocated normally but reused between screenshots?",
+      "parentUuid": "84b6b779_033e5cce",
+      "range": {
+        "startLine": 284,
+        "startChar": 16,
+        "endLine": 284,
+        "endChar": 29
+      },
+      "revId": "82c99f4c579e950d388aece2c6726039d85f4972",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
