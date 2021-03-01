@@ -164,6 +164,30 @@
       },
       "revId": "82c99f4c579e950d388aece2c6726039d85f4972",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "16a7f12d_e131b286",
+        "filename": "android/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-03-01T18:47:19Z",
+      "side": 1,
+      "message": "It could, but we still have to choose between:\n\n- additional memcpy\n- break std::allocate contract\n\nWe support 2 transport mechanisms:\n\n- For mmap: We have a memory region where the bytes need to end up in.\n- For gRPC: A protobuf message exposes a bytes object as std::string which the message itself owns. We are free to pre-allocate our own and inject it. Since C++17 std::string gives access to the underlying char*, it is no longer const and is guaranteed to be a contiguous memory region of the size of the string.\n\nSo for both of our transport mechanisms we can create and have access to the raw memory of the desired size.\n\nstd::vector is designed such that it owns its own internal data structures. We can only provide an allocator to provide/release memory as needed. If we go with a std::vector our options are:\n\n- Either the std::vector is created and backed by the existing memory region, which means providing our own std::allocate implementation and hope that the vector calls it in the right way.\n- Copy the final bytes in std::vector into the destination memory region.",
+      "parentUuid": "9f906aef_3daea033",
+      "range": {
+        "startLine": 284,
+        "startChar": 16,
+        "endLine": 284,
+        "endChar": 29
+      },
+      "revId": "82c99f4c579e950d388aece2c6726039d85f4972",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
