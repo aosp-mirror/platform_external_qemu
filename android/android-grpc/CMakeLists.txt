@@ -37,7 +37,6 @@ if(NOT WINDOWS_MSVC_X86_64)
 endif()
 
 set(GNSS_ROOT ${ANDROID_QEMU2_TOP_DIR}/../../device/google/cuttlefish/host/commands/gnss_grpc_proxy/)
-set(LOCATION_ROOT ${ANDROID_QEMU2_TOP_DIR}/android/third_party/location/)
 
 protobuf_generate_grpc_cpp(
   SOURCE_DIR ${GNSS_ROOT}
@@ -47,9 +46,9 @@ protobuf_generate_grpc_cpp(
   )
 
 set(emu_gnss_sources
-    ${LOCATION_ROOT}/gnss_grpc_proxy.cpp
-    ${LOCATION_ROOT}/gnss_main.cpp
-    ${GNSS_SERVICE_GRPC_SRC}
+    location/gnss_grpc_proxy.cpp
+    location/gnss_main.cpp
+    ${GNSS_GRPC_PROXY_SRC}
 )
 
 android_add_library(
@@ -69,6 +68,7 @@ target_include_directories(gnss_proxy_lib PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/)
 target_link_libraries(gnss_proxy_lib PRIVATE libprotobuf  grpc++)
 target_link_libraries(gnss_proxy_lib PRIVATE android-emu-base)
 target_link_libraries(gnss_proxy_lib PRIVATE android-emu GLIB2::GLIB2)
+target_link_libraries(gnss_proxy_lib PRIVATE modem_simulator_lib)
 
 
 protobuf_generate_grpc_cpp(
