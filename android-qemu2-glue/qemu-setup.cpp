@@ -39,9 +39,9 @@ extern "C" {
 #include <unordered_map>
 #include <utility>
 
-#include "android-qemu2-glue/audio-output.h"
 #include "android-qemu2-glue/android_qemud.h"
 #include "android-qemu2-glue/audio-capturer.h"
+#include "android-qemu2-glue/audio-output.h"
 #include "android-qemu2-glue/base/async/CpuLooper.h"
 #include "android-qemu2-glue/base/async/Looper.h"
 #include "android-qemu2-glue/emulation/DmaMap.h"
@@ -59,6 +59,7 @@ extern "C" {
 #include "android/avd/info.h"
 #include "android/base/CpuUsage.h"
 #include "android/base/Log.h"
+#include "android/base/Tracing.h"
 #include "android/base/files/MemStream.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/cmdline-option.h"
@@ -74,11 +75,11 @@ extern "C" {
 #include "android/emulation/VmLock.h"
 #include "android/emulation/address_space_device.h"
 #include "android/emulation/address_space_device.hpp"
-#include "android/emulation/control/adb/AdbService.h"
 #include "android/emulation/control/EmulatorAdvertisement.h"
 #include "android/emulation/control/EmulatorService.h"
-#include "android/emulation/control/UiController.h"
 #include "android/emulation/control/GrpcServices.h"
+#include "android/emulation/control/UiController.h"
+#include "android/emulation/control/adb/AdbService.h"
 #include "android/emulation/control/record_screen_agent.h"
 #include "android/emulation/control/snapshot/SnapshotService.h"
 #include "android/emulation/control/user_event_agent.h"
@@ -304,9 +305,8 @@ int qemu_setup_grpc() {
     auto h2o = android::emulation::control::getWaterfallService(
             android_cmdLineOptions->waterfall);
     auto snapshot = android::emulation::control::getSnapshotService();
-    auto uiController =
-            android::emulation::control::getUiControllerService(
-                    getConsoleAgents());
+    auto uiController = android::emulation::control::getUiControllerService(
+            getConsoleAgents());
     auto adb = android::emulation::control::getAdbService();
     auto builder = EmulatorControllerService::Builder()
                            .withConsoleAgents(getConsoleAgents())
@@ -343,7 +343,8 @@ int qemu_setup_grpc() {
         exit(1);
     }
     builder.withService(android::emulation::control::getRtcService(
-            getConsoleAgents(), android_adb_port, android_cmdLineOptions->turncfg));
+            getConsoleAgents(), android_adb_port,
+            android_cmdLineOptions->turncfg));
 #endif
     int port = -1;
     grpcService = builder.build();
@@ -379,6 +380,11 @@ int qemu_setup_grpc() {
 }
 
 bool qemu_android_emulation_setup() {
+    android::base::initializeTracing();
+    if (std::getenv("VPERFETTO_TRACE_ENABLED")) {
+        android::base::enableTracing();
+    }
+
     android_qemu_init_slirp_shapers();
 
     if (!qemu_android_setup_http_proxy(op_http_proxy)) {
@@ -483,6 +489,7 @@ void qemu_android_emulation_teardown() {
         grpcService->stop();
         grpcService = nullptr;
     }
+    android::base::disableTracing();
     if (advertiser)
         advertiser->remove();
 }
