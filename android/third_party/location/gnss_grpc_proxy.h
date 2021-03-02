@@ -27,6 +27,8 @@
 #include <thread>
 #include <vector>
 
+#include <common/libs/fs/shared_fd.h>
+
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
@@ -40,7 +42,8 @@ using gnss_grpc_proxy::GnssGrpcProxy;
 namespace cuttlefish {
 class GnssGrpcProxyServiceImpl final : public GnssGrpcProxy::Service {
   public:
-    GnssGrpcProxyServiceImpl(std::string gnss_file_path);
+    GnssGrpcProxyServiceImpl(cuttlefish::SharedFD gnss_in,
+                     cuttlefish::SharedFD gnss_out, std::string gnss_file_path);
 
     Status SendNmea(ServerContext* context, const SendNmeaRequest* request,
                     SendNmeaReply* reply) override;
@@ -58,6 +61,9 @@ class GnssGrpcProxyServiceImpl final : public GnssGrpcProxy::Service {
     static constexpr uint32_t GNSS_SERIAL_BUFFER_SIZE = 4096;
   private:
     [[noreturn]] void ReadLoop();
+
+    cuttlefish::SharedFD gnss_in_;
+    cuttlefish::SharedFD gnss_out_;
 
     std::string gnss_file_path_;
     std::thread read_thread_;

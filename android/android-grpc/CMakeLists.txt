@@ -69,6 +69,7 @@ target_include_directories(gnss_proxy_lib PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/)
 target_link_libraries(gnss_proxy_lib PRIVATE libprotobuf  grpc++)
 target_link_libraries(gnss_proxy_lib PRIVATE android-emu-base)
 target_link_libraries(gnss_proxy_lib PRIVATE android-emu GLIB2::GLIB2)
+target_link_libraries(gnss_proxy_lib PRIVATE modem_simulator_lib)
 
 
 protobuf_generate_grpc_cpp(
