@@ -21,9 +21,11 @@
 #include <memory>
 #include <string>
 
-#include <grpcpp.h>
+#include "grpcpp.h"
 
 #include "gnss_grpc_proxy.grpc.pb.h"
+#include <common/libs/fs/shared_select.h>
+#include <android-base/logging.h>
 
 #include <signal.h>
 
@@ -45,8 +47,12 @@ using gnss_grpc_proxy::GnssGrpcProxy;
 namespace cuttlefish {
 
 GnssGrpcProxyServiceImpl::GnssGrpcProxyServiceImpl(
-                     std::string gnss_file_path) :
+        cuttlefish::SharedFD gnss_in,
+        cuttlefish::SharedFD gnss_out,
+        std::string gnss_file_path) :
                                                  
+    gnss_in_(gnss_in),
+    gnss_out_(gnss_out),
     gnss_file_path_(gnss_file_path) {}
 
 Status GnssGrpcProxyServiceImpl::SendNmea(ServerContext* context, const SendNmeaRequest* request,
@@ -61,6 +67,11 @@ Status GnssGrpcProxyServiceImpl::SendNmea(ServerContext* context, const SendNmea
 
 void GnssGrpcProxyServiceImpl::sendToSerial() {
       std::lock_guard<std::mutex> lock(cached_nmea_mutex);
+      ssize_t bytes_written = cuttlefish::WriteAll(gnss_in_, cached_nmea);
+      if (bytes_written < 0) {
+          LOG(ERROR) << "Error writing to fd: " << gnss_in_->StrError();
+      }
+
 }
 
 void GnssGrpcProxyServiceImpl::StartServer() {
@@ -110,8 +121,30 @@ void GnssGrpcProxyServiceImpl::ReadNmeaFromLocalFile() {
 }
 
 [[noreturn]] void GnssGrpcProxyServiceImpl::ReadLoop() {
+          std::vector<char> buffer(GNSS_SERIAL_BUFFER_SIZE);
+      int total_read = 0;
+      std::string gnss_cmd_str;
+
       while (true) {
+        auto bytes_read = gnss_out_->Read(buffer.data(), buffer.size());
+        if (bytes_read > 0) {
+          std::string s(buffer.data(), bytes_read);
+          gnss_cmd_str += s;
+          // In case random string sent though /dev/gnss0, gnss_cmd_str will auto resize,
+          // to get rid of first page.
+          if (gnss_cmd_str.size() > GNSS_SERIAL_BUFFER_SIZE * 2) {
+            gnss_cmd_str = gnss_cmd_str.substr(gnss_cmd_str.size() - GNSS_SERIAL_BUFFER_SIZE);
+          }
+          total_read += bytes_read;
+          if (gnss_cmd_str.find(CMD_GET_LOCATION) != std::string::npos) {
+            sendToSerial();
+            gnss_cmd_str = "";
+            total_read = 0;
+          }
+        } else {
+            // just sleep
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
+          }
       }
 }
 
