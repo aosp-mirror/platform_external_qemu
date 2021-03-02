@@ -22,6 +22,30 @@
       },
       "revId": "cd2adea9048431d822fa241672742d0e823a993e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "997fba36_dad7ffb9",
+        "filename": "android/android-emu/android/opengl/OpenglEsPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-03-02T02:23:56Z",
+      "side": 1,
+      "message": "We would execute the same logic that getScreenshot uses to obtain the proper w \u0026 h.\nThis function is only called once during the writing of a snapshot.",
+      "parentUuid": "108a1177_49f8bbf5",
+      "range": {
+        "startLine": 207,
+        "startChar": 12,
+        "endLine": 207,
+        "endChar": 81
+      },
+      "revId": "cd2adea9048431d822fa241672742d0e823a993e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
