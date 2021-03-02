@@ -589,7 +589,6 @@ bool MultiDisplay::multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h
     // * 120 <= dpi <= 640
     // * 320 * (dpi / 160) <= width
     // * 320 * (dpi / 160) <= height
-    // * Screen aspect ratio cannot be longer (or wider) than 21:9 (or 9:21).
     //
     // Also we don't want a screen too big to limit the performance impact.
     // * 4K might be a good upper limit
@@ -612,16 +611,11 @@ bool MultiDisplay::multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h
         LOG(ERROR) << "resolution should not exceed 4k (4096*2160)";
         return false;
     }
-    if (w * 21 < h * 9 || w * 9 > h * 21) {
-        mWindowAgent->showMessage("Aspect ratio cannot be longer (or wider) than 21:9 (or 9:21)",
-                                  WINDOW_MESSAGE_ERROR, 1000);
-        LOG(ERROR) << "Aspect ratio cannot be longer (or wider) than 21:9 (or 9:21)";
-        return false;
-    }
     if (id > s_maxNumMultiDisplay) {
-        mWindowAgent->showMessage("Display index cannot be more than 3",
-                                  WINDOW_MESSAGE_ERROR, 1000);
-        LOG(ERROR) << "Display index cannot be more than 3";
+        std::string msg = "Display index cannot be more than " +
+            std::to_string(s_maxNumMultiDisplay);
+        mWindowAgent->showMessage(msg.c_str(), WINDOW_MESSAGE_ERROR, 1000);
+        LOG(ERROR) << msg;
         return false;
     }
     return true;
