@@ -241,7 +241,7 @@ build_qemu_android () {
                EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ladvapi32"
                ;;
            *)
-               EXTRA_LDFLAGS="$EXTRA_LDFLAGS -static-libgcc -static-libstdc++"
+               EXTRA_LDFLAGS="$EXTRA_LDFLAGS -static-libgcc -stdlib=libc++"
                ;;
         esac
         case $1 in
@@ -358,7 +358,7 @@ EOF
             GCC=g++
             ;;
           linux-x86*)
-            GCC=gcc
+            GCC=g++
             ;;
           linux-aarch64)
             GCC=g++
@@ -430,7 +430,7 @@ EOF
             $CROSS_PREFIX_FLAG \
             --target-list="$QEMU_TARGET_LIST" \
             --prefix=$PREFIX \
-            --extra-cflags="$EXTRA_CFLAGS -I/Users/lfy/emu/prebuilts/android-emulator-build/common/virglrenderer/darwin-aarch64/include/virgl" \
+            --extra-cflags="$EXTRA_CFLAGS -I/Users/lfy/emu/prebuilts/android-emulator-build/common/virglrenderer/darwin-aarch64/include/virgl -w" \
             --extra-ldflags="$EXTRA_LDFLAGS -L/Users/lfy/emu/prebuilts/android-emulator-build/common/virglrenderer/darwin-aarch64/lib" \
             --python=$PYTHON2 \
             $DEBUG_FLAGS \
