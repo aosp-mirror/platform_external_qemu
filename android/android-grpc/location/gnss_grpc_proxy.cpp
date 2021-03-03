@@ -126,6 +126,7 @@ void GnssGrpcProxyServiceImpl::ReadNmeaFromLocalFile() {
       std::string gnss_cmd_str;
 
       while (true) {
+          //LOG(INFO)<<"wait to read output from guest " << gnss_cmd_str;
         auto bytes_read = gnss_out_->Read(buffer.data(), buffer.size());
         if (bytes_read > 0) {
           std::string s(buffer.data(), bytes_read);
@@ -135,6 +136,7 @@ void GnssGrpcProxyServiceImpl::ReadNmeaFromLocalFile() {
           if (gnss_cmd_str.size() > GNSS_SERIAL_BUFFER_SIZE * 2) {
             gnss_cmd_str = gnss_cmd_str.substr(gnss_cmd_str.size() - GNSS_SERIAL_BUFFER_SIZE);
           }
+          LOG(DEBUG)<<"got " << gnss_cmd_str;
           total_read += bytes_read;
           if (gnss_cmd_str.find(CMD_GET_LOCATION) != std::string::npos) {
             sendToSerial();
