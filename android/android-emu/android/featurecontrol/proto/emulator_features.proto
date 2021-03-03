@@ -4,8 +4,6 @@ package emulator_features;
 
 // Must match emulator's featurecontrol defs.
 
-// Next tag: 58
-
 enum Feature {
     GLPipeChecksum = 0;
     GrallocSync = 1;
@@ -107,4 +105,6 @@ enum Feature {
     VirtconsoleLogcat = 59;
 
     Minigbm = 60;
+
+    GnssGrpcV1 = 61;
 }
