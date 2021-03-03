@@ -173,7 +173,7 @@ struct VSockStream {
     }
 
     void sendOp(enum virtio_vsock_op op);
-    void signalWake();
+    void signalWake(bool write);
 
     bool canSave() const {
         return mPipe || (mHostCallbacks && mHostCallbacks->canSave());
@@ -251,7 +251,7 @@ struct VSockStream {
     static void closeFromHostCallback(void* that);
 
     static void signalWakeCallback(void* that, unsigned flags) {
-        static_cast<VSockStream*>(that)->signalWake();
+        static_cast<VSockStream*>(that)->signalWake(true);
     }
 
     static void signalWakeEmptyCallback(void* that, unsigned flags) {
@@ -708,6 +708,10 @@ private:
                 break;
 
             case DstPort::Ping:
+                for (const auto &kv : mStreams) {
+                    kv.second->signalWake(false);
+                }
+
                 // this port is not intended to be open
                 queueOrphanFrameHostToGuestLocked(request, VIRTIO_VSOCK_OP_RST);
                 break;
@@ -862,7 +866,7 @@ void VSockStream::sendOp(enum virtio_vsock_op op) {
     }
 }
 
-void VSockStream::signalWake() {
+void VSockStream::signalWake(const bool write) {
     if (mPipe) {
         while (true) {
             uint8_t data[1024];
@@ -882,7 +886,9 @@ void VSockStream::signalWake() {
     } else {
         ::crashhandler_die("%s:%d: No data source", __func__, __LINE__);
     }
-    mDev->vqWriteHostToGuestLocked();
+    if (write) {
+        mDev->vqWriteHostToGuestLocked();
+    }
 }
 
 void VSockStream::closeFromHostCallback(void* that) {
