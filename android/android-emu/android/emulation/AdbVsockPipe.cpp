@@ -209,18 +209,18 @@ struct VsockJdwpProxy : public AdbVsockPipe::Proxy {
 
 AdbVsockPipe::Service::Service(AdbHostAgent* hostAgent)
     : mHostAgent(hostAgent)
-    , mGuestAdbdPollingThread(&AdbVsockPipe::Service::pollGuestAdbdThreadLoop, this)
     , mDestroyPipesThread(&AdbVsockPipe::Service::destroyPipesThreadLoop, this) {
+    startPollGuestAdbdThread();
     g_service = this;
 }
 
 AdbVsockPipe::Service::~Service() {
     g_service = nullptr;
-    mGuestAdbdPollingThreadRunning = false;
+
+    stopPollGuestAdbdThread(kAdbdPollingThreadSisabled);
+
     mPipesToDestroy.stop();
-    mGuestAdbdPollingThread.join();
     mDestroyPipesThread.join();
-    mHostAgent->stopListening();
 }
 
 void AdbVsockPipe::Service::onHostConnection(android::base::ScopedSocket&& socket,
@@ -259,6 +259,10 @@ void AdbVsockPipe::Service::destroyPipesThreadLoop() {
                 });
 
             mPipes.erase(end, mPipes.end());
+            if (mPipes.empty()) {
+                stopPollGuestAdbdThread(kAdbdPollingThreadIdle);
+                startPollGuestAdbdThread();
+            }
         } else {
             break;
         }
@@ -270,7 +274,7 @@ void AdbVsockPipe::Service::destroyPipe(AdbVsockPipe *p) {
 }
 
 void AdbVsockPipe::Service::pollGuestAdbdThreadLoop() {
-    while (mGuestAdbdPollingThreadRunning) {
+    while (mGuestAdbdPollingThreadState.load() == kAdbdPollingThreadRunning) {
         if (checkIfGuestAdbdAlive()) {
             mHostAgent->startListening();
             mHostAgent->notifyServer();
@@ -279,6 +283,25 @@ void AdbVsockPipe::Service::pollGuestAdbdThreadLoop() {
             using namespace std::chrono_literals;
             std::this_thread::sleep_for(500ms);
         }
+    }
+}
+
+void AdbVsockPipe::Service::startPollGuestAdbdThread() {
+    auto expectedState = kAdbdPollingThreadIdle;
+    if (mGuestAdbdPollingThreadState.compare_exchange_strong(expectedState,
+                                                             kAdbdPollingThreadRunning)) {
+        mGuestAdbdPollingThread = std::thread(
+            &AdbVsockPipe::Service::pollGuestAdbdThreadLoop, this);
+    }
+}
+
+void AdbVsockPipe::Service::stopPollGuestAdbdThread(int newState) {
+    auto expectedState = kAdbdPollingThreadRunning;
+    if (mGuestAdbdPollingThreadState.compare_exchange_strong(expectedState, newState)) {
+        mHostAgent->stopListening();
+        mGuestAdbdPollingThread.join();
+    } else {
+        mGuestAdbdPollingThreadState = newState;
     }
 }
 

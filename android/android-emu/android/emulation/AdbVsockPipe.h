@@ -55,13 +55,20 @@ public:
         void pollGuestAdbdThreadLoop();
         bool checkIfGuestAdbdAlive();
 
+        void startPollGuestAdbdThread();
+        void stopPollGuestAdbdThread(int newState);
+
         void reset();
         void saveImpl(base::Stream* stream) const;
         bool loadImpl(base::Stream* stream);
         IVsockHostCallbacks* getHostCallbacksImpl(uint64_t key) const;
 
+        static constexpr int kAdbdPollingThreadIdle = 0;
+        static constexpr int kAdbdPollingThreadRunning = 1;
+        static constexpr int kAdbdPollingThreadSisabled = 2;
+
         AdbHostAgent* mHostAgent;
-        std::atomic<bool> mGuestAdbdPollingThreadRunning = true;
+        std::atomic<int> mGuestAdbdPollingThreadState = kAdbdPollingThreadIdle;
         std::vector<std::unique_ptr<AdbVsockPipe>> mPipes;
         base::MessageChannel<AdbVsockPipe *, 4> mPipesToDestroy;
         std::thread mGuestAdbdPollingThread;
