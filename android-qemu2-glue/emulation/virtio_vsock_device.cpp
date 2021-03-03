@@ -111,7 +111,7 @@ struct VSockStream {
         , mGuestBufAlloc(guest_buf_alloc)
         , mGuestFwdCnt(guest_fwd_cnt) {
         if (!hostCallbacks) {
-            mPipe = android_pipe_guest_open_with_flags(this, ANDROID_PIPE_VIRTIO_VSOCK_BIT);
+            mPipe = android_pipe_guest_open(this);
         }
     }
 
