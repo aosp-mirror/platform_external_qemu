@@ -5634,13 +5634,17 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
     bool tryDefaultVmLoad = true;
 #ifdef CONFIG_ANDROID
-    if (android_qemu_mode) {
+    if (android_qemu_mode || is_fuchsia) {
         // Initialize reporting right before starting the real VM work (load/boot
         // and the main loop). We want to track performance of a running emulator,
         // ignoring any too early exits as a result of incorrect setup.
         if (!android_reporting_setup()) {
             return 1;
         }
+    }
+
+    if (android_qemu_mode) {
+
 #if SNAPSHOT_PROFILE > 1
         printf("Starting VM at uptime %lld ms\n", (long long)get_uptime_ms());
 #endif
