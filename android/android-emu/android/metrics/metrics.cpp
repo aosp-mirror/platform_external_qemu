@@ -473,6 +473,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::VIRTCONSOLE_LOGCAT;
         case android::featurecontrol::VulkanQueueSubmitWithCommands:
             return android_studio::EmulatorFeatureFlagState::VULKAN_QUEUE_SUBMIT_WITH_COMMANDS;
+        case android::featurecontrol::GnssGrpcV1:
+            return android_studio::EmulatorFeatureFlagState::GNSS_GRPC_V1;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }

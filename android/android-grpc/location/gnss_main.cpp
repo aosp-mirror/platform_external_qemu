@@ -24,6 +24,8 @@
 #include "gnss_grpc_proxy.h"
 #include "gnss_grpc_proxy.grpc.pb.h"
 
+#include "android/base/sockets/SocketUtils.h"
+
 #include <signal.h>
 #include <chrono>
 #include <deque>
@@ -35,16 +37,15 @@ using cuttlefish::GnssGrpcProxyServiceImpl;
 
 using cuttlefish::SharedFD;
 
-void RunServer() {
-    std::string FLAGS_gnss_grpc_port = "9999";
-    std::string FLAGS_gnss_file_path = "";
+void RunServer(SharedFD gnss_fd, std::string gnss_grpc_port, std::string gnss_file_path) {
 
-    // TODO: fix the following two fds
-    SharedFD gnss_in, gnss_out;
-  auto server_address("0.0.0.0:" + FLAGS_gnss_grpc_port);
-  GnssGrpcProxyServiceImpl service(gnss_in, gnss_out, FLAGS_gnss_file_path);
+  if (gnss_grpc_port.empty()) {
+      gnss_grpc_port = "9999";
+  }
+  auto server_address("0.0.0.0:" + gnss_grpc_port);
+  GnssGrpcProxyServiceImpl service(gnss_fd, gnss_fd, gnss_file_path);
   service.StartServer();
-  if (!FLAGS_gnss_file_path.empty()) {
+  if (!gnss_file_path.empty()) {
     service.StartReadFileThread();
     // In the local mode, we are not start a grpc server, use a infinite loop instead
     while(true) {
@@ -68,8 +69,12 @@ void RunServer() {
 
 }
 
-int location_main(int argc, char** argv) {
-  RunServer();
+int start_android_gnss_grpc_detached(bool& isIpv4, std::string grpcport, std::string gnssfilepath) {
+    int request_port = 0; // pick an available port
+    auto shared_fd = cuttlefish::SharedFD::SocketLocalServer(request_port);
+    isIpv4 = shared_fd.isIpv4();
+    int actual_port = android::base::socketGetPort(shared_fd->getFd());
+    RunServer(shared_fd, grpcport, gnssfilepath);
+    return actual_port;
 
-  return 0;
 }
