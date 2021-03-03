@@ -14,11 +14,11 @@
 #define _QEMU_VIRTIO_VSOCK_H
 
 #include <stdint.h>
-#include <qemu/compiler.h>
-#include <qemu/osdep.h>
-#include <qemu/typedefs.h>
-#include <hw/virtio/virtio.h>
-#include <qapi/error.h>
+#include "qemu/compiler.h"
+#include "qemu/osdep.h"
+#include "qemu/typedefs.h"
+#include "hw/virtio/virtio.h"
+#include "qapi/error.h"
 
 typedef struct VirtIOVSockTag {
     VirtIODevice parent;

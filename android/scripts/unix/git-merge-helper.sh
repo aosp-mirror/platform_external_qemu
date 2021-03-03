@@ -45,6 +45,9 @@ option_register_var "--steps=<count>" OPT_STEP "The number of commits to skip pe
 OPT_DIST=linux-x86_64
 option_register_var "--dist=<dist>" OPT_DIST "Target distribution for compilation (linux-x86_64, windows-x86_64, darwin-x86_64)"
 
+
+OPT_DEST=/mnt/ram/mrg
+option_register_var "--dest=<dest>" OPT_DIST "Target destination for compilation"
 option_parse "$@"
 
 HOST_NUM_CPUS=1
@@ -74,10 +77,11 @@ do_tac() {
 
 build() {
     # First attempt a partial build
-    make -j $HOST_NUM_CPUS ||
-   (./android/scripts/build-qemu-android.sh  --build-dir=$HOME/qemu-build --host=$OPT_DIST &&
-    ./android-qemu2-glue/scripts/gen-qemu2-sources-mk.py -i ../../prebuilts/android-emulator-build/qemu-upstream/ -o ./android-qemu2-glue/build/Makefile.qemu2-sources.mk -s $OPT_DIST -r . &&
-    ./android/rebuild.sh --no-strip --no-tests)
+    echo "Building!"
+    ninja -C $OPT_DEST ||
+   (./android/scripts/unix/build-qemu-android.sh  --build-dir=$OPT_DEST/qemu-build --host=$OPT_DIST &&
+    ./android-qemu2-glue/scripts/unix/gen-qemu2-sources-mk.py -i ../../prebuilts/android-emulator-build/qemu-upstream/ -o ./android-qemu2-glue/build/Makefile.qemu2-sources.mk -s $OPT_DIST -r . &&
+    ./android/rebuild.sh --no-strip --no-tests --out $OPT_DEST)
 }
 
 COMMITS=$((git log --first-parent --format=format:%H HEAD..$OPT_TAG; echo) | do_tac)

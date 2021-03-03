@@ -4648,6 +4648,12 @@ fi
 # fi
 
 ##########################################
+virglrenderer=no
+
+## Android emulator include header, to fix dependency issue.
+QEMU_CFLAGS="$QEMU_CFLAGS -I\$(SRC_PATH)/android/android-emu/"
+
+
 # capstone
 
 case "$capstone" in
