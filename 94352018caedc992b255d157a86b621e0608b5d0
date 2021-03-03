@@ -16,6 +16,24 @@
       "message": "Huan, could you please share a screenshot of how the apps look when you create a display with aspect ratio taller than 21:9? Is it properly letterboxed?",
       "revId": "94352018caedc992b255d157a86b621e0608b5d0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ead7bf66_610a9c45",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2021-03-03T23:55:17Z",
+      "side": 1,
+      "message": "updated the bug.",
+      "parentUuid": "f37163f6_6b7baf7c",
+      "revId": "94352018caedc992b255d157a86b621e0608b5d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
