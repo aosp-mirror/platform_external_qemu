@@ -22,6 +22,8 @@
 // for Linux and Window, Cuvid is available
 #include "android/emulation/MediaCudaDriverHelper.h"
 #include "android/emulation/MediaCudaVideoHelper.h"
+#else
+#include "android/emulation/MediaVideoToolBoxVideoHelper.h"
 #endif
 
 #include <cstdint>
@@ -31,7 +33,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MEDIA_H264_DEBUG 0
+#define MEDIA_H264_DEBUG 1
 
 #if MEDIA_H264_DEBUG
 #define H264_DPRINT(fmt, ...)                                                \
@@ -148,7 +150,13 @@ void MediaH264DecoderGeneric::initH264ContextInternal(unsigned int width,
         }
     }
 // TODO: add video toolbox for apple
+#else
+    mHwVideoHelper.reset( new MediaVideoToolBoxVideoHelper(
+                MediaVideoToolBoxVideoHelper::OutputTreatmentMode::SAVE_RESULT,
+                MediaVideoToolBoxVideoHelper::FrameStorageMode:: USE_BYTE_BUFFER));
 #endif
+
+//    mHwVideoHelper.reset();
 
     mSnapshotHelper.reset(
             new MediaSnapshotHelper(MediaSnapshotHelper::CodecType::H264));
@@ -214,12 +222,15 @@ void MediaH264DecoderGeneric::decodeFrame(void* ptr) {
 
     *retSzBytes = szBytes;
     *retErr = (int32_t)Err::NoErr;
+
+    H264_DPRINT("done decoding this frame");
 }
 
 void MediaH264DecoderGeneric::decodeFrameInternal(const uint8_t* data,
                                                   size_t len,
                                                   uint64_t pts) {
     if (mTrialPeriod) {
+        H264_DPRINT("still in trial period");
         try_decode(data, len, pts);
     } else {
         mVideoHelper->decode(data, len, pts);
@@ -239,6 +250,7 @@ void MediaH264DecoderGeneric::try_decode(const uint8_t* data,
             H264_DPRINT("Failed to decode with HW decoder %d; switch to SW",
                         mHwVideoHelper->error());
             mHwVideoHelper.reset(nullptr);
+            mTrialPeriod = false;
         }
     }
 
@@ -251,12 +263,14 @@ void MediaH264DecoderGeneric::try_decode(const uint8_t* data,
                 this->oneShotDecode(data, len, pts);
             };
 
+    H264_DPRINT("now replay on ffmpeg");
     mSnapshotHelper->replay(func);
+    H264_DPRINT("done replay on ffmpeg");
 
     mVideoHelper->setSaveDecodedFrames();
 
     mVideoHelper->decode(data, len, pts);
-    mTrialPeriod = false;
+    H264_DPRINT("done trial period");
 }
 
 void MediaH264DecoderGeneric::fetchAllFrames() {
