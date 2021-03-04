@@ -217,7 +217,7 @@ AdbVsockPipe::Service::Service(AdbHostAgent* hostAgent)
 AdbVsockPipe::Service::~Service() {
     g_service = nullptr;
 
-    stopPollGuestAdbdThread(kAdbdPollingThreadSisabled);
+    stopPollGuestAdbdThread(kAdbdPollingThreadDisabled);
 
     mPipesToDestroy.stop();
     mDestroyPipesThread.join();

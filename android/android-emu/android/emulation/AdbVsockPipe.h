@@ -65,7 +65,7 @@ public:
 
         static constexpr int kAdbdPollingThreadIdle = 0;
         static constexpr int kAdbdPollingThreadRunning = 1;
-        static constexpr int kAdbdPollingThreadSisabled = 2;
+        static constexpr int kAdbdPollingThreadDisabled = 2;
 
         AdbHostAgent* mHostAgent;
         std::atomic<int> mGuestAdbdPollingThreadState = kAdbdPollingThreadIdle;
