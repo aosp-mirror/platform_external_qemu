@@ -22,6 +22,8 @@
 // for Linux and Window, Cuvid is available
 #include "android/emulation/MediaCudaDriverHelper.h"
 #include "android/emulation/MediaCudaVideoHelper.h"
+#else
+#include "android/emulation/MediaVideoToolBoxVideoHelper.h"
 #endif
 
 #include <cstdint>
@@ -148,6 +150,10 @@ void MediaH264DecoderGeneric::initH264ContextInternal(unsigned int width,
         }
     }
 // TODO: add video toolbox for apple
+#else
+    mHwVideoHelper.reset( new MediaVideoToolBoxVideoHelper(
+                MediaVideoToolBoxVideoHelper::OutputTreatmentMode::SAVE_RESULT,
+                MediaVideoToolBoxVideoHelper::FrameStorageMode:: USE_BYTE_BUFFER));
 #endif
 
     mSnapshotHelper.reset(
