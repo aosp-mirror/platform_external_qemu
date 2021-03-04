@@ -296,12 +296,32 @@ void AdbVsockPipe::Service::startPollGuestAdbdThread() {
 }
 
 void AdbVsockPipe::Service::stopPollGuestAdbdThread(const int newState) {
-    auto expectedState = kAdbdPollingThreadRunning;
-    if (mGuestAdbdPollingThreadState.compare_exchange_strong(expectedState, newState)) {
-        mHostAgent->stopListening();
-        mGuestAdbdPollingThread.join();
-    } else {
-        mGuestAdbdPollingThreadState = newState;
+    int expectedState = kAdbdPollingThreadRunning;
+
+    while (expectedState != newState) {
+        switch (expectedState) {
+        case kAdbdPollingThreadRunning:
+            if (mGuestAdbdPollingThreadState.compare_exchange_strong(expectedState, newState)) {
+                mHostAgent->stopListening();
+                mGuestAdbdPollingThread.join();
+                return;
+            }
+            break;
+
+        case kAdbdPollingThreadIdle:
+            if (mGuestAdbdPollingThreadState.compare_exchange_strong(expectedState, newState)) {
+                return;
+            }
+            break;
+
+        case kAdbdPollingThreadDisabled:
+            return;
+
+        default:
+            ::crashhandler_die("%s:%d: unexpected adbd polling thread state: %d",
+                               __func__, __LINE__, expectedState);
+            break;
+        }
     }
 }
 
