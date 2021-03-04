@@ -300,7 +300,7 @@ void AdbVsockPipe::Service::stopPollGuestAdbdThread(const int newState) {
     if (mGuestAdbdPollingThreadState.compare_exchange_strong(expectedState, newState)) {
         mHostAgent->stopListening();
         mGuestAdbdPollingThread.join();
-    } else {
+    } else if (newState == kAdbdPollingThreadDisabled) {
         mGuestAdbdPollingThreadState = newState;
     }
 }
