@@ -295,7 +295,7 @@ void AdbVsockPipe::Service::startPollGuestAdbdThread() {
     }
 }
 
-void AdbVsockPipe::Service::stopPollGuestAdbdThread(int newState) {
+void AdbVsockPipe::Service::stopPollGuestAdbdThread(const int newState) {
     auto expectedState = kAdbdPollingThreadRunning;
     if (mGuestAdbdPollingThreadState.compare_exchange_strong(expectedState, newState)) {
         mHostAgent->stopListening();
