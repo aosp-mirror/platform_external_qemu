@@ -16,7 +16,7 @@
 #include "android/emulation/YuvConverter.h"
 #include "android/utils/debug.h"
 
-#define MEDIA_FFMPEG_DEBUG 0
+#define MEDIA_FFMPEG_DEBUG 1
 
 #if MEDIA_FFMPEG_DEBUG
 #define MEDIA_DPRINT(fmt, ...)                                              \
