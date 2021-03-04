@@ -1103,6 +1103,21 @@ void hmp_info_usernet(Monitor *mon, const QDict *qdict)
     }
 }
 
+void hmp_info_neighbors(Monitor *mon, const QDict *qdict)
+{
+    SlirpState *s;
+
+    QTAILQ_FOREACH(s, &slirp_stacks, entry) {
+        int id;
+        bool got_hub_id = net_hub_id_for_client(&s->nc, &id) == 0;
+        char *info = slirp_neighbor_info(s->slirp);
+        monitor_printf(mon, "Hub %d (%s):\n%s",
+                       got_hub_id ? id : -1,
+                       s->nc.name, info);
+        g_free(info);
+    }
+}
+
 static void
 net_init_slirp_configs(const StringList *fwd, int flags)
 {

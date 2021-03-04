@@ -486,6 +486,21 @@ SRST
     Show user network stack connection states.
 ERST
 
+#if defined(CONFIG_SLIRP)
+    {
+        .name       = "neighbors",
+        .args_type  = "",
+        .params     = "",
+        .help       = "show the ARP and NDP tables",
+        .cmd        = hmp_info_neighbors,
+    },
+#endif
+
+SRST
+  ``info neighbors``
+    Show the ARP and NDP tables.
+ERST
+
     {
         .name       = "migrate",
         .args_type  = "",

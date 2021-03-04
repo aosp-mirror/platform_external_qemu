@@ -31,6 +31,7 @@ void hmp_hostfwd_add(Monitor *mon, const QDict *qdict);
 void hmp_hostfwd_remove(Monitor *mon, const QDict *qdict);
 
 void hmp_info_usernet(Monitor *mon, const QDict *qdict);
+void hmp_info_neighbors(Monitor *mon, const QDict *qdict);
 
 #endif
 
