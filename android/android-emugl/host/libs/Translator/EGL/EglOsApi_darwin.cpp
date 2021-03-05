@@ -76,6 +76,7 @@ public:
 
     void* context() const { return mContext; }
 
+    virtual void* lowLevelContext() { return nsGetLowLevelContext(mContext); }
     static void* from(EglOS::Context* c) {
         return static_cast<MacContext*>(c)->context();
     }
@@ -414,3 +415,8 @@ EglOS::Engine* EglOS::Engine::getHostInstance() {
     return sHostEngine.ptr();
 }
 
+extern "C" {
+    int bohu_osx_func1() {
+        return 1;
+    }
+}
