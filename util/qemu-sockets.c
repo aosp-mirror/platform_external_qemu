@@ -638,9 +638,16 @@ const char *inet_parse_host_port(InetSocketAddress *addr, const char *str,
             return NULL;
         }
     } else if (str[0] == '[') {
-        /* IPv6 addr */
-        if (sscanf(str, "[%64[^]]]:%32[^,]%n", host, port, &pos) != 2) {
-            error_setg(errp, "error parsing IPv6 address '%s'", str);
+        /*
+         * Probably, but not necessarily, an IPv6 addr.
+         * Note that [127.0.0.1] is also valid.
+         *
+         * sscanf %[ doesn't recognize empty contents.
+         */
+        if (sscanf(str, "[]:%32s%n", port, &pos) == 1) {
+            host[0] = '\0';
+        } else if (sscanf(str, "[%64[^]]]:%32s%n", host, port, &pos) != 2) {
+            error_setg(errp, "error parsing address '%s'", str);
             return NULL;
         }
     } else {
