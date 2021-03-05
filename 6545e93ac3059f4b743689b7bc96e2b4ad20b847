@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "57e94db1_6f89a2a0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-03-05T01:10:06Z",
+      "side": 1,
+      "message": "No dEQP-VK.binding_model* regressions",
+      "revId": "6545e93ac3059f4b743689b7bc96e2b4ad20b847",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
