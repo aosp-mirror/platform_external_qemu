@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <Cocoa/Cocoa.h>
 #include <OpenGL/OpenGL.h>
+#include <OpenGL/gl3.h>
 #include "MacPixelFormatsAttribs.h"
 
 //
@@ -216,6 +217,117 @@ void* nsCreateContext(void* format,void* share){
     NSOpenGLPixelFormat* frmt = (NSOpenGLPixelFormat*)format;
     return [[EmuGLContext alloc] initWithFormat:frmt shareContext:share];
 }
+
+void* nsGetLowLevelContext(void* context) {
+    EmuGLContext* ctx = (EmuGLContext *)context;
+    return ctx;
+}
+
+void nsConvertVideoFrameToNV12Textures(void* context, void* iosurface, int* Ytex, int* UVtex) {
+    //NSLog(@"calling nsConvertVideoFrameToNV12Textures");
+
+    EmuGLContext* ctx = (EmuGLContext *)context;
+
+    // https://developer.apple.com/forums/thread/27589
+    // this is probably already current when this is called
+    // [ctx makeCurrentContext];
+    /*
+CGLTexImageIOSurface2D(glContext,GL_TEXTURE_RECTANGLE,GL_R8,(GLsizei)textureSize.width,(GLsizei)textureSize.height,GL_RED,GL_UNSIGNED_BYTE,surfaceRef, 0);
+
+// chroma texture, subsampled
+
+CGLTexImageIOSurface2D(glContext,GL_TEXTURE_RECTANGLE, GL_RG8, (GLsizei)planeSize.width, (GLsizei)planeSize.height, GL_RG, GL_UNSIGNED_BYTE, surfaceRef, 1);
+    */
+    CGLContextObj cgl_ctx = ctx.CGLContextObj;
+    
+    glEnable(GL_TEXTURE_RECTANGLE);
+   
+    IOSurfaceRef* surface = (IOSurfaceRef*)iosurface;
+
+    //NSLog(@"get w and h");
+    GLsizei surface_w = (GLsizei)IOSurfaceGetWidth(surface);
+    GLsizei surface_h = (GLsizei)IOSurfaceGetHeight(surface);
+      
+    //NSLog(@"create textures y");
+    static int s_ytex;
+    static int s_uvtex;
+    static int s_created=false;
+    if (!s_created) {
+        s_created = true;
+        glGenTextures(1, &s_ytex);
+        glGenTextures(1, &s_uvtex);
+    }
+    *Ytex = s_ytex;
+    *UVtex = s_uvtex;
+
+    glBindTexture(GL_TEXTURE_RECTANGLE, *Ytex);
+    //NSLog(@"fetch textures y");
+    CGLError cglError =
+        CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE,
+                GL_R8, surface_w, surface_h, GL_RED, GL_UNSIGNED_BYTE, surface, 0);
+   
+    if (cglError != kCGLNoError) {
+        fprintf(stderr, "create textures y error %d\n", cglError);
+    }
+
+    //NSLog(@"create textures uv");
+    glBindTexture(GL_TEXTURE_RECTANGLE, *UVtex);
+    cglError =
+        CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE,
+                GL_RG8, surface_w/2, surface_h/2, GL_RG, GL_UNSIGNED_BYTE, surface, 1);
+
+    if (cglError != kCGLNoError) {
+        fprintf(stderr, "create textures uv error %d\n", cglError);
+    }
+    glBindTexture(GL_TEXTURE_RECTANGLE, 0);
+    //NSLog(@"done creating textures uv");
+}
+
+void nsCopyTexture(void* context, int from, int to, int width, int height) {
+    //NSLog(@"calling nsCopyTexture");
+    EmuGLContext* ctx = (EmuGLContext *)context;
+    // assume ctx is alreldy current
+
+      if (glGetError() != GL_NO_ERROR) {
+          //NSLog(@"bad in blit 0");
+      }
+    int tex1 = from;
+    int tex2 = to;
+      GLuint g_fb=0;
+      glGenFramebuffers( 1, &g_fb );
+      glBindFramebuffer( GL_FRAMEBUFFER, g_fb );
+      glBindTexture(GL_TEXTURE_RECTANGLE, tex1);
+      glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+              GL_TEXTURE_RECTANGLE, tex1, 0);
+      if (glGetError() != GL_NO_ERROR) {
+          //NSLog(@"bad in blit 1");
+      }
+      glBindTexture(GL_TEXTURE_2D, tex2);
+      glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
+              GL_TEXTURE_2D, tex2, 0);
+      if (glGetError() != GL_NO_ERROR) {
+          //NSLog(@"bad in blit 2");
+      }
+      //glDrawBuffer(GL_COLOR_ATTACHMENT1);
+
+      if (glGetError() != GL_NO_ERROR) {
+          //NSLog(@"bad in blit 3");
+      }
+      glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0,0, 0,0,width, height);
+
+      glBindTexture(GL_TEXTURE_RECTANGLE, 0);
+      glBindTexture(GL_TEXTURE_2D, 0);
+      //glBlitFramebuffer(0,0,width, height, 0,0,width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+      //glDeleteTextures( 1, &from);
+      if (glGetError() != GL_NO_ERROR) {
+          //NSLog(@"bad in blit4 ");
+      }
+
+      glBindFramebuffer( GL_FRAMEBUFFER, 0);
+      glDeleteFramebuffers( 1, &g_fb );
+}
+
 
 void  nsPBufferMakeCurrent(void* context,void* nativePBuffer,int level){
     EmuGLContext* ctx = (EmuGLContext *)context;
