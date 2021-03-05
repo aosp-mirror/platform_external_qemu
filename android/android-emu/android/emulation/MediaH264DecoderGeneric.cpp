@@ -22,6 +22,8 @@
 // for Linux and Window, Cuvid is available
 #include "android/emulation/MediaCudaDriverHelper.h"
 #include "android/emulation/MediaCudaVideoHelper.h"
+#else
+#include "android/emulation/MediaVideoToolBoxVideoHelper.h"
 #endif
 
 #include <cstdint>
@@ -147,7 +149,12 @@ void MediaH264DecoderGeneric::initH264ContextInternal(unsigned int width,
             H264_DPRINT("succeeded to init cuda decoder");
         }
     }
-// TODO: add video toolbox for apple
+#else
+    mHwVideoHelper.reset(new MediaVideoToolBoxVideoHelper(
+            mOutputWidth, mOutputHeight,
+            MediaVideoToolBoxVideoHelper::OutputTreatmentMode::SAVE_RESULT,
+            MediaVideoToolBoxVideoHelper::FrameStorageMode::USE_BYTE_BUFFER));
+    mHwVideoHelper->init();
 #endif
 
     mSnapshotHelper.reset(
@@ -214,12 +221,15 @@ void MediaH264DecoderGeneric::decodeFrame(void* ptr) {
 
     *retSzBytes = szBytes;
     *retErr = (int32_t)Err::NoErr;
+
+    H264_DPRINT("done decoding this frame");
 }
 
 void MediaH264DecoderGeneric::decodeFrameInternal(const uint8_t* data,
                                                   size_t len,
                                                   uint64_t pts) {
     if (mTrialPeriod) {
+        H264_DPRINT("still in trial period");
         try_decode(data, len, pts);
     } else {
         mVideoHelper->decode(data, len, pts);
@@ -242,6 +252,7 @@ void MediaH264DecoderGeneric::try_decode(const uint8_t* data,
         }
     }
 
+    mTrialPeriod = false;
     createAndInitSoftVideoHelper();
     mVideoHelper = std::move(mSwVideoHelper);
 
@@ -251,12 +262,14 @@ void MediaH264DecoderGeneric::try_decode(const uint8_t* data,
                 this->oneShotDecode(data, len, pts);
             };
 
+    H264_DPRINT("now replay on ffmpeg");
     mSnapshotHelper->replay(func);
+    H264_DPRINT("done replay on ffmpeg");
 
     mVideoHelper->setSaveDecodedFrames();
 
     mVideoHelper->decode(data, len, pts);
-    mTrialPeriod = false;
+    H264_DPRINT("done trial period");
 }
 
 void MediaH264DecoderGeneric::fetchAllFrames() {

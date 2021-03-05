@@ -1930,6 +1930,8 @@ void FrameBuffer::destroyYUVTextures(uint32_t type,
     }
 }
 
+//TODO: get osx decoding to texture working as well
+
 extern "C" {
 typedef void (*yuv_updater_t)(void* privData,
                               uint32_t type,
@@ -1981,6 +1983,11 @@ void FrameBuffer::swapTexturesAndUpdateColorBuffer(uint32_t p_colorbuffer,
                       nullptr);
 }
 
+extern "C" {
+    int bohu_osx_func1();
+    void* getLowLevelContext(EGLContext handle);
+}
+
 bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
                                     int x,
                                     int y,
@@ -1999,6 +2006,19 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
     if (c == m_colorbuffers.end()) {
         // bad colorbuffer handle
         return false;
+    }
+
+    if (0) {
+        // this works, at least can access this function
+        fprintf(stderr, "call mac global %d\n", bohu_osx_func1());
+    }
+
+    if (0) {
+        EGLContext prevContext = s_egl.eglGetCurrentContext();
+        long long hndl = reinterpret_cast<long long> (prevContext);
+        auto nativecontext = getLowLevelContext(prevContext);
+        fprintf(stderr, "calling getLowLevelContext on handle %lld and got %p\n", 
+                hndl, nativecontext);
     }
 
     (*c).second.cb->subUpdate(x, y, width, height, format, type, pixels);
@@ -2283,6 +2303,15 @@ bool FrameBuffer::bind_locked() {
     m_prevContext = prevContext;
     m_prevReadSurf = prevReadSurf;
     m_prevDrawSurf = prevDrawSurf;
+    if (1) {
+        long long hndl = reinterpret_cast<long long> (prevContext);
+        if (hndl != 0) {
+        auto nativecontext = getLowLevelContext(prevContext);
+            fprintf(stderr, "calling getLowLevelContext on handle %lld and got %p\n", 
+                hndl, nativecontext);
+        }
+    }
+
     return true;
 }
 
