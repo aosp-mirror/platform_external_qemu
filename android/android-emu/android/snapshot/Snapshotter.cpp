@@ -358,6 +358,27 @@ void Snapshotter::fillSnapshotMetrics(pb::AndroidStudioEvent* event,
         snapshot = event->mutable_emulator_details()->add_snapshot_loads();
     }
 
+    fillSnapshotMetrics(snapshot, stats);
+
+    // Also report some common host machine stats so we can correlate
+    // performance with host machine config.
+    auto memUsageProto =
+            event->mutable_emulator_performance_stats()->add_memory_usage();
+    event->set_kind(
+            android_studio::AndroidStudioEvent::EMULATOR_PERFORMANCE_STATS);
+    memUsageProto->set_resident_memory(stats.memUsage.resident);
+    memUsageProto->set_resident_memory_max(stats.memUsage.resident_max);
+    memUsageProto->set_virtual_memory(stats.memUsage.virt);
+    memUsageProto->set_virtual_memory_max(stats.memUsage.virt_max);
+    memUsageProto->set_total_phys_memory(stats.memUsage.total_phys_memory);
+    memUsageProto->set_total_page_file(stats.memUsage.total_page_file);
+    android_metrics_fill_common_info(true /* opengl alive */, event);
+#endif
+}
+
+void Snapshotter::fillSnapshotMetrics(pb::EmulatorSnapshot* snapshot,
+                                      const SnapshotOperationStats& stats) {
+#if SNAPSHOT_METRICS
     snapshot->set_name(MetricsReporter::get().anonymize(stats.name));
 
     if (stats.compressedRam) {
@@ -395,19 +416,6 @@ void Snapshotter::fillSnapshotMetrics(pb::AndroidStudioEvent* event,
         snapshot->set_ram_load_duration_ms(int64_t(stats.ramDurationMs));
         snapshot->set_textures_load_duration_ms(int64_t(stats.texturesDurationMs));
     }
-
-    // Also report some common host machine stats so we can correlate performance with
-    // host machine config.
-    auto memUsageProto = event->mutable_emulator_performance_stats()->add_memory_usage();
-    event->set_kind(
-        android_studio::AndroidStudioEvent::EMULATOR_PERFORMANCE_STATS);
-    memUsageProto->set_resident_memory(stats.memUsage.resident);
-    memUsageProto->set_resident_memory_max(stats.memUsage.resident_max);
-    memUsageProto->set_virtual_memory(stats.memUsage.virt);
-    memUsageProto->set_virtual_memory_max(stats.memUsage.virt_max);
-    memUsageProto->set_total_phys_memory(stats.memUsage.total_phys_memory);
-    memUsageProto->set_total_page_file(stats.memUsage.total_page_file);
-    android_metrics_fill_common_info(true /* opengl alive */, event);
 #endif
 }
 

@@ -1262,6 +1262,34 @@ message StudioCrash {
   repeated StudioExceptionDetails details = 6;
 }
 
+
+// Metrics for Icebox invocations.
+message EmulatorIcebox {
+  // Message for starting an icebox command.
+  message StartIcebox {
+    // Maximum number of snapshots set by users. -1 for infinite snapshots;
+    optional int32 max_snapshot_number = 1;
+  }
+  // Message for taking a snapshot.
+  message TakeSnapshot {
+    // The snapshot.
+    optional EmulatorSnapshot snapshot = 1;
+  }
+  // Message for finishing an icebox command.
+  message FinishIcebox {
+    // Maximum number of snapshots set by users. -1 for infinite snapshots;
+    optional int32 max_snapshot_number = 1;
+    // Actual number of snapshots taken.
+    optional uint32 actual_snapshot_number = 2;
+  }
+  // Kind of command of this message.
+  oneof kind {
+    StartIcebox start_icebox = 1;
+    TakeSnapshot take_snapshot = 2;
+    FinishIcebox finish_icebox = 3;
+  }
+}
+
 // Emulator guest image's GL info.
 message EmulatorGuestGlInfo {
   // GL Driver vendor.
@@ -1924,7 +1952,6 @@ message EmulatorGrpc {
   // Duration of the total request time in milliseconds.
   optional PercentileEstimator duration = 6;
 }
-
 // Metrics related to the Emulator.
 message EmulatorDetails {
   // Cpu architecture of the guest.
@@ -1991,7 +2018,9 @@ message EmulatorDetails {
   optional EmulatorLocationV2 location_v2 = 33;
   // Metrics for streamScreenshot
   optional EmulatorStreamScreenshot screenshot = 34;
-  // Next tag: 35
+  // Metrics for Icebox
+  repeated EmulatorIcebox icebox = 35;
+  // Next tag: 36
 
 
   // Emulator instance liveness as determined via adb connectivity.

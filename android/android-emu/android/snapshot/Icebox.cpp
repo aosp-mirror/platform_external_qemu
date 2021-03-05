@@ -26,9 +26,9 @@
 #include <memory>                                            // for unique_ptr
 #include <vector>                                            // for vector
 
-#include "android/base/Log.h"                                // for CHECK
-#include "android/base/async/ThreadLooper.h"                 // for ThreadLo...
-#include "android/base/files/PathUtils.h"                    // for pj
+#include "android/base/Log.h"                 // for CHECK
+#include "android/base/async/ThreadLooper.h"  // for ThreadLo...
+#include "android/base/files/PathUtils.h"     // for pj
 #include "android/base/files/ScopedFd.h"
 #include "android/base/sockets/SocketUtils.h"                // for socketSe...
 #include "android/base/synchronization/ConditionVariable.h"  // for Conditio...
@@ -40,9 +40,12 @@
 #include "android/emulation/apacket_utils.h"                 // for apacket
 #include "android/emulation/control/vm_operations.h"         // for QAndroid...
 #include "android/jdwp/Jdwp.h"                               // for JdwpComm...
-#include "android/snapshot/interface.h"                      // for androidS...
-#include "openssl/base.h"                                    // for RSA
-#include "openssl/nid.h"                                     // for NID_sha1
+#include "android/metrics/MetricsReporter.h"
+#include "android/snapshot/Snapshotter.h"
+#include "android/snapshot/interface.h"  // for androidS...
+#include "openssl/base.h"                // for RSA
+#include "openssl/nid.h"                 // for NID_sha1
+#include "studio_stats.pb.h"
 
 #define DEBUG 0
 
@@ -333,7 +336,13 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
         fprintf(stderr, "adb port uninitialized\n");
         return false;
     }
-
+    metrics::MetricsReporter* reporter = &metrics::MetricsReporter::get();
+    reporter->report(
+            [max_snapshot_number](android_studio::AndroidStudioEvent* event) {
+                auto icebox = event->mutable_emulator_details()->add_icebox();
+                icebox->mutable_start_icebox()->set_max_snapshot_number(
+                        max_snapshot_number);
+            });
     uint32_t local_id = s_id.fetch_add(1);
     uint32_t remote_id = 0;
     // It is ok for some non-thread safe to happen during the following loop,
@@ -617,34 +626,59 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
                         snapshot_name + std::to_string(snapshot_num);
                 snapshot_num++;
                 android::base::ThreadLooper::
-                        runOnMainLooperAndWaitForCompletion(
-                                [&new_snapshot_name]() {
-                                    D("ready to take snapshot");
-                                    getConsoleAgents()->vm->vmStop();
-                                    bool snapshotSkipped =
-                                            getConsoleAgents()
-                                                    ->vm
-                                                    ->isSnapshotSaveSkipped();
-                                    if (snapshotSkipped) {
-                                        D("Temporarily re-enabling snapshot");
-                                        getConsoleAgents()
-                                                ->vm->setSkipSnapshotSave(
-                                                        false);
-                                    }
-                                    androidSnapshot_delete(
+                        runOnMainLooperAndWaitForCompletion([&new_snapshot_name,
+                                                             reporter]() {
+                            D("ready to take snapshot");
+                            getConsoleAgents()->vm->vmStop();
+                            const auto startMs = android::base::System::get()
+                                                         ->getHighResTimeUs() /
+                                                 1000;
+                            bool snapshotSkipped =
+                                    getConsoleAgents()
+                                            ->vm->isSnapshotSaveSkipped();
+                            if (snapshotSkipped) {
+                                D("Temporarily re-enabling snapshot");
+                                getConsoleAgents()->vm->setSkipSnapshotSave(
+                                        false);
+                            }
+                            androidSnapshot_delete(new_snapshot_name.c_str());
+                            const AndroidSnapshotStatus result =
+                                    androidSnapshot_save(
                                             new_snapshot_name.c_str());
-                                    const AndroidSnapshotStatus result =
-                                            androidSnapshot_save(
-                                                    new_snapshot_name.c_str());
-                                    D("Snapshot done, result %d (expect %d)",
-                                      result, SNAPSHOT_STATUS_OK);
-                                    if (snapshotSkipped) {
-                                        getConsoleAgents()
-                                                ->vm->setSkipSnapshotSave(true);
-                                    }
-                                    getConsoleAgents()->vm->vmStart();
-                                    D("Snapshot thread done");
-                                });
+                            D("Snapshot done, result %d (expect %d)", result,
+                              SNAPSHOT_STATUS_OK);
+                            if (snapshotSkipped) {
+                                getConsoleAgents()->vm->setSkipSnapshotSave(
+                                        true);
+                            } else {
+                                if (reporter->isReportingEnabled()) {
+                                    const auto endMs =
+                                            android::base::System::get()
+                                                    ->getHighResTimeUs() /
+                                            1000;
+                                    const auto duration = startMs - endMs;
+                                    snapshot::Snapshotter::SnapshotOperationStats stats =
+                                            snapshot::Snapshotter::get()
+                                                    .getSaveStats(
+                                                            new_snapshot_name
+                                                                    .c_str(),
+                                                            duration);
+                                    reporter->report([stats](android_studio::
+                                                                     AndroidStudioEvent*
+                                                                             event) {
+                                        auto icebox =
+                                                event->mutable_emulator_details()
+                                                        ->add_icebox();
+                                        snapshot::Snapshotter::fillSnapshotMetrics(
+                                                icebox->mutable_take_snapshot()
+                                                        ->mutable_snapshot(),
+                                                stats);
+                                    });
+                                }
+                            }
+                            getConsoleAgents()->vm->vmStart();
+                            D("Snapshot thread done");
+                        });
                 D("Icebox thread resume after snapshot");
             }
             _SEND_PACKET(ok_out);
@@ -665,6 +699,13 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
             _SEND_PACKET(ok_out);
         }
     }
+    reporter->report([max_snapshot_number,
+                      snapshot_num](android_studio::AndroidStudioEvent* event) {
+        auto icebox = event->mutable_emulator_details()->add_icebox();
+        auto finish_icebox = icebox->mutable_finish_icebox();
+        finish_icebox->set_max_snapshot_number(max_snapshot_number);
+        finish_icebox->set_actual_snapshot_number(snapshot_num);
+    });
     return true;
 #undef _SEND_PACKET
 #undef _RECV_PACKET

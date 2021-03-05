@@ -27,6 +27,7 @@
 // Fwd-declare the protobuf class
 namespace android_studio {
 class AndroidStudioEvent;
+class EmulatorSnapshot;
 } // namespace android_studio
 
 namespace android {
@@ -60,6 +61,8 @@ public:
         base::System::Duration texturesDurationMs;
     };
 
+    static void fillSnapshotMetrics(android_studio::EmulatorSnapshot* event,
+                                    const SnapshotOperationStats& stats);
     static void fillSnapshotMetrics(
         android_studio::AndroidStudioEvent* event,
         const SnapshotOperationStats& stats);
