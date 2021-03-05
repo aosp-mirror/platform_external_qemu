@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "39ea78c8_1c88b6ff",
+        "filename": "android/android-emu-base/android/base/files/TarStream.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-03-05T21:29:47Z",
+      "side": 1,
+      "message": "Looks like you found a bug in toybox!\n\nhttps://source.corp.google.com/android/external/toybox/toys/posix/tar.c;rcl\u003d5774d7afb4f7f1b0707881d019df6de9eeaa8d2a;l\u003d89",
+      "range": {
+        "startLine": 103,
+        "startChar": 8,
+        "endLine": 103,
+        "endChar": 45
+      },
+      "revId": "9892b1ab06f7beba02a7f47c147b10cd7acd1814",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
