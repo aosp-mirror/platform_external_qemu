@@ -50,6 +50,7 @@ void* finalizePixelFormat(
 int getPixelFormatAttrib(int i, int attrib);
 
 void* nsCreateContext(void* finalizedPixelFormat,void* share);
+void* nsGetLowLevelContext(void* context);
 void nsWindowMakeCurrent(void* context,void* nativeWin);
 void nsPBufferMakeCurrent(void* context,void* nativePBuffer,int level);
 void nsSwapBuffers();
