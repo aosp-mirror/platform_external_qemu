@@ -120,6 +120,10 @@ extern "C" {
 #include <string>
 #include <thread>
 
+#ifdef __APPLE__
+#include <sys/resource.h>
+#endif
+
 #include "android/version.h"
 #define D(...)                   \
     do {                         \
@@ -1144,10 +1148,52 @@ static int startEmulatorWithMinConfig(
 
 extern "C" AndroidProxyCB* gAndroidProxyCB;
 extern "C" int main(int argc, char** argv) {
+
     if (argc < 1) {
         fprintf(stderr, "Invalid invocation (no program path)\n");
         return 1;
     }
+
+#ifdef __APPLE__
+    {
+        int ret;
+        struct rlimit rl;
+        static constexpr rlim_t kDesiredFileLimit = 16384;
+        rlim_t desiredLimit = kDesiredFileLimit;
+        bool raiseLimit = true;
+        ret = getrlimit(RLIMIT_NOFILE, &rl);
+
+        if (0 == ret) {
+            D("Num files limit: cur max %u %u", rl.rlim_cur, rl.rlim_max);
+            if (desiredLimit < rl.rlim_cur) {
+                raiseLimit = false;
+                D("Current limit already high enough, don't raise limit.");
+            } else if (desiredLimit > rl.rlim_max) {
+                desiredLimit = rl.rlim_max;
+                D("Target files limit: %u", desiredLimit);
+            }
+        } else {
+            fprintf(stderr, "%s: Failed to query files limit. errno %d\n", __func__, errno);
+        }
+
+        if (raiseLimit) {
+            rl.rlim_cur = desiredLimit;
+            ret = setrlimit(RLIMIT_NOFILE, &rl);
+            if (0 == ret) {
+                D("Raised open files limit to %u\n", __func__, desiredLimit);
+            } else {
+                fprintf(stderr, "%s: Failed to raise files limit. errno %d\n", __func__, errno);
+            }
+            ret = getrlimit(RLIMIT_NOFILE, &rl);
+            if (0 == ret) {
+                D("Num files limit (after): cur max %u %u\n", __func__, rl.rlim_cur, rl.rlim_max);
+            } else {
+                fprintf(stderr, "%s: Failed to query files limit. errno %d\n", __func__, errno);
+            }
+        }
+    }
+#endif
+
 #ifdef CONFIG_HEADLESS
     host_emulator_is_headless = 1;
     D("emulator running in headless mode");
