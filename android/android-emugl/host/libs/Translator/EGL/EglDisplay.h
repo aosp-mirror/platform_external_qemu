@@ -41,6 +41,7 @@ typedef std::unordered_map<unsigned int, SurfacePtr>  SurfacesHndlMap;
 typedef std::unordered_set<EglConfig> ConfigSet;
 
 class EglDisplay {
+    static int s_count;
 public:
     // Create new EglDisplay instance from a given native display |dpy|,
     // with matching internal display |idpy|. If |isDefault| is true,
