@@ -419,9 +419,16 @@ static bool import_snapshot(const char* name,
         DD("Copying %s", qcow2.c_str());
         auto dest = pj(avd, qcow2) + kImportSuffix;
         auto src = pj(datadir, qcow2);
+        // There is a corner case if we are on an imported snapshot, we might
+        // not be able to delete dest. path_delete_file returns 0 on success
+        for (int i = 0;
+             path_exists(dest.c_str()) && path_delete_file(dest.c_str()) != 0;
+             i++) {
+            dest = pj(avd, qcow2) + "_" + std::to_string(i) + kImportSuffix;
+        }
 
         // We do not symlink as we do not want to modify the existing snapshot.
-        path_delete_file(dest.c_str());
+
         if (path_copy_file(dest.c_str(), src.c_str()) != 0) {
             std::string msg = "Failed to copy " + qcow2 + " to: " + dest +
                               " due to " + std::to_string(errno);
