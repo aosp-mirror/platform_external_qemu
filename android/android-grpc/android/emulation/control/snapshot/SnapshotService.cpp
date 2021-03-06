@@ -289,6 +289,7 @@ public:
         }
 
         reply->set_snapshot_id(id);
+        snapshot::Snapshotter::get().deleteSnapshot(id.c_str());
         std::string finalDest = snapshot::getSnapshotDir(id.c_str());
         if (System::get()->pathExists(finalDest) &&
             path_delete_dir(finalDest.c_str()) != 0) {
