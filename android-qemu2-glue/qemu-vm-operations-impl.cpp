@@ -419,15 +419,16 @@ static bool import_snapshot(const char* name,
         DD("Copying %s", qcow2.c_str());
         auto dest = pj(avd, qcow2) + kImportSuffix;
         auto src = pj(datadir, qcow2);
+        dest = src;
 
         // We do not symlink as we do not want to modify the existing snapshot.
-        path_delete_file(dest.c_str());
+        /*path_delete_file(dest.c_str());
         if (path_copy_file(dest.c_str(), src.c_str()) != 0) {
             std::string msg = "Failed to copy " + qcow2 + " to: " + dest +
                               " due to " + std::to_string(errno);
             errConsumer(opaque, msg.c_str(), msg.size());
             success = false;
-        };
+        };*/
 
         auto baseimg = drive["backing"];
         DD("backing file %s\n", ((std::string)baseimg).c_str());
