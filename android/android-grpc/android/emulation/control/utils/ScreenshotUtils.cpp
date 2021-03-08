@@ -98,10 +98,12 @@ Rotation_SkinRotation ScreenshotUtils::deriveRotation(
                        std::make_pair(glm::vec3(-1.0f, 0.0f, 0.0f),
                                       Rotation::REVERSE_LANDSCAPE)};
     auto coarse_orientation = Rotation::PORTRAIT;
+    double max_c = -1;
     for (const auto& v : directions) {
-        if (fabs(glm::dot(normalized_accelerometer, v.first) - 1.f) < 0.1f) {
+        auto c = glm::dot(normalized_accelerometer, v.first);
+        if (c > max_c) {
             coarse_orientation = v.second;
-            break;
+            max_c = c;
         }
     }
     return coarse_orientation;
