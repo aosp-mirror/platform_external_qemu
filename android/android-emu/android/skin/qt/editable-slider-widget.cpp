@@ -1,8 +1,20 @@
 #include "android/skin/qt/editable-slider-widget.h"
 
-#include <QEvent>
-#include <QStyle>
-#include <QtMath>
+#include <math.h>          // for M_LN10
+#include <qcoreevent.h>    // for QEvent (ptr only), QEvent::FocusIn, QEvent...
+#include <qmath.h>         // for qCeil, qLn
+#include <qnamespace.h>    // for operator|, AlignTop, AlignRight, AlignLeft
+#include <qstring.h>       // for operator==
+#include <qvalidator.h>    // for QDoubleValidator::StandardNotation, QValid...
+#include <QEvent>          // for QEvent
+#include <QLocale>         // for QLocale
+#include <QSignalBlocker>  // for QSignalBlocker
+#include <QStyle>          // for QStyle
+#include <QValidator>      // for QValidator
+#include <QVariant>        // for QVariant
+
+class QObject;
+class QWidget;
 
 EditableSliderWidget::EditableSliderWidget(QWidget* parent)
     : QWidget(parent),
@@ -98,7 +110,10 @@ void EditableSliderWidget::setMinimum(double minimum, bool emit_signal) {
     setValue(mValue,
              emit_signal);  // Force the current value into the new bounds.
     mMinValueLabel.setText(QString::number(mMinimum));
-    mSlider.setMinimum(static_cast<int>(mMinimum * mSteps));
+    {
+        QSignalBlocker blocker(mSlider);
+        mSlider.setMinimum(static_cast<int>(mMinimum * mSteps));
+    }
 }
 
 void EditableSliderWidget::setMaximum(double maximum, bool emit_signal) {
@@ -107,7 +122,10 @@ void EditableSliderWidget::setMaximum(double maximum, bool emit_signal) {
     setValue(mValue,
              emit_signal);  // Force the current value into the new bounds.
     mMaxValueLabel.setText(QString::number(mMaximum));
-    mSlider.setMaximum(static_cast<int>(mMaximum * mSteps));
+    {
+        QSignalBlocker blocker(mSlider);
+        mSlider.setMaximum(static_cast<int>(mMaximum * mSteps));
+    }
 }
 
 void EditableSliderWidget::sliderValueChanged(int new_value) {
@@ -121,6 +139,9 @@ void EditableSliderWidget::lineEditValueChanged() {
 }
 
 bool EditableSliderWidget::eventFilter(QObject*, QEvent* e) {
+    // This function can be called by the destructor, hence we check null here.
+    if (!mLineEdit.validator()) return false;
+
     if (e->type() == QEvent::FocusIn) {
         // If the edit box was previously highlighted due to an
         // invalid value, un-highlight it.
@@ -150,4 +171,9 @@ void EditableSliderWidget::updateValidatorStyle(QString colorGroup) {
         mLineEdit.style()->unpolish(&mLineEdit);
         mLineEdit.style()->polish(&mLineEdit);
     }
+}
+
+void EditableSliderWidget::setLabelHidden() {
+    mMinValueLabel.hide();
+    mMaxValueLabel.hide();
 }

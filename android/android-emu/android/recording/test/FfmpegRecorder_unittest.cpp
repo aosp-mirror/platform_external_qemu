@@ -14,24 +14,35 @@
 
 #include "android/recording/FfmpegRecorder.h"
 
-#include "android/base/Compiler.h"
-#include "android/base/StringView.h"
-#include "android/base/system/System.h"
-#include "android/base/testing/TestSystem.h"
-#include "android/base/threads/Thread.h"
-#include "android/recording/AVScopedPtr.h"
-#include "android/recording/GifConverter.h"
-#include "android/recording/codecs/audio/VorbisCodec.h"
-#include "android/recording/codecs/video/VP9Codec.h"
-#include "android/recording/screen-recorder-constants.h"
-#include "android/recording/test/DummyAudioProducer.h"
-#include "android/recording/test/DummyVideoProducer.h"
+#include <gtest/gtest.h>                                  // for AssertionRe...
+#include <atomic>                                         // for atomic
+#include <functional>                                     // for __base
+#include <iostream>                                       // for operator<<
+#include <string>                                         // for string, ope...
+#include <utility>                                        // for move
 
-#include <gtest/gtest.h>
+#include "android/base/StringView.h"                      // for StringView
+#include "android/base/memory/ScopedPtr.h"                // for FuncDelete
+#include "android/base/system/System.h"                   // for System, Sys...
+#include "android/base/testing/TestSystem.h"              // for TestSystem
+#include "android/base/testing/TestTempDir.h"             // for TestTempDir
+#include "android/base/threads/Thread.h"                  // for Thread
+#include "android/recording/AVScopedPtr.h"                // for makeAVScope...
+#include "android/recording/Frame.h"                      // for toAVPixelFo...
+#include "android/recording/GifConverter.h"               // for GifConverter
+#include "android/recording/Producer.h"                   // for Producer
+#include "android/recording/codecs/Codec.h"               // for CodecParams
+#include "android/recording/codecs/audio/VorbisCodec.h"   // for VorbisCodec
+#include "android/recording/codecs/video/VP9Codec.h"      // for VP9Codec
+#include "android/recording/screen-recorder-constants.h"  // for kContainerF...
+#include "android/recording/test/DummyAudioProducer.h"    // for createDummy...
+#include "android/recording/test/DummyVideoProducer.h"    // for createDummy...
 
-#include <atomic>
-#include <iostream>
-#include <string>
+extern "C" {
+#include <libavcodec/avcodec.h>                           // for AVCodecContext
+#include <libavformat/avformat.h>                         // for AVFormatCon...
+#include <libavutil/avutil.h>                             // for AVMEDIA_TYP...
+}
 
 using android::base::c_str;
 using android::base::StringView;

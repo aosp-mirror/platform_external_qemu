@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 # A static library containing the android-emu glue code
 
 QEMU2_GLUE_INCLUDES := $(ANDROID_EMU_INCLUDES) $(EMUGL_INCLUDES)
@@ -41,3 +42,5 @@ QEMU2_GLUE_HEADLESS_LDFLAGS :=
 
 QEMU2_GLUE_HEADLESS_LDLIBS := $(EMULATOR_LIBUI_HEADLESS_LDLIBS)
 
+=======
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)

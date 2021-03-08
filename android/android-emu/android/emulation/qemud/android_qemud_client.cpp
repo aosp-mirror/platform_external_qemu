@@ -67,6 +67,8 @@ static QemudPipeMessage* _qemud_pipe_alloc_msg(int msglen) {
 }
 
 static void _qemud_pipe_append_msg(QemudClient* client, QemudPipeMessage* buf) {
+    qemud_client_global_lock_acquire();
+
     if (client->ProtocolSelector.Pipe.last_msg) {
         client->ProtocolSelector.Pipe.last_msg->next = buf;
         client->ProtocolSelector.Pipe.last_msg = buf;
@@ -74,6 +76,8 @@ static void _qemud_pipe_append_msg(QemudClient* client, QemudPipeMessage* buf) {
         client->ProtocolSelector.Pipe.last_msg =
             client->ProtocolSelector.Pipe.messages = buf;
     }
+
+    qemud_client_global_lock_release();
 }
 
 void _qemud_pipe_send(QemudClient* client, const uint8_t* msg, int msglen) {

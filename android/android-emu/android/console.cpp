@@ -26,11 +26,15 @@
 
 #include "android/android.h"
 #include "android/automation/AutomationController.h"
+#include "android/avd/BugreportInfo.h"
+#include "android/avd/info.h"
 #include "android/base/StringView.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/cmdline-option.h"
 #include "android/console_auth.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/emulation/ConfigDirs.h"
+#include "android/emulation/QemuMiscPipe.h"
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
@@ -42,8 +46,18 @@
 #include "android/network/wifi.h"
 #include "android/recording/screen-recorder-constants.h"
 #include "android/shaper.h"
+#include "android/snapshot/Icebox.h"
+#include "android/snapshot/interface.h"
+#include "android/snapshot/PathUtils.h"
 #include "android/tcpdump.h"
 #include "android/telephony/modem_driver.h"
+
+#if defined(AEMU_GFXSTREAM_BACKEND)
+#include "android_modem_v2_stubs.h"
+#else
+#include "android_modem_v2.h"
+#endif
+
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
@@ -59,6 +73,7 @@
 
 #include <atomic>
 #include <vector>
+#include <sstream>
 
 #include <assert.h>
 #include <ctype.h>
@@ -68,7 +83,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#include "msvc-getopt.h"
+#else
 #include <getopt.h>
 #include <unistd.h>
 #endif
@@ -122,7 +140,7 @@ typedef struct ControlClientRec_
 typedef struct ControlGlobalRec_
 {
     // Interfaces to call into QEMU specific code.
-#define ANDROID_CONSOLE_DEFINE_FIELD(type, name) type name ## _agent [1];
+#define ANDROID_CONSOLE_DEFINE_FIELD(type, name) const type * name ## _agent;
     ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_DEFINE_FIELD)
 
     /* IO */
@@ -778,7 +796,7 @@ int android_console_start(int control_port,
     // Copy the QEMU specific interfaces passed in to make lifetime management
     // simpler.
 #define ANDROID_CONSOLE_COPY_AGENT(type, name) \
-        global-> name ## _agent [0] = agents-> name [0];
+        global-> name ## _agent  = agents-> name ;
     ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_COPY_AGENT)
 
     int console_auth_status = android_console_auth_get_status();
@@ -796,12 +814,7 @@ int android_console_start(int control_port,
 
 
     Socket fd4 = socket_loopback4_server(control_port, SOCKET_STREAM);
-    Socket fd6 = -1;
-    // Only try to listen on ipv6 if ipv4 is not supported by system.
-    // This is another work around for b.android.com/213734
-    if (fd4 < 0 && errno == EAFNOSUPPORT) {
-      fd6 = socket_loopback6_server(control_port, SOCKET_STREAM);
-    }
+    Socket fd6 = socket_loopback6_server(control_port, SOCKET_STREAM);
 
     if (fd4 < 0 && fd6 < 0) {
         // Could not bind to either IPv4 or IPv6 interface?
@@ -1392,10 +1405,44 @@ do_gsm_status( ControlClient  client, char*  args )
     return 0;
 }
 
+static void help_gsm_meter(ControlClient client) {
+    int nn;
+    control_write(client,
+                  "the 'gsm meter <on|off>' allows you to change the meterness "
+                  "of your mobile data plan\r\n");
+    control_write(client, "\r\n");
+}
 
-static void
-help_gsm_data( ControlClient  client )
-{
+static int do_gsm_meter(ControlClient client, char* args) {
+    int nn;
+
+    if (!args) {
+        control_write(client,
+                      "KO: missing argument, try 'gsm meter <on|off>'\r\n");
+        return -1;
+    }
+
+    int meteron = -1;
+    if (!strcmp(args, "on")) {
+        meteron = 1;
+    } else if (!strcmp(args, "off")) {
+        meteron = 0;
+    } else {
+        control_write(client,
+                      "KO: bad GSM meter state name, try 'help gsm meter' for "
+                      "list of valid values\r\n");
+        return -1;
+    }
+
+    if (!android_modem_get()) {
+        control_write(client, "KO: modem emulation not running\r\n");
+        return -1;
+    }
+    amodem_set_meter_state(android_modem_get(), meteron);
+    return 0;
+}
+
+static void help_gsm_data(ControlClient client) {
     int  nn;
     control_write( client,
             "the 'gsm data <state>' allows you to change the state of your GPRS connection\r\n"
@@ -1411,7 +1458,6 @@ help_gsm_data( ControlClient  client )
     }
     control_write( client, "\r\n" );
 }
-
 
 static int
 do_gsm_data( ControlClient  client, char*  args )
@@ -1531,7 +1577,7 @@ do_gsm_call( ControlClient  client, char*  args )
         control_write( client, "KO: modem emulation not running\r\n" );
         return -1;
     }
-    amodem_add_inbound_call( android_modem_get(), args );
+    amodem_add_inbound_call_vx(android_modem_get(), args);
     return 0;
 }
 
@@ -1737,7 +1783,7 @@ do_gsm_signal_profile( ControlClient  client, char*  args )
         return -1;
     }
 
-    amodem_set_signal_strength_profile( android_modem_get(), val );
+    amodem_set_signal_strength_profile_vx( android_modem_get(), val );
 
     return 0;
 }
@@ -1777,58 +1823,66 @@ static const CommandDefRec  cdma_commands[] =
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
-static const CommandDefRec  gsm_commands[] =
-{
-    { "list", "list current phone calls",
-    "'gsm list' lists all inbound and outbound calls and their state\r\n", NULL,
-    do_gsm_list, NULL },
+static const CommandDefRec gsm_commands[] = {
+        {"list", "list current phone calls",
+         "'gsm list' lists all inbound and outbound calls and their state\r\n",
+         NULL, do_gsm_list, NULL},
 
-    { "call", "create inbound phone call",
-    "'gsm call <phonenumber>' allows you to simulate a new inbound call\r\n", NULL,
-    do_gsm_call, NULL },
+        {"call", "create inbound phone call",
+         "'gsm call <phonenumber>' allows you to simulate a new inbound "
+         "call\r\n",
+         NULL, do_gsm_call, NULL},
 
-    { "busy", "close waiting outbound call as busy",
-    "'gsm busy <remoteNumber>' closes an outbound call, reporting\r\n"
-    "the remote phone as busy. only possible if the call is 'waiting'.\r\n", NULL,
-    do_gsm_busy, NULL },
+        {"busy", "close waiting outbound call as busy",
+         "'gsm busy <remoteNumber>' closes an outbound call, reporting\r\n"
+         "the remote phone as busy. only possible if the call is "
+         "'waiting'.\r\n",
+         NULL, do_gsm_busy, NULL},
 
-    { "hold", "change the state of an outbound call to 'held'",
-    "'gsm hold <remoteNumber>' change the state of a call to 'held'. this is only possible\r\n"
-    "if the call in the 'waiting' or 'active' state\r\n", NULL,
-    do_gsm_hold, NULL },
+        {"hold", "change the state of an outbound call to 'held'",
+         "'gsm hold <remoteNumber>' change the state of a call to 'held'. this "
+         "is only possible\r\n"
+         "if the call in the 'waiting' or 'active' state\r\n",
+         NULL, do_gsm_hold, NULL},
 
-    { "accept", "change the state of an outbound call to 'active'",
-    "'gsm accept <remoteNumber>' change the state of a call to 'active'. this is only possible\r\n"
-    "if the call is in the 'waiting' or 'held' state\r\n", NULL,
-    do_gsm_accept, NULL },
+        {"accept", "change the state of an outbound call to 'active'",
+         "'gsm accept <remoteNumber>' change the state of a call to 'active'. "
+         "this is only possible\r\n"
+         "if the call is in the 'waiting' or 'held' state\r\n",
+         NULL, do_gsm_accept, NULL},
 
-    { "cancel", "disconnect an inbound or outbound phone call",
-    "'gsm cancel <phonenumber>' allows you to simulate the end of an inbound or outbound call\r\n", NULL,
-    do_gsm_cancel, NULL },
+        {"cancel", "disconnect an inbound or outbound phone call",
+         "'gsm cancel <phonenumber>' allows you to simulate the end of an "
+         "inbound or outbound call\r\n",
+         NULL, do_gsm_cancel, NULL},
 
-    { "data", "modify data connection state", NULL, help_gsm_data,
-    do_gsm_data, NULL },
+        {"data", "modify data connection state", NULL, help_gsm_data,
+         do_gsm_data, NULL},
 
-    { "voice", "modify voice connection state", NULL, help_gsm_voice,
-    do_gsm_voice, NULL },
+        {"meter", "modify mobile data meterness", NULL, help_gsm_meter,
+         do_gsm_meter, NULL},
 
-    { "status", "display GSM status",
-    "'gsm status' displays the current state of the GSM emulation\r\n", NULL,
-    do_gsm_status, NULL },
+        {"voice", "modify voice connection state", NULL, help_gsm_voice,
+         do_gsm_voice, NULL},
 
-    { "signal", "set sets the rssi and ber",
-    "'gsm signal <rssi> [<ber>]' changes the reported strength and error rate on next (15s) update.\r\n"
-    "rssi range is 0..31 and 99 for unknown\r\n"
-    "ber range is 0..7 percent and 99 for unknown\r\n",
-    NULL, do_gsm_signal, NULL },
+        {"status", "display GSM status",
+         "'gsm status' displays the current state of the GSM emulation\r\n",
+         NULL, do_gsm_status, NULL},
 
-    { "signal-profile", "set the signal strength profile",
-    "'gsm signal-profile <strength>' changes the reported strength on next (15s) update.\r\n"
-    "strength range is 0..4\r\n",
-    NULL, do_gsm_signal_profile, NULL },
+        {"signal", "set sets the rssi and ber",
+         "'gsm signal <rssi> [<ber>]' changes the reported strength and error "
+         "rate on next (15s) update.\r\n"
+         "rssi range is 0..31 and 99 for unknown\r\n"
+         "ber range is 0..7 percent and 99 for unknown\r\n",
+         NULL, do_gsm_signal, NULL},
 
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
+        {"signal-profile", "set the signal strength profile",
+         "'gsm signal-profile <strength>' changes the reported strength on "
+         "next (15s) update.\r\n"
+         "strength range is 0..4\r\n",
+         NULL, do_gsm_signal_profile, NULL},
+
+        {NULL, NULL, NULL, NULL, NULL, NULL}};
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -1891,8 +1945,9 @@ do_sms_send( ControlClient  client, char*  args )
         return -1;
     }
 
-    for (nn = 0; pdus[nn] != NULL; nn++)
-        amodem_receive_sms( android_modem_get(), pdus[nn] );
+    for (nn = 0; pdus[nn] != NULL; nn++) {
+        amodem_receive_sms_vx( android_modem_get(), pdus[nn] );
+    }
 
     smspdu_free_list( pdus );
     return 0;
@@ -2131,7 +2186,7 @@ do_event_send( ControlClient  client, char*  args )
     while (*p) {
         char*  q;
         char   temp[128];
-        int    type, code, value, ret;
+        int type, code, value, displayId, ret;
 
         p += strspn( p, " \t" );  /* skip spaces */
         if (*p == 0)
@@ -2160,8 +2215,9 @@ do_event_send( ControlClient  client, char*  args )
             }
             return -1;
         }
-
-        client->global->user_event_agent->sendGenericEvent(type, code, value);
+        displayId = 0;
+        client->global->user_event_agent->sendGenericEvent(
+                {type, code, value, displayId});
         p = q;
     }
     return 0;
@@ -2244,7 +2300,7 @@ static int do_event_mouse(ControlClient client, char* args) {
         return -1;
     }
 
-    client->global->user_event_agent->sendMouseEvent(x, y, dev, btn);
+    client->global->user_event_agent->sendMouseEvent(x, y, dev, btn, 0);
     return 0;
 }
 
@@ -2273,7 +2329,7 @@ do_event_text( ControlClient  client, char*  args )
     }
 
     if (!client->global->libui_agent->convertUtf8ToKeyCodeEvents(p, textlen,
-        (LibuiKeyCodeSendFunc)client->global->user_event_agent->sendKeyCodes)) {
+        (LibuiKeyCodeSendFunc)client->global->user_event_agent->sendKeyCodes, nullptr)) {
         control_write( client, "KO: device is unable to recieve text input now\r\n" );
         return -1;
     }
@@ -2507,9 +2563,176 @@ do_avd_status( ControlClient  client, char*  args )
 }
 
 static int
+do_avd_heartbeat( ControlClient  client, char*  args )
+{
+    control_write(client, "heartbeat: %d\r\n", get_guest_heart_beat_count());
+    return 0;
+}
+
+static bool s_rewind_audio_requested = false;
+extern "C" int qemu_wav_audio_rewind_input_wave() {
+    bool ret = s_rewind_audio_requested;
+    s_rewind_audio_requested = false;
+    return ret;
+}
+
+static int
+do_avd_rewind_audio( ControlClient  client, char*  args )
+{
+    s_rewind_audio_requested = true;
+    return 0;
+}
+
+static int
 do_avd_name( ControlClient  client, char*  args )
 {
     control_write( client, "%s\r\n", android_hw->avd_name);
+    return 0;
+}
+
+static int
+do_avd_id( ControlClient  client, char*  args )
+{
+    control_write( client, "%s\r\n", android_hw->avd_id);
+    return 0;
+}
+
+static int
+do_avd_windowtype( ControlClient  client, char*  args )
+{
+    control_write( client, "windowtype=%s\r\n", host_emulator_is_headless == 1 ? "headless" : "qtwindow");
+    return 0;
+}
+
+static int
+do_avd_path( ControlClient  client, char* args )
+{
+    auto avdInfo = android_avdInfo;
+
+    if (!avdInfo) {
+        control_write( client, "NO_AVD_INFO\r\n" );
+        return 0;
+    }
+
+    auto contentPath = avdInfo_getContentPath(avdInfo);
+
+    if (!contentPath) {
+        control_write( client, "\r\n" );
+        return 0;
+    }
+
+    control_write( client, "%s\r\n", contentPath);
+
+    return 0;
+}
+
+static int
+do_avd_discoverypath( ControlClient  client, char* args )
+{
+    auto avdInfo = android_avdInfo;
+
+    if (!avdInfo) {
+        control_write( client, "NO_AVD_INFO\r\n" );
+        return 0;
+    }
+
+    auto discoveryPath = android::ConfigDirs::getCurrentDiscoveryPath();
+
+    control_write( client, "%s\r\n", discoveryPath.c_str());
+    return 0;
+}
+
+static int
+do_avd_snapshotspath( ControlClient  client, char* args )
+{
+    auto avdInfo = android_avdInfo;
+
+    if (!avdInfo) {
+        control_write( client, "NO_AVD_INFO\r\n" );
+        return 0;
+    }
+
+    auto path = android::snapshot::getSnapshotBaseDir();
+
+    control_write( client, "%s\r\n", path.c_str());
+    return 0;
+}
+
+static int
+do_avd_snapshotpath( ControlClient  client, char* args )
+{
+    if (!args) {
+        control_write( client, "KO: snapshot name required\r\n" );
+        return -1;
+    }
+
+    size_t len = strcspn(args, " ");
+    std::string snapshotName(args, args + len);
+
+    if (snapshotName.empty()) {
+        control_write( client, "KO: snapshot name required\r\n" );
+        return -1;
+    }
+
+    auto avdInfo = android_avdInfo;
+
+    if (!avdInfo) {
+        control_write( client, "NO_AVD_INFO\r\n" );
+        return 0;
+    }
+
+    bool exists = androidSnapshot_protoExists(snapshotName.c_str());
+
+    if (!exists) {
+        control_write( client, "NO_SNAPSHOT\r\n");
+        return 0;
+    }
+
+    auto path = android::snapshot::getSnapshotDir(snapshotName.c_str());
+    control_write( client, "%s\r\n", path.c_str());
+    return 0;
+}
+
+static int
+do_avd_pause( ControlClient  client, char*  args )
+{
+    bool success = vmopers(client)->vmPause();
+    return success ? 0 : -1;
+}
+
+static int
+do_avd_resume( ControlClient  client, char*  args )
+{
+    bool success = vmopers(client)->vmResume();
+    return success ? 0 : -1;
+}
+
+static int
+do_avd_hostmicon( ControlClient  client, char*  args )
+{
+    (void)args;
+    vmopers(client)->allowRealAudio(true /* pass through host mic data */);
+    return 0;
+}
+
+static int
+do_avd_hostmicoff( ControlClient  client, char*  args )
+{
+    (void)args;
+    vmopers(client)->allowRealAudio(false /* send 0 instead of host mic data */);
+    return 0;
+}
+
+static int
+do_avd_bugreport( ControlClient client, char* args )
+{
+    android::avd::BugreportInfo bugreport;
+    std::istringstream input(bugreport.dump());
+
+    for(std::string line; std::getline(input, line);) {
+        control_write(client, "%s\r\n", line.c_str());
+    }
+
     return 0;
 }
 
@@ -2527,6 +2750,14 @@ static const CommandDefRec  vm_commands[] =
     "'avd status' will indicate whether the virtual device is running or not\r\n",
     NULL, do_avd_status, NULL },
 
+    { "heartbeat", "query the heart beat number of the guest system",
+    "'avd heartbeat' will report the number of heart beats from guest system running inside this avd\r\n",
+    NULL, do_avd_heartbeat, NULL },
+
+    { "rewindaudio", "rewind the input audio to the beginning",
+    "'avd rewindaudio' will rewind the input of audio to beginning(applicable only to wav audio driver)\r\n",
+    NULL, do_avd_rewind_audio, NULL },
+
     { "name", "query virtual device name",
     "'avd name' will return the name of this virtual device\r\n",
     NULL, do_avd_name, NULL },
@@ -2534,6 +2765,52 @@ static const CommandDefRec  vm_commands[] =
     { "snapshot", "state snapshot commands",
     "allows you to save and restore the virtual device state in snapshots\r\n",
     NULL, NULL, snapshot_commands },
+
+    { "pause", "pause the virtual device",
+    "'avd pause' pauses the virtual device. This is useful for saving system resources\r\n"
+    "when the virtual device is not immediately needed.",
+    NULL, do_avd_pause, NULL },
+
+    { "hostmicon", "activate the host audio input device",
+    "'avd hostmicon' allows real audio to go through the guest microphone input.\r\n",
+    NULL, do_avd_hostmicon, NULL },
+
+    { "hostmicoff", "deactivate the host audio input device",
+    "'avd hostmicoff' sends zeroes to the guest microphone input regardless of host microphone signals.\r\n",
+    NULL, do_avd_hostmicoff, NULL },
+
+    { "resume", "resume the virtual device",
+    "'avd resume' resumes a previously-paused virtual device.\r\n",
+    NULL, do_avd_resume, NULL },
+
+    { "bugreport", "generate bug report info.",
+    "'avd bugreport' will print out bug report information which is used for the filling the template in issue tracker.\r\n",
+    NULL, do_avd_bugreport, NULL},
+
+    { "id", "query virtual device ID",
+    "'avd id' will return the ID of this virtual device (possibly separate from the name)\r\n",
+    NULL, do_avd_id, NULL },
+
+    { "windowtype", "query virtual device headless or qtwindow",
+    "'avd windowtype' will return either windowtype=headless or windowtype=qtwindow.\r\n",
+    NULL, do_avd_windowtype, NULL },
+
+    { "path", "query AVD path",
+    "'avd path' will return the path to the AVD files. If no AVD can be found, 'NO_AVD_INFO' is returned. If the path cannot be queried, an empty string will be returned.\r\n",
+    NULL, do_avd_path, NULL },
+
+    { "discoverypath", "query AVD discovery path",
+    "'avd discoverypath' will return the path to the discovery file (for use with Studio embedded). If no AVD can be found, 'NO_AVD_INFO' is returned. If the path cannot be queried, an empty string will be returned.\r\n",
+    NULL, do_avd_discoverypath, NULL },
+
+    { "snapshotspath", "query AVD snapshots path",
+    "'avd snapshotspath' will return the path where snapshots are stored for the current AVD. If no AVD can be found, 'NO_AVD_INFO' is returned. If the path cannot be queried, an empty string will be returned.\r\n",
+    NULL, do_avd_snapshotspath, NULL },
+
+    { "snapshotpath", "query path to a particular AVD snapshot",
+    "'avd snapshotpath <snapshotname>' will return the directory where a particular snapshot is stored. Requires one argument: the name of the snapshot on disk (The user-specified name is currently not supported). If no AVD can be found, 'NO_AVD_INFO' is returned. If the snapshot does not exist at that directory, 'NO_SNAPSHOT' is returned. If the path cannot be formed for some other reason, an empty string is returned.\r\n",
+    NULL, do_avd_snapshotpath, NULL },
+
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
@@ -3120,14 +3397,16 @@ static bool parseValueWithUnit(const char* str, uint32_t* pValue) {
 static int do_screenrecord_start(ControlClient client, char* args) {
     // kMaxArgs is max number of arguments that we have to process (options +
     // parameters, if any, and the filename)
-    static constexpr int kMaxArgs = 3 * 2 + 1;
+    static constexpr int kMaxArgs = 4 * 2 + 1;
     static const struct option longOptions[] = {
             {"size", required_argument, NULL, 's'},
             {"bit-rate", required_argument, NULL, 'b'},
             {"time-limit", required_argument, NULL, 't'},
+            {"fps", required_argument, NULL, 'f'},
+            {"display", required_argument, NULL, 'd'},
             {NULL, 0, NULL, 0}};
 
-    switch (client->global->record_agent->getRecorderState()) {
+    switch (client->global->record_agent->getRecorderState().state) {
         case RECORDER_STOPPED:
             break;
         default:
@@ -3158,6 +3437,7 @@ static int do_screenrecord_start(ControlClient client, char* args) {
     sarray.push_back(nullptr);
 
     RecordingInfo info = {};
+    info.displayId = 0;
     // Setting optind to 1 does not completely reset the internal state for
     // getopt() on gcc, despite what the documentation says. Setting it to 0
     // does however, and this setting does not cause any issues on mingw and
@@ -3217,6 +3497,21 @@ static int do_screenrecord_start(ControlClient client, char* args) {
                     return -1;
                 }
                 break;
+            case 'f':
+                D(("Got --%s=[%s]\n", longOptions[optionIndex].name, optarg));
+                info.fps = atoi(optarg);
+                if (info.fps == 0 || info.fps > kMaxFPS) {
+                    control_write(
+                            client,
+                            "FPS %ds outside acceptable range [1,%d]\n",
+                            info.fps, kMaxFPS);
+                    return -1;
+                }
+                break;
+            case 'd':
+                D(("Got --%s=[%s]\n", longOptions[optionIndex].name, optarg));
+                info.displayId = atoi(optarg);
+                break;
             default:
                 D(("getopt_long returned %d\n", ic));
                 control_write(client,
@@ -3253,7 +3548,7 @@ static int do_screenrecord_start(ControlClient client, char* args) {
 }
 
 static int do_screenrecord_stop(ControlClient client, char* args) {
-    switch (client->global->record_agent->getRecorderState()) {
+    switch (client->global->record_agent->getRecorderState().state) {
         case RECORDER_RECORDING:
             break;
         case RECORDER_STOPPED:
@@ -3272,14 +3567,78 @@ static int do_screenrecord_stop(ControlClient client, char* args) {
 }
 
 static int do_screenrecord_screenshot(ControlClient client, char* args) {
-    client->global->record_agent->doSnap(args);
-    return 0;
+    // kMaxArgs is max number of arguments that we have to process (options +
+    // parameters, if any, and the filename)
+    static constexpr int kMaxArgs = 1 * 2 + 1;
+    static const struct option longOptions[] = {
+            {"display", required_argument, NULL, 'd'},
+            {NULL, 0, NULL, 0}};
+
+    if (!args) {
+        // default file name and path
+        return client->global->record_agent->doSnap(nullptr, 0) ? 0 : -1;
+    }
+
+    // Count number of arguments
+    // Need to get it into a format for getopt_long().
+    std::vector<std::string> splitArgs;
+    splitArgs.push_back("screenshot");
+    android::base::split(args, " ", [&splitArgs](android::base::StringView s) {
+        if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
+            splitArgs.push_back(s);
+    });
+
+    // Need char** for getopt()
+    std::vector<char*> sarray;
+    for (auto& arg : splitArgs) {
+        sarray.push_back(&arg[0]);
+    }
+    // last argument needs to be NULL for getopt().
+    sarray.push_back(nullptr);
+
+    RecordingInfo info = {};
+    // Setting optind to 1 does not completely reset the internal state for
+    // getopt() on gcc, despite what the documentation says. Setting it to 0
+    // does however, and this setting does not cause any issues on mingw and
+    // clang.
+    optind = 0;
+
+    uint32_t displayId = 0;
+    while (true) {
+        int optionIndex = 0;
+        int ic = getopt_long(sarray.size() - 1, sarray.data(), "", longOptions,
+                             &optionIndex);
+        if (ic == -1) {
+            D(("Got ic=-1\n"));
+            break;
+        }
+
+        switch (ic) {
+            case 'd':
+                D(("Got --%s=[%s]\n", longOptions[optionIndex].name, optarg));
+                displayId = atoi(optarg);
+                break;
+
+            default:
+                D(("getopt_long returned %d\n", ic));
+                control_write(client,
+                              "KO: Invalid arguments (see help screenrecord "
+                              "screenshot).\r\n");
+                return -1;
+        }
+    }
+
+    if (optind != splitArgs.size() - 1) {
+        return client->global->record_agent->doSnap(nullptr, displayId) ? 0 : -1;
+    }
+
+    return client->global->record_agent->doSnap(sarray[optind], displayId) ? 0 : -1;
 }
 
 static int do_screenrecord_webrtc(ControlClient client, char* args) {
     // kMaxArgs is max number of arguments that we have to process (options +
     // parameters, if any, and the filename)
-    const int kMaxArgs = 3;
+    const int kMaxArgs = 2;
 
     // Count number of arguments
     std::vector<std::string> splitArgs;
@@ -3294,22 +3653,23 @@ static int do_screenrecord_webrtc(ControlClient client, char* args) {
     }
 
     if (splitArgs[0] == "start") {
-        if (splitArgs.size() < 2) {
-            control_write(client, "KO: Must provide an output filename\r\n");
-            return -1;
-        }
         int fps = 60;
-        if (splitArgs.size() == 3) {
-          if (sscanf(splitArgs[2].c_str(), "%d", &fps) != 1) {
+        if (splitArgs.size() == 2) {
+          if (sscanf(splitArgs[1].c_str(), "%d", &fps) != 1) {
             control_write(client, "KO: Fps not a number\r\n");
             return -1;
           }
         }
         // Start on the given handle!
-        return client->global->record_agent->startWebRtcModule(splitArgs[1].c_str(), fps) ? 0 : -1;
+        const char* name = client->global->record_agent->startSharedMemoryModule(fps);
+        if (name) {
+            control_write(client, name);
+            control_write(client, "\r\n");
+        }
+        return name  ? 0 : -1;
 
     } else if (splitArgs[0] == "stop") {
-        return client->global->record_agent->stopWebRtcModule() ? 0 : -1;
+        return client->global->record_agent->stopSharedMemoryModule() ? 0 : -1;
     } else {
         control_write(client, "KO: expected 'start' or 'stop'\r\n");
         return -1;
@@ -3335,6 +3695,9 @@ static const CommandDefRec screenrecord_commands[] = {
          "  --time-limit TIME\r\n"
          "    Set the maximum recording time, in seconds. Default/maximum is "
          "180.\r\n"
+         "  --fps FPS\r\n"
+         "    Set the frames per second for the video recording. Default is 24"
+         " fps, maximum is 60 fps.\r\n"
          "\r\nThe recording will stop with 'screenrecord stop' or when the "
          "time limit\r\n"
          "is reached\r\n",
@@ -3346,19 +3709,67 @@ static const CommandDefRec screenrecord_commands[] = {
          NULL, do_screenrecord_stop, NULL},
 
         {"screenshot", "Take a screenshot",
-         "'screenrecord screenshot <dirname>'\r\n"
+         "'screenrecord screenshot [options] <dirname>'\r\n"
          "\r\nTakes a single screenshot of emulator's display "
-         "and saves the resulting PNG in <dirname>.\r\n",
+         "and saves the resulting PNG in <dirname>.\r\n"
+         "\r\nOptions:\r\n"
+         "  --display ID\r\n"
+         "    Set display to take screenshot. Default is the device's "
+         "main display ID = 0\r\n",
          NULL, do_screenrecord_screenshot, NULL},
 
         {"webrtc", "start/stop the webrtc module",
-         "'screenrecord webrtc [start|stop] [<handle>] [fps]'\r\n"
+         "'screenrecord webrtc [start|stop] [fps]'\r\n"
          "\r\nStart or stop the webrtc memory sharing."
-         "\r\nSharing can happen on only one handle and must "
-         "be provided on start."
+         "\r\nSharing will happen on only one handle and will be "
+         "returned on start."
          "\r\nAn option framerate can be provided, the default is fps=60",
          NULL, do_screenrecord_webrtc, NULL},
 
+
+        {NULL, NULL, NULL, NULL, NULL, NULL}};
+
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
+/*****                    I C E B O X   C O M M A N D S                                ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+static int do_icebox_track(ControlClient client, char* args) {
+    int pid = -1;
+    if (!args || strlen(args) == 0) {
+        control_write(client, "KO: pid required\r\n");
+        return -1;
+    }
+    int max_snapshot_count;
+    if (sscanf(args, "%d %d", &pid, &max_snapshot_count) < 2) {
+        max_snapshot_count = -1;
+    }
+    if (pid < 0) {
+        control_write(client, "KO: Bad process ID %s\r\n", args);
+        return -1;
+    }
+    if (android::icebox::track_async(pid, "test_failure_snapshot",
+                                     max_snapshot_count)) {
+        control_write(client, "OK: Start tracking PID %d\r\n", pid);
+        return 0;
+    } else {
+        control_write(client,
+                      "KO: Failed to track PID %d, might have pending icebox "
+                      "operations, please try again\r\n",
+                      pid);
+        return -1;
+    }
+}
+
+static const CommandDefRec icebox_commands[] = {
+        {"track",
+         "(experimental) track exceptions in <pid> and take (up to "
+         "[max_snapshots]) snasphots when there are assert failures",
+         "'icebox track <pid> [max_snapshots]'\r\n", NULL, do_icebox_track,
+         NULL},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
@@ -3407,6 +3818,101 @@ static const CommandDefRec  qemu_commands[] =
                 NULL, NULL, sub_commands                                    \
     }
 
+static int
+do_multi_display_add( ControlClient  client, char*  args ) {
+    // kMaxArgs is max number of arguments that we have to process (options +
+    // parameters, if any, and the filename)
+    const int kMaxArgs = 5;
+
+    // Count number of arguments
+    std::vector<std::string> splitArgs;
+    android::base::split(args, " ", [&splitArgs](android::base::StringView s) {
+        if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
+            splitArgs.push_back(s);
+    });
+
+    if (splitArgs.size() < kMaxArgs) {
+        control_write(client, "KO: not enough arguments\r\n");
+        return -1;
+    }
+
+    int id = std::stoi(splitArgs[0]);
+    if (id < 1 || id > 10) {
+        control_write(client, "KO: invalid display id\r\n");
+        return -1;
+    }
+
+    int width = std::stoi(splitArgs[1]);
+    int height = std::stoi(splitArgs[2]);
+    int dpi = std::stoi(splitArgs[3]);
+    int flag = std::stoi(splitArgs[4]);
+
+    if (client->global->multi_display_agent->setMultiDisplay(id, -1,
+                -1, width, height, dpi, flag, true) < 0) {
+        return -1;
+    }
+    client->global->emu_agent->updateUIMultiDisplayPage(id);
+    return 0;
+}
+
+static int
+do_multi_display_del( ControlClient  client, char*  args ) {
+    // kMaxArgs is max number of arguments that we have to process (options +
+    // parameters, if any, and the filename)
+    const int kMaxArgs = 1;
+
+    // Count number of arguments
+    std::vector<std::string> splitArgs;
+    android::base::split(args, " ", [&splitArgs](android::base::StringView s) {
+        if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
+            splitArgs.push_back(s);
+    });
+
+    if (splitArgs.size() < kMaxArgs) {
+        control_write(client, "KO: not enough arguments\r\n");
+        return -1;
+    }
+    int id = std::stoi(splitArgs[0]);
+    if (id < 1 || id > 10) {
+        control_write(client, "KO: invalid display id\r\n");
+        return -1;
+    }
+
+    if (client->global->multi_display_agent->setMultiDisplay(id, -1, -1,
+                0, 0, 0, 0, false) < 0) {
+        return -1;
+    }
+    client->global->emu_agent->updateUIMultiDisplayPage(id);
+    return 0;
+}
+
+static const CommandDefRec  multi_display_commands[] =
+{
+    { "add",  "add new or modify existing display",
+    "add a new or modify existing display, arguments must be:\r\n\r\n"
+            "  multidisplay add <display-id>:<width>:<height>:<dpi>:<flag>\r\n\r\n"
+            "where:   <display-id>   a number within [1, 10]\r\n"
+            "         <width>        display width\r\n"
+            "         <height>       display height\r\n"
+            "         <dpi>          display dpi\r\n"
+            "         <flag>         display flag, 0 for default flag\r\n\r\n"
+         "as an example,\r\n"
+         "'multidisplay add 1 1200 800 240 0' will create/modify display 1 with "
+         "dimension 1200x800,\r\n"
+         " dpi 240 and the default flag\r\n",
+    NULL,
+    do_multi_display_add, NULL },
+
+    { "del",  "remove existing display",
+    "remove existing display, arguments must be:\r\n\r\n"
+            "  multidisplay  del <display-id>\r\n\r\n"
+            "where:   <display-id>   a number within [1, 10]\r\n",
+    NULL,
+    do_multi_display_del, NULL },
+
+    { NULL, NULL, NULL, NULL, NULL, NULL }
+};
+
 /********************************************************************************************/
 /********************************************************************************************/
 /*****                                                                                 ******/
@@ -3427,6 +3933,34 @@ do_crash( ControlClient  client, char*  args )
 }
 
 static int
+
+do_start_grpc( ControlClient  client, char*  args )
+{
+     if (args) {
+        int port;
+
+        if (sscanf(args, "%d", &port) == 1 && port >= 0 && port < 65536) {
+            int active = client->global->grpc_agent->start(port, "");
+            control_write(client, "OK: { \"port\": \"%d\" }\n", active);
+            if (active < 0) {
+                control_write( client, "KO: Failed to launch gRPC service\n" );
+                return -1;
+            }
+            if (port != 0 && active != port) {
+                control_write( client, "OK: Port has already been activated at port: %d\n", active);
+            } else {
+               control_write( client, "OK: gRPC endpoint available at port %d\r\n", active );
+            }
+            return 0;
+        }
+    }
+
+    control_write( client, "KO: Usage: \"grpc <port>\"\n" );
+    return -1;
+}
+
+
+static int
 do_crash_on_exit( ControlClient  client, char*  args )
 {
     control_write( client, "OK: crashing emulator on exit, bye bye\r\n" );
@@ -3437,9 +3971,32 @@ do_crash_on_exit( ControlClient  client, char*  args )
 static int
 do_kill( ControlClient  client, char*  args )
 {
+    if (client->global->record_agent->getRecorderState().state == RECORDER_RECORDING) {
+        D(("Stopping the recording ...\n"));
+        client->global->record_agent->stopRecording();
+    }
     control_write( client, "OK: killing emulator, bye bye\r\n" );
     DINIT("Emulator killed by console kill command.\n");
     fflush(stdout);
+    bool needRequestClose = false;
+
+    if (host_emulator_is_headless && android_avdInfo) {
+        auto arch = (avdInfo_getTargetCpuArch(android_avdInfo));
+        if (!strcmp(arch, "x86") || !strcmp(arch, "x86_64")) {
+        } else if (!android_cmdLineOptions->no_snapshot_save){
+            needRequestClose = true;
+        }
+    }
+    if (needRequestClose) {
+#ifdef _WIN32
+        //TODO: figure out whether this work on windows
+        client->global->libui_agent->requestExit(0, "Killed by console command");
+#else
+        kill(getpid(), SIGINT);
+#endif
+        return 0;
+    }
+
     client->global->libui_agent->requestExit(0, "Killed by console command");
     return 0;
 }
@@ -3468,7 +4025,36 @@ static int do_debug(ControlClient client, char* args) {
 }
 
 static int do_rotate_90_clockwise(ControlClient client, char* args) {
-    return (int)client->global->emu_agent->rotate90Clockwise();
+    if (client->global->emu_agent->rotate90Clockwise()) {
+        return 0;
+    }
+    return -1;
+}
+
+static int do_start_extended_window(ControlClient client, char* args) {
+    // start extended window with the currently selected pane.
+    // set to location pane by default.
+    client->global->emu_agent->startExtendedWindow(PANE_IDX_UNKNOWN);
+    return 0;
+}
+
+static int do_quit_extended_window(ControlClient client, char* args) {
+    client->global->emu_agent->quitExtendedWindow();
+    return 0;
+}
+
+static int do_fold(ControlClient client, char* args) {
+    if (client->global->emu_agent->fold(true)) {
+          return 0;
+    }
+    return -1;
+}
+
+static int do_unfold(ControlClient client, char* args) {
+    if (client->global->emu_agent->fold(false)) {
+        return 0;
+    }
+    return -1;
 }
 
 /* NOTE: The names of all commands are listed when the 'help' command
@@ -3525,9 +4111,19 @@ extern const CommandDefRec main_commands[] = {
          "emulated device.\r\n",
          NULL, NULL, network_commands},
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
          {"wifi", "manage wifi settings",
           "allows you to manage wifi settings in the device\r\n",
           NULL, NULL, wifi_commands},
+=======
+        {"grpc", "enable the grpc endpoint",
+         "This allows you to start the grpc endpoint at the given port\n", NULL,
+         do_start_grpc, NULL},
+
+        {"wifi", "manage wifi settings",
+         "allows you to manage wifi settings in the device\r\n", NULL, NULL,
+         wifi_commands},
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 
         {"power", "power related commands",
          "allows to change battery and AC power status\r\n", NULL, NULL,
@@ -3572,8 +4168,33 @@ extern const CommandDefRec main_commands[] = {
         {"rotate", "rotate the screen clockwise by 90 degrees", NULL, NULL,
          do_rotate_90_clockwise, NULL},
 
+        {"startExtendedWindow", "Show the extended window", NULL, NULL,
+         do_start_extended_window, NULL},
+
+        {"quitExtendedWindow", "Show the extended window", NULL, NULL,
+         do_quit_extended_window, NULL},
+
         {"screenrecord", "Records the emulator's display", NULL, NULL, NULL,
          screenrecord_commands},
+
+        {"fold", "fold the device", NULL, NULL, do_fold, NULL},
+
+        {"unfold", "unfold the device", NULL, NULL, do_unfold, NULL},
+
+        {"multidisplay", "configure the multi-display",
+         "allows you to create/modify/delete displays besides the default "
+         "android display, as an example,\r\n"
+         "'multidisplay add 1 1200 800 240 0' will create/modify display 1 "
+         "with "
+         "dimension 1200x800,\r\n"
+         " dpi 240 and the default flag\r\n"
+         "'multidisplay del 1' will delete the display 1\r\n",
+         NULL, NULL, multi_display_commands},
+
+        {"icebox", "auto-snapshot on uncaught exceptions",
+         "allows emulator to automatically take snapshot on uncaught "
+         "exceptions, for test and debug purpose. (experimental)",
+         NULL, NULL, icebox_commands},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 

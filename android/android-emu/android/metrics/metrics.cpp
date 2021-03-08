@@ -31,14 +31,14 @@
 #include "android/opengles.h"
 #include "android/metrics/AdbLivenessChecker.h"
 #include "android/metrics/MetricsReporter.h"
-#include "android/metrics/MemoryUsageReporter.h"
+#include "android/metrics/PerfStatReporter.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/StudioConfig.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_io.h"
 #include "android/utils/x86_cpuid.h"
 
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "studio_stats.pb.h"
 
 #include <utility>
 
@@ -57,7 +57,7 @@ namespace {
 // For now it's a single member, but soon to be more.
 struct InstanceData {
     android::metrics::AdbLivenessChecker::Ptr livenessChecker;
-    android::metrics::MemoryUsageReporter::Ptr memoryReporter;
+    android::metrics::PerfStatReporter::Ptr perfStatReporter;
     std::string emulatorName;
 
     void reset() {
@@ -65,9 +65,9 @@ struct InstanceData {
             livenessChecker->stop();
             livenessChecker.reset();
         }
-        if (memoryReporter) {
-          memoryReporter->stop();
-          memoryReporter.reset();
+        if (perfStatReporter) {
+            perfStatReporter->stop();
+            perfStatReporter.reset();
         }
     }
 };
@@ -97,13 +97,12 @@ bool android_metrics_start(const char* emulatorVersion,
                 // nothing to do here.
                 return true;
             });
+    // Collect PerfStats metrics every 5 seconds.
+    sGlobalData->perfStatReporter =
+            android::metrics::PerfStatReporter::create(
+                    android::base::ThreadLooper::get(), 5 * 1000);
+    sGlobalData->perfStatReporter->start();
 
-    // For now only report memory usage on console when we are logging verbosely
-    if (android_verbose) {
-      sGlobalData->memoryReporter = android::metrics::MemoryUsageReporter::create(
-          android::base::ThreadLooper::get(), 1000);
-      sGlobalData->memoryReporter->start();
-    }
     return true;
 }
 
@@ -338,6 +337,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::GLDMA;
         case android::featurecontrol::GLDMA2:
             return android_studio::EmulatorFeatureFlagState::GLDMA2;
+        case android::featurecontrol::GLDirectMem:
+            return android_studio::EmulatorFeatureFlagState::GL_DIRECT_MEM;
         case android::featurecontrol::GLESDynamicVersion:
             return android_studio::EmulatorFeatureFlagState::GLES_DYNAMIC_VERSION;
         case android::featurecontrol::ForceANGLE:
@@ -366,6 +367,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::SCREEN_RECORDING;
         case android::featurecontrol::VirtualScene:
             return android_studio::EmulatorFeatureFlagState::VIRTUAL_SCENE;
+        case android::featurecontrol::VideoPlayback:
+            return android_studio::EmulatorFeatureFlagState::VIDEO_PLAYBACK;
         case android::featurecontrol::IgnoreHostOpenGLErrors:
             return android_studio::EmulatorFeatureFlagState::IGNORE_HOST_OPENGL_ERRORS;
         case android::featurecontrol::GenericSnapshotsUI:
@@ -378,6 +381,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::WINDOWS_HYPERVISOR_PLATFORM;
         case android::featurecontrol::KernelDeviceTreeBlobSupport:
             return android_studio::EmulatorFeatureFlagState::KERNEL_DEVICE_TREE_BLOB_SUPPORT;
+        case android::featurecontrol::DynamicPartition:
+            return android_studio::EmulatorFeatureFlagState::DYNAMIC_PARTITION;
         case android::featurecontrol::LocationUiV2:
             return android_studio::EmulatorFeatureFlagState::LOCATION_UI_V2;
         case android::featurecontrol::SnapshotAdb:
@@ -398,6 +403,79 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
         case android::featurecontrol::WifiConfigurable:
             return android_studio::EmulatorFeatureFlagState::WIFI_CONFIGURABLE;
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+        case android::featurecontrol::Vulkan:
+            return android_studio::EmulatorFeatureFlagState::VULKAN;
+        case android::featurecontrol::MacroUi:
+            return android_studio::EmulatorFeatureFlagState::MACRO_UI;
+        case android::featurecontrol::CarVHalTable:
+            return android_studio::EmulatorFeatureFlagState::CAR_VHAL_TABLE;
+        case android::featurecontrol::IpDisconnectOnLoad:
+            return android_studio::EmulatorFeatureFlagState::IP_DISCONNECT_ON_LOAD;
+        case android::featurecontrol::VulkanSnapshots:
+            return android_studio::EmulatorFeatureFlagState::VULKAN_SNAPSHOTS;
+        case android::featurecontrol::VirtioInput:
+            return android_studio::EmulatorFeatureFlagState::VIRTIO_INPUT;
+        case android::featurecontrol::MultiDisplay:
+            return android_studio::EmulatorFeatureFlagState::MULTI_DISPLAY;
+        case android::featurecontrol::VulkanNullOptionalStrings:
+            return android_studio::EmulatorFeatureFlagState::VULKAN_NULL_OPTIONAL_STRINGS;
+        case android::featurecontrol::VulkanIgnoredHandles:
+            return android_studio::EmulatorFeatureFlagState::VULKAN_IGNORED_HANDLES;
+        case android::featurecontrol::DynamicMediaProfile:
+            return android_studio::EmulatorFeatureFlagState::DYNAMIC_MEDIA_PROFILE;
+        case android::featurecontrol::YUV420888toNV21:
+            return android_studio::EmulatorFeatureFlagState::YUV420_888_to_NV21;
+        case android::featurecontrol::YUVCache:
+            return android_studio::EmulatorFeatureFlagState::YUV_Cache;
+        case android::featurecontrol::KeycodeForwarding:
+            return android_studio::EmulatorFeatureFlagState::KEYCODE_FORWARDING;
+        case android::featurecontrol::VirtioGpuNext:
+            return android_studio::EmulatorFeatureFlagState::VIRTIO_GPU_NEXT;
+        case android::featurecontrol::Mac80211hwsimUserspaceManaged:
+            return android_studio::EmulatorFeatureFlagState::MAC80211HWSIM_USERSPACE_MANAGED;
+        case android::featurecontrol::HasSharedSlotsHostMemoryAllocator:
+            return android_studio::EmulatorFeatureFlagState::HAS_SHARED_SLOTS_HOST_MEMORY_ALLOCATOR;
+        case android::featurecontrol::CarVhalReplay:
+            return android_studio::EmulatorFeatureFlagState::CAR_VHAL_REPLAY;
+        case android::featurecontrol::CarAssistButton:
+            return android_studio::EmulatorFeatureFlagState::CAR_ASSIST_BUTTON;
+        case android::featurecontrol::HardwareDecoder:
+            return android_studio::EmulatorFeatureFlagState::HARDWARE_DECODER;
+        case android::featurecontrol::NoDelayCloseColorBuffer:
+            return android_studio::EmulatorFeatureFlagState::NO_DELAY_CLOSE_COLOR_BUFFER;
+        case android::featurecontrol::NoDeviceFrame:
+            return android_studio::EmulatorFeatureFlagState::NO_DEVICE_FRAME;
+        case android::featurecontrol::VirtioGpuNativeSync:
+            return android_studio::EmulatorFeatureFlagState::VIRTIO_GPU_NATIVE_SYNC;
+        case android::featurecontrol::VirtioWifi:
+            return android_studio::EmulatorFeatureFlagState::VIRTIO_WIFI;
+        case android::featurecontrol::VulkanShaderFloat16Int8:
+            return android_studio::EmulatorFeatureFlagState::VULKAN_SHADER_FLOAT16_INT8;
+        case android::featurecontrol::CarRotary:
+            return android_studio::EmulatorFeatureFlagState::CAR_ROTARY;
+        case android::featurecontrol::ModemSimulator:
+            return android_studio::EmulatorFeatureFlagState::MODEM_SIMULATOR;
+        case android::featurecontrol::TvRemote:
+            return android_studio::EmulatorFeatureFlagState::TV_REMOTE;
+        case android::featurecontrol::NativeTextureDecompression:
+            return android_studio::EmulatorFeatureFlagState::NATIVE_TEXTURE_DECOMPRESSION;
+        case android::featurecontrol::BptcTextureSupport:
+            return android_studio::EmulatorFeatureFlagState::BPTC_TEXTURE_SUPPORT;
+        case android::featurecontrol::GuestUsesAngle:
+            return android_studio::EmulatorFeatureFlagState::GUEST_USES_ANGLE;
+        case android::featurecontrol::VirtioVsockPipe:
+            return android_studio::EmulatorFeatureFlagState::VIRTIO_VSOCK_PIPE;
+        case android::featurecontrol::S3tcTextureSupport:
+            return android_studio::EmulatorFeatureFlagState::S3TC_TEXTURE_SUPPORT;
+        case android::featurecontrol::VirtioMouse:
+            return android_studio::EmulatorFeatureFlagState::VIRTIO_MOUSE;
+        case android::featurecontrol::VirtconsoleLogcat:
+            return android_studio::EmulatorFeatureFlagState::VIRTCONSOLE_LOGCAT;
+        case android::featurecontrol::VulkanQueueSubmitWithCommands:
+            return android_studio::EmulatorFeatureFlagState::VULKAN_QUEUE_SUBMIT_WITH_COMMANDS;
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
@@ -478,7 +556,9 @@ void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
     }
 
     fillAvdMetrics(event);
-
+    event->set_kind(
+                android_studio::AndroidStudioEvent::
+                    EMULATOR_HOST);
     event->mutable_emulator_host()->set_os_bit_count(
                 System::get()->getHostBitness());
     const AndroidCpuInfoFlags cpuFlags = android::GetCpuInfo().first;
@@ -514,6 +594,20 @@ void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
         android::CommonReportedInfo::setHostInfo(&forCommonInfoHost);
         android::CommonReportedInfo::setDetails(&forCommonInfoDetails);
     }
+
+    // Whether we are running with standalone metrics
+    if (android_cmdLineOptions->metrics_collection) {
+        event->mutable_emulator_details()
+                                ->mutable_used_features()
+                                ->set_launch_type(android_studio::EmulatorFeatures::CONTAINER);
+    }
+
+    if (android_cmdLineOptions->fuchsia) {
+        event->mutable_emulator_details()
+                                ->mutable_used_features()
+                                ->set_launch_type(android_studio::EmulatorFeatures::FUCHSIA);
+    }
+
 }
 
 void android_metrics_report_common_info(bool openglAlive) {

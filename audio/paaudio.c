@@ -303,7 +303,6 @@ static int qpa_write (SWVoiceOut *sw, void *buf, int len)
     return audio_pcm_sw_write (sw, buf, len);
 }
 
-/* capture */
 static void *qpa_thread_in (void *arg)
 {
     PAVoiceIn *pa = arg;
@@ -330,7 +329,7 @@ static void *qpa_thread_in (void *arg)
             }
         }
 
-        incr = to_grab = audio_MIN (pa->dead, pa->g->conf.samples >> 2);
+        incr = to_grab = audio_MIN(pa->dead, pa->g->conf.samples >> 5);
         wpos = pa->wpos;
 
         if (audio_pt_unlock(&pa->pt, __func__)) {
@@ -342,28 +341,15 @@ static void *qpa_thread_in (void *arg)
             int chunk = audio_MIN (to_grab, hw->samples - wpos);
             void *buf = advance (pa->pcm_buf, wpos);
 
-            int bytes = chunk << hw->info.shift;
-            int bytes_read = qpa_simple_read (pa, buf, bytes, &error);
-            if (bytes < 0) {
+            if (qpa_simple_read (pa, buf,
+                                 chunk << hw->info.shift, &error) < 0) {
                 qpa_logerr (error, "pa_simple_read failed\n");
                 return NULL;
             }
 
-            // qpa_simple_read may return a partial read if the data stream is
-            // corked. This ignores any partially read data frames.
-            int chunk_read = bytes_read >> hw->info.shift;
-
-            hw->conv (hw->conv_buf + wpos, buf, chunk_read);
-            wpos = (wpos + chunk_read) % hw->samples;
-            to_grab -= chunk_read;
-
-            if (bytes != bytes_read) {
-                //qpa_simple_read was a partial read due to the stream being
-                //corked. There won't be any more data for the time being so
-                //wait until the next time tick.
-                incr -= to_grab;
-                break;
-            }
+            hw->conv (hw->conv_buf + wpos, buf, chunk);
+            wpos = (wpos + chunk) % hw->samples;
+            to_grab -= chunk;
         }
 
         if (audio_pt_lock(&pa->pt, __func__)) {

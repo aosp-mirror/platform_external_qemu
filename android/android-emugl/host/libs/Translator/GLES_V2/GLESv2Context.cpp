@@ -16,10 +16,11 @@
 
 #include "GLESv2Context.h"
 
-#include "android/base/files/StreamSerializing.h"
+#include "ProgramData.h"
 #include "SamplerData.h"
 #include "ShaderParser.h"
-#include "ProgramData.h"
+#include "TransformFeedbackData.h"
+#include "android/base/files/StreamSerializing.h"
 
 #include "emugl/common/crash_reporter.h"
 
@@ -70,7 +71,8 @@ void GLESv2Context::init() {
         setVertexArrayObject(0);
         setAttribute0value(0.0, 0.0, 0.0, 1.0);
 
-        buildStrings((const char*)dispatcher().glGetString(GL_VENDOR),
+        buildStrings(false /* not gles1 */,
+                     (const char*)dispatcher().glGetString(GL_VENDOR),
                      (const char*)dispatcher().glGetString(GL_RENDERER),
                      (const char*)dispatcher().glGetString(GL_VERSION),
                      sPickVersionStringPart(m_glesMajorVersion, m_glesMinorVersion));
@@ -95,6 +97,14 @@ void GLESv2Context::init() {
 
         initEmulatedVAO();
         initEmulatedBuffers();
+        // init emulated transform feedback
+        if (m_glesMajorVersion >= 3) {
+            m_transformFeedbackNameSpace->genName(
+                    GenNameInfo(NamedObjectType::TRANSFORM_FEEDBACK), 0, false);
+            TransformFeedbackData* tf = new TransformFeedbackData();
+            tf->setMaxSize(getCaps()->maxTransformFeedbackSeparateAttribs);
+            m_transformFeedbackNameSpace->setObjectData(0, ObjectDataPtr(tf));
+        }
     }
     m_initialized = true;
 }
@@ -165,6 +175,14 @@ GLESv2Context::GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,
         m_glesMajorVersion = maj;
         m_glesMinorVersion = min;
     }
+    ObjectData::loadObject_t loader = [this](NamedObjectType type,
+                                             long long unsigned int localName,
+                                             android::base::Stream* stream) {
+        return loadObject(type, localName, stream);
+    };
+    m_transformFeedbackNameSpace =
+            new NameSpace(NamedObjectType::TRANSFORM_FEEDBACK, globalNameSpace,
+                          stream, loader);
 }
 
 GLESv2Context::~GLESv2Context() {
@@ -179,6 +197,7 @@ GLESv2Context::~GLESv2Context() {
     }
 
     deleteVAO(0);
+    delete m_transformFeedbackNameSpace;
 }
 
 void GLESv2Context::onSave(android::base::Stream* stream) const {
@@ -195,6 +214,23 @@ void GLESv2Context::onSave(android::base::Stream* stream) const {
                 stream->putBe32(item.first);
                 stream->putBe32(item.second);
             });
+    m_transformFeedbackNameSpace->onSave(stream);
+}
+
+void GLESv2Context::addVertexArrayObject(GLuint array) {
+    m_vaoStateMap[array] = VAOState(0, nullptr, kMaxVertexAttributes);
+}
+
+void GLESv2Context::enableArr(GLenum arrType, bool enable) {
+    uint32_t index = (uint32_t)arrType;
+    if (index > kMaxVertexAttributes) return;
+    m_currVaoState.attribInfo()[index].enable(enable);
+}
+
+const GLESpointer* GLESv2Context::getPointer(GLenum arrType) {
+    uint32_t index = (uint32_t)arrType;
+    if (index > kMaxVertexAttributes) return nullptr;
+    return m_currVaoState.attribInfo().data() + index;
 }
 
 void GLESv2Context::postLoadRestoreCtx() {
@@ -213,21 +249,20 @@ void GLESv2Context::postLoadRestoreCtx() {
         if (vaoIte.first != 0) {
             genVAOName(vaoIte.first, false);
         }
-        if (m_glesMajorVersion >= 3) {
-            dispatcher.glBindVertexArray(getVAOGlobalName(vaoIte.first));
-        }
-        for (const auto& glesPointerIte : *vaoIte.second.arraysMap) {
-            GLESpointer* glesPointer = glesPointerIte.second;
+        dispatcher.glBindVertexArray(getVAOGlobalName(vaoIte.first));
+        for (uint32_t i = 0; i < kMaxVertexAttributes; ++i) {
+            GLESpointer* glesPointer =
+                (GLESpointer*)(vaoIte.second.vertexAttribInfo.data() + i);
 
             // don't skip enabling if the guest assumes it was enabled.
             if (glesPointer->isEnable()) {
-                dispatcher.glEnableVertexAttribArray(glesPointerIte.first);
+                dispatcher.glEnableVertexAttribArray(i);
             }
 
             // attribute 0 are bound right before draw, no need to bind it here
             if (glesPointer->getAttribType() == GLESpointer::VALUE
-                    && glesPointerIte.first == 0) {
-                break;
+                    && i == 0) {
+                continue;
             }
             switch (glesPointer->getAttribType()) {
                 case GLESpointer::BUFFER: {
@@ -241,13 +276,13 @@ void GLESv2Context::postLoadRestoreCtx() {
                     dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
                             globalBufferName);
                     if (glesPointer->isIntPointer()) {
-                        dispatcher.glVertexAttribIPointer(glesPointerIte.first,
+                        dispatcher.glVertexAttribIPointer(i,
                                 glesPointer->getSize(),
                                 glesPointer->getType(),
                                 glesPointer->getStride(),
                                 (GLvoid*)(size_t)glesPointer->getBufferOffset());
                     } else {
-                        dispatcher.glVertexAttribPointer(glesPointerIte.first,
+                        dispatcher.glVertexAttribPointer(i,
                                 glesPointer->getSize(),
                                 glesPointer->getType(), glesPointer->isNormalize(),
                                 glesPointer->getStride(),
@@ -258,19 +293,19 @@ void GLESv2Context::postLoadRestoreCtx() {
                 case GLESpointer::VALUE:
                     switch (glesPointer->getValueCount()) {
                         case 1:
-                            dispatcher.glVertexAttrib1fv(glesPointerIte.first,
+                            dispatcher.glVertexAttrib1fv(i,
                                     glesPointer->getValues());
                             break;
                         case 2:
-                            dispatcher.glVertexAttrib2fv(glesPointerIte.first,
+                            dispatcher.glVertexAttrib2fv(i,
                                     glesPointer->getValues());
                             break;
                         case 3:
-                            dispatcher.glVertexAttrib3fv(glesPointerIte.first,
+                            dispatcher.glVertexAttrib3fv(i,
                                     glesPointer->getValues());
                             break;
                         case 4:
-                            dispatcher.glVertexAttrib4fv(glesPointerIte.first,
+                            dispatcher.glVertexAttrib4fv(i,
                                     glesPointer->getValues());
                             break;
                     }
@@ -288,8 +323,8 @@ void GLESv2Context::postLoadRestoreCtx() {
             }
         }
     }
+    dispatcher.glBindVertexArray(getVAOGlobalName(m_currVaoState.vaoId()));
     if (m_glesMajorVersion >= 3) {
-        dispatcher.glBindVertexArray(getVAOGlobalName(m_currVaoState.vaoId()));
         auto bindBufferRangeFunc =
                 [this](GLenum target,
                     const std::vector<BufferBinding>& bufferBindings) {
@@ -344,6 +379,21 @@ void GLESv2Context::postLoadRestoreCtx() {
                     shareGroup()->getGlobalName(NamedObjectType::SAMPLER,
                         bindSampler.second));
         }
+        m_transformFeedbackNameSpace->postLoadRestore(
+                [this](NamedObjectType p_type, ObjectLocalName p_localName) {
+                    switch (p_type) {
+                        case NamedObjectType::FRAMEBUFFER:
+                            return getFBOGlobalName(p_localName);
+                        case NamedObjectType::TRANSFORM_FEEDBACK:
+                            return getTransformFeedbackGlobalName(p_localName);
+                        default:
+                            return m_shareGroup->getGlobalName(p_type,
+                                                               p_localName);
+                    }
+                });
+        dispatcher.glBindTransformFeedback(
+                GL_TRANSFORM_FEEDBACK,
+                getTransformFeedbackGlobalName(m_transformFeedbackBuffer));
     }
 
     GLEScontext::postLoadRestoreCtx();
@@ -371,6 +421,8 @@ ObjectDataPtr GLESv2Context::loadObject(NamedObjectType type,
                     assert(false);
                     return nullptr;
             }
+        case NamedObjectType::TRANSFORM_FEEDBACK:
+            return ObjectDataPtr(new TransformFeedbackData(stream));
         default:
             return nullptr;
     }
@@ -378,10 +430,7 @@ ObjectDataPtr GLESv2Context::loadObject(NamedObjectType type,
 
 void GLESv2Context::setAttribValue(int idx, unsigned int count,
         const GLfloat* val) {
-    auto vertexAttrib = m_currVaoState.find(idx);
-    if (vertexAttrib != m_currVaoState.end()) {
-        vertexAttrib->second->setValue(count, val);
-    }
+    m_currVaoState.attribInfo()[idx].setValue(count, val);
 }
 
 void GLESv2Context::setAttribute0value(float x, float y, float z, float w)
@@ -479,9 +528,12 @@ void GLESv2Context::drawWithEmulations(
         }
     }
 
+    bool needEnablingPostDraw[kMaxVertexAttributes];
+    memset(needEnablingPostDraw, 0, sizeof(needEnablingPostDraw));
+
     if (needClientVBOSetup) {
         GLESConversionArrays tmpArrs;
-        setupArraysPointers(tmpArrs, 0, count, type, indices, false);
+        setupArraysPointers(tmpArrs, 0, count, type, indices, false, needEnablingPostDraw);
         if (needAtt0PreDrawValidation()) {
             if (indices) {
                 validateAtt0PreDraw(findMaxIndex(count, type, indices));
@@ -536,7 +588,8 @@ void GLESv2Context::drawWithEmulations(
             s_glDispatch.glDrawArraysInstanced(mode, first, count, primcount);
             break;
         default:
-            emugl_crash_reporter("drawWithEmulations has corrupt call parameters!");
+            emugl::emugl_crash_reporter(
+                    "drawWithEmulations has corrupt call parameters!");
     }
 
     if (needClientIBOSetup) {
@@ -553,15 +606,18 @@ void GLESv2Context::drawWithEmulations(
             s_glDispatch.glDisable(GL_POINT_SPRITE);
         }
     }
+
+    for (int i = 0; i < kMaxVertexAttributes; ++i) {
+        if (needEnablingPostDraw[i]) {
+            s_glDispatch.glEnableVertexAttribArray(i);
+        }
+    }
 }
 
-void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) {
-    ArraysMap::iterator it;
-
+void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct, bool* needEnablingPostDraw) {
     //going over all clients arrays Pointers
-    for ( it=m_currVaoState.begin() ; it != m_currVaoState.end(); ++it) {
-        GLenum array_id = (*it).first;
-        GLESpointer* p = (*it).second;
+    for (uint32_t i = 0; i < kMaxVertexAttributes; ++i) {
+        GLESpointer* p = m_currVaoState.attribInfo().data() + i;
         if (!p->isEnable() || p->getAttribType() == GLESpointer::VALUE) {
             continue;
         }
@@ -569,22 +625,36 @@ void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
         setupArrWithDataSize(
             p->getDataSize(),
             p->getArrayData(),
-            array_id,
+            i,
             p->getType(),
             p->getSize(),
             p->getStride(),
             p->getNormalized(),
             -1,
-            p->isIntPointer());
+            p->isIntPointer(),
+            needEnablingPostDraw);
     }
 }
 
 //setting client side arr
 void GLESv2Context::setupArrWithDataSize(GLsizei datasize, const GLvoid* arr,
                                          GLenum arrayType, GLenum dataType,
-                                         GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt){
+                                         GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt, bool* needEnablingPostDraw){
     // is not really a client side arr.
-    if (arr == NULL) return;
+    if (arr == NULL) {
+        GLint isEnabled;
+        s_glDispatch.glGetVertexAttribiv((int)arrayType, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &isEnabled);
+        GLuint boundBuf;
+        s_glDispatch.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*)&boundBuf);
+
+        if (isEnabled && !boundBuf) {
+            s_glDispatch.glDisableVertexAttribArray(arrayType);
+            if (needEnablingPostDraw)
+                needEnablingPostDraw[arrayType] = true;
+        }
+
+        return;
+    }
 
     GLuint prevArrayBuffer;
     s_glDispatch.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*)&prevArrayBuffer);
@@ -614,17 +684,14 @@ void GLESv2Context::setVertexAttribDivisor(GLuint bindingindex, GLuint divisor) 
 }
 
 void GLESv2Context::setVertexAttribBindingIndex(GLuint attribindex, GLuint bindingindex) {
-    auto vertexAttrib = m_currVaoState.find(attribindex);
-    if (vertexAttrib != m_currVaoState.end()) {
-        vertexAttrib->second->setBindingIndex(bindingindex);
-    }
+    if (attribindex > kMaxVertexAttributes) return;
+
+    m_currVaoState.attribInfo()[attribindex].setBindingIndex(bindingindex);
 }
 
 void GLESv2Context::setVertexAttribFormat(GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint reloffset, bool isInt) {
-    auto vertexAttrib = m_currVaoState.find(attribindex);
-    if (vertexAttrib != m_currVaoState.end()) {
-        vertexAttrib->second->setFormat(size, type, normalized == GL_TRUE, reloffset, isInt);
-    }
+    if (attribindex > kMaxVertexAttributes) return;
+    m_currVaoState.attribInfo()[attribindex].setFormat(size, type, normalized == GL_TRUE, reloffset, isInt);
 }
 
 void GLESv2Context::setBindSampler(GLuint unit, GLuint sampler) {
@@ -675,6 +742,8 @@ ProgramData* GLESv2Context::getUseProgram() {
 }
 
 void GLESv2Context::initExtensionString() {
+    if (s_glExtensionsInitialized) return;
+
     *s_glExtensions = "GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_depth24 GL_OES_depth32 GL_OES_element_index_uint "
                       "GL_OES_texture_float GL_OES_texture_float_linear "
                       "GL_OES_compressed_paletted_texture GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth_texture ";
@@ -690,8 +759,17 @@ void GLESv2Context::initExtensionString() {
         *s_glExtensions+="GL_OES_texture_npot ";
     if (s_glSupport.GL_OES_RGB8_RGBA8)
         *s_glExtensions+="GL_OES_rgb8_rgba8 ";
-    if (s_glSupport.GL_EXT_color_buffer_float)
+    if (s_glSupport.ext_GL_EXT_color_buffer_float)
         *s_glExtensions+="GL_EXT_color_buffer_float ";
+    if (s_glSupport.ext_GL_EXT_color_buffer_half_float)
+        *s_glExtensions+="GL_EXT_color_buffer_half_float ";
+    if (s_glSupport.ext_GL_EXT_shader_framebuffer_fetch)
+        *s_glExtensions+="GL_EXT_shader_framebuffer_fetch ";
+    if (s_glSupport.GL_EXT_TEXTURE_FORMAT_BGRA8888) {
+        *s_glExtensions+="GL_EXT_texture_format_BGRA8888 GL_APPLE_texture_format_BGRA8888 ";
+    }
+
+    s_glExtensionsInitialized = true;
 }
 
 int GLESv2Context::getMaxTexUnits() {
@@ -700,4 +778,106 @@ int GLESv2Context::getMaxTexUnits() {
 
 int GLESv2Context::getMaxCombinedTexUnits() {
     return getCaps()->maxCombinedTexImageUnits;
+}
+
+unsigned int GLESv2Context::getTransformFeedbackGlobalName(
+        ObjectLocalName p_localName) {
+    return m_transformFeedbackNameSpace->getGlobalName(p_localName);
+}
+
+bool GLESv2Context::hasBoundTransformFeedback(
+        ObjectLocalName transformFeedback) {
+    return transformFeedback &&
+           m_transformFeedbackNameSpace->getObjectDataPtr(transformFeedback)
+                   .get();
+}
+
+ObjectLocalName GLESv2Context::genTransformFeedbackName(
+        ObjectLocalName p_localName,
+        bool genLocal) {
+    return m_transformFeedbackNameSpace->genName(
+            GenNameInfo(NamedObjectType::TRANSFORM_FEEDBACK), p_localName,
+            genLocal);
+}
+
+void GLESv2Context::bindTransformFeedback(ObjectLocalName p_localName) {
+    if (m_transformFeedbackDeletePending &&
+        m_bindTransformFeedback != p_localName) {
+        m_transformFeedbackNameSpace->deleteName(m_bindTransformFeedback);
+        m_transformFeedbackDeletePending = false;
+    }
+    m_bindTransformFeedback = p_localName;
+    if (p_localName &&
+        !m_transformFeedbackNameSpace->getGlobalName(p_localName)) {
+        genTransformFeedbackName(p_localName, false);
+    }
+    if (p_localName &&
+        !m_transformFeedbackNameSpace->getObjectDataPtr(p_localName).get()) {
+        TransformFeedbackData* tf = new TransformFeedbackData();
+        tf->setMaxSize(getCaps()->maxTransformFeedbackSeparateAttribs);
+        m_transformFeedbackNameSpace->setObjectData(p_localName,
+                                                    ObjectDataPtr(tf));
+    }
+}
+
+ObjectLocalName GLESv2Context::getTransformFeedbackBinding() {
+    return m_bindTransformFeedback;
+}
+
+void GLESv2Context::deleteTransformFeedback(ObjectLocalName p_localName) {
+    // Note: GLES3.0 says it should be pending for delete if it is active
+    // GLES3.2 says report error in this situation
+    if (m_bindTransformFeedback == p_localName) {
+        m_transformFeedbackDeletePending = true;
+        return;
+    }
+    m_transformFeedbackNameSpace->deleteName(p_localName);
+}
+
+TransformFeedbackData* GLESv2Context::boundTransformFeedback() {
+    return (TransformFeedbackData*)m_transformFeedbackNameSpace
+            ->getObjectDataPtr(m_bindTransformFeedback)
+            .get();
+}
+
+GLuint GLESv2Context::getIndexedBuffer(GLenum target, GLuint index) {
+    switch (target) {
+        case GL_TRANSFORM_FEEDBACK_BUFFER:
+            return boundTransformFeedback()->getIndexedBuffer(index);
+        default:
+            return GLEScontext::getIndexedBuffer(target, index);
+    }
+}
+
+void GLESv2Context::bindIndexedBuffer(GLenum target,
+                                      GLuint index,
+                                      GLuint buffer,
+                                      GLintptr offset,
+                                      GLsizeiptr size,
+                                      GLintptr stride,
+                                      bool isBindBase) {
+    switch (target) {
+        case GL_TRANSFORM_FEEDBACK_BUFFER: {
+            TransformFeedbackData* tf = boundTransformFeedback();
+            tf->bindIndexedBuffer(index, buffer, offset, size, stride,
+                                  isBindBase);
+            break;
+        }
+        default:
+            GLEScontext::bindIndexedBuffer(target, index, buffer, offset, size,
+                                           stride, isBindBase);
+    }
+}
+
+void GLESv2Context::bindIndexedBuffer(GLenum target,
+                                      GLuint index,
+                                      GLuint buffer) {
+    GLEScontext::bindIndexedBuffer(target, index, buffer);
+}
+
+void GLESv2Context::unbindBuffer(GLuint buffer) {
+    if (m_glesMajorVersion >= 3) {
+        boundTransformFeedback()->unbindBuffer(buffer);
+    }
+    GLEScontext::unbindBuffer(buffer);
 }

@@ -14,13 +14,16 @@
 
 #include "SampleApplication.h"
 
+#include "android/base/GLObjectCounter.h"
 #include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/threads/FunctorThread.h"
-
+#include "android/console.h"
+#include "android/emulation/control/multi_display_agent.h"
+#include "android/emulation/MultiDisplay.h"
 #include "Standalone.h"
 
 #include <EGL/egl.h>
@@ -219,12 +222,16 @@ private:
     ComposeDevice* mComposeDevice;
 };
 
+extern "C" const QAndroidMultiDisplayAgent* const gMockQAndroidMultiDisplayAgent;
+
 // SampleApplication implementation/////////////////////////////////////////////
 SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refreshRate, GLESApi glVersion, bool compose) :
     mWidth(windowWidth), mHeight(windowHeight), mRefreshRate(refreshRate), mIsCompose(compose) {
 
     setupStandaloneLibrarySearchPaths();
-
+    emugl::setGLObjectCounter(android::base::GLObjectCounter::get());
+    emugl::set_emugl_window_operations(*getConsoleAgents()->emu);;
+    emugl::set_emugl_multi_display_operations(*getConsoleAgents()->multi_display);
     LazyLoadedEGLDispatch::get();
     if (glVersion == GLESApi_CM) LazyLoadedGLESv1Dispatch::get();
     LazyLoadedGLESv2Dispatch::get();
@@ -245,7 +252,7 @@ SampleApplication::SampleApplication(int windowWidth, int windowHeight, int refr
             mWindow->getFramebufferNativeWindow(),
             0, 0,
             mWidth, mHeight, mWidth, mHeight,
-            mWindow->getDevicePixelRatio(), 0, false);
+            mWindow->getDevicePixelRatio(), 0, false, false);
         mWindow->messageLoop();
     }
 

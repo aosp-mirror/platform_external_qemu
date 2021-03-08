@@ -109,3 +109,12 @@ void getGpuInfoListNative(GpuInfoList* out) {
                 );
     }
 }
+
+// macOS: Disable Vulkan for now unless on M1.
+bool isVulkanSafeToUseNative() {
+#ifdef __aarch64__
+    return true;
+#else
+    return false;
+#endif
+}

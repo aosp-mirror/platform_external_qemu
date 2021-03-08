@@ -82,9 +82,11 @@ extern int daemon(int, int);
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <assert.h>
-/* setjmp must be declared before sysemu/os-win32.h
- * because it is redefined there. */
-#include <setjmp.h>
+#ifndef _MSC_VER
+  /* setjmp must be declared before sysemu/os-win32.h
+   * because it is redefined there. */
+    #include <setjmp.h>
+#endif
 #include <signal.h>
 
 #ifdef __OpenBSD__
@@ -99,7 +101,12 @@ extern int daemon(int, int);
 #endif
 
 #ifdef _WIN32
+#ifdef _MSC_VER
+// msvc libs (mingw doesn't define _MSC_VER)
+#include "sysemu/os-win32-msvc.h"
+#else
 #include "sysemu/os-win32.h"
+#endif
 #endif
 
 #ifdef CONFIG_POSIX
@@ -372,6 +379,8 @@ extern bool insufficientMemMessage;
 #elif defined(__linux__) && defined(__sparc__)
 #include <sys/shm.h>
 #  define QEMU_VMALLOC_ALIGN MAX(getpagesize(), SHMLBA)
+#elif defined(__APPLE__) && defined(__arm64__)
+#  define QEMU_VMALLOC_ALIGN 16384
 #else
 #  define QEMU_VMALLOC_ALIGN getpagesize()
 #endif
@@ -441,7 +450,7 @@ struct iovec {
 
 ssize_t readv(int fd, const struct iovec *iov, int iov_cnt);
 ssize_t writev(int fd, const struct iovec *iov, int iov_cnt);
-#else
+#elif !defined(_WIN32)
 #include <sys/uio.h>
 #endif
 

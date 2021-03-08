@@ -11,21 +11,27 @@
 */
 #include "android/skin/window.h"
 
-#include "android/config/config.h"
-#include "android/crashreport/crash-handler.h"
-#include "android/multitouch-screen.h"
-#include "android/skin/charmap.h"
-#include "android/skin/event.h"
-#include "android/skin/image.h"
-#include "android/skin/winsys.h"
-#include "android/utils/debug.h"
-#include "android/utils/setenv.h"
-#include "android/utils/system.h"
-#include "android/utils/duff.h"
+#include <math.h>                               // for ceil
+#include <stdint.h>                             // for uint32_t, uint8_t
+#include <stdio.h>                              // for NULL, fprintf, stderr
+#include <stdlib.h>                             // for calloc, free, malloc
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "android/crashreport/crash-handler.h"  // for crashhandler_die_format
+#include "android/emulation/control/multi_display_agent.h"
+#include "android/emulator-window.h"
+#include "android/featurecontrol/feature_control.h"
+#include "android/globals.h"
+#include "android/hw-sensors.h"
+#include "android/multitouch-screen.h"          // for multitouch_create_but...
+#include "android/skin/event.h"                 // for SkinEvent, (anonymous...
+#include "android/skin/image.h"                 // for skin_image_unref, ski...
+#include "android/skin/keycode.h"               // for skin_keycode_rotate
+#include "android/skin/linux_keycodes.h"        // for LINUX_BTN_MOUSE
+#include "android/skin/surface.h"               // for skin_surface_blit
+#include "android/skin/winsys.h"                // for skin_winsys_set_windo...
+#include "android/utils/debug.h"                // for derror, dprint, VERBO...
+#include "android/utils/duff.h"                 // for DUFF4
+#include "android/utils/system.h"               // for AFREE, AARRAY_NEW0
 
 /* when shrinking, we reduce the pixel ratio by this fixed amount */
 #define  SHRINK_SCALE  0.6
@@ -84,6 +90,11 @@ background_redraw(Background* back, SkinRect* rect, SkinSurface* surface)
     }
 }
 
+typedef struct SubDisplay {
+    struct SubDisplay* next;
+    SkinRect  rect;
+    int id;
+} SubDisplay;
 
 typedef struct ADisplay {
     SkinRect       rect;
@@ -165,7 +176,6 @@ static int adisplay_init(ADisplay* disp,
                                         disp->rect.size.h,
                                         disp->rect.size.w,
                                         disp->rect.size.h);
-
     return (disp->data == NULL) ? -1 : 0;
 }
 
@@ -669,7 +679,7 @@ static void adisplay_redraw(ADisplay* disp,
 #if 0
     fprintf(stderr, "--- display redraw r.pos(%d,%d) r.size(%d,%d) "
             "disp.pos(%d,%d) disp.size(%d,%d) datasize(%d,%d) rect.pos(%d,%d) rect.size(%d,%d)\n",
-            r.pos.x - disp->rect.pos.x, r.pos.y - disp->rect.pos.y,
+            r.pos.x, r.pos.y,
             r.size.w, r.size.h, disp->rect.pos.x, disp->rect.pos.y,
             disp->rect.size.w, disp->rect.size.h, disp->datasize.w, disp->datasize.h,
             rect->pos.x, rect->pos.y, rect->size.w, rect->size.h );
@@ -812,6 +822,16 @@ finger_state_reset( FingerState*  finger )
     finger->tracking  = 0;
     finger->inside    = 0;
     finger->at_corner = 0;
+}
+
+typedef struct {
+    char tracking;
+    uint32_t button_pressed;
+} MouseState;
+
+static void mouse_state_reset(MouseState* mouse) {
+    mouse->tracking = 0;
+    mouse->button_pressed = 0u;
 }
 
 typedef struct {
@@ -1031,6 +1051,7 @@ struct SkinWindow {
     SkinPos       pos;
     FingerState   finger;
     FingerState   secondary_finger;
+    MouseState mouse;
     ButtonState   button;
     BallState     ball;
     bool          use_emugl_subwindow;
@@ -1047,6 +1068,7 @@ struct SkinWindow {
     int           x_pos;
     int           y_pos;
     double        scale;
+    double        dpr; // Needed for HiDPI
 
     // For dragging and resizing the window
     int           drag_x_start;
@@ -1063,13 +1085,61 @@ struct SkinWindow {
     int           scroll_h; // Needed for OSX
 };
 
+static void add_mouse_event(SkinWindow* window, int32_t rel_x, int32_t rel_y) {
+    uint32_t id = 0;
+    // TODO(liyl): handle multi-display and display rotation.
+    window->win_funcs->mouse_event(rel_x, rel_y, window->mouse.button_pressed,
+                                   id);
+}
+
+static void add_mouse_wheel_event(SkinWindow* window,
+                                  int32_t x_delta,
+                                  int32_t y_delta) {
+    uint32_t id = 0;
+    // TODO(liyl): handle multi-display and display rotation.
+    window->win_funcs->mouse_wheel_event(x_delta, y_delta, id);
+}
+
 static void
 add_finger_event(SkinWindow* window,
+                 FingerState* finger,
                  unsigned x,
                  unsigned y,
                  unsigned state)
 {
-    window->win_funcs->mouse_event(x, y, state);
+    unsigned posX = x;
+    unsigned posY = y;
+    uint32_t id = 0;
+
+    if (finger->display) {
+        if (android_foldable_is_folded()) {
+            int fx, fy, fw, fh;
+            android_foldable_get_folded_area(&fx, &fy, &fw, &fh);
+            switch (finger->display->rotation) {
+            case SKIN_ROTATION_0:
+                posX = x + fx;
+                posY = y + fy;
+                break;
+            case SKIN_ROTATION_180:
+                posX = x + fx + fw - android_hw->hw_lcd_width;
+                posY = y + fy + fh - android_hw->hw_lcd_height;
+                break;
+            case SKIN_ROTATION_90:
+                posX = x + fx;
+                posY = y + fy + fh - android_hw->hw_lcd_height;
+                break;
+            case SKIN_ROTATION_270:
+                posX = x + fx + fw - android_hw->hw_lcd_width;
+                posY = y + fy;
+            break;
+            }
+        } else {
+            const QAndroidMultiDisplayAgent* const multiDisplayAgent =
+                emulator_window_get()->uiEmuAgent->multiDisplay;
+            multiDisplayAgent->translateCoordination(&posX, &posY, &id);
+        }
+    }
+    window->win_funcs->mouse_event(posX, posY, state, id);
 }
 
 static void
@@ -1314,18 +1384,12 @@ typedef struct {
     int fbw;
     int fbh;
     float rot;
+    float dpr;
     bool deleteExisting;
 } gles_show_data;
 
 static void skin_window_run_opengles_show(void* p) {
     gles_show_data* data = p;
-    double dpr = 1.0;
-#ifdef __APPLE__
-    // If the window is on a retina monitor, the framebuffer size needs to be
-    // adjusted to the actual number of pixels.
-    skin_winsys_get_device_pixel_ratio(&dpr);
-#endif
-
     data->window->win_funcs->opengles_show(skin_winsys_get_window_handle(),
                                            data->wx,
                                            data->wy,
@@ -1333,7 +1397,7 @@ static void skin_window_run_opengles_show(void* p) {
                                            data->wh,
                                            data->fbw,
                                            data->fbh,
-                                           dpr,
+                                           data->dpr,
                                            data->rot,
                                            data->deleteExisting);
     AFREE(data);
@@ -1350,6 +1414,19 @@ skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data)
 
     data->fbw = window->framebuffer.w;
     data->fbh = window->framebuffer.h;
+
+    data->dpr = 1.0;
+    // Only sets the pixel ratio to adjust the framebuffer size if HiDPI scaling
+    // is enabled.
+    if (!android_cmdLineOptions->no_hidpi_scaling) {
+        data->dpr = window->dpr;
+    }
+
+#if 0
+    printf("%s pos %d %d, size %d %d, fb %d %d\n", __func__,
+           data->wx, data->wy, data->ww, data->wh,
+           data->fbw, data->fbh);
+#endif
 #if defined(__APPLE__)
     // The native GL subwindow for OSX (using Cocoa) uses cartesian (y-up) coordinates. We
     // have code to transform window (y-down) coordinates into cartesian coordinates at that
@@ -1440,6 +1517,18 @@ static void skin_window_ensure_fully_visible(void* ptr) {
     AFREE(data);
 }
 
+static void
+skin_window_set_device_pixel_ratio( SkinWindow* window )
+{
+    double dpr = 1.0;
+#ifdef __APPLE__
+    // Only macOS devices with Retina display needs to get the device pixel
+    // ratio to zoom the opengles display.
+    skin_winsys_get_device_pixel_ratio(&dpr);
+#endif
+    window->dpr = dpr;
+}
+
 SkinWindow* skin_window_create(SkinLayout* slayout,
                                int x,
                                int y,
@@ -1466,6 +1555,8 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
 
     window->drag_x_start = 0;
     window->drag_y_start = 0;
+
+    skin_window_set_device_pixel_ratio(window);
 
     SkinRect  monitor;
     int       win_w = slayout->size.w;
@@ -1637,6 +1728,7 @@ skin_window_resize( SkinWindow*  window, int resize_container )
     int           window_x = window->x_pos;
     int           window_y = window->y_pos;
     double        scale = window->scale;
+    double        dpr = window->dpr;
 
     // Pre-record the container dimensions
     if (resize_container) {
@@ -1651,6 +1743,17 @@ skin_window_resize( SkinWindow*  window, int resize_container )
     if (scale != 1.0) {
         window_w = (int) ceil(layout_w * scale);
         window_h = (int) ceil(layout_h * scale);
+    }
+
+    // If HiDPI scaling is disabled on the device, window->container and
+    // (window_w, window_h) should be the actual pixel size of container and
+    // the window; the logical pixel size used for Qt should be divided by the
+    // display's pixel ratio.
+    if (android_cmdLineOptions->no_hidpi_scaling) {
+        window->container.w = (int) ceil(window->container.w / dpr);
+        window->container.h = (int) ceil(window->container.h / dpr);
+        window_w = (int) ceil(window_w / dpr);
+        window_h = (int) ceil(window_h / dpr);
     }
 
     // Attempt to resize the window surface. If it doesn't exist, a new one will be
@@ -1686,6 +1789,14 @@ skin_window_resize( SkinWindow*  window, int resize_container )
 
     window->framebuffer.w = drect.size.w;
     window->framebuffer.h = drect.size.h;
+
+    // The OpenGL framebuffer subwindow uses actual pixel size to initialize.
+    // so size of "window->framebuffer" should be the Skin size (logical pixel)
+    // multiplies display's pixel ratio.
+    if (android_cmdLineOptions->no_hidpi_scaling) {
+        window->framebuffer.w = window->framebuffer.w * dpr;
+        window->framebuffer.h = window->framebuffer.h * dpr;
+    }
 
     if (skin_window_recompute_subwindow_rect(window, &drect)) {
         skin_window_show_opengles(window, false);
@@ -1743,6 +1854,7 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
     finger_state_reset( &window->secondary_finger );
     button_state_reset( &window->button );
     ball_state_reset( &window->ball, window );
+    mouse_state_reset(&window->mouse);
 
     skin_window_redraw( window, NULL );
 
@@ -1831,6 +1943,35 @@ skin_window_set_onion( SkinWindow*   window,
 
     if (disp != NULL)
         adisplay_set_onion(disp, window->onion, onion_rotation, onion_alpha);
+}
+
+void
+skin_window_set_layout_region(SkinWindow* window, int xOffset, int yOffset, int width, int height)
+{
+    int displayIdx;
+    for (displayIdx = 0; displayIdx < window->layout.num_displays; displayIdx++) {
+        window->layout.displays[displayIdx].rect.pos.x = xOffset;
+        window->layout.displays[displayIdx].rect.pos.y = yOffset;
+    }
+
+    window->layout.rect.size.w = width;
+    window->layout.rect.size.h = height;
+}
+
+void
+skin_window_set_display_region_and_update(SkinWindow* window, int xOffset,
+                                          int yOffset, int width, int height)
+{
+    int displayIdx;
+    for (displayIdx = 0; displayIdx < window->layout.num_displays; displayIdx++) {
+        window->layout.displays[displayIdx].rect.pos.x = xOffset;
+        window->layout.displays[displayIdx].rect.pos.y = yOffset;
+        window->layout.displays[displayIdx].rect.size.w = width;
+        window->layout.displays[displayIdx].rect.size.h = height;
+    }
+
+    window->layout.rect.size.w = width;
+    window->layout.rect.size.h = height;
 }
 
 void
@@ -1935,6 +2076,8 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         finger = &window->finger;
     }
 
+    MouseState* mouse = &window->mouse;
+
     if (!window->surface)
         return;
 
@@ -1955,15 +2098,27 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
                ev->u.mouse.x, ev->u.mouse.y, window->finger.pos.x,
                window->finger.pos.y, window->finger.inside);
 #endif
-        if (finger->inside) {
+        if (feature_is_enabled(kFeature_VirtioMouse)) {
+            if (mouse->tracking) {
+                // update button state
+                mouse->button_pressed |= 1 << (ev->u.mouse.button);
+
+                int32_t rel_x = ev->u.mouse.xrel;
+                int32_t rel_y = ev->u.mouse.yrel;
+                skin_window_map_to_scale(window, &rel_x, &rel_y);
+
+                add_mouse_event(window, rel_x, rel_y);
+            }
+        } else if (finger->inside) {
             // The click is inside the touch screen
             finger->tracking = 1;
             add_finger_event(window,
+                             finger,
                              finger->pos.x,
                              finger->pos.y,
                              button_state);
         } else if (!multitouch_should_skip_sync(button_state) &&
-                   !multitouch_is_second_finger(button_state)    ) {
+                   !multitouch_is_second_finger(button_state)) {
             // This is a single click outside the touch screen
             window->button.pressed = NULL;
             button = window->button.hover;
@@ -2067,12 +2222,23 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
             window->button.pressed = NULL;
             window->button.hover   = NULL;
             skin_window_move_mouse( window, finger, mx, my );
-        }
-        else if (finger->tracking)
-        {
+        } else if (feature_is_enabled(kFeature_VirtioMouse)) {
+            skin_window_move_mouse(window, finger, mx, my);
+            if (mouse->tracking) {
+                // update button state
+                mouse->button_pressed &= ~(1 << (ev->u.mouse.button));
+
+                int32_t rel_x = ev->u.mouse.xrel;
+                int32_t rel_y = ev->u.mouse.yrel;
+                skin_window_map_to_scale(window, &rel_x, &rel_y);
+
+                add_mouse_event(window, rel_x, rel_y);
+            }
+        } else if (finger->tracking) {
             skin_window_move_mouse( window, finger, mx, my );
             finger->tracking = 0;
             add_finger_event(window,
+                             finger,
                              finger->pos.x,
                              finger->pos.y,
                              button_state);
@@ -2113,21 +2279,53 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         if ( !window->button.pressed )
         {
             skin_window_move_mouse( window, finger, mx, my );
-            if ( finger->tracking ) {
+            if (feature_is_enabled(kFeature_VirtioMouse)) {
+                if (mouse->tracking) {
+                    int32_t rel_x = ev->u.mouse.xrel;
+                    int32_t rel_y = ev->u.mouse.yrel;
+                    skin_window_map_to_scale(window, &rel_x, &rel_y);
+
+                    add_mouse_event(window, rel_x, rel_y);
+                }
+            } else if (finger->tracking) {
                 add_finger_event(window,
+                                 finger,
                                  finger->pos.x,
                                  finger->pos.y,
                                  button_state);
             }
         }
         break;
+
+    case kEventMouseWheel:
+        if (feature_is_enabled(kFeature_VirtioMouse) && mouse->tracking) {
+            add_mouse_wheel_event(window, ev->u.wheel.x_delta,
+                                  ev->u.wheel.y_delta);
+        }
+        break;
+
+    case kEventMouseStartTracking:
+        window->mouse.tracking = 1;
+        break;
+
+    case kEventMouseStopTracking:
+        window->mouse.tracking = 0;
+        break;
+
     case kEventRotaryInput:
         window->win_funcs->rotary_input_event(ev->u.rotary_input.delta);
         break;
 
     case kEventScreenChanged:
-        // Re-setup the OpenGL ES subwindow with a potentially different
-        // framebuffer size (e.g., 2x for retina screens).
+        // Re-setup the guest window and the OpenGL ES subwindow with a
+        // potentially different window size / framebuffer size.
+        //
+        // For example, if HiDPI is enabled, the guest window size keeps the
+        // same, while OpenGL ES subwindow will be initialized with a
+        // framebuffer of 2x size. Otherwise, if HiDPI is disabled, the
+        // framebuffer still gets the same size, but window size will be halved.
+        skin_window_set_device_pixel_ratio(window);
+        skin_window_resize(window, 1);
         skin_window_show_opengles(window, true);
         break;
 

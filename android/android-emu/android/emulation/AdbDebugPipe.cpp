@@ -48,7 +48,7 @@ int AdbDebugPipe::onGuestRecv(AndroidPipeBuffer* buffers, int count) {
 }
 
 int AdbDebugPipe::onGuestSend(const AndroidPipeBuffer* buffers,
-                              int numBuffers) {
+                              int numBuffers, void** newPipePtr) {
     int result = 0;
     while (numBuffers > 0) {
         if (mOutput) {

@@ -570,7 +570,9 @@ void SaveableTexture::loadFromStream(android::base::Stream* stream) {
                     return std::make_pair(pname, value);
                 });
     } else if (m_target != 0) {
-        GL_LOG("SaveableTexture::%s: warning: texture target 0x%x not supported\n", m_target);
+        GL_LOG("SaveableTexture::%s: warning: texture target 0x%x not "
+               "supported\n",
+               __func__, m_target);
         fprintf(stderr, "Warning: texture target %d not supported\n", m_target);
     }
     m_loadedFromStream.store(true);
@@ -825,7 +827,7 @@ void SaveableTexture::onSave(
     } else if (m_target != 0) {
         // SaveableTexture is uninitialized iff a texture hasn't been bound,
         // which will give m_target==0
-        GL_LOG("SaveableTexture::%s: warning: texture target 0x%x not supported\n", m_target);
+        GL_LOG("SaveableTexture::onSave: warning: texture target 0x%x not supported\n", m_target);
         fprintf(stderr, "Warning: texture target 0x%x not supported\n", m_target);
     }
 }
@@ -842,7 +844,8 @@ void SaveableTexture::restore() {
             GenNameInfo(NamedObjectType::TEXTURE), m_globalNamespace));
     if (!m_globalTexObj) {
         GL_LOG("SaveableTexture::%s: %p: could not allocate NamedObject for texture\n", __func__, this);
-        emugl_crash_reporter( "Fatal: could not allocate SaveableTexture m_globalTexObj\n");
+        emugl::emugl_crash_reporter(
+                "Fatal: could not allocate SaveableTexture m_globalTexObj\n");
     }
 
     m_globalName = m_globalTexObj->getGlobalName();
@@ -899,7 +902,11 @@ void SaveableTexture::restore() {
                 m_maxMipmapLevel + 1;
         GLint resultInternalFormat = m_internalFormat;
         GLenum resultFormat = m_format;
-        if (isCoreProfile() && isCoreProfileEmulatedFormat(m_format)) {
+        // Desktop OpenGL doesn't support GL_BGRA_EXT as internal format.
+        if (!isGles2Gles() && m_type == GL_UNSIGNED_BYTE && m_format == GL_BGRA_EXT &&
+            resultInternalFormat == GL_BGRA_EXT) {
+            resultInternalFormat = GL_RGBA;
+        } else if (isCoreProfile() && isCoreProfileEmulatedFormat(m_format)) {
             resultInternalFormat = getCoreProfileEmulatedInternalFormat(
                     m_format, m_type);
             resultFormat = getCoreProfileEmulatedFormat(m_format);

@@ -14,11 +14,23 @@
 
 #include "emugl/common/misc.h"
 
+#include "android/base/GLObjectCounter.h"
+#include "android/base/CpuUsage.h"
+#include "android/base/memory/MemoryTracker.h"
+
+#include <cstring>
+
 static int s_apiLevel = -1;
 static bool s_isPhone = false;
 
 static int s_glesMajorVersion = 2;
 static int s_glesMinorVersion = 0;
+
+android::base::GLObjectCounter* s_default_gl_object_counter = nullptr;
+
+android::base::GLObjectCounter* s_gl_object_counter = nullptr;
+android::base::CpuUsage* s_cpu_usage = nullptr;
+android::base::MemoryTracker* s_mem_usage = nullptr;
 
 static SelectedRenderer s_renderer =
     SELECTED_RENDERER_HOST;
@@ -60,4 +72,34 @@ bool emugl::hasExtension(const char* extensionsStr, const char* wantedExtension)
         return true;
     }
     return false;
+}
+
+void emugl::setGLObjectCounter(android::base::GLObjectCounter* counter) {
+    s_gl_object_counter = counter;
+}
+
+android::base::GLObjectCounter* emugl::getGLObjectCounter() {
+    if (!s_gl_object_counter) {
+        if (!s_default_gl_object_counter) {
+            s_default_gl_object_counter = new android::base::GLObjectCounter;
+        }
+        return s_default_gl_object_counter;
+    }
+    return s_gl_object_counter;
+}
+
+void emugl::setCpuUsage(android::base::CpuUsage* usage) {
+    s_cpu_usage = usage;
+}
+
+android::base::CpuUsage* emugl::getCpuUsage() {
+    return s_cpu_usage;
+}
+
+void emugl::setMemoryTracker(android::base::MemoryTracker* usage) {
+    s_mem_usage = usage;
+}
+
+android::base::MemoryTracker* emugl::getMemoryTracker() {
+    return s_mem_usage;
 }

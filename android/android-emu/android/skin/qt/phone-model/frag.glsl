@@ -8,6 +8,7 @@ uniform sampler2D diffuse_map;
 uniform sampler2D specular_map;
 uniform sampler2D gloss_map;
 uniform samplerCube env_map;
+uniform float no_light;
 
 const vec3 light_pos = vec3(0.0, 0.0, 5.0);
 
@@ -45,5 +46,6 @@ void main() {
     vec3 diffuse = lambert * ((1.0 - spec_intensity) * diffuse_color.rgb +
                                      spec_intensity * refl_color.rgb);
     vec3 specular = vec3(specular_value * spec_intensity);
-    gl_FragColor = vec4(diffuse + specular, diffuse_color.a);
+    vec4 lit_color = vec4(diffuse + specular, diffuse_color.a);
+    gl_FragColor = mix(lit_color, diffuse_color, no_light);
 }

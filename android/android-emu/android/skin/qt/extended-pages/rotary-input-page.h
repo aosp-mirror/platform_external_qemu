@@ -11,12 +11,16 @@
 
 #pragma once
 
-#include "ui_rotary-input-page.h"
+#include <qobjectdefs.h>           // for Q_OBJECT
+#include <QString>                 // for QString
+#include <QWidget>                 // for QWidget
+#include <memory>                  // for unique_ptr
 
-#include <QWidget>
-#include <memory>
+#include "ui_rotary-input-page.h"  // for RotaryInputPage
 
 class EmulatorQtWindow;
+class QObject;
+class QWidget;
 
 class RotaryInputPage : public QWidget
 {

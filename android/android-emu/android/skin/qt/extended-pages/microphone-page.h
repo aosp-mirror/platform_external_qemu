@@ -11,12 +11,22 @@
 
 #pragma once
 
-#include "ui_microphone-page.h"
+#include <QByteArrayData>        // for Q_OBJECT, slots
+#include <QString>               // for QString
+#include <QWidget>               // for QWidget
+#include <memory>                // for shared_ptr, unique_ptr
 
-#include <QWidget>
-#include <memory>
+#include "ui_microphone-page.h"  // for MicrophonePage
 
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
 class EmulatorQtWindow;
+class QObject;
 
 class MicrophonePage : public QWidget
 {
@@ -32,6 +42,7 @@ private slots:
     void on_mic_hookButton_pressed();
     void on_mic_hookButton_released();
     void on_mic_inserted_toggled(bool checked);
+    void on_mic_allowRealAudio_toggled(bool checked);
     void on_mic_voiceAssistButton_pressed();
     void on_mic_voiceAssistButton_released();
 
@@ -40,5 +51,6 @@ private:
 
 private:
     std::unique_ptr<Ui::MicrophonePage> mUi;
+    std::shared_ptr<UiEventTracker> mMicTracker;
     EmulatorQtWindow* mEmulatorWindow;
 };

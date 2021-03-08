@@ -70,7 +70,8 @@ static inline unsigned long int ramblock_recv_bitmap_offset(void *host_addr,
                                                             RAMBlock *rb)
 {
     uint64_t host_addr_offset =
-            (uint64_t)(uintptr_t)(host_addr - (void *)rb->host);
+            (uint64_t)(uintptr_t)((char *)host_addr - (char *)rb->host);
+
     return host_addr_offset >> TARGET_PAGE_BITS;
 }
 
@@ -91,6 +92,15 @@ RAMBlock *qemu_ram_alloc_resizeable(ram_addr_t size, ram_addr_t max_size,
                                                     uint64_t length,
                                                     void *host),
                                     MemoryRegion *mr, Error **errp);
+RAMBlock *qemu_ram_alloc_user_backed(ram_addr_t size, MemoryRegion *mr,
+                                     Error **errp);
+
+typedef void (*QemuUserBackedRamMapFunc)(uint64_t gpa, void* hva, uint64_t size, int flags);
+typedef void (*QemuUserBackedRamUnmapFunc)(uint64_t gpa, uint64_t size);
+
+void qemu_set_user_backed_mapping_funcs(QemuUserBackedRamMapFunc mapFunc,
+                                        QemuUserBackedRamUnmapFunc unmapFunc);
+
 void qemu_ram_free(RAMBlock *block);
 void qemu_set_ram_blocks_exiting(void);
 
@@ -290,7 +300,6 @@ static inline void cpu_physical_memory_set_dirty_range(ram_addr_t start,
     xen_hvm_modified_memory(start, length);
 }
 
-#if !defined(_WIN32)
 static inline void cpu_physical_memory_set_dirty_lebitmap(unsigned long *bitmap,
                                                           ram_addr_t start,
                                                           ram_addr_t pages)
@@ -364,7 +373,6 @@ static inline void cpu_physical_memory_set_dirty_lebitmap(unsigned long *bitmap,
         }
     }
 }
-#endif /* not _WIN32 */
 
 bool cpu_physical_memory_test_and_clear_dirty(ram_addr_t start,
                                               ram_addr_t length,

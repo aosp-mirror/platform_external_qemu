@@ -12,15 +12,23 @@
 
 #include "android/opengles.h"
 
+#include "android/base/CpuUsage.h"
+#include "android/base/GLObjectCounter.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/files/Stream.h"
+#include "android/base/memory/MemoryTracker.h"
 #include "android/base/system/System.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/emulation/address_space_device.h"
+#include "android/emulation/address_space_graphics.h"
+#include "android/emulation/address_space_graphics_types.h"
 #include "android/emulation/GoldfishDma.h"
 #include "android/emulation/RefcountPipe.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/logger.h"
+#include "android/opengl/GLProcessPipe.h"
 #include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/utils/bufprint.h"
@@ -54,15 +62,12 @@
 
 using android::base::pj;
 using android::base::System;
+using android::emulation::asg::AddressSpaceGraphicsContext;
+using android::emulation::asg::ConsumerInterface;
+using android::emulation::asg::ConsumerCallbacks;
 
 /* Name of the GLES rendering library we're going to use */
-#if UINTPTR_MAX == UINT32_MAX
-#define RENDERER_LIB_NAME  "libOpenglRender"
-#elif UINTPTR_MAX == UINT64_MAX
-#define RENDERER_LIB_NAME  "lib64OpenglRender"
-#else
-#error Unknown UINTPTR_MAX
-#endif
+#define RENDERER_LIB_NAME "libOpenglRender"
 
 /* Declared in "android/globals.h" */
 int  android_gles_fast_pipes = 1;
@@ -101,11 +106,22 @@ static bool sEgl2egl = false;
 static emugl::RenderLibPtr sRenderLib = nullptr;
 static emugl::RendererPtr sRenderer = nullptr;
 
-static EGLDispatch* sEgl = nullptr;
-static GLESv2Dispatch* sGLES = nullptr;
+static const EGLDispatch* sEgl = nullptr;
+static const GLESv2Dispatch* sGlesv2 = nullptr;
 
 int android_initOpenglesEmulation() {
     android_init_opengl_logger();
+
+    bool glFineLogging = System::get()->envGet("ANDROID_EMUGL_FINE_LOG") == "1";
+    bool glLogPrinting = System::get()->envGet("ANDROID_EMUGL_LOG_PRINT") == "1";
+
+    AndroidOpenglLoggerFlags loggerFlags =
+        static_cast<AndroidOpenglLoggerFlags>(
+        (glFineLogging ? OPENGL_LOGGER_DO_FINE_LOGGING : 0) |
+        (glLogPrinting ? OPENGL_LOGGER_PRINT_TO_STDOUT : 0));
+
+    android_opengl_logger_set_flags(loggerFlags);
+
     sOpenglLoggerInitialized = true;
 
     char* error = NULL;
@@ -166,8 +182,8 @@ int android_initOpenglesEmulation() {
         }
     }
 
-    sEgl = (EGLDispatch *)sRenderLib->getEGL();
-    sGLES = (GLESv2Dispatch *)sRenderLib->getGL();
+    sEgl = (const EGLDispatch *)sRenderLib->getEGLDispatch();
+    sGlesv2 = (const GLESv2Dispatch *)sRenderLib->getGLESv2Dispatch();
 
     return 0;
 
@@ -179,6 +195,9 @@ BAD_EXIT:
 
 int
 android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int guestApiLevel,
+                              const QAndroidVmOperations *vm_operations,
+                              const QAndroidEmulatorWindowAgent *window_agent,
+                              const QAndroidMultiDisplayAgent *multi_display_agent,
                               int* glesMajorVersion_out,
                               int* glesMinorVersion_out)
 {
@@ -192,7 +211,7 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
         return -1;
     }
 
-    if (!sGLES) {
+    if (!sGlesv2) {
         D("Can't start OpenGLES renderer without GLES libraries");
         return -1;
     }
@@ -221,15 +240,19 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     logfuncs.coarse = android_opengl_logger_write;
     logfuncs.fine = android_opengl_cxt_logger_write;
     sRenderLib->setLogger(logfuncs);
+    sRenderLib->setGLObjectCounter(android::base::GLObjectCounter::get());
     emugl_dma_ops dma_ops;
-    dma_ops.add_buffer = android_goldfish_dma_ops.add_buffer;
-    dma_ops.remove_buffer = android_goldfish_dma_ops.remove_buffer;
     dma_ops.get_host_addr = android_goldfish_dma_ops.get_host_addr;
-    dma_ops.invalidate_host_mappings = android_goldfish_dma_ops.invalidate_host_mappings;
     dma_ops.unlock = android_goldfish_dma_ops.unlock;
     sRenderLib->setDmaOps(dma_ops);
+    sRenderLib->setVmOps(*vm_operations);
+    sRenderLib->setAddressSpaceDeviceControlOps(get_address_space_device_control_ops());
+    sRenderLib->setWindowOps(*window_agent, *multi_display_agent);
+    sRenderLib->setUsageTracker(android::base::CpuUsage::get(),
+                                android::base::MemoryTracker::get());
 
     sRenderer = sRenderLib->initRenderer(width, height, sRendererUsesSubWindow, sEgl2egl);
+
     android::snapshot::Snapshotter::get().addOperationCallback(
             [](android::snapshot::Snapshotter::Operation op,
                android::snapshot::Snapshotter::Stage stage) {
@@ -238,6 +261,56 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
 
     android::emulation::registerOnLastRefCallback(
             sRenderLib->getOnLastColorBufferRef());
+
+    ConsumerInterface interface = {
+        // create
+        [](struct asg_context context,
+           android::base::Stream* loadStream,
+           ConsumerCallbacks callbacks) {
+           return sRenderer->addressSpaceGraphicsConsumerCreate(
+               context, loadStream, callbacks);
+        },
+        // destroy
+        [](void* consumer) {
+           sRenderer->addressSpaceGraphicsConsumerDestroy(consumer);
+        },
+        // pre save
+        [](void* consumer) {
+           sRenderer->addressSpaceGraphicsConsumerPreSave(consumer);
+        },
+        // global presave
+        []() {
+           sRenderer->pauseAllPreSave();
+        },
+        // save
+        [](void* consumer, android::base::Stream* stream) {
+           sRenderer->addressSpaceGraphicsConsumerSave(consumer, stream);
+        },
+        // global postsave
+        []() {
+           sRenderer->resumeAll();
+        },
+        // postSave
+        [](void* consumer) {
+           sRenderer->addressSpaceGraphicsConsumerPostSave(consumer);
+        },
+        // postLoad
+        [](void* consumer) {
+           sRenderer->addressSpaceGraphicsConsumerRegisterPostLoadRenderThread(consumer);
+        },
+        // global preload
+        []() {
+            // This wants to address that when using asg, pipe wants to clean
+            // up all render threads and wait for gl objects, but framebuffer
+            // notices that there is a render thread info that is still not
+            // cleaned up because these render threads come from asg.
+            android::opengl::forEachProcessPipeIdRunAndErase([](uint64_t id) {
+                android_cleanupProcGLObjects(id);
+            });
+            android_waitForOpenglesProcessCleanup();
+        },
+    };
+    AddressSpaceGraphicsContext::setConsumer(interface);
 
     if (!sRenderer) {
         D("Can't start OpenGLES renderer?");
@@ -263,10 +336,10 @@ android_asyncReadbackSupported() {
 }
 
 void
-android_setPostCallback(OnPostFunc onPost, void* onPostContext)
+android_setPostCallback(OnPostFunc onPost, void* onPostContext, bool useBgraReadback, uint32_t displayId)
 {
     if (sRenderer) {
-        sRenderer->setPostCallback(onPost, onPostContext);
+        sRenderer->setPostCallback(onPost, onPostContext, useBgraReadback, displayId);
     }
 }
 
@@ -277,6 +350,15 @@ ReadPixelsFunc android_getReadPixelsFunc() {
         return nullptr;
     }
 }
+
+FlushReadPixelPipeline android_getFlushReadPixelPipeline() {
+    if (sRenderer) {
+        return sRenderer->getFlushReadPixelPipeline();
+    } else {
+        return nullptr;
+    }
+}
+
 
 static char* strdupBaseString(const char* src) {
     const char* begin = strchr(src, '(');
@@ -364,18 +446,24 @@ static emugl::RenderOpt sOpt;
 static int sWidth, sHeight;
 static int sNewWidth, sNewHeight;
 
-int
-android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
-                           int fbw, int fbh, float dpr, float rotation,
-                           bool deleteExisting)
-{
+int android_showOpenglesWindow(void* window,
+                               int wx,
+                               int wy,
+                               int ww,
+                               int wh,
+                               int fbw,
+                               int fbh,
+                               float dpr,
+                               float rotation,
+                               bool deleteExisting,
+                               bool hideWindow) {
     if (!sRenderer) {
         return -1;
     }
     FBNativeWindowType win = (FBNativeWindowType)(uintptr_t)window;
-    bool success = sRenderer->showOpenGLSubwindow(
-            win, wx, wy, ww, wh, fbw, fbh, dpr, rotation,
-                       deleteExisting);
+    bool success = sRenderer->showOpenGLSubwindow(win, wx, wy, ww, wh, fbw, fbh,
+                                                  dpr, rotation, deleteExisting,
+                                                  hideWindow);
     sNewWidth = ww * dpr;
     sNewHeight = wh * dpr;
     return success ? 0 : -1;
@@ -439,11 +527,12 @@ void android_registerScreenshotFunc(ScreenshotFunc f)
     sScreenshotFunc = f;
 }
 
-void android_screenShot(const char* dirname)
+bool android_screenShot(const char* dirname, uint32_t displayId)
 {
     if (sScreenshotFunc) {
-        sScreenshotFunc(dirname);
+        return sScreenshotFunc(dirname, displayId);
     }
+    return false;
 }
 
 const emugl::RendererPtr& android_getOpenglesRenderer() {
@@ -456,11 +545,22 @@ void android_cleanupProcGLObjects(uint64_t puid) {
     }
 }
 
+void android_cleanupProcGLObjectsAndWaitFinished(uint64_t puid) {
+    if (sRenderer) {
+        sRenderer->cleanupProcGLObjects(puid);
+    }
+}
+
+void android_waitForOpenglesProcessCleanup() {
+    if (sRenderer) {
+        sRenderer->waitForProcessCleanup();
+    }
+}
 
 static void* sContext, * sRenderContext, * sSurface;
 static EGLint s_gles_attr[5];
 
-extern void tinyepoxy_init(GLESv2Dispatch* gles, int version);
+extern void tinyepoxy_init(const GLESv2Dispatch* gles, int version);
 
 static bool prepare_epoxy(void) {
     if (!sRenderLib->getOpt(&sOpt)) {
@@ -495,7 +595,7 @@ static bool prepare_epoxy(void) {
     }
     static_assert(sizeof(attr) == sizeof(s_gles_attr), "Mismatch");
     memcpy(s_gles_attr, attr, sizeof(s_gles_attr));
-    tinyepoxy_init(sGLES, major * 10 + minor);
+    tinyepoxy_init(sGlesv2, major * 10 + minor);
     return true;
 }
 
@@ -544,11 +644,11 @@ void android_gl_scanout_texture(DisplayChangeListener* unuse,
     sEgl->eglMakeCurrent(sOpt.display, sOpt.surface, sOpt.surface,
                          sRenderContext);
     if (!s_fbo_id) {
-        sGLES->glGenFramebuffers(1, &s_fbo_id);
+        sGlesv2->glGenFramebuffers(1, &s_fbo_id);
     }
-    sGLES->glBindFramebuffer(GL_FRAMEBUFFER_EXT, s_fbo_id);
-    sGLES->glViewport(0, 0, h, w);
-    sGLES->glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0,
+    sGlesv2->glBindFramebuffer(GL_FRAMEBUFFER_EXT, s_fbo_id);
+    sGlesv2->glViewport(0, 0, h, w);
+    sGlesv2->glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0,
                                   GL_TEXTURE_2D, backing_id, 0);
 }
 
@@ -561,16 +661,31 @@ void android_gl_scanout_flush(DisplayChangeListener* unuse,
     sEgl->eglMakeCurrent(sOpt.display, sOpt.surface, sOpt.surface,
                          sRenderContext);
 
-    sGLES->glBindFramebuffer(GL_READ_FRAMEBUFFER, s_fbo_id);
-    sGLES->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    sGlesv2->glBindFramebuffer(GL_READ_FRAMEBUFFER, s_fbo_id);
+    sGlesv2->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
     int y1 = s_y0_top ? 0 : s_gfx_h;
     int y2 = s_y0_top ? s_gfx_h : 0;
 
-    sGLES->glViewport(0, 0, sWidth, sHeight);
-    sGLES->glBlitFramebuffer(0, y1, s_gfx_w, y2,
+    sGlesv2->glViewport(0, 0, sWidth, sHeight);
+    sGlesv2->glBlitFramebuffer(0, y1, s_gfx_w, y2,
                              0, 0, sWidth, sHeight,
                              GL_COLOR_BUFFER_BIT, GL_NEAREST);
     sEgl->eglSwapBuffers(sOpt.display, sOpt.surface);
-    sGLES->glBindFramebuffer(GL_FRAMEBUFFER_EXT, s_fbo_id);
+    sGlesv2->glBindFramebuffer(GL_FRAMEBUFFER_EXT, s_fbo_id);
+}
+
+struct AndroidVirtioGpuOps* android_getVirtioGpuOps() {
+    if (sRenderer) {
+        return sRenderer->getVirtioGpuOps();
+    }
+    return nullptr;
+}
+
+const void* android_getEGLDispatch() {
+    return sEgl;
+}
+
+const void* android_getGLESv2Dispatch() {
+    return sGlesv2;
 }

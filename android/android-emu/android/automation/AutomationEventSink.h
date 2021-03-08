@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "android/automation/proto/automation.pb.h"
+#include "automation.pb.h"
 #include "android/base/Compiler.h"
 #include "android/base/async/Looper.h"
 #include "android/base/files/Stream.h"
@@ -62,6 +62,9 @@ public:
     // Record an event from the physical model.
     void recordPhysicalModelEvent(uint64_t timeNs,
                                   pb::PhysicalModelEvent& event);
+
+    // Get the last event time for a specific stream.
+    uint64_t getLastEventTimeForStream(android::base::Stream* stream);
 
 private:
     void handleEvent(uint64_t timeNs, const pb::RecordedEvent& event);

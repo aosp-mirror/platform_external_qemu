@@ -18,38 +18,49 @@
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
-#include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 
 #include "emugl/common/lazy_instance.h"
-#include "emugl/common/thread_store.h"
 #include "FrameBuffer.h"
 
 #include <unordered_map>
+#include <unordered_set>
 
+using android::base::AutoLock;
 using android::base::Stream;
+using android::base::Lock;
 
-namespace {
+static thread_local RenderThreadInfo* s_threadInfoPtr;
 
-class ThreadInfoStore : public ::emugl::ThreadStore {
-public:
-    ThreadInfoStore() : ::emugl::ThreadStore(NULL) {}
+struct RenderThreadRegistry {
+    Lock lock;
+    std::unordered_set<RenderThreadInfo*> threadInfos;
 };
 
-}  // namespace
-
-static ::emugl::LazyInstance<ThreadInfoStore> s_tls = LAZY_INSTANCE_INIT;
+static RenderThreadRegistry sRegistry;
 
 RenderThreadInfo::RenderThreadInfo() {
-    s_tls->set(this);
+    s_threadInfoPtr = this;
+    AutoLock lock(sRegistry.lock);
+    sRegistry.threadInfos.insert(this);
 }
 
 RenderThreadInfo::~RenderThreadInfo() {
-    s_tls->set(NULL);
+    s_threadInfoPtr = nullptr;
+    AutoLock lock(sRegistry.lock);
+    sRegistry.threadInfos.erase(this);
 }
 
 RenderThreadInfo* RenderThreadInfo::get() {
-    return static_cast<RenderThreadInfo*>(s_tls->get());
+    return s_threadInfoPtr;
+}
+
+// Loop over all active render thread infos. Takes the global render thread info lock.
+void RenderThreadInfo::forAllRenderThreadInfos(std::function<void(RenderThreadInfo*)> f) {
+    AutoLock lock(sRegistry.lock);
+    for (auto info: sRegistry.threadInfos) {
+        f(info);
+    }
 }
 
 void RenderThreadInfo::onSave(Stream* stream) {
@@ -91,6 +102,10 @@ bool RenderThreadInfo::onLoad(Stream* stream) {
     HandleType ctxHndl = stream->getBe32();
     HandleType drawSurf = stream->getBe32();
     HandleType readSurf = stream->getBe32();
+    currContextHandleFromLoad = ctxHndl;
+    currDrawSurfHandleFromLoad = drawSurf;
+    currReadSurfHandleFromLoad = readSurf;
+
     fb->lock();
     currContext = fb->getContext_locked(ctxHndl);
     currDrawSurf = fb->getWindowSurface_locked(drawSurf);
@@ -110,4 +125,14 @@ bool RenderThreadInfo::onLoad(Stream* stream) {
     stream->getBe64();
 
     return true;
+}
+
+void RenderThreadInfo::postLoadRefreshCurrentContextSurfacePtrs() {
+    FrameBuffer* fb = FrameBuffer::getFB();
+    assert(fb);
+    fb->lock();
+    currContext = fb->getContext_locked(currContextHandleFromLoad);
+    currDrawSurf = fb->getWindowSurface_locked(currDrawSurfHandleFromLoad);
+    currReadSurf = fb->getWindowSurface_locked(currReadSurfHandleFromLoad);
+    fb->unlock();
 }

@@ -1,0 +1,28 @@
+From 7367e292e9899ad5b17a61fab988c4daca1b1261 Mon Sep 17 00:00:00 2001
+From: Lingfeng Yang <lfy@google.com>
+Date: Wed, 26 Dec 2018 13:00:07 -0800
+Subject: [PATCH] Fix bad buffer copy in timestamp tests
+
+512 was used when m_bufsize (256) should have been used.
+
+Change-Id: Ib7c1d788fb873acb150294e248c331173eba19a6
+---
+ .../modules/vulkan/pipeline/vktPipelineTimestampTests.cpp       | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/external/vulkancts/modules/vulkan/pipeline/vktPipelineTimestampTests.cpp b/external/vulkancts/modules/vulkan/pipeline/vktPipelineTimestampTests.cpp
+index 205abc72c..b3752082e 100644
+--- a/external/vulkancts/modules/vulkan/pipeline/vktPipelineTimestampTests.cpp
++++ b/external/vulkancts/modules/vulkan/pipeline/vktPipelineTimestampTests.cpp
+@@ -1971,7 +1971,7 @@ void TransferTestInstance::configCommandBuffer(void)
+ 				{
+ 					0u,      // VkDeviceSize    srcOffset;
+ 					0u,      // VkDeviceSize    destOffset;
+-					512u,    // VkDeviceSize    copySize;
++					m_bufSize,    // VkDeviceSize    copySize;
+ 				};
+ 				vk.cmdCopyBuffer(*m_cmdBuffer, *m_srcBuffer, *m_dstBuffer, 1u, &copyBufRegion);
+ 				break;
+-- 
+2.20.1.415.g653613c723-goog
+

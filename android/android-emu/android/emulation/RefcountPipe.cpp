@@ -34,10 +34,13 @@ RefcountPipe::RefcountPipe(void* hwPipe, Service* svc, base::Stream* loadStream)
     }
 }
 
-void RefcountPipe::onGuestClose(PipeCloseReason reason) {
+RefcountPipe::~RefcountPipe() {
     OnLastColorBufferRef func = sOnLastColorBufferRef.get();
     if (func != nullptr)
         func(mHandle);
+}
+
+void RefcountPipe::onGuestClose(PipeCloseReason reason) {
     delete this;
 }
 
@@ -52,7 +55,8 @@ int RefcountPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
 }
 
 int RefcountPipe::onGuestSend(const AndroidPipeBuffer* buffers,
-                              int numBuffers) {
+                              int numBuffers,
+                              void** newPipePtr) {
     int result = 0;
     char forRecv[4] = {};
 
@@ -75,7 +79,7 @@ void RefcountPipe::onSave(base::Stream* stream) {
 }
 
 void registerRefcountPipeService() {
-    android::AndroidPipe::Service::add(new RefcountPipe::Service());
+    AndroidPipe::Service::add(std::make_unique<RefcountPipe::Service>());
 }
 
 ////////////////////////////////////////////////////////////////////////////////

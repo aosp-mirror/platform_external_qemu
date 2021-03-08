@@ -29,6 +29,7 @@ typedef enum {
     kEventMouseButtonDown,
     kEventMouseButtonUp,
     kEventMouseMotion,
+    kEventMouseWheel,
     kEventQuit,
     kEventScrollBarChanged,
     kEventRotaryInput,
@@ -41,6 +42,12 @@ typedef enum {
     kEventZoomedWindowResized,
     kEventToggleTrackball,
     kEventWindowChanged,
+    kEventSetDisplayRegion,
+    kEventSetDisplayRegionAndUpdate,
+    kEventSetNoSkin,
+    kEventRestoreSkin,
+    kEventMouseStartTracking,
+    kEventMouseStopTracking,
 } SkinEventType;
 
 typedef enum {
@@ -63,6 +70,8 @@ typedef struct {
 typedef struct {
     uint8_t text[32];
     bool down;
+    int32_t keycode;
+    int32_t mod;
 } SkinEventTextInputData;
 
 typedef struct {
@@ -77,8 +86,29 @@ typedef struct {
 } SkinEventMouseData;
 
 typedef struct {
+    int x_delta;
+    int y_delta;
+} SkinEventWheelData;
+
+typedef struct {
     SkinRotation rotation;
 } SkinEventLayoutRotateData;
+
+typedef struct {
+    int xOffset;
+    int yOffset;
+    int width;
+    int height;
+} SkinEventDisplayRegion;
+
+typedef struct {
+    int id;
+    int xOffset;
+    int yOffset;
+    int width;
+    int height;
+    bool add;
+} SkinEventMultiDisplay;
 
 typedef struct {
     int x; // Send current window coordinates to maintain window location
@@ -105,11 +135,14 @@ typedef struct {
         SkinEventKeyData key;
         SkinEventGenericData generic_event;
         SkinEventMouseData mouse;
+        SkinEventWheelData wheel;
         SkinEventScrollData scroll;
         SkinEventRotaryInputData rotary_input;
         SkinEventTextInputData text;
         SkinEventWindowData window;
         SkinEventLayoutRotateData layout_rotation;
+        SkinEventDisplayRegion display_region;
+        SkinEventMultiDisplay multi_display;
     } u;
 } SkinEvent;
 
@@ -120,6 +153,8 @@ extern bool skin_event_poll(SkinEvent* event);
 // Turns mouse tracking on/off. If tracking is on, we receive the mouse
 // position even if there is no click.
 extern void skin_enable_mouse_tracking(bool enable);
+
+extern void skin_event_add(SkinEvent *ev);
 
 #ifdef __cplusplus
 }

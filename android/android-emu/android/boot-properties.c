@@ -142,6 +142,48 @@ void boot_property_add_logcat_pipe(const char* logcat_filter) {
     boot_property_add("qemu.logcat", "start");
 }
 
+void boot_property_add_logcat_pipe_virtconsole(const char* logcat_filter) {
+    boot_property_add("qemu.logcat_filter", (logcat_filter ? logcat_filter : "*:S"));
+}
+
+void boot_property_add_shared_net_ip(int a4) {
+    char value[16];
+    snprintf(value, sizeof(value), "10.1.2.%d", a4);
+    boot_property_add("net.shared_net_ip", value);
+}
+
+void boot_property_add_wifi_mac_prefix(int mac_prefix) {
+    char value[8];
+    snprintf(value, sizeof(value), "%d", mac_prefix);
+    boot_property_add("net.wifi_mac_prefix", value);
+}
+
+void boot_property_add_qemu_adb_secure(int value) {
+    boot_property_add("qemu.adb.secure", (value ? "1" : "0"));
+}
+
+void boot_property_add_qemu_timezone(const char* value) {
+    boot_property_add("qemu.timezone", value);
+}
+
+void boot_property_add_qemu_hw_mainkeys(int value) {
+    boot_property_add("qemu.hw.mainkeys", (value ? "1" : "0"));
+}
+
+void boot_property_add_qemu_keyboard_layout(const char* value) {
+    boot_property_add("qemu.keyboard_layout", value);
+}
+
+void boot_property_add_qemu_sf_fake_camera(const char* value) {
+    boot_property_add("qemu.sf.fake_camera", value);
+}
+
+void boot_property_add_qemu_sf_lcd_density(int mapped_density) {
+    char value[8];
+    snprintf(value, sizeof(value), "%d", mapped_density);
+    boot_property_add("qemu.sf.lcd_density", value);
+}
+
 /* Prints the warning string corresponding to the error code returned by
  * boot_propery_add2().
  */
@@ -312,6 +354,10 @@ boot_property_client_recv( void*         opaque,
         /* Send a NUL to signal the end of the list. */
         qemud_client_send(client, (uint8_t*)"", 1);
 
+        /* when qemu-props starts in the guest, it will issue "list",
+           reset boot complete/data partition mounted */
+        guest_boot_completed = 0;
+        guest_data_partition_mounted = 0;
         return;
     }
 

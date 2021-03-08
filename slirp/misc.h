@@ -50,8 +50,15 @@ struct slirp_quehead {
     struct slirp_quehead *qh_rlink;
 };
 
+#if defined(_MSC_VER) && defined(__clang__)
+// TODO: Clang is not liking the inline functions for some reason.
+// find a solution for this.
+extern void slirp_insque(void *, void *);
+extern void slirp_remque(void *);
+#else
 void slirp_insque(void *, void *);
 void slirp_remque(void *);
+#endif
 int add_exec(struct ex_list **, int, char *, struct in_addr, int);
 int fork_exec(struct socket *so, const char *ex, int do_pty);
 

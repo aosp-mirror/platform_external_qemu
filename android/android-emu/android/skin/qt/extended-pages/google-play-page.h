@@ -10,13 +10,27 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "android/base/StringView.h"
-#include "android/emulation/control/GooglePlayServices.h"
-#include "ui_google-play-page.h"
+#include <qobjectdefs.h>                                   // for Q_OBJECT
+#include <QString>                                         // for QString
+#include <QTimer>                                          // for QTimer
+#include <QWidget>                                         // for QWidget
+#include <memory>                                          // for unique_ptr
+#include <utility>                                         // for pair
 
-#include <QTimer>
-#include <QWidget>
-#include <memory>
+#include "android/base/StringView.h"                       // for StringView
+#include "android/emulation/control/GooglePlayServices.h"  // for GooglePlay...
+
+class QObject;
+class QString;
+class QWidget;
+namespace Ui {
+class GooglePlayPage;
+}  // namespace Ui
+namespace android {
+namespace emulation {
+class AdbInterface;
+}  // namespace emulation
+}  // namespace android
 
 class GooglePlayPage : public QWidget {
     Q_OBJECT

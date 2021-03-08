@@ -2,6 +2,7 @@
 # This is only a subset of the full EGL API.
 
 !Render_EGL_extensions
+namespaces translator,egl
 
 %#include <EGL/egl.h>
 %#define EGL_EGLEXT_PROTOTYPES
@@ -18,3 +19,5 @@ void eglBlitFromCurrentReadBufferANDROID(EGLDisplay display, EGLImageKHR image);
 void* eglSetImageFenceANDROID(EGLDisplay display, EGLImageKHR image);
 void eglWaitImageFenceANDROID(EGLDisplay display, void* fence);
 void eglAddLibrarySearchPathANDROID(const char* path);
+EGLBoolean eglQueryVulkanInteropSupportANDROID(void);
+EGLBoolean eglGetSyncAttribKHR(EGLDisplay display, EGLSync sync, EGLint attribute, EGLint *value);

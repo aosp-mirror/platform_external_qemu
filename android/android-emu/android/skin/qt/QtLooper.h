@@ -11,9 +11,11 @@
 
 #pragma once
 
-#include "android/base/async/Looper.h"
-
 namespace android {
+namespace base {
+class Looper;
+}  // namespace base
+
 namespace qt {
 
 // Return a Looper instance for threads running Qt's event loop.

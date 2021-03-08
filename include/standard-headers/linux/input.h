@@ -10,7 +10,9 @@
 #define _INPUT_H
 
 
+#ifndef _MSC_VER
 #include <sys/time.h>
+#endif
 #include <sys/types.h>
 #include "standard-headers/linux/types.h"
 

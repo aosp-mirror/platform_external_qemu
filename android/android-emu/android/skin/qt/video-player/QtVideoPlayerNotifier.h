@@ -31,6 +31,7 @@
 
 #pragma once
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 #include "android/recording/video/player/VideoPlayerNotifier.h"
 
 #include <QObject>
@@ -77,6 +78,58 @@ private slots:
 signals:
     void updateWidget();
     void videoFinished();
+=======
+#include <qobjectdefs.h>                                         // for emit
+#include <QObject>                                               // for QObject
+#include <QString>                                               // for QString
+#include <QTimer>                                                // for QTimer
+
+#include "android/recording/video/player/VideoPlayerNotifier.h"  // for Vide...
+
+class QObject;
+
+namespace android {
+namespace videoplayer {
+
+// Qt related functions for the video player
+// to notifier updates to the caller and a timer for the player
+// to refresh video displays
+
+class QtVideoPlayerNotifier : public QObject, public VideoPlayerNotifier {
+    Q_OBJECT
+
+public:
+    QtVideoPlayerNotifier() = default;
+
+    virtual ~QtVideoPlayerNotifier() = default;
+
+    // initialize the Qt timer, must be called from Qt UI thread
+    void initTimer() override;
+
+    // start the Qt timer, must be called from Qt UI thread
+    void startTimer(int delayMs) override;
+
+    // stop the Qt timer, must be called from Qt UI thread
+    void stopTimer() override;
+
+    void emitUpdateWidget() override { emit updateWidget(); }
+
+    void emitVideoFinished() override { emit videoFinished(); }
+
+    void emitVideoStopped() override { emit videoStopped(); }
+
+private:
+
+    QTimer mTimer;
+
+private slots:
+    void videoRefreshTimer();
+
+signals:
+    void updateWidget();
+    void videoFinished();
+    void videoStopped();
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 };
 
 }  // namespace videoplayer

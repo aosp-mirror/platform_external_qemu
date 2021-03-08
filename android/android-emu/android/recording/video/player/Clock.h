@@ -68,6 +68,13 @@ public:
 
     int getSpeed() const { return mSpeed; }
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+    double getLastUpdated() const { return mLastUpdated; }
+
+    void setPaused(bool paused) { mPaused = paused; }
+
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 private:
     // clock base
     double mPts = 0.0;

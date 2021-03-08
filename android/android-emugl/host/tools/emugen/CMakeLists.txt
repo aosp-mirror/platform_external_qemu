@@ -1,27 +1,44 @@
 cmake_minimum_required(VERSION 3.5)
 project(emugen)
-enable_testing ()
 
-add_subdirectory(../../../../../../googletest build/googletest)
-include_directories(../../../../android-emu)
+if(NOT ANDROID_QEMU2_TOP_DIR AND MSVC)
+  get_filename_component(ANDROID_QEMU2_TOP_DIR
+                         "${CMAKE_CURRENT_LIST_DIR}/../../../../../" ABSOLUTE)
+  get_filename_component(
+    ADD_PATH "${ANDROID_QEMU2_TOP_DIR}/android/build/cmake/" ABSOLUTE)
+  list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
+  include(visual-studio)
+  include(android)
+endif()
 
-add_executable(emugen
-    ApiGen.cpp
-    EntryPoint.cpp
-    main.cpp
-    Parser.cpp
-    strUtils.cpp
-    TypeFactory.cpp)
+include(android)
 
-add_executable(emugen_unittests
-    Parser.cpp
-    Parser_unittest.cpp)
+if(NOT TARGET gmock_main)
+  add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../googletest googletest)
+  # Okay, google test is not happy under msvc
+  android_target_compile_definitions(
+    gmock_main windows_msvc-x86_64 PUBLIC
+    -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
+  android_target_compile_definitions(
+    gmock windows_msvc-x86_64 PUBLIC
+    -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
+  android_target_compile_definitions(
+    gtest windows_msvc-x86_64 PUBLIC
+    -DGTEST_INCLUDE_GTEST_INTERNAL_CUSTOM_GTEST_H_)
+  enable_testing()
+endif()
 
-IF(UNIX AND NOT APPLE)
-    set_target_properties(emugen PROPERTIES LINK_FLAGS "-Wl,-rpath=$ORIGIN/lib64:$ORIGIN/lib:$ORIGIN/intermediates64")
-    set_target_properties(emugen_unittests PROPERTIES LINK_FLAGS "-Wl,-rpath=$ORIGIN/lib64:$ORIGIN/lib:$ORIGIN/intermediates64")
-ENDIF(UNIX AND NOT APPLE)
+# Emugen executable (note not unicode safe!)
+android_add_executable(
+  TARGET emugen
+  LICENSE Apache-2.0
+  SRC # cmake-format: sortable
+      ApiGen.cpp EntryPoint.cpp main.cpp Parser.cpp strUtils.cpp
+      TypeFactory.cpp)
+target_include_directories(
+  emugen PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android/android-emu-base)
 
-
-target_link_libraries(emugen_unittests gmock_main)
-add_test (NAME emugen_unittests COMMAND emugen_unittests)
+# The unit tests
+android_add_test(TARGET emugen_unittests SRC # cmake-format: sortable
+                                             Parser.cpp Parser_unittest.cpp)
+target_link_libraries(emugen_unittests PRIVATE gmock_main)

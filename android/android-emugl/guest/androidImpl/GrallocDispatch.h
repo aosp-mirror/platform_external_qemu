@@ -21,38 +21,8 @@
 struct gralloc_implementation {
     void* lib;
 
-    struct framebuffer_device_t* fb_dev;
     struct alloc_device_t* alloc_dev;
-
-    struct gralloc_module_t* fb_module;
     struct gralloc_module_t* alloc_module;
-
-// Framebuffer device===========================================================
-
-    int setSwapInterval(int interval) {
-        return fb_dev->setSwapInterval(fb_dev, interval);
-    }
-
-    int setUpdateRect(int left, int top, int width, int height) {
-        if (!fb_dev->setUpdateRect)
-            return 0;
-        return fb_dev->setUpdateRect(fb_dev, left, top, width, height);
-    }
-
-    int post(buffer_handle_t buffer) { return fb_dev->post(fb_dev, buffer); }
-
-    int compositionComplete(struct framebuffer_device_t* dev) {
-        return fb_dev->compositionComplete(fb_dev);
-    }
-
-    void dumpFb(char* buffer, int buff_len) {
-        if (!fb_dev->dump) return;
-        fb_dev->dump(fb_dev, buffer, buff_len);
-    }
-
-    int enableScreen(int enable) {
-        return fb_dev->enableScreen(fb_dev, enable);
-    }
 
 // Allocator device=============================================================
 
@@ -143,5 +113,10 @@ void load_gralloc_module(
 
 void unload_gralloc_module(
     const struct gralloc_implementation* impl);
+
+void set_global_gralloc_module(struct gralloc_implementation* impl);
+
+struct gralloc_implementation*
+get_global_gralloc_module(void);
 
 } // extern "C"

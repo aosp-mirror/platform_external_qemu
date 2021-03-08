@@ -48,10 +48,17 @@ public:
             return false;
         }
 
-        mHandler.reset(new google_breakpad::ExceptionHandler(
-                google_breakpad::MinidumpDescriptor(getDumpDir()),
-                &HostCrashReporter::exceptionFilterCallback,
-                nullptr, nullptr, true, std::stoi(crashpipe.mClient)));
+        mHandler = CreateExceptionHandler(std::stoi(crashpipe.mClient), getDumpDir());
+
+        return mHandler != nullptr;
+    }
+
+    bool attachSimpleCrashHandler() override {
+        if (mHandler) {
+            return false;
+        }
+
+        mHandler = CreateExceptionHandler(-1, getDumpDir());
 
         return mHandler != nullptr;
     }
@@ -72,6 +79,17 @@ public:
     static bool exceptionFilterCallback(void* context);
 
 private:
+    static std::unique_ptr<google_breakpad::ExceptionHandler> CreateExceptionHandler(
+            const int server_fd, const std::string& dumpDir) {
+        return std::make_unique<google_breakpad::ExceptionHandler>(
+                google_breakpad::MinidumpDescriptor(dumpDir),
+                &HostCrashReporter::exceptionFilterCallback,
+                nullptr,
+                nullptr,
+                true,
+                server_fd);
+    }
+
     bool onCrashPlatformSpecific() override;
 
     std::unique_ptr<google_breakpad::ExceptionHandler> mHandler;

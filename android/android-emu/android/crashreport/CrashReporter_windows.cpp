@@ -62,6 +62,10 @@ public:
         return mHandler != nullptr;
     }
 
+    bool attachSimpleCrashHandler() override {
+        return false;
+    }
+
     bool waitServicePipeReady(const std::string& pipename,
                               int timeout_ms) override {
         static_assert(kWaitIntervalMS > 0, "kWaitIntervalMS must be greater than 0");

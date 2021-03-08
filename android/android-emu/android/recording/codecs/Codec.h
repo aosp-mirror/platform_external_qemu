@@ -52,6 +52,7 @@ public:
     // Configures the encoder and opens the codec context. Returns true if
     // successful, false otherwise.
     virtual bool configAndOpenEncoder(const AVFormatContext* oc,
+                                      AVCodecContext* c,
                                       AVStream* stream) const = 0;
     // Configures and initializes either the SwsContext or SwrContext
     virtual bool initSwxContext(const AVCodecContext* c, T* swxCxt) const = 0;

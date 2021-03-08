@@ -26,6 +26,12 @@
 #include "hw/input/android_keycodes.h"
 #include "hw/input/linux_keycodes.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <pthread.h>
+#endif
+
 #define MAX_EVENTS (256 * 4)
 
 /* Event types (as per Linux input event layer) */
@@ -197,6 +203,11 @@ typedef struct GoldfishEvDevState {
     uint32_t last;
     uint32_t state;
 
+    /* Latency measurement */
+    bool measure_latency;
+    uint32_t enqueue_times_us[MAX_EVENTS];
+    uint32_t dequeue_times_us[MAX_EVENTS];
+
     uint32_t modifier_state;
 
     /* All data below here is set up at realize and not modified thereafter */
@@ -210,6 +221,11 @@ typedef struct GoldfishEvDevState {
 
     int32_t *abs_info;
     size_t abs_info_count;
+#ifdef _WIN32
+    SRWLOCK lock;
+#else
+    pthread_mutex_t lock;
+#endif
 } GoldfishEvDevState;
 
 #define GOLDFISHEVDEV_VM_STATE_DESCRIPTION(device_name) \

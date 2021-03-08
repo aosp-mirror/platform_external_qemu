@@ -31,6 +31,7 @@
 
 #pragma once
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 #include "android/recording/video/player/VideoPlayerNotifier.h"
 #include "android/recording/video/player/VideoPlayerRenderTarget.h"
 #include "android/utils/compiler.h"
@@ -61,6 +62,72 @@ public:
     virtual bool isRunning() const = 0;
     virtual void videoRefresh() = 0;
     virtual void scheduleRefresh(int delayMs) = 0;
+=======
+#include <atomic>  // for atomic
+#include <memory>  // for unique_ptr
+#include <string>  // for string
+
+class VideoPlayerRenderTarget;
+namespace offworld {
+class DatasetInfo;
+}  // namespace offworld
+
+namespace android {
+namespace videoplayer {
+class VideoPlayerNotifier;
+
+struct PlayConfig {
+    // absolute timestamp from the beginning of the video, measured in seconds
+    std::atomic<double> seekTimestamp;
+    // play in looping mode or not
+    std::atomic<bool> looping;
+
+    PlayConfig(double timestamp = 0, bool looping_ = false)
+        : seekTimestamp(timestamp), looping(looping_) {}
+
+    // assignment operator because std::atomic deletes it
+    PlayConfig& operator=(const PlayConfig& other) {
+        seekTimestamp.exchange(other.seekTimestamp);
+        looping.exchange(other.looping);
+        return *this;
+    }
+};
+
+// public APIs of the video player
+class VideoPlayer {
+protected:
+    VideoPlayer() = default;
+
+public:
+    virtual ~VideoPlayer() = default;
+
+public:
+    // create a video player instance the input video file, the output widget to
+    // display, and the notifier to receive updates
+    static std::unique_ptr<VideoPlayer> create(
+            std::string videoFile,
+            VideoPlayerRenderTarget* widget,
+            std::unique_ptr<VideoPlayerNotifier> notifier);
+
+    virtual void start() = 0;
+    virtual void start(const PlayConfig& playConfig) = 0;
+    virtual void stop() = 0;
+    virtual void pause() = 0;
+    virtual void pauseAt(double timestamp) = 0;
+
+    virtual bool isRunning() const = 0;
+    virtual bool isLooping() const = 0;
+
+    virtual void videoRefresh() = 0;
+    virtual void scheduleRefresh(int delayMs) = 0;
+
+    virtual void loadVideoFileWithData(
+            const ::offworld::DatasetInfo& datasetInfo) = 0;
+
+    virtual void setErrorStatusAndRecordErrorMessage(std::string errorDetails) = 0;
+    virtual bool getErrorStatus() = 0;
+    virtual std::string getErrorMessage() = 0;
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 };
 
 }  // namespace videoplayer

@@ -11,23 +11,45 @@
 
 #include "android/skin/qt/emulator-container.h"
 
-#include "android/skin/qt/ModalOverlay.h"
-#include "android/skin/qt/VirtualSceneInfoDialog.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/qt/tool-window.h"
-#include "android/utils/debug.h"
+#include <qframe.h>                                  // for QFrame::NoFrame
+#include <qglobal.h>                                 // for Q_ASSERT
+#include <qlist.h>                                   // for QList<>::iterator
+#include <qnamespace.h>                              // for WindowMinimized
+#include <qwindowdefs.h>                             // for WId
+#include <QFlags>                                    // for QFlags
+#include <QFrame>                                    // for QFrame
+#include <QMoveEvent>                                // for QMoveEvent
+#include <QObject>                                   // for QObject
+#include <QPoint>                                    // for QPoint
+#include <QScrollBar>                                // for QScrollBar
+#include <QStyle>                                    // for QStyle
+#include <QStyleFactory>                             // for QStyleFactory
+#include <QVector2D>                                 // for QVector2D
+#include <algorithm>                                 // for min, find, max
+#include <functional>                                // for __base
+#include <tuple>                                     // for tuple
+#include <utility>                                   // for move
 
-#include <QApplication>
-#include <QObject>
-#include <QScrollBar>
-#include <QStyle>
-#include <QStyleFactory>
-#include <QtCore>
+#include "android/cmdline-option.h"                  // for android_cmdLineOptions
+#include "android/skin/qt/ModalOverlay.h"            // for ModalOverlay
+#include "android/skin/qt/OverlayMessageCenter.h"    // for OverlayMessageCe...
+#include "android/skin/qt/VirtualSceneInfoDialog.h"  // for VirtualSceneInfo...
+#include "android/skin/qt/emulator-qt-window.h"      // for EmulatorQtWindow
+#include "android/skin/qt/size-tweaker.h"            // for SizeTweaker
+#include "android/skin/qt/tool-window.h"             // for ToolWindow
+#include "android/utils/debug.h"                     // for VERBOSE_PRINT
 
-#include <algorithm>
+class QCloseEvent;
+class QFocusEvent;
+class QKeyEvent;
+class QMoveEvent;
+class QResizeEvent;
+class QScrollBar;
+class QShowEvent;
+class QStyle;
 
 #if defined(__APPLE__)
-#include "android/skin/qt/mac-native-window.h"
+#include "android/skin/qt/mac-native-window.h"       // for getNSWindow, nsW...
 #endif
 
 #if defined(_WIN32)
@@ -46,7 +68,11 @@ EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
 
     // The following hints prevent the minimize/maximize/close buttons from
     // appearing.
-    setWindowFlags(Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::Window);
+#ifdef __APPLE__
+    setWindowFlags(Qt::WindowTitleHint | Qt::Window);
+#else
+    setWindowFlags(Qt::WindowTitleHint | Qt::Window | Qt::CustomizeWindowHint);
+#endif
 
 #ifdef __APPLE__
     // Digging into the Qt source code reveals that if the above flags are set
@@ -183,6 +209,12 @@ void EmulatorContainer::changeEvent(QEvent* event) {
             // to ignore this state change, we just want to counteract the
             // effects it had.
             if (windowState() & Qt::WindowMaximized) {
+                // BUG: 142088252 On macOS, if the emulator window
+                // - coincides with the monitor dimensions
+                // - the host's device pixel ratio is 1,
+                // it's possible to enter an infinite recursive event loop if
+                // we try the functions here.
+#ifndef __APPLE__
                 showNormal();
                 if (mModalOverlay) {
                     mModalOverlay->showNormal();
@@ -191,19 +223,29 @@ void EmulatorContainer::changeEvent(QEvent* event) {
                     mVirtualSceneInfo->showNormal();
                 }
                 mMessages->showNormal();
+#endif
             } else if (windowState() & Qt::WindowMinimized) {
                 // In case the window was minimized without pressing the
                 // toolbar's minimize button (which is possible on some
                 // window managers), remember to hide the toolbar (which
                 // will also hide the extended window, if it exists).
-                mEmulatorWindow->toolWindow()->hide();
-                if (mModalOverlay) {
-                    mModalOverlay->hide();
-                }
-                if (mVirtualSceneInfo) {
-                    mVirtualSceneInfo->hide();
-                }
-                mMessages->hide();
+                // showMinimized();
+                // bug: 128977914
+                // This code is super risky to run because even though
+                // the window state returns minimized, we could be
+                // in the process of restoring from minimize,
+                // which ends up hiding a bunch of stuff again
+                // when the emulator restores.
+                // Instead, opt for the lesser evil of leaving tool
+                // windows and other objects visible.
+                // mEmulatorWindow->toolWindow()->hide();
+                // if (mModalOverlay) {
+                //     mModalOverlay->hide();
+                // }
+                // if (mVirtualSceneInfo) {
+                //     mVirtualSceneInfo->hide();
+                // }
+                // mMessages->hide();
             }
 
             break;
@@ -303,12 +345,12 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
     // way to achieve this on OS X is apparently to make the tool window a
     // "child" of the main window (using OS X's native API).
     Q_ASSERT(mEmulatorWindow->toolWindow());
-    mEmulatorWindow->toolWindow()
-            ->showNormal();  // force creation of native window id
+    mEmulatorWindow->toolWindow()->showNormal();  // force creation of native window id
     WId tool_wid = mEmulatorWindow->toolWindow()->effectiveWinId();
-    Q_ASSERT(tool_wid && wid);
     tool_wid = (WId)getNSWindow((void*)tool_wid);
-    nsWindowAdopt((void*)wid, (void*)tool_wid);
+    if (wid && tool_wid) {
+        nsWindowAdopt((void*)wid, (void*)tool_wid);
+    }
 #endif  // __APPLE__
 
     // showEvent() gets called when the emulator is minimized because we are
@@ -346,6 +388,14 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
     }
 }
 
+void EmulatorContainer::show() {
+    // When emulator is running in embedded mode,
+    // hide all windows except for extended controls window.
+    if (android_cmdLineOptions->qt_hide_window) {
+        return;
+    }
+    QScrollArea::show();
+}
 void EmulatorContainer::showMinimized() {
 // Some Linux window managers (specifically, Compiz, which is the default
 // Ubuntu window manager) will not allow minimizing unless the minimize
@@ -417,6 +467,11 @@ void EmulatorContainer::slot_resizeDone() {
 void EmulatorContainer::slot_showModalOverlay(QString text) {
     slot_hideModalOverlay();
     slot_hideVirtualSceneInfoDialog();
+    // When emulator is running in embedded mode,
+    // hide all windows except for extended controls window.
+    if (android_cmdLineOptions->qt_hide_window) {
+        return;
+    }
     mModalOverlay = new Ui::ModalOverlay(text, this);
     adjustModalOverlayGeometry();
     mModalOverlay->show();

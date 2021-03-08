@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>621</width>
-    <height>456</height>
+    <width>647</width>
+    <height>552</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,10 +16,10 @@
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>16</x>
      <y>20</y>
-     <width>511</width>
-     <height>21</height>
+     <width>300</width>
+     <height>50</height>
     </rect>
    </property>
    <property name="font">
@@ -41,9 +41,9 @@
    <widget class="QSlider" name="car_speedSlider">
     <property name="geometry">
      <rect>
-      <x>120</x>
-      <y>0</y>
-      <width>311</width>
+      <x>0</x>
+      <y>28</y>
+      <width>160</width>
       <height>20</height>
      </rect>
     </property>
@@ -63,24 +63,55 @@
    <widget class="QLabel" name="car_speedLabel">
     <property name="geometry">
      <rect>
-      <x>440</x>
-      <y>0</y>
-      <width>61</width>
+      <x>165</x>
+      <y>29</y>
+      <width>60</width>
       <height>17</height>
      </rect>
     </property>
     <property name="text">
-     <string>0 MPH</string>
+     <string>0</string>
     </property>
    </widget>
+  </widget>
+  <widget class="QComboBox" name="comboBox_speedUnit">
+   <property name="geometry">
+    <rect>
+     <x>205</x>
+     <y>47</y>
+     <width>85</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">padding: 3px 3px 3px 3px;</string>
+   </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <item>
+    <property name="text">
+     <string>mph</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>kmph</string>
+    </property>
+   </item>
   </widget>
   <widget class="QGroupBox" name="groupBox_3">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>130</y>
+     <x>326</x>
+     <y>85</y>
      <width>231</width>
-     <height>31</height>
+     <height>50</height>
     </rect>
    </property>
    <property name="font">
@@ -102,8 +133,8 @@
    <widget class="QCheckBox" name="checkBox_night">
     <property name="geometry">
      <rect>
-      <x>120</x>
-      <y>0</y>
+      <x>0</x>
+      <y>25</y>
       <width>96</width>
       <height>22</height>
      </rect>
@@ -127,10 +158,10 @@
   <widget class="QGroupBox" name="groupBox_4">
    <property name="geometry">
     <rect>
-     <x>310</x>
-     <y>130</y>
+     <x>16</x>
+     <y>150</y>
      <width>271</width>
-     <height>31</height>
+     <height>50</height>
     </rect>
    </property>
    <property name="font">
@@ -152,8 +183,8 @@
    <widget class="QCheckBox" name="checkBox_park">
     <property name="geometry">
      <rect>
-      <x>120</x>
-      <y>0</y>
+      <x>0</x>
+      <y>25</y>
       <width>131</width>
       <height>22</height>
      </rect>
@@ -177,10 +208,10 @@
   <widget class="QGroupBox" name="groupBox_5">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>190</y>
+     <x>326</x>
+     <y>150</y>
      <width>481</width>
-     <height>21</height>
+     <height>50</height>
     </rect>
    </property>
    <property name="font">
@@ -202,8 +233,8 @@
    <widget class="QCheckBox" name="checkBox_fuel_low">
     <property name="geometry">
      <rect>
-      <x>120</x>
-      <y>0</y>
+      <x>0</x>
+      <y>25</y>
       <width>96</width>
       <height>22</height>
      </rect>
@@ -227,9 +258,9 @@
   <widget class="QComboBox" name="comboBox_ignition">
    <property name="geometry">
     <rect>
-     <x>430</x>
-     <y>70</y>
-     <width>83</width>
+     <x>326</x>
+     <y>40</y>
+     <width>275</width>
      <height>25</height>
     </rect>
    </property>
@@ -278,9 +309,9 @@
   <widget class="QComboBox" name="comboBox_gear">
    <property name="geometry">
     <rect>
-     <x>150</x>
-     <y>70</y>
-     <width>83</width>
+     <x>16</x>
+     <y>110</y>
+     <width>275</width>
      <height>25</height>
     </rect>
    </property>
@@ -297,75 +328,30 @@
    </property>
    <item>
     <property name="text">
-     <string>N</string>
+     <string>N (Neutral)</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>R</string>
+     <string>R (Reverse)</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>P</string>
+     <string>P (Park)</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>D</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>D1</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>D2</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>D3</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>D4</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>D5</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>D6</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>D7</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>D8</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>D9</string>
+     <string>D (Drive)</string>
     </property>
    </item>
   </widget>
   <widget class="QGroupBox" name="groupBox_7">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>70</y>
+     <x>16</x>
+     <y>85</y>
      <width>101</width>
      <height>21</height>
     </rect>
@@ -390,8 +376,8 @@
   <widget class="QGroupBox" name="groupBox_8">
    <property name="geometry">
     <rect>
-     <x>310</x>
-     <y>70</y>
+     <x>326</x>
+     <y>20</y>
      <width>111</width>
      <height>21</height>
     </rect>
@@ -411,6 +397,45 @@
    </property>
    <property name="ColorGroup" stdset="0">
     <string>Title</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="button_loadrecord">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>210</y>
+     <width>95</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>LOAD RECORD</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="button_playrecord">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>250</y>
+     <width>95</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>PLAY RECORD</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="button_voice_assistant">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>210</y>
+     <width>101</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>VOICE ASSIST</string>
    </property>
   </widget>
  </widget>

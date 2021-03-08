@@ -111,6 +111,8 @@ ANDROID_BEGIN_HEADER
 typedef struct ClientFrameBuffer {
     /* Pixel format used in the client framebuffer. */
     uint32_t    pixel_format;
+    int width;
+    int height;
     /* Address of the client framebuffer. */
     void*       framebuffer;
 } ClientFrameBuffer;
@@ -148,7 +150,9 @@ typedef enum CameraSourceType {
     /* A webcam camera device enumerated on the host. */
     kWebcam,
     /* A virtual scene camera, renders a virtual environment on the host. */
-    kVirtualScene
+    kVirtualScene,
+    /* A video playback camera, feeds in frames from a video file. */
+    kVideoPlayback
 } CameraSourceType;
 
 /* Camera information descriptor, containing properties of a camera connected

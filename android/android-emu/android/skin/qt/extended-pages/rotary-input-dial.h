@@ -12,8 +12,15 @@
 #ifndef ROTARY_INPUT_DIAL_H
 #define ROTARY_INPUT_DIAL_H
 
-#include <QDial>
-#include <QSvgRenderer>
+#include <qobjectdefs.h>  // for Q_OBJECT
+#include <QDial>          // for QDial
+#include <QString>        // for QString
+#include <QSvgRenderer>   // for QSvgRenderer
+
+class QObject;
+class QPaintEvent;
+class QString;
+class QWidget;
 
 // A QDial with a custom rotating SVG instead of the standard styling.
 class RotaryInputDial : public QDial

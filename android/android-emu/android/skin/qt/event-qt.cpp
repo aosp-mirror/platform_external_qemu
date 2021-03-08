@@ -9,19 +9,14 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include <stdbool.h>
-
-#include <QSemaphore>
-
-#include "android/skin/event.h"
-#include "android/skin/keycode.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/utils/utf8_utils.h"
+#include "android/skin/event.h"                  // for SkinEvent, skin_enab...
+#include "android/skin/qt/emulator-qt-window.h"  // for EmulatorQtWindow
 
 #define  DEBUG  1
 
 #if DEBUG
-#include "android/utils/debug.h"
+#include "android/utils/debug.h"                 // for VERBOSE_PRINT
+
 #define  D(...)   VERBOSE_PRINT(surface,__VA_ARGS__)
 #else
 #define  D(...)   ((void)0)
@@ -40,4 +35,10 @@ extern void skin_enable_mouse_tracking(bool enable) {
     if (window) {
         window->setMouseTracking(enable);
     }
+}
+
+extern void skin_event_add(SkinEvent* event) {
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    if (!window) return;
+    window->queueSkinEvent(event);
 }

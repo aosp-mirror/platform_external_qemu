@@ -11,21 +11,35 @@
 
 #include "android/skin/qt/extended-pages/camera-virtualscene-subpage.h"
 
-#include "android/emulation/control/virtual_scene_agent.h"
-#include "android/globals.h"
-#include "android/metrics/MetricsReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
-#include "android/skin/qt/qt-settings.h"
+#include <QByteArray>                                       // for QByteArray
+#include <QCheckBox>                                        // for QCheckBox
+#include <QFileInfo>                                        // for QFileInfo
+#include <QMap>                                             // for QMap
+#include <QMapIterator>                                     // for QMapIterator
+#include <QSettings>                                        // for QSettings
+#include <QVariant>                                         // for QVariant
+#include <functional>                                       // for __base
 
-#include <QDebug>
-#include <QFileInfo>
-#include <QSettings>
+#include "android/avd/util.h"                               // for path_getA...
+#include "android/emulation/control/virtual_scene_agent.h"  // for QAndroidV...
+#include "android/globals.h"                                // for android_hw
+#include "android/metrics/MetricsReporter.h"                // for MetricsRe...
+#include "android/metrics/UiEventTracker.h"                 // for UiEventTr...
+#include "android/skin/qt/poster-image-well.h"              // for PosterIma...
+#include "android/skin/qt/qt-settings.h"                    // for PER_AVD_S...
+#include "studio_stats.pb.h"                                // for EmulatorU...
+
+class QShowEvent;
 
 const QAndroidVirtualSceneAgent* CameraVirtualSceneSubpage::sVirtualSceneAgent =
         nullptr;
 
 CameraVirtualSceneSubpage::CameraVirtualSceneSubpage(QWidget* parent)
-    : QWidget(parent), mUi(new Ui::CameraVirtualSceneSubpage()) {
+    : QWidget(parent), mUi(new Ui::CameraVirtualSceneSubpage()),
+       mCameraTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::BUTTON_PRESS,
+              android_studio::EmulatorUiEvent::EXTENDED_CAMERA_TAB))
+    {
     mUi->setupUi(this);
 
     connect(mUi->imageWall, SIGNAL(interaction()), this,
@@ -49,6 +63,7 @@ void CameraVirtualSceneSubpage::showEvent(QShowEvent* event) {
 }
 
 void CameraVirtualSceneSubpage::on_imageWall_pathChanged(QString path) {
+    mCameraTracker->increment("WALL");
     changePoster("wall", path);
 }
 
@@ -57,11 +72,30 @@ void CameraVirtualSceneSubpage::on_imageWall_scaleChanged(float value) {
 }
 
 void CameraVirtualSceneSubpage::on_imageTable_pathChanged(QString path) {
+    mCameraTracker->increment("TABLE");
     changePoster("table", path);
 }
 
 void CameraVirtualSceneSubpage::on_imageTable_scaleChanged(float value) {
     changePosterScale("table", value);
+}
+
+void CameraVirtualSceneSubpage::on_toggleTV_toggled(bool value) {
+    // Persist to settings.
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        const QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+
+        avdSpecificSettings.setValue(
+                Ui::Settings::PER_AVD_VIRTUAL_SCENE_TV_ANIMATION, value);
+    }
+
+    // Update the scene.
+    if (sVirtualSceneAgent) {
+        sVirtualSceneAgent->setAnimationState(value);
+    }
 }
 
 void CameraVirtualSceneSubpage::reportInteraction() {
@@ -154,6 +188,9 @@ void CameraVirtualSceneSubpage::loadUi() {
                     self->mUi->imageTable->setMinMaxSize(minWidth, maxWidth);
                 }
             });
+
+    // Set UI display to correct state.
+    mUi->toggleTV->setChecked(sVirtualSceneAgent->getAnimationState());
 }
 
 // static
@@ -172,6 +209,10 @@ void CameraVirtualSceneSubpage::loadInitialSettings() {
                 avdSpecificSettings
                         .value(Ui::Settings::PER_AVD_VIRTUAL_SCENE_POSTER_SIZES)
                         .toMap();
+        const bool savedAnimationState =
+                avdSpecificSettings
+                        .value(Ui::Settings::PER_AVD_VIRTUAL_SCENE_TV_ANIMATION)
+                        .toBool();
 
         // Send the saved posters to the virtual scene.  This is called early
         // during emulator startup.  If a poster has been set via a command line
@@ -194,5 +235,8 @@ void CameraVirtualSceneSubpage::loadInitialSettings() {
                 }
             }
         }
+
+        // Set animation state.
+        sVirtualSceneAgent->setAnimationState(savedAnimationState);
     }
 }

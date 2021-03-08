@@ -1,3 +1,18 @@
+/*
+* Copyright (C) 2017 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 #include "PostWorker.h"
 
 #include "ColorBuffer.h"
@@ -6,14 +21,53 @@
 #include "RenderThreadInfo.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
+#include "emugl/common/misc.h"
 
-PostWorker::PostWorker(PostWorker::BindSubwinCallback&& cb) :
+#include "emugl/common/misc.h"
+
+#define POST_DEBUG 0
+#if POST_DEBUG >= 1
+#define DD(fmt, ...) \
+    fprintf(stderr, "%s:%d| " fmt, __func__, __LINE__, ##__VA_ARGS__)
+#else
+#define DD(fmt, ...) (void)0
+#endif
+
+static void sDefaultRunOnUiThread(UiUpdateFunc f, void* data, bool wait) {
+    (void)f;
+    (void)data;
+    (void)wait;
+}
+
+PostWorker::PostWorker(
+        PostWorker::BindSubwinCallback&& cb,
+        bool mainThreadPostingOnly,
+        EGLContext eglContext,
+        EGLSurface eglSurface) :
     mFb(FrameBuffer::getFB()),
-    mBindSubwin(cb) {}
+    mBindSubwin(cb),
+    m_mainThreadPostingOnly(mainThreadPostingOnly),
+    m_runOnUiThread(m_mainThreadPostingOnly ?
+        emugl::get_emugl_window_operations().runOnUiThread :
+        sDefaultRunOnUiThread),
+    mContext(eglContext),
+    mSurface(eglSurface) {}
 
-void PostWorker::post(ColorBuffer* cb) {
+void PostWorker::fillMultiDisplayPostStruct(ComposeLayer* l,
+                                            hwc_rect_t displayArea,
+                                            hwc_frect_t cropArea,
+                                            hwc_transform_t transform) {
+    l->composeMode = HWC2_COMPOSITION_DEVICE;
+    l->blendMode = HWC2_BLEND_MODE_NONE;
+    l->transform = transform;
+    l->alpha = 1.0;
+    l->displayFrame = displayArea;
+    l->crop = cropArea;
+}
+
+void PostWorker::postImpl(ColorBuffer* cb) {
     // bind the subwindow eglSurface
-    if (!m_initialized) {
+    if (!m_mainThreadPostingOnly && !m_initialized) {
         m_initialized = mBindSubwin();
     }
 
@@ -23,9 +77,13 @@ void PostWorker::post(ColorBuffer* cb) {
     float px = mFb->getPx();
     float py = mFb->getPy();
     int zRot = mFb->getZrot();
+    hwc_transform_t rotation = (hwc_transform_t)0;
 
     cb->waitSync();
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     GLuint tex = cb->scale();
+=======
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 
     // Find the x and y values at the origin when "fully scrolled."
     // Multiply by 2 because the texture goes from -1 to 1, not 0 to 1.
@@ -38,10 +96,76 @@ void PostWorker::post(ColorBuffer* cb) {
     float dx = px * fx;
     float dy = py * fy;
 
-    //
-    // render the color buffer to the window and apply the overlay
-    //
-    cb->postWithOverlay(tex, zRot, dx, dy);
+    if (emugl::get_emugl_multi_display_operations().isMultiDisplayEnabled()) {
+        uint32_t combinedW, combinedH;
+        emugl::get_emugl_multi_display_operations().getCombinedDisplaySize(&combinedW, &combinedH);
+        mFb->getTextureDraw()->prepareForDrawLayer();
+        int32_t start_id = -1, x, y;
+        uint32_t id, w, h, c;
+        while(emugl::get_emugl_multi_display_operations().getNextMultiDisplay(start_id, &id,
+                                                                              &x, &y, &w, &h,
+                                                                              nullptr, nullptr,
+                                                                              &c)) {
+            if ((id != 0) && (w == 0 || h == 0 || c == 0)) {
+                start_id = id;
+                continue;
+            }
+            ColorBuffer* multiDisplayCb = id == 0 ? cb : mFb->findColorBuffer(c).get();
+            if (multiDisplayCb == nullptr) {
+                start_id = id;
+                continue;
+            }
+            ComposeLayer l;
+            hwc_rect_t displayArea = { .left = (int)x,
+                                       .top = (int)y,
+                                       .right = (int)(x + w),
+                                       .bottom = (int)(y + h) };
+            hwc_frect_t cropArea = { .left = 0.0,
+                                     .top = (float)multiDisplayCb->getHeight(),
+                                     .right = (float)multiDisplayCb->getWidth(),
+                                     .bottom = 0.0 };
+            fillMultiDisplayPostStruct(&l, displayArea, cropArea, rotation);
+            multiDisplayCb->postLayer(&l, combinedW, combinedH);
+            start_id = id;
+        }
+        mFb->getTextureDraw()->cleanupForDrawLayer();
+    }
+    else if (emugl::get_emugl_window_operations().isFolded()) {
+        mFb->getTextureDraw()->prepareForDrawLayer();
+        ComposeLayer l;
+        int x, y, w, h;
+        emugl::get_emugl_window_operations().getFoldedArea(&x, &y, &w, &h);
+        hwc_rect_t displayArea = { .left = 0,
+                                   .top = 0,
+                                   .right = windowWidth,
+                                   .bottom = windowHeight };
+        hwc_frect_t cropArea = { .left = (float)x,
+                                 .top = (float)(y + h),
+                                 .right = (float)(x + w),
+                                 .bottom = (float)y };
+        switch ((int)zRot/90) {
+            case 1:
+                rotation = HWC_TRANSFORM_ROT_270;
+                break;
+            case 2:
+                rotation = HWC_TRANSFORM_ROT_180;
+                break;
+            case 3:
+                rotation = HWC_TRANSFORM_ROT_90;
+                break;
+            default: ;
+        }
+
+        fillMultiDisplayPostStruct(&l, displayArea, cropArea, rotation);
+        cb->postLayer(&l, m_viewportWidth/dpr, m_viewportHeight/dpr);
+        mFb->getTextureDraw()->cleanupForDrawLayer();
+    }
+    else {
+        // render the color buffer to the window and apply the overlay
+        GLuint tex = cb->scale();
+        cb->postWithOverlay(tex, zRot, dx, dy);
+    }
+
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
 }
 
@@ -49,10 +173,12 @@ void PostWorker::post(ColorBuffer* cb) {
 // This rebinds the subwindow context (to account for
 // when the refresh is a display change, for instance)
 // and resets the posting viewport.
-void PostWorker::viewport(int width, int height) {
+void PostWorker::viewportImpl(int width, int height) {
     // rebind the subwindow eglSurface unconditionally---
     // this could be from a display change
-    m_initialized = mBindSubwin();
+    if (!m_mainThreadPostingOnly) {
+        m_initialized = mBindSubwin();
+    }
 
     float dpr = mFb->getDpr();
     m_viewportWidth = width * dpr;
@@ -64,15 +190,17 @@ void PostWorker::viewport(int width, int height) {
 // last posted color buffer to show to the user. Instead of
 // displaying whatever happens to be in the back buffer,
 // clear() is useful for outputting consistent colors.
-void PostWorker::clear() {
+void PostWorker::clearImpl() {
+#ifndef __linux__
     s_gles2.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
                     GL_STENCIL_BUFFER_BIT);
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
+#endif
 }
 
-void PostWorker::compose(ComposeDevice* p) {
+void PostWorker::composeImpl(ComposeDevice* p) {
     // bind the subwindow eglSurface
-    if (!m_initialized) {
+    if (!m_mainThreadPostingOnly && !m_initialized) {
         m_initialized = mBindSubwin();
     }
 
@@ -84,16 +212,25 @@ void PostWorker::compose(ComposeDevice* p) {
         s_gles2.glGenFramebuffers(1, &m_composeFbo);
     }
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, m_composeFbo);
+
+    auto cbPtr = mFb->findColorBuffer(p->targetHandle);
+
+    if (!cbPtr) {
+        s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
+        return;
+    }
+
     s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER,
                                    GL_COLOR_ATTACHMENT0_OES,
                                    GL_TEXTURE_2D,
-                                   mFb->findColorBuffer(p->targetHandle)->getTexture(),
+                                   cbPtr->getTexture(),
                                    0);
 
-    DBG("worker compose %d layers\n", p->numLayers);
+    DD("worker compose %d layers\n", p->numLayers);
     mFb->getTextureDraw()->prepareForDrawLayer();
     for (int i = 0; i < p->numLayers; i++, l++) {
-        DBG("\tcomposeMode %d color %d %d %d %d blendMode "
+        DD("\tcomposeMode %d color %d %d %d %d blendMode "
                "%d alpha %f transform %d %d %d %d %d "
                "%f %f %f %f\n",
                l->composeMode, l->color.r, l->color.g, l->color.b,
@@ -105,18 +242,93 @@ void PostWorker::compose(ComposeDevice* p) {
         composeLayer(l);
     }
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     mFb->findColorBuffer(p->targetHandle)->setSync();
+=======
+    cbPtr->setSync();
+
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
     s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
     mFb->getTextureDraw()->cleanupForDrawLayer();
 }
 
+void PostWorker::composev2Impl(ComposeDevice_v2* p) {
+    // bind the subwindow eglSurface
+    if (!m_mainThreadPostingOnly && !m_initialized) {
+        m_initialized = mBindSubwin();
+    }
+
+    ComposeLayer* l = (ComposeLayer*)p->layer;
+    GLint vport[4] = { 0, };
+    s_gles2.glGetIntegerv(GL_VIEWPORT, vport);
+    s_gles2.glViewport(0, 0, mFb->getWidth(),mFb->getHeight());
+    if (!m_composeFbo) {
+        s_gles2.glGenFramebuffers(1, &m_composeFbo);
+    }
+    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, m_composeFbo);
+
+    auto cbPtr = mFb->findColorBuffer(p->targetHandle);
+
+    if (!cbPtr) {
+        s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
+        return;
+    }
+
+    s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER,
+                                   GL_COLOR_ATTACHMENT0_OES,
+                                   GL_TEXTURE_2D,
+                                   cbPtr->getTexture(),
+                                   0);
+
+    DD("worker compose %d layers\n", p->numLayers);
+    mFb->getTextureDraw()->prepareForDrawLayer();
+    for (int i = 0; i < p->numLayers; i++, l++) {
+        DD("\tcomposeMode %d color %d %d %d %d blendMode "
+               "%d alpha %f transform %d %d %d %d %d "
+               "%f %f %f %f\n",
+               l->composeMode, l->color.r, l->color.g, l->color.b,
+               l->color.a, l->blendMode, l->alpha, l->transform,
+               l->displayFrame.left, l->displayFrame.top,
+               l->displayFrame.right, l->displayFrame.bottom,
+               l->crop.left, l->crop.top, l->crop.right,
+               l->crop.bottom);
+        composeLayer(l);
+    }
+
+    cbPtr->setSync();
+    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
+    mFb->getTextureDraw()->cleanupForDrawLayer();
+}
+
+void PostWorker::bind() {
+    if (m_mainThreadPostingOnly) {
+        if (mFb->getDisplay() != EGL_NO_DISPLAY) {
+            EGLint res = s_egl.eglMakeCurrent(mFb->getDisplay(), mFb->getWindowSurface(), mFb->getWindowSurface(), mContext);
+            if (!res) fprintf(stderr, "%s: error in binding: 0x%x\n", __func__, s_egl.eglGetError());
+        } else {
+            fprintf(stderr, "%s: no display!\n", __func__);
+        }
+    } else {
+        mBindSubwin();
+    }
+}
+
+void PostWorker::unbind() {
+    if (mFb->getDisplay() != EGL_NO_DISPLAY) {
+        s_egl.eglMakeCurrent(mFb->getDisplay(), EGL_NO_SURFACE, EGL_NO_SURFACE,
+                             EGL_NO_CONTEXT);
+    }
+}
+
 void PostWorker::composeLayer(ComposeLayer* l) {
     if (l->composeMode == HWC2_COMPOSITION_DEVICE) {
         ColorBufferPtr cb = mFb->findColorBuffer(l->cbHandle);
-        if (cb == nullptr) {
+        if (!cb) {
             // bad colorbuffer handle
-            ERR("%s: fail to find colorbuffer %d\n", __FUNCTION__, l->cbHandle);
+            // ERR("%s: fail to find colorbuffer %d\n", __FUNCTION__, l->cbHandle);
             return;
         }
         cb->postLayer(l, mFb->getWidth(), mFb->getHeight());
@@ -128,9 +340,135 @@ void PostWorker::composeLayer(ComposeLayer* l) {
     }
 }
 
+void PostWorker::screenshot(
+    ColorBuffer* cb,
+    int width,
+    int height,
+    GLenum format,
+    GLenum type,
+    SkinRotation rotation,
+    void* pixels) {
+    cb->readPixelsScaled(
+        width, height, format, type, rotation, pixels);
+}
+
 PostWorker::~PostWorker() {
     if (mFb->getDisplay() != EGL_NO_DISPLAY) {
         s_egl.eglMakeCurrent(mFb->getDisplay(), EGL_NO_SURFACE, EGL_NO_SURFACE,
                              EGL_NO_CONTEXT);
     }
 }
+
+void PostWorker::post(ColorBuffer* cb) {
+    if (m_mainThreadPostingOnly) {
+        PostArgs args = {
+            .postCb = cb,
+        };
+
+        m_toUiThread.send(args);
+
+        m_runOnUiThread([](void* data) {
+            PostWorker* p = (PostWorker*)data;
+            PostArgs uiThreadArgs;
+            p->m_toUiThread.receive(&uiThreadArgs);
+            p->bind();
+            p->postImpl(uiThreadArgs.postCb);
+        },
+        this,
+        false /* no wait */);
+    } else {
+        postImpl(cb);
+    }
+}
+
+void PostWorker::viewport(int width, int height) {
+    if (m_mainThreadPostingOnly) {
+        PostArgs args = {
+            .width = width,
+            .height = height,
+        };
+
+        m_toUiThread.send(args);
+
+        m_runOnUiThread([](void* data) {
+            PostWorker* p = (PostWorker*)data;
+            PostArgs uiThreadArgs;
+            p->m_toUiThread.receive(&uiThreadArgs);
+            p->bind();
+            p->viewportImpl(uiThreadArgs.width, uiThreadArgs.height);
+        },
+        this,
+        false /* no wait */);
+    } else {
+        viewportImpl(width, height);
+    }
+}
+
+void PostWorker::compose(ComposeDevice* p, uint32_t bufferSize) {
+    if (m_mainThreadPostingOnly) {
+        PostArgs args;
+        std::vector<char> buffer(bufferSize, 0);
+        memcpy(buffer.data(), p, bufferSize);
+        args.composeBuffer = buffer;
+
+        m_toUiThread.send(args);
+
+        m_runOnUiThread([](void* data) {
+            PostWorker* p = (PostWorker*)data;
+            PostArgs uiThreadArgs;
+            p->m_toUiThread.receive(&uiThreadArgs);
+            p->bind();
+            p->composeImpl((ComposeDevice*)uiThreadArgs.composeBuffer.data());
+        },
+        this,
+        false /* no wait */);
+    } else {
+        composeImpl(p);
+    }
+}
+
+void PostWorker::compose(ComposeDevice_v2* p, uint32_t bufferSize) {
+    if (m_mainThreadPostingOnly) {
+        PostArgs args;
+        std::vector<char> buffer(bufferSize, 0);
+        memcpy(buffer.data(), p, bufferSize);
+        args.composeBuffer = buffer;
+
+        m_toUiThread.send(args);
+
+        m_runOnUiThread([](void* data) {
+            PostWorker* p = (PostWorker*)data;
+            PostArgs uiThreadArgs;
+            p->m_toUiThread.receive(&uiThreadArgs);
+            p->bind();
+            p->composev2Impl((ComposeDevice_v2*)uiThreadArgs.composeBuffer.data());
+        },
+        this,
+        false /* no wait */);
+    } else {
+        composev2Impl(p);
+    }
+}
+
+void PostWorker::clear() {
+    if (m_mainThreadPostingOnly) {
+        PostArgs args = {
+            .postCb = 0,
+        };
+
+        m_toUiThread.send(args);
+
+        m_runOnUiThread([](void* data) {
+            PostWorker* p = (PostWorker*)data;
+            PostArgs uiThreadArgs;
+            p->m_toUiThread.receive(&uiThreadArgs);
+            p->bind();
+            p->clearImpl();
+        },
+        this,
+        false /* no wait */);
+    } else {
+        clearImpl();
+    }
+}
+

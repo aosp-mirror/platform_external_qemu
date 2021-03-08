@@ -15,6 +15,7 @@
 */
 #include "ApiGen.h"
 #include "android/base/EnumFlags.h"
+#include "android/utils/file_io.h"
 #include "EntryPoint.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -81,6 +82,9 @@ int ApiGen::genProcTypes(const std::string &filename, SideType side)
     fprintf(fp, "#define __%s_%s_proc_t_h\n", basename, sideString(side));
     fprintf(fp, "\n\n");
     fprintf(fp, "\n#include \"%s_types.h\"\n",basename);
+    fprintf(fp, "#ifdef _MSC_VER\n");
+    fprintf(fp, "#include <stdint.h>\n");
+    fprintf(fp, "#endif\n");
     fprintf(fp, "#ifndef %s_APIENTRY\n",basename);
     fprintf(fp, "#define %s_APIENTRY \n",basename);
     fprintf(fp, "#endif\n");
@@ -364,7 +368,7 @@ int ApiGen::genEncoderHeader(const std::string &filename)
     fprintf(fp, "\tChecksumCalculator *m_checksumCalculator;\n\n");
 
     fprintf(fp, "\t%s(IOStream *stream, ChecksumCalculator *checksumCalculator);\n", classname.c_str());
-    fprintf(fp, "\tvirtual uint64_t lockAndWriteDma(void* data, uint32_t sz) { return 0; }\n");
+    fprintf(fp, "\tvirtual uint64_t lockAndWriteDma(void*, uint32_t) { return 0; }\n");
     fprintf(fp, "};\n\n");
 
     fprintf(fp, "#endif  // GUARD_%s\n", classname.c_str());
@@ -449,7 +453,7 @@ static void writeVarEncodingExpression(Var& var, FILE* fp)
         if (var.isDMA()) {
             fprintf(fp, "\t*(uint64_t *)(ptr) = ctx->lockAndWriteDma(%s, __size_%s); ptr += 8;\n", varname, varname);
         } else {
-            fprintf(fp, "\t*(unsigned int *)(ptr) = __size_%s; ptr += 4;\n", varname);
+            fprintf(fp, "\tmemcpy(ptr, &__size_%s, 4); ptr += 4;\n", varname);
 
             Var::PointerDir dir = var.pointerDir();
             if (dir == Var::POINTER_INOUT || dir == Var::POINTER_IN) {
@@ -493,7 +497,11 @@ static void writeVarLargeEncodingExpression(Var& var, FILE* fp)
     if (var.writeExpression() != "") {
         fprintf(fp, "%s", var.writeExpression().c_str());
     } else {
-        fprintf(fp, "\t\tstream->writeFully(%s, __size_%s);\n", varname, varname);
+        if (var.guestPackExpression() != "") {
+            fprintf(fp, "\t\t%s;\n", var.guestPackExpression().c_str());
+        } else {
+            fprintf(fp, "\t\tstream->writeFully(%s, __size_%s);\n", varname, varname);
+        }
         fprintf(fp, "\t\tif (useChecksum) checksumCalculator->addBuffer(%s, __size_%s);\n", varname, varname);
     }
     if (var.nullAllowed()) fprintf(fp, "\t}\n");
@@ -544,6 +552,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
     fprintf(fp, "#include \"%s_enc.h\"\n\n\n", m_basename.c_str());
     fprintf(fp, "#include <vector>\n\n");
     fprintf(fp, "#include <stdio.h>\n\n");
+    fprintf(fp, "#include \"android/base/Tracing.h\"\n");
     fprintf(fp, "namespace {\n\n");
 
     // unsupport printout
@@ -567,6 +576,8 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 #if DLOG_ALL_ENCODES
         fprintf(fp, "ALOGD(\"%%s: enter\", __FUNCTION__);\n");
 #endif
+
+        fprintf(fp, "\tAEMU_SCOPED_TRACE(\"%s encode\");\n", e->name().c_str());
 
 #if INSTRUMENT_TIMING_GUEST
         fprintf(fp, "\tstruct timespec ts0, ts1;\n");
@@ -840,7 +851,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
     for (size_t i = 0; i < n; i++) {
         EntryPoint *e = &at(i);
         if (e->unsupported()) {
-            fprintf(fp, 
+            fprintf(fp,
                     "\tthis->%s = (%s_%s_proc_t) &enc_unsupported;\n",
                     e->name().c_str(),
                     e->name().c_str(),
@@ -965,14 +976,6 @@ int ApiGen::genDecoderImpl(const std::string &filename)
     fprintf(fp, "#include <stdio.h>\n\n");
     fprintf(fp, "typedef unsigned int tsize_t; // Target \"size_t\", which is 32-bit for now. It may or may not be the same as host's size_t when emugen is compiled.\n\n");
 
-    // helper macros
-    fprintf(fp,
-            "#ifdef OPENGL_DEBUG_PRINTOUT\n"
-            "#  define DEBUG(...) do { if (emugl_cxt_logger) { emugl_cxt_logger(__VA_ARGS__); } } while(0)\n"
-            "#else\n"
-            "#  define DEBUG(...)  ((void)0)\n"
-            "#endif\n\n");
-
     fprintf(fp,
 #if DECODER_CHECK_GL_ERRORS
             "#define CHECK_GL_ERRORS\n"
@@ -1039,6 +1042,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
 
         // TODO - add for return value;
         fprintf(fp, "\t\tcase OP_%s: {\n", e->name().c_str());
+        fprintf(fp, "\t\t\tandroid::base::beginTrace(\"%s decode\");\n", e->name().c_str());
 
 #if INSTRUMENT_TIMING_HOST
         fprintf(fp, "\t\t\tstruct timespec ts0, ts1, ts2;\n");
@@ -1054,7 +1058,13 @@ R"(        // Do this on every iteration, as some commands may change the checks
             retvalType = e->retval().type()->name();
         }
 
+#define SKIP_DEBUG_PRINT 1
+
         for (int pass = PASS_FIRST; pass < PASS_LAST; pass++) {
+#if SKIP_DEBUG_PRINT
+            if (pass == PASS_DebugPrint) continue;
+#endif
+
 #if INSTRUMENT_TIMING_HOST
             if (pass == PASS_FunctionCall) {
                 fprintf(fp, "\t\t\tclock_gettime(CLOCK_REALTIME, &ts2);\n");
@@ -1069,9 +1079,9 @@ R"(        // Do this on every iteration, as some commands may change the checks
 
             if (pass == PASS_FunctionCall) {
                 if (e->customDecoder() && !e->notApi()) {
-                    fprintf(fp, "\t\t\tthis->%s_dec(", e->name().c_str());
+                    fprintf(fp, "\t\t\tthis->%s_dec(", e->hostApiName().c_str());
                 } else {
-                    fprintf(fp, "\t\t\tthis->%s(", e->name().c_str());
+                    fprintf(fp, "\t\t\tthis->%s(", e->hostApiName().c_str());
                 }
                 if (e->customDecoder()) {
                     fprintf(fp, "this"); // add a context to the call
@@ -1430,6 +1440,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
                     "ts1.tv_sec, ts1.tv_nsec/1000, timeDiff, timeDiff2);\n", e->name().c_str());
 #endif
         fprintf(fp, "\t\t\tSET_LASTCALL(\"%s\");\n", e->name().c_str());
+        fprintf(fp, "\t\t\tandroid::base::endTrace();\n");
         fprintf(fp, "\t\t\tbreak;\n");
         fprintf(fp, "\t\t}\n");
 

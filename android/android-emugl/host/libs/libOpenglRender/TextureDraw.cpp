@@ -16,6 +16,9 @@
 
 #include "DispatchTables.h"
 
+#include "emugl/common/crash_reporter.h"
+
+#include <string>
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
@@ -42,8 +45,24 @@ GLuint createShader(GLint shaderType, const char* shaderText) {
     s_gles2.glCompileShader(shader);
     s_gles2.glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (success == GL_FALSE) {
+        GLint infoLogLength;
+        s_gles2.glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::string infoLog(infoLogLength + 1, '\0');
+        fprintf(stderr, "%s: TextureDraw shader compile failed.\n", __func__);
+        s_gles2.glGetShaderInfoLog(shader, infoLogLength, 0, &infoLog[0]);
+        fprintf(stderr, "%s: Info log:\n%s\n", __func__,
+                infoLog.c_str());
+        fprintf(stderr, "%s: Source:\n%s\n", __func__,
+                shaderText);
         s_gles2.glDeleteShader(shader);
-        return 0;
+
+        // No point in continuing as it's going to be a black screen.
+        // Send a crash report.
+        emugl::emugl_crash_reporter(
+            "FATAL: Could not compile shader for guest framebuffer blit. "
+            "There may be an issue with the GPU drivers on your machine. "
+            "Try using software rendering; launch the emulator "
+            "from the command line with -gpu swiftshader_indirect. ");
     }
 
     return shader;
@@ -155,20 +174,23 @@ const GLint kIndicesPerDraw = 6;
 
 }  // namespace
 
-TextureDraw::TextureDraw() :
-        mVertexShader(0),
-        mFragmentShader(0),
-        mProgram(0),
-        mCoordTranslation(-1),
-        mCoordScale(-1),
-        mPositionSlot(-1),
-        mInCoordSlot(-1),
-        mScaleSlot(-1),
-        mTextureSlot(-1),
-        mTranslationSlot(-1),
-        mMaskTexture(0),
-        mHaveNewMask(false),
-        mMaskIsValid(false) {
+TextureDraw::TextureDraw()
+    : mVertexShader(0),
+      mFragmentShader(0),
+      mProgram(0),
+      mCoordTranslation(-1),
+      mCoordScale(-1),
+      mPositionSlot(-1),
+      mInCoordSlot(-1),
+      mScaleSlot(-1),
+      mTextureSlot(-1),
+      mTranslationSlot(-1),
+      mMaskTexture(0),
+      mMaskTextureWidth(0),
+      mMaskTextureHeight(0),
+      mHaveNewMask(false),
+      mMaskIsValid(false),
+      mShouldReallocateTexture(true) {
     // Create shaders and program.
     mVertexShader = createShader(GL_VERTEX_SHADER, kVertexShaderSource);
     mFragmentShader = createShader(GL_FRAGMENT_SHADER, kFragmentShaderSource);
@@ -353,43 +375,84 @@ bool TextureDraw::drawImpl(GLuint texture, float rotation,
         break;
     }
 
+    s_gles2.glClear(GL_COLOR_BUFFER_BIT);
     s_gles2.glDrawElements(GL_TRIANGLES, kIndicesPerDraw, GL_UNSIGNED_BYTE,
                            (const GLvoid*)indexShift);
 
-    if (wantOverlay && mHaveNewMask) {
-        // Create a texture from the mask image and make it
-        // available to be blended
-        GLint prevUnpackAlignment;
-        s_gles2.glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpackAlignment);
-        s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    bool shouldDrawMask = false;
+    GLfloat scale[2];
+    s_gles2.glGetUniformfv(mProgram, mScaleSlot, scale);
+    GLfloat overlayScale[2];
+    {
+        android::base::AutoLock lock(mMaskLock);
+        if (wantOverlay && mHaveNewMask) {
+            // Create a texture from the mask image and make it
+            // available to be blended
+            GLint prevUnpackAlignment;
+            s_gles2.glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpackAlignment);
+            s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        s_gles2.glBindTexture(GL_TEXTURE_2D, mMaskTexture);
+            s_gles2.glBindTexture(GL_TEXTURE_2D, mMaskTexture);
 
-        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, mMaskWidth, mMaskHeight, 0,
-                             GL_RGBA, GL_UNSIGNED_BYTE, mMaskPixels);
+            if (mShouldReallocateTexture) {
+                mMaskTextureWidth = std::max(mMaskTextureWidth, mMaskWidth);
+                mMaskTextureHeight = std::max(mMaskTextureHeight, mMaskHeight);
+                // mMaskPixels is actually not used here, we only use
+                // glTexImage2D here to resize the texture
+                s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,
+                                     mMaskTextureWidth, mMaskTextureHeight, 0,
+                                     GL_RGBA, GL_UNSIGNED_BYTE,
+                                     mMaskPixels.data());
+                mShouldReallocateTexture = false;
+            }
 
-        s_gles2.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        s_gles2.glEnable(GL_BLEND);
+            // Put the new texture in the center.
+            s_gles2.glTexSubImage2D(
+                    GL_TEXTURE_2D, 0, (mMaskTextureWidth - mMaskWidth) / 2,
+                    (mMaskTextureHeight - mMaskHeight) / 2, mMaskWidth,
+                    mMaskHeight, GL_RGBA, GL_UNSIGNED_BYTE, mMaskPixels.data());
 
-        s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
+            s_gles2.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            s_gles2.glEnable(GL_BLEND);
 
-        mHaveNewMask = false;
-        mMaskIsValid = true;
+            s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
+
+            mHaveNewMask = false;
+            mMaskIsValid = true;
+        }
+        shouldDrawMask = mMaskIsValid && wantOverlay;
+        // Scale the texture to only show that actual mask.
+        overlayScale[0] = static_cast<float>(mMaskTextureWidth) /
+                          static_cast<float>(mMaskWidth) * scale[0];
+        overlayScale[1] = static_cast<float>(mMaskTextureHeight) /
+                          static_cast<float>(mMaskHeight) * scale[1];
     }
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     if (wantOverlay && mMaskIsValid) {
         if (mBlendResetNeeded) {
             s_gles2.glEnable(GL_BLEND);
             mBlendResetNeeded = false;
         }
+=======
+    if (shouldDrawMask) {
+        if (mBlendResetNeeded) {
+            s_gles2.glEnable(GL_BLEND);
+            mBlendResetNeeded = false;
+        }
+        s_gles2.glUniform2f(mScaleSlot, overlayScale[0], overlayScale[1]);
+        // mMaskTexture should only be accessed on the thread where drawImpl is
+        // called, hence no need for lock.
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
         s_gles2.glBindTexture(GL_TEXTURE_2D, mMaskTexture);
         s_gles2.glDrawElements(GL_TRIANGLES, kIndicesPerDraw, GL_UNSIGNED_BYTE,
                                (const GLvoid*)indexShift);
         // Reset to the "normal" texture
         s_gles2.glBindTexture(GL_TEXTURE_2D, texture);
+        s_gles2.glUniform2f(mScaleSlot, scale[0], scale[1]);
     }
 
 #ifndef NDEBUG
@@ -422,19 +485,29 @@ TextureDraw::~TextureDraw() {
     if (mVertexShader) {
         s_gles2.glDeleteShader(mVertexShader);
     }
+    if (mMaskTexture) {
+        s_gles2.glDeleteTextures(1, &mMaskTexture);
+    }
 }
 
 void TextureDraw::setScreenMask(int width, int height, const unsigned char* rgbaData) {
+    android::base::AutoLock lock(mMaskLock);
     if (width <= 0 || height <= 0 || rgbaData == nullptr) {
         mMaskIsValid = false;
         return;
     }
+
+    mShouldReallocateTexture =
+            (width > mMaskTextureWidth) || (height > mMaskTextureHeight);
+    auto nextMaskTextureWidth = std::max(width, mMaskTextureWidth);
+    auto nextMaskTextureHeight = std::max(height, mMaskTextureHeight);
+    mMaskPixels.resize(nextMaskTextureWidth * nextMaskTextureHeight * 4);
     // Save the data for use in the right context
-    mMaskPixels = rgbaData;
-    mMaskWidth = width;
-    mMaskHeight = height;
+    std::copy(rgbaData, rgbaData + width * height * 4, mMaskPixels.begin());
 
     mHaveNewMask = true;
+    mMaskWidth = width;
+    mMaskHeight = height;
 }
 
 void TextureDraw::prepareForDrawLayer() {

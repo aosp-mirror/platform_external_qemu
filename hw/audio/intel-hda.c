@@ -486,6 +486,16 @@ static void intel_hda_parse_bdl(IntelHDAState *d, IntelHDAStream *st)
     st->bp    = 0;
 }
 
+static void intel_hda_reset_bdl(IntelHDAState *d, IntelHDAStream *st)
+{
+    g_free(st->bpl);
+    st->bpl      = NULL;
+    st->bentries = 0;
+    st->bsize    = 0;
+    st->be       = 0;
+    st->bp       = 0;
+}
+
 static void intel_hda_notify_codecs(IntelHDAState *d, uint32_t stream, bool running, bool output)
 {
     BusChild *kid;
@@ -575,27 +585,55 @@ static void intel_hda_set_st_ctl(IntelHDAState *d, const IntelHDAReg *reg, uint3
     bool output = reg->stream >= 4;
     IntelHDAStream *st = d->st + reg->stream;
 
-    if (st->ctl & 0x01) {
-        /* reset */
-        dprint(d, 1, "st #%d: reset\n", reg->stream);
-        st->ctl = SD_STS_FIFO_READY << 24;
-    }
-    if ((st->ctl & 0x02) != (old & 0x02)) {
-        uint32_t stnr = (st->ctl >> 20) & 0x0f;
-        /* run bit flipped */
-        if (st->ctl & 0x02) {
-            /* start */
-            dprint(d, 1, "st #%d: start %d (ring buf %d bytes)\n",
-                   reg->stream, stnr, st->cbl);
-            intel_hda_parse_bdl(d, st);
-            intel_hda_notify_codecs(d, stnr, true, output);
-        } else {
-            /* stop */
-            dprint(d, 1, "st #%d: stop %d\n", reg->stream, stnr);
-            intel_hda_notify_codecs(d, stnr, false, output);
+    if ((st->ctl & 0x01) && (old & 0x01)) {
+        /* If the stream descriptor was in the reset state, and this update did
+         * not clear the reset bit, ignore the register write */
+        st->ctl = old;
+    } else {
+        if (st->ctl & 0x01) {
+            /* reset */
+            dprint(d, 1, "st #%d: reset\n", reg->stream);
+
+            /* Reset all writable register bits to their power on defaults.
+             * Mark the SRST bit as being set in the CTL register */
+            uint32_t stnr  = (st->ctl >> 20) & 0x0f;
+            st->ctl        = (SD_STS_FIFO_READY << 24) | 0x01;
+            st->lpib       = 0;
+            st->cbl        = 0;
+            st->lvi        = 0;
+            st->fmt        = 0;
+            st->bdlp_lbase = 0;
+            st->bdlp_ubase = 0;
+
+            /* In theory, no one should place the stream into reset while the
+             * RUN bit is set.  Docs say "The RUN bit must be cleared before
+             * SRST is asserted".  Behavior in this situation is undefined.
+             * QEMU's implementation chooses to 'magicically' stop all streams.
+             * */
+            if (old & 0x02) {
+                dprint(d, 1, "st #%d: WARNING SRST asserted while RUN set\n", reg->stream);
+                intel_hda_notify_codecs(d, stnr, false, output);
+                intel_hda_reset_bdl(d, st);
+            }
+        } else if ((st->ctl & 0x02) != (old & 0x02)) {
+            uint32_t stnr = (st->ctl >> 20) & 0x0f;
+            /* run bit flipped */
+            if (st->ctl & 0x02) {
+                /* start */
+                dprint(d, 1, "st #%d: start %d (ring buf %d bytes)\n",
+                       reg->stream, stnr, st->cbl);
+                intel_hda_parse_bdl(d, st);
+                intel_hda_notify_codecs(d, stnr, true, output);
+            } else {
+                /* stop */
+                dprint(d, 1, "st #%d: stop %d\n", reg->stream, stnr);
+                intel_hda_notify_codecs(d, stnr, false, output);
+                intel_hda_reset_bdl(d, st);
+            }
         }
+
+        intel_hda_update_irq(d);
     }
-    intel_hda_update_irq(d);
 }
 
 /* --------------------------------------------------------------------- */
@@ -812,6 +850,7 @@ static const struct IntelHDAReg regtab[] = {
         .name     = _t stringify(_i) " CTL",                          \
         .size     = 4,                                                \
         .wmask    = 0x1cff001f,                                       \
+        .wclear   = 0x1c000000,                                       \
         .offset   = offsetof(IntelHDAState, st[_i].ctl),              \
         .whandler = intel_hda_set_st_ctl,                             \
     },                                                                \

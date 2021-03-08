@@ -29,6 +29,7 @@
 #define GL_DEPTH_CLAMP 0x864F
 
 class ProgramData;
+class TransformFeedbackData;
 
 class GLESv2Context : public GLEScontext{
 public:
@@ -57,7 +58,7 @@ public:
         GLuint start,
         GLuint end);
 
-    void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
+    void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct, bool* needEnablingPostDraw);
     void setVertexAttribDivisor(GLuint bindingindex, GLuint divisor);
     void setVertexAttribBindingIndex(GLuint attribindex, GLuint bindingindex);
     void setVertexAttribFormat(GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint reloffset, bool isInt = false);
@@ -93,14 +94,40 @@ public:
     void initEmulatedBuffers();
     void initEmulatedVAO();
 
+    unsigned int getTransformFeedbackGlobalName(ObjectLocalName p_localName);
+    ObjectLocalName genTransformFeedbackName(ObjectLocalName p_localName = 0,
+                                             bool genLocal = 0);
+    void bindTransformFeedback(ObjectLocalName p_localName);
+    ObjectLocalName getTransformFeedbackBinding();
+    bool hasBoundTransformFeedback(ObjectLocalName transformFeedback);
+    void deleteTransformFeedback(ObjectLocalName p_localName);
+    GLuint getIndexedBuffer(GLenum target, GLuint index) override;
+    void bindIndexedBuffer(GLenum target,
+                           GLuint index,
+                           GLuint buffer,
+                           GLintptr offset,
+                           GLsizeiptr size,
+                           GLintptr stride = 0,
+                           bool isBindBase = false) override;
+    void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer) override;
+    void unbindBuffer(GLuint buffer) override;
+
     static void setMaxGlesVersion(GLESVersion version);
+
+    TransformFeedbackData* boundTransformFeedback();
+
+    void enableArr(GLenum arr, bool enable) override;
+    const GLESpointer* getPointer(GLenum arrType) override;
+
 protected:
+    void addVertexArrayObject(GLuint array) override;
+
     virtual void postLoadRestoreCtx();
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
 private:
     void setupArrWithDataSize(GLsizei datasize, const GLvoid* arr,
                               GLenum arrayType, GLenum dataType,
-                              GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt);
+                              GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt, bool* needEnablingPostDraw);
     void initExtensionString();
 
     float m_attribute0value[4] = {};
@@ -114,6 +141,10 @@ private:
 
     std::vector<GLuint> m_emulatedClientVBOs;
     GLuint m_emulatedClientIBO = 0;
+
+    NameSpace* m_transformFeedbackNameSpace = nullptr;
+    ObjectLocalName m_bindTransformFeedback = 0;
+    bool m_transformFeedbackDeletePending = false;
 };
 
 #endif

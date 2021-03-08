@@ -15,9 +15,15 @@
 */
 #pragma once
 
-#include "OpenGLESDispatch/RenderEGL_functions.h"
-#include "OpenGLESDispatch/RenderEGL_extensions_functions.h"
-#include "OpenGLESDispatch/RenderEGL_snapshot_functions.h"
+extern "C" {
+    #include "OpenGLESDispatch/RenderEGL_functions.h"
+    #include "OpenGLESDispatch/RenderEGL_extensions_functions.h"
+    #include "OpenGLESDispatch/RenderEGL_snapshot_functions.h"
+}
+
+#include "OpenGLESDispatch/RenderEGL_static_translator_namespaced_header.h"
+#include "OpenGLESDispatch/RenderEGL_extensions_static_translator_namespaced_header.h"
+#include "OpenGLESDispatch/RenderEGL_snapshot_static_translator_namespaced_header.h"
 
 // This header is used to define the EGLDispatch structure that contains
 // pointers to the EGL shared library used by libOpenglRender. Normally,
@@ -47,6 +53,8 @@ struct EGLDispatch {
     LIST_RENDER_EGL_FUNCTIONS(RENDER_EGL_DECLARE_MEMBER)
     LIST_RENDER_EGL_EXTENSIONS_FUNCTIONS(RENDER_EGL_DECLARE_MEMBER)
     LIST_RENDER_EGL_SNAPSHOT_FUNCTIONS(RENDER_EGL_DECLARE_MEMBER)
+
+    bool initialized = false;
 };
 
 // Initialize EGLDispatch function. Return true on success, false on failure.

@@ -1,5 +1,5 @@
 /*
- * Property Service contexts backend for labeling Android 
+ * Property Service contexts backend for labeling Android
  * property keys
  */
 
@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include "callbacks.h"
 #include "label_internal.h"
+#include "android/utils/file_io.h"
 
 /* A property security context specification. */
 typedef struct spec {
@@ -81,7 +82,7 @@ static int nodups_specs(struct saved_data *data, const char *path)
 }
 
 static int process_line(struct selabel_handle *rec,
-			const char *path, char *line_buf, 
+			const char *path, char *line_buf,
 			int pass, unsigned lineno)
 {
 	int items, len;
@@ -116,7 +117,7 @@ static int process_line(struct selabel_handle *rec,
 				    "%s:  out of memory at line %d on prop %s\n",
 				    path, lineno, prop);
 		return -1;
-	    
+
 		}
 
 		spec_arr[nspec].lr.ctx_raw = strdup(context);
@@ -160,7 +161,7 @@ static int init(struct selabel_handle *rec, const struct selinux_opt *opts,
 		}
 
 	/* Open the specification file. */
-	if ((fp = fopen(path, "r")) == NULL)
+	if ((fp = android_fopen(path, "r")) == NULL)
 		return -1;
 
 	if (fstat(fileno(fp), &sb) < 0)
@@ -172,8 +173,8 @@ static int init(struct selabel_handle *rec, const struct selinux_opt *opts,
 
 	/*
 	 * Two passes of the specification file. First is to get the size.
-	 * After the first pass, the spec array is malloced to the appropriate 
-	 * size. Second pass is to populate the spec array and check for 
+	 * After the first pass, the spec array is malloced to the appropriate
+	 * size. Second pass is to populate the spec array and check for
 	 * dups.
 	 */
 	maxnspec = UINT_MAX / sizeof(spec_t);
@@ -189,7 +190,7 @@ static int init(struct selabel_handle *rec, const struct selinux_opt *opts,
 
 		if (pass == 1) {
 			status = nodups_specs(data, path);
-	    
+
 			if (status)
 				goto finish;
 		}
@@ -237,12 +238,12 @@ static void closef(struct selabel_handle *rec)
 
 	if (data->spec_arr)
 		free(data->spec_arr);
-	
+
 	free(data);
 }
 
-static struct selabel_lookup_rec *lookup(struct selabel_handle *rec, 
-					 const char *key, 
+static struct selabel_lookup_rec *lookup(struct selabel_handle *rec,
+					 const char *key,
 					 int __attribute__((unused)) type)
 {
 	struct saved_data *data = (struct saved_data *)rec->data;
@@ -256,7 +257,7 @@ static struct selabel_lookup_rec *lookup(struct selabel_handle *rec,
 	}
 
 	for (i = 0; i < data->nspec; i++) {
-		if (strncmp(spec_arr[i].property_key, key, 
+		if (strncmp(spec_arr[i].property_key, key,
 		    strlen(spec_arr[i].property_key)) == 0) {
 			break;
 		}

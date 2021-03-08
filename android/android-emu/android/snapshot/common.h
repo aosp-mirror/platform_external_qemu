@@ -46,6 +46,7 @@ using ITextureLoaderWPtr = std::weak_ptr<ITextureLoader>;
 // are for the |flags| field in SnapshotRamBlock.
 #define SNAPSHOT_RAM_MAPPED_SHARED (1 << 1)
 #define SNAPSHOT_RAM_MAPPED (1 << 3)
+#define SNAPSHOT_RAM_USER_BACKED (1 << 4)
 
 using RamBlock = ::SnapshotRamBlock;
 
@@ -108,7 +109,11 @@ bool isComplete(const Operation& op) {
 
 bool isBufferZeroed(const void* ptr, int32_t size);
 
+#if defined(__APPLE__) && defined(__aarch64__)
+constexpr int32_t kDefaultPageSize = 16384;
+#else
 constexpr int32_t kDefaultPageSize = 4096;
+#endif
 
 constexpr int32_t kCancelTimeoutMs = 15000;
 
@@ -120,8 +125,16 @@ constexpr const char* kTexturesFileName = "textures.bin";
 constexpr const char* kMappedRamFileName = "ram.img";
 constexpr const char* kMappedRamFileDirtyName = "ram.img.dirty";
 
+constexpr const char* kSnapshotProtobufName = "snapshot.pb";
+
 void resetSnapshotLiveness();
 bool isSnapshotAlive();
+
+#ifdef AEMU_MIN
+#define SNAPSHOT_METRICS 0
+#else
+#define SNAPSHOT_METRICS 1
+#endif
 
 }  // namespace snapshot
 }  // namespace android

@@ -1,18 +1,17 @@
 #include "android/help.h"
-#include "android/cmdline-option.h"
-#include "android/emulation/bufprint_config_dirs.h"
-#include "android/network/constants.h"
-#include "android/utils/path.h"
-#include "android/utils/bufprint.h"
-#include "android/utils/debug.h"
-#include "android/utils/misc.h"
-#ifndef NO_SKIN
-#include "android/skin/keycode.h"
-#endif
-#include "android/android.h"
-#include <stdint.h>
-#include <string.h>
-#include <stdlib.h>
+
+#include <stdio.h>                                   // for snprintf
+#include <stdlib.h>                                  // for NULL
+#include <string.h>                                  // for strlen, strcmp
+
+#include "android/android.h"                         // for CORE_HARDWARE_INI
+#include "android/emulation/bufprint_config_dirs.h"  // for bufprint_config_...
+#include "android/network/constants.h"               // for AndroidNetworkLa...
+#include "android/utils/bufprint.h"                  // for bufprint
+#include "android/utils/debug.h"                     // for VERBOSE_adb, VER...
+#include "android/utils/misc.h"                      // for buffer_translate...
+#include "android/utils/path.h"                      // for MAX_PATH, PATH_SEP
+#include "android/utils/system.h"                    // for STRINGIFY
 
 /* XXX: TODO: put most of the help stuff in auto-generated files */
 
@@ -384,6 +383,15 @@ help_avd(stralloc_t*  out)
 
     "  As a special convenience, using '@<name>' is equivalent to using\n"
     "  '-avd <name>'.\n\n"
+    );
+}
+
+static void
+help_avd_arch(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-avd-arch <target>' to start the emulator program with a specific\n"
+    "  target architecture and without having to create an AVD.\n\n"
     );
 }
 
@@ -932,6 +940,19 @@ help_ui_only(stralloc_t*  out)
 }
 
 static void
+help_id(stralloc_t*  out)
+{
+    PRINTF(
+    "  '-id <name>' specifies the ID of the virtual device\n"
+    "  separate from the AVD name. If not specified, the ID\n"
+    "  defaults to the AVD name.\n"
+    "  This can be useful when running multiple clones of the same device.\n"
+    "  The ID associated with $device_serial can be queried via\n"
+    "  adb -s $device_serial emu avd id\n\n"
+    );
+}
+
+static void
 help_dpi_device(stralloc_t*  out)
 {
     PRINTF(
@@ -990,6 +1011,11 @@ help_shell(stralloc_t*  out)
     "  * this works even if the ADB daemon in the emulated system is broken\n"
     "  * pressing Ctrl-C will stop the emulator, instead of the shell.\n\n"
     "  See also '-shell-serial'.\n\n" );
+}
+
+static void help_virtio_console(stralloc_t* out) {
+    PRINTF("  use '-virtio-console' to use virtio console hvc0 instead of "
+           "default serial line\n\n");
 }
 
 static void
@@ -1119,13 +1145,140 @@ help_ports(stralloc_t*  out)
 
     "  This is a very special option that should probably *not* be used by typical\n"
     "  developers using the Android SDK (use '-port <port>' instead), because the\n"
-    "  corresponding instance is probably not going to be seen from adb. Its\n"
+    "  corresponding instance is probably not going to be seen from adb. \n"
+    "  It requires you to explicitly enable the gRPC port if you need it. Its\n"
     "  purpose is to use the emulator in very specific network configurations.\n\n"
 
     "    <consoleport> is the TCP port used to bind the control console\n"
     "    <adbport> is the TCP port used to bind the ADB local transport/tunnel.\n\n"
 
     "  If both ports aren't available on startup, the emulator will exit.\n\n");
+}
+
+static void
+help_grpc(stralloc_t*  out)
+{
+    PRINTF(
+    "  Enables the gRPC service to control the emulator.\n\n"
+    "    <port> is the TCP port used to bind the gRPC service\n\n"
+    "  The gRPC service will not be started if the port is not available on startup.\n\n");
+}
+
+static void
+help_grpc_tls_key(stralloc_t*  out)
+{
+    PRINTF(
+    "  Use the PEM file containing a private key for TLS.\n\n"
+    "    <pem> a PEM file containing a private key used for TLS.\n\n"
+    "  You must provide the -grpc-pem flag as well.\n\n"
+    );
+}
+
+static void
+help_grpc_tls_cer(stralloc_t*  out)
+{
+    PRINTF(
+    "  Use the given file containing a X509 certificate for TLS.\n\n"
+    "    <pem> a PEM file with a X.509 public key certificate.\n\n"
+    "  The X509 certificate can be self signed.\n\n"
+    "  You must provide the -grpc-key flag as well.\n\n"
+    );
+}
+
+static void
+help_grpc_tls_ca(stralloc_t*  out)
+{
+    PRINTF(
+    "  Use the file containing a series of certificate authorities for client validation.\n\n"
+    "    <pem> The file with a root certificate chain to use.\n\n"
+    "  This file must be a PEM encoded file with all the roots such as the one that\n"
+    "  can be downloaded from https://pki.google.com/roots.pem.\n\n"
+    "  The emulator will request and validate the client certificate.\n"
+    "  Clients with invalid certificates will be rejected.\n"
+    );
+
+}
+
+static void
+help_grpc_use_token(stralloc_t*  out)
+{
+    PRINTF(
+    "  Require an authorization header with a valid token for every grpc call.\n\n"
+    "  Every grpc request expects the following header:\n"
+    "    authorization: Bearer <token>\n\n"
+    "  The token can be found in the android studio discovery file "
+    "  If an incorrect token is present the status UNAUTHORIZED will be returned.\n\n"
+    "  Note: Token based security can only be installed if you are using localhost or TLS.\n\n");
+}
+
+
+static void
+help_idle_grpc_timeout(stralloc_t*  out)
+{
+    PRINTF(
+    "  Terminates the emulator if there is no interaction on the gRPC endpoint.\n\n"
+    "    <timeout> Time in seconds before the emulator should terminate.\n"
+    "    at first a clean shutdown will be attempted, if this does not succeed\n"
+    "    within <timeout> seconds, the process will be killed.\n\n"
+    "  Make sure that timeout is large enough to give the emulator a chance to \n"
+    "  attempt a clean shutdown.\n\n");
+}
+
+static void
+help_waterfall(stralloc_t*  out)
+{
+    PRINTF(
+    "  Mode in which to run the waterfall grpc endpoint..\n\n"
+    "    \n\n"
+    "    fwd:  Forward the waterfall commands to the waterfall service\n"
+    "          running inside the emulator.\n"
+    "    adb:  Translate the waterfall commands to ADB.\n\n"
+    );
+}
+
+static void
+help_share_vid(stralloc_t*  out)
+{
+    PRINTF(
+    "  Share the current video state in a shared memory region..\n\n"
+    "  A shared memory region will be created that is available under\n"
+    "  the handle videmulatorXXXX where XXXX is the port number of the emulator\n\n"
+    "  For example:\n\n"
+    "  -ports 6000,6001 -share-vid\n\n"
+    "  will create the shared memory region videmulator6000\n"
+    );
+}
+
+static void
+help_turncfg(stralloc_t*  out)
+{
+    PRINTF(
+    "  Execute the given command to obtain turn configuration..\n\n"
+    "    <cmd> is the command to execute\n\n"
+    "  Parameters in <cmd> can be grouped with a single (') or double (\") quote\n\n"
+    "  This command must do the following:\n\n"
+    "  - Produce a result on stdout.\n"
+    "  - Produce a result within 1000 ms.\n"
+    "  - Produce a valid JSON RTCConfiguration object "
+    " (See https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/RTCPeerConnection).\n"
+    "  - That contain at least an \"iceServers\" array.\n"
+    "  - The exit value should be 0 on success\n\n"
+    "  For example:\n\n"
+    "  -turncfg \"sh -c 'curl -s -X POST https://api.twilio.com/2010-04-01/Accounts/some_account/Tokens.json -u some_account:some_secret | sed \\'s/ice_servers/iceServers/g\\''\"\n\n"
+    );
+}
+
+static void
+help_rtcfps(stralloc_t*  out)
+{
+    PRINTF(
+    "  The maximimum frequency at which frames are delivered to the webrtc video bridge. \n\n"
+    "   <fps> The maximimum frequency at which frames are delivered.\n\n"
+    "  DEPRECATED. The emulator will always update every frame immediately without any cpu penalty. \n\n"
+    "  <fps> set above.\n\n"
+    "  For example:\n\n"
+    "  -rtcfps 60\n\n"
+    );
 }
 
 
@@ -1197,6 +1350,38 @@ help_timezone(stralloc_t*  out)
     );
 }
 
+static void
+help_change_language(stralloc_t* out)
+{
+    PRINTF(
+    "  Change the device's language to the language code specified.\n"
+    "  The emulator will cold boot and then restart the framework again for\n"
+    "  the setting to take effect.\n"
+    "  Note that when doing so, the Quickboot snapshot will be overwritten\n"
+    "  unless -no-snapshot-save is also issued.");
+}
+
+static void
+help_change_country(stralloc_t* out)
+{
+    PRINTF(
+    "  Change the device's country to the country code specified.\n"
+    "  The emulator will cold boot and then restart the framework again for\n"
+    "  the setting to take effect.\n"
+    "  Note that when doing so, the Quickboot snapshot will be overwritten\n"
+    "  unless -no-snapshot-save is also issued.");
+}
+
+static void
+help_change_locale(stralloc_t* out)
+{
+    PRINTF(
+    "  Change the device's locale to the locale code specified.\n"
+    "  The emulator will cold boot and then restart the framework again for\n"
+    "  the setting to take effect.\n"
+    "  Note that when doing so, the Quickboot snapshot will be overwritten\n"
+    "  unless -no-snapshot-save is also issued.");
+}
 
 static void
 help_dns_server(stralloc_t*  out)
@@ -1312,7 +1497,7 @@ help_gps(stralloc_t*  out)
 }
 
 
-#ifdef CONFIG_NAND_LIMITS
+#ifndef _WIN32
 static void
 help_nand_limits(stralloc_t*  out)
 {
@@ -1416,6 +1601,11 @@ help_gpu(stralloc_t* out)
     "  use cases:\n\n"
 
     "     auto (default)       -> Auto-select the renderer.\n"
+    "     auto-no-window       -> Auto-select the renderer when\n"
+    "                             running headless. This will use the same\n"
+    "                             gpu selection mechanism as running without\n"
+    "                             the \"-no-window\" flag and the \"-gpu auto\"\n"
+    "                             option. See auto for details on the behavior.\n"
     "     host                 -> Use the host system's OpenGL driver.\n"
     "     swiftshader_indirect -> Use SwiftShader software renderer on the\n"
     "                             host, which can be beneficial if you are\n"
@@ -1429,13 +1619,21 @@ help_gpu(stralloc_t* out)
     "                             In API 28 and later, guest rendering\n"
     "                             is not supported, and will fall back\n"
     "                             automatically to swiftshader_indirect.\n"
-
+    "\n"
     "  Note that enabling GPU emulation if the system image does not support it\n"
     "  will prevent the proper display of the emulated framebuffer.\n\n"
 
     "  The 'auto' mode is the default. In this mode, the hw.gpu.enabled setting\n"
     "  in the AVD's " CORE_HARDWARE_INI " file will determine whether GPU emulation\n"
     "  is enabled.\n\n"
+    );
+}
+
+static void
+help_use_host_vulkan(stralloc_t* out)
+{
+    PRINTF(
+    "  Use '-use_host_vulkan' to force the use of host GPU for vulkan calls.\n\n"
     );
 }
 
@@ -1449,6 +1647,7 @@ help_camera_back(stralloc_t* out)
     "     emulated     -> camera will be emulated using software ('fake') camera emulation\n"
     "     webcam<N>    -> camera will be emulated using a webcamera connected to the host\n"
     "     virtualscene -> If the feature is enabled, camera will render a virtual scene\n"
+    "     videoplayback -> If the feature is enabled, camera will support playing back a video\n"
     "     none         -> camera emulation will be disabled\n\n"
     );
 }
@@ -1538,6 +1737,22 @@ help_use_system_libs(stralloc_t* out)
     "\n"
     );
 }
+
+static void
+help_stdouterr_file(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-stdouterr-file' to redirect stdout and stderr to it.\n\n"
+    );
+}
+
+static void
+help_no_qt(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-no-qt' to disable qt windowing system.\n\n"
+    );
+}
 #endif  // __linux__
 
 static void
@@ -1600,7 +1815,18 @@ help_metrics_to_console(stralloc_t* out)
     PRINTF(
     "  Enable metrics reporting in the emulator and print the collected\n"
     "  data to stdout in JSON format.\n"
-    "  Mutually exclusive with \"-metrics-to-file <file>\"\n\n"
+    "  Mutually exclusive with \"-metrics-to-file <file>\" and \"-metrics-collection\"\n\n"
+    );
+}
+
+
+static void
+help_metrics_collection(stralloc_t* out)
+{
+    PRINTF(
+    "  Help make the emulator better by sending usage statistics\n"
+    "  to Google upon (graceful) emulator exit.\n"
+    "  Mutually exclusive with \"-metrics-to-file <file>\" and \"-metrics-to-console\"\n\n"
     );
 }
 
@@ -1610,7 +1836,7 @@ help_metrics_to_file(stralloc_t* out)
     PRINTF(
     "  Enable metrics reporting in the emulator and write the collected\n"
     "  data to <file> in JSON format. Old contents of <file> are destroyed.\n"
-    "  Mutually exclusive with \"-metrics-to-console\"\n\n"
+    "  Mutually exclusive with \"-metrics-to-console\" and \"-metrics-collection\"\n\n"
     );
 }
 
@@ -1634,6 +1860,94 @@ help_sim_access_rules_file(stralloc_t* out)
     );
 }
 
+static void
+help_multidisplay(stralloc_t* out)
+{
+    PRINTF(
+    "  Create displays besides the default android display. Format:\n"
+    "  -multidisplay <index> <width> <height> <dpi> <flag>\n"
+    "    1 <= index <= 3\n"
+    "  as an example,\n"
+    "  -multidisplay 1,1200,800,240,0 will create display 1 with dimension\n"
+    "  1200x800, dpi 240 and the default flag\n\n"
+    );
+}
+
+static void
+help_google_maps_key(stralloc_t* out)
+{
+    PRINTF(
+    "  User-provided API key to use with the Google maps GUI.\n"
+    "  -google_maps_key <your_key>\n"
+    "  Note that providing this key will override the one provided by Android Studio.\n\n"
+    );
+}
+
+static void
+help_no_location_ui(stralloc_t* out)
+{
+    PRINTF(
+    "  Disables the location UI in the extended window.\n"
+    "  -no-location-ui\n"
+    "  This is useful if the location UI is interfering with your own location mocking.\n\n"
+    );
+}
+
+static void help_use_keycode_forwarding(stralloc_t* out) {
+    PRINTF("  Directly forward keycode generated by keypress event to guest.\n"
+           "  -use-keycode-forwarding\n"
+           "  This is useful if the you want to use a different key character\n"
+           "  mapping from the default one. You will need to manually set the\n"
+           "  keyboard layout in the guest system.\n\n"
+
+    );
+}
+
+static void
+help_record_session(stralloc_t* out)
+{
+    PRINTF(
+    "  Screen record the emulator session. Format:\n"
+    "  -record-session <file>,<delay>[,<duration>]\n"
+    "  Examples:\n"
+    "  -record-session /tmp/tmp.webm,20 will start recording after 20 second delay until shutdown.\n"
+    "  -record-session /tmp/tmp.webm,0,20 will start recording immediately for 20 seconds.\n\n"
+    );
+}
+
+static void
+help_legacy_fake_camera(stralloc_t* out)
+{
+    PRINTF(
+    "  Emulates the fake camera by legacy camera HAL.\n\n"
+    );
+}
+
+
+static void
+help_no_direct_adb(stralloc_t* out)
+{
+    PRINTF(
+    "  Disables the internal ADB bridge and use the external adb bridge.\n"
+    );
+}
+
+static void help_check_snapshot_loadable(stralloc_t* out) {
+    PRINTF("  Check if a snapshot is loadable.\n"
+           "  -check-snapshot-loadable <snapshot name|snapshot TAR file>\n");
+}
+
+static void help_no_hidpi_scaling(stralloc_t* out) {
+    PRINTF("  Disable HiDPI scaling of guest display on macOS devices.\n");
+}
+
+static void help_no_mouse_reposition(stralloc_t* out) {
+    PRINTF("  Do not reposition the mouse to emulator window center if mouse\n"
+           "  pointer gets out of the window.\n"
+           "  Enable this if experiencing mouse issues on remote desktops\n"
+           "  like VNC or Chrome remote desktop.\n");
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
@@ -1648,6 +1962,7 @@ help_sim_access_rules_file(stralloc_t* out)
 #define  help_no_sim       NULL
 #define  help_lowram       NULL
 #define  help_no_window    NULL
+#define  help_qt_hide_window NULL
 #define  help_version      NULL
 #define  help_no_passive_gps NULL
 #define  help_read_only    NULL
@@ -1657,10 +1972,18 @@ help_sim_access_rules_file(stralloc_t* out)
 
 #define help_skip_adb_auth NULL
 #define help_quit_after_boot NULL
+#define help_delay_adb NULL
 
 #define help_phone_number NULL
+#define help_monitor_adb NULL
+#define help_qemu_top_dir NULL
 
 #define help_acpi_config NULL
+#define help_fuchsia NULL
+#define help_window_size NULL
+#define help_allow_host_audio NULL
+#define help_restart_when_stalled NULL
+#define help_perf_stat NULL
 
 typedef struct {
     const char*  name;
@@ -1674,6 +1997,7 @@ static const OptionHelp    option_help[] = {
 #define  OPT_PARAM(_name,_template,_descr)  { STRINGIFY(_name), _template, _descr, help_##_name },
 #define  OPT_LIST                           OPT_PARAM
 #include "android/cmdline-options.h"
+
     { NULL, NULL, NULL, NULL }
 };
 

@@ -26,6 +26,10 @@
 #ifndef QEMU_OS_WIN32_H
 #define QEMU_OS_WIN32_H
 
+#ifdef _MSC_VER
+#error Should not be used from msvc.
+#endif
+
 #include <winsock2.h>
 #include <windows.h>
 #include <ws2tcpip.h>
@@ -40,7 +44,6 @@
 #define sigjmp_buf jmp_buf
 
 #ifndef _WIN64
-
 #define sigsetjmp(env, savemask) setjmp(env)
 #define siglongjmp(env, val) longjmp(env, val)
 
@@ -230,8 +233,8 @@ DWORD win32GetModuleFileName(
         LPTSTR  lpFilename,
         DWORD   nSize);
 
-int win32_stat(const char* filepath, struct stat* st);
-int win32_lstat(const char* filepath, struct stat* st);
+int win32_stat(const char* filepath, struct _stati64* st);
+int win32_lstat(const char* filepath, struct _stati64* st);
 
 // ANDROID_END
 

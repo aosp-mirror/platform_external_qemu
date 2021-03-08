@@ -9,15 +9,17 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU General Public License for more details.
  */
-
-#include "android-qemu2-glue/qemu-control-impl.h"
-
 #include "android/android.h"
 #include "android/emulation/control/cellular_agent.h"
 #include "android/network/control.h"
 #include "android/network/globals.h"
 #include "android/shaper.h"
 #include "android/telephony/modem_driver.h"
+#ifdef AEMU_GFXSTREAM_BACKEND
+#include "android/android_modem_v2_stubs.h"
+#else
+#include "android_modem_v2.h"
+#endif
 
 static void cellular_setSimPresent(bool isPresent)
 {
@@ -49,7 +51,7 @@ static void cellular_setSignalStrengthProfile(enum CellularSignal signal)
             case Cellular_Signal_Great: signalQuality = 4; break;
         }
         if (signalQuality >= 0) {
-            amodem_set_signal_strength_profile(android_modem, signalQuality);
+            amodem_set_signal_strength_profile_vx(android_modem, signalQuality);
         }
     }
 }
@@ -68,7 +70,21 @@ static void cellular_setVoiceStatus(enum CellularStatus voiceStatus)
             case Cellular_Stat_Unregistered:  state = A_REGISTRATION_UNREGISTERED;  break;
         }
 
-        amodem_set_voice_registration(android_modem, state);
+        amodem_set_voice_registration_vx(android_modem, state);
+    }
+}
+
+static void cellular_setMeterStatus(enum CellularMeterStatus meterStatus)
+{
+    int meteron = -1;
+
+    if (android_modem) {
+        switch (meterStatus) {
+            case Cellular_Metered:                  meteron = 1;                    break;
+            case Cellular_Temporarily_Not_Metered:  meteron = 0;                    break;
+            default: return;
+        }
+        amodem_set_meter_state(android_modem, meteron);
     }
 }
 
@@ -86,7 +102,7 @@ static void cellular_setDataStatus(enum CellularStatus dataStatus)
     }
 
     if (android_modem) {
-        amodem_set_data_registration(android_modem, state);
+        amodem_set_data_registration_vx(android_modem, state);
     }
 
     android_net_disable = (state != A_REGISTRATION_HOME    &&
@@ -106,6 +122,7 @@ static void cellular_setStandard(enum CellularStandard cStandard)
         case Cellular_Std_UMTS:   speedName = "umts";   break;
         case Cellular_Std_HSDPA:  speedName = "hsdpa";  break;
         case Cellular_Std_LTE:    speedName = "lte";    break;
+        case Cellular_Std_5G:     speedName = "5g";     break;
         case Cellular_Std_full:   speedName = "full";   break;
 
         default:
@@ -124,7 +141,7 @@ static void cellular_setStandard(enum CellularStandard cStandard)
 
     if (android_modem) {
         // Tell the guest about the new network type.
-        amodem_set_data_network_type(android_modem,
+        amodem_set_data_network_type_vx(android_modem,
                                      android_parse_network_type(speedName));
     }
 }
@@ -133,6 +150,7 @@ static const QAndroidCellularAgent sQAndroidCellularAgent = {
     .setSignalStrength = cellular_setSignalStrength,
     .setSignalStrengthProfile = cellular_setSignalStrengthProfile,
     .setVoiceStatus = cellular_setVoiceStatus,
+    .setMeterStatus = cellular_setMeterStatus,
     .setDataStatus = cellular_setDataStatus,
     .setStandard = cellular_setStandard,
     .setSimPresent = cellular_setSimPresent};

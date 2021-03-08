@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RecordAndPlaybackPage</class>
+ <widget class="QWidget" name="RecordAndPlaybackPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>622</width>
+    <height>620</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QTabWidget" name="tabWidget">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>20</y>
+     <width>622</width>
+     <height>600</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <widget class="RecordScreenPage" name="recordScreen">
+    <attribute name="title">
+     <string>Screen Record</string>
+    </attribute>
+   </widget>
+   <widget class="RecordMacroPage" name="recordMacro">
+    <attribute name="title">
+     <string>Macro Playback</string>
+    </attribute>
+   </widget>
+   <widget class="RecordSettingsPage" name="recordSettings">
+    <attribute name="title">
+     <string>Settings</string>
+    </attribute>
+   </widget>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RecordScreenPage</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/extended-pages/record-screen-page.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RecordMacroPage</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/extended-pages/record-macro-page.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RecordSettingsPage</class>
+   <extends>QWidget</extends>
+   <header location="global">android/skin/qt/extended-pages/record-settings-page.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -10,31 +10,102 @@
 // GNU General Public License for more details.
 #include "android/skin/qt/extended-pages/battery-page.h"
 
-#include "android/emulation/control/battery_agent.h"
-#include "android/emulation/VmLock.h"
-#include "android/globals.h"
-#include "android/skin/qt/qt-settings.h"
+#include <qsettings.h>  // for QSettings::IniF...
+#include <qstring.h>    // for operator+
 
-#include "ui_battery-page.h"
+#include <QComboBox>  // for QComboBox
+#include <QLabel>     // for QLabel
+#include <QLineEdit>  // for QLineEdit
+#include <QSettings>  // for QSettings
+#include <QSlider>    // for QSlider
+#include <QVariant>   // for QVariant
 
-#include <QSettings>
+#include "android/avd/info.h"                         // for avdInfo_getApiL...
+#include "android/avd/util.h"                         // for path_getAvdCont...
+#include "android/emulation/control/battery_agent.h"  // for BatteryHealth
+#include "android/globals.h"                          // for android_hw, and...
+#include "android/metrics/UiEventTracker.h"
+#include "android/skin/qt/qt-settings.h"  // for PER_AVD_SETTING...
+#include "ui_battery-page.h"              // for BatteryPage
+
+class QComboBox;
+class QWidget;
 
 // Must be protected by the BQL!
 static const QAndroidBatteryAgent* sBatteryAgent = nullptr;
 
+static void saveChargeLevel(int chargeLevel);
+static void saveCharger(BatteryCharger charger);
+static void saveHealth(BatteryHealth health);
+static void saveStatus(BatteryStatus status);
+
+static int getSavedChargeLevel();
+static BatteryCharger getSavedCharger();
+static BatteryHealth getSavedHealth();
+static BatteryStatus getSavedStatus();
+
+#define STATE(p) \
+    case (p):    \
+        s = #p;  \
+        break;
+
+static std::string translate_idx(BatteryCharger value) {
+    std::string s = "";
+    switch (value) {
+        STATE(BATTERY_CHARGER_NONE);
+        STATE(BATTERY_CHARGER_AC);
+        STATE(BATTERY_CHARGER_USB);
+        STATE(BATTERY_CHARGER_WIRELESS);
+        STATE(BATTERY_CHARGER_NUM_ENTRIES);
+    }
+    // Chop off BATTERY_
+    return s.substr(8);
+}
+static std::string translate_idx(BatteryHealth value) {
+    std::string s = "";
+    switch (value) {
+        STATE(BATTERY_HEALTH_GOOD);
+        STATE(BATTERY_HEALTH_FAILED);
+        STATE(BATTERY_HEALTH_DEAD);
+        STATE(BATTERY_HEALTH_OVERVOLTAGE);
+        STATE(BATTERY_HEALTH_OVERHEATED);
+        STATE(BATTERY_HEALTH_UNKNOWN);
+        STATE(BATTERY_HEALTH_NUM_ENTRIES);
+    }
+    // Chop off BATTERY_
+    return s.substr(8);
+}
+
+static std::string translate_idx(BatteryStatus value) {
+    std::string s = "";
+    switch (value) {
+        STATE(BATTERY_STATUS_UNKNOWN);
+        STATE(BATTERY_STATUS_CHARGING);
+        STATE(BATTERY_STATUS_DISCHARGING);
+        STATE(BATTERY_STATUS_NOT_CHARGING);
+        STATE(BATTERY_STATUS_FULL);
+        STATE(BATTERY_STATUS_NUM_ENTRIES);
+    }
+    // Chop off BATTERY_
+    return s.substr(8);
+}
+
 BatteryPage::BatteryPage(QWidget* parent)
-    : QWidget(parent), mUi(new Ui::BatteryPage()) {
+    : QWidget(parent),
+      mUi(new Ui::BatteryPage()),
+      mDropDownTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::OPTION_SELECTED,
+              android_studio::EmulatorUiEvent::EXTENDED_BATTERY_TAB)) {
     mUi->setupUi(this);
-    populateListBox(
-            mUi->bat_chargerBox,
-            {
-                    {BATTERY_CHARGER_NONE, "None"},
-                    {BATTERY_CHARGER_AC, "AC charger"},
-                    // TODO: The UI only allows NONE and AC.
-                    // Need to also allow and implement USB and WIRELESS.
-                    // {BATTERY_CHARGER_USB, "USB charger"},
-                    // {BATTERY_CHARGER_WIRELESS, "Wireless charger"},
-            });
+    populateListBox(mUi->bat_chargerBox,
+                    {
+                            {BATTERY_CHARGER_NONE, "None"},
+                            {BATTERY_CHARGER_AC, "AC charger"},
+                            // TODO: The UI only allows NONE and AC.
+                            // Need to also allow and implement USB and
+                            // WIRELESS. {BATTERY_CHARGER_USB, "USB charger"},
+                            // {BATTERY_CHARGER_WIRELESS, "Wireless charger"},
+                    });
     populateListBox(mUi->bat_healthBox,
                     {
                             {BATTERY_HEALTH_GOOD, "Good"},
@@ -55,27 +126,23 @@ BatteryPage::BatteryPage(QWidget* parent)
 
     if (android_hw->hw_battery) {
         // Update the UI with the saved values
-        QSettings settings;
-        int chargeLevel = settings.value(Ui::Settings::BATTERY_CHARGE_LEVEL, 100).toInt();
+        int chargeLevel = getSavedChargeLevel();
 
-        BatteryCharger batteryCharger = (BatteryCharger)settings.value(
-                                                      Ui::Settings::BATTERY_CHARGER_TYPE,
-                                                      BATTERY_CHARGER_AC).toInt();
+        BatteryCharger batteryCharger = getSavedCharger();
         int chargerIdx = mUi->bat_healthBox->findData(batteryCharger);
-        if (chargerIdx < 0) chargerIdx = 0;  // In case the saved value wasn't found in the pull-down
+        if (chargerIdx < 0)
+            chargerIdx =
+                    0;  // In case the saved value wasn't found in the pull-down
 
-        BatteryHealth batteryHealth = (BatteryHealth)settings.value(Ui::Settings::BATTERY_HEALTH,
-                                                                    BATTERY_HEALTH_GOOD).toInt();
+        BatteryHealth batteryHealth = getSavedHealth();
         int healthIdx = mUi->bat_healthBox->findData(batteryHealth);
-        if (healthIdx < 0) healthIdx = 0;
+        if (healthIdx < 0)
+            healthIdx = 0;
 
-        BatteryStatus defaultBatteryStatus = (batteryCharger == BATTERY_CHARGER_AC) ?
-                                                   BATTERY_STATUS_CHARGING :
-                                                   BATTERY_STATUS_NOT_CHARGING;
-        BatteryStatus batteryStatus = (BatteryStatus)settings.value(Ui::Settings::BATTERY_STATUS,
-                                                                    defaultBatteryStatus).toInt();
+        BatteryStatus batteryStatus = getSavedStatus();
         int statusIdx = mUi->bat_statusBox->findData(batteryStatus);
-        if (statusIdx < 0) statusIdx = 0;
+        if (statusIdx < 0)
+            statusIdx = 0;
 
         mUi->bat_levelSlider->setValue(chargeLevel);
         mUi->bat_chargeLevelText->setText(QString::number(chargeLevel) + "%");
@@ -103,40 +170,24 @@ void BatteryPage::setBatteryAgent(const QAndroidBatteryAgent* agent) {
 
     // The VM lock is needed because the battery agent touches the
     // goldfish battery virtual device explicitly
-    android::RecursiveScopedVmLock vmlock;
     sBatteryAgent = agent;
 
     if (sBatteryAgent) {
         // Send the current settings to the device
-        QSettings settings;
         if (sBatteryAgent->setChargeLevel) {
-            int chargeLevel = settings.value(Ui::Settings::BATTERY_CHARGE_LEVEL,
-                                             100).toInt();
-            sBatteryAgent->setChargeLevel(chargeLevel);
+            sBatteryAgent->setChargeLevel(getSavedChargeLevel());
         }
 
-        BatteryCharger batteryCharger = (BatteryCharger)settings.value(
-                                                      Ui::Settings::BATTERY_CHARGER_TYPE,
-                                                      BATTERY_CHARGER_AC).toInt();
         if (sBatteryAgent->setCharger) {
-            sBatteryAgent->setCharger(batteryCharger);
+            sBatteryAgent->setCharger(getSavedCharger());
         }
 
         if (sBatteryAgent->health) {
-            BatteryHealth batteryHealth = (BatteryHealth)settings.value(
-                                               Ui::Settings::BATTERY_HEALTH,
-                                               BATTERY_HEALTH_GOOD).toInt();
-            sBatteryAgent->setHealth(batteryHealth);
+            sBatteryAgent->setHealth(getSavedHealth());
         }
 
         if (sBatteryAgent->setStatus) {
-            BatteryStatus defaultBatteryStatus = (batteryCharger == BATTERY_CHARGER_AC) ?
-                                                       BATTERY_STATUS_CHARGING :
-                                                       BATTERY_STATUS_NOT_CHARGING;
-            BatteryStatus batteryStatus = (BatteryStatus)settings.value(
-                                               Ui::Settings::BATTERY_STATUS,
-                                               defaultBatteryStatus).toInt();
-            sBatteryAgent->setStatus(batteryStatus);
+            sBatteryAgent->setStatus(getSavedStatus());
         }
     }
 }
@@ -154,13 +205,12 @@ void BatteryPage::on_bat_chargerBox_activated(int index) {
     BatteryCharger bCharger = static_cast<BatteryCharger>(
             mUi->bat_statusBox->itemData(index).toInt());
 
-    QSettings settings;
-    settings.setValue(Ui::Settings::BATTERY_CHARGER_TYPE, bCharger);
+    saveCharger(bCharger);
 
-    android::RecursiveScopedVmLock vmlock;
     if (bCharger >= 0 && bCharger < BATTERY_CHARGER_NUM_ENTRIES) {
         if (sBatteryAgent && sBatteryAgent->setCharger) {
             sBatteryAgent->setCharger(bCharger);
+            mDropDownTracker->increment(translate_idx(bCharger));
         }
     }
 }
@@ -168,11 +218,9 @@ void BatteryPage::on_bat_chargerBox_activated(int index) {
 void BatteryPage::on_bat_levelSlider_valueChanged(int value) {
     // Update the text output
     mUi->bat_chargeLevelText->setText(QString::number(value) + "%");
+    mDropDownTracker->increment("LEVEL_SLIDER");
+    saveChargeLevel(value);
 
-    QSettings settings;
-    settings.setValue(Ui::Settings::BATTERY_CHARGE_LEVEL, value);
-
-    android::RecursiveScopedVmLock vmlock;
     if (sBatteryAgent && sBatteryAgent->setChargeLevel) {
         sBatteryAgent->setChargeLevel(value);
     }
@@ -182,13 +230,12 @@ void BatteryPage::on_bat_healthBox_activated(int index) {
     BatteryHealth bHealth = static_cast<BatteryHealth>(
             mUi->bat_healthBox->itemData(index).toInt());
 
-    QSettings settings;
-    settings.setValue(Ui::Settings::BATTERY_HEALTH, bHealth);
+    saveHealth(bHealth);
 
-    android::RecursiveScopedVmLock vmlock;
     if (bHealth >= 0 && bHealth < BATTERY_HEALTH_NUM_ENTRIES) {
         if (sBatteryAgent && sBatteryAgent->setHealth) {
             sBatteryAgent->setHealth(bHealth);
+            mDropDownTracker->increment(translate_idx(bHealth));
         }
     }
 }
@@ -197,13 +244,162 @@ void BatteryPage::on_bat_statusBox_activated(int index) {
     BatteryStatus bStatus = static_cast<BatteryStatus>(
             mUi->bat_statusBox->itemData(index).toInt());
 
-    QSettings settings;
-    settings.setValue(Ui::Settings::BATTERY_STATUS, bStatus);
+    saveStatus(bStatus);
 
-    android::RecursiveScopedVmLock vmlock;
     if (bStatus >= 0 && bStatus < BATTERY_STATUS_NUM_ENTRIES) {
         if (sBatteryAgent && sBatteryAgent->setStatus) {
             sBatteryAgent->setStatus(bStatus);
+            mDropDownTracker->increment(translate_idx(bStatus));
         }
+    }
+}
+
+static void saveChargeLevel(int chargeLevel) {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_BATTERY_CHARGE_LEVEL,
+                                     chargeLevel);
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        settings.setValue(Ui::Settings::BATTERY_CHARGE_LEVEL, chargeLevel);
+    }
+}
+
+static void saveCharger(BatteryCharger charger) {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        avdSpecificSettings.setValue(
+                Ui::Settings::PER_AVD_BATTERY_CHARGER_TYPE3, charger);
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        settings.setValue(Ui::Settings::BATTERY_CHARGER_TYPE2, charger);
+    }
+}
+
+static void saveHealth(BatteryHealth health) {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_BATTERY_HEALTH,
+                                     health);
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        settings.setValue(Ui::Settings::BATTERY_HEALTH, health);
+    }
+}
+
+static void saveStatus(BatteryStatus status) {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_BATTERY_STATUS,
+                                     status);
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        settings.setValue(Ui::Settings::BATTERY_STATUS, status);
+    }
+}
+
+static int getSavedChargeLevel() {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        return avdSpecificSettings
+                .value(Ui::Settings::PER_AVD_BATTERY_CHARGE_LEVEL, 100)
+                .toInt();
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        return settings.value(Ui::Settings::BATTERY_CHARGE_LEVEL, 100).toInt();
+    }
+}
+
+static BatteryCharger getSavedCharger() {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+
+        int noMiscPipe = avdInfo_getApiLevel(android_avdInfo) < 26;
+        const bool isWear = avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR;
+
+        BatteryCharger defaultCharger = BATTERY_CHARGER_NONE;
+
+        if (noMiscPipe || isWear) {
+            defaultCharger = BATTERY_CHARGER_AC;
+        }
+
+        // If api level is lower than 26, use ac charging as the default value.
+        return (BatteryCharger)avdSpecificSettings
+                .value(Ui::Settings::PER_AVD_BATTERY_CHARGER_TYPE3,
+                       defaultCharger)
+                .toInt();
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        return (BatteryCharger)settings
+                .value(Ui::Settings::BATTERY_CHARGER_TYPE2,
+                       BATTERY_CHARGER_NONE)
+                .toInt();
+    }
+}
+
+static BatteryHealth getSavedHealth() {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        return (BatteryHealth)avdSpecificSettings
+                .value(Ui::Settings::PER_AVD_BATTERY_HEALTH,
+                       BATTERY_HEALTH_GOOD)
+                .toInt();
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        return (BatteryHealth)settings
+                .value(Ui::Settings::BATTERY_HEALTH, BATTERY_HEALTH_GOOD)
+                .toInt();
+    }
+}
+
+static BatteryStatus getSavedStatus() {
+    BatteryCharger batteryCharger = getSavedCharger();
+    BatteryStatus defaultBatteryStatus = (batteryCharger == BATTERY_CHARGER_AC)
+                                                 ? BATTERY_STATUS_CHARGING
+                                                 : BATTERY_STATUS_NOT_CHARGING;
+
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        return (BatteryStatus)avdSpecificSettings
+                .value(Ui::Settings::PER_AVD_BATTERY_HEALTH,
+                       defaultBatteryStatus)
+                .toInt();
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        return (BatteryStatus)settings
+                .value(Ui::Settings::BATTERY_STATUS, defaultBatteryStatus)
+                .toInt();
     }
 }

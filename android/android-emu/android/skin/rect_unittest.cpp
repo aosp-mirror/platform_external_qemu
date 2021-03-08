@@ -11,7 +11,12 @@
 */
 #include "android/skin/rect.h"
 
-#include <gtest/gtest.h>
+#include <gtest/gtest.h>  // for Message, Test, EXPECT_EQ, TestPartResult
+#include <stddef.h>       // for size_t
+
+// namespace android_skin {
+// struct rect_skin_pos_rotate_Test::TestBody::;
+// }  // namespace android_skin
 
 #define ARRAYLEN(x)  (sizeof(x)/sizeof((x)[0]))
 

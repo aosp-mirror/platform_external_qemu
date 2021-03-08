@@ -25,12 +25,14 @@ void skin_generic_event_buffer_init(SkinGenericEventBuffer* buffer,
 void skin_generic_event_buffer_add(SkinGenericEventBuffer* buffer,
                                    unsigned type,
                                    unsigned code,
-                                   unsigned value) {
+                                   unsigned value,
+                                   unsigned displayId) {
     if (buffer->event_count < MAX_GENERIC_EVENTS) {
         int count = (int)buffer->event_count++;
         buffer->events[count].type = type;
         buffer->events[count].code = code;
         buffer->events[count].value = value;
+        buffer->events[count].displayId = displayId;
     }
 }
 

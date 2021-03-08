@@ -11,8 +11,10 @@
 
 #pragma once
 
-#include <QString>
-#include <QWidget>
+#include <QString>  // for QString
+
+class QString;
+class QWidget;
 
 void initErrorDialog(QWidget *parent);
 

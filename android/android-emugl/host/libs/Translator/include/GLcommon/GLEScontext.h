@@ -26,10 +26,13 @@
 #include "ObjectNameSpace.h"
 #include "ShareGroup.h"
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
 #include <functional>
+
+static constexpr int kMaxVertexAttributes = 16;
 
 typedef std::unordered_map<GLenum,GLESpointer*>  ArraysMap;
 
@@ -95,7 +98,19 @@ struct GLSupport {
     bool GL_OES_TEXTURE_NPOT = false;
     bool GL_OES_RGB8_RGBA8 = false;
 
-    bool GL_EXT_color_buffer_float = false;
+    bool ext_GL_EXT_color_buffer_float = false;
+    bool ext_GL_EXT_color_buffer_half_float = false;
+    bool ext_GL_EXT_shader_framebuffer_fetch = false;
+
+    bool ext_GL_EXT_memory_object = false;
+    bool ext_GL_EXT_semaphore = false;
+
+    bool ext_GL_KHR_texture_compression_astc_ldr = false;
+
+    bool hasEtc2Support = false;
+    bool hasAstcSupport = false;
+    bool hasBptcSupport = false;
+    bool hasS3tcSupport = false;
 };
 
 struct ArrayData {
@@ -116,21 +131,26 @@ struct BufferBinding {
     void onSave(android::base::Stream* stream) const;
 };
 
+typedef std::vector<GLESpointer> VertexAttribInfoVector;
 typedef std::vector<BufferBinding> VertexAttribBindingVector;
 
 struct VAOState {
     VAOState() : VAOState(0, NULL, 0) { }
     VAOState(GLuint ibo, ArraysMap* arr, int numVertexAttribBindings) :
         element_array_buffer_binding(ibo),
+        vertexAttribInfo(numVertexAttribBindings),
+        legacy(arr != nullptr),
         arraysMap(arr),
         bindingState(numVertexAttribBindings),
         everBound(false) { }
     VAOState(android::base::Stream* stream);
     GLuint element_array_buffer_binding;
-    ArraysMap* arraysMap;
+    VertexAttribInfoVector vertexAttribInfo;
     VertexAttribBindingVector bindingState;
     bool bufferBacked;
     bool everBound;
+    bool legacy = false;
+    std::unique_ptr<ArraysMap> arraysMap;
     void onSave(android::base::Stream* stream) const;
 };
 
@@ -142,6 +162,14 @@ struct VAOStateRef {
     GLuint vaoId() const { return it->first; }
     GLuint& iboId() { return it->second.element_array_buffer_binding; }
 
+    const VertexAttribInfoVector& attribInfo_const() const {
+        return it->second.vertexAttribInfo;
+    }
+
+    VertexAttribInfoVector& attribInfo() {
+        return it->second.vertexAttribInfo;
+    }
+
     ArraysMap::iterator begin() {
         return it->second.arraysMap->begin();
     }
@@ -152,7 +180,7 @@ struct VAOStateRef {
         return it->second.arraysMap->find(arrType);
     }
     GLESpointer*& operator[](size_t k) {
-        ArraysMap* map = it->second.arraysMap;
+        ArraysMap* map = it->second.arraysMap.get();
         return (*map)[k];
     }
     VertexAttribBindingVector& bufferBindings() {
@@ -212,7 +240,7 @@ public:
     GLint getUnpackAlignment();
 
     bool  isArrEnabled(GLenum);
-    void  enableArr(GLenum arr,bool enable);
+    virtual void  enableArr(GLenum arr,bool enable);
 
     void addVertexArrayObjects(GLsizei n, GLuint* arrays);
     void removeVertexArrayObjects(GLsizei n, const GLuint* arrays);
@@ -222,34 +250,47 @@ public:
     bool vertexAttributesBufferBacked();
     const GLvoid* setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data, GLsizei dataSize, bool normalize = false, bool isInt = false);
     virtual const GLESpointer* getPointer(GLenum arrType);
-    virtual void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) = 0;
+    virtual void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct, bool* needEnablingPostDraw) = 0;
 
     static void prepareCoreProfileEmulatedTexture(TextureData* texData, bool is3d, GLenum target,
                                                   GLenum format, GLenum type,
                                                   GLint* internalformat_out, GLenum* format_out);
 
-    void bindBuffer(GLenum target,GLuint buffer);
-    void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer,
-        GLintptr offset, GLsizeiptr size, GLintptr stride = 0, bool isBindBase = false);
-    void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer);
-    void unbindBuffer(GLuint buffer);
+    GLuint bindBuffer(GLenum target,GLuint buffer); // returns global name for dispatcher
+    virtual void bindIndexedBuffer(GLenum target,
+                                   GLuint index,
+                                   GLuint buffer,
+                                   GLintptr offset,
+                                   GLsizeiptr size,
+                                   GLintptr stride = 0,
+                                   bool isBindBase = false);
+    virtual void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer);
+    virtual void unbindBuffer(GLuint buffer);
     bool isBuffer(GLuint buffer);
     bool isBindedBuffer(GLenum target);
     GLvoid* getBindedBuffer(GLenum target);
     GLuint getBuffer(GLenum target);
-    GLuint getIndexedBuffer(GLenum target, GLuint index);
+    virtual GLuint getIndexedBuffer(GLenum target, GLuint index);
     void getBufferSize(GLenum target,GLint* param);
     void getBufferSizeById(GLuint buffer,GLint* param);
     void getBufferUsage(GLenum target,GLint* param);
     bool setBufferData(GLenum target,GLsizeiptr size,const GLvoid* data,GLenum usage);
     bool setBufferSubData(GLenum target,GLintptr offset,GLsizeiptr size,const GLvoid* data);
-    const char * getExtensionString();
-    const char * getVendorString() const;
-    const char * getRendererString() const;
-    const char * getVersionString() const;
+    const char * getExtensionString(bool isGles1);
+    const char * getVendorString(bool isGles1) const;
+    const char * getRendererString(bool isGles1) const;
+    const char * getVersionString(bool isGles1) const;
     void getGlobalLock();
     void releaseGlobalLock();
     virtual GLSupport*  getCaps(){return &s_glSupport;};
+    static GLSupport* getCapsGlobal(){return &s_glSupport;};
+    static bool vulkanInteropSupported() {
+        return s_glSupport.ext_GL_EXT_memory_object &&
+               s_glSupport.ext_GL_EXT_semaphore;
+    }
+    static bool shaderFramebufferFetchSupported() {
+        return s_glSupport.ext_GL_EXT_shader_framebuffer_fetch;
+    }
     virtual ~GLEScontext();
     virtual int getMaxTexUnits() = 0;
     virtual int getMaxCombinedTexUnits() { return getMaxTexUnits(); }
@@ -446,10 +487,10 @@ protected:
     virtual void postLoadRestoreShareGroup();
     virtual void postLoadRestoreCtx();
 
-    static void buildStrings(const char* baseVendor, const char* baseRenderer, const char* baseVersion, const char* version);
+    static void buildStrings(bool isGles1, const char* baseVendor, const char* baseRenderer, const char* baseVersion, const char* version);
 
     void freeVAOState();
-    void addVertexArrayObject(GLuint array);
+    virtual void addVertexArrayObject(GLuint array);
     void removeVertexArrayObject(GLuint array);
 
     virtual bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) = 0;
@@ -551,7 +592,12 @@ protected:
     GLclampf m_clearDepth = 1.0f;
     GLint m_clearStencil = 0;
 
+    static std::string*   s_glExtensionsGles1;
+    static bool           s_glExtensionsGles1Initialized;
     static std::string*   s_glExtensions;
+    static bool           s_glExtensionsInitialized;
+
+    // Common for gles1/2
     static GLSupport      s_glSupport;
 
     int m_glesMajorVersion = 1;
@@ -602,6 +648,10 @@ private:
     GLuint                m_renderbuffer = 0;
     GLuint                m_drawFramebuffer = 0;
     GLuint                m_readFramebuffer = 0;
+
+    static std::string    s_glVendorGles1;
+    static std::string    s_glRendererGles1;
+    static std::string    s_glVersionGles1;
 
     static std::string    s_glVendor;
     static std::string    s_glRenderer;

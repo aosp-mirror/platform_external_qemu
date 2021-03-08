@@ -21,6 +21,8 @@
 #include "android/emulation/CpuAccelerator.h"
 #include "android/utils/x86_cpuid.h"
 
+#include <fstream>
+
 #define DEBUG 0
 
 #if DEBUG
@@ -96,11 +98,44 @@ HostHwInfo::HostHwInfo() {
           gpuinfo.version.c_str(), gpuinfo.renderer.c_str());
         (void)gpuinfo;
     }
+
+#if __linux__
+#if defined(__aarch64__)
+    // read /proc/cpuinfo, parsing the "CPU part : <number>
+    {
+        std::string line;
+        std::ifstream myfile("/proc/cpuinfo");
+        if (myfile.is_open()) {
+            while (getline(myfile, line)) {
+                if (line.find("CPU part") != 0)
+                    continue;
+                const size_t colonpos = line.find(":");
+                if (colonpos == std::string::npos)
+                    continue;
+                if (colonpos >= line.size())
+                    continue;
+                int part = strtol(line.substr(colonpos + 1).c_str(), NULL, 16);
+                if (armCpuInfo.cpumodels.size() > 0) {
+                    if (armCpuInfo.cpumodels[0] != part) {
+                        armCpuInfo.is_big_little = true;
+                    }
+                }
+                armCpuInfo.cpumodels.push_back(part);
+            }
+            myfile.close();
+        }
+    }
+#endif
+#endif
 }
 
 // static
 const HostHwInfo::Info& HostHwInfo::query() {
     return sHostHwInfo->info;
+}
+
+const HostHwInfo::ArmCpuInfo& HostHwInfo::queryArmCpuInfo() {
+    return sHostHwInfo->armCpuInfo;
 }
 
 } // namespace android

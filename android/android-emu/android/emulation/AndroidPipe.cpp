@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/emulation/AndroidPipe.h"
+#include "android/emulation/android_pipe_base.h"
 
 #include "android/base/async/Looper.h"
 #include "android/base/async/ThreadLooper.h"
@@ -51,7 +52,9 @@
 
 #define E(...) fprintf(stderr, "ERROR:" __VA_ARGS__), fprintf(stderr, "\n")
 
-static const AndroidPipeHwFuncs* sPipeHwFuncs = nullptr;
+static const AndroidPipeHwFuncs* getPipeHwFuncs(const void* hwPipe) {
+    return *static_cast<const AndroidPipeHwFuncs* const *>(hwPipe);
+}
 
 using namespace android::base;
 
@@ -150,7 +153,8 @@ public:
     // initialization), PIPE_ERROR_INVAL will be returned, otherwise, the
     // number of bytes accepted from the guest is returned.
     virtual int onGuestSend(const AndroidPipeBuffer* buffers,
-                            int numBuffers) override {
+                            int numBuffers,
+                            void** newPipePtr) override {
         int result = 0;
         size_t avail = kBufferSize - mPos;
         bool foundZero = false;
@@ -260,7 +264,9 @@ public:
           newPipe,
           mHwPipe,
           pipeName);
-        sPipeHwFuncs->resetPipe(mHwPipe, newPipe);
+
+        newPipe->setFlags(mFlags);
+        *newPipePtr = newPipe;
         delete this;
 
         return result;
@@ -363,10 +369,11 @@ private:
         void* hwPipe = wake_cmd.hwPipe;
         int flags = wake_cmd.wakeFlags;
 
+        // Not used when in virtio mode.
         if (flags & PIPE_WAKE_CLOSED) {
-            sPipeHwFuncs->closeFromHost(hwPipe);
+            getPipeHwFuncs(hwPipe)->closeFromHost(hwPipe);
         } else {
-            sPipeHwFuncs->signalWake(hwPipe, flags);
+            getPipeHwFuncs(hwPipe)->signalWake(hwPipe, flags);
         }
     }
 };
@@ -475,11 +482,10 @@ AndroidPipe::~AndroidPipe() {
 }
 
 // static
-void AndroidPipe::Service::add(Service* service) {
+void AndroidPipe::Service::add(std::unique_ptr<Service> service) {
     DD("Adding new pipe service '%s' this=%p", service->name().c_str(),
-       service);
-    std::unique_ptr<Service> svc(service);
-    sGlobals->services.push_back(std::move(svc));
+       service.get());
+    sGlobals->services.push_back(std::move(service));
 }
 
 // static
@@ -489,6 +495,8 @@ void AndroidPipe::Service::resetAll() {
 }
 
 void AndroidPipe::signalWake(int wakeFlags) {
+    // i.e., pipe not using normal pipe device
+    if (mFlags) return;
     if (!mHwPipe) {
         CrashReporter::get()->GenerateDumpAndDie(
                 StringFormat(
@@ -501,6 +509,8 @@ void AndroidPipe::signalWake(int wakeFlags) {
 }
 
 void AndroidPipe::closeFromHost() {
+    // i.e., pipe not using normal pipe device
+    if (mFlags) return;
     if (!mHwPipe) {
         CrashReporter::get()->GenerateDumpAndDie(
                 StringFormat("AndroidPipe::%s [%s]: hwPipe is NULL", __func__,
@@ -512,6 +522,9 @@ void AndroidPipe::closeFromHost() {
 }
 
 void AndroidPipe::abortPendingOperation() {
+    // i.e., pipe not using normal pipe device
+    if (mFlags) return;
+
     if (!mHwPipe) {
         CrashReporter::get()->GenerateDumpAndDie(
                 StringFormat("AndroidPipe::%s [%s]: hwPipe is NULL", __func__,
@@ -589,13 +602,6 @@ AndroidPipe* AndroidPipe::loadFromStreamLegacy(BaseStream* stream,
 
 // API for the virtual device.
 
-const AndroidPipeHwFuncs* android_pipe_set_hw_funcs(
-        const AndroidPipeHwFuncs* hwFuncs) {
-    const AndroidPipeHwFuncs* result = sPipeHwFuncs;
-    sPipeHwFuncs = hwFuncs;
-    return result;
-}
-
 void android_pipe_reset_services() {
     AndroidPipe::Service::resetAll();
 }
@@ -604,6 +610,14 @@ void* android_pipe_guest_open(void* hwpipe) {
     CHECK_VM_STATE_LOCK();
     DD("%s: Creating new connector pipe for hwpipe=%p", __FUNCTION__, hwpipe);
     return android::sGlobals->connectorService.create(hwpipe, nullptr);
+}
+
+void* android_pipe_guest_open_with_flags(void* hwpipe, uint32_t flags) {
+    CHECK_VM_STATE_LOCK();
+    DD("%s: Creating new connector pipe for hwpipe=%p", __FUNCTION__, hwpipe);
+    auto pipe = android::sGlobals->connectorService.create(hwpipe, nullptr);
+    pipe->setFlags((AndroidPipeFlags)flags);
+    return pipe;
 }
 
 void android_pipe_guest_close(void* internalPipe, PipeCloseReason reason) {
@@ -763,14 +777,14 @@ int android_pipe_guest_recv(void* internalPipe,
     return pipe->onGuestRecv(buffers, numBuffers);
 }
 
-int android_pipe_guest_send(void* internalPipe,
+int android_pipe_guest_send(void** internalPipe,
                             const AndroidPipeBuffer* buffers,
                             int numBuffers) {
     CHECK_VM_STATE_LOCK();
-    auto pipe = static_cast<AndroidPipe*>(internalPipe);
+    auto pipe = static_cast<AndroidPipe*>(*internalPipe);
     // Note that pipe may be deleted during this call, so it's not safe to
     // access pipe after this point.
-    return pipe->onGuestSend(buffers, numBuffers);
+    return pipe->onGuestSend(buffers, numBuffers, internalPipe);
 }
 
 void android_pipe_guest_wake_on(void* internalPipe, unsigned wakes) {
@@ -790,10 +804,36 @@ void android_pipe_host_signal_wake(void* hwpipe, unsigned flags) {
     android::sGlobals->pipeWaker.signalWake(hwpipe, flags);
 }
 
+// Not used when in virtio mode.
 int android_pipe_get_id(void* hwpipe) {
-    return sPipeHwFuncs->getPipeId(hwpipe);
+    return getPipeHwFuncs(hwpipe)->getPipeId(hwpipe);
 }
 
-void* android_pipe_lookup_by_id(int id) {
-    return sPipeHwFuncs->lookupPipeById(id);
+static std::vector<std::pair<void*(*)(int), const char*>> lookup_by_id_callbacks;
+
+void android_pipe_append_lookup_by_id_callback(void*(*cb)(int), const char* tag) {
+    lookup_by_id_callbacks.push_back({cb, tag});
+}
+
+void* android_pipe_lookup_by_id(const int id) {
+    void* hwPipeFound = nullptr;
+    const char* tagFound = "(null)";
+
+    for (const auto &cb : lookup_by_id_callbacks) {
+        void* hwPipe = (*cb.first)(id);
+        if (hwPipe) {
+            if (hwPipeFound) {
+                CrashReporter::get()->GenerateDumpAndDie(
+                    StringFormat("Pipe id (%d) is not unique, at least two "
+                                 "pipes are found: `%s` and `%s`",
+                                 __func__, id, tagFound, cb.second).c_str());
+                abort();
+            } else {
+                hwPipeFound = hwPipe;
+                tagFound = cb.second;
+            }
+        }
+    }
+
+    return hwPipeFound;
 }

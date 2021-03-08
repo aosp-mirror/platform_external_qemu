@@ -18,5 +18,19 @@
 
 #include "OpenglRender/render_api_types.h"
 
-extern emugl_crash_reporter_t emugl_crash_reporter;
-void set_emugl_crash_reporter(emugl_crash_reporter_t crash_reporter);
+#ifdef _MSC_VER
+# ifdef BUILDING_EMUGL_COMMON_SHARED
+#  define EMUGL_COMMON_API __declspec(dllexport)
+# else
+#  define EMUGL_COMMON_API __declspec(dllimport)
+#endif
+#else
+# define EMUGL_COMMON_API
+#endif
+
+namespace emugl {
+
+EMUGL_COMMON_API extern emugl_crash_reporter_t emugl_crash_reporter;
+EMUGL_COMMON_API void set_emugl_crash_reporter(emugl_crash_reporter_t crash_reporter);
+
+}  // namespace emugl

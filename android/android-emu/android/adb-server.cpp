@@ -31,6 +31,7 @@
 
 namespace {
 
+using android::emulation::AdbGuestAgent;
 using android::emulation::AdbGuestPipe;
 using android::emulation::AdbHostListener;
 using android::emulation::AdbHostServer;
@@ -42,20 +43,22 @@ struct Globals {
 
     void registerServices() {
         // Register adb pipe service.
-        adbGuestPipeService = new AdbGuestPipe::Service(&hostListener);
+        auto adbGuestPipeService = new AdbGuestPipe::Service(&hostListener);
         hostListener.setGuestAgent(adbGuestPipeService);
-        AndroidPipe::Service::add(adbGuestPipeService);
+        AndroidPipe::Service::add(std::unique_ptr<AdbGuestPipe::Service>(adbGuestPipeService));
+        adbGuestAgent = adbGuestPipeService;
 
         // Register adb-debug pipe service.
         android::base::Stream* debugStream = nullptr;
         if (VERBOSE_CHECK(adb)) {
             debugStream = new android::base::StdioStream(stderr);
         }
-        android::AndroidPipe::Service::add(
-                new android::emulation::AdbDebugPipe::Service(debugStream));
+        AndroidPipe::Service::add(
+            std::make_unique<android::emulation::AdbDebugPipe::Service>(
+                debugStream));
     }
 
-    AdbGuestPipe::Service* adbGuestPipeService = nullptr;
+    AdbGuestAgent* adbGuestAgent = nullptr;
     AdbHostListener hostListener;
 };
 
@@ -83,6 +86,10 @@ int android_adb_server_init(int port) {
     return 0;
 }
 
+int android_get_jdwp_port() {
+    return sGlobals->hostListener.jdwpPort();
+}
+
 void android_adb_server_undo_init(void) {
     sGlobals->hostListener.reset(-1);
 }
@@ -93,7 +100,7 @@ void android_adb_service_init(void) {
 }
 
 void android_adb_reset_connection(void) {
-    if (sGlobals->adbGuestPipeService) {
-        sGlobals->adbGuestPipeService->resetActiveGuestPipeConnection();
+    if (sGlobals->adbGuestAgent) {
+        sGlobals->adbGuestAgent->resetActiveGuestPipeConnection();
     }
 }

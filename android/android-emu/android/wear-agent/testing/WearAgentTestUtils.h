@@ -25,22 +25,14 @@ int testStartMockServer(int* hostPort);
 //
 // |adbServerSocket| is the server socket descriptor for ADB connection
 // that will be used by the agent.
-// |consoleServerSocket| is the console server socket for console
-// connections that will be used by the agent if it thinks it is talking
-// to an emulator, instead of a real device. This is ignored if |usbPhone|
-// is true.
 // |wearDevice| is the serial number of a simulated wear device or emulator.
 // |phoneDevice| is the serial number of a simulated compatible device or
 // emulator to be paired-up with |wearDevice|
-// |usbPhone| is true to indicate that |phoneDevice| is a simulated device,
-// and false to indicate that it is a simulated emulator.
 //
 // Return true on success, false/errno otherwise.
 bool testRunMockAdbServer(int adbServerSocket,
-                          int consoleServerSocket,
                           const char* wearDevice,
-                          const char* phoneDevice,
-                          bool usbPhone);
+                          const char* phoneDevice);
 
 // Send a given zero-terminated |message| to socket |socketFd|.
 // On success, return true, on error return false/errno.

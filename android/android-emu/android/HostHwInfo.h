@@ -34,8 +34,20 @@ public:
 
     static const Info& query();
 
+    struct ArmCpuInfo {
+        // if true, it has at least two different cpu models
+        // e.g., cpu0-3: cortex-a53 (0xd03)
+        // cpu4-5: cortex-a72 (0xd08)
+        bool is_big_little = false;
+        // model id of cpus, the order matters
+        std::vector<int> cpumodels;
+    };
+
+    static const ArmCpuInfo& queryArmCpuInfo();
+
 private:
     Info info;
+    ArmCpuInfo armCpuInfo;
     DISALLOW_COPY_AND_ASSIGN(HostHwInfo);
 };
 

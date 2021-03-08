@@ -82,7 +82,7 @@ if [ "$OPT_EMUGEN" ]; then
         fatal "Missing emugen binary: $EMUGEN"
     fi
 else
-    EMUGEN=$PROGDIR/../../../objs/build/intermediates64/emugen/emugen
+    EMUGEN=$PROGDIR/../../../objs/emugen
     if [ ! -f "$EMUGEN" ]; then
         fatal "Missing emugen binary: $EMUGEN, please build it or use --emugen=<program>"
     fi
@@ -93,9 +93,6 @@ if [ "$OPT_AOSP_DIR" ]; then
     AOSP_DIR=$OPT_AOSP_DIR
 else
     echo "Auto-config: --aosp-dir=$AOSP_DIR"
-fi
-if [ ! -f "$AOSP_DIR/build/envsetup.sh" ]; then
-    fatal "Not an AOSP directory: $AOSP_DIR"
 fi
 
 AOSP_DIR=$(cd "$AOSP_DIR" && pwd -P)

@@ -14,12 +14,12 @@
 
 #pragma once
 
+#include <memory>
+
+#include "android/automation/EventSource.h"
 #include "android/base/Compiler.h"
 #include "android/base/Result.h"
-#include "android/base/async/Looper.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
-
-#include <memory>
 
 // Forward declarations.
 typedef struct PhysicalModel PhysicalModel;
@@ -30,8 +30,6 @@ class Response;
 
 namespace android {
 namespace automation {
-
-typedef android::base::Looper::DurationNs DurationNs;
 
 // Forward declarations.
 class AutomationEventSink;
@@ -46,7 +44,7 @@ enum class StartError {
 using StartResult = base::Result<void, StartError>;
 std::ostream& operator<<(std::ostream& os, const StartError& value);
 
-enum class StopError { NotStarted };
+enum class StopError { NotStarted, ParseError };
 using StopResult = base::Result<void, StopError>;
 std::ostream& operator<<(std::ostream& os, const StopError& value);
 
@@ -121,11 +119,37 @@ public:
     // Stops a recording to a file.
     virtual StopResult stopRecording() = 0;
 
+    // Start a playback from an EventSource.
+    virtual StartResult startPlaybackFromSource(
+            std::shared_ptr<EventSource> source) = 0;
+
     // Start a playback from a file.
     virtual StartResult startPlayback(android::base::StringView filename) = 0;
 
     // Stop playback from a file.
     virtual StopResult stopPlayback() = 0;
+
+    // Start playback with stop callback.
+    virtual StartResult startPlaybackWithCallback(
+            android::base::StringView filename,
+            void (*onStopCallback)()) = 0;
+
+    // Set the macro name in the header of a file.
+    virtual void setMacroName(android::base::StringView macroName,
+                              android::base::StringView filename) = 0;
+
+    // Get the macro name from the header of a file.
+    virtual std::string getMacroName(android::base::StringView filename) = 0;
+
+    // Get the duration in ns and datetime in ms from a file.
+    virtual std::pair<uint64_t, uint64_t> getMetadata(
+            android::base::StringView filename) = 0;
+
+    // Get the current timestamp of the looper used by the controller
+    virtual uint64_t getLooperNowTimestamp() = 0;
+
+    // Set the timestamp at which the next playback command should be executed
+    virtual void setNextPlaybackCommandTime(DurationNs nextTimestamp) = 0;
 
     //
     // Offworld API
@@ -144,6 +168,8 @@ public:
     virtual ReplayResult replayEvent(android::AsyncMessagePipeHandle pipe,
                                      android::base::StringView event,
                                      uint32_t asyncId) = 0;
+
+    virtual void sendEvent(const emulator_automation::RecordedEvent& event) = 0;
 
     // Listen to the stream of automation events, returns an error if there is
     // already a pending listen operations.

@@ -10,9 +10,11 @@
 
 #pragma once
 
-#include "GLES2/gl2.h"
+#include <vector>       // for vector
 
-#include <QTextStream>
+#include "GLES2/gl2.h"  // for GLuint
+
+class QTextStream;
 
 // This function can be used to parse certain subset of the Wavefront OBJ format.
 // See here for details: https://en.wikipedia.org/wiki/Wavefront_.obj_file

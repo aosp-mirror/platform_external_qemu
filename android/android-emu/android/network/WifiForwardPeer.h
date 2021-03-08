@@ -32,6 +32,7 @@ public:
         size_t offset;
     };
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     using OnDataAvailableCallback = std::function<void (const uint8_t* data,
                                                         size_t size)>;
 
@@ -83,6 +84,61 @@ private:
     OnDataAvailableCallback mOnDataAvailable;
 
     std::vector<uint8_t> mReceiveBuffer;
+=======
+    using OnDataAvailableCallback =
+            std::function<size_t(const uint8_t* data, size_t size)>;
+
+    explicit WifiForwardPeer(OnDataAvailableCallback onDataAvailable);
+    virtual ~WifiForwardPeer() = default;
+
+    bool init();
+    bool initForTesting(android::base::Looper* looper, int fd);
+    void run();
+    void stop();
+
+    // Return a pointer to the currently available data that this peer has
+    // read from other peers. Returns nullptr if no data available. After
+    // receiving and processing the data the caller should call clear() to
+    // indicate that the data is no longer needed. Data will keep piling up
+    // until it reaches a maximum threshold, after that all incoming data will
+    // be dropped. Therefore it's important to regularly read and clear this
+    // data.
+    const void* data() const;
+    // The size of the available data from peers.
+    size_t size() const;
+    // Clear the receive buffer of all returne data, indicating that it is
+    // no longer of use.
+    void clear();
+
+    size_t queue(const uint8_t* data, size_t size);
+protected:
+    size_t send(const void* data, size_t size);
+    size_t receive(void* data, size_t size);
+    virtual void start() = 0;
+    void threadLoop();
+    bool onConnect(int fd);
+    void onDisconnect();
+    void onFdEvent(int fd, unsigned events);
+    static void staticOnFdEvent(void *opaque, int fd, unsigned events);
+
+    android::base::Looper* mLooper;
+private:
+    enum class WakePipeCommand : uint8_t {
+        Quit,
+        Send
+    };
+
+    void sendQueue();
+    static void onWakePipe(void* opaque, int fd, unsigned events);
+    void sendWakeCommand(WakePipeCommand command);
+
+    android::base::Looper::FdWatch* mFdWatch = nullptr;
+    OnDataAvailableCallback mOnDataAvailable;
+
+    std::vector<uint8_t> mReceiveBuffer;
+    size_t mAvailableDataFromPeers = 0;
+
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     std::vector<uint8_t> mTransmitBuffer;
     size_t mTransmitQueuePos = 0;
     size_t mTransmitSendPos = 0;

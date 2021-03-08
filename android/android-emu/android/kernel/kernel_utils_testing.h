@@ -11,15 +11,13 @@
 
 #pragma once
 
-// Probe the kernel image at |kernelPath| and copy the corresponding
-// 'Linux version ' string into the |dst| buffer.  On success, returns true
-// and copies up to |dstLen-1| characters into dst.  dst will always be NUL
-// terminated if |dstLen| >= 1
-//
-// On failure (e.g. if the file doesn't exist or cannot be probed), return
-// false and doesn't touch |dst| buffer.
-bool android_imageProbeKernelVersionString(const uint8_t* kernelFileData,
-                                           size_t kernelFileSize,
-                                           char* dst,
-                                           size_t dstLen);
+#include "kernel_utils.h"
 
+ANDROID_BEGIN_HEADER
+
+// The same as android_getKernelVersion, but operates with kernel bits
+// loaded into memory (for testing).
+bool android_getKernelVersionImpl(const char* const kernelBits, size_t size,
+                                  KernelVersion* version);
+
+ANDROID_END_HEADER

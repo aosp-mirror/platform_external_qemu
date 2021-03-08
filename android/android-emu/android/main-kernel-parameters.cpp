@@ -16,6 +16,7 @@
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/SetupParameters.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/kernel/kernel_utils.h"
 #include "android/utils/debug.h"
 #include "android/utils/dns.h"
 #include "android/version.h"
@@ -43,6 +44,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    int apiLevel,
                                    const char* kernelSerialPrefix,
                                    const char* avdKernelParameters,
+                                   const char* kernelPath,
                                    const std::vector<std::string>* verifiedBootParameters,
                                    AndroidGlesEmulationMode glesMode,
                                    int bootPropOpenglesVersion,
@@ -50,7 +52,12 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    mem_map ramoops,
                                    const int vm_heapSize,
                                    bool isQemu2,
-                                   bool isCros) {
+                                   bool isCros,
+                                   uint32_t lcd_width,
+                                   uint32_t lcd_height,
+                                   uint32_t lcd_vsync,
+                                   const char* gltransport,
+                                   uint32_t gltransport_drawFlushInterval) {
     android::ParameterList params;
     if (isCros) {
       std::string cmdline(StringFormat(
@@ -82,11 +89,22 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     if (isX86ish) {
         params.add("clocksource=pit");
+
+        KernelVersion kernelVersion = KERNEL_VERSION_0;
+        if (!android_getKernelVersion(kernelPath, &kernelVersion)) {
+            derror("Can't get kernel version from the kernel image file: '%s'",
+                   kernelPath);
+        }
+
         // b/67565886, when cpu core is set to 2, clock_gettime() function hangs
         // in goldfish kernel which caused surfaceflinger hanging in the guest
         // system. To workaround, start the kernel with no kvmclock. Currently,
         // only API 24 and API 25 have kvm clock enabled in goldfish kernel.
-        params.add("no-kvmclock");
+        //
+        // kvm-clock seems to be stable for >= 5.4.
+        if (kernelVersion < KERNEL_VERSION_5_4_0) {
+            params.add("no-kvmclock");
+        }
     }
 
     android::setupVirtualSerialPorts(
@@ -110,6 +128,10 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         params.addFormat("qemu.gles=%d", gles);
     }
 
+    // To save battery, set the screen off timeout to a high value.
+    // Using int32_max here. The unit is milliseconds.
+    params.addFormat("qemu.settings.system.screen_off_timeout=2147483647"); // 596 hours
+
     if (isQemu2 && android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData)) {
         params.add("qemu.encrypt=1");
     }
@@ -118,6 +140,24 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     if (!isQemu2)
         android::featurecontrol::setEnabledOverride(
                 android::featurecontrol::GLDMA, false);
+
+    // Android media profile selection
+    // 1. If the SelectMediaProfileConfig is on, then select
+    // <media_profile_name> if the resolution is above 1080p (1920x1080).
+    if (isQemu2 && android::featurecontrol::isEnabled(android::featurecontrol::DynamicMediaProfile)) {
+        if ((lcd_width > 1920 && lcd_height > 1080) ||
+            (lcd_width > 1080 && lcd_height > 1920)) {
+            fprintf(stderr, "Display resolution > 1080p. Using different media profile.\n");
+            params.addFormat("qemu.mediaprofile.video=%s", "/data/vendor/etc/media_codecs_google_video_v2.xml");
+        }
+    }
+
+    // Set vsync rate
+    params.addFormat("qemu.vsync=%u", lcd_vsync);
+
+    // Set gl transport props
+    params.addFormat("qemu.gltransport=%s", gltransport);
+    params.addFormat("qemu.gltransport.drawFlushInterval=%u", gltransport_drawFlushInterval);
 
     // OpenGL ES related setup
     // 1. Set opengles.version and set Skia as UI renderer if
@@ -172,11 +212,25 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
             android::featurecontrol::isEnabled(android::featurecontrol::Wifi)) {
         params.add("qemu.wifi=1");
         // Enable multiple channels so the kernel can scan on one channel while
-        // communicating the other. This speeds up scanning significantly.
-        params.add("mac80211_hwsim.channels=2");
+        // communicating the other. This speeds up scanning significantly. This
+        // does not work if WiFi Direct is enabled starting with Q images so
+        // only set this option if WiFi Direct support is not enabled.
+        if (apiLevel < 29) {
+            params.add("mac80211_hwsim.channels=2");
+        } else if (!opts->wifi_client_port && !opts->wifi_server_port) {
+            params.add("mac80211_hwsim.channels=2");
+        }
     }
-
-    if (isQemu2 && isX86ish) {
+#ifndef AEMU_GFXSTREAM_BACKEND
+    if (isQemu2 &&
+            android::featurecontrol::isEnabled(android::featurecontrol::VirtioWifi)) {
+        params.add("qemu.virtiowifi=1");
+        // Turn off hwsim when virtio wifi is in use.
+        params.add("mac80211_hwsim.radios=0");
+    }
+#endif
+    const bool isDynamicPartition = android::featurecontrol::isEnabled(android::featurecontrol::DynamicPartition);
+    if (isQemu2 && isX86ish && !isDynamicPartition) {
         // x86 and x86_64 platforms use an alternative Android DT directory that
         // mimics the layout of /proc/device-tree/firmware/android/
         params.addFormat("androidboot.android_dt_dir=%s",
@@ -225,6 +279,21 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         char  temp[64];
         snprintf(temp, sizeof(temp), "%dm", vm_heapSize);
         params.addFormat("qemu.dalvik.vm.heapsize=%s", temp);
+    }
+
+    if (opts->legacy_fake_camera) {
+        params.addFormat("qemu.legacy_fake_camera=1");
+    }
+
+    if (apiLevel > 29) {
+        params.addFormat("qemu.camera_protocol_ver=1");
+    }
+
+    if (opts->shell || opts->shell_serial || opts->show_kernel) {
+        // The default value for printk.devkmsg is "ratelimit",
+        // causing only a few logs from the android init
+        // executable to be printed.
+        params.addFormat("printk.devkmsg=on");
     }
 
     // User entered parameters are space separated. Passing false here to prevent

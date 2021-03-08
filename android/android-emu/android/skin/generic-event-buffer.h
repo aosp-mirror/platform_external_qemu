@@ -12,9 +12,7 @@
 
 #pragma once
 
-#include "android/utils/compiler.h"
-
-#include <stdbool.h>
+#include "android/utils/compiler.h"  // for ANDROID_BEGIN_HEADER, ANDROID_EN...
 
 ANDROID_BEGIN_HEADER
 
@@ -30,6 +28,9 @@ typedef struct SkinGenericEventCode {
     int type;
     int code;
     int value;
+    // With multiple display, mouse input events can be sent to different
+    // devices.
+    int displayId;
 } SkinGenericEventCode;
 
 // Type of a function used to flush buffered events
@@ -50,7 +51,8 @@ void skin_generic_event_buffer_init(SkinGenericEventBuffer* buffer,
 void skin_generic_event_buffer_add(SkinGenericEventBuffer* buffer,
                                    unsigned type,
                                    unsigned code,
-                                   unsigned value);
+                                   unsigned value,
+                                   unsigned displayId);
 
 /* Flushes (transfers) collected events to the core. */
 void skin_generic_event_buffer_flush(SkinGenericEventBuffer* buffer);

@@ -12,6 +12,7 @@
 #include "android/snapshot/RamSnapshotTesting.h"
 
 #include "android/base/files/StdioStream.h"
+#include "android/utils/file_io.h"
 
 #include <cstdlib>
 #include <random>
@@ -72,7 +73,7 @@ void saveRamSingleBlock(const RamSaver::Flags flags,
 
 void loadRamSingleBlock(const RamBlock& block,
                         android::base::StringView filename) {
-    auto ram = fopen(c_str(filename), "rb");
+    auto ram = android_fopen(c_str(filename), "rb");
 
     RamLoader::RamBlockStructure emptyRamBlockStructure = {};
 
@@ -90,7 +91,7 @@ void incrementalSaveSingleBlock(const RamSaver::Flags flags,
                                 const RamBlock& blockToLoad,
                                 const RamBlock& blockToSave,
                                 android::base::StringView filename) {
-    auto ram = fopen(c_str(filename), "rb");
+    auto ram = android_fopen(c_str(filename), "rb");
 
     RamLoader::RamBlockStructure emptyRamBlockStructure = {};
 
@@ -117,7 +118,14 @@ TestRamBuffer generateRandomRam(size_t numPages, float zeroPageChance, int seed)
     generator.seed(seed);
 
     // Distributions for the random patterns and zero pages
-    std::uniform_int_distribution<char> patternDistribution(0, 255);
+#ifdef _MSC_VER
+    // MSVC throws the following error if type is char:
+    //
+    // invalid template argument for uniform_int_distribution: N4659 29.6.1.1 [rand.req.genl]/1e requires one of short, int, long, long long, unsigned short, unsigned int, unsigned long, or unsigned long long
+    std::uniform_int_distribution<unsigned short> patternDistribution(0, 255);
+#else
+    std::uniform_int_distribution<uint8_t> patternDistribution(0, 255);
+#endif
     std::bernoulli_distribution zeroPageDistribution(zeroPageChance);
 
     TestRamBuffer res(numPages * kTestingPageSize);
@@ -141,7 +149,11 @@ void randomMutateRam(TestRamBuffer& ram, float noChangeChance, float zeroPageCha
     std::default_random_engine generator;
     generator.seed(seed);
 
-    std::uniform_int_distribution<char> patternDistribution(0, 255);
+#ifdef _MSC_VER
+    std::uniform_int_distribution<unsigned short> patternDistribution(0, 255);
+#else
+    std::uniform_int_distribution<uint8_t> patternDistribution(0, 255);
+#endif
     std::bernoulli_distribution noChangeDistribution(noChangeChance);
     std::bernoulli_distribution zeroPageDistribution(zeroPageChance);
 

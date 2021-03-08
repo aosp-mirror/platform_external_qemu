@@ -13,6 +13,7 @@
 #pragma once
 
 #include "android/avd/info.h"
+#include "android/skin/rect.h"
 #include "android/utils/compiler.h"
 #include <stdint.h>
 
@@ -31,7 +32,8 @@ ANDROID_BEGIN_HEADER
 typedef struct AUserConfig   AUserConfig;
 
 /* Create a new AUserConfig object from a given AvdInfo */
-AUserConfig*   auserConfig_new( AvdInfo*  info );
+AUserConfig*   auserConfig_new( AvdInfo*  info, SkinRect* monitorRect, int screenWidth, int screenHeight );
+AUserConfig*   auserConfig_new_custom( AvdInfo*  info, const SkinRect* monitorRect, int screenWidth, int screenHeight );
 void           auserConfig_free( AUserConfig* uconfig );
 
 /* Retrieve the unique UID for this AVD */
@@ -42,6 +44,14 @@ void           auserConfig_getWindowPos( AUserConfig*  uconfig, int  *pX, int  *
 
 /* Change the stored window position for this AVD */
 void           auserConfig_setWindowPos( AUserConfig*  uconfig, int  x, int  y );
+
+/* Retrieve the stored extended controls window position for this AVD,
+return 1 if the userconfig stores the position previously */
+int auserConfig_getExtendedControlsPos(AUserConfig* uconfig, int* pX, int* pY);
+
+/* Change the stored extended controls window position for this AVD
+return 1 if the new values are stored*/
+int auserConfig_setExtendedControlsPos(AUserConfig* uconfig, int x, int y);
 
 /* Save the user configuration back to the content directory.
  * Should be used in an atexit() handler. This will effectively

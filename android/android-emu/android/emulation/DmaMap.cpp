@@ -126,8 +126,6 @@ void* DmaMap::getPipeInstance(uint64_t guest_paddr) {
     if (auto info = android::base::find(mDmaBuffers, guest_paddr)) {
         return info->hwpipe;
     } else {
-        E("guest paddr 0x%llx not alloced!",
-          (unsigned long long)guest_paddr);
         return nullptr;
     }
 }

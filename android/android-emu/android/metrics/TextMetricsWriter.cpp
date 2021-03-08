@@ -13,8 +13,8 @@
 
 #include "android/metrics/MetricsLogging.h"
 
-#include "android/metrics/proto/clientanalytics.pb.h"
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "google_logs_publishing.pb.h"
+#include "studio_stats.pb.h"
 
 #include <utility>
 
@@ -32,10 +32,8 @@ TextMetricsWriter::TextMetricsWriter(base::StdioStream&& outStream)
 void TextMetricsWriter::write(
         const android_studio::AndroidStudioEvent& asEvent,
         wireless_android_play_playlog::LogEvent* logEvent) {
-    D("writing a log event with uptime %ld ms", logEvent->event_uptime_ms());
-
-    fprintf(mOutStream.get(), "text_metrics: { %s }\n",
-            asEvent.ShortDebugString().c_str());
+    fprintf(mOutStream.get(), "event time %" PRIi64 " ms\n", logEvent->event_time_ms());
+    fprintf(mOutStream.get(), "{ %s }\n", asEvent.ShortDebugString().c_str());
     fflush(mOutStream.get());
 }
 

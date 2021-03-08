@@ -17,6 +17,9 @@
 #include "ui/console.h"
 #include "trace.h"
 #include "hw/virtio/virtio.h"
+#ifdef CONFIG_ANDROID
+#include "hw/virtio/virtio-goldfish-pipe.h"
+#endif
 #include "hw/virtio/virtio-gpu.h"
 #include "hw/virtio/virtio-bus.h"
 #include "migration/blocker.h"
@@ -112,7 +115,6 @@ static void update_cursor_data_simple(VirtIOGPU *g,
            pixels * sizeof(uint32_t));
 }
 
-#ifdef CONFIG_VIRGL
 
 static void update_cursor_data_virgl(VirtIOGPU *g,
                                      struct virtio_gpu_scanout *s,
@@ -121,7 +123,11 @@ static void update_cursor_data_virgl(VirtIOGPU *g,
     uint32_t width, height;
     uint32_t pixels, *data;
 
+#ifdef CONFIG_VIRGL
+    data = g->virgl->virgl_renderer_get_cursor_data(resource_id, &width, &height);
+#else
     data = virgl_renderer_get_cursor_data(resource_id, &width, &height);
+#endif
     if (!data) {
         return;
     }
@@ -137,7 +143,6 @@ static void update_cursor_data_virgl(VirtIOGPU *g,
     free(data);
 }
 
-#endif
 
 static void update_cursor(VirtIOGPU *g, struct virtio_gpu_update_cursor *cursor)
 {
@@ -201,8 +206,11 @@ static uint64_t virtio_gpu_get_features(VirtIODevice *vdev, uint64_t features,
 {
     VirtIOGPU *g = VIRTIO_GPU(vdev);
 
+    features |= (1ull << VIRTIO_F_VERSION_1);
+
     if (virtio_gpu_virgl_enabled(g->conf)) {
         features |= (1 << VIRTIO_GPU_F_VIRGL);
+        features |= (1 << VIRTIO_GPU_F_RESOURCE_BLOB);
     }
     return features;
 }
@@ -214,6 +222,10 @@ static void virtio_gpu_set_features(VirtIODevice *vdev, uint64_t features)
 
     g->use_virgl_renderer = ((features & virgl) == virgl);
     trace_virtio_gpu_features(g->use_virgl_renderer);
+
+    if (virtio_vdev_has_feature(vdev, VIRTIO_RING_F_EVENT_IDX)) {
+        fprintf(stderr, "%s: virtio gpu has eventidx\n", __func__);
+    }
 }
 
 static void virtio_gpu_notify_event(VirtIOGPU *g, uint32_t event_type)
@@ -834,6 +846,8 @@ static void virtio_gpu_simple_process_cmd(VirtIOGPU *g,
     }
 }
 
+static void virtio_gpu_handle_ctrl(VirtIODevice *vdev, VirtQueue *vq);
+
 static void virtio_gpu_handle_ctrl_cb(VirtIODevice *vdev, VirtQueue *vq)
 {
     VirtIOGPU *g = VIRTIO_GPU(vdev);
@@ -897,11 +911,13 @@ static void virtio_gpu_handle_ctrl(VirtIODevice *vdev, VirtQueue *vq)
 
     cmd = virtqueue_pop(vq, sizeof(struct virtio_gpu_ctrl_command));
     while (cmd) {
+
         cmd->vq = vq;
         cmd->error = 0;
         cmd->finished = false;
         cmd->waiting = false;
         QTAILQ_INSERT_TAIL(&g->cmdq, cmd, next);
+
         cmd = virtqueue_pop(vq, sizeof(struct virtio_gpu_ctrl_command));
     }
 
@@ -1164,6 +1180,52 @@ static int virtio_gpu_load(QEMUFile *f, void *opaque, size_t size,
     return 0;
 }
 
+void proxy_virgl_write_fence(void *opaque, uint32_t fence) {
+    VirtIOGPU *g = opaque;
+    struct virtio_gpu_ctrl_command *cmd, *tmp;
+
+    QTAILQ_FOREACH_SAFE(cmd, &g->fenceq, next, tmp) {
+        /*
+         * the guest can end up emitting fences out of order
+         * so we should check all fenced cmds not just the first one.
+         */
+        if (cmd->cmd_hdr.fence_id > fence) {
+            continue;
+        }
+        trace_virtio_gpu_fence_resp(cmd->cmd_hdr.fence_id);
+        virtio_gpu_ctrl_response_nodata(g, cmd, VIRTIO_GPU_RESP_OK_NODATA);
+        QTAILQ_REMOVE(&g->fenceq, cmd, next);
+        g_free(cmd);
+        g->inflight--;
+        if (virtio_gpu_stats_enabled(g->conf)) {
+            fprintf(stderr, "inflight: %3d (-)\r", g->inflight);
+        }
+    }
+}
+
+#ifdef CONFIG_ANDROID
+static virgl_renderer_gl_context
+proxy_virgl_create_context(void *opaque, int scanout_idx,
+                     struct virgl_renderer_gl_ctx_param *params)
+{
+    return (virgl_renderer_gl_context)0;
+}
+
+static void proxy_virgl_destroy_context(
+    void *opaque, virgl_renderer_gl_context ctx) { }
+
+static int proxy_virgl_make_context_current(
+    void *opaque, int scanout_idx, virgl_renderer_gl_context ctx) { return 0; }
+
+static struct virgl_renderer_callbacks proxy_3d_cbs = {
+    .version             = 1,
+    .write_fence         = proxy_virgl_write_fence,
+    .create_gl_context   = proxy_virgl_create_context,
+    .destroy_gl_context  = proxy_virgl_destroy_context,
+    .make_current        = proxy_virgl_make_context_current,
+};
+#endif
+
 static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
 {
     VirtIODevice *vdev = VIRTIO_DEVICE(qdev);
@@ -1182,15 +1244,15 @@ static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
         return;
     }
 
-    g->use_virgl_renderer = false;
-#if !defined(CONFIG_VIRGL) || defined(HOST_WORDS_BIGENDIAN)
-    have_virgl = false;
+#ifdef CONFIG_ANDROID
+    g->use_virgl_renderer = true;
+    g->conf.flags |= (1 << VIRTIO_GPU_FLAG_VIRGL_ENABLED);
+    g->virgl_as_proxy = true;
+    g->virgl = get_goldfish_pipe_virgl_renderer_virtio_interface();
+    g->gpu_3d_cbs = &proxy_3d_cbs;
 #else
-    have_virgl = display_opengl;
+    g->use_virgl_renderer = false;
 #endif
-    if (!have_virgl) {
-        g->conf.flags &= ~(1 << VIRTIO_GPU_FLAG_VIRGL_ENABLED);
-    }
 
     if (virtio_gpu_virgl_enabled(g->conf)) {
         error_setg(&g->migration_blocker, "virgl is not yet migratable");
@@ -1278,7 +1340,7 @@ static void virtio_gpu_reset(VirtIODevice *vdev)
 
 #ifdef CONFIG_VIRGL
     if (g->use_virgl_renderer) {
-        virtio_gpu_virgl_reset(g);
+        // virtio_gpu_virgl_reset(g);
         g->use_virgl_renderer = 0;
     }
 #endif

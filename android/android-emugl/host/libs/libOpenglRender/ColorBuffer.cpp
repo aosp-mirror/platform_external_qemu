@@ -28,6 +28,8 @@
 
 #include "emugl/common/misc.h"
 
+#include <GLES2/gl2ext.h>
+
 #include <stdio.h>
 #include <string.h>
 
@@ -79,6 +81,10 @@ ColorBuffer::Helper::~Helper() = default;
 
 static GLenum sGetUnsizedColorBufferFormat(GLenum format) {
     switch (format) {
+        case GL_R8:
+            return GL_RED;
+        case GL_RG8:
+            return GL_RG;
         case GL_RGB8:
         case GL_RGB565:
         case GL_RGB16F:
@@ -90,10 +96,101 @@ static GLenum sGetUnsizedColorBufferFormat(GLenum format) {
         case GL_RGB10_A2:
         case GL_RGBA16F:
             return GL_RGBA;
-        default:
+        default: // already unsized
             return format;
     }
 }
+
+static bool sGetFormatParameters(
+    GLint internalFormat,
+    GLenum* texFormat,
+    GLenum* pixelType,
+    int* bytesPerPixel,
+    GLint* sizedInternalFormat,
+    bool* isBlob) {
+    *isBlob = false;
+
+    switch (internalFormat) {
+        case GL_RGB:
+        case GL_RGB8:
+            *texFormat = GL_RGB;
+            *pixelType = GL_UNSIGNED_BYTE;
+            *bytesPerPixel = 3;
+            *sizedInternalFormat = GL_RGB8;
+            return true;
+        case GL_RGB565_OES:
+            *texFormat = GL_RGB;
+            *pixelType = GL_UNSIGNED_SHORT_5_6_5;
+            *bytesPerPixel = 2;
+            *sizedInternalFormat = GL_RGB565;
+            return true;
+        case GL_RGBA:
+        case GL_RGBA8:
+        case GL_RGB5_A1_OES:
+        case GL_RGBA4_OES:
+            *texFormat = GL_RGBA;
+            *pixelType = GL_UNSIGNED_BYTE;
+            *bytesPerPixel = 4;
+            *sizedInternalFormat = GL_RGBA8;
+            return true;
+        case GL_UNSIGNED_INT_10_10_10_2_OES:
+            *texFormat = GL_RGBA;
+            *pixelType = GL_UNSIGNED_SHORT;
+            *bytesPerPixel = 4;
+            *sizedInternalFormat = GL_UNSIGNED_INT_10_10_10_2_OES;
+            return true;
+        case GL_RGB10_A2:
+            *texFormat = GL_RGBA;
+            *pixelType = GL_UNSIGNED_INT_2_10_10_10_REV;
+            *bytesPerPixel = 4;
+            *sizedInternalFormat = GL_RGB10_A2;
+            return true;
+        case GL_RGB16F:
+            *texFormat = GL_RGB;
+            *pixelType = GL_HALF_FLOAT;
+            *bytesPerPixel = 6;
+            *sizedInternalFormat = GL_RGB16F;
+            return true;
+        case GL_RGBA16F:
+            *texFormat = GL_RGBA;
+            *pixelType = GL_HALF_FLOAT;
+            *bytesPerPixel = 8;
+            *sizedInternalFormat = GL_RGBA16F;
+            return true;
+        case GL_LUMINANCE:
+            *texFormat = GL_LUMINANCE;
+            *pixelType = GL_UNSIGNED_SHORT;
+            *bytesPerPixel = 2;
+            *sizedInternalFormat = GL_R8;
+            *isBlob = true;
+            return true;
+        case GL_BGRA_EXT:
+            *texFormat = GL_BGRA_EXT;
+            *pixelType = GL_UNSIGNED_BYTE;
+            *bytesPerPixel = 4;
+            *sizedInternalFormat = GL_BGRA8_EXT;
+            return true;
+        case GL_R8:
+        case GL_RED:
+            *texFormat = GL_RED;
+            *pixelType = GL_UNSIGNED_BYTE;
+            *bytesPerPixel = 1;
+            *sizedInternalFormat = GL_R8;
+            return true;
+        case GL_RG8:
+        case GL_RG:
+            *texFormat = GL_RG;
+            *pixelType = GL_UNSIGNED_BYTE;
+            *bytesPerPixel = 2;
+            *sizedInternalFormat = GL_RG8;
+            return true;
+        default:
+            fprintf(stderr, "%s: Unknown format 0x%x\n",
+                    __func__, internalFormat);
+            return false;
+    }
+}
+
 // static
 ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  int p_width,
@@ -104,58 +201,21 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  Helper* helper,
                                  bool fastBlitSupported) {
     GLenum texFormat = 0;
-
     GLenum pixelType = GL_UNSIGNED_BYTE;
-    int bytesPerPixel = 3;
-    switch (p_internalFormat) {
-        case GL_RGB:
-            texFormat = GL_RGB;
-            bytesPerPixel = 3;
-            break;
+    int bytesPerPixel = 4;
+    GLint p_sizedInternalFormat = GL_RGBA8;
+    bool isBlob = false;;
 
-        case GL_RGB565_OES: // and GL_RGB565
-            // Still say "GL_RGB" for compatibility
-            // with older drivers
-            texFormat = GL_RGB;
-            pixelType = GL_UNSIGNED_SHORT_5_6_5;
-            bytesPerPixel = 2;
-            break;
-
-        case GL_RGBA:
-        case GL_RGB5_A1_OES:
-        case GL_RGBA4_OES:
-            texFormat = GL_RGBA;
-            bytesPerPixel = 4;
-            break;
-
-        case GL_UNSIGNED_INT_10_10_10_2_OES:
-            texFormat = GL_RGBA;
-            pixelType = GL_UNSIGNED_SHORT;
-            bytesPerPixel = 4;
-            break;
-
-        case GL_RGB10_A2:
-            texFormat = GL_RGBA;
-            pixelType = GL_UNSIGNED_INT_2_10_10_10_REV;
-            bytesPerPixel = 4;
-            break;
-
-        case GL_RGBA16F:
-            texFormat = GL_RGBA;
-            pixelType = GL_HALF_FLOAT;
-            bytesPerPixel = 8;
-            break;
-
-        case GL_LUMINANCE:
-            texFormat = GL_LUMINANCE;
-            pixelType = GL_UNSIGNED_SHORT;
-            bytesPerPixel = 2;
-            break;
-        default:
-            fprintf(stderr, "ColorBuffer::create invalid format 0x%x\n",
-                    p_internalFormat);
-            return NULL;
+    if (!sGetFormatParameters(
+            p_internalFormat,
+            &texFormat, &pixelType, &bytesPerPixel,
+            &p_sizedInternalFormat,
+            &isBlob)) {
+        fprintf(stderr, "ColorBuffer::create invalid format 0x%x\n",
+                p_internalFormat);
+        return NULL;
     }
+
     const unsigned long bufsize = ((unsigned long)bytesPerPixel) * p_width
             * p_height;
     android::base::ScopedCPtr<char> initialImage(
@@ -167,7 +227,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                 p_width, p_height, bytesPerPixel * 8, bufsize / 1024);
         return nullptr;
     }
-    memset(initialImage.get(), 0xff, bufsize);
+    memset(initialImage.get(), 0x0, bufsize);
 
     RecursiveScopedHelperContext context(helper);
     if (!context.isOk()) {
@@ -209,6 +269,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     cb->m_width = p_width;
     cb->m_height = p_height;
     cb->m_internalFormat = p_internalFormat;
+    cb->m_sizedInternalFormat = p_sizedInternalFormat;
     cb->m_format = texFormat;
     cb->m_type = pixelType;
 
@@ -226,12 +287,9 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     switch (cb->m_frameworkFormat) {
         case FRAMEWORK_FORMAT_GL_COMPATIBLE:
             break;
-        case FRAMEWORK_FORMAT_YV12:
-        case FRAMEWORK_FORMAT_YUV_420_888:
+        default: // Any YUV format
             cb->m_yuv_converter.reset(
                     new YUVConverter(p_width, p_height, cb->m_frameworkFormat));
-            break;
-        default:
             break;
     }
 
@@ -243,6 +301,8 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 #define GL_UNSIGNED_INT_8_8_8_8_REV       0x8367
         cb->m_asyncReadbackType = GL_UNSIGNED_INT_8_8_8_8_REV;
     }
+
+    cb->m_numBytes = (size_t)bufsize;
 
     s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
 
@@ -271,10 +331,18 @@ ColorBuffer::~ColorBuffer() {
         s_gles2.glDeleteFramebuffers(1, &m_yuv_conversion_fbo);
     }
 
+    if (m_scaleRotationFbo) {
+        s_gles2.glDeleteFramebuffers(1, &m_scaleRotationFbo);
+    }
+
     m_yuv_converter.reset();
 
     GLuint tex[2] = {m_tex, m_blitTex};
     s_gles2.glDeleteTextures(2, tex);
+
+    if (m_memoryObject) {
+        s_gles2.glDeleteMemoryObjectsEXT(1, &m_memoryObject);
+    }
 
     delete m_resizer;
 }
@@ -290,10 +358,9 @@ void ColorBuffer::readPixels(int x,
     if (!context.isOk()) {
         return;
     }
-
     p_format = sGetUnsizedColorBufferFormat(p_format);
-
     touch();
+
     if (bindFbo(&m_fbo, m_tex)) {
         GLint prevAlignment = 0;
         s_gles2.glGetIntegerv(GL_PACK_ALIGNMENT, &prevAlignment);
@@ -304,18 +371,91 @@ void ColorBuffer::readPixels(int x,
     }
 }
 
-void ColorBuffer::reformat(GLint internalformat,
-                           GLenum format, GLenum type) {
+void ColorBuffer::readPixelsScaled(int width,
+                                   int height,
+                                   GLenum p_format,
+                                   GLenum p_type,
+                                   SkinRotation rotation,
+                                   void* pixels) {
+    RecursiveScopedHelperContext context(m_helper);
+    if (!context.isOk()) {
+        return;
+    }
+    p_format = sGetUnsizedColorBufferFormat(p_format);
+    touch();
+    GLuint tex = m_resizer->update(m_tex, width, height, rotation);
+    if (bindFbo(&m_scaleRotationFbo, tex)) {
+        GLint prevAlignment = 0;
+        s_gles2.glGetIntegerv(GL_PACK_ALIGNMENT, &prevAlignment);
+        s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        s_gles2.glReadPixels(0, 0, width, height, p_format, p_type, pixels);
+        s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, prevAlignment);
+        unbindFbo();
+    }
+}
 
-    format = sGetUnsizedColorBufferFormat(format);
+void ColorBuffer::readPixelsYUVCached(int x,
+                                      int y,
+                                      int width,
+                                      int height,
+                                      void* pixels,
+                                      uint32_t pixels_size) {
+    RecursiveScopedHelperContext context(m_helper);
+    if (!context.isOk()) {
+        return;
+    }
+
+    touch();
+
+#if DEBUG_CB_FBO
+    fprintf(stderr, "%s %d request width %d height %d\n", __func__, __LINE__,
+            width, height);
+    memset(pixels, 0x00, pixels_size);
+    assert(m_yuv_converter.get());
+#endif
+
+    m_yuv_converter->readPixels((uint8_t*)pixels, pixels_size);
+
+    return;
+}
+
+void ColorBuffer::reformat(GLint internalformat, GLenum type) {
+    GLenum texFormat = internalformat;
+    GLenum pixelType = GL_UNSIGNED_BYTE;
+    GLint sizedInternalFormat = GL_RGBA8;
+    int bpp = 4;
+    bool isBlob = false;
+    if (!sGetFormatParameters(internalformat, &texFormat, &pixelType, &bpp, &sizedInternalFormat, &isBlob)) {
+        fprintf(stderr, "%s: WARNING: reformat failed. internal format: 0x%x\n",
+                __func__, internalformat);
+    }
+
+    // BUG: 143607546
+    //
+    // During reformatting, sGetFormatParameters can be too
+    // opinionated and override the guest's intended choice for the
+    // pixel type.  If the guest wanted GL_UNSIGNED_SHORT_5_6_5 as
+    // the pixel type, and the incoming internal format is not
+    // explicitly sized, sGetFormatParameters will pick a default of
+    // GL_UNSIGNED BYTE, which goes against guest expectations.
+    //
+    // This happens only on older API levels where gralloc.cpp in
+    // goldfish-opengl communicated HAL_PIXEL_FORMAT_RGB_565 as GL
+    // format GL_RGB, pixel type GL_UNSIGNED_SHORT_5_6_5.  Newer
+    // system images communicate HAL_PIXEL_FORMAT_RGB_565 as GL
+    // format GL_RGB565, which allows sGetFormatParameters to work
+    // correctly.
+    if (pixelType != type) {
+        pixelType = type;
+    }
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_width, m_height,
-                         0, format, type, nullptr);
+                         0, texFormat, pixelType, nullptr);
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_blitTex);
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_width, m_height,
-                         0, format, type, nullptr);
+                         0, texFormat, pixelType, nullptr);
 
     // EGL images need to be recreated because the EGL_KHR_image_base spec
     // states that respecifying an image (i.e. glTexImage2D) will generally
@@ -331,9 +471,23 @@ void ColorBuffer::reformat(GLint internalformat,
             (EGLClientBuffer)SafePointerFromUInt(m_blitTex), NULL);
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
+
     m_internalFormat = internalformat;
-    m_format = format;
-    m_type = type;
+    m_format = texFormat;
+    m_type = pixelType;
+    m_sizedInternalFormat = sizedInternalFormat;
+
+    m_numBytes = bpp * m_width * m_height;
+}
+
+void ColorBuffer::swapYUVTextures(uint32_t type, uint32_t* textures) {
+    if (type == FRAMEWORK_FORMAT_NV12) {
+        m_yuv_converter->swapTextures(type, textures);
+    } else {
+        fprintf(stderr,
+                "%s: ERROR: format other than NV12 is not supported: 0x%x\n",
+                __func__, type);
+    }
 }
 
 void ColorBuffer::subUpdate(int x,
@@ -343,6 +497,7 @@ void ColorBuffer::subUpdate(int x,
                             GLenum p_format,
                             GLenum p_type,
                             void* pixels) {
+    const GLenum p_unsizedFormat = sGetUnsizedColorBufferFormat(p_format);
     RecursiveScopedHelperContext context(m_helper);
 
     if (!context.isOk()) {
@@ -351,17 +506,14 @@ void ColorBuffer::subUpdate(int x,
 
     touch();
 
-    p_format = sGetUnsizedColorBufferFormat(p_format);
-
     if (m_needFormatCheck) {
         if (p_type != m_type || p_format != m_format) {
-            reformat((GLint)p_format, p_format, p_type);
+            reformat((GLint)p_format, p_type);
         }
         m_needFormatCheck = false;
     }
 
-    if (m_frameworkFormat == FRAMEWORK_FORMAT_YV12 ||
-        m_frameworkFormat == FRAMEWORK_FORMAT_YUV_420_888) {
+    if (m_frameworkFormat != FRAMEWORK_FORMAT_GL_COMPATIBLE) {
         assert(m_yuv_converter.get());
 
         // This FBO will convert the YUV frame to RGB
@@ -372,11 +524,12 @@ void ColorBuffer::subUpdate(int x,
 
         // |m_tex| still needs to be bound afterwards
         s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+
     } else {
         s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
         s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, p_format,
+        s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, p_unsizedFormat,
                                 p_type, pixels);
     }
 
@@ -386,8 +539,61 @@ void ColorBuffer::subUpdate(int x,
     }
 }
 
-bool ColorBuffer::blitFromCurrentReadBuffer() {
+bool ColorBuffer::replaceContents(const void* newContents, size_t numBytes) {
+    RecursiveScopedHelperContext context(m_helper);
+    if (!context.isOk()) {
+        fprintf(stderr, "%s: Failed: Could not get current context\n", __func__);
+        return false;
+    }
 
+    if (m_numBytes != numBytes) {
+        fprintf(stderr,
+            "%s: Error: Tried to replace contents of ColorBuffer with "
+            "%zu bytes (expected %zu; GL format info: 0x%x 0x%x 0x%x); ",
+            __func__,
+            numBytes,
+            m_numBytes,
+            m_internalFormat,
+            m_format,
+            m_type);
+        return false;
+    }
+
+    touch();
+
+    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+    s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, m_format,
+                            m_type, newContents);
+
+    if (m_fastBlitSupported) {
+        s_gles2.glFlush();
+        m_sync = (GLsync)s_egl.eglSetImageFenceANDROID(m_display, m_eglImage);
+    }
+
+    return true;
+}
+
+bool ColorBuffer::readContents(size_t* numBytes, void* pixels) {
+    if (m_yuv_converter) {
+        *numBytes = m_yuv_converter->getDataSize();
+        if (pixels) {
+            readPixelsYUVCached(0, 0, 0, 0, pixels, *numBytes);
+        }
+        return true;
+    } else {
+        RecursiveScopedHelperContext context(m_helper);
+        *numBytes = m_numBytes;
+
+        if (!pixels) return true;
+
+        readPixels(0, 0, m_width, m_height, m_format, m_type, pixels);
+
+        return true;
+    }
+}
+
+bool ColorBuffer::blitFromCurrentReadBuffer() {
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
     if (!tInfo->currContext.get()) {
         // no Current context
@@ -550,6 +756,7 @@ bool ColorBuffer::bindToTexture() {
     if (!m_eglImage) {
         return false;
     }
+
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
     if (!tInfo->currContext.get()) {
         return false;
@@ -561,6 +768,15 @@ bool ColorBuffer::bindToTexture() {
     } else {
         s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
     }
+    return true;
+}
+
+bool ColorBuffer::bindToTexture2() {
+    if (!m_eglImage) {
+        return false;
+    }
+
+    s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
     return true;
 }
 
@@ -611,59 +827,38 @@ bool ColorBuffer::postWithOverlay(GLuint tex, float rotation, float dx, float dy
     return m_helper->getTextureDraw()->drawWithOverlay(tex, rotation, dx, dy);
 }
 
-void ColorBuffer::readback(unsigned char* img) {
+void ColorBuffer::readback(unsigned char* img, bool readbackBgra) {
     RecursiveScopedHelperContext context(m_helper);
     if (!context.isOk()) {
         return;
     }
     touch();
-
     waitSync();
 
     if (bindFbo(&m_fbo, m_tex)) {
-        s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE, img);
+        // Flip the readback format if RED/BLUE components are swizzled.
+        bool shouldReadbackBgra = m_BRSwizzle ? !readbackBgra : readbackBgra;
+        GLenum format = shouldReadbackBgra ? GL_BGRA_EXT : GL_RGBA;
+
+        s_gles2.glReadPixels(0, 0, m_width, m_height, format, GL_UNSIGNED_BYTE, img);
         unbindFbo();
     }
 }
 
-void ColorBuffer::readbackAsync(GLuint buffer) {
+void ColorBuffer::readbackAsync(GLuint buffer, bool readbackBgra) {
     RecursiveScopedHelperContext context(m_helper);
     if (!context.isOk()) {
         return;
     }
     touch();
-
     waitSync();
 
     if (bindFbo(&m_fbo, m_tex)) {
         s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer);
-        s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, m_asyncReadbackType, 0);
+        bool shouldReadbackBgra = m_BRSwizzle ? !readbackBgra : readbackBgra;
+        GLenum format = shouldReadbackBgra ? GL_BGRA_EXT : GL_RGBA;
+        s_gles2.glReadPixels(0, 0, m_width, m_height, format, m_asyncReadbackType, 0);
         s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-        unbindFbo();
-    }
-}
-
-void ColorBuffer::readbackAsync(GLuint buffer1, GLuint buffer2, unsigned char* img) {
-    RecursiveScopedHelperContext context(m_helper);
-    if (!context.isOk()) {
-        return;
-    }
-    touch();
-
-    waitSync();
-
-    if (bindFbo(&m_fbo, m_tex)) {
-        s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer1);
-        s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, m_asyncReadbackType, 0);
-        s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-
-        s_gles2.glBindBuffer(GL_COPY_READ_BUFFER, buffer2);
-        uint32_t bytes = 4 * m_width * m_height;
-        void* toCopy = s_gles2.glMapBufferRange(GL_COPY_READ_BUFFER, 0, bytes, GL_MAP_READ_BIT);
-        memcpy(img, toCopy, bytes);
-        s_gles2.glUnmapBuffer(GL_COPY_READ_BUFFER);
-        s_gles2.glBindBuffer(GL_COPY_READ_BUFFER, 0);
-
         unbindFbo();
     }
 }
@@ -682,6 +877,7 @@ void ColorBuffer::onSave(android::base::Stream* stream) {
     assert(m_eglImage && m_blitEGLImage);
     stream->putBe32(reinterpret_cast<uintptr_t>(m_eglImage));
     stream->putBe32(reinterpret_cast<uintptr_t>(m_blitEGLImage));
+    stream->putBe32(m_needFormatCheck);
 }
 
 ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
@@ -696,6 +892,7 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
             static_cast<FrameworkFormat>(stream->getBe32());
     EGLImageKHR eglImage = reinterpret_cast<EGLImageKHR>(stream->getBe32());
     EGLImageKHR blitEGLImage = reinterpret_cast<EGLImageKHR>(stream->getBe32());
+    uint32_t needFormatCheck = stream->getBe32();
 
     if (!eglImage) {
         return create(p_display, width, height, internalFormat, frameworkFormat,
@@ -711,6 +908,7 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
     cb->m_internalFormat = internalFormat;
     cb->m_frameworkFormat = frameworkFormat;
     cb->m_fastBlitSupported = fastBlitSupported;
+    cb->m_needFormatCheck = needFormatCheck;
     return cb;
 }
 
@@ -745,6 +943,84 @@ GLuint ColorBuffer::getTexture() {
 }
 
 void ColorBuffer::postLayer(ComposeLayer* l, int frameWidth, int frameHeight) {
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+    if (m_inUse) fprintf(stderr, "%s: cb in use\n", __func__);
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     waitSync();
     m_helper->getTextureDraw()->drawLayer(l, frameWidth, frameHeight, m_width, m_height, m_tex);
+}
+
+bool ColorBuffer::importMemory(
+#ifdef _WIN32
+        void* handle,
+#else
+        int handle,
+#endif
+        uint64_t size,
+        bool dedicated,
+        bool linearTiling,
+        bool vulkanOnly) {
+    RecursiveScopedHelperContext context(m_helper);
+    s_gles2.glCreateMemoryObjectsEXT(1, &m_memoryObject);
+    if (dedicated) {
+        static const GLint DEDICATED_FLAG = GL_TRUE;
+        s_gles2.glMemoryObjectParameterivEXT(m_memoryObject,
+                                             GL_DEDICATED_MEMORY_OBJECT_EXT,
+                                             &DEDICATED_FLAG);
+    }
+
+#ifdef _WIN32
+    s_gles2.glImportMemoryWin32HandleEXT(m_memoryObject, size, GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, handle);
+#else
+    s_gles2.glImportMemoryFdEXT(m_memoryObject, size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, handle);
+#endif
+
+    GLuint glTiling = linearTiling ? GL_LINEAR_TILING_EXT : GL_OPTIMAL_TILING_EXT;
+
+    std::vector<uint8_t> prevContents;
+
+    if (!vulkanOnly) {
+        size_t bytes;
+        readContents(&bytes, nullptr);
+        prevContents.resize(bytes, 0);
+        readContents(&bytes, prevContents.data());
+    }
+
+    s_gles2.glDeleteTextures(1, &m_tex);
+    s_gles2.glGenTextures(1, &m_tex);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+
+    // HOST needed because we do not expose this to guest
+    s_gles2.glTexParameteriHOST(GL_TEXTURE_2D, GL_TEXTURE_TILING_EXT, glTiling);
+
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    if (m_sizedInternalFormat == GL_BGRA8_EXT) {
+        s_gles2.glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, GL_RGBA8, m_width, m_height, m_memoryObject, 0);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_RED);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_BLUE);
+        m_BRSwizzle = true;
+    } else {
+        s_gles2.glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, m_sizedInternalFormat, m_width, m_height, m_memoryObject, 0);
+        m_BRSwizzle = false;
+    }
+
+    s_egl.eglDestroyImageKHR(m_display, m_eglImage);
+    m_eglImage = s_egl.eglCreateImageKHR(
+            m_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
+            (EGLClientBuffer)SafePointerFromUInt(m_tex), NULL);
+
+    if (!vulkanOnly) {
+        replaceContents(prevContents.data(), m_numBytes);
+    }
+
+    return true;
+}
+
+void ColorBuffer::setInUse(bool inUse) {
+    m_inUse = inUse;
 }

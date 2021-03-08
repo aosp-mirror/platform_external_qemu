@@ -50,6 +50,7 @@ BUILD_CMAKE               := $(_BUILD_CORE_DIR)/emulator/cmake.make
 BUILD_HOST_STATIC_LIBRARY := $(_BUILD_CORE_DIR)/emulator/host_static_library.make
 BUILD_HOST_SHARED_LIBRARY := $(_BUILD_CORE_DIR)/emulator/host_shared_library.make
 PREBUILT_STATIC_LIBRARY   := $(_BUILD_CORE_DIR)/emulator/prebuilt_static_library.make
+PREBUILT_SHARED_LIBRARY   := $(_BUILD_CORE_DIR)/emulator/prebuilt_shared_library.make
 
 _BUILD_DEPENDENCY_DIRS :=
 
@@ -81,6 +82,8 @@ symbols: $(_BUILD_SYMBOLS)
 debuginfo: $(_BUILD_DEBUG_INFOS)
 tests: $(_BUILD_TESTS)
 lint: $(_BUILD_LINT)
+foo: $(_BUILD_FOO)
+	@echo "Hi $(_BUILD_FOO)"
 
 
 # Zip up the generated symbols and errors.

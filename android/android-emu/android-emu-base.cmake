@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 # This file defines android-emu-base library
 
 # Dependencies
@@ -129,3 +130,5 @@ set(android-emu-base_compile_options_private
     "-Wno-c++14-extensions")
 
 add_android_library(android-emu-base)
+=======
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)

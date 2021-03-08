@@ -844,10 +844,13 @@ static void xhci_er_reset(XHCIState *xhci, int v)
             v, intr->er_start, intr->er_size);
 }
 
+static void xhci_psc_refresh(XHCIState* xhci);
+
 static void xhci_run(XHCIState *xhci)
 {
     trace_usb_xhci_run();
     xhci->usbsts &= ~USBSTS_HCH;
+    xhci_psc_refresh(xhci);
     xhci->mfindex_start = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
 }
 
@@ -2563,6 +2566,28 @@ static bool xhci_port_have_device(XHCIPort *port)
     }
     return true;
 }
+
+static void xhci_port_notify_loop(XHCIPort *port)
+{
+    XHCIEvent ev = { ER_PORT_STATUS_CHANGE, CC_SUCCESS,
+                     port->portnr << 24 };
+
+    if (!xhci_running(port->xhci)) {
+        return;
+    }
+    xhci_event(port->xhci, &ev, 0);
+}
+
+static void xhci_psc_refresh(XHCIState *xhci)
+{
+    uint32_t port_count = xhci->numports;
+    for(uint32_t i = 0;i<port_count;i++) {
+        if(xhci->ports[i].portsc & (PORTSC_PLC | PORTSC_PRC | PORTSC_OCC | PORTSC_WRC | PORTSC_PEC | PORTSC_CSC)) {
+            xhci_port_notify_loop(&xhci->ports[i]);
+        }
+    }
+}
+
 
 static void xhci_port_notify(XHCIPort *port, uint32_t bits)
 {

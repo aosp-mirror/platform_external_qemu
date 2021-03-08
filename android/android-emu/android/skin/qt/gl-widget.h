@@ -10,16 +10,24 @@
 
 #pragma once
 
-#include "android/skin/qt/gl-canvas.h"
-#include "android/skin/qt/gl-texture-draw.h"
+#include <qobjectdefs.h>  // for slots, Q_OBJECT
+#include <QString>        // for QString
+#include <QWidget>        // for QWidget
+#include <cmath>          // for ceil
+#include <memory>         // for unique_ptr
 
-#include <cmath>
-#include <memory>
-
-#include <QWidget>
-
-struct EGLState;
+class GLCanvas;
+class QObject;
+class QPaintEngine;
+class QPaintEvent;
+class QResizeEvent;
+class QScreen;
+class QShowEvent;
+class QWidget;
+class TextureDraw;
 struct EGLDispatch;
+struct EGLState;
+struct GLESv2Dispatch;
 
 // Helper class used to perform EGL/GLESv2 rendering inside a Qt widget.
 // Relies on EmuGL's OpenGLESDispatch library to access the correct set of
@@ -74,11 +82,11 @@ protected:
     int realPixelsWidth() const { return std::ceil(width() * devicePixelRatioF()); }
     int realPixelsHeight() const { return std::ceil(height() * devicePixelRatioF()); }
     void toggleAA() { mEnableAA = !mEnableAA; }
+    virtual void showEvent(QShowEvent*) override;
 
 private:
     void paintEvent(QPaintEvent*) override;
     void resizeEvent(QResizeEvent*) override;
-    void showEvent(QShowEvent*) override;
 
     bool ensureInit();
     void destroyContext();

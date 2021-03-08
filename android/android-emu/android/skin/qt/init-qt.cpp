@@ -10,14 +10,19 @@
 
 #include "android/skin/qt/init-qt.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/system/System.h"
-#include "android/skin/qt/qt-settings.h"
-#include "android/utils/debug.h"
+#include <qglobal.h>                      // for Q_INIT_RESOURCE
+#include <QCoreApplication>               // for QCoreApplication
+#include <QFontDatabase>                  // for QFontDatabase
 
-#include <QCoreApplication>
-#include <QFontDatabase>
-#include <QResource>
+#include "android/skin/qt/qt-settings.h"  // for APP_NAME, ORG_DOMAIN, ORG_NAME
+#include "android/utils/debug.h"          // for VERBOSE_PRINT, VERBOSE_init
+
+namespace android {
+namespace base {
+class PathUtils;
+class System;
+}  // namespace base
+}  // namespace android
 
 using android::base::System;
 using android::base::PathUtils;

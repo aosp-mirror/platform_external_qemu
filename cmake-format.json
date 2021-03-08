@@ -1,0 +1,174 @@
+{
+  "autosort": true,
+  "line_width": 80,
+  "dangle_parens": false,
+  "first_comment_is_literal": true,
+  "command_case": "lower",
+  "additional_commands": {
+    "protobuf_generate_grpc_cpp": {
+      "flags": [],
+      "kwargs": {
+        "SOURCE_DIR": "*",
+        "INCLUDES": "*",
+        "SOURCES": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "OUTPUT_DIR": "*",
+        "GENERATED": "*"
+      }
+    },
+    "png_add_test": {
+      "flags": [],
+      "kwargs": {
+        "NAME": "*",
+        "COMMAND": "*",
+        "OPTIONS": "*",
+        "FILES": "*"
+      }
+    },
+    "android_add_library": {
+      "flags": [
+        "NODISTRIBUTE",
+        "SHARED"
+      ],
+      "kwargs": {
+        "TARGET": "*",
+        "LIBNAME": "*",
+        "REPO": "*",
+        "LICENSE": "*",
+        "REPO_DIR": "*",
+        "NOTICE": "*",
+        "DARWIN": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "WINDOWS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "LINUX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
+      }
+    },
+    "android_nasm_compile": {
+      "flags": [
+        "NODISTRIBUTE"
+      ],
+      "kwargs": {
+        "TARGET": "*",
+        "LIBNAME": "*",
+        "REPO": "*",
+        "LICENSE": "*",
+        "REPO_DIR": "*",
+        "NOTICE": "*",
+        "DARWIN": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "WINDOWS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "LINUX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
+      }
+    },
+    "android_add_interface": {
+      "flags": [
+        "NODISTRIBUTE",
+        "SHARED"
+      ],
+      "kwargs": {
+        "TARGET": "*",
+        "LIBNAME": "*",
+        "REPO": "*",
+        "LICENSE": "*",
+        "REPO_DIR": "*",
+        "NOTICE": "*"
+      }
+    },
+    "android_license": {
+      "flags": [],
+      "kwargs": {
+        "TARGET": "*",
+        "LIBNAME": "*",
+        "EXECUTABLES": "*",
+        "URL": "*",
+        "SPDX": "*",
+        "LICENSE": "*",
+        "LOCAL": "*"
+      }
+    },
+    "android_add_test": {
+      "flags": [],
+      "kwargs": {
+        "TARGET": "*",
+        "DARWIN": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "WINDOWS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "LINUX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
+      }
+    },
+    "android_build_qemu_variant": {
+      "flags": [
+        "INSTALL"
+      ],
+      "kwargs": {
+        "EXE": "*",
+        "CPU": "*",
+        "SOURCES": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "DEFINITIONS": "*",
+        "LIBRARIES": "*"
+      }
+    },
+    "android_add_prebuilt_library": {
+      "flags": [],
+      "kwargs": {
+        "INCLUDES": "*",
+        "PACKAGE": "*",
+        "MODULE": "*",
+        "LICENSE": "*",
+        "LIBNAME": "*",
+        "LOCAL": "*",
+        "URL": "*",
+        "NOTICE": "*",
+        "DEFINITIONS": "*"
+      }
+    },
+    "android_target_compile_options": {
+      "flags": [],
+      "kwargs": {
+        "PUBLIC": "*",
+        "PRIVATE": "*"
+      }
+    },
+    "android_target_link_libraries": {
+      "flags": [],
+      "kwargs": {
+        "PUBLIC": "*",
+        "PRIVATE": "*"
+      }
+    },
+    "android_add_executable": {
+      "flags": [
+        "NODISTRIBUTE"
+      ],
+      "kwargs": {
+        "TARGET": "*",
+        "LIBNAME": "*",
+        "REPO": "*",
+        "LICENSE": "*",
+        "REPO_DIR": "*",
+        "NOTICE": "*",
+        "DARWIN": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "WINDOWS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "LINUX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
+      }
+    }
+  },
+  "separate_fn_name_with_space": false,
+  "always_wrap": [],
+  "separate_ctrl_name_with_space": false,
+  "max_subgroups_hwrap": 10,
+  "fence_pattern": "^\\s*([`~]{3}[`~]*)(.*)$",
+  "enable_markup": true,
+  "enable_sort": true,
+  "ruler_pattern": "^\\s*[^\\w\\s]{3}.*[^\\w\\s]{3}$",
+  "tab_size": 2,
+  "keyword_case": "unchanged",
+  "enum_char": ".",
+  "literal_comment_pattern": null,
+  "bullet_char": "*",
+  "line_ending": "unix"
+}

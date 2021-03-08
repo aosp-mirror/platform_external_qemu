@@ -23,7 +23,11 @@
 #define _LIBS_CUTILS_PRIVATE_FS_CONFIG_H
 
 #include <stdint.h>
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <sys/cdefs.h>
+#endif
 #include <sys/types.h>
 
 

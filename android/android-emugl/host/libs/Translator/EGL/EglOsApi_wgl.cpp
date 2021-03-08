@@ -15,11 +15,11 @@
 */
 #include "EglOsApi.h"
 
-#include "android/base/Profiler.h"
 #include "android/base/synchronization/Lock.h"
 
 #include "CoreProfileConfigs.h"
 #include "emugl/common/lazy_instance.h"
+#include "emugl/common/logging.h"
 #include "emugl/common/shared_library.h"
 #include "emugl/common/thread_store.h"
 #include "GLcommon/GLLibrary.h"
@@ -54,20 +54,13 @@
 #define D(...)  ((void)0)
 #endif
 
-#define PROFILE_SLOW_EGL 0
+#define WGL_ERR(...)  do { \
+    fprintf(stderr, __VA_ARGS__); \
+    GL_LOG(__VA_ARGS__); \
+} while(0) \
 
-#if PROFILE_SLOW_EGL
-
-// Log everything slower than 6 ms.
-#define PROFILE_SLOW(tag) \
-    android::base::ScopedProfiler profile_slow(tag, [](const char* tag2, uint64_t elapsed) { \
-            if (elapsed >= 6000) { fprintf(stderr, "%s: slow, %f ms\n", tag2, elapsed / 1000.0f); }}); \
-
-#else
-
+// TODO: Replace with latency tracker.
 #define PROFILE_SLOW(tag)
-
-#endif
 
 namespace {
 
@@ -201,7 +194,7 @@ struct WglBaseDispatch {
             return_type (GL_APIENTRY*) signature>( \
                     glLib->findSymbol(#function_name)); \
     if (!this->function_name) { \
-        ERR("%s: Could not find %s in GL library\n", __FUNCTION__, \
+        WGL_ERR("%s: Could not find %s in GL library\n", __FUNCTION__, \
                 #function_name); \
         result = false; \
     }
@@ -211,7 +204,7 @@ struct WglBaseDispatch {
             return_type (GL_APIENTRY*) signature>( \
                     GetProcAddress(gdi32, #function_name)); \
     if (!this->function_name) { \
-        ERR("%s: Could not find %s in GDI32 library\n", __FUNCTION__, \
+        WGL_ERR("%s: Could not find %s in GDI32 library\n", __FUNCTION__, \
                 #function_name); \
         result = false; \
     }
@@ -221,7 +214,7 @@ struct WglBaseDispatch {
             return_type (GL_APIENTRY*) signature>( \
                     glLib->findSymbol("wgl" #function_name)); \
     if (!this->function_name) { \
-        ERR("%s: Could not find %s in GL library\n", __FUNCTION__, \
+        WGL_ERR("%s: Could not find %s in GL library\n", __FUNCTION__, \
                 "wgl" #function_name); \
         result = false; \
     }
@@ -357,22 +350,53 @@ public:
         GetExtensionsStringFunc wglGetExtensionsString =
                 reinterpret_cast<GetExtensionsStringFunc>(
                         this->findFunction("wglGetExtensionsStringARB"));
+
+        bool foundArb = wglGetExtensionsString != nullptr;
+
         if (wglGetExtensionsString) {
             extensionList = wglGetExtensionsString(hdc);
         }
+
+        bool extensionListArbNull = extensionList == nullptr;
+        bool extensionListArbEmpty = !extensionListArbNull && !strcmp(extensionList, "");
+
+        bool foundExt = false;
+        bool extensionListExtNull = false;
+        bool extensionListExtEmpty = false;
+
         // wglGetExtensionsStringARB failed, try wglGetExtensionsStringEXT.
         if (!extensionList || !strcmp(extensionList, "")) {
             wglGetExtensionsString =
                 reinterpret_cast<GetExtensionsStringFunc>(
                         this->findFunction("wglGetExtensionsStringEXT"));
+
+            foundExt = wglGetExtensionsString != nullptr;
+
             if (wglGetExtensionsString) {
                 extensionList = wglGetExtensionsString(hdc);
             }
         }
+
+        extensionListExtNull = extensionList == nullptr;
+        extensionListExtEmpty = !extensionListExtNull && !strcmp(extensionList, "");
+
         // Both failed, suicide.
         if (!extensionList || !strcmp(extensionList, "")) {
-            ERR("%s: Could not find wglGetExtensionsString!\n",
-                __FUNCTION__);
+            bool isRemoteSession = GetSystemMetrics(SM_REMOTESESSION);
+
+            WGL_ERR(
+                "%s: Could not find wglGetExtensionsString! "
+                "arbFound %d listarbNull/empty %d %d "
+                "extFound %d extNull/empty %d %d remote %d\n",
+                __FUNCTION__,
+                foundArb,
+                extensionListArbNull,
+                extensionListArbEmpty,
+                foundExt,
+                extensionListExtNull,
+                extensionListExtEmpty,
+                isRemoteSession);
+
             return false;
         }
 
@@ -387,7 +411,7 @@ public:
                         this->findFunction(#function_name "EXT")); \
     } \
     if (!this->function_name) { \
-        ERR("ERROR: %s: Missing extension function %s\n", __FUNCTION__, \
+        WGL_ERR("ERROR: %s: Missing extension function %s\n", __FUNCTION__, \
             #function_name); \
         result = false; \
     }
@@ -397,7 +421,7 @@ public:
         supportsExtension("WGL_EXT_" #extension, extensionList)) { \
         LIST_##extension##_FUNCTIONS(LOAD_WGL_EXTENSION_FUNCTION) \
     } else { \
-        ERR("WARNING: %s: Missing WGL extension %s\n", __FUNCTION__, #extension); \
+        WGL_ERR("WARNING: %s: Missing WGL extension %s\n", __FUNCTION__, #extension); \
     }
 
         LOAD_WGL_EXTENSION(pixel_format)
@@ -419,7 +443,8 @@ const WglExtensionsDispatch* initExtensionsDispatch(
     HWND hwnd = createDummyWindow();
     HDC hdc =  GetDC(hwnd);
     if (!hwnd || !hdc){
-        fprintf(stderr,"error while getting DC\n");
+        int err = GetLastError();
+        WGL_ERR("error while getting DC: 0x%x\n", err);
         return NULL;
     }
     PIXELFORMATDESCRIPTOR pfd = {
@@ -446,12 +471,12 @@ const WglExtensionsDispatch* initExtensionsDispatch(
     int iPixelFormat = dispatch->ChoosePixelFormat(hdc, &pfd);
     if (iPixelFormat <= 0) {
         int err = GetLastError();
-        fprintf(stderr,"error while choosing pixel format 0x%x\n", err);
+        WGL_ERR("error while choosing pixel format 0x%x\n", err);
         return NULL;
     }
     if (!dispatch->SetPixelFormat(hdc, iPixelFormat, &pfd)) {
         int err = GetLastError();
-        fprintf(stderr,"error while setting pixel format 0x%x\n", err);
+        WGL_ERR("error while setting pixel format 0x%x\n", err);
         return NULL;
     }
 
@@ -459,11 +484,11 @@ const WglExtensionsDispatch* initExtensionsDispatch(
     HGLRC ctx = dispatch->wglCreateContext(hdc);
     if (!ctx) {
         err =  GetLastError();
-        fprintf(stderr,"error while creating dummy context %d\n", err);
+        WGL_ERR("error while creating dummy context: 0x%x\n", err);
     }
     if (!dispatch->wglMakeCurrent(hdc, ctx)) {
         err =  GetLastError();
-        fprintf(stderr,"error while making dummy context current %d\n", err);
+        WGL_ERR("error while making dummy context current: 0x%x\n", err);
     }
 
     WglExtensionsDispatch* result = new WglExtensionsDispatch(*dispatch);
@@ -502,10 +527,11 @@ private:
 
 class WinSurface : public EglOS::Surface {
 public:
-    explicit WinSurface(HWND wnd) :
+    explicit WinSurface(HWND wnd, const WglExtensionsDispatch* dispatch) :
             Surface(WINDOW),
             m_hwnd(wnd),
-            m_hdc(GetDC(wnd)) {}
+            m_hdc(GetDC(wnd)),
+            m_dispatch(dispatch) {}
 
     explicit WinSurface(HPBUFFERARB pb, const EglOS::PixelFormat* pixelFormat, const WglExtensionsDispatch* dispatch) :
             Surface(PBUFFER),
@@ -546,6 +572,14 @@ public:
         }
     }
 
+    void onMakeCurrent() {
+        if (m_everMadeCurrent) return;
+        if (m_dispatch->wglSwapInterval) {
+            m_dispatch->wglSwapInterval(0);
+        }
+        m_everMadeCurrent = true;
+    }
+
     HWND getHwnd() const { return m_hwnd; }
     HDC  getDC() const { return m_hdc; }
     HPBUFFERARB getPbuffer() const { return m_pb; }
@@ -556,6 +590,7 @@ public:
     }
 
 private:
+    bool        m_everMadeCurrent = false;
     bool        m_dcReleased = true;
     HWND        m_hwnd = nullptr;
     HPBUFFERARB m_pb = nullptr;
@@ -574,7 +609,7 @@ public:
     ~WinContext() {
         android::base::AutoLock lock(sGlobalLock);
         if (!mDispatch->wglDeleteContext(mCtx)) {
-            fprintf(stderr, "error deleting WGL context! error 0x%x\n",
+            WGL_ERR("error deleting WGL context! error 0x%x\n",
                     (unsigned)GetLastError());
         }
     }
@@ -934,6 +969,11 @@ public:
         int maxFormat = mDispatch->DescribePixelFormat(
                 dpy, 1, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
 
+        if (0 == maxFormat) {
+            WGL_ERR("No pixel formats found from wglDescribePixelFormat! "
+                    "error: 0x%x\n", GetLastError());
+        }
+
         // Inserting rest of formats. Try to map each one to an EGL Config.
         for (int configId = 1; configId <= maxFormat; configId++) {
             mDispatch->DescribePixelFormat(
@@ -1099,12 +1139,15 @@ public:
                              EglOS::Surface* draw,
                              EglOS::Context* context) {
         android::base::AutoLock lock(sGlobalLock);
-        HDC hdcRead = read ? WinSurface::from(read)->getDC() : NULL;
-        HDC hdcDraw = draw ? WinSurface::from(draw)->getDC() : NULL;
+        WinSurface* readWinSurface = WinSurface::from(read);
+        WinSurface* drawWinSurface = WinSurface::from(draw);
+        HDC hdcRead = read ? readWinSurface->getDC() : NULL;
+        HDC hdcDraw = draw ? drawWinSurface->getDC() : NULL;
         HGLRC hdcContext = context ? WinContext::from(context) : 0;
 
         const WglExtensionsDispatch* dispatch = mDispatch;
 
+        bool ret = false;
         if (hdcRead == hdcDraw){
             // The following loop is a work-around for a problem when
             // occasionally the rendering is incorrect after hibernating and
@@ -1132,13 +1175,19 @@ public:
                 D("Error: wglMakeCurrent() failed, error %d\n", (int)GetLastError());
                 return false;
             }
-            return true;
+            ret = true;
         } else if (!dispatch->wglMakeContextCurrent) {
             return false;
+        } else {
+            ret = dispatch->wglMakeContextCurrent(
+                    hdcDraw, hdcRead, hdcContext);
         }
-        bool retVal = dispatch->wglMakeContextCurrent(
-                hdcDraw, hdcRead, hdcContext);
-        return retVal;
+
+        if (ret) {
+            if (readWinSurface) readWinSurface->onMakeCurrent();
+            if (drawWinSurface) drawWinSurface->onMakeCurrent();
+        }
+        return ret;
     }
 
     virtual void swapBuffers(EglOS::Surface* srfc) {
@@ -1155,6 +1204,7 @@ private:
         mCoreProfileSupported = false;
 
         if (!mDispatch->wglCreateContextAttribs) {
+            WGL_ERR("OpenGL Core Profile not supported.\n");
             // Not supported, don't even try.
             return;
         }
@@ -1248,7 +1298,7 @@ public:
     virtual EglOS::Surface* createWindowSurface(EglOS::PixelFormat* cfg,
                                                 EGLNativeWindowType wnd) {
         (void)cfg;
-        return new WinSurface(wnd);
+        return new WinSurface(wnd, mDispatch);
     }
 
 private:
@@ -1270,18 +1320,18 @@ WinEngine::WinEngine() :
         isSystemLib = false;
     }
     char error[256];
-    D("%s: Trying to load %s\n", __FUNCTION__, kLibName);
+    GL_LOG("%s: Trying to load %s\n", __FUNCTION__, kLibName);
     mLib = SharedLibrary::open(kLibName, error, sizeof(error));
     if (!mLib) {
-        ERR("ERROR: %s: Could not open %s: %s\n", __FUNCTION__,
-            kLibName, error);
+        WGL_ERR("ERROR: %s: Could not open %s: %s\n", __FUNCTION__,
+                kLibName, error);
         exit(1);
     }
 
-    D("%s: Library loaded at %p\n", __FUNCTION__, mLib);
+    GL_LOG("%s: Library loaded at %p\n", __FUNCTION__, mLib);
     mBaseDispatch.init(mLib, isSystemLib);
     mDispatch = initExtensionsDispatch(&mBaseDispatch);
-    D("%s: Dispatch initialized\n", __FUNCTION__);
+    GL_LOG("%s: Dispatch initialized\n", __FUNCTION__);
 }
 
 emugl::LazyInstance<WinEngine> sHostEngine = LAZY_INSTANCE_INIT;

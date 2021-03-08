@@ -67,8 +67,14 @@ QEMU_BUILD_BUG_ON(QEMU_CAN_EFF_FLAG != CAN_EFF_FLAG);
 QEMU_BUILD_BUG_ON(QEMU_CAN_RTR_FLAG != CAN_RTR_FLAG);
 QEMU_BUILD_BUG_ON(QEMU_CAN_ERR_FLAG != CAN_ERR_FLAG);
 QEMU_BUILD_BUG_ON(QEMU_CAN_INV_FILTER != CAN_INV_FILTER);
+// We can't use a static_assert with offsetof() because in msvc 2017, it uses
+// reinterpret_cast.
+// TODO: Add runtime assertion instead?
+// https://developercommunity.visualstudio.com/content/problem/22196/static-assert-cannot-compile-constexprs-method-tha.html
+#ifndef _MSC_VER
 QEMU_BUILD_BUG_ON(offsetof(qemu_can_frame, data)
                   != offsetof(struct can_frame, data));
+#endif
 
 static void can_host_socketcan_display_msg(struct qemu_can_frame *msg)
 {

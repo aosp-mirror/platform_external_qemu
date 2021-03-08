@@ -14,26 +14,68 @@
 
 #pragma once
 
-#include "android/base/Profiler.h"
+#include "android/emulation/control/multi_display_agent.h"
+#include "android/emulation/control/window_agent.h"
 #include "android/opengl/emugl_config.h"
+
+#ifdef _MSC_VER
+# ifdef BUILDING_EMUGL_COMMON_SHARED
+#  define EMUGL_COMMON_API __declspec(dllexport)
+# else
+#  define EMUGL_COMMON_API __declspec(dllimport)
+#endif
+#else
+# define EMUGL_COMMON_API
+#endif
+
+namespace android {
+
+namespace base {
+
+class CpuUsage;
+class MemoryTracker;
+class GLObjectCounter;
+
+} // namespace base
+} // namespace android
 
 namespace emugl {
 
     // Set and get API version of system image.
-    void setAvdInfo(bool isPhone, int apiLevel);
-    void getAvdInfo(bool* isPhone, int* apiLevel);
+    EMUGL_COMMON_API void setAvdInfo(bool isPhone, int apiLevel);
+    EMUGL_COMMON_API void getAvdInfo(bool* isPhone, int* apiLevel);
 
     // Set/get GLES major/minor version.
-    void setGlesVersion(int maj, int min);
-    void getGlesVersion(int* maj, int* min);
+    EMUGL_COMMON_API void setGlesVersion(int maj, int min);
+    EMUGL_COMMON_API void getGlesVersion(int* maj, int* min);
 
     // Set/get renderer
-    void setRenderer(SelectedRenderer renderer);
-    SelectedRenderer getRenderer();
+    EMUGL_COMMON_API void setRenderer(SelectedRenderer renderer);
+    EMUGL_COMMON_API SelectedRenderer getRenderer();
 
     // Extension string query
-    bool hasExtension(const char* extensionsStr,
+    EMUGL_COMMON_API bool hasExtension(const char* extensionsStr,
                       const char* wantedExtension);
 
-    using Profiler = android::base::Profiler;
+    // GL object counter get/set
+    EMUGL_COMMON_API void setGLObjectCounter(
+            android::base::GLObjectCounter* counter);
+    EMUGL_COMMON_API android::base::GLObjectCounter* getGLObjectCounter();
+
+    // CPU usage get/set.
+    EMUGL_COMMON_API void setCpuUsage(android::base::CpuUsage* usage);
+    EMUGL_COMMON_API android::base::CpuUsage* getCpuUsage();
+
+    // Memory usage get/set
+    EMUGL_COMMON_API void setMemoryTracker(android::base::MemoryTracker* usage);
+    EMUGL_COMMON_API android::base::MemoryTracker* getMemoryTracker();
+
+    // Window operation agent
+    EMUGL_COMMON_API void set_emugl_window_operations(const QAndroidEmulatorWindowAgent &voperations);
+    EMUGL_COMMON_API const QAndroidEmulatorWindowAgent &get_emugl_window_operations();
+
+    // MultiDisplay operation agent
+    EMUGL_COMMON_API void set_emugl_multi_display_operations(const QAndroidMultiDisplayAgent &operations);
+    EMUGL_COMMON_API const QAndroidMultiDisplayAgent &get_emugl_multi_display_operations();
+
 }

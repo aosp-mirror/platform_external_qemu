@@ -11,6 +11,7 @@
 
 #pragma once
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 #include "android/base/Optional.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
@@ -20,22 +21,44 @@
 #include "android/skin/rect.h"
 #include "android/ui-emu-agent.h"
 #include "android/virtualscene/WASDInputHandler.h"
+=======
+#include <glm/gtc/quaternion.hpp>                     // for tquat
+#include <limits.h>                                   // for INT_MAX
+#include <qobjectdefs.h>                              // for slots, Q_OBJECT
+#include <stdint.h>                                   // for uint32_t, uint64_t
+#include <QElapsedTimer>                              // for QElapsedTimer
+#include <QFrame>                                     // for QFrame
+#include <QPoint>                                     // for QPoint
+#include <QString>                                    // for QString
+#include <QTimer>                                     // for QTimer
+#include <memory>                                     // for unique_ptr
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 
-#include "ui_virtualscene-controls.h"
+#include "android/base/Optional.h"                    // for Optional
+#include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
+#include "android/skin/qt/qt-ui-commands.h"           // for QtKeyEventSource
+#include "android/skin/qt/size-tweaker.h"             // for SizeTweaker
+#include "android/skin/rect.h"                        // for SkinRotation
+#include "android/ui-emu-agent.h"                     // for UiEmuAgent
+#include "android/virtualscene/WASDInputHandler.h"    // for WASDInputHandler
 
-#include <QElapsedTimer>
-#include <QFrame>
-#include <QObject>
-#include <QWidget>
-#include <QtCore>
-
-#include <glm/gtc/quaternion.hpp>
-#include <glm/vec3.hpp>
-
-#include <memory>
+#include <glm/gtc/quaternion.hpp>                     // for tquat::tquat<T, P>
+#include <glm/vec3.hpp>                               // for tvec3
 
 class EmulatorQtWindow;
+class QEvent;
+class QHideEvent;
+class QKeyEvent;
+class QObject;
+class QPaintEvent;
+class QPoint;
+class QShowEvent;
+class QString;
 class ToolWindow;
+namespace Ui {
+class VirtualSceneControls;
+}  // namespace Ui
+template <class CommandType> class ShortcutKeyStore;
 
 // Design requested a max width of 700 dp, and offset of 16 from the emulator
 // window.  This is defined here.
@@ -58,14 +81,15 @@ public:
     void setCaptureMouse(bool capture);
 
     bool eventFilter(QObject* target, QEvent* event) override;
-
+    void show();
     void showEvent(QShowEvent* event) override;
     void hideEvent(QHideEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
     void paintEvent(QPaintEvent*) override;
 
-    void setActive(bool active);
+    void setActiveForCamera(bool active);
+    void setActiveForRecording(bool active);
     bool isActive();
 
     void reportMouseButtonDown();
@@ -75,11 +99,13 @@ public:
             ShortcutKeyStore<QtUICommand>& keystore);
 signals:
     void virtualSceneControlsEngaged(bool engaged);
+    void on_recOngoingButton_clicked();
 
 public slots:
     void orientationChanged(SkinRotation);
     void virtualSensorsPageVisible();
     void virtualSensorsInteraction();
+    void setRecordingState(bool state);
 
 private slots:
     void slot_mousePoller();
@@ -111,7 +137,8 @@ private:
     QPoint mOriginalMousePosition;
     QPoint mPreviousMousePosition;
 
-    bool mIsActive = false;
+    bool mIsActiveCamera = false;
+    bool mIsActiveRecording = false;
     bool mShouldShowInfoDialog = true;
     bool mIsHotkeyAvailable = true;
 

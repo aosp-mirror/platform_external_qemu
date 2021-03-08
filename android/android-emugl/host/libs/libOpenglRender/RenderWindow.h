@@ -79,10 +79,14 @@ public:
     // Specify a function that will be called everytime a new frame is
     // displayed. This is relatively slow but allows one to capture the
     // output.
-    void setPostCallback(emugl::Renderer::OnPostCallback onPost, void* onPostContext);
+    void setPostCallback(emugl::Renderer::OnPostCallback onPost,
+                         void* onPostContext,
+                         uint32_t displayId,
+                         bool useBgraReadback = false);
 
     bool asyncReadbackSupported();
     emugl::Renderer::ReadPixelsCallback getReadPixelsCallback();
+    emugl::Renderer::FlushReadPixelPipeline getFlushReadPixelPipeline();
 
     // Start displaying the emulated framebuffer using a sub-window of a
     // parent |window| id. |wx|, |wy|, |ww| and |wh| are the position
@@ -107,7 +111,8 @@ public:
                         int fbh,
                         float dpr,
                         float rotation,
-                        bool deleteExisting);
+                        bool deleteExisting,
+                        bool hideWindow);
 
     // Remove the sub-window created by calling setupSubWindow().
     // Note that this doesn't discard the content of the emulated framebuffer,

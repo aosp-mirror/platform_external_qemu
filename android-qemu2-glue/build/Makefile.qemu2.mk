@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 # Rules to build QEMU2 for the Android emulator from sources.
 # This file is included from external/qemu/Makefile or one of its sub-Makefiles.
 
@@ -233,3 +234,5 @@ ifneq (windows,$(BUILD_TARGET_OS))
 endif
 
 LOCAL_PATH := $(QEMU2_OLD_LOCAL_PATH)
+=======
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)

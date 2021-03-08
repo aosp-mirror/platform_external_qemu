@@ -11,6 +11,7 @@
 
 #include "android/skin/qt/virtualscene-control-window.h"
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 #include "android/base/Log.h"
 #include "android/base/system/System.h"
 #include "android/featurecontrol/feature_control.h"
@@ -21,14 +22,75 @@
 #include "android/skin/qt/tool-window.h"
 #include "android/utils/debug.h"
 
+=======
+#include <QtCore/qglobal.h>
+#include <qapplication.h>
+#include <qcoreevent.h>
+#include <qglobal.h>
+#include <qnamespace.h>
+#include <qpoint.h>
+#include <qwindowdefs.h>
+#include <QApplication>
+#include <QColor>
+#include <QCoreApplication>
+#include <QCursor>
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 #include <QDesktopWidget>
+#include <QEvent>
+#include <QKeyEvent>
+#include <QLabel>
+#include <QList>
+#include <QObject>
 #include <QPainter>
+#include <QPen>
+#include <QRect>
 #include <QScreen>
+#include <QSettings>
+#include <QSize>
 #include <QStyle>
 #include <QTextStream>
+#include <QVariant>
+#include <QWidget>
+#include <algorithm>
+#include <cmath>
+#include <functional>
+
+#include "android/base/Log.h"
+#include "android/base/system/System.h"
+#include "android/cmdline-option.h"
+#include "android/featurecontrol/feature_control.h"
+#include "android/hw-sensors.h"
+#include "android/metrics/MetricsReporter.h"
+#include "android/physics/GlmHelpers.h"
+#include "android/physics/Physics.h"
+#include "android/settings-agent.h"
+#include "android/skin/keycode.h"
+#include "android/skin/qt/emulator-container.h"
+#include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/raised-material-button.h"
+#include "android/skin/qt/shortcut-key-store.h"
+#include "android/skin/qt/stylesheet.h"
+#include "android/skin/qt/tool-window.h"
+#include "android/virtualscene/WASDInputHandler.h"
+// #include "glm/gtc/../detail/func_geometric.inl"
+// #include "glm/gtc/../detail/func_trigonometric.inl"
+#include "glm/gtc/quaternion.hpp"
+#include "studio_stats.pb.h"
+#include "ui_virtualscene-controls.h"
+
+class QHideEvent;
+class QKeyEvent;
+class QObject;
+class QPaintEvent;
+class QScreen;
+class QShowEvent;
+class QString;
+class QWidget;
 
 #ifdef __APPLE__
-#include <Carbon/Carbon.h>  // For kVK_ANSI_E
+#import <Carbon/Carbon.h>  // For kVK_ANSI_E
 #include "android/skin/qt/mac-native-window.h"
 #endif
 
@@ -161,8 +223,8 @@ void VirtualSceneControlWindow::dockMainWindow() {
 bool VirtualSceneControlWindow::handleQtKeyEvent(QKeyEvent* event,
                                                  QtKeyEventSource source) {
     const bool down = event->type() == QEvent::KeyPress;
-
     // Trigger when the Alt key but no other modifiers is held.
+
     if (event->key() == Qt::Key_Alt &&
         source != QtKeyEventSource::ExtendedWindow) {
         if (down && !mCaptureMouse && event->modifiers() == Qt::AltModifier) {
@@ -170,7 +232,6 @@ bool VirtualSceneControlWindow::handleQtKeyEvent(QKeyEvent* event,
         } else if (!down && mCaptureMouse) {
             setCaptureMouse(false);
         }
-
         return true;
     }
 
@@ -241,6 +302,12 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
 
     updateHighlightAndFocusStyle();
     update();  // Queues a repaint call.
+}
+
+void VirtualSceneControlWindow::show() {
+    if (!android_cmdLineOptions->qt_hide_window) {
+        QFrame::show();
+    }
 }
 
 void VirtualSceneControlWindow::showEvent(QShowEvent* event) {
@@ -319,7 +386,15 @@ void VirtualSceneControlWindow::hideEvent(QHideEvent* event) {
 
 bool VirtualSceneControlWindow::eventFilter(QObject* target, QEvent* event) {
     if (mCaptureMouse) {
-        if (event->type() == QEvent::MouseMove) {
+        if ((event->type() == QEvent::WindowDeactivate &&
+                       target == parentWidget())
+#ifdef __APPLE__
+            || !isOptionKeyHeld()
+#endif
+        ) {
+            setCaptureMouse(false);
+        }
+        else if (event->type() == QEvent::MouseMove) {
             updateMouselook();
             return true;
         } else if (event->type() == QEvent::Wheel) {
@@ -330,9 +405,6 @@ bool VirtualSceneControlWindow::eventFilter(QObject* target, QEvent* event) {
             if (handleKeyEvent(keyEvent)) {
                 return true;
             }
-        } else if (event->type() == QEvent::WindowDeactivate &&
-                   target == parentWidget()) {
-            setCaptureMouse(false);
         }
     }
 
@@ -402,8 +474,8 @@ void VirtualSceneControlWindow::paintEvent(QPaintEvent*) {
     p.end();
 }
 
-void VirtualSceneControlWindow::setActive(bool active) {
-    mIsActive = active;
+void VirtualSceneControlWindow::setActiveForCamera(bool active) {
+    mIsActiveCamera = active;
     if (active) {
         show();
 
@@ -415,7 +487,9 @@ void VirtualSceneControlWindow::setActive(bool active) {
                     SLOT(slot_virtualSceneInfoDialogHasBeenSeen()));
         }
     } else {
-        hide();
+        if (!mIsActiveRecording) {
+            hide();
+        }
 
         // The camera session has ended.  If the info dialog is still open, we
         // want to show it again next time in case the camera crashed and the
@@ -430,8 +504,20 @@ void VirtualSceneControlWindow::setActive(bool active) {
     }
 }
 
+void VirtualSceneControlWindow::setActiveForRecording(bool active) {
+    mIsActiveRecording = active;
+    if (mIsActiveCamera) {
+        return;
+    }
+    if (active) {
+        show();
+    } else {
+        hide();
+    }
+}
+
 bool VirtualSceneControlWindow::isActive() {
-    return mIsActive;
+    return mIsActiveCamera || mIsActiveRecording;
 }
 
 void VirtualSceneControlWindow::reportMouseButtonDown() {
@@ -538,6 +624,7 @@ QString VirtualSceneControlWindow::getInfoText() {
 static android::base::Optional<android::virtualscene::ControlKey> toControlKey(
         QKeyEvent* event) {
     using android::virtualscene::ControlKey;
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 
     switch (event->key()) {
         case Qt::Key_W:
@@ -552,7 +639,10 @@ static android::base::Optional<android::virtualscene::ControlKey> toControlKey(
             return ControlKey::Q;
         case Qt::Key_E:
             return ControlKey::E;
+=======
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 #ifdef __APPLE__
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
         case Qt::Key_unknown:
             // On OS X, when the Alt key is held Qt can't recognize the E key.
             // Compare the nativeVirtualKey code to see if this is the E key.
@@ -561,7 +651,26 @@ static android::base::Optional<android::virtualscene::ControlKey> toControlKey(
             }
 
 // Otherwise fall through.
+=======
+    int nativeCode = event->nativeVirtualKey();
+#else
+    int nativeCode = event->nativeScanCode();
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 #endif
+    int linuxKeyCode = skin_native_scancode_to_linux(nativeCode);
+    switch (linuxKeyCode) {
+        case LINUX_KEY_W:
+            return ControlKey::W;
+        case LINUX_KEY_A:
+            return ControlKey::A;
+        case LINUX_KEY_S:
+            return ControlKey::S;
+        case LINUX_KEY_D:
+            return ControlKey::D;
+        case LINUX_KEY_Q:
+            return ControlKey::Q;
+        case LINUX_KEY_E:
+            return ControlKey::E;
         default:
             return {};
     }
@@ -626,4 +735,17 @@ QPoint VirtualSceneControlWindow::getMouseCaptureCenter() {
     QWidget* container = parentWidget();
     return container->pos() +
            QPoint(container->width() / 2, container->height() / 2);
+}
+
+void VirtualSceneControlWindow::setRecordingState(bool state) {
+    setActiveForRecording(state);
+    if (state) {
+        mControlsUi->recOngoingButton->setIcon(
+                getIconForCurrentTheme("recordCircle"));
+        mControlsUi->recOngoingButton->setIconSize(QSize(30, 20));
+        mControlsUi->recOngoingButton->setText(tr("RECORDING ONGOING "));
+        mControlsUi->recOngoingButton->show();
+    } else {
+        mControlsUi->recOngoingButton->hide();
+    }
 }

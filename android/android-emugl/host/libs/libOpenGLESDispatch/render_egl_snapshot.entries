@@ -1,6 +1,7 @@
 # The list of EGL functions used for GPU snapshot
 
 !Render_EGL_snapshot
+namespaces translator,egl
 
 EGLConfig eglLoadConfig(EGLDisplay display, EGLStream stream);
 EGLContext eglLoadContext(EGLDisplay display, const EGLint *attrib_list, EGLStream stream);

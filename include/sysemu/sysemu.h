@@ -19,6 +19,7 @@ extern QemuUUID qemu_uuid;
 extern bool qemu_uuid_set;
 
 bool runstate_check(RunState state);
+RunState get_runstate();
 void runstate_set(RunState new_state);
 int runstate_is_running(void);
 bool runstate_needs_reset(void);
@@ -108,6 +109,45 @@ typedef struct {
     QEMUCallbackSet delvm;
 } QEMUSnapshotCallbacks;
 
+typedef uint32_t (*qemu_address_space_device_gen_handle_t)(void);
+typedef void (*qemu_address_space_device_destroy_handle_t)(uint32_t);
+typedef void (*qemu_address_space_device_tell_ping_info_t)(uint32_t handle, uint64_t gpa);
+typedef void (*qemu_address_space_device_ping_t)(uint32_t handle);
+typedef int (*qemu_address_space_device_add_memory_mapping_t)(uint64_t gpa, void *ptr, uint64_t size);
+typedef int (*qemu_address_space_device_remove_memory_mapping_t)(uint64_t gpa, void *ptr, uint64_t size);
+typedef void* (*qemu_address_space_device_get_host_ptr_t)(uint64_t gpa);
+typedef void* (*qemu_address_space_device_handle_to_context_t)(uint32_t handle);
+typedef void (*qemu_address_space_device_clear_t)(void);
+// virtio-gpu-next
+typedef uint64_t (*qemu_address_space_device_hostmem_register_t)(uint64_t hva, uint64_t size);
+typedef void (*qemu_address_space_device_hostmem_unregister_t)(uint64_t id);
+typedef void (*qemu_address_space_device_ping_at_hva_t)(uint32_t handle, void* hva);
+// deallocation callbacks
+typedef void (*qemu_address_space_device_deallocation_callback_t)(void* context, uint64_t gpa);
+typedef void (*qemu_address_space_device_register_deallocation_callback_t)(void* context, uint64_t gpa, qemu_address_space_device_deallocation_callback_t);
+typedef void (*qemu_address_space_device_run_deallocation_callbacks_t)(uint64_t gpa);
+
+struct qemu_address_space_device_control_ops {
+    qemu_address_space_device_gen_handle_t gen_handle;
+    qemu_address_space_device_destroy_handle_t destroy_handle;
+    qemu_address_space_device_tell_ping_info_t tell_ping_info;
+    qemu_address_space_device_ping_t ping;
+    qemu_address_space_device_add_memory_mapping_t add_memory_mapping;
+    qemu_address_space_device_remove_memory_mapping_t remove_memory_mapping;
+    qemu_address_space_device_get_host_ptr_t get_host_ptr;
+    qemu_address_space_device_handle_to_context_t handle_to_context;
+    qemu_address_space_device_clear_t clear;
+    qemu_address_space_device_hostmem_register_t hostmem_register;
+    qemu_address_space_device_hostmem_unregister_t hostmem_unregister;
+    qemu_address_space_device_ping_at_hva_t ping_at_hva;
+    qemu_address_space_device_register_deallocation_callback_t register_deallocation_callback;
+    qemu_address_space_device_run_deallocation_callbacks_t run_deallocation_callbacks;
+};
+
+void qemu_set_address_space_device_control_ops(struct qemu_address_space_device_control_ops* ops);
+struct qemu_address_space_device_control_ops*
+qemu_get_address_space_device_control_ops(void);
+
 void qemu_set_snapshot_callbacks(const QEMUSnapshotCallbacks* callbacks);
 
 typedef void (*QEMURamLoadCallback)(void*, uint64_t);
@@ -127,6 +167,11 @@ int qemu_delvm(const char* name, const QEMUMessageCallback* messages);
 
 // Callback for lazy loading of RAM for snapshots.
 void qemu_ram_load(void* hostRam, uint64_t size);
+
+// Disable or enable real audio input.
+// TODO: Also a potential way to pipe fake audio input
+void qemu_allow_real_audio(bool allow);
+bool qemu_is_real_audio_allowed(void);
 
 /* Populates the passed array of strings with the snapshot names.
  * If |names_count| is not NULL, it must be the size of |names| array.

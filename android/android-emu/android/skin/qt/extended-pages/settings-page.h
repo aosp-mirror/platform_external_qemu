@@ -11,21 +11,40 @@
 
 #pragma once
 
-#include "android/settings-agent.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "ui_settings-page.h"
-#include <QString>
-#include <QWidget>
-#include <memory>
+#include <QByteArrayData>            // for slots, Q_OBJECT, signals
+#include <QString>                   // for QString
+#include <QWidget>                   // for QWidget
+#include <memory>                    // for unique_ptr, shared_ptr
 
+#include "android/settings-agent.h"  // for SettingsTheme
+
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
+class PerfStatsPage;
+class QEvent;
+class QObject;
+
+namespace Ui {
+  class SettingsPage;
+}
+
+namespace android {
+namespace emulation {
+class AdbInterface;
+}  // namespace emulation
+}  // namespace android
 struct QAndroidHttpProxyAgent;
 
-class SettingsPage : public QWidget
-{
+class SettingsPage : public QWidget {
     Q_OBJECT
 
 public:
-    explicit SettingsPage(QWidget *parent = 0);
+    explicit SettingsPage(QWidget* parent = 0);
     ~SettingsPage();
 
     void setAdbInterface(android::emulation::AdbInterface* adb);
@@ -33,7 +52,7 @@ public:
 
 public slots:
     void setHaveClipboardSharing(bool haveSharing);
-
+    void setUiTheme(SettingsTheme theme);
 signals:
     void frameAlwaysChanged(bool showFrame);
     void onForwardShortcutsToDeviceChanged(int index);
@@ -56,7 +75,10 @@ private slots:
     void on_set_glesBackendPrefComboBox_currentIndexChanged(int index);
     void on_set_glesApiLevelPrefComboBox_currentIndexChanged(int index);
     void on_set_resetNotifications_pressed();
-#ifndef SNAPSHOT_CONTROLS  // TODO:jameskaye Remove when Snapshot controls are fully enabled
+    void on_perfstatsButton_pressed();
+    void on_tabChanged();
+#ifndef SNAPSHOT_CONTROLS  // TODO:jameskaye Remove when Snapshot controls are
+                           // fully enabled
     void on_set_saveSnapNowButton_clicked();
     void on_set_loadSnapNowButton_clicked();
     void on_set_saveSnapshotOnExit_currentIndexChanged(int index);
@@ -86,8 +108,11 @@ private:
     void enableProxyApply();
     void initProxy();
     void proxyDtor();
+    void disableForEmbeddedEmulator();
 
     android::emulation::AdbInterface* mAdb;
     std::unique_ptr<Ui::SettingsPage> mUi;
-    bool    mDisableANGLE = false;
+    std::unique_ptr<PerfStatsPage> mPerfStatsPage;
+    std::shared_ptr<UiEventTracker> mSettingsTracker;
+    bool mDisableANGLE = false;
 };

@@ -93,7 +93,6 @@ static void goldfish_pstore_save_restore(goldfish_pstore *store, bool write) {
     size_t read = qemu_get_buffer(
         file, (uint8_t *)memory_region_get_ram_ptr(&store->memory),
         memory_region_size(&store->memory));
-    assert(read == memory_region_size(&store->memory));
   }
 
   if (qemu_file_get_error(file)) {
@@ -115,7 +114,9 @@ Error:
   if (file) {
     qemu_fclose(file);
   }
+#ifndef _MSC_VER
   close(fd);
+#endif
 }
 
 static void goldfish_pstore_realize(DeviceState *dev, Error **errp) {

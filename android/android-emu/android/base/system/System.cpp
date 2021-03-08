@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 // Copyright (C) 2015 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -2689,3 +2690,5 @@ void System::disableAppNap() {
 
 }  // namespace base
 }  // namespace android
+=======
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)

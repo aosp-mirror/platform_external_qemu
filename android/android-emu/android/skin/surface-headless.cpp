@@ -9,6 +9,7 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 #ifndef _MSC_VER
 #include "android/skin/argb.h"
 #endif
@@ -25,6 +26,22 @@
 
 #if DEBUG
 #include "android/utils/debug.h"
+=======
+#include <stddef.h>                                    // for NULL
+#include <stdint.h>                                    // for uint32_t
+#include <functional>                                  // for __base, function
+#include <memory>                                      // for unique_ptr
+#include <type_traits>                                 // for swap
+
+#include "android/skin/qt/emulator-no-qt-no-window.h"  // for SkinSurface
+#include "android/skin/rect.h"                         // for SkinRect, Skin...
+#include "android/skin/surface.h"                      // for SkinBlitOp
+
+#define  DEBUG  1
+
+#if DEBUG
+#include "android/utils/debug.h"                       // for VERBOSE_PRINT
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 
 #define  D(...)   VERBOSE_PRINT(surface,__VA_ARGS__)
 #else

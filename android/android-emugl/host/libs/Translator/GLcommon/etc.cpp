@@ -459,7 +459,7 @@ void eac_decode_single_channel_block(const etc1_byte* pIn,
 
         int modifier = 0;
         if (bitOffset < 0) { // (Part of) the index is in the next byte.
-            modifier += ((int*)p)[0] << (-bitOffset);
+            modifier += p[0] << (-bitOffset);
             p ++;
             bitOffset += 8;
         }

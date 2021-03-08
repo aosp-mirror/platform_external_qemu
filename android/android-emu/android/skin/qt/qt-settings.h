@@ -38,6 +38,10 @@ constexpr char SHOW_ADB_WARNING[] = "showAdbWarning";
 constexpr char SHOW_AVD_ARCH_WARNING[] = "showAvdArchWarning";
 constexpr char SHOW_GPU_WARNING[] = "showGpuWarning";
 constexpr char SHOW_VIRTUALSCENE_INFO[] = "showVirtualSceneInfo";
+#ifdef _WIN32
+constexpr char SHOW_VGK_WARNING[] = "showVgkWarning";
+#endif
+constexpr char SHOW_NESTED_WARNING[] = "showNestedWarning";
 
 // Note: The "set/" here is because these settings are
 //       associated with "settings-page", not because
@@ -55,14 +59,16 @@ constexpr char SAVE_PATH[] = "set/savePath";
 constexpr char UI_THEME[] = "set/theme";
 constexpr char DISABLE_MOUSE_WHEEL[] = "set/disableMouseWheel";
 
-constexpr char BATTERY_CHARGE_LEVEL[] = "battery/charge_level";
-constexpr char BATTERY_CHARGER_TYPE[] = "battery/charger_type";
-constexpr char BATTERY_HEALTH[]       = "battery/health";
-constexpr char BATTERY_STATUS[]       = "battery/status";
+constexpr char BATTERY_CHARGE_LEVEL[]  = "battery/charge_level";
+constexpr char BATTERY_CHARGER_TYPE[]  = "battery/charger_type";
+constexpr char BATTERY_CHARGER_TYPE2[] = "battery/charger_type2";
+constexpr char BATTERY_HEALTH[]        = "battery/health";
+constexpr char BATTERY_STATUS[]        = "battery/status";
 
 constexpr char CELLULAR_NETWORK_TYPE[]    = "cell/network_type";
 constexpr char CELLULAR_SIGNAL_STRENGTH[] = "cell/signal_strength";
 constexpr char CELLULAR_VOICE_STATUS[]    = "cell/voice_status";
+constexpr char CELLULAR_METER_STATUS[]    = "cell/meter_status";
 constexpr char CELLULAR_DATA_STATUS[]     = "cell/data_status";
 
 constexpr char CRASHREPORT_PREFERENCE[] = "set/crashReportPreference";
@@ -109,6 +115,7 @@ constexpr char LOCATION_RECENT_VELOCITY[] = "loc/recent_velocity";
 
 constexpr char SCREENREC_SAVE_PATH[] = "rec/savePath";
 
+
 // ***** These settings apply only to the current AVD *****
 
 constexpr char PER_AVD_SETTINGS_NAME[] = "/AVD.conf";
@@ -131,6 +138,19 @@ constexpr char PER_AVD_LOC_PLAYBACK_SPEED[] = "perAvd/loc/playback_speed";
 constexpr char PER_AVD_VIRTUAL_SCENE_POSTERS[] = "perAvd/virtualscene/posters";
 constexpr char PER_AVD_VIRTUAL_SCENE_POSTER_SIZES[] =
         "perAvd/virtualscene/poster_sizes";
+constexpr char PER_AVD_VIRTUAL_SCENE_TV_ANIMATION[] =
+        "perAvd/virtualscene/tv_animation";
 
+constexpr char PER_AVD_BATTERY_CHARGE_LEVEL[]  = "perAvd/battery/charge_level";
+constexpr char PER_AVD_BATTERY_CHARGER_TYPE2[] = "perAvd/battery/charger_type2";
+constexpr char PER_AVD_BATTERY_CHARGER_TYPE3[] = "perAvd/battery/charger_type3";
+constexpr char PER_AVD_BATTERY_HEALTH[]        = "perAvd/battery/health";
+constexpr char PER_AVD_BATTERY_STATUS[]        = "perAvd/battery/status";
+
+constexpr char PER_AVD_CELLULAR_NETWORK_TYPE[]    = "perAvd/cell/network_type";
+constexpr char PER_AVD_CELLULAR_SIGNAL_STRENGTH[] = "perAvd/cell/signal_strength";
+constexpr char PER_AVD_CELLULAR_VOICE_STATUS[]    = "perAvd/cell/voice_status";
+constexpr char PER_AVD_CELLULAR_METER_STATUS[]    = "perAvd/cell/meter_status";
+constexpr char PER_AVD_CELLULAR_DATA_STATUS[]     = "perAvd/cell/data_status";
 }  // namespace Settings
 }  // namespace Ui

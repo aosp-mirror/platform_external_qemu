@@ -11,10 +11,13 @@
 */
 #include "android/skin/keycode.h"
 
-#include "android/utils/bufprint.h"
-
 #include <stddef.h>
 #include <string.h>
+
+#ifdef __APPLE__
+#import <Carbon/Carbon.h>
+#endif
+#include "android/utils/bufprint.h"
 
 SkinKeyCode skin_keycode_rotate(SkinKeyCode code, int  rotation) {
     static const SkinKeyCode  wheel[4] = { kKeyCodeDpadUp,
@@ -32,6 +35,8 @@ SkinKeyCode skin_keycode_rotate(SkinKeyCode code, int  rotation) {
     }
     return code;
 }
+
+#define ARRAYLEN(x) (sizeof(x) / sizeof(x[0]))
 
 #define _KEYSYM1_(x) _KEYSYM_(x, x)
 #define _KEYSYM1_ANDROID_(x) _KEYSYM_ANDROID_(x, x)
@@ -195,6 +200,15 @@ const char* skin_key_pair_to_string(uint32_t keycode, uint32_t mod) {
     if ((mod & kKeyModRAlt) != 0) {
         p = bufprint(p, end, "RAlt-");
     }
+    if ((mod & kKeyModLMeta) != 0) {
+        p = bufprint(p, end, "Meta-");
+    }
+    if ((mod & kKeyModRMeta) != 0) {
+        p = bufprint(p, end, "RMeta-");
+    }
+    if ((mod & kKeyModNumLock) != 0) {
+        p = bufprint(p, end, "NumLock");
+    }
     for (nn = 0; nn < keysym_names_size; ++nn) {
         if (keysym_names[nn]._sym == keycode) {
             p = bufprint(p, end, "%s", keysym_names[nn]._str);
@@ -202,7 +216,7 @@ const char* skin_key_pair_to_string(uint32_t keycode, uint32_t mod) {
         }
     }
 
-    if (keycode >= 32 && keycode <= 127) {
+    if (keycode >= 32 && keycode <= 255) {
         p = bufprint(p, end, "%c", (int)keycode);
         return temp;
     }
@@ -219,23 +233,16 @@ bool skin_key_pair_from_string(const char* str,
     uint32_t     mod = 0;
     int          match = 1;
     int          nn;
-    static const struct { const char*  prefix; int  mod; }  mods[] =
-    {
-        { "^",      kKeyModLCtrl },
-        { "Ctrl",   kKeyModLCtrl },
-        { "ctrl",   kKeyModLCtrl },
-        { "RCtrl",  kKeyModRCtrl },
-        { "rctrl",  kKeyModRCtrl },
-        { "Alt",    kKeyModLAlt },
-        { "alt",    kKeyModLAlt },
-        { "RAlt",   kKeyModRAlt },
-        { "ralt",   kKeyModRAlt },
-        { "Shift",  kKeyModLShift },
-        { "shift",  kKeyModLShift },
-        { "RShift", kKeyModRShift },
-        { "rshift", kKeyModRShift },
-        { NULL, 0 }
-    };
+    static const struct { const char*  prefix; int  mod;
+    } mods[] = {{"^", kKeyModLCtrl},       {"Ctrl", kKeyModLCtrl},
+                {"ctrl", kKeyModLCtrl},    {"RCtrl", kKeyModRCtrl},
+                {"rctrl", kKeyModRCtrl},   {"Alt", kKeyModLAlt},
+                {"alt", kKeyModLAlt},      {"RAlt", kKeyModRAlt},
+                {"ralt", kKeyModRAlt},     {"Shift", kKeyModLShift},
+                {"shift", kKeyModLShift},  {"RShift", kKeyModRShift},
+                {"rshift", kKeyModRShift}, {"Meta", kKeyModLMeta},
+                {"meta", kKeyModLMeta},    {"RMeta", kKeyModRMeta},
+                {"rmeta", kKeyModRMeta},   {NULL, 0}};
 
     while (match) {
         match = 0;
@@ -267,4 +274,142 @@ bool skin_key_pair_from_string(const char* str,
         }
     }
     return false;
+}
+
+// the linux key code is alphabetical if it is within the range of the 3 rows on
+// Qwerty keyboard.
+bool skin_keycode_is_alpha(int32_t linux_key) {
+    return (linux_key >= LINUX_KEY_Q && linux_key <= LINUX_KEY_P) ||
+           (linux_key >= LINUX_KEY_A && linux_key <= LINUX_KEY_L) ||
+           (linux_key >= LINUX_KEY_Z && linux_key <= LINUX_KEY_M);
+}
+
+bool skin_keycode_is_modifier(int32_t linux_key) {
+    switch (linux_key) {
+        case LINUX_KEY_LEFTCTRL:
+        case LINUX_KEY_RIGHTCTRL:
+        case LINUX_KEY_LEFTSHIFT:
+        case LINUX_KEY_RIGHTSHIFT:
+        case LINUX_KEY_LEFTALT:
+        case LINUX_KEY_RIGHTALT:
+        case LINUX_KEY_CAPSLOCK:
+        case LINUX_KEY_NUMLOCK:
+            return true;
+        default:
+            return false;
+    }
+}
+
+typedef struct {
+    // Contains one of the following:
+    //  On Linux: XKB scancode
+    //  On Windows: Windows OEM scancode
+    //  On Mac: Mac keycode
+    int native_scancode;
+    int linux_keycode;
+} LinuxKeyCodeMapEntry;
+
+#define LINUX_KEYMAP_DECLARATION \
+    const LinuxKeyCodeMapEntry linux_keycode_map[] =
+#if defined(__linux__)
+#define LINUX_KEYMAP(xkb, win, mac, code) \
+    { xkb, code }
+#elif defined(__APPLE__)
+#define LINUX_KEYMAP(xkb, win, mac, code) \
+    { mac, code }
+#else
+#define LINUX_KEYMAP(xkb, win, mac, code) \
+    { win, code }
+#endif
+#include "android/skin/keycode_converter_data.inc"
+
+#undef LINUX_KEYMAP
+#undef LINUX_KEYMAP_DECLARATION
+
+int skin_native_scancode_to_linux(int32_t scancode) {
+    size_t nn;
+    for (nn = 0; nn < ARRAYLEN(linux_keycode_map); nn++) {
+        if (linux_keycode_map[nn].native_scancode == scancode) {
+            return linux_keycode_map[nn].linux_keycode;
+        }
+    }
+    return LINUX_KEY_RESERVED;  // 0
+}
+
+#if defined(__linux__)
+static struct keypad_num_mapping {
+    int32_t keypad;
+    int32_t digit;
+} sKeypadNumMapping[] = {
+        {79, 16},  // KP_7 --> 7
+        {80, 17},  // KP_8 --> 8
+        {81, 18},  // KP_9 --> 9
+        {83, 13},  // KP_4 --> 4
+        {84, 14},  // KP_5 --> 5
+        {85, 15},  // KP_6 --> 6
+        {87, 10},  // KP_1 --> 1
+        {88, 11},  // KP_2 --> 2
+        {89, 12},  // KP_3 --> 3
+        {90, 19},  // KP_0 --> 0
+        {91, 60},  // KP_DOT --> DOT
+};
+
+#elif defined(__APPLE__)
+
+static struct keypad_num_mapping {
+    int32_t keypad;
+    int32_t digit;
+} sKeypadNumMapping[] = {
+        {kVK_ANSI_Keypad7, kVK_ANSI_7},             // KP_7 --> 7
+        {kVK_ANSI_Keypad8, kVK_ANSI_8},             // KP_8 --> 8
+        {kVK_ANSI_Keypad9, kVK_ANSI_9},             // KP_9 --> 9
+        {kVK_ANSI_Keypad4, kVK_ANSI_4},             // KP_4 --> 4
+        {kVK_ANSI_Keypad5, kVK_ANSI_5},             // KP_5 --> 5
+        {kVK_ANSI_Keypad6, kVK_ANSI_6},             // KP_6 --> 6
+        {kVK_ANSI_Keypad1, kVK_ANSI_1},             // KP_1 --> 1
+        {kVK_ANSI_Keypad2, kVK_ANSI_2},             // KP_2 --> 2
+        {kVK_ANSI_Keypad3, kVK_ANSI_3},             // KP_3 --> 3
+        {kVK_ANSI_Keypad0, kVK_ANSI_0},             // KP_0 --> 0
+        {kVK_ANSI_KeypadDecimal, kVK_ANSI_Period},  // KP_DOT --> DOT
+};
+
+#else
+
+static struct keypad_num_mapping {
+    int32_t keypad;
+    int32_t digit;
+} sKeypadNumMapping[] = {
+        {0x0047, 0x0008},  // KP_7 --> 7
+        {0x0048, 0x0009},  // KP_8 --> 8
+        {0x0049, 0x000a},  // KP_9 --> 9
+        {0x004b, 0x0005},  // KP_4 --> 4
+        {0x004c, 0x0006},  // KP_5 --> 5
+        {0x004d, 0x0007},  // KP_6 --> 6
+        {0x004f, 0x0002},  // KP_1 --> 1
+        {0x0050, 0x0003},  // KP_2 --> 2
+        {0x0051, 0x0004},  // KP_3 --> 3
+        {0x0052, 0x000b},  // KP_0 --> 0
+        {0x0053, 0x0034},  // KP_DOT --> DOT
+};
+
+#endif
+
+bool skin_keycode_native_is_keypad(int32_t scancode) {
+    size_t nn;
+    for (nn = 0; nn < ARRAYLEN(sKeypadNumMapping); nn++) {
+        if (scancode == sKeypadNumMapping[nn].keypad) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int32_t skin_keycode_native_map_keypad(int32_t scancode) {
+    size_t nn;
+    for (nn = 0; nn < ARRAYLEN(sKeypadNumMapping); nn++) {
+        if (scancode == sKeypadNumMapping[nn].keypad) {
+            return sKeypadNumMapping[nn].digit;
+        }
+    }
+    return LINUX_KEY_RESERVED;
 }

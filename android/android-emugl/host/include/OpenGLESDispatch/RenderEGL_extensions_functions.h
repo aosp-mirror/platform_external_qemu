@@ -19,6 +19,14 @@
   X(void*, eglSetImageFenceANDROID, (EGLDisplay display, EGLImageKHR image)) \
   X(void, eglWaitImageFenceANDROID, (EGLDisplay display, void* fence)) \
   X(void, eglAddLibrarySearchPathANDROID, (const char* path)) \
+  X(EGLBoolean, eglQueryVulkanInteropSupportANDROID, ()) \
+  X(EGLBoolean, eglGetSyncAttribKHR, (EGLDisplay display, EGLSync sync, EGLint attribute, EGLint * value)) \
 
+EGLAPI EGLint EGLAPIENTRY eglGetMaxGLESVersion(EGLDisplay display);
+EGLAPI void EGLAPIENTRY eglBlitFromCurrentReadBufferANDROID(EGLDisplay display, EGLImageKHR image);
+EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay display, EGLImageKHR image);
+EGLAPI void EGLAPIENTRY eglWaitImageFenceANDROID(EGLDisplay display, void* fence);
+EGLAPI void EGLAPIENTRY eglAddLibrarySearchPathANDROID(const char* path);
+EGLAPI EGLBoolean EGLAPIENTRY eglQueryVulkanInteropSupportANDROID();
 
 #endif  // RENDER_EGL_EXTENSIONS_FUNCTIONS_H

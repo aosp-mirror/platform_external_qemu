@@ -15,6 +15,7 @@
 #pragma once
 
 #include "android/emulation/control/callbacks.h"
+#include "android/emulation/control/structs.h"
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
@@ -106,12 +107,34 @@ typedef struct {
     int64_t ramSizeBytes;
 } VmConfiguration;
 
+typedef enum EmuRunState {
+    QEMU_RUN_STATE_DEBUG = 0,
+    QEMU_RUN_STATE_INMIGRATE = 1,
+    QEMU_RUN_STATE_INTERNAL_ERROR = 2,
+    QEMU_RUN_STATE_IO_ERROR = 3,
+    QEMU_RUN_STATE_PAUSED = 4,
+    QEMU_RUN_STATE_POSTMIGRATE = 5,
+    QEMU_RUN_STATE_PRELAUNCH = 6,
+    QEMU_RUN_STATE_FINISH_MIGRATE = 7,
+    QEMU_RUN_STATE_RESTORE_VM = 8,
+    QEMU_RUN_STATE_RUNNING = 9,
+    QEMU_RUN_STATE_SAVE_VM = 10,
+    QEMU_RUN_STATE_SHUTDOWN = 11,
+    QEMU_RUN_STATE_SUSPENDED = 12,
+    QEMU_RUN_STATE_WATCHDOG = 13,
+    QEMU_RUN_STATE_GUEST_PANICKED = 14,
+    QEMU_RUN_STATE_COLO = 15,
+    QEMU_RUN_STATE__MAX = 16,
+} EmuRunState;
+
 // C interface to expose Qemu implementations of common VM related operations.
 typedef struct QAndroidVmOperations {
     bool (*vmStop)(void);
     bool (*vmStart)(void);
     void (*vmReset)(void);
     void (*vmShutdown)(void);
+    bool (*vmPause)(void);
+    bool (*vmResume)(void);
 
     bool (*vmIsRunning)(void);
 
@@ -136,9 +159,20 @@ typedef struct QAndroidVmOperations {
                           void* opaque,
                           LineConsumerCallback errConsumer);
 
+    // Export the qcow2s associated with the given snapshot to the given destination.
+    bool (*snapshotExport)(const char* snapshot,
+                           const char* dest,
+                           void* opaque,
+                           LineConsumerCallback errConsumer);
+
     // Sets a set of callback to listen for snapshot operations.
     void (*setSnapshotCallbacks)(void* opaque,
                                  const SnapshotCallbacks* callbacks);
+
+    // callbacks to "plug" and "unplug" memory into the provided address range
+    // on fly.
+    void (*mapUserBackedRam)(uint64_t gpa, void* hva, uint64_t size);
+    void (*unmapUserBackedRam)(uint64_t gpa, uint64_t size);
 
     // Fills in the supplied |out| with current VM configuration.
     void (*getVmConfiguration)(VmConfiguration* out);
@@ -151,6 +185,26 @@ typedef struct QAndroidVmOperations {
     // QEMU snapshot save calls work.
     void (*setExiting)(void);
 
-} QAndroidVmOperations;
+    // Allow actual audio on host through to the guest.
+    void (*allowRealAudio)(bool allow);
 
+    // Get the host address of a guest physical address, if any.
+    void* (*physicalMemoryGetAddr)(uint64_t gpa);
+
+    // Query whether host audio is allowed.
+    bool (*isRealAudioAllowed)(void);
+
+    // Set whether to skip snapshotting on exit.
+    void (*setSkipSnapshotSave)(bool used);
+
+    // Retrieve the state of whether snapshotting is skipped.
+    bool (*isSnapshotSaveSkipped)(void);
+
+    // Create/register/getinfo for host memory Id's
+    uint64_t (*hostmemRegister)(uint64_t hva, uint64_t size, uint32_t register_fixed, uint64_t fixed_id);
+    void (*hostmemUnregister)(uint64_t id);
+    struct HostmemEntry (*hostmemGetInfo)(uint64_t id);
+    EmuRunState (*getRunState)();
+
+} QAndroidVmOperations;
 ANDROID_END_HEADER

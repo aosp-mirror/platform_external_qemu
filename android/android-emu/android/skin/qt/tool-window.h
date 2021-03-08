@@ -12,8 +12,12 @@
 
 #pragma once
 
+#include "android/hw-sensors.h"
 #include "android/base/containers/CircularBuffer.h"
 #include "android/base/memory/OnDemand.h"
+#include "android/base/synchronization/Lock.h"
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/threads/WorkerThread.h"
 #include "android/skin/event.h"
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/extended-window.h"
@@ -37,6 +41,7 @@
 
 class EmulatorQtWindow;
 class ExtendedWindow;
+class PostureSelectionDialog;
 
 class ToolWindow : public QFrame {
     Q_OBJECT
@@ -88,6 +93,7 @@ public:
     void reportMouseButtonDown();
 
     bool isExtendedWindowFocused();
+    bool isExtendedWindowVisible();
     void closeExtendedWindow();
 
     // Observed only on Windows:
@@ -99,7 +105,8 @@ public:
 
     // The designers want a gap between the main emulator
     // window and the tool bar. This is how big that gap is.
-    static const int toolGap = 10;
+    static const int TOOL_GAP_FRAMED    = 0;
+    static const int TOOL_GAP_FRAMELESS = 4;
 
     bool shouldClose();
 
@@ -107,20 +114,26 @@ public:
         return mClipboardSupported;
     }
     void forwardKeyToEmulator(uint32_t keycode, bool down);
+    void touchExtendedWindow();
+    // Handle a full key press (down + up) in a single call.
+    void handleUICommand(QtUICommand cmd, std::string extra = "") {
+        handleUICommand(cmd, true, extra);
+        handleUICommand(cmd, false, extra);
+    }
+    void hideRotationButton(bool hide);
+    bool setUiTheme(SettingsTheme theme, bool persist);
+    void showExtendedWindow(ExtendedWindowPane pane);
+    void hideExtendedWindow();
 
 signals:
     void guestClipboardChanged(QString text);
     void haveClipboardSharingKnown(bool have);
+    void themeChanged(SettingsTheme theme);
 
 private:
-    void handleUICommand(QtUICommand cmd, bool down);
-    void forwardGenericEventToEmulator(int type, int code, int value);
-
-    // Handle a full key press (down + up) in a single call.
-    void handleUICommand(QtUICommand cmd) {
-        handleUICommand(cmd, true);
-        handleUICommand(cmd, false);
-    }
+    static void forwardGenericEventToEmulator(int type, int code, int value);
+    void handleUICommand(QtUICommand cmd, bool down, std::string extra = "");
+    void ensureExtendedWindowExists();
 
     void stopExtendedWindowCreation();
 
@@ -134,7 +147,9 @@ private:
     }
     bool askWhetherToSaveSnapshot();
 
+
     void showOrRaiseExtendedWindow(ExtendedWindowPane pane);
+    void updateButtonUiCommand(QPushButton* button, const char* uiCommand);
 
     virtual void closeEvent(QCloseEvent* ce) override;
     virtual void mousePressEvent(QMouseEvent* event) override;
@@ -159,7 +174,6 @@ private:
     QString mDetectedAdbPath;
     UIEventRecorderPtr mUIEventRecorder;
     UserActionsCounterPtr mUserActionsCounter;
-    SizeTweaker mSizeTweaker;
     bool mTopSwitched = false;
 
     bool mIsExiting = false;
@@ -167,12 +181,34 @@ private:
     bool mAllowExtWindow = false;
     bool mClipboardSupported = false;
 
+    int mLastRequestedFoldablePosture = -1;
+
     static const UiEmuAgent* sUiEmuAgent;
+
+    PostureSelectionDialog* mPostureSelectionDialog;
+    enum FoldableSyncToAndroidOp {
+        SEND_AREA = 0,
+        CONFIRM_AREA,
+        SEND_LID_CLOSE,
+        SEND_LID_OPEN,
+        SEND_EXIT,
+    };
+    struct FoldableSyncToAndroidItem {
+        enum FoldableSyncToAndroidOp op;
+        int x, y, width, height;
+    };
+    android::base::WorkerThread<FoldableSyncToAndroidItem> mFoldableSyncToAndroid;
+    android::base::WorkerProcessingResult foldableSyncToAndroidItemFunction(const FoldableSyncToAndroidItem& item);
+    android::base::Lock mLock;
+    android::base::ConditionVariable mCv;
+    bool mFoldableSyncToAndroidSuccess;
+    bool mFoldableSyncToAndroidTimeout;
 
 public slots:
     void raise();
     void switchClipboardSharing(bool enabled);
     void showVirtualSceneControls(bool show);
+    void ensureVirtualSceneWindowCreated();
 
 private slots:
     void on_back_button_pressed();
@@ -195,6 +231,9 @@ private slots:
     void on_volume_up_button_released();
     void on_zoom_button_clicked();
     void on_tablet_mode_button_clicked();
+    void on_change_posture_button_clicked();
+    void on_new_posture_requested(int newPosture);
+    void on_dismiss_posture_selection_dialog();
 
     void onGuestClipboardChanged(QString text);
     void onHostClipboardChanged();

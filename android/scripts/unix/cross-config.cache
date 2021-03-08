@@ -1,0 +1,295 @@
+# Package-specific cache values
+# ensure that even if a setting is repeated
+# that the *value* of that setting remains the same.
+# If not, remove *all* mentions of that setting and
+# use the /etc/dpkg-cross/cross-config.d/$arch/$package
+# support to isolate architecture-dependent values.
+# Settings are listed by package to avoid setting
+# a value unless the package requires that value.
+
+# Common libc things - global until someone finds a reason not to
+ac_cv_func_malloc_0_nonnull=yes
+ac_cv_func_realloc_0_nonnull=yes
+# shadow
+ac_cv_func_setpgrp_void=yes
+
+# override libtool until #367115 is fixed
+mydir=`dirname $ac_site_file`
+
+hostarch=`dpkg-architecture -qDEB_HOST_GNU_TYPE`
+lt_cv_sys_lib_dlsearch_path_spec=" /lib/$hostarch /usr/lib/$hostarch /lib /usr/lib /usr/local/lib"
+
+#apr
+if [ "$PACKAGE" = "apr" -o "$PACKAGE_NAME" = "apr" ]; then
+ac_cv_file__dev_zero=yes
+ac_cv_func_setpgrp_void=yes
+apr_cv_tcp_nodelay_with_cork=yes
+#apr's configure script will assume no epoll if cross compiling. Fix
+apr_cv_epoll=yes
+apr_cv_epoll_create1=yes
+# apr_cv_process_shared_works: maybe arch specific? 
+# apr_cv_mutex_robust_shared: maybe arch specific?
+# ac_cv_sizeof_struct_iovec: is arch specific
+fi
+
+# avahi
+if [ "$PACKAGE" = "avahi" -o "$PACKAGE_NAME" = "avahi" ]; then
+ac_cv_func_malloc_0_nonnull=yes
+ac_cv_func_realloc_0_nonnull=yes
+ac_cv_lib_gdbm_gdbm_open=yes
+ac_cv_header_gdbm_h=yes
+fi
+
+# bash
+if [ "$PACKAGE" = "bash" -o "$PACKAGE_NAME" = "bash" ]; then
+ac_cv_have_abstract_sockets=yes
+fi
+
+# coreutils
+if [ "$PACKAGE" = "coreutils" -o "$PACKAGE_NAME" = "GNU coreutils" ]; then
+gl_cv_func_tzset_clobber=no
+gl_cv_func_gettimeofday_clobber=no
+jm_cv_func_gettimeofday_clobber=no
+utils_cv_localtime_cache=no
+ac_cv_func_futimesat=yes
+ac_cv_prog_cc_c99=${ac_cv_prog_cc_c99=-std=gnu99}
+ac_cv_prog_cc_stdc=${ac_cv_prog_cc_stdc=-std=gnu99}
+fu_cv_sys_stat_statfs2_bsize=yes
+gl_cv_struct_dirent_d_ino=yes
+ac_cv_func_malloc_0_nonnull=yes
+ac_cv_func_realloc_0_nonnull=yes
+gl_cv_header_working_fcntl_h=yes
+gl_cv_func_gnu_getopt=yes
+ac_cv_func_calloc_0_nonnull=yes
+gl_cv_func_fflush_stdin=yes
+gl_cv_func_wcwidth_works=yes
+ac_cv_func_fnmatch_gnu=yes
+gl_cv_func_getcwd_null=yes
+ac_cv_func_memcmp_working=yes
+gl_cv_func_signbit=yes
+ac_cv_func_lstat_empty_string_bug=no
+gl_cv_func_working_acl_get_file=yes
+gl_cv_func_fchownat_nofollow_works=yes
+gl_cv_func_fstatat_zero_flag=yes
+fi
+
+# dbus-glib
+if [ "$PACKAGE" = "dbus-glib" -o "$PACKAGE_NAME" = "dbus-glib" ]; then
+ac_cv_func_posix_getpwnam_r=yes
+ac_cv_have_abstract_sockets=yes
+fi
+
+# dbus
+if [ "$PACKAGE" = "dbus" -o "$PACKAGE_NAME" = "dbus" ]; then
+ac_cv_have_abstract_sockets=yes
+fi
+
+# dpkg
+if [ "$PACKAGE" = "dpkg" -o "$PACKAGE_NAME" = "dpkg" ]; then
+dpkg_cv_va_copy=yes
+dpkg_cv_c99_snprintf=yes
+fi
+
+# findutils
+if [ "$PACKAGE" = "findutils" -o "$PACKAGE_NAME" = "GNU findutils" ]; then
+ac_cv_func_malloc_0_nonnull=yes
+ac_cv_func_realloc_0_nonnull=yes
+ac_cv_func_calloc_0_nonnull=yes
+gl_cv_header_working_fcntl_h=yes
+gl_cv_func_fflush_stdin=yes
+ac_cv_func_fnmatch_gnu=yes
+gl_cv_func_getcwd_null=yes
+gl_cv_func_gnu_getopt=yes
+gl_cv_func_wcwidth_works=yes
+fi
+
+# glib2.0
+if [ "$PACKAGE" = "glib2.0" -o "$PACKAGE_NAME" = "glib" ]; then
+glib_cv_stack_grows=no
+glib_cv_monotonic_clock=yes
+glib_cv_uscore=no
+ac_cv_func_posix_getpwuid_r=yes
+ac_cv_func_posix_getgrgid_r=yes
+ac_cv_path_GLIB_GENMARSHAL=$mydir/../../../../../prebuilts/android-emulator-build/qemu-android-deps/linux-x86_64/bin/glib-genmarshal
+fi
+
+# gnupg
+if [ "$PACKAGE" = "gnupg" -o "$PACKAGE_NAME" = "gnupg" ]; then
+ac_cv_type_mode_t=yes
+fi
+
+# isc-dhcp
+if [ "$PACKAGE" = "isc-dhcp" -o "$PACKAGE_NAME" = "isc-dhcp" ]; then
+ac_cv_file__dev_random=yes
+fi
+
+
+# krb5
+if [ "$PACKAGE" = "krb5" -o "$PACKAGE_NAME" = "Kerberos 5" ]; then
+krb5_cv_attr_constructor_destructor=yes,yes
+ac_cv_func_regcomp=yes
+ac_cv_printf_positional=yes
+ac_cv_file__etc_environment=no
+ac_cv_file__etc_TIMEZONE=no
+fi
+
+# libdaemon
+if [ "$PACKAGE" = "libdaemon" -o "$PACKAGE_NAME" = "libdaemon" ]; then
+ac_cv_func_setpgrp_void=yes
+fi
+
+# libidl
+if [ "$PACKAGE" = "libidl" -o "$PACKAGE_NAME" = "libIDL" ]; then
+libIDL_cv_long_long_format=llu
+fi
+
+# libopenobex does not support PACKAGE_NAME or PACKAGE
+# so this value is currently passed directly via
+# debian rules
+#if [ "$PACKAGE" = "libopenobex" -o "$PACKAGE_NAME" = "libopenobex" ]; then
+#ac_cv_file__usr_lib_pkgconfig_libusb_pc=yes
+#fi
+
+# mysql
+if [ "$PACKAGE" = "mysql" -o "$PACKAGE_NAME" = "mysql" ]; then
+mysql_cv_gcc_atomic_builtins=yes
+ac_cv_HAVE_IB_ATOMIC_PTHREAD_T_GCC=yes
+ac_cv_IB_GCC_ATOMIC_BUILTINS=yes
+ac_cv_HAVE_IB_GCC_ATOMIC_BUILTINS=yes
+ac_cv_HAVE_IB_SOLARIS_ATOMICS=yes
+# ac_cv_c_stack_direction is arch-sepcific
+fi
+
+# mktemp
+if [ "$PACKAGE" = "mktemp" -o "$PACKAGE_NAME" = "mktemp" ]; then
+sudo_cv_ebcdic=no
+fi
+
+# ncurses does not support PACKAGE_NAME or PACKAGE
+# so this value is currently passed directly via
+# debian rules
+#if [ "$PACKAGE" = "ncurses" -o "$PACKAGE_NAME" = "ncurses" ]; then
+#cf_cv_wint_t=no
+#fi
+
+# ntp
+if [ "$PACKAGE" = "ntp" -o "$PACKAGE_NAME" = "ntp" ]; then
+with_openssl_libdir=yes
+with_openssl_incdir=yes
+libopts_cv_run_strftime=yes
+libopts_cv_run_fopen_binary=yes
+libopts_cv_run_fopen_text=yes
+libopts_cv_with_libregex=yes
+fi
+
+# openldap
+if [ "$PACKAGE" = "openldap" -o "$PACKAGE_NAME" = "openldap" ]; then
+ac_cv_func_memcmp_working=yes
+fi
+
+# ossp-uuid
+if [ "$PACKAGE" = "ossp-uuid" -o "$PACKAGE_NAME" = "ossp-uuid" ]; then
+ac_cv_va_copy=yes
+fi
+
+# php
+if [ "$PACKAGE" = "php" -o "$PACKAGE_NAME" = "php" ]; then
+ac_cv_lib_gmp___gmp_randinit_lc_2exp_size=yes
+ac_cv_crypt_SHA512=yes
+ac_cv_crypt_SHA256=yes
+ac_cv_crypt_md5=yes
+fi
+
+# popt
+if [ "$PACKAGE" = "popt" -o "$PACKAGE_NAME" = "popt" ]; then
+ac_cv_va_copy=yes
+fi
+
+# procps
+if [ "$PACKAGE" = "procps" -o "$PACKAGE_NAME" = "procps" ]; then
+gl_cv_have_proc_uptime=yes
+fi
+
+
+# python2.7
+if [ "$PACKAGE" = "python" -o "$PACKAGE_NAME" = "python" ]; then
+ac_cv_buggy_getaddrinfo=no
+ac_cv_have_long_long_format=yes
+ac_cv_working_tzset=yes
+fi
+
+# rsyslog
+if [ "$PACKAGE" = "rsyslog" -o "$PACKAGE_NAME" = "rsyslog" ]; then
+ap_cv_atomic_builtins=yes
+fi
+
+
+# screen
+if [ "$PACKAGE" = "screen" -o "$PACKAGE_NAME" = "screen" ]; then
+ac_cv_prog_gcc_traditional=no
+fi
+
+# shadow does not support PACKAGE_NAME or PACKAGE
+# so this value is currently passed directly via
+# debian rules
+if [ "$PACKAGE" = "shadow" -o "$PACKAGE_NAME" = "shadow" ]; then
+ac_cv_func_setpgrp=yes
+ac_cv_func_setpgrp_void=yes
+fi
+
+# sqlite does not support PACKAGE_NAME or PACKAGE
+# need bespoke /etc/dpkg-cross/cross-config.d/arch:all support.
+if [ "$PACKAGE" = "sqlite" -o "$PACKAGE_NAME" = "sqlite" ]; then
+ac_cv_prog_cc_c89=
+ac_cv_header_readline_h=yes
+lt_cv_path_NM="/usr/bin/nm -B"
+archive_cmds_need_lc=no
+archive_cmds_need_lc_CXX=no
+archive_cmds_need_lc_F77=no
+archive_cmds_need_lc_GCJ=no
+fi
+
+# startup-notification
+if [ "$PACKAGE" = "startup-notification" -o "$PACKAGE_NAME" = "startup-notification" ]; then
+lf_cv_sane_realloc=yes
+fi
+
+# sudo
+if [ "$PACKAGE" = "sudo" -o "$PACKAGE_NAME" = "GNU sudo" ]; then
+sudo_cv_uid_t_len=10
+sudo_cv_func_unsetenv_void=no
+fi
+
+# tar
+if [ "$PACKAGE" = "tar" -o "$PACKAGE_NAME" = "GNU tar" ]; then
+ac_cv_have_decl_wcwidth=yes
+gl_cv_func_wcwidth_works=yes
+fi
+
+# tcl
+if [ "$PACKAGE_NAME" = "tcl" ]; then
+	# FIXME these were only observed under Linux; should preferably disable
+	# them on !linux, but it's too early to use AC_CANONICAL_HOST output
+	tcl_cv_strstr_unbroken=${tcl_cv_strstr_unbroken='ok'}
+	tcl_cv_strtoul_unbroken=${tcl_cv_strtoul_unbroken='ok'}
+	tcl_cv_strtod_unbroken=${tcl_cv_strtod_unbroken='ok'}
+	tcl_cv_putenv_copy=${tcl_cv_putenv_copy='no'}
+fi
+
+
+# util-linux
+if [ "$PACKAGE_NAME" = "util-linux" -o "$PACKAGE_NAME" = "util-linux-ng" ]; then
+ac_cv_lib_blkid_blkid_known_fstype=yes
+ac_cv_lib_uuid_uuid_is_null=yes
+scanf_cv_type_modifier=ms
+fi
+
+# xorg-server
+if [ "$PACKAGE" = "xorg-server" -o "$PACKAGE_NAME" = "xorg-server" ]; then
+ac_cv_file__usr_share_sgml_X11_defs_ent=no
+fi
+
+# xserver-xorg-input-mouse
+if [ "$PACKAGE" = "xserver-xorg-input-mouse" -o "$PACKAGE_NAME" = "xf86-input-mouse" ]; then
+ac_cv_file__usr_share_sgml_X11_defs_ent=no
+fi

@@ -13,12 +13,14 @@
 // limitations under the License.
 #include "VulkanStream.h"
 
+#include "IOStream.h"
+
 #include "common/goldfish_vk_deepcopy.h"
 #include "common/goldfish_vk_marshaling.h"
 #include "common/goldfish_vk_testing.h"
 
 #include "android/base/ArraySize.h"
-#include "android/base/Pool.h"
+#include "android/base/BumpPool.h"
 
 #include <gtest/gtest.h>
 #include <string.h>
@@ -28,21 +30,43 @@ using android::base::arraySize;
 
 namespace goldfish_vk {
 
-class VulkanStreamForTesting : public VulkanStream {
+class TestStream : public IOStream {
 public:
-    ssize_t read(void* buffer, size_t size) override {
-        EXPECT_LE(mReadCursor + size, mBuffer.size());
-        memcpy(buffer, mBuffer.data() + mReadCursor, size);
+    static constexpr size_t kBufSize = 1024;
+    TestStream() : IOStream(kBufSize) { }
+protected:
 
-        mReadCursor += size;
+    void* getDmaForReading(uint64_t guest_paddr) override { return nullptr; }
+    void unlockDma(uint64_t guest_paddr) override { }
 
-        if (mReadCursor == mWriteCursor) {
-            clear();
-        }
-        return size;
+    // VulkanStream should never use these functions.
+    void* allocBuffer(size_t minSize) override {
+        fprintf(stderr, "%s: FATAL: not intended for use!\n", __func__);
+        abort();
     }
 
-    ssize_t write(const void* buffer, size_t size) override {
+    int commitBuffer(size_t size) override {
+        fprintf(stderr, "%s: FATAL: not intended for use!\n", __func__);
+        abort();
+    }
+
+    const unsigned char *readRaw(void *buf, size_t *inout_len) override {
+        fprintf(stderr, "%s: FATAL: not intended for use!\n", __func__);
+        abort();
+    }
+
+    void onSave(android::base::Stream*) override {
+        fprintf(stderr, "%s: FATAL: not intended for use!\n", __func__);
+        abort();
+
+    }
+
+    virtual unsigned char* onLoad(android::base::Stream*) override {
+        fprintf(stderr, "%s: FATAL: not intended for use!\n", __func__);
+        abort();
+    }
+
+    int writeFully(const void* buffer, size_t size) override {
         if (mBuffer.size() < mWriteCursor + size) {
             mBuffer.resize(mWriteCursor + size);
         }
@@ -54,7 +78,19 @@ public:
         if (mReadCursor == mWriteCursor) {
             clear();
         }
-        return size;
+        return 0;
+    }
+
+    const unsigned char* readFully(void* buf, size_t len) override {
+        EXPECT_LE(mReadCursor + len, mBuffer.size());
+        memcpy(buf, mBuffer.data() + mReadCursor, len);
+
+        mReadCursor += len;
+
+        if (mReadCursor == mWriteCursor) {
+            clear();
+        }
+        return (unsigned char*)buf;
     }
 
 private:
@@ -71,7 +107,8 @@ private:
 
 // Just see whether the test class is OK
 TEST(VulkanStream, Basic) {
-    VulkanStreamForTesting stream;
+    TestStream testStream;
+    VulkanStream stream(&testStream);
 
     const uint32_t testInt = 6;
     stream.putBe32(testInt);
@@ -84,7 +121,8 @@ TEST(VulkanStream, Basic) {
 
 // Try a "basic" Vulkan struct (VkInstanceCreateInfo)
 TEST(VulkanStream, testMarshalVulkanStruct) {
-    VulkanStreamForTesting stream;
+    TestStream testStream;
+    VulkanStream stream(&testStream);
 
     VkApplicationInfo appInfo = {
         VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -174,7 +212,8 @@ TEST(VulkanStream, testMarshalVulkanStruct) {
 
 // Try a Vulkan struct that has non-ptr structs in it
 TEST(VulkanStream, testMarshalVulkanStructWithNonPtrStruct) {
-    VulkanStreamForTesting stream;
+    TestStream testStream;
+    VulkanStream stream(&testStream);
 
     VkPhysicalDeviceProperties forMarshaling = {
         VK_API_VERSION_1_0,
@@ -332,7 +371,8 @@ TEST(VulkanStream, testMarshalVulkanStructWithNonPtrStruct) {
 
 // Try a Vulkan struct that has ptr fields with count (dynamic arrays)
 TEST(VulkanStream, testMarshalVulkanStructWithPtrFields) {
-    VulkanStreamForTesting stream;
+    TestStream testStream;
+    VulkanStream stream(&testStream);
 
     const uint32_t bindCount = 14;
 
@@ -398,7 +438,8 @@ TEST(VulkanStream, testMarshalVulkanStructWithPtrFields) {
 
 // Try a Vulkan struct that has ptr fields that are not structs
 TEST(VulkanStream, testMarshalVulkanStructWithSimplePtrFields) {
-    VulkanStreamForTesting stream;
+    TestStream testStream;
+    VulkanStream stream(&testStream);
 
     const uint32_t queueCount = 4;
 
@@ -443,7 +484,8 @@ TEST(VulkanStream, testMarshalVulkanStructWithSimplePtrFields) {
 // Vulkan struct with a void* field that refers to actual data
 // that needs to get transmitted over
 TEST(VulkanStream, testMarshalVulkanStructWithVoidPtrToData) {
-    VulkanStreamForTesting stream;
+    TestStream testStream;
+    VulkanStream stream(&testStream);
 
     // Not going to validate the map entries---
     // that's the validation layer's job,
@@ -494,8 +536,9 @@ TEST(VulkanStream, testMarshalVulkanStructWithVoidPtrToData) {
 
 // Tests that marshal + unmarshal is equivalent to deepcopy.
 TEST(VulkanStream, testDeepcopyEquivalence) {
-    Pool pool;
-    VulkanStreamForTesting stream;
+    BumpPool pool;
+    TestStream testStream;
+    VulkanStream stream(&testStream);
 
     VkApplicationInfo appInfo = {
         VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -543,6 +586,63 @@ TEST(VulkanStream, testDeepcopyEquivalence) {
     });
 
     checkEqual_VkInstanceCreateInfo(
+        &forMarshaling, &forDeepcopy, [](const char* errMsg) {
+        EXPECT_TRUE(false) << errMsg;
+    });
+}
+
+// Tests that a struct with an extension struct attached
+// is properly marshaled/unmarshaled.
+TEST(VulkanStream, testStructExtension) {
+    BumpPool pool;
+    TestStream testStream;
+    VulkanStream stream(&testStream);
+
+    VkImage image = (VkImage)1;
+    VkBuffer buffer = (VkBuffer)2;
+
+    VkMemoryDedicatedAllocateInfo dedicatedAllocInfo = {
+        VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO, 0,
+        image, buffer,
+    };
+
+    VkMemoryAllocateInfo forMarshaling = {
+        VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        &dedicatedAllocInfo,
+        4096,
+        5,
+    };
+
+    marshal_VkMemoryAllocateInfo(&stream, &forMarshaling);
+
+    VkMemoryAllocateInfo forUnmarshaling;
+    unmarshal_VkMemoryAllocateInfo(&stream, &forUnmarshaling);
+
+    VkMemoryDedicatedAllocateInfo* copiedDedicated =
+        (VkMemoryDedicatedAllocateInfo*)forUnmarshaling.pNext;
+
+    EXPECT_EQ(VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO,
+              copiedDedicated->sType);
+    EXPECT_EQ(image, copiedDedicated->image);
+    EXPECT_EQ(buffer, copiedDedicated->buffer);
+
+    checkEqual_VkMemoryAllocateInfo(
+        &forMarshaling, &forUnmarshaling, [](const char* errMsg) {
+        EXPECT_TRUE(false) << errMsg;
+    });
+
+    VkMemoryAllocateInfo forDeepcopy;
+    deepcopy_VkMemoryAllocateInfo(&pool, &forMarshaling, &forDeepcopy);
+
+    copiedDedicated =
+        (VkMemoryDedicatedAllocateInfo*)forDeepcopy.pNext;
+
+    EXPECT_EQ(VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO,
+              copiedDedicated->sType);
+    EXPECT_EQ(image, copiedDedicated->image);
+    EXPECT_EQ(buffer, copiedDedicated->buffer);
+
+    checkEqual_VkMemoryAllocateInfo(
         &forMarshaling, &forDeepcopy, [](const char* errMsg) {
         EXPECT_TRUE(false) << errMsg;
     });

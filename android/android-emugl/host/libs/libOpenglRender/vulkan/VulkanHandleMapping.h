@@ -1,4 +1,5 @@
 // Copyright (C) 2018 The Android Open Source Project
+// Copyright (C) 2018 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,58 +14,60 @@
 // limitations under the License.
 #pragma once
 
-#include <vulkan.h>
+#include <vulkan/vulkan.h>
+
+#include "VulkanHandles.h"
+#include "VulkanDispatch.h"
+
+#include <functional>
 
 namespace goldfish_vk {
 
+class VkDecoderGlobalState;
+
 class VulkanHandleMapping {
 public:
-    VulkanHandleMapping() = default;
+    VulkanHandleMapping(VkDecoderGlobalState* state) : m_state (state) { }
+    virtual ~VulkanHandleMapping() { }
 
-    virtual void mapHandles_VkInstance(VkInstance* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkDevice(VkDevice* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkQueue(VkQueue* handles, size_t count = 1) = 0;
+#define DECLARE_HANDLE_MAP_PURE_VIRTUAL_METHOD(type) \
+    virtual void mapHandles_##type(type* handles, size_t count = 1) = 0; \
+    virtual void mapHandles_##type##_u64(const type* handles, uint64_t* handle_u64s, size_t count = 1) = 0; \
+    virtual void mapHandles_u64_##type(const uint64_t* handle_u64s, type* handles, size_t count = 1) = 0; \
 
-    virtual void mapHandles_VkSemaphore(VkSemaphore* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkCommandBuffer(VkCommandBuffer* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkDeviceMemory(VkDeviceMemory* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkBuffer(VkBuffer* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkImage(VkImage* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkShaderModule(VkShaderModule* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkPipelineLayout(VkPipelineLayout* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkRenderPass(VkRenderPass* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkPipeline(VkPipeline* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkDescriptorSetLayout(VkDescriptorSetLayout* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkSampler(VkSampler* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkDescriptorPool(VkDescriptorPool* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkImageView(VkImageView* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkDescriptorSet(VkDescriptorSet* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkBufferView(VkBufferView* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkCommandPool(VkCommandPool* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkFramebuffer(VkFramebuffer* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkPhysicalDevice(VkPhysicalDevice* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkSamplerYcbcrConversion(VkSamplerYcbcrConversion* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkFence(VkFence* handles, size_t count = 1) = 0;
-
-#ifdef VK_KHR_swapchain
-    virtual void mapHandles_VkSurfaceKHR(VkSurfaceKHR* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkSwapchainKHR(VkSwapchainKHR* handles, size_t count = 1) = 0;
-#endif
-
-#ifdef VK_KHR_display
-    virtual void mapHandles_VkDisplayKHR(VkDisplayKHR* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkDisplayModeKHR(VkDisplayModeKHR* handles, size_t count = 1) = 0;
-#endif
-
-#ifdef VK_NVX_device_generated_commands
-    virtual void mapHandles_VkObjectTableNVX(VkObjectTableNVX* handles, size_t count = 1) = 0;
-    virtual void mapHandles_VkIndirectCommandsLayoutNVX(VkIndirectCommandsLayoutNVX* handles, size_t count = 1) = 0;
-#endif
-
-#ifdef VK_EXT_validation_cache
-    virtual void mapHandles_VkValidationCacheEXT(VkValidationCacheEXT* handles, size_t count = 1) = 0;
-#endif
-
+    GOLDFISH_VK_LIST_HANDLE_TYPES(DECLARE_HANDLE_MAP_PURE_VIRTUAL_METHOD)
+protected:
+    VkDecoderGlobalState* m_state;
 };
+
+class DefaultHandleMapping : public VulkanHandleMapping {
+public:
+    DefaultHandleMapping() : VulkanHandleMapping(nullptr) { }
+    virtual ~DefaultHandleMapping() { }
+
+#define DECLARE_HANDLE_MAP_OVERRIDE(type) \
+    void mapHandles_##type(type* handles, size_t count) override; \
+    void mapHandles_##type##_u64(const type* handles, uint64_t* handle_u64s, size_t count) override; \
+    void mapHandles_u64_##type(const uint64_t* handle_u64s, type* handles, size_t count) override; \
+
+    GOLDFISH_VK_LIST_HANDLE_TYPES(DECLARE_HANDLE_MAP_OVERRIDE)
+};
+
+#define DEFINE_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DECL(type) \
+    type unbox_##type(type boxed); \
+    type unboxed_to_boxed_##type(type boxed); \
+    void delete_##type(type boxed); \
+    VulkanDispatch* dispatch_##type(type boxed); \
+
+GOLDFISH_VK_LIST_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_DISPATCHABLE_HANDLE_GLOBAL_API_DECL)
+
+#define DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_GLOBAL_API_DECL(type) \
+    type new_boxed_non_dispatchable_##type(type underlying); \
+    void delete_##type(type boxed); \
+    void delayed_delete_##type(type boxed, VkDevice device, std::function<void()> callback); \
+    type unbox_##type(type boxed); \
+    type unboxed_to_boxed_non_dispatchable_##type(type boxed); \
+
+GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HANDLE_GLOBAL_API_DECL)
 
 } // namespace goldfish_vk

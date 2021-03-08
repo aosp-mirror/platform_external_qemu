@@ -5,12 +5,13 @@
 #define RENDER_EGL_FUNCTIONS_H
 
 #include <EGL/egl.h>
+#define translator_egl_const_char const char
 #define LIST_RENDER_EGL_FUNCTIONS(X) \
   X(EGLint, eglGetError, ()) \
   X(EGLDisplay, eglGetDisplay, (EGLNativeDisplayType dpy)) \
   X(EGLBoolean, eglTerminate, (EGLDisplay dpy)) \
   X(EGLBoolean, eglInitialize, (EGLDisplay dpy, EGLint* major, EGLint* minor)) \
-  X(char*, eglQueryString, (EGLDisplay dpy, EGLint id)) \
+  X(translator_egl_const_char*, eglQueryString, (EGLDisplay dpy, EGLint id)) \
   X(EGLBoolean, eglGetConfigs, (EGLDisplay display, EGLConfig* configs, EGLint config_size, EGLint* num_config)) \
   X(EGLBoolean, eglChooseConfig, (EGLDisplay display, const EGLint* attribs, EGLConfig* configs, EGLint config_size, EGLint* num_config)) \
   X(EGLBoolean, eglGetConfigAttrib, (EGLDisplay display, EGLConfig config, EGLint attribute, EGLint* value)) \

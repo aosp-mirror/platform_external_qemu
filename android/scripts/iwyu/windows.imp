@@ -1,0 +1,18 @@
+[
+# Windows
+# Standard library
+{ include: ["<vcruntime_exception.h>", "private", "<exception>", "public" ] },
+{ include: ["<vcruntime_new.h>", "private", "<new>", "public" ] },
+{ include: ["<vcruntime_new_debug.h>", "private", "<new>", "public" ] },
+{ include: ["<vcruntime_string.h>", "private", "<cstring>", "public" ] },
+{ include: ["<vcruntime_typeinfo.h>", "private", "<typeinfo>", "public" ] },
+
+# Not yet sure what to do with specstrings.h and other SAL related headers.
+#{ include: ["<specstrings.h>", "private", "", "public" ] }
+
+# Windows libraries.
+{ include: ["\"WinBase.h\"", "private", "<Windows.h>", "public" ] },
+# WinApi documentation says you should include Windows.h for all debugging methods.
+# example https://msdn.microsoft.com/en-us/library/windows/desktop/aa363362(v=vs.85).aspx
+{ include: ["\"debugapi.h\"", "private", "<Windows.h>", "public" ] }
+]

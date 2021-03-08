@@ -14,6 +14,7 @@
 
 #include "android/avd/hw-config.h"
 #include "android/avd/util.h"
+#include "android/base/export.h"
 #include "android/utils/compiler.h"
 #include "android/utils/file_data.h"
 #include "android/utils/ini.h"
@@ -60,6 +61,7 @@ ANDROID_BEGIN_HEADER
     _AVD_IMG(KERNELRANCHU,"kernel-ranchu","kernel") \
     _AVD_IMG(KERNELRANCHU64,"kernel-ranchu-64","kernel") \
     _AVD_IMG(RAMDISK,"ramdisk.img","ramdisk") \
+    _AVD_IMG(USERRAMDISK,"ramdisk-qemu.img","user ramdisk") \
     _AVD_IMG(INITSYSTEM,"system.img","init system") \
     _AVD_IMG(INITVENDOR,"vendor.img","init vendor") \
     _AVD_IMG(INITDATA,"userdata.img","init data") \
@@ -121,6 +123,9 @@ typedef struct {
  */
 AvdInfo*  avdInfo_new( const char*  name, AvdInfoParams*  params );
 
+/* Sets a custom ID for this AVD. */
+void avdInfo_setAvdId( AvdInfo* i, const char* id );
+
 /* Update the AvdInfo hardware config from a given skin name and path */
 int avdInfo_getSkinHardwareIni( AvdInfo* i, char* skinName, char* skinDirPath);
 
@@ -147,6 +152,10 @@ void        avdInfo_free( AvdInfo*  i );
 /* Return the name of the Android Virtual Device
  */
 const char*  avdInfo_getName( const AvdInfo*  i );
+
+/* Get the device ID, which can be different from the AVD name
+ * depending on multiple instances or the specific use case. */
+const char*  avdInfo_getId( const AvdInfo*  i );
 
 /* Return the target API level for this AVD.
  * Note that this will be some ridiculously large
@@ -229,6 +238,11 @@ char*  avdInfo_getSystemImageDevicePathInGuest( const AvdInfo*  i );
 */
 char*  avdInfo_getVendorImageDevicePathInGuest( const AvdInfo*  i );
 
+/*
+  for xish: pci0000:00/0000:00:03.0
+  for armish: %s.virtio_mmio
+   */
+char*  avdInfo_getDynamicPartitionBootDevice( const AvdInfo*  i );
 
 char*  avdInfo_getDataImagePath( const AvdInfo*  i );
 char*  avdInfo_getDefaultDataImagePath( const AvdInfo*  i );
@@ -417,4 +431,31 @@ bool avdInfo_sysImgGuestRenderingBlacklisted(const AvdInfo* i);
 /* Replace the disk.dataPartition.size in avd config.ini */
 void avdInfo_replaceDataPartitionSizeInConfigIni(AvdInfo* i, int64_t sizeBytes);
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+bool avdInfo_isMarshmallowOrHigher(AvdInfo* i);
+
+AEMU_EXPORT AvdInfo* avdInfo_newCustom(
+    const char* name,
+    int apiLevel,
+    const char* abi,
+    const char* arch,
+    bool isGoogleApis,
+    AvdFlavor flavor);
+
+/* Set a custom content path. Useful for testing. */
+void avdInfo_setCustomContentPath(AvdInfo* info, const char* path);
+
+/* Set a custom core hw ini path. Useful for testing. */
+void avdInfo_setCustomCoreHwIniPath(AvdInfo* info, const char* path);
+
+void avdInfo_replaceMultiDisplayInConfigIni(AvdInfo* i, int index,
+                                            int x, int y,
+                                            int w, int h,
+                                            int dpi, int flag );
+
+/* Maximum number of supported multi display entries in an avd. */
+int avdInfo_maxMultiDisplayEntries();
+
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 ANDROID_END_HEADER

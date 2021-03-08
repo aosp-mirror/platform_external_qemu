@@ -12,17 +12,30 @@
 // This file contains the methods for the Proxy
 // tab of the Settings page
 
-#include "android/skin/qt/extended-pages/settings-page.h"
+#include <qbytearray.h>                                    // for operator==
+#include <qiodevice.h>                                     // for operator|
+#include <qstring.h>                                       // for operator+
+#include <QByteArray>                                      // for QByteArray
+#include <QCheckBox>                                       // for QCheckBox
+#include <QFile>                                           // for QFile
+#include <QLineEdit>                                       // for QLineEdit
+#include <QRadioButton>                                    // for QRadioButton
+#include <QSettings>                                       // for QSettings
+#include <QSpinBox>                                        // for QSpinBox
+#include <QString>                                         // for QString
+#include <QVariant>                                        // for QVariant
+#include <memory>                                          // for unique_ptr
+#include <string>                                          // for string
 
-#include "android/emulation/control/http_proxy_agent.h"
-#include "android/emulation/VmLock.h"
-#include "android/emulator-window.h"
-#include "android/proxy/proxy_common.h"
-#include "android/proxy/proxy_errno.h"
-#include "android/skin/qt/qt-settings.h"
-
-#include <QFile>
-#include <QSettings>
+#include "android/emulation/VmLock.h"                      // for RecursiveS...
+#include "android/emulation/control/http_proxy_agent.h"    // for QAndroidHt...
+#include "android/emulator-window.h"                       // for EmulatorWi...
+#include "android/proxy/proxy_common.h"                    // for proxy_erro...
+#include "android/proxy/proxy_errno.h"                     // for PROXY_ERR_OK
+#include "android/skin/qt/extended-pages/settings-page.h"  // for SettingsPage
+#include "android/skin/qt/qt-settings.h"                   // for HTTP_PROXY...
+#include "android/skin/qt/raised-material-button.h"        // for RaisedMate...
+#include "ui_settings-page.h"                              // for SettingsPage
 
 static QString sHttpProxyResults;
 static QString sStudioProxyString;
@@ -72,7 +85,7 @@ void SettingsPage::proxyDtor() {
     // to read it and we didn't delete it.)
 
     EmulatorWindow* const ew = emulator_window_get();
-    if (ew && ew->opts && ew->opts->studio_params) {
+    if (ew && ew->opts->studio_params) {
         QFile paramFile(ew->opts->studio_params);
         (void)paramFile.remove();
     }
@@ -192,7 +205,7 @@ static void sendProxySettingsToAgent(QString password) {
     }
 
     EmulatorWindow* const ew = emulator_window_get();
-    if (ew && ew->opts && ew->opts->http_proxy) {
+    if (ew && ew->opts->http_proxy) {
         // There is HTTP proxy information on the command line.
         // This takes precendence over the UI, and the back end
         // is already using these settings.
@@ -205,7 +218,12 @@ static void sendProxySettingsToAgent(QString password) {
     QString proxyString;
 
     QSettings settings;
+
     bool useStudio = settings.value(Ui::Settings::HTTP_PROXY_USE_STUDIO, true).toBool();
+    // When in embedded mode, always use proxy setting from Studio.
+    if (android_cmdLineOptions->qt_hide_window) {
+        useStudio = true;
+    }
     bool proxyAuth = settings.value(Ui::Settings::HTTP_PROXY_AUTHENTICATION, false).toBool();
     enum Ui::Settings::HTTP_PROXY_TYPE proxyType =
             (enum Ui::Settings::HTTP_PROXY_TYPE)settings.value(
@@ -232,6 +250,7 @@ static void sendProxySettingsToAgent(QString password) {
         // Should never get here. Default to "no proxy."
         proxyString = "";
     }
+
     // Send the proxy selection to the agent
     int proxyResultCode = sHttpProxyAgent->httpProxySet(proxyString.toStdString().c_str());
 
@@ -258,7 +277,7 @@ void SettingsPage::disableProxyApply() {
 
 static void getStudioProxyString() {
     EmulatorWindow* const ew = emulator_window_get();
-    if (!ew || !ew->opts || !ew->opts->studio_params) {
+    if (!ew || !ew->opts->studio_params) {
         // No file to read
         return;
     }

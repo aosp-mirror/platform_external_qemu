@@ -15,11 +15,12 @@
 */
 
 #include "emugl/common/logging.h"
+namespace emugl {
 
 void default_logger(const char* fmt, ...) { }
 
-emugl_logger_t emugl_logger = default_logger;
-emugl_logger_t emugl_cxt_logger = default_logger;
+EMUGL_COMMON_API emugl_logger_t emugl_logger = default_logger;
+EMUGL_COMMON_API emugl_logger_t emugl_cxt_logger = default_logger;
 
 void set_emugl_logger(emugl_logger_t f) {
     if (!f) {
@@ -36,3 +37,5 @@ void set_emugl_cxt_logger(emugl_logger_t f) {
         emugl_cxt_logger = f;
     }
 }
+
+}  // namespace emugl

@@ -15,7 +15,9 @@
 #include "android/utils/compiler.h"
 
 #define  LCD_DENSITY_LDPI      120
+#define  LCD_DENSITY_140       140
 #define  LCD_DENSITY_MDPI      160
+#define  LCD_DENSITY_180       180
 #define  LCD_DENSITY_TVDPI     213
 #define  LCD_DENSITY_HDPI      240
 #define  LCD_DENSITY_260DPI    260
@@ -26,6 +28,7 @@
 #define  LCD_DENSITY_360DPI    360
 #define  LCD_DENSITY_400DPI    400
 #define  LCD_DENSITY_420DPI    420
+#define  LCD_DENSITY_440DPI    440
 #define  LCD_DENSITY_XXHDPI    480
 #define  LCD_DENSITY_560DPI    560
 #define  LCD_DENSITY_XXXHDPI   640

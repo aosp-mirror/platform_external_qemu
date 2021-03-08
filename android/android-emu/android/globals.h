@@ -12,9 +12,14 @@
 
 #pragma once
 
-#include "android/constants.h"
-#include "android/avd/info.h"
 #include "android/avd/hw-config.h"
+#include "android/avd/info.h"
+#include "android/base/export.h"
+#include "android/constants.h"
+#include "android/user-config.h"
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
 
 /* this structure is setup when loading the virtual device
  * after that, you can read the 'flags' field to determine
@@ -28,8 +33,14 @@ extern AvdInfoParams     android_avdParams[1];
  */
 extern AvdInfo*          android_avdInfo;
 
+/* MSVC only exports function pointers */
+extern AEMU_EXPORT AvdInfo** aemu_get_android_avdInfoPtr();
+
 /* the hardware configuration for this specific virtual device */
 extern AndroidHwConfig   android_hw[1];
+
+/* MSVC only exports function pointers */
+AEMU_EXPORT AndroidHwConfig* aemu_get_android_hw();
 
 /* this is to support snapshot (currently only qemu1+software-renderer) */
 extern const char* savevm_on_exit;
@@ -40,8 +51,44 @@ extern int guest_data_partition_mounted;
 /* this indicates that guest has boot completed */
 extern int guest_boot_completed;
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 extern int android_snapshot_update_timer;
 
 /* are we using qemu 2? */
 /* remove this flag once we deprecate qemu1 on both dev and release branches. */
 extern int engine_supports_snapshot;
+=======
+extern int arm_snapshot_save_completed;
+
+extern int host_emulator_is_headless;
+
+/* are we using the emulator in the android mode or plain qemu? */
+extern int android_qemu_mode;
+
+/* are we using android-emu libraries for a minimal configuration? */
+extern int min_config_qemu_mode;
+
+/* is android-emu running Fuchsia? */
+extern int is_fuchsia;
+
+extern int android_snapshot_update_timer;
+
+/* are we using qemu 2? */
+/* remove this flag once we deprecate qemu1 on both dev and release branches. */
+extern int engine_supports_snapshot;
+
+/* are we changing the language, country, or locale? */
+extern int changing_language_country_locale;
+extern const char* to_set_language;
+extern const char* to_set_country;
+extern const char* to_set_locale;
+
+/* True if we are using keycode forwarding instead of translating text value to
+ * keycode */
+/* on emulator host. */
+extern int use_keycode_forwarding;
+
+extern AEMU_EXPORT AUserConfig* aemu_get_userConfigPtr();
+
+ANDROID_END_HEADER
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)

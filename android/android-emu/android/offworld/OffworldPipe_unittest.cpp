@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "android/offworld/OffworldPipe.h"
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 #include "android/automation/AutomationController.h"
 #include "android/base/ArraySize.h"
 #include "android/base/files/MemStream.h"
@@ -35,24 +36,64 @@
 #include "android/snapshot/SnapshotAPI.h"
 #include "android/snapshot/interface.h"
 #include "android/utils/looper.h"
+=======
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include <android/console.h>                                    // for getCo...
+#include <gmock/gmock.h>                                        // for Anyth...
+#include <gtest/gtest.h>                                        // for Message
+#include <stddef.h>                                             // for size_t
+#include <cstdint>                                              // for uint8_t
+#include <functional>                                           // for __base
+#include <memory>                                               // for uniqu...
+#include <string>                                               // for string
+#include <type_traits>                                          // for decay...
+#include <utility>                                              // for move
+#include <vector>                                               // for vector
 
-#include <atomic>
-#include <chrono>
-#include <condition_variable>
-#include <deque>
-#include <mutex>
-#include <thread>
+#include "android/automation/AutomationController.h"            // for Autom...
+#include "android/base/Log.h"                                   // for android
+#include "android/base/Result.h"                                // for Result
+#include "android/base/async/Looper.h"                          // for Looper
+#include "android/base/files/MemStream.h"                       // for MemSt...
+#include "android/base/testing/MockUtils.h"                     // for repla...
+#include "android/base/testing/ProtobufMatchers.h"              // for Equal...
+#include "android/base/testing/ResultMatchers.h"                // for IsOk
+#include "android/base/testing/TestEvent.h"                     // for TestE...
+#include "android/base/testing/TestLooper.h"                    // for TestL...
+#include "android/emulation/AndroidAsyncMessagePipe.h"          // for Async...
+#include "android/emulation/AndroidPipe.h"                      // for Andro...
+#include "android/emulation/VmLock.h"                           // for Recur...
+#include "android/emulation/android_pipe_common.h"              // for PIPE_...
+#include "android/emulation/control/callbacks.h"                // for LineC...
+#include "android/emulation/hostdevices/HostGoldfishPipe.h"     // for HostG...
+#include "android/emulation/testing/MockAndroidVmOperations.h"  // for MockA...
+#include "android/emulation/testing/TestVmLock.h"               // for TestV...
+#include "android/globals.h"                                    // for engin...
+#include "android/opengl/emugl_config.h"                        // for emugl...
+#include "android/physics/PhysicalModel.h"                      // for physi...
+#include "android/physics/Physics.h"                            // for PARAM...
+#include "android/skin/winsys.h"                                // for WINSY...
+#include "android/snapshot/SnapshotAPI.h"                       // for onOff...
+#include "android/snapshot/interface.h"                         // for andro...
+#include "android/utils/looper.h"                               // for andro...
+#include "android/videoinjection/VideoInjectionController.h"    // for Video...
+#include "google/protobuf/message.h"                            // for Message
+#include "google/protobuf/text_format.h"                        // for TextF...
+#include "offworld.pb.h"                                        // for Response
 
-extern const QAndroidVmOperations* const gQAndroidVmOperations;
-extern const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
+namespace android {
+namespace base {
+class Stream;
+}  // namespace base
+}  // namespace android
+
 
 using namespace android;
 using namespace android::offworld;
 using namespace android::base;
 using android::automation::AutomationController;
+using android::videoinjection::VideoInjectionController;
 
 using android::EqualsProto;
 using android::proto::Partially;
@@ -91,13 +132,16 @@ protected:
         mPhysicalModel.reset(physicalModel_new());
         mAutomationController = AutomationController::createForTest(
                 mPhysicalModel.get(), mLooper.get(), sendResponse);
+        mVideoInjectionController = VideoInjectionController::createForTest(
+                sendResponse);
 
-        registerOffworldPipeServiceForTest(mAutomationController.get());
+        registerOffworldPipeServiceForTest(
+            mAutomationController.get(), mVideoInjectionController.get());
 
         EmuglConfig config;
         EXPECT_TRUE(emuglConfig_init(&config, true, "host", "off", 0, false,
                                      false, false,
-                                     WINSYS_GLESBACKEND_PREFERENCE_AUTO));
+                                     WINSYS_GLESBACKEND_PREFERENCE_AUTO, false));
     }
 
     void TearDown() override {
@@ -116,13 +160,14 @@ protected:
         AndroidPipe::initThreading(TestVmLock::getInstance());
         android_registerMainLooper(nullptr);
         mAutomationController.reset();
+        mVideoInjectionController.reset();
         mPhysicalModel.reset();
         mLooper.reset();
     }
 
     // Returns pipe pointer.
-    void* openAndConnectOffworld() {
-        void* pipe = mDevice->connect("OffworldPipe");
+    int openAndConnectOffworld() {
+        int pipe = mDevice->connect("OffworldPipe");
 
         pb::ConnectHandshake connect;
         connect.set_version(android::offworld::kProtocolVersion);
@@ -135,7 +180,7 @@ protected:
         return pipe;
     }
 
-    void writeMessage(void* pipe, const google::protobuf::Message& message) {
+    void writeMessage(int pipe, const google::protobuf::Message& message) {
         const int size = message.ByteSize();
         std::vector<uint8_t> data(static_cast<size_t>(size));
         EXPECT_TRUE(message.SerializeToArray(data.data(), size));
@@ -147,7 +192,7 @@ protected:
         EXPECT_THAT(mDevice->write(pipe, data), IsOk());
     }
 
-    void writeRequest(void* pipe, const std::string& request) {
+    void writeRequest(int pipe, const std::string& request) {
         pb::Request requestMessage;
         ASSERT_TRUE(google::protobuf::TextFormat::ParseFromString(
                 request, &requestMessage));
@@ -155,7 +200,7 @@ protected:
     }
 
     template <typename T>
-    T readMessage(void* pipe) {
+    T readMessage(int pipe) {
         uint32_t responseSize = 0;
         EXPECT_EQ(sizeof(uint32_t),
                   mDevice->read(pipe, &responseSize, sizeof(uint32_t)));
@@ -178,7 +223,7 @@ protected:
     }
 
     template <typename T>
-    T readMessageBlocking(void* pipe) {
+    T readMessageBlocking(int pipe) {
         const base::Looper::Duration deadline = mLooper->nowMs() + kTimeoutMs;
 
         // Since these unittests never expect long-running operations, run in
@@ -205,6 +250,7 @@ protected:
         event.wait();
     }
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     void snapshotSave(void* pipe, base::Stream* stream) {
         RecursiveScopedVmLock lock;
         auto cStream = reinterpret_cast<::Stream*>(stream);
@@ -224,6 +270,21 @@ protected:
     }
 
     void createCheckpoint(void* pipe,
+=======
+    void snapshotSave(int pipe, base::Stream* stream) {
+        RecursiveScopedVmLock lock;
+        mDevice->saveSnapshot(stream, pipe);
+    }
+
+    int snapshotLoad(base::Stream* stream) {
+        RecursiveScopedVmLock lock;
+        int pipe = mDevice->loadSnapshotSinglePipe(stream);
+        EXPECT_GE(pipe, 0);
+        return pipe;
+    }
+
+    void createCheckpoint(int pipe,
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
                           const char* snapshotName,
                           base::Stream* stream) {
         MockAndroidVmOperations mock;
@@ -231,8 +292,8 @@ protected:
                 replaceMock(&MockAndroidVmOperations::mock, &mock);
 
         EXPECT_CALL(mock, setSnapshotCallbacks(_, _)).Times(1);
-        androidSnapshot_initialize(gQAndroidVmOperations,
-                                   gQAndroidEmulatorWindowAgent);
+        androidSnapshot_initialize(getConsoleAgents()->vm,
+                                  getConsoleAgents()->emu);
         Mock::VerifyAndClearExpectations(&mock);
 
         EXPECT_CALL(mock, vmStop()).Times(1);
@@ -255,7 +316,7 @@ protected:
         EXPECT_EQ(response.result(), pb::Response::RESULT_NO_ERROR);
     }
 
-    void gotoCheckpoint(void* pipe,
+    void gotoCheckpoint(int pipe,
                         const char* snapshotName,
                         base::Stream* stream) {
         MockAndroidVmOperations mock;
@@ -301,10 +362,11 @@ protected:
     std::unique_ptr<TestLooper> mLooper;
     PhysicalModelPtr mPhysicalModel;
     std::unique_ptr<AutomationController> mAutomationController;
+    std::unique_ptr<VideoInjectionController> mVideoInjectionController;
 };
 
 TEST_F(OffworldPipeTest, Connect) {
-    void* pipe = mDevice->connect("OffworldPipe");
+    int pipe = mDevice->connect("OffworldPipe");
 
     pb::ConnectHandshake connect;
     connect.set_version(android::offworld::kProtocolVersion);
@@ -320,7 +382,11 @@ TEST_F(OffworldPipeTest, Connect) {
 TEST_F(OffworldPipeTest, ConnectSnapshotBeforeHandshake) {
     base::MemStream snapshotStream;
     {
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
         void* pipe = mDevice->connect("OffworldPipe");
+=======
+        int pipe = mDevice->connect("OffworldPipe");
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
         snapshotSave(pipe, &snapshotStream);
         mDevice->close(pipe);
     }
@@ -339,7 +405,7 @@ TEST_F(OffworldPipeTest, ConnectSnapshotBeforeHandshake) {
 }
 
 TEST_F(OffworldPipeTest, ConnectionFailure) {
-    void* pipe = mDevice->connect("OffworldPipe");
+    int pipe = mDevice->connect("OffworldPipe");
 
     TestEvent receivedClose;
     mDevice->setWakeCallback(pipe, [&](int wakes) {
@@ -364,7 +430,7 @@ TEST_F(OffworldPipeTest, ConnectionFailure) {
 }
 
 TEST_F(OffworldPipeTest, Snapshot) {
-    void* pipe = openAndConnectOffworld();
+    int pipe = openAndConnectOffworld();
 
     MemStream stream;
     createCheckpoint(pipe, "TestSnapshot", &stream);
@@ -374,8 +440,8 @@ TEST_F(OffworldPipeTest, Snapshot) {
 }
 
 TEST_F(OffworldPipeTest, SnapshotMultiPipe) {
-    void* commandPipe = openAndConnectOffworld();
-    void* otherPipe = openAndConnectOffworld();
+    int commandPipe = openAndConnectOffworld();
+    int otherPipe = openAndConnectOffworld();
 
     MemStream stream;
     createCheckpoint(commandPipe, "TestSnapshot", &stream);
@@ -391,7 +457,7 @@ TEST_F(OffworldPipeTest, SnapshotMultiPipe) {
 // TODO(jwmcglynn): Add test coverage for fork API.
 
 TEST_F(OffworldPipeTest, AutomationListen) {
-    void* pipe = openAndConnectOffworld();
+    int pipe = openAndConnectOffworld();
 
     writeRequest(pipe, "automation { listen {} }");
 
@@ -422,7 +488,7 @@ TEST_F(OffworldPipeTest, AutomationListen) {
 }
 
 TEST_F(OffworldPipeTest, AutomationListenBlocksMultiple) {
-    void* pipe = openAndConnectOffworld();
+    int pipe = openAndConnectOffworld();
 
     writeRequest(pipe, "automation { listen {} }");
 
@@ -440,7 +506,7 @@ TEST_F(OffworldPipeTest, AutomationListenBlocksMultiple) {
 }
 
 TEST_F(OffworldPipeTest, AutomationListenPipeClose) {
-    void* pipe = openAndConnectOffworld();
+    int pipe = openAndConnectOffworld();
 
     writeRequest(pipe, "automation { listen {} }");
 
@@ -450,7 +516,7 @@ TEST_F(OffworldPipeTest, AutomationListenPipeClose) {
                                   "automation { listen {} }")));
     mDevice->close(pipe);
 
-    void* secondPipe = openAndConnectOffworld();
+    int secondPipe = openAndConnectOffworld();
     writeRequest(secondPipe, "automation { listen {} }");
 
     EXPECT_THAT(
@@ -461,6 +527,7 @@ TEST_F(OffworldPipeTest, AutomationListenPipeClose) {
 }
 
 TEST_F(OffworldPipeTest, AutomationReplay) {
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     void* pipe = openAndConnectOffworld();
     const vec3 kPosition1 = {0.5f, 10.0f, 0.0f};
     const uint64_t kFutureTime = secondsToNs(10.0f);
@@ -518,4 +585,103 @@ TEST_F(OffworldPipeTest, AutomationAsyncIdSnapshot) {
                 EqualsProto("result: RESULT_NO_ERROR pending_async_id: 2"));
 
     mDevice->close(restoredPipe);
+=======
+    int pipe = openAndConnectOffworld();
+    const vec3 kPosition1 = {0.5f, 10.0f, 0.0f};
+    const uint64_t kFutureTime = secondsToNs(10.0f);
+
+    writeRequest(pipe,
+                 "automation { replay { event: 'delay: 123 "
+                 "physical_model { type: POSITION target_value { "
+                 "data: [0.5, 10, 0] } } ' } }");
+
+    EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+                EqualsProto("result: RESULT_NO_ERROR pending_async_id: 1"));
+
+    // Advance the time so that the event completes.
+    mLooper->setVirtualTimeNs(kFutureTime);
+    EXPECT_EQ(mAutomationController->advanceTime(), kFutureTime);
+
+    EXPECT_THAT(
+            readMessageBlocking<pb::Response>(pipe),
+            Partially(EqualsProto("result: RESULT_NO_ERROR async { async_id: 1 "
+                                  "complete: true automation { "
+                                  "replay_complete {} } }")));
+
+    EXPECT_EQ(physicalModel_getParameterPosition(mPhysicalModel.get(),
+                                                 PARAMETER_VALUE_TYPE_TARGET),
+              kPosition1);
+
+    mDevice->close(pipe);
+}
+
+TEST_F(OffworldPipeTest, AutomationAsyncIdSnapshot) {
+    base::MemStream snapshotStream;
+    {
+        int pipe = openAndConnectOffworld();
+
+        writeRequest(pipe,
+                     "automation { replay { event: 'delay: 123 "
+                     "physical_model { type: POSITION target_value { "
+                     "data: [0.5, 10, 0] } } ' } }");
+
+        EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+                    EqualsProto("result: RESULT_NO_ERROR pending_async_id: 1"));
+
+        snapshotSave(pipe, &snapshotStream);
+        mDevice->close(pipe);
+    }
+
+    auto restoredPipe = snapshotLoad(&snapshotStream);
+
+    writeRequest(restoredPipe,
+                 "automation { replay { event: 'delay: 123 "
+                 "physical_model { type: POSITION target_value { "
+                 "data: [0.5, 10, 0] } } ' } }");
+
+    EXPECT_THAT(readMessageBlocking<pb::Response>(restoredPipe),
+                EqualsProto("result: RESULT_NO_ERROR pending_async_id: 2"));
+
+    mDevice->close(restoredPipe);
+}
+
+TEST_F(OffworldPipeTest, VideoInjection) {
+    int pipe = openAndConnectOffworld();
+
+    writeRequest(
+        pipe,
+        "video_injection { display_default_frame {} } ");
+
+    EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+                Partially(EqualsProto(
+                    "result: RESULT_NO_ERROR pending_async_id: 1")));
+
+    writeRequest(
+        pipe,
+        "video_injection { display_default_frame {} }");
+
+    EXPECT_THAT(
+            readMessageBlocking<pb::Response>(pipe),
+            Partially(EqualsProto("result: RESULT_NO_ERROR pending_async_id: 2 "
+                                  "video_injection {sequence_id: 0}")));
+
+    writeRequest(
+        pipe,
+        "video_injection {sequence_id: 100 display_default_frame {} }");
+
+    EXPECT_THAT(
+            readMessageBlocking<pb::Response>(pipe),
+            Partially(EqualsProto("result: RESULT_NO_ERROR pending_async_id: 3 "
+                                  "video_injection {sequence_id: 100}")));
+
+    writeRequest(
+        pipe,
+        "video_injection { }");
+
+    EXPECT_THAT(readMessageBlocking<pb::Response>(pipe),
+                Partially(EqualsProto("result: RESULT_ERROR_UNKNOWN "
+                                      "error_string: \"Invalid request\"")));
+
+    mDevice->close(pipe);
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 }

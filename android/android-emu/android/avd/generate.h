@@ -36,6 +36,7 @@ struct AvdGenerateInfo {
     const char* hwAccelerometer; // hw.accelerometer=yes
     const char* hwArc; // hw.arc=false
     const char* hwAudioInput; // hw.audioInput=yes
+    const char* hwAudioOutput; // hw.audioOutput=yes
     const char* hwBattery; // hw.battery=yes
     const char* hwCameraBack; // hw.camera.back=virtualscene
     const char* hwCameraFront; // hw.camera.front=emulated

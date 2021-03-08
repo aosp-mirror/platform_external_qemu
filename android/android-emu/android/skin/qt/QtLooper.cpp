@@ -11,13 +11,23 @@
 
 #include "android/skin/qt/QtLooper.h"
 
-#include "android/skin/qt/QtLooperImpl.h"
+#include <qglobal.h>                           // for Q_ASSERT_X
+#include <qloggingcategory.h>                  // for qCWarning, qCDebug
+#include <errno.h>                             // for ENOSYS, errno
+#include <QTime>                               // for QTime
+#include <utility>                             // for move
 
-#include <QTime>
-
-#include <errno.h>
+#include "android/base/Compiler.h"             // for DISALLOW_COPY_AND_ASSIGN
+#include "android/base/StringView.h"           // for StringView
+#include "android/base/async/Looper.h"         // for Looper::ClockType, Looper
+#include "android/skin/qt/QtLooperImpl.h"      // for TimerImpl, TaskImpl
+#include "android/skin/qt/logging-category.h"  // for emu
 
 namespace android {
+namespace base {
+class Stream;
+}  // namespace base
+
 namespace qt {
 namespace internal {
 
@@ -74,11 +84,11 @@ public:
         virtual bool isActive() const { return mTimer.isActive(); }
 
         virtual void save(android::base::Stream* stream) const {
-            qDebug("QtLooper::Timer does not support serialization. Skipped.");
+            qCDebug(emu, "QtLooper::Timer does not support serialization. Skipped.");
         }
 
         virtual void load(android::base::Stream* stream) {
-            qDebug("QtLooper::Timer does not support deserialization. "
+            qCDebug(emu, "QtLooper::Timer does not support deserialization. "
                    "Skipped.");
         }
 
@@ -137,27 +147,27 @@ public:
     }
 
     virtual DurationNs nowNs(ClockType clockType) override {
-        qWarning("QtLooper::nowNs is not supported. Defaulting to nowMs.");
+        qCWarning(emu, "QtLooper::nowNs is not supported. Defaulting to nowMs.");
         return nowMs(clockType);
     }
 
     virtual int runWithDeadlineMs(Duration deadline_ms) override {
-        qWarning("User cannot call |run*| on a QtLooper event loop");
+        qCWarning(emu, "User cannot call |run*| on a QtLooper event loop");
         errno = ENOSYS;
         return -1;
     }
 
     virtual void forceQuit() override {
-        qWarning("User cannot call |forceQuit| on a QtLooper event loop");
+        qCWarning(emu, "User cannot call |forceQuit| on a QtLooper event loop");
     }
 
 protected:
     ClockType validateClockType(ClockType clock) {
         if (clock != ClockType::kHost) {
-            qWarning(
-                    "QtLooper::Timer does not support %s."
-                    "Defaulting to  ClockType::kHost.",
-                    Looper::clockTypeToString(clock));
+            qCWarning(emu,
+                      "QtLooper::Timer does not support %s."
+                      "Defaulting to  ClockType::kHost.",
+                      Looper::clockTypeToString(clock));
         }
         return ClockType::kHost;
     }

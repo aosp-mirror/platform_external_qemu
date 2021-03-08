@@ -11,12 +11,28 @@
 
 #pragma once
 
-#include "android/skin/qt/shortcut-key-store.h"
-#include "android/skin/qt/qt-ui-commands.h"
+#include <qobjectdefs.h>                     // for Q_OBJECT, slots, signals
+#include <QObject>                           // for QObject
+#include <QString>                           // for QString
+#include <QWidget>                           // for QWidget
+#include <memory>                            // for unique_ptr
 
-#include "ui_help-page.h"
-#include <QWidget>
-#include <memory>
+#include "android/avd/BugreportInfo.h"       // for BugreportInfo
+#include "android/skin/qt/qt-ui-commands.h"  // for QtUICommand
+#include "ui_help-page.h"                    // for HelpPage
+
+
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
+class QObject;
+class QString;
+class QWidget;
+template <class CommandType> class ShortcutKeyStore;
 
 
 class HelpPage : public QWidget
@@ -34,8 +50,11 @@ private slots:
 private:
     void initializeLicenseText();
     void initializeKeyboardShortcutList(const ShortcutKeyStore<QtUICommand>* key_store);
+    void disableForEmbeddedEmulator();
 
     std::unique_ptr<Ui::HelpPage> mUi;
+    std::shared_ptr<UiEventTracker> mHelpTracker;
+    android::avd::BugreportInfo mBugreportInfo;
 };
 
 class LatestVersionLoadTask : public QObject {

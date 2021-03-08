@@ -82,17 +82,28 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
     mUi->icon->setPixmap(icon);
 
     crashservice->processCrash();
-    auto suggestions = crashservice->getSuggestions().suggestions;
+
+    const auto& suggestions = crashservice->getSuggestions().suggestions;
+    const auto& stringSuggestions = crashservice->getSuggestions().stringSuggestions;
+
     bool haveGfxFailure = false;
-    if (!suggestions.empty()) {
+
+    if (suggestions.empty() && stringSuggestions.empty()) {
+        mUi->suggestions->hide();
+    } else {
+
+        for (const auto suggestString : stringSuggestions) {
+            addSuggestion(tr(suggestString));
+        }
+
         if (suggestions.find(
                     android::crashreport::Suggestion::UpdateGfxDrivers) !=
             suggestions.end()) {
             haveGfxFailure = true;
             addSuggestion(
-                    tr("It appears that your computer's OpenGL graphics driver "
+                    tr("It appears that your computer's graphics driver "
                        "crashed. This was probably caused by a bug in the "
-                       "driver or by a bug in your app's OpenGL code.\n\n"
+                       "driver or by a bug in your app's graphics code.\n\n"
                        "You should check your manufacturer's website for an "
                        "updated graphics driver.\n\n"
                        "You can also tell the Emulator to use software "
@@ -105,8 +116,6 @@ ConfirmDialog::ConfirmDialog(QWidget* parent,
                        "to \"Swiftshader.\""
                        ));
         }
-    } else {
-        mUi->suggestions->hide();
     }
 
     if (!haveGfxFailure) {
@@ -310,7 +319,7 @@ QString ConfirmDialog::constructDumpMessage() const {
     } else {
         dumpMessage = tr("<p>Android Emulator closed because of an internal "
                          "error:</p>") +
-                      "<p>" + dumpMessage + "</p>";
+                      "<p>" + dumpMessage.replace("\n", "<br/>") + "</p>";
     }
     dumpMessage +=
             tr("<p>Do you want to send a crash report about the problem?</p>");

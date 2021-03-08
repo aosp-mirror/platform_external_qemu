@@ -67,6 +67,7 @@ CFG_PARAM( sysdir,  "<dir>",  "search for system disk images in <dir>" )
 CFG_PARAM( system,  "<file>", "read initial system image from <file>" )
 CFG_PARAM( vendor,  "<file>", "read initial vendor image from <file>" )
 CFG_FLAG ( writable_system, "make system & vendor image writable after 'adb remount'" )
+CFG_FLAG ( delay_adb, "delay adb communication till boot completes" )
 CFG_PARAM( datadir, "<dir>",  "write user data into <dir>" )
 CFG_PARAM( kernel,  "<file>", "use specific emulated kernel" )
 CFG_PARAM( ramdisk, "<file>", "ramdisk image (default <system>/ramdisk.img" )
@@ -82,6 +83,8 @@ CFG_FLAG ( no_cache, "disable the cache partition" )
 CFG_FLAG ( nocache,  "same as -no-cache" )
 OPT_PARAM( sdcard, "<file>", "SD card image (default <datadir>/sdcard.img")
 CFG_PARAM( quit_after_boot, "<timeout>", "qeuit emulator after guest boots completely, or after timeout in seconds" )
+CFG_PARAM( qemu_top_dir, "<dir>", "Use the emulator in the specified dir (relative or absolute path)" )
+CFG_PARAM( monitor_adb, "<verbose_level>", "monitor the adb messages between guest and host, default not" )
 OPT_PARAM( snapstorage,    "<file>", "file that contains all state snapshots (default <datadir>/snapshots.img)")
 OPT_FLAG ( no_snapstorage, "do not mount a snapshot storage file (this disables all snapshot functionality)" )
 OPT_PARAM( snapshot,       "<name>", "name of snapshot within storage file for auto-start and auto-save (default 'default-boot')" )
@@ -92,12 +95,14 @@ OPT_FLAG ( snapshot_list,  "show a list of available snapshots" )
 OPT_FLAG ( no_snapshot_update_time, "do not try to correct snapshot time on restore" )
 OPT_FLAG ( wipe_data, "reset the user data image (copy it from initdata)" )
 CFG_PARAM( avd, "<name>", "use a specific android virtual device" )
+CFG_PARAM( avd_arch, "<target>", "use a specific target architecture" )
 CFG_PARAM( skindir, "<dir>", "search skins in <dir> (default <system>/skins)" )
 CFG_PARAM( skin, "<name>", "select a given skin" )
 CFG_FLAG ( no_skin, "deprecated: create an AVD with no skin instead" )
 CFG_FLAG ( noskin, "same as -no-skin" )
 CFG_PARAM( memory, "<size>", "physical RAM size in MBs" )
 OPT_PARAM( ui_only, "<UI feature>", "run only the UI feature requested")
+CFG_PARAM( id, "<name>", "assign an id to this virtual device (separate from the avd name)")
 
 OPT_PARAM( cores, "<number>", "Set number of CPU cores to emulator" )
 OPT_PARAM( accel, "<mode>", "Configure emulation acceleration" )
@@ -119,6 +124,8 @@ OPT_PARAM( logcat, "<tags>", "enable logcat output with given tags" )
 #ifdef __linux__
 OPT_FLAG ( use_system_libs, "Use system libstdc++ instead of bundled one" )
 OPT_PARAM( bluetooth, "<vendorid:productid>", "forward bluetooth to vendorid:productid" )
+CFG_PARAM( stdouterr_file, "<file-name>", "redirect stdout/stderr to a specific file" )
+OPT_FLAG ( no_qt, "disable qt windowing system" )
 #endif  // __linux__
 
 OPT_FLAG ( no_audio, "disable audio support" )
@@ -140,6 +147,9 @@ OPT_PARAM( wifi_client_port, "<port>", "connect to other emulator for WiFi forwa
 OPT_PARAM( wifi_server_port, "<port>", "listen to other emulator for WiFi forwarding" )
 OPT_PARAM( http_proxy, "<proxy>", "make TCP connections through a HTTP/HTTPS proxy" )
 OPT_PARAM( timezone, "<timezone>", "use this timezone instead of the host's default" )
+OPT_PARAM( change_language, "<language>", "use this language instead of the current one. Restarts the framework." )
+OPT_PARAM( change_country, "<country>", "use this country instead of the current one. Restarts the framework." )
+OPT_PARAM( change_locale, "<locale>", "use this locale instead of the current one. Restarts the framework." )
 OPT_PARAM( dns_server, "<servers>", "use this DNS server(s) in the emulated system" )
 OPT_PARAM( net_tap, "<interface>", "use this TAP interface for networking" )
 OPT_PARAM( net_tap_script_up, "<script>", "script to run when the TAP interface goes up" )
@@ -148,10 +158,12 @@ OPT_PARAM( cpu_delay, "<cpudelay>", "throttle CPU emulation" )
 OPT_FLAG ( no_boot_anim, "disable animation for faster boot" )
 
 OPT_FLAG( no_window, "disable graphical window display" )
+OPT_FLAG( qt_hide_window, "Start QT window but hide window display")
 OPT_FLAG( no_sim, "device has no SIM card" )
 OPT_FLAG( lowram, "device is a low ram device" )
 OPT_FLAG( version, "display emulator version number" )
 OPT_FLAG( no_passive_gps, "disable passive gps updates" )
+OPT_FLAG( virtio_console, "using virtio console as console")
 OPT_FLAG( read_only, "allow running multiple instances of emulators on the same"
         " AVD, but cannot save snapshot.")
 OPT_PARAM( is_restart, "<restart-pid>", "specifies that this emulator was a restart, and to wait out <restart-pid> before proceeding")
@@ -176,6 +188,7 @@ OPT_PARAM( nand_limits, "<nlimits>", "enforce NAND/Flash read/write thresholds" 
 #endif
 
 OPT_PARAM( gpu, "<mode>", "set hardware OpenGLES emulation mode" )
+OPT_FLAG( use_host_vulkan, "use host for vulkan emulation regardless of 'gpu' mode")
 
 OPT_PARAM( camera_back, "<mode>", "set emulation mode for a camera facing back" )
 OPT_PARAM( camera_front, "<mode>", "set emulation mode for a camera facing front" )
@@ -199,6 +212,7 @@ OPT_FLAG(wait_for_debugger, "Pause on launch and wait for a debugger process to 
 OPT_FLAG(skip_adb_auth, "Skip adb authentication dialogue")
 
 OPT_FLAG(metrics_to_console, "Enable usage metrics and print the messages to stdout")
+OPT_FLAG(metrics_collection, "Enable usage metrics and send them to google play")
 OPT_PARAM(metrics_to_file, "<file>", "Enable usage metrics and write the messages into specified file")
 OPT_FLAG(detect_image_hang, "Enable the detection of system image hangs.")
 
@@ -208,6 +222,56 @@ OPT_PARAM(sim_access_rules_file, "<file>", "Use SIM access rules from specified 
 OPT_PARAM(phone_number, "<phone_number>", "Sets the phone number of the emulated device")
 
 CFG_PARAM(acpi_config, "<file>", "specify acpi device proprerties (hierarchical key=value pair)")
+
+OPT_FLAG(fuchsia, "Run Fuchsia image. Bypasses android-specific setup; args after are treated as standard QEMU args")
+
+OPT_PARAM(window_size, "<size>", "Set window size for when bypassing android-specific setup.")
+
+OPT_FLAG(allow_host_audio, "Allows sending of audio from audio input devices. Otherwise, zeroes out audio.")
+
+OPT_FLAG(restart_when_stalled, "Allows restarting guest when it is stalled.")
+
+OPT_PARAM(perf_stat, "<file>", "Run periodic perf stat reporter in the background and write output to specified file.")
+
+OPT_FLAG(share_vid, "Share current video state in shared memory region.")
+
+OPT_PARAM(grpc, "<port>", "TCP ports used for the gRPC bridge." )
+OPT_PARAM(grpc_tls_key, "<pem>", "File with the private key used to enable gRPC TLS.")
+OPT_PARAM(grpc_tls_cer, "<pem>", "File with the public X509 certificate used to enable gRPC TLS.")
+OPT_PARAM(grpc_tls_ca, "<pem>", "File with the Certificate Authorities used to validate client certificates.")
+OPT_FLAG(grpc_use_token, "Use the emulator console token for gRPC authentication.")
+OPT_PARAM(idle_grpc_timeout, "<timeout>", "Terminate the emulator if there is no gRPC activity within <timeout> seconds.")
+OPT_PARAM(waterfall, "<mode>", "Mode in which to run waterfall.")
+
+#ifdef ANDROID_WEBRTC
+OPT_PARAM(turncfg, "cmd", "Command to execute to obtain turn configuration for the webrtc video bridge.")
+OPT_PARAM(rtcfps, "<fps>", "The frequency at which frames are delivered to webrtc video bridge.")
+#endif
+
+OPT_PARAM(multidisplay, "index width height dpi flag", "config multiple displays.")
+
+OPT_PARAM(google_maps_key, "<API key>", "API key to use with the Google Maps GUI.")
+
+OPT_FLAG(no_location_ui, "Disable the location UI in the extended window.")
+
+OPT_FLAG(use_keycode_forwarding,
+         "Use keycode forwarding instead of host charmap translation.")
+
+OPT_PARAM(record_session, "<file>,<delay>[,<duration>]", "Screen record the emulator session.")
+
+OPT_FLAG(legacy_fake_camera, "Use legacy camera HAL for the emulated fake camera.")
+
+OPT_FLAG(no_direct_adb, "Use external adb executable for internal communication.")
+
+OPT_PARAM(check_snapshot_loadable,
+          "<snapshot name|exported snapshot tar file>",
+          "Check if a snasphot is loadable.")
+
+OPT_FLAG(no_hidpi_scaling, "Disable HiDPI scaling of guest display on macOS devices.")
+
+OPT_FLAG(no_mouse_reposition,
+         "Do not reposition the mouse to emulator window center if mouse "
+         "pointer gets out of the window.")
 
 #undef CFG_FLAG
 #undef CFG_PARAM

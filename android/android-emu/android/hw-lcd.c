@@ -21,10 +21,14 @@ hwLcd_mapDensity(int density) {
        value) so we do only exact match on it.
     */
     if (density != LCD_DENSITY_TVDPI) {
-        if (density < (LCD_DENSITY_LDPI + LCD_DENSITY_MDPI)/2)
+        if (density < (LCD_DENSITY_LDPI + LCD_DENSITY_140)/2)
             density = LCD_DENSITY_LDPI;
-        else if (density < (LCD_DENSITY_MDPI + LCD_DENSITY_HDPI)/2)
+        else if (density < (LCD_DENSITY_140 + LCD_DENSITY_MDPI)/2)
+            density = LCD_DENSITY_140;
+        else if (density < (LCD_DENSITY_MDPI + LCD_DENSITY_180)/2)
             density = LCD_DENSITY_MDPI;
+        else if (density < (LCD_DENSITY_180 + LCD_DENSITY_HDPI)/2)
+            density = LCD_DENSITY_180;
         else if (density < (LCD_DENSITY_HDPI + LCD_DENSITY_260DPI)/2)
             density = LCD_DENSITY_HDPI;
         else if (density < (LCD_DENSITY_260DPI + LCD_DENSITY_280DPI)/2)
@@ -41,8 +45,10 @@ hwLcd_mapDensity(int density) {
             density = LCD_DENSITY_360DPI;
         else if (density < (LCD_DENSITY_400DPI + LCD_DENSITY_420DPI) / 2)
             density = LCD_DENSITY_400DPI;
-        else if (density < (LCD_DENSITY_420DPI + LCD_DENSITY_XXHDPI) / 2)
+        else if (density < (LCD_DENSITY_420DPI + LCD_DENSITY_440DPI) / 2)
             density = LCD_DENSITY_420DPI;
+        else if (density < (LCD_DENSITY_440DPI + LCD_DENSITY_XXHDPI) / 2)
+            density = LCD_DENSITY_440DPI;
         else if (density < (LCD_DENSITY_XXHDPI + LCD_DENSITY_560DPI)/2)
             density = LCD_DENSITY_XXHDPI;
         else if (density < (LCD_DENSITY_560DPI + LCD_DENSITY_XXXHDPI)/2)
@@ -57,14 +63,9 @@ hwLcd_mapDensity(int density) {
 void
 hwLcd_setBootProperty(int density)
 {
-    char  temp[8];
-    int mapped_density;
-
-    mapped_density = hwLcd_mapDensity(density);
-
-
-    snprintf(temp, sizeof temp, "%d", mapped_density);
-    boot_property_add("qemu.sf.lcd_density", temp);
+#ifndef AEMU_MIN
+    boot_property_add_qemu_sf_lcd_density(hwLcd_mapDensity(density));
+#endif
 }
 
 hwLcd_screenSize_t hwLcd_getScreenSize(int heightPx, int widthPx, int density) {

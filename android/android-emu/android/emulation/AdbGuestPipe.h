@@ -17,10 +17,14 @@
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/threads/Thread.h"
+#include "android/emulation/AdbHub.h"
+#include "android/emulation/AdbMessageSniffer.h"
 #include "android/emulation/AdbTypes.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/CrossSessionSocket.h"
 
+#include <map>
+#include <memory>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -93,11 +97,16 @@ public:
                           android::base::Stream* stream) override;
 
         // Overridden AdbGuestAgent method.
-        virtual void onHostConnection(ScopedSocket&& socket) override;
+        virtual void onHostConnection(ScopedSocket&& socket,
+                                      AdbPortType portType) override;
 
         void preLoad(android::base::Stream* stream) override;
         void postLoad(android::base::Stream* stream) override;
         void postSave(android::base::Stream* stream) override;
+
+        // Resets the current ADB guest pipe connection.
+        void resetActiveGuestPipeConnection() override;
+
         // Called when a new adb pipe connection is opened by
         // the guest. Note that this does *not* transfer ownership of |pipe|.
         // Technically, AndroidPipe instances are owned by the virtual device.
@@ -109,11 +118,11 @@ public:
 
         // search for an item in |mPipes| that is in the WaitingForHostAdbConnection state,
         // remove it from |mPipes| and return it.
-
         AdbGuestPipe* searchForActivePipe();
 
-        // Resets the current ADB guest pipe connection.
-        void resetActiveGuestPipeConnection();
+        // Check if there is a pipe in WaitingForHostAdbConnection state.
+        bool hasActivePipe() const;
+
 
         // For pipes in the middle of deletion to notify the service
         // that they are gone.
@@ -138,13 +147,16 @@ public:
     virtual unsigned onGuestPoll() const override;
     virtual int onGuestRecv(AndroidPipeBuffer* buffers, int count) override;
     virtual int onGuestSend(const AndroidPipeBuffer* buffers,
-                            int count) override;
+                            int count,
+                            void** newPipePtr) override;
     virtual void onGuestWantWakeOn(int flags) override;
 
     // Called when a host connection occurs. Transfers ownership of
-    // |socket| to the pipe. On success, return true, on error return
-    // false and closes the socket.
-    void onHostConnection(ScopedSocket&& socket);
+    // |socket| to the pipe. |portType| tells if the connection is a
+    // regular adb connection, or a jdwp connection from icebox
+    // On success, return true, on error return false and closes the
+    // socket.
+    void onHostConnection(ScopedSocket&& socket, AdbPortType portType);
 
     bool isProxyingData() const {
         return mState == State::ProxyingData;
@@ -207,7 +219,11 @@ private:
     void waitForHostConnection();
 
     bool shouldUseRecvBuffer();
-
+    void stopSocketTraffic();
+    // Need to use adb hub to translate messages
+    // Returns true for jdwp pipes, or previous jdwp pipes that have been
+    // snapshotted and reused for other adb traffics.
+    bool needsHubTranslation() const;
     // Command/reply buffer and cursor.
     char mBuffer[16];        // the command being accepted or reply being sent.
     size_t mBufferSize = 0;  // size of valid bytes in mBuffer.
@@ -218,6 +234,15 @@ private:
     AdbHostAgent* mHostAgent = nullptr;
     bool mPlayStoreImage = false;
     std::unique_ptr<android::base::Looper::FdWatch> mFdWatcher;
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+
+    std::unique_ptr<android::emulation::AdbMessageSniffer> mReceivedMesg;
+    std::unique_ptr<android::emulation::AdbMessageSniffer> mSendingMesg;
+    AdbPortType mPortType = AdbPortType::RegularAdb;
+    std::unique_ptr<AdbHub> mAdbHub = {};
+    bool mReuseFromSnapshot = false;
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 };
 
 }  // namespace emulation

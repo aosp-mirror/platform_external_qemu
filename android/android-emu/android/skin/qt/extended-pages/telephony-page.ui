@@ -26,7 +26,7 @@
     <string notr="true">padding: 4px 2px 2px 2px;</string>
    </property>
    <property name="plainText">
-    <string>Yumm! Pie à la Android mode!</string>
+    <string>Android is always a sweet treat!</string>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>SmsBox</string>

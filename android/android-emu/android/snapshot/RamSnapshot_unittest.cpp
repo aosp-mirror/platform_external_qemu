@@ -46,7 +46,7 @@ TEST_F(RamSnapshotTest, SimpleRandom) {
     std::string ramPath = mTempDir->makeSubPath("ram.bin");
 
     const int numPages = 100;
-    const int numTrials = 100;
+    const int numTrials = 10;
     const float zeroPageChance = 0.5;
 
     for (int i = 0; i < numTrials; i++) {
@@ -74,7 +74,7 @@ TEST_F(RamSnapshotTest, IncrementalSaveRandomNoChanges) {
     std::string ramPath = mTempDir->makeSubPath("ram.bin");
 
     const int numPages = 100;
-    const int numTrials = 100;
+    const int numTrials = 10;
     const float zeroPageChance = 0.5;
 
     for (int i = 0; i < numTrials; i++) {
@@ -107,7 +107,7 @@ TEST_F(RamSnapshotTest, IncrementalSaveRandom) {
     std::string ramPath = mTempDir->makeSubPath("ram.bin");
 
     const int numPages = 100;
-    const int numTrials = 100;
+    const int numTrials = 10;
     const float noChangeChance = 0.5;
     const float zeroPageChance = 0.5;
 
@@ -146,9 +146,9 @@ TEST_F(RamSnapshotTest, IncrementalSaveRandom) {
 TEST_F(RamSnapshotTest, IncrementalSaveRandomMultiStep) {
     std::string ramPath = mTempDir->makeSubPath("ram.bin");
 
-    const int numPages = 100;
+    const int numPages = 10;
     const int numTrials = 2;
-    const int steps = 50;
+    const int steps = 5;
     const float noChangeChance = 0.75;
     const float zeroPageChance = 0.5;
 

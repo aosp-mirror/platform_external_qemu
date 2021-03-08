@@ -12,25 +12,34 @@
 
 #include "android/emulator-window.h"
 
-#include "android/android.h"
-#include "android/emulation/control/user_event_agent.h"
-#include "android/emulation/control/vm_operations.h"
-#include "android/framebuffer.h"
-#include "android/globals.h"
-#include "android/gpu_frame.h"
-#include "android/hw-control.h"
-#include "android/hw-sensors.h"
-#include "android/network/globals.h"
-#include "android/opengles.h"
-#include "android/skin/keycode.h"
-#include "android/skin/winsys.h"
-#include "android/ui-emu-agent.h"
-#include "android/utils/bufprint.h"
-#include "android/utils/debug.h"
-#include "android/utils/looper.h"
+#include <assert.h>                                      // for assert
+#include <stdio.h>                                       // for snprintf
+#include <stdlib.h>                                      // for NULL, calloc
+#include <string.h>                                      // for strcmp
 
-#include "android/telephony/modem_driver.h"
-
+#include "android/android.h"                             // for android_base...
+#include "android/avd/hw-config.h"                       // for androidHwCon...
+#include "android/avd/info.h"                            // for avdInfo_getName
+#include "android/emulation/control/user_event_agent.h"  // for QAndroidUser...
+#include "android/emulation/control/vm_operations.h"     // for QEMU_SHUTDOW...
+#include "android/emulation/control/window_agent.h"      // for EmulatorWindow
+#include "android/framebuffer.h"                         // for QFrameBuffer
+#include "android/globals.h"                             // for android_hw
+#include "android/hw-control.h"                          // for android_hw_c...
+#include "android/hw-sensors.h"                          // for android_sens...
+#include "android/network/globals.h"                     // for android_net_...
+#include "android/opengles.h"                            // for android_redr...
+#include "android/skin/generic-event-buffer.h"           // for SkinGenericE...
+#include "android/skin/keycode.h"                        // for SkinKeyCode
+#include "android/skin/trackball.h"                      // for SkinTrackBal...
+#include "android/skin/window.h"                         // for SkinWindowFuncs
+#include "android/skin/winsys.h"                         // for skin_winsys_...
+#include "android/telephony/modem.h"                     // for amodem_set_d...
+#include "android/telephony/modem_driver.h"              // for android_modem
+#include "android/ui-emu-agent.h"                        // for UiEmuAgent
+#include "android/utils/debug.h"                         // for dprint, dwar...
+#include "android/utils/looper.h"                        // for looper_getFo...
+#include "android/cmdline-option.h"                      // for android_cmdLineOptions
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
@@ -46,6 +55,9 @@ const QAndroidUserEventAgent* user_event_agent;
 // the frame post callback to retrieve every frame from the GPU, which will
 // be slower, except for software-based renderers.
 static bool s_use_emugl_subwindow = 1;
+// Set to 1 to hide all QT windows and their subwindows except for the
+// extended control window.
+static bool s_qt_hide_windw = 0;
 
 static void emulator_window_refresh(EmulatorWindow* emulator);
 
@@ -55,7 +67,8 @@ static void write_window_name(char* buff,
                               size_t buff_len,
                               int base_port,
                               const char* avd_name) {
-    snprintf(buff, buff_len, "Android Emulator - %s:%d", avd_name, base_port);
+    char* product_name = qemulator->opts->fuchsia ? "Fuchsia" : "Android";
+    snprintf(buff, buff_len, "%s Emulator - %s:%d", product_name, avd_name, base_port);
 }
 
 static void
@@ -72,14 +85,14 @@ emulator_window_light_brightness(void* opaque, const char*  light, int  value)
 }
 
 static void emulator_window_trackball_event(int dx, int dy) {
-    user_event_agent->sendMouseEvent(dx, dy, 1, 0);
+    user_event_agent->sendMouseEvent(dx, dy, 1, 0, 0);
 }
 
 static void emulator_window_window_key_event(unsigned keycode, int down) {
     user_event_agent->sendKey(keycode, down);
 }
 
-static void emulator_window_keycodes_event(int* keycodes, int count) {
+static void emulator_window_keycodes_event(int* keycodes, int count, void* context) {
     user_event_agent->sendKeyCodes(keycodes, count);
 }
 
@@ -90,11 +103,18 @@ static void emulator_window_generic_event(SkinGenericEventCode* events,
 
 static void emulator_window_window_mouse_event(unsigned x,
                                          unsigned y,
-                                         unsigned state) {
+                                         unsigned state,
+                                         int displayId) {
     /* NOTE: the 0 is used in hw/android/goldfish/events_device.c to
      * differentiate between a touch-screen and a trackball event
      */
-    user_event_agent->sendMouseEvent(x, y, 0, state);
+    user_event_agent->sendMouseEvent(x, y, 0, state, displayId);
+}
+
+static void emulator_window_window_mouse_wheel_event(int x_delta,
+                                                     int y_delta,
+                                                     int display_id) {
+    user_event_agent->sendMouseWheelEvent(x_delta, y_delta, display_id);
 }
 
 static void emulator_window_window_rotary_input_event(int delta) {
@@ -138,7 +158,7 @@ static int emulator_window_opengles_show_window(
         float rotation, bool deleteExisting) {
     if (s_use_emugl_subwindow) {
         return android_showOpenglesWindow(window, x, y, vw, vh, w, h, dpr,
-                                          rotation, deleteExisting);
+                                          rotation, deleteExisting, s_qt_hide_windw);
     } else {
         return 0;
     }
@@ -172,7 +192,7 @@ bool emulator_window_stop_recording_async(void) {
     return screen_recorder_stop(true);
 }
 
-RecorderState emulator_window_recorder_state_get(void) {
+RecorderStates emulator_window_recorder_state_get(void) {
     return screen_recorder_state_get();
 }
 
@@ -181,6 +201,7 @@ static void _emulator_window_on_gpu_frame(void* context,
                                           int width,
                                           int height,
                                           const void* pixels) {
+    D("_emulator_window_on_gpu_frame enter\n");
     EmulatorWindow* emulator = (EmulatorWindow*)context;
     // This function is called from an EmuGL thread, which cannot
     // call the skin_ui_update_gpu_frame() function. Create a GpuFrame
@@ -188,6 +209,7 @@ static void _emulator_window_on_gpu_frame(void* context,
     skin_ui_update_gpu_frame(emulator->ui, width, height, pixels);
 }
 
+extern void android_load_multi_display_config();
 static void
 emulator_window_setup( EmulatorWindow*  emulator )
 {
@@ -196,6 +218,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
     static const SkinWindowFuncs my_window_funcs = {
         .key_event = &emulator_window_window_key_event,
         .mouse_event = &emulator_window_window_mouse_event,
+        .mouse_wheel_event = &emulator_window_window_mouse_wheel_event,
         .rotary_input_event = &emulator_window_window_rotary_input_event,
         .set_device_orientation = &emulator_window_set_device_orientation,
         .opengles_show = &emulator_window_opengles_show_window,
@@ -252,19 +275,18 @@ emulator_window_setup( EmulatorWindow*  emulator )
             .framebuffer_invalidate = &emulator_window_framebuffer_invalidate,
     };
 
-    // Determine whether to use an EmuGL sub-window or not.
-    const char* env = getenv("ANDROID_GL_SOFTWARE_RENDERER");
-    s_use_emugl_subwindow = !env || !env[0] || env[0] == '0';
     // for gpu off or gpu guest, we don't use the subwindow
     if (!android_hw->hw_gpu_enabled || !strcmp(android_hw->hw_gpu_mode, "guest")) {
         s_use_emugl_subwindow = 0;
     }
-
+    if (android_cmdLineOptions->qt_hide_window) {
+        s_qt_hide_windw = 1;
+    }
 
     if (s_use_emugl_subwindow) {
         VERBOSE_PRINT(gles, "Using EmuGL sub-window for GPU display");
     } else {
-        VERBOSE_PRINT(gles, "Using glReadPixels() for GPU display");
+        VERBOSE_PRINT(gles, "Using guest rendering for display");
     }
 
     emulator->ui = skin_ui_create(
@@ -296,14 +318,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
     }
 
     skin_winsys_set_ui_agent(emulator->uiEmuAgent);
-
-    // Determine whether to use an EmuGL sub-window or not.
-    if (!s_use_emugl_subwindow) {
-        gpu_frame_set_post_callback(looper_getForThread(),
-                                    emulator,
-                                    _emulator_window_on_gpu_frame);
-    }
-
+    android_load_multi_display_config();
     skin_ui_reset_title(emulator->ui);
 }
 
@@ -311,6 +326,8 @@ static void
 emulator_window_fb_update( void*   _emulator, int  x, int  y, int  w, int  h )
 {
     EmulatorWindow*  emulator = _emulator;
+
+    D("%s\n", __FUNCTION__);
 
     if (emulator->opts->no_window) {
         return;
@@ -328,6 +345,7 @@ emulator_window_fb_update( void*   _emulator, int  x, int  y, int  w, int  h )
 static void
 emulator_window_fb_rotate( void*  _emulator, int  rotation )
 {
+    D("%s\n", __FUNCTION__);
     EmulatorWindow*  emulator = _emulator;
 
     emulator_window_setup( emulator );
@@ -372,6 +390,26 @@ static void* emulator_window_framebuffer_get_pixels(void* opaque) {
 static int emulator_window_framebuffer_get_depth(void* opaque) {
     QFrameBuffer* fb = opaque;
     return fb->bits_per_pixel;
+}
+
+void emulator_window_set_no_skin() {
+    EmulatorWindow* emulator = emulator_window_get();
+    if (emulator->layout_file_no_skin == NULL) {
+        emulator->layout_file_no_skin = skin_file_create_from_display_v1(
+            emulator->layout_file->parts->display);
+        emulator->layout_file_skin = emulator->layout_file;
+    }
+    emulator->layout_file = emulator->layout_file_no_skin;
+    skin_ui_update_and_rotate(emulator->ui, emulator->layout_file, 0);
+}
+
+void emulator_window_restore_skin() {
+    EmulatorWindow* emulator = emulator_window_get();
+    if (emulator->layout_file_skin == NULL) {
+        return;
+    }
+    emulator->layout_file = emulator->layout_file_skin;
+    skin_ui_update_and_rotate(emulator->ui, emulator->layout_file, 0);
 }
 
 int emulator_window_init(EmulatorWindow* emulator,
@@ -445,7 +483,6 @@ static void emulator_window_refresh(EmulatorWindow* emulator)
    /* this will eventually call sdl_update if the content of the VGA framebuffer
     * has changed */
     qframebuffer_check_updates();
-
     if (emulator->ui && !emulator->done) {
         if (skin_ui_process_events(emulator->ui)) {
             // Quit program.
@@ -509,13 +546,17 @@ emulator_window_set_device_coarse_orientation(SkinRotation orientation,
     android_sensors_set_coarse_orientation(coarseOrientation, tilt_degrees);
 }
 
-bool
-emulator_window_rotate_90(bool clockwise) {
+bool emulator_window_rotate_90(bool clockwise) {
     if (qemulator->ui) {
-        const SkinLayout* layout = clockwise ?
-                skin_ui_get_next_layout(qemulator->ui) :
-                skin_ui_get_prev_layout(qemulator->ui);
-        emulator_window_set_device_coarse_orientation(layout->orientation, 0.f);
+        const SkinRotation fromState = qemulator->uiEmuAgent->window->getRotation();
+        const int max_rotation = SKIN_ROTATION_270 + 1;
+        assert(fromState >= 0 && fromState < max_rotation);
+        const SkinRotation orientation =
+                clockwise ? (fromState + 1) % max_rotation
+                          : (max_rotation + fromState - 1) % max_rotation;
+        assert(orientation < max_rotation && orientation >= 0);
+        emulator_window_set_device_coarse_orientation(orientation, 0.f);
+        skin_winsys_touch_qt_extended_virtual_sensors();
         return true;
     }
     return false;

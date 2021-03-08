@@ -14,6 +14,7 @@
 
 #include "android/base/StringFormat.h"
 #include "android/base/system/System.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/globals.h"
 #include "android/opengl/EmuglBackendList.h"
 #include "android/skin/winsys.h"
@@ -31,7 +32,7 @@
 #if DEBUG
 #define D(...)  printf(__VA_ARGS__)
 #else
-#define D(...)  ((void)0)
+#define D(...)  crashhandler_append_message_format(__VA_ARGS__)
 #endif
 
 using android::base::RunOptions;
@@ -43,8 +44,16 @@ static EmuglBackendList* sBackendList = NULL;
 
 static void resetBackendList(int bitness) {
     delete sBackendList;
-    sBackendList = new EmuglBackendList(
-            System::get()->getLauncherDirectory().c_str(), bitness);
+    if (System::getEnvironmentVariable("ANDROID_EMUGL_FIXED_BACKEND_LIST") == "1") {
+        std::vector<std::string> fixedBackendNames = {
+            "swiftshader_indirect",
+            "angle_indirect",
+        };
+        sBackendList = new EmuglBackendList(64, fixedBackendNames);
+    } else {
+        sBackendList = new EmuglBackendList(
+                System::get()->getLauncherDirectory().c_str(), bitness);
+    }
 }
 
 static bool stringVectorContains(const std::vector<std::string>& list,
@@ -185,16 +194,19 @@ bool emuglConfig_init(EmuglConfig* config,
                       bool no_window,
                       bool blacklisted,
                       bool has_guest_renderer,
-                      enum WinsysPreferredGlesBackend uiPreferredBackend) {
-    D("%s: blacklisted=%d has_guest_renderer=%d\n",
+                      enum WinsysPreferredGlesBackend uiPreferredBackend,
+                      bool use_host_vulkan) {
+    D("%s: blacklisted=%d has_guest_renderer=%d, mode: %s, option: %s\n",
       __FUNCTION__,
       blacklisted,
-      has_guest_renderer);
+      has_guest_renderer,
+      gpu_mode, gpu_option);
 
     // zero all fields first.
     memset(config, 0, sizeof(*config));
 
     bool host_set_in_hwconfig = false;
+    bool has_auto_no_window = false;
 
     bool hasUiPreference = uiPreferredBackend != WINSYS_GLESBACKEND_PREFERENCE_AUTO;
 
@@ -211,9 +223,13 @@ bool emuglConfig_init(EmuglConfig* config,
                    !strcmp(gpu_option, "guest")) {
             gpu_mode = gpu_option;
             gpu_enabled = false;
-        } else if (!strcmp(gpu_option, "auto")) {
+        } else if (!strcmp(gpu_option, "auto")){
             // Nothing to do, use gpu_mode set from
             // hardware properties instead.
+        } else if  (!strcmp(gpu_option, "auto-no-window")) {
+            // Nothing to do, use gpu_mode set from
+            // hardware properties instead.
+            has_auto_no_window = true;
         } else {
             gpu_enabled = true;
             gpu_mode = gpu_option;
@@ -250,11 +266,20 @@ bool emuglConfig_init(EmuglConfig* config,
         return true;
     }
 
+    if (!strcmp("angle", gpu_mode)) {
+        gpu_mode = "angle_indirect";
+    }
+
+    if (!strcmp("swiftshader", gpu_mode)) {
+        gpu_mode = "swiftshader_indirect";
+    }
+
     if (!bitness) {
         bitness = System::get()->getProgramBitness();
     }
 
     config->bitness = bitness;
+    config->use_host_vulkan = use_host_vulkan;
     resetBackendList(bitness);
 
     // Check that the GPU mode is a valid value. 'auto' means determine
@@ -278,10 +303,10 @@ bool emuglConfig_init(EmuglConfig* config,
                 setCurrentRenderer(gpu_mode);
                 return true;
             }
-            D("%s: 'swiftshader' mode auto-selected\n", __FUNCTION__);
+            D("%s: 'swiftshader_indirect' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "swiftshader_indirect";
         }
-        else if (no_window || (blacklisted && !hasUiPreference)) {
+        else if (!has_auto_no_window && (no_window || (blacklisted && !hasUiPreference))) {
             if (stringVectorContains(sBackendList->names(), "swiftshader")) {
                 D("%s: Headless mode or blacklisted GPU driver, "
                   "using Swiftshader backend\n",
@@ -317,7 +342,7 @@ bool emuglConfig_init(EmuglConfig* config,
                     gpu_mode = "angle_indirect";
                     break;
                 case WINSYS_GLESBACKEND_PREFERENCE_ANGLE9:
-                    gpu_mode = "angle9";
+                    gpu_mode = "angle_indirect";
                     break;
                 case WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER:
                     gpu_mode = "swiftshader_indirect";
@@ -341,11 +366,19 @@ bool emuglConfig_init(EmuglConfig* config,
         const std::vector<std::string>& backends = sBackendList->names();
         if (!stringVectorContains(backends, gpu_mode)) {
             std::string error = StringFormat(
-                "Invalid GPU mode '%s', use one of: on off host guest", gpu_mode);
+                "Invalid GPU mode '%s', use one of: host swiftshader_indirect. "
+                "If you're already using one of those modes, "
+                "the emulator installation may be corrupt. "
+                "Please re-install the emulator.", gpu_mode);
+
             for (size_t n = 0; n < backends.size(); ++n) {
                 error += " ";
                 error += backends[n];
             }
+
+            D("%s: Error: [%s]\n", __func__, error.c_str());
+            fprintf(stderr, "%s: %s\n", __func__, error.c_str());
+
             config->enabled = false;
             gpu_mode = "error";
             snprintf(config->backend, sizeof(config->backend), "%s", gpu_mode);
@@ -364,11 +397,19 @@ bool emuglConfig_init(EmuglConfig* config,
     snprintf(config->status, sizeof(config->status),
              "GPU emulation enabled using '%s' mode", gpu_mode);
     setCurrentRenderer(gpu_mode);
+    D("%s: %s\n", __func__, config->status);
     return true;
 }
 
 void emuglConfig_setupEnv(const EmuglConfig* config) {
     System* system = System::get();
+
+    if (config->use_host_vulkan) {
+        system->envSet("ANDROID_EMU_VK_ICD", NULL);
+    } else if (sCurrentRenderer == SELECTED_RENDERER_SWIFTSHADER_INDIRECT) {
+        // Use Swiftshader vk icd if using swiftshader_indirect
+        system->envSet("ANDROID_EMU_VK_ICD", "swiftshader");
+    }
 
     if (!config->enabled) {
         // There is no real GPU emulation. As a special case, define
@@ -425,8 +466,7 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
                         "Using GLESv2 only.\n",
                         config->backend);
         // A GLESv1 lib is optional---we can deal with a GLESv2 only
-        // backend by using a GLESv1->GLESv2 emulation library.
-        system->envSet("ANDROID_GLESv1_LIB", sBackendList->getGLES12TranslatorLibName().c_str());
+        // backend by using CoreProfileEngine in the Translator.
     }
 
     if (sBackendList->getBackendLibPath(

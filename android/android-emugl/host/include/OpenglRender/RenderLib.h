@@ -19,7 +19,25 @@
 #include "OpenglRender/render_api_types.h"
 #include "android/base/files/Stream.h"
 #include "android/emulation/RefcountPipe.h"
+#include "android/emulation/control/vm_operations.h"
+#include "android/emulation/control/window_agent.h"
 #include "android/opengl/emugl_config.h"
+
+extern "C" {
+
+struct address_space_device_control_ops;
+
+} // extern "C"
+
+namespace android {
+namespace base {
+
+class CpuUsage;
+class MemoryTracker;
+class GLObjectCounter;
+
+} // namespace base
+} // namespace android
 
 namespace emugl {
 
@@ -28,6 +46,7 @@ struct RenderOpt {
     void* surface;
     void* config;
 };
+
 using android::emulation::OnLastColorBufferRef;
 
 // RenderLib - root interface for the GPU emulation library
@@ -44,6 +63,8 @@ public:
     // Get the GLES major/minor version determined by libOpenglRender.
     virtual void getGlesVersion(int* maj, int* min) = 0;
     virtual void setLogger(emugl_logger_struct logger) = 0;
+    virtual void setGLObjectCounter(
+            android::base::GLObjectCounter* counter) = 0;
     virtual void setCrashReporter(emugl_crash_reporter_t reporter) = 0;
     virtual void setFeatureController(emugl_feature_is_enabled_t featureController) = 0;
     virtual void setSyncDevice(emugl_sync_create_timeline_t,
@@ -57,9 +78,18 @@ public:
     // physically contiguous DMA region at particular offsets.
     virtual void setDmaOps(emugl_dma_ops) = 0;
 
-    virtual void* getGL(void) = 0;
+    virtual void setVmOps(const QAndroidVmOperations &vm_operations) = 0;
+    virtual void setAddressSpaceDeviceControlOps(struct address_space_device_control_ops* ops) = 0;
 
-    virtual void* getEGL(void) = 0;
+    virtual void setWindowOps(const QAndroidEmulatorWindowAgent &window_operations,
+                              const QAndroidMultiDisplayAgent &multi_display_operations) = 0;
+
+    virtual void setUsageTracker(android::base::CpuUsage* cpuUsage,
+                                 android::base::MemoryTracker* memUsage) = 0;
+
+    virtual void* getGLESv2Dispatch(void) = 0;
+
+    virtual void* getEGLDispatch(void) = 0;
 
     virtual bool getOpt(RenderOpt* opt) = 0;
 

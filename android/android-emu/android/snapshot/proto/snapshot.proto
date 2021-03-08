@@ -25,7 +25,7 @@ syntax = "proto2";
 
 package emulator_snapshot;
 
-option java_package = "com.android.emulator";
+option java_package = "com.android.emulator.snapshot";
 
 message Image {
     enum Type {
@@ -140,4 +140,16 @@ message Snapshot {
 
     // Record of save stats.
     repeated SaveStats save_stats = 15;
+
+    // Folded state.
+    optional bool folded = 16;
+
+    // Emulator boot parameters
+    repeated string launch_parameters = 17;
+
+    // Emulator build ID
+    optional string emulator_build_id = 18;
+
+    // System image build ID
+    optional string system_image_build_id = 19;
 }

@@ -11,6 +11,7 @@
 */
 #include "android/telephony/modem.h"
 
+#include "android/telephony/MeterService.h"
 #include "android/telephony/debug.h"
 #include "android/telephony/phone_number.h"
 #include "android/telephony/remote_call.h"
@@ -28,6 +29,12 @@
 #include "android/utils/path.h"
 #include "android/utils/system.h"
 #include "android/utils/timezone.h"
+
+#ifdef _WIN32
+#  include "android/base/sockets/Winsock.h"
+#else
+#  include <netinet/in.h>
+#endif
 
 #include <assert.h>
 #include <memory.h>
@@ -68,7 +75,10 @@
 #define  OPERATOR_ROAMING_MCCMNC  STRINGIFY(OPERATOR_ROAMING_MCC) \
                                   STRINGIFY(OPERATOR_ROAMING_MNC)
 
-static const char* _amodem_switch_technology(AModem modem, AModemTech newtech, int32_t newpreferred);
+static const char* _amodem_switch_technology(AModem modem, AModemTech newtech, int32_t newpreferred,
+        bool new_data_network);
+static void adjustNetDataNetwork(AModem modem);
+static void amodem_addPhysChanCfgUpdate( AModem  modem );
 static int _amodem_set_cdma_subscription_source( AModem modem, ACdmaSubscriptionSource ss);
 static int _amodem_set_cdma_prl_version( AModem modem, int prlVersion);
 
@@ -134,6 +144,7 @@ android_parse_network_type( const char*  speed )
         { "hsdpa", A_DATA_NETWORK_UMTS },  /* not handled yet by Android GSM framework */
         { "lte",   A_DATA_NETWORK_LTE },
         { "full",  A_DATA_NETWORK_LTE },
+        { "5g",   A_DATA_NETWORK_NR   },  /* non-standalone 5g, based on lte, there is no 5g sa yet */
         { NULL, 0 }
     };
     int  nn;
@@ -143,9 +154,11 @@ android_parse_network_type( const char*  speed )
     }
 
     for (nn = 0; types[nn].name; nn++) {
-        if (!strcmp(speed, types[nn].name))
+        if (!strcmp(speed, types[nn].name)){
             return types[nn].type;
+        }
     }
+
     /* not found, be conservative */
     return A_DATA_NETWORK_GPRS;
 }
@@ -189,7 +202,21 @@ typedef enum {
  * Secure Elements Access Control (SEAC) document for more instructions. */
 typedef enum {
     kSimApduGetData = 0xCA, // Global Platform SEAC section 4.1 GET DATA Command
+    kSimApduSelect = 0xA4, // Command: SELECT
+    kSimApduReadBinary = 0xB0, // Command: READ_BINARY
+    kSimApduStatus = 0xF2, // Command: STATUS
+    kSimApduManageChannel = 0x70, // Command: MANAGE_CHANNEL
 } SimApduInstruction;
+
+/* APDU class, see ETSI 102 221 and globalplatform.org's
+ * Secure Elements Access Control (SEAC) document for more instructions. */
+typedef enum {
+    kSimApduClaGetResponse = 0x00, // CLA_GET_RESPONSE
+    kSimApduClaManageChannel = 0x00, // CLA_MANAGE_CHANNEL
+    kSimApduClaReadBinary = 0x00, // CLA_READ_BINARY
+    kSimApduClaSelect = 0x00, // CLA_SELECT
+    kSimApduClaStatus = 0x80, // CLA_STATUS
+} SimApduClass;
 
 
 typedef struct {
@@ -283,6 +310,8 @@ typedef struct AModemRec_
     int           cell_id;
     int           base_port;
 
+    int           send_phys_channel_cfg_unsol;
+
     /* Signal strength variables */
     int             use_signal_profile;
     signal_strength quality;
@@ -302,6 +331,7 @@ typedef struct AModemRec_
     ARegistrationUnsolMode   data_mode;
     ARegistrationState       data_state;
     ADataNetworkType         data_network;
+    ADataNetworkType         data_network_requested;
 
     /* operator names */
     AOperatorSelection  oper_selection_mode;
@@ -362,6 +392,7 @@ typedef struct AModemRec_
     struct {
         char* df_name;
         bool is_open;
+        uint16_t file_id;
     } logical_channels[MAX_LOGICAL_CHANNELS];
 } AModemRec;
 
@@ -415,7 +446,7 @@ parseSimApduCommand(const char* command, int length, SIM_APDU* apdu) {
         // Invalid or mismatching parameters
         return false;
     }
-    if (length < 10) {
+    if (length < 8) {
         // Less than minimal length for an APDU
         return false;
     }
@@ -424,7 +455,9 @@ parseSimApduCommand(const char* command, int length, SIM_APDU* apdu) {
     apdu->instruction = hex2int(commandData + 2, 2);
     apdu->param1 = hex2int(commandData + 4, 2);
     apdu->param2 = hex2int(commandData + 6, 2);
-    apdu->param3 = hex2int(commandData + 8, 2);
+    if (length > 8) {
+        apdu->param3 = hex2int(commandData + 8, 2);
+    }
     if (length > 10) {
         apdu->data = (char*)malloc(length - 10);
         parseHexCharsToBuffer(command + 10, length - 10, apdu->data);
@@ -471,6 +504,23 @@ amodem_receive_sms( AModem  modem, SmsPDU  sms )
 
         modem->unsol_func( modem->unsol_opaque, modem->out_buff );
     }
+}
+
+const char* amodem_sms_to_string(AModem modem, SmsPDU sms) {
+#define SMS_UNSOL_HEADER_2 "+CMT: 0\r"
+    int len, max;
+    char* p;
+
+    strcpy(modem->out_buff, SMS_UNSOL_HEADER_2);
+    p = modem->out_buff + (sizeof(SMS_UNSOL_HEADER_2) - 1);
+    max = sizeof(modem->out_buff) - 2 - (sizeof(SMS_UNSOL_HEADER_2) - 1);
+    len = smspdu_to_hex(sms, p, max);
+    if (len > max) /* too long */
+        return NULL;
+    p[len] = '\r';
+    p[len + 1] = 0;
+
+    return modem->out_buff;
 }
 
 static const char*
@@ -602,6 +652,7 @@ amodem_reset( AModem  modem )
     int i;
     modem->nvram_config = amodem_load_nvram(modem);
     modem->radio_state = A_RADIO_STATE_OFF;
+    modem->send_phys_channel_cfg_unsol = 0;
     modem->wait_sms    = 0;
 
     modem->use_signal_profile = 1;
@@ -646,6 +697,7 @@ amodem_reset( AModem  modem )
     modem->data_mode    = A_REGISTRATION_UNSOL_ENABLED_FULL;
     modem->data_state   = A_REGISTRATION_HOME;
     modem->data_network = A_DATA_NETWORK_LTE;
+    modem->data_network_requested = A_DATA_NETWORK_LTE;
 
     tmp = amodem_nvram_get_str( modem, NV_MODEM_TECHNOLOGY, "gsm" );
     modem->technology = android_parse_modem_tech( tmp );
@@ -660,6 +712,10 @@ amodem_reset( AModem  modem )
 
     // Clear out all logical channels, none of them are open, they have no names
     memset(modem->logical_channels, 0, sizeof(modem->logical_channels));
+    // channel 0 is the basic channel and it is always open
+    modem->logical_channels[0].is_open = true;
+    modem->logical_channels[0].df_name = strdup("");
+    modem->logical_channels[0].file_id = 0x3F00;
 }
 
 static AVoiceCall amodem_alloc_call( AModem   modem );
@@ -684,6 +740,9 @@ void amodem_state_save(AModem modem, SysFile* file)
                           A_CALL_NUMBER_MAX_SIZE+1);
     }
     sys_file_put_byte(file, modem->radio_state);
+    sys_file_put_byte(file, modem->send_phys_channel_cfg_unsol);
+    sys_file_put_byte(file, modem->data_network);
+    sys_file_put_byte(file, modem->data_network_requested);
 }
 
 int amodem_state_load(AModem modem, SysFile* file, int version_id)
@@ -707,6 +766,9 @@ int amodem_state_load(AModem modem, SysFile* file, int version_id)
     if (version_id == MODEM_DEV_STATE_SAVE_VERSION) {
         ARadioState radio_state = sys_file_get_byte(file);
         modem->radio_state = radio_state;
+        modem->send_phys_channel_cfg_unsol = sys_file_get_byte(file);
+        modem->data_network = sys_file_get_byte(file);;
+        modem->data_network_requested = sys_file_get_byte(file);
     } else {
         // In the past, we didn't save radio state in amode_state_save(),
         // we will by default set radio state on in this case.
@@ -828,6 +890,12 @@ amodem_get_data_registration( AModem  modem )
 }
 
 void
+amodem_set_meter_state( AModem  modem, int meteron )
+{
+    set_mobile_data_meterness(meteron);
+}
+
+void
 amodem_set_data_registration( AModem  modem, ARegistrationState  state )
 {
     modem->data_state = state;
@@ -839,11 +907,13 @@ amodem_set_data_registration( AModem  modem, ARegistrationState  state )
             break;
 
         case A_REGISTRATION_UNSOL_ENABLED_FULL:
-            if (modem->supportsNetworkDataType)
+            if (modem->supportsNetworkDataType) {
+                adjustNetDataNetwork(modem);
                 amodem_unsol( modem, "+CGREG: %d,%d,\"%04x\",\"%04x\",\"%04x\"\r",
                             modem->data_mode, modem->data_state,
                             modem->area_code & 0xffff, modem->cell_id & 0xffff,
                             modem->data_network );
+            }
             else
                 amodem_unsol( modem, "+CGREG: %d,%d,\"%04x\",\"%04x\"\r",
                             modem->data_mode, modem->data_state,
@@ -870,6 +940,7 @@ tech_from_network_type( ADataNetworkType type )
         case A_DATA_NETWORK_UMTS:
             return A_TECH_GSM;
         case A_DATA_NETWORK_LTE:
+        case A_DATA_NETWORK_NR:
             return A_TECH_LTE;
         case A_DATA_NETWORK_UNKNOWN:
             return A_TECH_UNKNOWN;
@@ -881,12 +952,17 @@ void
 amodem_set_data_network_type( AModem  modem, ADataNetworkType   type )
 {
     AModemTech modemTech;
-    modem->data_network = type;
+    modem->data_network_requested = type;
+    if (type != A_DATA_NETWORK_NR) {
+        modem->data_network = type;
+    }
+    bool new_data_network = (modem->data_network_requested != type);
     amodem_set_data_registration( modem, modem->data_state );
     modemTech = tech_from_network_type(type);
     if (modem->unsol_func && modemTech != A_TECH_UNKNOWN) {
-        if (_amodem_switch_technology( modem, modemTech, modem->preferred_mask )) {
+        if (_amodem_switch_technology( modem, modemTech, modem->preferred_mask, new_data_network)) {
             modem->unsol_func( modem->unsol_opaque, modem->out_buff );
+            amodem_addPhysChanCfgUpdate(modem);
         }
     }
 }
@@ -1213,7 +1289,7 @@ chooseTechFromMask( AModem modem, int32_t preferred )
 }
 
 static const char*
-_amodem_switch_technology( AModem modem, AModemTech newtech, int32_t newpreferred )
+_amodem_switch_technology( AModem modem, AModemTech newtech, int32_t newpreferred, bool new_data_network)
 {
     D("_amodem_switch_technology: oldtech: %d, newtech %d, preferred: %d. newpreferred: %d\n",
                       modem->technology, newtech, modem->preferred_mask, newpreferred);
@@ -1233,7 +1309,7 @@ _amodem_switch_technology( AModem modem, AModemTech newtech, int32_t newpreferre
         }
     }
 
-    if (modem->technology != newtech) {
+    if (modem->technology != newtech || new_data_network) {
         modem->technology = newtech;
         ret = amodem_printf(modem, "+CTEC: %d", modem->technology);
     }
@@ -1388,7 +1464,7 @@ handleTech( const char*  cmd, AModem  modem )
         D( "cmd: %s\n", cmd );
         if (cmd[0] == ',' && ! parsePreferred( ++cmd, &pt ))
             return amodem_printf( modem, "ERROR: invalid preferred mode" );
-        return _amodem_switch_technology( modem, newtech, pt );
+        return _amodem_switch_technology( modem, newtech, pt, false );
     }
     return amodem_printf( modem, "ERROR: %s: Unknown Technology", cmd + 1 );
 }
@@ -1440,6 +1516,13 @@ handlePrlVersion( const char* cmd, AModem modem )
 }
 
 static const char*
+enableGoldfishPhysicalChannelConfigUnsol( const char*  cmd, AModem  modem )
+{
+    modem->send_phys_channel_cfg_unsol = 1;
+    return NULL;
+}
+
+static const char*
 handleRadioPower( const char*  cmd, AModem  modem )
 {
     if ( !strcmp( cmd, "+CFUN=0" ) )
@@ -1479,6 +1562,7 @@ handleOpenLogicalChannel(const char* cmd, AModem modem)
         if (!modem->logical_channels[channel].is_open) {
             modem->logical_channels[channel].is_open = true;
             modem->logical_channels[channel].df_name = strdup(df_name);
+            modem->logical_channels[channel].file_id = 0x3F00;
             break;
         }
     }
@@ -1486,8 +1570,8 @@ handleOpenLogicalChannel(const char* cmd, AModem modem)
         // Could not find an available channel, we're probably leaking channels
         return amodem_printf(modem, "+CME ERROR: %d", kCmeErrorMemoryFull);
     }
-    // Note that logical channels start at 1 so use an offset here
-    return amodem_printf(modem, "%u", channel + 1);
+
+    return amodem_printf(modem, "%u", channel);
 }
 
 static const char*
@@ -1498,18 +1582,15 @@ handleCloseLogicalChannel(const char* cmd, AModem modem)
     char* channel_str = NULL;
     char* divider = strchr(cmd, '=');
 
+
     if (divider == NULL) {
-        return amodem_printf(modem, "+CME ERROR: %d",
-                            kCmeErrorInvalidCharactersInTextString);
+        return amodem_printf(modem, "+CME ERROR: %d", kCmeErrorInvalidCharactersInTextString);
     }
     channel_str = divider + 1;
     if (sscanf(channel_str, "%d%c", &channel, &dummy) != 1) {
-        return amodem_printf(modem, "+CME ERROR: %d",
-                            kCmeErrorInvalidCharactersInTextString);
+        return amodem_printf(modem, "+CME ERROR: %d", kCmeErrorInvalidCharactersInTextString);
     }
-    // Logical channels start at 1, decrease by one to create an index
-    --channel;
-    if (channel < 0 ||
+    if (channel <= 0 ||
             channel >= MAX_LOGICAL_CHANNELS ||
             !modem->logical_channels[channel].is_open) {
         return amodem_printf(modem, "+CME ERROR: %d", kCmeErrorInvalidIndex);
@@ -1532,6 +1613,7 @@ handleTransmitLogicalChannel(const char* cmd, AModem modem) {
     uint8_t apduClass;
     SIM_APDU apdu;
 
+
     // Create a scan string with the size of the command array in it
     snprintf(scan_string, sizeof(scan_string),
              "+CGLA=%%d,%%d,%%%ds%%c", (int)(sizeof(command) - 1));
@@ -1541,8 +1623,6 @@ handleTransmitLogicalChannel(const char* cmd, AModem modem) {
                               kCmeErrorInvalidCharactersInTextString);
     }
 
-    // Logical channels start at 1, decrease by one to get a channel index
-    --channel;
     // Validate the channel number and ensure the channel is open
     if (channel < 0 ||
             channel >= MAX_LOGICAL_CHANNELS ||
@@ -1563,12 +1643,98 @@ handleTransmitLogicalChannel(const char* cmd, AModem modem) {
     // Now see if it's a supported instruction
     switch (apdu.instruction) {
     case kSimApduGetData:
-        if (apduClass == 0x80 && apdu.param1 == 0xFF && apdu.param2 == 0x40) {
+        if (apduClass == kSimApduClaStatus && apdu.param1 == 0xFF && apdu.param2 == 0x40) {
             // Get Data (from class and instrcution) ALL (from params) command
             char* df_name = modem->logical_channels[channel].df_name;
-            const char* rules = sim_get_access_rules(df_name);
+            char* rules = sim_get_access_rules(df_name);
             if (rules) {
                 result = amodem_printf(modem, "+CGLA: 144,0,%s", rules);
+                free(rules);
+                rules = NULL;
+            }
+        }
+        break;
+    case kSimApduSelect:
+        if (apduClass == kSimApduClaSelect && apdu.param1 == 0x00 && apdu.param2 == 0x0C && apdu.param3 == 2) {
+            uint16_t *file_id = &(modem->logical_channels[channel].file_id);
+            memcpy(file_id, apdu.data, 2);
+            // change to little endian
+            *file_id = ntohs(*file_id);
+
+            char* fcpstr = sim_get_fcp(*file_id);
+            if (fcpstr == NULL) {
+                result = amodem_printf(modem, "+CGLA: %d,%d", 0x6a, 0x82);
+            } else {
+                // save the fileid select status for later fetch
+                asimcard_set_fileid_status(modem->sim, fcpstr);
+                result = amodem_printf(modem, "+CGLA: 144,0");
+                free(fcpstr);
+            }
+        } else if (apduClass == kSimApduClaSelect && apdu.param1 == 0x00 && apdu.param2 == 0x04 && apdu.param3 == 2) {
+            uint16_t *file_id = &(modem->logical_channels[channel].file_id);
+            memcpy(file_id, apdu.data, 2);
+            *file_id = ntohs(*file_id);
+
+            // when p2 is 0x004, we need to return the respond right away
+            char* fcpstr = sim_get_fcp(*file_id);
+            if (fcpstr == NULL) {
+                result = amodem_printf(modem, "+CGLA: %d,%d", 0x6a, 0x82);
+            } else {
+                result = amodem_printf(modem, "+CGLA: 144,0,%s", fcpstr);
+                free(fcpstr);
+            }
+        }
+        break;
+    case kSimApduReadBinary:
+        if (apduClass == kSimApduClaReadBinary && apdu.param1 == 0x00 && apdu.param2 == 0x00 && apdu.param3 == 0x00) {
+            uint16_t file_id = modem->logical_channels[channel].file_id;
+            if (file_id == 0x2FE2) {
+                // return hardcoded ICCID file content
+                result = amodem_printf(modem, "+CGLA: 144,0,%s", "98942000001081853911");
+            }
+        }
+        break;
+    case kSimApduStatus:
+        if (apduClass != kSimApduClaStatus && apduClass != kSimApduClaGetResponse) {
+            result = amodem_printf(modem, "+CGLA: %d,%d", 0x6e, 0x00);
+        } else if (apduClass == kSimApduClaStatus && apdu.param1 == 0x00 && apdu.param2 == 0x00 && apdu.param3 == 0x00) {
+            char* fcpstr = sim_get_fcp(modem->logical_channels[channel].file_id);
+            if (fcpstr == NULL) {
+                result = amodem_printf(modem, "+CGLA: %d,%d", 0x6a, 0x82);
+            } else {
+                result = amodem_printf(modem, "+CGLA: 144,0,%s", fcpstr);
+                free(fcpstr);
+            }
+        } else if (apdu.param1 != 0x00 && apdu.param1 != 0x01 && apdu.param1 != 0x02) {
+            result = amodem_printf(modem, "+CGLA: %d,%d", 0x6a, 0x86);
+        }
+        break;
+    case kSimApduManageChannel:
+        if (apduClass == kSimApduClaManageChannel && apdu.param1 == 0x00 && apdu.param2 == 0x00 && apdu.param3 == 0x00) {
+            int channel = -1;
+            for (channel = 0; channel < MAX_LOGICAL_CHANNELS; ++channel) {
+                if (!modem->logical_channels[channel].is_open) {
+                    modem->logical_channels[channel].is_open = true;
+                    modem->logical_channels[channel].df_name = strdup("");
+                    modem->logical_channels[channel].file_id = 0x3F00;
+                    break;
+                }
+            }
+            if (channel >= MAX_LOGICAL_CHANNELS) {
+                result = amodem_printf(modem, "+CME ERROR: %d", kCmeErrorMemoryFull);
+            } else {
+                result = amodem_printf(modem, "+CGLA: 144,0,%02x", channel);
+            }
+        }
+        else if (apduClass == kSimApduClaManageChannel && apdu.param1 == 0x80 && apdu.param2 > 0x00 && apdu.param3 == 0x00) {
+            int channel = apdu.param2; // to close this channel
+            if (channel <= 0 || channel >= MAX_LOGICAL_CHANNELS || !modem->logical_channels[channel].is_open) {
+                result = amodem_printf(modem, "+CME ERROR: %d", kCmeErrorInvalidIndex);
+            } else {
+                modem->logical_channels[channel].is_open = false;
+                free(modem->logical_channels[channel].df_name);
+                modem->logical_channels[channel].df_name = NULL;
+                result = amodem_printf(modem, "+CGLA: 144,0");
             }
         }
         break;
@@ -1624,6 +1790,15 @@ handleSetCarrierRestrictionsReq( const char*  cmd, AModem  modem )
     }
 }
 
+static void adjustNetDataNetwork(AModem modem)
+{
+    /* ignore system that does not support 5g*/
+    modem->data_network = modem->data_network_requested;
+    if (modem->send_phys_channel_cfg_unsol == 0 && modem-> data_network_requested == A_DATA_NETWORK_NR) {
+         modem-> data_network = A_DATA_NETWORK_LTE;
+    }
+}
+
 /* TODO: Will we need this?
 static const char*
 handleSRegister( const char * cmd, AModem modem )
@@ -1675,11 +1850,13 @@ handleNetworkRegistration( const char*  cmd, AModem  modem )
     } else if ( !memcmp( cmd, "+CGREG", 6 ) ) {
         cmd += 6;
         if (cmd[0] == '?') {
-            if (modem->supportsNetworkDataType)
+            if (modem->supportsNetworkDataType) {
+                adjustNetDataNetwork(modem);
                 return amodem_printf( modem, "+CGREG: %d,%d,\"%04x\",\"%04x\",\"%04x\"",
                                     modem->data_mode, modem->data_state,
                                     modem->area_code, modem->cell_id,
                                     modem->data_network );
+            }
             else
                 return amodem_printf( modem, "+CGREG: %d,%d,\"%04x\",\"%04x\"",
                                     modem->data_mode, modem->data_state,
@@ -2131,6 +2308,41 @@ handleListCurrentCalls( const char*  cmd, AModem  modem )
     return amodem_end_line( modem );
 }
 
+static void
+amodem_addOnePhysChanCfgUpdate(int status, int bandwidth, int rat, int freq, int id, AModem  modem )
+{
+    amodem_add_line( modem, "%%CGFPCCFG: %d,%d,%d,%d,%d\r\n", status, bandwidth, rat, freq, id);
+}
+
+static void
+amodem_addPhysChanCfgUpdate( AModem  modem )
+{
+    if (modem->send_phys_channel_cfg_unsol == 0 ) {
+        return;
+    }
+
+    const int PRIMARY_SERVING = 1;
+    const int SECONDARY_SERVING = 2;
+    int cellBandwidthDownlink = 5000;
+    const int UNKNOWN = 0;
+    const int MMWAVE = 4;
+    int freq = UNKNOWN;
+    if (modem->data_network == A_DATA_NETWORK_NR) {
+        freq = MMWAVE;
+        cellBandwidthDownlink = 50000;
+    }
+    int nn;
+    for (nn = 0; nn < MAX_DATA_CONTEXTS; nn++) {
+        ADataContext  data = modem->data_contexts + nn;
+        if (!data->active || data->id <= 0)
+            continue;
+        amodem_addOnePhysChanCfgUpdate(PRIMARY_SERVING, cellBandwidthDownlink, modem->data_network,
+                freq, data->id, modem);
+        amodem_addOnePhysChanCfgUpdate(SECONDARY_SERVING, cellBandwidthDownlink, modem->data_network,
+                freq, data->id, modem);
+    }
+}
+
 /* Add a(n unsolicited) time response.
  *
  * retrieve the current time and zone in a format suitable
@@ -2196,6 +2408,7 @@ handleEndOfInit( const char*  cmd, AModem  modem )
 {
     amodem_begin_line( modem );
     amodem_addTimeUpdate( modem );
+    amodem_addPhysChanCfgUpdate( modem );
     return amodem_end_line( modem );
 }
 
@@ -2485,11 +2698,19 @@ handleSignalStrength( const char*  cmd, AModem  modem )
       modem->snapshotTimeUpdateRequested = 0;
     } else if (wakeup_from_sleep()) {
         amodem_addTimeUpdate(modem);
+        amodem_addPhysChanCfgUpdate( modem );
     } else if (firstSignalStrengthRequest) {
         firstSignalStrengthRequest = false;
         amodem_addTimeUpdate(modem);
+        amodem_addPhysChanCfgUpdate( modem );
     }
 
+    if(modem->send_phys_channel_cfg_unsol) {
+        amodem_addPhysChanCfgUpdate( modem );
+        if(modem->data_network_requested != modem->data_network) {
+            amodem_set_data_registration( modem, modem->data_state );
+        }
+    }
     android_last_signal_time = time(NULL);
 
     if (modem->use_signal_profile) {
@@ -2667,6 +2888,7 @@ static const struct {
     /* see onRadioPowerOn() */
     { "%CPHS=1", NULL, NULL },
     { "%CTZV=1", NULL, NULL },
+    { "%CGFPCCFG=1", NULL, enableGoldfishPhysicalChannelConfigUnsol},
 
     /* see onSIMReady() */
     { "+CSMS=1", "+CSMS: 1, 1, 1", NULL },
@@ -2894,4 +3116,8 @@ const char* amodem_send_unsol_nitz( AModem  modem )
 {
     amodem_addTimeUpdate(modem);
     REPLY(amodem_end_line(modem));
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 }
+=======
+}
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)

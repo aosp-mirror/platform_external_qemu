@@ -13,15 +13,13 @@
 // limitations under the License.
 
 #pragma once
-
-#include "android/base/system/System.h"
+#include <cstdint>                // for uint8_t, uint32_t, uint64_t
+#include <vector>                 // for vector
 
 extern "C" {
-#include "libavutil/pixfmt.h"
-#include "libavutil/samplefmt.h"
+#include "libavutil/pixfmt.h"     // for AVPixelFormat
+#include "libavutil/samplefmt.h"  // for AVSampleFormat
 }
-
-#include <memory>
 
 namespace android {
 namespace recording {

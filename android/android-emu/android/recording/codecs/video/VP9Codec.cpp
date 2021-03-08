@@ -11,8 +11,19 @@
 
 #include "android/recording/codecs/video/VP9Codec.h"
 
-#include "android/base/Log.h"
-#include "android/base/system/System.h"
+#include <stddef.h>                      // for NULL
+#include <algorithm>                     // for min
+#include <utility>                       // for move
+
+#include "android/base/Log.h"            // for LOG, LogMessage, LogStream
+#include "android/base/system/System.h"  // for System
+
+extern "C" {
+#include <libavutil/dict.h>              // for av_dict_set, av_dict_free
+#include <libavutil/rational.h>          // for AVRational
+#include <libswscale/swscale.h>          // for sws_getContext, SWS_BICUBIC
+struct SwsContext;
+}
 
 #define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
 #define SCALE_FLAGS SWS_BICUBIC
@@ -33,10 +44,10 @@ VP9Codec::~VP9Codec() {}
 
 // Configures the encoder. Returns true if successful, false otherwise.
 bool VP9Codec::configAndOpenEncoder(const AVFormatContext* oc,
-                                          AVStream* stream) const {
+                                    AVCodecContext* c,
+                                    AVStream* stream) const {
     stream->id = oc->nb_streams - 1;
 
-    AVCodecContext* c = stream->codec;
     c->codec_id = mCodecId;
     c->bit_rate = mParams.bitrate;
     c->width = mParams.width;
@@ -44,9 +55,15 @@ bool VP9Codec::configAndOpenEncoder(const AVFormatContext* oc,
     c->thread_count =
             std::min(8, android::base::System::get()->getCpuCoreCount() * 2);
 
-    stream->time_base = (AVRational){1, static_cast<int>(mParams.fps)};
-    c->time_base = stream->time_base;
-    stream->avg_frame_rate = stream->time_base;
+    // If you use a .WEBM container, the stream time base will automatically get changed
+    // to a millisecond time base. Even so, let's explicitly set it anyways just in case
+    // webm changes the format down the road.
+    stream->time_base = (AVRational){1, 1000};
+    // This time base should match up with the timebase we use when we get the timestamp
+    // for the frames (getHighResTimeUs()). In this case, it's the microsecond time base.
+    c->time_base = (AVRational){1, 1000000};
+    stream->avg_frame_rate = (AVRational){static_cast<int>(mParams.fps), 1};
+    c->framerate = stream->avg_frame_rate;
 
     // Key frame spacing
     c->gop_size = mParams.intra_spacing;

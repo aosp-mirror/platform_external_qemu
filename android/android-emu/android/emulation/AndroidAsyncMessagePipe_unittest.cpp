@@ -22,7 +22,7 @@
 #include "android/base/testing/TestLooper.h"
 #include "android/emulation/VmLock.h"
 #include "android/emulation/android_pipe_device.h"
-#include "android/emulation/hostpipe/HostGoldfishPipe.h"
+#include "android/emulation/hostdevices/HostGoldfishPipe.h"
 #include "android/emulation/testing/TestVmLock.h"
 
 #include <gmock/gmock.h>
@@ -62,7 +62,7 @@ protected:
         mLooper.reset();
     }
 
-    void writePacket(void* pipe, const std::vector<uint8_t>& data) {
+    void writePacket(int pipe, const std::vector<uint8_t>& data) {
         const uint32_t payloadSize = static_cast<uint32_t>(data.size());
         EXPECT_EQ(sizeof(uint32_t),
                   mDevice->write(pipe, &payloadSize, sizeof(uint32_t)));
@@ -70,7 +70,7 @@ protected:
         EXPECT_THAT(mDevice->write(pipe, data), IsOk());
     }
 
-    std::vector<uint8_t> readPacket(void* pipe) {
+    std::vector<uint8_t> readPacket(int pipe) {
         uint32_t responseSize = 0;
         EXPECT_EQ(sizeof(uint32_t),
                   mDevice->read(pipe, &responseSize, sizeof(uint32_t)));
@@ -101,21 +101,15 @@ protected:
         event.wait();
     }
 
-    void snapshotSave(void* pipe, base::Stream* stream) {
+    void snapshotSave(int pipe, base::Stream* stream) {
         RecursiveScopedVmLock lock;
-        auto cStream = reinterpret_cast<Stream*>(stream);
-        android_pipe_guest_pre_save(cStream);
-        android_pipe_guest_save(pipe, cStream);
-        android_pipe_guest_post_save(cStream);
+        mDevice->saveSnapshot(stream, pipe);
     }
 
-    void* snapshotLoad(base::Stream* stream) {
+    int snapshotLoad(base::Stream* stream) {
         RecursiveScopedVmLock lock;
-        auto cStream = reinterpret_cast<Stream*>(stream);
-        android_pipe_guest_pre_load(cStream);
-        void* pipe = mDevice->load(stream);
-        EXPECT_NE(pipe, nullptr);
-        android_pipe_guest_post_load(cStream);
+        int pipe = mDevice->loadSnapshotSinglePipe(stream);
+        EXPECT_GE(pipe, 0);
         return pipe;
     }
 
@@ -142,7 +136,7 @@ public:
 
 TEST_F(AndroidAsyncMessagePipeTest, Basic) {
     registerAsyncMessagePipeService(
-            new AndroidAsyncMessagePipe::Service<SimpleMessagePipe>(
+        std::make_unique<AndroidAsyncMessagePipe::Service<SimpleMessagePipe>>(
                     "TestPipe"));
 
     auto pipe = mDevice->connect("TestPipe");
@@ -253,9 +247,9 @@ public:
 
 // Attempt to close the pipe in the onMessage callback.
 TEST_F(AndroidAsyncMessagePipeTest, CloseOnMessage) {
-    auto pipeService = new AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>(
-            "ClosePipe");
-    registerAsyncMessagePipeService(pipeService);
+    registerAsyncMessagePipeService(
+        std::make_unique<AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>>(
+            "ClosePipe"));
 
     auto pipe = mDevice->connect("ClosePipe");
 
@@ -278,9 +272,9 @@ TEST_F(AndroidAsyncMessagePipeTest, CloseOnMessage) {
 // Verify closing the pipe skips processing future messages, with multiple
 // simultaneous messages.
 TEST_F(AndroidAsyncMessagePipeTest, CloseWithQueuedMessages) {
-    auto pipeService = new AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>(
-            "ClosePipe");
-    registerAsyncMessagePipeService(pipeService);
+    registerAsyncMessagePipeService(
+        std::make_unique<AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>>(
+            "ClosePipe"));
 
     auto pipe = mDevice->connect("ClosePipe");
 
@@ -311,9 +305,9 @@ TEST_F(AndroidAsyncMessagePipeTest, CloseWithQueuedMessages) {
 }
 
 TEST_F(AndroidAsyncMessagePipeTest, QueueCloseOnMessage) {
-    auto pipeService = new AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>(
-            "ClosePipe");
-    registerAsyncMessagePipeService(pipeService);
+    registerAsyncMessagePipeService(
+        std::make_unique<AndroidAsyncMessagePipe::Service<CloseOnMessagePipe>>(
+            "ClosePipe"));
 
     auto pipe = mDevice->connect("ClosePipe");
 
@@ -373,8 +367,9 @@ private:
 // bug: 118512307
 TEST_F(AndroidAsyncMessagePipeTest, DISABLED_Multithreaded) {
     registerAsyncMessagePipeService(
-            new AndroidAsyncMessagePipe::Service<MultithreadedEchoMessagePipe>(
-                    "Multithreaded"));
+        std::make_unique<AndroidAsyncMessagePipe::Service<MultithreadedEchoMessagePipe>>(
+            "Multithreaded"));
+
     auto pipe = mDevice->connect("Multithreaded");
 
     std::deque<std::vector<uint8_t>> packets;
@@ -459,21 +454,21 @@ TEST_F(AndroidAsyncMessagePipeTest, Snapshot) {
 
 // Verifies that getPipe can restore the pipe after snapshot load.
 TEST_F(AndroidAsyncMessagePipeTest, SnapshotGetPipe) {
-    auto pipeService =
-            new AndroidAsyncMessagePipe::Service<SimpleMessagePipe>("TestPipe");
-    registerAsyncMessagePipeService(pipeService);
+    typedef AndroidAsyncMessagePipe::Service<SimpleMessagePipe> PipeService;
+    auto pipeService = new PipeService("TestPipe");
+    registerAsyncMessagePipeService(std::unique_ptr<PipeService>(pipeService));
 
     auto pipe = mDevice->connect("TestPipe");
 
     AsyncMessagePipeHandle handle = static_cast<AndroidAsyncMessagePipe*>(
-                                            static_cast<AndroidPipe*>(pipe))
+                                            static_cast<AndroidPipe*>(mDevice->getHostPipe(pipe)))
                                             ->getHandle();
 
     base::MemStream snapshotStream;
     snapshotSave(pipe, &snapshotStream);
     mDevice->close(pipe);
 
-    auto restoredPipe = snapshotLoad(&snapshotStream);
+    auto restoredPipe = mDevice->getHostPipe(snapshotLoad(&snapshotStream));
     SimpleMessagePipe* derivedRestoredPipe = static_cast<SimpleMessagePipe*>(
             static_cast<AndroidPipe*>(restoredPipe));
 

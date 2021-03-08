@@ -45,10 +45,11 @@ public:
                                                           AndroidBufferQueue*)>;
 
     SurfaceFlinger(
+            int refreshRate,
             AndroidWindow* composeWindow,
             std::vector<ANativeWindowBuffer*> appBuffers,
             ComposerConstructFunc&& composerFunc,
-            Vsync::Callback&& vsyncFunc);
+            Vsync::Callback vsyncFunc);
     ~SurfaceFlinger();
 
     void start();

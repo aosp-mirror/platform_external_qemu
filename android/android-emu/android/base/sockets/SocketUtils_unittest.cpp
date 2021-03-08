@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 // Copyright 2014 The Android Open Source Project
 //
 // This software is licensed under the terms of the GNU General Public
@@ -223,3 +224,5 @@ TEST(SocketUtils, socketSendDoesNotGenerateSigPipe) {
 
 }  // namespace base
 }  // namespace android
+=======
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)

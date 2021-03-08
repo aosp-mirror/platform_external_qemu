@@ -9,13 +9,14 @@
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU General Public License for more details.
  */
-
 #pragma once
 
-#include "android/emulation/control/AdbInterface.h"
+namespace android {
+namespace emulation {
+class AdbInterface;
+}  // namespace emulation
+}  // namespace android
 
 namespace ScreenMask {
-
-    void loadMask(android::emulation::AdbInterface* adbInterface);
-
+    void loadMask();
 };

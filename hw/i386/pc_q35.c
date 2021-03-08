@@ -39,6 +39,8 @@
 #include "sysemu/kvm.h"
 #include "kvm_i386.h"
 #include "hw/kvm/clock.h"
+#include "sysemu/gvm.h"
+#include "gvm_i386.h"
 #include "hw/pci-host/q35.h"
 #include "exec/address-spaces.h"
 #include "hw/i386/pc.h"
@@ -52,6 +54,11 @@
 #include "qapi/error.h"
 #include "qemu/error-report.h"
 #include "sysemu/numa.h"
+
+#ifdef CONFIG_ANDROID
+#include "android/globals.h"
+#include "hw/acpi/goldfish_defs.h"
+#endif
 
 /* ICH9 AHCI has 6 ports */
 #define MAX_SATA_PORTS     6
@@ -161,6 +168,10 @@ static void pc_q35_init(MachineState *machine)
         kvm_pc_setup_irq_routing(pcmc->pci_enabled);
         pcms->gsi = qemu_allocate_irqs(kvm_pc_gsi_handler, gsi_state,
                                        GSI_NUM_PINS);
+    } else if (gvm_ioapic_in_kernel()) {
+        gvm_pc_setup_irq_routing(pcmc->pci_enabled);
+        pcms->gsi = qemu_allocate_irqs(gvm_pc_gsi_handler, gsi_state,
+                                       GSI_NUM_PINS);
     } else {
         pcms->gsi = qemu_allocate_irqs(gsi_handler, gsi_state, GSI_NUM_PINS);
     }
@@ -210,6 +221,10 @@ static void pc_q35_init(MachineState *machine)
 
     if (kvm_pic_in_kernel()) {
         i8259 = kvm_i8259_init(isa_bus);
+#if 0
+    } else if (gvm_pic_in_kernel()) {
+        i8259 = gvm_i8259_init(isa_bus);
+#endif
     } else if (xen_enabled()) {
         i8259 = xen_interrupt_controller_init();
     } else {
@@ -226,6 +241,42 @@ static void pc_q35_init(MachineState *machine)
     }
 
     pc_register_ferr_irq(pcms->gsi[13]);
+
+#ifdef CONFIG_ANDROID
+    uint32_t goldfish_sync_irq = GOLDFISH_SYNC_IRQ;
+    uint32_t goldfish_events_irq = GOLDFISH_EVENTS_IRQ;
+
+    /* TODO(fxbug.dev/66965): Currently for Fuchsia emulator, we swap the IRQ
+     * line of goldfish_sync (IRQ 21) and goldfish_events (IRQ 17) devices as
+     * the former one has an IRQ conflict with PCI devices using legacy IRQ
+     * handling.
+     */
+    if (!android_qemu_mode) {
+        goldfish_sync_irq = GOLDFISH_EVENTS_IRQ;
+        goldfish_events_irq = GOLDFISH_SYNC_IRQ;
+    }
+
+    sysbus_create_simple("goldfish_battery", GOLDFISH_BATTERY_IOMEM_BASE,
+                         pcms->gsi[GOLDFISH_BATTERY_IRQ]);
+    sysbus_create_simple("goldfish-events", GOLDFISH_EVENTS_IOMEM_BASE,
+                         pcms->gsi[goldfish_events_irq]);
+    sysbus_create_simple("goldfish_pipe", GOLDFISH_PIPE_IOMEM_BASE,
+                         pcms->gsi[GOLDFISH_PIPE_IRQ]);
+    sysbus_create_simple("goldfish_fb", GOLDFISH_FB_IOMEM_BASE,
+                         pcms->gsi[GOLDFISH_FB_IRQ]);
+    sysbus_create_simple("goldfish_audio", GOLDFISH_AUDIO_IOMEM_BASE,
+                         pcms->gsi[GOLDFISH_AUDIO_IRQ]);
+    sysbus_create_simple("goldfish_rtc", GOLDFISH_RTC_IOMEM_BASE,
+                         pcms->gsi[GOLDFISH_RTC_IRQ]);
+    sysbus_create_simple("goldfish_sync", GOLDFISH_SYNC_IOMEM_BASE,
+                         pcms->gsi[goldfish_sync_irq]);
+    sysbus_create_simple("goldfish_rotary", GOLDFISH_ROTARY_IOMEM_BASE,
+                         pcms->gsi[GOLDFISH_ROTARY_IRQ]);
+    g_assert(pci_create_simple(host_bus,
+                               PCI_DEVFN(GOLDFISH_ADDRESS_SPACE_PCI_SLOT,
+                                         GOLDFISH_ADDRESS_SPACE_PCI_FUNCTION),
+                               GOLDFISH_ADDRESS_SPACE_NAME));
+#endif
 
     assert(pcms->vmport != ON_OFF_AUTO__MAX);
     if (pcms->vmport == ON_OFF_AUTO_AUTO) {

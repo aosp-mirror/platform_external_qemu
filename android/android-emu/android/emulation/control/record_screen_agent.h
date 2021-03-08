@@ -35,13 +35,15 @@ typedef struct QAndroidRecordScreenAgent {
     // recording state.
     bool (*stopRecordingAsync)(void);
     // Get the state of the recorder.
-    RecorderState (*getRecorderState)(void);
+    RecorderStates (*getRecorderState)(void);
     // Take a screenshot.
-    void (*doSnap)(const char* dirname);
+    bool (*doSnap)(const char* dirname, uint32_t displayId);
 
-    bool (*startWebRtcModule)(const char* module, int fps);
+    // Setup a shared memory region. The framerate should ideally be fps
+    // Returns the name of the memory handle, or null if initialization failed.
+    const char* (*startSharedMemoryModule)(int desiredFps);
 
-    bool (*stopWebRtcModule)();
+    bool (*stopSharedMemoryModule)();
 } QAndroidRecordScreenAgent;
 
 ANDROID_END_HEADER

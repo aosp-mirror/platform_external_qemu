@@ -10,10 +10,10 @@
 
 #include "android/skin/qt/gl-texture-draw.h"
 
-#include "android/skin/qt/gl-common.h"
-#include "GLES2/gl2.h"
+#include <stdio.h>                            // for fprintf, stderr
 
-#include <cstring>
+#include "OpenGLESDispatch/GLESv2Dispatch.h"  // for GLESv2Dispatch
+#include "android/skin/qt/gl-common.h"        // for CHECK_GL_ERROR, createS...
 
 // Vertex shader for anti-aliasing - doesn't do anything special.
 static const char VertexShaderSource[] = R"(

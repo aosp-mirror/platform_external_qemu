@@ -94,7 +94,8 @@ typedef struct {
     void                                            (*restoreTexture)(SaveableTexture*);
     void                                            (*deleteRbo)(GLuint);
     void                                            (*blitFromCurrentReadBufferANDROID)(EGLImage);
-    void                                            (*fillGLESUsages)(android_studio::EmulatorGLESUsages*);
+    bool                                            (*vulkanInteropSupported)();
+    void                                            (*getSynciv)(GLsync, GLenum pname, GLsizei bufSize, GLsizei *length, GLint *values);
 } GLESiface;
 
 class GlLibrary;

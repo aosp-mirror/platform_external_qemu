@@ -21,8 +21,8 @@
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/base/Uuid.h"
-#include "android/metrics/proto/clientanalytics.pb.h"
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "google_logs_publishing.pb.h"
+#include "studio_stats.pb.h"
 #include "android/metrics/tests/MockMetricsReporter.h"
 
 #include <gtest/gtest.h>
@@ -50,7 +50,7 @@ public:
         PeriodicReporter::start(&mReporter, &mLooper);
     }
 
-    void TearDown() {
+    void TearDown() override {
         mReporter.mOnReportConditional = {};
         PeriodicReporter::stop();
     }

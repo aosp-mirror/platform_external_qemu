@@ -30,9 +30,14 @@
 // THE SOFTWARE.
 
 #include "android/skin/qt/video-player/QtVideoPlayerNotifier.h"
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 #include "android/skin/qt/video-player/VideoPlayerWidget.h"
 
 #include "android/recording/video/player/VideoPlayer.h"
+=======
+
+#include "android/recording/video/player/VideoPlayer.h"  // for VideoPlayer
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 
 namespace android {
 namespace videoplayer {

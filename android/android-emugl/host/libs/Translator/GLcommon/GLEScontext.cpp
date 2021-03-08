@@ -18,6 +18,7 @@
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
+#include "emugl/common/feature_control.h"
 
 #include <GLcommon/GLconversion_macros.h>
 #include <GLcommon/GLSnapshotSerializers.h>
@@ -40,6 +41,9 @@
 #include <string.h>
 
 #include <numeric>
+#include <map>
+
+using emugl::emugl_feature_is_enabled;
 
 //decleration
 static void convertFixedDirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,unsigned int nBytes,unsigned int strideOut,int attribSize);
@@ -67,11 +71,24 @@ void BufferBinding::onSave(android::base::Stream* stream) const {
 
 VAOState::VAOState(android::base::Stream* stream) {
     element_array_buffer_binding = stream->getBe32();
-    arraysMap = new ArraysMap();
-    size_t mapSize = stream->getBe32();
-    for (size_t i = 0; i < mapSize; i++) {
-        GLuint id = stream->getBe32();
-        arraysMap->emplace(id, new GLESpointer(stream));
+
+    vertexAttribInfo.clear();
+    for (uint32_t i = 0; i < kMaxVertexAttributes; ++i) {
+        vertexAttribInfo.emplace_back(stream);
+    }
+
+    uint64_t arraysMapPtr = stream->getBe64();
+
+    if (arraysMapPtr) {
+        arraysMap.reset(new ArraysMap());
+        size_t mapSize = stream->getBe32();
+        for (size_t i = 0; i < mapSize; i++) {
+            GLuint id = stream->getBe32();
+            arraysMap->emplace(id, new GLESpointer(stream));
+        }
+        legacy = true;
+    } else {
+        arraysMap.reset();
     }
 
     loadContainer(stream, bindingState);
@@ -81,12 +98,23 @@ VAOState::VAOState(android::base::Stream* stream) {
 
 void VAOState::onSave(android::base::Stream* stream) const {
     stream->putBe32(element_array_buffer_binding);
-    assert(arraysMap);
-    stream->putBe32(arraysMap->size());
-    for (const auto& ite : *arraysMap) {
-        stream->putBe32(ite.first);
-        assert(ite.second);
-        ite.second->onSave(stream);
+    for (uint32_t i = 0; i < kMaxVertexAttributes; ++i) {
+        vertexAttribInfo[i].onSave(stream);
+    }
+
+    if (arraysMap) {
+        stream->putBe64((uint64_t)(uintptr_t)arraysMap.get());
+    } else {
+        stream->putBe64(0);
+    }
+
+    if (arraysMap) {
+        stream->putBe32(arraysMap->size());
+        for (const auto& ite : *arraysMap) {
+            stream->putBe32(ite.first);
+            assert(ite.second);
+            ite.second->onSave(stream);
+        }
     }
 
     saveContainer(stream, bindingState);
@@ -149,7 +177,13 @@ void GLESConversionArrays::operator++(){
 
 GLDispatch     GLEScontext::s_glDispatch;
 emugl::Mutex   GLEScontext::s_lock;
-std::string*   GLEScontext::s_glExtensions= NULL;
+std::string*   GLEScontext::s_glExtensionsGles1 = NULL;
+bool           GLEScontext::s_glExtensionsGles1Initialized = false;
+std::string*   GLEScontext::s_glExtensions = NULL;
+bool           GLEScontext::s_glExtensionsInitialized = false;
+std::string    GLEScontext::s_glVendorGles1;
+std::string    GLEScontext::s_glRendererGles1;
+std::string    GLEScontext::s_glVersionGles1;
 std::string    GLEScontext::s_glVendor;
 std::string    GLEScontext::s_glRenderer;
 std::string    GLEScontext::s_glVersion;
@@ -294,12 +328,13 @@ void GLEScontext::removeVertexArrayObject(GLuint array) {
         setVertexArrayObject(0);
     }
 
-    ArraysMap* map = m_vaoStateMap[array].arraysMap;
+    auto& state = m_vaoStateMap[array];
 
-    for (auto elem : *map) {
-        delete elem.second;
+    if (state.arraysMap) {
+        for (auto elem : *(state.arraysMap)) {
+            delete elem.second;
+        }
     }
-    delete map;
 
     m_vaoStateMap.erase(array);
 }
@@ -322,14 +357,15 @@ GLuint GLEScontext::getVertexArrayObject() const {
 }
 
 bool GLEScontext::vertexAttributesBufferBacked() {
-    int numVtxAttrib = std::min(s_glSupport.maxVertexAttribs,
-            static_cast<int>(m_currVaoState.bufferBindings().size()));
-    for (int i = 0; i < numVtxAttrib; i++) {
-        if (m_currVaoState[i]->isEnable() &&
-            !m_currVaoState.bufferBindings()[m_currVaoState[i]->getBindingIndex()].buffer) {
+    const auto& info = m_currVaoState.attribInfo_const();
+    for (uint32_t i = 0; i  < kMaxVertexAttributes; ++i) {
+        const auto& pointerInfo = info[i];
+        if (pointerInfo.isEnable() &&
+            !m_currVaoState.bufferBindings()[pointerInfo.getBindingIndex()].buffer) {
             return false;
         }
     }
+
     return true;
 }
 
@@ -347,16 +383,16 @@ void GLEScontext::initEglIface(EGLiface* iface) {
 
 void GLEScontext::initGlobal(EGLiface* iface) {
     initEglIface(iface);
+    s_lock.lock();
     if (!s_glExtensions) {
         initCapsLocked(reinterpret_cast<const GLubyte*>(
                 getHostExtensionsString(&s_glDispatch).c_str()));
-        // NOTE: the string below corresponds to the extensions reported
-        // by this context, which is initialized in each GLESv1 or GLESv2
-        // context implementation, based on the parsing of the host
-        // extensions string performed by initCapsLocked(). I.e. it will
-        // be populated after calling this ::init() method.
         s_glExtensions = new std::string();
     }
+    if (!s_glExtensionsGles1) {
+        s_glExtensionsGles1 = new std::string();
+    }
+    s_lock.unlock();
 }
 
 void GLEScontext::init() {
@@ -577,12 +613,11 @@ GLEScontext::~GLEScontext() {
     m_defaultReadFBO = 0;
 
     for (auto&& vao : m_vaoStateMap) {
-        ArraysMap* map = vao.second.arraysMap;
-        if (map) {
-            for (auto elem : *map) {
+        if (vao.second.arraysMap) {
+            for (auto elem : *(vao.second.arraysMap)) {
                 delete elem.second;
             }
-            delete map;
+            vao.second.arraysMap.reset();
         }
     }
 
@@ -905,10 +940,20 @@ ObjectDataPtr GLEScontext::loadObject(NamedObjectType type,
 
 const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data, GLsizei dataSize, bool normalize, bool isInt) {
     GLuint bufferName = m_arrayBuffer;
-    auto vertexAttrib = m_currVaoState.find(arrType);
-    if (vertexAttrib == m_currVaoState.end()) {
-        return nullptr;
+    GLESpointer* glesPointer = nullptr;
+
+    if (m_currVaoState.it->second.legacy) {
+        auto vertexAttrib = m_currVaoState.find(arrType);
+        if (vertexAttrib == m_currVaoState.end()) {
+            return nullptr;
+        }
+        glesPointer = m_currVaoState[arrType];
+    } else {
+        uint32_t attribIndex = (uint32_t)arrType;
+        if (attribIndex > kMaxVertexAttributes) return nullptr;
+        glesPointer = m_currVaoState.attribInfo().data() + (uint32_t)arrType;
     }
+
     if(bufferName) {
         unsigned int offset = SafeUIntFromPointer(data);
         GLESbuffer* vbo = static_cast<GLESbuffer*>(
@@ -921,10 +966,12 @@ const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsi
 #endif
             return nullptr;
         }
-        m_currVaoState[arrType]->setBuffer(size,type,stride,vbo,bufferName,offset,normalize, isInt);
+
+        glesPointer->setBuffer(size,type,stride,vbo,bufferName,offset,normalize, isInt);
+
         return  static_cast<const unsigned char*>(vbo->getData()) +  offset;
     }
-    m_currVaoState[arrType]->setArray(size,type,stride,data,dataSize,normalize,isInt);
+    glesPointer->setArray(size,type,stride,data,dataSize,normalize,isInt);
     return data;
 }
 
@@ -941,7 +988,12 @@ void GLEScontext::enableArr(GLenum arr,bool enable) {
 }
 
 bool GLEScontext::isArrEnabled(GLenum arr) {
-    return m_currVaoState[arr]->isEnable();
+    if (m_currVaoState.it->second.legacy) {
+        return m_currVaoState[arr]->isEnable();
+    } else {
+        if ((uint32_t)arr > kMaxVertexAttributes) return false;
+        return m_currVaoState.attribInfo()[(uint32_t)arr].isEnable();
+    }
 }
 
 const GLESpointer* GLEScontext::getPointer(GLenum arrType) {
@@ -1140,7 +1192,7 @@ void GLEScontext::convertIndirectVBO(GLESConversionArrays& cArrs,GLsizei count,G
     cArrs.setArr(data,p->getStride(),GL_FLOAT);
 }
 
-void GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
+GLuint GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
     switch(target) {
     case GL_ARRAY_BUFFER:
         m_arrayBuffer = buffer;
@@ -1182,15 +1234,20 @@ void GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
         m_arrayBuffer = buffer;
         break;
     }
+
+    if (!buffer) return 0;
+
+    auto sg = m_shareGroup.get();
+
+    if (!sg) return 0;
+
+    return sg->ensureObjectOnBind(NamedObjectType::VERTEXBUFFER, buffer);
 }
 
 void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer,
         GLintptr offset, GLsizeiptr size, GLintptr stride, bool isBindBase) {
     VertexAttribBindingVector* bindings = nullptr;
     switch (target) {
-    case GL_TRANSFORM_FEEDBACK_BUFFER:
-        bindings = &m_indexedTransformFeedbackBuffers;
-        break;
     case GL_UNIFORM_BUFFER:
         bindings = &m_indexedUniformBuffers;
         break;
@@ -1337,8 +1394,6 @@ GLuint GLEScontext::getBuffer(GLenum target) {
 
 GLuint GLEScontext::getIndexedBuffer(GLenum target, GLuint index) {
     switch (target) {
-    case GL_TRANSFORM_FEEDBACK_BUFFER:
-        return m_indexedTransformFeedbackBuffers[index].buffer;
     case GL_UNIFORM_BUFFER:
         return m_indexedUniformBuffers[index].buffer;
     case GL_ATOMIC_COUNTER_BUFFER:
@@ -1597,27 +1652,34 @@ void GLEScontext::setClearStencil(GLint s) {
     m_clearStencil = s;
 }
 
-const char * GLEScontext::getExtensionString() {
+const char * GLEScontext::getExtensionString(bool isGles1) {
     const char * ret;
     s_lock.lock();
-    if (s_glExtensions)
-        ret = s_glExtensions->c_str();
-    else
-        ret="";
+    if (isGles1) {
+        if (s_glExtensionsGles1)
+            ret = s_glExtensionsGles1->c_str();
+        else
+            ret="";
+    } else {
+        if (s_glExtensions)
+            ret = s_glExtensions->c_str();
+        else
+            ret="";
+    }
     s_lock.unlock();
     return ret;
 }
 
-const char * GLEScontext::getVendorString() const {
-    return s_glVendor.c_str();
+const char * GLEScontext::getVendorString(bool isGles1) const {
+    return isGles1 ? s_glVendorGles1.c_str() : s_glVendor.c_str();
 }
 
-const char * GLEScontext::getRendererString() const {
-    return s_glRenderer.c_str();
+const char * GLEScontext::getRendererString(bool isGles1) const {
+    return isGles1 ? s_glRendererGles1.c_str() : s_glRenderer.c_str();
 }
 
-const char * GLEScontext::getVersionString() const {
-    return s_glVersion.c_str();
+const char * GLEScontext::getVersionString(bool isGles1) const {
+    return isGles1 ? s_glVersionGles1.c_str() : s_glVersion.c_str();
 }
 
 void GLEScontext::getGlobalLock() {
@@ -1633,6 +1695,11 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     const char* cstring = (const char*)extensionString;
 
     s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,&s_glSupport.maxVertexAttribs);
+
+    if (s_glSupport.maxVertexAttribs > kMaxVertexAttributes) {
+        s_glSupport.maxVertexAttribs = kMaxVertexAttributes;
+    }
+
     s_glDispatch.glGetIntegerv(GL_MAX_CLIP_PLANES,&s_glSupport.maxClipPlane);
     s_glDispatch.glGetIntegerv(GL_MAX_LIGHTS,&s_glSupport.maxLights);
     s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_SIZE,&s_glSupport.maxTexSize);
@@ -1653,6 +1720,66 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     s_glDispatch.glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, &s_glSupport.maxShaderStorageBufferBindings);
     s_glDispatch.glGetIntegerv(GL_MAX_DRAW_BUFFERS, &s_glSupport.maxDrawBuffers);
     s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, &s_glSupport.maxVertexAttribBindings);
+
+    // Compressed texture format query
+    if(emugl_feature_is_enabled(android::featurecontrol::NativeTextureDecompression)) {
+        bool hasEtc2Support = false;
+        bool hasAstcSupport = false;
+        int numCompressedFormats = 0;
+        s_glDispatch.glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &numCompressedFormats);
+        if (numCompressedFormats > 0) {
+            int numEtc2Formats = 0;
+            int numAstcFormats = 0;
+            int numEtc2FormatsSupported = 0;
+            int numAstcFormatsSupported = 0;
+
+            std::map<GLint, bool> found;
+            forEachEtc2Format([&numEtc2Formats, &found](GLint format) { ++numEtc2Formats; found[format] = false;});
+            forEachAstcFormat([&numAstcFormats, &found](GLint format) { ++numAstcFormats; found[format] = false;});
+
+            std::vector<GLint> formats(numCompressedFormats);
+            s_glDispatch.glGetIntegerv(GL_COMPRESSED_TEXTURE_FORMATS, formats.data());
+
+            for (int i = 0; i < numCompressedFormats; ++i) {
+                GLint format = formats[i];
+                if (isEtc2Format(format)) {
+                    ++numEtc2FormatsSupported;
+                    found[format] = true;
+                } else if (isAstcFormat(format)) {
+                    ++numAstcFormatsSupported;
+                    found[format] = true;
+                }
+            }
+
+            if (numEtc2Formats == numEtc2FormatsSupported) {
+                hasEtc2Support = true; // Supports ETC2 underneath
+            } else {
+                // It is unusual to support only some. Record what happened.
+                fprintf(stderr, "%s: Not supporting etc2: %d vs %d\n", __func__,
+                        numEtc2FormatsSupported, numEtc2Formats);
+                for (auto it : found) {
+                    if (!it.second) {
+                        fprintf(stderr, "%s: Not found: 0x%x\n", __func__, it.first);
+                    }
+                }
+            }
+
+            if (numAstcFormats == numAstcFormatsSupported) {
+                hasAstcSupport = true; // Supports ASTC underneath
+            } else {
+                // It is unusual to support only some. Record what happened.
+                fprintf(stderr, "%s: Not supporting astc: %d vs %d\n", __func__,
+                        numAstcFormatsSupported, numAstcFormats);
+                for (auto it : found) {
+                    if (!it.second) {
+                        fprintf(stderr, "%s: Not found: 0x%x\n", __func__, it.first);
+                    }
+                }
+            }
+        }
+        s_glSupport.hasEtc2Support = hasEtc2Support;
+        s_glSupport.hasAstcSupport = hasAstcSupport;
+    }
 
     // Clear GL error in case these enums not supported.
     s_glDispatch.glGetError();
@@ -1712,14 +1839,48 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     if (::isCoreProfile() ||
         strstr(cstring,"GL_ARB_color_buffer_float")!=NULL ||
         strstr(cstring,"GL_EXT_color_buffer_float")!=NULL)
-        s_glSupport.GL_EXT_color_buffer_float = true;
+        s_glSupport.ext_GL_EXT_color_buffer_float = true;
+
+    if (::isCoreProfile() ||
+        strstr(cstring,"GL_EXT_color_buffer_half_float")!=NULL)
+        s_glSupport.ext_GL_EXT_color_buffer_half_float = true;
+
+    if (strstr(cstring,"GL_EXT_shader_framebuffer_fetch")!=NULL) {
+        s_glSupport.ext_GL_EXT_shader_framebuffer_fetch = true;
+    }
 
     if (!(Version((const char*)glVersion) < Version("3.0")) || strstr(cstring,"GL_OES_rgb8_rgba8")!=NULL)
         s_glSupport.GL_OES_RGB8_RGBA8 = true;
 
+    if (strstr(cstring, "GL_EXT_memory_object") != NULL) {
+        s_glSupport.ext_GL_EXT_memory_object = true;
+    }
+
+    if (strstr(cstring, "GL_EXT_semaphore") != NULL) {
+        s_glSupport.ext_GL_EXT_semaphore = true;
+    }
+
+    // ASTC
+    if (strstr(cstring, "GL_KHR_texture_compression_astc_ldr") != NULL) {
+        s_glSupport.ext_GL_KHR_texture_compression_astc_ldr = true;
+    }
+
+    // BPTC extension detection
+    if (emugl_feature_is_enabled(android::featurecontrol::BptcTextureSupport)) {
+        if ((strstr(cstring, "GL_EXT_texture_compression_bptc") != NULL) ||
+            (strstr(cstring, "GL_ARB_texture_compression_bptc") != NULL)) {
+            s_glSupport.hasBptcSupport = true;
+        }
+    }
+
+    if (emugl_feature_is_enabled(android::featurecontrol::S3tcTextureSupport)) {
+        if (strstr(cstring, "GL_EXT_texture_compression_s3tc") != NULL) {
+            s_glSupport.hasS3tcSupport = true;
+        }
+    }
 }
 
-void GLEScontext::buildStrings(const char* baseVendor,
+void GLEScontext::buildStrings(bool isGles1, const char* baseVendor,
         const char* baseRenderer, const char* baseVersion, const char* version)
 {
     static const char VENDOR[]   = {"Google ("};
@@ -1743,28 +1904,32 @@ void GLEScontext::buildStrings(const char* baseVendor,
         version = "N/A";
     }
 
+    std::string& vendorString = isGles1 ? s_glVendorGles1 : s_glVendor;
+    std::string& rendererString = isGles1 ? s_glRendererGles1 : s_glRenderer;
+    std::string& versionString = isGles1 ? s_glVersionGles1 : s_glVersion;
+
     size_t baseVendorLen = strlen(baseVendor);
-    s_glVendor.clear();
-    s_glVendor.reserve(baseVendorLen + VENDOR_LEN + 1);
-    s_glVendor.append(VENDOR, VENDOR_LEN);
-    s_glVendor.append(baseVendor, baseVendorLen);
-    s_glVendor.append(")", 1);
+    vendorString.clear();
+    vendorString.reserve(baseVendorLen + VENDOR_LEN + 1);
+    vendorString.append(VENDOR, VENDOR_LEN);
+    vendorString.append(baseVendor, baseVendorLen);
+    vendorString.append(")", 1);
 
     size_t baseRendererLen = strlen(baseRenderer);
-    s_glRenderer.clear();
-    s_glRenderer.reserve(baseRendererLen + RENDERER_LEN + 1);
-    s_glRenderer.append(RENDERER, RENDERER_LEN);
-    s_glRenderer.append(baseRenderer, baseRendererLen);
-    s_glRenderer.append(")", 1);
+    rendererString.clear();
+    rendererString.reserve(baseRendererLen + RENDERER_LEN + 1);
+    rendererString.append(RENDERER, RENDERER_LEN);
+    rendererString.append(baseRenderer, baseRendererLen);
+    rendererString.append(")", 1);
 
     size_t baseVersionLen = strlen(baseVersion);
     size_t versionLen = strlen(version);
-    s_glVersion.clear();
-    s_glVersion.reserve(baseVersionLen + versionLen + 3);
-    s_glVersion.append(version, versionLen);
-    s_glVersion.append(" (", 2);
-    s_glVersion.append(baseVersion, baseVersionLen);
-    s_glVersion.append(")", 1);
+    versionString.clear();
+    versionString.reserve(baseVersionLen + versionLen + 3);
+    versionString.append(version, versionLen);
+    versionString.append(" (", 2);
+    versionString.append(baseVersion, baseVersionLen);
+    versionString.append(")", 1);
 }
 
 bool GLEScontext::isTextureUnitEnabled(GLenum unit) {
@@ -1848,14 +2013,6 @@ bool GLEScontext::glGetIntegerv(GLenum pname, GLint *params)
 
         case GL_ACTIVE_TEXTURE:
             *params = m_activeTexture+GL_TEXTURE0;
-            break;
-
-        case GL_IMPLEMENTATION_COLOR_READ_TYPE_OES:
-            *params = GL_UNSIGNED_BYTE;
-            break;
-
-        case GL_IMPLEMENTATION_COLOR_READ_FORMAT_OES:
-            *params = GL_RGBA;
             break;
 
         case GL_MAX_TEXTURE_SIZE:
@@ -2658,6 +2815,12 @@ void GLEScontext::blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
     bool shouldBlit = setupImageBlitForTexture(width, height, internalFormat);
 
     if (!shouldBlit) return;
+
+    // b/159670873: The texture to blit doesn't necessarily match the display
+    // size. If it doesn't match, then we might not be using the right mipmap
+    // level, which can result in a black screen. Set to always use level 0.
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 
     gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

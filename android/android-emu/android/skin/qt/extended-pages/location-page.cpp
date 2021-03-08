@@ -9,42 +9,64 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#ifdef _MSC_VER
+#define _USE_MATH_DEFINES
+#endif
+
 #include "android/skin/qt/extended-pages/location-page.h"
 
 #include "android/base/memory/LazyInstance.h"
+#include "android/cmdline-option.h"
 #include "android/emulation/control/location_agent.h"
+#include "android/featurecontrol/feature_control.h"
+#include "android/location/MapsKey.h"
+#include "android/location/MapsKeyFileParser.h"
+#include "android/location/StudioMapsKey.h"
 #include "android/globals.h"
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
 #include "android/metrics/MetricsReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "studio_stats.pb.h"
 #include "android/settings-agent.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/logging-category.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/stylesheet.h"
+#include "android/utils/path.h"
 
 #include <QFileDialog>
+#include <QItemDelegate>
+#include <QMovie>
 #include <QSettings>
+#ifdef USE_WEBENGINE
+#include <QWebEngineProfile>
+#endif // USE_WEBENGINE
+
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 #include <string>
 #include <utility>
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
+#include <math.h>
+
+#define DEBUG_PLAYBACK 0
 
 using android::base::AutoLock;
 using android::base::LazyInstance;
 
-static constexpr double kGplexLon = -122.084;
-static constexpr double kGplexLat =   37.422;
-static constexpr double kGplexAlt =    5.0; // Meters
-static constexpr double MAX_SPEED =  666.0; // Arbitrary (~speed of sound in knots)
+static constexpr double kGplexLon       = -122.084;
+static constexpr double kGplexLat       =   37.422;
+static constexpr double kGplexAlt       =    5.0; // Meters
+static constexpr double MAX_SPEED       =  666.0; // Arbitrary (~speed of sound in knots)
+static constexpr double UPDATE_INTERVAL = 1000.0; // 1 second
 
 static double getHeading(double startLat, double startLon, double endLat, double endLon);
 static double getDistanceNm(double startLat, double startLon, double endLat, double endLon);
 static void sendLocationToDevice();
-static void getDeviceLocation(double* pLatitude, double* pLongitude,
-                              double* pAltitude, double* pVelocity, double* pHeading);
 static void getDeviceLocationFromSettings(double* pOutLatitude,
                                           double* pOutLongitude,
                                           double* pOutAltitude,
@@ -97,58 +119,166 @@ static void updateThreadLoop() {
 
 LocationPage::LocationPage(QWidget *parent) :
     QWidget(parent),
-    mUi(new Ui::LocationPage)
+    mUi(new Ui::LocationPage),
+    mPaneInvocationTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::UNKONWN_EMULATOR_UI_EVENT_TYPE,
+              android_studio::EmulatorUiEvent::EXTENDED_WINDOW_OPEN))
+
+#ifdef USE_WEBENGINE
+    ,
+    mShouldRefreshPageOnReconnect(false),
+    mNetworkConnectivityManager(nullptr)
+#endif // USE_WEBENGINE
 {
     sGlobals->locationPagePtr = this;
     mUi->setupUi(this);
-    mTimer.setSingleShot(true);
 
-    mUi->loc_latitudeInput->setMinValue(-90.0);
-    mUi->loc_latitudeInput->setMaxValue(90.0);
-    QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout);
-    QObject::connect(this, &LocationPage::locationUpdateRequired,
-                     this, &LocationPage::updateDisplayedLocation);
-    QObject::connect(this, &LocationPage::populateNextGeoDataChunk,
-                     this, &LocationPage::populateTableByChunks,
-                     Qt::QueuedConnection);
+    if (android_cmdLineOptions && android_cmdLineOptions->no_location_ui) {
+        qCDebug(emu) << "Location UI disabled by command-line option.";
+        return;
+    }
+    bool useLocationV2 = false;
 
-    setButtonEnabled(mUi->loc_playStopButton, getSelectedTheme(), false);
+#ifdef USE_WEBENGINE
+    mUi->loc_importGpxKmlButton->setEnabled(true);
+    mUi->loc_importGpxKmlButton_route->setEnabled(true);
 
-    // Set the GUI to the current values
-    double curLat, curLon, curAlt, curVelocity, curHeading;
-    getDeviceLocation(&curLat, &curLon, &curAlt, &curVelocity, &curHeading);
-    updateDisplayedLocation(curLat, curLon, curAlt, curVelocity, curHeading);
+    if (feature_is_enabled(kFeature_LocationUiV2)) {
+        useLocationV2 = true;
+        auto mapsKeyHolder = android::location::MapsKey::get();
+        QObject::connect(this,
+                         &LocationPage::onMapsKeyUpdated,
+                         this,
+                         &LocationPage::setUpWebEngine,
+                         Qt::QueuedConnection);
+        // Always prefer user-provided maps key
+        if (strlen(mapsKeyHolder->userMapsKey()) == 0) {
+            auto studioMapsKey = android::location::StudioMapsKey::create(
+                [](android::base::StringView mapsFile, void* opaque) {
+                    auto s = reinterpret_cast<LocationPage*>(opaque);
+                    if (!mapsFile.empty()) {
+                        auto mapsKeyHolder = android::location::MapsKey::get();
+                        auto mapsKey = android::location::parseMapsKeyFromFile(
+                                mapsFile);
+                        mapsKeyHolder->setAndroidStudioMapsKey(mapsKey);
+                        s->mMapsApiKey = mapsKeyHolder->androidStudioMapsKey();
+                    }
+                    emit s->onMapsKeyUpdated();
+                }, this);
+        } else {
+            mMapsApiKey = mapsKeyHolder->userMapsKey();
+            emit onMapsKeyUpdated();
+        }
+    }
+#endif // USE_WEBENGINE
 
-    mUi->loc_altitudeInput->setText(QString::number(curAlt, 'f', 1));
-    mUi->loc_speedInput->setText(QString::number(curVelocity, 'f', 1));
-    mUi->loc_latitudeInput->setValue(curLat);
-    mUi->loc_longitudeInput->setValue(curLon);
+    // Connect the tab signaling
+    connect(mUi->locationTabs, SIGNAL(currentChanged(int)), this, SLOT(on_tabChanged()));
 
-    QSettings settings;
-    mUi->loc_playbackSpeed->setCurrentIndex(
-            getLocationPlaybackSpeedFromSettings());
-    mUi->loc_pathTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    QString location_data_file =
-        getLocationPlaybackFilePathFromSettings();
-    mGeoDataLoader = GeoDataLoaderThread::newInstance(
-            this,
-            SLOT(geoDataThreadStarted()),
-            SLOT(startupGeoDataThreadFinished(QString, bool, QString)));
-    mGeoDataLoader->loadGeoDataFromFile(location_data_file, &mGpsFixesArray);
+    if (useLocationV2) {
+        // Hide the old tab on the Location page
+        mOfflineTab = mUi->locationTabs->widget(3);
+        mUi->locationTabs->removeTab(3);
+        // Hide the V2 widgets that are not functional yet
+        mUi->locationTabs->removeTab(2); // "Settings"
+        mUi->loc_pointSortBox->hide();   // "Sort by ..."
+        mUi->locationTabs->setCurrentIndex(0);
+    } else {
+        mUi->locationTabs->setTabText(3, ""); // "V1"
+        // Hide the new tabs on the Location page
+        mUi->locationTabs->removeTab(2); // "Settings"
+        mUi->locationTabs->removeTab(1); // "Routes"
+        mUi->locationTabs->removeTab(0); // "Single points"
+    }
 
-    using android::metrics::PeriodicReporter;
-    mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
-            60 * 10 * 1000,  // reporting period
-            [this](android_studio::AndroidStudioEvent* event) {
-                if (mLocationUsed) {
-                    event->mutable_emulator_details()
-                            ->mutable_used_features()
-                            ->set_gps(true);
-                    mMetricsReportingToken.reset();  // Report it only once.
-                    return true;
-                }
-                return false;
-    });
+    if (useLocationV2) {
+#ifdef USE_WEBENGINE
+        mNetworkConnectivityManager = new NetworkConnectivityManager(this);
+        connect(mNetworkConnectivityManager,
+                SIGNAL(connectivityStateChanged(NetworkConnectivityManager::State)),
+                this,
+                SLOT(onConnectivityStateChanged(NetworkConnectivityManager::State)));
+
+        mTimer.setSingleShot(true);
+        QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout_v2);
+        scanForPoints();
+        scanForRoutes();
+
+        mUi->loc_playRouteButton->setEnabled(false);
+
+        SettingsTheme theme = getSelectedTheme();
+        QMovie* movie = new QMovie(this);
+        movie->setFileName(":/" +
+                           Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
+                           "/circular_spinner_transparent");
+        if (movie->isValid()) {
+            movie->start();
+            mUi->loc_overlaySpinner->setMovie(movie);
+        }
+#endif // USE_WEBENGINE
+    } else { // !useLocationV2
+        mUi->loc_latitudeInput->setMinValue(-90.0);
+        mUi->loc_latitudeInput->setMaxValue(90.0);
+        mTimer.setSingleShot(true);
+        QObject::connect(&mTimer, &QTimer::timeout, this, &LocationPage::timeout);
+        QObject::connect(this, &LocationPage::locationUpdateRequired,
+                         this, &LocationPage::updateDisplayedLocation);
+        QObject::connect(this, &LocationPage::populateNextGeoDataChunk,
+                         this, &LocationPage::populateTableByChunks,
+                         Qt::QueuedConnection);
+
+        setButtonEnabled(mUi->loc_playStopButton, getSelectedTheme(), false);
+
+        // Set the GUI to the current values
+        double curLat, curLon, curAlt, curVelocity, curHeading;
+        getDeviceLocation(&curLat, &curLon, &curAlt, &curVelocity, &curHeading);
+        updateDisplayedLocation(curLat, curLon, curAlt, curVelocity, curHeading);
+
+        mUi->loc_altitudeInput->setText(QString::number(curAlt, 'f', 1));
+        mUi->loc_speedInput->setText(QString::number(curVelocity, 'f', 1));
+        mUi->loc_latitudeInput->setValue(curLat);
+        mUi->loc_longitudeInput->setValue(curLon);
+
+        QSettings settings;
+        mUi->loc_playbackSpeed->setCurrentIndex(
+                getLocationPlaybackSpeedFromSettings());
+        mUi->loc_pathTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        QString location_data_file =
+            getLocationPlaybackFilePathFromSettings();
+        mGeoDataLoader.reset(GeoDataLoaderThread::newInstance(
+                this,
+                SLOT(geoDataThreadStarted()),
+                SLOT(startupGeoDataThreadFinished(QString, bool, QString))));
+        mGeoDataLoader->loadGeoDataFromFile(location_data_file, &mGpsFixesArray);
+
+        using android::metrics::PeriodicReporter;
+        mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
+                60 * 10 * 1000,  // reporting period
+                [this](android_studio::AndroidStudioEvent* event) {
+                    if (mLocationUsed) {
+                        event->mutable_emulator_details()
+                                ->mutable_used_features()
+                                ->set_gps(true);
+                        mMetricsReportingToken.reset();  // Report it only once.
+                        return true;
+                    }
+                    return false;
+        });
+    }
+}
+
+
+void LocationPage::on_tabChanged() {
+    switch(mUi->locationTabs->currentIndex()) {
+        case 0:
+            mPaneInvocationTracker->increment("SINGLE_POINT");
+            break;
+        case 1:
+            mPaneInvocationTracker->increment("ROUTES");
+            break;
+        default:
+            LOG(WARNING) << "Unknown tab selected.";
+    }
 }
 
 LocationPage::~LocationPage() {
@@ -160,6 +290,10 @@ LocationPage::~LocationPage() {
         // ignore all signals from it and wait for it to finish.
         mGeoDataLoader->blockSignals(true);
         mGeoDataLoader->wait();
+    }
+    if (mRouteSender != nullptr) {
+        mRouteSender->blockSignals(true);
+        mRouteSender->wait();
     }
     mUi->loc_pathTable->blockSignals(true);
     mUi->loc_pathTable->clear();
@@ -197,6 +331,16 @@ void LocationPage::shutDown() {
     sGlobals->updateThread.wait();
 }
 
+void LocationPage::updateTheme() {
+    // Set the icons in the Mode of Travel pull-down.
+    // (I couldn't figure out how to extend adjustAllButtonsForTheme()
+    //  to include QComboBox items that have icons. I could find all
+    //  QComboBox items that have icons, but I could not read their
+    //  properties to get 'iconThemeName'.)
+    points_updateTheme();
+    routes_updateTheme();
+}
+
 void LocationPage::on_loc_GpxKmlButton_clicked()
 {
     // Use dialog to get file name
@@ -208,9 +352,9 @@ void LocationPage::on_loc_GpxKmlButton_clicked()
     // Asynchronously parse the file with geo data.
     // If the file is big enough, parsing it synchronously will cause a noticeable
     // hiccup in the UI.
-    mGeoDataLoader = GeoDataLoaderThread::newInstance(this,
+    mGeoDataLoader.reset(GeoDataLoaderThread::newInstance(this,
                                                       SLOT(geoDataThreadStarted()),
-                                                      SLOT(geoDataThreadFinished(QString, bool, QString)));
+                                                      SLOT(geoDataThreadFinished(QString, bool, QString))));
     mGeoDataLoader->loadGeoDataFromFile(fileName, &mGpsFixesArray);
 }
 
@@ -274,6 +418,47 @@ void LocationPage::updateDisplayedLocation(double lat, double lon, double alt,
 void LocationPage::on_loc_playbackSpeed_currentIndexChanged(int index) {
     writeLocationPlaybackSpeedToSettings(index);
 }
+
+void LocationPage::onWebPageLoadFinished(bool okay) {
+    // qDebug() << "Web page loaded" << (okay ? "successullfy" : "with errors");
+#ifdef USE_WEBENGINE
+    if (mNetworkConnectivityManager == nullptr ) { return; }
+    mShouldRefreshPageOnReconnect = !mNetworkConnectivityManager->isOnline();
+#endif // USE_WEBENGINE
+}
+
+#ifdef USE_WEBENGINE
+void LocationPage::onConnectivityStateChanged(NetworkConnectivityManager::State state) {
+    // QString str = "NetworkConnectivityManager state changed. ";
+
+    switch (state) {
+    case NetworkConnectivityManager::Unknown:
+        // str += "Unknown";
+        break;
+    case NetworkConnectivityManager::NotAvailable:
+        // str += "NotAvailable";
+        onConnectivityOffline();
+        break;
+    case NetworkConnectivityManager::Connected:
+        // str += "Connected";
+        onConnectivityOnline();
+        break;
+    }
+
+    // qCDebug(emu) << str;
+}
+
+void LocationPage::onConnectivityOffline() {
+    // do nothing
+}
+
+void LocationPage::onConnectivityOnline() {
+    if (mShouldRefreshPageOnReconnect) {
+        mUi->loc_pointWebEngineView->reload();
+        mUi->loc_routeWebEngineView->reload();
+    }
+}
+#endif // USE_WEBENGINE
 
 bool LocationPage::validateCell(QTableWidget* table,
                                 int row,
@@ -457,6 +642,20 @@ void LocationPage::locationPlaybackStop()
     mNowPlaying = false;
 }
 
+void LocationPage::locationPlaybackStop_v2()
+{
+    mTimer.stop();
+    mNextRoutePointIdx = -1;
+    playRouteStateChanged(true);
+    if (mSavedRoutePlayingItem != nullptr) {
+        mUi->loc_routeList->setCurrentItem(nullptr);
+        mUi->loc_routeList->setCurrentItem(mSavedRoutePlayingItem);
+    } else {
+        emit mMapBridge->showRouteOnMap(mRouteJson, false);
+    }
+
+    mNowPlaying = false;
+}
 
 void LocationPage::timeout() {
     bool cellOK;
@@ -553,6 +752,93 @@ void LocationPage::timeout() {
     }
 }
 
+// Advance (up to) one second along the route
+void LocationPage::timeout_v2() {
+    double latNow = 0.0;
+    double lngNow = 0.0;
+    double altNow = 0.0;
+
+    if (mMsIntoSegment >= mSegmentDurationMs) {
+        // Advance to the next segment in the route
+        mNextRoutePointIdx++;
+        if (mNextRoutePointIdx >= mRouteNumPoints) {
+            // End of the route
+            if (mUi->loc_repeatRoute->isChecked()) {
+                // We are at the end and should repeat
+                mTimer.stop();
+                locationPlaybackStart_v2(mIsGpxKmlPlayback);
+            } else {
+                // We are at the end and should stop
+                locationPlaybackStop_v2();
+            }
+            return;
+        }
+        double deltaTimeSec = mPlaybackElements[mNextRoutePointIdx].delayBefore /
+                                  (mUi->loc_routeSpeed->currentIndex() + 1.0);
+
+        mSegmentDurationMs = deltaTimeSec * 1000.0;
+
+        double prevLat = mPlaybackElements[mNextRoutePointIdx-1].lat;
+        double prevLng = mPlaybackElements[mNextRoutePointIdx-1].lng;
+        double prevElevation = mPlaybackElements[mNextRoutePointIdx-1].elevation;
+        double nextLat = mPlaybackElements[mNextRoutePointIdx  ].lat;
+        double nextLng = mPlaybackElements[mNextRoutePointIdx  ].lng;
+        double nextElevation = mPlaybackElements[mNextRoutePointIdx  ].elevation;
+
+        // TODO: Account for altitude change in addition to sphere distance
+        (void)nextElevation;
+        double distance = getDistanceNm(prevLat, prevLng, nextLat, nextLng);
+        double deltaTimeHours = deltaTimeSec / (60.0 * 60.0);
+
+        mVelocityOnRoute = (deltaTimeHours <= 0.0) ? 0.0
+                             : std::min(distance / deltaTimeHours, MAX_SPEED);
+        mHeadingOnRoute = getHeading(prevLat, prevLng, nextLat, nextLng);
+        latNow = prevLat;
+        lngNow = prevLng;
+        altNow = prevElevation;
+        mMsIntoSegment = 0.0;
+    } else {
+        // We are within a segment, between point [mNextRoutePointIdx-1] and [mNextRoutePointIdx]
+        mMsIntoSegment = std::min(mMsIntoSegment + UPDATE_INTERVAL, mSegmentDurationMs);
+
+        double prevLat = mPlaybackElements[mNextRoutePointIdx-1].lat;
+        double prevLng = mPlaybackElements[mNextRoutePointIdx-1].lng;
+        double prevElevation = mPlaybackElements[mNextRoutePointIdx-1].elevation;
+        double nextLat = mPlaybackElements[mNextRoutePointIdx  ].lat;
+        double nextLng = mPlaybackElements[mNextRoutePointIdx  ].lng;
+        double nextElevation = mPlaybackElements[mNextRoutePointIdx  ].elevation;
+
+        double alpha = mMsIntoSegment / mSegmentDurationMs;
+        latNow = (alpha * nextLat) + ((1.0 - alpha) * prevLat);
+        lngNow = (alpha * nextLng) + ((1.0 - alpha) * prevLng);
+        altNow = (alpha * nextElevation) + ((1.0 - alpha) * prevElevation);
+    }
+
+    // Send the current location
+    AutoLock lock (sGlobals->updateThreadLock);
+    LocationPage::writeDeviceLocationToSettings(latNow, lngNow, altNow,
+                                                mVelocityOnRoute, mHeadingOnRoute);
+    sGlobals->updateThreadCv.signalAndUnlock(&lock);
+
+    // Update the location marker on the UI map
+    emit mMapBridge->locationChanged(QString::number(latNow, 'g', 12), QString::number(lngNow, 'g', 12));
+    emit targetHeadingChanged(mHeadingOnRoute); // Update the magnetometer repeatedly
+
+    if (mIsGpxKmlPlayback) {
+        // Don't interpolate between gpx/kml points.
+        mMsIntoSegment = mSegmentDurationMs;
+        mTimer.setInterval(mSegmentDurationMs);
+#if DEBUG_PLAYBACK
+        qDebug() << "Gpx point #" << mNextRoutePointIdx - 1 << ": next pt in "
+                 << mSegmentDurationMs << " ms";
+#endif
+    } else {
+        int sleepTime = mSegmentDurationMs - mMsIntoSegment;
+        mTimer.setInterval(std::min((int)UPDATE_INTERVAL, sleepTime));
+    }
+    mTimer.start();
+}
+
 void LocationPage::geoDataThreadStarted() {
     {
         QSignalBlocker blocker(mUi->loc_pathTable);
@@ -573,7 +859,7 @@ void LocationPage::finishGeoDataLoading(
         bool ok,
         const QString& error_message,
         bool ignore_error) {
-    mGeoDataLoader = nullptr;
+    mGeoDataLoader.reset();
     if (!ok) {
         if (!ignore_error) {
             showErrorDialog(error_message, tr("Geo Data Parser"));
@@ -602,6 +888,31 @@ void LocationPage::updateControlsAfterLoading() {
     setButtonEnabled(mUi->loc_GpxKmlButton, theme, true);
     setButtonEnabled(mUi->loc_playStopButton, theme, true);
     mNowLoadingGeoData = false;
+}
+
+void LocationPage::validateCoordinates() {
+    // Latitude range: +/-90 deg
+    // Longitude range: +/-180 deg
+    double lat = mLastLat.toDouble();
+    double lng = mLastLng.toDouble();
+    if (lat >= -90.0 && lat <= 90.0 &&
+        lng >= -180.0 && lng <= 180.0) {
+        mUi->loc_singlePoint_setLocationButton->setEnabled(true);
+    } else {
+        mUi->loc_singlePoint_setLocationButton->setEnabled(false);
+    }
+}
+
+// Give the device the location that is now showing on
+// the map UI
+void LocationPage::sendMostRecentUiLocation() {
+    // Update the location marker on the map
+    emit mMapBridge->locationChanged(mLastLat, mLastLng);
+
+    writeDeviceLocationToSettings(mLastLat.toDouble(),
+                                  mLastLng.toDouble(),
+                                  0.0, 0.0, 0.0);
+    sendLocationToDevice();
 }
 
 // static
@@ -720,9 +1031,10 @@ void LocationPage::writeDeviceLocationToSettings(double lat,
 
 // Get the current location from the device. If that fails, use
 // the saved location from this UI.
-static void getDeviceLocation(double* pLatitude, double* pLongitude,
-                              double* pAltitude,
-                              double* pVelocity, double* pHeading)
+// static
+void LocationPage::getDeviceLocation(double* pLatitude, double* pLongitude,
+                                     double* pAltitude,
+                                     double* pVelocity, double* pHeading)
 {
     bool gotDeviceLoc = false;
 
@@ -746,7 +1058,7 @@ static void sendLocationToDevice() {
         double altitude;
         double velocity;
         double heading;
-        getDeviceLocation(&latitude, &longitude, &altitude, &velocity, &heading);
+        LocationPage::getDeviceLocation(&latitude, &longitude, &altitude, &velocity, &heading);
 
         timeval timeVal = {};
         gettimeofday(&timeVal, nullptr);

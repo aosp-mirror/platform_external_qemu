@@ -12,9 +12,11 @@
 
 #pragma once
 
+#include <stdint.h>
+#include "android/settings-agent.h"
+#include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/rect.h"
 #include "android/utils/compiler.h"
-
 ANDROID_BEGIN_HEADER
 
 // Window agent's possible message types
@@ -29,6 +31,8 @@ typedef enum {
 static const int kWindowMessageTimeoutInfinite = -1;
 
 typedef struct EmulatorWindow EmulatorWindow;
+
+typedef void (*UiUpdateFunc)(void* data);
 
 typedef struct QAndroidEmulatorWindowAgent {
     // Get a pointer to the emulator window structure.
@@ -56,9 +60,36 @@ typedef struct QAndroidEmulatorWindowAgent {
                                            void* context,
                                            void (*func)(void*),
                                            int timeoutMs);
-} QAndroidEmulatorWindowAgent;
+    // Fold/Unfold device
+    bool (*fold)(bool is_fold);
+    // Query folded state
+    bool (*isFolded)(void);
+    bool (*getFoldedArea)(int* x, int* y, int* w, int* h);
 
-// Defined in android/window-agent-impl.cpp
-extern const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
+// Update UI indicator which shows which foldable posture device is in
+    void (*updateFoldablePostureIndicator)(bool confirmFoldedArea);
+
+    // Set the UI display region
+    void (*setUIDisplayRegion)(int, int, int, int);
+    bool (*getMultiDisplay)(uint32_t,
+                            int32_t*,
+                            int32_t*,
+                            uint32_t*,
+                            uint32_t*,
+                            uint32_t*,
+                            uint32_t*,
+                            bool*);
+    void (*setNoSkin)(void);
+    void (*restoreSkin)(void);
+    void (*updateUIMultiDisplayPage)(uint32_t);
+    bool (*getMonitorRect)(uint32_t*, uint32_t*);
+    // start extended window and switch to the pane specified by the index.
+    // return true if extended controls window's visibility has changed.
+    bool (*startExtendedWindow)(ExtendedWindowPane index);
+    bool (*quitExtendedWindow)(void);
+    bool (*setUiTheme)(SettingsTheme type);
+    void (*runOnUiThread)(UiUpdateFunc f, void* data, bool wait);
+    bool (*isRunningInUiThread)(void);
+} QAndroidEmulatorWindowAgent;
 
 ANDROID_END_HEADER

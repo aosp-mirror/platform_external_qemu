@@ -1,0 +1,687 @@
+# Copyright 2015 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Common routines - do not execute directly.
+
+# Sanitize environment
+set -e
+export LANG=C
+export LC_ALL=C
+
+
+
+
+if [ -z "$_SHU_PROGDIR" ]; then
+    _SHU_PROGDIR=$(dirname "$0")
+elif [ ! -f "$_SHU_PROGDIR"/common.shi ]; then
+    echo "ERROR: Invalid _SHU_PROGDIR value (missing common.shi): $_SHU_PROGDIR"
+fi
+
+_SHU_PROGNAME=$(basename "$0")
+_SHU_INVOKED="$0 $@"
+# Print an error message to stderr then exit the current process.
+panic () {
+    echo "ERROR: $@" >&2
+    exit 1
+}
+
+warn () {
+    # Fancy colors in the terminal
+    if [ -t 1 ] ; then
+      RED=`tput setaf 1`
+      RESET=`tput sgr0`
+    else
+      RED=
+      RESET=
+    fi
+    echo "${RED}WARNING: $@${RESET}" >&2
+}
+
+# Internal verbosity level. Note that this value is inherited from
+# the VERBOSE environment variable.
+_SHU_VERBOSE=${VERBOSE:-1}
+
+# Increment internal verbosity level.
+increment_verbosity () {
+    _SHU_VERBOSE=$(( $_SHU_VERBOSE + 1 ))
+}
+
+# Decrement internal verbosity level.
+decrement_verbosity () {
+    _SHU_VERBOSE=$(( $_SHU_VERBOSE - 1 ))
+}
+
+# Set the verbosity to a given level.
+set_verbosity () {
+    _SHU_VERBOSE=$1
+}
+
+# Return internal verbosity level, clamped to 0 as a minimum bound.
+get_verbosity () {
+    local RET=$_SHU_VERBOSE
+    if [ "$RET" -lt 0 ]; then
+        RET=0
+    fi
+    echo "$RET"
+}
+
+# Used internally to conditionally print a message.
+# $1: message's verbosity level. If greater or equal than $_SHU_VERBOSE then
+#     the message will be ignored.
+# $2+: message to print to stdout.
+dump_n () {
+    local LEVEL=$1
+    shift
+    if [ "$LEVEL" -lt "$_SHU_VERBOSE" ]; then
+        printf "%s\n" "$@"
+    fi
+}
+
+# Dump a message to standard output.
+dump () {
+    dump_n 0 "$@"
+}
+
+# Dump a message to standard output if --verbose was used.
+log () {
+    dump_n 1 "$@"
+}
+
+# Dump a message to standard output if --verbose --verbose is used.
+log2 () {
+    dump_n 2 "$@"
+}
+
+# Run a command, but suppress stdout
+# keep stderr open in case error
+silent_run () {
+    "$@" >/dev/null
+}
+
+# Run a command, output depends on verbosity level
+run () {
+    local VERBOSE=$_SHU_VERBOSE
+    if [ "$VERBOSE" -lt 0 ]; then
+        VERBOSE=0
+    fi
+    if [ "$VERBOSE" -gt 1 ]; then
+        echo "COMMAND: $@"
+    fi
+    case $VERBOSE in
+        0|1)
+             "$@" >/dev/null 2>&1
+             ;;
+        2)
+            "$@" >/dev/null
+            ;;
+        *)
+            "$@"
+            ;;
+    esac
+}
+
+# Return the current script's directory.
+program_directory () {
+    printf "%s" "$_SHU_PROGDIR"
+}
+
+# Return the current script's filename.
+program_name () {
+    printf "%s" "$_SHU_PROGNAME"
+}
+
+# Return the value of a given named variable.
+# $1: variable name
+#
+# example:
+#    FOO=BAR
+#    BAR=ZOO
+#    echo `var_value $FOO`
+#    will print 'ZOO'
+#
+var_value () {
+    eval printf %s \"\$$1\"
+}
+
+# Return success if variable $1 is set and non-empty, failure otherwise.
+# $1: Variable name.
+# Usage example:
+#   if var_is_set FOO; then
+#      .. Do something the handle FOO condition.
+#   fi
+var_is_set () {
+    test -n "$(var_value $1)"
+}
+
+_var_quote_value () {
+    printf %s "$1" | sed -e "s|'|\\'\"'\"\\'|g"
+}
+
+# Set the value of a given name variables.
+# $1: Variable name.
+# $2+: Variable value.
+# example:
+#    FOO=BAR
+#    var_assign $FOO bar
+# is equivalent to
+#    BAR=bar
+var_assign () {
+    local _var_assign_varname _var_assign_value
+    _var_assign_varname=$1
+    shift
+    _var_assign_value=$(_var_quote_value "$*")
+    eval $_var_assign_varname=\'$_var_assign_value\'
+}
+
+# Append a space-separated list of items to a given variable.
+# $1: Variable name.
+# $2+: Variable value.
+# Example:
+#   FOO=
+#   var_append FOO foo    (FOO is now 'foo')
+#   var_append FOO bar    (FOO is now 'foo bar')
+#   var_append FOO zoo    (FOO is now 'foo bar zoo')
+var_append () {
+    local _var_append_varname
+    _var_append_varname=$1
+    shift
+    if test "$(var_value $_var_append_varname)"; then
+        eval $_var_append_varname=\$$_var_append_varname\'\ $(_var_quote_value "$*")\'
+    else
+        eval $_var_append_varname=\'$(_var_quote_value "$*")\'
+    fi
+}
+
+# Import shell script $1. Similar to sourcing the script except
+# that each script will only be sourced once, even with multiple
+# dependencies.
+shell_import () {
+    local SCRIPT="$_SHU_PROGDIR/$1"
+    if [ ! -f "$SCRIPT" ]; then
+        panic "Missing script: $SCRIPT"
+    fi
+    local SCRIPT_TAG=_SHU_SHELL_SCRIPT_TAG__${1%%.shi}
+    SCRIPT_TAG=$(echo "$SCRIPT_TAG" | tr '-' '_' | tr '/' '__')
+	case $(var_value $SCRIPT_TAG) in
+        imported)
+            # Script is already imported.
+            return 0
+            ;;
+        importing)
+            # Script is already being imported, this is
+            # a circular dependency.
+            panic "Circular dependency when trying to import $1"
+            ;;
+        *)
+            # Import the script.
+            var_assign $SCRIPT_TAG importing
+            . "$SCRIPT"
+            var_assign $SCRIPT_TAG imported
+            ;;
+    esac
+}
+
+# Unpack a given archive into a given destination directory.
+# $1: Archive path
+# $2: Destination directory
+unpack_archive () {
+    local PKG_PATH="$1"
+    local DEST_DIR="$2"
+    case $PKG_PATH in
+        *.tar.gz|*.tar.bz2|*.tar.xz)
+            silent_run tar xf "$PKG_PATH" -C "$DEST_DIR"
+            ;;
+        *.zip)
+            silent_run unzip -q -o -d "$DEST_DIR" "$PKG_PATH"
+            ;;
+        *)
+            panic "Unsupported package format: $PKG_PATH"
+            ;;
+    esac
+}
+
+# Return the build machine's operating system tag.
+# Valid return values are:
+#    linux
+#    darwin
+#    freebsd
+#    windows   (really MSys)
+#    cygwin
+get_build_os () {
+    if [ -z "$_SHU_BUILD_OS" ]; then
+        _SHU_BUILD_OS=$(uname -s)
+        case $_SHU_BUILD_OS in
+            Darwin)
+                _SHU_BUILD_OS=darwin
+                ;;
+            FreeBSD)  # note: this is not tested
+                _SHU_BUILD_OS=freebsd
+                ;;
+            Linux)
+                # note that building  32-bit binaries on x86_64 is handled later
+                _SHU_BUILD_OS=linux
+                ;;
+            CYGWIN*|*_NT-*)
+                _SHU_BUILD_OS=windows
+                if [ "x$OSTYPE" = xcygwin ] ; then
+                    _SHU_BUILD_OS=cygwin
+                fi
+                ;;
+        esac
+    fi
+    echo "$_SHU_BUILD_OS"
+}
+
+# Return the build machine's CPU architecture.
+# Valid return values are:
+#     x86
+#     x86_64
+#     aarch64
+get_build_arch () {
+    local TEST
+    if [ -z "$_SHU_BUILD_ARCH" ]; then
+        case $(get_build_os) in
+            linux|darwin)
+                _SHU_BUILD_ARCH=$(uname -m)
+                # Kernel bitness might not match user space, so test
+                # the bitness of our shell to know what the user is
+                # really running.
+                TEST=$(/usr/bin/file -L $SHELL 2>/dev/null | grep 'x86[_-]64' || true)
+                if [ "$TEST" ]; then
+                    _SHU_BUILD_ARCH=x86_64
+                fi
+                ;;
+            windows|cygwin)
+                case $PROCESSOR_ARCHITECTURE in
+                    ADM64)
+                        _SHU_BUILD_ARCH=x86_64
+                        ;;
+                    *)
+                        _SHU_BUILD_ARCH=x86
+                        ;;
+                esac
+                ;;
+            *)
+                _SHU_BUILD_ARCH=$(uname -p)
+                ;;
+        esac
+    fi
+    echo "$_SHU_BUILD_ARCH"
+}
+
+# Return the executable extension for a given operating system tag.
+# $1: operating system tag.
+_shu_get_exe_extension_for () {
+    case $1 in
+        windows|cygwin)
+            echo ".exe"
+            ;;
+        *)
+            echo ""
+    esac
+}
+
+# Return the dynamic library extension for a given operating system tag.
+# $1: operating system tag.
+_shu_get_dll_extension_for () {
+    case $1 in
+        darwin)
+            echo ".dylib"
+            ;;
+        windows|cygwin)
+            echo ".dll"
+            ;;
+        *)
+            echo ".so"
+            ;;
+    esac
+}
+
+# Return the extension of executables on the build machine.
+get_build_exe_extension () {
+    if [ -z "$_SHU_BUILD_EXE_EXTENSION_DEFINED" ]; then
+        _SHU_BUILD_EXE_EXTENSION=$(_shu_get_exe_extension_for $(get_build_os))
+        _SHU_BUILD_EXE_EXTENSION_DEFINED=true
+    fi
+    echo "$_SHU_BUILD_EXE_EXTENSION"
+}
+
+# Return the extension of dynamic libraries on the build machine.
+get_build_dll_extension () {
+    if [ -z "$_SHU_BUILD_DLL_EXTENSION_DEFINED" ]; then
+        _SHU_BUILD_DLL_EXTENSION=$(_shu_get_dll_extension_for $(get_build_os))
+        _SHU_BUILD_DLL_EXTENSION_DEFINED=true
+    fi
+    echo "$_SHU_BUILD_DLL_EXTENSION"
+}
+
+# Return the number of CPU cores on the build machine.
+get_build_num_cores () {
+    case $(get_build_os) in
+        linux)
+            grep -c -e processor /proc/cpuinfo 2>/dev/null || echo 1
+            ;;
+        darwin|freebsd)
+            sysctl -n hw.ncpu 2>/dev/null || echo 1
+            ;;
+        windows|cygwin)
+            echo "${NUMBER_OF_PROCESSORS:-1}"
+            ;;
+        *)
+            echo "1"
+            ;;
+    esac
+}
+
+# Convert commas into spaces.
+# $1: input string
+# Out: input string, with each comma replaced by a space.
+commas_to_spaces () {
+    printf "%s" "$@" | tr ',' ' '
+}
+
+# Convert spaces into commas
+# $1+: input string
+# Out: input string, with contiguous spaces replaced by a comma.
+# NOTE: This also strips leading/trailing space.
+spaces_to_commas () {
+    local ITEM RET
+    for ITEM in $*; do
+        if [ -z "$RET" ]; then
+            RET=$ITEM
+        else
+            RET="$RET,$ITEM"
+        fi
+    done
+    printf "%s" "$RET"
+}
+
+# Return success iff item |$2| is in list |$1|.
+# $1: input list
+# $2: item to find in list.
+list_contains () {
+    local ITEM
+    for ITEM in $(commas_to_spaces "$1"); do
+        if [ "$ITEM" = "$2" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Copy a directory, create target location if needed
+#
+# $1: source directory
+# $2: target directory location
+#
+copy_directory ()
+{
+    local SRCDIR="$1"
+    local DSTDIR="$2"
+    if [ ! -d "$SRCDIR" ] ; then
+        panic "Can't copy from non-directory: $SRCDIR"
+    fi
+    log "Copying directory: from [$SRCDIR] to [$DSTDIR]"
+    mkdir -p "$DSTDIR" && (cd "$SRCDIR" && 2>/dev/null tar cf - *) | (tar xf - -C "$DSTDIR") ||
+            panic "Cannot copy to directory: $DSTDIR"
+}
+
+# $1: source directory
+# $2: target directory location
+# $3+: list of file names and filters.
+copy_directory_files ()
+{
+    local SRCDIR="$1"
+    local DSTDIR="$2"
+    shift
+    shift
+    if [ ! -d "$SRCDIR" ] ; then
+        panic "Can't copy from non-directory: $SRCDIR"
+    fi
+    log "Copying directory: from [$SRCDIR] to [$DSTDIR]"
+    mkdir -p "$DSTDIR" || panic "Cannot create target directory: $DSTDIR"
+    (cd "$SRCDIR" && 2>/dev/null tar cf - "$@" | \
+            tar xf - -C "$DSTDIR") ||
+        panic "Cannot copy to directory: $DSTDIR"
+}
+
+# Creates the given directory if it doesn't exist yet
+# $1: Directory to create
+make_if_not_exists()
+{
+    local DESTDIR="$1"
+    if [ ! -d $DESTDIR ]; then
+       run mkdir -p ${DESTDIR} || panic "Unable to create ${DESTDIR}"
+    else
+       log2 "Directory: ${DESTDIR} already exists"
+    fi
+}
+
+# Compute the SHA-1 sum of a given file. Implementation depends on the
+# current host machine.
+# $1: File path
+# Out: SHA-1 sum as an hexadecimal string.
+compute_file_sha1 () {
+    case $(get_build_os) in
+        linux)
+            (sha1sum "$1" | awk '{ print $1; }') 2>/dev/null
+            ;;
+        darwin)
+            (openssl sha1 "$1" | awk '{ print $2; }') 2>/dev/null
+            ;;
+        *)
+            panic "Don't know how to compute a SHA-1 sum on this platform: \
+$(get_build_os)"
+    esac
+}
+
+# Compute the SHA-1 sum of a given zip or tarball archive. This is done by
+# generated a sorted list of all files from the archive, and their SHA-1, then
+# computing the SHA-1 of the result. This means the output is only dependent
+# on the archive's content, not on any user/group/mtime field present in the
+# actual archive file. Required because the Darwin 'tar' command doesn't seem
+# to be able to generate reproducible archives (and even if it could, they
+# would probably be slightly different from the ones generated on Linux).
+# $1: Archive file path
+# Out: SHA-1 sum as an hexadecimal string.
+compute_archive_sha1 () {
+    local LIST_FILE LIST_DIR RET
+    LIST_DIR=$(mktemp -d /tmp/sha1_archive.XXXXXX)
+    LIST_FILE=$(mktemp /tmp/sha1_list.XXXXXX)
+    unpack_archive "$1" "$LIST_DIR"
+    RET=0
+    (
+        unpack_archive "$1" "$LIST_DIR" &&
+        cd "$LIST_DIR" &&
+        LANG=C LC_ALL=C find . -type f -o -type l | sort -u -s | xargs openssl sha1 > "$LIST_FILE"
+        compute_file_sha1 "$LIST_FILE"
+    ) || RET=$?
+    rm -rf "$LIST_DIR"
+    rm -rf "$LIST_FILE"
+    return $RET
+}
+
+# Return the file path of a given timestamp
+# $1: Installation directory
+# $2: Timestamp group name
+_shu_timestamp_file () {
+    printf %s "$1/timestamps/$2"
+}
+
+timestamp_check () {
+    test -f "$(_shu_timestamp_file "$1" "$2")"
+}
+
+timestamp_set () {
+    local TIMESTAMP="$(_shu_timestamp_file "$1" "$2")"
+    run mkdir -p "$(dirname $TIMESTAMP)" && run touch "$TIMESTAMP"
+}
+
+timestamp_clear () {
+    run rm -f "$(_shu_timestamp_file "$1" "$2")"
+}
+
+# Find a given program in the current path. This function never fails.
+# $1: Program name
+# Out: program path, if found, or empty string otherwise.
+find_program () {
+    which "$1" 2>/dev/null || true
+}
+
+
+# Return the dump_syms tool path for a given host system.
+# $1: System name (e.g. 'linux-x86' or 'linux-x86_64')
+aosp_prebuilt_breakpad_dump_syms_for () {
+    local SYMTOOL="dump_syms"
+    local HOST="$1"
+    if [ "$(get_build_os)" = "linux" ]; then
+        case ${HOST} in
+            *windows*)
+            SYMTOOL=${SYMTOOL}_dwarf
+            HOST=$(get_build_os)-$(get_build_arch)
+            ;;
+        esac
+    fi
+    local SYMTOOL_PATH="$AOSP_DIR/$(aosp_prebuilt_breakpad_subdir_for $HOST)/bin/${SYMTOOL}"
+    if [ ! -f "${SYMTOOL_PATH}" ]; then
+        panic "Breakpad prebuilt ${SYMTOOL} could not be found at ${SYMTOOL_PATH}"
+    fi
+    printf %s "${SYMTOOL_PATH}"
+}
+
+# Build debug_info from unstripped binaries
+# Platform specific. On mac, generates the dSYMs alongside the libraries
+#
+# $1: Src root directory
+# $2: Target root directory
+# $3+: List of binary paths relative to Src root
+build_debug_info () {
+    local SRC_ROOT="$1"
+    local DEST_ROOT="$2"
+    shift
+    shift
+    local BINARY_FILES="$@"
+    for BINARY in $BINARY_FILES; do
+        if [ "$(get_build_os)" = "darwin" ]; then
+            DSYM_DIR=$DEST_ROOT/$BINARY.dSYM
+            if [ -L "$SRC_ROOT"/$BINARY ]; then
+                DEST=`readlink $SRC_ROOT/$BINARY`
+                ln -fs $DEST.dSYM $DSYM_DIR
+            else
+                dsymutil --out=$DSYM_DIR $SRC_ROOT/$BINARY ||
+                panic "Failed to create dsym for $SRC_ROOT/$BINARY"
+            fi
+        fi
+    done
+}
+
+# Build breakpad symbols from unstripped binaries
+# Builds a symbols directory at the destination root dir and populates it with
+# *.sym extension symbol files mirroring the binary file paths
+#
+# Expects Breakpad prebuilt to be built, panics otherwise.
+# $1: Src root directory
+# $2: Target root directory
+# $3: Host target
+# $4+: List of binary paths relative to Src root
+build_symbols () {
+    local SRC_ROOT="$1"
+    local DEST_ROOT="$2"
+    local HOST="$3"
+    shift
+    shift
+    shift
+    local BINARY_FILES="$@"
+    local SYMBOL_DIR="$DEST_ROOT"/symbols
+    local DSYM_DIR="$DEST_ROOT"/debug_info
+    local BINARY_FULLNAME=
+    local BINARY_DIR=
+    local SYMTOOL="$(aosp_prebuilt_breakpad_dump_syms_for $HOST)"
+    if [ ! -f "$SYMTOOL" ]; then
+        panic "Breakpad prebuilt symbol dumper could not be found at $SYMTOOL"
+    fi
+    run mkdir -p "$SYMBOL_DIR"
+    for BINARY in $BINARY_FILES; do
+        if [ -L "$SRC_ROOT"/$BINARY ] || [ ! -f "$SRC_ROOT"/$BINARY ]; then
+            log "Skipping $BINARY"
+            continue
+        fi
+        BINARY_FULLNAME="$(basename "$BINARY")"
+        BINARY_DIR="$(dirname "$BINARY")"
+        silent_run mkdir -p $SYMBOL_DIR/$BINARY_DIR
+        silent_run mkdir -p $DSYM_DIR/$BINARY_DIR
+        log "Processing symbols for: ${BINARY}"
+        if [ "$(get_build_os)" = "darwin" ]; then
+            DSYM_BIN_DIR=$DSYM_DIR/$BINARY.dsym
+            mkdir -p $DSYM_BIN_DIR
+            log2 dsymutil --out=$DSYM_BIN_DIR $SRC_ROOT/$BINARY
+            log2 $SYMTOOL -g $DSYM_BIN_DIR $SRC_ROOT/$BINARY > $SYMBOL_DIR/$BINARY.sym 2> $SYMBOL_DIR/$BINARY.err
+
+            dsymutil --out=$DSYM_BIN_DIR $SRC_ROOT/$BINARY 2>&1 | grep -q 'no debug symbols' ||
+            strip -S $DEST_ROOT/$LIB || panic "Could not strip $DEST_ROOT" &&
+            $SYMTOOL -g $DSYM_BIN_DIR $SRC_ROOT/$BINARY > $SYMBOL_DIR/$BINARY.sym 2> $SYMBOL_DIR/$BINARY.err ||
+                echo "Failed to create symbol file for $SRC_ROOT/$BINARY"
+        else
+            cp -f $SRC_ROOT/$BINARY $DSYM_DIR/$BINARY
+            $SYMTOOL $SRC_ROOT/$BINARY > $SYMBOL_DIR/$BINARY.sym 2> $SYMBOL_DIR/$BINARY.err ||
+                panic "Failed to create symbol file for $SRC_ROOT/$BINARY"
+            local OBJCOPY="$TOOLCHAIN_WRAPPER_DIR"/$(builder_gnu_config_host_prefix)objcopy
+            if [ ! -f "$OBJCOPY" ]; then
+                panic "Could not find objcopy at $OBJCOPY"
+            fi
+            run "$OBJCOPY" --strip-unneeded $SRC_ROOT/$BINARY || \
+                panic "Could not strip $SRC_ROOT/$BINARY"
+        fi
+    done
+}
+
+# Strips a library in place
+# Expects TOOLCHAIN_WRAPPER_DIR to be valid (set by builder_prepare_for_host*)
+# Panics if not found
+# $1: Target root directory
+# $2+: List of lib paths relative to $1
+strip_libs () {
+    local DEST_ROOT="$1"
+    shift
+    local LIBS="$@"
+    if [ -z $TOOLCHAIN_WRAPPER_DIR ]; then
+        panic "TOOLCHAIN_WRAPPER_DIR not set, was builder_prepare_for_host called?"
+    fi
+    if [ ! -d $TOOLCHAIN_WRAPPER_DIR ]; then
+        panic "TOOLCHAIN_WRAPPER_DIR is not a directory"
+    fi
+    for LIB in $LIBS; do
+        if [ -L "$DEST_ROOT"/$LIB ] || [ ! -f "$DEST_ROOT"/$LIB ]; then
+            log "Skipping $LIB"
+            continue
+        fi
+        if [ "$(get_build_os)" = "darwin" ]; then
+            run strip -S $DEST_ROOT/$LIB || panic "Could not strip $DEST_ROOT"
+        else
+            local OBJCOPY="$TOOLCHAIN_WRAPPER_DIR"/$(builder_gnu_config_host_prefix)objcopy
+            if [ ! -f "$OBJCOPY" ]; then
+                panic "Could not find objcopy at $OBJCOPY"
+            fi
+            run "$OBJCOPY" --strip-unneeded $DEST_ROOT/$LIB || \
+                panic "Could not strip $DEST_ROOT/$LIB"
+        fi
+    done
+}
+
+
+log_invocation() {
+    # Log the invocation of this command, this makes
+    # reading the build logs a lot easier.
+    dump "Running: $_SHU_INVOKED"
+}

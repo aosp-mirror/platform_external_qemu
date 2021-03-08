@@ -13,7 +13,7 @@
 #include "android/base/testing/Utils.h"
 #include "android/location/Route.h"
 
-#include "android/location/proto/point.pb.h"
+#include "point.pb.h"
 
 #include <fstream>
 #include <gtest/gtest.h>
@@ -70,6 +70,7 @@ TEST(Route, WriteReadDefaultFile) {
 
     rtMetadata.set_logical_name("Country roads");
     rtMetadata.set_creation_time(nowMsec);
+    rtMetadata.set_json_format(emulator_location::RouteMetadata_JsonFormat_GOOGLEMAPS);
 
     // Write to protobuf to disk
     TestTempDir myDir("location_route_tests");
@@ -96,12 +97,11 @@ TEST(Route, WriteReadDefaultFile) {
     EXPECT_EQ(nowMsec, inputMetadata->creation_time());
     // Default values:
     EXPECT_STREQ("",   inputMetadata->description().c_str());
-    EXPECT_EQ(emulator_location::RouteMetadata_Mode_UNKNOWN,
-                       inputMetadata->mode_of_transportation());
-    EXPECT_FALSE(      inputMetadata->loop());
-    EXPECT_EQ(emulator_location::RouteMetadata_PlaybackSpeed_SPEED_1x,
-                       inputMetadata->speed_factor());
+    EXPECT_EQ(emulator_location::RouteMetadata_Mode_DRIVING,
+                       inputMetadata->mode_of_travel());
     EXPECT_EQ(0,       inputMetadata->duration());
+    EXPECT_EQ(emulator_location::RouteMetadata_JsonFormat_GOOGLEMAPS,
+              inputMetadata->json_format());
 }
 
 TEST(Route, WriteReadExplicitFile) {
@@ -112,10 +112,9 @@ TEST(Route, WriteReadExplicitFile) {
     rtMetadata.set_logical_name("Grandmother's house");
     rtMetadata.set_creation_time(nowMsec);
     rtMetadata.set_description("Over the river and through the wood");
-    rtMetadata.set_mode_of_transportation(emulator_location::RouteMetadata_Mode_CAR);
-    rtMetadata.set_loop(true);
-    rtMetadata.set_speed_factor(emulator_location::RouteMetadata_PlaybackSpeed_SPEED_2x);
+    rtMetadata.set_mode_of_travel(emulator_location::RouteMetadata_Mode_WALKING);
     rtMetadata.set_duration(13579LL);
+    rtMetadata.set_json_format(emulator_location::RouteMetadata_JsonFormat_GOOGLEMAPS);
 
     // Write to protobuf to disk
     TestTempDir myDir("location_route_tests");
@@ -142,11 +141,10 @@ TEST(Route, WriteReadExplicitFile) {
     EXPECT_EQ(nowMsec, inputMetadata->creation_time());
     EXPECT_STREQ("Over the river and through the wood",
                        inputMetadata->description().c_str());
-    EXPECT_EQ(emulator_location::RouteMetadata_Mode_CAR,
-                       inputMetadata->mode_of_transportation());
-    EXPECT_TRUE(       inputMetadata->loop());
-    EXPECT_EQ(emulator_location::RouteMetadata_PlaybackSpeed_SPEED_2x,
-                       inputMetadata->speed_factor());
+    EXPECT_EQ(emulator_location::RouteMetadata_Mode_WALKING,
+                       inputMetadata->mode_of_travel());
     EXPECT_EQ(13579LL, inputMetadata->duration());
+    EXPECT_EQ(emulator_location::RouteMetadata_JsonFormat_GOOGLEMAPS,
+              inputMetadata->json_format());
 }
 }

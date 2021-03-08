@@ -16,6 +16,7 @@
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
+#include "OpenGLESDispatch/StaticDispatch.h"
 
 #include "android/utils/debug.h"
 
@@ -37,7 +38,6 @@
 #endif
 
 static emugl::SharedLibrary *s_gles1_lib = NULL;
-static emugl::SharedLibrary *s_underlying_gles2_lib = NULL;
 
 // An unimplemented function which prints out an error message.
 // To make it consistent with the guest, all GLES1 functions not supported by
@@ -100,109 +100,27 @@ static return_type gles1_dummy_##func_name signature { \
 #endif
 
 LIST_GLES1_FUNCTIONS(DEFINE_DUMMY_FUNCTION, DEFINE_DUMMY_EXTENSION_FUNCTION);
-LIST_GLES12_TR_FUNCTIONS(DEFINE_DUMMY_FUNCTION);
 
 //
 // This function is called only once during initialiation before
 // any thread has been created - hence it should NOT be thread safe.
 //
 
-//
-// init dummy GLESv1 dispatch table
-//
-#define ASSIGN_DUMMY(return_type,function_name,signature,callargs) do { \
-        dispatch_table-> function_name = gles1_dummy_##function_name; \
-        } while(0);
+// macro to assign from static library
+#define ASSIGN_GLES1_STATIC(return_type,function_name,signature,callargs)\
+    dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
+            translator::gles1::function_name); \
+        if ((!dispatch_table-> function_name) && s_egl.eglGetProcAddress) \
+        dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
+            s_egl.eglGetProcAddress(#function_name)); \
 
 bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
+    if (dispatch_table->initialized) return true;
 
-    dispatch_table->underlying_gles2_api = NULL;
+    LIST_GLES1_FUNCTIONS(ASSIGN_GLES1_STATIC, ASSIGN_GLES1_STATIC);
 
-    const char* libName = getenv("ANDROID_GLESv1_LIB");
-    if (!libName) {
-        libName = DEFAULT_GLES_CM_LIB;
-    }
-
-    // If emugl_config has detected specifically a backend
-    // that supports only GLESv2, set GLESv1 entry points
-    // to the dummy functions.
-    if (!strcmp(libName, "<gles2_only_backend>")) {
-
-        LIST_GLES1_FUNCTIONS(ASSIGN_DUMMY,ASSIGN_DUMMY)
-
-        DPRINT("assigning dummies because <gles2_only_backend>");
-        return true;
-    } else {
-
-        char error[256];
-        s_gles1_lib = emugl::SharedLibrary::open(libName, error, sizeof(error));
-        if (!s_gles1_lib) {
-            fprintf(stderr, "%s: Could not load %s [%s]\n", __FUNCTION__,
-                    libName, error);
-            return false;
-        }
-
-        //
-        // init the GLES dispatch table
-        //
-#define LOOKUP_SYMBOL(return_type,function_name,signature,callargs) do { \
-        dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
-                s_gles1_lib->findSymbol(#function_name)); \
-            if ((!dispatch_table-> function_name) && s_egl.eglGetProcAddress) \
-            dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
-                s_egl.eglGetProcAddress(#function_name)); \
-        } while(0); \
-
-        LIST_GLES1_FUNCTIONS(LOOKUP_SYMBOL,LOOKUP_SYMBOL)
-
-        DPRINT("successful");
-
-        LIST_GLES12_TR_FUNCTIONS(ASSIGN_DUMMY);
-
-        // If we are using the translator,
-        // import the gles1->2 translator dll
-        if (strstr(libName, "GLES12Translator")) {
-
-            DPRINT("trying to assign gles12-specific functions");
-            LIST_GLES12_TR_FUNCTIONS(LOOKUP_SYMBOL);
-            DPRINT("hopefully, successfully assigned "
-                   "12tr-specific functions...");
-
-            DPRINT("Now creating the underlying api");
-            UnderlyingApis* gles2api =
-                (UnderlyingApis*)dispatch_table->create_underlying_api();
-            dispatch_table->underlying_gles2_api = gles2api;
-
-            DPRINT("api ptr:%p", dispatch_table->underlying_gles2_api);
-
-#define SET_UNDERLYING_GLES2_FUNC(rett, function_name, sig, callargs) do { \
-    dispatch_table->underlying_gles2_api->angle-> function_name = \
-        reinterpret_cast< function_name ## _t >( \
-                s_underlying_gles2_lib->findSymbol(#function_name)); \
-} while(0);
-
-            DPRINT("trying to initialize GLESv1->2 translation");
-            const char* underlying_gles2_lib_name =
-                getenv("ANDROID_GLESv2_LIB");
-
-            if (!underlying_gles2_lib_name) {
-                underlying_gles2_lib_name = DEFAULT_UNDERLYING_GLES_V2_LIB;
-            }
-            s_underlying_gles2_lib =
-                emugl::SharedLibrary::open(underlying_gles2_lib_name,
-                                           error, sizeof(error));
-            if (!s_underlying_gles2_lib) {
-                DPRINT("Could not load underlying gles2 lib %s [%s]",
-                        libName, error);
-                return false;
-            }
-            DPRINT("done trying to get gles2 lib");
-
-            LIST_GLES2_FUNCTIONS(SET_UNDERLYING_GLES2_FUNC,
-                                 SET_UNDERLYING_GLES2_FUNC);
-       }
-       return true;
-    }
+    dispatch_table->initialized = true;
+    return true;
 }
 
 //
@@ -215,6 +133,12 @@ void *gles1_dispatch_get_proc_func(const char *name, void *userData)
     if (s_gles1_lib) {
         func = (void *)s_gles1_lib->findSymbol(name);
     }
+
+    // Check the static functions
+    if (!func) {
+        func = gles1_dispatch_get_proc_func_static(name);
+    }
+
     // To make it consistent with the guest, redirect any unsupported functions
     // to gles1_unimplemented.
     if (!func) {

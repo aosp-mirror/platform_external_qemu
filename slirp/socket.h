@@ -152,6 +152,8 @@ void sorecvfrom(struct socket *);
 int sosendto(struct socket *, struct mbuf *);
 struct socket * tcp_listen(Slirp *, uint32_t, u_int, uint32_t, u_int,
                                int);
+struct socket * tcp6_listen(Slirp *, struct in6_addr, u_int, struct in6_addr, u_int,
+                            int);
 void soisfconnecting(register struct socket *);
 void soisfconnected(register struct socket *);
 void sofwdrain(struct socket *);

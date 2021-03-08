@@ -21,6 +21,7 @@
 #include <GLES/gl.h>
 #include <GLES3/gl3.h>
 #include "android/base/files/Stream.h"
+#include "android/skin/rect.h"
 #include "android/snapshot/LazySnapshotObj.h"
 #include "emugl/common/smart_ptr.h"
 #include "FrameworkFormats.h"
@@ -141,8 +142,8 @@ public:
 
     // Sometimes things happen and we need to reformat the GL texture
     // used. This function replaces the format of the underlying texture
-    // with the internalformat / format / type combination specified.
-    void reformat(GLint internalformat, GLenum format, GLenum type);
+    // with the internalformat specified.
+    void reformat(GLint internalformat, GLenum type);
 
     // Destructor.
     ~ColorBuffer();
@@ -150,6 +151,7 @@ public:
     // Return ColorBuffer width and height in pixels
     GLuint getWidth() const { return m_width; }
     GLuint getHeight() const { return m_height; }
+    GLint getInternalFormat() const { return m_internalFormat; }
 
     // Read the ColorBuffer instance's pixel values into host memory.
     void readPixels(int x,
@@ -159,6 +161,23 @@ public:
                     GLenum p_format,
                     GLenum p_type,
                     void* pixels);
+
+    void readPixelsScaled(int width,
+                          int height,
+                          GLenum p_format,
+                          GLenum p_type,
+                          SkinRotation rotation,
+                          void* pixels);
+
+    // Read cached YUV pixel values into host memory.
+    void readPixelsYUVCached(int x,
+                             int y,
+                             int width,
+                             int height,
+                             void* pixels,
+                             uint32_t pixels_size);
+
+    void swapYUVTextures(uint32_t texture_type, uint32_t* textures);
 
     // Update the ColorBuffer instance's pixel values from host memory.
     // |p_format / p_type| are the desired OpenGL color buffer format
@@ -172,6 +191,14 @@ public:
                    GLenum p_format,
                    GLenum p_type,
                    void* pixels);
+
+    // Completely replaces contents, assuming that |pixels| is a buffer
+    // that is allocated and filled with the same format.
+    bool replaceContents(const void* pixels, size_t numBytes);
+
+    // Reads back entire contents, tightly packed rows.
+    // If the framework format is YUV, it will read back as raw YUV data.
+    bool readContents(size_t* numBytes, void* pixels);
 
     // Draw a ColorBuffer instance, i.e. blit it to the current guest
     // framebuffer object / window surface. This doesn't display anything.
@@ -194,6 +221,7 @@ public:
     // EGLImage. This is intended to implement glEGLImageTargetTexture2DOES()
     // for all GLES versions.
     bool bindToTexture();
+    bool bindToTexture2();
 
     // Bind the current context's EGL_RENDERBUFFER_OES render buffer to this
     // ColorBuffer's EGLImage. This is intended to implement
@@ -207,13 +235,9 @@ public:
 
     // Read the content of the whole ColorBuffer as 32-bit RGBA pixels.
     // |img| must be a buffer large enough (i.e. width * height * 4).
-    void readback(unsigned char* img);
+    void readback(unsigned char* img, bool readbackBgra = false);
     // readback() but async (to the specified |buffer|)
-    void readbackAsync(GLuint buffer);
-    // readbackAsync() but in one thread:
-    // glReadPixels will be done to buffer1, and then right after,
-    // glMapBufferRange -> memcpy(img, <memory of buffer2>)
-    void readbackAsync(GLuint buffer1, GLuint buffer2, unsigned char* img);
+    void readbackAsync(GLuint buffer, bool readbackBgra = false);
 
     void onSave(android::base::Stream* stream);
     static ColorBuffer* onLoad(android::base::Stream* stream,
@@ -227,9 +251,30 @@ public:
     void postLayer(ComposeLayer* l, int frameWidth, int frameHeight);
     GLuint getTexture();
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     void setSync(bool debug = false);
     void waitSync(bool debug = false);
 
+=======
+    bool importMemory(
+#ifdef _WIN32
+        void* handle,
+#else
+        int handle,
+#endif
+        uint64_t size,
+        bool dedicated,
+        bool linearTiling,
+        bool vulkanOnly);
+    void setInUse(bool inUse);
+    bool isInUse() const { return m_inUse; }
+
+    void setSync(bool debug = false);
+    void waitSync(bool debug = false);
+    void setDisplay(uint32_t displayId) { m_displayId = displayId; }
+    uint32_t getDisplay() { return m_displayId; }
+    FrameworkFormat getFrameworkFormat() { return m_frameworkFormat; }
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 public:
     void restore();
 
@@ -245,6 +290,7 @@ private:
     GLuint m_height = 0;
     GLuint m_fbo = 0;
     GLenum m_internalFormat = 0;
+    GLenum m_sizedInternalFormat = 0;
 
     // |m_format| and |m_type| are for reformatting purposes only
     // to work around bugs in the guest. No need to snapshot those.
@@ -263,6 +309,7 @@ private:
     TextureResize* m_resizer = nullptr;
     FrameworkFormat m_frameworkFormat;
     GLuint m_yuv_conversion_fbo = 0;  // FBO to offscreen-convert YUV to RGB
+    GLuint m_scaleRotationFbo = 0;  // FBO to read scaled rotation pixels
     std::unique_ptr<YUVConverter> m_yuv_converter;
     HandleType mHndl;
 
@@ -270,7 +317,39 @@ private:
     bool m_fastBlitSupported = false;
 
     GLenum m_asyncReadbackType = GL_UNSIGNED_BYTE;
+    size_t m_numBytes = 0;
+
+    bool m_importedMemory = false;
+    GLuint m_memoryObject = 0;
+    bool m_inUse = false;
+    bool m_isBuffer = false;
+    GLuint m_buf = 0;
+    uint32_t m_displayId = 0;
+    bool m_BRSwizzle = false;
 };
 
 typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;
+
+class Buffer : public android::snapshot::LazySnapshotObj<Buffer> {
+public:
+    static Buffer* create(size_t sizeBytes, HandleType hndl) {
+        return new Buffer(sizeBytes, hndl);
+    }
+
+    ~Buffer() = default;
+
+    HandleType getHndl() const { return m_handle; }
+    size_t getSize() const { return m_sizeBytes; }
+
+protected:
+    Buffer(size_t sizeBytes, HandleType hndl)
+        : m_handle(hndl), m_sizeBytes(sizeBytes) {}
+
+private:
+    HandleType m_handle;
+    size_t m_sizeBytes;
+};
+
+typedef emugl::SmartPtr<Buffer> BufferPtr;
+
 #endif

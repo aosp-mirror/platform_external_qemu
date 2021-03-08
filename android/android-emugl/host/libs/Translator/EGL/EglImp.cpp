@@ -15,17 +15,20 @@
 */
 #ifdef _WIN32
 #undef EGLAPI
-#define EGLAPI __declspec(dllexport)
+#define EGLAPI
+#define EGLAPIENTRY
 #endif
 
-#include "android/base/files/Stream.h"
-#include "ThreadInfo.h"
+#include <GLcommon/GLESmacros.h>
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/GLutils.h"
 #include "GLcommon/TextureData.h"
 #include "GLcommon/TranslatorIfaces.h"
-#include "emugl/common/shared_library.h"
 #include "OpenglCodecCommon/ErrorLog.h"
+#include "ThreadInfo.h"
+#include "android/base/files/Stream.h"
+#include "android/base/system/System.h"
+#include "emugl/common/shared_library.h"
 
 #include "EglWindowSurface.h"
 #include "EglPbufferSurface.h"
@@ -50,6 +53,9 @@
 
 //declarations
 
+namespace translator {
+namespace egl {
+
 ImagePtr getEGLImage(unsigned int imageId);
 GLEScontext* getGLESContext();
 GlLibrary* getGlLibrary();
@@ -60,6 +66,12 @@ static bool unbindAndDestroyAuxiliaryContext(
 static bool bindAuxiliaryContext(
     EGLContext context, EGLSurface surface);
 static bool unbindAuxiliaryContext();
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+
+} // namespace translator
+} // namespace egl
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 
 #define tls_thread  EglThreadInfo::get()
 
@@ -76,6 +88,7 @@ void initGlobalInfo()
 }
 
 static const EGLiface s_eglIface = {
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     .getGLESContext = getGLESContext,
     .getEGLImage = getEGLImage,
     .eglGetGlLibrary = getGlLibrary,
@@ -83,6 +96,15 @@ static const EGLiface s_eglIface = {
     .unbindAndDestroyAuxiliaryContext = unbindAndDestroyAuxiliaryContext,
     .bindAuxiliaryContext = bindAuxiliaryContext,
     .unbindAuxiliaryContext = unbindAuxiliaryContext,
+=======
+    .getGLESContext = translator::egl::getGLESContext,
+    .getEGLImage = translator::egl::getEGLImage,
+    .eglGetGlLibrary = translator::egl::getGlLibrary,
+    .createAndBindAuxiliaryContext = translator::egl::createAndBindAuxiliaryContext,
+    .unbindAndDestroyAuxiliaryContext = translator::egl::unbindAndDestroyAuxiliaryContext,
+    .bindAuxiliaryContext = translator::egl::bindAuxiliaryContext,
+    .unbindAuxiliaryContext = translator::egl::unbindAuxiliaryContext,
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 };
 
 static void initGLESx(GLESVersion version) {
@@ -96,7 +118,9 @@ static void initGLESx(GLESVersion version) {
 
 /*****************************************  supported extensions  ***********************************************************************/
 
-extern "C" {
+namespace translator {
+namespace egl {
+
 EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext context, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list);
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR image);
 EGLAPI EGLSyncKHR EGLAPIENTRY eglCreateSyncKHR(EGLDisplay display, EGLenum type, const EGLint* attribs);
@@ -108,7 +132,33 @@ EGLAPI void EGLAPIENTRY eglBlitFromCurrentReadBufferANDROID(EGLDisplay display, 
 EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay display, EGLImageKHR image);
 EGLAPI void EGLAPIENTRY eglWaitImageFenceANDROID(EGLDisplay display, void* fence);
 EGLAPI void EGLAPIENTRY eglAddLibrarySearchPathANDROID(const char* path);
-}  // extern "C"
+EGLAPI EGLBoolean EGLAPIENTRY eglQueryVulkanInteropSupportANDROID(void);
+EGLAPI EGLBoolean EGLAPIENTRY eglGetSyncAttribKHR(EGLDisplay display, EGLSyncKHR sync, EGLint attribute, EGLint *value);
+
+EGLAPI EGLBoolean EGLAPIENTRY eglSaveConfig(EGLDisplay display, EGLConfig config, EGLStream stream);
+EGLAPI EGLConfig EGLAPIENTRY eglLoadConfig(EGLDisplay display, EGLStream stream);
+
+EGLAPI EGLBoolean EGLAPIENTRY eglPreSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream);
+EGLAPI EGLBoolean EGLAPIENTRY eglSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream);
+EGLAPI EGLBoolean EGLAPIENTRY eglPostSaveContext(EGLDisplay display, EGLContext context, EGLStream stream);
+EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *attrib_list, EGLStream stream);
+
+EGLAPI EGLBoolean EGLAPIENTRY eglSaveAllImages(EGLDisplay display,
+                                               EGLStream stream,
+                                               const void* textureSaver);
+EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display,
+                                               EGLStream stream,
+                                               const void* textureLoader);
+EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream stream);
+EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable);
+EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version);
+EGLAPI void EGLAPIENTRY eglFillUsages(void* usages);
+
+} // namespace translator
+} // namespace egl
+
+namespace translator {
+namespace egl {
 
 static const ExtensionDescriptor s_eglExtensions[] = {
         {"eglCreateImageKHR" ,
@@ -133,34 +183,26 @@ static const ExtensionDescriptor s_eglExtensions[] = {
                 (__eglMustCastToProperFunctionPointerType)eglWaitImageFenceANDROID },
         {"eglAddLibrarySearchPathANDROID",
                 (__eglMustCastToProperFunctionPointerType)eglAddLibrarySearchPathANDROID },
+        {"eglQueryVulkanInteropSupportANDROID",
+                (__eglMustCastToProperFunctionPointerType)eglQueryVulkanInteropSupportANDROID },
+        {"eglGetSyncAttribKHR",
+                (__eglMustCastToProperFunctionPointerType)eglGetSyncAttribKHR },
 };
 
 static const int s_eglExtensionsSize =
         sizeof(s_eglExtensions) / sizeof(ExtensionDescriptor);
 
+} // namespace translator
+} // namespace egl
+
 /****************************************************************************************************************************************/
 //macros for accessing global egl info & tls objects
 
 extern "C" {
-EGLAPI EGLBoolean EGLAPIENTRY eglSaveConfig(EGLDisplay display, EGLConfig config, EGLStream stream);
-EGLAPI EGLConfig EGLAPIENTRY eglLoadConfig(EGLDisplay display, EGLStream stream);
-
-EGLAPI EGLBoolean EGLAPIENTRY eglPreSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream);
-EGLAPI EGLBoolean EGLAPIENTRY eglSaveContext(EGLDisplay display, EGLContext contex, EGLStream stream);
-EGLAPI EGLBoolean EGLAPIENTRY eglPostSaveContext(EGLDisplay display, EGLContext context, EGLStream stream);
-EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *attrib_list, EGLStream stream);
-
-EGLAPI EGLBoolean EGLAPIENTRY eglSaveAllImages(EGLDisplay display,
-                                               EGLStream stream,
-                                               const void* textureSaver);
-EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display,
-                                               EGLStream stream,
-                                               const void* textureLoader);
-EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream stream);
-EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable);
-EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version);
-EGLAPI void EGLAPIENTRY eglFillUsages(void* usages);
 }
+
+namespace translator {
+namespace egl {
 
 #define CURRENT_THREAD() do {} while (0);
 
@@ -171,14 +213,15 @@ EGLAPI void EGLAPIENTRY eglFillUsages(void* usages);
         }                                                    \
         return ret;
 
-#define VALIDATE_DISPLAY_RETURN(EGLDisplay,ret)              \
-        EglDisplay* dpy = g_eglInfo->getDisplay(EGLDisplay); \
-        if(!dpy){                                            \
-            RETURN_ERROR(ret,EGL_BAD_DISPLAY);               \
-        }                                                    \
-        if(!dpy->isInitialize()) {                           \
-            RETURN_ERROR(ret,EGL_NOT_INITIALIZED);           \
-        }
+#define VALIDATE_DISPLAY_RETURN(EGLDisplay, ret)                \
+    MEM_TRACE_IF(strncmp(__FUNCTION__, "egl", 3) == 0, "EMUGL") \
+    EglDisplay* dpy = g_eglInfo->getDisplay(EGLDisplay);        \
+    if (!dpy) {                                                 \
+        RETURN_ERROR(ret, EGL_BAD_DISPLAY);                     \
+    }                                                           \
+    if (!dpy->isInitialize()) {                                 \
+        RETURN_ERROR(ret, EGL_NOT_INITIALIZED);                 \
+    }
 
 #define VALIDATE_CONFIG_RETURN(EGLConfig,ret)                \
         EglConfig* cfg = dpy->getConfig(EGLConfig);          \
@@ -222,6 +265,7 @@ GlLibrary* getGlLibrary() {
     return EglGlobalInfo::getInstance()->getOsEngine()->getGlLibrary();
 }
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 
 static const GLint kAuxiliaryContextAttribsCompat[] = {
     EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE
@@ -341,7 +385,10 @@ EGLAPI EGLint EGLAPIENTRY eglGetError(void) {
     return err;
 }
 
+=======
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplay(EGLNativeDisplayType display_id) {
+    MEM_TRACE("EMUGL");
     EglDisplay* dpy = NULL;
     EglOS::Display* internalDisplay = NULL;
 
@@ -361,31 +408,42 @@ EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplay(EGLNativeDisplayType display_id) {
     return dpy;
 }
 
+} // namespace translator
+} // namespace egl
 
 #define TRANSLATOR_GETIFACE_NAME "__translator_getIfaces"
 
-static __translator_getGLESIfaceFunc loadIfaces(const char* libName,
-                                                char* error,
-                                                size_t errorSize) {
-    emugl::SharedLibrary* libGLES = emugl::SharedLibrary::open(
-            libName, error, errorSize);
-    if (!libGLES) {
-        return NULL;
-    }
-    __translator_getGLESIfaceFunc func =  (__translator_getGLESIfaceFunc)
-            libGLES->findSymbol(TRANSLATOR_GETIFACE_NAME);
-    if (!func) {
-        snprintf(error, errorSize, "Missing symbol %s",
-                 TRANSLATOR_GETIFACE_NAME);
-        return NULL;
-    }
-    return func;
-}
+extern "C" {
+GLESiface* static_translator_glescm_getIfaces(const EGLiface*);
+GL_APICALL GLESiface* GL_APIENTRY static_translator_glesv2_getIfaces(const EGLiface*);
+}; // extern "C"
+
+#define STATIC_TRANSLATOR_GETIFACE_NAME_GLES_CM static_translator_glescm_getIfaces
+#define STATIC_TRANSLATOR_GETIFACE_NAME_GLES_V2 static_translator_glesv2_getIfaces
 
 #define LIB_GLES_CM_NAME EMUGL_LIBNAME("GLES_CM_translator")
 #define LIB_GLES_V2_NAME EMUGL_LIBNAME("GLES_V2_translator")
 
+static __translator_getGLESIfaceFunc loadIfaces(const char* libName,
+                                                char* error,
+                                                size_t errorSize) {
+
+    if (!strcmp(libName, LIB_GLES_CM_NAME)) {
+        return STATIC_TRANSLATOR_GETIFACE_NAME_GLES_CM;
+    }
+
+    if (!strcmp(libName, LIB_GLES_V2_NAME)) {
+        return STATIC_TRANSLATOR_GETIFACE_NAME_GLES_V2;
+    }
+
+    return 0;
+}
+
+namespace translator {
+namespace egl {
+
 EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, EGLint *minor) {
+    MEM_TRACE("EMUGL");
 
     initGlobalInfo();
 
@@ -1318,6 +1376,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSwapBuffers(EGLDisplay display, EGLSurface surf
 }
 
 EGLAPI EGLContext EGLAPIENTRY eglGetCurrentContext(void) {
+    MEM_TRACE("EMUGL");
     emugl::Mutex::AutoLock mutex(s_eglLock);
     ThreadInfo* thread = getThreadInfo();
     EglDisplay* dpy    = static_cast<EglDisplay*>(thread->eglDisplay);
@@ -1335,6 +1394,7 @@ EGLAPI EGLContext EGLAPIENTRY eglGetCurrentContext(void) {
 }
 
 EGLAPI EGLSurface EGLAPIENTRY eglGetCurrentSurface(EGLint readdraw) {
+    MEM_TRACE("EMUGL");
     emugl::Mutex::AutoLock mutex(s_eglLock);
     if (!EglValidate::surfaceTarget(readdraw)) {
         return EGL_NO_SURFACE;
@@ -1364,11 +1424,13 @@ EGLAPI EGLSurface EGLAPIENTRY eglGetCurrentSurface(EGLint readdraw) {
 }
 
 EGLAPI EGLDisplay EGLAPIENTRY eglGetCurrentDisplay(void) {
+    MEM_TRACE("EMUGL");
     ThreadInfo* thread = getThreadInfo();
     return (thread->eglContext.get()) ? thread->eglDisplay : EGL_NO_DISPLAY;
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglBindAPI(EGLenum api) {
+    MEM_TRACE("EMUGL");
     if(!EglValidate::supportedApi(api)) {
         RETURN_ERROR(EGL_FALSE,EGL_BAD_PARAMETER);
     }
@@ -1378,18 +1440,20 @@ EGLAPI EGLBoolean EGLAPIENTRY eglBindAPI(EGLenum api) {
 }
 
 EGLAPI EGLenum EGLAPIENTRY eglQueryAPI(void) {
+    MEM_TRACE("EMUGL");
     CURRENT_THREAD();
     return tls_thread->getApi();
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglReleaseThread(void) {
+    MEM_TRACE("EMUGL");
     ThreadInfo* thread  = getThreadInfo();
     EglDisplay* dpy     = static_cast<EglDisplay*>(thread->eglDisplay);
-    return eglMakeCurrent(dpy,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);
+    return translator::egl::eglMakeCurrent(dpy,EGL_NO_SURFACE,EGL_NO_SURFACE,EGL_NO_CONTEXT);
 }
 
-EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
-       eglGetProcAddress(const char *procname){
+EGLAPI void* EGLAPIENTRY
+eglGetProcAddress(const char *procname){
     __eglMustCastToProperFunctionPointerType retVal = NULL;
 
     if(!strncmp(procname,"egl",3)) { //EGL proc
@@ -1405,7 +1469,7 @@ EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
         // function table.
         retVal = ClientAPIExts::getProcAddress(procname);
     }
-    return retVal;
+    return (void*)retVal;
 }
 
 /************************** KHR IMAGE *************************************************************/
@@ -1481,20 +1545,23 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR
 
 
 EGLAPI EGLSyncKHR EGLAPIENTRY eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint* attrib_list) {
+    MEM_TRACE("EMUGL");
     // swiftshader_indirect does not work with eglCreateSyncKHR
     // Disable it before we figure out a proper fix in swiftshader
     // BUG: 65587659
-    if (g_eglInfo->isEgl2Egl()) {
+    if (!g_eglInfo->isEgl2EglSyncSafeToUse()) {
         return (EGLSyncKHR)0x42;
     }
+
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     GLsync res = iface->fenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     return (EGLSyncKHR)res;
 }
 
 EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout) {
+    MEM_TRACE("EMUGL");
     emugl::Mutex::AutoLock mutex(s_eglLock);
-    if (g_eglInfo->isEgl2Egl()) {
+    if (!g_eglInfo->isEgl2EglSyncSafeToUse()) {
         return EGL_CONDITION_SATISFIED_KHR;
     }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
@@ -1520,11 +1587,68 @@ EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, 
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync) {
-    if (g_eglInfo->isEgl2Egl()) {
+    MEM_TRACE("EMUGL");
+    if (!g_eglInfo->isEgl2EglSyncSafeToUse()) {
         return EGL_TRUE;
     }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     iface->deleteSync((GLsync)sync);
+    return EGL_TRUE;
+}
+
+EGLAPI EGLBoolean EGLAPIENTRY eglGetSyncAttribKHR(
+    EGLDisplay dpy, EGLSyncKHR sync,
+    EGLint attribute, EGLint *value) {
+    MEM_TRACE("EMUGL");
+
+    if (!g_eglInfo->isEgl2EglSyncSafeToUse()) {
+        switch (attribute) {
+            case EGL_SYNC_TYPE_KHR:
+                *value = EGL_SYNC_FENCE_KHR;
+                break;
+            case EGL_SYNC_CONDITION_KHR:
+                *value = EGL_SYNC_PRIOR_COMMANDS_COMPLETE_KHR;
+                break;
+            case EGL_SYNC_STATUS_KHR: {
+                *value = EGL_SIGNALED_KHR;
+                break;
+            default:
+                return EGL_FALSE;
+            }
+        }
+        return EGL_TRUE;
+    }
+
+    switch (attribute) {
+        // Guest doesn't care about sync type (handled in guest),
+        // but host side might care
+        case EGL_SYNC_TYPE_KHR:
+            *value = EGL_SYNC_FENCE_KHR;
+            break;
+        case EGL_SYNC_CONDITION_KHR:
+            *value = EGL_SYNC_PRIOR_COMMANDS_COMPLETE_KHR;
+            break;
+        case EGL_SYNC_STATUS_KHR: {
+            const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+            GLint status = -1;
+            iface->getSynciv((GLsync)sync, GL_SYNC_STATUS, sizeof(GLint), nullptr, &status);
+            switch (status) {
+                case GL_UNSIGNALED:
+                    *value = EGL_UNSIGNALED_KHR;
+                    break;
+                case GL_SIGNALED:
+                    *value = EGL_SIGNALED_KHR;
+                    break;
+                default:
+                    // error, return EGL_FALSE
+                    return EGL_FALSE;
+            }
+            break;
+        }
+        default:
+            return EGL_FALSE;
+    }
+
     return EGL_TRUE;
 }
 
@@ -1535,7 +1659,8 @@ EGLAPI EGLint EGLAPIENTRY eglGetMaxGLESVersion(EGLDisplay display) {
 }
 
 EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags) {
-    if (g_eglInfo->isEgl2Egl()) {
+    MEM_TRACE("EMUGL");
+    if (!g_eglInfo->isEgl2EglSyncSafeToUse()) {
         return EGL_TRUE;
     }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
@@ -1544,6 +1669,7 @@ EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint
 }
 
 EGLAPI void EGLAPIENTRY eglBlitFromCurrentReadBufferANDROID(EGLDisplay dpy, EGLImageKHR image) {
+    MEM_TRACE("EMUGL");
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     iface->blitFromCurrentReadBufferANDROID((GLeglImageOES)image);
 }
@@ -1557,9 +1683,12 @@ EGLAPI void EGLAPIENTRY eglBlitFromCurrentReadBufferANDROID(EGLDisplay dpy, EGLI
 // reading, so we call eglSetImageFenceANDROID at the end of writing operations
 // in Thread A, and then wait on the fence in Thread B.
 EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay dpy, EGLImageKHR image) {
+    MEM_TRACE("EMUGL");
     unsigned int imagehndl = SafeUIntFromPointer(image);
     ImagePtr img = getEGLImage(imagehndl);
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    if (!img) return iface->fenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+
 
     if (img->sync) {
         iface->deleteSync((GLsync)img->sync);
@@ -1567,17 +1696,26 @@ EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay dpy, EGLImageKHR ima
     }
 
     GLsync res = iface->fenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    iface->flush();
     img->sync = res;
     return (void*)res;
 }
 
 EGLAPI void EGLAPIENTRY eglWaitImageFenceANDROID(EGLDisplay dpy, void* fence) {
+    MEM_TRACE("EMUGL");
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     iface->waitSync((GLsync)fence, 0, -1);
 }
 
 EGLAPI void EGLAPIENTRY eglAddLibrarySearchPathANDROID(const char* path) {
+    MEM_TRACE("EMUGL");
     emugl::SharedLibrary::addLibrarySearchPath(path);
+}
+
+EGLAPI EGLBoolean EGLAPIENTRY eglQueryVulkanInteropSupportANDROID(void) {
+    MEM_TRACE("EMUGL");
+    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    return iface->vulkanInteropSupported() ? EGL_TRUE : EGL_FALSE;
 }
 
 /*********************************************************************************/
@@ -1675,10 +1813,15 @@ EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream
 }
 
 EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable) {
+    MEM_TRACE("EMUGL");
     EglGlobalInfo::setEgl2Egl(enable);
+    bool safeToUse = android::base::System::getEnvironmentVariable("ANDROID_GFXSTREAM_EGL") == "1";
+    EglGlobalInfo::setEgl2EglSyncSafeToUse(
+        safeToUse ? EGL_TRUE : EGL_FALSE);
 }
 
 EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version) {
+    MEM_TRACE("EMUGL");
     // The "version" here follows the convention of eglGetMaxGLESVesion
     // 0: es2 1: es3.0 2: es3.1 3: es3.2
     GLESVersion glesVersion = GLES_2_0;
@@ -1708,14 +1851,142 @@ EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version) {
 }
 
 EGLAPI void EGLAPIENTRY eglFillUsages(void* usages) {
-    if (g_eglInfo->getIface(GLES_1_1) &&
-            g_eglInfo->getIface(GLES_1_1)->fillGLESUsages) {
-        g_eglInfo->getIface(GLES_1_1)->fillGLESUsages(
-            (android_studio::EmulatorGLESUsages*)usages);
-    }
-    if (g_eglInfo->getIface(GLES_2_0) &&
-            g_eglInfo->getIface(GLES_2_0)->fillGLESUsages) {
-        g_eglInfo->getIface(GLES_2_0)->fillGLESUsages(
-            (android_studio::EmulatorGLESUsages*)usages);
-    }
+    MEM_TRACE("EMUGL");
+    // TODO: Figure out better usage metrics interface
+    // that doesn't require linking protobuf into Translator
+    // if (g_eglInfo->getIface(GLES_1_1) &&
+    //         g_eglInfo->getIface(GLES_1_1)->fillGLESUsages) {
+    //     g_eglInfo->getIface(GLES_1_1)->fillGLESUsages(
+    //         (android_studio::EmulatorGLESUsages*)usages);
+    // }
+    // if (g_eglInfo->getIface(GLES_2_0) &&
+    //         g_eglInfo->getIface(GLES_2_0)->fillGLESUsages) {
+    //     g_eglInfo->getIface(GLES_2_0)->fillGLESUsages(
+    //         (android_studio::EmulatorGLESUsages*)usages);
+    // }
 }
+
+static const GLint kAuxiliaryContextAttribsCompat[] = {
+    EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE
+};
+
+static const GLint kAuxiliaryContextAttribsCore[] = {
+    EGL_CONTEXT_CLIENT_VERSION, 2,
+    EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR,
+    EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR,
+    EGL_NONE
+};
+
+#define NAMESPACED_EGL(f) translator::egl::f
+
+static bool createAndBindAuxiliaryContext(EGLContext* context_out, EGLSurface* surface_out) {
+    // create the context
+    EGLDisplay dpy = NAMESPACED_EGL(eglGetDisplay)(EGL_DEFAULT_DISPLAY);
+
+    NAMESPACED_EGL(eglBindAPI)(EGL_OPENGL_ES_API);
+
+    static const GLint configAttribs[] = {
+        EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
+        EGL_RENDERABLE_TYPE,
+        EGL_OPENGL_ES2_BIT, EGL_NONE };
+
+    EGLConfig config;
+    int numConfigs;
+    if (!NAMESPACED_EGL(eglChooseConfig)(dpy, configAttribs, &config, 1, &numConfigs) ||
+        numConfigs == 0) {
+        fprintf(stderr, "%s: could not find gles 2 config!\n", __func__);
+        return false;
+    }
+
+    static const EGLint pbufAttribs[] =
+        { EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
+    EGLSurface surface = eglCreatePbufferSurface(dpy, config, pbufAttribs);
+    if (!surface) {
+        fprintf(stderr, "%s: could not create surface\n", __func__);
+        return false;
+    }
+
+    EGLContext context =
+        NAMESPACED_EGL(eglCreateContext)(dpy, config, EGL_NO_CONTEXT,
+            isCoreProfile() ? kAuxiliaryContextAttribsCore :
+                              kAuxiliaryContextAttribsCompat);
+
+    if (!NAMESPACED_EGL(eglMakeCurrent)(dpy, surface, surface, context)) {
+        fprintf(stderr, "%s: eglMakeCurrent failed\n", __func__);
+        return false;
+    }
+
+    if (context_out) *context_out = context;
+    if (surface_out) *surface_out = surface;
+
+    return true;
+}
+
+static bool unbindAndDestroyAuxiliaryContext(EGLContext context, EGLSurface surface) {
+
+    // create the context
+    EGLDisplay dpy = NAMESPACED_EGL(eglGetDisplay)(EGL_DEFAULT_DISPLAY);
+
+    if (!NAMESPACED_EGL(eglMakeCurrent)(
+            dpy, EGL_NO_SURFACE, EGL_NO_SURFACE,
+            EGL_NO_CONTEXT)) {
+        fprintf(stderr, "%s: failure to unbind current context!\n",
+                __func__);
+        return false;
+    }
+
+
+    if (!eglDestroySurface(dpy, surface)) {
+        fprintf(stderr, "%s: failure to destroy surface!\n",
+                __func__);
+        return false;
+    }
+
+    if (!eglDestroyContext(dpy, context)) {
+        fprintf(stderr, "%s: failure to destroy context!\n",
+                __func__);
+        return false;
+    }
+
+    return true;
+}
+
+static bool bindAuxiliaryContext(EGLContext context, EGLSurface surface) {
+    // create the context
+    EGLDisplay dpy = NAMESPACED_EGL(eglGetDisplay)(EGL_DEFAULT_DISPLAY);
+
+    if (!eglMakeCurrent(dpy, surface, surface, context)) {
+        fprintf(stderr, "%s: eglMakeCurrent failed\n", __func__);
+        return false;
+    }
+
+    return true;
+}
+
+static bool unbindAuxiliaryContext() {
+
+    // create the context
+    EGLDisplay dpy = NAMESPACED_EGL(eglGetDisplay)(EGL_DEFAULT_DISPLAY);
+
+    if (!eglMakeCurrent(
+            dpy, EGL_NO_SURFACE, EGL_NO_SURFACE,
+            EGL_NO_CONTEXT)) {
+        fprintf(stderr, "%s: failure to unbind current context!\n",
+                __func__);
+        return false;
+    }
+
+    return true;
+}
+
+EGLAPI EGLint EGLAPIENTRY eglGetError(void) {
+    MEM_TRACE("EMUGL");
+    CURRENT_THREAD();
+    EGLint err = tls_thread->getError();
+    tls_thread->setError(EGL_SUCCESS);
+    return err;
+}
+
+
+} // namespace translator
+} // namespace egl

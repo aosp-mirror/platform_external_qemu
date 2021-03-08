@@ -116,3 +116,8 @@ void getGpuInfoListNative(GpuInfoList* gpulist) {
     //      http://web.mit.edu/jhawk/mnt/spo/3d/src/Mesa-3.0/samples/oglinfo.c
     //
 }
+
+// Linux: do not blacklist Vulkan
+bool isVulkanSafeToUseNative() {
+    return true;
+}

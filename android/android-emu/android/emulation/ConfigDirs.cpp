@@ -14,21 +14,43 @@
 
 #include "android/emulation/ConfigDirs.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/base/misc/StringUtils.h"
-#include "android/base/system/System.h"
+#include <assert.h>  // for assert
+#include <errno.h>   // for errno
+#include <string.h>  // for strerror
 
-#include <assert.h>
+#include <vector>  // for vector
+
+#include "android/base/Log.h"              // for LogStream, LOG, LogMessage
+#include "android/base/Optional.h"         // for Optional
+#include "android/base/files/PathUtils.h"  // for PathUtils, pj
+#include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/Lock.h"
+#include "android/base/system/System.h"    // for System
+#include "android/utils/path.h"            // for path_mkdir_if_needed
 
 namespace android {
 
+using ::android::base::AutoLock;;
+using ::android::base::LazyInstance;
+using ::android::base::Lock;
 using ::android::base::PathUtils;
+using ::android::base::pj;
 using ::android::base::System;
 
 // Name of the Android configuration directory under $HOME.
 static const char kAndroidSubDir[] = ".android";
 // Subdirectory for AVD data files.
 static const char kAvdSubDir[] = "avd";
+
+// Current discovery path
+class DiscoveryPathState {
+public:
+    Lock lock;
+    std::string path = "";
+};
+
+static LazyInstance<DiscoveryPathState> sDiscoveryPathState =
+    LAZY_INSTANCE_INIT;
 
 // static
 std::string ConfigDirs::getUserDirectory() {
@@ -38,15 +60,24 @@ std::string ConfigDirs::getUserDirectory() {
         return home;
     }
 
-    home = system->envGet("ANDROID_SDK_HOME");
+    // New key: ANDROID_PREFS_ROOT
+    home = system->envGet("ANDROID_PREFS_ROOT");
     if (!home.empty()) {
         // In v1.9 emulator was changed to use $ANDROID_SDK_HOME/.android
         // directory, but Android Studio has always been using $ANDROID_SDK_HOME
         // directly. Put a workaround here to make sure it works both ways,
         // preferring the one from AS.
-        auto homeOldWay = PathUtils::join(home, kAndroidSubDir);
-        return system->pathIsDir(homeOldWay) ? homeOldWay : home;
+        auto homeNewWay = PathUtils::join(home, kAndroidSubDir);
+        return system->pathIsDir(homeNewWay) ? homeNewWay : home;
+    } else {
+        // Old key that is deprecated (ANDROID_SDK_HOME)
+        home = system->envGet("ANDROID_SDK_HOME");
+        if (!home.empty()) {
+            auto homeOldWay = PathUtils::join(home, kAndroidSubDir);
+            return system->pathIsDir(homeOldWay) ? homeOldWay : home;
+        }
     }
+
     home = system->getHomeDirectory();
     if (home.empty()) {
         home = system->getTempDir();
@@ -64,47 +95,43 @@ std::string ConfigDirs::getAvdRootDirectory() {
     // The search order here should match that in AndroidLocation.java
     // in Android Studio. Otherwise, Studio and the Emulator may find
     // different AVDs. Or one may find an AVD when the other doesn't.
-
     std::string avdRoot = system->envGet("ANDROID_AVD_HOME");
-    if ( !avdRoot.empty() && system->pathIsDir(avdRoot) ) {
+    if (!avdRoot.empty() && system->pathIsDir(avdRoot)) {
         return avdRoot;
     }
 
-    // No luck with ANDROID_AVD_HOME, try ANDROID_SDK_HOME
-    avdRoot = system->envGet("ANDROID_SDK_HOME");
-    if ( !avdRoot.empty() ) {
-        // ANDROID_SDK_HOME is defined
-        if (isValidAvdRoot(avdRoot)) {
-            // ANDROID_SDK_HOME is good
-            return PathUtils::join(avdRoot, kAvdSubDir);
-        }
-        avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
-        if (isValidAvdRoot(avdRoot)) {
-            // ANDROID_SDK_HOME/.android is good
-            return PathUtils::join(avdRoot, kAvdSubDir);
-        }
-        // ANDROID_SDK_HOME is defined but bad. In this case,
-        // Android Studio tries $TEST_TMPDIR, $USER_HOME, and
-        // $HOME. We'll do the same.
-        avdRoot = system->envGet("TEST_TMPDIR");
-        if ( !avdRoot.empty() ) {
-            avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
-            if (isValidAvdRoot(avdRoot)) {
-                return PathUtils::join(avdRoot, kAvdSubDir);
+    // No luck with ANDROID_AVD_HOME, try ANDROID_PREFS_ROOT/ANDROID_SDK_HOME
+    avdRoot = getAvdRootDirectoryWithPrefsRoot(system->envGet("ANDROID_PREFS_ROOT"));
+    if (!avdRoot.empty()) {
+        return avdRoot;
+    } else {
+        avdRoot = getAvdRootDirectoryWithPrefsRoot(system->envGet("ANDROID_SDK_HOME"));
+        if (!avdRoot.empty()) {
+            return avdRoot;
+        } else {
+            // ANDROID_PREFS_ROOT/ANDROID_SDK_HOME is defined but bad. In this case,
+            // Android Studio tries $TEST_TMPDIR, $USER_HOME, and
+            // $HOME. We'll do the same.
+            avdRoot = system->envGet("TEST_TMPDIR");
+            if (!avdRoot.empty()) {
+                avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
+                if (isValidAvdRoot(avdRoot)) {
+                    return PathUtils::join(avdRoot, kAvdSubDir);
+                }
             }
-        }
-        avdRoot = system->envGet("USER_HOME");
-        if ( !avdRoot.empty() ) {
-            avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
-            if (isValidAvdRoot(avdRoot)) {
-                return PathUtils::join(avdRoot, kAvdSubDir);
+            avdRoot = system->envGet("USER_HOME");
+            if (!avdRoot.empty()) {
+                avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
+                if (isValidAvdRoot(avdRoot)) {
+                    return PathUtils::join(avdRoot, kAvdSubDir);
+                }
             }
-        }
-        avdRoot = system->envGet("HOME");
-        if ( !avdRoot.empty() ) {
-            avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
-            if (isValidAvdRoot(avdRoot)) {
-                return PathUtils::join(avdRoot, kAvdSubDir);
+            avdRoot = system->envGet("HOME");
+            if (!avdRoot.empty()) {
+                avdRoot = PathUtils::join(avdRoot, kAndroidSubDir);
+                if (isValidAvdRoot(avdRoot)) {
+                    return PathUtils::join(avdRoot, kAvdSubDir);
+                }
             }
         }
     }
@@ -120,7 +147,7 @@ std::string ConfigDirs::getSdkRootDirectoryByEnv() {
     auto system = System::get();
 
     std::string sdkRoot = system->envGet("ANDROID_HOME");
-    if ( isValidSdkRoot(sdkRoot) ) {
+    if (isValidSdkRoot(sdkRoot)) {
         return sdkRoot;
     }
 
@@ -148,7 +175,7 @@ std::string ConfigDirs::getSdkRootDirectoryByPath() {
     PathUtils::simplifyComponents(&parts);
 
     std::string sdkRoot = PathUtils::recompose(parts);
-    if ( isValidSdkRoot(sdkRoot) ) {
+    if (isValidSdkRoot(sdkRoot)) {
         return sdkRoot;
     }
     return std::string();
@@ -171,15 +198,15 @@ bool ConfigDirs::isValidSdkRoot(android::base::StringView rootPath) {
         return false;
     }
     System* system = System::get();
-    if ( !system->pathIsDir(rootPath) || !system->pathCanRead(rootPath) ) {
+    if (!system->pathIsDir(rootPath) || !system->pathCanRead(rootPath)) {
         return false;
     }
     std::string platformsPath = PathUtils::join(rootPath, "platforms");
-    if ( !system->pathIsDir(platformsPath) ) {
+    if (!system->pathIsDir(platformsPath)) {
         return false;
     }
     std::string platformToolsPath = PathUtils::join(rootPath, "platform-tools");
-    if ( !system->pathIsDir(platformToolsPath) ) {
+    if (!system->pathIsDir(platformToolsPath)) {
         return false;
     }
 
@@ -192,15 +219,97 @@ bool ConfigDirs::isValidAvdRoot(android::base::StringView avdPath) {
         return false;
     }
     System* system = System::get();
-    if ( !system->pathIsDir(avdPath) || !system->pathCanRead(avdPath) ) {
+    if (!system->pathIsDir(avdPath) || !system->pathCanRead(avdPath)) {
         return false;
     }
     std::string avdAvdPath = PathUtils::join(avdPath, "avd");
-    if ( !system->pathIsDir(avdAvdPath) ) {
+    if (!system->pathIsDir(avdAvdPath)) {
         return false;
     }
 
     return true;
+}
+
+std::string ConfigDirs::getAvdRootDirectoryWithPrefsRoot(const std::string& path) {
+    if (path.empty()) return {};
+
+    // ANDROID_PREFS_ROOT is defined
+    if (isValidAvdRoot(path)) {
+        // ANDROID_PREFS_ROOT is good
+        return PathUtils::join(path, kAvdSubDir);
+    }
+
+    std::string avdRoot = PathUtils::join(path, kAndroidSubDir);
+    if (isValidAvdRoot(avdRoot)) {
+        // ANDROID_PREFS_ROOT/.android is good
+        return PathUtils::join(avdRoot, kAvdSubDir);
+    }
+
+    return {};
+}
+
+typedef struct discovery_dir {
+    const char* root_env;
+    const char* subdir;
+} discovery_dir;
+
+#if defined(_WIN32)
+discovery_dir discovery{"LOCALAPPDATA", "Temp"};
+#elif defined(__linux__)
+discovery_dir discovery{"XDG_RUNTIME_DIR", ""};
+#elif defined(__APPLE__)
+discovery_dir discovery{"HOME", "Library/Caches/TemporaryItems"};
+#else
+#error This platform is not supported.
+#endif
+
+static std::string getAlternativeRoot() {
+#ifdef __linux__
+    auto uid = getuid();
+    auto discovery = pj("/run/user/", std::to_string(uid));
+    if (System::get()->pathExists(discovery)) {
+        return discovery;
+    }
+#endif
+
+    // Reverting to the standard emulator user directories
+    return ConfigDirs::getUserDirectory();
+}
+
+std::string ConfigDirs::getDiscoveryDirectory() {
+    auto root = System::get()->getEnvironmentVariable(discovery.root_env);
+    if (root.empty()) {
+        // Reverting to the alternative root if these environment variables do
+        // not exist.
+        fprintf(stderr,
+                "WARNING. Using fallback path for the emulator registration "
+                "directory.\n");
+        root = getAlternativeRoot();
+    } else {
+        root = pj(root, discovery.subdir);
+    }
+
+    auto desired_directory = pj(root, "avd", "running");
+    auto path = PathUtils::decompose(desired_directory);
+    PathUtils::simplifyComponents(&path);
+    auto recomposed = PathUtils::recompose(path);
+    if (!System::get()->pathExists(recomposed)) {
+        if (path_mkdir_if_needed(recomposed.c_str(), 0700) == -1) {
+            LOG(ERROR) << "Unable to create " << recomposed << " due to "
+                       << errno << ": " << strerror(errno);
+        }
+    }
+    return recomposed;
+}
+
+void ConfigDirs::setCurrentDiscoveryPath(android::base::StringView path) {
+    AutoLock lock(sDiscoveryPathState->lock);
+    sDiscoveryPathState->path = path.str();
+}
+
+std::string ConfigDirs::getCurrentDiscoveryPath() {
+    AutoLock lock(sDiscoveryPathState->lock);
+    return sDiscoveryPathState->path;
 }
 
 }  // namespace android

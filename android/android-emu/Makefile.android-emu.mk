@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 # Declarations related to the AndroidEmu library, which group Android-specific
 # emulation features that are used by both QEMU1 and QEMU2 engines.
 #
@@ -942,3 +943,5 @@ $(call end-emulator-program)
 # Done
 
 LOCAL_PATH := $(_ANDROID_EMU_OLD_LOCAL_PATH)
+=======
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)

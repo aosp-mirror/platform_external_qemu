@@ -41,12 +41,13 @@ class EvpMdCtxCleaner {
     EVP_MD_CTX* ctx_;
 };
 
-template <typename T, void (*FreeFunc)(T*)> struct OpenSslObjectDeleter {
+template <typename T, typename FreeFuncRet, FreeFuncRet (*FreeFunc)(T*)>
+struct OpenSslObjectDeleter {
     void operator()(T* p) { FreeFunc(p); }
 };
 
 #define DEFINE_OPENSSL_OBJECT_POINTER(name)                                                        \
-    typedef OpenSslObjectDeleter<name, name##_free> name##_Delete;                                 \
+    typedef OpenSslObjectDeleter<name, decltype(name##_free(nullptr)), name##_free> name##_Delete; \
     typedef UniquePtr<name, name##_Delete> name##_Ptr;
 
 DEFINE_OPENSSL_OBJECT_POINTER(ASN1_BIT_STRING)
@@ -66,7 +67,7 @@ DEFINE_OPENSSL_OBJECT_POINTER(X509)
 DEFINE_OPENSSL_OBJECT_POINTER(X509_EXTENSION)
 DEFINE_OPENSSL_OBJECT_POINTER(X509_NAME)
 
-typedef OpenSslObjectDeleter<BIGNUM, BN_free> BIGNUM_Delete;
+typedef OpenSslObjectDeleter<BIGNUM, void, BN_free> BIGNUM_Delete;
 typedef UniquePtr<BIGNUM, BIGNUM_Delete> BIGNUM_Ptr;
 
 keymaster_error_t ec_get_group_size(const EC_GROUP* group, size_t* key_size_bits);

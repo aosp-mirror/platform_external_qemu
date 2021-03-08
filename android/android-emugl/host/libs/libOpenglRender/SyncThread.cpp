@@ -17,6 +17,7 @@
 #include "SyncThread.h"
 
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/system/System.h"
 #include "android/utils/debug.h"
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/OpenGLDispatchLoader.h"
@@ -89,6 +90,17 @@ void SyncThread::triggerWait(FenceSync* fenceSync,
     DPRINT("exit");
 }
 
+void SyncThread::triggerBlockedWaitNoTimeline(FenceSync* fenceSync) {
+    DPRINT("fenceSyncInfo=0x%llx timeline=0x%lx ...",
+            fenceSync, timeline);
+    SyncThreadCmd to_send;
+    to_send.opCode = SYNC_THREAD_BLOCKED_WAIT_NO_TIMELINE;
+    to_send.fenceSync = fenceSync;
+    DPRINT("opcode=%u", to_send.opCode);
+    sendAndWaitForResult(to_send);
+    DPRINT("exit");
+}
+
 void SyncThread::cleanup() {
     DPRINT("enter");
     SyncThreadCmd to_send;
@@ -156,7 +168,7 @@ void SyncThread::sendAsync(SyncThreadCmd& cmd) {
 }
 
 void SyncThread::doSyncContextInit() {
-    const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+    const EGLDispatch* egl = emugl::LazyLoadedEGLDispatch::get();
 
     mDisplay = egl->eglGetDisplay(EGL_DEFAULT_DISPLAY);
     int eglMaj, eglMin;
@@ -198,7 +210,7 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
         FenceSync::getFromHandle((uint64_t)(uintptr_t)cmd->fenceSync);
 
     if (!fenceSync) {
-        emugl_sync_timeline_inc(cmd->timeline, kTimelineInterval);
+        emugl::emugl_sync_timeline_inc(cmd->timeline, kTimelineInterval);
         return;
     }
 
@@ -242,7 +254,7 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
     //   incrementing the timeline means that the app's rendering freezes.
     //   So, despite the faulty GPU driver, not incrementing is too heavyweight a response.
 
-    emugl_sync_timeline_inc(cmd->timeline, kTimelineInterval);
+    emugl::emugl_sync_timeline_inc(cmd->timeline, kTimelineInterval);
     FenceSync::incrementTimelineAndDeleteOldFences();
 
     DPRINT("done timeline increment");
@@ -250,11 +262,36 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
     DPRINT("exit");
 }
 
+void SyncThread::doSyncBlockedWaitNoTimeline(SyncThreadCmd* cmd) {
+    DPRINT("enter");
+
+    FenceSync* fenceSync =
+        FenceSync::getFromHandle((uint64_t)(uintptr_t)cmd->fenceSync);
+
+    if (!fenceSync) {
+        return;
+    }
+
+    EGLint wait_result = 0x0;
+
+    DPRINT("wait on sync obj: %p", cmd->fenceSync);
+    wait_result = cmd->fenceSync->wait(kDefaultTimeoutNsecs);
+
+    DPRINT("done waiting, with wait result=0x%x. "
+           "increment timeline (and signal fence)",
+           wait_result);
+
+    if (wait_result != EGL_CONDITION_SATISFIED_KHR) {
+        fprintf(stderr, "error: eglClientWaitSync abnormal exit 0x%x\n",
+                wait_result);
+    }
+}
+
 void SyncThread::doExit() {
 
     if (mContext == EGL_NO_CONTEXT) return;
 
-    const EGLDispatch* egl = LazyLoadedEGLDispatch::get();
+    const EGLDispatch* egl = emugl::LazyLoadedEGLDispatch::get();
 
     egl->eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     egl->eglDestroyContext(mDisplay, mContext);
@@ -277,6 +314,10 @@ int SyncThread::doSyncThreadCmd(SyncThreadCmd* cmd) {
     case SYNC_THREAD_EXIT:
         DPRINT("exec SYNC_THREAD_EXIT");
         doExit();
+        break;
+    case SYNC_THREAD_BLOCKED_WAIT_NO_TIMELINE:
+        DPRINT("exec SYNC_THREAD_BLOCKED_WAIT_NO_TIMELINE");
+        doSyncBlockedWaitNoTimeline(cmd);
         break;
     }
     return result;

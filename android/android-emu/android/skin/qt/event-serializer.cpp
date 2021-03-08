@@ -14,12 +14,19 @@
 
 #include "android/skin/qt/event-serializer.h"
 
-#include <QEnterEvent>
-#include <QEvent>
-#include <QMouseEvent>
-#include <QResizeEvent>
+#include <qcoreevent.h>  // for QEvent (ptr only), QEvent::Close, QEvent::Enter
+#include <qnamespace.h>  // for KeyboardModifiers, MouseButtons
+#include <QEnterEvent>   // for QEnterEvent
+#include <QEvent>        // for QEvent
+#include <QMouseEvent>   // for QMouseEvent
+#include <QPointF>       // for QPointF
+#include <QResizeEvent>  // for QResizeEvent
+#include <QSize>         // for QSize
+#include <cassert>       // for assert
 
-#include <cassert>
+class QEnterEvent;
+class QMouseEvent;
+class QResizeEvent;
 
 std::ostream& operator<<(std::ostream& out, const QEvent& event) {
     switch (event.type()) {

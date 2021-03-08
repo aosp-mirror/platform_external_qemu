@@ -12,6 +12,8 @@
 #include "cpu.h"
 #include "exec/address-spaces.h"
 #include "exec/exec-all.h"
+#include "exec/ram_addr.h"
+#include "exec/memory-remap.h"
 
 #include "target/i386/hax-i386.h"
 #include "qemu/queue.h"
@@ -117,17 +119,14 @@ static bool is_compatible_mapping(hax_slot *slot,
            ((uintptr_t)slot->hva - (uintptr_t)hva == slot->start - start_gpa);
 }
 
-void hax_set_phys_mem(MemoryRegionSection *section, bool add)
+void hax_set_phys_mem_general(void* hva, uint64_t start, uint64_t size, bool add, int flags)
 {
 #ifdef HAX_SLOT_DEBUG
     fprintf(stderr, "%s begin=======================================================\n", __func__);
 #endif
 
     hax_slot *mem;
-    MemoryRegion *area = section->mr;
-    uint64_t start, size, end;
-    int flags;
-    void *hva;
+    uint64_t end;
     int i;
     int free_slots[HAX_MAX_SLOTS];
     int overlap_slots[HAX_MAX_SLOTS];
@@ -136,27 +135,7 @@ void hax_set_phys_mem(MemoryRegionSection *section, bool add)
     int split_slot_id;
     int split_needed_free_slots;
 
-    start = section->offset_within_address_space;
-    size = int128_get64(section->size);
     end = start + size;
-
-    if (!memory_region_is_ram(area)) {
-#ifdef HAX_SLOT_DEBUG
-        fprintf(stderr, "%s: is not ram, skip [0x%llx 0x%llx] for %s\n",
-                __func__,
-                (unsigned long long)start,
-                (unsigned long long)end, add ? "ADD" : "REMOVE");
-#endif
-        goto end;
-    }
-
-    hva = memory_region_get_ram_ptr(area) + section->offset_within_region;
-
-    if (memory_region_is_rom(area)) {
-        flags = HAX_RAM_INFO_ROM;
-    } else {
-        flags = 0;
-    }
 
     memset(free_slots, 0, HAX_MAX_SLOTS * sizeof(int));
     memset(overlap_slots, 0, HAX_MAX_SLOTS * sizeof(int));
@@ -317,7 +296,7 @@ void hax_set_phys_mem(MemoryRegionSection *section, bool add)
 
         // This is not the split region, so we can use the following
         // calculation of overlap interval and remaining interval.
-        overlap_start = start > slot_start ? slot_start : start;
+        overlap_start = start < slot_start ? slot_start : start;
         overlap_end = end > slot_end ? slot_end : end;
 
         // This region is totally overlapped; we may not want to restore it.
@@ -326,6 +305,10 @@ void hax_set_phys_mem(MemoryRegionSection *section, bool add)
         // Restore the partially overlapped region.
         remaining_start = overlap_start > slot_start ? slot_start : overlap_end;
         remaining_end = overlap_end < slot_end ? slot_end : overlap_start;
+
+        if (remaining_start >= remaining_end) {
+            qemu_abort("%s: FATAL: Invalid slot to restore\n", __func__);
+        }
 
         if (hax_set_ram(
                 remaining_start,
@@ -460,6 +443,7 @@ void hax_set_phys_mem(MemoryRegionSection *section, bool add)
 
     // Obtain the free slot.
     {
+        int ret;
         hax_slot* slot = NULL;
         for (i = 0; i < HAX_MAX_SLOTS; ++i) {
             if (free_slots[i]) {
@@ -489,10 +473,14 @@ void hax_set_phys_mem(MemoryRegionSection *section, bool add)
         slot->size = end - start;
         slot->hva = hva;
         slot->flags = flags;
-        hax_set_ram(slot->start,
-                    slot->size,
-                    (uint64_t)(uintptr_t)slot->hva,
-                    slot->flags);
+        ret = hax_set_ram(slot->start,
+                          slot->size,
+                          (uint64_t)(uintptr_t)slot->hva,
+                          slot->flags);
+        if (ret) {
+            qemu_abort("%s: FATAL: final hax_set_ram() failed, ret=%d\n",
+                       __func__, ret);
+        }
         HAX_SET_PHYS_MEM_DUMP("After addition of new slot")
     }
 end:
@@ -504,16 +492,63 @@ end:
     return;
 }
 
+void hax_set_phys_mem_from_memory_region(MemoryRegionSection *section, bool add)
+{
+#ifdef HAX_SLOT_DEBUG
+    fprintf(stderr, "%s begin=======================================================\n", __func__);
+#endif
+
+    MemoryRegion *area = section->mr;
+    uint64_t start, size, end;
+    int flags;
+    void *hva;
+
+    start = section->offset_within_address_space;
+    size = int128_get64(section->size);
+    end = start + size;
+
+    if (!memory_region_is_ram(area)) {
+#ifdef HAX_SLOT_DEBUG
+        fprintf(stderr, "%s: is not ram, skip [0x%llx 0x%llx] for %s\n",
+                __func__,
+                (unsigned long long)start,
+                (unsigned long long)end, add ? "ADD" : "REMOVE");
+#endif
+        return;
+    }
+
+    if (memory_region_is_user_backed(area)) {
+#ifdef HAX_SLOT_DEBUG
+        fprintf(stderr, "%s: is user-backed ram, skip [0x%llx 0x%llx] for %s\n",
+                __func__,
+                (unsigned long long)start,
+                (unsigned long long)end, add ? "ADD" : "REMOVE");
+#endif
+        return;
+    }
+
+    hva = memory_region_get_ram_ptr(area) + section->offset_within_region;
+
+    if (memory_region_is_rom(area)) {
+        flags = HAX_RAM_INFO_ROM;
+    } else {
+        flags = 0;
+    }
+
+    hax_set_phys_mem_general(hva, start, size, add, flags);
+    return;
+}
+
 static void hax_region_add(MemoryListener * listener,
                            MemoryRegionSection * section)
 {
-    hax_set_phys_mem(section, true);
+    hax_set_phys_mem_from_memory_region(section, true);
 }
 
 static void hax_region_del(MemoryListener * listener,
                            MemoryRegionSection * section)
 {
-    hax_set_phys_mem(section, false);
+    hax_set_phys_mem_from_memory_region(section, false);
 }
 
 /* currently we fake the dirty bitmap sync, always dirty */
@@ -528,6 +563,34 @@ static void hax_log_sync(MemoryListener *listener,
     }
 
     memory_region_set_dirty(mr, 0, int128_get64(section->size));
+}
+
+// User backed memory region API
+static int
+user_backed_flags_to_hax(int flags) {
+    /* HAX_RAM_INFO_STANDALONE is ignored if not supported by HAXM */
+    int hax_flags = HAX_RAM_INFO_STANDALONE;
+    if (!(flags & USER_BACKED_RAM_FLAGS_READ)) {
+        hax_flags |= HAX_RAM_INFO_ROM;
+    }
+    return hax_flags;
+}
+
+static void hax_user_backed_ram_map(uint64_t gpa, void* hva, uint64_t size, int flags) {
+    if (!hax_global.supports_implicit_ramblock) {
+        /* This code path is for older HAXM and does not work well. */
+        int ret = hax_populate_ram((uint64_t)(uintptr_t)hva, size);
+        if (ret < 0) {
+            fprintf(stderr, "%s: Failed to add RAM block, ret=%d\n", __func__, ret);
+            abort();
+        }
+    }
+    hax_set_phys_mem_general(hva, gpa, size, true /* add */, user_backed_flags_to_hax(flags));
+}
+
+static void hax_user_backed_ram_unmap(uint64_t gpa, uint64_t size) {
+    /* HAXM will take care of freeing the RAM block [hva, hva + size) */
+    hax_set_phys_mem_general(0, gpa, size, false /* del */, HAX_RAM_INFO_INVALID);
 }
 
 static MemoryListener hax_memory_listener = {
@@ -563,4 +626,7 @@ void hax_memory_init(void)
 {
     ram_block_notifier_add(&hax_ram_notifier);
     memory_listener_register(&hax_memory_listener, &address_space_memory);
+    qemu_set_user_backed_mapping_funcs(
+        hax_user_backed_ram_map,
+        hax_user_backed_ram_unmap);
 }

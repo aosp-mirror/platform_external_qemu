@@ -10,15 +10,30 @@
 
 #include "android/skin/qt/gl-widget.h"
 
-#include "android/base/memory/LazyInstance.h"
+#include "android/opengles.h"
 
-#include "GLES2/gl2.h"
+#include <qloggingcategory.h>                   // for qCWarning
+#include <qnamespace.h>                         // for WA_DontCreateNativeAn...
+#include <QRegion>                              // for QRegion
+#include <QResizeEvent>                         // for QResizeEvent
+#include <QSize>                                // for QSize
+#include <QWindow>                              // for QWindow
 
-#include <QResizeEvent>
-#include <QtGlobal>
-#include <QWindow>
+#include "EGL/egl.h"                            // for EGL_FALSE, EGL_NONE
+#include "EGL/eglplatform.h"                    // for EGLint, EGLNativeWind...
+#include "GLES3/gl3.h"                          // for GL_TEXTURE_2D
+#include "OpenGLESDispatch/EGLDispatch.h"       // for EGLDispatch
+#include "OpenGLESDispatch/GLESv2Dispatch.h"    // for GLESv2Dispatch
+#include "android/skin/qt/gl-canvas.h"          // for GLCanvas
+#include "android/skin/qt/gl-texture-draw.h"    // for TextureDraw
+#include "android/skin/qt/logging-category.h"   // for emu
+#include "emugl/common/OpenGLDispatchLoader.h"  // for LazyLoadedEGLDispatch
 
-#include "emugl/common/OpenGLDispatchLoader.h"
+class QPaintEvent;
+class QResizeEvent;
+class QScreen;
+class QShowEvent;
+class QWidget;
 
 struct EGLState {
     EGLDisplay display;
@@ -36,8 +51,8 @@ static int nearestPOT(int value) {
 
 GLWidget::GLWidget(QWidget* parent) :
         QWidget(parent),
-        mEGL(LazyLoadedEGLDispatch::get()),
-        mGLES2(LazyLoadedGLESv2Dispatch::get()),
+        mEGL((const EGLDispatch*)android_getEGLDispatch()),
+        mGLES2((const GLESv2Dispatch*)android_getGLESv2Dispatch()),
         mEGLState(nullptr),
         mValid(false),
         mEnableAA(false) {
@@ -76,7 +91,7 @@ bool GLWidget::ensureInit() {
 
     mEGLState->display = mEGL->eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (mEGLState->display == EGL_NO_DISPLAY) {
-        qWarning("Failed to get EGL display: EGL error %d",
+        qCWarning(emu, "Failed to get EGL display: EGL error %d",
                  mEGL->eglGetError());
         return false;
     }
@@ -88,7 +103,7 @@ bool GLWidget::ensureInit() {
     // Initializing an already-initialized display is OK.
     if (mEGL->eglInitialize(mEGLState->display, &egl_maj, &egl_min) ==
         EGL_FALSE) {
-        qWarning("Failed to initialize EGL display: EGL error %d",
+        qCWarning(emu, "Failed to initialize EGL display: EGL error %d",
                  mEGL->eglGetError());
         return false;
     }
@@ -113,17 +128,23 @@ bool GLWidget::ensureInit() {
     EGLBoolean choose_result = mEGL->eglChooseConfig(
             mEGLState->display, config_attribs, &egl_config, 1, &num_config);
     if (choose_result == EGL_FALSE || num_config < 1) {
-        qWarning("Failed to choose EGL config: EGL error %d",
+        qCWarning(emu, "Failed to choose EGL config: EGL error %d",
                  mEGL->eglGetError());
         return false;
     }
 
     // Create a context.
     EGLint context_attribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+    AndroidVirtioGpuOps* ops = android_getVirtioGpuOps();
+    // Share this context with the emulator framebuffer context by default.
     mEGLState->context = mEGL->eglCreateContext(
-            mEGLState->display, egl_config, EGL_NO_CONTEXT, context_attribs);
+        mEGLState->display,
+        egl_config,
+        (EGLContext)ops->get_global_egl_context(),
+        context_attribs);
+
     if (mEGLState->context == EGL_NO_CONTEXT) {
-        qWarning("Failed to create EGL context %d", mEGL->eglGetError());
+        qCWarning(emu, "Failed to create EGL context %d", mEGL->eglGetError());
     }
 
     // Finally, create a window surface associated with this widget.
@@ -131,7 +152,7 @@ bool GLWidget::ensureInit() {
             mEGLState->display, egl_config, (EGLNativeWindowType)(winId()),
             nullptr);
     if (mEGLState->surface == EGL_NO_SURFACE) {
-        qWarning("Failed to create an EGL surface %d", mEGL->eglGetError());
+        qCWarning(emu, "Failed to create an EGL surface %d", mEGL->eglGetError());
         return false;
     }
 

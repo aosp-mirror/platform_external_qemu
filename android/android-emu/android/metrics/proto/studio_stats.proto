@@ -52,11 +52,11 @@ message AndroidStudioEvent {
 
   // Deprecated, use debug_session_start_details instead.
   // set when kind = LLDB_SESSION_STARTED
-  optional RunConfigurationType run_configuration_type = 10 [deprecated=true];
+  optional RunConfigurationType run_configuration_type = 10 [deprecated = true];
 
   // Deprecated, use debug_session_start_details instead.
   // set when kind = LLDB_SESSION_STARTED
-  optional DebuggerType debugger_type = 11 [deprecated=true];
+  optional DebuggerType debugger_type = 11 [deprecated = true];
 
   // set when kind = LLDB_LAUNCHED
   // or kind = DEPLOYMENT_APK
@@ -80,7 +80,8 @@ message AndroidStudioEvent {
   // set when category = GRADLE_SYNC
   optional string gradle_version = 15;  // e.g. '2.10'
 
-  // set when kind = GRADLE_SYNC_FAILURE
+  // set when kind = GRADLE_SYNC_FAILURE_DETAILS (previously set when kind =
+  // GRADLE_SYNC_FAILURE)
   optional GradleSyncFailure gradle_sync_failure = 16;
 
   // set when kind = GRADLE_SYNC_FAILURE and gradle_sync_failure = *_NOT_FOUND
@@ -268,6 +269,47 @@ message AndroidStudioEvent {
   // set when kind = RUN_EVENT
   optional RunEvent run_event = 72;
 
+  // set when kind = NAV_EDITOR_EVENT
+  optional NavEditorEvent nav_editor_event = 73;
+
+  // set when kind = DIALOG_STATS
+  optional DialogStats dialog_stats = 74;
+
+  // set when kind = GRADLE_PLUGIN_UPGRADE_DIALOG
+  optional GradlePluginUpgradeDialogStats gradle_plugin_upgrade_dialog = 75;
+
+  // set when kind = DATA_BINDING
+  optional DataBindingEvent data_binding_event = 76;
+
+  // set when kind = TYPING_LATENCY_STATS
+  optional TypingLatencyStats typing_latency_stats = 77;
+
+  // set when kind = GRADLE_SYNC_ISSUES.
+  repeated GradleSyncIssue gradle_sync_issues = 78;
+
+  // The list of quick-fixes offered to resolve a sync failure. (Quick fixes
+  // offered to resolve specific sync issues are reported in
+  // gradle_sync_issues). set when kind = GRADLE_SYNC_FAILURE_DETAILS.
+  repeated GradleSyncQuickFix offered_quick_fixes = 79;
+
+  // set when kind = STUDIO_PATCH_UPDATER
+  optional StudioPatchUpdaterEvent studio_patch_updater_event = 80;
+
+  // Set when kind = RESOURCE_MANAGER
+  optional ResourceManagerEvent resource_manager_event = 81;
+
+  // Set when kind = IDE_PLUGIN_INFO
+  optional IdePluginInfo ide_plugin_info = 82;
+
+  // Set when kind = EDITOR_HIGHLIGHTING_STATS
+  optional EditorHighlightingStats editor_highlighting_stats = 83;
+
+  // Set when kind = WINDOWS_DEFENDER_STATUS
+  optional WindowsDefenderStatus windows_defender_status = 84;
+
+  // set when kind = EMULATOR_UI_EVENTS
+  repeated EmulatorUiEvent emulator_ui_events = 114;
+
   enum EventCategory {
     // The event was not grouped into any specific category (default).
     NO_EVENT_CATEGORY = 0;
@@ -329,6 +371,8 @@ message AndroidStudioEvent {
     // The event is related to CMake editing.
     // Do not use this -- use the EventKind below.
     DEPRECATED_CMAKE_EDITING_EVENT = 26 [deprecated = true];
+    // The event is related to Android Studio Projects
+    PROJECT_SYSTEM = 27;
   }
 
   // Specific kind of event, primary separation key of all Android Studio
@@ -395,10 +439,10 @@ message AndroidStudioEvent {
     LLDB_SESSION_STARTED = 28;
     // Deprecated, use LLDB_SESSION_ENDED instead.
     // Native debugger session has failed.
-    LLDB_SESSION_FAILED = 29 [deprecated=true];
+    LLDB_SESSION_FAILED = 29 [deprecated = true];
     // Deprecated, use DEBUG_SESSION_ENDED instead.
     // Native debugger session has completed successfully.
-    LLDB_SESSION_COMPLETED = 30 [deprecated=true];
+    LLDB_SESSION_COMPLETED = 30 [deprecated = true];
     // SDK Manager QuickFix Wizard is invoked to install LLDB package.
     LLDB_INSTALL_STARTED = 31;
     // SDK Manager QuickFix Wizard invocation to install LLDB package failed.
@@ -635,7 +679,7 @@ message AndroidStudioEvent {
     LINT_ACTION = 133;
 
     // Events related to a “Run” in studio
-    STUDIO_RUN_EVENT = 134 [ deprecated = true ];
+    STUDIO_RUN_EVENT = 134 [deprecated = true];
 
     // The event is related to count files in a search scope
     INTELLIJ_PROJECT_SIZE_STATS = 135;
@@ -684,6 +728,52 @@ message AndroidStudioEvent {
 
     // Studio's LowMemoryWatcher triggered
     STUDIO_LOW_MEMORY_EVENT = 168;
+
+    // Project Structure Dialog repository search events.
+    PROJECT_STRUCTURE_DIALOG_REPOSITORIES_SEARCH = 169;
+
+    // Navigation Editor event
+    NAV_EDITOR_EVENT = 170;
+
+    // User took an action on a dialog (open or close)
+    DIALOG_STATS = 171;
+
+    // User took an action to invalidate caches
+    PROJECT_SYSTEM_INVALIDATE_CACHES = 172;
+
+    // Performed an action with the Gradle Plugin Upgrade dialog
+    GRADLE_PLUGIN_UPGRADE_DIALOG = 173;
+
+    // Data binding related metrics
+    DATA_BINDING = 174;
+
+    // Typing latency statistics.
+    TYPING_LATENCY_STATS = 175;
+
+    // Sync failure details reported to the user (previously reported as a
+    // GRADLE_SYNC_FAILURE).
+    GRADLE_SYNC_FAILURE_DETAILS = 176;
+
+    // Sync issues reported to the user (after sync completed).
+    GRADLE_SYNC_ISSUES = 177;
+
+    // Android Studio Patch Updater events
+    STUDIO_PATCH_UPDATER = 178;
+
+    // Resource Manager events
+    RESOURCE_MANAGER = 179;
+
+    // Info on which IDE plugins are enabled for the current session.
+    IDE_PLUGIN_INFO = 180;
+
+    // Editor syntax highlighting statistics.
+    EDITOR_HIGHLIGHTING_STATS = 181;
+
+    // Status of Windows Defender
+    WINDOWS_DEFENDER_STATUS = 182;
+
+    // User clicked something in the Emulator UI.
+    EMULATOR_UI_EVENTS = 216;
   }
 
   // Represents different Performance Monitoring types.
@@ -804,16 +894,197 @@ message AndroidStudioEvent {
     UNKNOWN_HOST = 11;
     UNSUPPORTED_ANDROID_MODEL_VERSION = 12;
     UNSUPPORTED_GRADLE_VERSION = 13;
+    CANNOT_BE_CAST_TO = 14;
+    BROKEN_PIPE = 15;
+    CANNOT_OPEN_ZIP_FILE = 16;
+    OBJECT_STREAM_ERROR = 17;
+    NDK_INTEGRATION_DEPRECATED = 18;
+    SDK_BUILD_TOOLS_TOO_LOW = 19;
+    CACHED_DEPENDENCY_NOT_FOUND = 20;
+    UNEXPECTED_ERROR = 21;
+    GRADLE2_REQUIRED = 22;
+    CORRUPT_GRADLE_DEPENDENCY = 23;
+    INTERNET_CONNECTION_ERROR = 24;
+    OLD_ANDROID_PLUGIN = 25;
+    MISSING_CMAKE = 26;
+    NDK_NOT_CONFIGURED = 27;
+    FAILED_TO_INSTALL_NDK_BUNDLE = 28;
+    UNSUPPORTED_MODEL_VERSION = 29;
+    DAEMON_CONTEXT_MISMATCH = 30;
+    JAVA_HEAP_ERROR = 31;
+    JDK8_REQUIRED = 32;
   }
 
   // IDE brand containing the android plugin
   enum IdeBrand {
     UNKNOWN_IDE_BRAND = 0;
-    ANDROID_STUDIO= 1;
+    ANDROID_STUDIO = 1;
     ANDROID_STUDIO_WITH_BLAZE = 2;
     INTELLIJ = 3;
   }
+
+  // Gradle sync issue type.
+  enum GradleSyncIssueType {
+    UNKNOWN_GRADLE_SYNC_ISSUE_TYPE = 0;
+
+    TYPE_PLUGIN_OBSOLETE = 1;
+    TYPE_UNRESOLVED_DEPENDENCY = 2;
+    TYPE_DEPENDENCY_IS_APK = 3;
+    TYPE_DEPENDENCY_IS_APKLIB = 4;
+    TYPE_NON_JAR_LOCAL_DEP = 5;
+    TYPE_NON_JAR_PACKAGE_DEP = 6;
+    TYPE_NON_JAR_PROVIDED_DEP = 7;
+    TYPE_JAR_DEPEND_ON_AAR = 8;
+
+    // Mismatch dependency version between tested and test app. Data is dep
+    // coordinate without the version (groupId:artifactId)
+    TYPE_MISMATCH_DEP = 9;
+
+    TYPE_OPTIONAL_LIB_NOT_FOUND = 10;
+
+    TYPE_JACK_IS_NOT_SUPPORTED = 11;
+
+    TYPE_GRADLE_TOO_OLD = 12;
+
+    TYPE_BUILD_TOOLS_TOO_LOW = 13;
+
+    // Found dependency that's the maven published android.jar. Data is the
+    // maven artifact coordinates.
+    TYPE_DEPENDENCY_MAVEN_ANDROID = 14;
+
+    // Found dependency that is known to be inside android.jar. Data is maven
+    // artifact coordinates.
+    TYPE_DEPENDENCY_INTERNAL_CONFLICT = 15;
+
+    // Errors configuring NativeConfigValues for individual individual variants
+    TYPE_EXTERNAL_NATIVE_BUILD_CONFIGURATION = 16;
+
+    // Errors configuring NativeConfigValues. There was a process exception.
+    // Data contains STDERR which should be interpreted by Android Studio.
+    TYPE_EXTERNAL_NATIVE_BUILD_PROCESS_EXCEPTION = 17;
+
+    // Cannot use Java 8 Language features without Jack.
+    TYPE_JACK_REQUIRED_FOR_JAVA_8_LANGUAGE_FEATURES = 18;
+
+    // A wearApp configuration was resolved and found more than one apk. Data is
+    // the configuration name.
+    TYPE_DEPENDENCY_WEAR_APK_TOO_MANY = 19;
+
+    // A wearApp configuration was resolved and found an apk even though
+    // unbundled mode is on.
+    TYPE_DEPENDENCY_WEAR_APK_WITH_UNBUNDLED = 20;
+
+    TYPE_JAR_DEPEND_ON_ATOM = 21;
+
+    TYPE_AAR_DEPEND_ON_ATOM = 22;
+
+    TYPE_ATOM_DEPENDENCY_PROVIDED = 23;
+
+    // Indicates that a required SDK package was not installed. The data field
+    // contains the sdklib package ID of the missing package that the user
+    // should install.
+    TYPE_MISSING_SDK_PACKAGE = 24;
+
+    // Indicates that the plugin requires a newer version of studio. Minimum
+    // version is passed in the data.
+    TYPE_STUDIO_TOO_OLD = 25;
+
+    // Indicates that the module contains flavors but that no dimensions have
+    // been named. data is empty.
+    TYPE_UNNAMED_FLAVOR_DIMENSION = 26;
+
+    // An incompatible plugin is used.
+    TYPE_INCOMPATIBLE_PLUGIN = 27;
+
+    // Indicates that the project uses a deprecated DSL.
+    TYPE_DEPRECATED_DSL = 28;
+
+    TYPE_DEPRECATED_CONFIGURATION = 29;
+
+    // Indicates that the project uses a deprecated DSL.
+    TYPE_DEPRECATED_DSLVALUE = 30;
+
+    // Indicates that the project contains the min sdk in the android manifest
+    // file.
+    TYPE_MIN_SDK_VERSION_IN_MANIFEST = 31;
+
+    // Indicates that the project contains the target sdk in the android
+    // manifest file.
+    TYPE_TARGET_SDK_VERSION_IN_MANIFEST = 32;
+
+    // Indicated that an experimental gradle project option is used.
+    TYPE_UNSUPPORTED_PROJECT_OPTION_USE = 33;
+
+    // Indicates that building the configuration rules for this project requires
+    // parsing the manifest file.
+    TYPE_MANIFEST_PARSED_DURING_CONFIGURATION = 34;
+
+    // Indicates that the version of a third-party Gradle plugin (not the
+    // Android Gradle plugin) is not supported and needs to be updated.
+    TYPE_THIRD_PARTY_GRADLE_PLUGIN_TOO_OLD = 35;
+
+    // Indicates that the signing configuration is declared in the
+    // dynamic-feature gradle file. This should only be declared in the
+    // application module, as dynamic-features use the base module's signing
+    // configuration, and this will be ignored.
+    TYPE_SIGNING_CONFIG_DECLARED_IN_DYNAMIC_FEATURE = 36;
+
+    // Indicates that the SDK is missing or invalid, this can either be set in
+    // the ANDROID_SDK_ROOT environment variable or the projects
+    // local.properties files.
+    TYPE_SDK_NOT_SET = 37;
+  }
+
+  // Various quick-fixes that are offered to resolve sync issues.
+  enum GradleSyncQuickFix {
+    UNKNOWN_GRADLE_SYNC_QUICK_FIX = 0;
+    ADD_GOOGLE_MAVEN_REPOSITORY_HYPERLINK = 1;
+    BUILD_PROJECT_HYPERLINK = 2;
+    CREATE_GRADLE_WRAPPER_HYPERLINK = 3;
+    DISABLE_OFFLINE_MODE_HYPERLINK = 4;
+    DOWNLOAD_ANDROID_STUDIO_HYPERLINK = 5;
+    DOWNLOAD_JDK8_HYPERLINK = 6;
+    ENABLE_EMBEDDED_REPO_HYPERLINK = 7;
+    FILE_BUG_HYPERLINK = 8;
+    FIX_ANDROID_GRADLE_PLUGIN_VERSION_HYPERLINK = 9;
+    FIX_BUILD_TOOLS_VERSION_HYPERLINK = 10;
+    FIX_GRADLE_VERSION_IN_WRAPPER_HYPERLINK = 11;
+    INSTALL_ARTIFACT_HYPERLINK = 12;
+    INSTALL_BUILD_TOOLS_HYPERLINK = 13;
+    INSTALL_C_MAKE_HYPERLINK = 14;
+    INSTALL_NDK_HYPERLINK = 15;
+    INSTALL_PLATFORM_HYPERLINK = 16;
+    INSTALL_REPOSITORY_HYPERLINK = 17;
+    INSTALL_SDK_PACKAGE_HYPERLINK = 18;
+    INSTALL_SDK_TOOLS_HYPERLINK = 19;
+    OPEN_ANDROID_SDK_MANAGER_HYPERLINK = 20;
+    OPEN_BUILD_FILE_HYPERLINK = 21;
+    OPEN_FILE_HYPERLINK = 22;
+    OPEN_GRADLE_SETTINGS_HYPERLINK = 23;
+    OPEN_HTTP_SETTINGS_HYPERLINK = 24;
+    OPEN_PLUGIN_BUILD_FILE_HYPERLINK = 25;
+    OPEN_PROJECT_STRUCTURE_HYPERLINK = 26;
+    OPEN_URL_HYPERLINK = 27;
+    REMOVE_SDK_FROM_MANIFEST_HYPERLINK = 28;
+    SEARCH_IN_BUILD_FILES_HYPERLINK = 29;
+    SELECT_JDK_FROM_FILE_SYSTEM_HYPERLINK = 30;
+    SET_SDK_DIR_HYPERLINK = 31;
+    SET_USE_DEPRECATED_NDK_HYPERLINK = 32;
+    SHOW_DEPENDENCY_IN_PROJECT_STRUCTURE_HYPERLINK = 33;
+    SHOW_LOG_HYPERLINK = 34;
+    SHOW_SYNC_ISSUES_DETAILS_HYPERLINK = 35;
+    STOP_GRADLE_DAEMONS_HYPERLINK = 36;
+    SYNC_PROJECT_WITH_EXTRA_COMMAND_LINE_OPTIONS_HYPERLINK = 37;
+    TOGGLE_OFFLINE_MODE_HYPERLINK = 38;
+    UPDATE_PLUGIN_HYPERLINK = 39;
+    UPGRADE_APPENGINE_PLUGIN_VERSION_HYPERLINK = 40;
+    USE_CURRENTLY_RUNNING_JDK_HYPERLINK = 41;
+    USE_EMBEDDED_JDK_HYPERLINK = 42;
+    SET_NDK_DIR_HYPERLINK = 43;
+    SET_CMAKE_DIR_HYPERLINK = 44;
+  }
 }
+
 // Describes a product, e.g. Android Studio or Emulator.
 message ProductDetails {
   // The product this event relates to.
@@ -848,6 +1119,7 @@ message ProductDetails {
     EMULATOR = 2;
     GRADLE = 3;
     DDMS = 4;
+    STUDIO_PATCH_UPDATER = 5;
   }
 
   // Chip the software is running on.
@@ -1018,9 +1290,17 @@ message EmulatorGpuInfo {
 
 // Set of emulator feature flags to report ones used during current session.
 message EmulatorFeatures {
+  enum EmulatorLaunchType {
+    UNKNOWN_EMULATOR_LAUNCH_TYPE = 0;
+    CONTAINER = 1;
+    FUCHSIA = 2;
+  }
   optional bool gps = 1;
   optional bool sensors = 2;
   optional bool virtualscene_config = 3;
+  // Use launch_type with "CONTAINER" instead.
+  optional bool container_launch = 4 [deprecated = true];
+  optional EmulatorLaunchType launch_type = 5;
 }
 
 // A description of a single file from an AVD.
@@ -1107,7 +1387,6 @@ message EmulatorFeatureFlagState {
     INTEL_PERFORMANCE_MONITORING_UNIT = 4;
     GL_ASYNC_SWAP = 5;
     GLDMA = 6;
-    GLDMA2 = 35;
     GLES_DYNAMIC_VERSION = 7;
     FORCE_ANGLE = 8;
     FORCE_SWIFTSHADER = 9;
@@ -1137,10 +1416,53 @@ message EmulatorFeatureFlagState {
     OFFWORLD_DISABLE_SECURITY = 32;
     QUICKBOOT_FILE_BACKED = 33;
     REFCOUNT_PIPE = 34;
+    GLDMA2 = 35;
     HOST_COMPOSITION_V1 = 36;
     ON_DEMAND_SNAPSHOT_LOAD = 37;
     WIFI_CONFIGURABLE = 38;
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     // Next tag: 39
+=======
+    GL_DIRECT_MEM = 39;
+    VIDEO_PLAYBACK = 40;
+    VULKAN = 41;
+    MACRO_UI = 42;
+    CAR_VHAL_TABLE = 43;
+    DYNAMIC_PARTITION = 44;
+    IP_DISCONNECT_ON_LOAD = 45;
+    VULKAN_SNAPSHOTS = 46;
+    VIRTIO_INPUT = 47;
+    MULTI_DISPLAY = 48;
+    VULKAN_NULL_OPTIONAL_STRINGS = 49;
+    DYNAMIC_MEDIA_PROFILE = 50;
+    YUV420_888_to_NV21 = 51;
+    YUV_Cache = 52;
+    KEYCODE_FORWARDING = 53;
+    VULKAN_IGNORED_HANDLES = 54;
+    VIRTIO_GPU_NEXT = 55;
+    MAC80211HWSIM_USERSPACE_MANAGED = 56;
+    HAS_SHARED_SLOTS_HOST_MEMORY_ALLOCATOR = 57;
+    CAR_VHAL_REPLAY = 58;
+    CAR_ASSIST_BUTTON = 59;
+    HARDWARE_DECODER = 60;
+    NO_DELAY_CLOSE_COLOR_BUFFER = 61;
+    NO_DEVICE_FRAME = 62;
+    VIRTIO_GPU_NATIVE_SYNC = 63;
+    VIRTIO_WIFI = 64;
+    VULKAN_SHADER_FLOAT16_INT8 = 65;
+    CAR_ROTARY = 66;
+    MODEM_SIMULATOR = 67;
+    TV_REMOTE = 68;
+    NATIVE_TEXTURE_DECOMPRESSION = 69;
+    BPTC_TEXTURE_SUPPORT = 70;
+    GUEST_USES_ANGLE = 71;
+    VIRTIO_VSOCK_PIPE = 72;
+    S3TC_TEXTURE_SUPPORT = 73;
+    VIRTIO_MOUSE = 74;
+    VIRTCONSOLE_LOGCAT = 75;
+    VULKAN_QUEUE_SUBMIT_WITH_COMMANDS = 76;
+    // Next tag: 76
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
@@ -1161,6 +1483,7 @@ message EmulatorMemoryUsage {
   optional uint64 virtual_memory_max = 4;
   optional uint64 total_phys_memory = 5;
   optional uint64 total_page_file = 6;
+  optional uint64 total_guest_memory = 7;
 }
 
 // An enum representing all possible snapshot properties (bit flags).
@@ -1250,7 +1573,7 @@ enum EmulatorSnapshotFailureReason {
   EMULATOR_SNAPSHOT_FAILURE_REASON_IN_PROGRESS_LIMIT = 30000;
 
   // Next new type of error here: 30001
-};
+}
 
 // Emulator snapshot description.
 message EmulatorSnapshot {
@@ -1439,6 +1762,8 @@ message EmulatorCameraSession {
     EMULATOR_CAMERA_TYPE_WEBCAM = 1;
     // Camera source is the virtual scene camera.
     EMULATOR_CAMERA_TYPE_VIRTUAL_SCENE = 2;
+    // Camera source is the video playback camera.
+    EMULATOR_CAMERA_TYPE_VIDEO_PLAYBACK = 3;
   }
 
   // List of possible camera directions.
@@ -1528,6 +1853,79 @@ message EmulatorVirtualSceneSession {
   optional double total_translation_meters = 11;
 }
 
+// Per-session metrics for automation/macros.
+message EmulatorAutomation {
+  // List of possible preset macros played.
+  enum EmulatorAutomationPresetMacro {
+    // Reset position.
+    EMULATOR_AUTOMATION_PRESET_MACRO_RESET = 0;
+    // Track horizontal plane.
+    EMULATOR_AUTOMATION_PRESET_MACRO_TRACK_HORIZONTAL = 1;
+    // Track vertical plane.
+    EMULATOR_AUTOMATION_PRESET_MACRO_TRACK_VERTICAL = 2;
+    // Walk to image room.
+    EMULATOR_AUTOMATION_PRESET_MACRO_IMAGE_ROOM = 3;
+  }
+  // Total sum of time of macros playing -> Sum(Stop-Play).
+  optional uint64 total_duration_ms = 1;
+  // Total amount of times macros played.
+  optional uint64 macro_playback_count = 2;
+  // Total amount of times previews replayed.
+  optional uint64 preview_replay_count = 3;
+  // Played preset-macros.
+  repeated EmulatorAutomationPresetMacro played_preset_macro = 4;
+  // Total amount of macros recorded.
+  optional uint64 record_macro_count = 5;
+  // Total amount of macros deleted.
+  optional uint64 delete_macro_count = 6;
+  // Total amount of macros edited.
+  optional uint64 edit_macro_count = 7;
+}
+
+// Metrics for multi-display details
+message EmulatorMultiDisplay {
+  // Count for add/modify/delete displays
+  optional uint32 apply_count = 1;
+  // Max displays created
+  optional uint32 max_displays = 2;
+}
+
+// Metrics for LocationV2
+message EmulatorLocationV2 {
+  // Count for "Set Location" button
+  optional uint32 set_loc_count = 1;
+  // Count for "Play route" button
+  optional uint32 play_route_count = 2;
+}
+
+// Metrics for streaming screenshots.
+message EmulatorStreamScreenshot {
+   // Size of a single screenshot in bytes, w * h * bpp
+   optional uint32 size = 1;
+   // This gives us an idea of delivery delay we are experiencing
+   // from the emulators perspective, and frames delivered.
+   optional PercentileEstimator delivery_delay = 2;
+   // # of frames generated by the emulator.
+   optional uint32 frames = 3;
+}
+
+
+// Metrics for grpc invocations.
+message EmulatorGrpc {
+  // CRC32 digest of the fully-specified method name.
+  optional uint32 call_id = 1;
+  // Number of requests
+  optional uint32 requests = 2;
+  // Number of requests for which the response was not Status::OK
+  optional uint32 failures = 3;
+  // Sum of received message size, if streaming
+  optional PercentileEstimator rcv_bytes_estimate = 4;
+  // Sum of sent message size, if streaming
+  optional PercentileEstimator snd_bytes_estimate = 5;
+  // Duration of the total request time in milliseconds.
+  optional PercentileEstimator duration = 6;
+}
+
 // Metrics related to the Emulator.
 message EmulatorDetails {
   // Cpu architecture of the guest.
@@ -1584,7 +1982,18 @@ message EmulatorDetails {
   optional EmulatorVirtualSceneSession virtual_scene = 28;
   // Metrics for emulator boot status and time.
   optional EmulatorBootInfo boot_info = 29;
-  // Next tag: 30
+  // Metrics for automation/macros.
+  optional EmulatorAutomation automation = 30;
+  // Metrics for multi-display
+  optional EmulatorMultiDisplay multi_display = 31;
+  // Metrics for gRPC invocation
+  optional EmulatorGrpc grpc = 32;
+  // Metrics for LocationUiV2
+  optional EmulatorLocationV2 location_v2 = 33;
+  // Metrics for streamScreenshot
+  optional EmulatorStreamScreenshot screenshot = 34;
+  // Next tag: 35
+
 
   // Emulator instance liveness as determined via adb connectivity.
   enum EmulatorAdbLiveness {
@@ -1643,13 +2052,14 @@ message EmulatorDetails {
 
   // Hypervisor in use for the session.
   enum EmulatorHypervisor {
-      UNKNOWN_HYPERVISOR = 0;
-      NO_HYPERVISOR = 1;
-      KVM = 2; // KVM
-      HAXM = 3; // Intel HAXM
-      HVF = 4; // Apple Hypervisor.Framework
-      HYPERV = 5; // Microsoft Hyper-V
-      // Next tag: 6
+    UNKNOWN_HYPERVISOR = 0;
+    NO_HYPERVISOR = 1;
+    KVM = 2;     // KVM
+    HAXM = 3;    // Intel HAXM
+    HVF = 4;     // Apple Hypervisor.Framework
+    HYPERV = 5;  // Microsoft Hyper-V
+    GVM = 6;     // GVM
+                 // Next tag: 7
   }
 }
 
@@ -1686,6 +2096,19 @@ message EmulatorUiEvent {
   enum EmulatorUiEventContext {
     UNKNOWN_EMULATOR_UI_EVENT_CONTEXT = 0;
     EXTENDED_WINDOW_OPEN = 1;
+    EXTENDED_DISPLAYS_TAB = 2;
+    EXTENDED_CELLULAR_TAB = 3;
+    EXTENDED_BATTERY_TAB = 4;
+    EXTENDED_CAMERA_TAB = 5;
+    EXTENDED_TELEPHONY_TAB = 6;
+    EXTENDED_MIC_TAB = 7;
+    EXTENDED_FINGER_TAB = 8;
+    EXTENDED_SENSORS_TAB = 9;
+    EXTENDED_BUG_TAB = 10;
+    EXTENDED_SNAPSHOT_TAB = 11;
+    EXTENDED_RECORD_TAB = 12;
+    EXTENDED_SETTINGS_TAB = 13;
+    EXTENDED_HELP_TAB = 14;
   }
 }
 
@@ -1702,12 +2125,103 @@ message EmulatorPercentileEstimator {
   enum EmulatorPerformanceMetric { UI_EVENT_HANDLING_TIME_US = 0; }
 }
 
+// Tracking CPU usage for some operation
+message CpuTimeSlice {
+  optional uint64 wall_time_us = 1;
+  optional uint64 user_time_us = 2;
+  optional uint64 system_time_us = 3;
+}
+
+// Tracking OpenGL/Vulkan resource usage
+message VulkanResourceUsage {
+  optional uint64 total_host_visible_memory_allocation_bytes = 1;
+  optional uint64 total_device_local_memory_allocation_bytes = 2;
+  optional uint32 total_instances = 3;
+}
+
+message GraphicsResourceUsage {
+  // common betweek OpenGL and Vulkan
+  optional uint32 colorbuffer_count = 1;
+  optional uint32 shader_count = 2;
+  optional uint32 renderthread_count = 3;
+  optional uint64 colorbuffer_total_allocation_bytes = 4;
+  // Vulkan
+  optional VulkanResourceUsage vulkan_resource_usage = 5;
+}
+
+// Emulator resource usage statistics
+message EmulatorResourceUsage {
+  // Run condition, if applicable
+  enum RunCondition {
+    RUN_CONDITION_DEFAULT = 0;
+    RUN_CONDITION_IDLE = 1;
+    RUN_CONDITION_TEST = 2;
+    RUN_CONDITION_DEPLOY = 3;
+  }
+  // Estimations of what is taking CPU in the guest
+  enum GuestCpuUsageSource {
+    GUEST_CPU_USAGE_DEFAULT = 0;
+    GUEST_CPU_USAGE_PLAY_SERVICES = 1;
+    GUEST_CPU_USAGE_SURFACEFLINGER = 2;
+    GUEST_CPU_USAGE_AUDIO_SERVICE = 3;
+    GUEST_CPU_USAGE_SENSOR_SERVICE = 4;
+    GUEST_CPU_USAGE_CHROME = 5;
+    GUEST_CPU_USAGE_OTHER = 6;
+  }
+  optional RunCondition run_condition = 1;
+  optional CpuTimeSlice main_loop_slice = 2;
+  repeated CpuTimeSlice vcpu_slices = 3;
+  repeated CpuTimeSlice guest_cpu_slices = 4;
+  repeated GuestCpuUsageSource top_guest_cpu_usage_sources = 5;
+  optional EmulatorMemoryUsage memory_usage = 6;
+  optional GraphicsResourceUsage graphics_resource_usage = 7;
+}
+
+// Emulator latency statistics
+message EmulatorLatencyStats {
+  // An enum that attempts to account for the source of
+  // high latencies and hangs in the emulator.
+  enum EmulatorLatencySource {
+    EMULATOR_LATENCY_SOURCE_DEFAULT = 0;
+    EMULATOR_LATENCY_SOURCE_NETWORK = 1;
+    EMULATOR_LATENCY_SOURCE_BLOCK_DEVICE = 2;
+    EMULATOR_LATENCY_SOURCE_PIPE_CAMERA = 3;
+    EMULATOR_LATENCY_SOURCE_PIPE_OPENGL = 4;
+    EMULATOR_LATENCY_SOURCE_PIPE_OPERATION = 5;
+    EMULATOR_LATENCY_SOURCE_PCI_DEVICE = 6;
+    EMULATOR_LATENCY_SOURCE_MMIO = 7;
+    EMULATOR_LATENCY_SOURCE_UI_EVENT_HOST_ONLY = 8;
+    EMULATOR_LATENCY_SOURCE_UI_EVENT_TO_GUEST = 9;
+    EMULATOR_LATENCY_INPUT_QUEUE_FULL = 10;
+  }
+  optional EmulatorLatencySource latency_source = 1;
+  // if vcpu mmio access was involved, this holds the MMIO address.
+  optional uint64 vcpu_handling_mmio_address = 2;
+  // Number of loops where the input queue was full.
+  optional uint32 input_queue_full_loops = 8;
+  // Time stats for the latency in microseconds.
+  optional uint64 latency_max_us = 3;
+  optional uint64 latency_99_9_us = 4;
+  optional uint64 latency_99_us = 5;
+  optional uint64 latency_90_us = 6;
+  optional uint64 latency_50_us = 7;
+}
+
 // Estimations of percentiles of time spent on Emulator operations.
 message EmulatorPerformanceStats {
   // Collection of estimations of performance metrics.
   repeated EmulatorPercentileEstimator estimator = 1;
-  // Emulator memory usage over time.
-  repeated EmulatorMemoryUsage memory_usage = 2;
+  // Emulator memory usage over time. (Deprecated)
+  repeated EmulatorMemoryUsage memory_usage = 2 [deprecated = true];
+  // Process uptime when this was captured. Relative to when
+  // the emulator process was launched---this is not a timestamp.
+  optional uint64 process_uptime_us = 3;
+  // Resource usage and latency stats.
+  optional EmulatorResourceUsage resource_usage = 4;
+  optional EmulatorLatencyStats latency_stats = 5;
+  // Guest system uptime when this was captured. Relative to when
+  // the Android system image is started---this is not a timestamp.
+  optional uint64 guest_uptime_us = 6;
 }
 
 // Details about a single Gradle run.
@@ -2004,9 +2518,12 @@ message TestRun {
 }
 
 // Provides details on commonly used test libraries.
+// Each string field of this message holds the exact version of the given
+// library that the field name represents. The field is populated only if this
+// project uses the given library.
+// Next ID: 20
 message TestLibraries {
-  // The exact version of the given library that this project uses.
-  // Not present if project doesn't use a given library.
+  // "com.android.support.test.runner" or "androidx.test.runner".
   optional string test_support_library_version = 1;  // e.g. '0.5'
   optional string espresso_version = 2;  // e.g. '2.2.2'
   optional string robolectric_version = 3;  // e.g. '3.0'
@@ -2018,6 +2535,21 @@ message TestLibraries {
   optional string espresso_accessibility_version = 9;  // e.g. '2.2.2'
   optional string test_orchestrator_version = 10;  // e.g. '1.0.0'
   optional string test_rules_version = 11;  // e.g. '1.0.0'
+  // "androidx.test.core".
+  optional string test_core_version = 12;  // e.g. '1.0.0'
+  // "androidx.test.core-ktx".
+  optional string test_core_ktx_version = 13;  // e.g. '1.0.0'
+  // "androidx.test.ext.junit".
+  optional string test_ext_junit_version = 14;  // e.g. '1.0.0'
+  // "androidx.test.ext.junit-ktx".
+  optional string test_ext_junit_ktx_version = 15;  // e.g. '1.0.0'
+  // "androidx.test.ext.truth".
+  optional string test_ext_truth_version = 16;  // e.g. '1.0.0'
+  // "androidx.fragment.fragment-testing".
+  optional string fragment_testing_version = 17;  // e.g. '1.0.0'
+  optional string junit_version = 18;  // e.g. '4.2'
+  // "com.google.truth".
+  optional string truth_version = 19;  // e.g. '0.40'
 }
 
 // Describes the status of various Hypervisors
@@ -2038,7 +2570,7 @@ message Hypervisor {
 message EmulatorHost {
   // CPU manufacturer of the host, used as certain hypervisors are limited
   // to a certain manufacturer.
-  optional string cpu_manufacturer = 1; // AMD, INTEL, ...
+  optional string cpu_manufacturer = 1;  // AMD, INTEL, ...
 
   // Does the host support virtualization technology
   optional bool virt_support = 2;
@@ -2053,17 +2585,16 @@ message EmulatorHost {
   // after issuing CPUID instruction with EAX=1:
   // 31   27   23   19   15   11   7    3  0
   // 0000 yyyy yyyy xxxx 00tt ffff mmmm ssss
-  optional uint32 cpuid_stepping = 5; // s: [3:0] stepping (CPU version)
-  optional uint32 cpuid_model = 6; // m: [7:4] model (CPU model)
-  optional uint32 cpuid_family = 7; // f: [11:8] family (CPU make)
-  optional uint32 cpuid_type = 8; // t: [13:12] CPU type
-  optional uint32 cpuid_extmodel = 9; // x: [19:16] extended model
-  optional uint32 cpuid_extfamily = 10; // y: [27:20] extended family
+  optional uint32 cpuid_stepping = 5;    // s: [3:0] stepping (CPU version)
+  optional uint32 cpuid_model = 6;       // m: [7:4] model (CPU model)
+  optional uint32 cpuid_family = 7;      // f: [11:8] family (CPU make)
+  optional uint32 cpuid_type = 8;        // t: [13:12] CPU type
+  optional uint32 cpuid_extmodel = 9;    // x: [19:16] extended model
+  optional uint32 cpuid_extfamily = 10;  // y: [27:20] extended family
 }
 
 // Detailed profiling information for the gradle build.
 message GradleBuildProfile {
-
   // Version of the open source Gradle application used.
   // e.g. "2.14" or "3.0-20160617000025+0000"
   optional string gradle_version = 2;
@@ -2246,7 +2777,8 @@ message GradleBuildProject {
     HUGO_WEAVING_PLUGIN_HUGOPLUGIN = 40;
     IO_REALM_GRADLE_REALM = 41;
     ME_TATARKA_RETROLAMBDAPLUGIN = 42;
-    ORG_JETBRAINS_KOTLIN_GRADLE_INTERNAL_ANDROIDEXTENSIONSSUBPLUGININDICATOR = 43;
+    ORG_JETBRAINS_KOTLIN_GRADLE_INTERNAL_ANDROIDEXTENSIONSSUBPLUGININDICATOR =
+        43;
     ORG_JETBRAINS_KOTLIN_GRADLE_INTERNAL_KAPT3GRADLESUBPLUGIN = 44;
     ORG_KT3K_GRADLE_PLUGIN_COVERALLSPLUGIN = 45;
     COM_CRASHLYTICS_TOOLS_GRADLE_CRASHLYTICSPLUGIN = 46;
@@ -2258,6 +2790,8 @@ message GradleBuildProject {
     COM_ANDROID_BUILD_GRADLE_LINTPLUGIN = 52;
     COM_ANDROID_BUILD_GRADLE_REPORTINGPLUGIN = 53;
     COM_ANDROID_BUILD_GRADLE_TESTPLUGIN = 54;
+    ORG_GRADLE_BUILDINIT_PLUGINS_BUILDINITPLUGIN = 55;
+    ORG_GRADLE_BUILDINIT_PLUGINS_WRAPPERPLUGIN = 56;
   }
 }
 
@@ -2380,7 +2914,6 @@ message GradleBuildProjectMetrics {
 
   // The size of the resources_ap included in that apk.
   optional int64 resources_ap_size = 3;
-
 }
 
 message GradleBuildVariant {
@@ -2440,7 +2973,8 @@ message GradleBuildVariant {
   // The method used to run instrumentation tests for this variant.
   optional TestRun.TestExecution test_execution = 18;
   // The underlying native project system.
-  optional GradleNativeAndroidModule.NativeBuildSystemType native_build_system_type = 19;
+  optional GradleNativeAndroidModule.NativeBuildSystemType
+      native_build_system_type = 19;
   // The CMake version number if this is a CMake-based build.
   optional string native_cmake_version = 20;
   // Per-ABI native build info.
@@ -2569,27 +3103,26 @@ message ApiVersion {
 }
 
 message GradleBuildMemorySample {
-   // Garbage collection time since the current daemon started.
-   // Historical: Used in Android Gradle Plugin 2.2.x, circa 2016-10
-   // Replaced by JavaProcessStats.
-   optional int64 gc_time_ms = 1 [deprecated = true];
+  // Garbage collection time since the current daemon started.
+  // Historical: Used in Android Gradle Plugin 2.2.x, circa 2016-10
+  // Replaced by JavaProcessStats.
+  optional int64 gc_time_ms = 1 [deprecated = true];
 
-   // Garbage collection count since the current daemon started.
-   // Historical: Used in Android Gradle Plugin 2.2.x, circa 2016-10.
-   // Replaced by JavaProcessStats.
-   optional int64 gc_count = 2 [deprecated=true];
+  // Garbage collection count since the current daemon started.
+  // Historical: Used in Android Gradle Plugin 2.2.x, circa 2016-10.
+  // Replaced by JavaProcessStats.
+  optional int64 gc_count = 2 [deprecated = true];
 
-   // Time that the memory stats were collected.
-   optional int64 timestamp = 3;
+  // Time that the memory stats were collected.
+  optional int64 timestamp = 3;
 
-   // More detailed stats on the current running java process.
-   optional JavaProcessStats java_process_stats = 4;
+  // More detailed stats on the current running java process.
+  optional JavaProcessStats java_process_stats = 4;
 }
 
 // A single execution span from a build.
 // For example, a task execution or creation of some tasks for a variant.
 message GradleBuildProfileSpan {
-
   // Identifier for this span, created by sequentially allocating IDs to spans
   // as they start. Used only for the parent-child relationship of spans, to
   // show execution that is part of another span.
@@ -2651,13 +3184,42 @@ message GradleBuildProfileSpan {
     VARIANT_MANAGER_CREATE_TESTS_TASKS = 11;
     VARIANT_MANAGER_CREATE_VARIANTS = 12;
     RESOLVE_DEPENDENCIES = 13;
+    // span for task execution as reported by Gradle, that's including Gradle's
+    // pre and post task activities.
     TASK_EXECUTION = 14;
+    WORKER_EXECUTION = 15;
+    THREAD_EXECUTION = 16;
     INITIAL_METADATA = 100 [deprecated = true];
     FINAL_METADATA = 101 [deprecated = true];
     GENERAL_CONFIG = 102;
     VARIANT_CONFIG = 103;
     VARIANT_MANAGER_EXTERNAL_NATIVE_CONFIG_VALUES = 104;
     APK_METRICS = 105;
+
+    // span for task execution excluding Gradle's pre and post task activities.
+    TASK_EXECUTION_ALL_PHASES = 200;
+    // generic span types for task implementation. Phases are sequential sub
+    // parts of the task implementation that can help determine the performance
+    // of sub parts of the task implementation.
+    // For instance a task spans can look like :
+    //
+    // <---------------------- TASK_EXECUTION ------------------->
+    // <--PRE--><------- TASK_EXECUTION_ALL_PHASES ----><--POST-->
+    //          <---PHASE_1---><-PHASE_2-><--PHASE_3--->
+    //
+    TASK_EXECUTION_PHASE_1 = 201;
+    TASK_EXECUTION_PHASE_2 = 202;
+    TASK_EXECUTION_PHASE_3 = 203;
+    TASK_EXECUTION_PHASE_4 = 204;
+    TASK_EXECUTION_PHASE_5 = 205;
+    TASK_EXECUTION_PHASE_6 = 206;
+    TASK_EXECUTION_PHASE_7 = 207;
+    TASK_EXECUTION_PHASE_8 = 208;
+    TASK_EXECUTION_PHASE_9 = 209;
+    // span for gradle overhead before task execution
+    GRADLE_PRE_TASK_SPAN = 298;
+    // span for gradle overhead after task execution
+    GRADLE_POST_TASK_SPAN = 299;
 
     // ApplicationTaskManager per variant tasks.
     APP_TASK_MANAGER_CREATE_MERGE_MANIFEST_TASK = 1000 [deprecated = true];
@@ -2672,13 +3234,17 @@ message GradleBuildProfileSpan {
     APP_TASK_MANAGER_CREATE_NDK_TASK = 1009 [deprecated = true];
     APP_TASK_MANAGER_CREATE_SPLIT_TASK = 1010 [deprecated = true];
     APP_TASK_MANAGER_CREATE_PACKAGING_TASK = 1011 [deprecated = true];
-    APP_TASK_MANAGER_CREATE_PREPROCESS_RESOURCES_TASK = 1012 [deprecated = true];
+    APP_TASK_MANAGER_CREATE_PREPROCESS_RESOURCES_TASK = 1012
+        [deprecated = true];
     APP_TASK_MANAGER_CREATE_BACKPORT_RESOURCES_TASK = 1013 [deprecated = true];
     APP_TASK_MANAGER_CREATE_LINT_TASK = 1014 [deprecated = true];
-    APP_TASK_MANAGER_CREATE_MERGE_JNILIBS_FOLDERS_TASK = 1015 [deprecated = true];
+    APP_TASK_MANAGER_CREATE_MERGE_JNILIBS_FOLDERS_TASK = 1015
+        [deprecated = true];
     APP_TASK_MANAGER_CREATE_SHADER_TASK = 1016 [deprecated = true];
-    APP_TASK_MANAGER_CREATE_EXTERNAL_NATIVE_BUILD_TASK = 1017 [deprecated = true];
-    APP_TASK_MANAGER_CREATE_STRIP_NATIVE_LIBRARY_TASK = 1018 [deprecated = true];
+    APP_TASK_MANAGER_CREATE_EXTERNAL_NATIVE_BUILD_TASK = 1017
+        [deprecated = true];
+    APP_TASK_MANAGER_CREATE_STRIP_NATIVE_LIBRARY_TASK = 1018
+        [deprecated = true];
 
     // LibraryTaskManager per variant tasks.
     LIB_TASK_MANAGER_CREATE_MERGE_MANIFEST_TASK = 2000 [deprecated = true];
@@ -2700,73 +3266,82 @@ message GradleBuildProfileSpan {
     LIB_TASK_MANAGER_CREATE_BACKPORT_RESOURCES_TASK = 2016 [deprecated = true];
     LIB_TASK_MANAGER_CREATE_LINT_TASK = 2017 [deprecated = true];
     LIB_TASK_MANAGER_CREATE_SHADER_TASK = 2018 [deprecated = true];
-    LIB_TASK_MANAGER_CREATE_EXTERNAL_NATIVE_BUILD_TASK = 2019 [deprecated = true];
+    LIB_TASK_MANAGER_CREATE_EXTERNAL_NATIVE_BUILD_TASK = 2019
+        [deprecated = true];
 
     // Task execution: Deprecated, use TASK_EXECUTION and
     // GradleTaskExecution#Type instead.
     // Deprecated July 2016.
-    GENERIC_TASK_EXECUTION = 3000 [deprecated=true];
-    TASK_AIDL_COMPILE = 3001 [deprecated=true];
-    TASK_DELETE = 3002 [deprecated=true];
-    TASK_CHECK_MANIFEST = 3003 [deprecated=true];
-    TASK_PREPARE_DEPENDENCIES_TASK = 3004 [deprecated=true];
-    TASK_RENDERSCRIPT_COMPILE = 3005 [deprecated=true];
-    TASK_GENERATE_BUILD_CONFIG = 3006 [deprecated=true];
-    TASK_MERGE_ASSETS = 3007 [deprecated=true];
-    TASK_GENERATE_RES_VALUES = 3008 [deprecated=true];
-    TASK_MERGE_RESOURCES = 3009 [deprecated=true];
-    TASK_MERGE_MANIFESTS = 3010 [deprecated=true];
-    TASK_PROCESS_ANDROID_RESOURCES = 3011 [deprecated=true];
-    TASK_JAVA_COMPILE = 3012 [deprecated=true];
-    TASK_NDK_COMPILE = 3013 [deprecated=true];
-    TASK_PRE_DEX = 3014 [deprecated=true];
-    TASK_DEX = 3015 [deprecated=true];
-    TASK_PACKAGE_SPLIT_RES = 3016 [deprecated=true];
-    TASK_PROCESS_RESOURCES = 3017 [deprecated=true];
-    TASK_VALIDATE_SIGNING_TASK = 3018 [deprecated=true];
-    TASK_PACKAGE_APPLICATION = 3019 [deprecated=true];
-    TASK_SPLIT_ZIP_ALIGN = 3020 [deprecated=true];
-    TASK_ZIP_ALIGN = 3021 [deprecated=true];
-    TASK_COPY = 3022 [deprecated=true];
-    TASK_LINT = 3023 [deprecated=true];
-    TASK_FILE_VERIFICATION = 3026 [deprecated=true];
+    GENERIC_TASK_EXECUTION = 3000 [deprecated = true];
+    TASK_AIDL_COMPILE = 3001 [deprecated = true];
+    TASK_DELETE = 3002 [deprecated = true];
+    TASK_CHECK_MANIFEST = 3003 [deprecated = true];
+    TASK_PREPARE_DEPENDENCIES_TASK = 3004 [deprecated = true];
+    TASK_RENDERSCRIPT_COMPILE = 3005 [deprecated = true];
+    TASK_GENERATE_BUILD_CONFIG = 3006 [deprecated = true];
+    TASK_MERGE_ASSETS = 3007 [deprecated = true];
+    TASK_GENERATE_RES_VALUES = 3008 [deprecated = true];
+    TASK_MERGE_RESOURCES = 3009 [deprecated = true];
+    TASK_MERGE_MANIFESTS = 3010 [deprecated = true];
+    TASK_PROCESS_ANDROID_RESOURCES = 3011 [deprecated = true];
+    TASK_JAVA_COMPILE = 3012 [deprecated = true];
+    TASK_NDK_COMPILE = 3013 [deprecated = true];
+    TASK_PRE_DEX = 3014 [deprecated = true];
+    TASK_DEX = 3015 [deprecated = true];
+    TASK_PACKAGE_SPLIT_RES = 3016 [deprecated = true];
+    TASK_PROCESS_RESOURCES = 3017 [deprecated = true];
+    TASK_VALIDATE_SIGNING_TASK = 3018 [deprecated = true];
+    TASK_PACKAGE_APPLICATION = 3019 [deprecated = true];
+    TASK_SPLIT_ZIP_ALIGN = 3020 [deprecated = true];
+    TASK_ZIP_ALIGN = 3021 [deprecated = true];
+    TASK_COPY = 3022 [deprecated = true];
+    TASK_LINT = 3023 [deprecated = true];
+    TASK_FILE_VERIFICATION = 3026 [deprecated = true];
     TASK_EXTERNAL_NATIVE_BUILD_GENERATE_JSON_PROCESS_PER_ABI = 3027
-      [deprecated=true];
-    TASK_EXTERNAL_NATIVE_BUILD_GENERATE_JSON_PROCESS = 3028 [deprecated=true];
+        [deprecated = true];
+    TASK_EXTERNAL_NATIVE_BUILD_GENERATE_JSON_PROCESS = 3028 [deprecated = true];
 
     // Transform execution
     TASK_TRANSFORM_PREPARATION = 3024;
     TASK_TRANSFORM = 3025;
 
     // AtomTaskManager per variant tasks.
-    ATOM_TASK_MANAGER_CREATE_MERGE_MANIFEST_TASK = 4000 [deprecated=true];
-    ATOM_TASK_MANAGER_CREATE_GENERATE_RES_VALUES_TASK = 4001 [deprecated=true];
-    ATOM_TASK_MANAGER_CREATE_CREATE_RENDERSCRIPT_TASK = 4002 [deprecated=true];
-    ATOM_TASK_MANAGER_CREATE_MERGE_RESOURCES_TASK = 4003 [deprecated=true];
-    ATOM_TASK_MANAGER_CREATE_MERGE_ASSETS_TASK = 4004 [deprecated=true];
-    ATOM_TASK_MANAGER_CREATE_BUILD_CONFIG_TASK = 4005 [deprecated=true];
-    ATOM_TASK_MANAGER_CREATE_PROCESS_RES_TASK = 4006 [deprecated=true];
-    ATOM_TASK_MANAGER_CREATE_AIDL_TASK = 4007 [deprecated=true];
-    ATOM_TASK_MANAGER_CREATE_SHADER_TASK = 4008 [deprecated=true];
-    ATOM_TASK_MANAGER_CREATE_NDK_TASK = 4009 [deprecated=true];
-    ATOM_TASK_MANAGER_CREATE_EXTERNAL_NATIVE_BUILD_TASK = 4010 [deprecated=true];
-    ATOM_TASK_MANAGER_CREATE_MERGE_JNILIBS_FOLDERS_TASK = 4011 [deprecated=true];
-    ATOM_TASK_MANAGER_CREATE_COMPILE_TASK = 4012 [deprecated=true];
-    ATOM_TASK_MANAGER_CREATE_BUNDLING_TASK = 4013 [deprecated=true];
-    ATOM_TASK_MANAGER_CREATE_LINT_TASK = 4014 [deprecated=true];
+    ATOM_TASK_MANAGER_CREATE_MERGE_MANIFEST_TASK = 4000 [deprecated = true];
+    ATOM_TASK_MANAGER_CREATE_GENERATE_RES_VALUES_TASK = 4001
+        [deprecated = true];
+    ATOM_TASK_MANAGER_CREATE_CREATE_RENDERSCRIPT_TASK = 4002
+        [deprecated = true];
+    ATOM_TASK_MANAGER_CREATE_MERGE_RESOURCES_TASK = 4003 [deprecated = true];
+    ATOM_TASK_MANAGER_CREATE_MERGE_ASSETS_TASK = 4004 [deprecated = true];
+    ATOM_TASK_MANAGER_CREATE_BUILD_CONFIG_TASK = 4005 [deprecated = true];
+    ATOM_TASK_MANAGER_CREATE_PROCESS_RES_TASK = 4006 [deprecated = true];
+    ATOM_TASK_MANAGER_CREATE_AIDL_TASK = 4007 [deprecated = true];
+    ATOM_TASK_MANAGER_CREATE_SHADER_TASK = 4008 [deprecated = true];
+    ATOM_TASK_MANAGER_CREATE_NDK_TASK = 4009 [deprecated = true];
+    ATOM_TASK_MANAGER_CREATE_EXTERNAL_NATIVE_BUILD_TASK = 4010
+        [deprecated = true];
+    ATOM_TASK_MANAGER_CREATE_MERGE_JNILIBS_FOLDERS_TASK = 4011
+        [deprecated = true];
+    ATOM_TASK_MANAGER_CREATE_COMPILE_TASK = 4012 [deprecated = true];
+    ATOM_TASK_MANAGER_CREATE_BUNDLING_TASK = 4013 [deprecated = true];
+    ATOM_TASK_MANAGER_CREATE_LINT_TASK = 4014 [deprecated = true];
 
     // InstantAppTaskManager per variant tasks.
-    INSTANTAPP_TASK_MANAGER_CREATE_MERGE_MANIFEST_TASK = 5000 [deprecated=true];
-    INSTANTAPP_TASK_MANAGER_CREATE_ATOM_PACKAGING_TASKS = 5001 [deprecated=true];
-    INSTANTAPP_TASK_MANAGER_CREATE_PROCESS_RES_TASK = 5002 [deprecated=true];
+    INSTANTAPP_TASK_MANAGER_CREATE_MERGE_MANIFEST_TASK = 5000
+        [deprecated = true];
+    INSTANTAPP_TASK_MANAGER_CREATE_ATOM_PACKAGING_TASKS = 5001
+        [deprecated = true];
+    INSTANTAPP_TASK_MANAGER_CREATE_PROCESS_RES_TASK = 5002 [deprecated = true];
     INSTANTAPP_TASK_MANAGER_CREATE_PACKAGING_TASK = 5003 [deprecated = true];
 
     // FeatureTaskManager per variant tasks.
     FEATURE_TASK_MANAGER_CREATE_BASE_TASKS = 6000 [deprecated = true];
     FEATURE_TASK_MANAGER_CREATE_NON_BASE_TASKS = 6001 [deprecated = true];
     FEATURE_TASK_MANAGER_CREATE_MERGE_MANIFEST_TASK = 6002 [deprecated = true];
-    FEATURE_TASK_MANAGER_CREATE_GENERATE_RES_VALUES_TASK = 6003 [deprecated = true];
-    FEATURE_TASK_MANAGER_CREATE_CREATE_RENDERSCRIPT_TASK = 6004 [deprecated = true];
+    FEATURE_TASK_MANAGER_CREATE_GENERATE_RES_VALUES_TASK = 6003
+        [deprecated = true];
+    FEATURE_TASK_MANAGER_CREATE_CREATE_RENDERSCRIPT_TASK = 6004
+        [deprecated = true];
     FEATURE_TASK_MANAGER_CREATE_MERGE_RESOURCES_TASK = 6005 [deprecated = true];
     FEATURE_TASK_MANAGER_CREATE_MERGE_ASSETS_TASK = 6006 [deprecated = true];
     FEATURE_TASK_MANAGER_CREATE_BUILD_CONFIG_TASK = 6007 [deprecated = true];
@@ -2774,10 +3349,13 @@ message GradleBuildProfileSpan {
     FEATURE_TASK_MANAGER_CREATE_AIDL_TASK = 6009 [deprecated = true];
     FEATURE_TASK_MANAGER_CREATE_SHADER_TASK = 6010 [deprecated = true];
     FEATURE_TASK_MANAGER_CREATE_NDK_TASK = 6011 [deprecated = true];
-    FEATURE_TASK_MANAGER_CREATE_EXTERNAL_NATIVE_BUILD_TASK = 6012 [deprecated = true];
-    FEATURE_TASK_MANAGER_CREATE_MERGE_JNILIBS_FOLDERS_TASK = 6013 [deprecated = true];
+    FEATURE_TASK_MANAGER_CREATE_EXTERNAL_NATIVE_BUILD_TASK = 6012
+        [deprecated = true];
+    FEATURE_TASK_MANAGER_CREATE_MERGE_JNILIBS_FOLDERS_TASK = 6013
+        [deprecated = true];
     FEATURE_TASK_MANAGER_CREATE_COMPILE_TASK = 6014 [deprecated = true];
-    FEATURE_TASK_MANAGER_CREATE_STRIP_NATIVE_LIBRARY_TASK = 6015 [deprecated = true];
+    FEATURE_TASK_MANAGER_CREATE_STRIP_NATIVE_LIBRARY_TASK = 6015
+        [deprecated = true];
     FEATURE_TASK_MANAGER_CREATE_SPLIT_TASK = 6016 [deprecated = true];
     FEATURE_TASK_MANAGER_CREATE_PACKAGING_TASK = 6017 [deprecated = true];
     FEATURE_TASK_MANAGER_CREATE_LINT_TASK = 6018 [deprecated = true];
@@ -2819,7 +3397,6 @@ message GradleTransformExecution {
 }
 
 message InstantRunStatus {
-
   // The type of artifacts built in this invocation.
   // e.g. COLD for when the changes cannot be hot-swapped, either due to the
   // app not running on the users device or the changes cannot be hot swapped.
@@ -2908,8 +3485,8 @@ message InstantRunStatus {
 
     MANIFEST_FILE_CHANGE = 22;
 
-    // the binary manifest file changed, probably due to references to resources which ID changed
-    // since last build.
+    // the binary manifest file changed, probably due to references to resources
+    // which ID changed since last build.
     BINARY_MANIFEST_FILE_CHANGE = 23;
 
     COLD_SWAP_REQUESTED = 24;
@@ -3119,6 +3696,8 @@ message DisplayDetails {
   optional int32 dots_per_inch_horizontal = 3;
   // Densitiy of the pixels on the screen vertically.
   optional int32 dots_per_inch_vertical = 4;
+  // System scale factor for the screen resolution.
+  optional float system_scale = 5;
 }
 
 // Stats on the current running java process.
@@ -3182,10 +3761,57 @@ message JvmDetails {
 
 // Details for an indexing operation.
 message IntellijIndexingStats {
+  // Major operations on indexes.
+  enum Operation {
+    UNKNOWN_OPERATION = 0;
+    MAP_INPUT = 1;
+    WRITE_LOCK = 2;
+    UPDATE_DATA = 3;
+    GET_DATA = 4;
+  }
+
+  // Details for a specific indexing operation.
+  message OperationStats {
+    // Operation described by this message.
+    optional Operation operation = 1;
+    // Total CPU time.
+    optional int64 total_cpu_nanos = 2;
+    // Total wall time.
+    optional int64 total_wall_nanos = 3;
+    // Maximum observed CPU time.
+    optional int32 max_cpu_nanos = 4;
+    // Maximum observed wall time.
+    optional int32 max_wall_nanos = 5;
+    // Total number of operations aggregated in this record.
+    optional int32 total_count = 6;
+  }
+
+  // IDE's major indexes.
+  enum Index {
+    UNKNOWN_INDEX = 0;
+    ID_INDEX = 1;
+    STUB_INDEX = 2;
+    TRIGRAM_INDEX = 3;
+    OTHER = 4;
+  }
+
+  // Details for indexing operations of a specific specific index.
+  message IndexStats {
+    // Index described by this message.
+    optional Index index = 1;
+    // Details for specific operations.
+    repeated OperationStats operation_stats = 2;
+  }
+
   // How long the indexing operation took in milliseconds.
   optional int32 duration_ms = 1;
   // Number of files indexed during this indexing operation.
   optional int32 file_count = 2;
+  // Number of threads configured to run indexing tasks.
+  optional int32 indexer_threads = 3;
+
+  // Indexing operation details for specific indexes.
+  repeated IndexStats index_stats = 4;
 }
 
 // Stats on Studio's performance
@@ -3206,6 +3832,28 @@ message StudioPerformanceStats {
   optional int32 event_service_time_sample_period = 3;
   // Histogram of wait times for the global write lock
   optional Histogram write_lock_wait_time_ms = 4;
+  // Information about GC pause time distributions, one for each collector that
+  // is active.
+  repeated GcPauseInfo gc_pause_info = 5;
+}
+
+// Information about GC pause times for a particular collector.
+message GcPauseInfo {
+  enum GcType {
+    UNKNOWN = 0;
+    SERIAL_YOUNG = 1;
+    SERIAL_OLD = 2;
+    PARALLEL_YOUNG = 3;
+    PARALLEL_OLD = 4;
+    CMS_YOUNG = 5;
+    CMS_OLD = 6;
+    G1_YOUNG = 7;
+    G1_OLD = 8;
+  }
+  // The type of the garbage collector
+  optional GcType collector_type = 1;
+  // Distribution of pause times for this collector
+  optional Histogram pause_times_ms = 2;
 }
 
 // One bucket of a PercentileEstimator.
@@ -3370,9 +4018,11 @@ message AndroidAttribute {
     TOOLS = 3;
   }
 
-  // Specifies an attribute name of an Android View class.
-  // Only properties defined on Google View classes will be specified by name.
-  // Properties defined on custom views will be left unspecified.
+  // Specifies an attribute name of an Android View class or Navigation element.
+  // Only properties defined on Google View classes or Google-provided
+  // Navigation destinations will be specified by name.
+  // Properties defined on custom views or destinations, or custom properties on
+  // Google-provided destinations will be left unspecified.
   optional string attribute_name = 1;
   // The namespace of this attribute
   optional AttributeNamespace attribute_namespace = 2;
@@ -3549,6 +4199,217 @@ message LayoutEditorEvent {
   optional LayoutFavoriteAttributeChangeEvent favorite_change_event = 6;
 }
 
+// Details for navigation editor events
+message NavEditorEvent {
+  enum NavEditorEventType {
+    UNKNOWN_EVENT_TYPE = 0;
+
+    OPEN_FILE = 1;
+
+    SELECT_DESIGN_TAB = 2;
+    SELECT_XML_TAB = 3;
+
+    CREATE_ACTION = 4;
+    EDIT_ACTION = 5;
+    CREATE_ARGUMENT = 6;
+    EDIT_ARGUMENT = 36;
+    CREATE_DEEP_LINK = 7;
+    EDIT_DEEP_LINK = 37;
+
+    CHANGE_PROPERTY = 8;
+
+    ADD_DESTINATION = 9;
+    CREATE_FRAGMENT = 10;
+    ADD_INCLUDE = 11;
+
+    CREATE_NESTED_GRAPH = 12;
+    MOVE_TO_GRAPH = 38;
+
+    ACTIVATE_LAYOUT = 13;
+    ACTIVATE_CLASS = 14;
+    ACTIVATE_NESTED = 15;
+    ACTIVATE_INCLUDE = 16;
+
+    EXIT_NESTED_GRAPH = 17;
+
+    SET_START_DESTINATION = 18;
+
+    AUTO_ARRANGE = 19;
+    POSITION_DESTINATION = 20;
+
+    RESTORE_ERROR_PANEL = 21;
+    MINIMIZE_ERROR_PANEL = 22;
+
+    DELETE_DESTINATION = 23;
+    DELETE_INCLUDE = 24;
+    DELETE_NESTED = 25;
+    DELETE_ACTION = 26;
+    DELETE_DEEPLINK = 27;
+    DELETE_ARGUMENT = 28;
+
+    SCHEMA_CREATED = 29;
+
+    ZOOM_IN = 30;
+    ZOOM_OUT = 31;
+    ZOOM_FIT = 32;
+
+    CUT = 33;
+    COPY = 34;
+    PASTE = 35;
+
+    // next index: 39
+  }
+
+  enum Source {
+    UNKNOWN = 0;
+    TOOLBAR = 1;
+    DESIGN_SURFACE = 2;
+    PROPERTY_INSPECTOR = 3;
+    SHORTCUT = 4;
+    CONTEXT_MENU = 5;
+  }
+
+  // Type of event
+  optional NavEditorEventType type = 1;
+  // Where the event was triggered
+  optional Source source = 2;
+  // If the event is property-related, information about the affected property
+  optional NavPropertyInfo property_info = 3;
+  // If the event is action-related, information about the relevant action
+  optional NavActionInfo action_info = 4;
+  // If the event is destination-related, information about the relevant
+  // destination
+  optional NavDestinationInfo destination_info = 5;
+  // Information about the current NavigationSchema
+  optional NavSchemaInfo schema_info = 6;
+  // Information on the current contents of the navigation file
+  optional NavigationContents contents = 7;
+}
+
+message NavPropertyInfo {
+  enum Property {
+    UNKNOWN = 0;
+    CUSTOM = 1;
+
+    ACTION = 2;
+    ARG_TYPE = 3;
+    AUTO_VERIFY = 4;
+    UNUSED_1 = 5;
+    DATA = 6;
+    DATA_PATTERN = 7;
+    DEFAULT_NAV_HOST = 8;
+    DEFAULT_VALUE = 9;
+    DESTINATION = 10;
+    ENTER_ANIM = 11;
+    EXIT_ANIM = 12;
+    GRAPH = 13;
+    ID = 14;
+    LABEL = 15;
+    UNUSED_2 = 16;
+    LAUNCH_SINGLE_TOP = 17;
+    NAME = 18;
+    NAV_GRAPH = 19;
+    NULLABLE = 20;
+    POP_ENTER_ANIM = 21;
+    POP_EXIT_ANIM = 22;
+    POP_UP_TO = 23;
+    POP_UP_TO_INCLUSIVE = 24;
+    START_DESTINATION = 25;
+    URI = 26;
+  }
+  enum TagType {
+    UNKNOWN_TAG = 0;
+    CUSTOM_TAG = 1;
+    ACTION_TAG = 2;
+    DEEPLINK_TAG = 3;
+    FRAGMENT_TAG = 4;
+    ACTIVITY_TAG = 5;
+    NAVIGATION_TAG = 6;
+    INCLUDE_TAG = 7;
+    ARGUMENT_TAG = 8;
+  }
+  // The property affected.
+  optional Property property = 1;
+  // Type of the containing tag.
+  optional TagType containing_tag = 2;
+  // Whether the property was empty prior to being set just now.
+  optional bool was_empty = 3;
+}
+
+message NavActionInfo {
+  enum ActionType {
+    UNKNOWN = 0;
+    REGULAR = 1;
+    EXIT = 2;
+    GLOBAL = 3;
+    SELF = 4;
+  }
+
+  // Type of the action affected
+  optional ActionType type = 1;
+  // Whether the action has popTo set
+  optional bool has_pop = 2;
+  // Whether the action has popToInclusive set
+  optional bool inclusive = 3;
+  // The number of actions originating from the same destination as this one
+  optional uint32 count_from_source = 4;
+  // The number of actions targeting the same destination as this one
+  optional uint32 count_to_destination = 5;
+  // The number of actions with the same source and destination as this one
+  optional uint32 count_same = 6;
+}
+
+message NavDestinationInfo {
+  enum DestinationType {
+    UNKNOWN = 0;
+    FRAGMENT = 1;
+    ACTIVITY = 2;
+    OTHER = 3;
+  }
+
+  // The type of the destination
+  optional DestinationType type = 1;
+  // Whether the destination has a class (android:name) specified
+  optional bool has_class = 2;
+  // Whether the destination has a layout (tools:layout) specified
+  optional bool has_layout = 3;
+}
+
+message NavSchemaInfo {
+  // The number of custom navigators in the current schema
+  optional uint32 custom_navigators = 1;
+  // The number of custom tags in the current schema
+  optional uint32 custom_tags = 2;
+  // The number of custom destination classes in the current schema
+  optional uint32 custom_destinations = 3;
+  // The number of custom attributes in the current schema
+  optional uint32 custom_attributes = 4;
+}
+
+message NavigationContents {
+  // The number of fragments in the current file
+  optional uint32 fragments = 1;
+  // The number of activities in the current file
+  optional uint32 activities = 2;
+  // The number of custom destinations in the current file
+  optional uint32 custom_destinations = 3;
+  // The number of regular actions in the current file
+  optional uint32 regular_actions = 4;
+  // The number of exit actions in the current file
+  optional uint32 exit_actions = 5;
+  // The number of global actions in the current file
+  optional uint32 global_actions = 6;
+  // The number of self actions in the current file
+  optional uint32 self_actions = 10;
+  // The number of includes in the current file
+  optional uint32 includes = 7;
+  // The number of nested graphs in the current file
+  optional uint32 nested_graphs = 8;
+  // The number of placeholders (destinations with android:name not set) in the
+  // current file
+  optional uint32 placeholders = 9;
+}
+
 // App links assistant user event detail.
 message AppLinksAssistantEvent {
   // Client-side salted (rotating every 28 days), sha256 of the project id for
@@ -3653,7 +4514,7 @@ message AppLinksAssistantEvent {
 
 // ADB Assistant event details
 message AdbAssistantStats {
-   // Why the assistant was started
+  // Why the assistant was started
   optional Trigger trigger = 1;
 
   // State list of trigger
@@ -3726,6 +4587,8 @@ message CpuCaptureMetadata {
     PARSING_FAILURE = 3;
     // User aborted parsing the trace after being notified it was too large
     USER_ABORTED_PARSING = 4;
+    // There was an error while preprocessing the trace file
+    PREPROCESS_FAILURE = 5;
   }
 
   // The result of a CPU capture
@@ -3923,6 +4786,25 @@ message EnergyEventMetadata {
   repeated EnergyEvent.Subevent subevents = 3;
 }
 
+message PerfdCrashInfo {
+  // Addresses of the backstack of the crash reported by perfd.
+  repeated uint64 backstack_address_list = 1;
+}
+
+message TransportFailureMetadata {
+  enum FailureType {
+    UNKNOWN_FAILURE_TYPE = 0;
+    TIMEOUT = 1;
+    INTERRUPTED = 2;
+    IO = 3;
+    SYNC = 4;
+    SHELL_COMMAND_UNRESPONSIVE = 5;
+    ADB_COMMAND_REJECTED = 6;
+  }
+
+  optional FailureType failure_type = 1;
+}
+
 // Android Profiler metrics
 message AndroidProfilerEvent {
   // The current stage we're on when this event was generated
@@ -3951,7 +4833,7 @@ message AndroidProfilerEvent {
   optional ProfilerSessionSelectionMetaData session_artifact_metadata = 8;
 
   // Set if |type| is |CPU_STARTUP_PROFILING|
-  optional CpuStartupProfilingMetadata  cpu_startup_profiling_metadata = 9;
+  optional CpuStartupProfilingMetadata cpu_startup_profiling_metadata = 9;
 
   // Set if |type| is |CPU_IMPORT_TRACE|
   optional CpuImportTraceMetadata cpu_import_trace_metadata = 10;
@@ -3964,6 +4846,12 @@ message AndroidProfilerEvent {
 
   // Set if |type| is |SELECT_ENERGY_EVENT|
   optional EnergyEventMetadata energy_event_metadata = 13;
+
+  // Set if |type| is |PERFD_CRASHED|
+  optional PerfdCrashInfo perfd_crash_info = 14;
+
+  // Set if |type| is |TRANSPORT_DAEMON_FAILED| OR |TRANSPORT_PROXY_FAILED|
+  optional TransportFailureMetadata transport_failure_metadata = 15;
 
   enum Stage {
     UNKNOWN_STAGE = 0;
@@ -4001,6 +4889,16 @@ message AndroidProfilerEvent {
     STAGE_ENTERED = 3;
     // Triggered when the user starts an app in profiling mode.
     RUN_WITH_PROFILING = 4;
+    // Triggered when perfd crashes. The callstack is sent with this metric.
+    PERFD_CRASHED = 5;
+    // Triggered when the transport device manager starts initializing a device.
+    PRE_TRANSPORT_DAEMON_STARTS = 6;
+    // Triggered when the transport daemon failed to launch.
+    TRANSPORT_DAEMON_FAILED = 7;
+    // Triggerd when the transport proxy layer fails to initialize.
+    TRANSPORT_PROXY_FAILED = 8;
+    // Triggered when the profiler service is unavailable.
+    PROFILER_INITIALIZATION_FAILED = 9;
 
     /// General
 
@@ -4017,11 +4915,15 @@ message AndroidProfilerEvent {
     // be correlated with |stage|.
     SELECT_RANGE = 110;
     FILTER = 111;
+    // Triggered when profilers starts finding a process for auto-profiling.
+    AUTO_PROFILING_REQUESTED = 112;
+    // Triggered when profilers found a auto-profiling process successfully.
+    AUTO_PROFILING_SUCCEEDED = 113;
 
     /// CPU
 
-    TRACE_SAMPLED = 201; // Deprecated since 3.0.0.5. Use TRACE_CPU.
-    TRACE_INSTRUMENTED = 202; // Deprecated since 3.0.0.5. Use TRACE_CPU.
+    TRACE_SAMPLED = 201;       // Deprecated since 3.0.0.5. Use TRACE_CPU.
+    TRACE_INSTRUMENTED = 202;  // Deprecated since 3.0.0.5. Use TRACE_CPU.
     SELECT_THREAD = 204;
     SELECT_TOP_DOWN = 205;
     SELECT_BOTTOM_UP = 206;
@@ -4029,8 +4931,8 @@ message AndroidProfilerEvent {
     SELECT_CALL_CHART = 210;
     OPEN_CPU_CONFIG_DIALOG = 208;
     CREATE_CPU_CONFIG = 209;
-    TRACE_CPU = 211; // Deprecated since 3.0.0.8. Use CAPTURE_TRACE.
-    CAPTURE_TRACE = 212; // Correlate with |cpu_capture_metadata|
+    TRACE_CPU = 211;      // Deprecated since 3.0.0.8. Use CAPTURE_TRACE.
+    CAPTURE_TRACE = 212;  // Correlate with |cpu_capture_metadata|
     THREADS_REORDERED = 213;
     KERNEL_VIEW_CLICKED = 214;
     KERNEL_VIEW_TOGGLED = 215;
@@ -4050,7 +4952,7 @@ message AndroidProfilerEvent {
     ARRANGE_CLASSES = 307;
     SELECT_MEMORY_STACK = 308;
     SELECT_MEMORY_REFERENCES = 309;
-    SELECT_MEMORY_HEAP = 310; // This event type should have |memory_heap|
+    SELECT_MEMORY_HEAP = 310;  // This event type should have |memory_heap|
 
     /// Network
 
@@ -4078,6 +4980,7 @@ message AndroidProfilerEvent {
     SESSION_UI_COLLAPSED = 504;
     SESSION_UI_RESIZED = 505;
     SESSION_ARTIFACT_SELECTED = 506;
+    SESSION_DROPDOWN_CLICKED = 507;
   }
 }
 
@@ -4110,6 +5013,35 @@ message ApkAnalyzerStats {
   optional uint64 compressed_size = 2;
 }
 
+// Gradle Plugin Upgrade Dialog Stats
+message GradlePluginUpgradeDialogStats {
+  // The current Gradle Version used by the project e.g "4.10.3"
+  optional string current_gradle_version = 1;
+  // The current Android Gradle Plugin version used by the project e.g
+  // "3.4-alpha01"
+  optional string current_android_gradle_plugin_version = 2;
+  // The Gradle version that the update prompt recommended e.g "5.1"
+  optional string recommended_gradle_version = 3;
+  // The Android Gradle Plugin version that the upgrade prompt recommended e.g
+  // "3.5-beta02"
+  optional string recommended_android_gradle_plugin_version = 4;
+  // The action the user took
+  optional UserAction user_action = 5;
+
+  enum UserAction {
+    // We don't know
+    UNKNOWN_USER_ACTION = 0;
+    // The user closed the dialog
+    CANCEL = 1;
+    // Do not show the prompt again
+    DO_NOT_ASK_AGAIN = 2;
+    // Do not show the prompt again until tomorrow
+    REMIND_ME_TOMORROW = 3;
+    // Upgrade the Gradle and Plugin version
+    OK = 4;
+  }
+}
+
 // Gradle Sync details
 message GradleSyncStats {
   // Cause of sync
@@ -4122,25 +5054,252 @@ message GradleSyncStats {
   optional int64 ide_time_ms = 4;
   // Whether the embedded maven repository is enabled
   optional bool embedded_repo_enabled = 5;
-  // What type of sync was performed
+  // What type of sync was requested
   optional GradleSyncType sync_type = 6;
+  // What type of sync was actually performed
+  optional GradleSyncType actual_sync_type = 7;
+  // The version of our Android Gradle plugin from the last known successful
+  // sync. (e.g. 3.5.0-dev)
+  optional string last_known_android_gradle_plugin_version = 8;
+  // The version of AGP used for this sync, if known. (e.g. 3.5.0)
+  optional string android_gradle_plugin_version = 9;
+  // Whether or not the project uses Groovy build files ("build.gradle")
+  optional bool uses_build_gradle = 10;
+  // Whether or not the project uses Kotlin build files ("build.gradle.kts")
+  optional bool uses_build_gradle_kts = 11;
 
   // List of triggers for gradle Sync
   enum Trigger {
-    // Unknown (this is the default, but should not be used)
+    // Default, should not be explicitly set
     TRIGGER_UNKNOWN = 0;
-    // Project being loaded caused the sync
+    // Used only when a project is opened
     TRIGGER_PROJECT_LOADED = 1;
-    // Project modifications caused the sync
+    // Project modifications caused a sync. This is too generic, prefer a more
+    // specific value
     TRIGGER_PROJECT_MODIFIED = 2;
-    // User requests the sync directly (by pressing sync button)
+    // User has explicitly requested a sync using the sync button
     TRIGGER_USER_REQUEST = 3;
     // User clicked quickfix to enable embedded Maven repo
     TRIGGER_EMBEDDED_REPO_ENABLED_BY_QUICKFIX = 4;
     // User changed variant selection from Build Variants window
     TRIGGER_VARIANT_SELECTION_CHANGED_BY_USER = 5;
-    // Project modifications done by PSD
+    // User made changes in PSD that require a sync
     TRIGGER_PSD_CHANGES = 6;
+    // Sync was done as part of Android Studio testing (should not be used since
+    // logs from testing are stored in a different place)
+    TRIGGER_TEST_REQUESTED = 7;
+
+    // First marker for user initiated syncs
+    TRIGGER_USER_FIRST_MARKER = 100;
+    // Started by ""Sync now"" banner when there are pending changes
+    TRIGGER_USER_STALE_CHANGES = 101;
+    // User clicked on the try again hyperlink from a banner
+    TRIGGER_USER_TRY_AGAIN = 102;
+    // Started by user from sync action
+    TRIGGER_USER_SYNC_ACTION = 103;
+    // Syncing with additional arguments for c++ projects
+    TRIGGER_USER_REFRESH_LINKED_CPP_PROJECTS = 104;
+    // Sync was requested by user while the project was building
+    TRIGGER_USER_REQUEST_WHILE_BUILDING = 105;
+    // Last marker for user initiated syncs
+    TRIGGER_USER_LAST_MARKER = 199;
+
+    // First marker for syncs caused by quickfixes
+    TRIGGER_QF_FIRST_MARKER = 400;
+    // Upgrade appengine version using a quickfix
+    TRIGGER_QF_APPENGINE_VERSION_UPGRADED = 401;
+    // Install an artifact using a quickfix
+    TRIGGER_QF_ARTIFACT_INSTALLED = 402;
+    // Install build tools using a quickfix
+    TRIGGER_QF_BUILD_TOOLS_INSTALLED = 403;
+    // Build tools version removed using a quickfix
+    TRIGGER_QF_BUILD_TOOLS_VERISON_REMOVED = 404;
+    // Build tools version changed using a quickfix
+    TRIGGER_QF_BUILD_TOOLS_VERSION_CHANGED = 405;
+    // Install CMake using a quickfix
+    TRIGGER_QF_CMAKE_INSTALLED = 406;
+    // Change JDK to the one used by Android Studio itself from a quickfix
+    TRIGGER_QF_JDK_CHANGED_TO_CURRENT = 407;
+    // Change JDK to use the one embedded with Android Studio from a quickfix
+    TRIGGER_QF_JDK_CHANGED_TO_EMBEDDED = 408;
+    // Install NDK using a quickfix
+    TRIGGER_QF_NDK_INSTALLED = 409;
+    // Property android.useDeprecatedNdk was set to true using a quickfix
+    TRIGGER_QF_NDK_INTEGRATION_DEPRECATED_SET = 410;
+    // Offline mode was disabled using a quickfix
+    TRIGGER_QF_OFFLINE_MODE_DISABLED = 411;
+    // Offline mode was enabled using a quickfix
+    TRIGGER_QF_OFFLINE_MODE_ENABLED = 412;
+    // Install one or more platforms using a quickfix
+    TRIGGER_QF_PLATFORM_INSTALLED = 413;
+    // Sync passing --refresh-dependencies option from an hyperlink
+    TRIGGER_QF_REFRESH_DEPENDENCIES = 414;
+    // Repository added from a quickfix
+    TRIGGER_QF_REPOSITORY_ADDED = 415;
+    // Install repository from a quickfix
+    TRIGGER_QF_REPOSITORY_INSTALLED = 416;
+    // Install missing SDK packages from a quickfix
+    TRIGGER_QF_SDK_PACKAGE_INSTALLED = 417;
+    // SDK path was changed from a quickfix
+    TRIGGER_QF_SDK_PATH_CHANGED = 418;
+    // Install a missing SDK version from a quickfix
+    TRIGGER_QF_SDK_VERSION_INSTALLED = 419;
+    // Gradle wrapper was created using a quickfix
+    TRIGGER_QF_WRAPPER_CREATED = 420;
+    // Gradle version was changed in wrapper using a quickfix
+    TRIGGER_QF_WRAPPER_GRADLE_VERSION_FIXED = 421;
+    // SDK has been removed from manifest files
+    TRIGGER_QF_SDK_REMOVED_FROM_MANIFEST = 422;
+    // Last marker for syncs caused by quickfixes
+    TRIGGER_QF_LAST_MARKER = 999;
+
+    // First marker for syncs caused by a refactor
+    TRIGGER_REFACTOR_FIRST_MARKER = 1200;
+    // Migrate project to use Androidx
+    TRIGGER_REFACTOR_MIGRATE_TO_ANDROIDX = 1201;
+    // Migrate project to use resource namespaces
+    TRIGGER_REFACTOR_MIGRATE_TO_RESOURCE_NAMESPACES = 1202;
+    // A module was renamed using refactoring
+    TRIGGER_REFACTOR_MODULE_RENAMED = 1203;
+    // Last marker for syncs caused by a refactor
+    TRIGGER_REFACTOR_LAST_MARKER = 1299;
+
+    // First marker for syncs due to changes from PSD
+    TRIGGER_PSD_FIRST_MARKER = 1500;
+    // A dependency was removed using PSD (using
+    // GradleOperations#removeDependencies)
+    TRIGGER_PSD_DEPENDENCY_REMOVED = 1501;
+    // A module was removed from the PSD (using
+    // AndroidProjectStructureConfigurable.DeleteModuleAction)
+    TRIGGER_PSD_MODULE_REMOVED = 1502;
+    // Last marker for syncs due to changes from PSD
+    TRIGGER_PSD_LAST_MARKER = 1599;
+
+    // First marker for changes in SDK
+    TRIGGER_SDK_FIRST_MARKER = 1800;
+    // Android SDK path in local.properties was changed
+    TRIGGER_SDK_PATH_CHANGED = 1801;
+    // Last marker for changes in SDK
+    TRIGGER_SDK_LAST_MARKER = 1899;
+
+    // First marker for sync due to changes done by
+    // AndroidGradleJavaProjectModelModifier
+    TRIGGER_MODIFIER_FIRST_MARKER = 2100;
+    // An action was redone (from
+    // AndroidGradleJavaProjectModelModifier#registerUndoAction)
+    TRIGGER_MODIFIER_ACTION_REDONE = 2101;
+    // An action was undone (from
+    // AndroidGradleJavaProjectModelModifier#registerUndoAction)
+    TRIGGER_MODIFIER_ACTION_UNDONE = 2102;
+    // A dependency to a module was added
+    TRIGGER_MODIFIER_ADD_MODULE_DEPENDENCY = 2103;
+    // A dependency to an external library was added
+    TRIGGER_MODIFIER_ADD_LIBRARY_DEPENDENCY = 2104;
+    // Language level was changed
+    TRIGGER_MODIFIER_LANGUAGE_LEVEL_CHANGED = 2105;
+    // Last marker for sync due to changes done by
+    // AndroidGradleJavaProjectModelModifier
+    TRIGGER_MODIFIER_LAST_MARKER = 2199;
+
+    // First marker for changes in languages
+    TRIGGER_LANGUAGE_FIRST_MARKER = 2400;
+    // Java language level was changed
+    TRIGGER_LANGUAGE_JAVA_LEVEL_CHANGED = 2401;
+    // Kotlin was configured for current project
+    TRIGGER_LANGUAGE_KOTLIN_CONFIGURED = 2402;
+    // Last marker for changes in languages
+    TRIGGER_LANGUAGE_LAST_MARKER = 2499;
+
+    // First marker for syncs related to Single Variant Sync
+    TRIGGER_SVS_FIRST_MARKER = 2700;
+    // SVS is not supported. SVS was disabled and a new sync started
+    TRIGGER_SVS_NOT_SUPPORTED = 2701;
+    // Last marker for syncs related to Single Variant Sync
+    TRIGGER_SVS_LAST_MARKER = 2799;
+
+    // First marker for sync due to C++ changes
+    TRIGGER_CPP_FIRST_MARKER = 3000;
+    // Link an external C++ project with Gradle
+    TRIGGER_CPP_EXTERNAL_PROJECT_LINKED = 3001;
+    // Last marker for sync due to C++ changes
+    TRIGGER_CPP_LAST_MARKER = 3099;
+
+    // First marker for AddDependencyAction syncs
+    TRIGGER_ADDDEPENDENCYACTION_FIRST_MARKER = 3300;
+    // A dependency was added by Add dependency action
+    TRIGGER_ADDDEPENDENCYACTION_CALLED = 3301;
+    // Last marker for AddDependencyAction syncs
+    TRIGGER_ADDDEPENDENCYACTION_LAST_MARKER = 3399;
+
+    // First marker for syncs related to Espresso
+    TRIGGER_ESPRESSO_FIRST_MARKER = 3600;
+    // Espresso is enabled by RecordingDialog
+    TRIGGER_ESPRESSO_SETUP = 3601;
+    // Last marker for syncs related to Espresso
+    TRIGGER_ESPRESSO_LAST_MARKER = 3699;
+
+    // First marker for syncs caused by a build
+    TRIGGER_BUILD_FIRST_MARKER = 3900;
+    // Sync is needed before building an APK
+    TRIGGER_BUILD_BEFORE_BUILDING_APK = 3901;
+    // There was an error in the previous sync (before building) or there were
+    // changes after build was done that require a sync
+    TRIGGER_BUILD_SYNC_NEEDED_AFTER_BUILD = 3902;
+    // Last marker for syncs caused by a build
+    TRIGGER_BUILD_LAST_MARKER = 3999;
+
+    // First marker for sync started due to a run
+    TRIGGER_RUN_FIRST_MARKER = 4200;
+    // There are native unsynced variants before running
+    TRIGGER_RUN_NATIVE_UNSYNCED = 4201;
+    // Sync was not performed before running and there are changes that require
+    // a sync
+    TRIGGER_RUN_SYNC_NEEDED_BEFORE_RUNNING = 4202;
+    // Last marker for sync started due to a run
+    TRIGGER_RUN_LAST_MARKER = 4299;
+
+    // First marker for changes in Android Gradle Plugin
+    TRIGGER_AGP_FIRST_MARKER = 4500;
+    // Android Gradle plugin was updated
+    TRIGGER_AGP_VERSION_UPDATED = 4501;
+    // Last marker for changes in Android Gradle Plugin
+    TRIGGER_AGP_LAST_MARKER = 4599;
+
+    // First marker for project loading triggers
+    TRIGGER_PROJECT_LOADED_FIRST_MARKER = 4800;
+    // First sync after project was created from NPW
+    TRIGGER_PROJECT_NEW = 4801;
+    // Project was reopen from recent projects or after IDE restart
+    TRIGGER_PROJECT_REOPEN = 4802;
+    // There was a failure while trying to setup module from cache
+    TRIGGER_PROJECT_CACHED_SETUP_FAILED = 4803;
+    // Last marker for project loading triggers
+    TRIGGER_PROJECT_LOADED_LAST_MARKER = 4899;
+
+    // First marker for sync required while importing
+    TRIGGER_IMPORT_FIRST_MARKER = 5100;
+    // An ADT module was imported to the current project
+    TRIGGER_IMPORT_ADT_MODULE = 5101;
+    // One or more modules were copied and registered to current project
+    TRIGGER_IMPORT_MODULES_COPIED = 5102;
+    // Last marker for sync required while importing
+    TRIGGER_IMPORT_LAST_MARKER = 5199;
+
+    // First marker for sync after changes in variants
+    TRIGGER_VARIANT_FIRST_MARKER = 5400;
+    // Variant changed by user but a full sync is required
+    TRIGGER_VARIANT_SELECTION_FULL_SYNC = 5401;
+    // Last marker for sync after changes in variants
+    TRIGGER_VARIANT_LAST_MARKER = 5499;
+
+    // First marker for changes done by GradleDependencyManager
+    TRIGGER_GRADLEDEPENDENCY_FIRST_MARKER = 5700;
+    // A dependency was added
+    TRIGGER_GRADLEDEPENDENCY_ADDED = 5701;
+    // A dependency was updated
+    TRIGGER_GRADLEDEPENDENCY_UPDATED = 5702;
+    // Last marker for changes done by GradleDependencyManager
+    TRIGGER_GRADLEDEPENDENCY_LAST_MARKER = 5799;
   }
 
   // List of sync types
@@ -4158,6 +5317,14 @@ message GradleSyncStats {
     // New sync (without other features)
     GRADLE_SYNC_TYPE_NEW_SYNC = 5;
   }
+}
+
+// Gradle sync issue details.
+message GradleSyncIssue {
+  // The type of the sync issue.
+  optional AndroidStudioEvent.GradleSyncIssueType type = 1;
+  // The list of quick-fixes offered to resolve the issue.
+  repeated AndroidStudioEvent.GradleSyncQuickFix offered_quick_fixes = 2;
 }
 
 // APK Debugging project information
@@ -4238,10 +5405,12 @@ message ConnectionAssistantEvent {
   // Type of event
   optional ConnectionAssistantEventType type = 1;
 
-  // defined if ConnectionAssistantEventType = USB_DEVICES_DETECTED, ADB_DEVICES_DETECTEd
+  // defined if ConnectionAssistantEventType = USB_DEVICES_DETECTED,
+  // ADB_DEVICES_DETECTEd
   optional int32 usb_devices_detected = 2;
 
-  // defined if ConnectionAssistantEventType = USB_DEVICES_DETECTED, ADB_DEVICES_DETECTEd
+  // defined if ConnectionAssistantEventType = USB_DEVICES_DETECTED,
+  // ADB_DEVICES_DETECTEd
   optional int32 adb_devices_detected = 3;
 }
 
@@ -4540,10 +5709,13 @@ message RunEvent {
   optional bool deployed_as_instant = 19;
   // Whether the run configuration was set to deploy from app bundle
   optional bool deployed_from_bundle = 20;
+
+  // Enum name representing deploy failure reason
+  optional string deploy_failure_id = 21;
 }
 
 message LaunchTaskDetail {
-  // The id of the task from LaunchTask::getId()
+  // The id of the task
   optional string id = 1;
   // This task starts
   optional int64 start_timestamp_ms = 2;
@@ -4551,10 +5723,19 @@ message LaunchTaskDetail {
   optional int64 end_timestamp_ms = 3;
   // For the tasks that deploy artifacts, their details.
   repeated ArtifactDetail artifact = 4;
+  // Thread ID this task is running on
+  optional int32 tid = 5;
+  // The completion status of the task. This value
+  // is populated from several enums in code (using enum.code())
+  // interface, each LaunchTask has its own set of error codes with
+  // some of them coming from device and being populated here. This is similar
+  // to the RunEvent.deploy_failure_id
+  optional string status = 6;
 }
 
 message StudioRunEvent {
   option deprecated = true;
+
   enum RunType {
     UNKNOWN = 0;
     RUN = 1;
@@ -4801,8 +5982,9 @@ message PSDEvent {
     //   From Propertires tab
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_PROPERTIES_COMPILE_SDK_VERSION = 120;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_PROPERTIES_BUILD_TOLS_VERSION = 121;
-    PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_PROPERTIES_LIBRARY_REPOSITORY =122;
-    PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_PROPERTIES_IGNORE_ASSETS_PATTERN = 123;
+    PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_PROPERTIES_LIBRARY_REPOSITORY = 122;
+    PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_PROPERTIES_IGNORE_ASSETS_PATTERN =
+        123;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_PROPERTIES_INCREMENTAL_DEX = 124;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_PROPERTIES_SOURCE_COMPATIBILITY = 125;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_PROPERTIES_TARGET_COMPATIBILITY = 126;
@@ -4818,7 +6000,8 @@ message PSDEvent {
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_FLAVOR_PROGUARD_FILE = 162;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_FLAVOR_SIGNING_CONFIG = 163;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_FLAVOR_TARGET_SDK_VERSION = 164;
-    PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_FLAVOR_TEST_INSTRUMENTATION_RUNNER = 165;
+    PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_FLAVOR_TEST_INSTRUMENTATION_RUNNER =
+        165;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_FLAVOR_TEST_APPLICATION_ID = 166;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_FLAVOR_VERSION_CODE = 167;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_FLAVOR_VERSION_NAME = 168;
@@ -4828,8 +6011,10 @@ message PSDEvent {
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_BUILDTYPE_DEBUGGABLE = 181;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_BUILDTYPE_JNI_DEBUGGABLE = 182;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_BUILDTYPE_SIGNING_CONFIG = 183;
-    PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_BUILDTYPE_RENDERSCRIPT_DEBUGGABLE = 184;
-    PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_BUILDTYPE_RENDERSCRIPT_OPTIM_LEVEL = 185;
+    PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_BUILDTYPE_RENDERSCRIPT_DEBUGGABLE =
+        184;
+    PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_BUILDTYPE_RENDERSCRIPT_OPTIM_LEVEL =
+        185;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_BUILDTYPE_MINIFY_ENABLED = 186;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_BUILDTYPE_PSEUDO_LOCAL_ENABLED = 187;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULE_BUILDTYPE_PROGUARD_FILE = 188;
@@ -4845,17 +6030,24 @@ message PSDEvent {
     // From Modules
     //   From Default Config
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_APPLICATION_ID = 400;
-    PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_TARGET_SDK_VERSION = 401;
+    PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_TARGET_SDK_VERSION =
+        401;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_MIN_SDK_VERSION = 402;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_MAX_SDK_VERSION = 403;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_SIGNING_CONFIG = 404;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_PROGUARD_FILES = 405;
-    PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_MANIFEST_PLACEHOLDERS = 406;
-    PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_MULTI_DEX_ENABLED = 407;
-    PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_TEST_INSTRUMENTATION_RUNNER_CLASS_NAME = 408;
-    PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_TEST_INSTRUMENTATION_RUNNER_ARGUMENTS_KEY = 409;
-    PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_TEST_INSTRUMENTATION_RUNNER_ARGUMENTS_VALUE = 410;
-    PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_TEST_APPLICATION_ID = 411;
+    PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_MANIFEST_PLACEHOLDERS =
+        406;
+    PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_MULTI_DEX_ENABLED =
+        407;
+    PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_TEST_INSTRUMENTATION_RUNNER_CLASS_NAME =
+        408;
+    PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_TEST_INSTRUMENTATION_RUNNER_ARGUMENTS_KEY =
+        409;
+    PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_TEST_INSTRUMENTATION_RUNNER_ARGUMENTS_VALUE =
+        410;
+    PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_TEST_APPLICATION_ID =
+        411;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_VERSION_CODE = 412;
     PROJECT_STRUCTURE_DIALOG_FIELD_MODULES_DEFAULTCONFIG_VERSION_NAME = 413;
     //   From Signing Configs
@@ -4869,34 +6061,71 @@ message PSDEvent {
     // From Build Variants
     //   From Build Types
     PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_DEBUGGABLE = 600;
-    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_JNI_DEBUGGABLE = 601;
-    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_RENDERSCRIPT_DEBUGGABLE = 602;
-    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_RENDERSCRIPT_OPTIMIZATION_LEVEL = 603;
-    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_SIGNING_CONFIG = 604;
-    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_PROGUARD_FILES = 605;
-    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_MANIFEST_PLACEHOLDERS = 606;
-    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_MINIFY_ENABLED = 607;
-    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_MULTI_DEX_ENABLED = 608;
-    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_APPLICATIOND_ID_SUFFIX = 609;
-    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_VERSION_NAME_SUFFIX = 610;
-    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_ZIP_ALIGN_ENABLED = 611;
+    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_JNI_DEBUGGABLE =
+        601;
+    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_RENDERSCRIPT_DEBUGGABLE =
+        602;
+    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_RENDERSCRIPT_OPTIMIZATION_LEVEL =
+        603;
+    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_SIGNING_CONFIG =
+        604;
+    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_PROGUARD_FILES =
+        605;
+    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_MANIFEST_PLACEHOLDERS =
+        606;
+    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_MINIFY_ENABLED =
+        607;
+    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_MULTI_DEX_ENABLED =
+        608;
+    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_APPLICATIOND_ID_SUFFIX =
+        609;
+    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_VERSION_NAME_SUFFIX =
+        610;
+    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_BUILDTYPES_ZIP_ALIGN_ENABLED =
+        611;
     //   From Flavors
     PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_DIMENSION = 620;
     PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_APPLICATION_ID = 621;
-    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_TARGET_SDK_VERSION = 622;
+    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_TARGET_SDK_VERSION =
+        622;
     PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_MIN_SDK_VERSION = 623;
     PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_MAX_SDK_VERSION = 624;
     PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_SIGNING_CONFIG = 625;
     PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_PROGUARD_FILES = 626;
-    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_MANIFEST_PLACEHOLDERS = 627;
-    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_MULTI_DEX_ENABLED = 628;
-    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_TEST_INSTRUMENTATION_RUNNER_CLASS_NAME = 629;
-    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_TEST_INSTRUMENTATION_RUNNER_ARGUMENTS_KEY = 630;
-    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_TEST_INSTRUMENTATION_RUNNER_ARGUMENTS_VALUE = 631;
-    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_TEST_APPLICATION_ID = 632;
+    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_MANIFEST_PLACEHOLDERS =
+        627;
+    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_MULTI_DEX_ENABLED =
+        628;
+    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_TEST_INSTRUMENTATION_RUNNER_CLASS_NAME =
+        629;
+    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_TEST_INSTRUMENTATION_RUNNER_ARGUMENTS_KEY =
+        630;
+    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_TEST_INSTRUMENTATION_RUNNER_ARGUMENTS_VALUE =
+        631;
+    PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_TEST_APPLICATION_ID =
+        632;
     PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_VERSION_CODE = 633;
     PROJECT_STRUCTURE_DIALOG_FIELD_BUILDVARIANTS_FLAVORS_VERSION_NAME = 634;
     // From Suggestions
+  }
+
+  // Repository usage statistics in PSD.
+  message PSDRepositoryUsage {
+    // Types of repositories that can be searched.
+    enum PSDRepository {
+      PROJECT_STRUCTURE_DIALOG_REPOSITORY_UNKNOWN = 0;
+      PROJECT_STRUCTURE_DIALOG_REPOSITORY_GOOGLE = 1;
+      PROJECT_STRUCTURE_DIALOG_REPOSITORY_MAVEN_CENTRAL = 2;
+      PROJECT_STRUCTURE_DIALOG_REPOSITORY_JCENTER = 3;
+      PROJECT_STRUCTURE_DIALOG_REPOSITORY_LOCAL = 4;
+      PROJECT_STRUCTURE_DIALOG_REPOSITORY_OTHER = 5;
+    }
+    // The repository being accessed.
+    optional PSDRepository repository = 1;
+    // How long did it take to search the repository for a specific library
+    // from the user's perspective. Some repositories like Google's one
+    // requires multiple files to be fetched to complete the search.
+    optional uint64 duration_ms = 2;
   }
 
   // What PSD generation is used?
@@ -4909,12 +6138,16 @@ message PSDEvent {
   optional uint64 duration_ms = 4;
   // List of fields that were modified
   repeated PSDField modified_fields = 5;
+  // Repositories searched.
+  repeated PSDRepositoryUsage repositories_searched = 6;
 }
 
 // UserSentiment describes how users feel about the product.
 message UserSentiment {
   // does the user feel positive or negative about the product at this time?
   optional SentimentState state = 1;
+  // in our popup question the user can indicate a satisfaction level.
+  optional SatisfactionLevel level = 2;
 
   enum SentimentState {
     UNKNOWN_SENTIMENT_STATE = 0;
@@ -4922,6 +6155,18 @@ message UserSentiment {
     NEGATIVE = 2;
     // The user is feeling strong enough about the issue to start filing a bug.
     FILE_BUG = 3;
+    // We popped up a question dialog on what the user's sentiment is instead of
+    // them chosing to submit feedback themselves
+    POPUP_QUESTION = 4;
+  }
+
+  enum SatisfactionLevel {
+    UNKNOWN_SATISFACTION_LEVEL = 0;
+    VERY_DISSATISFIED = 1;
+    DISSATISFIED = 2;
+    NEUTRAL = 3;
+    SATISFIED = 4;
+    VERY_SATISFIED = 5;
   }
 }
 
@@ -4936,4 +6181,262 @@ message EmulatorBootInfo {
   optional BootStatus boot_status = 1;
   // How long it took to boot, either successfully or not.
   optional uint64 duration_ms = 2;
+}
+
+// Reports information about how users invoke available dialogs.
+message DialogStats {
+  enum DialogState {
+    UNKNOWN_DIALOG_STATE = 0;
+    SHOW = 1;
+    SELECT = 2;
+    APPLY = 3;
+    RESET = 4;
+    CLOSE = 5;
+  }
+  // java class name (our code, not customer) of the Dialog reported on
+  // e.g. ' com.intellij.openapi.options.newEditor.SettingsDialog'
+  optional string dialog_class_name = 1;
+  // State the dialog is transitioning to.
+  optional DialogState state = 2;
+}
+
+// Data Binding metrics
+message DataBindingEvent {
+  // The detailed type of this event.
+  optional EventType type = 1;
+
+  // The context in which this event was triggered.
+  optional DataBindingContext context = 2;
+
+  // Set if |type| is |DATA_BINDING_BUILD_EVENT| or |DATA_BINDING_SYNC_EVENT|
+  optional DataBindingPollMetadata poll_metadata = 3;
+
+  // Type of data binding event
+  enum EventType {
+    UNKNOWN_TYPE = 0;
+
+    /// Polling events
+    // Triggered when a gradle sync happens
+    DATA_BINDING_SYNC_EVENT = 1;
+    // Triggered when a build happens
+    DATA_BINDING_BUILD_EVENT = 2;
+
+    /// User initiated events
+    // Completion related events
+    DATA_BINDING_COMPLETION_SUGGESTED = 101;
+    DATA_BINDING_COMPLETION_ACCEPTED = 102;
+    DATA_BINDING_COMPLETION_DECLINED = 103;
+  }
+
+  // Used to denote the context in which data binding events are triggered
+  enum DataBindingContext {
+    UNKNOWN_CONTEXT = 0;
+
+    // Data binding expression of the format @{() -> obj.func()}
+    DATA_BINDING_CONTEXT_LAMBDA = 1;
+
+    // Data binding expression of the format @{obj::func}
+    DATA_BINDING_CONTEXT_METHOD_REFERENCE = 2;
+
+    // Data binding xml tags. For example <variable> tag.
+    DATA_BINDING_CONTEXT_XML_TAG = 3;
+  }
+
+  // All of the stats we actively poll for
+  message DataBindingPollMetadata {
+    /// These are set when the message is a |DATA_BINDING_SYNC_EVENT|
+    // Whether user enabled data binding in gradle file.
+    optional bool data_binding_enabled = 1;
+
+    /// These are set when the message is a |DATA_BINDING_BUILD_EVENT|
+    // # of data binding layout xmls
+    optional uint32 layout_xml_count = 2;
+
+    // # of data binding imports
+    optional uint32 import_count = 3;
+
+    // # of data binding variables
+    optional uint32 variable_count = 4;
+
+    // # of data binding expressions in the xml
+    optional uint32 expression_count = 5;
+
+    // # of data binding related errors generated by compiler
+    optional uint32 error_count = 6;
+
+    // Observable type metrics
+    optional ObservableMetrics observable_metrics = 101;
+
+    // Binding adapter metrics
+    optional BindingAdapterMetrics binding_adapter_metrics = 102;
+
+    // Live Data metrics
+    optional LiveDataMetrics live_data_metrics = 103;
+
+    message ObservableMetrics {
+      // # of observable primitives used
+      optional uint32 primitive_count = 1;
+
+      // # of observable collections
+      optional uint32 collection_count = 2;
+
+      // # of user defined observable objects
+      optional uint32 observable_object_count = 3;
+    }
+
+    message BindingAdapterMetrics {
+      // # of user defined adapters
+      optional uint32 adapter_count = 1;
+
+      // # of references to user defined adapters in layout xml
+      optional uint32 adapter_reference_count = 2;
+    }
+
+    message LiveDataMetrics {
+      // # of live data objects
+      optional uint32 live_data_object_count = 1;
+    }
+  }
+}
+
+enum EditorFileType {
+  UNKNOWN = 0;
+  JAVA = 1;
+  KOTLIN = 2;
+  XML = 3;
+  GROOVY = 4;
+  PROPERTIES = 5;
+  JSON = 6;
+  KOTLIN_SCRIPT = 7;  // .kts
+  NATIVE = 8;         // .c, .cpp, .h, etc.
+}
+
+message TypingLatencyStats {
+  message LatencyRecord {
+    optional EditorFileType file_type = 1;
+    // Total number of keys typed.
+    optional int64 total_keys_typed = 2;
+    // Sum of latency for all keys typed.
+    optional int64 total_latency_ms = 3;
+    // Max latency recorded for a single key typed.
+    optional int64 max_latency_ms = 4;
+    // Full latency histogram.
+    optional Histogram histogram = 5;
+  }
+  // Per-file-type latency stats.
+  repeated LatencyRecord latency_records = 1;
+}
+
+message EditorHighlightingStats {
+  message Stats {
+    optional EditorFileType file_type = 1;
+    // Highlighting latencies in milliseconds.
+    optional Histogram histogram = 2;
+  }
+  repeated Stats by_file_type = 1;
+}
+
+// Details of events relating to the Android Studio Patch Updater
+message StudioPatchUpdaterEvent {
+  //Removed as uses reserved words when building with mingw
+}
+
+// Event related to the resource manager
+message ResourceManagerEvent {
+  optional Kind kind = 1;
+
+  optional ResourceType resource_type = 2;
+
+  enum Kind {
+    UNKNOWN_EVENT_KIND = 0;
+
+    // Resource Manager tool window is openend
+    TOOL_WINDOW_OPEN = 1;
+
+    // Asset added pressing the "Import Drawable" action
+    ASSET_ADDED_VIA_BUTTON = 2;
+
+    // Asset added using Drag and Drop on the resource manager
+    ASSET_ADDED_VIA_DND = 3;
+
+    // User open the view showing the different version of a resource
+    DETAIL_VIEW_OPENED = 4;
+
+    // A resource has been opened via the resource manager
+    ASSET_OPENED = 5;
+
+    // List mode has been changed to grid or list
+    LIST_MODE_CHANGED = 6;
+
+    // User shows or hide libraries assets
+    LIBRARIES_SHOWN = 7;
+    LIBRARIES_HIDDEN = 8;
+
+    // A density indicator was present in the imported file
+    DENSITY_INFERED = 9;
+
+    // Drop events
+    DROP_ON_XML_BLANK_SPACE = 10;
+    DROP_ON_XML_TAG = 11;
+    DROP_ON_XML_ATTRIBUTE = 12;
+    DROP_ON_LAYOUT_VIEW = 13;
+    DROP_ON_LAYOUT_VIEWGROUP = 14;
+
+    // Default drop type when the target does not recognize the resource url
+    // type
+    DROP_AS_TEXT = 15;
+
+    // When user tries to import more resources than the supported number
+    IMPORT_LIMIT_REACHED = 16;
+  }
+
+  // The type of the resource. It could be an Android type (e.g drawable)
+  // or an external type (e.g SVG, PNG)
+  enum ResourceType {
+    UNKNOWN = 0;
+    DRAWABLE = 1;
+    COLOR = 2;
+    LAYOUT = 3;
+    STRING = 4;
+    FONT = 5;
+    SVG = 6;
+    RASTER = 7;
+  }
+}
+
+message IdePluginInfo {
+  // The set of plugins enabled for the current session.
+  repeated IdePlugin plugins = 1;
+}
+
+message IdePlugin {
+  // Unique ID (e.g., "org.jetbrains.kotlin").
+  optional string id = 1;
+  // Version (e.g., "1.3.21-release-Studio3.4-1").
+  optional string version = 2;
+  // Whether this plugin (in its current version) came bundled with Studio.
+  optional bool bundled = 3;
+}
+
+// Information about the status of Windows Defender, which can have a
+// significant impact on build speed. We check whether realtime scanning is
+// enabled, and if so, whether several important directories are excluded from
+// scanning. This message is sent once per project, since the project root is
+// one such directory.
+message WindowsDefenderStatus {
+  // Overall status of Windows Defender
+  optional Status status = 1;
+  // Whether the project root directory is excluded from scanning.
+  optional bool project_dir_excluded = 2;
+
+  // Status of Windows Defender - either scanning is disabled, or all, some, or
+  // none of the important directories are excluded, or there was some problem
+  // determining the status.
+  enum Status {
+    UNKNOWN_STATUS = 0;
+    SCANNING_DISABLED = 1;
+    ALL_EXCLUDED = 2;
+    SOME_EXCLUDED = 3;
+    NONE_EXCLUDED = 4;
+  }
 }

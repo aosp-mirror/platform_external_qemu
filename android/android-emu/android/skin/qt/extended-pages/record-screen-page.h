@@ -10,17 +10,42 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "ui_record-screen-page.h"
+#include <qmetatype.h>    // for Q_DECLARE_METATYPE
+#include <qobjectdefs.h>  // for slots, Q_OBJECT, signals
+#include <QString>        // for QString
+#include <QTimer>         // for QTimer
+#include <QWidget>        // for QWidget
+#include <memory>         // for unique_ptr
+#include <string>         // for string
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 #include "android/recording/screen-recorder.h"
 #include "android/recording/video/player/VideoPlayer.h"
 #include "android/skin/qt/video-player/VideoInfo.h"
 #include "android/skin/qt/video-player/VideoPlayerWidget.h"
+=======
+#include "android/recording/screen-recorder.h"  // for RecordingStatus
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 
-#include <QTimer>
-#include <QWidget>
-#include <memory>
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
 
+using android::metrics::UiEventTracker;
+class QObject;
+class QString;
+class QWidget;
+namespace Ui {
+class RecordScreenPage;
+}  // namespace Ui
+namespace android {
+namespace videoplayer {
+class VideoInfo;
+class VideoPlayer;
+}  // namespace videoplayer
+}  // namespace android
 struct QAndroidRecordScreenAgent;
 
 Q_DECLARE_METATYPE(RecordingStatus);
@@ -52,6 +77,7 @@ signals:
 private slots:
     void on_rec_playStopButton_clicked();
     void on_rec_recordButton_clicked();
+    void on_rec_recordAgainButton_clicked();
     void on_rec_saveButton_clicked();
     void updateElapsedTime();
     void slot_recordingStatusChange(RecordingStatus status);
@@ -66,14 +92,14 @@ public:
     void setRecordUiState(RecordUiState r);
 
 private:
-    static const char kTmpMediaName[]; // tmp name for unsaved media file
+    static const char kTmpMediaName[];  // tmp name for unsaved media file
     static const QAndroidRecordScreenAgent* sRecordScreenAgent;
 
     std::string mTmpFilePath;
     std::unique_ptr<Ui::RecordScreenPage> mUi;
-    std::unique_ptr<android::videoplayer::VideoPlayerWidget> mVideoWidget;
     std::unique_ptr<android::videoplayer::VideoPlayer> mVideoPlayer;
     std::unique_ptr<android::videoplayer::VideoInfo> mVideoInfo;
+    std::shared_ptr<UiEventTracker> mRecTracker;
     RecordUiState mState;
     QTimer mTimer;
     int mSec;  // number of elapsed seconds

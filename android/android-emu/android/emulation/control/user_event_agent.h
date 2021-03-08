@@ -31,7 +31,13 @@ typedef struct QAndroidUserEventAgent {
     void (*sendKeyCodes)(int* keycodes, int count);
 
     // Mouse event.
-    void (*sendMouseEvent)(int dx, int dy, int dz, int buttonsState);
+    void (*sendMouseEvent)(int dx,
+                           int dy,
+                           int dz,
+                           int buttonsState,
+                           int displayId);
+    // Mouse wheel event.
+    void (*sendMouseWheelEvent)(int dx, int dy, int displayId);
 
     // Rotary encoder events
     // delta is a positive or negative value indicating the change of angle
@@ -40,7 +46,7 @@ typedef struct QAndroidUserEventAgent {
     void (*sendRotaryEvent)(int delta);
 
     // Send generic input events.
-    void (*sendGenericEvent)(int type, int code, int value);
+    void (*sendGenericEvent)(SkinGenericEventCode events);
     void (*sendGenericEvents)(SkinGenericEventCode* events, int count);
 
     // notify the emulator that new user event is available

@@ -85,6 +85,8 @@ struct RenderWindowMessage {
         struct {
             emugl::Renderer::OnPostCallback on_post;
             void* on_post_context;
+            uint32_t on_post_displayId;
+            bool use_bgra_readback;
         } set_post_callback;
 
         // CMD_SETUP_SUBWINDOW
@@ -99,6 +101,7 @@ struct RenderWindowMessage {
             float dpr;
             float rotation;
             bool deleteExisting;
+            bool hideWindow;
         } subwindow;
 
         // CMD_SET_TRANSLATION;
@@ -147,7 +150,9 @@ struct RenderWindowMessage {
                 D("CMD_SET_POST_CALLBACK\n");
                 fb = FrameBuffer::getFB();
                 fb->setPostCallback(msg.set_post_callback.on_post,
-                                    msg.set_post_callback.on_post_context);
+                                    msg.set_post_callback.on_post_context,
+                                    msg.set_post_callback.on_post_displayId,
+                                    msg.set_post_callback.use_bgra_readback);
                 result = true;
                 break;
 
@@ -182,7 +187,8 @@ struct RenderWindowMessage {
                         msg.subwindow.fbh,
                         msg.subwindow.dpr,
                         msg.subwindow.rotation,
-                        msg.subwindow.deleteExisting);
+                        msg.subwindow.deleteExisting,
+                        msg.subwindow.hideWindow);
                 break;
 
             case CMD_REMOVE_SUBWINDOW:
@@ -444,12 +450,17 @@ bool RenderWindow::getHardwareStrings(const char** vendor,
     return true;
 }
 
-void RenderWindow::setPostCallback(emugl::Renderer::OnPostCallback onPost, void* onPostContext) {
+void RenderWindow::setPostCallback(emugl::Renderer::OnPostCallback onPost,
+                                   void* onPostContext,
+                                   uint32_t displayId,
+                                   bool useBgraReadback) {
     D("Entering\n");
     RenderWindowMessage msg = {};
     msg.cmd = CMD_SET_POST_CALLBACK;
     msg.set_post_callback.on_post = onPost;
     msg.set_post_callback.on_post_context = onPostContext;
+    msg.set_post_callback.on_post_displayId = displayId;
+    msg.set_post_callback.use_bgra_readback = useBgraReadback;
     (void) processMessage(msg);
     D("Exiting\n");
 }
@@ -464,6 +475,10 @@ emugl::Renderer::ReadPixelsCallback RenderWindow::getReadPixelsCallback() {
     return FrameBuffer::getFB()->getReadPixelsCallback();
 }
 
+emugl::Renderer::FlushReadPixelPipeline
+RenderWindow::getFlushReadPixelPipeline() {
+    return FrameBuffer::getFB()->getFlushReadPixelPipeline();
+}
 bool RenderWindow::setupSubWindow(FBNativeWindowType window,
                                   int wx,
                                   int wy,
@@ -473,7 +488,8 @@ bool RenderWindow::setupSubWindow(FBNativeWindowType window,
                                   int fbh,
                                   float dpr,
                                   float zRot,
-                                  bool deleteExisting) {
+                                  bool deleteExisting,
+                                  bool hideWindow) {
     D("Entering mHasSubWindow=%s\n", mHasSubWindow ? "true" : "false");
 
     RenderWindowMessage msg = {};
@@ -488,7 +504,7 @@ bool RenderWindow::setupSubWindow(FBNativeWindowType window,
     msg.subwindow.dpr = dpr;
     msg.subwindow.rotation = zRot;
     msg.subwindow.deleteExisting = deleteExisting;
-
+    msg.subwindow.hideWindow = hideWindow;
     mHasSubWindow = processMessage(msg);
 
     D("Exiting mHasSubWindow=%s\n", mHasSubWindow ? "true" : "false");

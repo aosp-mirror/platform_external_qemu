@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700&display=swap"
+        type="text/css">
+    <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
+        type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" type="text/css">
+    <link rel="stylesheet" href="css/route-panel.css" type="text/css">
+    <link rel="stylesheet" href="css/location-panel.css" type="text/css">
+    <link rel="stylesheet" href="css/search-box.css" type="text/css">
+    <link rel="stylesheet" href="css/common.css" type="text/css">
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="js/location-mock-web-channel.js"></script>
+    <script src="js/event-bus.js"></script>
+    <script src="js/geocoder.js"></script>
+    <script src="js/autocompleter.js"></script>
+    <script src="js/map-manager.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/route-model.js"></script>
+    <script src="js/route-viewmodel.js"></script>
+    <script src="js/route-panel-controller.js"></script>
+    <script src="js/map-controller.js"></script>
+    <script src="js/location-panel-controller.js"></script>
+    <script src="js/search-box-controller.js"></script>
+    <script src="js/route.js"></script>
+</head>
+
+<body>
+    <div id="search-container" class="search-container mdc-ripple-surface">
+        <input id="search-input" class="search-input" type="text" placeholder="Search" autocomplete="off" dir="ltr"
+            spellcheck="false">
+        <div id="search-spinner" class="spinner-container">
+            <div class="spinner"></div>
+        </div>
+        <div id="search-icon" class="search-icon material-icons">search</div>
+    </div>
+    <div id="locationInfoOverlay">
+    </div>
+    <div id="map" class="map"></div>
+    <div id="location-panel" class="location-container-collapsed">
+        <div id="floating-action-button" class="circular-button mdc-ripple-surface">
+            <div class="directions-icon material-icons">directions</div>
+        </div>
+        <div id="location-panel-close-button" class="material-icons floating-right-button">close</div>
+        <div id="location-title" class="location-title">Port Authority Bus Terminal, NY</div>
+        <div id="location-subtitle" class="location-subtitle">40.134832, -74.832453, 14.34</div>
+    </div>
+    <div id="route-panel" class="route-container-collapsed">
+        <div class="transportation-options-container">
+            <div class="material-icons transportation-options-spacer">view_headline</div>
+            <div id="transport-mode-DRIVING" class="material-icons round-icon">directions_car</div>
+            <div id="transport-mode-TRANSIT" class="material-icons round-icon">directions_transit</div>
+            <div id="transport-mode-WALKING" class="material-icons round-icon">directions_walk</div>
+            <div id="transport-mode-BICYCLING" class="material-icons round-icon">directions_bike</div>
+            <div id="route-panel-close" class="material-icons close-icon">close</div>
+        </div>
+        <div id="waypoints-container" class="waypoints-container">
+            <div id="waypoints-icons-container" class="waypoints-icons-container">
+                <div class="widget-directions-icon material-icons start-dot-icon">trip_origin</div>
+                <div class="widget-directions-icon material-icons waypoints-icon">more_vert</div>
+                <div id="prototype-start-dot-icon" class="widget-directions-icon material-icons start-dot-icon"
+                    style="display:none;">trip_origin</div>
+                <div id="prototype-waypoints-icon" class="widget-directions-icon material-icons waypoints-icon"
+                    style="display:none;">more_vert</div>
+                <div id="destination-icon" class="widget-directions-icon material-icons end-marker-icon">place</div>
+                <div id="add-destination-icon" class="widget-directions-icon material-icons add-destination-icon"
+                    style="display:none;"></div>
+            </div>
+            <div id="waypoint-addresses-container" class="waypoint-addresses-container">
+                <input id="origin-address" name="origin" class="waypoint-address-input" type="text"
+                    placeholder="Choose starting point, or click on the map..." autocomplete="off" dir="ltr"
+                    spellcheck="false" />
+                <input id="prototype-address-input" name="waypoint-" class="waypoint-address-input" type="text"
+                    placeholder="Choose destination..." autocomplete="off" dir="ltr" spellcheck="false"
+                    style="display:none;" />
+                <input id="destination-address" name="destination" class="waypoint-address-input" type="text"
+                    placeholder="Choose destination, or click on the map..." autocomplete="off" dir="ltr"
+                    spellcheck="false" />
+                <div id="add-destination-label" class="add-destination-label" style="display:none;">Add destination
+                </div>
+            </div>
+            <div id="waypoints-reverse-container" class="waypoints-reverse-container">
+                <div id="swap-origin-destination-button" class="widget-directions-icon material-icons reverse-icon">
+                    swap_vert</div>
+                <div id="prototype-destination-remove-icon" class="destination-remove-icon material-icons"
+                    style="display: none;">
+                    close</div>
+                <div id="origin-remove-icon" class="destination-remove-icon material-icons" style="display: none;">close
+                </div>
+                <div id="destination-remove-icon" class="destination-remove-icon material-icons" style="display: none;">
+                    close</div>
+            </div>
+        </div>
+        <div id="action-buttons-container" class="action-buttons-container">
+            <div id="save-route-button" class="common-button save-route-button mdc-ripple-surface">
+                SAVE ROUTE
+            </div>
+        </div>
+        <div id="search-results-container" class="search-results-container">
+            <div id="prototype-search-result-item" class="search-result-item-container" style="display:none;">
+                <div class="material-icons search-result-item-icon"></div>
+                <span class="search-result-item-name">Dazzling Hair Salon<span
+                        class="search-result-item-address">fiewnwnifn feiwenf iowef South Bascom
+                        Avenue, Campbell, CA</span></span>
+            </div>
+        </div>
+    </div>
+    <script src="js/location-loader.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=YOUR_API_KEY&callback=initMap" async
+        defer></script>
+</body>
+
+</html>

@@ -158,14 +158,16 @@ extern const char* skin_key_code_str(int index);
 
 // Bit flag for key modifiers like Ctrl or Alt.
 typedef enum {
-    kKeyModLCtrl  = (1U << 0),  // left-control key
-    kKeyModRCtrl  = (1U << 1),  // right-control
-    kKeyModLAlt   = (1U << 2),  // left-alt
-    kKeyModRAlt   = (1U << 3),  // right-alt
-    kKeyModLShift = (1U << 4),  // left-shift
-    kKeyModRShift = (1U << 5),  // right-shift
-    kKeyModNumLock = (1U << 6),  // numlock
-
+    kKeyModLCtrl = (1U << 0),     // left-control key
+    kKeyModRCtrl = (1U << 1),     // right-control
+    kKeyModLAlt = (1U << 2),      // left-alt
+    kKeyModRAlt = (1U << 3),      // right-alt
+    kKeyModLShift = (1U << 4),    // left-shift
+    kKeyModRShift = (1U << 5),    // right-shift
+    kKeyModNumLock = (1U << 6),   // numlock
+    kKeyModCapsLock = (1U << 7),  // capslock
+    kKeyModLMeta = (1U << 8),     // left-meta
+    kKeyModRMeta = (1U << 9),     // right-meta
 } SkinKeyMod;
 
 // Convert a pair of (SkinKeyCode,SkinKeyMod) values into a human-readable
@@ -181,5 +183,15 @@ extern const char* skin_key_pair_to_string(uint32_t keycode, uint32_t mod);
 extern bool skin_key_pair_from_string(const char* str,
                                       uint32_t* keycode,
                                       uint32_t* mod);
+
+extern int skin_native_scancode_to_linux(int32_t scancode);
+
+extern bool skin_keycode_native_is_keypad(int32_t virtualKey);
+
+extern int32_t skin_keycode_native_map_keypad(int32_t virtualKey);
+
+extern bool skin_keycode_is_alpha(int32_t linux_key);
+
+extern bool skin_keycode_is_modifier(int32_t linux_key);
 
 ANDROID_END_HEADER

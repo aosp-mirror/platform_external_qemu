@@ -33,6 +33,11 @@ protected:
     }
 
 public:
+    virtual void *allocBuffer(size_t minSize) = 0;
+    virtual int commitBuffer(size_t size) = 0;
+    virtual int writeFully(const void* buf, size_t len) = 0;
+    virtual const unsigned char *readFully( void *buf, size_t len) = 0;
+
     size_t read(void* buf, size_t bufLen) {
         if (!readRaw(buf, &bufLen)) {
             return 0;
@@ -73,6 +78,11 @@ public:
         return stat;
     }
 
+    const unsigned char *readback(void *buf, size_t len) {
+        flush();
+        return readFully(buf, len);
+    }
+
     void save(android::base::Stream* stream) {
         stream->putBe32(m_bufsize);
         stream->putBe32(m_free);
@@ -92,13 +102,10 @@ public:
     virtual void unlockDma(uint64_t guest_paddr) = 0;
 
 protected:
-    virtual void *allocBuffer(size_t minSize) = 0;
-    virtual int commitBuffer(size_t size) = 0;
     virtual const unsigned char *readRaw(void *buf, size_t *inout_len) = 0;
     virtual void onSave(android::base::Stream* stream) = 0;
     virtual unsigned char* onLoad(android::base::Stream* stream) = 0;
 
-private:
     unsigned char* m_buf = nullptr;
     size_t m_bufsize;
     size_t m_free = 0;

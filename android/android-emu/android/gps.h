@@ -15,7 +15,9 @@
 #include "android/emulation/serial_line.h"
 
 #include <stdbool.h>
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <sys/time.h>
 #endif
 

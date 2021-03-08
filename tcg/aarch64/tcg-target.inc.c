@@ -2482,6 +2482,10 @@ QEMU_BUILD_BUG_ON(FRAME_SIZE - PUSH_SIZE > 0xfff);
 
 static void tcg_target_qemu_prologue(TCGContext *s)
 {
+#if defined(__APPLE__) && defined(__aarch64__)
+    pthread_jit_write_protect_np(false);
+#endif
+
     TCGReg r;
 
     /* Push (FP, LR) and allocate space for all saved registers.  */
@@ -2539,6 +2543,10 @@ static void tcg_target_qemu_prologue(TCGContext *s)
     tcg_out_insn(s, 3314, LDP, TCG_REG_FP, TCG_REG_LR,
                  TCG_REG_SP, PUSH_SIZE, 0, 1);
     tcg_out_insn(s, 3207, RET, TCG_REG_LR);
+
+#if defined(__APPLE__) && defined(__aarch64__)
+    pthread_jit_write_protect_np(true);
+#endif
 }
 
 static void tcg_out_nop_fill(tcg_insn_unit *p, int count)

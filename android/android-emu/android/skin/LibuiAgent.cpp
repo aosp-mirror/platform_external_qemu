@@ -7,14 +7,11 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
-#include "android/skin/LibuiAgent.h"
-
-#include "android/base/ProcessControl.h"
-
-#include "android/skin/charmap.h"
-#include "android/skin/keycode-buffer.h"
-#include "android/skin/winsys.h"
+#include "android/base/ProcessControl.h"            // for restartEmulator
+#include "android/emulation/control/libui_agent.h"  // for LibuiKeyCodeSendFunc
+#include "android/skin/charmap.h"                   // for skin_charmap_reve...
+#include "android/skin/keycode-buffer.h"            // for skin_keycode_buff...
+#include "android/skin/winsys.h"                    // for skin_winsys_quit_...
 
 static int utf8_next(const unsigned char** pp, const unsigned char* end) {
     const unsigned char* p = *pp;
@@ -32,6 +29,7 @@ static int utf8_next(const unsigned char** pp, const unsigned char* end) {
 
             while (p < end && (p[0] & 0xc0) == 0x80) {
                 c = (c << 6) | (p[0] & 0x3f);
+                p++;
             }
         }
         result = c;
@@ -44,7 +42,8 @@ static const QAndroidLibuiAgent kLibuiAgent = {
         // convertUtf8ToKeyCodeEvents
         [](const unsigned char* text,
            int len,
-           LibuiKeyCodeSendFunc sendFunc) -> bool {
+           LibuiKeyCodeSendFunc sendFunc,
+           void* context) -> bool {
             const auto charmap = skin_charmap_get();
             if (!charmap) {
                 return false;
@@ -52,6 +51,7 @@ static const QAndroidLibuiAgent kLibuiAgent = {
 
             SkinKeycodeBuffer keycodes;
             skin_keycode_buffer_init(&keycodes, (SkinKeyCodeFlushFunc)sendFunc);
+            keycodes.context = context;
 
             const auto end = text + len;
             while (text < end) {
@@ -78,4 +78,4 @@ static const QAndroidLibuiAgent kLibuiAgent = {
         },
 };
 
-const QAndroidLibuiAgent* const gQAndroidLibuiAgent = &kLibuiAgent;
+extern "C" const QAndroidLibuiAgent* const gQAndroidLibuiAgent = &kLibuiAgent;

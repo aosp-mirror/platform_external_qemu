@@ -51,6 +51,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    int apiLevel,
                                    const char* kernelSerialPrefix,
                                    const char* avdKernelParameters,
+                                   const char* kernelPath,
                                    const std::vector<std::string>* verifiedBootParameters,
                                    AndroidGlesEmulationMode glesMode,
                                    int bootPropOpenglesVersion,
@@ -58,6 +59,11 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    mem_map ramoops,
                                    const int vm_heapSize,
                                    bool isQemu2,
-                                   bool isCros);
+                                   bool isCros,
+                                   uint32_t lcd_width,
+                                   uint32_t lcd_height,
+                                   uint32_t lcd_vsync,
+                                   const char* gltransport,
+                                   uint32_t gltransport_drawFlushInterval);
 
 ANDROID_END_HEADER

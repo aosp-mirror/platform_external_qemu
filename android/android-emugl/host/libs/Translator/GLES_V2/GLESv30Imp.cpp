@@ -2,7 +2,8 @@
 // This file is best left unedited.
 // Try to make changes through gen_translator in gen-entries.py,
 // and/or parcel out custom functionality in separate code.
-extern "C" GL_APICALL GLconstubyteptr GL_APIENTRY glGetStringi(GLenum name, GLint index) {
+
+EXTERN_PART GL_APICALL GLconstubyteptr GL_APIENTRY glGetStringi(GLenum name, GLint index) {
     GET_CTX_V2_RET(0);
     GLconstubyteptr glGetStringiRET = ctx->dispatcher().glGetStringi(name, index);
     return glGetStringiRET;
@@ -126,7 +127,7 @@ GL_APICALL GLuint GL_APIENTRY glGetUniformBlockIndex(GLuint program, const GLcha
     } else return 0;
 }
 
-extern "C" GL_APICALL void GL_APIENTRY glGetUniformIndices(GLuint program, GLsizei uniformCount, const GLchar ** uniformNames, GLuint * uniformIndices) {
+EXTERN_PART GL_APICALL void GL_APIENTRY glGetUniformIndices(GLuint program, GLsizei uniformCount, const GLchar ** uniformNames, GLuint * uniformIndices) {
     GET_CTX_V2();
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
@@ -152,98 +153,98 @@ GL_APICALL void GL_APIENTRY glGetActiveUniformBlockName(GLuint program, GLuint u
 
 GL_APICALL void GL_APIENTRY glUniform1ui(GLint location, GLuint v0) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniform1ui(hostLoc, v0);
 }
 
 GL_APICALL void GL_APIENTRY glUniform2ui(GLint location, GLuint v0, GLuint v1) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniform2ui(hostLoc, v0, v1);
 }
 
 GL_APICALL void GL_APIENTRY glUniform3ui(GLint location, GLuint v0, GLuint v1, GLuint v2) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniform3ui(hostLoc, v0, v1, v2);
 }
 
-extern "C" GL_APICALL void GL_APIENTRY glUniform4ui(GLint location, GLint v0, GLuint v1, GLuint v2, GLuint v3) {
+EXTERN_PART GL_APICALL void GL_APIENTRY glUniform4ui(GLint location, GLint v0, GLuint v1, GLuint v2, GLuint v3) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniform4ui(hostLoc, v0, v1, v2, v3);
 }
 
 GL_APICALL void GL_APIENTRY glUniform1uiv(GLint location, GLsizei count, const GLuint * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniform1uiv(hostLoc, count, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniform2uiv(GLint location, GLsizei count, const GLuint * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniform2uiv(hostLoc, count, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniform3uiv(GLint location, GLsizei count, const GLuint * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniform3uiv(hostLoc, count, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniform4uiv(GLint location, GLsizei count, const GLuint * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniform4uiv(hostLoc, count, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniformMatrix2x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniformMatrix2x3fv(hostLoc, count, transpose, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniformMatrix3x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniformMatrix3x2fv(hostLoc, count, transpose, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniformMatrix2x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniformMatrix2x4fv(hostLoc, count, transpose, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniformMatrix4x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniformMatrix4x2fv(hostLoc, count, transpose, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniformMatrix3x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniformMatrix3x4fv(hostLoc, count, transpose, value);
 }
 
 GL_APICALL void GL_APIENTRY glUniformMatrix4x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
-    int hostLoc = s_getHostLocOrSetError(location);
+    int hostLoc = s_getHostLocOrSetError(ctx, location);
     SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
     ctx->dispatcher().glUniformMatrix4x3fv(hostLoc, count, transpose, value);
 }
@@ -260,11 +261,19 @@ GL_APICALL void GL_APIENTRY glGetUniformuiv(GLuint program, GLint location, GLui
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
         ProgramData* pData = (ProgramData *)objData;
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
         (void)pData;
+=======
+        SET_ERROR_IF(!pData, GL_INVALID_OPERATION);
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 #if !defined(TOLERATE_PROGRAM_LINK_ERROR) || !TOLERATE_PROGRAM_LINK_ERROR
         SET_ERROR_IF(!pData->getLinkStatus(), GL_INVALID_OPERATION);
 #endif
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
         int hostLoc = s_getHostLocOrSetError(location);
+=======
+        int hostLoc = pData->getHostUniformLocation(location);
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
         SET_ERROR_IF(hostLoc < -1, GL_INVALID_OPERATION);
         ctx->dispatcher().glGetUniformuiv(globalProgramName, hostLoc, params);
     }
@@ -497,6 +506,34 @@ static void internal_glDeleteSync(GLsync to_delete) {
         return;
     }
     ctx->dispatcher().glDeleteSync(to_delete);
+}
+
+static void internal_glGetSynciv(GLsync sync, GLenum pname, GLsizei bufsize, GLsizei *length, GLint *values) {
+    GET_CTX_V2();
+    if (!ctx->dispatcher().glGetSynciv) {
+        if (bufsize < sizeof(GLint)) return;
+        switch (pname) {
+            case GL_OBJECT_TYPE:
+                if (length) *length = sizeof(GLint);
+                *values = GL_SYNC_FENCE;
+                break;
+            case GL_SYNC_CONDITION:
+                if (length) *length = sizeof(GLint);
+                *values = GL_SYNC_GPU_COMMANDS_COMPLETE;
+                break;
+            case GL_SYNC_FLAGS:
+                // Not supported
+                break;
+            case GL_SYNC_STATUS:
+                if (length) *length = sizeof(GLint);
+                *values = GL_SIGNALED;
+                break;
+            default:
+                break;
+        }
+        return;
+    }
+    ctx->dispatcher().glGetSynciv(sync, pname, bufsize, length, values);
 }
 
 GL_APICALL GLsync GL_APIENTRY glFenceSync(GLenum condition, GLbitfield flags) {
@@ -735,11 +772,13 @@ GL_APICALL void GL_APIENTRY glTexStorage2D(GLenum target, GLsizei levels, GLenum
 GL_APICALL void GL_APIENTRY glBeginTransformFeedback(GLenum primitiveMode) {
     GET_CTX_V2();
     gles30usages->set_is_used(true);
+    ctx->boundTransformFeedback()->mIsActive = true;
     ctx->dispatcher().glBeginTransformFeedback(primitiveMode);
 }
 
 GL_APICALL void GL_APIENTRY glEndTransformFeedback() {
     GET_CTX_V2();
+    ctx->boundTransformFeedback()->mIsActive = false;
     ctx->dispatcher().glEndTransformFeedback();
 }
 
@@ -750,13 +789,31 @@ GL_APICALL void GL_APIENTRY glGenTransformFeedbacks(GLsizei n, GLuint * ids) {
         gles30usages->set_is_used(true);
         gles30usages->set_gen_transform_feedbacks(true);
     }
-    ctx->dispatcher().glGenTransformFeedbacks(n, ids);
+    for (int i = 0; i < n; i++) {
+        ids[i] = ctx->genTransformFeedbackName(0, true);
+    }
 }
 
 GL_APICALL void GL_APIENTRY glDeleteTransformFeedbacks(GLsizei n, const GLuint * ids) {
     GET_CTX_V2();
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
-    ctx->dispatcher().glDeleteTransformFeedbacks(n, ids);
+    ObjectLocalName boundTransformFeedback = ctx->getTransformFeedbackBinding();
+    TransformFeedbackData* tfData = ctx->boundTransformFeedback();
+    if (boundTransformFeedback) {
+        for (GLsizei i = 0; i < n; i++) {
+            SET_ERROR_IF(ids[i] == boundTransformFeedback && tfData->mIsActive,
+                         GL_INVALID_OPERATION);
+        }
+    }
+    for (GLsizei i = 0; i < n; i++) {
+        if (ids[i]) {
+            if (boundTransformFeedback == ids[i]) {
+                assert(!tfData->mIsActive);
+                ctx->bindTransformFeedback(0);
+            }
+            ctx->deleteTransformFeedback(ids[i]);
+        }
+    }
 }
 
 GL_APICALL void GL_APIENTRY glBindTransformFeedback(GLenum target, GLuint id) {
@@ -765,7 +822,10 @@ GL_APICALL void GL_APIENTRY glBindTransformFeedback(GLenum target, GLuint id) {
         gles30usages->set_is_used(true);
         gles30usages->set_gen_transform_feedbacks(true);
     }
-    ctx->dispatcher().glBindTransformFeedback(target, id);
+    unsigned int globalName = ctx->getTransformFeedbackGlobalName(id);
+    SET_ERROR_IF(id != 0 && globalName == 0, GL_INVALID_OPERATION);
+    ctx->bindTransformFeedback(id);
+    ctx->dispatcher().glBindTransformFeedback(target, globalName);
 }
 
 GL_APICALL void GL_APIENTRY glPauseTransformFeedback() {
@@ -780,11 +840,10 @@ GL_APICALL void GL_APIENTRY glResumeTransformFeedback() {
 
 GL_APICALL GLboolean GL_APIENTRY glIsTransformFeedback(GLuint id) {
     GET_CTX_V2_RET(0);
-    GLboolean glIsTransformFeedbackRET = ctx->dispatcher().glIsTransformFeedback(id);
-    return glIsTransformFeedbackRET;
+    return ctx->hasBoundTransformFeedback(id);
 }
 
-extern "C" GL_APICALL void GL_APIENTRY glTransformFeedbackVaryings(GLuint program, GLsizei count, const char ** varyings, GLenum bufferMode) {
+EXTERN_PART GL_APICALL void GL_APIENTRY glTransformFeedbackVaryings(GLuint program, GLsizei count, const char ** varyings, GLenum bufferMode) {
     GET_CTX_V2();
     gles30usages->set_is_used(true);
     if (ctx->shareGroup().get()) {
@@ -1024,6 +1083,11 @@ GL_APICALL void GL_APIENTRY glTexImage3D(GLenum target, GLint level, GLint inter
 
     s_glInitTexImage3D(target, level, internalFormat, width, height, depth,
             border, format, type);
+    // Desktop OpenGL doesn't support GL_BGRA_EXT as internal format.
+    if (!isGles2Gles() && type == GL_UNSIGNED_BYTE && format == GL_BGRA_EXT &&
+        internalFormat == GL_BGRA_EXT) {
+        internalFormat = GL_RGBA;
+    }
 
     if (isCoreProfile()) {
         GLEScontext::prepareCoreProfileEmulatedTexture(
@@ -1042,6 +1106,11 @@ GL_APICALL void GL_APIENTRY glTexStorage3D(GLenum target, GLsizei levels, GLenum
     GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalformat, &format, &type);
     s_glInitTexImage3D(target, 0, internalformat, width, height, depth, 0,
             format, type);
+    // Desktop OpenGL doesn't support GL_BGRA_EXT as internal format.
+    if (!isGles2Gles() && type == GL_UNSIGNED_BYTE && format == GL_BGRA_EXT &&
+        internalformat == GL_BGRA8_EXT) {
+        internalformat = GL_RGBA8;
+    }
     TextureData *texData = getTextureTargetData(target);
     texData->texStorageLevels = levels;
     ctx->dispatcher().glTexStorage3D(target, levels, internalformat, width, height, depth);

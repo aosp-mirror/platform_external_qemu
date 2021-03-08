@@ -14,6 +14,7 @@
 
 #include "android/physics/Physics.h"
 #include "android/utils/compiler.h"
+#include "android/emulation/control/window_agent.h"
 
 #include <stdint.h>
 #include <math.h>
@@ -25,7 +26,9 @@ typedef struct PhysicalModel PhysicalModel;
 ANDROID_BEGIN_HEADER
 
 /* initialize sensor emulation */
-extern void  android_hw_sensors_init( void );
+extern void  android_hw_sensors_init(const QAndroidEmulatorWindowAgent* windowAgent);
+
+const QAndroidEmulatorWindowAgent* android_hw_sensors_get_window_agent();
 
 /* initialize remote controller for HW sensors. This must be called after
  * init_clocks(), i.e. later than android_hw_sensors_init(). */
@@ -89,6 +92,10 @@ typedef enum{
     SENSOR_(HUMIDITY,"humidity",Humidity,float,"humidity:%g") \
     SENSOR_(MAGNETIC_FIELD_UNCALIBRATED,"magnetic-field-uncalibrated",MagnetometerUncalibrated,vec3,"magnetic-uncalibrated:%g:%g:%g") \
     SENSOR_(GYROSCOPE_UNCALIBRATED,"gyroscope-uncalibrated",GyroscopeUncalibrated,vec3,"gyroscope-uncalibrated:%g:%g:%g") \
+    SENSOR_(HINGE_ANGLE0, "hinge-angle0", HingeAngle0, float, "hinge-angle0:%g") \
+    SENSOR_(HINGE_ANGLE1, "hinge-angle1", HingeAngle1, float, "hinge-angle1:%g") \
+    SENSOR_(HINGE_ANGLE2, "hinge-angle2", HingeAngle2, float, "hinge-angle2:%g") \
+    SENSOR_(HEART_RATE, "heart-rate", HeartRate, float, "heart-rate:%g") \
 
 typedef enum {
 #define  SENSOR_(x,y,z,v,w)  ANDROID_SENSOR_##x,
@@ -125,6 +132,14 @@ typedef enum{
     PHYSICAL_PARAMETER_(HUMIDITY,"humidity",Humidity,float) \
     PHYSICAL_PARAMETER_(VELOCITY,"velocity",Velocity,vec3) \
     PHYSICAL_PARAMETER_(AMBIENT_MOTION,"ambientMotion",AmbientMotion,float) \
+    PHYSICAL_PARAMETER_(HINGE_ANGLE0,"hinge-angle0",HingeAngle0,float) \
+    PHYSICAL_PARAMETER_(HINGE_ANGLE1,"hinge-angle1",HingeAngle1,float) \
+    PHYSICAL_PARAMETER_(HINGE_ANGLE2,"hinge-angle2",HingeAngle2,float) \
+    PHYSICAL_PARAMETER_(ROLLABLE0,"rollable0",Rollable0,float) \
+    PHYSICAL_PARAMETER_(ROLLABLE1,"rollable1",Rollable1,float) \
+    PHYSICAL_PARAMETER_(ROLLABLE2,"rollable2",Rollable2,float) \
+    PHYSICAL_PARAMETER_(POSTURE,"posture",Posture,float) \
+    PHYSICAL_PARAMETER_(HEART_RATE, "heart-rate", HeartRate, float) \
 
 typedef enum {
 #define PHYSICAL_PARAMETER_(x,y,z,w)  PHYSICAL_PARAMETER_##x,
@@ -200,5 +215,127 @@ extern int android_physical_model_record_ground_truth(const char* file_name);
 
 // Stop recording ground truth.
 extern int android_physical_model_stop_recording();
+
+extern void android_hw_sensor_set_window_agent(void* agent);
+
+/* Foldable state */
+
+#define ANDROID_FOLDABLE_MAX_HINGES 3
+#define ANDROID_FOLDABLE_MAX_ROLLS 2
+#if ANDROID_FOLDABLE_MAX_HINGES > ANDROID_FOLDABLE_MAX_ROLLS
+#define ANDROID_FOLDABLE_MAX_HINGES_ROLLS ANDROID_FOLDABLE_MAX_HINGES
+#else
+#define ANDROID_FOLDABLE_MAX_HINGES_ROLLS ANDROID_FOLDABLE_MAX_ROLLS
+#endif
+#define ANDROID_FOLDABLE_MAX_DISPLAY_REGIONS 3
+
+enum FoldablePostures {
+    POSTURE_UNKNOWN = 0,
+    POSTURE_CLOSED = 1,
+    POSTURE_HALF_OPENED = 2,
+    POSTURE_OPENED = 3,
+    POSTURE_FLIPPED = 4,
+    POSTURE_TENT = 5,
+    POSTURE_MAX
+};
+
+struct AnglesToPosture {
+    struct {
+        float left;
+        float right;
+        float default_value;
+    } angles[ANDROID_FOLDABLE_MAX_HINGES_ROLLS];
+    enum FoldablePostures posture;
+};
+
+enum FoldableDisplayType {
+    // Horizontal split means something like a laptop, i.e.
+    // |-----| Camera is here
+    // | top |
+    // |-----| hinge 0
+    // |     |
+    // |-----| hinge 1
+    // |     |
+    // |-----|
+    ANDROID_FOLDABLE_HORIZONTAL_SPLIT = 0,
+
+    // Vertical split is left to right, rotated version of horizontal split:
+    // |-camera|-------|------|-------|
+    // |       |       |      |       |
+    // |       |       |      |       |
+    // |-------|-------|------|-------|
+    // hinge:  0       1      2
+    // |-----|
+    // | top |
+    // |-----| hinge 0
+    // |     |
+    // |-----| hinge 1
+    // |     |
+    // |-----|
+    ANDROID_FOLDABLE_VERTICAL_SPLIT = 1,
+
+    // Roll configurations (essentially the # hinges are infinite,
+    // representable via separate parameters)
+    ANDROID_FOLDABLE_HORIZONTAL_ROLL = 2,
+    ANDROID_FOLDABLE_VERTICAL_ROLL = 3,
+    ANDROID_FOLDABLE_TYPE_MAX
+};
+
+enum FoldableHingeSubType {
+    ANDROID_FOLDABLE_HINGE_FOLD = 0,
+    ANDROID_FOLDABLE_HINGE_HINGE = 1,
+    ANDROID_FOLDABLE_HINGE_SUB_TYPE_MAX
+};
+
+struct FoldableHingeParameters {
+    int x, y, width, height;
+    int displayId;
+    float minDegrees;
+    float maxDegrees;
+    float defaultDegrees;
+};
+
+struct RollableParameters {
+    float rollRadiusAsDisplayPercent; // % of display height (horiz. roll) or display width (vertical roll) that determines the radius of the rollable
+    int displayId;
+    float minRolledPercent;
+    float maxRolledPercent;
+    float defaultRolledPercent;
+    int direction;
+};
+
+struct FoldableConfig {
+    enum FoldableDisplayType type;
+    enum FoldableHingeSubType hingesSubType;
+    bool supportedFoldablePostures[POSTURE_MAX];
+
+    // For hinges only
+    int numHinges;
+    enum FoldablePostures foldAtPosture;
+    struct FoldableHingeParameters hingeParams[ANDROID_FOLDABLE_MAX_HINGES];
+    // For rollables only
+    int numRolls;
+    enum FoldablePostures resizeAtPosture[ANDROID_FOLDABLE_MAX_DISPLAY_REGIONS];
+    struct RollableParameters rollableParams[ANDROID_FOLDABLE_MAX_ROLLS];
+};
+
+struct FoldableState {
+    struct FoldableConfig config;
+    float currentHingeDegrees[ANDROID_FOLDABLE_MAX_HINGES];
+    float currentRolledPercent[ANDROID_FOLDABLE_MAX_ROLLS];
+    enum FoldablePostures currentPosture;
+};
+
+int android_foldable_get_state(struct FoldableState* state);
+bool android_foldable_hinge_configured();
+bool android_foldable_any_folded_area_configured();
+bool android_foldable_folded_area_configured(int area);
+bool android_foldable_is_folded();
+bool android_foldable_fold();
+bool android_foldable_unfold();
+bool android_foldable_get_folded_area(int* x, int* y, int* w, int* h);
+bool android_foldable_rollable_configured();
+bool android_hw_sensors_is_loading_snapshot();
+bool android_heart_rate_sensor_configured();
 
 ANDROID_END_HEADER

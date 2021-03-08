@@ -12,11 +12,18 @@
 #pragma once
 
 #include "android/utils/compiler.h"
+#include <stdint.h>
 
 ANDROID_BEGIN_HEADER
 
 // Get the access rules given by |name| if they exist, otherwise returns NULL
-const char* sim_get_access_rules(const char* name);
+// caller should free the string
+char* sim_get_access_rules(const char* name);
+
+// Get the file control parameters assosicated with the file id if they exist,
+// otherwise returns NULL
+// caller should free the string
+char* sim_get_fcp(uint16_t file_id);
 
 ANDROID_END_HEADER
 

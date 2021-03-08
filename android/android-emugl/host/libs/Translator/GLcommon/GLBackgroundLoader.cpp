@@ -32,12 +32,26 @@ intptr_t GLBackgroundLoader::main() {
     const auto start = get_uptime_ms();
     printf("Starting GL background loading at %" PRIu64 " ms\n", start);
 #endif
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     if (s_context == EGL_NO_CONTEXT) {
         if (!m_eglIface.createAndBindAuxiliaryContext(&s_context, &s_surface)) {
             return 0;
         }
     } else {
         m_eglIface.bindAuxiliaryContext(s_context, s_surface);
+=======
+
+    if (s_context == EGL_NO_CONTEXT) {
+        if (!m_eglIface.createAndBindAuxiliaryContext(&s_context, &s_surface)) {
+            return 0;
+        }
+    } else {
+        // In unit tests, we might have torn down EGL. Check for stale
+        // context and surface, and recreate them if that happened.
+        if (!m_eglIface.bindAuxiliaryContext(s_context, s_surface)) {
+            m_eglIface.createAndBindAuxiliaryContext(&s_context, &s_surface);
+        }
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     }
 
     for (const auto& it : m_textureMap) {

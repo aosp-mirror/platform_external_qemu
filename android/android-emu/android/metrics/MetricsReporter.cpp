@@ -8,31 +8,33 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
 #include "android/metrics/MetricsReporter.h"
 
-#include "android/base/threads/Async.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/Uuid.h"
-#include "android/cmdline-option.h"
-#include "android/metrics/AsyncMetricsReporter.h"
-#include "android/metrics/CrashMetricsReporting.h"
-#include "android/metrics/FileMetricsWriter.h"
-#include "android/metrics/MetricsPaths.h"
-#include "android/metrics/NullMetricsReporter.h"
-#include "android/metrics/StudioConfig.h"
-#include "android/metrics/TextMetricsWriter.h"
-#include "android/utils/debug.h"
+#include <assert.h>                                    // for assert
+#include <stdio.h>                                     // for FILE, stdout
+#include <type_traits>                                 // for swap, integral...
+#include <utility>                                     // for move
 
-#include "android/metrics/proto/clientanalytics.pb.h"
-#include "android/metrics/proto/studio_stats.pb.h"
-
-
-#include "picosha2.h"
-
-#include <stdio.h>
-#include <type_traits>
+#include "android/base/Optional.h"                     // for Optional
+#include "android/base/async/ThreadLooper.h"           // for ThreadLooper
+#include "android/base/files/PathUtils.h"              // for pj
+#include "android/base/files/StdioStream.h"            // for StdioStream
+#include "android/base/memory/LazyInstance.h"          // for LazyInstance
+#include "android/base/threads/Async.h"                // for async
+#include "android/cmdline-option.h"                    // for AndroidOptions
+#include "android/metrics/AsyncMetricsReporter.h"      // for AsyncMetricsRe...
+#include "android/metrics/CrashMetricsReporting.h"     // for reportCrashMet...
+#include "android/metrics/FileMetricsWriter.h"         // for FileMetricsWriter
+#include "android/metrics/MetricsPaths.h"              // for getSpoolDirectory
+#include "android/metrics/NullMetricsReporter.h"       // for NullMetricsRep...
+#include "android/metrics/PlaystoreMetricsWriter.h"    // for PlaystoreMetri...
+#include "android/metrics/StudioConfig.h"              // for getAnonymizati...
+#include "android/metrics/TextMetricsWriter.h"         // for TextMetricsWriter
+#include "google_logs_publishing.pb.h"  // for LogEvent
+#include "studio_stats.pb.h"     // for AndroidStudioE...
+#include "android/utils/debug.h"                       // for dwarning
+#include "android/utils/file_io.h"                     // for android_fopen
+#include "picosha2.h"                                  // for hash256_one_by...
 
 using android::base::System;
 
@@ -76,6 +78,11 @@ static base::LazyInstance<ReporterHolder> sInstance = {};
 
 }  // namespace
 
+// Used by unit tests.
+void set_unittest_Reporter(MetricsReporter::Ptr newPtr) {
+    sInstance->reset(std::move(newPtr));
+}
+
 void MetricsReporter::start(const std::string& sessionId,
                             base::StringView emulatorVersion,
                             base::StringView emulatorFullVersion,
@@ -83,8 +90,12 @@ void MetricsReporter::start(const std::string& sessionId,
     MetricsWriter::Ptr writer;
     if (android_cmdLineOptions->metrics_to_console) {
         writer = TextMetricsWriter::create(base::StdioStream(stdout));
+    } else if (android_cmdLineOptions->metrics_collection) {
+        writer = PlaystoreMetricsWriter::create(sessionId,
+        base::pj(getSpoolDirectory(), "backoff_cookie.proto"));
     } else if (android_cmdLineOptions->metrics_to_file != nullptr) {
-        if (FILE* out = ::fopen(android_cmdLineOptions->metrics_to_file, "w")) {
+        if (FILE* out = ::android_fopen(android_cmdLineOptions->metrics_to_file,
+                                        "w")) {
             writer = TextMetricsWriter::create(
                     base::StdioStream(out, base::StdioStream::kOwner));
         } else {
@@ -116,14 +127,22 @@ void MetricsReporter::start(const std::string& sessionId,
 }
 
 void MetricsReporter::stop(MetricsStopReason reason) {
+    for (const auto& callback : sInstance->reporter().mOnExit) {
+        sInstance->reporter().report(callback);
+    }
     sInstance->reporter().report(
-                [reason](android_studio::AndroidStudioEvent* event) {
-                    int crashCount = reason != METRICS_STOP_GRACEFUL ? 1 : 0;
-                    event->mutable_emulator_details()->set_crashes(crashCount);
-                });
+            [reason](android_studio::AndroidStudioEvent* event) {
+                int crashCount = reason != METRICS_STOP_GRACEFUL ? 1 : 0;
+                event->mutable_emulator_details()->set_crashes(crashCount);
+            });
     sInstance->reset({});
 }
 
+void MetricsReporter::reportOnExit(Callback callback) {
+    if (callback) {
+        mOnExit.push_back(callback);
+    }
+}
 MetricsReporter& MetricsReporter::get() {
     return sInstance->reporter();
 }
@@ -138,7 +157,8 @@ void MetricsReporter::report(Callback callback) {
     });
 }
 
-MetricsReporter::MetricsReporter(bool enabled, MetricsWriter::Ptr writer,
+MetricsReporter::MetricsReporter(bool enabled,
+                                 MetricsWriter::Ptr writer,
                                  base::StringView emulatorVersion,
                                  base::StringView emulatorFullVersion,
                                  base::StringView qemuVersion)
@@ -174,16 +194,14 @@ std::string MetricsReporter::anonymize(base::StringView s) {
 }
 
 const base::System::Duration MetricsReporter::getStartTimeMs() {
-  return mStartTimeMs;
+    return mStartTimeMs;
 }
 
-void MetricsReporter::sendToWriter(
-        android_studio::AndroidStudioEvent* event) {
+void MetricsReporter::sendToWriter(android_studio::AndroidStudioEvent* event) {
     wireless_android_play_playlog::LogEvent logEvent;
 
     const auto timeMs = System::get()->getUnixTimeUs() / 1000;
     logEvent.set_event_time_ms(timeMs);
-    logEvent.set_event_uptime_ms(timeMs - mStartTimeMs);
 
     if (!event->has_kind()) {
         event->set_kind(android_studio::AndroidStudioEvent::EMULATOR_PING);
@@ -220,7 +238,7 @@ std::string MetricsReporter::salt() {
     base::AutoLock lock(mSaltLock);
     if (mSalt.empty() || modTime.valueOr(0) != mSaltFileTime) {
         auto salt = studio::getAnonymizationSalt();
-        mSaltFileTime = *modTime;
+        mSaltFileTime = modTime.valueOr(0);
         mSalt = std::move(salt);
     }
     return mSalt;

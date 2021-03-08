@@ -9,11 +9,21 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+#include <QtCore/qglobal.h>
+#include <qapplication.h>
+#include <qloggingcategory.h>
+#include <qmenu.h>
+#include <qnamespace.h>
+#include <qwindowdefs.h>
 #include <stdio.h>
+#include <stdlib.h>
 #ifdef CONFIG_POSIX
 #include <pthread.h>
+#include <sys/signal.h>
+#include <unistd.h>
 #endif
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
@@ -32,18 +42,60 @@
 #include "android/main-common-ui.h"
 
 #include <QtCore>
+=======
+#include <QAction>
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 #include <QApplication>
+#include <QByteArray>
 #include <QCoreApplication>
-#include <QDesktopWidget>
-#include <QFontDatabase>
 #include <QMenu>
 #include <QMenuBar>
+#include <QMessageLogContext>
+#include <QObject>
 #include <QRect>
 #include <QSemaphore>
+#include <QSettings>
+#include <QString>
+#include <QStringList>
 #include <QThread>
-#include <QWidget>
-
+#include <QVariant>
+#include <cstdint>
+#include <functional>
+#include <memory>
 #include <string>
+#include <vector>
+
+#include "android/base/Log.h"
+#include "android/base/threads/Thread.h"
+#include "android/cmdline-option.h"
+#include "android/emulation/control/multi_display_agent.h"
+#include "android/emulation/MultiDisplay.h"
+#include "android/globals.h"
+#include "android/location/MapsKey.h"
+#include "android/qt/qt_path.h"
+#include "android/skin/qt/QtLogger.h"
+#include "android/skin/qt/emulator-no-qt-no-window.h"
+#include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/error-dialog.h"
+#include "android/skin/qt/extended-pages/snapshot-page.h"
+#include "android/skin/qt/init-qt.h"
+#include "android/skin/qt/logging-category.h"
+#include "android/skin/qt/native-event-filter-factory.h"
+#include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/tool-window.h"
+#include "android/skin/rect.h"
+#include "android/skin/winsys.h"
+#include "android/ui-emu-agent.h"
+
+class QAction;
+class QCoreApplication;
+class QMenuBar;
+class QString;
+namespace android {
+namespace base {
+class System;
+}  // namespace base
+}  // namespace android
 
 #ifdef Q_OS_LINUX
 // This include needs to be after all the Qt includes
@@ -53,11 +105,16 @@
 #endif
 
 #ifdef _WIN32
-#include <windows.h>
 #include <shellapi.h>
+#include <windows.h>
+#include "android/base/system/Win32UnicodeString.h"
 #endif
 
 #ifdef __APPLE__
+#include <ApplicationServices/ApplicationServices.h>
+#endif
+
+#ifdef CONFIG_POSIX
 #include <signal.h>
 #endif
 
@@ -75,6 +132,8 @@ using android::base::Win32UnicodeString;
 #else
 #define  D(...)   ((void)0)
 #endif
+
+Q_LOGGING_CATEGORY(emu, "android.emu")
 
 struct GlobalState {
     int argc;
@@ -103,6 +162,13 @@ static bool sMainLoopShouldExit = false;
 static HANDLE sWakeEvent;
 #endif
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+#ifdef Q_OS_LINUX
+static Display *s_display = NULL;
+#endif
+
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 static void enableSigChild() {
     // The issue only occurs on Darwin so to be safe just do this on Darwin
     // to prevent potential issues. The function exists on all platforms to
@@ -179,6 +245,12 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
         // signal will not be emitted from QProcess.
         enableSigChild();
         GlobalState* g = globalState();
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+        g->app->installNativeEventFilter(
+                NativeEventFilterFactory::getEventFilter());
+
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
         g->app->exec();
         D("Finished QT main loop\n");
     }
@@ -186,19 +258,47 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
 
 extern void skin_winsys_get_monitor_rect(SkinRect *rect)
 {
-    QRect qrect;
-    QSemaphore semaphore;
+    D("skin_winsys_get_monitor_rect: begin\n");
+    bool haveScreenRect = false;
+    D("skin_winsys_get_monitor_rect: get Qt window\n");
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
-    if (window == NULL) {
-        D("%s: Could not get window handle", __FUNCTION__);
-        return;
+    D("skin_winsys_get_monitor_rect: get Qt window (done)\n");
+    // Qt method of getting screen dimensions is unreliable.
+    // Use platform-specific queries.
+    if (!rect) return;
+    rect->pos.x = 0;
+    rect->pos.y = 0;
+    D("skin_winsys_get_monitor_rect: Begin calling platform specific display queries.\n");
+#if defined(_WIN32)
+    D("skin_winsys_get_monitor_rect: Windows: GetSystemMetrics(SM_CXSCREEN)\n");
+    rect->size.w = (int)GetSystemMetrics(SM_CXSCREEN);
+    D("skin_winsys_get_monitor_rect: Windows: GetSystemMetrics(SM_CYSCREEN)\n");
+    rect->size.h = (int)GetSystemMetrics(SM_CYSCREEN);
+#elif defined(__APPLE__)
+    D("skin_winsys_get_monitor_rect: macOS: CGMainDisplayID()\n");
+    int displayId = CGMainDisplayID();
+    D("skin_winsys_get_monitor_rect: macOS: CGDisplayPixelsWide()\n");
+    rect->size.w = CGDisplayPixelsWide(displayId);
+    D("skin_winsys_get_monitor_rect: macOS: CGDisplayPixelsHigh()\n");
+    rect->size.h = CGDisplayPixelsHigh(displayId);
+#else // Linux
+    D("skin_winsys_get_monitor_rect: Linux: XOpenDisplay(NULL)\n");
+    if (!s_display) {
+        s_display = XOpenDisplay(NULL);
     }
-    window->getScreenDimensions(&qrect, &semaphore);
-    semaphore.acquire();
-    rect->pos.x = qrect.left();
-    rect->pos.y = qrect.top();
-    rect->size.w = qrect.width();
-    rect->size.h = qrect.height();
+    D("skin_winsys_get_monitor_rect: Linux: XOpenDisplay(NULL) (done)\n");
+    if (s_display) {
+        D("skin_winsys_get_monitor_rect: Linux: "
+          "DefaultScreenOfDisplay(s_display)\n");
+        Screen* defaultScreen = DefaultScreenOfDisplay(s_display);
+        D("skin_winsys_get_monitor_rect: Linux: "
+          "DefaultScreenOfDisplay(s_display) (done)\n");
+        if (defaultScreen) {
+            rect->size.w = defaultScreen->width;
+            rect->size.h = defaultScreen->height;
+        }
+    }
+#endif
     D("%s: (%d,%d) %dx%d", __FUNCTION__, rect->pos.x, rect->pos.y,
       rect->size.w, rect->size.h);
 }
@@ -293,13 +393,13 @@ extern void skin_winsys_get_frame_pos(int *x, int *y)
 
 extern bool skin_winsys_window_has_frame()
 {
-    QSemaphore semaphore;
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return false;
     }
     bool hasFrame;
+    QSemaphore semaphore;
     window->windowHasFrame(&hasFrame, &semaphore);
     semaphore.acquire();
 
@@ -401,7 +501,10 @@ extern void skin_winsys_quit_request()
     if (auto window = EmulatorQtWindow::getInstance()) {
         window->requestClose();
     } else if (auto nowindow = EmulatorNoQtNoWindow::getInstance()){
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
         (void)nowindow;
+=======
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
         sMainLoopShouldExit = true;
 #ifdef _WIN32
         if ( !SetEvent(sWakeEvent) ) {
@@ -433,6 +536,11 @@ void skin_winsys_destroy() {
 #else
     delete globalState()->app;
     globalState()->app = nullptr;
+#endif
+
+#ifdef Q_OS_LINUX
+    if (s_display)
+        XCloseDisplay(s_display);
 #endif
 }
 
@@ -574,6 +682,20 @@ extern void skin_winsys_spawn_thread(bool no_window,
     }
 }
 
+extern void skin_winsys_touch_qt_extended_virtual_sensors(void) {
+    EmulatorQtWindow* qtWindow = EmulatorQtWindow::getInstance();
+    if (qtWindow == nullptr) return;
+
+    qtWindow->runOnUiThread([qtWindow]() {
+        ToolWindow* toolWindow = qtWindow->toolWindow();
+        if (toolWindow == nullptr) {
+            D("%s: toolWindow null", __FUNCTION__);
+            return;
+        }
+        toolWindow->touchExtendedWindow();
+    });
+}
+
 void skin_winsys_setup_library_paths() {
     // Make Qt look at the libraries within this installation
     // Despite the fact that we added the plugins directory to the environment
@@ -608,11 +730,9 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
         q->write("Info: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
         break;
     case QtWarningMsg:
-        fprintf(stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
         q->write("Warning: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
         break;
     case QtCriticalMsg:
-        fprintf(stderr, "Critical: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
         q->write("Critical: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
         break;
     case QtFatalMsg:
@@ -636,6 +756,14 @@ extern int skin_winsys_snapshot_control_start() {
     return g->app->exec();
 }
 
+static void initUserGoogleMapKeys() {
+    auto mapsKeyHolder = android::location::MapsKey::get();
+
+    if (android_cmdLineOptions && android_cmdLineOptions->google_maps_key) {
+        mapsKeyHolder->setUserMapsKey(android_cmdLineOptions->google_maps_key);
+    }
+}
+
 extern void skin_winsys_start(bool no_window) {
     GlobalState* g = globalState();
 #ifdef Q_OS_LINUX
@@ -647,6 +775,7 @@ extern void skin_winsys_start(bool no_window) {
     skin_winsys_setup_library_paths();
 
     qInstallMessageHandler(myMessageOutput);
+    initUserGoogleMapKeys();
     if (no_window) {
         g->app = nullptr;
         EmulatorNoQtNoWindow::create();
@@ -684,6 +813,9 @@ extern void skin_winsys_start(bool no_window) {
         quitMenu->addAction(quitAction);
         mainBar->addMenu(quitMenu);
         qt_mac_set_dock_menu(quitMenu);
+        // Hide icon on macOS dock in embedded emulator mode.
+        if (android_cmdLineOptions->qt_hide_window)
+            System::get()->hideDockIcon();
 #endif
     }
 }
@@ -698,10 +830,16 @@ void skin_winsys_run_ui_update(SkinGenericFunction f, void* data,
     }
     if (wait) {
         QSemaphore semaphore;
-        window->runOnUiThread([f, data]() { f(data); }, &semaphore);
+        window->runOnUiThread([f, data]() {
+            android::base::setUiThreadId(android::base::getCurrentThreadId());
+            f(data);
+        }, &semaphore);
         semaphore.acquire();
     } else {
-        window->runOnUiThread([f, data]() { f(data); }, nullptr);
+        window->runOnUiThread([f, data]() {
+            android::base::setUiThreadId(android::base::getCurrentThreadId());
+            f(data);
+        }, nullptr);
     }
 }
 extern void skin_winsys_error_dialog(const char* message, const char* title) {
@@ -755,43 +893,3 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
 void skin_winsys_report_entering_main_loop(void) {
     ToolWindow::onMainLoopStart();
 }
-
-#ifdef _WIN32
-extern "C" int qt_main(int, char**);
-
-int qMain(int argc, char** argv) {
-    // The arguments coming in here are encoded in whatever local code page
-    // Windows is configured with but we need them to be UTF-8 encoded. So we
-    // use GetCommandLineW and CommandLineToArgvW to get a UTF-16 encoded argv
-    // which we then convert to UTF-8.
-    //
-    // According to the Qt documentation Qt itself doesn't really care about
-    // these as it also uses GetCommandLineW on Windows so this shouldn't cause
-    // problems for Qt. But the emulator uses argv[0] to determine the path of
-    // the emulator executable so we need that to be encoded correctly.
-    int numArgs = 0;
-    const auto wideArgv = android::base::makeCustomScopedPtr(
-                        CommandLineToArgvW(GetCommandLineW(), &numArgs),
-                        [](wchar_t** ptr) { LocalFree(ptr); });
-    if (!wideArgv) {
-        // If this fails we can at least give it a try with the local code page
-        // As long as there are only ANSI characters in the arguments this works
-        return qt_main(argc, argv);
-    }
-
-    // Store converted strings and pointers to those strings, the pointers are
-    // what will become the argv for qt_main.
-    // Also reserve a slot for an array null-terminator as QEMU command line
-    // parsing code relies on it (and it's a part of C Standard, actually).
-    std::vector<std::string> arguments(numArgs);
-    std::vector<char*> argumentPointers(numArgs + 1);
-
-    for (int i = 0; i < numArgs; ++i) {
-        arguments[i] = Win32UnicodeString::convertToUtf8(wideArgv.get()[i]);
-        argumentPointers[i] = &arguments[i].front();
-    }
-    argumentPointers.back() = nullptr;
-
-    return qt_main(numArgs, argumentPointers.data());
-}
-#endif  // _WIN32

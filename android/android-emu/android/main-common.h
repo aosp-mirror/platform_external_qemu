@@ -16,6 +16,7 @@
 #include "android/avd/info.h"
 #include "android/cpu_accelerator.h"
 #include "android/cmdline-option.h"
+#include "android/emulation/control/vm_operations.h"
 #include "android/opengl/emugl_config.h"
 #include "android/skin/winsys.h"
 #include "android/utils/aconfig-file.h"
@@ -84,8 +85,12 @@ typedef struct {
     SelectedRenderer selectedRenderer;
 } RendererConfig;
 // Function itself:
+
 bool configAndStartRenderer(
          AvdInfo* avd, AndroidOptions* opt, AndroidHwConfig* hw,
+         const struct QAndroidVmOperations *vm_operations,
+         const struct QAndroidEmulatorWindowAgent *window_agent,
+         const struct QAndroidMultiDisplayAgent *multi_display_agent,
          enum WinsysPreferredGlesBackend uiPreferredBackend,
          RendererConfig* config_out);
 

@@ -14,6 +14,10 @@
 #include "RendererImpl.h"
 
 #include "RenderChannelImpl.h"
+#include "RenderThread.h"
+
+#include "android/base/system/System.h"
+#include "android/utils/debug.h"
 
 #include "emugl/common/logging.h"
 #include "ErrorLog.h"
@@ -97,6 +101,10 @@ RendererImpl::~RendererImpl() {
 }
 
 bool RendererImpl::initialize(int width, int height, bool useSubWindow, bool egl2egl) {
+    if (android::base::System::get()->envGet("ANDROID_EMUGL_VERBOSE") == "1") {
+        base_enable_verbose_logs();
+    }
+
     if (mRenderWindow) {
         return false;
     }
@@ -226,6 +234,41 @@ RenderChannelPtr RendererImpl::createRenderChannel(
     return channel;
 }
 
+void* RendererImpl::addressSpaceGraphicsConsumerCreate(
+    struct asg_context context,
+    android::base::Stream* loadStream,
+    android::emulation::asg::ConsumerCallbacks callbacks) {
+    auto thread = new RenderThread(context, loadStream, callbacks);
+    thread->start();
+    return (void*)thread;
+}
+
+void RendererImpl::addressSpaceGraphicsConsumerDestroy(void* consumer) {
+    RenderThread* thread = (RenderThread*)consumer;
+    thread->wait();
+    delete thread;
+}
+
+void RendererImpl::addressSpaceGraphicsConsumerPreSave(void* consumer) {
+    RenderThread* thread = (RenderThread*)consumer;
+    thread->pausePreSnapshot();
+}
+
+void RendererImpl::addressSpaceGraphicsConsumerSave(void* consumer, android::base::Stream* stream) {
+    RenderThread* thread = (RenderThread*)consumer;
+    thread->save(stream);
+}
+
+void RendererImpl::addressSpaceGraphicsConsumerPostSave(void* consumer) {
+    RenderThread* thread = (RenderThread*)consumer;
+    thread->resume();
+}
+
+void RendererImpl::addressSpaceGraphicsConsumerRegisterPostLoadRenderThread(void* consumer) {
+    RenderThread* thread = (RenderThread*)consumer;
+    mAdditionalPostLoadRenderThreads.push_back(thread);
+}
+
 void RendererImpl::pauseAllPreSave() {
     android::base::AutoLock lock(mChannelsLock);
     if (mStopped) {
@@ -247,6 +290,11 @@ void RendererImpl::resumeAll() {
         for (const auto& c : mChannels) {
             c->renderThread()->resume();
         }
+
+        for (const auto t: mAdditionalPostLoadRenderThreads) {
+            t->resume();
+        }
+        mAdditionalPostLoadRenderThreads.clear();
     }
 
     repaintOpenGLDisplay();
@@ -302,9 +350,36 @@ void RendererImpl::fillGLESUsages(android_studio::EmulatorGLESUsages* usages) {
 }
 
 void RendererImpl::getScreenshot(unsigned int nChannels, unsigned int* width,
-        unsigned int* height, std::vector<unsigned char>& pixels) {
+        unsigned int* height, std::vector<unsigned char>& pixels, int displayId,
+        int desiredWidth, int desiredHeight, SkinRotation desiredRotation) {
     auto fb = FrameBuffer::getFB();
-    if (fb) fb->getScreenshot(nChannels, width, height, pixels);
+    if (fb) fb->getScreenshot(nChannels, width, height, pixels, displayId,
+                              desiredWidth, desiredHeight, desiredRotation);
+}
+
+void RendererImpl::setMultiDisplay(uint32_t id,
+                                   int32_t x,
+                                   int32_t y,
+                                   uint32_t w,
+                                   uint32_t h,
+                                   uint32_t dpi,
+                                   bool add) {
+    auto fb = FrameBuffer::getFB();
+    if (fb) {
+        if (add) {
+            fb->createDisplay(&id);
+            fb->setDisplayPose(id, x, y, w, h, dpi);
+        } else {
+            fb->destroyDisplay(id);
+        }
+    }
+}
+
+void RendererImpl::setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) {
+    auto fb = FrameBuffer::getFB();
+    if (fb) {
+        fb->setDisplayColorBuffer(id, cb);
+    }
 }
 
 RendererImpl::HardwareStrings RendererImpl::getHardwareStrings() {
@@ -324,9 +399,11 @@ RendererImpl::HardwareStrings RendererImpl::getHardwareStrings() {
 }
 
 void RendererImpl::setPostCallback(RendererImpl::OnPostCallback onPost,
-                                   void* context) {
+                                   void* context,
+                                   bool useBgraReadback,
+                                   uint32_t displayId) {
     assert(mRenderWindow);
-    mRenderWindow->setPostCallback(onPost, context);
+    mRenderWindow->setPostCallback(onPost, context, displayId, useBgraReadback);
 }
 
 bool RendererImpl::asyncReadbackSupported() {
@@ -340,6 +417,12 @@ RendererImpl::getReadPixelsCallback() {
     return mRenderWindow->getReadPixelsCallback();
 }
 
+RendererImpl::FlushReadPixelPipeline
+RendererImpl::getFlushReadPixelPipeline() {
+    assert(mRenderWindow);
+    return mRenderWindow->getFlushReadPixelPipeline();
+}
+
 bool RendererImpl::showOpenGLSubwindow(FBNativeWindowType window,
                                        int wx,
                                        int wy,
@@ -349,10 +432,11 @@ bool RendererImpl::showOpenGLSubwindow(FBNativeWindowType window,
                                        int fbh,
                                        float dpr,
                                        float zRot,
-                                       bool deleteExisting) {
+                                       bool deleteExisting,
+                                       bool hideWindow) {
     assert(mRenderWindow);
     return mRenderWindow->setupSubWindow(window, wx, wy, ww, wh, fbw, fbh, dpr,
-                                         zRot, deleteExisting);
+                                         zRot, deleteExisting, hideWindow);
 }
 
 bool RendererImpl::destroyOpenGLSubwindow() {
@@ -395,6 +479,123 @@ void RendererImpl::setScreenMask(int width, int height, const unsigned char* rgb
 
 void RendererImpl::cleanupProcGLObjects(uint64_t puid) {
     mCleanupThread->cleanup(puid);
+}
+
+static struct AndroidVirtioGpuOps sVirtioGpuOps = {
+        .create_color_buffer_with_handle =
+                [](uint32_t width,
+                   uint32_t height,
+                   uint32_t format,
+                   uint32_t fwkFormat,
+                   uint32_t handle) {
+                    FrameBuffer::getFB()->createColorBufferWithHandle(
+                            width, height, (GLenum)format,
+                            (FrameworkFormat)fwkFormat, handle);
+                },
+        .open_color_buffer =
+                [](uint32_t handle) {
+                    FrameBuffer::getFB()->openColorBuffer(handle);
+                },
+        .close_color_buffer =
+                [](uint32_t handle) {
+                    FrameBuffer::getFB()->closeColorBuffer(handle);
+                },
+        .update_color_buffer =
+                [](uint32_t handle,
+                   int x,
+                   int y,
+                   int width,
+                   int height,
+                   uint32_t format,
+                   uint32_t type,
+                   void* pixels) {
+                    FrameBuffer::getFB()->updateColorBuffer(
+                            handle, x, y, width, height, format, type, pixels);
+                },
+        .read_color_buffer =
+                [](uint32_t handle,
+                   int x,
+                   int y,
+                   int width,
+                   int height,
+                   uint32_t format,
+                   uint32_t type,
+                   void* pixels) {
+                    FrameBuffer::getFB()->readColorBuffer(
+                            handle, x, y, width, height, format, type, pixels);
+                },
+        .read_color_buffer_yuv =
+                [](uint32_t handle,
+                   int x,
+                   int y,
+                   int width,
+                   int height,
+                   void* pixels,
+                   uint32_t pixels_size) {
+                    FrameBuffer::getFB()->readColorBufferYUV(
+                            handle, x, y, width, height, pixels, pixels_size);
+                },
+        .post_color_buffer =
+                [](uint32_t handle) { FrameBuffer::getFB()->post(handle); },
+        .repost = []() { FrameBuffer::getFB()->repost(); },
+        .create_yuv_textures =
+                [](uint32_t type,
+                   uint32_t count,
+                   int width,
+                   int height,
+                   uint32_t* output) {
+                    FrameBuffer::getFB()->createYUVTextures(type, count, width,
+                                                            height, output);
+                },
+        .destroy_yuv_textures =
+                [](uint32_t type, uint32_t count, uint32_t* textures) {
+                    FrameBuffer::getFB()->destroyYUVTextures(type, count,
+                                                             textures);
+                },
+        .update_yuv_textures =
+                [](uint32_t type,
+                   uint32_t* textures,
+                   void* privData,
+                   void* func) {
+                    FrameBuffer::getFB()->updateYUVTextures(type, textures,
+                                                            privData, func);
+                },
+        .swap_textures_and_update_color_buffer =
+                [](uint32_t colorbufferhandle,
+                   int x,
+                   int y,
+                   int width,
+                   int height,
+                   uint32_t format,
+                   uint32_t type,
+                   uint32_t texture_type,
+                   uint32_t* textures) {
+                    FrameBuffer::getFB()->swapTexturesAndUpdateColorBuffer(
+                            colorbufferhandle, x, y, width, height, format,
+                            type, texture_type, textures);
+                },
+        .get_last_posted_color_buffer = []() {
+            return FrameBuffer::getFB()->getLastPostedColorBuffer();
+        },
+        .bind_color_buffer_to_texture = [](uint32_t handle) {
+            FrameBuffer::getFB()->bindColorBufferToTexture2(handle);
+        },
+        .get_global_egl_context = []() {
+            return FrameBuffer::getFB()->getGlobalEGLContext();
+        },
+        .wait_for_gpu = [](uint64_t eglsync) {
+            FrameBuffer::getFB()->waitForGpu(eglsync);
+        },
+        .wait_for_gpu_vulkan = [](uint64_t device, uint64_t fence) {
+            FrameBuffer::getFB()->waitForGpuVulkan(device, fence);
+        },
+        .set_guest_managed_color_buffer_lifetime = [](bool guestManaged) {
+            FrameBuffer::getFB()->setGuestManagedColorBufferLifetime(true);
+        },
+};
+
+struct AndroidVirtioGpuOps* RendererImpl::getVirtioGpuOps() {
+    return &sVirtioGpuOps;
 }
 
 void RendererImpl::snapshotOperationCallback(

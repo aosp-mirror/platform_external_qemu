@@ -47,6 +47,7 @@ static bool qemu_serialline_pipe_open(SerialLine** pfirst,
 }
 
 void qemu2_android_serialline_init() {
+
     static const android::SerialLine::Funcs kQemuSerialLineFuncs = {
         .openBuffer = qemu_serialline_buffer_open,
         .openPipe = qemu_serialline_pipe_open

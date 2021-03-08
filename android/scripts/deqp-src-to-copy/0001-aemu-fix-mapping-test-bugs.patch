@@ -1,0 +1,35 @@
+From 76c8147eff0412ec736cbeedb490069a49a5827d Mon Sep 17 00:00:00 2001
+From: Lingfeng Yang <lfy@google.com>
+Date: Wed, 28 Nov 2018 09:09:05 -0800
+Subject: [PATCH] aemu: fix mapping test bugs
+
+Change-Id: Idbb0bc15ac2514e4e6c4ae5a7cbd07dcf23bacfe
+---
+ .../vulkancts/modules/vulkan/memory/vktMemoryMappingTests.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/external/vulkancts/modules/vulkan/memory/vktMemoryMappingTests.cpp b/external/vulkancts/modules/vulkan/memory/vktMemoryMappingTests.cpp
+index 970449092..bc199741b 100644
+--- a/external/vulkancts/modules/vulkan/memory/vktMemoryMappingTests.cpp
++++ b/external/vulkancts/modules/vulkan/memory/vktMemoryMappingTests.cpp
+@@ -697,7 +697,7 @@ tcu::TestStatus testMemoryMapping (Context& context, const TestConfig config)
+ 							DE_NULL,
+ 
+ 							*memory,
+-							(config.flushMappings[ndx].offset % atomSize == 0) ? config.flushMappings[ndx].offset : config.flushMappings[ndx].offset + (atomSize - (config.flushMappings[ndx].offset % atomSize)),
++							(config.flushMappings[ndx].offset % atomSize == 0) ? config.flushMappings[ndx].offset : config.flushMappings[ndx].offset - (config.flushMappings[ndx].offset % atomSize),
+ 							(config.flushMappings[ndx].size % atomSize == 0) ? config.flushMappings[ndx].size : config.flushMappings[ndx].size + (atomSize - (config.flushMappings[ndx].size % atomSize)),
+ 						};
+ 
+@@ -729,7 +729,7 @@ tcu::TestStatus testMemoryMapping (Context& context, const TestConfig config)
+ 							DE_NULL,
+ 
+ 							*memory,
+-							(config.invalidateMappings[ndx].offset % atomSize == 0) ? config.invalidateMappings[ndx].offset : config.invalidateMappings[ndx].offset + (atomSize - (config.invalidateMappings[ndx].offset % atomSize)),
++							(config.invalidateMappings[ndx].offset % atomSize == 0) ? config.invalidateMappings[ndx].offset : config.invalidateMappings[ndx].offset - (config.invalidateMappings[ndx].offset % atomSize),
+ 							(config.invalidateMappings[ndx].size % atomSize == 0) ? config.invalidateMappings[ndx].size : config.invalidateMappings[ndx].size + (atomSize - (config.invalidateMappings[ndx].size % atomSize)),
+ 						};
+ 
+-- 
+2.19.0.605.g01d371f741-goog
+

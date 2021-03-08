@@ -16,6 +16,7 @@
 
 #include "android/base/StringView.h"
 #include "android/base/files/ScopedFd.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/CommonReportedInfo.h"
 #include "android/crashreport/common.h"
 #include "android/crashreport/CrashSystem.h"
@@ -75,6 +76,8 @@ public:
     // Returns false if already attached or if attach fails.
     virtual bool attachCrashHandler(
             const CrashSystem::CrashPipe& crashpipe) = 0;
+    // Attach a simple crash handler that does not talk to other processes
+    virtual bool attachSimpleCrashHandler() = 0;
 
     // Waits for a platform dependent pipe to become valid or timeout occurs.
     // Returns false if timeout occurs.
@@ -156,6 +159,7 @@ private:
 private:
     DISALLOW_COPY_AND_ASSIGN(CrashReporter);
 
+    android::base::Lock mLock;
     std::vector<CrashCallback> mCrashCallbacks;
     const std::string mDumpDir;
     const std::string mDataExchangeDir;

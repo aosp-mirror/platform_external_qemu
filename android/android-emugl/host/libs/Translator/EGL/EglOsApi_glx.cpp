@@ -15,7 +15,6 @@
 */
 #include "EglOsApi.h"
 
-#include "android/base/Profiler.h"
 #include "android/base/synchronization/Lock.h"
 
 #include "CoreProfileConfigs.h"
@@ -34,21 +33,10 @@
 
 #include <unordered_map>
 
-#define PROFILE_SLOW_EGL 0
 #define DEBUG_PBUF_POOL 0
 
-#if PROFILE_SLOW_EGL
-
-// Log everything slower than 6 ms.
-#define PROFILE_SLOW(tag) \
-    android::base::ScopedProfiler __profile_slow(tag, [](const char* tag2, uint64_t elapsed) { \
-            if (elapsed >= 6000) { fprintf(stderr, "%s: slow, %f ms\n", tag2, elapsed / 1000.0f); }}); \
-
-#else
-
+// TODO: Replace with latency tracker.
 #define PROFILE_SLOW(tag)
-
-#endif
 
 namespace {
 
@@ -371,7 +359,7 @@ public:
                               EglOS::AddConfigCallback* addConfigFunc,
                               void* addConfigOpaque) {
         int n;
-        GLXFBConfig* frmtList = glXGetFBConfigs(mDisplay, 0, &n);
+        GLXFBConfig* frmtList = glXGetFBConfigs(mDisplay, DefaultScreen(mDisplay), &n);
         if (frmtList) {
             mFBConfigs.assign(frmtList, frmtList + n);
             for(int i = 0; i < n; i++) {
@@ -585,6 +573,19 @@ public:
                     GlxSurface::drawableFor(draw),
                     GlxSurface::drawableFor(read),
                     GlxContext::contextFor(context));
+            if (mSwapInterval && draw->type() == GlxSurface::SurfaceType::WINDOW) {
+                android::base::AutoLock lock(mPbufLock);
+                auto it = mDisabledVsyncWindows.find(draw);
+                bool notPresent = it == mDisabledVsyncWindows.end();
+                if (notPresent || !it->second) {
+                    mSwapInterval(mDisplay, GlxSurface::drawableFor(draw), 0);
+                    if (notPresent) {
+                        mDisabledVsyncWindows[draw] = true;
+                    } else {
+                        it->second = true;
+                    }
+                }
+            }
         }
         int err = handler.getLastError();
         return (err == 0) && retval;
@@ -599,6 +600,8 @@ public:
 private:
     using CreateContextAttribs =
         GLXContext (*)(X11Display*, GLXFBConfig, GLXContext, Bool, const int*);
+    using SwapInterval =
+        void (*)(X11Display*, GLXDrawable, int);
 
     // Returns the highest level of OpenGL core profile support in
     // this GLX implementation.
@@ -609,8 +612,14 @@ private:
         GlxLibrary* lib = sGlxLibrary.ptr();
         mCreateContextAttribs =
             (CreateContextAttribs)lib->findSymbol("glXCreateContextAttribsARB");
+        mSwapInterval =
+            (SwapInterval)lib->findSymbol("glXSwapIntervalEXT");
 
         if (!mCreateContextAttribs || mFBConfigs.size() == 0) return;
+
+        if (!mSwapInterval) {
+            fprintf(stderr, "%s: swap interval not found\n", __func__);
+        }
 
         // Ascending index order of context attribs :
         // decreasing GL major/minor version
@@ -656,6 +665,7 @@ private:
     }
 
     CreateContextAttribs mCreateContextAttribs = nullptr;
+    SwapInterval mSwapInterval = nullptr;
 
     bool mCoreProfileSupported = false;
     int mCoreMajorVersion = 4;
@@ -668,12 +678,21 @@ private:
     std::unordered_map<GLXFBConfig, std::vector<EglOS::Surface* > > mLivePbufs;
     int mPbufPrimingCount = 8;
     android::base::Lock mPbufLock;
+    std::unordered_map<EglOS::Surface*, bool> mDisabledVsyncWindows;
 };
 
 class GlxEngine : public EglOS::Engine {
 public:
     virtual EglOS::Display* getDefaultDisplay() {
-        return new GlxDisplay(XOpenDisplay(0));
+        Display* disp =
+            XOpenDisplay(0 /* default display or $DISPLAY env var */);
+        if (!disp) {
+            fprintf(stderr,
+                    "GlxEngine%s: Failed to open display 0. DISPLAY: [%s]\n",
+                    __func__, getenv("DISPLAY"));
+            return nullptr;
+        }
+        return new GlxDisplay(disp);
     }
 
     virtual GlLibrary* getGlLibrary() {

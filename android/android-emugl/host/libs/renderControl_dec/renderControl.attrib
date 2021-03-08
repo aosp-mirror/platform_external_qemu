@@ -38,6 +38,10 @@ rcReadColorBuffer
     dir pixels out
     len pixels (((glUtilsPixelBitSize(format, type) * width) >> 3) * height)
 
+rcReadColorBufferYUV
+    dir pixels out
+    len pixels pixels_size
+
 rcUpdateColorBuffer
     dir pixels in
     len pixels (((glUtilsPixelBitSize(format, type) * width) >> 3) * height)
@@ -63,4 +67,37 @@ rcCreateSyncKHR
 rcCompose
     dir buffer in
     len buffer bufferSize
+    flag flushOnEncode
+
+rcCreateDisplay
+    dir displayId out
+    len displayId sizeof(uint32_t)
+
+rcGetDisplayColorBuffer
+    dir colorBuffer out
+    len colorBuffer sizeof(uint32_t)
+
+rcGetColorBufferDisplay
+    dir displayId out
+    len displayId sizeof(uint32_t)
+
+rcGetDisplayPose
+    dir x out
+    len x sizeof(int32_t)
+    dir y out
+    len y sizeof(int32_t)
+    dir w out
+    len w sizeof(uint32_t)
+    dir h out
+    len h sizeof(uint32_t)
+
+rcMakeCurrentAsync
+    flag flushOnEncode
+
+rcComposeAsync
+    dir buffer in
+    len buffer bufferSize
+    flag flushOnEncode
+
+rcDestroySyncKHRAsync
     flag flushOnEncode

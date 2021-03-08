@@ -66,6 +66,49 @@
   X(void, glTexEnviv, (GLenum target, GLenum pname, const GLint * params), (target, pname, params)) \
   X(void, glTranslatef, (GLfloat x, GLfloat y, GLfloat z), (x, y, z)) \
   X(void, glVertexPointer, (GLint size, GLenum type, GLsizei stride, const GLvoid * pointer), (size, type, stride, pointer)) \
+  X(void, glClipPlanef, (GLenum plane, const GLfloat * equation), (plane, equation)) \
+  X(void, glFrustumf, (GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar), (left, right, bottom, top, zNear, zFar)) \
+  X(void, glGetClipPlanef, (GLenum pname, GLfloat eqn[4]), (pname, eqn[4])) \
+  X(void, glOrthof, (GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar), (left, right, bottom, top, zNear, zFar)) \
+  X(void, glAlphaFuncx, (GLenum func, GLclampx ref), (func, ref)) \
+  X(void, glClearColorx, (GLclampx red, GLclampx green, GLclampx blue, GLclampx alpha), (red, green, blue, alpha)) \
+  X(void, glClearDepthx, (GLclampx depth), (depth)) \
+  X(void, glColor4x, (GLfixed red, GLfixed green, GLfixed blue, GLfixed alpha), (red, green, blue, alpha)) \
+  X(void, glDepthRangex, (GLclampx zNear, GLclampx zFar), (zNear, zFar)) \
+  X(void, glFogx, (GLenum pname, GLfixed param), (pname, param)) \
+  X(void, glFogxv, (GLenum pname, const GLfixed * params), (pname, params)) \
+  X(void, glFrustumx, (GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar), (left, right, bottom, top, zNear, zFar)) \
+  X(void, glClipPlanex, (GLenum pname, const GLfixed * eqn), (pname, eqn)) \
+  X(void, glGetFixedv, (GLenum pname, GLfixed * params), (pname, params)) \
+  X(void, glGetLightxv, (GLenum light, GLenum pname, GLfixed * params), (light, pname, params)) \
+  X(void, glGetMaterialxv, (GLenum face, GLenum pname, GLfixed * params), (face, pname, params)) \
+  X(void, glGetTexEnvxv, (GLenum env, GLenum pname, GLfixed * params), (env, pname, params)) \
+  X(void, glGetTexParameterxv, (GLenum target, GLenum pname, GLfixed * params), (target, pname, params)) \
+  X(void, glLightModelx, (GLenum pname, GLfixed param), (pname, param)) \
+  X(void, glLightModelxv, (GLenum pname, const GLfixed * params), (pname, params)) \
+  X(void, glLightx, (GLenum light, GLenum pname, GLfixed param), (light, pname, param)) \
+  X(void, glLightxv, (GLenum light, GLenum pname, const GLfixed * params), (light, pname, params)) \
+  X(void, glLineWidthx, (GLfixed width), (width)) \
+  X(void, glLoadMatrixx, (const GLfixed * m), (m)) \
+  X(void, glMaterialx, (GLenum face, GLenum pname, GLfixed param), (face, pname, param)) \
+  X(void, glMaterialxv, (GLenum face, GLenum pname, const GLfixed * params), (face, pname, params)) \
+  X(void, glMultMatrixx, (const GLfixed * m), (m)) \
+  X(void, glMultiTexCoord4x, (GLenum target, GLfixed s, GLfixed t, GLfixed r, GLfixed q), (target, s, t, r, q)) \
+  X(void, glNormal3x, (GLfixed nx, GLfixed ny, GLfixed nz), (nx, ny, nz)) \
+  X(void, glOrthox, (GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar), (left, right, bottom, top, zNear, zFar)) \
+  X(void, glPointParameterx, (GLenum pname, GLfixed param), (pname, param)) \
+  X(void, glPointParameterxv, (GLenum pname, const GLfixed * params), (pname, params)) \
+  X(void, glPointSizex, (GLfixed size), (size)) \
+  X(void, glPolygonOffsetx, (GLfixed factor, GLfixed units), (factor, units)) \
+  X(void, glRotatex, (GLfixed angle, GLfixed x, GLfixed y, GLfixed z), (angle, x, y, z)) \
+  X(void, glSampleCoveragex, (GLclampx value, GLboolean invert), (value, invert)) \
+  X(void, glScalex, (GLfixed x, GLfixed y, GLfixed z), (x, y, z)) \
+  X(void, glTexEnvx, (GLenum target, GLenum pname, GLfixed param), (target, pname, param)) \
+  X(void, glTexEnvxv, (GLenum target, GLenum pname, const GLfixed * params), (target, pname, params)) \
+  X(void, glTexParameterx, (GLenum target, GLenum pname, GLfixed param), (target, pname, param)) \
+  X(void, glTexParameterxv, (GLenum target, GLenum pname, const GLfixed * params), (target, pname, params)) \
+  X(void, glTranslatex, (GLfixed x, GLfixed y, GLfixed z), (x, y, z)) \
+  X(void, glGetClipPlanex, (GLenum pname, GLfixed eqn[4]), (pname, eqn[4])) \
 
 
 #endif  // GLES1_ONLY_FUNCTIONS_H

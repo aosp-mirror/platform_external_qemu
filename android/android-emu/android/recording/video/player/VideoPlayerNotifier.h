@@ -30,6 +30,7 @@
 // THE SOFTWARE.
 #pragma once
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 #include <functional>
 #include <memory>
 
@@ -63,3 +64,38 @@ protected:
 
 }  // namespace videoplayer
 }  // namespace android
+=======
+#include <functional>  // for function
+
+namespace android {
+namespace videoplayer {
+
+class VideoPlayer;
+
+// Abstract VideoPlayerNotifier class, backing AndroidEmu and Qt impls.
+class VideoPlayerNotifier {
+
+public:
+
+    virtual ~VideoPlayerNotifier() = default;
+
+    using WidgetUpdateCallback = std::function<void()>;
+
+    void setVideoPlayer(VideoPlayer* player) { mPlayer = player; }
+
+    void onVideoRefresh();
+
+    virtual void initTimer() = 0;
+    virtual void startTimer(int delayMs) = 0;
+    virtual void stopTimer() = 0;
+    virtual void emitUpdateWidget() = 0;
+    virtual void emitVideoFinished() = 0;
+    virtual void emitVideoStopped() = 0;
+
+protected:
+    VideoPlayer* mPlayer = nullptr;
+};
+
+}  // namespace videoplayer
+}  // namespace android
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)

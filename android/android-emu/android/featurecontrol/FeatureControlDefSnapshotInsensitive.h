@@ -35,10 +35,13 @@ FEATURE_CONTROL_ITEM(WindowsOnDemandSnapshotLoad)
 FEATURE_CONTROL_ITEM(LocationUiV2)
 FEATURE_CONTROL_ITEM(ScreenRecording)
 FEATURE_CONTROL_ITEM(VirtualScene)
+FEATURE_CONTROL_ITEM(VideoPlayback)
 FEATURE_CONTROL_ITEM(GenericSnapshotsUI)
 // File-backed Quickboot
 FEATURE_CONTROL_ITEM(QuickbootFileBacked)
 // Meta feature which disables a confirmation dialog, does not affect snapshot
 // data
 FEATURE_CONTROL_ITEM(OffworldDisableSecurity)
+FEATURE_CONTROL_ITEM(MacroUi)
+FEATURE_CONTROL_ITEM(IpDisconnectOnLoad)
 // No guest feature flags seem safe to snapshot.

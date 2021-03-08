@@ -38,7 +38,7 @@
 *[ColorGroup="SliderLabel"]  { color: %%TEXT_COLOR%% }
 *[ColorGroup="SmsBox"] { border: 1px solid %%BOX_COLOR%% }
 *[ColorGroup="HorizDivider"] {
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0  %%LARGE_DIVIDER_COLOR%%, stop: 1 %%TAB_SELECTED_COLOR%%);
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0  %%LARGE_DIVIDER_COLOR%%, stop: 1 %%HORIZ_DIVIDER_COLOR%%);
     border: 0px;
 }
 *[ColorGroup="HorizDivider2"] { color: %%TITLE_COLOR%% }
@@ -56,11 +56,63 @@
     background: %%SNAPSHOT_INFO_BKG%%;
     border: 1px solid %%TREE_WIDGET_BORDER%%;
 }
+/*VhalTableSearchFrame and VhalTablePropertyFrame are used in VhalTable, their boder color always same as LIST_WIDGET_BORDER*/
+*[ColorGroup="VhalTableSearchFrame"] {
+    border: 1px solid %%LIST_WIDGET_BORDER%%;
+}
+*[ColorGroup="VhalTablePropertyFrame"] {
+    border: 1px solid %%LIST_WIDGET_BORDER%%;
+    background: %%VHAL_PROPERTY_BKG%%;
+}
+*[ColorGroup="Countdown"] {
+    color: #CA4644;
+}
+*[ColorGroup="RoutePlaybackTitleItem"] {
+    background-color: %%MACRO_BKG_COLOR%%;
+    border: 1px solid %%LIST_WIDGET_BORDER%%;
+}
 *{
     color: %%TEXT_COLOR%%;
     background-color: %%BKG_COLOR%%;
 }
-QGroupBox::title { margin-top: 4px; margin-left: 0px }
+QListWidget {
+    border: 1px solid %%LIST_WIDGET_BORDER%%;
+}
+QListWidget::item {
+    border-bottom: 1px solid %%LIST_WIDGET_BORDER%%;
+}
+QListWidget::item:focus {
+    border: 2px solid %%LIST_WIDGET_BORDER%%;
+}
+QListWidget::item:!selected {
+    background-color: transparent;
+}
+QListWidget::item:selected {
+    border-bottom: 1px solid %%LIST_WIDGET_BORDER%%;
+    background-color: #4285F4;
+}
+
+QListWidget QLabel, QWidget QLabel {
+    background-color: transparent;
+}
+QListWidget QLabel:disabled {
+    color:gray;
+}
+QListWidget QPushButton {
+    background: none;
+    border: none;
+}
+QListWidget[ColorGroup="MultiDisplay"] {
+    border: none;
+}
+QListWidget::item[ColorGroup="MultiDisplay"] {
+    border: none;
+}
+QListWidget::item:focus[ColorGroup="MultiDisplay"], QListWidget::item:selected[ColorGroup="MultiDisplay"] {
+    border: none;
+    background-color: %%BKG_COLOR%%;
+}
+QGroupBox::title { margin-top: 4px; margin-left: 0px; padding-left: 0px; }
 QTextEdit:disabled, QLineEdit:disabled { border: 0px }
 QTextEdit, QLineEdit {
     border-top: 0px;
@@ -74,7 +126,7 @@ QPlainTextEdit:disabled, QPlainTextEdit[readOnly=true] {
     background: transparent
 }
 QPlainTextEdit {
-    background: %%TAB_BKG_COLOR%%;
+    background: %%TEXT_INPUT_BKG%%;
     border: 1px solid %%EDIT_COLOR%%;
 }
 QCheckBox::indicator:checked[ColorGroup="Toggle"] {
@@ -148,6 +200,7 @@ QPushButton:pressed[ColorGroup="MajorTab"] {
 QPushButton:checked[ColorGroup="MajorTab"] {
     border: none;
     background: %%TAB_SELECTED_COLOR%%;
+    color: %%MAJOR_TAB_SELECTED_COLOR%%;
 }
 QPushButton:pressed[ColorGroup="Button"] {
     border: none;
@@ -189,6 +242,7 @@ QTextBrowser, QTableWidget {
     background: %%TAB_BKG_COLOR%%;
     border: 1px solid %%EDIT_COLOR%%;
     alternate-background-color: %%BKG_COLOR%%;
+    selection-background-color: %%TABLE_SELECTED%%;
 }
 QTableView::item {
     padding-left: 16;
@@ -250,23 +304,28 @@ QTabBar::tab:!selected{
     border-bottom: 2px solid %%BKG_COLOR%%;
 }
 QTabBar::tab:disabled {
-    color: transparent;
-    border-bottom: 2px solid transparent
+    color: %%TITLE_COLOR%%;
+    border-bottom: 2px solid %%BKG_COLOR%%;
+}
+QTabBar[ColorGroup="NoHiddenTabOnDisabled"]::tab:disabled {
+    color: %%DISABLED_TITLE_COLOR%%;
+    border-bottom: 2px solid %%DISABLED_BKG_COLOR%%;
 }
 RaisedMaterialButton {
     border-radius: 2px;
     color: %%BUTTON_COLOR%%;
+    border: %%BUTTON_BORDER%%;
 }
 RaisedMaterialButton:pressed {
-    background: %%TAB_DARKENED_COLOR%%;
+    background: %%BUTTON_BKG_PRESSED_COLOR%%;
 }
 RaisedMaterialButton[ColorGroup="RaisedColoredButton"] {
     padding: 0 16px;
     color: %%RAISED_COLORED_COLOR%%;
-    background: %%RAISED_COLORED_BKG_COLOR%%
+    background: %%RAISED_COLORED_BKG_COLOR%%;
 }
 RaisedMaterialButton[ColorGroup="RaisedColoredButton"]:pressed {
-    background: %%RAISED_COLORED_PRESSED_COLOR%%
+    background: %%RAISED_COLORED_PRESSED_COLOR%%;
 }
 QAbstractSpinBox {
     border-top: 0px;
@@ -298,4 +357,7 @@ QToolTip {
     border-style: solid;
     border-width: 2px;
     border-color: %%TOOL_COLOR%%;
+}
+QComboBox[ColorGroup="focused"] {
+  border-bottom: 2px solid %%TOOL_COLOR%%;
 }

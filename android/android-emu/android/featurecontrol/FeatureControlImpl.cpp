@@ -169,15 +169,14 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
                     }
                 }
                 if (unexpectedGuestFeatures.size()) {
-                    fprintf(stderr,
-                            "WARNING: unexpected system image feature string, "
-                            "emulator might not function correctly, "
-                            "please try updating the emulator.\n");
-                    fprintf(stderr, "Unexpected feature list:");
+                    LOG(VERBOSE) << "WARNING: unexpected system image feature string, "
+                           "emulator might not function correctly, "
+                           "please try updating the emulator.\n";
+                    LOG(VERBOSE) << "Unexpected feature list:\n";
                     for (const auto& guestFeature : unexpectedGuestFeatures) {
-                        fprintf(stderr, " %s", guestFeature.c_str());
+                        LOG(VERBOSE) << guestFeature.c_str();
                     }
-                    fprintf(stderr, "\n");
+                    LOG(VERBOSE) << "\n";
                 }
 #define FEATURE_CONTROL_ITEM(item)                                         \
                 initGuestFeatureAndParseDefault(defaultIniHost, defaultIniGuest, item, #item);
@@ -240,6 +239,31 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
     }
 }
 
+void FeatureControlImpl::initNoFiles() {
+    memset(mGuestTriedEnabledFeatures, 0, sizeof(FeatureOption) * Feature_n_items);
+
+    // Apply overrides from the hw config.
+    if (android_hw->hw_featureflags) {
+        parseAndApplyOverrides(android_hw->hw_featureflags);
+    }
+
+    // Enumerate the command line and environment variables to add overrides.
+    const auto envVar =
+            android::base::System::get()->envGet("ANDROID_EMULATOR_FEATURES");
+    if (!envVar.empty()) {
+        parseAndApplyOverrides(envVar);
+    }
+
+    if (android_cmdLineOptions) {
+        if (const ParamList* feature = android_cmdLineOptions->feature) {
+            do {
+                parseAndApplyOverrides(feature->param);
+                feature = feature->next;
+            } while (feature);
+        }
+    }
+}
+
 void FeatureControlImpl::create() {
     if (s_featureControl.hasInstance()) {
         LOG(ERROR) << "Feature control already exists in create() call";
@@ -248,6 +272,12 @@ void FeatureControlImpl::create() {
 }
 
 FeatureControlImpl::FeatureControlImpl() {
+
+    if (base::System::getEnvironmentVariable("ANDROID_EMU_SANDBOX") == "1") {
+        initNoFiles();
+        return;
+    }
+
     const auto updateChannel = studio::updateChannel();
 
     std::string defaultIniHostName;
@@ -277,6 +307,7 @@ FeatureControlImpl::FeatureControlImpl() {
     init(defaultIniHostName, defaultIniGuestName.get(), userIniHostName,
          userIniGuestName);
 
+#ifndef AEMU_MIN
     using android::crashreport::CrashReporter;
     CrashReporter::get()->addCrashCallback([this]() {
         base::ScopedFd file = CrashReporter::get()->openDataAttachFile(
@@ -294,6 +325,7 @@ FeatureControlImpl::FeatureControlImpl() {
                                buffer, std::min<int>(count, sizeof(buffer))));
         }
     });
+#endif
 }
 
 FeatureControlImpl& FeatureControlImpl::get() {

@@ -10,32 +10,65 @@
 // GNU General Public License for more details.
 #include "android/skin/qt/extended-pages/virtual-sensors-page.h"
 
-#include "android/emulation/control/sensors_agent.h"
-#include "android/hw-sensors.h"
-#include "android/metrics/PeriodicReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
-#include "android/physics/GlmHelpers.h"
-#include "android/skin/ui.h"
+#include <math.h>         // for fabs
+#include <qtextstream.h>  // for QTextStream::Fi...
+#include <stdint.h>       // for uint64_t
 
-#include "android/skin/qt/stylesheet.h"
+#include <QDesktopServices>  // for QDesktopServices
+#include <QDoubleSpinBox>    // for QDoubleSpinBox
+#include <QFlags>            // for QFlags
+#include <QLocale>           // for QLocale
+#include <QPoint>
+#include <QRadioButton>            // for QRadioButton
+#include <QStackedWidget>          // for QStackedWidget
+#include <QTabWidget>              // for QTabWidget
+#include <QTextBrowser>            // for QTextBrowser
+#include <QTextStream>             // for QTextStream
+#include <QUrl>                    // for QUrl
+#include <array>                   // for array
+#include <functional>              // for __base
+#include <glm/gtc/quaternion.hpp>  // for tquat
+#include <utility>                 // for make_pair, pair
 
-#include <QDesktopServices>
-#include <QTextStream>
+#include "android/avd/info.h"                         // for avdInfo_getAvdF...
+#include "android/avd/util.h"                         // for AVD_ANDROID_AUTO
+#include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
+#include "android/globals.h"                          // for android_avdInfo
+#include "android/hw-sensors.h"                       // for PHYSICAL_PARAME...
+#include "android/metrics/PeriodicReporter.h"         // for PeriodicReporter
+#include "android/physics/GlmHelpers.h"               // for vecNearEqual
+#include "android/skin/qt/device-3d-widget.h"         // for Device3D...
+#include "android/skin/qt/editable-slider-widget.h"   // for EditableSliderW...
+#include "android/skin/qt/emulator-qt-window.h"       // for EmulatorQtWindow
+#include "android/skin/qt/raised-material-button.h"   // for RaisedMaterialB...
+#include "android/skin/qt/stylesheet.h"               // for stylesheetFontSize
+#include "studio_stats.pb.h"                          // for AndroidStudioEvent
+#include "android/metrics/UiEventTracker.h"          // for UiEventTracker
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
 
 #include <array>
 #include <cassert>
+=======
+class QShowEvent;
+class QWidget;
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 
 constexpr float kMetersPerInch = 0.0254f;
 constexpr uint64_t kMinInteractionTimeMilliseconds = 500;
 
+int kAccelerometerTabIndex = 0;
+
 const QAndroidSensorsAgent* VirtualSensorsPage::sSensorsAgent = nullptr;
 
 VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
-    : QWidget(parent), mUi(new Ui::VirtualSensorsPage()) {
+    : QWidget(parent), mUi(new Ui::VirtualSensorsPage()),
+       mSensorTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::BUTTON_PRESS,
+              android_studio::EmulatorUiEvent::EXTENDED_SENSORS_TAB)) {
     mQAndroidPhysicalStateAgent.onTargetStateChanged = onTargetStateChanged;
     mQAndroidPhysicalStateAgent.onPhysicalStateChanging =
             onPhysicalStateChanging;
@@ -49,6 +82,10 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
     mUi->temperatureSensorValueWidget->setRange(-273.1, 100.0, false);
     mUi->lightSensorValueWidget->setRange(0, 40000.0, false);
     mUi->pressureSensorValueWidget->setRange(0, 1100, false);
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+    mUi->heartRateSensorValueWidget->setRange(0, 500, false);
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     mUi->humiditySensorValueWidget->setRange(0, 100, false);
     mUi->proximitySensorValueWidget->setRange(0, 10, false);
     mUi->magNorthWidget->setLocale(QLocale::c());
@@ -58,6 +95,7 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
     mUi->zRotSlider->setRange(-180.0, 180.0, false);
     mUi->xRotSlider->setRange(-180.0, 180.0, false);
     mUi->yRotSlider->setRange(-180.0, 180.0, false);
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     mUi->positionXSlider->setRange(Accelerometer3DWidget::MinX,
                                    Accelerometer3DWidget::MaxX, false);
     mUi->positionYSlider->setRange(Accelerometer3DWidget::MinY,
@@ -65,28 +103,44 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
     mUi->positionZSlider->setRange(Accelerometer3DWidget::MinZ,
                                    Accelerometer3DWidget::MaxZ, false);
 
+=======
+    mUi->positionXSlider->setRange(Device3DWidget::MinX, Device3DWidget::MaxX,
+                                   false);
+    mUi->positionYSlider->setRange(Device3DWidget::MinY, Device3DWidget::MaxY,
+                                   false);
+    mUi->positionZSlider->setRange(Device3DWidget::MinZ, Device3DWidget::MaxZ,
+                                   false);
+    setupHingeSensorUI();
+    setupRollableUI();
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     connect(mUi->accelWidget, SIGNAL(targetRotationChanged()), this,
             SLOT(propagateAccelWidgetChange()));
     connect(mUi->accelWidget, SIGNAL(targetPositionChanged()), this,
             SLOT(propagateAccelWidgetChange()));
 
-    connect(this, &VirtualSensorsPage::updateResultingValuesRequired,
-            this, &VirtualSensorsPage::updateResultingValues);
+    connect(this, &VirtualSensorsPage::updateResultingValuesRequired, this,
+            &VirtualSensorsPage::updateResultingValues);
 
-    connect(this, &VirtualSensorsPage::updateTargetStateRequired,
-            this, &VirtualSensorsPage::updateTargetState);
+    connect(this, &VirtualSensorsPage::updateTargetStateRequired, this,
+            &VirtualSensorsPage::updateTargetState);
 
-    connect(this, &VirtualSensorsPage::startSensorUpdateTimerRequired,
-            this, &VirtualSensorsPage::startSensorUpdateTimer);
+    connect(this, &VirtualSensorsPage::startSensorUpdateTimerRequired, this,
+            &VirtualSensorsPage::startSensorUpdateTimer);
 
-    connect(this, &VirtualSensorsPage::stopSensorUpdateTimerRequired,
-            this, &VirtualSensorsPage::stopSensorUpdateTimer);
+    connect(this, &VirtualSensorsPage::stopSensorUpdateTimerRequired, this,
+            &VirtualSensorsPage::stopSensorUpdateTimer);
 
-    connect(&mAccelerationTimer, SIGNAL(timeout()),
-            this, SLOT(updateSensorValuesInUI()));
+    connect(&mAccelerationTimer, SIGNAL(timeout()), this,
+            SLOT(updateSensorValuesInUI()));
     mAccelerationTimer.setInterval(33);
     mAccelerationTimer.stop();
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+    connect(this, SIGNAL(coarseOrientationChanged(SkinRotation)),
+            EmulatorQtWindow::getInstance(), SLOT(rotateSkin(SkinRotation)));
+
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     using android::metrics::PeriodicReporter;
     mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
             60 * 10 * 1000,  // reporting period
@@ -99,7 +153,11 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
                     return true;
                 }
                 return false;
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     });
+=======
+            });
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 
     if (sSensorsAgent != nullptr) {
         sSensorsAgent->setPhysicalStateAgent(&mQAndroidPhysicalStateAgent);
@@ -107,6 +165,18 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
     }
 
     updateSensorValuesInUI();
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+        mUi->tabWidget->removeTab(kAccelerometerTabIndex);
+    }
+
+
+    if (!android_heart_rate_sensor_configured()) {
+        disableHeartRateSensor();
+    }
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 }
 
 VirtualSensorsPage::~VirtualSensorsPage() {
@@ -116,24 +186,145 @@ VirtualSensorsPage::~VirtualSensorsPage() {
     }
 }
 
+void VirtualSensorsPage::togglePostureButtonsVisibility(bool newVisibility) {
+    struct FoldableState foldableState;
+    android_foldable_get_state(&foldableState);
+    bool *supportedFoldablePostures = foldableState.config.supportedFoldablePostures;
+
+    mUi->btn_postureClosed->setHidden(!newVisibility || !supportedFoldablePostures[POSTURE_CLOSED]);
+    mUi->btn_postureFlipped->setHidden(!newVisibility || !supportedFoldablePostures[POSTURE_FLIPPED]);
+    mUi->btn_postureHalfOpen->setHidden(!newVisibility || !supportedFoldablePostures[POSTURE_HALF_OPENED]);
+    mUi->btn_postureOpen->setHidden(!newVisibility || !supportedFoldablePostures[POSTURE_OPENED]);
+    mUi->btn_postureTent->setHidden(!newVisibility || !supportedFoldablePostures[POSTURE_TENT]);
+}
+
+void VirtualSensorsPage::setupHingeSensorUI() {
+    // Hide the hinge sensors based on the config.
+    mUi->hinge0Label->setHidden(true);
+    mUi->hinge1Label->setHidden(true);
+    mUi->hinge2Label->setHidden(true);
+    mUi->hinge0Slider->setHidden(true);
+    mUi->hinge1Slider->setHidden(true);
+    mUi->hinge2Slider->setHidden(true);
+    mUi->hinge0Slider->setLabelHidden();
+    mUi->hinge1Slider->setLabelHidden();
+    mUi->hinge2Slider->setLabelHidden();
+    mUi->verticalLayout->setSpacing(1);
+    mUi->accelModeFold->setHidden(true);
+    if (android_foldable_hinge_configured()) {
+        mUi->lbl_posture->setHidden(false);
+        mUi->lbl_currentPosture->setHidden(false);
+        mUi->lbl_currentPostureValue->setHidden(false);
+        togglePostureButtonsVisibility(true);
+        mUi->accelModeFold->setHidden(false);
+        mUi->accelModeFold->setChecked(true);
+        mUi->accelModeRotate->setChecked(false);
+        mUi->accelerometerSliders->setCurrentIndex(2);
+        struct FoldableState foldableState;
+        android_foldable_get_state(&foldableState);
+        switch (foldableState.config.numHinges) {
+            case 3:
+                mUi->hinge2Slider->setRange(
+                        foldableState.config.hingeParams[2].minDegrees,
+                        foldableState.config.hingeParams[2].maxDegrees, false);
+                mUi->hinge2Label->setHidden(false);
+                mUi->hinge2Slider->setHidden(false);
+            case 2:
+                mUi->hinge1Slider->setRange(
+                        foldableState.config.hingeParams[1].minDegrees,
+                        foldableState.config.hingeParams[1].maxDegrees, false);
+                mUi->hinge1Label->setHidden(false);
+                mUi->hinge1Slider->setHidden(false);
+            case 1:
+                mUi->hinge0Slider->setRange(
+                        foldableState.config.hingeParams[0].minDegrees,
+                        foldableState.config.hingeParams[0].maxDegrees, false);
+                mUi->hinge0Label->setHidden(false);
+                mUi->hinge0Slider->setHidden(false);
+            default:;
+        }
+    }
+}
+
+void VirtualSensorsPage::setupRollableUI() {
+    mUi->roll0Label->setHidden(true);
+    mUi->roll1Label->setHidden(true);
+    mUi->roll2Label->setHidden(true);
+    mUi->roll0Slider->setHidden(true);
+    mUi->roll1Slider->setHidden(true);
+    mUi->roll2Slider->setHidden(true);
+    mUi->accelModeRoll->setHidden(true);
+    if (android_foldable_rollable_configured()) {
+        mUi->accelModeRoll->setHidden(false);
+        mUi->accelModeRoll->setChecked(true);
+        mUi->accelerometerSliders->setCurrentIndex(3);
+        struct FoldableState foldableState;
+        android_foldable_get_state(&foldableState);
+        switch (foldableState.config.numRolls) {
+            case 2:
+                mUi->roll1Slider->setRange(
+                        foldableState.config.rollableParams[1].minRolledPercent,
+                        foldableState.config.rollableParams[1].maxRolledPercent, false);
+                mUi->roll1Label->setHidden(false);
+                mUi->roll1Slider->setHidden(false);
+            case 1:
+                mUi->roll0Slider->setRange(
+                        foldableState.config.rollableParams[0].minRolledPercent,
+                        foldableState.config.rollableParams[0].maxRolledPercent, false);
+                mUi->roll0Label->setHidden(false);
+                mUi->roll0Slider->setHidden(false);
+            default:;
+        }
+    }
+}
+
 void VirtualSensorsPage::showEvent(QShowEvent* event) {
     emit windowVisible();
     mFirstShow = false;
 }
 
+void VirtualSensorsPage::on_btn_postureClosed_clicked() {
+    mSensorTracker->increment("POST_CLOSED");
+    on_posture_valueChanged(POSTURE_CLOSED);
+}
+
+void VirtualSensorsPage::on_btn_postureFlipped_clicked() {
+    mSensorTracker->increment("POST_FLIPPED");
+    on_posture_valueChanged(POSTURE_FLIPPED);
+}
+
+void VirtualSensorsPage::on_btn_postureHalfOpen_clicked() {
+    mSensorTracker->increment("POST_HALF_OPENED");
+    on_posture_valueChanged(POSTURE_HALF_OPENED);
+}
+
+void VirtualSensorsPage::on_btn_postureOpen_clicked() {
+    mSensorTracker->increment("POST_OPENED");
+    on_posture_valueChanged(POSTURE_OPENED);
+}
+
+void VirtualSensorsPage::on_btn_postureTent_clicked() {
+    mSensorTracker->increment("POST_TENT");
+    on_posture_valueChanged(POSTURE_TENT);
+}
+
 void VirtualSensorsPage::on_rotateToPortrait_clicked() {
+    mSensorTracker->increment("PORTRAIT");
     setCoarseOrientation(ANDROID_COARSE_PORTRAIT);
 }
 
 void VirtualSensorsPage::on_rotateToLandscape_clicked() {
+    mSensorTracker->increment("LANDSCAPE");
     setCoarseOrientation(ANDROID_COARSE_LANDSCAPE);
 }
 
 void VirtualSensorsPage::on_rotateToReversePortrait_clicked() {
+    mSensorTracker->increment("REV_PORTRAIT");
     setCoarseOrientation(ANDROID_COARSE_REVERSE_PORTRAIT);
 }
 
 void VirtualSensorsPage::on_rotateToReverseLandscape_clicked() {
+    mSensorTracker->increment("REV_LANDSCAPE");
     setCoarseOrientation(ANDROID_COARSE_REVERSE_LANDSCAPE);
 }
 
@@ -179,11 +370,8 @@ void VirtualSensorsPage::setPhysicalParameterTarget(
     if (sSensorsAgent) {
         mIsUIModifyingPhysicalState = true;
         sSensorsAgent->setPhysicalParameterTarget(
-                parameter_id,
-                static_cast<float>(v1),
-                static_cast<float>(v2),
-                static_cast<float>(v3),
-                mode);
+                parameter_id, static_cast<float>(v1), static_cast<float>(v2),
+                static_cast<float>(v3), mode);
         mIsUIModifyingPhysicalState = false;
     }
 }
@@ -202,91 +390,133 @@ void VirtualSensorsPage::setCoarseOrientation(
 
 void VirtualSensorsPage::on_temperatureSensorValueWidget_valueChanged(
         double value) {
-    setPhysicalParameterTarget(
-            PHYSICAL_PARAMETER_TEMPERATURE,
-            PHYSICAL_INTERPOLATION_SMOOTH,
-            value);
+    mSensorTracker->increment("TEMPERATURE");
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_TEMPERATURE,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_proximitySensorValueWidget_valueChanged(
         double value) {
-    setPhysicalParameterTarget(
-            PHYSICAL_PARAMETER_PROXIMITY,
-            PHYSICAL_INTERPOLATION_SMOOTH,
-            value);
+    mSensorTracker->increment("PROXIMITY");
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_PROXIMITY,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_lightSensorValueWidget_valueChanged(double value) {
-    setPhysicalParameterTarget(
-            PHYSICAL_PARAMETER_LIGHT,
-            PHYSICAL_INTERPOLATION_SMOOTH,
-            value);
+    mSensorTracker->increment("LIGHT");
+
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_LIGHT,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_pressureSensorValueWidget_valueChanged(
-    double value) {
-    setPhysicalParameterTarget(
-            PHYSICAL_PARAMETER_PRESSURE,
-            PHYSICAL_INTERPOLATION_SMOOTH,
-            value);
+        double value) {
+            mSensorTracker->increment("PRESSURE");
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_PRESSURE,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+}
+
+void VirtualSensorsPage::on_heartRateSensorValueWidget_valueChanged(
+        double value) {
+            mSensorTracker->increment("HEART_RATE");
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_HEART_RATE,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_humiditySensorValueWidget_valueChanged(
-    double value) {
-    setPhysicalParameterTarget(
-            PHYSICAL_PARAMETER_HUMIDITY,
-            PHYSICAL_INTERPOLATION_SMOOTH,
-            value);
+        double value) {
+            mSensorTracker->increment("HUMIDITY");
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_HUMIDITY,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
 }
 
 void VirtualSensorsPage::on_magNorthWidget_valueChanged(double value) {
+    mSensorTracker->increment("MAG_FIELD_NORTH");
     setPhysicalParameterTarget(
-            PHYSICAL_PARAMETER_MAGNETIC_FIELD,
-            PHYSICAL_INTERPOLATION_SMOOTH,
-            mUi->magNorthWidget->value(),
-            mUi->magEastWidget->value(),
+            PHYSICAL_PARAMETER_MAGNETIC_FIELD, PHYSICAL_INTERPOLATION_SMOOTH,
+            mUi->magNorthWidget->value(), mUi->magEastWidget->value(),
             mUi->magVerticalWidget->value());
 }
 
 void VirtualSensorsPage::on_magEastWidget_valueChanged(double value) {
+    mSensorTracker->increment("MAG_FIELD_EAST");
     setPhysicalParameterTarget(
-            PHYSICAL_PARAMETER_MAGNETIC_FIELD,
-            PHYSICAL_INTERPOLATION_SMOOTH,
-            mUi->magNorthWidget->value(),
-            mUi->magEastWidget->value(),
+            PHYSICAL_PARAMETER_MAGNETIC_FIELD, PHYSICAL_INTERPOLATION_SMOOTH,
+            mUi->magNorthWidget->value(), mUi->magEastWidget->value(),
             mUi->magVerticalWidget->value());
 }
 
 void VirtualSensorsPage::on_magVerticalWidget_valueChanged(double value) {
+    mSensorTracker->increment("MAG_FIELD_VERT");
     setPhysicalParameterTarget(
-            PHYSICAL_PARAMETER_MAGNETIC_FIELD,
-            PHYSICAL_INTERPOLATION_SMOOTH,
-            mUi->magNorthWidget->value(),
-            mUi->magEastWidget->value(),
+            PHYSICAL_PARAMETER_MAGNETIC_FIELD, PHYSICAL_INTERPOLATION_SMOOTH,
+            mUi->magNorthWidget->value(), mUi->magEastWidget->value(),
             mUi->magVerticalWidget->value());
 }
 
+void VirtualSensorsPage::on_hinge0Slider_valueChanged(double value) {
+    mSensorTracker->increment("HINGE_ANGLE0");
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE0,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+}
+
+void VirtualSensorsPage::on_hinge1Slider_valueChanged(double value) {
+    mSensorTracker->increment("HINGE_ANGLE1");
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE1,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+}
+
+void VirtualSensorsPage::on_hinge2Slider_valueChanged(double value) {
+    mSensorTracker->increment("HINGE_ANGLE2");
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE2,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+}
+
+void VirtualSensorsPage::on_roll0Slider_valueChanged(double value) {
+    mSensorTracker->increment("ROLLABLE0");
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROLLABLE0,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+}
+
+void VirtualSensorsPage::on_roll1Slider_valueChanged(double value) {
+    mSensorTracker->increment("ROLLABLE1");
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROLLABLE1,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+}
+
+void VirtualSensorsPage::on_roll2Slider_valueChanged(double value) {
+    mSensorTracker->increment("ROLLABLE2");
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROLLABLE2,
+                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+}
+
 void VirtualSensorsPage::on_zRotSlider_valueChanged(double) {
+    mSensorTracker->increment("Z_ROT");
     propagateSlidersChange();
 }
 
 void VirtualSensorsPage::on_xRotSlider_valueChanged(double) {
+    mSensorTracker->increment("X_ROT");
     propagateSlidersChange();
 }
 
 void VirtualSensorsPage::on_yRotSlider_valueChanged(double) {
+    mSensorTracker->increment("Y_ROT");
     propagateSlidersChange();
 }
 
 void VirtualSensorsPage::on_positionXSlider_valueChanged(double) {
+    mSensorTracker->increment("X_POS");
     propagateSlidersChange();
 }
 
 void VirtualSensorsPage::on_positionYSlider_valueChanged(double) {
+    mSensorTracker->increment("Y_POS");
     propagateSlidersChange();
 }
 
 void VirtualSensorsPage::on_positionZSlider_valueChanged(double) {
+    mSensorTracker->increment("Z_POS");
     propagateSlidersChange();
 }
 
@@ -359,8 +589,8 @@ void VirtualSensorsPage::setTargetHeadingDegrees(double heading) {
         heading += 360.0;
     }
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROTATION,
-                               PHYSICAL_INTERPOLATION_STEP,
-                               -90.0, 0.0, -heading);
+                               PHYSICAL_INTERPOLATION_STEP, -90.0, 0.0,
+                               -heading);
 }
 
 void VirtualSensorsPage::onTargetStateChanged() {
@@ -399,16 +629,12 @@ void VirtualSensorsPage::onPhysicalStateStabilized(void* context) {
     }
 }
 
-void VirtualSensorsPage::updateResultingValues(glm::vec3 acceleration,
-                                               glm::vec3 gyroscope,
-                                               glm::vec3 device_magnetic_vector) {
-
-    static const QString rotation_labels[] = {
-        "ROTATION_0",
-        "ROTATION_90",
-        "ROTATION_180",
-        "ROTATION_270"
-    };
+void VirtualSensorsPage::updateResultingValues(
+        glm::vec3 acceleration,
+        glm::vec3 gyroscope,
+        glm::vec3 device_magnetic_vector) {
+    static const QString rotation_labels[] = {"ROTATION_0", "ROTATION_90",
+                                              "ROTATION_180", "ROTATION_270"};
 
     // Update labels with new values.
     QString table_html;
@@ -417,30 +643,33 @@ void VirtualSensorsPage::updateResultingValues(glm::vec3 acceleration,
     table_html_stream.setNumberFlags(table_html_stream.numberFlags() |
                                      QTextStream::ForcePoint);
     table_html_stream.setRealNumberNotation(QTextStream::FixedNotation);
-    table_html_stream
-        << "<table border=\"0\""
-        << "       cellpadding=\"3\" style=\"font-size:" <<
-           Ui::stylesheetFontSize(Ui::FontSize::Medium) << "\">"
-        << "<tr>"
-        << "<td>" << tr("Accelerometer (m/s<sup>2</sup>)") << ":</td>"
-        << "<td align=left>" << acceleration.x << "</td>"
-        << "<td align=left>" << acceleration.y << "</td>"
-        << "<td align=left>" << acceleration.z << "</td></tr>"
-        << "<tr>"
-        << "<td>" << tr("Gyroscope (rad/s)") << ":</td>"
-        << "<td align=left>" << gyroscope.x << "</td>"
-        << "<td align=left>" << gyroscope.y << "</td>"
-        << "<td align=left>" << gyroscope.z << "</td></tr>"
-        << "<tr>"
-        << "<td>" << tr("Magnetometer (&mu;T)") << ":</td>"
-        << "<td align=left>" << device_magnetic_vector.x << "</td>"
-        << "<td align=left>" << device_magnetic_vector.y << "</td>"
-        << "<td align=left>" << device_magnetic_vector.z << "</td></tr>"
-        << "<tr><td>" << tr("Rotation")
-        << ":</td><td colspan = \"3\" align=left>"
-        << rotation_labels[mCoarseOrientation - SKIN_ROTATION_0]
-        << "</td></tr>"
-        << "</table>";
+    table_html_stream << "<table border=\"0\""
+                      << "       cellpadding=\"3\" style=\"font-size:"
+                      << Ui::stylesheetFontSize(Ui::FontSize::Medium) << "\">"
+                      << "<tr>"
+                      << "<td>" << tr("Accelerometer (m/s<sup>2</sup>)")
+                      << ":</td>"
+                      << "<td align=left>" << acceleration.x << "</td>"
+                      << "<td align=left>" << acceleration.y << "</td>"
+                      << "<td align=left>" << acceleration.z << "</td></tr>"
+                      << "<tr>"
+                      << "<td>" << tr("Gyroscope (rad/s)") << ":</td>"
+                      << "<td align=left>" << gyroscope.x << "</td>"
+                      << "<td align=left>" << gyroscope.y << "</td>"
+                      << "<td align=left>" << gyroscope.z << "</td></tr>"
+                      << "<tr>"
+                      << "<td>" << tr("Magnetometer (&mu;T)") << ":</td>"
+                      << "<td align=left>" << device_magnetic_vector.x
+                      << "</td>"
+                      << "<td align=left>" << device_magnetic_vector.y
+                      << "</td>"
+                      << "<td align=left>" << device_magnetic_vector.z
+                      << "</td></tr>"
+                      << "<tr><td>" << tr("Rotation")
+                      << ":</td><td colspan = \"3\" align=left>"
+                      << rotation_labels[mCoarseOrientation - SKIN_ROTATION_0]
+                      << "</td></tr>"
+                      << "</table>";
     mUi->resultingAccelerometerValues->setText(table_html);
 }
 
@@ -504,16 +733,20 @@ void VirtualSensorsPage::updateModelFromSliders(PhysicalInterpolation mode) {
 
     position = kMetersPerInch * position;
 
-    setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSITION, mode,
-            position.x, position.y, position.z);
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSITION, mode, position.x,
+                               position.y, position.z);
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROTATION, mode,
-            rotationDegrees.x, rotationDegrees.y, rotationDegrees.z);
+                               rotationDegrees.x, rotationDegrees.y,
+                               rotationDegrees.z);
 }
 
 /*
  * Update the UI to reflect the underlying model state.
  */
 void VirtualSensorsPage::updateUIFromModelCurrentState() {
+    if (EmulatorQtWindow::sClosed)
+        return;
+
     if (sSensorsAgent != nullptr) {
         glm::vec3 position;
         sSensorsAgent->getPhysicalParameter(
@@ -561,8 +794,48 @@ void VirtualSensorsPage::updateUIFromModelCurrentState() {
                 getPhysicalParameterTarget(PHYSICAL_PARAMETER_LIGHT), false);
         mUi->pressureSensorValueWidget->setValue(
                 getPhysicalParameterTarget(PHYSICAL_PARAMETER_PRESSURE), false);
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
         mUi->humiditySensorValueWidget->setValue(
                 getPhysicalParameterTarget(PHYSICAL_PARAMETER_HUMIDITY), false);
+=======
+        mUi->heartRateSensorValueWidget->setValue(
+                getPhysicalParameterTarget(PHYSICAL_PARAMETER_HEART_RATE), false);
+        mUi->humiditySensorValueWidget->setValue(
+                getPhysicalParameterTarget(PHYSICAL_PARAMETER_HUMIDITY), false);
+        if (!mUi->hinge0Slider->isHidden()) {
+            mUi->hinge0Slider->setValue(
+                    getPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE0),
+                    false);
+        }
+        if (!mUi->hinge1Slider->isHidden()) {
+            mUi->hinge1Slider->setValue(
+                    getPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE1),
+                    false);
+        }
+        if (!mUi->hinge2Slider->isHidden()) {
+            mUi->hinge2Slider->setValue(
+                    getPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE2),
+                    false);
+        }
+        if (android_foldable_hinge_configured()) {
+            updateUIPosture();
+        }
+        if (!mUi->roll0Slider->isHidden()) {
+            mUi->roll0Slider->setValue(
+                    getPhysicalParameterTarget(PHYSICAL_PARAMETER_ROLLABLE0),
+                    false);
+        }
+        if (!mUi->roll1Slider->isHidden()) {
+            mUi->roll1Slider->setValue(
+                    getPhysicalParameterTarget(PHYSICAL_PARAMETER_ROLLABLE1),
+                    false);
+        }
+        if (!mUi->roll2Slider->isHidden()) {
+            mUi->roll2Slider->setValue(
+                    getPhysicalParameterTarget(PHYSICAL_PARAMETER_ROLLABLE2),
+                    false);
+        }
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     }
 }
 
@@ -571,6 +844,8 @@ void VirtualSensorsPage::updateUIFromModelCurrentState() {
  * inertial model.
  */
 void VirtualSensorsPage::updateSensorValuesInUI() {
+    if (EmulatorQtWindow::sClosed)
+        return;
     updateUIFromModelCurrentState();
 
     if (sSensorsAgent != nullptr) {
@@ -579,27 +854,30 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
         glm::vec3 gravity_vector(0.0f, 9.81f, 0.0f);
 
         glm::vec3 device_accelerometer;
-        sSensorsAgent->getSensor(ANDROID_SENSOR_ACCELERATION,
-                &device_accelerometer.x,
-                &device_accelerometer.y,
-                &device_accelerometer.z);
+        sSensorsAgent->getSensor(
+                ANDROID_SENSOR_ACCELERATION, &device_accelerometer.x,
+                &device_accelerometer.y, &device_accelerometer.z);
 
         if (!mBypassOrientationChecks) {
             glm::vec3 normalized_accelerometer =
                     glm::normalize(device_accelerometer);
 
-            // Update the "rotation" label according to the current acceleraiton.
-            static const std::array<std::pair<glm::vec3, SkinRotation>, 4> directions {
-                std::make_pair(glm::vec3(0.0f, 1.0f, 0.0f), SKIN_ROTATION_0),
-                std::make_pair(glm::vec3(-1.0f, 0.0f, 0.0f), SKIN_ROTATION_90),
-                std::make_pair(glm::vec3(0.0f, -1.0f, 0.0f), SKIN_ROTATION_180),
-                std::make_pair(glm::vec3(1.0f, 0.0f, 0.0f), SKIN_ROTATION_270)
-            };
+            // Update the "rotation" label according to the current
+            // acceleraiton.
+            static const std::array<std::pair<glm::vec3, SkinRotation>, 4>
+                    directions{std::make_pair(glm::vec3(0.0f, 1.0f, 0.0f),
+                                              SKIN_ROTATION_0),
+                               std::make_pair(glm::vec3(-1.0f, 0.0f, 0.0f),
+                                              SKIN_ROTATION_90),
+                               std::make_pair(glm::vec3(0.0f, -1.0f, 0.0f),
+                                              SKIN_ROTATION_180),
+                               std::make_pair(glm::vec3(1.0f, 0.0f, 0.0f),
+                                              SKIN_ROTATION_270)};
             QString rotation_label;
             SkinRotation coarse_orientation = mCoarseOrientation;
             for (const auto& v : directions) {
                 if (fabs(glm::dot(normalized_accelerometer, v.first) - 1.f) <
-                        0.1f) {
+                    0.1f) {
                     coarse_orientation = v.second;
                     break;
                 }
@@ -614,15 +892,12 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
 
         glm::vec3 device_magnetometer;
         sSensorsAgent->getSensor(ANDROID_SENSOR_MAGNETIC_FIELD,
-                &device_magnetometer.x,
-                &device_magnetometer.y,
-                &device_magnetometer.z);
+                                 &device_magnetometer.x, &device_magnetometer.y,
+                                 &device_magnetometer.z);
 
         glm::vec3 device_gyroscope;
-        sSensorsAgent->getSensor(ANDROID_SENSOR_GYROSCOPE,
-                &device_gyroscope.x,
-                &device_gyroscope.y,
-                &device_gyroscope.z);
+        sSensorsAgent->getSensor(ANDROID_SENSOR_GYROSCOPE, &device_gyroscope.x,
+                                 &device_gyroscope.y, &device_gyroscope.z);
 
         // Emit a signal to update the UI. We cannot just update
         // the UI here because the current function is sometimes
@@ -630,15 +905,12 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
         // We only block signals for this widget if it's running on the Qt
         // thread, so it's Ok to call the connected function directly.
         if (signalsBlocked()) {
-            updateResultingValues(
-                    device_accelerometer,
-                    device_gyroscope,
-                    device_magnetometer);
+            updateResultingValues(device_accelerometer, device_gyroscope,
+                                  device_magnetometer);
         } else {
-            emit updateResultingValuesRequired(
-                    device_accelerometer,
-                    device_gyroscope,
-                    device_magnetometer);
+            emit updateResultingValuesRequired(device_accelerometer,
+                                               device_gyroscope,
+                                               device_magnetometer);
         }
     }
 }
@@ -647,7 +919,7 @@ void VirtualSensorsPage::on_accelModeRotate_toggled() {
     reportVirtualSensorsInteraction();
     if (mUi->accelModeRotate->isChecked()) {
         mUi->accelWidget->setOperationMode(
-            Accelerometer3DWidget::OperationMode::Rotate);
+                Device3DWidget::OperationMode::Rotate);
         mUi->accelerometerSliders->setCurrentIndex(0);
     }
 }
@@ -655,38 +927,116 @@ void VirtualSensorsPage::on_accelModeRotate_toggled() {
 void VirtualSensorsPage::on_accelModeMove_toggled() {
     reportVirtualSensorsInteraction();
     if (mUi->accelModeMove->isChecked()) {
-        mUi->accelWidget->setOperationMode(
-            Accelerometer3DWidget::OperationMode::Move);
+        mUi->accelWidget->setOperationMode(Device3DWidget::OperationMode::Move);
         mUi->accelerometerSliders->setCurrentIndex(1);
     }
 }
 
+void VirtualSensorsPage::on_accelModeFold_toggled() {
+    reportVirtualSensorsInteraction();
+    if (mUi->accelModeFold->isChecked()) {
+        mUi->accelWidget->setOperationMode(
+                Device3DWidget::OperationMode::Rotate);
+        mUi->accelerometerSliders->setCurrentIndex(2);
+    }
+}
+
+void VirtualSensorsPage::on_accelModeRoll_toggled() {
+    reportVirtualSensorsInteraction();
+    if (mUi->accelModeRoll->isChecked()) {
+        mUi->accelWidget->setOperationMode(
+                Device3DWidget::OperationMode::Rotate);
+        mUi->accelerometerSliders->setCurrentIndex(3);
+    }
+}
+
+void VirtualSensorsPage::on_posture_valueChanged(int index) {
+    if (mCurrentPosture == (enum FoldablePostures)index) {
+        return;
+    }
+    mCurrentPosture = (enum FoldablePostures)index;
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSTURE,
+                               PHYSICAL_INTERPOLATION_SMOOTH,
+                               (double)mCurrentPosture);
+}
+
 void VirtualSensorsPage::on_helpMagneticField_clicked() {
-    QDesktopServices::openUrl(QUrl::fromEncoded(
-            "https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_MAGNETIC_FIELD"));
+    QDesktopServices::openUrl(
+            QUrl::fromEncoded("https://developer.android.com/reference/android/"
+                              "hardware/Sensor.html#TYPE_MAGNETIC_FIELD"));
 }
 
 void VirtualSensorsPage::on_helpLight_clicked() {
-    QDesktopServices::openUrl(QUrl::fromEncoded(
-            "https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_LIGHT"));
+    QDesktopServices::openUrl(
+            QUrl::fromEncoded("https://developer.android.com/reference/android/"
+                              "hardware/Sensor.html#TYPE_LIGHT"));
 }
 
 void VirtualSensorsPage::on_helpPressure_clicked() {
-    QDesktopServices::openUrl(QUrl::fromEncoded(
-            "https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_PRESSURE"));
+    QDesktopServices::openUrl(
+            QUrl::fromEncoded("https://developer.android.com/reference/android/"
+                              "hardware/Sensor.html#TYPE_PRESSURE"));
+}
+
+void VirtualSensorsPage::on_helpHeartRate_clicked() {
+    QDesktopServices::openUrl(
+            QUrl::fromEncoded("https://developer.android.com/reference/android/"
+                              "hardware/Sensor.html#TYPE_HEART_RATE"));
 }
 
 void VirtualSensorsPage::on_helpAmbientTemp_clicked() {
-  QDesktopServices::openUrl(QUrl::fromEncoded(
-            "https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_AMBIENT_TEMPERATURE"));
+    QDesktopServices::openUrl(
+            QUrl::fromEncoded("https://developer.android.com/reference/android/"
+                              "hardware/Sensor.html#TYPE_AMBIENT_TEMPERATURE"));
 }
 
 void VirtualSensorsPage::on_helpProximity_clicked() {
-  QDesktopServices::openUrl(QUrl::fromEncoded(
-            "https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_PROXIMITY"));
+    QDesktopServices::openUrl(
+            QUrl::fromEncoded("https://developer.android.com/reference/android/"
+                              "hardware/Sensor.html#TYPE_PROXIMITY"));
 }
 
 void VirtualSensorsPage::on_helpHumidity_clicked() {
-  QDesktopServices::openUrl(QUrl::fromEncoded(
-            "https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_RELATIVE_HUMIDITY"));
+    QDesktopServices::openUrl(
+            QUrl::fromEncoded("https://developer.android.com/reference/android/"
+                              "hardware/Sensor.html#TYPE_RELATIVE_HUMIDITY"));
+}
+
+void VirtualSensorsPage::hideRotationButtons(bool hide) {
+    mUi->rotateToLandscape->setHidden(hide);
+    mUi->rotateToReversePortrait->setHidden(hide);
+    mUi->rotateToReverseLandscape->setHidden(hide);
+    mUi->accelModeRotate->setHidden(hide);
+}
+
+void VirtualSensorsPage::updateUIPosture() {
+    enum FoldablePostures posture =
+            (enum FoldablePostures)getPhysicalParameterTarget(
+                    PHYSICAL_PARAMETER_POSTURE);
+    mCurrentPosture = posture;
+    switch(mCurrentPosture) {
+        case POSTURE_CLOSED:
+            mUi->lbl_currentPostureValue->setText(tr("Closed"));
+            break;
+        case POSTURE_HALF_OPENED:
+            mUi->lbl_currentPostureValue->setText(tr("Half-Open"));
+            break;
+        case POSTURE_OPENED:
+            mUi->lbl_currentPostureValue->setText(tr("Open"));
+            break;
+        case POSTURE_FLIPPED:
+            mUi->lbl_currentPostureValue->setText(tr("Flipped"));
+            break;
+        case POSTURE_TENT:
+            mUi->lbl_currentPostureValue->setText(tr("Tent"));
+            break;
+        case POSTURE_UNKNOWN:
+        default:
+            mUi->lbl_currentPostureValue->setText(tr("Unknown"));
+            break;
+    }
+}
+
+void VirtualSensorsPage::disableHeartRateSensor() {
+    mUi->heartRateSensorValueWidget->setEnabled(false);
 }

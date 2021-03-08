@@ -15,7 +15,7 @@
 #include "android/session_phase_reporter.h"
 
 #include "android/CommonReportedInfo.h"
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "studio_stats.pb.h"
 
 static AndroidSessionPhase sCurrentSessionPhase;
 

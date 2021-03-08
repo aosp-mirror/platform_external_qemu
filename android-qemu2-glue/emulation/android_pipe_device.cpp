@@ -26,6 +26,7 @@
 
 extern "C" {
 #include "hw/misc/goldfish_pipe.h"
+#include "hw/virtio/virtio-goldfish-pipe.h"
 }  // extern "C"
 
 // Technical note: This file contains the glue code used between the
@@ -34,7 +35,7 @@ extern "C" {
 //
 // The host service pipe expects a device implementation that will
 // implement the callbacks in AndroidHwPipeFuncs. These are injected
-// into the service by calling android_pipe_set_hw_funcs().
+// into the service by vtbl in hwPipe.
 //
 // The virtual device expects a service implementation that will
 // implement the callbacks in GoldfishPipeServiceOps. These are injected
@@ -56,6 +57,11 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
         [](GoldfishHwPipe* hwPipe) -> GoldfishHostPipe* {
             return static_cast<GoldfishHostPipe*>(
                     android_pipe_guest_open(hwPipe));
+        },
+        // guest_open_with_flags()
+        [](GoldfishHwPipe* hwPipe, uint32_t flags) -> GoldfishHostPipe* {
+            return static_cast<GoldfishHostPipe*>(
+                    android_pipe_guest_open_with_flags(hwPipe, flags));
         },
         // guest_close()
         [](GoldfishHostPipe* hostPipe, GoldfishPipeCloseReason reason) {
@@ -129,22 +135,28 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
             static_assert(
                     sizeof(AndroidPipeBuffer) == sizeof(GoldfishPipeBuffer),
                     "Invalid PipeBuffer sizes");
+        // We can't use a static_assert with offsetof() because in msvc, it uses
+        // reinterpret_cast.
+        // TODO: Add runtime assertion instead?
+        // https://developercommunity.visualstudio.com/content/problem/22196/static-assert-cannot-compile-constexprs-method-tha.html
+#ifndef _MSC_VER
             static_assert(offsetof(AndroidPipeBuffer, data) ==
                                   offsetof(GoldfishPipeBuffer, data),
                           "Invalid PipeBuffer::data offsets");
             static_assert(offsetof(AndroidPipeBuffer, size) ==
                                   offsetof(GoldfishPipeBuffer, size),
                           "Invalid PipeBuffer::size offsets");
+#endif
             return android_pipe_guest_recv(
                     hostPipe, reinterpret_cast<AndroidPipeBuffer*>(buffers),
                     numBuffers);
         },
         // guest_send()
-        [](GoldfishHostPipe* hostPipe,
+        [](GoldfishHostPipe** hostPipe,
            const GoldfishPipeBuffer* buffers,
            int numBuffers) -> int {
             return android_pipe_guest_send(
-                    hostPipe,
+                    reinterpret_cast<void**>(hostPipe),
                     reinterpret_cast<const AndroidPipeBuffer*>(buffers),
                     numBuffers);
         },
@@ -174,47 +186,15 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
         },
 };
 
-// These callbacks are called from the pipe service into the virtual device.
-static const AndroidPipeHwFuncs android_pipe_hw_funcs = {
-        // resetPipe()
-        [](void* hwPipe, void* hostPipe) {
-            goldfish_pipe_reset(static_cast<GoldfishHwPipe*>(hwPipe),
-                                static_cast<GoldfishHostPipe*>(hostPipe));
-        },
-        // closeFromHost()
-        [](void* hwPipe) {
-            goldfish_pipe_close_from_host(static_cast<GoldfishHwPipe*>(hwPipe));
-        },
-        // signalWake()
-        [](void* hwPipe, unsigned flags) {
-            static_assert(
-                    (int)GOLDFISH_PIPE_WAKE_CLOSED == (int)PIPE_WAKE_CLOSED,
-                    "Invalid PIPE_WAKE_CLOSED values");
-            static_assert((int)GOLDFISH_PIPE_WAKE_READ == (int)PIPE_WAKE_READ,
-                          "Invalid PIPE_WAKE_READ values");
-            static_assert((int)GOLDFISH_PIPE_WAKE_WRITE == (int)PIPE_WAKE_WRITE,
-                          "Invalid PIPE_WAKE_WRITE values");
-            static_assert((int)GOLDFISH_PIPE_WAKE_UNLOCK_DMA ==
-                                  (int)PIPE_WAKE_UNLOCK_DMA,
-                          "Invalid PIPE_WAKE_WRITE values");
-
-            goldfish_pipe_signal_wake(
-                    static_cast<GoldfishHwPipe*>(hwPipe),
-                    static_cast<GoldfishPipeWakeFlags>(flags));
-        },
-        // getPipeId()
-        [](void* hwPipe) {
-            return goldfish_pipe_get_id(static_cast<GoldfishHwPipe*>(hwPipe));
-        },
-        // lookupPipeById()
-        [](int id) {
-            return (void*)goldfish_pipe_lookup_by_id(id);
-        }
-};
+static void* goldfish_pipe_lookup_by_id_wrapper(int id) {
+    return goldfish_pipe_lookup_by_id(id);
+}
 
 bool qemu_android_pipe_init(android::VmLock* vmLock) {
     goldfish_pipe_set_service_ops(&goldfish_pipe_service_ops);
-    android_pipe_set_hw_funcs(&android_pipe_hw_funcs);
+    android_pipe_append_lookup_by_id_callback(
+        &goldfish_pipe_lookup_by_id_wrapper,
+        "goldfish_pipe");
     android::AndroidPipe::initThreading(vmLock);
     return true;
 }

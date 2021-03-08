@@ -31,7 +31,7 @@ namespace aemu {
 
 class Vsync::Impl {
 public:
-    Impl(Callback&& callback, int refreshRate = 60)
+    Impl(Callback callback, int refreshRate = 60)
         : mCallback(std::move(callback)),
           mRefreshRate(refreshRate),
           mRefreshIntervalUs(1000000ULL / mRefreshRate),
@@ -96,8 +96,8 @@ private:
     FunctorThread mThread;
 };
 
-Vsync::Vsync(Vsync::Callback&& callback)
-    : mImpl(new Vsync::Impl(std::move(callback))) {}
+Vsync::Vsync(int refreshRate, Vsync::Callback callback)
+    : mImpl(new Vsync::Impl(std::move(callback), refreshRate)) {}
 
 Vsync::~Vsync() = default;
 

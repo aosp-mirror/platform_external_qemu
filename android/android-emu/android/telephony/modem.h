@@ -46,6 +46,9 @@ extern const char*  amodem_send( AModem  modem, const char*  cmd );
 /* simulate the receipt on an incoming SMS message */
 extern void         amodem_receive_sms( AModem  modem, SmsPDU  pdu );
 
+/* convert the pdu to c-string; returns NULL if failed */
+extern const char* amodem_sms_to_string(AModem modem, SmsPDU pdu);
+
 /** RADIO STATE
  **/
 typedef enum {
@@ -88,6 +91,7 @@ typedef enum {
     A_DATA_NETWORK_EDGE,           // RADIO_TECH_EDGE
     A_DATA_NETWORK_UMTS,           // RADIO_TECH_UMTS
     A_DATA_NETWORK_LTE     = 14,   // RADIO_TECH_LTE
+    A_DATA_NETWORK_NR      = 20,   // RADIO_TECH_NR
 } ADataNetworkType;
 // TODO: Merge the usage of these two structs and rename ADataNetworkType
 typedef enum {
@@ -114,6 +118,7 @@ extern void                amodem_set_voice_registration( AModem  modem, ARegist
 
 extern ARegistrationState  amodem_get_data_registration( AModem  modem );
 extern void                amodem_set_data_registration( AModem  modem, ARegistrationState    state );
+extern void                amodem_set_meter_state( AModem  modem, int meteron );
 extern void                amodem_set_data_network_type( AModem  modem, ADataNetworkType   type );
 
 extern ADataNetworkType    android_parse_network_type( const char*  speed );

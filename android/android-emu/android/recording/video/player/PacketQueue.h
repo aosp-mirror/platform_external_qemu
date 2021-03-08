@@ -31,6 +31,7 @@
 
 #pragma once
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 #include "android/recording/video/player/VideoPlayerWaitInfo.h"
 
 extern "C" {
@@ -87,6 +88,65 @@ public:
     int getSerial() const { return mSerial; }
 
     int* getSerialPtr() { return &mSerial; }
+=======
+#include <stdint.h>                                              // for int64_t
+
+#include "android/recording/video/player/VideoPlayerWaitInfo.h"  // for Vide...
+
+extern "C" {
+#include "libavcodec/avcodec.h"                                  // for AVPa...
+}
+
+namespace android {
+namespace videoplayer {
+
+class VideoPlayer;
+
+struct CustomAVPacketList {
+    AVPacket pkt;
+    CustomAVPacketList* next;
+    int serial;
+};
+
+// a queue structure to keep audio/video packets read from a video file
+class PacketQueue {
+public:
+    PacketQueue(VideoPlayer* player);
+    ~PacketQueue();
+
+    static void init();
+
+    void start();
+
+    void abort();
+
+    // insert a new packet
+    int put(AVPacket* pkt);
+
+    int putNullPacket(int stream_index);
+
+    void flush();
+
+    // retrieve the front packet, usually for decoding
+    int get(AVPacket* pkt, bool blocking, int* serial);
+
+    // signal and unlock blocking wait
+    void signalWait();
+
+    bool isAbort() const { return mAbortRequest; }
+
+    int getNumPackets() const { return mNumPkts; }
+
+    int getSize() const { return mSize; }
+
+    int getSerial() const { return mSerial; }
+
+    int* getSerialPtr() { return &mSerial; }
+
+    // retrieve the timespan covered by the enqueued packets, in
+    // AVStream->time_base unit
+    int64_t getEnqueuedPktDuration();
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 
 private:
     int internalPut(AVPacket* pkt);

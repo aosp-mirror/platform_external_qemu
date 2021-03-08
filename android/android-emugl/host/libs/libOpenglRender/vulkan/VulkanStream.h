@@ -13,18 +13,39 @@
 // limitations under the License.
 #pragma once
 
+#include "android/base/BumpPool.h"
 #include "android/base/files/Stream.h"
+#include "android/base/files/StreamSerializing.h"
 
-#include "android/base/Pool.h"
+#include "VulkanHandleMapping.h"
+#include "common/goldfish_vk_private_defs.h"
 
-#include <string>
+#include <memory>
 #include <vector>
+
+#include <inttypes.h>
+
+#define E(fmt,...) fprintf(stderr, fmt "\n", ##__VA_ARGS__)
+
+class IOStream;
+
+namespace android {
+namespace base {
+class BumpPool;
+} // namespace android
+} // namespace base
 
 namespace goldfish_vk {
 
 class VulkanStream : public android::base::Stream {
 public:
-    VulkanStream();
+    VulkanStream(IOStream* stream);
+    ~VulkanStream();
+
+    void setStream(IOStream* stream);
+
+    // Returns whether the connection is valid.
+    bool valid();
 
     // General allocation function
     void alloc(void** ptrAddr, size_t bytes);
@@ -34,8 +55,59 @@ public:
     void loadStringInPlace(char** forOutput);
     void loadStringArrayInPlace(char*** forOutput);
 
+    // When we load a string and are using a reserved pointer.
+    void loadStringInPlaceWithStreamPtr(char** forOutput, uint8_t** streamPtr);
+    void loadStringArrayInPlaceWithStreamPtr(char*** forOutput, uint8_t** streamPtr);
+
+    virtual ssize_t read(void *buffer, size_t size);
+    virtual ssize_t write(const void *buffer, size_t size);
+
+    void commitWrite();
+
+    // Frees everything that got alloc'ed.
+    void clearPool();
+
+    void setHandleMapping(VulkanHandleMapping* mapping);
+    void unsetHandleMapping();
+    VulkanHandleMapping* handleMapping() const;
+
+    uint32_t getFeatureBits() const;
+
+    android::base::BumpPool* pool();
+
 private:
-    android::base::Pool mPool { 8, 4096, 64 };
+    size_t remainingWriteBufferSize() const;
+    ssize_t bufferedWrite(const void *buffer, size_t size);
+    android::base::BumpPool mPool;
+    size_t mWritePos = 0;
+    std::vector<uint8_t> mWriteBuffer;
+    IOStream* mStream = nullptr;
+    DefaultHandleMapping mDefaultHandleMapping;
+    VulkanHandleMapping* mCurrentHandleMapping;
+    uint32_t mFeatureBits = 0;
+};
+
+class VulkanMemReadingStream : public VulkanStream {
+public:
+    VulkanMemReadingStream(uint8_t* start);
+    ~VulkanMemReadingStream();
+
+    void setBuf(uint8_t* buf);
+    uint8_t* getBuf();
+    void setReadPos(uintptr_t pos);
+
+    ssize_t read(void *buffer, size_t size) override;
+    ssize_t write(const void *buffer, size_t size) override;
+
+    uint8_t* beginTrace();
+    size_t endTrace();
+    
+private:
+    void resetTrace();
+
+    uint8_t* mStart;
+    uint8_t* mTraceStart;
+    uintptr_t mReadPos = 0;
 };
 
 } // namespace goldfish_vk

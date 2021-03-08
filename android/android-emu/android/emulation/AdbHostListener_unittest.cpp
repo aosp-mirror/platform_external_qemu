@@ -108,7 +108,8 @@ struct TestAdbGuestAgent : public AdbGuestAgent {
     TestAdbGuestAgent(int id)
         : mId(id), mPrefix(StringFormat("[guest %d] ", id)) {}
 
-    virtual void onHostConnection(ScopedSocket&& socket) override {
+    virtual void onHostConnection(ScopedSocket&& socket,
+                                  AdbPortType portType) override {
         mSocket = std::move(socket);
 
         uint32_t id = 0;
@@ -122,6 +123,8 @@ struct TestAdbGuestAgent : public AdbGuestAgent {
         }
         mId = static_cast<int>(id);
     }
+
+    void resetActiveGuestPipeConnection() override {}
 
     int id() const { return mId; }
 
@@ -167,14 +170,14 @@ TEST(AdbHostListener, startListening) {
         // startListening()
         // is called. Even if we run the current thread looper for 10 ms.
         testThread.start();
-        ThreadLooper::get()->runWithTimeoutMs(10);
+        ThreadLooper::get()->runWithTimeoutMs(100);
         EXPECT_EQ(-1, testAgent.socket());
         EXPECT_EQ(1, testAgent.id());
 
         // Start listening and run the thread looper again, this time the
         // send should work.
         testListener.startListening();
-        ThreadLooper::get()->runWithTimeoutMs(10);
+        ThreadLooper::get()->runWithTimeoutMs(100);
         EXPECT_EQ(2, testAgent.id());
         EXPECT_EQ(TestConnectThread::kDisconnected, testThread.state());
     }
@@ -186,13 +189,13 @@ TEST(AdbHostListener, startListening) {
         // startListening() is called again. Even if we run the current
         // thread looper for 10 ms.
         testThread.start();
-        ThreadLooper::get()->runWithTimeoutMs(10);
+        ThreadLooper::get()->runWithTimeoutMs(100);
         EXPECT_EQ(2, testAgent.id());
 
         // Start listening and run the thread looper again, this time the
         // send should work.
         testListener.startListening();
-        ThreadLooper::get()->runWithTimeoutMs(10);
+        ThreadLooper::get()->runWithTimeoutMs(100);
         EXPECT_EQ(3, testAgent.id());
         EXPECT_EQ(TestConnectThread::kDisconnected, testThread.state());
     }

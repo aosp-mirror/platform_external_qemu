@@ -14,8 +14,15 @@
 
 #include "android/recording/test/DummyAudioProducer.h"
 
-#include "android/base/system/System.h"
-#include "android/recording/Frame.h"
+#include <assert.h>                      // for assert
+#include <math.h>                        // for sin, M_PI
+#include <cstdint>                       // for uint8_t, uint32_t, uint64_t
+#include <utility>                       // for move
+#include <vector>                        // for vector
+
+#include "android/base/system/System.h"  // for System
+#include "android/recording/Frame.h"     // for Frame, AVFormat, AudioFormat
+#include "android/recording/Producer.h"  // for Producer
 
 namespace android {
 namespace recording {

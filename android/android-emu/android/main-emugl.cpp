@@ -31,8 +31,21 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                             char** hwGpuModePtr,
                             int wantedBitness,
                             bool noWindow,
-                            enum WinsysPreferredGlesBackend uiPreferredBackend) {
+                            enum WinsysPreferredGlesBackend uiPreferredBackend,
+                            bool* hostGpuVulkanBlacklisted,
+                            bool forceUseHostGpuVulkan) {
     bool gpuEnabled = false;
+
+    bool avdManagerHasWrongSetting = apiLevel < 16;
+
+    if (avdManagerHasWrongSetting &&
+        (*hwGpuModePtr) &&
+        !gpuOption &&
+        (!strcmp(*hwGpuModePtr, "off") ||
+         !strcmp(*hwGpuModePtr, "guest"))) {
+        str_reset(hwGpuModePtr, "auto");
+    }
+
     if (avdName) {
         gpuEnabled = hwGpuModePtr && (*hwGpuModePtr);
         // If the user has hw config set to mesa, not-so-silently overrule that.
@@ -42,7 +55,7 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                     "which is deprecated. This AVD is being auto-switched to "
                     "the current and better-supported \'swiftshader\' renderer. "
                     "Please update your AVD config.ini's hw.gpu.mode to match.\n");
-            str_reset(hwGpuModePtr, "swiftshader");
+            str_reset(hwGpuModePtr, "swiftshader_indirect");
         }
     } else if (!gpuOption) {
         // In the case of a platform build, use the 'auto' mode by default.
@@ -67,12 +80,13 @@ bool androidEmuglConfigInit(EmuglConfig* config,
     // Only check the blacklist for 'auto', 'host' or 'on' mode.
     if (gpuChoice && (!strcmp(gpuChoice, "auto") ||
                       !strcmp(gpuChoice, "host") ||
+                      !strcmp(gpuChoice, "auto-no-window") ||
                       !strcmp(gpuChoice, "on"))) {
 
          onBlacklist = isHostGpuBlacklisted();
     }
 
-    if (gpuChoice && !strcmp(gpuChoice, "auto")) {
+    if (gpuChoice && (!strcmp(gpuChoice, "auto") || !strcmp(gpuChoice, "auto-no-window"))) {
         if (onBlacklist) {
             dwarning("Your GPU drivers may have a bug. "
                      "Switching to software rendering.");
@@ -88,7 +102,11 @@ bool androidEmuglConfigInit(EmuglConfig* config,
 
     bool result = emuglConfig_init(
             config, gpuEnabled, *hwGpuModePtr, gpuOption, wantedBitness,
-            noWindow, blacklisted, hasGuestRenderer, uiPreferredBackend);
+            noWindow, blacklisted, hasGuestRenderer, uiPreferredBackend,
+            forceUseHostGpuVulkan);
+
+    *hostGpuVulkanBlacklisted =
+        async_query_host_gpu_VulkanBlacklisted();
 
     return result;
 }

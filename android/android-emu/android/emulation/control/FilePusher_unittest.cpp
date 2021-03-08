@@ -63,7 +63,7 @@ public:
         mAtomicNumCommands = 0;
     }
 
-    void TearDown() {
+    void TearDown() override {
         mFilePusher.reset();
         mAdb.reset();
         delete mLooper;

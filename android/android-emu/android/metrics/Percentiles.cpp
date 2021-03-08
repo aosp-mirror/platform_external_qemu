@@ -11,9 +11,9 @@
 
 #include "android/metrics/Percentiles.h"
 
-#include "android/metrics/proto/studio_stats.pb.h"
-
 #include <cassert>
+
+#include "studio_stats.pb.h"
 
 namespace android {
 namespace metrics {
@@ -103,7 +103,8 @@ base::Optional<double> Percentiles::calcValueForTargetNo(int targetNo) {
     return {};
 }
 
-void Percentiles::fillMetricsEvent(android_studio::PercentileEstimator* event) {
+void Percentiles::fillMetricsEvent(
+        android_studio::PercentileEstimator* event, std::initializer_list<double> targets) const {
     assert(event);
 
     if (mCount <= mRawDataSize) {
@@ -111,7 +112,11 @@ void Percentiles::fillMetricsEvent(android_studio::PercentileEstimator* event) {
             event->add_raw_sample(val);
         }
     } else {
+        std::unordered_set<double> desired{targets.begin(), targets.end()};
         for (const Bucket& b : mBuckets) {
+            if (!desired.empty() && desired.count(b.target) == 0) {
+                continue;
+            }
             auto eventBucket = event->add_bucket();
             eventBucket->set_target_percentile(b.target);
             eventBucket->set_value(b.value);
@@ -202,5 +207,8 @@ void Percentiles::updateBucket(Percentiles::Bucket* b,
     b->count += (int64_t)d;
 }
 
+int Percentiles::samplesCount() const { return mCount; }
+
+bool Percentiles::isBucketized() const { return mCount > mRawDataSize; }
 }  // namespace metrics
 }  // namespace android

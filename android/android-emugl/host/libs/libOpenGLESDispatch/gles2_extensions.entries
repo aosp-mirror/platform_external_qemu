@@ -1,8 +1,19 @@
 !gles2_extensions
+namespaces translator,gles2
 
 # GLES 2.0 extensions
 void glGetShaderPrecisionFormat(GLenum shadertype, GLenum precisiontype, GLint* range, GLint* precision);
 void glReleaseShaderCompiler(void);
 void glShaderBinary(GLsizei n, const GLuint* shaders, GLenum binaryformat, const GLvoid* binary, GLsizei length);
 void glVertexAttribPointerWithDataSize(GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 void glFramebufferTexture3DOES(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLint zoffset);
+=======
+void glFramebufferTexture3DOES(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLint zoffset);
+void glTestHostDriverPerformance(GLuint count, uint64_t* duration_us, uint64_t* duration_cpu_us);
+
+void glBindVertexArrayOES(GLuint array);
+void glDeleteVertexArraysOES(GLsizei n, const GLuint *arrays);
+void glGenVertexArraysOES(GLsizei n, GLuint *arrays);
+GLboolean glIsVertexArrayOES(GLuint array);
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)

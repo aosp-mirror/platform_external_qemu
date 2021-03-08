@@ -1154,6 +1154,20 @@ static void build_goldfish_aml(Aml *table)
 {
     Aml *scope = aml_scope("_SB");
 
+    uint32_t goldfish_sync_irq = GOLDFISH_SYNC_IRQ;
+    uint32_t goldfish_events_irq = GOLDFISH_EVENTS_IRQ;
+
+    /* TODO(fxbug.dev/66965): Currently for Fuchsia emulator, we swap the IRQ
+     * line of goldfish_sync (IRQ 21) and goldfish_events (IRQ 17) devices as
+     * the former one has an IRQ conflict with PCI devices using legacy IRQ
+     * handling. This is just a workaround and may fail at any time. These IRQ
+     * lines needs to be swapped back once the issue is fixed.
+     */
+    if (!android_qemu_mode) {
+        goldfish_sync_irq = GOLDFISH_EVENTS_IRQ;
+        goldfish_events_irq = GOLDFISH_SYNC_IRQ;
+    }
+
     build_goldfish_device_aml(scope, "GFBY", "GFSH0001", "goldfish battery",
                               GOLDFISH_BATTERY_IOMEM_BASE,
                               GOLDFISH_BATTERY_IOMEM_SIZE,
@@ -1162,7 +1176,7 @@ static void build_goldfish_aml(Aml *table)
     build_goldfish_device_aml(scope, "GFEV", "GFSH0002", "goldfish events",
                               GOLDFISH_EVENTS_IOMEM_BASE,
                               GOLDFISH_EVENTS_IOMEM_SIZE,
-                              GOLDFISH_EVENTS_IRQ);
+                              goldfish_events_irq);
 
     build_goldfish_device_aml(scope, "GFPP", "GFSH0003", "goldfish pipe",
                               GOLDFISH_PIPE_IOMEM_BASE,
@@ -1182,7 +1196,7 @@ static void build_goldfish_aml(Aml *table)
     build_goldfish_device_aml(scope, "GFSK", "GFSH0006", "goldfish sync",
                               GOLDFISH_SYNC_IOMEM_BASE,
                               GOLDFISH_SYNC_IOMEM_SIZE,
-                              GOLDFISH_SYNC_IRQ);
+                              goldfish_sync_irq);
 
     build_goldfish_device_aml(scope, "GFRT", "GFSH0007", "goldfish rtc",
                               GOLDFISH_RTC_IOMEM_BASE,
@@ -1194,7 +1208,9 @@ static void build_goldfish_aml(Aml *table)
                               GOLDFISH_ROTARY_IOMEM_SIZE,
                               GOLDFISH_ROTARY_IRQ);
 
-    build_android_dt_aml(scope, "ANDT", "ANDR0001", "android device tree");
+    if (android_qemu_mode) {
+        build_android_dt_aml(scope, "ANDT", "ANDR0001", "android device tree");
+    }
     aml_append(table, scope);
 }
 #endif  /* CONFIG_ANDROID */
@@ -2012,7 +2028,9 @@ build_dsdt(GArray *table_data, BIOSLinker *linker,
         build_q35_pci0_int(dsdt);
     }
 #ifdef CONFIG_ANDROID
-    build_goldfish_aml(dsdt);
+    if (android_qemu_mode || min_config_qemu_mode) {
+        build_goldfish_aml(dsdt);
+    }
 #endif
 
     if (pcmc->legacy_cpu_hotplug) {

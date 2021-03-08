@@ -14,6 +14,12 @@
 
 #include "android/emulation/testing/MockAndroidVmOperations.h"
 #include "android/base/Log.h"
+#include "android/emulation/hostdevices/HostAddressSpace.h"
+#include "android/emulation/HostmemIdMapping.h"
+
+using android::HostAddressSpaceDevice;
+
+static bool sSkipSnapshotSave = false;
 
 static const QAndroidVmOperations sQAndroidVmOperations = {
         .vmStop = []() -> bool {
@@ -26,6 +32,8 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         },
         .vmReset = nullptr,       // Not currently mocked.
         .vmShutdown = nullptr,    // Not currently mocked.
+        .vmPause = nullptr,       // Not currently mocked.
+        .vmResume = nullptr,      // Not currently mocked.
         .vmIsRunning = nullptr,   // Not currently mocked.
         .snapshotList = nullptr,  // Not currently mocked.
         .snapshotSave = [](const char* name,
@@ -50,18 +58,49 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
             return android::MockAndroidVmOperations::mock->snapshotRemap(
                     shared, opaque, errConsumer);
         },
+        .snapshotExport = [](const char* snapshot,
+                             const char* dest,
+                             void* opaque,
+                             LineConsumerCallback errConsumer) -> bool {
+            CHECK(android::MockAndroidVmOperations::mock);
+            return android::MockAndroidVmOperations::mock->snapshotExport(
+                    snapshot, dest, opaque, errConsumer);
+        },
         .setSnapshotCallbacks =
                 [](void* opaque, const SnapshotCallbacks* callbacks) {
                     CHECK(android::MockAndroidVmOperations::mock);
                     return android::MockAndroidVmOperations::mock
                             ->setSnapshotCallbacks(opaque, callbacks);
                 },
+        .mapUserBackedRam =
+                [](uint64_t gpa, void* hva, uint64_t size) {
+                    HostAddressSpaceDevice::get()->setHostAddrByPhysAddr(gpa,
+                                                                         hva);
+                },
+        .unmapUserBackedRam =
+                [](uint64_t gpa, uint64_t size) {
+                    HostAddressSpaceDevice::get()->unsetHostAddrByPhysAddr(gpa);
+                },
         .getVmConfiguration = nullptr,  // Not currently mocked.
         .setFailureReason = nullptr,    // Not currently mocked.
         .setExiting = nullptr,          // Not currently mocked.
+        .allowRealAudio = nullptr,      // Not currently mocked.
+        .physicalMemoryGetAddr =
+                [](uint64_t gpa) {
+                    void* res = HostAddressSpaceDevice::get()->getHostAddr(gpa);
+                    if (!res)
+                        return (void*)(uintptr_t)gpa;
+                    return res;
+                },
+        .isRealAudioAllowed = nullptr,  // Not currently mocked.
+        .setSkipSnapshotSave = [](bool skip) { sSkipSnapshotSave = skip; },
+        .isSnapshotSaveSkipped = []() -> bool { return sSkipSnapshotSave; },
+        .hostmemRegister = android_emulation_hostmem_register,
+        .hostmemUnregister = android_emulation_hostmem_unregister,
+        .hostmemGetInfo = android_emulation_hostmem_get_info,
 };
 
-extern "C" const QAndroidVmOperations* const gQAndroidVmOperations =
+extern "C" const QAndroidVmOperations* const gMockQAndroidVmOperations =
         &sQAndroidVmOperations;
 
 namespace android {

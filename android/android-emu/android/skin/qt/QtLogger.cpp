@@ -13,11 +13,13 @@
 // limitations under the License.
 #include "android/skin/qt/QtLogger.h"
 
-#include "android/base/Log.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/system/System.h"
-#include "android/crashreport/CrashReporter.h"
+#include <stdarg.h>                             // for va_end, va_list, va_s...
+#include <stdio.h>                              // for vsnprintf
+
+#include "android/base/Log.h"                   // for LOG, LogMessage, LogS...
+#include "android/base/files/PathUtils.h"       // for pj
+#include "android/base/memory/LazyInstance.h"   // for LazyInstance, LAZY_IN...
+#include "android/crashreport/CrashReporter.h"  // for CrashReporter
 
 using android::base::LazyInstance;
 using android::crashreport::CrashReporter;

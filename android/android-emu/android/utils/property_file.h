@@ -28,6 +28,18 @@ char* propertyFile_getValue(const char* propertyFile,
                             size_t propertyFileLen,
                             const char* propertyName);
 
+// Similar to 'propertyFile_getValue' but allows searching for the value
+// a properties matching any of the given names. If these properties
+// appears several times in a file, the last definition is returned.
+// |propertyFile| is the address of the file in memory.
+// |propertyFileLen| is its length in bytes.
+// |propertyNames| are the names of the properties.
+// |propertyNamesCount| is the size of the above array.
+char* propertyFile_getAnyValue(const char* propertyFile,
+                               size_t propertyFileLen,
+                               const char* propertyNames[],
+                               int propertyNamesCount);
+
 // Maximum length of a property name (including terminating zero).
 // Any property name that is equal or greater than this value will be
 // considered undefined / ignored.

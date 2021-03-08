@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 // Copyright 2016 The Android Open Source Project
 // This software is licensed under the terms of the GNU General Public
 // License version 2, as published by the Free Software Foundation, and
@@ -498,3 +499,5 @@ glm::vec3 Accelerometer3DWidget::screenToWorldCoordinate(int x, int y) const {
     // Move plane position to world space.
     return mCameraTransformInverse * cameraSpacePhonePlaneCoordinate;
 }
+=======
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)

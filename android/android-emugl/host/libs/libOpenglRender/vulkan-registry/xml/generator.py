@@ -379,12 +379,14 @@ class OutputGenerator:
                 os.makedirs(path)
             self.madeDirs[path] = None
     #
-    def beginFile(self, genOpts):
+    def beginFile(self, genOpts, suppress = False):
+        self.suppress = suppress
+
         self.genOpts = genOpts
         #
         # Open specified output file. Not done in constructor since a
         # Generator can be used without writing to a file.
-        if (self.genOpts.filename != None):
+        if (self.genOpts.filename != None) and not self.suppress:
             filename = self.genOpts.directory + '/' + self.genOpts.filename
             self.outFile = io.open(filename, 'w', encoding='utf-8')
         else:

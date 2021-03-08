@@ -103,9 +103,8 @@ GLESDispatchMaxVersion calcMaxVersionFromDispatch(EGLDisplay dpy) {
        GLES_DISPATCH_MAX_VERSION_3_1;
 
     // TODO: CTS conformance for OpenGL ES 3.1
-    bool playStoreImage =
-        emugl_feature_is_enabled(
-                android::featurecontrol::PlayStoreImage);
+    bool playStoreImage = emugl::emugl_feature_is_enabled(
+            android::featurecontrol::PlayStoreImage);
 
     if (emugl::getRenderer() == SELECTED_RENDERER_HOST
         || emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT
@@ -155,6 +154,7 @@ GLESDispatchMaxVersion calcMaxVersionFromDispatch(EGLDisplay dpy) {
 // just whether to use them)
 bool shouldEnableCoreProfile() {
     int dispatchMaj, dispatchMin;
+
     emugl::getGlesVersion(&dispatchMaj, &dispatchMin);
     return emugl::getRenderer() == SELECTED_RENDERER_HOST &&
            dispatchMaj > 2;
@@ -228,7 +228,8 @@ std::string filterExtensionsBasedOnMaxVersion(GLESDispatchMaxVersion ver,
     // b. the guest image is not updated for ES 3+
     // (GLESDynamicVersion is disabled)
     if (ver > GLES_DISPATCH_MAX_VERSION_2 &&
-        emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion)) {
+        emugl::emugl_feature_is_enabled(
+                android::featurecontrol::GLESDynamicVersion)) {
         return exts;
     }
 

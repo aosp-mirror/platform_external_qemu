@@ -11,12 +11,30 @@
 
 #pragma once
 
-#include "ui_telephony-page.h"
-#include <QValidator>
-#include <QWidget>
-#include <memory>
+#include <qcoreevent.h>   // for QEvent (ptr only), QEvent::Type
+#include <qobjectdefs.h>  // for Q_OBJECT, slots
+#include <qvalidator.h>   // for QValidator::State
+#include <QEvent>         // for QEvent
+#include <QString>        // for QString
+#include <QValidator>     // for QValidator
+#include <QWidget>        // for QWidget
+#include <memory>         // for unique_ptr
 
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
+class QObject;
+class QString;
+class QWidget;
+namespace Ui {
+class TelephonyPage;
+}  // namespace Ui
 struct QAndroidTelephonyAgent;
+
 class TelephonyPage : public QWidget
 {
     Q_OBJECT
@@ -55,6 +73,7 @@ private:
     };
 
     std::unique_ptr<Ui::TelephonyPage> mUi;
+    std::shared_ptr<UiEventTracker> mPhoneTracker;
     CallActivity mCallActivity;
     QString mPhoneNumber;
     QEvent::Type mCustomEventType;

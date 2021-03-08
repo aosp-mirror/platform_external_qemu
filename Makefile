@@ -345,7 +345,10 @@ configure: ;
 
 $(call set-vpath, $(SRC_PATH))
 
-LIBS+=-lm -lz $(LIBS_TOOLS)
+ifndef CONFIG_MSVC
+LIBS+=-lm
+endif
+LIBS+=-lz $(LIBS_TOOLS)
 
 HELPERS-$(CONFIG_LINUX) = qemu-bridge-helper$(EXESUF)
 
@@ -738,7 +741,7 @@ clean:
         done
 	rm -f $(SUBDIR_DEVICES_MAK) config-all-devices.mak
 
-VERSION ?= $(shell cat VERSION)
+VERSION ?= $(shell cat QEMU_VERSION)
 
 dist: qemu-$(VERSION).tar.bz2
 

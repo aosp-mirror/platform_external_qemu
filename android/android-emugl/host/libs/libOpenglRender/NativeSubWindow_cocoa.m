@@ -32,14 +32,14 @@
 
 @end
 
-
 EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
                                     int x,
                                     int y,
                                     int width,
                                     int height,
                                     SubWindowRepaintCallback repaint_callback,
-                                    void* repaint_callback_param) {
+                                    void* repaint_callback_param,
+                                    int hideWindow) {
     NSWindow* win = (NSWindow *)p_window;
     if (!win) {
         return NULL;
@@ -55,6 +55,9 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
         [glView setWantsBestResolutionOpenGLSurface:YES];
         [[win contentView] addSubview:glView];
         [win makeKeyAndOrderFront:nil];
+        if (hideWindow) {
+            [glView setHidden:YES];
+        }
     }
 
     return (EGLNativeWindowType)glView;

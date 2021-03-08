@@ -28,7 +28,7 @@
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/utils/filelock.h"
 
-#include "android/featurecontrol/proto/emulator_feature_patterns.pb.h"
+#include "emulator_feature_patterns.pb.h"
 #include "google/protobuf/io/zero_copy_stream.h"
 #include "google/protobuf/io/zero_copy_stream_impl.h"
 #include "google/protobuf/text_format.h"
@@ -389,7 +389,8 @@ bool downloadFeaturePatternsText(emulator_features::EmulatorFeaturePatterns* pat
             kFeaturePatternsUrlText, nullptr,
             &curlDownloadFeaturePatternsCallback,
             &res, &curlError)) {
-        D("failed to download feature flags from server.\n");
+        D("failed to download feature flags from server: %s.\n", curlError);
+        free(curlError);
         return false;
     }
 
@@ -411,7 +412,8 @@ bool downloadFeaturePatternsBinary(emulator_features::EmulatorFeaturePatterns* p
             kFeaturePatternsUrl, nullptr,
             &curlDownloadFeaturePatternsCallback,
             &res, &curlError)) {
-        D("failed to download feature flags from server.\n");
+        D("failed to download feature flags from server: %s.\n", curlError);
+        free(curlError);
         return false;
     }
 

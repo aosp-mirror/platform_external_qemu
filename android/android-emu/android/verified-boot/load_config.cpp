@@ -12,14 +12,16 @@
 #include "android/verified-boot/load_config.h"
 
 #include "android/base/Log.h"
-#include "android/verified-boot/proto/verified_boot_config.pb.h"
+#include "verified_boot_config.pb.h"
 
 #include <google/protobuf/io/tokenizer.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
 
 #include <fcntl.h>
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <unistd.h>
 #endif
 
@@ -31,7 +33,7 @@ using ::google::protobuf::io::ColumnNumber;
 using ::google::protobuf::io::FileInputStream;
 using ::google::protobuf::io::ZeroCopyInputStream;
 
-static const int kMaxSupportedMajorVersion = 1;
+static const int kMaxSupportedMajorVersion = 2;
 
 namespace {
 
@@ -173,10 +175,12 @@ static Status buildParams(const VerifiedBootConfig& config,
                           std::vector<std::string>* params) {
     std::string dm_param;
     Status status = Status::OK;
-    if ((status = buildDMParam(config, &dm_param)) != Status::OK) {
-        return status;
+    if (config.major_version() == 1) {
+        if ((status = buildDMParam(config, &dm_param)) != Status::OK) {
+            return status;
+        }
+        params->push_back(dm_param);
     }
-    params->push_back(dm_param);
 
     for (int i = 0; i < config.param_size(); ++i) {
         const std::string& param = config.param(i);

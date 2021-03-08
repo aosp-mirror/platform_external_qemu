@@ -10,11 +10,27 @@
 // GNU General Public License for more details.
 #pragma once
 
-#include "ui_battery-page.h"
-#include <QWidget>
-#include <initializer_list>
-#include <memory>
+#include <qobjectdefs.h>      // for Q_OBJECT, slots
+#include <QString>            // for QString
+#include <QWidget>            // for QWidget
+#include <initializer_list>   // for initializer_list
+#include <memory>             // for unique_ptr
+#include <utility>            // for pair
 
+#include "ui_battery-page.h"  // for BatteryPage
+
+
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
+
+class QComboBox;
+class QObject;
+class QWidget;
 struct QAndroidBatteryAgent;
 
 class BatteryPage : public QWidget {
@@ -38,4 +54,5 @@ private:
 
 private:
     std::unique_ptr<Ui::BatteryPage> mUi;
+    std::shared_ptr<UiEventTracker> mDropDownTracker;
 };

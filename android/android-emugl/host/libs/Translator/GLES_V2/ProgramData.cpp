@@ -388,8 +388,12 @@ void ProgramData::restore(ObjectLocalName localName,
     assert(globalName);
     ProgramName = globalName;
     GLDispatch& dispatcher = GLEScontext::dispatcher();
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     assert(mGuestLocToHostLoc.size() == 0);
     mGuestLocToHostLoc[-1] = -1;
+=======
+    mGuestLocToHostLoc.add(-1, -1);
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     bool shoudLoadLinked = LinkStatus;
 #if defined(TOLERATE_PROGRAM_LINK_ERROR) && TOLERATE_PROGRAM_LINK_ERROR == 1
     shoudLoadLinked = 1;
@@ -469,7 +473,7 @@ void ProgramData::restore(ObjectLocalName localName,
             GLint hostLoc = dispatcher.glGetUniformLocation(
                     globalName, c_str(getTranslatedName(uniform.first)));
             if (hostLoc != -1) {
-                mGuestLocToHostLoc.emplace(uniform.second, hostLoc);
+                mGuestLocToHostLoc.add(uniform.second, hostLoc);
             }
         }
         for (const auto& uniformEntry : uniforms) {
@@ -738,14 +742,14 @@ static bool sCheckUndecl(ProgramData* pData,
                          const ANGLEShaderParser::ShaderLinkInfo& fragLinkInfo,
                          const ANGLEShaderParser::ShaderLinkInfo& vertLinkInfo);
 static bool sCheckLimits(ProgramData* pData,
-                         const ShBuiltInResources& resources,
+                         const ST_BuiltInResources& resources,
                          const ANGLEShaderParser::ShaderLinkInfo& fragLinkInfo,
                          const ANGLEShaderParser::ShaderLinkInfo& vertLinkInfo);
 static bool sCheckVariables(ProgramData* pData,
                             const ANGLEShaderParser::ShaderLinkInfo& a,
                             const ANGLEShaderParser::ShaderLinkInfo& b);
 static void sInitializeUniformLocs(ProgramData* pData,
-                                   const std::vector<sh::ShaderVariable>& uniforms);
+                                   const std::vector<ST_ShaderVariable>& uniforms);
 
 bool ProgramData::validateLink(ShaderParser* frag, ShaderParser* vert) {
     const ANGLEShaderParser::ShaderLinkInfo& fragLinkInfo =
@@ -771,12 +775,21 @@ void ProgramData::setLinkStatus(GLint status) {
     LinkStatus = (status == GL_FALSE) ? false : true;
     mUniNameToGuestLoc.clear();
     mGuestLocToHostLoc.clear();
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     mGuestLocToHostLoc[-1] = -1;
 #if defined(TOLERATE_PROGRAM_LINK_ERROR) && TOLERATE_PROGRAM_LINK_ERROR == 1
     status = 1;
 #endif
     if (status && HostLinkStatus) {
         std::vector<sh::ShaderVariable> allUniforms;
+=======
+    mGuestLocToHostLoc.add(-1, -1);
+#if defined(TOLERATE_PROGRAM_LINK_ERROR) && TOLERATE_PROGRAM_LINK_ERROR == 1
+    status = 1;
+#endif
+    if (status && HostLinkStatus) {
+        std::vector<ST_ShaderVariable> allUniforms;
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
         bool is310 = false;
         for (auto& s : attachedShaders) {
             if (s.localName) {
@@ -802,7 +815,6 @@ void ProgramData::setLinkStatus(GLint status) {
     } else {
         for (auto& s : attachedShaders) {
             s.linkedSource.clear();
-            s.linkInfo = {};
         }
     }
 }
@@ -841,8 +853,8 @@ static const char* sQualifierString(ValidationQualifier q) {
 
 static bool sVarCheck(ProgramData* pData,
                       ValidationQualifier qualifier,
-                      const sh::ShaderVariable& a,
-                      const sh::ShaderVariable& b) {
+                      const ST_ShaderVariable& a,
+                      const ST_ShaderVariable& b) {
     bool res = true;
 
     if (qualifier == ValidationQualifier::UNIFORM &&
@@ -854,7 +866,10 @@ static bool sVarCheck(ProgramData* pData,
         res = false;
     }
 
-    if (a.isStruct() != b.isStruct() ||
+    bool aIsStruct = a.fieldsCount > 0;
+    bool bIsStruct = b.fieldsCount > 0;
+
+    if (aIsStruct != bIsStruct ||
         a.type != b.type) {
         std::ostringstream err;
         err << sQualifierString(qualifier) << " " << a.name << " ";
@@ -863,11 +878,11 @@ static bool sVarCheck(ProgramData* pData,
         res = false;
     }
 
-    if (a.isStruct()) {
-        for (const auto& afield : a.fields) {
-            for (const auto& bfield : b.fields) {
-                if (afield.name != bfield.name) continue;
-                res = res && sVarCheck(pData, qualifier, afield, bfield);
+    if (aIsStruct) {
+        for (unsigned int i = 0; i < a.fieldsCount; ++i) {
+            for (unsigned int j = 0; j < b.fieldsCount; ++j) {
+                if (strcmp(a.pFields[i].name, b.pFields[j].name)) continue;
+                res = res && sVarCheck(pData, qualifier, a.pFields[i], b.pFields[j]);
             }
         }
     }
@@ -876,8 +891,8 @@ static bool sVarCheck(ProgramData* pData,
 }
 
 static bool sInterfaceBlockCheck(ProgramData* pData,
-                                 const sh::InterfaceBlock& a,
-                                 const sh::InterfaceBlock& b) {
+                                 const ST_InterfaceBlock& a,
+                                 const ST_InterfaceBlock& b) {
     bool res = true;
 
     if (a.layout != b.layout ||
@@ -889,7 +904,7 @@ static bool sInterfaceBlockCheck(ProgramData* pData,
         res = false;
     }
 
-    if (a.fields.size() != b.fields.size()) {
+    if (a.fieldsCount != b.fieldsCount) {
         std::ostringstream err;
         err << "interface block " << a.name << " ";
         err << kDifferentTypeErr;
@@ -897,11 +912,14 @@ static bool sInterfaceBlockCheck(ProgramData* pData,
         res = false;
     }
 
-    for (const auto& afield : a.fields) {
-        for (const auto& bfield : b.fields) {
-            if (afield.name != bfield.name) continue;
+    for (unsigned int i = 0; i < a.fieldsCount; ++i) {
+        for (unsigned int j = 0; j < b.fieldsCount; ++j) {
+            const auto afield = a.pFields[i];
+            const auto bfield = b.pFields[j];
+
+            if (strcmp(afield.name, bfield.name)) continue;
             res = res && sVarCheck(pData, ValidationQualifier::VARYING,
-                                   afield, bfield);
+                    afield, bfield);
             if (afield.isRowMajorLayout != bfield.isRowMajorLayout) {
                 std::ostringstream err;
                 err << "interface block field ";
@@ -912,7 +930,15 @@ static bool sInterfaceBlockCheck(ProgramData* pData,
             }
         }
     }
+
     return res;
+}
+
+static bool sIsBuiltInShaderVariable(const ST_ShaderVariable& var) {
+    if (!var.name || strlen(var.name) < 4) return false;
+
+    const char* name = var.name;
+    return (name[0] == 'g' && name[1] == 'l' && name[2] == '_');
 }
 
 static bool sCheckUndecl(
@@ -921,11 +947,11 @@ static bool sCheckUndecl(
         const ANGLEShaderParser::ShaderLinkInfo& vertLinkInfo) {
     bool res = true;
     for (const auto& felt : fragLinkInfo.varyings) {
-        if (felt.isBuiltIn()) continue;
+        if (sIsBuiltInShaderVariable(felt)) continue;
 
         bool declaredInVertShader = false;
         for (const auto& velt : vertLinkInfo.varyings) {
-            if (velt.name == felt.name) {
+            if (!strcmp(velt.name, felt.name)) {
                 declaredInVertShader = true;
                 break;
             }
@@ -944,9 +970,10 @@ static bool sCheckUndecl(
 
 static bool sCheckLimits(
         ProgramData* pData,
-        const ShBuiltInResources& resources,
+        const ST_BuiltInResources& resources,
         const ANGLEShaderParser::ShaderLinkInfo& fragShaderLinkInfo,
         const ANGLEShaderParser::ShaderLinkInfo& vertShaderLinkInfo) {
+
     bool res = true;
 
     size_t maxAttribs = (size_t)resources.MaxVertexAttribs;
@@ -982,21 +1009,21 @@ static bool sCheckVariables(ProgramData* pData,
 
     for (const auto& aelt : a.uniforms) {
         for (const auto& belt : b.uniforms) {
-            if (aelt.name != belt.name) continue;
+            if (strcmp(aelt.name, belt.name)) continue;
             res = res && sVarCheck(pData, ValidationQualifier::UNIFORM, aelt, belt);
         }
     }
 
     for (const auto& aelt : a.varyings) {
         for (const auto& belt : b.varyings) {
-            if (aelt.name != belt.name) continue;
+            if (strcmp(aelt.name, belt.name)) continue;
             res = res && sVarCheck(pData, ValidationQualifier::VARYING, aelt, belt);
         }
     }
 
     for (const auto& aelt : a.interfaceBlocks) {
         for (const auto& belt : b.interfaceBlocks) {
-            if (aelt.name != belt.name) continue;
+            if (strcmp(aelt.name, belt.name)) continue;
             res = res && sInterfaceBlockCheck(pData, aelt, belt);
         }
     }
@@ -1004,37 +1031,46 @@ static bool sCheckVariables(ProgramData* pData,
     return res;
 }
 
-static void sRecursiveLocInitalize(ProgramData* pData, const std::string& keyBase, const sh::ShaderVariable& var) {
-    bool isArr = var.arraySize > 0;
-    int baseSize = isArr ? var.arraySize : 1;
+static void sRecursiveLocInitalize(ProgramData* pData, const std::string& keyBase, const ST_ShaderVariable& var) {
+    // fprintf(stderr, "%s: call. name: %s\n", __func__, var.name);
+    bool isArr = var.arraySizeCount > 0;
+    int baseSize = isArr ? var.pArraySizes[0] : 1;
+    bool isStruct = var.fieldsCount > 0;
 
-    if (var.isStruct()) {
+    if (isStruct) {
+        // fprintf(stderr, "%s: is struct\n", __func__);
         if (isArr) {
-            for (int k = 0; k < var.arraySize; k++) {
-                for (const auto& field : var.fields) {
-                    std::vector<char> keyBuf(keyBase.length() + field.name.length() + 20, 0);
-                    snprintf(keyBuf.data(), keyBuf.size(), "%s[%d].%s", keyBase.c_str(), k, field.name.c_str());
-                    sRecursiveLocInitalize(pData, std::string(keyBuf.data()), field);
+            // fprintf(stderr, "%s: is arr\n", __func__);
+            for (int k = 0; k < var.pArraySizes[0]; k++) {
+                for (uint32_t i = 0; i < var.fieldsCount; ++i) {
+                    std::vector<char> keyBuf(keyBase.length() + strlen(var.pFields[i].name) + 20, 0);
+                    snprintf(keyBuf.data(), keyBuf.size(), "%s[%d].%s", keyBase.c_str(), k, var.pFields[i].name);
+                    sRecursiveLocInitalize(pData, std::string(keyBuf.data()), var.pFields[i]);
                 }
             }
         } else {
-            for (const auto& field : var.fields) {
-                std::vector<char> keyBuf(keyBase.length() + field.name.length() + 20, 0);
-                snprintf(keyBuf.data(), keyBuf.size(), "%s.%s", keyBase.c_str(), field.name.c_str());
-                sRecursiveLocInitalize(pData, std::string(keyBuf.data()), field);
+            // fprintf(stderr, "%s: is plain struct\n", __func__);
+            for (uint32_t i = 0; i < var.fieldsCount; ++i) {
+                std::vector<char> keyBuf(keyBase.length() + strlen(var.pFields[i].name) + 20, 0);
+                snprintf(keyBuf.data(), keyBuf.size(), "%s.%s", keyBase.c_str(), var.pFields[i].name);
+                // fprintf(stderr, "%s: keyBuf: %s\n", __func__, keyBuf.data());
+                sRecursiveLocInitalize(pData, std::string(keyBuf.data()), var.pFields[i]);
             }
         }
     } else {
+        // fprintf(stderr, "%s: is not struct\n", __func__);
         for (int k = 0; k < baseSize; k++) {
             if (k == 0) {
                 std::vector<char> keyBuf(keyBase.length() + 20, 0);
                 std::vector<char> keyBuf2(keyBase.length() + 20, 0);
                 snprintf(keyBuf.data(), keyBuf.size(), "%s", keyBase.c_str());
                 snprintf(keyBuf2.data(), keyBuf.size(), "%s[%d]", keyBase.c_str(), k);
+                // fprintf(stderr, "%s: initGuestUniformLocForKey. keyBuf2 %s\n", __func__, keyBuf2.data());
                 pData->initGuestUniformLocForKey(keyBuf.data(), keyBuf2.data());
             } else {
                 std::vector<char> keyBuf(keyBase.length() + 20, 0);
                 snprintf(keyBuf.data(), keyBuf.size(), "%s[%d]", keyBase.c_str(), k);
+                // fprintf(stderr, "%s: initGuestUniformLocForKey. keyBu2 %s\n", __func__, keyBuf.data());
                 pData->initGuestUniformLocForKey(keyBuf.data());
             }
         }
@@ -1042,7 +1078,8 @@ static void sRecursiveLocInitalize(ProgramData* pData, const std::string& keyBas
 }
 
 static void sInitializeUniformLocs(ProgramData* pData,
-                                   const std::vector<sh::ShaderVariable>& uniforms) {
+                                   const std::vector<ST_ShaderVariable>& uniforms) {
+    // fprintf(stderr, "%s: call\n", __func__);
     // initialize in order of indices
     std::vector<std::string> orderedUniforms;
     GLint uniform_count;
@@ -1060,7 +1097,9 @@ static void sInitializeUniformLocs(ProgramData* pData,
         GLsizei length;
         gl.glGetActiveUniform(pData->getProgramName(), i, nameLength, &length,
                 &size, &type, name.data());
+        // fprintf(stderr, "%s: host uniform: %s\n", __func__, name.data());
         orderedUniforms.push_back(pData->getDetranslatedName(name.data()));
+        // fprintf(stderr, "%s: host uniform detranslated: %s\n", __func__, pData->getDetranslatedName(name.data()).str().c_str());
     }
 
     std::unordered_map<std::string, size_t> linkInfoUniformsByName;
@@ -1072,8 +1111,11 @@ static void sInitializeUniformLocs(ProgramData* pData,
     }
 
     for (const auto& str : orderedUniforms) {
+        // fprintf(stderr, "%s: do ordered uniforms\n", __func__);
         if (linkInfoUniformsByName.find(str) != linkInfoUniformsByName.end()) {
             sRecursiveLocInitalize(pData, str, uniforms[linkInfoUniformsByName[str]]);
+        } else {
+            // fprintf(stderr, "%s: found in link info uniforms\n", __func__);
         }
     }
 
@@ -1083,16 +1125,25 @@ static void sInitializeUniformLocs(ProgramData* pData,
 }
 
 void ProgramData::initGuestUniformLocForKey(StringView key) {
+    // fprintf(stderr, "%s: for %s\n", __func__, key.str().c_str());
     if (mUniNameToGuestLoc.find(key) == mUniNameToGuestLoc.end()) {
         mUniNameToGuestLoc[key] = mCurrUniformBaseLoc;
         // Emplace host location beforehand to workaround Unreal bug
         // BUG: 120548998
         GLDispatch& dispatcher = GLEScontext::dispatcher();
         std::string translatedName = getTranslatedName(key);
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
         int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
                 translatedName.c_str());
         if (hostLoc != -1) {
             mGuestLocToHostLoc.emplace(mCurrUniformBaseLoc, hostLoc);
+=======
+        // fprintf(stderr, "%s: trname: %s\n", __func__, translatedName.c_str());
+        int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
+                translatedName.c_str());
+        if (hostLoc != -1) {
+            mGuestLocToHostLoc.add(mCurrUniformBaseLoc, hostLoc);
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
         }
 
         mCurrUniformBaseLoc++;
@@ -1118,7 +1169,11 @@ void ProgramData::initGuestUniformLocForKey(StringView key, StringView key2) {
         int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
                 translatedName.c_str());
         if (hostLoc != -1) {
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
             mGuestLocToHostLoc.emplace(mCurrUniformBaseLoc, hostLoc);
+=======
+            mGuestLocToHostLoc.add(mCurrUniformBaseLoc, hostLoc);
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
         }
 
         mCurrUniformBaseLoc++;
@@ -1141,8 +1196,8 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
                 if (guestLoc == -1) {
                     return -1;
                 } else {
-                    mUniNameToGuestLoc.emplace(uniName, guestLoc);
-                    mGuestLocToHostLoc.emplace(guestLoc, guestLoc);
+                    mUniNameToGuestLoc[uniName] = guestLoc;
+                    mGuestLocToHostLoc.add(guestLoc, guestLoc);
                 }
             }
             return guestLoc;
@@ -1164,7 +1219,7 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
                 return -1;
             }
 
-            mGuestLocToHostLoc.emplace(guestLoc, hostLoc);
+            mGuestLocToHostLoc.add(guestLoc, hostLoc);
             return guestLoc;
         }
     } else {
@@ -1177,12 +1232,9 @@ int ProgramData::getHostUniformLocation(int guestLocation) {
     if (mUseUniformLocationVirtualization) {
         if (guestLocation == -1) return -1;
 
-        const auto& location = mGuestLocToHostLoc.find(guestLocation);
-        if (location != mGuestLocToHostLoc.end()) {
-            return location->second;
-        } else {
-            return -2;
-        }
+        auto locPtr = mGuestLocToHostLoc.get_const(guestLocation);
+        if (!locPtr) return -2;
+        return *locPtr;
     } else {
         return guestLocation;
     }

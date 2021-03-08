@@ -59,6 +59,8 @@ static u_int dns_addr_time;
 static u_int dns6_addr_time;
 #endif
 
+static int enable_cleanup_ip_on_load = 0;
+
 #define TIMEOUT_FAST 2  /* milliseconds */
 #define TIMEOUT_SLOW 499  /* milliseconds */
 /* for the aging of certain requests like DNS */
@@ -1204,6 +1206,53 @@ int slirp_add_hostfwd(Slirp *slirp, int is_udp, struct in_addr host_addr,
     return 0;
 }
 
+/* Drop host forwarding rule, return 0 if found. */
+int slirp_remove_ipv6_hostfwd(Slirp *slirp, int is_udp, struct in6_addr host_addr,
+                         int host_port)
+{
+    struct socket *so;
+    struct socket *head = (is_udp ? &slirp->udb : &slirp->tcb);
+    struct sockaddr_in6 addr;
+    int port = htons(host_port);
+    socklen_t addr_len;
+
+    for (so = head->so_next; so != head; so = so->so_next) {
+        addr_len = sizeof(addr);
+        if ((so->so_state & SS_HOSTFWD) &&
+            getsockname(so->s, (struct sockaddr *)&addr, &addr_len) == 0 &&
+            addr_len == sizeof(host_addr) &&
+            !memcmp(&host_addr, &addr, addr_len) &&
+            addr.sin6_port == port) {
+            close(so->s);
+            sofree(so);
+            return 0;
+        }
+    }
+
+    return -1;
+}
+
+int slirp_add_ipv6_hostfwd(Slirp *slirp, int is_udp, struct in6_addr host_addr,
+                      int host_port, struct in6_addr guest_addr, int guest_port)
+{
+    // TODO
+    // if (!guest_addr.s_addr) {
+    //     guest_addr = slirp->vdhcp_startaddr;
+    // }
+
+    if (is_udp) {
+        if (!udp6_listen(slirp, host_addr, htons(host_port),
+                         guest_addr, htons(guest_port), SS_HOSTFWD))
+            return -1;
+    } else {
+        if (!tcp6_listen(slirp, host_addr, htons(host_port),
+                         guest_addr, htons(guest_port), SS_HOSTFWD))
+            return -1;
+    }
+
+    return 0;
+}
+
 int slirp_add_exec(Slirp *slirp, int do_pty, const void *args,
                    struct in_addr *guest_addr, int guest_port)
 {
@@ -1577,11 +1626,20 @@ static const VMStateDescription vmstate_slirp = {
 static void slirp_state_save(QEMUFile *f, void *opaque)
 {
     Slirp *slirp = opaque;
+    struct socket *so;
     struct ex_list *ex_ptr;
+
+    // TODO: save udp
+
+    for (so = slirp->tcb.so_next; so != &slirp->tcb;
+        so = so->so_next) {
+        qemu_put_byte(f, 42);
+        vmstate_save_state(f, &vmstate_slirp_socket, so, NULL);
+    }
+    qemu_put_byte(f, 0);
 
     for (ex_ptr = slirp->exec_list; ex_ptr; ex_ptr = ex_ptr->ex_next)
         if (ex_ptr->ex_pty == 3) {
-            struct socket *so;
             so = slirp_find_ctl_socket(slirp, ex_ptr->ex_addr,
                                        ntohs(ex_ptr->ex_fport));
             if (!so)
@@ -1595,11 +1653,117 @@ static void slirp_state_save(QEMUFile *f, void *opaque)
     vmstate_save_state(f, &vmstate_slirp, slirp, NULL);
 }
 
+#ifdef DEBUG
+static void print_so_list(struct socket* head, struct socket* tail) {
+    struct socket *tmpSocket;
+    char printBuffer[100];
+    int tcpCount = 0;
+    tmpSocket = head;
+    while (tmpSocket != tail) {
+        if (tmpSocket->so_ffamily == AF_INET6) {
+            printf("so %s\n", inet_ntop(AF_INET6, &tmpSocket->so_faddr6,
+                printBuffer, sizeof(printBuffer)));
+        } else {
+            printf("so %s\n", inet_ntop(AF_INET, &tmpSocket->so_faddr,
+                printBuffer, sizeof(printBuffer)));
+        }
+        tmpSocket = tmpSocket->so_next;
+        tcpCount ++;
+    }
+    printf("so counts %d\n", tcpCount);
+}
+#endif // DEBUG
+
+static int is_same_addr(const union slirp_sockaddr* so1,
+        const union slirp_sockaddr* so2) {
+    if (so1->ss.ss_family != so2->ss.ss_family) {
+        return 0;
+    }
+    return (so1->ss.ss_family == AF_INET &&
+            so1->sin.sin_addr.s_addr == so2->sin.sin_addr.s_addr &&
+            so1->sin.sin_port == so2->sin.sin_port) ||
+        (so1->ss.ss_family == AF_INET6 &&
+            !memcmp(&so1->sin6.sin6_addr, &so2->sin6.sin6_addr,
+                sizeof(struct in6_addr)) &&
+            so1->sin6.sin6_port == so2->sin6.sin6_port);
+}
+
+// Release memory for the old so list, as well as closing any stale connections
+// that are not in the new list.
+static int cleanup_old_so_list(struct socket *old_head, struct socket *old_tail,
+        struct socket *new_head, struct socket *new_tail) {
+    struct socket *next_so;
+    while (old_head != old_tail) {
+        next_so = old_head->so_next;
+        // Check if it is in the new list
+        int should_keep = 0;
+        struct socket *so;
+        for (so = new_head->so_next; so != new_tail; so = so->so_next) {
+            if (is_same_addr(&so->fhost, &old_head->fhost)
+                && is_same_addr(&so->lhost, &old_head->lhost)) {
+                should_keep = true;
+                break;
+            }
+        }
+        if (!should_keep) {
+            closesocket(old_head->s);
+            // TODO: should we call slirp_proxy->remove(so)?
+        }
+        free(old_head->so_rcv.sb_data);
+        free(old_head->so_snd.sb_data);
+        free(old_head);
+        old_head = next_so;
+    }
+}
 
 static int slirp_state_load(QEMUFile *f, void *opaque, int version_id)
 {
     Slirp *slirp = opaque;
     struct ex_list *ex_ptr;
+    struct socket *tcp_old_head = slirp->tcb.so_next;
+
+#ifdef DEBUG
+    printf("So before snapshot load:\n");
+    printf("udp:\n");
+    print_so_list(slirp->udb.so_next, &slirp->udb);
+
+    printf("tcp:\n");
+    print_so_list(slirp->tcb.so_next, &slirp->tcb);
+
+    printf("icmp:\n");
+    print_so_list(slirp->icmp.so_next, &slirp->icmp);
+#endif // DEBUG
+
+    // Clean up stale connections
+    // ip_cleanup cleans up both IPv4 and IPv6 connections, and ip6_cleanup
+    // cleans up extra data structures for IPv6. (Naming is confusing.)
+    if (enable_cleanup_ip_on_load) {
+        ip_cleanup(slirp);
+    }
+
+    // TODO: load udp
+
+    slirp->tcb.so_next = &slirp->tcb;
+    slirp->tcp_last_so = &slirp->tcb;
+
+    while (qemu_get_byte(f)) {
+        int ret;
+        struct socket *so = socreate(slirp);
+
+        if (!so) {
+            return -ENOMEM;
+        }
+
+        ret = vmstate_load_state(f, &vmstate_slirp_socket, so, version_id);
+
+        if (ret < 0) {
+            error_report("load vmstate_slirp_socket error %d\n", ret);
+            return ret;
+        }
+    }
+
+    // Clean up stale TCP connections
+    cleanup_old_so_list(tcp_old_head, &slirp->tcb, &slirp->tcb, &slirp->tcb);
 
     while (qemu_get_byte(f)) {
         int ret;
@@ -1629,6 +1793,21 @@ static int slirp_state_load(QEMUFile *f, void *opaque, int version_id)
 
         so->extra = (void *)ex_ptr->ex_exec;
     }
+#ifdef DEBUG
+    printf("So after snapshot load:\n");
+    printf("udp:\n");
+    print_so_list(slirp->udb.so_next, &slirp->udb);
+
+    printf("tcp:\n");
+    print_so_list(slirp->tcb.so_next, &slirp->tcb);
+
+    printf("icmp:\n");
+    print_so_list(slirp->icmp.so_next, &slirp->icmp);
+#endif // DEBUG
 
     return vmstate_load_state(f, &vmstate_slirp, slirp, version_id);
+}
+
+void slirp_set_cleanup_ip_on_load(bool enable) {
+    enable_cleanup_ip_on_load = enable;
 }

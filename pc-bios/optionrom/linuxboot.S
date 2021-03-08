@@ -165,7 +165,62 @@ load_kernel:
 	/* We're now running in 16-bit CS, but 32-bit ES! */
 
 	/* Load kernel and initrd */
-	read_fw_blob_addr32_edi(FW_CFG_INITRD)
+
+	/* Load initrd using the "DMA" interface.
+	   TODO(vtl): Should really detect whether DMA is supported. */
+	/* Get stack space for a FWCfgDmaAccess struct:
+	     typedef struct FWCfgDmaAccess {
+	         uint32_t control;
+	         uint32_t length;
+	         uint64_t address;
+	     } FWCfgDmaAccess;
+	*/
+	mov             %esp, %ebp
+	sub             $16, %esp
+	/* Set dma.control (big-endian):
+	     high (16-bit) word is FW_CFG_INITRD_DATA
+	     low (16-bit) word is FW_CFG_DMA_CTL_READ (0x02) |
+	                          FW_CFG_DMA_CTL_SELECT (0x08)
+	*/
+	movl		$(FW_CFG_INITRD_DATA << 16 | 0x02 | 0x08), %eax
+	bswap		%eax
+	mov		%eax, -16(%bp)
+	/* Get the initrd's length and set dma.length. */
+	read_fw(FW_CFG_INITRD_SIZE)
+	bswap		%eax
+	movl		%eax, -12(%bp)
+	/* Set dma.address (the address is already in EDI). */
+	movl		$0, -8(%bp)
+	mov		%edi, %eax
+	bswap		%eax
+	mov		%eax, -4(%bp)
+	/* Kick off the DMA by outputting the physical address of dma to 0x514
+	   (as two 32-bit values). */
+	/* The top value is always 0. */
+	xor		%eax, %eax
+	mov		$0x514, %dx
+	out		%eax, (%dx)
+	/* Calculate the physical address of ESP, and send it to 0x514+4. */
+	mov		%ss, %eax
+	movzwl		%ax, %eax
+	shl		$4, %eax
+	addl		%esp, %eax
+	bswap		%eax
+	add		$4, %dx
+	out		%eax, (%dx)
+.Lwait_for_dma:
+	mov -16(%bp), %eax
+	bswap %eax
+	test $~1, %eax
+	jnz .Lwait_for_dma
+
+	mov		%ebp, %esp
+
+	/* The code for reading the initrd using an I/O port was just:
+	     read_fw_blob_addr32_edi(FW_CFG_INITRD)
+	   We could also use DMA for the kernel, but we assume it's relatively
+	   small.
+	*/
 	read_fw_blob_addr32(FW_CFG_KERNEL)
 	read_fw_blob_addr32(FW_CFG_CMDLINE)
 

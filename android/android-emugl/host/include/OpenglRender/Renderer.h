@@ -16,8 +16,12 @@
 #include "OpenglRender/RenderChannel.h"
 #include "OpenglRender/render_api_platform_types.h"
 #include "android/base/files/Stream.h"
+#include "android/base/ring_buffer.h"
+#include "android/emulation/address_space_graphics_types.h"
+#include "android/opengl/virtio_gpu_ops.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/snapshot/common.h"
+#include "android/skin/rect.h"
 
 #include <functional>
 #include <memory>
@@ -43,6 +47,17 @@ public:
     //   the call as all the required data is copied here synchronously.
     virtual RenderChannelPtr createRenderChannel(
             android::base::Stream* loadStream = nullptr) = 0;
+
+    // analog of createRenderChannel, but for the address space graphics device
+    virtual void* addressSpaceGraphicsConsumerCreate(
+        struct asg_context,
+        android::base::Stream* loadStream,
+        android::emulation::asg::ConsumerCallbacks) = 0;
+    virtual void addressSpaceGraphicsConsumerDestroy(void*) = 0;
+    virtual void addressSpaceGraphicsConsumerPreSave(void* consumer) = 0;
+    virtual void addressSpaceGraphicsConsumerSave(void* consumer, android::base::Stream* stream) = 0;
+    virtual void addressSpaceGraphicsConsumerPostSave(void* consumer) = 0;
+    virtual void addressSpaceGraphicsConsumerRegisterPostLoadRenderThread(void* consumer) = 0;
 
     // getHardwareStrings - describe the GPU hardware and driver.
     // The underlying GL's vendor/renderer/version strings are returned to the
@@ -70,6 +85,8 @@ public:
     // RGB conversion, or in-place y-inversion.
     //
     // Parameters are:
+    //   displayId      Default is 0. Can also be 1 to 10 if multi display
+    //                  configured.
     //   width, height  Dimensions of the image, in pixels. Rows are tightly
     //                  packed; there is no inter-row padding.
     //   ydir           Indicates row order: 1 means top-to-bottom order, -1
@@ -82,20 +99,31 @@ public:
     // and type are always GL_RGBA and GL_UNSIGNED_BYTE, and the width and
     // height will always be the same as the ones used to create the renderer.
     using OnPostCallback = void (*)(void* context,
+                                    uint32_t displayId,
                                     int width,
                                     int height,
                                     int ydir,
                                     int format,
                                     int type,
                                     unsigned char* pixels);
-    virtual void setPostCallback(OnPostCallback onPost, void* context) = 0;
+    virtual void setPostCallback(OnPostCallback onPost,
+                                 void* context,
+                                 bool useBgraReadback,
+                                 uint32_t displayId) = 0;
 
     // Async readback API
     virtual bool asyncReadbackSupported() = 0;
 
     // Separate callback to get RGBA Pixels in async readback mode.
-    using ReadPixelsCallback = void (*)(void* pixels, uint32_t bytes);
+    using ReadPixelsCallback = void (*)(void* pixels, uint32_t bytes, uint32_t displayId);
     virtual ReadPixelsCallback getReadPixelsCallback() = 0;
+
+    using FlushReadPixelPipeline = void(*)(int displayId);
+    // Flushes the pipeline by duplicating the last frame and informing
+    // the async callback that a new frame is available if no reads are
+    // active
+    virtual FlushReadPixelPipeline getFlushReadPixelPipeline() = 0;
+
 
     // showOpenGLSubwindow -
     //     Create or modify a native subwindow which is a child of 'window'
@@ -121,7 +149,8 @@ public:
                                      int fbh,
                                      float dpr,
                                      float zRot,
-                                     bool deleteExisting) = 0;
+                                     bool deleteExisting,
+                                     bool hideWindow) = 0;
 
     // destroyOpenGLSubwindow -
     //   destroys the created native subwindow. Once destroyed,
@@ -161,10 +190,28 @@ public:
     //    device screen to mask that screen
     virtual void setScreenMask(int width, int height, const unsigned char* rgbaData) = 0;
 
+    // setMultiDisplay
+    //    add/modify/del multi-display window
+    virtual void setMultiDisplay(uint32_t id,
+                                 int32_t x,
+                                 int32_t y,
+                                 uint32_t w,
+                                 uint32_t h,
+                                 uint32_t dpi,
+                                 bool add) = 0;
+    // setMultiDisplayColorBuffer
+    //    bind ColorBuffer to the display
+    virtual void setMultiDisplayColorBuffer(uint32_t id, uint32_t cb) = 0;
+
     // cleanupProcGLObjects -
     //    clean up all per-process resources when guest process exits (or is
     // killed). Such resources include color buffer handles and EglImage handles.
     virtual void cleanupProcGLObjects(uint64_t puid) = 0;
+
+    // Wait for cleanupProcGLObjects to finish.
+    virtual void waitForProcessCleanup() = 0;
+
+    virtual struct AndroidVirtioGpuOps* getVirtioGpuOps(void) = 0;
 
     // Stops all channels and render threads. The renderer cannot be used after
     // stopped.
@@ -187,7 +234,9 @@ public:
     // Fill GLES usage protobuf
     virtual void fillGLESUsages(android_studio::EmulatorGLESUsages*) = 0;
     virtual void getScreenshot(unsigned int nChannels, unsigned int* width,
-        unsigned int* height, std::vector<unsigned char>& pixels) = 0;
+        unsigned int* height, std::vector<unsigned char>& pixels, int displayId = 0,
+        int desiredWidth = 0, int desiredHeight = 0,
+        SkinRotation desiredRotation = SKIN_ROTATION_0) = 0;
     virtual void snapshotOperationCallback(
             android::snapshot::Snapshotter::Operation op,
             android::snapshot::Snapshotter::Stage stage) = 0;

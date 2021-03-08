@@ -11,14 +11,19 @@
 
 #pragma once
 
-#include "ui_dpad-page.h"
+#include <qobjectdefs.h>           // for Q_OBJECT
+#include <QString>                 // for QString
+#include <QWidget>                 // for QWidget
+#include <memory>                  // for unique_ptr
 
-#include "android/skin/keycode.h"
-#include <QPushButton>
-#include <QWidget>
-#include <memory>
+#include "android/skin/keycode.h"  // for SkinKeyCode
+#include "ui_dpad-page.h"          // for DPadPage
 
 class EmulatorQtWindow;
+class QEvent;
+class QObject;
+class QPushButton;
+class QWidget;
 
 class DPadPage : public QWidget
 {

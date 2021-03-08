@@ -37,9 +37,14 @@
 #ifdef CONFIG_VHOST_SCSI
 #include "hw/virtio/vhost-scsi.h"
 #endif
+
 #ifdef CONFIG_VHOST_VSOCK
 #include "hw/virtio/vhost-vsock.h"
+#else
+#include "hw/virtio/virtio-vsock.h"
 #endif
+
+#include "android-qemu2-glue/emulation/virtio-wifi.h"
 
 typedef struct VirtIOPCIProxy VirtIOPCIProxy;
 typedef struct VirtIOBlkPCI VirtIOBlkPCI;
@@ -56,7 +61,9 @@ typedef struct VirtIOInputHIDPCI VirtIOInputHIDPCI;
 typedef struct VirtIOInputHostPCI VirtIOInputHostPCI;
 typedef struct VirtIOGPUPCI VirtIOGPUPCI;
 typedef struct VHostVSockPCI VHostVSockPCI;
+typedef struct VirtIOVSockPCI VirtIOVSockPCI;
 typedef struct VirtIOCryptoPCI VirtIOCryptoPCI;
+typedef struct VirtIOWifiPCI VirtIOWifiPCI;
 
 /* virtio-pci-bus */
 
@@ -82,6 +89,7 @@ enum {
     VIRTIO_PCI_FLAG_INIT_DEVERR_BIT,
     VIRTIO_PCI_FLAG_INIT_LNKCTL_BIT,
     VIRTIO_PCI_FLAG_INIT_PM_BIT,
+    VIRTIO_PCI_FLAG_HOSTSHM_BIT,
 };
 
 /* Need to activate work-arounds for buggy guests at vmstate load. */
@@ -117,6 +125,9 @@ enum {
 
 /* Init Power Management */
 #define VIRTIO_PCI_FLAG_INIT_PM (1 << VIRTIO_PCI_FLAG_INIT_PM_BIT)
+
+/* Host coherent shared memory */
+#define VIRTIO_PCI_FLAG_HOSTSHM (1 << VIRTIO_PCI_FLAG_HOSTSHM_BIT)
 
 typedef struct {
     MSIMessage msg;
@@ -171,10 +182,12 @@ struct VirtIOPCIProxy {
     };
     MemoryRegion modern_bar;
     MemoryRegion io_bar;
+    MemoryRegion hostshm_bar;
     uint32_t legacy_io_bar_idx;
     uint32_t msix_bar_idx;
     uint32_t modern_io_bar_idx;
     uint32_t modern_mem_bar_idx;
+    uint32_t hostshm_mem_bar_idx;
     int config_cap;
     uint32_t flags;
     bool disable_modern;
@@ -400,6 +413,16 @@ struct VHostVSockPCI {
     VirtIOPCIProxy parent_obj;
     VHostVSock vdev;
 };
+#else
+
+#define TYPE_VIRTIO_VSOCK_PCI "virtio-vsock-pci"
+#define VIRTIO_VSOCK_PCI(obj) \
+        OBJECT_CHECK(VirtIOVSockPCI, (obj), TYPE_VIRTIO_VSOCK_PCI)
+
+struct VirtIOVSockPCI {
+    VirtIOPCIProxy parent_obj;
+    VirtIOVSock vdev;
+};
 #endif
 
 /*
@@ -412,6 +435,18 @@ struct VHostVSockPCI {
 struct VirtIOCryptoPCI {
     VirtIOPCIProxy parent_obj;
     VirtIOCrypto vdev;
+};
+
+/*
+ * virtio-wifi-pci: This extends VirtioPCIProxy.
+ */
+
+#define TYPE_VIRTIO_WIFI_PCI "virtio-wifi-pci"
+#define VIRTIO_WIFI_PCI(obj) \
+        OBJECT_CHECK(VirtIOWifiPCI, (obj), TYPE_VIRTIO_WIFI_PCI)
+struct VirtIOWifiPCI {
+    VirtIOPCIProxy parent_obj;
+    VirtIOWifi vdev;
 };
 
 /* Virtio ABI version, if we increment this, we break the guest driver. */

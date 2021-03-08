@@ -16,7 +16,14 @@
 using android::SerialLine;
 
 static SerialLine* asClass(CSerialLine* sl) {
+#ifdef _MSC_VER
+    // Our vtable becomes corrupted by a static_cast in msvc.
+    // 1. This does not happen in the unit tests.
+    // 2. It does happen in the emulator run.
+    return (SerialLine*)(void*)(sl);
+#else
     return static_cast<SerialLine*>(sl);
+#endif
 }
 
 int android_serialline_write(CSerialLine* sl, const uint8_t* data, int len) {

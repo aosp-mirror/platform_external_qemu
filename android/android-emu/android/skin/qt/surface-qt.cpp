@@ -10,27 +10,28 @@
 ** GNU General Public License for more details.
 */
 
-#include <QtCore>
-#include <QColor>
-#include <QImage>
-#include <QObject>
-#include <QPainter>
-#include <QRect>
-#include <QWidget>
+#include <assert.h>                              // for assert
+#include <qpainter.h>                            // for QPainter::Compositio...
+#include <qsize.h>                               // for operator==
+#include <stdint.h>                              // for uint32_t
+#include <string.h>                              // for NULL, memcpy
+#include <QColor>                                // for QColor
+#include <QImage>                                // for QImage
+#include <QPainter>                              // for QPainter
+#include <QPoint>                                // for QPoint
+#include <QRect>                                 // for QRect
+#include <QSize>                                 // for QSize
+#include <memory>                                // for unique_ptr, shared_ptr
+#include <type_traits>                           // for swap
 
-#include "android/skin/argb.h"
-#include "android/skin/rect.h"
-#include "android/skin/surface.h"
-#include "android/skin/winsys.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/utils/setenv.h"
-
-#include <memory>
+#include "android/skin/qt/emulator-qt-window.h"  // for SkinSurface, SkinSur...
+#include "android/skin/rect.h"                   // for SkinRect, SkinPos
+#include "android/skin/surface.h"                // for SKIN_BLIT_COPY, SKIN...
 
 #define  DEBUG  1
 
 #if DEBUG
-#include "android/utils/debug.h"
+#include "android/utils/debug.h"                 // for VERBOSE_PRINT, VERBO...
 
 #define  D(...)   VERBOSE_PRINT(surface,__VA_ARGS__)
 #else
@@ -68,7 +69,7 @@ extern void skin_surface_unrefp(SkinSurface* *psurface)
 
 extern int skin_surface_width(SkinSurface *s)
 {
-    D("skin_surface_width %d", s->id);
+    D("skin_surface_width %d", s->w);
     return s->w;
 }
 
@@ -98,6 +99,7 @@ extern SkinSurface *skin_surface_create(int w, int h, int original_w, int origin
         s->w = w;
         s->h = h;
         s->isRound = 0;
+        D("skin_surface_create bitmap(%dx%d) w %d h %d id %d\n", original_w, original_h,s->w, s->h, next_id);
     });
 }
 
@@ -106,6 +108,7 @@ extern SkinSurface* skin_surface_create_from_data(const void* data, int size) {
         s->bitmap = new SkinSurfaceBitmap((const unsigned char*)data, size);
         s->w = s->bitmap->size().width();
         s->h = s->bitmap->size().height();
+        D("skin_surface_create_from_data w %d h %did %d\n", s->w, s->h, next_id);
         s->isRound = 0;
     });
 }
@@ -115,6 +118,7 @@ extern SkinSurface* skin_surface_create_from_file(const char* path) {
         s->bitmap = new SkinSurfaceBitmap(path);
         s->w = s->bitmap->size().width();
         s->h = s->bitmap->size().height();
+        D("skin_surface_create_from_file %s w %d h %did %d\n", path, s->w, s->h, next_id);
         s->isRound = 0;
     });
 }
@@ -137,6 +141,7 @@ extern SkinSurface* skin_surface_create_derived(SkinSurface* source,
 extern SkinSurface* skin_surface_resize(SkinSurface *surface, int w, int h,
                                         int original_w, int original_h)
 {
+    D("skin_surface_resize w %d h %d original_w %d original_h %d\n", w, h, original_w, original_h);
     if ( surface == NULL ) {
         return skin_surface_create(w, h, original_w, original_h);
     } else if (surface->bitmap->size() == QSize(original_w, original_h)) {
@@ -174,7 +179,7 @@ extern void skin_surface_update(SkinSurface *surface, SkinRect *rect)
 extern void skin_surface_blit(SkinSurface *dst, SkinPos *pos, SkinSurface *src, SkinRect *rect, SkinBlitOp op)
 {
 #if 0
-    D("skin_surface_blit from %d (%d, %d) to %d: %d,%d,%d,%d", src->id, rect->pos.x, rect->pos.y, dst->id, rect->pos.x, rect->pos.y, rect->size.w, rect->size.h);
+    D("skin_surface_blit from %d (%d, %d, %d, %d) to %d: %d,%d", src->id, rect->pos.x, rect->pos.y, rect->size.w, rect->size, dst->id, pos->x, pos->y);
 #endif
     QRect qrect(rect->pos.x, rect->pos.y, rect->size.w, rect->size.h);
     QPoint qpos(pos->x, pos->y);
@@ -274,9 +279,6 @@ extern void skin_surface_reverse_map(SkinSurface *surface, int *x, int *y)
 {
     int new_x = *x * surface->bitmap->size().width() / surface->w;
     int new_y = *y * surface->bitmap->size().height() / surface->h;
-#if 0
-    D("skin_surface_reverse_map %d: %d,%d to %d,%d", surface->id, *x, *y, new_x, new_y);
-#endif
     *x = new_x;
     *y = new_y;
 }

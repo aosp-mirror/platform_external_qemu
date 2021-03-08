@@ -16,7 +16,9 @@
 #include "FrameBuffer.h"
 #include "RendererImpl.h"
 
+#include "android/base/CpuUsage.h"
 #include "android/base/files/Stream.h"
+#include "emugl/common/address_space_device_control_ops.h"
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/dma_device.h"
 #include "emugl/common/feature_control.h"
@@ -46,6 +48,11 @@ void RenderLibImpl::setLogger(emugl_logger_struct logger) {
     set_emugl_cxt_logger(logger.fine);
 }
 
+void RenderLibImpl::setGLObjectCounter(
+        android::base::GLObjectCounter* counter) {
+    emugl::setGLObjectCounter(counter);
+}
+
 void RenderLibImpl::setCrashReporter(emugl_crash_reporter_t reporter) {
     set_emugl_crash_reporter(reporter);
 }
@@ -70,18 +77,35 @@ void RenderLibImpl::setSyncDevice
 }
 
 void RenderLibImpl::setDmaOps(emugl_dma_ops ops) {
-    set_emugl_dma_add_buffer(ops.add_buffer);
-    set_emugl_dma_remove_buffer(ops.remove_buffer);
     set_emugl_dma_get_host_addr(ops.get_host_addr);
-    set_emugl_dma_invalidate_host_mappings(ops.invalidate_host_mappings);
     set_emugl_dma_unlock(ops.unlock);
 }
 
-void* RenderLibImpl::getGL(void) {
+void RenderLibImpl::setVmOps(const QAndroidVmOperations &vm_operations) {
+    set_emugl_vm_operations(vm_operations);
+}
+
+void RenderLibImpl::setAddressSpaceDeviceControlOps(struct address_space_device_control_ops* ops) {
+    set_emugl_address_space_device_control_ops(ops);
+}
+
+void RenderLibImpl::setWindowOps(const QAndroidEmulatorWindowAgent &window_operations,
+                                 const QAndroidMultiDisplayAgent &multi_display_operations) {
+    set_emugl_window_operations(window_operations);
+    set_emugl_multi_display_operations(multi_display_operations);
+}
+
+void RenderLibImpl::setUsageTracker(android::base::CpuUsage* cpuUsage,
+                                    android::base::MemoryTracker* memUsage) {
+    emugl::setCpuUsage(cpuUsage);
+    emugl::setMemoryTracker(memUsage);
+}
+
+void* RenderLibImpl::getGLESv2Dispatch(void) {
     return &s_gles2;
 }
 
-void* RenderLibImpl::getEGL(void) {
+void* RenderLibImpl::getEGLDispatch(void) {
     return &s_egl;
 }
 

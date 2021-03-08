@@ -72,6 +72,10 @@ typedef QemudClient* (*QemudServiceConnect)(void* opaque,
                                             int channel,
                                             const char* client_param);
 
+/* The global QEMUD client lock. */
+void qemud_client_global_lock_acquire();
+void qemud_client_global_lock_release();
+
 /* Register a new client for a given service.
  *
  * This function must be used in the serv_connect callback

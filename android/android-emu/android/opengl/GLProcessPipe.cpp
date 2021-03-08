@@ -10,14 +10,32 @@
 // GNU General Public License for more details.
 
 #include "android/emulation/AndroidPipe.h"
+#include "android/base/synchronization/Lock.h"
 
 #include "android/opengles.h"
 #include <assert.h>
 #include <atomic>
 #include <memory>
+#include <unordered_set>
+
+using android::base::AutoLock;
+using android::base::Lock;
 
 namespace android {
 namespace opengl {
+
+struct ProcessPipeIdRegistry {
+    Lock lock;
+    std::unordered_set<uint64_t> ids;
+};
+
+static ProcessPipeIdRegistry sRegistry;
+
+static bool sIdExistsInRegistry(uint64_t id) {
+    AutoLock lock(sRegistry.lock);
+    auto it = sRegistry.ids.find(id);
+    return it != sRegistry.ids.end();
+}
 
 namespace {
 
@@ -64,17 +82,28 @@ public:
         : AndroidPipe(hwPipe, service) {
         if (loadStream) {
             m_uniqueId = loadStream->getBe64();
+            m_hasData = (loadStream->getByte() != 0);
         } else {
             m_uniqueId = ++s_headId;
         }
+        AutoLock lock(sRegistry.lock);
+        sRegistry.ids.insert(m_uniqueId);
+    }
+
+    ~GLProcessPipe() {
+        AutoLock lock(sRegistry.lock);
+        sRegistry.ids.erase(m_uniqueId);
     }
 
     void onSave(base::Stream* stream) override {
         stream->putBe64(m_uniqueId);
+        stream->putByte(m_hasData ? 1 : 0);
     }
 
     void onGuestClose(PipeCloseReason reason) override {
-        android_cleanupProcGLObjects(m_uniqueId);
+        if (sIdExistsInRegistry(m_uniqueId)) {
+            android_cleanupProcGLObjects(m_uniqueId);
+        }
         delete this;
     }
 
@@ -84,18 +113,25 @@ public:
 
     int onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) override {
         assert(buffers[0].size >= 8);
-        memcpy(buffers[0].data, (const char*)&m_uniqueId, sizeof(m_uniqueId));
-        return sizeof(m_uniqueId);
+        if (m_hasData) {
+            m_hasData = false;
+            memcpy(buffers[0].data, (const char*)&m_uniqueId, sizeof(m_uniqueId));
+            return sizeof(m_uniqueId);
+        } else {
+            return 0;
+        }
     }
 
     int onGuestSend(const AndroidPipeBuffer* buffers,
-                            int numBuffers) override {
+                            int numBuffers,
+                            void** newPipePtr) override {
         // The guest is supposed to send us a confirm code first. The code is
         // 100 (4 byte integer).
         assert(buffers[0].size >= 4);
         int32_t confirmInt = *((int32_t*)buffers[0].data);
         assert(confirmInt == 100);
         (void)confirmInt;
+        m_hasData = true;
         return buffers[0].size;
     }
 
@@ -108,6 +144,7 @@ private:
     // space.
     // Please change it if you ever have a use case that exhausts them
     uint64_t m_uniqueId;
+    bool m_hasData = false;
     static std::atomic<uint64_t> s_headId;
 
 };
@@ -117,7 +154,23 @@ std::atomic<uint64_t> GLProcessPipe::s_headId {0};
 }
 
 void registerGLProcessPipeService() {
-    android::AndroidPipe::Service::add(new GLProcessPipe::Service());
+    AndroidPipe::Service::add(std::make_unique<GLProcessPipe::Service>());
+}
+
+void forEachProcessPipeId(std::function<void(uint64_t)> f) {
+    AutoLock lock(sRegistry.lock);
+    for (auto id: sRegistry.ids) {
+        f(id);
+    }
+}
+
+void forEachProcessPipeIdRunAndErase(std::function<void(uint64_t)> f) {
+    AutoLock lock(sRegistry.lock);
+    auto it = sRegistry.ids.begin();
+    while (it != sRegistry.ids.end()) {
+        f(*it);
+        it = sRegistry.ids.erase(it);
+    }
 }
 
 }

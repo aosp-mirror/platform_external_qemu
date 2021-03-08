@@ -14,17 +14,25 @@
 
 #include "android/recording/video/VideoProducer.h"
 
-#include "android/base/synchronization/MessageChannel.h"
-#include "android/base/system/System.h"
-#include "android/base/threads/Async.h"
-#include "android/emulation/control/display_agent.h"
-#include "android/gpu_frame.h"
-#include "android/opengles.h"
-#include "android/recording/Frame.h"
-#include "android/recording/video/GuestReadbackWorker.h"
-#include "android/utils/debug.h"
+#include <assert.h>                                       // for assert
+#include <cstdint>                                        // for uint8_t
+#include <functional>                                     // for __base, fun...
+#include <memory>                                         // for unique_ptr
+#include <new>                                            // for operator new
+#include <utility>                                        // for move
+#include <vector>                                         // for vector
 
-#include <memory>
+#include "android/base/Optional.h"                        // for Optional
+#include "android/base/synchronization/MessageChannel.h"  // for MessageChannel
+#include "android/base/system/System.h"                   // for System
+#include "android/base/threads/Async.h"                   // for async
+#include "android/emulation/control/display_agent.h"      // for QAndroidDis...
+#include "android/gpu_frame.h"                            // for gpu_frame_s...
+#include "android/opengles.h"                             // for android_red...
+#include "android/recording/Frame.h"                      // for Frame, AVFo...
+#include "android/recording/Producer.h"                   // for Producer
+#include "android/recording/video/GuestReadbackWorker.h"  // for GuestReadba...
+#include "android/utils/debug.h"                          // for VERBOSE_PRINT
 
 #define D(...) VERBOSE_PRINT(record, __VA_ARGS__);
 
@@ -47,8 +55,9 @@ public:
     VideoProducer(uint32_t fbWidth,
                   uint32_t fbHeight,
                   uint8_t fps,
+                  uint32_t displayId,
                   const QAndroidDisplayAgent* dpyAgent)
-        : mFbWidth(fbWidth), mFbHeight(fbHeight), mFps(fps) {
+        : mFbWidth(fbWidth), mFbHeight(fbHeight), mFps(fps), mDisplayId(displayId) {
         mTimeDeltaMs = 1000 / mFps;
         // Is |dpyAgent| was supplied, then assume we are in guest mode.
         if (dpyAgent) {
@@ -58,7 +67,7 @@ public:
             mFormat.videoFormat = mGuestReadbackWorker->getPixelFormat();
         } else {
             // The host framebuffer is always using RGBA8888.
-            mFormat.videoFormat = VideoFormat::RGBA8888;
+            mFormat.videoFormat = VideoFormat::BGRA8888;
         }
 
         // Prefill the free queue with empty frames
@@ -75,9 +84,10 @@ public:
 
     intptr_t main() final {
         assert(mCallback);
+        mIsStopped = false;
         if (!mIsGuestMode) {
             // Force a repost
-            gpu_frame_set_record_mode(true);
+            gpu_frame_set_record_mode(true, mDisplayId);
             android_redrawOpenglesWindow();
         }
 
@@ -102,12 +112,23 @@ public:
         return 0;
     }
 
+    void pokeReceiver() {
+        mSignal.send(1);
+    }
+
+    void waitForPoke() {
+        mSignal.receive();
+    }
+
     virtual void stop() override {
-        if (!mIsGuestMode) {
-            gpu_frame_set_record_mode(false);
-        }
+        mIsStopped = true;
         mDataQueue.stop();
         mFreeQueue.stop();
+        waitForPoke();
+        // disable Gpu record when sendFramesWorker() thread exits.
+        if (!mIsGuestMode) {
+            gpu_frame_set_record_mode(false, mDisplayId);
+        }
     }
 
 private:
@@ -116,6 +137,9 @@ private:
         int i = 0;
 
         while (true) {
+            if (mIsStopped) {
+              break;
+            }
             long long currTimeMs =
                     android::base::System::get()->getHighResTimeUs() / 1000;
 
@@ -130,7 +154,7 @@ private:
             frame->tsUs = android::base::System::get()->getHighResTimeUs();
             bool gotFrame = false;
             if (!mIsGuestMode) {
-                auto px = (unsigned char*)gpu_frame_get_record_frame();
+                auto px = (unsigned char*)gpu_frame_get_record_frame(mDisplayId);
                 if (px) {
                     frame->dataVec.assign(px, px + frame->dataVec.size());
                     gotFrame = true;
@@ -179,11 +203,13 @@ private:
         }
 
         D("Finished sending video frames");
+        pokeReceiver();
     }
 
     uint32_t mFbWidth = 0;
     uint32_t mFbHeight = 0;
     uint32_t mTimeDeltaMs = 0;
+    uint32_t mDisplayId = 0;
     uint8_t mFps = 0;
     uint8_t mTimeLimitSecs = 0;
     bool mIsGuestMode = false;
@@ -201,6 +227,8 @@ private:
     static constexpr int kMaxFrames = 3;
     MessageChannel<Frame, kMaxFrames> mDataQueue;
     MessageChannel<Frame, kMaxFrames> mFreeQueue;
+    MessageChannel<int, 1> mSignal;
+    bool mIsStopped = false;
 
     // In guest mode, the frames are already triple-buffered in the readback
     // worker, so we don't need to use the messaage channel.
@@ -212,9 +240,10 @@ std::unique_ptr<Producer> createVideoProducer(
         uint32_t fbWidth,
         uint32_t fbHeight,
         uint8_t fps,
+        uint32_t displayId,
         const QAndroidDisplayAgent* dpyAgent) {
     return std::unique_ptr<Producer>(
-            new VideoProducer(fbWidth, fbHeight, fps, dpyAgent));
+            new VideoProducer(fbWidth, fbHeight, fps, displayId, dpyAgent));
 }
 
 }  // namespace recording

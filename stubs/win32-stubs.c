@@ -1,3 +1,19 @@
+// THIS IS EMPTY ON PURPOSE, AS THESE IMPLEMENTATIONS ARE NOT UNICODE SAFE
+
+// You should take a dependency on android-emu-base, where you will find the proper
+// implementation that is unicode compliant.
+
+#if 0
+#ifdef _MSC_VER
+  #include "msvc-posix.h"
+// TODO: MSVC build currently relies on this; it should not use this.
+#else
+
+#ifndef LIBQEMUSTUB
+#error "This file should not be linked against the Android emulator binaries, as it makes non-ASCII filename handling fail."
+#endif
+
+#endif
 #include "qemu/osdep.h"
 
 /* NOTE: This file should not be linked against the Android emulator binaries */
@@ -30,10 +46,11 @@ DWORD win32GetModuleFileName(
     return GetModuleFileName(hModule, lpFilename, nSize);
 }
 
-int win32_stat(const char* filepath, struct stat* st) {
+int win32_stat(const char* filepath, struct _stati64* st) {
     return _stati64(filepath, st);
 }
 
-int win32_lstat(const char* filepath, struct stat* st) {
+int win32_lstat(const char* filepath, struct _stati64* st) {
     return win32_stat(filepath, st);
 }
+#endif

@@ -133,7 +133,7 @@ TEST(TagLengthValue, ConstructAllRefArDo) {
         },
         RefArDo {
             RefDo {
-                AidRefDo { },
+                AidRefDo(),
                 DeviceAppIdRefDo { "BEEF" }
             },
             ArDo {

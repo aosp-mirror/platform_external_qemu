@@ -9,17 +9,20 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android/globals.h"
+#include <stdbool.h>                     // for true
+#include <stdlib.h>                      // for NULL, strtol
+#include <string.h>                      // for memcmp, strchr, strcmp, memcpy
 
-#include "android/skin/file.h"
-
-#include "android/skin/keycode.h"
-#include "android/utils/path.h"
-#include "android/utils/bufprint.h"
-#include "android/utils/system.h"
-#include "android/utils/debug.h"
-
-#include <stdlib.h>
+#include "android/globals.h"             // for android_hw
+#include "android/skin/file.h"           // for SkinPart, SkinLayout, SkinLo...
+#include "android/skin/image.h"          // for skin_image_clone_rotated
+#include "android/skin/keycode.h"        // for kKeyCodeDel, kKeyCodeDpadUp
+#include "android/skin/rect.h"           // for SkinRect, SkinSize, SkinPos
+#include "android/utils/aconfig-file.h"  // for aconfig_int, aconfig_find_const
+#include "android/utils/bufprint.h"      // for bufprint
+#include "android/utils/debug.h"         // for dprint
+#include "android/utils/path.h"          // for PATH_SEP
+#include "android/utils/system.h"        // for ANEW0, AFREE
 
 /** UTILITY ROUTINES
  **/
@@ -805,7 +808,6 @@ Fail:
 
 /** SKIN FILE
  **/
-
 static int skin_file_load_from_v1(SkinFile* file,
                                   const AConfig* aconfig,
                                   const char* basepath,
@@ -898,7 +900,7 @@ static int skin_file_load_from_v2(SkinFile* file,
             SkinPart*  part = skin_part_create_from_v2(
                     node, basepath, fb_funcs);
             if (part == NULL) {
-                dprint( "## WARNING: can't load part '%s' from skin\n", node->name ? "<NULL>" : node->name );
+                dprint( "## WARNING: can't load part '%s' from skin\n", node->name ? node->name : "<NULL>");
                 continue;
             }
 
@@ -998,6 +1000,74 @@ SkinFile* skin_file_create_from_aconfig(const AConfig* aconfig,
 BAD_FILE:
     skin_file_free( file );
     return NULL;
+}
+
+SkinFile* skin_file_create_from_display_v1(const SkinDisplay* display) {
+    SkinFile*  file;
+    ANEW0(file);
+    SkinPart*      part;
+    SkinLayout*    layout;
+    SkinLayout**   ptail = &file->layouts;
+    SkinLocation*  location;
+    int            nn;
+
+    ANEW0(file->parts);
+    memcpy(file->parts->display, display, sizeof(SkinDisplay));
+    file->parts->rect = display->rect;
+    part = file->parts;
+
+    for (nn = 0; nn < 4; nn++)
+    {
+        ANEW0(layout);
+
+        layout->color = 0xff808080;
+
+        ANEW0(location);
+
+        layout->event_type  = 0x05;  /* close keyboard by default */
+        layout->event_code  = 0;
+        layout->event_value = 0;
+
+        location->part     = part;
+        switch (nn) {
+            case 0:
+                location->anchor.x = 0;
+                location->anchor.y = 0;
+                location->rotation = SKIN_ROTATION_0;
+                layout->size       = part->rect.size;
+                break;
+
+            case 1:
+                location->anchor.x = part->rect.size.h;
+                location->anchor.y = 0;
+                location->rotation = SKIN_ROTATION_90;
+                layout->size.w     = part->rect.size.h;
+                layout->size.h     = part->rect.size.w;
+                break;
+
+            case 2:
+                location->anchor.x = part->rect.size.w;
+                location->anchor.y = part->rect.size.h;
+                location->rotation = SKIN_ROTATION_180;
+                layout->size       = part->rect.size;
+                break;
+
+            default:
+                location->anchor.x = 0;
+                location->anchor.y = part->rect.size.w;
+                location->rotation = SKIN_ROTATION_270;
+                layout->size.w     = part->rect.size.h;
+                layout->size.h     = part->rect.size.w;
+                break;
+        }
+        layout->locations = location;
+        layout->orientation = location->rotation;
+
+        *ptail = layout;
+        ptail  = &layout->next;
+    }
+    file->version = 1;
+    return file;
 }
 
 void

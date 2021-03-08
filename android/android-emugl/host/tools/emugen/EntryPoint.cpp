@@ -357,6 +357,21 @@ int EntryPoint::setAttribute(const std::string &line, size_t lc)
 
         pos = last;
         v->setGuestUnpackExpression(line.substr(pos));
+    } else if (token == "custom_guest_pack") {
+        pos = last;
+        std::string varname = getNextToken(line, pos, &last, WHITESPACE);
+        err = validateVarAttr(varname, lc);
+        if (err < 0) return err;
+
+        v = var(varname);
+        if (v->pointerDir() == Var::POINTER_OUT) {
+            fprintf(stderr, "ERROR: %u: variable %s is not an input or inout\n",
+                    (unsigned int)lc, varname.c_str());
+            return -2;
+        }
+
+        pos = last;
+        v->setGuestPackExpression(line.substr(pos));
     } else if (token == "custom_write") {
         pos = last;
         std::string varname = getNextToken(line, pos, &last, WHITESPACE);
@@ -386,6 +401,10 @@ int EntryPoint::setAttribute(const std::string &line, size_t lc)
         } else {
             fprintf(stderr, "WARNING: %u: unknown flag %s\n", (unsigned int)lc, flag.c_str());
         }
+    } else if (token == "custom_host_api") {
+        pos = last;
+        std::string apiname = getNextToken(line, pos, &last, WHITESPACE);
+        setCustomHostApi(apiname);
     } else {
         fprintf(stderr, "WARNING: %u: unknown attribute %s\n", (unsigned int)lc, token.c_str());
     }

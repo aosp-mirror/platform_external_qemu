@@ -12,34 +12,36 @@
 
 #pragma once
 
-#include "android/emulation/control/location_agent.h"
-#include "android/emulation/control/sensors_agent.h"
-#include "android/emulation/control/user_event_agent.h"
-#include "android/gps/GpsFix.h"
-#include "android/hw-sensors.h"
-#include "android/settings-agent.h"
-#include "android/skin/qt/extended-window-styles.h"
-#include "android/skin/qt/shortcut-key-store.h"
-#include "android/skin/qt/size-tweaker.h"
-#include "android/skin/qt/qt-ui-commands.h"
-#include "android/skin/qt/extended-pages/common.h"
-#include "android/ui-emu-agent.h"
-#include "android/utils/path.h"
+#include <qobjectdefs.h>                             // for Q_OBJECT, slots
+#include <QButtonGroup>                              // for QButtonGroup
+#include <QFrame>                                    // for QFrame
+#include <QString>                                   // for QString
+#include <map>                                       // for map
+#include <memory>                                    // for unique_ptr
 
-#include <QButtonGroup>
-#include <QFrame>
-#include <QPushButton>
-#include <QString>
-#include <QShowEvent>
-
-#include <map>
-#include <memory>
-#include <vector>
+#include "android/settings-agent.h"                  // for SettingsTheme
+#include "android/skin/qt/extended-window-styles.h"  // for ExtendedWindowPane
+#include "android/skin/qt/qt-ui-commands.h"          // for QtUICommand
+#include "android/skin/qt/size-tweaker.h"            // for SizeTweaker
+#include "android/ui-emu-agent.h"                    // for UiEmuAgent
 
 class EmulatorQtWindow;
+class QCloseEvent;
+class QKeyEvent;
+class QObject;
+class QPushButton;
+class QShowEvent;
 class ToolWindow;
-class GeoDataLoaderThread;
 class VirtualSceneControlWindow;
+template <class CommandType> class ShortcutKeyStore;
+
+namespace android {
+namespace metrics {
+ class UiEventTracker;
+}
+}
+
+using android::metrics::UiEventTracker;
 
 namespace Ui {
     class ExtendedControls;
@@ -61,6 +63,7 @@ public:
     // someone needs to call 'shutdown' to let us know we should stop
     // those actions.
     static void shutDown();
+    void sendMetricsOnShutDown();
 
     void show();
     void showPane(ExtendedWindowPane pane);
@@ -73,6 +76,8 @@ private slots:
     void switchOnTop(bool isOntop);
     void switchToTheme(SettingsTheme theme);
     void disableMouseWheel(bool disabled);
+    void showMacroRecordPage();
+    void hideRotationButtons();
 
     // Master tabs
     void on_batteryButton_clicked();
@@ -80,13 +85,16 @@ private slots:
     void on_bugreportButton_clicked();
     void on_cellularButton_clicked();
     void on_dpadButton_clicked();
+    void on_displaysButton_clicked();
     void on_fingerButton_clicked();
     void on_googlePlayButton_clicked();
     void on_helpButton_clicked();
     void on_carDataButton_clicked();
+    void on_carRotaryButton_clicked();
+    void on_sensorReplayButton_clicked();
     void on_locationButton_clicked();
     void on_microphoneButton_clicked();
-    void on_recordScreenButton_clicked();
+    void on_recordButton_clicked();
     void on_rotaryInputButton_clicked();
     void on_settingsButton_clicked();
     void on_snapshotButton_clicked();
@@ -100,11 +108,13 @@ private:
     void showEvent(QShowEvent* e) override;
 
     EmulatorQtWindow* mEmulatorWindow;
-    ToolWindow* mToolWindow;
+    ToolWindow*  mToolWindow;
     std::map<ExtendedWindowPane, QPushButton*> mPaneButtonMap;
+    std::shared_ptr<UiEventTracker> mPaneInvocationTracker;
     const ShortcutKeyStore<QtUICommand>* mQtUIShortcuts;
     std::unique_ptr<Ui::ExtendedControls> mExtendedUi;
     bool mFirstShowEvent = true;
     SizeTweaker mSizeTweaker;
     QButtonGroup mSidebarButtons;
+    bool mExtendedWindowWasShown = false;
 };

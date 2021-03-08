@@ -11,16 +11,21 @@
 
 #pragma once
 
-#include "android/skin/qt/emulator-container.h"
-#include "ui_virtualscene-info-dialog.h"
+#include <qobjectdefs.h>                  // for Q_OBJECT, signals, slots
+#include <QSize>                          // for QSize
+#include <QString>                        // for QString
+#include <QWidget>                        // for QWidget
+#include <functional>                     // for function
+#include <memory>                         // for unique_ptr
 
-#include <QString>
-#include <QWidget>
+#include "ui_virtualscene-info-dialog.h"  // for VirtualSceneInfoDialog
 
-#include <functional>
-#include <memory>
-
-class QFrame;
+class EmulatorContainer;
+class QKeyEvent;
+class QObject;
+class QShowEvent;
+class QSize;
+class QString;
 
 class VirtualSceneInfoDialog : public QWidget {
     Q_OBJECT

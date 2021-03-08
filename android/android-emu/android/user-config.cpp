@@ -20,7 +20,9 @@
 #include "android/utils/path.h"
 #include <stdlib.h>
 #include <errno.h>
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
 #include <sys/time.h>
 #endif
 
@@ -36,6 +38,9 @@ struct AUserConfig {
     ABool        changed;
     int          windowX;
     int          windowY;
+    int extendedControlsX;
+    int extendedControlsY;
+    ABool hasExtendedControlPos;
     uint64_t     uuid;
     char*        iniPath;
 };
@@ -45,10 +50,12 @@ struct AUserConfig {
 
 #define  KEY_WINDOW_X  "window.x"
 #define  KEY_WINDOW_Y  "window.y"
+#define KEY_EXTENDED_CONTROLS_X "extended_controls.x"
+#define KEY_EXTENDED_CONTROLS_Y "extended_controls.y"
 #define  KEY_UUID      "uuid"
 
-#define  DEFAULT_X  100
-#define  DEFAULT_Y  100
+#define  DEFAULT_X 100
+#define  DEFAULT_Y 100
 
 void auserConfig_free( AUserConfig* uconfig) {
     if (uconfig->iniPath) {
@@ -57,9 +64,35 @@ void auserConfig_free( AUserConfig* uconfig) {
     delete uconfig;
 }
 
+AUserConfig*
+auserConfig_new_custom(
+    AvdInfo* info,
+    const SkinRect* monitorRect,
+    int screenWidth, int screenHeight ) {
+
+    std::unique_ptr<AUserConfig> uc(new AUserConfig());
+    memset(uc.get(), 0, sizeof(*uc));
+    int default_w = (monitorRect->size.w * 3) / 4;
+    int default_h = (monitorRect->size.h * 3) / 4;
+    if (default_w < 100) default_w = 100;
+    if (default_h < 100) default_h = 100;
+    uc->windowX  = DEFAULT_X;
+    uc->windowY  = DEFAULT_Y;
+    // uc->windowW  = default_w;
+    // uc->windowH  = default_h;
+    // uc->frameX   = DEFAULT_X;
+    // uc->frameY   = DEFAULT_Y;
+    // uc->frameW   = default_w;
+    // uc->frameH   = default_h;
+    uc->changed  = 1;
+    uc->uuid = 0;
+
+    return uc.release();
+}
+
 /* Create a new AUserConfig object from a given AvdInfo */
 AUserConfig*
-auserConfig_new( AvdInfo*  info )
+auserConfig_new( AvdInfo* info, SkinRect* monitorRect, int screenWidth, int screenHeight )
 {
     char          inAndroidBuild = avdInfo_inAndroidBuild(info);
     char          needUUID = 1;
@@ -126,13 +159,44 @@ auserConfig_new( AvdInfo*  info )
                      uc->iniPath);
         }
     }
-
+    // Set the default width and height to 3/4 the monitor size
+    int default_w = (monitorRect->size.w * 3) / 4;
+    int default_h = (monitorRect->size.h * 3) / 4;
+    if (default_w < 100) default_w = 100;
+    if (default_h < 100) default_h = 100;
+    if (screenWidth > 0 && screenHeight > 0) {
+        // Reduce one side of the default size to make it match the device's aspect ratio
+        double defaultSizeAspectRatio = ((double)default_w)   / default_h;
+        double deviceAspectRatio      = ((double)screenWidth) / screenHeight;
+        if (defaultSizeAspectRatio < deviceAspectRatio) {
+            // Reduce the height
+            default_h = default_w / deviceAspectRatio;
+        } else {
+            // Reduce the width
+            default_w = default_h * deviceAspectRatio;
+        }
+    }
     if (ini != NULL) {
         uc->windowX = iniFile_getInteger(ini, KEY_WINDOW_X, DEFAULT_X);
         DD("    found %s = %d", KEY_WINDOW_X, uc->windowX);
 
         uc->windowY = iniFile_getInteger(ini, KEY_WINDOW_Y, DEFAULT_Y);
         DD("    found %s = %d", KEY_WINDOW_Y, uc->windowY);
+        if (iniFile_hasKey(ini, KEY_EXTENDED_CONTROLS_X)) {
+            uc->hasExtendedControlPos = 1;
+            uc->extendedControlsX =
+                    iniFile_getInteger(ini, KEY_EXTENDED_CONTROLS_X, 0);
+            DD("    found %s = %d\n", KEY_EXTENDED_CONTROLS_X,
+               uc->extendedControlsX);
+        }
+
+        if (iniFile_hasKey(ini, KEY_EXTENDED_CONTROLS_Y)) {
+            uc->hasExtendedControlPos = 1;
+            uc->extendedControlsY =
+                    iniFile_getInteger(ini, KEY_EXTENDED_CONTROLS_Y, 0);
+            DD("    found %s = %d", KEY_EXTENDED_CONTROLS_Y,
+               uc->extendedControlsY);
+        }
 
         if (iniFile_hasKey(ini, KEY_UUID)) {
             uc->uuid = (uint64_t) iniFile_getInt64(ini, KEY_UUID, 0LL);
@@ -188,6 +252,28 @@ auserConfig_setWindowPos( AUserConfig*  uconfig, int  x, int  y )
     }
 }
 
+int auserConfig_getExtendedControlsPos(AUserConfig* uconfig, int* pX, int* pY) {
+    if (uconfig->hasExtendedControlPos) {
+        *pX = uconfig->extendedControlsX;
+        *pY = uconfig->extendedControlsY;
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+int auserConfig_setExtendedControlsPos(AUserConfig* uconfig, int x, int y) {
+    if (x != uconfig->extendedControlsX || y != uconfig->extendedControlsY) {
+        uconfig->extendedControlsX = x;
+        uconfig->extendedControlsY = y;
+        uconfig->changed = 1;
+        uconfig->hasExtendedControlPos = 1;
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
 /* Save the user configuration back to the content directory.
  * Should be used in an atexit() handler */
 void
@@ -208,6 +294,13 @@ auserConfig_save( AUserConfig*  uconfig )
 
     iniFile_setInteger(ini, KEY_WINDOW_X, uconfig->windowX);
     iniFile_setInteger(ini, KEY_WINDOW_Y, uconfig->windowY);
+
+    if (uconfig->hasExtendedControlPos) {
+        iniFile_setInteger(ini, KEY_EXTENDED_CONTROLS_X,
+                           uconfig->extendedControlsX);
+        iniFile_setInteger(ini, KEY_EXTENDED_CONTROLS_Y,
+                           uconfig->extendedControlsY);
+    }
     iniFile_setInt64(ini, KEY_UUID, uconfig->uuid);
     if (iniFile_saveToFile(ini, uconfig->iniPath) < 0) {
         dwarning("could not save user configuration: %s: %s",

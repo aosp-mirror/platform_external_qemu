@@ -16,7 +16,9 @@
 #include "android/proxy/proxy_common.h"
 #include "android/utils/sockets.h"
 
+extern "C" {
 #include "slirp/proxy.h"
+}
 
 #ifdef _WIN32
 #include "android/base/sockets/Winsock.h"

@@ -24,9 +24,10 @@
 
 #pragma once
 
-#include <vulkan.h>
+#include <vulkan/vulkan.h>
 
 
+#include "goldfish_vk_private_defs.h"
 #include <string.h>
 #include <functional>
 using OnFailCompareFunc = std::function<void(const char*)>;
@@ -1348,6 +1349,20 @@ void checkEqual_VkPhysicalDevice8BitStorageFeaturesKHR(
     OnFailCompareFunc onFail);
 
 #endif
+#ifdef VK_KHR_shader_float16_int8
+void checkEqual_VkPhysicalDeviceShaderFloat16Int8Features(
+    const VkPhysicalDeviceShaderFloat16Int8Features* a,
+    const VkPhysicalDeviceShaderFloat16Int8Features* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_ANDROID_native_buffer
+void checkEqual_VkNativeBufferANDROID(
+    const VkNativeBufferANDROID* a,
+    const VkNativeBufferANDROID* b,
+    OnFailCompareFunc onFail);
+
+#endif
 #ifdef VK_EXT_debug_report
 void checkEqual_VkDebugReportCallbackCreateInfoEXT(
     const VkDebugReportCallbackCreateInfoEXT* a,
@@ -1992,6 +2007,43 @@ void checkEqual_VkCheckpointDataNV(
     const VkCheckpointDataNV* b,
     OnFailCompareFunc onFail);
 
+#endif
+#ifdef VK_GOOGLE_address_space
+#endif
+#ifdef VK_GOOGLE_color_buffer
+void checkEqual_VkImportColorBufferGOOGLE(
+    const VkImportColorBufferGOOGLE* a,
+    const VkImportColorBufferGOOGLE* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkImportBufferGOOGLE(
+    const VkImportBufferGOOGLE* a,
+    const VkImportBufferGOOGLE* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkImportPhysicalAddressGOOGLE(
+    const VkImportPhysicalAddressGOOGLE* a,
+    const VkImportPhysicalAddressGOOGLE* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_GOOGLE_sized_descriptor_update_template
+#endif
+#ifdef VK_GOOGLE_async_command_buffers
+#endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+#endif
+#ifdef VK_GOOGLE_address_space_info
+#endif
+#ifdef VK_GOOGLE_free_memory_sync
+#endif
+#ifdef VK_GOOGLE_async_queue_submit
+#endif
+#ifdef VK_GOOGLE_linear_image_layout
+#endif
+#ifdef VK_MVK_moltenvk
+#endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
 #endif
 
 } // namespace goldfish_vk

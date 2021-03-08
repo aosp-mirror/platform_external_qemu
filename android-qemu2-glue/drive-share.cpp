@@ -28,6 +28,7 @@
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"
 #include "android/utils/tempfile.h"
+#include "android/utils/file_io.h"
 
 extern "C" {
 #include "block/block.h"
@@ -109,7 +110,7 @@ static bool parseQemuOptForQcow2(bool wipeData) {
          */
         reset_version_number_cache = true;
     } else {
-        FILE* vn_cache_file = fopen(sysimg_version_number_cache_path, "r");
+        FILE* vn_cache_file = android_fopen(sysimg_version_number_cache_path, "r");
         int sysimg_version_number = -1;
         /* If the file with version number contained an error, or the
          * saved version number doesn't match the current one, we'll
@@ -212,7 +213,17 @@ static bool parseQemuOptForQcow2(bool wipeData) {
             }
             if (!android::base::PathUtils::isAbsolute(qcow2_image_path)) {
                 qcow2_path_buffer = path_join(avd_data_dir, qcow2_image_path);
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
                 sDriveShare->srcImagePaths[images[p].drive] = qcow2_path_buffer;
+=======
+                // bug: 130353176
+                // bug: 130724870
+                if (path_exists(qcow2_path_buffer)) {
+                    sDriveShare->srcImagePaths[images[p].drive] = qcow2_path_buffer;
+                } else {
+                    sDriveShare->srcImagePaths[images[p].drive] = qcow2_image_path;
+                }
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
             }
         }
 
@@ -243,7 +254,7 @@ static bool parseQemuOptForQcow2(bool wipeData) {
 
     /* Update version number cache if necessary. */
     if (reset_version_number_cache) {
-        FILE* vn_cache_file = fopen(sysimg_version_number_cache_path, "w");
+        FILE* vn_cache_file = android_fopen(sysimg_version_number_cache_path, "w");
         if (vn_cache_file) {
             fprintf(vn_cache_file, "%d\n",
                     avdInfo_getSysImgIncrementalVersion(android_avdInfo));
@@ -333,7 +344,14 @@ static void mirrorTmpCache(const char* dst, const char* src) {
     if (!android::base::PathUtils::isAbsolute(backingFile)) {
         absPath =
                 path_join(avdInfo_getContentPath(android_avdInfo), backingFile);
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
         backingFile = absPath;
+=======
+        // bug: 130724870
+        if (path_exists(absPath)) {
+            backingFile = absPath;
+        }
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     }
     D("backing cache.img path: %s\n", backingFile);
     int res = bdrv_change_backing_file(bs, backingFile, NULL);

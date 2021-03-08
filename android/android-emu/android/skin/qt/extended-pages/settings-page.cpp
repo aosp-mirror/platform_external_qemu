@@ -11,27 +11,56 @@
 
 #include "android/skin/qt/extended-pages/settings-page.h"
 
-#include "android/base/files/PathUtils.h"
-#include "android/skin/qt/FramelessDetector.h"
-#include "android/skin/qt/qt-settings.h"
+#include <stdio.h>                                          // for fprintf
+
+#include "android/avd/info.h"                               // for AVDINFO_N...
+#include "android/avd/util.h"                               // for path_getA...
+#include "android/base/Log.h"                               // for LogStream...
+#include "android/base/files/PathUtils.h"                   // for PathUtils
+#include "android/cmdline-option.h"                         // for AndroidOp...
+#include "android/emulation/control/adb/AdbInterface.h"     // for AdbInterface
+#include "android/featurecontrol/Features.h"                // for GenericSn...
+#include "android/globals.h"                                // for android_a...
+#include "android/metrics/MetricsWriter.h"                  // for android_s...
+#include "android/metrics/UiEventTracker.h"                 // for UiEventTr...
+#include "android/skin/qt/FramelessDetector.h"              // for Frameless...
+#include "android/skin/qt/extended-pages/common.h"          // for getSelect...
+#include "android/skin/qt/extended-pages/perfstats-page.h"  // for PerfStats...
+#include "android/skin/qt/qt-settings.h"                    // for SaveSnaps...
+#include "android/skin/qt/raised-material-button.h"         // for RaisedMat...
+#include "android/skin/qt/stylesheet.h"                     // for fontStyle...
+#include "android/skin/winsys.h"                            // for WinsysPre...
+#include "ui_settings-page.h"                               // for SettingsPage
 
 #ifndef SNAPSHOT_CONTROLS // TODO:jameskaye Remove when Snapshot controls are fully enabled
-#include "android/base/async/ThreadLooper.h"
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/metrics/MetricsReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
-#include "android/skin/qt/error-dialog.h"
-#include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/qt-settings.h"
-#include "android/snapshot/common.h"
-#include "android/snapshot/interface.h"
-
-#include <QApplication>
+#include "android/base/async/ThreadLooper.h"                // for ThreadLooper
+#include "android/featurecontrol/FeatureControl.h"          // for isEnabled
+#include "android/metrics/MetricsReporter.h"                // for MetricsRe...
+#include "android/skin/qt/error-dialog.h"                   // for showError...
+#include "android/snapshot/common.h"                        // for kDefaultB...
+#include "android/snapshot/interface.h"                     // for androidSn...
+#include "studio_stats.pb.h"                                // for EmulatorS...
 #endif
 
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QSettings>
+#include <QCheckBox>                                        // for QCheckBox
+#include <QComboBox>                                        // for QComboBox
+#include <QDir>                                             // for QDir
+#include <QEvent>                                           // for QEvent
+#include <QFileDialog>                                      // for QFileDialog
+#include <QFileInfo>                                        // for QFileInfo
+#include <QFontMetrics>                                     // for QFontMetrics
+#include <QGroupBox>                                        // for QGroupBox
+#include <QLabel>                                           // for QLabel
+#include <QLineEdit>                                        // for QLineEdit
+#include <QMessageBox>                                      // for QMessageBox
+#include <QPushButton>                                      // for QPushButton
+#include <QSettings>                                        // for QSettings
+#include <QTabWidget>                                       // for QTabWidget
+#include <QVariant>                                         // for QVariant
+#include <QtCore>                                           // for emit, SIGNAL
+#include <functional>                                       // for __base
+#include <initializer_list>                                 // for initializ...
+#include <string>                                           // for string
 
 #ifndef SNAPSHOT_CONTROLS // TODO:jameskaye Remove when Snapshot controls are fully enabled
 using Ui::Settings::SaveSnapshotOnExit;
@@ -51,8 +80,12 @@ static void setElidedText(QLineEdit* line_edit, const QString& text) {
 }
 
 SettingsPage::SettingsPage(QWidget* parent)
-    : QWidget(parent), mAdb(nullptr), mUi(new Ui::SettingsPage()) {
+    : QWidget(parent), mAdb(nullptr), mUi(new Ui::SettingsPage()),
+     mSettingsTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::BUTTON_PRESS,
+              android_studio::EmulatorUiEvent::EXTENDED_SETTINGS_TAB)) {
     mUi->setupUi(this);
+    disableForEmbeddedEmulator();
     mUi->set_saveLocBox->installEventFilter(this);
     mUi->set_adbPathBox->installEventFilter(this);
 
@@ -284,10 +317,29 @@ SettingsPage::SettingsPage(QWidget* parent)
         settings.value(Ui::Settings::DISABLE_MOUSE_WHEEL, false).toBool();
     mUi->set_disableMouseWheel->setChecked(disableMouseWheel);
     on_set_disableMouseWheel_toggled(disableMouseWheel);
+
+    // Connect the tab signaling
+    connect(mUi->set_tabs, SIGNAL(currentChanged(int)), this, SLOT(on_tabChanged()));
 }
 
 SettingsPage::~SettingsPage() {
     proxyDtor();
+}
+
+void SettingsPage::on_tabChanged() {
+    switch(mUi->set_tabs->currentIndex()) {
+        case 0:
+            mSettingsTracker->increment("GENERAL");
+            break;
+        case 1:
+            mSettingsTracker->increment("PROXY");
+            break;
+        case 2:
+            mSettingsTracker->increment("ADVANCED");
+            break;
+        default:
+            LOG(VERBOSE) << "Unknown tab selected.";
+    }
 }
 
 void SettingsPage::setAdbInterface(android::emulation::AdbInterface* adb) {
@@ -303,6 +355,10 @@ void SettingsPage::setHaveClipboardSharing(bool haveSharing) {
         mUi->set_clipboardSharing->setChecked(false);
         mUi->set_clipboardSharingTitle->setEnabled(false);
     }
+}
+
+void SettingsPage::setUiTheme(SettingsTheme theme) {
+    mUi->set_themeBox->setCurrentIndex(static_cast<int>(theme));
 }
 
 bool SettingsPage::eventFilter(QObject* object, QEvent* event)
@@ -342,9 +398,7 @@ void SettingsPage::on_set_themeBox_currentIndexChanged(int index)
         // Out of range--ignore
         return;
     }
-    QSettings settings;
-    settings.setValue(Ui::Settings::UI_THEME, (int)theme);
-
+    setSelectedTheme(theme, true);
     emit(themeChanged(theme));
 }
 
@@ -612,6 +666,22 @@ void SettingsPage::on_set_resetNotifications_pressed() {
     settings.remove(Ui::Settings::SHOW_GPU_WARNING);
     settings.remove(Ui::Settings::SHOW_ADB_WARNING);
     settings.remove(Ui::Settings::SHOW_VIRTUALSCENE_INFO);
+#ifdef _WIN32
+    settings.remove(Ui::Settings::SHOW_VGK_WARNING);
+#endif
+    settings.remove(Ui::Settings::SHOW_NESTED_WARNING);
+}
+
+void SettingsPage::on_perfstatsButton_pressed() {
+    if (!mPerfStatsPage.get()) {
+        const double densityFactor = devicePixelRatioF();
+        QString styleString = Ui::fontStylesheet(densityFactor > 1.5);
+        styleString += Ui::stylesheetForTheme(getSelectedTheme());
+        mPerfStatsPage.reset(new PerfStatsPage(nullptr));
+        mPerfStatsPage->setStyleSheet(styleString);
+    }
+    mPerfStatsPage->show();
+    setFrameOnTop(mPerfStatsPage.get(), true);
 }
 
 void SettingsPage::on_set_clipboardSharing_toggled(bool checked) {
@@ -629,4 +699,12 @@ void SettingsPage::on_set_disableMouseWheel_toggled(bool checked) {
     QSettings settings;
     settings.setValue(Ui::Settings::DISABLE_MOUSE_WHEEL, checked);
     emit disableMouseWheelChanged(checked);
+}
+
+void SettingsPage::disableForEmbeddedEmulator() {
+    if (android_cmdLineOptions->qt_hide_window) {
+        for (auto* w : {mUi->general_tab, mUi->proxy_tab}) {
+            mUi->set_tabs->removeTab(mUi->set_tabs->indexOf(w));
+        }
+    }
 }

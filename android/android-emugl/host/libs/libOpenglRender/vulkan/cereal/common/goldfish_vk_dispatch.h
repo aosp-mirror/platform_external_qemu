@@ -24,9 +24,10 @@
 
 #pragma once
 
-#include <vulkan.h>
+#include <vulkan/vulkan.h>
 
 
+#include "goldfish_vk_private_defs.h"
 namespace goldfish_vk {
 
 struct VulkanDispatch;
@@ -34,8 +35,6 @@ struct VulkanDispatch;
 } // namespace goldfish_vk
 using DlOpenFunc = void* (void);
 using DlSymFunc = void* (void*, const char*);
-using InstanceGetter = bool (const goldfish_vk::VulkanDispatch* vk, VkInstance* instance);
-using DeviceGetter = bool (const goldfish_vk::VulkanDispatch* vk, VkInstance instance, VkPhysicalDevice* physDeviceOut, uint32_t* physicalDeviceQueueFamilyInfoCountOut, VkQueueFamilyProperties* physicalDeviceQueueFamilyInfosOut, VkDevice* deviceOut, bool* presentCapable);
 
 
 namespace goldfish_vk {
@@ -45,6 +44,34 @@ void init_vulkan_dispatch_from_system_loader(
     DlOpenFunc dlOpenFunc,
     DlSymFunc dlSymFunc,
     VulkanDispatch* dispatch_out);
+
+
+void init_vulkan_dispatch_from_instance(
+    VulkanDispatch* vk,
+    VkInstance instance,
+    VulkanDispatch* dispatch_out);
+
+
+void init_vulkan_dispatch_from_device(
+    VulkanDispatch* vk,
+    VkDevice device,
+    VulkanDispatch* dispatch_out);
+
+
+bool vulkan_dispatch_check_instance_VK_VERSION_1_0(
+    const VulkanDispatch* vk);
+
+
+bool vulkan_dispatch_check_instance_VK_VERSION_1_1(
+    const VulkanDispatch* vk);
+
+
+bool vulkan_dispatch_check_device_VK_VERSION_1_0(
+    const VulkanDispatch* vk);
+
+
+bool vulkan_dispatch_check_device_VK_VERSION_1_1(
+    const VulkanDispatch* vk);
 
 struct VulkanDispatch {
 #ifdef VK_VERSION_1_0
@@ -402,6 +429,13 @@ PFN_vkCmdDrawIndexedIndirectCountKHR vkCmdDrawIndexedIndirectCountKHR;
 #endif
 #ifdef VK_KHR_8bit_storage
 #endif
+#ifdef VK_KHR_shader_float16_int8
+#endif
+#ifdef VK_ANDROID_native_buffer
+PFN_vkGetSwapchainGrallocUsageANDROID vkGetSwapchainGrallocUsageANDROID;
+PFN_vkAcquireImageANDROID vkAcquireImageANDROID;
+PFN_vkQueueSignalReleaseImageANDROID vkQueueSignalReleaseImageANDROID;
+#endif
 #ifdef VK_EXT_debug_report
 PFN_vkCreateDebugReportCallbackEXT vkCreateDebugReportCallbackEXT;
 PFN_vkDestroyDebugReportCallbackEXT vkDestroyDebugReportCallbackEXT;
@@ -604,6 +638,52 @@ PFN_vkCmdWriteBufferMarkerAMD vkCmdWriteBufferMarkerAMD;
 #ifdef VK_NV_device_diagnostic_checkpoints
 PFN_vkCmdSetCheckpointNV vkCmdSetCheckpointNV;
 PFN_vkGetQueueCheckpointDataNV vkGetQueueCheckpointDataNV;
+#endif
+#ifdef VK_GOOGLE_address_space
+PFN_vkMapMemoryIntoAddressSpaceGOOGLE vkMapMemoryIntoAddressSpaceGOOGLE;
+#endif
+#ifdef VK_GOOGLE_color_buffer
+PFN_vkRegisterImageColorBufferGOOGLE vkRegisterImageColorBufferGOOGLE;
+PFN_vkRegisterBufferColorBufferGOOGLE vkRegisterBufferColorBufferGOOGLE;
+#endif
+#ifdef VK_GOOGLE_sized_descriptor_update_template
+PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE vkUpdateDescriptorSetWithTemplateSizedGOOGLE;
+#endif
+#ifdef VK_GOOGLE_async_command_buffers
+PFN_vkBeginCommandBufferAsyncGOOGLE vkBeginCommandBufferAsyncGOOGLE;
+PFN_vkEndCommandBufferAsyncGOOGLE vkEndCommandBufferAsyncGOOGLE;
+PFN_vkResetCommandBufferAsyncGOOGLE vkResetCommandBufferAsyncGOOGLE;
+PFN_vkCommandBufferHostSyncGOOGLE vkCommandBufferHostSyncGOOGLE;
+#endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+PFN_vkCreateImageWithRequirementsGOOGLE vkCreateImageWithRequirementsGOOGLE;
+PFN_vkCreateBufferWithRequirementsGOOGLE vkCreateBufferWithRequirementsGOOGLE;
+#endif
+#ifdef VK_GOOGLE_address_space_info
+PFN_vkGetMemoryHostAddressInfoGOOGLE vkGetMemoryHostAddressInfoGOOGLE;
+#endif
+#ifdef VK_GOOGLE_free_memory_sync
+PFN_vkFreeMemorySyncGOOGLE vkFreeMemorySyncGOOGLE;
+#endif
+#ifdef VK_GOOGLE_async_queue_submit
+PFN_vkQueueHostSyncGOOGLE vkQueueHostSyncGOOGLE;
+PFN_vkQueueSubmitAsyncGOOGLE vkQueueSubmitAsyncGOOGLE;
+PFN_vkQueueWaitIdleAsyncGOOGLE vkQueueWaitIdleAsyncGOOGLE;
+PFN_vkQueueBindSparseAsyncGOOGLE vkQueueBindSparseAsyncGOOGLE;
+#endif
+#ifdef VK_GOOGLE_linear_image_layout
+PFN_vkGetLinearImageLayoutGOOGLE vkGetLinearImageLayoutGOOGLE;
+#endif
+#ifdef VK_MVK_moltenvk
+PFN_vkGetMTLDeviceMVK vkGetMTLDeviceMVK;
+PFN_vkSetMTLTextureMVK vkSetMTLTextureMVK;
+PFN_vkGetMTLTextureMVK vkGetMTLTextureMVK;
+PFN_vkGetMTLBufferMVK vkGetMTLBufferMVK;
+PFN_vkUseIOSurfaceMVK vkUseIOSurfaceMVK;
+PFN_vkGetIOSurfaceMVK vkGetIOSurfaceMVK;
+#endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
+PFN_vkQueueFlushCommandsGOOGLE vkQueueFlushCommandsGOOGLE;
 #endif
 };
 

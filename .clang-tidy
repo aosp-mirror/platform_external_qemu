@@ -1,0 +1,15 @@
+Checks: 'bugprone-*,
+         cert-*,
+         clang-analyzer-*,
+         google-*,
+         misc-*,
+         llvm-*,
+         -llvm-header-guard,
+         modernize-*,
+         performance-*,
+         portability-*,
+         readability-*,'
+WarningsAsErrors: ''
+HeaderFilterRegex: '^((?!pb\.h).)*$'
+AnalyzeTemporaryDtors: false
+FormatStyle:     none

@@ -10,9 +10,12 @@
 
 #include "android/skin/qt/gl-common.h"
 
-#include <cstring>
+#include <qloggingcategory.h>                  // for qCWarning
+#include <cstring>                             // for strlen
 
-#include <QtGlobal>
+#include "GLES2/gl2.h"                         // for GL_COMPILE_STATUS, GL_...
+#include "OpenGLESDispatch/GLESv2Dispatch.h"   // for GLESv2Dispatch
+#include "android/skin/qt/logging-category.h"  // for emu
 
 GLuint createShader(const GLESv2Dispatch* gles2,
                     GLint shader_type,
@@ -30,7 +33,7 @@ GLuint createShader(const GLESv2Dispatch* gles2,
     if (success == GL_FALSE) {
         char msgs[256];
         gles2->glGetShaderInfoLog(shader, sizeof(msgs), nullptr, msgs);
-        qWarning("Error compiling %s shader: %s",
+        qCWarning(emu, "Error compiling %s shader: %s",
                  shader_type == GL_VERTEX_SHADER ? "vertex" : "fragment",
                  msgs);
     }

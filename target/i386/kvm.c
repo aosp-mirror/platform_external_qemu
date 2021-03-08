@@ -30,6 +30,7 @@
 #include "hyperv-proto.h"
 
 #include "exec/gdbstub.h"
+#include "qemu/abort.h"
 #include "qemu/host-utils.h"
 #include "qemu/config-file.h"
 #include "qemu/error-report.h"
@@ -3272,6 +3273,7 @@ int kvm_arch_handle_exit(CPUState *cs, struct kvm_run *run)
                         "\n\n");
         }
         ret = -1;
+        qemu_abort("%s: hardware error happened in KVM, aborting now\n", __func__);
         break;
     case KVM_EXIT_EXCEPTION:
         fprintf(stderr, "KVM: exception %d exit (error code 0x%x)\n",

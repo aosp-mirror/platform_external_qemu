@@ -600,7 +600,11 @@ static AndroidPipeFuncs s_unix_pipe_funcs = {
 void android_unix_pipes_init(void) {
     Looper* looper = looper_getForThread();
     if (android::featurecontrol::isEnabled(
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
                 android::featurecontrol::Feature::SnapshotAdb)) {
+=======
+            android::featurecontrol::Feature::SnapshotAdb)) {
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
         s_unix_pipe_funcs.save = socketPipe_save;
         s_unix_pipe_funcs.load = socketPipe_load;
     }

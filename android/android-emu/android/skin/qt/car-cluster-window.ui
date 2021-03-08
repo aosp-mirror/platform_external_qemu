@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CarClusterWindow</class>
+ <widget class="QFrame" name="CarClusterWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>635</width>
+    <height>360</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Instrument Cluster</string>
+  </property>
+  <widget class="CarClusterWidget" name="render_window" native="true">
+    <property name="geometry">
+     <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>620</width>
+     <height>349</height>
+     </rect>
+    </property>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+    <class>CarClusterWidget</class>
+    <extends>QWidget</extends>
+    <header>android/skin/qt/extended-pages/instr-cluster-render/car-cluster-widget.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

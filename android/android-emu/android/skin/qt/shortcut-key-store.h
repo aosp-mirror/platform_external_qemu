@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "android/skin/qt/logging-category.h"
+
 #include <QKeySequence>
 #include <QString>
 #include <QTextStream>
@@ -61,7 +63,7 @@ public:
             bool command_parse_result =
                 command_parser(command_str, &command);
             if (!command_parse_result || key_seq.isEmpty()) {
-                qWarning() << "Warning: Unable to parse shortcut [" << command_str << "]";
+                qCWarning(emu) << "Warning: Unable to parse shortcut [" << command_str << "]";
             } else {
                 add(key_seq, command);
                 if (handled_externally) {

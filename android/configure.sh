@@ -12,12 +12,8 @@
 # first, let's see which system we're running this on
 PROGNAME=`basename $0`
 PROGDIR=`dirname $0`
-CURR_SHELL=$(ps -o comm= -p $$)
-## Logging support
-##
-VERBOSE=yes
-VERBOSE2=no
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 panic () {
     echo "ERROR: $@"
     exit 1
@@ -1607,3 +1603,6 @@ rm -f "$QEMU_VERSION_TMP_H"
 clean_temp
 
 echo "Ready to go. Type ${GREEN}'make'${RESET} to build emulator, and ${GREEN}'make tests'${RESET} to run the unit tests."
+=======
+${PROGDIR}/scripts/config-cmake.sh "$@"
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)

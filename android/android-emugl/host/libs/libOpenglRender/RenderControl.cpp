@@ -26,9 +26,12 @@
 #include "SyncThread.h"
 #include "ChecksumCalculatorThreadInfo.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
+#include "vulkan/VkCommonOperations.h"
+#include "vulkan/VkDecoderGlobalState.h"
 
 #include "android/utils/debug.h"
 #include "android/base/StringView.h"
+#include "android/base/Tracing.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/sync_device.h"
@@ -43,6 +46,9 @@
 
 using android::base::AutoLock;
 using android::base::Lock;
+using emugl::emugl_feature_is_enabled;
+using emugl::emugl_sync_device_exists;
+using emugl::emugl_sync_register_trigger_wait;
 
 #define DEBUG_GRALLOC_SYNC 0
 #define DEBUG_EGL_SYNC 0
@@ -152,10 +158,12 @@ static const GLint rendererVersion = 1;
 // "ANDROID_EMU_NATIVE_SYNC": original version
 // "ANDROIDEMU_native_sync_v2": +cleanup of sync objects
 // "ANDROIDEMU_native_sync_v3": EGL_KHR_wait_sync
+// "ANDROIDEMU_native_sync_v4": Correct eglGetSyncAttrib via rcIsSyncSignaled
 // (We need all the different strings to not be prefixes of any other
 // due to how they are checked for in the GL extensions on the guest)
 static constexpr android::base::StringView kAsyncSwapStrV2 = "ANDROID_EMU_native_sync_v2";
 static constexpr android::base::StringView kAsyncSwapStrV3 = "ANDROID_EMU_native_sync_v3";
+static constexpr android::base::StringView kAsyncSwapStrV4 = "ANDROID_EMU_native_sync_v4";
 
 // DMA version history:
 // "ANDROID_EMU_dma_v1": add dma device and rcUpdateColorBufferDMA and do
@@ -163,6 +171,7 @@ static constexpr android::base::StringView kAsyncSwapStrV3 = "ANDROID_EMU_native
 // "ANDROID_EMU_dma_v2": adds DMA support glMapBufferRange (and unmap)
 static constexpr android::base::StringView kDma1Str = "ANDROID_EMU_dma_v1";
 static constexpr android::base::StringView kDma2Str = "ANDROID_EMU_dma_v2";
+static constexpr android::base::StringView kDirectMemStr = "ANDROID_EMU_direct_mem";
 
 // GLESDynamicVersion: up to 3.1 so far
 static constexpr android::base::StringView kGLESDynamicVersion_2 = "ANDROID_EMU_gles_max_version_2";
@@ -171,8 +180,56 @@ static constexpr android::base::StringView kGLESDynamicVersion_3_1 = "ANDROID_EM
 
 // HWComposer Host Composition
 static constexpr android::base::StringView kHostCompositionV1 = "ANDROID_EMU_host_composition_v1";
+static constexpr android::base::StringView kHostCompositionV2 = "ANDROID_EMU_host_composition_v2";
 
 static constexpr android::base::StringView kGLESNoHostError = "ANDROID_EMU_gles_no_host_error";
+
+// Vulkan
+static constexpr android::base::StringView kVulkanFeatureStr = "ANDROID_EMU_vulkan";
+static constexpr android::base::StringView kDeferredVulkanCommands = "ANDROID_EMU_deferred_vulkan_commands";
+static constexpr android::base::StringView kVulkanNullOptionalStrings = "ANDROID_EMU_vulkan_null_optional_strings";
+static constexpr android::base::StringView kVulkanCreateResourcesWithRequirements = "ANDROID_EMU_vulkan_create_resources_with_requirements";
+
+// treat YUV420_888 as NV21
+static constexpr android::base::StringView kYUV420888toNV21 = "ANDROID_EMU_YUV420_888_to_NV21";
+
+// Cache YUV frame
+static constexpr android::base::StringView kYUVCache = "ANDROID_EMU_YUV_Cache";
+
+// GL protocol v2
+static constexpr android::base::StringView kAsyncUnmapBuffer = "ANDROID_EMU_async_unmap_buffer";
+// Vulkan: Correct marshaling for ignored handles
+static constexpr android::base::StringView kVulkanIgnoredHandles = "ANDROID_EMU_vulkan_ignored_handles";
+
+// virtio-gpu-next
+static constexpr android::base::StringView kVirtioGpuNext = "ANDROID_EMU_virtio_gpu_next";
+
+// address space subdevices
+static constexpr android::base::StringView kHasSharedSlotsHostMemoryAllocator = "ANDROID_EMU_has_shared_slots_host_memory_allocator";
+
+// vulkan free memory sync
+static constexpr android::base::StringView kVulkanFreeMemorySync = "ANDROID_EMU_vulkan_free_memory_sync";
+
+// virtio-gpu native sync
+static constexpr android::base::StringView kVirtioGpuNativeSync = "ANDROID_EMU_virtio_gpu_native_sync";
+
+// Struct defs for VK_KHR_shader_float16_int8
+static constexpr android::base::StringView kVulkanShaderFloat16Int8 = "ANDROID_EMU_vulkan_shader_float16_int8";
+
+// Async queue submit
+static constexpr android::base::StringView kVulkanAsyncQueueSubmit = "ANDROID_EMU_vulkan_async_queue_submit";
+
+// Host side tracing
+static constexpr android::base::StringView kHostSideTracing = "ANDROID_EMU_host_side_tracing";
+
+// Some frame commands we can easily make async
+// rcMakeCurrent
+// rcCompose
+// rcDestroySyncKHR
+static constexpr android::base::StringView kAsyncFrameCommands = "ANDROID_EMU_async_frame_commands";
+
+// Queue submit with commands
+static constexpr android::base::StringView kVulkanQueueSubmitWithCommands = "ANDROID_EMU_vulkan_queue_submit_with_commands";
 
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
@@ -233,14 +290,60 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
 static bool shouldEnableAsyncSwap() {
     bool isPhone;
     emugl::getAvdInfo(&isPhone, NULL);
+    bool playStoreImage = emugl::emugl_feature_is_enabled(
+            android::featurecontrol::PlayStoreImage);
     return emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap) &&
-           emugl_sync_device_exists() &&
-           isPhone &&
+           emugl_sync_device_exists() && (isPhone || playStoreImage) &&
            sizeof(void*) == 8;
 }
 
-static bool shouleEnableHostCompose() {
+static bool shouldEnableVirtioGpuNativeSync() {
+    return emugl_feature_is_enabled(android::featurecontrol::VirtioGpuNativeSync);
+}
+
+static bool shouldEnableHostComposition() {
     return emugl_feature_is_enabled(android::featurecontrol::HostComposition);
+}
+
+static bool shouldEnableVulkan() {
+    auto supportInfo =
+        goldfish_vk::VkDecoderGlobalState::get()->
+            getHostFeatureSupport();
+    bool flagEnabled =
+        emugl_feature_is_enabled(android::featurecontrol::Vulkan);
+    // TODO: Restrict further to devices supporting external memory.
+    return supportInfo.supportsVulkan &&
+           flagEnabled;
+}
+
+static bool shouldEnableDeferredVulkanCommands() {
+    auto supportInfo =
+        goldfish_vk::VkDecoderGlobalState::get()->
+            getHostFeatureSupport();
+    return supportInfo.supportsVulkan &&
+           supportInfo.useDeferredCommands;
+}
+
+static bool shouldEnableCreateResourcesWithRequirements() {
+    auto supportInfo =
+        goldfish_vk::VkDecoderGlobalState::get()->
+            getHostFeatureSupport();
+    return supportInfo.supportsVulkan &&
+           supportInfo.useCreateResourcesWithRequirements;
+}
+
+static bool shouldEnableVulkanShaderFloat16Int8() {
+    return shouldEnableVulkan() &&
+        emugl_feature_is_enabled(android::featurecontrol::VulkanShaderFloat16Int8);
+}
+
+static bool shouldEnableAsyncQueueSubmit() {
+    return shouldEnableVulkan();
+}
+
+static bool shouldEnableQueueSubmitWithCommands() {
+    return shouldEnableVulkan() &&
+        emugl_feature_is_enabled(android::featurecontrol::VulkanQueueSubmitWithCommands);
 }
 
 android::base::StringView maxVersionToFeatureString(GLESDispatchMaxVersion version) {
@@ -304,8 +407,7 @@ void removeExtension(std::string& currExts, const std::string& toRemove) {
         currExts.erase(pos, toRemove.length());
 }
 
-static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
-{
+static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
 
     // whatever we end up returning,
@@ -337,11 +439,37 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     bool isChecksumEnabled =
         emugl_feature_is_enabled(android::featurecontrol::GLPipeChecksum);
     bool asyncSwapEnabled = shouldEnableAsyncSwap();
+    bool virtioGpuNativeSyncEnabled = shouldEnableVirtioGpuNativeSync();
     bool dma1Enabled =
         emugl_feature_is_enabled(android::featurecontrol::GLDMA);
     bool dma2Enabled =
         emugl_feature_is_enabled(android::featurecontrol::GLDMA2);
-    bool hostCompositionEnabled = shouleEnableHostCompose();
+    bool directMemEnabled =
+        emugl_feature_is_enabled(android::featurecontrol::GLDirectMem);
+    bool hostCompositionEnabled = shouldEnableHostComposition();
+    bool vulkanEnabled = shouldEnableVulkan();
+    bool deferredVulkanCommandsEnabled =
+        shouldEnableVulkan() && shouldEnableDeferredVulkanCommands();
+    bool vulkanNullOptionalStringsEnabled =
+        shouldEnableVulkan() && emugl_feature_is_enabled(android::featurecontrol::VulkanNullOptionalStrings);
+    bool vulkanCreateResourceWithRequirementsEnabled =
+        shouldEnableVulkan() && shouldEnableCreateResourcesWithRequirements();
+    bool YUV420888toNV21Enabled =
+        emugl_feature_is_enabled(android::featurecontrol::YUV420888toNV21);
+    bool YUVCacheEnabled =
+        emugl_feature_is_enabled(android::featurecontrol::YUVCache);
+    bool AsyncUnmapBufferEnabled = true;
+    bool vulkanIgnoredHandlesEnabled =
+        shouldEnableVulkan() && emugl_feature_is_enabled(android::featurecontrol::VulkanIgnoredHandles);
+    bool virtioGpuNextEnabled =
+        emugl_feature_is_enabled(android::featurecontrol::VirtioGpuNext);
+    bool hasSharedSlotsHostMemoryAllocatorEnabled =
+        emugl_feature_is_enabled(android::featurecontrol::HasSharedSlotsHostMemoryAllocator);
+    bool vulkanFreeMemorySyncEnabled =
+        shouldEnableVulkan();
+    bool vulkanShaderFloat16Int8Enabled = shouldEnableVulkanShaderFloat16Int8();
+    bool vulkanAsyncQueueSubmitEnabled = shouldEnableAsyncQueueSubmit();
+    bool vulkanQueueSubmitWithCommands = shouldEnableQueueSubmitWithCommands();
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -351,9 +479,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     if (asyncSwapEnabled && name == GL_EXTENSIONS) {
         glStr += kAsyncSwapStrV2;
         glStr += " "; // for compatibility with older system images
-        // Only enable EGL_KHR_wait_sync for host gpu.
+        // Only enable EGL_KHR_wait_sync (and above) for host gpu.
         if (emugl::getRenderer() == SELECTED_RENDERER_HOST) {
             glStr += kAsyncSwapStrV3;
+            glStr += " ";
+            glStr += kAsyncSwapStrV4;
             glStr += " ";
         }
     }
@@ -368,8 +498,93 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
         glStr += " ";
     }
 
+    if (directMemEnabled && name == GL_EXTENSIONS) {
+        glStr += kDirectMemStr;
+        glStr += " ";
+    }
+
     if (hostCompositionEnabled && name == GL_EXTENSIONS) {
         glStr += kHostCompositionV1;
+        glStr += " ";
+    }
+
+    if (hostCompositionEnabled && name == GL_EXTENSIONS) {
+        glStr += kHostCompositionV2;
+        glStr += " ";
+    }
+
+    if (vulkanEnabled && name == GL_EXTENSIONS) {
+        glStr += kVulkanFeatureStr;
+        glStr += " ";
+    }
+
+    if (deferredVulkanCommandsEnabled && name == GL_EXTENSIONS) {
+        glStr += kDeferredVulkanCommands;
+        glStr += " ";
+    }
+
+    if (vulkanNullOptionalStringsEnabled && name == GL_EXTENSIONS) {
+        glStr += kVulkanNullOptionalStrings;
+        glStr += " ";
+    }
+
+    if (vulkanCreateResourceWithRequirementsEnabled && name == GL_EXTENSIONS) {
+        glStr += kVulkanCreateResourcesWithRequirements;
+        glStr += " ";
+    }
+
+    if (YUV420888toNV21Enabled && name == GL_EXTENSIONS) {
+        glStr += kYUV420888toNV21;
+        glStr += " ";
+    }
+
+    if (YUVCacheEnabled && name == GL_EXTENSIONS) {
+        glStr += kYUVCache;
+        glStr += " ";
+    }
+
+    if (AsyncUnmapBufferEnabled && name == GL_EXTENSIONS) {
+        glStr += kAsyncUnmapBuffer;
+        glStr += " ";
+    }
+
+    if (vulkanIgnoredHandlesEnabled && name == GL_EXTENSIONS) {
+        glStr += kVulkanIgnoredHandles;
+        glStr += " ";
+    }
+
+    if (virtioGpuNextEnabled && name == GL_EXTENSIONS) {
+        glStr += kVirtioGpuNext;
+        glStr += " ";
+    }
+
+    if (hasSharedSlotsHostMemoryAllocatorEnabled && name == GL_EXTENSIONS) {
+        glStr += kHasSharedSlotsHostMemoryAllocator;
+        glStr += " ";
+    }
+
+    if (vulkanFreeMemorySyncEnabled && name == GL_EXTENSIONS) {
+        glStr += kVulkanFreeMemorySync;
+        glStr += " ";
+    }
+
+    if (vulkanShaderFloat16Int8Enabled && name == GL_EXTENSIONS) {
+        glStr += kVulkanShaderFloat16Int8;
+        glStr += " ";
+    }
+
+    if (vulkanAsyncQueueSubmitEnabled && name == GL_EXTENSIONS) {
+        glStr += kVulkanAsyncQueueSubmit;
+        glStr += " ";
+    }
+
+    if (vulkanQueueSubmitWithCommands && name == GL_EXTENSIONS) {
+        glStr += kVulkanQueueSubmitWithCommands;
+        glStr += " ";
+    }
+
+    if (virtioGpuNativeSyncEnabled && name == GL_EXTENSIONS) {
+        glStr += kVirtioGpuNativeSync;
         glStr += " ";
     }
 
@@ -390,6 +605,23 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
 
         // ASTC LDR compressed texture support.
         glStr += "GL_KHR_texture_compression_astc_ldr ";
+
+        // BPTC compressed texture support
+        if (emugl_feature_is_enabled(android::featurecontrol::BptcTextureSupport)) {
+            glStr += "GL_EXT_texture_compression_bptc ";
+        }
+
+        if (emugl_feature_is_enabled(android::featurecontrol::S3tcTextureSupport)) {
+            glStr += "GL_EXT_texture_compression_s3tc ";
+       }
+
+        // Host side tracing support.
+        glStr += kHostSideTracing;
+        glStr += " ";
+
+        // Async makecurrent support.
+        glStr += kAsyncFrameCommands;
+        glStr += " ";
 
         if (emugl_feature_is_enabled(android::featurecontrol::IgnoreHostOpenGLErrors)) {
             glStr += kGLESNoHostError;
@@ -458,8 +690,15 @@ static EGLint rcChooseConfig(EGLint *attribs,
                              uint32_t configs_size)
 {
     FrameBuffer *fb = FrameBuffer::getFB();
-    if (!fb || attribs_size==0) {
+    if (!fb) {
         return 0;
+    }
+
+    if (attribs_size == 0) {
+        if (configs && configs_size > 0) {
+            // Pick the first config
+            *configs = 0;
+        }
     }
 
     return fb->getConfigs()->chooseConfig(
@@ -606,10 +845,19 @@ static int rcFlushWindowColorBuffer(uint32_t windowSurface)
         GRSYNC_DPRINT("unlock gralloc cb lock");
         return -1;
     }
+
+    // Update from Vulkan if necessary
+    goldfish_vk::updateColorBufferFromVkImage(
+        fb->getWindowSurfaceColorBufferHandle(windowSurface));
+
     if (!fb->flushWindowSurfaceColorBuffer(windowSurface)) {
         GRSYNC_DPRINT("unlock gralloc cb lock }");
         return -1;
     }
+
+    // Update to Vulkan if necessary
+    goldfish_vk::updateVkImageFromColorBuffer(
+        fb->getWindowSurfaceColorBufferHandle(windowSurface));
 
     GRSYNC_DPRINT("unlock gralloc cb lock }");
 
@@ -674,6 +922,9 @@ static void rcFBPost(uint32_t colorBuffer)
         return;
     }
 
+    // Update from Vulkan if necessary
+    goldfish_vk::updateColorBufferFromVkImage(colorBuffer);
+
     fb->post(colorBuffer);
 }
 
@@ -689,6 +940,9 @@ static void rcBindTexture(uint32_t colorBuffer)
         return;
     }
 
+    // Update from Vulkan if necessary
+    goldfish_vk::updateColorBufferFromVkImage(colorBuffer);
+
     fb->bindColorBufferToTexture(colorBuffer);
 }
 
@@ -699,17 +953,20 @@ static void rcBindRenderbuffer(uint32_t colorBuffer)
         return;
     }
 
+    // Update from Vulkan if necessary
+    goldfish_vk::updateColorBufferFromVkImage(colorBuffer);
+
     fb->bindColorBufferToRenderbuffer(colorBuffer);
 }
 
 static EGLint rcColorBufferCacheFlush(uint32_t colorBuffer,
                                       EGLint postCount, int forRead)
 {
-   // gralloc_lock() on the guest calls rcColorBufferCacheFlush
-   GRSYNC_DPRINT("waiting for gralloc cb lock");
-   sGrallocSync->lockColorBufferPrepare();
-   GRSYNC_DPRINT("lock gralloc cb lock {");
-   return 0;
+    // gralloc_lock() on the guest calls rcColorBufferCacheFlush
+    GRSYNC_DPRINT("waiting for gralloc cb lock");
+    sGrallocSync->lockColorBufferPrepare();
+    GRSYNC_DPRINT("lock gralloc cb lock {");
+    return 0;
 }
 
 static void rcReadColorBuffer(uint32_t colorBuffer,
@@ -721,6 +978,9 @@ static void rcReadColorBuffer(uint32_t colorBuffer,
     if (!fb) {
         return;
     }
+
+    // Update from Vulkan if necessary
+    goldfish_vk::updateColorBufferFromVkImage(colorBuffer);
 
     fb->readColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
 }
@@ -738,10 +998,17 @@ static int rcUpdateColorBuffer(uint32_t colorBuffer,
         return -1;
     }
 
+    // Since this is a modify operation, also read the current contents
+    // of the VkImage, if any.
+    goldfish_vk::updateColorBufferFromVkImage(colorBuffer);
+
     fb->updateColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
 
     GRSYNC_DPRINT("unlock gralloc cb lock");
     sGrallocSync->unlockColorBufferPrepare();
+
+    // Update to Vulkan if necessary
+    goldfish_vk::updateVkImageFromColorBuffer(colorBuffer);
 
     return 0;
 }
@@ -760,11 +1027,19 @@ static int rcUpdateColorBufferDMA(uint32_t colorBuffer,
         return -1;
     }
 
+    // Since this is a modify operation, also read the current contents
+    // of the VkImage, if any.
+    goldfish_vk::updateColorBufferFromVkImage(colorBuffer);
+
     fb->updateColorBuffer(colorBuffer, x, y, width, height,
                           format, type, pixels);
 
     GRSYNC_DPRINT("unlock gralloc cb lock");
     sGrallocSync->unlockColorBufferPrepare();
+
+    // Update to Vulkan if necessary
+    goldfish_vk::updateVkImageFromColorBuffer(colorBuffer);
+
     return 0;
 }
 
@@ -800,9 +1075,11 @@ static void rcSelectChecksumHelper(uint32_t protocol, uint32_t reserved) {
 static void rcTriggerWait(uint64_t eglsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline) {
-    // We don't use per render thread sync threads anymore.
-    // Ignore but not remove (for backward compat)
-    (void)thread_ptr;
+    if (thread_ptr == 1) {
+        // Is vulkan sync fd;
+        // just signal right away for now
+        SyncThread::get()->triggerWait(0, timeline);
+    }
 
     FenceSync* fenceSync = (FenceSync*)(uintptr_t)eglsync_ptr;
     EGLSYNC_DPRINT("eglsync=0x%llx "
@@ -927,6 +1204,8 @@ static int rcDestroySyncKHR(uint64_t handle) {
 static void rcSetPuid(uint64_t puid) {
     RenderThreadInfo *tInfo = RenderThreadInfo::get();
     tInfo->m_puid = puid;
+    FrameBuffer *fb = FrameBuffer::getFB();
+    fb->registerProcessSequenceNumberForPuid(puid);
 }
 
 static int rcCompose(uint32_t bufferSize, void* buffer) {
@@ -935,6 +1214,234 @@ static int rcCompose(uint32_t bufferSize, void* buffer) {
         return -1;
     }
     return fb->compose(bufferSize, buffer);
+}
+
+static int rcCreateDisplay(uint32_t* displayId) {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return -1;
+    }
+
+    // Assume this API call always allocates a new displayId
+    *displayId = FrameBuffer::s_invalidIdMultiDisplay;
+    return fb->createDisplay(displayId);
+}
+
+static int rcDestroyDisplay(uint32_t displayId) {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return -1;
+    }
+
+    return fb->destroyDisplay(displayId);
+}
+
+static int rcSetDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer) {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return -1;
+    }
+
+    return fb->setDisplayColorBuffer(displayId, colorBuffer);
+}
+
+static int rcGetDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer) {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return -1;
+    }
+
+    return fb->getDisplayColorBuffer(displayId, colorBuffer);
+}
+
+static int rcGetColorBufferDisplay(uint32_t colorBuffer, uint32_t* displayId) {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return -1;
+    }
+
+    return fb->getColorBufferDisplay(colorBuffer, displayId);
+}
+
+static int rcGetDisplayPose(uint32_t displayId,
+                            int32_t* x,
+                            int32_t* y,
+                            uint32_t* w,
+                            uint32_t* h) {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return -1;
+    }
+
+    return fb->getDisplayPose(displayId, x, y, w, h);
+}
+
+static int rcSetDisplayPose(uint32_t displayId,
+                            int32_t x,
+                            int32_t y,
+                            uint32_t w,
+                            uint32_t h) {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return -1;
+    }
+
+    return fb->setDisplayPose(displayId, x, y, w, h);
+}
+
+static void rcReadColorBufferYUV(uint32_t colorBuffer,
+                                GLint x, GLint y,
+                                GLint width, GLint height,
+                                void* pixels, uint32_t pixels_size)
+{
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return;
+    }
+
+    fb->readColorBufferYUV(colorBuffer, x, y, width, height, pixels, pixels_size);
+}
+
+static int rcIsSyncSignaled(uint64_t handle) {
+    FenceSync* fenceSync = FenceSync::getFromHandle(handle);
+    if (!fenceSync) return 1; // assume destroyed => signaled
+    return fenceSync->isSignaled() ? 1 : 0;
+}
+
+static void rcCreateColorBufferWithHandle(
+    uint32_t width, uint32_t height, GLenum internalFormat, uint32_t handle)
+{
+    FrameBuffer *fb = FrameBuffer::getFB();
+
+    if (!fb) {
+        return;
+    }
+
+    fb->createColorBufferWithHandle(
+        width, height, internalFormat,
+        FRAMEWORK_FORMAT_GL_COMPATIBLE, handle);
+}
+
+static uint32_t rcCreateBuffer2(uint64_t size, uint32_t memoryProperty) {
+    FrameBuffer* fb = FrameBuffer::getFB();
+    if (!fb) {
+        return 0;
+    }
+
+    return fb->createBuffer(size, memoryProperty);
+}
+
+static uint32_t rcCreateBuffer(uint32_t size) {
+    return rcCreateBuffer2(size, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+}
+
+static void rcCloseBuffer(uint32_t buffer) {
+    FrameBuffer* fb = FrameBuffer::getFB();
+    if (!fb) {
+        return;
+    }
+    fb->closeBuffer(buffer);
+}
+
+static int rcSetColorBufferVulkanMode2(uint32_t colorBuffer,
+                                       uint32_t mode,
+                                       uint32_t memoryProperty) {
+    if (!goldfish_vk::isColorBufferVulkanCompatible(colorBuffer)) {
+        fprintf(stderr,
+                "%s: error: colorBuffer 0x%x is not Vulkan compatible\n",
+                __func__, colorBuffer);
+        return -1;
+    }
+
+#define VULKAN_MODE_VULKAN_ONLY 1
+
+    bool modeIsVulkanOnly = mode == VULKAN_MODE_VULKAN_ONLY;
+
+    if (!goldfish_vk::setupVkColorBuffer(colorBuffer, modeIsVulkanOnly,
+                                         memoryProperty)) {
+        fprintf(stderr,
+                "%s: error: failed to create VkImage for colorBuffer 0x%x\n",
+                __func__, colorBuffer);
+        return -1;
+    }
+
+    if (!goldfish_vk::setColorBufferVulkanMode(colorBuffer, mode)) {
+        fprintf(stderr,
+                "%s: error: failed to set Vulkan mode for colorBuffer 0x%x\n",
+                __func__, colorBuffer);
+        return -1;
+    }
+
+    return 0;
+}
+
+static int rcSetColorBufferVulkanMode(uint32_t colorBuffer, uint32_t mode) {
+    return rcSetColorBufferVulkanMode2(colorBuffer, mode,
+                                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+}
+
+static int32_t rcMapGpaToBufferHandle(uint32_t bufferHandle, uint64_t gpa) {
+    int32_t result = goldfish_vk::mapGpaToBufferHandle(bufferHandle, gpa);
+    if (result < 0) {
+        fprintf(stderr,
+                "%s: error: failed to map gpa %lx to buffer handle 0x%x: %d\n",
+                __func__, gpa, bufferHandle, result);
+    }
+    return result;
+}
+
+static int32_t rcMapGpaToBufferHandle2(uint32_t bufferHandle,
+                                       uint64_t gpa,
+                                       uint64_t size) {
+    int32_t result = goldfish_vk::mapGpaToBufferHandle(bufferHandle, gpa, size);
+    if (result < 0) {
+        fprintf(stderr,
+                "%s: error: failed to map gpa %lx to buffer handle 0x%x: %d\n",
+                __func__, gpa, bufferHandle, result);
+    }
+    return result;
+}
+
+static void rcFlushWindowColorBufferAsyncWithFrameNumber(uint32_t windowSurface, uint32_t frameNumber) {
+    android::base::traceCounter("gfxstreamFrameNumber", (int64_t)frameNumber);
+    rcFlushWindowColorBufferAsync(windowSurface);
+}
+
+static void rcSetTracingForPuid(uint64_t puid, uint32_t enable, uint64_t time) {
+    if (enable) {
+        android::base::setGuestTime(time);
+        android::base::enableTracing();
+    } else {
+        android::base::disableTracing();
+    }
+}
+
+static void rcMakeCurrentAsync(uint32_t context, uint32_t drawSurf, uint32_t readSurf) {
+    AEMU_SCOPED_THRESHOLD_TRACE_CALL();
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) { return; }
+
+    fb->bindContext(context, drawSurf, readSurf);
+}
+
+static void rcComposeAsync(uint32_t bufferSize, void* buffer) {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return;
+    }
+    fb->compose(bufferSize, buffer);
+}
+
+static void rcDestroySyncKHRAsyncy(uint64_t handle) {
+    FenceSync* fenceSync = FenceSync::getFromHandle(handle);
+    if (!fenceSync) return;
+    fenceSync->decRef();
+}
+
+static void rcDestroySyncKHRAsync(uint64_t handle) {
+    FenceSync* fenceSync = FenceSync::getFromHandle(handle);
+    if (!fenceSync) return;
+    fenceSync->decRef();
 }
 
 void initRenderControlContext(renderControl_decoder_context_t *dec)
@@ -977,4 +1484,26 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateColorBufferDMA = rcCreateColorBufferDMA;
     dec->rcWaitSyncKHR = rcWaitSyncKHR;
     dec->rcCompose = rcCompose;
+    dec->rcCreateDisplay = rcCreateDisplay;
+    dec->rcDestroyDisplay = rcDestroyDisplay;
+    dec->rcSetDisplayColorBuffer = rcSetDisplayColorBuffer;
+    dec->rcGetDisplayColorBuffer = rcGetDisplayColorBuffer;
+    dec->rcGetColorBufferDisplay = rcGetColorBufferDisplay;
+    dec->rcGetDisplayPose = rcGetDisplayPose;
+    dec->rcSetDisplayPose = rcSetDisplayPose;
+    dec->rcSetColorBufferVulkanMode = rcSetColorBufferVulkanMode;
+    dec->rcReadColorBufferYUV = rcReadColorBufferYUV;
+    dec->rcIsSyncSignaled = rcIsSyncSignaled;
+    dec->rcCreateColorBufferWithHandle = rcCreateColorBufferWithHandle;
+    dec->rcCreateBuffer = rcCreateBuffer;
+    dec->rcCreateBuffer2 = rcCreateBuffer2;
+    dec->rcCloseBuffer = rcCloseBuffer;
+    dec->rcSetColorBufferVulkanMode2 = rcSetColorBufferVulkanMode2;
+    dec->rcMapGpaToBufferHandle = rcMapGpaToBufferHandle;
+    dec->rcMapGpaToBufferHandle2 = rcMapGpaToBufferHandle2;
+    dec->rcFlushWindowColorBufferAsyncWithFrameNumber = rcFlushWindowColorBufferAsyncWithFrameNumber;
+    dec->rcSetTracingForPuid = rcSetTracingForPuid;
+    dec->rcMakeCurrentAsync = rcMakeCurrentAsync;
+    dec->rcComposeAsync = rcComposeAsync;
+    dec->rcDestroySyncKHRAsync = rcDestroySyncKHRAsync;
 }

@@ -286,6 +286,7 @@ glGetVertexAttribiv
 glReadPixels
     dir pixels out
     len pixels glesv2_enc::pixelDataSize(self, width, height, format, type, 1)
+	custom_guest_unpack pixels stream->readbackPixels(self, width, height, format, type, pixels)
 
 glReadPixelsOffsetAEMU
     flag custom_decoder
@@ -299,6 +300,7 @@ glShaderBinary
 glTexImage2D
     dir pixels in
     len pixels glesv2_enc::pixelDataSize(self, width, height, format, type, 0)
+	custom_guest_pack pixels stream->uploadPixels(self, width, height, 1, format, type, pixels)
     var_flag pixels nullAllowed isLarge
 
 #void glTexParameterfv(GLenum target, GLenum pname, GLfloat *params)
@@ -311,6 +313,7 @@ glTexParameteriv
 #void glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *pixels)
 glTexSubImage2D
     len pixels glesv2_enc::pixelDataSize(self, width, height, format, type, 0)
+	custom_guest_pack pixels stream->uploadPixels(self, width, height, 1, format, type, pixels)
     var_flag pixels nullAllowed isLarge
 
 #void glUniform1fv(GLint location, GLsizei count, GLfloat *v)
@@ -1020,6 +1023,7 @@ glGetInteger64i_v
 glTexImage3D
     dir data in
     len data glesv2_enc::pixelDataSize3D(self, width, height, depth, format, type, 0)
+	custom_guest_pack data stream->uploadPixels(self, width, height, depth, format, type, data)
     var_flag data nullAllowed isLarge
 
 glTexImage3DOffsetAEMU
@@ -1028,6 +1032,7 @@ glTexImage3DOffsetAEMU
 
 glTexSubImage3D
     len data glesv2_enc::pixelDataSize3D(self, width, height, depth, format, type, 0)
+	custom_guest_pack data stream->uploadPixels(self, width, height, depth, format, type, data)
     var_flag data nullAllowed isLarge
 
 glTexSubImage3DOffsetAEMU
@@ -1412,4 +1417,69 @@ glGetProgramResourceLocation
 glGetProgramResourceName
     flag custom_decoder
 
+glMapBufferRangeDMA
+    flag custom_decoder
+    flag not_api
 
+glUnmapBufferDMA
+    dir out_res out
+    len out_res (sizeof(GLboolean))
+    flag custom_decoder
+    flag not_api
+
+glMapBufferRangeDirect
+    flag custom_decoder
+    flag not_api
+
+glUnmapBufferDirect
+    dir out_res out
+    len out_res (sizeof(GLboolean))
+    flag custom_decoder
+    flag not_api
+
+glFlushMappedBufferRangeDirect
+    flag custom_decoder
+    flag not_api
+
+glReadnPixelsEXT
+    dir data out
+    len data bufSize
+
+glGetnUniformfvEXT
+    dir params out
+    len params bufSize
+
+glGetnUniformivEXT
+    dir params out
+    len params bufSize
+
+glDrawElementsNullAEMU
+    flag unsupported
+
+glDrawElementsDataNullAEMU
+    len data datalen
+    flag custom_decoder
+    flag not_api
+
+glDrawElementsOffsetNullAEMU
+    flag custom_decoder
+    flag not_api
+
+# Async UnmapBuffer
+glUnmapBufferAsyncAEMU
+    dir guest_buffer in
+    len guest_buffer length
+    var_flag guest_buffer nullAllowed isLarge
+    dir out_res in
+    len out_res (sizeof(GLboolean))
+    flag custom_decoder
+    flag not_api
+    custom_host_api glUnmapBufferAEMU
+
+glFlushMappedBufferRangeAEMU2
+    dir guest_buffer in
+    len guest_buffer length
+    var_flag guest_buffer nullAllowed isLarge
+    flag custom_decoder
+    flag not_api
+    custom_host_api glFlushMappedBufferRangeAEMU

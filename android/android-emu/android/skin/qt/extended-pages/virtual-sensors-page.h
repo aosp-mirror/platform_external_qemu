@@ -12,23 +12,33 @@
 
 #include "ui_virtual-sensors-page.h"
 
-#include "android/hw-sensors.h"
-#include "android/metrics/PeriodicReporter.h"
-#include "android/physics/Physics.h"
-#include "android/physics/physical_state_agent.h"
-#include "android/skin/file.h"
-#include "android/skin/rect.h"
+#include <qobjectdefs.h>                           // for slots, Q_OBJECT
+#include <QDoubleValidator>                        // for QDoubleValidator
+#include <QElapsedTimer>                           // for QElapsedTimer
+#include <QString>                                 // for QString
+#include <QTimer>                                  // for QTimer
+#include <QWidget>                                 // for QWidget
+#include <memory>                                  // for unique_ptr
 
-#include <QDoubleValidator>
-#include <QElapsedTimer>
-#include <QTimer>
-#include <QWidget>
+#include "android/hw-sensors.h"                    // for PhysicalParameter
+#include "android/metrics/PeriodicReporter.h"      // for PeriodicReporter
+#include "android/physics/Physics.h"               // for PhysicalInterpolation
+#include "android/physics/physical_state_agent.h"  // for QAndroidPhysicalSt...
+#include "android/skin/rect.h"                     // for SkinRotation, SKIN...
+#include "glm/detail/../fwd.hpp"                   // for quat
+#include "glm/detail/type_vec.hpp"                 // for vec3
+#include "glm/detail/type_vec3.hpp"                // for tvec3
 
-#include <memory>
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
 
-#include <glm/vec3.hpp>
-#include <glm/gtc/quaternion.hpp>
-
+using android::metrics::UiEventTracker;
+class QObject;
+class QShowEvent;
+class QWidget;
 struct QAndroidSensorsAgent;
 
 class VirtualSensorsPage : public QWidget
@@ -40,8 +50,8 @@ public:
     ~VirtualSensorsPage();
 
     void showEvent(QShowEvent* event) override;
-
     static void setSensorsAgent(const QAndroidSensorsAgent* agent);
+    void hideRotationButtons(bool hide);
 
 private slots:
     void on_temperatureSensorValueWidget_valueChanged(double value);
@@ -49,8 +59,11 @@ private slots:
     void on_lightSensorValueWidget_valueChanged(double value);
     void on_pressureSensorValueWidget_valueChanged(double value);
     void on_humiditySensorValueWidget_valueChanged(double value);
+    void on_heartRateSensorValueWidget_valueChanged(double value);
     void on_accelModeRotate_toggled();
     void on_accelModeMove_toggled();
+    void on_accelModeFold_toggled();
+    void on_accelModeRoll_toggled();
 
     void on_magNorthWidget_valueChanged(double value);
     void on_magEastWidget_valueChanged(double value);
@@ -89,9 +102,15 @@ private slots:
     void on_rotateToLandscape_clicked();
     void on_rotateToReversePortrait_clicked();
     void on_rotateToReverseLandscape_clicked();
+    void on_btn_postureClosed_clicked();
+    void on_btn_postureFlipped_clicked();
+    void on_btn_postureHalfOpen_clicked();
+    void on_btn_postureOpen_clicked();
+    void on_btn_postureTent_clicked();
     void on_helpMagneticField_clicked();
     void on_helpLight_clicked();
     void on_helpPressure_clicked();
+    void on_helpHeartRate_clicked();
     void on_helpAmbientTemp_clicked();
     void on_helpProximity_clicked();
     void on_helpHumidity_clicked();
@@ -101,6 +120,13 @@ private slots:
     void on_positionXSlider_valueChanged(double);
     void on_positionYSlider_valueChanged(double);
     void on_positionZSlider_valueChanged(double);
+    void on_hinge0Slider_valueChanged(double);
+    void on_hinge1Slider_valueChanged(double);
+    void on_hinge2Slider_valueChanged(double);
+    void on_roll0Slider_valueChanged(double);
+    void on_roll1Slider_valueChanged(double);
+    void on_roll2Slider_valueChanged(double);
+    void on_posture_valueChanged(int);
 
     void updateResultingValues(glm::vec3 acceleration,
                                glm::vec3 gyroscope,
@@ -127,12 +153,18 @@ private:
     void onTargetStateChanged();
     void onPhysicalStateChanging();
     void onPhysicalStateStabilized();
+    void setupHingeSensorUI();
+    void togglePostureButtonsVisibility(bool newVisibility);
+    void setupRollableUI();
+    void updateUIPosture();
+    void disableHeartRateSensor();
 
     static void onTargetStateChanged(void* context);
     static void onPhysicalStateChanging(void* context);
     static void onPhysicalStateStabilized(void* context);
 
     std::unique_ptr<Ui::VirtualSensorsPage> mUi;
+    std::shared_ptr<UiEventTracker> mSensorTracker;
     QDoubleValidator mMagFieldValidator;
     QTimer mAccelerationTimer;
     bool mFirstShow = true;
@@ -150,4 +182,7 @@ private:
     bool mBypassOrientationChecks = false;
     bool mVirtualSceneControlsEngaged = false;
     QElapsedTimer mLastInteractionElapsed;
+    enum FoldablePostures mCurrentPosture = POSTURE_UNKNOWN;
+
+    void updateCurrentPosture();
 };

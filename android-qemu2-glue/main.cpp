@@ -9,27 +9,38 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android-qemu2-glue/qemu-console-factory.h"
 #include "android/android.h"
 #include "android/avd/hw-config.h"
-#include "android/base/async/ThreadLooper.h"
 #include "android/base/Log.h"
+#include "android/base/ProcessControl.h"
 #include "android/base/StringFormat.h"
+#include "android/base/async/ThreadLooper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/ScopedPtr.h"
-#include "android/base/ProcessControl.h"
 #include "android/base/system/System.h"
+#include "android/base/system/Win32Utils.h"
+#include "android/base/threads/Async.h"
 #include "android/base/threads/Thread.h"
 #include "android/boot-properties.h"
 #include "android/camera/camera-virtualscene.h"
 #include "android/cmdline-option.h"
 #include "android/config/BluetoothConfig.h"
+#include "android/console.h"
 #include "android/constants.h"
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/ConfigDirs.h"
+#include "android/emulation/LogcatPipe.h"
+#include "android/emulation/MultiDisplay.h"
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/control/ScreenCapturer.h"
+#include "android/emulation/control/adb/adbkey.h"
+#include "android/emulation/control/automation_agent.h"
+#include "android/emulation/control/multi_display_agent.h"
+#include "android/emulation/control/vm_operations.h"
+#include "android/emulation/control/window_agent.h"
 #include "android/error-messages.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/feature_control.h"
@@ -37,6 +48,7 @@
 #include "android/filesystems/ext4_utils.h"
 #include "android/globals.h"
 #include "android/help.h"
+#include "android/hw-sensors.h"
 #include "android/kernel/kernel_utils.h"
 #include "android/main-common-ui.h"
 #include "android/main-common.h"
@@ -48,6 +60,7 @@
 #include "android/process_setup.h"
 #include "android/recording/screen-recorder.h"
 #include "android/session_phase_reporter.h"
+#include "android/snapshot/check_snapshot_loadable.h"
 #include "android/snapshot/interface.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -67,6 +80,12 @@
 
 #include "config-target.h"
 
+// modem simulator
+extern "C" {
+#include "android_modem_v2.h"
+}
+#include "modem_main.h"
+
 extern "C" {
 #include "android/skin/charmap.h"
 #include "hw/misc/goldfish_pstore.h"
@@ -74,10 +93,15 @@ extern "C" {
 
 #include "android-qemu2-glue/adbkey.h"
 #include "android-qemu2-glue/dtb.h"
+#include "android-qemu2-glue/emulation/HostapdController.h"
 #include "android-qemu2-glue/emulation/serial_line.h"
+#include "android-qemu2-glue/emulation/virtio-input-multi-touch.h"
+#include "android-qemu2-glue/emulation/virtio-input-rotary.h"
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
-#include "android-qemu2-glue/qemu-control-impl.h"
+#include "android/gps/PassiveGpsUpdater.h"
 #include "android/ui-emu-agent.h"
+
+#include <iostream>
 
 #ifdef TARGET_AARCH64
 #define TARGET_ARM64
@@ -89,10 +113,17 @@ extern "C" {
 #include <assert.h>
 #include <limits.h>
 #include <stdio.h>
+#include <signal.h>
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
 #include <algorithm>
+#include <string>
+#include <thread>
+
+#ifdef __APPLE__
+#include <sys/resource.h>
+#endif
 
 #include "android/version.h"
 #define D(...)                   \
@@ -101,15 +132,22 @@ extern "C" {
             dprint(__VA_ARGS__); \
     } while (0)
 
-extern bool android_op_wipe_data;
-extern bool android_op_writable_system;
+extern "C" bool android_op_wipe_data;
+extern "C" bool android_op_writable_system;
 
 // Check if we are running multiple emulators on the same AVD
 static bool is_multi_instance = false;
 
 using namespace android::base;
 using android::base::System;
+using android::emulation::PassiveGpsUpdater;
 namespace fc = android::featurecontrol;
+
+#ifdef __linux__
+static bool is_linux = true;
+#else
+static bool is_linux = false;
+#endif
 
 namespace {
 
@@ -163,7 +201,15 @@ const TargetInfo kTarget = {
 #ifdef TARGET_ARM64
         "arm64",
         "aarch64",
+#if defined(__aarch64__)
+#ifdef __APPLE__
+        "cortex-a53",
+#else // __APPLE__
+        "host",
+#endif // !__APPLE__
+#else
         "cortex-a57",
+#endif
         "ttyAMA",
         "virtio-blk-device",
         "virtio-net-device",
@@ -260,7 +306,7 @@ static int genHwIniFile(AndroidHwConfig* hw, const char* coreHwIniPath) {
 
     /* In verbose mode, dump the file's content */
     if (VERBOSE_CHECK(init)) {
-        auto file = makeCustomScopedPtr(fopen(coreHwIniPath, "rt"), fclose);
+        auto file = makeCustomScopedPtr(android_fopen(coreHwIniPath, "rt"), fclose);
         if (file.get() == NULL) {
             derror("Could not open hardware configuration file: "
                    "%s\n",
@@ -280,6 +326,7 @@ static int genHwIniFile(AndroidHwConfig* hw, const char* coreHwIniPath) {
     return 0;
 }
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 // Get adbkey path, return "" if failed
 // adbKeyFileName could be "adbkey" or "adbkey.pub"
 static std::string getAdbKeyPath(const char* adbKeyFileName) {
@@ -310,6 +357,29 @@ static std::string getAdbKeyPath(const char* adbKeyFileName) {
     }
     D("cannot read adb key file (failed): %s", adbKeyPath.c_str());
     return "";
+=======
+static void prepareDisplaySettingXml(AndroidHwConfig* hw,
+                               const char* destDirectory) {
+    if(!strcmp(hw->display_settings_xml, "")){
+        return;
+    }
+    static const int kDirFilePerm = 02750;
+    std::string guestXmlDir = PathUtils::join(destDirectory, "system");
+    std::string guestXmlPath = PathUtils::join(guestXmlDir, "display_settings.xml");
+    std::string guestDisplaySettingXmlFile = "display_settings_" +
+                                             std::string(hw->display_settings_xml) +
+                                             ".xml";
+    std::string guestDisplaySettingXmlPath = PathUtils::join(guestXmlDir,
+                                                             guestDisplaySettingXmlFile);
+    if (!path_exists(guestDisplaySettingXmlPath.c_str())) {
+        dwarning("Could not locate display settings file: %s\n",
+                 guestDisplaySettingXmlPath.c_str());
+        return;
+    }
+    path_mkdir_if_needed(guestXmlDir.c_str(), kDirFilePerm);
+    path_copy_file(guestXmlPath.c_str(), guestDisplaySettingXmlPath.c_str());
+    android_chmod(guestXmlPath.c_str(), 0640);
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 }
 
 static void prepareDataFolder(const char* destDirectory,
@@ -379,6 +449,8 @@ static int createUserData(AvdInfo* avd,
     if (path_exists(initDir.get())) {
         D("Creating ext4 userdata partition: %s", dataPath);
         prepareDataFolder(dataPath, initDir.get());
+        prepareDisplaySettingXml(hw, dataPath);
+
         needCopyDataPartition = !creatUserDataExt4Img(hw, dataPath);
         path_delete_dir(dataPath);
     }
@@ -474,13 +546,13 @@ private:
                             systemDir,
                             get_qcow2_image_basename(sysImagePath).c_str()));
                     filePath = allocatedPath.get();
-                    driveParam += StringFormat("index=%d,id=system,file=%s",
+                    driveParam += StringFormat("index=%d,id=system,if=none,file=%s",
                                                m_driveIndex++, filePath);
                 } else {
                     qCow2Format = false;
                     filePath = sysImagePath.c_str();
                     driveParam += StringFormat(
-                            "index=%d,id=system,file=%s"
+                            "index=%d,id=system,if=none,file=%s"
                             ",read-only",
                             m_driveIndex++, filePath);
                 }
@@ -502,13 +574,13 @@ private:
                             systemDir,
                             get_qcow2_image_basename(vendorImagePath).c_str()));
                     filePath = allocatedPath.get();
-                    driveParam += StringFormat("index=%d,id=vendor,file=%s",
+                    driveParam += StringFormat("index=%d,id=vendor,if=none,file=%s",
                                                m_driveIndex++, filePath);
                 } else {
                     qCow2Format = false;
                     filePath = vendorImagePath.c_str();
                     driveParam += StringFormat(
-                            "index=%d,id=vendor,file=%s"
+                            "index=%d,id=vendor,if=none,file=%s"
                             ",read-only",
                             m_driveIndex++, filePath);
                 }
@@ -519,7 +591,7 @@ private:
                 filePath = m_hw->disk_cachePartition_path;
                 bufferString = StringFormat("%s.qcow2", filePath);
                 driveParam +=
-                        StringFormat("index=%d,id=cache,file=%s",
+                        StringFormat("index=%d,id=cache,if=none,file=%s",
                                      m_driveIndex++, bufferString.c_str());
                 deviceParam = StringFormat("%s,drive=cache",
                                            kTarget.storageDeviceType);
@@ -528,7 +600,7 @@ private:
                 filePath = m_hw->disk_dataPartition_path;
                 bufferString = StringFormat("%s.qcow2", filePath);
                 driveParam +=
-                        StringFormat("index=%d,id=userdata,file=%s",
+                        StringFormat("index=%d,id=userdata,if=none,file=%s",
                                      m_driveIndex++, bufferString.c_str());
                 deviceParam = StringFormat("%s,drive=userdata",
                                            kTarget.storageDeviceType);
@@ -539,7 +611,7 @@ private:
                     filePath = m_hw->hw_sdCard_path;
                     bufferString = StringFormat("%s.qcow2", filePath);
                     driveParam +=
-                            StringFormat("index=%d,id=sdcard,file=%s",
+                            StringFormat("index=%d,id=sdcard,if=none,file=%s",
                                          m_driveIndex++, bufferString.c_str());
                     deviceParam = StringFormat("%s,drive=sdcard",
                                                kTarget.storageDeviceType);
@@ -555,7 +627,7 @@ private:
                     filePath = m_hw->disk_encryptionKeyPartition_path;
                     bufferString = StringFormat("%s.qcow2", filePath);
                     driveParam +=
-                            StringFormat("index=%d,id=encrypt,file=%s",
+                            StringFormat("index=%d,id=encrypt,if=none,file=%s",
                                          m_driveIndex++, bufferString.c_str());
                     deviceParam = StringFormat("%s,drive=encrypt",
                                                kTarget.storageDeviceType);
@@ -608,6 +680,52 @@ private:
     int m_driveIndex;
 };
 
+static void initialize_virtio_input_devs(android::ParameterList& args, AndroidHwConfig* hw) {
+    if (fc::isEnabled(fc::VirtioInput)) {
+        if (fc::isEnabled(fc::VirtioMouse)) {
+            args.add("-device");
+            args.add("virtio-mouse-pci");
+        } else if (androidHwConfig_isScreenMultiTouch(hw)) {
+            for (int id = 1; id <= VIRTIO_INPUT_MAX_NUM; id++) {
+                args.add("-device");
+                args.add(StringFormat("virtio_input_multi_touch_pci_%d", id).c_str());
+            }
+        }
+
+        if (hw->hw_rotaryInput) {
+            args.add("-device");
+            args.add("virtio_input_rotary_pci");
+        }
+
+        if (hw->hw_keyboard) {
+            args.add("-device");
+            args.add("virtio-keyboard-pci");
+        }
+    }
+}
+
+static void enableSignalTermination() {
+    // The issue only occurs on Darwin so to be safe just do this on Darwin
+    // to prevent potential issues. The function exists on all platforms to
+    // make the calling code look cleaner.
+#ifdef __APPLE__
+    sigset_t set;
+    sigemptyset(&set);
+    sigaddset(&set, SIGTERM);
+    sigaddset(&set, SIGHUP);
+    sigaddset(&set, SIGINT);
+    int result = pthread_sigmask(SIG_UNBLOCK, &set, nullptr);
+    if (result != 0) {
+        D("Could not set thread sigmask: %d", result);
+    }
+#endif
+}
+
+static bool isCrostini() {
+    struct stat buf;
+    return is_linux && stat("/dev/.cros_milestone", &buf) == 0;
+}
+
 }  // namespace
 
 extern "C" int run_qemu_main(int argc,
@@ -644,16 +762,51 @@ static void enter_qemu_main_loop(int argc, char** argv) {
     if (android_init_error_occurred()) {
         skin_winsys_error_dialog(android_init_error_get_message(), "Error");
     }
+#ifdef CONFIG_HEADLESS
+     skin_winsys_quit_request();
+#endif
 }
 
 #ifdef CONFIG_HEADLESS
 #else
 #if defined(_WIN32) || defined(_MSC_VER)
 // On Windows, link against qtmain.lib which provides a WinMain()
-// implementation, that later calls qMain().
+// implementation, that later calls qMain(). In the MSVC build, qtmain.lib calls
+// main() instead of qMain(), so we need to make sure qMain is redefined to
+// main for that case.
 #define main qt_main
 #endif // windows
 #endif // !CONFIG_HEADLESS
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+
+// create the modem_simulator sub folder on the host
+// the radio configs come from the image/<arch>/data/misc/modem_simulator
+// folder, make a copy of that folder to avd/modem_simulator/ and create
+// the necessary dir strucutres that modem simulator expects
+static bool create_modem_simulator_configs_if_needed(AndroidHwConfig* hw) {
+    ScopedCPtr<char> avd_dir(path_dirname(hw->disk_dataPartition_path));
+    if (!avd_dir) {
+        return false;
+    }
+
+    std::string modem_config_dir = PathUtils::join(avd_dir.get(), "modem_simulator");
+    std::string iccprofile_path = PathUtils::join(modem_config_dir.c_str(), "iccprofile_for_sim0.xml");
+    if (android_op_wipe_data) {
+        path_delete_file(iccprofile_path.c_str());
+    }
+
+    if (path_exists(iccprofile_path.c_str())) {
+        return true;
+    }
+
+    ScopedCPtr<char> sysimg_dir(path_dirname(hw->disk_ramdisk_path));
+    std::string org_modem_config_dir = PathUtils::join(sysimg_dir.get(), "data", "misc", "modem_simulator");
+
+    path_copy_dir(modem_config_dir.c_str(), org_modem_config_dir.c_str());
+    return path_exists(iccprofile_path.c_str());
+}
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 
 static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
     ScopedCPtr<char> userdata_dir(path_dirname(hw->disk_dataPartition_path));
@@ -686,13 +839,407 @@ static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
     return false;
 }
 
-extern AndroidProxyCB* gAndroidProxyCB;
+bool handleCpuAccelerationForMinConfig(int argc, char** argv,
+        CpuAccelMode* accel_mode, char** accel_status) {
+
+    printf("%s: configure CPU acceleration\n", __func__);
+
+    int hasEnableKvm = 0;
+    int hasEnableHax = 0;
+    int hasEnableHvf = 0;
+    int hasEnableWhpx = 0;
+    int hasEnableGvm = 0;
+
+    for (int i = 0; i < argc; i++) {
+        if (!strcmp(argv[i], "-enable-kvm")) {
+            hasEnableKvm = 1;
+        } else if (!strcmp(argv[i], "-enable-hax")) {
+            hasEnableHax = 1;
+        } else if (!strcmp(argv[i], "-enable-hvf")) {
+            hasEnableHvf = 1;
+        } else if (!strcmp(argv[i], "-enable-whpx")) {
+            hasEnableWhpx = 1;
+        } else if (!strcmp(argv[i], "-enable-gvm")) {
+            hasEnableGvm = 1;
+        }
+    }
+
+    int totalEnabled =
+        hasEnableKvm +
+        hasEnableHax +
+        hasEnableHvf +
+        hasEnableWhpx +
+        hasEnableGvm;
+
+    if (totalEnabled > 1) {
+        fprintf(stderr, "%s: ERROR: tried to enable more than once acceleration mode. "
+                "Attempted enables: kvm %d haxm %d hvf %d whpx %d gvm %d\n", __func__,
+                hasEnableKvm,
+                hasEnableHax,
+                hasEnableHvf,
+                hasEnableWhpx,
+                hasEnableGvm);
+        exit(1);
+    }
+
+    printf("%s: Checking CPU acceleration capability on host...\n", __func__);
+
+    // Check acceleration capabilities on the host.
+    AndroidCpuAcceleration accel_capability =
+        androidCpuAcceleration_getStatus(accel_status);
+    bool accel_ok =
+        (accel_capability == ANDROID_CPU_ACCELERATION_READY);
+
+    // Print the current status.
+    if (accel_ok) {
+        printf("%s: Host can use CPU acceleration\n", __func__);
+    } else {
+        printf("%s: Host cannot use CPU acceleration\n", __func__);
+    }
+
+    printf("%s: Host CPU acceleration capability status string: [%s]\n",
+           __func__, *accel_status);
+
+    if (0 == totalEnabled) {
+        printf("%s: CPU acceleration disabled by user (no enabled hypervisors)\n", __func__);
+        androidCpuAcceleration_resetCpuAccelerator(
+                ANDROID_CPU_ACCELERATOR_NONE);
+        *accel_mode = ACCEL_OFF;
+        return true;
+    }
+
+    *accel_mode = ACCEL_ON;
+
+    if (hasEnableKvm) {
+        printf("%s: Selecting KVM for CPU acceleration\n", __func__);
+        androidCpuAcceleration_resetCpuAccelerator(
+                ANDROID_CPU_ACCELERATOR_KVM);
+    } else if (hasEnableHax) {
+        printf("%s: Selecting HAXM for CPU acceleration\n", __func__);
+        androidCpuAcceleration_resetCpuAccelerator(
+                ANDROID_CPU_ACCELERATOR_HAX);
+    } else if (hasEnableHvf) {
+        printf("%s: Selecting HVF for CPU acceleration\n", __func__);
+        androidCpuAcceleration_resetCpuAccelerator(
+                ANDROID_CPU_ACCELERATOR_HVF);
+    } else if (hasEnableWhpx) {
+        printf("%s: Selecting WHPX for CPU acceleration\n", __func__);
+        androidCpuAcceleration_resetCpuAccelerator(
+                ANDROID_CPU_ACCELERATOR_WHPX);
+    } else if (hasEnableGvm) {
+        printf("%s: Selecting GVM for CPU acceleration\n", __func__);
+        androidCpuAcceleration_resetCpuAccelerator(
+                ANDROID_CPU_ACCELERATOR_GVM);
+    }
+
+    return true;
+}
+
+struct HeadLessPassiveGpsData {
+    std::unique_ptr<PassiveGpsUpdater> update;
+    std::string AVDconf;
+    double latitude = {37.422};
+    double longitude{-122.084};
+    double altitude = 0;
+    double velocity{0};
+    double heading{0};
+};
+
+static HeadLessPassiveGpsData s_headlessGpsData;
+
+static void process_gps_passive_data() {
+    // Send a GPS location to the device
+    auto sLocationAgent = getConsoleAgents()->location;
+    if (sLocationAgent && sLocationAgent->gpsSendLoc) {
+        // Send these to the device
+        // lat 37.422 lon -122.084 al 5 vel 0 head 0
+        timeval timeVal = {};
+        gettimeofday(&timeVal, nullptr);
+
+        sLocationAgent->gpsSendLoc(
+                s_headlessGpsData.latitude, s_headlessGpsData.longitude,
+                s_headlessGpsData.altitude, s_headlessGpsData.velocity,
+                s_headlessGpsData.heading, 4, &timeVal);
+    }
+}
+
+static void start_passive_gps_feeder(const std::string& AVDconfPath) {
+    s_headlessGpsData.AVDconf = AVDconfPath;
+    PassiveGpsUpdater::parseLocationConf(
+            s_headlessGpsData.AVDconf, s_headlessGpsData.latitude,
+            s_headlessGpsData.longitude, s_headlessGpsData.altitude,
+            s_headlessGpsData.velocity, s_headlessGpsData.heading);
+    s_headlessGpsData.update.reset(
+            new PassiveGpsUpdater(process_gps_passive_data));
+}
+
+static int startEmulatorWithMinConfig(
+    int argc,
+    char** argv,
+    const char* avdName,
+    int apiLevel,
+    const char* abi,
+    const char* arch,
+    bool isGoogleApis,
+    AvdFlavor flavor,
+    const char* gpuMode,
+    bool noWindow,
+    int lcdWidth,
+    int lcdHeight,
+    int lcdDensity,
+    const char* lcdInitialOrientation,
+    AndroidOptions* optsToOverride,
+    AndroidHwConfig* hwConfigToOverride,
+    AvdInfo** avdInfoToOverride) {
+
+    android_qemu_mode = 0;
+    // Min config mode and fuchsia mode are equivalent, at least for now.
+    min_config_qemu_mode = is_fuchsia = 1;
+
+    auto opts = optsToOverride;
+    auto hw = hwConfigToOverride;
+
+    opts->avd = strdup(avdName);
+    opts->gpu = strdup(gpuMode);
+    opts->no_window = noWindow;
+
+    *avdInfoToOverride =
+        avdInfo_newCustom(
+            avdName, apiLevel,
+            abi, arch,
+            isGoogleApis, flavor);
+
+    AvdInfo* avd = *avdInfoToOverride;
+
+    // Initialize the hw config to default values, so that code paths that
+    // still rely on android_hw aren't reading uninitialized memory.
+    androidHwConfig_init(hw, 0);
+
+    str_reset(&hw->hw_initialOrientation, lcdInitialOrientation);
+    hw->hw_gpu_enabled = true;
+    str_reset(&hw->hw_gpu_mode, gpuMode);
+    hw->hw_lcd_width = lcdWidth;
+    hw->hw_lcd_height = lcdHeight;
+    hw->hw_lcd_density = lcdDensity;
+
+    auto battery = getConsoleAgents()->battery;
+    if (battery &&
+        battery->setHasBattery) {
+        battery->setHasBattery(false);
+    }
+    getConsoleAgents()->location->gpsSetPassiveUpdate(false);
+
+    // Setup GPU acceleration. This needs to go along with user interface
+    // initialization, because we need the selected backend from Qt settings.
+    const UiEmuAgent uiEmuAgent = {
+        getConsoleAgents()->automation,
+            getConsoleAgents()->battery,
+            getConsoleAgents()->cellular,
+            getConsoleAgents()->clipboard,
+            getConsoleAgents()->display,
+            getConsoleAgents()->emu,
+            getConsoleAgents()->finger,
+            getConsoleAgents()->location,
+            getConsoleAgents()->proxy,
+            getConsoleAgents()->record,
+            getConsoleAgents()->sensors,
+            getConsoleAgents()->telephony,
+            getConsoleAgents()->user_event,
+            getConsoleAgents()->virtual_scene,
+            getConsoleAgents()->car,
+            getConsoleAgents()->multi_display,
+            nullptr  // For now there's no uses of SettingsAgent, so we
+            //          // don't set it.
+    };
+
+    android::base::Thread::maskAllSignals();
+    skin_winsys_init_args(argc, argv);
+    if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
+        fprintf(stderr, "%s: warning: user interface init failed\n",
+                __func__);
+    }
+
+    // Register the quit callback
+    android::base::registerEmulatorQuitCallback([] {
+        android::base::ThreadLooper::runOnMainLooper([] {
+            skin_winsys_quit_request();
+        });
+    });
+
+#if (SNAPSHOT_PROFILE > 1)
+    printf("skin_winsys_init and UI finishing at uptime %" PRIu64 " ms\n",
+           get_uptime_ms());
+#endif
+
+    // Use advancedFeatures to override renderer if the user has
+    // selected in UI that the preferred renderer is "autoselected".
+    WinsysPreferredGlesBackend uiPreferredGlesBackend =
+            skin_winsys_get_preferred_gles_backend();
+
+#ifndef _WIN32
+    if (uiPreferredGlesBackend == WINSYS_GLESBACKEND_PREFERENCE_ANGLE ||
+        uiPreferredGlesBackend == WINSYS_GLESBACKEND_PREFERENCE_ANGLE9) {
+        uiPreferredGlesBackend = WINSYS_GLESBACKEND_PREFERENCE_AUTO;
+        skin_winsys_set_preferred_gles_backend(uiPreferredGlesBackend);
+    }
+#endif
+
+    // BUG: 148804702: angle9 has been removed
+    // BUG: 156911788: potential other way to end up with gl config failure
+    if (uiPreferredGlesBackend == WINSYS_GLESBACKEND_PREFERENCE_ANGLE9) {
+        skin_winsys_set_preferred_gles_backend(
+            WINSYS_GLESBACKEND_PREFERENCE_ANGLE);
+    }
+
+    char* accel_status = NULL;
+    CpuAccelMode accel_mode = ACCEL_AUTO;
+
+    handleCpuAccelerationForMinConfig(argc, argv, &accel_mode, &accel_status);
+
+    // Feature flags-related last-microsecond renderer changes
+    {
+        // Should enable OpenGL ES 3.x?
+        if (skin_winsys_get_preferred_gles_apilevel() ==
+            WINSYS_GLESAPILEVEL_PREFERENCE_MAX) {
+            fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion,
+                                                 true);
+        }
+
+        if (skin_winsys_get_preferred_gles_apilevel() ==
+                    WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT) {
+            fc::setEnabledOverride(fc::GLESDynamicVersion, false);
+        }
+
+        if (fc::isEnabled(fc::ForceANGLE)) {
+            uiPreferredGlesBackend =
+                    skin_winsys_override_glesbackend_if_auto(
+                            WINSYS_GLESBACKEND_PREFERENCE_ANGLE);
+        }
+
+        if (fc::isEnabled(fc::ForceSwiftshader)) {
+            uiPreferredGlesBackend =
+                    skin_winsys_override_glesbackend_if_auto(
+                            WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
+        }
+    }
+    android_init_multi_display(getConsoleAgents()->emu, getConsoleAgents()->record);
+
+    RendererConfig rendererConfig;
+    configAndStartRenderer(avd, opts, hw, getConsoleAgents()->vm,
+                           getConsoleAgents()->emu,
+                           getConsoleAgents()->multi_display,
+                           uiPreferredGlesBackend, &rendererConfig);
+
+    // Gpu configuration is set, now initialize the multi display, screen recorder
+    // and screenshot callback
+    bool isGuestMode =
+            (!hw->hw_gpu_enabled || !strcmp(hw->hw_gpu_mode, "guest"));
+    getConsoleAgents()->multi_display->setGpuMode(isGuestMode, hw->hw_lcd_width, hw->hw_lcd_height);
+    screen_recorder_init(hw->hw_lcd_width, hw->hw_lcd_height,
+                         isGuestMode ? uiEmuAgent.display : nullptr,
+                         getConsoleAgents()->multi_display);
+    android_registerScreenshotFunc([](const char* dirname, uint32_t display) ->bool {
+        return android::emulation::captureScreenshot(dirname, nullptr, display);
+    });
+
+    /* Disable the GLAsyncSwap for ANGLE so far */
+    bool shouldDisableAsyncSwap =
+            rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE ||
+            rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
+    // Features to disable or enable depending on rendering backend
+    // and gpu make/model/version
+#if defined(__APPLE__) && defined(__aarch64__)
+    shouldDisableAsyncSwap = false;
+#else
+    shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3) ||
+                              System::get()->getProgramBitness() == 32;
+#endif
+    shouldDisableAsyncSwap = shouldDisableAsyncSwap ||
+                             async_query_host_gpu_SyncBlacklisted();
+
+    if (shouldDisableAsyncSwap) {
+        fc::setEnabledOverride(fc::GLAsyncSwap, false);
+    }
+
+    android_report_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);
+
+    // Generate a hardware-qemu.ini for this AVD.
+    if (VERBOSE_CHECK(init)) {
+        printf("QEMU options list (startEmulatorWithMinConfig):\n");
+        for (int i = 0; i < argc; i++) {
+            printf("emulator: argv[%02d] = \"%s\"\n", i, argv[i]);
+        }
+    }
+
+    skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, argc,
+                             argv);
+    android::crashreport::CrashReporter::get()->hangDetector().pause(false);
+    skin_winsys_enter_main_loop(opts->no_window);
+    android::crashreport::CrashReporter::get()->hangDetector().pause(true);
+
+    stopRenderer();
+    emulator_finiUserInterface();
+
+    cuttlefish::stop_android_modem_simulator();
+    process_late_teardown();
+    return 0;
+}
+
+extern "C" AndroidProxyCB* gAndroidProxyCB;
 extern "C" int main(int argc, char** argv) {
+
     if (argc < 1) {
         fprintf(stderr, "Invalid invocation (no program path)\n");
         return 1;
     }
 
+#ifdef __APPLE__
+    {
+        int ret;
+        struct rlimit rl;
+        static constexpr rlim_t kDesiredFileLimit = 16384;
+        rlim_t desiredLimit = kDesiredFileLimit;
+        bool raiseLimit = true;
+        ret = getrlimit(RLIMIT_NOFILE, &rl);
+
+        if (0 == ret) {
+            D("Num files limit: cur max %u %u", rl.rlim_cur, rl.rlim_max);
+            if (desiredLimit < rl.rlim_cur) {
+                raiseLimit = false;
+                D("Current limit already high enough, don't raise limit.");
+            } else if (desiredLimit > rl.rlim_max) {
+                desiredLimit = rl.rlim_max;
+                D("Target files limit: %u", desiredLimit);
+            }
+        } else {
+            fprintf(stderr, "%s: Failed to query files limit. errno %d\n", __func__, errno);
+        }
+
+        if (raiseLimit) {
+            rl.rlim_cur = desiredLimit;
+            ret = setrlimit(RLIMIT_NOFILE, &rl);
+            if (0 == ret) {
+                D("Raised open files limit to %u\n", __func__, desiredLimit);
+            } else {
+                fprintf(stderr, "%s: Failed to raise files limit. errno %d\n", __func__, errno);
+            }
+            ret = getrlimit(RLIMIT_NOFILE, &rl);
+            if (0 == ret) {
+                D("Num files limit (after): cur max %u %u\n", __func__, rl.rlim_cur, rl.rlim_max);
+            } else {
+                fprintf(stderr, "%s: Failed to query files limit. errno %d\n", __func__, errno);
+            }
+        }
+    }
+#endif
+
+#ifdef CONFIG_HEADLESS
+    host_emulator_is_headless = 1;
+    D("emulator running in headless mode");
+#else
+    host_emulator_is_headless = 0;
+    D("emulator running in qt mode");
+#endif
     process_early_setup(argc, argv);
     android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
 
@@ -714,15 +1261,86 @@ extern "C" int main(int argc, char** argv) {
                 &argc, &argv, kTarget.androidArch,
                 true,  // is_qemu2
                 opts, hw, &android_avdInfo, &exitStatus)) {
-        // Special case for QEMU positional parameters.
+
+
+        // Make the console agents available.
+        injectConsoleAgents("");
+
+        // Special case for QEMU positional parameters (or Fuchsia path)
         if (exitStatus == EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER) {
             // Copy all QEMU options to |args|, and set |n| to the number
             // of options in |args| (|argc| must be positive here).
             // NOTE: emulator_parseCommonCommandLineOptions has side effects
-            // and modififes argc, as well as argv. Because of these magical
+            // and modifies argc, as well as argv. Because of these magical
             // side effects we are *NOT* just copying over argc, argv.
-            for (int n = 1; n <= argc; ++n) {
-                args.add(argv[n - 1]);
+
+            // If running Fuchsia, the kernel argument needs to be passed through
+            // as when opts->fuchsia is true, since it is not a Linux kernel,
+            // we do not run it through the usual parsing scheme that writes the
+            // kernel path to android_hw->kernel_path (android_hw is currently
+            // not used in the Fuchsia path).
+            if (opts->fuchsia) {
+                if (opts->kernel) {
+                    args.add({"-kernel", opts->kernel});
+                }
+                std::string dataDir = getNthParentDir(executable, 3U);
+                if (dataDir.empty()) {
+                    dataDir = "lib/pc-bios";
+                } else {
+                    dataDir += "/lib/pc-bios";
+                }
+
+                args.add({"-L", dataDir});
+                for (int n = 1; n < argc; ++n) {
+                    args.add(argv[n]);
+                }
+
+                fc::setIfNotOverriden(fc::HVF, true);
+                fc::setIfNotOverriden(fc::Vulkan, true);
+                fc::setIfNotOverriden(fc::GLDirectMem, true);
+                fc::setIfNotOverriden(fc::VirtioInput, true);
+                fc::setIfNotOverriden(fc::VirtioMouse, false);
+                fc::setEnabledOverride(fc::RefCountPipe, false);
+                fc::setIfNotOverriden(fc::VulkanNullOptionalStrings, true);
+                fc::setIfNotOverriden(fc::VulkanIgnoredHandles, true);
+                fc::setIfNotOverriden(fc::NoDelayCloseColorBuffer, true);
+                fc::setIfNotOverriden(fc::VulkanShaderFloat16Int8, true);
+                fc::setIfNotOverriden(fc::KeycodeForwarding, true);
+                fc::setIfNotOverriden(fc::VulkanQueueSubmitWithCommands, true);
+
+                int lcdWidth = 1280;
+                int lcdHeight = 720;
+                if (opts->window_size) {
+                    if (sscanf(opts->window_size, "%dx%d", &lcdWidth, &lcdHeight) != 2) {
+                        fprintf(stderr, "%s: invalid window size: %s\n",
+                                __func__, opts->window_size);
+                        return -1;
+                    }
+                }
+
+                // Handle input args.
+                if (!emulator_parseInputCommandLineOptions(opts)) {
+                    return 1;
+                }
+
+                initialize_virtio_input_devs(args, hw);
+                return startEmulatorWithMinConfig(
+                    args.size(),
+                    args.array(),
+                    "custom", 25, "x86_64", "x86_64", true, AVD_PHONE,
+                    opts->gpu ? opts->gpu : "host", opts->no_window, lcdWidth, lcdHeight,
+                    // LCD DPI, orientation
+                    96, "landscape",
+                    opts, hw, &android_avdInfo);
+
+            } else {
+                for (int n = 1; n <= argc; ++n) {
+                    args.add(argv[n - 1]);
+                }
+            }
+
+            for (int i = 0; i < args.size(); i++) {
+                fprintf(stderr, "%s: arg: %s\n", __func__, args[i].c_str());
             }
 
             // Skip the translation of command-line options and jump
@@ -734,6 +1352,9 @@ extern "C" int main(int argc, char** argv) {
         // Normal exit.
         return exitStatus;
     }
+
+    // Make the console agents available.
+    injectConsoleAgents("");
 
     // just because we know that we're in the new emulator as we got here
     opts->ranchu = 1;
@@ -747,7 +1368,7 @@ extern "C" int main(int argc, char** argv) {
         return 1;
     }
 
-    if (avdInfo_inAndroidBuild(avd) || opts->read_only) {
+    if (opts->read_only) {
         android::base::disableRestart();
     } else {
         android::base::finalizeEmulatorRestartParameters(avdInfo_getContentPath(avd));
@@ -776,7 +1397,8 @@ extern "C" int main(int argc, char** argv) {
         is_multi_instance = true;
         opts->no_snapshot_save = true;
         args.add("-read-only");
-    } else if (filelock_create_timeout(coreHwIniPath, 2000) == NULL) {
+    } else if (!opts->check_snapshot_loadable &&
+               filelock_create_timeout(coreHwIniPath, 2000) == NULL) {
         /* The AVD is already in use, we still support this as an
          * experimental feature. Use a temporary hardware-qemu.ini
          * file though to avoid overwriting the existing one. */
@@ -817,19 +1439,30 @@ extern "C" int main(int argc, char** argv) {
         return 1;
     }
 
+    if (!emulator_parseInputCommandLineOptions(opts)) {
+        return 1;
+    }
+    
     if (!emulator_parseUiCommandLineOptions(opts, avd, hw)) {
         return 1;
     }
 
-    // If the virtual scene camera is selected in the avd, but not supported,
-    // use the emulated camera instead.
-    const bool isVirtualScene = !strcmp(hw->hw_camera_back, "virtualscene");
-    if (isVirtualScene && !feature_is_enabled(kFeature_VirtualScene)) {
-        str_reset(&hw->hw_camera_back, "emulated");
+    if (!strcmp(hw->hw_camera_back, "virtualscene")) {
+        if (!feature_is_enabled(kFeature_VirtualScene)) {
+            // If the virtual scene camera is selected in the avd, but not
+            // supported, use the emulated camera instead.
+            str_reset(&hw->hw_camera_back, "emulated");
+        } else {
+            // Parse virtual scene command line options, if enabled.
+            camera_virtualscene_parse_cmdline();
+        }
+    } else if (!strcmp(hw->hw_camera_back, "videoplayback")) {
+        if (!feature_is_enabled(kFeature_VideoPlayback)) {
+            // If the video playback camera is selected in the avd, but not
+            // supported, use the emulated camera instead.
+            str_reset(&hw->hw_camera_back, "emulated");
+        }
     }
-
-    // Parse virtual scene command line options, if enabled.
-    camera_virtualscene_parse_cmdline();
 
     if (opts->shared_net_id) {
         char* end;
@@ -840,8 +1473,7 @@ extern "C" int main(int argc, char** argv) {
                     "255\n");
             return 1;
         }
-        args.add("-boot-property");
-        args.addFormat("net.shared_net_ip=10.1.2.%ld", shared_net_id);
+        boot_property_add_shared_net_ip(shared_net_id);
     }
 
     // Add bluetooth parameters if applicable.
@@ -862,8 +1494,17 @@ extern "C" int main(int argc, char** argv) {
     args.add2If("-dns-server", opts->dns_server);
     args.addIf("-skip-adb-auth", opts->skip_adb_auth);
 
-    if (opts->audio && !strcmp(opts->audio, "none"))
+    if (opts->audio && !strcmp(opts->audio, "none") ||
+        (!hw->hw_audioInput && !hw->hw_audioOutput)) {
+        // TODO(b/161814396): Be able to disable audio input/output separately
         args.add("-no-audio");
+    }
+
+    if (opts->allow_host_audio)
+        args.add("-allow-host-audio");
+
+    if (opts->restart_when_stalled)
+        args.add("-restart-when-stalled");
 
     bool badSnapshots = false;
 
@@ -886,24 +1527,56 @@ extern "C" int main(int argc, char** argv) {
 
         if (badSnapshots) {
             feature_set_enabled_override(kFeature_FastSnapshotV1, false);
+            feature_set_enabled_override(kFeature_GenericSnapshotsUI, false);
             feature_set_enabled_override(kFeature_QuickbootFileBacked, false);
         }
 
         // Situations where not to use mmap() for RAM
-        // 1. Using HDD on Linux; no file mapping or we will have a bad time.
+        // 1. Using HDD on Linux or macOS; no file mapping or we will have a bad time.
+        // 2. macOS when having a machine with < 8 logical cores
+        // 3. Apple Silicon (we probably messed up some file page size or synchronization somewhere)
         if (avd){
             auto contentPath = avdInfo_getContentPath(avd);
             auto diskKind = System::get()->pathDiskKind(contentPath);
             if (diskKind) {
                 if (*diskKind == System::DiskKind::Hdd) {
                     androidSnapshot_setUsingHdd(true /* is hdd */);
-#ifdef __linux__
-                    feature_set_if_not_overridden(kFeature_QuickbootFileBacked, false);
+#ifndef _WIN32
+                    feature_set_if_not_overridden(kFeature_QuickbootFileBacked, false /* enable */);
 #endif
                 }
             }
+#ifdef __APPLE__
+            auto numCores = System::get()->getCpuCoreCount();
+            if (numCores < 8) {
+                feature_set_if_not_overridden(kFeature_QuickbootFileBacked, false /* enable */);
+            }
+#ifdef __aarch64__
+            // TODO: Fix file-backed RAM snapshot support.
+            feature_set_if_not_overridden(kFeature_QuickbootFileBacked, false /* enable */);
+#endif
+#endif
+
+            if (isCrostini()) {
+                feature_set_if_not_overridden(kFeature_QuickbootFileBacked,
+                                              false /* enable */);
+            }
         }
         // 2. TODO
+
+        // If we are changing the language, country, or locale, do not load snapshot.
+        if (opts->change_language ||
+            opts->change_country ||
+            opts->change_locale) {
+
+            changing_language_country_locale = 1;
+
+            to_set_language = opts->change_language;
+            to_set_country = opts->change_country;
+            to_set_locale = opts->change_locale;
+
+            opts->no_snapshot_load = true;
+        }
     }
 
     if (opts->snapshot && feature_is_enabled(kFeature_FastSnapshotV1)) {
@@ -927,6 +1600,7 @@ extern "C" int main(int argc, char** argv) {
                 !opts->read_only &&
                 !opts->snapshot &&
                 !opts->no_snapshot_save &&
+                !opts->check_snapshot_loadable &&
                 androidSnapshot_getQuickbootChoice();
 
             if (mapAsShared) {
@@ -964,19 +1638,14 @@ extern "C" int main(int argc, char** argv) {
 #endif  // QEMU2_SNAPSHOT_SUPPORT
     }
 
-    if (fc::isEnabled(fc::LogcatPipe) && opts->logcat) {
-        boot_property_add_logcat_pipe(opts->logcat);
-        // we have done with -logcat option.
-        opts->logcat = NULL;
-    }
-
     // Always setup a single serial port, that can be connected
     // either to the 'null' chardev, or the -shell-serial one,
     // which by default will be either 'stdout' (Posix) or 'con:'
     // (Windows).
-    const char* serial = (opts->shell || opts->logcat || opts->show_kernel)
-                                 ? opts->shell_serial
-                                 : "null";
+    const char* const serial =
+        (!opts->virtio_console && (opts->shell || opts->show_kernel)) ?
+        opts->shell_serial : "null";
+
     args.add2("-serial", serial);
 
     args.add2If("-radio", opts->radio);
@@ -997,7 +1666,11 @@ extern "C" int main(int argc, char** argv) {
         }
     }
 
-    for (ParamList* pl = opts->prop; pl != NULL; pl = pl->next) {
+    for (const ParamList* pl = opts->prop; pl != NULL; pl = pl->next) {
+        if (strncmp(pl->param, "qemu.", 5)) {
+            fprintf(stderr, "WARNING: unexpected '-prop' value ('%s'), only "
+                            "'qemu.*' properties are supported\n", pl->param);
+        }
         args.add2("-boot-property", pl->param);
     }
 
@@ -1082,6 +1755,11 @@ extern "C" int main(int argc, char** argv) {
     path_mkdir_if_needed(pstorePath.c_str(), 0777);
     android_chmod(pstorePath.c_str(), 0777);
 
+    // TODO(jansene): pstore conflicts with memory maps on Apple Silicon
+#if defined(__APPLE__) && defined(__aarch64__)
+    mem_map pstore = {.start = 0,
+                      .size = 0 };
+#else
     mem_map pstore = {.start = GOLDFISH_PSTORE_MEM_BASE,
                       .size = GOLDFISH_PSTORE_MEM_SIZE};
 
@@ -1090,6 +1768,10 @@ extern "C" int main(int argc, char** argv) {
                    ",file=%s",
                    pstore.start, pstore.size, pstoreFile.c_str());
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+#endif
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     bool firstTimeSetup =
             (android_op_wipe_data || !path_exists(hw->disk_dataPartition_path));
 
@@ -1262,8 +1944,41 @@ extern "C" int main(int argc, char** argv) {
        // KVM on Mac, etc.)
 
     AFREE(accel_status);
+
+#ifdef _WIN32
+    if ((accelerator == ANDROID_CPU_ACCELERATOR_HAX ||
+         accelerator == ANDROID_CPU_ACCELERATOR_GVM) &&
+         ::android::base::Win32Utils::getServiceStatus("vgk") > SVC_NOT_FOUND) {
+        dwarning("Vanguard anti-cheat software is deteced on your system. "
+                 "It is known to have compatibility issues with Android "
+                 "emulator. It is recommended to uninstall or deactivate "
+                 "Vanguard anti-cheat software while running Android "
+                 "emulator.");
+    }
+#endif  // _WIN32
 #else   // !TARGET_X86_64 && !TARGET_I386
+#if defined(__aarch64__)
+    args.add2("-machine", "type=virt");
+    char* accel_status = NULL;
+    CpuAccelMode accel_mode = ACCEL_AUTO;
+    const bool accel_ok =
+            handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
+    if (accel_ok) {
+#ifdef __APPLE__
+        args.add("-enable-hvf");
+#else
+        args.add("-enable-kvm");
+#endif
+        if (hw->hw_cpu_ncore > 1) {
+            args.add("-smp");
+            args.addFormat("cores=%d", hw->hw_cpu_ncore);
+        }
+    } else {
+        dwarning("kvm is not enabled on this aarch64 host.");
+    }
+#else
     args.add2("-machine", "type=ranchu");
+#endif
 #endif  // !TARGET_X86_64 && !TARGET_I386
 
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
@@ -1281,7 +1996,7 @@ extern "C" int main(int argc, char** argv) {
         args.add("-smp");
 
 #ifdef _WIN32
-        if (hw->hw_cpu_ncore > 16) {
+        if (hw->hw_cpu_ncore > 16 && accelerator == ANDROID_CPU_ACCELERATOR_HAX) {
             dwarning(
                     "HAXM does not support more than 16 cores. Number of cores "
                     "set to 16");
@@ -1289,6 +2004,16 @@ extern "C" int main(int argc, char** argv) {
         }
 #endif
         args.addFormat("cores=%d", hw->hw_cpu_ncore);
+
+#ifdef __APPLE__
+        // macOS emulator is super slow on machines with less
+        // than 6 logical cores.
+        if (System::get()->getCpuCoreCount() < 6) {
+            dwarning("Running on a system with less than 6 logical cores. "
+                     "Setting number of virtual cores to 1");
+            hw->hw_cpu_ncore = 1;
+        }
+#endif
     }
 #endif  // !TARGET_X86_64 && !TARGET_I386
 
@@ -1315,24 +2040,31 @@ extern "C" int main(int argc, char** argv) {
     // won't appreciate it.
     args.add("-nodefaults");
 
-    if (!hw->hw_arc) {
-        args.add(
-                {"-kernel", hw->kernel_path, "-initrd", hw->disk_ramdisk_path});
-        // add partition parameters with the sequence pre-defined in
-        // targetInfo.imagePartitionTypes
-        args.add(PartitionParameters::create(hw, avd));
-    } else {
+    if (hw->hw_arc) {
         args.add2("-kernel", hw->kernel_path);
+
         // hw->hw_arc: ChromeOS single disk image, use regular block device
         // instead of virtio block device
         args.add("-drive");
         const char* avd_dir = avdInfo_getContentPath(avd);
+
         args.addFormat("format=raw,file=cat:%s" PATH_SEP
                        "system.img.qcow2|"
                        "%s" PATH_SEP
                        "userdata-qemu.img.qcow2|"
                        "%s" PATH_SEP "vendor.img.qcow2",
                        avd_dir, avd_dir, avd_dir);
+    } else {
+        if (hw->disk_ramdisk_path) {
+            args.add({"-kernel", hw->kernel_path, "-initrd", hw->disk_ramdisk_path});
+        } else {
+            derror("disk_ramdisk_path is required but missing");
+            return 1;
+        }
+
+        // add partition parameters with the sequence pre-defined in
+        // targetInfo.imagePartitionTypes
+        args.add(PartitionParameters::create(hw, avd));
     }
 
     if (fc::isEnabled(fc::KernelDeviceTreeBlobSupport)) {
@@ -1384,6 +2116,96 @@ extern "C" int main(int argc, char** argv) {
     args.add("-device");
     args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
 
+    const bool createVirtconsoles =
+        opts->virtio_console ||
+        fc::isEnabled(fc::VirtconsoleLogcat);
+
+    if (createVirtconsoles) {
+        args.add("-chardev");
+        args.addFormat("%s,id=forhvc0",
+            ((opts->virtio_console && opts->show_kernel)
+                ? "stdio,echo=on" : "null"));
+
+        args.add("-chardev");
+        if (fc::isEnabled(fc::VirtconsoleLogcat)) {
+            if (opts->logcat) {
+                if (opts->logcat_output) {
+                    args.addFormat("file,id=forhvc1,path=%s",
+                                   opts->logcat_output);
+                } else {
+                    args.add("stdio,id=forhvc1,echo=on");
+                }
+            } else {
+                args.add("null,id=forhvc1");
+            }
+
+            boot_property_add_logcat_pipe_virtconsole("*:V");
+        } else {
+            args.add("null,id=forhvc1");
+        }
+
+        args.add2("-device", "virtio-serial-pci");
+
+        // the order of virtconsoles must be preserved
+        args.add2("-device", "virtconsole,chardev=forhvc0");
+        args.add2("-device", "virtconsole,chardev=forhvc1");
+    } else {
+        // no virtconsoles here
+
+        if (!fc::isEnabled(fc::VirtconsoleLogcat)) {
+            if (fc::isEnabled(fc::LogcatPipe)) {
+                boot_property_add_logcat_pipe("*:V");
+            }
+
+            if (opts->logcat) {
+                dwarning("Logcat tag filtering is currently disabled. b/132840817, everything will be placed on stdout");
+                // Output to std out if no file is provided.
+                if (!opts->logcat_output) {
+                    auto str = new std::ostream(std::cout.rdbuf());
+                    android::emulation::LogcatPipe::registerStream(str);
+                }
+            }
+        }
+    }
+
+    if (feature_is_enabled(kFeature_ModemSimulator)) {
+        if (create_modem_simulator_configs_if_needed(hw)) {
+            init_modem_simulator();
+            bool isIpv4 = false;
+            // start modem now, so qemu can proceed with virtioport setup
+            int modem_simulator_guest_port =
+                    cuttlefish::start_android_modem_simulator_detached(isIpv4);
+
+            args.add("-device");
+            args.add("virtio-serial");
+            args.add("-chardev");
+            args.addFormat(
+                    "socket,port=%d,host=%s,nowait,nodelay,%s,id="
+                    "modem",
+                    modem_simulator_guest_port, isIpv4 ? "127.0.0.1" : "::1",
+                    isIpv4 ? "ipv4" : "ipv6");
+            args.add("-device");
+            args.add("virtserialport,chardev=modem,name=modem");
+        } else {
+            dwarning(
+                    "Could not setup modem simulator config files, modem "
+                    "simulator disabled.");
+        }
+    }
+
+    getConsoleAgents()->location->gpsSetPassiveUpdate(!opts->no_passive_gps);
+
+    // for headless mode, start a thread to feed guest gps hal with
+    // passive gps locations; qt emulator already does that in location-page.cpp
+#ifdef CONFIG_HEADLESS
+    if (getConsoleAgents()->location->gpsGetPassiveUpdate()) {
+        dprint("feeding guest with passive gps data, in headless mode");
+        std::string AVDconfPath =
+                PathUtils::join(avdInfo_getContentPath(avd), "AVDconf");
+        start_passive_gps_feeder(AVDconfPath);
+    }
+#endif
+
     // rng
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
     args.add("-device");
@@ -1393,6 +2215,29 @@ extern "C" int main(int argc, char** argv) {
     args.add("virtio-rng-device");
 #endif
     args.add("-show-cursor");
+
+    if (fc::isEnabled(fc::VirtioGpuNativeSync) ||
+        !strcmp(hw->hw_gltransport, "virtio-gpu") ||
+        !strcmp(hw->hw_gltransport, "virtio-gpu-pipe") ||
+        !strcmp(hw->hw_gltransport, "virtio-gpu-asg")) {
+        args.add("-device");
+        args.add("virtio-gpu-pci");
+    }
+    initialize_virtio_input_devs(args, hw);
+#ifndef AEMU_GFXSTREAM_BACKEND
+    if (feature_is_enabled(kFeature_VirtioWifi)) {
+        args.add("-netdev");
+        args.add("user,id=virtio-wifi,dhcpstart=10.0.2.16");
+        args.add("-device");
+        args.add("virtio-wifi-pci,netdev=virtio-wifi");
+    }
+#endif
+
+
+    if (feature_is_enabled(kFeature_VirtioVsockPipe)) {
+        args.add("-device");
+        args.add("virtio-vsock-pci,guest-cid=77");
+    }
 
     if (opts->tcpdump) {
         args.add("-object");
@@ -1417,10 +2262,17 @@ extern "C" int main(int argc, char** argv) {
     }
     args.add(dataDir);
 
-// Audio enable hda by default for x86 and x64 platforms
+    // Audio enable hda by default for x86 and x64 platforms
+    // (Or all targets incl. ARM if api level >= 30)
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
-    args.add2("-soundhw", "hda");
+    bool targetIsX86 = true;
+#else
+    bool targetIsX86 = false;
 #endif
+
+    if (apiLevel >= 30 || targetIsX86) {
+        args.add2("-soundhw", "hda");
+    }
 
     /* append extra qemu parameters if any */
     for (int idx = 0; kTarget.qemuExtraArgs[idx] != NULL; idx++) {
@@ -1429,31 +2281,34 @@ extern "C" int main(int argc, char** argv) {
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGPU);
 
-    if (gQAndroidBatteryAgent && gQAndroidBatteryAgent->setHasBattery) {
-        gQAndroidBatteryAgent->setHasBattery(android_hw->hw_battery);
+    auto battery = getConsoleAgents()->battery;
+    if (battery && battery->setHasBattery) {
+        battery->setHasBattery(android_hw->hw_battery);
     }
 
-    gQAndroidLocationAgent->gpsSetPassiveUpdate(!opts->no_passive_gps);
+    android_init_multi_display(getConsoleAgents()->emu, getConsoleAgents()->record);
 
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.
     const UiEmuAgent uiEmuAgent = {
-            gQAndroidBatteryAgent,
-            gQAndroidCellularAgent,
-            gQAndroidClipboardAgent,
-            gQAndroidDisplayAgent,
-            gQAndroidEmulatorWindowAgent,
-            gQAndroidFingerAgent,
-            gQAndroidLocationAgent,
-            gQAndroidHttpProxyAgent,
-            gQAndroidRecordScreenAgent,
-            gQAndroidSensorsAgent,
-            gQAndroidTelephonyAgent,
-            gQAndroidUserEventAgent,
-            gQAndroidVirtualSceneAgent,
-            gQCarDataAgent,
-            nullptr  // For now there's no uses of SettingsAgent, so we
-                     // don't set it.
+        getConsoleAgents()->automation,
+        getConsoleAgents()->battery,
+        getConsoleAgents()->cellular,
+        getConsoleAgents()->clipboard,
+        getConsoleAgents()->display,
+        getConsoleAgents()->emu,
+        getConsoleAgents()->finger,
+        getConsoleAgents()->location,
+        getConsoleAgents()->proxy,
+        getConsoleAgents()->record,
+        getConsoleAgents()->sensors,
+        getConsoleAgents()->telephony,
+        getConsoleAgents()->user_event,
+        getConsoleAgents()->virtual_scene,
+        getConsoleAgents()->car,
+        getConsoleAgents()->multi_display,
+        nullptr,  // For now there's no uses of SettingsAgent, so we
+                // don't set it.
     };
 
     {
@@ -1462,6 +2317,12 @@ extern "C" int main(int argc, char** argv) {
         /* Setup SDL UI just before calling the code */
         android::base::Thread::maskAllSignals();
 
+        /* BUG: 138377082 On Mac OS, user can't quit the program by ctrl-c after
+         * all signals are blocked on QT main loop thread.
+         * Thus, we explicitly remove signals SIGINT, SIGHUP and SIGTERM from the
+         * blocking mask of the QT main loop thread.
+         */
+        enableSignalTermination();
 #if (SNAPSHOT_PROFILE > 1)
         printf("skin_winsys_init and UI starting at uptime %" PRIu64 " ms\n",
                get_uptime_ms());
@@ -1501,6 +2362,12 @@ extern "C" int main(int argc, char** argv) {
 
         // Feature flags-related last-microsecond renderer changes
         {
+            // b/147241060
+            // Chrome on R requires GLAsyncSwap, otherwise it will spam logcat
+            if (avdInfo_getApiLevel(avd) >= 30) {
+                fc::setIfNotOverridenOrGuestDisabled(fc::GLAsyncSwap, true);
+            }
+
             // Should enable OpenGL ES 3.x?
             if (skin_winsys_get_preferred_gles_apilevel() ==
                 WINSYS_GLESAPILEVEL_PREFERENCE_MAX) {
@@ -1511,6 +2378,12 @@ extern "C" int main(int argc, char** argv) {
                         WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT ||
                 System::get()->getProgramBitness() == 32) {
                 fc::setEnabledOverride(fc::GLESDynamicVersion, false);
+            }
+
+            // In build environment, enable gles3 if possible
+            if (avdInfo_inAndroidBuild(avd)) {
+                fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion,
+                                                     true);
             }
 
             if (fc::isEnabled(fc::ForceANGLE)) {
@@ -1527,17 +2400,21 @@ extern "C" int main(int argc, char** argv) {
         }
 
         RendererConfig rendererConfig;
-        configAndStartRenderer(avd, opts, hw, uiPreferredGlesBackend,
-                               &rendererConfig);
+        configAndStartRenderer(avd, opts, hw, getConsoleAgents()->vm,
+                               getConsoleAgents()->emu,
+                               getConsoleAgents()->multi_display,
+                               uiPreferredGlesBackend, &rendererConfig);
 
-        // Gpu configuration is set, now initialize the screen recorder
+        // Gpu configuration is set, now initialize the multi display, screen recorder
         // and screenshot callback
         bool isGuestMode =
-                (!hw->hw_gpu_enabled || !strcmp(hw->hw_gpu_mode, "guest"));
+            (!hw->hw_gpu_enabled || !strcmp(hw->hw_gpu_mode, "guest"));
+        getConsoleAgents()->multi_display->setGpuMode(isGuestMode, hw->hw_lcd_width, hw->hw_lcd_height);
         screen_recorder_init(hw->hw_lcd_width, hw->hw_lcd_height,
-                             isGuestMode ? uiEmuAgent.display : nullptr);
-        android_registerScreenshotFunc([](const char* dirname) {
-            android::emulation::captureScreenshot(dirname, nullptr);
+                             isGuestMode ? uiEmuAgent.display : nullptr,
+                             getConsoleAgents()->multi_display);
+        android_registerScreenshotFunc([](const char* dirname, uint32_t display) -> bool {
+            return android::emulation::captureScreenshot(dirname, nullptr, display);
         });
 
         /* Disable the GLAsyncSwap for ANGLE so far */
@@ -1546,8 +2423,12 @@ extern "C" int main(int argc, char** argv) {
                 rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
         // Features to disable or enable depending on rendering backend
         // and gpu make/model/version
+#if defined(__APPLE__) && defined(__aarch64__)
+        shouldDisableAsyncSwap = false;
+#else
         shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3) ||
                                   System::get()->getProgramBitness() == 32;
+#endif
         shouldDisableAsyncSwap = shouldDisableAsyncSwap ||
                                  async_query_host_gpu_SyncBlacklisted();
 
@@ -1559,18 +2440,48 @@ extern "C" int main(int argc, char** argv) {
         // If this is not a playstore image, then -writable_system will
         // disable verified boot.
         std::vector<std::string> verified_boot_params;
-        if (feature_is_enabled(kFeature_PlayStoreImage) || !android_op_writable_system) {
+        if (feature_is_enabled(kFeature_PlayStoreImage) || !android_op_writable_system
+                || feature_is_enabled(kFeature_DynamicPartition)) {
           android::verifiedboot::getParametersFromFile(
                   avdInfo_getVerifiedBootParamsPath(avd),  // NULL here is OK
                   &verified_boot_params);
+          if (feature_is_enabled(kFeature_DynamicPartition)) {
+              std::string boot_dev("androidboot.boot_devices=");
+              boot_dev.append(avdInfo_getDynamicPartitionBootDevice(avd));
+              verified_boot_params.push_back(boot_dev);
+          }
+          if (android_op_writable_system) {
+              // unlocked state
+              verified_boot_params.push_back("androidboot.verifiedbootstate=orange");
+          }
+        }
+
+        // hardware codec feature
+        std::vector<std::string> hwcodec_boot_params;
+        if (feature_is_enabled(kFeature_HardwareDecoder)) {
+            hwcodec_boot_params.push_back("qemu.hwcodec.avcdec=2");
+            hwcodec_boot_params.push_back("qemu.hwcodec.vpxdec=2");
+        }
+
+        auto all_boot_params = std::move(verified_boot_params);
+        all_boot_params.insert(all_boot_params.end(),
+                               hwcodec_boot_params.begin(),
+                               hwcodec_boot_params.end());
+
+        const char* real_console_tty_prefix = kTarget.ttyPrefix;
+
+        if (opts->virtio_console) {
+            real_console_tty_prefix = "hvc";
         }
 
         ScopedCPtr<char> kernel_parameters(emulator_getKernelParameters(
-                opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
-                hw->kernel_parameters, &verified_boot_params,
+                opts, kTarget.androidArch, apiLevel, real_console_tty_prefix,
+                hw->kernel_parameters, hw->kernel_path, &all_boot_params,
                 rendererConfig.glesMode, rendererConfig.bootPropOpenglesVersion,
                 rendererConfig.glFramebufferSizeBytes, pstore, hw->vm_heapSize,
-                true /* isQemu2 */, hw->hw_arc));
+                true /* isQemu2 */, hw->hw_arc, hw->hw_lcd_width,
+                hw->hw_lcd_height, hw->hw_lcd_vsync, hw->hw_gltransport,
+                hw->hw_gltransport_drawFlushInterval));
 
         if (!kernel_parameters.get()) {
             return 1;
@@ -1624,9 +2535,23 @@ extern "C" int main(int argc, char** argv) {
         // Dump final command-line option to make debugging the core easier
         printf("Concatenated QEMU options:\n %s\n", args.toString().c_str());
     }
+#ifndef AEMU_GFXSTREAM_BACKEND
+    if (fc::isEnabled(fc::VirtioWifi)) {
+        auto* hostapd = android::qemu2::HostapdController::getInstance();
+        hostapd->initAndRun(VERBOSE_CHECK(wifi));
+    }
+#endif
+    if (opts->check_snapshot_loadable) {
+        android_check_snapshot_loadable(opts->check_snapshot_loadable);
+        stopRenderer();
+        cuttlefish::stop_android_modem_simulator();
+        process_late_teardown();
+        return 0;
+    }
 
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, args.size(),
                              args.array());
+
     android::crashreport::CrashReporter::get()->hangDetector().pause(false);
     skin_winsys_enter_main_loop(opts->no_window);
     android::crashreport::CrashReporter::get()->hangDetector().pause(true);
@@ -1634,6 +2559,7 @@ extern "C" int main(int argc, char** argv) {
     stopRenderer();
     emulator_finiUserInterface();
 
+    cuttlefish::stop_android_modem_simulator();
     process_late_teardown();
     return 0;
 }

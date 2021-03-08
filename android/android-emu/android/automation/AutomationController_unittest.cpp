@@ -20,7 +20,7 @@
 #include "android/base/testing/TestMemoryOutputStream.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
-#include "android/offworld/proto/offworld.pb.h"
+#include "offworld.pb.h"
 #include "android/physics/PhysicalModel.h"
 
 #include <gmock/gmock.h>
@@ -116,6 +116,8 @@ protected:
                         }));
     }
 
+    static void onStopCallback() { sCallbackInt++; }
+
     MOCK_METHOD2(offworldSendResponse,
                  void(android::AsyncMessagePipeHandle,
                       const ::offworld::Response&));
@@ -124,7 +126,10 @@ protected:
     std::unique_ptr<TestLooper> mLooper;
     PhysicalModelPtr mPhysicalModel;
     std::unique_ptr<AutomationController> mController;
+    static int sCallbackInt;
 };
+
+int AutomationControllerTest::sCallbackInt;
 
 TEST_F(AutomationControllerTest, InvalidInput) {
     EXPECT_THAT(mController->startRecording(nullptr),
@@ -142,10 +147,31 @@ TEST_F(AutomationControllerTest, InvalidInput) {
                 IsErr(StartError::FileOpenError));
 }
 
-TEST_F(AutomationControllerTest, SimpleRecordPlay) {
+TEST_F(AutomationControllerTest, SimpleRecordPlayEmpty) {
     EXPECT_THAT(mController->startRecording("testRecording.txt"), IsOk());
     EXPECT_THAT(mController->stopRecording(), IsOk());
 
+    // Recordings now always contain a simple final empty event.
+    EXPECT_THAT(mController->startPlayback("testRecording.txt"), IsOk());
+
+    // Advancing time because of simple end of file event.
+    advanceTimeToNs(secondsToNs(1));
+    EXPECT_THAT(mController->stopPlayback(), IsErr(StopError::NotStarted));
+}
+
+TEST_F(AutomationControllerTest, SimpleRecordPlay) {
+    // Non empty recording.
+    EXPECT_THAT(mController->startRecording("testRecording.txt"), IsOk());
+
+    const uint64_t kEventTime1 = secondsToNs(0.5);
+    const vec3 kPosition1 = {0.5f, 10.0f, 0.0f};
+    advanceTimeToNs(kEventTime1);
+    physicalModel_setTargetPosition(mPhysicalModel.get(), kPosition1,
+                                    PHYSICAL_INTERPOLATION_SMOOTH);
+
+    EXPECT_THAT(mController->stopRecording(), IsOk());
+
+    // Playback stops before all commands are excecuted.
     EXPECT_THAT(mController->startPlayback("testRecording.txt"), IsOk());
     EXPECT_THAT(mController->stopPlayback(), IsOk());
 }
@@ -157,9 +183,18 @@ TEST_F(AutomationControllerTest, DuplicateRecord) {
 }
 
 TEST_F(AutomationControllerTest, DuplicatePlay) {
+    // Non empty recording.
     EXPECT_THAT(mController->startRecording("testRecording.txt"), IsOk());
+
+    const uint64_t kEventTime1 = secondsToNs(0.5);
+    const vec3 kPosition1 = {0.5f, 10.0f, 0.0f};
+    advanceTimeToNs(kEventTime1);
+    physicalModel_setTargetPosition(mPhysicalModel.get(), kPosition1,
+                                    PHYSICAL_INTERPOLATION_SMOOTH);
+
     EXPECT_THAT(mController->stopRecording(), IsOk());
 
+    // Start second recording before first ends.
     EXPECT_THAT(mController->startPlayback("testRecording.txt"), IsOk());
     EXPECT_THAT(mController->startPlayback("testRecording.txt"),
                 IsErr(StartError::AlreadyStarted));
@@ -173,7 +208,7 @@ TEST_F(AutomationControllerTest, PlaybackFileCorrupt) {
             System::get()->getHomeDirectory(), kFilename);
 
     std::unique_ptr<StdioStream> stream(
-            new StdioStream(fopen(path.c_str(), "wb"), StdioStream::kOwner));
+            new StdioStream(android_fopen(path.c_str(), "wb"), StdioStream::kOwner));
     ASSERT_TRUE(stream->get());
     stream->putBe32(0);
     stream->putString("Test string please ignore");
@@ -196,6 +231,9 @@ TEST_F(AutomationControllerTest, RecordPlayEvents) {
     const vec3 kVelocity = {1.0f, 0.0f, 0.0f};
     const uint64_t kPlaybackStartTime = secondsToNs(100.0);
 
+    // Need a 4th state so recording doesn't stop by itself.
+    const uint64_t kEventTime4 = secondsToNs(120.0);
+
     advanceTimeToNs(kEventTime1);
     physicalModel_setTargetPosition(mPhysicalModel.get(), kPosition1,
                                     PHYSICAL_INTERPOLATION_SMOOTH);
@@ -205,6 +243,10 @@ TEST_F(AutomationControllerTest, RecordPlayEvents) {
                                     PHYSICAL_INTERPOLATION_STEP);
 
     advanceTimeToNs(kEventTime3);
+    physicalModel_setTargetVelocity(mPhysicalModel.get(), kVelocity,
+                                    PHYSICAL_INTERPOLATION_STEP);
+
+    advanceTimeToNs(kEventTime4);
     physicalModel_setTargetVelocity(mPhysicalModel.get(), kVelocity,
                                     PHYSICAL_INTERPOLATION_STEP);
     EXPECT_THAT(mController->stopRecording(), IsOk());
@@ -217,7 +259,7 @@ TEST_F(AutomationControllerTest, RecordPlayEvents) {
                                                  PARAMETER_VALUE_TYPE_CURRENT),
               kVecZero);
     EXPECT_EQ(physicalModel_getParameterVelocity(mPhysicalModel.get(),
-                                                 PARAMETER_VALUE_TYPE_TARGET),
+                                                 PARAMETER_VALUE_TYPE_CURRENT),
               kVecZero);
 
     // Now go through the events and validate.
@@ -245,14 +287,61 @@ TEST_F(AutomationControllerTest, RecordPlayEvents) {
               kVelocity);
 
     EXPECT_THAT(mController->stopPlayback(), IsOk());
+
+    // Velocity was different from zero before stopping playback.
+    EXPECT_EQ(physicalModel_getParameterVelocity(mPhysicalModel.get(),
+                                                 PARAMETER_VALUE_TYPE_TARGET),
+              kVecZero);
+}
+
+TEST_F(AutomationControllerTest, PlaybackStops) {
+    EXPECT_THAT(mController->startRecording("testRecording.txt"), IsOk());
+
+    const uint64_t kEventTime1 = secondsToNs(0.5);
+    const uint64_t kEventTime2 = secondsToNs(1);
+    const vec3 kPosition1 = {0.5f, 10.0f, 0.0f};
+    advanceTimeToNs(kEventTime1);
+    physicalModel_setTargetPosition(mPhysicalModel.get(), kPosition1,
+                                    PHYSICAL_INTERPOLATION_STEP);
+    advanceTimeToNs(kEventTime2);
+    physicalModel_setTargetPosition(mPhysicalModel.get(), kPosition1,
+                                    PHYSICAL_INTERPOLATION_STEP);
+
+    EXPECT_THAT(mController->stopRecording(), IsOk());
+
+    EXPECT_THAT(mController->startPlayback("testRecording.txt"), IsOk());
+
+    // Check Playback stops after last event.
+    advanceTimeToNs(kEventTime2 + secondsToNs(1));
+    EXPECT_THAT(mController->stopPlayback(), IsErr(StopError::NotStarted));
+}
+
+TEST_F(AutomationControllerTest, PlaybackWithCallback) {
+    EXPECT_THAT(mController->startRecording("testRecording.txt"), IsOk());
+    EXPECT_THAT(mController->stopRecording(), IsOk());
+
+    sCallbackInt = 0;
+
+    EXPECT_THAT(mController->startPlaybackWithCallback(
+                        "testRecording.txt",
+                        &AutomationControllerTest::onStopCallback),
+                IsOk());
+
+    // Advancing time because of simple end of file event.
+    advanceTimeToNs(secondsToNs(1));
+    EXPECT_EQ(sCallbackInt, 1);
 }
 
 TEST_F(AutomationControllerTest, DestructWhileRecording) {
     EXPECT_THAT(mController->startRecording("testRecording.txt"), IsOk());
 
     const uint64_t kEventTime1 = secondsToNs(0.5);
+    const uint64_t kEventTime2 = secondsToNs(1);
     const vec3 kPosition1 = {0.5f, 10.0f, 0.0f};
     advanceTimeToNs(kEventTime1);
+    physicalModel_setTargetPosition(mPhysicalModel.get(), kPosition1,
+                                    PHYSICAL_INTERPOLATION_STEP);
+    advanceTimeToNs(kEventTime2);
     physicalModel_setTargetPosition(mPhysicalModel.get(), kPosition1,
                                     PHYSICAL_INTERPOLATION_STEP);
 
@@ -270,6 +359,11 @@ TEST_F(AutomationControllerTest, DestructWhileRecording) {
               kPosition1);
 
     EXPECT_THAT(mController->stopPlayback(), IsOk());
+
+    const vec3 kVecZero = {0.0f, 0.0f, 0.0f};
+    EXPECT_EQ(physicalModel_getParameterVelocity(mPhysicalModel.get(),
+                                                 PARAMETER_VALUE_TYPE_CURRENT),
+              kVecZero);
 }
 
 TEST_F(AutomationControllerTest, DestructWhilePlaying) {

@@ -16,9 +16,15 @@
 
 #include "GLcommon/NamedObject.h"
 
-#include "emugl/common/mutex.h"
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/ObjectNameSpace.h"
+#include "android/base/GLObjectCounter.h"
+#include "emugl/common/misc.h"
+#include "emugl/common/mutex.h"
+
+static constexpr int toIndex(NamedObjectType type) {
+    return static_cast<int>(type);
+}
 
 NamedObject::NamedObject(GenNameInfo genNameInfo,
                          GlobalNameSpace *globalNameSpace) {
@@ -73,9 +79,14 @@ NamedObject::NamedObject(GenNameInfo genNameInfo,
             case NamedObjectType::VERTEX_ARRAY_OBJECT:
                 GLEScontext::dispatcher().glGenVertexArrays(1, &m_globalName);
                 break;
+            case NamedObjectType::TRANSFORM_FEEDBACK:
+                GLEScontext::dispatcher().glGenTransformFeedbacks(
+                        1, &m_globalName);
+                break;
             default:
                 m_globalName = 0;
         }
+        emugl::getGLObjectCounter()->incCount(toIndex(genNameInfo.m_type));
     }
 }
 
@@ -111,8 +122,12 @@ NamedObject::~NamedObject() {
     case NamedObjectType::VERTEX_ARRAY_OBJECT:
         GLEScontext::dispatcher().glDeleteVertexArrays(1, &m_globalName);
         break;
+    case NamedObjectType::TRANSFORM_FEEDBACK:
+        GLEScontext::dispatcher().glDeleteTransformFeedbacks(1, &m_globalName);
+        break;
     default:
         break;
     }
+    emugl::getGLObjectCounter()->decCount(toIndex(m_type));
 }
 

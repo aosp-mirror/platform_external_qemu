@@ -24,14 +24,17 @@
 // Debug logs.
 #define  D(...)  ANDROID_TELEPHONY_LOG_ON(modem,__VA_ARGS__)
 
-/* maximum number of data bytes in a SMS data message */
+/* maximum number of payload bytes in a message */
 #define  MAX_USER_DATA_BYTES   140
 
-/* maximum number of 7-bit septets in a SMS text message */
+/* maximum number of payload septets in a message */
 #define  MAX_USER_DATA_SEPTETS  160
 
-/* size of the user data header in bytes */
-#define  USER_DATA_HEADER_SIZE   6
+/* maximum number of payload bytes in a message if a user data header is present */
+#define  MAX_USER_DATA_BYTES_WITH_HEADER   134
+
+/* maximum number of payload septets in a message if a user data header is present*/
+#define  MAX_USER_DATA_SEPTETS_WITH_HEADER   153
 
 /* ETSI TS 123 040 9.1.2.5 Address fields */
 #define TON_DOMESTIC      0
@@ -537,7 +540,7 @@ sms_address_eq( const SmsAddressRec*  addr1, const SmsAddressRec*  addr2 )
          addr1->len != addr2->len )
         return 0;
 
-    return ( !memcmp( addr1->data, addr2->data, addr1->len ) );
+    return ( !memcmp( addr1->data, addr2->data, (addr1->len + 1) / 2 ));
 }
 
 /** SMS PARSER
@@ -698,6 +701,7 @@ sms_skip_address( cbytes_t   *pcur,
     if (cur > end)
         goto Exit;
 
+    *pcur = cur;
     result = 0;
 Exit:
     return result;
@@ -904,6 +908,7 @@ sms_get_text_utf8( cbytes_t        *pcur,
     len = *cur++;
 
     /* skip user data header if any */
+    int pad = 0;
     if ( hasUDH )
     {
         int  hlen;
@@ -918,7 +923,14 @@ sms_get_text_utf8( cbytes_t        *pcur,
         cur += hlen;
 
         if (coding == SMS_CODING_SCHEME_GSM7)
-            len -= 2*(hlen+1);
+        {
+            int  headerBits    = (hlen + 1) * CHAR_BIT;
+            int  headerSeptets = headerBits / 7;
+            if (headerBits % 7 > 0)
+                headerSeptets += 1;
+            len -= headerSeptets;
+            pad = headerSeptets*7 - headerBits;
+        }
         else
             len -= hlen+1;
 
@@ -929,15 +941,14 @@ sms_get_text_utf8( cbytes_t        *pcur,
     /* switch the user data header if any */
     if (coding == SMS_CODING_SCHEME_GSM7)
     {
-        int  count = utf8_from_gsm7( cur, 0, len, NULL );
+        int  count = utf8_from_gsm7( cur, pad, len, NULL );
 
         if (rope != NULL)
         {
             bytes_t  dst = gsm_rope_reserve( rope, count );
             if (dst != NULL)
-                utf8_from_gsm7( cur, 0, len, dst );
+                utf8_from_gsm7( cur, pad, len, dst );
         }
-        cur += (len+1)/2;
     }
     else if (coding == SMS_CODING_SCHEME_UCS2)
     {
@@ -949,14 +960,10 @@ sms_get_text_utf8( cbytes_t        *pcur,
             if (dst != NULL)
                 ucs2_to_utf8( cur, len/2, dst );
         }
-        cur += len;
     }
     result = 0;
 
 Exit:
-    if (!result)
-        *pcur = cur;
-
     return result;
 }
 
@@ -1020,6 +1027,8 @@ smspdu_get_text_message( SmsPDU  pdu, unsigned char*  utf8, int  utf8len )
                 if (coding == SMS_CODING_SCHEME_UNKNOWN)
                     goto Fail;
 
+                if ( sms_skip_validity_period( &data, end, mtiByte ) < 0 )
+                    goto Fail;
                 gsm_rope_init_alloc( rope, 0 );
                 if ( sms_get_text_utf8( &data, end, (mtiByte & 0x40), coding, rope ) < 0 ) {
                     gsm_rope_done( rope );
@@ -1071,7 +1080,7 @@ smspdu_get_user_data_ref( SmsPDU  pdu )
             if ( sms_skip_address( &data, end ) < 0 )
                 goto Fail;
 
-            data += 2;  /* protocol identifier + oding schene */
+            data += 2;  /* skip protocol identifier + coding scheme */
             if ( sms_skip_validity_period( &data, end, mtiByte ) < 0 )
                 goto Fail;
 
@@ -1179,7 +1188,7 @@ gsm_rope_add_sms_deliver_pdu( GsmRope                 rope,
                               int                     pdu_index)
 {
     int  coding;
-    int  mtiByte  = 0x20;  /* message type - SMS DELIVER */
+    int  mtiByte  = 0x00;  /* message type - SMS DELIVER */
 
     if (pdu_count > 1)
         mtiByte |= 0x40;  /* user data header indicator */
@@ -1189,8 +1198,8 @@ gsm_rope_add_sms_deliver_pdu( GsmRope                 rope,
     gsm_rope_add_address( rope, sender_address );
     gsm_rope_add_c( rope, 0 );        /* protocol identifier */
 
-    /* data coding scheme - GSM 7 bits / no class - or - 16-bit UCS2 / class 1 */
-    coding = (use_gsm7 ? 0x00 : 0x09);
+    /* data coding scheme - GSM 7 bits / no class - or - 16-bit UCS2 / no class */
+    coding = (use_gsm7 ? 0x00 : 0x08);
 
     gsm_rope_add_c( rope, coding );               /* data coding scheme       */
     gsm_rope_add_timestamp( rope, timestamp );    /* service center timestamp */
@@ -1200,22 +1209,23 @@ gsm_rope_add_sms_deliver_pdu( GsmRope                 rope,
         int    count = utf8_to_gsm7( utf8, utf8len, NULL, 0 );
         int    pad   = 0;
 
-        assert( count <= MAX_USER_DATA_SEPTETS - USER_DATA_HEADER_SIZE );
-
         if (pdu_count > 1)
         {
-            int  headerBits    = 6*8;  /* 6 is size of header in bytes */
+            assert( count <= MAX_USER_DATA_SEPTETS_WITH_HEADER );
+            int  headerBits    = 6 * CHAR_BIT;  /* 6 is size of header in bytes */
             int  headerSeptets = headerBits / 7;
             if (headerBits % 7 > 0)
                 headerSeptets += 1;
 
             pad = headerSeptets*7 - headerBits;
-
             gsm_rope_add_c( rope, count + headerSeptets );
             gsm_rope_add_sms_user_header(rope, ref_num, pdu_count, pdu_index);
         }
         else
+        {
+            assert( count <= MAX_USER_DATA_SEPTETS );
             gsm_rope_add_c( rope, count );
+        }
 
         count = (count*7+pad+7)/8;  /* convert to byte count */
 
@@ -1227,15 +1237,18 @@ gsm_rope_add_sms_deliver_pdu( GsmRope                 rope,
         bytes_t  dst;
         int      count = utf8_to_ucs2( utf8, utf8len, NULL );
 
-        assert( count*2 <= MAX_USER_DATA_BYTES - USER_DATA_HEADER_SIZE );
 
         if (pdu_count > 1)
         {
+            assert( count*2 <= MAX_USER_DATA_BYTES_WITH_HEADER );
             gsm_rope_add_c( rope, count*2 + 6 );
             gsm_rope_add_sms_user_header( rope, ref_num, pdu_count, pdu_index );
         }
         else
+        {
+            assert( count*2 <= MAX_USER_DATA_BYTES );
             gsm_rope_add_c( rope, count*2 );
+        }
 
         dst = gsm_rope_reserve( rope, count*2 );
         if (dst != NULL) {
@@ -1331,12 +1344,20 @@ smspdu_create_deliver_utf8( const unsigned char*   utf8,
 
     if (use_gsm7) {
         count = utf8_to_gsm7( utf8, utf8len, NULL, 0 );
-        block = MAX_USER_DATA_SEPTETS - USER_DATA_HEADER_SIZE;
+        if (count > MAX_USER_DATA_SEPTETS) {
+            block = MAX_USER_DATA_SEPTETS_WITH_HEADER;
+        } else {
+            block = MAX_USER_DATA_SEPTETS;
+        }
         num_pdus = count / block;
         leftover = count - num_pdus*block;
     } else {
         count = utf8_to_ucs2( utf8, utf8len, NULL );
-        block = MAX_USER_DATA_BYTES - USER_DATA_HEADER_SIZE;
+        if (count > MAX_USER_DATA_BYTES) {
+            block = MAX_USER_DATA_BYTES_WITH_HEADER;
+        } else {
+            block = MAX_USER_DATA_BYTES;
+        }
         num_pdus = (2 * count) / block;
         leftover = (2 * count) - num_pdus*block;
     }

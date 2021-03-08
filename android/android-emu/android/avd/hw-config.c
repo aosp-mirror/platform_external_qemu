@@ -10,15 +10,24 @@
 ** GNU General Public License for more details.
 */
 #include "android/avd/hw-config.h"
+#include "android/base/export.h"
+#include "android/emulation/bufprint_config_dirs.h"
+#include "android/avd/util.h"
+#include "android/utils/path.h"
 #include "android/utils/debug.h"
 #include "android/utils/ini.h"
 #include "android/utils/system.h"
 #include <string.h>
+#include <limits.h>
 #include <stdlib.h>
 
 
 /* the global variable containing the hardware config for this device */
 AndroidHwConfig   android_hw[1];
+
+AEMU_EXPORT AndroidHwConfig* aemu_get_android_hw() {
+    return (AndroidHwConfig*)(android_hw);
+}
 
 static int stringToBoolean(const char* value) {
     if (!strcmp(value,"1")    ||
@@ -118,6 +127,18 @@ int androidHwConfig_read(AndroidHwConfig* config, CIniFile* ini) {
             config->hw_sdCard = true;
         }
     }
+
+    if (!config->android_sdk_root || strlen(config->android_sdk_root) == 0) {
+        config->android_sdk_root = path_getSdkRoot();
+    }
+    if (!config->android_avd_home || strlen(config->android_avd_home) == 0) {
+        char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
+        p = bufprint_avd_home_path(temp, end);
+        if (p < end) {
+            config->android_avd_home = ASTRDUP(temp);
+        }
+    }
+
     return 0;
 }
 
@@ -153,18 +174,21 @@ androidHwConfig_done( AndroidHwConfig* config )
 int
 androidHwConfig_isScreenNoTouch( AndroidHwConfig* config )
 {
+    if (!config->hw_screen) return 0;
     return strcmp(config->hw_screen, "no-touch") == 0;
 }
 
 int
 androidHwConfig_isScreenTouch( AndroidHwConfig* config )
 {
+    if (!config->hw_screen) return 0;
     return strcmp(config->hw_screen, "touch") == 0;
 }
 
 int
 androidHwConfig_isScreenMultiTouch( AndroidHwConfig* config )
 {
+    if (!config->hw_screen) return 0;
     return strcmp(config->hw_screen, "multi-touch") == 0;
 }
 
@@ -191,6 +215,7 @@ int androidHwConfig_getMinVmHeapSize(AndroidHwConfig* config, int apiLevel) {
             } else if (config->hw_lcd_density >= LCD_DENSITY_XXHDPI) {
                 minVMHeapSize = 384;
             } else if (config->hw_lcd_density >= LCD_DENSITY_420DPI) {
+                // Includes LCD_DENSITY_440DPI
                 minVMHeapSize = 336;
             } else if (config->hw_lcd_density >= LCD_DENSITY_400DPI) {
                 minVMHeapSize = 288;
@@ -217,6 +242,7 @@ int androidHwConfig_getMinVmHeapSize(AndroidHwConfig* config, int apiLevel) {
             } else if (config->hw_lcd_density >= LCD_DENSITY_XXHDPI) {
                 minVMHeapSize = 256;
             } else if (config->hw_lcd_density >= LCD_DENSITY_420DPI) {
+                // Includes LCD_DENSITY_440DPI
                 minVMHeapSize = 228;
             } else if (config->hw_lcd_density >= LCD_DENSITY_400DPI) {
                 minVMHeapSize = 192;
@@ -243,6 +269,7 @@ int androidHwConfig_getMinVmHeapSize(AndroidHwConfig* config, int apiLevel) {
             } else if (config->hw_lcd_density >= LCD_DENSITY_XXHDPI) {
                 minVMHeapSize = 128;
             } else if (config->hw_lcd_density >= LCD_DENSITY_420DPI) {
+                // Includes LCD_DENSITY_440DPI
                 minVMHeapSize = 112;
             } else if (config->hw_lcd_density >= LCD_DENSITY_400DPI) {
                 minVMHeapSize = 96;
@@ -520,4 +547,12 @@ void androidHwConfig_stripDefaults(CIniFile* source, CIniFile* target) {
 
 int androidHwConfig_hasVirtualSceneCamera(AndroidHwConfig* config) {
     return strcmp(config->hw_camera_back, "virtualscene") == 0;
+}
+
+int androidHwConfig_hasVideoPlaybackFrontCamera(AndroidHwConfig* config) {
+    return strcmp(config->hw_camera_front, "videoplayback") == 0;
+}
+
+int androidHwConfig_hasVideoPlaybackBackCamera(AndroidHwConfig* config) {
+    return strcmp(config->hw_camera_back, "videoplayback") == 0;
 }

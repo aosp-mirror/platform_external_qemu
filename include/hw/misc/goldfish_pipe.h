@@ -78,6 +78,7 @@ typedef struct {
     // and its |host_pipe| value, which can be reset by calling
     // goldfish_pipe_reset().
     GoldfishHostPipe* (*guest_open)(GoldfishHwPipe *hw_pipe);
+    GoldfishHostPipe* (*guest_open_with_flags)(GoldfishHwPipe *hw_pipe, uint32_t flags);
 
     // Close and free a pipe. |host_pipe| must be the result of a previous
     // guest_open() or guest_load() call, or the second parameter to
@@ -125,7 +126,7 @@ typedef struct {
     // decribed by the array |buffers| or |num_buffers| items.
     // Return number of bytes transferred, or a (negative) GoldfishPipeError
     // value otherwise.
-    int (*guest_send)(GoldfishHostPipe *host_pipe,
+    int (*guest_send)(GoldfishHostPipe **host_pipe,
                       const GoldfishPipeBuffer *buffers,
                       int num_buffers);
 
@@ -156,27 +157,10 @@ typedef struct {
 extern void goldfish_pipe_set_service_ops(
         const GoldfishPipeServiceOps* ops);
 
-/* Function to look up id of hwpipe and vice versa. */
-extern int goldfish_pipe_get_id(GoldfishHwPipe* hw_pipe);
+/* Query the service ops struct from other places. For use with
+ * virtio. */
+extern const GoldfishPipeServiceOps* goldfish_pipe_get_service_ops(void);
+
 extern GoldfishHwPipe* goldfish_pipe_lookup_by_id(int id);
-
-/* Implemented by the virtual device, always called from the service in
- * a thread that owns the BQL. */
-
-/* Reset the association of |hw_pipe| with a new |host_pipe|
- * value. This is called once the guest has written the service name
- * to the initial pipe connection, and the host decided of the right
- * implementation for it. */
-extern void goldfish_pipe_reset(GoldfishHwPipe *hw_pipe,
-                                GoldfishHostPipe *host_pipe);
-
-/* Called by the host to notify the virtual device that it has
- * closed its side of the pipe. */
-extern void goldfish_pipe_close_from_host(GoldfishHwPipe *hw_pipe);
-
-/* Called by the host to notify that one or more conditions identified
- * by |flags| has been met for a given pipe identified by |hw_pipe|. */
-extern void goldfish_pipe_signal_wake(GoldfishHwPipe *hw_pipe,
-                                      GoldfishPipeWakeFlags flags);
 
 #endif /* _HW_GOLDFISH_PIPE_H */

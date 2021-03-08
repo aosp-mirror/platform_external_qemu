@@ -35,11 +35,28 @@
 
 #pragma once
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 #include "android/recording/video/player/FrameQueue.h"
 #include "android/skin/qt/video-player/VideoPlayerWidget.h"
+=======
+#include <qobjectdefs.h>                                // for Q_OBJECT, sig...
+#include <QObject>                                      // for QObject
+#include <QString>                                      // for QString
+#include <string>                                       // for string, basic...
+
+#include "android/recording/video/player/FrameQueue.h"  // for Frame
+
+class QObject;
+
+extern "C" {
+    struct AVCodecContext;
+    #include <libavformat/avformat.h>
+}
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 
 namespace android {
 namespace videoplayer {
+class VideoPlayerWidget;
 
 // Class to grab any useful metadata from a video. Also grabs the first frame
 // of a video file for displaying to a widget.
@@ -55,10 +72,10 @@ public:
 
 private:
     void initialize();
-    static void adjustWindowSize(AVCodecContext* c,
-                                 VideoPlayerWidget* widget,
-                                 int* pWidth,
-                                 int* pHeight);
+    static void getDestinationSize(AVCodecContext* c,
+                                   VideoPlayerWidget* widget,
+                                   int* pWidth,
+                                   int* pHeight);
     static int calculateDurationSecs(AVFormatContext* f);
 
 private:

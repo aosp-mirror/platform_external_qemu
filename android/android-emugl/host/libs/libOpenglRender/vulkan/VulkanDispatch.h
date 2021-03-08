@@ -13,12 +13,13 @@
 // limitations under the License.
 #pragma once
 
-#include "cereal/common/goldfish_vk_dispatch.h"
+#include "vulkan/cereal/common/goldfish_vk_dispatch.h"
 
 using goldfish_vk::VulkanDispatch;
 
 namespace emugl {
 
-VulkanDispatch* getInstanceDeviceAndDispatch();
+VulkanDispatch* vkDispatch(bool forTesting = false);
+bool vkDispatchValid(const VulkanDispatch* vk);
 
-}
+} // namespace emugl

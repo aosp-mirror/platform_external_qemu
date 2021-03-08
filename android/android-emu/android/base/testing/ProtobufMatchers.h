@@ -168,7 +168,6 @@
 #include <string>   // NOLINT
 #include <vector>   // NOLINT
 
-#include <gmock/gmock-generated-matchers.h>
 #include <gmock/gmock-matchers.h>
 #include <gmock/gmock-more-matchers.h>
 
@@ -510,14 +509,12 @@ public:
     virtual void DeleteExpectedProto(
             const google::protobuf::Message* expected) const {}
 
-    const ::testing::internal::linked_ptr<const google::protobuf::Message>&
-    expected() const {
+    const std::shared_ptr<const google::protobuf::Message>& expected() const {
         return expected_;
     }
 
 private:
-    const ::testing::internal::linked_ptr<const google::protobuf::Message>
-            expected_;
+    const std::shared_ptr<const google::protobuf::Message> expected_;
 };
 
 // Implements EqualsProto, EquivToProto, EqualsInitializedProto, and
@@ -703,11 +700,10 @@ public:
 
 private:
     // The expected protobuf specified in the inner matcher
-    // (proto_matcher_).  We only need a linked_ptr to it instead of
+    // (proto_matcher_).  We only need a std::shared_ptr to it instead of
     // making a copy, as the expected protobuf will never be changed
     // once created.
-    const ::testing::internal::linked_ptr<const google::protobuf::Message>
-            expected_proto_;
+    const std::shared_ptr<const google::protobuf::Message> expected_proto_;
 };
 
 // Implements WhenDeserializedAs<Proto>(proto_matcher).

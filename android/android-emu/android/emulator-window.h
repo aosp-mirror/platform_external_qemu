@@ -12,17 +12,17 @@
 
 #pragma once
 
-#include "android/cmdline-option.h"
-#include "android/framebuffer.h"
-#include "android/recording/screen-recorder.h"
-#include "android/skin/file.h"
-#include "android/skin/keyboard.h"
-#include "android/skin/window.h"
-#include "android/utils/aconfig-file.h"
-#include "android/utils/stralloc.h"
+#include <stdbool.h>                            // for bool
 
-#include "android/skin/ui.h"
-#include "android/ui-emu-agent.h"
+#include "android/cmdline-option.h"             // for AndroidOptions
+#include "android/recording/screen-recorder.h"  // for RecordingInfo, Record...
+#include "android/skin/file.h"                  // for SkinFile, SkinLayout
+#include "android/skin/image.h"                 // for SkinImage
+#include "android/skin/rect.h"                  // for SkinRotation
+#include "android/skin/ui.h"                    // for SkinUI
+#include "android/ui-emu-agent.h"               // for UiEmuAgent
+#include "android/utils/aconfig-file.h"         // for AConfig
+#include "android/utils/compiler.h"             // for ANDROID_BEGIN_HEADER
 
 ANDROID_BEGIN_HEADER
 
@@ -35,6 +35,8 @@ typedef struct EmulatorScreenMask {
 typedef struct EmulatorWindow {
     const AConfig* aconfig;
     SkinFile*      layout_file;
+    SkinFile*      layout_file_skin;
+    SkinFile*      layout_file_no_skin;
     int            win_x;
     int            win_y;
     SkinUI*        ui;
@@ -93,8 +95,11 @@ bool emulator_window_stop_recording(void);
  * status. */
 bool emulator_window_stop_recording_async(void);
 /* Returns the current state of the screen recorder. */
-RecorderState emulator_window_recorder_state_get(void);
+RecorderStates emulator_window_recorder_state_get(void);
 
 void emulator_window_set_screen_mask(int width, int height, const unsigned char* rgbaData);
 
+void emulator_window_set_no_skin();
+
+void emulator_window_restore_skin();
 ANDROID_END_HEADER

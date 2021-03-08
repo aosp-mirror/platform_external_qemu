@@ -119,7 +119,8 @@ size_t AndroidMessagePipe::copyData(uint8_t** bufdatap,
 }
 
 int AndroidMessagePipe::onGuestSend(const AndroidPipeBuffer* buffers,
-                                    int numBuffers) {
+                                    int numBuffers,
+                                    void** newPipePtr) {
     if (!readyForGuestToSend()) {
         return PIPE_ERROR_AGAIN;
     }
@@ -283,8 +284,8 @@ void AndroidMessagePipe::loadFromStream(base::Stream* stream) {
 void registerAndroidMessagePipeService(
         const char* serviceName,
         android::AndroidMessagePipe::DecodeAndExecuteFunction cb) {
-    android::AndroidPipe::Service::add(
-            new AndroidMessagePipe::Service(serviceName, cb));
+    AndroidPipe::Service::add(
+        std::make_unique<AndroidMessagePipe::Service>(serviceName, cb));
 }
 
 }  // namespace android

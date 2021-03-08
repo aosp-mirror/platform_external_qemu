@@ -14,6 +14,7 @@
 #include "android/base/files/FileShareOpen.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
+#include "android/base/threads/Thread.h"
 #include "android/globals.h"
 #include "android/utils/debug.h"
 
@@ -42,8 +43,16 @@ bool android::multiinstance::initInstanceShareMode(
             shareMode == android::base::FileShare::Read
                     ? "rb"
                     : "wb";
-    sMultiInstanceState->sharedFile =
+    for (int i = 0; i < 3; ++ i) {
+        sMultiInstanceState->sharedFile =
             android::base::fsopen(multiInstanceLock, mode, shareMode);
+        if (!sMultiInstanceState->sharedFile) {
+            dwarning("Another emualtor is still running, wait for a sec...");
+            base::Thread::sleepMs(1 * 1000);
+        } else {
+            break;
+        }
+    }
     if (!sMultiInstanceState->sharedFile) {
         derror("Another emulator instance is running. Please close it or "
                "run all emulators with -read-only flag.\n");

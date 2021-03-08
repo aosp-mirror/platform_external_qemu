@@ -11,21 +11,27 @@
 */
 #include "android/skin/keyboard.h"
 
-#include "android/globals.h"
-#include "android/skin/charmap.h"
-#include "android/skin/keycode.h"
-#include "android/skin/keycode-buffer.h"
-#include "android/utils/debug.h"
-#include "android/utils/bufprint.h"
-#include "android/utils/system.h"
-#include "android/utils/utf8_utils.h"
+#include <stdbool.h>                                 // for bool, true, false
+#include <stdint.h>                                  // for uint8_t, uint32_t
+#include <stdio.h>                                   // for fprintf, NULL
+#include <string.h>
 
-#include <stdio.h>
+#include "android/featurecontrol/feature_control.h"  // for feature_is_enabled
+#include "android/globals.h"                         // for android_hw
+#include "android/skin/android_keycodes.h"           // for KEY_APPSWITCH
+#include "android/skin/charmap.h"                    // for skin_charmap_get...
+#include "android/skin/keycode-buffer.h"             // for skin_keycode_buf...
+#include "android/skin/keycode.h"                    // for skin_key_pair_to...
+#include "android/skin/linux_keycodes.h"             // for LINUX_KEY_LEFTSHIFT
+#include "android/skin/qt/mac-native-window.h"
+#include "android/utils/debug.h"       // for VERBOSE_PRINT
+#include "android/utils/system.h"      // for AFREE, ANEW0
+#include "android/utils/utf8_utils.h"  // for android_utf8_decode
 
 #define  DEBUG  1
 
 #if DEBUG
-#  define  D(...)  VERBOSE_PRINT(keys,__VA_ARGS__)
+#define D(...) VERBOSE_PRINT(keys, __VA_ARGS__)
 #else
 #  define  D(...)  ((void)0)
 #endif
@@ -126,6 +132,8 @@ static SkinKeyMod keycode_to_mod(int key) {
         return kKeyModLCtrl;
     case LINUX_KEY_LEFTSHIFT:
         return kKeyModLShift;
+    case LINUX_KEY_LEFTMETA:
+        return kKeyModLMeta;
     }
     return 0;
 }
@@ -166,6 +174,9 @@ static int map_cros_key(int* code) {
         return 0;
     case KEY_APPSWITCH:
         *code = LINUX_KEY_F5;
+        return 0;
+    case LINUX_KEY_GREEN:
+        *code = LINUX_KEY_GRAVE;
         return 0;
     }
     return -1;
@@ -211,6 +222,41 @@ static bool has_modifier_key(int keycode, int mod)
     return false;
 }
 
+static void process_modifier_key(SkinKeyboard* kb, SkinEvent* ev, int down) {
+    if (ev->u.text.mod & kKeyModNumLock) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_NUMLOCK, 1);
+        skin_keyboard_add_key_event(kb, LINUX_KEY_NUMLOCK, 0);
+    }
+    if (ev->u.text.mod & kKeyModCapsLock) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_CAPSLOCK, 1);
+        skin_keyboard_add_key_event(kb, LINUX_KEY_CAPSLOCK, 0);
+    }
+    if (ev->u.text.mod & kKeyModRShift) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_RIGHTSHIFT, down);
+    }
+    if (ev->u.text.mod & kKeyModLShift) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTSHIFT, down);
+    }
+    if (ev->u.text.mod & kKeyModRAlt) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_RIGHTALT, down);
+    }
+    if (ev->u.text.mod & kKeyModLAlt) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTALT, down);
+    }
+    if (ev->u.text.mod & kKeyModLCtrl) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTCTRL, down);
+    }
+    if (ev->u.text.mod & kKeyModRCtrl) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_RIGHTCTRL, down);
+    }
+    if (ev->u.text.mod & kKeyModLMeta) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTMETA, down);
+    }
+    if (ev->u.text.mod & kKeyModRMeta) {
+        skin_keyboard_add_key_event(kb, LINUX_KEY_RIGHTMETA, down);
+    }
+}
+
 void
 skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
 {
@@ -221,7 +267,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
              * key events based on text. Since we've already send shift
              * key events to guest in cros case, we have to make sure
              * it's in released status. Otherwise shift key will
-             * interfer capslock. Here, we tell sync_modifier_key
+             * interfere capslock. Here, we tell sync_modifier_key
              * there is a key down event without any modifier key.
              * sync_modifier_key will generate one shift release event
              * if the old status for shift is in pressed status. The
@@ -229,19 +275,35 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
              */
             mod = sync_modifier_key(LINUX_KEY_LEFTSHIFT, kb, 0, 0, 1);
         }
-        // TODO(digit): For each Unicode value in the input text.
-        const uint8_t* text = ev->u.text.text;
-        const uint8_t* end = text + sizeof(ev->u.text.text);
-        while (text < end && *text) {
-            uint32_t codepoint = 0;
-            int len = android_utf8_decode(text, end - text, &codepoint);
-            if (len < 0) {
-                break;
+
+        if (!use_keycode_forwarding) {
+            // TODO(digit): For each Unicode value in the input text.
+            const uint8_t* text = ev->u.text.text;
+            const uint8_t* end = text + sizeof(ev->u.text.text);
+            while (text < end && *text) {
+                uint32_t codepoint = 0;
+                int len = android_utf8_decode(text, end - text, &codepoint);
+                if (len < 0) {
+                    break;
+                }
+                skin_keyboard_process_unicode_event(kb, codepoint, 1);
+                skin_keyboard_process_unicode_event(kb, codepoint, 0);
+                text += len;
             }
-            skin_keyboard_process_unicode_event(kb, codepoint, 1);
-            skin_keyboard_process_unicode_event(kb, codepoint, 0);
-            text += len;
+        } else {
+            process_modifier_key(kb, ev, 1);
+            D("event type: kTextInput key code=%d mod=0x%x str=%s",
+              ev->u.text.keycode, ev->u.text.mod,
+              skin_key_pair_to_string(ev->u.text.keycode, ev->u.text.mod));
+
+            if (android_hw->hw_arc) {
+                map_cros_key(&ev->u.text.keycode);
+            }
+            skin_keyboard_add_key_event(kb, ev->u.text.keycode, 1);
+            skin_keyboard_add_key_event(kb, ev->u.text.keycode, 0);
+            process_modifier_key(kb, ev, 0);
         }
+
         if (android_hw->hw_arc && mod) {
             /* If the tracked shift status was pressed, restore it by
              * telling sync_modifier_key there is a shift pressed event.
@@ -251,6 +313,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
                               LINUX_KEY_LEFTSHIFT, 0, 1);
             skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTSHIFT, 1);
         }
+
         skin_keyboard_flush(kb);
     } else if (ev->type == kEventKeyDown || ev->type == kEventKeyUp) {
         int keycode = ev->u.key.keycode;
@@ -283,6 +346,8 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
         if (code == kKeyCodeAltLeft  || code == kKeyCodeAltRight ||
             code == kKeyCodeCapLeft  || code == kKeyCodeCapRight ||
             code == kKeyCodeSym) {
+            skin_keyboard_add_key_event(kb, code, down);
+            skin_keyboard_flush(kb);
             return;
         }
 
@@ -345,8 +410,10 @@ static SkinKeyboard* skin_keyboard_create_from_charmap_name(
     if (!kb->charmap) {
         // Charmap name was not found. Default to "qwerty2" */
         kb->charmap = skin_charmap_get_by_name(DEFAULT_ANDROID_CHARMAP);
-        fprintf(stderr, "### warning, skin requires unknown '%s' charmap, reverting to '%s'\n",
-                charmap_name, kb->charmap->name );
+        fprintf(stderr,
+                "warning, skin requires unknown '%s' charmap, reverting to "
+                "'%s'\n",
+                charmap_name, kb->charmap->name);
     }
     skin_keycode_buffer_init(kb->keycodes, keycode_flush);
     skin_keyboard_set_rotation(kb, dpad_rotation);
@@ -374,3 +441,221 @@ skin_keyboard_free( SkinKeyboard*  keyboard )
         AFREE(keyboard);
     }
 }
+
+#ifndef CONFIG_HEADLESS
+
+#if defined(_WIN32)
+#include <windows.h>
+const char* skin_keyboard_host_layout_name() {
+    char temp[64];
+    AMEM_ZERO(temp, sizeof(temp));
+    GetKeyboardLayoutNameA(temp);
+    return ASTRDUP(temp);
+}
+
+// window keyboard layout is represented as ID defined in
+// https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/windows-language-pack-default-values
+// Thus, we use direct mapping on the basis of best effort. Note that the text
+// displayed on screen depends on the android key character mapping.
+static const struct {
+    const char* native_kb_layout;
+    const char* android_kb_layout;
+} s_native_to_android_keyboard_map[] = {
+        {"00000809", "keyboard_layout_english_uk"},  // United Kingdom
+        {"00000409", "keyboard_layout_english_us"},  // United States - English
+        {"00020409",
+         "keyboard_layout_english_us_intl"},  // United States - International
+        {"00010409",
+         "keyboard_layout_english_us_dvorak"},  // United States - Dvorak
+        {"00000407", "keyboard_layout_german"},
+        {"0000040c", "keyboard_layout_french"},
+        {"00001009", "keyboard_layout_french_ca"},  // Canadian French
+        {"00000419", "keyboard_layout_russian"},
+        {"0000040a", "keyboard_layout_spanish"},
+        {"0001040a", "keyboard_layout_spanish_latin"},
+        {"0000100c", "keyboard_layout_swiss_french"},
+        {"00000807", "keyboard_layout_swiss_german"},
+        {"0001080c", "keyboard_layout_belgian"},  // Belgian (Comma)
+        {"0000080c", "keyboard_layout_belgian"},  // Belgian French
+        {"0030402", "keyboard_layout_bulgarian"},
+        {"00000410", "keyboard_layout_italian"},
+        {"00000406", "keyboard_layout_danish"},
+        {"00000414", "keyboard_layout_norwegian"},
+        {"0000041d", "keyboard_layout_swedish"},
+        {"0000040b", "keyboard_layout_finnish"},
+        {"0000041a", "keyboard_layout_croatian_and_slovenian"},  // Croatian
+        {"00010405", "keyboard_layout_czech"},  // Czech (QWERTY)
+        {"00000425", "keyboard_layout_estonian"},
+        {"0000040e", "keyboard_layout_hungarian"},
+        {"0000040f", "keyboard_layout_icelandic"},
+        {"00000416",
+         "keyboard_layout_brazilian"},  // Portuguese (Brazilian ABNT)
+        {"00010416",
+         "keyboard_layout_brazilian"},  // Portuguese (Brazilian ABNT2)
+        {"00000816", "keyboard_layout_portuguese"},
+        {"0001041b", "keyboard_layout_slovak"},
+        {"00000424", "keyboard_layout_croatian_and_slovenian"},  // Slovenian
+        {"0000041f", "keyboard_layout_turkish"},                 // Turkish Q
+        {"00000422", "keyboard_layout_ukrainian"},
+        {"00010427", "keyboard_layout_lithuanian"},
+        {"00020426", "keyboard_layout_latvian"},
+        {"00000429", "keyboard_layout_persian"},
+        {"0001042c", "keyboard_layout_azerbaijani"},
+        {"00000415", "keyboard_layout_polish"},  // Polish (Programmers)
+};
+
+#elif defined(__linux__)
+
+#include <X11/XKBlib.h>
+#include <xcb/xcb.h>
+
+const char* skin_keyboard_host_layout_name() {
+    Display* display = XOpenDisplay(NULL);
+
+    if (!display) {
+        fprintf(stderr, "%s: warning: cannot get x11 display info\n", __func__);
+        return NULL;
+    }
+
+    XkbDescPtr xkb = XkbGetMap(display, XkbAllComponentsMask, XkbUseCoreKbd);
+
+    if (!xkb) {
+        fprintf(stderr, "%s: warning: cannot get mod mask info\n", __func__);
+        return NULL;
+    }
+
+    if (XkbGetNames(display, XkbGroupNamesMask, xkb) != 0) {
+        fprintf(stderr, "%s: warning: cannot get xkb group names\n", __func__);
+        return NULL;
+    }
+
+    XkbStateRec state;
+    XkbGetState(display, XkbUseCoreKbd, &state);
+
+    const char* name = XGetAtomName(display, xkb->names->groups[state.group]);
+
+    XkbFreeClientMap(xkb, XkbAllComponentsMask, true);
+    XCloseDisplay(display);
+    return name;
+}
+
+const static struct {
+    const char* native_kb_layout;
+    const char* android_kb_layout;
+} s_native_to_android_keyboard_map[] = {
+        {"English (UK)", "keyboard_layout_english_uk"},
+        {"English (US)", "keyboard_layout_english_us"},
+        {"English (US, alt. intl.)", "keyboard_layout_english_us_intl"},
+        {"English (Colemak)", "keyboard_layout_english_us_colemak"},
+        {"English (Dvorak)", "keyboard_layout_english_us_dvorak"},
+        {"English (Workman)", "keyboard_layout_english_workman"},
+        {"German", "keyboard_layout_german"},
+        {"French (AZERTY)", "keyboard_layout_french"},
+        {"French (Canada)", "keyboard_layout_french_ca"},
+        {"Russian", "keyboard_layout_russian"},
+        {"Russian (Macintosh)", "keyboard_layout_russian_mac"},
+        {"Spanish", "keyboard_layout_spanish"},
+        {"Spanish (Latin America)", "keyboard_layout_spanish_latin"},
+        {"French (Switzerland)", "keyboard_layout_swiss_french"},
+        {"German (Switzerland)", "keyboard_layout_swiss_german"},
+        {"Belgian", "keyboard_layout_belgian"},
+        {"Bulgarian", "keyboard_layout_bulgarian"},
+        {"Italian", "keyboard_layout_italian"},
+        {"Danish", "keyboard_layout_danish"},
+        {"Norwegian", "keyboard_layout_norwegian"},
+        {"Swedish", "keyboard_layout_swedish"},
+        {"Finnish", "keyboard_layout_finnish"},
+        {"Croatian", "keyboard_layout_croatian_and_slovenian"},
+        {"Czech (QWERTY)", "keyboard_layout_czech"},
+        {"Estonian", "keyboard_layout_estonian"},
+        {"Hungarian", "keyboard_layout_hungarian"},
+        {"Icelandic", "keyboard_layout_icelandic"},
+        {"Portuguese (Brazil)", "keyboard_layout_brazilian"},
+        {"Portuguese", "keyboard_layout_portuguese"},
+        {"Slovak (QWERTY)", "keyboard_layout_slovak"},
+        {"Slovenian", "keyboard_layout_croatian_and_slovenian"},
+        {"Turkish", "keyboard_layout_turkish"},
+        //{"Ukrainian", "keyboard_layout_ukrainian"},
+        {"Latvian", "keyboard_layout_latvian_qwerty"},
+        {"Persian", "keyboard_layout_persian"},
+        {"Azerbaijani", "keyboard_layout_azerbaijani"},
+        {"Polish", "keyboard_layout_polish"},
+};
+
+#else  // __APPLE__
+// Defined in mac-native-window.mm
+const char* skin_keyboard_host_layout_name() {
+    return keyboard_host_layout_name_macImpl();
+}
+
+const static struct {
+    const char* native_kb_layout;
+    const char* android_kb_layout;
+} s_native_to_android_keyboard_map[] = {
+        {"com.apple.keylayout.British", "keyboard_layout_english_uk"},
+        {"com.apple.keylayout.US", "keyboard_layout_english_us"},
+        {"com.apple.keylayout.USInternational-PC",
+         "keyboard_layout_english_us_intl"},
+        {"com.apple.keylayout.Colemak", "keyboard_layout_english_us_colemak"},
+        {"com.apple.keylayout.Dvorak", "keyboard_layout_english_us_dvorak"},
+        {"com.apple.keylayout.German", "keyboard_layout_german"},
+        {"com.apple.keylayout.French", "keyboard_layout_french"},
+        {"com.apple.keylayout.Canadian-CSA", "keyboard_layout_french_ca"},
+        {"com.apple.keylayout.Russian", "keyboard_layout_russian_mac"},
+        {"com.apple.keylayout.RussianWin", "keyboard_layout_russian"},
+        {"com.apple.keylayout.Spanish", "keyboard_layout_spanish"},
+        {"com.apple.keylayout.Spanish-ISO", "keyboard_layout_spanish_latin"},
+        {"com.apple.keylayout.SwissFrench", "keyboard_layout_swiss_french"},
+        {"com.apple.keylayout.SwissGerman", "keyboard_layout_swiss_german"},
+        {"com.apple.keylayout.Belgian", "keyboard_layout_belgian"},
+        {"com.apple.keylayout.Bulgarian", "keyboard_layout_bulgarian"},
+        {"com.apple.keylayout.Italian", "keyboard_layout_italian"},
+        {"com.apple.keylayout.Danish", "keyboard_layout_danish"},
+        {"com.apple.keylayout.Norwegian", "keyboard_layout_norwegian"},
+        {"com.apple.keylayout.Swedish", "keyboard_layout_swedish"},
+        {"com.apple.keylayout.Finnish", "keyboard_layout_finnish"},
+        {"com.apple.keylayout.Croatian",
+         "keyboard_layout_croatian_and_slovenian"},
+        {"com.apple.keylayout.Czech-QWERTY", "keyboard_layout_czech"},
+        {"com.apple.keylayout.Estonian", "keyboard_layout_estonian"},
+        {"com.apple.keylayout.Hungarian", "keyboard_layout_hungarian"},
+        {"com.apple.keylayout.Icelandic", "keyboard_layout_icelandic"},
+        {"com.apple.keylayout.Brazilian", "keyboard_layout_brazilian"},
+        {"com.apple.keylayout.Portuguese", "keyboard_layout_portuguese"},
+        {"com.apple.keylayout.Slovak-QWERTY", "keyboard_layout_slovak"},
+        {"com.apple.keylayout.Slovenian",
+         "keyboard_layout_croatian_and_slovenian"},
+        {"com.apple.keylayout.Turkish-QWERTY-PC", "keyboard_layout_turkish"},
+        {"com.apple.keylayout.Ukrainian", "keyboard_layout_ukrainian"},
+        {"com.apple.keylayout.Latvian", "keyboard_layout_latvian"},
+        {"com.apple.keylayout.Persian", "keyboard_layout_persian"},
+        {"com.apple.keylayout.Azeri", "keyboard_layout_azerbaijani"},
+        {"com.apple.keylayout.Polish", "keyboard_layout_polish"},
+};
+
+#endif
+
+const char* skin_keyboard_host_to_guest_layout_name(const char* name) {
+    size_t i;
+    if (name) {
+        for (i = 0; i < sizeof(s_native_to_android_keyboard_map) /
+                                sizeof(s_native_to_android_keyboard_map[0]);
+             i++) {
+#if defined(_WIN32)
+            if (strtoi(name, NULL, 16) ==
+                strtoi(s_native_to_android_keyboard_map[i].native_kb_layout,
+                       NULL, 16))
+#else
+            if (strcmp(name,
+                       s_native_to_android_keyboard_map[i].native_kb_layout) ==
+                0)
+#endif
+            {
+                return s_native_to_android_keyboard_map[i].android_kb_layout;
+            }
+        }
+    }
+    return NULL;
+}
+
+#endif /* CONFIG_HEADLESS */

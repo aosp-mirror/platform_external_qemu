@@ -16,24 +16,41 @@
 
 #pragma once
 
+#include "android/utils/debug.h"
+
 #include "OpenglRender/render_api_types.h"
 
-extern emugl_logger_t emugl_logger;
-extern emugl_logger_t emugl_cxt_logger;
-void set_emugl_logger(emugl_logger_t f);
-void set_emugl_cxt_logger(emugl_logger_t f);
+#ifdef _MSC_VER
+# ifdef BUILDING_EMUGL_COMMON_SHARED
+#  define EMUGL_COMMON_API __declspec(dllexport)
+# else
+#  define EMUGL_COMMON_API __declspec(dllimport)
+#endif
+#else
+# define EMUGL_COMMON_API
+#endif
 
+namespace emugl {
+
+EMUGL_COMMON_API extern emugl_logger_t emugl_logger;
+EMUGL_COMMON_API extern emugl_logger_t emugl_cxt_logger;
+EMUGL_COMMON_API void set_emugl_logger(emugl_logger_t f);
+EMUGL_COMMON_API void set_emugl_cxt_logger(emugl_logger_t f);
+
+}  // namespace emugl
 #define GL_LOGGING 1
 
 #if GL_LOGGING
 
-#define GL_LOG(...) do { \
-    emugl_logger(__VA_ARGS__); \
-} while (0)
+#define GL_LOG(...)                       \
+    do {                                  \
+        emugl::emugl_logger(__VA_ARGS__); \
+    } while (0)
 
-#define GL_CXT_LOG(...) do { \
-    emugl_cxt_logger(__VA_ARGS__); \
-} while (0)
+#define GL_CXT_LOG(...)                       \
+    do {                                      \
+        emugl::emugl_cxt_logger(__VA_ARGS__); \
+    } while (0)
 
 #else
 #define GL_LOG(...) 0

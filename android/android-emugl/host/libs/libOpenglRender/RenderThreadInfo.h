@@ -22,9 +22,11 @@
 #include "GLESv1Decoder.h"
 #include "GLESv2Decoder.h"
 #include "renderControl_dec.h"
+#include "VkDecoder.h"
 #include "StalePtrRegistry.h"
 #include "SyncThread.h"
 
+#include <functional>
 #include <unordered_set>
 
 typedef uint32_t HandleType;
@@ -44,7 +46,14 @@ struct RenderThreadInfo {
     // Return the current thread's instance, if any, or NULL.
     static RenderThreadInfo* get();
 
+    // Loop over all active render thread infos
+    static void forAllRenderThreadInfos(std::function<void(RenderThreadInfo*)>);
+
     // Current EGL context, draw surface and read surface.
+    HandleType currContextHandleFromLoad;
+    HandleType currDrawSurfHandleFromLoad;
+    HandleType currReadSurfHandleFromLoad;
+
     RenderContextPtr currContext;
     WindowSurfacePtr currDrawSurf;
     WindowSurfacePtr currReadSurf;
@@ -53,6 +62,7 @@ struct RenderThreadInfo {
     GLESv1Decoder                   m_glDec;
     GLESv2Decoder                   m_gl2Dec;
     renderControl_decoder_context_t m_rcDec;
+    VkDecoder                       m_vkDec;
 
     // All the contexts that are created by this render thread.
     // New emulator manages contexts in guest process level,
@@ -69,6 +79,10 @@ struct RenderThreadInfo {
     // They must be called after Framebuffer snapshot
     void onSave(android::base::Stream* stream);
     bool onLoad(android::base::Stream* stream);
+
+    // Sometimes we can load render thread info before
+    // FrameBuffer repopulates the contexts.
+    void postLoadRefreshCurrentContextSurfacePtrs();
 };
 
 #endif

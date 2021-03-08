@@ -12,8 +12,9 @@
 
 #pragma once
 
-#include "android/skin/event.h"
-#include "android/skin/generic-event-buffer.h"
+#include "android/skin/event.h"                 // for SkinEvent
+#include "android/skin/generic-event-buffer.h"  // for SkinGenericEventFlush...
+#include "android/utils/compiler.h"             // for ANDROID_BEGIN_HEADER
 
 ANDROID_BEGIN_HEADER
 
@@ -30,7 +31,8 @@ extern void skin_generic_event_free(SkinGenericEvent* event);
 extern void skin_generic_event_add_event(SkinGenericEvent* ge,
                                          unsigned type,
                                          unsigned code,
-                                         unsigned value);
+                                         unsigned value,
+                                         unsigned displayId);
 
 extern void skin_generic_event_flush(SkinGenericEvent* ge);
 

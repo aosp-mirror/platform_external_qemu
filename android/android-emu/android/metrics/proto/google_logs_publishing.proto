@@ -1,0 +1,52 @@
+// Exposes the proto messages required for publishing Android
+// Studio logs to Google's server.
+//
+// DO NOT CHANGE Without updating server-side logic.
+
+syntax = "proto2";
+
+package wireless_android_play_playlog;
+
+option java_package = "com.google.wireless.android.play.playlog.proto";
+option java_outer_classname = "ClientAnalytics";
+
+message LogEvent {
+  optional int64 event_time_ms = 1;
+  optional bytes source_extension = 6;
+}
+
+message DesktopClientInfo {
+  optional string client_id = 1;
+  optional string logging_id = 2;
+  optional string os = 3;
+  optional string os_major_version = 4;
+  optional string os_full_version = 5;
+  optional string application_build = 6;
+  optional string country = 7;
+}
+
+message ClientInfo {
+  enum ClientType {
+    DESKTOP = 2;
+  }
+  optional ClientInfo.ClientType client_type = 1;
+  optional DesktopClientInfo desktop_client_info = 3;
+}
+
+message LogRequest {
+  enum LogSource {
+    UNKNOWN = -1;
+    ANDROID_STUDIO = 302;
+  }
+  optional int64 request_time_ms = 4;
+  optional ClientInfo client_info = 1;
+  optional LogRequest.LogSource log_source = 2 [default = UNKNOWN];
+  repeated LogEvent log_event = 3;
+}
+
+message LogResponse {
+  optional int64 next_request_wait_millis = 1 [default = -1];
+  extensions 1000 to 536870911;
+}
+
+

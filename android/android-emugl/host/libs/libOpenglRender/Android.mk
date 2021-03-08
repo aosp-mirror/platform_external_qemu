@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 LOCAL_PATH := $(call my-dir)
 
 $(call emugl-begin-static-library,lib$(BUILD_TARGET_SUFFIX)OSWindow)
@@ -254,3 +255,5 @@ $(call make_sample,CreateDestroyContext)
 $(call make_sample,HelloHostComposition)
 
 endif
+=======
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)

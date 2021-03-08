@@ -62,4 +62,24 @@
 #define GOLDFISH_ROTARY_IOMEM_SIZE    0x00001000
 #define GOLDFISH_ROTARY_IRQ           23
 
+#define GOLDFISH_ADDRESS_SPACE_PCI_REVISION         1
+#define GOLDFISH_ADDRESS_SPACE_PCI_SLOT             11
+#define GOLDFISH_ADDRESS_SPACE_PCI_FUNCTION         0
+#define GOLDFISH_ADDRESS_SPACE_NAME                 "goldfish_address_space"
+#define GOLDFISH_ADDRESS_SPACE_PCI_VENDOR_ID        0x607D
+#define GOLDFISH_ADDRESS_SPACE_PCI_DEVICE_ID        0xF153
+#define GOLDFISH_ADDRESS_SPACE_PCI_INTERRUPT_PIN    2 /* pin B */
+#define GOLDFISH_ADDRESS_SPACE_PCI_INTERRUPT_LINE   2
+#define GOLDFISH_ADDRESS_SPACE_CONTROL_BAR          0
+#define GOLDFISH_ADDRESS_SPACE_CONTROL_NAME         "goldfish_address_space_control"
+#define GOLDFISH_ADDRESS_SPACE_CONTROL_SIZE         0x00001000
+#define GOLDFISH_ADDRESS_SPACE_AREA_BAR             1
+#define GOLDFISH_ADDRESS_SPACE_AREA_NAME            "goldfish_address_space_area"
+#if defined(__APPLE__) && defined(__arm64__)
+// Apple Silicon only has 36 bits of address space. Be more conservative here.
+#define GOLDFISH_ADDRESS_SPACE_AREA_SIZE            (16ULL << 29ULL)
+#else
+#define GOLDFISH_ADDRESS_SPACE_AREA_SIZE            (16ULL << 30ULL)
+#endif
+
 #endif  /* !ACPI_GOLDFISH_DEFS_H */

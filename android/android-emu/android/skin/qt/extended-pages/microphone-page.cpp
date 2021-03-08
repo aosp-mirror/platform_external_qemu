@@ -11,22 +11,39 @@
 
 #include "android/skin/qt/extended-pages/microphone-page.h"
 
-#include "android/hw-events.h"
-#include "android/skin/event.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/qt-settings.h"
-#include <QSettings>
+#include <QCheckBox>                                  // for QCheckBox
+
+#include "android/avd/info.h"                         // for avdInfo_getAvdF...
+#include "android/avd/util.h"                         // for AVD_ANDROID_AUTO
+#include "android/console.h"                          // for getConsoleAgents
+#include "android/emulation/control/vm_operations.h"  // for QAndroidVmOpera...
+#include "android/globals.h"                          // for android_avdInfo
+#include "android/hw-events.h"                        // for EV_KEY, EV_SW
+#include "android/metrics/UiEventTracker.h"           // for UiEventTracker
+#include "android/skin/event.h"                       // for SkinEvent, Skin...
+#include "android/skin/qt/emulator-qt-window.h"       // for EmulatorQtWindow
+#include "android/skin/qt/extended-pages/common.h"    // for getSelectedTheme
+#include "android/skin/qt/raised-material-button.h"   // for RaisedMaterialB...
+#include "studio_stats.pb.h"                          // for EmulatorUiEvent
+
 
 MicrophonePage::MicrophonePage(QWidget* parent)
     : QWidget(parent),
       mUi(new Ui::MicrophonePage()),
+             mMicTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::BUTTON_PRESS,
+              android_studio::EmulatorUiEvent::EXTENDED_MIC_TAB)),
       mEmulatorWindow(nullptr) {
     mUi->setupUi(this);
 
     // The Hook button is not functional yet.
     // Hide it for now.
     mUi->mic_hookButton->hide();
+
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+        // Android Auto doesn't support the key event used in voice assist button
+        mUi->mic_voiceAssistButton->setHidden(true);
+    }
 }
 
 void MicrophonePage::on_mic_hasMic_toggled(bool checked) {
@@ -70,6 +87,10 @@ void MicrophonePage::on_mic_inserted_toggled(bool checked) {
     forwardGenericEventToEmulator(EV_SW, SW_HEADPHONE_INSERT, phonesInserted);
     forwardGenericEventToEmulator(EV_SW, SW_MICROPHONE_INSERT, micInserted);
     forwardGenericEventToEmulator(EV_SYN, 0, 0);
+}
+
+void MicrophonePage::on_mic_allowRealAudio_toggled(bool checked) {
+    getConsoleAgents()->vm->allowRealAudio(checked);
 }
 
 void MicrophonePage::on_mic_voiceAssistButton_pressed() {

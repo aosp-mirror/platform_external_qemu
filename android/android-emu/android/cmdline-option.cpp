@@ -3,6 +3,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android/utils/system.h"
+#include <android/utils/x86_cpuid.h>
 #include <errno.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -10,6 +11,7 @@
 #include <string.h>
 
 const AndroidOptions* android_cmdLineOptions = NULL;
+const char* android_cmdLine = NULL;
 
 #define  _VERBOSE_TAG(x,y)   { #x, VERBOSE_##x, y },
 static const struct { const char*  name; int  flag; const char*  text; }
@@ -147,6 +149,20 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
 
                         if (oo->var_type == OPTION_IS_PARAM)
                         {
+#ifdef _WIN32
+                            /* Drop netspeed and netdelay parameter for AMD platform.
+                             * Studio will add these two parameters to its emulator commandline.
+                             * However, this brings adb connection issue for quickboot.
+                             * This is a temporary fix for bug:144788277
+                             */
+                            char vendor_id[16] = { 0 };
+                            android_get_x86_cpuid_vendor_id(vendor_id, 16);
+                            if (android_get_x86_cpuid_vendor_id_type(vendor_id) == VENDOR_ID_AMD)
+                                if (!strcmp(oo->name, "netspeed") || !strcmp(oo->name, "netdelay")) {
+                                    aread++;
+                                    break;
+                                }
+#endif
                             ((char**)field)[0] = strdup(*aread++);
                         }
                         else if (oo->var_type == OPTION_IS_LIST)

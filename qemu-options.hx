@@ -2533,7 +2533,7 @@ DEF("chardev", HAS_ARG, QEMU_OPTION_chardev,
     "-chardev serial,id=id,path=path[,mux=on|off][,logfile=PATH][,logappend=on|off]\n"
 #else
     "-chardev pty,id=id[,mux=on|off][,logfile=PATH][,logappend=on|off]\n"
-    "-chardev stdio,id=id[,mux=on|off][,signal=on|off][,logfile=PATH][,logappend=on|off]\n"
+    "-chardev stdio,id=id[,mux=on|off][,signal=on|off][,logfile=PATH][,logappend=on|off][,echo=on|off]\n"
 #endif
 #ifdef CONFIG_BRLAPI
     "-chardev braille,id=id[,mux=on|off][,logfile=PATH][,logappend=on|off]\n"
@@ -2788,12 +2788,15 @@ not take any options.
 
 @option{pty} is not available on Windows hosts.
 
-@item -chardev stdio,id=@var{id}[,signal=on|off]
+@item -chardev stdio,id=@var{id}[,signal=on|off][,echo=on|off]
 Connect to standard input and standard output of the QEMU process.
 
 @option{signal} controls if signals are enabled on the terminal, that includes
 exiting QEMU with the key sequence @key{Control-c}. This option is enabled by
 default, use @option{signal=off} to disable it.
+
+@option{echo} controls if the input contents will be echoed to the output. This
+option is disabled by default, use @option{echo=on} to enable it.
 
 @item -chardev braille,id=@var{id}
 
@@ -3631,13 +3634,22 @@ is only available if WHPX support is enabled when compiling.
 ETEXI
 
 DEF("enable-hvf", 0, QEMU_OPTION_enable_hvf, \
-    "-enable-hvf     enable Hypervisor.framework virtualization support\n", QEMU_ARCH_I386)
+    "-enable-hvf     enable Hypervisor.framework virtualization support\n", QEMU_ARCH_ALL)
 STEXI
 @item -enable-hvf
 @findex -enable-hvf
 Enable Mac Hypervisor.framework (HVF) support, used for full
 virtualization support on OS X.  This option
 is only available if HVF support is enabled when compiling.
+ETEXI
+
+DEF("enable-gvm", 0, QEMU_OPTION_enable_gvm, \
+    "-enable-gvm     enable GVM full virtualization support\n", QEMU_ARCH_I386)
+STEXI
+@item -enable-gvm
+@findex -enable-gvm
+Enable GVM full virtualization support. This option is only available
+if GVM support is enabled when compiling.
 ETEXI
 
 DEF("xen-domid", HAS_ARG, QEMU_OPTION_xen_domid,
@@ -4775,6 +4787,38 @@ STEXI
 @item -read-only
 @findex -read-only
 Abandon changes on exit
+ETEXI
+
+DEF("fuchsia", 0, QEMU_OPTION_fuchsia,
+"-fuchsia Fuchsia kernel/image run. Only standard QEMU options are allowed after, and emulator does not start Android virtual devices automatically.", QEMU_ARCH_ALL)
+STEXI
+@item -fuchsia
+@findex -fuchsia
+Run Fuchsia kernel/image. Only standard QEMU options are allowed after -fuchsia, and emulator does not start Android virtual devices automatically.
+ETEXI
+
+DEF("allow-host-audio", 0, QEMU_OPTION_allow_host_audio,
+"-allow-host-audio Allows sending of audio from audio input devices. Otherwise, zeroes out audio.", QEMU_ARCH_ALL)
+STEXI
+@item -allow-host-audio
+@findex -allow-host-audio
+Allows sending of audio from audio input devices. Otherwise, zeroes out audio.
+ETEXI
+
+DEF("restart-when-stalled", 0, QEMU_OPTION_restart_when_stalled,
+"-restart-when-stalled Allows restarting guest when it is stalled.", QEMU_ARCH_ALL)
+STEXI
+@item -restart-when-stalled
+@findex -restart-when-stalled
+Allows restarting guest when it is stalled.
+ETEXI
+
+DEF("perf-stat", HAS_ARG, QEMU_OPTION_perf_stat,
+"-perf-stat <file> Run periodic perf stat reporter in the background and write output to specified file.", QEMU_ARCH_ALL)
+STEXI
+@item -perf-stat
+@findex -perf-stat
+Run periodic perf stat reporter in the background and write output to specified file.
 ETEXI
 
 #endif  // CONFIG_ANDROID

@@ -119,6 +119,7 @@ public:
     }
 
     int onGuestSend(const AndroidPipeBuffer* buffers,
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
                     int numBuffers) override {
         int transferred = 0;
         for (int i = 0; i < numBuffers; ++i) {
@@ -151,6 +152,42 @@ void registerNetworkPipeService() {
     if (sNetworkPipeService == nullptr) {
         sNetworkPipeService = new NetworkPipe::Service;
         android::AndroidPipe::Service::add(sNetworkPipeService);
+=======
+                    int numBuffers,
+                    void** newPipePtr) override {
+        int transferred = 0;
+        for (int i = 0; i < numBuffers; ++i) {
+            transferred += buffers[i].size;
+        }
+
+        return transferred;
+    }
+
+    void onGuestWantWakeOn(int flags) override {
+    }
+
+private:
+    Service* mNetworkPipeService;
+    std::atomic<bool> mDataAvailable;
+    std::vector<char> mTxBuffer;
+    android::base::Lock mLock;
+    time_t mLastRead = 0;
+};
+
+
+}  // namespace
+
+namespace android {
+namespace network {
+
+static NetworkPipe::Service* sNetworkPipeService = nullptr;
+
+void registerNetworkPipeService() {
+    if (sNetworkPipeService == nullptr) {
+        sNetworkPipeService = new NetworkPipe::Service;
+        AndroidPipe::Service::add(
+            std::unique_ptr<NetworkPipe::Service>(sNetworkPipeService));
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     }
 }
 

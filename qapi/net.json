@@ -204,7 +204,8 @@
     '*smb':       'str',
     '*smbserver': 'str',
     '*hostfwd':   ['String'],
-    '*guestfwd':  ['String'] } }
+    '*guestfwd':  ['String'],
+    '*ipv6-hostfwd':  ['String'] } }
 
 ##
 # @NetdevTapOptions:

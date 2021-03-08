@@ -34,7 +34,6 @@ public:
     ~LooperWatcher();
 
     LooperWatcher(LooperWatcher&&) = default;
-    LooperWatcher& operator=(LooperWatcher&&) = default;
 
     void startHangCheck();
     void cancelHangCheck();
@@ -105,7 +104,13 @@ void HangDetector::LooperWatcher::process(const HangCallback& hangCallback) {
             ++mHangCount;
             l.unlock();
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
             derror("%s", message.c_str());
+=======
+            derror("%s%s", message.c_str(),
+                  android::base::IsDebuggerAttached() ? ", ignored (debugger attached)" : "");
+
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
             if (mHangCount >= kMaxHangCount &&
                 hangCallback && !android::base::IsDebuggerAttached()) {
                 hangCallback(message);
@@ -220,7 +225,8 @@ void HangDetector::workerThread() {
                         "Failed hang detection predicate: '%s'",
                         predicate.second);
 
-                derror("%s", message.c_str());
+                derror("%s%s", message.c_str(),
+                  android::base::IsDebuggerAttached() ? ", ignored (debugger attached)" : "");
                 if (mHangCallback && !android::base::IsDebuggerAttached()) {
                     mHangCallback(message);
                 }
@@ -228,12 +234,22 @@ void HangDetector::workerThread() {
         }
     }
 }
-void HangDetector::addPredicateCheck(HangPredicate&& predicate,
+HangDetector& HangDetector::addPredicateCheck(HangPredicate&& predicate,
                                      std::string&& msg) {
     base::AutoLock lock(mLock);
     mPredicates.emplace_back(
             std::make_pair(std::move(predicate), std::move(msg)));
+    return *this;
 }
+
+ HangDetector& HangDetector::addPredicateCheck(StatefulHangdetector* detector, std::string&& msg) {
+     {
+        base::AutoLock lock(mLock);
+        mRegistered.push_back(std::unique_ptr<StatefulHangdetector>(detector));
+     }
+     HangPredicate pred = [detector] { return detector->check();};
+     return addPredicateCheck([detector] { return detector->check();}, std::move(msg));
+ }
 
 base::System::Duration HangDetector::hangTimeoutMs() {
     // x86 and x64 run pretty fast, but other types of images could be really

@@ -7,6 +7,7 @@
             "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/common/include/QtCore",
             "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/common/include/QtGui",
             "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/common/include/QtSvg",
+            "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/common/include/QtWebChannel",
             "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/common/include/QtWidgets",
             "${workspaceFolder}/../googletest/googlemock/include",
             "${workspaceFolder}/../googletest/googletest/include",
@@ -14,6 +15,7 @@
             "${workspaceFolder}/../tinyobjloader",
             "${workspaceFolder}/android-qemu2-glue/config/target-x86_64",
             "${workspaceFolder}/android/android-emu",
+            "${workspaceFolder}/android/android-grpc",
             "${workspaceFolder}/android/android-emugl/guest",
             "${workspaceFolder}/android/android-emugl/guest/androidImpl",
             "${workspaceFolder}/android/android-emugl/host/include",
@@ -34,6 +36,7 @@
             "${workspaceFolder}/qemu2-auto-generated"
         ],
         "sharedGeneratedIncludePaths": [
+            "${workspaceFolder}/objs/build/intermediates64/cmake/android-emu-base",
             "${workspaceFolder}/objs/build/intermediates64/emulator_hw_config_defs",
             "${workspaceFolder}/objs/build/intermediates64/emulator-libui",
             "${workspaceFolder}/objs/build/intermediates64/gles1",
@@ -43,7 +46,17 @@
             "${workspaceFolder}/objs/build/intermediates64/renderControl"
         ],
         "sharedDefines": [
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
             "CONFIG_ANDROID=1"
+=======
+            "CONFIG_ANDROID=1",
+            "VK_VERSION_1_0",
+            "VK_VERSION_1_1",
+            "VK_KHR_android_surface",
+            "VK_KHR_xlib_surface",
+            "VK_MVK_macos_surface",
+            "VK_KHR_win32_surface"
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
         ]
     },
     "configurations": [
@@ -65,11 +78,19 @@
                 "${workspaceFolder}/../../prebuilts/android-emulator-build/qemu-android-deps/darwin-x86_64/include/pixman-1",
                 "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/darwin-x86_64/include.system",
                 "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/darwin-x86_64/include.system/QtCore",
-                "${workspaceFolder}/android-qemu2-glue/config/darwin-x86_64"
+                "${workspaceFolder}/android-qemu2-glue/config/darwin-x86_64",
+                "${workspaceFolder}/objs/build/intermediates64/cmake/android-emu-base"
             ],
             "defines": [
                 "${sharedDefines}",
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
                 "_DARWIN_C_SOURCE=1"
+=======
+                "_DARWIN_C_SOURCE=1",
+                "DARWINN_PORT_ANDROID_EMULATOR",
+                "DARWINN_CHIP_NAME=beagle",
+                "DARWINN_CHIP_TYPE=USB"
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
             ],
             "macFrameworkPath": [
                 "/System/Library/Frameworks",
@@ -78,7 +99,38 @@
             "compilerPath": "/usr/bin/clang",
             "cStandard": "c11",
             "cppStandard": "c++14",
-            "intelliSenseMode": "clang-x64"
+            "intelliSenseMode": "clang-x64",
+            "configurationProvider": "vector-of-bool.cmake-tools",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
+        },
+        {
+            "name": "Win32",
+            "includePath": [
+                "${sharedIncludePaths}",
+                "${sharedGeneratedIncludePaths}",
+                "${workspaceFolder}/../../prebuilts/android-emulator-build/common/ffmpeg/windows-x86_64/include",
+                "${workspaceFolder}/../../prebuilts/android-emulator-build/common/lz4/windows-x86_64/include",
+                "${workspaceFolder}/../../prebuilts/android-emulator-build/curl/windows-x86_64/include",
+                "${workspaceFolder}/../../prebuilts/android-emulator-build/protobuf/windows-x86_64/include",
+                "${workspaceFolder}/../../prebuilts/android-emulator-build/qemu-android-deps/windows-x86_64/include",
+                "${workspaceFolder}/../../prebuilts/android-emulator-build/qemu-android-deps/windows-x86_64/include/pixman-1",
+                "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/windows-x86_64/include.system",
+                "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/windows-x86_64/include.system/QtCore",
+                "${workspaceFolder}/android-qemu2-glue/config/windows-x86_64",
+                "${workspaceFolder}/objs/build/intermediates64/cmake/android-emu-base"
+            ],
+            "defines": [
+                "${sharedDefines}",
+                "DARWINN_PORT_ANDROID_EMULATOR",
+                "DARWINN_CHIP_NAME=beagle",
+                "DARWINN_CHIP_TYPE=USB"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "clang-x64",
+            "configurationProvider": "vector-of-bool.cmake-tools",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
         },
         {
             "name": "Linux",
@@ -94,15 +146,25 @@
                 "${workspaceFolder}/../../prebuilts/android-emulator-build/qemu-android-deps/linux-x86_64/include/pixman-1",
                 "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/linux-x86_64/include.system",
                 "${workspaceFolder}/../../prebuilts/android-emulator-build/qt/linux-x86_64/include.system/QtCore",
-                "${workspaceFolder}/android-qemu2-glue/config/linux-x86_64"
+                "${workspaceFolder}/android-qemu2-glue/config/linux-x86_64",
+                "${workspaceFolder}/objs/build/intermediates64/cmake/android-emu-base"
             ],
             "defines": [
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
                 "${sharedDefines}"
+=======
+                "${sharedDefines}",
+                "DARWINN_PORT_ANDROID_EMULATOR",
+                "DARWINN_CHIP_NAME=beagle",
+                "DARWINN_CHIP_TYPE=USB"
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
             ],
             "compilerPath": "/usr/bin/clang",
             "cStandard": "c11",
             "cppStandard": "c++14",
-            "intelliSenseMode": "clang-x64"
+            "intelliSenseMode": "clang-x64",
+            "configurationProvider": "vector-of-bool.cmake-tools",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
         }
     ],
     "version": 4

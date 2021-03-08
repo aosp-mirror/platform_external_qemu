@@ -16,6 +16,10 @@
 #ifndef _LIBRENDER_HWC2_H
 #define _LIBRENDER_HWC2_H
 
+#ifdef _MSC_VER
+#include <stdint.h>
+#endif
+
 /* Copied from Android source */
 
 // Should be identical to graphics-base-v1.0.h
@@ -97,5 +101,12 @@ typedef struct compose_device {
     uint32_t numLayers;
     struct compose_layer layer[0];
 } ComposeDevice;
+typedef struct compose_device_v2 {
+    uint32_t version;
+    uint32_t displayId;
+    uint32_t targetHandle;
+    uint32_t numLayers;
+    struct compose_layer layer[0];
+} ComposeDevice_v2;
 
 #endif

@@ -18,5 +18,19 @@
 
 #include "OpenglRender/render_api_types.h"
 
-extern emugl_feature_is_enabled_t emugl_feature_is_enabled;
-void set_emugl_feature_is_enabled(emugl_feature_is_enabled_t feature_is_enabled);
+#ifdef _MSC_VER
+# ifdef BUILDING_EMUGL_COMMON_SHARED
+#  define EMUGL_COMMON_API __declspec(dllexport)
+# else
+#  define EMUGL_COMMON_API __declspec(dllimport)
+#endif
+#else
+# define EMUGL_COMMON_API
+#endif
+
+namespace emugl {
+
+EMUGL_COMMON_API extern emugl_feature_is_enabled_t emugl_feature_is_enabled;
+EMUGL_COMMON_API void set_emugl_feature_is_enabled(emugl_feature_is_enabled_t feature_is_enabled);
+
+}  // namespace emugl

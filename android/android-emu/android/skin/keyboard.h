@@ -12,11 +12,10 @@
 
 #pragma once
 
-#include "android/skin/charmap.h"
-#include "android/skin/event.h"
-#include "android/skin/image.h"  /* for SkinRotation */
-#include "android/skin/keycode-buffer.h"
-#include "android/utils/aconfig-file.h"
+#include "android/skin/event.h"           // for SkinEvent
+#include "android/skin/keycode-buffer.h"  // for SkinKeyCodeFlushFunc
+#include "android/skin/keycode.h"         // for SkinKeyCode
+#include "android/skin/rect.h"            // for SkinRotation
 
 typedef struct SkinKeyboard   SkinKeyboard;
 
@@ -37,3 +36,8 @@ extern int            skin_keyboard_process_unicode_event( SkinKeyboard*  kb,  u
 
 extern void           skin_keyboard_add_key_event( SkinKeyboard*  k, unsigned code, unsigned  down );
 extern void           skin_keyboard_flush( SkinKeyboard*  kb );
+
+#ifndef CONFIG_HEADLESS
+extern const char* skin_keyboard_host_layout_name();
+extern const char* skin_keyboard_host_to_guest_layout_name(const char* name);
+#endif

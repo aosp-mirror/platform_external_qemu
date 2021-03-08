@@ -41,6 +41,7 @@
 #include "sysemu/block-backend.h"
 #include "sysemu/device_tree.h"
 #include "sysemu/numa.h"
+#include "sysemu/ranchu.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/kvm.h"
 #include "hw/compat.h"
@@ -93,6 +94,18 @@
 
 #define PLATFORM_BUS_NUM_IRQS 64
 
+#if defined(__APPLE__) && defined(__aarch64__)
+#define APPLE_SILICON 1
+#else
+#define APPLE_SILICON 0
+#endif
+
+static QemuDeviceTreeSetupFunc virt_device_tree_setup_func;
+void qemu_device_tree_setup_callback2(QemuDeviceTreeSetupFunc setup_func)
+{
+    virt_device_tree_setup_func = setup_func;
+}
+
 static ARMPlatformBusSystemParams platform_bus_params;
 
 /* RAM limit in GB. Since VIRT_MEM starts at the 1GB mark, this means
@@ -109,7 +122,11 @@ static ARMPlatformBusSystemParams platform_bus_params;
  * of a terabyte of RAM will be doing it on a host with more than a
  * terabyte of physical address space.)
  */
+#if APPLE_SILICON
+#define RAMLIMIT_GB 31
+#else
 #define RAMLIMIT_GB 255
+#endif
 #define RAMLIMIT_BYTES (RAMLIMIT_GB * 1024ULL * 1024 * 1024)
 
 /* Addresses and sizes of our components.
@@ -143,14 +160,32 @@ static const MemMapEntry a15memmap[] = {
     [VIRT_SECURE_UART] =        { 0x09040000, 0x00001000 },
     [VIRT_MMIO] =               { 0x0a000000, 0x00000200 },
     /* ...repeating for a total of NUM_VIRTIO_TRANSPORTS, each of that size */
+    [RANCHU_GOLDFISH_FB] =      { 0x0a020000, 0x00000100 },
+    [RANCHU_GOLDFISH_AUDIO] =   { 0x0a030000, 0x00000100 },
+    [RANCHU_GOLDFISH_BATTERY] = { 0x0a040000, 0x00001000 },
+    [RANCHU_GOLDFISH_EVDEV] =   { 0x0a050000, 0x00001000 },
+    [RANCHU_GOLDFISH_PIPE] =    { 0x0a060000, 0x00002000 },
+// TODO(bohu): check on rockpi to see if the sync device works there too
+#if APPLE_SILICON
+    [RANCHU_GOLDFISH_SYNC] =    { 0x0a070000, 0x00002000 },
+#endif
     [VIRT_PLATFORM_BUS] =       { 0x0c000000, 0x02000000 },
     [VIRT_SECURE_MEM] =         { 0x0e000000, 0x01000000 },
     [VIRT_PCIE_MMIO] =          { 0x10000000, 0x2eff0000 },
     [VIRT_PCIE_PIO] =           { 0x3eff0000, 0x00010000 },
     [VIRT_PCIE_ECAM] =          { 0x3f000000, 0x01000000 },
     [VIRT_MEM] =                { 0x40000000, RAMLIMIT_BYTES },
+#if APPLE_SILICON
+    /* Second PCIe window, 32GB wide at the 32GB boundary */
+    /* This used to be 512GB, but doesn't work on Apple Silicon
+     * as Apple Silicon only has 36 bits of address space. */
+    /* Temp hack until we can dynamically set pcie mmio high
+     * based on arm64 cpu features */
+    [VIRT_PCIE_MMIO_HIGH] =   { 0x0800000000ULL, 0x0800000000ULL },
+#else
     /* Second PCIe window, 512GB wide at the 512GB boundary */
     [VIRT_PCIE_MMIO_HIGH] =   { 0x8000000000ULL, 0x8000000000ULL },
+#endif
 };
 
 static const int a15irqmap[] = {
@@ -159,9 +194,17 @@ static const int a15irqmap[] = {
     [VIRT_PCIE] = 3, /* ... to 6 */
     [VIRT_GPIO] = 7,
     [VIRT_SECURE_UART] = 8,
-    [VIRT_MMIO] = 16, /* ...to 16 + NUM_VIRTIO_TRANSPORTS - 1 */
-    [VIRT_GIC_V2M] = 48, /* ...to 48 + NUM_GICV2M_SPIS - 1 */
-    [VIRT_PLATFORM_BUS] = 112, /* ...to 112 + PLATFORM_BUS_NUM_IRQS -1 */
+    [RANCHU_GOLDFISH_FB] = 16,
+    [RANCHU_GOLDFISH_BATTERY] = 17,
+    [RANCHU_GOLDFISH_AUDIO] = 18,
+    [RANCHU_GOLDFISH_EVDEV] = 19,
+    [RANCHU_GOLDFISH_PIPE] = 20,
+#if APPLE_SILICON
+    [RANCHU_GOLDFISH_SYNC] = 21,
+#endif
+    [VIRT_MMIO] = 32, /* ...to 16 + NUM_VIRTIO_TRANSPORTS - 1 */
+    [VIRT_GIC_V2M] = 64, /* ...to 48 + NUM_GICV2M_SPIS - 1 */
+    [VIRT_PLATFORM_BUS] = 128, /* ...to 112 + PLATFORM_BUS_NUM_IRQS -1 */
 };
 
 static const char *valid_cpus[] = {
@@ -196,10 +239,20 @@ static void create_fdt(VirtMachineState *vms)
     vms->fdt = fdt;
 
     /* Header */
-    qemu_fdt_setprop_string(fdt, "/", "compatible", "linux,dummy-virt");
+    qemu_fdt_setprop_string(fdt, "/", "compatible", "linux,ranchu");
     qemu_fdt_setprop_cell(fdt, "/", "#address-cells", 0x2);
     qemu_fdt_setprop_cell(fdt, "/", "#size-cells", 0x2);
 
+        /* Firmware node */
+    qemu_fdt_add_subnode(fdt, "/firmware");
+    qemu_fdt_add_subnode(fdt, "/firmware/android");
+    qemu_fdt_setprop_string(fdt, "/firmware/android", "compatible", "android,firmware");
+    qemu_fdt_setprop_string(fdt, "/firmware/android", "hardware", "ranchu");
+
+   if (virt_device_tree_setup_func) {
+        virt_device_tree_setup_func(fdt);
+    }
+    
     /*
      * /chosen and /memory nodes must exist for load_dtb
      * to fill in necessary properties later
@@ -582,6 +635,64 @@ static void create_gic(VirtMachineState *vms, qemu_irq *pic)
     } else if (type == 2) {
         create_v2m(vms, pic);
     }
+}
+
+static void init_simple_device(DeviceState *dev,
+                               const VirtMachineState *vms,qemu_irq *pic,
+                               int devid, const char *sysbus_name,
+                               const char *compat,
+                               int num_compat_strings,
+                               const char *clocks, int num_clocks)
+{
+    int irq = vms->irqmap[devid];
+    hwaddr base = vms->memmap[devid].base;
+    hwaddr size = vms->memmap[devid].size;
+    char *nodename;
+    int i;
+    int compat_sz = 0;
+    int clocks_sz = 0;
+
+    SysBusDevice *s = SYS_BUS_DEVICE(dev);
+    qdev_init_nofail(dev);
+    sysbus_mmio_map(s, 0, base);
+    if (pic[irq]) {
+        sysbus_connect_irq(s, 0, pic[irq]);
+    }
+
+    for (i = 0; i < num_compat_strings; i++) {
+        compat_sz += strlen(compat + compat_sz) + 1;
+    }
+
+    for (i = 0; i < num_clocks; i++) {
+        clocks_sz += strlen(clocks + clocks_sz) + 1;
+    }
+
+    nodename = g_strdup_printf("/%s@%" PRIx64, sysbus_name, base);
+    qemu_fdt_add_subnode(vms->fdt, nodename);
+    qemu_fdt_setprop(vms->fdt, nodename, "compatible", compat, compat_sz);
+    qemu_fdt_setprop_sized_cells(vms->fdt, nodename, "reg", 2, base, 2, size);
+    if (irq) {
+        qemu_fdt_setprop_cells(vms->fdt, nodename, "interrupts",
+                               GIC_FDT_IRQ_TYPE_SPI, irq,
+                               GIC_FDT_IRQ_FLAGS_LEVEL_HI);
+    }
+    if (num_clocks) {
+        qemu_fdt_setprop_cells(vms->fdt, nodename, "clocks",
+                               vms->clock_phandle, vms->clock_phandle);
+        qemu_fdt_setprop(vms->fdt, nodename, "clock-names",
+                         clocks, clocks_sz);
+    }
+    g_free(nodename);
+}
+
+static void create_simple_device(const VirtMachineState *vms, qemu_irq *pic,
+                                 int devid, const char *sysbus_name,
+                                 const char *compat, int num_compat_strings,
+                                 const char *clocks, int num_clocks)
+{
+    DeviceState *dev = qdev_create(NULL, sysbus_name);
+    init_simple_device(dev, vms, pic, devid, sysbus_name, compat,
+                       num_compat_strings, clocks, num_clocks);
 }
 
 static void create_uart(const VirtMachineState *vms, qemu_irq *pic, int uart,
@@ -1371,7 +1482,14 @@ static void machvirt_init(MachineState *machine)
 
     fdt_add_pmu_nodes(vms);
 
-    create_uart(vms, pic, VIRT_UART, sysmem, serial_hds[0]);
+    const char *virtio_console_env =
+        getenv("ANDROID_EMULATOR_USE_VIRTIO_CONSOLE");
+
+    if (virtio_console_env && !strcmp("1", virtio_console_env)) {
+        // ignore uart creation, since it crashes on some aarch64 hosts
+    } else {
+        create_uart(vms, pic, VIRT_UART, sysmem, serial_hds[0]);
+    }
 
     if (vms->secure) {
         create_secure_ram(vms, secure_sysmem);
@@ -1382,8 +1500,43 @@ static void machvirt_init(MachineState *machine)
 
     create_pcie(vms, pic);
 
+    if (machine_usb(machine)) {
+        PCIBus *pci_bus = (PCIBus*)object_resolve_path_type("", TYPE_PCI_BUS, NULL);
+        if (!pci_bus)
+            error_report("No PCI bus available to add USB OHCI controller to.");
+        else
+            pci_create_simple(pci_bus, -1, "pci-ohci");
+    }
+
+    {
+        PCIBus *pci_bus = (PCIBus*)object_resolve_path_type("", TYPE_PCI_BUS, NULL);
+        if (!pci_bus)
+            error_report("No PCI bus available to add goldfish_address_space device to.");
+        pci_create_simple(pci_bus, PCI_DEVFN(11,0), "goldfish_address_space");
+    }
+
     create_gpio(vms, pic);
 
+    create_simple_device(vms, pic, RANCHU_GOLDFISH_FB, "goldfish_fb",
+                         "google,goldfish-fb\0"
+                         "generic,goldfish-fb", 2, 0, 0);
+    create_simple_device(vms, pic, RANCHU_GOLDFISH_BATTERY, "goldfish_battery",
+                         "google,goldfish-battery\0"
+                         "generic,goldfish-battery", 2, 0, 0);
+    create_simple_device(vms, pic, RANCHU_GOLDFISH_AUDIO, "goldfish_audio",
+                         "google,goldfish-audio\0"
+                         "generic,goldfish-audio", 2, 0, 0);
+    create_simple_device(vms, pic, RANCHU_GOLDFISH_EVDEV, "goldfish-events",
+                         "google,goldfish-events-keypad\0"
+                         "generic,goldfish-events-keypad", 2, 0, 0);
+    create_simple_device(vms, pic, RANCHU_GOLDFISH_PIPE, "goldfish_pipe",
+                         "google,android-pipe\0"
+                         "generic,android-pipe", 2, 0, 0);
+#if APPLE_SILICON
+    create_simple_device(vms, pic, RANCHU_GOLDFISH_SYNC, "goldfish_sync",
+                         "google,goldfish-sync\0"
+                         "generic,goldfish-sync", 2, 0, 0);
+#endif
     /* Create mmio transports, so the user can create virtio backends
      * (which will be automatically plugged in to the transports). If
      * no backend is created the transport will just sit harmlessly idle.

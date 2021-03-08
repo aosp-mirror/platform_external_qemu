@@ -24,6 +24,10 @@
 
 ANDROID_BEGIN_HEADER
 
+// Handle input-related command-line options, for example, keyboard events
+// guest forwarding. Return true on success, false otherwise.
+bool emulator_parseInputCommandLineOptions(AndroidOptions* opts);
+
 // Handle UI-related command-line options and AVD configuration.
 // This function will update the content of |hw| based on the values
 // found in |opts| and |avd|, so call this before writing hardware-qemu.img

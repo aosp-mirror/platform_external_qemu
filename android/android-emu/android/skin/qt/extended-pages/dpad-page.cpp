@@ -11,19 +11,41 @@
 
 #include "android/skin/qt/extended-pages/dpad-page.h"
 
-#include "android/globals.h"
-#include "android/skin/event.h"
-#include "android/skin/keycode.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/qt/stylesheet.h"
-#include "android/skin/qt/qt-settings.h"
-#include "android/skin/qt/size-tweaker.h"
+#include <QtCore/qglobal.h>                         // for Q_OS_MAC
+#include <qcoreevent.h>                             // for QEvent (ptr only)
+#include <qsize.h>                                  // for operator*
+#include <qstring.h>                                // for operator+, operat...
+#include <stddef.h>                                 // for NULL
+#include <QAbstractButton>                          // for QAbstractButton
+#include <QBitmap>                                  // for QBitmap
+#include <QDesktopWidget>                           // for QDesktopWidget
+#include <QEvent>                                   // for QEvent
+#include <QHash>                                    // for QHash
+#include <QIcon>                                    // for QIcon
+#include <QLabel>                                   // for QLabel
+#include <QList>                                    // for QList
+#include <QPixmap>                                  // for QPixmap
+#include <QPushButton>                              // for QPushButton
+#include <QSettings>                                // for QSettings
+#include <QSize>                                    // for QSize
+#include <QVariant>                                 // for QVariant
 
+#include "android/globals.h"                        // for android_hw
+#include "android/settings-agent.h"                 // for SettingsTheme
+#include "android/skin/event.h"                     // for SkinEvent, (anony...
+#include "android/skin/keycode.h"                   // for kKeyCodeDpadCenter
+#include "android/skin/qt/emulator-qt-window.h"     // for EmulatorQtWindow
+#include "android/skin/qt/extended-pages/common.h"  // for getSelectedTheme
+#include "android/skin/qt/stylesheet.h"             // for stylesheetValues
+
+class QObject;
+class QPushButton;
+class QWidget;
+
+#ifndef __APPLE__
 #include <QApplication>
-#include <QBitmap>
-#include <QDesktopWidget>
 #include <QScreen>
-#include <QSettings>
+#endif
 
 DPadPage::DPadPage(QWidget *parent) :
     QWidget(parent),

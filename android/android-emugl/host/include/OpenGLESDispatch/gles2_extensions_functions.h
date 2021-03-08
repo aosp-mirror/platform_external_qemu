@@ -10,6 +10,14 @@
   X(void, glShaderBinary, (GLsizei n, const GLuint* shaders, GLenum binaryformat, const GLvoid* binary, GLsizei length), (n, shaders, binaryformat, binary, length)) \
   X(void, glVertexAttribPointerWithDataSize, (GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize), (indx, size, type, normalized, stride, ptr, dataSize)) \
   X(void, glFramebufferTexture3DOES, (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level, GLint zoffset), (target, attachment, textarget, texture, level, zoffset)) \
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+  X(void, glTestHostDriverPerformance, (GLuint count, uint64_t* duration_us, uint64_t* duration_cpu_us), (count, duration_us, duration_cpu_us)) \
+  X(void, glBindVertexArrayOES, (GLuint array), (array)) \
+  X(void, glDeleteVertexArraysOES, (GLsizei n, const GLuint * arrays), (n, arrays)) \
+  X(void, glGenVertexArraysOES, (GLsizei n, GLuint * arrays), (n, arrays)) \
+  X(GLboolean, glIsVertexArrayOES, (GLuint array), (array)) \
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 
 
 #endif  // GLES2_EXTENSIONS_FUNCTIONS_H

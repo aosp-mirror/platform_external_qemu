@@ -13,18 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .vulkantypes import VulkanType, VulkanCompoundType, VulkanAPI
+from .vulkantypes import VulkanType, VulkanTypeInfo, VulkanCompoundType, VulkanAPI
 
-from copy import deepcopy
+from copy import copy
 
 import os
 import sys
 
-
 # Class capturing a .cpp file and a .h file (a "C++ module")
 class Module(object):
 
-    def __init__(self, directory, basename):
+    def __init__(self, directory, basename, customAbsDir = None, suppress = False, implOnly = False):
         self.directory = directory
         self.basename = basename
 
@@ -37,62 +36,177 @@ class Module(object):
         self.headerFileHandle = ""
         self.implFileHandle = ""
 
+        self.customAbsDir = customAbsDir
+
+        self.suppress = suppress
+
+        self.implOnly = implOnly
+
     def getMakefileSrcEntry(self):
+        if self.customAbsDir:
+            return self.basename + ".cpp \\\n"
         dirName = self.directory
         baseName = self.basename
         joined = os.path.join(dirName, baseName)
         return "    " + joined + ".cpp \\\n"
 
+    def getCMakeSrcEntry(self):
+        if self.customAbsDir:
+            return self.basename + ".cpp "
+        dirName = self.directory
+        baseName = self.basename
+        joined = os.path.join(dirName, baseName)
+        return "    " + joined + ".cpp "
+
     def begin(self, globalDir):
+        if self.suppress:
+            return
+
         # Create subdirectory, if needed
-        absDir = os.path.join(globalDir, self.directory)
+        if self.customAbsDir:
+            absDir = self.customAbsDir
+        else:
+            absDir = os.path.join(globalDir, self.directory)
 
         filename = os.path.join(absDir, self.basename)
 
-        fpHeader = open(filename + ".h", "w", encoding="utf-8")
+        fpHeader = None
+
+        if not self.implOnly:
+            fpHeader = open(filename + ".h", "w", encoding="utf-8")
+
         fpImpl = open(filename + ".cpp", "w", encoding="utf-8")
 
         self.headerFileHandle = fpHeader
         self.implFileHandle = fpImpl
 
-        self.headerFileHandle.write(self.headerPreamble)
+        if not self.implOnly:
+            self.headerFileHandle.write(self.headerPreamble)
+
         self.implFileHandle.write(self.implPreamble)
 
     def appendHeader(self, toAppend):
-        self.headerFileHandle.write(toAppend)
+        if self.suppress:
+            return
+
+        if not self.implOnly:
+            self.headerFileHandle.write(toAppend)
 
     def appendImpl(self, toAppend):
+        if self.suppress:
+            return
+
         self.implFileHandle.write(toAppend)
 
     def end(self):
-        self.headerFileHandle.write(self.headerPostamble)
+        if self.suppress:
+            return
+
+        if not self.implOnly:
+            self.headerFileHandle.write(self.headerPostamble)
+
         self.implFileHandle.write(self.implPostamble)
 
-        self.headerFileHandle.close()
+        if not self.implOnly:
+            self.headerFileHandle.close()
+
         self.implFileHandle.close()
 
+# Class capturing a .proto protobuf definition file
+class Proto(object):
+
+    def __init__(self, directory, basename, customAbsDir = None, suppress = False):
+        self.directory = directory
+        self.basename = basename
+        self.customAbsDir = customAbsDir
+
+        self.preamble = ""
+        self.postamble = ""
+
+        self.suppress = suppress
+
+    def getMakefileSrcEntry(self):
+        if self.customAbsDir:
+            return self.basename + ".proto \\\n"
+        dirName = self.directory
+        baseName = self.basename
+        joined = os.path.join(dirName, baseName)
+        return "    " + joined + ".proto \\\n"
+
+    def getCMakeSrcEntry(self):
+        if self.customAbsDir:
+            return self.basename + ".proto "
+
+        dirName = self.directory
+        baseName = self.basename
+        joined = os.path.join(dirName, baseName)
+        return "    " + joined + ".proto "
+
+    def begin(self, globalDir):
+        if self.suppress:
+            return
+
+        # Create subdirectory, if needed
+        if self.customAbsDir:
+            absDir = self.customAbsDir
+        else:
+            absDir = os.path.join(globalDir, self.directory)
+
+        filename = os.path.join(absDir, self.basename)
+
+        fpProto = open(filename + ".proto", "w", encoding="utf-8")
+        self.protoFileHandle = fpProto
+        self.protoFileHandle.write(self.preamble)
+
+    def append(self, toAppend):
+        if self.suppress:
+            return
+
+        self.protoFileHandle.write(toAppend)
+
+    def end(self):
+        if self.suppress:
+            return
+
+        self.protoFileHandle.write(self.postamble)
+        self.protoFileHandle.close()
 
 class CodeGen(object):
 
     def __init__(self,):
         self.code = ""
         self.indentLevel = 0
+        self.gensymCounter = 0
+
+    def var(self, prefix="cgen_var"):
+        res = "%s_%d" % (prefix, self.gensymCounter)
+        self.gensymCounter += 1
+        return res
 
     def swapCode(self,):
         res = "%s" % self.code
         self.code = ""
         return res
 
-    def indent(self,):
-        return "".join("    " * self.indentLevel)
+    def indent(self,extra=0):
+        return "".join("    " * (self.indentLevel + extra))
 
-    def beginBlock(self,):
-        self.code += self.indent() + "{\n"
+    def incrIndent(self,):
         self.indentLevel += 1
 
-    def endBlock(self,):
+    def decrIndent(self,):
+        if self.indentLevel > 0:
+            self.indentLevel -= 1
+
+    def beginBlock(self, bracketPrint=True):
+        if bracketPrint:
+            self.code += self.indent() + "{\n"
+        self.indentLevel += 1
+
+    def endBlock(self,bracketPrint=True):
         self.indentLevel -= 1
-        self.code += self.indent() + "}\n"
+        if bracketPrint:
+            self.code += self.indent() + "}\n"
 
     def beginIf(self, cond):
         self.code += self.indent() + "if (" + cond + ")\n"
@@ -113,6 +227,25 @@ class CodeGen(object):
     def endIf(self):
         self.endBlock()
 
+    def beginSwitch(self, switchvar):
+        self.code += self.indent() + "switch (" + switchvar + ")\n"
+        self.beginBlock()
+
+    def switchCase(self, switchval, blocked = False):
+        self.code += self.indent() + "case %s:" % switchval
+        self.beginBlock(bracketPrint = blocked)
+
+    def switchCaseBreak(self, switchval, blocked = False):
+        self.code += self.indent() + "case %s:" % switchval
+        self.endBlock(bracketPrint = blocked)
+
+    def switchCaseDefault(self, blocked = False):
+        self.code += self.indent() + "default:" % switchval
+        self.beginBlock(bracketPrint = blocked)
+
+    def endSwitch(self):
+        self.endBlock()
+
     def beginWhile(self, cond):
         self.code += self.indent() + "while (" + cond + ")\n"
         self.beginBlock()
@@ -130,6 +263,15 @@ class CodeGen(object):
     def endFor(self):
         self.endBlock()
 
+    def beginLoop(self, loopVarType, loopVar, loopInit, loopBound):
+        self.beginFor(
+            "%s %s = %s" % (loopVarType, loopVar, loopInit),
+            "%s < %s" % (loopVar, loopBound),
+            "++%s" % (loopVar))
+
+    def endLoop(self):
+        self.endBlock()
+
     def stmt(self, code):
         self.code += self.indent() + code + ";\n"
 
@@ -139,14 +281,21 @@ class CodeGen(object):
     def leftline(self, code):
         self.code += code + "\n"
 
+    def makeCallExpr(self, funcName, parameters):
+        return funcName + "(%s)" % (", ".join(parameters))
+
     def funcCall(self, lhs, funcName, parameters):
         res = self.indent()
 
         if lhs is not None:
             res += lhs + " = "
 
-        res += funcName + "(%s);\n" % (", ".join(parameters))
+        res += self.makeCallExpr(funcName, parameters) + ";\n"
+        self.code += res
 
+    def funcCallRet(self, _lhs, funcName, parameters):
+        res = self.indent()
+        res += "return " + self.makeCallExpr(funcName, parameters) + ";\n"
         self.code += res
 
     # Given a VulkanType object, generate a C type declaration
@@ -172,14 +321,48 @@ class CodeGen(object):
 
         return "%s%s%s%s" % (constness, typeName, ptrSpec, paramStr)
 
+    def makeRichCTypeDecl(self, vulkanType, useParamName=True):
+        constness = "const " if vulkanType.isConst else ""
+        typeName = vulkanType.typeName
+
+        if vulkanType.pointerIndirectionLevels == 0:
+            ptrSpec = ""
+        elif vulkanType.isPointerToConstPointer:
+            ptrSpec = "* const*" if vulkanType.isConst else "**"
+            if vulkanType.pointerIndirectionLevels > 2:
+                ptrSpec += "*" * (vulkanType.pointerIndirectionLevels - 2)
+        else:
+            ptrSpec = "*" * vulkanType.pointerIndirectionLevels
+
+        if useParamName and (vulkanType.paramName is not None):
+            paramStr = (" " + vulkanType.paramName)
+        else:
+            paramStr = ""
+
+        if vulkanType.staticArrExpr:
+            staticArrInfo = "[%s]" % vulkanType.staticArrExpr
+        else:
+            staticArrInfo = ""
+
+        return "%s%s%s%s%s" % (constness, typeName, ptrSpec, paramStr, staticArrInfo)
+
     # Given a VulkanAPI object, generate the C function protype:
     # <returntype> <funcname>(<parameters>)
-    def makeFuncProto(self, vulkanApi):
+    def makeFuncProto(self, vulkanApi, useParamName=True):
 
         protoBegin = "%s %s" % (self.makeCTypeDecl(
             vulkanApi.retType, useParamName=False), vulkanApi.name)
-        protoParams = "(\n    %s)" % (",\n    ".join(
-            list(map(self.makeCTypeDecl, vulkanApi.parameters))))
+
+        def getFuncArgDecl(param):
+            if param.staticArrExpr:
+                return self.makeCTypeDecl(param, useParamName=useParamName) + ("[%s]" % param.staticArrExpr)
+            else:
+                return self.makeCTypeDecl(param, useParamName=useParamName)
+
+        protoParams = "(\n    %s)" % ((",\n%s" % self.indent(1)).join(
+            list(map(
+                getFuncArgDecl,
+                vulkanApi.parameters))))
 
         return protoBegin + protoParams
 
@@ -195,6 +378,12 @@ class CodeGen(object):
         self.endBlock()
 
         return self.swapCode() + "\n"
+
+    def emitFuncImpl(self, vulkanApi, codegenFunc):
+        self.line(self.makeFuncProto(vulkanApi))
+        self.beginBlock()
+        codegenFunc(self)
+        self.endBlock()
 
     def makeStructAccess(self,
                          vulkanType,
@@ -329,20 +518,28 @@ class CodeGen(object):
 
     def generalAccess(self,
                       vulkanType,
-                      parentVarName="parent",
+                      parentVarName=None,
                       asPtr=True,
                       structAsPtr=True):
         if vulkanType.parent is None:
-            return self.accessParameter(vulkanType, asPtr=asPtr)
+            if parentVarName is None:
+                return self.accessParameter(vulkanType, asPtr=asPtr)
+            else:
+                return self.accessParameter(vulkanType.withModifiedName(parentVarName), asPtr=asPtr)
 
         if isinstance(vulkanType.parent, VulkanCompoundType):
             return self.makeStructAccess(
                 vulkanType, parentVarName, asPtr=asPtr, structAsPtr=structAsPtr)
 
         if isinstance(vulkanType.parent, VulkanAPI):
-            return self.accessParameter(vulkanType, asPtr=asPtr)
+            if parentVarName is None:
+                return self.accessParameter(vulkanType, asPtr=asPtr)
+            else:
+                return self.accessParameter(vulkanType.withModifiedName(parentVarName), asPtr=asPtr)
 
-        raise
+        os.abort("Could not find a way to access Vulkan type %s" %
+                 vulkanType.name)
+
 
     def generalLengthAccess(self, vulkanType, parentVarName="parent"):
         if vulkanType.parent is None:
@@ -355,8 +552,200 @@ class CodeGen(object):
         if isinstance(vulkanType.parent, VulkanAPI):
             return self.makeLengthAccessFromApi(vulkanType.parent, vulkanType)
 
-        raise
+        os.abort("Could not find a way to access length of Vulkan type %s" %
+                 vulkanType.name)
 
+    def vkApiCall(self, api, customPrefix="", customParameters=None, retVarDecl=True):
+        callLhs = None
+
+        retTypeName = api.getRetTypeExpr()
+        retVar = None
+
+        if retTypeName != "void":
+            retVar = api.getRetVarExpr()
+            if retVarDecl:
+                self.stmt("%s %s = (%s)0" % (retTypeName, retVar, retTypeName))
+            callLhs = retVar
+
+        if customParameters is None:
+            self.funcCall(
+            callLhs, customPrefix + api.name, [p.paramName for p in api.parameters])
+        else:
+            self.funcCall(
+                callLhs, customPrefix + api.name, customParameters)
+
+        return (retTypeName, retVar)
+
+    def makeCheckVkSuccess(self, expr):
+        return "((%s) == VK_SUCCESS)" % expr
+
+    def makeReinterpretCast(self, varName, typeName, const=True):
+        return "reinterpret_cast<%s%s*>(%s)" % \
+               ("const " if const else "", typeName, varName)
+
+    def validPrimitive(self, typeInfo, typeName):
+        size = typeInfo.getPrimitiveEncodingSize(typeName)
+        return size != None
+
+    def makePrimitiveStreamMethod(self, typeInfo, typeName, direction="write"):
+        if not self.validPrimitive(typeInfo, typeName):
+            return None
+
+        size = typeInfo.getPrimitiveEncodingSize(typeName)
+        prefix = "put" if direction == "write" else "get"
+        suffix = None
+        if size == 1:
+            suffix = "Byte"
+        elif size == 2:
+            suffix = "Be16"
+        elif size == 4:
+            suffix = "Be32"
+        elif size == 8:
+            suffix = "Be64"
+
+        if suffix:
+            return prefix + suffix
+
+        return None
+
+    def makePrimitiveStreamMethodInPlace(self, typeInfo, typeName, direction="write"):
+        if not self.validPrimitive(typeInfo, typeName):
+            return None
+
+        size = typeInfo.getPrimitiveEncodingSize(typeName)
+        prefix = "to" if direction == "write" else "from"
+        suffix = None
+        if size == 1:
+            suffix = "Byte"
+        elif size == 2:
+            suffix = "Be16"
+        elif size == 4:
+            suffix = "Be32"
+        elif size == 8:
+            suffix = "Be64"
+
+        if suffix:
+            return prefix + suffix
+
+        return None
+
+    def streamPrimitive(self, typeInfo, streamVar, accessExpr, accessType, direction="write"):
+        accessTypeName = accessType.typeName
+
+        if accessType.pointerIndirectionLevels == 0 and not self.validPrimitive(typeInfo, accessTypeName):
+            print("Tried to stream a non-primitive type: %s" % accessTypeName)
+            os.abort()
+
+        needPtrCast = False
+
+        if accessType.pointerIndirectionLevels > 0:
+            streamSize = 8
+            streamStorageVarType = "uint64_t"
+            needPtrCast = True
+            streamMethod = "putBe64" if direction == "write" else "getBe64"
+        else:
+            streamSize = typeInfo.getPrimitiveEncodingSize(accessTypeName)
+            if streamSize == 1:
+                streamStorageVarType = "uint8_t"
+            elif streamSize == 2:
+                streamStorageVarType = "uint16_t"
+            elif streamSize == 4:
+                streamStorageVarType = "uint32_t"
+            elif streamSize == 8:
+                streamStorageVarType = "uint64_t"
+            streamMethod = self.makePrimitiveStreamMethod(
+                typeInfo, accessTypeName, direction=direction)
+
+        streamStorageVar = self.var()
+
+        accessCast = self.makeRichCTypeDecl(accessType, useParamName=False)
+
+        ptrCast = "(uintptr_t)" if needPtrCast else ""
+
+        if direction == "read":
+            self.stmt("%s = (%s)%s%s->%s()" % \
+                (accessExpr,
+                 accessCast,
+                 ptrCast,
+                 streamVar,
+                 streamMethod))
+        else:
+            self.stmt("%s %s = (%s)%s%s" %
+                      (streamStorageVarType, streamStorageVar,
+                       streamStorageVarType, ptrCast, accessExpr))
+            self.stmt("%s->%s(%s)" % (streamVar, streamMethod, streamStorageVar))
+
+    def memcpyPrimitive(self, typeInfo, streamVar, accessExpr, accessType, direction="write"):
+        accessTypeName = accessType.typeName
+
+        if accessType.pointerIndirectionLevels == 0 and not self.validPrimitive(typeInfo, accessTypeName):
+            print("Tried to stream a non-primitive type: %s" % accessTypeName)
+            os.abort()
+
+        needPtrCast = False
+
+        streamSize = 8
+
+        if accessType.pointerIndirectionLevels > 0:
+            streamSize = 8
+            streamStorageVarType = "uint64_t"
+            needPtrCast = True
+            streamMethod = "toBe64" if direction == "write" else "fromBe64"
+        else:
+            streamSize = typeInfo.getPrimitiveEncodingSize(accessTypeName)
+            if streamSize == 1:
+                streamStorageVarType = "uint8_t"
+            elif streamSize == 2:
+                streamStorageVarType = "uint16_t"
+            elif streamSize == 4:
+                streamStorageVarType = "uint32_t"
+            elif streamSize == 8:
+                streamStorageVarType = "uint64_t"
+            streamMethod = self.makePrimitiveStreamMethodInPlace(
+                typeInfo, accessTypeName, direction=direction)
+
+        streamStorageVar = self.var()
+
+        accessCast = self.makeRichCTypeDecl(accessType, useParamName=False)
+
+        if direction == "read":
+            accessCast = self.makeRichCTypeDecl(accessType.getForNonConstAccess(), useParamName=False)
+
+        ptrCast = "(uintptr_t)" if needPtrCast else ""
+
+        if direction == "read":
+            self.stmt("memcpy((%s*)&%s, %s, %s)" %
+                (accessCast,
+                 accessExpr,
+                 streamVar,
+                 str(streamSize)))
+            self.stmt("android::base::Stream::%s((uint8_t*)&%s)" % (
+                streamMethod,
+                accessExpr))
+        else:
+            self.stmt("%s %s = (%s)%s%s" %
+                      (streamStorageVarType, streamStorageVar,
+                       streamStorageVarType, ptrCast, accessExpr))
+            self.stmt("memcpy(%s, &%s, %s)" % (streamVar, streamStorageVar, str(streamSize)))
+            self.stmt("android::base::Stream::%s((uint8_t*)%s)" % (
+                streamMethod,
+                streamVar))
+
+    def countPrimitive(self, typeInfo, accessType):
+        accessTypeName = accessType.typeName
+
+        if accessType.pointerIndirectionLevels == 0 and not self.validPrimitive(typeInfo, accessTypeName):
+            print("Tried to count a non-primitive type: %s" % accessTypeName)
+            os.abort()
+
+        needPtrCast = False
+
+        if accessType.pointerIndirectionLevels > 0:
+            streamSize = 8
+        else:
+            streamSize = typeInfo.getPrimitiveEncodingSize(accessTypeName)
+
+        return streamSize
 
 # Class to wrap a Vulkan API call.
 #
@@ -380,15 +769,18 @@ class VulkanAPIWrapper(object):
         self.definitionFunc = codegenDef
 
         # Private function
+
         def makeApiFunc(self, typeInfo, apiName):
-            customApi = deepcopy(typeInfo.apis[apiName])
+            customApi = copy(typeInfo.apis[apiName])
             customApi.name = self.customApiPrefix + customApi.name
             if self.extraParameters is not None:
                 if isinstance(self.extraParameters, list):
                     customApi.parameters = \
                         self.extraParameters + customApi.parameters
                 else:
-                    raise
+                    os.abort(
+                        "Type of extra parameters to custom API not valid. Expected list, got %s" % type(
+                            self.extraParameters))
 
             if self.returnTypeOverride is not None:
                 customApi.retType = self.returnTypeOverride
@@ -429,6 +821,7 @@ class VulkanWrapperGenerator(object):
     def __init__(self, module, typeInfo):
         self.module = module
         self.typeInfo = typeInfo
+        self.extensionStructTypes = []
 
     def onBegin(self):
         pass
@@ -443,9 +836,14 @@ class VulkanWrapperGenerator(object):
         pass
 
     def onGenType(self, typeInfo, name, alias):
+        category = self.typeInfo.categoryOf(name)
+        if category in ["struct", "union"] and not alias:
+            structInfo = self.typeInfo.structs[name]
+            if structInfo.structExtendsExpr:
+                self.extensionStructTypes.append(structInfo)
         pass
 
-    def onGenStruct(self, typeInfo, typeName, alias):
+    def onGenStruct(self, typeInfo, name, alias):
         pass
 
     def onGenGroup(self, groupinfo, groupName, alias=None):
@@ -456,3 +854,87 @@ class VulkanWrapperGenerator(object):
 
     def onGenCmd(self, cmdinfo, name, alias):
         pass
+
+    def emitForEachStructExtension(self, cgen, retType, triggerVar, forEachFunc, autoBreak=True, defaultEmit=None, nullEmit=None):
+        def readStructType(structTypeName, structVarName, cgen):
+            cgen.stmt("uint32_t %s = (uint32_t)%s(%s)" % \
+                (structTypeName, "goldfish_vk_struct_type", structVarName))
+
+        def castAsStruct(varName, typeName, const=True):
+            return "reinterpret_cast<%s%s*>(%s)" % \
+                   ("const " if const else "", typeName, varName)
+
+        def doDefaultReturn(cgen):
+            if retType.typeName == "void":
+                cgen.stmt("return")
+            else:
+                cgen.stmt("return (%s)0" % retType.typeName)
+
+        cgen.beginIf("!%s" % triggerVar.paramName)
+        if nullEmit is None:
+            doDefaultReturn(cgen)
+        else:
+            nullEmit(cgen)
+        cgen.endIf()
+
+        readStructType("structType", triggerVar.paramName, cgen)
+
+        cgen.line("switch(structType)")
+        cgen.beginBlock()
+
+        currFeature = None
+
+        for ext in self.extensionStructTypes:
+            if not currFeature:
+                cgen.leftline("#ifdef %s" % ext.feature)
+                currFeature = ext.feature
+
+            if currFeature and ext.feature != currFeature:
+                cgen.leftline("#endif")
+                cgen.leftline("#ifdef %s" % ext.feature)
+                currFeature = ext.feature
+
+            enum = ext.structEnumExpr
+            cgen.line("case %s:" % enum)
+            cgen.beginBlock()
+
+            castedAccess = castAsStruct(
+                triggerVar.paramName, ext.name, const=triggerVar.isConst)
+            forEachFunc(ext, castedAccess, cgen)
+
+            if autoBreak:
+                cgen.stmt("break")
+            cgen.endBlock()
+
+        if currFeature:
+            cgen.leftline("#endif")
+
+        cgen.line("default:")
+        cgen.beginBlock()
+        if defaultEmit is None:
+            doDefaultReturn(cgen)
+        else:
+            defaultEmit(cgen)
+        cgen.endBlock()
+
+        cgen.endBlock()
+
+    def emitForEachStructExtensionGeneral(self, cgen, forEachFunc, doFeatureIfdefs=False):
+        currFeature = None
+
+        for (i, ext) in enumerate(self.extensionStructTypes):
+            if doFeatureIfdefs:
+                if not currFeature:
+                    cgen.leftline("#ifdef %s" % ext.feature)
+                    currFeature = ext.feature
+
+                if currFeature and ext.feature != currFeature:
+                    cgen.leftline("#endif")
+                    cgen.leftline("#ifdef %s" % ext.feature)
+                    currFeature = ext.feature
+
+            forEachFunc(i, ext, cgen)
+
+        if doFeatureIfdefs:
+            if currFeature:
+                cgen.leftline("#endif")

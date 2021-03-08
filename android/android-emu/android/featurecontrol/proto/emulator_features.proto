@@ -3,7 +3,13 @@ syntax = "proto2";
 package emulator_features;
 
 // Must match emulator's featurecontrol defs.
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 // Next tag: 33
+=======
+
+// Next tag: 58
+
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 enum Feature {
     GLPipeChecksum = 0;
     GrallocSync = 1;
@@ -12,6 +18,7 @@ enum Feature {
     GLAsyncSwap = 4;
     GLDMA = 5;
     GLDMA2 = 30;
+    GLDirectMem = 33;
     GLESDynamicVersion = 6;
 
     // Forced renderer enums
@@ -62,4 +69,47 @@ enum Feature {
     HostComposition = 31;
 
     WifiConfigurable = 32;
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+
+    VideoPlayback = 34;
+
+    VirtioInput = 35;
+
+    MultiDisplay = 36;
+
+    CarVHalTable = 43;
+
+    DynamicPartition = 44;
+
+    DynamicMediaProfile = 45;
+
+    YUV420888toNV21 = 46;
+
+    YUVCache = 47;
+
+    KeycodeForwarding = 48;
+
+    VirtioGpuNext = 49;
+
+    Mac80211hwsimUserspaceManaged = 50;
+
+    HasSharedSlotsHostMemoryAllocator = 51;
+
+    CarVhalReplay = 52;
+
+    HardwareDecoder = 53;
+
+    VirtioWifi = 54;
+
+    CarRotary = 55;
+    
+    ModemSimulator = 56;
+
+    TvRemote = 57;
+
+    VirtioMouse = 58;
+
+    VirtconsoleLogcat = 59;
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 }

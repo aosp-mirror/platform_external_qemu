@@ -12,23 +12,26 @@
 
 #pragma once
 
+#include "android/base/StringView.h"
 #include "android/base/containers/CircularBuffer.h"
 #include "android/base/memory/OnDemand.h"
-#include "android/base/StringView.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/emulation/control/ApkInstaller.h"
 #include "android/emulation/control/FilePusher.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/globals.h"
 #include "android/metrics/PeriodicReporter.h"
+#include "android/settings-agent.h"
 #include "android/skin/event.h"
+#include "android/skin/image.h"
+#include "android/skin/qt/car-cluster-window.h"
 #include "android/skin/qt/emulator-container.h"
 #include "android/skin/qt/emulator-overlay.h"
 #include "android/skin/qt/error-dialog.h"
+#include "android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h"
 #include "android/skin/qt/tool-window.h"
 #include "android/skin/qt/ui-event-recorder.h"
 #include "android/skin/qt/user-actions-counter.h"
-#include "android/skin/image.h"
 #include "android/skin/surface.h"
 #include "android/skin/winsys.h"
 
@@ -199,6 +202,7 @@ signals:
                                         int timeoutMs);
 
     void showVirtualSceneControls(bool show);
+    void updateMultiDisplayPage(int id);
 
 public:
     void pollEvent(SkinEvent* event, bool* hasEvent);
@@ -207,7 +211,10 @@ public:
 
     android::emulation::AdbInterface* getAdbInterface() const;
     bool isInZoomMode() const;
-    ToolWindow* toolWindow() const;
+    ToolWindow*  toolWindow() const;
+    CarClusterWindow* carClusterWindow() const;
+    CarClusterConnector* carClusterConnector() const;
+
     EmulatorContainer* containerWindow();
     void showZoomIfNotUserHidden();
     QSize containerSize() const;
@@ -215,13 +222,17 @@ public:
 
     void doResize(const QSize& size,
                   bool isKbdShortcut = false);
+    void resizeAndChangeAspectRatio(bool isFolded);
+    void resizeAndChangeAspectRatio(int x, int y, int w, int h);
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
                           const QPoint& pos,
                           const QPoint& gPos,
                           bool skipSync = false);
+    void handleMouseWheelEvent(int delta, Qt::Orientation orientation);
     void panHorizontal(bool left);
     void panVertical(bool up);
+    SkinEvent* createSkinEvent(SkinEventType type);
     void queueSkinEvent(SkinEvent* event);
     void recenterFocusPoint();
     void saveZoomPoints(const QPoint& focus, const QPoint& viewportFocus);
@@ -234,6 +245,8 @@ public:
     void setIgnoreWheelEvent(bool ignore);
     void simulateKeyPress(int keyCode, int modifiers);
     void simulateScrollBarChanged(int x, int y);
+    void setDisplayRegion(int xOffset, int yOffset, int width, int height);
+    void setDisplayRegionAndUpdate(int xOffset, int yOffset, int width, int height);
     void simulateSetScale(double scale);
     void simulateSetZoom(double zoom);
     void simulateWindowMoved(const QPoint& pos);
@@ -249,12 +262,42 @@ public:
     int  getRightTransparency()  { return mSkinGapRight; }
     int  getBottomTransparency() { return mSkinGapBottom; }
     int  getLeftTransparency()   { return mSkinGapLeft; }
+    bool getMultiDisplay(uint32_t id,
+                         int32_t* x,
+                         int32_t* y,
+                         uint32_t* w,
+                         uint32_t* h,
+                         uint32_t* dpi,
+                         uint32_t* flag,
+                         bool* enabled);
+    int switchMultiDisplay(bool enabled,
+                            uint32_t id,
+                            int32_t x,
+                            int32_t y,
+                            uint32_t width,
+                            uint32_t height,
+                            uint32_t dpi,
+                            uint32_t flag);
+    bool getMonitorRect(uint32_t* width, uint32_t* height);
+    void setNoSkin();
+    void restoreSkin();
+    bool multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h,
+                                   uint32_t dpi, uint32_t flag);
+    void updateUIMultiDisplayPage(uint32_t id);
+    void setUIDisplayRegion(int x, int y, int w, int h);
+    const QPixmap* getRawSkinPixmap() { getSkinPixmap(); return mRawSkinPixmap; }
+
+    static bool sClosed;
 
 public slots:
     void rotateSkin(SkinRotation rot);
 
 private slots:
     void slot_adbWarningMessageAccepted();
+#ifdef _WIN32
+    void slot_vgkWarningMessageAccepted();
+#endif
+    void slot_nestedWarningMessageAccepted();
     void slot_blit(SkinSurfaceBitmap* src,
                    QRect srcRect,
                    SkinSurfaceBitmap* dst,
@@ -336,10 +379,11 @@ public slots:
     void onScreenConfigChanged();
     void onScreenChanged(QScreen* newScreen);
 
+    bool event(QEvent* ev) override;  // Used to resume the MV on un-minimize
+
 private:
     static const android::base::StringView kRemoteDownloadsDir;
     static const android::base::StringView kRemoteDownloadsDirApi10;
-
     // When the main window appears, close the "Starting..."
     // pop-up, if it was displayed.
     void showEvent(QShowEvent* event) override;
@@ -352,14 +396,18 @@ private:
     void showAvdArchWarning();
     void checkShouldShowGpuWarning();
     void showGpuWarning();
+#ifdef _WIN32
+    void checkVgkAndWarn();
+#endif
+    void checkNestedAndWarn();
 
     bool mouseInside();
     SkinMouseButtonType getSkinMouseButton(QMouseEvent* event) const;
 
-    SkinEvent* createSkinEvent(SkinEventType type);
     void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
     void forwardGenericEventToEmulator(int type, int code, int value);
     void handleKeyEvent(SkinEventType type, QKeyEvent* event);
+
     void maskWindowFrame();
     bool hasFrame() const;
 
@@ -395,10 +443,18 @@ private:
     bool mShouldShowSnapshotModalOverlay = false;
     android::base::Lock mSnapshotStateLock;
 
-    ToolWindow* mToolWindow;
+    ToolWindow*  mToolWindow;
+    CarClusterWindow* mCarClusterWindow;
+    CarClusterConnector* mCarClusterConnector;
+
     EmulatorContainer mContainer;
     EmulatorOverlay mOverlay;
     QRect mDeviceGeometry;
+
+    bool mMouseGrabbed = false;
+    bool mMouseRepositioning = false;
+    bool mMouseRepositionFinished = false;
+    bool mPromptMouseRestoreMessageBox = true;
 
     // Window flags to use for frameless and framed appearance
 
@@ -407,7 +463,11 @@ private:
                                                                 | Qt::FramelessWindowHint);
     static constexpr Qt::WindowFlags FRAMED_WINDOW_FLAGS     = (  Qt::Window
                                                                 | Qt::WindowTitleHint
-                                                                | Qt::CustomizeWindowHint);
+#ifndef __APPLE__
+                                                                | Qt::CustomizeWindowHint
+#endif
+                                                               );
+
     static constexpr Qt::WindowFlags FRAME_WINDOW_FLAGS_MASK = (  FRAMELESS_WINDOW_FLAGS
                                                                 | FRAMED_WINDOW_FLAGS);
 
@@ -439,6 +499,10 @@ private:
     OnDemandMessageBox mAvdWarningBox;
     OnDemandMessageBox mGpuWarningBox;
     OnDemandMessageBox mAdbWarningBox;
+#ifdef _WIN32
+    OnDemandMessageBox mVgkWarningBox;
+#endif
+    OnDemandMessageBox mNestedWarningBox;
 
     // First-show related warning messages state
     bool mGpuBlacklisted = false;
@@ -456,8 +520,8 @@ private:
 
     std::shared_ptr<android::qt::UserActionsCounter> mUserActionsCounter;
     android::base::MemberOnDemandT<
-            std::unique_ptr<android::emulation::AdbInterface>,
-            std::unique_ptr<android::emulation::AdbInterface>>
+            android::emulation::AdbInterface*,
+            android::emulation::AdbInterface*>
             mAdbInterface;
     android::emulation::AdbCommandPtr mApkInstallCommand;
     android::base::MemberOnDemandT<android::emulation::ApkInstaller,
@@ -487,10 +551,12 @@ private:
     bool         mHaveBeenFrameless;
     unsigned int mHardRefreshCountDown = 0;
     SkinRotation mOrientation;       // Rotation of the main window
+    bool         mWindowIsMinimized = false;
 
     QScreen* mCurrentScreen = nullptr;
 
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
+    void saveMultidisplayToConfig();
 };
 
 class SkinSurfaceBitmap {

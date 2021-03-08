@@ -29,6 +29,7 @@ struct Stream;
 namespace emulator_automation {
 class InitialState;
 class PhysicalModelEvent;
+class SensorOverrideEvent;
 }  // namespace emulator_automation
 
 namespace android {
@@ -145,6 +146,11 @@ void physicalModel_replayEvent(
         PhysicalModel* model,
         const emulator_automation::PhysicalModelEvent& event);
 
+/* Replay a SensorOverride event. */
+void physicalModel_replayOverrideEvent(
+        PhysicalModel* model,
+        const emulator_automation::SensorOverrideEvent& event);
+
 /* Start recording ground truth to the specified file.
  * Returns 0 if successful.
  */
@@ -154,5 +160,13 @@ int physicalModel_recordGroundTruth(PhysicalModel* model, const char* filename);
  * Returns 0 if successful.
  */
 int physicalModel_stopRecording(PhysicalModel* model);
+
+int physicalModel_getFoldableState(PhysicalModel* model, struct FoldableState* state);
+
+bool physicalModel_foldableisFolded(PhysicalModel* model);
+
+bool physicalModel_getFoldedArea(PhysicalModel* model, int* x, int* y, int* w, int* h);
+
+bool physicalModel_isLoadingSnapshot(PhysicalModel* model);
 
 ANDROID_END_HEADER

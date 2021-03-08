@@ -11,6 +11,7 @@
 
 #include "android/utils/property_file.h"
 
+#include "android/base/ArraySize.h"
 #include "android/utils/system.h"
 
 #include <string.h>
@@ -93,21 +94,36 @@ bool propertyFileIterator_next(PropertyFileIterator* iter) {
     return false;
 }
 
-char* propertyFile_getValue(const char* propFile,
+char* propertyFile_getAnyValue(const char* propFile,
                             size_t propFileLen,
-                            const char* propName) {
-    size_t propNameLen = strlen(propName);
-    if (propNameLen >= MAX_PROPERTY_NAME_LEN)
-        return NULL;
-
+                            const char* propNames[],
+                            int propNamesCount) {
+    int i;
     char* ret = NULL;
+
+    for (i = 0; i < propNamesCount; i++) {
+        if (strlen(propNames[i]) >= MAX_PROPERTY_NAME_LEN)
+            return NULL;
+    }
+
     PropertyFileIterator iter[1];
     propertyFileIterator_init(iter, propFile, propFileLen);
     while (propertyFileIterator_next(iter)) {
-        if (!strcmp(iter->name, propName)) {
-            free(ret);
-            ret = ASTRDUP(iter->value);
+        for (i = 0; i < propNamesCount; i++) {
+            if (!strcmp(iter->name, propNames[i])) {
+                free(ret);
+                ret = ASTRDUP(iter->value);
+            }
         }
     }
     return ret;
 }
+
+char* propertyFile_getValue(const char* propFile,
+                            size_t propFileLen,
+                            const char* propName) {
+    const char* propNames[] = {propName};
+    return propertyFile_getAnyValue(propFile, propFileLen, propNames,
+                                ARRAY_SIZE(propNames));
+}
+

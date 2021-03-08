@@ -31,17 +31,29 @@
 
 #include "android/skin/qt/video-player/VideoInfo.h"
 
+#include <stdint.h>
+#include <stdio.h>
+
 #include "android/base/memory/ScopedPtr.h"
 #include "android/recording/video/player/PacketQueue.h"
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+#include "android/recording/video/player/VideoPlayerRenderTarget.h"
+#include "android/skin/qt/video-player/VideoPlayerWidget.h"
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 #include "android/utils/debug.h"
 
 extern "C" {
+
+#include <libavutil/avutil.h>
+#include <libavutil/frame.h>
+#include <libavutil/pixfmt.h>
+#include <libavutil/rational.h>
+
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
-#include "libavutil/opt.h"
-#include "libavutil/samplefmt.h"
-#include "libswresample/swresample.h"
 #include "libswscale/swscale.h"
+struct SwsContext;
 }
 
 namespace android {
@@ -114,10 +126,10 @@ void VideoInfo::initialize() {
     auto pVideoCodecCtx = android::base::makeCustomScopedPtr(
             videoCodecCtx, [=](AVCodecContext* c) { avcodec_close(c); });
 
-    // Calculate the dimensions for the widget
-    int dst_w = videoCodecCtx->width;
-    int dst_h = videoCodecCtx->height;
-    adjustWindowSize(videoCodecCtx, mWidget, &dst_w, &dst_h);
+    // Calculate the dimensions for the video
+    int dst_w;
+    int dst_h;
+    getDestinationSize(videoCodecCtx, mWidget, &dst_w, &dst_h);
 
     // create image convert context
     AVPixelFormat dst_fmt = AV_PIX_FMT_RGB24;
@@ -197,11 +209,11 @@ int VideoInfo::getDurationSecs() {
     return mDurationSecs;
 }
 
-// adjust window size to fit the video aspect ratio
-void VideoInfo::adjustWindowSize(AVCodecContext* c,
-                                    VideoPlayerWidget* widget,
-                                    int* pWidth,
-                                    int* pHeight) {
+// get the video size for the widget
+void VideoInfo::getDestinationSize(AVCodecContext* c,
+                                   VideoPlayerWidget* widget,
+                                   int* pWidth,
+                                   int* pHeight) {
     float aspect_ratio;
 
     if (c->sample_aspect_ratio.num == 0) {
@@ -214,23 +226,8 @@ void VideoInfo::adjustWindowSize(AVCodecContext* c,
         aspect_ratio = (float)c->width / (float)c->height;
     }
 
-    int h = widget->height();
-    int w = ((int)(h * aspect_ratio)) & -3;
-    if (w > widget->width()) {
-        w = widget->width();
-        h = ((int)(w / aspect_ratio)) & -3;
-    }
-
-    int x = (widget->width() - w) / 2;
-    int y = (widget->height() - h) / 2;
-
-    if (widget->width() != w || widget->height() != h) {
-        widget->move(x, y);
-        widget->setFixedSize(w, h);
-    }
-
-    *pWidth = w;
-    *pHeight = h;
+    widget->getRenderTargetSize(aspect_ratio, c->width, c->height, pWidth,
+                                pHeight);
 }
 
 int VideoInfo::calculateDurationSecs(AVFormatContext* f) {
@@ -241,7 +238,11 @@ int VideoInfo::calculateDurationSecs(AVFormatContext* f) {
 
 // Show the frame
 void VideoInfo::show() {
-    mWidget->setPixelBuffer(mPreviewFrame.buf, mPreviewFrame.len);
+    VideoPlayerRenderTarget::FrameInfo info;
+    info.headerlen = mPreviewFrame.headerlen;
+    info.width = mPreviewFrame.width;
+    info.height = mPreviewFrame.height;
+    mWidget->setPixelBuffer(info, mPreviewFrame.buf, mPreviewFrame.len);
     emit updateWidget();
 }
 

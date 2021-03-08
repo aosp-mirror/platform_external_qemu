@@ -2404,6 +2404,9 @@ void kbd_mouse_event(int dx, int dy, int dz, int button_state) {
         prev_state = (uint32_t)button_state;
     }
 
+    // TODO(liyl): Determine whether the input is absolute using input
+    // arguments. Clients should specify whether the given (dx, dy, dz) values
+    // are absolute or relative.
     const bool is_absolute = qemu_input_is_absolute();
     int y;
     if (graphic_rotate) {
@@ -2425,6 +2428,14 @@ void kbd_mouse_event(int dx, int dy, int dz, int button_state) {
     }
 
     qemu_input_event_sync();
+}
+
+void kbd_mouse_wheel_event(int dx, int dy) {
+  assert(active_console && qemu_console_is_graphic(active_console));
+  qemu_input_queue_rel(active_console, INPUT_AXIS_X_WHEEL, dx);
+  qemu_input_queue_rel(active_console, INPUT_AXIS_Y_WHEEL, dy);
+
+  qemu_input_event_sync();
 }
 
 static const TypeInfo qemu_console_info = {

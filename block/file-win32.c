@@ -36,7 +36,11 @@
 #include "qapi/qmp/qstring.h"
 #include <windows.h>
 #include <winioctl.h>
+#ifdef _MSC_VER
+#include "sysemu/os-win32-msvc.h"
+#else
 #include "sysemu/os-win32.h"
+#endif
 
 #define FTYPE_FILE 0
 #define FTYPE_CD     1

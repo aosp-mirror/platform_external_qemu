@@ -21,7 +21,7 @@
 #include "android/base/Uuid.h"
 #include "android/metrics/metrics.h"
 #include "android/metrics/MetricsReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
+#include "studio_stats.pb.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"
@@ -42,6 +42,7 @@
 #define D(...) VERBOSE_PRINT(init, __VA_ARGS__)
 #define I(...) printf(__VA_ARGS__)
 
+using android::base::AutoLock;
 using android::base::c_str;
 using android::base::PathUtils;
 using android::base::ScopedFd;
@@ -178,12 +179,14 @@ static void formatDataFileName(char (&buffer)[N], StringView baseName) {
 }
 
 void CrashReporter::attachData(StringView name, StringView data, bool replace) {
+    AutoLock lock(mLock);
     auto fd = openDataAttachFile(name, replace);
     HANDLE_EINTR(write(fd.get(), data.data(), data.size()));
     HANDLE_EINTR(write(fd.get(), "\n", 1));
 }
 
 void CrashReporter::attachBinaryData(StringView name, StringView data, bool replace) {
+    AutoLock lock(mLock);
     auto fd = openDataAttachFile(name, replace, true);
     HANDLE_EINTR(write(fd.get(), data.data(), data.size()));
 }
@@ -282,15 +285,7 @@ using android::crashreport::CrashSystem;
 
 extern "C" {
 
-bool crashhandler_init() {
-    if (CrashSystem::CrashType::CRASHUPLOAD == CrashSystem::CrashType::NONE) {
-        return false;
-    }
-
-    if (!CrashSystem::get()->validatePaths()) {
-        return false;
-    }
-
+static bool crashhandler_init_full() {
     CrashSystem::CrashPipe crashpipe(CrashSystem::get()->getCrashPipe());
 
     const std::string procident = CrashSystem::get()->getProcessId();
@@ -323,6 +318,22 @@ bool crashhandler_init() {
     return CrashReporter::get()->attachCrashHandler(crashpipe);
 }
 
+bool crashhandler_init() {
+    if (CrashSystem::CrashType::CRASHUPLOAD == CrashSystem::CrashType::NONE) {
+        return false;
+    }
+
+    if (!CrashSystem::get()->validatePaths()) {
+        return false;
+    }
+
+    if (android::base::System::get()->getEnableCrashReporting()) {
+        return crashhandler_init_full();
+    } else {
+        return CrashReporter::get()->attachSimpleCrashHandler();
+    }
+}
+
 void crashhandler_cleanup() {
     CrashReporter::destroy();
 }
@@ -348,6 +359,7 @@ void crashhandler_append_message_format(const char* format, ...) {
 
 void crashhandler_die(const char* message) {
     if (const auto reporter = CrashReporter::get()) {
+        fprintf(stderr, "%s: fatal: %s\n", __func__, message);
         reporter->GenerateDumpAndDie(message);
         } else {
         I("Emulator: exiting becase of the internal error '%s'\n", message);

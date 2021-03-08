@@ -19,6 +19,7 @@
 // changes in the video dimensions.
 class VideoPlayerRenderTarget {
 public:
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 
     // An interaction between the render target (whether it is a raw buffer, Qt
     // widget, or GL texture, VkImage, or whatever) and the video player.
@@ -40,6 +41,35 @@ public:
     // TODO: An interface that doesn't
     // necessarily have to use CPU memory transfers.
     virtual void setPixelBuffer(
+=======
+    // Metadata for the decoded frame being passed to setPixelBuffer.
+    struct FrameInfo {
+      size_t headerlen;
+      size_t width;
+      size_t height;
+    };
+
+    // An interaction between the render target (whether it is a raw buffer, Qt
+    // widget, or GL texture, VkImage, or whatever) and the video player.
+    //
+    // The video player calls getRenderTargetSize passing in the raw video
+    // dimensions, then gets the render target's size as the output.
+    //
+    // It is possible that the render target size differs from the input size,
+    // and that the render target itself may change to accommodate the video.
+    virtual void getRenderTargetSize(float sampleAspectRatio,
+                                     int video_width,
+                                     int video_height,
+                                     int* resultRenderTargetWidth,
+                                     int* resultRenderTargetHeight) = 0;
+
+    // The video player calls setPixelBuffer to communicate the actual decoded
+    // result to the render target.
+    // TODO: An interface that doesn't
+    // necessarily have to use CPU memory transfers.
+    virtual void setPixelBuffer(
+            const FrameInfo& frameInfo,
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
             const unsigned char* buf,
             size_t len) = 0;
 

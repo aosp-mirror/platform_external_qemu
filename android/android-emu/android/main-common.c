@@ -13,6 +13,7 @@
 
 #include "android/avd/info.h"
 #include "android/avd/util.h"
+#include "android/base/gl_object_counter.h"
 #include "android/camera/camera-list.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/android_pipe_unix.h"
@@ -84,8 +85,18 @@ bool android_op_writable_system = false;
 const char *savevm_on_exit = NULL;
 int guest_data_partition_mounted = 0;
 int guest_boot_completed = 0;
+int arm_snapshot_save_completed = 0;
+int host_emulator_is_headless = 0;
+int android_qemu_mode = 1;
+int min_config_qemu_mode = 0;
+int is_fuchsia = 0;
 
 bool emulator_has_network_option = false;
+
+int changing_language_country_locale = 0;
+const char* to_set_language = 0;
+const char* to_set_country = 0;
+const char* to_set_locale = 0;
 
 #define ONE_MB (1024 * 1024)
 
@@ -149,7 +160,7 @@ _adjustPartitionSize( const char*  description,
     }
 
     if (inAndroidBuild) {
-        dwarning("%s partition size adjusted to match image file %s\n", description, temp);
+        D("%s partition size adjusted to match image file %s\n", description, temp);
     }
 
     return convertMBToBytes(imageMB);
@@ -497,6 +508,12 @@ static AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild) {
             dprint("could not find virtual device named '%s'", opts->avd);
             exit(1);
         }
+
+        /* Did we set an ID for this AVD? */
+        if (opts->id != NULL)
+        {
+            avdInfo_setAvdId( ret, opts->id );
+        }
     }
     else
     {
@@ -651,19 +668,10 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         AFREE(abi);
     }
 
-    char versionString[256];
-    if (!android_pathProbeKernelVersionString(hw->kernel_path,
-                                              versionString,
-                                              sizeof(versionString))) {
-        derror("Can't find 'Linux version ' string in kernel image file: %s",
+    KernelVersion kernelVersion = KERNEL_VERSION_0;
+    if (!android_getKernelVersion(hw->kernel_path, &kernelVersion)) {
+        derror("Can't get kernel version from the kernel image file: '%s'",
                hw->kernel_path);
-        return false;
-    }
-
-    KernelVersion kernelVersion = 0;
-    if (!android_parseLinuxVersionString(versionString, &kernelVersion)) {
-        derror("Can't parse 'Linux version ' string in kernel image file: '%s'",
-               versionString);
         return false;
     }
 
@@ -730,6 +738,21 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         } else {
             D("Will quit emulator after guest boots completely, or after %d seconds",
                     hw->test_quitAfterBootTimeOut);
+        }
+    }
+
+    if (opts->delay_adb) {
+        hw->test_delayAdbTillBootComplete = 1;
+    }
+
+    if (opts->monitor_adb) {
+        char*  end;
+        hw->test_monitorAdb = strtol(opts->monitor_adb, &end, 0);
+        if (hw->test_monitorAdb <= 0) {
+            derror("-monitor-adb must be followed by a positive number");
+            exit(1);
+        } else {
+            D("Will monitor adb messages to the guest");
         }
     }
 
@@ -978,9 +1001,14 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
             // If the -partition-size option is given that should override
             // whatever setting was in the config file.
             defaultBytes = defaultPartitionSize;
+            if (opts->partition_size) {
+                hw->disk_dataPartition_size = atoi(opts->partition_size) * 1048576ULL;
+            } else {
+                hw->disk_dataPartition_size = defaultBytes;
+            }
+        } else {
+            hw->disk_dataPartition_size = defaultBytes;
         }
-
-        hw->disk_dataPartition_size = defaultBytes;
     }
 
     /** CACHE PARTITION **/
@@ -1151,7 +1179,14 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
 
     // enforce CDD minimums
     int minRam = 32;
-    if (avdInfo_getApiLevel(avd) >= 26) {
+    if (avdInfo_getApiLevel(avd) >= 29) {
+        // bug: 129958266
+        // Q preview where API level is not 29 yet,
+        // it becomes 1000 so we still get the effect we want.
+        minRam = 2048;
+        // To avoid lmk, 4096 mb is required. but that makes it a
+        // non-starter for running on most user machines :/
+    } else if (avdInfo_getApiLevel(avd) >= 26) {
         // bug: 112664026
         // This isn't a CDD minimum, but could be a source of why
         // people think the emulator is slow recently.
@@ -1212,8 +1247,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     int minVmHeapSize = minRamVmHeapSize > minApiLevelVmHeapSize
                              ? minRamVmHeapSize
                              : minApiLevelVmHeapSize;
-    const int maxVmHeapSize =
-            4 * minApiLevelVmHeapSize > 576 ? 576 : 4 * minApiLevelVmHeapSize;
+    const int maxVmHeapSize = 4 * minVmHeapSize > 576 ? 576 : 4 * minVmHeapSize;
 
     if (minVmHeapSize > maxVmHeapSize) {
         minVmHeapSize = maxVmHeapSize;
@@ -1267,6 +1301,8 @@ const char* getAcceleratorEnableParam(AndroidCpuAccelerator accel_type) {
             return "-enable-hvf";
         case ANDROID_CPU_ACCELERATOR_WHPX:
             return "-enable-whpx";
+        case ANDROID_CPU_ACCELERATOR_GVM:
+            return "-enable-gvm";
         default:
             return "";
     }
@@ -1274,6 +1310,7 @@ const char* getAcceleratorEnableParam(AndroidCpuAccelerator accel_type) {
 
 bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                            CpuAccelMode* accel_mode, char** accel_status) {
+
     assert(accel_status != NULL);
 
     /* Handle CPU acceleration options. */
@@ -1325,24 +1362,49 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
     // available.
     {
         char* abi = avdInfo_getTargetAbi(avd);
+#if defined(__APPLE__) && defined(__arm64__)
+        if (!strncmp(abi, "arm64", 3)) {
+#else
         if (!strncmp(abi, "x86", 3)) {
+#endif
+            fprintf(stderr, "%s: feature check for hvf\n", __func__);
             // select HVF on Mac if available and we are running on x86
             // TODO: Fix x86_64 support in HVF
             const bool hvf_is_ok = feature_is_enabled(kFeature_HVF) &&
                     androidCpuAcceleration_isAcceleratorSupported(ANDROID_CPU_ACCELERATOR_HVF);
-            if (!hvf_is_ok && !accel_ok && *accel_mode != ACCEL_OFF) {
-                derror("%s emulation currently requires hardware acceleration!\n"
-                    "Please ensure %s is properly installed and usable.\n"
-                    "CPU acceleration status: %s",
-                    abi, kAccelerator, *accel_status);
+
+            if (android_qemu_mode && !hvf_is_ok && !accel_ok && *accel_mode != ACCEL_OFF) {
+                derror(
+                    "%s emulation currently requires hardware acceleration!\n"
+                    "CPU acceleration status: %s\n"
+                    "More info on configuring VM acceleration on "
+#ifdef _WIN32
+                    "Windows:\n"
+                    "https://developer.android.com/studio/run/emulator-acceleration#vm-windows\n"
+#else // _WIN32
+#ifdef __APPLE__
+                    "macOS:\n"
+                    "https://developer.android.com/studio/run/emulator-acceleration#vm-mac\n"
+#else // __APPLE__
+                    "Linux:\n"
+                    "https://developer.android.com/studio/run/emulator-acceleration#vm-linux\n"
+#endif // !__APPLE__
+#endif // !_WIN32
+                    "General information on acceleration: "
+                    "https://developer.android.com/studio/run/emulator-acceleration.\n",
+                    abi, *accel_status);
                 exit(1);
             }
-            else if (*accel_mode == ACCEL_OFF) {
+            else if (*accel_mode == ACCEL_OFF || (*accel_mode == ACCEL_OFF && !android_qemu_mode)) {
+                if (!android_qemu_mode) {
+                    *accel_mode = ACCEL_OFF;
+                }
                 // '-no-accel' of '-accel off' was used explicitly. Warn about
                 // the issue but do not exit.
                 dwarning("%s emulation may not work without hardware acceleration!", abi);
             }
             else {
+#ifndef __arm64__
                 /* CPU acceleration is enabled and working, but if the host CPU
                  * does not support all instruction sets specified in the x86/
                  * x86_64 ABI, emulation may fail on unsupported instructions.
@@ -1383,6 +1445,7 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                             "\nHardware-accelerated emulation may not work"
                             " properly!\n", abi, buf);
                 }
+#endif
 
                 if (hvf_is_ok) {
                     androidCpuAcceleration_resetCpuAccelerator(ANDROID_CPU_ACCELERATOR_HVF);
@@ -1394,6 +1457,11 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
 
         AFREE(abi);
     }
+
+    if (*accel_mode == ACCEL_OFF) {
+        androidCpuAcceleration_resetCpuAccelerator(ANDROID_CPU_ACCELERATOR_NONE);
+    }
+
     return accel_ok;
 }
 
@@ -1450,6 +1518,22 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     }
 
     android_cmdLineOptions = opts;
+
+    // BUG: 143949261
+    //
+    // We are deprecating the no_window boolean flag.  no_window is now an
+    // inherent property of the binary (qemu-system-***-headless)
+    //
+    // TODO: After this technique proves stable, go through the code and remove
+    // all paths that depend on no_window, then add back a different variable
+    // to track it based on the build being qemu-system-***-headless or not
+    opts->no_window = false;
+
+    if (opts->fuchsia) {
+        android_qemu_mode = 0;
+        *exit_status = EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER;
+        return false;
+    }
 
     opts->ranchu = is_qemu2;
 
@@ -1787,20 +1871,8 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         hw->vm_heapSize = heapSize;
     }
 
-    if (opts->camera_front) {
-        /* Validate parameter. */
-        if (memcmp(opts->camera_front, "webcam", 6) &&
-            strcmp(opts->camera_front, "emulated") &&
-            strcmp(opts->camera_front, "none")) {
-            derror("Invalid value for -camera-front <mode> parameter: %s\n"
-                   "Valid values are: 'emulated', 'webcam<N>', or 'none'\n",
-                   opts->camera_front);
-            return false;
-        }
-        str_reset(&hw->hw_camera_front, opts->camera_front);
-    }
-
     str_reset(&hw->avd_name, avdInfo_getName(avd));
+    str_reset(&hw->avd_id, avdInfo_getId(avd));
 
     /* Setup screen emulation */
     if (opts->screen) {
@@ -1813,7 +1885,13 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
                    opts->screen);
             return false;
         }
-        str_reset(&hw->hw_screen, opts->screen);
+        // BUG(140563470) Explicitly set screen to multi-touch when VirtioInput
+        // feature is enabled because virtio input device is configured to be multi-touch.
+        if (strcmp(opts->screen, "touch") == 0 && feature_is_enabled(kFeature_VirtioInput)) {
+            str_reset(&hw->hw_screen, "multi-touch");
+        } else {
+            str_reset(&hw->hw_screen, opts->screen);
+        }
     }
 
     // DNS server support. Validate the option if any, find the DNS
@@ -1913,23 +1991,46 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 bool emulator_parseFeatureCommandLineOptions(AndroidOptions* opts,
                                              AvdInfo* avd,
                                              AndroidHwConfig* hw) {
+    bool supportsVirtualScene = feature_is_enabled(kFeature_VirtualScene);
+    bool supportsVideoPlayback = feature_is_enabled(kFeature_VideoPlayback);
+
     if (opts->camera_back) {
-        bool supportsVirtualScene = feature_is_enabled(kFeature_VirtualScene);
         bool isVirtualScene = !strcmp(opts->camera_back, "virtualscene");
+        bool isVideoPlayback = !strcmp(opts->camera_back, "videoplayback");
         /* Validate parameter. */
         if (memcmp(opts->camera_back, "webcam", 6) &&
             strcmp(opts->camera_back, "emulated") &&
             (!isVirtualScene || !supportsVirtualScene) &&
+            (!isVideoPlayback || !supportsVideoPlayback) &&
             strcmp(opts->camera_back, "none")) {
             derror("Invalid value for -camera-back <mode> parameter: %s\n"
-                   "Valid values are: 'emulated', 'webcam<N>'%s, "
+                   "Valid values are: 'emulated', 'webcam<N>'%s%s, "
                    "or 'none'\n",
                    opts->camera_back,
-                   supportsVirtualScene? ", 'virtualscene'": "");
+                   supportsVirtualScene ? ", 'virtualscene'" : "",
+                   supportsVideoPlayback ? ", 'videoplayback'" : "");
             return false;
         }
         str_reset(&hw->hw_camera_back, opts->camera_back);
     }
+
+    if (opts->camera_front) {
+        bool isVideoPlayback = !strcmp(opts->camera_front, "videoplayback");
+        /* Validate parameter. */
+        if (memcmp(opts->camera_front, "webcam", 6) &&
+            strcmp(opts->camera_front, "emulated") &&
+            (!isVideoPlayback || !supportsVideoPlayback) &&
+            strcmp(opts->camera_front, "none")) {
+            derror("Invalid value for -camera-front <mode> parameter: %s\n"
+                   "Valid values are: 'emulated', 'webcam<N>'%s, "
+                   "or 'none'\n",
+                   opts->camera_front,
+                   supportsVideoPlayback ? ", 'videoplayback'" : "");
+            return false;
+        }
+        str_reset(&hw->hw_camera_front, opts->camera_front);
+    }
+
     return true;
 }
 
@@ -1942,6 +2043,9 @@ static bool isGuestRendererChoice(const char* choice) {
 
 bool configAndStartRenderer(
          AvdInfo* avd, AndroidOptions* opts, AndroidHwConfig* hw,
+         const QAndroidVmOperations *vm_operations,
+         const struct QAndroidEmulatorWindowAgent *window_agent,
+         const QAndroidMultiDisplayAgent *multi_display_agent,
          enum WinsysPreferredGlesBackend uiPreferredBackend,
          RendererConfig* config_out) {
     EmuglConfig config;
@@ -1968,6 +2072,8 @@ bool configAndStartRenderer(
         str_reset(&hw->hw_gpu_mode, DEFAULT_SOFTWARE_GPU_MODE);
     }
 
+    bool hostGpuVulkanBlacklisted = true;
+
     if (!androidEmuglConfigInit(&config,
                 opts->avd,
                 api_arch,
@@ -1976,8 +2082,10 @@ bool configAndStartRenderer(
                 opts->gpu,
                 &hw->hw_gpu_mode,
                 0,
-                opts->no_window,
-                uiPreferredBackend)) {
+                host_emulator_is_headless,
+                uiPreferredBackend,
+                &hostGpuVulkanBlacklisted,
+                opts->use_host_vulkan)) {
         derror("%s", config.status);
         config_out->openglAlive = 0;
 
@@ -1988,6 +2096,73 @@ bool configAndStartRenderer(
         AFREE(api_arch);
 
         return false;
+    }
+
+    // Also write the selected renderer.
+    config_out->selectedRenderer =
+        emuglConfig_get_current_renderer();
+
+    // Determine whether to enable Vulkan (if in android qemu mode)
+
+    if (android_qemu_mode) {
+        // Always enable GLDirectMem for API >= 29
+        bool shouldEnableGLDirectMem = api_level >= 29;
+        bool shouldEnableVulkan = true;
+
+        crashhandler_append_message_format(
+            "Deciding if GLDirectMem/Vulkan should be enabled. "
+            "Selected renderer: %d "
+            "API level: %d host GPU blacklisted? %d\n",
+            config_out->selectedRenderer,
+            api_level, hostGpuVulkanBlacklisted);
+        switch (config_out->selectedRenderer) {
+            // Host gpu: enable as long as not on blacklist
+            // and api >= 29
+            case SELECTED_RENDERER_HOST:
+                shouldEnableVulkan =
+                    (api_level >= 29) &&
+                    !hostGpuVulkanBlacklisted;
+                if (shouldEnableVulkan) {
+                    crashhandler_append_message_format(
+                        "Host GPU selected, enabling Vulkan.\n");
+                } else {
+                    crashhandler_append_message_format(
+                        "Host GPU selected, not enabling Vulkan because either API level is < 29 or host GPU driver is blacklisted.\n");
+                }
+                break;
+            // Swiftshader: always enable if api level >= 29
+            case SELECTED_RENDERER_SWIFTSHADER_INDIRECT:
+                shouldEnableVulkan = api_level >= 29;
+                if (shouldEnableVulkan) {
+                    crashhandler_append_message_format(
+                        "Swiftshader selected, enabling Vulkan.\n");
+                } else {
+                    crashhandler_append_message_format(
+                        "Swiftshader selected, not enabling Vulkan because API level is < 29.\n");
+                }
+                break;
+            // Other renderers (such as angle, mesa):
+            default:
+                shouldEnableVulkan = false;
+                crashhandler_append_message_format(
+                    "Some other renderer selected, not enabling Vulkan.\n");
+        }
+
+        if (shouldEnableGLDirectMem) {
+            crashhandler_append_message_format("Enabling GLDirectMem");
+            // Do not enable if we did not enable it on the API 29 image itself.
+            feature_set_if_not_overridden_or_guest_disabled(kFeature_GLDirectMem, true);
+        }
+
+        if (shouldEnableVulkan) {
+            crashhandler_append_message_format("Enabling Vulkan");
+            feature_set_if_not_overridden(kFeature_GLDirectMem, true);
+            feature_set_if_not_overridden(kFeature_Vulkan, true);
+        } else {
+            crashhandler_append_message_format(
+                "Not enabling Vulkan here "
+                "(feature flag may be turned on manually)");
+        }
     }
 
     AFREE(api_arch);
@@ -2040,6 +2215,9 @@ bool configAndStartRenderer(
     if (strcmp(gpu_mode, "guest") == 0 ||
         strcmp(gpu_mode, "off") == 0 ||
         !hw->hw_gpu_enabled) {
+
+        android_gl_object_counter_get();
+
         if (avdInfo_isGoogleApis(avd) &&
                 avdInfo_getApiLevel(avd) >= 19) {
             config_out->glesMode = kAndroidGlesEmulationGuest;
@@ -2055,6 +2233,9 @@ bool configAndStartRenderer(
                     hw->hw_lcd_height,
                     avdInfo_getAvdFlavor(avd) == AVD_PHONE,
                     avdInfo_getApiLevel(avd),
+                    vm_operations,
+                    window_agent,
+                    multi_display_agent,
                     &gles_major_version,
                     &gles_minor_version);
         if (gles_init_res || renderer_startup_res) {
@@ -2091,10 +2272,6 @@ bool configAndStartRenderer(
         hw->hw_lcd_width *
         hw->hw_lcd_height *
         pixelSizeBytes;
-
-    // Also write the selected renderer.
-    config_out->selectedRenderer =
-        emuglConfig_get_current_renderer();
 
     lastRendererConfig = *config_out;
     return true;

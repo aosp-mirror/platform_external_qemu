@@ -11,8 +11,11 @@
 
 #include "android/skin/qt/qt-ui-commands.h"
 
-#include <QApplication>
-#include <algorithm>
+#include <qapplication.h>  // for QApplication (ptr only), qApp
+#include <qstring.h>       // for operator==, QString (ptr only)
+#include <QApplication>    // for QApplication
+#include <algorithm>       // for find_if
+#include <iterator>        // for end, begin
 
 namespace {
 
@@ -36,11 +39,16 @@ constexpr CommandInfo kCommands[] = {
         INIT_COMMAND(SHOW_PANE_VIRTSENSORS, "Virtual sensors"),
         INIT_COMMAND(SHOW_PANE_SNAPSHOT, "Snapshots"),
         INIT_COMMAND(SHOW_PANE_DPAD, "D-Pad"),
+        INIT_COMMAND(SHOW_PANE_TV_REMOTE, "TV remote"),
         INIT_COMMAND(SHOW_PANE_FINGER, "Fingerprint"),
+        INIT_COMMAND(SHOW_PANE_CAR, "Car Data"),
+        INIT_COMMAND(SHOW_PANE_CAR_ROTARY, "Car Rotary"),
         INIT_COMMAND(SHOW_PANE_GPLAY, "Google Play"),
-        INIT_COMMAND(SHOW_PANE_RECORD_SCREEN, "Screen record"),
+        INIT_COMMAND(SHOW_PANE_RECORD, "Record and Playback"),
         INIT_COMMAND(SHOW_PANE_SETTINGS, "Settings"),
         INIT_COMMAND(SHOW_PANE_HELP, "Help"),
+        INIT_COMMAND(SHOW_PANE_PERFSTATS, "Performance Stats"),
+        INIT_COMMAND(SHOW_PANE_MULTIDISPLAY, "Multiple displays"),
         INIT_COMMAND(SHOW_MULTITOUCH,
                      "Multitouch (left click to pinch/zoom, right click to "
                      "vertical swipe)"),
@@ -64,14 +72,21 @@ constexpr CommandInfo kCommands[] = {
         INIT_COMMAND(BACK, "Back"),
         INIT_COMMAND(MENU, "Menu"),
         INIT_COMMAND(OVERVIEW, "Overview"),
-        INIT_COMMAND(TOGGLE_TRACKBALL, "Toggle trackball mode (if AVD is configured for it)"),
-        INIT_COMMAND(VIRTUAL_SCENE_MOVE_FORWARD, "Move virtual scene camera forward"),
+        INIT_COMMAND(TOGGLE_TRACKBALL,
+                     "Toggle trackball mode (if AVD is configured for it)"),
+        INIT_COMMAND(VIRTUAL_SCENE_MOVE_FORWARD,
+                     "Move virtual scene camera forward"),
         INIT_COMMAND(VIRTUAL_SCENE_MOVE_LEFT, "Move virtual scene camera left"),
-        INIT_COMMAND(VIRTUAL_SCENE_MOVE_BACKWARD, "Move virtual scene camera backward"),
-        INIT_COMMAND(VIRTUAL_SCENE_MOVE_RIGHT, "Move virtual scene camera right"),
+        INIT_COMMAND(VIRTUAL_SCENE_MOVE_BACKWARD,
+                     "Move virtual scene camera backward"),
+        INIT_COMMAND(VIRTUAL_SCENE_MOVE_RIGHT,
+                     "Move virtual scene camera right"),
         INIT_COMMAND(VIRTUAL_SCENE_MOVE_DOWN, "Move virtual scene camera down"),
         INIT_COMMAND(VIRTUAL_SCENE_MOVE_UP, "Move virtual scene camera up"),
-        INIT_COMMAND(VIRTUAL_SCENE_CONTROL, "Enable virtual scene camera controls"),
+        INIT_COMMAND(VIRTUAL_SCENE_CONTROL,
+                     "Enable virtual scene camera controls"),
+        INIT_COMMAND(FOLD, "Fold"),
+        INIT_COMMAND(UNFOLD, "Unfold"),
 };
 
 bool parseQtUICommand(const QString& string, QtUICommand* command) {

@@ -106,6 +106,9 @@ static bool ram_blocks_exiting = false;
 /* RAM is a mapped file */
 #define RAM_MAPPED (1 << 3)
 
+/* RAM backing is managed by user */
+#define RAM_USER_BACKED (1 << 4)
+
 /* UFFDIO_ZEROPAGE is available on this RAMBlock to atomically
  * zero the page and wake waiting processes.
  * (Set during postcopy)
@@ -603,6 +606,8 @@ static MemoryRegionSection flatview_do_translate(FlatView *fv,
                                                  AddressSpace **target_as)
 {
     MemoryRegionSection *section = NULL;
+    MemoryRegionSection result;
+
     IOMMUMemoryRegion *iommu_mr;
     hwaddr plen = (hwaddr)(-1);
 
@@ -610,15 +615,27 @@ static MemoryRegionSection flatview_do_translate(FlatView *fv,
         plen_out = &plen;
     }
 
+    flatview_ref(fv);
+
     section = address_space_translate_internal(
             flatview_to_dispatch(fv), addr, xlat,
             plen_out, is_mmio);
+
     iommu_mr = memory_region_get_iommu(section->mr);
     if (unlikely(iommu_mr)) {
-        return address_space_translate_iommu(iommu_mr, xlat,
-                                             plen_out, page_mask_out,
-                                             is_write, is_mmio,
-                                             target_as);
+
+        MemoryRegionSection iommu_section;
+
+        iommu_section =
+            address_space_translate_iommu(
+                iommu_mr, xlat,
+                plen_out, page_mask_out,
+                is_write, is_mmio,
+                target_as);
+
+        flatview_unref(fv);
+
+        return iommu_section;
     }
 
     if (page_mask_out) {
@@ -626,7 +643,10 @@ static MemoryRegionSection flatview_do_translate(FlatView *fv,
         *page_mask_out = ~TARGET_PAGE_MASK;
     }
 
-    return *section;
+    result = *section;
+    flatview_unref(fv);
+
+    return result;
 }
 
 /* Called from RCU critical section */
@@ -1136,6 +1156,8 @@ void cpu_single_step(CPUState *cpu, int enabled)
         cpu->singlestep_enabled = enabled;
         if (kvm_enabled()) {
             kvm_update_guest_debug(cpu, 0);
+        } else if (gvm_enabled()) {
+            gvm_update_guest_debug(cpu, 0);
         } else {
             /* must flush all the translated code to avoid inconsistencies */
             /* XXX: only flush what is necessary */
@@ -2107,7 +2129,7 @@ static void ram_block_add(RAMBlock *new_block, Error **errp, bool shared)
     qemu_mutex_lock_ramlist();
     new_block->offset = find_ram_offset(new_block->max_length);
 
-    if (!new_block->host) {
+    if (!new_block->host && !(new_block->flags & RAM_USER_BACKED)) {
         if (xen_enabled()) {
             xen_ram_alloc(new_block->offset, new_block->max_length,
                           new_block->mr, &err);
@@ -2328,6 +2350,145 @@ RAMBlock *qemu_ram_alloc_resizeable(ram_addr_t size, ram_addr_t maxsz,
 {
     return qemu_ram_alloc_internal(size, maxsz, resized, NULL, true,
                                    false, mr, errp);
+}
+
+RAMBlock *qemu_ram_alloc_user_backed(ram_addr_t size, MemoryRegion *mr,
+                                     Error **errp)
+{
+    RAMBlock *new_block;
+    Error *local_err = NULL;
+
+    size = HOST_PAGE_ALIGN(size);
+    new_block = (RAMBlock*)g_malloc0(sizeof(*new_block));
+    new_block->mr = mr;
+    new_block->used_length = size;
+    new_block->max_length = size;
+    new_block->fd = -1;
+    new_block->page_size = getpagesize();
+    new_block->host = NULL;
+    new_block->flags |= RAM_PREALLOC;
+    new_block->flags |= RAM_USER_BACKED;
+    ram_block_add(new_block, &local_err, false /* not shared */);
+    if (local_err) {
+        g_free(new_block);
+        error_propagate(errp, local_err);
+        return NULL;
+    }
+    return new_block;
+}
+
+#define TCG_MAX_USER_RAM_SLOTS 1024
+
+struct TcgUserRamSlotInfo {
+    int used;
+    MemoryRegion mr;
+    uint64_t gpa;
+};
+
+struct TcgUserRamTable {
+    struct TcgUserRamSlotInfo slots[TCG_MAX_USER_RAM_SLOTS];
+};
+
+static struct TcgUserRamTable* tcg_user_ram_table_get(void) {
+    static struct TcgUserRamTable* s_table;
+    if (!s_table) {
+        struct TcgUserRamTable* table =
+            (struct TcgUserRamTable*)malloc(sizeof(*table));
+        memset(table, 0, sizeof(*table));
+        s_table = table;
+    }
+    return s_table;
+}
+
+static struct TcgUserRamSlotInfo* s_tcg_user_ram_slot_infos = NULL;
+
+static int tcg_user_ram_slot_infos_first_free_slot() {
+    struct TcgUserRamTable* table = tcg_user_ram_table_get();
+
+    for (int i = 0; i < TCG_MAX_USER_RAM_SLOTS; ++i) {
+        if (0 == table->slots[i].used) return i;
+    }
+    return -1;
+}
+
+static void tcg_user_ram_slot_map(
+    uint64_t gpa, void *hva, uint64_t size, int flags) {
+
+    struct TcgUserRamTable* table = tcg_user_ram_table_get();
+    int slot = tcg_user_ram_slot_infos_first_free_slot();
+    MemoryRegion* mr = &(table->slots[slot].mr);
+
+    if (slot < 0) {
+        fprintf(stderr, "%s: error: no free slots to "
+                "map hva %p -> gpa [0x%llx 0x%llx)\n", __func__,
+                hva, (unsigned long long)gpa, (unsigned long long)gpa + size);
+        return;
+    }
+
+    memory_region_init_ram_ptr(
+        mr, 0 /* unattached */, "tcg-user-backed", size, hva);
+    memory_region_add_subregion(system_memory, gpa, mr);
+
+    table->slots[slot].gpa = gpa;
+    table->slots[slot].used = 1;
+}
+
+static void tcg_user_ram_slot_unmap(
+    uint64_t gpa, uint64_t size) {
+
+    struct TcgUserRamTable* table = tcg_user_ram_table_get();
+
+    for (int i = 0; i < TCG_MAX_USER_RAM_SLOTS; ++i) {
+        if (0 == table->slots[i].used) continue;
+        if (gpa != table->slots[i].gpa) continue;
+
+        memory_region_del_subregion(system_memory, &(table->slots[i].mr));
+        table->slots[i].used = 0;
+        return;
+    }
+}
+
+void qemu_user_backed_ram_map_empty(uint64_t gpa, void *hva, uint64_t size, int flags)
+{
+    tcg_user_ram_slot_map(gpa, hva, size, flags);
+}
+
+void qemu_user_backed_ram_unmap_empty(uint64_t gpa, uint64_t size)
+{
+    tcg_user_ram_slot_unmap(gpa, size);
+}
+
+static QemuUserBackedRamMapFunc s_user_backed_ram_map = &qemu_user_backed_ram_map_empty;
+static QemuUserBackedRamUnmapFunc s_user_backed_ram_unmap = &qemu_user_backed_ram_unmap_empty;
+
+void qemu_set_user_backed_mapping_funcs(QemuUserBackedRamMapFunc mapFunc,
+                                        QemuUserBackedRamUnmapFunc unmapFunc)
+{
+    s_user_backed_ram_map = mapFunc;
+    s_user_backed_ram_unmap = unmapFunc;
+}
+
+void qemu_user_backed_ram_map(uint64_t gpa, void *hva, uint64_t size, int flags)
+{
+    s_user_backed_ram_map(gpa, hva, size, flags);
+}
+
+void qemu_user_backed_ram_unmap(uint64_t gpa, uint64_t size)
+{
+    s_user_backed_ram_unmap(gpa, size);
+}
+
+static struct qemu_address_space_device_control_ops*
+qemu_address_space_device_control_ops = 0;
+
+void qemu_set_address_space_device_control_ops(
+    struct qemu_address_space_device_control_ops* ops) {
+    qemu_address_space_device_control_ops = ops;
+}
+
+struct qemu_address_space_device_control_ops*
+qemu_get_address_space_device_control_ops() {
+    return qemu_address_space_device_control_ops;
 }
 
 static void reclaim_ramblock(RAMBlock *block)
@@ -3886,6 +4047,13 @@ void cpu_physical_memory_unmap(void *buffer, hwaddr len,
                                int is_write, hwaddr access_len)
 {
     return address_space_unmap(&address_space_memory, buffer, len, is_write, access_len);
+}
+
+void *cpu_physical_memory_get_addr(hwaddr addr) {
+    hwaddr len = 4096;
+    void* hva = cpu_physical_memory_map(addr, &len, 1);
+    cpu_physical_memory_unmap(hva, len, 1, len);
+    return hva;
 }
 
 #define ARG1_DECL                AddressSpace *as

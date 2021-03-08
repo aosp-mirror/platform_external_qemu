@@ -90,7 +90,7 @@ INSTANTIATE_TEST_CASE_P(GLES2SnapshotPixelOps,
 // Tests preservation of stencil test conditional state, set by glStencilFunc.
 class SnapshotGlStencilConditionsTest
     : public SnapshotSetValueTest<GlStencilFunc> {
-    void stateCheck(GlStencilFunc expected) {
+    void stateCheck(GlStencilFunc expected) override {
         EXPECT_TRUE(compareGlobalGlInt(gl, GL_STENCIL_FUNC, expected.func));
         EXPECT_TRUE(compareGlobalGlInt(gl, GL_STENCIL_REF, expected.ref));
         EXPECT_TRUE(
@@ -218,7 +218,7 @@ class SnapshotGlDepthFuncTest : public SnapshotSetValueTest<GLenum>,
     void stateCheck(GLenum expected) override {
         EXPECT_TRUE(compareGlobalGlInt(gl, GL_DEPTH_FUNC, expected));
     }
-    void stateChange() { gl->glDepthFunc(*m_changed_value); }
+    void stateChange() override { gl->glDepthFunc(*m_changed_value); }
 };
 
 TEST_P(SnapshotGlDepthFuncTest, SetDepthFunc) {
@@ -237,7 +237,7 @@ class SnapshotGlBlendEquationTest
         EXPECT_TRUE(compareGlobalGlInt(gl, GL_BLEND_EQUATION_RGB, expected));
         EXPECT_TRUE(compareGlobalGlInt(gl, GL_BLEND_EQUATION_ALPHA, expected));
     }
-    void stateChange() { gl->glBlendEquation(*m_changed_value); }
+    void stateChange() override { gl->glBlendEquation(*m_changed_value); }
 };
 
 TEST_P(SnapshotGlBlendEquationTest, SetBlendEquation) {

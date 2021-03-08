@@ -95,7 +95,10 @@ extern int convert_frame_slow(const void* src_frame,
  *  |src_framebuffer_size|, |src_width|, |src_height| - Source framebuffer byte
  *                                                      size,  width, and
  *                                                      height.
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
  *  |result_width|, |result_height| - Destination width and height.
+=======
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
  *  |result_frame| - ClientFrame struct containing an array of framebuffers
  *                   where to convert the frame.
  *  |exp_comp| - Exposure compensation.
@@ -107,8 +110,11 @@ extern int convert_frame_fast(const void* src_frame,
                               size_t src_framebuffer_size,
                               int src_width,
                               int src_height,
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
                               int result_width,
                               int result_height,
+=======
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
                               ClientFrame* result_frame,
                               float exp_comp);
 

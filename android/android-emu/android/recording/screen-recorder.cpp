@@ -13,22 +13,38 @@
 // limitations under the License.
 
 #include "android/recording/screen-recorder.h"
-#include "android/base/Log.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/threads/FunctorThread.h"
-#include "android/emulator-window.h"
-#include "android/recording/FfmpegRecorder.h"
-#include "android/recording/audio/AudioProducer.h"
-#include "android/recording/codecs/audio/VorbisCodec.h"
-#include "android/recording/codecs/video/VP9Codec.h"
-#include "android/recording/screen-recorder-constants.h"
-#include "android/recording/video/VideoProducer.h"
-#include "android/recording/video/VideoFrameSharer.h"
-#include "android/utils/debug.h"
 
-#include <atomic>
+#include <assert.h>                                          // for assert
+#include <string.h>                                          // for strlen
+#include <atomic>                                            // for atomic
+#include <functional>                                        // for __base
+#include <memory>                                            // for unique_ptr
+#include <string>                                            // for basic_st...
+#include <thread>
+#include <utility>                                           // for move
+
+#include "android/android.h"                                 // for android_...
+#include "android/base/Log.h"                                // for LOG, Log...
+#include "android/base/memory/LazyInstance.h"                // for LazyInst...
+#include "android/base/misc/StringUtils.h"                   // for split
+#include "android/base/synchronization/ConditionVariable.h"  // for Conditio...
+#include "android/base/synchronization/Lock.h"               // for Lock
+#include "android/base/system/System.h"                      // for System
+#include "android/base/threads/FunctorThread.h"              // for FunctorT...
+#include "android/emulator-window.h"                         // for emulator...
+#include "android/framebuffer.h"                             // for qframebu...
+#include "android/gpu_frame.h"                               // for gpu_fram...
+#include "android/recording/FfmpegRecorder.h"                // for FfmpegRe...
+#include "android/recording/Frame.h"                         // for toAVPixe...
+#include "android/recording/Producer.h"                      // for Producer
+#include "android/recording/audio/AudioProducer.h"           // for createAu...
+#include "android/recording/codecs/Codec.h"                  // for CodecParams
+#include "android/recording/codecs/audio/VorbisCodec.h"      // for VorbisCodec
+#include "android/recording/codecs/video/VP9Codec.h"         // for VP9Codec
+#include "android/recording/screen-recorder-constants.h"     // for kMaxTime...
+#include "android/recording/video/VideoFrameSharer.h"        // for VideoFra...
+#include "android/recording/video/VideoProducer.h"           // for createVi...
+#include "android/utils/debug.h"                             // for VERBOSE_...
 
 #define D(...) VERBOSE_PRINT(record, __VA_ARGS__)
 
@@ -41,9 +57,9 @@ using android::base::Lock;
 using android::recording::AudioFormat;
 using android::recording::CodecParams;
 using android::recording::FfmpegRecorder;
+using android::recording::VideoFrameSharer;
 using android::recording::VorbisCodec;
 using android::recording::VP9Codec;
-using android::recording::VideoFrameSharer;
 
 // The incoming audio sample format.
 constexpr AudioFormat kInSampleFormat = AudioFormat::AUD_FMT_S16;
@@ -57,7 +73,9 @@ struct Globals {
     Lock lock;
     std::unique_ptr<ScreenRecorder> recorder;
     std::unique_ptr<VideoFrameSharer> webrtc_module;
+    std::string sharedMemoryHandle;
     const QAndroidDisplayAgent* displayAgent = nullptr;
+    const QAndroidMultiDisplayAgent* multiDisplayAgent = nullptr;
     uint32_t fbWidth = 0;
     uint32_t fbHeight = 0;
     QFrameBuffer dummyQf = {};
@@ -77,7 +95,7 @@ public:
     bool startRecording(bool async);
     bool stopRecording(bool async);
 
-    RecorderState getRecorderState() const;
+    RecorderStates getRecorderState() const;
 
 private:
     bool startRecordingWorker();
@@ -135,9 +153,9 @@ ScreenRecorder::ScreenRecorder(uint32_t fbWidth,
     // string because info->fileName is pointing to data that we don't own.
     D("RecordingInfo "
       "{\n\tfileName=[%s],\n\twidth=[%u],\n\theight=[%u],\n\tvideoBitrate=[%u],"
-      "\n\ttimeLimit=[%u],\n\tcb=[%p],\n\topaque=[%p]\n}\n",
+      "\n\ttimeLimit=[%u],\n\tdisplay=[%u],\n\tcb=[%p],\n\topaque=[%p]\n}\n",
       info->fileName, info->width, info->height, info->videoBitrate,
-      info->timeLimit, info->cb, info->opaque);
+      info->timeLimit, info->displayId, info->cb, info->opaque);
     mFilename = info->fileName;
     mInfo.fileName = mFilename.c_str();
 }
@@ -190,19 +208,18 @@ bool ScreenRecorder::startRecordingWorker() {
 
     // Add the video track
     auto videoProducer = android::recording::createVideoProducer(
-            mFbWidth, mFbHeight, kFPS, mAgent);
+            mFbWidth, mFbHeight, mInfo.fps, mInfo.displayId, mAgent);
     // Fill in the codec params for the audio and video
     CodecParams videoParams;
     videoParams.width = mInfo.width;
     videoParams.height = mInfo.height;
     videoParams.bitrate = mInfo.videoBitrate;
-    videoParams.fps = kFPS;
+    videoParams.fps = mInfo.fps;
     videoParams.intra_spacing = kIntraSpacing;
     VP9Codec videoCodec(
             std::move(videoParams), mFbWidth, mFbHeight,
             toAVPixelFormat(videoProducer->getFormat().videoFormat));
-    if (!ffmpegRecorder->addVideoTrack(std::move(videoProducer),
-                                       &videoCodec)) {
+    if (!ffmpegRecorder->addVideoTrack(std::move(videoProducer), &videoCodec)) {
         LOG(ERROR) << "Failed to add video track";
         mRecorderState = RECORDER_STOPPED;
         sendRecordingStatus(RECORD_START_FAILED);
@@ -219,8 +236,7 @@ bool ScreenRecorder::startRecordingWorker() {
     VorbisCodec audioCodec(
             std::move(audioParams),
             toAVSampleFormat(audioProducer->getFormat().audioFormat));
-    if (!ffmpegRecorder->addAudioTrack(std::move(audioProducer),
-                                       &audioCodec)) {
+    if (!ffmpegRecorder->addAudioTrack(std::move(audioProducer), &audioCodec)) {
         LOG(ERROR) << "Failed to add audio track";
         mRecorderState = RECORDER_STOPPED;
         sendRecordingStatus(RECORD_START_FAILED);
@@ -266,7 +282,6 @@ bool ScreenRecorder::stopRecordingWorker() {
         mFinished = true;
         mCond.signalAndUnlock(&lock);
     }
-
     bool has_frames = ffmpegRecorder->stop();
     ffmpegRecorder.reset();
 
@@ -294,40 +309,95 @@ bool ScreenRecorder::parseRecordingInfo(RecordingInfo& info) {
         info.videoBitrate = kDefaultVideoBitrate;
     }
 
-    if (info.timeLimit < 1 || info.timeLimit > kMaxTimeLimit) {
+    if (info.timeLimit < 1) {
+        D("Defaulting time limit to %d seconds", kDefaultTimeLimit);
+        info.timeLimit = kDefaultTimeLimit;
+    } else if (info.timeLimit > kMaxTimeLimit &&
+               !(android_cmdLineOptions && android_cmdLineOptions->record_session)) {
+        // Allow indefinite recording for emulator recording sessions.
         D("Defaulting time limit to %d seconds", kMaxTimeLimit);
         info.timeLimit = kMaxTimeLimit;
     }
 
+    if (info.fps == 0) {
+        fprintf(stderr, "Defaulting fps to %u fps\n", kFPS);
+        info.fps = kFPS;
+    }
     return true;
 }
 
-RecorderState ScreenRecorder::getRecorderState() const {
-    return mRecorderState;
+RecorderStates ScreenRecorder::getRecorderState() const {
+    RecorderStates ret = {mRecorderState, mInfo.displayId};
+    return ret;
 }
 }  // namespace
 
 // C compatibility functions
-RecorderState screen_recorder_state_get(void) {
+RecorderStates screen_recorder_state_get(void) {
     auto& globals = *sGlobals;
+    RecorderStates ret = {RECORDER_STOPPED, 0};
 
     AutoLock lock(globals.lock);
     if (globals.recorder) {
-        return globals.recorder->getRecorderState();
-    } else {
-        return RECORDER_STOPPED;
+        ret = globals.recorder->getRecorderState();
     }
+    return ret;
 }
 
+static void screen_recorder_record_session(const char* cmdLineArgs) {
+    // Format is <filename>,<delay[,<duration>].
+    // If no duration, then record until the emulator shuts down.
+    std::vector<std::string> tokens;
+    android::base::split(cmdLineArgs, ",", [&tokens](android::base::StringView s) {
+        if (!s.empty()) {
+            tokens.push_back(s);
+        }
+    });
 
+    if (tokens.size() < 2) {
+        fprintf(stderr, "Not enough arguments for record-session\n");
+        return;
+    }
+
+    // Validate filename
+    if (!android::base::endsWith(tokens[0], ".webm")) {
+        fprintf(stderr, "Filename must end with .webm extension\n");
+        return;
+    }
+
+    // Get delay
+    int delay = atoi(tokens[1].c_str());
+
+    // Get duration
+    int duration = INT32_MAX;
+    if (tokens.size() > 2) {
+        duration = atoi(tokens[2].c_str());
+    }
+
+    std::thread(std::bind([](std::string filename, int delay, int duration) {
+        RecordingInfo info = {};
+        if (delay > 0) {
+            android::base::Thread::sleepMs(delay * 1000);
+        }
+        info.fileName = filename.c_str();
+        info.timeLimit = duration;
+        // Make the quality and fps low, so we don't have so much cpu usage.
+        info.fps = 3;
+        info.videoBitrate = 500000;
+        info.displayId = 0;
+        screen_recorder_start(&info, true);
+    }, tokens[0], delay, duration)).detach();
+}
 void screen_recorder_init(uint32_t w,
                           uint32_t h,
-                          const QAndroidDisplayAgent* dpy_agent) {
+                          const QAndroidDisplayAgent* dpy_agent,
+                          const QAndroidMultiDisplayAgent* mdpy_agent) {
     assert(w > 0 && h > 0);
     auto& globals = *sGlobals;
     globals.fbWidth = w;
     globals.fbHeight = h;
     globals.displayAgent = dpy_agent;
+    globals.multiDisplayAgent = mdpy_agent;
 
     if (dpy_agent) {
         if (emulator_window_get()->opts->no_window) {
@@ -341,6 +411,10 @@ void screen_recorder_init(uint32_t w,
         }
     }
 
+    if (android_cmdLineOptions && android_cmdLineOptions->record_session) {
+        screen_recorder_record_session(android_cmdLineOptions->record_session);
+    }
+
     D("%s(w=%d, h=%d, isGuestMode=%d)", __func__, w, h, dpy_agent != nullptr);
 }
 
@@ -349,8 +423,21 @@ bool screen_recorder_start(const RecordingInfo* info, bool async) {
 
     AutoLock lock(globals.lock);
 
-    globals.recorder.reset(new ScreenRecorder(globals.fbWidth, globals.fbHeight,
-                                              info, globals.displayAgent));
+    // Check if the display is created. For guest mode, display 0 return true.
+    uint32_t w, h, cb = 0;
+    if (globals.multiDisplayAgent->getMultiDisplay(info->displayId, nullptr, nullptr,
+                                                   &w, &h, nullptr,
+                                                   nullptr, nullptr) == false) {
+        return false;
+    }
+    if (info->displayId != 0) {
+        globals.multiDisplayAgent->getDisplayColorBuffer(info->displayId, &cb);
+        if (cb == 0) {
+            return false;
+        }
+    }
+
+    globals.recorder.reset(new ScreenRecorder(w, h, info, globals.displayAgent));
     return globals.recorder->startRecording(async);
 }
 
@@ -360,52 +447,53 @@ bool screen_recorder_stop(bool async) {
     AutoLock lock(globals.lock);
 
     if (globals.recorder) {
-        return globals.recorder->stopRecording(async);
+        globals.recorder->stopRecording(async);
+        globals.recorder.reset();
+        return true;
     }
-
     return false;
 }
 
-bool start_webrtc_module(const char* handle, int fps) {
+const char* start_shared_memory_module(int fps) {
     auto& globals = *sGlobals;
 
-    AutoLock lock(globals.lock);
-    if (globals.webrtc_module) {
-        globals.webrtc_module->stop();
+    // emulator name --> shared memory handle.
+    // 1. Discovery is easier.
+    // 2. If we accidentally leak a region on posix, we can reclaim an clean up
+    // on 2nd run.
+    globals.sharedMemoryHandle = std::string("videmulator") +
+                                 std::to_string(android_serial_number_port);
+    if (!globals.webrtc_module) {
+        globals.webrtc_module.reset(
+                new VideoFrameSharer(globals.fbWidth, globals.fbHeight,
+                                     globals.sharedMemoryHandle.c_str()));
+
+        if (!globals.webrtc_module->initialize()) {
+            LOG(ERROR) << "Unable to initialize frame sharing.. disabling "
+                          "frame sharing.";
+            globals.webrtc_module.reset(nullptr);
+            return nullptr;
+        }
     }
-
-    auto producer = android::recording::createVideoProducer(
-            globals.fbWidth, globals.fbHeight, fps, globals.displayAgent);
-    globals.webrtc_module.reset(new VideoFrameSharer(
-            globals.fbWidth, globals.fbHeight, fps, handle));
-
-    // We can fail due to shared memory allocation issues.
-    if (!globals.webrtc_module->attachProducer(std::move(producer)))
-        return false;
 
     globals.webrtc_module->start();
-    return true;
+    gpu_frame_set_record_mode(true);
+    const char* handle = globals.sharedMemoryHandle.c_str();
+    D("%s(handle=%s, fps=%d)", __func__, handle, fps);
+    return handle;
 }
 
-bool stop_webrtc_module() {
-    auto& globals = *sGlobals;
-
-    AutoLock lock(globals.lock);
-
-    if (globals.webrtc_module) {
-        globals.webrtc_module->stop();
-    }
-
+bool stop_shared_memory_module() {
+    gpu_frame_set_record_mode(false);
     return true;
 }
 
 extern "C" {
-bool start_webrtc(const char* handle, int fps) {
-    return start_webrtc_module(handle, fps);
+const char* start_webrtc(int fps) {
+    return start_shared_memory_module(fps);
 }
 
 bool stop_webrtc() {
-    return stop_webrtc_module();
+    return stop_shared_memory_module();
 }
 }
-

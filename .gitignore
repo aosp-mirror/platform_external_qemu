@@ -1,3 +1,5 @@
+/build*/
+/.vscode/*
 /objs/*
 /config-devices.*
 /config-all-devices.*
@@ -118,6 +120,7 @@
 /qemu-monitor-info.texi
 /qemu-version.h
 /qemu-version.h.tmp
+/qemu2-auto-generated/asm
 /module_block.h
 /scsi/qemu-pr-helper
 /vhost-user-scsi
@@ -191,5 +194,11 @@ docker-src.*
 *~
 *.DS_Store
 /default.profraw
+/build
+.vscode/cquery_cached_index
 *.ast_raw
 *.depend_raw
+.vs/
+/.gradle
+/.settings
+/.project

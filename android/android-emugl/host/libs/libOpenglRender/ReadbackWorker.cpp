@@ -1,42 +1,78 @@
-
+/*
+* Copyright (C) 2017 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 #include "ReadbackWorker.h"
 
-#include "ColorBuffer.h"
-#include "DispatchTables.h"
-#include "FrameBuffer.h"
-#include "RenderThreadInfo.h"
-#include "OpenGLESDispatch/EGLDispatch.h"
-#include "OpenGLESDispatch/GLESv2Dispatch.h"
+#include <string.h>                           // for memcpy
 
+#include "ColorBuffer.h"                      // for ColorBuffer
+#include "DispatchTables.h"                   // for s_gles2
+#include "FbConfig.h"                         // for FbConfig, FbConfigList
+#include "FrameBuffer.h"                      // for FrameBuffer
+#include "OpenGLESDispatch/EGLDispatch.h"     // for EGLDispatch, s_egl
+#include "OpenGLESDispatch/GLESv2Dispatch.h"  // for GLESv2Dispatch
+#include "emugl/common/misc.h"                // for getGlesVersion
 
-ReadbackWorker::ReadbackWorker(uint32_t width, uint32_t height) :
-    mFb(FrameBuffer::getFB()),
-    mBufferSize(4 * width * height /* RGBA8 (4 bpp) */),
-    mBuffers(3 /* mailbox */, 0) {
-}
+ReadbackWorker::recordDisplay::recordDisplay(uint32_t displayId, uint32_t w, uint32_t h)
+    : mBufferSize(4 * w * h /* RGBA8 (4 bpp) */),
+      mBuffers(4 /* mailbox */,
+               0),  // Note, last index is used for duplicating buffer on flush
+      mDisplayId(displayId) {}
 
 void ReadbackWorker::initGL() {
+    mFb = FrameBuffer::getFB();
     mFb->createAndBindTrivialSharedContext(&mContext, &mSurf);
-    s_gles2.glGenBuffers(mBuffers.size(), &mBuffers[0]);
-    for (auto buffer : mBuffers) {
-        s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer);
-        s_gles2.glBufferData(GL_PIXEL_PACK_BUFFER, mBufferSize,
-                             0 /* init, with no data */,
-                             GL_STREAM_READ);
-    }
-    s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+    mFb->createAndBindTrivialSharedContext(&mFlushContext, &mFlushSurf);
 }
 
 ReadbackWorker::~ReadbackWorker() {
     s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
     s_gles2.glBindBuffer(GL_COPY_READ_BUFFER, 0);
-    s_gles2.glDeleteBuffers(mBuffers.size(), &mBuffers[0]);
+    for (auto& r : mRecordDisplays) {
+        s_gles2.glDeleteBuffers(r.second.mBuffers.size(), &r.second.mBuffers[0]);
+    }
     mFb->unbindAndDestroyTrivialSharedContext(mContext, mSurf);
+    mFb->unbindAndDestroyTrivialSharedContext(mFlushContext, mFlushSurf);
 }
 
-void ReadbackWorker::doNextReadback(ColorBuffer* cb, void* fbImage,
-                                    bool repaint) {
+void ReadbackWorker::setRecordDisplay(uint32_t displayId, uint32_t w, uint32_t h, bool add) {
+    android::base::AutoLock lock(mLock);
+    if (add) {
+        mRecordDisplays.emplace(displayId, recordDisplay(displayId, w, h));
+        recordDisplay& r = mRecordDisplays[displayId];
+        s_gles2.glGenBuffers(r.mBuffers.size(), &r.mBuffers[0]);
+        for (auto buffer : r.mBuffers) {
+            s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer);
+            s_gles2.glBufferData(GL_PIXEL_PACK_BUFFER, r.mBufferSize,
+                             0 /* init, with no data */, GL_STREAM_READ);
+        }
+        s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+    } else {
+        recordDisplay& r = mRecordDisplays[displayId];
+        s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+        s_gles2.glBindBuffer(GL_COPY_READ_BUFFER, 0);
+        s_gles2.glDeleteBuffers(r.mBuffers.size(), &r.mBuffers[0]);
+        mRecordDisplays.erase(displayId);
+    }
+}
 
+void ReadbackWorker::doNextReadback(uint32_t displayId,
+                                    ColorBuffer* cb,
+                                    void* fbImage,
+                                    bool repaint,
+                                    bool readbackBgra) {
     // if |repaint|, make sure that the current frame is immediately sent down
     // the pipeline and made available to the consumer by priming async
     // readback; doing 4 consecutive reads in a row, which should be enough to
@@ -68,60 +104,91 @@ void ReadbackWorker::doNextReadback(ColorBuffer* cb, void* fbImage,
     //   doesn't happen either (avoid sync point in glMapBufferRange)
     for (int i = 0; i < numIter; i++) {
         android::base::AutoLock lock(mLock);
-        if (mIsCopying) {
-            switch (mMapCopyIndex) {
+        recordDisplay& r = mRecordDisplays[displayId];
+        if (r.mIsCopying) {
+            switch (r.mMapCopyIndex) {
                 // To keep double buffering effect on
                 // glReadPixels, need to keep even/oddness of
                 // mReadPixelsIndexEven and mReadPixelsIndexOdd.
                 case 0:
-                    mReadPixelsIndexEven = 2;
-                    mReadPixelsIndexOdd = 1;
+                    r.mReadPixelsIndexEven = 2;
+                    r.mReadPixelsIndexOdd = 1;
                     break;
                 case 1:
-                    mReadPixelsIndexEven = 0;
-                    mReadPixelsIndexOdd = 2;
+                    r.mReadPixelsIndexEven = 0;
+                    r.mReadPixelsIndexOdd = 2;
                     break;
                 case 2:
-                    mReadPixelsIndexEven = 0;
-                    mReadPixelsIndexOdd = 1;
+                    r.mReadPixelsIndexEven = 0;
+                    r.mReadPixelsIndexOdd = 1;
                     break;
             }
         } else {
-            mReadPixelsIndexEven = 0;
-            mReadPixelsIndexOdd = 1;
-            mMapCopyIndex = mPrevReadPixelsIndex;
+            r.mReadPixelsIndexEven = 0;
+            r.mReadPixelsIndexOdd = 1;
+            r.mMapCopyIndex = r.mPrevReadPixelsIndex;
         }
 
         // Double buffering on buffer A / B part
         uint32_t readAt;
-        if (m_readbackCount % 2 == 0) {
-            readAt = mReadPixelsIndexEven;
+        if (r.m_readbackCount % 2 == 0) {
+            readAt = r.mReadPixelsIndexEven;
         } else {
-            readAt = mReadPixelsIndexOdd;
+            readAt = r.mReadPixelsIndexOdd;
         }
-        lock.unlock();
+        r.m_readbackCount++;
+        r.mPrevReadPixelsIndex = readAt;
 
-        cb->readbackAsync(mBuffers[readAt]);
+        cb->readbackAsync(r.mBuffers[readAt], readbackBgra);
 
         // It's possible to post callback before any of the async readbacks
         // have written any data yet, which results in a black frame.  Safer
         // option to avoid this glitch is to wait until all 3 potential
         // buffers in our triple buffering setup have had chances to readback.
-        if (m_readbackCount > 2) {
-            mFb->doPostCallback(fbImage);
+        lock.unlock();
+        if (r.m_readbackCount > 3) {
+            mFb->doPostCallback(fbImage, r.mDisplayId);
         }
-        m_readbackCount++;
-
-        mPrevReadPixelsIndex = readAt;
     }
 }
 
-void ReadbackWorker::getPixels(void* buf, uint32_t bytes) {
+void ReadbackWorker::flushPipeline(uint32_t displayId) {
     android::base::AutoLock lock(mLock);
-    mIsCopying = true;
+    recordDisplay& r = mRecordDisplays[displayId];
+    if (r.mIsCopying) {
+        // No need to make the last frame available,
+        // we are currently being read.
+        return;
+    }
+
+    auto src = r.mBuffers[r.mPrevReadPixelsIndex];
+    auto dst = r.mBuffers.back();
+
+    // This is not called from a renderthread, so let's activate
+    // the context.
+    s_egl.eglMakeCurrent(mFb->getDisplay(), mFlushSurf, mFlushSurf, mFlushContext);
+
+    // We now copy the last frame into slot 4, where no other thread
+    // ever writes.
+    s_gles2.glBindBuffer(GL_COPY_READ_BUFFER, src);
+    s_gles2.glBindBuffer(GL_COPY_WRITE_BUFFER, dst);
+    s_gles2.glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0,
+                                r.mBufferSize);
+    s_egl.eglMakeCurrent(mFb->getDisplay(), EGL_NO_SURFACE, EGL_NO_SURFACE,
+                         EGL_NO_CONTEXT);
+
+    r.mMapCopyIndex = r.mBuffers.size() - 1;
+    lock.unlock();
+    mFb->doPostCallback(nullptr, r.mDisplayId);
+}
+
+void ReadbackWorker::getPixels(uint32_t displayId, void* buf, uint32_t bytes) {
+    android::base::AutoLock lock(mLock);
+    recordDisplay& r = mRecordDisplays[displayId];
+    r.mIsCopying = true;
     lock.unlock();
 
-    GLuint buffer = mBuffers[mMapCopyIndex];
+    GLuint buffer = r.mBuffers[r.mMapCopyIndex];
     s_gles2.glBindBuffer(GL_COPY_READ_BUFFER, buffer);
     void* pixels = s_gles2.glMapBufferRange(GL_COPY_READ_BUFFER, 0, bytes,
                                             GL_MAP_READ_BIT);
@@ -129,6 +196,6 @@ void ReadbackWorker::getPixels(void* buf, uint32_t bytes) {
     s_gles2.glUnmapBuffer(GL_COPY_READ_BUFFER);
 
     lock.lock();
-    mIsCopying = false;
+    r.mIsCopying = false;
     lock.unlock();
 }

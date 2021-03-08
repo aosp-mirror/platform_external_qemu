@@ -1,0 +1,65 @@
+// Copyright (C) 2018 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+syntax = "proto2";
+
+package android.emulation.control;
+
+option java_package = "com.android.emulator.control";
+
+// Used to communicate the socket state between a waterfall service running
+// inside the emulator (guest) and a domain socket running on the host
+// (emulator)
+//
+// The host does not have the abiliy to open direct connections, but can accept
+// incoming connections.
+//
+// The protocol is as follows:
+//
+// - The first message on a channel from guest -> host is always a
+// "SocketControl" message.
+// - A channel that is identified with fd=0 is called the control channel.
+//   Only SocketControl messages are exchanged on this channel.
+//
+// For channel 0:
+//    - If the hosts sends an open message:
+//           - The guest should respond with a new connection, With the first
+//           message
+//             an identity message with the requested fd
+//    - If the hosts sends a close message:
+//           - The guest can close the connection with the given fd, no new
+//           messages will be send on the
+//             channel. (Be aware of out of order delivery, there still might be
+//             some leftover bytes)
+//    - If the guests sends a close message:
+//           - The host can close the connection with the given fd, no new
+//           messages will be send on the
+//             channel. (Be aware of out of order delivery, there still might be
+//             some leftover bytes)
+//
+// For a new connection the host usually will read the socket control message,
+// and pass on the remaining bytes to whomever wants to consume them.
+message SocketControl {
+    enum Sort {
+        identity = 0;  // Indicates the identify of the channel on which this
+                       // message is sent.
+        open = 1;      // Request the client to open up a connection with the
+                       // requested id.
+        close = 2;     // Indicate that the channel with the given fd is to be
+                    // closed. More specifically No new data will be placed on
+                    // the wire after the sending of this message.
+    }
+
+    required Sort sort = 1;   // 1 Byte
+    required fixed32 fd = 2;  // 4 Bytes
+}

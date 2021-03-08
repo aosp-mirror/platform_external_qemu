@@ -1,0 +1,1193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LocationPage</class>
+ <widget class="QWidget" name="LocationPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>622</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QTabWidget" name="locationTabs">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>20</y>
+     <width>630</width>
+     <height>588</height>
+    </rect>
+   </property>
+   <property name="cursor">
+    <cursorShape>ArrowCursor</cursorShape>
+   </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <widget class="QWidget" name="singlePointsTab">
+    <attribute name="title">
+     <string>Single points</string>
+    </attribute>
+    <widget class="QListWidget" name="loc_pointList">
+     <property name="geometry">
+      <rect>
+       <x>332</x>
+       <y>38</y>
+       <width>272</width>
+       <height>472</height>
+      </rect>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="autoScroll">
+      <bool>false</bool>
+     </property>
+     <property name="selectionRectVisible">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="RaisedMaterialButton" name="loc_savePoint">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>520</y>
+       <width>132</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>SAVE POINT</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="RaisedMaterialButton" name="loc_singlePoint_setLocationButton">
+     <property name="geometry">
+      <rect>
+       <x>472</x>
+       <y>520</y>
+       <width>132</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>SET LOCATION</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="loc_savedPointsLabel">
+     <property name="geometry">
+      <rect>
+       <x>332</x>
+       <y>20</y>
+       <width>78</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Saved points</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Title</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="loc_pointSortBox">
+     <property name="geometry">
+      <rect>
+       <x>472</x>
+       <y>20</y>
+       <width>132</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>Sort by name</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QLabel" name="loc_noSavedPoints_mask">
+     <property name="geometry">
+      <rect>
+       <x>342</x>
+       <y>48</y>
+       <width>252</width>
+       <height>452</height>
+      </rect>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgba(128, 128, 128, 200)</string>
+     </property>
+     <property name="text">
+      <string>No points have been saved</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="loc_routesTab">
+    <attribute name="title">
+     <string>Routes</string>
+    </attribute>
+    <widget class="RaisedMaterialButton" name="loc_saveRoute">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>520</y>
+       <width>132</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>SAVE ROUTE</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="RaisedMaterialButton" name="loc_playRouteButton">
+     <property name="geometry">
+      <rect>
+       <x>472</x>
+       <y>520</y>
+       <width>132</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>PLAY ROUTE</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="loc_noSavedRoutes_mask">
+     <property name="geometry">
+      <rect>
+       <x>342</x>
+       <y>48</y>
+       <width>252</width>
+       <height>352</height>
+      </rect>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgba(128, 128, 128, 200)</string>
+     </property>
+     <property name="text">
+      <string>No routes have been saved</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="loc_savedRoutesLabel_2">
+     <property name="geometry">
+      <rect>
+       <x>332</x>
+       <y>20</y>
+       <width>78</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Saved routes</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Title</string>
+     </property>
+    </widget>
+    <widget class="QListWidget" name="loc_routeList">
+     <property name="geometry">
+      <rect>
+       <x>332</x>
+       <y>38</y>
+       <width>272</width>
+       <height>372</height>
+      </rect>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="autoScroll">
+      <bool>false</bool>
+     </property>
+     <property name="selectionRectVisible">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QTextBrowser" name="loc_routeInfo">
+     <property name="geometry">
+      <rect>
+       <x>332</x>
+       <y>414</y>
+       <width>272</width>
+       <height>96</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="loc_travelMode">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>140</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>Driving</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Walking</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Bicycling</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Transit</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QComboBox" name="loc_routeSpeed">
+     <property name="geometry">
+      <rect>
+       <x>172</x>
+       <y>520</y>
+       <width>111</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>Speed 1X</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Speed 2X</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Speed 3X</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Speed 4X</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Speed 5X</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QGroupBox" name="loc_repeatLabel">
+     <property name="geometry">
+      <rect>
+       <x>304</x>
+       <y>520</y>
+       <width>121</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Repeat playback</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="loc_repeatRoute">
+     <property name="geometry">
+      <rect>
+       <x>304</x>
+       <y>540</y>
+       <width>120</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Disable mouse wheel</string>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Toggle</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <zorder>loc_routeList</zorder>
+    <zorder>loc_saveRoute</zorder>
+    <zorder>loc_playRouteButton</zorder>
+    <zorder>loc_savedRoutesLabel_2</zorder>
+    <zorder>loc_routeInfo</zorder>
+    <zorder>loc_noSavedRoutes_mask</zorder>
+    <zorder>loc_travelMode</zorder>
+    <zorder>loc_routeSpeed</zorder>
+    <zorder>loc_repeatLabel</zorder>
+    <zorder>loc_repeatRoute</zorder>
+   </widget>
+   <widget class="QWidget" name="settingsTab">
+    <attribute name="title">
+     <string>Settings</string>
+    </attribute>
+    <widget class="QGroupBox" name="loc_settingsUsePinPointAccuracyLabel">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>581</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Use pin point accuracy?</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="loc_settingsUsePinPointAccuracy">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>86</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Disable mouse wheel</string>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Toggle</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="loc_settingsSimulateWifiHandoffLabel">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>80</y>
+       <width>581</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Simulate wifi - cellular handoff in presets?</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="loc_settingsSimulateWifiHandoff">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>100</y>
+       <width>86</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Disable mouse wheel</string>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Toggle</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="loc_settingsHidePresetRoutesLabel">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>140</y>
+       <width>581</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Hide preset routes?</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="loc_settingsHidePresetRoutes">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>160</y>
+       <width>86</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Disable mouse wheel</string>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Toggle</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab">
+    <attribute name="title">
+     <string>v1</string>
+    </attribute>
+    <widget class="RaisedMaterialButton" name="loc_sendPointButton">
+     <property name="geometry">
+      <rect>
+       <x>462</x>
+       <y>202</y>
+       <width>132</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>SEND</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="loc_modeSwitch">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>32</y>
+       <width>140</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>Decimal</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Sexigesimal</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QGroupBox" name="locationGroup_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>232</y>
+       <width>180</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>GPS data playback</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="loc_altitudeInput">
+     <property name="geometry">
+      <rect>
+       <x>314</x>
+       <y>112</y>
+       <width>128</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Altitude in meters</string>
+     </property>
+     <property name="text">
+      <string>0</string>
+     </property>
+     <property name="class" stdset="0">
+      <string>EditableValue</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="locationGroup_3">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>2</y>
+       <width>180</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>GPS data point</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QTableWidget" name="loc_pathTable">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>272</y>
+       <width>584</width>
+       <height>247</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
+     <property name="showGrid">
+      <bool>false</bool>
+     </property>
+     <property name="rowCount">
+      <number>1</number>
+     </property>
+     <property name="columnCount">
+      <number>6</number>
+     </property>
+     <attribute name="horizontalHeaderCascadingSectionResizes">
+      <bool>true</bool>
+     </attribute>
+     <attribute name="horizontalHeaderStretchLastSection">
+      <bool>true</bool>
+     </attribute>
+     <attribute name="verticalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
+     <row/>
+     <column>
+      <property name="text">
+       <string>Delay (sec)</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="textAlignment">
+       <set>AlignTrailing|AlignVCenter</set>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Latitude</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="textAlignment">
+       <set>AlignTrailing|AlignVCenter</set>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Longitude</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="textAlignment">
+       <set>AlignTrailing|AlignVCenter</set>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Elevation</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="textAlignment">
+       <set>AlignTrailing|AlignVCenter</set>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Name</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="textAlignment">
+       <set>AlignTrailing|AlignVCenter</set>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Description</string>
+      </property>
+      <property name="font">
+       <font>
+        <family>Roboto</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="textAlignment">
+       <set>AlignTrailing|AlignVCenter</set>
+      </property>
+     </column>
+    </widget>
+    <widget class="QComboBox" name="loc_playbackSpeed">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>533</y>
+       <width>111</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>Speed 1X</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Speed 2X</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Speed 3X</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Speed 4X</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Speed 5X</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QLabel" name="label_14">
+     <property name="geometry">
+      <rect>
+       <x>314</x>
+       <y>92</y>
+       <width>128</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Altitude (meters)</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_15">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>32</y>
+       <width>140</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Coordinate system</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_12">
+     <property name="geometry">
+      <rect>
+       <x>314</x>
+       <y>32</y>
+       <width>128</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Latitude</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="AngleInputWidget" name="loc_latitudeInput" native="true">
+     <property name="geometry">
+      <rect>
+       <x>314</x>
+       <y>52</y>
+       <width>128</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="RaisedMaterialButton" name="loc_GpxKmlButton">
+     <property name="geometry">
+      <rect>
+       <x>462</x>
+       <y>528</y>
+       <width>132</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>LOAD GPX/KML</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="loc_currentLocLabel">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>92</y>
+       <width>180</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Currently reported location</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_13">
+     <property name="geometry">
+      <rect>
+       <x>462</x>
+       <y>32</y>
+       <width>128</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Longitude</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="RaisedMaterialButton" name="loc_playStopButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>528</y>
+       <width>36</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Play</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../resources.qrc">
+       <normaloff>:/light/play_arrow</normaloff>:/light/play_arrow</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="themeIconName" stdset="0">
+      <string>play_arrow</string>
+     </property>
+     <property name="themeIconName_disabled" stdset="0">
+      <string>play_arrow_disabled</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="AngleInputWidget" name="loc_longitudeInput" native="true">
+     <property name="geometry">
+      <rect>
+       <x>462</x>
+       <y>52</y>
+       <width>128</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QTextBrowser" name="loc_currentLoc">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>280</width>
+       <height>60</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+    </widget>
+    <widget class="QLabel" name="loc_speedLabel">
+     <property name="geometry">
+      <rect>
+       <x>462</x>
+       <y>92</y>
+       <width>128</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Speed (knots)</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="loc_speedInput">
+     <property name="geometry">
+      <rect>
+       <x>462</x>
+       <y>112</y>
+       <width>128</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Speed in knots</string>
+     </property>
+     <property name="text">
+      <string>0</string>
+     </property>
+     <property name="class" stdset="0">
+      <string>EditableValue</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RaisedMaterialButton</class>
+   <extends>QPushButton</extends>
+   <header>android/skin/qt/raised-material-button.h</header>
+  </customwidget>
+  <customwidget>
+   <class>AngleInputWidget</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/angle-input-widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

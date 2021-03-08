@@ -32,6 +32,7 @@ typedef struct ASimCardRec_ {
     char        puk[ A_SIM_PUK_SIZE+1 ];
     int         pin_retries;
     int         port;
+    char        curr_fileid_status[256];
 
     char        out_buff[ 256 ];
     int         out_size;
@@ -57,6 +58,12 @@ asimcard_destroy( ASimCard  card )
 {
     /* nothing really */
     card=card;
+}
+
+void
+asimcard_set_fileid_status( ASimCard sim, const char* str )
+{
+    snprintf(sim->curr_fileid_status, sizeof(sim->curr_fileid_status), "%s", str);
 }
 
 static __inline__ int
@@ -458,6 +465,7 @@ asimcard_io( ASimCard  sim, const char*  cmd )
         { "+CRSM=178,28480,1,4,32", "+CRSM: 144,0,ffffffffffffffffffffffffffffffffffff07815155258131f5ffffffffffff" },
 
         { "+CRSM=192,28615,0,0,15", "+CRSM: 144,0,000000406fc7040011a0aa01020120" },
+        // number=+15552175049
         { "+CRSM=178,28615,1,4,32", "+CRSM: 144,0,566f6963656d61696cffffffffffffffffff07915155125740f9ffffffffffff" },
 
         /* b/37718561
@@ -466,13 +474,42 @@ asimcard_io( ASimCard  sim, const char*  cmd )
            the 15's f is simply copied from my own phone; the value does not seem
            to matter that much; but the length has to be a multiple of 5's
          */
-        { "+CRSM=192,28539,0,0,15", "+CRSM: 144,0,000000406fc7040011a0aa01000000" },
-        { "+CRSM=176,28539,0,0,64", "+CRSM: 144,0,ffffffffffffffffffffffff" },
+        { "+CRSM=192,28539,0,0,15", "+CRSM: 144,0,0000000f6fc7040011a0aa01000000" },
+        { "+CRSM=176,28539,0,0,15", "+CRSM: 144,0,21635487F910FFFFFFFFFFFFFFFFFF" },
 
         { NULL, NULL }
     };
 
     assert( memcmp( cmd, "+CRSM=", 6 ) == 0 );
+
+#define SET_FPLMN_COMMAND "+CRSM=214,28539,0,0,15,"
+    static char s_fplmn[256] = "21635487F910FFFFFFFFFFFFFFFFFF";
+    if (0 == strncmp(cmd, SET_FPLMN_COMMAND, strlen(SET_FPLMN_COMMAND))) {
+        snprintf(s_fplmn, sizeof(s_fplmn), "%s", cmd + strlen(SET_FPLMN_COMMAND));
+        return "+CRSM: 144,0";
+    }
+
+#define GET_FPLMN_COMMAND "+CRSM=176,28539,0,0,15"
+    if (0 == strncmp(cmd, GET_FPLMN_COMMAND, strlen(GET_FPLMN_COMMAND))) {
+        snprintf( sim->out_buff, sizeof(sim->out_buff), "+CRSM: 144,0,%s", s_fplmn);
+        return sim->out_buff;
+    }
+
+
+#define SET_VOICE_MAIL_NUMBER_COMMAND "+CRSM=220,28615,1,4,32,"
+
+    static char s_voice_mail_number[256] = "566f6963656d61696cffffffffffffffffff07915155125740f9ffffffffffff";
+    if (0 == strncmp(cmd, SET_VOICE_MAIL_NUMBER_COMMAND, strlen(SET_VOICE_MAIL_NUMBER_COMMAND))) {
+        snprintf(s_voice_mail_number, sizeof(s_voice_mail_number), "%s", cmd + strlen(SET_VOICE_MAIL_NUMBER_COMMAND));
+        return "+CRSM: 144,0";
+    }
+
+#define GET_VOICE_MAIL_NUMBER_COMMAND "+CRSM=178,28615,1,4,32"
+    if (0 == strncmp(cmd, GET_VOICE_MAIL_NUMBER_COMMAND, strlen(GET_VOICE_MAIL_NUMBER_COMMAND))) {
+        snprintf( sim->out_buff, sizeof(sim->out_buff), "+CRSM: 144,0,%s", s_voice_mail_number);
+        return sim->out_buff;
+    }
+
 
 #if ENABLE_DYNAMIC_RECORDS
     if ( sscanf(cmd, "+CRSM=%d,%d,%d,%d,%d", &command, &id, &p1, &p2, &p3) == 5 ) {
@@ -558,11 +595,17 @@ asimcard_io( ASimCard  sim, const char*  cmd )
         return sim->out_buff;
         }
 
+    if (!strcmp("+CRSM=242,0,0,0,0", cmd)) {
+        snprintf( sim->out_buff, sizeof(sim->out_buff), "+CRSM: 144,0,%s", sim->curr_fileid_status);
+        return sim->out_buff;
+    }
+
     for (nn = 0; answers[nn].cmd != NULL; nn++) {
         if ( !strcmp( answers[nn].cmd, cmd ) ) {
             return answers[nn].answer;
         }
     }
+
     return "ERROR: BAD COMMAND";
 }
 

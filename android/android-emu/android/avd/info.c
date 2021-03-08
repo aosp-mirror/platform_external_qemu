@@ -15,6 +15,7 @@
 #include "android/avd/util.h"
 #include "android/avd/keys.h"
 #include "android/base/ArraySize.h"
+#include "android/base/export.h"
 #include "android/cmdline-option.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/featurecontrol/feature_control.h"
@@ -41,9 +42,21 @@
 AvdInfoParams   android_avdParams[1];
 AvdInfo*        android_avdInfo;
 
-/* for debugging */
-#define  D(...)   VERBOSE_PRINT(init,__VA_ARGS__)
-#define  DD(...)  VERBOSE_PRINT(avd_config,__VA_ARGS__)
+AEMU_EXPORT AvdInfo** aemu_get_android_avdInfoPtr() {
+    return &android_avdInfo;
+}
+
+/* set to 1 for debugging */
+#define DEBUG 0
+
+#if DEBUG >= 1
+#include <stdio.h>
+#define D(...) VERBOSE_PRINT(init,__VA_ARGS__)
+#define DD(...) VERBOSE_PRINT(avd_config,__VA_ARGS__)
+#else
+#define D(...) (void)0
+#define DD(...) (void)0
+#endif
 
 /* technical note on how all of this is supposed to work:
  *
@@ -113,6 +126,7 @@ struct AvdInfo {
 
     /* for the normal virtual device case */
     char*     deviceName;
+    char*     deviceId;
     char*     sdkRootPath;
     char*     searchPaths[ MAX_SEARCH_PATHS ];
     int       numSearchPaths;
@@ -146,6 +160,9 @@ struct AvdInfo {
     /* image files */
     char*     imagePath [ AVD_IMAGE_MAX ];
     char      imageState[ AVD_IMAGE_MAX ];
+
+    /* skip checks */
+    bool noChecks;
 };
 
 
@@ -199,6 +216,7 @@ avdInfo_free( AvdInfo*  i )
         }
 
         AFREE(i->deviceName);
+        AFREE(i->deviceId);
         AFREE(i);
     }
 }
@@ -469,6 +487,10 @@ _avdInfo_getRootIni( AvdInfo*  i )
 static int
 _avdInfo_getContentPath( AvdInfo*  i )
 {
+    if (i->inAndroidBuild && i->androidOut && i->contentPath) {
+        return 0;
+    }
+
     char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
 
     i->contentPath = iniFile_getString(i->rootIni, ROOT_ABS_PATH_KEY, NULL);
@@ -617,6 +639,8 @@ static const struct {
     { 26, "Oreo", "8.0 (Oreo) - API 26" },
     { 27, "Oreo", "8.1 (Oreo) - API 27" },
     { 28, "Pie", "9.0 (Pie) - API 28" },
+    { 29, "Q", "10.0 (Q) - API 29" },
+    { 30, "R", "11.0 (R) - API 30"}
 };
 
 const char* avdInfo_getApiDessertName(int apiLevel) {
@@ -709,7 +733,7 @@ _avdInfo_getSearchPaths( AvdInfo*  i )
     if (i->configIni == NULL)
         return true;
 
-    if (android_cmdLineOptions->sysdir) {
+    if (android_cmdLineOptions && android_cmdLineOptions->sysdir) {
         // The user specified a path on the command line.
         // Use only that.
         i->numSearchPaths = 1;
@@ -921,6 +945,8 @@ avdInfo_new( const char*  name, AvdInfoParams*  params )
 
     ANEW0(i);
     str_reset(&i->deviceName, name);
+    str_reset(&i->deviceId, name);
+    i->noChecks = false;
 
     if ( _avdInfo_getSdkRoot(i) < 0     ||
          _avdInfo_getRootIni(i) < 0     ||
@@ -955,6 +981,13 @@ avdInfo_new( const char*  name, AvdInfoParams*  params )
 FAIL:
     avdInfo_free(i);
     return NULL;
+}
+
+void avdInfo_setAvdId( AvdInfo* i, const char* avdId)
+{
+    if (i == NULL) return;
+
+    str_reset(&i->deviceId, avdId);
 }
 
 /***************************************************************
@@ -1051,6 +1084,7 @@ avdInfo_newForAndroidBuild( const char*     androidBuildRoot,
     _avdInfo_extractBuildProperties(i);
 
     str_reset(&i->deviceName, "<build>");
+    str_reset(&i->deviceId, "<build>");
 
     i->numSearchPaths = 1;
     i->searchPaths[0] = strdup(androidOut);
@@ -1076,6 +1110,12 @@ const char*
 avdInfo_getName( const AvdInfo*  i )
 {
     return i ? i->deviceName : NULL;
+}
+
+const char*
+avdInfo_getId( const AvdInfo*  i )
+{
+    return i ? i->deviceId : NULL;
 }
 
 const char*
@@ -1209,6 +1249,10 @@ avdInfo_getRanchuKernelPath( const AvdInfo*  i )
 char*
 avdInfo_getRamdiskPath( const AvdInfo* i )
 {
+    const char* userImageName = _imageFileNames[ AVD_IMAGE_USERRAMDISK ];
+    char* result = _avdInfo_getContentOrSdkFilePath(i, userImageName);
+    if (result) return result;
+
     const char* imageName = _imageFileNames[ AVD_IMAGE_RAMDISK ];
     return _avdInfo_getContentOrSdkFilePath(i, imageName);
 }
@@ -1225,8 +1269,18 @@ char*  avdInfo_getDefaultCachePath( const AvdInfo*  i )
     return _getFullFilePath(i->contentPath, imageName);
 }
 
+static bool is_armish(const AvdInfo* i);
+
 char*  avdInfo_getSdCardPath( const AvdInfo* i )
 {
+    if (i->apiLevel >=30 && is_armish(i)) {
+        // BUG: 174481551
+        // ignore sdcard for arm when api is >=30, as
+        // it makes setting up the metadata disk id tricky
+        // TODO: figure out better approach
+        dprint("INFO: ignore sdcard for arm at api level >= 30");
+        return NULL;
+    }
     const char* imageName = _imageFileNames[ AVD_IMAGE_SDCARD ];
     char*       path;
 
@@ -1347,6 +1401,7 @@ const char* const arm_device_id[] = {
     "a003a00",
     "a003800",
     "a003600",
+    "a003400",
 };
 
 const char* const mips_device_id[] = {
@@ -1404,6 +1459,9 @@ char* get_device_path(const AvdInfo* info, const char* image)
     if (has_vendor(info)) {
         device_table[i++] = "vendor";
     }
+    if (has_encryption(info)) {
+        device_table[i++] = "encryption";
+    }
     device_table[i++] = "userdata";
     device_table[i++] = "cache";
     device_table[i++] = "system";
@@ -1445,6 +1503,24 @@ avdInfo_getVendorImageDevicePathInGuest( const AvdInfo*  i )
         return get_device_path(i, "vendor");
     }
     return NULL;
+}
+
+char*
+avdInfo_getDynamicPartitionBootDevice( const AvdInfo*  i )
+{
+    if (is_x86ish(i)) {
+        return strdup("pci0000:00/0000:00:03.0");
+    }
+
+    char* system_path = get_device_path(i, "system");
+    if (!system_path) {
+        return NULL;
+    }
+
+    char* bootdev = strdup(system_path + strlen("/dev/block/platform/"));
+    char* end = strstr(bootdev, "/by-name/system");
+    *end = '\0';
+    return bootdev;
 }
 
 char*
@@ -1660,6 +1736,37 @@ avdInfo_getSkinInfo( const AvdInfo*  i, char** pSkinName, char** pSkinDir )
     *pSkinName = NULL;
     *pSkinDir  = NULL;
 
+    // TODO: Apple Silicon Qt support is spotty; we can't currently use device skins with
+    // our build. So hardcode the skin to the lcd widthxheight.
+#if defined(__APPLE__) && defined(__aarch64__)
+    if (i->configIni != NULL ) {
+        /* We need to create a name.
+         * Make a "magical" name using the screen size from config.ini
+         * (parse_skin_files() in main-common-ui.c parses this name
+         *  to determine the screen size.)
+         */
+        int width = iniFile_getInteger(i->configIni, "hw.lcd.width", 0);
+        int height = iniFile_getInteger(i->configIni, "hw.lcd.height", 0);
+        if (width > 0 && height > 0) {
+            char skinNameBuf[64];
+            snprintf(skinNameBuf, sizeof skinNameBuf, "%dx%d", width, height);
+            skinName = ASTRDUP(skinNameBuf);
+        } else {
+            skinName = ASTRDUP(SKIN_DEFAULT);
+        }
+    } else {
+        skinName = ASTRDUP(SKIN_DEFAULT);
+    }
+
+    *pSkinName = skinName;
+    return;
+#endif
+
+    if (!i->contentPath) {
+        *pSkinName = ASTRDUP(SKIN_DEFAULT);
+        return;
+    }
+
     /* First, see if the config.ini contains a SKIN_PATH entry that
      * names the full directory path for the skin.
      */
@@ -1868,6 +1975,7 @@ const char* avdInfo_getSdCardSize(const AvdInfo* i) {
 bool avdInfo_sysImgGuestRenderingBlacklisted(const AvdInfo* i) {
     switch (i->apiLevel) {
     // Allow guest rendering for older API levels
+    case 9:
     case 10:
     case 15:
     case 16:
@@ -1907,3 +2015,98 @@ void avdInfo_replaceDataPartitionSizeInConfigIni(AvdInfo* i, int64_t sizeBytes) 
     char*  iniPath = _avdInfo_getContentFilePath(i, CORE_CONFIG_INI);
     iniFile_saveToFile(i->configIni, iniPath);
 }
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+
+bool avdInfo_isMarshmallowOrHigher(AvdInfo* i) {
+    return i->isMarshmallowOrHigher;
+}
+
+AvdInfo* avdInfo_newCustom(
+    const char* name,
+    int apiLevel,
+    const char* abi,
+    const char* arch,
+    bool isGoogleApis,
+    AvdFlavor flavor) {
+
+    AvdInfo* i;
+    ANEW0(i);
+    str_reset(&i->deviceName, name);
+    str_reset(&i->deviceId, name);
+    i->noChecks = true;
+
+    i->apiLevel = apiLevel;
+    i->targetAbi = strdup(abi);
+    i->targetArch = strdup(arch);
+    i->isGoogleApis = isGoogleApis;
+    i->flavor = flavor;
+
+    return i;
+}
+
+void avdInfo_setCustomContentPath(AvdInfo* info, const char* path) {
+    info->contentPath = strdup(path);
+}
+
+void avdInfo_setCustomCoreHwIniPath(AvdInfo* info, const char* path) {
+    info->coreHardwareIniPath = strdup(path);
+}
+
+int avdInfo_maxMultiDisplayEntries() {
+    return 3;
+}
+
+void avdInfo_replaceMultiDisplayInConfigIni(AvdInfo* i, int index,
+                                            int x, int y,
+                                            int w, int h,
+                                            int dpi, int flag ) {
+    if (!i || !i->configIni) return;
+
+//    char x_s[] = "hw.display0.xOffset";
+//    char y_s[] = "hw.display0.yOffset";
+    char w_s[] = "hw.display0.width";
+    char h_s[] = "hw.display0.height";
+    char d_s[] = "hw.display0.density";
+    char f_s[] = "hw.display0.flag";
+    bool write = false;
+
+//    x_s[10] += index;
+//    y_s[10] += index;
+    w_s[10] += index;
+    h_s[10] += index;
+    d_s[10] += index;
+    f_s[10] += index;
+
+//    if (iniFile_getInteger(i->configIni, x_s, -1) != x) {
+//        iniFile_setInteger(i->configIni, x_s, x);
+//        write = true;
+//    }
+//    if (iniFile_getInteger(i->configIni, y_s, -1) != y) {
+//        iniFile_setInteger(i->configIni, y_s, y);
+//        write = true;
+//    }
+    if (iniFile_getInteger(i->configIni, w_s, 0) != w) {
+        iniFile_setInteger(i->configIni, w_s, w);
+        write = true;
+    }
+    if (iniFile_getInteger(i->configIni, h_s, 0) != h) {
+        iniFile_setInteger(i->configIni, h_s, h);
+        write = true;
+    }
+    if (iniFile_getInteger(i->configIni, d_s, 0) != dpi) {
+        iniFile_setInteger(i->configIni, d_s, dpi);
+        write = true;
+    }
+    if (iniFile_getInteger(i->configIni, f_s, 0) != flag) {
+        iniFile_setInteger(i->configIni, f_s, flag);
+        write = true;
+    }
+
+    char*  iniPath = _avdInfo_getContentFilePath(i, CORE_CONFIG_INI);
+    if (iniPath && write)
+        iniFile_saveToFile(i->configIni, iniPath);
+}
+
+
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)

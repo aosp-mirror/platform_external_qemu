@@ -16,6 +16,8 @@
 #include "OpenglRender/RenderLib.h"
 
 #include "android/base/Compiler.h"
+#include "emugl/common/vm_operations.h"
+#include "emugl/common/misc.h"
 
 #include <memory>
 
@@ -29,6 +31,8 @@ public:
     virtual void setAvdInfo(bool phone, int api) override;
     virtual void getGlesVersion(int* maj, int* min) override;
     virtual void setLogger(emugl_logger_struct logger) override;
+    virtual void setGLObjectCounter(
+            android::base::GLObjectCounter* counter) override;
     virtual void setCrashReporter(emugl_crash_reporter_t reporter) override;
     virtual void setFeatureController(emugl_feature_is_enabled_t featureController) override;
     virtual void setSyncDevice(emugl_sync_create_timeline_t,
@@ -40,9 +44,18 @@ public:
 
     virtual void setDmaOps(emugl_dma_ops) override;
 
-    virtual void* getGL(void) override;
+    virtual void setVmOps(const QAndroidVmOperations &vm_operations) override;
+    virtual void setAddressSpaceDeviceControlOps(struct address_space_device_control_ops* ops) override;
 
-    virtual void* getEGL(void) override;
+    virtual void setWindowOps(const QAndroidEmulatorWindowAgent &window_operations,
+                              const QAndroidMultiDisplayAgent &multi_display_operations) override;
+
+    virtual void setUsageTracker(android::base::CpuUsage* cpuUsage,
+                                 android::base::MemoryTracker* memUsage) override;
+
+    virtual void* getGLESv2Dispatch(void) override;
+
+    virtual void* getEGLDispatch(void) override;
 
     virtual bool getOpt(RenderOpt* opt) override;
 

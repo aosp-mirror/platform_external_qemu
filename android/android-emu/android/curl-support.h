@@ -71,6 +71,25 @@ extern bool curl_download(const char* url,
                           void* callback_userdata,
                           char** error);
 
+// Post the given data to the given |url|, passing optional header fields in
+// |headers|, which can be NULL if not needed. The data is sent to
+// the |callback_func| function, which will receive |callback_userdata| as
+// its fourth parameter.
+//
+// This function can block forever.
+//
+// On failure, return false and sets |*error| to a heap-allocated error message
+// string that must be free()-ed by the caller. On success, return true and
+// do not touch |*error|.
+extern bool curl_post(const char* url,
+                      const char* data,
+                      const size_t cData,
+                      const char** headers,
+                      const size_t cHeaders,
+                      CurlWriteCallback callback_func,
+                      void* callback_userdata,
+                      char** error);
+
 // A variant of curl_download() that throws the downloaded file to /dev/null.
 // This is really used to check that a file is available, or to send a POST
 // request if |post_fields| is not NULL. If |allow_404| is true, then an

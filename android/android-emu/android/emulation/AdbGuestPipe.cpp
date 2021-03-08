@@ -32,6 +32,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <iostream>
 
 #include <assert.h>
 
@@ -62,6 +63,7 @@
 
 namespace android {
 namespace emulation {
+
 
 // Technical note: full state transition diagram
 //
@@ -179,10 +181,7 @@ AndroidPipe* AdbGuestPipe::Service::create(void* mHwPipe, const char* args) {
 }
 
 bool AdbGuestPipe::Service::canLoad() const {
-    bool ret = android::featurecontrol::isEnabled(
-            android::featurecontrol::Feature::SnapshotAdb);
-    D("%s: can load %d", __func__, ret);
-    return ret;
+    return true;
 }
 
 AndroidPipe* AdbGuestPipe::Service::load(void* hwPipe,
@@ -192,6 +191,9 @@ AndroidPipe* AdbGuestPipe::Service::load(void* hwPipe,
     if (pipe->mState == State::ClosedByHost) {
         delete pipe;
         pipe = nullptr;
+    } else if (pipe->mReuseFromSnapshot) {
+        D("loaded pending pipe\n");
+        mPipes.push_back(pipe);
     }
     D("%s: [%p] loaded", __func__, pipe);
 
@@ -202,15 +204,15 @@ void AdbGuestPipe::Service::removeAdbGuestPipe(AdbGuestPipe* pipe) {
     mPipes.erase(std::remove(mPipes.begin(), mPipes.end(), pipe), mPipes.end());
 }
 
-void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket) {
+void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket,
+                                             AdbPortType portType) {
     D("%s", __func__);
-    // There must be no active pipe yet, but at least one waiting
-    // for activation in mPipes.
-    // We have one connection from adb sever, stop listening for now.
-    mHostAgent->stopListening();
     AdbGuestPipe* activePipe = searchForActivePipe();
     CHECK(activePipe != nullptr);
-    activePipe->onHostConnection(std::move(socket));
+    if (!hasActivePipe()) {
+        mHostAgent->stopListening();
+    }
+    activePipe->onHostConnection(std::move(socket), portType);
 }
 
 void AdbGuestPipe::Service::preLoad(android::base::Stream* stream) {
@@ -219,7 +221,7 @@ void AdbGuestPipe::Service::preLoad(android::base::Stream* stream) {
 }
 
 void AdbGuestPipe::Service::postLoad(android::base::Stream* stream) {
-    int activeFd = stream->getBe32();
+    int activeFd = stream ? stream->getBe32() : 0;
     if (activeFd == 0) {
         mCurrentActivePipe = nullptr;
     } else {
@@ -257,10 +259,18 @@ void AdbGuestPipe::Service::onPipeClose(AdbGuestPipe* pipe) {
 }
 
 AdbGuestPipe* AdbGuestPipe::Service::searchForActivePipe() {
-    const auto pipeIt = std::find_if(
+    // Prefer reused pipes over new pipes
+    auto pipeIt = std::find_if(
             mPipes.begin(), mPipes.end(), [](const AdbGuestPipe* pipe) {
-                return pipe->mState == State::WaitingForHostAdbConnection;
+                return pipe->mReuseFromSnapshot &&
+                       pipe->mState == State::WaitingForHostAdbConnection;
             });
+    if (pipeIt == mPipes.end()) {
+        pipeIt = std::find_if(
+                mPipes.begin(), mPipes.end(), [](const AdbGuestPipe* pipe) {
+                    return pipe->mState == State::WaitingForHostAdbConnection;
+                });
+    }
     if (pipeIt != mPipes.end()) {
         AdbGuestPipe* activePipe = *pipeIt;
         removeAdbGuestPipe(activePipe);
@@ -268,6 +278,15 @@ AdbGuestPipe* AdbGuestPipe::Service::searchForActivePipe() {
         return activePipe;
     }
     return nullptr;
+}
+
+bool AdbGuestPipe::Service::hasActivePipe() const {
+    return mPipes.end() !=
+           std::find_if(mPipes.begin(), mPipes.end(),
+                        [](const AdbGuestPipe* pipe) {
+                            return pipe->mState ==
+                                   State::WaitingForHostAdbConnection;
+                        });
 }
 
 void AdbGuestPipe::Service::resetActiveGuestPipeConnection() {
@@ -293,7 +312,9 @@ AdbGuestPipe::AdbGuestPipe(void* mHwPipe,
                            Service* service,
                            AdbHostAgent* hostAgent,
                            android::base::Stream* stream)
-    : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent) {
+    : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent),
+    mReceivedMesg(AdbMessageSniffer::create("HOST==>GUEST",  android_hw->test_monitorAdb, &std::cout)),
+    mSendingMesg(AdbMessageSniffer::create("HOST<==GUEST",  android_hw->test_monitorAdb, &std::cout)) {
     mPlayStoreImage = android::featurecontrol::isEnabled(
             android::featurecontrol::PlayStoreImage);
     if (!stream) {
@@ -331,8 +352,12 @@ void AdbGuestPipe::onLoad(android::base::Stream* stream) {
                 assert(mFdWatcher);
                 mHostSocket.drainSocket(
                         CrossSessionSocket::DrainBehavior::Clear);
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
                 DD("%s: [%p] poll %d", __func__, this,
                 mFdWatcher->poll());
+=======
+                DD("%s: [%p] poll %d", __func__, this, mFdWatcher->poll());
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
                 mFdWatcher->wantRead();
                 mFdWatcher->wantWrite();
                 if (mHostSocket.hasStaleData()) {
@@ -341,6 +366,20 @@ void AdbGuestPipe::onLoad(android::base::Stream* stream) {
                 return;
             }
         }
+    } else {
+        mReuseFromSnapshot = true;
+        mState = State::WaitingForHostAdbConnection;
+    }
+    int proxyCount = stream->getBe32();
+    D("Loading %d jdwp proxies", proxyCount);
+    if (!socket && proxyCount <= 0) {
+        // Regular adb pipe, immediately close it after load
+        mReuseFromSnapshot = false;
+        mState = State::ClosedByHost;
+    }
+    if (proxyCount >= 0) {
+        mAdbHub.reset(new AdbHub());
+        mAdbHub->onLoad(stream);
     }
     // Socket could be in a broken state.
     // In that case we just close the pipe.
@@ -356,9 +395,18 @@ void AdbGuestPipe::onSave(android::base::Stream* stream) {
     stream->putBe32(mBufferSize);
     stream->putBe32(mBufferPos);
     stream->putBe32(static_cast<uint32_t>(mState));
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     stream->putBe32(mHostSocket.valid() ? mHostSocket.fd()
                                         : 0);
     if (mHostSocket.valid()) {
+=======
+    bool saveHostSocket =
+            android::featurecontrol::isEnabled(
+                    android::featurecontrol::Feature::SnapshotAdb) &&
+            mHostSocket.valid();
+    if (saveHostSocket) {
+        stream->putBe32(mHostSocket.fd());
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
         bool needSaveBuffer = shouldUseRecvBuffer();
         DD("%s: [%p] save socket %d needSaveBuffer %d\n", __func__, this,
            mHostSocket.fd(), needSaveBuffer);
@@ -375,10 +423,29 @@ void AdbGuestPipe::onSave(android::base::Stream* stream) {
             signalWake(PIPE_WAKE_READ);
         }
         DD("%s: [%p] poll %d", __func__, this, mFdWatcher->poll());
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+    } else {
+        stream->putBe32(0);
+    }
+    if (mPortType == Jdwp) {
+        int proxyCount = mAdbHub->getProxyCount();
+        D("Saving %d jdwp proxies", (int)proxyCount);
+        stream->putBe32(proxyCount);
+        mAdbHub->onSave(stream);
+    } else {
+        stream->putBe32(-1);
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     }
 }
 
 AdbGuestPipe::~AdbGuestPipe() {
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+    if (needsHubTranslation()) {
+        stopSocketTraffic();
+    }
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     CrossSessionSocket::recycleSocket(std::move(mHostSocket));
     DD("%s: [%p] destroyed", __func__, this);
     CHECK(mState == State::ClosedByGuest ||
@@ -390,6 +457,12 @@ void AdbGuestPipe::onGuestClose(PipeCloseReason reason) {
     DD("%s: [%p]", __func__, this);
     mState = State::ClosedByGuest;
     DINIT("%s: [%p] Adb closed by guest",__func__, this);
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+    if (needsHubTranslation()) {
+        stopSocketTraffic();
+    }
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     CrossSessionSocket::recycleSocket(std::move(mHostSocket));
     service()->onPipeClose(this);  // This deletes the instance.
 }
@@ -408,12 +481,25 @@ unsigned AdbGuestPipe::onGuestPoll() const {
             break;
 
         case State::ProxyingData: {
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
             unsigned flags = mFdWatcher->poll();
             if (flags & FdWatch::kEventRead) {
                 result |= PIPE_POLL_IN;
             }
             if (flags & FdWatch::kEventWrite) {
                 result |= PIPE_POLL_OUT;
+=======
+            if (needsHubTranslation()) {
+                result = mAdbHub->onGuestPoll();
+            } else {
+                unsigned flags = mFdWatcher->poll();
+                if (flags & FdWatch::kEventRead) {
+                    result |= PIPE_POLL_IN;
+                }
+                if (flags & FdWatch::kEventWrite) {
+                    result |= PIPE_POLL_OUT;
+                }
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
             }
             break;
         }
@@ -432,7 +518,28 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
       toString(mState));
     if (mState == State::ProxyingData) {
         // Common case, proxy-ing the data from the host to the guest.
-        return onGuestRecvData(buffers, numBuffers);
+        int count = needsHubTranslation()
+                            ? mAdbHub->onGuestRecvData(buffers, numBuffers)
+                            : onGuestRecvData(buffers, numBuffers);
+        if (android_hw->test_monitorAdb> 0) {
+            mReceivedMesg->read(buffers, numBuffers, count);
+        }
+        if (needsHubTranslation()) {
+            if (count == PIPE_ERROR_IO) {
+                mState = State::ClosedByHost;
+                stopSocketTraffic();
+                mHostSocket.reset();
+            }
+            if (count == PIPE_ERROR_AGAIN && !mAdbHub->socketWantRead()) {
+                mFdWatcher->dontWantRead();
+            }
+            if (mAdbHub->socketWantRead()) {
+                mFdWatcher->wantRead();
+            }
+        }
+        return count;
+    } else if (guest_boot_completed == 0 && android_hw->test_delayAdbTillBootComplete == 1) {
+        return PIPE_ERROR_AGAIN;
     } else if (guest_data_partition_mounted == 0 && mPlayStoreImage) {
         return PIPE_ERROR_AGAIN;
     } else if (mState == State::SendingAcceptReplyOk) {
@@ -452,16 +559,44 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
 }
 
 int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
                               int numBuffers) {
+=======
+                              int numBuffers,
+                              void** newPipePtr) {
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     D("%s: [%p] numBuffers=%d state=%s", __func__, this, numBuffers,
       toString(mState));
     if (mState == State::ProxyingData) {
         // Common-case, proxy-ing the data from the guest to the host.
-        return onGuestSendData(buffers, numBuffers);
+        int count = needsHubTranslation()
+                            ? mAdbHub->onGuestSendData(buffers, numBuffers)
+                            : onGuestSendData(buffers, numBuffers);
+        if (android_hw->test_monitorAdb > 0) {
+            mSendingMesg->read(buffers, numBuffers, count);
+        }
+        if (needsHubTranslation()) {
+            if (count == PIPE_ERROR_IO) {
+                D("onGuestSend PIPE_ERROR_IO");
+                mState = State::ClosedByHost;
+                stopSocketTraffic();
+                mHostSocket.reset();
+            }
+            if (count == PIPE_ERROR_AGAIN && !mAdbHub->socketWantWrite()) {
+                mFdWatcher->dontWantWrite();
+            }
+            if (mAdbHub->socketWantWrite()) {
+                mFdWatcher->wantWrite();
+            }
+        }
+        return count;
     } else if (mState == State::WaitingForGuestAcceptCommand ||
                mState == State::WaitingForGuestStartCommand) {
         // Waiting command bytes from the guest.
         return onGuestSendCommand(buffers, numBuffers);
+    } else if (mReuseFromSnapshot &&
+               mState == State::WaitingForHostAdbConnection) {
+        return PIPE_ERROR_AGAIN;
     } else {
         if (mState != State::ClosedByHost) {
             // Invalid state !!!
@@ -473,21 +608,54 @@ int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
 
 void AdbGuestPipe::onGuestWantWakeOn(int flags) {
     DD("%s: [%p] flags=%x (%d)", __func__, this, (unsigned)flags, flags);
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     if (flags & PIPE_WAKE_READ) {
         if (mHostSocket.valid()) {
             mFdWatcher->wantRead();
         }
+=======
+    if (!mHostSocket.valid()) {
+        return;
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     }
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     if (flags & PIPE_WAKE_WRITE) {
         if (mHostSocket.valid()) {
+=======
+    if (mAdbHub) {
+        int hubWakeFlags = mAdbHub->pipeWakeFlags();
+        // If guest read/write would block, signal host socket event to
+        // clear/fill the internal buffer.
+        if (flags & PIPE_WAKE_READ) {
+            if (!(hubWakeFlags & PIPE_WAKE_READ)) {
+                mFdWatcher->wantRead();
+            }
+        }
+        if (flags & PIPE_WAKE_WRITE) {
+            if (!(hubWakeFlags & PIPE_WAKE_WRITE)) {
+                mFdWatcher->wantWrite();
+            }
+        }
+        flags &= hubWakeFlags;
+        if (flags) {
+            signalWake(flags);
+        }
+    } else {
+        if (flags & PIPE_WAKE_READ) {
+            mFdWatcher->wantRead();
+        }
+        if (flags & PIPE_WAKE_WRITE) {
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
             mFdWatcher->wantWrite();
         }
     }
 }
 
-void AdbGuestPipe::onHostConnection(ScopedSocket&& socket) {
+void AdbGuestPipe::onHostConnection(ScopedSocket&& socket,
+                                    AdbPortType portType) {
     DD("%s: [%p] host connection", __func__, this);
     CHECK(mState <= State::WaitingForHostAdbConnection);
+
     android::base::socketSetNonBlocking(socket.get());
     // socketSetNoDelay() reduces the latency of sending data, at the cost
     // of creating more TCP packets on the connection. It's useful when
@@ -503,15 +671,35 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket) {
             },
             this));
     assert(mFdWatcher);
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     mHostSocket = CrossSessionSocket(std::move(socket));
+=======
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 
-    DD("%s: [%p] sending reply", __func__, this);
-    setReply("ok", State::SendingAcceptReplyOk);
-    signalWake(PIPE_WAKE_READ);
+    mHostSocket = CrossSessionSocket(std::move(socket));
+    mPortType = portType;
+    DD("set up pipe type %d\n", portType);
+
+    if (mReuseFromSnapshot) {
+        mState = State::ProxyingData;
+        if (mAdbHub->socketWantRead()) {
+            mFdWatcher->wantRead();
+        }
+        signalWake(PIPE_WAKE_READ | PIPE_WAKE_WRITE);
+        D("Reuse pipe %p from snapshot", this);
+    } else {
+        DD("%s: [%p] sending reply", __func__, this);
+        setReply("ok", State::SendingAcceptReplyOk);
+        signalWake(PIPE_WAKE_READ);
+    }
 }
 
 void AdbGuestPipe::resetConnection() {
     D("%s: [%p] reset connection\n", __func__, this);
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+    stopSocketTraffic();
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     service()->hostCloseSocket(mHostSocket.fd());
     mHostSocket.reset();
     mState = State::ClosedByHost;
@@ -542,6 +730,7 @@ const char* AdbGuestPipe::toString(AdbGuestPipe::State state) {
 
 // Called whenever an i/o event occurs on the host socket.
 void AdbGuestPipe::onHostSocketEvent(unsigned events) {
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     // DD("%s: [%p] events=%x (%u)", __func__, this, events, events);
     int wakeFlags = 0;
     if ((events & FdWatch::kEventRead) != 0) {
@@ -554,6 +743,44 @@ void AdbGuestPipe::onHostSocketEvent(unsigned events) {
     }
     if (wakeFlags) {
         signalWake(wakeFlags);
+=======
+    DD("%s: [%p] events=%x (%u)", __func__, this, events, events);
+
+    if (mAdbHub) {
+        mAdbHub->onHostSocketEvent(mFdWatcher->fd(), events, [this]() {
+            mState = State::ClosedByHost;
+            resetConnection();
+        });
+        if (mState != State::ClosedByHost) {
+            if (mAdbHub->socketWantRead()) {
+                mFdWatcher->wantRead();
+            } else {
+                mFdWatcher->dontWantRead();
+            }
+            if (mAdbHub->socketWantWrite()) {
+                mFdWatcher->wantWrite();
+            } else {
+                mFdWatcher->dontWantWrite();
+            }
+            int wakeFlags = mAdbHub->pipeWakeFlags();
+            if (wakeFlags) {
+                signalWake(wakeFlags);
+            }
+        }
+    } else {
+        int wakeFlags = 0;
+        if ((events & FdWatch::kEventRead) != 0) {
+            wakeFlags |= PIPE_WAKE_READ;
+            mFdWatcher->dontWantRead();
+        }
+        if ((events & FdWatch::kEventWrite) != 0) {
+            wakeFlags |= PIPE_WAKE_WRITE;
+            mFdWatcher->dontWantWrite();
+        }
+        if (wakeFlags) {
+            signalWake(wakeFlags);
+        }
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     }
 }
 
@@ -574,7 +801,6 @@ int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
                     DD("%s: [%p] loaded %d data from buffer", __func__, this,
                        (int)len);
                 } else if (mHostSocket.valid()) {
-                    ScopedVmUnlock unlockBql;
                     len = android::base::socketRecv(
                             mHostSocket.fd(), data, dataSize);
                 } else {
@@ -631,7 +857,11 @@ static int parseMsgSize(const char* msg) {
 
 int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
                                   int numBuffers) {
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     D("%s: [%p] numBuffers=%d", __func__, this, numBuffers);
+=======
+    DD("%s: [%p] numBuffers=%d", __func__, this, numBuffers);
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     CHECK(mState == State::ProxyingData);
     int result = 0;
 #ifdef _DEBUG
@@ -643,7 +873,6 @@ int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
         while (dataSize > 0) {
             ssize_t len;
             {
-                ScopedVmUnlock unlockBql;
                 // Possible that the host socket has been reset.
                 if (mHostSocket.valid()) {
                     len = android::base::socketSend(
@@ -747,6 +976,7 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
                 // Mismatched, this is not what the pipe is expecting.
                 // Closing the connection now is easier than sending 'ko'.
                 DD("%s: [%p] mismatched command", __func__, this);
+                stopSocketTraffic();
                 mHostSocket.reset();
                 return PIPE_ERROR_IO;
             }
@@ -765,6 +995,12 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
                     mState = State::ProxyingData;
                     // when -verbose, print a message indicating adb is connected
                     DINIT("%s: [%p] Adb connected, start proxing data",__func__, this);
+                    if (needsHubTranslation()) {
+                        mAdbHub.reset(new AdbHub());
+                        if (mAdbHub->socketWantRead()) {
+                            mFdWatcher->wantRead();
+                        }
+                    }
                 }
                 return result;
             }
@@ -775,6 +1011,13 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
     DD("%s: [%p] returning %d with buffer pos/size %d/%d", __func__, this,
        result, (int)mBufferPos, (int)mBufferSize);
     return result;
+}
+
+void AdbGuestPipe::stopSocketTraffic() {
+    if (mFdWatcher) {
+        mFdWatcher->dontWantWrite();
+        mFdWatcher->dontWantRead();
+    }
 }
 
 void AdbGuestPipe::setReply(StringView reply, State newState) {
@@ -814,5 +1057,13 @@ bool AdbGuestPipe::shouldUseRecvBuffer() {
     return isProxyingData();
 }
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+bool AdbGuestPipe::needsHubTranslation() const {
+    auto res = mReuseFromSnapshot || mPortType == AdbPortType::Jdwp;
+    return res;
+}
+
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 }  // namespace emulation
 }  // namespace android

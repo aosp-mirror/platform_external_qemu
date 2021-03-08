@@ -8,7 +8,11 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
+#ifdef _MSC_VER
+extern "C" {
+#include "sysemu/os-win32-msvc.h"
+}
+#endif
 #include "android-qemu2-glue/audio-capturer.h"
 #include "android-qemu2-glue/utils/stream.h"
 

@@ -11,10 +11,14 @@
 
 #include "android/emulation/ClipboardPipe.h"
 
-#include "android/base/memory/LazyInstance.h"
-#include "android/clipboard-pipe.h"
+#include <string.h>                            // for memcpy, size_t
+#include <algorithm>                           // for min
+#include <cassert>                             // for assert
+#include <type_traits>                         // for swap
+#include <utility>                             // for move
 
-#include <cassert>
+#include "android/base/memory/LazyInstance.h"  // for LazyInstance
+#include "android/clipboard-pipe.h"            // for android_init_clipboard...
 
 namespace android {
 namespace emulation {
@@ -31,8 +35,8 @@ struct ClipboardPipeInstance {
     android::base::Lock pipeLock;
     ClipboardPipe::Ptr pipe;
 
-    ClipboardPipe::GuestClipboardCallback guestClipboardCallback =
-            emptyCallback;
+    android::base::Lock callbackLock;
+    std::vector<ClipboardPipe::GuestClipboardCallback> guestClipboardCallbacks;
 };
 
 static android::base::LazyInstance<ClipboardPipeInstance> sInstance = {};
@@ -118,7 +122,8 @@ int ClipboardPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
 }
 
 int ClipboardPipe::onGuestSend(const AndroidPipeBuffer* buffers,
-                               int numBuffers) {
+                               int numBuffers,
+                               void** newPipePtr) {
     if (!sEnabled) {
         // Fake out that we've processed the data, and don't do anything.
         int total = 0;
@@ -131,8 +136,11 @@ int ClipboardPipe::onGuestSend(const AndroidPipeBuffer* buffers,
     int result = processOperation(OperationType::ReadFromGuest,
                                   &mGuestReadState, buffers, numBuffers);
     if (mGuestReadState.isFinished()) {
-        sInstance->guestClipboardCallback(mGuestReadState.buffer.data(),
-                                          mGuestReadState.processedBytes);
+        base::AutoLock cbLock(sInstance->callbackLock);
+        for (const auto& callback : sInstance->guestClipboardCallbacks) {
+            callback(mGuestReadState.buffer.data(),
+                     mGuestReadState.processedBytes);
+        }
         mGuestReadState.reset();
     }
     return result;
@@ -143,15 +151,23 @@ void ClipboardPipe::setEnabled(bool enabled) {
 }
 
 void registerClipboardPipeService() {
-    android::AndroidPipe::Service::add(new ClipboardPipe::Service());
+    android::AndroidPipe::Service::add(std::make_unique<ClipboardPipe::Service>());
 }
 
-void ClipboardPipe::setGuestClipboardCallback(
+void ClipboardPipe::registerGuestClipboardCallback(
         ClipboardPipe::GuestClipboardCallback cb) {
-    sInstance->guestClipboardCallback = cb ? std::move(cb) : emptyCallback;
+    if (cb) {
+        base::AutoLock cbLock(sInstance->callbackLock);
+        sInstance->guestClipboardCallbacks.emplace_back(std::move(cb));
+    }
 }
 
 void ClipboardPipe::wakeGuestIfNeeded() {
+    android::base::AutoLock lock(mLock);
+    wakeGuestIfNeededLocked();
+}
+
+void ClipboardPipe::wakeGuestIfNeededLocked() {
     if (sEnabled && mWakeOnRead && mGuestWriteState.hasData()) {
         signalWake(PIPE_WAKE_READ);
         mWakeOnRead = false;
@@ -160,7 +176,7 @@ void ClipboardPipe::wakeGuestIfNeeded() {
 
 void ClipboardPipe::setGuestClipboardContents(const uint8_t* buf, size_t len) {
     if (!sEnabled) {
-        return; // who cares.
+        return;  // who cares.
     }
     mGuestWriteState.queueContents(buf, len);
     wakeGuestIfNeeded();

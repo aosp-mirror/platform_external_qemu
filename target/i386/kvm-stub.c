@@ -13,6 +13,7 @@
 #include "qemu-common.h"
 #include "cpu.h"
 #include "kvm_i386.h"
+#include "sysemu/kvm.h"
 
 bool kvm_allows_irq0_override(void)
 {
@@ -39,4 +40,5 @@ uint32_t kvm_arch_get_supported_cpuid(KVMState *env, uint32_t function,
 {
     abort();
 }
+
 #endif

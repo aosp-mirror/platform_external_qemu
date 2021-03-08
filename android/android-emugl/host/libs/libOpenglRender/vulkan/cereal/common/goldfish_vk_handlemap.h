@@ -24,9 +24,10 @@
 
 #pragma once
 
-#include <vulkan.h>
+#include <vulkan/vulkan.h>
 
 
+#include "goldfish_vk_private_defs.h"
 #include "VulkanHandleMapping.h"
 
 
@@ -1104,6 +1105,18 @@ void handlemap_VkPhysicalDevice8BitStorageFeaturesKHR(
     VkPhysicalDevice8BitStorageFeaturesKHR* toMap);
 
 #endif
+#ifdef VK_KHR_shader_float16_int8
+void handlemap_VkPhysicalDeviceShaderFloat16Int8Features(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceShaderFloat16Int8Features* toMap);
+
+#endif
+#ifdef VK_ANDROID_native_buffer
+void handlemap_VkNativeBufferANDROID(
+    VulkanHandleMapping* handlemap,
+    VkNativeBufferANDROID* toMap);
+
+#endif
 #ifdef VK_EXT_debug_report
 void handlemap_VkDebugReportCallbackCreateInfoEXT(
     VulkanHandleMapping* handlemap,
@@ -1647,6 +1660,40 @@ void handlemap_VkCheckpointDataNV(
     VulkanHandleMapping* handlemap,
     VkCheckpointDataNV* toMap);
 
+#endif
+#ifdef VK_GOOGLE_address_space
+#endif
+#ifdef VK_GOOGLE_color_buffer
+void handlemap_VkImportColorBufferGOOGLE(
+    VulkanHandleMapping* handlemap,
+    VkImportColorBufferGOOGLE* toMap);
+
+void handlemap_VkImportBufferGOOGLE(
+    VulkanHandleMapping* handlemap,
+    VkImportBufferGOOGLE* toMap);
+
+void handlemap_VkImportPhysicalAddressGOOGLE(
+    VulkanHandleMapping* handlemap,
+    VkImportPhysicalAddressGOOGLE* toMap);
+
+#endif
+#ifdef VK_GOOGLE_sized_descriptor_update_template
+#endif
+#ifdef VK_GOOGLE_async_command_buffers
+#endif
+#ifdef VK_GOOGLE_create_resources_with_requirements
+#endif
+#ifdef VK_GOOGLE_address_space_info
+#endif
+#ifdef VK_GOOGLE_free_memory_sync
+#endif
+#ifdef VK_GOOGLE_async_queue_submit
+#endif
+#ifdef VK_GOOGLE_linear_image_layout
+#endif
+#ifdef VK_MVK_moltenvk
+#endif
+#ifdef VK_GOOGLE_queue_submit_with_commands
 #endif
 
 } // namespace goldfish_vk

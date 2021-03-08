@@ -19,6 +19,11 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/ScopedStdioFile.h"
 #include "android/utils/debug.h"
+#include "android/utils/file_io.h"
+
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#endif
 
 #include <png.h>
 extern "C" {
@@ -69,14 +74,15 @@ TextureUtils::Result TextureUtils::createPlaceholder() {
     return result;
 }
 
-Optional<TextureUtils::Result> TextureUtils::load(const char* filename) {
+Optional<TextureUtils::Result> TextureUtils::load(const char* filename,
+                                                  Orientation orientation) {
     const base::StringView extension = PathUtils::extension(filename);
 
     if (strncasecmp(extension.data(), ".png", extension.size()) == 0) {
-        return loadPNG(filename);
+        return loadPNG(filename, orientation);
     } else if (strncasecmp(extension.data(), ".jpg", extension.size()) == 0 ||
                strncasecmp(extension.data(), ".jpeg", extension.size()) == 0) {
-        return loadJPEG(filename);
+        return loadJPEG(filename, orientation);
     } else {
         E("%s: Unsupported file format %s", __FUNCTION__,
           base::c_str(extension).get());
@@ -84,8 +90,9 @@ Optional<TextureUtils::Result> TextureUtils::load(const char* filename) {
     }
 }
 
-Optional<TextureUtils::Result> TextureUtils::loadPNG(const char* filename) {
-    ScopedStdioFile fp(fopen(filename, "rb"));
+Optional<TextureUtils::Result> TextureUtils::loadPNG(const char* filename,
+                                                     Orientation orientation) {
+    ScopedStdioFile fp(android_fopen(filename, "rb"));
     if (!fp) {
         E("%s: Failed to open file %s", __FUNCTION__, filename);
         return {};
@@ -178,7 +185,10 @@ Optional<TextureUtils::Result> TextureUtils::loadPNG(const char* filename) {
     std::vector<uint8_t*> rowPtrs(height);
 
     for (size_t i = 0; i < height; i++) {
-        rowPtrs[i] = data.data() + stride * (height - i - 1);
+        if (orientation == Orientation::BottomUp)
+            rowPtrs[i] = data.data() + stride * (height - i - 1);
+        else
+            rowPtrs[i] = data.data() + stride * i;
     }
 
     png_read_image(png, rowPtrs.data());
@@ -198,8 +208,9 @@ struct ErrorManager {
     jmp_buf setjmp_buffer;
 };
 
-Optional<TextureUtils::Result> TextureUtils::loadJPEG(const char* filename) {
-    ScopedStdioFile fp(fopen(filename, "rb"));
+Optional<TextureUtils::Result> TextureUtils::loadJPEG(const char* filename,
+                                                      Orientation orientation) {
+    ScopedStdioFile fp(android_fopen(filename, "rb"));
     if (!fp) {
         E("%s: Failed to open file %s", __FUNCTION__, filename);
         return {};
@@ -254,8 +265,12 @@ Optional<TextureUtils::Result> TextureUtils::loadJPEG(const char* filename) {
         // decompression it is typically one at a time.  Only read one at a time
         // for simplicity.
         uint8_t* rowPtrs[1];
-        rowPtrs[0] =
-                data.data() + (height - cinfo.output_scanline - 1) * stride;
+        if (orientation == Orientation::BottomUp) {
+            rowPtrs[0] =
+                    data.data() + (height - cinfo.output_scanline - 1) * stride;
+        } else {
+            rowPtrs[0] = data.data() + cinfo.output_scanline * stride;
+        }
         (void)jpeg_read_scanlines(&cinfo, rowPtrs, 1);
     }
 

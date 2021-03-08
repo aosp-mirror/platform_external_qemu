@@ -20,10 +20,13 @@
 #include "android/emulation/VmLock.h"
 #include "android/globals.h"
 #include "android/metrics/AdbLivenessChecker.h"
-#include "android/metrics/MemoryUsageReporter.h"
 #include "android/metrics/metrics.h"
 #include "android/metrics/MetricsReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
+
+#if SNAPSHOT_METRICS
+#include "studio_stats.pb.h"
+#endif
+
 #include "android/metrics/StudioConfig.h"
 #include "android/opengl/emugl_config.h"
 #include "android/snapshot/Hierarchy.h"
@@ -41,9 +44,14 @@
 #include <cassert>
 #include <utility>
 
+#ifdef __x86_64__
+#define FAST_ZERO_CHECK 1
 extern "C" {
 #include <emmintrin.h>
 }
+#else
+#define FAST_ZERO_CHECK 0
+#endif
 
 using android::base::LazyInstance;
 using android::base::PathUtils;
@@ -57,6 +65,7 @@ namespace pb = android_studio;
 // Inspired by QEMU's bufferzero.c implementation, but simplified for the case
 // when checking the whole aligned memory page.
 static bool buffer_zero_sse2(const void* buf, int len) {
+#ifdef __x86_64__
     buf = __builtin_assume_aligned(buf, 1024);
     __m128i t = _mm_load_si128(static_cast<const __m128i*>(buf));
     auto p = reinterpret_cast<__m128i*>(
@@ -72,15 +81,34 @@ static bool buffer_zero_sse2(const void* buf, int len) {
         if (_mm_movemask_epi8(t) != 0xFFFF) {
             return false;
         }
+#ifdef _MSC_VER
+        t = _mm_or_si128(_mm_or_si128(p[-4], p[-3]), _mm_or_si128(p[-2], p[-1]));
+#else
         t = p[-4] | p[-3] | p[-2] | p[-1];
+#endif
         p += 4;
     } while (p <= e);
 
     /* Finish the aligned tail.  */
+#ifdef _WIN32
+    t = _mm_or_si128(t, e[-3]);
+    t = _mm_or_si128(t, e[-2]);
+    t = _mm_or_si128(t, e[-1]);
+#else
     t |= e[-3];
     t |= e[-2];
     t |= e[-1];
+#endif
     return _mm_movemask_epi8(_mm_cmpeq_epi32(t, zero)) == 0xFFFF;
+#else
+    // TODO(bohu): find faster implementation for aarch64
+    const char* bytes = (const char*)buf;
+    for (int i = 0; i < len; ++i) {
+        if (bytes[i])
+            return false;
+    }
+    return true;
+#endif
 }
 
 namespace android {
@@ -229,8 +257,13 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
     mVmOperations.setSnapshotCallbacks(this, &kCallbacks);
 }  // namespace snapshot
 
+void Snapshotter::setDiskSpaceCheck(bool enable) {
+    mDiskSpaceCheck = enable;
+}
+
 static constexpr int kDefaultMessageTimeoutMs = 10000;
 
+#if SNAPSHOT_METRICS
 static void appendFailedSave(pb::EmulatorSnapshotSaveState state,
                              FailureReason failureReason) {
     MetricsReporter::get().report([state, failureReason](pb::AndroidStudioEvent* event) {
@@ -248,6 +281,12 @@ static void appendFailedLoad(pb::EmulatorSnapshotLoadState state,
         snap->set_load_failure_reason((pb::EmulatorSnapshotFailureReason)failureReason);
     });
 }
+#else
+
+#define appendFailedSave(...)
+#define appendFailedLoad(...)
+
+#endif
 
 OperationStatus Snapshotter::prepareForLoading(const char* name) {
     if (mSaver && mSaver->snapshot().name() == name) {
@@ -310,7 +349,7 @@ void Snapshotter::callCallbacks(Operation op, Stage stage) {
 
 void Snapshotter::fillSnapshotMetrics(pb::AndroidStudioEvent* event,
                                       const SnapshotOperationStats& stats) {
-
+#if SNAPSHOT_METRICS
     pb::EmulatorSnapshot* snapshot = nullptr;
 
     if (stats.forSave) {
@@ -360,8 +399,16 @@ void Snapshotter::fillSnapshotMetrics(pb::AndroidStudioEvent* event,
     // Also report some common host machine stats so we can correlate performance with
     // host machine config.
     auto memUsageProto = event->mutable_emulator_performance_stats()->add_memory_usage();
-    metrics::MemoryUsageReporter::fillProto(stats.memUsage, memUsageProto);
+    event->set_kind(
+        android_studio::AndroidStudioEvent::EMULATOR_PERFORMANCE_STATS);
+    memUsageProto->set_resident_memory(stats.memUsage.resident);
+    memUsageProto->set_resident_memory_max(stats.memUsage.resident_max);
+    memUsageProto->set_virtual_memory(stats.memUsage.virt);
+    memUsageProto->set_virtual_memory_max(stats.memUsage.virt_max);
+    memUsageProto->set_total_phys_memory(stats.memUsage.total_phys_memory);
+    memUsageProto->set_total_page_file(stats.memUsage.total_page_file);
     android_metrics_fill_common_info(true /* opengl alive */, event);
+#endif
 }
 
 Snapshotter::SnapshotOperationStats Snapshotter::getSaveStats(const char* name,
@@ -398,6 +445,8 @@ Snapshotter::SnapshotOperationStats Snapshotter::getSaveStats(const char* name,
 
 Snapshotter::SnapshotOperationStats Snapshotter::getLoadStats(const char* name,
                                                               System::Duration durationMs) {
+    SnapshotOperationStats defaultStats;
+
     auto& load = loader();
     const auto onDemandRamEnabled = load.ramLoader().onDemandEnabled();
     const auto compressedRam = load.ramLoader().compressed();
@@ -429,19 +478,29 @@ Snapshotter::SnapshotOperationStats Snapshotter::getLoadStats(const char* name,
 
 void Snapshotter::appendSuccessfulSave(const char* name,
                                        System::Duration durationMs) {
+#if SNAPSHOT_METRICS
+    if (!mSaver ||
+        !mSaver->textureSaver()) return;
+
     auto stats = getSaveStats(name, durationMs);
     MetricsReporter::get().report([stats](pb::AndroidStudioEvent* event) {
         fillSnapshotMetrics(event, stats);
     });
+#endif
 }
 
 void Snapshotter::appendSuccessfulLoad(const char* name,
                                        System::Duration durationMs) {
+#if SNAPSHOT_METRICS
+    if (!mLoader ||
+        !mLoader->textureLoader()) return;
+
     loader().reportSuccessful();
     auto stats = getLoadStats(name, durationMs);
     MetricsReporter::get().report([stats](pb::AndroidStudioEvent* event) {
         fillSnapshotMetrics(event, stats);
     });
+#endif
 }
 
 void Snapshotter::showError(const std::string& message) {
@@ -498,7 +557,7 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
     // Snapshots vary in size. They can be close to a GB.
     // Rather than taking all the remaining disk space,
     // save only if we have 2 GB of space available.
-    if (android_avdInfo &&
+    if (mDiskSpaceCheck && android_avdInfo &&
         System::isUnderDiskPressure(avdInfo_getContentPath(android_avdInfo))) {
         showError("Not saving snapshot: Disk space < 2 GB");
         if (reportMetrics) {
@@ -506,6 +565,19 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
                 pb::EmulatorSnapshotSaveState::
                     EMULATOR_SNAPSHOT_SAVE_SKIPPED_DISK_PRESSURE,
                 FailureReason::OutOfDiskSpace);
+        }
+        return false;
+    }
+
+    // Check whether skipping snapshot saves was set.
+    if (mVmOperations.isSnapshotSaveSkipped()) {
+        showError("Skipping snapshot save: "
+                  "current state "
+                  "doesn't support snapshotting");
+        if (reportMetrics) {
+            appendFailedSave(pb::EmulatorSnapshotSaveState::
+                                 EMULATOR_SNAPSHOT_SAVE_SKIPPED_UNSUPPORTED,
+                             FailureReason::SnapshotsNotSupported);
         }
         return false;
     }
@@ -715,7 +787,8 @@ void Snapshotter::deleteSnapshot(const char* name) {
 
     // then delete the folder and refresh hierarchy
     path_delete_dir(getSnapshotDir(nameWithStorage.c_str()).c_str());
-    Hierarchy::get()->currentInfo();
+    // bug: 129763714
+    // Hierarchy::get()->currentInfo();
 }
 
 void Snapshotter::invalidateSnapshot(const char* name) {
@@ -728,13 +801,17 @@ void Snapshotter::invalidateSnapshot(const char* name) {
         // We're deleting the "loaded" snapshot, so first finish any pending
         // load, and then clear the snapshot file.  Do it under the VM lock to
         // finish background loading faster (i.e., no interference from VCPUs)
+#ifndef AEMU_MIN
         CrashReporter::get()->hangDetector().pause(true);
+#endif
         android::RecursiveScopedVmLock lock;
         if (mLoader && mLoader->status() == OperationStatus::Ok) {
             mLoader->synchronize(false /* not on exit */);
         }
         mLoadedSnapshotFile.clear();
+#ifndef AEMU_MIN
         CrashReporter::get()->hangDetector().pause(false);
+#endif
     }
 
     mIsInvalidating = true;
@@ -776,7 +853,9 @@ void Snapshotter::onCrashedSnapshot(const char* name) {
 }
 
 bool Snapshotter::onStartSaving(const char* name) {
+#ifndef AEMU_MIN
     CrashReporter::get()->hangDetector().pause(true);
+#endif
     callCallbacks(Operation::Save, Stage::Start);
     prepareLoaderForSaving(name);
     if (!mSaver || isComplete(*mSaver)) {
@@ -800,14 +879,17 @@ bool Snapshotter::onStartSaving(const char* name) {
 bool Snapshotter::onSavingComplete(const char* name, int res) {
     assert(mSaver && name == mSaver->snapshot().name());
     mSaver->complete(res == 0);
+#ifndef AEMU_MIN
     CrashReporter::get()->hangDetector().pause(false);
+#endif
     callCallbacks(Operation::Save, Stage::End);
     bool good = mSaver->status() != OperationStatus::Error &&
                 mSaver->status() != OperationStatus::Canceled;
 
-    if (good) {
-        Hierarchy::get()->currentInfo();
-    }
+    // bug: 129763714
+    // if (good) {
+    //     Hierarchy::get()->currentInfo();
+    // }
 
     return good;
 }
@@ -818,7 +900,9 @@ void Snapshotter::onSavingFailed(const char* name, int res) {
 
 bool Snapshotter::onStartLoading(const char* name) {
     mLoadedSnapshotFile.clear();
+#ifndef AEMU_MIN
     CrashReporter::get()->hangDetector().pause(true);
+#endif
     callCallbacks(Operation::Load, Stage::Start);
     mSaver.reset();
     if (!mLoader || isComplete(*mLoader)) {
@@ -844,7 +928,9 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
 
     mLoader->complete(res == 0);
 
+#ifndef AEMU_MIN
     CrashReporter::get()->hangDetector().pause(false);
+#endif
     mLastLoadUptimeMs =
             System::Duration(System::get()->getProcessTimes().wallClockMs);
     callCallbacks(Operation::Load, Stage::End);
@@ -858,7 +944,10 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
         return false;
     }
     mLoadedSnapshotFile = name;
-    Hierarchy::get()->currentInfo();
+    // bug: 129763714
+    // if (good) {
+    //     Hierarchy::get()->currentInfo();
+    // }
     return true;
 }
 
@@ -882,7 +971,9 @@ void Snapshotter::onLoadingFailed(const char* name, int err) {
 }
 
 bool Snapshotter::onStartDelete(const char*) {
+#ifndef AEMU_MIN
     CrashReporter::get()->hangDetector().pause(true);
+#endif
     return true;
 }
 
@@ -898,7 +989,9 @@ bool Snapshotter::onDeletingComplete(const char* name, int res) {
             path_delete_dir(base::c_str(Snapshot::dataDir(name)));
         }
     }
+#ifndef AEMU_MIN
     CrashReporter::get()->hangDetector().pause(false);
+#endif
     mIsInvalidating = false;
     return true;
 }
@@ -918,6 +1011,7 @@ void androidSnapshot_initialize(
     using android::base::Version;
 
     static constexpr auto kMinStudioVersion = Version(3, 0, 0);
+#ifndef AEMU_MIN
     // Make sure the installed AndroidStudio is able to handle the snapshots
     // feature.
     if (isEnabled(android::featurecontrol::FastSnapshotV1)) {
@@ -934,9 +1028,14 @@ void androidSnapshot_initialize(
             setEnabledOverride(android::featurecontrol::FastSnapshotV1, false);
         }
     }
+#endif
 
     android::snapshot::sInstance->initialize(*vmOperations, *windowAgent);
     android::snapshot::Quickboot::initialize(*vmOperations, *windowAgent);
+}
+
+void androidSnapshot_setDiskSpaceCheck(bool enable) {
+    android::snapshot::sInstance->setDiskSpaceCheck(enable);
 }
 
 void androidSnapshot_finalize() {

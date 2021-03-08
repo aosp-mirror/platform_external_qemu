@@ -65,7 +65,12 @@ TEST(CrossSessionSocket, RecycleWithoutRegister) {
     CrossSessionSocket::clearRecycleSockets();
 }
 
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 TEST(CrossSessionSocket, DrainStale) {
+=======
+// BUG: 173703455
+TEST(CrossSessionSocket, DISABLED_DrainStale) {
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     const char* kContents = "Stale text";
     const int kContentSize = strlen(kContents) + 1;
     // Make buffer slightly larger so that it can catch if there are

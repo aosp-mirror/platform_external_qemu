@@ -17,7 +17,7 @@
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/ParallelTask.h"
-#include "android/emulation/control/AdbInterface.h"
+#include "android/emulation/control/adb/AdbInterface.h"
 
 #include <functional>
 #include <deque>
@@ -44,7 +44,7 @@ public:
     using PushItem = std::pair<std::string, std::string>;
     // This callback reports the result of each individual push operation.
     using ResultCallback =
-            std::function<void(android::base::StringView filePath,
+            std::function<void(std::string filePath,
                                FilePusher::Result result)>;
     // First argument has an double value in [0,1], reporting progress.
     // Second argument reports whether current batch of file pushing has been

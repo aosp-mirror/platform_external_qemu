@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from copy import deepcopy
-
 from .common.codegen import CodeGen
 from .common.vulkantypes import \
         VulkanAPI, makeVulkanTypeSimple, iterateVulkanType
@@ -42,10 +40,19 @@ getProcAddrFuncs = [
     "vkDestroyDevice",
     "vkEnumerateDeviceExtensionProperties",
     "vkEnumerateDeviceLayerProperties",
-    "vkGetDeviceQueue",
-    "vkQueueSubmit",
-    "vkQueueWaitIdle",
-    "vkDeviceWaitIdle",
+]
+
+# Some methods can only be found using dlsym() while we cannot get the function
+# address using vkGetInstProcAddr() or vkGetDeviceProcAddr(). These function
+# pointers should only be initialized when setting up the dispatch from system
+# loader.
+getProcAddrOnlyFuncs = [
+    "vkGetMTLDeviceMVK",
+    "vkSetMTLTextureMVK",
+    "vkGetMTLTextureMVK",
+    "vkGetMTLBufferMVK",
+    "vkUseIOSurfaceMVK",
+    "vkGetIOSurfaceMVK",
 ]
 
 getInstanceProcAddrNoInstanceFuncs = [
@@ -68,6 +75,19 @@ getInstanceProcAddrFuncs = [
     "vkGetPhysicalDeviceXlibPresentationSupportKHR",
     "vkCreateXcbSurfaceKHR",
     "vkGetPhysicalDeviceXcbPresentationSupportKHR",
+    "vkGetPhysicalDeviceSparseImageFormatProperties",
+    "vkEnumerateInstanceVersion",
+    "vkEnumeratePhysicalDeviceGroups",
+    "vkGetPhysicalDeviceFeatures2",
+    "vkGetPhysicalDeviceProperties2",
+    "vkGetPhysicalDeviceFormatProperties2",
+    "vkGetPhysicalDeviceImageFormatProperties2",
+    "vkGetPhysicalDeviceQueueFamilyProperties2",
+    "vkGetPhysicalDeviceMemoryProperties2",
+    "vkGetPhysicalDeviceSparseImageFormatProperties2",
+    "vkGetPhysicalDeviceExternalBufferProperties",
+    "vkGetPhysicalDeviceExternalFenceProperties",
+    "vkGetPhysicalDeviceExternalSemaphoreProperties",
 ]
 
 # Implicitly, everything else is going to be obtained
@@ -76,6 +96,9 @@ getInstanceProcAddrFuncs = [
 
 def isGetProcAddressAPI(vulkanApi):
     return vulkanApi.name in getProcAddrFuncs
+
+def isGetProcAddressOnlyAPI(vulkanApi):
+    return vulkanApi.name in getProcAddrOnlyFuncs
 
 def isGetInstanceProcAddressNoInstanceAPI(vulkanApi):
     return vulkanApi.name in getInstanceProcAddrNoInstanceFuncs
@@ -93,6 +116,9 @@ def isGetDeviceProcAddressAPI(vulkanApi):
     if isGetProcAddressAPI(vulkanApi):
         return False
 
+    if isGetProcAddressOnlyAPI(vulkanApi):
+        return False
+
     if isGetInstanceProcAddressAPI(vulkanApi):
         return False
 
@@ -101,6 +127,8 @@ def isGetDeviceProcAddressAPI(vulkanApi):
 def inferProcAddressFuncType(vulkanApi):
     if isGetProcAddressAPI(vulkanApi):
         return "global"
+    if isGetProcAddressOnlyAPI(vulkanApi):
+        return "global-only"
     if isGetInstanceProcAddressNoInstanceAPI(vulkanApi):
         return "global-instance"
     if isGetInstanceProcAddressAPI(vulkanApi):
@@ -125,14 +153,60 @@ class VulkanDispatch(VulkanWrapperGenerator):
         self.featureForCodegen = ""
 
     def onBegin(self):
+
+        # The first way is to use just the loader to get symbols. This doesn't
+        # necessarily work with extensions because at that point the dispatch
+        # table needs to be specific to a particular Vulkan instance or device.
+
         self.cgenHeader.line("""
 void init_vulkan_dispatch_from_system_loader(
     DlOpenFunc dlOpenFunc,
     DlSymFunc dlSymFunc,
     VulkanDispatch* dispatch_out);
 """)
+
+        # The second way is to initialize the table from a given Vulkan
+        # instance or device. Provided the instance or device was created with
+        # the right extensions, we can obtain function pointers to extension
+        # functions this way.
+
+        self.cgenHeader.line("""
+void init_vulkan_dispatch_from_instance(
+    VulkanDispatch* vk,
+    VkInstance instance,
+    VulkanDispatch* dispatch_out);
+""")
+        self.cgenHeader.line("""
+void init_vulkan_dispatch_from_device(
+    VulkanDispatch* vk,
+    VkDevice device,
+    VulkanDispatch* dispatch_out);
+""")
+
+        # After populating a VulkanDispatch with the above methods,
+        # it can be useful to check whether the Vulkan 1.0 or 1.1 methods
+        # are all there.
+        def emit_feature_check_decl(cgen, tag, featureToCheck):
+            cgen.line("""
+bool vulkan_dispatch_check_%s_%s(
+    const VulkanDispatch* vk);
+""" % (tag, featureToCheck))
+
+        emit_feature_check_decl(self.cgenHeader, "instance", "VK_VERSION_1_0")
+        emit_feature_check_decl(self.cgenHeader, "instance", "VK_VERSION_1_1")
+        emit_feature_check_decl(self.cgenHeader, "device", "VK_VERSION_1_0")
+        emit_feature_check_decl(self.cgenHeader, "device", "VK_VERSION_1_1")
+
         self.cgenHeader.line("struct VulkanDispatch {")
         self.module.appendHeader(self.cgenHeader.swapCode())
+
+    def syncFeatureQuiet(self, cgen, feature):
+        if self.featureForCodegen != feature:
+            if feature == "":
+                self.featureForCodegen = feature
+                return
+
+            self.featureForCodegen = feature
 
     def syncFeature(self, cgen, feature):
         if self.featureForCodegen != feature:
@@ -152,10 +226,21 @@ void init_vulkan_dispatch_from_system_loader(
             "out->%s = (%s)dlSymFunc(lib, \"%s\")" % \
             (apiname, typedecl, apiname))
 
+    def makeGetInstanceProcAddrCall(self, cgen, dispatch, instance, apiname, typedecl):
+        cgen.stmt( \
+            "out->%s = (%s)%s->vkGetInstanceProcAddr(%s, \"%s\")" % \
+            (apiname, typedecl, dispatch, instance, apiname))
+
+    def makeGetDeviceProcAddrCall(self, cgen, dispatch, device, apiname, typedecl):
+        cgen.stmt( \
+            "out->%s = (%s)%s->vkGetDeviceProcAddr(%s, \"%s\")" % \
+            (apiname, typedecl, dispatch, device, apiname))
+
     def onEnd(self):
         self.cgenHeader.line("};")
         self.module.appendHeader(self.cgenHeader.swapCode())
 
+        # Getting dispatch tables from the loader
         self.cgenImpl.line("""
 void init_vulkan_dispatch_from_system_loader(
     DlOpenFunc dlOpenFunc,
@@ -163,7 +248,7 @@ void init_vulkan_dispatch_from_system_loader(
     VulkanDispatch* out)""")
 
         self.cgenImpl.beginBlock()
-        
+
         self.cgenImpl.stmt("memset(out, 0x0, sizeof(VulkanDispatch))")
 
         self.cgenImpl.stmt("void* lib = dlOpenFunc()")
@@ -174,8 +259,7 @@ void init_vulkan_dispatch_from_system_loader(
             self.apisToGet["global-instance"] + \
             self.apisToGet["instance"] + \
             self.apisToGet["device"] + \
-            self.apisToGet["global"] + \
-            self.apisToGet["global"]
+            self.apisToGet["global-only"]
 
         for vulkanApi, typeDecl, feature in apis:
             self.syncFeature(self.cgenImpl, feature)
@@ -183,6 +267,92 @@ void init_vulkan_dispatch_from_system_loader(
 
         self.syncFeature(self.cgenImpl, "")
         self.cgenImpl.endBlock()
+
+        # Getting instance dispatch tables
+        self.cgenImpl.line("""
+void init_vulkan_dispatch_from_instance(
+    VulkanDispatch* vk,
+    VkInstance instance,
+    VulkanDispatch* out)""")
+
+        self.cgenImpl.beginBlock()
+
+        self.cgenImpl.stmt("memset(out, 0x0, sizeof(VulkanDispatch))")
+
+        apis = \
+            self.apisToGet["global"] + \
+            self.apisToGet["global-instance"] + \
+            self.apisToGet["instance"] + \
+            self.apisToGet["device"]
+
+        for vulkanApi, typeDecl, feature in apis:
+            self.syncFeature(self.cgenImpl, feature)
+            self.makeGetInstanceProcAddrCall(
+                self.cgenImpl, "vk", "instance", vulkanApi.name, typeDecl)
+
+        self.syncFeature(self.cgenImpl, "")
+        self.cgenImpl.endBlock()
+
+        # Getting device dispatch tables
+        self.cgenImpl.line("""
+void init_vulkan_dispatch_from_device(
+    VulkanDispatch* vk,
+    VkDevice device,
+    VulkanDispatch* out)""")
+
+        self.cgenImpl.beginBlock()
+
+        self.cgenImpl.stmt("memset(out, 0x0, sizeof(VulkanDispatch))")
+
+        apis = \
+            self.apisToGet["global"] + \
+            self.apisToGet["global-instance"] + \
+            self.apisToGet["instance"] + \
+            self.apisToGet["device"]
+
+        for vulkanApi, typeDecl, feature in apis:
+            self.syncFeature(self.cgenImpl, feature)
+            self.makeGetDeviceProcAddrCall(
+                self.cgenImpl, "vk", "device", vulkanApi.name, typeDecl)
+
+        self.syncFeature(self.cgenImpl, "")
+        self.cgenImpl.endBlock()
+
+        # Check Vulkan 1.0 / 1.1 functions
+
+        def emit_check_impl(cgen, dispatchVar, feature, featureToCheck, apiName):
+            if feature == featureToCheck:
+                cgen.beginIf("!%s->%s" % (dispatchVar, apiName))
+                cgen.stmt("fprintf(stderr, \"%s check failed: %s not found\\n\")" % (featureToCheck, apiName))
+                cgen.stmt("good = false")
+                cgen.endIf()
+
+        def emit_feature_check_impl(context, cgen, tag, featureToCheck, apis):
+            cgen.line("""
+bool vulkan_dispatch_check_%s_%s(
+    const VulkanDispatch* vk)
+""" % (tag, featureToCheck))
+
+            cgen.beginBlock()
+
+            cgen.stmt("bool good = true")
+
+            for vulkanApi, typeDecl, feature in apis:
+                context.syncFeatureQuiet(self.cgenImpl, feature)
+                emit_check_impl(cgen, "vk", feature, featureToCheck, vulkanApi.name)
+
+            context.syncFeatureQuiet(self.cgenImpl, "")
+
+            cgen.stmt("return good")
+            cgen.endBlock()
+
+        instanceApis = self.apisToGet["global-instance"] + self.apisToGet["instance"]
+
+        emit_feature_check_impl(self, self.cgenImpl, "instance", "VK_VERSION_1_0", instanceApis)
+        emit_feature_check_impl(self, self.cgenImpl, "instance", "VK_VERSION_1_1", instanceApis)
+        emit_feature_check_impl(self, self.cgenImpl, "device", "VK_VERSION_1_0", self.apisToGet["device"])
+        emit_feature_check_impl(self, self.cgenImpl, "device", "VK_VERSION_1_1", self.apisToGet["device"])
+
         self.module.appendImpl(self.cgenImpl.swapCode())
 
     def onBeginFeature(self, featureName):
@@ -271,7 +441,7 @@ void init_vulkan_dispatch_from_system_loader(
     VulkanDispatch* out)""")
 
         self.cgenImpl.beginBlock()
-        
+
         self.cgenImpl.stmt("out->instance = nullptr")
         self.cgenImpl.stmt("out->physicalDevice = nullptr")
         self.cgenImpl.stmt("out->physicalDeviceQueueFamilyInfoCount = 0")

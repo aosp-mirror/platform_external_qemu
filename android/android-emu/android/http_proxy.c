@@ -31,7 +31,7 @@ android_http_proxy_set( const char*  proxy )
     D("android_http_proxy_set %s proxy \n", proxy? "add":"remove");
     // remove proxy
     if (proxy == NULL || proxy[0] == '\0') {
-        if (stralloc_cstr(UIProxy) != '\0') {
+        if (stralloc_cstr(UIProxy) != NULL) {
             stralloc_reset(UIProxy);
         }
         if (gAndroidProxyCB->ProxyUnset) {
@@ -44,7 +44,7 @@ android_http_proxy_set( const char*  proxy )
     rt = android_http_proxy_setup(proxy, VERBOSE_CHECK(proxy));
     if (rt == PROXY_ERR_OK)
     {
-        if (stralloc_cstr(UIProxy) != '\0') {
+        if (stralloc_cstr(UIProxy) != NULL) {
             stralloc_reset(UIProxy);
         }
         stralloc_add_str(UIProxy, proxy);

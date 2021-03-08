@@ -11,11 +11,25 @@
 
 #pragma once
 
-#include "ui_cellular-page.h"
-#include <QWidget>
-#include <memory>
+#include <qobjectdefs.h>       // for Q_OBJECT, slots
+#include <QString>             // for QString
+#include <QWidget>             // for QWidget
+#include <memory>              // for unique_ptr
 
+#include "ui_cellular-page.h"  // for CellularPage
+
+class QObject;
+class QWidget;
 struct QAndroidCellularAgent;
+
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
+
 class CellularPage : public QWidget
 {
     Q_OBJECT
@@ -31,10 +45,11 @@ private slots:
     void on_cell_standardBox_currentIndexChanged(int index);
     void on_cell_voiceStatusBox_currentIndexChanged(int index);
     void on_cell_signalStatusBox_currentIndexChanged(int index);
+    void on_cell_meterStatusBox_currentIndexChanged(int index);
 
     // TODO: Implement Network delay setting
     // http://developer.android.com/tools/devices/emulator.html#netdelay
-
 private:
     std::unique_ptr<Ui::CellularPage> mUi;
+    std::shared_ptr<UiEventTracker> mDropDownTracker;
 };

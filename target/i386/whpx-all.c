@@ -13,6 +13,8 @@
 #include "exec/address-spaces.h"
 #include "exec/exec-all.h"
 #include "exec/ioport.h"
+#include "exec/ram_addr.h"
+#include "exec/memory-remap.h"
 #include "qemu-common.h"
 #ifndef _MSC_VER
 #include "strings.h"
@@ -21,6 +23,7 @@
 #include "sysemu/whpx.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/cpus.h"
+#include "qemu/abort.h"
 #include "qemu/main-loop.h"
 #include "hw/boards.h"
 #include "qemu/error-report.h"
@@ -29,6 +32,7 @@
 #include "migration/migration.h"
 #include "whp-dispatch.h"
 
+#include "./WinHvPlatformDefs.h"
 #include <WinHvPlatform.h>
 #include <WinHvEmulation.h>
 
@@ -167,10 +171,15 @@ struct whpx_vcpu {
 static bool whpx_allowed;
 static bool whp_dispatch_initialized = false;
 static HMODULE hWinHvPlatform, hWinHvEmulation;
+static WHV_PROCESSOR_XSAVE_FEATURES whpx_xsave_cap;
 
 struct whpx_state whpx_global;
 struct WHPDispatch whp_dispatch;
 
+static bool whpx_has_xsave(void)
+{
+    return whpx_xsave_cap.XsaveSupport;
+}
 
 /*
  * VP support
@@ -220,6 +229,28 @@ static SegmentCache whpx_seg_h2q(const WHV_X64_SEGMENT_REGISTER *hs)
     qs.flags = ((uint32_t)hs->Attributes) << DESC_TYPE_SHIFT;
 
     return qs;
+}
+
+/* X64 Extended Control Registers */
+static void whpx_set_xcrs(CPUState *cpu)
+{
+    struct CPUX86State *env = (CPUArchState *)(cpu->env_ptr);
+    HRESULT hr;
+    struct whpx_state *whpx = &whpx_global;
+    WHV_REGISTER_VALUE xcr0;
+    WHV_REGISTER_NAME xcr0_name = WHvX64RegisterXCr0;
+
+    if (!whpx_has_xsave()) {
+        return;
+    }
+
+    /* Only xcr0 is supported by the hypervisor currently */
+    xcr0.Reg64 = env->xcr0;
+    hr = whp_dispatch.WHvSetVirtualProcessorRegisters(
+        whpx->partition, cpu->cpu_index, &xcr0_name, 1, &xcr0);
+    if (FAILED(hr)) {
+        error_report("WHPX: Failed to set register xcr0, hr=%08lx", hr);
+    }
 }
 
 static void whpx_set_registers(CPUState *cpu)
@@ -296,6 +327,9 @@ static void whpx_set_registers(CPUState *cpu)
     vcxt.values[idx++].Reg64 = vcpu->tpr;
 
     /* 8 Debug Registers - Skipped */
+
+    /* Extended control registers */
+    whpx_set_xcrs(cpu);
 
     /* 16 XMM registers */
     assert(whpx_register_names[idx] == WHvX64RegisterXmm0);
@@ -386,6 +420,30 @@ static void whpx_set_registers(CPUState *cpu)
     return;
 }
 
+/* X64 Extended Control Registers */
+static void whpx_get_xcrs(CPUState *cpu)
+{
+    struct CPUX86State *env = (CPUArchState *)(cpu->env_ptr);
+    HRESULT hr;
+    struct whpx_state *whpx = &whpx_global;
+    WHV_REGISTER_VALUE xcr0;
+    WHV_REGISTER_NAME xcr0_name = WHvX64RegisterXCr0;
+
+    if (!whpx_has_xsave()) {
+        return;
+    }
+
+    /* Only xcr0 is supported by the hypervisor currently */
+    hr = whp_dispatch.WHvGetVirtualProcessorRegisters(
+        whpx->partition, cpu->cpu_index, &xcr0_name, 1, &xcr0);
+    if (FAILED(hr)) {
+        error_report("WHPX: Failed to get register xcr0, hr=%08lx", hr);
+        return;
+    }
+
+    env->xcr0 = xcr0.Reg64;
+}
+
 static void whpx_get_registers(CPUState *cpu)
 {
     struct whpx_state *whpx = &whpx_global;
@@ -462,6 +520,9 @@ static void whpx_get_registers(CPUState *cpu)
     }
 
     /* 8 Debug Registers - Skipped */
+
+    /* Extended control registers */
+    whpx_get_xcrs(cpu);
 
     /* 16 XMM registers */
     assert(whpx_register_names[idx] == WHvX64RegisterXmm0);
@@ -1314,12 +1375,151 @@ void whpx_vcpu_kick(CPUState *cpu)
  * Memory support.
  */
 
+#define WHPX_MAX_SLOTS 64
+
+struct whpx_slot {
+    int present;
+    uint64_t size;
+    uint64_t gpa_start;
+    uint64_t gva;
+    void* hva;
+};
+
+struct whpx_slot whpx_slots[WHPX_MAX_SLOTS];
+
+void* whpx_gpa2hva(uint64_t gpa, bool* found) {
+    struct whpx_slot *mslot;
+    *found = false;
+    uint32_t i;
+
+    for (i = 0; i < WHPX_MAX_SLOTS; i++) {
+        mslot = &whpx_slots[i];
+        if (!mslot->size) continue;
+        if (gpa >= mslot->gpa_start &&
+            gpa < mslot->gpa_start + mslot->size) {
+            *found = true;
+            return (void*)((char*)(mslot->hva) + (gpa - mslot->gpa_start));
+        }
+    }
+
+    return 0;
+}
+
+struct whpx_slot* whpx_next_free_slot() {
+    struct whpx_slot *mem = 0;
+    int x;
+
+    for (x = 0; x < WHPX_MAX_SLOTS; ++x) {
+        mem = whpx_slots + x;
+        if (!mem->size) return mem;
+    }
+
+    return mem;
+}
+
+struct whpx_slot* whpx_find_overlap_slot(uint64_t start, uint64_t end, bool* coincident) {
+    struct whpx_slot *slot = 0;
+    int x;
+
+    if (coincident) *coincident = false;
+
+    for (x = 0; x < WHPX_MAX_SLOTS; ++x) {
+        slot = whpx_slots + x;
+        if (slot->size && start < (slot->gpa_start + slot->size) && end > slot->gpa_start) {
+            // Is [start, end) describing the same range?
+            if ((start == slot->gpa_start) &&
+                (end == slot->gpa_start + slot->size)) {
+                if (coincident) *coincident = true;
+            }
+            return slot;
+        }
+    }
+
+    return slot;
+}
+
+static HRESULT whpx_set_ram(
+    VOID* SourceAddress,
+    WHV_GUEST_PHYSICAL_ADDRESS GuestAddress,
+    UINT64 SizeInBytes,
+    WHV_MAP_GPA_RANGE_FLAGS Flags,
+    int add) {
+
+    struct whpx_state *whpx = &whpx_global;
+    HRESULT hr;
+
+    WHV_PARTITION_HANDLE partition = whpx->partition;
+
+    if (add) {
+        hr = whp_dispatch.WHvMapGpaRange(partition,
+                                         SourceAddress,
+                                         GuestAddress,
+                                         SizeInBytes,
+                                         Flags);
+    } else {
+        hr = whp_dispatch.WHvUnmapGpaRange(partition,
+                                           GuestAddress,
+                                           SizeInBytes);
+    }
+
+    if (FAILED(hr)) {
+        error_report("WHPX: Failed to %s GPA range PA:%p, Size:%p bytes,"
+                     " Host:%p, hr=%08lx",
+                     (add ? "MAP" : "UNMAP"),
+                     (void *)(uintptr_t)GuestAddress, (void *)SizeInBytes, SourceAddress, hr);
+        return hr;
+    }
+
+    // Success. Update our internal slots.
+    {
+        // Could have overlapped with existing slot.
+        // If so, and not coincident, reset the old mapping.
+        bool coincident;
+        struct whpx_slot* overlap_slot =
+            whpx_find_overlap_slot(
+                GuestAddress,
+                GuestAddress + SizeInBytes,
+                &coincident);
+
+        if (overlap_slot && coincident) {
+            if (add) {
+                // Nothing to do because the slot overlaps, return.
+                return hr;
+            } else {
+                // Coincident overlap slot; delete
+                overlap_slot->size = 0;
+                return hr;
+            }
+        }
+
+        // Delete existing overlap slot, and add the new one to a free slot,
+        // if we are adding a new region.
+        if (overlap_slot) {
+            overlap_slot->size = 0;
+        }
+
+        if (add) {
+            struct whpx_slot* new_slot = 0;
+            new_slot = whpx_next_free_slot();
+
+            if (!new_slot) {
+                qemu_abort("%s: no free slots\n", __func__);
+            }
+
+            new_slot->size = SizeInBytes;
+            new_slot->gpa_start = GuestAddress;
+            new_slot->hva = SourceAddress;
+        }
+    }
+
+    return hr;
+}
+
 static void whpx_update_mapping(hwaddr start_pa, ram_addr_t size,
                                 void *host_va, int add, int rom,
                                 const char *name)
 {
     struct whpx_state *whpx = &whpx_global;
-    HRESULT hr;
 
     /*
     if (add) {
@@ -1332,26 +1532,13 @@ static void whpx_update_mapping(hwaddr start_pa, ram_addr_t size,
     }
     */
 
-    if (add) {
-        hr = whp_dispatch.WHvMapGpaRange(whpx->partition,
-                                         host_va,
-                                         start_pa,
-                                         size,
-                                         (WHvMapGpaRangeFlagRead |
-                                          WHvMapGpaRangeFlagExecute |
-                                          (rom ? 0 : WHvMapGpaRangeFlagWrite)));
-    } else {
-        hr = whp_dispatch.WHvUnmapGpaRange(whpx->partition,
-                                           start_pa,
-                                           size);
-    }
-
-    if (FAILED(hr)) {
-        error_report("WHPX: Failed to %s GPA range '%s' PA:%p, Size:%p bytes,"
-                     " Host:%p, hr=%08lx",
-                     (add ? "MAP" : "UNMAP"), name,
-                     (void *)(uintptr_t)start_pa, (void *)size, host_va, hr);
-    }
+    whpx_set_ram(host_va,
+                 start_pa,
+                 size,
+                 (WHvMapGpaRangeFlagRead |
+                  WHvMapGpaRangeFlagExecute |
+                  (rom ? 0 : WHvMapGpaRangeFlagWrite)),
+                 add);
 }
 
 static void whpx_process_section(MemoryRegionSection *section, int add)
@@ -1363,6 +1550,10 @@ static void whpx_process_section(MemoryRegionSection *section, int add)
     uint64_t host_va;
 
     if (!memory_region_is_ram(mr)) {
+        return;
+    }
+
+    if (memory_region_is_user_backed(mr)) {
         return;
     }
 
@@ -1383,6 +1574,53 @@ static void whpx_process_section(MemoryRegionSection *section, int add)
 
     whpx_update_mapping(start_pa, size, (void *)(uintptr_t)host_va, add,
                         memory_region_is_rom(mr), mr->name);
+}
+
+// User backed memory region API
+static WHV_MAP_GPA_RANGE_FLAGS
+user_backed_flags_to_whpx(int flags) {
+    WHV_MAP_GPA_RANGE_FLAGS whpx_flags = 0;
+    if (flags & USER_BACKED_RAM_FLAGS_READ) {
+        whpx_flags |= WHvMapGpaRangeFlagRead;
+    }
+    if (flags & USER_BACKED_RAM_FLAGS_WRITE) {
+        whpx_flags |= WHvMapGpaRangeFlagWrite;
+    }
+    if (flags & USER_BACKED_RAM_FLAGS_EXEC) {
+        whpx_flags |= WHvMapGpaRangeFlagExecute;
+    }
+    return whpx_flags;
+}
+
+static void whpx_user_backed_ram_map(uint64_t gpa, void* hva, uint64_t size, int flags) {
+    struct whpx_state *whpx = &whpx_global;
+    HRESULT hr;
+
+    hr = whpx_set_ram(hva, gpa, size, user_backed_flags_to_whpx(flags), 1 /* add */);
+
+    if (FAILED(hr)) {
+        error_report(
+            "WHPX: Failed to map GPA range "
+            "[0x%llx 0x%llx] to HVA %p. flags: 0x%x",
+            (unsigned long long)gpa,
+            (unsigned long long)(gpa + size),
+            hva, flags);
+    }
+}
+
+static void whpx_user_backed_ram_unmap(uint64_t gpa, uint64_t size) {
+    struct whpx_state *whpx = &whpx_global;
+    HRESULT hr;
+
+    hr = whpx_set_ram(0, gpa, size, 0 /* no flags */, 0 /* for delete */);
+
+    if (FAILED(hr)) {
+        error_report(
+            "WHPX: Failed to unmap GPA range "
+            "[0x%llx 0x%llx]",
+            (unsigned long long)gpa,
+            (unsigned long long)(gpa + size));
+    }
 }
 
 static void whpx_region_add(MemoryListener *listener,
@@ -1431,6 +1669,9 @@ static MemoryListener whpx_memory_listener = {
 static void whpx_memory_init(void)
 {
     memory_listener_register(&whpx_memory_listener, &address_space_memory);
+    qemu_set_user_backed_mapping_funcs(
+        whpx_user_backed_ram_map,
+        whpx_user_backed_ram_unmap);
 }
 
 static void whpx_handle_interrupt(CPUState *cpu, int mask)
@@ -1445,6 +1686,28 @@ static void whpx_handle_interrupt(CPUState *cpu, int mask)
 /*
  * Partition support
  */
+static void whpx_disable_xsave(struct whpx_state *whpx)
+{
+    WHV_PROCESSOR_XSAVE_FEATURES xsave_cap;
+    HRESULT hr;
+
+    if (!whpx_has_xsave()) {
+        return;
+    }
+
+    xsave_cap.AsUINT64 = 0;
+    hr = whp_dispatch.WHvSetPartitionProperty(
+        whpx->partition,
+        WHvPartitionPropertyCodeProcessorXsaveFeatures,
+        &xsave_cap,
+        sizeof(xsave_cap));
+
+    if (FAILED(hr)) {
+        return;
+    }
+
+    whpx_xsave_cap.AsUINT64 = 0;
+}
 
 static int whpx_accel_init(MachineState *ms)
 {
@@ -1463,6 +1726,8 @@ static int whpx_accel_init(MachineState *ms)
     }
 
     memset(whpx, 0, sizeof(struct whpx_state));
+    memset(whpx_slots, 0, sizeof(whpx_slots));
+
     whpx->mem_quota = ms->ram_size;
 
     hr = whp_dispatch.WHvGetCapability(
@@ -1481,6 +1746,27 @@ static int whpx_accel_init(MachineState *ms)
         goto error;
     }
 
+    /* Query the XSAVE capability of the partition. */
+    hr = whp_dispatch.WHvGetPartitionProperty(
+        whpx->partition,
+        WHvPartitionPropertyCodeProcessorXsaveFeatures,
+        &whpx_xsave_cap,
+        sizeof(whpx_xsave_cap),
+        &whpx_cap_size);
+
+    /*
+     * Windows version which don't support this property will return with the
+     * specific error code.
+     */
+    if (FAILED(hr) && hr != WHV_E_UNKNOWN_PROPERTY) {
+        error_report("WHPX: Failed to query XSAVE capability, hr=%08lx", hr);
+        ret = -EINVAL;
+        goto error;
+    }
+
+    /* Disable xsave until the WHPX xsave API's have not been plumbed in */
+    whpx_disable_xsave(whpx);
+
     memset(&prop, 0, sizeof(WHV_PARTITION_PROPERTY));
     prop.ProcessorCount = smp_cpus;
     hr = whp_dispatch.WHvSetPartitionProperty(
@@ -1496,6 +1782,7 @@ static int whpx_accel_init(MachineState *ms)
         goto error;
     }
 
+    memset(&prop, 0, sizeof(WHV_PARTITION_PROPERTY));
     prop.ExtendedVmExits.X64MsrExit = 1;
     prop.ExtendedVmExits.X64CpuidExit = 1;
     hr = whp_dispatch.WHvSetPartitionProperty(

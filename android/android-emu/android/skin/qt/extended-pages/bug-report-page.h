@@ -11,17 +11,34 @@
 
 #pragma once
 
-#include "android/emulation/control/AdbBugReportServices.h"
-#include "android/skin/qt/emulator-qt-window.h"
+#include <stddef.h>                                      // for size_t
+#include <QByteArrayData>                                // for Q_OBJECT, slots
+#include <QString>                                       // for QString
+#include <QWidget>                                       // for QWidget
+#include <memory>                                        // for shared_ptr
+#include <string>                                        // for string
 
-#include "ui_bug-report-page.h"
+#include "android/avd/BugreportInfo.h"                   // for BugreportInfo
+#include "android/base/StringView.h"                     // for StringView
+#include "android/base/async/RecurrentTask.h"            // for RecurrentTask
+#include "android/emulation/control/adb/AdbInterface.h"  // for AdbCommandPtr
+#include "android/settings-agent.h"                      // for SettingsTheme
 
-#include <QMessageBox>
-#include <QThread>
-#include <QWidget>
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
 
-#include <memory>
-#include <string>
+using android::metrics::UiEventTracker;
+class QEvent;
+class QMessageBox;
+class QObject;
+class QShowEvent;
+
+namespace Ui {
+class BugreportPage;
+}  // namespace Ui
 
 class BugreportPage : public QWidget {
     Q_OBJECT
@@ -29,20 +46,9 @@ class BugreportPage : public QWidget {
 public:
     explicit BugreportPage(QWidget* parent = 0);
     ~BugreportPage();
-    void initialize(EmulatorQtWindow* eW);
-    void showEvent(QShowEvent* event);
+    void setAdbInterface(android::emulation::AdbInterface* adb);
+    void showEvent(QShowEvent* event) override;
     void updateTheme();
-    struct ReportingFields {
-        std::string androidVer;
-        std::string avdDetails;
-        std::string cpuModel;
-        std::string deviceName;
-        std::string emulatorVer;
-        std::string hypervisorVer;
-        std::string hostOsName;
-        std::string reproSteps;
-        std::string sdkToolsVer;
-    };
 
     struct SavingStates {
         std::string saveLocation;
@@ -57,66 +63,31 @@ public:
 private slots:
     void on_bug_saveButton_clicked();
     void on_bug_sendToGoogle_clicked();
-    void saveBugreportFolderFinished(bool success,
-                                     QString folderPath,
-                                     bool willOpenIssueTracker);
-    void saveBugreportFolderStarted();
-    void issueTrackerTaskFinished(bool success, QString error);
+    void on_bug_bugReportCheckBox_clicked();
 
 private:
+    void refreshContents();
     void loadAdbBugreport();
     void loadAdbLogcat();
-    void loadAvdDetails();
     void loadCircularSpinner(SettingsTheme theme);
     void loadScreenshotImage();
     bool eventFilter(QObject* object, QEvent* event) override;
-    void saveBugReportFolder(bool willOpenIssueTracker);
-    void launchIssueTrackerThread();
-
-    EmulatorQtWindow* mEmulatorWindow;
-    std::unique_ptr<android::emulation::AdbBugReportServices> mBugReportServices;
+    bool launchIssueTracker();
+    void enableInput(bool enabled);
+    void showSpinningWheelAnimation(bool enabled);
+    bool saveBugReportTo(android::base::StringView location);
+    bool saveToFile(android::base::StringView filePath,
+                    const char* content,
+                    size_t length);
+    std::string generateUniqueBugreportName();
+    android::emulation::AdbInterface* mAdb = nullptr;
     QMessageBox* mDeviceDetailsDialog;
-    bool mFirstShowEvent = true;
     std::unique_ptr<Ui::BugreportPage> mUi;
-    ReportingFields mReportingFields;
+    std::shared_ptr<UiEventTracker> mBugTracker;
     SavingStates mSavingStates;
-};
-
-class BugReportFolderSavingTask : public QObject {
-    Q_OBJECT
-public:
-    BugReportFolderSavingTask(std::string savingPath,
-                              std::string adbBugreportFilePath,
-                              std::string screenshotFilePath,
-                              std::string avdDetails,
-                              std::string reproSteps,
-                              bool openIssueTracker);
-public slots:
-    void run();
-
-signals:
-    void started();
-    void finished(bool success, QString folderPath, bool openIssueTracker);
-
-private:
-    std::string mSavingPath;
-    std::string mAdbBugreportFilePath;
-    std::string mScreenshotFilePath;
-    std::string mAvdDetails;
+    android::avd::BugreportInfo mReportingFields;
     std::string mReproSteps;
-    bool mOpenIssueTracker;
-};
-
-class IssueTrackerTask : public QObject {
-    Q_OBJECT
-public:
-    IssueTrackerTask(BugreportPage::ReportingFields reportingField);
-
-public slots:
-    void run();
-signals:
-    void finished(bool success, QString error);
-
-private:
-    BugreportPage::ReportingFields mReportingFields;
+    android::emulation::AdbCommandPtr mAdbBugreport;
+    android::emulation::AdbCommandPtr mAdbLogcat;
+    android::base::RecurrentTask mTask;
 };

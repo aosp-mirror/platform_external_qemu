@@ -10,16 +10,38 @@
 // GNU General Public License for more details.
 
 #include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/raised-material-button.h"
-#include "android/skin/qt/stylesheet.h"
-#include "android/skin/qt/qt-settings.h"
-#include <QApplication>
-#include <QDir>
-#include <QSettings>
-#include <QStandardPaths>
-#include <QStringList>
-#include <QTemporaryFile>
-#include <QVariant>
+
+#include <qicon.h>                                   // for QIcon::Disabled
+#include <qnamespace.h>                              // for WindowFlags, Win...
+#include <qobject.h>                                 // for qobject_cast
+#include <qstandardpaths.h>                          // for QStandardPaths::...
+#include <qstring.h>                                 // for operator+, QStri...
+#include <QApplication>                              // for QApplication
+#include <QDir>                                      // for QDir
+#include <QFrame>                                    // for QFrame
+#include <QHash>                                     // for QHash
+#include <QList>                                     // for QList
+#include <QPixmap>                                   // for QPixmap
+#include <QPushButton>                               // for QPushButton
+#include <QSettings>                                 // for QSettings
+#include <QStandardPaths>                            // for QStandardPaths
+#include <QStringList>                               // for QStringList
+#include <QTemporaryFile>                            // for QTemporaryFile
+#include <QVariant>                                  // for QVariant
+#include <QWidget>                                   // for QWidget
+#include <QWidgetList>                               // for QWidgetList
+
+#include "android/cmdline-option.h"                  // for android_cmdLineOptions
+#include "android/skin/qt/qt-settings.h"             // for SAVE_PATH, SCREE...
+#include "android/skin/qt/raised-material-button.h"  // for RaisedMaterialBu...
+#include "android/skin/qt/stylesheet.h"              // for stylesheetValues
+
+class QFrame;
+class QPushButton;
+class QWidget;
+
+// Only used by embedded emulator because the value is not persisted.
+static SettingsTheme sCurrentTheme = SETTINGS_THEME_STUDIO_LIGHT;
 
 void setButtonEnabled(QPushButton*  button, SettingsTheme theme, bool isEnabled)
 {
@@ -127,14 +149,27 @@ QString getRecordingSaveDirectory()
 }
 
 SettingsTheme getSelectedTheme() {
-    QSettings settings;
-    SettingsTheme theme =
-            (SettingsTheme)settings.value(Ui::Settings::UI_THEME, SETTINGS_THEME_LIGHT).toInt();
-    if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
-        theme = SETTINGS_THEME_LIGHT;
-    }
+    if (android_cmdLineOptions->qt_hide_window) {
+        return sCurrentTheme;
+    } else {
+        QSettings settings;
+        SettingsTheme theme =
+                (SettingsTheme)settings.value(Ui::Settings::UI_THEME, SETTINGS_THEME_LIGHT).toInt();
+        if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
+            theme = SETTINGS_THEME_LIGHT;
+        }
 
-    return theme;
+        return theme;
+    }
+}
+
+void setSelectedTheme(SettingsTheme theme, bool persist) {
+    if (persist) {
+        QSettings settings;
+        settings.setValue(Ui::Settings::UI_THEME, (int)theme);
+    } else {
+        sCurrentTheme = theme;
+    }
 }
 
 void adjustAllButtonsForTheme(SettingsTheme theme)
@@ -160,6 +195,16 @@ void adjustAllButtonsForTheme(SettingsTheme theme)
 
 QIcon getIconForCurrentTheme(const QString& icon_name) {
     QString iconType = Ui::stylesheetValues(getSelectedTheme())[Ui::THEME_PATH_VAR];
+    return QIcon(":/" + iconType + "/" + icon_name);
+}
+
+QColor getColorForCurrentTheme(const QString& colorName) {
+    QString colorValues = Ui::stylesheetValues(getSelectedTheme())[colorName];
+    return QColor(colorValues);
+}
+
+QIcon getIconForTheme(const QString& icon_name, SettingsTheme theme) {
+    QString iconType = Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR];
     return QIcon(":/" + iconType + "/" + icon_name);
 }
 

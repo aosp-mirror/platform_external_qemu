@@ -230,6 +230,32 @@ bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
     return true;
 }
 
+#if defined(__APPLE__) && defined(__arm64)
+extern "C" void android_sdl_display_early_init(DisplayOptions* opts) {
+    if (opts->gl && android_hw->hw_arc) {
+        display_opengl = 1;
+    }
+}
+
+extern "C" int android_sdl_display_init(DisplayState* ds, DisplayOptions* opts) {
+    (void)opts;
+
+    EmulatorWindow* const emulator = emulator_window_get();
+    if (emulator->opts->no_window) {
+        return true;
+    }
+
+    return android_display_init(ds, qframebuffer_fifo_get());
+}
+
+static QemuDisplay qemu_display_android = {
+    .type       = DISPLAY_TYPE_SDL,
+    .early_init = android_sdl_display_early_init,
+    .init       = android_sdl_display_init,
+};
+
+#else
+
 extern "C" void sdl_display_early_init(DisplayOptions* opts) {
     if (opts->gl && android_hw->hw_arc) {
         display_opengl = 1;
@@ -252,6 +278,8 @@ static QemuDisplay qemu_display_android = {
     .early_init = sdl_display_early_init,
     .init       = sdl_display_init,
 };
+
+#endif
 
 static void register_android_ui(void)
 {

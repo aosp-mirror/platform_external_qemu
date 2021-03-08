@@ -10,7 +10,7 @@
   GNU General Public License for more details.
  */
 
-QGroupBox { font-weight: regular; font-size: %%FONT_MEDIUM%%; }
+QGroupBox, QMenu::item { font-weight: regular; font-size: %%FONT_MEDIUM%%; }
 QComboBox, QLineEdit, QPlainTextEdit, QPushButton, QRadioButton, QAbstractSpinBox {
     font-weight: regular;
     font-size: %%FONT_LARGE%%;
@@ -26,6 +26,21 @@ QComboBox, QLineEdit, QPlainTextEdit, QPushButton, QRadioButton, QAbstractSpinBo
 *[ColorGroup="Instruction"] {
     font-weight: regular;
     font-size: %%FONT_LARGE%%;
+}
+*[ColorGroup="Property"] {
+    font-weight: regular;
+    font-size: %%FONT_LARGE%%;
+}
+*[ColorGroup="ListItem"] {
+    font-weight: regular;
+    font-size: %%FONT_LARGE%%;
+}
+*[ColorGroup="ListSubitem"] {
+    font-weight: regular;
+    font-size: %%FONT_MEDIUM%%;
+}
+*[ColorGroup="Countdown"] {
+    font-size: 48px;
 }
 * {
     font-size: %%FONT_MEDIUM%%;

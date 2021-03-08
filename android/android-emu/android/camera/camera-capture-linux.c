@@ -138,10 +138,16 @@ static const uint32_t _preferred_formats[] =
     V4L2_PIX_FMT_NV12,
     V4L2_PIX_FMT_NV21,
     V4L2_PIX_FMT_YUYV,
+    V4L2_PIX_FMT_UYVY,
+    V4L2_PIX_FMT_YUY2,
+    V4L2_PIX_FMT_YUNV,
+    V4L2_PIX_FMT_V422,
     /* End with RGB. */
     V4L2_PIX_FMT_RGB32,
     V4L2_PIX_FMT_RGB24,
-    V4L2_PIX_FMT_RGB565,
+    V4L2_PIX_FMT_ARGB32,
+    V4L2_PIX_FMT_BGR32,
+    V4L2_PIX_FMT_BGR24
 };
 /* Number of entries in _preferred_formats array. */
 static const int _preferred_format_num =
@@ -779,6 +785,8 @@ _camera_device_get_info(LinuxCameraDevice* cd, CameraInfo* cis)
          * matter which one we choose. Lets choose the first one. */
         chosen = 0;
     }
+
+    D("webcam choose format %.4s\n", (char*)&_preferred_formats[chosen]);
 
     cis->device_name = ASTRDUP(cd->device_name);
     cis->inp_channel = cd->input_channel;

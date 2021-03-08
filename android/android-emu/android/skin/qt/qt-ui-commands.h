@@ -10,7 +10,9 @@
 
 #pragma once
 
-#include <QString>
+#include <QString>  // for QString
+
+class QString;
 
 enum class QtUICommand {
     SHOW_PANE_LOCATION,
@@ -23,11 +25,16 @@ enum class QtUICommand {
     SHOW_PANE_VIRTSENSORS,
     SHOW_PANE_SNAPSHOT,
     SHOW_PANE_DPAD,
+    SHOW_PANE_TV_REMOTE,
     SHOW_PANE_FINGER,
     SHOW_PANE_GPLAY,
-    SHOW_PANE_RECORD_SCREEN,
+    SHOW_PANE_RECORD,
     SHOW_PANE_SETTINGS,
     SHOW_PANE_HELP,
+    SHOW_PANE_PERFSTATS,
+    SHOW_PANE_CAR,
+    SHOW_PANE_CAR_ROTARY,
+    SHOW_PANE_MULTIDISPLAY,
     SHOW_MULTITOUCH,
     TAKE_SCREENSHOT,
     ENTER_ZOOM,
@@ -55,6 +62,10 @@ enum class QtUICommand {
     VIRTUAL_SCENE_MOVE_DOWN,
     VIRTUAL_SCENE_MOVE_UP,
     VIRTUAL_SCENE_CONTROL,
+    FOLD,
+    UNFOLD,
+    CHANGE_FOLDABLE_POSTURE,
+    UPDATE_FOLDABLE_POSTURE_INDICATOR,
 };
 
 enum class QtKeyEventSource {

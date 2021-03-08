@@ -19,6 +19,8 @@
 #include <EGL/eglext.h>
 #include <GLES2/gl2.h>
 #include "Hwc2.h"
+#include "android/base/synchronization/Lock.h"
+#include "emugl/common/mutex.h"
 
 
 // Helper class used to draw a simple texture to the current framebuffer.
@@ -76,12 +78,23 @@ private:
     GLuint mVertexBuffer;
     GLuint mIndexBuffer;
 
+    emugl::Mutex mMaskLock;
     GLuint mMaskTexture;
     int    mMaskWidth;
     int    mMaskHeight;
+    // The size of the mMaskPixels. If the new mask is smaller than this size, we won't
+    // allocate new memory for mMaskPixels.
+    int    mMaskTextureWidth;
+    int    mMaskTextureHeight;
     bool   mHaveNewMask;
     bool   mMaskIsValid;
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
     const unsigned char* mMaskPixels;
+=======
+    bool mShouldReallocateTexture;
+    // The size of mMaskPixels are always of size mMaskWidth * mMaskHeight * 4 bytes
+    std::vector<unsigned char> mMaskPixels;
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
     bool   mBlendResetNeeded = false;
 };
 

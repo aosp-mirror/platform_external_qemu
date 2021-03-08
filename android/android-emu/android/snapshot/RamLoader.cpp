@@ -28,6 +28,7 @@
 #include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
+#include "android/utils/file_io.h"
 
 #include <algorithm>
 #include <atomic>
@@ -348,6 +349,10 @@ void RamLoader::readBlockPages(base::Stream* stream,
     // Ram block was a file mapping, and current emulator session is using the
     // same file. No need to do anything more, even if we mapped privately in
     // this session instead of shared.
+    if (savedFlags & SNAPSHOT_RAM_USER_BACKED) {
+        return;
+    }
+
     if ((savedFlags & SNAPSHOT_RAM_MAPPED_SHARED) &&
         (activeFlags & SNAPSHOT_RAM_MAPPED) && savedMemPath == activeMemPath) {
         mLazyLoadingFromFileBacking = true;
@@ -363,7 +368,7 @@ void RamLoader::readBlockPages(base::Stream* stream,
           savedMemPath != activeMemPath))) {
         auto ramFilePath = PathUtils::join(getSnapshotBaseDir(), savedMemPath);
 
-        auto ramFilePtr = fopen(ramFilePath.c_str(), "rb");
+        auto ramFilePtr = android_fopen(ramFilePath.c_str(), "rb");
 
         if (!ramFilePtr) {
             mHasError = true;

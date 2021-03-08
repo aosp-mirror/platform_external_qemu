@@ -17,9 +17,11 @@
 ANDROID_BEGIN_HEADER
 
 
-enum SettingsTheme { SETTINGS_THEME_LIGHT,
-                     SETTINGS_THEME_DARK,
-                     SETTINGS_THEME_NUM_ENTRIES };
+typedef enum { SETTINGS_THEME_LIGHT,
+               SETTINGS_THEME_DARK,
+               SETTINGS_THEME_STUDIO_LIGHT,
+               SETTINGS_THEME_STUDIO_DARK,
+               SETTINGS_THEME_NUM_ENTRIES } SettingsTheme;
 
 typedef struct SettingsAgent {
     // Sets the IP port used for the Android Debug Bridge

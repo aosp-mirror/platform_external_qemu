@@ -43,6 +43,10 @@ EmuglBackendList::EmuglBackendList(const char* execDir,
     mNames = EmuglBackendScanner::scanDir(execDir, programBitness);
 }
 
+EmuglBackendList::EmuglBackendList(int programBitness,
+                                   const std::vector<std::string>& names) :
+        mDefaultName("auto"), mNames(names), mProgramBitness(programBitness) { }
+
 bool EmuglBackendList::contains(const char* name) const {
     for (size_t n = 0; n < mNames.size(); ++n) {
         if (mNames[n] == name) {
@@ -68,8 +72,6 @@ std::string EmuglBackendList::getLibDirPath(const char* name) {
             nameNoSuffix.c_str());
 }
 
-static const char kLibPrefix[] = "lib";
-
 #ifdef _WIN32
 static const char kLibSuffix[] = ".dll";
 #elif defined(__APPLE__)
@@ -77,20 +79,6 @@ static const char kLibSuffix[] = ".dylib";
 #else
 static const char kLibSuffix[] = ".so";
 #endif
-
-std::string EmuglBackendList::getGLES12TranslatorLibName() {
-
-    std::string res(kLibPrefix);
-
-    if (mProgramBitness == 64) {
-        res += "64";
-    }
-
-    res += kGLES12TranslatorName;
-
-    res += kLibSuffix;
-    return res;
-}
 
 bool EmuglBackendList::getBackendLibPath(const char* name,
                                          Library library,
@@ -110,9 +98,8 @@ bool EmuglBackendList::getBackendLibPath(const char* name,
     }
 
     std::string path = android::base::StringFormat(
-            "%s" PATH_SEP "%s%s%s",
+            "%s" PATH_SEP "lib%s%s",
             getLibDirPath(name),
-            kLibPrefix,
             libraryName,
             kLibSuffix);
 

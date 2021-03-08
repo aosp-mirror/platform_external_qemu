@@ -1,3 +1,7 @@
+# Run ./android/android-emugl/scripts/update-emugl-sources.sh to regenerate encoders and decoders
+# e.g.:
+# ./android/android-emugl/scripts/update-emugl-sources.sh --emugen=./objs/emugen --aosp-dir=/path/to/repo-aosp-master
+
 GL_ENTRY(void, glActiveTexture, GLenum texture)
 GL_ENTRY(void, glAttachShader, GLuint program, GLuint shader)
 GL_ENTRY(void, glBindAttribLocation, GLuint program, GLuint index, const GLchar* name)
@@ -557,3 +561,27 @@ GL_ENTRY(void, glGetFramebufferParameteriv, GLenum target, GLenum pname, GLint *
 # Already used in Translator's validations, just need encoder.
 GL_ENTRY(void, glGetTexLevelParameterfv, GLenum target, GLint level, GLenum pname, GLfloat * params)
 GL_ENTRY(void, glGetTexLevelParameteriv, GLenum target, GLint level, GLenum pname, GLint * params)
+
+# DMA support for glMapBufferRange
+GL_ENTRY(void, glMapBufferRangeDMA, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr)
+GL_ENTRY(void, glUnmapBufferDMA, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr, GLboolean* out_res)
+
+# Direct memory access GL functions
+GL_ENTRY(uint64_t, glMapBufferRangeDirect, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr)
+GL_ENTRY(void, glUnmapBufferDirect, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, uint64_t paddr, uint64_t guest_ptr, GLboolean* out_res)
+GL_ENTRY(void, glFlushMappedBufferRangeDirect, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access)
+
+GL_ENTRY(GLenum, glGetGraphicsResetStatusEXT, void)
+GL_ENTRY(void, glReadnPixelsEXT, GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLsizei bufSize, GLvoid *data)
+GL_ENTRY(void, glGetnUniformfvEXT, GLuint program, GLint location, GLsizei bufSize, GLfloat *params)
+GL_ENTRY(void, glGetnUniformivEXT, GLuint program, GLint location, GLsizei bufSize, GLint *params)
+
+# Performance measurement
+GL_ENTRY(void, glDrawArraysNullAEMU, GLenum mode, GLint first, GLsizei count);
+GL_ENTRY(void, glDrawElementsNullAEMU, GLenum mode, GLsizei count, GLenum type, const GLvoid* indices);
+GL_ENTRY(void, glDrawElementsOffsetNullAEMU, GLenum mode, GLsizei count, GLenum type, GLuint offset);
+GL_ENTRY(void, glDrawElementsDataNullAEMU, GLenum mode, GLsizei count, GLenum type, void *data, GLuint datalen);
+
+# Async UnmapBuffer (also distinguishes sending arbitrary length buffer)
+GL_ENTRY(void, glUnmapBufferAsyncAEMU, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, GLboolean* out_res)
+GL_ENTRY(void, glFlushMappedBufferRangeAEMU2, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer)

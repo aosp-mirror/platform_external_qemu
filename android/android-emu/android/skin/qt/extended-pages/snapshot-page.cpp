@@ -11,40 +11,106 @@
 
 #include "android/skin/qt/extended-pages/snapshot-page.h"
 
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/ProcessControl.h"
-#include "android/emulator-window.h"
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/globals.h"
-#include "android/metrics/MetricsReporter.h"
-#include "android/metrics/proto/studio_stats.pb.h"
-#include "android/skin/qt/extended-pages/common.h"
-#include "android/skin/qt/error-dialog.h"
-#include "android/skin/ui.h"
-#include "android/snapshot/interface.h"
-#include "android/snapshot/PathUtils.h"
-#include "android/snapshot/proto/snapshot.pb.h"
-#include "android/snapshot/Quickboot.h"
-#include "android/snapshot/Snapshot.h"
+#include <qbytearray.h>                              // for operator==
+#include <qdialog.h>                                 // for QDialog::Rejected
+#include <qdialogbuttonbox.h>                        // for operator|, QDial...
+#include <qdir.h>                                    // for operator|, QDir:...
+#include <qeasingcurve.h>                            // for QEasingCurve::Ou...
+#include <qheaderview.h>                             // for QHeaderView::Fixed
+#include <qiodevice.h>                               // for operator|, QIODe...
+#include <qmessagebox.h>                             // for operator|, QMess...
+#include <qnamespace.h>                              // for WaitCursor, Asce...
+#include <qsettings.h>                               // for QSettings::IniFo...
+#include <qstring.h>                                 // for operator+, QStri...
+#include <stdio.h>                                   // for fprintf, printf
+#include <string.h>                                  // for strcmp
+#include <QApplication>                              // for QApplication
+#include <QBrush>                                    // for QBrush
+#include <QByteArray>                                // for QByteArray
+#include <QCheckBox>                                 // for QCheckBox
+#include <QComboBox>                                 // for QComboBox
+#include <QDateTime>                                 // for QDateTime
+#include <QDialog>                                   // for QDialog
+#include <QDialogButtonBox>                          // for QDialogButtonBox
+#include <QDir>                                      // for QDir
+#include <QEasingCurve>                              // for QEasingCurve
+#include <QFile>                                     // for QFile
+#include <QFont>                                     // for QFont
+#include <QGraphicsPixmapItem>                       // for QGraphicsPixmapItem
+#include <QGraphicsTextItem>                         // for QGraphicsTextItem
+#include <QGraphicsView>                             // for QGraphicsView
+#include <QHash>                                     // for QHash
+#include <QHeaderView>                               // for QHeaderView
+#include <QIcon>                                     // for QIcon
+#include <QLabel>                                    // for QLabel
+#include <QLineEdit>                                 // for QLineEdit
+#include <QList>                                     // for QList
+#include <QMessageBox>                               // for QMessageBox
+#include <QObject>                                   // for QObject
+#include <QPixmap>                                   // for QPixmap
+#include <QPlainTextEdit>                            // for QPlainTextEdit
+#include <QPropertyAnimation>                        // for QPropertyAnimation
+#include <QPushButton>                               // for QPushButton
+#include <QRectF>                                    // for QRectF
+#include <QSettings>                                 // for QSettings
+#include <QSizeF>                                    // for QSizeF
+#include <QTabWidget>                                // for QTabWidget
+#include <QTextDocument>                             // for QTextDocument
+#include <QTextEdit>                                 // for QTextEdit
+#include <QTreeWidget>                               // for QTreeWidget
+#include <QTreeWidgetItem>                           // for QTreeWidgetItem
+#include <QTreeWidgetItemIterator>                   // for QTreeWidgetItemI...
+#include <QVBoxLayout>                               // for QVBoxLayout
+#include <QVariant>                                  // for QVariant
+#include <fstream>                                   // for ofstream
+#include <functional>                                // for __base
+#include <string>                                    // for string
 
-#include "android/skin/qt/stylesheet.h"
+#include "android/avd/info.h"                        // for AVDINFO_NO_SNAPS...
+#include "android/avd/util.h"                        // for path_getAvdConte...
+#include "android/base/Log.h"                        // for base
+#include "android/base/ProcessControl.h"             // for isRestartDisabled
+#include "android/base/async/ThreadLooper.h"         // for ThreadLooper
+#include "android/base/files/PathUtils.h"            // for PathUtils
+#include "android/base/system/System.h"              // for System, System::...
+#include "android/cmdline-option.h"                  // for AndroidOptions
+#include "android/emulation/control/window_agent.h"  // for EmulatorWindow
+#include "android/emulator-window.h"                 // for emulator_window_get
+#include "android/featurecontrol/FeatureControl.h"   // for isEnabled
+#include "android/featurecontrol/Features.h"         // for QuickbootFileBacked
+#include "android/globals.h"                         // for android_avdParams
+#include "android/metrics/MetricsReporter.h"         // for MetricsReporter
+#include "android/metrics/MetricsWriter.h"           // for android_studio
+#include "android/metrics/UiEventTracker.h"          // for UiEventTracker
+#include "studio_stats.pb.h"                         // for EmulatorSnapshot...
+#include "android/settings-agent.h"                  // for SettingsTheme
+#include "android/skin/qt/error-dialog.h"            // for showErrorDialog
+#include "android/skin/qt/extended-pages/common.h"   // for setButtonEnabled
+#include "android/skin/qt/raised-material-button.h"  // for RaisedMaterialBu...
+#include "android/skin/qt/stylesheet.h"              // for stylesheetForTheme
+#include "android/snapshot/common.h"
+#include "android/snapshot/PathUtils.h"              // for getSnapshotBaseDir
+#include "android/snapshot/Quickboot.h"              // for Quickboot, Quick...
+#include "android/snapshot/Snapshot.h"               // for Snapshot
+#include "android/snapshot/interface.h"              // for androidSnapshot_...
+#include "snapshot.pb.h"      // for Snapshot
 
-#include <QCheckBox>
-#include <QDialogButtonBox>
-#include <QDir>
-#include <QGraphicsPixmapItem>
-#include <QInputDialog>
-#include <QLabel>
-#include <QMenu>
-#include <QMessageBox>
-#include <QPlainTextEdit>
-#include <QPropertyAnimation>
-#include <QSemaphore>
-#include <QSettings>
-#include <QVBoxLayout>
-
-#include <fstream>
+class QCheckBox;
+class QCloseEvent;
+class QDateTime;
+class QGraphicsItem;
+class QGraphicsPixmapItem;
+class QGraphicsTextItem;
+class QLineEdit;
+class QPlainTextEdit;
+class QPropertyAnimation;
+class QPushButton;
+class QShowEvent;
+class QTextDocument;
+class QTreeWidget;
+class QTreeWidgetItem;
+class QVBoxLayout;
+class QWidget;
 
 using android::metrics::MetricsReporter;
 using android::snapshot::Quickboot;
@@ -158,7 +224,10 @@ static SnapshotPage* sInstance = nullptr;
 SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
     QWidget(parent),
     mIsStandAlone(standAlone),
-    mUi(new Ui::SnapshotPage())
+    mUi(new Ui::SnapshotPage()),
+    mSnapshotTracker(new UiEventTracker(
+            android_studio::EmulatorUiEvent::BUTTON_PRESS,
+            android_studio::EmulatorUiEvent::EXTENDED_SNAPSHOT_TAB))
 {
     mUi->setupUi(this);
 
@@ -489,6 +558,7 @@ void SnapshotPage::changeUiFromSaveOnExitSetting(SaveSnapshotOnExit choice) {
 
 void SnapshotPage::on_enlargeInfoButton_clicked() {
     // Make the info window grow
+    mSnapshotTracker->increment("ENLARGE");
     mUi->preview->lower(); // Let the preview window get covered
     QPropertyAnimation *infoAnimation = new QPropertyAnimation(mUi->selectionInfo, "geometry");
 
@@ -517,15 +587,17 @@ void SnapshotPage::on_reduceInfoButton_clicked() {
 }
 
 void SnapshotPage::on_editSnapshot_clicked() {
+    mSnapshotTracker->increment("EDIT");
     editSnapshot(getSelectedSnapshot());
 }
 
 void SnapshotPage::on_deleteSnapshot_clicked() {
+    mSnapshotTracker->increment("DELETE");
     deleteSnapshot(getSelectedSnapshot());
 }
 
 void SnapshotPage::on_loadSnapshot_clicked() {
-
+    mSnapshotTracker->increment("LOAD");
     const WidgetSnapshotItem* theItem = getSelectedSnapshot();
     if (!theItem) return;
 
@@ -540,6 +612,7 @@ void SnapshotPage::on_loadSnapshot_clicked() {
 }
 
 void SnapshotPage::on_saveQuickBootNowButton_clicked() {
+    mSnapshotTracker->increment("SAVE_BOOT");
     setEnabled(false);
     setOperationInProgress(true);
     // Invoke the snapshot save function.
@@ -550,6 +623,7 @@ void SnapshotPage::on_saveQuickBootNowButton_clicked() {
 }
 
 void SnapshotPage::on_loadQuickBootNowButton_clicked() {
+    mSnapshotTracker->increment("LOAD_BOOT");
     setEnabled(false);
     setOperationInProgress(true);
     // Invoke the snapshot load function.
@@ -578,6 +652,7 @@ void SnapshotPage::slot_snapshotLoadCompleted(int statusInt, const QString& snap
 }
 
 void SnapshotPage::on_defaultSnapshotDisplay_itemSelectionChanged() {
+    mSnapshotTracker->increment("SELECT_DEFAULT");
     QList<QTreeWidgetItem *> selectedItems = mUi->defaultSnapshotDisplay->selectedItems();
     if (selectedItems.size() > 0) {
         // We have the selection, de-select the other list
@@ -586,6 +661,7 @@ void SnapshotPage::on_defaultSnapshotDisplay_itemSelectionChanged() {
     updateAfterSelectionChanged();
 }
 void SnapshotPage::on_snapshotDisplay_itemSelectionChanged() {
+    mSnapshotTracker->increment("SELECT");
     QList<QTreeWidgetItem *> selectedItems = mUi->snapshotDisplay->selectedItems();
     if (selectedItems.size() > 0) {
         // We have the selection, de-select the other list
@@ -623,6 +699,7 @@ static void setSaveOnExitChoice(SaveSnapshotOnExit choice) {
 }
 
 void SnapshotPage::on_saveQuickBootOnExit_currentIndexChanged(int uiIndex) {
+    mSnapshotTracker->increment("SELECT_BOOT");
     SaveSnapshotOnExit preferenceValue;
     switch(static_cast<SaveSnapshotOnExitUiOrder>(uiIndex)) {
         case SaveSnapshotOnExitUiOrder::Never:
@@ -670,6 +747,7 @@ void SnapshotPage::on_saveQuickBootOnExit_currentIndexChanged(int uiIndex) {
 }
 
 void SnapshotPage::on_deleteInvalidSnapshots_currentIndexChanged(int uiIndex) {
+    mSnapshotTracker->increment("DELETE_INVALID");
     DeleteInvalidSnapshots preferenceValue;
     switch(static_cast<DeleteInvalidSnapshotsUiOrder>(uiIndex)) {
         case DeleteInvalidSnapshotsUiOrder::No:
@@ -921,13 +999,16 @@ void SnapshotPage::showEvent(QShowEvent* ee) {
 // In stand-alone mode, it is used to choose the selected
 // snapshot.
 void SnapshotPage::on_takeSnapshotButton_clicked() {
+    mSnapshotTracker->increment("TAKE_SNAPSHOT");
     setOperationInProgress(true);
+
 
     if (mIsStandAlone) {
         mMadeSelection = true;
         close();
     } else {
 
+        setEnabled(false);
         QString snapshotName("snap_"
                              + QDateTime::currentDateTime().toString("yyyy-MM-dd_HH-mm-ss"));
 
@@ -1515,7 +1596,7 @@ void SnapshotPage::writeProtobuf(const QString& fileName,
                                  const std::unique_ptr<emulator_snapshot::Snapshot>& protobuf) {
     std::string protoFileName = PathUtils::join(getSnapshotBaseDir().c_str(),
                                                 fileName.toStdString().c_str(),
-                                                "snapshot.pb");
+                                                android::snapshot::kSnapshotProtobufName);
     std::ofstream outStream(protoFileName.c_str(), std::ofstream::binary);
 
     protobuf->SerializeToOstream(&outStream);
@@ -1544,7 +1625,7 @@ void SnapshotPage::getOutputFileName() {
 
     // Get the name of the file containing parameters from Android Studio
     EmulatorWindow* const ew = emulator_window_get();
-    if (!ew || !ew->opts || !ew->opts->studio_params) {
+    if (!ew || !ew->opts->studio_params) {
         // No file to read
         return;
     }

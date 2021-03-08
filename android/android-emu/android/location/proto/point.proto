@@ -37,4 +37,7 @@ message PointMetadata {
 
   // Descriptive string given by the user
   optional string description = 6;
+
+  // Street address
+  optional string address = 7;
 }

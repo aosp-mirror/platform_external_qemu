@@ -12,10 +12,9 @@
 
 #pragma once
 
-#include "android/skin/keycode.h"
-#include "android/skin/keycode-buffer.h"
-
-#include "android/utils/compiler.h"
+#include "android/skin/keycode.h"         // Keycodes
+#include "android/skin/keycode-buffer.h"  // for SkinKeycodeBuffer
+#include "android/utils/compiler.h"       // for ANDROID_BEGIN_HEADER, ANDRO...
 
 ANDROID_BEGIN_HEADER
 

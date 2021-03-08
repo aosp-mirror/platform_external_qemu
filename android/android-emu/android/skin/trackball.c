@@ -9,15 +9,24 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "android/skin/trackball.h"
-#include "android/skin/image.h"
-#include "android/utils/system.h"
-
-#include <math.h>
-#include <stdlib.h>
-#ifndef _MSC_VER
-#include <sys/time.h>
+#ifdef _MSC_VER
+#define _USE_MATH_DEFINES
 #endif
+
+#include "android/skin/trackball.h"
+
+#include "android/utils/system.h"  // for AFREE, ANEW0
+
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
+#include <sys/time.h>              // for gettimeofday, timeval
+#endif
+
+#include <math.h>                  // for sqrt, cos, sin, M_PI
+#include <stdint.h>                // for uint32_t
+#include <stdlib.h>                // for calloc, free, rand, NULL
+#include <string.h>                // for memset
 
 // Return the number of milliseconds since the start of this module.
 static uint32_t get_ticks(void) {

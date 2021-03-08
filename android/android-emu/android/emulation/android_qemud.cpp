@@ -11,6 +11,7 @@
 
 #include "android/emulation/android_qemud.h"
 
+#include "android/base/synchronization/Lock.h"
 #include "android/utils/looper.h"
 #include "android/utils/misc.h"
 #include "android/utils/panic.h"
@@ -26,6 +27,10 @@
 #include <assert.h>
 #include <stdlib.h>
 
+namespace {
+android::base::Lock g_qemud_client_global_lock;
+}  // namespace
+
 /* Initializes QEMUD serial interface.
  */
 static void _android_qemud_serial_init(CSerialLine* sl) {
@@ -38,6 +43,14 @@ static void _android_qemud_serial_init(CSerialLine* sl) {
 
     qemud_serial_line = sl;
     qemud_multiplexer_init(qemud_multiplexer, sl);
+}
+
+void qemud_client_global_lock_acquire() {
+    g_qemud_client_global_lock.lock();
+}
+
+void qemud_client_global_lock_release() {
+    g_qemud_client_global_lock.unlock();
 }
 
 /*------------------------------------------------------------------------------
@@ -219,6 +232,8 @@ _qemudPipe_recvBuffers(void* opaque, AndroidPipeBuffer* buffers, int numBuffers)
         D("%s: Unexpected NULL client", __FUNCTION__);
         return -1;
     }
+
+    ::android::base::AutoLock guard(g_qemud_client_global_lock);
 
     msg_list = &client->ProtocolSelector.Pipe.messages;
     if (*msg_list == NULL) {

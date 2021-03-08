@@ -11,11 +11,23 @@
 
 #pragma once
 
-#include "ui_finger-page.h"
-#include <QWidget>
-#include <memory>
+#include <QByteArrayData>    // for Q_OBJECT, slots
+#include <QString>           // for QString
+#include <QWidget>           // for QWidget
+#include <memory>            // for shared_ptr, unique_ptr
 
+#include "ui_finger-page.h"  // for FingerPage
+
+namespace android {
+namespace metrics {
+class UiEventTracker;
+}  // namespace metrics
+}  // namespace android
+
+using android::metrics::UiEventTracker;
+class QObject;
 struct QAndroidFingerAgent;
+
 class FingerPage : public QWidget
 {
     Q_OBJECT
@@ -30,4 +42,5 @@ private slots:
 
 private:
     std::unique_ptr<Ui::FingerPage> mUi;
+    std::shared_ptr<UiEventTracker> mFingerTracker;
 };

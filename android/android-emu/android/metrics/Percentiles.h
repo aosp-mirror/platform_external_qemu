@@ -11,12 +11,12 @@
 
 #pragma once
 
-#include "android/base/Optional.h"
-
-#include <cstdint>
 #include <algorithm>
+#include <cstdint>
 #include <initializer_list>
 #include <vector>
+
+#include "android/base/Optional.h"
 
 namespace android_studio {
 class PercentileEstimator;
@@ -26,12 +26,13 @@ namespace android {
 namespace metrics {
 
 //
-// This class is a C++ implementation of a corresponding Android Studio code from
+// This class is a C++ implementation of a corresponding Android Studio code
+// from
 //    https://android.googlesource.com/platform/tools/analytics-library/+/studio-master-dev/tracker/src/main/java/com/android/tools/analytics
 //
 // Percentiles class creates an estimation of the value at target percentiles
 // from a data stream. It is based on the P-square algorithm found at:
-//    http://pierrechainais.ec-lille.fr/Centrale/Option_DAD/IMPACT_files/Dynamic%20quantiles%20calcultation%20-%20P2%20Algorythm.pdf
+//    https://www.cse.wustl.edu/~jain/papers/ftp/psqr.pdf
 // with extensions to allow monitoring multiple percentiles.
 //
 
@@ -40,6 +41,9 @@ public:
     // Constructor.
     // |rawDataSize| - number of samples before interpolating.
     // |targets| - percentiles to monitor.
+    // Be aware that up to rawDataSize elements will not be bucketized
+    // which can significantly increase the size of
+    // filled out protobuf messages.
     explicit Percentiles(int rawDataSize,
                          std::initializer_list<double> targets);
 
@@ -59,6 +63,13 @@ public:
 
     // Returns the number of tracked percentiles.
     int targetCount() const;
+
+    // Returns the number of samples collected.
+    int samplesCount() const;
+
+    // Returns true if the raw samples have been bucketized.
+    bool isBucketized() const;
+
     // Returns the value of tracked percentile #|index|, or empty optional if
     // |index| is out of range.
     base::Optional<double> target(int index) const;
@@ -70,8 +81,11 @@ public:
     base::Optional<double> calcValueForTarget(double target);
     base::Optional<double> calcValueForTargetNo(int targetNo);
 
-    // Fills in a metrics event with the current state.
-    void fillMetricsEvent(android_studio::PercentileEstimator* event);
+    // Fills in a metrics event with the current state, you can provide an
+    // optional set of targets that should be selected, leave empty to send all
+    // targets.
+    void fillMetricsEvent(android_studio::PercentileEstimator* event,
+                          std::initializer_list<double> targets = {}) const;
 
 private:
     // A single tracked bucket.

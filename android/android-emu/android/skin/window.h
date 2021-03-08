@@ -12,15 +12,20 @@
 
 #pragma once
 
-#include "android/skin/event.h"
-#include "android/skin/file.h"
-#include "android/skin/trackball.h"
+#include <stdbool.h>                 // for bool
+
+#include "android/skin/event.h"      // for SkinEvent
+#include "android/skin/file.h"       // for SkinLayout
+#include "android/skin/image.h"      // for SkinImage
+#include "android/skin/rect.h"       // for SkinRotation, SkinRect
+#include "android/skin/trackball.h"  // for SkinTrackBall
 
 typedef struct SkinWindow  SkinWindow;
 
 typedef struct SkinWindowFuncs {
     void (*key_event)(unsigned keycode, int down);
-    void (*mouse_event)(unsigned x, unsigned y, unsigned state);
+    void (*mouse_event)(unsigned x, unsigned y, unsigned state, int displayId);
+    void (*mouse_wheel_event)(int x_delta, int y_delta, int displayId);
     void (*rotary_input_event)(int delta);
     void (*set_device_orientation)(SkinRotation rotation);
     int (*opengles_show)(void* winhandle,
@@ -63,6 +68,16 @@ extern void             skin_window_set_onion( SkinWindow*   window,
                                                SkinImage*    onion,
                                                SkinRotation  rotation,
                                                int           alpha );
+
+extern void             skin_window_set_layout_region(SkinWindow* window,
+                                                      int         xOffset, int yOffset,
+                                                      int         width,   int height);
+
+extern void             skin_window_set_display_region_and_update(SkinWindow* window,
+                                                                  int         xOffset,
+                                                                  int         yOffset,
+                                                                  int         width,
+                                                                  int         height);
 
 extern void             skin_window_set_scale( SkinWindow*  window,
                                                double       scale );

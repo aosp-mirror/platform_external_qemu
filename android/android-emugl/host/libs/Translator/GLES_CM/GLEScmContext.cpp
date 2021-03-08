@@ -74,7 +74,8 @@ void GLEScmContext::init() {
 void GLEScmContext::initGlobal(EGLiface* eglIface) {
     s_glDispatch.dispatchFuncs(s_maxGlesVersion, eglIface->eglGetGlLibrary());
     GLEScontext::initGlobal(eglIface);
-    buildStrings((const char*)dispatcher().glGetString(GL_VENDOR),
+    buildStrings(true /* is gles1 */,
+                 (const char*)dispatcher().glGetString(GL_VENDOR),
                  (const char*)dispatcher().glGetString(GL_RENDERER),
                  (const char*)dispatcher().glGetString(GL_VERSION),
                  "OpenGL ES-CM 1.1");
@@ -451,7 +452,8 @@ void GLEScmContext::setupArrayPointerHelper(GLESConversionArrays& cArrs,GLint fi
         }
 }
 
-void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) {
+void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct, bool* needEnablingPostDraw) {
+    (void)needEnablingPostDraw;
     ArraysMap::iterator it;
     m_pointsIndex = -1;
 
@@ -640,9 +642,8 @@ GLEScmContext::MatrixStack& GLEScmContext::currMatrixStack() {
     case GL_MODELVIEW:
         return mModelviewMatrices;
     default:
-        emugl_crash_reporter(
-            "error: matrix mode set to 0x%x!",
-            mCurrMatrixMode);
+        emugl::emugl_crash_reporter("error: matrix mode set to 0x%x!",
+                                    mCurrMatrixMode);
     }
     // Make compiler happy
     return mModelviewMatrices;
@@ -699,31 +700,35 @@ const GLESpointer* GLEScmContext::getPointer(GLenum arrType) {
 }
 
 void GLEScmContext::initExtensionString() {
-    *s_glExtensions = "GL_OES_blend_func_separate GL_OES_blend_equation_separate GL_OES_blend_subtract "
+    if (s_glExtensionsGles1Initialized) return;
+
+    *s_glExtensionsGles1 = "GL_OES_blend_func_separate GL_OES_blend_equation_separate GL_OES_blend_subtract "
                       "GL_OES_byte_coordinates GL_OES_compressed_paletted_texture GL_OES_point_size_array "
                       "GL_OES_point_sprite GL_OES_single_precision GL_OES_stencil_wrap GL_OES_texture_env_crossbar "
                       "GL_OES_texture_mirored_repeat GL_OES_EGL_image GL_OES_element_index_uint GL_OES_draw_texture "
                       "GL_OES_texture_cube_map GL_OES_draw_texture ";
     if (s_glSupport.GL_OES_READ_FORMAT)
-        *s_glExtensions+="GL_OES_read_format ";
+        *s_glExtensionsGles1+="GL_OES_read_format ";
     if (s_glSupport.GL_EXT_FRAMEBUFFER_OBJECT) {
-        *s_glExtensions+="GL_OES_framebuffer_object GL_OES_depth24 GL_OES_depth32 GL_OES_fbo_render_mipmap "
+        *s_glExtensionsGles1+="GL_OES_framebuffer_object GL_OES_depth24 GL_OES_depth32 GL_OES_fbo_render_mipmap "
                          "GL_OES_rgb8_rgba8 GL_OES_stencil1 GL_OES_stencil4 GL_OES_stencil8 ";
     }
     if (s_glSupport.GL_EXT_PACKED_DEPTH_STENCIL)
-        *s_glExtensions+="GL_OES_packed_depth_stencil ";
+        *s_glExtensionsGles1+="GL_OES_packed_depth_stencil ";
     if (s_glSupport.GL_EXT_TEXTURE_FORMAT_BGRA8888)
-        *s_glExtensions+="GL_EXT_texture_format_BGRA8888 GL_APPLE_texture_format_BGRA8888 ";
+        *s_glExtensionsGles1+="GL_EXT_texture_format_BGRA8888 GL_APPLE_texture_format_BGRA8888 ";
     if (s_glSupport.GL_ARB_MATRIX_PALETTE && s_glSupport.GL_ARB_VERTEX_BLEND) {
-        *s_glExtensions+="GL_OES_matrix_palette ";
+        *s_glExtensionsGles1+="GL_OES_matrix_palette ";
         GLint max_palette_matrices=0;
         GLint max_vertex_units=0;
         dispatcher().glGetIntegerv(GL_MAX_PALETTE_MATRICES_OES,&max_palette_matrices);
         dispatcher().glGetIntegerv(GL_MAX_VERTEX_UNITS_OES,&max_vertex_units);
         if (max_palette_matrices>=32 && max_vertex_units>=4)
-            *s_glExtensions+="GL_OES_extended_matrix_palette ";
+            *s_glExtensionsGles1+="GL_OES_extended_matrix_palette ";
     }
-    *s_glExtensions+="GL_OES_compressed_ETC1_RGB8_texture ";
+    *s_glExtensionsGles1+="GL_OES_compressed_ETC1_RGB8_texture ";
+
+    s_glExtensionsGles1Initialized = true;
 }
 
 int GLEScmContext::getMaxTexUnits() {
@@ -1834,7 +1839,7 @@ void GLEScmContext::drawArrays(GLenum mode, GLint first, GLsizei count) {
     } else {
         GLESConversionArrays tmpArrs;
 
-        setupArraysPointers(tmpArrs,first,count,0,NULL,true);
+        setupArraysPointers(tmpArrs,first,count,0,NULL,true,nullptr);
 
         if (mode == GL_POINTS && isArrEnabled(GL_POINT_SIZE_ARRAY_OES)){
             drawPointsArrs(tmpArrs,first,count);
@@ -1890,7 +1895,7 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
     } else {
         GLESConversionArrays tmpArrs;
 
-        setupArraysPointers(tmpArrs,0,count,type,indices,false);
+        setupArraysPointers(tmpArrs,0,count,type,indices,false,nullptr);
         if(mode == GL_POINTS && isArrEnabled(GL_POINT_SIZE_ARRAY_OES)){
             drawPointsElems(tmpArrs,count,type,indices);
         }

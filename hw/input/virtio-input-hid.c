@@ -3,10 +3,11 @@
  * (at your option) any later version.  See the COPYING file in the
  * top-level directory.
  */
-
 #include "qemu/osdep.h"
 #include "qemu/iov.h"
 
+#include "hw/input/android_keycodes.h"
+#include "hw/input/linux_keycodes.h"
 #include "hw/qdev.h"
 #include "hw/virtio/virtio.h"
 #include "hw/virtio/virtio-input.h"
@@ -16,10 +17,20 @@
 
 #include "standard-headers/linux/input.h"
 
-#define VIRTIO_ID_NAME_KEYBOARD "QEMU Virtio Keyboard"
+// BUG: 136093985 Use name "qwerty2" so that Android system is able
+// to associate the keyboard device with the "qwerty2.Therefore the device will
+// be recognized as the built-in keyboard.
+#define VIRTIO_ID_NAME_KEYBOARD "qwerty2"
 #define VIRTIO_ID_NAME_MOUSE    "QEMU Virtio Mouse"
 #define VIRTIO_ID_NAME_TABLET   "QEMU Virtio Tablet"
 
+#define DEBUG 0
+
+#if DEBUG
+#define D(...) (fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n"))
+#else
+#define D(...) ((void)0)
+#endif
 /* ----------------------------------------------------------------- */
 
 static const unsigned short keymap_button[INPUT_BUTTON__MAX] = {
@@ -35,6 +46,8 @@ static const unsigned short keymap_button[INPUT_BUTTON__MAX] = {
 static const unsigned short axismap_rel[INPUT_AXIS__MAX] = {
     [INPUT_AXIS_X]                   = REL_X,
     [INPUT_AXIS_Y]                   = REL_Y,
+    [INPUT_AXIS_X_WHEEL]             = REL_HWHEEL,
+    [INPUT_AXIS_Y_WHEEL]             = REL_WHEEL,
 };
 
 static const unsigned short axismap_abs[INPUT_AXIS__MAX] = {
@@ -76,7 +89,7 @@ static void virtio_input_handle_event(DeviceState *dev, QemuConsole *src,
     VirtIOInputHID *vhid = VIRTIO_INPUT_HID(dev);
     VirtIOInput *vinput = VIRTIO_INPUT(dev);
     virtio_input_event event;
-    int qcode;
+    int linux_keycode;
     InputKeyEvent *key;
     InputMoveEvent *move;
     InputBtnEvent *btn;
@@ -84,18 +97,25 @@ static void virtio_input_handle_event(DeviceState *dev, QemuConsole *src,
     switch (evt->type) {
     case INPUT_EVENT_KIND_KEY:
         key = evt->u.key.data;
-        qcode = qemu_input_key_value_to_qcode(key->key);
-        if (qcode < qemu_input_map_qcode_to_linux_len &&
-            qemu_input_map_qcode_to_linux[qcode]) {
-            event.type  = cpu_to_le16(EV_KEY);
-            event.code  = cpu_to_le16(qemu_input_map_qcode_to_linux[qcode]);
+        // On AEMU (Android Emulator), we get the keycode from Qt
+        // where we already converted it to a linux keycode.
+        // That means |linux_keycode| (previously |qcode|)
+        // here is a linux keycode already.
+        linux_keycode = qemu_input_key_value_to_qcode(key->key);
+        // On AEMU (Android Emulator), certain keycodes such as
+        // ANDROID_KEY_APPSWITCH is unmapped in qemu_input_map_linux_to_qcode.
+        // Thus, we skip the mapping check.
+
+        if (linux_keycode < qemu_input_map_linux_to_qcode_len) {
+            event.type = cpu_to_le16(EV_KEY);
+            event.code = cpu_to_le16(linux_keycode);
             event.value = cpu_to_le32(key->down ? 1 : 0);
             virtio_input_send(vinput, &event);
         } else {
             if (key->down) {
-                fprintf(stderr, "%s: unmapped key: %d [%s]\n", __func__,
-                        qcode, QKeyCode_str(qcode));
-            }
+                D("%s: out of bounds key: %d [%s]", __func__, linux_keycode,
+                  KeyCode_str(linux_keycode));
+           }
         }
         break;
     case INPUT_EVENT_KIND_BTN:
@@ -116,7 +136,7 @@ static void virtio_input_handle_event(DeviceState *dev, QemuConsole *src,
             virtio_input_send(vinput, &event);
         } else {
             if (btn->down) {
-                fprintf(stderr, "%s: unmapped button: %d [%s]\n", __func__,
+                D("%s: unmapped button: %d [%s]", __func__,
                         btn->button,
                         InputButton_str(btn->button));
             }
@@ -204,8 +224,7 @@ static void virtio_input_hid_handle_status(VirtIOInput *vinput,
         kbd_put_ledstate(vhid->ledstate);
         break;
     default:
-        fprintf(stderr, "%s: unknown type %d\n", __func__,
-                le16_to_cpu(event->type));
+        D("%s: unknown type %d", __func__, le16_to_cpu(event->type));
         break;
     }
 }
@@ -278,11 +297,29 @@ static void virtio_keyboard_init(Object *obj)
 {
     VirtIOInputHID *vhid = VIRTIO_INPUT_HID(obj);
     VirtIOInput *vinput = VIRTIO_INPUT(obj);
-
     vhid->handler = &virtio_keyboard_handler;
     virtio_input_init_config(vinput, virtio_keyboard_config);
-    virtio_input_key_config(vinput, qemu_input_map_qcode_to_linux,
-                            qemu_input_map_qcode_to_linux_len);
+    // Mandatory android keys. Reference hw/input/goldfish_events.c
+    const guint16 mandatory_android_keys[] = {
+        LINUX_KEY_HOME, LINUX_KEY_BACK, LINUX_KEY_SEND, LINUX_KEY_END,
+        LINUX_KEY_SOFT1, LINUX_KEY_VOLUMEUP, LINUX_KEY_VOLUMEDOWN,
+        LINUX_KEY_SOFT2, LINUX_KEY_POWER, LINUX_KEY_SEARCH, LINUX_KEY_SLEEP,
+        ANDROID_KEY_APPSWITCH, ANDROID_KEY_STEM_PRIMARY, ANDROID_KEY_STEM_1,
+        ANDROID_KEY_STEM_2, ANDROID_KEY_STEM_3, LINUX_KEY_CENTER,
+        // equivalent to LINUX_KEY_GRAVE in Android system qwerty.kl
+        LINUX_KEY_GREEN};
+    const size_t android_keycodes_len =
+        sizeof(mandatory_android_keys) / sizeof(mandatory_android_keys[0]) +
+        qemu_input_map_qcode_to_linux_len;
+    guint16 *android_keycodes =
+        malloc(android_keycodes_len * sizeof(qemu_input_map_qcode_to_linux[0]));
+    memmove(android_keycodes, qemu_input_map_qcode_to_linux,
+            qemu_input_map_qcode_to_linux_len *
+                sizeof(qemu_input_map_qcode_to_linux[0]));
+    memmove(android_keycodes + qemu_input_map_qcode_to_linux_len,
+            mandatory_android_keys, sizeof(mandatory_android_keys));
+    virtio_input_key_config(vinput, android_keycodes, android_keycodes_len);
+    free(android_keycodes);
 }
 
 static const TypeInfo virtio_keyboard_info = {

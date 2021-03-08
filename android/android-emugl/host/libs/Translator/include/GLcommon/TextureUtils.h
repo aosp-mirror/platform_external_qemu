@@ -33,6 +33,9 @@ ETC2ImageFormat getEtcFormat(GLenum internalformat);
 void getAstcFormats(const GLint** formats, size_t* formatsCount);
 bool isAstcFormat(GLenum internalformat);
 bool isEtcFormat(GLenum internalformat);
+bool isEtc2Format(GLenum internalformat);
+bool isBptcFormat(GLenum internalformat);
+bool isS3tcFormat(GLenum internalformat);
 bool isPaletteFormat(GLenum internalformat);
 int getCompressedFormats(int* formats);
 void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
@@ -78,4 +81,15 @@ bool isSwizzleParam(GLenum pname);
 
 bool isIntegerInternalFormat(GLint internalFormat);
 
+void doCompressedTexImage2DNative(GLEScontext* ctx, GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data);
+void doCompressedTexSubImage2DNative(GLEScontext* ctx, GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data);
+
+void forEachEtc2Format(std::function<void(GLint format)>);
+void forEachAstcFormat(std::function<void(GLint format)>);
+void forEachBptcFormat(std::function<void(GLint format)>);
+void forEachS3tcForamt(std::function<void(GLint format)>);
+
+bool isEtc2OrAstcFormat(GLenum format);
+
+bool shouldPassthroughCompressedFormat(GLEScontext* ctx, GLenum internalformat);
 #endif

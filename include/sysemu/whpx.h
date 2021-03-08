@@ -21,11 +21,12 @@ int whpx_vcpu_exec(CPUState *cpu);
 void whpx_destroy_vcpu(CPUState *cpu);
 void whpx_vcpu_kick(CPUState *cpu);
 
-
 void whpx_cpu_synchronize_state(CPUState *cpu);
 void whpx_cpu_synchronize_post_reset(CPUState *cpu);
 void whpx_cpu_synchronize_post_init(CPUState *cpu);
 void whpx_cpu_synchronize_pre_loadvm(CPUState *cpu);
+
+void* whpx_gpa2hva(uint64_t gpa, bool* found);
 
 #ifdef CONFIG_WHPX
 

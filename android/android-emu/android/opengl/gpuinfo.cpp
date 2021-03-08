@@ -98,6 +98,7 @@ void GpuInfoList::clear() {
     blacklist_status = false;
     Anglelist_status = false;
     SyncBlacklist_status = false;
+    VulkanBlacklist_status = false;
     infos.clear();
 }
 
@@ -363,6 +364,9 @@ public:
               mGpuInfoList.SyncBlacklist_status = gpuinfo_query_blacklist(
                       &mGpuInfoList, sSyncBlacklist, arraySize(sSyncBlacklist));
 
+              mGpuInfoList.VulkanBlacklist_status =
+                !isVulkanSafeToUseNative();
+
           }) {
         mAsyncLoadThread.start();
     }
@@ -407,6 +411,10 @@ bool async_query_host_gpu_AngleWhitelisted() {
 
 bool async_query_host_gpu_SyncBlacklisted() {
     return globalGpuInfoList().SyncBlacklist_status;
+}
+
+bool async_query_host_gpu_VulkanBlacklisted() {
+    return globalGpuInfoList().VulkanBlacklist_status;
 }
 
 void setGpuBlacklistStatus(bool switchedToSoftware) {

@@ -534,7 +534,10 @@ void tcp_connect(struct socket *inso)
         return;
     }
     qemu_set_nonblock(s);
-    socket_set_fast_reuse(s);
+    /*
+     * Do not call socket_set_fast_reuse() on a connected socket.
+     * Some kernels disallow it.
+     */
     opt = 1;
     qemu_setsockopt(s, SOL_SOCKET, SO_OOBINLINE, &opt, sizeof(int));
     socket_set_nodelay(s);

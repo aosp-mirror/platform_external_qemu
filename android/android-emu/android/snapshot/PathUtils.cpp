@@ -21,6 +21,28 @@ using android::base::System;
 namespace android {
 namespace snapshot {
 
+std::vector<std::string> getQcow2Files(std::string avdDir) {
+    std::vector<std::string> qcows{};
+    const std::string ext = ".qcow2";
+
+    auto list = System::get()->scanDirEntries(avdDir);
+
+    // Copy all files that have a .qcow2 extension.
+    std::copy_if(list.begin(), list.end(), std::back_inserter(qcows),
+                 [ext](std::string fname) {
+                     if (ext.size() > fname.size())
+                         return false;
+                     return std::equal(
+                             fname.begin() + fname.size() - ext.size(),
+                             fname.end(), ext.begin());
+                 });
+    return qcows;
+}
+
+std::string getAvdDir() {
+    return avdInfo_getContentPath(android_avdInfo);
+}
+
 std::string getSnapshotBaseDir() {
     auto avdDir = avdInfo_getContentPath(android_avdInfo);
     auto path = base::PathUtils::join(avdDir, "snapshots");

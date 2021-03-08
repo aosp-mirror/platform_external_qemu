@@ -17,8 +17,8 @@
 #include "android/globals.h"
 #include "android/protobuf/LoadSave.h"
 #include "android/snapshot/common.h"
-#include "android/snapshot/proto/snapshot.pb.h"
-#include "android/snapshot/proto/snapshot_deps.pb.h"
+#include "snapshot.pb.h"
+#include "snapshot_deps.pb.h"
 #include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Snapshot.h"
 

@@ -199,6 +199,17 @@ supported_kvm_target() {
     return 1
 }
 
+supported_gvm_target() {
+    test "$gvm" = "yes" || return 1
+    glob "$1" "*-softmmu" || return 1
+    case "${1%-softmmu}" in
+        i386|x86_64)
+            return 0
+        ;;
+    esac
+    return 1
+}
+
 supported_xen_target() {
     test "$xen" = "yes" || return 1
     glob "$1" "*-softmmu" || return 1
@@ -256,6 +267,7 @@ supported_target() {
     esac
     test "$tcg" = "yes" && return 0
     supported_kvm_target "$1" && return 0
+    supported_gvm_target "$1" && return 0
     supported_xen_target "$1" && return 0
     supported_hax_target "$1" && return 0
     supported_hvf_target "$1" && return 0
@@ -349,6 +361,7 @@ vhost_scsi="no"
 vhost_vsock="no"
 vhost_user=""
 kvm="no"
+gvm="no"
 whpx="no"
 hax="no"
 colo="yes"
@@ -364,6 +377,7 @@ strip_opt="yes"
 tcg_interpreter="no"
 bigendian="no"
 mingw32="no"
+msvc="no"
 gcov="no"
 gcov_tool="gcov"
 EXESUF=""
@@ -718,6 +732,9 @@ HOST_VARIANT_DIR=""
 case $targetos in
 MINGW32*)
   mingw32="yes"
+  if check_define _MSC_VER ; then
+    msvc="yes"
+  fi
   hax="yes"
   audio_possible_drivers="dsound sdl winaudio"
   if check_include dsound.h; then
@@ -823,7 +840,6 @@ Linux)
   vhost_net="yes"
   vhost_crypto="yes"
   vhost_scsi="yes"
-  vhost_vsock="yes"
   QEMU_INCLUDES="-I\$(SRC_PATH)/linux-headers -I$(pwd)/linux-headers $QEMU_INCLUDES"
   supported_os="yes"
 ;;
@@ -879,7 +895,7 @@ for opt do
   case "$opt" in
   --help|-h) show_help=yes
   ;;
-  --version|-V) exec cat $source_path/VERSION
+  --version|-V) exec cat $source_path/QEMU_VERSION
   ;;
   --prefix=*) prefix="$optarg"
   ;;
@@ -1071,6 +1087,10 @@ for opt do
   --disable-kvm) kvm="no"
   ;;
   --enable-kvm) kvm="yes"
+  ;;
+  --disable-gvm) gvm="no"
+  ;;
+  --enable-gvm) gvm="yes"
   ;;
   --disable-whpx) whpx="no"
   ;;
@@ -1621,6 +1641,7 @@ disabled with --disable-FEATURE, default is enabled if available:
   fdt             fdt device tree
   bluez           bluez stack connectivity
   kvm             KVM acceleration support
+  gvm             GVM acceleration support
   whpx            Windows Hypervisor Platform acceleration support
   hax             HAX acceleration support
   colo            COarse-grain LOck-stepping VM for Non-stop Service
@@ -2042,7 +2063,19 @@ fi
 ##########################################
 # MinGW / Mingw-w64 localtime_r/gmtime_r check
 
-if test "$mingw32" = "yes"; then
+if test "$msvc" = "yes"; then
+    # For msvc build, we redirect localtime_r to localtime_s. So
+    # let's test localtime_s instead.
+cat > $TMPC << EOF
+#include <time.h>
+int main(void) { localtime_s(NULL, NULL); return 0; }
+EOF
+    if compile_prog "" "" ; then
+        localtime_r="yes"
+    else
+        error_exit "Need localtime_s for msvc build."
+    fi
+elif test "$mingw32" = "yes"; then
     # Some versions of MinGW / Mingw-w64 lack localtime_r
     # and gmtime_r entirely.
     #
@@ -3424,7 +3457,9 @@ done
 # 32-bit QEMU while pointing at 64-bit glib headers
 cat > $TMPC <<EOF
 #include <glib.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #define QEMU_BUILD_BUG_ON(x) \
   typedef char qemu_build_bug_on[(x)?-1:1] __attribute__((unused));
@@ -4594,23 +4629,23 @@ fi
 ##########################################
 # virgl renderer probe
 
-if test "$virglrenderer" != "no" ; then
-  cat > $TMPC << EOF
-#include <virglrenderer.h>
-int main(void) { virgl_renderer_poll(); return 0; }
-EOF
-  virgl_cflags=$($pkg_config --cflags virglrenderer 2>/dev/null)
-  virgl_libs=$($pkg_config --libs virglrenderer 2>/dev/null)
-  if $pkg_config virglrenderer >/dev/null 2>&1 && \
-     compile_prog "$virgl_cflags" "$virgl_libs" ; then
-    virglrenderer="yes"
-  else
-    if test "$virglrenderer" = "yes" ; then
-      feature_not_found "virglrenderer"
-    fi
-    virglrenderer="no"
-  fi
-fi
+# if test "$virglrenderer" != "no" ; then
+#   cat > $TMPC << EOF
+# #include <virglrenderer.h>
+# int main(void) { virgl_renderer_poll(); return 0; }
+# EOF
+#   virgl_cflags=$($pkg_config --cflags virglrenderer 2>/dev/null)
+#   virgl_libs=$($pkg_config --libs virglrenderer 2>/dev/null)
+#   if $pkg_config virglrenderer >/dev/null 2>&1 && \
+#      compile_prog "$virgl_cflags" "$virgl_libs" ; then
+#     virglrenderer="yes"
+#   else
+#     if test "$virglrenderer" = "yes" ; then
+#       feature_not_found "virglrenderer"
+#     fi
+#     virglrenderer="no"
+#   fi
+# fi
 
 ##########################################
 # capstone
@@ -5005,16 +5040,25 @@ cat > $TMPC << EOF
 #endif
 __int128_t a;
 __uint128_t b;
+__int128_t c;
 int main (void) {
   a = a + b;
   b = a * b;
   a = a * a;
+#ifdef _MSC_VER
+  // cross-compiling to windows using clang generates an undefined __udivti3
+  // symbol for 128-bit division, so we'll need to disable it until there's support
+  // for it either for msvc or libc++. I.e. this should not compile and turn off
+  // 128-bit support for msvc build.
+  a = a / c;
+#endif
   return 0;
 }
 EOF
 if compile_prog "" "" ; then
     int128=yes
 fi
+
 
 #########################################
 # See if 128-bit atomic operations are supported.
@@ -5616,7 +5660,7 @@ if test "$guest_agent_msi" = "yes"; then
   fi
 
   if test "$QEMU_GA_VERSION" = ""; then
-      QEMU_GA_VERSION=$(cat $source_path/VERSION)
+      QEMU_GA_VERSION=$(cat $source_path/QEMU_VERSION)
   fi
 
   QEMU_GA_MSI_MINGW_DLL_PATH="-D Mingw_dlls=$($pkg_config --variable=prefix glib-2.0)/bin"
@@ -5835,6 +5879,7 @@ echo "Linux AIO support $linux_aio"
 echo "ATTR/XATTR support $attr"
 echo "Install blobs     $blobs"
 echo "KVM support       $kvm"
+echo "GVM support       $gvm"
 echo "HAX support       $hax"
 echo "WHPX support      $whpx"
 echo "COLO support      $colo"
@@ -5988,7 +6033,7 @@ if test "$bigendian" = "yes" ; then
 fi
 if test "$mingw32" = "yes" ; then
   echo "CONFIG_WIN32=y" >> $config_host_mak
-  rc_version=$(cat $source_path/VERSION)
+  rc_version=$(cat $source_path/QEMU_VERSION)
   version_major=${rc_version%%.*}
   rc_version=${rc_version#*.}
   version_minor=${rc_version%%.*}
@@ -6016,6 +6061,10 @@ if test "$mingw32" = "yes" ; then
   fi
 else
   echo "CONFIG_POSIX=y" >> $config_host_mak
+fi
+
+if test "$msvc" = "yes" ; then
+  echo "CONFIG_MSVC=y" >> $config_host_mak
 fi
 
 if test "$linux" = "yes" ; then
@@ -6100,7 +6149,7 @@ fi
 if test "$xfs" = "yes" ; then
   echo "CONFIG_XFS=y" >> $config_host_mak
 fi
-qemu_version=$(head $source_path/VERSION)
+qemu_version=$(head $source_path/QEMU_VERSION)
 echo "VERSION=$qemu_version" >>$config_host_mak
 echo "PKGVERSION=$pkgversion" >>$config_host_mak
 echo "SRC_PATH=$source_path" >> $config_host_mak
@@ -6974,6 +7023,10 @@ if supported_kvm_target $target; then
         fi
     fi
 fi
+if supported_gvm_target $target; then
+    echo "CONFIG_GVM=y" >> $config_target_mak
+fi
+
 if supported_hax_target $target; then
     echo "CONFIG_HAX=y" >> $config_target_mak
 fi

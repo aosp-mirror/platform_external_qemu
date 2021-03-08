@@ -1,0 +1,90 @@
+# read in package-specific and global values.
+echo "Reading Cross Config Cache (/etc/dpkg-cross/cross-config.arm64)"
+foobar=`dirname $ac_site_file`
+echo "Reading $foobar/cross-config.cache"
+. `dirname $ac_site_file`/cross-config.cache
+# now ensure the real architecture-dependent values take priority
+ac_cv_c_bigendian=no
+ac_cv_c_char_unsigned=yes
+ac_cv_sizeof_long_long=8
+ac_cv_sizeof_unsigned_long_long=8
+ac_cv_sizeof_long=8
+ac_cv_sizeof_unsigned_long=8
+ac_cv_sizeof_int=4
+ac_cv_sizeof_unsigned_int=4
+ac_cv_sizeof_short=2
+ac_cv_sizeof_unsigned_short=2
+ac_cv_sizeof_char=1
+ac_cv_sizeof_unsigned_char=1
+ac_cv_sizeof_signed_char=1
+ac_cv_sizeof_float=4
+ac_cv_sizeof_double=8
+ac_cv_sizeof_long_double=16
+ac_cv_sizeof_void_p=8
+ac_cv_sizeof_char_p=8
+ac_cv_sizeof_time_t=8
+
+#lots of things: turn off stack protector
+libc_cv_fno_stack_protector=no
+
+# Supplemental groups are disabled by default when crossing coreutils.
+# Should this go in generic file?
+ac_cv_func_getgroups_works=yes
+
+#Syscall resumable test passes (ie wait syscall is resumable)
+ac_cv_sys_restartable_syscalls=yes
+
+#Void ptr longer than long
+ap_cv_void_ptr_lt_long=no
+
+#apr
+#Verified with native test program
+apr_cv_process_shared_works=yes
+#Verifed with native test program
+apr_cv_mutex_robust_shared=yes
+#probably more general than just APR. verifed by cross compiling and running test from configure
+ac_cv_sizeof_struct_iovec=16
+
+# mysql
+# mysql wants to know stack direction:
+# STACK_DIRECTION > 0 => grows toward higher addresses
+# STACK_DIRECTION < 0 => grows toward lower addresses
+# STACK_DIRECTION = 0 => direction of growth unknown
+ac_cv_c_stack_direction=-1
+
+
+path=`dirname $ac_site_file`
+# now allow package-specific architecture-independent values to be set
+if [ -d $path/cross-config.d/arm64/ ]; then
+for file in `ls $path/cross-config.d/arm64/`; do
+	if [ "$file" = "$PACKAGE" -o "$file" = "$PACKAGE_NAME" ]; then
+		[ -d $path/cross-config.d/arm64/$file ] || . $path/cross-config.d/arm64/$file
+		HAVE_PKG_CACHE=1
+	fi
+done
+fi
+
+if [ -z "$HAVE_PKG_CACHE" ]; then
+	# orbit2 - only needed until liborbit-dev provides these directly
+	# using the mechanism above.
+	if [ "$PACKAGE" = "orbit2" -o "$PACKAGE_NAME" = "ORBit2" ]; then
+		ac_cv_alignof_CORBA_octet=1
+		ac_cv_alignof_CORBA_boolean=1
+		ac_cv_alignof_CORBA_char=1
+		ac_cv_alignof_CORBA_wchar=2
+		ac_cv_alignof_CORBA_short=2
+		ac_cv_alignof_CORBA_long=4
+		ac_cv_alignof_CORBA_long_long=4
+		ac_cv_alignof_CORBA_float=4
+		ac_cv_alignof_CORBA_double=4
+		ac_cv_alignof_CORBA_long_double=4
+		ac_cv_alignof_CORBA_struct=4
+		ac_cv_alignof_CORBA_pointer=4
+	fi
+fi
+
+# glib-2.0
+ac_cv_func_vsnprintf_c99=${ac_cv_func_vsnprintf_c99=yes}
+ac_cv_func_printf_unix98=${ac_cv_func_printf_unix98=yes}
+glib_cv_long_long_format=${glib_cv_long_long_format=ll}
+ac_cv_path_GLIB_COMPILE_RESOURCES=/bin/true

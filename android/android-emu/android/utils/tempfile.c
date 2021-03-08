@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
 /* Copyright (C) 2007-2008 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
@@ -247,3 +248,5 @@ tempfile_atexit( void )
     for (tempfile = _all_tempfiles; tempfile; tempfile = tempfile->next)
         tempfile_close(tempfile);
 }
+=======
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)

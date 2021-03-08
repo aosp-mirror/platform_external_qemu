@@ -17,7 +17,9 @@
 #define _LIBRENDER_FRAMEBUFFER_H
 
 #include "android/base/files/Stream.h"
+#include "android/base/threads/Thread.h"
 #include "android/base/threads/WorkerThread.h"
+#include "android/base/synchronization/MessageChannel.h"
 #include "android/snapshot/common.h"
 
 #include "ColorBuffer.h"
@@ -36,6 +38,8 @@
 
 #include <EGL/egl.h>
 
+#include <functional>
+#include <map>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -55,6 +59,10 @@ struct ColorBufferRef {
     android::base::System::Duration closedTs;
 };
 
+struct BufferRef {
+    BufferPtr buffer;
+};
+
 typedef std::unordered_map<HandleType, std::pair<WindowSurfacePtr, HandleType> > WindowSurfaceMap;
 typedef std::unordered_set<HandleType> WindowSurfaceSet;
 typedef std::unordered_map<uint64_t, WindowSurfaceSet> ProcOwnedWindowSurfaces;
@@ -67,8 +75,17 @@ typedef std::unordered_map<HandleType, ColorBufferRef> ColorBufferMap;
 typedef std::unordered_multiset<HandleType> ColorBufferSet;
 typedef std::unordered_map<uint64_t, ColorBufferSet> ProcOwnedColorBuffers;
 
+typedef std::unordered_map<HandleType, BufferRef> BufferMap;
+typedef std::unordered_multiset<HandleType> BufferSet;
+typedef std::unordered_map<uint64_t, BufferSet> ProcOwnedBuffers;
+
 typedef std::unordered_set<HandleType> EGLImageSet;
 typedef std::unordered_map<uint64_t, EGLImageSet> ProcOwnedEGLImages;
+
+typedef std::unordered_map<void*, std::function<void()>> CallbackMap;
+typedef std::unordered_map<uint64_t, CallbackMap> ProcOwnedCleanupCallbacks;
+
+typedef std::unordered_map<uint64_t, uint32_t*> ProcOwnedSequenceNumbers;
 
 // A structure used to list the capabilities of the underlying EGL
 // implementation that the FrameBuffer instance depends on.
@@ -123,10 +140,16 @@ public:
     //
     // NOTE: This can return false for software-only EGL engines like OSMesa.
     bool setupSubWindow(FBNativeWindowType p_window,
-                        int wx, int wy,
-                        int ww, int wh,
-                        int fbw, int fbh, float dpr, float zRot,
-                        bool deleteExisting);
+                        int wx,
+                        int wy,
+                        int ww,
+                        int wh,
+                        int fbw,
+                        int fbh,
+                        float dpr,
+                        float zRot,
+                        bool deleteExisting,
+                        bool hideWindow);
 
     // Remove the sub-window created by setupSubWindow(), if any.
     // Return true on success, false otherwise.
@@ -159,7 +182,10 @@ public:
     // Set a callback that will be called each time the emulated GPU content
     // is updated. This can be relatively slow with host-based GPU emulation,
     // so only do this when you need to.
-    void setPostCallback(emugl::Renderer::OnPostCallback onPost, void* onPostContext);
+    void setPostCallback(emugl::Renderer::OnPostCallback onPost,
+                         void* onPostContext,
+                         uint32_t displayId,
+                         bool useBgraReadback = false);
 
     // Retrieve the GL strings of the underlying EGL/GLES implementation.
     // On return, |*vendor|, |*renderer| and |*version| will point to strings
@@ -167,9 +193,9 @@ public:
     void getGLStrings(const char** vendor,
                       const char** renderer,
                       const char** version) const {
-        *vendor = m_glVendor;
-        *renderer = m_glRenderer;
-        *version = m_glVersion;
+        *vendor = m_glVendor.c_str();
+        *renderer = m_glRenderer.c_str();
+        *version = m_glVersion.c_str();
     }
 
     // Create a new RenderContext instance for this display instance.
@@ -198,6 +224,21 @@ public:
     HandleType createColorBuffer(
         int p_width, int p_height, GLenum p_internalFormat,
         FrameworkFormat p_frameworkFormat);
+    // Variant of createColorBuffer except with a particular
+    // handle already assigned. This is for use with
+    // virtio-gpu's RESOURCE_CREATE ioctl.
+    void createColorBufferWithHandle(
+        int p_width, int p_height, GLenum p_internalFormat,
+        FrameworkFormat p_frameworkFormat,
+        HandleType handle);
+
+    // Create a new data Buffer instance from this display instance.
+    // The buffer will be backed by a VkBuffer and VkDeviceMemory (if Vulkan
+    // is available).
+    // |size| is the requested size of Buffer in bytes.
+    // |memoryProperty| is the requested memory property bits of the device
+    // memory.
+    HandleType createBuffer(uint64_t size, uint32_t memoryProperty);
 
     // Call this function when a render thread terminates to destroy all
     // the remaining contexts it created. Necessary to avoid leaking host
@@ -216,7 +257,8 @@ public:
     // Destroy a given WindowSurface instance. |p_surcace| is its handle
     // value as returned by createWindowSurface().
     void DestroyWindowSurface(HandleType p_surface);
-    void DestroyWindowSurfaceLocked(HandleType p_surface);
+    // Returns the set of ColorBuffers destroyed (for further cleanup)
+    std::vector<HandleType> DestroyWindowSurfaceLocked(HandleType p_surface);
 
     // Increment the reference count associated with a given ColorBuffer
     // instance. |p_colorbuffer| is its handle value as returned by
@@ -228,6 +270,10 @@ public:
     // createColorBuffer(). Note that if the reference count reaches 0,
     // the instance is destroyed automatically.
     void closeColorBuffer(HandleType p_colorbuffer);
+
+    // Destroy a Buffer created previously. |p_buffer| is its handle value as
+    // returned by createBuffer().
+    void closeBuffer(HandleType p_colorbuffer);
 
     void cleanupProcGLObjects(uint64_t puid);
 
@@ -263,12 +309,17 @@ public:
     // Returns true on success, false on failure.
     bool  flushWindowSurfaceColorBuffer(HandleType p_surface);
 
+    // Retrieves the color buffer handle associated with |p_surface|.
+    // Returns 0 if there is no such handle.
+    HandleType getWindowSurfaceColorBufferHandle(HandleType p_surface);
+
     // Bind the current context's EGL_TEXTURE_2D texture to a ColorBuffer
     // instance's EGLImage. This is intended to implement
     // glEGLImageTargetTexture2DOES() for all GLES versions.
     // |p_colorbuffer| is the ColorBuffer's handle value.
     // Returns true on success, false on failure.
     bool  bindColorBufferToTexture(HandleType p_colorbuffer);
+    bool  bindColorBufferToTexture2(HandleType p_colorbuffer);
 
     // Bind the current context's EGL_RENDERBUFFER_OES render buffer to this
     // ColorBuffer's EGLImage. This is intended to implement
@@ -290,6 +341,40 @@ public:
                            int x, int y, int width, int height,
                            GLenum format, GLenum type, void *pixels);
 
+    // Read the content of a given YUV420_888 ColorBuffer into client memory.
+    // |p_colorbuffer| is the ColorBuffer's handle value. Similar
+    // to glReadPixels(), this can be a slow operation.
+    // |x|, |y|, |width| and |height| are the position and dimensions of
+    // a rectangle whose pixel values will be transfered to the host.
+    // |pixels| is the address of a caller-provided buffer that will be filled
+    // with the pixel data.
+    // |pixles_size| is the size of buffer
+    void  readColorBufferYUV(HandleType p_colorbuffer,
+                             int x, int y, int width, int height,
+                             void *pixels, uint32_t pixels_size);
+
+    // create a Y texture and a UV texture with width and height, the created
+    // texture ids are stored in textures respectively
+    void createYUVTextures(uint32_t type,
+                           uint32_t count,
+                           int width,
+                           int height,
+                           uint32_t* output);
+    void destroyYUVTextures(uint32_t type, uint32_t count, uint32_t* textures);
+    void updateYUVTextures(uint32_t type,
+                           uint32_t* textures,
+                           void* privData,
+                           void* func);
+    void swapTexturesAndUpdateColorBuffer(uint32_t colorbufferhandle,
+                                          int x,
+                                          int y,
+                                          int width,
+                                          int height,
+                                          uint32_t format,
+                                          uint32_t type,
+                                          uint32_t texture_type,
+                                          uint32_t* textures);
+
     // Update the content of a given ColorBuffer from client data.
     // |p_colorbuffer| is the ColorBuffer's handle value. Similar
     // to glReadPixels(), this can be a slow operation.
@@ -305,6 +390,32 @@ public:
     bool updateColorBuffer(HandleType p_colorbuffer,
                            int x, int y, int width, int height,
                            GLenum format, GLenum type, void *pixels);
+    // Replaces contents completely using the color buffer's current format,
+    // with row length equal to width of a row in bytes.
+    // The number of bytes is passed as a check.
+    bool replaceColorBufferContents(
+        HandleType p_colorbuffer,
+        const void *pixels,
+        size_t numBytes);
+    // Reads back the raw color buffer to |pixels|
+    // if |pixels| is not null.
+    // Always returns in |numBytes| how many bytes were
+    // planned to be transmitted.
+    // |numBytes| is not an input parameter;
+    // fewer or more bytes cannot be specified.
+    // If the framework format is YUV, it will read
+    // back as raw YUV data.
+    bool readColorBufferContents(
+        HandleType p_colorbuffer,
+        size_t* numBytes,
+        void *pixels);
+
+    bool getColorBufferInfo(HandleType p_colorbuffer,
+                            int* width,
+                            int* height,
+                            GLint* internalformat,
+                            FrameworkFormat* frameworkFormat = nullptr);
+    bool getBufferInfo(HandleType p_buffer, int* size);
 
     // Display the content of a given ColorBuffer into the framebuffer's
     // sub-window. |p_colorbuffer| is a handle value.
@@ -317,12 +428,15 @@ public:
 
     // Runs the post callback with |pixels| (good for when the readback
     // happens in a separate place)
-    void doPostCallback(void* pixels);
+    void doPostCallback(void* pixels, uint32_t displayId);
 
-    void getPixels(void* pixels, uint32_t bytes);
+    void getPixels(void* pixels, uint32_t bytes, uint32_t displayId);
+    void flushReadPipeline(int displayId);
+    void ensureReadbackWorker();
 
     bool asyncReadbackSupported();
     emugl::Renderer::ReadPixelsCallback getReadPixelsCallback();
+    emugl::Renderer::FlushReadPixelPipeline getFlushReadPixelPipeline();
 
     // Re-post the last ColorBuffer that was displayed through post().
     // This is useful if you detect that the sub-window content needs to
@@ -420,6 +534,20 @@ public:
     int getZrot() const { return m_zRot; }
 
     bool isFastBlitSupported() const { return m_fastBlitSupported; }
+    bool isVulkanInteropSupported() const { return m_vulkanInteropSupported; }
+    bool importMemoryToColorBuffer(
+#ifdef _WIN32
+        void* handle,
+#else
+        int handle,
+#endif
+        uint64_t size,
+        bool dedicated,
+        bool linearTiling,
+        bool vulkanOnly,
+        uint32_t colorBufferHandle);
+    void setColorBufferInUse(uint32_t colorBufferHandle, bool inUse);
+
     // Used during tests to disable fast blit.
     void disableFastBlit();
 
@@ -429,10 +557,57 @@ public:
     // nChannels should be 3 (RGB) or 4 (RGBA).
     // Note: swiftshader_indirect does not work with 3 channels
     void getScreenshot(unsigned int nChannels, unsigned int* width,
-            unsigned int* height, std::vector<unsigned char>& pixels);
+            unsigned int* height, std::vector<unsigned char>& pixels,
+            int displayId, int desiredWidth, int desiredHeight,
+            SkinRotation desiredRotation);
     void onLastColorBufferRef(uint32_t handle);
     ColorBuffer::Helper* getColorBufferHelper() { return m_colorBufferHelper; }
     ColorBufferPtr findColorBuffer(HandleType p_colorbuffer);
+
+    void registerProcessCleanupCallback(void* key, std::function<void()> callback);
+    void unregisterProcessCleanupCallback(void* key);
+
+    void registerProcessSequenceNumberForPuid(uint64_t puid);
+    uint32_t* getProcessSequenceNumberPtr(uint64_t puid);
+
+    int createDisplay(uint32_t *displayId);
+    int destroyDisplay(uint32_t displayId);
+    int setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer);
+    int getDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer);
+    int getColorBufferDisplay(uint32_t colorBuffer, uint32_t* displayId);
+    int getDisplayPose(uint32_t displayId,
+                       int32_t* x,
+                       int32_t* y,
+                       uint32_t* w,
+                       uint32_t* h);
+    int setDisplayPose(uint32_t displayId,
+                       int32_t x,
+                       int32_t y,
+                       uint32_t w,
+                       uint32_t h,
+                       uint32_t dpi = 0);
+    void getCombinedDisplaySize(int* w, int* h);
+    struct DisplayInfo {
+        uint32_t cb;
+        int32_t pos_x;
+        int32_t pos_y;
+        uint32_t width;
+        uint32_t height;
+        uint32_t dpi;
+        DisplayInfo() : cb(0), pos_x(0), pos_y(0), width(0), height(0), dpi(0) {};
+        DisplayInfo(uint32_t cb, int32_t x, int32_t y, uint32_t w, uint32_t h, uint32_t d)
+            : cb(cb), pos_x(x), pos_y(y), width(w), height(h), dpi(d) {}
+    };
+    // Inline with MultiDisplay::s_invalidIdMultiDisplay
+    static const uint32_t s_invalidIdMultiDisplay = 0xFFFFFFAB;
+    static const uint32_t s_maxNumMultiDisplay = 11;
+
+    EGLContext getGlobalEGLContext() { return m_pbufContext; }
+    HandleType getLastPostedColorBuffer() { return m_lastPostedColorBuffer; }
+    void waitForGpu(uint64_t eglsync);
+    void waitForGpuVulkan(uint64_t deviceHandle, uint64_t fenceHandle);
+
+    void setGuestManagedColorBufferLifetime(bool guestManaged);
 
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
@@ -441,10 +616,14 @@ private:
     bool bindSubwin_locked();
     bool bindFakeWindow_locked();
     bool removeSubWindow_locked();
-    void cleanupProcGLObjects_locked(uint64_t puid, bool forced = false);
+    // Returns the set of ColorBuffers destroyed (for further cleanup)
+    std::vector<HandleType> cleanupProcGLObjects_locked(uint64_t puid, bool forced = false);
 
     void markOpened(ColorBufferRef* cbRef);
-    void closeColorBufferLocked(HandleType p_colorbuffer, bool forced = false);
+    // Returns true if the color buffer was erased.
+    bool closeColorBufferLocked(HandleType p_colorbuffer, bool forced = false);
+    // Returns true if this was the last ref and we need to destroy stuff.
+    bool decColorBufferRefCountLocked(HandleType p_colorbuffer);
     // Close all expired color buffers for real.
     // Treat all delayed color buffers as expired if forced=true
     void performDelayedColorBufferCloseLocked(bool forced = false);
@@ -457,6 +636,18 @@ private:
                                        int p_height,
                                        GLenum p_internalFormat,
                                        FrameworkFormat p_frameworkFormat);
+    HandleType createColorBufferWithHandleLocked(
+        int p_width,
+        int p_height,
+        GLenum p_internalFormat,
+        FrameworkFormat p_frameworkFormat,
+        HandleType handle);
+    HandleType createBufferLocked(int p_size);
+    HandleType createBufferWithHandleLocked(int p_size, HandleType handle);
+
+    void recomputeLayout();
+    void setDisplayPoseInSkinUI(int totalHeight);
+    void sweepColorBuffersLocked();
 
 private:
     static FrameBuffer *s_theFrameBuffer;
@@ -473,9 +664,11 @@ private:
     bool m_eglContextInitialized = false;
 
     bool m_fpsStats = false;
+    bool m_perfStats = false;
     int m_statsNumFrames = 0;
     long long m_statsStartTime = 0;
 
+    android::base::Thread* m_perfThread;
     emugl::Mutex m_lock;
     emugl::ReadWriteMutex m_contextStructureLock;
     FbConfigList* m_configs = nullptr;
@@ -485,6 +678,8 @@ private:
     RenderContextMap m_contexts;
     WindowSurfaceMap m_windows;
     ColorBufferMap m_colorbuffers;
+    BufferMap m_buffers;
+    std::unordered_map<HandleType, HandleType> m_windowSurfaceToColorBuffer;
 
     // A collection of color buffers that were closed without any usages
     // (|opened| == false).
@@ -524,13 +719,49 @@ private:
     float      m_px = 0;
     float      m_py = 0;
 
-    emugl::Renderer::OnPostCallback m_onPost = nullptr;
-    void* m_onPostContext = nullptr;
-    unsigned char* m_fbImage = nullptr;
+    // Async readback
+    enum class ReadbackCmd {
+        Init = 0,
+        GetPixels = 1,
+        AddRecordDisplay = 2,
+        DelRecordDisplay = 3,
+        Exit = 4,
+    };
+    struct Readback {
+        ReadbackCmd cmd;
+        uint32_t displayId;
+        GLuint bufferId;
+        void* pixelsOut;
+        uint32_t bytes;
+        uint32_t width;
+        uint32_t height;
+    };
+    android::base::WorkerProcessingResult sendReadbackWorkerCmd(const Readback& readback);
+    bool m_asyncReadbackSupported = true;
+    bool m_guestPostedAFrame = false;
 
-    const char* m_glVendor = nullptr;
-    const char* m_glRenderer = nullptr;
-    const char* m_glVersion = nullptr;
+    struct onPost {
+        emugl::Renderer::OnPostCallback cb;
+        void* context;
+        uint32_t displayId;
+        uint32_t width;
+        uint32_t height;
+        unsigned char* img = nullptr;
+        bool readBgra;
+        ~onPost() {
+            if (img) {
+                delete[] img;
+                img = nullptr;
+            }
+        }
+    };
+    std::map<uint32_t, onPost> m_onPost;
+    std::unique_ptr<ReadbackWorker> m_readbackWorker;
+    android::base::WorkerThread<Readback> m_readbackThread;
+
+    std::string m_glVendor;
+    std::string m_glRenderer;
+    std::string m_glVersion;
 
     // The host associates color buffers with guest processes for memory
     // cleanup. Guest processes are identified with a host generated unique ID.
@@ -538,34 +769,25 @@ private:
     ProcOwnedColorBuffers m_procOwnedColorBuffers;
     ProcOwnedEGLImages m_procOwnedEGLImages;
     ProcOwnedRenderContexts m_procOwnedRenderContext;
+    ProcOwnedCleanupCallbacks m_procOwnedCleanupCallbacks;
+    ProcOwnedSequenceNumbers m_procOwnedSequenceNumbers;
 
     // Flag set when emulator is shutting down.
     bool m_shuttingDown = false;
 
-    // Flag set when guest feature RefCountPipe is enabled. When this feature is
-    // enabled, no more reference counting is needed on host side because the
-    // Refcount piepe should rely on the guest kernel to know when to destroy
-    // color buffer.
+    // When this feature is enabled, open/close operations from gralloc in guest
+    // will no longer control the reference counting of color buffers on host.
+    // Instead, it will be managed by a file descriptor in the guest kernel. In
+    // case all the native handles in guest are destroyed, the pipe will be
+    // automatically closed by the kernel. We only need to do reference counting
+    // for color buffers attached in window surface.
     bool m_refCountPipeEnabled = false;
-    // Async readback
-    enum class ReadbackCmd {
-        Init = 0,
-        GetPixels = 1,
-        Exit = 2,
-    };
 
-    struct Readback {
-        ReadbackCmd cmd;
-        GLuint bufferId;
-        void* pixelsOut;
-        uint32_t bytes;
-    };
-    std::unique_ptr<ReadbackWorker> m_readbackWorker = {};
-    android::base::WorkerThread<Readback> m_readbackThread;
-    android::base::WorkerProcessingResult sendReadbackWorkerCmd(const Readback& readback);
-
-    bool m_asyncReadbackSupported = true;
-    bool m_guestPostedAFrame = false;
+    // When this feature is enabled, and m_refCountPipeEnabled == false, color
+    // buffer close operations will immediately close the color buffer if host
+    // refcount hits 0. This is for use with guest kernels where the color
+    // buffer is already tied to a file descriptor in the guest kernel.
+    bool m_noDelayCloseColorBufferEnabled = false;
 
     // Posting
     enum class PostCmd {
@@ -573,18 +795,29 @@ private:
         Viewport = 1,
         Compose = 2,
         Clear = 3,
-        Exit = 4,
+        Screenshot = 4,
+        Exit = 5,
     };
 
     struct Post {
         PostCmd cmd;
+        int composeVersion;
+        std::vector<char> composeBuffer;
         union {
             ColorBuffer* cb;
             struct {
                 int width;
                 int height;
             } viewport;
-            ComposeDevice* d;
+            struct {
+                ColorBuffer* cb;
+                int screenwidth;
+                int screenheight;
+                GLenum format;
+                GLenum type;
+                SkinRotation rotation;
+                void* pixels;
+            } screenshot;
         };
     };
 
@@ -594,5 +827,13 @@ private:
     void sendPostWorkerCmd(Post post);
 
     bool m_fastBlitSupported = false;
+    bool m_vulkanInteropSupported = false;
+    bool m_guestUsesAngle = false;
+    // Whether the guest manages ColorBuffer lifetime
+    // so we don't need refcounting on the host side.
+    bool m_guestManagedColorBufferLifetime = false;
+
+    android::base::MessageChannel<HandleType, 1024>
+        mOutstandingColorBufferDestroys;
 };
 #endif

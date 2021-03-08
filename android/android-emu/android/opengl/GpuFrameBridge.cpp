@@ -14,17 +14,18 @@
 
 #include "android/opengl/GpuFrameBridge.h"
 
-#include "android/base/async/Looper.h"
-#include "android/base/Log.h"
-#include "android/base/synchronization/Lock.h"
-#include "android/base/sockets/SocketUtils.h"
+#include <stdio.h>   // for printf
+#include <stdlib.h>  // for NULL, free, malloc
+#include <string.h>  // for memcpy
+
+#include <atomic>  // for atomic_bool, memory_o...
+#include <memory>  // for unique_ptr
+
+#include "android/base/async/Looper.h"          // for Looper::Timer, Looper
+#include "android/base/async/ThreadLooper.h"    // for ThreadLooper
+#include "android/base/synchronization/Lock.h"  // for Lock, AutoLock
 #include "android/base/synchronization/MessageChannel.h"
-#include "android/opengles.h"
-
-#include <atomic>
-
-#include <stdlib.h>
-#include <string.h>
+#include "android/opengles.h"  // for android_getFlushReadP...
 
 #ifdef _WIN32
 #undef ERROR
@@ -48,64 +49,39 @@ struct Frame {
     void* pixels;
     bool isValid;
 
-    Frame(int w, int h, const void* pixels) :
-            width(w), height(h), pixels(NULL), isValid(true) {
-        this->pixels = ::calloc(w * 4, h);
-        ::memcpy(this->pixels, pixels, w * 4 * h);
+    Frame(int w, int h, const void* pixels)
+        : width(w), height(h), pixels(NULL), isValid(true) {
+        this->pixels = ::malloc(w * 4 * h);
     }
 
-    ~Frame() {
-        ::free(pixels);
-    }
+    ~Frame() { ::free(pixels); }
 };
 
 // Real implementation of GpuFrameBridge interface.
 class Bridge : public GpuFrameBridge {
 public:
     // Constructor.
-    Bridge(Looper* looper, Callback* callback, void* callbackOpaque) :
-            GpuFrameBridge(),
-            mLooper(looper),
-            mInSocket(-1),
-            mOutSocket(-1),
-            mFdWatch(NULL),
-            mFrames(),
-            mCallback(callback),
-            mCallbackOpaque(callbackOpaque),
-            mRecFrame(NULL),
-            mRecTmpFrame(NULL),
-            mRecFrameUpdated(false),
-            mReadPixelsFunc(android_getReadPixelsFunc()) {
-        if (!mLooper) {
-            return;
-        }
+    Bridge()
+        : GpuFrameBridge(),
+          mRecFrame(NULL),
+          mRecTmpFrame(NULL),
+          mRecFrameUpdated(false),
+          mReadPixelsFunc(android_getReadPixelsFunc()),
+          mFlushPixelPipeline(android_getFlushReadPixelPipeline()) {}
 
-        if (::android::base::socketCreatePair(&mInSocket, &mOutSocket) < 0) {
-            PLOG(ERROR) << "Could not create socket pair";
-            return;
-        }
-
-        mFdWatch = looper->createFdWatch(mOutSocket, onSocketEvent, this);
-        if (!mFdWatch) {
-            LOG(ERROR) << "Could not create FdWatch";
-            android::base::socketClose(mInSocket);
-            android::base::socketClose(mOutSocket);
-            mInSocket = -1;
-            mOutSocket = -1;
-            return;
-        }
-
-        mFdWatch->wantRead();
-    }
+    // The gpu bridge receives frames from a buffer that can contain multiple
+    // frames. usually the bridge is one frame behind. This is usually not a
+    // problem when we have a high enough framerate. However it is possible that
+    // the framerate drops really low (even <1). This can result in the bridge
+    // never delivering this "stuck frame".
+    //
+    // As a work around we will flush the reader pipeline if no frames are
+    // delivered within at most 2x kFrameDelayms
+    const long kMinFPS = 24;
+    const long kFrameDelayMs = 1000 / kMinFPS;
 
     // Destructor
     virtual ~Bridge() {
-        // Non-recording mode
-        if (mLooper) {
-            delete mFdWatch;
-            android::base::socketClose(mOutSocket);
-            android::base::socketClose(mInSocket);
-        }
         if (mRecFrame) {
             delete mRecFrame;
         }
@@ -114,41 +90,50 @@ public:
         }
     }
 
-    // Implementation of the GpuFrameBridge::postFrame() method, must be
-    // called from the EmuGL thread.
-    virtual void postFrame(int width, int height, const void* pixels) {
-        if (mInSocket < 0) {
-            return;
+    virtual void setLooper(android::base::Looper* aLooper) override {
+        mTimer = std::unique_ptr<android::base::Looper::Timer>(
+                aLooper->createTimer(_on_frame_notify, this));
+    }
+
+    void notify() {
+        AutoLock delay(mDelayLock);
+        switch (mDelayCallback) {
+            case FrameDelay::Reschedule:
+                mTimer->startRelative(kFrameDelayMs);
+                mDelayCallback = FrameDelay::Scheduled;
+                break;
+            case FrameDelay::Scheduled:
+                mTimer->stop();
+                mDelayCallback = FrameDelay::Firing;
+                delay.unlock();
+                mFlushPixelPipeline(mDisplayId);
+                break;
+            default:
+                assert(false);
         }
-        Frame* frame = new Frame(width, height, pixels);
-        ::memcpy(frame->pixels, pixels, width * 4 * height);
-        mFrames.send(frame);
-        char c = 1;
-        android::base::socketSend(mInSocket, &c, 1);
+    }
+
+    static void _on_frame_notify(void* opaque,
+                                 android::base::Looper::Timer* timer) {
+        Bridge* worker = static_cast<Bridge*>(opaque);
+        worker->notify();
     }
 
     // Implementation of the GpuFrameBridge::postRecordFrame() method, must be
     // called from the EmuGL thread.
-    virtual void postRecordFrame(int width, int height, const void* pixels) {
-        postRecordFrameAsync(width, height, pixels);
-        AutoLock lock(mRecLock);
-        memcpy(mRecTmpFrame->pixels, pixels, width * height * 4);
+    virtual void postRecordFrame(int width,
+                                 int height,
+                                 const void* pixels) override {
+        postFrame(width, height, pixels, true);
     }
 
-    virtual void postRecordFrameAsync(int width, int height, const void* pixels) {
-        {
-            AutoLock lock(mRecLock);
-            if (!mRecFrame) {
-                mRecFrame = new Frame(width, height, pixels);
-            }
-            if (!mRecTmpFrame) {
-                mRecTmpFrame = new Frame(width, height, pixels);
-            }
-        }
-        mRecFrameUpdated.store(true, std::memory_order_release);
+    virtual void postRecordFrameAsync(int width,
+                                      int height,
+                                      const void* pixels) override {
+        postFrame(width, height, pixels, false);
     }
 
-    virtual void* getRecordFrame() {
+    virtual void* getRecordFrame() override {
         if (mRecFrameUpdated.exchange(false)) {
             AutoLock lock(mRecLock);
             memcpy(mRecFrame->pixels, mRecTmpFrame->pixels,
@@ -158,84 +143,102 @@ public:
         return mRecFrame && mRecFrame->isValid ? mRecFrame->pixels : nullptr;
     }
 
-    virtual void* getRecordFrameAsync() {
+    virtual void* getRecordFrameAsync() override {
         if (mRecFrameUpdated.exchange(false)) {
             AutoLock lock(mRecLock);
             mReadPixelsFunc(mRecFrame->pixels,
-                            mRecFrame->width * mRecFrame->height * 4);
+                            mRecFrame->width * mRecFrame->height * 4,
+                            mDisplayId);
             mRecFrame->isValid = true;
         }
         return mRecFrame && mRecFrame->isValid ? mRecFrame->pixels : nullptr;
     }
 
-    virtual void invalidateRecordingBuffers() {
+    virtual void invalidateRecordingBuffers() override {
         {
             AutoLock lock(mRecLock);
+            // Release the buffers because new recording in the furture may have
+            // different resolution if multi display changes its resolution.
             if (mRecFrame) {
-                mRecFrame->isValid = false;
+                delete mRecFrame;
+                mRecFrame = nullptr;
+            }
+            if (mRecTmpFrame) {
+                delete mRecTmpFrame;
+                mRecTmpFrame = nullptr;
             }
         }
         mRecFrameUpdated.store(false, std::memory_order_release);
     }
 
-private:
-    enum {
-        kMaxFrames = 16
-    };
+    void setFrameReceiver(FrameAvailableCallback receiver,
+                          void* opaque) override {
+        mReceiver = receiver;
+        mReceiverOpaque = opaque;
+    }
 
-    // Called from the looper thread when a new Frame instance is available.
-    static void onSocketEvent(void* opaque, int fd, unsigned events) {
-        Bridge* bridge = reinterpret_cast<Bridge*>(opaque);
-        if (events & Looper::FdWatch::kEventRead) {
-            char c = 0;
-            android::base::socketRecv(bridge->mOutSocket, &c, 1);
-            // char c; is the "confirmation" bit
-            // that actual data was grabbed by the socket.
-            // In a more multithreaded situation,
-            // we aren't guaranteed 1:1
-            // onSocketEvent and postFrame calls.
-            // If we simply quit if the confirm bit is not set,
-            // we can avoid a deadlock.
-            if (!c) {
-                return;
+    void postFrame(int width, int height, const void* pixels, bool copy) {
+        {
+            AutoLock lock(mRecLock);
+            if (!mRecFrame) {
+                mRecFrame = new Frame(width, height, pixels);
             }
-            Frame* frame = NULL;
-            bridge->mFrames.receive(&frame);
-            if (frame) {
-                bridge->mCallback(bridge->mCallbackOpaque,
-                                  frame->width,
-                                  frame->height,
-                                  frame->pixels);
-                bridge->postRecordFrame(frame->width,
-                                        frame->height,
-                                        frame->pixels);
-                delete frame;
+            if (!mRecTmpFrame) {
+                mRecTmpFrame = new Frame(width, height, pixels);
+            }
+            if (copy) {
+                memcpy(mRecTmpFrame->pixels, pixels, width * height * 4);
+            }
+        }
+        mRecFrameUpdated.store(true, std::memory_order_release);
+        if (mReceiver) {
+            mReceiver(mReceiverOpaque);
+            AutoLock delay(mDelayLock);
+            switch (mDelayCallback) {
+                case FrameDelay::NotScheduled:
+                    mTimer->startRelative(kFrameDelayMs);
+                    mDelayCallback = FrameDelay::Scheduled;
+                    break;
+                case FrameDelay::Firing:
+                    mDelayCallback = FrameDelay::NotScheduled;
+                    break;
+                default:
+                    mDelayCallback = FrameDelay::Reschedule;
+                    break;
             }
         }
     }
 
-    Looper* mLooper;
-    int mInSocket;
-    int mOutSocket;
-    Looper::FdWatch* mFdWatch;
-    MessageChannel<Frame*, kMaxFrames> mFrames;
-    Callback* mCallback;
-    void* mCallbackOpaque;
+    virtual void setDisplayId(uint32_t displayId) override {
+        mDisplayId = displayId;
+    }
+    enum class FrameDelay {
+        NotScheduled = 0,  // No delay timer is scheduled
+        Scheduled,   // A delay timer has been scheduled and will flush the
+                     // pipeline on expiration
+        Reschedule,  // Do not flush the pipeline, but reschedule
+        Firing,      // A callback has been scheduled, nothing needs to happen
+    };
+
+private:
+    FrameAvailableCallback mReceiver = nullptr;
+    void* mReceiverOpaque = nullptr;
     Lock mRecLock;
     Frame* mRecFrame;
     Frame* mRecTmpFrame;
     std::atomic_bool mRecFrameUpdated;
-
     ReadPixelsFunc mReadPixelsFunc = 0;
+    uint32_t mDisplayId = 0;
+    FlushReadPixelPipeline mFlushPixelPipeline = 0;
+
+    std::unique_ptr<android::base::Looper::Timer> mTimer;
+    Lock mDelayLock;
+    FrameDelay mDelayCallback{FrameDelay::NotScheduled};
 };
-
 }  // namespace
-
 // static
-GpuFrameBridge* GpuFrameBridge::create(android::base::Looper* looper,
-                                       Callback* callback,
-                                       void* callbackOpaque) {
-    return new Bridge(looper, callback, callbackOpaque);
+GpuFrameBridge* GpuFrameBridge::create() {
+    return new Bridge();
 }
 
 }  // namespace opengl

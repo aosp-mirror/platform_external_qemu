@@ -14,11 +14,15 @@
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 
-#include "android/automation/proto/automation.pb.h"
+#include "automation.pb.h"
 #include "android/base/Debug.h"
 #include "android/base/files/MemStream.h"
 #include "android/base/testing/GlmTestHelpers.h"
 #include "android/base/testing/ProtobufMatchers.h"
+<<<<<<< HEAD   (464e37 Merge "Merge empty history for sparse-5409122-L7540000028739)
+=======
+#include "android/globals.h"
+>>>>>>> BRANCH (510a80 Merge "Merge cherrypicks of [1623139] into sparse-7187391-L1)
 #include "android/physics/InertialModel.h"
 #include "android/physics/physical_state_agent.h"
 #include "android/utils/stream.h"
@@ -1144,5 +1148,49 @@ TEST(PhysicalModel, SetVelocityAndPositionWhileRotating) {
     EXPECT_FALSE(targetStateChanged);
     physicalModel_setPhysicalStateAgent(model, nullptr);
 
+    physicalModel_free(model);
+}
+
+TEST(PhysicalModel, FoldableInitialize) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    android_hw->hw_lcd_width = 1260;
+    android_hw->hw_lcd_height = 2400;
+    android_hw->hw_sensor_hinge = true;
+    android_hw->hw_sensor_hinge_count = 2;
+    android_hw->hw_sensor_hinge_type = 0;
+    android_hw->hw_sensor_hinge_sub_type = 1;
+    android_hw->hw_sensor_hinge_ranges = (char*)"0- 360, 0-180";
+    android_hw->hw_sensor_hinge_defaults = (char*)"180,90";
+    android_hw->hw_sensor_hinge_areas = (char*)"25-10, 50-10";
+    android_hw->hw_sensor_posture_list = (char*)"1, 2,3 ,  4";
+    android_hw->hw_sensor_hinge_angles_posture_definitions = (char*)"0-30&0-15,  30-150 & 15-75,150-330&75-165, 330-360&165-180";
+
+    PhysicalModel* model = physicalModel_new();
+    physicalModel_setCurrentTime(model, 1000000000L);
+
+    struct FoldableState ret;
+    physicalModel_getFoldableState(model, &ret);
+    EXPECT_EQ(180, ret.currentHingeDegrees[0]);
+    EXPECT_EQ(90, ret.currentHingeDegrees[1]);
+    EXPECT_EQ(2, ret.config.numHinges);
+    EXPECT_EQ(ANDROID_FOLDABLE_HORIZONTAL_SPLIT, ret.config.type);
+    EXPECT_EQ(ANDROID_FOLDABLE_HINGE_HINGE, ret.config.hingesSubType);
+    EXPECT_EQ(0, ret.config.hingeParams[0].displayId);
+    EXPECT_EQ(0, ret.config.hingeParams[0].x);
+    EXPECT_EQ(600, ret.config.hingeParams[0].y);
+    EXPECT_EQ(1260, ret.config.hingeParams[0].width);
+    EXPECT_EQ(10, ret.config.hingeParams[0].height);
+    EXPECT_EQ(0, ret.config.hingeParams[0].minDegrees);
+    EXPECT_EQ(360, ret.config.hingeParams[0].maxDegrees);
+    EXPECT_EQ(0, ret.config.hingeParams[1].displayId);
+    EXPECT_EQ(0, ret.config.hingeParams[1].x);
+    EXPECT_EQ(1200, ret.config.hingeParams[1].y);
+    EXPECT_EQ(1260, ret.config.hingeParams[1].width);
+    EXPECT_EQ(10, ret.config.hingeParams[1].height);
+    EXPECT_EQ(0, ret.config.hingeParams[1].minDegrees);
+    EXPECT_EQ(180, ret.config.hingeParams[1].maxDegrees);
+    EXPECT_EQ(180, ret.config.hingeParams[0].defaultDegrees);
+    EXPECT_EQ(90, ret.config.hingeParams[1].defaultDegrees);
+    EXPECT_EQ(3, ret.currentPosture);
     physicalModel_free(model);
 }

@@ -11,26 +11,60 @@
 
 #include "android/skin/qt/extended-pages/help-page.h"
 
-#include "android/android.h"
-#include "android/base/system/System.h"
-#include "android/globals.h"
-#include "android/update-check/UpdateChecker.h"
-#include "android/update-check/VersionExtractor.h"
+#include <QtCore/qglobal.h>                         // for Q_OS_MAC
+#include <qiodevice.h>                              // for QIODevice::ReadOnly
+#include <qkeysequence.h>                           // for QKeySequence::Nat...
+#include <qmap.h>                                   // for QMap<>::const_ite...
+#include <qstring.h>                                // for operator+, QStrin...
+#include <QDesktopServices>                         // for QDesktopServices
+#include <QFile>                                    // for QFile
+#include <QIODevice>                                // for QIODevice
+#include <QKeySequence>                             // for QKeySequence
+#include <QPlainTextEdit>                           // for QPlainTextEdit
+#include <QTableWidget>                             // for QTableWidget
+#include <QTableWidgetItem>                         // for QTableWidgetItem
+#include <QTextStream>                              // for QTextStream
+#include <QThread>                                  // for QThread
+#include <QUrl>                                     // for QUrl
+#include <string>                                   // for basic_string, ope...
+#include <utility>                                  // for pair
 
-#include <QDesktopServices>
-#include <QThread>
-#include <QUrl>
+#include "android/android.h"                        // for android_serial_nu...
+#include "android/avd/info.h"                       // for avdInfo_getApiLevel
+#include "android/base/Optional.h"                  // for Optional
+#include "android/base/Uri.h"                       // for Uri
+#include "android/base/Version.h"                   // for Version
+#include "android/base/system/System.h"             // for System
+#include "android/cmdline-option.h"                 // for android_cmdLineOptions
+#include "android/globals.h"                        // for android_avdInfo
+#include "android/metrics/StudioConfig.h"           // for UpdateChannel
+#include "android/metrics/UiEventTracker.h"         // for UiEventTr...
+#include "android/skin/qt/shortcut-key-store.h"     // for ShortcutKeyStore
+#include "android/update-check/UpdateChecker.h"     // for UpdateChecker
+#include "android/update-check/VersionExtractor.h"  // for VersionExtractor
 
-#include <cassert>
+class QTableWidget;
+class QWidget;
 
-const char DOCS_URL[] =
-    "http://developer.android.com/r/studio-ui/emulator.html";
-const char SEND_FEEDBACK_URL[] =
-    "https://issuetracker.google.com/issues/new?component=192727&template=872501";
+using android::base::Uri;
 
-HelpPage::HelpPage(QWidget* parent) : QWidget(parent), mUi(new Ui::HelpPage) {
+static const char DOCS_URL[] =
+        "http://developer.android.com/r/studio-ui/emulator.html";
+
+static const char SEND_FEEDBACK_URL[] =
+        "https://issuetracker.google.com/issues/"
+        "new?component=192727&description=%s&&template=872501";
+
+static const char FEATURE_REQUEST_TEMPLATE[] =
+        R"(Feature Request:
+
+Use Case or Problem this feature helps you with:)";
+HelpPage::HelpPage(QWidget* parent) : QWidget(parent), mUi(new Ui::HelpPage),  mHelpTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::BUTTON_PRESS,
+              android_studio::EmulatorUiEvent::EXTENDED_HELP_TAB))
+               {
     mUi->setupUi(this);
-
+    disableForEmbeddedEmulator();
     // Get the version of this code
     android::update_check::VersionExtractor vEx;
 
@@ -62,8 +96,10 @@ HelpPage::HelpPage(QWidget* parent) : QWidget(parent), mUi(new Ui::HelpPage) {
 }
 
 void HelpPage::initialize(const ShortcutKeyStore<QtUICommand>* key_store) {
-    initializeLicenseText();
-    initializeKeyboardShortcutList(key_store);
+    if (!android_cmdLineOptions->qt_hide_window) {
+        initializeLicenseText();
+        initializeKeyboardShortcutList(key_store);
+    }
 }
 
 void HelpPage::initializeLicenseText() {
@@ -139,11 +175,27 @@ void HelpPage::initializeKeyboardShortcutList(const ShortcutKeyStore<QtUICommand
 }
 
 void HelpPage::on_help_docs_clicked() {
+    mHelpTracker->increment("DOCS");
     QDesktopServices::openUrl(QUrl::fromEncoded(DOCS_URL));
 }
 
 void HelpPage::on_help_sendFeedback_clicked() {
-    QDesktopServices::openUrl(QUrl::fromEncoded(SEND_FEEDBACK_URL));
+    mHelpTracker->increment("FEEDBACK");
+    std::string encodedArgs = Uri::FormatEncodeArguments(
+            SEND_FEEDBACK_URL,
+            mBugreportInfo.dump() + FEATURE_REQUEST_TEMPLATE);
+    QUrl url(QString::fromStdString(encodedArgs));
+    if (url.isValid())
+        QDesktopServices::openUrl(url);
+}
+
+void HelpPage::disableForEmbeddedEmulator() {
+    if (android_cmdLineOptions->qt_hide_window) {
+        for (auto* w : {mUi->keyboard_shortcuts_tab,
+                mUi->emulator_help_tab, mUi->license_tab}) {
+            mUi->help_tabs->removeTab(mUi->help_tabs->indexOf(w));
+        }
+    }
 }
 
 static const char* updateChannelName(android::studio::UpdateChannel channel) {

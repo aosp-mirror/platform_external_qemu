@@ -44,7 +44,7 @@ public:
         delete this;
     }
 
-    virtual unsigned onGuestPoll() const { return getFuncs()->poll(mInstance); }
+    virtual unsigned onGuestPoll() const override { return getFuncs()->poll(mInstance); }
 
     virtual int onGuestRecv(AndroidPipeBuffer* buffers,
                             int numBuffers) override {
@@ -52,7 +52,8 @@ public:
     }
 
     virtual int onGuestSend(const AndroidPipeBuffer* buffers,
-                            int numBuffers) override {
+                            int numBuffers,
+                            void** newPipePtr) override {
         return getFuncs()->sendBuffers(mInstance, buffers, numBuffers);
     }
 
@@ -60,7 +61,7 @@ public:
         getFuncs()->wakeOn(mInstance, flags);
     }
 
-    virtual void onSave(BaseStream* stream) {
+    virtual void onSave(BaseStream* stream) override {
         if (getFuncs()->save) {
             getFuncs()->save(mInstance, asCStream(stream));
         }
@@ -114,7 +115,7 @@ const AndroidPipeFuncs* LegacyPipe::getFuncs() const {
 void android_pipe_add_type(const char* pipeName,
                            void* pipeOpaque,
                            const AndroidPipeFuncs* pipeFuncs) {
-    auto service =
-            new android::LegacyPipeService(pipeName, pipeOpaque, pipeFuncs);
-    android::Service::add(service);
+    android::Service::add(
+        std::make_unique<android::LegacyPipeService>(
+                pipeName, pipeOpaque, pipeFuncs));
 }

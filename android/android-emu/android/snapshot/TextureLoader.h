@@ -12,6 +12,7 @@
 #pragma once
 
 #include "android/base/containers/SmallVector.h"
+#include "android/base/export.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
@@ -50,19 +51,19 @@ public:
 
 class TextureLoader final : public ITextureLoader {
 public:
-    TextureLoader(android::base::StdioStream&& stream);
+    AEMU_EXPORT TextureLoader(android::base::StdioStream&& stream);
 
-    bool start() override;
-    void loadTexture(uint32_t texId, const loader_t& loader) override;
-    bool hasError() const override { return mHasError; }
-    uint64_t diskSize() const override { return mDiskSize; }
-    bool compressed() const override { return mVersion > 1; }
+    AEMU_EXPORT bool start() override;
+    AEMU_EXPORT void loadTexture(uint32_t texId, const loader_t& loader) override;
+    AEMU_EXPORT bool hasError() const override { return mHasError; }
+    AEMU_EXPORT uint64_t diskSize() const override { return mDiskSize; }
+    AEMU_EXPORT bool compressed() const override { return mVersion > 1; }
 
-    void acquireLoaderThread(LoaderThreadPtr thread) override {
+    AEMU_EXPORT void acquireLoaderThread(LoaderThreadPtr thread) override {
         mLoaderThread = std::move(thread);
     }
 
-    void join() override {
+    AEMU_EXPORT void join() override {
         if (mLoaderThread) {
             mLoaderThread->wait();
             mLoaderThread.reset();
@@ -71,7 +72,7 @@ public:
         mEndTime = base::System::get()->getHighResTimeUs();
     }
 
-    void interrupt() override {
+    AEMU_EXPORT void interrupt() override {
         if (mLoaderThread) {
             mLoaderThread->interrupt();
             mLoaderThread->wait();
@@ -85,7 +86,7 @@ public:
     // Returns true if there was save with measurable time
     // (and writes it to |duration| if |duration| is not null),
     // otherwise returns false.
-    bool getDuration(base::System::Duration* duration) {
+    AEMU_EXPORT bool getDuration(base::System::Duration* duration) {
         if (mEndTime < mStartTime) {
             return false;
         }
