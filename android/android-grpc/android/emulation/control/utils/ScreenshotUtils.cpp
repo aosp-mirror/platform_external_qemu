@@ -65,19 +65,19 @@ ImageFormat_ImgFormat ScreenshotUtils::translate(
     return ImageFormat::RGBA8888;
 };
 
+static constexpr bool match(Rotation_SkinRotation x, SkinRotation y) {
+    return static_cast<int>(x) == static_cast<int>(y);
+}
+
 SkinRotation ScreenshotUtils::translate(Rotation_SkinRotation x) {
-    switch (x) {
-        default:
-        case Rotation::PORTRAIT:
-            return SKIN_ROTATION_0;
-        case Rotation::LANDSCAPE:
-            return SKIN_ROTATION_270;
-        case Rotation::REVERSE_PORTRAIT:
-            return SKIN_ROTATION_180;
-        case Rotation::REVERSE_LANDSCAPE:
-            return SKIN_ROTATION_90;
-    }
-};
+    // Make sure nobody accidentally renumbers the expected enums.
+    static_assert(match(Rotation::PORTRAIT, SKIN_ROTATION_0));
+    static_assert(match(Rotation::LANDSCAPE, SKIN_ROTATION_90));
+    static_assert(match(Rotation::REVERSE_PORTRAIT, SKIN_ROTATION_180));
+    static_assert(match(Rotation::REVERSE_LANDSCAPE, SKIN_ROTATION_270));
+    assert(x <= static_cast<int>(SKIN_ROTATION_270));
+    return static_cast<SkinRotation>(x);
+}
 
 Rotation_SkinRotation ScreenshotUtils::deriveRotation(
         const QAndroidSensorsAgent* sensorAgent) {
