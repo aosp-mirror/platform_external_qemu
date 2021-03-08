@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "09298568_3c60a389",
+        "filename": "android/android-emu/android/emulation/SocketBuffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-03-08T17:43:46Z",
+      "side": 1,
+      "message": "does this matter for snapshot state? can we save snapshot in the middle where mConsumed !\u003d 0?",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 22
+      },
+      "revId": "d7bd2e37e2a930cfd05d5f96ff4ac24b4b6da2ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
