@@ -22,6 +22,30 @@
       },
       "revId": "d7bd2e37e2a930cfd05d5f96ff4ac24b4b6da2ca",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "018ef467_5621b61b",
+        "filename": "android/android-emu/android/emulation/SocketBuffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-03-08T17:45:45Z",
+      "side": 1,
+      "message": "We don\u0027t want to save consumed data, so `save` discards it.",
+      "parentUuid": "09298568_3c60a389",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 22
+      },
+      "revId": "d7bd2e37e2a930cfd05d5f96ff4ac24b4b6da2ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
