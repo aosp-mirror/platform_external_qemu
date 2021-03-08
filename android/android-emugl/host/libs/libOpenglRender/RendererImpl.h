@@ -109,11 +109,6 @@ public:
             unsigned int* height, std::vector<unsigned char>& pixels,
             int displayId, int desiredWidth, int desiredHeight,
             SkinRotation desiredRotation) final;
-    int getScreenshot(unsigned int nChannels, unsigned int* width,
-            unsigned int* height, uint8_t *pixels, size_t *cPixels,
-            int displayId, int desiredWidth, int desiredHeight,
-            SkinRotation desiredRotation) final;
-
     void snapshotOperationCallback(
             android::snapshot::Snapshotter::Operation op,
             android::snapshot::Snapshotter::Stage stage) final;
