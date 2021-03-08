@@ -159,7 +159,7 @@ bool ScreenshotUtils::getScreenshot(int displayId,
             ScreenshotUtils::translate(format);
     SkinRotation desiredRotation = ScreenshotUtils::translate(rotation);
 
-    if (renderer.get() &&
+    if (renderer.get() && rotation == Rotation::PORTRAIT &&
         (format == ImageFormat::RGB888 || format == ImageFormat::RGBA8888)) {
         unsigned int bpp = (format == ImageFormat::RGB888 ? 3 : 4);
         return renderer.get()->getScreenshot(bpp, finalWidth, finalHeight,
