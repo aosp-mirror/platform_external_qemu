@@ -201,12 +201,8 @@ public:
             const unsigned int nChannels = 4;
             unsigned int width;
             unsigned int height;
-            size_t cPixels = 0;
-
-            // Fetch size of buffer.
-            renderer.getScreenshot(nChannels, &width, &height, nullptr, &cPixels);
-            std::vector<unsigned char> pixels(cPixels);
-            renderer.getScreenshot(nChannels, &width, &height, pixels.data(), &cPixels);
+            std::vector<unsigned char> pixels;
+            renderer.getScreenshot(nChannels, &width, &height, pixels);
 #if SNAPSHOT_PROFILE > 1
             printf("Screenshot load texture time %lld ms\n",
                    (long long)(sw.elapsedUs() / 1000));
