@@ -12,7 +12,6 @@
 
 #include <deque>
 #include <memory>
-#include <mutex>
 #include <numeric>
 #include <unordered_map>
 #include <vector>
@@ -38,6 +37,7 @@ extern "C" {
 #include <android/android-emu/android/emulation/android_pipe_device.h>
 #include <android/android-emu/android/emulation/virtio_vsock_device.h>
 #include <android/android-emu/android/emulation/SocketBuffer.h>
+#include <android/android-emu/android/emulation/VmLock.h>
 #include <android/android-emu/android/featurecontrol/feature_control.h>
 #include <android/crashreport/crash-handler.h>
 #include <android-qemu2-glue/base/files/QemuFileStream.h>
@@ -319,9 +319,7 @@ struct VirtIOVSockDev {
         closeStreamLocked(streamWeak->mGuestPort, streamWeak->mHostPort);
     }
 
-    // guest to host vq has data in it
-    void vqGuestToHostCallback(VirtIODevice *dev, VirtQueue *vq) {
-        std::lock_guard<std::mutex> lock(mMtx);
+    void vqGuestToHostCallbackLocked(VirtIODevice *dev, VirtQueue *vq) {
         vqReadGuestToHostLocked(dev, vq);
         vqWriteHostToGuestLocked();
     }
@@ -338,15 +336,9 @@ struct VirtIOVSockDev {
         }
     }
 
-    // the host to guest vq has space in it
-    void vqHostToGuestCallback() {
-        std::lock_guard<std::mutex> lock(mMtx);
-        vqWriteHostToGuestLocked();
-    }
-
     uint64_t hostToGuestOpen(const uint32_t guestPort,
                              IVsockHostCallbacks *callbacks) {
-        std::lock_guard<std::mutex> lock(mMtx);
+        android::RecursiveScopedVmLock lock;
 
         // this is what we will hear when the guest replies
         const struct virtio_vsock_hdr request = {
@@ -368,7 +360,7 @@ struct VirtIOVSockDev {
     }
 
     bool hostToGuestClose(const uint64_t key) {
-        std::lock_guard<std::mutex> lock(mMtx);
+        android::RecursiveScopedVmLock lock;
 
         auto stream = findStreamLocked(key);
         if (stream) {
@@ -383,7 +375,7 @@ struct VirtIOVSockDev {
     }
 
     size_t hostToGuestSend(const uint64_t key, const void *data, size_t size) {
-        std::lock_guard<std::mutex> lock(mMtx);
+        android::RecursiveScopedVmLock lock;
 
         const auto stream = findStreamLocked(key);
         if (stream) {
@@ -396,7 +388,7 @@ struct VirtIOVSockDev {
     }
 
     void save(android::base::Stream *stream) const {
-        std::lock_guard<std::mutex> lock(mMtx);
+        android::RecursiveScopedVmLock lock;
 
         const size_t nStreams = std::accumulate(
             mStreams.begin(), mStreams.end(), 0,
@@ -422,7 +414,7 @@ struct VirtIOVSockDev {
     }
 
     bool load(android::base::Stream *stream) {
-        std::lock_guard<std::mutex> lock(mMtx);
+        android::RecursiveScopedVmLock lock;
 
         resetDeviceLocked();
 
@@ -633,7 +625,7 @@ private:
     }
 
     void resetDevice() {
-        std::lock_guard<std::mutex> lock(mMtx);
+        android::RecursiveScopedVmLock lock;
         resetDeviceLocked();
     }
 
@@ -840,8 +832,6 @@ private:
     std::vector<uint8_t> mVqGuestToHostBuf;
     std::deque<struct virtio_vsock_hdr> mHostToGuestOrphanFrames;
     uint32_t mSrcHostPortI = kSrcHostPortMin;
-
-    mutable std::mutex mMtx;
 };
 
 void VSockStream::sendOp(enum virtio_vsock_op op) {
@@ -898,14 +888,16 @@ void VSockStream::closeFromHostCallback(void* that) {
 }
 }  // namespace
 
+// the host to guest vq has space in it
 void virtio_vsock_handle_host_to_guest(VirtIODevice *dev, VirtQueue *vq) {
     VirtIOVSock *s = VIRTIO_VSOCK(dev);
-    static_cast<VirtIOVSockDev *>(s->impl)->vqHostToGuestCallback();
+    static_cast<VirtIOVSockDev *>(s->impl)->vqWriteHostToGuestLocked();
 }
 
+// the guest to host vq has data in it
 void virtio_vsock_handle_guest_to_host(VirtIODevice *dev, VirtQueue *vq) {
     VirtIOVSock *s = VIRTIO_VSOCK(dev);
-    static_cast<VirtIOVSockDev *>(s->impl)->vqGuestToHostCallback(dev, vq);
+    static_cast<VirtIOVSockDev *>(s->impl)->vqGuestToHostCallbackLocked(dev, vq);
 }
 
 void virtio_vsock_handle_event_to_guest(VirtIODevice *dev, VirtQueue *vq) {
