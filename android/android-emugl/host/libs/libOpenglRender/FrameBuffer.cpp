@@ -2617,35 +2617,34 @@ static void loadProcOwnedCollection(Stream* stream, Collection* c) {
     });
 }
 
-int FrameBuffer::getScreenshot(unsigned int nChannels,
-                               unsigned int* width,
-                               unsigned int* height,
-                               uint8_t* pixels,
-                               size_t* cPixels,
-                               int displayId,
-                               int desiredWidth,
-                               int desiredHeight,
-                               SkinRotation desiredRotation) {
+
+int  FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
+        unsigned int* height, uint8_t* pixels, size_t* cPixels, int displayId,
+        int desiredWidth, int desiredHeight, SkinRotation desiredRotation) {
     AutoLock mutex(m_lock);
     uint32_t w, h, cb;
-    if (!emugl::get_emugl_multi_display_operations().getMultiDisplay(
-                displayId, nullptr, nullptr, &w, &h, nullptr, nullptr,
-                nullptr)) {
-        LOG(ERROR) << "Screenshot of invalid display: " << displayId;
+    if (!emugl::get_emugl_multi_display_operations().getMultiDisplay(displayId,
+                                                                     nullptr,
+                                                                     nullptr,
+                                                                     &w,
+                                                                     &h,
+                                                                     nullptr,
+                                                                     nullptr,
+                                                                     nullptr)) {
+        fprintf(stderr, "Screenshot of invalid display %d", displayId);
         *width = 0;
         *height = 0;
         *cPixels = 0;
         return -1;
     }
     if (nChannels != 3 && nChannels != 4) {
-        LOG(ERROR) << "Screenshot only support 3(RGB) or 4(RGBA) channels";
+        fprintf(stderr, "Screenshot only support 3(RGB) or 4(RGBA) channels");
         *width = 0;
         *height = 0;
         *cPixels = 0;
         return -1;
     }
-    emugl::get_emugl_multi_display_operations().getDisplayColorBuffer(displayId,
-                                                                      &cb);
+    emugl::get_emugl_multi_display_operations().getDisplayColorBuffer(displayId, &cb);
     if (displayId == 0) {
         cb = m_lastPostedColorBuffer;
     }
@@ -2667,8 +2666,7 @@ int FrameBuffer::getScreenshot(unsigned int nChannels,
     }
     *cPixels = needed;
 
-    if (desiredRotation == SKIN_ROTATION_90 ||
-        desiredRotation == SKIN_ROTATION_270) {
+    if (desiredRotation == SKIN_ROTATION_90 || desiredRotation == SKIN_ROTATION_270) {
         std::swap(*width, *height);
     }
 
@@ -2685,6 +2683,24 @@ int FrameBuffer::getScreenshot(unsigned int nChannels,
 
     sendPostWorkerCmd(scrCmd);
     return 0;
+}
+
+
+void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
+        unsigned int* height, std::vector<unsigned char>& pixels, int displayId,
+        int desiredWidth, int desiredHeight, SkinRotation desiredRotation) {
+
+    size_t size = pixels.size();
+    if (!getScreenshot(nChannels, width, height, pixels.data(), &size, displayId, desiredWidth, desiredHeight, desiredRotation))  {
+        if (size == 0) {
+            // Fatal error..
+            return;
+        }
+
+        // Buffer to small, increase the vector size.
+        pixels.resize(size);
+        getScreenshot(nChannels, width, height, pixels.data(), &size, displayId, desiredWidth, desiredHeight, desiredRotation);
+    }
 }
 
 void FrameBuffer::onLastColorBufferRef(uint32_t handle) {
