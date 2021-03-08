@@ -526,26 +526,19 @@ public:
 
         // Make sure we always write the first frame, this can be
         // a completely empty frame if the screen is not active.
-        Image reply;
-
-        // cPixels is used to verify the invariant that retrieved image
-        // is not shrinking over subsequent calls, as this might result
-        // in unexpected behavior for clients.
-        int cPixels = reply.image().size();
+        Image first;
         bool clientAvailable = !context->IsCancelled();
 
         if (clientAvailable) {
-            getScreenshot(context, request, &reply);
-            assert(reply.image().size() >= cPixels);
-            cPixels = reply.image().size();
-            clientAvailable = !context->IsCancelled() && writer->Write(reply);
+            getScreenshot(context, request, &first);
+            clientAvailable = !context->IsCancelled() && writer->Write(first);
         }
 
-        bool lastFrameWasEmpty = reply.format().width() == 0;
+        bool lastFrameWasEmpty = first.format().width() == 0;
         int frame = 0;
 
-        // TODO(jansen): Move to ScreenshotUtils.
         std::unique_ptr<EventWaiter> frameEvent;
+
         std::unique_ptr<RaiiEventListener<emugl::Renderer,
                                           emugl::FrameBufferChangeEvent>>
                 frameListener;
@@ -570,6 +563,7 @@ public:
         // Track percentiles, and report if we have seen at least 32 frames.
         metrics::Percentiles perfEstimator(32, {0.5, 0.95});
         while (clientAvailable) {
+            Image reply;
             const auto kTimeToWaitForFrame = std::chrono::milliseconds(125);
 
             // The next call will return the number of frames that are
@@ -582,14 +576,8 @@ public:
                 frame += arrived;
                 Stopwatch sw;
                 getScreenshot(context, request, &reply);
-
-                // The invariant that the pixel buffer does not decrease should
-                // hold. Clients likely rely on the buffer size to match the actual
-                // number of available pixels.
-                assert(reply.image().size() >= cPixels);
-                cPixels = reply.image().size();
-
                 reply.set_seq(frame);
+
                 // We send the first empty frame, after that we wait for frames
                 // to come, or until the client gives up on us. So for a screen
                 // that comes in and out the client will see this timeline: (0
@@ -666,6 +654,7 @@ public:
         // Calculate the desired rotation and width we should use..
         int desiredWidth = request->width();
         int desiredHeight = request->height();
+        SkinRotation desiredRotation = ScreenshotUtils::translate(rotation);
 
         // User wants to use device width/height
         if (desiredWidth == 0 || desiredHeight == 0) {
@@ -696,24 +685,28 @@ public:
             std::swap(newWidth, newHeight);
         }
 
+        // Screenshots can come from either the gl renderer, or the guest.
+        const auto& renderer = android_getOpenglesRenderer();
+
         // This is an expensive operation, that frequently can get cancelled, so
         // check availability of the client first.
         if (context->IsCancelled()) {
             return Status::CANCELLED;
         }
 
-        // Let's make a fast call to learn how many pixels we need to reserve.
-        uint8_t* pixels;
-        size_t cPixels = 0;
-        ScreenshotUtils::getScreenshot(request->display(), request->format(),
-                                       rotation, newWidth, newHeight, pixels,
-                                       &cPixels, &width, &height);
+        Stopwatch sw;
+        android::emulation::Image img = android::emulation::takeScreenshot(
+                desiredFormat, desiredRotation, renderer.get(),
+                mAgents->display->getFrameBuffer, request->display(), newWidth,
+                newHeight);
+        LOG(VERBOSE) << "Screenshot " << newWidth << "x" << newHeight
+                     << ", in: " << sw.elapsedUs() << " us";
 
         // Update format information with the retrieved width, height..
         auto format = reply->mutable_format();
-        format->set_format(request->format());
-        format->set_height(height);
-        format->set_width(width);
+        format->set_format(ScreenshotUtils::translate(img.getImageFormat()));
+        format->set_height(img.getHeight());
+        format->set_width(img.getWidth());
 
         auto rotation_reply = format->mutable_rotation();
         rotation_reply->set_xaxis(xaxis);
@@ -722,47 +715,19 @@ public:
         rotation_reply->set_rotation(rotation);
 
         if (request->transport().channel() == ImageTransport::MMAP) {
+            // TODO(jansene): have takeScreenshot write directly to the region
             auto shm = mSharedMemoryLibrary.borrow(
-                    request->transport().handle(), cPixels);
+                    request->transport().handle(), img.getPixelCount());
             if (shm->isOpen() && shm->isMapped()) {
-                if (cPixels > shm->size()) {
-                    // Oh oh, this will not work.
-                    return Status(::grpc::StatusCode::FAILED_PRECONDITION,
-                                  "The shared memory region needs to have a "
-                                  "size of at least: " +
-                                          std::to_string(cPixels),
-                                  "");
-                }
-                cPixels = shm->size();
-                pixels = reinterpret_cast<uint8_t*>(shm->get());
-
+                memcpy(shm->get(), img.getPixelBuf(), img.getPixelCount());
                 auto transport = format->mutable_transport();
                 transport->set_handle(request->transport().handle());
                 transport->set_channel(ImageTransport::MMAP);
             }
         } else {
-            // Make sure the image field has a string that is large enough.
-            // Usually there are 2 cases:
-            // - A single screenshot is requested, we need to allocate a buffer of sufficient size
-            // - The first screenshot in a series is requested and we need to allocate the first frame.
-            if (reply->mutable_image()->size() < cPixels) {
-                LOG(VERBOSE) << "Allocation of string object. " << reply->mutable_image()->size() << " < " << cPixels;
-                auto buffer = new std::string(cPixels, 0);
-                // The protobuf message takes ownership of the pointer.
-                reply->set_allocated_image(buffer);
-            }
-            // The underlying char* is r/w since c++17.
-            char* unsafe = reply->mutable_image()->data();
-            pixels = reinterpret_cast<uint8_t*>(unsafe);
+            reply->set_image(img.getPixelBuf(), img.getPixelCount());
         }
 
-        Stopwatch sw;
-        ScreenshotUtils::getScreenshot(request->display(), request->format(),
-                                       rotation, newWidth, newHeight, pixels,
-                                       &cPixels, &width, &height);
-
-        LOG(VERBOSE) << "Screenshot " << newWidth << "x" << newHeight
-                     << ", in: " << sw.elapsedUs() << " us";
         return Status::OK;
     }
 
