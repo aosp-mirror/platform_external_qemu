@@ -632,6 +632,7 @@ void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
             p->getNormalized(),
             -1,
             p->isIntPointer(),
+            p->getBufferName(),
             needEnablingPostDraw);
     }
 }
@@ -639,15 +640,13 @@ void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
 //setting client side arr
 void GLESv2Context::setupArrWithDataSize(GLsizei datasize, const GLvoid* arr,
                                          GLenum arrayType, GLenum dataType,
-                                         GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt, bool* needEnablingPostDraw){
+                                         GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt, GLuint ptrBufferName, bool* needEnablingPostDraw){
     // is not really a client side arr.
     if (arr == NULL) {
         GLint isEnabled;
         s_glDispatch.glGetVertexAttribiv((int)arrayType, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &isEnabled);
-        GLuint boundBuf;
-        s_glDispatch.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*)&boundBuf);
 
-        if (isEnabled && !boundBuf) {
+        if (isEnabled && !ptrBufferName) {
             s_glDispatch.glDisableVertexAttribArray(arrayType);
             if (needEnablingPostDraw)
                 needEnablingPostDraw[arrayType] = true;
