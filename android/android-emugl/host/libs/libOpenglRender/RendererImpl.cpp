@@ -357,24 +357,12 @@ void RendererImpl::fillGLESUsages(android_studio::EmulatorGLESUsages* usages) {
     if (fb) fb->fillGLESUsages(usages);
 }
 
-int RendererImpl::getScreenshot(
-        unsigned int nChannels,
-        unsigned int* width,
-        unsigned int* height,
-        uint8_t* pixels,
-        size_t* cPixels,
-        int displayId = 0,
-        int desiredWidth = 0,
-        int desiredHeight = 0,
-        SkinRotation desiredRotation = SKIN_ROTATION_0) {
+void RendererImpl::getScreenshot(unsigned int nChannels, unsigned int* width,
+        unsigned int* height, std::vector<unsigned char>& pixels, int displayId,
+        int desiredWidth, int desiredHeight, SkinRotation desiredRotation) {
     auto fb = FrameBuffer::getFB();
-    if (fb) {
-        return fb->getScreenshot(nChannels, width, height, pixels, cPixels,
-                                 displayId, desiredWidth, desiredHeight,
-                                 desiredRotation);
-    }
-    *cPixels = 0;
-    return -1;
+    if (fb) fb->getScreenshot(nChannels, width, height, pixels, displayId,
+                              desiredWidth, desiredHeight, desiredRotation);
 }
 
 void RendererImpl::setMultiDisplay(uint32_t id,

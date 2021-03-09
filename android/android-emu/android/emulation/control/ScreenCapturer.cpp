@@ -55,8 +55,9 @@ bool captureScreenshot(android::base::StringView outputDirectoryPath,
             return false;
         }
         return captureScreenshot(
-                nullptr, getConsoleAgents()->display->getFrameBuffer, rotation,
-                outputDirectoryPath, pOutputFilepath);
+                nullptr,
+                emulator_window_get()->uiEmuAgent->display->getFrameBuffer,
+                rotation, outputDirectoryPath, pOutputFilepath);
     }
 }
 
@@ -76,21 +77,15 @@ Image takeScreenshot(
     unsigned int width;
     unsigned int height;
     ImageFormat outputFormat = ImageFormat::RGBA8888;
-    std::vector<unsigned char> pixelBuffer(0);
+    std::vector<unsigned char> pixelBuffer;
     if (renderer) {
         if (desiredFormat == ImageFormat::RGB888) {
             nChannels = 3;
             outputFormat = ImageFormat::RGB888;
         }
-        size_t cPixels = 0;
-        if (renderer->getScreenshot(
-                    nChannels, &width, &height, pixelBuffer.data(), &cPixels,
-                    displayId, desiredWidth, desiredHeight, rotation) != 0) {
-            pixelBuffer.resize(cPixels);
-            renderer->getScreenshot(nChannels, &width, &height,
-                                    pixelBuffer.data(), &cPixels, displayId,
-                                    desiredWidth, desiredHeight, rotation);
-        }
+        renderer->getScreenshot(nChannels, &width, &height, pixelBuffer,
+                                displayId, desiredWidth, desiredHeight,
+                                rotation);
     } else {
         unsigned char* pixels = nullptr;
         int bpp = 4;
