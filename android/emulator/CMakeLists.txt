@@ -35,6 +35,10 @@ else()
     emulator-crash-service)
 endif()
 
+if(WEBRTC)
+ add_dependencies(emulator goldfish-webrtc-bridge)
+endif()
+
 set(PC_BIOS "${ANDROID_QEMU2_TOP_DIR}/pc-bios")
 set(EMULATOR_BIOS_DEPENDENCIES
     "${PC_BIOS}/bios.bin>lib/pc-bios/bios.bin"

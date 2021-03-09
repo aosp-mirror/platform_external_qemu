@@ -58,3 +58,6 @@ GL_ENTRY(void, rcSetTracingForPuid, uint64_t puid, uint32_t enable, uint64_t gue
 GL_ENTRY(void, rcMakeCurrentAsync, uint32_t context, uint32_t drawSurf, uint32_t readSurf)
 GL_ENTRY(void, rcComposeAsync, uint32_t bufferSize, void *buffer);
 GL_ENTRY(void, rcDestroySyncKHRAsync, uint64_t sync);
+GL_ENTRY(GLint, rcComposeWithoutPost, uint32_t bufferSize, void *buffer);
+GL_ENTRY(void, rcComposeAsyncWithoutPost, uint32_t bufferSize, void *buffer);
+

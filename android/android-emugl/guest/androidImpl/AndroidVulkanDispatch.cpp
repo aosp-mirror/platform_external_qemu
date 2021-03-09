@@ -501,7 +501,7 @@ EXPORT android_vulkan_dispatch* load_android_vulkan_dispatch(const char* path) {
     out->vkCmdSetCheckpointNV = (PFN_vkCmdSetCheckpointNV)dlsym(lib, "vkCmdSetCheckpointNV");
     out->vkGetQueueCheckpointDataNV = (PFN_vkGetQueueCheckpointDataNV)dlsym(lib, "vkGetQueueCheckpointDataNV");
 #endif
-#ifdef VK_GOOGLE_address_space
+#if defined(VK_GOOGLE_gfxstream) || defined(VK_GOOGLE_address_space)
     out->vkMapMemoryIntoAddressSpaceGOOGLE = (PFN_vkMapMemoryIntoAddressSpaceGOOGLE)dlsym(lib, "vkMapMemoryIntoAddressSpaceGOOGLE");
 #endif
 #ifdef VK_VERSION_1_0

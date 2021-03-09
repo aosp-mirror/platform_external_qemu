@@ -46,6 +46,11 @@ class VulkanUnbox(VulkanWrapperGenerator):
 
         category = self.typeInfo.categoryOf(name)
 
+        if category in ["struct", "union"] and alias:
+            self.module.appendHeader(
+                self.codegen.makeFuncAlias(self.unboxPrefix + "_" + name,
+                                           self.unboxPrefix + "_" + alias))
+
         if category in ["struct", "union"] and not alias:
             structInfo = self.typeInfo.structs[name]
             self.knownStructs[name] = structInfo

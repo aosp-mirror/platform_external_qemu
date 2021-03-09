@@ -323,6 +323,7 @@ int MultiDisplay::createDisplay(uint32_t* displayId) {
 
     mMultiDisplay.emplace(*displayId, MultiDisplayInfo());
     LOG(VERBOSE) << "create display " << *displayId;
+    fireEvent(DisplayChangeEvent{ DisplayChange::DisplayAdded, *displayId});
     return 0;
 }
 
@@ -363,6 +364,7 @@ int MultiDisplay::destroyDisplay(uint32_t displayId) {
         }
     }
     LOG(VERBOSE) << "delete display " << displayId;
+    fireEvent(DisplayChangeEvent{ DisplayChange::DisplayRemoved, displayId});
     return 0;
 }
 
@@ -414,6 +416,8 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
     LOG(VERBOSE) << "setDisplayPose " << displayId << " x " << x
                  << " y " << y << " w " << w << " h " << h
                  << " dpi " << dpi;
+
+    fireEvent(DisplayChangeEvent{ DisplayChange::DisplayChanged, displayId});
     return 0;
 }
 
@@ -508,6 +512,11 @@ void MultiDisplay::getCombinedDisplaySize(uint32_t* w, uint32_t* h) {
     getCombinedDisplaySizeLocked(w, h);
 }
 
+bool MultiDisplay::notifyDisplayChanges() {
+    fireEvent(DisplayChangeEvent{ DisplayChange::DisplayTransactionCompleted, 0});
+    return true;
+}
+
 void MultiDisplay::getCombinedDisplaySizeLocked(uint32_t* w, uint32_t* h) {
     uint32_t total_h = 0;
     uint32_t total_w = 0;
@@ -580,7 +589,6 @@ bool MultiDisplay::multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h
     // * 120 <= dpi <= 640
     // * 320 * (dpi / 160) <= width
     // * 320 * (dpi / 160) <= height
-    // * Screen aspect ratio cannot be longer (or wider) than 21:9 (or 9:21).
     //
     // Also we don't want a screen too big to limit the performance impact.
     // * 4K might be a good upper limit
@@ -603,16 +611,11 @@ bool MultiDisplay::multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h
         LOG(ERROR) << "resolution should not exceed 4k (4096*2160)";
         return false;
     }
-    if (w * 21 < h * 9 || w * 9 > h * 21) {
-        mWindowAgent->showMessage("Aspect ratio cannot be longer (or wider) than 21:9 (or 9:21)",
-                                  WINDOW_MESSAGE_ERROR, 1000);
-        LOG(ERROR) << "Aspect ratio cannot be longer (or wider) than 21:9 (or 9:21)";
-        return false;
-    }
     if (id > s_maxNumMultiDisplay) {
-        mWindowAgent->showMessage("Display index cannot be more than 3",
-                                  WINDOW_MESSAGE_ERROR, 1000);
-        LOG(ERROR) << "Display index cannot be more than 3";
+        std::string msg = "Display index cannot be more than " +
+            std::to_string(s_maxNumMultiDisplay);
+        mWindowAgent->showMessage(msg.c_str(), WINDOW_MESSAGE_ERROR, 1000);
+        LOG(ERROR) << msg;
         return false;
     }
     return true;

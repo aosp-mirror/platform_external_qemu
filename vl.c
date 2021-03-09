@@ -3426,6 +3426,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     } BlockdevOptions_queue;
     QSIMPLEQ_HEAD(, BlockdevOptions_queue) bdo_queue
         = QSIMPLEQ_HEAD_INITIALIZER(bdo_queue);
+    bool wear_auto_forward = false;
 
 #if defined(CONFIG_ANDROID) && (SNAPSHOT_PROFILE > 1)
     printf("Entering QEMU main with uptime %lld ms\n",
@@ -4597,6 +4598,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             case QEMU_OPTION_restart_when_stalled:
                 set_restart_when_stalled();
                 break;
+            case QEMU_OPTION_wear_auto_forward:
+                wear_auto_forward = true;
+                break;
 #endif  // CONFIG_ANDROID
             default:
                 os_parse_cmd_args(popt->index, optarg);
@@ -4657,7 +4661,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         android_hw_control_init();
 
         socket_drainer_start(looper_getForThread());
-        android_wear_agent_start(looper_getForThread());
+        if (wear_auto_forward) {
+            android_wear_agent_start(looper_getForThread());
+        }
         android_registerMainLooper(looper_getForThread());
     }
 
@@ -5628,13 +5634,17 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
     bool tryDefaultVmLoad = true;
 #ifdef CONFIG_ANDROID
-    if (android_qemu_mode) {
+    if (android_qemu_mode || is_fuchsia) {
         // Initialize reporting right before starting the real VM work (load/boot
         // and the main loop). We want to track performance of a running emulator,
         // ignoring any too early exits as a result of incorrect setup.
         if (!android_reporting_setup()) {
             return 1;
         }
+    }
+
+    if (android_qemu_mode) {
+
 #if SNAPSHOT_PROFILE > 1
         printf("Starting VM at uptime %lld ms\n", (long long)get_uptime_ms());
 #endif
