@@ -475,7 +475,7 @@ public:
     void blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
                                             GLuint width, GLuint height,
                                             GLint internalFormat, GLenum format, GLenum type);
-
+    bool drawDisabled() const;
 protected:
     void initDefaultFboImpl(
         GLint width, GLint height,
@@ -636,6 +636,7 @@ protected:
             };
 
     GLuint m_useProgram = 0;
+    bool m_drawDisabled;
 
 private:
 

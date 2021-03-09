@@ -632,6 +632,7 @@ void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
             p->getNormalized(),
             -1,
             p->isIntPointer(),
+            p->getBufferName(),
             needEnablingPostDraw);
     }
 }
@@ -639,15 +640,13 @@ void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
 //setting client side arr
 void GLESv2Context::setupArrWithDataSize(GLsizei datasize, const GLvoid* arr,
                                          GLenum arrayType, GLenum dataType,
-                                         GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt, bool* needEnablingPostDraw){
+                                         GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt, GLuint ptrBufferName, bool* needEnablingPostDraw){
     // is not really a client side arr.
     if (arr == NULL) {
         GLint isEnabled;
         s_glDispatch.glGetVertexAttribiv((int)arrayType, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &isEnabled);
-        GLuint boundBuf;
-        s_glDispatch.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*)&boundBuf);
 
-        if (isEnabled && !boundBuf) {
+        if (isEnabled && !ptrBufferName) {
             s_glDispatch.glDisableVertexAttribArray(arrayType);
             if (needEnablingPostDraw)
                 needEnablingPostDraw[arrayType] = true;
@@ -744,7 +743,7 @@ ProgramData* GLESv2Context::getUseProgram() {
 void GLESv2Context::initExtensionString() {
     if (s_glExtensionsInitialized) return;
 
-    *s_glExtensions = "GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_depth24 GL_OES_depth32 GL_OES_element_index_uint "
+    *s_glExtensions = "GL_OES_EGL_sync GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_depth24 GL_OES_depth32 GL_OES_element_index_uint "
                       "GL_OES_texture_float GL_OES_texture_float_linear "
                       "GL_OES_compressed_paletted_texture GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth_texture ";
     if (s_glSupport.GL_ARB_HALF_FLOAT_PIXEL || s_glSupport.GL_NV_HALF_FLOAT)

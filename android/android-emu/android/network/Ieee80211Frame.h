@@ -20,20 +20,52 @@
 #include "android/base/IOVector.h"
 #include "android/network/MacAddress.h"
 
+#include <array>
+#include <memory>
 #include <string>
+#include <vector>
+
 typedef struct ieee80211_hdr ieee80211_hdr;
 
 namespace android {
 namespace network {
 
-// Provide a simple wrapper on top of the IEEE80211 Ieee80211Frame header
-// and its underlying data.
+enum class FrameType : uint8_t {
+    Unknown,
+    Ack,
+    Data,
+};
+
+struct hwsim_tx_rate {
+    int8_t idx;
+    uint8_t count;
+} __attribute((packed));
+
+using Rates = std::array<hwsim_tx_rate, 4>;
+
+struct FrameInfo {
+    FrameInfo() = default;
+    FrameInfo(MacAddress transmitter,
+              uint64_t cookie,
+              uint32_t flags,
+              uint32_t channel,
+              const hwsim_tx_rate* rates,
+              size_t numRates);
+
+    MacAddress mTransmitter;
+    uint64_t mCookie = 0;
+    uint32_t mFlags = 0;
+    uint32_t mChannel = 0;
+    Rates mTxRates;
+};
 
 class Ieee80211Frame {
 public:
+    Ieee80211Frame(const uint8_t* data, size_t size, FrameInfo info);
     Ieee80211Frame(const uint8_t* data, size_t size);
     Ieee80211Frame(size_t size);
-    Ieee80211Frame(const std::vector<uint8_t>& ethernet, MacAddress bssid);
+    static std::unique_ptr<Ieee80211Frame>
+    buildFromEthernet(const uint8_t* data, size_t size, MacAddress bssid);
     size_t size() const { return mData.size(); }
     size_t hdrLength() const;
     const uint8_t* data() const { return mData.data(); }
@@ -41,6 +73,9 @@ public:
     uint8_t* frameBody();
     const uint8_t* frameBody() const;
     const ieee80211_hdr& hdr() const;
+    const FrameInfo& info() const { return mInfo; }
+    FrameInfo& info() { return mInfo; }
+
     MacAddress addr1() const;
     MacAddress addr2() const;
     MacAddress addr3() const;
@@ -56,11 +91,13 @@ public:
     bool uses4Addresses() const;
     uint16_t getQoSControl() const;
     const android::base::IOVector toEthernet();
-    static constexpr size_t MAX_FRAME_LEN = 2352;
+    static constexpr uint32_t MAX_FRAME_LEN = 2352;
+    static constexpr uint32_t TX_MAX_RATES = 4;
     static bool validEtherType(uint16_t ethertype);
 
 private:
     std::vector<uint8_t> mData;
+    android::network::FrameInfo mInfo;
 };
 
 }  // namespace network

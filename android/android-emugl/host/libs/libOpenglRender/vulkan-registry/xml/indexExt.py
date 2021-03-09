@@ -1,18 +1,8 @@
 #!/usr/bin/python3
 #
-# Copyright (c) 2017-2018 The Khronos Group Inc.
+# Copyright (c) 2017-2020 The Khronos Group Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 
 # Construct an HTML fragment indexing extension appendices in vkspec.html.
 # This is run only when publishing an update spec, to update the Vulkan
@@ -31,7 +21,14 @@ def listExts(vendor, ext, tag):
         desc = vendor + ' Extensions (full vendor description unavailable)'
     print(prefix, desc, suffix)
 
-    fmtString = '    <li> <a href="specs/1.1-extensions/html/vkspec.html#{0}"> {0} </a> </li>'
+    # (OLD) Links to the extension appendix in the single-page HTML document.
+    # This is very slow to load.
+    # fmtString = '    <li> <a href="specs/1.2-extensions/html/vkspec.html#{0}"> {0} </a> </li>'
+
+    # This links to the individual per-extension refpages, which are a
+    # slightly modified version of the extension appendices, and far faster
+    # to load.
+    fmtString = '    <li> <a href="specs/1.2-extensions/man/html/{0}.html"> {0} </a> </li>'
 
     for name in sorted(ext[vendor]):
         print(fmtString.format(name))
@@ -69,7 +66,7 @@ if __name__ == '__main__':
         name = elem.get('name')
         supported = elem.get('supported')
 
-        if (supported == 'vulkan'):
+        if supported == 'vulkan':
             # Relies on name being in the form VK_<vendor>_stuff
             (vk, vendor) = name.split('_')[0:2]
 

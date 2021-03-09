@@ -41,7 +41,7 @@ namespace emulation {
 // disconnecting the guest.
 class AdbHub {
 public:
-    void onSave(android::base::Stream* stream);
+    void onSave(android::base::Stream* stream) const;
     void onLoad(android::base::Stream* stream);
     int onGuestSendData(const AndroidPipeBuffer* buffers, int numBuffers);
     int onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers);
