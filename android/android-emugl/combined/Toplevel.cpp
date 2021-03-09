@@ -214,6 +214,9 @@ static int32_t sDisplayH = 0;
 static int32_t sDisplayDpi = 0;
 
 static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
+        .notifyDisplayChanges = []() {
+            return true;
+        },
         .setMultiDisplay = [](uint32_t id,
                               int32_t x,
                               int32_t y,
@@ -587,6 +590,8 @@ private:
             android::featurecontrol::GuestUsesAngle, false);
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::VulkanQueueSubmitWithCommands, true);
+    android::featurecontrol::setEnabledOverride(
+            android::featurecontrol::VulkanBatchedDescriptorSetUpdate, true);
 
         android_hw->hw_gltransport_asg_writeBufferSize = 262144;
         android_hw->hw_gltransport_asg_writeStepSize = 8192;

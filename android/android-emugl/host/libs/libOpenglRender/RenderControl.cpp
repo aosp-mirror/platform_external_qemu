@@ -231,6 +231,9 @@ static constexpr android::base::StringView kAsyncFrameCommands = "ANDROID_EMU_as
 // Queue submit with commands
 static constexpr android::base::StringView kVulkanQueueSubmitWithCommands = "ANDROID_EMU_vulkan_queue_submit_with_commands";
 
+// Batched descriptor set update
+static constexpr android::base::StringView kVulkanBatchedDescriptorSetUpdate = "ANDROID_EMU_vulkan_batched_descriptor_set_update";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -344,6 +347,12 @@ static bool shouldEnableAsyncQueueSubmit() {
 static bool shouldEnableQueueSubmitWithCommands() {
     return shouldEnableVulkan() &&
         emugl_feature_is_enabled(android::featurecontrol::VulkanQueueSubmitWithCommands);
+}
+
+static bool shouldEnableBatchedDescriptorSetUpdate() {
+    return shouldEnableVulkan() &&
+        shouldEnableQueueSubmitWithCommands() &&
+        emugl_feature_is_enabled(android::featurecontrol::VulkanBatchedDescriptorSetUpdate);
 }
 
 android::base::StringView maxVersionToFeatureString(GLESDispatchMaxVersion version) {
@@ -470,6 +479,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
     bool vulkanShaderFloat16Int8Enabled = shouldEnableVulkanShaderFloat16Int8();
     bool vulkanAsyncQueueSubmitEnabled = shouldEnableAsyncQueueSubmit();
     bool vulkanQueueSubmitWithCommands = shouldEnableQueueSubmitWithCommands();
+    bool vulkanBatchedDescriptorSetUpdate = shouldEnableBatchedDescriptorSetUpdate();
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -580,6 +590,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
     if (vulkanQueueSubmitWithCommands && name == GL_EXTENSIONS) {
         glStr += kVulkanQueueSubmitWithCommands;
+        glStr += " ";
+    }
+
+    if (vulkanBatchedDescriptorSetUpdate && name == GL_EXTENSIONS) {
+        glStr += kVulkanBatchedDescriptorSetUpdate;
         glStr += " ";
     }
 
@@ -1213,7 +1228,15 @@ static int rcCompose(uint32_t bufferSize, void* buffer) {
     if (!fb) {
         return -1;
     }
-    return fb->compose(bufferSize, buffer);
+    return fb->compose(bufferSize, buffer, true);
+}
+
+static int rcComposeWithoutPost(uint32_t bufferSize, void* buffer) {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return -1;
+    }
+    return fb->compose(bufferSize, buffer, false);
 }
 
 static int rcCreateDisplay(uint32_t* displayId) {
@@ -1429,9 +1452,16 @@ static void rcComposeAsync(uint32_t bufferSize, void* buffer) {
     if (!fb) {
         return;
     }
-    fb->compose(bufferSize, buffer);
+    fb->compose(bufferSize, buffer, true);
 }
 
+static void rcComposeAsyncWithoutPost(uint32_t bufferSize, void* buffer) {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return;
+    }
+    fb->compose(bufferSize, buffer, false);
+}
 static void rcDestroySyncKHRAsyncy(uint64_t handle) {
     FenceSync* fenceSync = FenceSync::getFromHandle(handle);
     if (!fenceSync) return;
@@ -1506,4 +1536,6 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcMakeCurrentAsync = rcMakeCurrentAsync;
     dec->rcComposeAsync = rcComposeAsync;
     dec->rcDestroySyncKHRAsync = rcDestroySyncKHRAsync;
+    dec->rcComposeWithoutPost = rcComposeWithoutPost;
+    dec->rcComposeAsyncWithoutPost = rcComposeAsyncWithoutPost;
 }

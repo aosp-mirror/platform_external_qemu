@@ -41,6 +41,7 @@ set(android-emu-common
     android/emulation/AdbHostServer.cpp
     android/emulation/AdbHub.cpp
     android/emulation/AdbMessageSniffer.cpp
+    android/emulation/AdbVsockPipe.cpp
     android/emulation/address_space_device.cpp
     android/emulation/address_space_graphics.cpp
     android/emulation/address_space_host_media.cpp
@@ -178,12 +179,14 @@ set(android-emu-common
     android/network/constants.c
     android/network/control.cpp
     android/network/globals.c
+    android/network/Ieee80211Frame.cpp
     android/network/NetworkPipe.cpp
     android/network/wifi.cpp
     android/network/WifiForwardClient.cpp
     android/network/WifiForwardPeer.cpp
     android/network/WifiForwardPipe.cpp
     android/network/WifiForwardServer.cpp
+    android/network/GenericNetlinkMessage.cpp
     android/opengl/emugl_config.cpp
     android/opengl/EmuglBackendList.cpp
     android/opengl/EmuglBackendScanner.cpp
@@ -343,10 +346,6 @@ set(android_emu_dependent_src
 # are not circular
 list(APPEND android-emu_src ${android-emu-common} ${android_emu_dependent_src})
 
-if(NOT OPTION_GFXSTREAM_BACKEND)
-  list(APPEND android-emu_src "android/network/Ieee80211Frame.cpp")
-endif()
-
 android_add_library(
   TARGET android-emu
   LICENSE Apache-2.0
@@ -429,8 +428,10 @@ target_link_libraries(
          zlib
          android-hw-config)
 
+target_link_libraries(android-emu PRIVATE hostapd)
+
 if(NOT OPTION_GFXSTREAM_BACKEND)
-  target_link_libraries(android-emu PRIVATE hostapd modem_simulator_lib)
+  target_link_libraries(android-emu PRIVATE modem_simulator_lib)
   target_link_libraries(android-emu PUBLIC modem_simulator_lib)
 endif()
 
@@ -881,7 +882,10 @@ if(NOT LINUX_AARCH64)
       android/location/Route_unittest.cpp
       android/network/constants_unittest.cpp
       android/network/control_unittest.cpp
+      android/network/GenericNetlinkMessage_unittest.cpp
+      android/network/Ieee80211Frame_unittest.cpp
       android/network/MacAddress_unittest.cpp
+      android/network/WifiForwardPeer_unittest.cpp
       android/offworld/OffworldPipe_unittest.cpp
       android/opengl/emugl_config_unittest.cpp
       android/opengl/EmuglBackendList_unittest.cpp
@@ -925,12 +929,6 @@ if(NOT LINUX_AARCH64)
       android/wear-agent/testing/WearAgentTestUtils.cpp
       android/wear-agent/WearAgent_unittest.cpp)
 
-  if(NOT OPTION_GFXSTREAM_BACKEND)
-    list(APPEND android-emu_unittests_common
-         "android/network/Ieee80211Frame_unittest.cpp")
-    list(APPEND android-emu_unittests_common
-         "android/network/WifiForwardPeer_unittest.cpp")
-  endif()
 
   # And declare the test
   android_add_test(

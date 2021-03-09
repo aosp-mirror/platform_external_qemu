@@ -194,7 +194,7 @@ void PlaystoreMetricsWriter::commit() {
     bool success = curl_post(mUrl.c_str(), data.data(), data.size(), headers, 2,
                              curlWriteCallback, &protobuf_response, &error);
     if (success) {
-        D("Response %s", protobuf_response.c_str());
+        D("Metrics written to playstore");
         writeCookie(protobuf_response);
     } else {
         LOG(ERROR) << "Failed to send data due to: " << error;

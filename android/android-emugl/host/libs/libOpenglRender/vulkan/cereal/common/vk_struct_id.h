@@ -15,6 +15,7 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 #include "goldfish_vk_private_defs.h"
 
 template <class T> struct vk_get_vk_struct_id;
@@ -53,5 +54,6 @@ REGISTER_VK_STRUCT_ID(VkImportMemoryFdInfoKHR, VK_STRUCTURE_TYPE_IMPORT_MEMORY_F
 REGISTER_VK_STRUCT_ID(VkPhysicalDeviceImageFormatInfo2, VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2);
 REGISTER_VK_STRUCT_ID(VkPhysicalDeviceExternalImageFormatInfo, VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO);
 REGISTER_VK_STRUCT_ID(VkExternalImageFormatProperties, VK_STRUCTURE_TYPE_EXTERNAL_IMAGE_FORMAT_PROPERTIES);
+REGISTER_VK_STRUCT_ID(VkSemaphoreTypeCreateInfoKHR, VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO_KHR)
 
 #undef REGISTER_VK_STRUCT_ID
