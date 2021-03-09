@@ -165,6 +165,12 @@ typedef struct QAndroidVmOperations {
                            void* opaque,
                            LineConsumerCallback errConsumer);
 
+    // Get the name of the last loaded snapshot (current snapshot).
+    // Will print "(null)" if the emulator cold booted and loaded no snapshots.
+    bool (*snapshotLastLoaded)(void* opaque,
+                             LineConsumerCallback outConsumer,
+                             LineConsumerCallback errConsumer);
+
     // Sets a set of callback to listen for snapshot operations.
     void (*setSnapshotCallbacks)(void* opaque,
                                  const SnapshotCallbacks* callbacks);

@@ -202,6 +202,7 @@ android_add_test(
       android/base/containers/StaticMap_unittest.cpp
       android/base/ContiguousRangeMapper_unittest.cpp
       android/base/EintrWrapper_unittest.cpp
+      android/base/EventNotificationSupport_unittest.cpp
       android/base/files/FileShareOpen_unittest.cpp
       android/base/files/GzipStreambuf_unittest.cpp
       android/base/files/IniFile_unittest.cpp

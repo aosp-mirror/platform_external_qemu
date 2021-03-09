@@ -29,6 +29,8 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
+#include <mutex>
+#include <new>
 #include <ratio>
 #include <set>
 #include <string>
@@ -39,20 +41,23 @@
 #include <vector>
 
 #include "android/avd/info.h"
+#include "android/base/EventNotificationSupport.h"
 #include "android/base/Log.h"
 #include "android/base/Optional.h"
 #include "android/base/Stopwatch.h"
+#include "android/base/Tracing.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/memory/SharedMemory.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
+#include "android/emulation/MultiDisplay.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/ServiceUtils.h"
 #include "android/emulation/control/battery_agent.h"
-#include "android/emulation/control/camera/Camera.h"
+#include "android/emulation/control/camera/VirtualSceneCamera.h"
 #include "android/emulation/control/clipboard/Clipboard.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
@@ -125,7 +130,7 @@ public:
           mLogcatBuffer(k128KB),
           mKeyEventSender(agents),
           mTouchEventSender(agents),
-          mCamera(Camera::getCamera()),
+          mCamera(agents->sensors),
           mClipboard(Clipboard::getClipboard(agents->clipboard)),
           mLooper(android::base::ThreadLooper::get()) {
         // the logcat pipe will take ownership of the created stream, and writes
@@ -511,9 +516,6 @@ public:
     Status streamScreenshot(ServerContext* context,
                             const ImageFormat* request,
                             ServerWriter<Image>* writer) override {
-        EventWaiter frameEvent(&gpu_register_shared_memory_callback,
-                               &gpu_unregister_shared_memory_callback);
-
         SharedMemoryLibrary::LibraryEntry entry;
         if (request->transport().channel() == ImageTransport::MMAP) {
             entry = mSharedMemoryLibrary.borrow(
@@ -535,6 +537,29 @@ public:
         bool lastFrameWasEmpty = first.format().width() == 0;
         int frame = 0;
 
+        std::unique_ptr<EventWaiter> frameEvent;
+
+        std::unique_ptr<RaiiEventListener<emugl::Renderer,
+                                          emugl::FrameBufferChangeEvent>>
+                frameListener;
+        // Screenshots can come from either the gl renderer, or the guest.
+        const auto& renderer = android_getOpenglesRenderer();
+        if (renderer.get()) {
+            // Fast mode..
+            frameEvent = std::make_unique<EventWaiter>();
+            frameListener = std::make_unique<RaiiEventListener<
+                    emugl::Renderer, emugl::FrameBufferChangeEvent>>(
+                    renderer.get(),
+                    [&](const emugl::FrameBufferChangeEvent state) {
+                        frameEvent->newEvent();
+                    });
+        } else {
+            // slow mode, you are likely using older api..
+            LOG(VERBOSE) << "Reverting to slow callbacks";
+            frameEvent = std::make_unique<EventWaiter>(
+                    &gpu_register_shared_memory_callback,
+                    &gpu_unregister_shared_memory_callback);
+        }
         // Track percentiles, and report if we have seen at least 32 frames.
         metrics::Percentiles perfEstimator(32, {0.5, 0.95});
         while (clientAvailable) {
@@ -546,7 +571,7 @@ public:
             // interval. Since this is a synchronous call we want to wait at
             // most kTimeToWaitForFrame so we can check if the client is still
             // there. (All clients get disconnected on emulator shutdown).
-            auto arrived = frameEvent.next(kTimeToWaitForFrame);
+            auto arrived = frameEvent->next(kTimeToWaitForFrame);
             if (arrived > 0 && !context->IsCancelled()) {
                 frame += arrived;
                 Stopwatch sw;
@@ -595,6 +620,7 @@ public:
     Status getScreenshot(ServerContext* context,
                          const ImageFormat* request,
                          Image* reply) override {
+        AEMU_SCOPED_TRACE_CALL();
         uint32_t width, height;
         bool enabled;
         bool multiDisplayQueryWorks = mAgents->emu->getMultiDisplay(
@@ -742,8 +768,8 @@ public:
                                     const ::google::protobuf::Empty* request,
                                     DisplayConfigurations* reply) override {
         if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
-            return Status(::grpc::StatusCode::UNIMPLEMENTED,
-                          "The multi display feature is not available", "");
+            return Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "The multi-display feature is not available", "");
         }
 
         uint32_t width, height, dpi, flags;
@@ -777,14 +803,14 @@ public:
                                     DisplayConfigurations* reply) override {
         // Check preconditions, do we have multi display and no duplicate ids?
         if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
-            return Status(::grpc::StatusCode::UNIMPLEMENTED,
+            return Status(::grpc::StatusCode::FAILED_PRECONDITION,
                           "The multi-display feature is not available", "");
         }
 
         std::set<int> updatingDisplayIds;
         for (const auto& display : request->displays()) {
             if (updatingDisplayIds.count(display.display())) {
-                return Status(::grpc::StatusCode::ABORTED,
+                return Status(::grpc::StatusCode::INVALID_ARGUMENT,
                               "Duplicate display: " +
                                       std::to_string(display.display()) +
                                       " detected.",
@@ -794,7 +820,7 @@ public:
             if (!mAgents->multi_display->multiDisplayParamValidate(
                         display.display(), display.width(), display.height(),
                         display.dpi(), display.flags())) {
-                return Status(::grpc::StatusCode::ABORTED,
+                return Status(::grpc::StatusCode::INVALID_ARGUMENT,
                               "Display: " + std::to_string(display.display()) +
                                       " is an invalid configuration.",
                               "");
@@ -863,7 +889,7 @@ public:
             }
 
             // TODO(jansene): Extract detailed messages from setMultiDisplay
-            return Status(::grpc::StatusCode::ABORTED,
+            return Status(::grpc::StatusCode::INTERNAL,
                           "Internal error while trying to modify display: " +
                                   std::to_string(failureDisplay),
                           "");
@@ -972,43 +998,112 @@ public:
         return Status::OK;
     }
 
-    void setNotificationEvent(Notification* reply) {
-        if (mCamera->isVirtualSceneConnected()) {
-            reply->set_event(Notification::VIRTUAL_SCENE_CAMERA_ACTIVE);
+    Notification getCameraNotificationEvent() {
+        Notification reply;
+        if (mCamera.isConnected()) {
+            reply.set_event(Notification::VIRTUAL_SCENE_CAMERA_ACTIVE);
         } else {
-            reply->set_event(Notification::VIRTUAL_SCENE_CAMERA_INACTIVE);
+            reply.set_event(Notification::VIRTUAL_SCENE_CAMERA_INACTIVE);
         }
+        return reply;
     }
 
     Status streamNotification(ServerContext* context,
                               const Empty* request,
                               ServerWriter<Notification>* writer) override {
-        Notification reply;
         bool clientAvailable = !context->IsCancelled();
         if (clientAvailable) {
-            setNotificationEvent(&reply);
-            clientAvailable = writer->Write(reply);
+            clientAvailable = writer->Write(getCameraNotificationEvent());
         }
+
+        // The event waiter will be unlocked when a change event is received.
+        EventWaiter notifier;
+        int eventCount = 0;
+        enum class EventTypes { CameraEvent, DisplayEvent };
+
+        // This is the set of notifications that need to be delivered.
+        std::vector<Notification> activeNotifications;
+        std::mutex notificationLock;
+
+        // Register temporary listeners for multi display & camera changes.
+        RaiiEventListener<VirtualSceneCamera, bool> cameraListener(
+                &mCamera, [&](auto state) {
+                    std::lock_guard<std::mutex> lock(notificationLock);
+                    activeNotifications.push_back(getCameraNotificationEvent());
+                    notifier.newEvent();
+                });
+
+        RaiiEventListener<MultiDisplay, android::DisplayChangeEvent>
+                displayListener(
+                        MultiDisplay::getInstance(),
+                        [&](const android::DisplayChangeEvent state) {
+                            if (state.change ==
+                                DisplayChange::DisplayTransactionCompleted) {
+                                Notification display;
+                                display.set_event(
+                                        Notification::
+                                                DISPLAY_CONFIGURATIONS_CHANGED_UI);
+
+                                std::lock_guard<std::mutex> lock(
+                                        notificationLock);
+                                activeNotifications.push_back(display);
+                                notifier.newEvent();
+                            }
+                        });
+
+        // And deliver the events as they come in.
         while (clientAvailable) {
             const auto kTimeToWaitForFrame = std::chrono::milliseconds(500);
-            auto arrived = mCamera->eventWaiter()->next(kTimeToWaitForFrame);
+            // This will not block if events came in while we were processing
+            // them below.
+            auto arrived = notifier.next(eventCount, kTimeToWaitForFrame);
             if (arrived > 0 && !context->IsCancelled()) {
-                setNotificationEvent(&reply);
-                clientAvailable = writer->Write(reply);
+                eventCount += arrived;
+                // We now have a non empty set of events we have to deliver.
+                std::vector<Notification> current;
+                {
+                    // Make sure we deliver events only once.
+                    std::lock_guard<std::mutex> lock(notificationLock);
+                    std::swap(current, activeNotifications);
+                }
+
+                // Deliver each individual event.
+                for (const auto& event : current) {
+                    clientAvailable = writer->Write(event);
+                    if (!clientAvailable) {
+                        break;
+                    }
+                }
             }
             clientAvailable = !context->IsCancelled() && clientAvailable;
         }
         return Status::OK;
     }
 
+    Status rotateVirtualSceneCamera(ServerContext* context,
+                                    const RotationRadian* request,
+                                    ::google::protobuf::Empty* reply) override {
+        mCamera.rotate({request->x(), request->y(), request->z()});
+        return Status::OK;
+    }
+
+    Status setVirtualSceneCameraVelocity(
+            ServerContext* context,
+            const Velocity* request,
+            ::google::protobuf::Empty* reply) override {
+        mCamera.setVelocity({request->x(), request->y(), request->z()});
+
+        return Status::OK;
+    }
 
 private:
     const AndroidConsoleAgents* mAgents;
     keyboard::EmulatorKeyEventSender mKeyEventSender;
     TouchEventSender mTouchEventSender;
     SharedMemoryLibrary mSharedMemoryLibrary;
+    EventWaiter mNotificationWaiter;
 
-    Camera* mCamera;
+    VirtualSceneCamera mCamera;
     Clipboard* mClipboard;
     Looper* mLooper;
     RingStreambuf

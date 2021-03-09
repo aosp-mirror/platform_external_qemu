@@ -21,6 +21,9 @@ set(android-qemu2-glue_src
     emulation/virtio-input-multi-touch.c
     emulation/virtio-input-rotary.c
     emulation/virtio_vsock_device.cpp
+    emulation/virtio-wifi.cpp
+    emulation/HostapdController.cpp
+    emulation/VirtioWifiForwarder.cpp
     looper-qemu.cpp
     net-android.cpp
     proxy/slirp_proxy.cpp
@@ -48,11 +51,6 @@ set(android-qemu2-glue_src
     telephony/modem_init.c
     utils/stream.cpp)
 
-if(NOT OPTION_GFXSTREAM_BACKEND)
-  list(APPEND android-qemu2-glue_src "emulation/VirtioWifiForwarder.cpp"
-       "emulation/virtio-wifi.cpp" "emulation/HostapdController.cpp")
-endif()
-
 android_add_library(
   TARGET libqemu2-glue LICENSE Apache-2.0 SRC # cmake-format: sortable
                                               ${android-qemu2-glue_src})
@@ -68,11 +66,7 @@ if(WEBRTC)
   target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
 endif()
 target_link_libraries(libqemu2-glue PRIVATE android-emu GLIB2::GLIB2
-                                            PIXMAN::PIXMAN emulator-libdtb ssl)
-
-if(NOT OPTION_GFXSTREAM_BACKEND)
-  target_link_libraries(libqemu2-glue PRIVATE hostapd)
-endif()
+                                            PIXMAN::PIXMAN emulator-libdtb ssl hostapd)
 
 target_compile_definitions(libqemu2-glue INTERFACE "-DCONFIG_VIRGL")
 android_add_library(

@@ -141,8 +141,13 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
         mUi->tabWidget->removeTab(kAccelerometerTabIndex);
     }
 
-
-    if (!android_heart_rate_sensor_configured()) {
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR) {
+        if (avdInfo_getApiLevel(android_avdInfo) < 28) {
+            // This feature is currently only available on Wear OS API 28+ emulators.
+            disableHeartRateSensor();
+        }
+    } else if (!android_heart_rate_sensor_configured()) {
+        // Otherwise use the hardware configuration.
         disableHeartRateSensor();
     }
 }
@@ -1002,4 +1007,5 @@ void VirtualSensorsPage::updateUIPosture() {
 
 void VirtualSensorsPage::disableHeartRateSensor() {
     mUi->heartRateSensorValueWidget->setEnabled(false);
+    mUi->heartRateSensorValueWidget->setToolTip("The running system image doesn't support this sensor.");
 }

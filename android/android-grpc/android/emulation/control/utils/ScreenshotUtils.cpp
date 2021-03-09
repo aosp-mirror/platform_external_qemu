@@ -37,12 +37,6 @@ const std::array<ImageFormatPair, 3> imgFormatMap{
          {ImageFormat::PNG, android::emulation::ImageFormat::PNG},
          {ImageFormat::RGB888, android::emulation::ImageFormat::RGB888}}};
 
-const std::array<RotationPair, 4> rotationMap{
-        {{Rotation::PORTRAIT, SKIN_ROTATION_0},
-         {Rotation::LANDSCAPE, SKIN_ROTATION_90},
-         {Rotation::REVERSE_PORTRAIT, SKIN_ROTATION_180},
-         {Rotation::REVERSE_LANDSCAPE, SKIN_ROTATION_270}}};
-
 // Translates our external format to the intenal format. Note that the
 // internal format contains values that do not exist in the external enum.
 android::emulation::ImageFormat ScreenshotUtils::translate(
@@ -69,18 +63,18 @@ ImageFormat_ImgFormat ScreenshotUtils::translate(
     return ImageFormat::RGBA8888;
 };
 
-static constexpr bool match(Rotation_SkinRotation x, SkinRotation y) {
-    return static_cast<int>(x) == static_cast<int>(y);
-}
-
 SkinRotation ScreenshotUtils::translate(Rotation_SkinRotation x) {
-    // Make sure nobody accidentally renumbers the expected enums.
-    static_assert(match(Rotation::PORTRAIT, SKIN_ROTATION_0));
-    static_assert(match(Rotation::LANDSCAPE, SKIN_ROTATION_90));
-    static_assert(match(Rotation::REVERSE_PORTRAIT, SKIN_ROTATION_180));
-    static_assert(match(Rotation::REVERSE_LANDSCAPE, SKIN_ROTATION_270));
-    assert(x <= static_cast<int>(SKIN_ROTATION_270));
-    return static_cast<SkinRotation>(x);
+    switch (x) {
+        default:
+        case Rotation::PORTRAIT:
+            return SKIN_ROTATION_0;
+        case Rotation::LANDSCAPE:
+            return SKIN_ROTATION_270;
+        case Rotation::REVERSE_PORTRAIT:
+            return SKIN_ROTATION_180;
+        case Rotation::REVERSE_LANDSCAPE:
+            return SKIN_ROTATION_90;
+    }
 };
 
 Rotation_SkinRotation ScreenshotUtils::deriveRotation(
@@ -95,11 +89,11 @@ Rotation_SkinRotation ScreenshotUtils::deriveRotation(
     static const std::array<std::pair<glm::vec3, Rotation_SkinRotation>, 4>
             directions{std::make_pair(glm::vec3(0.0f, 1.0f, 0.0f),
                                       Rotation::PORTRAIT),
-                       std::make_pair(glm::vec3(-1.0f, 0.0f, 0.0f),
+                       std::make_pair(glm::vec3(1.0f, 0.0f, 0.0f),
                                       Rotation::LANDSCAPE),
                        std::make_pair(glm::vec3(0.0f, -1.0f, 0.0f),
                                       Rotation::REVERSE_PORTRAIT),
-                       std::make_pair(glm::vec3(1.0f, 0.0f, 0.0f),
+                       std::make_pair(glm::vec3(-1.0f, 0.0f, 0.0f),
                                       Rotation::REVERSE_LANDSCAPE)};
     auto coarse_orientation = Rotation::PORTRAIT;
     for (const auto& v : directions) {

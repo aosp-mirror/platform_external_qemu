@@ -29,6 +29,27 @@ static const float kMaxVerticalRotationDegrees = 80.0f;
 
 enum class ControlKey { W, A, S, D, Q, E, Count };
 
+// The physical model in sensors agent represents rotation in the X Y Z order,
+// but for mouselook we need the Y X Z order. Convert the rotation order via a
+// quaternion and decomposing the rotations.
+
+// x axis is horizontal and orthogonal to the view direction.
+// y axis points up and is perpendicular to the floor.
+// z axis is the view direction
+class PhysicalModel {
+public:
+    PhysicalModel(const QAndroidSensorsAgent* sensorsAgent);
+    void onEnable();
+    void onDisable();
+    void updateRotation(glm::vec3 radianDelta);
+    void updateVelocity(glm::vec3 baseVelocity);
+
+private:
+    glm::vec3 mVelocity = glm::vec3();
+    glm::vec3 mEulerRotationRadians = glm::vec3();
+    const QAndroidSensorsAgent* mSensorsAgent;
+};
+
 class WASDInputHandler {
 public:
     WASDInputHandler(const QAndroidSensorsAgent* sensorsAgent);
@@ -45,14 +66,9 @@ private:
     void updateMouselook();
     void updateVelocity();
 
-    const QAndroidSensorsAgent* mSensorsAgent;
-
     bool mEnabled = false;
-
+    PhysicalModel mModel;
     bool mKeysHeld[static_cast<size_t>(ControlKey::Count)] = {};
-
-    glm::vec3 mVelocity = glm::vec3();
-    glm::vec3 mEulerRotationRadians = glm::vec3();
 };
 
 }  // namespace virtualscene

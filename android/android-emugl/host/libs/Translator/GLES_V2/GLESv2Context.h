@@ -127,7 +127,7 @@ protected:
 private:
     void setupArrWithDataSize(GLsizei datasize, const GLvoid* arr,
                               GLenum arrayType, GLenum dataType,
-                              GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt, bool* needEnablingPostDraw);
+                              GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt, GLuint ptrBufferName, bool* needEnablingPostDraw);
     void initExtensionString();
 
     float m_attribute0value[4] = {};

@@ -76,10 +76,10 @@ add_subdirectory(ext4_utils)
 add_subdirectory(google-benchmark)
 add_subdirectory(mksdcard)
 add_subdirectory(breakpad)
-
 add_subdirectory(boringssl)
+add_subdirectory(hostapd)
+
 if(NOT OPTION_GFXSTREAM_BACKEND)
-  add_subdirectory(hostapd)
   add_subdirectory(modem-simulator)
 endif()
 add_library(picosha2 INTERFACE)
