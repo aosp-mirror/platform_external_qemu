@@ -29,6 +29,7 @@ from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRIT
 from .wrapperdefs import API_PREFIX_RESERVEDMARSHAL
 from .wrapperdefs import API_PREFIX_RESERVEDUNMARSHAL
 
+from .marshalingdefs import CUSTOM_MARSHAL_TYPES
 class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
     def __init__(self,
                  cgen,
@@ -62,6 +63,8 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
         self.exprValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = False)
         self.exprPrimitiveValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = False)
         self.lenAccessor = lambda t: self.cgen.generalLengthAccess(t, parentVarName = self.inputVarName)
+        self.lenAccessorGuard = lambda t: self.cgen.generalLengthAccessGuard(
+            t, parentVarName=self.inputVarName)
         self.filterVarAccessor = lambda t: self.cgen.filterVarAccess(t, parentVarName = self.inputVarName)
 
         self.dynAlloc = dynAlloc
@@ -141,7 +144,7 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
             self.typeInfo,
             vulkanType)))
 
-    def genHandleMappingCall(self, vulkanType, access, lenAccess):
+    def genHandleMappingCall(self, vulkanType, access, lenAccess, lenAccessGuard):
 
         if lenAccess is None:
             lenAccess = "1"
@@ -178,19 +181,27 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
                     self.cgen.stmt("*%s = (%s)%s(*%s)" % (access, vulkanType.typeName, mapFunc, access))
                     self.genStreamCall(vulkanType, access, "8 * %s" % lenAccess)
                 else:
+                    if lenAccessGuard is not None:
+                        self.cgen.beginIf(lenAccessGuard)
                     self.cgen.beginFor("uint32_t k = 0", "k < %s" % lenAccess, "++k")
                     self.cgen.stmt("%s[k] = (%s)%s(%s[k])" % (access, vulkanType.typeName, mapFunc, access))
                     self.cgen.endFor()
+                    if lenAccessGuard is not None:
+                        self.cgen.endIf()
                     self.genPtrIncr("8 * %s" % lenAccess)
             else:
                 if "1" == lenAccess:
                     self.cgen.stmt("*%s = %s((*%s))" % (handle64VarAccess, mapFunc64, access))
                     self.genStreamCall(handle64VarType, handle64VarAccess, handle64Bytes)
                 else:
+                    if lenAccessGuard is not None:
+                        self.cgen.beginIf(lenAccessGuard)
                     self.cgen.beginFor("uint32_t k = 0", "k < %s" % lenAccess, "++k")
                     self.cgen.stmt("uint64_t tmpval = %s(%s[k])" % (mapFunc64, access))
                     self.cgen.stmt("memcpy(%s_ptr + k * 8, &tmpval, sizeof(uint64_t))" % (handle64Var))
                     self.cgen.endFor()
+                    if lenAccessGuard is not None:
+                        self.cgen.endIf()
                     self.genPtrIncr("8 * %s" % lenAccess)
         else:
             if "1" == lenAccess:
@@ -200,11 +211,15 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
                     vulkanType.typeName,mapFunc, vulkanType.typeName, handle64VarAccess))
             else:
                 self.genPtrIncr("8 * %s" % lenAccess)
+                if lenAccessGuard is not None:
+                    self.cgen.beginIf(lenAccessGuard)
                 self.cgen.beginFor("uint32_t k = 0", "k < %s" % lenAccess, "++k")
                 self.cgen.stmt("uint64_t tmpval; memcpy(&tmpval, %s_ptr + k * 8, sizeof(uint64_t))" % handle64Var)
                 self.cgen.stmt("*((%s%s) + k) = (%s)%s((%s)tmpval)" % (
                     self.makeCastExpr(vulkanType.getForNonConstAccess()), access,
                     vulkanType.typeName, mapFunc, vulkanType.typeName))
+                if lenAccessGuard is not None:
+                    self.cgen.endIf()
                 self.cgen.endFor()
 
         if lenAccess != "1":
@@ -527,11 +542,17 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
     def onStringArray(self, vulkanType):
         access = self.exprAccessor(vulkanType)
         lenAccess = self.lenAccessor(vulkanType)
+        lenAccessGuard = self.lenAccessorGuard(vulkanType)
 
         if self.direction == "write":
             self.cgen.beginBlock()
 
-            self.cgen.stmt("uint32_t c = %s" % (lenAccess))
+            self.cgen.stmt("uint32_t c = 0")
+            if lenAccessGuard is not None:
+                self.cgen.beginIf(lenAccessGuard)
+            self.cgen.stmt("c = %s" % (lenAccess))
+            if lenAccessGuard is not None:
+                self.cgen.endIf()
             self.genMemcpyAndIncr(self.ptrVar, "(uint32_t*)" ,"&c", "sizeof(uint32_t)", toBe = True, actualSize = 4)
 
             self.cgen.beginFor("uint32_t i = 0", "i < c", "++i")
@@ -596,6 +617,7 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
         access = self.exprAccessor(vulkanType)
 
         lenAccess = self.lenAccessor(vulkanType)
+        lenAccessGuard = self.lenAccessorGuard(vulkanType)
 
         self.beginFilterGuard(vulkanType)
         self.doAllocSpace(vulkanType)
@@ -604,13 +626,18 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
             print("onPointer Needs filter: %s filterVar %s" % (access, vulkanType.filterVar))
 
         if vulkanType.isHandleType() and self.mapHandles:
-            self.genHandleMappingCall(vulkanType, access, lenAccess)
+            self.genHandleMappingCall(
+                vulkanType, access, lenAccess, lenAccessGuard)
         else:
             if self.typeInfo.isNonAbiPortableType(vulkanType.typeName):
                 if lenAccess is not None:
+                    if lenAccessGuard is not None:
+                        self.cgen.beginIf(lenAccessGuard)
                     self.cgen.beginFor("uint32_t i = 0", "i < (uint32_t)%s" % lenAccess, "++i")
                     self.genPrimitiveStreamCall(vulkanType.getForValueAccess(), "%s[i]" % access)
                     self.cgen.endFor()
+                    if lenAccessGuard is not None:
+                        self.cgen.endIf()
                 else:
                     self.genPrimitiveStreamCall(vulkanType.getForValueAccess(), "(*%s)" % access)
             else:
@@ -635,7 +662,7 @@ class VulkanReservedMarshalingCodegen(VulkanTypeIterator):
             if vulkanType.filterVar != None:
                 print("onValue Needs filter: %s filterVar %s" % (access, vulkanType.filterVar))
             self.genHandleMappingCall(
-                vulkanType.getForAddressAccess(), access, "1")
+                vulkanType.getForAddressAccess(), access, "1", None)
         elif self.typeInfo.isNonAbiPortableType(vulkanType.typeName):
             access = self.exprPrimitiveValueAccessor(vulkanType)
             self.genPrimitiveStreamCall(vulkanType, access)
@@ -704,11 +731,6 @@ class VulkanReservedMarshaling(VulkanWrapperGenerator):
 
         self.knownDefs = {}
 
-        # Begin Vulkan API opcodes from something high
-        # that is not going to interfere with renderControl
-        # opcodes
-        self.currentOpcode = 20000
-
         self.extensionMarshalPrototype = \
             VulkanAPI(API_PREFIX_RESERVEDMARSHAL + "extension_struct",
                       STREAM_RET_TYPE,
@@ -738,6 +760,16 @@ class VulkanReservedMarshaling(VulkanWrapperGenerator):
 
         category = self.typeInfo.categoryOf(name)
 
+        if category in ["struct", "union"] and alias:
+            if self.variant != "host":
+                self.module.appendHeader(
+                    self.cgenHeader.makeFuncAlias(API_PREFIX_RESERVEDMARSHAL + name,
+                                                  API_PREFIX_RESERVEDMARSHAL + alias))
+            if self.variant != "guest":
+                self.module.appendHeader(
+                    self.cgenHeader.makeFuncAlias(API_PREFIX_RESERVEDUNMARSHAL + name,
+                                                  API_PREFIX_RESERVEDUNMARSHAL + alias))
+
         if category in ["struct", "union"] and not alias:
 
             structInfo = self.typeInfo.structs[name]
@@ -765,6 +797,18 @@ class VulkanReservedMarshaling(VulkanWrapperGenerator):
                 VulkanAPI(API_PREFIX_RESERVEDMARSHAL + name,
                           STREAM_RET_TYPE,
                           marshalParams)
+
+            def structMarshalingCustom(cgen):
+                self.writeCodegen.cgen = cgen
+                self.writeCodegen.currentStructInfo = structInfo
+                marshalingCode = \
+                    CUSTOM_MARSHAL_TYPES[name]["common"] + \
+                    CUSTOM_MARSHAL_TYPES[name]["reservedmarshaling"].format(
+                        streamVarName=self.writeCodegen.streamVarName, 
+                        inputVarName=self.writeCodegen.inputVarName,
+                        newInputVarName=self.writeCodegen.inputVarName + "_new")
+                for line in marshalingCode.split('\n'):
+                    cgen.line(line)
 
             def structMarshalingDef(cgen):
                 self.writeCodegen.cgen = cgen
@@ -801,9 +845,15 @@ class VulkanReservedMarshaling(VulkanWrapperGenerator):
             if self.variant != "host":
                 self.module.appendHeader(
                     self.cgenHeader.makeFuncDecl(marshalPrototype))
-                self.module.appendImpl(
-                    self.cgenImpl.makeFuncImpl(
-                        marshalPrototype, structMarshalingDef))
+
+                if name in CUSTOM_MARSHAL_TYPES:
+                    self.module.appendImpl(
+                        self.cgenImpl.makeFuncImpl(
+                            marshalPrototype, structMarshalingCustom))
+                else:
+                    self.module.appendImpl(
+                        self.cgenImpl.makeFuncImpl(
+                            marshalPrototype, structMarshalingDef))
 
                 if freeParams != []:
                     self.module.appendHeader(
@@ -821,6 +871,18 @@ class VulkanReservedMarshaling(VulkanWrapperGenerator):
                 VulkanAPI(API_PREFIX_RESERVEDUNMARSHAL + name,
                           STREAM_RET_TYPE,
                           self.marshalingParams + [makeVulkanTypeSimple(False, name, 1, UNMARSHAL_INPUT_VAR_NAME), self.ptrVarTypeUnmarshal])
+
+            def structUnmarshalingCustom(cgen):
+                self.readCodegen.cgen = cgen
+                self.readCodegen.currentStructInfo = structInfo
+                unmarshalingCode = \
+                    CUSTOM_MARSHAL_TYPES[name]["common"] + \
+                    CUSTOM_MARSHAL_TYPES[name]["reservedunmarshaling"].format(
+                        streamVarName=self.readCodegen.streamVarName, 
+                        inputVarName=self.readCodegen.inputVarName,
+                        newInputVarName=self.readCodegen.inputVarName + "_new")
+                for line in unmarshalingCode.split('\n'):
+                    cgen.line(line)
 
             def structUnmarshalingDef(cgen):
                 self.readCodegen.cgen = cgen
@@ -852,9 +914,15 @@ class VulkanReservedMarshaling(VulkanWrapperGenerator):
             if self.variant != "guest":
                 self.module.appendHeader(
                     self.cgenHeader.makeFuncDecl(unmarshalPrototype))
-                self.module.appendImpl(
-                    self.cgenImpl.makeFuncImpl(
-                        unmarshalPrototype, structUnmarshalingDef))
+
+                if name in CUSTOM_MARSHAL_TYPES:
+                    self.module.appendImpl(
+                        self.cgenImpl.makeFuncImpl(
+                            unmarshalPrototype, structUnmarshalingCustom))
+                else:
+                    self.module.appendImpl(
+                        self.cgenImpl.makeFuncImpl(
+                            unmarshalPrototype, structUnmarshalingDef))
 
                 if freeParams != []:
                     self.module.appendHeader(
@@ -865,10 +933,6 @@ class VulkanReservedMarshaling(VulkanWrapperGenerator):
 
     def onGenCmd(self, cmdinfo, name, alias):
         VulkanWrapperGenerator.onGenCmd(self, cmdinfo, name, alias)
-        # self.module.appendHeader(
-        #     "#define OP_%s %d\n" % (name, self.currentOpcode))
-        # self.apiOpcodes[name] = (self.currentOpcode, self.currentFeature)
-        # self.currentOpcode += 1
 
     def doExtensionStructMarshalingCodegen(self, cgen, retType, extParam, forEach, funcproto, direction):
         accessVar = "structAccess"

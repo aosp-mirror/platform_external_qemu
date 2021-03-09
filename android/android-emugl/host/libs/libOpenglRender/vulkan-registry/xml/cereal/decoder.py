@@ -13,6 +13,10 @@ from .wrapperdefs import RELAXED_APIS
 
 from copy import copy
 
+SKIPPED_DECODER_DELETES = [
+    "vkFreeDescriptorSets",
+]
+
 DELAYED_DECODER_DELETES = [
     "vkDestroyPipelineLayout",
 ]
@@ -118,15 +122,20 @@ def emit_unmarshal(typeInfo, param, cgen, output = False, destroy = False, noUnb
             "",
             direction="read",
             dynAlloc=True))
-        lenAccess =  cgen.generalLengthAccess(param)
+        lenAccess = cgen.generalLengthAccess(param)
+        lenAccessGuard = cgen.generalLengthAccessGuard(param)
         if None == lenAccess or "1" == lenAccess:
             cgen.stmt("boxed_%s_preserve = %s" % (param.paramName, param.paramName))
             cgen.stmt("%s = unbox_%s(%s)" % (param.paramName, param.typeName, param.paramName))
         else:
+            if lenAccessGuard is not None:
+                cgen.beginIf(lenAccessGuard)
             cgen.beginFor("uint32_t i = 0", "i < %s" % lenAccess, "++i")
             cgen.stmt("boxed_%s_preserve[i] = %s[i]" % (param.paramName, param.paramName))
             cgen.stmt("((%s*)(%s))[i] = unbox_%s(%s[i])" % (param.typeName, param.paramName, param.typeName, param.paramName))
             cgen.endFor()
+            if lenAccessGuard is not None:
+                cgen.endIf()
     else:
         if noUnbox:
             cgen.line("// No unbox for %s" % (param.paramName))
@@ -376,11 +385,19 @@ def emit_decode_finish(api, cgen):
 def emit_destroyed_handle_cleanup(api, cgen):
     decodingParams = DecodingParameters(api)
     paramsToRead = decodingParams.toRead
+
+    skipDelete = api.name in SKIPPED_DECODER_DELETES
+
+    if skipDelete:
+        cgen.line("// Skipping handle cleanup for %s" % api.name)
+        return
+
     for p in paramsToRead:
         if p.dispatchHandle:
             pass
         else:
             lenAccess = cgen.generalLengthAccess(p)
+            lenAccessGuard = cgen.generalLengthAccess(p)
             destroy = p.nonDispatchableHandleDestroy or p.dispatchableHandleDestroy
             if destroy:
                 if None == lenAccess or "1" == lenAccess:
@@ -389,12 +406,16 @@ def emit_destroyed_handle_cleanup(api, cgen):
                     else:
                         cgen.stmt("delete_%s(boxed_%s_preserve)" % (p.typeName, p.paramName))
                 else:
+                    if lenAccessGuard is not None:
+                        cgen.beginIf(lenAccessGuard)
                     cgen.beginFor("uint32_t i = 0", "i < %s" % lenAccess, "++i")
                     if api.name in DELAYED_DECODER_DELETES:
                         cgen.stmt("delayed_delete_%s(boxed_%s_preserve[i], unboxed_device, delayed_remove_callback)" % (p.typeName, p.paramName))
                     else:
                         cgen.stmt("delete_%s(boxed_%s_preserve[i])" % (p.typeName, p.paramName))
                     cgen.endFor()
+                    if lenAccessGuard is not None:
+                        cgen.endIf()
 
 def emit_pool_free(cgen):
     cgen.stmt("%s->clearPool()" % READ_STREAM)
@@ -627,10 +648,8 @@ custom_decodes = {
     "vkImportSemaphoreFdKHR" : emit_global_state_wrapped_decoding,
     "vkDestroySemaphore" : emit_global_state_wrapped_decoding,
 
-    # VK_GOOGLE_free_memory_sync
+    # VK_GOOGLE_gfxstream
     "vkFreeMemorySyncGOOGLE" : emit_global_state_wrapped_decoding,
-
-    # VK_GOOGLE_address_space
     "vkMapMemoryIntoAddressSpaceGOOGLE" : emit_global_state_wrapped_decoding,
     "vkGetMemoryHostAddressInfoGOOGLE" : emit_global_state_wrapped_decoding,
 
@@ -645,26 +664,21 @@ custom_decodes = {
     "vkDestroyDescriptorUpdateTemplateKHR" : emit_global_state_wrapped_decoding,
     "vkUpdateDescriptorSetWithTemplateSizedGOOGLE" : emit_global_state_wrapped_decoding,
 
-    # VK_GOOGLE_async_command_buffer
+    # VK_GOOGLE_gfxstream
     "vkBeginCommandBufferAsyncGOOGLE" : emit_global_state_wrapped_decoding,
     "vkEndCommandBufferAsyncGOOGLE" : emit_global_state_wrapped_decoding,
     "vkResetCommandBufferAsyncGOOGLE" : emit_global_state_wrapped_decoding,
     "vkCommandBufferHostSyncGOOGLE" : emit_global_state_wrapped_decoding,
-
-    # VK_GOOGLE_create_resources_with_requirements
     "vkCreateImageWithRequirementsGOOGLE" : emit_global_state_wrapped_decoding,
     "vkCreateBufferWithRequirementsGOOGLE" : emit_global_state_wrapped_decoding,
-
-    # VK_GOOGLE_async_queue_submit
     "vkQueueHostSyncGOOGLE" : emit_global_state_wrapped_decoding,
     "vkQueueSubmitAsyncGOOGLE" : emit_global_state_wrapped_decoding,
     "vkQueueWaitIdleAsyncGOOGLE" : emit_global_state_wrapped_decoding,
     "vkQueueBindSparseAsyncGOOGLE" : emit_global_state_wrapped_decoding,
-
     "vkGetLinearImageLayoutGOOGLE" : emit_global_state_wrapped_decoding,
-
-    # VK_GOOGLE_queue_submit_with_commands
     "vkQueueFlushCommandsGOOGLE" : emit_global_state_wrapped_decoding,
+    "vkQueueCommitDescriptorSetUpdatesGOOGLE" : emit_global_state_wrapped_decoding,
+    "vkCollectDescriptorPoolIdsGOOGLE" : emit_global_state_wrapped_decoding,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):
@@ -706,7 +720,7 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("uint8_t* snapshotTraceBegin = %s->beginTrace()" % READ_STREAM)
         self.cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
         self.cgen.line("""
-                 if (queueSubmitWithCommandsEnabled && opcode >= OP_vkCreateInstance && opcode < OP_vkLast) {
+                 if (queueSubmitWithCommandsEnabled && ((opcode >= OP_vkFirst && opcode < OP_vkLast) || (opcode >= OP_vkFirst_old && opcode < OP_vkLast_old))) {
             uint32_t seqno; memcpy(&seqno, *readStreamPtrPtr, sizeof(uint32_t)); *readStreamPtrPtr += sizeof(uint32_t);
             if (seqnoPtr && !m_forSnapshotLoad) {
                 while ((seqno - __atomic_load_n(seqnoPtr, __ATOMIC_SEQ_CST) != 1));

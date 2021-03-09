@@ -296,6 +296,10 @@ static GLuint getIndex(GLenum indices_type, const GLvoid* indices, unsigned int 
     }
 }
 
+bool GLEScontext::drawDisabled() const {
+    return m_drawDisabled;
+}
+
 void GLEScontext::addVertexArrayObjects(GLsizei n, GLuint* arrays) {
     for (int i = 0; i < n; i++) {
         addVertexArrayObject(arrays[i]);
@@ -445,10 +449,13 @@ void GLEScontext::setActiveTexture(GLenum tex) {
    m_maxUsedTexUnit = std::max(m_activeTexture, m_maxUsedTexUnit);
 }
 
-GLEScontext::GLEScontext() {}
+GLEScontext::GLEScontext() {
+    m_drawDisabled = emugl_feature_is_enabled(android::featurecontrol::NoDraw);
+}
 
 GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
         android::base::Stream* stream, GlLibrary* glLib) {
+    m_drawDisabled = emugl_feature_is_enabled(android::featurecontrol::NoDraw);
     if (stream) {
         m_initialized = stream->getByte();
         m_glesMajorVersion = stream->getBe32();

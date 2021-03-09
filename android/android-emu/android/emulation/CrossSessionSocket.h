@@ -44,7 +44,7 @@ public:
     bool hasStaleData() const;
     size_t readStaleData(void* data, size_t dataSize);
     size_t getReadableDataSize() const;
-    void onSave(android::base::Stream* stream);
+    void onSave(android::base::Stream* stream) const;
     void onLoad(android::base::Stream* stream);
     int fd() const;
 private:
