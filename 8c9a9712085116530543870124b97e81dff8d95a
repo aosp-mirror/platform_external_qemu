@@ -16,6 +16,24 @@
       "message": "We should probably have used the same naming scheme :-(",
       "revId": "8c9a9712085116530543870124b97e81dff8d95a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "aeb312ca_089465ea",
+        "filename": "android/android-grpc/android/emulation/control/utils/ScreenshotUtils.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-09T21:18:19Z",
+      "side": 1,
+      "message": "This can be fixed. Changing the internal enum shouldn\u0027t be hard, should it?",
+      "parentUuid": "fef017df_a36a6681",
+      "revId": "8c9a9712085116530543870124b97e81dff8d95a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
