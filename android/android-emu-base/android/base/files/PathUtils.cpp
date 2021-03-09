@@ -223,12 +223,12 @@ std::vector<String> PathUtils::decompose(const String& path,
     }
     for (;;) {
         auto p = it;
-        while (*p && !isDirSeparator(*p, hostType))
+        while (p != path.end() && !isDirSeparator(*p, hostType))
             p++;
         if (p > it) {
             result.emplace_back(it, p);
         }
-        if (!*p) {
+        if (p == path.end()) {
             break;
         }
         it = p + 1;
