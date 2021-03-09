@@ -191,6 +191,7 @@ void AndroidMessagePipe::switchGuestWaitingState() {
             m_curPos = reinterpret_cast<uint8_t*>(&mRecvLengthBuffer);
             m_expected = kMessageHeaderNumBytes;
             mGuestWaitingState = GuestWaitingState::RecvMesgLength;
+            signalWake(PIPE_WAKE_READ);
             break;
         case GuestWaitingState::RecvMesgLength:
             m_expected = mRecvPayloadBuffer.size();

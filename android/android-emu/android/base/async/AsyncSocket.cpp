@@ -28,10 +28,28 @@ static void socket_watcher(void* opaque, int fd, unsigned events) {
     }
 }
 
+AsyncSocket::~AsyncSocket() {}
+
 AsyncSocket::AsyncSocket(Looper* looper, int port)
     : mLooper(looper),
       mPort(port),
       mWriteQueue(WRITE_BUFFER_SIZE, mWriteQueueLock) {}
+
+AsyncSocket::AsyncSocket(Looper* looper, ScopedSocket socket)
+    : mLooper(looper),
+      mPort(-1),
+      mWriteQueue(WRITE_BUFFER_SIZE, mWriteQueueLock),
+      mSocket(std::move(socket)) {
+    socketSetNonBlocking(mSocket.get());
+    mFdWatch = std::unique_ptr<Looper::FdWatch>(
+            mLooper->createFdWatch(mSocket.get(), socket_watcher, this));
+}
+
+void AsyncSocket::wantRead() {
+    if (mFdWatch) {
+        mFdWatch->wantRead();
+    }
+}
 
 uint64_t AsyncSocket::recv(char* buffer, uint64_t bufferSize) {
     int fd = -1;
@@ -114,7 +132,7 @@ void AsyncSocket::dispose() {
 void AsyncSocket::close() {
     // Let's not accidentally trip a reader/writer up.
     AutoLock watchLock(mWatchLock);
-    socketClose(mSocket);
+    mSocket.close();
     mFdWatch = nullptr;
     mConnecting = false;
 }
@@ -168,10 +186,10 @@ void AsyncSocket::connectToPort() {
     }
 
     mSocket = socket;
-    socketSetNonBlocking(mSocket);
+    socketSetNonBlocking(mSocket.get());
     AutoLock watchLock(mWatchLock);
     mFdWatch = std::unique_ptr<Looper::FdWatch>(
-            mLooper->createFdWatch(mSocket, socket_watcher, this));
+            mLooper->createFdWatch(mSocket.get(), socket_watcher, this));
     mFdWatch->wantRead();
     DD(<< "Connected to: " << mPort);
     if (mListener) {

@@ -304,7 +304,7 @@
 #
 # Since: 1.5
 ##
-{ 'struct': 'ChardevStdio', 'data': { '*signal' : 'bool' },
+{ 'struct': 'ChardevStdio', 'data': { '*signal' : 'bool', '*echo' : 'bool' },
   'base': 'ChardevCommon' }
 
 

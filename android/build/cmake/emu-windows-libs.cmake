@@ -52,9 +52,10 @@ endforeach()
 if(WIN32 AND MSVC)  
    # We expect all the visual studio variables to be set. The rebuild script will take care of this..
    # If you are building from 
-  get_filename_component(VCTOOLS_PATH "$ENV{VCToolsInstallDir}" ABSOLUTE CACHE)
+  get_filename_component(VCTOOLS_PATH "$ENV{VCTOOLSINSTALLDIR}" ABSOLUTE CACHE)
   get_filename_component(VSINSTALLDIR "$ENV{VSINSTALLDIR}" ABSOLUTE CACHE)
 
+  message(STATUS "Looking for DIA SDK:  [${VSINSTALLDIR}]")
   # Find the DIA SDK path, it will typically look something like this.
   find_path(DIASDK_INCLUDE_DIR # Set variable DIASDK_INCLUDE_DIR
             dia2.h # Find a path with dia2.h
@@ -71,7 +72,8 @@ if(WIN32 AND MSVC)
 
   # Find the ATL path, it will typically look something like this.
   #C:\Program Files (x86)\Microsoft Visual Studio\2017\xxx\VC\Tools\MSVC\14.16.27023\atlmfc\include
-  find_path(ATL_INCLUDE_DIR # Set variable DIASDK_INCLUDE_DIR
+  message(STATUS "Looking for atls: [${VCTOOLS_PATH}]")
+  find_path(ATL_INCLUDE_DIR
             atlbase.h # Find a path with atlbase.h
             HINTS "${VCTOOLS_PATH}/atlmfc/include"
             DOC "path to ATL header files")

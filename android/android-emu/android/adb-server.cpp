@@ -18,10 +18,13 @@
 #include "android/base/system/System.h"
 #include "android/emulation/AdbDebugPipe.h"
 #include "android/emulation/AdbGuestPipe.h"
+#include "android/emulation/AdbVsockPipe.h"
 #include "android/emulation/AdbHostListener.h"
 #include "android/emulation/AdbHostServer.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/utils/debug.h"
+
+#include "android/featurecontrol/feature_control.h"
 
 #include <memory>
 #include <string>
@@ -33,6 +36,7 @@ namespace {
 
 using android::emulation::AdbGuestAgent;
 using android::emulation::AdbGuestPipe;
+using android::emulation::AdbVsockPipe;
 using android::emulation::AdbHostListener;
 using android::emulation::AdbHostServer;
 using android::AndroidPipe;
@@ -41,12 +45,18 @@ using android::AndroidPipe;
 struct Globals {
     Globals() : hostListener(AdbHostServer::getClientPort()) {}
 
+    // Register adb pipe service.
     void registerServices() {
-        // Register adb pipe service.
-        auto adbGuestPipeService = new AdbGuestPipe::Service(&hostListener);
-        hostListener.setGuestAgent(adbGuestPipeService);
-        AndroidPipe::Service::add(std::unique_ptr<AdbGuestPipe::Service>(adbGuestPipeService));
-        adbGuestAgent = adbGuestPipeService;
+        if (feature_is_enabled(kFeature_VirtioVsockPipe)) {
+            auto service = new AdbVsockPipe::Service(&hostListener);
+            hostListener.setGuestAgent(service);
+            adbGuestAgent = service;
+        } else {
+            auto service = new AdbGuestPipe::Service(&hostListener);
+            hostListener.setGuestAgent(service);
+            AndroidPipe::Service::add(std::unique_ptr<AdbGuestPipe::Service>(service));
+            adbGuestAgent = service;
+        }
 
         // Register adb-debug pipe service.
         android::base::Stream* debugStream = nullptr;

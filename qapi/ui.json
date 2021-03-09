@@ -858,7 +858,7 @@
 # Since: 2.0
 ##
 { 'enum'  : 'InputAxis',
-  'data'  : [ 'x', 'y' ] }
+  'data'  : [ 'x', 'y', 'x_wheel', 'y_wheel' ] }
 
 ##
 # @InputKeyEvent:

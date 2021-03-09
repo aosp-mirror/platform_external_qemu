@@ -36,6 +36,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_VERSION_1_1
 #endif
+#ifdef VK_VERSION_1_2
+#endif
 #ifdef VK_KHR_surface
 #endif
 #ifdef VK_KHR_swapchain
@@ -49,8 +51,6 @@ namespace goldfish_vk {
 #ifdef VK_KHR_xcb_surface
 #endif
 #ifdef VK_KHR_wayland_surface
-#endif
-#ifdef VK_KHR_mir_surface
 #endif
 #ifdef VK_KHR_android_surface
 #endif
@@ -90,11 +90,15 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_KHR_push_descriptor
 #endif
+#ifdef VK_KHR_shader_float16_int8
+#endif
 #ifdef VK_KHR_16bit_storage
 #endif
 #ifdef VK_KHR_incremental_present
 #endif
 #ifdef VK_KHR_descriptor_update_template
+#endif
+#ifdef VK_KHR_imageless_framebuffer
 #endif
 #ifdef VK_KHR_create_renderpass2
 #endif
@@ -107,6 +111,8 @@ namespace goldfish_vk {
 #ifdef VK_KHR_external_fence_win32
 #endif
 #ifdef VK_KHR_external_fence_fd
+#endif
+#ifdef VK_KHR_performance_query
 #endif
 #ifdef VK_KHR_maintenance2
 #endif
@@ -130,13 +136,55 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_KHR_bind_memory2
 #endif
+#ifdef VK_KHR_portability_subset
+#endif
 #ifdef VK_KHR_maintenance3
 #endif
 #ifdef VK_KHR_draw_indirect_count
 #endif
+#ifdef VK_KHR_shader_subgroup_extended_types
+#endif
 #ifdef VK_KHR_8bit_storage
 #endif
-#ifdef VK_KHR_shader_float16_int8
+#ifdef VK_KHR_shader_atomic_int64
+#endif
+#ifdef VK_KHR_shader_clock
+#endif
+#ifdef VK_KHR_driver_properties
+#endif
+#ifdef VK_KHR_shader_float_controls
+#endif
+#ifdef VK_KHR_depth_stencil_resolve
+#endif
+#ifdef VK_KHR_swapchain_mutable_format
+#endif
+#ifdef VK_KHR_timeline_semaphore
+#endif
+#ifdef VK_KHR_vulkan_memory_model
+#endif
+#ifdef VK_KHR_shader_terminate_invocation
+#endif
+#ifdef VK_KHR_fragment_shading_rate
+#endif
+#ifdef VK_KHR_spirv_1_4
+#endif
+#ifdef VK_KHR_surface_protected_capabilities
+#endif
+#ifdef VK_KHR_separate_depth_stencil_layouts
+#endif
+#ifdef VK_KHR_uniform_buffer_standard_layout
+#endif
+#ifdef VK_KHR_buffer_device_address
+#endif
+#ifdef VK_KHR_deferred_host_operations
+#endif
+#ifdef VK_KHR_pipeline_executable_properties
+#endif
+#ifdef VK_KHR_pipeline_library
+#endif
+#ifdef VK_KHR_shader_non_semantic_info
+#endif
+#ifdef VK_KHR_copy_commands2
 #endif
 #ifdef VK_ANDROID_native_buffer
 #endif
@@ -160,6 +208,10 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_NV_dedicated_allocation
 #endif
+#ifdef VK_EXT_transform_feedback
+#endif
+#ifdef VK_NVX_image_view_handle
+#endif
 #ifdef VK_AMD_draw_indirect_count
 #endif
 #ifdef VK_AMD_negative_viewport_height
@@ -173,6 +225,10 @@ namespace goldfish_vk {
 #ifdef VK_AMD_shader_info
 #endif
 #ifdef VK_AMD_shader_image_load_store_lod
+#endif
+#ifdef VK_GGP_stream_descriptor_surface
+#endif
+#ifdef VK_NV_corner_sampled_image
 #endif
 #ifdef VK_IMG_format_pvrtc
 #endif
@@ -192,9 +248,11 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_EXT_shader_subgroup_vote
 #endif
-#ifdef VK_EXT_conditional_rendering
+#ifdef VK_EXT_texture_compression_astc_hdr
 #endif
-#ifdef VK_NVX_device_generated_commands
+#ifdef VK_EXT_astc_decode_mode
+#endif
+#ifdef VK_EXT_conditional_rendering
 #endif
 #ifdef VK_NV_clip_space_w_scaling
 #endif
@@ -222,6 +280,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_EXT_conservative_rasterization
 #endif
+#ifdef VK_EXT_depth_clip_enable
+#endif
 #ifdef VK_EXT_swapchain_colorspace
 #endif
 #ifdef VK_EXT_hdr_metadata
@@ -229,6 +289,8 @@ namespace goldfish_vk {
 #ifdef VK_MVK_ios_surface
 #endif
 #ifdef VK_MVK_macos_surface
+#endif
+#ifdef VK_MVK_moltenvk
 #endif
 #ifdef VK_EXT_external_memory_dma_buf
 #endif
@@ -246,6 +308,8 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_AMD_shader_fragment_mask
 #endif
+#ifdef VK_EXT_inline_uniform_block
+#endif
 #ifdef VK_EXT_shader_stencil_export
 #endif
 #ifdef VK_EXT_sample_locations
@@ -258,7 +322,11 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_NV_fill_rectangle
 #endif
+#ifdef VK_NV_shader_sm_builtins
+#endif
 #ifdef VK_EXT_post_depth_coverage
+#endif
+#ifdef VK_EXT_image_drm_format_modifier
 #endif
 #ifdef VK_EXT_validation_cache
 #endif
@@ -266,41 +334,157 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_EXT_shader_viewport_index_layer
 #endif
+#ifdef VK_NV_shading_rate_image
+#endif
+#ifdef VK_NV_ray_tracing
+#endif
+#ifdef VK_NV_representative_fragment_test
+#endif
+#ifdef VK_EXT_filter_cubic
+#endif
+#ifdef VK_QCOM_render_pass_shader_resolve
+#endif
 #ifdef VK_EXT_global_priority
 #endif
 #ifdef VK_EXT_external_memory_host
 #endif
 #ifdef VK_AMD_buffer_marker
 #endif
+#ifdef VK_AMD_pipeline_compiler_control
+#endif
+#ifdef VK_EXT_calibrated_timestamps
+#endif
 #ifdef VK_AMD_shader_core_properties
+#endif
+#ifdef VK_AMD_memory_overallocation_behavior
 #endif
 #ifdef VK_EXT_vertex_attribute_divisor
 #endif
+#ifdef VK_GGP_frame_token
+#endif
+#ifdef VK_EXT_pipeline_creation_feedback
+#endif
 #ifdef VK_NV_shader_subgroup_partitioned
+#endif
+#ifdef VK_NV_compute_shader_derivatives
+#endif
+#ifdef VK_NV_mesh_shader
+#endif
+#ifdef VK_NV_fragment_shader_barycentric
+#endif
+#ifdef VK_NV_shader_image_footprint
+#endif
+#ifdef VK_NV_scissor_exclusive
 #endif
 #ifdef VK_NV_device_diagnostic_checkpoints
 #endif
-#ifdef VK_GOOGLE_address_space
+#ifdef VK_INTEL_shader_integer_functions2
+#endif
+#ifdef VK_INTEL_performance_query
+#endif
+#ifdef VK_EXT_pci_bus_info
+#endif
+#ifdef VK_AMD_display_native_hdr
+#endif
+#ifdef VK_FUCHSIA_imagepipe_surface
+#endif
+#ifdef VK_EXT_metal_surface
 #endif
 #ifdef VK_GOOGLE_color_buffer
 #endif
-#ifdef VK_GOOGLE_sized_descriptor_update_template
+#ifdef VK_EXT_scalar_block_layout
 #endif
-#ifdef VK_GOOGLE_async_command_buffers
+#ifdef VK_GOOGLE_hlsl_functionality1
 #endif
-#ifdef VK_GOOGLE_create_resources_with_requirements
+#ifdef VK_GOOGLE_decorate_string
 #endif
-#ifdef VK_GOOGLE_address_space_info
+#ifdef VK_EXT_subgroup_size_control
 #endif
-#ifdef VK_GOOGLE_free_memory_sync
+#ifdef VK_AMD_shader_core_properties2
 #endif
-#ifdef VK_GOOGLE_async_queue_submit
+#ifdef VK_AMD_device_coherent_memory
 #endif
-#ifdef VK_GOOGLE_linear_image_layout
+#ifdef VK_EXT_shader_image_atomic_int64
 #endif
-#ifdef VK_MVK_moltenvk
+#ifdef VK_EXT_memory_budget
 #endif
-#ifdef VK_GOOGLE_queue_submit_with_commands
+#ifdef VK_EXT_memory_priority
+#endif
+#ifdef VK_NV_dedicated_allocation_image_aliasing
+#endif
+#ifdef VK_EXT_buffer_device_address
+#endif
+#ifdef VK_EXT_tooling_info
+#endif
+#ifdef VK_EXT_separate_stencil_usage
+#endif
+#ifdef VK_EXT_validation_features
+#endif
+#ifdef VK_NV_cooperative_matrix
+#endif
+#ifdef VK_NV_coverage_reduction_mode
+#endif
+#ifdef VK_EXT_fragment_shader_interlock
+#endif
+#ifdef VK_EXT_ycbcr_image_arrays
+#endif
+#ifdef VK_EXT_full_screen_exclusive
+#endif
+#ifdef VK_EXT_headless_surface
+#endif
+#ifdef VK_EXT_line_rasterization
+#endif
+#ifdef VK_EXT_shader_atomic_float
+#endif
+#ifdef VK_EXT_host_query_reset
+#endif
+#ifdef VK_EXT_index_type_uint8
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+#endif
+#ifdef VK_EXT_shader_demote_to_helper_invocation
+#endif
+#ifdef VK_NV_device_generated_commands
+#endif
+#ifdef VK_EXT_texel_buffer_alignment
+#endif
+#ifdef VK_QCOM_render_pass_transform
+#endif
+#ifdef VK_EXT_device_memory_report
+#endif
+#ifdef VK_EXT_robustness2
+#endif
+#ifdef VK_EXT_custom_border_color
+#endif
+#ifdef VK_GOOGLE_user_type
+#endif
+#ifdef VK_EXT_private_data
+#endif
+#ifdef VK_EXT_pipeline_creation_cache_control
+#endif
+#ifdef VK_NV_device_diagnostics_config
+#endif
+#ifdef VK_QCOM_render_pass_store_ops
+#endif
+#ifdef VK_NV_fragment_shading_rate_enums
+#endif
+#ifdef VK_EXT_fragment_density_map2
+#endif
+#ifdef VK_QCOM_rotated_copy_commands
+#endif
+#ifdef VK_EXT_image_robustness
+#endif
+#ifdef VK_EXT_4444_formats
+#endif
+#ifdef VK_EXT_directfb_surface
+#endif
+#ifdef VK_GOOGLE_gfxstream
+#endif
+#ifdef VK_KHR_acceleration_structure
+#endif
+#ifdef VK_KHR_ray_tracing_pipeline
+#endif
+#ifdef VK_KHR_ray_query
 #endif
 
 void init_vulkan_dispatch_from_system_loader(
@@ -369,9 +553,6 @@ void init_vulkan_dispatch_from_system_loader(
 #ifdef VK_KHR_wayland_surface
     out->vkCreateWaylandSurfaceKHR = (PFN_vkCreateWaylandSurfaceKHR)dlSymFunc(lib, "vkCreateWaylandSurfaceKHR");
 #endif
-#ifdef VK_KHR_mir_surface
-    out->vkCreateMirSurfaceKHR = (PFN_vkCreateMirSurfaceKHR)dlSymFunc(lib, "vkCreateMirSurfaceKHR");
-#endif
 #ifdef VK_KHR_android_surface
     out->vkCreateAndroidSurfaceKHR = (PFN_vkCreateAndroidSurfaceKHR)dlSymFunc(lib, "vkCreateAndroidSurfaceKHR");
 #endif
@@ -387,6 +568,9 @@ void init_vulkan_dispatch_from_system_loader(
     out->vkDestroyDebugReportCallbackEXT = (PFN_vkDestroyDebugReportCallbackEXT)dlSymFunc(lib, "vkDestroyDebugReportCallbackEXT");
     out->vkDebugReportMessageEXT = (PFN_vkDebugReportMessageEXT)dlSymFunc(lib, "vkDebugReportMessageEXT");
 #endif
+#ifdef VK_GGP_stream_descriptor_surface
+    out->vkCreateStreamDescriptorSurfaceGGP = (PFN_vkCreateStreamDescriptorSurfaceGGP)dlSymFunc(lib, "vkCreateStreamDescriptorSurfaceGGP");
+#endif
 #ifdef VK_NN_vi_surface
     out->vkCreateViSurfaceNN = (PFN_vkCreateViSurfaceNN)dlSymFunc(lib, "vkCreateViSurfaceNN");
 #endif
@@ -400,6 +584,18 @@ void init_vulkan_dispatch_from_system_loader(
     out->vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)dlSymFunc(lib, "vkCreateDebugUtilsMessengerEXT");
     out->vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)dlSymFunc(lib, "vkDestroyDebugUtilsMessengerEXT");
     out->vkSubmitDebugUtilsMessageEXT = (PFN_vkSubmitDebugUtilsMessageEXT)dlSymFunc(lib, "vkSubmitDebugUtilsMessageEXT");
+#endif
+#ifdef VK_FUCHSIA_imagepipe_surface
+    out->vkCreateImagePipeSurfaceFUCHSIA = (PFN_vkCreateImagePipeSurfaceFUCHSIA)dlSymFunc(lib, "vkCreateImagePipeSurfaceFUCHSIA");
+#endif
+#ifdef VK_EXT_metal_surface
+    out->vkCreateMetalSurfaceEXT = (PFN_vkCreateMetalSurfaceEXT)dlSymFunc(lib, "vkCreateMetalSurfaceEXT");
+#endif
+#ifdef VK_EXT_headless_surface
+    out->vkCreateHeadlessSurfaceEXT = (PFN_vkCreateHeadlessSurfaceEXT)dlSymFunc(lib, "vkCreateHeadlessSurfaceEXT");
+#endif
+#ifdef VK_EXT_directfb_surface
+    out->vkCreateDirectFBSurfaceEXT = (PFN_vkCreateDirectFBSurfaceEXT)dlSymFunc(lib, "vkCreateDirectFBSurfaceEXT");
 #endif
 #ifdef VK_VERSION_1_0
     out->vkGetDeviceQueue = (PFN_vkGetDeviceQueue)dlSymFunc(lib, "vkGetDeviceQueue");
@@ -540,6 +736,21 @@ void init_vulkan_dispatch_from_system_loader(
     out->vkUpdateDescriptorSetWithTemplate = (PFN_vkUpdateDescriptorSetWithTemplate)dlSymFunc(lib, "vkUpdateDescriptorSetWithTemplate");
     out->vkGetDescriptorSetLayoutSupport = (PFN_vkGetDescriptorSetLayoutSupport)dlSymFunc(lib, "vkGetDescriptorSetLayoutSupport");
 #endif
+#ifdef VK_VERSION_1_2
+    out->vkCmdDrawIndirectCount = (PFN_vkCmdDrawIndirectCount)dlSymFunc(lib, "vkCmdDrawIndirectCount");
+    out->vkCmdDrawIndexedIndirectCount = (PFN_vkCmdDrawIndexedIndirectCount)dlSymFunc(lib, "vkCmdDrawIndexedIndirectCount");
+    out->vkCreateRenderPass2 = (PFN_vkCreateRenderPass2)dlSymFunc(lib, "vkCreateRenderPass2");
+    out->vkCmdBeginRenderPass2 = (PFN_vkCmdBeginRenderPass2)dlSymFunc(lib, "vkCmdBeginRenderPass2");
+    out->vkCmdNextSubpass2 = (PFN_vkCmdNextSubpass2)dlSymFunc(lib, "vkCmdNextSubpass2");
+    out->vkCmdEndRenderPass2 = (PFN_vkCmdEndRenderPass2)dlSymFunc(lib, "vkCmdEndRenderPass2");
+    out->vkResetQueryPool = (PFN_vkResetQueryPool)dlSymFunc(lib, "vkResetQueryPool");
+    out->vkGetSemaphoreCounterValue = (PFN_vkGetSemaphoreCounterValue)dlSymFunc(lib, "vkGetSemaphoreCounterValue");
+    out->vkWaitSemaphores = (PFN_vkWaitSemaphores)dlSymFunc(lib, "vkWaitSemaphores");
+    out->vkSignalSemaphore = (PFN_vkSignalSemaphore)dlSymFunc(lib, "vkSignalSemaphore");
+    out->vkGetBufferDeviceAddress = (PFN_vkGetBufferDeviceAddress)dlSymFunc(lib, "vkGetBufferDeviceAddress");
+    out->vkGetBufferOpaqueCaptureAddress = (PFN_vkGetBufferOpaqueCaptureAddress)dlSymFunc(lib, "vkGetBufferOpaqueCaptureAddress");
+    out->vkGetDeviceMemoryOpaqueCaptureAddress = (PFN_vkGetDeviceMemoryOpaqueCaptureAddress)dlSymFunc(lib, "vkGetDeviceMemoryOpaqueCaptureAddress");
+#endif
 #ifdef VK_KHR_surface
     out->vkGetPhysicalDeviceSurfaceSupportKHR = (PFN_vkGetPhysicalDeviceSurfaceSupportKHR)dlSymFunc(lib, "vkGetPhysicalDeviceSurfaceSupportKHR");
     out->vkGetPhysicalDeviceSurfaceCapabilitiesKHR = (PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR)dlSymFunc(lib, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
@@ -565,9 +776,6 @@ void init_vulkan_dispatch_from_system_loader(
 #endif
 #ifdef VK_KHR_wayland_surface
     out->vkGetPhysicalDeviceWaylandPresentationSupportKHR = (PFN_vkGetPhysicalDeviceWaylandPresentationSupportKHR)dlSymFunc(lib, "vkGetPhysicalDeviceWaylandPresentationSupportKHR");
-#endif
-#ifdef VK_KHR_mir_surface
-    out->vkGetPhysicalDeviceMirPresentationSupportKHR = (PFN_vkGetPhysicalDeviceMirPresentationSupportKHR)dlSymFunc(lib, "vkGetPhysicalDeviceMirPresentationSupportKHR");
 #endif
 #ifdef VK_KHR_get_physical_device_properties2
     out->vkGetPhysicalDeviceFeatures2KHR = (PFN_vkGetPhysicalDeviceFeatures2KHR)dlSymFunc(lib, "vkGetPhysicalDeviceFeatures2KHR");
@@ -637,6 +845,12 @@ void init_vulkan_dispatch_from_system_loader(
     out->vkImportFenceFdKHR = (PFN_vkImportFenceFdKHR)dlSymFunc(lib, "vkImportFenceFdKHR");
     out->vkGetFenceFdKHR = (PFN_vkGetFenceFdKHR)dlSymFunc(lib, "vkGetFenceFdKHR");
 #endif
+#ifdef VK_KHR_performance_query
+    out->vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR = (PFN_vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR)dlSymFunc(lib, "vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR");
+    out->vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR = (PFN_vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR)dlSymFunc(lib, "vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR");
+    out->vkAcquireProfilingLockKHR = (PFN_vkAcquireProfilingLockKHR)dlSymFunc(lib, "vkAcquireProfilingLockKHR");
+    out->vkReleaseProfilingLockKHR = (PFN_vkReleaseProfilingLockKHR)dlSymFunc(lib, "vkReleaseProfilingLockKHR");
+#endif
 #ifdef VK_KHR_get_surface_capabilities2
     out->vkGetPhysicalDeviceSurfaceCapabilities2KHR = (PFN_vkGetPhysicalDeviceSurfaceCapabilities2KHR)dlSymFunc(lib, "vkGetPhysicalDeviceSurfaceCapabilities2KHR");
     out->vkGetPhysicalDeviceSurfaceFormats2KHR = (PFN_vkGetPhysicalDeviceSurfaceFormats2KHR)dlSymFunc(lib, "vkGetPhysicalDeviceSurfaceFormats2KHR");
@@ -667,6 +881,40 @@ void init_vulkan_dispatch_from_system_loader(
     out->vkCmdDrawIndirectCountKHR = (PFN_vkCmdDrawIndirectCountKHR)dlSymFunc(lib, "vkCmdDrawIndirectCountKHR");
     out->vkCmdDrawIndexedIndirectCountKHR = (PFN_vkCmdDrawIndexedIndirectCountKHR)dlSymFunc(lib, "vkCmdDrawIndexedIndirectCountKHR");
 #endif
+#ifdef VK_KHR_timeline_semaphore
+    out->vkGetSemaphoreCounterValueKHR = (PFN_vkGetSemaphoreCounterValueKHR)dlSymFunc(lib, "vkGetSemaphoreCounterValueKHR");
+    out->vkWaitSemaphoresKHR = (PFN_vkWaitSemaphoresKHR)dlSymFunc(lib, "vkWaitSemaphoresKHR");
+    out->vkSignalSemaphoreKHR = (PFN_vkSignalSemaphoreKHR)dlSymFunc(lib, "vkSignalSemaphoreKHR");
+#endif
+#ifdef VK_KHR_fragment_shading_rate
+    out->vkGetPhysicalDeviceFragmentShadingRatesKHR = (PFN_vkGetPhysicalDeviceFragmentShadingRatesKHR)dlSymFunc(lib, "vkGetPhysicalDeviceFragmentShadingRatesKHR");
+    out->vkCmdSetFragmentShadingRateKHR = (PFN_vkCmdSetFragmentShadingRateKHR)dlSymFunc(lib, "vkCmdSetFragmentShadingRateKHR");
+#endif
+#ifdef VK_KHR_buffer_device_address
+    out->vkGetBufferDeviceAddressKHR = (PFN_vkGetBufferDeviceAddressKHR)dlSymFunc(lib, "vkGetBufferDeviceAddressKHR");
+    out->vkGetBufferOpaqueCaptureAddressKHR = (PFN_vkGetBufferOpaqueCaptureAddressKHR)dlSymFunc(lib, "vkGetBufferOpaqueCaptureAddressKHR");
+    out->vkGetDeviceMemoryOpaqueCaptureAddressKHR = (PFN_vkGetDeviceMemoryOpaqueCaptureAddressKHR)dlSymFunc(lib, "vkGetDeviceMemoryOpaqueCaptureAddressKHR");
+#endif
+#ifdef VK_KHR_deferred_host_operations
+    out->vkCreateDeferredOperationKHR = (PFN_vkCreateDeferredOperationKHR)dlSymFunc(lib, "vkCreateDeferredOperationKHR");
+    out->vkDestroyDeferredOperationKHR = (PFN_vkDestroyDeferredOperationKHR)dlSymFunc(lib, "vkDestroyDeferredOperationKHR");
+    out->vkGetDeferredOperationMaxConcurrencyKHR = (PFN_vkGetDeferredOperationMaxConcurrencyKHR)dlSymFunc(lib, "vkGetDeferredOperationMaxConcurrencyKHR");
+    out->vkGetDeferredOperationResultKHR = (PFN_vkGetDeferredOperationResultKHR)dlSymFunc(lib, "vkGetDeferredOperationResultKHR");
+    out->vkDeferredOperationJoinKHR = (PFN_vkDeferredOperationJoinKHR)dlSymFunc(lib, "vkDeferredOperationJoinKHR");
+#endif
+#ifdef VK_KHR_pipeline_executable_properties
+    out->vkGetPipelineExecutablePropertiesKHR = (PFN_vkGetPipelineExecutablePropertiesKHR)dlSymFunc(lib, "vkGetPipelineExecutablePropertiesKHR");
+    out->vkGetPipelineExecutableStatisticsKHR = (PFN_vkGetPipelineExecutableStatisticsKHR)dlSymFunc(lib, "vkGetPipelineExecutableStatisticsKHR");
+    out->vkGetPipelineExecutableInternalRepresentationsKHR = (PFN_vkGetPipelineExecutableInternalRepresentationsKHR)dlSymFunc(lib, "vkGetPipelineExecutableInternalRepresentationsKHR");
+#endif
+#ifdef VK_KHR_copy_commands2
+    out->vkCmdCopyBuffer2KHR = (PFN_vkCmdCopyBuffer2KHR)dlSymFunc(lib, "vkCmdCopyBuffer2KHR");
+    out->vkCmdCopyImage2KHR = (PFN_vkCmdCopyImage2KHR)dlSymFunc(lib, "vkCmdCopyImage2KHR");
+    out->vkCmdCopyBufferToImage2KHR = (PFN_vkCmdCopyBufferToImage2KHR)dlSymFunc(lib, "vkCmdCopyBufferToImage2KHR");
+    out->vkCmdCopyImageToBuffer2KHR = (PFN_vkCmdCopyImageToBuffer2KHR)dlSymFunc(lib, "vkCmdCopyImageToBuffer2KHR");
+    out->vkCmdBlitImage2KHR = (PFN_vkCmdBlitImage2KHR)dlSymFunc(lib, "vkCmdBlitImage2KHR");
+    out->vkCmdResolveImage2KHR = (PFN_vkCmdResolveImage2KHR)dlSymFunc(lib, "vkCmdResolveImage2KHR");
+#endif
 #ifdef VK_ANDROID_native_buffer
     out->vkGetSwapchainGrallocUsageANDROID = (PFN_vkGetSwapchainGrallocUsageANDROID)dlSymFunc(lib, "vkGetSwapchainGrallocUsageANDROID");
     out->vkAcquireImageANDROID = (PFN_vkAcquireImageANDROID)dlSymFunc(lib, "vkAcquireImageANDROID");
@@ -678,6 +926,18 @@ void init_vulkan_dispatch_from_system_loader(
     out->vkCmdDebugMarkerBeginEXT = (PFN_vkCmdDebugMarkerBeginEXT)dlSymFunc(lib, "vkCmdDebugMarkerBeginEXT");
     out->vkCmdDebugMarkerEndEXT = (PFN_vkCmdDebugMarkerEndEXT)dlSymFunc(lib, "vkCmdDebugMarkerEndEXT");
     out->vkCmdDebugMarkerInsertEXT = (PFN_vkCmdDebugMarkerInsertEXT)dlSymFunc(lib, "vkCmdDebugMarkerInsertEXT");
+#endif
+#ifdef VK_EXT_transform_feedback
+    out->vkCmdBindTransformFeedbackBuffersEXT = (PFN_vkCmdBindTransformFeedbackBuffersEXT)dlSymFunc(lib, "vkCmdBindTransformFeedbackBuffersEXT");
+    out->vkCmdBeginTransformFeedbackEXT = (PFN_vkCmdBeginTransformFeedbackEXT)dlSymFunc(lib, "vkCmdBeginTransformFeedbackEXT");
+    out->vkCmdEndTransformFeedbackEXT = (PFN_vkCmdEndTransformFeedbackEXT)dlSymFunc(lib, "vkCmdEndTransformFeedbackEXT");
+    out->vkCmdBeginQueryIndexedEXT = (PFN_vkCmdBeginQueryIndexedEXT)dlSymFunc(lib, "vkCmdBeginQueryIndexedEXT");
+    out->vkCmdEndQueryIndexedEXT = (PFN_vkCmdEndQueryIndexedEXT)dlSymFunc(lib, "vkCmdEndQueryIndexedEXT");
+    out->vkCmdDrawIndirectByteCountEXT = (PFN_vkCmdDrawIndirectByteCountEXT)dlSymFunc(lib, "vkCmdDrawIndirectByteCountEXT");
+#endif
+#ifdef VK_NVX_image_view_handle
+    out->vkGetImageViewHandleNVX = (PFN_vkGetImageViewHandleNVX)dlSymFunc(lib, "vkGetImageViewHandleNVX");
+    out->vkGetImageViewAddressNVX = (PFN_vkGetImageViewAddressNVX)dlSymFunc(lib, "vkGetImageViewAddressNVX");
 #endif
 #ifdef VK_AMD_draw_indirect_count
     out->vkCmdDrawIndirectCountAMD = (PFN_vkCmdDrawIndirectCountAMD)dlSymFunc(lib, "vkCmdDrawIndirectCountAMD");
@@ -695,17 +955,6 @@ void init_vulkan_dispatch_from_system_loader(
 #ifdef VK_EXT_conditional_rendering
     out->vkCmdBeginConditionalRenderingEXT = (PFN_vkCmdBeginConditionalRenderingEXT)dlSymFunc(lib, "vkCmdBeginConditionalRenderingEXT");
     out->vkCmdEndConditionalRenderingEXT = (PFN_vkCmdEndConditionalRenderingEXT)dlSymFunc(lib, "vkCmdEndConditionalRenderingEXT");
-#endif
-#ifdef VK_NVX_device_generated_commands
-    out->vkCmdProcessCommandsNVX = (PFN_vkCmdProcessCommandsNVX)dlSymFunc(lib, "vkCmdProcessCommandsNVX");
-    out->vkCmdReserveSpaceForCommandsNVX = (PFN_vkCmdReserveSpaceForCommandsNVX)dlSymFunc(lib, "vkCmdReserveSpaceForCommandsNVX");
-    out->vkCreateIndirectCommandsLayoutNVX = (PFN_vkCreateIndirectCommandsLayoutNVX)dlSymFunc(lib, "vkCreateIndirectCommandsLayoutNVX");
-    out->vkDestroyIndirectCommandsLayoutNVX = (PFN_vkDestroyIndirectCommandsLayoutNVX)dlSymFunc(lib, "vkDestroyIndirectCommandsLayoutNVX");
-    out->vkCreateObjectTableNVX = (PFN_vkCreateObjectTableNVX)dlSymFunc(lib, "vkCreateObjectTableNVX");
-    out->vkDestroyObjectTableNVX = (PFN_vkDestroyObjectTableNVX)dlSymFunc(lib, "vkDestroyObjectTableNVX");
-    out->vkRegisterObjectsNVX = (PFN_vkRegisterObjectsNVX)dlSymFunc(lib, "vkRegisterObjectsNVX");
-    out->vkUnregisterObjectsNVX = (PFN_vkUnregisterObjectsNVX)dlSymFunc(lib, "vkUnregisterObjectsNVX");
-    out->vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX = (PFN_vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX)dlSymFunc(lib, "vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX");
 #endif
 #ifdef VK_NV_clip_space_w_scaling
     out->vkCmdSetViewportWScalingNV = (PFN_vkCmdSetViewportWScalingNV)dlSymFunc(lib, "vkCmdSetViewportWScalingNV");
@@ -754,11 +1003,34 @@ void init_vulkan_dispatch_from_system_loader(
     out->vkCmdSetSampleLocationsEXT = (PFN_vkCmdSetSampleLocationsEXT)dlSymFunc(lib, "vkCmdSetSampleLocationsEXT");
     out->vkGetPhysicalDeviceMultisamplePropertiesEXT = (PFN_vkGetPhysicalDeviceMultisamplePropertiesEXT)dlSymFunc(lib, "vkGetPhysicalDeviceMultisamplePropertiesEXT");
 #endif
+#ifdef VK_EXT_image_drm_format_modifier
+    out->vkGetImageDrmFormatModifierPropertiesEXT = (PFN_vkGetImageDrmFormatModifierPropertiesEXT)dlSymFunc(lib, "vkGetImageDrmFormatModifierPropertiesEXT");
+#endif
 #ifdef VK_EXT_validation_cache
     out->vkCreateValidationCacheEXT = (PFN_vkCreateValidationCacheEXT)dlSymFunc(lib, "vkCreateValidationCacheEXT");
     out->vkDestroyValidationCacheEXT = (PFN_vkDestroyValidationCacheEXT)dlSymFunc(lib, "vkDestroyValidationCacheEXT");
     out->vkMergeValidationCachesEXT = (PFN_vkMergeValidationCachesEXT)dlSymFunc(lib, "vkMergeValidationCachesEXT");
     out->vkGetValidationCacheDataEXT = (PFN_vkGetValidationCacheDataEXT)dlSymFunc(lib, "vkGetValidationCacheDataEXT");
+#endif
+#ifdef VK_NV_shading_rate_image
+    out->vkCmdBindShadingRateImageNV = (PFN_vkCmdBindShadingRateImageNV)dlSymFunc(lib, "vkCmdBindShadingRateImageNV");
+    out->vkCmdSetViewportShadingRatePaletteNV = (PFN_vkCmdSetViewportShadingRatePaletteNV)dlSymFunc(lib, "vkCmdSetViewportShadingRatePaletteNV");
+    out->vkCmdSetCoarseSampleOrderNV = (PFN_vkCmdSetCoarseSampleOrderNV)dlSymFunc(lib, "vkCmdSetCoarseSampleOrderNV");
+#endif
+#ifdef VK_NV_ray_tracing
+    out->vkCreateAccelerationStructureNV = (PFN_vkCreateAccelerationStructureNV)dlSymFunc(lib, "vkCreateAccelerationStructureNV");
+    out->vkDestroyAccelerationStructureNV = (PFN_vkDestroyAccelerationStructureNV)dlSymFunc(lib, "vkDestroyAccelerationStructureNV");
+    out->vkGetAccelerationStructureMemoryRequirementsNV = (PFN_vkGetAccelerationStructureMemoryRequirementsNV)dlSymFunc(lib, "vkGetAccelerationStructureMemoryRequirementsNV");
+    out->vkBindAccelerationStructureMemoryNV = (PFN_vkBindAccelerationStructureMemoryNV)dlSymFunc(lib, "vkBindAccelerationStructureMemoryNV");
+    out->vkCmdBuildAccelerationStructureNV = (PFN_vkCmdBuildAccelerationStructureNV)dlSymFunc(lib, "vkCmdBuildAccelerationStructureNV");
+    out->vkCmdCopyAccelerationStructureNV = (PFN_vkCmdCopyAccelerationStructureNV)dlSymFunc(lib, "vkCmdCopyAccelerationStructureNV");
+    out->vkCmdTraceRaysNV = (PFN_vkCmdTraceRaysNV)dlSymFunc(lib, "vkCmdTraceRaysNV");
+    out->vkCreateRayTracingPipelinesNV = (PFN_vkCreateRayTracingPipelinesNV)dlSymFunc(lib, "vkCreateRayTracingPipelinesNV");
+    out->vkGetRayTracingShaderGroupHandlesKHR = (PFN_vkGetRayTracingShaderGroupHandlesKHR)dlSymFunc(lib, "vkGetRayTracingShaderGroupHandlesKHR");
+    out->vkGetRayTracingShaderGroupHandlesNV = (PFN_vkGetRayTracingShaderGroupHandlesNV)dlSymFunc(lib, "vkGetRayTracingShaderGroupHandlesNV");
+    out->vkGetAccelerationStructureHandleNV = (PFN_vkGetAccelerationStructureHandleNV)dlSymFunc(lib, "vkGetAccelerationStructureHandleNV");
+    out->vkCmdWriteAccelerationStructuresPropertiesNV = (PFN_vkCmdWriteAccelerationStructuresPropertiesNV)dlSymFunc(lib, "vkCmdWriteAccelerationStructuresPropertiesNV");
+    out->vkCompileDeferredNV = (PFN_vkCompileDeferredNV)dlSymFunc(lib, "vkCompileDeferredNV");
 #endif
 #ifdef VK_EXT_external_memory_host
     out->vkGetMemoryHostPointerPropertiesEXT = (PFN_vkGetMemoryHostPointerPropertiesEXT)dlSymFunc(lib, "vkGetMemoryHostPointerPropertiesEXT");
@@ -766,47 +1038,143 @@ void init_vulkan_dispatch_from_system_loader(
 #ifdef VK_AMD_buffer_marker
     out->vkCmdWriteBufferMarkerAMD = (PFN_vkCmdWriteBufferMarkerAMD)dlSymFunc(lib, "vkCmdWriteBufferMarkerAMD");
 #endif
+#ifdef VK_EXT_calibrated_timestamps
+    out->vkGetPhysicalDeviceCalibrateableTimeDomainsEXT = (PFN_vkGetPhysicalDeviceCalibrateableTimeDomainsEXT)dlSymFunc(lib, "vkGetPhysicalDeviceCalibrateableTimeDomainsEXT");
+    out->vkGetCalibratedTimestampsEXT = (PFN_vkGetCalibratedTimestampsEXT)dlSymFunc(lib, "vkGetCalibratedTimestampsEXT");
+#endif
+#ifdef VK_NV_mesh_shader
+    out->vkCmdDrawMeshTasksNV = (PFN_vkCmdDrawMeshTasksNV)dlSymFunc(lib, "vkCmdDrawMeshTasksNV");
+    out->vkCmdDrawMeshTasksIndirectNV = (PFN_vkCmdDrawMeshTasksIndirectNV)dlSymFunc(lib, "vkCmdDrawMeshTasksIndirectNV");
+    out->vkCmdDrawMeshTasksIndirectCountNV = (PFN_vkCmdDrawMeshTasksIndirectCountNV)dlSymFunc(lib, "vkCmdDrawMeshTasksIndirectCountNV");
+#endif
+#ifdef VK_NV_scissor_exclusive
+    out->vkCmdSetExclusiveScissorNV = (PFN_vkCmdSetExclusiveScissorNV)dlSymFunc(lib, "vkCmdSetExclusiveScissorNV");
+#endif
 #ifdef VK_NV_device_diagnostic_checkpoints
     out->vkCmdSetCheckpointNV = (PFN_vkCmdSetCheckpointNV)dlSymFunc(lib, "vkCmdSetCheckpointNV");
     out->vkGetQueueCheckpointDataNV = (PFN_vkGetQueueCheckpointDataNV)dlSymFunc(lib, "vkGetQueueCheckpointDataNV");
 #endif
-#ifdef VK_GOOGLE_address_space
-    out->vkMapMemoryIntoAddressSpaceGOOGLE = (PFN_vkMapMemoryIntoAddressSpaceGOOGLE)dlSymFunc(lib, "vkMapMemoryIntoAddressSpaceGOOGLE");
+#ifdef VK_INTEL_performance_query
+    out->vkInitializePerformanceApiINTEL = (PFN_vkInitializePerformanceApiINTEL)dlSymFunc(lib, "vkInitializePerformanceApiINTEL");
+    out->vkUninitializePerformanceApiINTEL = (PFN_vkUninitializePerformanceApiINTEL)dlSymFunc(lib, "vkUninitializePerformanceApiINTEL");
+    out->vkCmdSetPerformanceMarkerINTEL = (PFN_vkCmdSetPerformanceMarkerINTEL)dlSymFunc(lib, "vkCmdSetPerformanceMarkerINTEL");
+    out->vkCmdSetPerformanceStreamMarkerINTEL = (PFN_vkCmdSetPerformanceStreamMarkerINTEL)dlSymFunc(lib, "vkCmdSetPerformanceStreamMarkerINTEL");
+    out->vkCmdSetPerformanceOverrideINTEL = (PFN_vkCmdSetPerformanceOverrideINTEL)dlSymFunc(lib, "vkCmdSetPerformanceOverrideINTEL");
+    out->vkAcquirePerformanceConfigurationINTEL = (PFN_vkAcquirePerformanceConfigurationINTEL)dlSymFunc(lib, "vkAcquirePerformanceConfigurationINTEL");
+    out->vkReleasePerformanceConfigurationINTEL = (PFN_vkReleasePerformanceConfigurationINTEL)dlSymFunc(lib, "vkReleasePerformanceConfigurationINTEL");
+    out->vkQueueSetPerformanceConfigurationINTEL = (PFN_vkQueueSetPerformanceConfigurationINTEL)dlSymFunc(lib, "vkQueueSetPerformanceConfigurationINTEL");
+    out->vkGetPerformanceParameterINTEL = (PFN_vkGetPerformanceParameterINTEL)dlSymFunc(lib, "vkGetPerformanceParameterINTEL");
+#endif
+#ifdef VK_AMD_display_native_hdr
+    out->vkSetLocalDimmingAMD = (PFN_vkSetLocalDimmingAMD)dlSymFunc(lib, "vkSetLocalDimmingAMD");
 #endif
 #ifdef VK_GOOGLE_color_buffer
     out->vkRegisterImageColorBufferGOOGLE = (PFN_vkRegisterImageColorBufferGOOGLE)dlSymFunc(lib, "vkRegisterImageColorBufferGOOGLE");
     out->vkRegisterBufferColorBufferGOOGLE = (PFN_vkRegisterBufferColorBufferGOOGLE)dlSymFunc(lib, "vkRegisterBufferColorBufferGOOGLE");
 #endif
-#ifdef VK_GOOGLE_sized_descriptor_update_template
-    out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)dlSymFunc(lib, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
+#ifdef VK_EXT_buffer_device_address
+    out->vkGetBufferDeviceAddressEXT = (PFN_vkGetBufferDeviceAddressEXT)dlSymFunc(lib, "vkGetBufferDeviceAddressEXT");
 #endif
-#ifdef VK_GOOGLE_async_command_buffers
+#ifdef VK_EXT_tooling_info
+    out->vkGetPhysicalDeviceToolPropertiesEXT = (PFN_vkGetPhysicalDeviceToolPropertiesEXT)dlSymFunc(lib, "vkGetPhysicalDeviceToolPropertiesEXT");
+#endif
+#ifdef VK_NV_cooperative_matrix
+    out->vkGetPhysicalDeviceCooperativeMatrixPropertiesNV = (PFN_vkGetPhysicalDeviceCooperativeMatrixPropertiesNV)dlSymFunc(lib, "vkGetPhysicalDeviceCooperativeMatrixPropertiesNV");
+#endif
+#ifdef VK_NV_coverage_reduction_mode
+    out->vkGetPhysicalDeviceSupportedFramebufferMixedSamplesCombinationsNV = (PFN_vkGetPhysicalDeviceSupportedFramebufferMixedSamplesCombinationsNV)dlSymFunc(lib, "vkGetPhysicalDeviceSupportedFramebufferMixedSamplesCombinationsNV");
+#endif
+#ifdef VK_EXT_full_screen_exclusive
+    out->vkGetPhysicalDeviceSurfacePresentModes2EXT = (PFN_vkGetPhysicalDeviceSurfacePresentModes2EXT)dlSymFunc(lib, "vkGetPhysicalDeviceSurfacePresentModes2EXT");
+    out->vkAcquireFullScreenExclusiveModeEXT = (PFN_vkAcquireFullScreenExclusiveModeEXT)dlSymFunc(lib, "vkAcquireFullScreenExclusiveModeEXT");
+    out->vkReleaseFullScreenExclusiveModeEXT = (PFN_vkReleaseFullScreenExclusiveModeEXT)dlSymFunc(lib, "vkReleaseFullScreenExclusiveModeEXT");
+    out->vkGetDeviceGroupSurfacePresentModes2EXT = (PFN_vkGetDeviceGroupSurfacePresentModes2EXT)dlSymFunc(lib, "vkGetDeviceGroupSurfacePresentModes2EXT");
+#endif
+#ifdef VK_EXT_line_rasterization
+    out->vkCmdSetLineStippleEXT = (PFN_vkCmdSetLineStippleEXT)dlSymFunc(lib, "vkCmdSetLineStippleEXT");
+#endif
+#ifdef VK_EXT_host_query_reset
+    out->vkResetQueryPoolEXT = (PFN_vkResetQueryPoolEXT)dlSymFunc(lib, "vkResetQueryPoolEXT");
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+    out->vkCmdSetCullModeEXT = (PFN_vkCmdSetCullModeEXT)dlSymFunc(lib, "vkCmdSetCullModeEXT");
+    out->vkCmdSetFrontFaceEXT = (PFN_vkCmdSetFrontFaceEXT)dlSymFunc(lib, "vkCmdSetFrontFaceEXT");
+    out->vkCmdSetPrimitiveTopologyEXT = (PFN_vkCmdSetPrimitiveTopologyEXT)dlSymFunc(lib, "vkCmdSetPrimitiveTopologyEXT");
+    out->vkCmdSetViewportWithCountEXT = (PFN_vkCmdSetViewportWithCountEXT)dlSymFunc(lib, "vkCmdSetViewportWithCountEXT");
+    out->vkCmdSetScissorWithCountEXT = (PFN_vkCmdSetScissorWithCountEXT)dlSymFunc(lib, "vkCmdSetScissorWithCountEXT");
+    out->vkCmdBindVertexBuffers2EXT = (PFN_vkCmdBindVertexBuffers2EXT)dlSymFunc(lib, "vkCmdBindVertexBuffers2EXT");
+    out->vkCmdSetDepthTestEnableEXT = (PFN_vkCmdSetDepthTestEnableEXT)dlSymFunc(lib, "vkCmdSetDepthTestEnableEXT");
+    out->vkCmdSetDepthWriteEnableEXT = (PFN_vkCmdSetDepthWriteEnableEXT)dlSymFunc(lib, "vkCmdSetDepthWriteEnableEXT");
+    out->vkCmdSetDepthCompareOpEXT = (PFN_vkCmdSetDepthCompareOpEXT)dlSymFunc(lib, "vkCmdSetDepthCompareOpEXT");
+    out->vkCmdSetDepthBoundsTestEnableEXT = (PFN_vkCmdSetDepthBoundsTestEnableEXT)dlSymFunc(lib, "vkCmdSetDepthBoundsTestEnableEXT");
+    out->vkCmdSetStencilTestEnableEXT = (PFN_vkCmdSetStencilTestEnableEXT)dlSymFunc(lib, "vkCmdSetStencilTestEnableEXT");
+    out->vkCmdSetStencilOpEXT = (PFN_vkCmdSetStencilOpEXT)dlSymFunc(lib, "vkCmdSetStencilOpEXT");
+#endif
+#ifdef VK_NV_device_generated_commands
+    out->vkGetGeneratedCommandsMemoryRequirementsNV = (PFN_vkGetGeneratedCommandsMemoryRequirementsNV)dlSymFunc(lib, "vkGetGeneratedCommandsMemoryRequirementsNV");
+    out->vkCmdPreprocessGeneratedCommandsNV = (PFN_vkCmdPreprocessGeneratedCommandsNV)dlSymFunc(lib, "vkCmdPreprocessGeneratedCommandsNV");
+    out->vkCmdExecuteGeneratedCommandsNV = (PFN_vkCmdExecuteGeneratedCommandsNV)dlSymFunc(lib, "vkCmdExecuteGeneratedCommandsNV");
+    out->vkCmdBindPipelineShaderGroupNV = (PFN_vkCmdBindPipelineShaderGroupNV)dlSymFunc(lib, "vkCmdBindPipelineShaderGroupNV");
+    out->vkCreateIndirectCommandsLayoutNV = (PFN_vkCreateIndirectCommandsLayoutNV)dlSymFunc(lib, "vkCreateIndirectCommandsLayoutNV");
+    out->vkDestroyIndirectCommandsLayoutNV = (PFN_vkDestroyIndirectCommandsLayoutNV)dlSymFunc(lib, "vkDestroyIndirectCommandsLayoutNV");
+#endif
+#ifdef VK_EXT_private_data
+    out->vkCreatePrivateDataSlotEXT = (PFN_vkCreatePrivateDataSlotEXT)dlSymFunc(lib, "vkCreatePrivateDataSlotEXT");
+    out->vkDestroyPrivateDataSlotEXT = (PFN_vkDestroyPrivateDataSlotEXT)dlSymFunc(lib, "vkDestroyPrivateDataSlotEXT");
+    out->vkSetPrivateDataEXT = (PFN_vkSetPrivateDataEXT)dlSymFunc(lib, "vkSetPrivateDataEXT");
+    out->vkGetPrivateDataEXT = (PFN_vkGetPrivateDataEXT)dlSymFunc(lib, "vkGetPrivateDataEXT");
+#endif
+#ifdef VK_NV_fragment_shading_rate_enums
+    out->vkCmdSetFragmentShadingRateEnumNV = (PFN_vkCmdSetFragmentShadingRateEnumNV)dlSymFunc(lib, "vkCmdSetFragmentShadingRateEnumNV");
+#endif
+#ifdef VK_EXT_directfb_surface
+    out->vkGetPhysicalDeviceDirectFBPresentationSupportEXT = (PFN_vkGetPhysicalDeviceDirectFBPresentationSupportEXT)dlSymFunc(lib, "vkGetPhysicalDeviceDirectFBPresentationSupportEXT");
+#endif
+#ifdef VK_GOOGLE_gfxstream
+    out->vkMapMemoryIntoAddressSpaceGOOGLE = (PFN_vkMapMemoryIntoAddressSpaceGOOGLE)dlSymFunc(lib, "vkMapMemoryIntoAddressSpaceGOOGLE");
+    out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)dlSymFunc(lib, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
     out->vkBeginCommandBufferAsyncGOOGLE = (PFN_vkBeginCommandBufferAsyncGOOGLE)dlSymFunc(lib, "vkBeginCommandBufferAsyncGOOGLE");
     out->vkEndCommandBufferAsyncGOOGLE = (PFN_vkEndCommandBufferAsyncGOOGLE)dlSymFunc(lib, "vkEndCommandBufferAsyncGOOGLE");
     out->vkResetCommandBufferAsyncGOOGLE = (PFN_vkResetCommandBufferAsyncGOOGLE)dlSymFunc(lib, "vkResetCommandBufferAsyncGOOGLE");
     out->vkCommandBufferHostSyncGOOGLE = (PFN_vkCommandBufferHostSyncGOOGLE)dlSymFunc(lib, "vkCommandBufferHostSyncGOOGLE");
-#endif
-#ifdef VK_GOOGLE_create_resources_with_requirements
     out->vkCreateImageWithRequirementsGOOGLE = (PFN_vkCreateImageWithRequirementsGOOGLE)dlSymFunc(lib, "vkCreateImageWithRequirementsGOOGLE");
     out->vkCreateBufferWithRequirementsGOOGLE = (PFN_vkCreateBufferWithRequirementsGOOGLE)dlSymFunc(lib, "vkCreateBufferWithRequirementsGOOGLE");
-#endif
-#ifdef VK_GOOGLE_address_space_info
     out->vkGetMemoryHostAddressInfoGOOGLE = (PFN_vkGetMemoryHostAddressInfoGOOGLE)dlSymFunc(lib, "vkGetMemoryHostAddressInfoGOOGLE");
-#endif
-#ifdef VK_GOOGLE_free_memory_sync
     out->vkFreeMemorySyncGOOGLE = (PFN_vkFreeMemorySyncGOOGLE)dlSymFunc(lib, "vkFreeMemorySyncGOOGLE");
-#endif
-#ifdef VK_GOOGLE_async_queue_submit
     out->vkQueueHostSyncGOOGLE = (PFN_vkQueueHostSyncGOOGLE)dlSymFunc(lib, "vkQueueHostSyncGOOGLE");
     out->vkQueueSubmitAsyncGOOGLE = (PFN_vkQueueSubmitAsyncGOOGLE)dlSymFunc(lib, "vkQueueSubmitAsyncGOOGLE");
     out->vkQueueWaitIdleAsyncGOOGLE = (PFN_vkQueueWaitIdleAsyncGOOGLE)dlSymFunc(lib, "vkQueueWaitIdleAsyncGOOGLE");
     out->vkQueueBindSparseAsyncGOOGLE = (PFN_vkQueueBindSparseAsyncGOOGLE)dlSymFunc(lib, "vkQueueBindSparseAsyncGOOGLE");
-#endif
-#ifdef VK_GOOGLE_linear_image_layout
     out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)dlSymFunc(lib, "vkGetLinearImageLayoutGOOGLE");
-#endif
-#ifdef VK_GOOGLE_queue_submit_with_commands
     out->vkQueueFlushCommandsGOOGLE = (PFN_vkQueueFlushCommandsGOOGLE)dlSymFunc(lib, "vkQueueFlushCommandsGOOGLE");
+    out->vkQueueCommitDescriptorSetUpdatesGOOGLE = (PFN_vkQueueCommitDescriptorSetUpdatesGOOGLE)dlSymFunc(lib, "vkQueueCommitDescriptorSetUpdatesGOOGLE");
+    out->vkCollectDescriptorPoolIdsGOOGLE = (PFN_vkCollectDescriptorPoolIdsGOOGLE)dlSymFunc(lib, "vkCollectDescriptorPoolIdsGOOGLE");
+#endif
+#ifdef VK_KHR_acceleration_structure
+    out->vkCreateAccelerationStructureKHR = (PFN_vkCreateAccelerationStructureKHR)dlSymFunc(lib, "vkCreateAccelerationStructureKHR");
+    out->vkDestroyAccelerationStructureKHR = (PFN_vkDestroyAccelerationStructureKHR)dlSymFunc(lib, "vkDestroyAccelerationStructureKHR");
+    out->vkCmdBuildAccelerationStructuresKHR = (PFN_vkCmdBuildAccelerationStructuresKHR)dlSymFunc(lib, "vkCmdBuildAccelerationStructuresKHR");
+    out->vkCmdBuildAccelerationStructuresIndirectKHR = (PFN_vkCmdBuildAccelerationStructuresIndirectKHR)dlSymFunc(lib, "vkCmdBuildAccelerationStructuresIndirectKHR");
+    out->vkBuildAccelerationStructuresKHR = (PFN_vkBuildAccelerationStructuresKHR)dlSymFunc(lib, "vkBuildAccelerationStructuresKHR");
+    out->vkCopyAccelerationStructureKHR = (PFN_vkCopyAccelerationStructureKHR)dlSymFunc(lib, "vkCopyAccelerationStructureKHR");
+    out->vkCopyAccelerationStructureToMemoryKHR = (PFN_vkCopyAccelerationStructureToMemoryKHR)dlSymFunc(lib, "vkCopyAccelerationStructureToMemoryKHR");
+    out->vkCopyMemoryToAccelerationStructureKHR = (PFN_vkCopyMemoryToAccelerationStructureKHR)dlSymFunc(lib, "vkCopyMemoryToAccelerationStructureKHR");
+    out->vkWriteAccelerationStructuresPropertiesKHR = (PFN_vkWriteAccelerationStructuresPropertiesKHR)dlSymFunc(lib, "vkWriteAccelerationStructuresPropertiesKHR");
+    out->vkCmdCopyAccelerationStructureKHR = (PFN_vkCmdCopyAccelerationStructureKHR)dlSymFunc(lib, "vkCmdCopyAccelerationStructureKHR");
+    out->vkCmdCopyAccelerationStructureToMemoryKHR = (PFN_vkCmdCopyAccelerationStructureToMemoryKHR)dlSymFunc(lib, "vkCmdCopyAccelerationStructureToMemoryKHR");
+    out->vkCmdCopyMemoryToAccelerationStructureKHR = (PFN_vkCmdCopyMemoryToAccelerationStructureKHR)dlSymFunc(lib, "vkCmdCopyMemoryToAccelerationStructureKHR");
+    out->vkGetAccelerationStructureDeviceAddressKHR = (PFN_vkGetAccelerationStructureDeviceAddressKHR)dlSymFunc(lib, "vkGetAccelerationStructureDeviceAddressKHR");
+    out->vkCmdWriteAccelerationStructuresPropertiesKHR = (PFN_vkCmdWriteAccelerationStructuresPropertiesKHR)dlSymFunc(lib, "vkCmdWriteAccelerationStructuresPropertiesKHR");
+    out->vkGetDeviceAccelerationStructureCompatibilityKHR = (PFN_vkGetDeviceAccelerationStructureCompatibilityKHR)dlSymFunc(lib, "vkGetDeviceAccelerationStructureCompatibilityKHR");
+    out->vkGetAccelerationStructureBuildSizesKHR = (PFN_vkGetAccelerationStructureBuildSizesKHR)dlSymFunc(lib, "vkGetAccelerationStructureBuildSizesKHR");
+#endif
+#ifdef VK_KHR_ray_tracing_pipeline
+    out->vkCmdTraceRaysKHR = (PFN_vkCmdTraceRaysKHR)dlSymFunc(lib, "vkCmdTraceRaysKHR");
+    out->vkCreateRayTracingPipelinesKHR = (PFN_vkCreateRayTracingPipelinesKHR)dlSymFunc(lib, "vkCreateRayTracingPipelinesKHR");
+    out->vkGetRayTracingCaptureReplayShaderGroupHandlesKHR = (PFN_vkGetRayTracingCaptureReplayShaderGroupHandlesKHR)dlSymFunc(lib, "vkGetRayTracingCaptureReplayShaderGroupHandlesKHR");
+    out->vkCmdTraceRaysIndirectKHR = (PFN_vkCmdTraceRaysIndirectKHR)dlSymFunc(lib, "vkCmdTraceRaysIndirectKHR");
+    out->vkGetRayTracingShaderGroupStackSizeKHR = (PFN_vkGetRayTracingShaderGroupStackSizeKHR)dlSymFunc(lib, "vkGetRayTracingShaderGroupStackSizeKHR");
+    out->vkCmdSetRayTracingPipelineStackSizeKHR = (PFN_vkCmdSetRayTracingPipelineStackSizeKHR)dlSymFunc(lib, "vkCmdSetRayTracingPipelineStackSizeKHR");
 #endif
 #ifdef VK_MVK_moltenvk
     out->vkGetMTLDeviceMVK = (PFN_vkGetMTLDeviceMVK)dlSymFunc(lib, "vkGetMTLDeviceMVK");
@@ -882,9 +1250,6 @@ void init_vulkan_dispatch_from_instance(
 #ifdef VK_KHR_wayland_surface
     out->vkCreateWaylandSurfaceKHR = (PFN_vkCreateWaylandSurfaceKHR)vk->vkGetInstanceProcAddr(instance, "vkCreateWaylandSurfaceKHR");
 #endif
-#ifdef VK_KHR_mir_surface
-    out->vkCreateMirSurfaceKHR = (PFN_vkCreateMirSurfaceKHR)vk->vkGetInstanceProcAddr(instance, "vkCreateMirSurfaceKHR");
-#endif
 #ifdef VK_KHR_android_surface
     out->vkCreateAndroidSurfaceKHR = (PFN_vkCreateAndroidSurfaceKHR)vk->vkGetInstanceProcAddr(instance, "vkCreateAndroidSurfaceKHR");
 #endif
@@ -900,6 +1265,9 @@ void init_vulkan_dispatch_from_instance(
     out->vkDestroyDebugReportCallbackEXT = (PFN_vkDestroyDebugReportCallbackEXT)vk->vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT");
     out->vkDebugReportMessageEXT = (PFN_vkDebugReportMessageEXT)vk->vkGetInstanceProcAddr(instance, "vkDebugReportMessageEXT");
 #endif
+#ifdef VK_GGP_stream_descriptor_surface
+    out->vkCreateStreamDescriptorSurfaceGGP = (PFN_vkCreateStreamDescriptorSurfaceGGP)vk->vkGetInstanceProcAddr(instance, "vkCreateStreamDescriptorSurfaceGGP");
+#endif
 #ifdef VK_NN_vi_surface
     out->vkCreateViSurfaceNN = (PFN_vkCreateViSurfaceNN)vk->vkGetInstanceProcAddr(instance, "vkCreateViSurfaceNN");
 #endif
@@ -913,6 +1281,18 @@ void init_vulkan_dispatch_from_instance(
     out->vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vk->vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
     out->vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vk->vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
     out->vkSubmitDebugUtilsMessageEXT = (PFN_vkSubmitDebugUtilsMessageEXT)vk->vkGetInstanceProcAddr(instance, "vkSubmitDebugUtilsMessageEXT");
+#endif
+#ifdef VK_FUCHSIA_imagepipe_surface
+    out->vkCreateImagePipeSurfaceFUCHSIA = (PFN_vkCreateImagePipeSurfaceFUCHSIA)vk->vkGetInstanceProcAddr(instance, "vkCreateImagePipeSurfaceFUCHSIA");
+#endif
+#ifdef VK_EXT_metal_surface
+    out->vkCreateMetalSurfaceEXT = (PFN_vkCreateMetalSurfaceEXT)vk->vkGetInstanceProcAddr(instance, "vkCreateMetalSurfaceEXT");
+#endif
+#ifdef VK_EXT_headless_surface
+    out->vkCreateHeadlessSurfaceEXT = (PFN_vkCreateHeadlessSurfaceEXT)vk->vkGetInstanceProcAddr(instance, "vkCreateHeadlessSurfaceEXT");
+#endif
+#ifdef VK_EXT_directfb_surface
+    out->vkCreateDirectFBSurfaceEXT = (PFN_vkCreateDirectFBSurfaceEXT)vk->vkGetInstanceProcAddr(instance, "vkCreateDirectFBSurfaceEXT");
 #endif
 #ifdef VK_VERSION_1_0
     out->vkGetDeviceQueue = (PFN_vkGetDeviceQueue)vk->vkGetInstanceProcAddr(instance, "vkGetDeviceQueue");
@@ -1053,6 +1433,21 @@ void init_vulkan_dispatch_from_instance(
     out->vkUpdateDescriptorSetWithTemplate = (PFN_vkUpdateDescriptorSetWithTemplate)vk->vkGetInstanceProcAddr(instance, "vkUpdateDescriptorSetWithTemplate");
     out->vkGetDescriptorSetLayoutSupport = (PFN_vkGetDescriptorSetLayoutSupport)vk->vkGetInstanceProcAddr(instance, "vkGetDescriptorSetLayoutSupport");
 #endif
+#ifdef VK_VERSION_1_2
+    out->vkCmdDrawIndirectCount = (PFN_vkCmdDrawIndirectCount)vk->vkGetInstanceProcAddr(instance, "vkCmdDrawIndirectCount");
+    out->vkCmdDrawIndexedIndirectCount = (PFN_vkCmdDrawIndexedIndirectCount)vk->vkGetInstanceProcAddr(instance, "vkCmdDrawIndexedIndirectCount");
+    out->vkCreateRenderPass2 = (PFN_vkCreateRenderPass2)vk->vkGetInstanceProcAddr(instance, "vkCreateRenderPass2");
+    out->vkCmdBeginRenderPass2 = (PFN_vkCmdBeginRenderPass2)vk->vkGetInstanceProcAddr(instance, "vkCmdBeginRenderPass2");
+    out->vkCmdNextSubpass2 = (PFN_vkCmdNextSubpass2)vk->vkGetInstanceProcAddr(instance, "vkCmdNextSubpass2");
+    out->vkCmdEndRenderPass2 = (PFN_vkCmdEndRenderPass2)vk->vkGetInstanceProcAddr(instance, "vkCmdEndRenderPass2");
+    out->vkResetQueryPool = (PFN_vkResetQueryPool)vk->vkGetInstanceProcAddr(instance, "vkResetQueryPool");
+    out->vkGetSemaphoreCounterValue = (PFN_vkGetSemaphoreCounterValue)vk->vkGetInstanceProcAddr(instance, "vkGetSemaphoreCounterValue");
+    out->vkWaitSemaphores = (PFN_vkWaitSemaphores)vk->vkGetInstanceProcAddr(instance, "vkWaitSemaphores");
+    out->vkSignalSemaphore = (PFN_vkSignalSemaphore)vk->vkGetInstanceProcAddr(instance, "vkSignalSemaphore");
+    out->vkGetBufferDeviceAddress = (PFN_vkGetBufferDeviceAddress)vk->vkGetInstanceProcAddr(instance, "vkGetBufferDeviceAddress");
+    out->vkGetBufferOpaqueCaptureAddress = (PFN_vkGetBufferOpaqueCaptureAddress)vk->vkGetInstanceProcAddr(instance, "vkGetBufferOpaqueCaptureAddress");
+    out->vkGetDeviceMemoryOpaqueCaptureAddress = (PFN_vkGetDeviceMemoryOpaqueCaptureAddress)vk->vkGetInstanceProcAddr(instance, "vkGetDeviceMemoryOpaqueCaptureAddress");
+#endif
 #ifdef VK_KHR_surface
     out->vkGetPhysicalDeviceSurfaceSupportKHR = (PFN_vkGetPhysicalDeviceSurfaceSupportKHR)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
     out->vkGetPhysicalDeviceSurfaceCapabilitiesKHR = (PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
@@ -1078,9 +1473,6 @@ void init_vulkan_dispatch_from_instance(
 #endif
 #ifdef VK_KHR_wayland_surface
     out->vkGetPhysicalDeviceWaylandPresentationSupportKHR = (PFN_vkGetPhysicalDeviceWaylandPresentationSupportKHR)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceWaylandPresentationSupportKHR");
-#endif
-#ifdef VK_KHR_mir_surface
-    out->vkGetPhysicalDeviceMirPresentationSupportKHR = (PFN_vkGetPhysicalDeviceMirPresentationSupportKHR)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceMirPresentationSupportKHR");
 #endif
 #ifdef VK_KHR_get_physical_device_properties2
     out->vkGetPhysicalDeviceFeatures2KHR = (PFN_vkGetPhysicalDeviceFeatures2KHR)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceFeatures2KHR");
@@ -1150,6 +1542,12 @@ void init_vulkan_dispatch_from_instance(
     out->vkImportFenceFdKHR = (PFN_vkImportFenceFdKHR)vk->vkGetInstanceProcAddr(instance, "vkImportFenceFdKHR");
     out->vkGetFenceFdKHR = (PFN_vkGetFenceFdKHR)vk->vkGetInstanceProcAddr(instance, "vkGetFenceFdKHR");
 #endif
+#ifdef VK_KHR_performance_query
+    out->vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR = (PFN_vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR)vk->vkGetInstanceProcAddr(instance, "vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR");
+    out->vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR = (PFN_vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR");
+    out->vkAcquireProfilingLockKHR = (PFN_vkAcquireProfilingLockKHR)vk->vkGetInstanceProcAddr(instance, "vkAcquireProfilingLockKHR");
+    out->vkReleaseProfilingLockKHR = (PFN_vkReleaseProfilingLockKHR)vk->vkGetInstanceProcAddr(instance, "vkReleaseProfilingLockKHR");
+#endif
 #ifdef VK_KHR_get_surface_capabilities2
     out->vkGetPhysicalDeviceSurfaceCapabilities2KHR = (PFN_vkGetPhysicalDeviceSurfaceCapabilities2KHR)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceSurfaceCapabilities2KHR");
     out->vkGetPhysicalDeviceSurfaceFormats2KHR = (PFN_vkGetPhysicalDeviceSurfaceFormats2KHR)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceSurfaceFormats2KHR");
@@ -1180,6 +1578,40 @@ void init_vulkan_dispatch_from_instance(
     out->vkCmdDrawIndirectCountKHR = (PFN_vkCmdDrawIndirectCountKHR)vk->vkGetInstanceProcAddr(instance, "vkCmdDrawIndirectCountKHR");
     out->vkCmdDrawIndexedIndirectCountKHR = (PFN_vkCmdDrawIndexedIndirectCountKHR)vk->vkGetInstanceProcAddr(instance, "vkCmdDrawIndexedIndirectCountKHR");
 #endif
+#ifdef VK_KHR_timeline_semaphore
+    out->vkGetSemaphoreCounterValueKHR = (PFN_vkGetSemaphoreCounterValueKHR)vk->vkGetInstanceProcAddr(instance, "vkGetSemaphoreCounterValueKHR");
+    out->vkWaitSemaphoresKHR = (PFN_vkWaitSemaphoresKHR)vk->vkGetInstanceProcAddr(instance, "vkWaitSemaphoresKHR");
+    out->vkSignalSemaphoreKHR = (PFN_vkSignalSemaphoreKHR)vk->vkGetInstanceProcAddr(instance, "vkSignalSemaphoreKHR");
+#endif
+#ifdef VK_KHR_fragment_shading_rate
+    out->vkGetPhysicalDeviceFragmentShadingRatesKHR = (PFN_vkGetPhysicalDeviceFragmentShadingRatesKHR)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceFragmentShadingRatesKHR");
+    out->vkCmdSetFragmentShadingRateKHR = (PFN_vkCmdSetFragmentShadingRateKHR)vk->vkGetInstanceProcAddr(instance, "vkCmdSetFragmentShadingRateKHR");
+#endif
+#ifdef VK_KHR_buffer_device_address
+    out->vkGetBufferDeviceAddressKHR = (PFN_vkGetBufferDeviceAddressKHR)vk->vkGetInstanceProcAddr(instance, "vkGetBufferDeviceAddressKHR");
+    out->vkGetBufferOpaqueCaptureAddressKHR = (PFN_vkGetBufferOpaqueCaptureAddressKHR)vk->vkGetInstanceProcAddr(instance, "vkGetBufferOpaqueCaptureAddressKHR");
+    out->vkGetDeviceMemoryOpaqueCaptureAddressKHR = (PFN_vkGetDeviceMemoryOpaqueCaptureAddressKHR)vk->vkGetInstanceProcAddr(instance, "vkGetDeviceMemoryOpaqueCaptureAddressKHR");
+#endif
+#ifdef VK_KHR_deferred_host_operations
+    out->vkCreateDeferredOperationKHR = (PFN_vkCreateDeferredOperationKHR)vk->vkGetInstanceProcAddr(instance, "vkCreateDeferredOperationKHR");
+    out->vkDestroyDeferredOperationKHR = (PFN_vkDestroyDeferredOperationKHR)vk->vkGetInstanceProcAddr(instance, "vkDestroyDeferredOperationKHR");
+    out->vkGetDeferredOperationMaxConcurrencyKHR = (PFN_vkGetDeferredOperationMaxConcurrencyKHR)vk->vkGetInstanceProcAddr(instance, "vkGetDeferredOperationMaxConcurrencyKHR");
+    out->vkGetDeferredOperationResultKHR = (PFN_vkGetDeferredOperationResultKHR)vk->vkGetInstanceProcAddr(instance, "vkGetDeferredOperationResultKHR");
+    out->vkDeferredOperationJoinKHR = (PFN_vkDeferredOperationJoinKHR)vk->vkGetInstanceProcAddr(instance, "vkDeferredOperationJoinKHR");
+#endif
+#ifdef VK_KHR_pipeline_executable_properties
+    out->vkGetPipelineExecutablePropertiesKHR = (PFN_vkGetPipelineExecutablePropertiesKHR)vk->vkGetInstanceProcAddr(instance, "vkGetPipelineExecutablePropertiesKHR");
+    out->vkGetPipelineExecutableStatisticsKHR = (PFN_vkGetPipelineExecutableStatisticsKHR)vk->vkGetInstanceProcAddr(instance, "vkGetPipelineExecutableStatisticsKHR");
+    out->vkGetPipelineExecutableInternalRepresentationsKHR = (PFN_vkGetPipelineExecutableInternalRepresentationsKHR)vk->vkGetInstanceProcAddr(instance, "vkGetPipelineExecutableInternalRepresentationsKHR");
+#endif
+#ifdef VK_KHR_copy_commands2
+    out->vkCmdCopyBuffer2KHR = (PFN_vkCmdCopyBuffer2KHR)vk->vkGetInstanceProcAddr(instance, "vkCmdCopyBuffer2KHR");
+    out->vkCmdCopyImage2KHR = (PFN_vkCmdCopyImage2KHR)vk->vkGetInstanceProcAddr(instance, "vkCmdCopyImage2KHR");
+    out->vkCmdCopyBufferToImage2KHR = (PFN_vkCmdCopyBufferToImage2KHR)vk->vkGetInstanceProcAddr(instance, "vkCmdCopyBufferToImage2KHR");
+    out->vkCmdCopyImageToBuffer2KHR = (PFN_vkCmdCopyImageToBuffer2KHR)vk->vkGetInstanceProcAddr(instance, "vkCmdCopyImageToBuffer2KHR");
+    out->vkCmdBlitImage2KHR = (PFN_vkCmdBlitImage2KHR)vk->vkGetInstanceProcAddr(instance, "vkCmdBlitImage2KHR");
+    out->vkCmdResolveImage2KHR = (PFN_vkCmdResolveImage2KHR)vk->vkGetInstanceProcAddr(instance, "vkCmdResolveImage2KHR");
+#endif
 #ifdef VK_ANDROID_native_buffer
     out->vkGetSwapchainGrallocUsageANDROID = (PFN_vkGetSwapchainGrallocUsageANDROID)vk->vkGetInstanceProcAddr(instance, "vkGetSwapchainGrallocUsageANDROID");
     out->vkAcquireImageANDROID = (PFN_vkAcquireImageANDROID)vk->vkGetInstanceProcAddr(instance, "vkAcquireImageANDROID");
@@ -1191,6 +1623,18 @@ void init_vulkan_dispatch_from_instance(
     out->vkCmdDebugMarkerBeginEXT = (PFN_vkCmdDebugMarkerBeginEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdDebugMarkerBeginEXT");
     out->vkCmdDebugMarkerEndEXT = (PFN_vkCmdDebugMarkerEndEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdDebugMarkerEndEXT");
     out->vkCmdDebugMarkerInsertEXT = (PFN_vkCmdDebugMarkerInsertEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdDebugMarkerInsertEXT");
+#endif
+#ifdef VK_EXT_transform_feedback
+    out->vkCmdBindTransformFeedbackBuffersEXT = (PFN_vkCmdBindTransformFeedbackBuffersEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdBindTransformFeedbackBuffersEXT");
+    out->vkCmdBeginTransformFeedbackEXT = (PFN_vkCmdBeginTransformFeedbackEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdBeginTransformFeedbackEXT");
+    out->vkCmdEndTransformFeedbackEXT = (PFN_vkCmdEndTransformFeedbackEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdEndTransformFeedbackEXT");
+    out->vkCmdBeginQueryIndexedEXT = (PFN_vkCmdBeginQueryIndexedEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdBeginQueryIndexedEXT");
+    out->vkCmdEndQueryIndexedEXT = (PFN_vkCmdEndQueryIndexedEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdEndQueryIndexedEXT");
+    out->vkCmdDrawIndirectByteCountEXT = (PFN_vkCmdDrawIndirectByteCountEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdDrawIndirectByteCountEXT");
+#endif
+#ifdef VK_NVX_image_view_handle
+    out->vkGetImageViewHandleNVX = (PFN_vkGetImageViewHandleNVX)vk->vkGetInstanceProcAddr(instance, "vkGetImageViewHandleNVX");
+    out->vkGetImageViewAddressNVX = (PFN_vkGetImageViewAddressNVX)vk->vkGetInstanceProcAddr(instance, "vkGetImageViewAddressNVX");
 #endif
 #ifdef VK_AMD_draw_indirect_count
     out->vkCmdDrawIndirectCountAMD = (PFN_vkCmdDrawIndirectCountAMD)vk->vkGetInstanceProcAddr(instance, "vkCmdDrawIndirectCountAMD");
@@ -1208,17 +1652,6 @@ void init_vulkan_dispatch_from_instance(
 #ifdef VK_EXT_conditional_rendering
     out->vkCmdBeginConditionalRenderingEXT = (PFN_vkCmdBeginConditionalRenderingEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdBeginConditionalRenderingEXT");
     out->vkCmdEndConditionalRenderingEXT = (PFN_vkCmdEndConditionalRenderingEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdEndConditionalRenderingEXT");
-#endif
-#ifdef VK_NVX_device_generated_commands
-    out->vkCmdProcessCommandsNVX = (PFN_vkCmdProcessCommandsNVX)vk->vkGetInstanceProcAddr(instance, "vkCmdProcessCommandsNVX");
-    out->vkCmdReserveSpaceForCommandsNVX = (PFN_vkCmdReserveSpaceForCommandsNVX)vk->vkGetInstanceProcAddr(instance, "vkCmdReserveSpaceForCommandsNVX");
-    out->vkCreateIndirectCommandsLayoutNVX = (PFN_vkCreateIndirectCommandsLayoutNVX)vk->vkGetInstanceProcAddr(instance, "vkCreateIndirectCommandsLayoutNVX");
-    out->vkDestroyIndirectCommandsLayoutNVX = (PFN_vkDestroyIndirectCommandsLayoutNVX)vk->vkGetInstanceProcAddr(instance, "vkDestroyIndirectCommandsLayoutNVX");
-    out->vkCreateObjectTableNVX = (PFN_vkCreateObjectTableNVX)vk->vkGetInstanceProcAddr(instance, "vkCreateObjectTableNVX");
-    out->vkDestroyObjectTableNVX = (PFN_vkDestroyObjectTableNVX)vk->vkGetInstanceProcAddr(instance, "vkDestroyObjectTableNVX");
-    out->vkRegisterObjectsNVX = (PFN_vkRegisterObjectsNVX)vk->vkGetInstanceProcAddr(instance, "vkRegisterObjectsNVX");
-    out->vkUnregisterObjectsNVX = (PFN_vkUnregisterObjectsNVX)vk->vkGetInstanceProcAddr(instance, "vkUnregisterObjectsNVX");
-    out->vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX = (PFN_vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX");
 #endif
 #ifdef VK_NV_clip_space_w_scaling
     out->vkCmdSetViewportWScalingNV = (PFN_vkCmdSetViewportWScalingNV)vk->vkGetInstanceProcAddr(instance, "vkCmdSetViewportWScalingNV");
@@ -1267,11 +1700,34 @@ void init_vulkan_dispatch_from_instance(
     out->vkCmdSetSampleLocationsEXT = (PFN_vkCmdSetSampleLocationsEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdSetSampleLocationsEXT");
     out->vkGetPhysicalDeviceMultisamplePropertiesEXT = (PFN_vkGetPhysicalDeviceMultisamplePropertiesEXT)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceMultisamplePropertiesEXT");
 #endif
+#ifdef VK_EXT_image_drm_format_modifier
+    out->vkGetImageDrmFormatModifierPropertiesEXT = (PFN_vkGetImageDrmFormatModifierPropertiesEXT)vk->vkGetInstanceProcAddr(instance, "vkGetImageDrmFormatModifierPropertiesEXT");
+#endif
 #ifdef VK_EXT_validation_cache
     out->vkCreateValidationCacheEXT = (PFN_vkCreateValidationCacheEXT)vk->vkGetInstanceProcAddr(instance, "vkCreateValidationCacheEXT");
     out->vkDestroyValidationCacheEXT = (PFN_vkDestroyValidationCacheEXT)vk->vkGetInstanceProcAddr(instance, "vkDestroyValidationCacheEXT");
     out->vkMergeValidationCachesEXT = (PFN_vkMergeValidationCachesEXT)vk->vkGetInstanceProcAddr(instance, "vkMergeValidationCachesEXT");
     out->vkGetValidationCacheDataEXT = (PFN_vkGetValidationCacheDataEXT)vk->vkGetInstanceProcAddr(instance, "vkGetValidationCacheDataEXT");
+#endif
+#ifdef VK_NV_shading_rate_image
+    out->vkCmdBindShadingRateImageNV = (PFN_vkCmdBindShadingRateImageNV)vk->vkGetInstanceProcAddr(instance, "vkCmdBindShadingRateImageNV");
+    out->vkCmdSetViewportShadingRatePaletteNV = (PFN_vkCmdSetViewportShadingRatePaletteNV)vk->vkGetInstanceProcAddr(instance, "vkCmdSetViewportShadingRatePaletteNV");
+    out->vkCmdSetCoarseSampleOrderNV = (PFN_vkCmdSetCoarseSampleOrderNV)vk->vkGetInstanceProcAddr(instance, "vkCmdSetCoarseSampleOrderNV");
+#endif
+#ifdef VK_NV_ray_tracing
+    out->vkCreateAccelerationStructureNV = (PFN_vkCreateAccelerationStructureNV)vk->vkGetInstanceProcAddr(instance, "vkCreateAccelerationStructureNV");
+    out->vkDestroyAccelerationStructureNV = (PFN_vkDestroyAccelerationStructureNV)vk->vkGetInstanceProcAddr(instance, "vkDestroyAccelerationStructureNV");
+    out->vkGetAccelerationStructureMemoryRequirementsNV = (PFN_vkGetAccelerationStructureMemoryRequirementsNV)vk->vkGetInstanceProcAddr(instance, "vkGetAccelerationStructureMemoryRequirementsNV");
+    out->vkBindAccelerationStructureMemoryNV = (PFN_vkBindAccelerationStructureMemoryNV)vk->vkGetInstanceProcAddr(instance, "vkBindAccelerationStructureMemoryNV");
+    out->vkCmdBuildAccelerationStructureNV = (PFN_vkCmdBuildAccelerationStructureNV)vk->vkGetInstanceProcAddr(instance, "vkCmdBuildAccelerationStructureNV");
+    out->vkCmdCopyAccelerationStructureNV = (PFN_vkCmdCopyAccelerationStructureNV)vk->vkGetInstanceProcAddr(instance, "vkCmdCopyAccelerationStructureNV");
+    out->vkCmdTraceRaysNV = (PFN_vkCmdTraceRaysNV)vk->vkGetInstanceProcAddr(instance, "vkCmdTraceRaysNV");
+    out->vkCreateRayTracingPipelinesNV = (PFN_vkCreateRayTracingPipelinesNV)vk->vkGetInstanceProcAddr(instance, "vkCreateRayTracingPipelinesNV");
+    out->vkGetRayTracingShaderGroupHandlesKHR = (PFN_vkGetRayTracingShaderGroupHandlesKHR)vk->vkGetInstanceProcAddr(instance, "vkGetRayTracingShaderGroupHandlesKHR");
+    out->vkGetRayTracingShaderGroupHandlesNV = (PFN_vkGetRayTracingShaderGroupHandlesNV)vk->vkGetInstanceProcAddr(instance, "vkGetRayTracingShaderGroupHandlesNV");
+    out->vkGetAccelerationStructureHandleNV = (PFN_vkGetAccelerationStructureHandleNV)vk->vkGetInstanceProcAddr(instance, "vkGetAccelerationStructureHandleNV");
+    out->vkCmdWriteAccelerationStructuresPropertiesNV = (PFN_vkCmdWriteAccelerationStructuresPropertiesNV)vk->vkGetInstanceProcAddr(instance, "vkCmdWriteAccelerationStructuresPropertiesNV");
+    out->vkCompileDeferredNV = (PFN_vkCompileDeferredNV)vk->vkGetInstanceProcAddr(instance, "vkCompileDeferredNV");
 #endif
 #ifdef VK_EXT_external_memory_host
     out->vkGetMemoryHostPointerPropertiesEXT = (PFN_vkGetMemoryHostPointerPropertiesEXT)vk->vkGetInstanceProcAddr(instance, "vkGetMemoryHostPointerPropertiesEXT");
@@ -1279,47 +1735,143 @@ void init_vulkan_dispatch_from_instance(
 #ifdef VK_AMD_buffer_marker
     out->vkCmdWriteBufferMarkerAMD = (PFN_vkCmdWriteBufferMarkerAMD)vk->vkGetInstanceProcAddr(instance, "vkCmdWriteBufferMarkerAMD");
 #endif
+#ifdef VK_EXT_calibrated_timestamps
+    out->vkGetPhysicalDeviceCalibrateableTimeDomainsEXT = (PFN_vkGetPhysicalDeviceCalibrateableTimeDomainsEXT)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceCalibrateableTimeDomainsEXT");
+    out->vkGetCalibratedTimestampsEXT = (PFN_vkGetCalibratedTimestampsEXT)vk->vkGetInstanceProcAddr(instance, "vkGetCalibratedTimestampsEXT");
+#endif
+#ifdef VK_NV_mesh_shader
+    out->vkCmdDrawMeshTasksNV = (PFN_vkCmdDrawMeshTasksNV)vk->vkGetInstanceProcAddr(instance, "vkCmdDrawMeshTasksNV");
+    out->vkCmdDrawMeshTasksIndirectNV = (PFN_vkCmdDrawMeshTasksIndirectNV)vk->vkGetInstanceProcAddr(instance, "vkCmdDrawMeshTasksIndirectNV");
+    out->vkCmdDrawMeshTasksIndirectCountNV = (PFN_vkCmdDrawMeshTasksIndirectCountNV)vk->vkGetInstanceProcAddr(instance, "vkCmdDrawMeshTasksIndirectCountNV");
+#endif
+#ifdef VK_NV_scissor_exclusive
+    out->vkCmdSetExclusiveScissorNV = (PFN_vkCmdSetExclusiveScissorNV)vk->vkGetInstanceProcAddr(instance, "vkCmdSetExclusiveScissorNV");
+#endif
 #ifdef VK_NV_device_diagnostic_checkpoints
     out->vkCmdSetCheckpointNV = (PFN_vkCmdSetCheckpointNV)vk->vkGetInstanceProcAddr(instance, "vkCmdSetCheckpointNV");
     out->vkGetQueueCheckpointDataNV = (PFN_vkGetQueueCheckpointDataNV)vk->vkGetInstanceProcAddr(instance, "vkGetQueueCheckpointDataNV");
 #endif
-#ifdef VK_GOOGLE_address_space
-    out->vkMapMemoryIntoAddressSpaceGOOGLE = (PFN_vkMapMemoryIntoAddressSpaceGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkMapMemoryIntoAddressSpaceGOOGLE");
+#ifdef VK_INTEL_performance_query
+    out->vkInitializePerformanceApiINTEL = (PFN_vkInitializePerformanceApiINTEL)vk->vkGetInstanceProcAddr(instance, "vkInitializePerformanceApiINTEL");
+    out->vkUninitializePerformanceApiINTEL = (PFN_vkUninitializePerformanceApiINTEL)vk->vkGetInstanceProcAddr(instance, "vkUninitializePerformanceApiINTEL");
+    out->vkCmdSetPerformanceMarkerINTEL = (PFN_vkCmdSetPerformanceMarkerINTEL)vk->vkGetInstanceProcAddr(instance, "vkCmdSetPerformanceMarkerINTEL");
+    out->vkCmdSetPerformanceStreamMarkerINTEL = (PFN_vkCmdSetPerformanceStreamMarkerINTEL)vk->vkGetInstanceProcAddr(instance, "vkCmdSetPerformanceStreamMarkerINTEL");
+    out->vkCmdSetPerformanceOverrideINTEL = (PFN_vkCmdSetPerformanceOverrideINTEL)vk->vkGetInstanceProcAddr(instance, "vkCmdSetPerformanceOverrideINTEL");
+    out->vkAcquirePerformanceConfigurationINTEL = (PFN_vkAcquirePerformanceConfigurationINTEL)vk->vkGetInstanceProcAddr(instance, "vkAcquirePerformanceConfigurationINTEL");
+    out->vkReleasePerformanceConfigurationINTEL = (PFN_vkReleasePerformanceConfigurationINTEL)vk->vkGetInstanceProcAddr(instance, "vkReleasePerformanceConfigurationINTEL");
+    out->vkQueueSetPerformanceConfigurationINTEL = (PFN_vkQueueSetPerformanceConfigurationINTEL)vk->vkGetInstanceProcAddr(instance, "vkQueueSetPerformanceConfigurationINTEL");
+    out->vkGetPerformanceParameterINTEL = (PFN_vkGetPerformanceParameterINTEL)vk->vkGetInstanceProcAddr(instance, "vkGetPerformanceParameterINTEL");
+#endif
+#ifdef VK_AMD_display_native_hdr
+    out->vkSetLocalDimmingAMD = (PFN_vkSetLocalDimmingAMD)vk->vkGetInstanceProcAddr(instance, "vkSetLocalDimmingAMD");
 #endif
 #ifdef VK_GOOGLE_color_buffer
     out->vkRegisterImageColorBufferGOOGLE = (PFN_vkRegisterImageColorBufferGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkRegisterImageColorBufferGOOGLE");
     out->vkRegisterBufferColorBufferGOOGLE = (PFN_vkRegisterBufferColorBufferGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkRegisterBufferColorBufferGOOGLE");
 #endif
-#ifdef VK_GOOGLE_sized_descriptor_update_template
-    out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
+#ifdef VK_EXT_buffer_device_address
+    out->vkGetBufferDeviceAddressEXT = (PFN_vkGetBufferDeviceAddressEXT)vk->vkGetInstanceProcAddr(instance, "vkGetBufferDeviceAddressEXT");
 #endif
-#ifdef VK_GOOGLE_async_command_buffers
+#ifdef VK_EXT_tooling_info
+    out->vkGetPhysicalDeviceToolPropertiesEXT = (PFN_vkGetPhysicalDeviceToolPropertiesEXT)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceToolPropertiesEXT");
+#endif
+#ifdef VK_NV_cooperative_matrix
+    out->vkGetPhysicalDeviceCooperativeMatrixPropertiesNV = (PFN_vkGetPhysicalDeviceCooperativeMatrixPropertiesNV)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceCooperativeMatrixPropertiesNV");
+#endif
+#ifdef VK_NV_coverage_reduction_mode
+    out->vkGetPhysicalDeviceSupportedFramebufferMixedSamplesCombinationsNV = (PFN_vkGetPhysicalDeviceSupportedFramebufferMixedSamplesCombinationsNV)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceSupportedFramebufferMixedSamplesCombinationsNV");
+#endif
+#ifdef VK_EXT_full_screen_exclusive
+    out->vkGetPhysicalDeviceSurfacePresentModes2EXT = (PFN_vkGetPhysicalDeviceSurfacePresentModes2EXT)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceSurfacePresentModes2EXT");
+    out->vkAcquireFullScreenExclusiveModeEXT = (PFN_vkAcquireFullScreenExclusiveModeEXT)vk->vkGetInstanceProcAddr(instance, "vkAcquireFullScreenExclusiveModeEXT");
+    out->vkReleaseFullScreenExclusiveModeEXT = (PFN_vkReleaseFullScreenExclusiveModeEXT)vk->vkGetInstanceProcAddr(instance, "vkReleaseFullScreenExclusiveModeEXT");
+    out->vkGetDeviceGroupSurfacePresentModes2EXT = (PFN_vkGetDeviceGroupSurfacePresentModes2EXT)vk->vkGetInstanceProcAddr(instance, "vkGetDeviceGroupSurfacePresentModes2EXT");
+#endif
+#ifdef VK_EXT_line_rasterization
+    out->vkCmdSetLineStippleEXT = (PFN_vkCmdSetLineStippleEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdSetLineStippleEXT");
+#endif
+#ifdef VK_EXT_host_query_reset
+    out->vkResetQueryPoolEXT = (PFN_vkResetQueryPoolEXT)vk->vkGetInstanceProcAddr(instance, "vkResetQueryPoolEXT");
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+    out->vkCmdSetCullModeEXT = (PFN_vkCmdSetCullModeEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdSetCullModeEXT");
+    out->vkCmdSetFrontFaceEXT = (PFN_vkCmdSetFrontFaceEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdSetFrontFaceEXT");
+    out->vkCmdSetPrimitiveTopologyEXT = (PFN_vkCmdSetPrimitiveTopologyEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdSetPrimitiveTopologyEXT");
+    out->vkCmdSetViewportWithCountEXT = (PFN_vkCmdSetViewportWithCountEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdSetViewportWithCountEXT");
+    out->vkCmdSetScissorWithCountEXT = (PFN_vkCmdSetScissorWithCountEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdSetScissorWithCountEXT");
+    out->vkCmdBindVertexBuffers2EXT = (PFN_vkCmdBindVertexBuffers2EXT)vk->vkGetInstanceProcAddr(instance, "vkCmdBindVertexBuffers2EXT");
+    out->vkCmdSetDepthTestEnableEXT = (PFN_vkCmdSetDepthTestEnableEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdSetDepthTestEnableEXT");
+    out->vkCmdSetDepthWriteEnableEXT = (PFN_vkCmdSetDepthWriteEnableEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdSetDepthWriteEnableEXT");
+    out->vkCmdSetDepthCompareOpEXT = (PFN_vkCmdSetDepthCompareOpEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdSetDepthCompareOpEXT");
+    out->vkCmdSetDepthBoundsTestEnableEXT = (PFN_vkCmdSetDepthBoundsTestEnableEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdSetDepthBoundsTestEnableEXT");
+    out->vkCmdSetStencilTestEnableEXT = (PFN_vkCmdSetStencilTestEnableEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdSetStencilTestEnableEXT");
+    out->vkCmdSetStencilOpEXT = (PFN_vkCmdSetStencilOpEXT)vk->vkGetInstanceProcAddr(instance, "vkCmdSetStencilOpEXT");
+#endif
+#ifdef VK_NV_device_generated_commands
+    out->vkGetGeneratedCommandsMemoryRequirementsNV = (PFN_vkGetGeneratedCommandsMemoryRequirementsNV)vk->vkGetInstanceProcAddr(instance, "vkGetGeneratedCommandsMemoryRequirementsNV");
+    out->vkCmdPreprocessGeneratedCommandsNV = (PFN_vkCmdPreprocessGeneratedCommandsNV)vk->vkGetInstanceProcAddr(instance, "vkCmdPreprocessGeneratedCommandsNV");
+    out->vkCmdExecuteGeneratedCommandsNV = (PFN_vkCmdExecuteGeneratedCommandsNV)vk->vkGetInstanceProcAddr(instance, "vkCmdExecuteGeneratedCommandsNV");
+    out->vkCmdBindPipelineShaderGroupNV = (PFN_vkCmdBindPipelineShaderGroupNV)vk->vkGetInstanceProcAddr(instance, "vkCmdBindPipelineShaderGroupNV");
+    out->vkCreateIndirectCommandsLayoutNV = (PFN_vkCreateIndirectCommandsLayoutNV)vk->vkGetInstanceProcAddr(instance, "vkCreateIndirectCommandsLayoutNV");
+    out->vkDestroyIndirectCommandsLayoutNV = (PFN_vkDestroyIndirectCommandsLayoutNV)vk->vkGetInstanceProcAddr(instance, "vkDestroyIndirectCommandsLayoutNV");
+#endif
+#ifdef VK_EXT_private_data
+    out->vkCreatePrivateDataSlotEXT = (PFN_vkCreatePrivateDataSlotEXT)vk->vkGetInstanceProcAddr(instance, "vkCreatePrivateDataSlotEXT");
+    out->vkDestroyPrivateDataSlotEXT = (PFN_vkDestroyPrivateDataSlotEXT)vk->vkGetInstanceProcAddr(instance, "vkDestroyPrivateDataSlotEXT");
+    out->vkSetPrivateDataEXT = (PFN_vkSetPrivateDataEXT)vk->vkGetInstanceProcAddr(instance, "vkSetPrivateDataEXT");
+    out->vkGetPrivateDataEXT = (PFN_vkGetPrivateDataEXT)vk->vkGetInstanceProcAddr(instance, "vkGetPrivateDataEXT");
+#endif
+#ifdef VK_NV_fragment_shading_rate_enums
+    out->vkCmdSetFragmentShadingRateEnumNV = (PFN_vkCmdSetFragmentShadingRateEnumNV)vk->vkGetInstanceProcAddr(instance, "vkCmdSetFragmentShadingRateEnumNV");
+#endif
+#ifdef VK_EXT_directfb_surface
+    out->vkGetPhysicalDeviceDirectFBPresentationSupportEXT = (PFN_vkGetPhysicalDeviceDirectFBPresentationSupportEXT)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceDirectFBPresentationSupportEXT");
+#endif
+#ifdef VK_GOOGLE_gfxstream
+    out->vkMapMemoryIntoAddressSpaceGOOGLE = (PFN_vkMapMemoryIntoAddressSpaceGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkMapMemoryIntoAddressSpaceGOOGLE");
+    out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
     out->vkBeginCommandBufferAsyncGOOGLE = (PFN_vkBeginCommandBufferAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkBeginCommandBufferAsyncGOOGLE");
     out->vkEndCommandBufferAsyncGOOGLE = (PFN_vkEndCommandBufferAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkEndCommandBufferAsyncGOOGLE");
     out->vkResetCommandBufferAsyncGOOGLE = (PFN_vkResetCommandBufferAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkResetCommandBufferAsyncGOOGLE");
     out->vkCommandBufferHostSyncGOOGLE = (PFN_vkCommandBufferHostSyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkCommandBufferHostSyncGOOGLE");
-#endif
-#ifdef VK_GOOGLE_create_resources_with_requirements
     out->vkCreateImageWithRequirementsGOOGLE = (PFN_vkCreateImageWithRequirementsGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkCreateImageWithRequirementsGOOGLE");
     out->vkCreateBufferWithRequirementsGOOGLE = (PFN_vkCreateBufferWithRequirementsGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkCreateBufferWithRequirementsGOOGLE");
-#endif
-#ifdef VK_GOOGLE_address_space_info
     out->vkGetMemoryHostAddressInfoGOOGLE = (PFN_vkGetMemoryHostAddressInfoGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkGetMemoryHostAddressInfoGOOGLE");
-#endif
-#ifdef VK_GOOGLE_free_memory_sync
     out->vkFreeMemorySyncGOOGLE = (PFN_vkFreeMemorySyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkFreeMemorySyncGOOGLE");
-#endif
-#ifdef VK_GOOGLE_async_queue_submit
     out->vkQueueHostSyncGOOGLE = (PFN_vkQueueHostSyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueHostSyncGOOGLE");
     out->vkQueueSubmitAsyncGOOGLE = (PFN_vkQueueSubmitAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueSubmitAsyncGOOGLE");
     out->vkQueueWaitIdleAsyncGOOGLE = (PFN_vkQueueWaitIdleAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueWaitIdleAsyncGOOGLE");
     out->vkQueueBindSparseAsyncGOOGLE = (PFN_vkQueueBindSparseAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueBindSparseAsyncGOOGLE");
-#endif
-#ifdef VK_GOOGLE_linear_image_layout
     out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkGetLinearImageLayoutGOOGLE");
-#endif
-#ifdef VK_GOOGLE_queue_submit_with_commands
     out->vkQueueFlushCommandsGOOGLE = (PFN_vkQueueFlushCommandsGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueFlushCommandsGOOGLE");
+    out->vkQueueCommitDescriptorSetUpdatesGOOGLE = (PFN_vkQueueCommitDescriptorSetUpdatesGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueCommitDescriptorSetUpdatesGOOGLE");
+    out->vkCollectDescriptorPoolIdsGOOGLE = (PFN_vkCollectDescriptorPoolIdsGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkCollectDescriptorPoolIdsGOOGLE");
+#endif
+#ifdef VK_KHR_acceleration_structure
+    out->vkCreateAccelerationStructureKHR = (PFN_vkCreateAccelerationStructureKHR)vk->vkGetInstanceProcAddr(instance, "vkCreateAccelerationStructureKHR");
+    out->vkDestroyAccelerationStructureKHR = (PFN_vkDestroyAccelerationStructureKHR)vk->vkGetInstanceProcAddr(instance, "vkDestroyAccelerationStructureKHR");
+    out->vkCmdBuildAccelerationStructuresKHR = (PFN_vkCmdBuildAccelerationStructuresKHR)vk->vkGetInstanceProcAddr(instance, "vkCmdBuildAccelerationStructuresKHR");
+    out->vkCmdBuildAccelerationStructuresIndirectKHR = (PFN_vkCmdBuildAccelerationStructuresIndirectKHR)vk->vkGetInstanceProcAddr(instance, "vkCmdBuildAccelerationStructuresIndirectKHR");
+    out->vkBuildAccelerationStructuresKHR = (PFN_vkBuildAccelerationStructuresKHR)vk->vkGetInstanceProcAddr(instance, "vkBuildAccelerationStructuresKHR");
+    out->vkCopyAccelerationStructureKHR = (PFN_vkCopyAccelerationStructureKHR)vk->vkGetInstanceProcAddr(instance, "vkCopyAccelerationStructureKHR");
+    out->vkCopyAccelerationStructureToMemoryKHR = (PFN_vkCopyAccelerationStructureToMemoryKHR)vk->vkGetInstanceProcAddr(instance, "vkCopyAccelerationStructureToMemoryKHR");
+    out->vkCopyMemoryToAccelerationStructureKHR = (PFN_vkCopyMemoryToAccelerationStructureKHR)vk->vkGetInstanceProcAddr(instance, "vkCopyMemoryToAccelerationStructureKHR");
+    out->vkWriteAccelerationStructuresPropertiesKHR = (PFN_vkWriteAccelerationStructuresPropertiesKHR)vk->vkGetInstanceProcAddr(instance, "vkWriteAccelerationStructuresPropertiesKHR");
+    out->vkCmdCopyAccelerationStructureKHR = (PFN_vkCmdCopyAccelerationStructureKHR)vk->vkGetInstanceProcAddr(instance, "vkCmdCopyAccelerationStructureKHR");
+    out->vkCmdCopyAccelerationStructureToMemoryKHR = (PFN_vkCmdCopyAccelerationStructureToMemoryKHR)vk->vkGetInstanceProcAddr(instance, "vkCmdCopyAccelerationStructureToMemoryKHR");
+    out->vkCmdCopyMemoryToAccelerationStructureKHR = (PFN_vkCmdCopyMemoryToAccelerationStructureKHR)vk->vkGetInstanceProcAddr(instance, "vkCmdCopyMemoryToAccelerationStructureKHR");
+    out->vkGetAccelerationStructureDeviceAddressKHR = (PFN_vkGetAccelerationStructureDeviceAddressKHR)vk->vkGetInstanceProcAddr(instance, "vkGetAccelerationStructureDeviceAddressKHR");
+    out->vkCmdWriteAccelerationStructuresPropertiesKHR = (PFN_vkCmdWriteAccelerationStructuresPropertiesKHR)vk->vkGetInstanceProcAddr(instance, "vkCmdWriteAccelerationStructuresPropertiesKHR");
+    out->vkGetDeviceAccelerationStructureCompatibilityKHR = (PFN_vkGetDeviceAccelerationStructureCompatibilityKHR)vk->vkGetInstanceProcAddr(instance, "vkGetDeviceAccelerationStructureCompatibilityKHR");
+    out->vkGetAccelerationStructureBuildSizesKHR = (PFN_vkGetAccelerationStructureBuildSizesKHR)vk->vkGetInstanceProcAddr(instance, "vkGetAccelerationStructureBuildSizesKHR");
+#endif
+#ifdef VK_KHR_ray_tracing_pipeline
+    out->vkCmdTraceRaysKHR = (PFN_vkCmdTraceRaysKHR)vk->vkGetInstanceProcAddr(instance, "vkCmdTraceRaysKHR");
+    out->vkCreateRayTracingPipelinesKHR = (PFN_vkCreateRayTracingPipelinesKHR)vk->vkGetInstanceProcAddr(instance, "vkCreateRayTracingPipelinesKHR");
+    out->vkGetRayTracingCaptureReplayShaderGroupHandlesKHR = (PFN_vkGetRayTracingCaptureReplayShaderGroupHandlesKHR)vk->vkGetInstanceProcAddr(instance, "vkGetRayTracingCaptureReplayShaderGroupHandlesKHR");
+    out->vkCmdTraceRaysIndirectKHR = (PFN_vkCmdTraceRaysIndirectKHR)vk->vkGetInstanceProcAddr(instance, "vkCmdTraceRaysIndirectKHR");
+    out->vkGetRayTracingShaderGroupStackSizeKHR = (PFN_vkGetRayTracingShaderGroupStackSizeKHR)vk->vkGetInstanceProcAddr(instance, "vkGetRayTracingShaderGroupStackSizeKHR");
+    out->vkCmdSetRayTracingPipelineStackSizeKHR = (PFN_vkCmdSetRayTracingPipelineStackSizeKHR)vk->vkGetInstanceProcAddr(instance, "vkCmdSetRayTracingPipelineStackSizeKHR");
 #endif
 }
 
@@ -1387,9 +1939,6 @@ void init_vulkan_dispatch_from_device(
 #ifdef VK_KHR_wayland_surface
     out->vkCreateWaylandSurfaceKHR = (PFN_vkCreateWaylandSurfaceKHR)vk->vkGetDeviceProcAddr(device, "vkCreateWaylandSurfaceKHR");
 #endif
-#ifdef VK_KHR_mir_surface
-    out->vkCreateMirSurfaceKHR = (PFN_vkCreateMirSurfaceKHR)vk->vkGetDeviceProcAddr(device, "vkCreateMirSurfaceKHR");
-#endif
 #ifdef VK_KHR_android_surface
     out->vkCreateAndroidSurfaceKHR = (PFN_vkCreateAndroidSurfaceKHR)vk->vkGetDeviceProcAddr(device, "vkCreateAndroidSurfaceKHR");
 #endif
@@ -1405,6 +1954,9 @@ void init_vulkan_dispatch_from_device(
     out->vkDestroyDebugReportCallbackEXT = (PFN_vkDestroyDebugReportCallbackEXT)vk->vkGetDeviceProcAddr(device, "vkDestroyDebugReportCallbackEXT");
     out->vkDebugReportMessageEXT = (PFN_vkDebugReportMessageEXT)vk->vkGetDeviceProcAddr(device, "vkDebugReportMessageEXT");
 #endif
+#ifdef VK_GGP_stream_descriptor_surface
+    out->vkCreateStreamDescriptorSurfaceGGP = (PFN_vkCreateStreamDescriptorSurfaceGGP)vk->vkGetDeviceProcAddr(device, "vkCreateStreamDescriptorSurfaceGGP");
+#endif
 #ifdef VK_NN_vi_surface
     out->vkCreateViSurfaceNN = (PFN_vkCreateViSurfaceNN)vk->vkGetDeviceProcAddr(device, "vkCreateViSurfaceNN");
 #endif
@@ -1418,6 +1970,18 @@ void init_vulkan_dispatch_from_device(
     out->vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vk->vkGetDeviceProcAddr(device, "vkCreateDebugUtilsMessengerEXT");
     out->vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vk->vkGetDeviceProcAddr(device, "vkDestroyDebugUtilsMessengerEXT");
     out->vkSubmitDebugUtilsMessageEXT = (PFN_vkSubmitDebugUtilsMessageEXT)vk->vkGetDeviceProcAddr(device, "vkSubmitDebugUtilsMessageEXT");
+#endif
+#ifdef VK_FUCHSIA_imagepipe_surface
+    out->vkCreateImagePipeSurfaceFUCHSIA = (PFN_vkCreateImagePipeSurfaceFUCHSIA)vk->vkGetDeviceProcAddr(device, "vkCreateImagePipeSurfaceFUCHSIA");
+#endif
+#ifdef VK_EXT_metal_surface
+    out->vkCreateMetalSurfaceEXT = (PFN_vkCreateMetalSurfaceEXT)vk->vkGetDeviceProcAddr(device, "vkCreateMetalSurfaceEXT");
+#endif
+#ifdef VK_EXT_headless_surface
+    out->vkCreateHeadlessSurfaceEXT = (PFN_vkCreateHeadlessSurfaceEXT)vk->vkGetDeviceProcAddr(device, "vkCreateHeadlessSurfaceEXT");
+#endif
+#ifdef VK_EXT_directfb_surface
+    out->vkCreateDirectFBSurfaceEXT = (PFN_vkCreateDirectFBSurfaceEXT)vk->vkGetDeviceProcAddr(device, "vkCreateDirectFBSurfaceEXT");
 #endif
 #ifdef VK_VERSION_1_0
     out->vkGetDeviceQueue = (PFN_vkGetDeviceQueue)vk->vkGetDeviceProcAddr(device, "vkGetDeviceQueue");
@@ -1558,6 +2122,21 @@ void init_vulkan_dispatch_from_device(
     out->vkUpdateDescriptorSetWithTemplate = (PFN_vkUpdateDescriptorSetWithTemplate)vk->vkGetDeviceProcAddr(device, "vkUpdateDescriptorSetWithTemplate");
     out->vkGetDescriptorSetLayoutSupport = (PFN_vkGetDescriptorSetLayoutSupport)vk->vkGetDeviceProcAddr(device, "vkGetDescriptorSetLayoutSupport");
 #endif
+#ifdef VK_VERSION_1_2
+    out->vkCmdDrawIndirectCount = (PFN_vkCmdDrawIndirectCount)vk->vkGetDeviceProcAddr(device, "vkCmdDrawIndirectCount");
+    out->vkCmdDrawIndexedIndirectCount = (PFN_vkCmdDrawIndexedIndirectCount)vk->vkGetDeviceProcAddr(device, "vkCmdDrawIndexedIndirectCount");
+    out->vkCreateRenderPass2 = (PFN_vkCreateRenderPass2)vk->vkGetDeviceProcAddr(device, "vkCreateRenderPass2");
+    out->vkCmdBeginRenderPass2 = (PFN_vkCmdBeginRenderPass2)vk->vkGetDeviceProcAddr(device, "vkCmdBeginRenderPass2");
+    out->vkCmdNextSubpass2 = (PFN_vkCmdNextSubpass2)vk->vkGetDeviceProcAddr(device, "vkCmdNextSubpass2");
+    out->vkCmdEndRenderPass2 = (PFN_vkCmdEndRenderPass2)vk->vkGetDeviceProcAddr(device, "vkCmdEndRenderPass2");
+    out->vkResetQueryPool = (PFN_vkResetQueryPool)vk->vkGetDeviceProcAddr(device, "vkResetQueryPool");
+    out->vkGetSemaphoreCounterValue = (PFN_vkGetSemaphoreCounterValue)vk->vkGetDeviceProcAddr(device, "vkGetSemaphoreCounterValue");
+    out->vkWaitSemaphores = (PFN_vkWaitSemaphores)vk->vkGetDeviceProcAddr(device, "vkWaitSemaphores");
+    out->vkSignalSemaphore = (PFN_vkSignalSemaphore)vk->vkGetDeviceProcAddr(device, "vkSignalSemaphore");
+    out->vkGetBufferDeviceAddress = (PFN_vkGetBufferDeviceAddress)vk->vkGetDeviceProcAddr(device, "vkGetBufferDeviceAddress");
+    out->vkGetBufferOpaqueCaptureAddress = (PFN_vkGetBufferOpaqueCaptureAddress)vk->vkGetDeviceProcAddr(device, "vkGetBufferOpaqueCaptureAddress");
+    out->vkGetDeviceMemoryOpaqueCaptureAddress = (PFN_vkGetDeviceMemoryOpaqueCaptureAddress)vk->vkGetDeviceProcAddr(device, "vkGetDeviceMemoryOpaqueCaptureAddress");
+#endif
 #ifdef VK_KHR_surface
     out->vkGetPhysicalDeviceSurfaceSupportKHR = (PFN_vkGetPhysicalDeviceSurfaceSupportKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceSurfaceSupportKHR");
     out->vkGetPhysicalDeviceSurfaceCapabilitiesKHR = (PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
@@ -1583,9 +2162,6 @@ void init_vulkan_dispatch_from_device(
 #endif
 #ifdef VK_KHR_wayland_surface
     out->vkGetPhysicalDeviceWaylandPresentationSupportKHR = (PFN_vkGetPhysicalDeviceWaylandPresentationSupportKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceWaylandPresentationSupportKHR");
-#endif
-#ifdef VK_KHR_mir_surface
-    out->vkGetPhysicalDeviceMirPresentationSupportKHR = (PFN_vkGetPhysicalDeviceMirPresentationSupportKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceMirPresentationSupportKHR");
 #endif
 #ifdef VK_KHR_get_physical_device_properties2
     out->vkGetPhysicalDeviceFeatures2KHR = (PFN_vkGetPhysicalDeviceFeatures2KHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceFeatures2KHR");
@@ -1655,6 +2231,12 @@ void init_vulkan_dispatch_from_device(
     out->vkImportFenceFdKHR = (PFN_vkImportFenceFdKHR)vk->vkGetDeviceProcAddr(device, "vkImportFenceFdKHR");
     out->vkGetFenceFdKHR = (PFN_vkGetFenceFdKHR)vk->vkGetDeviceProcAddr(device, "vkGetFenceFdKHR");
 #endif
+#ifdef VK_KHR_performance_query
+    out->vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR = (PFN_vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR)vk->vkGetDeviceProcAddr(device, "vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR");
+    out->vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR = (PFN_vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR");
+    out->vkAcquireProfilingLockKHR = (PFN_vkAcquireProfilingLockKHR)vk->vkGetDeviceProcAddr(device, "vkAcquireProfilingLockKHR");
+    out->vkReleaseProfilingLockKHR = (PFN_vkReleaseProfilingLockKHR)vk->vkGetDeviceProcAddr(device, "vkReleaseProfilingLockKHR");
+#endif
 #ifdef VK_KHR_get_surface_capabilities2
     out->vkGetPhysicalDeviceSurfaceCapabilities2KHR = (PFN_vkGetPhysicalDeviceSurfaceCapabilities2KHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceSurfaceCapabilities2KHR");
     out->vkGetPhysicalDeviceSurfaceFormats2KHR = (PFN_vkGetPhysicalDeviceSurfaceFormats2KHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceSurfaceFormats2KHR");
@@ -1685,6 +2267,40 @@ void init_vulkan_dispatch_from_device(
     out->vkCmdDrawIndirectCountKHR = (PFN_vkCmdDrawIndirectCountKHR)vk->vkGetDeviceProcAddr(device, "vkCmdDrawIndirectCountKHR");
     out->vkCmdDrawIndexedIndirectCountKHR = (PFN_vkCmdDrawIndexedIndirectCountKHR)vk->vkGetDeviceProcAddr(device, "vkCmdDrawIndexedIndirectCountKHR");
 #endif
+#ifdef VK_KHR_timeline_semaphore
+    out->vkGetSemaphoreCounterValueKHR = (PFN_vkGetSemaphoreCounterValueKHR)vk->vkGetDeviceProcAddr(device, "vkGetSemaphoreCounterValueKHR");
+    out->vkWaitSemaphoresKHR = (PFN_vkWaitSemaphoresKHR)vk->vkGetDeviceProcAddr(device, "vkWaitSemaphoresKHR");
+    out->vkSignalSemaphoreKHR = (PFN_vkSignalSemaphoreKHR)vk->vkGetDeviceProcAddr(device, "vkSignalSemaphoreKHR");
+#endif
+#ifdef VK_KHR_fragment_shading_rate
+    out->vkGetPhysicalDeviceFragmentShadingRatesKHR = (PFN_vkGetPhysicalDeviceFragmentShadingRatesKHR)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceFragmentShadingRatesKHR");
+    out->vkCmdSetFragmentShadingRateKHR = (PFN_vkCmdSetFragmentShadingRateKHR)vk->vkGetDeviceProcAddr(device, "vkCmdSetFragmentShadingRateKHR");
+#endif
+#ifdef VK_KHR_buffer_device_address
+    out->vkGetBufferDeviceAddressKHR = (PFN_vkGetBufferDeviceAddressKHR)vk->vkGetDeviceProcAddr(device, "vkGetBufferDeviceAddressKHR");
+    out->vkGetBufferOpaqueCaptureAddressKHR = (PFN_vkGetBufferOpaqueCaptureAddressKHR)vk->vkGetDeviceProcAddr(device, "vkGetBufferOpaqueCaptureAddressKHR");
+    out->vkGetDeviceMemoryOpaqueCaptureAddressKHR = (PFN_vkGetDeviceMemoryOpaqueCaptureAddressKHR)vk->vkGetDeviceProcAddr(device, "vkGetDeviceMemoryOpaqueCaptureAddressKHR");
+#endif
+#ifdef VK_KHR_deferred_host_operations
+    out->vkCreateDeferredOperationKHR = (PFN_vkCreateDeferredOperationKHR)vk->vkGetDeviceProcAddr(device, "vkCreateDeferredOperationKHR");
+    out->vkDestroyDeferredOperationKHR = (PFN_vkDestroyDeferredOperationKHR)vk->vkGetDeviceProcAddr(device, "vkDestroyDeferredOperationKHR");
+    out->vkGetDeferredOperationMaxConcurrencyKHR = (PFN_vkGetDeferredOperationMaxConcurrencyKHR)vk->vkGetDeviceProcAddr(device, "vkGetDeferredOperationMaxConcurrencyKHR");
+    out->vkGetDeferredOperationResultKHR = (PFN_vkGetDeferredOperationResultKHR)vk->vkGetDeviceProcAddr(device, "vkGetDeferredOperationResultKHR");
+    out->vkDeferredOperationJoinKHR = (PFN_vkDeferredOperationJoinKHR)vk->vkGetDeviceProcAddr(device, "vkDeferredOperationJoinKHR");
+#endif
+#ifdef VK_KHR_pipeline_executable_properties
+    out->vkGetPipelineExecutablePropertiesKHR = (PFN_vkGetPipelineExecutablePropertiesKHR)vk->vkGetDeviceProcAddr(device, "vkGetPipelineExecutablePropertiesKHR");
+    out->vkGetPipelineExecutableStatisticsKHR = (PFN_vkGetPipelineExecutableStatisticsKHR)vk->vkGetDeviceProcAddr(device, "vkGetPipelineExecutableStatisticsKHR");
+    out->vkGetPipelineExecutableInternalRepresentationsKHR = (PFN_vkGetPipelineExecutableInternalRepresentationsKHR)vk->vkGetDeviceProcAddr(device, "vkGetPipelineExecutableInternalRepresentationsKHR");
+#endif
+#ifdef VK_KHR_copy_commands2
+    out->vkCmdCopyBuffer2KHR = (PFN_vkCmdCopyBuffer2KHR)vk->vkGetDeviceProcAddr(device, "vkCmdCopyBuffer2KHR");
+    out->vkCmdCopyImage2KHR = (PFN_vkCmdCopyImage2KHR)vk->vkGetDeviceProcAddr(device, "vkCmdCopyImage2KHR");
+    out->vkCmdCopyBufferToImage2KHR = (PFN_vkCmdCopyBufferToImage2KHR)vk->vkGetDeviceProcAddr(device, "vkCmdCopyBufferToImage2KHR");
+    out->vkCmdCopyImageToBuffer2KHR = (PFN_vkCmdCopyImageToBuffer2KHR)vk->vkGetDeviceProcAddr(device, "vkCmdCopyImageToBuffer2KHR");
+    out->vkCmdBlitImage2KHR = (PFN_vkCmdBlitImage2KHR)vk->vkGetDeviceProcAddr(device, "vkCmdBlitImage2KHR");
+    out->vkCmdResolveImage2KHR = (PFN_vkCmdResolveImage2KHR)vk->vkGetDeviceProcAddr(device, "vkCmdResolveImage2KHR");
+#endif
 #ifdef VK_ANDROID_native_buffer
     out->vkGetSwapchainGrallocUsageANDROID = (PFN_vkGetSwapchainGrallocUsageANDROID)vk->vkGetDeviceProcAddr(device, "vkGetSwapchainGrallocUsageANDROID");
     out->vkAcquireImageANDROID = (PFN_vkAcquireImageANDROID)vk->vkGetDeviceProcAddr(device, "vkAcquireImageANDROID");
@@ -1696,6 +2312,18 @@ void init_vulkan_dispatch_from_device(
     out->vkCmdDebugMarkerBeginEXT = (PFN_vkCmdDebugMarkerBeginEXT)vk->vkGetDeviceProcAddr(device, "vkCmdDebugMarkerBeginEXT");
     out->vkCmdDebugMarkerEndEXT = (PFN_vkCmdDebugMarkerEndEXT)vk->vkGetDeviceProcAddr(device, "vkCmdDebugMarkerEndEXT");
     out->vkCmdDebugMarkerInsertEXT = (PFN_vkCmdDebugMarkerInsertEXT)vk->vkGetDeviceProcAddr(device, "vkCmdDebugMarkerInsertEXT");
+#endif
+#ifdef VK_EXT_transform_feedback
+    out->vkCmdBindTransformFeedbackBuffersEXT = (PFN_vkCmdBindTransformFeedbackBuffersEXT)vk->vkGetDeviceProcAddr(device, "vkCmdBindTransformFeedbackBuffersEXT");
+    out->vkCmdBeginTransformFeedbackEXT = (PFN_vkCmdBeginTransformFeedbackEXT)vk->vkGetDeviceProcAddr(device, "vkCmdBeginTransformFeedbackEXT");
+    out->vkCmdEndTransformFeedbackEXT = (PFN_vkCmdEndTransformFeedbackEXT)vk->vkGetDeviceProcAddr(device, "vkCmdEndTransformFeedbackEXT");
+    out->vkCmdBeginQueryIndexedEXT = (PFN_vkCmdBeginQueryIndexedEXT)vk->vkGetDeviceProcAddr(device, "vkCmdBeginQueryIndexedEXT");
+    out->vkCmdEndQueryIndexedEXT = (PFN_vkCmdEndQueryIndexedEXT)vk->vkGetDeviceProcAddr(device, "vkCmdEndQueryIndexedEXT");
+    out->vkCmdDrawIndirectByteCountEXT = (PFN_vkCmdDrawIndirectByteCountEXT)vk->vkGetDeviceProcAddr(device, "vkCmdDrawIndirectByteCountEXT");
+#endif
+#ifdef VK_NVX_image_view_handle
+    out->vkGetImageViewHandleNVX = (PFN_vkGetImageViewHandleNVX)vk->vkGetDeviceProcAddr(device, "vkGetImageViewHandleNVX");
+    out->vkGetImageViewAddressNVX = (PFN_vkGetImageViewAddressNVX)vk->vkGetDeviceProcAddr(device, "vkGetImageViewAddressNVX");
 #endif
 #ifdef VK_AMD_draw_indirect_count
     out->vkCmdDrawIndirectCountAMD = (PFN_vkCmdDrawIndirectCountAMD)vk->vkGetDeviceProcAddr(device, "vkCmdDrawIndirectCountAMD");
@@ -1713,17 +2341,6 @@ void init_vulkan_dispatch_from_device(
 #ifdef VK_EXT_conditional_rendering
     out->vkCmdBeginConditionalRenderingEXT = (PFN_vkCmdBeginConditionalRenderingEXT)vk->vkGetDeviceProcAddr(device, "vkCmdBeginConditionalRenderingEXT");
     out->vkCmdEndConditionalRenderingEXT = (PFN_vkCmdEndConditionalRenderingEXT)vk->vkGetDeviceProcAddr(device, "vkCmdEndConditionalRenderingEXT");
-#endif
-#ifdef VK_NVX_device_generated_commands
-    out->vkCmdProcessCommandsNVX = (PFN_vkCmdProcessCommandsNVX)vk->vkGetDeviceProcAddr(device, "vkCmdProcessCommandsNVX");
-    out->vkCmdReserveSpaceForCommandsNVX = (PFN_vkCmdReserveSpaceForCommandsNVX)vk->vkGetDeviceProcAddr(device, "vkCmdReserveSpaceForCommandsNVX");
-    out->vkCreateIndirectCommandsLayoutNVX = (PFN_vkCreateIndirectCommandsLayoutNVX)vk->vkGetDeviceProcAddr(device, "vkCreateIndirectCommandsLayoutNVX");
-    out->vkDestroyIndirectCommandsLayoutNVX = (PFN_vkDestroyIndirectCommandsLayoutNVX)vk->vkGetDeviceProcAddr(device, "vkDestroyIndirectCommandsLayoutNVX");
-    out->vkCreateObjectTableNVX = (PFN_vkCreateObjectTableNVX)vk->vkGetDeviceProcAddr(device, "vkCreateObjectTableNVX");
-    out->vkDestroyObjectTableNVX = (PFN_vkDestroyObjectTableNVX)vk->vkGetDeviceProcAddr(device, "vkDestroyObjectTableNVX");
-    out->vkRegisterObjectsNVX = (PFN_vkRegisterObjectsNVX)vk->vkGetDeviceProcAddr(device, "vkRegisterObjectsNVX");
-    out->vkUnregisterObjectsNVX = (PFN_vkUnregisterObjectsNVX)vk->vkGetDeviceProcAddr(device, "vkUnregisterObjectsNVX");
-    out->vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX = (PFN_vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceGeneratedCommandsPropertiesNVX");
 #endif
 #ifdef VK_NV_clip_space_w_scaling
     out->vkCmdSetViewportWScalingNV = (PFN_vkCmdSetViewportWScalingNV)vk->vkGetDeviceProcAddr(device, "vkCmdSetViewportWScalingNV");
@@ -1772,11 +2389,34 @@ void init_vulkan_dispatch_from_device(
     out->vkCmdSetSampleLocationsEXT = (PFN_vkCmdSetSampleLocationsEXT)vk->vkGetDeviceProcAddr(device, "vkCmdSetSampleLocationsEXT");
     out->vkGetPhysicalDeviceMultisamplePropertiesEXT = (PFN_vkGetPhysicalDeviceMultisamplePropertiesEXT)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceMultisamplePropertiesEXT");
 #endif
+#ifdef VK_EXT_image_drm_format_modifier
+    out->vkGetImageDrmFormatModifierPropertiesEXT = (PFN_vkGetImageDrmFormatModifierPropertiesEXT)vk->vkGetDeviceProcAddr(device, "vkGetImageDrmFormatModifierPropertiesEXT");
+#endif
 #ifdef VK_EXT_validation_cache
     out->vkCreateValidationCacheEXT = (PFN_vkCreateValidationCacheEXT)vk->vkGetDeviceProcAddr(device, "vkCreateValidationCacheEXT");
     out->vkDestroyValidationCacheEXT = (PFN_vkDestroyValidationCacheEXT)vk->vkGetDeviceProcAddr(device, "vkDestroyValidationCacheEXT");
     out->vkMergeValidationCachesEXT = (PFN_vkMergeValidationCachesEXT)vk->vkGetDeviceProcAddr(device, "vkMergeValidationCachesEXT");
     out->vkGetValidationCacheDataEXT = (PFN_vkGetValidationCacheDataEXT)vk->vkGetDeviceProcAddr(device, "vkGetValidationCacheDataEXT");
+#endif
+#ifdef VK_NV_shading_rate_image
+    out->vkCmdBindShadingRateImageNV = (PFN_vkCmdBindShadingRateImageNV)vk->vkGetDeviceProcAddr(device, "vkCmdBindShadingRateImageNV");
+    out->vkCmdSetViewportShadingRatePaletteNV = (PFN_vkCmdSetViewportShadingRatePaletteNV)vk->vkGetDeviceProcAddr(device, "vkCmdSetViewportShadingRatePaletteNV");
+    out->vkCmdSetCoarseSampleOrderNV = (PFN_vkCmdSetCoarseSampleOrderNV)vk->vkGetDeviceProcAddr(device, "vkCmdSetCoarseSampleOrderNV");
+#endif
+#ifdef VK_NV_ray_tracing
+    out->vkCreateAccelerationStructureNV = (PFN_vkCreateAccelerationStructureNV)vk->vkGetDeviceProcAddr(device, "vkCreateAccelerationStructureNV");
+    out->vkDestroyAccelerationStructureNV = (PFN_vkDestroyAccelerationStructureNV)vk->vkGetDeviceProcAddr(device, "vkDestroyAccelerationStructureNV");
+    out->vkGetAccelerationStructureMemoryRequirementsNV = (PFN_vkGetAccelerationStructureMemoryRequirementsNV)vk->vkGetDeviceProcAddr(device, "vkGetAccelerationStructureMemoryRequirementsNV");
+    out->vkBindAccelerationStructureMemoryNV = (PFN_vkBindAccelerationStructureMemoryNV)vk->vkGetDeviceProcAddr(device, "vkBindAccelerationStructureMemoryNV");
+    out->vkCmdBuildAccelerationStructureNV = (PFN_vkCmdBuildAccelerationStructureNV)vk->vkGetDeviceProcAddr(device, "vkCmdBuildAccelerationStructureNV");
+    out->vkCmdCopyAccelerationStructureNV = (PFN_vkCmdCopyAccelerationStructureNV)vk->vkGetDeviceProcAddr(device, "vkCmdCopyAccelerationStructureNV");
+    out->vkCmdTraceRaysNV = (PFN_vkCmdTraceRaysNV)vk->vkGetDeviceProcAddr(device, "vkCmdTraceRaysNV");
+    out->vkCreateRayTracingPipelinesNV = (PFN_vkCreateRayTracingPipelinesNV)vk->vkGetDeviceProcAddr(device, "vkCreateRayTracingPipelinesNV");
+    out->vkGetRayTracingShaderGroupHandlesKHR = (PFN_vkGetRayTracingShaderGroupHandlesKHR)vk->vkGetDeviceProcAddr(device, "vkGetRayTracingShaderGroupHandlesKHR");
+    out->vkGetRayTracingShaderGroupHandlesNV = (PFN_vkGetRayTracingShaderGroupHandlesNV)vk->vkGetDeviceProcAddr(device, "vkGetRayTracingShaderGroupHandlesNV");
+    out->vkGetAccelerationStructureHandleNV = (PFN_vkGetAccelerationStructureHandleNV)vk->vkGetDeviceProcAddr(device, "vkGetAccelerationStructureHandleNV");
+    out->vkCmdWriteAccelerationStructuresPropertiesNV = (PFN_vkCmdWriteAccelerationStructuresPropertiesNV)vk->vkGetDeviceProcAddr(device, "vkCmdWriteAccelerationStructuresPropertiesNV");
+    out->vkCompileDeferredNV = (PFN_vkCompileDeferredNV)vk->vkGetDeviceProcAddr(device, "vkCompileDeferredNV");
 #endif
 #ifdef VK_EXT_external_memory_host
     out->vkGetMemoryHostPointerPropertiesEXT = (PFN_vkGetMemoryHostPointerPropertiesEXT)vk->vkGetDeviceProcAddr(device, "vkGetMemoryHostPointerPropertiesEXT");
@@ -1784,47 +2424,143 @@ void init_vulkan_dispatch_from_device(
 #ifdef VK_AMD_buffer_marker
     out->vkCmdWriteBufferMarkerAMD = (PFN_vkCmdWriteBufferMarkerAMD)vk->vkGetDeviceProcAddr(device, "vkCmdWriteBufferMarkerAMD");
 #endif
+#ifdef VK_EXT_calibrated_timestamps
+    out->vkGetPhysicalDeviceCalibrateableTimeDomainsEXT = (PFN_vkGetPhysicalDeviceCalibrateableTimeDomainsEXT)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceCalibrateableTimeDomainsEXT");
+    out->vkGetCalibratedTimestampsEXT = (PFN_vkGetCalibratedTimestampsEXT)vk->vkGetDeviceProcAddr(device, "vkGetCalibratedTimestampsEXT");
+#endif
+#ifdef VK_NV_mesh_shader
+    out->vkCmdDrawMeshTasksNV = (PFN_vkCmdDrawMeshTasksNV)vk->vkGetDeviceProcAddr(device, "vkCmdDrawMeshTasksNV");
+    out->vkCmdDrawMeshTasksIndirectNV = (PFN_vkCmdDrawMeshTasksIndirectNV)vk->vkGetDeviceProcAddr(device, "vkCmdDrawMeshTasksIndirectNV");
+    out->vkCmdDrawMeshTasksIndirectCountNV = (PFN_vkCmdDrawMeshTasksIndirectCountNV)vk->vkGetDeviceProcAddr(device, "vkCmdDrawMeshTasksIndirectCountNV");
+#endif
+#ifdef VK_NV_scissor_exclusive
+    out->vkCmdSetExclusiveScissorNV = (PFN_vkCmdSetExclusiveScissorNV)vk->vkGetDeviceProcAddr(device, "vkCmdSetExclusiveScissorNV");
+#endif
 #ifdef VK_NV_device_diagnostic_checkpoints
     out->vkCmdSetCheckpointNV = (PFN_vkCmdSetCheckpointNV)vk->vkGetDeviceProcAddr(device, "vkCmdSetCheckpointNV");
     out->vkGetQueueCheckpointDataNV = (PFN_vkGetQueueCheckpointDataNV)vk->vkGetDeviceProcAddr(device, "vkGetQueueCheckpointDataNV");
 #endif
-#ifdef VK_GOOGLE_address_space
-    out->vkMapMemoryIntoAddressSpaceGOOGLE = (PFN_vkMapMemoryIntoAddressSpaceGOOGLE)vk->vkGetDeviceProcAddr(device, "vkMapMemoryIntoAddressSpaceGOOGLE");
+#ifdef VK_INTEL_performance_query
+    out->vkInitializePerformanceApiINTEL = (PFN_vkInitializePerformanceApiINTEL)vk->vkGetDeviceProcAddr(device, "vkInitializePerformanceApiINTEL");
+    out->vkUninitializePerformanceApiINTEL = (PFN_vkUninitializePerformanceApiINTEL)vk->vkGetDeviceProcAddr(device, "vkUninitializePerformanceApiINTEL");
+    out->vkCmdSetPerformanceMarkerINTEL = (PFN_vkCmdSetPerformanceMarkerINTEL)vk->vkGetDeviceProcAddr(device, "vkCmdSetPerformanceMarkerINTEL");
+    out->vkCmdSetPerformanceStreamMarkerINTEL = (PFN_vkCmdSetPerformanceStreamMarkerINTEL)vk->vkGetDeviceProcAddr(device, "vkCmdSetPerformanceStreamMarkerINTEL");
+    out->vkCmdSetPerformanceOverrideINTEL = (PFN_vkCmdSetPerformanceOverrideINTEL)vk->vkGetDeviceProcAddr(device, "vkCmdSetPerformanceOverrideINTEL");
+    out->vkAcquirePerformanceConfigurationINTEL = (PFN_vkAcquirePerformanceConfigurationINTEL)vk->vkGetDeviceProcAddr(device, "vkAcquirePerformanceConfigurationINTEL");
+    out->vkReleasePerformanceConfigurationINTEL = (PFN_vkReleasePerformanceConfigurationINTEL)vk->vkGetDeviceProcAddr(device, "vkReleasePerformanceConfigurationINTEL");
+    out->vkQueueSetPerformanceConfigurationINTEL = (PFN_vkQueueSetPerformanceConfigurationINTEL)vk->vkGetDeviceProcAddr(device, "vkQueueSetPerformanceConfigurationINTEL");
+    out->vkGetPerformanceParameterINTEL = (PFN_vkGetPerformanceParameterINTEL)vk->vkGetDeviceProcAddr(device, "vkGetPerformanceParameterINTEL");
+#endif
+#ifdef VK_AMD_display_native_hdr
+    out->vkSetLocalDimmingAMD = (PFN_vkSetLocalDimmingAMD)vk->vkGetDeviceProcAddr(device, "vkSetLocalDimmingAMD");
 #endif
 #ifdef VK_GOOGLE_color_buffer
     out->vkRegisterImageColorBufferGOOGLE = (PFN_vkRegisterImageColorBufferGOOGLE)vk->vkGetDeviceProcAddr(device, "vkRegisterImageColorBufferGOOGLE");
     out->vkRegisterBufferColorBufferGOOGLE = (PFN_vkRegisterBufferColorBufferGOOGLE)vk->vkGetDeviceProcAddr(device, "vkRegisterBufferColorBufferGOOGLE");
 #endif
-#ifdef VK_GOOGLE_sized_descriptor_update_template
-    out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)vk->vkGetDeviceProcAddr(device, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
+#ifdef VK_EXT_buffer_device_address
+    out->vkGetBufferDeviceAddressEXT = (PFN_vkGetBufferDeviceAddressEXT)vk->vkGetDeviceProcAddr(device, "vkGetBufferDeviceAddressEXT");
 #endif
-#ifdef VK_GOOGLE_async_command_buffers
+#ifdef VK_EXT_tooling_info
+    out->vkGetPhysicalDeviceToolPropertiesEXT = (PFN_vkGetPhysicalDeviceToolPropertiesEXT)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceToolPropertiesEXT");
+#endif
+#ifdef VK_NV_cooperative_matrix
+    out->vkGetPhysicalDeviceCooperativeMatrixPropertiesNV = (PFN_vkGetPhysicalDeviceCooperativeMatrixPropertiesNV)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceCooperativeMatrixPropertiesNV");
+#endif
+#ifdef VK_NV_coverage_reduction_mode
+    out->vkGetPhysicalDeviceSupportedFramebufferMixedSamplesCombinationsNV = (PFN_vkGetPhysicalDeviceSupportedFramebufferMixedSamplesCombinationsNV)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceSupportedFramebufferMixedSamplesCombinationsNV");
+#endif
+#ifdef VK_EXT_full_screen_exclusive
+    out->vkGetPhysicalDeviceSurfacePresentModes2EXT = (PFN_vkGetPhysicalDeviceSurfacePresentModes2EXT)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceSurfacePresentModes2EXT");
+    out->vkAcquireFullScreenExclusiveModeEXT = (PFN_vkAcquireFullScreenExclusiveModeEXT)vk->vkGetDeviceProcAddr(device, "vkAcquireFullScreenExclusiveModeEXT");
+    out->vkReleaseFullScreenExclusiveModeEXT = (PFN_vkReleaseFullScreenExclusiveModeEXT)vk->vkGetDeviceProcAddr(device, "vkReleaseFullScreenExclusiveModeEXT");
+    out->vkGetDeviceGroupSurfacePresentModes2EXT = (PFN_vkGetDeviceGroupSurfacePresentModes2EXT)vk->vkGetDeviceProcAddr(device, "vkGetDeviceGroupSurfacePresentModes2EXT");
+#endif
+#ifdef VK_EXT_line_rasterization
+    out->vkCmdSetLineStippleEXT = (PFN_vkCmdSetLineStippleEXT)vk->vkGetDeviceProcAddr(device, "vkCmdSetLineStippleEXT");
+#endif
+#ifdef VK_EXT_host_query_reset
+    out->vkResetQueryPoolEXT = (PFN_vkResetQueryPoolEXT)vk->vkGetDeviceProcAddr(device, "vkResetQueryPoolEXT");
+#endif
+#ifdef VK_EXT_extended_dynamic_state
+    out->vkCmdSetCullModeEXT = (PFN_vkCmdSetCullModeEXT)vk->vkGetDeviceProcAddr(device, "vkCmdSetCullModeEXT");
+    out->vkCmdSetFrontFaceEXT = (PFN_vkCmdSetFrontFaceEXT)vk->vkGetDeviceProcAddr(device, "vkCmdSetFrontFaceEXT");
+    out->vkCmdSetPrimitiveTopologyEXT = (PFN_vkCmdSetPrimitiveTopologyEXT)vk->vkGetDeviceProcAddr(device, "vkCmdSetPrimitiveTopologyEXT");
+    out->vkCmdSetViewportWithCountEXT = (PFN_vkCmdSetViewportWithCountEXT)vk->vkGetDeviceProcAddr(device, "vkCmdSetViewportWithCountEXT");
+    out->vkCmdSetScissorWithCountEXT = (PFN_vkCmdSetScissorWithCountEXT)vk->vkGetDeviceProcAddr(device, "vkCmdSetScissorWithCountEXT");
+    out->vkCmdBindVertexBuffers2EXT = (PFN_vkCmdBindVertexBuffers2EXT)vk->vkGetDeviceProcAddr(device, "vkCmdBindVertexBuffers2EXT");
+    out->vkCmdSetDepthTestEnableEXT = (PFN_vkCmdSetDepthTestEnableEXT)vk->vkGetDeviceProcAddr(device, "vkCmdSetDepthTestEnableEXT");
+    out->vkCmdSetDepthWriteEnableEXT = (PFN_vkCmdSetDepthWriteEnableEXT)vk->vkGetDeviceProcAddr(device, "vkCmdSetDepthWriteEnableEXT");
+    out->vkCmdSetDepthCompareOpEXT = (PFN_vkCmdSetDepthCompareOpEXT)vk->vkGetDeviceProcAddr(device, "vkCmdSetDepthCompareOpEXT");
+    out->vkCmdSetDepthBoundsTestEnableEXT = (PFN_vkCmdSetDepthBoundsTestEnableEXT)vk->vkGetDeviceProcAddr(device, "vkCmdSetDepthBoundsTestEnableEXT");
+    out->vkCmdSetStencilTestEnableEXT = (PFN_vkCmdSetStencilTestEnableEXT)vk->vkGetDeviceProcAddr(device, "vkCmdSetStencilTestEnableEXT");
+    out->vkCmdSetStencilOpEXT = (PFN_vkCmdSetStencilOpEXT)vk->vkGetDeviceProcAddr(device, "vkCmdSetStencilOpEXT");
+#endif
+#ifdef VK_NV_device_generated_commands
+    out->vkGetGeneratedCommandsMemoryRequirementsNV = (PFN_vkGetGeneratedCommandsMemoryRequirementsNV)vk->vkGetDeviceProcAddr(device, "vkGetGeneratedCommandsMemoryRequirementsNV");
+    out->vkCmdPreprocessGeneratedCommandsNV = (PFN_vkCmdPreprocessGeneratedCommandsNV)vk->vkGetDeviceProcAddr(device, "vkCmdPreprocessGeneratedCommandsNV");
+    out->vkCmdExecuteGeneratedCommandsNV = (PFN_vkCmdExecuteGeneratedCommandsNV)vk->vkGetDeviceProcAddr(device, "vkCmdExecuteGeneratedCommandsNV");
+    out->vkCmdBindPipelineShaderGroupNV = (PFN_vkCmdBindPipelineShaderGroupNV)vk->vkGetDeviceProcAddr(device, "vkCmdBindPipelineShaderGroupNV");
+    out->vkCreateIndirectCommandsLayoutNV = (PFN_vkCreateIndirectCommandsLayoutNV)vk->vkGetDeviceProcAddr(device, "vkCreateIndirectCommandsLayoutNV");
+    out->vkDestroyIndirectCommandsLayoutNV = (PFN_vkDestroyIndirectCommandsLayoutNV)vk->vkGetDeviceProcAddr(device, "vkDestroyIndirectCommandsLayoutNV");
+#endif
+#ifdef VK_EXT_private_data
+    out->vkCreatePrivateDataSlotEXT = (PFN_vkCreatePrivateDataSlotEXT)vk->vkGetDeviceProcAddr(device, "vkCreatePrivateDataSlotEXT");
+    out->vkDestroyPrivateDataSlotEXT = (PFN_vkDestroyPrivateDataSlotEXT)vk->vkGetDeviceProcAddr(device, "vkDestroyPrivateDataSlotEXT");
+    out->vkSetPrivateDataEXT = (PFN_vkSetPrivateDataEXT)vk->vkGetDeviceProcAddr(device, "vkSetPrivateDataEXT");
+    out->vkGetPrivateDataEXT = (PFN_vkGetPrivateDataEXT)vk->vkGetDeviceProcAddr(device, "vkGetPrivateDataEXT");
+#endif
+#ifdef VK_NV_fragment_shading_rate_enums
+    out->vkCmdSetFragmentShadingRateEnumNV = (PFN_vkCmdSetFragmentShadingRateEnumNV)vk->vkGetDeviceProcAddr(device, "vkCmdSetFragmentShadingRateEnumNV");
+#endif
+#ifdef VK_EXT_directfb_surface
+    out->vkGetPhysicalDeviceDirectFBPresentationSupportEXT = (PFN_vkGetPhysicalDeviceDirectFBPresentationSupportEXT)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceDirectFBPresentationSupportEXT");
+#endif
+#ifdef VK_GOOGLE_gfxstream
+    out->vkMapMemoryIntoAddressSpaceGOOGLE = (PFN_vkMapMemoryIntoAddressSpaceGOOGLE)vk->vkGetDeviceProcAddr(device, "vkMapMemoryIntoAddressSpaceGOOGLE");
+    out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)vk->vkGetDeviceProcAddr(device, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
     out->vkBeginCommandBufferAsyncGOOGLE = (PFN_vkBeginCommandBufferAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkBeginCommandBufferAsyncGOOGLE");
     out->vkEndCommandBufferAsyncGOOGLE = (PFN_vkEndCommandBufferAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkEndCommandBufferAsyncGOOGLE");
     out->vkResetCommandBufferAsyncGOOGLE = (PFN_vkResetCommandBufferAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkResetCommandBufferAsyncGOOGLE");
     out->vkCommandBufferHostSyncGOOGLE = (PFN_vkCommandBufferHostSyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkCommandBufferHostSyncGOOGLE");
-#endif
-#ifdef VK_GOOGLE_create_resources_with_requirements
     out->vkCreateImageWithRequirementsGOOGLE = (PFN_vkCreateImageWithRequirementsGOOGLE)vk->vkGetDeviceProcAddr(device, "vkCreateImageWithRequirementsGOOGLE");
     out->vkCreateBufferWithRequirementsGOOGLE = (PFN_vkCreateBufferWithRequirementsGOOGLE)vk->vkGetDeviceProcAddr(device, "vkCreateBufferWithRequirementsGOOGLE");
-#endif
-#ifdef VK_GOOGLE_address_space_info
     out->vkGetMemoryHostAddressInfoGOOGLE = (PFN_vkGetMemoryHostAddressInfoGOOGLE)vk->vkGetDeviceProcAddr(device, "vkGetMemoryHostAddressInfoGOOGLE");
-#endif
-#ifdef VK_GOOGLE_free_memory_sync
     out->vkFreeMemorySyncGOOGLE = (PFN_vkFreeMemorySyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkFreeMemorySyncGOOGLE");
-#endif
-#ifdef VK_GOOGLE_async_queue_submit
     out->vkQueueHostSyncGOOGLE = (PFN_vkQueueHostSyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueHostSyncGOOGLE");
     out->vkQueueSubmitAsyncGOOGLE = (PFN_vkQueueSubmitAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueSubmitAsyncGOOGLE");
     out->vkQueueWaitIdleAsyncGOOGLE = (PFN_vkQueueWaitIdleAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueWaitIdleAsyncGOOGLE");
     out->vkQueueBindSparseAsyncGOOGLE = (PFN_vkQueueBindSparseAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueBindSparseAsyncGOOGLE");
-#endif
-#ifdef VK_GOOGLE_linear_image_layout
     out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)vk->vkGetDeviceProcAddr(device, "vkGetLinearImageLayoutGOOGLE");
-#endif
-#ifdef VK_GOOGLE_queue_submit_with_commands
     out->vkQueueFlushCommandsGOOGLE = (PFN_vkQueueFlushCommandsGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueFlushCommandsGOOGLE");
+    out->vkQueueCommitDescriptorSetUpdatesGOOGLE = (PFN_vkQueueCommitDescriptorSetUpdatesGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueCommitDescriptorSetUpdatesGOOGLE");
+    out->vkCollectDescriptorPoolIdsGOOGLE = (PFN_vkCollectDescriptorPoolIdsGOOGLE)vk->vkGetDeviceProcAddr(device, "vkCollectDescriptorPoolIdsGOOGLE");
+#endif
+#ifdef VK_KHR_acceleration_structure
+    out->vkCreateAccelerationStructureKHR = (PFN_vkCreateAccelerationStructureKHR)vk->vkGetDeviceProcAddr(device, "vkCreateAccelerationStructureKHR");
+    out->vkDestroyAccelerationStructureKHR = (PFN_vkDestroyAccelerationStructureKHR)vk->vkGetDeviceProcAddr(device, "vkDestroyAccelerationStructureKHR");
+    out->vkCmdBuildAccelerationStructuresKHR = (PFN_vkCmdBuildAccelerationStructuresKHR)vk->vkGetDeviceProcAddr(device, "vkCmdBuildAccelerationStructuresKHR");
+    out->vkCmdBuildAccelerationStructuresIndirectKHR = (PFN_vkCmdBuildAccelerationStructuresIndirectKHR)vk->vkGetDeviceProcAddr(device, "vkCmdBuildAccelerationStructuresIndirectKHR");
+    out->vkBuildAccelerationStructuresKHR = (PFN_vkBuildAccelerationStructuresKHR)vk->vkGetDeviceProcAddr(device, "vkBuildAccelerationStructuresKHR");
+    out->vkCopyAccelerationStructureKHR = (PFN_vkCopyAccelerationStructureKHR)vk->vkGetDeviceProcAddr(device, "vkCopyAccelerationStructureKHR");
+    out->vkCopyAccelerationStructureToMemoryKHR = (PFN_vkCopyAccelerationStructureToMemoryKHR)vk->vkGetDeviceProcAddr(device, "vkCopyAccelerationStructureToMemoryKHR");
+    out->vkCopyMemoryToAccelerationStructureKHR = (PFN_vkCopyMemoryToAccelerationStructureKHR)vk->vkGetDeviceProcAddr(device, "vkCopyMemoryToAccelerationStructureKHR");
+    out->vkWriteAccelerationStructuresPropertiesKHR = (PFN_vkWriteAccelerationStructuresPropertiesKHR)vk->vkGetDeviceProcAddr(device, "vkWriteAccelerationStructuresPropertiesKHR");
+    out->vkCmdCopyAccelerationStructureKHR = (PFN_vkCmdCopyAccelerationStructureKHR)vk->vkGetDeviceProcAddr(device, "vkCmdCopyAccelerationStructureKHR");
+    out->vkCmdCopyAccelerationStructureToMemoryKHR = (PFN_vkCmdCopyAccelerationStructureToMemoryKHR)vk->vkGetDeviceProcAddr(device, "vkCmdCopyAccelerationStructureToMemoryKHR");
+    out->vkCmdCopyMemoryToAccelerationStructureKHR = (PFN_vkCmdCopyMemoryToAccelerationStructureKHR)vk->vkGetDeviceProcAddr(device, "vkCmdCopyMemoryToAccelerationStructureKHR");
+    out->vkGetAccelerationStructureDeviceAddressKHR = (PFN_vkGetAccelerationStructureDeviceAddressKHR)vk->vkGetDeviceProcAddr(device, "vkGetAccelerationStructureDeviceAddressKHR");
+    out->vkCmdWriteAccelerationStructuresPropertiesKHR = (PFN_vkCmdWriteAccelerationStructuresPropertiesKHR)vk->vkGetDeviceProcAddr(device, "vkCmdWriteAccelerationStructuresPropertiesKHR");
+    out->vkGetDeviceAccelerationStructureCompatibilityKHR = (PFN_vkGetDeviceAccelerationStructureCompatibilityKHR)vk->vkGetDeviceProcAddr(device, "vkGetDeviceAccelerationStructureCompatibilityKHR");
+    out->vkGetAccelerationStructureBuildSizesKHR = (PFN_vkGetAccelerationStructureBuildSizesKHR)vk->vkGetDeviceProcAddr(device, "vkGetAccelerationStructureBuildSizesKHR");
+#endif
+#ifdef VK_KHR_ray_tracing_pipeline
+    out->vkCmdTraceRaysKHR = (PFN_vkCmdTraceRaysKHR)vk->vkGetDeviceProcAddr(device, "vkCmdTraceRaysKHR");
+    out->vkCreateRayTracingPipelinesKHR = (PFN_vkCreateRayTracingPipelinesKHR)vk->vkGetDeviceProcAddr(device, "vkCreateRayTracingPipelinesKHR");
+    out->vkGetRayTracingCaptureReplayShaderGroupHandlesKHR = (PFN_vkGetRayTracingCaptureReplayShaderGroupHandlesKHR)vk->vkGetDeviceProcAddr(device, "vkGetRayTracingCaptureReplayShaderGroupHandlesKHR");
+    out->vkCmdTraceRaysIndirectKHR = (PFN_vkCmdTraceRaysIndirectKHR)vk->vkGetDeviceProcAddr(device, "vkCmdTraceRaysIndirectKHR");
+    out->vkGetRayTracingShaderGroupStackSizeKHR = (PFN_vkGetRayTracingShaderGroupStackSizeKHR)vk->vkGetDeviceProcAddr(device, "vkGetRayTracingShaderGroupStackSizeKHR");
+    out->vkCmdSetRayTracingPipelineStackSizeKHR = (PFN_vkCmdSetRayTracingPipelineStackSizeKHR)vk->vkGetDeviceProcAddr(device, "vkCmdSetRayTracingPipelineStackSizeKHR");
 #endif
 }
 
