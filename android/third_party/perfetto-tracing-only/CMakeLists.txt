@@ -132,6 +132,7 @@ android_add_pbzero_library(${perfetto}/protos/perfetto/trace/track_event thread_
 android_add_pbzero_library(${perfetto}/protos/perfetto/trace/track_event track_descriptor)
 android_add_pbzero_library(${perfetto}/protos/perfetto/trace/track_event track_event)
 
+
 if (OPTION_PERFETTO_USE_SDK)
     set(PERFETTO_TRACING_ONLY_SOURCES
         perfetto.cc
