@@ -57,6 +57,7 @@ if(OPTION_ASTC_TESTS)
   endforeach()
 endif()
 
+
 add_subdirectory(libusb)
 add_subdirectory(zlib)
 add_subdirectory(protobuf)
@@ -110,4 +111,13 @@ if (EXISTS ${ANDROID_QEMU2_TOP_DIR}/../perfetto AND (NOT LINUX_AARCH64) AND (NOT
     add_subdirectory(perfetto-tracing-only)
 else()
     add_subdirectory(perfetto-tracing-only-stub)
+endif()
+
+if (BLUETOOTH_EMULATION)
+  message(STATUS "Including bluetooth emulation (and dependencies) from rootcanal")
+  add_subdirectory(abseil-cpp)
+  add_subdirectory(libchrome)
+  add_subdirectory(bluetooth)
+else()
+  message(STATUS "Bluetooth emulation disabled.")
 endif()
