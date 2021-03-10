@@ -188,9 +188,13 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     // clang-format on
 
     setObjectName("ExtendedControls");
-    setWindowTitle(QString("Extended controls - ") + android_hw->avd_name
+    // Use different title for Embedded Emuator in Studio.
+    if (android_cmdLineOptions->qt_hide_window) {
+        setWindowTitle(android_hw->avd_name + QString(" - Extended Controls"));
+    } else {
+        setWindowTitle(QString("Extended Controls - ") + android_hw->avd_name
                    + ":" + QString::number(android_serial_number_port));
-
+    }
     if (android_cmdLineOptions && android_cmdLineOptions->no_location_ui) {
         mExtendedUi->locationButton->setVisible(false);
     } else {
