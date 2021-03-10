@@ -18,40 +18,47 @@ function(android_find_windows_library NAME)
 endfunction()
 
 set(WINDOWS_LIBS
-    atls
-    ws2_32
-    d3d9
-    ole32
-    psapi
-    iphlpapi
-    wldap32
-    shell32
-    user32
     advapi32
-    secur32
-    mfuuid
-    msdmo
-    dmoguids
-    wmcodecdspuuid
     amstrmid
-    winmm
-    shlwapi
-    gdi32
-    dxguid
-    wininet
-    diaguids
-    dbghelp
-    normaliz
+    atls
+    cfgmgr32
     crypt32
+    d3d9
+    delayimp
+    dbghelp
+    diaguids
+    dmoguids
+    dxguid
+    gdi32
+    imagehlp
+    iphlpapi
+    mfuuid
     mincore
-    imagehlp)
+    msdmo
+    normaliz
+    ole32
+    powrprof
+    propsys
+    psapi
+    secur32
+    setupapi
+    shell32
+    shlwapi
+    user32
+    version
+    wininet
+    winmm
+    wldap32
+    wmcodecdspuuid
+    ws2_32
+    )
 foreach(LIB ${WINDOWS_LIBS})
   android_find_windows_library(${LIB})
 endforeach()
 
-if(WIN32 AND MSVC)  
+if(WIN32 AND MSVC)
    # We expect all the visual studio variables to be set. The rebuild script will take care of this..
-   # If you are building from 
+   # If you are building from
   get_filename_component(VCTOOLS_PATH "$ENV{VCTOOLSINSTALLDIR}" ABSOLUTE CACHE)
   get_filename_component(VSINSTALLDIR "$ENV{VSINSTALLDIR}" ABSOLUTE CACHE)
 

@@ -86,6 +86,228 @@ function(android_compile_for_host EXE SOURCE OUT_PATH)
 endfunction()
 
 # ~~~
+# Enable the compilation of pdl files using packet_gen. This relies on
+# syste/b being available
+#
+# The following parameters are accepted
+#
+# ``GENERATED`` The set of generated sources
+# ``SRC`` List of source files to be compiled.
+# ``INCLUDES`` Include directory.
+# ``NAMESPACE`` Root name space to use
+# ``OUTPUT_DIR``
+#      Directory where the generated sources will be placed, defaults to CMAKE_CURRENT_BINARY_DIR/gens
+#  ``SOURCE_DIR``
+#      Root directory where sources can be found, defaults to CMAKE_CURRENT_SOURCE_DIR
+# ~~~
+function(android_bluetooth_packet_gen)
+  # Parse arguments
+  set(options)
+  set(oneValueArgs OUTPUT_DIR GENERATED SOURCE_DIR INCLUDES NAMESPACE)
+  set(multiValueArgs SRC)
+  cmake_parse_arguments(packet_gen "${options}" "${oneValueArgs}"
+                        "${multiValueArgs}" ${ARGN})
+
+  if(NOT packet_gen_OUTPUT_DIR)
+    set(packet_gen_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/packet_gen)
+  endif()
+  if(packet_gen_NAMESPACE)
+    set(packet_gen_NAMESPACE "--root_namespace=${packet_gen_NAMESPACE}")
+  endif()
+  if(NOT packet_gen_SOURCE_DIR)
+    set(packet_gen_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+  endif()
+  if(NOT packet_gen_SRC)
+    message(
+      SEND_ERROR
+        "Error: android_packet_gen_compile() called without any .yy files")
+    return()
+  endif()
+
+  # Configure packet_gen
+  android_compile_for_host(
+    bluetooth_packetgen
+    ${ANDROID_QEMU2_TOP_DIR}/android/third_party/bluetooth/packet_gen
+    bluetooth_packetgen_EXECUTABLE)
+
+  set(BLUE_GEN "")
+  file(MAKE_DIRECTORY ${packet_gen_OUTPUT_DIR})
+  foreach(FIL ${packet_gen_SRC})
+    get_filename_component(
+      ABS_FIL ${packet_gen_SOURCE_DIR}/${packet_gen_INCLUDES}/${FIL} ABSOLUTE)
+    get_filename_component(FIL_WE ${FIL} NAME_WE)
+    get_filename_component(FIL_DIR ${FIL} DIRECTORY)
+    set(FIL_GEN "${packet_gen_OUTPUT_DIR}/${FIL_DIR}/${FIL_WE}.h")
+    add_custom_command(
+      OUTPUT "${FIL_GEN}"
+      COMMAND
+        ${bluetooth_packetgen_EXECUTABLE} ${packet_gen_NAMESPACE}
+        "--include=${packet_gen_INCLUDES}" "--out=${packet_gen_OUTPUT_DIR}"
+        ${packet_gen_INCLUDES}/${FIL}
+      COMMENT "Creating bluetooth packet headers from ${ABS_FIL}"
+      WORKING_DIRECTORY ${packet_gen_SOURCE_DIR}
+      VERBATIM
+      DEPENDS ${bluetooth_packetgen_EXECUTABLE} ${ABS_FIL})
+    list(APPEND BLUE_GEN ${FIL_GEN})
+    set_source_files_properties(${FIL_GEN} PROPERTIES GENERATED TRUE)
+  endforeach()
+
+  # Make the library available
+  if(packet_gen_GENERATED)
+    set(${packet_gen_GENERATED} "${BLUE_GEN}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+# ~~~
+# Enable the compilation of .l / .ll files using flex. This relies on
+# ./external/flex being available
+#
+# The following parameters are accepted
+#
+# ``GENERATED`` The set of generated files
+# ``SRC`` List of source files to be compiled.
+# ``OUTPUT_DIR``
+#      Directory where the generated sources will be placed, defaults to CMAKE_CURRENT_BINARY_DIR/flex
+#  ``SOURCE_DIR``
+#      Root directory where sources can be found, defaults to CMAKE_CURRENT_SOURCE_DIR
+# ~~~
+function(android_flex_compile)
+  # Parse arguments
+  set(options)
+  set(oneValueArgs OUTPUT_DIR GENERATED SOURCE_DIR)
+  set(multiValueArgs SRC)
+  cmake_parse_arguments(flex "${options}" "${oneValueArgs}" "${multiValueArgs}"
+                        ${ARGN})
+
+  if(NOT flex_OUTPUT_DIR)
+    set(flex_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/flex)
+  endif()
+  if(NOT flex_SOURCE_DIR)
+    set(flex_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+  endif()
+  if(NOT flex_SRC)
+    message(
+      SEND_ERROR "Error: android_flex_compile() called without any .l/.ll files"
+    )
+    return()
+  endif()
+
+  # Configure flex
+  android_compile_for_host(
+    flex ${ANDROID_QEMU2_TOP_DIR}/android/third_party/flex flex_EXECUTABLE)
+
+  set(FLEX_GEN "")
+  file(MAKE_DIRECTORY ${flex_OUTPUT_DIR})
+  foreach(FIL ${flex_SRC})
+    get_filename_component(ABS_FIL ${FIL} ABSOLUTE)
+    get_filename_component(FIL_WE ${FIL} NAME_WE)
+    file(RELATIVE_PATH REL_FIL ${flex_SOURCE_DIR} ${ABS_FIL})
+    get_filename_component(REL_DIR ${REL_FIL} DIRECTORY)
+    set(RELFIL_WE "${REL_DIR}/${FIL_WE}")
+    add_custom_command(
+      OUTPUT "${flex_OUTPUT_DIR}/${RELFIL_WE}.cpp"
+      COMMAND ${flex_EXECUTABLE} -o ${flex_OUTPUT_DIR}/${RELFIL_WE}.cpp
+              ${ABS_FIL}
+      COMMENT "Lexing ${ABS_FIL} with flex"
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      VERBATIM
+      DEPENDS ${flex_EXECUTABLE} ${ABS_FIL})
+    list(APPEND FLEX_GEN ${flex_OUTPUT_DIR}/${RELFIL_WE}.cpp)
+    set_source_files_properties(${flex_OUTPUT_DIR}/${RELFIL_WE}.cpp
+                                PROPERTIES GENERATED TRUE)
+  endforeach()
+
+  # Make the library available
+  if(flex_GENERATED)
+    set(${flex_GENERATED} "${FLEX_GEN}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+# ~~~
+# Enable the compilation of .yy files using bison. This relies on
+# ./external/bison
+#
+# The following parameters are accepted
+#
+# ''TYPE`` Generate c or cpp, defaults to cpp
+# ``TARGET`` The library target to generate.
+# ``SRC`` List of source files to be compiled.
+# ``OUTPUT_DIR``
+#      Directory where the generated sources will be placed, defaults to CMAKE_CURRENT_BINARY_DIR/gens
+#  ``SOURCE_DIR``
+#      Root directory where sources can be found, defaults to CMAKE_CURRENT_SOURCE_DIR
+# ~~~
+function(android_yacc_compile)
+  # Parse arguments
+  set(options)
+  set(oneValueArgs OUTPUT_DIR GENERATED SOURCE_DIR EXT)
+  set(multiValueArgs SRC)
+  cmake_parse_arguments(yacc "${options}" "${oneValueArgs}" "${multiValueArgs}"
+                        ${ARGN})
+
+  if(NOT yacc_EXT)
+    set(yacc_EXT "cpp")
+  endif()
+  if(NOT yacc_OUTPUT_DIR)
+    set(yacc_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/yacc)
+  endif()
+  if(NOT yacc_SOURCE_DIR)
+    set(yacc_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+  endif()
+  if(NOT yacc_SRC)
+    message(
+      SEND_ERROR "Error: android_yacc_compile() called without any .yy files")
+    return()
+  endif()
+
+  set(BISON_DIR ${ANDROID_QEMU2_TOP_DIR}/../bison)
+  # Configure bison & m4
+  android_compile_for_host(
+    bison ${ANDROID_QEMU2_TOP_DIR}/android/third_party/bison bison_EXECUTABLE)
+  android_compile_for_host(m4 ${ANDROID_QEMU2_TOP_DIR}/android/third_party/m4
+                           m4_EXECUTABLE)
+
+  if(MSVC AND WINDOWS_MSVC_X86_64)
+    set(PKG_DIR "set BISON_PKGDATADIR=${BISON_DIR}/data &")
+  else()
+    set(PKG_DIR "BISON_PKGDATADIR=${BISON_DIR}/data")
+    set(M4 "M4=${m4_EXECUTABLE}")
+  endif()
+
+  set(YACC_GEN "")
+  file(MAKE_DIRECTORY ${yacc_OUTPUT_DIR})
+  foreach(FIL ${yacc_SRC})
+    get_filename_component(ABS_FIL ${FIL} ABSOLUTE)
+    get_filename_component(FIL_WE ${FIL} NAME_WE)
+    get_filename_component(FIL_EX ${FIL} EXT)
+    file(RELATIVE_PATH REL_FIL ${yacc_SOURCE_DIR} ${ABS_FIL})
+    get_filename_component(REL_DIR ${REL_FIL} DIRECTORY)
+    set(RELFIL_WE "${REL_DIR}/${FIL_WE}")
+    add_custom_command(
+      OUTPUT "${yacc_OUTPUT_DIR}/${RELFIL_WE}.h"
+             "${yacc_OUTPUT_DIR}/${RELFIL_WE}.${yacc_EXT}"
+      COMMAND
+        ${PKG_DIR} ${M4} ${bison_EXECUTABLE} -d
+        --defines=${yacc_OUTPUT_DIR}/${RELFIL_WE}.h -o
+        ${yacc_OUTPUT_DIR}/${RELFIL_WE}.${yacc_EXT} ${ABS_FIL}
+      COMMENT "Yacc'ing ${ABS_FIL} with a bison"
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      VERBATIM
+      DEPENDS ${bison_EXECUTABLE} ${ABS_FIL} ${m4_EXECUTABLE})
+    list(APPEND YACC_GEN ${yacc_OUTPUT_DIR}/${RELFIL_WE}.h)
+    list(APPEND YACC_GEN ${yacc_OUTPUT_DIR}/${RELFIL_WE}.${yacc_EXT})
+    set_source_files_properties(
+      ${yacc_OUTPUT_DIR}/${RELFIL_WE}.h
+      ${yacc_OUTPUT_DIR}/${RELFIL_WE}.${yacc_EXT} PROPERTIES GENERATED TRUE)
+  endforeach()
+
+  # Make the library available
+  if(yacc_GENERATED)
+    set(${yacc_GENERATED} "${YACC_GEN}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+# ~~~
 # Enable the compilation of .asm files using nasm. This will include the nasm project if needed to compile the assembly
 # files.
 #
@@ -210,24 +432,62 @@ function(android_target_compile_options TGT OS MODIFIER ITEMS)
 endfunction()
 
 # ~~~
-# Registers the given target, by calculating the source set and setting licensens.
+# Prefix the given prefix path to a source file that is not absolute sets.
+#
+# ``OUT``     The variable containing the transformed paths.
+# ``PREFIX``  The relative prefix path.
+# ``SRC    `` List of source files to be prefixed
+# ~~~
+function(prefix_sources)
+  set(oneValueArgs OUT PREFIX)
+  set(multiValueArgs SRC)
+  cmake_parse_arguments(pre "${options}" "${oneValueArgs}" "${multiValueArgs}"
+                        ${ARGN})
+  message("Prefix: ${pre_PREFIX} -> ${pre_OUT}")
+  if(NOT "${pre_PREFIX}" STREQUAL "")
+    set(ABSOLUTE_SOURCES "")
+    foreach(FIL ${pre_SRC})
+      if(IS_ABSOLUTE ${FIL})
+        list(APPEND ABSOLUTE_SOURCES "${FIL}")
+      else()
+        list(APPEND ABSOLUTE_SOURCES "${pre_PREFIX}/${FIL}")
+      endif()
+    endforeach()
+    set(${pre_OUT} ${ABSOLUTE_SOURCES} PARENT_SCOPE)
+  else()
+    set(${pre_OUT} ${pre_SRC} PARENT_SCOPE)
+  endif()
+endfunction()
+
+# ~~~
+# ~~~
+# Registers the given target, by calculating the source set and setting
+# licensens.
 #
 # ``TARGET``  The library/executable target. For example emulatory-libyuv
-# ``LIBNAME`` Public library name, this is how it is known in the world. For example libyuv.
-# ``SOURCES`` List of source files to be compiled, part of every target.
-# ``LINUX``   List of source files to be compiled if the current target is LINUX_X86_64
-# ``DARWIN``  List of source files to be compiled if the current target is DARWIN_X86_64
-# ``WINDOWS`` List of source files to be compiled if the current target is WINDOWS_MSVC_X86_64
-# ``MSVC``    List of source files to be compiled if the current target is  WINDOWS_MSVC_X86_64
-# ``URL``     URL where the source code can be found.
-# ``REPO``    Internal location where the, where the notice can be found.
-# ``LICENSE`` SPDX License identifier.
-# ``NOTICE``  Location where the NOTICE can be found
+# ``LIBNAME`` Public library name, this is how it is known in the world. For
+# example libyuv. ``SOURCES`` List of source files to be compiled, part of every
+# target. ``LINUX``   List of source files to be compiled if the current target
+# is LINUX_X86_64 ``DARWIN``  List of source files to be compiled if the current
+# target is DARWIN_X86_64 ``WINDOWS`` List of source files to be compiled if the
+# current target is WINDOWS_MSVC_X86_64 ``MSVC``    List of source files to be
+# compiled if the current target is WINDOWS_MSVC_X86_64 ``URL``     URL where
+# the source code can be found. ``REPO``    Internal location where the, where
+# the notice can be found. ``LICENSE`` SPDX License identifier. ``NOTICE``
+# Location where the NOTICE can be found ``SOURCE_DIR`` Root source directory.
+# This will be prepended to every source
 # ~~~
 function(_register_target)
   set(options NODISTRIBUTE)
-  set(oneValueArgs TARGET LICENSE LIBNAME REPO URL NOTICE)
-  set(multiValueArgs SRC LINUX MSVC WINDOWS DARWIN)
+  set(oneValueArgs
+      TARGET
+      LICENSE
+      LIBNAME
+      REPO
+      URL
+      NOTICE
+      SOURCE_DIR)
+  set(multiValueArgs SRC LINUX MSVC WINDOWS DARWIN POSIX)
   cmake_parse_arguments(build "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN})
   if(NOT DEFINED build_TARGET)
@@ -235,15 +495,28 @@ function(_register_target)
   endif()
 
   set(src ${build_SRC})
-  if(LINUX AND build_LINUX)
-    list(APPEND src ${build_LINUX})
-  elseif((DARWIN_X86_64 OR DARWIN_AARCH64) AND build_DARWIN)
-    list(APPEND src ${build_DARWIN})
+  if(LINUX AND (build_LINUX OR build_POSIX))
+    list(APPEND src ${build_LINUX} ${build_POSIX})
+  elseif((DARWIN_X86_64 OR DARWIN_AARCH64) AND (build_DARWIN OR build_POSIX))
+    list(APPEND src ${build_DARWIN} ${build_POSIX})
   elseif(WINDOWS_MSVC_X86_64 AND (build_MSVC OR build_WINDOWS))
     list(APPEND src ${build_MSVC} ${build_WINDOWS})
   endif()
 
-  set(REGISTERED_SRC ${src} PARENT_SCOPE)
+  if(build_SOURCE_DIR)
+    set(ABSOLUTE_SOURCES "")
+    foreach(FIL ${src})
+      if(IS_ABSOLUTE ${FIL})
+        list(APPEND ABSOLUTE_SOURCES "${FIL}")
+      else()
+        list(APPEND ABSOLUTE_SOURCES "${build_SOURCE_DIR}/${FIL}")
+      endif()
+    endforeach()
+    set(REGISTERED_SRC ${ABSOLUTE_SOURCES} PARENT_SCOPE)
+  else()
+    set(REGISTERED_SRC ${src} PARENT_SCOPE)
+  endif()
+
   if(build_NODISTRIBUTE)
     return()
   endif()
@@ -323,8 +596,8 @@ function(android_add_library)
   endif()
   android_clang_tidy(${build_TARGET})
   # Clang on mac os does not get properly recognized by cmake
-  if (NOT DARWIN_X86_64)
-      target_compile_features(${build_TARGET} PRIVATE cxx_std_17)
+  if(NOT DARWIN_X86_64)
+    target_compile_features(${build_TARGET} PRIVATE cxx_std_17)
   endif()
 
   if(${build_SHARED})
@@ -535,13 +808,7 @@ function(android_add_default_test_properties name)
         WIN_PATH
         "${CMAKE_LIBRARY_OUTPUT_DIRECTORY};${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/gles_swiftshader;${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/qt/lib;$ENV{PATH}"
     )
-    string(
-      REPLACE
-        ";"
-        "\;"
-        WIN_PATH
-        "${WIN_PATH}"
-    )
+    string(REPLACE ";" "\;" WIN_PATH "${WIN_PATH}")
     set_property(TEST ${name} APPEND PROPERTY ENVIRONMENT "PATH=${WIN_PATH}")
   endif()
 endfunction()
@@ -625,8 +892,8 @@ function(android_add_executable)
 
   add_executable(${build_TARGET} ${REGISTERED_SRC})
   # Clang on mac os does not get properly recognized by cmake
-  if (NOT DARWIN_X86_64)
-      target_compile_features(${build_TARGET} PRIVATE cxx_std_17)
+  if(NOT DARWIN_X86_64)
+    target_compile_features(${build_TARGET} PRIVATE cxx_std_17)
   endif()
 
   if(WINDOWS_MSVC_X86_64)
@@ -658,8 +925,8 @@ endfunction()
 # protofiles: The set of protofiles to be included.
 function(android_add_protobuf name protofiles)
   protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${protofiles})
-  android_add_library(TARGET ${name} LICENSE Apache-2.0 SRC ${PROTO_SRCS}
-                                                            ${PROTO_HDRS})
+  android_add_library(TARGET ${name} LICENSE Apache-2.0 SRC ${PROTO_HDRS}
+                                                            ${PROTO_SRCS})
   target_link_libraries(${name} PUBLIC libprotobuf)
   target_include_directories(${name} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
   # Disable generation of information about every class with virtual functions
@@ -678,52 +945,85 @@ endfunction()
 
 function(protobuf_generate_with_plugin)
   include(CMakeParseArguments)
-
   set(_options APPEND_PATH)
-  set(_singleargs LANGUAGE OUT_VAR EXPORT_MACRO PROTOC_OUT_DIR PLUGIN PLUGINOUT PROTOPATH HEADERFILEEXTENSION)
+  set(_singleargs
+      LANGUAGE
+      OUT_VAR
+      EXPORT_MACRO
+      PROTOC_OUT_DIR
+      PLUGIN
+      PLUGINOUT
+      PROTOPATH
+      HEADERFILEEXTENSION)
   if(COMMAND target_sources)
     list(APPEND _singleargs TARGET)
   endif()
   set(_multiargs PROTOS IMPORT_DIRS GENERATE_EXTENSIONS)
 
-  cmake_parse_arguments(protobuf_generate_with_plugin "${_options}" "${_singleargs}" "${_multiargs}" "${ARGN}")
+  cmake_parse_arguments(protobuf_generate_with_plugin "${_options}"
+                        "${_singleargs}" "${_multiargs}" "${ARGN}")
 
-  if(NOT protobuf_generate_with_plugin_PROTOS AND NOT protobuf_generate_with_plugin_TARGET)
-    message(SEND_ERROR "Error: protobuf_generate_with_plugin called without any targets or source files")
+  if(NOT protobuf_generate_with_plugin_PROTOS
+     AND NOT protobuf_generate_with_plugin_TARGET)
+    message(
+      SEND_ERROR
+        "Error: protobuf_generate_with_plugin called without any targets or source files"
+    )
     return()
   endif()
 
-  if(NOT protobuf_generate_with_plugin_OUT_VAR AND NOT protobuf_generate_with_plugin_TARGET)
-    message(SEND_ERROR "Error: protobuf_generate called without a target or output variable")
+  if(protobuf_generate_with_plugin_PLUGIN)
+    set(protobuf_generate_with_plugin_PLUGIN
+        "--plugin=${protobuf_generate_with_plugin_PLUGIN}")
+  endif()
+
+  if(protobuf_generate_with_plugin_PLUGINOUT)
+    set(protobuf_generate_with_plugin_PLUGINOUT
+        "--plugin_out=${protobuf_generate_with_plugin_PLUGINOUT}")
+  endif()
+  if(NOT protobuf_generate_with_plugin_OUT_VAR
+     AND NOT protobuf_generate_with_plugin_TARGET)
+    message(
+      SEND_ERROR
+        "Error: protobuf_generate called without a target or output variable")
     return()
   endif()
 
   if(NOT protobuf_generate_with_plugin_LANGUAGE)
     set(protobuf_generate_with_plugin_LANGUAGE cpp)
   endif()
-  string(TOLOWER ${protobuf_generate_with_plugin_LANGUAGE} protobuf_generate_with_plugin_LANGUAGE)
+  string(TOLOWER ${protobuf_generate_with_plugin_LANGUAGE}
+                 protobuf_generate_with_plugin_LANGUAGE)
 
   if(NOT protobuf_generate_with_plugin_PROTOC_OUT_DIR)
-    set(protobuf_generate_with_plugin_PROTOC_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
+    set(protobuf_generate_with_plugin_PROTOC_OUT_DIR
+        ${CMAKE_CURRENT_BINARY_DIR})
   endif()
 
-  if(protobuf_generate_with_plugin_EXPORT_MACRO AND protobuf_generate_with_plugin_LANGUAGE STREQUAL cpp)
-    set(_dll_export_decl "dllexport_decl=${protobuf_generate_with_plugin_EXPORT_MACRO}:")
+  if(protobuf_generate_with_plugin_EXPORT_MACRO
+     AND protobuf_generate_with_plugin_LANGUAGE STREQUAL cpp)
+    set(_dll_export_decl
+        "dllexport_decl=${protobuf_generate_with_plugin_EXPORT_MACRO}:")
   endif()
 
   if(NOT protobuf_generate_with_plugin_GENERATE_EXTENSIONS)
     if(protobuf_generate_with_plugin_LANGUAGE STREQUAL cpp)
-        set(protobuf_generate_with_plugin_GENERATE_EXTENSIONS ${HEADERFILEEXTENSION} .pb.cc)
+      set(protobuf_generate_with_plugin_GENERATE_EXTENSIONS
+          ${HEADERFILEEXTENSION} .pb.cc)
     elseif(protobuf_generate_with_plugin_LANGUAGE STREQUAL python)
       set(protobuf_generate_with_plugin_GENERATE_EXTENSIONS _pb2.py)
     else()
-      message(SEND_ERROR "Error: protobuf_generatewith_plugin given unknown Language ${LANGUAGE}, please provide a value for GENERATE_EXTENSIONS")
+      message(
+        SEND_ERROR
+          "Error: protobuf_generatewith_plugin given unknown Language ${LANGUAGE}, please provide a value for GENERATE_EXTENSIONS"
+      )
       return()
     endif()
   endif()
 
   if(protobuf_generate_with_plugin_TARGET)
-    get_target_property(_source_list ${protobuf_generate_with_plugin_TARGET} SOURCES)
+    get_target_property(_source_list ${protobuf_generate_with_plugin_TARGET}
+                        SOURCES)
     foreach(_file ${_source_list})
       if(_file MATCHES "proto$")
         list(APPEND protobuf_generate_with_plugin_PROTOS ${_file})
@@ -732,7 +1032,9 @@ function(protobuf_generate_with_plugin)
   endif()
 
   if(NOT protobuf_generate_with_plugin_PROTOS)
-    message(SEND_ERROR "Error: protobuf_generate_with_plugin could not find any .proto files")
+    message(
+      SEND_ERROR
+        "Error: protobuf_generate_with_plugin could not find any .proto files")
     return()
   endif()
 
@@ -743,7 +1045,7 @@ function(protobuf_generate_with_plugin)
       get_filename_component(_abs_path ${_abs_file} PATH)
       list(FIND _protobuf_include_path ${_abs_path} _contains_already)
       if(${_contains_already} EQUAL -1)
-          list(APPEND _protobuf_include_path -I ${_abs_path})
+        list(APPEND _protobuf_include_path -I ${_abs_path})
       endif()
     endforeach()
   else()
@@ -754,7 +1056,7 @@ function(protobuf_generate_with_plugin)
     get_filename_component(ABS_PATH ${DIR} ABSOLUTE)
     list(FIND _protobuf_include_path ${ABS_PATH} _contains_already)
     if(${_contains_already} EQUAL -1)
-        list(APPEND _protobuf_include_path -I ${ABS_PATH})
+      list(APPEND _protobuf_include_path -I ${ABS_PATH})
     endif()
   endforeach()
 
@@ -769,35 +1071,59 @@ function(protobuf_generate_with_plugin)
 
     set(_generated_srcs)
     foreach(_ext ${protobuf_generate_with_plugin_GENERATE_EXTENSIONS})
-      list(APPEND _generated_srcs "${protobuf_generate_with_plugin_PROTOC_OUT_DIR}/${_basename}${_ext}")
+      list(
+        APPEND _generated_srcs
+        "${protobuf_generate_with_plugin_PROTOC_OUT_DIR}/${_basename}${_ext}")
     endforeach()
     list(APPEND _generated_srcs_all ${_generated_srcs})
 
     add_custom_command(
       OUTPUT ${_generated_srcs}
-      COMMAND  protobuf::protoc
-      ARGS --${protobuf_generate_with_plugin_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_with_plugin_PROTOC_OUT_DIR} ${_protobuf_include_path} ${PROTOPATH} ${_abs_file} --plugin=${PLUGIN} --plugin_out=${PLUGINOUT}
+      COMMAND
+        protobuf::protoc ARGS --${protobuf_generate_with_plugin_LANGUAGE}_out
+        ${_dll_export_decl}${protobuf_generate_with_plugin_PROTOC_OUT_DIR}
+        ${_protobuf_include_path} ${PROTOPATH} ${_abs_file}
+        ${protobuf_generate_with_plugin_PLUGIN}
+        ${protobuf_generate_with_plugin_PLUGINOUT}
       DEPENDS ${_abs_file} protobuf::protoc
-      COMMENT "Running ${protobuf_generate_with_plugin_LANGUAGE} protocol buffer compiler on ${_proto}"
-      VERBATIM )
+      COMMENT
+        "Running ${protobuf_generate_with_plugin_LANGUAGE} protocol buffer compiler on ${_proto}"
+      VERBATIM)
   endforeach()
 
   set_source_files_properties(${_generated_srcs_all} PROPERTIES GENERATED TRUE)
   if(protobuf_generate_with_plugin_OUT_VAR)
-    set(${protobuf_generate_with_plugin_OUT_VAR} ${_generated_srcs_all} PARENT_SCOPE)
+    set(${protobuf_generate_with_plugin_OUT_VAR} ${_generated_srcs_all}
+        PARENT_SCOPE)
   endif()
   if(protobuf_generate_with_plugin_TARGET)
-    target_sources(${protobuf_generate_with_plugin_TARGET} PRIVATE ${_generated_srcs_all})
+    target_sources(${protobuf_generate_with_plugin_TARGET}
+                   PRIVATE ${_generated_srcs_all})
+    target_compile_options(${protobuf_generate_with_plugin_TARGET}
+                           PRIVATE -fno-rtti)
+    target_compile_definitions(${protobuf_generate_with_plugin_TARGET}
+                               PUBLIC -DGOOGLE_PROTOBUF_NO_RTTI)
   endif()
 
 endfunction()
 
-function(PROTOBUF_GENERATE_CPP_WITH_PLUGIN HEADERFILEEXTENSION PLUGIN PLUGINOUT PROTOPATH SRCS HDRS)
-  cmake_parse_arguments(protobuf_generate_cpp_with_plugin "" "EXPORT_MACRO" "" ${ARGN})
+function(
+  PROTOBUF_GENERATE_CPP_WITH_PLUGIN
+  HEADERFILEEXTENSION
+  PLUGIN
+  PLUGINOUT
+  PROTOPATH
+  SRCS
+  HDRS)
+  cmake_parse_arguments(protobuf_generate_cpp_with_plugin "" "EXPORT_MACRO" ""
+                        ${ARGN})
 
   set(_proto_files "${protobuf_generate_cpp_with_plugin_UNPARSED_ARGUMENTS}")
   if(NOT _proto_files)
-      message(SEND_ERROR "Error: PROTOBUF_GENERATE_CPP_WITH_PLUGIN() called without any proto files")
+    message(
+      SEND_ERROR
+        "Error: PROTOBUF_GENERATE_CPP_WITH_PLUGIN() called without any proto files"
+    )
     return()
   endif()
 
@@ -810,7 +1136,16 @@ function(PROTOBUF_GENERATE_CPP_WITH_PLUGIN HEADERFILEEXTENSION PLUGIN PLUGINOUT 
   endif()
 
   set(_outvar)
-  protobuf_generate_with_plugin(${_append_arg} LANGUAGE cpp EXPORT_MACRO ${protobuf_generate_cpp_with_plugin_EXPORT_MACRO} OUT_VAR _outvar ${_import_arg} PROTOS ${_proto_files} PLUGIN ${PLUGIN} PLUGINOUT ${PLUGINOUT} PROTOPATH ${PROTOPATH} HEADERFILEEXTENSION ${HEADERFILEEXTENSION})
+  protobuf_generate_with_plugin(
+    ${_append_arg}
+    LANGUAGE cpp
+    EXPORT_MACRO ${protobuf_generate_cpp_with_plugin_EXPORT_MACRO}
+    OUT_VAR _outvar ${_import_arg}
+    PROTOS ${_proto_files}
+    PLUGIN ${PLUGIN}
+    PLUGINOUT ${PLUGINOUT}
+    PROTOPATH ${PROTOPATH}
+    HEADERFILEEXTENSION ${HEADERFILEEXTENSION})
 
   set(${SRCS})
   set(${HDRS})
@@ -826,8 +1161,24 @@ function(PROTOBUF_GENERATE_CPP_WITH_PLUGIN HEADERFILEEXTENSION PLUGIN PLUGINOUT 
 endfunction()
 
 # Adds a protozero library with the given plugin name.
-function(android_add_protobuf_with_plugin name headerfileextension plugin pluginout protolib PROTOPATH protofile genccpath)
-  protobuf_generate_cpp_with_plugin(${headerfileextension} ${plugin} ${pluginout} ${PROTOPATH} PROTO_SRCS PROTO_HDRS ${protofile})
+function(
+  android_add_protobuf_with_plugin
+  name
+  headerfileextension
+  plugin
+  pluginout
+  protolib
+  PROTOPATH
+  protofile
+  genccpath)
+  protobuf_generate_cpp_with_plugin(
+    ${headerfileextension}
+    ${plugin}
+    ${pluginout}
+    ${PROTOPATH}
+    PROTO_SRCS
+    PROTO_HDRS
+    ${protofile})
   get_filename_component(PROTO_SRCS_ABS ${PROTO_SRCS} ABSOLUTE)
   set(genccpath2 ${CMAKE_CURRENT_BINARY_DIR}/${genccpath})
   set_source_files_properties(${genccpath2} PROPERTIES GENERATED TRUE)
@@ -874,8 +1225,8 @@ function(android_generate_hw_config)
   android_add_library(TARGET android-hw-config LICENSE Apache-2.0
                       SRC ${ANDROID_HW_CONFIG_H} dummy.c)
   set_source_files_properties(
-    ${ANDROID_HW_CONFIG_H}
-    PROPERTIES GENERATED TRUE SKIP_AUTOGEN ON HEADER_FILE_ONLY TRUE)
+    ${ANDROID_HW_CONFIG_H} PROPERTIES GENERATED TRUE SKIP_AUTOGEN ON
+                                      HEADER_FILE_ONLY TRUE)
   target_include_directories(android-hw-config
                              PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/avd_config)
 endfunction()
@@ -958,7 +1309,7 @@ function(get_git_version VER)
       WARNING
         "Unable to retrieve git version from ${ANDROID_QEMU2_TOP_DIR}, out: ${STD_OUT}, err: ${STD_ERR}, not setting version."
     )
-   else()
+  else()
     # Clean up and make visibile
     string(REPLACE "\n" "" STD_OUT "${STD_OUT}")
     set(${VER} ${STD_OUT} PARENT_SCOPE)
@@ -1036,8 +1387,8 @@ function(android_build_qemu_variant)
       "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
     REPO "${ANDROID_QEMU2_TOP_DIR}"
     NOTICE "REPO/LICENSES/LICENSE.APACHE2"
-    SRC ${qemu_build_SOURCES} ${qemu-system-${QEMU_AARCH}_sources}
-        ${qemu-system-${QEMU_AARCH}_generated_sources})
+    SRC ${qemu-system-${QEMU_AARCH}_generated_sources}
+        ${qemu-system-${QEMU_AARCH}_sources} ${qemu_build_SOURCES})
   target_include_directories(
     ${qemu_build_EXE} PRIVATE android-qemu2-glue/config/target-${CONFIG_AARCH}
                               target/${CPU})
@@ -1057,8 +1408,9 @@ function(android_build_qemu_variant)
         RUNTIME_OUTPUT_DIRECTORY
         "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/qemu/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}"
     )
-    android_install_exe(${qemu_build_EXE}
-                        "./qemu/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}")
+    android_install_exe(
+      ${qemu_build_EXE}
+      "./qemu/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}")
   endif()
 endfunction()
 
@@ -1067,14 +1419,14 @@ endfunction()
 # ANDROID_AARCH The android architecture name STUBS The set of stub sources to
 # use.
 function(android_add_qemu_executable ANDROID_AARCH STUBS)
-  if (WINDOWS_MSVC_X86_64)
+  if(WINDOWS_MSVC_X86_64)
     set(WINDOWS_LAUNCHER emulator-winqt-launcher)
   endif()
   android_build_qemu_variant(
     INSTALL
     EXE qemu-system-${ANDROID_AARCH}
     CPU ${ANDROID_AARCH}
-    SOURCES android-qemu2-glue/main.cpp vl.c ${STUBS}
+    SOURCES ${STUBS} android-qemu2-glue/main.cpp vl.c
     DEFINITIONS
       -DNEED_CPU_H -DCONFIG_ANDROID
       -DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}
@@ -1099,7 +1451,7 @@ function(android_add_qemu_headless_executable ANDROID_AARCH STUBS)
     INSTALL
     EXE qemu-system-${ANDROID_AARCH}-headless
     CPU ${ANDROID_AARCH}
-    SOURCES android-qemu2-glue/main.cpp vl.c ${STUBS}
+    SOURCES ${STUBS} android-qemu2-glue/main.cpp vl.c
     DEFINITIONS
       -DNEED_CPU_H -DCONFIG_ANDROID -DCONFIG_HEADLESS
       -DANDROID_SDK_TOOLS_REVISION=${OPTION_SDK_TOOLS_REVISION}
@@ -1119,36 +1471,36 @@ endfunction()
 # ANDROID_AARCH The android architecture name STUBS The set of stub sources to
 # use.
 function(android_add_qemu_upstream_executable ANDROID_AARCH STUBS)
-    if (DARWIN_AARCH64)
-        android_build_qemu_variant(
-            # INSTALL We do not install this target.
-            EXE qemu-upstream-${ANDROID_AARCH}
-            CPU ${ANDROID_AARCH}
-            SOURCES vl.c ${STUBS}
-            DEFINITIONS -DNEED_CPU_H
-            LIBRARIES android-emu
-            libqemu2-glue
-            libqemu2-glue-vm-operations
-            libqemu2-util
-            android-qemu-deps
-            android-qemu-deps-headful
-            emulator-libusb)
-    else()
-        android_build_qemu_variant(
-            # INSTALL We do not install this target.
-            EXE qemu-upstream-${ANDROID_AARCH}
-            CPU ${ANDROID_AARCH}
-            SOURCES vl.c ${STUBS}
-            DEFINITIONS -DNEED_CPU_H
-            LIBRARIES android-emu
-            libqemu2-glue
-            libqemu2-glue-vm-operations
-            libqemu2-util
-            SDL2::SDL2
-            android-qemu-deps
-            android-qemu-deps-headful
-            emulator-libusb)
-    endif()
+  if(DARWIN_AARCH64)
+    android_build_qemu_variant(
+      # INSTALL We do not install this target.
+      EXE qemu-upstream-${ANDROID_AARCH}
+      CPU ${ANDROID_AARCH}
+      SOURCES ${STUBS} vl.c
+      DEFINITIONS -DNEED_CPU_H
+      LIBRARIES android-emu
+                libqemu2-glue
+                libqemu2-glue-vm-operations
+                libqemu2-util
+                android-qemu-deps
+                android-qemu-deps-headful
+                emulator-libusb)
+  else()
+    android_build_qemu_variant(
+      # INSTALL We do not install this target.
+      EXE qemu-upstream-${ANDROID_AARCH}
+      CPU ${ANDROID_AARCH}
+      SOURCES ${STUBS} vl.c
+      DEFINITIONS -DNEED_CPU_H
+      LIBRARIES android-emu
+                libqemu2-glue
+                libqemu2-glue-vm-operations
+                libqemu2-util
+                SDL2::SDL2
+                android-qemu-deps
+                android-qemu-deps-headful
+                emulator-libusb)
+  endif()
 endfunction()
 
 # Copies a shared library
@@ -1165,14 +1517,30 @@ function(android_log MSG)
 endfunction()
 
 function(android_validate_sha256 FILE EXPECTED)
-  file(SHA256 ${FILE} CHECKSUM)
-  if(NOT CHECKSUM STREQUAL "${EXPECTED}")
-    get_filename_component(
-      DEST "${ANDROID_QEMU2_TOP_DIR}/../../device/generic/goldfish-opengl"
-      ABSOLUTE)
+  get_filename_component(
+    DEST "${ANDROID_QEMU2_TOP_DIR}/../../device/generic/goldfish-opengl"
+    ABSOLUTE)
+  android_validate_sha(
+    FILE ${FILE}
+    EXPECTED ${EXPECTED}
+    ERROR
+      "You need to regenerate the cmake files by executing 'make' in ${DEST}")
+endfunction()
+
+function(android_validate_sha)
+  include(CMakeParseArguments)
+  set(_options)
+  set(_singleargs FILE EXPECTED ERROR)
+  set(_multiargs)
+
+  cmake_parse_arguments(sha "${_options}" "${_singleargs}" "${_multiargs}"
+                        "${ARGN}")
+
+  file(SHA256 ${sha_FILE} CHECKSUM)
+  if(NOT CHECKSUM STREQUAL "${sha_EXPECTED}")
     message(
       FATAL_ERROR
-        "Checksum mismatch for ${FILE} = ${CHECKSUM}, expecting ${EXPECTED}, you need to regenerate the cmake files by executing 'make' in ${DEST}"
+        "Checksum mismatch for sha256(${sha_FILE})=${CHECKSUM}, was expecting: ${sha_EXPECTED}. ${sha_ERROR}"
     )
   endif()
 endfunction()
@@ -1225,7 +1593,8 @@ function(android_install_shared TGT)
   android_upload_symbols(${TGT})
   android_install_license(${TGT} ${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
   # Account for lib prefix when signing
-  android_sign(${CMAKE_INSTALL_PREFIX}/lib64/lib${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
+  android_sign(
+    ${CMAKE_INSTALL_PREFIX}/lib64/lib${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
 endfunction()
 
 # Strips the given prebuilt executable during install..
@@ -1275,7 +1644,7 @@ function(android_extract_symbols TGT)
   set(DEST "${ANDROID_SYMBOL_DIR}/${TGT}.sym")
   add_custom_command(
     TARGET ${TGT} POST_BUILD COMMAND dump_syms "$<TARGET_FILE:${TGT}>" > ${DEST}
-    DEPENDS dump_syms
+                                     DEPENDS dump_syms
     COMMENT "Extracting symbols for ${TGT}" VERBATIM)
 endfunction()
 
@@ -1286,31 +1655,25 @@ if(WINDOWS_MSVC_X86_64 AND NOT INCLUDE_MSVC_POSIX)
                    msvc-posix-compat)
 endif()
 
-# Rule to build cf crosvm based on a combination of dependencies
-# built locally / prebuilt
+# Rule to build cf crosvm based on a combination of dependencies built locally /
+# prebuilt
 function(android_crosvm_build DEP)
-    message(STATUS "building crosvm with dependency ${DEP}")
-    set(CMAKE_CROSVM_HOST_PACKAGE_TOOLS_PATH
-        "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/cf-host-package")
-    set(CMAKE_CROSVM_BUILD_SCRIPT_PATH
-        "${CMAKE_CROSVM_HOST_PACKAGE_TOOLS_PATH}/crosvm-build.sh")
+  message(STATUS "building crosvm with dependency ${DEP}")
+  set(CMAKE_CROSVM_HOST_PACKAGE_TOOLS_PATH
+      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/cf-host-package"
+  )
+  set(CMAKE_CROSVM_BUILD_SCRIPT_PATH
+      "${CMAKE_CROSVM_HOST_PACKAGE_TOOLS_PATH}/crosvm-build.sh")
 
-    set(CMAKE_CROSVM_REPO_TOP_LEVEL_PATH
-        "${ANDROID_QEMU2_TOP_DIR}/../..")
-    set(CMAKE_CROSVM_BUILD_ENV_DIR
-        "${CMAKE_BINARY_DIR}/crosvm-build-env")
-    set(CMAKE_CROSVM_GFXSTREAM_BUILD_DIR
-        "${CMAKE_BINARY_DIR}")
-    set(CMAKE_CROSVM_DIST_DIR
-        "${CMAKE_INSTALL_PREFIX}")
-    add_custom_command(
-        OUTPUT "${CMAKE_CROSVM_BUILD_ENV_DIR}/release/crosvm"
-        COMMAND
-            "${CMAKE_CROSVM_BUILD_SCRIPT_PATH}"
-            "${CMAKE_CROSVM_REPO_TOP_LEVEL_PATH}"
-            "${CMAKE_CROSVM_HOST_PACKAGE_TOOLS_PATH}"
-            "${CMAKE_CROSVM_BUILD_ENV_DIR}"
-            "${CMAKE_CROSVM_GFXSTREAM_BUILD_DIR}"
-            "${CMAKE_CROSVM_DIST_DIR}"
-        DEPENDS ${DEP})
+  set(CMAKE_CROSVM_REPO_TOP_LEVEL_PATH "${ANDROID_QEMU2_TOP_DIR}/../..")
+  set(CMAKE_CROSVM_BUILD_ENV_DIR "${CMAKE_BINARY_DIR}/crosvm-build-env")
+  set(CMAKE_CROSVM_GFXSTREAM_BUILD_DIR "${CMAKE_BINARY_DIR}")
+  set(CMAKE_CROSVM_DIST_DIR "${CMAKE_INSTALL_PREFIX}")
+  add_custom_command(
+    OUTPUT "${CMAKE_CROSVM_BUILD_ENV_DIR}/release/crosvm"
+    COMMAND
+      "${CMAKE_CROSVM_BUILD_SCRIPT_PATH}" "${CMAKE_CROSVM_REPO_TOP_LEVEL_PATH}"
+      "${CMAKE_CROSVM_HOST_PACKAGE_TOOLS_PATH}" "${CMAKE_CROSVM_BUILD_ENV_DIR}"
+      "${CMAKE_CROSVM_GFXSTREAM_BUILD_DIR}" "${CMAKE_CROSVM_DIST_DIR}"
+    DEPENDS ${DEP})
 endfunction()
