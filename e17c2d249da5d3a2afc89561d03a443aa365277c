@@ -51,6 +51,24 @@
       "message": "as a quick hack you could just read the file from disk without using mmap on the file, that might be faster than sockets.\n\n(This what I did for vscode, seemed to work).\n\nNote: https://github.com/dart-lang/sdk/issues/35070 says there might be no mmap support for dart.",
       "revId": "e17c2d249da5d3a2afc89561d03a443aa365277c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4c1c0b76_0f40e995",
+        "filename": "android/android_emu_flutter/lib/main.dart",
+        "patchSetId": 3
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-03-10T19:00:18Z",
+      "side": 1,
+      "message": "Thanks for the tip. Indeed, I haven\u0027t found anything online for mmap support in dart. Since we will need mmap in the future, I will send an email to the dart core engineering and see if they have any plan for this.",
+      "parentUuid": "c9764b86_08011021",
+      "revId": "e17c2d249da5d3a2afc89561d03a443aa365277c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
