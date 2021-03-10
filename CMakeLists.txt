@@ -100,6 +100,8 @@ set(GFXSTREAM
       BOOL
       "True if we should build gfxstream, crosvm, and its accompanying libraries/tests."
 )
+set(OPTIONS_BUILD_PACKET_GEN FALSE CACHE BOOL "True if you wish to generate the bluetooth packet generator .yy and .ll files (posix only)")
+set(BLUETOOTH_EMULATION FALSE CACHE BOOL "True if you wish to build the emulated bluetooth stack")
 
 set(OPTION_AEMU_LIBS_ONLY FALSE
     CACHE BOOL "True if we should build only AEMU libraries and their tests.")
@@ -147,6 +149,7 @@ string(STRIP "${OPTION_SDK_TOOLS_REVISION}" OPTION_SDK_TOOLS_REVISION)
 
 set_property(CACHE OPTION_CRASHUPLOAD PROPERTY STRINGS NONE STAGING PROD)
 set(DBG_INFO ${CMAKE_BINARY_DIR}/build/debug_info)
+set(AOSP_ROOT ${ANDROID_QEMU2_TOP_DIR}/../..)
 
 # Symbol extraction is not supported when cross compiling.
 if(OPTION_CRASHUPLOAD STREQUAL "NONE")
@@ -313,6 +316,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 
   # grpc does some magic.
   add_c_flag("-Wno-non-c-typedef-for-linkage")
+
 endif()
 
 if(DARWIN_X86_64)
