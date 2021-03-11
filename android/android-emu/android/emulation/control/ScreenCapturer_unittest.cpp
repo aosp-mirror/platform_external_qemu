@@ -233,10 +233,15 @@ public:
         return false;
     }
     void fillGLESUsages(android_studio::EmulatorGLESUsages*) { }
-    void getScreenshot(unsigned int nChannels, unsigned int* width,
-        unsigned int* height, std::vector<unsigned char>& pixels,
-        int displayId, int desiredWidth, int desiredHeight,
-        SkinRotation desiredRotation) {
+    void getScreenshot(unsigned int nChannels,
+                       unsigned int* width,
+                       unsigned int* height,
+                       std::vector<unsigned char>& pixels,
+                       int displayId,
+                       int desiredWidth,
+                       int desiredHeight,
+                       SkinRotation desiredRotation,
+                       SkinRect rect) {
         if (mHasValidScreenshot) {
             if (desiredWidth == 0 && desiredHeight == 0) {
                 *width = kWidth;
