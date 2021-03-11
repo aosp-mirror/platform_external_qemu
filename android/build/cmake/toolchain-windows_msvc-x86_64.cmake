@@ -70,12 +70,8 @@ if(WIN32)
   set(CMAKE_C_FLAGS_RELEASE "/MD /Zi /GL")
   set(CMAKE_CXX_FLAGS_RELEASE "/MD /Zi /GL")
 
-
-  # Add compiler definition for Win8
-  # See https://docs.microsoft.com/en-us/windows/win32/winprog/using-the-windows-headers
-  add_definitions("-D_WIN32_WINNT=_WIN32_WINNT_WIN7")
-  add_definitions("-DNTDDI_VERSION=NTDDI_WIN7")
-
+  # Add compiler definition for Win7
+  add_definitions("-D_WIN32_WINNT=0x0601")
   # When configuring cmake on windows, it will do a series of compiler checks we
   # want to make sure it never tries to fall back to the msvc linker. CMake will
   # call the linker directly, v.s. through clang when cross building.
