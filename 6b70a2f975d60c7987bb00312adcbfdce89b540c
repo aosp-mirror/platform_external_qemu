@@ -94,6 +94,30 @@
       },
       "revId": "6b70a2f975d60c7987bb00312adcbfdce89b540c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2e875234_504df951",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-03-11T21:25:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f26985d4_74be2f0c",
+      "range": {
+        "startLine": 193,
+        "startChar": 23,
+        "endLine": 193,
+        "endChar": 43
+      },
+      "revId": "6b70a2f975d60c7987bb00312adcbfdce89b540c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
