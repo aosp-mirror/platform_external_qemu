@@ -550,6 +550,9 @@ GL_API void GL_APIENTRY  glBufferSubData( GLenum target, GLintptr offset, GLsize
 
 GL_API void GL_APIENTRY  glClear( GLbitfield mask) {
     GET_CTX()
+    if (ctx->drawDisabled()) {
+        return;
+    }
     GLES_CM_TRACE()
     ERRCHECK()
     ctx->drawValidate();
