@@ -358,7 +358,8 @@ private:
 
     void saveBlockLocked(
         base::Stream* stream,
-        const Block& block) {
+        const Block& block,
+        size_t size = ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE) {
 
         if (block.isEmpty) {
             stream->putBe32(0);
@@ -375,8 +376,12 @@ private:
 
         block.subAlloc->save(stream);
 
-        stream->putBe64(ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE);
-        stream->write(block.buffer, ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE);
+        if (block.dedicated) {
+            size = block.dedicatedSize;
+        }
+
+        stream->putBe64(size);
+        stream->write(block.buffer, size);
     }
 
     void loadBlockLocked(

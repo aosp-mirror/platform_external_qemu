@@ -26,6 +26,8 @@
  * THE SOFTWARE.
  */
 
+#define SNAPSHOT_PROFILE 5
+
 #include "qemu/osdep.h"
 #include "hw/boards.h"
 #include "hw/xen/xen.h"
