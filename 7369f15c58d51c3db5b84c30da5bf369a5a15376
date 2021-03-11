@@ -145,6 +145,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "330fa742_8929a71c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2661,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2021-03-11T22:45:13Z",
+      "side": 1,
+      "message": "The desiredWidth and desiredHeight means the same as rect.w and rect.h.\nIt would be great if we could remove desiredW/H parameter and using rect.w/h instead.",
+      "revId": "7369f15c58d51c3db5b84c30da5bf369a5a15376",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "7668cb06_7702421e",
         "filename": "android/android-grpc/emulator_controller.proto",
         "patchSetId": 3
