@@ -61,6 +61,52 @@ bool captureScreenshot(android::base::StringView outputDirectoryPath,
     }
 }
 
+// We only convert png/ RGBA8888 -> RBG888 at this time..
+static Image getImage(ImageFormat desiredFormat,
+                      ImageFormat outputFormat,
+                      SkinRotation rotation,
+                      unsigned int width,
+                      unsigned int height,
+                      unsigned int nChannels,
+                      std::vector<unsigned char> pixelBuffer,
+                      bool hasRenderer = true) {
+    switch (desiredFormat) {
+        case ImageFormat::PNG: {
+            std::vector<uint8_t> pngData;
+            png_structp p = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
+                                                    NULL, NULL);
+            png_infop pi = png_create_info_struct(p);
+            png_set_write_fn(
+                    p, &pngData,
+                    [](png_structp png_ptr, png_bytep data, png_size_t length) {
+                        std::vector<uint8_t>* vec =
+                                reinterpret_cast<std::vector<uint8_t>*>(
+                                        png_get_io_ptr(png_ptr));
+                        vec->insert(vec->end(), &data[0], &data[length]);
+                    },
+                    [](png_structp png_ptr) {});
+            // already rotated through rendering
+            rotation = hasRenderer ? SKIN_ROTATION_0 : rotation;
+            write_png_user_function(p, pi, nChannels, width, height, rotation,
+                                    pixelBuffer.data());
+            png_destroy_write_struct(&p, &pi);
+            return Image((uint16_t)width, (uint16_t)height, nChannels,
+                         ImageFormat::PNG, pngData);
+        }
+        case ImageFormat::RGB888: {
+            if (nChannels == 4) {
+                outputFormat = ImageFormat::RGBA8888;
+            }
+            auto img = Image((uint16_t)width, (uint16_t)height, nChannels,
+                             outputFormat, pixelBuffer);
+            return img.asRGB888();
+        }
+        default:
+            return Image((uint16_t)width, (uint16_t)height, nChannels,
+                         outputFormat, pixelBuffer);
+    }
+}
+
 Image takeScreenshot(
         ImageFormat desiredFormat,
         SkinRotation rotation,
@@ -133,42 +179,39 @@ Image takeScreenshot(
                                &pixels[width * height * nChannels]);
         }
     }
-    // We only convert png/ RGBA8888 -> RBG888 at this time..
-    switch (desiredFormat) {
-        case ImageFormat::PNG: {
-            std::vector<uint8_t> pngData;
-            png_structp p = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
-                                                    NULL, NULL);
-            png_infop pi = png_create_info_struct(p);
-            png_set_write_fn(
-                    p, &pngData,
-                    [](png_structp png_ptr, png_bytep data, png_size_t length) {
-                        std::vector<uint8_t>* vec =
-                                reinterpret_cast<std::vector<uint8_t>*>(
-                                        png_get_io_ptr(png_ptr));
-                        vec->insert(vec->end(), &data[0], &data[length]);
-                    },
-                    [](png_structp png_ptr) {});
-            // already rotated through rendering
-            rotation = renderer ? SKIN_ROTATION_0 : rotation;
-            write_png_user_function(p, pi, nChannels, width, height, rotation,
-                                    pixelBuffer.data());
-            png_destroy_write_struct(&p, &pi);
-            return Image((uint16_t)width, (uint16_t)height, nChannels,
-                         ImageFormat::PNG, pngData);
-        }
-        case ImageFormat::RGB888: {
-            if (nChannels == 4) {
-                outputFormat = ImageFormat::RGBA8888;
-            }
-            auto img = Image((uint16_t)width, (uint16_t)height, nChannels,
-                             outputFormat, pixelBuffer);
-            return img.asRGB888();
-        }
-        default:
-            return Image((uint16_t)width, (uint16_t)height, nChannels,
-                         outputFormat, pixelBuffer);
+    return getImage(desiredFormat, outputFormat, rotation, width, height,
+                    nChannels, std::move(pixelBuffer), renderer != nullptr);
+}
+
+android::base::Optional<Image> takePartialScreenshot(ImageFormat desiredFormat,
+                                                     SkinRotation rotation,
+                                                     emugl::Renderer* renderer,
+                                                     SkinRect rect,
+                                                     int desiredWidth,
+                                                     int desiredHeight,
+                                                     int displayId) {
+    android::base::Optional<Image> ret;
+    if (!renderer)
+        return ret;
+    if ((rect.pos.x < 0 || rect.pos.y < 0) ||
+        (desiredWidth < rect.pos.x + rect.size.w ||
+         desiredHeight < rect.pos.y + rect.size.h)) {
+        return ret;
     }
+    unsigned int nChannels = 4;
+    unsigned int width;
+    unsigned int height;
+    ImageFormat outputFormat = ImageFormat::RGBA8888;
+    std::vector<unsigned char> pixelBuffer;
+    if (desiredFormat == ImageFormat::RGB888) {
+        nChannels = 3;
+        outputFormat = ImageFormat::RGB888;
+    }
+    renderer->getScreenshot(nChannels, &width, &height, pixelBuffer, displayId,
+                            desiredWidth, desiredHeight, rotation, rect);
+    ret = getImage(desiredFormat, outputFormat, rotation, width, height,
+                   nChannels, std::move(pixelBuffer));
+    return ret;
 }
 
 bool captureScreenshot(

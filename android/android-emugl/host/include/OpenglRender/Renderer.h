@@ -254,10 +254,15 @@ public:
                       const android::snapshot::ITextureLoaderPtr& textureLoader) = 0;
     // Fill GLES usage protobuf
     virtual void fillGLESUsages(android_studio::EmulatorGLESUsages*) = 0;
-    virtual void getScreenshot(unsigned int nChannels, unsigned int* width,
-        unsigned int* height, std::vector<unsigned char>& pixels, int displayId = 0,
-        int desiredWidth = 0, int desiredHeight = 0,
-        SkinRotation desiredRotation = SKIN_ROTATION_0) = 0;
+    virtual void getScreenshot(unsigned int nChannels,
+                               unsigned int* width,
+                               unsigned int* height,
+                               std::vector<unsigned char>& pixels,
+                               int displayId = 0,
+                               int desiredWidth = 0,
+                               int desiredHeight = 0,
+                               SkinRotation desiredRotation = SKIN_ROTATION_0,
+                               SkinRect rect = {{0, 0}, {0, 0}}) = 0;
     virtual void snapshotOperationCallback(
             android::snapshot::Snapshotter::Operation op,
             android::snapshot::Snapshotter::Stage stage) = 0;
