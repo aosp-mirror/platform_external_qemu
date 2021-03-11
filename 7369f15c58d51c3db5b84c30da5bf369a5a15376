@@ -180,6 +180,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "7baa5782_ba2bafe6",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2661,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-11T23:04:40Z",
+      "side": 1,
+      "message": "Scaling should be done to fit the partial, not the full screen into desired rectangle.",
+      "parentUuid": "1e8149af_0a1ddf81",
+      "revId": "7369f15c58d51c3db5b84c30da5bf369a5a15376",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "7668cb06_7702421e",
         "filename": "android/android-grpc/emulator_controller.proto",
         "patchSetId": 3
