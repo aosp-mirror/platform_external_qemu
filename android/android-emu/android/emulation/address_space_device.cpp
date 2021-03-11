@@ -260,6 +260,7 @@ public:
             const uint32_t handle = stream->getBe32();
             const uint64_t pingInfoGpa = stream->getBe64();
 
+
             std::unique_ptr<AddressSpaceDeviceContext> context;
             switch (stream->getByte()) {
             case 0:
