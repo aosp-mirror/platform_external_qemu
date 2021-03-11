@@ -782,6 +782,9 @@ GL_APICALL GLenum GL_APIENTRY glCheckFramebufferStatus(GLenum target){
 
 GL_APICALL void  GL_APIENTRY glClear(GLbitfield mask){
     GET_CTX();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     GLbitfield allowed_bits = GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT;
     GLbitfield has_disallowed_bits = (mask & ~allowed_bits);
     SET_ERROR_IF(has_disallowed_bits, GL_INVALID_VALUE);
