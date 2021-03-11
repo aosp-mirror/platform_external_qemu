@@ -167,7 +167,8 @@ public:
                           GLenum p_format,
                           GLenum p_type,
                           SkinRotation rotation,
-                          void* pixels);
+                          void* pixels,
+                          SkinRect rect);
 
     // Read cached YUV pixel values into host memory.
     void readPixelsYUVCached(int x,

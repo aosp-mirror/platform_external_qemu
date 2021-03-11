@@ -773,6 +773,13 @@ message ImageFormat {
   // Set this if you wish to use a different transport channel to deliver image
   // frames.
   ImageTransport transport = 6;
+
+  enum FoldingState {
+    UNFOLDED = 0;
+    FOLDED = 1;
+  }
+  // [Output only] The folding state of the screen.
+  FoldingState foldingState = 7;
 }
 
 message Image {

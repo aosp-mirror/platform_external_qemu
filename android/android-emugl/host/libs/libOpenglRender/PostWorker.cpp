@@ -329,16 +329,15 @@ void PostWorker::composeLayer(ComposeLayer* l) {
     }
 }
 
-void PostWorker::screenshot(
-    ColorBuffer* cb,
-    int width,
-    int height,
-    GLenum format,
-    GLenum type,
-    SkinRotation rotation,
-    void* pixels) {
-    cb->readPixelsScaled(
-        width, height, format, type, rotation, pixels);
+void PostWorker::screenshot(ColorBuffer* cb,
+                            int width,
+                            int height,
+                            GLenum format,
+                            GLenum type,
+                            SkinRotation rotation,
+                            void* pixels,
+                            SkinRect rect) {
+    cb->readPixelsScaled(width, height, format, type, rotation, pixels, rect);
 }
 
 PostWorker::~PostWorker() {
