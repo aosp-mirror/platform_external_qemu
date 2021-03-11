@@ -523,6 +523,7 @@ static HwPipe* hwpipe_new(uint32_t id, uint64_t channel, PipeDevice* dev) {
     pipe->id = id;
     pipe->channel = channel;
     pipe->host_pipe = service_ops->guest_open(pipe);
+    fprintf(stderr, "%s: guest open %p\n", __func__, pipe->host_pipe);
     return pipe;
 }
 
@@ -1051,9 +1052,14 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
             int32_t status = 0;
             int32_t consumed_size = 0;
             if (send_buffers_count) {
+                void* pipeBefore = pipe->host_pipe;
                 status = service_ops->guest_send(&pipe->host_pipe,
                                                  send_buffers,
                                                  send_buffers_count);
+                void* pipeAfter = pipe->host_pipe;
+                if (pipeAfter != pipeBefore) {
+                    fprintf(stderr, "%s: reset pipe %p\n", __func__, pipeAfter);
+                }
                 if (status > 0) {
                     consumed_size += status;
                 }
@@ -1446,6 +1452,7 @@ static void goldfish_pipe_save(QEMUFile* f, void* opaque) {
     GoldfishPipeState* s = opaque;
     PipeDevice* dev = s->dev;
     service_ops->guest_pre_save(f);
+    fprintf(stderr, "%s: save opaque %p\n", __func__, opaque);
     dev->ops->save(f, dev);
     service_ops->guest_post_save(f);
 }
@@ -1478,6 +1485,7 @@ static void goldfish_pipe_save_v1(QEMUFile* file, PipeDevice* dev) {
         // when some force-closed pipes are still on the list.
         if (pipe->host_pipe) {
             qemu_put_byte(file, 1);
+            fprintf(stderr, "%s: save for hostpipe: %p\n", __func__, pipe->host_pipe);
             service_ops->guest_save(pipe->host_pipe, file);
         } else {
             qemu_put_byte(file, 0);
@@ -1536,6 +1544,7 @@ static void goldfish_pipe_save_v2(QEMUFile* file, PipeDevice* dev) {
         // when some force-closed pipes are still on the list.
         if (pipe->host_pipe) {
             qemu_put_byte(file, 1);
+            fprintf(stderr, "%s: save for hostpipe: %p\n", __func__, pipe->host_pipe);
             service_ops->guest_save(pipe->host_pipe, file);
         } else {
             qemu_put_byte(file, 0);

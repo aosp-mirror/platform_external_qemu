@@ -37,6 +37,8 @@ extern "C" {
 #include "hw/misc/goldfish_pipe.h"
 #include "hw/virtio/virtio-goldfish-pipe.h"
 
+#include "migration/migration.h"
+
 #include "virgl_hw.h"
 }  // extern "C"
 
@@ -194,6 +196,7 @@ struct PipeResEntry {
     uint64_t hvaSize;
     uint64_t hvaId;
     uint32_t hvSlot;
+    uint64_t* addrs;
 };
 
 static inline uint32_t align_up(uint32_t n, uint32_t a) {
@@ -558,6 +561,7 @@ public:
         auto hostPipe = ops->guest_open_with_flags(
             reinterpret_cast<GoldfishHwPipe*>(handle),
             0x1 /* is virtio */);
+        fprintf(stderr, "%s: pipe open %p\n", __func__, hostPipe);
 
         if (!hostPipe) {
             fprintf(stderr, "%s: failed to create hw pipe!\n", __func__);
@@ -959,6 +963,11 @@ public:
             entry.numIovs = 0;
         }
 
+        if (entry.addrs) {
+            free(entry.addrs);
+            entry.addrs = nullptr;
+        }
+
         if (entry.hvaId) {
             // gfxstream manages when to actually remove the hostmem id and storage
             //
@@ -979,7 +988,7 @@ public:
         mResources.erase(it);
     }
 
-    int attachIov(int resId, iovec* iov, int num_iovs) {
+    int attachIov(int resId, iovec* iov, int num_iovs, uint64_t* addrs = nullptr) {
         AutoLock lock(mLock);
 
         VGPLOG("resid: %d numiovs: %d", resId, num_iovs);
@@ -989,7 +998,7 @@ public:
 
         auto& entry = it->second;
         VGPLOG("res linear: %p", entry.linear);
-        if (!entry.linear) allocResource(entry, iov, num_iovs);
+        if (!entry.linear) allocResource(entry, iov, num_iovs, addrs);
 
         VGPLOG("done");
         return 0;
@@ -1019,7 +1028,7 @@ public:
             *iov = entry.iov;
         }
 
-        allocResource(entry, entry.iov, entry.numIovs);
+        allocResource(entry, entry.iov, entry.numIovs, nullptr);
         VGPLOG("done");
     }
 
@@ -1163,6 +1172,7 @@ public:
                 void* hostPipeBefore = hostPipe;
                 auto status = ops->guest_send(&hostPipe, &buf, 1);
                 if (hostPipe != hostPipeBefore) {
+                    fprintf(stderr, "%s: reset pipe %p\n", __func__, hostPipe);
                     resetPipe((GoldfishHwPipe*)(uintptr_t)(entry.ctxId), hostPipe);
                     it = mResources.find(resId);
                     entry = it->second;
@@ -1373,6 +1383,114 @@ public:
         return 0;
     }
 
+    void saveContext(QEMUFile* file, VirglCtxId ctxId, const PipeCtxEntry& pipeCtxEntry) {
+    }
+
+    void saveResource(QEMUFile* file, VirglResId resId, const PipeResEntry& pipeCtxEntry) {
+    }
+
+    void saveContextResourceList(QEMUFile* file, VirglCtxId ctxId, const std::vector<VirglResId>& resourceIds) {
+    }
+
+    void saveResourceContextListList(QEMUFile* file, VirglResId ctxId, const std::vector<VirglCtxId>& contextIds) {
+    }
+
+    void saveFenceDeque(QEMUFile* file, const std::deque<int>& deque) {
+    }
+
+    void saveSnapshot(void* opaque) {
+        QEMUFile* file = (QEMUFile*)opaque;
+        uint32_t cookie;
+        memcpy(&cookie, mCookie, sizeof(uint32_t));
+        qemu_put_be32(file, cookie);
+        qemu_put_be32(file, mFlags);
+
+        qemu_put_be32(file, mContexts.size());
+
+        for (auto it: mContexts) {
+            saveContext(file, it.first, it.second);
+        }
+
+        qemu_put_be32(file, mResources.size());
+
+        for (auto it: mResources) {
+            saveResource(file, it.first, it.second);
+        }
+
+        // save fence cookie
+        // save flags
+        // virtio-gpu ops, services ops and control ops should always be loaded
+        // contexts/resources, ctxresourcemap all saved in the obvious way
+        // mLastSubmitCmdCtxExists save
+        // mLastSubmitCmdCtx save
+        // mFenceDeque save the deque
+        //
+        // To save a PipeCtxEntry / asg handle
+        // it's possible that the pipe or asg handle has been saved by the android pipe service callback already,
+        // so we need to save some kind of token that lets us recover the pipe id that it corresponded to
+        // Nope, for pipes, the pipe device doesn't notice we have this pipe
+        // So we need to call the save function directly for each pipe.
+        // When loading the pipes, we need to follow a similar protocol as goldfish_pipe.c
+        //
+        // ASG: address space device should save all existing handles by itself
+        //
+        // ok, now we need gpa from iov.
+// struct PipeCtxEntry {
+//     VirglCtxId ctxId;
+//     GoldfishHostPipe* hostPipe;
+//     int fence;
+//     uint32_t addressSpaceHandle;
+//     bool hasAddressSpaceHandle;
+// };
+// 
+//
+// struct PipeResEntry {
+//     virgl_renderer_resource_create_args args;
+//     iovec* iov;
+//     uint32_t numIovs;
+//     void* linear;
+//     size_t linearSize;
+//     GoldfishHostPipe* hostPipe;
+//     VirglCtxId ctxId;
+//     uint64_t hva;
+//     uint64_t hvaSize;
+//     uint64_t hvaId;
+//     uint32_t hvSlot;
+// };
+//
+// To save a PipeResEntry:
+// - clearly need to save resource create args along with IOV
+// - but the problem is that IOVs are in host address space, while we need the guest physical addresses
+// - hva address, size, and maybe also id and slot need to be updated
+//
+        //
+
+    // void* mCookie = nullptr;
+    // int mFlags = 0;
+    // virgl_renderer_callbacks mVirglRendererCallbacks;
+    // AndroidVirtioGpuOps* mVirtioGpuOps = nullptr;
+    // ReadPixelsFunc mReadPixelsFunc = nullptr;
+    // struct address_space_device_control_ops* mAddressSpaceDeviceControlOps =
+    //     nullptr;
+
+    // const GoldfishPipeServiceOps* mServiceOps = nullptr;
+    //
+    //
+
+    // std::unordered_map<VirglCtxId, PipeCtxEntry> mContexts;
+    // std::unordered_map<VirglResId, PipeResEntry> mResources;
+    // std::unordered_map<VirglCtxId, std::vector<VirglResId>> mContextResources;
+    // std::unordered_map<VirglResId, std::vector<VirglCtxId>> mResourceContexts;
+    // bool mLastSubmitCmdCtxExists = false;
+    // uint32_t mLastSubmitCmdCtx = 0;
+    // // Other fences that aren't related to the fence covering a pipe buffer
+    // // submission.
+    // std::deque<int> mFenceDeque;
+    }
+
+    void loadSnapshot(void* qemufile) {
+    }
+
     void setResourceHvSlot(uint32_t res_handle, uint32_t slot) {
         AutoLock lock(mLock);
         auto it = mResources.find(res_handle);
@@ -1390,7 +1508,7 @@ public:
     }
 
 private:
-    void allocResource(PipeResEntry& entry, iovec* iov, int num_iovs) {
+    void allocResource(PipeResEntry& entry, iovec* iov, int num_iovs, uint64_t* addrs = nullptr) {
         VGPLOG("entry linear: %p", entry.linear);
         if (entry.linear) free(entry.linear);
 
@@ -1418,6 +1536,13 @@ private:
         initbox.y = 0;
         initbox.w = (uint32_t)linearSize;
         initbox.h = 1;
+
+        if (addrs) {
+            entry.addrs = (uint64_t*)malloc(sizeof(uint64_t) * num_iovs);
+            for (int i = 0; i < num_iovs; ++i) {
+                entry.addrs[i] = addrs[i];
+            }
+        }
     }
 
     void detachResourceLocked(uint32_t ctxId, uint32_t toUnrefId) {
@@ -1627,6 +1752,19 @@ VG_EXPORT int stream_renderer_resource_unmap(uint32_t res_handle) {
     return sRenderer->resourceUnmap(res_handle);
 }
 
+VG_EXPORT void pipe_virgl_renderer_save_snapshot(void* qemufile) {
+    fprintf(stderr, "%s: call\n", __func__);
+    sRenderer->saveSnapshot(qemufile);
+}
+
+VG_EXPORT void pipe_virgl_renderer_load_snapshot(void* qemufile) {
+    fprintf(stderr, "%s: call\n", __func__);
+    sRenderer->loadSnapshot(qemufile);
+}
+
+VG_EXPORT int pipe_virgl_renderer_resource_attach_iov_with_addrs(int res_handle, struct iovec *iov, int num_iovs, uint64_t* addrs) {
+    return sRenderer->attachIov(res_handle, iov, num_iovs, addrs);
+}
 
 #define VIRGLRENDERER_API_PIPE_STRUCT_DEF(api) pipe_##api,
 
