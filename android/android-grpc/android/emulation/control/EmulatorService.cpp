@@ -638,6 +638,13 @@ public:
         if (!enabled)
             return Status::OK;
 
+        bool isFolded = android_foldable_is_folded();
+        // The folded screen is represented as a rectangle within the full
+        // screen.
+        SkinRect rect = { {0,0}, {0,0} };
+        if (isFolded) {
+            android_foldable_get_folded_area(&rect.pos.x, &rect.pos.y, &rect.size.w, &rect.size.h);
+        }
         reply->set_timestampus(System::get()->getUnixTimeUs());
         android::emulation::ImageFormat desiredFormat =
                 ScreenshotUtils::translate(request->format());
@@ -672,11 +679,33 @@ public:
         if (rotation == Rotation::LANDSCAPE ||
             rotation == Rotation::REVERSE_LANDSCAPE) {
             std::swap(width, height);
+            if (isFolded) {
+                std::swap(rect.pos.x, rect.pos.y);
+                std::swap(rect.size.w, rect.size.h);
+            }
         }
 
-        // Calculate widht and height, keeping aspect ration in mind.
-        auto [newWidth, newHeight] = ScreenshotUtils::resizeKeepAspectRatio(
-                width, height, desiredWidth, desiredHeight);
+        // Calculate width and height, keeping aspect ratio in mind.
+        int newWidth, newHeight;
+        if (isFolded) {
+            // When screen is folded, resize based on the aspect ratio of the
+            // folded screen instead of full screen.
+            int newFoldedWidth, newFoldedHeight;
+            std::tie(newFoldedWidth, newFoldedHeight) =
+                    ScreenshotUtils::resizeKeepAspectRatio(
+                            rect.size.w, rect.size.h, desiredWidth,
+                            desiredHeight);
+            rect.pos.x = rect.pos.x * newFoldedWidth / rect.size.w;
+            rect.pos.y = rect.pos.y * newFoldedHeight / rect.size.h;
+            newWidth = width * newFoldedWidth / rect.size.w;
+            newHeight = height * newFoldedHeight / rect.size.h;
+            rect.size.w = newFoldedWidth;
+            rect.size.h = newFoldedHeight;
+        } else {
+            std::tie(newWidth, newHeight) =
+                    ScreenshotUtils::resizeKeepAspectRatio(
+                            width, height, desiredWidth, desiredHeight);
+        }
 
         // The screenshot produces a rotated result and will just simply flip
         // width and height.
@@ -695,19 +724,31 @@ public:
         }
 
         Stopwatch sw;
-        android::emulation::Image img = android::emulation::takeScreenshot(
+        auto img = android::emulation::Image(0, 0, 0, android::emulation::ImageFormat::RGB888, {});
+        if (isFolded) {
+            Optional<android::emulation::Image> ret =
+                    android::emulation::takePartialScreenshot(
+                            desiredFormat, desiredRotation, renderer.get(),
+                            rect, newWidth, newHeight, request->display());
+            if (ret.ptr()) {
+                img = ret.value();
+            }
+        } else {
+            img = android::emulation::takeScreenshot(
                 desiredFormat, desiredRotation, renderer.get(),
                 mAgents->display->getFrameBuffer, request->display(), newWidth,
                 newHeight);
-        LOG(VERBOSE) << "Screenshot " << newWidth << "x" << newHeight
-                     << ", in: " << sw.elapsedUs() << " us";
+        }
+        LOG(VERBOSE) << "Screenshot " << img.getWidth() << "x"
+                     << img.getHeight() << ", in: " << sw.elapsedUs() << " us";
 
         // Update format information with the retrieved width, height..
         auto format = reply->mutable_format();
         format->set_format(ScreenshotUtils::translate(img.getImageFormat()));
         format->set_height(img.getHeight());
         format->set_width(img.getWidth());
-
+        format->set_foldablestate(isFolded ? ImageFormat::FOLDED
+                                           : ImageFormat::UNFOLDED);
         auto rotation_reply = format->mutable_rotation();
         rotation_reply->set_xaxis(xaxis);
         rotation_reply->set_yaxis(yaxis);

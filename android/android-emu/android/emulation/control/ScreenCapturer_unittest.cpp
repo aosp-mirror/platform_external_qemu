@@ -233,18 +233,29 @@ public:
         return false;
     }
     void fillGLESUsages(android_studio::EmulatorGLESUsages*) { }
-    void getScreenshot(unsigned int nChannels, unsigned int* width,
-        unsigned int* height, std::vector<unsigned char>& pixels,
-        int displayId, int desiredWidth, int desiredHeight,
-        SkinRotation desiredRotation) {
+    void getScreenshot(unsigned int nChannels,
+                       unsigned int* width,
+                       unsigned int* height,
+                       std::vector<unsigned char>& pixels,
+                       int displayId,
+                       int desiredWidth,
+                       int desiredHeight,
+                       SkinRotation desiredRotation,
+                       SkinRect rect) {
         if (mHasValidScreenshot) {
-            if (desiredWidth == 0 && desiredHeight == 0) {
-                *width = kWidth;
-                *height = kHeight;
-                pixels.assign(*width * *height * nChannels, 0);
+            if (rect.size.w == 0 && rect.size.h == 0) {
+                if (desiredWidth == 0 && desiredHeight == 0) {
+                    *width = kWidth;
+                    *height = kHeight;
+                    pixels.assign(*width * *height * nChannels, 0);
+                } else {
+                    *width = desiredWidth;
+                    *height = desiredHeight;
+                    pixels.assign(*width * *height * nChannels, 0);
+                }
             } else {
-                *width = desiredWidth;
-                *height = desiredHeight;
+                *width = rect.size.w;
+                *height = rect.size.h;
                 pixels.assign(*width * *height * nChannels, 0);
             }
         } else {
@@ -489,4 +500,15 @@ TEST_F(ScreenCapturerTest, scaleSuccess) {
                                  0, 600, 800);
     EXPECT_TRUE(image.getWidth() == 600);
     EXPECT_TRUE(image.getHeight() == 800);
+}
+
+TEST_F(ScreenCapturerTest, takePartialScreenshot) {
+    MockRenderer renderer(true);
+    auto ret =
+            takePartialScreenshot(ImageFormat::RAW, SKIN_ROTATION_0, &renderer,
+                                  {{0, 0}, {500, 500}}, 1000, 1000);
+    EXPECT_TRUE(ret.ptr() != nullptr);
+    Image& image = ret.value();
+    EXPECT_TRUE(image.getWidth() == 500);
+    EXPECT_TRUE(image.getHeight() == 500);
 }

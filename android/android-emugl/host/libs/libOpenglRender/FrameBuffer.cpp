@@ -825,13 +825,10 @@ FrameBuffer::postWorkerFunc(const Post& post) {
             break;
         case PostCmd::Screenshot:
             m_postWorker->screenshot(
-                post.screenshot.cb,
-                post.screenshot.screenwidth,
-                post.screenshot.screenheight,
-                post.screenshot.format,
-                post.screenshot.type,
-                post.screenshot.rotation,
-                post.screenshot.pixels);
+                    post.screenshot.cb, post.screenshot.screenwidth,
+                    post.screenshot.screenheight, post.screenshot.format,
+                    post.screenshot.type, post.screenshot.rotation,
+                    post.screenshot.pixels, post.screenshot.rect);
             break;
         case PostCmd::Exit:
             return WorkerProcessingResult::Stop;
@@ -878,13 +875,11 @@ void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
     // For now, this fixes a screenshot issue on macOS.
     if (postOnlyOnMainThread && (PostCmd::Screenshot == post.cmd) &&
         emugl::get_emugl_window_operations().isRunningInUiThread()) {
-        post.cb->readPixelsScaled(
-            post.screenshot.screenwidth,
-            post.screenshot.screenheight,
-            post.screenshot.format,
-            post.screenshot.type,
-            post.screenshot.rotation,
-            post.screenshot.pixels);
+        post.cb->readPixelsScaled(post.screenshot.screenwidth,
+                                  post.screenshot.screenheight,
+                                  post.screenshot.format, post.screenshot.type,
+                                  post.screenshot.rotation,
+                                  post.screenshot.pixels, post.screenshot.rect);
     } else {
         m_postThread.enqueue(Post(post));
         if (!postOnlyOnMainThread) {
@@ -2617,9 +2612,15 @@ static void loadProcOwnedCollection(Stream* stream, Collection* c) {
     });
 }
 
-void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
-        unsigned int* height, std::vector<unsigned char>& pixels, int displayId,
-        int desiredWidth, int desiredHeight, SkinRotation desiredRotation) {
+void FrameBuffer::getScreenshot(unsigned int nChannels,
+                                unsigned int* width,
+                                unsigned int* height,
+                                std::vector<unsigned char>& pixels,
+                                int displayId,
+                                int desiredWidth,
+                                int desiredHeight,
+                                SkinRotation desiredRotation,
+                                SkinRect rect) {
     AutoLock mutex(m_lock);
     uint32_t w, h, cb;
     if (!emugl::get_emugl_multi_display_operations().getMultiDisplay(displayId,
@@ -2657,9 +2658,11 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
 
     *width = (desiredWidth == 0) ? w : desiredWidth;
     *height = (desiredHeight == 0) ? h : desiredHeight;
+
     if (desiredRotation == SKIN_ROTATION_90 || desiredRotation == SKIN_ROTATION_270) {
         std::swap(*width, *height);
     }
+
     pixels.resize(nChannels * (*width) * (*height));
 
     GLenum format = nChannels == 3 ? GL_RGB : GL_RGBA;
@@ -2673,8 +2676,13 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
     scrCmd.screenshot.type = GL_UNSIGNED_BYTE;
     scrCmd.screenshot.rotation = desiredRotation;
     scrCmd.screenshot.pixels = pixels.data();
-
+    scrCmd.screenshot.rect = rect;
     sendPostWorkerCmd(scrCmd);
+    // Indicate that this is partial screenshot
+    if (rect.size.w != 0 && rect.size.h != 0) {
+        *width = rect.size.w;
+        *height = rect.size.h;
+    }
 }
 
 void FrameBuffer::onLastColorBufferRef(uint32_t handle) {
