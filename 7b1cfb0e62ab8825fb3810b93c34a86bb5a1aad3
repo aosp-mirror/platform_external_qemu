@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7d074b03_beda4b32",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-11T21:53:33Z",
+      "side": 1,
+      "message": "File I/O inside a class constructor should probably be avoided. Doesn\u0027t emulator already read the config.ini file on startup?",
+      "range": {
+        "startLine": 195,
+        "startChar": 16,
+        "endLine": 195,
+        "endChar": 36
+      },
+      "revId": "7b1cfb0e62ab8825fb3810b93c34a86bb5a1aad3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
