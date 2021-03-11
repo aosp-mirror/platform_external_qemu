@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "332d0000_78028b6e",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-11T19:02:24Z",
+      "side": 1,
+      "message": "Is it the same as the value avd.ini.displayname in config.ini? If not, it should be changed to match avd.ini.displayname exactly.",
+      "range": {
+        "startLine": 193,
+        "startChar": 23,
+        "endLine": 193,
+        "endChar": 43
+      },
+      "revId": "6b70a2f975d60c7987bb00312adcbfdce89b540c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
