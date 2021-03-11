@@ -46,6 +46,30 @@
       },
       "revId": "6b70a2f975d60c7987bb00312adcbfdce89b540c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7ea9db4c_0ba273ce",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-11T20:47:12Z",
+      "side": 1,
+      "message": "We need the display name here to match Studio.",
+      "parentUuid": "d168e9b1_c09d721b",
+      "range": {
+        "startLine": 193,
+        "startChar": 23,
+        "endLine": 193,
+        "endChar": 43
+      },
+      "revId": "6b70a2f975d60c7987bb00312adcbfdce89b540c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
