@@ -21,6 +21,7 @@
 #include <utility>                    // for move
 #include <vector>                     // for vector
 
+#include "android/base/Optional.h"    // for Optional
 #include "android/base/StringView.h"  // for StringView
 #include "android/skin/rect.h"        // for SkinRotation
 
@@ -55,7 +56,6 @@ public:
 
     // Converts Image from RGBA8888 -> RGB888 if needed and possible.
     Image& asRGB888();
-
 private:
     void convertPerByte();
     void convertPerHexlet();
@@ -82,6 +82,19 @@ Image takeScreenshot(
         int desiredWidth = 0,
         int desiredHeight = 0
         );
+
+// Capture a partial screenshot using the Renderer only.
+// The partial screen is represented by a rectangle.
+// This function will check if the rectangle is within the bound of
+// the screen defined by width and height.
+// It Will return an empty Optional if valid condition fails.
+android::base::Optional<Image> takePartialScreenshot(ImageFormat desiredFormat,
+                                                     SkinRotation rotation,
+                                                     emugl::Renderer* renderer,
+                                                     SkinRect rect,
+                                                     int desiredWidth,
+                                                     int desiredHeight,
+                                                     int displayId = 0);
 
 bool captureScreenshot(android::base::StringView outputDirectoryPath,
                        std::string* outputFilepath = NULL,
