@@ -1055,14 +1055,39 @@ static const VMStateDescription vmstate_virtio_gpu_scanouts = {
 static int virtio_gpu_save(QEMUFile *f, void *opaque, size_t size,
                            VMStateField *field, QJSON *vmdesc)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     VirtIOGPU *g = opaque;
     struct virtio_gpu_simple_resource *res;
     int i;
+
+#ifdef CONFIG_VIRGL
+    if (virtio_gpu_virgl_enabled(g->conf)) {
+        // First save the renderer state then save the slots?
+        // (i.e., when loading, load the renderer state first, then load the slots)
+        // (slots need hva info)
+
+        fprintf(stderr, "%s: save virgl here\n", __func__);
+        g->virgl->virgl_renderer_save_snapshot(f);
+
+        virtio_gpu_save_ram_slots(f, g);
+        // g->save_ram_slots();
+
+        // Heh.
+        // error_setg(&g->migration_blocker, "virgl is not yet migratable");
+        // migrate_add_blocker(g->migration_blocker, &local_err);
+        // if (local_err) {
+            // error_propagate(errp, local_err);
+            // error_free(g->migration_blocker);
+            // return;
+        // }
+    }
+#endif
 
     /* in 2d mode we should never find unprocessed commands here */
     assert(QTAILQ_EMPTY(&g->cmdq));
 
     QTAILQ_FOREACH(res, &g->reslist, next) {
+        fprintf(stderr, "%s: save resid %u\n", __func__, res->resource_id);
         qemu_put_be32(f, res->resource_id);
         qemu_put_be32(f, res->width);
         qemu_put_be32(f, res->height);
@@ -1083,6 +1108,7 @@ static int virtio_gpu_save(QEMUFile *f, void *opaque, size_t size,
 static int virtio_gpu_load(QEMUFile *f, void *opaque, size_t size,
                            VMStateField *field)
 {
+    fprintf(stderr, "%s: call\n", __func__);
     VirtIOGPU *g = opaque;
     struct virtio_gpu_simple_resource *res;
     struct virtio_gpu_scanout *scanout;
@@ -1091,10 +1117,27 @@ static int virtio_gpu_load(QEMUFile *f, void *opaque, size_t size,
 
     g->hostmem = 0;
 
+#ifdef CONFIG_VIRGL
+    if (virtio_gpu_virgl_enabled(g->conf)) {
+        fprintf(stderr, "%s: save virgl here\n", __func__);
+        g->virgl->virgl_renderer_load_snapshot(f);
+        virtio_gpu_load_ram_slots(f, g);
+        // Heh.
+        // error_setg(&g->migration_blocker, "virgl is not yet migratable");
+        // migrate_add_blocker(g->migration_blocker, &local_err);
+        // if (local_err) {
+            // error_propagate(errp, local_err);
+            // error_free(g->migration_blocker);
+            // return;
+        // }
+    }
+#endif
+
     resource_id = qemu_get_be32(f);
     while (resource_id != 0) {
         res = g_new0(struct virtio_gpu_simple_resource, 1);
         res->resource_id = resource_id;
+        fprintf(stderr, "%s: load resid %u\n", __func__, res->resource_id);
         res->width = qemu_get_be32(f);
         res->height = qemu_get_be32(f);
         res->format = qemu_get_be32(f);
@@ -1255,13 +1298,14 @@ static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
 #endif
 
     if (virtio_gpu_virgl_enabled(g->conf)) {
-        error_setg(&g->migration_blocker, "virgl is not yet migratable");
-        migrate_add_blocker(g->migration_blocker, &local_err);
-        if (local_err) {
-            error_propagate(errp, local_err);
-            error_free(g->migration_blocker);
-            return;
-        }
+        // Heh.
+        // error_setg(&g->migration_blocker, "virgl is not yet migratable");
+        // migrate_add_blocker(g->migration_blocker, &local_err);
+        // if (local_err) {
+            // error_propagate(errp, local_err);
+            // error_free(g->migration_blocker);
+            // return;
+        // }
     }
 
     g->config_size = sizeof(struct virtio_gpu_config);
