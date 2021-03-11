@@ -162,6 +162,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "1e8149af_0a1ddf81",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2661,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-03-11T22:52:43Z",
+      "side": 1,
+      "message": "desiredW/H is not necessarily the same, image the screen is scaled by desiredW/H first before taking a rectangle from the partial screen.",
+      "parentUuid": "330fa742_8929a71c",
+      "revId": "7369f15c58d51c3db5b84c30da5bf369a5a15376",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "7668cb06_7702421e",
         "filename": "android/android-grpc/emulator_controller.proto",
         "patchSetId": 3
