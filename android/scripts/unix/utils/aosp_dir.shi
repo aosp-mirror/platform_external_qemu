@@ -194,8 +194,8 @@ aosp_depot_tools_dir () {
 }
 
 aosp_msvc_hash () {
-  # This is the hash of the msvc version we are using (VS 2017)
-  echo "3bc0ec615cf20ee342f3bc29bc991b5ad66d8d2c"
+  # This is the hash of the msvc version we are using (VS 2019)
+  echo "20d5f2553f"
 }
 
 # Find the AOSP top-level directory, starting from a given sub-directory.
