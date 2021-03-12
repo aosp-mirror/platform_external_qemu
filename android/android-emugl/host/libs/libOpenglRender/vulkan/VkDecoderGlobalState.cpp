@@ -268,6 +268,12 @@ public:
             get_emugl_address_space_device_control_ops().control_get_hw_funcs()) {
             mUseOldMemoryCleanupPath = 0 == get_emugl_address_space_device_control_ops().control_get_hw_funcs()->getPhysAddrStartLocked();
         }
+
+        if (mVerbosePrints) {
+            fprintf(stderr, "%s: memory cleanup path is old? %d\n", __func__, mUseOldMemoryCleanupPath);
+            fprintf(stderr, "%s: vk cleanup enabled? %d\n", __func__, mVkCleanupEnabled);
+        }
+
         mGuestUsesAngle =
             emugl::emugl_feature_is_enabled(
                 android::featurecontrol::GuestUsesAngle);
@@ -2833,6 +2839,12 @@ public:
         };
 
         if (!mUseOldMemoryCleanupPath) {
+
+            if (mVerbosePrints) {
+                fprintf(stderr, "%s: Registering deallocation callback for host-visible memory at gpa 0x%llx\n", __func__,
+                        (unsigned long long)gpa);
+            }
+
             get_emugl_address_space_device_control_ops().register_deallocation_callback(
                 this, gpa, [](void* thisPtr, uint64_t gpa) {
                 Impl* implPtr = (Impl*)thisPtr;
