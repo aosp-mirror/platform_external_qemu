@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b371fdf8_9f234353",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-03-12T17:02:19Z",
+      "side": 1,
+      "message": "This will likely fail in cross compile presubmit. We will have to update our images to make the new msvc toolchain available.",
+      "revId": "f3c09c30492faba5f26f59fb64c6df4b4d9c35a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
