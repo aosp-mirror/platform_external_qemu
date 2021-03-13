@@ -22,16 +22,8 @@ The consumer displays the images on the UI
 Note: Move the mouse around if the screen does not update.
 """
 import argparse
-import logging
 import mmap
 import sys
-import time
-from threading import Thread
-
-import grpc
-
-from queue import Queue
-
 from threading import Thread
 from tkinter import NW, Canvas, Tk
 
@@ -97,12 +89,19 @@ def _img_consumer(canvas, root, args):
 
     emu = None
     visual = None
+    old_w = 0
+    old_h = 0
 
     for img in stream_screenshots(args):
         img_bytes = img.image
         if mm:
             mm.seek(0)
             img_bytes = mm.read()
+
+        if old_h != img.format.height or old_w != img.format.width:
+            emu = None
+            old_h = img.format.height
+            old_w = img.format.width
 
         # Python has poor UI support, this takes up soo much time
         # that the type of call does not really make a difference.
