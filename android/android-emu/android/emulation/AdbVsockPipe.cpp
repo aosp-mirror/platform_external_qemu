@@ -445,7 +445,6 @@ AdbVsockPipe::AdbVsockPipe(AdbVsockPipe::Service *service,
 }
 
 AdbVsockPipe::~AdbVsockPipe() {
-    mVsockCallbacks.close();
     processProxyEventBits(Proxy::EventBits::DontWantRead |
                           Proxy::EventBits::DontWantWrite);
 }
@@ -476,6 +475,7 @@ void AdbVsockPipe::onGuestClose() {
 
 void AdbVsockPipe::processProxyEventBits(const Proxy::EventBits bits) {
     if (nonzero(bits & Proxy::EventBits::CloseSocket)) {
+        mVsockCallbacks.close();
         mService->destroyPipe(this);
     } else if (mSocketWatcher) {
         if (nonzero(bits & Proxy::EventBits::WantWrite)) {
