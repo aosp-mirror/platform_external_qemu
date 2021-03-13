@@ -709,18 +709,14 @@ public:
                                        rotation, newWidth, newHeight, pixels,
                                        &cPixels, &width, &height);
 
-        // Update format information with the retrieved width, height..
         auto format = reply->mutable_format();
         format->set_format(request->format());
-        format->set_height(height);
-        format->set_width(width);
 
         auto rotation_reply = format->mutable_rotation();
         rotation_reply->set_xaxis(xaxis);
         rotation_reply->set_yaxis(yaxis);
         rotation_reply->set_zaxis(zaxis);
         rotation_reply->set_rotation(rotation);
-
         if (request->transport().channel() == ImageTransport::MMAP) {
             auto shm = mSharedMemoryLibrary.borrow(
                     request->transport().handle(), cPixels);
@@ -761,7 +757,10 @@ public:
                                        rotation, newWidth, newHeight, pixels,
                                        &cPixels, &width, &height);
 
-        LOG(VERBOSE) << "Screenshot " << newWidth << "x" << newHeight
+        // Update format information with the retrieved width, height..
+        format->set_height(height);
+        format->set_width(width);
+        LOG(VERBOSE) << "Screenshot " << width << "x" << height << ", cPixels: " << cPixels
                      << ", in: " << sw.elapsedUs() << " us";
         return Status::OK;
     }
