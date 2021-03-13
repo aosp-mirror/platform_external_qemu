@@ -2665,7 +2665,6 @@ int  FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
         return -2;
     }
     *cPixels = needed;
-
     if (desiredRotation == SKIN_ROTATION_90 || desiredRotation == SKIN_ROTATION_270) {
         std::swap(*width, *height);
     }
@@ -2691,7 +2690,7 @@ void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
         int desiredWidth, int desiredHeight, SkinRotation desiredRotation) {
 
     size_t size = pixels.size();
-    if (!getScreenshot(nChannels, width, height, pixels.data(), &size, displayId, desiredWidth, desiredHeight, desiredRotation))  {
+    if (getScreenshot(nChannels, width, height, pixels.data(), &size, displayId, desiredWidth, desiredHeight, desiredRotation) != 0)  {
         if (size == 0) {
             // Fatal error..
             return;
