@@ -219,7 +219,7 @@ AdbVsockPipe::Service::~Service() {
 
     stopPollGuestAdbdThread(kAdbdPollingThreadDisabled);
 
-    mPipesToDestroy.stop();
+    destroyPipe(nullptr);
     mDestroyPipesThread.join();
 }
 
@@ -249,28 +249,36 @@ void AdbVsockPipe::Service::onHostConnection(android::base::ScopedSocket&& socke
 void AdbVsockPipe::Service::destroyPipesThreadLoop() {
     while (true) {
         AdbVsockPipe *toDestroy;
-        if (mPipesToDestroy.receive(&toDestroy)) {
-            std::lock_guard<std::mutex> guard(mPipesMtx);
-
-            const auto end = std::remove_if(
-                mPipes.begin(), mPipes.end(),
-                [toDestroy](const std::unique_ptr<AdbVsockPipe> &pipe){
-                    return toDestroy == pipe.get();
-                });
-
-            mPipes.erase(end, mPipes.end());
-            if (mPipes.empty()) {
-                stopPollGuestAdbdThread(kAdbdPollingThreadIdle);
-                startPollGuestAdbdThread();
-            }
-        } else {
+        {
+            std::unique_lock<std::mutex> guard(mPipesToDestroyMtx);
+            mPipesToDestroyCv.wait(guard, [this](){ return !mPipesToDestroy.empty(); });
+            toDestroy = mPipesToDestroy.front();
+            mPipesToDestroy.pop_front();
+        }
+        if (!toDestroy) {
             break;
+        }
+
+        std::lock_guard<std::mutex> guard(mPipesMtx);
+
+        const auto end = std::remove_if(
+            mPipes.begin(), mPipes.end(),
+            [toDestroy](const std::unique_ptr<AdbVsockPipe> &pipe){
+                return toDestroy == pipe.get();
+            });
+
+        mPipes.erase(end, mPipes.end());
+        if (mPipes.empty()) {
+            stopPollGuestAdbdThread(kAdbdPollingThreadIdle);
+            startPollGuestAdbdThread();
         }
     }
 }
 
 void AdbVsockPipe::Service::destroyPipe(AdbVsockPipe *p) {
-    mPipesToDestroy.send(p);
+    std::lock_guard<std::mutex> guard(mPipesToDestroyMtx);
+    mPipesToDestroy.push_back(p);
+    mPipesToDestroyCv.notify_one();
 }
 
 void AdbVsockPipe::Service::pollGuestAdbdThreadLoop() {
