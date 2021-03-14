@@ -143,7 +143,7 @@ private:
     friend Service;
     friend DataVsockCallbacks;
 
-    void onHostSocketEvent(unsigned events);
+    void onHostSocketEvent(int hostFd, unsigned events);
     void onGuestSend(const void *data, size_t size);
     void onGuestClose();
     void processProxyEventBits(Proxy::EventBits bits);
