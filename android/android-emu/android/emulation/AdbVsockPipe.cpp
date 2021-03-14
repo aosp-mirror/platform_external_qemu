@@ -72,7 +72,7 @@ struct VsockAdbProxy : public AdbVsockPipe::Proxy {
             while (true) {
                 const size_t received = android::base::socketRecv(hostFd, buf, sizeof(buf));
                 if (!received) {
-                    result |= EventBits::CloseSocket;  // hostFd is closed
+                    result |= EventBits::HostClosed;
                     break;
                 }
 
@@ -82,7 +82,7 @@ struct VsockAdbProxy : public AdbVsockPipe::Proxy {
 
                 const size_t sent = (*g_vsock_ops->send)(guestKey, buf, received);
                 if (sent != received) {
-                    result |= EventBits::CloseSocket;  // guestKey is closed
+                    result |= EventBits::GuestClosed;
                     break;
                 }
             }
@@ -141,38 +141,44 @@ struct VsockJdwpProxy : public AdbVsockPipe::Proxy {
         EventBits result = EventBits::None;
 
         mAdbHub.onHostSocketEvent(hostFd, events, [this, &result]() {
-            result = EventBits::CloseSocket;
+            result = EventBits::HostClosed;
         });
 
-        if (result == EventBits::None) {
-            uint8_t buf[2048];
-            AndroidPipeBuffer abuf;
-            abuf.data = buf;
-            abuf.size = sizeof(buf);
+        if (result != EventBits::None) {
+            return result;
+        }
 
-            while (true) {
-                const int sz = mAdbHub.onGuestRecvData(&abuf, 1);
-                if (sz > 0) {
-                    if ((*g_vsock_ops->send)(guestKey, buf, sz) != sz) {
-                        result |= EventBits::CloseSocket;  // guestKey is closed
-                        break;
-                    }
-                } else {
+        uint8_t buf[2048];
+        AndroidPipeBuffer abuf;
+        abuf.data = buf;
+        abuf.size = sizeof(buf);
+
+        while (true) {
+            const int sz = mAdbHub.onGuestRecvData(&abuf, 1);
+            if (sz > 0) {
+                if ((*g_vsock_ops->send)(guestKey, buf, sz) != sz) {
+                    result |= EventBits::GuestClosed;  // guestKey is closed
                     break;
                 }
-            }
-
-            if (mAdbHub.socketWantRead()) {
-                result |= EventBits::WantRead;
             } else {
-                result |= EventBits::DontWantRead;
+                break;
             }
+        }
 
-            if (mAdbHub.socketWantWrite()) {
-                result |= EventBits::WantWrite;
-            } else {
-                result |= EventBits::DontWantWrite;
-            }
+        if (result != EventBits::None) {
+            return result;
+        }
+
+        if (mAdbHub.socketWantRead()) {
+            result |= EventBits::WantRead;
+        } else {
+            result |= EventBits::DontWantRead;
+        }
+
+        if (mAdbHub.socketWantWrite()) {
+            result |= EventBits::WantWrite;
+        } else {
+            result |= EventBits::DontWantWrite;
         }
 
         return result;
@@ -250,15 +256,23 @@ void AdbVsockPipe::Service::destroyPipesThreadLoop() {
     while (true) {
         AdbVsockPipe *toDestroy;
         if (mPipesToDestroy.receive(&toDestroy)) {
-            std::unique_lock<std::mutex> guard(mPipesMtx);
+            std::unique_ptr<AdbVsockPipe> owner;  // ~AdbVsockPipe will not be called under mPipesMtx
 
-            const auto end = std::remove_if(
+            std::unique_lock<std::mutex> guard(mPipesMtx);
+            const auto i = std::find_if(
                 mPipes.begin(), mPipes.end(),
                 [toDestroy](const std::unique_ptr<AdbVsockPipe> &pipe){
                     return toDestroy == pipe.get();
                 });
 
-            mPipes.erase(end, mPipes.end());
+            if (i == mPipes.end()) {
+                ::crashhandler_die("%s:%d: toDestroy is not found in mPipes",
+                                   __func__, __LINE__);
+            }
+
+            owner = std::move(*i);
+            mPipes.erase(i);
+
             if (mPipes.empty()) {
                 stopPollGuestAdbdThread(kAdbdPollingThreadIdle);
                 startPollGuestAdbdThread();
@@ -356,8 +370,12 @@ bool AdbVsockPipe::Service::checkIfGuestAdbdAlive() {
 }
 
 void AdbVsockPipe::Service::resetActiveGuestPipeConnection() {
-    std::unique_lock<std::mutex> guard(mPipesMtx);
-    mPipes.clear();
+    decltype(mPipes) pipes;
+
+    {
+        std::unique_lock<std::mutex> guard(mPipesMtx);
+        pipes = std::move(mPipes);  // we can't call ~AdbVsockPipe with mPipesMtx locked
+    }
 }
 
 void AdbVsockPipe::Service::saveImpl(base::Stream* stream) const {
@@ -444,12 +462,6 @@ AdbVsockPipe::AdbVsockPipe(AdbVsockPipe::Service *service,
     setSocket(std::move(socket));
 }
 
-AdbVsockPipe::~AdbVsockPipe() {
-    mVsockCallbacks.close();
-    processProxyEventBits(Proxy::EventBits::DontWantRead |
-                          Proxy::EventBits::DontWantWrite);
-}
-
 std::unique_ptr<AdbVsockPipe> AdbVsockPipe::create(AdbVsockPipe::Service *service,
                                                    android::base::ScopedSocket socket,
                                                    AdbPortType portType) {
@@ -459,8 +471,8 @@ std::unique_ptr<AdbVsockPipe> AdbVsockPipe::create(AdbVsockPipe::Service *servic
     return std::make_unique<AdbVsockPipe>(service, std::move(socket), portType);
 }
 
-void AdbVsockPipe::onHostSocketEvent(unsigned events) {
-    processProxyEventBits(mProxy->onHostSocketEvent(mSocket.get(),
+void AdbVsockPipe::onHostSocketEvent(int hostFd, unsigned events) {
+    processProxyEventBits(mProxy->onHostSocketEvent(hostFd,
                                                     mVsockCallbacks.streamKey,
                                                     events));
 }
@@ -470,12 +482,15 @@ void AdbVsockPipe::onGuestSend(const void *data, size_t size) {
 }
 
 void AdbVsockPipe::onGuestClose() {
-    mVsockCallbacks.reset();
-    mService->destroyPipe(this);
+    processProxyEventBits(Proxy::EventBits::GuestClosed);
 }
 
 void AdbVsockPipe::processProxyEventBits(const Proxy::EventBits bits) {
-    if (nonzero(bits & Proxy::EventBits::CloseSocket)) {
+    if (nonzero(bits & (Proxy::EventBits::HostClosed | Proxy::EventBits::GuestClosed))) {
+        if (nonzero(bits & Proxy::EventBits::GuestClosed)) {
+            mVsockCallbacks.reset();
+        }
+
         mService->destroyPipe(this);
     } else if (mSocketWatcher) {
         if (nonzero(bits & Proxy::EventBits::WantWrite)) {
@@ -499,7 +514,7 @@ void AdbVsockPipe::setSocket(android::base::ScopedSocket socket) {
     mSocketWatcher.reset(android::base::ThreadLooper::get()->createFdWatch(
         mSocket.get(),
         [](void* opaque, int fd, unsigned events) {
-            static_cast<AdbVsockPipe*>(opaque)->onHostSocketEvent(events);
+            static_cast<AdbVsockPipe*>(opaque)->onHostSocketEvent(fd, events);
         },
         this));
 
@@ -558,7 +573,7 @@ void AdbVsockPipe::DataVsockCallbacks::close() {
 
 AdbVsockPipe::DataVsockCallbacks::~DataVsockCallbacks() {
     if (streamKey) {
-        ::crashhandler_die("%s:%d: streamKey is not zero", __func__, __LINE__);
+        (*g_vsock_ops->close)(streamKey);
     }
 }
 

@@ -87,16 +87,15 @@ public:
                  android::base::ScopedSocket socket,
                  AdbPortType portType);
 
-    ~AdbVsockPipe();
-
     struct Proxy {
         enum class EventBits {
             None = 0,
-            CloseSocket = 1u << 0,
-            WantWrite = 1u << 1,
-            DontWantWrite = 1u << 2,
-            WantRead = 1u << 3,
-            DontWantRead = 1u << 4,
+            HostClosed = 1u << 0,
+            GuestClosed = 1u << 1,
+            WantWrite = 1u << 2,
+            DontWantWrite = 1u << 3,
+            WantRead = 1u << 4,
+            DontWantRead = 1u << 5,
         };
 
         virtual ~Proxy() {}
@@ -143,7 +142,7 @@ private:
     friend Service;
     friend DataVsockCallbacks;
 
-    void onHostSocketEvent(unsigned events);
+    void onHostSocketEvent(int hostFd, unsigned events);
     void onGuestSend(const void *data, size_t size);
     void onGuestClose();
     void processProxyEventBits(Proxy::EventBits bits);
