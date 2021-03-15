@@ -247,7 +247,7 @@ LRESULT CALLBACK dummyWndProc(HWND hwnd,
                               UINT uMsg,
                               WPARAM wParam,
                               LPARAM lParam) {
-    return DefWindowProc(hwnd, uMsg, wParam, lParam);
+    return DefWindowProcA(hwnd, uMsg, wParam, lParam);
 }
 
 // Create a new dummy window, and return its handle.
