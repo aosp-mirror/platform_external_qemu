@@ -220,10 +220,12 @@ void* nsCreateContext(void* format,void* share){
 
 void* nsGetLowLevelContext(void* context) {
     EmuGLContext* ctx = (EmuGLContext *)context;
-    return ctx.CGLContextObj;
+    return ctx;
 }
 
 void nsConvertVideoFrameToNV12Textures(void* context, void* iosurface, int* Ytex, int* UVtex) {
+    NSLog(@"calling nsConvertVideoFrameToNV12Textures");
+
     EmuGLContext* ctx = (EmuGLContext *)context;
 
     // https://developer.apple.com/forums/thread/27589
@@ -242,28 +244,44 @@ CGLTexImageIOSurface2D(glContext,GL_TEXTURE_RECTANGLE, GL_RG8, (GLsizei)planeSiz
    
     IOSurfaceRef* surface = (IOSurfaceRef*)iosurface;
 
+    NSLog(@"get w and h");
     GLsizei surface_w = (GLsizei)IOSurfaceGetWidth(surface);
     GLsizei surface_h = (GLsizei)IOSurfaceGetHeight(surface);
       
-    glGenTextures(1, &Ytex);
-    glBindTexture(GL_TEXTURE_RECTANGLE, Ytex);
+    NSLog(@"create textures y");
+    glGenTextures(1, Ytex);
+    glBindTexture(GL_TEXTURE_RECTANGLE, *Ytex);
+    NSLog(@"fetch textures y");
     CGLError cglError =
         CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE,
                 GL_R8, surface_w, surface_h, GL_RED, GL_UNSIGNED_BYTE, surface, 0);
-    
-    glGenTextures(1, &UVtex);
-    glBindTexture(GL_TEXTURE_RECTANGLE, UVtex);
+   
+    if (cglError != kCGLNoError) {
+        fprintf(stderr, "create textures y error %d\n", cglError);
+    }
+
+    NSLog(@"create textures uv");
+    glGenTextures(1, UVtex);
+    glBindTexture(GL_TEXTURE_RECTANGLE, *UVtex);
     cglError =
         CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE,
                 GL_RG8, surface_w/2, surface_h/2, GL_RG, GL_UNSIGNED_BYTE, surface, 1);
 
+    if (cglError != kCGLNoError) {
+        fprintf(stderr, "create textures uv error %d\n", cglError);
+    }
     glBindTexture(GL_TEXTURE_RECTANGLE, 0);
+    NSLog(@"done creating textures uv");
 }
 
 void nsCopyTexture(void* context, int from, int to, int width, int height) {
+    NSLog(@"calling nsCopyTexture");
     EmuGLContext* ctx = (EmuGLContext *)context;
     // assume ctx is alreldy current
 
+      if (glGetError() != GL_NO_ERROR) {
+          NSLog(@"bad in blit 0");
+      }
     int tex1 = from;
     int tex2 = to;
       GLuint g_fb=0;
