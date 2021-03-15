@@ -222,6 +222,43 @@ void* nsGetLowLevelContext(void* context) {
     return ctx.CGLContextObj;
 }
 
+void nsConvertVideoFrameToNV12Textures(void* context, void* iosurface, int* Ytex, int* UVtex) {
+    EmuGLContext* ctx = (EmuGLContext *)context;
+
+    // https://developer.apple.com/forums/thread/27589
+    // this is probably already current when this is called
+    // [ctx makeCurrentContext];
+    /*
+CGLTexImageIOSurface2D(glContext,GL_TEXTURE_RECTANGLE,GL_R8,(GLsizei)textureSize.width,(GLsizei)textureSize.height,GL_RED,GL_UNSIGNED_BYTE,surfaceRef, 0);
+
+// chroma texture, subsampled
+
+CGLTexImageIOSurface2D(glContext,GL_TEXTURE_RECTANGLE, GL_RG8, (GLsizei)planeSize.width, (GLsizei)planeSize.height, GL_RG, GL_UNSIGNED_BYTE, surfaceRef, 1);
+    */
+    CGLContextObj cgl_ctx = ctx.CGLContextObj;
+    
+    glEnable(GL_TEXTURE_RECTANGLE);
+   
+    IOSurfaceRef* surface = (IOSurfaceRef*)iosurface;
+
+    GLsizei surface_w = (GLsizei)IOSurfaceGetWidth(surface);
+    GLsizei surface_h = (GLsizei)IOSurfaceGetHeight(surface);
+      
+    glGenTextures(1, &Ytex);
+    glBindTexture(GL_TEXTURE_RECTANGLE, Ytex);
+    CGLError cglError =
+        CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE,
+                GL_R8, surface_w, surface_h, GL_RED, GL_UNSIGNED_BYTE, surface, 0);
+    
+    glGenTextures(1, &UVtex);
+    glBindTexture(GL_TEXTURE_RECTANGLE, UVtex);
+    CGLError cglError =
+        CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE,
+                GL_RG8, surface_w/2, surface_h/2, GL_RG, GL_UNSIGNED_BYTE, surface, 1);
+
+    glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
+}
+
 void  nsPBufferMakeCurrent(void* context,void* nativePBuffer,int level){
     EmuGLContext* ctx = (EmuGLContext *)context;
     NSOpenGLPixelBuffer* pbuff = (NSOpenGLPixelBuffer *)nativePBuffer;
