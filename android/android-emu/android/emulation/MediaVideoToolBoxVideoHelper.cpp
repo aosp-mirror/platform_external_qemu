@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "android/emulation/MediaVideoToolBoxVideoHelper.h"
+#include "android/emulation/MediaVideoToolBoxUtils.h"
 #include "android/emulation/YuvConverter.h"
 #include "android/utils/debug.h"
 
@@ -513,6 +514,16 @@ void MediaVideoToolBoxVideoHelper::recreateDecompressionSession() {
 }
 
 void MediaVideoToolBoxVideoHelper::copyFrameToTextures() {
+    // TODO
+    TextureFrame texFrame;
+    if (mUseGpuTexture && mTexturePool != nullptr) {
+        auto my_copy_context = media_vtb_utils_copy_context{nullptr, mDecodedFrame, mOutputWidth,
+        mOutputHeight};
+        texFrame = mTexturePool->getTextureFrame(mOutputWidth, mOutputHeight);
+        mTexturePool->saveDecodedFrameToTexture(
+                texFrame, &my_copy_context,
+                (void*)media_vtb_utils_nv12_updater);
+    }
 }
 
 void MediaVideoToolBoxVideoHelper::copyFrameToCPU() {
