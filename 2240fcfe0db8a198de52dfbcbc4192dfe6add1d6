@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cc79166d_c94f62be",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-03-15T23:45:55Z",
+      "side": 1,
+      "message": "We have e2e python tests. You can add them here: https://source.corp.google.com/android/external/adt-infra/emu_test/test_embedded/tests/\n\n",
+      "revId": "2240fcfe0db8a198de52dfbcbc4192dfe6add1d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4ed90696_5caa66a7",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2666,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-03-15T23:45:55Z",
+      "side": 1,
+      "message": "Is this buffer the right size if rect.w/rect.h !\u003d 0?",
+      "revId": "2240fcfe0db8a198de52dfbcbc4192dfe6add1d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f018048c_1b1f247b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 565,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-03-15T23:45:55Z",
+      "side": 1,
+      "message": "Can you update the documentation? Not immediately clear what the rect parameter does.",
+      "revId": "2240fcfe0db8a198de52dfbcbc4192dfe6add1d6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
