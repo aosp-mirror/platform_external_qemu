@@ -70,6 +70,10 @@ public:
     void flush() override;
     void deInit() override;
 
+    void resetTexturePool(MediaTexturePool* pool = nullptr) {
+        mTexturePool = pool;
+    }
+
     virtual int error() const override { return mErrorCode; }
     virtual bool good() const override { return mIsGood; }
     virtual bool fatal() const override { return false; }
@@ -90,7 +94,8 @@ private:
                                                 void* buffer,
                                                 size_t sz);
 
-    void copyFrame();
+    void copyFrameToTextures();
+    void copyFrameToCPU();
     void createCMFormatDescription();
     void recreateDecompressionSession();
     void getOutputWH();
@@ -120,12 +125,15 @@ private:
     std::vector<uint8_t> mSPS;  // sps NALU
     std::vector<uint8_t> mPPS;  // pps NALU
 
+    // turn on gpu texture mode
+    bool mUseGpuTexture = true;
+    MediaTexturePool* mTexturePool = nullptr;
+
     uint64_t mNumInputFrame{0};
     uint64_t mNumOutputFrame{0};
     int mErrorCode = 0;
     bool mIsGood = true;
     unsigned int mHeight = 0;
-    bool mUseGpuTexture = false;
     unsigned int mWidth = 0;
     unsigned int mOutputHeight = 0;
     unsigned int mOutputWidth = 0;

@@ -70,15 +70,11 @@ bool canUseCudaDecoder() {
 }
 
 bool canDecodeToGpuTexture() {
-#ifndef __APPLE__
     if (emuglConfig_get_current_renderer() == SELECTED_RENDERER_HOST) {
         return true;
     } else {
         return false;
     }
-#else
-    return false;
-#endif
 }
 };  // end namespace
 
@@ -150,10 +146,20 @@ void MediaH264DecoderGeneric::initH264ContextInternal(unsigned int width,
         }
     }
 #else
-    mHwVideoHelper.reset(new MediaVideoToolBoxVideoHelper(
+    MediaVideoToolBoxVideoHelper::FrameStorageMode fMode =
+                (mParser.version() >= 200 && mUseGpuTexture) ?
+                MediaVideoToolBoxVideoHelper::FrameStorageMode:: USE_GPU_TEXTURE
+                : MediaVideoToolBoxVideoHelper::FrameStorageMode:: USE_BYTE_BUFFER;
+    auto macDecoder = new MediaVideoToolBoxVideoHelper(
             mOutputWidth, mOutputHeight,
             MediaVideoToolBoxVideoHelper::OutputTreatmentMode::SAVE_RESULT,
-            MediaVideoToolBoxVideoHelper::FrameStorageMode::USE_BYTE_BUFFER));
+            fMode);
+
+    if (mUseGpuTexture && mParser.version() >= 200) {
+        H264_DPRINT("use gpu texture on OSX");
+        macDecoder->resetTexturePool(mRenderer.getTexturePool());
+    }
+    mHwVideoHelper.reset(macDecoder);
     mHwVideoHelper->init();
 #endif
 

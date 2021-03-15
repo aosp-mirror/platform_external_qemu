@@ -290,7 +290,11 @@ void MediaVideoToolBoxVideoHelper::videoToolboxDecompressCallback(
     CGLPixelFormatObj _CGLPixelFormat;
 
     // Image is ready to be comsumed
-    ptr->copyFrame();
+    if (ptr->mUseGpuTexture) {
+        ptr->copyFrameToTextures();
+    } else {
+        ptr->copyFrameToCPU();
+    }
     ptr->mImageReady = true;
     VTB_DPRINT("Got decoded frame");
 }
@@ -451,8 +455,17 @@ void MediaVideoToolBoxVideoHelper::recreateDecompressionSession() {
             kVTVideoDecoderSpecification_RequireHardwareAcceleratedVideoDecoder,
             kCFBooleanTrue);
 
-    CFDictionaryRef bufAttr = createOutputBufferAttributes(
+    CFDictionaryRef bufAttr;
+
+    if(mUseGpuTexture) {
+        // use NV12 format
+        bufAttr = createOutputBufferAttributes(
+            mOutputWidth, mOutputHeight, kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange);
+    } else {
+        bufAttr = createOutputBufferAttributes(
             mOutputWidth, mOutputHeight, kCVPixelFormatType_420YpCbCr8Planar);
+    }
+
 
     VTDecompressionOutputCallbackRecord decoderCb;
     decoderCb.decompressionOutputCallback = videoToolboxDecompressCallback;
@@ -499,7 +512,10 @@ void MediaVideoToolBoxVideoHelper::recreateDecompressionSession() {
     }
 }
 
-void MediaVideoToolBoxVideoHelper::copyFrame() {
+void MediaVideoToolBoxVideoHelper::copyFrameToTextures() {
+}
+
+void MediaVideoToolBoxVideoHelper::copyFrameToCPU() {
     int imgWidth = CVPixelBufferGetWidth(mDecodedFrame);
     int imgHeight = CVPixelBufferGetHeight(mDecodedFrame);
     int imageSize = CVPixelBufferGetDataSize(mDecodedFrame);
