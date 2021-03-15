@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "android/emulation/MediaVideoToolBoxVideoHelper.h"
+#include "android/emulation/MediaVideoToolBoxUtils.h"
 #include "android/emulation/YuvConverter.h"
 #include "android/utils/debug.h"
 
@@ -290,11 +291,7 @@ void MediaVideoToolBoxVideoHelper::videoToolboxDecompressCallback(
     CGLPixelFormatObj _CGLPixelFormat;
 
     // Image is ready to be comsumed
-    if (ptr->mUseGpuTexture) {
-        ptr->copyFrameToTextures();
-    } else {
-        ptr->copyFrameToCPU();
-    }
+    ptr->copyFrame();
     ptr->mImageReady = true;
     VTB_DPRINT("Got decoded frame");
 }
@@ -513,23 +510,35 @@ void MediaVideoToolBoxVideoHelper::recreateDecompressionSession() {
 }
 
 void MediaVideoToolBoxVideoHelper::copyFrameToTextures() {
+    // TODO
+    TextureFrame texFrame;
+    if (mUseGpuTexture && mTexturePool != nullptr) {
+        auto my_copy_context = media_vtb_utils_copy_context{nullptr, mDecodedFrame, mOutputWidth,
+        mOutputHeight};
+        texFrame = mTexturePool->getTextureFrame(mOutputWidth, mOutputHeight);
+        mTexturePool->saveDecodedFrameToTexture(
+                texFrame, &my_copy_context,
+                (void*)media_vtb_utils_nv12_updater);
+    }
+
+    mVtbBufferMap[mOutputPts] = MediaSnapshotState::FrameInfo{
+        std::vector<uint8_t>(), std::vector<uint32_t>{texFrame.Ytex, texFrame.UVtex},
+            (int)mOutputWidth, (int)mOutputHeight, (uint64_t)(mOutputPts),
+            ColorAspects{mColorAspects}};
 }
 
 void MediaVideoToolBoxVideoHelper::copyFrameToCPU() {
-    int imgWidth = CVPixelBufferGetWidth(mDecodedFrame);
-    int imgHeight = CVPixelBufferGetHeight(mDecodedFrame);
+
     int imageSize = CVPixelBufferGetDataSize(mDecodedFrame);
     int stride = CVPixelBufferGetBytesPerRow(mDecodedFrame);
 
-    mOutputWidth = imgWidth;
-    mOutputHeight = imgHeight;
     mOutBufferSize = mOutputWidth * mOutputHeight * 3 / 2;
 
     VTB_DPRINT("copying size=%d dimension=[%dx%d] stride=%d", imageSize,
-               imgWidth, imgHeight, stride);
+               mOutputWidth, mOutputHeight, stride);
 
     // Copies the image data to the guest.
-    mSavedDecodedFrame.resize(imgWidth * imgHeight * 3 / 2);
+    mSavedDecodedFrame.resize(mOutputWidth* mOutputHeight* 3 / 2);
     uint8_t* dst = mSavedDecodedFrame.data();
 
     CVPixelBufferLockBaseAddress(mDecodedFrame, kCVPixelBufferLock_ReadOnly);
@@ -546,7 +555,7 @@ void MediaVideoToolBoxVideoHelper::copyFrameToCPU() {
                        planeData, linesize, planeWidth, planeHeight);
             // For kCVPixelFormatType_420YpCbCr8Planar, plane 0 is Y, UV planes
             // are 1 and 2
-            if (planeWidth != imgWidth && planeWidth != imgWidth / 2) {
+            if (planeWidth != mOutputWidth && planeWidth != mOutputWidth / 2) {
                 VTB_DPRINT("ERROR: Unable to determine YUV420 plane type");
                 continue;
             }
@@ -599,11 +608,23 @@ void MediaVideoToolBoxVideoHelper::copyFrameToCPU() {
             ColorAspects{mColorAspects}};
     mVtbBufferMap[mOutputPts].data.swap(mSavedDecodedFrame);
 
+
+}
+
+void MediaVideoToolBoxVideoHelper::copyFrame() {
+    mOutputWidth = CVPixelBufferGetWidth(mDecodedFrame);
+    mOutputHeight = CVPixelBufferGetHeight(mDecodedFrame);
+
+    if (mUseGpuTexture) {
+        copyFrameToTextures();
+    } else {
+        copyFrameToCPU();
+    }
+
     if (mVtbBufferMap.size() >= mVtbBufferSize) {
         mSavedDecodedFrames.push_back(std::move(mVtbBufferMap.begin()->second));
         mVtbBufferMap.erase(mVtbBufferMap.begin());
     }
-
 }
 
 }  // namespace emulation
