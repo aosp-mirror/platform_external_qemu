@@ -70,6 +70,30 @@
       },
       "revId": "727cdc70bb165d07329bec6d21bc1b841803e511",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "34143641_30faad98",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 782,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-15T23:38:59Z",
+      "side": 1,
+      "message": "A rollable display can change one of its dimensions as it is being rolled or unrolled. The Studio needs to know the exact rolled state corresponding to the screenshot. An enum is sufficient for foldables but not for rollables.",
+      "parentUuid": "0dec927f_e2c2dc3f",
+      "range": {
+        "startLine": 782,
+        "startChar": 2,
+        "endLine": 782,
+        "endChar": 29
+      },
+      "revId": "727cdc70bb165d07329bec6d21bc1b841803e511",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
