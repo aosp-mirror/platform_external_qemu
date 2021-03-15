@@ -94,6 +94,7 @@ private:
                                                 void* buffer,
                                                 size_t sz);
 
+    void copyFrame();
     void copyFrameToTextures();
     void copyFrameToCPU();
     void createCMFormatDescription();

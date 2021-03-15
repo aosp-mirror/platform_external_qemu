@@ -220,7 +220,7 @@ void* nsCreateContext(void* format,void* share){
 
 void* nsGetLowLevelContext(void* context) {
     EmuGLContext* ctx = (EmuGLContext *)context;
-    return ctx.CGLContextObj;
+    return ctx;
 }
 
 void nsConvertVideoFrameToNV12Textures(void* context, void* iosurface, int* Ytex, int* UVtex) {
