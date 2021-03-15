@@ -213,7 +213,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
         !android_foldable_any_folded_area_configured() &&
         !android_foldable_hinge_configured() &&
         !android_foldable_rollable_configured() &&
-        !android_cmdLineOptions->qt_hide_window) {
+        (!android_cmdLineOptions->qt_hide_window || android_cmdLineOptions->experimental_enable_multidisplay)) {
         mSidebarButtons.addButton(mExtendedUi->displaysButton);
         mExtendedUi->displaysButton->setVisible(true);
     } else {

@@ -273,6 +273,8 @@ OPT_FLAG(no_mouse_reposition,
          "Do not reposition the mouse to emulator window center if mouse "
          "pointer gets out of the window.")
 
+OPT_FLAG(experimental_enable_multidisplay,
+         "Enable multidisplay gRPC api for Android Studio.")
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

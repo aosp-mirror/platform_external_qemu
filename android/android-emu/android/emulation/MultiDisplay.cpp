@@ -79,9 +79,9 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
     if (android_foldable_any_folded_area_configured()) {
         return -1;
     }
-    // TODO (wdu@) Remove this when multidisplay is supported by embedded
-    // emulator.
-    if (android_cmdLineOptions->qt_hide_window) {
+
+    if (android_cmdLineOptions->qt_hide_window &&
+        !android_cmdLineOptions->experimental_enable_multidisplay) {
         return -1;
     }
     if (mGuestMode) {
