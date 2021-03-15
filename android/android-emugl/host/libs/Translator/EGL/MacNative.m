@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <Cocoa/Cocoa.h>
 #include <OpenGL/OpenGL.h>
+#include <OpenGL/gl3.h>
 #include "MacPixelFormatsAttribs.h"
 
 //
@@ -252,12 +253,48 @@ CGLTexImageIOSurface2D(glContext,GL_TEXTURE_RECTANGLE, GL_RG8, (GLsizei)planeSiz
     
     glGenTextures(1, &UVtex);
     glBindTexture(GL_TEXTURE_RECTANGLE, UVtex);
-    CGLError cglError =
+    cglError =
         CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE,
                 GL_RG8, surface_w/2, surface_h/2, GL_RG, GL_UNSIGNED_BYTE, surface, 1);
 
-    glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
+    glBindTexture(GL_TEXTURE_RECTANGLE, 0);
 }
+
+void nsCopyTexture(void* context, int from, int to, int width, int height) {
+    EmuGLContext* ctx = (EmuGLContext *)context;
+    // assume ctx is alreldy current
+
+    int tex1 = from;
+    int tex2 = to;
+      GLuint g_fb=0;
+      glGenFramebuffers( 1, &g_fb );
+      glBindFramebuffer( GL_FRAMEBUFFER, g_fb );
+      glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+              GL_TEXTURE_RECTANGLE, tex1, 0);
+      if (glGetError() != GL_NO_ERROR) {
+          NSLog(@"bad in blit 1");
+      }
+      glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
+              GL_TEXTURE_2D, tex2, 0);
+      if (glGetError() != GL_NO_ERROR) {
+          NSLog(@"bad in blit 2");
+      }
+      glDrawBuffer(GL_COLOR_ATTACHMENT1);
+
+      if (glGetError() != GL_NO_ERROR) {
+          NSLog(@"bad in blit 3");
+      }
+      glBlitFramebuffer(0,0,width, height, 0,0,width, height,
+              GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+      if (glGetError() != GL_NO_ERROR) {
+          NSLog(@"bad in blit4 ");
+      }
+
+      glBindFramebuffer( GL_FRAMEBUFFER, 0);
+      glDeleteFramebuffers( 1, &g_fb );
+}
+
 
 void  nsPBufferMakeCurrent(void* context,void* nativePBuffer,int level){
     EmuGLContext* ctx = (EmuGLContext *)context;
