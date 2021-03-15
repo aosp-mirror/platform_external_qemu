@@ -513,6 +513,15 @@ void MediaVideoToolBoxVideoHelper::recreateDecompressionSession() {
 }
 
 void MediaVideoToolBoxVideoHelper::copyFrameToTextures() {
+    // TODO
+    TextureFrame texFrame;
+    if (mUseGpuTexture && mTexturePool != nullptr) {
+        auto my_copy_context;
+        texFrame = mTexturePool->getTextureFrame(mOutputWidth, mOutputHeight);
+        mTexturePool->saveDecodedFrameToTexture(
+                texFrame, &my_copy_context,
+                (void*)media_vtb_utils_nv12_updater);
+    }
 }
 
 void MediaVideoToolBoxVideoHelper::copyFrameToCPU() {
