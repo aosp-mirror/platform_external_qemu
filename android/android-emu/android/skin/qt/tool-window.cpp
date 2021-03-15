@@ -1205,6 +1205,19 @@ void ToolWindow::onHostClipboardChanged() {
                 (const uint8_t*)bytes.data(), bytes.size());
 }
 
+static bool isPaneEnabled(ExtendedWindowPane pane) {
+    // Snapshot pane is disabled in embedded emulator.
+    if (pane == PANE_IDX_SNAPSHOT && android_cmdLineOptions->qt_hide_window) {
+        return false;
+    }
+    // Snapshot pane is disabled in embedded emulator, unless specifcally requested with the -experimental-enable-multidisplay flag.
+    if (pane == PANE_IDX_MULTIDISPLAY && (android_cmdLineOptions->qt_hide_window && !android_cmdLineOptions->experimental_enable_multidisplay)) {
+        return false;
+    }
+
+    return true;
+}
+
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         if (pane == PANE_IDX_DPAD || pane == PANE_IDX_BATTERY ||
@@ -1212,10 +1225,9 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
             return;
         }
     }
-    // Snapshot and multidisplay panes are disabled in embedded emulator.
+
     // Set to default location pane.
-    if (android_cmdLineOptions->qt_hide_window &&
-        (pane == PANE_IDX_MULTIDISPLAY || pane == PANE_IDX_SNAPSHOT)) {
+    if (!isPaneEnabled(pane)) {
         pane = PANE_IDX_LOCATION;
     }
     // Show the tabbed pane

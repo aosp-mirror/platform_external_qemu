@@ -1948,6 +1948,13 @@ static void help_no_mouse_reposition(stralloc_t* out) {
            "  like VNC or Chrome remote desktop.\n");
 }
 
+
+static void help_experimental_enable_multidisplay(stralloc_t* out) {
+    PRINTF(" Enables the multidisplay api for the embedded emulator.\n"
+           " This is an experimental feature, this flag will disappear\n"
+           " in future releases without any notice.\n");
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
