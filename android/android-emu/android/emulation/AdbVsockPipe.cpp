@@ -226,7 +226,7 @@ AdbVsockPipe::Service::~Service() {
 void AdbVsockPipe::Service::onHostConnection(android::base::ScopedSocket&& socket,
                                              const AdbPortType portType) {
     {
-        std::unique_lock<std::mutex> guard(mPipesMtx);
+        std::lock_guard<std::mutex> guard(mPipesMtx);
 
         const auto i = std::find_if(mPipes.begin(), mPipes.end(),
                                     [](const std::unique_ptr<AdbVsockPipe>& p){
@@ -241,7 +241,7 @@ void AdbVsockPipe::Service::onHostConnection(android::base::ScopedSocket&& socke
 
     auto pipe = AdbVsockPipe::create(this, std::move(socket), portType);
     if (pipe) {
-        std::unique_lock<std::mutex> guard(mPipesMtx);
+        std::lock_guard<std::mutex> guard(mPipesMtx);
         mPipes.push_back(std::move(pipe));
     }
 }
@@ -250,7 +250,7 @@ void AdbVsockPipe::Service::destroyPipesThreadLoop() {
     while (true) {
         AdbVsockPipe *toDestroy;
         if (mPipesToDestroy.receive(&toDestroy)) {
-            std::unique_lock<std::mutex> guard(mPipesMtx);
+            std::lock_guard<std::mutex> guard(mPipesMtx);
 
             const auto end = std::remove_if(
                 mPipes.begin(), mPipes.end(),
@@ -356,12 +356,12 @@ bool AdbVsockPipe::Service::checkIfGuestAdbdAlive() {
 }
 
 void AdbVsockPipe::Service::resetActiveGuestPipeConnection() {
-    std::unique_lock<std::mutex> guard(mPipesMtx);
+    std::lock_guard<std::mutex> guard(mPipesMtx);
     mPipes.clear();
 }
 
 void AdbVsockPipe::Service::saveImpl(base::Stream* stream) const {
-    std::unique_lock<std::mutex> guard(mPipesMtx);
+    std::lock_guard<std::mutex> guard(mPipesMtx);
 
     const size_t n = std::accumulate(
         mPipes.begin(), mPipes.end(), 0,
@@ -380,7 +380,8 @@ void AdbVsockPipe::Service::saveImpl(base::Stream* stream) const {
 }
 
 bool AdbVsockPipe::Service::loadImpl(base::Stream* stream) {
-    std::unique_lock<std::mutex> guard(mPipesMtx);
+    std::lock_guard<std::mutex> guard(mPipesMtx);
+
     mPipes.clear();
     for (uint32_t n = stream->getBe32(); n > 0; --n) {
         auto p = AdbVsockPipe::load(this, stream);
@@ -392,7 +393,8 @@ bool AdbVsockPipe::Service::loadImpl(base::Stream* stream) {
 }
 
 IVsockHostCallbacks* AdbVsockPipe::Service::getHostCallbacksImpl(uint64_t key) const {
-    std::unique_lock<std::mutex> guard(mPipesMtx);
+    std::lock_guard<std::mutex> guard(mPipesMtx);
+
     for (const auto& p : mPipes) {
         if (p->mVsockCallbacks.streamKey == key) {
             return &p->mVsockCallbacks;
