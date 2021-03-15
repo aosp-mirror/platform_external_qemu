@@ -459,8 +459,8 @@ std::unique_ptr<AdbVsockPipe> AdbVsockPipe::create(AdbVsockPipe::Service *servic
     return std::make_unique<AdbVsockPipe>(service, std::move(socket), portType);
 }
 
-void AdbVsockPipe::onHostSocketEvent(unsigned events) {
-    processProxyEventBits(mProxy->onHostSocketEvent(mSocket.get(),
+void AdbVsockPipe::onHostSocketEvent(int hostFd, unsigned events) {
+    processProxyEventBits(mProxy->onHostSocketEvent(hostFd,
                                                     mVsockCallbacks.streamKey,
                                                     events));
 }
@@ -499,7 +499,7 @@ void AdbVsockPipe::setSocket(android::base::ScopedSocket socket) {
     mSocketWatcher.reset(android::base::ThreadLooper::get()->createFdWatch(
         mSocket.get(),
         [](void* opaque, int fd, unsigned events) {
-            static_cast<AdbVsockPipe*>(opaque)->onHostSocketEvent(events);
+            static_cast<AdbVsockPipe*>(opaque)->onHostSocketEvent(fd, events);
         },
         this));
 
