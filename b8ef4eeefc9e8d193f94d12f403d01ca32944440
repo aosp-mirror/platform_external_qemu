@@ -57,6 +57,24 @@
       "parentUuid": "1b96d901_7a0d76be",
       "revId": "b8ef4eeefc9e8d193f94d12f403d01ca32944440",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "465fd073_d8d41d07",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-03-16T18:43:29Z",
+      "side": 1,
+      "message": "We would lose the history of the mistakes that were made. I have no preference either way.",
+      "parentUuid": "38d34a7c_8bc6e4ba",
+      "revId": "b8ef4eeefc9e8d193f94d12f403d01ca32944440",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
