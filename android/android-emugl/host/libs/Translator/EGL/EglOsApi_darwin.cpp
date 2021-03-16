@@ -70,8 +70,7 @@ public:
     explicit MacContext(bool isCoreProfile, void* context) :
         EglOS::Context(isCoreProfile), mContext(context) {
 
-            fprintf(stderr, "created maccontext %p lowlevel %p\n", this,
-                    nsGetLowLevelContext(context));
+            //fprintf(stderr, "created maccontext %p lowlevel %p\n", this, nsGetLowLevelContext(context));
         }
 
     ~MacContext() {
@@ -191,8 +190,8 @@ class MacDisplay : public EglOS::Display {
 public:
     explicit MacDisplay(EGLNativeDisplayType dpy) : mDpy(dpy) {
         ++s_count;
-        fprintf(stderr, "created a new mac display %p\n", this);
-        fprintf(stderr, "there are total of %d mac display\n", s_count);
+        //fprintf(stderr, "created a new mac display %p\n", this);
+        //fprintf(stderr, "there are total of %d mac display\n", s_count);
     }
 
     virtual EglOS::GlesVersion getMaxGlesVersion() {

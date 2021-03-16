@@ -1976,16 +1976,12 @@ void FrameBuffer::updateYUVTextures(uint32_t type,
     EGLContext prevContext = s_egl.eglGetCurrentContext();
     long long hndl = reinterpret_cast<long long> (prevContext);
     void* nativecontext = getLowLevelContext(prevContext);
-    fprintf(stderr, "calling getLowLevelContext on handle %lld and got %p\n", 
-                hndl, nativecontext);
+    //fprintf(stderr, "calling getLowLevelContext on handle %lld and got %p\n", hndl, nativecontext);
     struct CallerData callerdata;
     callerdata.ctx  = nativecontext;
     callerdata.f1  = (void*)nsConvertVideoFrameToNV12Textures;
     callerdata.f2  = (void*)nsCopyTexture;
-    fprintf(stderr, "callerdata 0 %p 1 %p 2 %p\n",
-            callerdata.ctx,
-            callerdata.f1,
-            callerdata.f2);
+    //fprintf(stderr, "callerdata 0 %p 1 %p 2 %p\n", callerdata.ctx, callerdata.f1, callerdata.f2);
 #else
     void* callerdata = nullptr;
 #endif
@@ -2045,8 +2041,7 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
         EGLContext prevContext = s_egl.eglGetCurrentContext();
         long long hndl = reinterpret_cast<long long> (prevContext);
         auto nativecontext = getLowLevelContext(prevContext);
-        fprintf(stderr, "calling getLowLevelContext on handle %lld and got %p\n", 
-                hndl, nativecontext);
+        //fprintf(stderr, "calling getLowLevelContext on handle %lld and got %p\n", hndl, nativecontext);
     }
 
     (*c).second.cb->subUpdate(x, y, width, height, format, type, pixels);
@@ -2335,8 +2330,7 @@ bool FrameBuffer::bind_locked() {
         long long hndl = reinterpret_cast<long long> (prevContext);
         if (hndl != 0) {
         auto nativecontext = getLowLevelContext(prevContext);
-            fprintf(stderr, "calling getLowLevelContext on handle %lld and got %p\n", 
-                hndl, nativecontext);
+            //fprintf(stderr, "calling getLowLevelContext on handle %lld and got %p\n", hndl, nativecontext);
         }
     }
 

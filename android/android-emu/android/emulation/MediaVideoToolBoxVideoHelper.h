@@ -177,7 +177,7 @@ private:
 
     // vtb decoder does not reorder output frames, that means
     // the video could see jumps all the times
-    int mVtbBufferSize = 1;
+    int mVtbBufferSize = 8;
     std::map<uint64_t, MediaSnapshotState::FrameInfo> mVtbBufferMap;
 
 };  // MediaVideoToolBoxVideoHelper

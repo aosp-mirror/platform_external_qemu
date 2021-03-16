@@ -224,7 +224,7 @@ void* nsGetLowLevelContext(void* context) {
 }
 
 void nsConvertVideoFrameToNV12Textures(void* context, void* iosurface, int* Ytex, int* UVtex) {
-    NSLog(@"calling nsConvertVideoFrameToNV12Textures");
+    //NSLog(@"calling nsConvertVideoFrameToNV12Textures");
 
     EmuGLContext* ctx = (EmuGLContext *)context;
 
@@ -244,14 +244,14 @@ CGLTexImageIOSurface2D(glContext,GL_TEXTURE_RECTANGLE, GL_RG8, (GLsizei)planeSiz
    
     IOSurfaceRef* surface = (IOSurfaceRef*)iosurface;
 
-    NSLog(@"get w and h");
+    //NSLog(@"get w and h");
     GLsizei surface_w = (GLsizei)IOSurfaceGetWidth(surface);
     GLsizei surface_h = (GLsizei)IOSurfaceGetHeight(surface);
       
-    NSLog(@"create textures y");
+    //NSLog(@"create textures y");
     glGenTextures(1, Ytex);
     glBindTexture(GL_TEXTURE_RECTANGLE, *Ytex);
-    NSLog(@"fetch textures y");
+    //NSLog(@"fetch textures y");
     CGLError cglError =
         CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE,
                 GL_R8, surface_w, surface_h, GL_RED, GL_UNSIGNED_BYTE, surface, 0);
@@ -260,7 +260,7 @@ CGLTexImageIOSurface2D(glContext,GL_TEXTURE_RECTANGLE, GL_RG8, (GLsizei)planeSiz
         fprintf(stderr, "create textures y error %d\n", cglError);
     }
 
-    NSLog(@"create textures uv");
+    //NSLog(@"create textures uv");
     glGenTextures(1, UVtex);
     glBindTexture(GL_TEXTURE_RECTANGLE, *UVtex);
     cglError =
@@ -271,16 +271,16 @@ CGLTexImageIOSurface2D(glContext,GL_TEXTURE_RECTANGLE, GL_RG8, (GLsizei)planeSiz
         fprintf(stderr, "create textures uv error %d\n", cglError);
     }
     glBindTexture(GL_TEXTURE_RECTANGLE, 0);
-    NSLog(@"done creating textures uv");
+    //NSLog(@"done creating textures uv");
 }
 
 void nsCopyTexture(void* context, int from, int to, int width, int height) {
-    NSLog(@"calling nsCopyTexture");
+    //NSLog(@"calling nsCopyTexture");
     EmuGLContext* ctx = (EmuGLContext *)context;
     // assume ctx is alreldy current
 
       if (glGetError() != GL_NO_ERROR) {
-          NSLog(@"bad in blit 0");
+          //NSLog(@"bad in blit 0");
       }
     int tex1 = from;
     int tex2 = to;
@@ -291,24 +291,24 @@ void nsCopyTexture(void* context, int from, int to, int width, int height) {
       glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
               GL_TEXTURE_RECTANGLE, tex1, 0);
       if (glGetError() != GL_NO_ERROR) {
-          NSLog(@"bad in blit 1");
+          //NSLog(@"bad in blit 1");
       }
       glBindTexture(GL_TEXTURE_2D, tex2);
       glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
               GL_TEXTURE_2D, tex2, 0);
       if (glGetError() != GL_NO_ERROR) {
-          NSLog(@"bad in blit 2");
+          //NSLog(@"bad in blit 2");
       }
       glDrawBuffer(GL_COLOR_ATTACHMENT1);
 
       if (glGetError() != GL_NO_ERROR) {
-          NSLog(@"bad in blit 3");
+          //NSLog(@"bad in blit 3");
       }
       glBlitFramebuffer(0,0,width, height, 0,0,width, height,
               GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
       if (glGetError() != GL_NO_ERROR) {
-          NSLog(@"bad in blit4 ");
+          //NSLog(@"bad in blit4 ");
       }
 
       glBindFramebuffer( GL_FRAMEBUFFER, 0);

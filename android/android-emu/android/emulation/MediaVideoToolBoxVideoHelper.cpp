@@ -17,7 +17,7 @@
 #include "android/emulation/YuvConverter.h"
 #include "android/utils/debug.h"
 
-#define MEDIA_VTB_DEBUG 1
+#define MEDIA_VTB_DEBUG 0
 
 #if MEDIA_VTB_DEBUG
 #define VTB_DPRINT(fmt, ...)                                             \

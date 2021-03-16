@@ -38,10 +38,10 @@ EglDisplay::EglDisplay(EGLNativeDisplayType dpy,
     m_manager[GLES_2_0] = new ObjectNameManager(&m_globalNameSpace);
     m_manager[GLES_3_0] = m_manager[GLES_2_0];
     m_manager[GLES_3_1] = m_manager[GLES_2_0];
-    fprintf(stderr, "create EglDisplay %p now there are %d native displays\n", this, s_count);
+    //fprintf(stderr, "create EglDisplay %p now there are %d native displays\n", this, s_count);
     if (!s_display) {
         s_display = this;
-        fprintf(stderr, "the global EglDisplay is %p\n", s_display);
+        //fprintf(stderr, "the global EglDisplay is %p\n", s_display);
     }
 };
 
@@ -57,7 +57,7 @@ extern "C" {
         if (ctx) {
             return ctx->nativeType()->lowLevelContext();
         } else {
-          //  fprintf(stderr, "cannot find handle of %p in %s\n", (void*)handle, __func__);
+            fprintf(stderr, "cannot find handle of %p in %s\n", (void*)handle, __func__);
         }
         return nullptr;
     }
@@ -544,7 +544,7 @@ EGLContext EglDisplay::addContext(ContextPtr ctx ) {
    if(m_contexts.find(hndl) != m_contexts.end()) {
        return ret;
    }
-   fprintf(stderr, "added handle in %s with handle %u ctx %p\n", __func__, hndl, ctx->nativeType()->lowLevelContext());
+   //fprintf(stderr, "added handle in %s with handle %u ctx %p\n", __func__, hndl, ctx->nativeType()->lowLevelContext());
    m_contexts[hndl] = ctx;
    return ret;
 }
