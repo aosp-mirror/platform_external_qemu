@@ -16,6 +16,24 @@
       "message": "keep this? Otherwise, it will crash if mBackingSurface is null.",
       "revId": "fbcef2b5d576c7a0626a2ff3194aba211d8aa623",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "96bbedd4_53a3f319",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2369,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-03-16T17:11:12Z",
+      "side": 1,
+      "message": "Yes, let\u0027s keep it.",
+      "parentUuid": "84ece34e_f6a1005c",
+      "revId": "fbcef2b5d576c7a0626a2ff3194aba211d8aa623",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
