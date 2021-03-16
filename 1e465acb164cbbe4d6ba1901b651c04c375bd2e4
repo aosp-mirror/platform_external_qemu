@@ -93,6 +93,30 @@
       },
       "revId": "1e465acb164cbbe4d6ba1901b651c04c375bd2e4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6eb7b974_fcb31808",
+        "filename": "android/android-grpc/docs/python/sample/screenshot.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-16T02:35:30Z",
+      "side": 1,
+      "message": "What does \"Ack\" mean?",
+      "parentUuid": "666358a7_fb7505d2",
+      "range": {
+        "startLine": 92,
+        "startChar": 4,
+        "endLine": 92,
+        "endChar": 9
+      },
+      "revId": "1e465acb164cbbe4d6ba1901b651c04c375bd2e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
