@@ -295,8 +295,8 @@ void MediaVideoToolBoxVideoHelper::videoToolboxDecompressCallback(
     ptr->copyFrame();
     ptr->mImageReady = true;
     VTB_DPRINT("Got decoded frame");
-    //CVPixelBufferRelease(ptr->mDecodedFrame);
-    //ptr->mDecodedFrame = nullptr;
+    CVPixelBufferRelease(ptr->mDecodedFrame);
+    ptr->mDecodedFrame = nullptr;
 }
 
 // static
