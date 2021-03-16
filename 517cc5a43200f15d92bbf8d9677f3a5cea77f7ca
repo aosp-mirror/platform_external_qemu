@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d6071cb2_8fdefaa1",
+        "filename": "android/android-emu/android/emulation/MultiDisplay.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-16T01:27:07Z",
+      "side": 1,
+      "message": "Should it be android_cmdLineOptions-\u003eqt_hide_window \u0026\u0026 !android_cmdLineOptions-\u003eexperimental_enable_multidisplay?",
+      "range": {
+        "startLine": 83,
+        "startChar": 8,
+        "endLine": 83,
+        "endChar": 65
+      },
+      "revId": "517cc5a43200f15d92bbf8d9677f3a5cea77f7ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
