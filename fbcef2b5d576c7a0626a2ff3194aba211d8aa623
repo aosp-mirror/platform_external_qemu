@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "84ece34e_f6a1005c",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2369,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2021-03-16T02:09:53Z",
+      "side": 1,
+      "message": "keep this? Otherwise, it will crash if mBackingSurface is null.",
+      "revId": "fbcef2b5d576c7a0626a2ff3194aba211d8aa623",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
