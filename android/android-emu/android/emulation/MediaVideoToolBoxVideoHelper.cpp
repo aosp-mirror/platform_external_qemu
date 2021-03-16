@@ -286,7 +286,7 @@ void MediaVideoToolBoxVideoHelper::videoToolboxDecompressCallback(
     }
 
     ptr->mOutputPts = pts.value;
-    ptr->mDecodedFrame = image_buffer;
+    ptr->mDecodedFrame = CVPixelBufferRetain(image_buffer);
     CVOpenGLTextureCacheRef _CVGLTextureCache;
     CVOpenGLTextureRef _CVGLTexture;
     CGLPixelFormatObj _CGLPixelFormat;
