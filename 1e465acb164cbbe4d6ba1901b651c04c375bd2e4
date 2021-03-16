@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bc46910d_119fcda1",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 760,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-16T00:28:28Z",
+      "side": 1,
+      "message": "nit: extra dot",
+      "range": {
+        "startLine": 760,
+        "startChar": 70,
+        "endLine": 760,
+        "endChar": 71
+      },
+      "revId": "1e465acb164cbbe4d6ba1901b651c04c375bd2e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c2fbd7a2_df54a263",
+        "filename": "android/android-grpc/docs/python/sample/screenshot.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-16T00:28:28Z",
+      "side": 1,
+      "message": "Is it a constant?",
+      "range": {
+        "startLine": 92,
+        "startChar": 4,
+        "endLine": 92,
+        "endChar": 9
+      },
+      "revId": "1e465acb164cbbe4d6ba1901b651c04c375bd2e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
