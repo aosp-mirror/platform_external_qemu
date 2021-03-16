@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a1a1f7c1_2d553d7c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-03-16T00:13:21Z",
+      "side": 1,
+      "message": "Relevant section of the E2E tests:\n\ntests/test_boot.py .                                                     [  2%]\ntests/test_gps.py sssss                                                  [ 16%]\ntests/test_keys.py ...                                                   [ 24%]\ntests/test_multi_display.py XxxxX                                        [ 37%]\ntests/test_physical_parameters.py .                                      [ 40%]\ntests/test_rotation.py .......                                           [ 59%]\ntests/test_snapshot.py .....                                             [ 72%]\ntests/test_stream_screenshot.py ......                                   [ 89%]\ntests/test_template_writer.py ..                                         [ 94%]\ntests/test_touch_event.py ..                                             [100%]\n\n\u003d 27 passed, 5 skipped, 21 deselected, 3 xfailed, 2 xpassed in 241.71s (0:04:01) \u003d\n___________________________________ summary ____________________________________\n  py3: commands succeeded\n  congratulations :)",
+      "revId": "b942003bcfffb56d982dec802db93dd2eafd76be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
