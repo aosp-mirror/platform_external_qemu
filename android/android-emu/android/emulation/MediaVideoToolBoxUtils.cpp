@@ -65,8 +65,8 @@ void media_vtb_utils_nv12_updater(void* privData,
 
     VTB_DPRINT("copyiong Ytex %d", textures[0]);
     nsCopyTexture(nscontext, yy, textures[0], ww, hh);
-    VTB_DPRINT("copyiong UVtex %d", textures[1]);
-    nsCopyTexture(nscontext, uv, textures[0], ww, hh/2);
+   // VTB_DPRINT("copyiong UVtex %d", textures[1]);
+   // nsCopyTexture(nscontext, uv, textures[0], ww/2, hh/2);
     VTB_DPRINT("done ");
 }
 

@@ -333,6 +333,9 @@ void MediaH264DecoderGeneric::getImage(void* ptr) {
     bool needToCopyToGuest = true;
     if (mParser.version() == 200) {
         if (mUseGpuTexture && pFrame->texture[0] > 0 && pFrame->texture[1] > 0) {
+            H264_DPRINT(
+                    "calling rendering to host side color buffer with id %d tex %d tex %d",
+                    param.hostColorBufferId, pFrame->texture[0], pFrame->texture[1]);
             mRenderer.renderToHostColorBufferWithTextures(
                     param.hostColorBufferId, pFrame->width, pFrame->height,
                     TextureFrame{pFrame->texture[0], pFrame->texture[1]});

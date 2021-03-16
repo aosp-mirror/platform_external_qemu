@@ -113,6 +113,7 @@ void MediaVideoToolBoxVideoHelper::decode(const uint8_t* frame,
             case H264NaluType::SEI:
                 break;
             case H264NaluType::CodedSliceIDR:
+                VTB_DPRINT("this is an IDR frame");
             case H264NaluType::CodedSliceNonIDR:
                 if (!mVtbReady) {
                     createCMFormatDescription();
@@ -274,10 +275,10 @@ void MediaVideoToolBoxVideoHelper::videoToolboxDecompressCallback(
     VTB_DPRINT("%s", __func__);
     auto ptr = static_cast<MediaVideoToolBoxVideoHelper*>(opaque);
 
-    if (ptr->mDecodedFrame) {
-        CVPixelBufferRelease(ptr->mDecodedFrame);
-        ptr->mDecodedFrame = nullptr;
-    }
+    //if (ptr->mDecodedFrame) {
+    //    CVPixelBufferRelease(ptr->mDecodedFrame);
+    //    ptr->mDecodedFrame = nullptr;
+    //}
 
     if (!image_buffer) {
         VTB_DPRINT("%s: output image buffer is null", __func__);
@@ -285,7 +286,7 @@ void MediaVideoToolBoxVideoHelper::videoToolboxDecompressCallback(
     }
 
     ptr->mOutputPts = pts.value;
-    ptr->mDecodedFrame = CVPixelBufferRetain(image_buffer);
+    ptr->mDecodedFrame = image_buffer;
     CVOpenGLTextureCacheRef _CVGLTextureCache;
     CVOpenGLTextureRef _CVGLTexture;
     CGLPixelFormatObj _CGLPixelFormat;
@@ -294,6 +295,8 @@ void MediaVideoToolBoxVideoHelper::videoToolboxDecompressCallback(
     ptr->copyFrame();
     ptr->mImageReady = true;
     VTB_DPRINT("Got decoded frame");
+    //CVPixelBufferRelease(ptr->mDecodedFrame);
+    //ptr->mDecodedFrame = nullptr;
 }
 
 // static
@@ -517,6 +520,7 @@ void MediaVideoToolBoxVideoHelper::copyFrameToTextures() {
                 CVPixelBufferGetIOSurface(mDecodedFrame), mOutputWidth, mOutputHeight);
         auto my_copy_context = media_vtb_utils_copy_context{CVPixelBufferGetIOSurface(mDecodedFrame), mOutputWidth, mOutputHeight};
         texFrame = mTexturePool->getTextureFrame(mOutputWidth, mOutputHeight);
+        VTB_DPRINT("ask videocore to copy to %d and %d", texFrame.Ytex, texFrame.UVtex);
         mTexturePool->saveDecodedFrameToTexture(
                 texFrame, &my_copy_context,
                 (void*)media_vtb_utils_nv12_updater);

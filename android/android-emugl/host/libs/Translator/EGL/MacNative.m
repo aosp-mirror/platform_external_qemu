@@ -287,11 +287,13 @@ void nsCopyTexture(void* context, int from, int to, int width, int height) {
       GLuint g_fb=0;
       glGenFramebuffers( 1, &g_fb );
       glBindFramebuffer( GL_FRAMEBUFFER, g_fb );
+      glBindTexture(GL_TEXTURE_RECTANGLE, tex1);
       glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
               GL_TEXTURE_RECTANGLE, tex1, 0);
       if (glGetError() != GL_NO_ERROR) {
           NSLog(@"bad in blit 1");
       }
+      glBindTexture(GL_TEXTURE_2D, tex2);
       glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
               GL_TEXTURE_2D, tex2, 0);
       if (glGetError() != GL_NO_ERROR) {
