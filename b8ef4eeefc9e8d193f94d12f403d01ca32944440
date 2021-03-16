@@ -75,6 +75,24 @@
       "parentUuid": "38d34a7c_8bc6e4ba",
       "revId": "b8ef4eeefc9e8d193f94d12f403d01ca32944440",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1f2b9e75_d2cd6b8c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-16T18:51:55Z",
+      "side": 1,
+      "message": "We would not lose history of the mistakes since aosp/1609616 and aosp/1621753 are still in history.",
+      "parentUuid": "465fd073_d8d41d07",
+      "revId": "b8ef4eeefc9e8d193f94d12f403d01ca32944440",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
