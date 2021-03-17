@@ -119,7 +119,7 @@ private:
                   const std::vector<std::string>& command,
                   bool want_output,
                   base::System::Duration timeoutMs,
-                  ResultCallback&& callback);
+                  ResultCallback callback);
     void taskFunction(OptionalAdbCommandResult* result);
     void taskDoneFunction(const OptionalAdbCommandResult& result);
 
@@ -141,7 +141,7 @@ private:
 class AdbDirect : public AdbCommand {
 public:
     AdbDirect(const std::vector<std::string>& args,
-              ResultCallback&& result_callback,
+              ResultCallback result_callback,
               bool want_output = true)
         : mResultCallback(std::move(result_callback)),
           mWantOutput(want_output) {
@@ -233,12 +233,12 @@ public:
     const std::string& serialString() const final { return mSerialString; }
 
     AdbCommandPtr runAdbCommand(const std::vector<std::string>& args,
-                                ResultCallback&& result_callback,
+                                ResultCallback result_callback,
                                 System::Duration timeout_ms,
                                 bool want_output = true) final;
 
     void enqueueCommand(const std::vector<std::string>& args,
-                        ResultCallback&& result) final;
+                        ResultCallback result) final;
 
 private:
     explicit AdbInterfaceImpl(Looper* looper,
@@ -487,7 +487,7 @@ AdbInterfaceImpl::AdbInterfaceImpl(Looper* looper,
 
 AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         const std::vector<std::string>& args,
-        ResultCallback&& result_callback,
+        ResultCallback result_callback,
         System::Duration timeout_ms,
         bool want_output) {
 
@@ -510,7 +510,7 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
 }
 
 void AdbInterfaceImpl::enqueueCommand(const std::vector<std::string>& args,
-                                      ResultCallback&& resultCallback) {
+                                      ResultCallback resultCallback) {
     AutoLock lock(sStatics->adbLock);
 
     if (sStatics->adbInterface == nullptr) {
@@ -538,7 +538,7 @@ AdbThroughExe::AdbThroughExe(Looper* looper,
                              const std::vector<std::string>& command,
                              bool want_output,
                              System::Duration timeoutMs,
-                             ResultCallback&& callback)
+                             ResultCallback callback)
     : mLooper(looper),
       mResultCallback(std::move(callback)),
       mWantOutput(want_output),
