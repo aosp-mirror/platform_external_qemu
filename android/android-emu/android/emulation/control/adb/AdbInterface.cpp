@@ -209,7 +209,6 @@ private:
     std::string mCmd;
     long mStart;
     ResultCallback mResultCallback;
-    AdbCommandPtr mSelf;
 };
 
 using AdbEntry = std::pair<std::string, Optional<int>>;
