@@ -24,26 +24,26 @@ extern "C" {
 using android::base::IOVector;
 using android::network::Ieee80211Frame;
 using android::qemu2::VirtioWifiForwarder;
-
 namespace {
+
 /* Limit the number of packets that can be sent via a single flush
  * of the TX queue.  This gives us a guaranteed exit condition and
  * ensures fairness in the io path.  256 conveniently matches the
  * length of the TX queue and shows a good balance of performance
  * and latency. */
-constexpr size_t kTXBurst = 256;
-constexpr size_t kQueueSize = 1;
+static constexpr size_t kTXBurst = 256;
+static constexpr size_t kQueueSize = 1;
 
-constexpr size_t VIRTIO_WIFI_CTRL_QUEUE_DEFAULT_SIZE = 64;
-constexpr size_t VIRTIO_WIFI_RX_QUEUE_DEFAULT_SIZE = 256;
-constexpr size_t VIRTIO_WIFI_TX_QUEUE_DEFAULT_SIZE = 256;
+static constexpr size_t VIRTIO_WIFI_CTRL_QUEUE_DEFAULT_SIZE = 64;
+static constexpr size_t VIRTIO_WIFI_RX_QUEUE_DEFAULT_SIZE = 256;
+static constexpr size_t VIRTIO_WIFI_TX_QUEUE_DEFAULT_SIZE = 256;
 
 constexpr uint16_t VIRTIO_LINK_UP = 1;
 
 static const uint8_t kBssID[] = {0x00, 0x13, 0x10, 0x85, 0xfe, 0x01};
 static const uint8_t kMacAddr[] = {0x02, 0x15, 0xb2, 0x00, 0x00, 0x00};
 
-static size_t virtio_wifi_on_frame_available(const uint8_t*, size_t, bool);
+static size_t virtio_wifi_on_frame_available(const uint8_t*, size_t);
 
 static void virtio_wifi_set_link_status(NetClientState* nc);
 
@@ -98,7 +98,7 @@ static bool virtio_wifi_has_buffers(VirtQueue* vq) {
 static ssize_t virtio_wifi_add_buf(VirtIODevice* vdev,
                                    VirtQueue* vq,
                                    const uint8_t* buf,
-                                   size_t size) {
+                                   uint32_t size) {
     if (!virtio_wifi_has_buffers(vq)) {
         LOG(VERBOSE) << "VirtIO WiFi: unexpected full virtqueue";
         return 0;
@@ -123,9 +123,7 @@ static ssize_t virtio_wifi_add_buf(VirtIODevice* vdev,
     return size;
 }
 
-static size_t virtio_wifi_on_frame_available(const uint8_t* buf,
-                                             size_t size,
-                                             bool fromRemoteVM) {
+static size_t virtio_wifi_on_frame_available(const uint8_t* buf, size_t size) {
     VirtIOWifi* n = sGlobal.wifi;
     VirtIODevice* vdev = VIRTIO_DEVICE(n);
     size_t ret = 0;
@@ -159,9 +157,8 @@ static ssize_t virtio_wifi_flush_tx(VirtIOWifiQueue* q) {
     VirtIODevice* vdev = VIRTIO_DEVICE(n);
     VirtQueue* vq = q->tx;
     size_t num_packets = 0;
-    bool toRemote = (q == &n->p2p);
 
-    if (!toRemote && q->async_tx.elem) {
+    if (q->async_tx.elem) {
         virtio_queue_set_notification(vq, 0);
         return num_packets;
     }
@@ -176,13 +173,13 @@ static ssize_t virtio_wifi_flush_tx(VirtIOWifiQueue* q) {
             g_free(elem);
             return -EINVAL;
         }
+
         IOVector iovec(elem->out_sg, elem->out_sg + elem->out_num);
-        if (sGlobal.wifiForwarder->forwardFrame(iovec, toRemote) == -EBUSY) {
+        if (sGlobal.wifiForwarder->forwardFrame(iovec) == -EBUSY) {
             virtio_queue_set_notification(vq, 0);
             q->async_tx.elem = elem;
             return -EBUSY;
         }
-
         virtqueue_push(vq, elem, 0);
         virtio_notify(vdev, vq);
         // Use C free API because virtqueue_pop is using C alloc.
@@ -226,13 +223,8 @@ static void virtio_wifi_set_link_status(NetClientState* nc) {
 
 static VirtIOWifiQueue* getWifiQueue(VirtQueue* vq) {
     VirtIOWifi* n = sGlobal.wifi;
-    if (vq == n->p2p.tx) {
-        return &n->p2p;
-    } else {
-        return std::find_if(
-                n->vqs, n->vqs + kQueueSize,
-                [vq](const VirtIOWifiQueue& q) { return q.tx == vq; });
-    }
+    return std::find_if(n->vqs, n->vqs + kQueueSize,
+                        [vq](const VirtIOWifiQueue& q) { return q.tx == vq; });
 }
 
 }  // namespace
@@ -316,7 +308,6 @@ static void virtio_wifi_tx_bh(void* opaque) {
     }
 
     q->tx_waiting = 0;
-
     ssize_t ret = virtio_wifi_flush_tx(q);
     if (ret == -EBUSY || ret == -EINVAL) {
         return; /* Notification re-enable handled by tx_complete or device
@@ -356,29 +347,23 @@ static void virtio_wifi_device_realize(DeviceState* dev, Error** errp) {
 
     n->nic_conf.peers.queues = kQueueSize;
     if (!sGlobal.initWifiForwarder(&n->nic_conf)) {
-        LOG(WARNING) << "VirtIO WiFi device failed to initialize.";
+        LOG(WARNING) << "Mac80211 Hwsim device failed to initialize.";
         virtio_cleanup(vdev);
+        return;
     }
 
-    virtio_init(vdev, "virtio-wifi", VIRTIO_ID_MAC80211_WLAN,
-                sizeof(virtio_wifi_config));
+    virtio_init(vdev, "virtio-wifi", VIRTIO_ID_MAC80211_HWSIM, 0);
     n->vqs = new VirtIOWifiQueue[kQueueSize];
     for (size_t index = 0; index < kQueueSize; index++) {
-        n->vqs[index].rx = virtio_add_queue(
-                vdev, VIRTIO_WIFI_RX_QUEUE_DEFAULT_SIZE, virtio_wifi_handle_rx);
         n->vqs[index].tx = virtio_add_queue(
                 vdev, VIRTIO_WIFI_TX_QUEUE_DEFAULT_SIZE, virtio_wifi_handle_tx);
         n->vqs[index].tx_bh = qemu_bh_new(virtio_wifi_tx_bh, &n->vqs[index]);
+        n->vqs[index].rx = virtio_add_queue(
+                vdev, VIRTIO_WIFI_RX_QUEUE_DEFAULT_SIZE, virtio_wifi_handle_rx);
         n->vqs[index].tx_waiting = 0;
         n->vqs[index].async_tx.elem = nullptr;
     }
     n->tx_burst = kTXBurst;
-    n->ctrl_vq = virtio_add_queue(vdev, VIRTIO_WIFI_CTRL_QUEUE_DEFAULT_SIZE,
-                                  virtio_wifi_handle_ctrl);
-    n->p2p.tx = virtio_add_queue(vdev, VIRTIO_WIFI_TX_QUEUE_DEFAULT_SIZE,
-                                 virtio_wifi_handle_tx);
-    n->p2p.tx_bh = qemu_bh_new(virtio_wifi_tx_bh, &n->p2p);
-    n->p2p.async_tx.elem = nullptr;
 
     memcpy(n->mac, kMacAddr, ETH_ALEN);
     n->mac[4] = (sGlobal.macPrefix >> 8) & 0xff;
@@ -398,27 +383,9 @@ static void virtio_wifi_device_unrealize(DeviceState* dev, Error** errp) {
         qemu_bh_delete(n->vqs[index].tx_bh);
         n->vqs[index].tx_bh = NULL;
     }
-    virtio_del_queue(vdev, kQueueSize * 2 + 0);
-    virtio_del_queue(vdev, kQueueSize * 2 + 1);
-    qemu_bh_delete(n->p2p.tx_bh);
-    n->p2p.tx_bh = NULL;
     delete[] n->vqs;
     sGlobal.wifiForwarder->stop();
     virtio_cleanup(vdev);
-}
-
-static void virtio_wifi_get_config(VirtIODevice* vdev, uint8_t* config) {
-    VirtIOWifi* n = VIRTIO_WIFI(vdev);
-    struct virtio_wifi_config cfg;
-    memcpy(cfg.mac, n->mac, ETH_ALEN);
-    memcpy(config, &cfg, sizeof(cfg));
-}
-
-static void virtio_wifi_set_config(VirtIODevice* vdev, const uint8_t* config) {
-    VirtIOWifi* n = VIRTIO_WIFI(vdev);
-    struct virtio_wifi_config cfg = {};
-    memcpy(&cfg, config, sizeof(cfg));
-    memcpy(n->mac, cfg.mac, ETH_ALEN);
 }
 
 static uint64_t virtio_wifi_get_features(VirtIODevice* vdev,
@@ -440,10 +407,6 @@ static void virtio_wifi_instance_init(Object* obj) {
     // register to the VirtioWifiForwarder will not need to pass
     // an opaque pointer which is essentially VirtIOWifi ptr.
     sGlobal.wifi = n;
-}
-
-static void virtio_wifi_reset(VirtIODevice* vdev) {
-    VirtIOWifi* n = VIRTIO_WIFI(vdev);
 }
 
 static bool virtio_wifi_started(VirtIOWifi *n, uint8_t status)
@@ -470,7 +433,6 @@ static void virtio_wifi_set_status(VirtIODevice* vdev, uint8_t status) {
     }
 }
 
-
 static Property virtio_wifi_properties[] = {
         DEFINE_NIC_PROPERTIES(VirtIOWifi, nic_conf),
         DEFINE_PROP_END_OF_LIST(),
@@ -485,12 +447,9 @@ static void virtio_wifi_class_init(ObjectClass* klass, void* data) {
     set_bit(DEVICE_CATEGORY_NETWORK, dc->categories);
     vdc->realize = virtio_wifi_device_realize;
     vdc->unrealize = virtio_wifi_device_unrealize;
-    vdc->get_config = virtio_wifi_get_config;
-    vdc->set_config = virtio_wifi_set_config;
     vdc->get_features = virtio_wifi_get_features;
     vdc->set_features = virtio_wifi_set_features;
     vdc->bad_features = virtio_wifi_bad_features;
-    vdc->reset = virtio_wifi_reset;
     vdc->set_status = virtio_wifi_set_status;
 }
 

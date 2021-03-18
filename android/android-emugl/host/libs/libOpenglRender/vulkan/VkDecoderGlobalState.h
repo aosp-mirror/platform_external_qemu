@@ -479,7 +479,7 @@ public:
         VkImage image,
         int* pNativeFenceFd);
 
-    // VK_GOOGLE_address_space
+    // VK_GOOGLE_gfxstream
     VkResult on_vkMapMemoryIntoAddressSpaceGOOGLE(
         android::base::BumpPool* pool,
         VkDevice device,
@@ -493,7 +493,7 @@ public:
         uint64_t* pSize,
         uint64_t* pHostmemId);
 
-    // VK_GOOGLE_free_memory_sync
+    // VK_GOOGLE_gfxstream
     VkResult on_vkFreeMemorySyncGOOGLE(
         android::base::BumpPool* pool,
         VkDevice device,
@@ -694,7 +694,7 @@ public:
                                    const VkAllocationCallbacks* pAllocator,
                                    VkRenderPass* pRenderPass);
 
-    // VK_GOOGLE_async_queue_submit
+    // VK_GOOGLE_gfxstream
     void on_vkQueueHostSyncGOOGLE(
         android::base::BumpPool* pool,
         VkQueue queue,
@@ -715,7 +715,7 @@ public:
         uint32_t bindInfoCount,
         const VkBindSparseInfo* pBindInfo, VkFence fence);
 
-    // VK_GOOGLE_linear_image_layout
+    // VK_GOOGLE_gfxstream
     void on_vkGetLinearImageLayoutGOOGLE(
         android::base::BumpPool* pool,
         VkDevice device,
@@ -723,13 +723,32 @@ public:
         VkDeviceSize* pOffset,
         VkDeviceSize* pRowPitchAlignment);
 
-    // VK_GOOGLE_queue_submit_with_commands
+    // VK_GOOGLE_gfxstream
     void on_vkQueueFlushCommandsGOOGLE(
         android::base::BumpPool* pool,
         VkQueue queue,
         VkCommandBuffer commandBuffer,
         VkDeviceSize dataSize,
         const void* pData);
+    void on_vkQueueCommitDescriptorSetUpdatesGOOGLE(
+        android::base::BumpPool* pool,
+        VkQueue queue,
+        uint32_t descriptorPoolCount,
+        const VkDescriptorPool* pDescriptorPools,
+        uint32_t descriptorSetCount,
+        const VkDescriptorSetLayout* pDescriptorSetLayouts,
+        const uint64_t* pDescriptorSetPoolIds,
+        const uint32_t* pDescriptorSetWhichPool,
+        const uint32_t* pDescriptorSetPendingAllocation,
+        const uint32_t* pDescriptorWriteStartingIndices,
+        uint32_t pendingDescriptorWriteCount,
+        const VkWriteDescriptorSet* pPendingDescriptorWrites);
+    void on_vkCollectDescriptorPoolIdsGOOGLE(
+        android::base::BumpPool* pool,
+        VkDevice device,
+        VkDescriptorPool descriptorPool,
+        uint32_t* pPoolIdCount,
+        uint64_t* pPoolIds);
 
     // Transformations
     void deviceMemoryTransform_tohost(

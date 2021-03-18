@@ -65,6 +65,8 @@
             "program": "${command:cmake.launchTargetPath}",
             "cwd": "${workspaceFolder}",
             "args": [
+                "--emulator" ,"localhost:9554" ,"--fwd", "--adb", "7555"
+
                 // "--verbose"
               //  "--gtest_repeat=0", "--gtest_break_on_failure"
               // "--benchmark_filter=BM_cnv.*"
@@ -96,13 +98,10 @@
             },
             "osx": {
                 "args": [
-                    "@Q",
+                    "@R",
                     "-verbose",
                     "-feature",
-                    "-HVF",
-                    "-qt-hide-window",
-                    "-gpu",
-                    "auto-no-window"
+                    "-HVF"
                 ],
                 "env": {
                     // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
@@ -124,7 +123,7 @@
             "type": "lldb",
             "request": "attach",
             // Replace this with the process executable you want to attach to
-            "pid": 19837, // replace pid with your real pid
+            "pid": 19034, // replace pid with your real pid
             // Ignore signal SIGUSR1
             "postRunCommands": [
                 "pro hand -p true -s false SIGUSR1",

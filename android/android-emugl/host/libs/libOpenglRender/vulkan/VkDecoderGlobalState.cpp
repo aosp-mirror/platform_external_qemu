@@ -268,6 +268,12 @@ public:
             get_emugl_address_space_device_control_ops().control_get_hw_funcs()) {
             mUseOldMemoryCleanupPath = 0 == get_emugl_address_space_device_control_ops().control_get_hw_funcs()->getPhysAddrStartLocked();
         }
+
+        if (mVerbosePrints) {
+            fprintf(stderr, "%s: memory cleanup path is old? %d\n", __func__, mUseOldMemoryCleanupPath);
+            fprintf(stderr, "%s: vk cleanup enabled? %d\n", __func__, mVkCleanupEnabled);
+        }
+
         mGuestUsesAngle =
             emugl::emugl_feature_is_enabled(
                 android::featurecontrol::GuestUsesAngle);
@@ -1770,6 +1776,15 @@ public:
         VkSemaphoreCreateInfo localCreateInfo = vk_make_orphan_copy(*pCreateInfo);
         vk_struct_chain_iterator structChainIter = vk_make_chain_iterator(&localCreateInfo);
 
+        VkSemaphoreTypeCreateInfoKHR localSemaphoreTypeCreateInfo;
+        if (const VkSemaphoreTypeCreateInfoKHR* semaphoreTypeCiPtr =
+                    vk_find_struct<VkSemaphoreTypeCreateInfoKHR>(pCreateInfo);
+            semaphoreTypeCiPtr) {
+            localSemaphoreTypeCreateInfo =
+                    vk_make_orphan_copy(*semaphoreTypeCiPtr);
+            vk_append_struct(&structChainIter, &localSemaphoreTypeCreateInfo);
+        }
+
         const VkExportSemaphoreCreateInfoKHR* exportCiPtr =
             vk_find_struct<VkExportSemaphoreCreateInfoKHR>(pCreateInfo);
         VkExportSemaphoreCreateInfoKHR localSemaphoreCreateInfo;
@@ -1966,12 +1981,18 @@ public:
                 state.used = 0;
                 info.pools.push_back(state);
             }
+
+            if (emugl::emugl_feature_is_enabled(android::featurecontrol::VulkanBatchedDescriptorSetUpdate)) {
+                for (uint32_t i = 0; i < pCreateInfo->maxSets; ++i) {
+                    info.poolIds.push_back((uint64_t)new_boxed_non_dispatchable_VkDescriptorSet(VK_NULL_HANDLE));
+                }
+            }
         }
 
         return res;
     }
 
-    void cleanupDescriptorPoolAllocedSetsLocked(VkDescriptorPool descriptorPool) {
+    void cleanupDescriptorPoolAllocedSetsLocked(VkDescriptorPool descriptorPool, bool isDestroy = false) {
         auto info = android::base::find(mDescriptorPoolInfo, descriptorPool);
 
         if (!info) return;
@@ -1980,7 +2001,22 @@ public:
             auto unboxedSet = it.first;
             auto boxedSet = it.second;
             mDescriptorSetInfo.erase(unboxedSet);
-            delete_VkDescriptorSet(boxedSet);
+            if (!emugl::emugl_feature_is_enabled(android::featurecontrol::VulkanBatchedDescriptorSetUpdate)) {
+                delete_VkDescriptorSet(boxedSet);
+            }
+        }
+
+        if (emugl::emugl_feature_is_enabled(android::featurecontrol::VulkanBatchedDescriptorSetUpdate)) {
+            if (isDestroy) {
+                for (auto poolId : info->poolIds) {
+                    delete_VkDescriptorSet((VkDescriptorSet)poolId);
+                }
+            } else {
+                for (auto poolId : info->poolIds) {
+                    auto handleInfo = sBoxedHandleManager.get(poolId);
+                    if (handleInfo) handleInfo->underlying = VK_NULL_HANDLE;
+                }
+            }
         }
 
         info->usedSets = 0;
@@ -2003,7 +2039,7 @@ public:
         vk->vkDestroyDescriptorPool(device, descriptorPool, pAllocator);
 
         AutoLock lock(mLock);
-        cleanupDescriptorPoolAllocedSetsLocked(descriptorPool);
+        cleanupDescriptorPoolAllocedSetsLocked(descriptorPool, true /* destroy */);
         mDescriptorPoolInfo.erase(descriptorPool);
     }
 
@@ -2026,6 +2062,26 @@ public:
         return res;
     }
 
+    void initDescriptorSetInfoLocked(
+        VkDescriptorPool pool,
+        VkDescriptorSetLayout setLayout,
+        uint64_t boxedDescriptorSet,
+        VkDescriptorSet descriptorSet) {
+
+        auto poolInfo = android::base::find(mDescriptorPoolInfo, pool);
+
+        auto setLayoutInfo =
+            android::base::find(mDescriptorSetLayoutInfo, setLayout);
+
+        auto& setInfo = mDescriptorSetInfo[descriptorSet];
+
+        setInfo.pool = pool;
+        setInfo.bindings = setLayoutInfo->bindings;
+
+        poolInfo->allocedSetsToBoxed[descriptorSet] = (VkDescriptorSet)boxedDescriptorSet;
+        applyDescriptorSetAllocationLocked(*poolInfo, setInfo.bindings);
+    }
+
     VkResult on_vkAllocateDescriptorSets(
         android::base::BumpPool* pool,
         VkDevice boxed_device,
@@ -2045,22 +2101,16 @@ public:
         if (res == VK_SUCCESS) {
 
             auto poolInfo = android::base::find(mDescriptorPoolInfo, pAllocateInfo->descriptorPool);
-
             if (!poolInfo) return res;
 
             for (uint32_t i = 0; i < pAllocateInfo->descriptorSetCount; ++i) {
-                auto setLayoutInfo =
-                    android::base::find(mDescriptorSetLayoutInfo, pAllocateInfo->pSetLayouts[i]);
-
-                auto& setInfo = mDescriptorSetInfo[pDescriptorSets[i]];
-
-                setInfo.pool = pAllocateInfo->descriptorPool;
-                setInfo.bindings = setLayoutInfo->bindings;
-
                 auto unboxed = pDescriptorSets[i];
                 pDescriptorSets[i] = new_boxed_non_dispatchable_VkDescriptorSet(pDescriptorSets[i]);
-                poolInfo->allocedSetsToBoxed[unboxed] = pDescriptorSets[i];
-                applyDescriptorSetAllocationLocked(*poolInfo, setInfo.bindings);
+                initDescriptorSetInfoLocked(
+                    pAllocateInfo->descriptorPool,
+                    pAllocateInfo->pSetLayouts[i],
+                    (uint64_t)(pDescriptorSets[i]),
+                    unboxed);
             }
         }
 
@@ -2104,6 +2154,15 @@ public:
 
                 if (!descSetAllocedEntry) continue;
 
+                auto handleInfo = sBoxedHandleManager.get((uint64_t)*descSetAllocedEntry);
+                if (handleInfo) {
+                    if (emugl::emugl_feature_is_enabled(android::featurecontrol::VulkanBatchedDescriptorSetUpdate)) {
+                        handleInfo->underlying = VK_NULL_HANDLE;
+                    } else {
+                        delete_VkDescriptorSet(*descSetAllocedEntry);
+                    }
+                }
+
                 poolInfo->allocedSetsToBoxed.erase(pDescriptorSets[i]);
 
                 mDescriptorSetInfo.erase(pDescriptorSets[i]);
@@ -2125,6 +2184,18 @@ public:
         auto vk = dispatch_VkDevice(boxed_device);
 
         AutoLock lock(mLock);
+        on_vkUpdateDescriptorSetsImpl(pool, vk, device, descriptorWriteCount, pDescriptorWrites, descriptorCopyCount, pDescriptorCopies);
+    }
+
+    void on_vkUpdateDescriptorSetsImpl(
+            android::base::BumpPool* pool,
+            VulkanDispatch* vk,
+            VkDevice device,
+            uint32_t descriptorWriteCount,
+            const VkWriteDescriptorSet* pDescriptorWrites,
+            uint32_t descriptorCopyCount,
+            const VkCopyDescriptorSet* pDescriptorCopies) {
+
         bool needEmulateWriteDescriptor = false;
         // c++ seems to allow for 0-size array allocation
         std::unique_ptr<bool[]> descriptorWritesNeedDeepCopy(
@@ -2768,6 +2839,12 @@ public:
         };
 
         if (!mUseOldMemoryCleanupPath) {
+
+            if (mVerbosePrints) {
+                fprintf(stderr, "%s: Registering deallocation callback for host-visible memory at gpa 0x%llx\n", __func__,
+                        (unsigned long long)gpa);
+            }
+
             get_emugl_address_space_device_control_ops().register_deallocation_callback(
                 this, gpa, [](void* thisPtr, uint64_t gpa) {
                 Impl* implPtr = (Impl*)thisPtr;
@@ -4203,6 +4280,163 @@ public:
         subDecode(readStream, vk, boxed_commandBuffer, commandBuffer, dataSize, pData);
     }
 
+    VkDescriptorSet getOrAllocateDescriptorSetFromPoolAndId(
+        VulkanDispatch* vk,
+        VkDevice device,
+        VkDescriptorPool pool,
+        VkDescriptorSetLayout setLayout,
+        uint64_t poolId,
+        uint32_t pendingAlloc,
+        bool* didAlloc) {
+
+        auto poolInfo = android::base::find(mDescriptorPoolInfo, pool);
+        if (!poolInfo) {
+            fprintf(stderr, "%s: FATAL: descriptor pool %p not found\n", __func__, pool);
+            abort();
+        }
+
+        DispatchableHandleInfo<uint64_t>* setHandleInfo = sBoxedHandleManager.get(poolId);
+
+        if (setHandleInfo->underlying) {
+            if (pendingAlloc) {
+                VkDescriptorSet allocedSet;
+                vk->vkFreeDescriptorSets(device, pool, 1, (VkDescriptorSet*)(&setHandleInfo->underlying));
+                VkDescriptorSetAllocateInfo dsAi = {
+                    VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO, 0,
+                    pool,
+                    1,
+                    &setLayout,
+                };
+                vk->vkAllocateDescriptorSets(device, &dsAi, &allocedSet);
+                setHandleInfo->underlying = (uint64_t)allocedSet;
+                initDescriptorSetInfoLocked(pool, setLayout, poolId, allocedSet);
+                *didAlloc = true;
+                return allocedSet;
+            } else {
+                *didAlloc = false;
+                return (VkDescriptorSet)(setHandleInfo->underlying);
+            }
+        } else {
+            if (pendingAlloc) {
+                VkDescriptorSet allocedSet;
+                VkDescriptorSetAllocateInfo dsAi = {
+                    VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO, 0,
+                    pool,
+                    1,
+                    &setLayout,
+                };
+                vk->vkAllocateDescriptorSets(device, &dsAi, &allocedSet);
+                setHandleInfo->underlying = (uint64_t)allocedSet;
+                initDescriptorSetInfoLocked(pool, setLayout, poolId, allocedSet);
+                *didAlloc = true;
+                return allocedSet;
+            } else {
+                fprintf(stderr, "%s: FATAL: descriptor pool %p wanted to get set with id 0x%llx but it wasn't allocated\n", __func__,
+                        pool, (unsigned long long)poolId);
+                abort();
+            }
+        }
+    }
+
+    void on_vkQueueCommitDescriptorSetUpdatesGOOGLE(
+        android::base::BumpPool* pool,
+        VkQueue boxed_queue,
+        uint32_t descriptorPoolCount,
+        const VkDescriptorPool* pDescriptorPools,
+        uint32_t descriptorSetCount,
+        const VkDescriptorSetLayout* pDescriptorSetLayouts,
+        const uint64_t* pDescriptorSetPoolIds,
+        const uint32_t* pDescriptorSetWhichPool,
+        const uint32_t* pDescriptorSetPendingAllocation,
+        const uint32_t* pDescriptorWriteStartingIndices,
+        uint32_t pendingDescriptorWriteCount,
+        const VkWriteDescriptorSet* pPendingDescriptorWrites) {
+
+        AutoLock lock(mLock);
+
+        VkDevice device;
+
+        auto queue = unbox_VkQueue(boxed_queue);
+        auto vk = dispatch_VkQueue(boxed_queue);
+
+        auto queueInfo = android::base::find(mQueueInfo, queue);
+        if (queueInfo) {
+            device = queueInfo->device;
+        } else {
+            fprintf(stderr, "%s: FATAL: queue %p (boxed: %p) with no device registered\n", __func__,
+                    queue, boxed_queue);
+            abort();
+        }
+
+        std::vector<VkDescriptorSet> setsToUpdate(descriptorSetCount, nullptr);
+
+        bool didAlloc = false;
+
+        for (uint32_t i = 0; i < descriptorSetCount; ++i) {
+            uint64_t poolId = pDescriptorSetPoolIds[i];
+            uint32_t whichPool = pDescriptorSetWhichPool[i];
+            uint32_t pendingAlloc = pDescriptorSetPendingAllocation[i];
+            bool didAllocThisTime;
+            setsToUpdate[i] = getOrAllocateDescriptorSetFromPoolAndId(
+                vk, device,
+                pDescriptorPools[whichPool],
+                pDescriptorSetLayouts[i],
+                poolId,
+                pendingAlloc,
+                &didAllocThisTime);
+
+            if (didAllocThisTime) didAlloc = true;
+        }
+
+        if (didAlloc) {
+
+            std::vector<VkWriteDescriptorSet> writeDescriptorSetsForHostDriver(pendingDescriptorWriteCount);
+            memcpy(writeDescriptorSetsForHostDriver.data(), pPendingDescriptorWrites, pendingDescriptorWriteCount * sizeof(VkWriteDescriptorSet));
+
+            for (uint32_t i = 0; i < descriptorSetCount; ++i) {
+                uint32_t writeStartIndex = pDescriptorWriteStartingIndices[i];
+                uint32_t writeEndIndex;
+                if (i == descriptorSetCount - 1) {
+                    writeEndIndex = pendingDescriptorWriteCount;
+                } else {
+                    writeEndIndex = pDescriptorWriteStartingIndices[i + 1];
+                }
+
+                for (uint32_t j = writeStartIndex; j < writeEndIndex; ++j) {
+                    writeDescriptorSetsForHostDriver[j].dstSet = setsToUpdate[i];
+                }
+            }
+            this->on_vkUpdateDescriptorSetsImpl(
+                pool, vk, device,
+                (uint32_t)writeDescriptorSetsForHostDriver.size(),
+                writeDescriptorSetsForHostDriver.data(), 0, nullptr);
+        } else {
+            this->on_vkUpdateDescriptorSetsImpl(
+                pool, vk, device,
+                pendingDescriptorWriteCount,
+                pPendingDescriptorWrites,
+                0, nullptr);
+        }
+    }
+
+    void on_vkCollectDescriptorPoolIdsGOOGLE(
+            android::base::BumpPool* pool,
+            VkDevice device,
+            VkDescriptorPool descriptorPool,
+            uint32_t* pPoolIdCount,
+            uint64_t* pPoolIds) {
+
+        AutoLock lock(mLock);
+        auto& info = mDescriptorPoolInfo[descriptorPool];
+        *pPoolIdCount = (uint32_t)info.poolIds.size();
+
+        if (pPoolIds) {
+            for (uint32_t i = 0; i < info.poolIds.size(); ++i) {
+                pPoolIds[i] = info.poolIds[i];
+            }
+        }
+    }
+
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA)
 
     // Transforms
@@ -4361,7 +4595,7 @@ public:
     type unbox_##type(type boxed) { \
         auto elt = sBoxedHandleManager.get( \
                 (uint64_t)(uintptr_t)boxed); \
-        if (!elt) { fprintf(stderr, "%s: unbox %p failed, not found\n", __func__, boxed); return VK_NULL_HANDLE; } \
+        if (!elt) { fprintf(stderr, "%s: unbox %p failed, not found\n", __func__, boxed); abort(); return VK_NULL_HANDLE; } \
         return (type)elt->underlying; \
     } \
 
@@ -5959,6 +6193,7 @@ private:
         std::vector<PoolState> pools;
 
         std::unordered_map<VkDescriptorSet, VkDescriptorSet> allocedSetsToBoxed;
+        std::vector<uint64_t> poolIds;
     };
 
     struct DescriptorSetInfo {
@@ -6758,7 +6993,7 @@ VkResult VkDecoderGlobalState::on_vkQueueSignalReleaseImageANDROID(
         image, pNativeFenceFd);
 }
 
-// VK_GOOGLE_address_space
+// VK_GOOGLE_gfxstream
 VkResult VkDecoderGlobalState::on_vkMapMemoryIntoAddressSpaceGOOGLE(
     android::base::BumpPool* pool,
     VkDevice device, VkDeviceMemory memory, uint64_t* pAddress) {
@@ -6773,7 +7008,7 @@ VkResult VkDecoderGlobalState::on_vkGetMemoryHostAddressInfoGOOGLE(
         pool, device, memory, pAddress, pSize, pHostmemId);
 }
 
-// VK_GOOGLE_free_memory_sync
+// VK_GOOGLE_gfxstream
 VkResult VkDecoderGlobalState::on_vkFreeMemorySyncGOOGLE(
     android::base::BumpPool* pool,
     VkDevice device,
@@ -7105,6 +7340,31 @@ void VkDecoderGlobalState::on_vkQueueFlushCommandsGOOGLE(
     mImpl->on_vkQueueFlushCommandsGOOGLE(pool, queue, commandBuffer, dataSize, pData);
 }
 
+void VkDecoderGlobalState::on_vkQueueCommitDescriptorSetUpdatesGOOGLE(
+    android::base::BumpPool* pool,
+    VkQueue queue,
+    uint32_t descriptorPoolCount,
+    const VkDescriptorPool* pDescriptorPools,
+    uint32_t descriptorSetCount,
+    const VkDescriptorSetLayout* pDescriptorSetLayouts,
+    const uint64_t* pDescriptorSetPoolIds,
+    const uint32_t* pDescriptorSetWhichPool,
+    const uint32_t* pDescriptorSetPendingAllocation,
+    const uint32_t* pDescriptorWriteStartingIndices,
+    uint32_t pendingDescriptorWriteCount,
+    const VkWriteDescriptorSet* pPendingDescriptorWrites) {
+    mImpl->on_vkQueueCommitDescriptorSetUpdatesGOOGLE(pool, queue, descriptorPoolCount, pDescriptorPools, descriptorSetCount, pDescriptorSetLayouts, pDescriptorSetPoolIds, pDescriptorSetWhichPool, pDescriptorSetPendingAllocation, pDescriptorWriteStartingIndices, pendingDescriptorWriteCount, pPendingDescriptorWrites);
+}
+
+void VkDecoderGlobalState::on_vkCollectDescriptorPoolIdsGOOGLE(
+    android::base::BumpPool* pool,
+    VkDevice device,
+    VkDescriptorPool descriptorPool,
+    uint32_t* pPoolIdCount,
+    uint64_t* pPoolIds) {
+    mImpl->on_vkCollectDescriptorPoolIdsGOOGLE(pool, device, descriptorPool, pPoolIdCount, pPoolIds);
+}
+
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(
     VkDeviceMemory* memory, uint32_t memoryCount,
     VkDeviceSize* offset, uint32_t offsetCount,
@@ -7227,7 +7487,7 @@ GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(DEFINE_BOXED_NON_DISPATCHABLE_HAN
         if (!boxed) return boxed; \
         auto elt = sBoxedHandleManager.get( \
                 (uint64_t)(uintptr_t)boxed); \
-        if (!elt) { fprintf(stderr, "%s: unbox %p failed, not found\n", __func__, boxed); return VK_NULL_HANDLE; } \
+        if (!elt) { fprintf(stderr, "%s: unbox %p failed, not found\n", __func__, boxed); abort(); return VK_NULL_HANDLE; } \
         return (type)elt->underlying; \
     } \
     type unboxed_to_boxed_non_dispatchable_##type(type unboxed) { \

@@ -1268,6 +1268,7 @@ extern "C" int main(int argc, char** argv) {
                 fc::setIfNotOverriden(fc::VulkanShaderFloat16Int8, true);
                 fc::setIfNotOverriden(fc::KeycodeForwarding, true);
                 fc::setIfNotOverriden(fc::VulkanQueueSubmitWithCommands, true);
+                fc::setIfNotOverriden(fc::VulkanBatchedDescriptorSetUpdate, true);
 
                 int lcdWidth = 1280;
                 int lcdHeight = 720;
@@ -1288,7 +1289,13 @@ extern "C" int main(int argc, char** argv) {
                 return startEmulatorWithMinConfig(
                     args.size(),
                     args.array(),
-                    "custom", 25, "x86_64", "x86_64", true, AVD_PHONE,
+                    "custom", 25,
+#ifdef __aarch64__
+                    "arm64-v8a", "arm64",
+#else
+                    "x86_64", "x86_64",
+#endif
+                    true, AVD_PHONE,
                     opts->gpu ? opts->gpu : "host", opts->no_window, lcdWidth, lcdHeight,
                     // LCD DPI, orientation
                     96, "landscape",
@@ -2343,6 +2350,14 @@ extern "C" int main(int argc, char** argv) {
                 fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion,
                                                      true);
             }
+
+#ifdef __linux__
+            // On Linux enable it by default.
+            fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion,
+                                                 true);
+            fc::setIfNotOverridenOrGuestDisabled(fc::GLAsyncSwap,
+                                                 true);
+#endif
 
             if (fc::isEnabled(fc::ForceANGLE)) {
                 uiPreferredGlesBackend =

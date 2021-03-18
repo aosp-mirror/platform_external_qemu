@@ -41,6 +41,9 @@ class VulkanEqualityCodegen(VulkanTypeIterator):
         def makeLengthAccess(varName):
             return lambda t: self.cgen.generalLengthAccess(t, parentVarName = varName)
 
+        def makeLengthAccessGuard(varName):
+            return lambda t: self.cgen.generalLengthAccessGuard(t, parentVarName=varName)
+
         self.exprAccessorLhs = makeAccess(self.inputVars[0])
         self.exprAccessorRhs = makeAccess(self.inputVars[1])
 
@@ -49,6 +52,9 @@ class VulkanEqualityCodegen(VulkanTypeIterator):
 
         self.lenAccessorLhs = makeLengthAccess(self.inputVars[0])
         self.lenAccessorRhs = makeLengthAccess(self.inputVars[1])
+
+        self.lenAccessGuardLhs = makeLengthAccessGuard(self.inputVars[0])
+        self.lenAccessGuardRhs = makeLengthAccessGuard(self.inputVars[1])
 
         self.checked = False
 
@@ -127,6 +133,9 @@ class VulkanEqualityCodegen(VulkanTypeIterator):
         lenAccessLhs = self.lenAccessorLhs(vulkanType)
         lenAccessRhs = self.lenAccessorRhs(vulkanType)
 
+        lenAccessGuardLhs = self.lenAccessGuardLhs(vulkanType)
+        lenAccessGuardRhs = self.lenAccessGuardRhs(vulkanType)
+
         needNullCheck = vulkanType.pointerIndirectionLevels > 0
 
         if needNullCheck:
@@ -150,6 +159,9 @@ class VulkanEqualityCodegen(VulkanTypeIterator):
             if needNullCheck:
                 self.cgen.beginIf(equalLenExpr)
 
+            if lenAccessGuardLhs is not None:
+                self.cgen.beginIf(lenAccessGuardLhs)
+
             self.cgen.beginFor(forInit, forCond, forIncr)
 
         self.cgen.funcCall(None, self.prefix + vulkanType.typeName,
@@ -157,6 +169,8 @@ class VulkanEqualityCodegen(VulkanTypeIterator):
 
         if lenAccessLhs is not None:
             self.cgen.endFor()
+            if lenAccessGuardLhs is not None:
+                self.cgen.endIf()
             if needNullCheck:
                 self.cgen.endIf()
 
@@ -191,6 +205,9 @@ class VulkanEqualityCodegen(VulkanTypeIterator):
         lenAccessLhs = self.lenAccessorLhs(vulkanType)
         lenAccessRhs = self.lenAccessorRhs(vulkanType)
 
+        lenAccessGuardLhs = self.lenAccessGuardLhs(vulkanType)
+        lenAccessGuardRhs = self.lenAccessGuardRhs(vulkanType)
+
         bothNullExpr = self.makeBothNullExpr(accessLhs, accessRhs)
         bothNotNullExpr = self.makeBothNotNullExpr(accessLhs, accessRhs)
         nullMatchExpr = "(%s) || (%s)" % (bothNullExpr, bothNotNullExpr)
@@ -219,6 +236,9 @@ class VulkanEqualityCodegen(VulkanTypeIterator):
         forCond = "%s < (uint32_t)%s" % (loopVar, lenAccessLhs)
         forIncr = "++%s" % loopVar
 
+        if lenAccessGuardLhs is not None:
+            self.cgen.beginIf(lenAccessGuardLhs)
+
         self.cgen.beginFor(forInit, forCond, forIncr)
 
         self.compareWithConsequence(
@@ -226,6 +246,9 @@ class VulkanEqualityCodegen(VulkanTypeIterator):
             vulkanType, "Unequal string in string array")
 
         self.cgen.endFor()
+
+        if lenAccessGuardLhs is not None:
+            self.cgen.endIf()
 
         self.cgen.endIf()
 
@@ -320,6 +343,11 @@ class VulkanTesting(VulkanWrapperGenerator):
             return
 
         category = self.typeInfo.categoryOf(name)
+
+        if category in ["struct", "union"] and alias:
+            self.module.appendHeader(
+                self.codegen.makeFuncAlias(API_PREFIX_EQUALITY + name,
+                                           API_PREFIX_EQUALITY + alias))
 
         if category in ["struct", "union"] and not alias:
 

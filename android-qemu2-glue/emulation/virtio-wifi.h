@@ -35,10 +35,6 @@ typedef struct VirtIOWifi {
     int32_t tx_burst;
     // regular virtqueues for TX/RX
     VirtIOWifiQueue* vqs;
-    VirtQueue* ctrl_vq;
-    // special virtqueue for transmitting p2p frames/beacons.
-    // Only initialize for tx.
-    VirtIOWifiQueue p2p;
     NICConf nic_conf;
     DeviceState* qdev;
 } VirtIOWifi;

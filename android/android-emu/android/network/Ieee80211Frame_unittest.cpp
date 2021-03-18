@@ -85,15 +85,16 @@ TEST(Ieee80211FrameTest, conversionTest) {
     ethernet.insert(ethernet.end(), kPayload, kPayload + sizeof(kPayload));
 
     // init Ieee80211 frame with ethernet
-    Ieee80211Frame frame(ethernet, MacAddress(MACARG(kBssID)));
-    EXPECT_TRUE(frame.isData());
-    EXPECT_TRUE(frame.isFromDS());
-    EXPECT_TRUE((frame.hdrLength() + ETH_ALEN + sizeof(kPayload)) ==
-                frame.size());
-    EXPECT_TRUE(MacAddress(MACARG(kDst)) == frame.addr1());
-    EXPECT_TRUE(MacAddress(MACARG(kBssID)) == frame.addr2());
-    EXPECT_TRUE(MacAddress(MACARG(kSrc)) == frame.addr3());
-    auto outSg = frame.toEthernet();
+    auto frame = Ieee80211Frame::buildFromEthernet(
+            ethernet.data(), ethernet.size(), MacAddress(MACARG(kBssID)));
+    EXPECT_TRUE(frame->isData());
+    EXPECT_TRUE(frame->isFromDS());
+    EXPECT_TRUE((frame->hdrLength() + ETH_ALEN + sizeof(kPayload)) ==
+                frame->size());
+    EXPECT_TRUE(MacAddress(MACARG(kDst)) == frame->addr1());
+    EXPECT_TRUE(MacAddress(MACARG(kBssID)) == frame->addr2());
+    EXPECT_TRUE(MacAddress(MACARG(kSrc)) == frame->addr3());
+    auto outSg = frame->toEthernet();
     std::vector<uint8_t> packet(outSg.summedLength());
     EXPECT_EQ(outSg.size(), 2);
     outSg.copyTo(packet.data(), 0, outSg.summedLength());
@@ -107,11 +108,9 @@ TEST(Ieee80211FrameTest, conversionTest) {
                    ethernet.size() - ETH_ALEN * 2),
             0);
 
-    // Test with invalid ethertype
+    // Test with invalid ethertype and expect nullptr returned.
     ethernet[12] = 0x00;
-    Ieee80211Frame frame2(ethernet, MacAddress(MACARG(kBssID)));
-    // Ethertype is no longer skipped when copying.
-    EXPECT_TRUE((frame2.hdrLength() + sizeof(kPayload) - 2) == frame2.size());
-    outSg = frame2.toEthernet();
-    EXPECT_EQ(outSg.size(), 0);
+    auto frame2 = Ieee80211Frame::buildFromEthernet(
+            ethernet.data(), ethernet.size(), MacAddress(MACARG(kBssID)));
+    EXPECT_TRUE(frame2.get() == nullptr);
 }

@@ -33,6 +33,15 @@ namespace android_studio {
 
 namespace emugl {
 
+enum class FrameBufferChange {
+    FrameReady = 0,
+};
+
+struct FrameBufferChangeEvent {
+    FrameBufferChange change;
+    uint64_t frameNumber;
+};
+
 // Renderer - an object that manages a single OpenGL window used for drawing
 // and is able to create individual render channels for that window.
 //
@@ -110,6 +119,18 @@ public:
                                  void* context,
                                  bool useBgraReadback,
                                  uint32_t displayId) = 0;
+
+
+    using FrameBufferChangeEventListener =
+            std::function<void(const FrameBufferChangeEvent evt)>;
+
+    // Adds a FramebufferChangeEventListener. The listener will be invoked whenever
+    // a new frame has been made available and is to be rendered on screen.
+    // You should do as little work as possible on this callback.
+    virtual void addListener(FrameBufferChangeEventListener* listener) = 0;
+
+    // Removes the listener.
+    virtual void removeListener(FrameBufferChangeEventListener* listener) = 0;
 
     // Async readback API
     virtual bool asyncReadbackSupported() = 0;

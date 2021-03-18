@@ -475,6 +475,14 @@ emugl::Renderer::ReadPixelsCallback RenderWindow::getReadPixelsCallback() {
     return FrameBuffer::getFB()->getReadPixelsCallback();
 }
 
+ void RenderWindow::addListener(emugl::Renderer::FrameBufferChangeEventListener* listener) {
+    FrameBuffer::getFB()->addListener(listener);
+ }
+
+void RenderWindow::removeListener(emugl::Renderer::FrameBufferChangeEventListener* listener) {
+    FrameBuffer::getFB()->removeListener(listener);
+}
+
 emugl::Renderer::FlushReadPixelPipeline
 RenderWindow::getFlushReadPixelPipeline() {
     return FrameBuffer::getFB()->getFlushReadPixelPipeline();

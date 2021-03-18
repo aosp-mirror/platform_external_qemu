@@ -31,17 +31,12 @@ class VulkanCountingCodegen(VulkanTypeIterator):
         self.prefix = prefix
         self.forApiOutput = forApiOutput
 
-        def makeAccess(varName, asPtr = True):
-            return lambda t: self.cgen.generalAccess(t, parentVarName = varName, asPtr = asPtr)
-
-        def makeLengthAccess(varName):
-            return lambda t: self.cgen.generalLengthAccess(t, parentVarName = varName)
-
         self.exprAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.toCountVar, asPtr = True)
         self.exprValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.toCountVar, asPtr = False)
         self.exprPrimitiveValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.toCountVar, asPtr = False)
 
         self.lenAccessor = lambda t: self.cgen.generalLengthAccess(t, parentVarName = self.toCountVar)
+        self.lenAccessorGuard = lambda t: self.cgen.generalLengthAccessGuard(t, parentVarName = self.toCountVar)
         self.filterVarAccessor = lambda t: self.cgen.filterVarAccess(t, parentVarName = self.toCountVar)
 
         self.checked = False
@@ -338,6 +333,7 @@ class VulkanCountingCodegen(VulkanTypeIterator):
 
         access = self.exprAccessor(vulkanType)
         lenAccess = self.lenAccessor(vulkanType)
+        lenAccessGuard = self.lenAccessorGuard(vulkanType)
 
         self.beginFilterGuard(vulkanType)
 
@@ -345,6 +341,8 @@ class VulkanCountingCodegen(VulkanTypeIterator):
             self.doAllocSpace(vulkanType)
 
         if lenAccess is not None:
+            if lenAccessGuard is not None:
+                self.cgen.beginIf(lenAccessGuard)
             loopVar = "i"
             access = "%s + %s" % (access, loopVar)
             forInit = "uint32_t %s = 0" % loopVar
@@ -365,6 +363,8 @@ class VulkanCountingCodegen(VulkanTypeIterator):
 
         if lenAccess is not None:
             self.cgen.endFor()
+            if lenAccessGuard is not None:
+                self.cgen.endIf()
 
         self.endFilterGuard(vulkanType)
 
@@ -375,17 +375,28 @@ class VulkanCountingCodegen(VulkanTypeIterator):
     def onStringArray(self, vulkanType):
         access = self.exprAccessor(vulkanType)
         lenAccess = self.lenAccessor(vulkanType)
+        lenAccessGuard = self.lenAccessorGuard(vulkanType)
 
         self.genCount("sizeof(uint32_t)")
+        if lenAccessGuard is not None:
+            self.cgen.beginIf(lenAccessGuard)
         self.cgen.beginFor("uint32_t i = 0", "i < %s" % lenAccess, "++i")
         self.cgen.stmt("size_t l = %s[i] ? strlen(%s[i]) : 0" % (access, access))
         self.genCount("sizeof(uint32_t) + (%s[i] ? strlen(%s[i]) : 0)" % (access, access))
         self.cgen.endFor()
+        if lenAccessGuard is not None:
+            self.cgen.endIf()
 
     def onStaticArr(self, vulkanType):
         access = self.exprValueAccessor(vulkanType)
         lenAccess = self.lenAccessor(vulkanType)
+        lenAccessGuard = self.lenAccessorGuard(vulkanType)
+
+        if lenAccessGuard is not None:
+            self.cgen.beginIf(lenAccessGuard)
         finalLenExpr = "%s * %s" % (lenAccess, self.cgen.sizeofExpr(vulkanType))
+        if lenAccessGuard is not None:
+            self.cgen.endIf()
         self.genCount(finalLenExpr)
 
     def onStructExtension(self, vulkanType):
@@ -402,6 +413,7 @@ class VulkanCountingCodegen(VulkanTypeIterator):
         access = self.exprAccessor(vulkanType)
 
         lenAccess = self.lenAccessor(vulkanType)
+        lenAccessGuard = self.lenAccessorGuard(vulkanType)
 
         self.beginFilterGuard(vulkanType)
         self.doAllocSpace(vulkanType)
@@ -414,19 +426,29 @@ class VulkanCountingCodegen(VulkanTypeIterator):
         else:
             if self.typeInfo.isNonAbiPortableType(vulkanType.typeName):
                 if lenAccess is not None:
+                    if lenAccessGuard is not None:
+                        self.cgen.beginIf(lenAccessGuard)
                     self.cgen.beginFor("uint32_t i = 0", "i < (uint32_t)%s" % lenAccess, "++i")
                     self.genPrimitiveStreamCall(vulkanType.getForValueAccess())
                     self.cgen.endFor()
+                    if lenAccessGuard is not None:
+                        self.cgen.endIf()
                 else:
                     self.genPrimitiveStreamCall(vulkanType.getForValueAccess())
             else:
                 if lenAccess is not None:
+                    needLenAccessGuard = True
                     finalLenExpr = "%s * %s" % (
                         lenAccess, self.cgen.sizeofExpr(vulkanType.getForValueAccess()))
                 else:
+                    needLenAccessGuard = False
                     finalLenExpr = "%s" % (
                         self.cgen.sizeofExpr(vulkanType.getForValueAccess()))
+                if needLenAccessGuard and lenAccessGuard is not None:
+                    self.cgen.beginIf(lenAccessGuard)
                 self.genCount(finalLenExpr)
+                if needLenAccessGuard and lenAccessGuard is not None:
+                    self.cgen.endIf()
 
         self.endFilterGuard(vulkanType)
 
@@ -504,6 +526,12 @@ class VulkanCounting(VulkanWrapperGenerator):
             return
 
         category = self.typeInfo.categoryOf(name)
+
+        if category in ["struct", "union"] and alias:
+            # TODO(liyl): might not work if freeParams != []
+            self.module.appendHeader(
+                self.codegen.makeFuncAlias(self.countingPrefix + name,
+                                           self.countingPrefix + alias))
 
         if category in ["struct", "union"] and not alias:
 

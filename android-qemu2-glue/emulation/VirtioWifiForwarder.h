@@ -16,6 +16,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/async/Looper.h"
 #include "android/base/sockets/ScopedSocket.h"
+#include "android/network/GenericNetlinkMessage.h"
 #include "android/network/Ieee80211Frame.h"
 #include "android/network/WifiForwardPeer.h"
 
@@ -28,14 +29,14 @@ namespace qemu2 {
 
 class VirtioWifiForwarder {
 public:
-    // The callback function will only provide the clietn with one and only one
+    // The callback function will only provide the client with one and only one
     // IEEE80211 frame.
     // The client should return the number of bytes consumed.
     // So if the client is busy or encouter a partial frame (It could happen
     // when communicating with the remote VM, it should return zero.
 
     using OnFrameAvailableCallback =
-            std::function<size_t(const uint8_t*, size_t, bool)>;
+            std::function<size_t(const uint8_t*, size_t)>;
     // Used when the outbound frame has been transmitted.
     // It is possible that the network device is busy therefore the client needs
     // to handle retransmission.
@@ -50,10 +51,12 @@ public:
                         OnFrameSentCallback onFrameSentCallback = {});
     ~VirtioWifiForwarder();
     bool init();
-    int forwardFrame(android::base::IOVector iov, bool toRemoteVM = false);
+    int forwardFrame(const android::base::IOVector& iov);
     void stop();
     NICState* getNic() { return mNic; }
     static VirtioWifiForwarder* getInstance(NetClientState* nc);
+    static const uint32_t kWifiForwardMagic = 0xD6C4B3A2;
+    static const uint8_t kWifiForwardVersion = 0x02;
 
 private:
     // Wrapper functions for passing C-sytle func ptr to C API.
@@ -65,14 +68,18 @@ private:
 
     static void onFrameSentCallback(NetClientState*, ssize_t);
     static void onHostApd(void* opaque, int fd, unsigned events);
-
-    static const uint32_t kWifiForwardMagic = 0xD6C4B3A2;
-    static const uint8_t kWifiForwardVersion = 0x02;
+    static ssize_t sendToGuest(
+            VirtioWifiForwarder* forwarder,
+            std::unique_ptr<android::network::Ieee80211Frame> frame);
     static const char* const kNicModel;
     static const char* const kNicName;
     size_t onRemoteData(const uint8_t* data, size_t size);
-    void sendToRemoteVM(android::network::Ieee80211Frame& frame);
-    int sendToNIC(android::network::Ieee80211Frame& frame);
+    void sendToRemoteVM(std::unique_ptr<android::network::Ieee80211Frame> frame,
+                        android::network::FrameType type);
+    int sendToNIC(std::unique_ptr<android::network::Ieee80211Frame> frame);
+    void ackLocalFrame(const android::network::Ieee80211Frame* frame);
+    std::unique_ptr<android::network::Ieee80211Frame> parseFrame(
+            const android::base::IOVector& iov);
     android::network::MacAddress mBssID;
     OnFrameAvailableCallback mOnFrameAvailableCallback;
     OnLinkStatusChanged mOnLinkStatusChanged;
@@ -84,7 +91,7 @@ private:
     std::unique_ptr<android::network::WifiForwardPeer> mRemotePeer;
     android::base::Looper::FdWatch* mFdWatch = nullptr;
     NICConf* mNicConf = nullptr;
-
+    android::network::FrameInfo mFrameInfo;
     DISALLOW_COPY_AND_ASSIGN(VirtioWifiForwarder);
 };
 

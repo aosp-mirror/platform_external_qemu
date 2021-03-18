@@ -25,13 +25,14 @@
 #include "android/metrics/AsyncMetricsReporter.h"      // for AsyncMetricsRe...
 #include "android/metrics/CrashMetricsReporting.h"     // for reportCrashMet...
 #include "android/metrics/FileMetricsWriter.h"         // for FileMetricsWriter
+#include "android/metrics/MetricsLogging.h"            // for D
 #include "android/metrics/MetricsPaths.h"              // for getSpoolDirectory
 #include "android/metrics/NullMetricsReporter.h"       // for NullMetricsRep...
 #include "android/metrics/PlaystoreMetricsWriter.h"    // for PlaystoreMetri...
 #include "android/metrics/StudioConfig.h"              // for getAnonymizati...
 #include "android/metrics/TextMetricsWriter.h"         // for TextMetricsWriter
-#include "google_logs_publishing.pb.h"  // for LogEvent
-#include "studio_stats.pb.h"     // for AndroidStudioE...
+#include "google_logs_publishing.pb.h"                 // for LogEvent
+#include "studio_stats.pb.h"                           // for AndroidStudioE...
 #include "android/utils/debug.h"                       // for dwarning
 #include "android/utils/file_io.h"                     // for android_fopen
 #include "picosha2.h"                                  // for hash256_one_by...
@@ -89,11 +90,16 @@ void MetricsReporter::start(const std::string& sessionId,
                             base::StringView qemuVersion) {
     MetricsWriter::Ptr writer;
     if (android_cmdLineOptions->metrics_to_console) {
+        D("Writing metrics to console");
         writer = TextMetricsWriter::create(base::StdioStream(stdout));
     } else if (android_cmdLineOptions->metrics_collection) {
-        writer = PlaystoreMetricsWriter::create(sessionId,
-        base::pj(getSpoolDirectory(), "backoff_cookie.proto"));
+        D("Writing metrics to play store");
+        writer = PlaystoreMetricsWriter::create(
+                sessionId,
+                base::pj(getSpoolDirectory(), "backoff_cookie.proto"));
     } else if (android_cmdLineOptions->metrics_to_file != nullptr) {
+        D("Attempting to write metrics to file: %s",
+          android_cmdLineOptions->metrics_to_file);
         if (FILE* out = ::android_fopen(android_cmdLineOptions->metrics_to_file,
                                         "w")) {
             writer = TextMetricsWriter::create(
@@ -103,6 +109,7 @@ void MetricsReporter::start(const std::string& sessionId,
                      android_cmdLineOptions->metrics_to_file);
         }
     } else if (studio::getUserMetricsOptIn()) {
+        D("Using android-studio for metrics.");
         writer = FileMetricsWriter::create(
                 getSpoolDirectory(), sessionId,
                 1000,  // record limit per single file
@@ -111,6 +118,7 @@ void MetricsReporter::start(const std::string& sessionId,
     }
 
     if (!writer) {
+        D("No metrics writer initialized, no metrics will be collected.");
         sInstance->reset({});
     } else {
         sInstance->reset(Ptr(new AsyncMetricsReporter(

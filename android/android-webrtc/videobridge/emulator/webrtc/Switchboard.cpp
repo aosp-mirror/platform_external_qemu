@@ -11,43 +11,35 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "Switchboard.h"
+#include "emulator/webrtc/Switchboard.h"
 
-#include <api/audio/audio_mixer.h>                              // for Audio...
-#include <api/audio_codecs/builtin_audio_decoder_factory.h>     // for Creat...
-#include <api/audio_codecs/builtin_audio_encoder_factory.h>     // for Creat...
-#include <api/create_peerconnection_factory.h>                  // for Creat...
-#include <api/peer_connection_interface.h>                      // for PeerC...
-#include <api/scoped_refptr.h>                                  // for scope...
-#include <api/task_queue/default_task_queue_factory.h>          // for Creat...
-#include <api/task_queue/task_queue_factory.h>                  // for TaskQ...
-#include <api/video_codecs/builtin_video_decoder_factory.h>     // for Creat...
-#include <api/video_codecs/builtin_video_encoder_factory.h>     // for Creat...
-#include <modules/audio_device/include/audio_device.h>          // for Audio...
-#include <modules/audio_processing/include/audio_processing.h>  // for Audio...
-#include <rtc_base/critical_section.h>                          // for CritS...
-#include <rtc_base/logging.h>                                   // for RTC_LOG
-#include <rtc_base/ref_counted_object.h>                        // for RefCo...
-#include <rtc_base/thread.h>                                    // for Thread
-#include <map>                                                  // for map
-#include <memory>                                               // for share...
-#include <ostream>                                              // for opera...
-#include <string>                                               // for string
-#include <unordered_map>                                        // for unord...
-#include <utility>                                              // for move
-#include <vector>                                               // for vector
+#include <api/scoped_refptr.h>            // for scoped_refptr
+#include <rtc_base/critical_section.h>    // for CritScope
+#include <rtc_base/logging.h>             // for Val, RTC_LOG
+#include <rtc_base/ref_counted_object.h>  // for RefCountedObject
+#include <map>                            // for map, operator==
+#include <memory>                         // for shared_ptr, make_sh...
+#include <ostream>                        // for operator<<, ostream
+#include <string>                         // for string, hash, opera...
+#include <type_traits>                    // for remove_extent_t
+#include <unordered_map>                  // for unordered_map, unor...
+#include <utility>                        // for move
+#include <vector>                         // for vector
 
-#include "Participant.h"                                        // for Parti...
-#include "android/base/Log.h"                                   // for LogSt...
-#include "android/base/Optional.h"                              // for Optional
-#include "android/base/ProcessControl.h"                        // for parse...
-#include "android/base/containers/BufferQueue.h"                // for Buffe...
-#include "android/base/synchronization/Lock.h"                  // for Lock
-#include "android/base/system/System.h"                         // for System
-#include "emulator/net/EmulatorGrcpClient.h"                    // for Emula...
-#include "emulator/webrtc/Switchboard.h"                        // for Switc...
-#include "emulator/webrtc/capture/GoldfishAudioDeviceModule.h"  // for Goldf...
-#include "nlohmann/json.hpp"                                    // for opera...
+#include "android/base/Log.h"                     // for LogStreamVoidify, LOG
+#include "android/base/async/AsyncSocket.h"       // for AsyncSocket
+#include "android/base/containers/BufferQueue.h"  // for BufferQueueResult
+#include "android/base/synchronization/Lock.h"    // for Lock, AutoReadLock
+#include "android/base/system/System.h"           // for System, System::Dur...
+#include "emulator/webrtc/Participant.h"          // for Participant
+#include "emulator/webrtc/RtcConnection.h"        // for json, RtcConnection
+#include "nlohmann/json.hpp"                      // for basic_json<>::value...
+
+namespace emulator {
+namespace webrtc {
+class EmulatorGrpcClient;
+}  // namespace webrtc
+}  // namespace emulator
 
 using namespace android::base;
 
@@ -58,66 +50,38 @@ std::string Switchboard::BRIDGE_RECEIVER = "WebrtcVideoBridge";
 
 Switchboard::~Switchboard() {}
 
-Switchboard::Switchboard(EmulatorGrpcClient client,
+Switchboard::Switchboard(EmulatorGrpcClient* client,
                          const std::string& shmPath,
-                         const std::string& turnConfig)
-    : mShmPath(shmPath),
-      mTaskFactory(::webrtc::CreateDefaultTaskQueueFactory()),
-      mNetwork(rtc::Thread::CreateWithSocketServer()),
-      mWorker(rtc::Thread::Create()),
-      mSignaling(rtc::Thread::Create()),
-      mTurnConfig(parseEscapedLaunchString(turnConfig)),
-      mClient(client) {
-    mNetwork->SetName("Sw-Network", nullptr);
-    mNetwork->Start();
-    mWorker->SetName("Sw-Worker", nullptr);
-    mWorker->Start();
-    mSignaling->SetName("Sw-Signaling", nullptr);
-    mSignaling->Start();
-    mConnectionFactory = ::webrtc::CreatePeerConnectionFactory(
-            mNetwork.get() /* network_thread */,
-            mWorker.get() /* worker_thread */,
-            mSignaling.get() /* signaling_thread */, &mGoldfishAdm,
-            ::webrtc::CreateBuiltinAudioEncoderFactory(),
-            ::webrtc::CreateBuiltinAudioDecoderFactory(),
-            ::webrtc::CreateBuiltinVideoEncoderFactory(),
-            ::webrtc::CreateBuiltinVideoDecoderFactory(),
-            nullptr /* audio_mixer */, nullptr /* audio_processing */);
-}
+                         TurnConfig turnConfig,
+                         int adbPort)
+    : RtcConnection(client),
+      mShmPath(shmPath),
+      mAdbPort(adbPort),
+      mTurnConfig(turnConfig) {}
 
-void Switchboard::rtcConnectionDropped(std::string participant) {
-    rtc::CritScope cs(&mCleanupCS);
-    mDroppedConnections.push_back(participant);
-}
+void Switchboard::rtcConnectionClosed(const std::string participant) {
+    const std::lock_guard<std::mutex> lock(mCleanupMutex);
 
-void Switchboard::rtcConnectionClosed(std::string participant) {
-    rtc::CritScope cs(&mCleanupClosedCS);
-    mClosedConnections.push_back(participant);
-}
-
-void Switchboard::finalizeConnections() {
-    {
-        rtc::CritScope cs(&mCleanupCS);
-        for (auto participant : mDroppedConnections) {
-            AutoWriteLock lock(mMapLock);
-            if (mId.find(participant) != mId.end()) {
-                auto queue = mId[participant];
-                mLocks.erase(queue.get());
-                mId.erase(participant);
-            }
-            mConnections[participant]->Close();
-        }
-        mDroppedConnections.clear();
+    if (mId.find(participant) != mId.end()) {
+        RTC_LOG(INFO) << "Finalizing " << participant;
+        auto queue = mId[participant];
+        mLocks.erase(queue.get());
+        mId.erase(participant);
     }
 
-    {
-        rtc::CritScope cs(&mCleanupClosedCS);
-        for (auto participant : mClosedConnections) {
-            mIdentityMap.erase(participant);
-            mConnections.erase(participant);
-        }
-        mClosedConnections.clear();
-    }
+    signalingThread()->PostDelayedTask(
+            RTC_FROM_HERE,
+            [this, participant] {
+                const std::lock_guard<std::mutex> lock(mCleanupMutex);
+                LOG(INFO) << "disconnect: " << participant
+                          << ", available: " << mConnections.count(participant);
+                auto it = mConnections.find(participant);
+                if (it != mConnections.end()) {
+                    it->second->Close();
+                    mConnections.erase(participant);
+                }
+            },
+            1);
 }
 
 void Switchboard::send(std::string to, json message) {
@@ -151,45 +115,34 @@ bool Switchboard::connect(std::string identity) {
         mMapLock.unlockRead();
     }
 
-    rtc::scoped_refptr<Participant> stream(
-            new rtc::RefCountedObject<Participant>(this, identity,
-                                                   mConnectionFactory.get()));
-    if (!stream->Initialize()) {
+    auto participant = std::make_shared<Participant>(this, identity, nullptr);
+    if (!participant->Initialize()) {
         return false;
     }
-    mConnections[identity] = stream;
-
-    // Note: Dynamically adding new tracks will likely require stream
-    // re-negotiation.
-    stream->AddVideoTrack("grpcVideo");
-    stream->AddAudioTrack("grpcAudio");
-    stream->CreateOffer();
+    mConnections[identity] = participant;
 
     // Inform the client we are going to start, this is the place
     // where we should send the turn config to the client.
     // Turn is really only needed when your server is
     // locked down pretty well. (Google gce environment for example)
-    json turnConfig = "{}"_json;
-    if (mTurnConfig.size() > 0) {
-        System::ProcessExitCode exitCode;
-        Optional<std::string> turn = System::get()->runCommandWithResult(
-                mTurnConfig, kMaxTurnConfigTime, &exitCode);
-        if (exitCode == 0 && turn && json::jsonaccept(*turn)) {
-            json config = json::parse(*turn, nullptr, false);
-            if (config.count("iceServers")) {
-                turnConfig = config;
-            } else {
-                RTC_LOG(LS_ERROR) << "Unusable turn config: " << turn;
-            }
-        }
-    }
+    json turnConfig = mTurnConfig.getConfig();
 
     // The format is json: {"start" : RTCPeerConnection config}
     // (i.e. result from
     // https://networktraversal.googleapis.com/v1alpha/iceconfig?key=....)
-    json start;
-    start["start"] = turnConfig;
-    send(identity, start);
+    send(identity, json{{"start", turnConfig}});
+
+    // Note: Dynamically adding new tracks will likely require participant
+    // re-negotiation.
+    participant->AddVideoTrack(0);
+    participant->AddAudioTrack();
+    if (mAdbPort >= 0) {
+        auto adbSocket = std::make_shared<android::base::AsyncSocket>(
+                getLooper(), mAdbPort);
+        adbSocket->connect();
+        participant->RegisterLocalAdbForwarder(adbSocket);
+    }
+    participant->CreateOffer();
 
     return true;
 }
@@ -213,8 +166,9 @@ void Switchboard::disconnect(std::string identity) {
     auto queue = mId[identity];
     mId.erase(identity);
     mLocks.erase(queue.get());
-    mIdentityMap.erase(identity);
-    mConnections.erase(identity);
+
+    const std::lock_guard<std::mutex> lock(mCleanupMutex);
+    mConnections[identity]->Close();
 }
 
 bool Switchboard::acceptJsepMessage(std::string identity, std::string message) {

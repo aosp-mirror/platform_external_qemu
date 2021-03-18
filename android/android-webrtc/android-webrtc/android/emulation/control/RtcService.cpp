@@ -21,6 +21,7 @@
 #include <ratio>                                     // for ratio
 #include <string>                                    // for string, operator+
 
+//#include "android/android.h"
 #include "android/base/Log.h"                        // for LogStreamVoidify
 #include "android/base/Optional.h"                   // for Optional
 #include "android/base/Stopwatch.h"                  // for Stopwatch
@@ -59,7 +60,7 @@ namespace control {
 // This forwards the RTC service calls to a separate goldfish-webrtc process.
 class RtcServiceForwarder : public Rtc::Service {
 public:
-    RtcServiceForwarder(std::string turncfg) : mTurnCfg(turncfg) {}
+    RtcServiceForwarder(int adbPort, std::string turncfg) : mAdbPort(adbPort), mTurnCfg(turncfg) {}
 
     ~RtcServiceForwarder() {
         if (mBridgePid) {
@@ -140,7 +141,7 @@ private:
             android::base::ScopedSocket s0(socketTcp4LoopbackServer(0));
             mPort = android::base::socketGetPort(s0.get());
         }
-        mBridgePid = WebRtcBridge::launch(mPort, mTurnCfg);
+        mBridgePid = WebRtcBridge::launch(mPort, mAdbPort, mTurnCfg);
         std::string grpc_address = "localhost:" + std::to_string(mPort);
         mChannel = grpc::CreateChannel(
                 grpc_address,
@@ -157,6 +158,7 @@ private:
 
     std::string mTurnCfg;
     int mPort = 0;
+    int mAdbPort = 0;
     Optional<System::Pid> mBridgePid;
     std::shared_ptr<::grpc::Channel> mChannel;
 };
@@ -233,12 +235,14 @@ private:
     RtcBridge* getBridge() { return mBridge; }
 
     RtcBridge* mBridge;
+    int mAdbPort;
     static constexpr uint16_t k5SecondsWait = 5 * 1000;
 };
 
 grpc::Service* getRtcService(const AndroidConsoleAgents* agents,
+                            int adbPort,
                              const char* turncfg) {
-    return new RtcServiceForwarder(turncfg ? turncfg : "");
+    return new RtcServiceForwarder(adbPort, turncfg ? turncfg : "");
 }
 
 grpc::Service* getRtcService(RtcBridge* bridge) {

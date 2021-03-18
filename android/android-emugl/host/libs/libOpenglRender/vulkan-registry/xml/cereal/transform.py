@@ -15,7 +15,7 @@
 
 from .common.codegen import CodeGen
 from .common.vulkantypes import \
-        VulkanCompoundType, VulkanAPI, makeVulkanTypeSimple, vulkanTypeNeedsTransform, vulkanTypeGetNeededTransformTypes, VulkanTypeIterator, iterateVulkanType, vulkanTypeforEachSubType, TRANSFORMED_TYPES
+        VulkanCompoundType, VulkanAPI, makeVulkanTypeSimple, vulkanTypeNeedsTransform, vulkanTypeGetNeededTransformTypes, VulkanTypeIterator, iterateVulkanType, vulkanTypeforEachSubType, TRIVIAL_TRANSFORMED_TYPES, NON_TRIVIAL_TRANSFORMED_TYPES, TRANSFORMED_TYPES
 
 from .wrapperdefs import VulkanWrapperGenerator
 from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE
@@ -114,9 +114,13 @@ class TransformCodegen(VulkanTypeIterator):
         def makeLengthAccess(varName):
             return lambda t: self.cgen.generalLengthAccess(t, parentVarName = varName)
 
+        def makeLengthAccessGuard(varName):
+            return lambda t: self.cgen.generalLengthAccessGuard(t, parentVarName=varName)
+
         self.exprAccessor = makeAccess(self.inputVar)
         self.exprAccessorValue = makeAccess(self.inputVar, asPtr = False)
         self.lenAccessor = makeLengthAccess(self.inputVar)
+        self.lenAccessorGuard = makeLengthAccessGuard(self.inputVar)
 
         self.checked = False
 
@@ -145,8 +149,12 @@ class TransformCodegen(VulkanTypeIterator):
 
         access = self.exprAccessor(vulkanType)
         lenAccess = self.lenAccessor(vulkanType)
+        lenAccessGuard = self.lenAccessorGuard(vulkanType)
 
         isPtr = vulkanType.pointerIndirectionLevels > 0
+
+        if lenAccessGuard is not None:
+            self.cgen.beginIf(lenAccessGuard)
 
         if isPtr:
             self.cgen.beginIf(access)
@@ -173,6 +181,9 @@ class TransformCodegen(VulkanTypeIterator):
             self.cgen.endFor()
 
         if isPtr:
+            self.cgen.endIf()
+
+        if lenAccessGuard is not None:
             self.cgen.endIf()
 
     def onString(self, vulkanType):
@@ -236,9 +247,19 @@ class VulkanTransform(VulkanWrapperGenerator):
         # Set up a convenience macro fro the transformed structs
         # and forward-declare the resource tracker class
         self.codegen.stmt("class %s" % self.resourceTrackerTypeName)
-        self.codegen.line("#define LIST_TRANSFORMED_TYPES(f) \\")
-        for name in TRANSFORMED_TYPES:
+        self.codegen.line("#define LIST_TRIVIAL_TRANSFORMED_TYPES(f) \\")
+        for name in TRIVIAL_TRANSFORMED_TYPES:
             self.codegen.line("f(%s) \\" % name)
+        self.codegen.line("")
+
+        self.codegen.line("#define LIST_NON_TRIVIAL_TRANSFORMED_TYPES(f) \\")
+        for name in NON_TRIVIAL_TRANSFORMED_TYPES:
+            self.codegen.line("f(%s) \\" % name)
+        self.codegen.line("")
+
+        self.codegen.line("#define LIST_TRANSFORMED_TYPES(f) \\")
+        self.codegen.line("LIST_TRIVIAL_TRANSFORMED_TYPES(f) \\")
+        self.codegen.line("LIST_NON_TRIVIAL_TRANSFORMED_TYPES(f) \\")
         self.codegen.line("")
 
         self.module.appendHeader(self.codegen.swapCode())
@@ -254,6 +275,12 @@ class VulkanTransform(VulkanWrapperGenerator):
             return
 
         category = self.typeInfo.categoryOf(name)
+
+        if category in ["struct", "union"] and alias:
+            for variant in self.variants:
+                self.module.appendHeader(
+                    self.codegen.makeFuncAlias(self.transformPrefix + variant + "_" + name,
+                                               self.transformPrefix + variant + "_" + alias))
 
         if category in ["struct", "union"] and not alias:
             structInfo = self.typeInfo.structs[name]
