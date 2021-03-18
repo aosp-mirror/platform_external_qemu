@@ -94,6 +94,13 @@ class AdbThroughExe : public AdbCommand {
 
 public:
     using ResultCallback = AdbInterface::ResultCallback;
+    AdbThroughExe(android::base::Looper* looper,
+                  const std::string& adb_path,
+                  const std::string& serial_string,
+                  const std::vector<std::string>& command,
+                  bool want_output,
+                  base::System::Duration timeoutMs,
+                  ResultCallback callback);
     ~AdbThroughExe() {
         if (VERBOSE_CHECK(adb)) {
             for (auto cmd : mCommand) {
@@ -113,13 +120,6 @@ public:
     void start(int checkTimeoutMs = 1000) override;
 
 private:
-    AdbThroughExe(android::base::Looper* looper,
-                  const std::string& adb_path,
-                  const std::string& serial_string,
-                  const std::vector<std::string>& command,
-                  bool want_output,
-                  base::System::Duration timeoutMs,
-                  ResultCallback callback);
     void taskFunction(OptionalAdbCommandResult* result);
     void taskDoneFunction(const OptionalAdbCommandResult& result);
 
@@ -498,12 +498,12 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
     AdbCommandPtr command;
     if (!(android_cmdLineOptions && android_cmdLineOptions->no_direct_adb) && AdbConnection::failed() &&
         (args[0] == "shell" || args[0] == "logcat")) {
-        command = std::shared_ptr<AdbDirect>(
-                new AdbDirect(args, std::move(result_callback), want_output));
+        command = std::make_shared<AdbDirect>(
+                args, std::move(result_callback), want_output);
     } else {
-        command = std::shared_ptr<AdbThroughExe>(new AdbThroughExe(
+        command = std::make_shared<AdbThroughExe>(
                 mLooper, adbPath(), mSerialString, args, want_output,
-                timeout_ms, std::move(result_callback)));
+                timeout_ms, std::move(result_callback));
     }
     command->start();
     return command;
