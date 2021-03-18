@@ -18,6 +18,7 @@
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/gl3.h>
+#include <Metal/Metal.h>
 #include "MacPixelFormatsAttribs.h"
 
 //
@@ -458,6 +459,42 @@ bool nsGetWinDims(void* win,unsigned int* width,unsigned int* height){
         return true;
     }
     return false;
+}
+
+static bool nsCanUseBlitting() {
+    NSArray<id<MTLDevice>> *_deviceList = MTLCopyAllDevices();
+    NSMutableArray<id<MTLDevice>> *externalGPUs = [[NSMutableArray alloc] init];
+    NSMutableArray<id<MTLDevice>> *integratedGPUs = [[NSMutableArray alloc] init];
+    NSMutableArray<id<MTLDevice>> *discreteGPUs = [[NSMutableArray alloc] init];
+
+    id<MTLDevice> defaultDev = MTLCreateSystemDefaultDevice();
+
+    int count = 0;
+    for (id <MTLDevice> device in _deviceList) {
+        if (device.removable) {
+            [externalGPUs addObject:device];
+        } else if (device.lowPower) {
+            ++count;
+            [integratedGPUs addObject:device];
+            if (device.registryID == defaultDev.registryID) {
+                return true;
+            }
+        } else {
+            ++count;
+            [discreteGPUs addObject:device];
+        }
+    }
+
+    // This is really hack based on my limited testing with Intel Mac and M1:
+    // the conclusion so far:
+    // For Intel Mac, when there are integrated GPU and descrete GPU (such as Radon),
+    // if default GPU is integrated, then it is blitable; if the default is Radon,
+    // then it is not blitable, and we have to use glTexSubImage2D to update textures;
+    // if there is only one discreteGPU, we can still blit: e.g., M1 has one descrete GPU
+    // and blit is fine
+    if (count == 1) {
+        return true;
+    }
 }
 
 bool  nsCheckColor(void* win,int colorSize){
