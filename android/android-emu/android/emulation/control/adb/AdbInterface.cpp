@@ -169,8 +169,8 @@ public:
     void cancel() override { mTimeout = 0; }
 
     void start(int timeout_ms = 1000) override {
-        mTimeout = System::get()->getUnixTimeUs() + timeout_ms * 1000;
         mStart = System::get()->getUnixTimeUs();
+        mTimeout = mStart + timeout_ms * 1000;
         auto shared = shared_from_this();
         std::thread t([this, timeout_ms, shared]() { execute(timeout_ms); });
         t.detach();
@@ -203,11 +203,11 @@ private:
         mRunning = false;
     }
 
+    int64_t mStart{0};
     int64_t mTimeout{std::numeric_limits<int64_t>::max()};
     bool mWantOutput{false};
     bool mRunning{true};
     std::string mCmd;
-    long mStart;
     ResultCallback mResultCallback;
 };
 
