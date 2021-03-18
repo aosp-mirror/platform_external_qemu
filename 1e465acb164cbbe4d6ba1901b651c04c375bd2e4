@@ -141,6 +141,30 @@
       },
       "revId": "1e465acb164cbbe4d6ba1901b651c04c375bd2e4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "da833193_0462e3fc",
+        "filename": "android/android-grpc/docs/python/sample/screenshot.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-03-18T21:11:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "258df02b_d0a64c57",
+      "range": {
+        "startLine": 92,
+        "startChar": 4,
+        "endLine": 92,
+        "endChar": 9
+      },
+      "revId": "1e465acb164cbbe4d6ba1901b651c04c375bd2e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
