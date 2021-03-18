@@ -1172,6 +1172,7 @@ set(qemu-system-aarch64_sources ""
    hw/cpu/realview_mpcore.c
    hw/cpu/a9mpcore.c
    hw/cpu/a15mpcore.c
+   hw/display/edid-generate.c
    hw/display/omap_dss.c
    hw/display/omap_lcdc.c
    hw/display/pxa2xx_lcd.c

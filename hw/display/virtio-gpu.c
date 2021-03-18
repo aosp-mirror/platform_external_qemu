@@ -22,6 +22,7 @@
 #endif
 #include "hw/virtio/virtio-gpu.h"
 #include "hw/virtio/virtio-bus.h"
+#include "hw/display/edid.h"
 #include "migration/blocker.h"
 #include "qemu/log.h"
 #include "qapi/error.h"
@@ -212,6 +213,9 @@ static uint64_t virtio_gpu_get_features(VirtIODevice *vdev, uint64_t features,
         features |= (1 << VIRTIO_GPU_F_VIRGL);
         features |= (1 << VIRTIO_GPU_F_RESOURCE_BLOB);
     }
+    if (virtio_gpu_edid_enabled(g->conf)) {
+        features |= (1 << VIRTIO_GPU_F_EDID);
+    }
     return features;
 }
 
@@ -308,6 +312,41 @@ void virtio_gpu_get_display_info(VirtIOGPU *g,
     virtio_gpu_fill_display_info(g, &display_info);
     virtio_gpu_ctrl_response(g, cmd, &display_info.hdr,
                              sizeof(display_info));
+}
+
+static void
+virtio_gpu_generate_edid(VirtIOGPU *g, int scanout,
+                         struct virtio_gpu_resp_edid *edid)
+{
+    qemu_edid_info info = {
+        .prefx = g->req_state[scanout].width,
+        .prefy = g->req_state[scanout].height,
+    };
+
+    edid->size = cpu_to_le32(sizeof(edid->edid));
+    qemu_edid_generate(edid->edid, sizeof(edid->edid), &info);
+}
+
+void virtio_gpu_get_edid(VirtIOGPU *g,
+                         struct virtio_gpu_ctrl_command *cmd)
+{
+    struct virtio_gpu_resp_edid edid;
+    struct virtio_gpu_cmd_get_edid get_edid;
+
+
+    VIRTIO_GPU_FILL_CMD(get_edid);
+    virtio_gpu_bswap_32(&get_edid, sizeof(get_edid));
+    printf("%s for scanout %d\n", __FUNCTION__, get_edid.scanout);
+
+    if (get_edid.scanout >= g->conf.max_outputs) {
+        cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_PARAMETER;
+        return;
+    }
+
+    memset(&edid, 0, sizeof(edid));
+    edid.hdr.type = VIRTIO_GPU_RESP_OK_EDID;
+    virtio_gpu_generate_edid(g, get_edid.scanout, &edid);
+    virtio_gpu_ctrl_response(g, cmd, &edid.hdr, sizeof(edid));
 }
 
 static pixman_format_code_t get_pixman_format(uint32_t virtio_gpu_format)
@@ -814,6 +853,9 @@ static void virtio_gpu_simple_process_cmd(VirtIOGPU *g,
     switch (cmd->cmd_hdr.type) {
     case VIRTIO_GPU_CMD_GET_DISPLAY_INFO:
         virtio_gpu_get_display_info(g, cmd);
+        break;
+    case VIRTIO_GPU_CMD_GET_EDID:
+        virtio_gpu_get_edid(g, cmd);
         break;
     case VIRTIO_GPU_CMD_RESOURCE_CREATE_2D:
         virtio_gpu_resource_create_2d(g, cmd);
@@ -1383,6 +1425,8 @@ static Property virtio_gpu_properties[] = {
     DEFINE_PROP_BIT("stats", VirtIOGPU, conf.flags,
                     VIRTIO_GPU_FLAG_STATS_ENABLED, false),
 #endif
+    DEFINE_PROP_BIT("edid", VirtIOGPU, conf.flags,
+                    VIRTIO_GPU_FLAG_EDID_ENABLED, true),
     DEFINE_PROP_UINT32("xres", VirtIOGPU, conf.xres, 1024),
     DEFINE_PROP_UINT32("yres", VirtIOGPU, conf.yres, 768),
     DEFINE_PROP_END_OF_LIST(),
