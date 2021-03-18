@@ -129,6 +129,12 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 },
         .setUIDisplayRegion =
                 [](int x, int y, int w, int h) {
+                    // The UI display region needs to be updated when we add additional displays, or when we
+                    // resize the screen. In the embedded case we do not have a visible UI, so we do not need
+                    // to update display regions.
+                    if (android_cmdLineOptions->qt_hide_window) {
+                        return;
+                    }
                     if (const auto win = EmulatorQtWindow::getInstance()) {
                         win->setUIDisplayRegion(x, y, w, h);
                     };
