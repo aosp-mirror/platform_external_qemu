@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f094af6f_ac47e79f",
+        "filename": "android/third_party/libusb/CMakeLists.txt",
+        "patchSetId": 14
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2021-03-18T22:02:37Z",
+      "side": 1,
+      "message": "b/183024978\nUsers reported the IOUSBHost is missed on Mac OS before Catalina, which failed to start the emulator.",
+      "revId": "7eaba66623ae94a4bfc767717049335eaca0321f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
