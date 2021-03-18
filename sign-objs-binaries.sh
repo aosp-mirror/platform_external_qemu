@@ -1,3 +1,4 @@
+#!/bin/sh
 ./sign-vm-entitlement.sh objs/qemu/darwin-aarch64/qemu-system-aarch64
 ./sign-vm-entitlement.sh objs/qemu/darwin-aarch64/qemu-system-aarch64-headless
 ./sign-vm-entitlement.sh objs/lib64/libemugl_common.dylib
