@@ -1943,11 +1943,13 @@ typedef void (*yuv_updater_t)(void* privData,
                               );
 #ifdef __APPLE__
 void nsConvertVideoFrameToNV12Textures(void* context, void* iosurface, int* Ytex, int* UVtex);
+void nsUpdateNV12TexturesFromIOSurface(void* context, void* iosurface, int Ytex, int UVtex);
 void nsCopyTexture(void* context, int from, int to, int w, int h);
 struct CallerData {
     void* ctx;
     void* f1;
     void* f2;
+    void* f3;
 };
 
 #endif
@@ -1981,6 +1983,7 @@ void FrameBuffer::updateYUVTextures(uint32_t type,
     callerdata.ctx  = nativecontext;
     callerdata.f1  = (void*)nsConvertVideoFrameToNV12Textures;
     callerdata.f2  = (void*)nsCopyTexture;
+    callerdata.f3  = (void*)nsUpdateNV12TexturesFromIOSurface;
     //fprintf(stderr, "callerdata 0 %p 1 %p 2 %p\n", callerdata.ctx, callerdata.f1, callerdata.f2);
 #else
     void* callerdata = nullptr;

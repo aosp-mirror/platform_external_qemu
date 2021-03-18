@@ -55,6 +55,8 @@ void* nsGetLowLevelContext(void* context);
 // convert to NV12 textures from decoded output iosurface 
 void nsConvertVideoFrameToNV12Textures(void* context, void* iosurface, int* Ytex, int* UVtex);
 
+void nsUpdateNV12TexturesFromIOSurface(void* context, void* iosurface, int Ytex, int UVtex);
+
 // copy texture "from" to "to"
 // from: GL_TEXTURE_RECTANGLE
 // to:   GL_TEXTURE_2D

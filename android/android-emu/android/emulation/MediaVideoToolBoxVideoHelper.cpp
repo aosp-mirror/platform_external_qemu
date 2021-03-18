@@ -287,6 +287,7 @@ void MediaVideoToolBoxVideoHelper::videoToolboxDecompressCallback(
 
     ptr->mOutputPts = pts.value;
     ptr->mDecodedFrame = CVPixelBufferRetain(image_buffer);
+    VTB_DPRINT("codedframe is %p", ptr->mDecodedFrame);
     CVOpenGLTextureCacheRef _CVGLTextureCache;
     CVOpenGLTextureRef _CVGLTexture;
     CGLPixelFormatObj _CGLPixelFormat;
@@ -335,6 +336,9 @@ CFDictionaryRef MediaVideoToolBoxVideoHelper::createOutputBufferAttributes(
     // into the guest
     CFDictionarySetValue(buffer_attributes,
                          kCVPixelBufferIOSurfaceOpenGLTextureCompatibilityKey,
+                         kCFBooleanTrue);
+    CFDictionarySetValue(buffer_attributes,
+                         kCVPixelBufferIOSurfaceOpenGLFBOCompatibilityKey,
                          kCFBooleanTrue);
 
     CFRelease(io_surface_properties);
@@ -518,7 +522,7 @@ void MediaVideoToolBoxVideoHelper::copyFrameToTextures() {
     if (mUseGpuTexture && mTexturePool != nullptr) {
         VTB_DPRINT("decoded surface is %p w %d h %d",
                 CVPixelBufferGetIOSurface(mDecodedFrame), mOutputWidth, mOutputHeight);
-        auto my_copy_context = media_vtb_utils_copy_context{CVPixelBufferGetIOSurface(mDecodedFrame), mOutputWidth, mOutputHeight};
+        auto my_copy_context = media_vtb_utils_copy_context{mDecodedFrame, mOutputWidth, mOutputHeight};
         texFrame = mTexturePool->getTextureFrame(mOutputWidth, mOutputHeight);
         VTB_DPRINT("ask videocore to copy to %d and %d", texFrame.Ytex, texFrame.UVtex);
         mTexturePool->saveDecodedFrameToTexture(
@@ -620,6 +624,7 @@ void MediaVideoToolBoxVideoHelper::copyFrame() {
     mOutputWidth = CVPixelBufferGetWidth(mDecodedFrame);
     mOutputHeight = CVPixelBufferGetHeight(mDecodedFrame);
 
+    VTB_DPRINT("decoded surface is %p w %d h %d", CVPixelBufferGetIOSurface(mDecodedFrame), mOutputWidth, mOutputHeight);
     if (mUseGpuTexture) {
         copyFrameToTextures();
     } else {

@@ -29,12 +29,14 @@ extern "C" {
 #define MEDIA_VTB_COPY_UV_TEXTURE 2
 
 typedef void (*nsConvertVideoFrameToNV12TexturesFun)(void* context, void* iosurface, int* Ytex, int* UVtex);
+typedef void (*nsUpdateNV12TexturesFromIOSurfaceFun)(void* context, void* iosurface, int Ytex, int UVtex);
 typedef void (*nsCopyTextureFun)(void* context, int from, int to, int w, int h);
 
 struct CallerData {
     void* ctx;
     void* f1;
     void* f2;
+    void* f3;
 };
 
 void media_vtb_utils_nv12_updater(void* privData,
@@ -58,6 +60,12 @@ void media_vtb_utils_nv12_updater(void* privData,
     void* nscontext = cdata->ctx;
     auto nsConvertVideoFrameToNV12Textures = (nsConvertVideoFrameToNV12TexturesFun)cdata->f1;
     auto nsCopyTexture = (nsCopyTextureFun)cdata->f2;
+    auto nsUpdateTextures = (nsUpdateNV12TexturesFromIOSurfaceFun)cdata->f3;
+    if (nsUpdateTextures) {
+        VTB_DPRINT("updating textures via CPU memory");
+        nsUpdateTextures(nscontext, iosurface, textures[0], textures[1]);
+        return;
+    }
     VTB_DPRINT("create Ytex and UV tex func %p context %p surface %p w %d h %d",
             nsConvertVideoFrameToNV12Textures, nscontext, iosurface, ww, hh);
     nsConvertVideoFrameToNV12Textures(nscontext, iosurface, &yy, &uv);

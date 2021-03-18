@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <Cocoa/Cocoa.h>
 #include <OpenGL/OpenGL.h>
+#include <OpenGL/gl.h>
 #include <OpenGL/gl3.h>
 #include "MacPixelFormatsAttribs.h"
 
@@ -312,9 +313,73 @@ void nsCopyTexture(void* context, int from, int to, int width, int height) {
       }
 
       glBindFramebuffer( GL_FRAMEBUFFER, 0);
+      glDeleteTextures(1, &from);
       glDeleteFramebuffers( 1, &g_fb );
 }
 
+void nsUpdateNV12TexturesFromIOSurface(void* context, void* iosurface, int Ytex, int UVtex) {
+    //NSLog(@"calling %s %d", __func__, __LINE__);
+
+    EmuGLContext* ctx = (EmuGLContext *)context;
+    CGLContextObj cgl_ctx = ctx.CGLContextObj;
+    CVPixelBufferRef mDecodedFrame = (CVPixelBufferRef)iosurface;
+    IOSurfaceRef* surface = CVPixelBufferGetIOSurface(mDecodedFrame);
+    GLsizei surface_w = (GLsizei)IOSurfaceGetWidth(surface);
+    GLsizei surface_h = (GLsizei)IOSurfaceGetHeight(surface);
+    unsigned char * data =  NULL;//(unsigned char*)malloc(surface_w * surface_h);
+    //NSLog(@"data[10] is %d", data[10]);
+
+   
+
+    CVPixelBufferLockBaseAddress(mDecodedFrame, kCVPixelBufferLock_ReadOnly);
+    int planes = CVPixelBufferGetPlaneCount(mDecodedFrame);
+     int linesize = CVPixelBufferGetBytesPerRowOfPlane(mDecodedFrame, 0);
+
+    void* planeData = CVPixelBufferGetBaseAddressOfPlane(mDecodedFrame, 0);
+                int planeWidth = CVPixelBufferGetWidthOfPlane(mDecodedFrame, 0);
+            int planeHeight = CVPixelBufferGetHeightOfPlane(mDecodedFrame, 0);
+
+    //NSLog(@"there are %d planes, 0th plandata is %p planw %d planeh %d linew %d", planes, planeData, planeWidth, planeHeight, linesize);
+    //memcpy(data, planeData, surface_w * surface_h);
+    data = planeData;
+    //NSLog(@"copy done for plandata is %p", planeData);
+
+
+
+    //NSLog(@"data[10] is %d later", data[10]);
+    glActiveTexture(GL_TEXTURE0);
+    if(1) {
+    glBindTexture(GL_TEXTURE_2D, Ytex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, surface_w, surface_h, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+    glTexSubImage2D(GL_TEXTURE_2D,0,0,0,surface_w,surface_h,GL_RED,GL_UNSIGNED_BYTE,data);
+    
+   //   if (glGetError() != GL_NO_ERROR) { NSLog(@"bad in %s %d", __func__, __LINE__); }
+    }
+
+    if(1) {
+    glBindTexture(GL_TEXTURE_2D, 0);
+    planeData = CVPixelBufferGetBaseAddressOfPlane(mDecodedFrame, 1);
+     linesize = CVPixelBufferGetBytesPerRowOfPlane(mDecodedFrame, 1);
+    planeWidth = CVPixelBufferGetWidthOfPlane(mDecodedFrame, 1);
+    planeHeight = CVPixelBufferGetHeightOfPlane(mDecodedFrame, 1);
+    //NSLog(@"there are %d planes, 1th plandata is %p planw %d planeh %d linew %d", planes, planeData, planeWidth, planeHeight, linesize);
+    //memcpy(data, planeData, surface_w * surface_h / 2);
+    data = planeData;
+
+
+    glBindTexture(GL_TEXTURE_2D, UVtex);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RG, surface_w/2, surface_h/2, 0, GL_RG, GL_UNSIGNED_BYTE, data);
+    glTexSubImage2D(GL_TEXTURE_2D,0,0,0,surface_w/2,surface_h/2,GL_RG,GL_UNSIGNED_BYTE,data);
+//      if (glGetError() != GL_NO_ERROR) { NSLog(@"bad in %s %d", __func__, __LINE__); }
+    }
+    glBindTexture(GL_TEXTURE_2D, 0);
+    //free(data);
+    CVPixelBufferUnlockBaseAddress(mDecodedFrame, kCVPixelBufferLock_ReadOnly);
+
+}
 
 void  nsPBufferMakeCurrent(void* context,void* nativePBuffer,int level){
     EmuGLContext* ctx = (EmuGLContext *)context;
