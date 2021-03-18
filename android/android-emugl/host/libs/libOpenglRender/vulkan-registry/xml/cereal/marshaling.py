@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from copy import copy
+import hashlib, sys
 
 from .common.codegen import CodeGen, VulkanAPIWrapper
 from .common.vulkantypes import \
@@ -29,6 +30,8 @@ from .wrapperdefs import PARAMETERS_MARSHALING_GUEST
 from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE, EXTENSION_SIZE_API_NAME, EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME
 from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
+
+from .marshalingdefs import KNOWN_FUNCTION_OPCODES, CUSTOM_MARSHAL_TYPES
 
 class VulkanMarshalingCodegen(VulkanTypeIterator):
 
@@ -58,6 +61,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         self.exprValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = False)
         self.exprPrimitiveValueAccessor = lambda t: self.cgen.generalAccess(t, parentVarName = self.inputVarName, asPtr = False)
         self.lenAccessor = lambda t: self.cgen.generalLengthAccess(t, parentVarName = self.inputVarName)
+        self.lenAccessorGuard = lambda t: self.cgen.generalLengthAccessGuard(
+            t, parentVarName=self.inputVarName)
         self.filterVarAccessor = lambda t: self.cgen.filterVarAccess(t, parentVarName = self.inputVarName)
 
         self.dynAlloc = dynAlloc
@@ -398,6 +403,7 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
 
         access = self.exprAccessor(vulkanType)
         lenAccess = self.lenAccessor(vulkanType)
+        lenAccessGuard = self.lenAccessorGuard(vulkanType)
 
         self.beginFilterGuard(vulkanType)
 
@@ -405,6 +411,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
             self.doAllocSpace(vulkanType)
 
         if lenAccess is not None:
+            if lenAccessGuard is not None:
+                self.cgen.beginIf(lenAccessGuard)
             loopVar = "i"
             access = "%s + %s" % (access, loopVar)
             forInit = "uint32_t %s = 0" % loopVar
@@ -425,6 +433,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
 
         if lenAccess is not None:
             self.cgen.endFor()
+            if lenAccessGuard is not None:
+                self.cgen.endIf()
 
         if self.direction == "read":
             self.endFilterGuard(vulkanType, "%s = 0" % self.exprAccessor(vulkanType))
@@ -507,7 +517,8 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         access = self.exprAccessor(vulkanType)
 
         lenAccess = self.lenAccessor(vulkanType)
-
+        lenAccessGuard = self.lenAccessorGuard(vulkanType)
+    
         self.beginFilterGuard(vulkanType)
         self.doAllocSpace(vulkanType)
 
@@ -519,9 +530,13 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         else:
             if self.typeInfo.isNonAbiPortableType(vulkanType.typeName):
                 if lenAccess is not None:
+                    if lenAccessGuard is not None:
+                        self.cgen.beginIf(lenAccessGuard)
                     self.cgen.beginFor("uint32_t i = 0", "i < (uint32_t)%s" % lenAccess, "++i")
                     self.genPrimitiveStreamCall(vulkanType.getForValueAccess(), "%s[i]" % access)
                     self.cgen.endFor()
+                    if lenAccessGuard is not None:
+                        self.cgen.endIf()
                 else:
                     self.genPrimitiveStreamCall(vulkanType.getForValueAccess(), "(*%s)" % access)
             else:
@@ -612,8 +627,12 @@ class VulkanMarshaling(VulkanWrapperGenerator):
         # Begin Vulkan API opcodes from something high
         # that is not going to interfere with renderControl
         # opcodes
-        self.currentOpcode = 20000
-        self.endOpcode = 30000
+        self.beginOpcodeOld = 20000
+        self.endOpcodeOld = 30000
+
+        self.beginOpcode = 200000000
+        self.endOpcode = 300000000
+        self.knownOpcodes = set()
 
         self.extensionMarshalPrototype = \
             VulkanAPI(API_PREFIX_MARSHAL + "extension_struct",
@@ -644,6 +663,14 @@ class VulkanMarshaling(VulkanWrapperGenerator):
 
         category = self.typeInfo.categoryOf(name)
 
+        if category in ["struct", "union"] and alias:
+            self.module.appendHeader(
+                self.cgenHeader.makeFuncAlias(API_PREFIX_MARSHAL + name,
+                                              API_PREFIX_MARSHAL + alias))
+            self.module.appendHeader(
+                self.cgenHeader.makeFuncAlias(API_PREFIX_UNMARSHAL + name,
+                                              API_PREFIX_UNMARSHAL + alias))
+
         if category in ["struct", "union"] and not alias:
 
             structInfo = self.typeInfo.structs[name]
@@ -670,6 +697,18 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 VulkanAPI(API_PREFIX_MARSHAL + name,
                           STREAM_RET_TYPE,
                           marshalParams)
+
+            def structMarshalingCustom(cgen):
+                self.writeCodegen.cgen = cgen
+                self.writeCodegen.currentStructInfo = structInfo
+                marshalingCode = \
+                    CUSTOM_MARSHAL_TYPES[name]["common"] + \
+                    CUSTOM_MARSHAL_TYPES[name]["marshaling"].format(
+                        streamVarName=self.writeCodegen.streamVarName, 
+                        inputVarName=self.writeCodegen.inputVarName,
+                        newInputVarName=self.writeCodegen.inputVarName + "_new")
+                for line in marshalingCode.split('\n'):
+                    cgen.line(line)
 
             def structMarshalingDef(cgen):
                 self.writeCodegen.cgen = cgen
@@ -702,9 +741,15 @@ class VulkanMarshaling(VulkanWrapperGenerator):
 
             self.module.appendHeader(
                 self.cgenHeader.makeFuncDecl(marshalPrototype))
-            self.module.appendImpl(
-                self.cgenImpl.makeFuncImpl(
-                    marshalPrototype, structMarshalingDef))
+
+            if name in CUSTOM_MARSHAL_TYPES:
+                self.module.appendImpl(
+                    self.cgenImpl.makeFuncImpl(
+                        marshalPrototype, structMarshalingCustom))
+            else:
+                self.module.appendImpl(
+                    self.cgenImpl.makeFuncImpl(
+                        marshalPrototype, structMarshalingDef))
 
             if freeParams != []:
                 self.module.appendHeader(
@@ -722,6 +767,18 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 VulkanAPI(API_PREFIX_UNMARSHAL + name,
                           STREAM_RET_TYPE,
                           self.marshalingParams + [makeVulkanTypeSimple(False, name, 1, UNMARSHAL_INPUT_VAR_NAME)])
+
+            def structUnmarshalingCustom(cgen):
+                self.readCodegen.cgen = cgen
+                self.readCodegen.currentStructInfo = structInfo
+                unmarshalingCode = \
+                    CUSTOM_MARSHAL_TYPES[name]["common"] + \
+                    CUSTOM_MARSHAL_TYPES[name]["unmarshaling"].format(
+                        streamVarName=self.readCodegen.streamVarName, 
+                        inputVarName=self.readCodegen.inputVarName,
+                        newInputVarName=self.readCodegen.inputVarName + "_new")
+                for line in unmarshalingCode.split('\n'):
+                    cgen.line(line)
 
             def structUnmarshalingDef(cgen):
                 self.readCodegen.cgen = cgen
@@ -752,9 +809,15 @@ class VulkanMarshaling(VulkanWrapperGenerator):
 
             self.module.appendHeader(
                 self.cgenHeader.makeFuncDecl(unmarshalPrototype))
-            self.module.appendImpl(
-                self.cgenImpl.makeFuncImpl(
-                    unmarshalPrototype, structUnmarshalingDef))
+
+            if name in CUSTOM_MARSHAL_TYPES:
+                self.module.appendImpl(
+                    self.cgenImpl.makeFuncImpl(
+                        unmarshalPrototype, structUnmarshalingCustom))
+            else:
+                self.module.appendImpl(
+                    self.cgenImpl.makeFuncImpl(
+                        unmarshalPrototype, structUnmarshalingDef))
 
             if freeParams != []:
                 self.module.appendHeader(
@@ -765,10 +828,27 @@ class VulkanMarshaling(VulkanWrapperGenerator):
 
     def onGenCmd(self, cmdinfo, name, alias):
         VulkanWrapperGenerator.onGenCmd(self, cmdinfo, name, alias)
+        if name in KNOWN_FUNCTION_OPCODES:
+            opcode = KNOWN_FUNCTION_OPCODES[name]
+        else:
+            hashCode = hashlib.sha256(name.encode()).hexdigest()[:8]
+            hashInt = int(hashCode, 16)
+            opcode = self.beginOpcode + hashInt % (self.endOpcode - self.beginOpcode)
+            hasHashCollision = False
+            while opcode in self.knownOpcodes:
+                hasHashCollision = True
+                opcode += 1
+            if hasHashCollision:
+                print("Hash collision occurred on function '{}'. "
+                      "Please add the following line to marshalingdefs.py:".format(name), file=sys.stderr)
+                print("----------------------", file=sys.stderr)
+                print("    \"{}\": {},".format(name, opcode), file=sys.stderr)
+                print("----------------------", file=sys.stderr)
+
         self.module.appendHeader(
-            "#define OP_%s %d\n" % (name, self.currentOpcode))
-        self.apiOpcodes[name] = (self.currentOpcode, self.currentFeature)
-        self.currentOpcode += 1
+            "#define OP_%s %d\n" % (name, opcode))
+        self.apiOpcodes[name] = (opcode, self.currentFeature)
+        self.knownOpcodes.add(opcode)
 
     def doExtensionStructMarshalingCodegen(self, cgen, retType, extParam, forEach, funcproto, direction):
         accessVar = "structAccess"
@@ -897,5 +977,11 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 opcode2stringPrototype,
                 lambda cgen: emitOpcode2StringImpl(self.apiOpcodes, cgen)))
 
+        self.module.appendHeader(
+            "#define OP_vkFirst_old %d\n" % (self.beginOpcodeOld))
+        self.module.appendHeader(
+            "#define OP_vkLast_old %d\n" % (self.endOpcodeOld))
+        self.module.appendHeader(
+            "#define OP_vkFirst %d\n" % (self.beginOpcode))
         self.module.appendHeader(
             "#define OP_vkLast %d\n" % (self.endOpcode))

@@ -62,22 +62,23 @@ private:
     grpc::string mToken;
 };
 
-bool EmulatorGrpcClient::hasOpenChannel() {
+bool EmulatorGrpcClient::hasOpenChannel(bool tryConnect) {
     if (!mChannel) {
         initializeChannel();
     }
     if (!mChannel)
         return false;
 
-    Stopwatch sw;
-    auto waitUntil = gpr_time_add(gpr_now(GPR_CLOCK_REALTIME),
-                                  gpr_time_from_seconds(5, GPR_TIMESPAN));
-    bool connect = mChannel->WaitForConnected(waitUntil);
-    auto state = mChannel->GetState(true);
-    RTC_LOG(INFO) << (connect ? "Connected" : "Not connected")
-                  << " to emulator: " << mAddress
-                  << ", after: " << Stopwatch::sec(sw.elapsedUs()) << " s";
-
+    if (tryConnect) {
+        Stopwatch sw;
+        auto waitUntil = gpr_time_add(gpr_now(GPR_CLOCK_REALTIME),
+                                      gpr_time_from_seconds(5, GPR_TIMESPAN));
+        bool connect = mChannel->WaitForConnected(waitUntil);
+        RTC_LOG(INFO) << (connect ? "Connected" : "Not connected")
+                      << " to emulator: " << mAddress
+                      << ", after: " << Stopwatch::sec(sw.elapsedUs()) << " s";
+    }
+    auto state = mChannel->GetState(tryConnect);
     return state == GRPC_CHANNEL_READY || state == GRPC_CHANNEL_IDLE;
 }
 
@@ -90,6 +91,15 @@ EmulatorGrpcClient::stub() {
     return android::emulation::control::EmulatorController::NewStub(mChannel);
 }
 
+std::unique_ptr<android::emulation::control::Rtc::Stub>
+EmulatorGrpcClient::rtcStub() {
+    if (!mChannel) {
+        initializeChannel();
+    }
+
+    return android::emulation::control::Rtc::NewStub(mChannel);
+}
+
 static std::string readFile(std::string fname) {
     std::ifstream fstream(fname);
     std::string contents((std::istreambuf_iterator<char>(fstream)),
@@ -100,8 +110,10 @@ static std::string readFile(std::string fname) {
 EmulatorGrpcClient::EmulatorGrpcClient(std::string address,
                                        std::string ca,
                                        std::string key,
-                                       std::string cer) : mAddress(address) {
-    std::shared_ptr<grpc::ChannelCredentials> call_creds = ::grpc::InsecureChannelCredentials();
+                                       std::string cer)
+    : mAddress(address) {
+    std::shared_ptr<grpc::ChannelCredentials> call_creds =
+            ::grpc::InsecureChannelCredentials();
     if (!ca.empty() && !key.empty() && !cer.empty()) {
         // Client will use the server cert as the ca authority.
         grpc::SslCredentialsOptions sslOpts;
@@ -128,8 +140,7 @@ bool EmulatorGrpcClient::initializeChannel() {
         RTC_LOG(LERROR) << "No grpc port, or tls enabled. gRPC disabled.";
         return false;
     }
-    mAddress =
-            "localhost:" + iniFile.getString("grpc.port", "8554");
+    mAddress = "localhost:" + iniFile.getString("grpc.port", "8554");
     mChannel = grpc::CreateChannel(
             mAddress, ::grpc::experimental::LocalCredentials(LOCAL_TCP));
 

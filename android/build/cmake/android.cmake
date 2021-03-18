@@ -24,7 +24,7 @@ set(ANDROID_CROSS_BUILD_DIRECTORY ${CMAKE_BINARY_DIR}/build/${ANDROID_HOST_TAG})
 
 set(ANDROID_XCODE_SIGN_ADHOC FALSE)
 
-if (APPLE AND BUILDING_FOR_AARCH64)
+if (APPLE)
     set(ANDROID_XCODE_SIGN_ADHOC TRUE)
 endif()
 
@@ -285,7 +285,7 @@ endfunction()
 function(android_sign path)
     if (ANDROID_XCODE_SIGN_ADHOC)
         install(
-            CODE "message(\"android_sign ${path}\")\nexecute_process(COMMAND codesign -s - --entitlements ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist ${path})")
+            CODE "message(\"android_sign ${path}\")\nexecute_process(COMMAND codesign --deep -s - --entitlements ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist ${path})")
     endif()
 endfunction()
 

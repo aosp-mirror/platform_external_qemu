@@ -13,6 +13,7 @@
 #include "android/network/Ieee80211Frame.h"
 #include "android/base/Log.h"
 #include "android/network/Endian.h"
+#include "android/network/mac80211_hwsim.h"
 
 #include <iomanip>
 #include <sstream>
@@ -27,11 +28,12 @@ extern "C" {
 #include "common/ieee802_11_defs.h"
 }
 
-#define ETH_P_ARP (0x0806) /* Address Resolution packet */
-#define ETH_P_IPV6 (0x86dd)
-#define ETH_P_NCSI (0x88f8)
+namespace {
 
-using namespace android::base;
+static constexpr uint16_t ETH_P_ARP = 0x0806; /* Address Resolution packet */
+static constexpr uint16_t ETH_P_IPV6 = 0x86dd;
+static constexpr uint16_t ETH_P_NCSI = 0x88f8;
+
 struct ieee8023_hdr {
     uint8_t dest[ETH_ALEN]; /* destination eth addr */
     uint8_t src[ETH_ALEN];  /* source ether addr    */
@@ -42,48 +44,83 @@ struct ieee8023_hdr {
 /* Ethernet-II snap header (RFC1042 for most EtherTypes) */
 static constexpr uint8_t kRfc1042Header[] = {0xaa, 0xaa, 0x03,
                                              0x00, 0x00, 0x00};
+}  // namespace
 
 namespace android {
 namespace network {
+
+using namespace android::base;
+
+FrameInfo::FrameInfo(MacAddress transmitter,
+                     uint64_t cookie,
+                     uint32_t flags,
+                     uint32_t channel,
+                     const hwsim_tx_rate* rates,
+                     size_t numRates)
+    : mTransmitter(transmitter),
+      mCookie(cookie),
+      mFlags(flags),
+      mChannel(channel) {
+    size_t i = 0;
+    for (; i < numRates; ++i) {
+        mTxRates[i].count = 0;
+        mTxRates[i].idx = rates[i].idx;
+    }
+    for (; i < mTxRates.size(); ++i) {
+        mTxRates[i].count = 0;
+        mTxRates[i].idx = -1;
+    }
+}
 
 // Frame Header layout as below
 //       2         2           6        6        6       2       6
 // Frame-Ctl | Duration ID | Addr1 | Addr2 | Addr3 | Seq-Ctl | Addr4 | Frame
 // Body
+
+Ieee80211Frame::Ieee80211Frame(const uint8_t* data, size_t size, FrameInfo info)
+    : mData(data, data + size), mInfo(info) {}
+
 Ieee80211Frame::Ieee80211Frame(const uint8_t* data, size_t size)
     : mData(data, data + size) {}
 
 Ieee80211Frame::Ieee80211Frame(size_t size) : mData(size) {}
 
-Ieee80211Frame::Ieee80211Frame(const std::vector<uint8_t>& ethernet,
-                               MacAddress bssid) {
-    uint16_t ethertype = (ethernet[12] << 8) | ethernet[13];
+std::unique_ptr<Ieee80211Frame> Ieee80211Frame::buildFromEthernet(
+        const uint8_t* data,
+        size_t size,
+        MacAddress bssid) {
+    uint16_t ethertype = (data[12] << 8) | data[13];
     size_t skippedBytes = ETH_HLEN;
     size_t encapLen = 0;
 
     if (validEtherType(ethertype)) {
         encapLen = ETH_ALEN;
         skippedBytes -= sizeof(ethertype);
+    } else {
+        LOG(VERBOSE) << "Unexpected ether type: " << ethertype;
+        return nullptr;
     }
 
     uint16_t fc = IEEE80211_FC(WLAN_FC_TYPE_DATA, WLAN_FC_STYPE_DATA);
     fc |= WLAN_FC_FROMDS;
     struct ieee80211_hdr hdr;
-    memcpy(hdr.addr1, ethernet.data(), ETH_ALEN);
-    memcpy(hdr.addr2, &bssid[0], ETH_ALEN);
-    memcpy(hdr.addr3, ethernet.data() + ETH_ALEN, ETH_ALEN);
+    memcpy(hdr.addr1, data, ETH_ALEN);
+    memcpy(hdr.addr2, bssid.mAddr, ETH_ALEN);
+    memcpy(hdr.addr3, data + ETH_ALEN, ETH_ALEN);
     hdr.frame_control = fc;
     hdr.duration_id = 0;
     hdr.seq_ctrl = 0;
+    auto frame = std::make_unique<Ieee80211Frame>(0);
 
-    mData.insert(mData.end(), (uint8_t*)&hdr,
-                 (uint8_t*)&hdr + IEEE80211_HDRLEN);
+    frame->mData.insert(frame->mData.end(), (uint8_t*)&hdr,
+                        (uint8_t*)&hdr + IEEE80211_HDRLEN);
 
     if (encapLen) {
-        mData.insert(mData.end(), kRfc1042Header, kRfc1042Header + encapLen);
+        frame->mData.insert(frame->mData.end(), kRfc1042Header,
+                            kRfc1042Header + encapLen);
     }
-    mData.insert(mData.end(), ethernet.begin() + skippedBytes,
-                 ethernet.end());
+    frame->mData.insert(frame->mData.end(), data + skippedBytes, data + size);
+    return frame;
 }
 
 MacAddress Ieee80211Frame::addr1() const {

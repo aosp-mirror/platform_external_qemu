@@ -803,7 +803,11 @@ int main(int argc, char** argv)
     }
 
     if (avdArch == NULL) {
+#ifdef __aarch64__
+        avdArch = "arm64";
+#else
         avdArch = "x86_64";
+#endif
         D("Can't determine target AVD architecture: defaulting to %s", avdArch);
     }
 

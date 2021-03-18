@@ -41,9 +41,4 @@ typedef enum {
 // On failure, returns false.
 bool android_getKernelVersion(const char* kernelPath, KernelVersion* version);
 
-// Return the serial device name prefix matching a given kernel type
-// |kernelVersion|.  I.e. this should be "/dev/ttyS" for before 3.10.0 and
-// "/dev/ttyGF" for 3.10.0 and later.
-const char* android_kernelSerialDevicePrefix(KernelVersion kernelVersion);
-
 ANDROID_END_HEADER

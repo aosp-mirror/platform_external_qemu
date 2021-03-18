@@ -113,6 +113,9 @@ public:
             android::snapshot::Snapshotter::Operation op,
             android::snapshot::Snapshotter::Stage stage) final;
 
+    void addListener(FrameBufferChangeEventListener* listener) override;
+    void removeListener(FrameBufferChangeEventListener* listener) override;
+
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RendererImpl);
 

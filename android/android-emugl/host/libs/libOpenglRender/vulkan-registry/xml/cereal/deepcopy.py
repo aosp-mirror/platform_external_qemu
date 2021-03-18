@@ -34,6 +34,9 @@ class DeepcopyCodegen(VulkanTypeIterator):
         def makeLengthAccess(varName):
             return lambda t: self.cgen.generalLengthAccess(t, parentVarName = varName)
 
+        def makeLengthAccessGuard(varName):
+            return lambda t: self.cgen.generalLengthAccessGuard(t, parentVarName=varName)
+
         self.exprAccessorLhs = makeAccess(self.inputVars[0])
         self.exprAccessorRhs = makeAccess(self.inputVars[1])
 
@@ -42,6 +45,9 @@ class DeepcopyCodegen(VulkanTypeIterator):
 
         self.lenAccessorLhs = makeLengthAccess(self.inputVars[0])
         self.lenAccessorRhs = makeLengthAccess(self.inputVars[1])
+
+        self.lenAccessorGuardLhs = makeLengthAccessGuard(self.inputVars[0])
+        self.lenAccessorGuardRhs = makeLengthAccessGuard(self.inputVars[1])
 
         self.checked = False
 
@@ -90,7 +96,13 @@ class DeepcopyCodegen(VulkanTypeIterator):
         lenAccessLhs = self.lenAccessorLhs(vulkanType)
         lenAccessRhs = self.lenAccessorRhs(vulkanType)
 
+        lenAccessorGuardLhs = self.lenAccessorGuardLhs(vulkanType)
+        lenAccessorGuardRhs = self.lenAccessorGuardRhs(vulkanType)
+
         isPtr = vulkanType.pointerIndirectionLevels > 0
+
+        if lenAccessorGuardLhs is not None:
+            self.cgen.beginIf(lenAccessorGuardLhs)
 
         if isPtr:
             self.cgen.stmt("%s = nullptr" % accessRhs)
@@ -127,6 +139,9 @@ class DeepcopyCodegen(VulkanTypeIterator):
             self.cgen.endFor()
 
         if isPtr:
+            self.cgen.endIf()
+
+        if lenAccessorGuardLhs is not None:
             self.cgen.endIf()
 
     def onString(self, vulkanType):
@@ -178,8 +193,18 @@ class DeepcopyCodegen(VulkanTypeIterator):
 
         rhsExpr = "(%s)(%s)" % ("void*", rhs)
 
+        nextVar = "from_%s" % vulkanType.paramName
         sizeVar = "%s_size" % vulkanType.paramName
-        self.cgen.stmt("size_t %s = %s(%s)" % (sizeVar, EXTENSION_SIZE_API_NAME, lhs))
+
+        self.cgen.stmt("const void* %s = %s" % (nextVar, self.inputVars[0]))
+        self.cgen.stmt("size_t %s = 0u" % sizeVar)
+        self.cgen.beginWhile("!%s && %s" % (sizeVar, nextVar))
+        self.cgen.stmt("%s = static_cast<const vk_struct_common*>(%s)->%s" % (
+            nextVar, nextVar, vulkanType.paramName
+        ))
+        self.cgen.stmt("%s = %s(%s)" % (sizeVar, EXTENSION_SIZE_API_NAME, nextVar))
+        self.cgen.endWhile()
+        
         self.cgen.stmt("%s = nullptr" % rhs)
 
         self.cgen.beginIf(sizeVar)
@@ -190,7 +215,7 @@ class DeepcopyCodegen(VulkanTypeIterator):
             self.poolVarName, sizeVar))
 
         self.cgen.funcCall(None, self.prefix + "extension_struct",
-                           [self.poolVarName, lhs, rhsExpr])
+                           [self.poolVarName, nextVar, rhsExpr])
 
         self.cgen.endIf()
 
@@ -273,6 +298,11 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
             return
 
         category = self.typeInfo.categoryOf(name)
+
+        if category in ["struct", "union"] and alias:
+            self.module.appendHeader(
+                self.codegen.makeFuncAlias(self.deepcopyPrefix + name,
+                                           self.deepcopyPrefix + alias))
 
         if category in ["struct", "union"] and not alias:
 

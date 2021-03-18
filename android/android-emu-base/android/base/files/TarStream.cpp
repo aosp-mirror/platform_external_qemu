@@ -85,8 +85,16 @@ static bool is_eof(void* data) {
 
 // Convert from octal to int.
 static uint64_t OTOI(octalnr* in, uint8_t len) {
-    std::string oct(in, len);
-    return std::stoull(oct, nullptr, 8);
+    if (in[0] == (char)128) {
+        uint64_t result = 0;
+        for (uint8_t i = 1; i < len; i++) {
+            result = (result << 8) | in[i];
+        }
+        return result;
+    } else {
+        std::string oct(in, len);
+        return std::stoull(oct, nullptr, 8);
+    }
 }
 // convert from int to octal (or base-256)
 static void itoo(char* str, uint8_t len, unsigned long long val) {
@@ -95,8 +103,10 @@ static void itoo(char* str, uint8_t len, unsigned long long val) {
         sprintf(str, "%0*llo", len - 1, val);
     else {
         *str = (char)128;
-        while (--len)
-            *++str = val >> (3 * len);
+        while (len) {
+            --len;
+            *++str = val >> (8 * len);
+        }
     }
 }
 
