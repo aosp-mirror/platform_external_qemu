@@ -125,6 +125,7 @@ def emit_impl(typeInfo, api, cgen):
             continue
 
         lenExpr = cgen.generalLengthAccess(p)
+        lenAccessGuard = cgen.generalLengthAccessGuard(p)
 
         if lenExpr is None:
             lenExpr = "1"
@@ -151,13 +152,21 @@ def emit_impl(typeInfo, api, cgen):
             cgen.stmt("auto apiHandle = mReconstruction.createApiInfo()")
             cgen.stmt("auto apiInfo = mReconstruction.getApiInfo(apiHandle)")
             cgen.stmt("mReconstruction.setApiTrace(apiInfo, OP_%s, snapshotTraceBegin, snapshotTraceBytes)" % api.name)
+            if lenAccessGuard is not None:
+                cgen.beginIf(lenAccessGuard)
             cgen.stmt("mReconstruction.forEachHandleAddApi((const uint64_t*)%s, %s, apiHandle)" % (access, lenExpr))
             cgen.stmt("mReconstruction.setCreatedHandlesForApi(apiHandle, (const uint64_t*)%s, %s)" % (access, lenExpr))
+            if lenAccessGuard is not None:
+                cgen.endIf()
 
         if p.isDestroyedBy(api):
             cgen.stmt("android::base::AutoLock lock(mLock)")
             cgen.line("// %s destroy" % p.paramName)
+            if lenAccessGuard is not None:
+                cgen.beginIf(lenAccessGuard)
             cgen.stmt("mReconstruction.removeHandles((const uint64_t*)%s, %s)" % (access, lenExpr));
+            if lenAccessGuard is not None:
+                cgen.endIf()
 
         if is_modify_operation(api, p):
             cgen.stmt("android::base::AutoLock lock(mLock)")
@@ -165,6 +174,8 @@ def emit_impl(typeInfo, api, cgen):
             cgen.stmt("auto apiHandle = mReconstruction.createApiInfo()")
             cgen.stmt("auto apiInfo = mReconstruction.getApiInfo(apiHandle)")
             cgen.stmt("mReconstruction.setApiTrace(apiInfo, OP_%s, snapshotTraceBegin, snapshotTraceBytes)" % api.name)
+            if lenAccessGuard is not None:
+                cgen.beginIf(lenAccessGuard)
             cgen.beginFor("uint32_t i = 0", "i < %s" % lenExpr, "++i")
             if p.isNonDispatchableHandleType():
                 cgen.stmt("%s boxed = unboxed_to_boxed_non_dispatchable_%s(%s[i])" % (p.typeName, p.typeName, access))
@@ -172,6 +183,8 @@ def emit_impl(typeInfo, api, cgen):
                 cgen.stmt("%s boxed = unboxed_to_boxed_%s(%s[i])" % (p.typeName, p.typeName, access))
             cgen.stmt("mReconstruction.forEachHandleAddModifyApi((const uint64_t*)(&boxed), 1, apiHandle)")
             cgen.endFor()
+            if lenAccessGuard is not None:
+                cgen.endIf()
 
 def emit_passthrough_to_impl(typeInfo, api, cgen):
     cgen.vkApiCall(api, customPrefix = "mImpl->")

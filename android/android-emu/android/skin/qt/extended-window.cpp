@@ -34,6 +34,7 @@
 #include "android/avd/hw-config.h"
 #include "android/avd/info.h"
 #include "android/avd/util.h"
+#include "android/base/files/IniFile.h"
 #include "android/cmdline-option.h"
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/featurecontrol/FeatureControl.h"
@@ -188,9 +189,20 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     // clang-format on
 
     setObjectName("ExtendedControls");
-    setWindowTitle(QString("Extended controls - ") + android_hw->avd_name
-                   + ":" + QString::number(android_serial_number_port));
+    // Use different title for Embedded Emuator in Studio.
+    if (android_cmdLineOptions->qt_hide_window) {
+        const auto* cfgIni = reinterpret_cast<const android::base::IniFile*>(
+                avdInfo_getConfigIni(android_avdInfo));
+        // If key avd.ini.displayname doesn't exists, use android_hw->avd_name
+        // by default
+        const auto displayName =
+                cfgIni->getString("avd.ini.displayname", android_hw->avd_name);
+        setWindowTitle(displayName.c_str() + QString(" - Extended Controls"));
 
+    } else {
+        setWindowTitle(QString("Extended Controls - ") + android_hw->avd_name
+                   + ":" + QString::number(android_serial_number_port));
+    }
     if (android_cmdLineOptions && android_cmdLineOptions->no_location_ui) {
         mExtendedUi->locationButton->setVisible(false);
     } else {

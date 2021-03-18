@@ -21,6 +21,7 @@
 #include "android/base/threads/WorkerThread.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/snapshot/common.h"
+#include "android/base/EventNotificationSupport.h"
 
 #include "ColorBuffer.h"
 #include "emugl/common/mutex.h"
@@ -62,6 +63,8 @@ struct ColorBufferRef {
 struct BufferRef {
     BufferPtr buffer;
 };
+
+
 
 typedef std::unordered_map<HandleType, std::pair<WindowSurfacePtr, HandleType> > WindowSurfaceMap;
 typedef std::unordered_set<HandleType> WindowSurfaceSet;
@@ -109,7 +112,10 @@ struct FrameBufferCaps {
 // There is only one global instance, that can be retrieved with getFB(),
 // and which must be previously setup by calling initialize().
 //
-class FrameBuffer {
+// You can register a listener to be informed of FrameBufferChange events. The registered
+// callback will be invoked whenever a new frame has been made available. Listeners should
+// do as little as possible as the callback is on the render thread itself.
+class FrameBuffer :  public android::base::EventNotificationSupport<emugl::FrameBufferChangeEvent> {
 public:
     // Initialize the global instance.
     // |width| and |height| are the dimensions of the emulator GPU display
@@ -510,7 +516,7 @@ public:
 
     void setShuttingDown() { m_shuttingDown = true; }
     bool isShuttingDown() const { return m_shuttingDown; }
-    bool compose(uint32_t bufferSize, void* buffer);
+    bool compose(uint32_t bufferSize, void* buffer, bool post = true);
 
     ~FrameBuffer();
 
@@ -631,7 +637,10 @@ private:
             HandleType cb, android::base::System::Duration ts);
 
     bool postImpl(HandleType p_colorbuffer, bool needLockAndBind = true, bool repaint = false);
-    void setGuestPostedAFrame() { m_guestPostedAFrame = true; }
+    void setGuestPostedAFrame() {
+        m_guestPostedAFrame = true;
+        fireEvent({ emugl::FrameBufferChange::FrameReady,  mFrameNumber++ });
+    }
     HandleType createColorBufferLocked(int p_width,
                                        int p_height,
                                        GLenum p_internalFormat,
@@ -669,6 +678,7 @@ private:
     long long m_statsStartTime = 0;
 
     android::base::Thread* m_perfThread;
+    uint64_t mFrameNumber;
     emugl::Mutex m_lock;
     emugl::ReadWriteMutex m_contextStructureLock;
     FbConfigList* m_configs = nullptr;

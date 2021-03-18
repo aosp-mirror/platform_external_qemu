@@ -345,6 +345,9 @@ GL_APICALL void GL_APIENTRY glVertexAttribDivisor(GLuint index, GLuint divisor) 
 
 GL_APICALL void GL_APIENTRY glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei primcount) {
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     gles30usages->set_is_used(true);
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!(GLESv2Validate::drawMode(mode)),GL_INVALID_ENUM);
@@ -362,6 +365,9 @@ GL_APICALL void GL_APIENTRY glDrawArraysInstanced(GLenum mode, GLint first, GLsi
 
 GL_APICALL void GL_APIENTRY glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, const void * indices, GLsizei primcount) {
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     gles30usages->set_is_used(true);
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!(GLESv2Validate::drawMode(mode) && GLESv2Validate::drawType(type)),GL_INVALID_ENUM);
@@ -381,6 +387,9 @@ GL_APICALL void GL_APIENTRY glDrawElementsInstanced(GLenum mode, GLsizei count, 
 
 GL_APICALL void GL_APIENTRY glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid * indices) {
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     gles30usages->set_is_used(true);
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!(GLESv2Validate::drawMode(mode) && GLESv2Validate::drawType(type)),GL_INVALID_ENUM);
@@ -592,6 +601,9 @@ GL_APICALL void GL_APIENTRY glGetSynciv(GLsync sync, GLenum pname, GLsizei bufSi
 
 GL_APICALL void GL_APIENTRY glDrawBuffers(GLsizei n, const GLenum * bufs) {
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     gles30usages->set_is_used(true);
     if (ctx->isDefaultFBOBound(GL_DRAW_FRAMEBUFFER)) {
         SET_ERROR_IF(n != 1 || (bufs[0] != GL_NONE && bufs[0] != GL_BACK),
@@ -719,7 +731,7 @@ GL_APICALL void GL_APIENTRY glFramebufferTextureLayer(GLenum target, GLenum atta
         TextureData* texData = getTextureData(texture);
         textarget = texData->target;
     }
-    if (ctx->shareGroup().get()) {
+    if (ctx->shareGroup().get() && !ctx->drawDisabled()) {
         const GLuint globalTextureName = ctx->shareGroup()->getGlobalName(NamedObjectType::TEXTURE, texture);
         ctx->dispatcher().glFramebufferTextureLayer(target, attachment, globalTextureName, level, layer);
     }
@@ -750,6 +762,9 @@ GL_APICALL void GL_APIENTRY glGetInternalformativ(GLenum target, GLenum internal
 
 GL_APICALL void GL_APIENTRY glTexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height) {
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     gles30usages->set_is_used(true);
     GLint err = GL_NO_ERROR;
     GLenum format, type;
@@ -1067,6 +1082,9 @@ GL_APICALL void GL_APIENTRY glGetInteger64i_v(GLenum target, GLuint index, GLint
 
 GL_APICALL void GL_APIENTRY glTexImage3D(GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid * data) {
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     gles30usages->set_is_used(true);
     SET_ERROR_IF(!GLESv2Validate::pixelItnlFrmt(ctx,internalFormat), GL_INVALID_VALUE);
     SET_ERROR_IF(!GLESv2Validate::isCompressedFormat(internalFormat) &&
@@ -1093,6 +1111,9 @@ GL_APICALL void GL_APIENTRY glTexImage3D(GLenum target, GLint level, GLint inter
 
 GL_APICALL void GL_APIENTRY glTexStorage3D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth) {
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     gles30usages->set_is_used(true);
     GLenum format, type;
     GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalformat, &format, &type);
@@ -1110,6 +1131,9 @@ GL_APICALL void GL_APIENTRY glTexStorage3D(GLenum target, GLsizei levels, GLenum
 
 GL_APICALL void GL_APIENTRY glTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid * data) {
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     gles30usages->set_is_used(true);
     if (isCoreProfile() &&
         isCoreProfileEmulatedFormat(format)) {

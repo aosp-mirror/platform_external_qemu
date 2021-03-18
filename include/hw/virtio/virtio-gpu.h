@@ -136,8 +136,8 @@ typedef struct VirtIOGPU {
     bool virgl_as_proxy;
     struct virgl_renderer_virtio_interface* virgl;
     struct virgl_renderer_callbacks* gpu_3d_cbs;
-    MemoryRegion host_coherent_memory;
 #endif
+    MemoryRegion host_coherent_memory;
 } VirtIOGPU;
 
 extern const GraphicHwOps virtio_gpu_ops;

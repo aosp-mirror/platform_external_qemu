@@ -53,14 +53,6 @@ bool android_parseKernelVersion(const char* str, KernelVersion* kernelVersion) {
     *kernelVersion = static_cast<KernelVersion>((major) << 16 | (minor << 8) | patch);
     return true;
 }
-}  // namespace
-
-const char* android_kernelSerialDevicePrefix(KernelVersion kernelVersion) {
-    if (kernelVersion >= KERNEL_VERSION_3_10_0) {
-        return "ttyGF";
-    }
-    return "ttyS";
-}
 
 bool android_getKernelVersionOffset(const char* const kernelBits, size_t size,
                                     KernelVersion* kernelVersion) {
@@ -149,6 +141,7 @@ bool android_getKernelVersionDecompress(const char* const kernelBits,
                                           decompressedBits.size(),
                                           kernelVersion);
 }
+}  // namespace
 
 bool android_getKernelVersionImpl(const char* const kernelBits,
                                   const size_t kernelBitsSize,

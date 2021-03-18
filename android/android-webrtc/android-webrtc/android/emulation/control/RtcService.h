@@ -24,6 +24,7 @@ namespace control {
 class RtcBridge;
 
 grpc::Service* getRtcService(const AndroidConsoleAgents* agents,
+                             int adbPort,
                              const char* turncfg);
 grpc::Service* getRtcService(RtcBridge* bridge);
 

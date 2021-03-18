@@ -1024,5 +1024,8 @@ DEF("legacy-fake-camera", 0, QEMU_OPTION_legacy_fake_camera,
 DEF("crostini", 0, QEMU_OPTION_crostini,
 "-crostini Turn on optimizations for running in a VM on Chrome OS", QEMU_ARCH_ALL)
 
+DEF("wear-auto-forward", 0, QEMU_OPTION_wear_auto_forward,
+"-wear-auto-forward automatically forward tcp:5601 on the host to tcp:5601 on a connected phone if a connected virtual watch is detected.", QEMU_ARCH_ALL)
+
 #endif  // CONFIG_ANDROID
 

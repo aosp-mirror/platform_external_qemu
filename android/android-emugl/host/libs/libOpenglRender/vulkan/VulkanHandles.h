@@ -49,11 +49,12 @@
     f(VkSwapchainKHR) \
     f(VkDisplayKHR) \
     f(VkDisplayModeKHR) \
-    f(VkObjectTableNVX) \
-    f(VkIndirectCommandsLayoutNVX) \
     f(VkValidationCacheEXT) \
     f(VkDebugReportCallbackEXT) \
     f(VkDebugUtilsMessengerEXT) \
+    f(VkAccelerationStructureNV) \
+    f(VkIndirectCommandsLayoutNV) \
+    f(VkAccelerationStructureKHR) \
 
 #define GOLDFISH_VK_LIST_NON_DISPATCHABLE_HANDLE_TYPES(f) \
     f(VkDeviceMemory) \
@@ -93,10 +94,11 @@
     f(VkSwapchainKHR) \
     f(VkDisplayKHR) \
     f(VkDisplayModeKHR) \
-    f(VkObjectTableNVX) \
-    f(VkIndirectCommandsLayoutNVX) \
     f(VkValidationCacheEXT) \
     f(VkDebugReportCallbackEXT) \
     f(VkDebugUtilsMessengerEXT) \
     f(VkCommandPool) \
-    f(VkCommandBuffer)
+    f(VkCommandBuffer) \
+    f(VkAccelerationStructureNV) \
+    f(VkIndirectCommandsLayoutNV) \
+    f(VkAccelerationStructureKHR) \

@@ -13,7 +13,7 @@
 // save argv,
 // kill and wait a process ID,
 // launch process with given cwd and args.
-
+#pragma once
 #include <string>                     // for string
 #include <vector>                     // for vector
 

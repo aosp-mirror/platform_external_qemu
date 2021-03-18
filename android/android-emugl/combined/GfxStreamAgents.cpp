@@ -35,6 +35,9 @@ static int32_t sDisplayH = 0;
 static int32_t sDisplayDpi = 0;
 
 static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
+        .notifyDisplayChanges = []() {
+            return true;
+        },
         .setMultiDisplay = [](uint32_t id,
                               int32_t x,
                               int32_t y,

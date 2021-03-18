@@ -159,7 +159,7 @@ void CrossSessionSocket::drainSocket(DrainBehavior drainBehavior) {
 #endif
 }
 
-void CrossSessionSocket::onSave(android::base::Stream* stream) {
+void CrossSessionSocket::onSave(android::base::Stream* stream) const {
     D("%s: [%p] saved buffer size %d", __func__, this,
         mRecvBufferEnd - mRecvBufferBegin);
     stream->putBe32(mRecvBufferEnd - mRecvBufferBegin);

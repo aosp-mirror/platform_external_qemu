@@ -550,6 +550,9 @@ GL_API void GL_APIENTRY  glBufferSubData( GLenum target, GLintptr offset, GLsize
 
 GL_API void GL_APIENTRY  glClear( GLbitfield mask) {
     GET_CTX()
+    if (ctx->drawDisabled()) {
+        return;
+    }
     GLES_CM_TRACE()
     ERRCHECK()
     ctx->drawValidate();
@@ -732,6 +735,9 @@ GL_API void GL_APIENTRY  glTexImage2D( GLenum target, GLint level, GLint interna
 GL_API void GL_APIENTRY  glCompressedTexImage2D( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data) {
     GET_CTX_CM()
     GLES_CM_TRACE()
+    if (ctx->drawDisabled()) {
+        return;
+    }
     SET_ERROR_IF(!GLEScmValidate::textureTargetEx(target),GL_INVALID_ENUM);
     SET_ERROR_IF(!data,GL_INVALID_OPERATION);
 
@@ -761,6 +767,9 @@ GL_API void GL_APIENTRY  glCompressedTexSubImage2D( GLenum target, GLint level, 
     SET_ERROR_IF(level < 0 || level > log2(ctx->getMaxTexSize()),GL_INVALID_VALUE)
     SET_ERROR_IF(!data,GL_INVALID_OPERATION);
 
+    if (ctx->drawDisabled()) {
+        return;
+    }
     if (shouldPassthroughCompressedFormat(ctx, format)) {
         doCompressedTexSubImage2DNative(ctx, target, level, xoffset, yoffset, width,
                                              height, format, imageSize, data);
@@ -909,7 +918,9 @@ GL_API void GL_APIENTRY  glDrawArrays( GLenum mode, GLint first, GLsizei count) 
     GLES_CM_TRACE()
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!GLEScmValidate::drawMode(mode),GL_INVALID_ENUM)
-
+    if (ctx->drawDisabled()) {
+        return;
+    }
     ctx->drawArrays(mode, first, count);
 }
 
@@ -918,7 +929,9 @@ GL_API void GL_APIENTRY  glDrawElements( GLenum mode, GLsizei count, GLenum type
     GLES_CM_TRACE()
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF((!GLEScmValidate::drawMode(mode) || !GLEScmValidate::drawType(type)),GL_INVALID_ENUM)
-
+    if (ctx->drawDisabled()) {
+        return;
+    }
     ctx->drawElements(mode, count, type, elementsIndices);
 }
 
@@ -1824,7 +1837,9 @@ GL_API void GL_APIENTRY  glPushMatrix(void) {
 GL_API void GL_APIENTRY  glReadPixels( GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *pixels) {
     GET_CTX()
     GLES_CM_TRACE()
-
+    if (ctx->drawDisabled()) {
+        return;
+    }
     SET_ERROR_IF(!(GLEScmValidate::pixelFrmt(ctx,format) && GLEScmValidate::pixelType(ctx,type)),GL_INVALID_ENUM);
     SET_ERROR_IF(!(GLEScmValidate::pixelOp(format,type)),GL_INVALID_OPERATION);
 
@@ -1984,7 +1999,9 @@ GL_API void GL_APIENTRY  glTexEnvxv( GLenum target, GLenum pname, const GLfixed 
 GL_API void GL_APIENTRY  glTexImage2D( GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels) {
     GET_CTX()
     GLES_CM_TRACE()
-
+    if (ctx->drawDisabled()) {
+        return;
+    }
     SET_ERROR_IF(!(GLEScmValidate::textureTargetEx(target) &&
                      GLEScmValidate::pixelFrmt(ctx,internalformat) &&
                      GLEScmValidate::pixelFrmt(ctx,format) &&
@@ -2153,6 +2170,10 @@ GL_API void GL_APIENTRY  glTexSubImage2D( GLenum target, GLint level, GLint xoff
     // set an error if level < 0 or level > log 2 max
     SET_ERROR_IF(level < 0 || 1<<level > ctx->getMaxTexSize(), GL_INVALID_VALUE);
     SET_ERROR_IF(xoffset < 0 || yoffset < 0 || width < 0 || height < 0, GL_INVALID_VALUE);
+
+    if (ctx->drawDisabled()) {
+        return;
+    }
     if (ctx->shareGroup().get()) {
         TextureData *texData = getTextureTargetData(target);
         SET_ERROR_IF(!texData, GL_INVALID_OPERATION);
@@ -2296,18 +2317,20 @@ GL_API void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GL
                         rbData->attachedFB);
             }
         }
-        if (isCoreProfile() || isGles2Gles()) {
-            ctx->dispatcher().glFramebufferTexture2D(GL_FRAMEBUFFER,
-                    rbData->attachedPoint,
-                    GL_TEXTURE_2D,
-                    img->globalTexObj->getGlobalName(),
-                    0);
-        } else {
-            ctx->dispatcher().glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-                    rbData->attachedPoint,
-                    GL_TEXTURE_2D,
-                    img->globalTexObj->getGlobalName(),
-                    0);
+        if (!ctx->drawDisabled()) {
+            if (isCoreProfile() || isGles2Gles()) {
+                ctx->dispatcher().glFramebufferTexture2D(GL_FRAMEBUFFER,
+                        rbData->attachedPoint,
+                        GL_TEXTURE_2D,
+                        img->globalTexObj->getGlobalName(),
+                        0);
+            } else {
+                ctx->dispatcher().glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                        rbData->attachedPoint,
+                        GL_TEXTURE_2D,
+                        img->globalTexObj->getGlobalName(),
+                        0);
+            }
         }
         if (prevFB != rbData->attachedFB) {
             if (isCoreProfile() || isGles2Gles()) {
@@ -2611,7 +2634,9 @@ GL_API void GLAPIENTRY glFramebufferTexture2DOES(GLenum target, GLenum attachmen
                 NamedObjectType::TEXTURE, texname);
     }
 
-    ctx->dispatcher().glFramebufferTexture2DEXT(target,attachment,textarget,globalTexName,level);
+    if (!ctx->drawDisabled()) {
+        ctx->dispatcher().glFramebufferTexture2DEXT(target,attachment,textarget,globalTexName,level);
+    }
 
     // Update the the current framebuffer object attachment state
     GLuint fbName = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
@@ -2664,7 +2689,7 @@ GL_API void GLAPIENTRY glFramebufferRenderbufferOES(GLenum target, GLenum attach
 
     if (renderbuffer && obj.get() != NULL) {
         RenderbufferData *rbData = (RenderbufferData *)obj.get();
-        if (rbData->eglImageGlobalTexObject) {
+        if (rbData->eglImageGlobalTexObject && !ctx->drawDisabled()) {
             //
             // This renderbuffer object is an eglImage target
             // attach the eglimage's texture instead the renderbuffer.
@@ -2873,6 +2898,9 @@ void glDrawTexOES (T x, T y, T z, T width, T height) {
     GLES_CM_TRACE()
 
     SET_ERROR_IF((width<=0 || height<=0),GL_INVALID_VALUE);
+    if (ctx->drawDisabled()) {
+        return;
+    }
 
     ctx->drawValidate();
     ctx->drawTexOES((float)x, (float)y, (float)z, (float)width, (float)height);

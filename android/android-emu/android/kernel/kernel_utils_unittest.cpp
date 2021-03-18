@@ -17,17 +17,6 @@
 namespace android {
 namespace kernel {
 
-TEST(KernelUtils, GetKernelSerialDevicePrefix) {
-    EXPECT_STREQ("ttyS",
-                 android_kernelSerialDevicePrefix(KERNEL_VERSION_2_6_29));
-    EXPECT_STREQ("ttyS",
-                 android_kernelSerialDevicePrefix(KERNEL_VERSION_3_4_0));
-    EXPECT_STREQ("ttyS",
-                 android_kernelSerialDevicePrefix(KERNEL_VERSION_3_4_67));
-    EXPECT_STREQ("ttyGF",
-                 android_kernelSerialDevicePrefix(KERNEL_VERSION_3_10_0));
-}
-
 TEST(KernelUtils, getKernelVersionOffset) {
     std::vector<char> kernelBits(1024);
     KernelVersion version;
