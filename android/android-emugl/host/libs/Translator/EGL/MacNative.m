@@ -276,6 +276,21 @@ CGLTexImageIOSurface2D(glContext,GL_TEXTURE_RECTANGLE, GL_RG8, (GLsizei)planeSiz
     //NSLog(@"done creating textures uv");
 }
 
+CVPixelBufferRef nsCreateNV12PixelBuffer(int w, int h) {
+        NSDictionary* cvBufferProperties = @{
+            (__bridge NSString*)kCVPixelBufferOpenGLCompatibilityKey : @YES,
+            (__bridge NSString*)kCVPixelBufferIOSurfaceOpenGLTextureCompatibilityKey: @YES,
+        };
+        CVPixelBufferRef _CVPixelBuffer;
+        CVReturn cvret = CVPixelBufferCreate(kCFAllocatorDefault,
+                                w, h,
+                                kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
+                                (__bridge CFDictionaryRef)cvBufferProperties,
+                                &_CVPixelBuffer);
+
+        return _CVPixelBuffer;
+}
+
 void nsCopyTexture(void* context, int from, int to, int width, int height) {
     //NSLog(@"calling nsCopyTexture");
     EmuGLContext* ctx = (EmuGLContext *)context;

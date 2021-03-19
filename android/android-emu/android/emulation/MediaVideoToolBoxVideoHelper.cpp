@@ -138,6 +138,9 @@ void MediaVideoToolBoxVideoHelper::decode(const uint8_t* frame,
 
 void MediaVideoToolBoxVideoHelper::flush() {
     VTB_DPRINT("started flushing");
+    if (mDecoderSession) {
+        VTDecompressionSessionFinishDelayedFrames(mDecoderSession);
+    }
     for (auto& iter : mVtbBufferMap) {
         mSavedDecodedFrames.push_back(std::move(iter.second));
     }
@@ -184,8 +187,8 @@ void MediaVideoToolBoxVideoHelper::handleIDRFrame(const uint8_t* ptr,
         // TODO: this call blocks until the frame has been decoded. Perhaps it
         // will be more efficient to signal the guest when the frame is ready to
         // be read instead.
-        status = VTDecompressionSessionWaitForAsynchronousFrames(
-                mDecoderSession);
+//        status = VTDecompressionSessionWaitForAsynchronousFrames(
+//                mDecoderSession);
         VTB_DPRINT("Success decoding IDR frame");
     } else {
         VTB_DPRINT("%s: Failed to decompress frame (err=%d)", __func__, status);
