@@ -33,6 +33,29 @@
       "message": "Anyone?",
       "revId": "b02f0967075c2df6637c1162e272592b462cab0c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d3c4bb58_1f99da11",
+        "filename": "android/android-grpc/docs/python/sample/screenshot.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-19T23:53:25Z",
+      "side": 1,
+      "message": "What is this condition for?",
+      "range": {
+        "startLine": 101,
+        "startChar": 8,
+        "endLine": 101,
+        "endChar": 66
+      },
+      "revId": "b02f0967075c2df6637c1162e272592b462cab0c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
