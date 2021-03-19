@@ -87,7 +87,7 @@ class EmulatorDiscovery(object):
 def get_discovery_directory():
     """Gets the discovery directory with the emulator pid files."""
     path = None
-    if platform.system() == "Windows" and "LOCALAPPADATA" in os.environ:
+    if platform.system() == "Windows" and "LOCALAPPDATA" in os.environ:
         path = os.path.join(os.environ.get("LOCALAPPDATA"), "Temp")
     if platform.system() == "Linux":
         path = os.environ.get("XDG_RUNTIME_DIR")
