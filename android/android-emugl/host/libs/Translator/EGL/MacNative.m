@@ -333,7 +333,75 @@ void nsCopyTexture(void* context, int from, int to, int width, int height) {
       glDeleteFramebuffers( 1, &g_fb );
 }
 
-void nsUpdateNV12TexturesFromIOSurface(void* context, void* iosurface, int Ytex, int UVtex) {
+void nsUpdateNV12TexturesFromIOSurface(void* context, void* iosurface, int Ytex1, int UVtex1) {
+    EmuGLContext* ctx = (EmuGLContext *)context;
+    CGLContextObj cgl_ctx = ctx.CGLContextObj;
+    CVPixelBufferRef mDecodedFrame = (CVPixelBufferRef)iosurface;
+    IOSurfaceRef* surface = CVPixelBufferGetIOSurface(mDecodedFrame);
+    GLsizei surface_w = (GLsizei)IOSurfaceGetWidth(surface);
+    GLsizei surface_h = (GLsizei)IOSurfaceGetHeight(surface);
+    unsigned char * data =  NULL;//(unsigned char*)malloc(surface_w * surface_h);
+    //NSLog(@"data[10] is %d", data[10]);
+
+   
+
+    CVPixelBufferLockBaseAddress(mDecodedFrame, kCVPixelBufferLock_ReadOnly);
+    int planes = CVPixelBufferGetPlaneCount(mDecodedFrame);
+    int linesize = CVPixelBufferGetBytesPerRowOfPlane(mDecodedFrame, 0);
+
+    int planeWidth = CVPixelBufferGetWidthOfPlane(mDecodedFrame, 0);
+    int planeHeight = CVPixelBufferGetHeightOfPlane(mDecodedFrame, 0);
+
+    int Ytex, UVtex;
+    glGenTextures(1, &Ytex);
+    glBindTexture(GL_TEXTURE_RECTANGLE, Ytex);
+    static CVPixelBufferRef mycopy = NULL;
+    if (mycopy == NULL) {
+        mycopy = nsCreateNV12PixelBuffer(surface_w, surface_h);
+    }
+    CVPixelBufferLockBaseAddress(mycopy, 0);
+    void* planeData = CVPixelBufferGetBaseAddressOfPlane(mDecodedFrame, 0);
+    data = CVPixelBufferGetBaseAddressOfPlane(mycopy, 0);
+    memcpy(data, planeData, surface_w * surface_h);
+    planeData = CVPixelBufferGetBaseAddressOfPlane(mDecodedFrame, 1);
+    data = CVPixelBufferGetBaseAddressOfPlane(mycopy, 1);
+    memcpy(data, planeData, surface_w * surface_h/2);
+    CVPixelBufferUnlockBaseAddress(mycopy, 0);
+
+    glActiveTexture(GL_TEXTURE0);
+    if(1) {
+        glBindTexture(GL_TEXTURE_2D, Ytex);
+        CGLError cglError =
+        CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE, GL_R8, surface_w, surface_h, GL_RED, GL_UNSIGNED_BYTE, surface, 0); 
+        if (cglError != kCGLNoError) {
+            fprintf(stderr, "create textures y error %d\n", cglError);
+        }
+    }
+
+    glGenTextures(1, &UVtex);
+    glBindTexture(GL_TEXTURE_RECTANGLE, UVtex);
+
+    if(1) {
+        glBindTexture(GL_TEXTURE_2D, UVtex);
+        CGLError cglError = CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE,
+                GL_RG8, surface_w/2, surface_h/2, GL_RG, GL_UNSIGNED_BYTE, surface, 1); 
+        if (cglError != kCGLNoError) {
+            fprintf(stderr, "create textures uv error %d\n", cglError);
+        }
+    }
+    glBindTexture(GL_TEXTURE_2D, 0);
+    //free(data);
+    CVPixelBufferUnlockBaseAddress(mDecodedFrame, kCVPixelBufferLock_ReadOnly);
+    
+    if (1) {
+        nsCopyTexture(context, Ytex, Ytex1, surface_w, surface_h);
+        nsCopyTexture(context, UVtex, UVtex1, surface_w/2, surface_h/2);
+        return;
+    }
+
+}
+
+void nsUpdateNV12TexturesFromIOSurfacev0(void* context, void* iosurface, int Ytex, int UVtex) {
     //NSLog(@"calling %s %d", __func__, __LINE__);
 
     EmuGLContext* ctx = (EmuGLContext *)context;
