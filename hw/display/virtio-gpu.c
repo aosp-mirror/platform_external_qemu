@@ -1059,6 +1059,17 @@ static int virtio_gpu_save(QEMUFile *f, void *opaque, size_t size,
     struct virtio_gpu_simple_resource *res;
     int i;
 
+#ifdef CONFIG_VIRGL
+    if (virtio_gpu_virgl_enabled(g->conf)) {
+        // First save the renderer state, then the ram slots, because when we
+        // load, the renderer state and host pointers backing blob resources
+        // need to be restored first before the ram slots corresponding to the
+        // blob resources themselves.
+        g->virgl->virgl_renderer_save_snapshot(f);
+        virtio_gpu_save_ram_slots(f, g);
+    }
+#endif
+
     /* in 2d mode we should never find unprocessed commands here */
     assert(QTAILQ_EMPTY(&g->cmdq));
 
@@ -1090,6 +1101,13 @@ static int virtio_gpu_load(QEMUFile *f, void *opaque, size_t size,
     int i;
 
     g->hostmem = 0;
+
+#ifdef CONFIG_VIRGL
+    if (virtio_gpu_virgl_enabled(g->conf)) {
+        g->virgl->virgl_renderer_load_snapshot(f);
+        virtio_gpu_load_ram_slots(f, g);
+    }
+#endif
 
     resource_id = qemu_get_be32(f);
     while (resource_id != 0) {
@@ -1153,29 +1171,31 @@ static int virtio_gpu_load(QEMUFile *f, void *opaque, size_t size,
         resource_id = qemu_get_be32(f);
     }
 
-    /* load & apply scanout state */
+    /* load scanout state */
     vmstate_load_state(f, &vmstate_virtio_gpu_scanouts, g, 1);
-    for (i = 0; i < g->conf.max_outputs; i++) {
-        scanout = &g->scanout[i];
-        if (!scanout->resource_id) {
-            continue;
-        }
-        res = virtio_gpu_find_resource(g, scanout->resource_id);
-        if (!res) {
-            return -EINVAL;
-        }
-        scanout->ds = qemu_create_displaysurface_pixman(res->image);
-        if (!scanout->ds) {
-            return -EINVAL;
-        }
 
-        dpy_gfx_replace_surface(scanout->con, scanout->ds);
-        dpy_gfx_update(scanout->con, 0, 0, scanout->width, scanout->height);
-        if (scanout->cursor.resource_id) {
-            update_cursor(g, &scanout->cursor);
-        }
-        res->scanout_bitmask |= (1 << i);
-    }
+    // TODO: Figure out why this hangs the emulator display and causes ANR in the current app.
+    // for (i = 0; i < g->conf.max_outputs; i++) {
+    //     scanout = &g->scanout[i];
+    //     if (!scanout->resource_id) {
+    //         continue;
+    //     }
+    //     res = virtio_gpu_find_resource(g, scanout->resource_id);
+    //     if (!res) {
+    //         return -EINVAL;
+    //     }
+    //     scanout->ds = qemu_create_displaysurface_pixman(res->image);
+    //     if (!scanout->ds) {
+    //         return -EINVAL;
+    //     }
+
+    //     dpy_gfx_replace_surface(scanout->con, scanout->ds);
+    //     dpy_gfx_update(scanout->con, 0, 0, scanout->width, scanout->height);
+    //     if (scanout->cursor.resource_id) {
+    //         update_cursor(g, &scanout->cursor);
+    //     }
+    //     res->scanout_bitmask |= (1 << i);
+    // }
 
     return 0;
 }
@@ -1253,16 +1273,6 @@ static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
 #else
     g->use_virgl_renderer = false;
 #endif
-
-    if (virtio_gpu_virgl_enabled(g->conf)) {
-        error_setg(&g->migration_blocker, "virgl is not yet migratable");
-        migrate_add_blocker(g->migration_blocker, &local_err);
-        if (local_err) {
-            error_propagate(errp, local_err);
-            error_free(g->migration_blocker);
-            return;
-        }
-    }
 
     g->config_size = sizeof(struct virtio_gpu_config);
     g->virtio_config.num_scanouts = cpu_to_le32(g->conf.max_outputs);

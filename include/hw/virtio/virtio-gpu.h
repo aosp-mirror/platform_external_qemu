@@ -186,4 +186,7 @@ void virtio_gpu_gl_block(void *opaque, bool block);
 int virtio_gpu_virgl_init(VirtIOGPU *g);
 int virtio_gpu_virgl_get_num_capsets(VirtIOGPU *g);
 
+void virtio_gpu_save_ram_slots(void* qemufile, VirtIOGPU* g);
+void virtio_gpu_load_ram_slots(void* qemufile, VirtIOGPU* g);
+
 #endif

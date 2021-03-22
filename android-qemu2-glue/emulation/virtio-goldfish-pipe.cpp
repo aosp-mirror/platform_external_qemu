@@ -37,6 +37,12 @@ extern "C" {
 #include "hw/misc/goldfish_pipe.h"
 #include "hw/virtio/virtio-goldfish-pipe.h"
 
+#ifdef AEMU_GFXSTREAM_BACKEND
+#include "migration-stubs.h"
+#else
+#include "migration/migration.h"
+#endif
+
 #include "virgl_hw.h"
 }  // extern "C"
 
@@ -194,6 +200,7 @@ struct PipeResEntry {
     uint64_t hvaSize;
     uint64_t hvaId;
     uint32_t hvSlot;
+    uint64_t* addrs;
 };
 
 static inline uint32_t align_up(uint32_t n, uint32_t a) {
@@ -959,6 +966,11 @@ public:
             entry.numIovs = 0;
         }
 
+        if (entry.addrs) {
+            free(entry.addrs);
+            entry.addrs = nullptr;
+        }
+
         if (entry.hvaId) {
             // gfxstream manages when to actually remove the hostmem id and storage
             //
@@ -979,7 +991,7 @@ public:
         mResources.erase(it);
     }
 
-    int attachIov(int resId, iovec* iov, int num_iovs) {
+    int attachIov(int resId, iovec* iov, int num_iovs, uint64_t* addrs = nullptr) {
         AutoLock lock(mLock);
 
         VGPLOG("resid: %d numiovs: %d", resId, num_iovs);
@@ -989,7 +1001,7 @@ public:
 
         auto& entry = it->second;
         VGPLOG("res linear: %p", entry.linear);
-        if (!entry.linear) allocResource(entry, iov, num_iovs);
+        if (!entry.linear) allocResource(entry, iov, num_iovs, addrs);
 
         VGPLOG("done");
         return 0;
@@ -1019,7 +1031,7 @@ public:
             *iov = entry.iov;
         }
 
-        allocResource(entry, entry.iov, entry.numIovs);
+        allocResource(entry, entry.iov, entry.numIovs, nullptr);
         VGPLOG("done");
     }
 
@@ -1373,6 +1385,89 @@ public:
         return 0;
     }
 
+    void saveSnapshot(void* opaque) {
+        QEMUFile* file = (QEMUFile*)opaque;
+        uint32_t cookie;
+        if (!mCookie) {
+            cookie = 0;
+        } else {
+            memcpy(&cookie, mCookie, sizeof(uint32_t));
+        }
+        qemu_put_be32(file, cookie);
+        qemu_put_be32(file, mFlags);
+
+        qemu_put_be32(file, mContexts.size());
+
+        for (auto it: mContexts) {
+            saveContext(file, it.first, it.second);
+        }
+
+        qemu_put_be32(file, mResources.size());
+
+        for (auto it: mResources) {
+            saveResource(file, it.first, it.second);
+        }
+
+        qemu_put_be32(file, (int)mContextResources.size());
+
+        for (auto it: mContextResources) {
+            saveContextResourceList(file, it.first, it.second);
+        }
+
+        qemu_put_be32(file, (int)mResourceContexts.size());
+
+        for (auto it: mResourceContexts) {
+            saveResourceContextList(file, it.first, it.second);
+        }
+
+        qemu_put_be32(file, (int)mLastSubmitCmdCtxExists);
+        qemu_put_be32(file, mLastSubmitCmdCtx);
+
+        saveFenceDeque(file, mFenceDeque);
+    }
+
+    void loadSnapshot(void* opaque) {
+        QEMUFile* file = (QEMUFile*)opaque;
+
+        uint32_t cookie = qemu_get_be32(file);
+        if (mCookie) memcpy(mCookie, &cookie, sizeof(uint32_t));
+
+        mFlags = qemu_get_be32(file);
+
+        uint32_t contextCount = qemu_get_be32(file);
+
+        for (uint32_t i = 0; i < contextCount; ++i) {
+            loadContext(file);
+        }
+
+        uint32_t resourceCount = qemu_get_be32(file);
+
+        for (uint32_t i = 0; i < resourceCount; ++i) {
+            loadResource(file);
+        }
+
+        uint32_t contextResourceListCount = qemu_get_be32(file);
+
+        for (uint32_t i = 0; i < contextResourceListCount; ++i) {
+            uint32_t ctxId;
+            auto ids = loadContextResourceList(file, &ctxId);
+            mContextResources[ctxId] = ids;
+        }
+
+        uint32_t resourceContextListCount = qemu_get_be32(file);
+
+        for (uint32_t i = 0; i < resourceContextListCount; ++i) {
+            uint32_t resId;
+            auto ids = loadResourceContextList(file, &resId);
+            mResourceContexts[resId] = ids;
+        }
+
+        mLastSubmitCmdCtxExists = qemu_get_be32(file);
+        mLastSubmitCmdCtx = qemu_get_be32(file);
+
+        loadFenceDeque(file);
+    }
+
     void setResourceHvSlot(uint32_t res_handle, uint32_t slot) {
         AutoLock lock(mLock);
         auto it = mResources.find(res_handle);
@@ -1390,7 +1485,7 @@ public:
     }
 
 private:
-    void allocResource(PipeResEntry& entry, iovec* iov, int num_iovs) {
+    void allocResource(PipeResEntry& entry, iovec* iov, int num_iovs, uint64_t* addrs = nullptr) {
         VGPLOG("entry linear: %p", entry.linear);
         if (entry.linear) free(entry.linear);
 
@@ -1418,6 +1513,13 @@ private:
         initbox.y = 0;
         initbox.w = (uint32_t)linearSize;
         initbox.h = 1;
+
+        if (addrs) {
+            entry.addrs = (uint64_t*)malloc(sizeof(uint64_t) * num_iovs);
+            for (int i = 0; i < num_iovs; ++i) {
+                entry.addrs[i] = addrs[i];
+            }
+        }
     }
 
     void detachResourceLocked(uint32_t ctxId, uint32_t toUnrefId) {
@@ -1445,6 +1547,204 @@ private:
         if (mServiceOps) return mServiceOps;
         mServiceOps = goldfish_pipe_get_service_ops();
         return mServiceOps;
+    }
+
+    void saveContext(QEMUFile* file, VirglCtxId ctxId, const PipeCtxEntry& pipeCtxEntry) {
+        auto ops = ensureAndGetServiceOps();
+
+        qemu_put_be32(file, pipeCtxEntry.ctxId);
+        qemu_put_be32(file, pipeCtxEntry.fence);
+        qemu_put_be32(file, pipeCtxEntry.addressSpaceHandle);
+        qemu_put_be32(file, pipeCtxEntry.hasAddressSpaceHandle);
+
+        ops->guest_save(pipeCtxEntry.hostPipe, file);
+    }
+
+    void saveResourceCreateArgs(QEMUFile* file, const virgl_renderer_resource_create_args& args) {
+        qemu_put_be32(file, args.handle);
+        qemu_put_be32(file, args.target);
+        qemu_put_be32(file, args.format);
+        qemu_put_be32(file, args.bind);
+        qemu_put_be32(file, args.width);
+        qemu_put_be32(file, args.height);
+        qemu_put_be32(file, args.depth);
+        qemu_put_be32(file, args.array_size);
+        qemu_put_be32(file, args.last_level);
+        qemu_put_be32(file, args.nr_samples);
+        qemu_put_be32(file, args.flags);
+    }
+
+    void saveResource(QEMUFile* file, VirglResId resId, const PipeResEntry& pipeResEntry) {
+        qemu_put_be32(file, resId);
+
+        saveResourceCreateArgs(file, pipeResEntry.args);
+
+        // Save guest phys addrs instead of the hva and iovs
+        qemu_put_be32(file, pipeResEntry.numIovs);
+
+        if (!pipeResEntry.addrs && pipeResEntry.iov) {
+            fprintf(stderr, "%s: fatal: did not save GPAs for virtio-gpu resources that are non-blob\n", __func__);
+            abort();
+        }
+
+        // Save the gpa and size
+        for (uint32_t i = 0; i < pipeResEntry.numIovs; ++i) {
+            qemu_put_be64(file, pipeResEntry.addrs[i]);
+            qemu_put_be64(file, pipeResEntry.iov[i].iov_len);
+        }
+
+        // save the linear copy
+        qemu_put_be64(file, pipeResEntry.linearSize);
+        qemu_put_buffer(file, (uint8_t*)pipeResEntry.linear, (int)pipeResEntry.linearSize);
+
+        // No need to save hva itself or its contents, as that should be
+        // managed by address space device
+        qemu_put_be32(file, pipeResEntry.ctxId);
+        qemu_put_be64(file, pipeResEntry.hvaSize);
+        qemu_put_be64(file, pipeResEntry.hvaId);
+        qemu_put_be32(file, pipeResEntry.hvSlot);
+    }
+
+    void saveContextResourceList(QEMUFile* file, VirglCtxId ctxId, const std::vector<VirglResId>& resourceIds) {
+        qemu_put_be32(file, ctxId);
+        qemu_put_be32(file, (int)resourceIds.size());
+        for (size_t i = 0; i < resourceIds.size(); ++i) {
+            qemu_put_be32(file, resourceIds[i]);
+        }
+    }
+
+    void saveResourceContextList(QEMUFile* file, VirglResId resId, const std::vector<VirglCtxId>& contextIds) {
+        qemu_put_be32(file, resId);
+        qemu_put_be32(file, (int)contextIds.size());
+        for (size_t i = 0; i < contextIds.size(); ++i) {
+            qemu_put_be32(file, contextIds[i]);
+        }
+    }
+
+    void saveFenceDeque(QEMUFile* file, const std::deque<int>& deque) {
+        qemu_put_be32(file, (int)mFenceDeque.size());
+        for (auto val : mFenceDeque) {
+            qemu_put_be32(file, val);
+        }
+    }
+
+    void loadContext(QEMUFile* file) {
+
+        auto ops = ensureAndGetServiceOps();
+
+        PipeCtxEntry pipeCtxEntry;
+
+        pipeCtxEntry.ctxId = qemu_get_be32(file);
+        pipeCtxEntry.fence = qemu_get_be32(file);
+        pipeCtxEntry.addressSpaceHandle = qemu_get_be32(file);
+        pipeCtxEntry.hasAddressSpaceHandle = qemu_get_be32(file);
+
+        char force_close = 1;
+        void* hwpipe = malloc(sizeof(uint64_t));
+        pipeCtxEntry.hostPipe = ops->guest_load(file, (GoldfishHwPipe*)hwpipe, &force_close);
+
+        mContexts[pipeCtxEntry.ctxId] = pipeCtxEntry;
+    }
+
+    virgl_renderer_resource_create_args loadResourceCreateArgs(QEMUFile* file) {
+        virgl_renderer_resource_create_args args;
+
+        args.handle = qemu_get_be32(file);
+        args.target = qemu_get_be32(file);
+        args.format = qemu_get_be32(file);
+        args.bind = qemu_get_be32(file);
+        args.width = qemu_get_be32(file);
+        args.height = qemu_get_be32(file);
+        args.depth = qemu_get_be32(file);
+        args.array_size = qemu_get_be32(file);
+        args.last_level = qemu_get_be32(file);
+        args.nr_samples = qemu_get_be32(file);
+        args.flags = qemu_get_be32(file);
+
+        return args;
+    }
+
+    void loadResource(QEMUFile* file) {
+        uint32_t resId = qemu_get_be32(file);
+
+        PipeResEntry pipeResEntry;
+
+        pipeResEntry.args = loadResourceCreateArgs(file);
+
+        // Save guest phys addrs instead of the hva and iovs
+        pipeResEntry.numIovs = qemu_get_be32(file);
+
+        pipeResEntry.addrs = (uint64_t*)malloc(sizeof(uint64_t) * pipeResEntry.numIovs);
+        pipeResEntry.iov = (iovec*)malloc(sizeof(pipeResEntry.iov[0]) * pipeResEntry.numIovs);
+
+        // Save the gpa and size
+        for (uint32_t i = 0; i < pipeResEntry.numIovs; ++i) {
+            pipeResEntry.addrs[i] = qemu_get_be64(file);
+            pipeResEntry.iov[i].iov_len = qemu_get_be64(file);
+            hwaddr len = (hwaddr)pipeResEntry.iov[i].iov_len;
+            pipeResEntry.iov[i].iov_base =
+                cpu_physical_memory_map(pipeResEntry.addrs[i], &len, 1);
+        }
+
+        // save the linear copy
+        pipeResEntry.linearSize = qemu_get_be64(file);
+        pipeResEntry.linear = malloc(pipeResEntry.linearSize);
+        qemu_get_buffer(file, (uint8_t*)pipeResEntry.linear, (int)pipeResEntry.linearSize);
+
+        // No need to save hva itself or its contents, as that should be
+        // managed by address space device
+        pipeResEntry.ctxId = qemu_get_be32(file);
+        pipeResEntry.hvaSize = qemu_get_be64(file);
+        pipeResEntry.hvaId = qemu_get_be64(file);
+        pipeResEntry.hvSlot = qemu_get_be32(file);
+
+        auto entry = HostmemIdMapping::get()->get(pipeResEntry.hvaId);
+
+        if (entry.size != pipeResEntry.hvaSize) {
+            fprintf(stderr, "%s: FATAL: HostmemIdMapping's hvaSize (0x%llx) doesn't match renderer's saved size (0x%llx)\n", __func__,
+                    (unsigned long long)entry.size,
+                    (unsigned long long)pipeResEntry.hvaSize);
+            abort();
+        }
+
+        pipeResEntry.hva = entry.hva;
+
+        mResources[resId] = pipeResEntry;
+    }
+
+    std::vector<VirglResId> loadContextResourceList(QEMUFile* file, uint32_t* ctxIdOut) {
+        uint32_t ctxId = qemu_get_be32(file);
+        *ctxIdOut = ctxId;
+        size_t count = qemu_get_be32(file);
+
+        std::vector<VirglResId> res;
+
+        for (size_t i = 0; i < count; ++i) {
+            res.push_back(qemu_get_be32(file));
+        }
+
+        return res;
+    }
+
+    std::vector<VirglCtxId> loadResourceContextList(QEMUFile* file, uint32_t* resIdOut) {
+        uint32_t resId = qemu_get_be32(file);
+        *resIdOut = resId;
+        size_t count = qemu_get_be32(file);
+
+        std::vector<VirglCtxId> res;
+
+        for (size_t i = 0; i < count; ++i) {
+            res.push_back(qemu_get_be32(file));
+        }
+
+        return res;
+    }
+
+    void loadFenceDeque(QEMUFile* file) {
+        uint32_t count = qemu_get_be32(file);
+        for (uint32_t i = 0; i < count; ++i) {
+            mFenceDeque.push_back(qemu_get_be32(file));
+        }
     }
 
     Lock mLock;
@@ -1628,19 +1928,15 @@ VG_EXPORT int stream_renderer_resource_unmap(uint32_t res_handle) {
 }
 
 VG_EXPORT void pipe_virgl_renderer_save_snapshot(void* qemufile) {
-    (void)qemufile;
+    sRenderer->saveSnapshot(qemufile);
 }
 
 VG_EXPORT void pipe_virgl_renderer_load_snapshot(void* qemufile) {
-    (void)qemufile;
+    sRenderer->loadSnapshot(qemufile);
 }
 
 VG_EXPORT int pipe_virgl_renderer_resource_attach_iov_with_addrs(int res_handle, struct iovec *iov, int num_iovs, uint64_t* addrs) {
-    (void)res_handle;
-    (void)iov;
-    (void)num_iovs;
-    (void)addrs;
-    return 0;
+    return sRenderer->attachIov(res_handle, iov, num_iovs, addrs);
 }
 
 #define VIRGLRENDERER_API_PIPE_STRUCT_DEF(api) pipe_##api,
