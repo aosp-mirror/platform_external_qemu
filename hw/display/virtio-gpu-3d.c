@@ -142,12 +142,13 @@ static void virgl_cmd_resource_flush(VirtIOGPU *g,
             continue;
         }
         virtio_gpu_rect_update(g, i, rf.r.x, rf.r.y, rf.r.width, rf.r.height);
-    }
 #ifdef CONFIG_ANDROID
-    stream_renderer_flush_resource_and_readback(rf.resource_id, rf.r.x, rf.r.y,
-                                                rf.r.width, rf.r.height,
-                                                NULL, 0);
+        if (i == 0)
+          stream_renderer_flush_resource_and_readback(rf.resource_id, rf.r.x, rf.r.y,
+                                                      rf.r.width, rf.r.height,
+                                                      NULL, 0);
 #endif
+    }
 }
 
 static void virgl_cmd_set_scanout(VirtIOGPU *g,
