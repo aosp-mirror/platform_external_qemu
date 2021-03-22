@@ -67,6 +67,7 @@ extern "C" {
 #include "sysemu/kvm.h"                               // for kvm_enabled
 #include "sysemu/sysemu.h"                            // for vm_start, vm_stop
 #include "sysemu/whpx.h"                              // for whpx_gpa2hva
+#include "ui/console.h"
 extern   int guest_boot_completed;
 }
 
@@ -1094,6 +1095,32 @@ static EmuRunState qemu_get_runstate() {
     return (EmuRunState) get_runstate();
 };
 
+static bool qemu_set_display(int32_t w, int32_t h, bool add) {
+    int last = -1;
+    for (int i = 0;; i++) {
+        QemuConsole* const c = qemu_console_lookup_by_index(i);
+        if (!c) {
+            break;
+        }
+        if (qemu_console_is_graphic(c)) {
+            last = i;
+        }
+    }
+
+        if (last < 0) {
+            return false;
+        }
+        console_select(last);
+        QemuConsole* con = qemu_console_lookup_by_index(last);
+        QemuUIInfo info = {
+            0, 0,
+            (uint32_t)w,
+            (uint32_t)h,
+        };
+        dpy_set_ui_info(con, &info);
+        return true;
+}
+
 static const QAndroidVmOperations sQAndroidVmOperations = {
         .vmStop = qemu_vm_stop,
         .vmStart = qemu_vm_start,
@@ -1124,6 +1151,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .hostmemUnregister = android_emulation_hostmem_unregister,
         .hostmemGetInfo = android_emulation_hostmem_get_info,
         .getRunState = qemu_get_runstate,
+        .setDisplay = qemu_set_display,
 };
 
 extern "C" const QAndroidVmOperations* const gQAndroidVmOperations =

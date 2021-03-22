@@ -3858,6 +3858,9 @@ do_multi_display_add( ControlClient  client, char*  args ) {
     int dpi = std::stoi(splitArgs[3]);
     int flag = std::stoi(splitArgs[4]);
 
+    //Test
+    client->global->vm_agent->setDisplay(666, 777, true);
+
     if (client->global->multi_display_agent->setMultiDisplay(id, -1,
                 -1, width, height, dpi, flag, true) < 0) {
         return -1;
