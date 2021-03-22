@@ -186,6 +186,7 @@ bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
             0, 0,
             (uint32_t)qf->width,
             (uint32_t)qf->height,
+            0,
         };
         dpy_set_ui_info(con, &info);
     }

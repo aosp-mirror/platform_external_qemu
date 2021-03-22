@@ -1,30 +1,30 @@
 /*
-* Copyright (C) 2020 The Android Open Source Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "MultiDisplay.h"
 
-#include <stddef.h>                                      // for size_t
-#include <algorithm>                                     // for max
-#include <cstdint>                                       // for uint32_t
-#include <ostream>                                       // for operator<<
-#include <set>                                           // for set
-#include <string>                                        // for string, stoi
-#include <unordered_map>                                 // for unordered_map
-#include <utility>                                       // for pair, make_pair
-#include <vector>                                        // for vector
+#include <stddef.h>       // for size_t
+#include <algorithm>      // for max
+#include <cstdint>        // for uint32_t
+#include <ostream>        // for operator<<
+#include <set>            // for set
+#include <string>         // for string, stoi
+#include <unordered_map>  // for unordered_map
+#include <utility>        // for pair, make_pair
+#include <vector>         // for vector
 
 #include "android/base/LayoutResolver.h"                 // for resolveLayout
 #include "android/base/Log.h"                            // for LogStreamVoi...
@@ -50,12 +50,14 @@ static MultiDisplay* sMultiDisplay = nullptr;
 
 MultiDisplay::MultiDisplay(const QAndroidEmulatorWindowAgent* const windowAgent,
                            const QAndroidRecordScreenAgent* const recordAgent,
+                           const QAndroidVmOperations* const vmAgent,
                            bool isGuestMode)
     : mWindowAgent(windowAgent),
       mRecordAgent(recordAgent),
-      mGuestMode(isGuestMode) { }
+      mVmAgent(vmAgent),
+      mGuestMode(isGuestMode) {}
 
-//static
+// static
 MultiDisplay* MultiDisplay::getInstance() {
     return sMultiDisplay;
 }
@@ -70,9 +72,9 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
                                   bool add) {
     int ret = 0;
     SkinRotation rotation = SKIN_ROTATION_0;
-    LOG(VERBOSE) << "setMultiDisplay id " << id << " "
-                 << x << " " << y << " " << w << " " << h << " "
-                << dpi << " " << flag << " " << (add? "add":"del");
+    LOG(VERBOSE) << "setMultiDisplay id " << id << " " << x << " " << y << " "
+                 << w << " " << h << " " << dpi << " " << flag << " "
+                 << (add ? "add" : "del");
     if (!featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)) {
         return -1;
     }
@@ -101,63 +103,72 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
         }
     }
     if (rotation != SKIN_ROTATION_0) {
-        mWindowAgent->showMessage("Please apply multiple displays without rotation",
-                                  WINDOW_MESSAGE_ERROR, 1000);
+        mWindowAgent->showMessage(
+                "Please apply multiple displays without rotation",
+                WINDOW_MESSAGE_ERROR, 1000);
         return -1;
     }
 
-    if (add) {
-        ret = createDisplay(&id);
-        if (ret != 0) {
-            return ret;
-        }
-        ret = setDisplayPose(id, x, y, w, h, dpi);
-        if (ret != 0) {
-            return ret;
+    if (featurecontrol::isEnabled(android::featurecontrol::Minigbm)) {
+        if (add) {
+            mVmAgent->setDisplay(id, w, h, dpi);
+        } else {
+            mVmAgent->setDisplay(id, 0, 0, 0);
         }
     } else {
-        ret = destroyDisplay(id);
-        if (ret != 0) {
-            return ret;
+        if (add) {
+            ret = createDisplay(&id);
+            if (ret != 0) {
+                return ret;
+            }
+            ret = setDisplayPose(id, x, y, w, h, dpi);
+            if (ret != 0) {
+                return ret;
+            }
+        } else {
+            ret = destroyDisplay(id);
+            if (ret != 0) {
+                return ret;
+            }
         }
-    }
 
-    // Service in guest has already started through QemuMiscPipe when
-    // bootCompleted. But this service may be killed, e.g., Android low
-    // memory. Send broadcast again to guarantee servce running.
-    // P.S. guest Service has check to avoid duplication.
-    auto adbInterface = emulation::AdbInterface::getGlobal();
-    if (!adbInterface) {
-        LOG(ERROR) << "Adb interface unavailable";
-        return -1;
-    }
-    adbInterface->enqueueCommand(
-        {"shell", "am", "broadcast", "-a",
-         "com.android.emulator.multidisplay.START", "-n",
-         "com.android.emulator.multidisplay/"
-         ".MultiDisplayServiceReceiver"});
+        // Service in guest has already started through QemuMiscPipe when
+        // bootCompleted. But this service may be killed, e.g., Android low
+        // memory. Send broadcast again to guarantee servce running.
+        // P.S. guest Service has check to avoid duplication.
+        auto adbInterface = emulation::AdbInterface::getGlobal();
+        if (!adbInterface) {
+            LOG(ERROR) << "Adb interface unavailable";
+            return -1;
+        }
+        adbInterface->enqueueCommand({"shell", "am", "broadcast", "-a",
+                                    "com.android.emulator.multidisplay.START",
+                                    "-n",
+                                    "com.android.emulator.multidisplay/"
+                                    ".MultiDisplayServiceReceiver"});
 
-    MultiDisplayPipe* pipe = MultiDisplayPipe::getInstance();
-    if (pipe) {
-        std::vector<uint8_t> data;
-        pipe->fillData(data, id, w, h, dpi, flag, add);
-        LOG(VERBOSE) << "MultiDisplayPipe send " << (add ? "add":"del") << " id " << id
-                     << " width " << w << " height " << h << " dpi " << dpi
-                     << " flag " << flag;
-        pipe->send(std::move(data));
+        MultiDisplayPipe* pipe = MultiDisplayPipe::getInstance();
+        if (pipe) {
+            std::vector<uint8_t> data;
+            pipe->fillData(data, id, w, h, dpi, flag, add);
+            LOG(VERBOSE) << "MultiDisplayPipe send " << (add ? "add" : "del")
+                        << " id " << id << " width " << w << " height " << h
+                        << " dpi " << dpi << " flag " << flag;
+            pipe->send(std::move(data));
+        }
     }
     return 0;
 }
 
 bool MultiDisplay::getMultiDisplay(uint32_t id,
-                                  int32_t* x,
-                                  int32_t* y,
-                                  uint32_t* w,
-                                  uint32_t* h,
-                                  uint32_t* dpi,
-                                  uint32_t* flag,
-                                  uint32_t* cb,
-                                  bool* enabled) {
+                                   int32_t* x,
+                                   int32_t* y,
+                                   uint32_t* w,
+                                   uint32_t* h,
+                                   uint32_t* dpi,
+                                   uint32_t* flag,
+                                   uint32_t* cb,
+                                   bool* enabled) {
     AutoLock lock(mLock);
     if (mMultiDisplay.find(id) == mMultiDisplay.end()) {
         if (enabled) {
@@ -186,13 +197,12 @@ bool MultiDisplay::getMultiDisplay(uint32_t id,
     if (enabled) {
         *enabled = mMultiDisplay[id].enabled;
     }
-    LOG(VERBOSE) << "getMultiDisplay " << id <<  "x " << mMultiDisplay[id].pos_x
-                 << " y " << mMultiDisplay[id].pos_y
-                 << " w " << mMultiDisplay[id].width
-                 << " h " << mMultiDisplay[id].height
-                 << " dpi " << mMultiDisplay[id].dpi
-                 << " flag " << mMultiDisplay[id].flag
-                 << " enable " << mMultiDisplay[id].enabled;
+    LOG(VERBOSE) << "getMultiDisplay " << id << " x " << mMultiDisplay[id].pos_x
+                 << " y " << mMultiDisplay[id].pos_y << " w "
+                 << mMultiDisplay[id].width << " h " << mMultiDisplay[id].height
+                 << " dpi " << mMultiDisplay[id].dpi << " flag "
+                 << mMultiDisplay[id].flag << " enable "
+                 << mMultiDisplay[id].enabled;
     return mMultiDisplay[id].enabled;
 }
 
@@ -246,7 +256,9 @@ bool MultiDisplay::getNextMultiDisplay(int32_t start_id,
     }
 }
 
-bool MultiDisplay::translateCoordination(uint32_t* x, uint32_t* y, uint32_t* displayId) {
+bool MultiDisplay::translateCoordination(uint32_t* x,
+                                         uint32_t* y,
+                                         uint32_t* displayId) {
     if (mGuestMode) {
         *displayId = 0;
         return true;
@@ -299,7 +311,7 @@ int MultiDisplay::createDisplay(uint32_t* displayId) {
 
     if (mMultiDisplay.size() > s_maxNumMultiDisplay) {
         LOG(ERROR) << "cannot create more displays, exceeding limits "
-            << s_maxNumMultiDisplay;
+                   << s_maxNumMultiDisplay;
         return -1;
     }
     if (mMultiDisplay.find(*displayId) != mMultiDisplay.end()) {
@@ -316,14 +328,14 @@ int MultiDisplay::createDisplay(uint32_t* displayId) {
         }
     }
     if (*displayId == s_invalidIdMultiDisplay) {
-        LOG(ERROR) << "cannot create more internaldisplays, exceeding limits " <<
-            s_maxNumMultiDisplay - s_displayIdInternalBegin;
+        LOG(ERROR) << "cannot create more internaldisplays, exceeding limits "
+                   << s_maxNumMultiDisplay - s_displayIdInternalBegin;
         return -1;
     }
 
     mMultiDisplay.emplace(*displayId, MultiDisplayInfo());
     LOG(VERBOSE) << "create display " << *displayId;
-    fireEvent(DisplayChangeEvent{ DisplayChange::DisplayAdded, *displayId});
+    fireEvent(DisplayChangeEvent{DisplayChange::DisplayAdded, *displayId});
     return 0;
 }
 
@@ -355,7 +367,8 @@ int MultiDisplay::destroyDisplay(uint32_t displayId) {
     if (needUIUpdate) {
         // stop recording of this display if it is happening.
         RecorderStates states = mRecordAgent->getRecorderState();
-        if (states.displayId == displayId && states.state == RECORDER_RECORDING) {
+        if (states.displayId == displayId &&
+            states.state == RECORDER_RECORDING) {
             mRecordAgent->stopRecording();
         }
         mWindowAgent->setUIDisplayRegion(0, 0, width, height);
@@ -364,16 +377,16 @@ int MultiDisplay::destroyDisplay(uint32_t displayId) {
         }
     }
     LOG(VERBOSE) << "delete display " << displayId;
-    fireEvent(DisplayChangeEvent{ DisplayChange::DisplayRemoved, displayId});
+    fireEvent(DisplayChangeEvent{DisplayChange::DisplayRemoved, displayId});
     return 0;
 }
 
 int MultiDisplay::setDisplayPose(uint32_t displayId,
-                                int32_t x,
-                                int32_t y,
-                                uint32_t w,
-                                uint32_t h,
-                                uint32_t dpi) {
+                                 int32_t x,
+                                 int32_t y,
+                                 uint32_t w,
+                                 uint32_t h,
+                                 uint32_t dpi) {
     bool UIUpdate = false;
     bool checkRecording = false;
     uint32_t width, height;
@@ -387,8 +400,9 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
             return -1;
         }
         if (mMultiDisplay[displayId].cb != 0 &&
-            (mMultiDisplay[displayId].width != w || mMultiDisplay[displayId].height != h)) {
-                checkRecording = true;
+            (mMultiDisplay[displayId].width != w ||
+             mMultiDisplay[displayId].height != h)) {
+            checkRecording = true;
         }
         mMultiDisplay[displayId].width = w;
         mMultiDisplay[displayId].height = h;
@@ -406,18 +420,18 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
     if (checkRecording) {
         // stop recording of this display if it is happening.
         RecorderStates states = mRecordAgent->getRecorderState();
-        if (states.displayId == displayId && states.state == RECORDER_RECORDING) {
+        if (states.displayId == displayId &&
+            states.state == RECORDER_RECORDING) {
             mRecordAgent->stopRecording();
         }
     }
     if (UIUpdate) {
         mWindowAgent->setUIDisplayRegion(0, 0, width, height);
     }
-    LOG(VERBOSE) << "setDisplayPose " << displayId << " x " << x
-                 << " y " << y << " w " << w << " h " << h
-                 << " dpi " << dpi;
+    LOG(VERBOSE) << "setDisplayPose " << displayId << " x " << x << " y " << y
+                 << " w " << w << " h " << h << " dpi " << dpi;
 
-    fireEvent(DisplayChangeEvent{ DisplayChange::DisplayChanged, displayId});
+    fireEvent(DisplayChangeEvent{DisplayChange::DisplayChanged, displayId});
     return 0;
 }
 
@@ -441,8 +455,9 @@ int MultiDisplay::getDisplayPose(uint32_t displayId,
     return 0;
 }
 
-int MultiDisplay::setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer) {
-    uint32_t width, height;
+int MultiDisplay::setDisplayColorBuffer(uint32_t displayId,
+                                        uint32_t colorBuffer) {
+    uint32_t width, height, dpi;
     bool noSkin = false;
     bool needUpdate = false;
     if (mGuestMode) {
@@ -461,10 +476,12 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer
             mMultiDisplay[displayId].cb = colorBuffer;
             // first time cb assigned, update the UI
             needUpdate = true;
+            dpi = mMultiDisplay[displayId].dpi;
             recomputeLayoutLocked();
             getCombinedDisplaySizeLocked(&width, &height);
             if (getNumberActiveMultiDisplaysLocked() == 2) {
-                //disable skin when first display set, index 0 is the default one.
+                // disable skin when first display set, index 0 is the default
+                // one.
                 noSkin = true;
             }
         }
@@ -477,11 +494,27 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer
         // Explicitly adjust host window size
         mWindowAgent->setUIDisplayRegion(0, 0, width, height);
     }
-    LOG(VERBOSE) << "setDisplayColorBuffer " << displayId << " cb " << colorBuffer;
+    if (needUpdate && featurecontrol::isEnabled(android::featurecontrol::Minigbm)) {
+        // b/131884992 b/186124236
+        auto adbInterface = emulation::AdbInterface::getGlobal();
+        if (!adbInterface) {
+            LOG(ERROR) << "Adb interface unavailable";
+            return -1;
+        }
+        adbInterface->enqueueCommand({"shell", "wm", "density",
+                                      std::to_string(dpi),
+                                      "-d",
+                                      std::to_string(displayId)
+                                    });
+        printf("send adb wm density %d display %d\n", dpi, displayId);
+    }
+    LOG(VERBOSE) << "setDisplayColorBuffer " << displayId << " cb "
+                 << colorBuffer;
     return 0;
 }
 
-int MultiDisplay::getDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer) {
+int MultiDisplay::getDisplayColorBuffer(uint32_t displayId,
+                                        uint32_t* colorBuffer) {
     if (mGuestMode) {
         return -1;
     }
@@ -493,7 +526,8 @@ int MultiDisplay::getDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffe
     return 0;
 }
 
-int MultiDisplay::getColorBufferDisplay(uint32_t colorBuffer, uint32_t* displayId) {
+int MultiDisplay::getColorBufferDisplay(uint32_t colorBuffer,
+                                        uint32_t* displayId) {
     if (mGuestMode) {
         return -1;
     }
@@ -513,7 +547,8 @@ void MultiDisplay::getCombinedDisplaySize(uint32_t* w, uint32_t* h) {
 }
 
 bool MultiDisplay::notifyDisplayChanges() {
-    fireEvent(DisplayChangeEvent{ DisplayChange::DisplayTransactionCompleted, 0});
+    fireEvent(
+            DisplayChangeEvent{DisplayChange::DisplayTransactionCompleted, 0});
     return true;
 }
 
@@ -554,8 +589,8 @@ int MultiDisplay::getNumberActiveMultiDisplaysLocked() {
  * Important detail of implementations: the x and y offsets saved in
  * mMultiDisplay use the bottom-left corner as origin. This coordinates will
  * be used by glviewport() in Postworker.cpp. However, the x and y offsets saved
- * by invoking setUIMultiDisplay() will be using top-left corner as origin. Thus,
- * input coordinates willl be calculated correctly when mouse events are
+ * by invoking setUIMultiDisplay() will be using top-left corner as origin.
+ * Thus, input coordinates willl be calculated correctly when mouse events are
  * captured by QT window.
  *
  * TODO: We assume all displays pos_x/pos_y is adjustable here. This may
@@ -565,26 +600,30 @@ void MultiDisplay::recomputeLayoutLocked() {
     uint32_t monitorWidth, monitorHeight;
     double monitorAspectRatio = 1.0;
     if (!mWindowAgent->getMonitorRect(&monitorWidth, &monitorHeight)) {
-        LOG(WARNING) << "Fail to get monitor width and height, use default ratio 1.0";
+        LOG(WARNING) << "Fail to get monitor width and height, use default "
+                        "ratio 1.0";
     } else {
-        monitorAspectRatio = (double) monitorHeight / (double) monitorWidth;
+        monitorAspectRatio = (double)monitorHeight / (double)monitorWidth;
     }
     std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles;
     for (const auto& iter : mMultiDisplay) {
         if (iter.first == 0 || iter.second.cb != 0) {
             rectangles[iter.first] =
-                std::make_pair(iter.second.width, iter.second.height);
+                    std::make_pair(iter.second.width, iter.second.height);
         }
     }
     for (const auto& iter :
-        android::base::resolveLayout(rectangles, monitorAspectRatio)) {
+         android::base::resolveLayout(rectangles, monitorAspectRatio)) {
         mMultiDisplay[iter.first].pos_x = iter.second.first;
         mMultiDisplay[iter.first].pos_y = iter.second.second;
     }
 }
 
-bool MultiDisplay::multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h,
-                                             uint32_t dpi, uint32_t flag) {
+bool MultiDisplay::multiDisplayParamValidate(uint32_t id,
+                                             uint32_t w,
+                                             uint32_t h,
+                                             uint32_t dpi,
+                                             uint32_t flag) {
     // According the Android 9 CDD,
     // * 120 <= dpi <= 640
     // * 320 * (dpi / 160) <= width
@@ -613,7 +652,7 @@ bool MultiDisplay::multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h
     }
     if (id > s_maxNumMultiDisplay) {
         std::string msg = "Display index cannot be more than " +
-            std::to_string(s_maxNumMultiDisplay);
+                          std::to_string(s_maxNumMultiDisplay);
         mWindowAgent->showMessage(msg.c_str(), WINDOW_MESSAGE_ERROR, 1000);
         LOG(ERROR) << msg;
         return false;
@@ -639,23 +678,22 @@ std::map<uint32_t, MultiDisplayInfo> MultiDisplay::parseConfig() {
         return ret;
     }
     int i = 0;
-    for (i = 0; i < params.size(); i+=5) {
+    for (i = 0; i < params.size(); i += 5) {
         if (params[i] == 0 || params[i] > 3) {
             LOG(ERROR) << "multidisplay index should only be 1, 2, or 3";
             ret.clear();
             return ret;
         }
-        if (multiDisplayParamValidate(params[i],
-                                      params[i + 1],
-                                      params[i + 2],
-                                      params[i + 3],
-                                      params[i + 4])) {
-            LOG(ERROR) << "Invalid index/width/height/dpi settings for multidisplay command";
+        if (multiDisplayParamValidate(params[i], params[i + 1], params[i + 2],
+                                      params[i + 3], params[i + 4])) {
+            LOG(ERROR) << "Invalid index/width/height/dpi settings for "
+                          "multidisplay command";
             ret.clear();
             return ret;
         }
-        ret.emplace(params[i], MultiDisplayInfo(-1, -1, params[i + 1], params[i + 2],
-                                                params[i + 3], params[i + 4], true));
+        ret.emplace(params[i],
+                    MultiDisplayInfo(-1, -1, params[i + 1], params[i + 2],
+                                     params[i + 3], params[i + 4], true));
     }
     return ret;
 }
@@ -684,61 +722,49 @@ void MultiDisplay::loadConfig() {
     if (info.size()) {
         LOG(VERBOSE) << "config multidisplay with command-line";
         for (const auto& i : info) {
-            setMultiDisplay(i.first,
-                            -1,
-                            -1,
-                            i.second.width,
-                            i.second.height,
-                            i.second.dpi,
-                            i.second.flag,
-                            true);
+            setMultiDisplay(i.first, -1, -1, i.second.width, i.second.height,
+                            i.second.dpi, i.second.flag, true);
             mWindowAgent->updateUIMultiDisplayPage(i.first);
         }
     } else {
         LOG(VERBOSE) << "config multidisplay with config.ini "
-                        << android_hw->hw_display1_width
-                        << "x" << android_hw->hw_display1_height << " " <<
-                        android_hw->hw_display2_width << "x" <<
-                        android_hw->hw_display2_height << " " <<
-                        android_hw->hw_display3_width << "x" <<
-                        android_hw->hw_display3_height;
+                     << android_hw->hw_display1_width << "x"
+                     << android_hw->hw_display1_height << " "
+                     << android_hw->hw_display2_width << "x"
+                     << android_hw->hw_display2_height << " "
+                     << android_hw->hw_display3_width << "x"
+                     << android_hw->hw_display3_height;
         if (android_hw->hw_display1_width != 0 &&
             android_hw->hw_display1_height != 0) {
             LOG(VERBOSE) << " add display 1";
-            setMultiDisplay(1,
-                            android_hw->hw_display1_xOffset,
+            setMultiDisplay(1, android_hw->hw_display1_xOffset,
                             android_hw->hw_display1_yOffset,
                             android_hw->hw_display1_width,
                             android_hw->hw_display1_height,
                             android_hw->hw_display1_density,
-                            android_hw->hw_display1_flag,
-                            true);
+                            android_hw->hw_display1_flag, true);
             mWindowAgent->updateUIMultiDisplayPage(1);
         }
         if (android_hw->hw_display2_width != 0 &&
             android_hw->hw_display2_height != 0) {
             LOG(VERBOSE) << " add display 2";
-            setMultiDisplay(2,
-                            android_hw->hw_display2_xOffset,
+            setMultiDisplay(2, android_hw->hw_display2_xOffset,
                             android_hw->hw_display2_yOffset,
                             android_hw->hw_display2_width,
                             android_hw->hw_display2_height,
                             android_hw->hw_display2_density,
-                            android_hw->hw_display2_flag,
-                            true);
+                            android_hw->hw_display2_flag, true);
             mWindowAgent->updateUIMultiDisplayPage(2);
         }
         if (android_hw->hw_display3_width != 0 &&
             android_hw->hw_display3_height != 0) {
             LOG(VERBOSE) << " add display 3";
-            setMultiDisplay(3,
-                            android_hw->hw_display3_xOffset,
+            setMultiDisplay(3, android_hw->hw_display3_xOffset,
                             android_hw->hw_display3_yOffset,
                             android_hw->hw_display3_width,
                             android_hw->hw_display3_height,
                             android_hw->hw_display3_density,
-                            android_hw->hw_display3_flag,
-                            true);
+                            android_hw->hw_display3_flag, true);
             mWindowAgent->updateUIMultiDisplayPage(3);
         }
     }
@@ -747,36 +773,39 @@ void MultiDisplay::loadConfig() {
 void MultiDisplay::onSave(base::Stream* stream) {
     AutoLock lock(mLock);
     base::saveCollection(
-        stream, mMultiDisplay,
-        [](base::Stream* s,
-           const std::map<uint32_t, MultiDisplayInfo>::value_type& pair) {
-        s->putBe32(pair.first);
-        s->putBe32(pair.second.pos_x);
-        s->putBe32(pair.second.pos_y);
-        s->putBe32(pair.second.width);
-        s->putBe32(pair.second.height);
-        s->putBe32(pair.second.dpi);
-        s->putBe32(pair.second.flag);
-        s->putBe32(pair.second.cb);
-        s->putByte(pair.second.enabled);
-    });
+            stream, mMultiDisplay,
+            [](base::Stream* s,
+               const std::map<uint32_t, MultiDisplayInfo>::value_type& pair) {
+                s->putBe32(pair.first);
+                s->putBe32(pair.second.pos_x);
+                s->putBe32(pair.second.pos_y);
+                s->putBe32(pair.second.width);
+                s->putBe32(pair.second.height);
+                s->putBe32(pair.second.dpi);
+                s->putBe32(pair.second.flag);
+                s->putBe32(pair.second.cb);
+                s->putByte(pair.second.enabled);
+            });
 }
 
 void MultiDisplay::onLoad(base::Stream* stream) {
     std::map<uint32_t, MultiDisplayInfo> displaysOnLoad;
-    base::loadCollection(stream, &displaysOnLoad,
-                         [this](base::Stream* stream) -> std::map<uint32_t, MultiDisplayInfo>::value_type {
-        const uint32_t idx = stream->getBe32();
-        const int32_t pos_x = stream->getBe32();
-        const int32_t pos_y = stream->getBe32();
-        const uint32_t width = stream->getBe32();
-        const uint32_t height = stream->getBe32();
-        const uint32_t dpi = stream->getBe32();
-        const uint32_t flag = stream->getBe32();
-        const uint32_t cb = stream->getBe32();
-        const bool enabled = stream->getByte();
-        return {idx, {pos_x, pos_y, width, height, dpi, flag, enabled, cb}};
-    });
+    base::loadCollection(
+            stream, &displaysOnLoad,
+            [this](base::Stream* stream)
+                    -> std::map<uint32_t, MultiDisplayInfo>::value_type {
+                const uint32_t idx = stream->getBe32();
+                const int32_t pos_x = stream->getBe32();
+                const int32_t pos_y = stream->getBe32();
+                const uint32_t width = stream->getBe32();
+                const uint32_t height = stream->getBe32();
+                const uint32_t dpi = stream->getBe32();
+                const uint32_t flag = stream->getBe32();
+                const uint32_t cb = stream->getBe32();
+                const bool enabled = stream->getByte();
+                return {idx,
+                        {pos_x, pos_y, width, height, dpi, flag, enabled, cb}};
+            });
     // Restore the multidisplays of the snapshot.
     std::set<uint32_t> ids;
     uint32_t combinedDisplayWidth = 0;
@@ -787,23 +816,26 @@ void MultiDisplay::onLoad(base::Stream* stream) {
         for (const auto& iter : mMultiDisplay) {
             ids.insert(iter.first);
         }
-        for (const auto& iter: displaysOnLoad) {
+        for (const auto& iter : displaysOnLoad) {
             ids.insert(iter.first);
         }
         activeBeforeLoad = getNumberActiveMultiDisplaysLocked() > 1;
         mMultiDisplay.clear();
         mMultiDisplay = displaysOnLoad;
         activeAfterLoad = getNumberActiveMultiDisplaysLocked() > 1;
-        getCombinedDisplaySizeLocked(&combinedDisplayWidth, &combinedDisplayHeight);
+        getCombinedDisplaySizeLocked(&combinedDisplayWidth,
+                                     &combinedDisplayHeight);
     }
     if (activeAfterLoad) {
         if (!activeBeforeLoad) {
             mWindowAgent->setNoSkin();
         }
-        mWindowAgent->setUIDisplayRegion(0, 0, combinedDisplayWidth, combinedDisplayHeight);
+        mWindowAgent->setUIDisplayRegion(0, 0, combinedDisplayWidth,
+                                         combinedDisplayHeight);
     } else {
         if (activeBeforeLoad) {
-            mWindowAgent->setUIDisplayRegion(0, 0, combinedDisplayWidth, combinedDisplayHeight);
+            mWindowAgent->setUIDisplayRegion(0, 0, combinedDisplayWidth,
+                                             combinedDisplayHeight);
             mWindowAgent->restoreSkin();
         }
     }
@@ -812,12 +844,15 @@ void MultiDisplay::onLoad(base::Stream* stream) {
     }
 }
 
-}   // namespace android
+}  // namespace android
 
-void android_init_multi_display(const QAndroidEmulatorWindowAgent* const windowAgent,
-                                const QAndroidRecordScreenAgent* const recordAgent,
-                                bool isGuestMode) {
-    android::sMultiDisplay = new android::MultiDisplay(windowAgent, recordAgent, isGuestMode);
+void android_init_multi_display(
+        const QAndroidEmulatorWindowAgent* const windowAgent,
+        const QAndroidRecordScreenAgent* const recordAgent,
+        const QAndroidVmOperations* const vmAgent,
+        bool isGuestMode) {
+    android::sMultiDisplay =
+            new android::MultiDisplay(windowAgent, recordAgent, vmAgent, isGuestMode);
 }
 
 extern "C" {

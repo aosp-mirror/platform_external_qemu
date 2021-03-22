@@ -318,9 +318,20 @@ static void
 virtio_gpu_generate_edid(VirtIOGPU *g, int scanout,
                          struct virtio_gpu_resp_edid *edid)
 {
+    // QEMU define max scanout as 16, naming them from
+    // "EMU_display_0" to "EMU_display_f"
+    char name[] = "EMU_display_0";
+    if (scanout < 10) {
+        name[12] = '0' + scanout;
+    } else {
+        name[12] = 'a' + scanout - 10;
+    }
     qemu_edid_info info = {
+        .vendor = "GGL",
+        .name = name,
         .prefx = g->req_state[scanout].width,
         .prefy = g->req_state[scanout].height,
+        .dpi = g->req_state[scanout].dpi,
     };
 
     edid->size = cpu_to_le32(sizeof(edid->edid));
@@ -336,7 +347,6 @@ void virtio_gpu_get_edid(VirtIOGPU *g,
 
     VIRTIO_GPU_FILL_CMD(get_edid);
     virtio_gpu_bswap_32(&get_edid, sizeof(get_edid));
-    printf("%s for scanout %d\n", __FUNCTION__, get_edid.scanout);
 
     if (get_edid.scanout >= g->conf.max_outputs) {
         cmd->error = VIRTIO_GPU_RESP_ERR_INVALID_PARAMETER;
@@ -1040,6 +1050,7 @@ static int virtio_gpu_ui_info(void *opaque, uint32_t idx, QemuUIInfo *info)
     g->req_state[idx].y = info->yoff;
     g->req_state[idx].width = info->width;
     g->req_state[idx].height = info->height;
+    g->req_state[idx].dpi = info->dpi;
 
     if (info->width && info->height) {
         g->enabled_output_bitmask |= (1 << idx);
@@ -1426,7 +1437,11 @@ static const VMStateDescription vmstate_virtio_gpu = {
 };
 
 static Property virtio_gpu_properties[] = {
+#ifdef CONFIG_ANDROID
+    DEFINE_PROP_UINT32("max_outputs", VirtIOGPU, conf.max_outputs, 11),
+#else
     DEFINE_PROP_UINT32("max_outputs", VirtIOGPU, conf.max_outputs, 1),
+#endif
     DEFINE_PROP_SIZE("max_hostmem", VirtIOGPU, conf.max_hostmem,
                      256 * 1024 * 1024),
 #ifdef CONFIG_VIRGL

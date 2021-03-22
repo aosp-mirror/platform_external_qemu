@@ -1096,7 +1096,9 @@ static int startEmulatorWithMinConfig(
                             WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
         }
     }
-    android_init_multi_display(getConsoleAgents()->emu, getConsoleAgents()->record);
+    android_init_multi_display(getConsoleAgents()->emu,
+                               getConsoleAgents()->record,
+                               getConsoleAgents()->vm);
 
     RendererConfig rendererConfig;
     configAndStartRenderer(avd, opts, hw, getConsoleAgents()->vm,
@@ -2282,7 +2284,9 @@ extern "C" int main(int argc, char** argv) {
         battery->setHasBattery(android_hw->hw_battery);
     }
 
-    android_init_multi_display(getConsoleAgents()->emu, getConsoleAgents()->record);
+    android_init_multi_display(getConsoleAgents()->emu,
+                               getConsoleAgents()->record,
+                               getConsoleAgents()->vm);
 
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.
