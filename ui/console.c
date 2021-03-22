@@ -1520,6 +1520,7 @@ void unregister_displaychangelistener(DisplayChangeListener *dcl)
 
 static void dpy_set_ui_info_timer(void *opaque)
 {
+    printf("%s enter\n", __FUNCTION__);
     QemuConsole *con = opaque;
 
     con->hw_ops->ui_info(con->hw, con->head, &con->ui_info);

@@ -295,8 +295,11 @@ virtio_gpu_fill_display_info(VirtIOGPU *g,
     for (i = 0; i < g->conf.max_outputs; i++) {
         if (g->enabled_output_bitmask & (1 << i)) {
             dpy_info->pmodes[i].enabled = 1;
+//            dpy_info->pmodes[i].enabled = ((i == 0) ? 1 : 0);
             dpy_info->pmodes[i].r.width = cpu_to_le32(g->req_state[i].width);
             dpy_info->pmodes[i].r.height = cpu_to_le32(g->req_state[i].height);
+            printf("reply display %d w %d h %d\n", i, dpy_info->pmodes[i].r.width,
+                   dpy_info->pmodes[i].r.height);
         }
     }
 }
@@ -321,6 +324,7 @@ virtio_gpu_generate_edid(VirtIOGPU *g, int scanout,
     qemu_edid_info info = {
         .prefx = g->req_state[scanout].width,
         .prefy = g->req_state[scanout].height,
+        .dpi = g->req_state[scanout].dpi,
     };
 
     edid->size = cpu_to_le32(sizeof(edid->edid));
@@ -1030,6 +1034,8 @@ static void virtio_gpu_text_update(void *opaque, console_ch_t *chardata)
 
 static int virtio_gpu_ui_info(void *opaque, uint32_t idx, QemuUIInfo *info)
 {
+    printf("enter %s idx %d x %d y %d w %d h %d\n", __FUNCTION__, idx,
+           info->xoff, info->yoff, info->width, info->height);
     VirtIOGPU *g = opaque;
 
     if (idx >= g->conf.max_outputs) {
@@ -1040,6 +1046,7 @@ static int virtio_gpu_ui_info(void *opaque, uint32_t idx, QemuUIInfo *info)
     g->req_state[idx].y = info->yoff;
     g->req_state[idx].width = info->width;
     g->req_state[idx].height = info->height;
+    g->req_state[idx].dpi = info->dpi;
 
     if (info->width && info->height) {
         g->enabled_output_bitmask |= (1 << idx);
@@ -1426,7 +1433,8 @@ static const VMStateDescription vmstate_virtio_gpu = {
 };
 
 static Property virtio_gpu_properties[] = {
-    DEFINE_PROP_UINT32("max_outputs", VirtIOGPU, conf.max_outputs, 1),
+    DEFINE_PROP_UINT32("max_outputs", VirtIOGPU, conf.max_outputs, 11),
+    //DEFINE_PROP_UINT32("max_outputs", VirtIOGPU, conf.max_outputs, 1),
     DEFINE_PROP_SIZE("max_hostmem", VirtIOGPU, conf.max_hostmem,
                      256 * 1024 * 1024),
 #ifdef CONFIG_VIRGL
