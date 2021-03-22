@@ -162,11 +162,13 @@ static void edid_desc_text(uint8_t *desc, uint8_t type,
     memset(desc + 5, ' ', 13);
 
     len = strlen(text);
-    if (len > 12) {
-        len = 12;
+    if (len >= 13) {
+        len = 13;
     }
     strncpy((char *)(desc + 5), text, len);
-    desc[5 + len] = '\n';
+    if (strlen(text) < 13) {
+        desc[5 + len] = '\n';
+    }
 }
 
 static void edid_desc_ranges(uint8_t *desc)
@@ -347,8 +349,8 @@ void qemu_edid_generate(uint8_t *edid, size_t size,
     *(uint32_t *)(edid + 12) = cpu_to_le32(serial_nr);
 
     /* manufacture week and year */
-    edid[16] = 42;
-    edid[17] = 2014 - 1990;
+    edid[16] = 12;
+    edid[17] = 2021 - 1990;
 
     /* edid version */
     edid[18] = 1;
@@ -361,8 +363,8 @@ void qemu_edid_generate(uint8_t *edid, size_t size,
     edid[20] = 0xa5;
 
     /* screen size: undefined */
-    edid[21] = info->prefx * info->dpi / 2540;
-    edid[22] = info->prefy * info->dpi / 2540;
+    edid[21] = (info->prefx * 254) / (info->dpi * 100);
+    edid[22] = (info->prefy * 254) / (info->dpi * 100);
 
     /* display gamma: 2.2 */
     edid[23] = 220 - 100;
