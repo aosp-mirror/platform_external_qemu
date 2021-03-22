@@ -1627,6 +1627,21 @@ VG_EXPORT int stream_renderer_resource_unmap(uint32_t res_handle) {
     return sRenderer->resourceUnmap(res_handle);
 }
 
+VG_EXPORT void pipe_virgl_renderer_save_snapshot(void* qemufile) {
+    (void)qemufile;
+}
+
+VG_EXPORT void pipe_virgl_renderer_load_snapshot(void* qemufile) {
+    (void)qemufile;
+}
+
+VG_EXPORT int pipe_virgl_renderer_resource_attach_iov_with_addrs(int res_handle, struct iovec *iov, int num_iovs, uint64_t* addrs) {
+    (void)res_handle;
+    (void)iov;
+    (void)num_iovs;
+    (void)addrs;
+    return 0;
+}
 
 #define VIRGLRENDERER_API_PIPE_STRUCT_DEF(api) pipe_##api,
 
