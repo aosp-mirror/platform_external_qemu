@@ -41,12 +41,12 @@ android_target_link_libraries(
   emulator-libusb darwin-x86_64 PRIVATE "-framework IOKit"
                                         "-framework Foundation"
                                         "-framework CoreFoundation"
-                                        "-framework IOUSBHost")
+                                        "-weak_framework IOUSBHost")
 android_target_link_libraries(
   emulator-libusb darwin-aarch64 PRIVATE "-framework IOKit"
                                         "-framework Foundation"
                                         "-framework CoreFoundation"
-                                        "-framework IOUSBHost")
+                                        "-weak_framework IOUSBHost")
 
 # These are very slow.. 27.97s user 90.95s system 75% cpu 2:37.73 total
 android_add_executable(TARGET libusb_stress_tests NODISTRIBUTE
