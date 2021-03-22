@@ -518,6 +518,7 @@ void MediaVideoToolBoxVideoHelper::recreateDecompressionSession() {
 
 void MediaVideoToolBoxVideoHelper::copyFrameToTextures() {
     // TODO
+    auto startTime = std::chrono::steady_clock::now();
     TextureFrame texFrame;
     if (mUseGpuTexture && mTexturePool != nullptr) {
         VTB_DPRINT("decoded surface is %p w %d h %d",
@@ -529,6 +530,10 @@ void MediaVideoToolBoxVideoHelper::copyFrameToTextures() {
                 texFrame, &my_copy_context,
                 (void*)media_vtb_utils_nv12_updater);
     }
+
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTime);
+    fprintf(stderr, "%s %d used %d ms\n", __func__, __LINE__, (int)elapsed.count());
+
 
     mVtbBufferMap[mOutputPts] = MediaSnapshotState::FrameInfo{
         std::vector<uint8_t>(), std::vector<uint32_t>{texFrame.Ytex, texFrame.UVtex},
