@@ -60,6 +60,7 @@ struct virtio_gpu_scanout {
 struct virtio_gpu_requested_state {
     uint32_t width, height;
     int x, y;
+    uint32_t dpi;
 };
 
 enum virtio_gpu_conf_flags {
