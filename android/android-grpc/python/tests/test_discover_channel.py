@@ -13,6 +13,7 @@
 # limitations under the License.
 import os
 import pytest
+import grpc
 
 import aemu.discovery.emulator_discovery
 from aemu.discovery.emulator_discovery import get_default_emulator
@@ -45,8 +46,21 @@ def test_get_default_channel(mocker, fake_emu_pid_file):
     mocker.patch.object(os, "listdir", return_value=[pid_file])
     channel = get_default_emulator().get_grpc_channel()
     assert channel is not None
+    assert isinstance(channel, grpc.Channel)
     assert channel.__class__.__name__ == "Channel"
 
+def test_get_default_async_channel(mocker, fake_emu_pid_file):
+    """Test you gets a standard async insecure channel."""
+    path = os.path.dirname(fake_emu_pid_file)
+    pid_file = os.path.basename(fake_emu_pid_file)
+    mocker.patch.object(
+        aemu.discovery.emulator_discovery, "get_discovery_directory", return_value=path
+    )
+    mocker.patch.object(os, "listdir", return_value=[pid_file])
+    channel = get_default_emulator().get_async_grpc_channel()
+    assert channel is not None
+    assert isinstance(channel, grpc.aio.Channel)
+    assert channel.__class__.__name__ == "Channel"
 
 def test_get_token_channel(mocker, fake_emu_pid_file_with_token):
     """Test you gets a standard insecure channel with interceptor."""
@@ -57,6 +71,20 @@ def test_get_token_channel(mocker, fake_emu_pid_file_with_token):
     )
     mocker.patch.object(os, "listdir", return_value=[pid_file])
     channel = get_default_emulator().get_grpc_channel()
+    assert channel is not None
+    # Note the hijacked channel class!
+    assert channel.__class__.__name__ == "_Channel"
+
+
+def test_get_token_async_channel(mocker, fake_emu_pid_file_with_token):
+    """Test you gets a standard insecure channel with interceptor."""
+    path = os.path.dirname(fake_emu_pid_file_with_token)
+    pid_file = os.path.basename(fake_emu_pid_file_with_token)
+    mocker.patch.object(
+        aemu.discovery.emulator_discovery, "get_discovery_directory", return_value=path
+    )
+    mocker.patch.object(os, "listdir", return_value=[pid_file])
+    channel = get_default_emulator().get_async_grpc_channel()
     assert channel is not None
     # Note the hijacked channel class!
     assert channel.__class__.__name__ == "_Channel"
