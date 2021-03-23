@@ -5718,7 +5718,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #ifdef CONFIG_ANDROID
     qemu_android_emulation_teardown();
     android_wear_agent_stop();
-    if (android_qemu_mode) {
+    if (android_qemu_mode || is_fuchsia) {
         android_reporting_teardown();
     }
     android_devices_teardown();
