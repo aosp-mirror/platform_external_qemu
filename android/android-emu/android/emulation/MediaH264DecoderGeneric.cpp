@@ -99,11 +99,26 @@ void MediaH264DecoderGeneric::reset(void* ptr) {
                             param.outputHeight, param.outputPixelFormat);
 }
 
+void MediaH264DecoderGeneric::handleFrames() {
+    while(1) {
+        FrameProcessMsg msg;
+        mChannel.receive(&msg);
+        if (msg.type == MsgType::MSG_TYPE_STOP) {
+            break;
+        }
+        mRenderer.renderToHostColorBufferWithTextures(
+                msg.colorBufferId, msg.w, msg.h,
+                msg.texFrame);
+    }
+}
+
 void MediaH264DecoderGeneric::initH264Context(void* ptr) {
     InitContextParam param{};
     mParser.parseInitContextParams(ptr, param);
     initH264ContextInternal(param.width, param.height, param.outputWidth,
                             param.outputHeight, param.outputPixelFormat);
+    mRenderWorker = std::move(std::thread( [this] { handleFrames(); } ));
+
 }
 
 void MediaH264DecoderGeneric::initH264ContextInternal(unsigned int width,
@@ -184,6 +199,13 @@ MediaH264DecoderPlugin* MediaH264DecoderGeneric::clone() {
 
 void MediaH264DecoderGeneric::destroyH264Context() {
     H264_DPRINT("Destroy context %p", this);
+
+    mChannel.send(FrameProcessMsg{MsgType::MSG_TYPE_STOP});
+
+    if (mRenderWorker.joinable()) {
+        mRenderWorker.join();
+    }
+
     while (mSnapshotHelper != nullptr) {
         MediaSnapshotState::FrameInfo* pFrame = mSnapshotHelper->frontFrame();
         if (!pFrame) {
@@ -336,9 +358,12 @@ void MediaH264DecoderGeneric::getImage(void* ptr) {
             H264_DPRINT(
                     "calling rendering to host side color buffer with id %d tex %d tex %d",
                     param.hostColorBufferId, pFrame->texture[0], pFrame->texture[1]);
-            mRenderer.renderToHostColorBufferWithTextures(
-                    param.hostColorBufferId, pFrame->width, pFrame->height,
-                    TextureFrame{pFrame->texture[0], pFrame->texture[1]});
+            auto startTime = std::chrono::steady_clock::now();
+            FrameProcessMsg msg{MsgType::MSG_TYPE_WORK, param.hostColorBufferId,
+                    pFrame->width, pFrame->height, TextureFrame{pFrame->texture[0], pFrame->texture[1]}};
+            mChannel.send(msg);
+            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTime);
+            //fprintf(stderr, "just render %s %d used %d ms\n", __func__, __LINE__, (int)elapsed.count());
         } else {
             H264_DPRINT(
                     "calling rendering to host side color buffer with id %d",
@@ -365,7 +390,6 @@ void MediaH264DecoderGeneric::getImage(void* ptr) {
     *retColorTransfer = pFrame->color.transfer;
 
     mSnapshotHelper->discardFrontFrame();
-
     H264_DPRINT("Copying completed pts %lld w %d h %d ow %d oh %d",
                 (long long)*retPts, (int)*retWidth, (int)*retHeight,
                 (int)mOutputWidth, (int)mOutputHeight);

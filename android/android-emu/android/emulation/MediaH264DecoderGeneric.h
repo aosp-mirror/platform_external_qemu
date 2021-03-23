@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "android/base/synchronization/MessageChannel.h"
 #include "android/emulation/GoldfishMediaDefs.h"
 #include "android/emulation/H264PingInfoParser.h"
 #include "android/emulation/MediaFfmpegVideoHelper.h"
@@ -24,6 +25,7 @@
 
 #include <cstdint>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include <stdio.h>
@@ -94,6 +96,28 @@ private:
     void createAndInitSoftVideoHelper();
 
     void oneShotDecode(const uint8_t* data, size_t len, uint64_t pts);
+
+    enum MsgType {
+        MSG_TYPE_STOP = 0,
+        MSG_TYPE_WORK = 1,
+        MSG_TYPE_COUNT = 2
+    };
+
+    struct FrameProcessMsg {
+        MsgType type;
+        int colorBufferId;
+        int w;
+        int h;
+        MediaTexturePool::TextureFrame texFrame;
+    };
+
+    static constexpr int kCapacity = 32;
+    android::base::MessageChannel<FrameProcessMsg, kCapacity> mChannel;
+
+
+    std::thread mRenderWorker;
+    void handleFrames();
+
 };  // MediaH264DecoderGeneric
 
 }  // namespace emulation
