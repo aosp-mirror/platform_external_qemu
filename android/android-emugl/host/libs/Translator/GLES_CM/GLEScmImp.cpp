@@ -550,9 +550,6 @@ GL_API void GL_APIENTRY  glBufferSubData( GLenum target, GLintptr offset, GLsize
 
 GL_API void GL_APIENTRY  glClear( GLbitfield mask) {
     GET_CTX()
-    if (ctx->drawDisabled()) {
-        return;
-    }
     GLES_CM_TRACE()
     ERRCHECK()
     ctx->drawValidate();
@@ -735,9 +732,6 @@ GL_API void GL_APIENTRY  glTexImage2D( GLenum target, GLint level, GLint interna
 GL_API void GL_APIENTRY  glCompressedTexImage2D( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data) {
     GET_CTX_CM()
     GLES_CM_TRACE()
-    if (ctx->drawDisabled()) {
-        return;
-    }
     SET_ERROR_IF(!GLEScmValidate::textureTargetEx(target),GL_INVALID_ENUM);
     SET_ERROR_IF(!data,GL_INVALID_OPERATION);
 
@@ -1837,9 +1831,7 @@ GL_API void GL_APIENTRY  glPushMatrix(void) {
 GL_API void GL_APIENTRY  glReadPixels( GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *pixels) {
     GET_CTX()
     GLES_CM_TRACE()
-    if (ctx->drawDisabled()) {
-        return;
-    }
+
     SET_ERROR_IF(!(GLEScmValidate::pixelFrmt(ctx,format) && GLEScmValidate::pixelType(ctx,type)),GL_INVALID_ENUM);
     SET_ERROR_IF(!(GLEScmValidate::pixelOp(format,type)),GL_INVALID_OPERATION);
 
@@ -1999,9 +1991,7 @@ GL_API void GL_APIENTRY  glTexEnvxv( GLenum target, GLenum pname, const GLfixed 
 GL_API void GL_APIENTRY  glTexImage2D( GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels) {
     GET_CTX()
     GLES_CM_TRACE()
-    if (ctx->drawDisabled()) {
-        return;
-    }
+
     SET_ERROR_IF(!(GLEScmValidate::textureTargetEx(target) &&
                      GLEScmValidate::pixelFrmt(ctx,internalformat) &&
                      GLEScmValidate::pixelFrmt(ctx,format) &&
@@ -2317,20 +2307,18 @@ GL_API void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GL
                         rbData->attachedFB);
             }
         }
-        if (!ctx->drawDisabled()) {
-            if (isCoreProfile() || isGles2Gles()) {
-                ctx->dispatcher().glFramebufferTexture2D(GL_FRAMEBUFFER,
-                        rbData->attachedPoint,
-                        GL_TEXTURE_2D,
-                        img->globalTexObj->getGlobalName(),
-                        0);
-            } else {
-                ctx->dispatcher().glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-                        rbData->attachedPoint,
-                        GL_TEXTURE_2D,
-                        img->globalTexObj->getGlobalName(),
-                        0);
-            }
+        if (isCoreProfile() || isGles2Gles()) {
+            ctx->dispatcher().glFramebufferTexture2D(GL_FRAMEBUFFER,
+                    rbData->attachedPoint,
+                    GL_TEXTURE_2D,
+                    img->globalTexObj->getGlobalName(),
+                    0);
+        } else {
+            ctx->dispatcher().glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                    rbData->attachedPoint,
+                    GL_TEXTURE_2D,
+                    img->globalTexObj->getGlobalName(),
+                    0);
         }
         if (prevFB != rbData->attachedFB) {
             if (isCoreProfile() || isGles2Gles()) {
@@ -2634,9 +2622,7 @@ GL_API void GLAPIENTRY glFramebufferTexture2DOES(GLenum target, GLenum attachmen
                 NamedObjectType::TEXTURE, texname);
     }
 
-    if (!ctx->drawDisabled()) {
-        ctx->dispatcher().glFramebufferTexture2DEXT(target,attachment,textarget,globalTexName,level);
-    }
+    ctx->dispatcher().glFramebufferTexture2DEXT(target,attachment,textarget,globalTexName,level);
 
     // Update the the current framebuffer object attachment state
     GLuint fbName = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
@@ -2689,7 +2675,7 @@ GL_API void GLAPIENTRY glFramebufferRenderbufferOES(GLenum target, GLenum attach
 
     if (renderbuffer && obj.get() != NULL) {
         RenderbufferData *rbData = (RenderbufferData *)obj.get();
-        if (rbData->eglImageGlobalTexObject && !ctx->drawDisabled()) {
+        if (rbData->eglImageGlobalTexObject) {
             //
             // This renderbuffer object is an eglImage target
             // attach the eglimage's texture instead the renderbuffer.
