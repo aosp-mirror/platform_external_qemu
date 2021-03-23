@@ -56,7 +56,7 @@ bool captureScreenshot(android::base::StringView outputDirectoryPath,
         }
         return captureScreenshot(
                 nullptr,
-                emulator_window_get()->uiEmuAgent->display->getFrameBuffer,
+                getConsoleAgents()->display->getFrameBuffer,
                 rotation, outputDirectoryPath, pOutputFilepath);
     }
 }
