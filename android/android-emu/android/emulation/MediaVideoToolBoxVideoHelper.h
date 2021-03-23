@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "android/base/synchronization/MessageChannel.h"
 #include "android/emulation/H264NaluParser.h"
 #include "android/emulation/MediaFfmpegVideoHelper.h"
 #include "android/emulation/MediaSnapshotState.h"
@@ -34,6 +35,7 @@
 #include <map>
 #include <mutex>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include <stdio.h>
@@ -180,6 +182,25 @@ private:
     int mVtbBufferSize = 8;
     std::map<uint64_t, MediaSnapshotState::FrameInfo> mVtbBufferMap;
 
+    enum MsgType {
+        MSG_TYPE_STOP = 0,
+        MSG_TYPE_WORK = 1,
+        MSG_TYPE_COUNT = 2
+    };
+
+    struct FrameProcessMsg {
+        MsgType type;
+        CVPixelBufferRef  pixelBuf;
+        MediaTexturePool::TextureFrame texFrame;
+        uint64_t pts;
+    };
+
+    void handleFrames();
+    static constexpr int kCapacity = 32;
+    android::base::MessageChannel<FrameProcessMsg, kCapacity> mChannel;
+    // frame upload thread
+    std::thread mFrameUploader;
+    void copyFrameToTexturesWorker(FrameProcessMsg& msg);
 };  // MediaVideoToolBoxVideoHelper
 
 }  // namespace emulation

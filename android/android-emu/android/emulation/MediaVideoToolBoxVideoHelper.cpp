@@ -27,8 +27,12 @@
 #define VTB_DPRINT(fmt, ...)
 #endif
 
+#include <thread>
+
 namespace android {
 namespace emulation {
+
+//  std::lock_guard<std::mutex> g(mFrameLock);
 
 using TextureFrame = MediaTexturePool::TextureFrame;
 using FrameInfo = MediaSnapshotState::FrameInfo;
@@ -53,6 +57,12 @@ MediaVideoToolBoxVideoHelper::~MediaVideoToolBoxVideoHelper() {
 void MediaVideoToolBoxVideoHelper::deInit() {
     VTB_DPRINT("deInit calling");
 
+    mChannel.send(FrameProcessMsg{MsgType::MSG_TYPE_STOP, nullptr});
+
+    if (mFrameUploader.joinable()) {
+        mFrameUploader.join();
+    }
+
     resetDecoderSession();
 
     resetFormatDesc();
@@ -64,10 +74,23 @@ void MediaVideoToolBoxVideoHelper::deInit() {
     mSavedDecodedFrames.clear();
 }
 
+void MediaVideoToolBoxVideoHelper::handleFrames() {
+    while(1) {
+        FrameProcessMsg msg;
+        mChannel.receive(&msg);
+        if (msg.type == MsgType::MSG_TYPE_STOP) {
+            break;
+        }
+        copyFrameToTexturesWorker(msg);
+        //TODO: handle flush
+    }
+}
+
 bool MediaVideoToolBoxVideoHelper::init() {
     VTB_DPRINT("init calling");
     constexpr int numthreads = 1;
     mVtbReady = false;
+    mFrameUploader = std::move(std::thread( [this] { handleFrames(); } ));
     return true;
 }
 
@@ -296,7 +319,6 @@ void MediaVideoToolBoxVideoHelper::videoToolboxDecompressCallback(
     ptr->copyFrame();
     ptr->mImageReady = true;
     VTB_DPRINT("Got decoded frame");
-    CVPixelBufferRelease(ptr->mDecodedFrame);
     ptr->mDecodedFrame = nullptr;
 }
 
@@ -517,7 +539,6 @@ void MediaVideoToolBoxVideoHelper::recreateDecompressionSession() {
 }
 
 void MediaVideoToolBoxVideoHelper::copyFrameToTextures() {
-    // TODO
     auto startTime = std::chrono::steady_clock::now();
     TextureFrame texFrame;
     if (mUseGpuTexture && mTexturePool != nullptr) {
@@ -526,19 +547,35 @@ void MediaVideoToolBoxVideoHelper::copyFrameToTextures() {
         auto my_copy_context = media_vtb_utils_copy_context{mDecodedFrame, mOutputWidth, mOutputHeight};
         texFrame = mTexturePool->getTextureFrame(mOutputWidth, mOutputHeight);
         VTB_DPRINT("ask videocore to copy to %d and %d", texFrame.Ytex, texFrame.UVtex);
-        mTexturePool->saveDecodedFrameToTexture(
-                texFrame, &my_copy_context,
-                (void*)media_vtb_utils_nv12_updater);
+        FrameProcessMsg msg {MsgType::MSG_TYPE_WORK, mDecodedFrame, texFrame, mOutputPts};
+        mChannel.send(msg);
     }
 
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTime);
-    fprintf(stderr, "%s %d used %d ms\n", __func__, __LINE__, (int)elapsed.count());
+    //fprintf(stderr, "%s %d used %d ms\n", __func__, __LINE__, (int)elapsed.count());
 
 
+}
+
+void MediaVideoToolBoxVideoHelper::copyFrameToTexturesWorker(FrameProcessMsg& msg) {
+    
+    const int w = CVPixelBufferGetWidth(msg.pixelBuf);
+    const int h = CVPixelBufferGetHeight(msg.pixelBuf);
+    auto my_copy_context = media_vtb_utils_copy_context{msg.pixelBuf, w, h};
+    VTB_DPRINT("ask videocore to copy to %d and %d", msg.texFrame.Ytex, msg.texFrame.UVtex);
+    mTexturePool->saveDecodedFrameToTexture(
+            msg.texFrame, &my_copy_context, (void*)media_vtb_utils_nv12_updater);
+    
+    CVPixelBufferRelease(msg.pixelBuf);
+    std::lock_guard<std::mutex> g(mFrameLock);
     mVtbBufferMap[mOutputPts] = MediaSnapshotState::FrameInfo{
-        std::vector<uint8_t>(), std::vector<uint32_t>{texFrame.Ytex, texFrame.UVtex},
-            (int)mOutputWidth, (int)mOutputHeight, (uint64_t)(mOutputPts),
+        std::vector<uint8_t>(), std::vector<uint32_t>{msg.texFrame.Ytex, msg.texFrame.UVtex},
+            w, h, (uint64_t)(msg.pts),
             ColorAspects{mColorAspects}};
+    if (mVtbBufferMap.size() >= mVtbBufferSize) {
+            mSavedDecodedFrames.push_back(std::move(mVtbBufferMap.begin()->second));
+            mVtbBufferMap.erase(mVtbBufferMap.begin());
+    }
 }
 
 void MediaVideoToolBoxVideoHelper::copyFrameToCPU() {
@@ -634,12 +671,13 @@ void MediaVideoToolBoxVideoHelper::copyFrame() {
         copyFrameToTextures();
     } else {
         copyFrameToCPU();
+        if (mVtbBufferMap.size() >= mVtbBufferSize) {
+            mSavedDecodedFrames.push_back(std::move(mVtbBufferMap.begin()->second));
+            mVtbBufferMap.erase(mVtbBufferMap.begin());
+        }
+        CVPixelBufferRelease(mDecodedFrame);
     }
 
-    if (mVtbBufferMap.size() >= mVtbBufferSize) {
-        mSavedDecodedFrames.push_back(std::move(mVtbBufferMap.begin()->second));
-        mVtbBufferMap.erase(mVtbBufferMap.begin());
-    }
 }
 
 }  // namespace emulation
