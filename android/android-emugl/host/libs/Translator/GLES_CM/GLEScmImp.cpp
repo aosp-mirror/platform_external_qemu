@@ -2299,6 +2299,10 @@ GL_API void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GL
     rbData->saveableTexture = img->saveableTexture;
     img->saveableTexture->makeDirty();
 
+    if (ctx->drawDisabled()) {
+        return;
+    }
+
     //
     // if the renderbuffer is attached to a framebuffer
     // change the framebuffer attachment in the undelying OpenGL
@@ -2411,10 +2415,12 @@ GL_API void GLAPIENTRY glBindRenderbufferOES(GLenum target, GLuint renderbuffer)
                     ? ctx->shareGroup()->getGlobalName(
                               NamedObjectType::RENDERBUFFER, renderbuffer)
                     : 0;
-    if (isCoreProfile() || isGles2Gles()) {
-        ctx->dispatcher().glBindRenderbuffer(target,globalBufferName);
-    } else {
-        ctx->dispatcher().glBindRenderbufferEXT(target,globalBufferName);
+    if (!ctx->drawDisabled()) {
+        if (isCoreProfile() || isGles2Gles()) {
+            ctx->dispatcher().glBindRenderbuffer(target,globalBufferName);
+        } else {
+            ctx->dispatcher().glBindRenderbufferEXT(target,globalBufferName);
+        }
     }
 
     // update renderbuffer binding state
@@ -2470,7 +2476,9 @@ GL_API void GLAPIENTRY glRenderbufferStorageOES(GLenum target, GLenum internalfo
     rbData->eglImageGlobalTexObject.reset();
     rbData->saveableTexture.reset();
 
-    ctx->dispatcher().glRenderbufferStorageEXT(target,internalformat,width,height);
+    if (!ctx->drawDisabled()) {
+        ctx->dispatcher().glRenderbufferStorageEXT(target,internalformat,width,height);
+    }
 }
 
 GL_API void GLAPIENTRY glGetRenderbufferParameterivOES(GLenum target, GLenum pname, GLint* params) {
@@ -2570,10 +2578,12 @@ GL_API void GLAPIENTRY glBindFramebufferOES(GLenum target, GLuint framebuffer) {
             (framebuffer != 0)
                     ? ctx->getFBOGlobalName(framebuffer)
                     : ctx->getDefaultFBOGlobalName();
-    if (isCoreProfile() || isGles2Gles()) {
-        ctx->dispatcher().glBindFramebuffer(target,globalBufferName);
-    } else {
-        ctx->dispatcher().glBindFramebufferEXT(target,globalBufferName);
+    if (!ctx->drawDisabled()) {
+        if (isCoreProfile() || isGles2Gles()) {
+            ctx->dispatcher().glBindFramebuffer(target,globalBufferName);
+        } else {
+            ctx->dispatcher().glBindFramebufferEXT(target,globalBufferName);
+        }
     }
 
     // update framebuffer binding state
@@ -2586,8 +2596,9 @@ GL_API void GLAPIENTRY glDeleteFramebuffersOES(GLsizei n, const GLuint *framebuf
     SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION);
     GLuint fbName = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
     for (int i=0;i<n;++i) {
-        if (framebuffers[i] == fbName)
+        if (framebuffers[i] == fbName && !ctx->drawDisabled()) {
             glBindFramebufferOES(GL_FRAMEBUFFER_EXT, 0);
+        }
         ctx->deleteFBO(framebuffers[i]);
     }
 }
