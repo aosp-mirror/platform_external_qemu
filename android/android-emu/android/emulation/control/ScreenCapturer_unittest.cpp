@@ -233,26 +233,35 @@ public:
         return false;
     }
     void fillGLESUsages(android_studio::EmulatorGLESUsages*) { }
-    void getScreenshot(unsigned int nChannels, unsigned int* width,
-        unsigned int* height, std::vector<unsigned char>& pixels,
-        int displayId, int desiredWidth, int desiredHeight,
-        SkinRotation desiredRotation) {
-        if (mHasValidScreenshot) {
+
+    int getScreenshot(unsigned int nChannels, unsigned int* width,
+        unsigned int* height, uint8_t* pixels, size_t* cPixels, int displayId = 0,
+        int desiredWidth = 0, int desiredHeight = 0,
+        SkinRotation desiredRotation = SKIN_ROTATION_0) {
+            if (mHasValidScreenshot) {
             if (desiredWidth == 0 && desiredHeight == 0) {
                 *width = kWidth;
                 *height = kHeight;
-                pixels.assign(*width * *height * nChannels, 0);
             } else {
                 *width = desiredWidth;
                 *height = desiredHeight;
-                pixels.assign(*width * *height * nChannels, 0);
             }
+            size_t needed = *width * *height * nChannels;
+            if (*cPixels < needed) {
+                *cPixels = needed;
+                return -2;
+            }
+            *cPixels = needed;
+            memset(pixels, 0, *cPixels);
         } else {
             *width = 0;
             *height = 0;
-            pixels.resize(0);
+            *cPixels = 0;
         }
+
+        return 0;
     }
+
     void snapshotOperationCallback(
             android::snapshot::Snapshotter::Operation op,
             android::snapshot::Snapshotter::Stage stage) {}
