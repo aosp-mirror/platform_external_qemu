@@ -1258,6 +1258,10 @@ void ToolWindow::on_more_button_clicked() {
     }
 }
 
+QRect ToolWindow::extendedWindowGeometry() {
+    return mExtendedWindow.get()->frameGeometry();
+}
+
 void ToolWindow::paintEvent(QPaintEvent*) {
     QPainter p;
     QPen pen(Qt::SolidLine);
