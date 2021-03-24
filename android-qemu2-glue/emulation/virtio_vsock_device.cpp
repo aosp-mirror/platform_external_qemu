@@ -387,6 +387,19 @@ struct VirtIOVSockDev {
         }
     }
 
+    bool hostToGuestPing(const uint64_t key) {
+        android::RecursiveScopedVmLock lock;
+
+        const auto stream = findStreamLocked(key);
+        if (stream) {
+            stream->sendOp(VIRTIO_VSOCK_OP_CREDIT_REQUEST);
+            vqWriteHostToGuestLocked();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     void save(android::base::Stream *stream) const {
         android::RecursiveScopedVmLock lock;
 
@@ -949,6 +962,10 @@ size_t virtio_vsock_host_to_guest_send(uint64_t handle,
     return g_impl ? g_impl->hostToGuestSend(handle, data, size) : 0;
 }
 
+bool virtio_vsock_host_to_guest_ping(uint64_t handle) {
+    return g_impl ? g_impl->hostToGuestPing(handle) : false;
+}
+
 bool virtio_vsock_host_to_guest_close(uint64_t handle) {
     return g_impl ? g_impl->hostToGuestClose(handle) : false;
 }
@@ -956,6 +973,7 @@ bool virtio_vsock_host_to_guest_close(uint64_t handle) {
 const virtio_vsock_device_ops_t virtio_vsock_device_host_ops = {
     .open = &virtio_vsock_host_to_guest_open,
     .send = &virtio_vsock_host_to_guest_send,
+    .ping = &virtio_vsock_host_to_guest_ping,
     .close = &virtio_vsock_host_to_guest_close,
 };
 }  // namespace
