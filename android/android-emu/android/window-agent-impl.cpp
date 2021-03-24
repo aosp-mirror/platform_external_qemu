@@ -21,6 +21,10 @@
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/winsys.h"
 #include "android/utils/debug.h"
+#include "android/globals.h"
+
+// Set this to true if you wish to enable debugging of the window position.
+constexpr bool DEBUG_GRPC_ENDPOINT = false;
 
 static_assert(WINDOW_MESSAGE_GENERIC == int(Ui::OverlayMessageType::None),
               "Bad message type enum value (None)");
@@ -153,6 +157,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                     return false;
                 },
+
         .setNoSkin =
                 []() {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
@@ -177,6 +182,43 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         return win->getMonitorRect(w, h);
                     } else {
                         return false;
+                    }
+                },
+        .moveExtendedWindow =
+                [](uint32_t x,
+                   uint32_t y,
+                   HorizontalAnchor horizontal,
+                   VerticalAnchor vertical) {
+                    auto* win = EmulatorQtWindow::getInstance();
+                    if (win) {
+                        auto size = win->toolWindow()->extendedWindowGeometry();
+                        int ax = x;
+                        switch (horizontal) {
+                            case HCENTER:
+                                ax -= (size.width() / 2);
+                                break;
+                            case RIGHT:
+                                ax -= size.width();
+                                break;
+                        }
+
+                        int ay = y;
+                        switch (vertical) {
+                            case VCENTER:
+                                ay -= (size.height() / 2);
+                                break;
+                            case BOTTOM:
+                                ay -= size.height();
+                                break;
+                        }
+                        int unused;
+                        auto userConfig = aemu_get_userConfigPtr();
+                        if (auserConfig_getExtendedControlsPos(
+                                    userConfig, &unused, &unused) == 0 ||
+                            DEBUG_GRPC_ENDPOINT) {
+                            auserConfig_setExtendedControlsPos(userConfig, ax,
+                                                               ay);
+                        }
                     }
                 },
         .startExtendedWindow =
@@ -214,7 +256,6 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     } else {
                         return false;
                     }
-
                 },
         .runOnUiThread =
                 [](UiUpdateFunc f, void* data, bool wait) {

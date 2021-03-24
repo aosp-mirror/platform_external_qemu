@@ -17,18 +17,17 @@
 #include <grpcpp/grpcpp.h>
 
 #include "android/base/async/ThreadLooper.h"
+#include "android/emulation/control/window_agent.h"
 #include "android/settings-agent.h"
 
 #include "ui_controller_service.grpc.pb.h"
 #include "ui_controller_service.pb.h"
 
-namespace google {
-namespace protobuf {
+namespace google::protobuf {
 class Empty;
-}  // namespace protobuf
 }  // namespace google
 
-using namespace android::base;
+
 using ::google::protobuf::Empty;
 using grpc::ServerContext;
 using grpc::Status;
@@ -88,15 +87,44 @@ static ExtendedWindowPane convertToExtendedWindowPane(
 
 class UiControllerImpl final : public UiController::Service {
 public:
-    UiControllerImpl(const AndroidConsoleAgents* agents)
+    explicit UiControllerImpl(const AndroidConsoleAgents* agents)
         : mAgents(agents) {}
 
-    Status showExtendedControls(ServerContext* context,
+    Status showExtendedControls(ServerContext* /*context*/,
                                 const PaneEntry* paneEntry,
-                                ExtendedControlsStatus* reply) {
-        auto agent = mAgents->emu;
+                                ExtendedControlsStatus* reply) override {
+        const auto* agent = mAgents->emu;
         android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
                 [agent, reply, paneEntry]() {
+                    if (paneEntry->has_position()) {
+                        auto position = paneEntry->position();
+                        HorizontalAnchor hAnchor;
+                        VerticalAnchor vAnchor;
+                        switch (position.horizontalanchor()) {
+                            case WindowPosition::LEFT:
+                                hAnchor = HorizontalAnchor::LEFT;
+                                break;
+                            case WindowPosition::HCENTER:
+                                hAnchor = HorizontalAnchor::HCENTER;
+                                break;
+                            case WindowPosition::RIGHT:
+                                hAnchor = HorizontalAnchor::RIGHT;
+                                break;
+                        }
+
+                        switch (position.verticalanchor()) {
+                            case WindowPosition::TOP:
+                                vAnchor = VerticalAnchor::TOP;
+                                break;
+                            case WindowPosition::VCENTER:
+                                vAnchor = VerticalAnchor::VCENTER;
+                                break;
+                            case WindowPosition::BOTTOM:
+                                vAnchor = VerticalAnchor::BOTTOM;
+                                break;
+                        }
+                        agent->moveExtendedWindow(position.x(), position.y(), hAnchor, vAnchor);
+                    }
                     bool ret = agent->startExtendedWindow(
                             convertToExtendedWindowPane(paneEntry->index()));
                     reply->set_visibilitychanged(ret);
@@ -104,10 +132,10 @@ public:
         return Status::OK;
     }
 
-    Status closeExtendedControls(ServerContext* context,
-                                 const Empty* request,
-                                 ExtendedControlsStatus* reply) {
-        auto agent = mAgents->emu;
+    Status closeExtendedControls(ServerContext*  /*context*/,
+                                 const Empty*  /*request*/,
+                                 ExtendedControlsStatus* reply) override {
+        const auto *agent = mAgents->emu;
         android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
                 [agent, reply]() {
                     bool ret = agent->quitExtendedWindow();
@@ -118,8 +146,8 @@ public:
 
     Status setUiTheme(ServerContext* context,
                       const ThemingStyle* request,
-                      Empty* reply) {
-        auto agent = mAgents->emu;
+                      Empty* reply) override {
+        const auto *agent = mAgents->emu;
         android::base::ThreadLooper::runOnMainLooper([agent, request]() {
             if (request->style() == ThemingStyle::LIGHT)
                 agent->setUiTheme(SETTINGS_THEME_STUDIO_LIGHT);
@@ -128,6 +156,7 @@ public:
         });
         return Status::OK;
     }
+
 private:
     const AndroidConsoleAgents* mAgents;
 };

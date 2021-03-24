@@ -45,6 +45,44 @@ message ExtendedControlsStatus {
     bool visibilityChanged = 1;
 }
 
+// The pixel coordinates are device independent, and will be scaled
+// by Qt.
+//
+// Some things to note:
+//
+// - You cannot move a window offscreen.
+// - There is a padding of around 10px around the frame.
+//
+// This means that moving to (0, 0) or (10, 10) will have the same
+// result.
+// This means that anchoring might not exactly behave as expected.
+message WindowPosition {
+
+    // Anchor that is used to determine horizontal window placement, w = width, x is left of the window.
+    enum HorizontalAnchor {
+        LEFT = 0;    // The window will be anchored to the left and visible from (x, x + w)
+        HCENTER = 1; // The window be anchored in the center and visible from (x - w / 2, x + w / 2)
+        RIGHT = 2;   // The window be anchored to the right will be visible form (x - w, x)
+    }
+
+    // Anchor that is used to determine vertical window placement, h = height, y is the top of the window.
+    enum VerticalAnchor {
+        TOP = 0;    // The windows will be visible from (y, y + h)
+        VCENTER = 1; // The window be visible from (y - h / 2, y + h / 2)
+        BOTTOM = 3; // The window will be visible form (y - h, y)
+    }
+
+    // Corresponds to the x and y coordinate of the window geometry. The window
+    // geometry includes the window frame.
+    // see: https://doc.qt.io/qt-5/application-windows.html#window-geometry for
+    // details and pecularities on linux.
+    uint32 x = 1;
+    uint32 y = 2;
+
+    HorizontalAnchor horizontalAnchor = 3;
+    VerticalAnchor verticalAnchor = 4;
+}
+
 message PaneEntry {
     enum PaneIndex {
         // When specified as KEEP_CURRENT, extended controls will display the
@@ -77,4 +115,8 @@ message PaneEntry {
         SENSOR_REPLAY = 21;
     };
     PaneIndex index = 1;
+
+    // Set the window position to the specified coordinates if no coordinates are
+    // present in the AVD, otherwise this value will be igonred.
+    WindowPosition position = 2;
 }
