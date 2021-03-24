@@ -234,17 +234,29 @@ public:
     }
     void fillGLESUsages(android_studio::EmulatorGLESUsages*) { }
 
-    int getScreenshot(unsigned int nChannels, unsigned int* width,
-        unsigned int* height, uint8_t* pixels, size_t* cPixels, int displayId = 0,
-        int desiredWidth = 0, int desiredHeight = 0,
-        SkinRotation desiredRotation = SKIN_ROTATION_0) {
-            if (mHasValidScreenshot) {
-            if (desiredWidth == 0 && desiredHeight == 0) {
-                *width = kWidth;
-                *height = kHeight;
+    int getScreenshot(unsigned int nChannels,
+                      unsigned int* width,
+                      unsigned int* height,
+                      uint8_t* pixels,
+                      size_t* cPixels,
+                      int displayId = 0,
+                      int desiredWidth = 0,
+                      int desiredHeight = 0,
+                      SkinRotation desiredRotation = SKIN_ROTATION_0,
+                      SkinRect rect = {{0, 0}, {0, 0}}) {
+        if (mHasValidScreenshot) {
+            bool useSnipping = (rect.size.w != 0 && rect.size.h != 0);
+            if (useSnipping) {
+                *width = rect.size.w;
+                *height = rect.size.h;
             } else {
-                *width = desiredWidth;
-                *height = desiredHeight;
+                if (desiredWidth == 0 && desiredHeight == 0) {
+                    *width = kWidth;
+                    *height = kHeight;
+                } else {
+                    *width = desiredWidth;
+                    *height = desiredHeight;
+                }
             }
             size_t needed = *width * *height * nChannels;
             if (*cPixels < needed) {
