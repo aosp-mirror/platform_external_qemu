@@ -1218,6 +1218,12 @@ static RAMBlock *qemu_get_ram_block(ram_addr_t addr)
     }
 
     fprintf(stderr, "Bad ram offset %" PRIx64 "\n", (uint64_t)addr);
+
+    RAMBLOCK_FOREACH(block) {
+        fprintf(stderr, "block {.offset=%" PRIx64 " .size=%" PRIx64 "}\n",
+                (uint64_t)block->offset, (uint64_t)block->max_length);
+    }
+
     abort();
 
 found:
