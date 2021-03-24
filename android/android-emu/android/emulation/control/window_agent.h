@@ -29,6 +29,18 @@ typedef enum {
 } WindowMessageType;
 
 
+typedef enum {
+    LEFT,
+    HCENTER,
+    RIGHT,
+} HorizontalAnchor;
+
+typedef enum {
+    TOP,
+    VCENTER,
+    BOTTOM,
+} VerticalAnchor;
+
 typedef struct {} MultiDisplayPageChangeEvent;
 
 static const int kWindowMessageTimeoutInfinite = -1;
@@ -86,6 +98,9 @@ typedef struct QAndroidEmulatorWindowAgent {
     void (*restoreSkin)(void);
     void (*updateUIMultiDisplayPage)(uint32_t);
     bool (*getMonitorRect)(uint32_t*, uint32_t*);
+    // moves the extended window to the given position if the window was never displayed. This does nothing
+    // if the window has been show once during the lifetime of the avd.
+    void (*moveExtendedWindow)(uint32_t x, uint32_t y, HorizontalAnchor horizonal, VerticalAnchor vertical);
     // start extended window and switch to the pane specified by the index.
     // return true if extended controls window's visibility has changed.
     bool (*startExtendedWindow)(ExtendedWindowPane index);
