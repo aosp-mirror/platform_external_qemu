@@ -468,6 +468,13 @@ AdbVsockPipe::AdbVsockPipe(AdbVsockPipe::Service *service,
     setSocket(std::move(socket));
 }
 
+AdbVsockPipe::~AdbVsockPipe() {
+    if (mSocketWatcher) {
+        mSocketWatcher->dontWantWrite();
+        mSocketWatcher->dontWantRead();
+    }
+}
+
 std::unique_ptr<AdbVsockPipe> AdbVsockPipe::create(AdbVsockPipe::Service *service,
                                                    android::base::ScopedSocket socket,
                                                    AdbPortType portType) {
@@ -495,6 +502,11 @@ void AdbVsockPipe::processProxyEventBits(const Proxy::EventBits bits) {
     if (nonzero(bits & (Proxy::EventBits::HostClosed | Proxy::EventBits::GuestClosed))) {
         if (nonzero(bits & Proxy::EventBits::GuestClosed)) {
             mVsockCallbacks.reset();
+        }
+
+        if (nonzero(bits & Proxy::EventBits::HostClosed)) {
+            mSocketWatcher->dontWantWrite();
+            mSocketWatcher->dontWantRead();
         }
 
         mService->destroyPipe(this);

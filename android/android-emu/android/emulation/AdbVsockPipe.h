@@ -90,6 +90,8 @@ public:
                  android::base::ScopedSocket socket,
                  AdbPortType portType);
 
+    ~AdbVsockPipe();
+
     struct Proxy {
         enum class EventBits {
             None = 0,
