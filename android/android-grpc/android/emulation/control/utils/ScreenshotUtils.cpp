@@ -152,19 +152,19 @@ bool ScreenshotUtils::getScreenshot(int displayId,
                                     uint8_t* pixels,
                                     size_t* cPixels,
                                     uint32_t* finalWidth,
-                                    uint32_t* finalHeight) {
+                                    uint32_t* finalHeight,
+                                    SkinRect rect) {
     // Screenshots can come from either the gl renderer, or the guest.
     const auto& renderer = android_getOpenglesRenderer();
     android::emulation::ImageFormat desiredFormat =
             ScreenshotUtils::translate(format);
     SkinRotation desiredRotation = ScreenshotUtils::translate(rotation);
-
     if (renderer.get() &&
         (format == ImageFormat::RGB888 || format == ImageFormat::RGBA8888)) {
         unsigned int bpp = (format == ImageFormat::RGB888 ? 3 : 4);
-        return renderer.get()->getScreenshot(bpp, finalWidth, finalHeight,
-                                             pixels, cPixels, displayId,
-                                             desiredWidth, desiredHeight, desiredRotation) == 0;
+        return renderer.get()->getScreenshot(
+                       bpp, finalWidth, finalHeight, pixels, cPixels, displayId,
+                       desiredWidth, desiredHeight, desiredRotation, rect) == 0;
     } else {
         // oh, oh slow path.
         android::emulation::Image img = android::emulation::takeScreenshot(
@@ -175,10 +175,46 @@ bool ScreenshotUtils::getScreenshot(int displayId,
             *cPixels = img.getPixelCount();
             return false;
         }
-        *cPixels = img.getPixelCount();
-        memcpy(pixels, img.getPixelBuf(), *cPixels);
-        *finalWidth = img.getWidth();
-        *finalHeight = img.getHeight();
+
+        bool useSnipping = rect.size.w != 0 && rect.size.h != 0;
+        if (useSnipping) {
+            int nChannel = (format == ImageFormat::RGBA8888) ? 4 : 3;
+            *cPixels = nChannel * rect.size.w * rect.size.h;
+            *finalWidth = rect.size.w;
+            *finalHeight = rect.size.h;
+
+            if (format == ImageFormat::PNG) {
+                LOG(ERROR) << "getScreenshot doesn't support PNG format when "
+                              "using snipping.";
+                return false;
+            }
+            if (desiredWidth != img.getWidth()) {
+                rect.size.w = rect.size.w * img.getWidth() / desiredWidth;
+                rect.pos.x = rect.pos.x * img.getWidth() / desiredWidth;
+            }
+            if (desiredHeight != img.getHeight()) {
+                rect.size.h = rect.size.h * img.getHeight() / desiredHeight;
+                rect.pos.y = rect.pos.y * img.getHeight() / desiredHeight;
+            }
+            // Copy a partial screenshot
+            int copied = 0;
+            int bytesPerLine = img.getWidth() * nChannel;
+            int cursor = rect.pos.y * bytesPerLine + rect.pos.x;
+            uint8_t* src = pixels;
+            uint8_t* dst = img.getPixelBuf() + cursor;
+            for (int h = rect.pos.y;
+                 h < std::min(rect.pos.y + rect.size.h, (int)img.getHeight());
+                 h++) {
+                memcpy(src, dst, rect.size.w * nChannel);
+                src += rect.size.w * nChannel;
+                dst += bytesPerLine;
+            }
+        } else {
+            *cPixels = img.getPixelCount();
+            memcpy(pixels, img.getPixelBuf(), *cPixels);
+            *finalWidth = img.getWidth();
+            *finalHeight = img.getHeight();
+        }
     }
 
     return true;
