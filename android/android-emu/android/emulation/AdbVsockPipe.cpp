@@ -231,6 +231,11 @@ AdbVsockPipe::Service::~Service() {
 
 void AdbVsockPipe::Service::onHostConnection(android::base::ScopedSocket&& socket,
                                              const AdbPortType portType) {
+    // A workaround.
+    // `BaseSocketServer::onAccept` calls `stopListening` for some reasons.
+    // Probably we want to fix `BaseSocketServer::onAccept` instead.
+    mHostAgent->startListening();
+
     {
         std::lock_guard<std::mutex> guard(mPipesMtx);
 
