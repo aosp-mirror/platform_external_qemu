@@ -223,9 +223,14 @@ AdbVsockPipe::Service::Service(AdbHostAgent* hostAgent)
     , mGuestAdbdPollingThread(&AdbVsockPipe::Service::pollGuestAdbdThreadLoop, this)
     , mDestroyPipesThread(&AdbVsockPipe::Service::destroyPipesThreadLoop, this) {
     g_service = this;
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p\n",
+            "AdbVsockPipe::Service", __func__, __LINE__, this);
 }
 
 AdbVsockPipe::Service::~Service() {
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p\n",
+            "AdbVsockPipe::Service", __func__, __LINE__, this);
+
     g_service = nullptr;
 
     mGuestAdbdPollingThreadRunning = false;
@@ -237,6 +242,9 @@ AdbVsockPipe::Service::~Service() {
 
 void AdbVsockPipe::Service::onHostConnection(android::base::ScopedSocket&& socket,
                                              const AdbPortType portType) {
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p portType=%d\n",
+            "AdbVsockPipe::Service", __func__, __LINE__, this, portType);
+
     // A workaround.
     // `BaseSocketServer::onAccept` calls `stopListening` for some reasons.
     // Probably we want to fix `BaseSocketServer::onAccept` instead.
@@ -264,6 +272,9 @@ void AdbVsockPipe::Service::onHostConnection(android::base::ScopedSocket&& socke
 }
 
 void AdbVsockPipe::Service::destroyPipesThreadLoop() {
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p\n",
+            "AdbVsockPipe::Service", __func__, __LINE__, this);
+
     while (true) {
         AdbVsockPipe *toDestroy;
         {
@@ -275,6 +286,9 @@ void AdbVsockPipe::Service::destroyPipesThreadLoop() {
         if (!toDestroy) {
             break;
         }
+
+        fprintf(stderr, "rkir555 %s:%s:%d this=%p toDestroy=%p\n",
+                "AdbVsockPipe::Service", __func__, __LINE__, this, toDestroy);
 
         std::unique_ptr<AdbVsockPipe> deleter;  // ~AdbVsockPipe will not be called under mPipesMtx
 
@@ -293,12 +307,18 @@ void AdbVsockPipe::Service::destroyPipesThreadLoop() {
 }
 
 void AdbVsockPipe::Service::destroyPipe(AdbVsockPipe *p) {
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p p=%p\n",
+            "AdbVsockPipe::Service", __func__, __LINE__, this, p);
+
     std::lock_guard<std::mutex> guard(mPipesToDestroyMtx);
     mPipesToDestroy.push_back(p);
     mPipesToDestroyCv.notify_one();
 }
 
 void AdbVsockPipe::Service::pollGuestAdbdThreadLoop() {
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p\n",
+            "AdbVsockPipe::Service", __func__, __LINE__, this);
+
     struct AdbdAliveCallbacks : public IVsockHostCallbacks {
         ~AdbdAliveCallbacks() override {
             if (streamKey) {
@@ -369,6 +389,8 @@ void AdbVsockPipe::Service::pollGuestAdbdThreadLoop() {
 
         case State::NotAlive:
             if (adbdAliveCallbacks.connect(100ms)) {
+                fprintf(stderr, "rkir555 %s:%s:%d this=%p startListening\n",
+                        "AdbVsockPipe::Service", __func__, __LINE__, this);
 
                 mHostAgent->startListening();
                 mHostAgent->notifyServer();
@@ -386,9 +408,15 @@ void AdbVsockPipe::Service::pollGuestAdbdThreadLoop() {
                 }
 
                 if (needNotifyAdbServer) {
+                    fprintf(stderr, "rkir555 %s:%s:%d this=%p notifyServer\n",
+                            "AdbVsockPipe::Service", __func__, __LINE__, this);
+
                     mHostAgent->notifyServer();
                 }
             } else {
+                fprintf(stderr, "rkir555 %s:%s:%d this=%p\n",
+                        "AdbVsockPipe::Service", __func__, __LINE__, this);
+
                 state = State::Retrying;
             }
             break;
@@ -397,6 +425,9 @@ void AdbVsockPipe::Service::pollGuestAdbdThreadLoop() {
             if (adbdAliveCallbacks.connect(100ms)) {
                 state = State::Alive;
             } else {
+                fprintf(stderr, "rkir555 %s:%s:%d this=%p stopListening\n",
+                        "AdbVsockPipe::Service", __func__, __LINE__, this);
+
                 mHostAgent->stopListening();
                 state = State::NotAlive;
             }
@@ -407,11 +438,17 @@ void AdbVsockPipe::Service::pollGuestAdbdThreadLoop() {
     }
 
     if (state != State::NotAlive) {
+        fprintf(stderr, "rkir555 %s:%s:%d this=%p stopListening\n",
+                "AdbVsockPipe::Service", __func__, __LINE__, this);
+
         mHostAgent->stopListening();
     }
 }
 
 void AdbVsockPipe::Service::resetActiveGuestPipeConnection() {
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p\n",
+            "AdbVsockPipe::Service", __func__, __LINE__, this);
+
     std::lock_guard<std::mutex> guard(mPipesMtx);
     for (const auto& pipe : mPipes) {
         // destroying a pipe requires the BQL which we can't aquire while holding mPipesMtx
@@ -483,6 +520,9 @@ AdbVsockPipe::AdbVsockPipe(AdbVsockPipe::Service *service,
                            const AdbPortType portType)
         : mService(service)
         , mVsockCallbacks(this) {
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p service=%p\n",
+            "AdbVsockPipe", __func__, __LINE__, this, service);
+
     mVsockCallbacks.streamKey = (*g_vsock_ops->open)(kGuestAdbdPort, &mVsockCallbacks);
     if (!mVsockCallbacks.streamKey) {
         ::crashhandler_die("%s:%d: streamKey==0", __func__, __LINE__);
@@ -506,6 +546,9 @@ AdbVsockPipe::AdbVsockPipe(AdbVsockPipe::Service *service,
 }
 
 AdbVsockPipe::~AdbVsockPipe() {
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p\n",
+            "AdbVsockPipe", __func__, __LINE__, this);
+
     if (mSocketWatcher) {
         mSocketWatcher->dontWantWrite();
         mSocketWatcher->dontWantRead();
@@ -522,26 +565,39 @@ std::unique_ptr<AdbVsockPipe> AdbVsockPipe::create(AdbVsockPipe::Service *servic
 }
 
 void AdbVsockPipe::onHostSocketEvent(int hostFd, unsigned events) {
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p hostFd=%d events=%u\n",
+            "AdbVsockPipe", __func__, __LINE__, this, hostFd, events);
+
     processProxyEventBits(mProxy->onHostSocketEvent(hostFd,
                                                     mVsockCallbacks.streamKey,
                                                     events));
 }
 
 void AdbVsockPipe::onGuestSend(const void *data, size_t size) {
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p size=%zu\n",
+            "AdbVsockPipe", __func__, __LINE__, this, size);
+
     processProxyEventBits(mProxy->onGuestSend(data, size));
 }
 
 void AdbVsockPipe::onGuestClose() {
+    fprintf(stderr, "rkir555 %s:%s:%d this=%p\n",
+            "AdbVsockPipe", __func__, __LINE__, this);
+
     processProxyEventBits(Proxy::EventBits::GuestClosed);
 }
 
 void AdbVsockPipe::processProxyEventBits(const Proxy::EventBits bits) {
     if (nonzero(bits & (Proxy::EventBits::HostClosed | Proxy::EventBits::GuestClosed))) {
         if (nonzero(bits & Proxy::EventBits::GuestClosed)) {
+            fprintf(stderr, "rkir555 %s:%s:%d this=%p GuestClosed\n",
+                    "AdbVsockPipe", __func__, __LINE__, this);
             mVsockCallbacks.reset();
         }
 
         if (nonzero(bits & Proxy::EventBits::HostClosed)) {
+            fprintf(stderr, "rkir555 %s:%s:%d this=%p HostClosed\n",
+                    "AdbVsockPipe", __func__, __LINE__, this);
             mSocketWatcher->dontWantWrite();
             mSocketWatcher->dontWantRead();
         }

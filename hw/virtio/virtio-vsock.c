@@ -91,6 +91,8 @@ static void virtio_vsock_device_realize(DeviceState *dev, Error **errp) {
 }
 
 static void virtio_vsock_device_unrealize(DeviceState *dev, Error **errp) {
+    fprintf(stderr, "rkir555 %s:%d dev=%p\n", __func__, __LINE__, dev);
+
     VirtIOVSock *s = VIRTIO_VSOCK(dev);
     VirtIODevice *v = &s->parent;
 
@@ -123,11 +125,25 @@ static void virtio_vsock_set_config(VirtIODevice *dev, const uint8_t *raw) {
     s->guest_cid = cfg.guest_cid;
 }
 
+static void virtio_vsock_reset(VirtIODevice *dev) {
+    fprintf(stderr, "rkir555 %s:%d dev=%p\n", __func__, __LINE__, dev);
+}
+
 static void virtio_vsock_guest_notifier_mask(VirtIODevice *dev, int idx, bool mask) {
+    fprintf(stderr, "rkir555 %s:%d dev=%p\n", __func__, __LINE__, dev);
 }
 
 static bool virtio_vsock_guest_notifier_pending(VirtIODevice *dev, int idx) {
+    fprintf(stderr, "rkir555 %s:%d dev=%p\n", __func__, __LINE__, dev);
     return 0;
+}
+
+int virtio_vsock_start_ioeventfd(VirtIODevice *dev) {
+    fprintf(stderr, "rkir555 %s:%d dev=%p\n", __func__, __LINE__, dev);
+    return 0;
+}
+void virtio_vsock_stop_ioeventfd(VirtIODevice *dev) {
+    fprintf(stderr, "rkir555 %s:%d dev=%p\n", __func__, __LINE__, dev);
 }
 
 static void virtio_vsock_instance_init(Object* obj) {
@@ -146,9 +162,12 @@ static void virtio_vsock_class_init(ObjectClass *klass, void *data) {
     vdc->get_features = &virtio_vsock_device_get_features;
     vdc->get_config = &virtio_vsock_get_config;
     vdc->set_config = &virtio_vsock_set_config;
+    vdc->reset = &virtio_vsock_reset;
     vdc->set_status = &virtio_vsock_set_status;
     vdc->guest_notifier_mask = &virtio_vsock_guest_notifier_mask;
     vdc->guest_notifier_pending = &virtio_vsock_guest_notifier_pending;
+    vdc->start_ioeventfd = &virtio_vsock_start_ioeventfd;
+    vdc->stop_ioeventfd = &virtio_vsock_stop_ioeventfd;
 }
 
 static const TypeInfo virtio_vsock_typeinfo = {
