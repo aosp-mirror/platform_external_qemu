@@ -446,6 +446,13 @@ public:
             response_entry->set_value(entry.second);
         };
 
+        auto userEntries = reply->mutable_userconfig();
+        auto userCnf = getUserConfig();
+        for (auto const& entry : userCnf) {
+            auto response_entry = userEntries->add_entry();
+            response_entry->set_key(entry.first);
+            response_entry->set_value(entry.second);
+        };
         return Status::OK;
     }
 

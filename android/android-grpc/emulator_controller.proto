@@ -869,8 +869,14 @@ message EmulatorStatus {
   VmConfiguration vmConfig = 4;
 
   // The hardware configuration of the running emulator as
-  // key valure pairs.
+  // key value pairs. This contains the data you normally find
+  // in hardware-qemu.ini
   EntryList hardwareConfig = 5;
+
+  // The user configuration of the running emulator os
+  // key value pairs. This contains the data you normally find
+  // in emulator-user.ini
+  EntryList userConfig = 6;
 };
 
 message AudioFormat {
