@@ -376,9 +376,22 @@ void ColorBuffer::readPixelsScaled(int width,
                                    GLenum p_format,
                                    GLenum p_type,
                                    SkinRotation rotation,
-                                   void* pixels) {
+                                   void* pixels,
+                                   SkinRect rect) {
     RecursiveScopedHelperContext context(m_helper);
     if (!context.isOk()) {
+        return;
+    }
+    bool useSnipping = rect.size.w != 0 && rect.size.h != 0;
+    // Boundary check
+    if (useSnipping &&
+        (rect.pos.x < 0 || rect.pos.y < 0 || rect.pos.x + rect.size.w > width ||
+         rect.pos.y + rect.size.h > height)) {
+        LOG(ERROR) << "readPixelsScaled failed. Out-of-bound rectangle: ("
+                   << rect.pos.x << ", " << rect.pos.y << ") [" << rect.size.w
+                   << " x " << rect.size.h << "] "
+                   << "with screen "
+                   << "[" << width << " x " << height << "] ";
         return;
     }
     p_format = sGetUnsizedColorBufferFormat(p_format);
@@ -388,7 +401,12 @@ void ColorBuffer::readPixelsScaled(int width,
         GLint prevAlignment = 0;
         s_gles2.glGetIntegerv(GL_PACK_ALIGNMENT, &prevAlignment);
         s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, 1);
-        s_gles2.glReadPixels(0, 0, width, height, p_format, p_type, pixels);
+        if (useSnipping) {
+            s_gles2.glReadPixels(rect.pos.x, rect.pos.y, rect.size.w,
+                                 rect.size.h, p_format, p_type, pixels);
+        } else {
+            s_gles2.glReadPixels(0, 0, width, height, p_format, p_type, pixels);
+        }
         s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, prevAlignment);
         unbindFbo();
     }
