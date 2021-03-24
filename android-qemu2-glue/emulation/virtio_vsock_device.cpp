@@ -337,7 +337,9 @@ struct VirtIOVSockDev {
     }
 
     void vqWriteHostToGuestExternalLocked() {
-        if (mRunning) {
+        VirtIODevice *vdev = VIRTIO_DEVICE(mS);
+
+        if (vdev->vm_running) {
             vqWriteHostToGuestLocked();
         }
     }
@@ -404,10 +406,6 @@ struct VirtIOVSockDev {
         } else {
             return false;
         }
-    }
-
-    void shutdown() {
-        mRunning = false;
     }
 
     void save(android::base::Stream *stream) const {
@@ -855,7 +853,6 @@ private:
     std::vector<uint8_t> mVqGuestToHostBuf;
     std::deque<struct virtio_vsock_hdr> mHostToGuestOrphanFrames;
     uint32_t mSrcHostPortI = kSrcHostPortMin;
-    std::atomic<bool> mRunning = true;
 };
 
 void VSockStream::sendOp(enum virtio_vsock_op op) {
@@ -991,10 +988,4 @@ const virtio_vsock_device_ops_t virtio_vsock_device_host_ops = {
 
 const virtio_vsock_device_ops_t *virtio_vsock_device_get_host_ops() {
     return &virtio_vsock_device_host_ops;
-}
-
-void virtio_vsock_device_shutdown() {
-    if (g_impl) {
-        g_impl->shutdown();
-    }
 }
