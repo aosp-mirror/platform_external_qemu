@@ -28,15 +28,16 @@
 #include "vulkan/VkCommonOperations.h"
 #include "vulkan/VkDecoderGlobalState.h"
 
-#include "android/base/LayoutResolver.h"
 #include "android/base/CpuUsage.h"
+#include "android/base/LayoutResolver.h"
+#include "android/base/Tracing.h"
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/MemoryTracker.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
-#include "android/base/Tracing.h"
+#include "android/utils/debug.h"
 
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/feature_control.h"
@@ -113,9 +114,9 @@ static unsigned int getUptimeMs() {
 static void dumpPerfStats() {
     auto usage = System::get()->getMemUsage();
     std::string memoryStats =
-        emugl::getMemoryTracker()
-                ? emugl::getMemoryTracker()->printUsage()
-                : "";
+            emugl::getMemoryTracker()
+                    ? emugl::getMemoryTracker()->printUsage(android_verbose)
+                    : "";
     auto cpuUsage = emugl::getCpuUsage();
     std::string lastStats =
         cpuUsage ? cpuUsage->printUsage() : "";
