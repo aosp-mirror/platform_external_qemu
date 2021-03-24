@@ -275,16 +275,22 @@ public:
     //
     // Note: Do not call this function again if it fails and *cPixels == 0
     //  swiftshader_indirect does not work with 3 channels
-    virtual int getScreenshot(
-            unsigned int nChannels,
-            unsigned int* width,
-            unsigned int* height,
-            uint8_t* pixels,
-            size_t* cPixels,
-            int displayId = 0,
-            int desiredWidth = 0,
-            int desiredHeight = 0,
-            SkinRotation desiredRotation = SKIN_ROTATION_0) = 0;
+    //
+    // This function supports rectangle snipping by
+    // providing an |rect| parameter. The default value of {{0,0}, {0,0}}
+    // indicates the users wants to snip the entire screen.
+    // - |rect|  represents a rectangle within the screen defined by
+    // desiredWidth and desiredHeight.
+    virtual int getScreenshot(unsigned int nChannels,
+                              unsigned int* width,
+                              unsigned int* height,
+                              uint8_t* pixels,
+                              size_t* cPixels,
+                              int displayId = 0,
+                              int desiredWidth = 0,
+                              int desiredHeight = 0,
+                              SkinRotation desiredRotation = SKIN_ROTATION_0,
+                              SkinRect rect = {{0, 0}, {0, 0}}) = 0;
     virtual void snapshotOperationCallback(
             android::snapshot::Snapshotter::Operation op,
             android::snapshot::Snapshotter::Stage stage) = 0;
