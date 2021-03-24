@@ -54,22 +54,14 @@ public:
         void destroyPipe(AdbVsockPipe *);
 
         void pollGuestAdbdThreadLoop();
-        bool checkIfGuestAdbdAlive();
-
-        void startPollGuestAdbdThread();
-        void stopPollGuestAdbdThread(int newState);
 
         void reset();
         void saveImpl(base::Stream* stream) const;
         bool loadImpl(base::Stream* stream);
         IVsockHostCallbacks* getHostCallbacksImpl(uint64_t key) const;
 
-        static constexpr int kAdbdPollingThreadIdle = 0;
-        static constexpr int kAdbdPollingThreadRunning = 1;
-        static constexpr int kAdbdPollingThreadDisabled = 2;
-
         AdbHostAgent* mHostAgent;
-        std::atomic<int> mGuestAdbdPollingThreadState = kAdbdPollingThreadIdle;
+        std::atomic<bool> mGuestAdbdPollingThreadRunning = true;
         std::vector<std::unique_ptr<AdbVsockPipe>> mPipes;
         std::deque<AdbVsockPipe*> mPipesToDestroy;
         std::condition_variable mPipesToDestroyCv;
