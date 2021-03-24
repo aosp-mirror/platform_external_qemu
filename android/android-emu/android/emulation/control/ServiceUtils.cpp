@@ -29,6 +29,7 @@
 #include "android/base/system/System.h"                      // for System
 #include "android/emulation/control/adb/AdbInterface.h"      // for Optional...
 #include "android/globals.h"                                 // for guest_bo...
+#include "android/user-config.h"
 
 using android::base::AutoLock;
 using android::base::ConditionVariable;
@@ -52,6 +53,23 @@ std::unordered_map<std::string, std::string> getQemuConfig() {
 #include "android/avd/hw-config-defs.h"
 
     return cfg;
+}
+
+std::unordered_map<std::string, std::string> getUserConfig() {
+    std::unordered_map<std::string, std::string> userCfg;
+    auto userConfig = aemu_get_userConfigPtr();
+    int x, y;
+    if (auserConfig_getExtendedControlsPos(userConfig, &x, &y)) {
+        userCfg["extended_controls.x"] = std::to_string(x);
+        userCfg["extended_controls.y"] = std::to_string(y);
+    }
+
+    auserConfig_getWindowPos(userConfig, &x, &y);
+    userCfg["window.x"] = std::to_string(x);
+    userCfg["window.y"] = std::to_string(y);
+
+    userCfg["uuid"] = std::to_string(auserConfig_getUUID(userConfig));
+    return userCfg;
 }
 
 struct BootCompletedSyncState {
