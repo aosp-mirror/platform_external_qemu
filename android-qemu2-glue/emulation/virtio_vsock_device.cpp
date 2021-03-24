@@ -336,6 +336,14 @@ struct VirtIOVSockDev {
         }
     }
 
+    /*void vqHostToGuestNotifyLocked() {
+        VirtQueue *vq = mS->host_to_guest_vq;
+
+        if (virtio_queue_ready(vq)) {
+            virtio_notify(&mS->parent, vq);
+        }
+    }*/
+
     uint64_t hostToGuestOpen(const uint32_t guestPort,
                              IVsockHostCallbacks *callbacks) {
         android::RecursiveScopedVmLock lock;
@@ -919,15 +927,23 @@ void virtio_vsock_handle_event_to_guest(VirtIODevice *dev, VirtQueue *vq) {
 VirtIOVSockDev *g_impl = nullptr;
 
 void virtio_vsock_ctor(VirtIOVSock *s, Error **errp) {
+    fprintf(stderr, "rkir555 %s:%d s=%p\n", __func__, __LINE__, s);
+
     VirtIOVSockDev *dev = new VirtIOVSockDev(s);
     s->impl = dev;
     g_impl = dev;
+
+    fprintf(stderr, "rkir555 %s:%d s=%p dev=%p\n", __func__, __LINE__, s, dev);
 }
 
 void virtio_vsock_dctor(VirtIOVSock *s) {
+    fprintf(stderr, "rkir555 %s:%d s=%p\n", __func__, __LINE__, s);
+
     g_impl = nullptr;
     delete static_cast<VirtIOVSockDev *>(s->impl);
     s->impl = nullptr;
+
+    fprintf(stderr, "rkir555 %s:%d s=%p\n", __func__, __LINE__, s);
 }
 
 void virtio_vsock_set_status(VirtIODevice *dev, uint8_t status) {

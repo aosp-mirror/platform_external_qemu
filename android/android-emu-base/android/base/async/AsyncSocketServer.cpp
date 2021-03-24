@@ -35,6 +35,9 @@ public:
                      int socket4,
                      int socket6)
         : mLooper(looper), mPort(port), mConnectCallback(connectCallback) {
+        fprintf(stderr, "rkir555 %s:%s:%d this=%p port=%d\n",
+                "BaseSocketServer", __func__, __LINE__, this, port);
+
         if (socket4 >= 0) {
             mBoundSocket4.reset(looper->createFdWatch(socket4, onAccept, this));
             CHECK(mBoundSocket4.get());
@@ -47,9 +50,17 @@ public:
 
     virtual ~BaseSocketServer() = default;
 
-    virtual int port() const override { return mPort; }
+    virtual int port() const override {
+        fprintf(stderr, "rkir555 %s:%s:%d this=%p mPort=%d\n",
+                "BaseSocketServer", __func__, __LINE__, this, mPort);
+
+        return mPort;
+    }
 
     virtual void startListening() override {
+        fprintf(stderr, "rkir555 %s:%s:%d this=%p\n",
+                "BaseSocketServer", __func__, __LINE__, this);
+
         if (mBoundSocket4) {
             mBoundSocket4->wantRead();
         }
@@ -60,10 +71,16 @@ public:
     };
 
     bool isListening() const {
+        fprintf(stderr, "rkir555 %s:%s:%d this=%p mListening=%d\n",
+                "BaseSocketServer", __func__, __LINE__, this, mListening);
+
         return mListening;
     };
 
     virtual void stopListening() override {
+        fprintf(stderr, "rkir555 %s:%s:%d this=%p\n",
+                "BaseSocketServer", __func__, __LINE__, this);
+
         if (mBoundSocket4) {
             mBoundSocket4->dontWantRead();
         }
@@ -82,6 +99,9 @@ private:
     // Called when an i/o event happens on the bound socket. Typically
     // a read event indicates a new client connection.
     static void onAccept(void* opaque, int fd, unsigned events) {
+        fprintf(stderr, "rkir555 %s:%s:%d opaque=%p fd=%d events=%u\n",
+                "BaseSocketServer", __func__, __LINE__, opaque, fd, events);
+
         auto server = reinterpret_cast<BaseSocketServer*>(opaque);
         if (!server->isListening()) {
             // If we listen on IPv4 and IPv6 both, then we could get onAccept from one socket
@@ -105,10 +125,16 @@ private:
             // we need to call it explicitly in case of error.
             server->stopListening();
             if (!server->mConnectCallback(clientFd)) {
+                fprintf(stderr, "rkir555 %s:%s:%d opaque=%p fd=%d events=%u\n",
+                        "BaseSocketServer", __func__, __LINE__, opaque, fd, events);
+
                 // Assume the callback printed any necessary error message.
                 socketClose(clientFd);
                 server->startListening();
                 return;
+            } else {
+                fprintf(stderr, "rkir555 %s:%s:%d opaque=%p fd=%d events=%u\n",
+                        "BaseSocketServer", __func__, __LINE__, opaque, fd, events);
             }
         }
     }
@@ -129,6 +155,9 @@ std::unique_ptr<AsyncSocketServer> AsyncSocketServer::createTcpLoopbackServer(
         ConnectCallback connectCallback,
         LoopbackMode mode,
         Looper* looper) {
+    fprintf(stderr, "rkir555 %s:%s:%d port=%d\n",
+            "AsyncSocketServer", __func__, __LINE__, port);
+
     if (!looper) {
         looper = ThreadLooper::get();
     }
