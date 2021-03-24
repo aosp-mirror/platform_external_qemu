@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fec445df_7f0d657e",
+        "filename": "android/android-grpc/emulator_controller.proto",
+        "patchSetId": 7
+      },
+      "lineNbr": 736,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-24T23:52:41Z",
+      "side": 1,
+      "message": "Could you please explain what xOffset and yOffset mean.",
+      "range": {
+        "startLine": 736,
+        "startChar": 11,
+        "endLine": 736,
+        "endChar": 18
+      },
+      "revId": "b78105f50bedf7fd3d1ec4df2ad59c78f4cd792c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
