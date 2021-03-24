@@ -21,6 +21,7 @@
 
 #include "ui_controller_service.grpc.pb.h"
 #include "ui_controller_service.pb.h"
+#include "android/emulation/control/ServiceUtils.h"
 
 namespace google {
 namespace protobuf {
@@ -32,6 +33,7 @@ using namespace android::base;
 using ::google::protobuf::Empty;
 using grpc::ServerContext;
 using grpc::Status;
+using android::emulation::control::getUserConfig;
 
 namespace android {
 namespace emulation {
@@ -88,8 +90,7 @@ static ExtendedWindowPane convertToExtendedWindowPane(
 
 class UiControllerImpl final : public UiController::Service {
 public:
-    UiControllerImpl(const AndroidConsoleAgents* agents)
-        : mAgents(agents) {}
+    UiControllerImpl(const AndroidConsoleAgents* agents) : mAgents(agents) {}
 
     Status showExtendedControls(ServerContext* context,
                                 const PaneEntry* paneEntry,
@@ -128,6 +129,20 @@ public:
         });
         return Status::OK;
     }
+
+    Status getUserConfig(ServerContext* context,
+                         const Empty* request,
+                         UserConfig* reply) {
+        auto userEntries = reply->mutable_entries();
+        auto userCnf = ::getUserConfig();
+        for (auto const& entry : userCnf) {
+            auto response_entry = userEntries->Add();
+            response_entry->set_key(entry.first);
+            response_entry->set_value(entry.second);
+        };
+        return Status::OK;
+    }
+
 private:
     const AndroidConsoleAgents* mAgents;
 };
