@@ -728,6 +728,18 @@ message ImageTransport {
   string handle = 2;
 }
 
+// The aspect ratio (width/height) will be different from the one
+// where the device is unfolded.
+message FoldedDisplay {
+    uint32 width = 1;
+    uint32 height = 2;
+    // It is possible for the screen to be folded in different ways depending
+    // on which surface is shown to the user. So xOffset and yOffset indicate
+    // the top left corner of the folded screen within the original unfolded screen.
+    uint32 xOffset = 3;
+    uint32 yOffset = 4;
+}
+
 message ImageFormat {
   enum ImgFormat {
     // Portable Network Graphics format
@@ -773,6 +785,10 @@ message ImageFormat {
   // Set this if you wish to use a different transport channel to deliver image
   // frames.
   ImageTransport transport = 6;
+
+  // [Output Only] Display configuration when screen is folded. The value is the
+  // original configuration before scaling.
+  FoldedDisplay foldedDisplay = 7;
 }
 
 message Image {
