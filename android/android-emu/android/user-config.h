@@ -47,11 +47,11 @@ void           auserConfig_setWindowPos( AUserConfig*  uconfig, int  x, int  y )
 
 /* Retrieve the stored extended controls window position for this AVD,
 return 1 if the userconfig stores the position previously */
-int auserConfig_getExtendedControlsPos(AUserConfig* uconfig, int* pX, int* pY);
+int auserConfig_getExtendedControlsPos(AUserConfig* uconfig, int* pX, int* pY, int* hAnchor, int* vAnchor);
 
 /* Change the stored extended controls window position for this AVD
 return 1 if the new values are stored*/
-int auserConfig_setExtendedControlsPos(AUserConfig* uconfig, int x, int y);
+int auserConfig_setExtendedControlsPos(AUserConfig* uconfig, int x, int y, int hAnchor, int vAnchor);
 
 /* Save the user configuration back to the content directory.
  * Should be used in an atexit() handler. This will effectively

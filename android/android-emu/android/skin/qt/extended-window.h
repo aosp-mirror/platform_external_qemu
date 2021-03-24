@@ -117,4 +117,6 @@ private:
     SizeTweaker mSizeTweaker;
     QButtonGroup mSidebarButtons;
     bool mExtendedWindowWasShown = false;
+    int mHAnchor = 0;
+    int mVAnchor = 0;
 };

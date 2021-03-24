@@ -124,6 +124,7 @@ public:
     bool setUiTheme(SettingsTheme theme, bool persist);
     void showExtendedWindow(ExtendedWindowPane pane);
     void hideExtendedWindow();
+    QRect extendedWindowGeometry();
 
 signals:
     void guestClipboardChanged(QString text);
