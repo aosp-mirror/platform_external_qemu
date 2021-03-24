@@ -1,3 +1,5 @@
+<<<<<<< PATCH SET (c0d43f test)
+=======
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>CarRotaryPage</class>
@@ -448,3 +450,4 @@
  </resources>
  <connections/>
 </ui>
+>>>>>>> BASE      (eaacea Merge "[Bug Fix] Memory Tracker prints breakdown for all fun)

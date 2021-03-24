@@ -1,3 +1,5 @@
+<<<<<<< PATCH SET (c0d43f test)
+=======
 // Copyright (C) 2020 The Android Open Source Project
 //
 // This software is licensed under the terms of the GNU General Public
@@ -67,3 +69,4 @@ private:
     bool mAdbExecuteIsActive;
     bool mSupportsActionArg;
 };
+>>>>>>> BASE      (eaacea Merge "[Bug Fix] Memory Tracker prints breakdown for all fun)

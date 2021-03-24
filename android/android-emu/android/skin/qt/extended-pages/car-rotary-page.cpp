@@ -1,3 +1,5 @@
+<<<<<<< PATCH SET (c0d43f test)
+=======
 // Copyright (C) 2020 The Android Open Source Project
 //
 // This software is licensed under the terms of the GNU General Public
@@ -295,3 +297,4 @@ bool CarRotaryPage::isBootCompleted() {
     // We don't want to block and wait at all for results.
     return android::emulation::control::bootCompleted(std::chrono::milliseconds(0));
 }
+>>>>>>> BASE      (eaacea Merge "[Bug Fix] Memory Tracker prints breakdown for all fun)
