@@ -17,6 +17,7 @@
 #include "android/base/StringFormat.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
+#include "android/base/Backtrace.h"
 
 #include <string>
 #include <stdlib.h>
