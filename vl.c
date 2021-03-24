@@ -204,7 +204,7 @@ int main(int argc, char **argv)
 
 #include "hw/input/goldfish_events.h"
 #include "hw/misc/goldfish_pstore.h"
-
+#include "hw/virtio/virtio-vsock.h"
 
 #define QEMU_CORE_VERSION "qemu2 " QEMU_VERSION
 
@@ -2127,6 +2127,10 @@ static bool main_loop_should_exit(void)
     request = qemu_shutdown_requested();
     if (request) {
 #ifdef CONFIG_ANDROID
+        // if there is a better place to call this callback - should be moved
+        // there.
+        virtio_vsock_device_shutdown();
+
         if (android_qemu_mode) {
             if (invalidate_exit_snapshot) {
                 androidSnapshot_quickbootInvalidate(NULL);
