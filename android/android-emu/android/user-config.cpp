@@ -40,6 +40,9 @@ struct AUserConfig {
     int          windowY;
     int extendedControlsX;
     int extendedControlsY;
+
+    int extenedControlsVerticalAnchor;
+    int extenedControlsHorizontalAnchor;
     ABool hasExtendedControlPos;
     uint64_t     uuid;
     char*        iniPath;
@@ -52,6 +55,8 @@ struct AUserConfig {
 #define  KEY_WINDOW_Y  "window.y"
 #define KEY_EXTENDED_CONTROLS_X "extended_controls.x"
 #define KEY_EXTENDED_CONTROLS_Y "extended_controls.y"
+#define KEY_EXTENDED_CONTROLS_HOR "extended_controls.hanchor"
+#define KEY_EXTENDED_CONTROLS_VER "extended_controls.vanchor"
 #define  KEY_UUID      "uuid"
 
 #define  DEFAULT_X 100
@@ -196,6 +201,19 @@ auserConfig_new( AvdInfo* info, SkinRect* monitorRect, int screenWidth, int scre
                     iniFile_getInteger(ini, KEY_EXTENDED_CONTROLS_Y, 0);
             DD("    found %s = %d", KEY_EXTENDED_CONTROLS_Y,
                uc->extendedControlsY);
+
+        }
+        if (iniFile_hasKey(ini, KEY_EXTENDED_CONTROLS_HOR)) {
+            uc->extenedControlsHorizontalAnchor =
+                    iniFile_getInteger(ini, KEY_EXTENDED_CONTROLS_HOR, 0);
+            DD("    found %s = %d", KEY_EXTENDED_CONTROLS_HOR,
+               uc->extenedControlsHorizontalAnchor);
+        }
+        if (iniFile_hasKey(ini, KEY_EXTENDED_CONTROLS_VER)) {
+            uc->extenedControlsHorizontalAnchor =
+                    iniFile_getInteger(ini, KEY_EXTENDED_CONTROLS_VER, 0);
+            DD("    found %s = %d", KEY_EXTENDED_CONTROLS_VER,
+               uc->extenedControlsVerticalAnchor);
         }
 
         if (iniFile_hasKey(ini, KEY_UUID)) {
@@ -252,20 +270,24 @@ auserConfig_setWindowPos( AUserConfig*  uconfig, int  x, int  y )
     }
 }
 
-int auserConfig_getExtendedControlsPos(AUserConfig* uconfig, int* pX, int* pY) {
+int auserConfig_getExtendedControlsPos(AUserConfig* uconfig, int* pX, int* pY, int* hAnchor, int* vAnchor) {
     if (uconfig->hasExtendedControlPos) {
         *pX = uconfig->extendedControlsX;
         *pY = uconfig->extendedControlsY;
+        *hAnchor = uconfig->extenedControlsHorizontalAnchor;
+        *vAnchor = uconfig->extenedControlsVerticalAnchor;
         return 1;
     } else {
         return 0;
     }
 }
 
-int auserConfig_setExtendedControlsPos(AUserConfig* uconfig, int x, int y) {
+int auserConfig_setExtendedControlsPos(AUserConfig* uconfig, int x, int y, int hAnchor, int vAnchor) {
     if (x != uconfig->extendedControlsX || y != uconfig->extendedControlsY) {
         uconfig->extendedControlsX = x;
         uconfig->extendedControlsY = y;
+        uconfig->extenedControlsVerticalAnchor = vAnchor;
+        uconfig->extenedControlsHorizontalAnchor = hAnchor;
         uconfig->changed = 1;
         uconfig->hasExtendedControlPos = 1;
         return 1;
@@ -300,6 +322,10 @@ auserConfig_save( AUserConfig*  uconfig )
                            uconfig->extendedControlsX);
         iniFile_setInteger(ini, KEY_EXTENDED_CONTROLS_Y,
                            uconfig->extendedControlsY);
+        iniFile_setInteger(ini, KEY_EXTENDED_CONTROLS_HOR,
+                            uconfig->extenedControlsHorizontalAnchor);
+        iniFile_setInteger(ini, KEY_EXTENDED_CONTROLS_VER,
+                            uconfig->extenedControlsVerticalAnchor);
     }
     iniFile_setInt64(ini, KEY_UUID, uconfig->uuid);
     if (iniFile_saveToFile(ini, uconfig->iniPath) < 0) {
