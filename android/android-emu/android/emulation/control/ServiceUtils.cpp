@@ -58,10 +58,12 @@ std::unordered_map<std::string, std::string> getQemuConfig() {
 std::unordered_map<std::string, std::string> getUserConfig() {
     std::unordered_map<std::string, std::string> userCfg;
     auto userConfig = aemu_get_userConfigPtr();
-    int x, y;
-    if (auserConfig_getExtendedControlsPos(userConfig, &x, &y)) {
+    int x, y, v, h;
+    if (auserConfig_getExtendedControlsPos(userConfig, &x, &y, &h, &v)) {
         userCfg["extended_controls.x"] = std::to_string(x);
         userCfg["extended_controls.y"] = std::to_string(y);
+        userCfg["extended_controls.vanchor"] = std::to_string(v);
+        userCfg["extended_controls.hanchor"] = std::to_string(h);
     }
 
     auserConfig_getWindowPos(userConfig, &x, &y);

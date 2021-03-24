@@ -15,12 +15,16 @@
 #include "android/emulation/control/window_agent.h"
 
 #include "android/base/threads/Thread.h"
-#include "android/emulator-window.h"
 #include "android/emulation/MultiDisplay.h"
+#include "android/emulator-window.h"
+#include "android/globals.h"
 #include "android/hw-sensors.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/winsys.h"
 #include "android/utils/debug.h"
+
+// Set this to true if you wish to enable debugging of the window position.
+constexpr bool DEBUG_GRPC_ENDPOINT = false;
 
 static_assert(WINDOW_MESSAGE_GENERIC == int(Ui::OverlayMessageType::None),
               "Bad message type enum value (None)");
@@ -153,6 +157,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                     return false;
                 },
+
         .setNoSkin =
                 []() {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
@@ -177,6 +182,22 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         return win->getMonitorRect(w, h);
                     } else {
                         return false;
+                    }
+                },
+        .moveExtendedWindow =
+                [](uint32_t x,
+                   uint32_t y,
+                   HorizontalAnchor horizontal,
+                   VerticalAnchor vertical) {
+                        int unused;
+                        auto userConfig = aemu_get_userConfigPtr();
+                        if (auserConfig_getExtendedControlsPos(
+                                        userConfig, &unused, &unused, &unused,
+                                        &unused) == 0 ||
+                            DEBUG_GRPC_ENDPOINT) {
+                                auserConfig_setExtendedControlsPos(
+                                        userConfig, x, y, (int)horizontal,
+                                        (int)vertical);
                     }
                 },
         .startExtendedWindow =
@@ -214,7 +235,6 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     } else {
                         return false;
                     }
-
                 },
         .runOnUiThread =
                 [](UiUpdateFunc f, void* data, bool wait) {
