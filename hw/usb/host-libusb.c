@@ -1239,7 +1239,8 @@ static int usb_host_claim_interfaces(USBHostDevice *s, int configuration)
 {
     USBDevice *udev = USB_DEVICE(s);
     struct libusb_config_descriptor *conf;
-    int rc, i, claimed;
+    const struct libusb_interface_descriptor *intf;
+    int rc, i, claimed, adb_interface;
 
     for (i = 0; i < USB_MAX_INTERFACES; i++) {
         udev->altsetting[i] = 0;
@@ -1259,21 +1260,31 @@ static int usb_host_claim_interfaces(USBHostDevice *s, int configuration)
     }
 
     claimed = 0;
-    for (i = 0; i < USB_MAX_INTERFACES; i++) {
+    adb_interface = 0;
+    for (i = 0; i < conf->bNumInterfaces; i++) {
         trace_usb_host_claim_interface(s->bus_num, s->addr, configuration, i);
+
+        intf = &conf->interface[i].altsetting[udev->altsetting[i]];
+        if (intf->bInterfaceClass == 255 &&
+            intf->bInterfaceSubClass == 66 &&
+            intf->bInterfaceProtocol == 1) {
+            adb_interface++;
+            continue;
+        }
+
         rc = libusb_claim_interface(s->dh, i);
         if (rc == 0) {
             s->ifs[i].claimed = true;
-            if (++claimed == conf->bNumInterfaces) {
+            if (++claimed == conf->bNumInterfaces - adb_interface) {
                 break;
             }
         }
     }
-    if (claimed != conf->bNumInterfaces) {
+    if (claimed != conf->bNumInterfaces - adb_interface) {
         return USB_RET_STALL;
     }
 
-    udev->ninterfaces   = conf->bNumInterfaces;
+    udev->ninterfaces   = conf->bNumInterfaces - adb_interface;
     udev->configuration = configuration;
 
     libusb_free_config_descriptor(conf);
