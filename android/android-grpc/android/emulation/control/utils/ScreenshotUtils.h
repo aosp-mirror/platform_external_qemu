@@ -75,6 +75,14 @@ public:
     // Note: This function can be very expensive under the following circumstances:
     //   - You are requesting the PNG format.
     //   - You are running on an older api level without a host renderer
+
+    // This function supports rectangle snipping by
+    // providing an |rect| parameter. The default value of {{0,0}, {0,0}}
+    // indicates the users wants to snip the entire screen instead of a
+    // partial screen.
+    // - |rect|  represents a rectangle within the screen defined by
+    // desiredWidth and desiredHeight.
+    // Todo (wdu@) snipping with PNG format is not supported yet.
     static bool getScreenshot(int displayId,
                               const ImageFormat_ImgFormat format,
                               const Rotation_SkinRotation rotation,
@@ -83,7 +91,8 @@ public:
                               uint8_t* pixels,
                               size_t* cPixels,
                               uint32_t* finalWidth,
-                              uint32_t* finalHeight);
+                              uint32_t* finalHeight,
+                              SkinRect rect = {{0, 0}, {0, 0}});
 };
 
 }  // namespace control
