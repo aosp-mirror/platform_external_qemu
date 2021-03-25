@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2245f834_f9dacead",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/MacNative.m",
+        "patchSetId": 1
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-03-25T15:09:46Z",
+      "side": 1,
+      "message": "on radeon, when subsequent frames aren\u0027t updated, can we check via reading back the texture contents to ensure the subsequent black frames are still black? I\u0027m wondering if the issue is due to NEAREST mipmap filtering where since cv pixel buffer textures only have one mip level (one layer), it becomes black due to zooming out slightly and going to the wrong mip level.",
+      "revId": "ac7960fd57685c69345b9a8f058912ea97a8a78e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
