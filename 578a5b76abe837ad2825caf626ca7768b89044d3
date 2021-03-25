@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "711a1556_fecbd25b",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/MacNative.m",
+        "patchSetId": 2
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-03-25T18:27:22Z",
+      "side": 1,
+      "message": "glReadPixels here to verify if contents of framebuffer changed",
+      "revId": "578a5b76abe837ad2825caf626ca7768b89044d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
