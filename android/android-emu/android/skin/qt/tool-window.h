@@ -124,6 +124,8 @@ public:
     bool setUiTheme(SettingsTheme theme, bool persist);
     void showExtendedWindow(ExtendedWindowPane pane);
     void hideExtendedWindow();
+
+    void waitForExtendedWindowVisibility(bool visible);
     QRect extendedWindowGeometry();
 
 signals:

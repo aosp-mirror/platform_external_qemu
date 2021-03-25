@@ -14,9 +14,11 @@
 
 #include "android/emulation/control/UiController.h"
 
-#include <grpcpp/grpcpp.h>
+#include <grpcpp/grpcpp.h>  // for Status, ServerCo...
+#include <functional>       // for __base
 
 #include "android/base/async/ThreadLooper.h"
+#include "android/base/system/System.h"
 #include "android/emulation/control/window_agent.h"
 #include "android/settings-agent.h"
 
@@ -95,35 +97,31 @@ public:
                                 const PaneEntry* paneEntry,
                                 ExtendedControlsStatus* reply) override {
         const auto* agent = mAgents->emu;
-        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
-                [agent, reply, paneEntry]() {
-                    if (paneEntry->has_position()) {
-                        auto position = paneEntry->position();
-                        HorizontalAnchor hAnchor = HorizontalAnchor::LEFT;
-                        VerticalAnchor vAnchor = VerticalAnchor::TOP;
-                        if (position.horizontalanchor() ==
-                            WindowPosition::HCENTER) {
-                            hAnchor = HorizontalAnchor::HCENTER;
-                        } else if (position.horizontalanchor() ==
-                                   WindowPosition::RIGHT) {
-                            hAnchor = HorizontalAnchor::RIGHT;
-                        }
 
-                        if (position.verticalanchor() ==
-                            WindowPosition::VCENTER) {
-                            vAnchor = VerticalAnchor::VCENTER;
-                        } else if (position.verticalanchor() ==
-                                   WindowPosition::BOTTOM) {
-                            vAnchor = VerticalAnchor::BOTTOM;
-                        }
+        if (paneEntry->has_position()) {
+            auto position = paneEntry->position();
+            HorizontalAnchor hAnchor = HorizontalAnchor::LEFT;
+            VerticalAnchor vAnchor = VerticalAnchor::TOP;
+            if (position.horizontalanchor() == WindowPosition::HCENTER) {
+                hAnchor = HorizontalAnchor::HCENTER;
+            } else if (position.horizontalanchor() == WindowPosition::RIGHT) {
+                hAnchor = HorizontalAnchor::RIGHT;
+            }
 
-                        agent->moveExtendedWindow(position.x(), position.y(),
-                                                  hAnchor, vAnchor);
-                    }
-                    bool ret = agent->startExtendedWindow(
-                            convertToExtendedWindowPane(paneEntry->index()));
-                    reply->set_visibilitychanged(ret);
-                });
+            if (position.verticalanchor() == WindowPosition::VCENTER) {
+                vAnchor = VerticalAnchor::VCENTER;
+            } else if (position.verticalanchor() == WindowPosition::BOTTOM) {
+                vAnchor = VerticalAnchor::BOTTOM;
+            }
+            agent->moveExtendedWindow(position.x(), position.y(), hAnchor,
+                                      vAnchor);
+        }
+        bool ret = agent->startExtendedWindow(
+                convertToExtendedWindowPane(paneEntry->index()));
+        reply->set_visibilitychanged(ret);
+
+        agent->waitForExtendedWindowVisibility(true);
+        android::base::System::get()->sleepMs(500);
         return Status::OK;
     }
 
@@ -131,11 +129,9 @@ public:
                                  const Empty* /*request*/,
                                  ExtendedControlsStatus* reply) override {
         const auto* agent = mAgents->emu;
-        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
-                [agent, reply]() {
-                    bool ret = agent->quitExtendedWindow();
-                    reply->set_visibilitychanged(ret);
-                });
+        bool ret = agent->quitExtendedWindow();
+        reply->set_visibilitychanged(ret);
+        agent->waitForExtendedWindowVisibility(false);
         return Status::OK;
     }
 
