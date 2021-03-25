@@ -2315,6 +2315,11 @@ transformExternalMemoryHandleTypeFlags_tohost(
         res &= ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA;
         res |= VK_EXT_MEMORY_HANDLE_TYPE_BIT;
     }
+
+    if (bits & VK_EXTERNAL_MEMORY_HANDLE_TYPE_ZIRCON_VMO_BIT_FUCHSIA) {
+        res &= ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_ZIRCON_VMO_BIT_FUCHSIA;
+        res |= VK_EXT_MEMORY_HANDLE_TYPE_BIT;
+    }
     return res;
 }
 
