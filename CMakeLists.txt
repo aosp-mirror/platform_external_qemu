@@ -914,8 +914,8 @@ if(NOT OPTION_AEMU_LIBS_ONLY)
       armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
   endif()
 
-  # The tests currently work on linux only.
-  if(ANDROID_TARGET_TAG MATCHES "linux.*")
+  # The tests currently work on linux x86 only.
+  if(LINUX_X86_64)
     include(qemu-test.cmake)
   endif()
 
