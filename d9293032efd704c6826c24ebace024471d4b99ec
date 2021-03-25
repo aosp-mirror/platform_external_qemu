@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c4815f62_55be7384",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-03-25T01:26:33Z",
+      "side": 1,
+      "message": "this is just a feature flag, more cls to come to get it working on emulator",
+      "revId": "d9293032efd704c6826c24ebace024471d4b99ec",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
