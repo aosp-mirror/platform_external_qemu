@@ -133,6 +133,9 @@ extern "C" {
 
 extern "C" bool android_op_wipe_data;
 extern "C" bool android_op_writable_system;
+extern int start_android_gnss_grpc_detached(bool& isIpv4,
+                                            std::string grpcport,
+                                            std::string gnssfilepath);
 
 // Check if we are running multiple emulators on the same AVD
 static bool is_multi_instance = false;
@@ -2155,6 +2158,32 @@ extern "C" int main(int argc, char** argv) {
             dwarning(
                     "Could not setup modem simulator config files, modem "
                     "simulator disabled.");
+        }
+    }
+
+    if (feature_is_enabled(kFeature_GnssGrpcV1)) {
+        if (1) {
+            bool isIpv4 = false;
+            // start gnss grpc now, so qemu can proceed with virtioport setup
+            int gnss_guest_port = start_android_gnss_grpc_detached(
+                    isIpv4, opts->gnss_grpc_port ? opts->gnss_grpc_port : "",
+                    opts->gnss_file_path ? opts->gnss_file_path : "");
+
+            args.add("-device");
+            args.add("virtio-serial");
+            args.add("-chardev");
+            args.addFormat(
+                    "socket,port=%d,host=%s,nowait,nodelay,%s,id="
+                    "gnss",
+                    gnss_guest_port, isIpv4 ? "127.0.0.1" : "::1",
+                    isIpv4 ? "ipv4" : "ipv6");
+            args.add("-device");
+            args.add("virtserialport,chardev=gnss,name=gnss");
+
+        } else {
+            dwarning(
+                    "Could not setup gnss grpc servie; gnss grpc service is "
+                    "disabled.");
         }
     }
 
