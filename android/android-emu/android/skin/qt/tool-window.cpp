@@ -505,8 +505,18 @@ void ToolWindow::showExtendedWindow(ExtendedWindowPane pane) {
     }
 }
 
+void ToolWindow::waitForExtendedWindowVisibility(bool visible) {
+    if (!visible && !mExtendedWindow.hasInstance()) {
+        // No extended window and we are wating to be hidden..
+        // so no need to wait
+        return;
+    }
+    ensureExtendedWindowExists();
+    mExtendedWindow.get()->waitForVisibility(visible);
+}
+
 void ToolWindow::hideExtendedWindow() {
-    mExtendedWindow.ifExists([&] { mExtendedWindow.get()->hide(); });
+        mExtendedWindow.ifExists([&] { mExtendedWindow.get()->hide(); });
 }
 
 void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) {
