@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8644ee6a_594fe67f",
+        "filename": "hw/usb/host-libusb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1243,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-03-25T14:42:29Z",
+      "side": 1,
+      "message": "Please add a comment why usb should know about adb and where \"255, 66 and 1\" come from.",
+      "range": {
+        "startLine": 1243,
+        "startChar": 24,
+        "endLine": 1243,
+        "endChar": 37
+      },
+      "revId": "864dc824121e1a0a2865c9c4becec3a206585c1f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
