@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bb70cd8f_19511a67",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/MacNative.m",
+        "patchSetId": 1
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-03-25T15:13:35Z",
+      "side": 1,
+      "message": "Can we use GL_TEXTURE_2D for everything? We already support non-power-of-2 textures in GL_TEXUTRE_2D and it\u0027s easy to make a binding mistake",
+      "range": {
+        "startLine": 290,
+        "startChar": 20,
+        "endLine": 290,
+        "endChar": 40
+      },
+      "revId": "65ed8a3b61350e44050b585a7f0ee4dcf8e7b57c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
