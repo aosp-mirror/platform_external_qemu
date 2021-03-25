@@ -299,14 +299,18 @@ void nsCopyTexture(void* context, int from, int to, int width, int height) {
       if (glGetError() != GL_NO_ERROR) {
           //NSLog(@"bad in blit 2");
       }
-      glDrawBuffer(GL_COLOR_ATTACHMENT1);
+      //glDrawBuffer(GL_COLOR_ATTACHMENT1);
 
       if (glGetError() != GL_NO_ERROR) {
           //NSLog(@"bad in blit 3");
       }
-      glBlitFramebuffer(0,0,width, height, 0,0,width, height,
-              GL_COLOR_BUFFER_BIT, GL_NEAREST);
+      glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0,0, 0,0,width, height);
 
+      glBindTexture(GL_TEXTURE_RECTANGLE, 0);
+      glBindTexture(GL_TEXTURE_2D, 0);
+      //glBlitFramebuffer(0,0,width, height, 0,0,width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+      glDeleteTextures( 1, &from);
       if (glGetError() != GL_NO_ERROR) {
           //NSLog(@"bad in blit4 ");
       }
