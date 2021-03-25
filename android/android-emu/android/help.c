@@ -1971,6 +1971,8 @@ static void help_experimental_enable_multidisplay(stralloc_t* out) {
 #define  help_no_window    NULL
 #define  help_qt_hide_window NULL
 #define  help_version      NULL
+#define  help_gnss_grpc_port NULL
+#define  help_gnss_file_path NULL
 #define  help_no_passive_gps NULL
 #define  help_read_only    NULL
 #define  help_is_restart    NULL
