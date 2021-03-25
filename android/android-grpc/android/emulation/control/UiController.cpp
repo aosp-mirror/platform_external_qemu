@@ -14,19 +14,20 @@
 
 #include "android/emulation/control/UiController.h"
 
-#include <grpcpp/grpcpp.h>
+#include <grpcpp/grpcpp.h>  // for Status, ServerCo...
+#include <functional>       // for __base
 
-#include "android/base/async/ThreadLooper.h"
-#include "android/emulation/control/window_agent.h"
-#include "android/settings-agent.h"
-
-#include "ui_controller_service.grpc.pb.h"
-#include "ui_controller_service.pb.h"
+#include "android/base/Log.h"                        // for LogStreamVoidify
+#include "android/base/async/ThreadLooper.h"         // for ThreadLooper
+#include "android/emulation/control/window_agent.h"  // for QAndroidEmulator...
+#include "android/settings-agent.h"                  // for SETTINGS_THEME_S...
+#include "android/skin/qt/extended-window-styles.h"  // for ExtendedWindowPane
+#include "ui_controller_service.grpc.pb.h"           // for UiController
+#include "ui_controller_service.pb.h"                // for PaneEntry, Windo...
 
 namespace google::protobuf {
 class Empty;
-}  // namespace google
-
+}  // namespace google::protobuf
 
 using ::google::protobuf::Empty;
 using grpc::ServerContext;
@@ -123,31 +124,36 @@ public:
                                 vAnchor = VerticalAnchor::BOTTOM;
                                 break;
                         }
-                        agent->moveExtendedWindow(position.x(), position.y(), hAnchor, vAnchor);
+                        agent->moveExtendedWindow(position.x(), position.y(),
+                                                  hAnchor, vAnchor);
                     }
                     bool ret = agent->startExtendedWindow(
                             convertToExtendedWindowPane(paneEntry->index()));
                     reply->set_visibilitychanged(ret);
                 });
+
+        agent->waitForExtendedWindowVisibility(true);
         return Status::OK;
     }
 
-    Status closeExtendedControls(ServerContext*  /*context*/,
-                                 const Empty*  /*request*/,
+    Status closeExtendedControls(ServerContext* /*context*/,
+                                 const Empty* /*request*/,
                                  ExtendedControlsStatus* reply) override {
-        const auto *agent = mAgents->emu;
+        const auto* agent = mAgents->emu;
         android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
                 [agent, reply]() {
                     bool ret = agent->quitExtendedWindow();
                     reply->set_visibilitychanged(ret);
                 });
+        agent->waitForExtendedWindowVisibility(false);
+
         return Status::OK;
     }
 
     Status setUiTheme(ServerContext* context,
                       const ThemingStyle* request,
                       Empty* reply) override {
-        const auto *agent = mAgents->emu;
+        const auto* agent = mAgents->emu;
         android::base::ThreadLooper::runOnMainLooper([agent, request]() {
             if (request->style() == ThemingStyle::LIGHT)
                 agent->setUiTheme(SETTINGS_THEME_STUDIO_LIGHT);

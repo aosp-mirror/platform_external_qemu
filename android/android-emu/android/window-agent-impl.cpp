@@ -12,16 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/control/window_agent.h"
+#include <assert.h>                                  // for assert
+#include <stdint.h>                                  // for uint32_t, int32_t
+#include <QRect>                                     // for QRect
+#include <QString>                                   // for QString
+#include <functional>                                // for __base
+#include <mutex>                                     // for mutex, lock_guard
+#include <string>                                    // for string
 
-#include "android/base/threads/Thread.h"
-#include "android/emulator-window.h"
-#include "android/emulation/MultiDisplay.h"
-#include "android/hw-sensors.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/winsys.h"
-#include "android/utils/debug.h"
-#include "android/globals.h"
+#include "android/base/Log.h"                        // for LogStreamVoidify
+#include "android/base/threads/Thread.h"             // for isRunningInUiThread
+#include "android/cmdline-option.h"                  // for AndroidOptions
+#include "android/emulation/MultiDisplay.h"          // for MultiDisplay
+#include "android/emulation/control/window_agent.h"  // for WindowMessageType
+#include "android/emulator-window.h"                 // for emulator_window_get
+#include "android/globals.h"                         // for aemu_get_userCon...
+#include "android/hw-sensors.h"                      // for android_foldable...
+#include "android/settings-agent.h"                  // for SettingsTheme
+#include "android/skin/file.h"                       // for SkinLayout
+#include "android/skin/qt/OverlayMessageCenter.h"    // for OverlayMessageType
+#include "android/skin/qt/emulator-qt-window.h"      // for EmulatorQtWindow
+#include "android/skin/qt/extended-window-styles.h"  // for ExtendedWindowPane
+#include "android/skin/qt/qt-ui-commands.h"          // for QtUICommand, QtU...
+#include "android/skin/qt/tool-window.h"             // for ToolWindow
+#include "android/skin/rect.h"                       // for (anonymous), SKI...
+#include "android/skin/winsys.h"                     // for skin_winsys_run_...
+#include "android/user-config.h"                     // for auserConfig_getE...
+#include "android/utils/debug.h"                     // for derror, dprint
 
 // Set this to true if you wish to enable debugging of the window position.
 constexpr bool DEBUG_GRPC_ENDPOINT = false;
@@ -37,12 +54,16 @@ static_assert(WINDOW_MESSAGE_ERROR == int(Ui::OverlayMessageType::Error),
 static_assert(WINDOW_MESSAGE_OK == int(Ui::OverlayMessageType::Ok),
               "Bad message type enum value (Ok)");
 
+static std::mutex s_extendedWindow;
+
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .getEmulatorWindow = emulator_window_get,
         .rotate90Clockwise =
                 [] {
-                    if (const auto instance = android::MultiDisplay::getInstance()) {
-                        if (instance && instance->isMultiDisplayEnabled() == false) {
+                    if (const auto instance =
+                                android::MultiDisplay::getInstance()) {
+                        if (instance &&
+                            instance->isMultiDisplayEnabled() == false) {
                             return emulator_window_rotate_90(true);
                         }
                     }
@@ -68,11 +89,9 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                                 timeoutMs);
                     } else {
                         const auto printer =
-                                (type == WINDOW_MESSAGE_ERROR)
-                                        ? &derror
-                                        : (type == WINDOW_MESSAGE_WARNING)
-                                                  ? &dwarning
-                                                  : &dprint;
+                                (type == WINDOW_MESSAGE_ERROR)     ? &derror
+                                : (type == WINDOW_MESSAGE_WARNING) ? &dwarning
+                                                                   : &dprint;
                         printer("%s", message);
                     }
                 },
@@ -88,15 +107,16 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                                 QString::fromUtf8(message),
                                 static_cast<Ui::OverlayMessageType>(type),
                                 QString::fromUtf8(dismissText),
-                                [func, context] { if (func) func(context); },
+                                [func, context] {
+                                    if (func)
+                                        func(context);
+                                },
                                 timeoutMs);
                     } else {
                         const auto printer =
-                                (type == WINDOW_MESSAGE_ERROR)
-                                        ? &derror
-                                        : (type == WINDOW_MESSAGE_WARNING)
-                                                  ? &dwarning
-                                                  : &dprint;
+                                (type == WINDOW_MESSAGE_ERROR)     ? &derror
+                                : (type == WINDOW_MESSAGE_WARNING) ? &dwarning
+                                                                   : &dprint;
                         printer("%s", message);
                         // Don't necessarily perform the func since the
                         // user doesn't get a chance to dismiss.
@@ -121,10 +141,12 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .updateFoldablePostureIndicator =
                 [](bool confirmFoldedArea) {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
-                        QtUICommand cmd = QtUICommand::UPDATE_FOLDABLE_POSTURE_INDICATOR;
+                        QtUICommand cmd =
+                                QtUICommand::UPDATE_FOLDABLE_POSTURE_INDICATOR;
                         win->runOnUiThread([win, cmd, confirmFoldedArea]() {
                             if (confirmFoldedArea) {
-                                win->toolWindow()->handleUICommand(cmd, std::string("confirmFoldedArea"));
+                                win->toolWindow()->handleUICommand(
+                                        cmd, std::string("confirmFoldedArea"));
                             } else {
                                 win->toolWindow()->handleUICommand(cmd);
                             }
@@ -133,9 +155,10 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 },
         .setUIDisplayRegion =
                 [](int x, int y, int w, int h) {
-                    // The UI display region needs to be updated when we add additional displays, or when we
-                    // resize the screen. In the embedded case we do not have a visible UI, so we do not need
-                    // to update display regions.
+                    // The UI display region needs to be updated when we add
+                    // additional displays, or when we resize the screen. In the
+                    // embedded case we do not have a visible UI, so we do not
+                    // need to update display regions.
                     if (android_cmdLineOptions->qt_hide_window) {
                         return;
                     }
@@ -189,6 +212,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                    uint32_t y,
                    HorizontalAnchor horizontal,
                    VerticalAnchor vertical) {
+                    std::lock_guard<std::mutex> extended(s_extendedWindow);
                     auto* win = EmulatorQtWindow::getInstance();
                     if (win) {
                         auto size = win->toolWindow()->extendedWindowGeometry();
@@ -221,8 +245,19 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         }
                     }
                 },
+        .waitForExtendedWindowVisibility =
+                [](bool visible) {
+                    auto* win = EmulatorQtWindow::getInstance();
+                    if (win) {
+                        win->toolWindow()->waitForExtendedWindowVisibility(
+                                visible);
+                        assert(visible ==
+                               win->toolWindow()->isExtendedWindowVisible());
+                    }
+                },
         .startExtendedWindow =
                 [](ExtendedWindowPane pane) {
+                    std::lock_guard<std::mutex> extended(s_extendedWindow);
                     auto* win = EmulatorQtWindow::getInstance();
                     bool visibilityChanged = false;
                     if (win) {
@@ -236,13 +271,15 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 },
         .quitExtendedWindow =
                 []() {
+                    std::lock_guard<std::mutex> extended(s_extendedWindow);
                     auto* win = EmulatorQtWindow::getInstance();
                     bool visibilityChanged = false;
                     if (win) {
                         visibilityChanged =
                                 win->toolWindow()->isExtendedWindowVisible();
-                        win->runOnUiThread(
-                            [win]() { win->toolWindow()->hideExtendedWindow(); });
+                        win->runOnUiThread([win]() {
+                            win->toolWindow()->hideExtendedWindow();
+                        });
                     }
                     return visibilityChanged;
                 },
@@ -267,5 +304,5 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 }
 };
 
-extern "C" const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
-        &sQAndroidEmulatorWindowAgent;
+extern "C" const QAndroidEmulatorWindowAgent* const
+        gQAndroidEmulatorWindowAgent = &sQAndroidEmulatorWindowAgent;
