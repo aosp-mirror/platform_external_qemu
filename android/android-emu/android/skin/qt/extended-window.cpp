@@ -649,8 +649,26 @@ void ExtendedWindow::showEvent(QShowEvent* e) {
         }
     }
     QFrame::showEvent(e);
+    {
+        std::lock_guard<std::mutex> lk(mMutexVisible);
+        mVisible = true;
+    }
+    mCvVisible.notify_all();
 }
 
+void ExtendedWindow::hideEvent(QHideEvent* e) {
+    QFrame::hideEvent(e);
+    {
+        std::lock_guard<std::mutex> lk(mMutexVisible);
+        mVisible = false;
+    }
+    mCvVisible.notify_all();
+}
+
+void ExtendedWindow::waitForVisibility(bool visible) {
+    std::unique_lock lk(mMutexVisible);
+    mCvVisible.wait(lk, [&] { return visible == mVisible;});
+}
 void ExtendedWindow::showMacroRecordPage() {
     show();
     on_recordButton_clicked();
