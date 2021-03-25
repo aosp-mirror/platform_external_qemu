@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e3652b1d_2c02c902",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/cereal/common/vk_struct_id.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1019788
+      },
+      "writtenOn": "2021-03-25T00:28:04Z",
+      "side": 1,
+      "message": "Switching to the new enum here should be fine since this one isn\u0027t used on the host.",
+      "revId": "8ebf9efd248b578b3bea06af72d5671315e4ebf4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
