@@ -160,7 +160,7 @@ TEST_F(EmulatorAdvertisementTest, pid_file_is_written) {
     }
 }
 
-TEST_F(EmulatorAdvertisementTest, pid_file_is_cleaned_in_shared_dir) {
+TEST_F(EmulatorAdvertisementTest, DISABLED_pid_file_is_cleaned_in_shared_dir) {
     auto pid = launchInBackground();
     EXPECT_TRUE(pid);
     if (pid) {
