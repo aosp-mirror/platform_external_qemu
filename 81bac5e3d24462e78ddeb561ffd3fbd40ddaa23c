@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1b0780dd_bab1a537",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/MacNative.m",
+        "patchSetId": 1
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-03-25T15:19:15Z",
+      "side": 1,
+      "message": "According to https://github.com/balabit/QtAV/blob/master/src/codec/video/VideoDecoderVDA.cpp#L230 should we use IOSurfaceGetWidthOfPlane to get the plane sizes for Y and UV?",
+      "revId": "81bac5e3d24462e78ddeb561ffd3fbd40ddaa23c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
