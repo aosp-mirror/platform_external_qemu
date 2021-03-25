@@ -249,7 +249,17 @@ CGLTexImageIOSurface2D(glContext,GL_TEXTURE_RECTANGLE, GL_RG8, (GLsizei)planeSiz
     GLsizei surface_h = (GLsizei)IOSurfaceGetHeight(surface);
       
     //NSLog(@"create textures y");
-    glGenTextures(1, Ytex);
+    static int s_ytex;
+    static int s_uvtex;
+    static int s_created=false;
+    if (!s_created) {
+        s_created = true;
+        glGenTextures(1, &s_ytex);
+        glGenTextures(1, &s_uvtex);
+    }
+    *Ytex = s_ytex;
+    *UVtex = s_uvtex;
+
     glBindTexture(GL_TEXTURE_RECTANGLE, *Ytex);
     //NSLog(@"fetch textures y");
     CGLError cglError =
@@ -261,7 +271,6 @@ CGLTexImageIOSurface2D(glContext,GL_TEXTURE_RECTANGLE, GL_RG8, (GLsizei)planeSiz
     }
 
     //NSLog(@"create textures uv");
-    glGenTextures(1, UVtex);
     glBindTexture(GL_TEXTURE_RECTANGLE, *UVtex);
     cglError =
         CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE,
@@ -299,14 +308,18 @@ void nsCopyTexture(void* context, int from, int to, int width, int height) {
       if (glGetError() != GL_NO_ERROR) {
           //NSLog(@"bad in blit 2");
       }
-      glDrawBuffer(GL_COLOR_ATTACHMENT1);
+      //glDrawBuffer(GL_COLOR_ATTACHMENT1);
 
       if (glGetError() != GL_NO_ERROR) {
           //NSLog(@"bad in blit 3");
       }
-      glBlitFramebuffer(0,0,width, height, 0,0,width, height,
-              GL_COLOR_BUFFER_BIT, GL_NEAREST);
+      glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0,0, 0,0,width, height);
 
+      glBindTexture(GL_TEXTURE_RECTANGLE, 0);
+      glBindTexture(GL_TEXTURE_2D, 0);
+      //glBlitFramebuffer(0,0,width, height, 0,0,width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+      //glDeleteTextures( 1, &from);
       if (glGetError() != GL_NO_ERROR) {
           //NSLog(@"bad in blit4 ");
       }
