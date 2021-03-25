@@ -200,28 +200,45 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                                         (int)vertical);
                     }
                 },
+        .waitForExtendedWindowVisibility =
+                [](bool visible) {
+                    auto* win = EmulatorQtWindow::getInstance();
+                    if (win) {
+                        win->toolWindow()->waitForExtendedWindowVisibility(
+                                visible);
+                        assert(visible ==
+                               win->toolWindow()->isExtendedWindowVisible());
+                    }
+                },
         .startExtendedWindow =
                 [](ExtendedWindowPane pane) {
+                    std::lock_guard<std::mutex> extended(s_extendedWindow);
                     auto* win = EmulatorQtWindow::getInstance();
                     bool visibilityChanged = false;
                     if (win) {
+                        QSemaphore completed;
                         visibilityChanged =
                                 !win->toolWindow()->isExtendedWindowVisible();
                         win->runOnUiThread([win, pane]() {
                             win->toolWindow()->showExtendedWindow(pane);
-                        });
+                        }, &completed);
+                        completed.acquire();
                     }
                     return visibilityChanged;
                 },
         .quitExtendedWindow =
                 []() {
+                    std::lock_guard<std::mutex> extended(s_extendedWindow);
                     auto* win = EmulatorQtWindow::getInstance();
                     bool visibilityChanged = false;
                     if (win) {
+                        QSemaphore completed;
                         visibilityChanged =
                                 win->toolWindow()->isExtendedWindowVisible();
-                        win->runOnUiThread(
-                            [win]() { win->toolWindow()->hideExtendedWindow(); });
+                        win->runOnUiThread([win]() {
+                            win->toolWindow()->hideExtendedWindow();
+                        }, &completed);
+                        completed.acquire();
                     }
                     return visibilityChanged;
                 },
