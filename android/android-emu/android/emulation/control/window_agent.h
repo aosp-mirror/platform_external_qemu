@@ -103,8 +103,23 @@ typedef struct QAndroidEmulatorWindowAgent {
     void (*moveExtendedWindow)(uint32_t x, uint32_t y, HorizontalAnchor horizonal, VerticalAnchor vertical);
     // start extended window and switch to the pane specified by the index.
     // return true if extended controls window's visibility has changed.
+    // The window is not necessarily visible when this method returns.
     bool (*startExtendedWindow)(ExtendedWindowPane index);
+
+    // Closes the extended window. At some point in time it will be gone.
     bool (*quitExtendedWindow)(void);
+
+    // This will wait until the state of the visibility of the window has
+    // changed to the given value. Calling show or close does not make
+    // a qt frame immediately visible. Instead a series of events will be
+    // fired when the frame is actually added to, or removed from the display.
+    // so usually the pattern is showWindow, wait for visibility..
+    //
+    // Be careful to:
+    //   - Not run this on a looper thread. The ui controls can post actions
+    //     to the looper thread which can result in a deadlock
+    //   - Not to run this on the Qt Message pump. You will deadlock.
+    void (*waitForExtendedWindowVisibility)(bool);
     bool (*setUiTheme)(SettingsTheme type);
     void (*runOnUiThread)(UiUpdateFunc f, void* data, bool wait);
     bool (*isRunningInUiThread)(void);
