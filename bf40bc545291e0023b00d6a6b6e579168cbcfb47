@@ -1,0 +1,108 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000009338090",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1653292?revision\u003d2",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "ea768ec3_61a007a6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2021-03-25T00:01:15Z",
+      "side": 1,
+      "message": "This file contains a set of conflict markers.If this is a false alarm, add IGNORE_MERGE_CONFLICT_CHECK\u003d\u003d\u003creason\u003e to your commit message.",
+      "range": {
+        "startLine": 1,
+        "startChar": 1,
+        "endLine": 1,
+        "endChar": 7
+      },
+      "revId": "bf40bc545291e0023b00d6a6b6e579168cbcfb47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000009338090",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1653292?revision\u003d2",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "02186776_fe997f89",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2021-03-25T00:01:15Z",
+      "side": 1,
+      "message": "This file contains a set of conflict markers.If this is a false alarm, add IGNORE_MERGE_CONFLICT_CHECK\u003d\u003d\u003creason\u003e to your commit message.",
+      "range": {
+        "startLine": 1,
+        "startChar": 1,
+        "endLine": 1,
+        "endChar": 7
+      },
+      "revId": "bf40bc545291e0023b00d6a6b6e579168cbcfb47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000009338090",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1653292?revision\u003d2",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "aec9734b_8edb31bd",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/car-rotary-page.ui",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2021-03-25T00:01:15Z",
+      "side": 1,
+      "message": "This file contains a set of conflict markers.If this is a false alarm, add IGNORE_MERGE_CONFLICT_CHECK\u003d\u003d\u003creason\u003e to your commit message.",
+      "range": {
+        "startLine": 1,
+        "startChar": 1,
+        "endLine": 1,
+        "endChar": 7
+      },
+      "revId": "bf40bc545291e0023b00d6a6b6e579168cbcfb47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000009338090",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1653292?revision\u003d2",
+      "fixSuggestions": [],
+      "key": {
+        "uuid": "4678b222_4f05abce",
+        "filename": "android/android-emu/android/utils/debug.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1757831
+      },
+      "writtenOn": "2021-03-25T00:01:15Z",
+      "side": 1,
+      "message": "This file contains a set of conflict markers.If this is a false alarm, add IGNORE_MERGE_CONFLICT_CHECK\u003d\u003d\u003creason\u003e to your commit message.",
+      "range": {
+        "startLine": 1,
+        "startChar": 1,
+        "endLine": 1,
+        "endChar": 7
+      },
+      "revId": "bf40bc545291e0023b00d6a6b6e579168cbcfb47",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
