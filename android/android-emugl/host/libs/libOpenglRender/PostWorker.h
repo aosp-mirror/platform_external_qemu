@@ -71,7 +71,8 @@ public:
                     GLenum format,
                     GLenum type,
                     SkinRotation rotation,
-                    void* pixels);
+                    void* pixels,
+                    SkinRect rect);
 
 private:
     // Impl versions of the above, so we can run it from separate threads

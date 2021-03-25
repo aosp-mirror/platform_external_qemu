@@ -161,13 +161,16 @@ public:
                     GLenum p_format,
                     GLenum p_type,
                     void* pixels);
-
+    // Read the ColorBuffer instance's pixel values by first scaling
+    // to the size of width x height, then clipping a |rect| from the
+    // screen defined by width x height.
     void readPixelsScaled(int width,
                           int height,
                           GLenum p_format,
                           GLenum p_type,
                           SkinRotation rotation,
-                          void* pixels);
+                          void* pixels,
+                          SkinRect rect);
 
     // Read cached YUV pixel values into host memory.
     void readPixelsYUVCached(int x,
