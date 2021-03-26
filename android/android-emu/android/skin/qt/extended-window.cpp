@@ -397,7 +397,14 @@ void ExtendedWindow::shutDown() {
 }
 
 void ExtendedWindow::show() {
-    QFrame::show();
+    // bug: 183660415
+    // As reported in KDE desktop environment, a minimize button is shown and 
+    // we need to show minimized window differently.
+    if (isMinimized()) {
+        QFrame::showNormal();
+    } else {
+        QFrame::show();
+    }
     mExtendedWindowWasShown = true;
 
     // Verify that the extended pane is fully visible (otherwise it may be
