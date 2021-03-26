@@ -521,7 +521,23 @@ typedef enum {
     ABS_CODE(TOOL_WIDTH, 0x1c)  \
     ABS_CODE(VOLUME,     0x20)  \
     ABS_CODE(MISC,       0x28)  \
-    ABS_CODE(MAX,        0x3f)
+    ABS_CODE(MAX,        0x3f)  \
+    ABS_CODE(MT_SLOT, 0x2f) \
+    ABS_CODE(MT_TOUCH_MAJOR,  0x30) \
+    ABS_CODE(MT_TOUCH_MINOR, 0x31) \
+    ABS_CODE(MT_WIDTH_MAJOR, 0x32) \
+    ABS_CODE(MT_WIDTH_MINOR, 0x33) \
+    ABS_CODE(MT_ORIENTATION, 0x34) \
+    ABS_CODE(MT_POSITION_X, 0x35) \
+    ABS_CODE(MT_POSITION_Y, 0x36) \
+    ABS_CODE(MT_TOOL_TYPE, 0x37) \
+    ABS_CODE(MT_BLOB_ID, 0x38) \
+    ABS_CODE(MT_TRACKING_ID, 0x39) \
+    ABS_CODE(MT_PRESSURE, 0x3a) \
+    ABS_CODE(MT_DISTANCE, 0x3b) \
+    ABS_CODE(MT_TOOL_X, 0x3c) \
+    ABS_CODE(MT_TOOL_Y, 0x3d)
+
 
 #define  ABS_CODE(n,v)  GLUE(ABS_,n) = v,
 
