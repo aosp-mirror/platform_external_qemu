@@ -21,7 +21,7 @@ function(add_qtest NAME DEPENDENCY)
   android_target_dependency(${NAME} linux-x86_64 TCMALLOC_OS_DEPENDENCIES)
   target_compile_definitions(${NAME} PRIVATE -DCONFIG_ANDROID)
   target_include_directories(${NAME} PUBLIC ${ANDROID_AUTOGEN}/tests)
-  target_link_libraries(${NAME} PRIVATE ${DEPENDENCY} qemu2-common libqemu2-util android-qemu-deps)
+  target_link_libraries(${NAME} PRIVATE "-fuse-ld=ld" ${DEPENDENCY} qemu2-common libqemu2-util android-qemu-deps)
 endfunction()
 
 # These tests rely on interaction with the qemu binary. These require a non- trivial test runner as they interact with a running
