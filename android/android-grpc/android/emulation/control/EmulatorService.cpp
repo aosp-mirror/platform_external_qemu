@@ -649,7 +649,14 @@ public:
 
         if (!enabled)
             return Status::OK;
-
+        bool isFolded = android_foldable_is_folded();
+        // The folded screen is represented as a rectangle within the full
+        // screen.
+        SkinRect rect = {{0, 0}, {0, 0}};
+        if (isFolded) {
+            android_foldable_get_folded_area(&rect.pos.x, &rect.pos.y,
+                                             &rect.size.w, &rect.size.h);
+        }
         reply->set_timestampus(System::get()->getUnixTimeUs());
         android::emulation::ImageFormat desiredFormat =
                 ScreenshotUtils::translate(request->format());
@@ -662,7 +669,6 @@ public:
                                                &xaxis, &yaxis, &zaxis,
                                                PARAMETER_VALUE_TYPE_CURRENT);
         auto rotation = ScreenshotUtils::deriveRotation(mAgents->sensors);
-
         // Calculate the desired rotation and width we should use..
         int desiredWidth = request->width();
         int desiredHeight = request->height();
@@ -683,17 +689,43 @@ public:
         if (rotation == Rotation::LANDSCAPE ||
             rotation == Rotation::REVERSE_LANDSCAPE) {
             std::swap(width, height);
+            if (isFolded) {
+                std::swap(rect.pos.x, rect.pos.y);
+                std::swap(rect.size.w, rect.size.h);
+            }
         }
 
-        // Calculate widht and height, keeping aspect ration in mind.
-        auto [newWidth, newHeight] = ScreenshotUtils::resizeKeepAspectRatio(
-                width, height, desiredWidth, desiredHeight);
+        // Calculate width and height, keeping aspect ratio in mind.
+        int newWidth, newHeight;
+        if (isFolded) {
+            // When screen is folded, resize based on the aspect ratio of the
+            // folded screen instead of full screen.
+            int newFoldedWidth, newFoldedHeight;
+            std::tie(newFoldedWidth, newFoldedHeight) =
+                    ScreenshotUtils::resizeKeepAspectRatio(
+                            rect.size.w, rect.size.h, desiredWidth,
+                            desiredHeight);
+            rect.pos.x = rect.pos.x * newFoldedWidth / rect.size.w;
+            rect.pos.y = rect.pos.y * newFoldedHeight / rect.size.h;
+            newWidth = width * newFoldedWidth / rect.size.w;
+            newHeight = height * newFoldedHeight / rect.size.h;
+            rect.size.w = newFoldedWidth;
+            rect.size.h = newFoldedHeight;
+        } else {
+            std::tie(newWidth, newHeight) =
+                    ScreenshotUtils::resizeKeepAspectRatio(
+                            width, height, desiredWidth, desiredHeight);
+        }
 
         // The screenshot produces a rotated result and will just simply flip
         // width and height.
         if (rotation == Rotation::LANDSCAPE ||
             rotation == Rotation::REVERSE_LANDSCAPE) {
             std::swap(newWidth, newHeight);
+            if (isFolded) {
+                std::swap(rect.pos.x, rect.pos.y);
+                std::swap(rect.size.w, rect.size.h);
+            }
         }
 
         // This is an expensive operation, that frequently can get cancelled, so
@@ -707,7 +739,7 @@ public:
         size_t cPixels = 0;
         ScreenshotUtils::getScreenshot(request->display(), request->format(),
                                        rotation, newWidth, newHeight, pixels,
-                                       &cPixels, &width, &height);
+                                       &cPixels, &width, &height, rect);
 
         auto format = reply->mutable_format();
         format->set_format(request->format());
@@ -755,13 +787,22 @@ public:
         Stopwatch sw;
         ScreenshotUtils::getScreenshot(request->display(), request->format(),
                                        rotation, newWidth, newHeight, pixels,
-                                       &cPixels, &width, &height);
+                                       &cPixels, &width, &height, rect);
 
         // Update format information with the retrieved width, height.
         format->set_height(height);
         format->set_width(width);
         LOG(VERBOSE) << "Screenshot " << width << "x" << height << ", cPixels: " << cPixels
                      << ", in: " << sw.elapsedUs() << " us";
+        if (isFolded) {
+            auto foldedDisplay = format->mutable_foldeddisplay();
+            int w, h, x, y;
+            android_foldable_get_folded_area(&x, &y, &w, &h);
+            foldedDisplay->set_width(w);
+            foldedDisplay->set_height(h);
+            foldedDisplay->set_xoffset(x);
+            foldedDisplay->set_yoffset(y);
+        }
         return Status::OK;
     }
 
