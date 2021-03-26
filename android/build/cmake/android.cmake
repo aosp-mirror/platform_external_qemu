@@ -983,7 +983,7 @@ function(android_complete_archive LIBCMD LIBNAME)
       set(${LIBCMD} "-Wl,-wholearchive:$<TARGET_FILE:${LIBNAME}>" PARENT_SCOPE)
     endif()
   else()
-    set(${LIBCMD} "-Wl,-whole-archive" ${LIBNAME} "-Wl,-no-whole-archive"
+    set(${LIBCMD} "-Wl,--whole-archive" ${LIBNAME} "-Wl,--no-whole-archive"
         PARENT_SCOPE)
   endif()
 endfunction()
