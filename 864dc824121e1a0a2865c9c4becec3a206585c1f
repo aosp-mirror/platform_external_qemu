@@ -22,6 +22,30 @@
       },
       "revId": "864dc824121e1a0a2865c9c4becec3a206585c1f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8b6a7f66_ca52af47",
+        "filename": "hw/usb/host-libusb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1243,
+      "author": {
+        "id": 1791310
+      },
+      "writtenOn": "2021-03-27T16:01:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8644ee6a_594fe67f",
+      "range": {
+        "startLine": 1243,
+        "startChar": 24,
+        "endLine": 1243,
+        "endChar": 37
+      },
+      "revId": "864dc824121e1a0a2865c9c4becec3a206585c1f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
