@@ -90,6 +90,7 @@ bool EmulatorAdvertisement::write()  const {
     if (System::get()->pathExists(pidFile)) {
         LOG(WARNING) << "Overwriting existing discovery file: " << pidFile;
     }
+    LOG(INFO) << "Advertising in: " << pidFile;
     auto shareFile = std::ofstream(PathUtils::asUnicodePath(pidFile).c_str());
     for (const auto& elem : mStudioConfig) {
         shareFile << elem.first << "=" << elem.second << "\n";
