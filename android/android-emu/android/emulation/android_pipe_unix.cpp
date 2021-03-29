@@ -119,16 +119,17 @@ static void socketPipe_free(SocketPipe* pipe) {
     delete pipe;
 }
 
-static void socketPipe_resetState(SocketPipe* pipe) {
+static void socketPipe_resetState(SocketPipe* pipe, bool startRead) {
     if ((pipe->wakeWanted & PIPE_WAKE_WRITE) != 0) {
         loopIo_wantWrite(pipe->io);
     } else {
         loopIo_dontWantWrite(pipe->io);
     }
 
-    if (pipe->state == STATE_CONNECTED &&
-        (pipe->wakeWanted & PIPE_WAKE_READ) != 0) {
-        loopIo_wantRead(pipe->io);
+    if (pipe->state == STATE_CONNECTED) {
+        if (startRead) {
+            loopIo_wantRead(pipe->io);
+        }
     } else {
         loopIo_dontWantRead(pipe->io);
     }
@@ -156,7 +157,7 @@ static void socketPipe_closeFromSocket(void* opaque) {
     }
 
     pipe->state = STATE_CLOSING_SOCKET;
-    socketPipe_resetState(pipe);
+    socketPipe_resetState(pipe, false);
 }
 
 /* This is the function that gets called each time there is an asynchronous
@@ -180,15 +181,13 @@ static void socketPipe_io_func(void* opaque, int fd, unsigned events) {
             return;
         }
         pipe->state = STATE_CONNECTED;
-        socketPipe_resetState(pipe);
+        socketPipe_resetState(pipe, true);
         return;
     }
 
     /* Otherwise, accept incoming data */
     if ((events & LOOP_IO_READ) != 0) {
-        if ((pipe->wakeWanted & PIPE_WAKE_READ) != 0) {
-            wakeFlags |= PIPE_WAKE_READ;
-        }
+        wakeFlags |= PIPE_WAKE_READ;
     }
 
     if ((events & LOOP_IO_WRITE) != 0) {
@@ -204,7 +203,7 @@ static void socketPipe_io_func(void* opaque, int fd, unsigned events) {
     }
 
     /* Reset state */
-    socketPipe_resetState(pipe);
+    socketPipe_resetState(pipe, false);
 }
 
 static void* socketPipe_initFromAddress(void* hwpipe,
@@ -237,7 +236,7 @@ static void* socketPipe_initFromAddress(void* hwpipe,
         }
         if (status == ASYNC_COMPLETE) {
             pipe->state = STATE_CONNECTED;
-            socketPipe_resetState(pipe);
+            socketPipe_resetState(pipe, true);
         }
     }
 
@@ -503,7 +502,7 @@ static void socketPipe_wakeOn(void* opaque, int flags) {
     DD("%s: flags=%d", __FUNCTION__, flags);
 
     pipe->wakeWanted |= flags;
-    socketPipe_resetState(pipe);
+    socketPipe_resetState(pipe, false);
 }
 
 void* socketPipe_initUnix(void* hwpipe, void* _looper, const char* args) {
@@ -577,7 +576,7 @@ static void* socketPipe_load(void* hwpipe,
                               socketPipe_io_func, pipe.get());
         pipe->connector->io = pipe->io;
         pipe->hwpipe = hwpipe;
-        socketPipe_resetState(pipe.get());
+        socketPipe_resetState(pipe.get(), true);
         return pipe.release();
     } else {
         return nullptr;
