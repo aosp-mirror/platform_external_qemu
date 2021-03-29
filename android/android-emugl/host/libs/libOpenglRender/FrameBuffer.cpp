@@ -2676,9 +2676,6 @@ int FrameBuffer::getScreenshot(unsigned int nChannels,
         }
     }
 
-    int needed = useSnipping ? (nChannels * rect.size.w * rect.size.h)
-                             : (nChannels * (*width) * (*height));
-
     if (useSnipping) {
         *width = rect.size.w;
         *height = rect.size.h;
@@ -2686,6 +2683,9 @@ int FrameBuffer::getScreenshot(unsigned int nChannels,
         *width = screenWidth;
         *height = screenHeight;
     }
+
+    int needed = useSnipping ? (nChannels * rect.size.w * rect.size.h)
+                             : (nChannels * (*width) * (*height));
 
     if (*cPixels < needed) {
         *cPixels = needed;
