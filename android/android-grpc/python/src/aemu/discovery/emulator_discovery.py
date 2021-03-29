@@ -33,21 +33,22 @@ class EmulatorDiscovery(object):
     _PID_FILE_ = re.compile("pid_(\\d+).ini")
 
     def __init__(self):
-        self.discovery_dir = get_discovery_directory()
+        self.discovery_dirs = get_discovery_directories()
         self.discover()
 
     def discover(self):
         """Discovers all running _emulators by scanning the discovery dir."""
-        logging.debug("Discovering _emulators using %s", self.discovery_dir)
         self._emulators = set()
-        if os.path.exists(self.discovery_dir):
-            for file in os.listdir(self.discovery_dir):
-                m = self._PID_FILE_.match(file)
-                if m:
-                    logging.debug("Found %s", file)
-                    emu = self._parse_ini(os.path.join(self.discovery_dir, file))
-                    if emu:
-                        self._emulators.add(EmulatorDescription(m.group(1), emu))
+        for discovery_dir in self.discovery_dirs:
+            logging.debug("Discovering emulators in %s", discovery_dir)
+            if os.path.exists(discovery_dir):
+                for file in os.listdir(discovery_dir):
+                    m = self._PID_FILE_.match(file)
+                    if m:
+                        logging.debug("Found %s", file)
+                        emu = self._parse_ini(os.path.join(discovery_dir, file))
+                        if emu:
+                            self._emulators.add(EmulatorDescription(m.group(1), emu))
 
     def _parse_ini(self, ini_file):
         """Parse an emulator ini file."""
@@ -84,8 +85,8 @@ class EmulatorDiscovery(object):
         return next(iter(self._emulators))
 
 
-def get_discovery_directory():
-    """Gets the discovery directory with the emulator pid files."""
+def get_discovery_directories():
+    """Gets all the discovery directories that could contain emulator pid files."""
     path = None
     if platform.system() == "Windows" and "LOCALAPPDATA" in os.environ:
         path = os.path.join(os.environ.get("LOCALAPPDATA"), "Temp")
@@ -98,24 +99,31 @@ def get_discovery_directory():
             os.environ.get("HOME"), "Library", "Caches", "TemporaryItems"
         )
 
-    if path is None or not os.path.exists(path):
-        path = _get_user_directory()
-    return os.path.join(path, "avd", "running")
+    paths = _get_user_directories()
+    paths.append(path)
+    return [os.path.join(path, "avd", "running") for path in paths if path != None]
 
 
-def _get_user_directory():
+def _get_user_directories():
     # See ConfigDirs::getUserDirectory()
-    logging.debug("Retrieving user directory")
+    logging.debug("Retrieving user directories")
+    paths = []
 
     if "ANDROID_EMULATOR_HOME" in os.environ:
-        return os.environ.get("ANDROID_EMULATOR_HOME")
+        paths.append(os.environ.get("ANDROID_EMULATOR_HOME"))
 
     if "ANDROID_SDK_HOME" in os.environ:
-        return os.path.join(
-            os.environ.get("ANDROID_SDK_HOME"), EmulatorDiscovery.ANDROID_SUBDIR
+        paths.append(
+            os.path.join(
+                os.environ.get("ANDROID_SDK_HOME"), EmulatorDiscovery.ANDROID_SUBDIR
+            )
         )
 
-    return os.path.join(os.environ.get("HOME"), EmulatorDiscovery.ANDROID_SUBDIR)
+    if "ANDROID_AVD_HOME" in os.environ:
+        paths.append(os.environ.get("ANDROID_AVD_HOME"))
+
+    paths.append(os.path.join(os.environ.get("HOME"), EmulatorDiscovery.ANDROID_SUBDIR))
+    return paths
 
 
 def get_default_emulator():
