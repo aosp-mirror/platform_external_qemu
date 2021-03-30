@@ -864,4 +864,4 @@ static void vapic_register(void)
     type_register_static(&vapic_type);
 }
 
-type_init(vapic_register);
+//type_init(vapic_register);
