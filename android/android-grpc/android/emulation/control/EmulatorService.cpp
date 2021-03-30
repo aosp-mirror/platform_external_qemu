@@ -656,7 +656,16 @@ public:
         if (isFolded) {
             android_foldable_get_folded_area(&rect.pos.x, &rect.pos.y,
                                              &rect.size.w, &rect.size.h);
+            auto foldedDisplay =
+                    reply->mutable_format()->mutable_foldeddisplay();
+            foldedDisplay->set_width(rect.size.w);
+            foldedDisplay->set_height(rect.size.h);
+            foldedDisplay->set_xoffset(rect.pos.x);
+            foldedDisplay->set_yoffset(rect.pos.y);
+        } else {
+            reply->mutable_format()->clear_foldeddisplay();
         }
+
         reply->set_timestampus(System::get()->getUnixTimeUs());
         android::emulation::ImageFormat desiredFormat =
                 ScreenshotUtils::translate(request->format());
@@ -794,15 +803,7 @@ public:
         format->set_width(width);
         LOG(VERBOSE) << "Screenshot " << width << "x" << height << ", cPixels: " << cPixels
                      << ", in: " << sw.elapsedUs() << " us";
-        if (isFolded) {
-            auto foldedDisplay = format->mutable_foldeddisplay();
-            int w, h, x, y;
-            android_foldable_get_folded_area(&x, &y, &w, &h);
-            foldedDisplay->set_width(w);
-            foldedDisplay->set_height(h);
-            foldedDisplay->set_xoffset(x);
-            foldedDisplay->set_yoffset(y);
-        }
+
         return Status::OK;
     }
 
