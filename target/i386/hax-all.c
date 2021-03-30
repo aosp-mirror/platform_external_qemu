@@ -849,6 +849,7 @@ vcpu_run:
 
 static void do_hax_cpu_synchronize_state(CPUState *cpu, run_on_cpu_data arg)
 {
+    printf("cpu->env_ptr %p, cpu.env %p\n", cpu->env_ptr, &(X86_CPU(cpu)->env));
     CPUArchState *env = cpu->env_ptr;
 
     hax_arch_get_registers(env);
@@ -879,7 +880,7 @@ void hax_cpu_synchronize_post_reset(CPUState *cpu)
 static void do_hax_cpu_synchronize_post_init(CPUState *cpu, run_on_cpu_data arg)
 {
     CPUArchState *env = cpu->env_ptr;
-
+    log_cpu(env);
     hax_vcpu_sync_state(env, 1);
     cpu->vcpu_dirty = false;
 }
@@ -999,7 +1000,7 @@ static void set_seg(struct segment_desc_t *lhs, const SegmentCache *rhs)
     lhs->limit = rhs->limit;
     lhs->type = (flags >> DESC_TYPE_SHIFT) & 15;
     lhs->present = (flags & DESC_P_MASK) != 0;
-    lhs->dpl = rhs->selector & 3;
+    lhs->dpl = (flags >> DESC_DPL_SHIFT) & 3;
     lhs->operand_size = (flags >> DESC_B_SHIFT) & 1;
     lhs->desc = (flags & DESC_S_MASK) != 0;
     lhs->long_mode = (flags >> DESC_L_SHIFT) & 1;
@@ -1068,6 +1069,7 @@ static int hax_set_segments(CPUArchState *env, struct vcpu_state_t *sregs)
     sregs->_idt.base = env->idt.base;
     sregs->_gdt.limit = env->gdt.limit;
     sregs->_gdt.base = env->gdt.base;
+    sregs->_efer = env->efer;
     return 0;
 }
 
@@ -1105,12 +1107,20 @@ static int hax_sync_vcpu_register(CPUArchState *env, int set)
 #endif
     hax_getput_reg(&regs._rflags, &env->eflags, set);
     hax_getput_reg(&regs._rip, &env->eip, set);
+    //hax_getput_reg(&regs.)
+    hax_getput_reg(&regs._dr0, &env->dr[0], set);
+    hax_getput_reg(&regs._dr1, &env->dr[1], set);
+    hax_getput_reg(&regs._dr2, &env->dr[2], set);
+    hax_getput_reg(&regs._dr3, &env->dr[3], set);
+    hax_getput_reg(&regs._dr6, &env->dr[6], set);
+    hax_getput_reg(&regs._dr7, &env->dr[7], set);
 
     if (set) {
         regs._cr0 = env->cr[0];
         regs._cr2 = env->cr[2];
         regs._cr3 = env->cr[3];
         regs._cr4 = env->cr[4];
+        
         hax_set_segments(env, &regs);
     } else {
         env->cr[0] = regs._cr0;
@@ -1147,6 +1157,7 @@ static int hax_get_msrs(CPUArchState *env)
     msrs[n++].entry = MSR_IA32_SYSENTER_ESP;
     msrs[n++].entry = MSR_IA32_SYSENTER_EIP;
     msrs[n++].entry = MSR_IA32_TSC;
+    msrs[n++].entry = MSR_IA32_SMBASE;
 #ifdef TARGET_X86_64
     msrs[n++].entry = MSR_EFER;
     msrs[n++].entry = MSR_STAR;
@@ -1174,6 +1185,9 @@ static int hax_get_msrs(CPUArchState *env)
             break;
         case MSR_IA32_TSC:
             env->tsc = msrs[i].value;
+            break;
+        case MSR_IA32_SMBASE:
+            env->smbase = msrs[i].value;
             break;
 #ifdef TARGET_X86_64
         case MSR_EFER:
@@ -1213,6 +1227,7 @@ static int hax_set_msrs(CPUArchState *env)
     hax_msr_entry_set(&msrs[n++], MSR_IA32_SYSENTER_ESP, env->sysenter_esp);
     hax_msr_entry_set(&msrs[n++], MSR_IA32_SYSENTER_EIP, env->sysenter_eip);
     hax_msr_entry_set(&msrs[n++], MSR_IA32_TSC, env->tsc);
+    hax_msr_entry_set(&msrs[n++], MSR_IA32_SMBASE, env->smbase);
 #ifdef TARGET_X86_64
     hax_msr_entry_set(&msrs[n++], MSR_EFER, env->efer);
     hax_msr_entry_set(&msrs[n++], MSR_STAR, env->star);

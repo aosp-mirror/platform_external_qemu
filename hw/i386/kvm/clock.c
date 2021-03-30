@@ -316,7 +316,7 @@ static const TypeInfo kvmclock_info = {
 };
 
 /* Note: Must be called after VCPU initialization. */
-void kvmclock_create(void)
+/*void kvmclock_create(void)
 {
     X86CPU *cpu = X86_CPU(first_cpu);
 
@@ -325,7 +325,7 @@ void kvmclock_create(void)
                                        (1ULL << KVM_FEATURE_CLOCKSOURCE2))) {
         sysbus_create_simple(TYPE_KVM_CLOCK, -1, NULL);
     }
-}
+}*/
 
 static void kvmclock_register_types(void)
 {
