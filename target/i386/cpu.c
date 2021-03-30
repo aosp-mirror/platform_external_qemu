@@ -378,17 +378,25 @@ static FeatureWordInfo feature_word_info[FEATURE_WORDS] = {
     },
     [FEAT_KVM] = {
         .feat_names = {
-            "kvmclock", "kvm-nopiodelay", "kvm-mmu", "kvmclock",
+            /*"kvmclock", "kvm-nopiodelay", "kvm-mmu", "kvmclock",
             "kvm-asyncpf", "kvm-steal-time", "kvm-pv-eoi", "kvm-pv-unhalt",
             NULL, "kvm-pv-tlb-flush", NULL, NULL,
             NULL, NULL, NULL, NULL,
             NULL, NULL, NULL, NULL,
             NULL, NULL, NULL, NULL,
             "kvmclock-stable-bit", NULL, NULL, NULL,
+            NULL, NULL, NULL, NULL,*/
+            NULL, NULL, NULL, NULL,
+            NULL, NULL, NULL, NULL,
+            NULL, NULL, NULL, NULL,
+            NULL, NULL, NULL, NULL,
+            NULL, NULL, NULL, NULL,
+            NULL, NULL, NULL, NULL,
+            NULL, NULL, NULL, NULL,
             NULL, NULL, NULL, NULL,
         },
         .cpuid_eax = KVM_CPUID_FEATURES, .cpuid_reg = R_EAX,
-        .tcg_features = TCG_KVM_FEATURES,
+        //.tcg_features = TCG_KVM_FEATURES,
     },
     [FEAT_KVM_HINTS] = {
         .feat_names = {
@@ -552,7 +560,8 @@ static FeatureWordInfo feature_word_info[FEATURE_WORDS] = {
     },
     [FEAT_XSAVE] = {
         .feat_names = {
-            "xsaveopt", "xsavec", "xgetbv1", "xsaves",
+            //"xsaveopt", "xsavec", "xgetbv1", "xsaves",
+            NULL, NULL, NULL, NULL,
             NULL, NULL, NULL, NULL,
             NULL, NULL, NULL, NULL,
             NULL, NULL, NULL, NULL,
@@ -3029,7 +3038,7 @@ static void x86_cpu_load_def(X86CPU *cpu, X86CPUDefinition *def, Error **errp)
             x86_cpu_change_kvm_default("x2apic", "off");
         }
 
-        x86_cpu_apply_props(cpu, kvm_default_props);
+        //x86_cpu_apply_props(cpu, kvm_default_props);
     } else if (tcg_enabled()) {
         x86_cpu_apply_props(cpu, tcg_default_props);
     }
@@ -4743,12 +4752,12 @@ static void x86_cpu_initfn(Object *obj)
     object_property_add_alias(obj, "nodeid_msr", obj, "nodeid-msr", &error_abort);
     object_property_add_alias(obj, "perfctr_core", obj, "perfctr-core", &error_abort);
     object_property_add_alias(obj, "perfctr_nb", obj, "perfctr-nb", &error_abort);
-    object_property_add_alias(obj, "kvm_nopiodelay", obj, "kvm-nopiodelay", &error_abort);
-    object_property_add_alias(obj, "kvm_mmu", obj, "kvm-mmu", &error_abort);
-    object_property_add_alias(obj, "kvm_asyncpf", obj, "kvm-asyncpf", &error_abort);
-    object_property_add_alias(obj, "kvm_steal_time", obj, "kvm-steal-time", &error_abort);
-    object_property_add_alias(obj, "kvm_pv_eoi", obj, "kvm-pv-eoi", &error_abort);
-    object_property_add_alias(obj, "kvm_pv_unhalt", obj, "kvm-pv-unhalt", &error_abort);
+    //object_property_add_alias(obj, "kvm_nopiodelay", obj, "kvm-nopiodelay", &error_abort);
+    //object_property_add_alias(obj, "kvm_mmu", obj, "kvm-mmu", &error_abort);
+    //object_property_add_alias(obj, "kvm_asyncpf", obj, "kvm-asyncpf", &error_abort);
+    //object_property_add_alias(obj, "kvm_steal_time", obj, "kvm-steal-time", &error_abort);
+    //object_property_add_alias(obj, "kvm_pv_eoi", obj, "kvm-pv-eoi", &error_abort);
+    //object_property_add_alias(obj, "kvm_pv_unhalt", obj, "kvm-pv-unhalt", &error_abort);
     object_property_add_alias(obj, "svm_lock", obj, "svm-lock", &error_abort);
     object_property_add_alias(obj, "nrip_save", obj, "nrip-save", &error_abort);
     object_property_add_alias(obj, "tsc_scale", obj, "tsc-scale", &error_abort);

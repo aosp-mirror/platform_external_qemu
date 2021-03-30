@@ -1273,7 +1273,8 @@ int kvm_arch_init(MachineState *ms, KVMState *s)
     struct utsname utsname;
 
 #ifdef KVM_CAP_XSAVE
-    has_xsave = kvm_check_extension(s, KVM_CAP_XSAVE);
+    //has_xsave = kvm_check_extension(s, KVM_CAP_XSAVE);
+    has_xsave = false;
 #endif
 
 #ifdef KVM_CAP_XCRS

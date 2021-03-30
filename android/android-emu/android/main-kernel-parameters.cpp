@@ -103,9 +103,10 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         //
         // kvm-clock seems to be stable for >= 5.4.
         if (kernelVersion < KERNEL_VERSION_5_4_0) {
-            params.add("no-kvmclock");
+            //params.add("no-kvmclock");
         }
     }
+    params.add("no-kvmclock");
 
     android::setupVirtualSerialPorts(
             &params, nullptr, apiLevel, targetArch, kernelSerialPrefix, isQemu2,
