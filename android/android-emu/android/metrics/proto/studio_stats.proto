@@ -1490,7 +1490,8 @@ message EmulatorFeatureFlagState {
     MINIGBM = 78;
     NO_DRAW = 79;
     GNSS_GRPC_V1 = 80;
-    // Next tag: 81
+    MIGRATABLE_SNAPSHOT_SAVE = 81;
+    // Next tag: 82
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

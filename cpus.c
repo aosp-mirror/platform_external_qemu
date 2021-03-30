@@ -79,6 +79,8 @@
 int64_t max_delay;
 int64_t max_advance;
 
+bool migratable_snapshot;
+
 /* vcpu throttling controls */
 static QEMUTimer *throttle_timer;
 static unsigned int throttle_percentage;

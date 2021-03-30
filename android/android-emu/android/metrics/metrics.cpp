@@ -481,6 +481,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::NO_DRAW;
         case android::featurecontrol::GnssGrpcV1:
             return android_studio::EmulatorFeatureFlagState::GNSS_GRPC_V1;
+        case android::featurecontrol::MigratableSnapshotSave:
+            return android_studio::EmulatorFeatureFlagState::MIGRATABLE_SNAPSHOT_SAVE;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }

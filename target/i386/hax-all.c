@@ -879,7 +879,6 @@ void hax_cpu_synchronize_post_reset(CPUState *cpu)
 static void do_hax_cpu_synchronize_post_init(CPUState *cpu, run_on_cpu_data arg)
 {
     CPUArchState *env = cpu->env_ptr;
-
     hax_vcpu_sync_state(env, 1);
     cpu->vcpu_dirty = false;
 }
@@ -989,7 +988,7 @@ static void get_seg(SegmentCache *lhs, const struct segment_desc_t *rhs)
         | (rhs->granularity * DESC_G_MASK) | (rhs->available * DESC_AVL_MASK);
 }
 
-static void set_seg(struct segment_desc_t *lhs, const SegmentCache *rhs)
+static void set_seg(struct segment_desc_t *lhs, const SegmentCache *rhs, bool is_tr)
 {
     unsigned flags = rhs->flags;
 
@@ -997,9 +996,13 @@ static void set_seg(struct segment_desc_t *lhs, const SegmentCache *rhs)
     lhs->selector = rhs->selector;
     lhs->base = rhs->base;
     lhs->limit = rhs->limit;
+    if (!rhs->selector && !is_tr) {
+        lhs->ar = 1 << 16;
+        return;
+    }
     lhs->type = (flags >> DESC_TYPE_SHIFT) & 15;
     lhs->present = (flags & DESC_P_MASK) != 0;
-    lhs->dpl = rhs->selector & 3;
+    lhs->dpl = (flags >> DESC_DPL_SHIFT) & 3;
     lhs->operand_size = (flags >> DESC_B_SHIFT) & 1;
     lhs->desc = (flags & DESC_S_MASK) != 0;
     lhs->long_mode = (flags >> DESC_L_SHIFT) & 1;
@@ -1047,12 +1050,12 @@ static int hax_set_segments(CPUArchState *env, struct vcpu_state_t *sregs)
         set_v8086_seg(&sregs->_gs, &env->segs[R_GS]);
         set_v8086_seg(&sregs->_ss, &env->segs[R_SS]);
     } else {
-        set_seg(&sregs->_cs, &env->segs[R_CS]);
-        set_seg(&sregs->_ds, &env->segs[R_DS]);
-        set_seg(&sregs->_es, &env->segs[R_ES]);
-        set_seg(&sregs->_fs, &env->segs[R_FS]);
-        set_seg(&sregs->_gs, &env->segs[R_GS]);
-        set_seg(&sregs->_ss, &env->segs[R_SS]);
+        set_seg(&sregs->_cs, &env->segs[R_CS], false);
+        set_seg(&sregs->_ds, &env->segs[R_DS], false);
+        set_seg(&sregs->_es, &env->segs[R_ES], false);
+        set_seg(&sregs->_fs, &env->segs[R_FS], false);
+        set_seg(&sregs->_gs, &env->segs[R_GS], false);
+        set_seg(&sregs->_ss, &env->segs[R_SS], false);
 
         if (env->cr[0] & CR0_PE_MASK) {
             /* force ss cpl to cs cpl */
@@ -1062,12 +1065,13 @@ static int hax_set_segments(CPUArchState *env, struct vcpu_state_t *sregs)
         }
     }
 
-    set_seg(&sregs->_tr, &env->tr);
-    set_seg(&sregs->_ldt, &env->ldt);
+    set_seg(&sregs->_tr, &env->tr, true);
+    set_seg(&sregs->_ldt, &env->ldt, false);
     sregs->_idt.limit = env->idt.limit;
     sregs->_idt.base = env->idt.base;
     sregs->_gdt.limit = env->gdt.limit;
     sregs->_gdt.base = env->gdt.base;
+    sregs->_efer = env->efer;
     return 0;
 }
 
@@ -1105,6 +1109,12 @@ static int hax_sync_vcpu_register(CPUArchState *env, int set)
 #endif
     hax_getput_reg(&regs._rflags, &env->eflags, set);
     hax_getput_reg(&regs._rip, &env->eip, set);
+    hax_getput_reg(&regs._dr0, &env->dr[0], set);
+    hax_getput_reg(&regs._dr1, &env->dr[1], set);
+    hax_getput_reg(&regs._dr2, &env->dr[2], set);
+    hax_getput_reg(&regs._dr3, &env->dr[3], set);
+    hax_getput_reg(&regs._dr6, &env->dr[6], set);
+    hax_getput_reg(&regs._dr7, &env->dr[7], set);
 
     if (set) {
         regs._cr0 = env->cr[0];
