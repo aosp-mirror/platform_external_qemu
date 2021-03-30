@@ -67,8 +67,10 @@ Status GnssGrpcProxyServiceImpl::SendNmea(ServerContext* context,
 }
 
 void GnssGrpcProxyServiceImpl::sendToSerial() {
-    std::lock_guard<std::mutex> lock(cached_nmea_mutex);
-    ssize_t bytes_written = cuttlefish::WriteAll(gnss_in_, cached_nmea);
+    std::string aaa("$GPGGA,192924,3727.5376,N,12213.6267,W,1,6,,0.0,M,0.,M,,,*47\n$GPRMC,192924,A,3727.5376,N,12213.6267,W,0.00,0.00,290321,0.0,W*47\r\n");
+    fprintf(stderr, "send to guest %s\n", aaa.c_str());
+//    std::lock_guard<std::mutex> lock(cached_nmea_mutex);
+    ssize_t bytes_written = cuttlefish::WriteAll(gnss_in_, aaa);
     if (bytes_written < 0) {
         LOG(ERROR) << "Error writing to fd: " << gnss_in_->StrError();
     }
@@ -83,7 +85,7 @@ void GnssGrpcProxyServiceImpl::StartServer() {
 void GnssGrpcProxyServiceImpl::StartReadFileThread() {
     // Create a new thread to handle writes to the gnss and to the any client
     // connected to the socket.
-    file_read_thread_ = std::thread([this]() { ReadNmeaFromLocalFile(); });
+    file_read_thread_ = std::thread([this]() { while(1) {ReadNmeaFromLocalFile();} });
 }
 
 void GnssGrpcProxyServiceImpl::ReadNmeaFromLocalFile() {
@@ -105,12 +107,17 @@ void GnssGrpcProxyServiceImpl::ReadNmeaFromLocalFile() {
              * extra work to make it more generic, i.e. align with the timestamp
              * in the file.
              */
+            //fprintf(stderr, "read from file %s\n", line.c_str());
             if (count % 2 == 0) {
                 {
                     std::lock_guard<std::mutex> lock(cached_nmea_mutex);
-                    cached_nmea = lastLine + '\n' + line;
+                    //cached_nmea = lastLine + '\n' + line;
+                    cached_nmea = lastLine + line;
                 }
                 std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+             //   fprintf(stderr, "1 current nmea %s\n", cached_nmea.c_str());
+            } else {
+              //  fprintf(stderr, "2 current nmea %s\n", cached_nmea.c_str());
             }
             lastLine = line;
         }
@@ -137,9 +144,9 @@ void GnssGrpcProxyServiceImpl::ReadNmeaFromLocalFile() {
                 gnss_cmd_str = gnss_cmd_str.substr(gnss_cmd_str.size() -
                                                    GNSS_SERIAL_BUFFER_SIZE);
             }
-            LOG(DEBUG) << "got " << gnss_cmd_str;
             total_read += bytes_read;
             if (gnss_cmd_str.find(CMD_GET_LOCATION) != std::string::npos) {
+                //fprintf(stderr, "from guest got %s\n", gnss_cmd_str.c_str());
                 sendToSerial();
                 gnss_cmd_str = "";
                 total_read = 0;
