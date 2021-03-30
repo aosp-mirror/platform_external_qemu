@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f36d8dd0_7338e4ef",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-03-30T18:14:40Z",
+      "side": 1,
+      "message": "I need to add e2e test for this CL once https://android-review.googlesource.com/c/platform/external/adt-infra/+/1653855 is unblocked.",
+      "revId": "aa6d5799a3f24d0a777a939664159f7cf4ccf702",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
