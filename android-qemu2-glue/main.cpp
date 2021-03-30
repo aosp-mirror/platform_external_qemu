@@ -2169,16 +2169,17 @@ extern "C" int main(int argc, char** argv) {
                     isIpv4, opts->gnss_grpc_port ? opts->gnss_grpc_port : "",
                     opts->gnss_file_path ? opts->gnss_file_path : "");
 
+            args.add("-device");
+            args.add("virtio-serial");
             args.add("-chardev");
             args.addFormat(
                     "socket,port=%d,host=%s,nowait,nodelay,%s,id="
-                    "gnsschardev",
+                    "gnss",
                     gnss_guest_port, isIpv4 ? "127.0.0.1" : "::1",
                     isIpv4 ? "ipv4" : "ipv6");
             args.add("-device");
-            args.add("virtio-serial-pci,max_ports=1,id=virtio-serial12");
-            args.add("-device");
-            args.add("virtconsole,bus=virtio-serial12.0,chardev=gnsschardev");
+            args.add("virtserialport,chardev=gnss,name=gnss");
+
         } else {
             dwarning(
                     "Could not setup gnss grpc servie; gnss grpc service is "
