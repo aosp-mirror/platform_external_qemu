@@ -1287,6 +1287,8 @@ typedef struct CPUX86State {
     TPRAccess tpr_access_type;
 } CPUX86State;
 
+void log_cpu(CPUX86State* cpu);
+
 struct kvm_msrs;
 struct gvm_msrs;
 
