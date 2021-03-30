@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d28693e6_d6227c21",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 4
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-30T23:41:29Z",
+      "side": 1,
+      "message": "This is an implementation detail that does not belong to the gRPC API definition. Better to explain what device independent means, possibly separately for each platform.",
+      "range": {
+        "startLine": 64,
+        "startChar": 49,
+        "endLine": 65,
+        "endChar": 9
+      },
+      "revId": "bd56f1213467543edb7105b71b7a10bee60ee96a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b3cd7184_148d100e",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-30T23:41:29Z",
+      "side": 1,
+      "message": "expected -\u003e requested",
+      "range": {
+        "startLine": 74,
+        "startChar": 57,
+        "endLine": 74,
+        "endChar": 65
+      },
+      "revId": "bd56f1213467543edb7105b71b7a10bee60ee96a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5d096b77_3f9c259d",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-30T23:41:29Z",
+      "side": 1,
+      "message": "Not clear what this sentence means. Consider changing to \"The x field is interpreted as the coordinate of the left edge of the window\"",
+      "range": {
+        "startLine": 79,
+        "startChar": 24,
+        "endLine": 79,
+        "endChar": 91
+      },
+      "revId": "bd56f1213467543edb7105b71b7a10bee60ee96a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
