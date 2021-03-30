@@ -162,7 +162,7 @@ ERROR_WHITELIST = [
     {'machine':'(?!pseries).*', 'device':'.*-spapr-cpu-core', 'expected':True},
 
     # KVM-specific devices shouldn't be tried without accel=kvm:
-    {'accel':'(?!kvm).*', 'device':'kvmclock', 'expected':True},
+    #{'accel':'(?!kvm).*', 'device':'kvmclock', 'expected':True},
 
     # xen-specific machines and devices:
     {'accel':'(?!xen).*', 'machine':'xen.*', 'expected':True},
