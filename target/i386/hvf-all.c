@@ -17,6 +17,8 @@
 #include "qemu/osdep.h"
 #include "qemu-common.h"
 
+#include "target/i386/hax-def.h"
+
 #include "hvf-i386.h"
 #include "hvf-utils/vmcs.h"
 #include "hvf-utils/vmx.h"
@@ -680,12 +682,18 @@ void hvf_cpu_synchronize_state(CPUState *cpu_state)
         run_on_cpu(cpu_state, __hvf_cpu_synchronize_state, RUN_ON_CPU_NULL);
 }
 
+static uint64_t print_vmcs(void* opaque, uint32_t enc) {
+    return rvmcs(*(hv_vcpuid_t*)opaque, enc);
+}
+
 void __hvf_cpu_synchronize_post_reset(CPUState* cpu_state, run_on_cpu_data data)
 {
     (void)data;
     hvf_put_registers(cpu_state);
     wvmcs(cpu_state->hvf_fd, VMCS_ENTRY_CTLS, 0);
     cpu_state->hvf_vcpu_dirty = false;
+    printf("post reset\n");
+    dump_vmcs(&(cpu_state->hvf_fd), print_vmcs);
 }
 
 void hvf_cpu_synchronize_post_reset(CPUState *cpu_state)
@@ -698,6 +706,8 @@ void _hvf_cpu_synchronize_post_init(CPUState* cpu_state, run_on_cpu_data data)
     (void)data;
     hvf_put_registers(cpu_state);
     cpu_state->hvf_vcpu_dirty = false;
+    printf("post init\n");
+    dump_vmcs(&(cpu_state->hvf_fd), print_vmcs);
 }
 
 void hvf_cpu_synchronize_post_init(CPUState *cpu_state)
