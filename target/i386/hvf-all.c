@@ -680,12 +680,17 @@ void hvf_cpu_synchronize_state(CPUState *cpu_state)
         run_on_cpu(cpu_state, __hvf_cpu_synchronize_state, RUN_ON_CPU_NULL);
 }
 
+static uint64_t print_vmcs(void* opaque, uint32_t enc) {
+    return rvmcs(*(hv_vcpuid_t*)opaque, enc);
+}
+
 void __hvf_cpu_synchronize_post_reset(CPUState* cpu_state, run_on_cpu_data data)
 {
     (void)data;
     hvf_put_registers(cpu_state);
     wvmcs(cpu_state->hvf_fd, VMCS_ENTRY_CTLS, 0);
     cpu_state->hvf_vcpu_dirty = false;
+    dump_vmcs(&(cpu_state->hvf_fd), print_vmcs);
 }
 
 void hvf_cpu_synchronize_post_reset(CPUState *cpu_state)
