@@ -25,6 +25,7 @@
 #include "cpu.h"
 #include "x86_descr.h"
 #include "x86_decode.h"
+#include "target/i386/hax-def.h"
 
 #include "hw/i386/apic_internal.h"
 
