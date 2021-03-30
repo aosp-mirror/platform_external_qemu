@@ -49,6 +49,20 @@
 #include "exec/memattrs.h"
 #include "trace.h"
 
+#include <execinfo.h>
+#include <stdio.h>
+
+void printCallStack() {
+    void* callstack[128];
+    int i, frames = backtrace(callstack, 128);
+    char** strs = backtrace_symbols(callstack, frames);
+    for (i = 0; i < frames; ++i) {
+        fprintf(stderr, "%s\n", strs[i]);
+    }
+    free(strs);
+}
+
+
 //#define DEBUG_KVM
 
 #ifdef DEBUG_KVM
@@ -345,7 +359,7 @@ uint32_t kvm_arch_get_supported_cpuid(KVMState *s, uint32_t function,
 
     if (function == 1 && reg == R_EDX) {
         /* KVM before 2.6.30 misreports the following features */
-        ret |= CPUID_MTRR | CPUID_PAT | CPUID_MCE | CPUID_MCA;
+        ret |= /*CPUID_MTRR |*/ CPUID_PAT | CPUID_MCE | CPUID_MCA;
     } else if (function == 1 && reg == R_ECX) {
         /* We can set the hypervisor flag, even if KVM does not return it on
          * GET_SUPPORTED_CPUID
@@ -1273,7 +1287,8 @@ int kvm_arch_init(MachineState *ms, KVMState *s)
     struct utsname utsname;
 
 #ifdef KVM_CAP_XSAVE
-    has_xsave = kvm_check_extension(s, KVM_CAP_XSAVE);
+    //has_xsave = kvm_check_extension(s, KVM_CAP_XSAVE);
+    has_xsave = false;
 #endif
 
 #ifdef KVM_CAP_XCRS
@@ -2710,7 +2725,9 @@ static int kvm_get_debugregs(X86CPU *cpu)
 
 int kvm_arch_put_registers(CPUState *cpu, int level)
 {
+    printCallStack();
     X86CPU *x86_cpu = X86_CPU(cpu);
+    log_cpu(&x86_cpu->env);
     int ret;
 
     assert(cpu_is_stopped(cpu) || qemu_cpu_is_self(cpu));
@@ -2735,11 +2752,11 @@ int kvm_arch_put_registers(CPUState *cpu, int level)
     if (ret < 0) {
         return ret;
     }
-    ret = kvm_put_xsave(x86_cpu);
+    //ret = kvm_put_xsave(x86_cpu);
     if (ret < 0) {
         return ret;
     }
-    ret = kvm_put_xcrs(x86_cpu);
+    //ret = kvm_put_xcrs(x86_cpu);
     if (ret < 0) {
         return ret;
     }
@@ -2785,6 +2802,8 @@ int kvm_arch_put_registers(CPUState *cpu, int level)
 
 int kvm_arch_get_registers(CPUState *cs)
 {
+    printf("cpu->env_ptr %p, cpu.env %p\n", cs->env_ptr, &(X86_CPU(cs)->env));
+
     X86CPU *cpu = X86_CPU(cs);
     int ret;
 

@@ -44,9 +44,9 @@
 #define __KVM_HAVE_PIT_STATE2
 #define __KVM_HAVE_XEN_HVM
 #define __KVM_HAVE_VCPU_EVENTS
-#define __KVM_HAVE_DEBUGREGS
-#define __KVM_HAVE_XSAVE
-#define __KVM_HAVE_XCRS
+//#define __KVM_HAVE_DEBUGREGS
+//#define __KVM_HAVE_XSAVE
+//#define __KVM_HAVE_XCRS
 #define __KVM_HAVE_READONLY_MEM
 
 /* Architectural interrupt line count. */
