@@ -41,7 +41,7 @@ def test_get_default_channel(mocker, fake_emu_pid_file):
     path = os.path.dirname(fake_emu_pid_file)
     pid_file = os.path.basename(fake_emu_pid_file)
     mocker.patch.object(
-        aemu.discovery.emulator_discovery, "get_discovery_directory", return_value=path
+        aemu.discovery.emulator_discovery, "get_discovery_directories", return_value=[path]
     )
     mocker.patch.object(os, "listdir", return_value=[pid_file])
     channel = get_default_emulator().get_grpc_channel()
@@ -54,7 +54,7 @@ def test_get_default_async_channel(mocker, fake_emu_pid_file):
     path = os.path.dirname(fake_emu_pid_file)
     pid_file = os.path.basename(fake_emu_pid_file)
     mocker.patch.object(
-        aemu.discovery.emulator_discovery, "get_discovery_directory", return_value=path
+        aemu.discovery.emulator_discovery, "get_discovery_directories", return_value=[path]
     )
     mocker.patch.object(os, "listdir", return_value=[pid_file])
     channel = get_default_emulator().get_async_grpc_channel()
@@ -67,7 +67,7 @@ def test_get_token_channel(mocker, fake_emu_pid_file_with_token):
     path = os.path.dirname(fake_emu_pid_file_with_token)
     pid_file = os.path.basename(fake_emu_pid_file_with_token)
     mocker.patch.object(
-        aemu.discovery.emulator_discovery, "get_discovery_directory", return_value=path
+        aemu.discovery.emulator_discovery, "get_discovery_directories", return_value=[path]
     )
     mocker.patch.object(os, "listdir", return_value=[pid_file])
     channel = get_default_emulator().get_grpc_channel()
@@ -81,7 +81,7 @@ def test_get_token_async_channel(mocker, fake_emu_pid_file_with_token):
     path = os.path.dirname(fake_emu_pid_file_with_token)
     pid_file = os.path.basename(fake_emu_pid_file_with_token)
     mocker.patch.object(
-        aemu.discovery.emulator_discovery, "get_discovery_directory", return_value=path
+        aemu.discovery.emulator_discovery, "get_discovery_directories", return_value=[path]
     )
     mocker.patch.object(os, "listdir", return_value=[pid_file])
     channel = get_default_emulator().get_async_grpc_channel()
