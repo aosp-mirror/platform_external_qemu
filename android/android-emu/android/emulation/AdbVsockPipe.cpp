@@ -220,19 +220,27 @@ struct VsockJdwpProxy : public AdbVsockPipe::Proxy {
 
 AdbVsockPipe::Service::Service(AdbHostAgent* hostAgent)
     : mHostAgent(hostAgent)
-    , mGuestAdbdPollingThread(&AdbVsockPipe::Service::pollGuestAdbdThreadLoop, this)
-    , mDestroyPipesThread(&AdbVsockPipe::Service::destroyPipesThreadLoop, this) {
+    , mGuestAdbdPollingThread([this] { this->pollGuestAdbdThreadLoop(); })
+    , mDestroyPipesThread([this] { this->destroyPipesThreadLoop(); }) {
     g_service = this;
+    startThreads();
+}
+
+void AdbVsockPipe::Service::startThreads() {
+    mGuestAdbdPollingThreadRunning.store(true);
+
+    mGuestAdbdPollingThread.start();
+    mDestroyPipesThread.start();
 }
 
 AdbVsockPipe::Service::~Service() {
     g_service = nullptr;
 
     mGuestAdbdPollingThreadRunning = false;
-    mGuestAdbdPollingThread.join();
 
+    mGuestAdbdPollingThread.wait();
     destroyPipe(nullptr);
-    mDestroyPipesThread.join();
+    mDestroyPipesThread.wait();
 }
 
 void AdbVsockPipe::Service::onHostConnection(android::base::ScopedSocket&& socket,
