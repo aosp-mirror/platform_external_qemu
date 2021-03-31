@@ -51,6 +51,7 @@ struct Globals {
             auto service = new AdbVsockPipe::Service(&hostListener);
             hostListener.setGuestAgent(service);
             adbGuestAgent = service;
+            service->startThreads();
         } else {
             auto service = new AdbGuestPipe::Service(&hostListener);
             hostListener.setGuestAgent(service);

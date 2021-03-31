@@ -14,6 +14,7 @@
 #include "android/base/async/Looper.h"
 #include "android/base/files/Stream.h"
 #include "android/base/sockets/ScopedSocket.h"
+#include "android/base/threads/FunctorThread.h"
 #include "android/emulation/AdbTypes.h"
 #include "android/emulation/SocketBuffer.h"
 #include "android/emulation/virtio_vsock_device.h"
@@ -36,6 +37,7 @@ public:
     class Service : public AdbGuestAgent {
     public:
         Service(AdbHostAgent* hostAgent);
+        void startThreads();
         ~Service();
 
         void onHostConnection(android::base::ScopedSocket&& socket,
@@ -61,12 +63,12 @@ public:
         IVsockHostCallbacks* getHostCallbacksImpl(uint64_t key) const;
 
         AdbHostAgent* mHostAgent;
-        std::atomic<bool> mGuestAdbdPollingThreadRunning = true;
+        std::atomic<bool> mGuestAdbdPollingThreadRunning = false;
         std::vector<std::unique_ptr<AdbVsockPipe>> mPipes;
         std::deque<AdbVsockPipe*> mPipesToDestroy;
         std::condition_variable mPipesToDestroyCv;
-        std::thread mGuestAdbdPollingThread;
-        std::thread mDestroyPipesThread;
+        android::base::FunctorThread mGuestAdbdPollingThread;
+        android::base::FunctorThread mDestroyPipesThread;
         mutable std::mutex mPipesMtx;
         mutable std::mutex mPipesToDestroyMtx;
     };
