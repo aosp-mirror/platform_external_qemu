@@ -20,6 +20,7 @@
 #include "hw/ipmi/ipmi.h"
 #include "hw/irq.h"
 #include "hw/sysbus.h"
+#include "qemu/fifo8.h"
 
 #define NPCM7XX_KCS_NR_CHANNELS             3
 /*
@@ -27,6 +28,18 @@
  * incrementing the version_id in the vmstate.
  */
 #define NPCM7XX_KCS_CHANNEL_NR_REGS         9
+
+/*
+ * Number of registers in BPC. Don't change this without incrementing the
+ * version_id in the vmstate.
+ */
+#define NPCM7XX_BPC_NR_REGS                 10
+
+/*
+ * The size of the BPC fifo. Don't change this without incrementing the
+ * version_id in the vmstate.
+ */
+#define NPCM7XX_BPC_FIFO_SIZE               128
 
 typedef struct NPCM7xxKCSState NPCM7xxKCSState;
 
@@ -77,11 +90,31 @@ typedef struct NPCM7xxKCSChannel {
 } NPCM7xxKCSChannel;
 
 /**
+ * struct NPCM7xxBPC - BIOS post code FIFO that's embedded in the KCS region.
+ * @parent Parent device.
+ * @owner: The KCS module that owns this BPC module.
+ * @regs: control registers.
+ * @data_fifo: The BIOS post code data FIFO.
+ * @addr_fifo: The BIOS post code addr bit FIFO.
+ * @addr: The current addr to write the next post code.
+ */
+typedef struct NPCM7xxBPC {
+    DeviceState         parent;
+
+    NPCM7xxKCSState     *owner;
+    uint8_t             regs[NPCM7XX_BPC_NR_REGS];
+    Fifo8               data_fifo;
+    Fifo8               addr_fifo;
+    uint16_t            addr;
+} NPCM7xxBPC;
+
+/**
  * struct NPCM7xxKCSState - Keyboard Control Style (KCS) Module device state.
  * @parent: System bus device.
  * @iomem: Memory region through which registers are accessed.
  * @irq: GIC interrupt line to fire on reading or writing the buffer.
  * @channels: The KCS channels this module manages.
+ * @bpc: The BIOS post code module.
  */
 struct NPCM7xxKCSState {
     SysBusDevice            parent;
@@ -90,11 +123,16 @@ struct NPCM7xxKCSState {
 
     qemu_irq                irq;
     NPCM7xxKCSChannel       channels[NPCM7XX_KCS_NR_CHANNELS];
+    NPCM7xxBPC              bpc;
 };
 
 #define TYPE_NPCM7XX_KCS_CHANNEL "npcm7xx-kcs-channel"
 #define NPCM7XX_KCS_CHANNEL(obj)                                      \
     OBJECT_CHECK(NPCM7xxKCSChannel, (obj), TYPE_NPCM7XX_KCS_CHANNEL)
+
+#define TYPE_NPCM7XX_BPC "npcm7xx-bpc"
+#define NPCM7XX_BPC(obj)                                              \
+    OBJECT_CHECK(NPCM7xxBPC, (obj), TYPE_NPCM7XX_BPC)
 
 #define TYPE_NPCM7XX_KCS "npcm7xx-kcs"
 #define NPCM7XX_KCS(obj)                                              \

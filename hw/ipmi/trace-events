@@ -6,3 +6,6 @@ npcm7xx_kcs_write(const char *id, int channel, int reg, uint8_t value) " %s chan
 npcm7xx_kcs_handle_event(const char *id, uint8_t status) " %s: %" PRIu8
 npcm7xx_kcs_host_read_byte(const char *id, uint8_t value) " %s: value 0x%02" PRIx8
 npcm7xx_kcs_host_write_byte(const char *id, uint8_t value) " %s: value 0x%02" PRIx8
+npcm7xx_bpc_read(const char *id, uint8_t reg, uint8_t value) " %s reg: 0x%02" PRIx8 ", value 0x%02" PRIx8
+npcm7xx_bpc_write(const char *id, uint8_t reg, uint8_t value) " %s reg: 0x%02" PRIx8 ", value 0x%02" PRIx8
+npcm7xx_bpc_send_data(const char *id, uint16_t addr, uint32_t data) " %s addr: 0x%04" PRIx16 ", data: 0x%08" PRIx32

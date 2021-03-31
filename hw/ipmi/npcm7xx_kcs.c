@@ -12,12 +12,16 @@
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
+ *
+ * TODO: Add a do_hw_op function that passes host reset signal to the BPC.
  */
 
 #include "qemu/osdep.h"
 #include "hw/ipmi/npcm7xx_kcs.h"
+#include "hw/irq.h"
 #include "migration/vmstate.h"
 #include "qapi/error.h"
+#include "qapi/visitor.h"
 #include "qemu/bitops.h"
 #include "qemu/log.h"
 #include "qemu/units.h"
@@ -36,6 +40,44 @@ typedef enum NPCM7xxKCSRegister {
     NPCM7XX_KCSIE,
     NPCM7XX_KCS_REGS_END,
 } NPCM7xxKCSRegister;
+
+#define NPCM7XX_BPC_BASE 0x42
+
+/* Registers for BIOS post code. */
+typedef enum NPCM7xxBPCRegister {
+    NPCM7XX_BPCFA2L,
+    NPCM7XX_BPCFA2M,
+    NPCM7XX_BPCFEN,
+    NPCM7XX_BPCFSTAT,
+    NPCM7XX_BPCFDATA,
+    NPCM7XX_BPCFMSTAT,
+    NPCM7XX_HIGLUE, /* not a BPC register, but takes up reg space. */
+    NPCM7XX_BPCFA1L,
+    NPCM7XX_BPCFA1M,
+    NPCM7XX_BPCSDR,
+    NPCM7XX_BPC_REGS_END,
+} NPCM7xxBPCRegister;
+
+/* BPC registers */
+#define NPCM7XX_BPCFEN_ADDR1EN      BIT(7)
+#define NPCM7XX_BPCFEN_ADDR2EN      BIT(6)
+#define NPCM7XX_BPCFEN_HRIE         BIT(4)
+#define NPCM7XX_BPCFEN_FRIE         BIT(3)
+#define NPCM7XX_BPCFEN_DWCAPTURE    BIT(2)
+#define NPCM7XX_BPCFEN_RI2IE        BIT(1)
+#define NPCM7XX_BPCFEN_RI1IE        BIT(0)
+
+#define NPCM7XX_BPCFSTAT_FIFO_V     BIT(7)
+#define NPCM7XX_BPCFSTAT_FIFO_OF    BIT(5)
+#define NPCM7XX_BPCFSTAT_AD         BIT(0)
+
+#define NPCM7XX_BPCFMSTAT_HR_CHG    BIT(6)
+#define NPCM7XX_BPCFMSTAT_HR_STAT   BIT(5)
+#define NPCM7XX_BPCFMSTAT_VDD_STAT  BIT(3)
+#define NPCM7XX_BPCFMSTAT_RI2_STS   BIT(1)
+#define NPCM7XX_BPCFMSTAT_RI1_STS   BIT(0)
+
+#define NPCM7XX_BPCFA1L_DEFAULT     0x80
 
 static const hwaddr npcm7xx_kcs_channel_base[] = {
     0x0c, 0x1e, 0x30, 0x42
@@ -315,12 +357,190 @@ static void npcm7xx_kcs_write_ctl(NPCM7xxKCSChannel *c, uint8_t value)
     c->ctl = value;
 }
 
+static void npcm7xx_bpc_update_interrupt(NPCM7xxBPC *b)
+{
+    int level = 0;
+
+    /* TODO: Interrupt for host reset signal. */
+    if (b->regs[NPCM7XX_BPCFEN] & NPCM7XX_BPCFEN_FRIE) {
+        if (b->regs[NPCM7XX_BPCFSTAT] & NPCM7XX_BPCFSTAT_FIFO_V) {
+            level = 1;
+        }
+    }
+    qemu_set_irq(b->owner->irq, level);
+}
+
+static void npcm7xx_bpc_add_data(NPCM7xxBPC *b, uint8_t data, uint8_t addr)
+{
+    /* Ignore the data if FIFO is full */
+    if (fifo8_is_full(&b->data_fifo)) {
+        b->regs[NPCM7XX_BPCFSTAT] |= NPCM7XX_BPCFSTAT_FIFO_OF;
+        return;
+    }
+
+    if (b->regs[NPCM7XX_BPCFSTAT] & NPCM7XX_BPCFSTAT_FIFO_V) {
+        fifo8_push(&b->data_fifo, data);
+        fifo8_push(&b->addr_fifo, addr);
+    } else {
+        b->regs[NPCM7XX_BPCFDATA] = data;
+        b->regs[NPCM7XX_BPCFSTAT] = NPCM7XX_BPCFSTAT_FIFO_V | addr;
+    }
+}
+
+static uint8_t npcm7xx_bpc_read_fstat(NPCM7xxBPC *b)
+{
+    uint8_t v = b->regs[NPCM7XX_BPCFSTAT];
+
+    /* Clear FIFO_OF when it's read */
+    b->regs[NPCM7XX_BPCFSTAT] &= ~NPCM7XX_BPCFSTAT_FIFO_OF;
+    return v;
+}
+
+static uint8_t npcm7xx_bpc_read_fdata(NPCM7xxBPC *b)
+{
+    uint8_t v = b->regs[NPCM7XX_BPCFDATA];
+
+    if (fifo8_is_empty(&b->data_fifo)) {
+        /* Set empty state */
+        b->regs[NPCM7XX_BPCFSTAT] &= ~NPCM7XX_BPCFSTAT_FIFO_V;
+    } else {
+        /* Pop the next data in the buffer. */
+        b->regs[NPCM7XX_BPCFDATA] = fifo8_pop(&b->data_fifo);
+        b->regs[NPCM7XX_BPCFSTAT] =
+            NPCM7XX_BPCFSTAT_FIFO_V | fifo8_pop(&b->addr_fifo);
+    }
+    npcm7xx_bpc_update_interrupt(b);
+    return v;
+}
+
+static uint8_t npcm7xx_bpc_read(NPCM7xxBPC *b, hwaddr addr)
+{
+    uint8_t v = 0;
+    hwaddr reg;
+
+    if (addr % 2 != 0) {
+        qemu_log_mask(LOG_GUEST_ERROR,
+                      "%s: unaligned access for 0x%02" HWADDR_PRIx,
+                      __func__, addr);
+        return 0;
+    }
+
+    reg = addr / 2;
+    if (reg >= NPCM7XX_BPC_REGS_END) {
+        qemu_log_mask(LOG_GUEST_ERROR,
+                      "%s: invalid access at 0x%02" HWADDR_PRIx,
+                      __func__, addr);
+        return 0;
+    }
+
+    switch (reg) {
+    case NPCM7XX_BPCFSTAT:
+        v = npcm7xx_bpc_read_fstat(b);
+        break;
+
+    case NPCM7XX_BPCFDATA:
+        v = npcm7xx_bpc_read_fdata(b);
+        break;
+
+    default:
+        v = b->regs[reg];
+        break;
+    }
+    trace_npcm7xx_bpc_read(DEVICE(b)->canonical_path, reg, v);
+    return v;
+}
+
+static void npcm7xx_bpc_write(NPCM7xxBPC *b, hwaddr addr, uint8_t v)
+{
+    hwaddr reg;
+
+    if (addr % 2 != 0) {
+        qemu_log_mask(LOG_GUEST_ERROR,
+                      "%s: unaligned access for 0x%02" HWADDR_PRIx,
+                      __func__, addr);
+        return;
+    }
+
+    reg = addr / 2;
+    trace_npcm7xx_bpc_write(DEVICE(b)->canonical_path, reg, v);
+    if (reg >= NPCM7XX_BPC_REGS_END) {
+        qemu_log_mask(LOG_GUEST_ERROR,
+                      "%s: invalid access at 0x%02" HWADDR_PRIx,
+                      __func__, addr);
+        return;
+    }
+
+    b->regs[reg] = v;
+}
+
+static void npcm7xx_bpc_send_data(Object *obj, Visitor *v, const char *name,
+                                 void *opaque, Error **errp)
+{
+    NPCM7xxBPC *b = NPCM7XX_BPC(obj);
+    uint32_t data;
+    /* match = 0 or 1 for address match, match = 2 for no match */
+    uint8_t match = 2;
+    uint8_t dwcapture = b->regs[NPCM7XX_BPCFEN] & NPCM7XX_BPCFEN_DWCAPTURE;
+
+    if (!visit_type_uint32(v, name, &data, errp)) {
+        return;
+    }
+
+    trace_npcm7xx_bpc_send_data(DEVICE(b)->canonical_path, b->addr, data);
+    /* Match address */
+    if ((dwcapture | (b->regs[NPCM7XX_BPCFEN] & NPCM7XX_BPCFEN_ADDR1EN)) &&
+        (b->addr >> 8 == b->regs[NPCM7XX_BPCFA1M]) &&
+        ((b->addr & 0xff) == b->regs[NPCM7XX_BPCFA1L])) {
+        match = 0;
+    } else if ((b->regs[NPCM7XX_BPCFEN] & NPCM7XX_BPCFEN_ADDR2EN) &&
+               (b->addr >> 8 == b->regs[NPCM7XX_BPCFA2M]) &&
+               ((b->addr & 0xff) == b->regs[NPCM7XX_BPCFA2L])) {
+        match = 1;
+    }
+
+    /*
+     * Add data to FIFO buffer if matched.
+     * In dw capture mode, only match 0 is accepted.
+     */
+    if (match > 1 || (dwcapture && (match == 1))) {
+        return;
+    }
+    /*
+     * In dw capture mode, put all data in the FIFO with the last one bit = 1.
+     * otherwise, only intepret data as uint8_t and push it to the fifo.
+     */
+    if (dwcapture) {
+        /*
+         * At least send 1 byte even if data == 0.
+         * Last byte is marked by match == 1.
+         */
+        g_assert(match == 0);
+        while (match == 0) {
+            uint8_t byte = data & 0xff;
+
+            data >>= 8;
+            match = (data == 0) ? 1 : 0;
+            npcm7xx_bpc_add_data(b, byte, match);
+        }
+    } else {
+        npcm7xx_bpc_add_data(b, data, match);
+    }
+
+    /* npcm7xx_bpc_add_data should have set valid bits for BPCSTAT register. */
+    g_assert(b->regs[NPCM7XX_BPCFSTAT] & NPCM7XX_BPCFSTAT_FIFO_V);
+    npcm7xx_bpc_update_interrupt(b);
+}
+
 static uint64_t npcm7xx_kcs_read(void *opaque, hwaddr addr, unsigned int size)
 {
     NPCM7xxKCSState *s = opaque;
     uint8_t value = 0;
     int channel;
     NPCM7xxKCSRegister reg;
+
+    if (addr >= NPCM7XX_BPC_BASE) {
+        return npcm7xx_bpc_read(&s->bpc, addr - NPCM7XX_BPC_BASE);
+    }
 
     channel = npcm7xx_kcs_channel_index(addr);
     if (channel < 0 || channel >= NPCM7XX_KCS_NR_CHANNELS) {
@@ -372,6 +592,11 @@ static void npcm7xx_kcs_write(void *opaque, hwaddr addr, uint64_t v,
     NPCM7xxKCSState *s = opaque;
     int channel;
     NPCM7xxKCSRegister reg;
+
+    if (addr >= NPCM7XX_BPC_BASE) {
+        npcm7xx_bpc_write(&s->bpc, addr - NPCM7XX_BPC_BASE, v);
+        return;
+    }
 
     channel = npcm7xx_kcs_channel_index(addr);
     if (channel < 0 || channel >= NPCM7XX_KCS_NR_CHANNELS) {
@@ -488,16 +713,55 @@ static void npcm7xx_kcs_channel_class_init(ObjectClass *klass, void *data)
     iic->set_atn = npcm7xx_kcs_set_atn;
 }
 
-static const TypeInfo npcm7xx_kcs_channel_info = {
-    .name               = TYPE_NPCM7XX_KCS_CHANNEL,
-    .parent             = TYPE_DEVICE,
-    .instance_size      = sizeof(NPCM7xxKCSChannel),
-    .class_init         = npcm7xx_kcs_channel_class_init,
-    .interfaces         = (InterfaceInfo[]) {
-        { TYPE_IPMI_INTERFACE },
-        { },
+static const VMStateDescription vmstate_npcm7xx_bpc = {
+    .name = "npcm7xx-bpc",
+    .version_id = 0,
+    .minimum_version_id = 0,
+    .fields = (VMStateField[]) {
+        VMSTATE_UINT8_ARRAY(regs, NPCM7xxBPC, NPCM7XX_BPC_NR_REGS),
+        VMSTATE_FIFO8(data_fifo, NPCM7xxBPC),
+        VMSTATE_FIFO8(addr_fifo, NPCM7xxBPC),
+        VMSTATE_UINT16(addr, NPCM7xxBPC),
+        VMSTATE_END_OF_LIST(),
     },
 };
+
+static void npcm7xx_bpc_reset(NPCM7xxBPC *b)
+{
+    for (int i = 0; i < NPCM7XX_BPC_NR_REGS; ++i) {
+        b->regs[i] = 0;
+    }
+    b->regs[NPCM7XX_BPCFA1L] = NPCM7XX_BPCFA1L_DEFAULT;
+    fifo8_reset(&b->data_fifo);
+    fifo8_reset(&b->addr_fifo);
+}
+
+static void npcm7xx_bpc_init(Object *obj)
+{
+    NPCM7xxBPC *b = NPCM7XX_BPC(obj);
+
+    fifo8_create(&b->data_fifo, NPCM7XX_BPC_FIFO_SIZE);
+    fifo8_create(&b->addr_fifo, NPCM7XX_BPC_FIFO_SIZE);
+    object_property_add_uint16_ptr(obj, "addr", &b->addr, OBJ_PROP_FLAG_WRITE);
+    object_property_add(obj, "data", "uint32", NULL, npcm7xx_bpc_send_data,
+                        NULL, NULL);
+}
+
+static void npcm7xx_bpc_finalize(Object *obj)
+{
+    NPCM7xxBPC *b = NPCM7XX_BPC(obj);
+
+    fifo8_destroy(&b->data_fifo);
+    fifo8_destroy(&b->addr_fifo);
+}
+
+static void npcm7xx_bpc_class_init(ObjectClass *klass, void *data)
+{
+    DeviceClass *dc = DEVICE_CLASS(klass);
+
+    dc->desc = "NPCM7xx BPC Module";
+    dc->vmsd = &vmstate_npcm7xx_bpc;
+}
 
 static void npcm7xx_kcs_enter_reset(Object *obj, ResetType type)
 {
@@ -512,6 +776,7 @@ static void npcm7xx_kcs_enter_reset(Object *obj, ResetType type)
         c->ic = 0x41;
         c->ie = 0x00;
     }
+    npcm7xx_bpc_reset(&s->bpc);
 }
 
 static void npcm7xx_kcs_hold_reset(Object *obj)
@@ -547,6 +812,10 @@ static void npcm7xx_kcs_realize(DeviceState *dev, Error **errp)
             return;
         }
     }
+    s->bpc.owner = s;
+    if (!qdev_realize(DEVICE(&s->bpc), NULL, errp)) {
+        return;
+    }
 }
 
 static void npcm7xx_kcs_init(Object *obj)
@@ -558,6 +827,7 @@ static void npcm7xx_kcs_init(Object *obj)
         object_initialize_child(obj, g_strdup_printf("channels[%d]", i),
                 &s->channels[i], TYPE_NPCM7XX_KCS_CHANNEL);
     }
+    object_initialize_child(obj, "bpc", &s->bpc, TYPE_NPCM7XX_BPC);
 }
 
 static void npcm7xx_kcs_class_init(ObjectClass *klass, void *data)
@@ -572,17 +842,31 @@ static void npcm7xx_kcs_class_init(ObjectClass *klass, void *data)
     rc->phases.hold = npcm7xx_kcs_hold_reset;
 }
 
-static const TypeInfo npcm7xx_kcs_info = {
-    .name               = TYPE_NPCM7XX_KCS,
-    .parent             = TYPE_SYS_BUS_DEVICE,
-    .instance_size      = sizeof(NPCM7xxKCSState),
-    .class_init         = npcm7xx_kcs_class_init,
-    .instance_init      = npcm7xx_kcs_init,
+static const TypeInfo npcm7xx_kcs_infos[] = {
+    {
+        .name               = TYPE_NPCM7XX_KCS_CHANNEL,
+        .parent             = TYPE_DEVICE,
+        .instance_size      = sizeof(NPCM7xxKCSChannel),
+        .class_init         = npcm7xx_kcs_channel_class_init,
+        .interfaces         = (InterfaceInfo[]) {
+            { TYPE_IPMI_INTERFACE },
+            { },
+        },
+    },
+    {
+        .name               = TYPE_NPCM7XX_BPC,
+        .parent             = TYPE_DEVICE,
+        .instance_size      = sizeof(NPCM7xxBPC),
+        .class_init         = npcm7xx_bpc_class_init,
+        .instance_init      = npcm7xx_bpc_init,
+        .instance_finalize  = npcm7xx_bpc_finalize,
+    },
+    {
+        .name               = TYPE_NPCM7XX_KCS,
+        .parent             = TYPE_SYS_BUS_DEVICE,
+        .instance_size      = sizeof(NPCM7xxKCSState),
+        .class_init         = npcm7xx_kcs_class_init,
+        .instance_init      = npcm7xx_kcs_init,
+    },
 };
-
-static void npcm7xx_kcs_register_type(void)
-{
-    type_register_static(&npcm7xx_kcs_channel_info);
-    type_register_static(&npcm7xx_kcs_info);
-}
-type_init(npcm7xx_kcs_register_type);
+DEFINE_TYPES(npcm7xx_kcs_infos);
