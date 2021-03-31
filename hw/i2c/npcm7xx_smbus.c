@@ -191,6 +191,38 @@ enum NPCM7xxSMBusBank1Register {
 #define NPCM7XX_SMB_RXF_STS_INIT_VAL 0x00
 #define NPCM7XX_SMB_RXF_CTL_INIT_VAL 0x01
 
+static const uint8_t npcm7xx_smbus_matchf_mask[] = {
+    NPCM7XX_SMBCST2_MATCH1F,
+    NPCM7XX_SMBCST2_MATCH2F,
+    NPCM7XX_SMBCST2_MATCH3F,
+    NPCM7XX_SMBCST2_MATCH4F,
+    NPCM7XX_SMBCST2_MATCH5F,
+    NPCM7XX_SMBCST2_MATCH6F,
+    NPCM7XX_SMBCST2_MATCH7F,
+    NPCM7XX_SMBCST3_MATCH8F,
+    NPCM7XX_SMBCST3_MATCH9F,
+    NPCM7XX_SMBCST3_MATCH10F,
+};
+
+QEMU_BUILD_BUG_ON(sizeof(npcm7xx_smbus_matchf_mask) != NPCM7XX_SMBUS_NR_ADDRS);
+
+static void npcm7xx_smbus_set_matchf(NPCM7xxSMBusState *s, int index, bool set)
+{
+    uint8_t *reg;
+
+    if (index > 5) {
+        reg = &s->cst3;
+    } else {
+        reg = &s->cst2;
+    }
+
+    if (set) {
+        *reg |= npcm7xx_smbus_matchf_mask[index];
+    } else {
+        *reg &= ~npcm7xx_smbus_matchf_mask[index];
+    }
+}
+
 static uint8_t npcm7xx_smbus_get_version(void)
 {
     return NPCM7XX_SMBUS_VERSION_FIFO_SUPPORTED << 7 |
@@ -207,6 +239,7 @@ static void npcm7xx_smbus_update_irq(NPCM7xxSMBusState *s)
                    (s->st & NPCM7XX_SMBST_BER) ||
                    (s->st & NPCM7XX_SMBST_NEGACK) ||
                    (s->st & NPCM7XX_SMBST_SDAST) ||
+                   (s->st & NPCM7XX_SMBST_STP) ||
                    (s->ctl1 & NPCM7XX_SMBCTL1_STASTRE &&
                     s->st & NPCM7XX_SMBST_SDAST) ||
                    (s->ctl1 & NPCM7XX_SMBCTL1_EOBINTE &&
@@ -225,6 +258,13 @@ static void npcm7xx_smbus_update_irq(NPCM7xxSMBusState *s)
         }
         qemu_set_irq(s->irq, level);
     }
+}
+
+static void npcm7xx_smbus_stop_target_device_transfer(NPCM7xxSMBusState *s)
+{
+    i2c_end_transfer(s->bus);
+    s->st |= NPCM7XX_SMBST_STP;
+    npcm7xx_smbus_update_irq(s);
 }
 
 static void npcm7xx_smbus_nack(NPCM7xxSMBusState *s)
@@ -246,7 +286,11 @@ static void npcm7xx_smbus_send_byte(NPCM7xxSMBusState *s, uint8_t value)
     int rv = i2c_send(s->bus, value);
 
     if (rv) {
-        npcm7xx_smbus_nack(s);
+        if (s->target_device_mode_active) {
+            npcm7xx_smbus_stop_target_device_transfer(s);
+        } else {
+           npcm7xx_smbus_nack(s);
+        }
     } else {
         s->st |= NPCM7XX_SMBST_SDAST;
         if (NPCM7XX_SMBUS_FIFO_ENABLED(s)) {
@@ -265,15 +309,25 @@ static void npcm7xx_smbus_send_byte(NPCM7xxSMBusState *s, uint8_t value)
 
 static void npcm7xx_smbus_recv_byte(NPCM7xxSMBusState *s)
 {
-    s->sda = i2c_recv(s->bus);
-    s->st |= NPCM7XX_SMBST_SDAST;
-    if (s->st & NPCM7XX_SMBCTL1_ACK) {
-        trace_npcm7xx_smbus_nack(DEVICE(s)->canonical_path);
-        i2c_nack(s->bus);
-        s->st &= ~NPCM7XX_SMBCTL1_ACK;
+    if (s->target_device_mode_active) {
+        if (s->target_device_send_bytes > 0) {
+            s->target_device_send_bytes--;
+            s->sda = i2c_recv(s->bus);
+            s->st |= NPCM7XX_SMBST_SDAST;
+            trace_npcm7xx_smbus_recv_byte((DEVICE(s)->canonical_path), s->sda);
+            npcm7xx_smbus_update_irq(s);
+        }
+    } else {
+        s->sda = i2c_recv(s->bus);
+        s->st |= NPCM7XX_SMBST_SDAST;
+        if (s->st & NPCM7XX_SMBCTL1_ACK) {
+            trace_npcm7xx_smbus_nack(DEVICE(s)->canonical_path);
+            i2c_nack(s->bus);
+            s->st &= ~NPCM7XX_SMBCTL1_ACK;
+        }
+        trace_npcm7xx_smbus_recv_byte((DEVICE(s)->canonical_path), s->sda);
+        npcm7xx_smbus_update_irq(s);
     }
-    trace_npcm7xx_smbus_recv_byte((DEVICE(s)->canonical_path), s->sda);
-    npcm7xx_smbus_update_irq(s);
 }
 
 static void npcm7xx_smbus_recv_fifo(NPCM7xxSMBusState *s)
@@ -289,24 +343,40 @@ static void npcm7xx_smbus_recv_fifo(NPCM7xxSMBusState *s)
     while (received_bytes < expected_bytes &&
            received_bytes < NPCM7XX_SMBUS_FIFO_SIZE) {
         pos = (s->rx_cur + received_bytes) % NPCM7XX_SMBUS_FIFO_SIZE;
+        if (s->target_device_mode_active && s->target_device_send_bytes == 0) {
+            break;
+        }
         s->rx_fifo[pos] = i2c_recv(s->bus);
         trace_npcm7xx_smbus_recv_byte((DEVICE(s)->canonical_path),
                                       s->rx_fifo[pos]);
         ++received_bytes;
+        if (s->target_device_mode_active && s->target_device_send_bytes > 0) {
+            s->target_device_send_bytes--;
+        }
     }
 
     trace_npcm7xx_smbus_recv_fifo((DEVICE(s)->canonical_path),
                                   received_bytes, expected_bytes);
     s->rxf_sts = received_bytes;
-    if (unlikely(received_bytes < expected_bytes)) {
+
+    if (s->target_device_mode_active && s->target_device_send_bytes == 0 &&
+       received_bytes == 0) {
+        npcm7xx_smbus_stop_target_device_transfer(s);
+    }
+
+    if (unlikely(received_bytes < expected_bytes &&
+                 !s->target_device_mode_active)) {
         qemu_log_mask(LOG_GUEST_ERROR,
                       "%s: invalid rx_thr value: 0x%02x\n",
                       DEVICE(s)->canonical_path, expected_bytes);
         return;
     }
 
-    s->rxf_sts |= NPCM7XX_SMBRXF_STS_RX_THST;
-    if (s->rxf_ctl & NPCM7XX_SMBRXF_CTL_LAST) {
+    if (received_bytes >= expected_bytes) {
+        s->rxf_sts |= NPCM7XX_SMBRXF_STS_RX_THST;
+    }
+    if (s->rxf_ctl & NPCM7XX_SMBRXF_CTL_LAST &&
+        !s->target_device_mode_active) {
         trace_npcm7xx_smbus_nack(DEVICE(s)->canonical_path);
         i2c_nack(s->bus);
         s->rxf_ctl &= ~NPCM7XX_SMBRXF_CTL_LAST;
@@ -334,6 +404,11 @@ static void npcm7xx_smbus_read_byte_fifo(NPCM7xxSMBusState *s)
     s->sda = s->rx_fifo[s->rx_cur];
     s->rx_cur = (s->rx_cur + 1u) % NPCM7XX_SMBUS_FIFO_SIZE;
     --s->rxf_sts;
+    if (s->rxf_sts == 0 && s->target_device_send_bytes == 0 &&
+        s->target_device_mode_active) {
+        npcm7xx_smbus_stop_target_device_transfer(s);
+    }
+
     npcm7xx_smbus_update_irq(s);
 }
 
@@ -398,7 +473,7 @@ static void npcm7xx_smbus_send_address(NPCM7xxSMBusState *s, uint8_t value)
         s->st |= NPCM7XX_SMBST_XMIT;
     }
 
-    if (s->ctl1 & NPCM7XX_SMBCTL1_STASTRE) {
+    if ((s->ctl1 & NPCM7XX_SMBCTL1_STASTRE) && !s->target_device_mode_active) {
         s->st |= NPCM7XX_SMBST_STASTR;
         if (!recv) {
             s->st |= NPCM7XX_SMBST_SDAST;
@@ -417,6 +492,41 @@ static void npcm7xx_smbus_send_address(NPCM7xxSMBusState *s, uint8_t value)
     npcm7xx_smbus_update_irq(s);
 }
 
+static int npcm7xx_smbus_device_initiated_transfer(I2CBus *bus, uint8_t address,
+                                                   int send_length)
+{
+    NPCM7xxSMBusState *s = NPCM7XX_SMBUS(bus->qbus.parent);
+    int ret = 0;
+    int recv = send_length > 0;
+    int i;
+    qemu_mutex_lock(&s->lock);
+
+    if (s->st & NPCM7XX_SMBST_SDAST) {
+        ret = 0;
+    } else {
+        for (i  = 0; i < NPCM7XX_SMBST_NMATCH; i++) {
+            if ((address == NPCM7XX_ADDR_A(s->addr[i]) &&
+                (s->addr[i] & NPCM7XX_ADDR_EN)) &&
+                 !s->target_device_mode_active) {
+
+                s->st |= NPCM7XX_SMBST_NMATCH;
+                s->cst |= NPCM7XX_SMBCST_MATCH;
+                npcm7xx_smbus_set_matchf(s, i, true);
+
+                s->target_device_send_bytes = send_length;
+                s->target_device_mode_active = true;
+
+                npcm7xx_smbus_send_address(s, recv | (address << 1));
+                ret = 1;
+                break;
+            }
+        }
+    }
+
+    qemu_mutex_unlock(&s->lock);
+    return ret;
+}
+
 static void npcm7xx_smbus_execute_stop(NPCM7xxSMBusState *s)
 {
     i2c_end_transfer(s->bus);
@@ -427,7 +537,6 @@ static void npcm7xx_smbus_execute_stop(NPCM7xxSMBusState *s)
     trace_npcm7xx_smbus_stop(DEVICE(s)->canonical_path);
     npcm7xx_smbus_update_irq(s);
 }
-
 
 static void npcm7xx_smbus_stop(NPCM7xxSMBusState *s)
 {
@@ -507,11 +616,33 @@ static void npcm7xx_smbus_write_sda(NPCM7xxSMBusState *s, uint8_t value)
                           DEVICE(s)->canonical_path, s->status, value);
             break;
         }
+    } else if (s->target_device_mode_active) {
+        npcm7xx_smbus_send_byte(s, value);
     }
 }
 
 static void npcm7xx_smbus_write_st(NPCM7xxSMBusState *s, uint8_t value)
 {
+    int i;
+
+    if (value & NPCM7XX_SMBST_STP) {
+        s->target_device_send_bytes = 0;
+        npcm7xx_smbus_clear_buffer(s);
+
+        s->st = 0;
+        s->cst = 0;
+
+        s->status = NPCM7XX_SMBUS_STATUS_IDLE;
+        s->cst3 |= NPCM7XX_SMBCST3_EO_BUSY;
+        s->target_device_mode_active = false;
+    }
+
+    if (value & NPCM7XX_SMBST_NMATCH) {
+        for (i = 0; i < NPCM7XX_SMBUS_NR_ADDRS; i++) {
+            npcm7xx_smbus_set_matchf(s, i, false);
+        }
+    }
+
     s->st = WRITE_ONE_CLEAR(s->st, value, NPCM7XX_SMBST_STP);
     s->st = WRITE_ONE_CLEAR(s->st, value, NPCM7XX_SMBST_BER);
     s->st = WRITE_ONE_CLEAR(s->st, value, NPCM7XX_SMBST_STASTR);
@@ -660,6 +791,8 @@ static uint64_t npcm7xx_smbus_read(void *opaque, hwaddr offset, unsigned size)
     uint8_t bank = s->ctl3 & NPCM7XX_SMBCTL3_BNK_SEL;
 
     /* The order of the registers are their order in memory. */
+    qemu_mutex_lock(&s->lock);
+
     switch (offset) {
     case NPCM7XX_SMB_SDA:
         value = npcm7xx_smbus_read_sda(s);
@@ -811,6 +944,8 @@ static uint64_t npcm7xx_smbus_read(void *opaque, hwaddr offset, unsigned size)
 
     trace_npcm7xx_smbus_read(DEVICE(s)->canonical_path, offset, value, size);
 
+    qemu_mutex_unlock(&s->lock);
+
     return value;
 }
 
@@ -819,6 +954,8 @@ static void npcm7xx_smbus_write(void *opaque, hwaddr offset, uint64_t value,
 {
     NPCM7xxSMBusState *s = opaque;
     uint8_t bank = s->ctl3 & NPCM7XX_SMBCTL3_BNK_SEL;
+
+    qemu_mutex_lock(&s->lock);
 
     trace_npcm7xx_smbus_write(DEVICE(s)->canonical_path, offset, value, size);
 
@@ -975,6 +1112,8 @@ static void npcm7xx_smbus_write(void *opaque, hwaddr offset, uint64_t value,
         }
         break;
     }
+
+    qemu_mutex_unlock(&s->lock);
 }
 
 static const MemoryRegionOps npcm7xx_smbus_ops = {
@@ -1020,6 +1159,9 @@ static void npcm7xx_smbus_enter_reset(Object *obj, ResetType type)
     npcm7xx_smbus_clear_buffer(s);
     s->status = NPCM7XX_SMBUS_STATUS_IDLE;
     s->rx_cur = 0;
+
+    s->target_device_mode_active = false;
+    s->target_device_send_bytes = 0;
 }
 
 static void npcm7xx_smbus_hold_reset(Object *obj)
@@ -1034,12 +1176,15 @@ static void npcm7xx_smbus_init(Object *obj)
     NPCM7xxSMBusState *s = NPCM7XX_SMBUS(obj);
     SysBusDevice *sbd = SYS_BUS_DEVICE(obj);
 
+    qemu_mutex_init(&s->lock);
+
     sysbus_init_irq(sbd, &s->irq);
     memory_region_init_io(&s->iomem, obj, &npcm7xx_smbus_ops, s,
                           "regs", 4 * KiB);
     sysbus_init_mmio(sbd, &s->iomem);
 
-    s->bus = i2c_init_bus(DEVICE(s), "i2c-bus");
+    s->bus = i2c_init_bus_type(TYPE_NPCM7XX_I2C_BUS, DEVICE(s), "i2c-bus");
+    s->status = NPCM7XX_SMBUS_STATUS_IDLE;
 }
 
 static const VMStateDescription vmstate_npcm7xx_smbus = {
@@ -1086,6 +1231,13 @@ static void npcm7xx_smbus_class_init(ObjectClass *klass, void *data)
     rc->phases.hold = npcm7xx_smbus_hold_reset;
 }
 
+static void npcm7xx_i2c_bus_class_init(ObjectClass *klass, void *data)
+{
+    I2CBusClass *ic = I2C_BUS_CLASS(klass);
+
+    ic->device_initiated_transfer = npcm7xx_smbus_device_initiated_transfer;
+}
+
 static const TypeInfo npcm7xx_smbus_types[] = {
     {
         .name = TYPE_NPCM7XX_SMBUS,
@@ -1093,6 +1245,12 @@ static const TypeInfo npcm7xx_smbus_types[] = {
         .instance_size = sizeof(NPCM7xxSMBusState),
         .class_init = npcm7xx_smbus_class_init,
         .instance_init = npcm7xx_smbus_init,
+    },
+    {
+        .name = TYPE_NPCM7XX_I2C_BUS,
+        .parent = TYPE_I2C_BUS,
+        .instance_size = sizeof(NPCM7xxI2CBus),
+        .class_init = npcm7xx_i2c_bus_class_init,
     },
 };
 DEFINE_TYPES(npcm7xx_smbus_types);

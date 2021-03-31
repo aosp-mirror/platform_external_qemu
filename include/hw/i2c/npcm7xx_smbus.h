@@ -67,6 +67,10 @@ typedef enum NPCM7xxSMBusStatus {
  * @rx_fifo: The FIFO buffer for receiving in FIFO mode.
  * @rx_cur: The current position of rx_fifo.
  * @status: The current status of the SMBus.
+ * @target_device_mode_active: True if the bus is being controlled by the
+ *                             device.
+ * @target_device_send_bytes: Remaining bytes to send to the target device.
+ * @lock: Used to sync between iomem actions and target device actions.
  */
 struct NPCM7xxSMBusState {
     SysBusDevice parent;
@@ -103,10 +107,27 @@ struct NPCM7xxSMBusState {
     uint8_t      rx_fifo[NPCM7XX_SMBUS_FIFO_SIZE];
     uint8_t      rx_cur;
 
+    bool         target_device_mode_active;
+    int          target_device_send_bytes;
+
+    QemuMutex lock;
+
     NPCM7xxSMBusStatus status;
 };
 
 #define TYPE_NPCM7XX_SMBUS "npcm7xx-smbus"
 OBJECT_DECLARE_SIMPLE_TYPE(NPCM7xxSMBusState, NPCM7XX_SMBUS)
+
+/**
+ * NPCM7xxI2CBus is needed to override device_initiated_transfer in the
+ * I2CBusClass.
+ */
+typedef struct NPCM7xxI2CBus {
+    I2CBus parent;
+} NPCM7xxI2CBus;
+
+#define TYPE_NPCM7XX_I2C_BUS "npcm7xx-i2c-bus"
+#define NPCM7XX_I2C_BUS(obj) OBJECT_CHECK(NPCM7xxI2CBus, (obj), \
+                                        TYPE_NPCM7XX_I2C_BUS)
 
 #endif /* NPCM7XX_SMBUS_H */
