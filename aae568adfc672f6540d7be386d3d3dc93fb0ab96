@@ -22,6 +22,30 @@
       },
       "revId": "aae568adfc672f6540d7be386d3d3dc93fb0ab96",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dad64798_1603f822",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 410,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-03-31T16:26:05Z",
+      "side": 1,
+      "message": "Good point, in theory it should always be safe:\n\n\"\nRenaming a field - With Protobuf content, the field names are only used in generated code. The field number is used to identify fields on the network. Renaming a field isn\u0027t a protocol breaking change for Protobuf. However, if a server is using JSON content then renaming a field is a breaking change.\n\"",
+      "parentUuid": "e4d4d059_cecf570b",
+      "range": {
+        "startLine": 410,
+        "startChar": 61,
+        "endLine": 410,
+        "endChar": 67
+      },
+      "revId": "aae568adfc672f6540d7be386d3d3dc93fb0ab96",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
