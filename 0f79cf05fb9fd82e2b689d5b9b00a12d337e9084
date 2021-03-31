@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9c4d0838_7a5e284c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-03-31T05:16:20Z",
+      "side": 1,
+      "message": "Likely not the best solution, see https://android-review.googlesource.com/c/platform/external/qemu/+/1658355",
+      "revId": "0f79cf05fb9fd82e2b689d5b9b00a12d337e9084",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
