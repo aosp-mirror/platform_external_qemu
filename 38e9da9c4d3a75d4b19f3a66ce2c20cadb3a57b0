@@ -16,6 +16,24 @@
       "message": "I am curious, does the Embedded Emulator have to wait for the window to become visible?  ",
       "revId": "38e9da9c4d3a75d4b19f3a66ce2c20cadb3a57b0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a0dfc7a0_3fdb7645",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-31T16:33:14Z",
+      "side": 1,
+      "message": "All gRPC calls in embedded emulator are asynchronous. For this particular one the callback is simply ignored.",
+      "parentUuid": "9f650bcd_1c92c7b0",
+      "revId": "38e9da9c4d3a75d4b19f3a66ce2c20cadb3a57b0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
