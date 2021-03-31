@@ -412,8 +412,10 @@ void AdbVsockPipe::Service::pollGuestAdbdThreadLoop() {
 void AdbVsockPipe::Service::resetActiveGuestPipeConnection() {
     std::lock_guard<std::mutex> guard(mPipesMtx);
     for (const auto& pipe : mPipes) {
+        fprintf(stderr, "%s: begin destroy pipe\n", __func__);
         // destroying a pipe requires the BQL which we can't aquire while holding mPipesMtx
         destroyPipe(pipe.get());
+        fprintf(stderr, "%s: end destroy pipe\n", __func__);
     }
 }
 
@@ -536,7 +538,9 @@ void AdbVsockPipe::onGuestClose() {
 void AdbVsockPipe::processProxyEventBits(const Proxy::EventBits bits) {
     if (nonzero(bits & (Proxy::EventBits::HostClosed | Proxy::EventBits::GuestClosed))) {
         if (nonzero(bits & Proxy::EventBits::GuestClosed)) {
+            fprintf(stderr, "%s: Call reset on mVsockCallbacks\n", __func__);
             mVsockCallbacks.reset();
+            fprintf(stderr, "%s: Call reset on mVsockCallbacks (done)\n", __func__);
         }
 
         if (nonzero(bits & Proxy::EventBits::HostClosed)) {
@@ -626,7 +630,11 @@ void AdbVsockPipe::DataVsockCallbacks::close() {
 
 AdbVsockPipe::DataVsockCallbacks::~DataVsockCallbacks() {
     if (streamKey) {
-        (*g_vsock_ops->close)(streamKey);
+        if (*g_vsock_ops->close) {
+            (*g_vsock_ops->close)(streamKey);
+        } else {
+            fprintf(stderr, "%s: warning: vsock ops close is null\n", __func__);
+        }
     }
 }
 
