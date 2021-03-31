@@ -49,8 +49,12 @@ struct Globals {
     void registerServices() {
         if (feature_is_enabled(kFeature_VirtioVsockPipe)) {
             auto service = new AdbVsockPipe::Service(&hostListener);
+            fprintf(stderr, "%s: after vsock pipe service ctor\n", __func__);
             hostListener.setGuestAgent(service);
             adbGuestAgent = service;
+            fprintf(stderr, "%s: after guest agent set\n", __func__);
+            service->startThreads();
+            fprintf(stderr, "%s: service started threads\n", __func__);
         } else {
             auto service = new AdbGuestPipe::Service(&hostListener);
             hostListener.setGuestAgent(service);

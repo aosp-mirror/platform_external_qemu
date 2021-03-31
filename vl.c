@@ -4654,8 +4654,10 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #endif
         qemu_set_rng_random_generic_random_func(rng_random_generic_read_random_bytes);
         if (!qemu_android_emulation_early_setup()) {
+            fprintf(stderr, "%s: after android emulation early setup (fail)\n", __func__);
             return 1;
         }
+            fprintf(stderr, "%s: after android emulation early setup (success)\n", __func__);
 
         boot_property_init_service();
         android_hw_control_init();
@@ -5461,9 +5463,11 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         process_cmd_properties();
 
         if (!qemu_android_ports_setup()) {
+            fprintf(stderr, "%s: after android ports setup (fail)\n", __func__);
             // Errors have already been reported inside this function
             return 1;
         }
+            fprintf(stderr, "%s: after android ports setup (success)\n", __func__);
 
         extern void android_emulator_set_base_port(int);
         android_emulator_set_base_port(android_base_port);
@@ -5523,8 +5527,10 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #ifdef CONFIG_ANDROID
     if (android_qemu_mode || min_config_qemu_mode) {
         if (!qemu_android_emulation_setup()) {
+            fprintf(stderr, "%s: after android emulation setup (fail)\n", __func__);
             return 1;
         }
+            fprintf(stderr, "%s: after android emulation setup (success)\n", __func__);
 
         if (snapshot_list) {
             androidSnapshot_listStdout();

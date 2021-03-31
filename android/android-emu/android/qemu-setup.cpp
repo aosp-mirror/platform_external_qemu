@@ -390,8 +390,10 @@ bool android_ports_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
 
             if (!setup_console_and_adb_ports(base_port, adb_port, legacy_adb,
                                              agents)) {
+                fprintf(stderr, "%s: after setup_console_and_adb_ports (fail)\n", __func__);
                 continue;
             }
+                fprintf(stderr, "%s: after setup_console_and_adb_ports (success)\n", __func__);
 
             D("control console listening on port %d, ADB on port %d", base_port,
               adb_port);
