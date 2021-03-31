@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "15bc1d8a_c90dea8f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-03-31T18:03:36Z",
+      "side": 1,
+      "message": "Base layer with bluetooth changes. This is not enabled.",
+      "revId": "a6281753e92360fbe35e4ad07cfc33f8f0b6bfb2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
