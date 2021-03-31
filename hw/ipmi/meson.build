@@ -9,5 +9,6 @@ ipmi_ss.add(when: 'CONFIG_PCI_IPMI_BT', if_true: files('pci_ipmi_bt.c'))
 ipmi_ss.add(when: 'CONFIG_IPMI_SSIF', if_true: files('smbus_ipmi.c'))
 ipmi_ss.add(when: 'CONFIG_IPMI_HOST', if_true: files('ipmi_host_extern.c'))
 ipmi_ss.add(when: 'CONFIG_NPCM7XX', if_true: files('npcm7xx_kcs.c'))
+ipmi_ss.add(when: 'CONFIG_IPMI_HOST', if_true: files('smbus_ipmi_host.c'))
 
 system_ss.add_all(when: 'CONFIG_IPMI', if_true: ipmi_ss)

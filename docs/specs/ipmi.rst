@@ -106,6 +106,8 @@ its own device implementation in QEMU, for example:
 * ``aspeed-ibt`` for emulating the Aspeed iBT peripheral.
 * ``npcm7xx-kcs`` for emulating the Nuvoton NPCM7xx Host-to-BMC Keyboard
   Controller Style (KCS) channels.
+* ``smbus-ipmi-host`` for emulating the SMBus System Interface(SSIF)
+  Host-to-BMC smbus channel.
 
 .. blockdiag::
 
@@ -114,6 +116,7 @@ its own device implementation in QEMU, for example:
         default_group_color = "none";
         class responder [color = lightblue];
         class host [color = salmon];
+        class i2c [color = yellow];
 
         host [color="aquamarine", label="External Host"]
 
@@ -125,8 +128,13 @@ its own device implementation in QEMU, for example:
 
                 bmc-responder [class = "responder"]
                 npcm7xx-ipmi-kcs [class = "responder", stacked]
+                smbus-ipmi-host [class="responder"];
+                smbus-device [class="i2c"];
 
                 bmc-responder <- npcm7xx-ipmi-kcs [hstyle = generalization];
+
+                bmc-responder <- smbus-ipmi-host [hstyle = generalization];
+                smbus-ipmi-host -> smbus-device
             }
 
             group {
