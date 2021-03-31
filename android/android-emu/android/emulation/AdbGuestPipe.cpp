@@ -204,7 +204,7 @@ void AdbGuestPipe::Service::removeAdbGuestPipe(AdbGuestPipe* pipe) {
     mPipes.erase(std::remove(mPipes.begin(), mPipes.end(), pipe), mPipes.end());
 }
 
-void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket,
+void AdbGuestPipe::Service::onHostConnection(ScopedSocket socket,
                                              AdbPortType portType) {
     D("%s", __func__);
     AdbGuestPipe* activePipe = searchForActivePipe();
@@ -602,7 +602,7 @@ void AdbGuestPipe::onGuestWantWakeOn(int flags) {
     }
 }
 
-void AdbGuestPipe::onHostConnection(ScopedSocket&& socket,
+void AdbGuestPipe::onHostConnection(ScopedSocket socket,
                                     AdbPortType portType) {
     DD("%s: [%p] host connection", __func__, this);
     CHECK(mState <= State::WaitingForHostAdbConnection);

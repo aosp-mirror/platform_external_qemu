@@ -44,7 +44,7 @@ struct AdbGuestAgent {
     // Called when the host ADB server connects. This passes ownership of
     // |socket| to the AdbGuestAgent instance. This should only happen after
     // startListening() was called on the AdbHostAgent.
-    virtual void onHostConnection(android::base::ScopedSocket&& socket,
+    virtual void onHostConnection(android::base::ScopedSocket socket,
                                   AdbPortType portType) = 0;
 
     // Resets the current ADB guest pipe connection.
