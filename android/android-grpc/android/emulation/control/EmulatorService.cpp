@@ -407,7 +407,7 @@ public:
 
         android::base::ThreadLooper::runOnMainLooper([agent, request]() {
             agent->sendMouseEvent(request.x(), request.y(), 0,
-                                  request.buttons(), request.device());
+                                  request.buttons(), request.display());
         });
 
         return Status::OK;
