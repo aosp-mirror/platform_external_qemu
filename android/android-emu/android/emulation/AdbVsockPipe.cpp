@@ -226,13 +226,21 @@ AdbVsockPipe::Service::Service(AdbHostAgent* hostAgent)
 }
 
 AdbVsockPipe::Service::~Service() {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     g_service = nullptr;
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     mGuestAdbdPollingThreadRunning = false;
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     mGuestAdbdPollingThread.join();
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     destroyPipe(nullptr);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     mDestroyPipesThread.join();
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 }
 
 void AdbVsockPipe::Service::onHostConnection(android::base::ScopedSocket&& socket,
@@ -267,10 +275,13 @@ void AdbVsockPipe::Service::destroyPipesThreadLoop() {
     while (true) {
         AdbVsockPipe *toDestroy;
         {
+            fprintf(stderr, "%s: destroy pipes threa dloop begin\n", __func__);
             std::unique_lock<std::mutex> guard(mPipesToDestroyMtx);
             mPipesToDestroyCv.wait(guard, [this](){ return !mPipesToDestroy.empty(); });
             toDestroy = mPipesToDestroy.front();
+            fprintf(stderr, "%s: destroying a pipe\n", __func__);
             mPipesToDestroy.pop_front();
+            fprintf(stderr, "%s: destroyed a pipe\n", __func__);
         }
         if (!toDestroy) {
             break;
@@ -279,23 +290,31 @@ void AdbVsockPipe::Service::destroyPipesThreadLoop() {
         std::unique_ptr<AdbVsockPipe> deleter;  // ~AdbVsockPipe will not be called under mPipesMtx
 
         std::lock_guard<std::mutex> guard(mPipesMtx);
+            fprintf(stderr, "%s: looking for pipes\n", __func__);
         const auto i = std::find_if(
             mPipes.begin(), mPipes.end(),
             [toDestroy](const std::unique_ptr<AdbVsockPipe> &pipe){
                 return toDestroy == pipe.get();
             });
+            fprintf(stderr, "%s: looking for pipes (done)\n", __func__);
 
         if (i != mPipes.end()) {
             deleter = std::move(*i);
+            fprintf(stderr, "%s: destroying a pipe (2)\n", __func__);
             mPipes.erase(i);
+            fprintf(stderr, "%s: destroying a pipe (2) (done)\n", __func__);
         }
     }
 }
 
 void AdbVsockPipe::Service::destroyPipe(AdbVsockPipe *p) {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     std::lock_guard<std::mutex> guard(mPipesToDestroyMtx);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     mPipesToDestroy.push_back(p);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     mPipesToDestroyCv.notify_one();
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
 }
 
 void AdbVsockPipe::Service::pollGuestAdbdThreadLoop() {
@@ -412,8 +431,10 @@ void AdbVsockPipe::Service::pollGuestAdbdThreadLoop() {
 void AdbVsockPipe::Service::resetActiveGuestPipeConnection() {
     std::lock_guard<std::mutex> guard(mPipesMtx);
     for (const auto& pipe : mPipes) {
+        fprintf(stderr, "%s: begin destroy pipe\n", __func__);
         // destroying a pipe requires the BQL which we can't aquire while holding mPipesMtx
         destroyPipe(pipe.get());
+        fprintf(stderr, "%s: end destroy pipe\n", __func__);
     }
 }
 
@@ -536,7 +557,9 @@ void AdbVsockPipe::onGuestClose() {
 void AdbVsockPipe::processProxyEventBits(const Proxy::EventBits bits) {
     if (nonzero(bits & (Proxy::EventBits::HostClosed | Proxy::EventBits::GuestClosed))) {
         if (nonzero(bits & Proxy::EventBits::GuestClosed)) {
+            fprintf(stderr, "%s: Call reset on mVsockCallbacks\n", __func__);
             mVsockCallbacks.reset();
+            fprintf(stderr, "%s: Call reset on mVsockCallbacks (done)\n", __func__);
         }
 
         if (nonzero(bits & Proxy::EventBits::HostClosed)) {
@@ -626,7 +649,11 @@ void AdbVsockPipe::DataVsockCallbacks::close() {
 
 AdbVsockPipe::DataVsockCallbacks::~DataVsockCallbacks() {
     if (streamKey) {
-        (*g_vsock_ops->close)(streamKey);
+        if (*g_vsock_ops->close) {
+            (*g_vsock_ops->close)(streamKey);
+        } else {
+            fprintf(stderr, "%s: warning: vsock ops close is null\n", __func__);
+        }
     }
 }
 
