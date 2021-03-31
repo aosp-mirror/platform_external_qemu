@@ -27,24 +27,12 @@
 #include "qapi/error.h"
 #include "qemu/error-report.h"
 #include "hw/ipmi/ipmi.h"
+#include "hw/ipmi/smbus_ipmi.h"
 #include "qom/object.h"
 #include "hw/acpi/ipmi.h"
 
 #define TYPE_SMBUS_IPMI "smbus-ipmi"
 OBJECT_DECLARE_SIMPLE_TYPE(SMBusIPMIDevice, SMBUS_IPMI)
-
-#define SSIF_IPMI_REQUEST                       2
-#define SSIF_IPMI_MULTI_PART_REQUEST_START      6
-#define SSIF_IPMI_MULTI_PART_REQUEST_MIDDLE     7
-#define SSIF_IPMI_MULTI_PART_REQUEST_END        8
-#define SSIF_IPMI_RESPONSE                      3
-#define SSIF_IPMI_MULTI_PART_RESPONSE_MIDDLE    9
-#define SSIF_IPMI_MULTI_PART_RETRY              0xa
-
-#define MAX_SSIF_IPMI_MSG_SIZE 255
-#define MAX_SSIF_IPMI_MSG_CHUNK 32
-
-#define IPMI_GET_SYS_INTF_CAP_CMD 0x57
 
 struct SMBusIPMIDevice {
     SMBusDevice parent;
