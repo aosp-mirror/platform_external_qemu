@@ -850,7 +850,7 @@ public:
 
         uint32_t width, height, dpi, flags;
         bool enabled;
-        for (int i = 0; i < avdInfo_maxMultiDisplayEntries(); i++) {
+        for (int i = 0; i <= avdInfo_maxMultiDisplayEntries(); i++) {
             if (mAgents->multi_display->getMultiDisplay(i, nullptr, nullptr,
                                                         &width, &height, &dpi,
                                                         &flags, &enabled)) {
@@ -902,6 +902,13 @@ public:
                               "");
             }
             updatingDisplayIds.insert(display.display());
+        }
+
+        if (updatingDisplayIds.size() > avdInfo_maxMultiDisplayEntries()) {
+             return Status(::grpc::StatusCode::INVALID_ARGUMENT,
+                              "At most: " + std::to_string(avdInfo_maxMultiDisplayEntries()) +
+                                      " can be configured.",
+                              "");
         }
 
         std::set<int> updatedDisplays;
