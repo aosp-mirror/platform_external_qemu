@@ -601,14 +601,11 @@ prepare_build_for_linux_x86_64() {
     var_append GCC_LINK_FLAGS "-L${CLANG_BINDIR}/../lib64/"
     var_append GCC_LINK_FLAGS "--sysroot=${SYSROOT}"
 
-    if [ $(get_verbosity) -gt 3 ]; then
-      # This will get pretty crazy, but useful if you want to debug linker issues.
-      var_append GCC_LINK_FLAGS "-Wl,-verbose"
-      var_append GCC_LINK_FLAGS "-v"
-    else
-      # You're likely to always hit this due to our linker workarounds..
-      var_append GCC_LINK_FLAGS "-Wno-unused-command-line-argument"
-    fi
+    # This will get pretty crazy, but useful if you want to debug linker issues. (b/184180046)
+    var_append GCC_LINK_FLAGS "-Wl,-verbose"
+    var_append GCC_LINK_FLAGS "-vv"
+    # You're likely to always hit this due to our linker workarounds..
+    var_append GCC_LINK_FLAGS "-Wno-unused-command-line-argument"
 
 
     EXTRA_CFLAGS="-m64"
@@ -858,14 +855,11 @@ prepare_build_for_windows_msvc() {
     # flags to it's makefile.
     var_append CLANG_LINK_FLAGS "-lshell32 -luser32 -ladvapi32 -liphlpapi -lwldap32 -lmfuuid -lwinmm"
 
-    if [ $(get_verbosity) -gt 3 ]; then
-      # This will get pretty crazy, but useful if you want to debug linker issues.
-      var_append CLANG_LINK_FLAGS "-Wl,-verbose"
-      var_append CLANG_LINK_FLAGS "-v"
-    else
-      # You're likely to always hit this due to our linker workarounds..
-      var_append CLANG_LINK_FLAGS "-Wno-unused-command-line-argument"
-    fi
+    # This will get pretty crazy, but useful if you want to debug linker issues. (b/184180046)
+    var_append CLANG_LINK_FLAGS "-Wl,-verbose"
+    var_append CLANG_LINK_FLAGS "-v"
+    # You're likely to always hit this due to our linker workarounds..
+    var_append CLANG_LINK_FLAGS "-Wno-unused-command-line-argument"
 
 
     EXTRA_CFLAGS="-target x86_64-pc-win32"
