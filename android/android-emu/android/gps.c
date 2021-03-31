@@ -260,6 +260,14 @@ android_gps_set_passive_update(bool enable)
     s_enable_passive_location_update = enable;
 }
 
+static bool s_enable_gnssgrpcv1 = false;
+
+void
+android_gps_enable_gnssgrpcv1()
+{
+    s_enable_gnssgrpcv1 = true;
+}
+
 bool
 android_gps_get_passive_update()
 {
