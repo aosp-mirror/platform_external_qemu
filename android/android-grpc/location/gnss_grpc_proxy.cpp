@@ -45,6 +45,8 @@ using grpc::Status;
 
 namespace cuttlefish {
 
+static GnssGrpcProxyServiceImpl* s_proxy = nullptr;
+
 GnssGrpcProxyServiceImpl::GnssGrpcProxyServiceImpl(
         cuttlefish::SharedFD gnss_in,
         cuttlefish::SharedFD gnss_out,
@@ -53,7 +55,9 @@ GnssGrpcProxyServiceImpl::GnssGrpcProxyServiceImpl(
 
       gnss_in_(gnss_in),
       gnss_out_(gnss_out),
-      gnss_file_path_(gnss_file_path) {}
+      gnss_file_path_(gnss_file_path) {
+        s_proxy = this;
+      }
 
 Status GnssGrpcProxyServiceImpl::SendNmea(ServerContext* context,
                                           const SendNmeaRequest* request,
@@ -66,8 +70,10 @@ Status GnssGrpcProxyServiceImpl::SendNmea(ServerContext* context,
     return Status::OK;
 }
 
-void GnssGrpcProxyServiceImpl::sendToSerial() {
+void GnssGrpcProxyServiceImpl::sendToSerial(const char* data, int len) {
     std::lock_guard<std::mutex> lock(cached_nmea_mutex);
+    if (data && len > 0)
+        cached_nmea.assign(data, len);
     ssize_t bytes_written = cuttlefish::WriteAll(gnss_in_, cached_nmea);
     if (bytes_written < 0) {
         LOG(ERROR) << "Error writing to fd: " << gnss_in_->StrError();
@@ -150,4 +156,32 @@ void GnssGrpcProxyServiceImpl::ReadNmeaFromLocalFile() {
     }
 }
 
+void
+GnssGrpcProxyServiceImpl::oneShotSendNmea(const char* data, int len) {
+    std::lock_guard<std::mutex> lock(cached_nmea_mutex);
+    cached_nmea.assign(data, len);
+    //sendToSerial(data, len);
+}
 }  // namespace cuttlefish
+
+extern "C" {
+
+void android_gnssgrpcv1_send_nmea(const char* data, int len) {
+    if (!cuttlefish::s_proxy || !data || len <=0)
+        return;
+
+    static std::string s_nmea;
+
+    std::string mystr;
+    mystr.assign(data, len);
+    mystr += "\n";
+    s_nmea += mystr;
+    if (s_nmea.find("GPGGA") != std::string::npos
+            &&s_nmea.find("GPRMC") != std::string::npos) {
+        fprintf(stderr, " %s %d: got data %s\n", __func__, __LINE__, s_nmea.c_str());
+        cuttlefish::s_proxy->oneShotSendNmea(s_nmea.c_str(), s_nmea.size());
+        s_nmea.clear();
+    }
+}
+
+} // external callable

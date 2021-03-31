@@ -49,13 +49,15 @@ public:
                     const SendNmeaRequest* request,
                     SendNmeaReply* reply) override;
 
-    void sendToSerial();
+    void sendToSerial(const char* data = nullptr, int len = 0);
 
     void StartServer();
 
     void StartReadFileThread();
 
     void ReadNmeaFromLocalFile();
+
+    void oneShotSendNmea(const char* data, int len);
 
 private:
     static constexpr char CMD_GET_LOCATION[] = "CMD_GET_LOCATION";

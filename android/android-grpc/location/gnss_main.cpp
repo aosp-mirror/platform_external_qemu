@@ -94,6 +94,11 @@ void RunServer(SharedFD gnss_fd,
     }
 }
 
+extern "C" {
+void android_gps_set_send_nmea_func(void* fptr);
+void android_gnssgrpcv1_send_nmea(const char*, int);
+}
+
 int start_android_gnss_grpc_detached(bool& isIpv4,
                                      std::string grpcport,
                                      std::string gnssfilepath) {
@@ -104,6 +109,9 @@ int start_android_gnss_grpc_detached(bool& isIpv4,
     std::thread t1(&RunServer, shared_fd, grpcport, gnssfilepath);
     t1.detach();
     s_mythread.mT1 = std::move(t1);
+
+    fprintf(stderr, "android_gnssgrpcv1_send_nmea is %p", android_gnssgrpcv1_send_nmea);
+    android_gps_set_send_nmea_func((void*)android_gnssgrpcv1_send_nmea);
 
     return actual_port;
 }

@@ -83,6 +83,7 @@
 // modem simulator
 extern "C" {
 #include "android_modem_v2.h"
+extern void(*android_gnssgrpcv1_send_nmea)(const char* , int );
 }
 #include "modem_main.h"
 
@@ -2179,6 +2180,11 @@ extern "C" int main(int argc, char** argv) {
                     isIpv4 ? "ipv4" : "ipv6");
             args.add("-device");
             args.add("virtserialport,chardev=gnss,name=gnss");
+
+            fprintf(stderr, "android_gnssgrpcv1_send_nmea is %p\n", android_gnssgrpcv1_send_nmea);
+            if(getConsoleAgents()->location->gpsEnableGnssGrpcV1) {
+                getConsoleAgents()->location->gpsEnableGnssGrpcV1();
+            }
 
         } else {
             dwarning(
