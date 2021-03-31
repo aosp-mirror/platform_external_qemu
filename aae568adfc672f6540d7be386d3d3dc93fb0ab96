@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e4d4d059_cecf570b",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 410,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-03-31T16:12:55Z",
+      "side": 1,
+      "message": "Since the device field has been ignored until now, it\u0027s safe to rename it in emulator_controller.proto to \"display\" for consistency with ImageFormat.display. TouchEvent.device should be renamed too. Both \"device\" fields can be renamed without changing their numeric IDs.",
+      "range": {
+        "startLine": 410,
+        "startChar": 61,
+        "endLine": 410,
+        "endChar": 67
+      },
+      "revId": "aae568adfc672f6540d7be386d3d3dc93fb0ab96",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
