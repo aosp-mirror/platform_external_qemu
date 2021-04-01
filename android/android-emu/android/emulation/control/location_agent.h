@@ -70,6 +70,8 @@ typedef struct QAndroidLocationAgent {
     // Should ping the guest GPS update every few seconds or not
     void (*gpsSetPassiveUpdate)(bool enable);
     bool (*gpsGetPassiveUpdate)();
+    // enable GnssGrpcV1
+    void (*gpsEnableGnssGrpcV1)();
 } QAndroidLocationAgent;
 
 ANDROID_END_HEADER
