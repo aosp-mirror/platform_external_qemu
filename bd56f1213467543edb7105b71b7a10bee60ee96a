@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "985ae7d6_0114d43a",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 4
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-04-01T22:25:26Z",
+      "side": 1,
+      "message": "I will update the documentation.",
+      "parentUuid": "d28693e6_d6227c21",
+      "range": {
+        "startLine": 64,
+        "startChar": 49,
+        "endLine": 65,
+        "endChar": 9
+      },
+      "revId": "bd56f1213467543edb7105b71b7a10bee60ee96a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b3cd7184_148d100e",
@@ -47,6 +71,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0988d759_416c19a9",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-04-01T22:25:26Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "b3cd7184_148d100e",
+      "range": {
+        "startLine": 74,
+        "startChar": 57,
+        "endLine": 74,
+        "endChar": 65
+      },
+      "revId": "bd56f1213467543edb7105b71b7a10bee60ee96a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5d096b77_3f9c259d",
@@ -60,6 +108,30 @@
       "writtenOn": "2021-03-30T23:41:29Z",
       "side": 1,
       "message": "Not clear what this sentence means. Consider changing to \"The x field is interpreted as the coordinate of the left edge of the window\"",
+      "range": {
+        "startLine": 79,
+        "startChar": 24,
+        "endLine": 79,
+        "endChar": 91
+      },
+      "revId": "bd56f1213467543edb7105b71b7a10bee60ee96a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c6bdb71d_1f568b2f",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-04-01T22:25:26Z",
+      "side": 1,
+      "message": "I will clarify this in more detail.",
+      "parentUuid": "5d096b77_3f9c259d",
       "range": {
         "startLine": 79,
         "startChar": 24,
