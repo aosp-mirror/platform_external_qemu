@@ -64,7 +64,7 @@ struct I2CSlave {
 };
 
 #define TYPE_I2C_BUS "i2c-bus"
-OBJECT_DECLARE_SIMPLE_TYPE(I2CBus, I2C_BUS)
+OBJECT_DECLARE_TYPE(I2CBus, I2CBusClass, I2C_BUS)
 
 typedef struct I2CNode I2CNode;
 
@@ -83,6 +83,19 @@ struct I2CPendingMaster {
 typedef QLIST_HEAD(I2CNodeList, I2CNode) I2CNodeList;
 typedef QSIMPLEQ_HEAD(I2CPendingMasters, I2CPendingMaster) I2CPendingMasters;
 
+struct I2CBusClass {
+    DeviceClass parent_class;
+
+    /*
+     * Start a transaction initiated by a device model. send_length = 0
+     * initiates a host to device transfer.  send_length > 0 initiates a
+     * device to host transfer of send_length bytes.  Returns non-zero for
+     * a NAK, 0 for success.
+     */
+    int (*device_initiated_transfer)(I2CBus *bus, uint8_t address,
+        int send_length);
+};
+
 struct I2CBus {
     BusState qbus;
     I2CNodeList current_devs;
@@ -95,6 +108,8 @@ struct I2CBus {
 };
 
 I2CBus *i2c_init_bus(DeviceState *parent, const char *name);
+I2CBus *i2c_init_bus_type(const char *type, DeviceState *parent, const char *name);
+void i2c_set_slave_address(I2CSlave *dev, uint8_t address);
 int i2c_bus_busy(I2CBus *bus);
 
 /**
@@ -153,6 +168,7 @@ int i2c_send_async(I2CBus *bus, uint8_t data);
 uint8_t i2c_recv(I2CBus *bus);
 bool i2c_scan_bus(I2CBus *bus, uint8_t address, bool broadcast,
                   I2CNodeList *current_devs);
+int i2c_start_device_transfer(I2CSlave *dev, int send_length);
 
 /**
  * Create an I2C slave device on the heap.

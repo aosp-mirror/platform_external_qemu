@@ -46,6 +46,7 @@ static const TypeInfo i2c_bus_info = {
     .parent = TYPE_BUS,
     .instance_size = sizeof(I2CBus),
     .class_init = i2c_bus_class_init,
+    .class_size = sizeof(I2CBusClass),
 };
 
 static int i2c_bus_pre_save(void *opaque)
@@ -78,9 +79,15 @@ static const VMStateDescription vmstate_i2c_bus = {
 /* Create a new I2C bus.  */
 I2CBus *i2c_init_bus(DeviceState *parent, const char *name)
 {
+    return i2c_init_bus_type(TYPE_I2C_BUS, parent, name);
+}
+
+/* Create a new I2C bus with custom type.  */
+I2CBus *i2c_init_bus_type(const char *type, DeviceState *parent, const char *name)
+{
     I2CBus *bus;
 
-    bus = I2C_BUS(qbus_new(TYPE_I2C_BUS, parent, name));
+    bus = I2C_BUS(qbus_new(type, parent, name));
     QLIST_INIT(&bus->current_devs);
     QSIMPLEQ_INIT(&bus->pending_masters);
     vmstate_register_any(NULL, &vmstate_i2c_bus, bus);
@@ -355,6 +362,20 @@ void i2c_ack(I2CBus *bus)
     trace_i2c_ack();
 
     qemu_bh_schedule(bus->bh);
+}
+
+int i2c_start_device_transfer(I2CSlave *dev, int send_length)
+{
+    I2CBusClass *bc;
+    I2CBus *bus;
+    bus = I2C_BUS(qdev_get_parent_bus(DEVICE(dev)));
+    bc = I2C_BUS_GET_CLASS(bus);
+    if (bc->device_initiated_transfer) {
+        return bc->device_initiated_transfer(bus, dev->address, send_length);
+    }
+
+    /* If there is no callback on the bus, return NAK. */
+    return 1;
 }
 
 static int i2c_slave_post_load(void *opaque, int version_id)
