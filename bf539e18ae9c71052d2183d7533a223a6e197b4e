@@ -88,6 +88,24 @@
       "parentUuid": "c7ac5fe6_2f3c0362",
       "revId": "bf539e18ae9c71052d2183d7533a223a6e197b4e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1d93ad93_2f825d28",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-04-01T23:07:28Z",
+      "side": 1,
+      "message": "You are right, the caller has to provide an rvalue reference to call f1. But if the type is not copyable, the caller has to call f2 with std::move.",
+      "parentUuid": "a6972ff1_081790b4",
+      "revId": "bf539e18ae9c71052d2183d7533a223a6e197b4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
