@@ -1701,6 +1701,15 @@ help_screen(stralloc_t* out)
     );
 }
 
+static void help_gnss_file_path(stralloc_t* out) {
+    PRINTF(" Use -gnss-file-path <path>  to set the gnss file path.\n\n");
+}
+
+static void help_gnss_grpc_port(stralloc_t* out) {
+    PRINTF(" Use -gnss-grpc-port <port>  to set the gnss grpc port "
+           "number.\n\n");
+}
+
 static void
 help_selinux(stralloc_t* out)
 {
