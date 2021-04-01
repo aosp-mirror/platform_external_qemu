@@ -38,7 +38,7 @@ public:
         Service(AdbHostAgent* hostAgent);
         ~Service();
 
-        void onHostConnection(android::base::ScopedSocket&& socket,
+        void onHostConnection(android::base::ScopedSocket socket,
                               AdbPortType portType) override;
 
         void resetActiveGuestPipeConnection() override;

@@ -234,7 +234,7 @@ AdbVsockPipe::Service::~Service() {
     g_service = nullptr;
 }
 
-void AdbVsockPipe::Service::onHostConnection(android::base::ScopedSocket&& socket,
+void AdbVsockPipe::Service::onHostConnection(android::base::ScopedSocket socket,
                                              const AdbPortType portType) {
     // A workaround.
     // `BaseSocketServer::onAccept` calls `stopListening` for some reasons.

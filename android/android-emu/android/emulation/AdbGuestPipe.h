@@ -97,7 +97,7 @@ public:
                           android::base::Stream* stream) override;
 
         // Overridden AdbGuestAgent method.
-        virtual void onHostConnection(ScopedSocket&& socket,
+        virtual void onHostConnection(ScopedSocket socket,
                                       AdbPortType portType) override;
 
         void preLoad(android::base::Stream* stream) override;
@@ -156,7 +156,7 @@ public:
     // regular adb connection, or a jdwp connection from icebox
     // On success, return true, on error return false and closes the
     // socket.
-    void onHostConnection(ScopedSocket&& socket, AdbPortType portType);
+    void onHostConnection(ScopedSocket socket, AdbPortType portType);
 
     bool isProxyingData() const {
         return mState == State::ProxyingData;
