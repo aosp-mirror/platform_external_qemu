@@ -93,7 +93,7 @@ endfunction()
 #
 # ``TARGET`` The library target to generate.
 # ``INCLUDES`` Optional list of include paths to pass to nasm
-# ``SOURCES`` List of source files to be compiled.
+# ``SRC`` List of source files to be compiled.
 #
 # For example:
 #    android_nasm_compile(TARGET foo_asm INCLUDES /tmp/foo /tmp/more_foo SOURCES /tmp/bar /tmp/z)
@@ -102,12 +102,8 @@ endfunction()
 # ~~~
 function(android_nasm_compile)
   _register_target(${ARGN})
-  # Parse arguments
-  set(options)
-  set(oneValueArgs TARGET)
-  set(multiValueArgs INCLUDES SOURCES)
-  cmake_parse_arguments(android_nasm_compile "${options}" "${oneValueArgs}"
-                        "${multiValueArgs}" ${ARGN})
+  # Parse target
+  cmake_parse_arguments(android_nasm_compile "" "TARGET" "" ${ARGN})
 
   # Configure nasm
   android_compile_for_host(
@@ -116,7 +112,7 @@ function(android_nasm_compile)
   # Setup the includes.
   set(LIBNAME ${android_nasm_compile_TARGET})
   set(ASM_INC "")
-  foreach(INCLUDE ${android_nasm_compile_INCLUDES})
+  foreach(INCLUDE ${REGISTERED_INCLUDES})
     set(ASM_INC ${ASM_INC} -I ${INCLUDE})
   endforeach()
 
@@ -223,11 +219,12 @@ endfunction()
 # ``REPO``    Internal location where the, where the notice can be found.
 # ``LICENSE`` SPDX License identifier.
 # ``NOTICE``  Location where the NOTICE can be found
+# ``INCLUDES`` Optional set of includes.
 # ~~~
 function(_register_target)
   set(options NODISTRIBUTE)
   set(oneValueArgs TARGET LICENSE LIBNAME REPO URL NOTICE)
-  set(multiValueArgs SRC LINUX MSVC WINDOWS DARWIN)
+  set(multiValueArgs SRC LINUX MSVC WINDOWS DARWIN INCLUDES)
   cmake_parse_arguments(build "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN})
   if(NOT DEFINED build_TARGET)
@@ -244,6 +241,7 @@ function(_register_target)
   endif()
 
   set(REGISTERED_SRC ${src} PARENT_SCOPE)
+  set(REGISTERED_INCLUDES ${build_INCLUDES} PARENT_SCOPE)
   if(build_NODISTRIBUTE)
     return()
   endif()

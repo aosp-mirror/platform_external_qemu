@@ -105,6 +105,7 @@ endif()
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 set(JSON_Install OFF CACHE INTERNAL "")
 add_subdirectory(json)
+add_subdirectory(libvpx)
 
 if (EXISTS ${ANDROID_QEMU2_TOP_DIR}/../perfetto AND (NOT LINUX_AARCH64) AND (NOT CROSSCOMPILE))
     add_subdirectory(perfetto-tracing-only)

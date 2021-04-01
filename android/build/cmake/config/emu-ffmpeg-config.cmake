@@ -11,7 +11,6 @@
 if(NOT WINDOWS_MSVC_X86_64)
   prebuilt(X264)
 endif()
-prebuilt(VPX)
 get_filename_component(
   PREBUILT_ROOT
   "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ffmpeg/${ANDROID_TARGET_TAG}"
@@ -50,7 +49,7 @@ if(NOT TARGET FFMPEG::FFMPEG)
     PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${FFMPEG_INCLUDE_DIRS}"
 
                INTERFACE_LINK_LIBRARIES "${FFMPEG_LIBRARIES}")
-  target_link_libraries(FFMPEG::FFMPEG INTERFACE VPX::VPX)
+  #target_link_libraries(FFMPEG::FFMPEG INTERFACE VPX::VPX)
 endif()
 
 set(PACKAGE_EXPORT

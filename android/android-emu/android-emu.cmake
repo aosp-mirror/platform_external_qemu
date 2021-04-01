@@ -1,5 +1,4 @@
 # This file defines android-emu library
-prebuilt(VPX)
 prebuilt(FFMPEG)
 
 # This is the set of sources that are common in both the shared libary and the
@@ -390,7 +389,7 @@ android_add_library(
 target_link_libraries(
   android-emu
   PUBLIC FFMPEG::FFMPEG
-         VPX::VPX
+         libvpx
          emulator-libext4_utils
          android-emu-base
          emulator-libsparse
