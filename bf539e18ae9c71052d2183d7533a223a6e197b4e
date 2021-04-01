@@ -106,6 +106,24 @@
       "parentUuid": "a6972ff1_081790b4",
       "revId": "bf539e18ae9c71052d2183d7533a223a6e197b4e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e677945f_5b373ef3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-04-01T23:24:50Z",
+      "side": 1,
+      "message": "Our style guide does not recommend using rvalue references except where required.",
+      "parentUuid": "1d93ad93_2f825d28",
+      "revId": "bf539e18ae9c71052d2183d7533a223a6e197b4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
