@@ -16,6 +16,24 @@
       "message": "I don\u0027t see why this is redundant?",
       "revId": "bf539e18ae9c71052d2183d7533a223a6e197b4e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8084e840_4da5250f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-04-01T22:28:46Z",
+      "side": 1,
+      "message": "\u003e I don\u0027t see why this is redundant?\n\nvoid f1(T\u0026\u0026) {}\nvoid f2(T) {}\n\nyou still have to provide a movable instance to satisfy the intent and since you are providing a movable instance and T is well written f2 will behave as good as f1.",
+      "parentUuid": "38f05c57_68b546e9",
+      "revId": "bf539e18ae9c71052d2183d7533a223a6e197b4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
