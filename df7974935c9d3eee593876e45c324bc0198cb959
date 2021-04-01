@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f0c16644_6da88ed0",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-04-01T22:40:57Z",
+      "side": 1,
+      "message": "This link doesn\u0027t apply since it is about Android, but the emulator doesn\u0027t run on Android.",
+      "range": {
+        "startLine": 65,
+        "startChar": 3,
+        "endLine": 65,
+        "endChar": 69
+      },
+      "revId": "df7974935c9d3eee593876e45c324bc0198cb959",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2fb40bac_97d02d77",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-04-01T22:40:57Z",
+      "side": 1,
+      "message": "This part is a leftover from earlier wording. It should be removed.",
+      "range": {
+        "startLine": 78,
+        "startChar": 69,
+        "endLine": 78,
+        "endChar": 103
+      },
+      "revId": "df7974935c9d3eee593876e45c324bc0198cb959",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "335357f5_aa50b936",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-04-01T22:40:57Z",
+      "side": 1,
+      "message": "There is no need to give HCENTER and VCENTER different names. They bot can be called CENTER.",
+      "range": {
+        "startLine": 81,
+        "startChar": 8,
+        "endLine": 81,
+        "endChar": 15
+      },
+      "revId": "df7974935c9d3eee593876e45c324bc0198cb959",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9c2a6af2_57e189b3",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-04-01T22:40:57Z",
+      "side": 1,
+      "message": "Description doesn\u0027t match the enumerator.",
+      "range": {
+        "startLine": 81,
+        "startChar": 64,
+        "endLine": 81,
+        "endChar": 69
+      },
+      "revId": "df7974935c9d3eee593876e45c324bc0198cb959",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "86e76fc5_f1bb47e8",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-04-01T22:40:57Z",
+      "side": 1,
+      "message": "There is no such thing as center edge.",
+      "range": {
+        "startLine": 82,
+        "startChar": 64,
+        "endLine": 82,
+        "endChar": 75
+      },
+      "revId": "df7974935c9d3eee593876e45c324bc0198cb959",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "23bf86ca_88459b68",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-04-01T22:40:57Z",
+      "side": 1,
+      "message": "There is no such thing as center edge.",
+      "range": {
+        "startLine": 88,
+        "startChar": 64,
+        "endLine": 88,
+        "endChar": 75
+      },
+      "revId": "df7974935c9d3eee593876e45c324bc0198cb959",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
