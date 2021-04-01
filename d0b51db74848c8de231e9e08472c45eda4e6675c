@@ -33,6 +33,24 @@
       "message": "Which part of code going to use these options?",
       "revId": "d0b51db74848c8de231e9e08472c45eda4e6675c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b19bf38c_06b25146",
+        "filename": "android/android-webrtc/videobridge/emulator/webrtc/capture/GrpcAudioSource.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-04-01T18:30:35Z",
+      "side": 1,
+      "message": "The encoder will request the options and apply them.",
+      "parentUuid": "9e153db8_1269590d",
+      "revId": "d0b51db74848c8de231e9e08472c45eda4e6675c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
