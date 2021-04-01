@@ -249,6 +249,7 @@ message PhysicalModelValue {
 
   // Details on the sensors documentation can be found here:
   // https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_
+  // The types must follow the order defined in "external/qemu/android/hw-sensors.h"
   enum PhysicalType {
     POSITION = 0;
 
@@ -275,6 +276,15 @@ message PhysicalModelValue {
 
     VELOCITY = 8;
     AMBIENT_MOTION = 9;
+
+    // Describing a hinge angle sensor in degrees.
+    HINGE_ANGLE0 = 10;
+    HINGE_ANGLE1 = 11;
+    HINGE_ANGLE2 = 12;
+
+    ROLLABLE0 = 13;
+    ROLLABLE1 = 14;
+    ROLLABLE2 = 15;
   }
   PhysicalType target = 1;
 
