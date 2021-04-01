@@ -34,6 +34,24 @@
       "parentUuid": "38f05c57_68b546e9",
       "revId": "bf539e18ae9c71052d2183d7533a223a6e197b4e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7476eb40_53fbcbd6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2021-04-01T22:36:17Z",
+      "side": 1,
+      "message": "I would still prefer f1 since it forces the caller to pass rvalue and avoid unintentional usage where people forgot std::move. What do you think?",
+      "parentUuid": "8084e840_4da5250f",
+      "revId": "bf539e18ae9c71052d2183d7533a223a6e197b4e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
