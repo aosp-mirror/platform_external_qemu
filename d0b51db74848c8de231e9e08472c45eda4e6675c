@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1ff316c7_c58e7ebb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1546766
+      },
+      "writtenOn": "2021-04-01T03:23:09Z",
+      "side": 1,
+      "message": "Thanks! Will add the same options to ACID.",
+      "revId": "d0b51db74848c8de231e9e08472c45eda4e6675c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9e153db8_1269590d",
