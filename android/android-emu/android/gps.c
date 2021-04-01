@@ -20,6 +20,7 @@
 CSerialLine* android_gps_serial_line;
 // Set to true to ping guest for location updates every few seconds
 static bool s_enable_passive_location_update = true;
+static bool s_enable_gnssgrpcv1 = false;
 
 // Last state of the gps, initial coordinates point to Googleplex.
 double s_latitude = 39.237256;
@@ -30,6 +31,10 @@ double s_headingDegrees = 0;
 int s_nSatellites = 4;
 
 #define  D(...)  VERBOSE_PRINT(gps,__VA_ARGS__)
+
+typedef void (*android_gnssgrpcv1_send_nmea_func)(const char*, int);
+
+static android_gnssgrpcv1_send_nmea_func s_gnssgrpcv1_send_nmea = NULL;
 
 void
 android_gps_send_nmea( const char*  sentence )
@@ -44,6 +49,12 @@ android_gps_send_nmea( const char*  sentence )
         return;
     }
 
+    if (s_enable_gnssgrpcv1) {
+        if (s_gnssgrpcv1_send_nmea) {
+            s_gnssgrpcv1_send_nmea(sentence, strlen(sentence));
+        }
+        return;
+    }
     android_serialline_write( android_gps_serial_line, (const void*)sentence, strlen(sentence) );
     android_serialline_write( android_gps_serial_line, (const void*)"\n", 1 );
 }
@@ -63,6 +74,11 @@ android_gps_send_gnss( const char*  sentence )
 
     char temp[1024];
     snprintf(temp, sizeof(temp), "$GPGNSSv1,%s", sentence);
+
+    if (s_enable_gnssgrpcv1) {
+        // TODO: handle gnss input
+        return;
+    }
 
     android_serialline_write( android_gps_serial_line, (const void*)temp, strlen(temp) );
     android_serialline_write( android_gps_serial_line, (const void*)"\n", 1 );
@@ -260,8 +276,18 @@ android_gps_set_passive_update(bool enable)
     s_enable_passive_location_update = enable;
 }
 
+void android_gps_enable_gnssgrpcv1() {
+    s_enable_gnssgrpcv1 = true;
+}
+
 bool
 android_gps_get_passive_update()
 {
     return s_enable_passive_location_update;
+}
+
+void android_gps_set_send_nmea_func(void* fptr) {
+    android_gnssgrpcv1_send_nmea_func myf =
+            (android_gnssgrpcv1_send_nmea_func)(fptr);
+    s_gnssgrpcv1_send_nmea = myf;
 }
