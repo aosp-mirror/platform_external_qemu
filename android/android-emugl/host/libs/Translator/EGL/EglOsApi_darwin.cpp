@@ -67,8 +67,11 @@ private:
 
 class MacContext : public EglOS::Context {
 public:
-    explicit MacContext(bool isCoreProfile, void* context) :
-        EglOS::Context(isCoreProfile), mContext(context) {}
+    explicit MacContext(bool isCoreProfile, void* context)
+        : EglOS::Context(isCoreProfile), mContext(context) {
+        // fprintf(stderr, "created maccontext %p lowlevel %p\n", this,
+        // nsGetLowLevelContext(context));
+    }
 
     ~MacContext() {
         nsDestroyContext(mContext);
@@ -76,6 +79,7 @@ public:
 
     void* context() const { return mContext; }
 
+    virtual void* lowLevelContext() { return nsGetLowLevelContext(mContext); }
     static void* from(EglOS::Context* c) {
         return static_cast<MacContext*>(c)->context();
     }
@@ -181,8 +185,14 @@ void pixelFormatToConfig(int index,
 
 
 class MacDisplay : public EglOS::Display {
+    static int s_count;
+
 public:
-    explicit MacDisplay(EGLNativeDisplayType dpy) : mDpy(dpy) {}
+    explicit MacDisplay(EGLNativeDisplayType dpy) : mDpy(dpy) {
+        ++s_count;
+        // fprintf(stderr, "created a new mac display %p\n", this);
+        // fprintf(stderr, "there are total of %d mac display\n", s_count);
+    }
 
     virtual EglOS::GlesVersion getMaxGlesVersion() {
         switch (sSupportInfo->maxOpenGLProfile) {
@@ -357,6 +367,8 @@ private:
     EGLNativeDisplayType mDpy = {};
 };
 
+int MacDisplay::s_count = 0;
+
 class MacGlLibrary : public GlLibrary {
 public:
     MacGlLibrary() {
@@ -414,3 +426,8 @@ EglOS::Engine* EglOS::Engine::getHostInstance() {
     return sHostEngine.ptr();
 }
 
+extern "C" {
+int bohu_osx_func1() {
+    return 1;
+}
+}

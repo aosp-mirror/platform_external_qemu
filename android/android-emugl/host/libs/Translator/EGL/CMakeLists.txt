@@ -35,7 +35,7 @@ android_target_compile_options(EGL_translator_static darwin-x86_64
 
 # OS specific link dependencies
 android_target_link_libraries(EGL_translator_static darwin-x86_64
-                              PUBLIC "-framework AppKit")
+                              PUBLIC "-framework AppKit -framework CoreVideo -framework IOSurface")
 android_target_link_libraries(EGL_translator_static linux-x86_64
                               PUBLIC "-lGL -lX11 -ldl -lpthread")
 android_target_link_libraries(EGL_translator_static windows
