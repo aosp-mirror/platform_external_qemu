@@ -22,6 +22,8 @@
 // for Linux and Window, Cuvid is available
 #include "android/emulation/MediaCudaDriverHelper.h"
 #include "android/emulation/MediaCudaVideoHelper.h"
+#else
+#include "android/emulation/MediaVideoToolBoxVideoHelper.h"
 #endif
 
 #include <cstdint>
@@ -68,15 +70,11 @@ bool canUseCudaDecoder() {
 }
 
 bool canDecodeToGpuTexture() {
-#ifndef __APPLE__
     if (emuglConfig_get_current_renderer() == SELECTED_RENDERER_HOST) {
         return true;
     } else {
         return false;
     }
-#else
-    return false;
-#endif
 }
 };  // end namespace
 
@@ -147,7 +145,30 @@ void MediaH264DecoderGeneric::initH264ContextInternal(unsigned int width,
             H264_DPRINT("succeeded to init cuda decoder");
         }
     }
-// TODO: add video toolbox for apple
+#else
+    //TODO: once all the CTS passed with VTB, remove this
+    const bool is_vtb_allowed = android::base::System::getEnvironmentVariable(
+                            "ANDROID_EMU_MEDIA_DECODER_VTB") == "1";
+
+    if (is_vtb_allowed) {
+        MediaVideoToolBoxVideoHelper::FrameStorageMode fMode =
+            (mParser.version() >= 200 && mUseGpuTexture)
+                    ? MediaVideoToolBoxVideoHelper::FrameStorageMode::
+                              USE_GPU_TEXTURE
+                    : MediaVideoToolBoxVideoHelper::FrameStorageMode::
+                              USE_BYTE_BUFFER;
+        auto macDecoder = new MediaVideoToolBoxVideoHelper(
+            mOutputWidth, mOutputHeight,
+            MediaVideoToolBoxVideoHelper::OutputTreatmentMode::SAVE_RESULT,
+            fMode);
+
+        if (mUseGpuTexture && mParser.version() >= 200) {
+            H264_DPRINT("use gpu texture on OSX");
+            macDecoder->resetTexturePool(mRenderer.getTexturePool());
+        }
+        mHwVideoHelper.reset(macDecoder);
+        mHwVideoHelper->init();
+    }
 #endif
 
     mSnapshotHelper.reset(
@@ -214,12 +235,15 @@ void MediaH264DecoderGeneric::decodeFrame(void* ptr) {
 
     *retSzBytes = szBytes;
     *retErr = (int32_t)Err::NoErr;
+
+    H264_DPRINT("done decoding this frame");
 }
 
 void MediaH264DecoderGeneric::decodeFrameInternal(const uint8_t* data,
                                                   size_t len,
                                                   uint64_t pts) {
     if (mTrialPeriod) {
+        H264_DPRINT("still in trial period");
         try_decode(data, len, pts);
     } else {
         mVideoHelper->decode(data, len, pts);
@@ -314,6 +338,11 @@ void MediaH264DecoderGeneric::getImage(void* ptr) {
     bool needToCopyToGuest = true;
     if (mParser.version() == 200) {
         if (mUseGpuTexture && pFrame->texture[0] > 0 && pFrame->texture[1] > 0) {
+            H264_DPRINT(
+                    "calling rendering to host side color buffer with id %d "
+                    "tex %d tex %d",
+                    param.hostColorBufferId, pFrame->texture[0],
+                    pFrame->texture[1]);
             mRenderer.renderToHostColorBufferWithTextures(
                     param.hostColorBufferId, pFrame->width, pFrame->height,
                     TextureFrame{pFrame->texture[0], pFrame->texture[1]});
