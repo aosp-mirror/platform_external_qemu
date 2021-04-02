@@ -39,6 +39,30 @@
       },
       "revId": "ab93d3f7987f8db42ab86b6e6bcc0caf9ec7a2be",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "497f88f1_49567e0d",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 2150,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-04-02T00:36:13Z",
+      "side": 1,
+      "message": "for the virtio-serial (not the console), it has name field which should match id field; and the guest can look at the name filed to hook up.",
+      "parentUuid": "4a55074c_79d0e93f",
+      "range": {
+        "startLine": 2150,
+        "startChar": 12,
+        "endLine": 2150,
+        "endChar": 33
+      },
+      "revId": "ab93d3f7987f8db42ab86b6e6bcc0caf9ec7a2be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
