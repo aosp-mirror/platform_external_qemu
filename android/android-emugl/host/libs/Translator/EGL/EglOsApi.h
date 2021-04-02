@@ -63,6 +63,10 @@ public:
     bool isCoreProfile() const {
         return mCoreProfile;
     }
+
+    // osx has lowerlevel CGLContextObj under NSOpenGLContext
+    virtual void* lowLevelContext() { return nullptr; }
+
 protected:
     ~Context() = default;
 private:
