@@ -17,6 +17,7 @@
 #include "FrameBuffer.h"
 
 #include "DispatchTables.h"
+#include "EglGlobalInfo.h"
 #include "GLESVersionDetector.h"
 #include "NativeSubWindow.h"
 #include "RenderControl.h"
@@ -1926,10 +1927,27 @@ void FrameBuffer::destroyYUVTextures(uint32_t type,
     }
 }
 
+
 extern "C" {
 typedef void (*yuv_updater_t)(void* privData,
                               uint32_t type,
-                              uint32_t* textures);
+                              uint32_t* textures,
+                              void* callerData);
+#ifdef __APPLE__
+void nsConvertVideoFrameToNV12Textures(void* context,
+                                       void* iosurface,
+                                       int Ytex,
+                                       int UVtex);
+typedef void (*convertNV21Func)(void* context,
+                                void* iosurface,
+                                int Ytex,
+                                int UVtex);
+struct CallerData {
+    void* ctx;
+    convertNV21Func converter;
+};
+
+#endif
 }
 
 void FrameBuffer::updateYUVTextures(uint32_t type,
@@ -1951,7 +1969,19 @@ void FrameBuffer::updateYUVTextures(uint32_t type,
         gtextures[2] = s_gles2.glGetGlobalTexName(textures[2]);
     }
 
-    updater(privData, type, gtextures);
+#ifdef __APPLE__
+    EGLContext prevContext = s_egl.eglGetCurrentContext();
+    long long hndl = reinterpret_cast<long long>(prevContext);
+    auto mydisp = EglGlobalInfo::getInstance()->getDisplay(EGL_DEFAULT_DISPLAY);
+    void* nativecontext = mydisp->getLowLevelContext(prevContext);
+    struct CallerData callerdata;
+    callerdata.ctx = nativecontext;
+    callerdata.converter = nsConvertVideoFrameToNV12Textures;
+#else
+    void* callerdata = nullptr;
+#endif
+
+    updater(privData, type, gtextures, &callerdata);
 }
 
 void FrameBuffer::swapTexturesAndUpdateColorBuffer(uint32_t p_colorbuffer,

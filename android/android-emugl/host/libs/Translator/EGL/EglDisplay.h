@@ -87,6 +87,7 @@ public:
     bool removeSurface(EGLSurface s);
     EGLContext addContext(ContextPtr ctx );
     ContextPtr getContext(EGLContext ctx) const;
+    void* getLowLevelContext(EGLContext ctx) const;
     bool removeContext(EGLContext ctx);
     bool removeContext(ContextPtr ctx);
     ObjectNameManager* getManager(GLESVersion ver) const { return m_manager[ver];}
