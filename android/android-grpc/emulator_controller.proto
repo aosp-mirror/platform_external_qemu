@@ -521,9 +521,9 @@ message TouchEvent {
   // The display device where the touch event occurred.
   // Omitting or using the value 0 indicates the main display.
   //
-  // Touch events cannot be send to devices other than 0, due to
+  // Touch events cannot be send to displays other than 0, due to
   // https://issuetracker.google.com/issues/150699691
-  int32 device = 2;
+  int32 display = 2;
 }
 
 // The MouseEvent interface represents events that occur due to the user
@@ -545,7 +545,7 @@ message MouseEvent {
 
   // The display device where the mouse event occurred.
   // Omitting or using the value 0 indicates the main display.
-  int32 device = 4;
+  int32 display = 4;
 }
 
 // KeyboardEvent objects describe a user interaction with the keyboard; each
