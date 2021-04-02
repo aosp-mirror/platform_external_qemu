@@ -39,7 +39,7 @@ public:
         m_textureMap.clear();
     }
 
-    intptr_t main();
+    intptr_t main() override;
     bool wait(intptr_t* exitStatus) override;
     void interrupt() override;
 

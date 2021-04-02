@@ -183,6 +183,7 @@ void pixelFormatToConfig(int index,
 
 
 class MacDisplay : public EglOS::Display {
+
 public:
     explicit MacDisplay(EGLNativeDisplayType dpy) : mDpy(dpy) {}
 
