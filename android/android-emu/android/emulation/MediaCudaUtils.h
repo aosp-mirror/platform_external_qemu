@@ -43,5 +43,6 @@ struct media_cuda_utils_copy_context {
 
 void media_cuda_utils_nv12_updater(void* privData,
                                    uint32_t type,
-                                   uint32_t* textures);
+                                   uint32_t* textures,
+                                   void* callerData);
 }
