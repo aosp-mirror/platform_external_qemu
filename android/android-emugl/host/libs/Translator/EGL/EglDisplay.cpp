@@ -24,16 +24,46 @@
 
 #include <algorithm>
 
+int EglDisplay::s_count = 0;
+
+static EglDisplay* s_display = nullptr;
+
 EglDisplay::EglDisplay(EGLNativeDisplayType dpy,
                        EglOS::Display* idpy) :
     m_dpy(dpy),
     m_idpy(idpy)
 {
+    ++s_count;
     m_manager[GLES_1_1] = new ObjectNameManager(&m_globalNameSpace);
     m_manager[GLES_2_0] = new ObjectNameManager(&m_globalNameSpace);
     m_manager[GLES_3_0] = m_manager[GLES_2_0];
     m_manager[GLES_3_1] = m_manager[GLES_2_0];
+    // fprintf(stderr, "create EglDisplay %p now there are %d native
+    // displays\n", this, s_count);
+    if (!s_display) {
+        s_display = this;
+        // fprintf(stderr, "the global EglDisplay is %p\n", s_display);
+    }
 };
+
+extern "C" {
+void* getLowLevelContext(EGLContext handle) {
+    if (!s_display) {
+        fprintf(stderr, "there is no global display cannot do much %s %d\n",
+                __func__, __LINE__);
+        return nullptr;
+    }
+
+    auto ctx = s_display->getContext(handle);
+    if (ctx) {
+        return ctx->nativeType()->lowLevelContext();
+    } else {
+        fprintf(stderr, "cannot find handle of %p in %s\n", (void*)handle,
+                __func__);
+    }
+    return nullptr;
+}
+}
 
 EglDisplay::~EglDisplay() {
     emugl::Mutex::AutoLock mutex(m_lock);
@@ -516,6 +546,8 @@ EGLContext EglDisplay::addContext(ContextPtr ctx ) {
    if(m_contexts.find(hndl) != m_contexts.end()) {
        return ret;
    }
+   // fprintf(stderr, "added handle in %s with handle %u ctx %p\n", __func__,
+   // hndl, ctx->nativeType()->lowLevelContext());
    m_contexts[hndl] = ctx;
    return ret;
 }
