@@ -431,8 +431,8 @@ target_link_libraries(
 target_link_libraries(android-emu PRIVATE hostapd)
 
 if(NOT OPTION_GFXSTREAM_BACKEND)
-  target_link_libraries(android-emu PRIVATE modem_simulator_lib)
-  target_link_libraries(android-emu PUBLIC modem_simulator_lib)
+  target_link_libraries(android-emu PRIVATE modem_simulator_lib gnss_proxy_lib)
+  target_link_libraries(android-emu PUBLIC modem_simulator_lib gnss_proxy_lib)
 endif()
 
 # Here are the windows library and link dependencies. They are public and will
