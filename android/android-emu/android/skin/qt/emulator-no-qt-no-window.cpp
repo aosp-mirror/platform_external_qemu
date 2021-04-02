@@ -158,10 +158,10 @@ void EmulatorNoQtNoWindow::sendFoldedArea() {
     int width = android_hw->hw_displayRegion_0_1_width;
     int height = android_hw->hw_displayRegion_0_1_height;
     char foldedArea[64];
-    sprintf(foldedArea, "folded-area %d,%d,%d,%d", xOffset, yOffset,
+    sprintf(foldedArea, "rollable %d,%d,%d,%d", xOffset, yOffset,
             xOffset + width, yOffset + height);
     mAdbInterface->enqueueCommand(
-            {"shell", "wm", foldedArea},
+            {"shell", "dumpsys", "activity", "service", "SystemUIService", "WMShell", foldedArea},
             [](const android::emulation::OptionalAdbCommandResult& result) {
                 if (result && result->exit_code == 0) {
                     D("'fold-area' command succeeded\n");

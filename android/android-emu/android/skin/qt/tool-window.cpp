@@ -1313,18 +1313,19 @@ WorkerProcessingResult ToolWindow::foldableSyncToAndroidItemFunction(const Folda
                 break;
             }
             char foldedArea[64];
-            sprintf(foldedArea, "folded-area %d,%d,%d,%d",
+            sprintf(foldedArea, "rollable %d,%d,%d,%d",
                     item.x,
                     item.y,
                     item.x + item.width,
                     item.y + item.height);
             std::string sendArea(foldedArea);
             emuQtWindow->getAdbInterface()->enqueueCommand(
-                    {"shell", "wm", foldedArea},
+                    {"shell", "dumpsys", "activity", "service", "SystemUIService", "WMShell", foldedArea},
                     [sendArea](const OptionalAdbCommandResult& result) {
                         if (result && result->exit_code == 0) {
                             VLOG(foldable) << "foldable-page: 'send " << sendArea <<"' command succeeded";
-                        }});
+                        }
+		);
             break;
         }
         case CONFIRM_AREA: {
@@ -1338,11 +1339,11 @@ WorkerProcessingResult ToolWindow::foldableSyncToAndroidItemFunction(const Folda
                 while (!mFoldableSyncToAndroidSuccess && !mFoldableSyncToAndroidTimeout) {
                     android::base::AutoLock lock(mLock);
                     emuQtWindow->getAdbInterface()->enqueueCommand(
-                        {"shell", "wm", "folded-area"},
+                        {"shell", "dumpsys", "activity", "service", "SystemUIService", "WMShell", "rollable"},
                         [this, item, timeOut](const OptionalAdbCommandResult& result) {
                             android::base::AutoLock lock(this->mLock);
                             if (System::get()->getUnixTimeUs() > timeOut) {
-                                LOG(ERROR) << "time out (30 sec) waiting for window manager configuring folded area";
+                                LOG(ERROR) << "time out (30 sec) waiting for window manager configuring rollable area";
                                 this->mFoldableSyncToAndroidTimeout = true;
                                 this->mCv.signalAndUnlock(&lock);
                                 return;
@@ -1354,7 +1355,7 @@ WorkerProcessingResult ToolWindow::foldableSyncToAndroidItemFunction(const Folda
                                 return;
                             }
                             std::string line;
-                            std::string expectedAdbOutput = "Folded area: " +
+                            std::string expectedAdbOutput = "Rollable area: " +
                                                             std::to_string(item.x) +
                                                             "," +
                                                             std::to_string(item.y) +
@@ -1363,7 +1364,7 @@ WorkerProcessingResult ToolWindow::foldableSyncToAndroidItemFunction(const Folda
                                                             "," +
                                                             std::to_string(item.y + item.height);
                             while (getline(*(result->output), line)) {
-                                if (line.compare(expectedAdbOutput) == 0) {
+                                if (line.find(expectedAdbOutput) != std::string::npos) {
                                     this->mFoldableSyncToAndroidSuccess = true;
                                     break;
                                 }
