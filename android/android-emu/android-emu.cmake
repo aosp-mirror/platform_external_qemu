@@ -377,6 +377,8 @@ android_add_library(
          android/camera/camera-capture-mac.m
          android/crashreport/CrashReporter_darwin.cpp
          android/emulation/MediaH264DecoderVideoToolBox.cpp
+         android/emulation/MediaVideoToolBoxVideoHelper.cpp
+         android/emulation/MediaVideoToolBoxUtils.cpp
          android/emulation/MediaH264DecoderVideoToolBoxProxy.cpp
          android/opengl/macTouchOpenGL.m
          android/opengl/NativeGpuInfo_darwin.cpp

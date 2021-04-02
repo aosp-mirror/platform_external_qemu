@@ -24,6 +24,10 @@
 
 #include <algorithm>
 
+// HACK: need to find the proper way for FrameBuffer.cpp to
+// access this display
+static EglDisplay* s_display = nullptr;
+
 EglDisplay::EglDisplay(EGLNativeDisplayType dpy,
                        EglOS::Display* idpy) :
     m_dpy(dpy),
@@ -33,7 +37,24 @@ EglDisplay::EglDisplay(EGLNativeDisplayType dpy,
     m_manager[GLES_2_0] = new ObjectNameManager(&m_globalNameSpace);
     m_manager[GLES_3_0] = m_manager[GLES_2_0];
     m_manager[GLES_3_1] = m_manager[GLES_2_0];
+    if (!s_display) {
+        s_display = this;
+    }
 };
+
+extern "C" {
+void* getLowLevelContext(EGLContext handle) {
+    if (!s_display) {
+        return nullptr;
+    }
+
+    auto ctx = s_display->getContext(handle);
+    if (ctx) {
+        return ctx->nativeType()->lowLevelContext();
+    }
+    return nullptr;
+}
+}
 
 EglDisplay::~EglDisplay() {
     emugl::Mutex::AutoLock mutex(m_lock);
