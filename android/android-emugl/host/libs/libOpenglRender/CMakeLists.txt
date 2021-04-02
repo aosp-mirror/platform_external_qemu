@@ -133,6 +133,8 @@ android_target_link_libraries(OpenglRender linux-x86_64
 android_target_link_libraries(
     OpenglRender darwin-x86_64
     PRIVATE "-WL,-exported_symbols_list,render_api.entries")
+android_target_link_libraries(OpenglRender darwin-aarch64 PUBLIC "-framework IOSurface")
+android_target_link_libraries(OpenglRender darwin-x86_64 PUBLIC "-framework IOSurface")
 android_target_link_libraries(
     OpenglRender darwin-aarch64
     PRIVATE "-WL,-exported_symbols_list,render_api.entries")
