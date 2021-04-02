@@ -1926,10 +1926,28 @@ void FrameBuffer::destroyYUVTextures(uint32_t type,
     }
 }
 
+// TODO: get osx decoding to texture working as well
+
 extern "C" {
+int bohu_osx_func1();
+void* getLowLevelContext(EGLContext handle);
 typedef void (*yuv_updater_t)(void* privData,
                               uint32_t type,
-                              uint32_t* textures);
+                              uint32_t* textures,
+                              void* callerData);
+#ifdef __APPLE__
+void nsConvertVideoFrameToNV12Textures(void* context,
+                                       void* iosurface,
+                                       int* Ytex,
+                                       int* UVtex);
+void nsCopyTexture(void* context, int from, int to, int w, int h);
+struct CallerData {
+    void* ctx;
+    void* f1;
+    void* f2;
+};
+
+#endif
 }
 
 void FrameBuffer::updateYUVTextures(uint32_t type,
@@ -1951,7 +1969,23 @@ void FrameBuffer::updateYUVTextures(uint32_t type,
         gtextures[2] = s_gles2.glGetGlobalTexName(textures[2]);
     }
 
-    updater(privData, type, gtextures);
+#ifdef __APPLE__
+    EGLContext prevContext = s_egl.eglGetCurrentContext();
+    long long hndl = reinterpret_cast<long long>(prevContext);
+    void* nativecontext = getLowLevelContext(prevContext);
+    // fprintf(stderr, "calling getLowLevelContext on handle %lld and got %p\n",
+    // hndl, nativecontext);
+    struct CallerData callerdata;
+    callerdata.ctx = nativecontext;
+    callerdata.f1 = (void*)nsConvertVideoFrameToNV12Textures;
+    callerdata.f2 = (void*)nsCopyTexture;
+    // fprintf(stderr, "callerdata 0 %p 1 %p 2 %p\n", callerdata.ctx,
+    // callerdata.f1, callerdata.f2);
+#else
+    void* callerdata = nullptr;
+#endif
+
+    updater(privData, type, gtextures, &callerdata);
 }
 
 void FrameBuffer::swapTexturesAndUpdateColorBuffer(uint32_t p_colorbuffer,
@@ -1995,6 +2029,19 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
     if (c == m_colorbuffers.end()) {
         // bad colorbuffer handle
         return false;
+    }
+
+    if (0) {
+        // this works, at least can access this function
+        fprintf(stderr, "call mac global %d\n", bohu_osx_func1());
+    }
+
+    if (0) {
+        EGLContext prevContext = s_egl.eglGetCurrentContext();
+        long long hndl = reinterpret_cast<long long>(prevContext);
+        auto nativecontext = getLowLevelContext(prevContext);
+        // fprintf(stderr, "calling getLowLevelContext on handle %lld and got
+        // %p\n", hndl, nativecontext);
     }
 
     (*c).second.cb->subUpdate(x, y, width, height, format, type, pixels);
@@ -2279,6 +2326,15 @@ bool FrameBuffer::bind_locked() {
     m_prevContext = prevContext;
     m_prevReadSurf = prevReadSurf;
     m_prevDrawSurf = prevDrawSurf;
+    if (1) {
+        long long hndl = reinterpret_cast<long long>(prevContext);
+        if (hndl != 0) {
+            auto nativecontext = getLowLevelContext(prevContext);
+            // fprintf(stderr, "calling getLowLevelContext on handle %lld and
+            // got %p\n", hndl, nativecontext);
+        }
+    }
+
     return true;
 }
 
