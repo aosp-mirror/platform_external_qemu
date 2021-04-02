@@ -69,6 +69,7 @@ android_add_library(
   NOTICE "REPO/NOTICE"
   SRC ${protobuf_source_dir}/src/google/protobuf/any_lite.cc
       ${protobuf_source_dir}/src/google/protobuf/arena.cc
+      ${protobuf_source_dir}/src/google/protobuf/arenastring.cc
       ${protobuf_source_dir}/src/google/protobuf/extension_set.cc
       ${protobuf_source_dir}/src/google/protobuf/generated_enum_util.cc
       ${protobuf_source_dir}/src/google/protobuf/generated_message_table_driven_lite.cc
@@ -80,6 +81,7 @@ android_add_library(
       ${protobuf_source_dir}/src/google/protobuf/io/zero_copy_stream.cc
       ${protobuf_source_dir}/src/google/protobuf/io/zero_copy_stream_impl.cc
       ${protobuf_source_dir}/src/google/protobuf/io/zero_copy_stream_impl_lite.cc
+      ${protobuf_source_dir}/src/google/protobuf/map.cc
       ${protobuf_source_dir}/src/google/protobuf/message_lite.cc
       ${protobuf_source_dir}/src/google/protobuf/parse_context.cc
       ${protobuf_source_dir}/src/google/protobuf/repeated_field.cc
@@ -278,8 +280,7 @@ else()
       google/protobuf/map_lite_unittest.proto
       google/protobuf/unittest_import_lite.proto
       google/protobuf/unittest_import_public_lite.proto
-      google/protobuf/unittest_lite.proto
-      google/protobuf/unittest_no_arena_lite.proto)
+      google/protobuf/unittest_lite.proto)
 
   set(tests_protos
       # AUTOGEN(test_protos)
@@ -288,33 +289,40 @@ else()
       google/protobuf/compiler/cpp/cpp_test_large_enum_value.proto
       google/protobuf/map_proto2_unittest.proto
       google/protobuf/map_unittest.proto
-      google/protobuf/unittest.proto
-      google/protobuf/unittest_arena.proto
-      google/protobuf/unittest_custom_options.proto
-      google/protobuf/unittest_drop_unknown_fields.proto
-      google/protobuf/unittest_embed_optimize_for.proto
-      google/protobuf/unittest_empty.proto
-      google/protobuf/unittest_enormous_descriptor.proto
-      google/protobuf/unittest_import.proto
-      google/protobuf/unittest_import_public.proto
-      google/protobuf/unittest_lazy_dependencies.proto
-      google/protobuf/unittest_lazy_dependencies_custom_option.proto
-      google/protobuf/unittest_lazy_dependencies_enum.proto
-      google/protobuf/unittest_lite_imports_nonlite.proto
-      google/protobuf/unittest_mset.proto
-      google/protobuf/unittest_mset_wire_format.proto
-      google/protobuf/unittest_no_arena.proto
-      google/protobuf/unittest_no_arena_import.proto
       google/protobuf/unittest_no_field_presence.proto
-      google/protobuf/unittest_no_generic_services.proto
+      google/protobuf/map_proto2_unittest.proto
       google/protobuf/unittest_optimize_for.proto
-      google/protobuf/unittest_preserve_unknown_enum.proto
-      google/protobuf/unittest_preserve_unknown_enum2.proto
-      google/protobuf/unittest_proto3.proto
-      google/protobuf/unittest_proto3_arena.proto
-      google/protobuf/unittest_proto3_arena_lite.proto
-      google/protobuf/unittest_proto3_lite.proto
+      google/protobuf/unittest_lazy_dependencies_custom_option.proto
+      google/protobuf/unittest_drop_unknown_fields.proto
+      google/protobuf/map_unittest.proto
       google/protobuf/unittest_well_known_types.proto
+      google/protobuf/unittest_enormous_descriptor.proto
+      google/protobuf/unittest_embed_optimize_for.proto
+      google/protobuf/unittest_arena.proto
+      google/protobuf/unittest_preserve_unknown_enum.proto
+      google/protobuf/util/message_differencer_unittest.proto
+      google/protobuf/unittest_lite.proto
+      google/protobuf/unittest_proto3_arena.proto
+      google/protobuf/unittest_proto3.proto
+      google/protobuf/unittest_import.proto
+      google/protobuf/unittest_no_generic_services.proto
+      google/protobuf/unittest_proto3_optional.proto
+      google/protobuf/unittest_import_public.proto
+      google/protobuf/unittest.proto
+      google/protobuf/unittest_mset_wire_format.proto
+      google/protobuf/unittest_selfreferential_options.proto
+      google/protobuf/unittest_empty.proto
+      google/protobuf/unittest_import_public_lite.proto
+      google/protobuf/map_lite_unittest.proto
+      google/protobuf/unittest_mset.proto
+      google/protobuf/unittest_import_lite.proto
+      google/protobuf/unittest_lazy_dependencies.proto
+      google/protobuf/unittest_proto3_lite.proto
+      google/protobuf/unittest_proto3_arena_lite.proto
+      google/protobuf/unittest_lite_imports_nonlite.proto
+      google/protobuf/unittest_lazy_dependencies_enum.proto
+      google/protobuf/unittest_preserve_unknown_enum2.proto
+      google/protobuf/unittest_custom_options.proto
       google/protobuf/util/internal/testdata/anys.proto
       google/protobuf/util/internal/testdata/books.proto
       google/protobuf/util/internal/testdata/default_value.proto
@@ -413,7 +421,7 @@ else()
         ${protobuf_source_dir}/src/google/protobuf/repeated_field_unittest.cc
         ${protobuf_source_dir}/src/google/protobuf/stubs/bytestream_unittest.cc
         ${protobuf_source_dir}/src/google/protobuf/stubs/common_unittest.cc
-        ${protobuf_source_dir}/src/google/protobuf/stubs/int128_unittest.cc
+        # ${protobuf_source_dir}/src/google/protobuf/stubs/int128_unittest.cc Not used.
         ${protobuf_source_dir}/src/google/protobuf/stubs/status_test.cc
         ${protobuf_source_dir}/src/google/protobuf/stubs/statusor_test.cc
         ${protobuf_source_dir}/src/google/protobuf/stubs/stringpiece_unittest.cc
