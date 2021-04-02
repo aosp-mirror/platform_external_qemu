@@ -599,7 +599,10 @@ void cuda_copy_decoded_frame(void* privData,
     NVDEC_API_CALL(cuGraphicsUnregisterResource(CudaRes));
 }
 
-void cuda_nv12_updater(void* privData, uint32_t type, uint32_t* textures) {
+void cuda_nv12_updater(void* privData,
+                       uint32_t type,
+                       uint32_t* textures,
+                       void* callerData) {
     constexpr uint32_t kFRAMEWORK_FORMAT_NV12 = 3;
     if (type != kFRAMEWORK_FORMAT_NV12) {
         return;
