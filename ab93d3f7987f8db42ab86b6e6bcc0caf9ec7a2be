@@ -16,6 +16,29 @@
       "message": "the host side codes is similar to cuttlefish/hostside\nI could not use that directly, unfortunately due to dependencies\nand build issue with cmake \n(the grpc stuff on build under android-grpc/ subdirectory, no idea why)\n\nbut the proto is shared with cuttlefish side, which seems to be accepted\nhappily by cmake.\n\nthis is a stop gap soln for now, and we do need to figure out how to\nhave a common code shared on the host side going forward.\n",
       "revId": "ab93d3f7987f8db42ab86b6e6bcc0caf9ec7a2be",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4a55074c_79d0e93f",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 2150,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-04-02T00:25:55Z",
+      "side": 1,
+      "message": "Since you cannot specify the id which it will appear in the guest, should we add \"null\" every time we add \"if\"? See line 2108 and 2113.",
+      "range": {
+        "startLine": 2150,
+        "startChar": 12,
+        "endLine": 2150,
+        "endChar": 33
+      },
+      "revId": "ab93d3f7987f8db42ab86b6e6bcc0caf9ec7a2be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
