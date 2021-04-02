@@ -16,6 +16,24 @@
       "message": "Hi Junfeng,\nCould you please confirm that renaming of the two \"device\" fields doesn\u0027t create any problems for your team. Thank you.",
       "revId": "0f6ce4cacc013742f9f86845cf52990c3acd8cf2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "161abd14_0d3dac13",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1546766
+      },
+      "writtenOn": "2021-04-02T05:09:01Z",
+      "side": 1,
+      "message": "ACID is not using the device/display fields for now so this change won\u0027t break anything on ACID side. Thanks for checking on this!",
+      "parentUuid": "dedc149b_73d5504a",
+      "revId": "0f6ce4cacc013742f9f86845cf52990c3acd8cf2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
