@@ -107,15 +107,16 @@ set(JSON_BuildTests OFF CACHE INTERNAL "")
 set(JSON_Install OFF CACHE INTERNAL "")
 add_subdirectory(json)
 
+
 if (EXISTS ${ANDROID_QEMU2_TOP_DIR}/../perfetto AND (NOT LINUX_AARCH64) AND (NOT CROSSCOMPILE))
     add_subdirectory(perfetto-tracing-only)
 else()
     add_subdirectory(perfetto-tracing-only-stub)
 endif()
 
+add_subdirectory(abseil-cpp)
 if (BLUETOOTH_EMULATION)
   message(STATUS "Including bluetooth emulation (and dependencies) from rootcanal")
-  add_subdirectory(abseil-cpp)
   add_subdirectory(libchrome)
   add_subdirectory(bluetooth)
 else()
