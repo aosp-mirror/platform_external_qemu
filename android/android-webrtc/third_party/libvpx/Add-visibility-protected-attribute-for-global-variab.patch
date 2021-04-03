@@ -1,0 +1,77 @@
+From 0d88e15454b632d92404dd6a7181c58d9985e2a2 Mon Sep 17 00:00:00 2001
+From: Rahul Chaudhry <rahulchaudhry@google.com>
+Date: Tue, 9 May 2017 12:00:58 -0700
+Subject: [PATCH] Add visibility="protected" attribute for global variables
+ referenced in asm files.
+
+During aosp builds with binutils-2.27, we're seeing linker error
+messages of this form:
+libvpx.a(subpixel_mmx.o): relocation R_386_GOTOFF against preemptible
+symbol vp8_bilinear_filters_x86_8 cannot be used when making a shared
+object
+
+subpixel_mmx.o is assembled from "vp8/common/x86/subpixel_mmx.asm".
+Other messages refer to symbol references from deblock_sse2.o and
+subpixel_sse2.o, also assembled from asm files.
+
+This change marks such symbols as having "protected" visibility. This
+satisfies the linker as the symbols are not preemptible from outside
+the shared library now, which I think is the original intent anyway.
+
+Change-Id: I2817f7a5f43041533d65ebf41aefd63f8581a452
+---
+ vp8/common/x86/filter_x86.c | 3 ++-
+ vpx_dsp/deblock.c           | 4 ++--
+ vpx_ports/mem.h             | 6 ++++++
+ 3 files changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/vp8/common/x86/filter_x86.c b/vp8/common/x86/filter_x86.c
+index 2405342f0..73435a7dd 100644
+--- a/vp8/common/x86/filter_x86.c
++++ b/vp8/common/x86/filter_x86.c
+@@ -17,7 +17,8 @@ DECLARE_ALIGNED(16, const short, vp8_bilinear_filters_x86_4[8][8]) = {
+   { 32, 32, 32, 32, 96, 96, 96, 96 }, { 16, 16, 16, 16, 112, 112, 112, 112 }
+ };
+ 
+-DECLARE_ALIGNED(16, const short, vp8_bilinear_filters_x86_8[8][16]) = {
++DECLARE_PROTECTED(DECLARE_ALIGNED(16, const short,
++                                  vp8_bilinear_filters_x86_8[8][16])) = {
+   { 128, 128, 128, 128, 128, 128, 128, 128, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { 112, 112, 112, 112, 112, 112, 112, 112, 16, 16, 16, 16, 16, 16, 16, 16 },
+   { 96, 96, 96, 96, 96, 96, 96, 96, 32, 32, 32, 32, 32, 32, 32, 32 },
+diff --git a/vpx_dsp/deblock.c b/vpx_dsp/deblock.c
+index a0db1e40c..3734ac251 100644
+--- a/vpx_dsp/deblock.c
++++ b/vpx_dsp/deblock.c
+@@ -10,9 +10,9 @@
+ #include <assert.h>
+ #include <stdlib.h>
+ #include "./vpx_dsp_rtcd.h"
+-#include "vpx/vpx_integer.h"
++#include "vpx_ports/mem.h"
+ 
+-const int16_t vpx_rv[] = {
++DECLARE_PROTECTED(const int16_t vpx_rv[]) = {
+   8,  5,  2,  2,  8,  12, 4,  9,  8,  3,  0,  3,  9,  0,  0,  0,  8,  3,  14,
+   4,  10, 1,  11, 14, 1,  14, 9,  6,  12, 11, 8,  6,  10, 0,  0,  8,  9,  0,
+   3,  14, 8,  11, 13, 4,  2,  9,  0,  3,  9,  6,  1,  2,  3,  14, 13, 1,  8,
+diff --git a/vpx_ports/mem.h b/vpx_ports/mem.h
+index bfef783b1..35751cef8 100644
+--- a/vpx_ports/mem.h
++++ b/vpx_ports/mem.h
+@@ -23,6 +23,12 @@
+ #define DECLARE_ALIGNED(n, typ, val) typ val
+ #endif
+ 
++#if defined(__GNUC__) && __GNUC__ >= 4 && !defined(_WIN32)
++#define DECLARE_PROTECTED(decl) decl __attribute__((visibility("protected")))
++#else
++#define DECLARE_PROTECTED(decl) decl
++#endif
++
+ #if HAVE_NEON && defined(_MSC_VER)
+ #define __builtin_prefetch(x)
+ #endif
+-- 
+2.15.1
+

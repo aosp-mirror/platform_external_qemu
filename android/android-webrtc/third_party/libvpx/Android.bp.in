@@ -1,0 +1,83 @@
+cc_library_static {
+    name: "libvpx",
+    vendor_available: true,
+
+    arch: {
+        arm: {
+            // Clang arm assembler cannot compile libvpx .S files yet.
+            clang_asflags: ["-no-integrated-as"],
+
+            // Want arm, not thumb, optimized
+            instruction_set: "arm",
+
+            srcs: libvpx_arm_c_srcs,
+            local_include_dirs: ["config/arm"],
+
+            neon: {
+                exclude_srcs: libvpx_arm_neon_exclude_c_srcs,
+                srcs: libvpx_arm_neon_c_srcs + libvpx_arm_neon_asm_srcs,
+                local_include_dirs: ["config/arm-neon"],
+            },
+        },
+
+        arm64: {
+            srcs: libvpx_arm64_c_srcs,
+            local_include_dirs: ["config/arm64"],
+        },
+
+        mips: {
+            srcs: libvpx_mips32_c_srcs,
+            local_include_dirs: ["config/mips32"],
+
+            dspr2: {
+                exclude_srcs: libvpx_mips32_dspr2_exclude_c_srcs,
+                srcs: libvpx_mips32_dspr2_c_srcs,
+                local_include_dirs: ["config/mips32-dspr2"],
+            },
+
+            msa: {
+                exclude_srcs: libvpx_mips32_msa_exclude_c_srcs,
+                srcs: libvpx_mips32_msa_c_srcs,
+                local_include_dirs: ["config/mips32-msa"],
+            },
+        },
+
+        mips64: {
+            srcs: libvpx_mips64_c_srcs,
+            local_include_dirs: ["config/mips64"],
+
+            msa: {
+                exclude_srcs: libvpx_mips64_msa_exclude_c_srcs,
+                srcs: libvpx_mips64_msa_c_srcs,
+                local_include_dirs: ["config/mips64-msa"],
+            },
+        },
+
+        x86: {
+            srcs: libvpx_x86_c_srcs + libvpx_x86_asm_srcs,
+            local_include_dirs: ["config/x86"],
+        },
+
+        x86_64: {
+            //srcs: libvpx_x86_64_c_srcs + libvpx_x86_64_asm_srcs,
+            //local_include_dirs: ["config/x86_64"],
+            srcs: libvpx_generic_c_srcs,
+            local_include_dirs: ["config/generic"],
+        },
+    },
+
+    cflags: [
+        "-O3",
+        "-Wno-unused-parameter",
+    ],
+
+    export_include_dirs: ["libvpx"],
+
+    sanitize: {
+        cfi: true,
+        diag: {
+            cfi: true,
+        },
+        blacklist: "cfi_blacklist.txt",
+    },
+}
