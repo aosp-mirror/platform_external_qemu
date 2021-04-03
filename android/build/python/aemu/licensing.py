@@ -192,6 +192,8 @@ class Licensing(object):
             and (" " not in target)
             and (not target.startswith("-"))
             and ("NOTFOUND" not in target)
+            and (not target.startswith('webrtc'))
+            and (not target.startswith('absl'))
             and (target not in Licensing.common_local_libs)
         )
 
