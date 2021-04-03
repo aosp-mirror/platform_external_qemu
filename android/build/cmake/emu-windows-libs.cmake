@@ -37,6 +37,7 @@ set(WINDOWS_LIBS
     msdmo
     normaliz
     ole32
+    oleaut32
     powrprof
     propsys
     psapi
@@ -44,6 +45,7 @@ set(WINDOWS_LIBS
     setupapi
     shell32
     shlwapi
+    strmiids
     user32
     version
     wininet
