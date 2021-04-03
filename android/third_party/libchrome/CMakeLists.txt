@@ -600,6 +600,7 @@ if(LINUX_X86_64 OR LINUX_AARCH64)
   target_include_directories(
     libevent
     PUBLIC ${LIBCHROME_ROOT} ${LIBCHROME_ROOT}/base/third_party/libevent/compat
+           ${LIBCHROME_ROOT}/base/third_party/libevent
            ${LIBCHROME_ROOT}/base/third_party/libevent/linux)
   target_compile_options(libevent PRIVATE -Wno-implicit-function-declaration
                                           -Wno-int-conversion)

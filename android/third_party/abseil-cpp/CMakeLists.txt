@@ -25,7 +25,7 @@ list(APPEND CMAKE_MODULE_PATH
   ${ABSL_ROOT}/CMake
   ${ABSL_ROOT}/absl/copts
 )
-
+set(CMAKE_CXX_STANDARD 17)
 include(AbseilInstallDirs)
 include(CMakePackageConfigHelpers)
 include(AbseilDll)

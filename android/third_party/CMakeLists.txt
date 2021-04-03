@@ -57,7 +57,6 @@ if(OPTION_ASTC_TESTS)
   endforeach()
 endif()
 
-
 add_subdirectory(libusb)
 add_subdirectory(zlib)
 add_subdirectory(protobuf)
@@ -107,16 +106,23 @@ set(JSON_BuildTests OFF CACHE INTERNAL "")
 set(JSON_Install OFF CACHE INTERNAL "")
 add_subdirectory(json)
 
-if (EXISTS ${ANDROID_QEMU2_TOP_DIR}/../perfetto AND (NOT LINUX_AARCH64) AND (NOT CROSSCOMPILE))
-    add_subdirectory(perfetto-tracing-only)
+if(EXISTS ${ANDROID_QEMU2_TOP_DIR}/../perfetto AND (NOT LINUX_AARCH64)
+   AND (NOT CROSSCOMPILE))
+  add_subdirectory(perfetto-tracing-only)
 else()
-    add_subdirectory(perfetto-tracing-only-stub)
+  add_subdirectory(perfetto-tracing-only-stub)
 endif()
 
-if (BLUETOOTH_EMULATION)
-  message(STATUS "Including bluetooth emulation (and dependencies) from rootcanal")
-  add_subdirectory(abseil-cpp)
+add_subdirectory(abseil-cpp)
+
+# libchrome is needed for bluetooth/webrtc
+if(BLUETOOTH_EMULATION OR WEBRTC)
   add_subdirectory(libchrome)
+endif()
+
+if(BLUETOOTH_EMULATION)
+  message(
+    STATUS "Including bluetooth emulation (and dependencies) from rootcanal")
   add_subdirectory(bluetooth)
 else()
   message(STATUS "Bluetooth emulation disabled.")
