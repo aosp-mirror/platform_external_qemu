@@ -65,7 +65,7 @@ if(LINUX_X86_64)
   )
 else()
   set(WEBRTC
-      FALSE
+      TRUE
       CACHE
         BOOL
         "True if the emulator should be build with WEBRTC support. Defaults on for Linux"
