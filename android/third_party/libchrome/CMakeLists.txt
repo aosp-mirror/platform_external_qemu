@@ -576,34 +576,6 @@ if(LINUX_X86_64 OR LINUX_AARCH64)
         demangle.cc symbolize.cc)
   target_include_directories(symbolize PUBLIC ${LIBCHROME_ROOT}
                                               ${LIBCHROME_ROOT}/base/symbolize)
-
-  android_add_library(
-    TARGET libevent
-    LICENSE BSD-3-Clause
-    SOURCE_DIR ${LIBCHROME_ROOT}/base/third_party/libevent
-    SRC # cmake-format: sortable
-        buffer.c
-        epoll.c
-        evbuffer.c
-        evdns.c
-        event.c
-        event_tagging.c
-        evrpc.c
-        evutil.c
-        http.c
-        log.c
-        log.h
-        poll.c
-        select.c
-        signal.c
-        strlcpy.c)
-  target_include_directories(
-    libevent
-    PUBLIC ${LIBCHROME_ROOT} ${LIBCHROME_ROOT}/base/third_party/libevent/compat
-           ${LIBCHROME_ROOT}/base/third_party/libevent/linux)
-  target_compile_options(libevent PRIVATE -Wno-implicit-function-declaration
-                                          -Wno-int-conversion)
-  target_compile_definitions(libevent PRIVATE -DHAVE_CONFIG_H=1)
   # Workaround for our (old) linux headers.
   set_property(SOURCE ${LIBCHROME_ROOT}/base/rand_util_posix.cc
                PROPERTY COMPILE_DEFINITIONS OS_NACL=1)

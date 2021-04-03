@@ -14,7 +14,6 @@
 #include "emulator/webrtc/Switchboard.h"
 
 #include <api/scoped_refptr.h>            // for scoped_refptr
-#include <rtc_base/critical_section.h>    // for CritScope
 #include <rtc_base/logging.h>             // for Val, RTC_LOG
 #include <rtc_base/ref_counted_object.h>  // for RefCountedObject
 #include <map>                            // for map, operator==

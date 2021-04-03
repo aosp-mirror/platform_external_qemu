@@ -315,7 +315,7 @@ endfunction()
 #
 # ``TARGET`` The library target to generate.
 # ``INCLUDES`` Optional list of include paths to pass to nasm
-# ``SOURCES`` List of source files to be compiled.
+# ``SRC`` List of source files to be compiled.
 #
 # For example:
 #    android_nasm_compile(TARGET foo_asm INCLUDES /tmp/foo /tmp/more_foo SOURCES /tmp/bar /tmp/z)
@@ -327,7 +327,7 @@ function(android_nasm_compile)
   # Parse arguments
   set(options)
   set(oneValueArgs TARGET)
-  set(multiValueArgs INCLUDES SOURCES)
+  set(multiValueArgs INCLUDES SRC)
   cmake_parse_arguments(android_nasm_compile "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN})
 
@@ -342,13 +342,18 @@ function(android_nasm_compile)
     set(ASM_INC ${ASM_INC} -I ${INCLUDE})
   endforeach()
 
+  if (LINUX OR APPLE)
+      # Asan can report leaks in nasm..
+      set(NO_ASAN "ASAN_OPTIONS=detect_leaks=0")
+  endif()
+
   # Configure the nasm compile command.
   foreach(asm ${REGISTERED_SRC})
     get_filename_component(asm_base ${asm} NAME_WE)
     set(DST ${CMAKE_CURRENT_BINARY_DIR}/${asm_base}.o)
     add_custom_command(
       OUTPUT ${DST}
-      COMMAND ${nasm_EXECUTABLE} -f ${ANDROID_ASM_TYPE} -o ${DST} ${asm}
+      COMMAND ${NO_ASAN} ${nasm_EXECUTABLE} -f ${ANDROID_ASM_TYPE} -o ${DST} ${asm}
               ${ASM_INC}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       VERBATIM
@@ -487,7 +492,7 @@ function(_register_target)
       URL
       NOTICE
       SOURCE_DIR)
-  set(multiValueArgs SRC LINUX MSVC WINDOWS DARWIN POSIX)
+  set(multiValueArgs INCLUDES SRC LINUX MSVC WINDOWS DARWIN POSIX)
   cmake_parse_arguments(build "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN})
   if(NOT DEFINED build_TARGET)
@@ -1008,8 +1013,7 @@ function(protobuf_generate_with_plugin)
 
   if(NOT protobuf_generate_with_plugin_GENERATE_EXTENSIONS)
     if(protobuf_generate_with_plugin_LANGUAGE STREQUAL cpp)
-      set(protobuf_generate_with_plugin_GENERATE_EXTENSIONS
-          ${HEADERFILEEXTENSION} .pb.cc)
+        set(protobuf_generate_with_plugin_GENERATE_EXTENSIONS  ${protobuf_generate_with_plugin_HEADERFILEEXTENSION} .pb.cc)
     elseif(protobuf_generate_with_plugin_LANGUAGE STREQUAL python)
       set(protobuf_generate_with_plugin_GENERATE_EXTENSIONS _pb2.py)
     else()
@@ -1676,4 +1680,19 @@ function(android_crosvm_build DEP)
       "${CMAKE_CROSVM_HOST_PACKAGE_TOOLS_PATH}" "${CMAKE_CROSVM_BUILD_ENV_DIR}"
       "${CMAKE_CROSVM_GFXSTREAM_BUILD_DIR}" "${CMAKE_CROSVM_DIST_DIR}"
     DEPENDS ${DEP})
+endfunction()
+
+function(android_symlink TARGET SYMLINK WORKDIR)
+    file(MAKE_DIRECTORY ${WORKDIR})
+    if (WIN32 AND NOT CROSSCOMPILE)
+        # message("Creating symlink, mklink: ${WORKDIR}/${SYMLINK} -> ${TARGET}")
+        execute_process(
+            COMMAND mklink /d "${SYMLINK}" "${TARGET}"
+            WORKING_DIRECTORY ${WORKDIR})
+    else()
+        # message("Creating symlink, create_symlink: ${WORKDIR}/${SYMLINK} -> ${TARGET}")
+        execute_process(
+            COMMAND ${CMAKE_COMMAND} -E create_symlink "${TARGET}" "${SYMLINK}"
+            WORKING_DIRECTORY ${WORKDIR})
+    endif()
 endfunction()
