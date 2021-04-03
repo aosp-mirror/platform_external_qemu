@@ -18,6 +18,7 @@
 #include <api/peer_connection_interface.h>  // for PeerConnectionInterface
 #include <api/scoped_refptr.h>              // for scoped_refptr
 #include <stdint.h>                         // for uint32_t
+#include <condition_variable>               // for condition_variable
 #include <memory>                           // for unique_ptr, shared_ptr
 #include <string>                           // for string
 #include <unordered_map>                    // for unordered_map
