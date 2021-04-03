@@ -22,22 +22,27 @@ android_add_executable(
       emulator/webrtc/StandaloneConnection.cpp
       emulator/webrtc/Switchboard.cpp)
 
-android_target_compile_options(goldfish-webrtc-bridge darwin-x86_64
-                               PRIVATE "-fvisibility=hidden")
-android_target_compile_definitions(goldfish-webrtc-bridge linux-x86_64 PRIVATE
-                                   "-DWEBRTC_POSIX")
-android_target_compile_definitions(goldfish-webrtc-bridge windows_msvc-x86_64
-                                   PRIVATE "-DWEBRTC_WIN")
-android_target_compile_definitions(
-  goldfish-webrtc-bridge darwin-x86_64 PRIVATE "-DWEBRTC_MAC" "-DWEBRTC_POSIX"
-  "-D_GLIBCXX_USE_CXX11_ABI=0")
+# android_target_compile_options(goldfish-webrtc-bridge darwin-x86_64 PRIVATE
+# "-fvisibility=hidden")
+# android_target_compile_definitions(goldfish-webrtc-bridge linux-x86_64 PRIVATE
+# "-DWEBRTC_POSIX") android_target_compile_definitions(goldfish-webrtc-bridge
+# windows_msvc-x86_64 PRIVATE "-DWEBRTC_WIN")
+# android_target_compile_definitions( goldfish-webrtc-bridge darwin-x86_64
+# PRIVATE "-DWEBRTC_MAC" "-DWEBRTC_POSIX" "-D_GLIBCXX_USE_CXX11_ABI=0")
 
 # WARNING! We are linking against a large webrtc prebuilt. This archive has
 # everything needed for webrtc support This includes SSL, LIBYUV, etc.. Be very
 # careful linking any of the android emulator libraries against it
 target_link_libraries(
   goldfish-webrtc-bridge
-  PRIVATE WebRTC::WebRTC
+  PRIVATE webrtc_api_libjingle_peerconnection_api.headers
+          webrtc_api_libjingle_peerconnection_api
+          webrtc_pc_peerconnection
+          webrtc_api_create_peerconnection_factory
+          webrtc_api_audio_codecs_builtin_audio_decoder_factory
+          webrtc_api_audio_codecs_builtin_audio_encoder_factory
+          webrtc_api_video_codecs_builtin_video_decoder_factory
+          webrtc_api_video_codecs_builtin_video_encoder_factory
           Threads::Threads
           android-net
           android-emu
