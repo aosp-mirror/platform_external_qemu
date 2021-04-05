@@ -160,7 +160,7 @@ Image takeScreenshot(
                                     pixelBuffer.data());
             png_destroy_write_struct(&p, &pi);
             return Image((uint16_t)width, (uint16_t)height, nChannels,
-                         ImageFormat::PNG, pngData);
+                         ImageFormat::PNG, std::move(pngData));
         }
         case ImageFormat::RGB888: {
             if (nChannels == 4) {
