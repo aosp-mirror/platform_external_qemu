@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c74dafb6_d881cf81",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 750,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-04-05T21:18:28Z",
+      "side": 1,
+      "message": "What happens if \"the max amount of memory ever encountered\" is insufficient?",
+      "range": {
+        "startLine": 750,
+        "startChar": 15,
+        "endLine": 750,
+        "endChar": 51
+      },
+      "revId": "f607311f938e7de1fd379aa686facc2a0a534758",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
