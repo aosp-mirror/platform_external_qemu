@@ -86,6 +86,20 @@ extern   int guest_boot_completed;
 #include <string>                                     // for string, operator+
 #include <vector>                                     // for vector
 
+#include <execinfo.h>
+#include <stdio.h>
+
+void printCallStack() {
+    void* callstack[128];
+    int i, frames = backtrace(callstack, 128);
+    char** strs = backtrace_symbols(callstack, frames);
+    for (i = 0; i < frames; ++i) {
+        fprintf(stderr, "%s\n", strs[i]);
+    }
+    free(strs);
+}
+
+
 /* set to 1 for very verbose debugging */
 #define DEBUG 0
 
@@ -876,6 +890,7 @@ static bool need_skip_snapshot_save = false;
 
 static void set_skip_snapshot_save(bool skip) {
     need_skip_snapshot_save = skip;
+    printCallStack();
 }
 
 static bool is_snapshot_save_skipped() {
