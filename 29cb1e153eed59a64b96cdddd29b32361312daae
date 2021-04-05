@@ -16,6 +16,24 @@
       "message": "nit: unnecessary blank line.",
       "revId": "29cb1e153eed59a64b96cdddd29b32361312daae",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "eb25404c_be3ccbed",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-04-05T19:23:56Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "0443e146_ee071a2e",
+      "revId": "29cb1e153eed59a64b96cdddd29b32361312daae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
