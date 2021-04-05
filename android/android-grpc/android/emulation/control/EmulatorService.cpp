@@ -746,10 +746,16 @@ public:
         // Let's make a fast call to learn how many pixels we need to reserve.
         uint8_t* pixels;
         size_t cPixels = 0;
-        ScreenshotUtils::getScreenshot(request->display(), request->format(),
+        // PNG image size may vary between different calls, so we just use
+        // the max amount of memory ever encoutered and only make one call.
+        if (request->format() == ImageFormat_ImgFormat::ImageFormat_ImgFormat_PNG) {
+            cPixels = mMaxCPixels;
+        } else {
+            ScreenshotUtils::getScreenshot(request->display(), request->format(),
                                        rotation, newWidth, newHeight, pixels,
                                        &cPixels, &width, &height, rect);
-
+            mMaxCPixels = std::max(cPixels, mMaxCPixels);
+        }
         auto format = reply->mutable_format();
         format->set_format(request->format());
 
@@ -797,7 +803,7 @@ public:
         ScreenshotUtils::getScreenshot(request->display(), request->format(),
                                        rotation, newWidth, newHeight, pixels,
                                        &cPixels, &width, &height, rect);
-
+        reply->mutable_image()->resize(cPixels);
         // Update format information with the retrieved width, height.
         format->set_height(height);
         format->set_width(width);
@@ -1190,7 +1196,8 @@ private:
     Clipboard* mClipboard;
     Looper* mLooper;
     RingStreambuf
-            mLogcatBuffer;  // A ring buffer that tracks the logcat output.
+    mLogcatBuffer;  // A ring buffer that tracks the logcat output.
+    size_t mMaxCPixels = 0;
 
     static constexpr uint32_t k128KB = (128 * 1024) - 1;
     static constexpr uint16_t k5SecondsWait = 5 * 1000;
