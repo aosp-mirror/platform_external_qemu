@@ -230,8 +230,13 @@ android_gps_send_location(double latitude, double longitude,
     struct tm *pTm = gmtime(&ttTime);
     stralloc_add_format(rmcStr, ",%02d%02d%02d", pTm->tm_mday, pTm->tm_mon+1, (pTm->tm_year)%100);
 
-    // Magnetic variation, cksum (both bogus)
-    stralloc_add_format(rmcStr, ",0.0,W*47");
+    if(s_enable_gnssgrpcv1) {
+        // TODO: fix checksum
+        stralloc_add_format(rmcStr, ",,,W*47");
+    } else {
+        // Magnetic variation, cksum (both bogus)
+        stralloc_add_format(rmcStr, ",0.0,W*47");
+    }
 
     // Send it
     android_gps_send_nmea( stralloc_cstr(rmcStr) );
