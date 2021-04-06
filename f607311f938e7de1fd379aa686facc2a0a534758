@@ -118,6 +118,30 @@
       },
       "revId": "f607311f938e7de1fd379aa686facc2a0a534758",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e7baef8e_c85bcdf8",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 750,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-04-06T17:28:14Z",
+      "side": 1,
+      "message": "Before the regression, we didn\u0027t have this windows c style function argument that asks for a pixel buffer, takeScreenshot just returns an image object which contains the pixel. So it is a regression introduced by the optimization we have.",
+      "parentUuid": "e625302f_0c1de067",
+      "range": {
+        "startLine": 750,
+        "startChar": 15,
+        "endLine": 750,
+        "endChar": 51
+      },
+      "revId": "f607311f938e7de1fd379aa686facc2a0a534758",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
