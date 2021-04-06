@@ -22,6 +22,30 @@
       },
       "revId": "f607311f938e7de1fd379aa686facc2a0a534758",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c5ca6ff2_8a0d5895",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 750,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-04-06T16:22:08Z",
+      "side": 1,
+      "message": "The screenshot operation will fail but not crash the program if the max amount of memory ever encountered\" is insufficient. \n\nI think an alternative is to call ScreenCapturer::takeScreenshot directly from EmulatorService. So we will copy over the returned img to pixels in EmulatorService without using the ScreenUtils::gettScreenshot() and resize the pixels if necessary based on the returned image. Code will be less clean but it will probably make sure it always work.",
+      "parentUuid": "c74dafb6_d881cf81",
+      "range": {
+        "startLine": 750,
+        "startChar": 15,
+        "endLine": 750,
+        "endChar": 51
+      },
+      "revId": "f607311f938e7de1fd379aa686facc2a0a534758",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
