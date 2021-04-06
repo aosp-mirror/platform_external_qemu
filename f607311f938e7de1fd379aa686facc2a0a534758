@@ -142,6 +142,30 @@
       },
       "revId": "f607311f938e7de1fd379aa686facc2a0a534758",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "257681a9_f25e9bd9",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 750,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-04-06T17:30:54Z",
+      "side": 1,
+      "message": "This optimization is good for RGB888 and RGBA8888 formats but not for PNG. Should we go to the old code for PNG?",
+      "parentUuid": "e7baef8e_c85bcdf8",
+      "range": {
+        "startLine": 750,
+        "startChar": 15,
+        "endLine": 750,
+        "endChar": 51
+      },
+      "revId": "f607311f938e7de1fd379aa686facc2a0a534758",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
