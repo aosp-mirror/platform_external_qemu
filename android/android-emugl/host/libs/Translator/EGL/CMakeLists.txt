@@ -13,6 +13,7 @@ android_add_library(
       EglThreadInfo.cpp
       EglValidate.cpp
       EglWindowSurface.cpp
+      ShaderCache.cpp
       ThreadInfo.cpp
   DARWIN EglOsApi_darwin.cpp EglOsApi_egl.cpp MacNative.m
          MacPixelFormatsAttribs.m

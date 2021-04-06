@@ -16,9 +16,10 @@
 
 #include "EglOsApi.h"
 
-#include "android/base/system/System.h"
 #include "GLcommon/GLLibrary.h"
 #include "OpenglCodecCommon/ErrorLog.h"
+#include "ShaderCache.h"
+#include "android/base/system/System.h"
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/misc.h"
 #include "emugl/common/shared_library.h"
@@ -69,16 +70,13 @@ static const char* kGLES2LibName = "libGLESv2.dylib";
 
 // List of EGL functions of interest to probe with GetProcAddress()
 #define LIST_EGL_FUNCTIONS(X)                                                  \
-    X(EGLBoolean, eglGetProcAddress,                                           \
-      (const char* procname))                                                  \
-    X(const char*, eglQueryString,                                             \
-      (EGLDisplay dpy, EGLint id))                                             \
-    X(EGLDisplay, eglGetPlatformDisplay,                                    \
-      (EGLenum platform, void *native_display, const EGLAttrib *attrib_list))  \
+    X(EGLBoolean, eglGetProcAddress, (const char* procname))                   \
+    X(const char*, eglQueryString, (EGLDisplay dpy, EGLint id))                \
+    X(EGLDisplay, eglGetPlatformDisplay,                                       \
+      (EGLenum platform, void* native_display, const EGLAttrib* attrib_list))  \
     X(EGLDisplay, eglGetPlatformDisplayEXT,                                    \
-      (EGLenum platform, void *native_display, const EGLint *attrib_list))     \
-    X(EGLBoolean, eglBindAPI,                                    \
-      (EGLenum api)) \
+      (EGLenum platform, void* native_display, const EGLint* attrib_list))     \
+    X(EGLBoolean, eglBindAPI, (EGLenum api))                                   \
     X(EGLBoolean, eglChooseConfig,                                             \
       (EGLDisplay display, EGLint const* attrib_list, EGLConfig* configs,      \
        EGLint config_size, EGLint* num_config))                                \
@@ -103,8 +101,10 @@ static const char* kGLES2LibName = "libGLESv2.dylib";
     X(EGLSurface, eglCreateWindowSurface,                                      \
       (EGLDisplay display, EGLConfig config,                                   \
        EGLNativeWindowType native_window, EGLint const* attrib_list))          \
-    X(EGLBoolean, eglSwapInterval,                                             \
-      (EGLDisplay display, EGLint interval))                                   \
+    X(EGLBoolean, eglSwapInterval, (EGLDisplay display, EGLint interval))      \
+    X(void, eglSetBlobCacheFuncsANDROID,                                       \
+      (EGLDisplay display, EGLSetBlobFuncANDROID set,                          \
+       EGLGetBlobFuncANDROID get))
 
 using android::base::System;
 
@@ -324,6 +324,11 @@ EglOsEglDisplay::EglOsEglDisplay() {
     if (mHeadless) mGlxDisplay = nullptr;
     else mGlxDisplay = XOpenDisplay(0);
 #endif // __linux__
+
+    if (clientExts != nullptr &&
+        emugl::hasExtension(clientExts, "EGL_ANDROID_blob_cache")) {
+        mDispatcher.eglSetBlobCacheFuncsANDROID(mDisplay, SetBlob, GetBlob);
+    }
 };
 
 EglOsEglDisplay::~EglOsEglDisplay() {
