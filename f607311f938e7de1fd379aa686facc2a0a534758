@@ -70,6 +70,30 @@
       },
       "revId": "f607311f938e7de1fd379aa686facc2a0a534758",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "23453c3c_905eccc2",
+        "filename": "android/android-grpc/android/emulation/control/EmulatorService.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 750,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-04-06T17:16:55Z",
+      "side": 1,
+      "message": "Maybe just allocate use width * height * 4 which is not actually too bad so we know for sure it\u0027s gonna be enough.",
+      "parentUuid": "53d2860d_d4e76c04",
+      "range": {
+        "startLine": 750,
+        "startChar": 15,
+        "endLine": 750,
+        "endChar": 51
+      },
+      "revId": "f607311f938e7de1fd379aa686facc2a0a534758",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
