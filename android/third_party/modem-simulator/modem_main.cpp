@@ -242,9 +242,20 @@ void process_msgs() {
             DD("quit now");
             break;
         }
+
+        const bool isRadioOff = !(!modem_simulators.empty() && modem_simulators[0]->IsRadioOn());
+
         if (msg.type == MODEM_MSG_SMS) {
+            if (isRadioOff)
+                continue;
             s_channel_monitor->SendUnsolicitedCommand(msg.sdata);
         } else if (msg.type == MODEM_MSG_CALL) {
+            if (isRadioOff) {
+                if (s_notify_call_back) {
+                    s_notify_call_back(s_notify_user_data, 0);
+                }
+                continue;
+            }
             if (!s_current_call_monitor_sock->IsOpen()) {
                 std::thread t1(&start_calling_thread, msg.sdata);
                 t1.detach();
