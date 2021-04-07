@@ -39,9 +39,9 @@ struct ModemMessage {
     std::string sdata;
 };
 
-void send_sms_msg(std::string msg);
+int send_sms_msg(std::string msg);
 
-void receive_inbound_call(std::string number);
+int receive_inbound_call(std::string number);
 
 void disconnect_call(std::string number);
 
