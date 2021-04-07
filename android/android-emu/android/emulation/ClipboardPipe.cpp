@@ -168,9 +168,8 @@ void ClipboardPipe::wakeGuestIfNeeded() {
 }
 
 void ClipboardPipe::wakeGuestIfNeededLocked() {
-    if (sEnabled && mWakeOnRead && mGuestWriteState.hasData()) {
+    if (sEnabled && mGuestWriteState.hasData()) {
         signalWake(PIPE_WAKE_READ);
-        mWakeOnRead = false;
     }
 }
 
