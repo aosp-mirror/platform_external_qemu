@@ -58,11 +58,24 @@ using MessageChannel = android::base::MessageChannel<ModemMessage, kCapacity>;
 static MessageChannel s_msg_channel;
 static bool s_stop_requested = false;
 
+enum ACallOpResult {
+    A_CALL_OP_OK = 0,
+    A_CALL_NUMBER_NOT_FOUND = -1,
+    A_CALL_EXCEED_MAX_NUM = -2,
+    A_CALL_RADIO_OFF = -3,
+};
+
+
+static bool isRadioOff();
+
 void queue_modem_message(ModemMessage msg) {
     s_msg_channel.send(msg);
 }
 
 void send_sms_msg(std::string msg) {
+    if (isRadioOff()) {
+        return;
+    }
     ModemMessage mymsg;
     mymsg.type = MODEM_MSG_SMS;
     mymsg.sdata = msg;
@@ -70,7 +83,11 @@ void send_sms_msg(std::string msg) {
     s_msg_channel.send(mymsg);
 }
 
-void receive_inbound_call(std::string number) {
+int receive_inbound_call(std::string number) {
+    if (isRadioOff()) {
+        return ACallOpResult::A_CALL_RADIO_OFF;
+    }
+
     ModemMessage mymsg;
     mymsg.type = MODEM_MSG_CALL;
     std::string ss("REM0");
@@ -82,6 +99,7 @@ void receive_inbound_call(std::string number) {
     mymsg.sdata = ss;
     DD("inbound call from %s", number.c_str());
     s_msg_channel.send(mymsg);
+    return ACallOpResult::A_CALL_OP_OK;
 }
 
 void disconnect_call(std::string number) {
@@ -188,6 +206,10 @@ static ChannelMonitor* s_channel_monitor = nullptr;
 static cuttlefish::SharedFD s_one_shot_monitor_sock;
 static cuttlefish::SharedFD s_current_call_monitor_sock;
 
+static bool isRadioOff() {
+   return !(!modem_simulators.empty() && modem_simulators[0]->IsRadioOn());
+}
+
 void start_calling_thread(std::string ss) {
     // connect and send message
     s_current_call_monitor_sock =
@@ -242,6 +264,7 @@ void process_msgs() {
             DD("quit now");
             break;
         }
+
         if (msg.type == MODEM_MSG_SMS) {
             s_channel_monitor->SendUnsolicitedCommand(msg.sdata);
         } else if (msg.type == MODEM_MSG_CALL) {
