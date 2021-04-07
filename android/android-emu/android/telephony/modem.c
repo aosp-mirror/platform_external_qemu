@@ -506,11 +506,13 @@ amodem_receive_sms( AModem  modem, SmsPDU  sms )
     }
 }
 
+/* this is only used in modem-lib, safe to reset out buf */
 const char* amodem_sms_to_string(AModem modem, SmsPDU sms) {
 #define SMS_UNSOL_HEADER_2 "+CMT: 0\r"
     int len, max;
     char* p;
 
+    modem->out_size = 0;
     strcpy(modem->out_buff, SMS_UNSOL_HEADER_2);
     p = modem->out_buff + (sizeof(SMS_UNSOL_HEADER_2) - 1);
     max = sizeof(modem->out_buff) - 2 - (sizeof(SMS_UNSOL_HEADER_2) - 1);
@@ -2401,6 +2403,14 @@ amodem_addTimeUpdate( AModem  modem )
              (tzdiff >= 0) ? '+' : '-', (tzdiff >= 0 ? tzdiff : -tzdiff),
              (isdst > 0),
              tzname );
+}
+
+/* this is only used in modem-lib, safe to reset out buf */
+const char* amodem_get_time_update_string() {
+    AModem  modem = _android_modem;
+    modem->out_size = 0;
+    amodem_addTimeUpdate(modem);
+    return modem->out_buff;
 }
 
 static const char*

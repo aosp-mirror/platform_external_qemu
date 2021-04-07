@@ -25,6 +25,7 @@
 #include "android/globals.h"
 #include "android/telephony/modem.h"
 #include "android/utils/system.h"
+#include "android/utils/timezone.h"
 // from cuttlefish modem-simulator library
 #include "modem_simulator.h"
 
@@ -235,6 +236,13 @@ void process_msgs() {
             sleep_ms(100);
             continue;
         }
+        static bool doneUpdatingTime = false;
+        if (false && !doneUpdatingTime) {
+            doneUpdatingTime = true;
+            std::string timestring(amodem_get_time_update_string());
+            s_channel_monitor->SendUnsolicitedCommand(timestring);
+            fprintf(stderr, "send from emulator %s\n", timestring.c_str());
+        }
         DD("waiting for new messages ...");
         ModemMessage msg;
         s_msg_channel.receive(&msg);
@@ -391,6 +399,8 @@ int start_android_modem_simulator_detached(bool& isIpv4) {
 
     int actual_guest_server_port = start_android_modem_guest_server(isIpv4);
 
+    char buffer[1024];
+    bufprint_zoneinfo_timezone(buffer, buffer+sizeof(buffer));
     {
         int32_t modem_id = 0;
 
@@ -409,6 +419,8 @@ int start_android_modem_simulator_detached(bool& isIpv4) {
             }
             modem_simulator->Initialize(std::move(channel_monitor));
 
+            modem_simulator->SetTimeZone(buffer);
+            fprintf(stderr, "emulator: setting timezone %s\n", buffer);
             modem_simulators.push_back(modem_simulator);
 
             modem_id++;

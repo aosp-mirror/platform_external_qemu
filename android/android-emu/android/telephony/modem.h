@@ -49,6 +49,7 @@ extern void         amodem_receive_sms( AModem  modem, SmsPDU  pdu );
 /* convert the pdu to c-string; returns NULL if failed */
 extern const char* amodem_sms_to_string(AModem modem, SmsPDU pdu);
 
+extern const char* amodem_get_time_update_string();
 /** RADIO STATE
  **/
 typedef enum {
