@@ -23,8 +23,7 @@ void ModemSimulator::receive_sms(AModem modem, SmsPDU sms) {
 
 int ModemSimulator::add_inbound_call(AModem modem, const char* args) {
     (void)modem;
-    cuttlefish::receive_inbound_call(std::string(args));
-    return 0;
+    return cuttlefish::receive_inbound_call(std::string(args));
 }
 
 int ModemSimulator::disconnect_call(AModem modem, const char* args) {
