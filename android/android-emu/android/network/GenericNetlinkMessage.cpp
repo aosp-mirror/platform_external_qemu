@@ -136,9 +136,9 @@ GenericNetlinkMessage::GenericNetlinkMessage(uint32_t port,
                                              uint8_t cmd,
                                              uint8_t version)
     : mData(NLMSG_HDRLEN + GENL_HDRLEN, 0), mUserHeaderLen(hdrlen) {
-    LOG(VERBOSE) << "Generic netlink header type=" << family
+    LOG(DEBUG) << "Generic netlink header type=" << family
                  << ", flags=" << flags << ", pid=" << port << ", seq=" << seq
-                 << "cmd =" << (int)cmd << ", version =" << (int)version;
+                 << ", cmd =" << (int)cmd << ", version =" << (int)version;
     putHeader(port, seq, family, flags);
     auto* hdr = genericNetlinkHeader();
     hdr->cmd = cmd;
@@ -248,7 +248,7 @@ bool GenericNetlinkMessage::getAttribute(int attributeId,
             reinterpret_cast<const struct nlattr*>(userData());
     struct nlattr* src = nla_find(head, userDataLen(), attributeId);
     if (!src) {
-        LOG(VERBOSE) << "NLA attribute " << attributeId << "is not found";
+        LOG(DEBUG) << "NLA attribute " << attributeId << "is not found";
     }
     return src && dst && nla_memcpy(dst, src, size) > 0;
 }
@@ -259,7 +259,7 @@ struct iovec GenericNetlinkMessage::getAttribute(int attributeId) const {
             reinterpret_cast<const struct nlattr*>(userData());
     struct nlattr* src = nla_find(head, userDataLen(), attributeId);
     if (!src) {
-        LOG(VERBOSE) << "NLA attribute " << attributeId << "is not found";
+        LOG(DEBUG) << "NLA attribute " << attributeId << "is not found";
     } else {
         iov.iov_base = nla_data(src),
         iov.iov_len = static_cast<size_t>(nla_len(src));
