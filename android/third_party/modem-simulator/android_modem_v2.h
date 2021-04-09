@@ -30,6 +30,8 @@ extern int amodem_disconnect_call_vx(AModem modem, const char* args);
 
 extern int amodem_update_call_vx(AModem modem, const char* args, int state);
 
+extern ACall amodem_find_call_by_number_vx(AModem modem, const char* args);
+
 extern void amodem_set_data_network_type_vx(AModem modem,
                                             ADataNetworkType type);
 

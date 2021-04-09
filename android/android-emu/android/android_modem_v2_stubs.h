@@ -19,6 +19,9 @@
 static inline int amodem_add_inbound_call_vx(AModem modem, const char* args) { return 0; }
 static inline void amodem_set_signal_strength_profile_vx(AModem modem, int quality) { }
 static inline void amodem_receive_sms_vx(AModem modem, SmsPDU sms) { }
+extern ACall amodem_find_call_by_number_vx(AModem modem, const char* args) {
+    return NULL;
+}
 static inline int amodem_disconnect_call_vx(AModem modem, const char* args) { return 0; }
 static inline int amodem_update_call_vx(AModem modem, const char* args, int state) { return 0; }
 static inline void amodem_set_data_registration_vx(AModem modem, ARegistrationState state) { }
