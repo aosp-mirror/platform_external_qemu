@@ -80,8 +80,8 @@ Image takeScreenshot(
                            uint8_t** frameBufferData)> getFrameBuffer,
         int displayId = 0,
         int desiredWidth = 0,
-        int desiredHeight = 0
-        );
+        int desiredHeight = 0,
+        SkinRect rect = {{0, 0}, {0, 0}});
 
 bool captureScreenshot(android::base::StringView outputDirectoryPath,
                        std::string* outputFilepath = NULL,

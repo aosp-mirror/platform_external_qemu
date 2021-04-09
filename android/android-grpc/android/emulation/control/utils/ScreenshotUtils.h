@@ -82,7 +82,6 @@ public:
     // partial screen.
     // - |rect|  represents a rectangle within the screen defined by
     // desiredWidth and desiredHeight.
-    // Todo (wdu@) snipping with PNG format is not supported yet.
     static bool getScreenshot(int displayId,
                               const ImageFormat_ImgFormat format,
                               const Rotation_SkinRotation rotation,
@@ -93,6 +92,20 @@ public:
                               uint32_t* finalWidth,
                               uint32_t* finalHeight,
                               SkinRect rect = {{0, 0}, {0, 0}});
+
+    // Takes a screenshot from the given display id
+    // in the desired format, rotation, width, height and
+    // return the captured image with the final computed width
+    // and height.
+    static android::emulation::Image getScreenshot(
+            int displayId,
+            const ImageFormat_ImgFormat format,
+            const Rotation_SkinRotation rotation,
+            const uint32_t desiredWidth,
+            const uint32_t desiredHeight,
+            uint32_t* finalWidth,
+            uint32_t* finalHeight,
+            SkinRect rect = {{0, 0}, {0, 0}});
 };
 
 }  // namespace control

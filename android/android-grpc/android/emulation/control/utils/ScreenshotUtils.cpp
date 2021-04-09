@@ -170,55 +170,42 @@ bool ScreenshotUtils::getScreenshot(int displayId,
         android::emulation::Image img = android::emulation::takeScreenshot(
                 desiredFormat, desiredRotation, renderer.get(),
                 getConsoleAgents()->display->getFrameBuffer, displayId,
-                desiredWidth, desiredHeight);
+                desiredWidth, desiredHeight, rect);
         if (img.getPixelCount() > *cPixels) {
             *cPixels = img.getPixelCount();
             return false;
         }
-
-        bool useSnipping = rect.size.w != 0 && rect.size.h != 0;
-        if (useSnipping) {
-            int nChannel = (format == ImageFormat::RGBA8888) ? 4 : 3;
-            *cPixels = nChannel * rect.size.w * rect.size.h;
-            *finalWidth = rect.size.w;
-            *finalHeight = rect.size.h;
-
-            if (format == ImageFormat::PNG) {
-                LOG(ERROR) << "getScreenshot doesn't support PNG format when "
-                              "using snipping.";
-                return false;
-            }
-            if (desiredWidth != img.getWidth()) {
-                rect.size.w = rect.size.w * img.getWidth() / desiredWidth;
-                rect.pos.x = rect.pos.x * img.getWidth() / desiredWidth;
-            }
-            if (desiredHeight != img.getHeight()) {
-                rect.size.h = rect.size.h * img.getHeight() / desiredHeight;
-                rect.pos.y = rect.pos.y * img.getHeight() / desiredHeight;
-            }
-            // Copy a partial screenshot
-            int copied = 0;
-            int bytesPerLine = img.getWidth() * nChannel;
-            int cursor = rect.pos.y * bytesPerLine + rect.pos.x;
-            uint8_t* src = pixels;
-            uint8_t* dst = img.getPixelBuf() + cursor;
-            for (int h = rect.pos.y;
-                 h < std::min(rect.pos.y + rect.size.h, (int)img.getHeight());
-                 h++) {
-                memcpy(src, dst, rect.size.w * nChannel);
-                src += rect.size.w * nChannel;
-                dst += bytesPerLine;
-            }
-        } else {
-            *cPixels = img.getPixelCount();
-            memcpy(pixels, img.getPixelBuf(), *cPixels);
-            *finalWidth = img.getWidth();
-            *finalHeight = img.getHeight();
-        }
+        *cPixels = img.getPixelCount();
+        memcpy(pixels, img.getPixelBuf(), *cPixels);
+        *finalWidth = img.getWidth();
+        *finalHeight = img.getHeight();
     }
 
     return true;
 }
+
+android::emulation::Image ScreenshotUtils::getScreenshot(
+        int displayId,
+        const ImageFormat_ImgFormat format,
+        const Rotation_SkinRotation rotation,
+        const uint32_t desiredWidth,
+        const uint32_t desiredHeight,
+        uint32_t* finalWidth,
+        uint32_t* finalHeight,
+        SkinRect rect) {
+    const auto& renderer = android_getOpenglesRenderer();
+    android::emulation::ImageFormat desiredFormat =
+            ScreenshotUtils::translate(format);
+    SkinRotation desiredRotation = ScreenshotUtils::translate(rotation);
+    auto img = android::emulation::takeScreenshot(
+            desiredFormat, desiredRotation, renderer.get(),
+            getConsoleAgents()->display->getFrameBuffer, displayId,
+            desiredWidth, desiredHeight, rect);
+    *finalWidth = img.getWidth();
+    *finalHeight = img.getHeight();
+    return img;
+}
+
 }  // namespace control
 }  // namespace emulation
 }  // namespace android
