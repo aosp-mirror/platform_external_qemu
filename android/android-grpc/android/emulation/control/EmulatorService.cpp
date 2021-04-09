@@ -734,12 +734,26 @@ public:
             return Status::CANCELLED;
         }
 
-        // Let's make a fast call to learn how many pixels we need to reserve.
         uint8_t* pixels;
         size_t cPixels = 0;
-        ScreenshotUtils::getScreenshot(request->display(), request->format(),
-                                       rotation, newWidth, newHeight, pixels,
-                                       &cPixels, &width, &height, rect);
+        bool isPNG = request->format() ==
+                     ImageFormat_ImgFormat::ImageFormat_ImgFormat_PNG;
+        android::emulation::Image img(
+                0, 0, 0, android::emulation::ImageFormat::RGB888, {});
+        // For png format, only make one getScreenshot call because the cPixels
+        // value can change for each call.
+        if (isPNG) {
+            img = ScreenshotUtils::getScreenshot(
+                    request->display(), request->format(), rotation, newWidth,
+                    newHeight, &width, &height, rect);
+            cPixels = img.getPixelCount();
+        } else {  // Let's make a fast call to learn how many pixels we need to
+                  // reserve.
+
+            ScreenshotUtils::getScreenshot(
+                    request->display(), request->format(), rotation, newWidth,
+                    newHeight, pixels, &cPixels, &width, &height, rect);
+        }
 
         auto format = reply->mutable_format();
         format->set_format(request->format());
@@ -785,10 +799,13 @@ public:
         }
 
         Stopwatch sw;
-        ScreenshotUtils::getScreenshot(request->display(), request->format(),
-                                       rotation, newWidth, newHeight, pixels,
-                                       &cPixels, &width, &height, rect);
-
+        if (isPNG) {
+            memcpy(pixels, img.getPixelBuf(), cPixels);
+        } else {
+            ScreenshotUtils::getScreenshot(
+                    request->display(), request->format(), rotation, newWidth,
+                    newHeight, pixels, &cPixels, &width, &height, rect);
+        }
         // Update format information with the retrieved width, height.
         format->set_height(height);
         format->set_width(width);
