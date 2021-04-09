@@ -15,6 +15,7 @@
 */
 #include "ColorBuffer.h"
 
+#include "android/base/Log.h"
 #include "android/base/memory/ScopedPtr.h"
 
 #include "DispatchTables.h"
@@ -96,21 +97,24 @@ static GLenum sGetUnsizedColorBufferFormat(GLenum format) {
         case GL_RGB10_A2:
         case GL_RGBA16F:
             return GL_RGBA;
+        case GL_BGRA8_EXT:
+        case GL_BGR10_A2_ANGLEX:
+            return GL_BGRA_EXT;
         default: // already unsized
             return format;
     }
 }
 
-static bool sGetFormatParameters(
-    GLint internalFormat,
-    GLenum* texFormat,
-    GLenum* pixelType,
-    int* bytesPerPixel,
-    GLint* sizedInternalFormat,
-    bool* isBlob) {
+static bool sGetFormatParameters(GLint* internalFormat,
+                                 GLenum* texFormat,
+                                 GLenum* pixelType,
+                                 int* bytesPerPixel,
+                                 GLint* sizedInternalFormat,
+                                 bool* isBlob) {
+    DCHECK(internalFormat != nullptr);
     *isBlob = false;
 
-    switch (internalFormat) {
+    switch (*internalFormat) {
         case GL_RGB:
         case GL_RGB8:
             *texFormat = GL_RGB;
@@ -170,6 +174,15 @@ static bool sGetFormatParameters(
             *bytesPerPixel = 4;
             *sizedInternalFormat = GL_BGRA8_EXT;
             return true;
+        case GL_BGR10_A2_ANGLEX:
+            *texFormat = GL_RGBA;
+            *pixelType = GL_UNSIGNED_INT_2_10_10_10_REV;
+            *bytesPerPixel = 4;
+            *internalFormat = GL_RGB10_A2_EXT;
+            // GL_BGR10_A2_ANGLEX is actually not a valid GL format. We should
+            // replace it with a normal GL internal format instead.
+            *sizedInternalFormat = GL_BGR10_A2_ANGLEX;
+            return true;
         case GL_R8:
         case GL_RED:
             *texFormat = GL_RED;
@@ -185,8 +198,8 @@ static bool sGetFormatParameters(
             *sizedInternalFormat = GL_RG8;
             return true;
         default:
-            fprintf(stderr, "%s: Unknown format 0x%x\n",
-                    __func__, internalFormat);
+            fprintf(stderr, "%s: Unknown format 0x%x\n", __func__,
+                    *internalFormat);
             return false;
     }
 }
@@ -195,7 +208,7 @@ static bool sGetFormatParameters(
 ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  int p_width,
                                  int p_height,
-                                 GLenum p_internalFormat,
+                                 GLint p_internalFormat,
                                  FrameworkFormat p_frameworkFormat,
                                  HandleType hndl,
                                  Helper* helper,
@@ -206,11 +219,9 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     GLint p_sizedInternalFormat = GL_RGBA8;
     bool isBlob = false;;
 
-    if (!sGetFormatParameters(
-            p_internalFormat,
-            &texFormat, &pixelType, &bytesPerPixel,
-            &p_sizedInternalFormat,
-            &isBlob)) {
+    if (!sGetFormatParameters(&p_internalFormat, &texFormat, &pixelType,
+                              &bytesPerPixel, &p_sizedInternalFormat,
+                              &isBlob)) {
         fprintf(stderr, "ColorBuffer::create invalid format 0x%x\n",
                 p_internalFormat);
         return NULL;
@@ -252,6 +263,12 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // Swizzle B/R channel for BGR10_A2 images.
+    if (p_sizedInternalFormat == GL_BGR10_A2_ANGLEX) {
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_RED);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_BLUE);
+        cb->m_BRSwizzle = true;
+    }
 
     //
     // create another texture for that colorbuffer for blit
@@ -265,6 +282,12 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // Swizzle B/R channel for BGR10_A2 images.
+    if (p_sizedInternalFormat == GL_BGR10_A2_ANGLEX) {
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_RED);
+        s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_BLUE);
+        cb->m_BRSwizzle = true;
+    }
 
     cb->m_width = p_width;
     cb->m_height = p_height;
@@ -443,7 +466,8 @@ void ColorBuffer::reformat(GLint internalformat, GLenum type) {
     GLint sizedInternalFormat = GL_RGBA8;
     int bpp = 4;
     bool isBlob = false;
-    if (!sGetFormatParameters(internalformat, &texFormat, &pixelType, &bpp, &sizedInternalFormat, &isBlob)) {
+    if (!sGetFormatParameters(&internalformat, &texFormat, &pixelType, &bpp,
+                              &sizedInternalFormat, &isBlob)) {
         fprintf(stderr, "%s: WARNING: reformat failed. internal format: 0x%x\n",
                 __func__, internalformat);
     }
@@ -1014,8 +1038,13 @@ bool ColorBuffer::importMemory(
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    if (m_sizedInternalFormat == GL_BGRA8_EXT) {
-        s_gles2.glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, GL_RGBA8, m_width, m_height, m_memoryObject, 0);
+    if (m_sizedInternalFormat == GL_BGRA8_EXT ||
+        m_sizedInternalFormat == GL_BGR10_A2_ANGLEX) {
+        GLint internalFormat = m_sizedInternalFormat == GL_BGRA8_EXT
+                                       ? GL_RGBA8
+                                       : GL_RGB10_A2_EXT;
+        s_gles2.glTexStorageMem2DEXT(GL_TEXTURE_2D, 1, internalFormat, m_width,
+                                     m_height, m_memoryObject, 0);
         s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_RED);
         s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_BLUE);
         m_BRSwizzle = true;
