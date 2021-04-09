@@ -23,6 +23,10 @@ int ModemLegacy::add_inbound_call(AModem modem, const char* args) {
     return amodem_add_inbound_call(modem, args);
 }
 
+ACall ModemLegacy::find_call_by_number(AModem modem, const char* args) {
+    return amodem_find_call_by_number(modem, args);
+}
+
 int ModemLegacy::disconnect_call(AModem modem, const char* args) {
     return amodem_disconnect_call(modem, args);
 }
