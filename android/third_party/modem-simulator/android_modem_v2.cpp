@@ -34,6 +34,10 @@ void amodem_receive_sms_vx(AModem modem, SmsPDU sms) {
     s_modem->receive_sms(modem, sms);
 }
 
+ACall amodem_find_call_by_number_vx(AModem modem, const char* args) {
+    return s_modem->find_call_by_number(modem, args);
+}
+
 int amodem_add_inbound_call_vx(AModem modem, const char* args) {
     return s_modem->add_inbound_call(modem, args);
 }
