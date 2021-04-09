@@ -71,7 +71,8 @@ Image takeScreenshot(
                            uint8_t** frameBufferData)> getFrameBuffer,
         int displayId,
         int desiredWidth,
-        int desiredHeight) {
+        int desiredHeight,
+        SkinRect rect) {
     unsigned int nChannels = 4;
     unsigned int width;
     unsigned int height;
@@ -83,15 +84,16 @@ Image takeScreenshot(
             outputFormat = ImageFormat::RGB888;
         }
         size_t cPixels = 0;
-        if (renderer->getScreenshot(
-                    nChannels, &width, &height, pixelBuffer.data(), &cPixels,
-                    displayId, desiredWidth, desiredHeight, rotation) != 0) {
-            pixelBuffer.resize(cPixels);
-            renderer->getScreenshot(nChannels, &width, &height,
+        if (renderer->getScreenshot(nChannels, &width, &height,
                                     pixelBuffer.data(), &cPixels, displayId,
-                                    desiredWidth, desiredHeight, rotation);
+                                    desiredWidth, desiredHeight, rotation,
+                                    rect) != 0) {
+            pixelBuffer.resize(cPixels);
+            renderer->getScreenshot(
+                    nChannels, &width, &height, pixelBuffer.data(), &cPixels,
+                    displayId, desiredWidth, desiredHeight, rotation, rect);
         }
-    } else {
+    } else {  // when -gpu guest is used.
         unsigned char* pixels = nullptr;
         int bpp = 4;
         int lineSize = 0;
@@ -100,23 +102,39 @@ Image takeScreenshot(
             // unknown pixel buffer format
             return Image(0, 0, 0, ImageFormat::RGB888, {});
         }
+
         // -gpu guest usually gives us bpp=2
         // bpp=2 infers we are using rgb565
         // convert it to rgb888
         nChannels = bpp == 2 ? 3 : bpp;
         outputFormat = ImageFormat::RGB888;
+
+        bool useSnipping = rect.size.w != 0 && rect.size.h != 0;
+        if (useSnipping) {
+            if (desiredWidth != width) {
+                rect.size.w = rect.size.w * width / desiredWidth;
+                rect.pos.x = rect.pos.x * width / desiredWidth;
+            }
+            if (desiredHeight != height) {
+                rect.size.h = rect.size.h * height / desiredHeight;
+                rect.pos.y = rect.pos.y * height / desiredHeight;
+            }
+            width = rect.size.w;
+            height = rect.size.h;
+        }
+
         // Need to handle padding if lineSize != width * nChannels
         if ((lineSize != 0 && lineSize != width * nChannels) || bpp == 2) {
             pixelBuffer.resize(width * height * nChannels);
             unsigned char* src = pixels;
             unsigned char* dst = pixelBuffer.data();
-            for (int h = 0; h < height; h++) {
+            for (int h = rect.pos.y; h < rect.pos.y + height; h++) {
                 if (bpp != 2) {
-                    memcpy(dst, src, width * nChannels);
+                    memcpy(dst, src + rect.pos.x, width * nChannels);
                     dst += width * nChannels;
                 } else {
                     // rgb565, need convertion
-                    for (int w = 0; w < width; w++) {
+                    for (int w = rect.pos.x; w < rect.pos.x + width; w++) {
                         unsigned char r = src[w * 2 + 1] >> 3;
                         unsigned char g =
                                 (src[w * 2 + 1] & 7) << 3 | src[w * 2] >> 5;
@@ -133,9 +151,19 @@ Image takeScreenshot(
             }
             pixels = pixelBuffer.data();
         } else {
-            // Just copy the pixels to our buffer.
-            pixelBuffer.insert(pixelBuffer.end(), &pixels[0],
-                               &pixels[width * height * nChannels]);
+            if (useSnipping) {
+                unsigned char* src = pixels;
+                unsigned char* dst = pixelBuffer.data();
+                for (int h = rect.pos.y; h < rect.pos.y + height; h++) {
+                    memcpy(dst, src + rect.pos.x, width * nChannels);
+                    dst += width * nChannels;
+                    src += lineSize;
+                }
+            } else {
+                // Just copy the pixels to our buffer.
+                pixelBuffer.insert(pixelBuffer.end(), &pixels[0],
+                                   &pixels[width * height * nChannels]);
+            }
         }
     }
     // We only convert png/ RGBA8888 -> RBG888 at this time..
