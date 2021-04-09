@@ -22,6 +22,30 @@
       },
       "revId": "c193497cd5aa6a72fa6b35da8793754db8ef4ae9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2b04ae33_d8528369",
+        "filename": "android/third_party/modem-simulator/ModemSimulator.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-04-09T18:35:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df508a28_808f246e",
+      "range": {
+        "startLine": 43,
+        "startChar": 9,
+        "endLine": 43,
+        "endChar": 12
+      },
+      "revId": "c193497cd5aa6a72fa6b35da8793754db8ef4ae9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
