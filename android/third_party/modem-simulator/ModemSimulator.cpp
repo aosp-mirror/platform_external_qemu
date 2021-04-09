@@ -23,12 +23,32 @@ void ModemSimulator::receive_sms(AModem modem, SmsPDU sms) {
 
 int ModemSimulator::add_inbound_call(AModem modem, const char* args) {
     (void)modem;
-    return cuttlefish::receive_inbound_call(std::string(args));
+    if (!args)
+        return 0;
+    int res = cuttlefish::receive_inbound_call(std::string(args));
+    if (res == A_CALL_OP_OK) {
+        ACallRec rec;
+        snprintf(rec.number, sizeof(rec.number), "%s", args);
+        mCalls[std::string(args)] = rec;
+    }
+    return res;
+}
+
+ACall ModemSimulator::find_call_by_number(AModem, const char* args) {
+    auto iter = mCalls.find(std::string(args));
+    if (iter == mCalls.end()) {
+        return nullptr;
+    } else {
+        return &(iter->second);
+    }
 }
 
 int ModemSimulator::disconnect_call(AModem modem, const char* args) {
     (void)modem;
+    if (!args)
+        return 0;
     cuttlefish::disconnect_call(std::string(args));
+    mCalls.erase(std::string(args));
     return 0;
 }
 

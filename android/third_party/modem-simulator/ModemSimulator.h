@@ -13,6 +13,9 @@
 
 #include "ModemBase.h"
 
+#include <string>
+#include <unordered_map>
+
 namespace android {
 namespace modem {
 
@@ -26,6 +29,7 @@ public:
     virtual void receive_sms(AModem, SmsPDU) override;
     virtual int add_inbound_call(AModem, const char*) override;
     virtual int disconnect_call(AModem, const char*) override;
+    virtual ACall find_call_by_number(AModem, const char*) override;
     virtual int update_call(AModem, const char*, int) override;
     virtual void set_data_network_type(AModem, ADataNetworkType) override;
     virtual void set_signal_strength_profile(AModem, int) override;
@@ -34,6 +38,9 @@ public:
     virtual void set_notification_callback_vx(AModem modem,
                                               ModemCallback callbackFunc,
                                               void* userData) override;
+
+private:
+    std::unordered_map<std::string, ACallRec> mCalls;
 };
 
 }  // namespace modem
