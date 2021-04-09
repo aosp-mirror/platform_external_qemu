@@ -183,6 +183,29 @@ bool ScreenshotUtils::getScreenshot(int displayId,
 
     return true;
 }
+
+android::emulation::Image ScreenshotUtils::getScreenshot(
+        int displayId,
+        const ImageFormat_ImgFormat format,
+        const Rotation_SkinRotation rotation,
+        const uint32_t desiredWidth,
+        const uint32_t desiredHeight,
+        uint32_t* finalWidth,
+        uint32_t* finalHeight,
+        SkinRect rect) {
+    const auto& renderer = android_getOpenglesRenderer();
+    android::emulation::ImageFormat desiredFormat =
+            ScreenshotUtils::translate(format);
+    SkinRotation desiredRotation = ScreenshotUtils::translate(rotation);
+    auto img = android::emulation::takeScreenshot(
+            desiredFormat, desiredRotation, renderer.get(),
+            getConsoleAgents()->display->getFrameBuffer, displayId,
+            desiredWidth, desiredHeight, rect);
+    *finalWidth = img.getWidth();
+    *finalHeight = img.getHeight();
+    return img;
+}
+
 }  // namespace control
 }  // namespace emulation
 }  // namespace android
