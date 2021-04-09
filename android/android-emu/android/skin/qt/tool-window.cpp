@@ -1221,9 +1221,13 @@ static bool isPaneEnabled(ExtendedWindowPane pane) {
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         if (pane == PANE_IDX_DPAD || pane == PANE_IDX_BATTERY ||
-            pane == PANE_IDX_FINGER) {
+            pane == PANE_IDX_FINGER || pane == PANE_IDX_CAMERA) {
             return;
         }
+    }
+    if (!androidHwConfig_hasVirtualSceneCamera(android_hw) &&
+        pane == PANE_IDX_CAMERA) {
+        return;
     }
 
     // Set to default location pane.
