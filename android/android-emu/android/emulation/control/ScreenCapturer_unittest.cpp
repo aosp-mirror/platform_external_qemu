@@ -511,3 +511,22 @@ TEST_F(ScreenCapturerTest, scaleSuccess) {
     EXPECT_TRUE(image.getWidth() == 600);
     EXPECT_TRUE(image.getHeight() == 800);
 }
+
+TEST_F(ScreenCapturerTest, takePartialScreen) {
+    MockRenderer renderer(true);
+    // Capture the screenshot.
+    Image image = takeScreenshot(ImageFormat::RAW, SKIN_ROTATION_0, &renderer, nullptr,
+                                 0, 600, 800, {{0, 0}, {300, 800}});
+    EXPECT_TRUE(image.getWidth() == 300);
+    EXPECT_TRUE(image.getHeight() == 800);
+}
+
+TEST_F(ScreenCapturerTest, takePngScreenshotPartial) {
+    Image img = takeScreenshot(ImageFormat::PNG, SKIN_ROTATION_0, nullptr,
+                                framebuffer4Pixels, 0, 4, 4, {{0, 0}, {2, 2}});
+    // Because the framebuffer4Pixels() returns a 2x2 image, the rectangle
+    // represented by {{0, 0}, {2, 2}} will be scaled to 1x1 within takeScreenshot()
+    EXPECT_TRUE(img.getWidth() == 1);
+    EXPECT_TRUE(img.getHeight() == 1);
+    EXPECT_TRUE(img.getImageFormat() == ImageFormat::PNG);
+}
