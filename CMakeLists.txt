@@ -56,21 +56,14 @@ set(OPTION_CLANG_TIDY
 set(OPTION_CLANG_TIDY_FIX FALSE
     CACHE BOOL "True if you wish clang-tidy to auto fix issues it encounters.")
 set(QTWEBENGINE FALSE CACHE BOOL "True if the webengine should be enabled.")
-if(LINUX_X86_64)
+
+# DO NOT SUBMIT PRESUBMIT BUILD TEST ONLY
   set(WEBRTC
       TRUE
       CACHE
         BOOL
         "True if the emulator should be build with WEBRTC support. Defaults on for Linux"
   )
-else()
-  set(WEBRTC
-      FALSE
-      CACHE
-        BOOL
-        "True if the emulator should be build with WEBRTC support. Defaults on for Linux"
-  )
-endif()
 set(QEMU_UPSTREAM TRUE
     CACHE BOOL "True if the upstream version of qemu should be build.")
 set(ANDROIDSTUDIO FALSE
