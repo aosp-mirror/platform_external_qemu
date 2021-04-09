@@ -26,6 +26,7 @@ public:
     virtual void receive_sms(AModem, SmsPDU) override;
     virtual int add_inbound_call(AModem, const char*) override;
     virtual int disconnect_call(AModem, const char*) override;
+    virtual ACall find_call_by_number(AModem, const char*) override;
     virtual int update_call(AModem, const char*, int) override;
     virtual void set_data_network_type(AModem, ADataNetworkType) override;
     virtual void set_signal_strength_profile(AModem, int) override;

@@ -25,6 +25,7 @@ public:
 public:
     virtual void receive_sms(AModem, SmsPDU) = 0;
     virtual int add_inbound_call(AModem, const char*) = 0;
+    virtual ACall find_call_by_number(AModem, const char*) = 0;
     virtual int disconnect_call(AModem, const char*) = 0;
     virtual int update_call(AModem, const char*, int) = 0;
     virtual void set_data_network_type(AModem, ADataNetworkType) = 0;
