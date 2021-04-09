@@ -1285,6 +1285,8 @@ static VkFormat glFormat2VkFormat(GLint internalformat) {
         case GL_RGB10_A2:
         case GL_UNSIGNED_INT_10_10_10_2_OES:
             return VK_FORMAT_A2R10G10B10_UNORM_PACK32;
+        case GL_BGR10_A2_ANGLEX:
+            return VK_FORMAT_A2B10G10R10_UNORM_PACK32;
         case GL_RGBA16F:
             return VK_FORMAT_R16G16B16A16_SFLOAT;
         case GL_BGRA_EXT:
