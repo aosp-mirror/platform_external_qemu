@@ -82,7 +82,6 @@ public:
     // partial screen.
     // - |rect|  represents a rectangle within the screen defined by
     // desiredWidth and desiredHeight.
-    // Todo (wdu@) snipping with PNG format is not supported yet.
     static bool getScreenshot(int displayId,
                               const ImageFormat_ImgFormat format,
                               const Rotation_SkinRotation rotation,
