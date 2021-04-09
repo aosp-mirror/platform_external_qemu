@@ -30,6 +30,9 @@
 
 #include <memory>
 
+// From ANGLE "src/common/angleutils.h"
+#define GL_BGR10_A2_ANGLEX 0x6AF9
+
 class TextureDraw;
 class TextureResize;
 class YUVConverter;
@@ -134,7 +137,7 @@ public:
     static ColorBuffer* create(EGLDisplay p_display,
                                int p_width,
                                int p_height,
-                               GLenum p_internalFormat,
+                               GLint p_internalFormat,
                                FrameworkFormat p_frameworkFormat,
                                HandleType hndl,
                                Helper* helper,
@@ -286,8 +289,8 @@ private:
     GLuint m_width = 0;
     GLuint m_height = 0;
     GLuint m_fbo = 0;
-    GLenum m_internalFormat = 0;
-    GLenum m_sizedInternalFormat = 0;
+    GLint m_internalFormat = 0;
+    GLint m_sizedInternalFormat = 0;
 
     // |m_format| and |m_type| are for reformatting purposes only
     // to work around bugs in the guest. No need to snapshot those.
