@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "df508a28_808f246e",
+        "filename": "android/third_party/modem-simulator/ModemSimulator.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-04-09T18:01:03Z",
+      "side": 1,
+      "message": "maybe unordered_map?",
+      "range": {
+        "startLine": 43,
+        "startChar": 9,
+        "endLine": 43,
+        "endChar": 12
+      },
+      "revId": "c193497cd5aa6a72fa6b35da8793754db8ef4ae9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
