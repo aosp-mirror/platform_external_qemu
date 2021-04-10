@@ -116,7 +116,7 @@
       <string notr="true"/>
      </property>
      <property name="text">
-      <string>DOCUMENTATION</string>
+      <string>Documentation</string>
      </property>
      <property name="flat">
       <bool>true</bool>
@@ -148,7 +148,7 @@
       <string notr="true"/>
      </property>
      <property name="text">
-      <string>SEND FEEDBACK</string>
+      <string>Send Feedback</string>
      </property>
      <property name="flat">
       <bool>true</bool>
