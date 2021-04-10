@@ -352,7 +352,7 @@
               </font>
              </property>
              <property name="text">
-              <string>CANCEL</string>
+              <string>Cancel</string>
              </property>
              <property name="ColorGroup" stdset="0">
               <string>Button</string>
@@ -440,7 +440,7 @@
         <enum>Qt::LeftToRight</enum>
        </property>
        <property name="text">
-        <string>RECORD NEW</string>
+        <string>Record New</string>
        </property>
        <property name="icon">
         <iconset resource="../resources.qrc">
@@ -489,7 +489,7 @@
         <enum>Qt::LeftToRight</enum>
        </property>
        <property name="text">
-        <string>PLAY</string>
+        <string>Play</string>
        </property>
        <property name="icon">
         <iconset resource="../resources.qrc">

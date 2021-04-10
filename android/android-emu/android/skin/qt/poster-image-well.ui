@@ -128,7 +128,7 @@
             <string notr="true">margin: 0 3px 3px 0</string>
            </property>
            <property name="text">
-            <string>ADD IMAGE</string>
+            <string>Add Image</string>
            </property>
            <property name="flat">
             <bool>true</bool>

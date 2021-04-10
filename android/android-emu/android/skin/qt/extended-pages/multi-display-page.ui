@@ -323,7 +323,7 @@
           </font>
          </property>
          <property name="text">
-          <string>APPLY CHANGES</string>
+          <string>Apply Changes</string>
          </property>
          <property name="flat">
           <bool>true</bool>
