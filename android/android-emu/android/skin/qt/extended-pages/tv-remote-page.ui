@@ -479,7 +479,7 @@
     </font>
     </property>
     <property name="text">
-    <string>SEND</string>
+    <string>Send</string>
     </property>
     <property name="flat">
     <bool>true</bool>
