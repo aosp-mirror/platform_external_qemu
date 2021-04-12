@@ -74,6 +74,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     // Disable apic timer check. b/33963880
     params.add("no_timer_check");
+    params.add("androidboot.hardware.egl=angle");
 
     params.addFormat("androidboot.hardware=%s",
                      isQemu2 ? "ranchu" : "goldfish");

@@ -1160,6 +1160,8 @@ public:
         deviceInfo.physicalDevice = physicalDevice;
         deviceInfo.emulateTextureEtc2 = emulateTextureEtc2;
         deviceInfo.emulateTextureAstc = emulateTextureAstc;
+        //deviceInfo.emulateTextureEtc2 = true;
+        //deviceInfo.emulateTextureAstc = true;
 
         for (uint32_t i = 0; i < createInfoFiltered.enabledExtensionCount;
                 ++i) {
