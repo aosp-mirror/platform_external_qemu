@@ -277,6 +277,10 @@ OPT_FLAG(no_mouse_reposition,
 
 OPT_FLAG(experimental_enable_multidisplay,
          "Enable multidisplay gRPC api for Android Studio.")
+
+OPT_FLAG(guest_angle,
+         "Enable guest ANGLE as system driver.")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG
