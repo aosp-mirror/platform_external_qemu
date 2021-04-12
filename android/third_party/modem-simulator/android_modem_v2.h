@@ -39,9 +39,12 @@ extern void amodem_set_signal_strength_profile_vx(AModem modem, int quality);
 
 extern void amodem_set_data_registration_vx(AModem modem,
                                             ARegistrationState state);
-
 extern void amodem_set_voice_registration_vx(AModem modem,
                                              ARegistrationState state);
+
+extern ARegistrationState amodem_get_data_registration_vx(AModem modem);
+
+extern ARegistrationState amodem_get_voice_registration_vx(AModem modem);
 
 extern void amodem_set_notification_callback_vx(AModem modem,
                                                 ModemCallback callbackFunc,
