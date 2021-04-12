@@ -16,6 +16,29 @@
       "message": "Verified on intel platforms.",
       "revId": "dbeeef31991dae34664a5e281eb90e2f2ed01b52",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "54110621_0665b8f6",
+        "filename": "android/android-webrtc/third_party/transform.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2021-04-12T22:49:14Z",
+      "side": 1,
+      "message": "Remove hardcoded path?",
+      "range": {
+        "startLine": 18,
+        "startChar": 15,
+        "endLine": 18,
+        "endChar": 30
+      },
+      "revId": "dbeeef31991dae34664a5e281eb90e2f2ed01b52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
