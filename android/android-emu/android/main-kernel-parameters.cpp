@@ -61,7 +61,9 @@ std::string emulator_getKernelParameters(const AndroidOptions* opts,
     // params.addFormat("androidboot.logcat=*:D");
 
     if (isX86ish) {
-        params.add("clocksource=pit");
+        // params.add("clocksource=pit");
+        params.add("clocksource=tsc");
+        params.add("tsc=reliable");
 
         KernelVersion kernelVersion = KERNEL_VERSION_0;
         if (!android_getKernelVersion(kernelPath, &kernelVersion)) {
