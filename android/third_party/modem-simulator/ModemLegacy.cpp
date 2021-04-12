@@ -48,6 +48,14 @@ void ModemLegacy::set_data_registration(AModem modem,
     amodem_set_data_registration(modem, state);
 }
 
+ARegistrationState ModemLegacy::get_data_registration(AModem modem) {
+    return amodem_get_data_registration(modem);
+}
+
+ARegistrationState ModemLegacy::get_voice_registration(AModem modem) {
+    return amodem_get_voice_registration(modem);
+}
+
 void ModemLegacy::set_voice_registration(AModem modem,
                                          ARegistrationState state) {
     amodem_set_voice_registration(modem, state);
