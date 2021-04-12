@@ -18,9 +18,10 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
+#include "android/base/threads/Thread.h"
 #include "android/utils/debug.h"
-#include "emugl/common/crash_reporter.h"
 #include "emugl/common/OpenGLDispatchLoader.h"
+#include "emugl/common/crash_reporter.h"
 #include "emugl/common/sync_device.h"
 
 #ifndef _MSC_VER
@@ -66,10 +67,15 @@ static LazyInstance<GlobalSyncThread> sGlobalSyncThread = LAZY_INSTANCE_INIT;
 
 static const uint32_t kTimelineInterval = 1;
 static const uint64_t kDefaultTimeoutNsecs = 5ULL * 1000ULL * 1000ULL * 1000ULL;
+static const uint64_t kNumWorkerThreads = 4u;
 
-SyncThread::SyncThread() :
-    emugl::Thread(android::base::ThreadFlags::MaskSignals, 512 * 1024) {
+SyncThread::SyncThread()
+    : emugl::Thread(android::base::ThreadFlags::MaskSignals, 512 * 1024),
+      mWorkerThreadPool(kNumWorkerThreads, [this](SyncThreadCmd&& cmd) {
+          doSyncThreadCmd(&cmd);
+      }) {
     this->start();
+    mWorkerThreadPool.start();
     initSyncContext();
 }
 
@@ -91,8 +97,7 @@ void SyncThread::triggerWait(FenceSync* fenceSync,
 }
 
 void SyncThread::triggerBlockedWaitNoTimeline(FenceSync* fenceSync) {
-    DPRINT("fenceSyncInfo=0x%llx timeline=0x%lx ...",
-            fenceSync, timeline);
+    DPRINT("fenceSyncInfo=0x%llx ...", fenceSync);
     SyncThreadCmd to_send;
     to_send.opCode = SYNC_THREAD_BLOCKED_WAIT_NO_TIMELINE;
     to_send.fenceSync = fenceSync;
@@ -106,6 +111,10 @@ void SyncThread::cleanup() {
     SyncThreadCmd to_send;
     to_send.opCode = SYNC_THREAD_EXIT;
     sendAndWaitForResult(to_send);
+    DPRINT("signal");
+    mLock.lock();
+    mExiting = true;
+    mCv.signalAndUnlock(&mLock);
     DPRINT("exit");
 }
 
@@ -121,50 +130,36 @@ void SyncThread::initSyncContext() {
 
 intptr_t SyncThread::main() {
     DPRINT("in sync thread");
+    mLock.lock();
+    mCv.wait(&mLock, [this] { return mExiting; });
 
-    bool exiting = false;
-    uint32_t num_iter = 0;
-
-    while (!exiting) {
-        SyncThreadCmd cmd = {};
-
-        DPRINT("waiting to receive command");
-        mInput.receive(&cmd);
-        num_iter++;
-
-        DPRINT("sync thread @%p num iter: %u", this, num_iter);
-
-        bool need_reply = cmd.needReply;
-        int result = doSyncThreadCmd(&cmd);
-
-        if (need_reply) {
-            DPRINT("sending result");
-            mOutput.send(result);
-            DPRINT("sent result");
-        }
-
-        if (cmd.opCode == SYNC_THREAD_EXIT) exiting = true;
-    }
-
+    mWorkerThreadPool.done();
+    mWorkerThreadPool.join();
     DPRINT("exited sync thread");
     return 0;
 }
 
 int SyncThread::sendAndWaitForResult(SyncThreadCmd& cmd) {
     DPRINT("send with opcode=%d", cmd.opCode);
-    cmd.needReply = true;
-    mInput.send(cmd);
-    int result = -1;
-    mOutput.receive(&result);
-    DPRINT("result=%d", result);
-    return result;
+    android::base::Lock lock;
+    android::base::ConditionVariable cond;
+    android::base::Optional<int> result = android::base::kNullopt;
+    cmd.lock = &lock;
+    cmd.cond = &cond;
+    cmd.result = &result;
+
+    lock.lock();
+    mWorkerThreadPool.enqueue(std::move(cmd));
+    cond.wait(&lock, [&result] { return result.hasValue(); });
+
+    DPRINT("result=%d", *result);
+    return *result;
 }
 
 void SyncThread::sendAsync(SyncThreadCmd& cmd) {
     DPRINT("send with opcode=%u fenceSyncInfo=0x%llx",
            cmd.opCode, cmd.fenceSync);
-    cmd.needReply = false;
-    mInput.send(cmd);
+    mWorkerThreadPool.enqueue(std::move(cmd));
 }
 
 void SyncThread::doSyncContextInit() {
@@ -301,6 +296,13 @@ void SyncThread::doExit() {
 }
 
 int SyncThread::doSyncThreadCmd(SyncThreadCmd* cmd) {
+#if DEBUG
+    thread_local static auto threadId = android::base::getCurrentThreadId();
+    thread_local static size_t numCommands = 0U;
+    DPRINT("threadId = %lu numCommands = %lu cmd = %p", threadId, ++numCommands,
+           cmd);
+#endif  // DEBUG
+
     int result = 0;
     switch (cmd->opCode) {
     case SYNC_THREAD_INIT:
@@ -319,6 +321,13 @@ int SyncThread::doSyncThreadCmd(SyncThreadCmd* cmd) {
         DPRINT("exec SYNC_THREAD_BLOCKED_WAIT_NO_TIMELINE");
         doSyncBlockedWaitNoTimeline(cmd);
         break;
+    }
+
+    bool need_reply = cmd->lock != nullptr && cmd->cond != nullptr;
+    if (need_reply) {
+        cmd->lock->lock();
+        *cmd->result = android::base::makeOptional(result);
+        cmd->cond->signalAndUnlock(cmd->lock);
     }
     return result;
 }

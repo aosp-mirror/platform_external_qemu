@@ -22,9 +22,12 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
+#include "android/base/Optional.h"
+#include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/MessageChannel.h"
 
+#include "android/base/threads/ThreadPool.h"
 #include "emugl/common/thread.h"
 
 // SyncThread///////////////////////////////////////////////////////////////////
@@ -49,16 +52,19 @@ enum SyncThreadOpCode {
 
 struct SyncThreadCmd {
     SyncThreadOpCode opCode = SYNC_THREAD_INIT;
-    bool needReply = false;
     FenceSync* fenceSync = nullptr;
     uint64_t timeline = 0;
+
+    android::base::Lock* lock = nullptr;
+    android::base::ConditionVariable* cond = nullptr;
+    android::base::Optional<int>* result = nullptr;
 };
 
 struct RenderThreadInfo;
 class SyncThread : public emugl::Thread {
 public:
-    // - constructor: start up the sync thread for a given context.
-    // The initialization of the sync thread is nonblocking.
+    // - constructor: start up the sync worker threads for a given context.
+    // The initialization of the sync threads is nonblocking.
     // - Triggers a |SyncThreadCmd| with op code |SYNC_THREAD_INIT|
     SyncThread();
     ~SyncThread();
@@ -97,16 +103,9 @@ private:
     // - Triggers a |SyncThreadCmd| with op code |SYNC_THREAD_INIT|
     void initSyncContext();
 
-    // Thread function executing all sync commands.
-    // It listens for |SyncThreadCmd| objects off the message channel
-    // |mInput|, and runs them serially.
+    // Thread function.
+    // It keeps the workers runner until |mExiting| is set.
     virtual intptr_t main() override final;
-    static const size_t kSyncThreadChannelCapacity = 256;
-    android::base::MessageChannel<SyncThreadCmd, kSyncThreadChannelCapacity> mInput;
-
-    // |mOutput| holds result of cmds in case of blocking commands
-    // that require return results.
-    android::base::MessageChannel<GLint, kSyncThreadChannelCapacity> mOutput;
 
     // These two functions are used to communicate with the sync thread
     // from another thread:
@@ -130,5 +129,10 @@ private:
     EGLDisplay mDisplay = EGL_NO_DISPLAY;
     EGLContext mContext = EGL_NO_CONTEXT;
     EGLSurface mSurface = EGL_NO_SURFACE;
+
+    bool mExiting = false;
+    android::base::Lock mLock;
+    android::base::ConditionVariable mCv;
+    android::base::ThreadPool<SyncThreadCmd> mWorkerThreadPool;
 };
 
