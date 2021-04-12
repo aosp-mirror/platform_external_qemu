@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8c4b9a14_eafa4d49",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/finger-page.ui",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-04-12T22:34:04Z",
+      "side": 1,
+      "message": "Articles should not be capitalized (The -\u003e the)\n\nIn fact, articles are rarely used in button labels, so \"The\" can be omitted altogether.",
+      "range": {
+        "startLine": 57,
+        "startChar": 18,
+        "endLine": 57,
+        "endChar": 21
+      },
+      "revId": "93cbd9a8731d008ed649428db1ab6fbb7e64a8b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
