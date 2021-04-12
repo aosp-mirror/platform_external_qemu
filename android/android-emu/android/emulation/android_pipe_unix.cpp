@@ -188,6 +188,7 @@ static void socketPipe_io_func(void* opaque, int fd, unsigned events) {
     /* Otherwise, accept incoming data */
     if ((events & LOOP_IO_READ) != 0) {
         wakeFlags |= PIPE_WAKE_READ;
+        loopIo_dontWantRead(pipe->io);
     }
 
     if ((events & LOOP_IO_WRITE) != 0) {
@@ -480,6 +481,8 @@ static int socketPipe_recvBuffers(void* opaque,
         }
         break;
     }
+
+    loopIo_wantRead(pipe->io);
     return ret;
 }
 
@@ -502,7 +505,7 @@ static void socketPipe_wakeOn(void* opaque, int flags) {
     DD("%s: flags=%d", __FUNCTION__, flags);
 
     pipe->wakeWanted |= flags;
-    socketPipe_resetState(pipe, false);
+    socketPipe_resetState(pipe, flags & PIPE_WAKE_READ);
 }
 
 void* socketPipe_initUnix(void* hwpipe, void* _looper, const char* args) {
