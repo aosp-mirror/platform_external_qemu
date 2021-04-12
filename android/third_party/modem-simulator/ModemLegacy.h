@@ -32,6 +32,8 @@ public:
     virtual void set_signal_strength_profile(AModem, int) override;
     virtual void set_data_registration(AModem, ARegistrationState) override;
     virtual void set_voice_registration(AModem, ARegistrationState) override;
+    virtual ARegistrationState get_data_registration(AModem) override;
+    virtual ARegistrationState get_voice_registration(AModem) override;
     virtual void set_notification_callback_vx(AModem modem,
                                               ModemCallback callbackFunc,
                                               void* userData) override;

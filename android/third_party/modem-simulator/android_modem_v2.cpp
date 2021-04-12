@@ -62,6 +62,14 @@ void amodem_set_data_registration_vx(AModem modem, ARegistrationState state) {
     s_modem->set_data_registration(modem, state);
 }
 
+ARegistrationState amodem_get_data_registration_vx(AModem modem) {
+    return s_modem->get_data_registration(modem);
+}
+
+ARegistrationState amodem_get_voice_registration_vx(AModem modem) {
+    return s_modem->get_voice_registration(modem);
+}
+
 void amodem_set_voice_registration_vx(AModem modem, ARegistrationState state) {
     s_modem->set_voice_registration(modem, state);
 }
