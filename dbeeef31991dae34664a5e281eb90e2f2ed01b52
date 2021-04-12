@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b9e88a46_3e46b6e9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-04-12T21:56:51Z",
+      "side": 1,
+      "message": "Verified on intel platforms.",
+      "revId": "dbeeef31991dae34664a5e281eb90e2f2ed01b52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
