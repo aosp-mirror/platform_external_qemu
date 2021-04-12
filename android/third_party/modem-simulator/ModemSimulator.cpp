@@ -72,12 +72,24 @@ void ModemSimulator::set_signal_strength_profile(AModem modem, int quality) {
 void ModemSimulator::set_data_registration(AModem modem,
                                            ARegistrationState state) {
     (void)modem;
+    mDataState = state;
     cuttlefish::set_data_registration(state);
+}
+
+ARegistrationState ModemSimulator::get_data_registration(AModem modem) {
+    (void)modem;
+    return mDataState;
+}
+
+ARegistrationState ModemSimulator::get_voice_registration(AModem modem) {
+    (void)modem;
+    return mVoiceState;
 }
 
 void ModemSimulator::set_voice_registration(AModem modem,
                                             ARegistrationState state) {
     (void)modem;
+    mVoiceState = state;
     cuttlefish::set_voice_registration(state);
 }
 
