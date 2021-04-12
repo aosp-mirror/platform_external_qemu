@@ -27,6 +27,12 @@ static inline int amodem_update_call_vx(AModem modem, const char* args, int stat
 static inline void amodem_set_data_registration_vx(AModem modem, ARegistrationState state) { }
 static inline void amodem_set_voice_registration_vx(AModem modem, ARegistrationState state) { }
 static inline void amodem_set_data_network_type_vx(AModem modem, ADataNetworkType type) { }
+static ARegistrationState amodem_get_data_registration_vx(AModem modem) {
+    return A_REGISTRATION_HOME;
+}
+static ARegistrationState amodem_get_voice_registration_vx(AModem modem) {
+    return A_REGISTRATION_HOME;
+}
 static inline void amodem_set_notification_callback_vx(
         AModem modem,
         ModemCallback callbackFunc,

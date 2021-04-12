@@ -1402,12 +1402,12 @@ do_gsm_status( ControlClient  client, char*  args )
         control_write( client, "KO: modem emulation not running\r\n" );
         return -1;
     }
-    control_write( client, "gsm voice state: %s\r\n",
-                   gsm_state_to_string(
-                       amodem_get_voice_registration(android_modem_get()) ) );
-    control_write( client, "gsm data state:  %s\r\n",
-                   gsm_state_to_string(
-                       amodem_get_data_registration(android_modem_get()) ) );
+    control_write(client, "gsm voice state: %s\r\n",
+                  gsm_state_to_string(amodem_get_voice_registration_vx(
+                          android_modem_get())));
+    control_write(client, "gsm data state:  %s\r\n",
+                  gsm_state_to_string(amodem_get_data_registration_vx(
+                          android_modem_get())));
     return 0;
 }
 
@@ -1487,7 +1487,7 @@ do_gsm_data( ControlClient  client, char*  args )
                 control_write( client, "KO: modem emulation not running\r\n" );
                 return -1;
             }
-            amodem_set_data_registration( android_modem_get(), state );
+            amodem_set_data_registration_vx(android_modem_get(), state);
             android_net_disable = (state != A_REGISTRATION_HOME    &&
                                 state != A_REGISTRATION_ROAMING );
             return 0;
@@ -1539,7 +1539,7 @@ do_gsm_voice( ControlClient  client, char*  args )
                 control_write( client, "KO: modem emulation not running\r\n" );
                 return -1;
             }
-            amodem_set_voice_registration( android_modem_get(), state );
+            amodem_set_voice_registration_vx(android_modem_get(), state);
             return 0;
         }
     }
