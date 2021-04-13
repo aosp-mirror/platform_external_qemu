@@ -395,9 +395,18 @@ static void prepareDataFolder(const char* destDirectory,
 
 static bool creatUserDataExt4Img(AndroidHwConfig* hw,
                                  const char* dataDirectory) {
-    android_createExt4ImageFromDir(hw->disk_dataPartition_path, dataDirectory,
-                                   android_hw->disk_dataPartition_size, "data");
-
+    std::string empty_data_path =
+            PathUtils::join(dataDirectory, "empty_data_disk");
+    const bool shouldUseEmptyDataImg = path_exists(empty_data_path.c_str());
+    if (shouldUseEmptyDataImg) {
+        android_createEmptyExt4Image(hw->disk_dataPartition_path,
+                                     android_hw->disk_dataPartition_size,
+                                     "data");
+    } else {
+        android_createExt4ImageFromDir(
+                hw->disk_dataPartition_path, dataDirectory,
+                android_hw->disk_dataPartition_size, "data");
+    }
     // Check if creating user data img succeed
     System::FileSize diskSize;
     if (System::get()->pathFileSize(hw->disk_dataPartition_path, &diskSize) &&
