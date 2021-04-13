@@ -470,11 +470,9 @@ bool qemu_android_emulation_setup() {
                         "system "
                         "is no longer responding.");
     }
-#ifndef AEMU_GFXSTREAM_BACKEND
     if (feature_is_enabled(kFeature_VirtioWifi)) {
         virtio_wifi_set_mac_prefix(android_serial_number_port);
     }
-#endif
     return true;
 }
 
