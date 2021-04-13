@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2bc67c4e_136ab3db",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-04-13T23:20:57Z",
+      "side": 1,
+      "message": "Do we create data partitions with a special file in it for the emulator to create empty partitions?",
+      "revId": "1a2cca835b0479995a3f8211781be7b5348187f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
