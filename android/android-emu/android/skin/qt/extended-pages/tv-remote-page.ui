@@ -13,27 +13,6 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QGroupBox" name="tvRemote_clusterTitle">
-    <property name="geometry">
-    <rect>
-      <x>24</x>
-      <y>17</y>
-      <width>181</width>
-      <height>21</height>
-    </rect>
-    </property>
-    <property name="font">
-    <font>
-      <family>Roboto</family>
-    </font>
-    </property>
-    <property name="styleSheet">
-    <string notr="true">border: 0px;</string>
-    </property>
-    <property name="title">
-    <string>Cluster</string>
-    </property>
-  </widget>
   <widget class="QPushButton" name="tvRemote_downButton">
    <property name="geometry">
     <rect>
