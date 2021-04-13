@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e6fd7292_fa3d9b73",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-04-13T00:45:36Z",
+      "side": 1,
+      "message": "protobuf did not properly generate dependencies causing non-deterministic build.\n\nWe are still running old msvc on our windows build bots.",
+      "revId": "f826363a35968db06860dd322a7add45bc48c01d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
