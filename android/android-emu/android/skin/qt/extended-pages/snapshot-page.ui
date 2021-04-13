@@ -476,7 +476,7 @@
       </font>
      </property>
      <property name="text">
-      <string>SAVE NOW</string>
+      <string>Save Now</string>
      </property>
      <property name="flat">
       <bool>true</bool>
@@ -544,7 +544,7 @@
       </font>
      </property>
      <property name="text">
-      <string>LOAD NOW</string>
+      <string>Load Now</string>
      </property>
      <property name="flat">
       <bool>true</bool>
