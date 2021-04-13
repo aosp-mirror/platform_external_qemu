@@ -215,7 +215,6 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     if (isQemu2) {
         if (android::featurecontrol::isEnabled(
                                      android::featurecontrol::VirtioWifi)) {
-#ifndef AEMU_GFXSTREAM_BACKEND
             if (apiLevel >= 30) {
                 params.add("qemu.virtiowifi=1");
                 params.add("mac80211_hwsim.radios=1");
@@ -231,7 +230,6 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
             } else {
                 dwarning("VirtioWifi is only support on API level 30 and above.");
             }
-#endif
         } else if (android::featurecontrol::isEnabled(
                            android::featurecontrol::Wifi)) {
             params.add("qemu.wifi=1");
