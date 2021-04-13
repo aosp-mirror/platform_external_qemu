@@ -78,6 +78,10 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     params.addFormat("androidboot.hardware=%s",
                      isQemu2 ? "ranchu" : "goldfish");
 
+    if (opts->guest_angle) {
+        params.addFormat("androidboot.hardware.egl=angle");
+    }
+
     {
         std::string myserialno(EMULATOR_VERSION_STRING);
         std::replace(myserialno.begin(), myserialno.end(), '.', 'X');
