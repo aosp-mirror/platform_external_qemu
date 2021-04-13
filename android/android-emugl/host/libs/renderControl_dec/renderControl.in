@@ -60,4 +60,4 @@ GL_ENTRY(void, rcComposeAsync, uint32_t bufferSize, void *buffer);
 GL_ENTRY(void, rcDestroySyncKHRAsync, uint64_t sync);
 GL_ENTRY(GLint, rcComposeWithoutPost, uint32_t bufferSize, void *buffer);
 GL_ENTRY(void, rcComposeAsyncWithoutPost, uint32_t bufferSize, void *buffer);
-
+GL_ENTRY(int, rcCreateDisplayById, uint32_t displayId);
