@@ -16,6 +16,24 @@
       "message": "do we need to \"setprop ro.hardware.egl\" emulation when not using guest ANGLE?",
       "revId": "7f6348f433fe7b33bdd2566044dbc68f6482af48",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b791de0b_baebad65",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-04-13T00:04:14Z",
+      "side": 1,
+      "message": "No, the guest side defaults to emulation. We have to do the default from the guest because there are older hosts that don\u0027t run this path at all",
+      "parentUuid": "f61d0165_82201fef",
+      "revId": "7f6348f433fe7b33bdd2566044dbc68f6482af48",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
