@@ -17,6 +17,7 @@
 #include <algorithm>                                     // for uniform_int_...
 #include <atomic>                                        // for atomic, __at...
 #include <cstdint>                                       // for uint8_t, int...
+#include <fstream>                                       // for file read
 #include <functional>                                    // for __base
 #include <random>                                        // for mt19937, ran...
 #include <string>                                        // for string, to_s...
@@ -27,6 +28,7 @@
 #include "android/base/ProcessControl.h"                 // for restartEmulator
 #include "android/base/files/MemStream.h"                // for MemStream
 #include "android/base/files/PathUtils.h"                // for PathUtils
+#include "android/base/misc/StringUtils.h"               // for split strings
 #include "android/base/threads/Thread.h"                 // for Thread
 #include "android/console.h"                             // for getConsoleAg...
 #include "android/emulation/AndroidMessagePipe.h"        // for AndroidMessa...
@@ -215,6 +217,35 @@ void miscPipeSetAndroidOverlay(emulation::AdbInterface* adbInterface) {
     }
 }
 
+static void runAdbScripts(emulation::AdbInterface* adbInterface,
+                          std::string dataDir,
+                          std::string adbScriptsDir) {
+    // the scripts contains multiple lines of adb command
+    // fileds in each line are tab separated, they are feed to adb command
+    // one bye one; right now, only push is implemented, and push's first
+    // argument will have dataDir prefixed to it. e.g., push
+    // media/test/file.mp4 /sdcard/test/media/file.mp4
+
+    auto list = base::System::get()->scanDirEntries(adbScriptsDir, true);
+    for (auto filepath : list) {
+        std::ifstream inFile(filepath, std::ios_base::in);
+        if (!inFile.is_open()) {
+            continue;
+        }
+        std::string line;
+        while (std::getline(inFile, line)) {
+            std::vector<std::string> commands = base::Split(line, "\t");
+            if (commands.size() != 3) {
+                continue;
+            }
+            if (commands[0] != "push")
+                continue;
+            adbInterface->enqueueCommand(
+                    {"push", dataDir + "/" + commands[1], commands[2]});
+        }
+    }
+}
+
 static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                                          std::vector<uint8_t>* outputp) {
     std::vector<uint8_t> & output = *outputp;
@@ -289,6 +320,20 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
 
             if (android_hw->test_monitorAdb && num_hostcts_watchdog == 0) {
                 std::thread{watchHostCtsFunction, 30}.detach();
+            }
+
+            if (android_avdInfo) {
+#ifdef __linux__
+                std::string datadir =
+                        avdInfo_getDataInitDirPath(android_avdInfo);
+                std::string adbscriptsdir =
+                        android::base::PathUtils::join(datadir, "adbscripts");
+                if (path_exists(adbscriptsdir.c_str())) {
+                    std::thread{runAdbScripts, adbInterface, datadir,
+                                adbscriptsdir}
+                            .detach();
+                }
+#endif
             }
 
             // start multi-display service after boot completion
