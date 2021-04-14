@@ -16,6 +16,24 @@
       "message": "There is a problem with the value of android_serial_number_port",
       "revId": "28f602605bff443213c2dfaecc73f0d5d60513d0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "46f4a330_2a982eec",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-04-14T19:01:52Z",
+      "side": 1,
+      "message": "Is it set later than this function is called (this could be the reason it was in vl.c)?",
+      "parentUuid": "83effa9a_42310483",
+      "revId": "28f602605bff443213c2dfaecc73f0d5d60513d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
