@@ -235,7 +235,12 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         } else if (android::featurecontrol::isEnabled(
                            android::featurecontrol::Wifi)) {
             params.add("qemu.wifi=1");
-            params.add("mac80211_hwsim.radios=2");
+            if (android::featurecontrol::isEnabled(
+                    android::featurecontrol::Mac80211hwsimUserspaceManaged)) {
+                params.add("mac80211_hwsim.radios=0");
+            } else {
+                params.add("mac80211_hwsim.radios=2");
+            }
             // Enable multiple channels so the kernel can scan on one channel
             // while communicating the other. This speeds up scanning
             // significantly. This does not work if WiFi Direct is enabled
