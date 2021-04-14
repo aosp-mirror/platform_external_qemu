@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d7914284_d18555de",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-04-14T03:46:40Z",
+      "side": 1,
+      "message": "This conflicts with Mac80211hwsimUserspaceManaged. Where is mac address set if featurecontrol::Wifi is enabled?",
+      "range": {
+        "startLine": 234,
+        "startChar": 12,
+        "endLine": 234,
+        "endChar": 50
+      },
+      "revId": "91440767a8411d47da026bdc2b56260522a7352c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
