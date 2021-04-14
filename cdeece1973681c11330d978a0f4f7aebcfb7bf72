@@ -52,6 +52,24 @@
       "parentUuid": "1dd7fdf4_667603fd",
       "revId": "cdeece1973681c11330d978a0f4f7aebcfb7bf72",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cbcd469f_f95999ec",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-04-14T01:29:59Z",
+      "side": 1,
+      "message": "Can we bake them into /etc and symlink in init.ranchu.rc?",
+      "parentUuid": "6f239fff_aa44d387",
+      "revId": "cdeece1973681c11330d978a0f4f7aebcfb7bf72",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
