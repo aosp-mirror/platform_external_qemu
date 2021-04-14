@@ -16,6 +16,24 @@
       "message": "Why do we need to preinstall these files? Should CTS tests do it for themselves?",
       "revId": "cdeece1973681c11330d978a0f4f7aebcfb7bf72",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1dd7fdf4_667603fd",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-04-14T01:12:04Z",
+      "side": 1,
+      "message": "it has server performance problem, I filed a bug to them and nobody bothered.\nwhen CTS installs it (actually the test harness installs it), it take 30+ minutes\nto just get ready; which is causing lots of timing violation on presubmit",
+      "parentUuid": "1753674c_4131d658",
+      "revId": "cdeece1973681c11330d978a0f4f7aebcfb7bf72",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
