@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1753674c_4131d658",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-04-14T01:06:58Z",
+      "side": 1,
+      "message": "Why do we need to preinstall these files? Should CTS tests do it for themselves?",
+      "revId": "cdeece1973681c11330d978a0f4f7aebcfb7bf72",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
