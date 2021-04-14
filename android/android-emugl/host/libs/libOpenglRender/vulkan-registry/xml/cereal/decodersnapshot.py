@@ -2,7 +2,6 @@ from .common.codegen import CodeGen, VulkanWrapperGenerator, VulkanAPIWrapper
 from .common.vulkantypes import \
         VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, DISPATCHABLE_HANDLE_TYPES, NON_DISPATCHABLE_HANDLE_TYPES
 
-from .marshaling import VulkanMarshalingCodegen
 from .transform import TransformCodegen, genTransformsForVulkanType
 
 from .wrapperdefs import API_PREFIX_MARSHAL

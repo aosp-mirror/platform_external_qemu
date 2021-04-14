@@ -2539,18 +2539,18 @@ void handlemap_VkMetalSurfaceCreateInfoEXT(
     VkMetalSurfaceCreateInfoEXT* toMap);
 
 #endif
-#ifdef VK_GOOGLE_color_buffer
-void handlemap_VkImportColorBufferGOOGLE(
+#ifdef VK_EXT_fragment_density_map
+void handlemap_VkPhysicalDeviceFragmentDensityMapFeaturesEXT(
     VulkanHandleMapping* handlemap,
-    VkImportColorBufferGOOGLE* toMap);
+    VkPhysicalDeviceFragmentDensityMapFeaturesEXT* toMap);
 
-void handlemap_VkImportBufferGOOGLE(
+void handlemap_VkPhysicalDeviceFragmentDensityMapPropertiesEXT(
     VulkanHandleMapping* handlemap,
-    VkImportBufferGOOGLE* toMap);
+    VkPhysicalDeviceFragmentDensityMapPropertiesEXT* toMap);
 
-void handlemap_VkImportPhysicalAddressGOOGLE(
+void handlemap_VkRenderPassFragmentDensityMapCreateInfoEXT(
     VulkanHandleMapping* handlemap,
-    VkImportPhysicalAddressGOOGLE* toMap);
+    VkRenderPassFragmentDensityMapCreateInfoEXT* toMap);
 
 #endif
 #ifdef VK_EXT_scalar_block_layout
@@ -2942,6 +2942,18 @@ void handlemap_VkDirectFBSurfaceCreateInfoEXT(
 
 #endif
 #ifdef VK_GOOGLE_gfxstream
+void handlemap_VkImportColorBufferGOOGLE(
+    VulkanHandleMapping* handlemap,
+    VkImportColorBufferGOOGLE* toMap);
+
+void handlemap_VkImportBufferGOOGLE(
+    VulkanHandleMapping* handlemap,
+    VkImportBufferGOOGLE* toMap);
+
+void handlemap_VkImportPhysicalAddressGOOGLE(
+    VulkanHandleMapping* handlemap,
+    VkImportPhysicalAddressGOOGLE* toMap);
+
 #endif
 #ifdef VK_KHR_acceleration_structure
 void handlemap_VkDeviceOrHostAddressKHR(
