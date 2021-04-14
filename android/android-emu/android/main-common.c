@@ -1226,7 +1226,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
 
     if (hw->hw_ramSize < minRam) {
         D("Increasing RAM size to %iMB", minRam);
-        hw->hw_ramSize = minRam;
+        //hw->hw_ramSize = minRam;
     }
     else if (limit_is_4gb && hw->hw_ramSize > 4096) {
         D("Decreasing RAM size to 4096MB");
