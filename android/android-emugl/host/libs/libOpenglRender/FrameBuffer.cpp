@@ -2002,6 +2002,33 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
     return true;
 }
 
+bool FrameBuffer::updateColorBufferFromFrameworkFormat(
+    HandleType p_colorbuffer,
+    int x,
+    int y,
+    int width,
+    int height,
+    FrameworkFormat fwkFormat,
+    GLenum format,
+    GLenum type,
+    void* pixels) {
+    if (width == 0 || height == 0) {
+        return false;
+    }
+
+    AutoLock mutex(m_lock);
+
+    ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+    if (c == m_colorbuffers.end()) {
+        // bad colorbuffer handle
+        return false;
+    }
+
+    (*c).second.cb->subUpdateFromFrameworkFormat(x, y, width, height, fwkFormat, format, type, pixels);
+
+    return true;
+}
+
 bool FrameBuffer::replaceColorBufferContents(
     HandleType p_colorbuffer, const void* pixels, size_t numBytes) {
     AutoLock mutex(m_lock);

@@ -701,14 +701,23 @@ void YUVConverter::swapTextures(uint32_t type, uint32_t* textures) {
 void YUVConverter::drawConvert(int x, int y,
                                int width, int height,
                                char* pixels) {
+    drawConvertFromFormat(mFormat, x, y, width, height, pixels);
+}
+
+void YUVConverter::drawConvertFromFormat(FrameworkFormat format, int x, int y, int width, int height, char* pixels) {
+
     saveGLState();
     if (pixels && (width != mWidth || height != mHeight)) {
         reset();
     }
 
-    if (mProgram == 0) {
+    if (mProgram == 0 || format != mFormat) {
+        reset();
+        mFormat = format;
+        mCbFormat = format;
         init(width, height, mFormat);
     }
+
     s_gles2.glViewport(x, y, width, height);
     uint32_t yoff, uoff, voff, ywidth, cwidth, cheight;
     getYUVOffsets(width, height, mFormat, &yoff, &uoff, &voff, &ywidth,
