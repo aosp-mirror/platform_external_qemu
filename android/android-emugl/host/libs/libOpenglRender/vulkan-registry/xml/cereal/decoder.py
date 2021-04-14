@@ -654,6 +654,9 @@ custom_decodes = {
     "vkImportSemaphoreFdKHR" : emit_global_state_wrapped_decoding,
     "vkDestroySemaphore" : emit_global_state_wrapped_decoding,
 
+    "vkCreateFence" : emit_global_state_wrapped_decoding,
+    "vkDestroyFence" : emit_global_state_wrapped_decoding,
+
     # VK_GOOGLE_gfxstream
     "vkFreeMemorySyncGOOGLE" : emit_global_state_wrapped_decoding,
     "vkMapMemoryIntoAddressSpaceGOOGLE" : emit_global_state_wrapped_decoding,
