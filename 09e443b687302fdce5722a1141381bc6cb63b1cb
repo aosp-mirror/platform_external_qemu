@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6c9dd7b6_4edc770c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2021-04-14T01:50:01Z",
+      "side": 1,
+      "message": "For our disk usage evaluation purpose only.",
+      "revId": "09e443b687302fdce5722a1141381bc6cb63b1cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
