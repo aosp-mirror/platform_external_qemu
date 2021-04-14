@@ -88,6 +88,23 @@
       "parentUuid": "cbcd469f_f95999ec",
       "revId": "cdeece1973681c11330d978a0f4f7aebcfb7bf72",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8601bc6a_5d2612b2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-04-14T03:20:27Z",
+      "side": 1,
+      "message": "only the sdk_gphone_x86_64 will have this need to install some extra medial files\nas it is used in presubmit and it runs a few media tests.\n\nother sdk targets, such as sdk_gphone64_* wont need those files and external\ndevs wont see them as well.\nthis is just a temp work around before the atest perf bug is fixed.",
+      "revId": "cdeece1973681c11330d978a0f4f7aebcfb7bf72",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
