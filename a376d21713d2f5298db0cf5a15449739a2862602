@@ -41,6 +41,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2cd083f3_36ef19df",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-04-14T18:49:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c04ab661_33862323",
+      "range": {
+        "startLine": 240,
+        "startChar": 16,
+        "endLine": 240,
+        "endChar": 54
+      },
+      "revId": "a376d21713d2f5298db0cf5a15449739a2862602",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "02998116_3f80133e",
@@ -54,6 +78,30 @@
       "writtenOn": "2021-04-14T18:21:55Z",
       "side": 1,
       "message": "You also want to provide mac80211_hwsim.mac_prefix\u003d%d here",
+      "range": {
+        "startLine": 242,
+        "startChar": 16,
+        "endLine": 242,
+        "endChar": 54
+      },
+      "revId": "a376d21713d2f5298db0cf5a15449739a2862602",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "03a885a3_6f6a7c55",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-04-14T18:49:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "02998116_3f80133e",
       "range": {
         "startLine": 242,
         "startChar": 16,
