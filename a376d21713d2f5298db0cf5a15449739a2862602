@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "928e4eb7_78382b14",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-04-14T18:20:23Z",
+      "side": 1,
+      "message": "Ran emulator with this patch and verbose mode on API 30 or API S. And WiFi stops working.",
+      "revId": "a376d21713d2f5298db0cf5a15449739a2862602",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
