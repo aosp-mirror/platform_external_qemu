@@ -27,39 +27,98 @@ namespace base {
 template <class K, class V>
 class MruCache {
 public:
-    explicit MruCache(size_t maxEntries) : mMaxEntries(maxEntries) {}
+    template <class S>
+    struct EntryWithSize {
+        EntryWithSize(const S&& d) : EntryWithSize(std::move(d), 0) {}
 
-    bool put(const K& key, V&& value) {
+        EntryWithSize(const S&& d, const size_t ds)
+            : data(std::move(d)), dataSize(ds) {
+            static_assert(
+                    std::is_same<S, K>::value || std::is_same<S, V>::value,
+                    "Cache entry instantiated with invalid types");
+        }
+
+        const S data;
+        size_t dataSize;
+
+        bool operator==(const EntryWithSize& rhs) const {
+            return data == rhs.data;
+        }
+        bool operator<(const EntryWithSize& rhs) const {
+            return data < rhs.data;
+        }
+    };
+
+    class MruCacheObserver {
+    public:
+        virtual void cacheChanged() = 0;
+        virtual ~MruCacheObserver() {}
+    };
+
+    class CacheFlattener {
+    public:
+        virtual void handleFlatten(
+                std::map<EntryWithSize<K>, EntryWithSize<V>>& mCache,
+                void* buf,
+                size_t bufSize) = 0;
+        virtual ~CacheFlattener() {}
+    };
+
+    MruCache(size_t maxEntries, CacheFlattener* cacheFlattener)
+        : mMaxEntries(maxEntries), mCacheFlattener(cacheFlattener) {}
+
+    bool put(const K& key, size_t keySize, V&& value, size_t valueSize) {
         evictIfNecessary();
-        auto exists = mCache.find(key);
+
+        EntryWithSize<K> cacheKey(std::move(key), keySize);
+        EntryWithSize<V> cacheValue(std::move(value), valueSize);
+
+        auto exists = mCache.find(cacheKey);
         if (exists != mCache.end()) {
-            auto iter =
-                    std::find(mMostRecents.begin(), mMostRecents.end(), key);
+            auto iter = std::find(mMostRecents.begin(), mMostRecents.end(),
+                                  cacheKey);
             mMostRecents.splice(mMostRecents.begin(), mMostRecents, iter);
             mCache.erase(exists);
         } else {
-            mMostRecents.push_front(key);
+            mMostRecents.push_front(cacheKey);
         }
 
-        auto res = mCache.insert({key, std::forward<V>(value)});
-        return true;
+        const auto [_, res] = mCache.insert({cacheKey, std::move(cacheValue)});
+
+        if (mCacheObserver != nullptr && res) {
+            mCacheObserver->cacheChanged();
+        }
+
+        return res;
+    }
+
+    void flatten(void* buf, size_t bufSize) {
+        if (mCacheFlattener) {
+            mCacheFlattener->handleFlatten(mCache, buf, bufSize);
+        }
     }
 
     bool get(const K& key, const V** value) {
-        auto res = mCache.find(key);
+        EntryWithSize<K> cacheKey(std::move(key));
+        auto res = mCache.find(cacheKey);
+
         if (res == mCache.end()) {
             return false;
         }
 
-        *value = &res->second;
-        auto iter = std::find(mMostRecents.begin(), mMostRecents.end(), key);
+        *value = &(res->second.data);
+        auto iter =
+                std::find(mMostRecents.begin(), mMostRecents.end(), cacheKey);
         mMostRecents.splice(mMostRecents.begin(), mMostRecents, iter);
+
         return true;
     }
 
+    void setObserver(MruCacheObserver* observer) { mCacheObserver = observer; }
+
 private:
-    using MruCacheMap = std::map<K, V>;
-    using MostRecentList = std::list<K>;
+    using MruCacheMap = std::map<EntryWithSize<K>, EntryWithSize<V>>;
+    using MostRecentList = std::list<EntryWithSize<K>>;
 
     void evictIfNecessary() {
         auto entryCount = mMostRecents.size();
@@ -67,7 +126,7 @@ private:
             auto threshold = entryCount * 0.9;
 
             for (int i = mMostRecents.size(); i > threshold; i--) {
-                K key = mMostRecents.front();
+                EntryWithSize<K> key = mMostRecents.front();
                 mMostRecents.pop_front();
                 mCache.erase(key);
             }
@@ -76,6 +135,8 @@ private:
 
     MruCacheMap mCache;
     MostRecentList mMostRecents;
+    MruCacheObserver* mCacheObserver;
+    CacheFlattener* mCacheFlattener;
     const size_t mMaxEntries;
 };
 
