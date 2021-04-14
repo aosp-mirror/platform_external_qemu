@@ -1093,16 +1093,18 @@ static void rcTriggerWait(uint64_t eglsync_ptr,
     if (thread_ptr == 1) {
         // Is vulkan sync fd;
         // just signal right away for now
-        SyncThread::get()->triggerWait(0, timeline);
+        EGLSYNC_DPRINT("vkFence=0x%llx timeline=0x%llx", eglsync_ptr,
+                       thread_ptr, timeline);
+        SyncThread::get()->triggerWaitVk(reinterpret_cast<VkFence>(eglsync_ptr),
+                                         timeline);
+    } else {
+        FenceSync* fenceSync = reinterpret_cast<FenceSync*>(eglsync_ptr);
+        EGLSYNC_DPRINT(
+                "eglsync=0x%llx fenceSync=%p thread_ptr=0x%llx "
+                "timeline=0x%llx",
+                eglsync_ptr, fenceSync, thread_ptr, timeline);
+        SyncThread::get()->triggerWait(fenceSync, timeline);
     }
-
-    FenceSync* fenceSync = (FenceSync*)(uintptr_t)eglsync_ptr;
-    EGLSYNC_DPRINT("eglsync=0x%llx "
-                   "fenceSync=%p "
-                   "thread_ptr=0x%llx "
-                   "timeline=0x%llx",
-                   eglsync_ptr, fenceSync, thread_ptr, timeline);
-    SyncThread::get()->triggerWait(fenceSync, timeline);
 }
 
 // |rcCreateSyncKHR| implements the guest's |eglCreateSyncKHR| by calling the

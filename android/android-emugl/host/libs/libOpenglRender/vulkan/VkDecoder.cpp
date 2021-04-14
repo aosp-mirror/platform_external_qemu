@@ -2219,14 +2219,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 const VkFenceCreateInfo* pCreateInfo;
                 const VkAllocationCallbacks* pAllocator;
                 VkFence* pFence;
-                // Begin non wrapped dispatchable handle unboxing for device;
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_0;
                 memcpy((uint64_t*)&cgen_var_0, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
                 *(VkDevice*)&device = (VkDevice)(VkDevice)((VkDevice)(*&cgen_var_0));
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                // End manual dispatchable handle unboxing for device;
                 vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkFenceCreateInfo));
                 reservedunmarshal_VkFenceCreateInfo(vkReadStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkFenceCreateInfo*)(pCreateInfo), readStreamPtrPtr);
                 // WARNING PTR CHECK
@@ -2258,15 +2255,15 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     fprintf(stderr, "stream %p: call vkCreateFence 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pFence);
                 }
                 VkResult vkCreateFence_VkResult_return = (VkResult)0;
-                vkCreateFence_VkResult_return = vk->vkCreateFence(unboxed_device, pCreateInfo, pAllocator, pFence);
+                vkCreateFence_VkResult_return = m_state->on_vkCreateFence(&m_pool, device, pCreateInfo, pAllocator, pFence);
                 vkStream->unsetHandleMapping();
-                // Begin auto non dispatchable handle create for pFence;
-                if (vkCreateFence_VkResult_return == VK_SUCCESS) vkStream->setHandleMapping(&m_boxedHandleCreateMapping);
+                // Begin manual non dispatchable handle create for pFence;
+                vkStream->unsetHandleMapping();
                 uint64_t cgen_var_3;
                 static_assert(8 == sizeof(VkFence), "handle map overwrite requres VkFence to be 8 bytes long");
                 vkStream->handleMapping()->mapHandles_VkFence((VkFence*)pFence, 1);
                 vkStream->write((VkFence*)pFence, 8 * 1);
-                // Begin auto non dispatchable handle create for pFence;
+                // Begin manual non dispatchable handle create for pFence;
                 vkStream->setHandleMapping(&m_boxedHandleUnwrapMapping);
                 vkStream->write(&vkCreateFence_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
@@ -2287,14 +2284,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 VkDevice device;
                 VkFence fence;
                 const VkAllocationCallbacks* pAllocator;
-                // Begin non wrapped dispatchable handle unboxing for device;
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_0;
                 memcpy((uint64_t*)&cgen_var_0, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
                 *(VkDevice*)&device = (VkDevice)(VkDevice)((VkDevice)(*&cgen_var_0));
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                // End manual dispatchable handle unboxing for device;
                 // Begin manual non dispatchable handle destroy unboxing for fence;
                 VkFence boxed_fence_preserve;
                 uint64_t cgen_var_1;
@@ -2320,7 +2314,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 {
                     fprintf(stderr, "stream %p: call vkDestroyFence 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)fence, (unsigned long long)pAllocator);
                 }
-                vk->vkDestroyFence(unboxed_device, fence, pAllocator);
+                m_state->on_vkDestroyFence(&m_pool, device, fence, pAllocator);
                 vkStream->unsetHandleMapping();
                 vkReadStream->setReadPos((uintptr_t)(*readStreamPtrPtr) - (uintptr_t)snapshotTraceBegin);
                 size_t snapshotTraceBytes = vkReadStream->endTrace();
