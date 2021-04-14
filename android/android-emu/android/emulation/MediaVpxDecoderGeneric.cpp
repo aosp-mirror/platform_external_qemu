@@ -270,9 +270,16 @@ void MediaVpxDecoderGeneric::getImage(void* ptr) {
         VPX_DPRINT("calling rendering to host side color buffer with id %d",
                    param.hostColorBufferId);
         if (mUseGpuTexture && pFrame->texture[0] > 0 && pFrame->texture[1] > 0) {
-            VPX_DPRINT(
-                    "calling rendering to host side color buffer with id %d "
+            // VPX_DPRINT(
+            //         "calling rendering to host side color buffer with id %d "
+            //         "(gpu texture mode: textures %u %u)",
+            //         param.hostColorBufferId,
+            //         pFrame->texture[0],
+            //         pFrame->texture[1]);
+            fprintf(stderr, 
+                    "%s: calling rendering to host side color buffer with id %d "
                     "(gpu texture mode: textures %u %u)",
+                    __func__,
                     param.hostColorBufferId,
                     pFrame->texture[0],
                     pFrame->texture[1]);
@@ -280,8 +287,8 @@ void MediaVpxDecoderGeneric::getImage(void* ptr) {
                     param.hostColorBufferId, pFrame->width, pFrame->height,
                     TextureFrame{pFrame->texture[0], pFrame->texture[1]});
         } else {
-            VPX_DPRINT(
-                    "calling rendering to host side color buffer with id %d",
+            fprintf(stderr,
+                    "%s: calling rendering to host side color buffer with id %d\n", __func__,
                     param.hostColorBufferId);
             mRenderer.renderToHostColorBuffer(param.hostColorBufferId,
                                               pFrame->width, pFrame->height,
