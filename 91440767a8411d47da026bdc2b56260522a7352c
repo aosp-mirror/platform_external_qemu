@@ -46,6 +46,30 @@
       },
       "revId": "91440767a8411d47da026bdc2b56260522a7352c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7444c53c_8f71bc8c",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-04-14T04:19:26Z",
+      "side": 1,
+      "message": "Before Mac80211hwsimUserspaceManaged we did this by setting mac80211_hwsim.mac_prefix, but starting from GKI this parameter is no longer available and Mac80211hwsimUserspaceManaged was introduced to created radios (with specified mac addresses) by userspace.",
+      "parentUuid": "045bd815_031cd612",
+      "range": {
+        "startLine": 234,
+        "startChar": 12,
+        "endLine": 234,
+        "endChar": 50
+      },
+      "revId": "91440767a8411d47da026bdc2b56260522a7352c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
