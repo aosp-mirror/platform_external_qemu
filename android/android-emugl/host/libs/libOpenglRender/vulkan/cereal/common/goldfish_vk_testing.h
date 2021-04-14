@@ -3021,20 +3021,20 @@ void checkEqual_VkMetalSurfaceCreateInfoEXT(
     OnFailCompareFunc onFail);
 
 #endif
-#ifdef VK_GOOGLE_color_buffer
-void checkEqual_VkImportColorBufferGOOGLE(
-    const VkImportColorBufferGOOGLE* a,
-    const VkImportColorBufferGOOGLE* b,
+#ifdef VK_EXT_fragment_density_map
+void checkEqual_VkPhysicalDeviceFragmentDensityMapFeaturesEXT(
+    const VkPhysicalDeviceFragmentDensityMapFeaturesEXT* a,
+    const VkPhysicalDeviceFragmentDensityMapFeaturesEXT* b,
     OnFailCompareFunc onFail);
 
-void checkEqual_VkImportBufferGOOGLE(
-    const VkImportBufferGOOGLE* a,
-    const VkImportBufferGOOGLE* b,
+void checkEqual_VkPhysicalDeviceFragmentDensityMapPropertiesEXT(
+    const VkPhysicalDeviceFragmentDensityMapPropertiesEXT* a,
+    const VkPhysicalDeviceFragmentDensityMapPropertiesEXT* b,
     OnFailCompareFunc onFail);
 
-void checkEqual_VkImportPhysicalAddressGOOGLE(
-    const VkImportPhysicalAddressGOOGLE* a,
-    const VkImportPhysicalAddressGOOGLE* b,
+void checkEqual_VkRenderPassFragmentDensityMapCreateInfoEXT(
+    const VkRenderPassFragmentDensityMapCreateInfoEXT* a,
+    const VkRenderPassFragmentDensityMapCreateInfoEXT* b,
     OnFailCompareFunc onFail);
 
 #endif
@@ -3500,6 +3500,21 @@ void checkEqual_VkDirectFBSurfaceCreateInfoEXT(
 
 #endif
 #ifdef VK_GOOGLE_gfxstream
+void checkEqual_VkImportColorBufferGOOGLE(
+    const VkImportColorBufferGOOGLE* a,
+    const VkImportColorBufferGOOGLE* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkImportBufferGOOGLE(
+    const VkImportBufferGOOGLE* a,
+    const VkImportBufferGOOGLE* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkImportPhysicalAddressGOOGLE(
+    const VkImportPhysicalAddressGOOGLE* a,
+    const VkImportPhysicalAddressGOOGLE* b,
+    OnFailCompareFunc onFail);
+
 #endif
 #ifdef VK_KHR_acceleration_structure
 void checkEqual_VkDeviceOrHostAddressKHR(
