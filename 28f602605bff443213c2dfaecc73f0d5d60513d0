@@ -118,6 +118,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8124392d_05cd4aa4",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-04-14T20:03:17Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "dc5e87ec_d98e89c4",
+      "range": {
+        "startLine": 246,
+        "startChar": 43,
+        "endLine": 246,
+        "endChar": 51
+      },
+      "revId": "28f602605bff443213c2dfaecc73f0d5d60513d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b3dfe509_b2304647",
@@ -131,6 +155,30 @@
       "writtenOn": "2021-04-14T19:20:03Z",
       "side": 1,
       "message": "Could you please add a comment that \"for kernels 4.14 and below we have had a parameter to pass the MAC address prefix\"?",
+      "range": {
+        "startLine": 250,
+        "startChar": 49,
+        "endLine": 250,
+        "endChar": 59
+      },
+      "revId": "28f602605bff443213c2dfaecc73f0d5d60513d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e13490ae_df935052",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-04-14T20:03:17Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "b3dfe509_b2304647",
       "range": {
         "startLine": 250,
         "startChar": 49,
