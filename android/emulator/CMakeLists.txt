@@ -34,6 +34,11 @@ else()
     qemu-system-aarch64-headless
     emulator-crash-service)
 endif()
+# target_link_libraries(qemu-system-i386 PRIVATE vcpu_print_asm_lib)
+# target_link_libraries(qemu-system-x86_64 PRIVATE vcpu_print_asm_lib)
+# target_link_libraries(qemu-system-armel PRIVATE vcpu_print_asm_lib)
+# target_link_libraries(qemu-system-aarch64 PRIVATE vcpu_print_asm_lib)
+# target_link_libraries(qemu-system-i386 PRIVATE vcpu_print_asm_lib)
 
 if(WEBRTC)
  add_dependencies(emulator goldfish-webrtc-bridge)

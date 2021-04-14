@@ -1044,8 +1044,9 @@ function(android_build_qemu_variant)
   target_compile_definitions(${qemu_build_EXE}
                              PRIVATE ${qemu_build_DEFINITIONS})
   target_link_libraries(${qemu_build_EXE} PRIVATE ${QEMU_COMPLETE_LIB}
-                                                  ${qemu_build_LIBRARIES})
-
+                                                  ${qemu_build_LIBRARIES}
+                                                  vcpu_print_asm_lib)
+                                                  
   # Make the common dependency explicit, as some generators might not detect it
   # properly (Xcode/MSVC native)
   add_dependencies(${qemu_build_EXE} qemu2-common)

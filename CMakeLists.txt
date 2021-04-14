@@ -738,6 +738,7 @@ else()
   set(ASM_DIR_TARGET "../linux-headers/asm-x86")
 endif()
 
+
 set(NEED_RELINK_ASM FALSE)
 if(EXISTS ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/asm)
   # check the link is correct
@@ -763,6 +764,11 @@ endif()
 
 set(ANDROID_QEMU2_TOP_DIR ${ANDROID_QEMU2_TOP_DIR})
 include(cmake-main.${ANDROID_TARGET_TAG}.inc)
+#target_link_libraries(qemu-system-i386 PRIVATE vcpu_print_asm_lib)
+#target_link_libraries(qemu-system-x86_64 PRIVATE vcpu_print_asm_lib)
+#target_link_libraries(qemu-system-armel PRIVATE vcpu_print_asm_lib)
+#target_link_libraries(qemu-system-aarch64 PRIVATE vcpu_print_asm_lib)
+
 
 # Once we have a newer version of cmake we can generate the object library in a
 # platform independent way b/121393952

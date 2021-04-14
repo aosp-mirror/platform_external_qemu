@@ -19,6 +19,10 @@
 
  ## TARGET: qemu2-shared ##
 
+android_nasm_compile(
+   TARGET vcpu_print_asm_lib LICENSE Apache-2.0 SRC # cmake-format: sortable
+                                                vmx_ops.asm)
+
 set(qemu2-shared_sources ""
    crypto/hash.c
    block/accounting.c
@@ -1452,7 +1456,7 @@ set(qemu-system-aarch64_sources ""
 set(qemu-system-aarch64_generated_sources "" 
 ${ANDROID_AUTOGEN}/trace/generated-helpers.c)
 
-set(qemu-system-aarch64_dep libqemuutil qemu2-shared)
+set(qemu-system-aarch64_dep libqemuutil qemu2-shared vcpu_print_asm_lib)
 
  ## TARGET: qemu-system-arm ##
 
@@ -1808,9 +1812,10 @@ set(qemu-system-arm_sources ""
 set(qemu-system-arm_generated_sources "" 
 ${ANDROID_AUTOGEN}/trace/generated-helpers.c)
 
-set(qemu-system-arm_dep libqemuutil qemu2-shared)
+set(qemu-system-arm_dep libqemuutil qemu2-shared vcpu_print_asm_lib)
 
  ## TARGET: qemu-system-i386 ##
+
 
 set(qemu-system-i386_sources ""
    exec.c
@@ -2010,7 +2015,7 @@ set(qemu-system-i386_sources ""
 set(qemu-system-i386_generated_sources "" 
 ${ANDROID_AUTOGEN}/trace/generated-helpers.c)
 
-set(qemu-system-i386_dep libqemuutil qemu2-shared)
+set(qemu-system-i386_dep libqemuutil qemu2-shared vcpu_print_asm_lib)
 
  ## TARGET: qemu-system-mips64el ##
 
@@ -2533,7 +2538,7 @@ set(qemu-system-x86_64_sources ""
 set(qemu-system-x86_64_generated_sources "" 
 ${ANDROID_AUTOGEN}/trace/generated-helpers.c)
 
-set(qemu-system-x86_64_dep libqemuutil qemu2-shared)
+set(qemu-system-x86_64_dep libqemuutil qemu2-shared vcpu_print_asm_lib)
 
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/trace-root.c ${ANDROID_QEMU2_TOP_DIR}/dump.c ${ANDROID_QEMU2_TOP_DIR}/bt-vhci.c ${ANDROID_QEMU2_TOP_DIR}/gdbstub.c ${ANDROID_QEMU2_TOP_DIR}/monitor.c ${ANDROID_QEMU2_TOP_DIR}/bt-host.c ${ANDROID_QEMU2_TOP_DIR}/blockdev-nbd.c ${ANDROID_QEMU2_TOP_DIR}/block.c ${ANDROID_QEMU2_TOP_DIR}/hmp.c ${ANDROID_QEMU2_TOP_DIR}/qdev-monitor.c ${ANDROID_QEMU2_TOP_DIR}/device_tree.c ${ANDROID_QEMU2_TOP_DIR}/blockdev.c ${ANDROID_QEMU2_TOP_DIR}/ioport.c ${ANDROID_QEMU2_TOP_DIR}/numa.c ${ANDROID_QEMU2_TOP_DIR}/blockjob.c ${ANDROID_QEMU2_TOP_DIR}/dma-helpers.c ${ANDROID_QEMU2_TOP_DIR}/qmp.c ${ANDROID_QEMU2_TOP_DIR}/qemu-nbd.c ${ANDROID_QEMU2_TOP_DIR}/qemu-io-cmds.c ${ANDROID_QEMU2_TOP_DIR}/iothread.c ${ANDROID_QEMU2_TOP_DIR}/qemu-bridge-helper.c ${ANDROID_QEMU2_TOP_DIR}/balloon.c ${ANDROID_QEMU2_TOP_DIR}/tpm.c ${ANDROID_QEMU2_TOP_DIR}/memory.c ${ANDROID_QEMU2_TOP_DIR}/cpus.c ${ANDROID_QEMU2_TOP_DIR}/cpus-common.c ${ANDROID_QEMU2_TOP_DIR}/qemu-img.c ${ANDROID_QEMU2_TOP_DIR}/os-posix.c ${ANDROID_QEMU2_TOP_DIR}/bootdevice.c ${ANDROID_QEMU2_TOP_DIR}/replication.c ${ANDROID_QEMU2_TOP_DIR}/qemu-io.c ${ANDROID_QEMU2_TOP_DIR}/arch_init.c ${ANDROID_QEMU2_TOP_DIR}/device-hotplug.c ${ANDROID_QEMU2_TOP_DIR}/qtest.c ${ANDROID_QEMU2_TOP_DIR}/exec.c ${ANDROID_QEMU2_TOP_DIR}/disas.c ${ANDROID_QEMU2_TOP_DIR}/memory_mapping.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/target/ppc/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/target/ppc")
