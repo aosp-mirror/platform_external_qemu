@@ -16,6 +16,52 @@
       "message": "Ran emulator with this patch and verbose mode on API 30 or API S. And WiFi stops working.",
       "revId": "a376d21713d2f5298db0cf5a15449739a2862602",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c04ab661_33862323",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-04-14T18:21:55Z",
+      "side": 1,
+      "message": "boot_property_add_wifi_mac_prefix(android_serial_number_port);",
+      "range": {
+        "startLine": 240,
+        "startChar": 16,
+        "endLine": 240,
+        "endChar": 54
+      },
+      "revId": "a376d21713d2f5298db0cf5a15449739a2862602",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "02998116_3f80133e",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-04-14T18:21:55Z",
+      "side": 1,
+      "message": "You also want to provide mac80211_hwsim.mac_prefix\u003d%d here",
+      "range": {
+        "startLine": 242,
+        "startChar": 16,
+        "endLine": 242,
+        "endChar": 54
+      },
+      "revId": "a376d21713d2f5298db0cf5a15449739a2862602",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
