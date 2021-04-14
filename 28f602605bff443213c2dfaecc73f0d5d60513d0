@@ -52,6 +52,24 @@
       "parentUuid": "46f4a330_2a982eec",
       "revId": "28f602605bff443213c2dfaecc73f0d5d60513d0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cd672a96_b6cc3e10",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-04-14T19:07:07Z",
+      "side": 1,
+      "message": "I am gonna change the logic to NOT pass in Mac80211_hwsim.radios\u003d2 when feature Wifi and Mac80211hwsimUserspaceManaged are both on. Although, the code looks not very clean, at least it won\u0027t have duplicates in androidboot.",
+      "parentUuid": "97910311_dd016247",
+      "revId": "28f602605bff443213c2dfaecc73f0d5d60513d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
