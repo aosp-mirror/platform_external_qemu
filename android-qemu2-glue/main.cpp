@@ -2223,15 +2223,12 @@ extern "C" int main(int argc, char** argv) {
         args.add("virtio-gpu-pci");
     }
     initialize_virtio_input_devs(args, hw);
-#ifndef AEMU_GFXSTREAM_BACKEND
     if (feature_is_enabled(kFeature_VirtioWifi)) {
         args.add("-netdev");
         args.add("user,id=virtio-wifi,dhcpstart=10.0.2.16");
         args.add("-device");
         args.add("virtio-wifi-pci,netdev=virtio-wifi");
     }
-#endif
-
 
     if (feature_is_enabled(kFeature_VirtioVsockPipe)) {
         args.add("-device");
@@ -2542,12 +2539,10 @@ extern "C" int main(int argc, char** argv) {
         // Dump final command-line option to make debugging the core easier
         printf("Concatenated QEMU options:\n %s\n", args.toString().c_str());
     }
-#ifndef AEMU_GFXSTREAM_BACKEND
     if (fc::isEnabled(fc::VirtioWifi)) {
         auto* hostapd = android::qemu2::HostapdController::getInstance();
         hostapd->initAndRun(VERBOSE_CHECK(wifi));
     }
-#endif
     if (opts->check_snapshot_loadable) {
         android_check_snapshot_loadable(opts->check_snapshot_loadable);
         stopRenderer();
