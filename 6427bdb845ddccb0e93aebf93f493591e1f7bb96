@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a1456b88_c1f749e7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-04-14T17:38:05Z",
+      "side": 1,
+      "message": "Could you please elaborate why they were added and why it is ok to remove them?",
+      "revId": "6427bdb845ddccb0e93aebf93f493591e1f7bb96",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
