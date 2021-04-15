@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ad3d8f84_8eb49353",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-04-15T20:47:55Z",
+      "side": 1,
+      "message": " FAILED: android/third_party/perfetto-tracing-only/proto/CMakeFiles/perfetto_trace.dir/perfetto_trace.pb.cc.o\n\n\nthis is strange",
+      "revId": "7e49106b7529f3a19eba03c6c6f02913ca957400",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
