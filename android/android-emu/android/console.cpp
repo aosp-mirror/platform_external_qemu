@@ -828,7 +828,9 @@ int android_console_start(int control_port,
                 loopIo_new(global->looper, fd4, control_global_accept4, global);
         loopIo_wantRead(global->listen4_loopio);
         // BUG: 180115054
-#ifndef _WIN32
+#ifdef _WIN32
+        loopIo_wantWrite(global->listen4_loopio);
+#else
         loopIo_dontWantWrite(global->listen4_loopio);
 #endif
     } else {
@@ -840,7 +842,9 @@ int android_console_start(int control_port,
                 loopIo_new(global->looper, fd6, control_global_accept6, global);
         loopIo_wantRead(global->listen6_loopio);
         // BUG: 180115054
-#ifndef _WIN32
+#ifdef _WIN32
+        loopIo_wantWrite(global->listen6_loopio);
+#else
         loopIo_dontWantWrite(global->listen6_loopio);
 #endif
     } else {
