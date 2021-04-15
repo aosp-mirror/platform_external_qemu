@@ -2098,6 +2098,7 @@ extern "C" int main(int argc, char** argv) {
         opts->virtio_console ||
         fc::isEnabled(fc::VirtconsoleLogcat);
 
+    bool virtio_serial_added = false;
     if (createVirtconsoles) {
         args.add("-chardev");
         args.addFormat("%s,id=forhvc0",
@@ -2123,6 +2124,7 @@ extern "C" int main(int argc, char** argv) {
         }
 
         args.add2("-device", "virtio-serial-pci,ioeventfd=off");
+        virtio_serial_added = true;
 
         // the order of virtconsoles must be preserved
         args.add2("-device", "virtconsole,chardev=forhvc0");
@@ -2154,8 +2156,10 @@ extern "C" int main(int argc, char** argv) {
             int modem_simulator_guest_port =
                     cuttlefish::start_android_modem_simulator_detached(isIpv4);
 
-            args.add("-device");
-            args.add("virtio-serial,ioeventfd=off");
+            if (!virtio_serial_added) {
+                args.add("-device");
+                args.add("virtio-serial-pci,ioeventfd=off");
+            }
             args.add("-chardev");
             args.addFormat(
                     "socket,port=%d,host=%s,nowait,nodelay,%s,id="
@@ -2178,8 +2182,10 @@ extern "C" int main(int argc, char** argv) {
                 isIpv4, opts->gnss_grpc_port ? opts->gnss_grpc_port : "",
                 opts->gnss_file_path ? opts->gnss_file_path : "");
 
-        args.add("-device");
-        args.add("virtio-serial,ioeventfd=off");
+        if (!virtio_serial_added) {
+            args.add("-device");
+            args.add("virtio-serial-pci,ioeventfd=off");
+        }
         args.add("-chardev");
         args.addFormat(
                 "socket,port=%d,host=%s,nowait,nodelay,%s,id="
