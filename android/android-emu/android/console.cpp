@@ -831,12 +831,14 @@ int android_console_start(int control_port,
         global->listen4_loopio =
                 loopIo_new(global->looper, fd4, control_global_accept4, global);
         loopIo_wantRead(global->listen4_loopio);
+<<<<<<< HEAD   (f97d82 Merge "Merge cherrypicks of [1676350, 1676351] into emu-30-r)
         // BUG: 180115054
 #ifdef _WIN32
         loopIo_wantWrite(global->listen4_loopio);
 #else
+=======
+>>>>>>> CHANGE (7e4910 Revert "windows: hack to fix nonresponsive console w/ modem )
         loopIo_dontWantWrite(global->listen4_loopio);
-#endif
     } else {
         global->listen4_loopio = NULL;
     }
@@ -845,12 +847,14 @@ int android_console_start(int control_port,
         global->listen6_loopio =
                 loopIo_new(global->looper, fd6, control_global_accept6, global);
         loopIo_wantRead(global->listen6_loopio);
+<<<<<<< HEAD   (f97d82 Merge "Merge cherrypicks of [1676350, 1676351] into emu-30-r)
         // BUG: 180115054
 #ifdef _WIN32
         loopIo_wantWrite(global->listen6_loopio);
 #else
+=======
+>>>>>>> CHANGE (7e4910 Revert "windows: hack to fix nonresponsive console w/ modem )
         loopIo_dontWantWrite(global->listen6_loopio);
-#endif
     } else {
         global->listen6_loopio = NULL;
     }
