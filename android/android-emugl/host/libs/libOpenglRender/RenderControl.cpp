@@ -1091,6 +1091,7 @@ static void rcTriggerWait(uint64_t eglsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline) {
     if (thread_ptr == 1) {
+        fprintf(stderr, "%s: Vulkan sync fd\n", __func__);
         // Is vulkan sync fd;
         // just signal right away for now
         EGLSYNC_DPRINT("vkFence=0x%llx timeline=0x%llx", eglsync_ptr,
@@ -1098,6 +1099,7 @@ static void rcTriggerWait(uint64_t eglsync_ptr,
         SyncThread::get()->triggerWaitVk(reinterpret_cast<VkFence>(eglsync_ptr),
                                          timeline);
     } else {
+        fprintf(stderr, "%s: EGL sync fd\n", __func__);
         FenceSync* fenceSync = reinterpret_cast<FenceSync*>(eglsync_ptr);
         EGLSYNC_DPRINT(
                 "eglsync=0x%llx fenceSync=%p thread_ptr=0x%llx "
