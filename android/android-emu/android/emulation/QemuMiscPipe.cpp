@@ -227,23 +227,23 @@ static void runAdbScripts(emulation::AdbInterface* adbInterface,
     // media/test/file.mp4 /sdcard/test/media/file.mp4
 
     auto list = base::System::get()->scanDirEntries(adbScriptsDir, true);
-    for (auto filepath : list) {
-        std::ifstream inFile(filepath, std::ios_base::in);
-        if (!inFile.is_open()) {
-            continue;
-        }
-        std::string line;
-        while (std::getline(inFile, line)) {
-            std::vector<std::string> commands = base::Split(line, "\t");
-            if (commands.size() != 3) {
-                continue;
-            }
-            if (commands[0] != "push")
-                continue;
-            adbInterface->enqueueCommand(
-                    {"push", dataDir + "/" + commands[1], commands[2]});
-        }
-    }
+    // for (auto filepath : list) {
+    //     std::ifstream inFile(filepath, std::ios_base::in);
+    //     if (!inFile.is_open()) {
+    //         continue;
+    //     }
+    //     std::string line;
+    //     while (std::getline(inFile, line)) {
+    //         std::vector<std::string> commands = base::Split(line, "\t");
+    //         if (commands.size() != 3) {
+    //             continue;
+    //         }
+    //         if (commands[0] != "push")
+    //             continue;
+    //         adbInterface->enqueueCommand(
+    //                 {"push", dataDir + "/" + commands[1], commands[2]});
+    //     }
+    // }
 }
 
 static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
@@ -326,11 +326,11 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
 #ifdef __linux__
                 std::string datadir =
                         avdInfo_getDataInitDirPath(android_avdInfo);
-                // std::string adbscriptsdir =
-                //         android::base::PathUtils::join(datadir, "adbscripts");
-                // if (path_exists(adbscriptsdir.c_str())) {
-                //     runAdbScripts(adbInterface, datadir, adbscriptsdir);
-                // }
+                std::string adbscriptsdir =
+                        android::base::PathUtils::join(datadir, "adbscripts");
+                if (path_exists(adbscriptsdir.c_str())) {
+                     runAdbScripts(adbInterface, datadir, adbscriptsdir);
+                }
 #endif
             }
 
