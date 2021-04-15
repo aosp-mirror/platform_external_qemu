@@ -1323,6 +1323,20 @@ static int rcSetDisplayPose(uint32_t displayId,
     return fb->setDisplayPose(displayId, x, y, w, h);
 }
 
+static int rcSetDisplayPoseDpi(uint32_t displayId,
+                               int32_t x,
+                               int32_t y,
+                               uint32_t w,
+                               uint32_t h,
+                               uint32_t dpi) {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return -1;
+    }
+
+    return fb->setDisplayPose(displayId, x, y, w, h, dpi);
+}
+
 static void rcReadColorBufferYUV(uint32_t colorBuffer,
                                 GLint x, GLint y,
                                 GLint width, GLint height,
@@ -1550,4 +1564,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcComposeWithoutPost = rcComposeWithoutPost;
     dec->rcComposeAsyncWithoutPost = rcComposeAsyncWithoutPost;
     dec->rcCreateDisplayById = rcCreateDisplayById;
+    dec->rcSetDisplayPoseDpi = rcSetDisplayPoseDpi;
 }
