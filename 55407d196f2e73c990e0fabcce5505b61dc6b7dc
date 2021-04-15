@@ -16,6 +16,23 @@
       "message": "green: https://android-review.googlesource.com/c/platform/external/qemu/+/1673737\nred: https://android-review.googlesource.com/c/platform/external/qemu/+/1673737",
       "revId": "55407d196f2e73c990e0fabcce5505b61dc6b7dc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6507dbad_fbea11c5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-04-15T02:52:05Z",
+      "side": 1,
+      "message": "that seems odd, as it is no-op on g3",
+      "revId": "55407d196f2e73c990e0fabcce5505b61dc6b7dc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
