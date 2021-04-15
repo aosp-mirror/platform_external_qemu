@@ -240,8 +240,8 @@ static void runAdbScripts(emulation::AdbInterface* adbInterface,
             }
             if (commands[0] != "push")
                 continue;
-            // adbInterface->enqueueCommand(
-            //         {"push", dataDir + "/" + commands[1], commands[2]});
+            adbInterface->enqueueCommand(
+                    {"push", dataDir + "/" + commands[1], commands[2]});
         }
     }
 }
@@ -329,9 +329,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                 std::string adbscriptsdir =
                         android::base::PathUtils::join(datadir, "adbscripts");
                 if (path_exists(adbscriptsdir.c_str())) {
-                    std::thread{runAdbScripts, adbInterface, datadir,
-                                adbscriptsdir}
-                            .detach();
+                    runAdbScripts(adbInterface, datadir, adbscriptsdir);
                 }
 #endif
             }
