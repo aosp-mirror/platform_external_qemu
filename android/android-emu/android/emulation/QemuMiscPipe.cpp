@@ -240,8 +240,8 @@ static void runAdbScripts(emulation::AdbInterface* adbInterface,
             }
             if (commands[0] != "push")
                 continue;
-            adbInterface->enqueueCommand(
-                    {"push", dataDir + "/" + commands[1], commands[2]});
+            // adbInterface->enqueueCommand(
+            //         {"push", dataDir + "/" + commands[1], commands[2]});
         }
     }
 }
