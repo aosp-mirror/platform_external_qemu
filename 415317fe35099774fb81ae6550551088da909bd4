@@ -22,6 +22,30 @@
       },
       "revId": "415317fe35099774fb81ae6550551088da909bd4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6165da2f_b60cc1e2",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2102,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-04-15T15:36:43Z",
+      "side": 1,
+      "message": "indeed, the name is a bit confusing.\nvirtio-serial can have\n1, virticonsole\n2, virtiserialport\n\nso using virtio_serial seems cover both.",
+      "parentUuid": "8170193f_b31ff01b",
+      "range": {
+        "startLine": 2101,
+        "startChar": 1,
+        "endLine": 2102,
+        "endChar": 29
+      },
+      "revId": "415317fe35099774fb81ae6550551088da909bd4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
