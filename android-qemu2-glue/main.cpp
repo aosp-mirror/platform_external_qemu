@@ -2141,8 +2141,17 @@ extern "C" int main(int argc, char** argv) {
             int modem_simulator_guest_port =
                     cuttlefish::start_android_modem_simulator_detached(isIpv4);
 
+<<<<<<< HEAD   (b4aa32 Merge "Merge cherrypicks of [1671017] into emu-30-release" i)
             args.add("-device");
             args.add("virtio-serial");
+=======
+            // BUG: 180115054
+            if (!createVirtconsoles) {
+                args.add("-device");
+                args.add("virtio-serial,ioeventfd=off");
+
+            }
+>>>>>>> CHANGE (6b8e63 windows: take 2 to fix adb emu not working)
             args.add("-chardev");
             args.addFormat(
                     "socket,port=%d,host=%s,nowait,nodelay,%s,id="
