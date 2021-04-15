@@ -2141,8 +2141,12 @@ extern "C" int main(int argc, char** argv) {
             int modem_simulator_guest_port =
                     cuttlefish::start_android_modem_simulator_detached(isIpv4);
 
-            args.add("-device");
-            args.add("virtio-serial,ioeventfd=off");
+            // BUG: 180115054
+            if (!createVirtconsoles) {
+                args.add("-device");
+                args.add("virtio-serial,ioeventfd=off");
+
+            }
             args.add("-chardev");
             args.addFormat(
                     "socket,port=%d,host=%s,nowait,nodelay,%s,id="
