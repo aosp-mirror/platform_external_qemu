@@ -326,11 +326,11 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
 #ifdef __linux__
                 std::string datadir =
                         avdInfo_getDataInitDirPath(android_avdInfo);
-                std::string adbscriptsdir =
-                        android::base::PathUtils::join(datadir, "adbscripts");
-                if (path_exists(adbscriptsdir.c_str())) {
-                    runAdbScripts(adbInterface, datadir, adbscriptsdir);
-                }
+                // std::string adbscriptsdir =
+                //         android::base::PathUtils::join(datadir, "adbscripts");
+                // if (path_exists(adbscriptsdir.c_str())) {
+                //     runAdbScripts(adbInterface, datadir, adbscriptsdir);
+                // }
 #endif
             }
 
