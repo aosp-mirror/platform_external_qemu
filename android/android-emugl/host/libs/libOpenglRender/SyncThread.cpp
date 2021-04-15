@@ -96,6 +96,17 @@ void SyncThread::triggerWait(FenceSync* fenceSync,
     DPRINT("exit");
 }
 
+void SyncThread::triggerWaitVk(VkFence vkFence, uint64_t timeline) {
+    DPRINT("fenceSyncInfo=0x%llx timeline=0x%lx ...", fenceSync, timeline);
+    SyncThreadCmd to_send;
+    to_send.opCode = SYNC_THREAD_WAIT_VK;
+    to_send.vkFence = vkFence;
+    to_send.timeline = timeline;
+    DPRINT("opcode=%u", to_send.opCode);
+    sendAsync(to_send);
+    DPRINT("exit");
+}
+
 void SyncThread::triggerBlockedWaitNoTimeline(FenceSync* fenceSync) {
     DPRINT("fenceSyncInfo=0x%llx ...", fenceSync);
     SyncThreadCmd to_send;
@@ -257,6 +268,32 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
     DPRINT("exit");
 }
 
+int SyncThread::doSyncWaitVk(SyncThreadCmd* cmd) {
+    DPRINT("enter");
+
+    auto decoder = goldfish_vk::VkDecoderGlobalState::get();
+    auto result = decoder->waitForFence(cmd->vkFence, kDefaultTimeoutNsecs);
+    if (result == VK_TIMEOUT) {
+        fprintf(stderr, "SyncThread::%s: SYNC_WAIT_VK timeout: vkFence=%p\n",
+                __func__, cmd->vkFence);
+    } else if (result != VK_SUCCESS) {
+        fprintf(stderr, "SyncThread::%s: SYNC_WAIT_VK error: %d vkFence=%p\n",
+                __func__, result, cmd->vkFence);
+    }
+
+    DPRINT("issue timeline increment");
+
+    // We always unconditionally increment timeline at this point, even
+    // if the call to vkWaitForFences returned abnormally.
+    // See comments in |doSyncWait| about the rationale.
+    emugl::emugl_sync_timeline_inc(cmd->timeline, kTimelineInterval);
+
+    DPRINT("done timeline increment");
+
+    DPRINT("exit");
+    return result;
+}
+
 void SyncThread::doSyncBlockedWaitNoTimeline(SyncThreadCmd* cmd) {
     DPRINT("enter");
 
@@ -312,6 +349,10 @@ int SyncThread::doSyncThreadCmd(SyncThreadCmd* cmd) {
     case SYNC_THREAD_WAIT:
         DPRINT("exec SYNC_THREAD_WAIT");
         doSyncWait(cmd);
+        break;
+    case SYNC_THREAD_WAIT_VK:
+        DPRINT("exec SYNC_THREAD_WAIT_VK");
+        result = doSyncWaitVk(cmd);
         break;
     case SYNC_THREAD_EXIT:
         DPRINT("exec SYNC_THREAD_EXIT");
