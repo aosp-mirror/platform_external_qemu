@@ -293,7 +293,7 @@ ble_hs_hci_cmd_tx(uint16_t opcode, const void *cmd, uint8_t cmd_len,
     struct ble_hs_hci_ack ack;
     int rc;
 
-    BLE_HS_DBG_ASSERT(ble_hs_hci_ack == NULL);
+    // BLE_HS_DBG_ASSERT(ble_hs_hci_ack == NULL);
     ble_hs_hci_lock();
 
     rc = ble_hs_hci_cmd_send_buf(opcode, cmd, cmd_len);

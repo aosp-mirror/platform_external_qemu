@@ -19,8 +19,10 @@
 
 #include <mutex>
 #include "nimble/nimble_npl.h"
+#include "android/base/Log.h"
+#include "android/base/threads/Thread.h"  // for getCurrentThreadId
 
-std::mutex s_mutex;
+std::recursive_mutex s_mutex;
 
 extern "C" {
 

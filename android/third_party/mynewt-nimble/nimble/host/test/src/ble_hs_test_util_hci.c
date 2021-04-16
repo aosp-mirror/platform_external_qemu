@@ -32,7 +32,7 @@
 #define BLE_HCI_EVENT_HDR_LEN               (2)
 #define BLE_HCI_EVENT_DISCONN_COMPLETE_LEN  (4)
 
-#define BLE_HS_TEST_UTIL_PREV_HCI_TX_CNT      64
+#define BLE_HS_TEST_UTIL_PREV_HCI_TX_CNT      128
 
 static uint8_t
 ble_hs_test_util_hci_out_queue[BLE_HS_TEST_UTIL_PREV_HCI_TX_CNT][260];
@@ -104,6 +104,8 @@ ble_hs_test_util_hci_out_enqueue(void *cmd)
 {
     TEST_ASSERT_FATAL(ble_hs_test_util_hci_out_queue_sz <
                       BLE_HS_TEST_UTIL_PREV_HCI_TX_CNT);
+
+    uint16_t opcode = get_le16(cmd);
     memcpy(ble_hs_test_util_hci_out_queue + ble_hs_test_util_hci_out_queue_sz,
            cmd, 260);
 

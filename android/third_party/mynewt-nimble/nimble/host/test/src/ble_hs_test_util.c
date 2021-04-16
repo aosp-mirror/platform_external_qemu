@@ -84,6 +84,7 @@ ble_hs_test_util_prev_tx_dequeue_once(struct hci_data_hdr *out_hci_hdr)
 
     rc = ble_hs_hci_util_data_hdr_strip(om, out_hci_hdr);
     TEST_ASSERT_FATAL(rc == 0);
+    int ln = OS_MBUF_PKTLEN(om);
     TEST_ASSERT_FATAL(out_hci_hdr->hdh_len == OS_MBUF_PKTLEN(om));
 
     return om;

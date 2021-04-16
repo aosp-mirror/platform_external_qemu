@@ -39,19 +39,20 @@ main(int argc, char **argv)
      * To fix this, we should implement a set of higher level BLE test
      * functions that don't require individual HCI commands to be specified.
      */
+    tu_init();
     ble_gap_test_suite_disc();
 
-    ble_att_clt_suite();
-    ble_att_svr_suite();
+    // ble_att_clt_suite();
+    // ble_att_svr_suite();
     ble_gap_test_suite_adv();
     ble_gap_test_suite_conn_cancel();
     ble_gap_test_suite_conn_find();
     ble_gap_test_suite_conn_gen();
     ble_gap_test_suite_conn_terminate();
-    ble_gap_test_suite_mtu();
-    ble_gap_test_suite_set_cb();
+    // ble_gap_test_suite_mtu();
+    // ble_gap_test_suite_set_cb();
     ble_gap_test_suite_stop_adv();
-    ble_gap_test_suite_timeout();
+    //  ble_gap_test_suite_timeout(); // slow
     ble_gap_test_suite_update_conn();
     ble_gap_test_suite_wl();
     ble_gatt_conn_suite();

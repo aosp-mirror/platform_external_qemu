@@ -324,6 +324,7 @@ ble_gatts_mutable(void)
         ble_gap_disc_active() ||
         ble_gap_conn_active()) {
 
+        dinfo("gap: %d, disc: %d, conn: %d", ble_gap_adv_active(), ble_gap_disc_active(), ble_gap_conn_active());
         return false;
     }
 

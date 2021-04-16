@@ -838,7 +838,7 @@ TEST_CASE_SELF(ble_gap_test_case_disc_busy)
 TEST_SUITE(ble_gap_test_suite_disc)
 {
     ble_gap_test_case_disc_bad_args();
-    ble_gap_test_case_disc_good();  //  HandleCommand: Unknown command, opcode: 0x202E, OGF: 0x0008, OCF: 0x002E
+    ble_gap_test_case_disc_good();
     ble_gap_test_case_disc_ltd_mismatch();
     ble_gap_test_case_disc_hci_fail();
     ble_gap_test_case_disc_dflts();
@@ -2788,11 +2788,11 @@ ble_gap_test_util_conn_timeout(int32_t duration_ms)
 {
     struct ble_gap_conn_complete evt;
     uint32_t duration_ticks;
-    int32_t ticks_from_now;
+    int32_t ticks_from_now, ticks_start;
     int rc;
 
     TEST_ASSERT_FATAL(duration_ms != BLE_HS_FOREVER);
-
+    ticks_start = ble_gap_timer();
     /* Initiate a connect procedure with the specified timeout. */
     ble_hs_test_util_connect(
         BLE_OWN_ADDR_PUBLIC,

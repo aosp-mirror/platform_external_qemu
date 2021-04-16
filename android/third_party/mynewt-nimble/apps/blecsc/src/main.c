@@ -119,6 +119,19 @@ blecsc_advertise(void)
         return;
     }
 
+    // Android for some reason expect these to be there, or it will not
+    // discover this device.
+    struct ble_hs_adv_fields rsp_fields = {0};
+    rsp_fields.tx_pwr_lvl = BLE_HS_ADV_TX_PWR_LVL_AUTO;
+    rsp_fields.tx_pwr_lvl_is_present = 1;
+
+    rc = ble_gap_adv_rsp_set_fields(&rsp_fields);
+    if (rc != 0) {
+        MODLOG_DFLT(ERROR, "error setting advanced advertisement data; rc=%d\n", rc);
+        return;
+    }
+
+
     /* Begin advertising */
     memset(&adv_params, 0, sizeof(adv_params));
     adv_params.conn_mode = BLE_GAP_CONN_MODE_UND;
