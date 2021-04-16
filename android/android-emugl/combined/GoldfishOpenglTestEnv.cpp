@@ -87,7 +87,7 @@ static AndroidOptions sTestEnvCmdLineOptions;
 // static
 std::vector<const char*> GoldfishOpenglTestEnv::getTransportsToTest() {
     return {
-            "pipe",
+            "asg",
     };
 }
 
@@ -301,8 +301,8 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
 
     emugl::vkDispatch(!useHostGpu /* use test ICD if not with host gpu */);
 
-    android_hw->hw_gltransport_asg_writeBufferSize = 262144;
-    android_hw->hw_gltransport_asg_writeStepSize = 8192;
+    android_hw->hw_gltransport_asg_writeBufferSize = 1048576;
+    android_hw->hw_gltransport_asg_writeStepSize = 131072;
     android_hw->hw_gltransport_asg_dataRingSize = 131072;
     android_hw->hw_gltransport_drawFlushInterval = 800;
 
