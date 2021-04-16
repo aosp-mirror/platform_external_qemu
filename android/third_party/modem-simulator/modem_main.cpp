@@ -193,6 +193,32 @@ void set_voice_registration(int state) {
     s_msg_channel.send(mymsg);
 }
 
+void set_radio_state(int state) {
+    ModemMessage mymsg;
+    mymsg.type = MODEM_MSG_RADIO_STATE;
+    std::string ss("AT+REMOTECFUN= ");
+    ss += std::to_string(state);
+    ss += "\r";
+    mymsg.sdata = ss;
+    s_msg_channel.send(mymsg);
+}
+
+void save_state(SysFile* file) {
+    int radio_power_state = isRadioOff() ? 0 : 1;
+    sys_file_put_byte(file, radio_power_state);
+}
+
+int load_state(SysFile* file, int version_id) {
+    (void)version_id;  // we dont use this, yet
+    int radio_power_state = sys_file_get_byte(file);
+    if (radio_power_state == 1) {
+        set_radio_state(1);
+    } else if (radio_power_state == 0) {
+        set_radio_state(0);
+    }
+    return 0;
+}
+
 static ModemCallback* s_notify_call_back = nullptr;  // The function
 static void* s_notify_user_data =
         nullptr;  // Some opaque data to give the function
@@ -281,6 +307,7 @@ void process_msgs() {
             }
         } else if (msg.type == MODEM_MSG_CTEC || msg.type == MODEM_MSG_SIGNAL ||
                    msg.type == MODEM_MSG_DATA_REG ||
+                   msg.type == MODEM_MSG_RADIO_STATE ||
                    msg.type == MODEM_MSG_VOICE_REG) {
             if (!s_one_shot_monitor_sock->IsOpen()) {
                 s_one_shot_monitor_sock =
