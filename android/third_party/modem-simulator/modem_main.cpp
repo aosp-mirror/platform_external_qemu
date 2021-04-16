@@ -193,6 +193,16 @@ void set_voice_registration(int state) {
     s_msg_channel.send(mymsg);
 }
 
+void set_radio_state(int state) {
+    ModemMessage mymsg;
+    mymsg.type = MODEM_MSG_RADIO_STATE;
+    std::string ss("AT+REMOTECFUN= ");
+    ss += std::to_string(state);
+    ss += "\r";
+    mymsg.sdata = ss;
+    s_msg_channel.send(mymsg);
+}
+
 static ModemCallback* s_notify_call_back = nullptr;  // The function
 static void* s_notify_user_data =
         nullptr;  // Some opaque data to give the function
@@ -249,6 +259,7 @@ void start_calling_thread(std::string ss) {
     DD("done with this thread");
 }
 
+static bool s_onetime_radio_on = false;
 void process_msgs() {
     while (true) {
         if (s_stop_requested) {
@@ -257,6 +268,10 @@ void process_msgs() {
         if (!guest_boot_completed) {
             sleep_ms(100);
             continue;
+        }
+        if (!s_onetime_radio_on) {
+            s_onetime_radio_on = true;
+            set_radio_state(1);
         }
         DD("waiting for new messages ...");
         ModemMessage msg;
@@ -281,6 +296,7 @@ void process_msgs() {
             }
         } else if (msg.type == MODEM_MSG_CTEC || msg.type == MODEM_MSG_SIGNAL ||
                    msg.type == MODEM_MSG_DATA_REG ||
+                   msg.type == MODEM_MSG_RADIO_STATE ||
                    msg.type == MODEM_MSG_VOICE_REG) {
             if (!s_one_shot_monitor_sock->IsOpen()) {
                 s_one_shot_monitor_sock =

@@ -31,6 +31,7 @@ enum ModemMessageType {
     MODEM_MSG_SIGNAL,
     MODEM_MSG_DATA_REG,
     MODEM_MSG_VOICE_REG,
+    MODEM_MSG_RADIO_STATE,
 };
 
 struct ModemMessage {

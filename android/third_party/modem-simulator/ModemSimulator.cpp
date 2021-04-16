@@ -93,6 +93,20 @@ void ModemSimulator::set_voice_registration(AModem modem,
     cuttlefish::set_voice_registration(state);
 }
 
+void ModemSimulator::save_sate(AModem modem, SysFile* file) {
+    (void)modem;
+    // TODO:
+    //  cuttlefish::save_state(file);
+}
+
+int ModemSimulator::load_sate(AModem modem, SysFile* file, int version_id) {
+    (void)modem;
+    int res = 0;
+    // TODO:
+    // res = cuttlefish::load_state(file, version_id);
+    return res;
+}
+
 void ModemSimulator::set_notification_callback_vx(AModem modem,
                                                   ModemCallback callbackFunc,
                                                   void* userData) {

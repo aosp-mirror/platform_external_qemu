@@ -34,6 +34,8 @@ public:
     virtual void set_voice_registration(AModem, ARegistrationState) = 0;
     virtual ARegistrationState get_data_registration(AModem) = 0;
     virtual ARegistrationState get_voice_registration(AModem) = 0;
+    virtual void save_sate(AModem, SysFile*) = 0;
+    virtual int load_sate(AModem modem, SysFile* file, int version_id) = 0;
     virtual void set_notification_callback_vx(AModem modem,
                                               ModemCallback callbackFunc,
                                               void* userData) = 0;
