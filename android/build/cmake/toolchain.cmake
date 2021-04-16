@@ -25,6 +25,8 @@ function(get_clang_version RET_VAL)
   set(${RET_VAL} "clang-r399163b" PARENT_SCOPE)
 endfunction()
 
+# Make the toolchain directory available.
+set(ANDROID_CMAKE_TOOLCHAIN_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 # This invokes the toolchain generator
 # HOST

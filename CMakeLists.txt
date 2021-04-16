@@ -1,4 +1,5 @@
 project(Android-Emulator)
+set(AOSP_ROOT ${CMAKE_CURRENT_LIST_DIR}/../..)
 cmake_minimum_required(VERSION 3.5)
 if(NOT DEFINED ANDROID_TARGET_TAG)
   message(
@@ -34,7 +35,10 @@ message(
 )
 
 include(android)
+include(qemu)
+include(protobuf-compile)
 include(prebuilts)
+include(${AOSP_ROOT}/external/nasm/cmake/nasm.cmake)
 
 set(OPTION_CRASHUPLOAD "NONE" CACHE STRING "Destination of crash reports.")
 set(OPTION_SDK_TOOLS_REVISION "" CACHE STRING
@@ -149,7 +153,7 @@ string(STRIP "${OPTION_SDK_TOOLS_REVISION}" OPTION_SDK_TOOLS_REVISION)
 
 set_property(CACHE OPTION_CRASHUPLOAD PROPERTY STRINGS NONE STAGING PROD)
 set(DBG_INFO ${CMAKE_BINARY_DIR}/build/debug_info)
-set(AOSP_ROOT ${ANDROID_QEMU2_TOP_DIR}/../..)
+
 
 # Symbol extraction is not supported when cross compiling.
 if(OPTION_CRASHUPLOAD STREQUAL "NONE")

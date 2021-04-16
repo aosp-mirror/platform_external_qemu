@@ -18,8 +18,7 @@
 
 # Note! This file can get included many times, so we use some tricks to
 # Only calculate the settings once.
-get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
-list (APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 include(toolchain)
 
 # First we setup all the tags and configure the toolchain

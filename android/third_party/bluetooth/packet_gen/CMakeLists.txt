@@ -12,6 +12,9 @@ endif()
 
 include(android)
 include(prebuilts)
+include(bluetooth-compile)
+
+
 set(AOSP_ROOT ${ANDROID_QEMU2_TOP_DIR}/../..)
 set(PACKET_GEN_ROOT ${AOSP_ROOT}/system/bt/gd/packet/parser/)
 set(CMAKE_CXX_STANDARD 17)

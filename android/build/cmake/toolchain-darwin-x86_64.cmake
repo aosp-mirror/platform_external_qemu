@@ -14,9 +14,7 @@
 
 # The toolchain files get processed multiple times during compile detection keep these files simple, and do not setup
 # libraries or anything else. merely tags, compiler toolchain and flags should be set here.
-
-get_filename_component(ADD_PATH "${CMAKE_CURRENT_LIST_FILE}" DIRECTORY)
-list(APPEND CMAKE_MODULE_PATH "${ADD_PATH}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 include(toolchain)
 
 # First we setup all the tags.

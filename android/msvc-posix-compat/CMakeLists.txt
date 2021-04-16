@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-
+include(${AOSP_ROOT}/external/nasm/cmake/nasm.cmake)
 if(NOT TARGET msvc-posix-compat)
   # This is a posix wrapper for windows-msvc build.
   android_nasm_compile(
