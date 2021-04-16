@@ -612,19 +612,6 @@ static struct AndroidVirtioGpuOps sVirtioGpuOps = {
         .set_guest_managed_color_buffer_lifetime = [](bool guestManaged) {
             FrameBuffer::getFB()->setGuestManagedColorBufferLifetime(true);
         },
-        .update_color_buffer_from_framework_format =
-            [](uint32_t handle,
-               int x,
-               int y,
-               int width,
-               int height,
-               uint32_t fwkFormat,
-               uint32_t format,
-               uint32_t type,
-               void* pixels) {
-                FrameBuffer::getFB()->updateColorBufferFromFrameworkFormat(
-                        handle, x, y, width, height, (FrameworkFormat)fwkFormat, format, type, pixels);
-        },
 };
 
 struct AndroidVirtioGpuOps* RendererImpl::getVirtioGpuOps() {
