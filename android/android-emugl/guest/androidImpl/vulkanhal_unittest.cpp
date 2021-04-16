@@ -2317,6 +2317,116 @@ TEST_P(VulkanHalTest, SecondaryCommandBuffersWithDescriptorSetUpdate) {
     vk->vkDestroyDescriptorPool(mDevice, pool, nullptr);
 }
 
+// Flush
+TEST_P(VulkanHalTest, Flush) {
+    constexpr uint32_t kThreadCount = 1;
+    VkDescriptorPool pool;
+    VkDescriptorSetLayout setLayout;
+
+    std::vector<VkDescriptorSet> sets(kThreadCount);
+
+    // Setup descriptor sets
+    EXPECT_EQ(VK_SUCCESS, allocateTestDescriptorSets(
+        kThreadCount, kThreadCount,
+        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
+        &pool, &setLayout, sets.data()));
+
+    VkPipelineLayout pipelineLayout;
+
+    VkPipelineLayoutCreateInfo pipelineLayoutCi = {
+        VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO, 0, 0,
+        1, &setLayout,
+        0, nullptr,
+    };
+    vk->vkCreatePipelineLayout(mDevice, &pipelineLayoutCi, nullptr, &pipelineLayout);
+
+    // Setup command buffers
+    VkCommandPoolCreateInfo poolCi = {
+        VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO, 0, 0, mGraphicsQueueFamily,
+    };
+
+    VkCommandPool commandPool;
+    vk->vkCreateCommandPool(mDevice, &poolCi, nullptr, &commandPool);
+
+    VkCommandBuffer cbs[kThreadCount];
+    VkCommandBuffer cbs2[kThreadCount * 2];
+
+    VkCommandBufferAllocateInfo cbAi = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO, 0,
+        commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, kThreadCount,
+    };
+
+    vk->vkAllocateCommandBuffers(mDevice, &cbAi, cbs);
+
+    VkCommandBufferAllocateInfo cbAi2 = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO, 0,
+        commandPool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, kThreadCount * 2,
+    };
+
+    vk->vkAllocateCommandBuffers(mDevice, &cbAi2, cbs2);
+
+    std::vector<FunctorThread*> threads;
+
+    constexpr uint32_t kRecordsPerThread = 800000;
+    constexpr uint32_t kTotalRecords = kThreadCount * kRecordsPerThread;
+
+    for (uint32_t i = 0; i < kThreadCount; ++i) {
+        FunctorThread* thread = new FunctorThread([this, cbs, cbs2, sets, pipelineLayout, i]() {
+            for (uint32_t k = 0; k < kRecordsPerThread; ++k) {
+                VkSubmitInfo si = {
+                    VK_STRUCTURE_TYPE_SUBMIT_INFO, 0,
+                    0, 0,
+                    0,
+                    0, nullptr,
+                    0, 0,
+                };
+
+                vk->vkQueueSubmit(mQueue, 1, &si, 0);
+            }
+            VkPhysicalDeviceMemoryProperties memProps;
+            vk->vkGetPhysicalDeviceMemoryProperties(mPhysicalDevice, &memProps);
+            return 0;
+        });
+        threads.push_back(thread);
+    }
+
+    auto cpuTimeStart = System::cpuTime();
+
+    for (uint32_t i = 0; i < kThreadCount; ++i) {
+        threads[i]->start();
+    }
+
+    for (uint32_t i = 0; i < kThreadCount; ++i) {
+        threads[i]->wait();
+        delete threads[i];
+    }
+
+    vk->vkQueueWaitIdle(mQueue);
+    vk->vkDeviceWaitIdle(mDevice);
+
+    auto cpuTime = System::cpuTime() - cpuTimeStart;
+
+    uint64_t duration_us = cpuTime.wall_time_us;
+    uint64_t duration_cpu_us = cpuTime.usageUs();
+
+    float ms = duration_us / 1000.0f;
+    float sec = duration_us / 1000000.0f;
+
+    float submitHz = (float)kTotalRecords / sec;
+
+    printf("Record %u times in %f ms. Rate: %f Hz per thread: %f Hz\n", kTotalRecords, ms, submitHz, (float)submitHz / (float)kThreadCount);
+
+    vk->vkFreeCommandBuffers(mDevice, commandPool, kThreadCount * 2, cbs2);
+    vk->vkFreeCommandBuffers(mDevice, commandPool, kThreadCount, cbs);
+    vk->vkDestroyCommandPool(mDevice, commandPool, nullptr);
+
+    EXPECT_EQ(VK_SUCCESS, vk->vkFreeDescriptorSets(
+        mDevice, pool, kThreadCount, sets.data()));
+
+    vk->vkDestroyDescriptorPool(mDevice, pool, nullptr);
+}
+
 INSTANTIATE_TEST_SUITE_P(
     MultipleTransports,
     VulkanHalTest,

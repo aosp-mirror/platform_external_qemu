@@ -614,6 +614,7 @@ AddressSpaceGraphicsContext::AddressSpaceGraphicsContext(bool isVirtio, bool fro
     mHostContext.ring_config->flush_interval =
         android_hw->hw_gltransport_asg_writeStepSize;
     mHostContext.ring_config->host_consumed_pos = 0;
+    mHostContext.ring_config->guest_write_pos = 0;
     mHostContext.ring_config->transfer_mode = 1;
     mHostContext.ring_config->transfer_size = 0;
     mHostContext.ring_config->in_error = 0;
