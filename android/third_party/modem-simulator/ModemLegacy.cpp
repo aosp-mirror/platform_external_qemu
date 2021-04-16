@@ -61,6 +61,14 @@ void ModemLegacy::set_voice_registration(AModem modem,
     amodem_set_voice_registration(modem, state);
 }
 
+void ModemLegacy::save_sate(AModem modem, SysFile* file) {
+    amodem_state_save(modem, file);
+}
+
+int ModemLegacy::load_sate(AModem modem, SysFile* file, int version_id) {
+    return amodem_state_load(modem, file, version_id);
+}
+
 void ModemLegacy::set_notification_callback_vx(AModem modem,
                                                ModemCallback callbackFunc,
                                                void* userData) {
