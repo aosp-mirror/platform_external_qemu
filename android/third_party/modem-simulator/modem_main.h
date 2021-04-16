@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "android/telephony/modem.h"
+
 #include <string>
 #include <vector>
 
@@ -31,6 +33,7 @@ enum ModemMessageType {
     MODEM_MSG_SIGNAL,
     MODEM_MSG_DATA_REG,
     MODEM_MSG_VOICE_REG,
+    MODEM_MSG_RADIO_STATE,
 };
 
 struct ModemMessage {
@@ -54,6 +57,10 @@ void set_signal_strength_profile(int quality);
 void set_data_registration(int state);
 
 void set_voice_registration(int state);
+
+void save_state(SysFile* file);
+
+int load_state(SysFile* file, int version_id);
 
 void set_notification_callback(void* callbackFunc, void* userData);
 

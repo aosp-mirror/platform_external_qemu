@@ -37,6 +37,8 @@ public:
     virtual void set_voice_registration(AModem, ARegistrationState) override;
     virtual ARegistrationState get_data_registration(AModem) override;
     virtual ARegistrationState get_voice_registration(AModem) override;
+    virtual void save_sate(AModem, SysFile*) override;
+    virtual int load_sate(AModem modem, SysFile* file, int version_id) override;
     virtual void set_notification_callback_vx(AModem modem,
                                               ModemCallback callbackFunc,
                                               void* userData) override;
