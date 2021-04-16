@@ -329,9 +329,21 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                 std::string adbscriptsdir =
                         android::base::PathUtils::join(datadir, "adbscripts");
                 if (path_exists(adbscriptsdir.c_str())) {
-                    std::thread{runAdbScripts, adbInterface, datadir,
-                                adbscriptsdir}
-                            .detach();
+                    // check adb path
+                    if (adbInterface->adbPath().empty()) {
+                        // try "/opt/bin/adb"
+                        constexpr char GCE_PRESUBMIT_ADB_PATH[] =
+                                "/opt/bin/adb";
+                        if (path_exists(GCE_PRESUBMIT_ADB_PATH)) {
+                            adbInterface->setCustomAdbPath(
+                                    GCE_PRESUBMIT_ADB_PATH);
+                        }
+                    }
+                    if (!adbInterface->adbPath().empty()) {
+                        std::thread{runAdbScripts, adbInterface, datadir,
+                                    adbscriptsdir}
+                                .detach();
+                    }
                 }
 #endif
             }
