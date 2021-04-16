@@ -396,9 +396,6 @@ public:
     bool updateColorBuffer(HandleType p_colorbuffer,
                            int x, int y, int width, int height,
                            GLenum format, GLenum type, void *pixels);
-    bool updateColorBufferFromFrameworkFormat(HandleType p_colorbuffer,
-                           int x, int y, int width, int height,
-                           FrameworkFormat fwkFormat, GLenum format, GLenum type, void *pixels);
     // Replaces contents completely using the color buffer's current format,
     // with row length equal to width of a row in bytes.
     // The number of bytes is passed as a check.

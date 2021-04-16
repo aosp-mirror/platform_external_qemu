@@ -47,8 +47,6 @@ MediaHostRenderer::~MediaHostRenderer() {
     cleanUpTextures();
 }
 
-constexpr uint32_t kFrameworkFormatYuv420888 = 0x2; // FRAMEWORK_FORMAT_YUV_420_888;
-
 const uint32_t kGlUnsignedByte = 0x1401;
 
 constexpr uint32_t kGL_RGBA8 = 0x8058;
@@ -70,7 +68,6 @@ void MediaHostRenderer::cleanUpTextures() {
     mTexturePool.cleanUpTextures();
 }
 
-// Host byte buffer upload is always I420, so kFrameworkFormatYuv420888 is used.
 void MediaHostRenderer::renderToHostColorBuffer(int hostColorBufferId,
                                                 unsigned int outputWidth,
                                                 unsigned int outputHeight,
@@ -82,15 +79,14 @@ void MediaHostRenderer::renderToHostColorBuffer(int hostColorBufferId,
         return;
     }
     if (mVirtioGpuOps) {
-        mVirtioGpuOps->update_color_buffer_from_framework_format(
-            hostColorBufferId, 0, 0, outputWidth, outputHeight,
-            kFrameworkFormatYuv420888, kGL_RGBA, kGlUnsignedByte, decodedFrame); } else {
+        mVirtioGpuOps->update_color_buffer(hostColorBufferId, 0, 0, outputWidth,
+                                           outputHeight, kGL_RGBA,
+                                           kGlUnsignedByte, decodedFrame);
+    } else {
         H264_DPRINT("ERROR: there is no virtio Gpu Ops is not setup");
     }
 }
 
-// NV12 implicitly. YOLO, doesn't consider target color buffer's actual format if differs,
-// but we don't expect it to differ (crosses fingers, knocks on wood, famous last words)
 void MediaHostRenderer::renderToHostColorBufferWithTextures(
         int hostColorBufferId,
         unsigned int outputWidth,
