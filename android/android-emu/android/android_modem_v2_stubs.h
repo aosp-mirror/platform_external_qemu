@@ -30,6 +30,14 @@ static inline void amodem_set_data_network_type_vx(AModem modem, ADataNetworkTyp
 static ARegistrationState amodem_get_data_registration_vx(AModem modem) {
     return A_REGISTRATION_HOME;
 }
+
+static inline void amodem_state_save_vx(AModem modem, SysFile* file) {}
+static inline int amodem_state_load_vx(AModem modem,
+                                       SysFile* file,
+                                       int version_id) {
+    return 0;
+}
+
 static ARegistrationState amodem_get_voice_registration_vx(AModem modem) {
     return A_REGISTRATION_HOME;
 }

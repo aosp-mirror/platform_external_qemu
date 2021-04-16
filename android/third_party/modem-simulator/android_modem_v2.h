@@ -46,6 +46,10 @@ extern ARegistrationState amodem_get_data_registration_vx(AModem modem);
 
 extern ARegistrationState amodem_get_voice_registration_vx(AModem modem);
 
+extern void amodem_state_save_vx(AModem modem, SysFile* file);
+
+extern int amodem_state_load_vx(AModem modem, SysFile* file, int version_id);
+
 extern void amodem_set_notification_callback_vx(AModem modem,
                                                 ModemCallback callbackFunc,
                                                 void* userData);
