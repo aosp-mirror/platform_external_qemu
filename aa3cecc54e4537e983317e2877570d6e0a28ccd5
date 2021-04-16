@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c3dc8216_95f39e6f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-04-16T19:38:17Z",
+      "side": 1,
+      "message": "1 g3 flakes\n2. compiler clang flakes\n\n\ningssl/src/ssl/ssl_test.cc.o\n17:51:19(02:01.48) rel | FAILED: android/third_party/boringssl/CMakeFiles/boringssl_ssl_unittests.dir/mnt/tmpfs/src/android/emu-master-dev/external/boringssl/src/ssl/ssl_test.cc.o\n17:51:19(02:01.65) rel | /opt/osxcross/osxcross/bin/o64-clang++  -DMACOSX_DEPLOYMENT_TARGET\u003d10.15 -DNDEBUG\u003d1 -D_DARWIN_C_SOURCE\u003d1 -D_FILE_OFFSET_BITS\u003d64 -D_GNU_SOURCE\u003d1 -D_LARGEFILE_SOURCE -D_LIBCPP_VERSION\u003d__GLIBCPP__ -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS\u003d1 -D__STDC_LIMIT_MACROS\u003d1 -I/mnt/tmpfs/src/android/emu-master-dev/external/qemu/../googletest/googlemock/include -I/mnt/tmpfs/src/android/emu-master-dev/external/qemu/../googletest/googlemock -I/mnt/tmpfs/src/android/emu-master-dev/external/qemu/../googletest/googletest/include -I/mnt/tmpfs/src/android/emu-master-dev/external/qemu/../googletest/googletest -I/mnt/tmpfs/src/android/emu-master-dev/external/qemu/../boringssl/src/include -std\u003dc++17 -O3 -g3 -Wno-everything -fmacro-backtrace-limit\u003d0 -Wno-unknown-warning-option -Wno-unknown-argument -Wno-non-c-typedef-for-linkage -Werror -g -fno-rtti -fno-exceptions -Wno-invalid-offsetof -Wno-implicit-int-float-conversion -O3 -DNDEBUG -mmacosx-version-min\u003d10.15 -fPIE   -O0 -pthread -MD -MT android/third_party/boringssl/CMakeFiles/boringssl_ssl_unittests.dir/mnt/tmpfs/src/android/emu-master-dev/external/boringssl/src/ssl/ssl_test.cc.o -MF android/third_party/boringssl/CMakeFiles/boringssl_ssl_unittests.dir/mnt/tmpfs/src/android/emu-master-dev/external/boringssl/src/ssl/ssl_test.cc.o.d -o android/third_party/boringssl/CMakeFiles/boringssl_ssl_unittests.dir/mnt/tmpfs/src/android/emu-master-dev/external/boringssl/src/ssl/ssl_test.cc.o -c /mnt/tmpfs/src/android/emu-master-dev/external/boringssl/src/ssl/ssl_test.cc\n17:51:19(02:01.65) rel | clang: error: unable to execute command: Killed\n17:51:19(02:01.57) rel | clang: error: clang frontend command failed due to signal (use -v to see invocation)\n17:51:19(02:01.35) rel | clang version 9.0.0-2~ubuntu18.04.2 (tags/RELEASE_900/final)\n17:51:19(02:01.6 ) rel | Target: x86_64-apple-darwin19\n17:51:19(02:01.78) rel | Thread model: posix\n17:51:19(02:01.61) rel | InstalledDir: /usr/bin\n17:51:19(02:01.22) rel | clang: note: diagnostic msg: PLEASE submit a bug report to https://bugs.llvm.org/ and include the crash backtrace, preprocessed source, and associated run script.",
+      "revId": "aa3cecc54e4537e983317e2877570d6e0a28ccd5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
