@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fbd2fc3e_68f9121c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 21
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-04-17T03:51:41Z",
+      "side": 1,
+      "message": "Should we also increment the snapshot version for this?",
+      "revId": "ecc63af29eb85ca61cdb41d264a7bb0eaa8cafb3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
