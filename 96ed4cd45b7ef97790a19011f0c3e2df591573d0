@@ -34,6 +34,24 @@
       "parentUuid": "2ac16410_99007d37",
       "revId": "96ed4cd45b7ef97790a19011f0c3e2df591573d0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1c468cba_1ac5ce3e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 23
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2021-04-19T21:20:22Z",
+      "side": 1,
+      "message": "SG. Then we can submit as it is now (which default it to off).",
+      "parentUuid": "1bae3e70_baebbd21",
+      "revId": "96ed4cd45b7ef97790a19011f0c3e2df591573d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
