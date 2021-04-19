@@ -86,7 +86,7 @@ private:
     void bind();
     void unbind();
 
-    void composeLayer(ComposeLayer* l);
+    void composeLayer(ComposeLayer* l, uint32_t w, uint32_t h);
     void fillMultiDisplayPostStruct(ComposeLayer* l,
                                     hwc_rect_t displayArea,
                                     hwc_frect_t cropArea,

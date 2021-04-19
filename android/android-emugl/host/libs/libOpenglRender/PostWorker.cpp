@@ -233,7 +233,7 @@ void PostWorker::composeImpl(ComposeDevice* p) {
                l->displayFrame.right, l->displayFrame.bottom,
                l->crop.left, l->crop.top, l->crop.right,
                l->crop.bottom);
-        composeLayer(l);
+        composeLayer(l, mFb->getWidth(), mFb->getHeight());
     }
 
     cbPtr->setSync();
@@ -251,7 +251,16 @@ void PostWorker::composev2Impl(ComposeDevice_v2* p) {
     ComposeLayer* l = (ComposeLayer*)p->layer;
     GLint vport[4] = { 0, };
     s_gles2.glGetIntegerv(GL_VIEWPORT, vport);
-    s_gles2.glViewport(0, 0, mFb->getWidth(),mFb->getHeight());
+    uint32_t w, h;
+    emugl::get_emugl_multi_display_operations().getMultiDisplay(p->displayId,
+                                                                nullptr,
+                                                                nullptr,
+                                                                &w,
+                                                                &h,
+                                                                nullptr,
+                                                                nullptr,
+                                                                nullptr);
+    s_gles2.glViewport(0, 0, w, h);
     if (!m_composeFbo) {
         s_gles2.glGenFramebuffers(1, &m_composeFbo);
     }
@@ -283,7 +292,7 @@ void PostWorker::composev2Impl(ComposeDevice_v2* p) {
                l->displayFrame.right, l->displayFrame.bottom,
                l->crop.left, l->crop.top, l->crop.right,
                l->crop.bottom);
-        composeLayer(l);
+        composeLayer(l, w, h);
     }
 
     cbPtr->setSync();
@@ -312,7 +321,7 @@ void PostWorker::unbind() {
     }
 }
 
-void PostWorker::composeLayer(ComposeLayer* l) {
+void PostWorker::composeLayer(ComposeLayer* l, uint32_t w, uint32_t h) {
     if (l->composeMode == HWC2_COMPOSITION_DEVICE) {
         ColorBufferPtr cb = mFb->findColorBuffer(l->cbHandle);
         if (!cb) {
@@ -320,12 +329,11 @@ void PostWorker::composeLayer(ComposeLayer* l) {
             // ERR("%s: fail to find colorbuffer %d\n", __FUNCTION__, l->cbHandle);
             return;
         }
-        cb->postLayer(l, mFb->getWidth(), mFb->getHeight());
+        cb->postLayer(l, w, h);
     }
     else {
         // no Colorbuffer associated with SOLID_COLOR mode
-        mFb->getTextureDraw()->drawLayer(l, mFb->getWidth(), mFb->getHeight(),
-                                         1, 1, 0);
+        mFb->getTextureDraw()->drawLayer(l, w, h, 1, 1, 0);
     }
 }
 
