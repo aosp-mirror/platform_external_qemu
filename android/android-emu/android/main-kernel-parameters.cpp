@@ -215,29 +215,25 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     if (isQemu2) {
         if (android::featurecontrol::isEnabled(
                                      android::featurecontrol::VirtioWifi)) {
-            params.add("qemu.virtiowifi=1");
-            android::featurecontrol::setIfNotOverriden(
-                    android::featurecontrol::Wifi, false);
-
-            // For API 30, we still use mac80211_hwsim.mac_prefix within kernel
-            // driver to configure mac address. For API 31  and above, we cannot
-            // make assumption about mac80211_hwsim.mac_prefix in kernel.
-            /*if (apiLevel == 30) {
+            if (apiLevel >= 30) {
+                params.add("qemu.virtiowifi=1");
                 params.add("mac80211_hwsim.radios=1");
+                // TODO(wdu@) Figure out why mac80211_create_radios is in conflict.
+                // Set Mac80211hwsimUserspaceManaged to false by default unless
+                // overriden
                 android::featurecontrol::setIfNotOverriden(
                         android::featurecontrol::Mac80211hwsimUserspaceManaged,
                         false);
-            } else if (apiLevel < 30) {
+                android::featurecontrol::setIfNotOverriden(
+                        android::featurecontrol::Wifi,
+                        false);
+            } else {
                 dwarning("VirtioWifi is only support on API level 30 and above.");
-            }*/
+            }
         } else if (android::featurecontrol::isEnabled(
                            android::featurecontrol::Wifi)) {
             params.add("qemu.wifi=1");
-            if (!android::featurecontrol::isEnabled(
-                        android::featurecontrol::
-                                Mac80211hwsimUserspaceManaged)) {
-                params.add("mac80211_hwsim.radios=2");
-            }
+            params.add("mac80211_hwsim.radios=2");
             // Enable multiple channels so the kernel can scan on one channel
             // while communicating the other. This speeds up scanning
             // significantly. This does not work if WiFi Direct is enabled
