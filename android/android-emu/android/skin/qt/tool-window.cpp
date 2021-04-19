@@ -1210,10 +1210,6 @@ static bool isPaneEnabled(ExtendedWindowPane pane) {
     if (pane == PANE_IDX_SNAPSHOT && android_cmdLineOptions->qt_hide_window) {
         return false;
     }
-    // Snapshot pane is disabled in embedded emulator, unless specifcally requested with the -experimental-enable-multidisplay flag.
-    if (pane == PANE_IDX_MULTIDISPLAY && (android_cmdLineOptions->qt_hide_window && !android_cmdLineOptions->experimental_enable_multidisplay)) {
-        return false;
-    }
 
     return true;
 }
