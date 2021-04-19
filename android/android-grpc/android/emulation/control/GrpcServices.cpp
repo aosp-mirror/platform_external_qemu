@@ -243,7 +243,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     }
 
     if (!mCredentials) {
-        if (mBindAddress == "localhost" || mBindAddress == "127.0.0.1") {
+        if (mBindAddress == "localhost" || mBindAddress == "[::1]") {
             mCredentials = LocalServerCredentials(LOCAL_TCP);
             mSecurity = Security::Local;
         } else {
@@ -254,7 +254,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
 
     if (!mAuthToken.empty()) {
         if (mSecurity == Security::Insecure) {
-            mBindAddress = "127.0.0.1";
+            mBindAddress = "[::1]";
             mCredentials = LocalServerCredentials(LOCAL_TCP);
             mSecurity = Security::Local;
             LOG(WARNING) << "Token auth requested without tls, restricting "
