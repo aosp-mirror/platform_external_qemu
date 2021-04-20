@@ -324,26 +324,28 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
 
             if (android_avdInfo) {
 #ifdef __linux__
-                std::string datadir =
-                        avdInfo_getDataInitDirPath(android_avdInfo);
-                std::string adbscriptsdir =
-                        android::base::PathUtils::join(datadir, "adbscripts");
-                if (path_exists(adbscriptsdir.c_str())) {
-                    // check adb path
-                    if (adbInterface->adbPath().empty()) {
-                        // try "/opt/bin/adb"
-                        constexpr char GCE_PRESUBMIT_ADB_PATH[] =
-                                "/opt/bin/adb";
-                        if (path_exists(GCE_PRESUBMIT_ADB_PATH)) {
-                            adbInterface->setCustomAdbPath(
-                                    GCE_PRESUBMIT_ADB_PATH);
+                char* datadir = avdInfo_getDataInitDirPath(android_avdInfo);
+                if (datadir) {
+                    std::string adbscriptsdir = android::base::PathUtils::join(
+                            datadir, "adbscripts");
+                    if (path_exists(adbscriptsdir.c_str())) {
+                        // check adb path
+                        if (adbInterface->adbPath().empty()) {
+                            // try "/opt/bin/adb"
+                            constexpr char GCE_PRESUBMIT_ADB_PATH[] =
+                                    "/opt/bin/adb";
+                            if (path_exists(GCE_PRESUBMIT_ADB_PATH)) {
+                                adbInterface->setCustomAdbPath(
+                                        GCE_PRESUBMIT_ADB_PATH);
+                            }
+                        }
+                        if (!adbInterface->adbPath().empty()) {
+                            std::thread{runAdbScripts, adbInterface, datadir,
+                                        adbscriptsdir}
+                                    .detach();
                         }
                     }
-                    if (!adbInterface->adbPath().empty()) {
-                        std::thread{runAdbScripts, adbInterface, datadir,
-                                    adbscriptsdir}
-                                .detach();
-                    }
+                    free(datadir);
                 }
 #endif
             }
