@@ -16,6 +16,24 @@
       "message": "bohu@, this is a change on both guest and host. Do we have a generic advanced feature for \"empty data partition\"?",
       "revId": "9421722d3427f6792fc295992b163b1500886615",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ec8b807c_3a5c4e1e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-04-20T02:19:03Z",
+      "side": 1,
+      "message": "as of now, there is a file named \"empty_data_disk\" under data/ to indicate whether\nthe image requires that. you can check that.\n\nhttps://android-review.googlesource.com/c/platform/external/qemu/+/1673733/3/android-qemu2-glue/main.cpp",
+      "parentUuid": "2758c638_c682f450",
+      "revId": "9421722d3427f6792fc295992b163b1500886615",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
