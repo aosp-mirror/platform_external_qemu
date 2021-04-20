@@ -35,6 +35,7 @@
 #include "android/hw-sensors.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/metrics.h"
+#include "android/multitouch-screen.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/skin/event.h"
@@ -86,8 +87,10 @@
 #include <QSemaphore>
 #include <QSettings>
 #include <QToolTip>
+#include <QTouchEvent>
 #include <QWindow>
 #include <QtCore>
+
 
 #ifdef _WIN32
 #include <io.h>
@@ -96,7 +99,7 @@
 #include <unistd.h>
 #endif
 #endif
-
+#include <algorithm>
 #include <array>
 #include <string>
 #include <vector>
@@ -572,6 +575,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     // Our paintEvent() always fills the whole window.
     setAttribute(Qt::WA_OpaquePaintEvent);
     setAttribute(Qt::WA_NoSystemBackground);
+    setAttribute(Qt::WA_AcceptTouchEvents);
 
     bool shortcutBool =
             settings.value(Ui::Settings::FORWARD_SHORTCUTS_TO_DEVICE, false)
@@ -1456,7 +1460,60 @@ void EmulatorQtWindow::showMinimized() {
     mWindowIsMinimized = true;
 }
 
+void EmulatorQtWindow::handleTouchPoints(const QTouchEvent& touch) {
+    unsigned char nrOfPoints = 0;
+    for (auto const& elem : touch.touchPoints()) {
+        SkinEvent* skin_event = nullptr;
+        bool eventSet = false;
+        if (elem.state() == Qt::TouchPointPressed) {
+            skin_event = createSkinEvent(kEventTouchBegin);
+            skin_event->u.multi_touch_point.type = kEventTouchBegin;
+            eventSet = true;
+        } else if (elem.state() == Qt::TouchPointMoved) {
+            skin_event = createSkinEvent(kEventTouchUpdate);
+            skin_event->u.multi_touch_point.type = kEventTouchUpdate;
+            eventSet = true;
+        } else if (elem.state() == Qt::TouchPointReleased) {
+            skin_event = createSkinEvent(kEventTouchEnd);
+            skin_event->u.multi_touch_point.type = kEventTouchEnd;
+            eventSet = true;
+        }
+        if (eventSet) {
+            skin_event->u.multi_touch_point.x = elem.pos().x();
+            skin_event->u.multi_touch_point.y = elem.pos().y();
+            skin_event->u.multi_touch_point.x_global = elem.screenPos().x();
+            skin_event->u.multi_touch_point.y_global = elem.screenPos().y();
+            skin_event->u.multi_touch_point.id = elem.id();
+            skin_event->u.multi_touch_point.pressure =
+                    (int)(elem.pressure() * MTS_PRESSURE_RANGE_MAX);
+            skin_event->u.multi_touch_point.touch_minor =
+                    std::min(elem.ellipseDiameters().rheight(),
+                             elem.ellipseDiameters().rwidth());
+            skin_event->u.multi_touch_point.touch_major =
+                    std::max(elem.ellipseDiameters().rheight(),
+                             elem.ellipseDiameters().rwidth());
+			skin_event->u.multi_touch_point.orientation=elem.rotation();
+            if (nrOfPoints == touch.touchPoints().length()-1)
+			{
+				skin_event->u.multi_touch_point.skip_sync=false;
+			}
+			else
+			{
+				skin_event->u.multi_touch_point.skip_sync=true;
+			}
+            queueSkinEvent(skin_event);
+            ++nrOfPoints;
+        }
+    }
+}
+
 bool EmulatorQtWindow::event(QEvent* ev) {
+    if (ev->type() == QEvent::TouchBegin || ev->type() == QEvent::TouchUpdate ||
+        ev->type() == QEvent::TouchEnd) {
+        QTouchEvent* touchEvent = static_cast<QTouchEvent*>(ev);
+        handleTouchPoints(*touchEvent);
+        return true;
+    }
     if (ev->type() == QEvent::WindowActivate && mWindowIsMinimized) {
         mWindowIsMinimized = false;
 

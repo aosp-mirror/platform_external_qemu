@@ -48,6 +48,9 @@ typedef enum {
     kEventRestoreSkin,
     kEventMouseStartTracking,
     kEventMouseStopTracking,
+    kEventTouchBegin,
+    kEventTouchEnd,
+    kEventTouchUpdate
 } SkinEventType;
 
 typedef enum {
@@ -84,6 +87,21 @@ typedef struct {
     int button;
     int skip_sync;
 } SkinEventMouseData;
+
+typedef struct {
+    int id;
+    int pressure;
+    int orientation;
+    int x;
+    int y;
+    int x_global;
+    int y_global;
+    int touch_major;
+    int touch_minor;
+    SkinEventType type;
+    bool skip_sync;
+} SkinEventTouchData;
+
 
 typedef struct {
     int x_delta;
@@ -143,6 +161,7 @@ typedef struct {
         SkinEventLayoutRotateData layout_rotation;
         SkinEventDisplayRegion display_region;
         SkinEventMultiDisplay multi_display;
+        SkinEventTouchData multi_touch_point;
     } u;
 } SkinEvent;
 

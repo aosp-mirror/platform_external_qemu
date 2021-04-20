@@ -101,10 +101,15 @@ static void emulator_window_generic_event(SkinGenericEventCode* events,
     user_event_agent->sendGenericEvents(events, count);
 }
 
-static void emulator_window_window_mouse_event(unsigned x,
-                                         unsigned y,
-                                         unsigned state,
+static void emulator_window_touch_events(const SkinEventTouchData* const data,
                                          int displayId) {
+    user_event_agent->sendTouchEvents(data, displayId);
+}
+  
+static void emulator_window_window_mouse_event(unsigned x,
+                                               unsigned y,
+                                               unsigned state,
+                                               int displayId) {
     /* NOTE: the 0 is used in hw/android/goldfish/events_device.c to
      * differentiate between a touch-screen and a trackball event
      */
@@ -216,6 +221,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
     user_event_agent = emulator->uiEmuAgent->userEvents;
 
     static const SkinWindowFuncs my_window_funcs = {
+         .touch_events = &emulator_window_touch_events,
         .key_event = &emulator_window_window_key_event,
         .mouse_event = &emulator_window_window_mouse_event,
         .mouse_wheel_event = &emulator_window_window_mouse_wheel_event,
