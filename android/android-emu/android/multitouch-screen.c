@@ -19,8 +19,10 @@
 #include "android/globals.h"  /* for android_hw */
 #include "android/hw-events.h"
 #include "android/skin/charmap.h"
+#include "android/skin/event.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
+#include "standard-headers/linux/input.h"
 
 #include <assert.h>
 
@@ -56,6 +58,8 @@ typedef struct MTSPointerState {
     int y;
     /* Current pressure value. */
     int pressure;
+    int major;
+    int minor;
 } MTSPointerState;
 
 /* Describes state of an emulated multi-touch screen. */
@@ -137,6 +141,90 @@ _mtsstate_get_available_pointer_index(const MTSState* mts_state)
     return _mtsstate_get_pointer_index(mts_state, MTS_POINTER_UP);
 }
 
+
+
+static void _touch_down(MTSState* mts_state,
+                        const SkinEventTouchData* const data,
+                        int x,
+                        int y) {
+    const int slot_index = _mtsstate_get_available_pointer_index(mts_state);
+    if (slot_index >= 0) {
+        mts_state->tracked_ptr_num++;
+        mts_state->tracked_pointers[slot_index].tracking_id = data->id;
+        mts_state->tracked_pointers[slot_index].x = x;
+        mts_state->tracked_pointers[slot_index].y = y;
+        mts_state->tracked_pointers[slot_index].pressure = data->pressure;
+        mts_state->tracked_pointers[slot_index].major = data->touch_major;
+        mts_state->tracked_pointers[slot_index].minor = data->touch_minor;
+        if (slot_index != mts_state->current_slot) {
+            _push_event(EV_ABS, LINUX_ABS_MT_SLOT, slot_index);
+        }
+        _push_event(EV_ABS, LINUX_ABS_MT_TRACKING_ID, slot_index);
+        _push_event(EV_ABS, LINUX_ABS_MT_PRESSURE, data->pressure);
+        _push_event(EV_ABS, LINUX_ABS_MT_POSITION_X, x);
+        _push_event(EV_ABS, LINUX_ABS_MT_POSITION_Y, y);
+        _push_event(EV_ABS, LINUX_ABS_MT_TOUCH_MAJOR, data->touch_major);
+        _push_event(EV_ABS, LINUX_ABS_MT_TOUCH_MINOR, data->touch_minor);
+        _push_event(EV_ABS,LINUX_ABS_MT_TOOL_TYPE, MT_TOOL_FINGER);
+        mts_state->current_slot = slot_index;
+    } else {
+        D("MTS pointer count is exceeded.");
+        return;
+    }
+}
+
+static void _touch_update(MTSState* mts_state,
+                          const SkinEventTouchData* const data,
+                          int x,
+                          int y,
+                          int slot_index) {
+    MTSPointerState* ptr_state = &mts_state->tracked_pointers[slot_index];
+    if (ptr_state->x == x && ptr_state->y == y) {
+        return;
+    }
+    if (slot_index != mts_state->current_slot) {
+        _push_event(EV_ABS, LINUX_ABS_MT_SLOT, slot_index);
+        mts_state->current_slot = slot_index;
+    }
+    if (ptr_state->pressure != data->pressure) {
+        _push_event(EV_ABS, LINUX_ABS_MT_PRESSURE, data->pressure);
+        ptr_state->pressure = data->pressure;
+    }
+    if (ptr_state->x != x) {
+        _push_event(EV_ABS, LINUX_ABS_MT_POSITION_X, x);
+        ptr_state->x = x;
+    }
+    if (ptr_state->y != y) {
+        _push_event(EV_ABS, LINUX_ABS_MT_POSITION_Y, y);
+        ptr_state->y = y;
+    }
+    if (ptr_state->major != data->touch_major) {
+        _push_event(EV_ABS, LINUX_ABS_MT_TOUCH_MAJOR, data->touch_major);
+        ptr_state->major = data->touch_major;
+    }
+    if (ptr_state->minor != data->touch_minor) {
+        _push_event(EV_ABS, LINUX_ABS_MT_TOUCH_MINOR, data->touch_minor);
+        ptr_state->minor = data->touch_minor;
+    }
+}
+
+
+static void _touch_release(MTSState* mts_state, int slot_index) {
+    if (slot_index != mts_state->current_slot) {
+        _push_event(EV_ABS, LINUX_ABS_MT_SLOT, slot_index);
+    }
+    _push_event(EV_ABS, LINUX_ABS_MT_PRESSURE, 0);
+    _push_event(EV_ABS, LINUX_ABS_MT_TRACKING_ID, -1);
+    mts_state->tracked_pointers[slot_index].tracking_id = MTS_POINTER_UP;
+    mts_state->tracked_pointers[slot_index].x = 0;
+    mts_state->tracked_pointers[slot_index].y = 0;
+    mts_state->tracked_pointers[slot_index].pressure = 0;
+    mts_state->tracked_pointers[slot_index].major = 0;
+    mts_state->tracked_pointers[slot_index].minor = 0;
+    mts_state->current_slot = -1;
+    mts_state->tracked_ptr_num--;
+    assert(mts_state->tracked_ptr_num >= 0);
+}
 /* Handles a "pointer down" event
  * Param:
  *  mts_state - MTS state descriptor.
@@ -514,12 +602,26 @@ void multitouch_update_displayId(int displayId) {
     mts_state->displayId = displayId;
 }
 
-void multitouch_update_pointer(MTESource source,
-                               int tracking_id,
-                               int x,
-                               int y,
-                               int pressure,
-                               bool skip_sync) {
+void multitouch_update(MTESource source, 
+                       const SkinEventTouchData* const data, 
+                       int dx, 
+                       int dy) {
+    MTSState* const mts_state = &_MTSState;
+    const int slot_index =
+            _mtsstate_get_pointer_index(mts_state, data->id);
+    if (data->type == kEventTouchBegin) {
+        _touch_down(mts_state, data, dx, dy);
+    } else if (data->type == kEventTouchUpdate) {
+        _touch_update(mts_state, data, dx, dy, slot_index);
+    } else {
+        _touch_release(mts_state, slot_index);
+    }
+    if (!data->skip_sync) {
+        _push_event(EV_SYN, LINUX_SYN_REPORT, 0);
+    }
+}
+
+void multitouch_update_pointer(MTESource source, int tracking_id, int x, int y, int pressure, bool skip_sync) {
     MTSState* const mts_state = &_MTSState;
     /* Assign a fixed tracking ID to the mouse pointer. */
     if (source == MTES_MOUSE) {

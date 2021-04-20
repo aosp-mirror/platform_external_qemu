@@ -205,6 +205,7 @@ signals:
     void updateMultiDisplayPage(int id);
 
 public:
+    void handleTouchPoints(const QTouchEvent& touchEvents);
     void pollEvent(SkinEvent* event, bool* hasEvent);
 
     WId getWindowId();

@@ -94,6 +94,11 @@ static void user_event_generic_events(SkinGenericEventCode* events, int count) {
     }
 }
 
+static void user_event_touch(const SkinEventTouchData * const data,
+                             int displayId) {
+    android_virtio_touch_event(data, displayId);
+}
+
 static void user_event_mouse(int dx,
                              int dy,
                              int dz,
@@ -132,6 +137,7 @@ static void on_new_event(void) {
 }
 
 static const QAndroidUserEventAgent sQAndroidUserEventAgent = {
+        .sendTouchEvents = user_event_touch,
         .sendKey = user_event_key,
         .sendKeyCode = user_event_keycode,
         .sendKeyCodes = user_event_keycodes,
