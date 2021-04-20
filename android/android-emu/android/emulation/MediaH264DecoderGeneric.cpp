@@ -242,6 +242,7 @@ void MediaH264DecoderGeneric::try_decode(const uint8_t* data,
         }
     }
 
+    mTrialPeriod = false;
     createAndInitSoftVideoHelper();
     mVideoHelper = std::move(mSwVideoHelper);
 
@@ -256,7 +257,6 @@ void MediaH264DecoderGeneric::try_decode(const uint8_t* data,
     mVideoHelper->setSaveDecodedFrames();
 
     mVideoHelper->decode(data, len, pts);
-    mTrialPeriod = false;
 }
 
 void MediaH264DecoderGeneric::fetchAllFrames() {
