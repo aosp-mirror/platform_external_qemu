@@ -385,6 +385,14 @@ ContextPtr EglDisplay::getContext(EGLContext ctx) const {
                                    ContextPtr();
 }
 
+void* EglDisplay::getLowLevelContext(EGLContext ctx) const {
+    auto lctx = getContext(ctx);
+    if (lctx) {
+        return lctx->nativeType()->lowLevelContext();
+    }
+    return nullptr;
+}
+
 bool EglDisplay::removeSurface(EGLSurface s) {
     emugl::Mutex::AutoLock mutex(m_lock);
     /* s is "key" in map<unsigned int, SurfacePtr>. */
