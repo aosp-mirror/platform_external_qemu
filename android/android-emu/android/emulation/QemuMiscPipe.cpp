@@ -294,6 +294,10 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                 adbInterface->enqueueCommand(
                     { "shell", "settings", "put", "global",
                       "force_resizable_activities", "1" });
+                adbInterface->enqueueCommand(
+                    { "shell", "settings", "put", "global",
+                      "wm_display_settings_path",
+                      "vendor/etc/display_settings_freeform.xml"});
             }
 
             // If we allowed host audio, don't revoke
