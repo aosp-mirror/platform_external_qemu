@@ -303,6 +303,8 @@ int icount_align_option;
 QemuUUID qemu_uuid;
 bool qemu_uuid_set;
 
+extern bool migratable_snapshot;
+
 static NotifierList exit_notifiers =
     NOTIFIER_LIST_INITIALIZER(exit_notifiers);
 
@@ -4803,6 +4805,8 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         goldfish_fb_set_display_depth(32);
         goldfish_fb_set_use_host_gpu(1);
     }
+
+    migratable_snapshot = feature_is_enabled(kFeature_MigratableSnapshotSave);
 
 #endif // CONFIG_ANDROID
 
