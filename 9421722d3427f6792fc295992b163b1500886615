@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2758c638_c682f450",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2021-04-20T02:08:38Z",
+      "side": 1,
+      "message": "bohu@, this is a change on both guest and host. Do we have a generic advanced feature for \"empty data partition\"?",
+      "revId": "9421722d3427f6792fc295992b163b1500886615",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
