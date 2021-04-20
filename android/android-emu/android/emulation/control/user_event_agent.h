@@ -16,7 +16,7 @@
 
 #include "android/skin/generic-event-buffer.h"
 #include "android/utils/compiler.h"
-
+#include "../../skin/event.h"
 #include <stdbool.h>
 
 ANDROID_BEGIN_HEADER
@@ -29,6 +29,8 @@ typedef struct QAndroidUserEventAgent {
     void (*sendKey)(unsigned key, bool down);
     void (*sendKeyCode)(int key);
     void (*sendKeyCodes)(int* keycodes, int count);
+    void (*sendTouchEvents)(const SkinEventTouchData* const dat,
+                            int displayId);
 
     // Mouse event.
     void (*sendMouseEvent)(int dx,

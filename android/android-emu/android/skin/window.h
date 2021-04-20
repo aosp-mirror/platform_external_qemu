@@ -23,6 +23,8 @@
 typedef struct SkinWindow  SkinWindow;
 
 typedef struct SkinWindowFuncs {
+    void (*touch_events)(const SkinEventTouchData * const data,
+                         int displayId);
     void (*key_event)(unsigned keycode, int down);
     void (*mouse_event)(unsigned x, unsigned y, unsigned state, int displayId);
     void (*mouse_wheel_event)(int x_delta, int y_delta, int displayId);

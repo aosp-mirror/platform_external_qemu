@@ -44,6 +44,8 @@ typedef enum MTESource {
     MTES_DEVICE,
 } MTESource;
 
+#define MTS_PRESSURE_RANGE_MAX 0x400
+
 /* Initializes MTSState instance.
  * Param:
  *  mtsp - Instance of the multi-touch port connected to the device.
@@ -64,6 +66,11 @@ extern bool multitouch_should_skip_sync(int buttons_state);
 extern bool multitouch_is_second_finger(int buttons_state);
 
 extern void multitouch_update_displayId(int displayId);
+
+extern void multitouch_update(MTESource source,
+                              const SkinEventTouchData* const data, 
+                               int dx, 
+                               int dy);
 
 /* Handles a MT pointer event.
  * Param:

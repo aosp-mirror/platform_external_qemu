@@ -14,20 +14,27 @@
 
 #pragma once
 
+#include "android/skin/event.h"
 #include "android/utils/compiler.h"
+
 
 ANDROID_BEGIN_HEADER
 
 /* Maximum number of virtio input devices*/
 #define VIRTIO_INPUT_MAX_NUM 11
 
-extern int android_virtio_input_send(int type,
-                                     int code,
-                                     int value,
-                                     int displayId);
+extern int
+android_virtio_input_send(int type,
+                          int code,
+                          int value,
+                          int displayId);
+
 extern void android_virtio_kbd_mouse_event(int dx,
                                            int dy,
                                            int dz,
                                            int buttonsState,
                                            int displayId);
+
+extern void android_virtio_touch_event(const SkinEventTouchData* const data,
+                                       int displayId);
 ANDROID_END_HEADER
