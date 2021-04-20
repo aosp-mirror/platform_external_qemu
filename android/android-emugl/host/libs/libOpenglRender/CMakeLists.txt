@@ -125,6 +125,7 @@ target_compile_options(OpenglRender PUBLIC -Wno-return-type-c-linkage)
 target_link_libraries(OpenglRender PRIVATE emugl_base)
 target_include_directories(
   OpenglRender PUBLIC ${ANDROID_EMUGL_DIR}/host/libs/Translator/include .
+                      ${ANDROID_EMUGL_DIR}/host/libs/Translator/EGL
                       ${ANDROID_EMUGL_DIR}/host/include/OpenglRender)
 android_target_link_libraries(OpenglRender linux-x86_64
                               PRIVATE "-WL,--version-script=render_api.entries")

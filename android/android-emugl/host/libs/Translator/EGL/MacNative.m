@@ -217,6 +217,11 @@ void* nsCreateContext(void* format,void* share){
     return [[EmuGLContext alloc] initWithFormat:frmt shareContext:share];
 }
 
+void* nsGetLowLevelContext(void* context) {
+    EmuGLContext* ctx = (EmuGLContext*)context;
+    return ctx;
+}
+
 void  nsPBufferMakeCurrent(void* context,void* nativePBuffer,int level){
     EmuGLContext* ctx = (EmuGLContext *)context;
     NSOpenGLPixelBuffer* pbuff = (NSOpenGLPixelBuffer *)nativePBuffer;
