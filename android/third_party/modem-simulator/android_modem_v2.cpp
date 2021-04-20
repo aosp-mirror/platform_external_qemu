@@ -74,6 +74,14 @@ void amodem_set_voice_registration_vx(AModem modem, ARegistrationState state) {
     s_modem->set_voice_registration(modem, state);
 }
 
+void amodem_state_save_vx(AModem modem, SysFile* file) {
+    s_modem->save_sate(modem, file);
+}
+
+int amodem_state_load_vx(AModem modem, SysFile* file, int version_id) {
+    return s_modem->load_sate(modem, file, version_id);
+}
+
 void amodem_set_notification_callback_vx(AModem modem,
                                          ModemCallback callbackFunc,
                                          void* userData) {
