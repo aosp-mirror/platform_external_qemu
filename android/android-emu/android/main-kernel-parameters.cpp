@@ -57,7 +57,8 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    uint32_t lcd_height,
                                    uint32_t lcd_vsync,
                                    const char* gltransport,
-                                   uint32_t gltransport_drawFlushInterval) {
+                                   uint32_t gltransport_drawFlushInterval,
+                                   const char* displaySettingsXml) {
     android::ParameterList params;
     if (isCros) {
       std::string cmdline(StringFormat(
@@ -311,6 +312,11 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         // causing only a few logs from the android init
         // executable to be printed.
         params.addFormat("printk.devkmsg=on");
+    }
+
+    // display settings file name
+    if (displaySettingsXml && displaySettingsXml[0]) {
+        params.addFormat("qemu.display.settings.xml=%s", displaySettingsXml);
     }
 
     // User entered parameters are space separated. Passing false here to prevent

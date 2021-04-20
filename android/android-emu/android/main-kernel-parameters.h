@@ -64,6 +64,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    uint32_t lcd_height,
                                    uint32_t lcd_vsync,
                                    const char* gltransport,
-                                   uint32_t gltransport_drawFlushInterval);
+                                   uint32_t gltransport_drawFlushInterval,
+                                   const char* displaySettingsXml);
 
 ANDROID_END_HEADER
