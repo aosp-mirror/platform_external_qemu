@@ -443,7 +443,7 @@ bool EmulatorForwarder::createRemoteConnection() {
             {"cmdline",
              R"#("qemu-system-x86_64-headless" "-netdelay" "none" "-netspeed" "full" "-avd" "P" "-qt-hide-window" "-grpc-use-token" "-idle-grpc-timeout" "300")#"}};
 
-    std::string address = "127.0.0.1";
+    std::string address = "localhost";
     int grpc_start = 9000;
     int grpc_end = 10000;
     auto builder = EmulatorControllerService::Builder()
