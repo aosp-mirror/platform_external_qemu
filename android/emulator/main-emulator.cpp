@@ -306,6 +306,7 @@ int main(int argc, char** argv)
     bool isHeadless = false;
     bool useSystemLibs = false;
     bool forceEngineLaunch = false;
+    bool isFuchsia = false;
     bool queryVersion = false;
     bool doListWebcams = false;
     bool cleanUpAvdContent = false;
@@ -452,6 +453,7 @@ int main(int argc, char** argv)
 
         if (!strcmp(opt,"-fuchsia")) {
             forceEngineLaunch = true;
+            isFuchsia = true;
             break;
         }
 
@@ -770,14 +772,16 @@ int main(int argc, char** argv)
     } else {
         android::base::disableRestart();
 
-        /* Otherwise, using the ANDROID_PRODUCT_OUT directory */
-        androidOut = getenv("ANDROID_PRODUCT_OUT");
+        if (!isFuchsia) {
+            /* Otherwise, using the ANDROID_PRODUCT_OUT directory */
+            androidOut = getenv("ANDROID_PRODUCT_OUT");
 
-        if (androidOut != NULL) {
-            D("Found ANDROID_PRODUCT_OUT: %s", androidOut);
-            avdArch = path_getBuildTargetArch(androidOut);
-            D("Found build target architecture: %s",
-              avdArch ? avdArch : "<NULL>");
+            if (androidOut != NULL) {
+                D("Found ANDROID_PRODUCT_OUT: %s", androidOut);
+                avdArch = path_getBuildTargetArch(androidOut);
+                D("Found build target architecture: %s",
+                  avdArch ? avdArch : "<NULL>");
+            }
         }
     }
 
