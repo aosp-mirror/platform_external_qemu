@@ -51,6 +51,29 @@
       "message": "on the other hand, I think such settings change should be better handled by\nthe GoogleSdkSetup or SdkSetup apk",
       "revId": "9421722d3427f6792fc295992b163b1500886615",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bffbbc7d_b0bb5d68",
+        "filename": "android/android-emu/android/emulation/QemuMiscPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-04-20T02:24:15Z",
+      "side": 1,
+      "message": "this can be done by SdkSetup apk ?",
+      "range": {
+        "startLine": 297,
+        "startChar": 16,
+        "endLine": 300,
+        "endChar": 67
+      },
+      "revId": "9421722d3427f6792fc295992b163b1500886615",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
