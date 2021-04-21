@@ -20,9 +20,11 @@
 # (https://fedoraproject.org/wiki/EPEL#Extra_Packages_for_Enterprise_Linux_.28EPEL.29)
 # and then issuing `yum install cmake3` on the command line.
 cmake_minimum_required(VERSION 3.5)
-set(ABSL_ROOT ${ANDROID_QEMU2_TOP_DIR}/../abseil-cpp)
+set(ABSL_ROOT ${ANDROID_QEMU2_TOP_DIR}/../webrtc/third_party/abseil-cpp)
 list(APPEND CMAKE_MODULE_PATH ${ABSL_ROOT}/CMake ${ABSL_ROOT}/absl/copts)
 set(CMAKE_CXX_STANDARD 17)
+set(_BUILD_TESTING ${BUILD_TESTING})
+set(BUILD_TESTING OFF)
 include(AbseilInstallDirs)
 include(CMakePackageConfigHelpers)
 include(AbseilDll)
@@ -55,3 +57,5 @@ target_compile_options(
   absl_time_zone
   PRIVATE -Wno-shadow -Wno-shadow-uncaptured-local
           -Wno-tautological-type-limit-compare -Wno-unused-template)
+
+set(BUILD_TESTING ${_BUILD_TESTING})
