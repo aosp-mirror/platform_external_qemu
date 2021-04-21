@@ -2196,14 +2196,13 @@ extern "C" int main(int argc, char** argv) {
     }
 
     if (feature_is_enabled(kFeature_GnssGrpcV1)) {
+        // TODO: add a new feature V2, as V1 is based on vport; V2 is based on virtio-gnss
         bool isIpv4 = false;
         // start gnss grpc now, so qemu can proceed with virtioport setup
         int gnss_guest_port = start_android_gnss_grpc_detached(
                 isIpv4, opts->gnss_grpc_port ? opts->gnss_grpc_port : "",
                 opts->gnss_file_path ? opts->gnss_file_path : "");
 
-        args.add("-device");
-        args.add("virtio-serial,ioeventfd=off");
         args.add("-chardev");
         args.addFormat(
                 "socket,port=%d,host=%s,nowait,nodelay,%s,id="
@@ -2211,7 +2210,7 @@ extern "C" int main(int argc, char** argv) {
                 gnss_guest_port, isIpv4 ? "127.0.0.1" : "::1",
                 isIpv4 ? "ipv4" : "ipv6");
         args.add("-device");
-        args.add("virtserialport,chardev=gnss,name=gnss");
+        args.add("virtio-gnss-pci,chardev=gnss");
 
         getConsoleAgents()->location->gpsEnableGnssGrpcV1();
     }
