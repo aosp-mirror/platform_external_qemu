@@ -11,7 +11,6 @@ android_bluetooth_packet_gen(
   INCLUDES system/bt/vendor_libs/test_vendor_lib NAMESPACE model
   SRC packets/link_layer_packets.pdl SOURCE_DIR ${AOSP_ROOT})
 
-
 android_add_library(
   TARGET libscriptedbeaconpayload-protos-lite LICENSE Apache-2.0
   SOURCE_DIR ${BT_ROOT}/vendor_libs/test_vendor_lib
@@ -30,7 +29,6 @@ target_include_directories(
 
 target_link_libraries(libscriptedbeaconpayload-protos-lite PRIVATE libprotobuf)
 
-
 android_add_library(
   TARGET libbt-rootcanal-types
   LICENSE Apache-2.0
@@ -40,7 +38,6 @@ android_add_library(
 target_include_directories(libbt-rootcanal-types
                            PUBLIC ${BT_ROOT}/vendor_libs/test_vendor_lib/types)
 target_link_libraries(libbt-rootcanal-types PUBLIC libchrome)
-
 
 android_add_test(
   TARGET rootcanal-test_types
@@ -52,9 +49,26 @@ target_link_libraries(rootcanal-test_types PRIVATE libbt-rootcanal-types gtest
                                                    gtest_main)
 
 # Rootcanal does not yet build under msvc/darwin
-if (NOT (LINUX_X86_64 OR LINUX_AARCH64))
+if(NOT (LINUX_X86_64 OR LINUX_AARCH64))
   return()
 endif()
+
+android_add_library(
+  TARGET BluetoothPacketSources
+  LICENSE Apache-2.0
+  SOURCE_DIR ${BT_ROOT}/gd/packet
+  SRC # cmake-format: sortable
+      bit_inserter.cc
+      byte_inserter.cc
+      byte_observer.cc
+      fragmenting_inserter.cc
+      iterator.cc
+      packet_view.cc
+      raw_builder.cc
+      view.cc)
+target_include_directories(BluetoothPacketSources PUBLIC ${BT_ROOT}/gd)
+target_compile_options(BluetoothPacketSources
+                       PRIVATE -Wno-inconsistent-missing-override)
 
 android_add_library(
   TARGET libbt-rootcanal
@@ -96,8 +110,9 @@ android_add_library(
       model/setup/test_command_handler.cc
       model/setup/test_model.cc)
 
-target_link_libraries(libbt-rootcanal
-                      PRIVATE libscriptedbeaconpayload-protos-lite libchrome)
+target_link_libraries(
+  libbt-rootcanal PRIVATE libscriptedbeaconpayload-protos-lite libchrome
+                          BluetoothPacketSources)
 target_include_directories(
   libbt-rootcanal PUBLIC ${VL_LIB} ${VL_LIB}/include ${BT_ROOT}/gd ${BT_ROOT}
                          ${CMAKE_CURRENT_BINARY_DIR}/packet_gen)
@@ -115,7 +130,6 @@ target_compile_definitions(test-vendor_test_host PRIVATE -DLOG_NDEBUG=1)
 target_link_libraries(
   test-vendor_test_host PRIVATE libbt-rootcanal libbt-rootcanal-types gtest
                                 gtest_main)
-
 
 # android_add_executable( TARGET rootcanal LICENSE Apache-2.0 SOURCE_DIR
 # ${BT_ROOT}/vendor_libs/test_vendor_lib SRC # cmake-format: sortable
