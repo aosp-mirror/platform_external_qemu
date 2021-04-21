@@ -106,6 +106,8 @@ private:
     static GLboolean gles2_APIENTRY s_glIsSyncAEMU(void* self, uint64_t sync);
     static void gles2_APIENTRY s_glGetSyncivAEMU(void* self, uint64_t sync, GLenum pname, GLsizei bufSize, GLsizei *length, GLint *values);
 
+    static GLboolean gles2_APIENTRY s_glBufferDataSyncAEMU(void* self, GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage);
+
     //============================================================
     // Snapshot state
     //============================================================

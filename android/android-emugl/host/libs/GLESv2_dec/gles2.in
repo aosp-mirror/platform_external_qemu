@@ -585,3 +585,5 @@ GL_ENTRY(void, glDrawElementsDataNullAEMU, GLenum mode, GLsizei count, GLenum ty
 # Async UnmapBuffer (also distinguishes sending arbitrary length buffer)
 GL_ENTRY(void, glUnmapBufferAsyncAEMU, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer, GLboolean* out_res)
 GL_ENTRY(void, glFlushMappedBufferRangeAEMU2, GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access, void* guest_buffer)
+
+GL_ENTRY(GLboolean, glBufferDataSyncAEMU, GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage)
