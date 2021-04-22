@@ -312,6 +312,12 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                   "com.google.android.googlequicksearchbox",
                   "android.permission.RECORD_AUDIO" });
 
+            // Add network "AndroidWifi" from host
+            if (fc::isEnabled(fc::Wifi) || fc::isEnabled(fc::VirtioWifi)) {
+                adbInterface->enqueueCommand({"shell", "cmd", "wifi",
+                        "add-network", "\"AndroidWifi\"", "open"});
+            }
+
             miscPipeSetAndroidOverlay(adbInterface);
 
             if (restart_when_stalled > 0 && num_watchdog == 0) {
