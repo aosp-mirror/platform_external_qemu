@@ -22,6 +22,30 @@
       },
       "revId": "19b13064d59bb41474382e19a485e3a77749f07e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c4df768e_cc3aae2a",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/MacNative.m",
+        "patchSetId": 18
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-04-22T18:25:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5e8a398b_436fb51a",
+      "range": {
+        "startLine": 251,
+        "startChar": 4,
+        "endLine": 257,
+        "endChar": 5
+      },
+      "revId": "19b13064d59bb41474382e19a485e3a77749f07e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
