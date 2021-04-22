@@ -34,6 +34,24 @@
       "parentUuid": "85ed668c_b42c0fca",
       "revId": "db5165d48a1859a7ee53fe6ead46d0c49404c252",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c6f60797_680d6e28",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-04-22T17:16:07Z",
+      "side": 1,
+      "message": "Yes. The WifiShellCommand can directly access the WifiService while Sdksetup as an privileged app can only access WifiManager. \n\nThis is how wifi shell command add network. https://source.corp.google.com/android/packages/modules/Wifi/service/java/com/android/server/wifi/WifiShellCommand.java;l\u003d620\n\nAs explained in b/185242318#comment19, there is some other bug related KeyStore when we use the WifiManager#addNetwork API.",
+      "parentUuid": "ce2c4c6d_84a7d96a",
+      "revId": "db5165d48a1859a7ee53fe6ead46d0c49404c252",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
