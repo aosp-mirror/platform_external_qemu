@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3284ef87_3634ed5d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 4493,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2021-04-22T21:00:00Z",
+      "side": 1,
+      "message": "I am not sure if this is feasible... I think the only way we can do it is to submit an empty CommandBuffer and wait on that; not sure how bad it is from performance perspective.",
+      "range": {
+        "startLine": 4493,
+        "startChar": 21,
+        "endLine": 4493,
+        "endChar": 46
+      },
+      "revId": "b7fab23a28b131a41d0e6f2839a0588d32c7279f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
