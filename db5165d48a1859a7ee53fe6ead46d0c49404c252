@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "85ed668c_b42c0fca",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-04-22T16:38:31Z",
+      "side": 1,
+      "message": "Hi Bo, this CL will workaround the issue that I have encountered in guest https://b.corp.google.com/issues/185242318#comment19 but newer system image won\u0027t be compatible with older version of emulator. So it might break goog3. Ideally, we need a guest side solution.",
+      "revId": "db5165d48a1859a7ee53fe6ead46d0c49404c252",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
