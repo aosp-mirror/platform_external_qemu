@@ -13,9 +13,10 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#include <stdio.h>
 #include <Cocoa/Cocoa.h>
 #include <OpenGL/OpenGL.h>
+#include <OpenGL/gl3.h>
+#include <stdio.h>
 #include "MacPixelFormatsAttribs.h"
 
 //
@@ -36,6 +37,9 @@
     @private
         int boundToPbuffer;
         int boundToWin;
+    @public
+        GLuint ytexForDecoder;
+        GLuint uvtexForDecoder;
 }
 
 - (id) initWithFormat:(NSOpenGLPixelFormat *)pixelFormat shareContext:(NSOpenGLContext *)share;
@@ -49,6 +53,8 @@
     if (self != nil) {
         boundToPbuffer = 0;
         boundToWin = 0;
+        ytexForDecoder = 0;
+        uvtexForDecoder = 0;
     }
     return self;
 }
@@ -222,6 +228,90 @@ void* nsGetLowLevelContext(void* context) {
     return ctx;
 }
 
+void nsCopyTexture(void* context, int from, int to, int width, int height) {
+    EmuGLContext* ctx = (EmuGLContext*)context;
+
+    if (glGetError() != GL_NO_ERROR) {
+        // ignore
+    }
+    int tex1 = from;
+    int tex2 = to;
+    GLuint g_fb = 0;
+    glGenFramebuffers(1, &g_fb);
+    glBindFramebuffer(GL_FRAMEBUFFER, g_fb);
+    glBindTexture(GL_TEXTURE_RECTANGLE, tex1);
+    glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                           GL_TEXTURE_RECTANGLE, tex1, 0);
+    if (glGetError() != GL_NO_ERROR) {
+        return;
+    }
+    glBindTexture(GL_TEXTURE_2D, tex2);
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
+                           GL_TEXTURE_2D, tex2, 0);
+    if (glGetError() != GL_NO_ERROR) {
+        return;
+    }
+    glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height);
+
+    glBindTexture(GL_TEXTURE_RECTANGLE, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    if (glGetError() != GL_NO_ERROR) {
+        return;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDeleteFramebuffers(1, &g_fb);
+}
+
+void nsConvertVideoFrameToNV12Textures(void* context,
+                                       void* iosurface,
+                                       int Ytexd,
+                                       int UVtexd) {
+    EmuGLContext* ctx = (EmuGLContext*)context;
+
+    CGLContextObj cgl_ctx = ctx.CGLContextObj;
+
+    glEnable(GL_TEXTURE_RECTANGLE);
+
+    IOSurfaceRef* surface = (IOSurfaceRef*)iosurface;
+
+    GLsizei surface_w = (GLsizei)IOSurfaceGetWidth(surface);
+    GLsizei surface_h = (GLsizei)IOSurfaceGetHeight(surface);
+
+    if (!ctx->ytexForDecoder) {
+        glGenTextures(1, &ctx->ytexForDecoder);
+    }
+    if (!ctx->uvtexForDecoder) {
+        glGenTextures(1, &ctx->uvtexForDecoder);
+    }
+    GLuint Ytex = ctx->ytexForDecoder;
+    GLuint UVtex = ctx->uvtexForDecoder;
+
+    glBindTexture(GL_TEXTURE_RECTANGLE, Ytex);
+    CGLError cglError = CGLTexImageIOSurface2D(
+            cgl_ctx, GL_TEXTURE_RECTANGLE, GL_R8, surface_w, surface_h, GL_RED,
+            GL_UNSIGNED_BYTE, surface, 0);
+
+    if (cglError != kCGLNoError) {
+        return;
+    }
+
+    glBindTexture(GL_TEXTURE_RECTANGLE, UVtex);
+    cglError = CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE, GL_RG8,
+                                      surface_w / 2, surface_h / 2, GL_RG,
+                                      GL_UNSIGNED_BYTE, surface, 1);
+
+    if (cglError != kCGLNoError) {
+        return;
+    }
+    glBindTexture(GL_TEXTURE_RECTANGLE, 0);
+
+    nsCopyTexture(context, (int)Ytex, Ytexd, surface_w, surface_h);
+    nsCopyTexture(context, (int)UVtex, UVtexd, surface_w/2, surface_h/2);
+}
+
+
 void  nsPBufferMakeCurrent(void* context,void* nativePBuffer,int level){
     EmuGLContext* ctx = (EmuGLContext *)context;
     NSOpenGLPixelBuffer* pbuff = (NSOpenGLPixelBuffer *)nativePBuffer;
@@ -270,6 +360,14 @@ void nsSwapInterval(int *interval){
 void nsDestroyContext(void* context){
     EmuGLContext *ctx = (EmuGLContext*)context;
     if(ctx != nil){
+        if (ctx->ytexForDecoder != 0) {
+            glDeleteTextures(1, &ctx->ytexForDecoder);
+            ctx->ytexForDecoder = 0;
+        }
+        if (ctx->uvtexForDecoder != 0) {
+            glDeleteTextures(1, &ctx->uvtexForDecoder);
+            ctx->uvtexForDecoder = 0;
+        }
         [ctx release];
     }
 }
