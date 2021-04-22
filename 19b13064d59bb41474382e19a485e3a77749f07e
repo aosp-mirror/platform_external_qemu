@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5e8a398b_436fb51a",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/MacNative.m",
+        "patchSetId": 18
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2021-04-22T17:54:03Z",
+      "side": 1,
+      "message": "Remove redundant glGetError call, unless you need to check it prior to calling glFramebufferTexture2D. In that case, move the first glGetError to immediately after glBindTexture.",
+      "range": {
+        "startLine": 251,
+        "startChar": 4,
+        "endLine": 257,
+        "endChar": 5
+      },
+      "revId": "19b13064d59bb41474382e19a485e3a77749f07e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
