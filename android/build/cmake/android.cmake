@@ -1685,9 +1685,11 @@ endfunction()
 function(android_symlink TARGET SYMLINK WORKDIR)
     file(MAKE_DIRECTORY ${WORKDIR})
     if (WIN32 AND NOT CROSSCOMPILE)
-        # message("Creating symlink, mklink: ${WORKDIR}/${SYMLINK} -> ${TARGET}")
+        # message("Creating symlink,  mklink ${WIN_PATH} ${WIN_TGT}")
+        file(TO_NATIVE_PATH "${TARGET}" WIN_TGT)
+        file(TO_NATIVE_PATH "${WORKDIR}/${SYMLINK}" WIN_PATH)
         execute_process(
-            COMMAND mklink /d "${SYMLINK}" "${TARGET}"
+            COMMAND cmd.exe /c mklink ${WIN_PATH} ${WIN_TGT}
             WORKING_DIRECTORY ${WORKDIR})
     else()
         # message("Creating symlink, create_symlink: ${WORKDIR}/${SYMLINK} -> ${TARGET}")
