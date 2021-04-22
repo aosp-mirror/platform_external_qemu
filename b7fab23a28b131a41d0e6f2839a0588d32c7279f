@@ -22,6 +22,30 @@
       },
       "revId": "b7fab23a28b131a41d0e6f2839a0588d32c7279f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "614e22e4_a312488a",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 4493,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-04-22T21:02:41Z",
+      "side": 1,
+      "message": "Yup. Also only one wait can be active for each signal at a time. Would probably need to delicately hunt down and replace or add a VkFence to the submit from the client that waits on the semaphore\n\nOr we can have timeline semaphores I guess",
+      "parentUuid": "3284ef87_3634ed5d",
+      "range": {
+        "startLine": 4493,
+        "startChar": 21,
+        "endLine": 4493,
+        "endChar": 46
+      },
+      "revId": "b7fab23a28b131a41d0e6f2839a0588d32c7279f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
