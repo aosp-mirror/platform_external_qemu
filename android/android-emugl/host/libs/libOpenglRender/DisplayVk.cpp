@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
 #include "ErrorLog.h"
+#include "Hwc2.h"
 
 static void repaintCallback(void *) {}
 
@@ -124,6 +125,10 @@ void DisplayVk::post(
     auto &surfaceState = *m_surfaceState;
     const auto &db = *displayBufferPtr;
 
+    if (!displayBufferPtr) {
+        fprintf(stderr, "%s: no display buffer\n", __func__);
+    }
+
     VK_CHECK(m_vk.vkWaitForFences(m_vkDevice, 1, &m_frameDrawCompleteFence,
                                   VK_TRUE, UINT64_MAX));
     uint32_t imageIndex;
@@ -142,15 +147,99 @@ void DisplayVk::post(
         }
         auto composition = std::make_unique<Composition>(
             db.m_vkImageView, m_compositionVkSampler, db.m_width, db.m_height);
-        composition->m_transform =
-            glm::scale(glm::mat3(1.0),
-                       glm::vec2(static_cast<float>(surfaceState.m_width) /
-                                     static_cast<float>(db.m_width),
-                                 static_cast<float>(surfaceState.m_height) /
-                                     static_cast<float>(db.m_height)));
         m_compositorVk->setComposition(imageIndex, std::move(composition));
         surfaceState.m_prevDisplayBuffer = displayBufferPtr;
     }
+
+    auto cmdBuff = m_compositorVk->getCommandBuffer(imageIndex);
+
+    VK_CHECK(m_vk.vkResetFences(m_vkDevice, 1, &m_frameDrawCompleteFence));
+    VkPipelineStageFlags waitStages[] = {
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+    VkSubmitInfo submitInfo = {.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+                               .waitSemaphoreCount = 1,
+                               .pWaitSemaphores = &m_imageReadySem,
+                               .pWaitDstStageMask = waitStages,
+                               .commandBufferCount = 1,
+                               .pCommandBuffers = &cmdBuff,
+                               .signalSemaphoreCount = 1,
+                               .pSignalSemaphores = &m_frameDrawCompleteSem};
+    VK_CHECK(m_vk.vkQueueSubmit(m_compositorVkQueue, 1, &submitInfo,
+                                m_frameDrawCompleteFence));
+
+    auto swapChain = m_swapChainStateVk->getSwapChain();
+    VkPresentInfoKHR presentInfo = {.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+                                    .waitSemaphoreCount = 1,
+                                    .pWaitSemaphores = &m_frameDrawCompleteSem,
+                                    .swapchainCount = 1,
+                                    .pSwapchains = &swapChain,
+                                    .pImageIndices = &imageIndex};
+    VK_CHECK(m_vk.vkQueuePresentKHR(m_swapChainVkQueue, &presentInfo));
+    VK_CHECK(m_vk.vkWaitForFences(m_vkDevice, 1, &m_frameDrawCompleteFence,
+                                  VK_TRUE, UINT64_MAX));
+}
+
+void DisplayVk::compose(
+    const Post& postCmd,
+    const std::vector<std::shared_ptr<DisplayBufferInfo>>& composeBuffers,
+    const std::shared_ptr<DisplayBufferInfo>& displayBufferPtr) {
+    ComposeDevice_v2* composeDevice = (ComposeDevice_v2*)(postCmd.composeBuffer.data());
+    uint32_t bufferSize = (uint32_t)postCmd.composeBuffer.size();
+    ComposeLayer* l = (ComposeLayer*)composeDevice->layer;
+
+    std::vector<ComposeLayerVk> composeLayers;
+    for (int i = 0; i < composeDevice->numLayers; ++i, ++l) {
+        ComposeLayerVk cl;
+        if (!composeBuffers[i]) {
+            fprintf(stderr, "%s: warning: null ptr passed to compose bufer\n", __func__);
+            continue;
+        }
+        cl.imageView = composeBuffers[i]->m_vkImageView;
+        cl.cbWidth = composeBuffers[i]->m_width;
+        cl.cbHeight = composeBuffers[i]->m_height;
+        cl.layerInfo = *l;
+        composeLayers.push_back(cl);
+    }
+
+    if (composeLayers.empty()) {
+        return;
+    }
+
+    if (m_swapChainStateVk == nullptr || m_compositorVk == nullptr) {
+        ERR("%s(%s:%d): Haven't bound to a surface, can't post color buffer.\n",
+            __FUNCTION__, __FILE__, static_cast<int>(__LINE__));
+        return;
+    }
+
+    auto &surfaceState = *m_surfaceState;
+    const auto &db = *displayBufferPtr;
+
+    if (!displayBufferPtr) {
+        fprintf(stderr, "%s: no display buffer\n", __func__);
+        return;
+    }
+
+    VK_CHECK(m_vk.vkWaitForFences(m_vkDevice, 1, &m_frameDrawCompleteFence,
+                                  VK_TRUE, UINT64_MAX));
+    uint32_t imageIndex;
+    VK_CHECK(m_vk.vkAcquireNextImageKHR(
+        m_vkDevice, m_swapChainStateVk->getSwapChain(), UINT64_MAX,
+        m_imageReadySem, VK_NULL_HANDLE, &imageIndex));
+    auto maybePrevDisplayBuffer = surfaceState.m_prevDisplayBuffer.lock();
+
+    if (!canComposite(db.m_vkFormat)) {
+        ERR("%s(%s:%d): Can't composite the DisplayBuffer(0x%" PRIxPTR
+            "). The image(VkFormat = %" PRIu64 ") can be sampled from.\n",
+            __FUNCTION__, __FILE__, static_cast<int>(__LINE__),
+            reinterpret_cast<uintptr_t>(displayBufferPtr.get()),
+            static_cast<uint64_t>(db.m_vkFormat));
+        return;
+    }
+
+    auto composition = std::make_unique<Composition>(
+        m_compositionVkSampler, db.m_width, db.m_height, composeLayers);
+    m_compositorVk->setComposition(imageIndex, std::move(composition));
+    surfaceState.m_prevDisplayBuffer = displayBufferPtr;
 
     auto cmdBuff = m_compositorVk->getCommandBuffer(imageIndex);
 

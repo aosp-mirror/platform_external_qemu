@@ -799,8 +799,20 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         finalDeviceExtensions.push_back(ext);
     }
 
+    VkPhysicalDeviceDescriptorIndexingFeaturesEXT descIndexingFeatures = {};
+    descIndexingFeatures.sType =
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
+    VkPhysicalDeviceFeatures2 features = {};
+    features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    features.pNext = &descIndexingFeatures;
+    descIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE;
+    // if (!CompositorVk::enablePhysicalDeviceFeatures(features)) {
+    //     VK_COMMON_ERROR(
+    //         "Fail to enable physical device features for CompositorVk.\n");
+    // }
+
     VkDeviceCreateInfo dCi = {
-        VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO, 0, 0,
+        VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO, &features, 0,
         // TODO: add compute queue as well if appropriate
         1, &dqCi,
         0, nullptr, // no layers
@@ -1326,6 +1338,7 @@ bool isColorBufferVulkanCompatible(uint32_t colorBufferHandle) {
 
     if (!fb->getColorBufferInfo(colorBufferHandle, &width, &height,
                                 &internalformat)) {
+        fprintf(stderr, "%s: cb not found\n", __func__);
         return false;
     }
 
@@ -1337,6 +1350,7 @@ bool isColorBufferVulkanCompatible(uint32_t colorBufferHandle) {
         }
     }
 
+    fprintf(stderr, "%s: fmt 0x%x vk 0x%x not supported\n", __func__, internalformat, vkFormat);
     return false;
 }
 
@@ -1385,7 +1399,9 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
                         VkDeviceSize* allocSize,
                         uint32_t* typeIndex,
                         void** mappedPtr) {
-    if (!isColorBufferVulkanCompatible(colorBufferHandle)) return false;
+    if (!isColorBufferVulkanCompatible(colorBufferHandle)) {
+        return false;
+    }
 
     auto vk = sVkEmulation->dvk;
 
@@ -1417,6 +1433,7 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
         // may map the same memory twice.
         if (mappedPtr)
             *mappedPtr = infoPtr->memory.mappedPtr;
+
         return true;
     }
 
@@ -1516,6 +1533,7 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
     VkResult createRes = vk->vkCreateImage(sVkEmulation->device, &imageCi,
                                            nullptr, &res.image);
     if (createRes != VK_SUCCESS) {
+        fprintf(stderr, "%s: cb img create vk: %u\n", __func__, colorBufferHandle);
         LOG(VERBOSE) << "Failed to create Vulkan image for ColorBuffer "
                      << colorBufferHandle;
         return false;
@@ -1557,6 +1575,7 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
 
     if (!allocRes) {
         LOG(VERBOSE) << "Failed to allocate ColorBuffer with Vulkan backing.";
+        fprintf(stderr, "%s: cb alloc failed vk: %u\n", __func__, colorBufferHandle);
         return false;
     }
 
@@ -1614,7 +1633,9 @@ bool teardownVkColorBuffer(uint32_t colorBufferHandle) {
 
     auto infoPtr = android::base::find(sVkEmulation->colorBuffers, colorBufferHandle);
 
-    if (!infoPtr) return false;
+    if (!infoPtr) {
+        return false;
+    }
 
     auto& info = *infoPtr;
 

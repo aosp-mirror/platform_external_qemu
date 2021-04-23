@@ -285,9 +285,11 @@ void teardownAndroidNativeBufferImage(
 
     anbInfo->acquireQueueState.teardown(vk, device);
 
-    if (anbInfo->externallyBacked) {
-        teardownVkColorBuffer(anbInfo->colorBufferHandle);
-    }
+    // Actually we shouldn't tear down the color buffer here
+    // if (anbInfo->externallyBacked) {
+    //     fprintf(stderr, "%s: tear down cb %u\n", __func__, anbInfo->colorBufferHandle);
+    //     // teardownVkColorBuffer(anbInfo->colorBufferHandle);
+    // }
 
     *anbInfo = {};
 }

@@ -29,6 +29,7 @@
 #include "FbConfig.h"
 #include "GLESVersionDetector.h"
 #include "Hwc2.h"
+#include "PostCommands.h"
 #include "PostWorker.h"
 #include "ReadbackWorker.h"
 #include "RenderContext.h"
@@ -801,39 +802,6 @@ private:
     // refcount hits 0. This is for use with guest kernels where the color
     // buffer is already tied to a file descriptor in the guest kernel.
     bool m_noDelayCloseColorBufferEnabled = false;
-
-    // Posting
-    enum class PostCmd {
-        Post = 0,
-        Viewport = 1,
-        Compose = 2,
-        Clear = 3,
-        Screenshot = 4,
-        Exit = 5,
-    };
-
-    struct Post {
-        PostCmd cmd;
-        int composeVersion;
-        std::vector<char> composeBuffer;
-        union {
-            ColorBuffer* cb;
-            struct {
-                int width;
-                int height;
-            } viewport;
-            struct {
-                ColorBuffer* cb;
-                int screenwidth;
-                int screenheight;
-                GLenum format;
-                GLenum type;
-                SkinRotation rotation;
-                void* pixels;
-                SkinRect rect;
-            } screenshot;
-        };
-    };
 
     std::unique_ptr<PostWorker> m_postWorker = {};
     android::base::WorkerThread<Post> m_postThread;

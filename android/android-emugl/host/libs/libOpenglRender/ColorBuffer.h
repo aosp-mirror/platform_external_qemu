@@ -269,6 +269,7 @@ public:
 
     const std::shared_ptr<DisplayVk::DisplayBufferInfo>& getDisplayBufferVk()
         const {
+            if (!m_displayBufferVk) fprintf(stderr, "%s: asking color buffer %u without vk display buffer for display buffer\n", __func__, getHndl());
         return m_displayBufferVk;
     };
 
