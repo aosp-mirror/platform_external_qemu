@@ -2478,7 +2478,7 @@ extern "C" int main(int argc, char** argv) {
             real_console_tty_prefix = "hvc";
         }
 
-        ScopedCPtr<char> kernel_parameters(emulator_getKernelParameters(
+        std::string append_arg = emulator_getKernelParameters(
                 opts, kTarget.androidArch, apiLevel, real_console_tty_prefix,
                 hw->kernel_parameters, hw->kernel_path, &all_boot_params,
                 rendererConfig.glesMode, rendererConfig.bootPropOpenglesVersion,
@@ -2486,14 +2486,13 @@ extern "C" int main(int argc, char** argv) {
                 true /* isQemu2 */, hw->hw_arc, hw->hw_lcd_width,
                 hw->hw_lcd_height, hw->hw_lcd_vsync, hw->hw_gltransport,
                 hw->hw_gltransport_drawFlushInterval,
-                hw->display_settings_xml));
+                hw->display_settings_xml);
 
-        if (!kernel_parameters.get()) {
+        if (append_arg.empty()) {
             return 1;
         }
 
         /* append the kernel parameters after -qemu */
-        std::string append_arg(kernel_parameters.get());
         for (int i = 0; i < argc; ++i) {
             if (!strcmp(argv[i], "-append")) {
                 if (++i < argc) {

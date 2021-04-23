@@ -32,26 +32,27 @@ using android::base::StringFormat;
 // Note: defined in platform/system/vold/model/Disk.cpp
 static const unsigned int kMajorBlockLoop = 7;
 
-char* emulator_getKernelParameters(const AndroidOptions* opts,
-                                   const char* targetArch,
-                                   int apiLevel,
-                                   const char* kernelSerialPrefix,
-                                   const char* avdKernelParameters,
-                                   const char* kernelPath,
-                                   const std::vector<std::string>* verifiedBootParameters,
-                                   AndroidGlesEmulationMode glesMode,
-                                   int bootPropOpenglesVersion,
-                                   uint64_t glFramebufferSizeBytes,
-                                   mem_map ramoops,
-                                   const int vm_heapSize,
-                                   bool isQemu2,
-                                   bool isCros,
-                                   uint32_t lcd_width,
-                                   uint32_t lcd_height,
-                                   uint32_t lcd_vsync,
-                                   const char* gltransport,
-                                   uint32_t gltransport_drawFlushInterval,
-                                   const char* displaySettingsXml) {
+std::string
+emulator_getKernelParameters(const AndroidOptions* opts,
+                             const char* targetArch,
+                             const int apiLevel,
+                             const char* kernelSerialPrefix,
+                             const char* avdKernelParameters,
+                             const char* kernelPath,
+                             const std::vector<std::string>* verifiedBootParameters,
+                             const AndroidGlesEmulationMode glesMode,
+                             const int bootPropOpenglesVersion,
+                             const uint64_t glFramebufferSizeBytes,
+                             const mem_map ramoops,
+                             const int vm_heapSize,
+                             const bool isQemu2,
+                             const bool isCros,
+                             const uint32_t lcd_width,
+                             const uint32_t lcd_height,
+                             const uint32_t lcd_vsync,
+                             const char* gltransport,
+                             const uint32_t gltransport_drawFlushInterval,
+                             const char* displaySettingsXml) {
     android::ParameterList params;
     if (isCros) {
       std::string cmdline(StringFormat(
@@ -208,5 +209,5 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     // User entered parameters are space separated. Passing false here to prevent
     // parameters from being surrounded by quotes.
-    return params.toCStringCopy(false);
+    return params.toString(false);
 }
