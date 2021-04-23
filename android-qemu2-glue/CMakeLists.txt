@@ -78,4 +78,5 @@ target_include_directories(libqemu2-glue-vm-operations
 target_link_libraries(
   libqemu2-glue-vm-operations
   PRIVATE android-emu GLIB2::GLIB2 android-hw-config
-          nlohmann_json::nlohmann_json)
+          nlohmann_json::nlohmann_json
+          PIXMAN::PIXMAN)
