@@ -8,6 +8,7 @@
 #include "CompositorVk.h"
 #include "RenderContext.h"
 #include "SwapChainStateVk.h"
+#include "PostCommands.h"
 #include "vulkan/cereal/common/goldfish_vk_dispatch.h"
 
 // The DisplayVk class holds the Vulkan and other states required to draw a
@@ -48,6 +49,10 @@ class DisplayVk {
                                                            uint32_t width,
                                                            uint32_t height);
     void post(const std::shared_ptr<DisplayBufferInfo> &);
+
+    void compose(
+            const Post& postCmd, const std::vector<std::shared_ptr<DisplayBufferInfo>>& composeBuffers,
+            const std::shared_ptr<DisplayBufferInfo>& displayBuffer);
 
    private:
     bool canComposite(VkFormat);
