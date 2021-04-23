@@ -83,7 +83,7 @@ set(OPTION_MINBUILD
       "True if we should build a minimum set of components to support 64-bit guets only."
 )
 set(OPTION_TCMALLOC
-    TRUE
+    FALSE
     CACHE
       BOOL
       "True if we should use TCMalloc on its supported platforms (currently, linux)."
@@ -501,7 +501,7 @@ prebuilt(SDL2)
 prebuilt(FDT)
 prebuilt(PIXMAN)
 prebuilt(VIRGLRENDERER)
-if (NOT DARWIN_AARCH64)
+if (OPTION_TCMALLOC AND NOT DARWIN_AARCH64)
   prebuilt(TCMALLOC)
 endif()
 
@@ -724,10 +724,17 @@ android_target_compile_options(
   "-Wno-implicit-int-float-conversion"
   "-Wno-gnu-variable-sized-type-not-at-end"
   "-Wno-reorder-init-list")
-android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE
-                              "${TCMALLOC_LIBRARIES} -lutil")
-android_target_link_libraries(android-qemu-deps linux-aarch64 INTERFACE
-                              "${TCMALLOC_LIBRARIES} -lutil")
+if (OPTION_TCMALLOC)
+  android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE
+                                "${TCMALLOC_LIBRARIES} -lutil")
+  android_target_link_libraries(android-qemu-deps linux-aarch64 INTERFACE
+                                "${TCMALLOC_LIBRARIES} -lutil")
+else()
+  android_target_link_libraries(android-qemu-deps linux-x86_64 INTERFACE
+                                "-lutil")
+  android_target_link_libraries(android-qemu-deps linux-aarch64 INTERFACE
+                                "-lutil")
+endif()
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE
     "-framework CoreAudio" "-framework AudioToolbox")
 android_target_link_libraries(android-qemu-deps darwin-aarch64 INTERFACE

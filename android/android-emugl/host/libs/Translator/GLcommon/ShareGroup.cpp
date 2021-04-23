@@ -25,6 +25,8 @@
 #include <array>
 #include <utility>
 
+static int sShareGroups = 0;
+
 static constexpr int toIndex(NamedObjectType type) {
     return static_cast<int>(type);
 }
@@ -64,6 +66,8 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
             ++i;
         }
     }
+    sShareGroups ++;
+    //printf("Creating new share group, total %d\n", sShareGroups);
 }
 
 void ShareGroup::preSave(GlobalNameSpace *globalNameSpace) {
@@ -142,6 +146,8 @@ ShareGroup::~ShareGroup()
         for (auto n : m_nameSpace) {
             delete n;
         }
+        sShareGroups --;
+        //printf("Deleting share group, total %d\n", sShareGroups);
     }
 }
 
