@@ -2,6 +2,8 @@
 #define COMPOSITOR_VK_H
 
 #include <array>
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #include <glm/glm.hpp>
 #include <memory>
 #include <optional>
@@ -12,19 +14,34 @@
 #include "vulkan/cereal/common/goldfish_vk_dispatch.h"
 #include "vulkan/vk_util.h"
 
+#include "Hwc2.h"
+
+class ComposeLayerVk {
+public:
+    VkImageView imageView;
+    uint32_t cbWidth;
+    uint32_t cbHeight;
+    ComposeLayer layerInfo;
+};
+
 class Composition {
-   public:
-    VkImageView m_vkImageView;
+public:
     VkSampler m_vkSampler;
     uint32_t m_width;
     uint32_t m_height;
 
-    // transform matrix in screen coordinates
-    glm::mat3 m_transform;
+    std::vector<ComposeLayerVk> m_composeLayers;
+    struct LayerTransform {
+        glm::mat4 pos;
+        glm::mat4 texcoord;
+    };
+    std::vector<LayerTransform> m_transformsPerLayer;
 
     Composition() = delete;
-    explicit Composition(VkImageView, VkSampler, uint32_t width,
-                         uint32_t height);
+    explicit Composition(VkSampler, uint32_t width, uint32_t height, const std::vector<ComposeLayerVk>& composeLayers);
+    explicit Composition(VkImageView, VkSampler, uint32_t width, uint32_t height);
+private:
+    void setTransforms();
 };
 
 struct CompositorVkBase
@@ -117,7 +134,8 @@ class CompositorVk : protected CompositorVkBase {
     void copyBuffer(VkBuffer src, VkBuffer dst, VkDeviceSize) const;
 
     struct UniformBufferObject {
-        alignas(16) glm::mat4 transform;
+        alignas(16) glm::mat4 pos_transform;
+        alignas(16) glm::mat4 texcoord_transform;
     };
 
     struct Vertex {
