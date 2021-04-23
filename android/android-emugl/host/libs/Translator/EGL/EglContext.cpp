@@ -24,6 +24,8 @@
 
 unsigned int EglContext::s_nextContextHndl = 0;
 
+static int sTotalContexts = 0;
+
 extern EglGlobalInfo* g_eglInfo; // defined in EglImp.cpp
 
 bool EglContext::usingSurface(SurfacePtr surface) {
@@ -95,6 +97,8 @@ EglContext::EglContext(EglDisplay *dpy,
     } else {
         m_hndl = 0;
     }
+    sTotalContexts ++;
+    printf("Creating new context. Total context %d\n", sTotalContexts);
 }
 
 EglContext::~EglContext()
@@ -151,7 +155,8 @@ EglContext::~EglContext()
     } else {
         m_dpy->nativeType()->makeCurrent(nullptr, nullptr, nullptr);
     }
-
+    sTotalContexts --;
+    printf("Deleting context. Total context %d\n", sTotalContexts);
 }
 
 void EglContext::setSurfaces(SurfacePtr read,SurfacePtr draw)

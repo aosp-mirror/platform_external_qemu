@@ -6,7 +6,7 @@
 prebuilt(UUID)
 prebuilt(GLIB2) # Acts as windows stdio compatibility layer.
 prebuilt(LIBUNWIND)
-if (NOT DARWIN_AARCH64)
+if (OPTION_TCMALLOC AND NOT DARWIN_AARCH64)
     prebuilt(TCMALLOC)
 endif()
 prebuilt(Threads)

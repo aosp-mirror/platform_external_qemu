@@ -1371,7 +1371,7 @@ for opt do
   ;;
   --disable-tcmalloc) tcmalloc="no"
   ;;
-  --enable-tcmalloc) tcmalloc="yes"
+  --enable-tcmalloc) tcmalloc="no"
   ;;
   --disable-jemalloc) jemalloc="no"
   ;;
