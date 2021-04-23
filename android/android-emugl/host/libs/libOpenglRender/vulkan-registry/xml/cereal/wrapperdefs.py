@@ -86,6 +86,8 @@ EQUALITY_RET_TYPE = makeVulkanTypeSimple(False, "void", 0)
 
 RELAXED_APIS = [
     "vkWaitForFences",
+    "vkWaitSemaphores",
+    "vkWaitSemaphoresKHR",
     "vkQueueWaitIdle",
     "vkDeviceWaitIdle",
     "vkQueueFlushCommandsGOOGLE",
