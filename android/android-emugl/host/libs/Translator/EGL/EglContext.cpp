@@ -20,9 +20,15 @@
 #include "EglPbufferSurface.h"
 #include "ThreadInfo.h"
 
+#include <iostream>
+#include <chrono>
+#include <ctime>  
+
 #include <GLcommon/GLEScontext.h>
 
 unsigned int EglContext::s_nextContextHndl = 0;
+
+static int sTotalContexts = 0;
 
 extern EglGlobalInfo* g_eglInfo; // defined in EglImp.cpp
 
@@ -95,6 +101,12 @@ EglContext::EglContext(EglDisplay *dpy,
     } else {
         m_hndl = 0;
     }
+    sTotalContexts ++;
+    std::time_t t = std::time(nullptr);
+    char mbstr[100];
+    if (std::strftime(mbstr, sizeof(mbstr), "%A %c", std::localtime(&t))) {
+        std::cout << mbstr << " Creating new context. Total context " << sTotalContexts << std::endl;
+    }
 }
 
 EglContext::~EglContext()
@@ -151,7 +163,12 @@ EglContext::~EglContext()
     } else {
         m_dpy->nativeType()->makeCurrent(nullptr, nullptr, nullptr);
     }
-
+    sTotalContexts --;
+    std::time_t t = std::time(nullptr);
+    char mbstr[100];
+    if (std::strftime(mbstr, sizeof(mbstr), "%A %c", std::localtime(&t))) {
+        std::cout << mbstr << " Deleting context. Total context " << sTotalContexts << std::endl;
+    }
 }
 
 void EglContext::setSurfaces(SurfacePtr read,SurfacePtr draw)

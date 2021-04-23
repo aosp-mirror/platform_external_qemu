@@ -192,6 +192,7 @@ public:
         // Now add in the metadata.
         auto entries = System::get()->scanDirEntries(snapshot->dataDir(), true);
         for (const auto& fname : entries) {
+            printf("taring entry %s\n", fname.c_str());
             if (!System::get()->pathIsFile(fname)) {
                 continue;
             }
@@ -205,6 +206,7 @@ public:
             std::ifstream ifs(fname, std::ios_base::in | std::ios_base::binary);
             ifs.rdbuf()->pubsetbuf(buf, sizeof(buf));
 
+            printf("taring %s\n", fname.c_str());
             if (android_stat(fname.c_str(), &sb) != 0 ||
                 !tw.addFileEntryFromStream(ifs, name, sb)) {
                 result.set_err("Unable to tar " + fname);

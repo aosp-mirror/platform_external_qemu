@@ -154,8 +154,10 @@ android_add_test(
   LINUX android/emulation/control/interceptor/LoggingInterceptor_unittest.cpp)
 target_link_libraries(android-grpc_unittest PRIVATE android-grpc grpc++
                                                     gmock_main)
-android_target_dependency(android-grpc_unittest linux-x86_64
+if (OPTION_TCMALLOC)
+  android_target_dependency(android-grpc_unittest linux-x86_64
                           TCMALLOC_OS_DEPENDENCIES)
+endif()
 set_property(TARGET android-grpc_unittest PROPERTY CXX_STANDARD 17)
 # Lets distribute the proto file
 install(

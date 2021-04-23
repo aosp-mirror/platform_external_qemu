@@ -562,6 +562,8 @@ static EGLint s_gles_attr[5];
 
 extern void tinyepoxy_init(const GLESv2Dispatch* gles, int version);
 
+static int sEpoxyCtxCount = 0;
+
 static bool prepare_epoxy(void) {
     if (!sRenderLib->getOpt(&sOpt)) {
         return false;
@@ -573,6 +575,7 @@ static bool prepare_epoxy(void) {
         EGL_CONTEXT_MINOR_VERSION_KHR, minor,
         EGL_NONE
     };
+    printf("epoxy create context %d\n", ++sEpoxyCtxCount);
     sContext = sEgl->eglCreateContext(sOpt.display, sOpt.config, EGL_NO_CONTEXT,
                                       attr);
     if (sContext == nullptr) {

@@ -48,7 +48,7 @@ public:
     static MemoryTracker* get();
     MemoryTracker();
     bool addToGroup(const std::string& group, const std::string& func);
-    std::string printUsage(int verbosity = 0);
+    std::string printUsage(int verbosity = 1);
     void start();
     void stop();
     bool isEnabled();
