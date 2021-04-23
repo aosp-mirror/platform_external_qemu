@@ -252,6 +252,7 @@ set(android-emu-common
     android/uncompress.cpp
     android/update-check/UpdateChecker.cpp
     android/update-check/VersionExtractor.cpp
+    android/userspace-boot-properties.cpp
     android/user-config.cpp
     android/utils/aconfig-file.c
     android/utils/assert.c
