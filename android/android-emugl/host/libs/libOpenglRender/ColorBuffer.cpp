@@ -25,6 +25,7 @@
 #include "TextureResize.h"
 #include "YUVConverter.h"
 #include "vulkan/VulkanDispatch.h"
+#include "vulkan/VkCommonOperations.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
@@ -1008,6 +1009,10 @@ bool ColorBuffer::importMemory(
     uint64_t size, bool dedicated, bool linearTiling, bool vulkanOnly,
     std::shared_ptr<DisplayVk::DisplayBufferInfo> displayBufferVk) {
     RecursiveScopedHelperContext context(m_helper);
+    if (!displayBufferVk) {
+        fprintf(stderr, "%s: null display buffer as input\n", __func__);
+        abort();
+    }
     m_displayBufferVk = std::move(displayBufferVk);
     s_gles2.glCreateMemoryObjectsEXT(1, &m_memoryObject);
     if (dedicated) {
