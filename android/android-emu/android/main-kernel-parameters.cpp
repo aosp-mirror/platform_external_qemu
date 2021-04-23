@@ -17,7 +17,6 @@
 #include "android/emulation/SetupParameters.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/kernel/kernel_utils.h"
-#include "android/userspace-boot-properties.h"
 #include "android/utils/debug.h"
 #include "android/utils/dns.h"
 
@@ -32,27 +31,18 @@ using android::base::StringFormat;
 // Note: defined in platform/system/vold/model/Disk.cpp
 static const unsigned int kMajorBlockLoop = 7;
 
-std::string
-emulator_getKernelParameters(const AndroidOptions* opts,
-                             const char* targetArch,
-                             const int apiLevel,
-                             const char* kernelSerialPrefix,
-                             const char* avdKernelParameters,
-                             const char* kernelPath,
-                             const std::vector<std::string>* verifiedBootParameters,
-                             const AndroidGlesEmulationMode glesMode,
-                             const int bootPropOpenglesVersion,
-                             const uint64_t glFramebufferSizeBytes,
-                             const mem_map ramoops,
-                             const int vm_heapSize,
-                             const bool isQemu2,
-                             const bool isCros,
-                             const uint32_t lcd_width,
-                             const uint32_t lcd_height,
-                             const uint32_t lcd_vsync,
-                             const char* gltransport,
-                             const uint32_t gltransport_drawFlushInterval,
-                             const char* displaySettingsXml) {
+std::string emulator_getKernelParameters(const AndroidOptions* opts,
+                                         const char* targetArch,
+                                         int apiLevel,
+                                         const char* kernelSerialPrefix,
+                                         const char* avdKernelParameters,
+                                         const char* kernelPath,
+                                         const std::vector<std::string>* verifiedBootParameters,
+                                         uint64_t glFramebufferSizeBytes,
+                                         mem_map ramoops,
+                                         bool isQemu2,
+                                         bool isCros,
+                                         std::vector<std::string> userspaceBootProps) {
     android::ParameterList params;
     if (isCros) {
       std::string cmdline(StringFormat(
@@ -197,14 +187,8 @@ emulator_getKernelParameters(const AndroidOptions* opts,
         params.addFormat("printk.devkmsg=on");
     }
 
-    for (const std::string& s : getUserspaceBootProperties(opts, isX86ish, isQemu2,
-                                                           lcd_width, lcd_height, lcd_vsync,
-                                                           glesMode, bootPropOpenglesVersion,
-                                                           vm_heapSize, apiLevel,
-                                                           verifiedBootParameters,
-                                                           gltransport, gltransport_drawFlushInterval,
-                                                           displaySettingsXml)) {
-        params.add(s);
+    for (std::string& prop : userspaceBootProps) {
+        params.add(std::move(prop));
     }
 
     // User entered parameters are space separated. Passing false here to prevent
