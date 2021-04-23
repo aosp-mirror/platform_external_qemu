@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5f346f3b_b657510e",
+        "filename": "android-qemu2-glue/CMakeLists.txt",
+        "patchSetId": 10
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-04-23T18:27:26Z",
+      "side": 1,
+      "message": "nit: spaces",
+      "revId": "71054c522abf7bd0a608b914f5a193cbb50737db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "48e408a1_f164852d",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 1098,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-04-23T18:27:26Z",
+      "side": 1,
+      "message": "nit: fix indents",
+      "revId": "71054c522abf7bd0a608b914f5a193cbb50737db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
