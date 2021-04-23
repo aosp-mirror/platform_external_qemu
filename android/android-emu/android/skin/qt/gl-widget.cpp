@@ -75,6 +75,8 @@ void GLWidget::handleScreenChange(QScreen*) {
     resizeGL(realPixelsWidth(), realPixelsHeight());
 }
 
+static int sGLWidgetCtx = 0;
+
 bool GLWidget::ensureInit() {
     // If an error occured when loading the EGL/GLESv2 libraries, return false.
     if (!mEGL || !mGLES2) {
@@ -142,6 +144,7 @@ bool GLWidget::ensureInit() {
         egl_config,
         (EGLContext)ops->get_global_egl_context(),
         context_attribs);
+    printf("epoxy create context %d\n", ++sGLWidgetCtx);
 
     if (mEGLState->context == EGL_NO_CONTEXT) {
         qCWarning(emu, "Failed to create EGL context %d", mEGL->eglGetError());

@@ -30,6 +30,9 @@ using android::base::AutoLock;
 using android::base::Stream;
 using android::base::Lock;
 
+#include <execinfo.h>
+#include <stdio.h>
+
 static thread_local RenderThreadInfo* s_threadInfoPtr;
 
 struct RenderThreadRegistry {
@@ -43,12 +46,24 @@ RenderThreadInfo::RenderThreadInfo() {
     s_threadInfoPtr = this;
     AutoLock lock(sRegistry.lock);
     sRegistry.threadInfos.insert(this);
+    printf("creating thread %p total %d\n", this, (int)sRegistry.threadInfos.size());
 }
 
 RenderThreadInfo::~RenderThreadInfo() {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (trivialContext) {
+        printf("thread deleting trivial context\n");
+        fb->DestroyRenderContext(trivialContext);
+        trivialContext = 0;
+    }
+    if (trivialSurface) {
+        fb->DestroyWindowSurface(trivialSurface);
+        trivialSurface = 0;
+    }
     s_threadInfoPtr = nullptr;
     AutoLock lock(sRegistry.lock);
     sRegistry.threadInfos.erase(this);
+    printf("deleting thread %p total %d\n", this, (int)sRegistry.threadInfos.size());
 }
 
 RenderThreadInfo* RenderThreadInfo::get() {

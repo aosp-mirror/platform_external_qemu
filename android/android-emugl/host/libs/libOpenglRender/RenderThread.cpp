@@ -43,6 +43,20 @@
 
 #include <assert.h>
 
+#include <execinfo.h>
+#include <stdio.h>
+
+static void printCallStack() {
+    void* callstack[128];
+    int i, frames = backtrace(callstack, 128);
+    char** strs = backtrace_symbols(callstack, frames);
+    for (i = 0; i < frames; ++i) {
+        fprintf(stderr, "%s\n", strs[i]);
+    }
+    free(strs);
+}
+
+
 using android::base::AutoLock;
 
 namespace emugl {
@@ -93,6 +107,8 @@ RenderThread::RenderThread(RenderChannelImpl* channel,
             mFinished.store(true, std::memory_order_relaxed);
         }
     }
+    printf("creating render thread\n");
+    //printCallStack();
 }
 
 RenderThread::RenderThread(
@@ -112,6 +128,7 @@ RenderThread::RenderThread(
             mFinished.store(true, std::memory_order_relaxed);
         }
     }
+
 }
 
 

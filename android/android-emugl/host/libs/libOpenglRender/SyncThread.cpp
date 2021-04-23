@@ -173,6 +173,8 @@ void SyncThread::sendAsync(SyncThreadCmd& cmd) {
     mWorkerThreadPool.enqueue(std::move(cmd));
 }
 
+static int sSyncCtx = 0;
+
 void SyncThread::doSyncContextInit() {
     const EGLDispatch* egl = emugl::LazyLoadedEGLDispatch::get();
 
@@ -205,6 +207,7 @@ void SyncThread::doSyncContextInit() {
 
     const EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
     mContext = egl->eglCreateContext(mDisplay, config, EGL_NO_CONTEXT, contextAttribs);
+    printf("sync thread create context %d\n", ++sSyncCtx);
 
     egl->eglMakeCurrent(mDisplay, mSurface, mSurface, mContext);
 }

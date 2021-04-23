@@ -112,6 +112,8 @@ int RenderedCameraDevice::readFrame(ClientFrame* resultFrame,
                          bScale, expComp);
 }
 
+static int sCameraCtx = 0;
+
 bool RenderedCameraDevice::initializeEgl() {
     mEglDispatch = (const EGLDispatch*)android_getEGLDispatch();
     mGles2 = (const GLESv2Dispatch*)android_getGLESv2Dispatch();
@@ -163,6 +165,7 @@ bool RenderedCameraDevice::initializeEgl() {
     const EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
     mEglContext = mEglDispatch->eglCreateContext(
             mEglDisplay, eglConfig, EGL_NO_CONTEXT, contextAttribs);
+    printf("camera create context %d\n", ++sCameraCtx);
     if (mEglContext == EGL_NO_CONTEXT) {
         LOG(ERROR) << "eglCreateContext failed, error "
                    << mEglDispatch->eglGetError();

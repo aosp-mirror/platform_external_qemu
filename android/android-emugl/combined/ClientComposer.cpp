@@ -40,6 +40,8 @@ using android::base::WorkerProcessingResult;
 using android::base::WorkerThread;
 using android::base::Lock;
 
+static int sClientCtx = 0;
+
 namespace aemu {
 
 class ClientComposer::Impl {
@@ -123,6 +125,7 @@ private:
                                         EGL_NONE};
 
         mContext = eglCreateContext(mDisplay, match, EGL_NO_CONTEXT, glesAtt);
+        printf("client composer create context %d\n", ++sClientCtx);
 
         mSurface = eglCreateWindowSurface(
                 mDisplay, match, (EGLNativeWindowType)composeWindow, 0);

@@ -118,7 +118,7 @@ static void dumpPerfStats() {
     auto usage = System::get()->getMemUsage();
     std::string memoryStats =
             emugl::getMemoryTracker()
-                    ? emugl::getMemoryTracker()->printUsage(android_verbose)
+                    ? emugl::getMemoryTracker()->printUsage(1)
                     : "";
     auto cpuUsage = emugl::getCpuUsage();
     std::string lastStats =
@@ -184,6 +184,8 @@ const GLint* getGlesMaxContextAttribs() {
     }
 }
 
+static int sFbCtx = 0;
+
 static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
     EGLConfig config;
     EGLSurface surface;
@@ -211,6 +213,7 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
 
     EGLContext ctx = s_egl.eglCreateContext(p_dpy, config, EGL_NO_CONTEXT,
                                             getGlesMaxContextAttribs());
+    printf("fb create context %d\n", ++sFbCtx);
     if (ctx == EGL_NO_CONTEXT) {
         GL_LOG("Could not create GLES 2.x Context!");
         ERR("%s: Could not create GLES 2.x Context!\n", __FUNCTION__);
@@ -490,6 +493,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     GL_LOG("attempting to create egl context");
     fb->m_eglContext = s_egl.eglCreateContext(fb->m_eglDisplay, fb->m_eglConfig,
                                               EGL_NO_CONTEXT, getGlesMaxContextAttribs());
+    printf("fb create context %d\n", ++sFbCtx);
     if (fb->m_eglContext == EGL_NO_CONTEXT) {
         GL_LOG("Failed to create context 0x%x", s_egl.eglGetError());
         ERR("Failed to create context 0x%x\n", s_egl.eglGetError());
@@ -508,6 +512,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     fb->m_pbufContext =
             s_egl.eglCreateContext(fb->m_eglDisplay, fb->m_eglConfig,
                                    fb->m_eglContext, getGlesMaxContextAttribs());
+    printf("fb create context %d\n", ++sFbCtx);
     if (fb->m_pbufContext == EGL_NO_CONTEXT) {
         GL_LOG("Failed to create Pbuffer Context 0x%x", s_egl.eglGetError());
         ERR("Failed to create Pbuffer Context 0x%x\n", s_egl.eglGetError());
@@ -1327,7 +1332,9 @@ HandleType FrameBuffer::createRenderContext(int p_config,
         // support it.
         if (puid) {
             m_procOwnedRenderContext[puid].insert(ret);
+            printf("puid %d owned %d contexts now\n", (int)puid, (int)m_procOwnedRenderContext[puid].size());
         } else { // legacy path to manage context lifetime by threads
+            printf("warning: deprecated thread info used\n");
             tinfo->m_contextSet.insert(ret);
         }
     } else {
@@ -1439,9 +1446,16 @@ void FrameBuffer::DestroyRenderContext(HandleType p_context) {
     if (puid) {
         auto ite = m_procOwnedRenderContext.find(puid);
         if (ite != m_procOwnedRenderContext.end()) {
+            if (!ite->second.count(p_context)) {
+                printf("warning: unrecognize ctx puid %d ctx name %d\n", (int)puid, (int)p_context);
+            }
             ite->second.erase(p_context);
+        } else {
+            printf("warning: unrecognize puid %d ctx name %d\n", (int)puid, (int)p_context);
         }
+        printf("erasing context puid %d now owning %d\n", (int)puid, (int)ite->second.size());
     } else {
+        printf("warning: erasing context with tinfo!!!\n");
         tinfo->m_contextSet.erase(p_context);
     }
 }
@@ -1774,6 +1788,7 @@ std::vector<HandleType> FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, 
                 m_contexts.erase(ctx);
             }
             m_procOwnedRenderContext.erase(procIte);
+            printf("puid %d erasing\n", (int)puid);
         }
     }
 
@@ -2326,6 +2341,7 @@ bool FrameBuffer::bindFakeWindow_locked() {
         m_eglFakeWindowContext = s_egl.eglCreateContext(
                 m_eglDisplay, m_eglConfig, m_eglContext,
                 getGlesMaxContextAttribs());
+        printf("fb create context %d\n", ++sFbCtx);
 
         static const EGLint kFakeWindowPbufAttribs[] = {
                 EGL_WIDTH,          m_framebufferWidth, EGL_HEIGHT,
@@ -2363,16 +2379,24 @@ bool FrameBuffer::unbind_locked() {
     return true;
 }
 
-void FrameBuffer::createTrivialContext(HandleType shared,
+void FrameBuffer::getOrCreateTrivialContext(HandleType shared,
                                        HandleType* contextOut,
                                        HandleType* surfOut) {
     assert(contextOut);
     assert(surfOut);
 
-    *contextOut = createRenderContext(0, shared, GLESApi_2);
-    // Zero size is formally allowed here, but SwiftShader doesn't like it and
-    // fails.
-    *surfOut = createWindowSurface(0, 1, 1);
+    RenderThreadInfo* tInfo = RenderThreadInfo::get();
+    if (!tInfo->trivialContext) {
+        printf("creating trivial context puid %d thread %p\n", (int)tInfo->m_puid, tInfo);
+        tInfo->trivialContext = createRenderContext(0, shared, GLESApi_2);
+    }
+    if (!tInfo->trivialSurface) {
+        // Zero size is formally allowed here, but SwiftShader doesn't like it and
+        // fails.
+        tInfo->trivialSurface = createWindowSurface(0, 1, 1);
+    }
+    *contextOut = tInfo->trivialContext;
+    *surfOut = tInfo->trivialSurface;
 }
 
 void FrameBuffer::createAndBindTrivialSharedContext(EGLContext* contextOut,
@@ -2393,6 +2417,7 @@ void FrameBuffer::createAndBindTrivialSharedContext(EGLContext* contextOut,
 
     *contextOut = s_egl.eglCreateContext(
             m_eglDisplay, config->getEglConfig(), m_pbufContext, contextAttribs);
+    printf("fb create context %d\n", ++sFbCtx);
 
     const EGLint pbufAttribs[] = {
         EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
