@@ -1830,7 +1830,7 @@ public:
             AutoLock lock(mLock);
 
             DCHECK(mFenceInfo.find(*pFence) == mFenceInfo.end());
-            mFenceInfo[*pFence] = {};
+            // Create FenceInfo for *pFence.
             auto& fenceInfo = mFenceInfo[*pFence];
             fenceInfo.device = device;
             fenceInfo.vk = vk;
@@ -1840,6 +1840,29 @@ public:
         }
 
         return res;
+    }
+
+    VkResult on_vkResetFences(android::base::BumpPool* pool,
+                              VkDevice boxed_device,
+                              uint32_t fenceCount,
+                              const VkFence* pFences) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        VkResult res = vk->vkResetFences(device, fenceCount, pFences);
+        if (res != VK_SUCCESS) {
+            return res;
+        }
+
+        // Reset all fences' states to kNotWaitable.
+        {
+            AutoLock lock(mLock);
+            for (uint32_t i = 0; i < fenceCount; i++) {
+                DCHECK(mFenceInfo.find(pFences[i]) != mFenceInfo.end());
+                mFenceInfo[pFences[i]].state = FenceInfo::State::kNotWaitable;
+            }
+        }
+        return VK_SUCCESS;
     }
 
     VkResult on_vkImportSemaphoreFdKHR(
@@ -3694,7 +3717,21 @@ public:
 
         AutoLock qlock(*ql);
 
-        return vk->vkQueueSubmit(queue, submitCount, pSubmits, fence);
+        auto result = vk->vkQueueSubmit(queue, submitCount, pSubmits, fence);
+
+        // After vkQueueSubmit is called, we can signal the conditional variable
+        // in FenceInfo, so that other threads (e.g. SyncThread) can call
+        // waitForFence() on this fence.
+        lock.lock();
+        auto fenceInfo = mFenceInfo.find(fence);
+        if (fenceInfo != mFenceInfo.end()) {
+            fenceInfo->second.state = FenceInfo::State::kWaitable;
+            fenceInfo->second.lock.lock();
+            fenceInfo->second.cv.signalAndUnlock(&fenceInfo->second.lock);
+        }
+        lock.unlock();
+
+        return result;
     }
 
     VkResult on_vkQueueWaitIdle(
@@ -4494,9 +4531,33 @@ public:
             return VK_SUCCESS;
         }
 
+        // Vulkan specs require fences of vkQueueSubmit to be *externally
+        // synchronized*, i.e. we cannot submit a queue while waiting for the
+        // fence in another thread. For threads that call this function, they
+        // have to wait until a vkQueueSubmit() using this fence is called
+        // before calling vkWaitForFences(). So we use a conditional variable
+        // and mutex for thread synchronization.
+        //
+        // See:
+        // https://www.khronos.org/registry/vulkan/specs/1.2/html/vkspec.html#fundamentals-threadingbehavior
+        // https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers/issues/519
+
         const VkDevice device = mFenceInfo[fence].device;
         const VulkanDispatch* vk = mFenceInfo[fence].vk;
+        auto& fenceLock = mFenceInfo[fence].lock;
+        auto& cv = mFenceInfo[fence].cv;
         lock.unlock();
+
+        fenceLock.lock();
+        cv.wait(&fenceLock, [this, fence] {
+            AutoLock lock(mLock);
+            if (mFenceInfo[fence].state == FenceInfo::State::kWaitable) {
+                mFenceInfo[fence].state = FenceInfo::State::kWaiting;
+                return true;
+            }
+            return false;
+        });
+        fenceLock.unlock();
 
         return vk->vkWaitForFences(device, /* fenceCount */ 1u, &fence,
                                    /* waitAll */ false, timeout);
@@ -6254,6 +6315,16 @@ private:
         VkDevice device = VK_NULL_HANDLE;
         VkFence boxed = VK_NULL_HANDLE;
         VulkanDispatch* vk = nullptr;
+
+        android::base::StaticLock lock;
+        android::base::ConditionVariable cv;
+
+        enum class State {
+            kWaitable,
+            kNotWaitable,
+            kWaiting,
+        };
+        State state = State::kNotWaitable;
     };
 
     struct SemaphoreInfo {
@@ -6835,6 +6906,13 @@ VkResult VkDecoderGlobalState::on_vkCreateFence(
         VkFence* pFence) {
     return mImpl->on_vkCreateFence(pool, device, pCreateInfo, pAllocator,
                                    pFence);
+}
+
+VkResult VkDecoderGlobalState::on_vkResetFences(android::base::BumpPool* pool,
+                                                VkDevice device,
+                                                uint32_t fenceCount,
+                                                const VkFence* pFences) {
+    return mImpl->on_vkResetFences(pool, device, fenceCount, pFences);
 }
 
 void VkDecoderGlobalState::on_vkDestroyFence(
