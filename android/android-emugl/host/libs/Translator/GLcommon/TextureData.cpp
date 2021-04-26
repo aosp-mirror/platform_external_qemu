@@ -142,3 +142,25 @@ void TextureData::setTarget(GLenum _target) {
 void TextureData::setMipmapLevelAtLeast(unsigned int level) {
     m_saveableTexture->setMipmapLevelAtLeast(level);
 }
+
+void TextureData::reallocateTexture(ObjectLocalName localName, GLEScontext* ctx) {
+    if (!delayedAllocation) {
+        return;
+    }
+    
+    GLuint globalName = ctx->shareGroup()->getGlobalName(
+                NamedObjectType::TEXTURE, localName);
+    delayedAllocation = false;
+    if (target != GL_TEXTURE_2D) {
+        printf("bad target !!!!!!! \n\n\n\n");
+    }
+    ctx->dispatcher().glBindTexture(target, globalName);
+    printf("reallocateTexture %d(global %d)\n", (int)localName, (int)globalName);
+    ctx->dispatcher().glTexImage2D(target,0,internalFormat,
+        width,
+        height,
+        border,format,type,nullptr);
+    GLuint prevTexture = ctx->shareGroup()->getGlobalName(
+                NamedObjectType::TEXTURE, ctx->getBindedTexture(target));
+    ctx->dispatcher().glBindTexture(target, prevTexture);
+}
