@@ -27,6 +27,8 @@
 class SaveableTexture;
 typedef std::shared_ptr<SaveableTexture> SaveableTexturePtr;
 
+class GLEScontext;
+
 class TextureData : public ObjectData
 {
 public:
@@ -90,6 +92,8 @@ public:
     void makeDirty();
     void setTarget(GLenum _target);
     void setMipmapLevelAtLeast(unsigned int level);
+    bool delayedAllocation = false;
+    void reallocateTexture(ObjectLocalName localName, GLEScontext* ctx);
 protected:
     // globalName is set during bind, used for snapshot when reading data from
     // GPU Usually this should be kept by saveableTexture, but we might not have
