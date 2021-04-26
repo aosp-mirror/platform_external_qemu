@@ -287,19 +287,6 @@ void CarSensorData::processMsg(emulator::EmulatorMessage emulatorMsg) {
                 }
                 break;
             }
-            case static_cast<int32_t>(VehicleProperty::PERF_VEHICLE_SPEED): {
-                float speedMeterPerSecond = val.float_values(0);
-                int speed = static_cast<int32_t>(
-                        speedMeterPerSecond /
-                        ((mUi->comboBox_speedUnit->currentIndex() ==
-                          MILES_PER_HOUR)
-                                 ? MILES_PER_HOUR_TO_METERS_PER_SEC
-                                 : KILOMETERS_PER_HOUR_TO_METERS_PER_SEC));
-                if (speed != mUi->car_speedSlider->value()) {
-                    mUi->car_speedSlider->setValue(speed);
-                }
-                break;
-            }
             case static_cast<int32_t>(VehicleProperty::IGNITION_STATE): {
                 int ignition_state_vhal = val.int32_values(0);
                 int ignition_state = mUi->comboBox_ignition->currentIndex();
