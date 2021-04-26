@@ -2334,14 +2334,11 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 VkDevice device;
                 uint32_t fenceCount;
                 const VkFence* pFences;
-                // Begin non wrapped dispatchable handle unboxing for device;
+                // Begin global wrapped dispatchable handle unboxing for device;
                 uint64_t cgen_var_0;
                 memcpy((uint64_t*)&cgen_var_0, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
                 *(VkDevice*)&device = (VkDevice)(VkDevice)((VkDevice)(*&cgen_var_0));
-                auto unboxed_device = unbox_VkDevice(device);
-                auto vk = dispatch_VkDevice(device);
-                // End manual dispatchable handle unboxing for device;
                 memcpy((uint32_t*)&fenceCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 vkReadStream->alloc((void**)&pFences, ((fenceCount)) * sizeof(const VkFence));
@@ -2360,7 +2357,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                     fprintf(stderr, "stream %p: call vkResetFences 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)fenceCount, (unsigned long long)pFences);
                 }
                 VkResult vkResetFences_VkResult_return = (VkResult)0;
-                vkResetFences_VkResult_return = vk->vkResetFences(unboxed_device, fenceCount, pFences);
+                vkResetFences_VkResult_return = m_state->on_vkResetFences(&m_pool, device, fenceCount, pFences);
                 vkStream->unsetHandleMapping();
                 vkStream->write(&vkResetFences_VkResult_return, sizeof(VkResult));
                 vkStream->commitWrite();
