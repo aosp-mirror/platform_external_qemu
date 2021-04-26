@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dbf02cbd_4212ab74",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkAndroidNativeBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2021-04-26T23:58:35Z",
+      "side": 1,
+      "message": "I think we can safely merge these two changes. Even if we call the vkWaitForFence, the TODO comment still applies here.",
+      "revId": "0ef1b54be0fa5a0052860ca768f26bb55feba05f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "905915fc_07948e95",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkAndroidNativeBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 733,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2021-04-26T23:58:35Z",
+      "side": 1,
+      "message": "I think we can safely merge these two changes. Even if we call the vkResetFences, the TODO comment still applies here.",
+      "revId": "0ef1b54be0fa5a0052860ca768f26bb55feba05f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
