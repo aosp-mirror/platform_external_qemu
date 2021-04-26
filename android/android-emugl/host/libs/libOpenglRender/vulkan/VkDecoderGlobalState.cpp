@@ -1830,7 +1830,7 @@ public:
             AutoLock lock(mLock);
 
             DCHECK(mFenceInfo.find(*pFence) == mFenceInfo.end());
-            mFenceInfo[*pFence] = {};
+            // Create FenceInfo for *pFence.
             auto& fenceInfo = mFenceInfo[*pFence];
             fenceInfo.device = device;
             fenceInfo.vk = vk;
@@ -3694,7 +3694,19 @@ public:
 
         AutoLock qlock(*ql);
 
-        return vk->vkQueueSubmit(queue, submitCount, pSubmits, fence);
+        auto result = vk->vkQueueSubmit(queue, submitCount, pSubmits, fence);
+
+        // After vkQueueSubmit is called, we can signal the conditional variable
+        // in FenceInfo, so that other threads (e.g. SyncThread) can call
+        // waitForFence() on this fence.
+        lock.lock();
+        auto fenceInfo = mFenceInfo.find(fence);
+        if (fenceInfo != mFenceInfo.end()) {
+            fenceInfo->second.cv.signalAndUnlock(&fenceInfo->second.lock);
+        }
+        lock.unlock();
+
+        return result;
     }
 
     VkResult on_vkQueueWaitIdle(
@@ -4494,9 +4506,26 @@ public:
             return VK_SUCCESS;
         }
 
+        // Vulkan specs require fences of vkQueueSubmit to be *externally
+        // synchronized*, i.e. we cannot submit a queue while waiting for the
+        // fence in another thread. For threads that call this function, they
+        // have to wait until a vkQueueSubmit() using this fence is called
+        // before calling vkWaitForFences(). So we use a conditional variable
+        // and mutex for thread synchronization.
+        //
+        // See:
+        // https://www.khronos.org/registry/vulkan/specs/1.2/html/vkspec.html#fundamentals-threadingbehavior
+        // https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers/issues/519
+
         const VkDevice device = mFenceInfo[fence].device;
         const VulkanDispatch* vk = mFenceInfo[fence].vk;
+        auto& fenceLock = mFenceInfo[fence].lock;
+        auto& cv = mFenceInfo[fence].cv;
         lock.unlock();
+
+        fenceLock.lock();
+        cv.wait(&fenceLock);
+        fenceLock.unlock();
 
         return vk->vkWaitForFences(device, /* fenceCount */ 1u, &fence,
                                    /* waitAll */ false, timeout);
@@ -6254,6 +6283,9 @@ private:
         VkDevice device = VK_NULL_HANDLE;
         VkFence boxed = VK_NULL_HANDLE;
         VulkanDispatch* vk = nullptr;
+
+        android::base::StaticLock lock;
+        android::base::ConditionVariable cv;
     };
 
     struct SemaphoreInfo {
