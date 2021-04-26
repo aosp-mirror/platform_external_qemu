@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5b7f5eab_846a5860",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 1122,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2021-04-26T22:16:39Z",
+      "side": 1,
+      "message": "for VkFence, do we need to signal the semaphore (or emulated VkFence) as well?",
+      "range": {
+        "startLine": 1122,
+        "startChar": 0,
+        "endLine": 1122,
+        "endChar": 88
+      },
+      "revId": "7a439a938a5beb5f62bb887dc5cf7c4b0df4fcb6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5cb4a351_e56bad87",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2021-04-26T22:16:39Z",
+      "side": 1,
+      "message": "GLint",
+      "range": {
+        "startLine": 307,
+        "startChar": 4,
+        "endLine": 307,
+        "endChar": 9
+      },
+      "revId": "7a439a938a5beb5f62bb887dc5cf7c4b0df4fcb6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
