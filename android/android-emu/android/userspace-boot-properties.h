@@ -20,7 +20,7 @@ ANDROID_BEGIN_HEADER
 
 std::vector<std::string>
 getUserspaceBootProperties(const AndroidOptions* opts,
-                           bool isX86ish,
+                           const char* targetArch,
                            bool isQemu2,
                            uint32_t lcd_width,
                            uint32_t lcd_height,
@@ -29,6 +29,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
                            int bootPropOpenglesVersion,
                            int vm_heapSize,
                            int apiLevel,
+                           const char* kernelSerialPrefix,
                            const std::vector<std::string>* verifiedBootParameters,
                            const char* gltransport,
                            uint32_t gltransport_drawFlushInterval,

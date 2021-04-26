@@ -53,6 +53,7 @@
 #include "android/main-common-ui.h"
 #include "android/main-common.h"
 #include "android/main-kernel-parameters.h"
+#include "android/userspace-boot-properties.h"
 #include "android/multi-instance.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
@@ -2482,15 +2483,38 @@ extern "C" int main(int argc, char** argv) {
             real_console_tty_prefix = "hvc";
         }
 
-        std::string append_arg = emulator_getKernelParameters(
-                opts, kTarget.androidArch, apiLevel, real_console_tty_prefix,
-                hw->kernel_parameters, hw->kernel_path, &all_boot_params,
-                rendererConfig.glesMode, rendererConfig.bootPropOpenglesVersion,
-                rendererConfig.glFramebufferSizeBytes, pstore, hw->vm_heapSize,
-                true /* isQemu2 */, hw->hw_arc, hw->hw_lcd_width,
-                hw->hw_lcd_height, hw->hw_lcd_vsync, hw->hw_gltransport,
+        constexpr bool isQemu2 = true;
+
+        std::vector<std::string> userspaceBootOpts = getUserspaceBootProperties(
+                opts,
+                kTarget.androidArch,
+                isQemu2,
+                hw->hw_lcd_width,
+                hw->hw_lcd_height,
+                hw->hw_lcd_vsync,
+                rendererConfig.glesMode,
+                rendererConfig.bootPropOpenglesVersion,
+                hw->vm_heapSize,
+                apiLevel,
+                real_console_tty_prefix,
+                &all_boot_params,
+                hw->hw_gltransport,
                 hw->hw_gltransport_drawFlushInterval,
                 hw->display_settings_xml);
+
+        std::string append_arg = emulator_getKernelParameters(
+                opts,
+                kTarget.androidArch,
+                apiLevel,
+                real_console_tty_prefix,
+                hw->kernel_parameters,
+                hw->kernel_path,
+                &all_boot_params,
+                rendererConfig.glFramebufferSizeBytes,
+                pstore,
+                isQemu2,
+                hw->hw_arc /* isCros */,
+                std::move(userspaceBootOpts));
 
         if (append_arg.empty()) {
             return 1;

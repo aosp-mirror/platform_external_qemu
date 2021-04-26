@@ -29,7 +29,7 @@ using android::base::StringFormat;
 
 std::vector<std::string>
 getUserspaceBootProperties(const AndroidOptions* opts,
-                           const bool isX86ish,
+                           const char* targetArch,
                            const bool isQemu2,
                            const uint32_t lcd_width,
                            const uint32_t lcd_height,
@@ -38,10 +38,15 @@ getUserspaceBootProperties(const AndroidOptions* opts,
                            const int bootPropOpenglesVersion,
                            const int vm_heapSize,
                            const int apiLevel,
+                           const char* kernelSerialPrefix,
                            const std::vector<std::string>* verifiedBootParameters,
                            const char* gltransport,
                            const uint32_t gltransport_drawFlushInterval,
                            const char* displaySettingsXml) {
+    const bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
+    const bool isARMish = !strcmp(targetArch, "arm") || !strcmp(targetArch, "arm64");
+    const bool hasShellConsole = opts->logcat || opts->shell;
+
     namespace fc = android::featurecontrol;
 
     std::vector<std::string> params;
@@ -173,6 +178,69 @@ getUserspaceBootProperties(const AndroidOptions* opts,
             params.push_back("qemu.virtiowifi=1");
         } else if (fc::isEnabled(fc::Wifi)) {
             params.push_back("qemu.wifi=1");
+        }
+    }
+
+    if (isQemu2) {
+        if (hasShellConsole) {
+            params.push_back(StringFormat("androidboot.console=%s0", kernelSerialPrefix));
+        }
+
+        params.push_back("android.qemud=1");
+    } else {  // !isQemu2
+        // Technical note: There are several important constraints when
+        // setting up QEMU1 virtual ttys:
+        //
+        // - The first one if that for API level < 14, the system requires
+        //   that the *second* virtual serial port (i.e. ttyS1) be associated
+        //   with the android-qemud chardev, used to implement the legacy
+        //   QEMUD protocol. Newer API levels use a pipe for this instead.
+        //
+        // - The second one is that the x86 and x86_64 virtual boards have
+        //   a limited number of IRQs which makes it unable to setup more
+        //   than two ttys at the same time.
+        //
+        // - Third, specifying -logcat implies -shell due to limitations in
+        //   the guest system. I.e. the shell console will always receive
+        //   logcat output, even if one uses -shell-serial to redirect its
+        //   output to a pty or something similar.
+        //
+        // We thus consider the following cases:
+        //
+        // * For apiLevel >= 14:
+        //      ttyS0 = android-kmsg (kernel messages)
+        //      ttyS1 = <shell-serial> (logcat/shell).
+        //
+        // * For apiLevel < 14 && !x86ish:
+        //      ttyS0 = android-kmsg (kernel messages)
+        //      ttyS1 = android-qemud
+        //      ttyS2 = <shell-serial> (logcat/shell)
+        //
+        // * For apiLevel < 14 && x86ish:
+        //      ttyS0 = <shell-serial> (kernel messages/logcat/shell).
+        //      ttyS1 = android-qemud
+        //
+        // Where <shell-serial> is the value of opts->shell_serial, which
+        // by default will be the 'stdio' or 'con:' chardev (for Posix and
+        // Windows, respectively).
+
+        int logcatSerial = 1;
+        if (apiLevel < 14) {
+            params.push_back(StringFormat("android.qemud=%s1", kernelSerialPrefix));
+            if (isX86ish) {
+                logcatSerial = 0;
+            } else {
+                logcatSerial = 2;
+            }
+        } else {
+            // The rild daemon, used for GSM emulation, checks for qemud,
+            // just set it to a dummy value instead of a serial port.
+            params.push_back("android.qemud=1");
+        }
+
+        if (hasShellConsole) {
+            params.push_back(StringFormat(
+                "androidboot.console=%s%d", kernelSerialPrefix, logcatSerial));
         }
     }
 
