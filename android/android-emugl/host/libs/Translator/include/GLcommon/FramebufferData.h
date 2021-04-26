@@ -53,6 +53,7 @@ public:
     GLint samples = 0;
 
     bool everBound = false;
+    bool delayedBindTexture = false;
 };
 
 const int MAX_ATTACH_POINTS = 19;
@@ -105,7 +106,8 @@ public:
     void makeTextureDirty(const getObjDataPtr_t& getObjDataPtr);
 
     void separateDepthStencilWorkaround(class GLEScontext* ctx);
-
+    bool delayedBindTexture = false;
+    void rebindTextures(ObjectLocalName localName, GLEScontext* ctx);
 private:
     inline int attachmentPointIndex(GLenum attachment);
     void detachObject(int idx);
