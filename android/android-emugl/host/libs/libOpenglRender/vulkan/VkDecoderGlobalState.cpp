@@ -294,6 +294,7 @@ public:
         mBufferInfo.clear();
         mMapInfo.clear();
         mSemaphoreInfo.clear();
+        mFenceInfo.clear();
 #ifdef _WIN32
         mSemaphoreId = 1;
         mExternalSemaphoresById.clear();
@@ -1805,6 +1806,36 @@ public:
         return res;
     }
 
+    VkResult on_vkCreateFence(android::base::BumpPool* pool,
+                              VkDevice boxed_device,
+                              const VkFenceCreateInfo* pCreateInfo,
+                              const VkAllocationCallbacks* pAllocator,
+                              VkFence* pFence) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        VkResult res =
+                vk->vkCreateFence(device, pCreateInfo, pAllocator, pFence);
+        if (res != VK_SUCCESS) {
+            return res;
+        }
+
+        {
+            AutoLock lock(mLock);
+
+            DCHECK(mFenceInfo.find(*pFence) == mFenceInfo.end());
+            mFenceInfo[*pFence] = {};
+            auto& fenceInfo = mFenceInfo[*pFence];
+            fenceInfo.device = device;
+            fenceInfo.vk = vk;
+
+            *pFence = new_boxed_non_dispatchable_VkFence(*pFence);
+            fenceInfo.boxed = *pFence;
+        }
+
+        return res;
+    }
+
     VkResult on_vkImportSemaphoreFdKHR(
             android::base::BumpPool* pool,
             VkDevice boxed_device,
@@ -1899,6 +1930,21 @@ public:
         }
 #endif
         vk->vkDestroySemaphore(device, semaphore, pAllocator);
+    }
+
+    void on_vkDestroyFence(android::base::BumpPool* pool,
+                           VkDevice boxed_device,
+                           VkFence fence,
+                           const VkAllocationCallbacks* pAllocator) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        {
+            AutoLock lock(mLock);
+            mFenceInfo.erase(fence);
+        }
+
+        vk->vkDestroyFence(device, fence, pAllocator);
     }
 
     VkResult on_vkCreateDescriptorSetLayout(
@@ -3540,10 +3586,11 @@ public:
         }
         AutoLock lock(mLock);
         mCmdPoolInfo[*pCommandPool] = CommandPoolInfo();
-        mCmdPoolInfo[*pCommandPool].device = device;
+        auto& cmdPoolInfo = mCmdPoolInfo[*pCommandPool];
+        cmdPoolInfo.device = device;
 
         *pCommandPool = new_boxed_non_dispatchable_VkCommandPool(*pCommandPool);
-        mCmdPoolInfo[*pCommandPool].boxed = *pCommandPool;
+        cmdPoolInfo.boxed = *pCommandPool;
 
         return result;
     }
@@ -4425,7 +4472,45 @@ public:
         }
     }
 
-#define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA)
+    VkResult waitForFence(VkFence boxed_fence, uint64_t timeout) {
+        AutoLock lock(mLock);
+
+        VkFence fence = unbox_VkFence(boxed_fence);
+        if (fence == VK_NULL_HANDLE || mFenceInfo.find(fence) == mFenceInfo.end()) {
+            // No fence, could be a semaphore.
+            // TODO: Async wait for semaphores
+            return VK_SUCCESS;
+        }
+
+        const VkDevice device = mFenceInfo[fence].device;
+        const VulkanDispatch* vk = mFenceInfo[fence].vk;
+        lock.unlock();
+
+        return vk->vkWaitForFences(device, /* fenceCount */ 1u, &fence,
+                                   /* waitAll */ false, timeout);
+    }
+
+    VkResult getFenceStatus(VkFence boxed_fence) {
+        AutoLock lock(mLock);
+
+        VkFence fence = unbox_VkFence(boxed_fence);
+        if (fence == VK_NULL_HANDLE || mFenceInfo.find(fence) == mFenceInfo.end()) {
+            // No fence, could be a semaphore.
+            // TODO: Async get status for semaphores
+            return VK_SUCCESS;
+        }
+
+        const VkDevice device = mFenceInfo[fence].device;
+        const VulkanDispatch* vk = mFenceInfo[fence].vk;
+        lock.unlock();
+
+        return vk->vkGetFenceStatus(device, fence);
+    }
+
+#define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES                                \
+    (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | \
+     VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA |         \
+     VK_EXTERNAL_MEMORY_HANDLE_TYPE_ZIRCON_VMO_BIT_FUCHSIA)
 
     // Transforms
 
@@ -6153,6 +6238,12 @@ private:
         VkSampler emulatedborderSampler = VK_NULL_HANDLE;
     };
 
+    struct FenceInfo {
+        VkDevice device = VK_NULL_HANDLE;
+        VkFence boxed = VK_NULL_HANDLE;
+        VulkanDispatch* vk = nullptr;
+    };
+
     struct SemaphoreInfo {
         int externalHandleId = 0;
         VK_EXT_MEMORY_HANDLE externalHandle =
@@ -6313,6 +6404,7 @@ private:
     std::unordered_map<VkDeviceMemory, MappedMemoryInfo> mMapInfo;
 
     std::unordered_map<VkSemaphore, SemaphoreInfo> mSemaphoreInfo;
+    std::unordered_map<VkFence, FenceInfo> mFenceInfo;
 
     std::unordered_map<VkDescriptorSetLayout, DescriptorSetLayoutInfo> mDescriptorSetLayoutInfo;
     std::unordered_map<VkDescriptorPool, DescriptorPoolInfo> mDescriptorPoolInfo;
@@ -6721,6 +6813,24 @@ void VkDecoderGlobalState::on_vkDestroySemaphore(
     VkSemaphore semaphore,
     const VkAllocationCallbacks* pAllocator) {
     mImpl->on_vkDestroySemaphore(pool, device, semaphore, pAllocator);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateFence(
+        android::base::BumpPool* pool,
+        VkDevice device,
+        const VkFenceCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkFence* pFence) {
+    return mImpl->on_vkCreateFence(pool, device, pCreateInfo, pAllocator,
+                                   pFence);
+}
+
+void VkDecoderGlobalState::on_vkDestroyFence(
+        android::base::BumpPool* pool,
+        VkDevice device,
+        VkFence fence,
+        const VkAllocationCallbacks* pAllocator) {
+    return mImpl->on_vkDestroyFence(pool, device, fence, pAllocator);
 }
 
 VkResult VkDecoderGlobalState::on_vkCreateDescriptorSetLayout(
@@ -7351,6 +7461,15 @@ void VkDecoderGlobalState::on_vkCollectDescriptorPoolIdsGOOGLE(
     uint32_t* pPoolIdCount,
     uint64_t* pPoolIds) {
     mImpl->on_vkCollectDescriptorPoolIdsGOOGLE(pool, device, descriptorPool, pPoolIdCount, pPoolIds);
+}
+
+VkResult VkDecoderGlobalState::waitForFence(VkFence boxed_fence,
+                                            uint64_t timeout) {
+    return mImpl->waitForFence(boxed_fence, timeout);
+}
+
+VkResult VkDecoderGlobalState::getFenceStatus(VkFence boxed_fence) {
+    return mImpl->getFenceStatus(boxed_fence);
 }
 
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(

@@ -85,7 +85,7 @@ option_register_var "--nostrip" OPT_NOSTRIP "Do not generate strip, needed for p
 OPT_FORCE_FETCH_WINTOOLCHAIN=
 option_register_var "--force-fetch-wintoolchain" OPT_FORCE_FETCH_WINTOOLCHAIN "Force fetch the Windows toolchain (google internal)"
 
-OPT_VSDIR=/mnt/msvc/win8sdk
+OPT_VSDIR=/mnt/msvc
 option_register_var "--vsdir=<msvc_install_dir>" OPT_VSDIR "Location of the msvc sdk. See documentation for details."
 
 
@@ -814,8 +814,10 @@ prepare_build_for_windows_msvc() {
     CIOPFS_DIR="${AOSP_DIR}/prebuilts/android-emulator-build/.ciopfs"
 
     # Check to see if we need to fetch the toolchain..
-    if [ -d "$OPT_VSDIR" ]; then
-      MSVC_DIR=$OPT_VSDIR
+    if [ -d "$OPT_VSDIR/win10sdk" ]; then
+      MSVC_DIR=$OPT_VSDIR/win10sdk
+    elif [ -d "$OPT_VSDIR/win8sdk" ]; then
+      MSVC_DIR=$OPT_VSDIR/win8sdk
     else
       log "Configuring msvc.."
       MSVC_HASH=$(aosp_msvc_hash)
@@ -823,9 +825,20 @@ prepare_build_for_windows_msvc() {
       fetch_dependencies_msvc "${MSVC_ROOT_DIR}" "${CIOPFS_DIR}"
     fi
 
+    # 2 Versions.. Old $WIN_SDK, or new Windows Kits
+    if [ -d "$MSVC_DIR/Windows Kits" ]; then
+      if [ ! -d "$MSVC_DIR/Windows_Kits" ]; then
+        log "Setting symlink for Windows 10 kit"
+        ln -sf "$MSVC_DIR/Windows Kits" "$MSVC_DIR/Windows_Kits"
+      fi
+      WIN_SDK="Windows_Kits/10"
+    else
+      WIN_SDK="win_sdk"
+    fi
+:
     # We cannot have multiple SDK versions in the same dir
-    MSVC_VER=$(ls -1 ${MSVC_DIR}/win_sdk/Include)
-    log "Using version [${MSVC_VER}]"
+    MSVC_VER=$(ls -1 ${MSVC_DIR}/$WIN_SDK/Include)
+    log "Using version [${MSVC_VER}], found in ${MSVC_DIR}/$WIN_SDK"
 
     VC_VER=$(ls -1 ${MSVC_DIR}/VC/Tools/MSVC)
     log "Using visual studio version: ${VC_VER}"
@@ -837,8 +850,8 @@ prepare_build_for_windows_msvc() {
     var_append CLANG_LINK_FLAGS "-fuse-ld=lld"
     var_append CLANG_LINK_FLAGS "-L${MSVC_DIR}/VC/Tools/MSVC/${VC_VER}/lib/x64"
     var_append CLANG_LINK_FLAGS "-L${MSVC_DIR}/VC/Tools/MSVC/${VC_VER}/atlmfc/lib/x64"
-    var_append CLANG_LINK_FLAGS "-L${MSVC_DIR}/win_sdk/lib/${MSVC_VER}/ucrt/x64"
-    var_append CLANG_LINK_FLAGS "-L${MSVC_DIR}/win_sdk/lib/${MSVC_VER}/um/x64"
+    var_append CLANG_LINK_FLAGS "-L${MSVC_DIR}/$WIN_SDK/lib/${MSVC_VER}/ucrt/x64"
+    var_append CLANG_LINK_FLAGS "-L${MSVC_DIR}/$WIN_SDK/lib/${MSVC_VER}/um/x64"
     var_append CLANG_LINK_FLAGS "\"-L${MSVC_DIR}/DIA SDK/lib/amd64\""
     var_append CLANG_LINK_FLAGS "-Wl,-nodefaultlib:libcmt,-defaultlib:msvcrt,-defaultlib:oldnames"
     # Other linker flags to make cross-compiling upstream-qemu work without adding any additional
@@ -875,10 +888,10 @@ prepare_build_for_windows_msvc() {
     var_append EXTRA_CFLAGS "-nobuiltininc"
     var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/clang-intrins/${CLANG_VERSION}/include"
     var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/VC/Tools/MSVC/${VC_VER}/include"
-    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/ucrt"
-    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/um"
-    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/winrt"
-    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/shared"
+    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/$WIN_SDK/include/${MSVC_VER}/ucrt"
+    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/$WIN_SDK/include/${MSVC_VER}/um"
+    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/$WIN_SDK/include/${MSVC_VER}/winrt"
+    var_append EXTRA_CFLAGS "-isystem $MSVC_DIR/$WIN_SDK/include/${MSVC_VER}/shared"
     var_append EXTRA_CFLAGS "-isystem \"$MSVC_DIR/DIA SDK/include\""
 
 
@@ -911,10 +924,10 @@ prepare_build_for_windows_msvc() {
     var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/clang-intrins/${CLANG_VERSION}/include"
     var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/VC/Tools/MSVC/${VC_VER}/include"
     var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/VC/Tools/MSVC/${VC_VER}/atlmfc/include"
-    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/ucrt"
-    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/um"
-    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/winrt"
-    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/win_sdk/include/${MSVC_VER}/shared"
+    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/$WIN_SDK/include/${MSVC_VER}/ucrt"
+    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/$WIN_SDK/include/${MSVC_VER}/um"
+    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/$WIN_SDK/include/${MSVC_VER}/winrt"
+    var_append EXTRA_CXXFLAGS "-isystem $MSVC_DIR/$WIN_SDK/include/${MSVC_VER}/shared"
     var_append EXTRA_CXXFLAGS "-isystem \"$MSVC_DIR/DIA SDK/include\""
     var_append EXTRA_CXXFLAGS ${CLANG_LINK_FLAGS}
 

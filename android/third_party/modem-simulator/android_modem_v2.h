@@ -30,6 +30,8 @@ extern int amodem_disconnect_call_vx(AModem modem, const char* args);
 
 extern int amodem_update_call_vx(AModem modem, const char* args, int state);
 
+extern ACall amodem_find_call_by_number_vx(AModem modem, const char* args);
+
 extern void amodem_set_data_network_type_vx(AModem modem,
                                             ADataNetworkType type);
 
@@ -37,9 +39,16 @@ extern void amodem_set_signal_strength_profile_vx(AModem modem, int quality);
 
 extern void amodem_set_data_registration_vx(AModem modem,
                                             ARegistrationState state);
-
 extern void amodem_set_voice_registration_vx(AModem modem,
                                              ARegistrationState state);
+
+extern ARegistrationState amodem_get_data_registration_vx(AModem modem);
+
+extern ARegistrationState amodem_get_voice_registration_vx(AModem modem);
+
+extern void amodem_state_save_vx(AModem modem, SysFile* file);
+
+extern int amodem_state_load_vx(AModem modem, SysFile* file, int version_id);
 
 extern void amodem_set_notification_callback_vx(AModem modem,
                                                 ModemCallback callbackFunc,

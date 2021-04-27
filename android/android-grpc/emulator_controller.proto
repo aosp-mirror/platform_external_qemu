@@ -249,6 +249,7 @@ message PhysicalModelValue {
 
   // Details on the sensors documentation can be found here:
   // https://developer.android.com/reference/android/hardware/Sensor.html#TYPE_
+  // The types must follow the order defined in "external/qemu/android/hw-sensors.h"
   enum PhysicalType {
     POSITION = 0;
 
@@ -275,6 +276,15 @@ message PhysicalModelValue {
 
     VELOCITY = 8;
     AMBIENT_MOTION = 9;
+
+    // Describing a hinge angle sensor in degrees.
+    HINGE_ANGLE0 = 10;
+    HINGE_ANGLE1 = 11;
+    HINGE_ANGLE2 = 12;
+
+    ROLLABLE0 = 13;
+    ROLLABLE1 = 14;
+    ROLLABLE2 = 15;
   }
   PhysicalType target = 1;
 
@@ -378,7 +388,7 @@ message LogcatEntry {
     ERR = 6;
     FATAL = 7;
     SILENT = 8;
-  };
+  }
 
   // A Unix timestamps in  milliseconds (The number of milliseconds that
   // have elapsed since January 1, 1970 (midnight UTC/GMT), not counting
@@ -423,7 +433,7 @@ message VmConfiguration {
     WHPX = 5;
 
     GVM = 6;
-  };
+  }
 
   VmHypervisorType hypervisorType = 1;
   int32 numberOfCpuCores = 2;
@@ -481,21 +491,21 @@ message Touch {
   // area measurement greater than 0.
   int32 touch_minor = 6;
 
-    enum EventExpiration {
-      // The system will use the default time of 120s to track
-      // the touch event with the given identifier. If no update happens
-      // within this timeframe the identifier is considered expired
-      // and can be made available for re-use. This means that a touch event
-      // with pressure 0 for this identifier will be send to the emulator.
-      EVENT_EXPIRATION_UNSPECIFIED = 0;
+  enum EventExpiration {
+    // The system will use the default time of 120s to track
+    // the touch event with the given identifier. If no update happens
+    // within this timeframe the identifier is considered expired
+    // and can be made available for re-use. This means that a touch event
+    // with pressure 0 for this identifier will be send to the emulator.
+    EVENT_EXPIRATION_UNSPECIFIED = 0;
 
-      // Never expire the given slot. You must *ALWAYS* close the identifier
-      // by sending a touch event with 0 pressure.
-      NEVER_EXPIRE = 1;
-    }
+    // Never expire the given slot. You must *ALWAYS* close the identifier
+    // by sending a touch event with 0 pressure.
+    NEVER_EXPIRE = 1;
+  }
 
-    EventExpiration expiration = 7;
-  };
+  EventExpiration expiration = 7;
+}
 
 // A TouchEvent contains a list of Touch objects that are in contact with
 // the touch surface.
@@ -511,9 +521,9 @@ message TouchEvent {
   // The display device where the touch event occurred.
   // Omitting or using the value 0 indicates the main display.
   //
-  // Touch events cannot be send to devices other than 0, due to
+  // Touch events cannot be send to displays other than 0, due to
   // https://issuetracker.google.com/issues/150699691
-  int32 device = 2;
+  int32 display = 2;
 }
 
 // The MouseEvent interface represents events that occur due to the user
@@ -535,7 +545,7 @@ message MouseEvent {
 
   // The display device where the mouse event occurred.
   // Omitting or using the value 0 indicates the main display.
-  int32 device = 4;
+  int32 display = 4;
 }
 
 // KeyboardEvent objects describe a user interaction with the keyboard; each
@@ -559,7 +569,7 @@ message KeyboardEvent {
     XKB = 2;
     Win = 3;
     Mac = 4;
-  };
+  }
 
   enum KeyEventType {
     // Indicates that this keyevent should be send to the emulator
@@ -577,7 +587,7 @@ message KeyboardEvent {
     // Indicates that the keyevent will be send to the emulator
     // as e key down event and immediately followed by a keyup event.
     keypress = 2;
-  };
+  }
 
   // Type of keycode contained in the keyCode field.
   KeyCodeType codeType = 1;
@@ -682,13 +692,14 @@ message BatteryState {
     DISCHARGING = 2;
     NOT_CHARGING = 3;
     FULL = 4;
-  };
+  }
+
   enum BatteryCharger {
     NONE = 0;
     AC = 1;
     USB = 2;
     WIRELESS = 3;
-  };
+  }
 
   enum BatteryHealth {
     GOOD = 0;
@@ -696,7 +707,8 @@ message BatteryState {
     DEAD = 2;
     OVERVOLTAGE = 3;
     OVERHEATED = 4;
-  };
+  }
+
   bool hasBattery = 1;
   bool isPresent = 2;
   BatteryCharger charger = 3;
@@ -887,18 +899,18 @@ message EmulatorStatus {
   // The hardware configuration of the running emulator as
   // key valure pairs.
   EntryList hardwareConfig = 5;
-};
+}
 
 message AudioFormat {
   enum SampleFormat {
     AUD_FMT_U8 = 0;  // Unsigned 8 bit
     AUD_FMT_S16 = 1; // Signed 16 bit (little endian)
-  };
+  }
 
   enum Channels {
     Mono = 0;
     Stereo = 1;
-  };
+  }
 
   // Sampling rate to use, defaulting to 44100 if this is not set.
   // Note, that android devices typically will not use a sampling
@@ -906,7 +918,7 @@ message AudioFormat {
   uint64 samplingRate = 1;
   Channels channels = 2;
   SampleFormat format = 3;
-};
+}
 
 message AudioPacket {
   AudioFormat format = 1;

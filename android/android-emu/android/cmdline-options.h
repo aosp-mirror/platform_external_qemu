@@ -163,6 +163,8 @@ OPT_FLAG( no_sim, "device has no SIM card" )
 OPT_FLAG( lowram, "device is a low ram device" )
 OPT_FLAG( version, "display emulator version number" )
 OPT_FLAG( no_passive_gps, "disable passive gps updates" )
+CFG_PARAM( gnss_file_path, "<path>", "Use the specified filepath to read gnss data" )
+CFG_PARAM( gnss_grpc_port, "<port number>", "Use the specified port number to start grpc service to receive gnss data" )
 OPT_FLAG( virtio_console, "using virtio console as console")
 OPT_FLAG( read_only, "allow running multiple instances of emulators on the same"
         " AVD, but cannot save snapshot.")
@@ -272,6 +274,12 @@ OPT_FLAG(no_hidpi_scaling, "Disable HiDPI scaling of guest display on macOS devi
 OPT_FLAG(no_mouse_reposition,
          "Do not reposition the mouse to emulator window center if mouse "
          "pointer gets out of the window.")
+
+OPT_FLAG(experimental_enable_multidisplay,
+         "Enable multidisplay gRPC api for Android Studio.")
+
+OPT_FLAG(guest_angle,
+         "Enable guest ANGLE as system driver.")
 
 #undef CFG_FLAG
 #undef CFG_PARAM

@@ -197,7 +197,7 @@
     </font>
    </property>
    <property name="text">
-    <string>IMPORT SENSOR FILE</string>
+    <string>Import Sensor File</string>
    </property>
    <property name="flat">
     <bool>true</bool>

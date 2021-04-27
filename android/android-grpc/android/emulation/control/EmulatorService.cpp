@@ -407,7 +407,7 @@ public:
 
         android::base::ThreadLooper::runOnMainLooper([agent, request]() {
             agent->sendMouseEvent(request.x(), request.y(), 0,
-                                  request.buttons(), 0);
+                                  request.buttons(), request.display());
         });
 
         return Status::OK;
@@ -656,7 +656,20 @@ public:
         if (isFolded) {
             android_foldable_get_folded_area(&rect.pos.x, &rect.pos.y,
                                              &rect.size.w, &rect.size.h);
+<<<<<<< HEAD   (f97d82 Merge "Merge cherrypicks of [1676350, 1676351] into emu-30-r)
         }
+=======
+            auto foldedDisplay =
+                    reply->mutable_format()->mutable_foldeddisplay();
+            foldedDisplay->set_width(rect.size.w);
+            foldedDisplay->set_height(rect.size.h);
+            foldedDisplay->set_xoffset(rect.pos.x);
+            foldedDisplay->set_yoffset(rect.pos.y);
+        } else {
+            reply->mutable_format()->clear_foldeddisplay();
+        }
+
+>>>>>>> BRANCH (a73bfe Merge "c2-codecs: use display sizes when rendering to surfac)
         reply->set_timestampus(System::get()->getUnixTimeUs());
         android::emulation::ImageFormat desiredFormat =
                 ScreenshotUtils::translate(request->format());
@@ -811,6 +824,7 @@ public:
         format->set_width(width);
         LOG(VERBOSE) << "Screenshot " << width << "x" << height << ", cPixels: " << cPixels
                      << ", in: " << sw.elapsedUs() << " us";
+<<<<<<< HEAD   (f97d82 Merge "Merge cherrypicks of [1676350, 1676351] into emu-30-r)
         if (isFolded) {
             auto foldedDisplay = format->mutable_foldeddisplay();
             int w, h, x, y;
@@ -820,6 +834,9 @@ public:
             foldedDisplay->set_xoffset(x);
             foldedDisplay->set_yoffset(y);
         }
+=======
+
+>>>>>>> BRANCH (a73bfe Merge "c2-codecs: use display sizes when rendering to surfac)
         return Status::OK;
     }
 
@@ -866,7 +883,7 @@ public:
 
         uint32_t width, height, dpi, flags;
         bool enabled;
-        for (int i = 0; i < avdInfo_maxMultiDisplayEntries(); i++) {
+        for (int i = 0; i <= avdInfo_maxMultiDisplayEntries(); i++) {
             if (mAgents->multi_display->getMultiDisplay(i, nullptr, nullptr,
                                                         &width, &height, &dpi,
                                                         &flags, &enabled)) {
@@ -918,6 +935,13 @@ public:
                               "");
             }
             updatingDisplayIds.insert(display.display());
+        }
+
+        if (updatingDisplayIds.size() > avdInfo_maxMultiDisplayEntries()) {
+             return Status(::grpc::StatusCode::INVALID_ARGUMENT,
+                              "At most: " + std::to_string(avdInfo_maxMultiDisplayEntries()) +
+                                      " can be configured.",
+                              "");
         }
 
         std::set<int> updatedDisplays;

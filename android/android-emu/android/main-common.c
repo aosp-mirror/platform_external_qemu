@@ -388,6 +388,8 @@ static AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild) {
         do {
             char*  out = getenv("ANDROID_PRODUCT_OUT");
 
+            if (!android_qemu_mode) out = NULL;
+
             if (out == NULL || out[0] == 0)
                 break;
 
@@ -399,6 +401,9 @@ static AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild) {
             }
 
             android_build_root = getenv("ANDROID_BUILD_TOP");
+
+            if (!android_qemu_mode) android_build_root = NULL;
+
             if (android_build_root == NULL || android_build_root[0] == 0)
                 break;
 

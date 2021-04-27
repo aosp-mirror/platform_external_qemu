@@ -1410,12 +1410,12 @@ do_gsm_status( ControlClient  client, char*  args )
         control_write( client, "KO: modem emulation not running\r\n" );
         return -1;
     }
-    control_write( client, "gsm voice state: %s\r\n",
-                   gsm_state_to_string(
-                       amodem_get_voice_registration(android_modem_get()) ) );
-    control_write( client, "gsm data state:  %s\r\n",
-                   gsm_state_to_string(
-                       amodem_get_data_registration(android_modem_get()) ) );
+    control_write(client, "gsm voice state: %s\r\n",
+                  gsm_state_to_string(amodem_get_voice_registration_vx(
+                          android_modem_get())));
+    control_write(client, "gsm data state:  %s\r\n",
+                  gsm_state_to_string(amodem_get_data_registration_vx(
+                          android_modem_get())));
     return 0;
 }
 
@@ -1495,7 +1495,7 @@ do_gsm_data( ControlClient  client, char*  args )
                 control_write( client, "KO: modem emulation not running\r\n" );
                 return -1;
             }
-            amodem_set_data_registration( android_modem_get(), state );
+            amodem_set_data_registration_vx(android_modem_get(), state);
             android_net_disable = (state != A_REGISTRATION_HOME    &&
                                 state != A_REGISTRATION_ROAMING );
             return 0;
@@ -1547,7 +1547,7 @@ do_gsm_voice( ControlClient  client, char*  args )
                 control_write( client, "KO: modem emulation not running\r\n" );
                 return -1;
             }
-            amodem_set_voice_registration( android_modem_get(), state );
+            amodem_set_voice_registration_vx(android_modem_get(), state);
             return 0;
         }
     }
@@ -1610,7 +1610,7 @@ do_gsm_cancel( ControlClient  client, char*  args )
         control_write( client, "KO: modem emulation not running\r\n" );
         return -1;
     }
-    if ( amodem_disconnect_call( android_modem_get(), args ) < 0 ) {
+    if (amodem_disconnect_call_vx(android_modem_get(), args) < 0) {
         control_write( client, "KO: could not cancel this number\r\n" );
         return -1;
     }
@@ -1664,7 +1664,7 @@ do_gsm_busy( ControlClient  client, char*  args )
         control_write( client, "KO: missing argument, try 'gsm busy <phonenumber>'\r\n" );
         return -1;
     }
-    call = amodem_find_call_by_number( android_modem_get(), args );
+    call = amodem_find_call_by_number_vx(android_modem_get(), args);
     if (call == NULL || call->dir != A_CALL_OUTBOUND) {
         control_write( client, "KO: no current outbound call to number '%s' (call %p)\r\n", args, call );
         return -1;
@@ -1685,7 +1685,7 @@ do_gsm_hold( ControlClient  client, char*  args )
         control_write( client, "KO: missing argument, try 'gsm hold <phonenumber>'\r\n" );
         return -1;
     }
-    call = amodem_find_call_by_number( android_modem_get(), args );
+    call = amodem_find_call_by_number_vx(android_modem_get(), args);
     if (call == NULL) {
         control_write( client, "KO: no current call to/from number '%s'\r\n", args );
         return -1;
@@ -1707,12 +1707,12 @@ do_gsm_accept( ControlClient  client, char*  args )
         control_write( client, "KO: missing argument, try 'gsm accept <phonenumber>'\r\n" );
         return -1;
     }
-    call = amodem_find_call_by_number( android_modem_get(), args );
+    call = amodem_find_call_by_number_vx(android_modem_get(), args);
     if (call == NULL) {
         control_write( client, "KO: no current call to/from number '%s'\r\n", args );
         return -1;
     }
-    if ( amodem_update_call( android_modem_get(), args, A_CALL_ACTIVE ) < 0 ) {
+    if (amodem_update_call_vx(android_modem_get(), args, A_CALL_ACTIVE) < 0) {
         control_write( client, "KO: could not activate this call\r\n" );
         return -1;
     }

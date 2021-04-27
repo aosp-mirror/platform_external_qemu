@@ -25,12 +25,17 @@ public:
 public:
     virtual void receive_sms(AModem, SmsPDU) = 0;
     virtual int add_inbound_call(AModem, const char*) = 0;
+    virtual ACall find_call_by_number(AModem, const char*) = 0;
     virtual int disconnect_call(AModem, const char*) = 0;
     virtual int update_call(AModem, const char*, int) = 0;
     virtual void set_data_network_type(AModem, ADataNetworkType) = 0;
     virtual void set_signal_strength_profile(AModem, int) = 0;
     virtual void set_data_registration(AModem, ARegistrationState) = 0;
     virtual void set_voice_registration(AModem, ARegistrationState) = 0;
+    virtual ARegistrationState get_data_registration(AModem) = 0;
+    virtual ARegistrationState get_voice_registration(AModem) = 0;
+    virtual void save_sate(AModem, SysFile*) = 0;
+    virtual int load_sate(AModem modem, SysFile* file, int version_id) = 0;
     virtual void set_notification_callback_vx(AModem modem,
                                               ModemCallback callbackFunc,
                                               void* userData) = 0;

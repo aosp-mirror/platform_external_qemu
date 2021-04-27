@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from .vulkantypes import VulkanType, VulkanTypeInfo, VulkanCompoundType, VulkanAPI
-
+from collections import OrderedDict
 from copy import copy
 
 import os
@@ -846,7 +846,7 @@ class VulkanWrapperGenerator(object):
     def __init__(self, module, typeInfo):
         self.module = module
         self.typeInfo = typeInfo
-        self.extensionStructTypes = []
+        self.extensionStructTypes = OrderedDict()
 
     def onBegin(self):
         pass
@@ -865,7 +865,7 @@ class VulkanWrapperGenerator(object):
         if category in ["struct", "union"] and not alias:
             structInfo = self.typeInfo.structs[name]
             if structInfo.structExtendsExpr:
-                self.extensionStructTypes.append(structInfo)
+                self.extensionStructTypes[name] = structInfo
         pass
 
     def onGenStruct(self, typeInfo, name, alias):
@@ -880,7 +880,31 @@ class VulkanWrapperGenerator(object):
     def onGenCmd(self, cmdinfo, name, alias):
         pass
 
-    def emitForEachStructExtension(self, cgen, retType, triggerVar, forEachFunc, autoBreak=True, defaultEmit=None, nullEmit=None):
+    # Below Vulkan structure types may correspond to multiple Vulkan structs
+    # due to a conflict between different Vulkan registries. In order to get
+    # the correct Vulkan struct type, we need to check the type of its "root"
+    # struct as well.
+    ROOT_TYPE_MAPPING = {
+        "VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_FEATURES_EXT": {
+            "VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2": "VkPhysicalDeviceFragmentDensityMapFeaturesEXT",
+            "VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO": "VkPhysicalDeviceFragmentDensityMapFeaturesEXT",
+            "VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO": "VkImportColorBufferGOOGLE",
+            "default": "VkPhysicalDeviceFragmentDensityMapFeaturesEXT",
+        },
+        "VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_PROPERTIES_EXT": {
+            "VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2": "VkPhysicalDeviceFragmentDensityMapPropertiesEXT",
+            "VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO": "VkImportPhysicalAddressGOOGLE",
+            "default": "VkPhysicalDeviceFragmentDensityMapPropertiesEXT",
+        },
+        "VK_STRUCTURE_TYPE_RENDER_PASS_FRAGMENT_DENSITY_MAP_CREATE_INFO_EXT": {
+            "VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO": "VkRenderPassFragmentDensityMapCreateInfoEXT",
+            "VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO_2": "VkRenderPassFragmentDensityMapCreateInfoEXT",
+            "VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO": "VkImportBufferGOOGLE",
+            "default": "VkRenderPassFragmentDensityMapCreateInfoEXT",
+        },
+    }
+
+    def emitForEachStructExtension(self, cgen, retType, triggerVar, forEachFunc, autoBreak=True, defaultEmit=None, nullEmit=None, rootTypeVar=None):
         def readStructType(structTypeName, structVarName, cgen):
             cgen.stmt("uint32_t %s = (uint32_t)%s(%s)" % \
                 (structTypeName, "goldfish_vk_struct_type", structVarName))
@@ -909,7 +933,7 @@ class VulkanWrapperGenerator(object):
 
         currFeature = None
 
-        for ext in self.extensionStructTypes:
+        for ext in self.extensionStructTypes.values():
             if not currFeature:
                 cgen.leftline("#ifdef %s" % ext.feature)
                 currFeature = ext.feature
@@ -923,9 +947,27 @@ class VulkanWrapperGenerator(object):
             cgen.line("case %s:" % enum)
             cgen.beginBlock()
 
-            castedAccess = castAsStruct(
-                triggerVar.paramName, ext.name, const=triggerVar.isConst)
-            forEachFunc(ext, castedAccess, cgen)
+            if rootTypeVar is not None and enum in VulkanWrapperGenerator.ROOT_TYPE_MAPPING:
+                cgen.line("switch(%s)" % rootTypeVar.paramName)
+                cgen.beginBlock()
+                kv = VulkanWrapperGenerator.ROOT_TYPE_MAPPING[enum]
+                for k in kv:
+                    v = self.extensionStructTypes[kv[k]]
+                    if k == "default":
+                        cgen.line("%s:" % k)
+                    else:
+                        cgen.line("case %s:" % k)
+                    cgen.beginBlock()
+                    castedAccess = castAsStruct(
+                        triggerVar.paramName, v.name, const=triggerVar.isConst)
+                    forEachFunc(v, castedAccess, cgen)
+                    cgen.line("break;")
+                    cgen.endBlock()
+                cgen.endBlock()
+            else:
+                castedAccess = castAsStruct(
+                    triggerVar.paramName, ext.name, const=triggerVar.isConst)
+                forEachFunc(ext, castedAccess, cgen)
 
             if autoBreak:
                 cgen.stmt("break")
@@ -947,7 +989,7 @@ class VulkanWrapperGenerator(object):
     def emitForEachStructExtensionGeneral(self, cgen, forEachFunc, doFeatureIfdefs=False):
         currFeature = None
 
-        for (i, ext) in enumerate(self.extensionStructTypes):
+        for (i, ext) in enumerate(self.extensionStructTypes.values()):
             if doFeatureIfdefs:
                 if not currFeature:
                     cgen.leftline("#ifdef %s" % ext.feature)

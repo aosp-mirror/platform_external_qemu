@@ -4704,30 +4704,30 @@ void transform_fromhost_VkMetalSurfaceCreateInfoEXT(
     VkMetalSurfaceCreateInfoEXT* toTransform);
 
 #endif
-#ifdef VK_GOOGLE_color_buffer
-void transform_tohost_VkImportColorBufferGOOGLE(
+#ifdef VK_EXT_fragment_density_map
+void transform_tohost_VkPhysicalDeviceFragmentDensityMapFeaturesEXT(
     VkDecoderGlobalState* resourceTracker,
-    VkImportColorBufferGOOGLE* toTransform);
+    VkPhysicalDeviceFragmentDensityMapFeaturesEXT* toTransform);
 
-void transform_fromhost_VkImportColorBufferGOOGLE(
+void transform_fromhost_VkPhysicalDeviceFragmentDensityMapFeaturesEXT(
     VkDecoderGlobalState* resourceTracker,
-    VkImportColorBufferGOOGLE* toTransform);
+    VkPhysicalDeviceFragmentDensityMapFeaturesEXT* toTransform);
 
-void transform_tohost_VkImportBufferGOOGLE(
+void transform_tohost_VkPhysicalDeviceFragmentDensityMapPropertiesEXT(
     VkDecoderGlobalState* resourceTracker,
-    VkImportBufferGOOGLE* toTransform);
+    VkPhysicalDeviceFragmentDensityMapPropertiesEXT* toTransform);
 
-void transform_fromhost_VkImportBufferGOOGLE(
+void transform_fromhost_VkPhysicalDeviceFragmentDensityMapPropertiesEXT(
     VkDecoderGlobalState* resourceTracker,
-    VkImportBufferGOOGLE* toTransform);
+    VkPhysicalDeviceFragmentDensityMapPropertiesEXT* toTransform);
 
-void transform_tohost_VkImportPhysicalAddressGOOGLE(
+void transform_tohost_VkRenderPassFragmentDensityMapCreateInfoEXT(
     VkDecoderGlobalState* resourceTracker,
-    VkImportPhysicalAddressGOOGLE* toTransform);
+    VkRenderPassFragmentDensityMapCreateInfoEXT* toTransform);
 
-void transform_fromhost_VkImportPhysicalAddressGOOGLE(
+void transform_fromhost_VkRenderPassFragmentDensityMapCreateInfoEXT(
     VkDecoderGlobalState* resourceTracker,
-    VkImportPhysicalAddressGOOGLE* toTransform);
+    VkRenderPassFragmentDensityMapCreateInfoEXT* toTransform);
 
 #endif
 #ifdef VK_EXT_scalar_block_layout
@@ -5421,6 +5421,30 @@ void transform_fromhost_VkDirectFBSurfaceCreateInfoEXT(
 
 #endif
 #ifdef VK_GOOGLE_gfxstream
+void transform_tohost_VkImportColorBufferGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportColorBufferGOOGLE* toTransform);
+
+void transform_fromhost_VkImportColorBufferGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportColorBufferGOOGLE* toTransform);
+
+void transform_tohost_VkImportBufferGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportBufferGOOGLE* toTransform);
+
+void transform_fromhost_VkImportBufferGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportBufferGOOGLE* toTransform);
+
+void transform_tohost_VkImportPhysicalAddressGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportPhysicalAddressGOOGLE* toTransform);
+
+void transform_fromhost_VkImportPhysicalAddressGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportPhysicalAddressGOOGLE* toTransform);
+
 #endif
 #ifdef VK_KHR_acceleration_structure
 void transform_tohost_VkDeviceOrHostAddressKHR(

@@ -48,7 +48,7 @@ option_register_var "--sdk=<path_to_sdk>" OPT_SDK "Path to the sdk you wish to u
 OPT_CROSS_TAR=
 option_register_var "--xcode-tar=<path_to_osxcross.tar.gz>" OPT_CROSS_TAR "Path to a gz with osxcross compiler, (normally construced by the --sdks flag."
 OPT_BASE="ubuntu:bionic"
-option_register_var "--base" OPT_BASE "Base docker image used for the created toolchain (debian:buster-slim, ubuntu:bionic). For rodete use debian:buster-slim."
+option_register_var "--base=<name>" OPT_BASE "Base docker image used for the created toolchain (debian:buster-slim, ubuntu:bionic). For rodete use debian:buster-slim."
 
 
 OPT_INSTALL=

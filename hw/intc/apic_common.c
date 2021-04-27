@@ -34,6 +34,8 @@
 static int apic_irq_delivered;
 bool apic_report_tpr_access;
 
+extern bool migratable_snapshot;
+
 void cpu_set_apic_base(DeviceState *dev, uint64_t val)
 {
     trace_cpu_set_apic_base(val);
@@ -321,7 +323,7 @@ static void apic_common_realize(DeviceState *dev, Error **errp)
 #ifndef CONFIG_HAX
     /* Note: We need at least 1M to map the VAPIC option ROM */
     if (!vapic && s->vapic_control & VAPIC_ENABLE_MASK &&
-        !hax_enabled() && ram_size >= 1024 * 1024) {
+        !hax_enabled() && ram_size >= 1024 * 1024 && !migratable_snapshot) {
         vapic = sysbus_create_simple("kvmvapic", -1, NULL);
     }
 #endif /* CONFIG_HAX */

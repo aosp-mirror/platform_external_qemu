@@ -22,10 +22,14 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
+#include "android/base/Optional.h"
+#include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/MessageChannel.h"
 
+#include "android/base/threads/ThreadPool.h"
 #include "emugl/common/thread.h"
+#include "vulkan/VkDecoderGlobalState.h"
 
 // SyncThread///////////////////////////////////////////////////////////////////
 // The purpose of SyncThread is to track sync device timelines and give out +
@@ -45,20 +49,30 @@ enum SyncThreadOpCode {
     // Blocking command to wait on a given FenceSync object.
     // No timeline handling is done.
     SYNC_THREAD_BLOCKED_WAIT_NO_TIMELINE = 3,
+    // Nonblocking command to wait on a given VkFence
+    // and timeline handle.
+    // A fence FD object / Zircon eventpair in the guest is signaled.
+    SYNC_THREAD_WAIT_VK = 4,
 };
 
 struct SyncThreadCmd {
     SyncThreadOpCode opCode = SYNC_THREAD_INIT;
-    bool needReply = false;
-    FenceSync* fenceSync = nullptr;
+    union {
+        FenceSync* fenceSync = nullptr;
+        VkFence vkFence;
+    };
     uint64_t timeline = 0;
+
+    android::base::Lock* lock = nullptr;
+    android::base::ConditionVariable* cond = nullptr;
+    android::base::Optional<int>* result = nullptr;
 };
 
 struct RenderThreadInfo;
 class SyncThread : public emugl::Thread {
 public:
-    // - constructor: start up the sync thread for a given context.
-    // The initialization of the sync thread is nonblocking.
+    // - constructor: start up the sync worker threads for a given context.
+    // The initialization of the sync threads is nonblocking.
     // - Triggers a |SyncThreadCmd| with op code |SYNC_THREAD_INIT|
     SyncThread();
     ~SyncThread();
@@ -71,6 +85,16 @@ public:
     // knows when to increment timelines / signal native fence FD's.
     void triggerWait(FenceSync* fenceSync,
                      uint64_t timeline);
+
+    // |triggerWaitVk|: async wait with a given VkFence object.
+    // The |vkFence| argument is a *boxed* host Vulkan handle of the fence.
+    //
+    // We call vkWaitForFences() on host Vulkan device to wait for the fence.
+    // After wait is over, the timeline will be incremented,
+    // which should signal the guest-side fence FD / Zircon eventpair.
+    // This method is how the goldfish sync virtual device
+    // knows when to increment timelines / signal native fence FD's.
+    void triggerWaitVk(VkFence vkFence, uint64_t timeline);
 
     // for use with the virtio-gpu path; is meant to have a current context
     // while waiting.
@@ -97,16 +121,9 @@ private:
     // - Triggers a |SyncThreadCmd| with op code |SYNC_THREAD_INIT|
     void initSyncContext();
 
-    // Thread function executing all sync commands.
-    // It listens for |SyncThreadCmd| objects off the message channel
-    // |mInput|, and runs them serially.
+    // Thread function.
+    // It keeps the workers runner until |mExiting| is set.
     virtual intptr_t main() override final;
-    static const size_t kSyncThreadChannelCapacity = 256;
-    android::base::MessageChannel<SyncThreadCmd, kSyncThreadChannelCapacity> mInput;
-
-    // |mOutput| holds result of cmds in case of blocking commands
-    // that require return results.
-    android::base::MessageChannel<GLint, kSyncThreadChannelCapacity> mOutput;
 
     // These two functions are used to communicate with the sync thread
     // from another thread:
@@ -114,14 +131,15 @@ private:
     //   and blocks until it receives the result of the command.
     // - |sendAsync| issues |cmd| to the sync thread and does not
     //   wait for the result, returning immediately after.
-    GLint sendAndWaitForResult(SyncThreadCmd& cmd);
+    int sendAndWaitForResult(SyncThreadCmd& cmd);
     void sendAsync(SyncThreadCmd& cmd);
 
     // |doSyncThreadCmd| and related functions below
     // execute the actual commands. These run on the sync thread.
-    GLint doSyncThreadCmd(SyncThreadCmd* cmd);
+    int doSyncThreadCmd(SyncThreadCmd* cmd);
     void doSyncContextInit();
     void doSyncWait(SyncThreadCmd* cmd);
+    int doSyncWaitVk(SyncThreadCmd* cmd);
     void doSyncBlockedWaitNoTimeline(SyncThreadCmd* cmd);
     void doExit();
 
@@ -130,5 +148,10 @@ private:
     EGLDisplay mDisplay = EGL_NO_DISPLAY;
     EGLContext mContext = EGL_NO_CONTEXT;
     EGLSurface mSurface = EGL_NO_SURFACE;
+
+    bool mExiting = false;
+    android::base::Lock mLock;
+    android::base::ConditionVariable mCv;
+    android::base::ThreadPool<SyncThreadCmd> mWorkerThreadPool;
 };
 
