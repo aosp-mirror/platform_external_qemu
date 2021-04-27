@@ -76,7 +76,7 @@ Install the following:
     - Visual C++ build tools
     - Visual C++ ATL for x86 & x64
     - Visual C++ MFC for x86 & x64
-    - Windows 10 SDK (10.0.177763.0)
+    - Windows 10 SDK (10.0.19041.0)
 - [Git](https://git-scm.com/downloads). Make sure that the install updates your
   path, so git will be on the path.
 - [Python3](https://www.python.org/downloads/windows/). Needed for repo.

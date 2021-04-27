@@ -292,12 +292,12 @@ int qemu_setup_grpc() {
 
     int grpc_start = android_serial_number_port + 3000;
     int grpc_end = grpc_start + 1000;
-    std::string address = "127.0.0.1";
+    std::string address = "[::1]";
 
     if (android_cmdLineOptions->grpc &&
         sscanf(android_cmdLineOptions->grpc, "%d", &grpc_start) == 1) {
         grpc_end = grpc_start + 1;
-        address = "0.0.0.0";
+        address = "[::]";
     }
 
     auto emulator = android::emulation::control::getEmulatorController(
@@ -470,11 +470,9 @@ bool qemu_android_emulation_setup() {
                         "system "
                         "is no longer responding.");
     }
-#ifndef AEMU_GFXSTREAM_BACKEND
     if (feature_is_enabled(kFeature_VirtioWifi)) {
         virtio_wifi_set_mac_prefix(android_serial_number_port);
     }
-#endif
     return true;
 }
 

@@ -182,8 +182,10 @@ void GrpcVideoSource::captureFrames() {
                     rpc->Read(&img, my_tag);
                 }
             case ::grpc::CompletionQueue::NextStatus::TIMEOUT:
-                // Attached decoders will immediately drop duplicate frames if android did not
-                // give us a new video frame.
+                // We update the timetamp to make sure the encoder does not immediately rejects
+                // the frame.
+                currentFrame.set_timestamp_us(rtc::TimeMicros());
+                assert(currentFrame.video_frame_buffer());
                 mBroadcaster.OnFrame(currentFrame);
                 break;
             case ::grpc::CompletionQueue::NextStatus::SHUTDOWN:

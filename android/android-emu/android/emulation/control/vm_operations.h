@@ -212,5 +212,8 @@ typedef struct QAndroidVmOperations {
     struct HostmemEntry (*hostmemGetInfo)(uint64_t id);
     EmuRunState (*getRunState)();
 
+    // virtio display
+    bool (*setDisplay)(int32_t id, int32_t w, int32_t h, uint32_t dpi);
+
 } QAndroidVmOperations;
 ANDROID_END_HEADER

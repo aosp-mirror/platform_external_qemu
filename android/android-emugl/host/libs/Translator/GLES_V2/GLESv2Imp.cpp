@@ -348,6 +348,9 @@ static bool vulkanInteropSupported() {
 
 static void blitFromCurrentReadBufferANDROID(EGLImage image) {
     GET_CTX()
+    if (ctx->drawDisabled()) {
+        return;
+    }
     unsigned int imagehndl = SafeUIntFromPointer(image);
     ImagePtr img = s_eglIface->getEGLImage(imagehndl);
     if (!img ||
@@ -603,9 +606,11 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
     GLuint globalFrameBufferName;
     bool isDefaultFBO = !framebuffer;
     if (isDefaultFBO) {
-       globalFrameBufferName = ctx->getDefaultFBOGlobalName();
-       ctx->dispatcher().glBindFramebuffer(target, globalFrameBufferName);
-       ctx->setFramebufferBinding(target, 0);
+        globalFrameBufferName = ctx->getDefaultFBOGlobalName();
+        if (!ctx->drawDisabled()) {
+            ctx->dispatcher().glBindFramebuffer(target, globalFrameBufferName);
+        }
+        ctx->setFramebufferBinding(target, 0);
     } else {
         globalFrameBufferName = framebuffer;
         if(framebuffer){
@@ -622,7 +627,9 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
             auto fbObj = ctx->getFBOData(framebuffer);
             fbObj->setBoundAtLeastOnce();
         }
-        ctx->dispatcher().glBindFramebuffer(target,globalFrameBufferName);
+        if (!ctx->drawDisabled()) {
+            ctx->dispatcher().glBindFramebuffer(target,globalFrameBufferName);
+        }
         ctx->setFramebufferBinding(target, framebuffer);
     }
 
@@ -654,7 +661,9 @@ GL_APICALL void  GL_APIENTRY glBindRenderbuffer(GLenum target, GLuint renderbuff
             if (rboData) rboData->everBound = true;
         }
     }
-    ctx->dispatcher().glBindRenderbuffer(target,globalRenderBufferName);
+    if (!ctx->drawDisabled()) {
+        ctx->dispatcher().glBindRenderbuffer(target,globalRenderBufferName);
+    }
 
     // update renderbuffer binding state
     ctx->setRenderbufferBinding(renderbuffer);
@@ -779,6 +788,9 @@ GL_APICALL GLenum GL_APIENTRY glCheckFramebufferStatus(GLenum target){
 
 GL_APICALL void  GL_APIENTRY glClear(GLbitfield mask){
     GET_CTX();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     GLbitfield allowed_bits = GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT;
     GLbitfield has_disallowed_bits = (mask & ~allowed_bits);
     SET_ERROR_IF(has_disallowed_bits, GL_INVALID_VALUE);
@@ -858,6 +870,9 @@ GL_APICALL void  GL_APIENTRY glCompressedTexImage2D(GLenum target, GLint level, 
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::textureTargetEx(ctx, target),GL_INVALID_ENUM);
     SET_ERROR_IF(level < 0 || imageSize < 0, GL_INVALID_VALUE);
+    if (ctx->drawDisabled()) {
+        return;
+    }
 
     auto funcPtr = translator::gles2::glTexImage2D;
 
@@ -1014,6 +1029,9 @@ void s_glInitTexImage3D(GLenum target, GLint level, GLint internalformat,
 
 GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border){
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     SET_ERROR_IF(!(GLESv2Validate::pixelFrmt(ctx,internalformat) &&
                    (GLESv2Validate::textureTarget(ctx, target) ||
                     GLESv2Validate::textureTargetEx(ctx, target))), GL_INVALID_ENUM);
@@ -1045,6 +1063,9 @@ GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum
 
 GL_APICALL void  GL_APIENTRY glCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height){
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) ||
                    GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
     TextureData* texData = getTextureTargetData(target);
@@ -1223,11 +1244,13 @@ GL_APICALL void  GL_APIENTRY glDeleteFramebuffers(GLsizei n, const GLuint* frame
     GET_CTX_V2();
     SET_ERROR_IF(n < 0, GL_INVALID_VALUE);
     for (int i = 0; i < n; i++) {
-        if (ctx->getFramebufferBinding(GL_FRAMEBUFFER) == framebuffers[i]) {
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        }
-        else if (ctx->getFramebufferBinding(GL_READ_FRAMEBUFFER) == framebuffers[i]) {
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+        if (!ctx->drawDisabled()) {
+            if (ctx->getFramebufferBinding(GL_FRAMEBUFFER) == framebuffers[i]) {
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            }
+            else if (ctx->getFramebufferBinding(GL_READ_FRAMEBUFFER) == framebuffers[i]) {
+                glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+            }
         }
         ctx->deleteFBO(framebuffers[i]);
     }
@@ -1270,7 +1293,7 @@ static void s_detachFromFramebuffer(NamedObjectType bufferType,
         GLuint name = fbObj->getAttachment(kAttachments[i], &textarget, NULL);
         if (name != texture) continue;
         if (NamedObjectType::TEXTURE == bufferType &&
-            GLESv2Validate::textureTargetEx(ctx, textarget)) {
+            GLESv2Validate::textureTargetEx(ctx, textarget) && !ctx->drawDisabled()) {
             glFramebufferTexture2D(GL_FRAMEBUFFER, kAttachments[i], textarget, 0, 0);
         } else if (NamedObjectType::RENDERBUFFER == bufferType &&
                    GLESv2Validate::renderbufferTarget(textarget)) {
@@ -1644,6 +1667,9 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
             // This renderbuffer object is an eglImage target
             // attach the eglimage's texture instead the renderbuffer.
             //
+            if (ctx->drawDisabled()) {
+                return;
+            }
             ctx->dispatcher().glFramebufferTexture2D(target,
                                     attachment,
                                     GL_TEXTURE_2D,
@@ -1660,6 +1686,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
 
 GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level){
     GET_CTX_V2();
+
     SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(ctx, target) &&
                    GLESv2Validate::textureTargetEx(ctx, textarget)  &&
                    GLESv2Validate::framebufferAttachment(ctx, attachment)), GL_INVALID_ENUM);
@@ -1681,8 +1708,9 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
             texData->makeDirty();
         }
     }
-
-    ctx->dispatcher().glFramebufferTexture2D(target,attachment,textarget,globalTextureName,level);
+    if (!ctx->drawDisabled()) {
+        ctx->dispatcher().glFramebufferTexture2D(target,attachment,textarget,globalTextureName,level);
+    }
 
     // Update the the current framebuffer object attachment state
     GLuint fbName = ctx->getFramebufferBinding(target);
@@ -3183,6 +3211,9 @@ GL_APICALL void GL_APIENTRY glBlitFramebuffer(GLint srcX0, GLint srcY0, GLint sr
 
 GL_APICALL void  GL_APIENTRY glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels){
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     SET_ERROR_IF(!(GLESv2Validate::pixelOp(format,type)),GL_INVALID_OPERATION);
     SET_ERROR_IF(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE, GL_INVALID_FRAMEBUFFER_OPERATION);
 
@@ -3311,7 +3342,9 @@ GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum interna
     GLint err = GL_NO_ERROR;
     internalformat = sPrepareRenderbufferStorage(internalformat, width, height, 0, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
-    ctx->dispatcher().glRenderbufferStorage(target,internalformat,width,height);
+    if (!ctx->drawDisabled()) {
+        ctx->dispatcher().glRenderbufferStorage(target,internalformat,width,height);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glSampleCoverage(GLclampf value, GLboolean invert){
@@ -3496,6 +3529,9 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
         fprintf(stderr, "%s: got err pre :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
     }
 
+    if (ctx->drawDisabled()) {
+        return;
+    }
     sPrepareTexImage2D(target, level, internalformat, width, height, border, format, type, 0, pixels, &type, &internalformat, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
 
@@ -4084,19 +4120,22 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
     if (rbData->attachedFB) {
         // update the framebuffer attachment point to the
         // underlying texture of the img
-        GLuint prevFB = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
-        if (prevFB != rbData->attachedFB) {
-            ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER_EXT,
-                                                   rbData->attachedFB);
-        }
-        ctx->dispatcher().glFramebufferTexture2D(GL_FRAMEBUFFER_EXT,
-                                                    rbData->attachedPoint,
-                                                    GL_TEXTURE_2D,
-                                                    img->globalTexObj->getGlobalName(),
-                                                    0);
-        if (prevFB != rbData->attachedFB) {
-            ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER_EXT,
-                                                   prevFB);
+        if (!ctx->drawDisabled()) {
+            GLuint prevFB = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
+            if (prevFB != rbData->attachedFB) {
+                ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER_EXT,
+                                                    rbData->attachedFB);
+            }
+
+            ctx->dispatcher().glFramebufferTexture2D(GL_FRAMEBUFFER_EXT,
+                                                        rbData->attachedPoint,
+                                                        GL_TEXTURE_2D,
+                                                        img->globalTexObj->getGlobalName(),
+                                                        0);
+            if (prevFB != rbData->attachedFB) {
+                ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER_EXT,
+                                                    prevFB);
+            }
         }
     }
 }
@@ -4400,6 +4439,9 @@ GL_APICALL void GL_APIENTRY glGetMemoryObjectParameterivEXT(GLuint memoryObject,
 
 GL_APICALL void GL_APIENTRY glTexStorageMem2DEXT(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLuint memory, GLuint64 offset) {
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     gles30usages->set_is_used(true);
     GLint err = GL_NO_ERROR;
     GLenum format, type;
@@ -4413,21 +4455,33 @@ GL_APICALL void GL_APIENTRY glTexStorageMem2DEXT(GLenum target, GLsizei levels, 
 
 GL_APICALL void GL_APIENTRY glTexStorageMem2DMultisampleEXT(GLenum target, GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height, GLboolean fixedSampleLocations, GLuint memory, GLuint64 offset) {
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     ctx->dispatcher().glTexStorageMem2DMultisampleEXT(target, samples, internalFormat, width, height, fixedSampleLocations, memory, offset);
 }
 
 GL_APICALL void GL_APIENTRY glTexStorageMem3DEXT(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLuint memory, GLuint64 offset) {
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     ctx->dispatcher().glTexStorageMem3DEXT(target, levels, internalFormat, width, height, depth, memory, offset);
 }
 
 GL_APICALL void GL_APIENTRY glTexStorageMem3DMultisampleEXT(GLenum target, GLsizei samples, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedSampleLocations, GLuint memory, GLuint64 offset) {
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     ctx->dispatcher().glTexStorageMem3DMultisampleEXT(target, samples, internalFormat, width, height, depth, fixedSampleLocations, memory, offset);
 }
 
 GL_APICALL void GL_APIENTRY glBufferStorageMemEXT(GLenum target, GLsizeiptr size, GLuint memory, GLuint64 offset) {
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     ctx->dispatcher().glBufferStorageMemEXT(target, size, memory, offset);
 }
 

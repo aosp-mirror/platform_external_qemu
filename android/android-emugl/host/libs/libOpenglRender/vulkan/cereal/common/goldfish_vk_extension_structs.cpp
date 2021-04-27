@@ -386,7 +386,7 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_EXT_metal_surface
 #endif
-#ifdef VK_GOOGLE_color_buffer
+#ifdef VK_EXT_fragment_density_map
 #endif
 #ifdef VK_EXT_scalar_block_layout
 #endif
@@ -490,6 +490,7 @@ uint32_t goldfish_vk_struct_type(
 }
 
 size_t goldfish_vk_extension_struct_size(
+    VkStructureType rootType,
     const void* structExtension)
 {
     if (!structExtension)
@@ -1437,18 +1438,79 @@ size_t goldfish_vk_extension_struct_size(
             return sizeof(VkSwapchainDisplayNativeHdrCreateInfoAMD);
         }
 #endif
-#ifdef VK_GOOGLE_color_buffer
-        case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
+#ifdef VK_EXT_fragment_density_map
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_FEATURES_EXT:
         {
-            return sizeof(VkImportColorBufferGOOGLE);
+            switch(rootType)
+            {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2:
+                {
+                    return sizeof(VkPhysicalDeviceFragmentDensityMapFeaturesEXT);
+                    break;
+                }
+                case VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO:
+                {
+                    return sizeof(VkPhysicalDeviceFragmentDensityMapFeaturesEXT);
+                    break;
+                }
+                case VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO:
+                {
+                    return sizeof(VkImportColorBufferGOOGLE);
+                    break;
+                }
+                default:
+                {
+                    return sizeof(VkPhysicalDeviceFragmentDensityMapFeaturesEXT);
+                    break;
+                }
+            }
         }
-        case VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_PROPERTIES_EXT:
         {
-            return sizeof(VkImportBufferGOOGLE);
+            switch(rootType)
+            {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2:
+                {
+                    return sizeof(VkPhysicalDeviceFragmentDensityMapPropertiesEXT);
+                    break;
+                }
+                case VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO:
+                {
+                    return sizeof(VkImportPhysicalAddressGOOGLE);
+                    break;
+                }
+                default:
+                {
+                    return sizeof(VkPhysicalDeviceFragmentDensityMapPropertiesEXT);
+                    break;
+                }
+            }
         }
-        case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
+        case VK_STRUCTURE_TYPE_RENDER_PASS_FRAGMENT_DENSITY_MAP_CREATE_INFO_EXT:
         {
-            return sizeof(VkImportPhysicalAddressGOOGLE);
+            switch(rootType)
+            {
+                case VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO:
+                {
+                    return sizeof(VkRenderPassFragmentDensityMapCreateInfoEXT);
+                    break;
+                }
+                case VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO_2:
+                {
+                    return sizeof(VkRenderPassFragmentDensityMapCreateInfoEXT);
+                    break;
+                }
+                case VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO:
+                {
+                    return sizeof(VkImportBufferGOOGLE);
+                    break;
+                }
+                default:
+                {
+                    return sizeof(VkRenderPassFragmentDensityMapCreateInfoEXT);
+                    break;
+                }
+            }
         }
 #endif
 #ifdef VK_EXT_subgroup_size_control
@@ -1741,6 +1803,20 @@ size_t goldfish_vk_extension_struct_size(
             return sizeof(VkPhysicalDevice4444FormatsFeaturesEXT);
         }
 #endif
+#ifdef VK_GOOGLE_gfxstream
+        case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
+        {
+            return sizeof(VkImportColorBufferGOOGLE);
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE:
+        {
+            return sizeof(VkImportBufferGOOGLE);
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
+        {
+            return sizeof(VkImportPhysicalAddressGOOGLE);
+        }
+#endif
 #ifdef VK_KHR_acceleration_structure
         case VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR:
         {
@@ -1780,6 +1856,7 @@ size_t goldfish_vk_extension_struct_size(
 
 size_t goldfish_vk_extension_struct_size_with_stream_features(
     uint32_t streamFeatures,
+    VkStructureType rootType,
     const void* structExtension)
 {
     if (!structExtension)
@@ -2734,18 +2811,79 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
             return sizeof(VkSwapchainDisplayNativeHdrCreateInfoAMD);
         }
 #endif
-#ifdef VK_GOOGLE_color_buffer
-        case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
+#ifdef VK_EXT_fragment_density_map
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_FEATURES_EXT:
         {
-            return sizeof(VkImportColorBufferGOOGLE);
+            switch(rootType)
+            {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2:
+                {
+                    return sizeof(VkPhysicalDeviceFragmentDensityMapFeaturesEXT);
+                    break;
+                }
+                case VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO:
+                {
+                    return sizeof(VkPhysicalDeviceFragmentDensityMapFeaturesEXT);
+                    break;
+                }
+                case VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO:
+                {
+                    return sizeof(VkImportColorBufferGOOGLE);
+                    break;
+                }
+                default:
+                {
+                    return sizeof(VkPhysicalDeviceFragmentDensityMapFeaturesEXT);
+                    break;
+                }
+            }
         }
-        case VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_PROPERTIES_EXT:
         {
-            return sizeof(VkImportBufferGOOGLE);
+            switch(rootType)
+            {
+                case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2:
+                {
+                    return sizeof(VkPhysicalDeviceFragmentDensityMapPropertiesEXT);
+                    break;
+                }
+                case VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO:
+                {
+                    return sizeof(VkImportPhysicalAddressGOOGLE);
+                    break;
+                }
+                default:
+                {
+                    return sizeof(VkPhysicalDeviceFragmentDensityMapPropertiesEXT);
+                    break;
+                }
+            }
         }
-        case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
+        case VK_STRUCTURE_TYPE_RENDER_PASS_FRAGMENT_DENSITY_MAP_CREATE_INFO_EXT:
         {
-            return sizeof(VkImportPhysicalAddressGOOGLE);
+            switch(rootType)
+            {
+                case VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO:
+                {
+                    return sizeof(VkRenderPassFragmentDensityMapCreateInfoEXT);
+                    break;
+                }
+                case VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO_2:
+                {
+                    return sizeof(VkRenderPassFragmentDensityMapCreateInfoEXT);
+                    break;
+                }
+                case VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO:
+                {
+                    return sizeof(VkImportBufferGOOGLE);
+                    break;
+                }
+                default:
+                {
+                    return sizeof(VkRenderPassFragmentDensityMapCreateInfoEXT);
+                    break;
+                }
+            }
         }
 #endif
 #ifdef VK_EXT_subgroup_size_control
@@ -3036,6 +3174,20 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_4444_FORMATS_FEATURES_EXT:
         {
             return sizeof(VkPhysicalDevice4444FormatsFeaturesEXT);
+        }
+#endif
+#ifdef VK_GOOGLE_gfxstream
+        case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
+        {
+            return sizeof(VkImportColorBufferGOOGLE);
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE:
+        {
+            return sizeof(VkImportBufferGOOGLE);
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
+        {
+            return sizeof(VkImportPhysicalAddressGOOGLE);
         }
 #endif
 #ifdef VK_KHR_acceleration_structure

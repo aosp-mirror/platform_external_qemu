@@ -164,13 +164,16 @@ The windows target requires you to install the MSVC libraries. These libraries n
 
 #### I'm within google
 
-- You will have to obtain the windows sdk
-
+- You will have to obtain the windows
 ```sh
-export PATH=$PATH:$PWD/android/third_party/chromium/depot_tools/
+git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git /tmp/depot_tools
+local DEPOT_TOOLS="/tmp/depot_tools"
+# This is the hash of the msvc version we are using (VS 2019)
+local MSVC_HASH="20d5f2553f"
+export PATH=$PATH:$PWD/android/third_party/chromium/$DEPOT_TOOLS/
 download_from_google_storage --config
-python ./android/third_party/chromium/depot_tools/win_toolchain/get_toolchain_if_necessary.py --toolchain-dir=$AOSP_DIR/prebuilts/android-emulator-build/msvc --force --output-json=res.json 3bc0ec615cf20ee342f3bc29bc991b5ad66d8d2c
-ln -sf $AOSP_DIR/prebuilts/android-emulator-build/msvc/vs_files/3bc0ec615cf20ee342f3bc29bc991b5ad66d8d2c $AOSP_DIR/prebuilts/android-emulator-build/msvc/win8sdk
+python3 $DEPOT_TOOLS/win_toolchain/get_toolchain_if_necessary.py --toolchain-dir=$AOSP_DIR/prebuilts/android-emulator-build/msvc --force --output-json=res.json $MSVC_HASH
+ln -sf $AOSP_DIR/prebuilts/android-emulator-build/msvc/vs_files/${MSVC_HASH} $AOSP_DIR/prebuilts/android-emulator-build/msvc/win8sdk
 ```
 
 next you will need to have a mingw compiler and realpath. The easiest way to obtain these is through homebrew:
@@ -196,7 +199,7 @@ If all went well you can now target windows as follows:
 ```sh
     cd path/to/depot_tools/win_toolchain
     # customize the Windows SDK version numbers
-    python package_from_installed.py 2017 -w 10.0.17134.0
+    python package_from_installed.py 2019 -w 10.0.19041.0
 ```
 
     copy the created zip file to your mac. Say win8sdk.zip

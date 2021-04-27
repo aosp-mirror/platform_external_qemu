@@ -368,7 +368,7 @@ typedef struct VkAccelerationStructureInstanceKHRWithoutBitFields {
 """,
         "marshaling": """
 const VkAccelerationStructureInstanceKHRWithoutBitFields* {newInputVarName} = (const VkAccelerationStructureInstanceKHRWithoutBitFields*)({inputVarName});
-marshal_VkTransformMatrixKHR({streamVarName}, (VkTransformMatrixKHR*)(&{newInputVarName}->transform));
+marshal_VkTransformMatrixKHR({streamVarName}, {rootTypeVarName}, (VkTransformMatrixKHR*)(&{newInputVarName}->transform));
 for (uint32_t i = 0; i < 2; i++) {{
     {streamVarName}->write((uint32_t*)&({newInputVarName}->dwords[i]), sizeof(uint32_t));
 }}
@@ -376,7 +376,7 @@ for (uint32_t i = 0; i < 2; i++) {{
 """,
         "unmarshaling": """
 VkAccelerationStructureInstanceKHRWithoutBitFields* {newInputVarName} = (VkAccelerationStructureInstanceKHRWithoutBitFields*)({inputVarName});
-unmarshal_VkTransformMatrixKHR({streamVarName}, (VkTransformMatrixKHR*)(&{newInputVarName}->transform));
+unmarshal_VkTransformMatrixKHR({streamVarName}, {rootTypeVarName}, (VkTransformMatrixKHR*)(&{newInputVarName}->transform));
 for (uint32_t i = 0; i < 2; i++) {{
     {streamVarName}->read((uint32_t*)&({newInputVarName}->dwords[i]), sizeof(uint32_t));
 }}
@@ -385,7 +385,7 @@ for (uint32_t i = 0; i < 2; i++) {{
         "reservedmarshaling": """
 (void)vkStream;
 const VkAccelerationStructureInstanceKHRWithoutBitFields* {newInputVarName} = (const VkAccelerationStructureInstanceKHRWithoutBitFields*)({inputVarName});
-reservedmarshal_VkTransformMatrixKHR({streamVarName}, (VkTransformMatrixKHR*)(&{newInputVarName}->transform), ptr);
+reservedmarshal_VkTransformMatrixKHR({streamVarName}, {rootTypeVarName}, (VkTransformMatrixKHR*)(&{newInputVarName}->transform), ptr);
 for (uint32_t i = 0; i < 2; i++) {{
     memcpy(*ptr, (uint32_t*)&({newInputVarName}->dwords[i]), sizeof(uint32_t));
     *ptr += sizeof(uint32_t);
@@ -395,7 +395,7 @@ memcpy(*ptr, (uint64_t*)&{newInputVarName}->accelerationStructureReference, size
 """,
         "reservedunmarshaling": """
 VkAccelerationStructureInstanceKHRWithoutBitFields* {newInputVarName} = (VkAccelerationStructureInstanceKHRWithoutBitFields*)({inputVarName});
-reservedunmarshal_VkTransformMatrixKHR(vkStream, (VkTransformMatrixKHR*)(&{newInputVarName}->transform), ptr);
+reservedunmarshal_VkTransformMatrixKHR({streamVarName}, {rootTypeVarName}, (VkTransformMatrixKHR*)(&{newInputVarName}->transform), ptr);
 for (uint32_t i = 0; i < 2; i++) {{
     memcpy((uint32_t*)&({newInputVarName}->dwords[i]), *ptr, sizeof(uint32_t));
     *ptr += sizeof(uint32_t);

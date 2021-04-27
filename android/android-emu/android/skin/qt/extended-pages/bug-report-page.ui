@@ -41,7 +41,7 @@
     </size>
    </property>
    <property name="text">
-    <string>SAVE REPORT</string>
+    <string>Save Report</string>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>Button</string>

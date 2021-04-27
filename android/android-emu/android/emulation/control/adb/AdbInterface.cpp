@@ -94,6 +94,13 @@ class AdbThroughExe : public AdbCommand {
 
 public:
     using ResultCallback = AdbInterface::ResultCallback;
+    AdbThroughExe(android::base::Looper* looper,
+                  const std::string& adb_path,
+                  const std::string& serial_string,
+                  const std::vector<std::string>& command,
+                  bool want_output,
+                  base::System::Duration timeoutMs,
+                  ResultCallback callback);
     ~AdbThroughExe() {
         if (VERBOSE_CHECK(adb)) {
             for (auto cmd : mCommand) {
@@ -113,13 +120,6 @@ public:
     void start(int checkTimeoutMs = 1000) override;
 
 private:
-    AdbThroughExe(android::base::Looper* looper,
-                  const std::string& adb_path,
-                  const std::string& serial_string,
-                  const std::vector<std::string>& command,
-                  bool want_output,
-                  base::System::Duration timeoutMs,
-                  ResultCallback&& callback);
     void taskFunction(OptionalAdbCommandResult* result);
     void taskDoneFunction(const OptionalAdbCommandResult& result);
 
@@ -141,7 +141,7 @@ private:
 class AdbDirect : public AdbCommand {
 public:
     AdbDirect(const std::vector<std::string>& args,
-              ResultCallback&& result_callback,
+              ResultCallback result_callback,
               bool want_output = true)
         : mResultCallback(std::move(result_callback)),
           mWantOutput(want_output) {
@@ -169,8 +169,8 @@ public:
     void cancel() override { mTimeout = 0; }
 
     void start(int timeout_ms = 1000) override {
-        mTimeout = System::get()->getUnixTimeUs() + timeout_ms * 1000;
         mStart = System::get()->getUnixTimeUs();
+        mTimeout = mStart + timeout_ms * 1000;
         auto shared = shared_from_this();
         std::thread t([this, timeout_ms, shared]() { execute(timeout_ms); });
         t.detach();
@@ -203,13 +203,12 @@ private:
         mRunning = false;
     }
 
+    int64_t mStart{0};
     int64_t mTimeout{std::numeric_limits<int64_t>::max()};
     bool mWantOutput{false};
     bool mRunning{true};
     std::string mCmd;
-    long mStart;
     ResultCallback mResultCallback;
-    AdbCommandPtr mSelf;
 };
 
 using AdbEntry = std::pair<std::string, Optional<int>>;
@@ -234,12 +233,12 @@ public:
     const std::string& serialString() const final { return mSerialString; }
 
     AdbCommandPtr runAdbCommand(const std::vector<std::string>& args,
-                                ResultCallback&& result_callback,
+                                ResultCallback result_callback,
                                 System::Duration timeout_ms,
                                 bool want_output = true) final;
 
     void enqueueCommand(const std::vector<std::string>& args,
-                        ResultCallback&& result) final;
+                        ResultCallback result) final;
 
 private:
     explicit AdbInterfaceImpl(Looper* looper,
@@ -488,7 +487,7 @@ AdbInterfaceImpl::AdbInterfaceImpl(Looper* looper,
 
 AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         const std::vector<std::string>& args,
-        ResultCallback&& result_callback,
+        ResultCallback result_callback,
         System::Duration timeout_ms,
         bool want_output) {
 
@@ -499,19 +498,19 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
     AdbCommandPtr command;
     if (!(android_cmdLineOptions && android_cmdLineOptions->no_direct_adb) && AdbConnection::failed() &&
         (args[0] == "shell" || args[0] == "logcat")) {
-        command = std::shared_ptr<AdbDirect>(
-                new AdbDirect(args, std::move(result_callback), want_output));
+        command = std::make_shared<AdbDirect>(
+                args, std::move(result_callback), want_output);
     } else {
-        command = std::shared_ptr<AdbThroughExe>(new AdbThroughExe(
+        command = std::make_shared<AdbThroughExe>(
                 mLooper, adbPath(), mSerialString, args, want_output,
-                timeout_ms, std::move(result_callback)));
+                timeout_ms, std::move(result_callback));
     }
     command->start();
     return command;
 }
 
 void AdbInterfaceImpl::enqueueCommand(const std::vector<std::string>& args,
-                                      ResultCallback&& resultCallback) {
+                                      ResultCallback resultCallback) {
     AutoLock lock(sStatics->adbLock);
 
     if (sStatics->adbInterface == nullptr) {
@@ -539,7 +538,7 @@ AdbThroughExe::AdbThroughExe(Looper* looper,
                              const std::vector<std::string>& command,
                              bool want_output,
                              System::Duration timeoutMs,
-                             ResultCallback&& callback)
+                             ResultCallback callback)
     : mLooper(looper),
       mResultCallback(std::move(callback)),
       mWantOutput(want_output),

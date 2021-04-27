@@ -21,11 +21,12 @@ from .wrapperdefs import VulkanWrapperGenerator
 from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE, EXTENSION_SIZE_API_NAME
 
 class DeepcopyCodegen(VulkanTypeIterator):
-    def __init__(self, cgen, inputVars, poolVarName, prefix, skipValues=False):
+    def __init__(self, cgen, inputVars, poolVarName, rootVarName, prefix, skipValues=False):
         self.cgen = cgen
         self.inputVars = inputVars
         self.prefix = prefix
         self.poolVarName = poolVarName
+        self.rootVarName = rootVarName
         self.skipValues = skipValues
 
         def makeAccess(varName, asPtr = True):
@@ -133,7 +134,7 @@ class DeepcopyCodegen(VulkanTypeIterator):
         accessRhsCasted = self.makeNonConstCastForCopy(accessRhs, vulkanType)
 
         self.cgen.funcCall(None, self.prefix + vulkanType.typeName,
-                           [self.poolVarName, accessLhs, accessRhsCasted])
+                           [self.poolVarName, self.rootVarName, accessLhs, accessRhsCasted])
 
         if lenAccessLhs is not None:
             self.cgen.endFor()
@@ -196,13 +197,19 @@ class DeepcopyCodegen(VulkanTypeIterator):
         nextVar = "from_%s" % vulkanType.paramName
         sizeVar = "%s_size" % vulkanType.paramName
 
+        self.cgen.beginIf("%s == VK_STRUCTURE_TYPE_MAX_ENUM" %
+                          self.rootVarName)
+        self.cgen.stmt("%s = from->sType" % self.rootVarName)
+        self.cgen.endIf()
+
         self.cgen.stmt("const void* %s = %s" % (nextVar, self.inputVars[0]))
         self.cgen.stmt("size_t %s = 0u" % sizeVar)
         self.cgen.beginWhile("!%s && %s" % (sizeVar, nextVar))
         self.cgen.stmt("%s = static_cast<const vk_struct_common*>(%s)->%s" % (
             nextVar, nextVar, vulkanType.paramName
         ))
-        self.cgen.stmt("%s = %s(%s)" % (sizeVar, EXTENSION_SIZE_API_NAME, nextVar))
+        self.cgen.stmt("%s = %s(%s, %s)" % (
+            sizeVar, EXTENSION_SIZE_API_NAME, self.rootVarName, nextVar))
         self.cgen.endWhile()
         
         self.cgen.stmt("%s = nullptr" % rhs)
@@ -215,7 +222,7 @@ class DeepcopyCodegen(VulkanTypeIterator):
             self.poolVarName, sizeVar))
 
         self.cgen.funcCall(None, self.prefix + "extension_struct",
-                           [self.poolVarName, nextVar, rhsExpr])
+                           [self.poolVarName, self.rootVarName, nextVar, rhsExpr])
 
         self.cgen.endIf()
 
@@ -267,6 +274,10 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
         self.deepcopyPoolParam = \
             makeVulkanTypeSimple(False, "BumpPool", 1,
                                  self.deepcopyPoolVarName)
+        self.deepcopyRootVarName = "rootType"
+        self.deepcopyRootParam = \
+            makeVulkanTypeSimple(False, "VkStructureType",
+                                 0, self.deepcopyRootVarName)
         self.voidType = makeVulkanTypeSimple(False, "void", 0)
 
         self.deepcopyCodegen = \
@@ -274,6 +285,7 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
                 None,
                 self.deepcopyVars,
                 self.deepcopyPoolVarName,
+                self.deepcopyRootVarName,
                 self.deepcopyPrefix,
                 skipValues=True)
 
@@ -283,6 +295,7 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
             VulkanAPI(self.deepcopyPrefix + "extension_struct",
                       self.voidType,
                       [self.deepcopyPoolParam,
+                       self.deepcopyRootParam,
                        STRUCT_EXTENSION_PARAM,
                        STRUCT_EXTENSION_PARAM_FOR_WRITE])
 
@@ -313,8 +326,8 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
                     makeVulkanTypeSimple(varname == "from", name, 1, varname)
 
             deepcopyParams = \
-                [self.deepcopyPoolParam] + \
-                list(map(typeFromName, self.deepcopyVars))
+                [self.deepcopyPoolParam, self.deepcopyRootParam] + \
+                 list(map(typeFromName, self.deepcopyVars))
 
             deepcopyPrototype = \
                 VulkanAPI(self.deepcopyPrefix + name,
@@ -329,6 +342,7 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
                         canSimplyAssign = False
 
                 cgen.stmt("(void)%s" % self.deepcopyPoolVarName)
+                cgen.stmt("(void)%s" % self.deepcopyRootVarName)
                 cgen.stmt("*to = *from")
                 if canSimplyAssign:
                     pass
@@ -356,6 +370,7 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
         def forEachExtensionDeepcopy(ext, castedAccess, cgen):
             cgen.funcCall(None, self.deepcopyPrefix + ext.name,
                           [self.deepcopyPoolVarName,
+                           self.deepcopyRootVarName,
                            castedAccess, deepcopyDstExpr(cgen, ext.name)])
 
         self.module.appendImpl(
@@ -365,4 +380,5 @@ class VulkanDeepcopy(VulkanWrapperGenerator):
                     cgen,
                     self.voidType,
                     STRUCT_EXTENSION_PARAM,
-                    forEachExtensionDeepcopy)))
+                    forEachExtensionDeepcopy,
+                    rootTypeVar=self.deepcopyRootParam)))

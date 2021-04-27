@@ -56,12 +56,12 @@ class QWidget;
 
 static const char CONVERTING_TO_GIF[]  = "Converting to GIF";
 static const char FINISHING_ENCODING[] = "Finishing encoding";
-static const char RECORD_AGAIN[]       = "RECORD AGAIN";
+static const char RECORD_AGAIN[]       = "Record Again";
 static const char SAVE_RECORDING[]     = "Save Recording";
 static const char SECONDS_RECORDING[]  = "%1s Recording...";
-static const char START_RECORDING[]    = "START RECORDING";
+static const char START_RECORDING[]    = "Start Recording";
 static const char STARTING_RECORDER[]  = "Starting the recorder";
-static const char STOP_RECORDING[]     = "STOP RECORDING";
+static const char STOP_RECORDING[]     = "Stop Recording";
 
 using android::base::PathUtils;
 
