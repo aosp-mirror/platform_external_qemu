@@ -1205,17 +1205,29 @@ void ToolWindow::onHostClipboardChanged() {
                 (const uint8_t*)bytes.data(), bytes.size());
 }
 
+static bool isPaneEnabled(ExtendedWindowPane pane) {
+    // Snapshot pane is disabled in embedded emulator.
+    if (pane == PANE_IDX_SNAPSHOT && android_cmdLineOptions->qt_hide_window) {
+        return false;
+    }
+
+    return true;
+}
+
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         if (pane == PANE_IDX_DPAD || pane == PANE_IDX_BATTERY ||
-            pane == PANE_IDX_FINGER) {
+            pane == PANE_IDX_FINGER || pane == PANE_IDX_CAMERA) {
             return;
         }
     }
-    // Snapshot and multidisplay panes are disabled in embedded emulator.
+    if (!androidHwConfig_hasVirtualSceneCamera(android_hw) &&
+        pane == PANE_IDX_CAMERA) {
+        return;
+    }
+
     // Set to default location pane.
-    if (android_cmdLineOptions->qt_hide_window &&
-        (pane == PANE_IDX_MULTIDISPLAY || pane == PANE_IDX_SNAPSHOT)) {
+    if (!isPaneEnabled(pane)) {
         pane = PANE_IDX_LOCATION;
     }
     // Show the tabbed pane

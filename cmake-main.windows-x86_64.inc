@@ -996,6 +996,7 @@ set(qemu-system-aarch64_sources ""
    hw/cpu/realview_mpcore.c
    hw/cpu/a9mpcore.c
    hw/cpu/a15mpcore.c
+   hw/display/edid-generate.c
    hw/display/omap_dss.c
    hw/display/omap_lcdc.c
    hw/display/pxa2xx_lcd.c
@@ -1353,6 +1354,7 @@ set(qemu-system-arm_sources ""
    hw/cpu/realview_mpcore.c
    hw/cpu/a9mpcore.c
    hw/cpu/a15mpcore.c
+   hw/display/edid-generate.c
    hw/display/omap_dss.c
    hw/display/omap_lcdc.c
    hw/display/pxa2xx_lcd.c
@@ -1685,6 +1687,7 @@ set(qemu-system-i386_sources ""
    hw/char/virtio-serial-bus.c
    hw/core/generic-loader.c
    hw/core/null-machine.c
+   hw/display/edid-generate.c
    hw/display/vga.c
    hw/display/virtio-gpu.c
    hw/display/virtio-gpu-3d.c
@@ -1873,6 +1876,7 @@ set(qemu-system-mips64el_sources ""
    hw/char/virtio-serial-bus.c
    hw/core/generic-loader.c
    hw/core/null-machine.c
+   hw/display/edid-generate.c
    hw/display/vga.c
    hw/display/virtio-gpu.c
    hw/display/virtio-gpu-3d.c
@@ -2024,6 +2028,7 @@ set(qemu-system-mipsel_sources ""
    hw/char/virtio-serial-bus.c
    hw/core/generic-loader.c
    hw/core/null-machine.c
+   hw/display/edid-generate.c
    hw/display/vga.c
    hw/display/virtio-gpu.c
    hw/display/virtio-gpu-3d.c
@@ -2160,6 +2165,7 @@ set(qemu-system-x86_64_sources ""
    hw/char/virtio-serial-bus.c
    hw/core/generic-loader.c
    hw/core/null-machine.c
+   hw/display/edid-generate.c
    hw/display/vga.c
    hw/display/virtio-gpu.c
    hw/display/virtio-gpu-3d.c

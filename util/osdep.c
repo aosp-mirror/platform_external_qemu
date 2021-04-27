@@ -590,8 +590,10 @@ void qemu_spin_warning(uint32_t spinCount,
             (spinCount % spinInterval == 0))) {
         va_list args;
         va_start(args, format);
-        vfprintf(stderr, format, args);
-        qemu_crash_dump_message_v(format, args);
+        char err[2048] = {};
+        vsnprintf(err, sizeof(err) - 1, format, args);
+        fprintf(stderr, "%s", err);
+        qemu_crash_dump_message("%s", err);
         va_end(args);
     }
 }

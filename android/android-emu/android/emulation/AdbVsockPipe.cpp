@@ -32,6 +32,10 @@ size_t empty_virtio_vsock_device_stream_send(uint64_t key,
     return 0;
 }
 
+bool empty_virtio_vsock_device_stream_ping(uint64_t key) {
+    return false;
+}
+
 bool empty_virtio_vsock_device_stream_close(uint64_t key) {
     return false;
 }
@@ -39,6 +43,7 @@ bool empty_virtio_vsock_device_stream_close(uint64_t key) {
 const virtio_vsock_device_ops_t empty_ops = {
     .open = &empty_virtio_vsock_device_stream_open,
     .send = &empty_virtio_vsock_device_stream_send,
+    .ping = empty_virtio_vsock_device_stream_ping,
     .close = &empty_virtio_vsock_device_stream_close,
 };
 
@@ -208,23 +213,28 @@ struct VsockJdwpProxy : public AdbVsockPipe::Proxy {
 
 
 AdbVsockPipe::Service::Service(AdbHostAgent* hostAgent)
-    : mHostAgent(hostAgent)
-    , mDestroyPipesThread(&AdbVsockPipe::Service::destroyPipesThreadLoop, this) {
-    startPollGuestAdbdThread();
+    : mHostAgent(hostAgent) {
     g_service = this;
+    mGuestAdbdPollingThread = std::thread(&AdbVsockPipe::Service::pollGuestAdbdThreadLoop, this);
+    mDestroyPipesThread = std::thread(&AdbVsockPipe::Service::destroyPipesThreadLoop, this);
 }
 
 AdbVsockPipe::Service::~Service() {
-    g_service = nullptr;
-
-    stopPollGuestAdbdThread(kAdbdPollingThreadDisabled);
+    mGuestAdbdPollingThreadRunning = false;
+    mGuestAdbdPollingThread.join();
 
     mPipesToDestroy.stop();
     mDestroyPipesThread.join();
+    g_service = nullptr;
 }
 
-void AdbVsockPipe::Service::onHostConnection(android::base::ScopedSocket&& socket,
+void AdbVsockPipe::Service::onHostConnection(android::base::ScopedSocket socket,
                                              const AdbPortType portType) {
+    // A workaround.
+    // `BaseSocketServer::onAccept` calls `stopListening` for some reasons.
+    // Probably we want to fix `BaseSocketServer::onAccept` instead.
+    mHostAgent->startListening();
+
     {
         std::unique_lock<std::mutex> guard(mPipesMtx);
 
@@ -258,6 +268,7 @@ void AdbVsockPipe::Service::destroyPipesThreadLoop() {
                     return toDestroy == pipe.get();
                 });
 
+<<<<<<< HEAD   (f97d82 Merge "Merge cherrypicks of [1676350, 1676351] into emu-30-r)
             mPipes.erase(end, mPipes.end());
             if (mPipes.empty()) {
                 stopPollGuestAdbdThread(kAdbdPollingThreadIdle);
@@ -265,6 +276,18 @@ void AdbVsockPipe::Service::destroyPipesThreadLoop() {
             }
         } else {
             break;
+=======
+        std::lock_guard<std::mutex> guard(mPipesMtx);
+        const auto i = std::find_if(
+            mPipes.begin(), mPipes.end(),
+            [toDestroy](const std::unique_ptr<AdbVsockPipe> &pipe){
+                return toDestroy == pipe.get();
+            });
+
+        if (i != mPipes.end()) {
+            deleter = std::move(*i);
+            mPipes.erase(i);
+>>>>>>> BRANCH (a73bfe Merge "c2-codecs: use display sizes when rendering to surfac)
         }
     }
 }
@@ -274,60 +297,8 @@ void AdbVsockPipe::Service::destroyPipe(AdbVsockPipe *p) {
 }
 
 void AdbVsockPipe::Service::pollGuestAdbdThreadLoop() {
-    while (mGuestAdbdPollingThreadState.load() == kAdbdPollingThreadRunning) {
-        if (checkIfGuestAdbdAlive()) {
-            mHostAgent->startListening();
-            mHostAgent->notifyServer();
-            break;
-        } else {
-            using namespace std::chrono_literals;
-            std::this_thread::sleep_for(500ms);
-        }
-    }
-}
-
-void AdbVsockPipe::Service::startPollGuestAdbdThread() {
-    auto expectedState = kAdbdPollingThreadIdle;
-    if (mGuestAdbdPollingThreadState.compare_exchange_strong(expectedState,
-                                                             kAdbdPollingThreadRunning)) {
-        mGuestAdbdPollingThread = std::thread(
-            &AdbVsockPipe::Service::pollGuestAdbdThreadLoop, this);
-    }
-}
-
-void AdbVsockPipe::Service::stopPollGuestAdbdThread(const int newState) {
-    int expectedState = kAdbdPollingThreadRunning;
-
-    while (expectedState != newState) {
-        switch (expectedState) {
-        case kAdbdPollingThreadRunning:
-            if (mGuestAdbdPollingThreadState.compare_exchange_strong(expectedState, newState)) {
-                mHostAgent->stopListening();
-                mGuestAdbdPollingThread.join();
-                return;
-            }
-            break;
-
-        case kAdbdPollingThreadIdle:
-            if (mGuestAdbdPollingThreadState.compare_exchange_strong(expectedState, newState)) {
-                return;
-            }
-            break;
-
-        case kAdbdPollingThreadDisabled:
-            return;
-
-        default:
-            ::crashhandler_die("%s:%d: unexpected adbd polling thread state: %d",
-                               __func__, __LINE__, expectedState);
-            break;
-        }
-    }
-}
-
-bool AdbVsockPipe::Service::checkIfGuestAdbdAlive() {
-    struct PollVsockHostCallbacks : public IVsockHostCallbacks {
-        ~PollVsockHostCallbacks() override {
+    struct AdbdAliveCallbacks : public IVsockHostCallbacks {
+        ~AdbdAliveCallbacks() override {
             if (streamKey) {
                 (*g_vsock_ops->close)(streamKey);
             }
@@ -338,21 +309,100 @@ bool AdbVsockPipe::Service::checkIfGuestAdbdAlive() {
         }
 
         void onReceive(const void *data, size_t size) override {}
-        void onClose() override {}
 
-        bool waitConnected(const std::chrono::milliseconds timeout) {
-            return isConnected.get_future().wait_for(timeout) == std::future_status::ready;
+        void onClose() override {
+            streamKey = 0;
         }
 
-        uint64_t streamKey = 0;
+        bool connect(const std::chrono::milliseconds timeout) {
+            if (streamKey) {
+                ::crashhandler_die("%s:%d: streamKey is not closed", __func__, __LINE__);
+            }
+
+            isConnected = decltype(isConnected)();
+            const uint64_t key = (*g_vsock_ops->open)(kGuestAdbdPort, this);
+            if (key) {
+                if (isConnected.get_future().wait_for(timeout) == std::future_status::ready) {
+                    streamKey = key;
+                    return true;
+                } else {
+                    (*g_vsock_ops->close)(key);
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        bool ping() {
+            if (streamKey) {
+                if ((*g_vsock_ops->ping)(streamKey)) {
+                    return true;
+                } else {
+                    streamKey = 0;
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        std::atomic<uint64_t> streamKey = 0;
         std::promise<void> isConnected;
     };
 
-    PollVsockHostCallbacks callbacks;
-    callbacks.streamKey = (*g_vsock_ops->open)(kGuestAdbdPort, &callbacks);
+    enum class State { NotAlive, Alive, Retrying };
 
-    using namespace std::chrono_literals;
-    return callbacks.streamKey && callbacks.waitConnected(100ms);
+    AdbdAliveCallbacks adbdAliveCallbacks;
+    State state = State::NotAlive;
+
+    while (mGuestAdbdPollingThreadRunning) {
+        using namespace std::chrono_literals;
+
+        switch (state) {
+
+        case State::NotAlive:
+            if (adbdAliveCallbacks.connect(100ms)) {
+
+                mHostAgent->startListening();
+                mHostAgent->notifyServer();
+                state = State::Alive;
+            }
+            break;
+
+        case State::Alive:
+            if (adbdAliveCallbacks.ping()) {
+                bool needNotifyAdbServer;
+
+                {
+                    std::lock_guard<std::mutex> guard(mPipesMtx);
+                    needNotifyAdbServer = mPipes.empty();
+                }
+
+                if (needNotifyAdbServer) {
+                    mHostAgent->notifyServer();
+                }
+            } else {
+                state = State::Retrying;
+            }
+            break;
+
+        case State::Retrying:
+            if (adbdAliveCallbacks.connect(100ms)) {
+                state = State::Alive;
+            } else {
+                mHostAgent->stopListening();
+                state = State::NotAlive;
+            }
+            break;
+        }
+
+        std::this_thread::sleep_for(500ms);
+    }
+
+    if (state != State::NotAlive) {
+        mHostAgent->stopListening();
+    }
 }
 
 void AdbVsockPipe::Service::resetActiveGuestPipeConnection() {
@@ -445,9 +495,16 @@ AdbVsockPipe::AdbVsockPipe(AdbVsockPipe::Service *service,
 }
 
 AdbVsockPipe::~AdbVsockPipe() {
+<<<<<<< HEAD   (f97d82 Merge "Merge cherrypicks of [1676350, 1676351] into emu-30-r)
     mVsockCallbacks.close();
     processProxyEventBits(Proxy::EventBits::DontWantRead |
                           Proxy::EventBits::DontWantWrite);
+=======
+    if (mSocketWatcher) {
+        mSocketWatcher->dontWantWrite();
+        mSocketWatcher->dontWantRead();
+    }
+>>>>>>> BRANCH (a73bfe Merge "c2-codecs: use display sizes when rendering to surfac)
 }
 
 std::unique_ptr<AdbVsockPipe> AdbVsockPipe::create(AdbVsockPipe::Service *service,
@@ -475,7 +532,20 @@ void AdbVsockPipe::onGuestClose() {
 }
 
 void AdbVsockPipe::processProxyEventBits(const Proxy::EventBits bits) {
+<<<<<<< HEAD   (f97d82 Merge "Merge cherrypicks of [1676350, 1676351] into emu-30-r)
     if (nonzero(bits & Proxy::EventBits::CloseSocket)) {
+=======
+    if (nonzero(bits & (Proxy::EventBits::HostClosed | Proxy::EventBits::GuestClosed))) {
+        if (nonzero(bits & Proxy::EventBits::GuestClosed)) {
+            mVsockCallbacks.reset();
+        }
+
+        if (nonzero(bits & Proxy::EventBits::HostClosed)) {
+            mSocketWatcher->dontWantWrite();
+            mSocketWatcher->dontWantRead();
+        }
+
+>>>>>>> BRANCH (a73bfe Merge "c2-codecs: use display sizes when rendering to surfac)
         mService->destroyPipe(this);
     } else if (mSocketWatcher) {
         if (nonzero(bits & Proxy::EventBits::WantWrite)) {

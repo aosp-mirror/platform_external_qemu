@@ -12918,10 +12918,10 @@ void transform_fromhost_VkMetalSurfaceCreateInfoEXT(
 }
 
 #endif
-#ifdef VK_GOOGLE_color_buffer
-void transform_tohost_VkImportColorBufferGOOGLE(
+#ifdef VK_EXT_fragment_density_map
+void transform_tohost_VkPhysicalDeviceFragmentDensityMapFeaturesEXT(
     VkDecoderGlobalState* resourceTracker,
-    VkImportColorBufferGOOGLE* toTransform)
+    VkPhysicalDeviceFragmentDensityMapFeaturesEXT* toTransform)
 {
     (void)resourceTracker;
     (void)toTransform;
@@ -12931,9 +12931,9 @@ void transform_tohost_VkImportColorBufferGOOGLE(
     }
 }
 
-void transform_fromhost_VkImportColorBufferGOOGLE(
+void transform_fromhost_VkPhysicalDeviceFragmentDensityMapFeaturesEXT(
     VkDecoderGlobalState* resourceTracker,
-    VkImportColorBufferGOOGLE* toTransform)
+    VkPhysicalDeviceFragmentDensityMapFeaturesEXT* toTransform)
 {
     (void)resourceTracker;
     (void)toTransform;
@@ -12943,9 +12943,9 @@ void transform_fromhost_VkImportColorBufferGOOGLE(
     }
 }
 
-void transform_tohost_VkImportBufferGOOGLE(
+void transform_tohost_VkPhysicalDeviceFragmentDensityMapPropertiesEXT(
     VkDecoderGlobalState* resourceTracker,
-    VkImportBufferGOOGLE* toTransform)
+    VkPhysicalDeviceFragmentDensityMapPropertiesEXT* toTransform)
 {
     (void)resourceTracker;
     (void)toTransform;
@@ -12953,11 +12953,13 @@ void transform_tohost_VkImportBufferGOOGLE(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
+    transform_tohost_VkExtent2D(resourceTracker, (VkExtent2D*)(&toTransform->minFragmentDensityTexelSize));
+    transform_tohost_VkExtent2D(resourceTracker, (VkExtent2D*)(&toTransform->maxFragmentDensityTexelSize));
 }
 
-void transform_fromhost_VkImportBufferGOOGLE(
+void transform_fromhost_VkPhysicalDeviceFragmentDensityMapPropertiesEXT(
     VkDecoderGlobalState* resourceTracker,
-    VkImportBufferGOOGLE* toTransform)
+    VkPhysicalDeviceFragmentDensityMapPropertiesEXT* toTransform)
 {
     (void)resourceTracker;
     (void)toTransform;
@@ -12965,11 +12967,13 @@ void transform_fromhost_VkImportBufferGOOGLE(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
+    transform_fromhost_VkExtent2D(resourceTracker, (VkExtent2D*)(&toTransform->minFragmentDensityTexelSize));
+    transform_fromhost_VkExtent2D(resourceTracker, (VkExtent2D*)(&toTransform->maxFragmentDensityTexelSize));
 }
 
-void transform_tohost_VkImportPhysicalAddressGOOGLE(
+void transform_tohost_VkRenderPassFragmentDensityMapCreateInfoEXT(
     VkDecoderGlobalState* resourceTracker,
-    VkImportPhysicalAddressGOOGLE* toTransform)
+    VkRenderPassFragmentDensityMapCreateInfoEXT* toTransform)
 {
     (void)resourceTracker;
     (void)toTransform;
@@ -12977,11 +12981,12 @@ void transform_tohost_VkImportPhysicalAddressGOOGLE(
     {
         transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
+    transform_tohost_VkAttachmentReference(resourceTracker, (VkAttachmentReference*)(&toTransform->fragmentDensityMapAttachment));
 }
 
-void transform_fromhost_VkImportPhysicalAddressGOOGLE(
+void transform_fromhost_VkRenderPassFragmentDensityMapCreateInfoEXT(
     VkDecoderGlobalState* resourceTracker,
-    VkImportPhysicalAddressGOOGLE* toTransform)
+    VkRenderPassFragmentDensityMapCreateInfoEXT* toTransform)
 {
     (void)resourceTracker;
     (void)toTransform;
@@ -12989,6 +12994,7 @@ void transform_fromhost_VkImportPhysicalAddressGOOGLE(
     {
         transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
     }
+    transform_fromhost_VkAttachmentReference(resourceTracker, (VkAttachmentReference*)(&toTransform->fragmentDensityMapAttachment));
 }
 
 #endif
@@ -14891,6 +14897,78 @@ void transform_fromhost_VkDirectFBSurfaceCreateInfoEXT(
 
 #endif
 #ifdef VK_GOOGLE_gfxstream
+void transform_tohost_VkImportColorBufferGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportColorBufferGOOGLE* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_fromhost_VkImportColorBufferGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportColorBufferGOOGLE* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_tohost_VkImportBufferGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportBufferGOOGLE* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_fromhost_VkImportBufferGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportBufferGOOGLE* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_tohost_VkImportPhysicalAddressGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportPhysicalAddressGOOGLE* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_tohost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
+void transform_fromhost_VkImportPhysicalAddressGOOGLE(
+    VkDecoderGlobalState* resourceTracker,
+    VkImportPhysicalAddressGOOGLE* toTransform)
+{
+    (void)resourceTracker;
+    (void)toTransform;
+    if (toTransform->pNext)
+    {
+        transform_fromhost_extension_struct(resourceTracker, (void*)(toTransform->pNext));
+    }
+}
+
 #endif
 #ifdef VK_KHR_acceleration_structure
 void transform_tohost_VkDeviceOrHostAddressKHR(
@@ -16758,20 +16836,20 @@ void transform_tohost_extension_struct(
             break;
         }
 #endif
-#ifdef VK_GOOGLE_color_buffer
-        case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
+#ifdef VK_EXT_fragment_density_map
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_FEATURES_EXT:
         {
-            transform_tohost_VkImportColorBufferGOOGLE(resourceTracker, reinterpret_cast<VkImportColorBufferGOOGLE*>(structExtension_out));
+            transform_tohost_VkPhysicalDeviceFragmentDensityMapFeaturesEXT(resourceTracker, reinterpret_cast<VkPhysicalDeviceFragmentDensityMapFeaturesEXT*>(structExtension_out));
             break;
         }
-        case VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_PROPERTIES_EXT:
         {
-            transform_tohost_VkImportBufferGOOGLE(resourceTracker, reinterpret_cast<VkImportBufferGOOGLE*>(structExtension_out));
+            transform_tohost_VkPhysicalDeviceFragmentDensityMapPropertiesEXT(resourceTracker, reinterpret_cast<VkPhysicalDeviceFragmentDensityMapPropertiesEXT*>(structExtension_out));
             break;
         }
-        case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
+        case VK_STRUCTURE_TYPE_RENDER_PASS_FRAGMENT_DENSITY_MAP_CREATE_INFO_EXT:
         {
-            transform_tohost_VkImportPhysicalAddressGOOGLE(resourceTracker, reinterpret_cast<VkImportPhysicalAddressGOOGLE*>(structExtension_out));
+            transform_tohost_VkRenderPassFragmentDensityMapCreateInfoEXT(resourceTracker, reinterpret_cast<VkRenderPassFragmentDensityMapCreateInfoEXT*>(structExtension_out));
             break;
         }
 #endif
@@ -17118,6 +17196,23 @@ void transform_tohost_extension_struct(
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_4444_FORMATS_FEATURES_EXT:
         {
             transform_tohost_VkPhysicalDevice4444FormatsFeaturesEXT(resourceTracker, reinterpret_cast<VkPhysicalDevice4444FormatsFeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_GOOGLE_gfxstream
+        case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
+        {
+            transform_tohost_VkImportColorBufferGOOGLE(resourceTracker, reinterpret_cast<VkImportColorBufferGOOGLE*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE:
+        {
+            transform_tohost_VkImportBufferGOOGLE(resourceTracker, reinterpret_cast<VkImportBufferGOOGLE*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
+        {
+            transform_tohost_VkImportPhysicalAddressGOOGLE(resourceTracker, reinterpret_cast<VkImportPhysicalAddressGOOGLE*>(structExtension_out));
             break;
         }
 #endif
@@ -18316,20 +18411,20 @@ void transform_fromhost_extension_struct(
             break;
         }
 #endif
-#ifdef VK_GOOGLE_color_buffer
-        case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
+#ifdef VK_EXT_fragment_density_map
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_FEATURES_EXT:
         {
-            transform_fromhost_VkImportColorBufferGOOGLE(resourceTracker, reinterpret_cast<VkImportColorBufferGOOGLE*>(structExtension_out));
+            transform_fromhost_VkPhysicalDeviceFragmentDensityMapFeaturesEXT(resourceTracker, reinterpret_cast<VkPhysicalDeviceFragmentDensityMapFeaturesEXT*>(structExtension_out));
             break;
         }
-        case VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_PROPERTIES_EXT:
         {
-            transform_fromhost_VkImportBufferGOOGLE(resourceTracker, reinterpret_cast<VkImportBufferGOOGLE*>(structExtension_out));
+            transform_fromhost_VkPhysicalDeviceFragmentDensityMapPropertiesEXT(resourceTracker, reinterpret_cast<VkPhysicalDeviceFragmentDensityMapPropertiesEXT*>(structExtension_out));
             break;
         }
-        case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
+        case VK_STRUCTURE_TYPE_RENDER_PASS_FRAGMENT_DENSITY_MAP_CREATE_INFO_EXT:
         {
-            transform_fromhost_VkImportPhysicalAddressGOOGLE(resourceTracker, reinterpret_cast<VkImportPhysicalAddressGOOGLE*>(structExtension_out));
+            transform_fromhost_VkRenderPassFragmentDensityMapCreateInfoEXT(resourceTracker, reinterpret_cast<VkRenderPassFragmentDensityMapCreateInfoEXT*>(structExtension_out));
             break;
         }
 #endif
@@ -18676,6 +18771,23 @@ void transform_fromhost_extension_struct(
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_4444_FORMATS_FEATURES_EXT:
         {
             transform_fromhost_VkPhysicalDevice4444FormatsFeaturesEXT(resourceTracker, reinterpret_cast<VkPhysicalDevice4444FormatsFeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_GOOGLE_gfxstream
+        case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
+        {
+            transform_fromhost_VkImportColorBufferGOOGLE(resourceTracker, reinterpret_cast<VkImportColorBufferGOOGLE*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE:
+        {
+            transform_fromhost_VkImportBufferGOOGLE(resourceTracker, reinterpret_cast<VkImportBufferGOOGLE*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
+        {
+            transform_fromhost_VkImportPhysicalAddressGOOGLE(resourceTracker, reinterpret_cast<VkImportPhysicalAddressGOOGLE*>(structExtension_out));
             break;
         }
 #endif

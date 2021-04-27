@@ -358,7 +358,8 @@ private:
 
     void saveBlockLocked(
         base::Stream* stream,
-        const Block& block) {
+        const Block& block,
+        size_t size = ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE) {
 
         if (block.isEmpty) {
             stream->putBe32(0);
@@ -375,13 +376,18 @@ private:
 
         block.subAlloc->save(stream);
 
-        stream->putBe64(ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE);
-        stream->write(block.buffer, ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE);
+        if (block.dedicated) {
+            size = block.dedicatedSize;
+        }
+
+        stream->putBe64(size);
+        stream->write(block.buffer, size);
     }
 
     void loadBlockLocked(
         base::Stream* stream,
         Block& block) {
+
 
         uint32_t filled = stream->getBe32();
 
@@ -410,7 +416,7 @@ private:
         block.subAlloc->load(stream);
 
         stream->getBe64();
-        stream->read(block.buffer, ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE);
+        stream->read(block.buffer, block.dedicated ? block.dedicatedSize : ADDRESS_SPACE_GRAPHICS_BLOCK_SIZE);
     }
 
     void fillAllocFromLoad(const Block& block, Allocation& alloc) {
@@ -752,6 +758,10 @@ bool AddressSpaceGraphicsContext::load(base::Stream* stream) {
     loadAllocation(stream, mRingAllocation, AllocType::AllocTypeRing);
     loadAllocation(stream, mBufferAllocation, AllocType::AllocTypeBuffer);
     loadAllocation(stream, mCombinedAllocation, AllocType::AllocTypeCombined);
+    if (mIsVirtio) {
+        mRingAllocation = sGlobals->allocRingViewIntoCombined(mCombinedAllocation);
+        mBufferAllocation = sGlobals->allocBufferViewIntoCombined(mCombinedAllocation);
+    }
 
     mHostContext = asg_context_create(
         mRingAllocation.buffer,

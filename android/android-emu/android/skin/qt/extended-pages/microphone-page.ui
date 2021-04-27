@@ -130,7 +130,7 @@
     </font>
    </property>
    <property name="text">
-    <string>VOICE ASSIST</string>
+    <string>Voice Assist</string>
    </property>
    <property name="flat">
     <bool>true</bool>
@@ -162,7 +162,7 @@
     </font>
    </property>
    <property name="text">
-    <string>HEADSET HOOK</string>
+    <string>Headset Hook</string>
    </property>
    <property name="flat">
     <bool>true</bool>

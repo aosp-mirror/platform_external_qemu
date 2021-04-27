@@ -91,7 +91,7 @@
       </font>
      </property>
      <property name="text">
-      <string>SET LOCATION</string>
+      <string>Set Location</string>
      </property>
      <property name="flat">
       <bool>true</bool>
@@ -191,7 +191,7 @@
       </font>
      </property>
      <property name="text">
-      <string>IMPORT GPX/KML</string>
+      <string>Import GPX/KML</string>
      </property>
      <property name="flat">
       <bool>true</bool>
@@ -235,7 +235,7 @@
       <enum>Qt::LeftToRight</enum>
      </property>
      <property name="text">
-      <string>PLAY ROUTE</string>
+      <string>Play Route</string>
      </property>
      <property name="icon">
       <iconset resource="../resources.qrc">
@@ -525,7 +525,7 @@
       </font>
      </property>
      <property name="text">
-      <string>IMPORT GPX/KML</string>
+      <string>Import GPX/KML</string>
      </property>
      <property name="flat">
       <bool>true</bool>
@@ -732,7 +732,7 @@
       </font>
      </property>
      <property name="text">
-      <string>SEND</string>
+      <string>Send</string>
      </property>
      <property name="flat">
       <bool>true</bool>
@@ -1101,7 +1101,7 @@
       </font>
      </property>
      <property name="text">
-      <string>LOAD GPX/KML</string>
+      <string>Load GPX/KML</string>
      </property>
      <property name="flat">
       <bool>true</bool>

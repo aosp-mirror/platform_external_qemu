@@ -120,7 +120,7 @@ bool FakeAvd::create() {
     // Write out the ini file.
     std::string ini =
             android::base::pj(ConfigDirs::getAvdRootDirectory(), name + ".ini");
-    std::ofstream iniFile(PathUtils::asUnicodePath(ini));
+    std::ofstream iniFile(PathUtils::asUnicodePath(ini).c_str());
     iniFile << "avd.ini.encoding=UTF-8" << std::endl;
     iniFile << "path=" << avdDir << std::endl;
     iniFile << "path.rel=" << android::base::pj("avd", name + ".avd")
@@ -135,7 +135,7 @@ bool FakeAvd::create() {
 
     // Write out pidfile, used to garbage collect leftover fakes.
     auto pidFilename = android::base::pj(avdDir, sPIDFILE);
-    std::ofstream pidFile(PathUtils::asUnicodePath(pidFilename));
+    std::ofstream pidFile(PathUtils::asUnicodePath(pidFilename).c_str());
     pidFile << "pid=" << System::get()->getCurrentProcessId() << std::endl;
     pidFile << "ini=" << ini << std::endl;
     if (pidFile.bad()) {

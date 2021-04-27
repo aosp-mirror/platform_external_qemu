@@ -603,9 +603,11 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
     GLuint globalFrameBufferName;
     bool isDefaultFBO = !framebuffer;
     if (isDefaultFBO) {
-       globalFrameBufferName = ctx->getDefaultFBOGlobalName();
-       ctx->dispatcher().glBindFramebuffer(target, globalFrameBufferName);
-       ctx->setFramebufferBinding(target, 0);
+        globalFrameBufferName = ctx->getDefaultFBOGlobalName();
+        if (!ctx->drawDisabled()) {
+            ctx->dispatcher().glBindFramebuffer(target, globalFrameBufferName);
+        }
+        ctx->setFramebufferBinding(target, 0);
     } else {
         globalFrameBufferName = framebuffer;
         if(framebuffer){
@@ -622,7 +624,9 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
             auto fbObj = ctx->getFBOData(framebuffer);
             fbObj->setBoundAtLeastOnce();
         }
-        ctx->dispatcher().glBindFramebuffer(target,globalFrameBufferName);
+        if (!ctx->drawDisabled()) {
+            ctx->dispatcher().glBindFramebuffer(target,globalFrameBufferName);
+        }
         ctx->setFramebufferBinding(target, framebuffer);
     }
 
@@ -654,7 +658,9 @@ GL_APICALL void  GL_APIENTRY glBindRenderbuffer(GLenum target, GLuint renderbuff
             if (rboData) rboData->everBound = true;
         }
     }
-    ctx->dispatcher().glBindRenderbuffer(target,globalRenderBufferName);
+    if (!ctx->drawDisabled()) {
+        ctx->dispatcher().glBindRenderbuffer(target,globalRenderBufferName);
+    }
 
     // update renderbuffer binding state
     ctx->setRenderbufferBinding(renderbuffer);
@@ -1223,11 +1229,13 @@ GL_APICALL void  GL_APIENTRY glDeleteFramebuffers(GLsizei n, const GLuint* frame
     GET_CTX_V2();
     SET_ERROR_IF(n < 0, GL_INVALID_VALUE);
     for (int i = 0; i < n; i++) {
-        if (ctx->getFramebufferBinding(GL_FRAMEBUFFER) == framebuffers[i]) {
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        }
-        else if (ctx->getFramebufferBinding(GL_READ_FRAMEBUFFER) == framebuffers[i]) {
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+        if (!ctx->drawDisabled()) {
+            if (ctx->getFramebufferBinding(GL_FRAMEBUFFER) == framebuffers[i]) {
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            }
+            else if (ctx->getFramebufferBinding(GL_READ_FRAMEBUFFER) == framebuffers[i]) {
+                glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+            }
         }
         ctx->deleteFBO(framebuffers[i]);
     }
@@ -3311,7 +3319,9 @@ GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum interna
     GLint err = GL_NO_ERROR;
     internalformat = sPrepareRenderbufferStorage(internalformat, width, height, 0, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
-    ctx->dispatcher().glRenderbufferStorage(target,internalformat,width,height);
+    if (!ctx->drawDisabled()) {
+        ctx->dispatcher().glRenderbufferStorage(target,internalformat,width,height);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glSampleCoverage(GLclampf value, GLboolean invert){
@@ -4084,6 +4094,7 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
     if (rbData->attachedFB) {
         // update the framebuffer attachment point to the
         // underlying texture of the img
+<<<<<<< HEAD   (f97d82 Merge "Merge cherrypicks of [1676350, 1676351] into emu-30-r)
         GLuint prevFB = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
         if (prevFB != rbData->attachedFB) {
             ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER_EXT,
@@ -4097,6 +4108,24 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
         if (prevFB != rbData->attachedFB) {
             ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER_EXT,
                                                    prevFB);
+=======
+        if (!ctx->drawDisabled()) {
+            GLuint prevFB = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
+            if (prevFB != rbData->attachedFB) {
+                ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER_EXT,
+                                                    rbData->attachedFB);
+            }
+
+            ctx->dispatcher().glFramebufferTexture2D(GL_FRAMEBUFFER_EXT,
+                                                        rbData->attachedPoint,
+                                                        GL_TEXTURE_2D,
+                                                        img->globalTexObj->getGlobalName(),
+                                                        0);
+            if (prevFB != rbData->attachedFB) {
+                ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER_EXT,
+                                                    prevFB);
+            }
+>>>>>>> BRANCH (a73bfe Merge "c2-codecs: use display sizes when rendering to surfac)
         }
     }
 }

@@ -76,6 +76,8 @@ public:
 
     void* context() const { return mContext; }
 
+    virtual void* lowLevelContext() { return nsGetLowLevelContext(mContext); }
+
     static void* from(EglOS::Context* c) {
         return static_cast<MacContext*>(c)->context();
     }
@@ -181,6 +183,7 @@ void pixelFormatToConfig(int index,
 
 
 class MacDisplay : public EglOS::Display {
+
 public:
     explicit MacDisplay(EGLNativeDisplayType dpy) : mDpy(dpy) {}
 
