@@ -626,6 +626,9 @@ GL_APICALL void GL_APIENTRY glReadBuffer(GLenum src) {
     // if default fbo is bound and src is GL_BACK,
     // use GL_COLOR_ATTACHMENT0 all of a sudden.
     // bc we are using fbo emulation.
+    if (ctx->drawDisabled()) {
+        return;
+    }
     if (ctx->isDefaultFBOBound(GL_READ_FRAMEBUFFER)) {
         SET_ERROR_IF(src != GL_NONE && src != GL_BACK, GL_INVALID_OPERATION);
         GLenum emulatedSrc = src == GL_NONE ? GL_NONE
@@ -643,6 +646,9 @@ GL_APICALL void GL_APIENTRY glReadBuffer(GLenum src) {
 GL_APICALL void GL_APIENTRY glBlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) {
     GET_CTX_V2();
     gles30usages->set_is_used(true);
+    if (ctx->drawDisabled()) {
+        return;
+    }
     ctx->dispatcher().glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
 }
 
@@ -670,6 +676,9 @@ GL_APICALL void GL_APIENTRY glInvalidateFramebuffer(GLenum target, GLsizei numAt
     SET_ERROR_IF(target != GL_FRAMEBUFFER &&
                  target != GL_READ_FRAMEBUFFER &&
                  target != GL_DRAW_FRAMEBUFFER, GL_INVALID_ENUM);
+    if (ctx->drawDisabled()) {
+        return;
+    }
 
     GLint maxColorAttachments;
     glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &maxColorAttachments);
@@ -696,6 +705,9 @@ GL_APICALL void GL_APIENTRY glInvalidateSubFramebuffer(GLenum target, GLsizei nu
     SET_ERROR_IF(target != GL_FRAMEBUFFER &&
             target != GL_READ_FRAMEBUFFER &&
             target != GL_DRAW_FRAMEBUFFER, GL_INVALID_ENUM);
+    if (ctx->drawDisabled()) {
+        return;
+    }
 
     GLint maxColorAttachments;
     glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &maxColorAttachments);
@@ -731,7 +743,7 @@ GL_APICALL void GL_APIENTRY glFramebufferTextureLayer(GLenum target, GLenum atta
         TextureData* texData = getTextureData(texture);
         textarget = texData->target;
     }
-    if (ctx->shareGroup().get()) {
+    if (ctx->shareGroup().get() && !ctx->drawDisabled()) {
         const GLuint globalTextureName = ctx->shareGroup()->getGlobalName(NamedObjectType::TEXTURE, texture);
         ctx->dispatcher().glFramebufferTextureLayer(target, attachment, globalTextureName, level, layer);
     }
@@ -749,6 +761,9 @@ GL_APICALL void GL_APIENTRY glRenderbufferStorageMultisample(GLenum target, GLsi
     GET_CTX_V2();
     gles30usages->set_is_used(true);
     gles30usages->set_renderbuffer_storage_multisample(true);
+    if (ctx->drawDisabled()) {
+        return;
+    }
     GLint err = GL_NO_ERROR;
     internalformat = sPrepareRenderbufferStorage(internalformat, width, height, samples, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
@@ -762,6 +777,9 @@ GL_APICALL void GL_APIENTRY glGetInternalformativ(GLenum target, GLenum internal
 
 GL_APICALL void GL_APIENTRY glTexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height) {
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     gles30usages->set_is_used(true);
     GLint err = GL_NO_ERROR;
     GLenum format, type;
@@ -1079,6 +1097,9 @@ GL_APICALL void GL_APIENTRY glGetInteger64i_v(GLenum target, GLuint index, GLint
 
 GL_APICALL void GL_APIENTRY glTexImage3D(GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid * data) {
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     gles30usages->set_is_used(true);
     SET_ERROR_IF(!GLESv2Validate::pixelItnlFrmt(ctx,internalFormat), GL_INVALID_VALUE);
     SET_ERROR_IF(!GLESv2Validate::isCompressedFormat(internalFormat) &&
@@ -1105,6 +1126,9 @@ GL_APICALL void GL_APIENTRY glTexImage3D(GLenum target, GLint level, GLint inter
 
 GL_APICALL void GL_APIENTRY glTexStorage3D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth) {
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     gles30usages->set_is_used(true);
     GLenum format, type;
     GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalformat, &format, &type);
@@ -1122,6 +1146,9 @@ GL_APICALL void GL_APIENTRY glTexStorage3D(GLenum target, GLsizei levels, GLenum
 
 GL_APICALL void GL_APIENTRY glTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid * data) {
     GET_CTX_V2();
+    if (ctx->drawDisabled()) {
+        return;
+    }
     gles30usages->set_is_used(true);
     if (isCoreProfile() &&
         isCoreProfileEmulatedFormat(format)) {

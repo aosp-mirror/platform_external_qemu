@@ -20,13 +20,15 @@ from .common.vulkantypes import \
         VulkanAPI, makeVulkanTypeSimple, iterateVulkanType, VulkanTypeIterator, Atom, FuncExpr, FuncExprVal, FuncLambda
 
 from .wrapperdefs import VulkanWrapperGenerator
-from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE, EXTENSION_SIZE_API_NAME, EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME
+from .wrapperdefs import ROOT_TYPE_VAR_NAME, ROOT_TYPE_PARAM
+from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE, EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME
 
 class VulkanCountingCodegen(VulkanTypeIterator):
-    def __init__(self, cgen, featureBitsVar, toCountVar, countVar, prefix, forApiOutput = False, mapHandles = True, handleMapOverwrites = False, doFiltering = True):
+    def __init__(self, cgen, featureBitsVar, toCountVar, countVar, rootTypeVar, prefix, forApiOutput=False, mapHandles=True, handleMapOverwrites=False, doFiltering=True):
         self.cgen = cgen
         self.featureBitsVar = featureBitsVar
         self.toCountVar = toCountVar
+        self.rootTypeVar = rootTypeVar
         self.countVar = countVar
         self.prefix = prefix
         self.forApiOutput = forApiOutput
@@ -353,7 +355,8 @@ class VulkanCountingCodegen(VulkanTypeIterator):
         accessWithCast = "%s(%s)" % (self.makeCastExpr(
             self.getTypeForStreaming(vulkanType)), access)
 
-        callParams = [self.featureBitsVar, accessWithCast, self.countVar]
+        callParams = [self.featureBitsVar,
+                      self.rootTypeVar, accessWithCast, self.countVar]
 
         for (bindName, localName) in vulkanType.binds.items():
             callParams.append(self.getEnvAccessExpr(localName))
@@ -400,13 +403,22 @@ class VulkanCountingCodegen(VulkanTypeIterator):
         self.genCount(finalLenExpr)
 
     def onStructExtension(self, vulkanType):
+        sTypeParam = copy(vulkanType)
+        sTypeParam.paramName = "sType"
+
         access = self.exprAccessor(vulkanType)
         sizeVar = "%s_size" % vulkanType.paramName
 
         castedAccessExpr = access
 
+        sTypeAccess = self.exprAccessor(sTypeParam)
+        self.cgen.beginIf("%s == VK_STRUCTURE_TYPE_MAX_ENUM" %
+                          self.rootTypeVar)
+        self.cgen.stmt("%s = %s" % (self.rootTypeVar, sTypeAccess))
+        self.cgen.endIf()
+
         self.cgen.funcCall(None, self.prefix + "extension_struct",
-            [self.featureBitsVar, castedAccessExpr, self.countVar])
+                           [self.featureBitsVar, self.rootTypeVar, castedAccessExpr, self.countVar])
 
 
     def onPointer(self, vulkanType):
@@ -496,6 +508,7 @@ class VulkanCounting(VulkanWrapperGenerator):
         self.countVars = ["toCount", "count"]
         self.countVarType = makeVulkanTypeSimple(False, "size_t", 1, self.countVars[1])
         self.voidType = makeVulkanTypeSimple(False, "void", 0)
+        self.rootTypeVar = ROOT_TYPE_VAR_NAME
 
         self.countingCodegen = \
             VulkanCountingCodegen(
@@ -503,6 +516,7 @@ class VulkanCounting(VulkanWrapperGenerator):
                 self.featureBitsVar,
                 self.countVars[0],
                 self.countVars[1],
+                self.rootTypeVar,
                 self.countingPrefix)
 
         self.knownDefs = {}
@@ -511,6 +525,7 @@ class VulkanCounting(VulkanWrapperGenerator):
             VulkanAPI(self.countingPrefix + "extension_struct",
                       self.voidType,
                       [self.featureBitsVarType,
+                       ROOT_TYPE_PARAM,
                        STRUCT_EXTENSION_PARAM,
                        self.countVarType])
 
@@ -553,6 +568,7 @@ class VulkanCounting(VulkanWrapperGenerator):
 
             countingParams = \
                 [makeVulkanTypeSimple(False, "uint32_t", 0, self.featureBitsVar),
+                 ROOT_TYPE_PARAM,
                  typeFromName(self.countVars[0]),
                  makeVulkanTypeSimple(False, "size_t", 1, self.countVars[1])]
 
@@ -570,6 +586,7 @@ class VulkanCounting(VulkanWrapperGenerator):
                 self.countingCodegen.cgen = cgen
                 self.countingCodegen.currentStructInfo = structInfo
                 cgen.stmt("(void)%s" % self.featureBitsVar);
+                cgen.stmt("(void)%s" % self.rootTypeVar);
                 cgen.stmt("(void)%s" % self.countVars[0]);
                 cgen.stmt("(void)%s" % self.countVars[1]);
 
@@ -588,6 +605,7 @@ class VulkanCounting(VulkanWrapperGenerator):
                 self.countingCodegen.currentStructInfo = structInfo
                 self.countingCodegen.doFiltering = False
                 cgen.stmt("(void)%s" % self.featureBitsVar);
+                cgen.stmt("(void)%s" % self.rootTypeVar);
                 cgen.stmt("(void)%s" % self.countVars[0]);
                 cgen.stmt("(void)%s" % self.countVars[1]);
 
@@ -622,12 +640,14 @@ class VulkanCounting(VulkanWrapperGenerator):
         accessVar = "structAccess"
         sizeVar = "currExtSize"
         cgen.stmt("VkInstanceCreateInfo* %s = (VkInstanceCreateInfo*)(%s)" % (accessVar, extParam.paramName))
-        cgen.stmt("size_t %s = %s(%s, %s)" % (sizeVar, EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME, self.featureBitsVar, extParam.paramName))
+        cgen.stmt("size_t %s = %s(%s, %s, %s)" % (sizeVar, EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME,
+                                                  self.featureBitsVar, ROOT_TYPE_VAR_NAME, extParam.paramName))
 
         cgen.beginIf("!%s && %s" % (sizeVar, extParam.paramName))
 
         cgen.line("// unknown struct extension; skip and call on its pNext field");
-        cgen.funcCall(None, funcproto.name, [self.featureBitsVar, "(void*)%s->pNext" % accessVar, self.countVars[1]])
+        cgen.funcCall(None, funcproto.name, [
+                      self.featureBitsVar, ROOT_TYPE_VAR_NAME, "(void*)%s->pNext" % accessVar, self.countVars[1]])
         cgen.stmt("return")
 
         cgen.endIf()
@@ -656,14 +676,15 @@ class VulkanCounting(VulkanWrapperGenerator):
             makeVulkanTypeSimple(False, "void", 0, "void"),
             extParam,
             forEach,
-            defaultEmit=fatalDefault)
+            defaultEmit=fatalDefault,
+            rootTypeVar=ROOT_TYPE_PARAM)
 
     def onEnd(self,):
         VulkanWrapperGenerator.onEnd(self)
 
         def forEachExtensionCounting(ext, castedAccess, cgen):
             cgen.funcCall(None, self.countingPrefix + ext.name,
-                          [self.featureBitsVar, castedAccess, self.countVars[1]])
+                          [self.featureBitsVar, self.rootTypeVar, castedAccess, self.countVars[1]])
 
         self.module.appendImpl(
             self.codegen.makeFuncImpl(

@@ -52,11 +52,6 @@ public:
     // |quotes| add quotes to parameters when there is a space
     std::string toString(bool quotes = true) const;
 
-    // A variant of toString() that returns instead a heap-allocated C string
-    // that must be free-d by the caller.
-    // |quotes| add quotes to parameters when there is a space
-    char* toCStringCopy(bool quotes = true) const;
-
     // Adds a set of parameters to the list.
     void add(const ParameterList& other);
 

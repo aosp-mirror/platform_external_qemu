@@ -15,6 +15,12 @@
 #include "android/telephony/modem_driver.h"
 #include "android-qemu2-glue/utils/stream.h"
 
+#ifdef AEMU_GFXSTREAM_BACKEND
+#include "android/android_modem_v2_stubs.h"
+#else
+#include "android_modem_v2.h"
+#endif
+
 #include "qemu/osdep.h"
 #include "hw/hw.h"
 
@@ -26,7 +32,7 @@ extern int sim_is_present();
 static void modem_state_save(QEMUFile* file, void* opaque)
 {
     Stream* const s = stream_from_qemufile(file);
-    amodem_state_save((AModem)opaque, (SysFile*)s);
+    amodem_state_save_vx((AModem)opaque, (SysFile*)s);
     stream_free(s);
     if (android_snapshot_update_timer) {
         android_modem_driver_send_nitz_now();
@@ -36,7 +42,8 @@ static void modem_state_save(QEMUFile* file, void* opaque)
 static int modem_state_load(QEMUFile* file, void* opaque, int version_id)
 {
     Stream* const s = stream_from_qemufile(file);
-    const int res = amodem_state_load((AModem)opaque, (SysFile*)s, version_id);
+    const int res =
+            amodem_state_load_vx((AModem)opaque, (SysFile*)s, version_id);
     stream_free(s);
     if (android_snapshot_update_timer) {
         android_modem_driver_send_nitz_now();

@@ -100,5 +100,16 @@ void GrpcAudioSource::ConsumeAudioPacket(const AudioPacket& audio_packet) {
 
 GrpcAudioSource::~GrpcAudioSource() {}
 
+const cricket::AudioOptions GrpcAudioSource::options() const {
+    cricket::AudioOptions options;
+    options.echo_cancellation = false;
+    options.auto_gain_control = false;
+    options.noise_suppression = false;
+    options.highpass_filter = false;
+    options.typing_detection = false;
+    options.residual_echo_detector = false;
+    return options;
+}
+
 }  // namespace webrtc
 }  // namespace emulator

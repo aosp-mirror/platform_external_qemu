@@ -1701,6 +1701,15 @@ help_screen(stralloc_t* out)
     );
 }
 
+static void help_gnss_file_path(stralloc_t* out) {
+    PRINTF(" Use -gnss-file-path <path>  to set the gnss file path.\n\n");
+}
+
+static void help_gnss_grpc_port(stralloc_t* out) {
+    PRINTF(" Use -gnss-grpc-port <port>  to set the gnss grpc port "
+           "number.\n\n");
+}
+
 static void
 help_selinux(stralloc_t* out)
 {
@@ -1946,6 +1955,17 @@ static void help_no_mouse_reposition(stralloc_t* out) {
            "  pointer gets out of the window.\n"
            "  Enable this if experiencing mouse issues on remote desktops\n"
            "  like VNC or Chrome remote desktop.\n");
+}
+
+
+static void help_experimental_enable_multidisplay(stralloc_t* out) {
+    PRINTF(" Enables the multidisplay api for the embedded emulator.\n"
+           " This is an experimental feature, this flag will disappear\n"
+           " in future releases without any notice.\n");
+}
+
+static void help_guest_angle(stralloc_t* out) {
+    PRINTF(" Enables ANGLE as the guest system GLES driver, using Vulkan to render on the host.\n");
 }
 
 #define  help_no_skin   NULL

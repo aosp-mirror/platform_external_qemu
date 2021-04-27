@@ -19,11 +19,28 @@
 static inline int amodem_add_inbound_call_vx(AModem modem, const char* args) { return 0; }
 static inline void amodem_set_signal_strength_profile_vx(AModem modem, int quality) { }
 static inline void amodem_receive_sms_vx(AModem modem, SmsPDU sms) { }
+extern ACall amodem_find_call_by_number_vx(AModem modem, const char* args) {
+    return NULL;
+}
 static inline int amodem_disconnect_call_vx(AModem modem, const char* args) { return 0; }
 static inline int amodem_update_call_vx(AModem modem, const char* args, int state) { return 0; }
 static inline void amodem_set_data_registration_vx(AModem modem, ARegistrationState state) { }
 static inline void amodem_set_voice_registration_vx(AModem modem, ARegistrationState state) { }
 static inline void amodem_set_data_network_type_vx(AModem modem, ADataNetworkType type) { }
+static ARegistrationState amodem_get_data_registration_vx(AModem modem) {
+    return A_REGISTRATION_HOME;
+}
+
+static inline void amodem_state_save_vx(AModem modem, SysFile* file) {}
+static inline int amodem_state_load_vx(AModem modem,
+                                       SysFile* file,
+                                       int version_id) {
+    return 0;
+}
+
+static ARegistrationState amodem_get_voice_registration_vx(AModem modem) {
+    return A_REGISTRATION_HOME;
+}
 static inline void amodem_set_notification_callback_vx(
         AModem modem,
         ModemCallback callbackFunc,

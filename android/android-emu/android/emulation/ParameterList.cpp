@@ -56,10 +56,6 @@ std::string ParameterList::toString(bool quotes) const {
   return result;
 }
 
-char* ParameterList::toCStringCopy(bool quotes) const {
-    return android::base::strDup(toString(quotes));
-}
-
 void ParameterList::add(const std::string& param) {
     mParams.push_back(param);
 }

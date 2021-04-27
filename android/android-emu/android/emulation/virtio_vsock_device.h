@@ -25,11 +25,13 @@ typedef uint64_t(*virtio_vsock_device_stream_open_t)(uint32_t guest_port,
                                                      IVsockHostCallbacks *callbacks);
 typedef size_t(*virtio_vsock_device_stream_send_t)(uint64_t key,
                                                    const void *data, size_t size);
+typedef bool(*virtio_vsock_device_stream_ping_t)(uint64_t key);
 typedef bool(*virtio_vsock_device_stream_close_t)(uint64_t key);
 
 struct virtio_vsock_device_ops_t {
     virtio_vsock_device_stream_open_t   open;
     virtio_vsock_device_stream_send_t   send;
+    virtio_vsock_device_stream_ping_t   ping;
     virtio_vsock_device_stream_close_t  close;
 };
 

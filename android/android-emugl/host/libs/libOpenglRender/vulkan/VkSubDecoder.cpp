@@ -46,7 +46,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkCommandBufferBeginInfo* pBeginInfo;
                 VkCommandBufferBeginInfo stack_pBeginInfo[1];
                 pBeginInfo = (VkCommandBufferBeginInfo*)stack_pBeginInfo;
-                reservedunmarshal_VkCommandBufferBeginInfo(readStream, (VkCommandBufferBeginInfo*)(pBeginInfo), readStreamPtrPtr);
+                reservedunmarshal_VkCommandBufferBeginInfo(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkCommandBufferBeginInfo*)(pBeginInfo), readStreamPtrPtr);
                 if (pBeginInfo)
                 {
                     transform_tohost_VkCommandBufferBeginInfo(globalstate, (VkCommandBufferBeginInfo*)(pBeginInfo));
@@ -111,7 +111,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((viewportCount)); ++i)
                 {
-                    reservedunmarshal_VkViewport(readStream, (VkViewport*)(pViewports + i), readStreamPtrPtr);
+                    reservedunmarshal_VkViewport(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkViewport*)(pViewports + i), readStreamPtrPtr);
                 }
                 if (pViewports)
                 {
@@ -145,7 +145,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((scissorCount)); ++i)
                 {
-                    reservedunmarshal_VkRect2D(readStream, (VkRect2D*)(pScissors + i), readStreamPtrPtr);
+                    reservedunmarshal_VkRect2D(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkRect2D*)(pScissors + i), readStreamPtrPtr);
                 }
                 if (pScissors)
                 {
@@ -507,7 +507,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((regionCount)); ++i)
                 {
-                    reservedunmarshal_VkBufferCopy(readStream, (VkBufferCopy*)(pRegions + i), readStreamPtrPtr);
+                    reservedunmarshal_VkBufferCopy(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkBufferCopy*)(pRegions + i), readStreamPtrPtr);
                 }
                 if (pRegions)
                 {
@@ -554,7 +554,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((regionCount)); ++i)
                 {
-                    reservedunmarshal_VkImageCopy(readStream, (VkImageCopy*)(pRegions + i), readStreamPtrPtr);
+                    reservedunmarshal_VkImageCopy(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkImageCopy*)(pRegions + i), readStreamPtrPtr);
                 }
                 if (pRegions)
                 {
@@ -602,7 +602,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((regionCount)); ++i)
                 {
-                    reservedunmarshal_VkImageBlit(readStream, (VkImageBlit*)(pRegions + i), readStreamPtrPtr);
+                    reservedunmarshal_VkImageBlit(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkImageBlit*)(pRegions + i), readStreamPtrPtr);
                 }
                 memcpy((VkFilter*)&filter, *readStreamPtrPtr, sizeof(VkFilter));
                 *readStreamPtrPtr += sizeof(VkFilter);
@@ -648,7 +648,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((regionCount)); ++i)
                 {
-                    reservedunmarshal_VkBufferImageCopy(readStream, (VkBufferImageCopy*)(pRegions + i), readStreamPtrPtr);
+                    reservedunmarshal_VkBufferImageCopy(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkBufferImageCopy*)(pRegions + i), readStreamPtrPtr);
                 }
                 if (pRegions)
                 {
@@ -692,7 +692,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((regionCount)); ++i)
                 {
-                    reservedunmarshal_VkBufferImageCopy(readStream, (VkBufferImageCopy*)(pRegions + i), readStreamPtrPtr);
+                    reservedunmarshal_VkBufferImageCopy(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkBufferImageCopy*)(pRegions + i), readStreamPtrPtr);
                 }
                 if (pRegions)
                 {
@@ -773,7 +773,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 memcpy((VkImageLayout*)&imageLayout, *readStreamPtrPtr, sizeof(VkImageLayout));
                 *readStreamPtrPtr += sizeof(VkImageLayout);
                 pColor = (VkClearColorValue*)stack_pColor;
-                reservedunmarshal_VkClearColorValue(readStream, (VkClearColorValue*)(pColor), readStreamPtrPtr);
+                reservedunmarshal_VkClearColorValue(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkClearColorValue*)(pColor), readStreamPtrPtr);
                 memcpy((uint32_t*)&rangeCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 if (((rangeCount)) <= MAX_STACK_ITEMS)
@@ -786,7 +786,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((rangeCount)); ++i)
                 {
-                    reservedunmarshal_VkImageSubresourceRange(readStream, (VkImageSubresourceRange*)(pRanges + i), readStreamPtrPtr);
+                    reservedunmarshal_VkImageSubresourceRange(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkImageSubresourceRange*)(pRanges + i), readStreamPtrPtr);
                 }
                 if (pColor)
                 {
@@ -820,7 +820,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 memcpy((VkImageLayout*)&imageLayout, *readStreamPtrPtr, sizeof(VkImageLayout));
                 *readStreamPtrPtr += sizeof(VkImageLayout);
                 pDepthStencil = (VkClearDepthStencilValue*)stack_pDepthStencil;
-                reservedunmarshal_VkClearDepthStencilValue(readStream, (VkClearDepthStencilValue*)(pDepthStencil), readStreamPtrPtr);
+                reservedunmarshal_VkClearDepthStencilValue(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkClearDepthStencilValue*)(pDepthStencil), readStreamPtrPtr);
                 memcpy((uint32_t*)&rangeCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 if (((rangeCount)) <= MAX_STACK_ITEMS)
@@ -833,7 +833,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((rangeCount)); ++i)
                 {
-                    reservedunmarshal_VkImageSubresourceRange(readStream, (VkImageSubresourceRange*)(pRanges + i), readStreamPtrPtr);
+                    reservedunmarshal_VkImageSubresourceRange(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkImageSubresourceRange*)(pRanges + i), readStreamPtrPtr);
                 }
                 if (pDepthStencil)
                 {
@@ -871,7 +871,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((attachmentCount)); ++i)
                 {
-                    reservedunmarshal_VkClearAttachment(readStream, (VkClearAttachment*)(pAttachments + i), readStreamPtrPtr);
+                    reservedunmarshal_VkClearAttachment(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkClearAttachment*)(pAttachments + i), readStreamPtrPtr);
                 }
                 memcpy((uint32_t*)&rectCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -885,7 +885,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((rectCount)); ++i)
                 {
-                    reservedunmarshal_VkClearRect(readStream, (VkClearRect*)(pRects + i), readStreamPtrPtr);
+                    reservedunmarshal_VkClearRect(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkClearRect*)(pRects + i), readStreamPtrPtr);
                 }
                 if (pAttachments)
                 {
@@ -939,7 +939,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((regionCount)); ++i)
                 {
-                    reservedunmarshal_VkImageResolve(readStream, (VkImageResolve*)(pRegions + i), readStreamPtrPtr);
+                    reservedunmarshal_VkImageResolve(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkImageResolve*)(pRegions + i), readStreamPtrPtr);
                 }
                 if (pRegions)
                 {
@@ -1035,7 +1035,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((memoryBarrierCount)); ++i)
                 {
-                    reservedunmarshal_VkMemoryBarrier(readStream, (VkMemoryBarrier*)(pMemoryBarriers + i), readStreamPtrPtr);
+                    reservedunmarshal_VkMemoryBarrier(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkMemoryBarrier*)(pMemoryBarriers + i), readStreamPtrPtr);
                 }
                 memcpy((uint32_t*)&bufferMemoryBarrierCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -1049,7 +1049,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((bufferMemoryBarrierCount)); ++i)
                 {
-                    reservedunmarshal_VkBufferMemoryBarrier(readStream, (VkBufferMemoryBarrier*)(pBufferMemoryBarriers + i), readStreamPtrPtr);
+                    reservedunmarshal_VkBufferMemoryBarrier(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkBufferMemoryBarrier*)(pBufferMemoryBarriers + i), readStreamPtrPtr);
                 }
                 memcpy((uint32_t*)&imageMemoryBarrierCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -1063,7 +1063,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((imageMemoryBarrierCount)); ++i)
                 {
-                    reservedunmarshal_VkImageMemoryBarrier(readStream, (VkImageMemoryBarrier*)(pImageMemoryBarriers + i), readStreamPtrPtr);
+                    reservedunmarshal_VkImageMemoryBarrier(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkImageMemoryBarrier*)(pImageMemoryBarriers + i), readStreamPtrPtr);
                 }
                 if (pMemoryBarriers)
                 {
@@ -1123,7 +1123,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((memoryBarrierCount)); ++i)
                 {
-                    reservedunmarshal_VkMemoryBarrier(readStream, (VkMemoryBarrier*)(pMemoryBarriers + i), readStreamPtrPtr);
+                    reservedunmarshal_VkMemoryBarrier(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkMemoryBarrier*)(pMemoryBarriers + i), readStreamPtrPtr);
                 }
                 memcpy((uint32_t*)&bufferMemoryBarrierCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -1137,7 +1137,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((bufferMemoryBarrierCount)); ++i)
                 {
-                    reservedunmarshal_VkBufferMemoryBarrier(readStream, (VkBufferMemoryBarrier*)(pBufferMemoryBarriers + i), readStreamPtrPtr);
+                    reservedunmarshal_VkBufferMemoryBarrier(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkBufferMemoryBarrier*)(pBufferMemoryBarriers + i), readStreamPtrPtr);
                 }
                 memcpy((uint32_t*)&imageMemoryBarrierCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
@@ -1151,7 +1151,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((imageMemoryBarrierCount)); ++i)
                 {
-                    reservedunmarshal_VkImageMemoryBarrier(readStream, (VkImageMemoryBarrier*)(pImageMemoryBarriers + i), readStreamPtrPtr);
+                    reservedunmarshal_VkImageMemoryBarrier(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkImageMemoryBarrier*)(pImageMemoryBarriers + i), readStreamPtrPtr);
                 }
                 if (pMemoryBarriers)
                 {
@@ -1319,7 +1319,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 VkRenderPassBeginInfo stack_pRenderPassBegin[1];
                 VkSubpassContents contents;
                 pRenderPassBegin = (VkRenderPassBeginInfo*)stack_pRenderPassBegin;
-                reservedunmarshal_VkRenderPassBeginInfo(readStream, (VkRenderPassBeginInfo*)(pRenderPassBegin), readStreamPtrPtr);
+                reservedunmarshal_VkRenderPassBeginInfo(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkRenderPassBeginInfo*)(pRenderPassBegin), readStreamPtrPtr);
                 memcpy((VkSubpassContents*)&contents, *readStreamPtrPtr, sizeof(VkSubpassContents));
                 *readStreamPtrPtr += sizeof(VkSubpassContents);
                 if (pRenderPassBegin)
@@ -1482,9 +1482,9 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkSubpassBeginInfo* pSubpassBeginInfo;
                 VkSubpassBeginInfo stack_pSubpassBeginInfo[1];
                 pRenderPassBegin = (VkRenderPassBeginInfo*)stack_pRenderPassBegin;
-                reservedunmarshal_VkRenderPassBeginInfo(readStream, (VkRenderPassBeginInfo*)(pRenderPassBegin), readStreamPtrPtr);
+                reservedunmarshal_VkRenderPassBeginInfo(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkRenderPassBeginInfo*)(pRenderPassBegin), readStreamPtrPtr);
                 pSubpassBeginInfo = (VkSubpassBeginInfo*)stack_pSubpassBeginInfo;
-                reservedunmarshal_VkSubpassBeginInfo(readStream, (VkSubpassBeginInfo*)(pSubpassBeginInfo), readStreamPtrPtr);
+                reservedunmarshal_VkSubpassBeginInfo(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkSubpassBeginInfo*)(pSubpassBeginInfo), readStreamPtrPtr);
                 if (pRenderPassBegin)
                 {
                     transform_tohost_VkRenderPassBeginInfo(globalstate, (VkRenderPassBeginInfo*)(pRenderPassBegin));
@@ -1505,9 +1505,9 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkSubpassEndInfo* pSubpassEndInfo;
                 VkSubpassEndInfo stack_pSubpassEndInfo[1];
                 pSubpassBeginInfo = (VkSubpassBeginInfo*)stack_pSubpassBeginInfo;
-                reservedunmarshal_VkSubpassBeginInfo(readStream, (VkSubpassBeginInfo*)(pSubpassBeginInfo), readStreamPtrPtr);
+                reservedunmarshal_VkSubpassBeginInfo(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkSubpassBeginInfo*)(pSubpassBeginInfo), readStreamPtrPtr);
                 pSubpassEndInfo = (VkSubpassEndInfo*)stack_pSubpassEndInfo;
-                reservedunmarshal_VkSubpassEndInfo(readStream, (VkSubpassEndInfo*)(pSubpassEndInfo), readStreamPtrPtr);
+                reservedunmarshal_VkSubpassEndInfo(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkSubpassEndInfo*)(pSubpassEndInfo), readStreamPtrPtr);
                 if (pSubpassBeginInfo)
                 {
                     transform_tohost_VkSubpassBeginInfo(globalstate, (VkSubpassBeginInfo*)(pSubpassBeginInfo));
@@ -1526,7 +1526,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkSubpassEndInfo* pSubpassEndInfo;
                 VkSubpassEndInfo stack_pSubpassEndInfo[1];
                 pSubpassEndInfo = (VkSubpassEndInfo*)stack_pSubpassEndInfo;
-                reservedunmarshal_VkSubpassEndInfo(readStream, (VkSubpassEndInfo*)(pSubpassEndInfo), readStreamPtrPtr);
+                reservedunmarshal_VkSubpassEndInfo(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkSubpassEndInfo*)(pSubpassEndInfo), readStreamPtrPtr);
                 if (pSubpassEndInfo)
                 {
                     transform_tohost_VkSubpassEndInfo(globalstate, (VkSubpassEndInfo*)(pSubpassEndInfo));
@@ -1651,7 +1651,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((descriptorWriteCount)); ++i)
                 {
-                    reservedunmarshal_VkWriteDescriptorSet(readStream, (VkWriteDescriptorSet*)(pDescriptorWrites + i), readStreamPtrPtr);
+                    reservedunmarshal_VkWriteDescriptorSet(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkWriteDescriptorSet*)(pDescriptorWrites + i), readStreamPtrPtr);
                 }
                 if (pDescriptorWrites)
                 {
@@ -1716,9 +1716,9 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkSubpassBeginInfo* pSubpassBeginInfo;
                 VkSubpassBeginInfo stack_pSubpassBeginInfo[1];
                 pRenderPassBegin = (VkRenderPassBeginInfo*)stack_pRenderPassBegin;
-                reservedunmarshal_VkRenderPassBeginInfo(readStream, (VkRenderPassBeginInfo*)(pRenderPassBegin), readStreamPtrPtr);
+                reservedunmarshal_VkRenderPassBeginInfo(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkRenderPassBeginInfo*)(pRenderPassBegin), readStreamPtrPtr);
                 pSubpassBeginInfo = (VkSubpassBeginInfo*)stack_pSubpassBeginInfo;
-                reservedunmarshal_VkSubpassBeginInfo(readStream, (VkSubpassBeginInfo*)(pSubpassBeginInfo), readStreamPtrPtr);
+                reservedunmarshal_VkSubpassBeginInfo(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkSubpassBeginInfo*)(pSubpassBeginInfo), readStreamPtrPtr);
                 if (pRenderPassBegin)
                 {
                     transform_tohost_VkRenderPassBeginInfo(globalstate, (VkRenderPassBeginInfo*)(pRenderPassBegin));
@@ -1739,9 +1739,9 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkSubpassEndInfo* pSubpassEndInfo;
                 VkSubpassEndInfo stack_pSubpassEndInfo[1];
                 pSubpassBeginInfo = (VkSubpassBeginInfo*)stack_pSubpassBeginInfo;
-                reservedunmarshal_VkSubpassBeginInfo(readStream, (VkSubpassBeginInfo*)(pSubpassBeginInfo), readStreamPtrPtr);
+                reservedunmarshal_VkSubpassBeginInfo(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkSubpassBeginInfo*)(pSubpassBeginInfo), readStreamPtrPtr);
                 pSubpassEndInfo = (VkSubpassEndInfo*)stack_pSubpassEndInfo;
-                reservedunmarshal_VkSubpassEndInfo(readStream, (VkSubpassEndInfo*)(pSubpassEndInfo), readStreamPtrPtr);
+                reservedunmarshal_VkSubpassEndInfo(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkSubpassEndInfo*)(pSubpassEndInfo), readStreamPtrPtr);
                 if (pSubpassBeginInfo)
                 {
                     transform_tohost_VkSubpassBeginInfo(globalstate, (VkSubpassBeginInfo*)(pSubpassBeginInfo));
@@ -1760,7 +1760,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkSubpassEndInfo* pSubpassEndInfo;
                 VkSubpassEndInfo stack_pSubpassEndInfo[1];
                 pSubpassEndInfo = (VkSubpassEndInfo*)stack_pSubpassEndInfo;
-                reservedunmarshal_VkSubpassEndInfo(readStream, (VkSubpassEndInfo*)(pSubpassEndInfo), readStreamPtrPtr);
+                reservedunmarshal_VkSubpassEndInfo(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkSubpassEndInfo*)(pSubpassEndInfo), readStreamPtrPtr);
                 if (pSubpassEndInfo)
                 {
                     transform_tohost_VkSubpassEndInfo(globalstate, (VkSubpassEndInfo*)(pSubpassEndInfo));
@@ -1898,7 +1898,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 VkExtent2D stack_pFragmentSize[1];
                 VkFragmentShadingRateCombinerOpKHR combinerOps[2];
                 pFragmentSize = (VkExtent2D*)stack_pFragmentSize;
-                reservedunmarshal_VkExtent2D(readStream, (VkExtent2D*)(pFragmentSize), readStreamPtrPtr);
+                reservedunmarshal_VkExtent2D(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkExtent2D*)(pFragmentSize), readStreamPtrPtr);
                 memcpy((VkFragmentShadingRateCombinerOpKHR*)combinerOps, *readStreamPtrPtr, 2 * sizeof(const VkFragmentShadingRateCombinerOpKHR));
                 *readStreamPtrPtr += 2 * sizeof(const VkFragmentShadingRateCombinerOpKHR);
                 if (pFragmentSize)
@@ -1935,7 +1935,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkCopyBufferInfo2KHR* pCopyBufferInfo;
                 VkCopyBufferInfo2KHR stack_pCopyBufferInfo[1];
                 pCopyBufferInfo = (VkCopyBufferInfo2KHR*)stack_pCopyBufferInfo;
-                reservedunmarshal_VkCopyBufferInfo2KHR(readStream, (VkCopyBufferInfo2KHR*)(pCopyBufferInfo), readStreamPtrPtr);
+                reservedunmarshal_VkCopyBufferInfo2KHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkCopyBufferInfo2KHR*)(pCopyBufferInfo), readStreamPtrPtr);
                 if (pCopyBufferInfo)
                 {
                     transform_tohost_VkCopyBufferInfo2KHR(globalstate, (VkCopyBufferInfo2KHR*)(pCopyBufferInfo));
@@ -1950,7 +1950,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkCopyImageInfo2KHR* pCopyImageInfo;
                 VkCopyImageInfo2KHR stack_pCopyImageInfo[1];
                 pCopyImageInfo = (VkCopyImageInfo2KHR*)stack_pCopyImageInfo;
-                reservedunmarshal_VkCopyImageInfo2KHR(readStream, (VkCopyImageInfo2KHR*)(pCopyImageInfo), readStreamPtrPtr);
+                reservedunmarshal_VkCopyImageInfo2KHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkCopyImageInfo2KHR*)(pCopyImageInfo), readStreamPtrPtr);
                 if (pCopyImageInfo)
                 {
                     transform_tohost_VkCopyImageInfo2KHR(globalstate, (VkCopyImageInfo2KHR*)(pCopyImageInfo));
@@ -1965,7 +1965,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkCopyBufferToImageInfo2KHR* pCopyBufferToImageInfo;
                 VkCopyBufferToImageInfo2KHR stack_pCopyBufferToImageInfo[1];
                 pCopyBufferToImageInfo = (VkCopyBufferToImageInfo2KHR*)stack_pCopyBufferToImageInfo;
-                reservedunmarshal_VkCopyBufferToImageInfo2KHR(readStream, (VkCopyBufferToImageInfo2KHR*)(pCopyBufferToImageInfo), readStreamPtrPtr);
+                reservedunmarshal_VkCopyBufferToImageInfo2KHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkCopyBufferToImageInfo2KHR*)(pCopyBufferToImageInfo), readStreamPtrPtr);
                 if (pCopyBufferToImageInfo)
                 {
                     transform_tohost_VkCopyBufferToImageInfo2KHR(globalstate, (VkCopyBufferToImageInfo2KHR*)(pCopyBufferToImageInfo));
@@ -1980,7 +1980,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkCopyImageToBufferInfo2KHR* pCopyImageToBufferInfo;
                 VkCopyImageToBufferInfo2KHR stack_pCopyImageToBufferInfo[1];
                 pCopyImageToBufferInfo = (VkCopyImageToBufferInfo2KHR*)stack_pCopyImageToBufferInfo;
-                reservedunmarshal_VkCopyImageToBufferInfo2KHR(readStream, (VkCopyImageToBufferInfo2KHR*)(pCopyImageToBufferInfo), readStreamPtrPtr);
+                reservedunmarshal_VkCopyImageToBufferInfo2KHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkCopyImageToBufferInfo2KHR*)(pCopyImageToBufferInfo), readStreamPtrPtr);
                 if (pCopyImageToBufferInfo)
                 {
                     transform_tohost_VkCopyImageToBufferInfo2KHR(globalstate, (VkCopyImageToBufferInfo2KHR*)(pCopyImageToBufferInfo));
@@ -1995,7 +1995,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkBlitImageInfo2KHR* pBlitImageInfo;
                 VkBlitImageInfo2KHR stack_pBlitImageInfo[1];
                 pBlitImageInfo = (VkBlitImageInfo2KHR*)stack_pBlitImageInfo;
-                reservedunmarshal_VkBlitImageInfo2KHR(readStream, (VkBlitImageInfo2KHR*)(pBlitImageInfo), readStreamPtrPtr);
+                reservedunmarshal_VkBlitImageInfo2KHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkBlitImageInfo2KHR*)(pBlitImageInfo), readStreamPtrPtr);
                 if (pBlitImageInfo)
                 {
                     transform_tohost_VkBlitImageInfo2KHR(globalstate, (VkBlitImageInfo2KHR*)(pBlitImageInfo));
@@ -2010,7 +2010,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkResolveImageInfo2KHR* pResolveImageInfo;
                 VkResolveImageInfo2KHR stack_pResolveImageInfo[1];
                 pResolveImageInfo = (VkResolveImageInfo2KHR*)stack_pResolveImageInfo;
-                reservedunmarshal_VkResolveImageInfo2KHR(readStream, (VkResolveImageInfo2KHR*)(pResolveImageInfo), readStreamPtrPtr);
+                reservedunmarshal_VkResolveImageInfo2KHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkResolveImageInfo2KHR*)(pResolveImageInfo), readStreamPtrPtr);
                 if (pResolveImageInfo)
                 {
                     transform_tohost_VkResolveImageInfo2KHR(globalstate, (VkResolveImageInfo2KHR*)(pResolveImageInfo));
@@ -2043,7 +2043,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkDebugMarkerMarkerInfoEXT* pMarkerInfo;
                 VkDebugMarkerMarkerInfoEXT stack_pMarkerInfo[1];
                 pMarkerInfo = (VkDebugMarkerMarkerInfoEXT*)stack_pMarkerInfo;
-                reservedunmarshal_VkDebugMarkerMarkerInfoEXT(readStream, (VkDebugMarkerMarkerInfoEXT*)(pMarkerInfo), readStreamPtrPtr);
+                reservedunmarshal_VkDebugMarkerMarkerInfoEXT(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkDebugMarkerMarkerInfoEXT*)(pMarkerInfo), readStreamPtrPtr);
                 if (pMarkerInfo)
                 {
                     transform_tohost_VkDebugMarkerMarkerInfoEXT(globalstate, (VkDebugMarkerMarkerInfoEXT*)(pMarkerInfo));
@@ -2065,7 +2065,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkDebugMarkerMarkerInfoEXT* pMarkerInfo;
                 VkDebugMarkerMarkerInfoEXT stack_pMarkerInfo[1];
                 pMarkerInfo = (VkDebugMarkerMarkerInfoEXT*)stack_pMarkerInfo;
-                reservedunmarshal_VkDebugMarkerMarkerInfoEXT(readStream, (VkDebugMarkerMarkerInfoEXT*)(pMarkerInfo), readStreamPtrPtr);
+                reservedunmarshal_VkDebugMarkerMarkerInfoEXT(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkDebugMarkerMarkerInfoEXT*)(pMarkerInfo), readStreamPtrPtr);
                 if (pMarkerInfo)
                 {
                     transform_tohost_VkDebugMarkerMarkerInfoEXT(globalstate, (VkDebugMarkerMarkerInfoEXT*)(pMarkerInfo));
@@ -2436,7 +2436,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkConditionalRenderingBeginInfoEXT* pConditionalRenderingBegin;
                 VkConditionalRenderingBeginInfoEXT stack_pConditionalRenderingBegin[1];
                 pConditionalRenderingBegin = (VkConditionalRenderingBeginInfoEXT*)stack_pConditionalRenderingBegin;
-                reservedunmarshal_VkConditionalRenderingBeginInfoEXT(readStream, (VkConditionalRenderingBeginInfoEXT*)(pConditionalRenderingBegin), readStreamPtrPtr);
+                reservedunmarshal_VkConditionalRenderingBeginInfoEXT(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkConditionalRenderingBeginInfoEXT*)(pConditionalRenderingBegin), readStreamPtrPtr);
                 if (pConditionalRenderingBegin)
                 {
                     transform_tohost_VkConditionalRenderingBeginInfoEXT(globalstate, (VkConditionalRenderingBeginInfoEXT*)(pConditionalRenderingBegin));
@@ -2475,7 +2475,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((viewportCount)); ++i)
                 {
-                    reservedunmarshal_VkViewportWScalingNV(readStream, (VkViewportWScalingNV*)(pViewportWScalings + i), readStreamPtrPtr);
+                    reservedunmarshal_VkViewportWScalingNV(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkViewportWScalingNV*)(pViewportWScalings + i), readStreamPtrPtr);
                 }
                 if (pViewportWScalings)
                 {
@@ -2531,7 +2531,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((discardRectangleCount)); ++i)
                 {
-                    reservedunmarshal_VkRect2D(readStream, (VkRect2D*)(pDiscardRectangles + i), readStreamPtrPtr);
+                    reservedunmarshal_VkRect2D(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkRect2D*)(pDiscardRectangles + i), readStreamPtrPtr);
                 }
                 if (pDiscardRectangles)
                 {
@@ -2570,7 +2570,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkDebugUtilsLabelEXT* pLabelInfo;
                 VkDebugUtilsLabelEXT stack_pLabelInfo[1];
                 pLabelInfo = (VkDebugUtilsLabelEXT*)stack_pLabelInfo;
-                reservedunmarshal_VkDebugUtilsLabelEXT(readStream, (VkDebugUtilsLabelEXT*)(pLabelInfo), readStreamPtrPtr);
+                reservedunmarshal_VkDebugUtilsLabelEXT(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkDebugUtilsLabelEXT*)(pLabelInfo), readStreamPtrPtr);
                 if (pLabelInfo)
                 {
                     transform_tohost_VkDebugUtilsLabelEXT(globalstate, (VkDebugUtilsLabelEXT*)(pLabelInfo));
@@ -2592,7 +2592,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkDebugUtilsLabelEXT* pLabelInfo;
                 VkDebugUtilsLabelEXT stack_pLabelInfo[1];
                 pLabelInfo = (VkDebugUtilsLabelEXT*)stack_pLabelInfo;
-                reservedunmarshal_VkDebugUtilsLabelEXT(readStream, (VkDebugUtilsLabelEXT*)(pLabelInfo), readStreamPtrPtr);
+                reservedunmarshal_VkDebugUtilsLabelEXT(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkDebugUtilsLabelEXT*)(pLabelInfo), readStreamPtrPtr);
                 if (pLabelInfo)
                 {
                     transform_tohost_VkDebugUtilsLabelEXT(globalstate, (VkDebugUtilsLabelEXT*)(pLabelInfo));
@@ -2623,7 +2623,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkSampleLocationsInfoEXT* pSampleLocationsInfo;
                 VkSampleLocationsInfoEXT stack_pSampleLocationsInfo[1];
                 pSampleLocationsInfo = (VkSampleLocationsInfoEXT*)stack_pSampleLocationsInfo;
-                reservedunmarshal_VkSampleLocationsInfoEXT(readStream, (VkSampleLocationsInfoEXT*)(pSampleLocationsInfo), readStreamPtrPtr);
+                reservedunmarshal_VkSampleLocationsInfoEXT(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkSampleLocationsInfoEXT*)(pSampleLocationsInfo), readStreamPtrPtr);
                 if (pSampleLocationsInfo)
                 {
                     transform_tohost_VkSampleLocationsInfoEXT(globalstate, (VkSampleLocationsInfoEXT*)(pSampleLocationsInfo));
@@ -2690,7 +2690,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((viewportCount)); ++i)
                 {
-                    reservedunmarshal_VkShadingRatePaletteNV(readStream, (VkShadingRatePaletteNV*)(pShadingRatePalettes + i), readStreamPtrPtr);
+                    reservedunmarshal_VkShadingRatePaletteNV(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkShadingRatePaletteNV*)(pShadingRatePalettes + i), readStreamPtrPtr);
                 }
                 if (pShadingRatePalettes)
                 {
@@ -2724,7 +2724,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((customSampleOrderCount)); ++i)
                 {
-                    reservedunmarshal_VkCoarseSampleOrderCustomNV(readStream, (VkCoarseSampleOrderCustomNV*)(pCustomSampleOrders + i), readStreamPtrPtr);
+                    reservedunmarshal_VkCoarseSampleOrderCustomNV(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkCoarseSampleOrderCustomNV*)(pCustomSampleOrders + i), readStreamPtrPtr);
                 }
                 if (pCustomSampleOrders)
                 {
@@ -2752,7 +2752,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 VkBuffer scratch;
                 VkDeviceSize scratchOffset;
                 pInfo = (VkAccelerationStructureInfoNV*)stack_pInfo;
-                reservedunmarshal_VkAccelerationStructureInfoNV(readStream, (VkAccelerationStructureInfoNV*)(pInfo), readStreamPtrPtr);
+                reservedunmarshal_VkAccelerationStructureInfoNV(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkAccelerationStructureInfoNV*)(pInfo), readStreamPtrPtr);
                 uint64_t cgen_var_0;
                 memcpy((uint64_t*)&cgen_var_0, *readStreamPtrPtr, 1 * 8);
                 *readStreamPtrPtr += 1 * 8;
@@ -3044,7 +3044,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((exclusiveScissorCount)); ++i)
                 {
-                    reservedunmarshal_VkRect2D(readStream, (VkRect2D*)(pExclusiveScissors + i), readStreamPtrPtr);
+                    reservedunmarshal_VkRect2D(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkRect2D*)(pExclusiveScissors + i), readStreamPtrPtr);
                 }
                 if (pExclusiveScissors)
                 {
@@ -3088,7 +3088,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkPerformanceMarkerInfoINTEL* pMarkerInfo;
                 VkPerformanceMarkerInfoINTEL stack_pMarkerInfo[1];
                 pMarkerInfo = (VkPerformanceMarkerInfoINTEL*)stack_pMarkerInfo;
-                reservedunmarshal_VkPerformanceMarkerInfoINTEL(readStream, (VkPerformanceMarkerInfoINTEL*)(pMarkerInfo), readStreamPtrPtr);
+                reservedunmarshal_VkPerformanceMarkerInfoINTEL(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkPerformanceMarkerInfoINTEL*)(pMarkerInfo), readStreamPtrPtr);
                 if (pMarkerInfo)
                 {
                     transform_tohost_VkPerformanceMarkerInfoINTEL(globalstate, (VkPerformanceMarkerInfoINTEL*)(pMarkerInfo));
@@ -3104,7 +3104,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkPerformanceStreamMarkerInfoINTEL* pMarkerInfo;
                 VkPerformanceStreamMarkerInfoINTEL stack_pMarkerInfo[1];
                 pMarkerInfo = (VkPerformanceStreamMarkerInfoINTEL*)stack_pMarkerInfo;
-                reservedunmarshal_VkPerformanceStreamMarkerInfoINTEL(readStream, (VkPerformanceStreamMarkerInfoINTEL*)(pMarkerInfo), readStreamPtrPtr);
+                reservedunmarshal_VkPerformanceStreamMarkerInfoINTEL(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkPerformanceStreamMarkerInfoINTEL*)(pMarkerInfo), readStreamPtrPtr);
                 if (pMarkerInfo)
                 {
                     transform_tohost_VkPerformanceStreamMarkerInfoINTEL(globalstate, (VkPerformanceStreamMarkerInfoINTEL*)(pMarkerInfo));
@@ -3120,7 +3120,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkPerformanceOverrideInfoINTEL* pOverrideInfo;
                 VkPerformanceOverrideInfoINTEL stack_pOverrideInfo[1];
                 pOverrideInfo = (VkPerformanceOverrideInfoINTEL*)stack_pOverrideInfo;
-                reservedunmarshal_VkPerformanceOverrideInfoINTEL(readStream, (VkPerformanceOverrideInfoINTEL*)(pOverrideInfo), readStreamPtrPtr);
+                reservedunmarshal_VkPerformanceOverrideInfoINTEL(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkPerformanceOverrideInfoINTEL*)(pOverrideInfo), readStreamPtrPtr);
                 if (pOverrideInfo)
                 {
                     transform_tohost_VkPerformanceOverrideInfoINTEL(globalstate, (VkPerformanceOverrideInfoINTEL*)(pOverrideInfo));
@@ -3139,7 +3139,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
 #endif
 #ifdef VK_EXT_metal_surface
 #endif
-#ifdef VK_GOOGLE_color_buffer
+#ifdef VK_EXT_fragment_density_map
 #endif
 #ifdef VK_EXT_scalar_block_layout
 #endif
@@ -3251,7 +3251,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((viewportCount)); ++i)
                 {
-                    reservedunmarshal_VkViewport(readStream, (VkViewport*)(pViewports + i), readStreamPtrPtr);
+                    reservedunmarshal_VkViewport(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkViewport*)(pViewports + i), readStreamPtrPtr);
                 }
                 if (pViewports)
                 {
@@ -3282,7 +3282,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((scissorCount)); ++i)
                 {
-                    reservedunmarshal_VkRect2D(readStream, (VkRect2D*)(pScissors + i), readStreamPtrPtr);
+                    reservedunmarshal_VkRect2D(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkRect2D*)(pScissors + i), readStreamPtrPtr);
                 }
                 if (pScissors)
                 {
@@ -3460,7 +3460,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkGeneratedCommandsInfoNV* pGeneratedCommandsInfo;
                 VkGeneratedCommandsInfoNV stack_pGeneratedCommandsInfo[1];
                 pGeneratedCommandsInfo = (VkGeneratedCommandsInfoNV*)stack_pGeneratedCommandsInfo;
-                reservedunmarshal_VkGeneratedCommandsInfoNV(readStream, (VkGeneratedCommandsInfoNV*)(pGeneratedCommandsInfo), readStreamPtrPtr);
+                reservedunmarshal_VkGeneratedCommandsInfoNV(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkGeneratedCommandsInfoNV*)(pGeneratedCommandsInfo), readStreamPtrPtr);
                 if (pGeneratedCommandsInfo)
                 {
                     transform_tohost_VkGeneratedCommandsInfoNV(globalstate, (VkGeneratedCommandsInfoNV*)(pGeneratedCommandsInfo));
@@ -3478,7 +3478,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 memcpy((VkBool32*)&isPreprocessed, *readStreamPtrPtr, sizeof(VkBool32));
                 *readStreamPtrPtr += sizeof(VkBool32);
                 pGeneratedCommandsInfo = (VkGeneratedCommandsInfoNV*)stack_pGeneratedCommandsInfo;
-                reservedunmarshal_VkGeneratedCommandsInfoNV(readStream, (VkGeneratedCommandsInfoNV*)(pGeneratedCommandsInfo), readStreamPtrPtr);
+                reservedunmarshal_VkGeneratedCommandsInfoNV(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkGeneratedCommandsInfoNV*)(pGeneratedCommandsInfo), readStreamPtrPtr);
                 if (pGeneratedCommandsInfo)
                 {
                     transform_tohost_VkGeneratedCommandsInfoNV(globalstate, (VkGeneratedCommandsInfoNV*)(pGeneratedCommandsInfo));
@@ -3558,7 +3558,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkCommandBufferBeginInfo* pBeginInfo;
                 VkCommandBufferBeginInfo stack_pBeginInfo[1];
                 pBeginInfo = (VkCommandBufferBeginInfo*)stack_pBeginInfo;
-                reservedunmarshal_VkCommandBufferBeginInfo(readStream, (VkCommandBufferBeginInfo*)(pBeginInfo), readStreamPtrPtr);
+                reservedunmarshal_VkCommandBufferBeginInfo(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkCommandBufferBeginInfo*)(pBeginInfo), readStreamPtrPtr);
                 if (pBeginInfo)
                 {
                     transform_tohost_VkCommandBufferBeginInfo(globalstate, (VkCommandBufferBeginInfo*)(pBeginInfo));
@@ -3619,7 +3619,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((infoCount)); ++i)
                 {
-                    reservedunmarshal_VkAccelerationStructureBuildGeometryInfoKHR(readStream, (VkAccelerationStructureBuildGeometryInfoKHR*)(pInfos + i), readStreamPtrPtr);
+                    reservedunmarshal_VkAccelerationStructureBuildGeometryInfoKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkAccelerationStructureBuildGeometryInfoKHR*)(pInfos + i), readStreamPtrPtr);
                 }
                 if (pInfos)
                 {
@@ -3657,7 +3657,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 }
                 for (uint32_t i = 0; i < (uint32_t)((infoCount)); ++i)
                 {
-                    reservedunmarshal_VkAccelerationStructureBuildGeometryInfoKHR(readStream, (VkAccelerationStructureBuildGeometryInfoKHR*)(pInfos + i), readStreamPtrPtr);
+                    reservedunmarshal_VkAccelerationStructureBuildGeometryInfoKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkAccelerationStructureBuildGeometryInfoKHR*)(pInfos + i), readStreamPtrPtr);
                 }
                 if (((infoCount)) <= MAX_STACK_ITEMS)
                 {
@@ -3697,7 +3697,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkCopyAccelerationStructureInfoKHR* pInfo;
                 VkCopyAccelerationStructureInfoKHR stack_pInfo[1];
                 pInfo = (VkCopyAccelerationStructureInfoKHR*)stack_pInfo;
-                reservedunmarshal_VkCopyAccelerationStructureInfoKHR(readStream, (VkCopyAccelerationStructureInfoKHR*)(pInfo), readStreamPtrPtr);
+                reservedunmarshal_VkCopyAccelerationStructureInfoKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkCopyAccelerationStructureInfoKHR*)(pInfo), readStreamPtrPtr);
                 if (pInfo)
                 {
                     transform_tohost_VkCopyAccelerationStructureInfoKHR(globalstate, (VkCopyAccelerationStructureInfoKHR*)(pInfo));
@@ -3712,7 +3712,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkCopyAccelerationStructureToMemoryInfoKHR* pInfo;
                 VkCopyAccelerationStructureToMemoryInfoKHR stack_pInfo[1];
                 pInfo = (VkCopyAccelerationStructureToMemoryInfoKHR*)stack_pInfo;
-                reservedunmarshal_VkCopyAccelerationStructureToMemoryInfoKHR(readStream, (VkCopyAccelerationStructureToMemoryInfoKHR*)(pInfo), readStreamPtrPtr);
+                reservedunmarshal_VkCopyAccelerationStructureToMemoryInfoKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkCopyAccelerationStructureToMemoryInfoKHR*)(pInfo), readStreamPtrPtr);
                 if (pInfo)
                 {
                     transform_tohost_VkCopyAccelerationStructureToMemoryInfoKHR(globalstate, (VkCopyAccelerationStructureToMemoryInfoKHR*)(pInfo));
@@ -3727,7 +3727,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 const VkCopyMemoryToAccelerationStructureInfoKHR* pInfo;
                 VkCopyMemoryToAccelerationStructureInfoKHR stack_pInfo[1];
                 pInfo = (VkCopyMemoryToAccelerationStructureInfoKHR*)stack_pInfo;
-                reservedunmarshal_VkCopyMemoryToAccelerationStructureInfoKHR(readStream, (VkCopyMemoryToAccelerationStructureInfoKHR*)(pInfo), readStreamPtrPtr);
+                reservedunmarshal_VkCopyMemoryToAccelerationStructureInfoKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkCopyMemoryToAccelerationStructureInfoKHR*)(pInfo), readStreamPtrPtr);
                 if (pInfo)
                 {
                     transform_tohost_VkCopyMemoryToAccelerationStructureInfoKHR(globalstate, (VkCopyMemoryToAccelerationStructureInfoKHR*)(pInfo));
@@ -3794,13 +3794,13 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 uint32_t height;
                 uint32_t depth;
                 pRaygenShaderBindingTable = (VkStridedDeviceAddressRegionKHR*)stack_pRaygenShaderBindingTable;
-                reservedunmarshal_VkStridedDeviceAddressRegionKHR(readStream, (VkStridedDeviceAddressRegionKHR*)(pRaygenShaderBindingTable), readStreamPtrPtr);
+                reservedunmarshal_VkStridedDeviceAddressRegionKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkStridedDeviceAddressRegionKHR*)(pRaygenShaderBindingTable), readStreamPtrPtr);
                 pMissShaderBindingTable = (VkStridedDeviceAddressRegionKHR*)stack_pMissShaderBindingTable;
-                reservedunmarshal_VkStridedDeviceAddressRegionKHR(readStream, (VkStridedDeviceAddressRegionKHR*)(pMissShaderBindingTable), readStreamPtrPtr);
+                reservedunmarshal_VkStridedDeviceAddressRegionKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkStridedDeviceAddressRegionKHR*)(pMissShaderBindingTable), readStreamPtrPtr);
                 pHitShaderBindingTable = (VkStridedDeviceAddressRegionKHR*)stack_pHitShaderBindingTable;
-                reservedunmarshal_VkStridedDeviceAddressRegionKHR(readStream, (VkStridedDeviceAddressRegionKHR*)(pHitShaderBindingTable), readStreamPtrPtr);
+                reservedunmarshal_VkStridedDeviceAddressRegionKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkStridedDeviceAddressRegionKHR*)(pHitShaderBindingTable), readStreamPtrPtr);
                 pCallableShaderBindingTable = (VkStridedDeviceAddressRegionKHR*)stack_pCallableShaderBindingTable;
-                reservedunmarshal_VkStridedDeviceAddressRegionKHR(readStream, (VkStridedDeviceAddressRegionKHR*)(pCallableShaderBindingTable), readStreamPtrPtr);
+                reservedunmarshal_VkStridedDeviceAddressRegionKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkStridedDeviceAddressRegionKHR*)(pCallableShaderBindingTable), readStreamPtrPtr);
                 memcpy((uint32_t*)&width, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 memcpy((uint32_t*)&height, *readStreamPtrPtr, sizeof(uint32_t));
@@ -3840,13 +3840,13 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 VkStridedDeviceAddressRegionKHR stack_pCallableShaderBindingTable[1];
                 VkDeviceAddress indirectDeviceAddress;
                 pRaygenShaderBindingTable = (VkStridedDeviceAddressRegionKHR*)stack_pRaygenShaderBindingTable;
-                reservedunmarshal_VkStridedDeviceAddressRegionKHR(readStream, (VkStridedDeviceAddressRegionKHR*)(pRaygenShaderBindingTable), readStreamPtrPtr);
+                reservedunmarshal_VkStridedDeviceAddressRegionKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkStridedDeviceAddressRegionKHR*)(pRaygenShaderBindingTable), readStreamPtrPtr);
                 pMissShaderBindingTable = (VkStridedDeviceAddressRegionKHR*)stack_pMissShaderBindingTable;
-                reservedunmarshal_VkStridedDeviceAddressRegionKHR(readStream, (VkStridedDeviceAddressRegionKHR*)(pMissShaderBindingTable), readStreamPtrPtr);
+                reservedunmarshal_VkStridedDeviceAddressRegionKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkStridedDeviceAddressRegionKHR*)(pMissShaderBindingTable), readStreamPtrPtr);
                 pHitShaderBindingTable = (VkStridedDeviceAddressRegionKHR*)stack_pHitShaderBindingTable;
-                reservedunmarshal_VkStridedDeviceAddressRegionKHR(readStream, (VkStridedDeviceAddressRegionKHR*)(pHitShaderBindingTable), readStreamPtrPtr);
+                reservedunmarshal_VkStridedDeviceAddressRegionKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkStridedDeviceAddressRegionKHR*)(pHitShaderBindingTable), readStreamPtrPtr);
                 pCallableShaderBindingTable = (VkStridedDeviceAddressRegionKHR*)stack_pCallableShaderBindingTable;
-                reservedunmarshal_VkStridedDeviceAddressRegionKHR(readStream, (VkStridedDeviceAddressRegionKHR*)(pCallableShaderBindingTable), readStreamPtrPtr);
+                reservedunmarshal_VkStridedDeviceAddressRegionKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkStridedDeviceAddressRegionKHR*)(pCallableShaderBindingTable), readStreamPtrPtr);
                 memcpy((VkDeviceAddress*)&indirectDeviceAddress, *readStreamPtrPtr, sizeof(VkDeviceAddress));
                 *readStreamPtrPtr += sizeof(VkDeviceAddress);
                 if (pRaygenShaderBindingTable)

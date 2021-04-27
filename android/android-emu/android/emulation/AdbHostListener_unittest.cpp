@@ -108,7 +108,7 @@ struct TestAdbGuestAgent : public AdbGuestAgent {
     TestAdbGuestAgent(int id)
         : mId(id), mPrefix(StringFormat("[guest %d] ", id)) {}
 
-    virtual void onHostConnection(ScopedSocket&& socket,
+    virtual void onHostConnection(ScopedSocket socket,
                                   AdbPortType portType) override {
         mSocket = std::move(socket);
 
