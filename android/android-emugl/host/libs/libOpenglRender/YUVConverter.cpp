@@ -709,7 +709,7 @@ void YUVConverter::drawConvert(int x, int y,
     if (mProgram == 0) {
         init(width, height, mFormat);
     }
-    s_gles2.glViewport(x, y, width, height);
+    s_gles2.glViewport(x, y, mCbWidth, mCbHeight);
     uint32_t yoff, uoff, voff, ywidth, cwidth, cheight;
     getYUVOffsets(width, height, mFormat, &yoff, &uoff, &voff, &ywidth,
                   &cwidth);
