@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "371e40ee_1ce2c1fd",
+        "filename": "android/third_party/mynewt-nimble/apps/advertiser/src/main.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1076123
+      },
+      "writtenOn": "2021-04-28T23:23:40Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 132,
+        "startChar": 3,
+        "endLine": 132,
+        "endChar": 25
+      },
+      "revId": "0c553d62bb8f08e6de7c953e05fab18d6d251989",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bb87f663_9c97a7ee",
+        "filename": "android/third_party/mynewt-nimble/apps/bttester/src/bttester.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1076123
+      },
+      "writtenOn": "2021-04-28T23:23:40Z",
+      "side": 1,
+      "message": "\"os/os.h\" ?",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 18
+      },
+      "revId": "0c553d62bb8f08e6de7c953e05fab18d6d251989",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f139b4cd_cc26f89a",
+        "filename": "android/third_party/mynewt-nimble/porting/npl/android_emulator/include/hci_bridge.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1076123
+      },
+      "writtenOn": "2021-04-28T23:23:40Z",
+      "side": 1,
+      "message": "Add later, if needed?",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 5
+      },
+      "revId": "0c553d62bb8f08e6de7c953e05fab18d6d251989",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
