@@ -27,21 +27,26 @@
 #include "transport/ram/ble_hci_ram.h"
 #endif
 
-static struct ble_npl_eventq g_eventq_dflt;
+// static struct ble_npl_eventq g_eventq_dflt;
 
 extern void os_msys_init(void);
 extern void os_mempool_module_init(void);
+extern void ble_store_config_init(void);
 
 void
 nimble_port_init(void)
 {
     /* Initialize default event queue */
-    ble_npl_eventq_init(&g_eventq_dflt);
+   // ble_npl_eventq_init(&g_eventq_dflt);
     /* Initialize the global memory pool */
     os_mempool_module_init();
     os_msys_init();
     /* Initialize the host */
     ble_hs_init();
+
+
+    /* Setup the store */
+    ble_store_config_init();
 
 #if NIMBLE_CFG_CONTROLLER
     ble_hci_ram_init();
@@ -51,13 +56,14 @@ nimble_port_init(void)
 #endif
 }
 
+// You can call this to pump the default message pump.
 void
 nimble_port_run(void)
 {
     struct ble_npl_event *ev;
 
     while (1) {
-        ev = ble_npl_eventq_get(&g_eventq_dflt, BLE_NPL_TIME_FOREVER);
+        ev = ble_npl_eventq_get(os_eventq_dflt_get(), BLE_NPL_TIME_FOREVER);
         ble_npl_event_run(ev);
     }
 }
@@ -65,7 +71,7 @@ nimble_port_run(void)
 struct ble_npl_eventq *
 nimble_port_get_dflt_eventq(void)
 {
-    return &g_eventq_dflt;
+    return os_eventq_dflt_get();
 }
 
 #if NIMBLE_CFG_CONTROLLER
