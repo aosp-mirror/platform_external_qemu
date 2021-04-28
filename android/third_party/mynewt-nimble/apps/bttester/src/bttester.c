@@ -24,7 +24,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-
+#include "os/os.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

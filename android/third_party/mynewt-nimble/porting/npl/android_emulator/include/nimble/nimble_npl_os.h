@@ -17,6 +17,34 @@
  * under the License.
  */
 
-// Most of the functions here have moved to os_sysinit.cc due to linker dependencies.
-// This is only left in the tree to resolve future merge conflicts.
+#ifndef _NIMBLE_NPL_OS_H_
+#define _NIMBLE_NPL_OS_H_
 
+#include <assert.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "os_types.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define BLE_NPL_OS_ALIGNMENT    4
+
+#define BLE_NPL_TIME_FOREVER    INT32_MAX
+
+#define SYSINIT_PANIC_MSG(msg) derror("%s:%d %s", __FILE__, __LINE__, __func__); derror(msg);
+
+#define SYSINIT_PANIC_ASSERT_MSG(rc, msg) do \
+{                                            \
+    if (!(rc)) {                             \
+        SYSINIT_PANIC_MSG(msg);              \
+    }                                        \
+} while (0)
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif  /* _NPL_H_ */

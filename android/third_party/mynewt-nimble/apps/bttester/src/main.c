@@ -25,6 +25,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
+#include "os/os.h"
 #include "sysinit/sysinit.h"
 
 #include "modlog/modlog.h"

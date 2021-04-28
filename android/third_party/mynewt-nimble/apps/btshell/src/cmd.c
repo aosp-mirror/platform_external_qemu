@@ -22,7 +22,7 @@
 #include <errno.h>
 #include <string.h>
 #include "os/mynewt.h"
-#include "bsp/bsp.h"
+// #include "bsp/bsp.h"
 
 #include "nimble/ble.h"
 #include "nimble/nimble_opt.h"
