@@ -8,7 +8,7 @@
 #include "modlog/modlog.h"
 #include "log_common/log_common.h"
 
-#define BLE_HS_LOG_DEBUG(...) IGNORE(__VA_ARGS__)
+#define BLE_HS_LOG_DEBUG(...) MODLOG_DEBUG(4,__VA_ARGS__)
 #define BLE_HS_LOG_INFO(...) MODLOG_INFO(4, __VA_ARGS__)
 #define BLE_HS_LOG_WARN(...) MODLOG_WARN(4, __VA_ARGS__)
 #define BLE_HS_LOG_ERROR(...) MODLOG_ERROR(4, __VA_ARGS__)
@@ -28,5 +28,7 @@
 #define MFG_LOG_ERROR(...) IGNORE(__VA_ARGS__)
 #define MFG_LOG_CRITICAL(...) IGNORE(__VA_ARGS__)
 #define MFG_LOG_DISABLED(...) MODLOG_DISABLED(128, __VA_ARGS__)
+
+#define MODLOG_DFLT(lvl, ...) MODLOG_INFO(4, __VA_ARGS__)
 
 #endif

@@ -17,27 +17,34 @@
  * under the License.
  */
 
-#ifndef _BLE_HCI_SOCKET_H_
-#define _BLE_HCI_SOCKET_H_
+#ifndef _NIMBLE_NPL_OS_H_
+#define _NIMBLE_NPL_OS_H_
+
+#include <assert.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "os_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct os_eventq;
-void ble_hci_sock_set_evq(struct os_eventq*);
+#define BLE_NPL_OS_ALIGNMENT    4
 
-/**
- * Initializes the UART HCI transport module.
- *
- * @return                      0 on success;
- *                              A BLE_ERR_[...] error code on failure.
- */
-void ble_hci_sock_init(void);
+#define BLE_NPL_TIME_FOREVER    INT32_MAX
 
-void ble_hci_sock_ack_handler(void *arg);
+#define SYSINIT_PANIC_MSG(msg) derror("%s:%d %s", __FILE__, __LINE__, __func__); derror(msg);
+
+#define SYSINIT_PANIC_ASSERT_MSG(rc, msg) do \
+{                                            \
+    if (!(rc)) {                             \
+        SYSINIT_PANIC_MSG(msg);              \
+    }                                        \
+} while (0)
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif  /* _NPL_H_ */
