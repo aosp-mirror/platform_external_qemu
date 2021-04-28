@@ -1,0 +1,10 @@
+Name: mynewt-nibmle
+URL: https://github.com/apache/mynewt-nimble
+Version: 1.4.0
+Date: Apr 28, 2021
+Revision: 015bac7
+License: Apache-2
+License File: LICENSE
+
+Description:
+Apache NimBLE is an open-source Bluetooth 5.1 stack (both Host & Controller) that completely replaces the proprietary SoftDevice on Nordic chipsets. It is part of Apache Mynewt project.
