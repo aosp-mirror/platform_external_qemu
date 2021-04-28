@@ -17,27 +17,19 @@
  * under the License.
  */
 
-#ifndef _BLE_HCI_SOCKET_H_
-#define _BLE_HCI_SOCKET_H_
+#ifndef __CONSOLE_H__
+#define __CONSOLE_H__
+
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct os_eventq;
-void ble_hci_sock_set_evq(struct os_eventq*);
+#define console_printf(_fmt, ...) printf(_fmt, ##__VA_ARGS__)
 
-/**
- * Initializes the UART HCI transport module.
- *
- * @return                      0 on success;
- *                              A BLE_ERR_[...] error code on failure.
- */
-void ble_hci_sock_init(void);
-
-void ble_hci_sock_ack_handler(void *arg);
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* __CONSOLE_H__ */

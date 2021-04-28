@@ -35,44 +35,15 @@
  */
 #include "syscfg/syscfg.h"
 
+#include "android_sockets.h"
+#include "android/utils/debug.h"
+
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <sys/uio.h>
-#include <unistd.h>
-#include <sys/socket.h>
-
-#if MYNEWT_VAL(BLE_SOCK_USE_TCP)
-#include <sys/errno.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#endif
-
-#if MYNEWT_VAL(BLE_SOCK_USE_LINUX_BLUE)
-#include <sys/errno.h>
-#define BTPROTO_HCI       1
-#define HCI_CHANNEL_RAW	  0
-#define HCI_CHANNEL_USER  1
-#define HCIDEVUP          _IOW('H', 201, int)
-#define HCIDEVDOWN        _IOW('H', 202, int)
-#define HCIDEVRESET       _IOW('H', 203, int)
-#define HCIGETDEVLIST     _IOR('H', 210, int)
-
-struct sockaddr_hci {
-    sa_family_t hci_family;
-    unsigned short hci_dev;
-    unsigned short hci_channel;
-};
-#elif MYNEWT_VAL(BLE_SOCK_USE_NUTTX)
 #include <errno.h>
-#include <netpacket/bluetooth.h>
-#endif
-
-#include <fcntl.h>
-#include <sys/ioctl.h>
 
 #include "sysinit/sysinit.h"
 #include "os/os.h"
@@ -204,6 +175,8 @@ static struct ble_hci_sock_state {
     uint8_t rx_data[512];
 } ble_hci_sock_state;
 
+
+// Defines the port where we can connect to root canal via sockets.
 #if MYNEWT_VAL(BLE_SOCK_USE_TCP)
 static int s_ble_hci_device = MYNEWT_VAL(BLE_SOCK_TCP_PORT);
 #elif MYNEWT_VAL(BLE_SOCK_USE_LINUX_BLUE)
@@ -232,166 +205,45 @@ ble_hci_trans_acl_buf_alloc(void)
     return m;
 }
 
-#if MYNEWT_VAL(BLE_SOCK_USE_LINUX_BLUE)
 static int
 ble_hci_sock_acl_tx(struct os_mbuf *om)
 {
-    struct msghdr msg;
-    struct iovec iov[8];
     int i;
     struct os_mbuf *m;
     uint8_t ch;
 
-    memset(&msg, 0, sizeof(msg));
-    memset(iov, 0, sizeof(iov));
-
-    msg.msg_iov = iov;
-
     ch = BLE_HCI_UART_H4_ACL;
-    iov[0].iov_len = 1;
-    iov[0].iov_base = &ch;
+    i = socketSend(ble_hci_sock_state.sock, &ch, sizeof(ch));
     i = 1;
     for (m = om; m; m = SLIST_NEXT(m, om_next)) {
-        iov[i].iov_base = m->om_data;
-        iov[i].iov_len = m->om_len;
-        i++;
+        i += socketSend(ble_hci_sock_state.sock, m->om_data, m->om_len);
     }
-    msg.msg_iovlen = i;
 
-    STATS_INC(hci_sock_stats, omsg);
-    STATS_INC(hci_sock_stats, oacl);
     STATS_INCN(hci_sock_stats, obytes, OS_MBUF_PKTLEN(om) + 1);
-    i = sendmsg(ble_hci_sock_state.sock, &msg, 0);
     os_mbuf_free_chain(om);
     if (i != OS_MBUF_PKTLEN(om) + 1) {
         if (i < 0) {
-            dprintf(1, "sendmsg() failed : %d\n", errno);
+            derror("socketSend() failed : %d\n", errno);
         } else {
-            dprintf(1, "sendmsg() partial write: %d\n", i);
+            derror("socketSend() partial write: %d\n", i);
         }
         STATS_INC(hci_sock_stats, oerr);
         return BLE_ERR_MEM_CAPACITY;
     }
     return 0;
 }
-#elif MYNEWT_VAL(BLE_SOCK_USE_NUTTX)
-static int
-ble_hci_sock_acl_tx(struct os_mbuf *om)
-{
-    size_t len;
-    uint8_t *buf;
-    int i;
-    struct os_mbuf *m;
-    struct sockaddr_hci addr;
 
-    addr.hci_family = AF_BLUETOOTH;
-    addr.hci_channel = HCI_CHANNEL_RAW;
-    addr.hci_dev = 0;
 
-    memcpy(&addr, &addr, sizeof(struct sockaddr_hci));
-
-    len = 1;
-
-    for (m = om; m; m = SLIST_NEXT(m, om_next)) {
-        len += m->om_len;
-    }
-
-    buf = (uint8_t *)malloc(len);
-
-    buf[0] = BLE_HCI_UART_H4_ACL;
-
-    i = 1;
-    for (m = om; m; m = SLIST_NEXT(m, om_next)) {
-        memcpy(&buf[i], m->om_data, m->om_len);
-        i += m->om_len;
-    }
-
-    STATS_INC(hci_sock_stats, omsg);
-    STATS_INC(hci_sock_stats, oacl);
-    STATS_INCN(hci_sock_stats, obytes, OS_MBUF_PKTLEN(om) + 1);
-
-    i = sendto(ble_hci_sock_state.sock, buf, len, 0,
-               (struct sockaddr *)&addr, sizeof(struct sockaddr_hci));
-
-    free(buf);
-
-    os_mbuf_free_chain(om);
-    if (i != OS_MBUF_PKTLEN(om) + 1) {
-        if (i < 0) {
-            dprintf(1, "sendto() failed : %d\n", errno);
-        } else {
-            dprintf(1, "sendto() partial write: %d\n", i);
-        }
-        STATS_INC(hci_sock_stats, oerr);
-        return BLE_ERR_MEM_CAPACITY;
-    }
-    return 0;
-}
-#endif
-
-#if MYNEWT_VAL(BLE_SOCK_USE_LINUX_BLUE)
 static int
 ble_hci_sock_cmdevt_tx(uint8_t *hci_ev, uint8_t h4_type)
 {
-    uint8_t btaddr[6];
-    struct msghdr msg;
-    struct iovec iov[8];
     int len;
     int i;
     uint8_t ch;
 
-    memset(&msg, 0, sizeof(msg));
-    memset(iov, 0, sizeof(iov));
-
-    msg.msg_iov = iov;
-    msg.msg_iovlen = 2;
 
     ch = h4_type;
-    iov[0].iov_len = 1;
-    iov[0].iov_base = &ch;
-    iov[1].iov_base = hci_ev;
-    if (h4_type == BLE_HCI_UART_H4_CMD) {
-        len = sizeof(struct ble_hci_cmd) + hci_ev[2];
-        STATS_INC(hci_sock_stats, ocmd);
-    } else if (h4_type == BLE_HCI_UART_H4_EVT) {
-        len = sizeof(struct ble_hci_ev) + hci_ev[1];
-        STATS_INC(hci_sock_stats, oevt);
-    } else {
-        assert(0);
-    }
-    iov[1].iov_len = len;
-
-    STATS_INC(hci_sock_stats, omsg);
-    STATS_INCN(hci_sock_stats, obytes, len + 1);
-
-    i = sendmsg(ble_hci_sock_state.sock, &msg, 0);
-    ble_hci_trans_buf_free(hci_ev);
-    if (i != len + 1) {
-        if (i < 0) {
-            dprintf(1, "sendmsg() failed : %d\n", errno);
-        } else {
-            dprintf(1, "sendmsg() partial write: %d\n", i);
-        }
-        STATS_INC(hci_sock_stats, oerr);
-        return BLE_ERR_MEM_CAPACITY;
-    }
-
-    return 0;
-}
-#elif MYNEWT_VAL(BLE_SOCK_USE_NUTTX)
-static int
-ble_hci_sock_cmdevt_tx(uint8_t *hci_ev, uint8_t h4_type)
-{
-    uint8_t *buf;
-    size_t len;
-    struct sockaddr_hci addr;
-    int i;
-
-    addr.hci_family = AF_BLUETOOTH;
-    addr.hci_channel = HCI_CHANNEL_RAW;
-    addr.hci_dev = 0;
-
-    memcpy(&addr, &addr, sizeof(struct sockaddr_hci));
+    i = socketSend(ble_hci_sock_state.sock, &ch, sizeof(ch));
 
     if (h4_type == BLE_HCI_UART_H4_CMD) {
         len = sizeof(struct ble_hci_cmd) + hci_ev[2];
@@ -403,24 +255,16 @@ ble_hci_sock_cmdevt_tx(uint8_t *hci_ev, uint8_t h4_type)
         assert(0);
     }
 
-    STATS_INC(hci_sock_stats, omsg);
     STATS_INCN(hci_sock_stats, obytes, len + 1);
 
-    buf = (uint8_t *)malloc(len + 1);
-
-    buf[0] = h4_type;
-    memcpy(&buf[1], hci_ev, len);
-
-    i = sendto(ble_hci_sock_state.sock, buf, len + 1, 0,
-               (struct sockaddr *)&addr, sizeof(struct sockaddr_hci));
-
-    free(buf);
+    i += socketSend(ble_hci_sock_state.sock, hci_ev, len);
+    dprint("Send %d bytes", i);
     ble_hci_trans_buf_free(hci_ev);
     if (i != len + 1) {
         if (i < 0) {
-            dprintf(1, "sendto() failed : %d\n", errno);
+            derror("socketSend() failed : %d\n", errno);
         } else {
-            dprintf(1, "sendto() partial write: %d\n", i);
+            derror("socketSend() partial write: %d\n", i);
         }
         STATS_INC(hci_sock_stats, oerr);
         return BLE_ERR_MEM_CAPACITY;
@@ -428,7 +272,6 @@ ble_hci_sock_cmdevt_tx(uint8_t *hci_ev, uint8_t h4_type)
 
     return 0;
 }
-#endif
 
 static int
 ble_hci_sock_rx_msg(void)
@@ -444,8 +287,9 @@ ble_hci_sock_rx_msg(void)
     if (bhss->sock < 0) {
         return -1;
     }
-    len = read(bhss->sock, bhss->rx_data + bhss->rx_off,
+    len = socketRecv(bhss->sock, bhss->rx_data + bhss->rx_off,
                sizeof(bhss->rx_data) - bhss->rx_off);
+               dprint("Received %d bytes", len);
     if (len < 0) {
         return -2;
     }
@@ -562,23 +406,13 @@ ble_hci_sock_rx_ev(struct ble_npl_event *ev)
     }
 }
 
-#if MYNEWT_VAL(BLE_SOCK_USE_TCP)
 static int
 ble_hci_sock_config(void)
 {
     struct ble_hci_sock_state *bhss = &ble_hci_sock_state;
-    struct sockaddr_in sin;
     ble_npl_time_t timeout;
     int s;
     int rc;
-
-    memset(&sin, 0, sizeof(sin));
-    sin.sin_family = AF_INET;
-    sin.sin_port = htons(s_ble_hci_device);
-    sin.sin_addr.s_addr = inet_addr("127.0.0.1");
-#ifdef MN_OSX
-    sin.sin_len = sizeof(sin);
-#endif
 
 #if 0
     if (bhss->sock >= 0) {
@@ -587,23 +421,16 @@ ble_hci_sock_config(void)
     }
 #endif
     if (bhss->sock < 0) {
-        s = socket(PF_INET, SOCK_STREAM, 0);
+        s = socketTcp4LoopbackClient(s_ble_hci_device);
         if (s < 0) {
-            goto err;
+            // Try Ipv6
+            s = socketTcp6LoopbackClient(s_ble_hci_device);
+            if (s < 0) {
+                dwarning("connect() failed: %d\n", errno);
+                goto err;
+            }
         }
 
-        rc = connect(s, (struct sockaddr *)&sin, sizeof(sin));
-        if (rc) {
-            dprintf(1, "connect() failed: %d\n", errno);
-            goto err;
-        }
-
-        rc = 1;
-
-        rc = ioctl(s, FIONBIO, (char *)&rc);
-        if (rc) {
-            goto err;
-        }
         bhss->sock = s;
     }
     rc = ble_npl_time_ms_to_ticks(10, &timeout);
@@ -615,117 +442,10 @@ ble_hci_sock_config(void)
     return 0;
 err:
     if (s >= 0) {
-        close(s);
+        socketClose(s);
     }
     return BLE_ERR_HW_FAIL;
 }
-#endif
-
-#if MYNEWT_VAL(BLE_SOCK_USE_LINUX_BLUE)
-static int
-ble_hci_sock_config(void)
-{
-    struct sockaddr_hci shci;
-    int s;
-    int rc;
-    ble_npl_time_t timeout;
-
-    memset(&shci, 0, sizeof(shci));
-    shci.hci_family = AF_BLUETOOTH;
-    shci.hci_dev = s_ble_hci_device;
-    shci.hci_channel = HCI_CHANNEL_USER;
-
-    if (ble_hci_sock_state.sock >= 0) {
-        close(ble_hci_sock_state.sock);
-        ble_hci_sock_state.sock = -1;
-    }
-
-    s = socket(PF_BLUETOOTH, SOCK_RAW, BTPROTO_HCI);
-    if (s < 0) {
-        dprintf(1, "socket() failed %d\n", errno);
-        goto err;
-    }
-
-    /* 
-     * HCI User Channel requires exclusive access to the device.
-     * The device has to be down at the time of binding.
-     */
-    ioctl(s, HCIDEVDOWN, shci.hci_dev);
-
-    rc = bind(s, (struct sockaddr *)&shci, sizeof(shci));
-    if (rc) {
-        dprintf(1, "bind() failed %d hci%d\n", errno, shci.hci_dev);
-        goto err;
-    }
-
-    rc = 1;
-
-    rc = ioctl(s, FIONBIO, (char *)&rc);
-    if (rc) {
-        goto err;
-    }
-    ble_hci_sock_state.sock = s;
-
-    rc = ble_npl_time_ms_to_ticks(10, &timeout);
-    if (rc) {
-        goto err;
-    }
-    ble_npl_callout_reset(&ble_hci_sock_state.timer, timeout);
-
-    return 0;
-err:
-    if (s >= 0) {
-        close(s);
-    }
-    return BLE_ERR_HW_FAIL;
-}
-#elif MYNEWT_VAL(BLE_SOCK_USE_NUTTX)
-static int
-ble_hci_sock_config(void)
-{
-    struct sockaddr_hci shci;
-    int s;
-    int rc;
-    ble_npl_time_t timeout;
-
-    memset(&shci, 0, sizeof(shci));
-    shci.hci_family = AF_BLUETOOTH;
-    shci.hci_dev = 0;
-    shci.hci_channel = HCI_CHANNEL_RAW;
-
-    if (ble_hci_sock_state.sock >= 0) {
-        close(ble_hci_sock_state.sock);
-        ble_hci_sock_state.sock = -1;
-    }
-
-    s = socket(PF_BLUETOOTH, SOCK_RAW, BTPROTO_HCI);
-    if (s < 0) {
-        dprintf(1, "socket() failed %d\n", errno);
-        goto err;
-    }
-
-    rc = bind(s, (struct sockaddr *)&shci, sizeof(shci));
-    if (rc) {
-        dprintf(1, "bind() failed %d hci%d\n", errno, shci.hci_dev);
-        goto err;
-    }
-
-    ble_hci_sock_state.sock = s;
-
-    rc = ble_npl_time_ms_to_ticks(10, &timeout);
-    if (rc) {
-        goto err;
-    }
-    ble_npl_callout_reset(&ble_hci_sock_state.timer, timeout);
-
-    return 0;
-err:
-    if (s >= 0) {
-        close(s);
-    }
-    return BLE_ERR_HW_FAIL;
-}
-#endif
 
 /**
  * Sends an HCI event from the controller to the host.
@@ -925,7 +645,7 @@ ble_hci_trans_reset(void)
     /* Reopen the UART. */
     rc = ble_hci_sock_config();
     if (rc != 0) {
-        dprintf(1, "Failure restarting socket HCI\n");
+        dwarning("Failure restarting socket HCI\n");
         return rc;
     }
 
