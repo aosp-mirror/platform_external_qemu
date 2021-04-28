@@ -26,7 +26,9 @@ TEST(Hw_lcd, MapDensity) {
     EXPECT_EQ(LCD_DENSITY_MDPI,    hwLcd_mapDensity(169));
     EXPECT_EQ(LCD_DENSITY_180,     hwLcd_mapDensity(170));
     EXPECT_EQ(LCD_DENSITY_180,     hwLcd_mapDensity(180));
-    EXPECT_EQ(LCD_DENSITY_180,     hwLcd_mapDensity(190));
+    EXPECT_EQ(LCD_DENSITY_180,     hwLcd_mapDensity(189));
+    EXPECT_EQ(LCD_DENSITY_200,     hwLcd_mapDensity(190));
+    EXPECT_EQ(LCD_DENSITY_200,     hwLcd_mapDensity(200));
     EXPECT_EQ(LCD_DENSITY_260DPI,  hwLcd_mapDensity(266));
     EXPECT_EQ(LCD_DENSITY_280DPI,  hwLcd_mapDensity(272));
     EXPECT_EQ(LCD_DENSITY_560DPI,  hwLcd_mapDensity(590));

@@ -214,6 +214,7 @@ int main(int argc, char **argv)
 #define  LCD_DENSITY_140       140
 #define  LCD_DENSITY_MDPI      160
 #define  LCD_DENSITY_180       180
+#define  LCD_DENSITY_200       200
 #define  LCD_DENSITY_TVDPI     213
 #define  LCD_DENSITY_HDPI      240
 #define  LCD_DENSITY_280DPI    280
@@ -4524,6 +4525,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                     case LCD_DENSITY_140:
                     case LCD_DENSITY_MDPI:
                     case LCD_DENSITY_180:
+                    case LCD_DENSITY_200:
                     case LCD_DENSITY_TVDPI:
                     case LCD_DENSITY_HDPI:
                     case LCD_DENSITY_280DPI:
