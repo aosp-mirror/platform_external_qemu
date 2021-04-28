@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d68998c9_2fa7d1cc",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1076123
+      },
+      "writtenOn": "2021-04-28T22:26:52Z",
+      "side": 1,
+      "message": "This would be much easier to review if it was split into two patches:\n1. NimBLE code\n2. Local changes\n\nI\u0027m assuming that #2 is relatively small, and that we don\u0027t need to review #1",
+      "revId": "5406b88ef293a8caa53b32f0bec4396a08527ec0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
