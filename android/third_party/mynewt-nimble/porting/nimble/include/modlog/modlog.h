@@ -25,34 +25,39 @@
 #include "log_common/log_common.h"
 #include "log/log.h"
 
+extern void   dprint( const char*  format, ... );
+extern void   dinfo( const char*  format, ... );
+extern void   dwarning( const char*  format, ... );
+extern void   derror( const char*  format, ... );
+
 #define MODLOG_MODULE_DFLT 255
 
 #if MYNEWT_VAL(LOG_LEVEL) <= LOG_LEVEL_DEBUG || defined __DOXYGEN__
 #define MODLOG_DEBUG(ml_mod_, ml_msg_, ...) \
     printf((ml_msg_), ##__VA_ARGS__)
 #else
-#define MODLOG_DEBUG(ml_mod_, ...) IGNORE(__VA_ARGS__)
+#define MODLOG_DEBUG(ml_mod_, format, ...) dprint("%s: " format ,  __func__, ##__VA_ARGS__);
 #endif
 
 #if MYNEWT_VAL(LOG_LEVEL) <= LOG_LEVEL_INFO || defined __DOXYGEN__
 #define MODLOG_INFO(ml_mod_, ml_msg_, ...) \
     printf((ml_msg_), ##__VA_ARGS__)
 #else
-#define MODLOG_INFO(ml_mod_, ...) IGNORE(__VA_ARGS__)
+#define MODLOG_INFO(ml_mod_, format, ...) dinfo("%s: " format ,  __func__, ##__VA_ARGS__);
 #endif
 
 #if MYNEWT_VAL(LOG_LEVEL) <= LOG_LEVEL_WARN || defined __DOXYGEN__
 #define MODLOG_WARN(ml_mod_, ml_msg_, ...) \
     printf((ml_msg_), ##__VA_ARGS__)
 #else
-#define MODLOG_WARN(ml_mod_, ...) IGNORE(__VA_ARGS__)
+#define MODLOG_WARN(ml_mod_, format, ...)  dwarning("%s: " format ,  __func__, ##__VA_ARGS__);
 #endif
 
 #if MYNEWT_VAL(LOG_LEVEL) <= LOG_LEVEL_ERROR || defined __DOXYGEN__
 #define MODLOG_ERROR(ml_mod_, ml_msg_, ...) \
     printf((ml_msg_), ##__VA_ARGS__)
 #else
-#define MODLOG_ERROR(ml_mod_, ...) IGNORE(__VA_ARGS__)
+#define MODLOG_ERROR(ml_mod_, format, ...) derror("%s: " format ,  __func__, ##__VA_ARGS__);
 #endif
 
 #if MYNEWT_VAL(LOG_LEVEL) <= LOG_LEVEL_CRITICAL || defined __DOXYGEN__
