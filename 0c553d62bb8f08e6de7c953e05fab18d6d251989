@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "caa7ee73_ce1a06a0",
+        "filename": "android/third_party/mynewt-nimble/apps/advertiser/src/main.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-04-28T23:54:18Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "371e40ee_1ce2c1fd",
+      "range": {
+        "startLine": 132,
+        "startChar": 3,
+        "endLine": 132,
+        "endChar": 25
+      },
+      "revId": "0c553d62bb8f08e6de7c953e05fab18d6d251989",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "bb87f663_9c97a7ee",
@@ -47,6 +71,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "577b5531_2d7c38cc",
+        "filename": "android/third_party/mynewt-nimble/apps/bttester/src/bttester.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-04-28T23:54:18Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "bb87f663_9c97a7ee",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 18
+      },
+      "revId": "0c553d62bb8f08e6de7c953e05fab18d6d251989",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f139b4cd_cc26f89a",
@@ -60,6 +108,30 @@
       "writtenOn": "2021-04-28T23:23:40Z",
       "side": 1,
       "message": "Add later, if needed?",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 5
+      },
+      "revId": "0c553d62bb8f08e6de7c953e05fab18d6d251989",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b283de51_77ecf50f",
+        "filename": "android/third_party/mynewt-nimble/porting/npl/android_emulator/include/hci_bridge.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-04-28T23:54:18Z",
+      "side": 1,
+      "message": "No longer user, can be removed.",
+      "parentUuid": "f139b4cd_cc26f89a",
       "range": {
         "startLine": 1,
         "startChar": 0,
