@@ -351,7 +351,8 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             }
 
             // start multi-display service after boot completion
-            if (fc::isEnabled(fc::MultiDisplay)) {
+            if (fc::isEnabled(fc::MultiDisplay) &&
+                !fc::isEnabled(fc::Minigbm)) {
                 adbInterface->enqueueCommand(
                         {"shell", "am", "broadcast", "-a",
                          "com.android.emulator.multidisplay.START", "-n",
