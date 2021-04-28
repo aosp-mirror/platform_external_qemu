@@ -959,7 +959,8 @@
 #endif
 
 #ifndef MYNEWT_VAL_BLE_SOCK_TCP_PORT
-#define MYNEWT_VAL_BLE_SOCK_TCP_PORT (14433)
+// Default root canal port.
+#define MYNEWT_VAL_BLE_SOCK_TCP_PORT (6402)
 #endif
 
 #ifndef MYNEWT_VAL_BLE_SOCK_USE_LINUX_BLUE
