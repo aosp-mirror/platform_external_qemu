@@ -1,0 +1,23 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(lldb) Debug Cmake Target",
+            "type": "lldb",
+            "request": "launch",
+            // Resolved by CMake Tools:
+            "program": "${command:cmake.launchTargetPath}",
+            "cwd": "${workspaceFolder}",
+            "args": [
+
+            ],
+            "env": {
+                // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
+                "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
+            },
+        },
+    ]
+}
