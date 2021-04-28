@@ -4068,6 +4068,17 @@ static int do_unfold(ControlClient client, char* args) {
     return -1;
 }
 
+static int do_no_draw(ControlClient client, char* args) {
+    std::string args_lower = args;
+    std::transform(args_lower.begin(), args_lower.end(), args_lower.begin(), ::tolower);
+    if (args_lower == "on" || args_lower == "true" || args_lower == "yes") {
+        android::featurecontrol::setEnabledOverride(android::featurecontrol::NoDraw, true);
+    } else {
+        android::featurecontrol::setEnabledOverride(android::featurecontrol::NoDraw, false);
+    }
+    return 0;
+}
+
 /* NOTE: The names of all commands are listed when the 'help' command
  *       is received.
  *       Android Studio uses the 'help' command and requires that the
@@ -4200,6 +4211,9 @@ extern const CommandDefRec main_commands[] = {
          "allows emulator to automatically take snapshot on uncaught "
          "exceptions, for test and debug purpose. (experimental)",
          NULL, NULL, icebox_commands},
+
+        {"nodraw", "turn on/off NoDraw mode. (experimental)",
+         NULL, NULL, do_no_draw, NULL},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
