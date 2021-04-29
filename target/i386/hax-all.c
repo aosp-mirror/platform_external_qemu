@@ -996,12 +996,13 @@ static void set_seg(struct segment_desc_t *lhs, const SegmentCache *rhs, bool is
     lhs->selector = rhs->selector;
     lhs->base = rhs->base;
     lhs->limit = rhs->limit;
-    if (!rhs->selector && !is_tr) {
-        lhs->ar = 1 << 16;
-        return;
-    }
+    //if (!rhs->selector && !is_tr) {
+    //    lhs->ar = 1 << 16;
+    //    return;
+    //}
     lhs->type = (flags >> DESC_TYPE_SHIFT) & 15;
     lhs->present = (flags & DESC_P_MASK) != 0;
+    //lhs->dpl = (flags >> DESC_DPL_SHIFT) & 3;
     lhs->dpl = (flags >> DESC_DPL_SHIFT) & 3;
     lhs->operand_size = (flags >> DESC_B_SHIFT) & 1;
     lhs->desc = (flags & DESC_S_MASK) != 0;
@@ -1071,7 +1072,7 @@ static int hax_set_segments(CPUArchState *env, struct vcpu_state_t *sregs)
     sregs->_idt.base = env->idt.base;
     sregs->_gdt.limit = env->gdt.limit;
     sregs->_gdt.base = env->gdt.base;
-    sregs->_efer = env->efer;
+    //sregs->_efer = env->efer;
     return 0;
 }
 
