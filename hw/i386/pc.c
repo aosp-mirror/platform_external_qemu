@@ -109,8 +109,6 @@ struct e820_table {
     struct e820_entry entry[E820_NR_ENTRIES];
 } QEMU_PACKED __attribute((__aligned__(4)));
 
-extern bool migratable_snapshot;
-
 static struct e820_table e820_reserve;
 static struct e820_entry *e820_table;
 static unsigned e820_entries;
@@ -2399,7 +2397,7 @@ static void pc_machine_class_init(ObjectClass *oc, void *data)
     pcmc->smbios_uuid_encoded = true;
     pcmc->gigabyte_align = true;
     pcmc->has_reserved_memory = true;
-    pcmc->kvmclock_enabled = !migratable_snapshot;
+    pcmc->kvmclock_enabled = true;
     pcmc->enforce_aligned_dimm = true;
     /* BIOS ACPI tables: 128K. Other BIOS datastructures: less than 4K reported
      * to be used at the moment, 32K should be enough for a while.  */

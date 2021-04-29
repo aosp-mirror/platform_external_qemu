@@ -73,8 +73,6 @@ const KVMCapabilityInfo kvm_arch_required_capabilities[] = {
     KVM_CAP_LAST_INFO
 };
 
-extern bool migratable_snapshot;
-
 static bool has_msr_star;
 static bool has_msr_hsave_pa;
 static bool has_msr_tsc_aux;
@@ -826,7 +824,7 @@ int kvm_arch_init_vcpu(CPUState *cs)
         has_msr_hv_hypercall = true;
     }
 
-    if (cpu->expose_kvm && !migratable_snapshot) {
+    if (cpu->expose_kvm) {
         memcpy(signature, "KVMKVMKVM\0\0\0", 12);
         c = &cpuid_data.entries[cpuid_i++];
         c->function = KVM_CPUID_SIGNATURE | kvm_base;
@@ -1066,7 +1064,6 @@ int kvm_arch_init_vcpu(CPUState *cs)
         /* Guests depend on 0x40000000 to detect this feature, so only expose
          * it if KVM exposes leaf 0x40000000. (Conflicts with Hyper-V) */
         && cpu->expose_kvm
-        && !migratable_snapshot
         && kvm_base == KVM_CPUID_SIGNATURE
         /* TSC clock must be stable and known for this feature. */
         && tsc_is_stable_and_known(env)) {
