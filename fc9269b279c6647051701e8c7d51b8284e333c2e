@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "59a5de88_206e8fc2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2021-04-29T23:25:22Z",
+      "side": 1,
+      "message": "This is the \"revert of the revert\". The fix is in the CL chain.",
+      "revId": "fc9269b279c6647051701e8c7d51b8284e333c2e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
