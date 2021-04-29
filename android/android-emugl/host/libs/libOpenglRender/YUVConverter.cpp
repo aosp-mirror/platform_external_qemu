@@ -692,6 +692,7 @@ void YUVConverter::swapTextures(uint32_t type, uint32_t* textures) {
     } else {
         FATAL("Unknown format: 0x%x", type);
     }
+    mTexturesSwapped = true;
 }
 
 // drawConvert: per-frame updates.
@@ -701,15 +702,30 @@ void YUVConverter::swapTextures(uint32_t type, uint32_t* textures) {
 void YUVConverter::drawConvert(int x, int y,
                                int width, int height,
                                char* pixels) {
+    drawConvertFromFormat(mFormat, x, y, width, height, pixels);
+}
+
+void YUVConverter::drawConvertFromFormat(FrameworkFormat format, int x, int y, int width, int height, char* pixels) {
+
     saveGLState();
     if (pixels && (width != mWidth || height != mHeight)) {
         reset();
     }
 
-    if (mProgram == 0) {
+    bool uploadFormatChanged = !mTexturesSwapped && pixels && (format != mFormat);
+    bool initNeeded = (mProgram == 0) || uploadFormatChanged;
+
+    if (initNeeded) {
+        if (uploadFormatChanged) {
+            mFormat = format;
+            mCbFormat = format;
+            reset();
+        }
         init(width, height, mFormat);
     }
+
     s_gles2.glViewport(x, y, mCbWidth, mCbHeight);
+
     uint32_t yoff, uoff, voff, ywidth, cwidth, cheight;
     getYUVOffsets(width, height, mFormat, &yoff, &uoff, &voff, &ywidth,
                   &cwidth);
