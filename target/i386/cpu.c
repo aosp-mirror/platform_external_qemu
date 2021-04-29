@@ -669,6 +669,8 @@ static const ExtSaveArea x86_ext_save_areas[] = {
             .size = sizeof(XSavePKRU) },
 };
 
+extern bool migratable_snapshot;
+
 static uint32_t xsave_area_size(uint64_t mask)
 {
     int i;
@@ -3025,11 +3027,13 @@ static void x86_cpu_load_def(X86CPU *cpu, X86CPUDefinition *def, Error **errp)
 
     /* Special cases not set in the X86CPUDefinition structs: */
     if (kvm_enabled()) {
-        if (!kvm_irqchip_in_kernel()) {
+        if (!kvm_irqchip_in_kernel() || migratable_snapshot) {
             x86_cpu_change_kvm_default("x2apic", "off");
         }
 
-        x86_cpu_apply_props(cpu, kvm_default_props);
+        if (!migratable_snapshot) {
+            x86_cpu_apply_props(cpu, kvm_default_props);
+        }
     } else if (tcg_enabled()) {
         x86_cpu_apply_props(cpu, tcg_default_props);
     }
@@ -4161,7 +4165,7 @@ static void x86_cpu_expand_features(X86CPU *cpu, Error **errp)
         }
     }
 
-    if (!kvm_enabled() || !cpu->expose_kvm) {
+    if (!kvm_enabled() || !cpu->expose_kvm || migratable_snapshot) {
         env->features[FEAT_KVM] = 0;
     }
 
