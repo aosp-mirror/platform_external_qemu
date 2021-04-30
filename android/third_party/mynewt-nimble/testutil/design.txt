@@ -1,0 +1,476 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+# 
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+****** TEST AUTOMATION
+
+*** HISTORY
+Rev.    Date            Changes
+2       2015/09/07      Addition of tu_restart(); clarification of exported
+                            preprocessor symbols.
+1       2015/08/28
+
+
+*** SUMMARY
+
+Automated testing can be done in either of two ways:
+    1. Testing a set of packages on embedded hardware or a simulated
+       environment.
+    2. Testing an individual package in a simulated environment.
+
+
+***** PACKAGE SET TESTING
+
+Automated testing of package sets consists of two components:
+    1. "PC software" which administers tests and manages results.
+    2. Test images which run on the units under test (UUTs).
+
+
+**** PC SOFTWARE
+
+The PC software will need to perform the following tasks:
+    1. Connect to UUT (e.g., via JTAG and OpenOCD) (if embedded).
+    2. Upload test image (if embedded).
+    3. Run test image.
+    4. Read test results from UUT.
+    5. Generate test report.
+
+If any of these tasks fail, a fatal error would need to be logged to the test
+report.
+
+The details of the PC software are TBD, and are not discussed further here.
+
+
+**** TEST IMAGES
+
+Test images are build using the stack tool.  The user will need to create a
+separate stack tool target for each platform under test.  In addition, there
+will be a single stack tool project which contains code to call the appropriate
+test code.  Each test image typically consists of the following:
+    1. The test cases from all relevant packages.
+    2. Some "glue code" from a special test project.
+
+
+*** PACKAGE TEST CASES
+
+A package may optionally contain a set of test cases.  Test cases are not
+normally compiled and linked when a package is built; they are only included
+when the "test" identity is specified.  All of a
+package's test code goes in its 'src/test' directory.  For example, the ffs
+package's test code is located in the following directory:
+
+    libs/ffs/src/test/
+
+This directory contains the source and header files that implement the ffs test
+code.
+
+The test code has access to all the header files in the following directories:
+    * src
+    * src/arch/<target-arch>
+    * include
+    * src/test
+    * src/test/arch/<target-arch>
+    * include directories of all package dependencies
+
+Package test code typically depends on the testutil package, described later in
+this document.  If a package's test code uses testutil, then the package itself
+needs to have testutil in its dependency list.
+
+Some test cases or test initialization code may be platform-specific.  In such
+cases, the platform-specific function definitions are placed in arch
+subdirectories within the package test directory.
+
+When test code is built (i.e., when the "test" identity is specified), the
+stack tool defines the "TEST" macro.  This macro is defined during complilation
+of all C source files in all projects and packages..
+
+
+***** TESTUTIL
+
+The testutil package is a test framework that provides facilities for
+specifying test cases and recording test results.  
+
+
+*** TEST STRUCTURE
+
+Tests are structures according to the following hierarchy:
+
+                [test]
+               /      \
+        [suite]        [suite]
+       /       \      /       \
+     [case] [case]  [case] [case]
+
+
+I.e., a test consists of test suites, and a test suite consits of test cases.
+
+The test code uses testutil to define test suites and test cases.
+
+
+*** TESTUTIL EXAMPLE
+
+The following example demonstrates how to create a simple test suite.
+
+    TEST_CASE(test_addition)
+    {
+        int sum;
+
+        sum = 5 + 10;
+        TEST_ASSERT(sum == 15, "actual value: %d", sum);
+    }
+
+    TEST_CASE(test_times_0)
+    {
+        TEST_ASSERT(3 * 0 == 0);
+        TEST_ASSERT(4 * 0 == 0);
+        TEST_ASSERT(712 * 0 == 0);
+    }
+
+    TEST_SUITE(test_suite_arithmetic)
+    {
+        test_addition();
+        test_times_0();
+    }
+
+The test suite would then be executed via a call to test_suite_arithmetic().
+
+
+*** TEST RESULTS
+
+The testutil package optionally writes test results to a file system residing
+on the UUT.  The contents of the file system can then be retrieved from the UUT
+by the PC software.  When run in an embedded environment, the results are
+written to an ffs file system.  When run in a simulated environment, the
+results are written to the native file system.
+
+Results directory structure:
+    /
+    └── test-results
+        ├── <test-suite-1>
+        |   ├── <test-case-1>
+        |   │   ├── <result-1>.txt
+        |   │   ├── [<result-2>.txt]
+        |   │   ├── [...]
+        |   │   └── [other-data-files]
+        |   ├── <test-case-2>
+        |   │   ├── <result-1>.txt
+        |   │   ├── [<result-2>.txt]
+        |   │   ├── [...]
+        |   │   └── [other-data-files]
+        |   └── [...]
+        ├── <test-suite-2>
+        |   └── [...]
+        └── [...]
+
+The name of the top-level directory is configurable.  This document uses
+'test-results' in its examples.
+
+Each test case directory contains a set of result files, and optionally
+contains data files containing information collected during the test.  Result
+files are named according to one of the following templates:
+
+    * pass.txt
+    * fail-xxxx.txt
+
+Where "xxxx" is a numeric index automatically generated by testutil.  If a test
+passes, its results directory is populated with a single 'pass' file and no
+'fail' files.  If a test fails, its results directory is populated with one or
+more 'fail' files and no 'pass' files.  A result file (pass or fail) optionally
+contains a text string.
+
+In addition, a results directory can contains data files containing information
+collected during the test.  For example, a test case may record timing
+information or statistics.  Test case code specifies the name and contents of a
+data file when it writes one.  Data files can be written during a test case
+regardless of the test outcome.  There are no restrictions on the size or
+contents of data files, but their filenames should be distinct from the test
+result naming scheme described above.  There is no limit to the number of data
+files that a particular test case can write.
+
+Returning to the earlier arithmetic test suite example, suppose the test suite
+completed with the following results:
+
+    * test_addition: 1 assertion success, 0 assertion failures
+    * test_times_0:  1 assertion success, 2 assertion failures
+
+Such a test run would produce the following directory tree:
+
+    /
+    └── test-results
+        └── test_suite_arithmetic
+            ├── test_addition
+            │   └── pass.txt
+            └── test_times_0
+                ├── fail-0000.txt
+                └── fail-0001.txt
+
+Each 'fail' file would contain a string describing the failure.
+
+
+*** TESTUTIL API
+
+struct tu_config {
+    /** If nonzero, test results are printed to stdout. */
+    int tc_print_results;
+
+    /**
+     * Name of the base results directory (e.g., "test-results").  If null,
+     * results are not written to disk.
+     */
+    const char *tc_results_path;
+
+    /**
+     * Array of flash areas where an ffs file system should be located.  Unused
+     * if run in a simulated environment.  This array must be terminated with a
+     * zero-length area.
+     */
+    const struct ffs_area_desc *tc_area_descs;
+};
+extern struct tu_config tu_config;
+
+Description:
+    The global tu_config struct contains all the testutil package's settings.
+    The struct must be populated before tu_init() is called.
+
+-
+
+int tu_init(void)
+
+Description:
+    Initializes the test framework according to the contents of the tu_config
+    struct.  If run in an embedded environment and the
+    tu_config.tc_results_path and tu_config.tc_area_descs fields are non-null,
+    this function ensures an ffs file system is present within the specified
+    flash areas.  If testutil is using an ffs file system, and no valid ffs
+    file system is detected in the specified region of flash, the region is
+    formatted with a new file system.  This function must be called before any
+    tests are run.
+
+    If, immediately prior to a call to tu_init(), the UUT was restarted via a
+    call to tu_restart(), this function skips all the test cases that have
+    already been executed.  See tu_restart() for details.
+
+    Returns 0 on success; nonzero on failure.
+
+-
+
+TEST_ASSERT(expression)
+TEST_ASSERT(expression, fail_msg, ...)
+
+Description:
+    Asserts that the specified condition is true.  If the expression is true,
+    nothing gets reported.  The expression argument is mandatory; the rest are
+    optional.  The fail_msg argument is a printf format string which specifies
+    how the remaining arguments are parsed.
+
+    If the expression is false, testutil reports the following message:
+
+        |<file>:<line-number>| failed assertion: <expression>
+        <fail_msg>
+
+    If no fail_msg is specified, only the first line gets reported.
+
+    The test case proceeds as normal after this macro is invoked.
+
+Example:
+    TEST_ASSERT(num_blocks == 1024,
+                "expected: 1024 blocks; got: %d", num_blocks);
+
+    On failure, the above assertion would result in a report like the
+    following:
+
+        |ffs_test.c:426| failed assertion: num_blocks == 1024
+        expected: 1024 blocks; got 12
+
+-
+
+TEST_ASSERT_FATAL(expression)
+TEST_ASSERT_FATAL(expression, fail_msg, ...)
+
+Description:
+    These are identical to their TEST_ASSERT counterparts, except that a
+    failure causes the current test case to be aborted.
+
+-
+
+TEST_PASS(msg, ...)
+
+Description:
+    Reports a success result for the current test.  This function is not
+    normally needed, as all successful tests automatically write an empty pass
+    result at completion.  This function is only needed when the success result
+    report should contain text.  The msg argument is a printf format string
+    which specifies how the remaining arguments are parsed.  The result file
+    produced by this function contains the following text:
+
+        |<file>:<line-number>| manual pass
+        <msg>
+
+    After this function is called, the remainder of the test case is not
+    executed.  If the current test has already failed when this macro is
+    invoked, the macro has no effect.
+
+-
+
+testutil_write_data(const char *filename, const uint8_t *data, size_t data_len)
+
+Description:
+    Writes a data file to the current test results directory.  The file's
+    contents are fully specified by the data and data_len arguments.  If a file
+    with the specified name already exists, it is overwritten.  After this
+    function is called, the test case proceeds as normal.
+
+    Data does not get written to stdout; it only gets written to disk.  This
+    function has no effect if testutil is configured to not write results to
+    disk.
+
+-
+
+TEST_CASE(test_case_name) { /* test case code */ }
+
+Description:
+    Defines a test case function with the following type:
+
+        int test_case_name(void)
+
+    The return value is 0 if the test case passed; nonzero if it failed.
+    Generally, the return code is not used.
+
+
+-
+
+TEST_SUITE(test_suite_name) { /* test suite code */ }
+
+Description:
+    Defines a test suite function with the following type:
+
+        int test_suite_name(void)
+
+    The return value is 0 if the test suite passed; nonzero if it failed.
+    Generally, the return code is not used.
+
+-
+
+void tu_restart(void)
+
+Description:
+    This function is used when a system reset is necessary to proceed with
+    testing.  For example, the OS is designed to run forever once started, so a
+    test which creates several OS tasks and then starts the OS has no means of
+    completing.  This function, when called from such a test, gracefully ends
+    the current test case and proceeds to the next test case.
+
+    The particulars of this function depend on whether it is called from a
+    simulated environment.  In a simulated environment, this function uses a
+    longjmp() call to break out of the current test case.
+
+    In a non-simulated environment, this function performs the following
+    procedure:
+
+        1. Record the current test status to the file system.
+        2. Perform a software reset of the UUT.
+        3. Read test status and delete it from the file system.
+        4. Skip all previously completed test cases.
+
+    If this function is called before any results have been reported for the
+    current test case, a "pass" result gets reported.
+
+    Note: after this function performs a software reset, the UUT may not be
+    fully initialized, depending on the test environment.  For example, if the
+    UUT has been set up to run the test image from RAM via JTAG, variables in
+    the .data section will not get properly initialized by the software reset.
+    Proper initialization in this case would require that data be re-read from
+    the image file via an additional run of the JTAG script.
+
+-
+
+ASSERT_IF_TEST(cond)
+
+Description:
+    The effect of this macro depends on whether the TEST macro is defined:
+
+        If defined:     expands to assert().
+        If not defined: expands to nothing.
+
+    This macro is not intended for use within test cases.  Instead, it should
+    be used in normal non-test code to perform computationally-expensive
+    checks.  In non-test builds, the checks do not get performed.
+
+
+***** INDIVIDUAL PACKAGE TESTING
+
+Testing individual packages is performed via the "target test" stack tool
+command.  When testing is done in this manner, the stack tool automatically
+runs the test code on the host machine.  There is no need for an extra stack
+project for producing a test image.
+
+Testing a package in this manner requires a special target that is specific to
+the package.  The target specifies the package to test via the "pkg"
+configuration variable.  The target must not specify a project, or the test
+command will fail.
+
+Below is an example target called testffs that tests the ffs package:
+
+    testffs
+            compiler: sim
+            compiler_def: debug
+            pkg: libs/ffs
+            bsp: hw/bsp/native
+            arch: sim
+            name: testffs
+
+The target specifies the "native" bsp.  This is necessary so that the ffs test
+code can link with the appropriate implementations of the hal functions that it
+depends on.
+
+The test is run by specifying the following stack arguments:
+
+    target test testffs
+
+When the "target test" command is used, the PKG_TEST macro is defined during
+compilation of the package under test.  This is in addition to the TEST macro,
+which is defined during compilation of all packages.
+
+
+***** ISSUES / QUESTIONS
+
+* For individual package tests, the requirement for a separate target for each
+  package may become unwieldy.  Perhaps the stack tool should be modified to
+  allow arbitrary key-value pairs to be specified on the command line.  That
+  way, the target's "pkg" variable could be unset, and the user would specify
+  the package to test when he executes the test command.  This would allow the
+  same target to be used for all packages, e.g.,
+
+        target test testtarget pkg=libs/ffs
+        target test testtarget pkg=libs/os
+
+* Most test frameworks define a lot of extra assertions (e.g., assert_equal(),
+  assert_not_null(), assert_false(), etc).  These don't seem particularly
+  useful to me, so I did not add them.  Typing TEST_ASSERT(x == 5) is no more
+  difficult than TEST_ASSERT_EQUAL(x, 5).  The benefit of the more specific
+  assertions is that they can automatically produce more helpful failure
+  messages.  For example, if TEST_ASSERT_EQUAL(x, 5) fails, the failure message
+  can contain the actual value of x in most cases, whereas a plain
+  TEST_ASSERT() won't automatically log that information.  This didn't seem
+  useful enough to me to justify growing the interface, but I am interested in
+  hearing what others think.
+
+* During testing on embedded devices, the PC software will need some
+  notification when testing is complete, so that it knows when to retrieve the
+  test results.  The testutil package should expose some state that the PC
+  software can poll for this purpose.

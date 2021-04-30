@@ -123,14 +123,14 @@ int
 ble_hs_locked_by_cur_task(void)
 {
 #if MYNEWT
-    struct os_task *owner;
+    void *owner;
 
     if (!ble_npl_os_started()) {
         return ble_hs_dbg_mutex_locked;
     }
 
-    owner = ble_hs_mutex.mu.mu_owner;
-    return owner != NULL && owner == os_sched_get_current_task();
+    owner = ble_hs_mutex.mu_owner;
+    return owner != NULL && owner == os_get_current_task_id();
 #else
     return 1;
 #endif

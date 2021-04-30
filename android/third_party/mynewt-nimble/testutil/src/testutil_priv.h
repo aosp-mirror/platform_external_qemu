@@ -17,23 +17,23 @@
  * under the License.
  */
 
-#ifndef _BLE_HCI_SOCKET_H_
-#define _BLE_HCI_SOCKET_H_
+#ifndef H_TESTUTIL_PRIV_
+#define H_TESTUTIL_PRIV_
+
+#include <stddef.h>
+#include <inttypes.h>
+
+#include "testutil/testutil.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct os_eventq;
-void ble_hci_sock_set_evq(struct os_eventq*);
+void tu_arch_restart(void);
+void tu_case_abort(void);
 
-/**
- * Initializes the UART HCI transport module.
- *
- * @return                      0 on success;
- *                              A BLE_ERR_[...] error code on failure.
- */
-void ble_hci_sock_init(void);
+extern tu_post_test_fn_t *tu_case_post_test_cb;
+extern void *tu_case_post_test_cb_arg;
 
 #ifdef __cplusplus
 }
