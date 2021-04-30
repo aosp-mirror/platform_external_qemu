@@ -1221,6 +1221,11 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
             return;
         }
     }
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV) {
+        if (pane == PANE_IDX_MULTIDISPLAY) {
+            return;
+        }
+    }
     if (!androidHwConfig_hasVirtualSceneCamera(android_hw) &&
         pane == PANE_IDX_CAMERA) {
         return;
