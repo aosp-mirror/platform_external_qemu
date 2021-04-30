@@ -653,7 +653,7 @@ ble_hci_trans_reset(void)
 }
 
 void
-ble_hci_sock_ack_handler(void *arg)
+*ble_hci_sock_ack_handler(void *arg)
 {
     struct ble_npl_event *ev;
 
@@ -661,6 +661,7 @@ ble_hci_sock_ack_handler(void *arg)
         ev = ble_npl_eventq_get(&ble_hci_sock_state.evq, BLE_NPL_TIME_FOREVER);
         ble_npl_event_run(ev);
     }
+    return NULL;
 }
 
 static void
