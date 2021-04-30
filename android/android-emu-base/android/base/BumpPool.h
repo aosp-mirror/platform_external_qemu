@@ -14,6 +14,7 @@
 #pragma once
 
 #include "android/base/AlignedBuf.h"
+#include "android/base/Allocator.h"
 
 #include <vector>
 #include <unordered_set>
@@ -28,7 +29,7 @@ namespace base {
 // BUT it's necessary to preserve previous pointer values in between the first
 // alloc() after a freeAll(), and the freeAll() itself, allowing some sloppy use of
 // malloc in the first pass while we find out how much data was needed.
-class BumpPool {
+class BumpPool : public Allocator {
 public:
     BumpPool(size_t startingBytes = 4096) : mStorage(startingBytes / sizeof(uint64_t))  { }
     // All memory allocated by this pool
@@ -36,7 +37,7 @@ public:
     // is deconstructed.
     ~BumpPool() { }
 
-    void* alloc(size_t wantedSize) {
+    void* alloc(size_t wantedSize) override {
         size_t wantedSizeRoundedUp =
             sizeof(uint64_t) * ((wantedSize + sizeof(uint64_t) - 1) / (sizeof(uint64_t)));
 
@@ -65,40 +66,6 @@ public:
         }
         mTotalWantedThisGeneration = 0;
     }
-
-    // Convenience function to allocate an array
-    // of objects of type T.
-    template <class T>
-    T* allocArray(size_t count) {
-        size_t bytes = sizeof(T) * count;
-        void* res = alloc(bytes);
-        return (T*) res;
-    }
-
-    char* strDup(const char* toCopy) {
-        size_t bytes = strlen(toCopy) + 1;
-        void* res = alloc(bytes);
-        memset(res, 0x0, bytes);
-        memcpy(res, toCopy, bytes);
-        return (char*)res;
-    }
-
-    char** strDupArray(const char* const* arrayToCopy, size_t count) {
-        char** res = allocArray<char*>(count);
-
-        for (size_t i = 0; i < count; i++) {
-            res[i] = strDup(arrayToCopy[i]);
-        }
-
-        return res;
-    }
-
-    void* dupArray(const void* buf, size_t bytes) {
-        void* res = alloc(bytes);
-        memcpy(res, buf, bytes);
-        return res;
-    }
-
 private:
     AlignedBuf<uint64_t, 8> mStorage;
     std::unordered_set<void*> mFallbackPtrs;
