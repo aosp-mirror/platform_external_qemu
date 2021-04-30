@@ -9,6 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android-qemu2-glue/bootconfig.h"
 #include "android-qemu2-glue/qemu-console-factory.h"
 #include "android/android.h"
 #include "android/avd/hw-config.h"
@@ -2037,7 +2038,7 @@ extern "C" int main(int argc, char** argv) {
                        avd_dir, avd_dir, avd_dir);
     } else {
         if (hw->disk_ramdisk_path) {
-            args.add({"-kernel", hw->kernel_path, "-initrd", hw->disk_ramdisk_path});
+            args.add({"-kernel", hw->kernel_path, "-initrd", "/tmp/myramdisk"});
         } else {
             derror("disk_ramdisk_path is required but missing");
             return 1;
@@ -2495,8 +2496,20 @@ extern "C" int main(int argc, char** argv) {
                 hw->display_settings_xml);
 
         std::vector<std::string> kernelCmdLineUserspaceBootOpts;
-        for (const auto& kv: userspaceBootOpts) {
-            kernelCmdLineUserspaceBootOpts.push_back(kv.first + "=" + kv.second);
+        if (fc::isEnabled(fc::AndroidbootProps)) {
+            const int r = UpdateRamdiskBootconfig(hw->disk_ramdisk_path,
+                                                  "/tmp/myramdisk",
+                                                  userspaceBootOpts);
+            if (r) {
+                fprintf(stderr, "rkir555 %s:%d r=%d\n", __func__, __LINE__, r);
+                return r;
+            }
+
+            kernelCmdLineUserspaceBootOpts.push_back("bootconfig");
+        } else {
+            for (const auto& kv: userspaceBootOpts) {
+                kernelCmdLineUserspaceBootOpts.push_back(kv.first + "=" + kv.second);
+            }
         }
 
         std::string append_arg = emulator_getKernelParameters(
