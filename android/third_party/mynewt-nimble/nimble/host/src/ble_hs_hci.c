@@ -70,17 +70,14 @@ static struct os_mempool ble_hs_hci_frag_mempool;
  */
 uint16_t ble_hs_hci_avail_pkts;
 
-#if MYNEWT_VAL(BLE_HS_PHONY_HCI_ACKS)
-static ble_hs_hci_phony_ack_fn *ble_hs_hci_phony_ack_cb;
-#endif
 
-#if MYNEWT_VAL(BLE_HS_PHONY_HCI_ACKS)
+static ble_hs_hci_phony_ack_fn *ble_hs_hci_phony_ack_cb = NULL;
+
 void
 ble_hs_hci_set_phony_ack_cb(ble_hs_hci_phony_ack_fn *cb)
 {
     ble_hs_hci_phony_ack_cb = cb;
 }
-#endif
 
 static void
 ble_hs_hci_lock(void)
@@ -256,16 +253,16 @@ ble_hs_hci_wait_for_ack(void)
 {
     int rc;
 
-#if MYNEWT_VAL(BLE_HS_PHONY_HCI_ACKS)
-    if (ble_hs_hci_phony_ack_cb == NULL) {
-        rc = BLE_HS_ETIMEOUT_HCI;
-    } else {
+
+    // Use fake acknowledgements if the have been requested.
+    // this is only needed to successfully run the E2E unit tests.
+    if (ble_hs_hci_phony_ack_cb != NULL) {
         ble_hs_hci_ack =
             (void *) ble_hci_trans_buf_alloc(BLE_HCI_TRANS_BUF_CMD);
         BLE_HS_DBG_ASSERT(ble_hs_hci_ack != NULL);
-        rc = ble_hs_hci_phony_ack_cb((void *)ble_hs_hci_ack, 260);
+        return ble_hs_hci_phony_ack_cb((void *)ble_hs_hci_ack, 260);
     }
-#else
+
     rc = ble_npl_sem_pend(&ble_hs_hci_sem,
                           ble_npl_time_ms_to_ticks32(BLE_HCI_CMD_TIMEOUT_MS));
     switch (rc) {
@@ -286,7 +283,6 @@ ble_hs_hci_wait_for_ack(void)
         rc = BLE_HS_EOS;
         break;
     }
-#endif
 
     return rc;
 }

@@ -28,7 +28,7 @@
 #include "host/ble_hs_adv.h"
 #include "host/ble_hs_id.h"
 #include "store/config/ble_store_config.h"
-#include "transport/ram/ble_hci_ram.h"
+//#include "transport/ram/ble_hci_ram.h"
 #include "ble_hs_test_util.h"
 
 /* Our global device address. */
@@ -84,7 +84,10 @@ ble_hs_test_util_prev_tx_dequeue_once(struct hci_data_hdr *out_hci_hdr)
 
     rc = ble_hs_hci_util_data_hdr_strip(om, out_hci_hdr);
     TEST_ASSERT_FATAL(rc == 0);
-    TEST_ASSERT_FATAL(out_hci_hdr->hdh_len == OS_MBUF_PKTLEN(om));
+
+    // Most tests assert and fail here.
+    int ln = OS_MBUF_PKTLEN(om);
+    TEST_ASSERT_FATAL(out_hci_hdr->hdh_len == ln);
 
     return om;
 }
@@ -2035,6 +2038,7 @@ ble_hs_test_util_init(void)
 {
     int rc;
 
+    assert(ble_hci_trans_reset() == 0);
     ble_hs_test_util_init_no_start();
 
     rc = ble_hs_start();

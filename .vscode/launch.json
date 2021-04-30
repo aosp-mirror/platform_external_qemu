@@ -101,7 +101,7 @@
                     "@R",
                     "-verbose",
                     "-experimental-enable-multidisplay",
-                    "-qt-hide-window",
+                    // "-qt-hide-window",
                     "-feature",
                     "-HVF"
                 ],

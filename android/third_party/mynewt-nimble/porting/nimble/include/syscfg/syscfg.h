@@ -579,7 +579,7 @@
 #endif
 
 #ifndef MYNEWT_VAL_BLE_HS_DEBUG
-#define MYNEWT_VAL_BLE_HS_DEBUG (0)
+#define MYNEWT_VAL_BLE_HS_DEBUG (1)
 #endif
 
 #ifndef MYNEWT_VAL_BLE_HS_FLOW_CTRL
@@ -607,7 +607,7 @@
 #endif
 
 #ifndef MYNEWT_VAL_BLE_HS_PHONY_HCI_ACKS
-#define MYNEWT_VAL_BLE_HS_PHONY_HCI_ACKS (0)
+#define MYNEWT_VAL_BLE_HS_PHONY_HCI_ACKS (1)
 #endif
 
 #ifndef MYNEWT_VAL_BLE_HS_REQUIRE_OS
@@ -731,7 +731,7 @@
 #endif
 
 #ifndef MYNEWT_VAL_BLE_SM_SC
-#define MYNEWT_VAL_BLE_SM_SC (0)
+#define MYNEWT_VAL_BLE_SM_SC (1)
 #endif
 
 #ifndef MYNEWT_VAL_BLE_SM_SC_DEBUG_KEYS
