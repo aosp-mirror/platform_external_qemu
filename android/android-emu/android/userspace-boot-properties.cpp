@@ -194,6 +194,11 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         }
     }
 
+    if (fc::isEnabled(fc::HardwareDecoder)) {
+        params.push_back({"qemu.hwcodec.avcdec", "2"});
+        params.push_back({"qemu.hwcodec.vpxdec", "2"});
+    }
+
     if (isQemu2) {
         if (hasShellConsole) {
             params.push_back({
