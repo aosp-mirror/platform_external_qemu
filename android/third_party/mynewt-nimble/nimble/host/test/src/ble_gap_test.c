@@ -838,7 +838,7 @@ TEST_CASE_SELF(ble_gap_test_case_disc_busy)
 TEST_SUITE(ble_gap_test_suite_disc)
 {
     ble_gap_test_case_disc_bad_args();
-    ble_gap_test_case_disc_good();
+    ble_gap_test_case_disc_good();  //  HandleCommand: Unknown command, opcode: 0x202E, OGF: 0x0008, OCF: 0x002E
     ble_gap_test_case_disc_ltd_mismatch();
     ble_gap_test_case_disc_hci_fail();
     ble_gap_test_case_disc_dflts();

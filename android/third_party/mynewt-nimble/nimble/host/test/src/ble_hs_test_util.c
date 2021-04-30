@@ -28,7 +28,7 @@
 #include "host/ble_hs_adv.h"
 #include "host/ble_hs_id.h"
 #include "store/config/ble_store_config.h"
-#include "transport/ram/ble_hci_ram.h"
+//#include "transport/ram/ble_hci_ram.h"
 #include "ble_hs_test_util.h"
 
 /* Our global device address. */

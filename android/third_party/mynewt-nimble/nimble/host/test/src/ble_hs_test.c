@@ -25,7 +25,7 @@
 #include "ble_hs_test_util.h"
 #include "ble_hs_test.h"
 
-#if MYNEWT_VAL(SELFTEST)
+#if 1 || MYNEWT_VAL(SELFTEST)
 
 int
 main(int argc, char **argv)
