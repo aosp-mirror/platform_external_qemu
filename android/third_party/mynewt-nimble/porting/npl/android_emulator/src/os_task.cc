@@ -56,7 +56,7 @@ extern "C" {
  * @param prio The priority at which to run this task
  * @param sanity_itvl The time at which this task should check in with the
  *                    sanity task.  OS_WAIT_FOREVER means never check in
- *                    here.
+ *                    here. (IGNORED)
  * @param stack_bottom A pointer to the bottom of a task's stack
  * @param stack_size The overall size of the task's stack.
  *

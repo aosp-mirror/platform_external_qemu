@@ -58,6 +58,7 @@ target_include_directories(
             nimble/include)
 
 add_subdirectory(porting)
+add_subdirectory(testutil)
 
 add_subdirectory(ext/tinycrypt)
 add_subdirectory(nimble/transport)
@@ -85,3 +86,4 @@ target_link_libraries(
 
 # Now include some sample apps
 add_subdirectory(apps)
+add_subdirectory(nimble/host/test)
