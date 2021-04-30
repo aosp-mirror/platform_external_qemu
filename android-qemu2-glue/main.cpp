@@ -2465,18 +2465,6 @@ extern "C" int main(int argc, char** argv) {
           }
         }
 
-        // hardware codec feature
-        std::vector<std::string> hwcodec_boot_params;
-        if (feature_is_enabled(kFeature_HardwareDecoder)) {
-            hwcodec_boot_params.push_back("qemu.hwcodec.avcdec=2");
-            hwcodec_boot_params.push_back("qemu.hwcodec.vpxdec=2");
-        }
-
-        auto all_boot_params = std::move(verified_boot_params);
-        all_boot_params.insert(all_boot_params.end(),
-                               hwcodec_boot_params.begin(),
-                               hwcodec_boot_params.end());
-
         const char* real_console_tty_prefix = kTarget.ttyPrefix;
 
         if (opts->virtio_console) {
@@ -2501,7 +2489,7 @@ extern "C" int main(int argc, char** argv) {
                 hw->vm_heapSize,
                 apiLevel,
                 real_console_tty_prefix,
-                &all_boot_params,
+                &verified_boot_params,
                 hw->hw_gltransport,
                 hw->hw_gltransport_drawFlushInterval,
                 hw->display_settings_xml);
@@ -2518,7 +2506,7 @@ extern "C" int main(int argc, char** argv) {
                 real_console_tty_prefix,
                 hw->kernel_parameters,
                 hw->kernel_path,
-                &all_boot_params,
+                &verified_boot_params,
                 rendererConfig.glFramebufferSizeBytes,
                 pstore,
                 isQemu2,
