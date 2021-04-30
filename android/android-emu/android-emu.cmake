@@ -915,6 +915,7 @@ if(NOT LINUX_AARCH64)
       android/telephony/TagLengthValue_unittest.cpp
       android/update-check/UpdateChecker_unittest.cpp
       android/update-check/VersionExtractor_unittest.cpp
+      android/userspace-boot-properties_unittest.cpp
       android/utils/aconfig-file_unittest.cpp
       android/utils/dns_unittest.cpp
       android/utils/file_data_unittest.cpp
