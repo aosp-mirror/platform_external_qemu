@@ -43,11 +43,6 @@ using android::base::ThreadLooper;
 static struct ble_npl_task s_task_hci;
 static struct ble_npl_task s_task_looper;
 
-void* ble_hci_sock_task(void* param) {
-    ble_hci_sock_ack_handler(param);
-    return NULL;
-}
-
 void* ble_looper_task(void* param) {
     auto heartbeat = RecurrentTask(
             ThreadLooper::get(), []() { return true; }, 1000);
@@ -66,11 +61,6 @@ extern "C" void sysinit(void) {
     /* Setup the socket to rootcanal */
     // TODO(jansene): Make this properly configurable vs the hardcoded socket.
     ble_hci_sock_init();
-
-    // We need a thread to push data into the nimble stack.
-    ble_npl_task_init(&s_task_hci, "hci_sock", ble_hci_sock_task, NULL,
-                      TASK_DEFAULT_PRIORITY, BLE_NPL_TIME_FOREVER,
-                      TASK_DEFAULT_STACK, TASK_DEFAULT_STACK_SIZE);
 
     // Let's setup our own looper.
     // TODO(jansene): QEMU provides its own looper..
