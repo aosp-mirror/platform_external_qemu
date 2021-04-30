@@ -2485,9 +2485,13 @@ extern "C" int main(int argc, char** argv) {
 
         constexpr bool isQemu2 = true;
 
-        std::vector<std::string> userspaceBootOpts = getUserspaceBootProperties(
+        std::string myserialno("EMULATOR" EMULATOR_VERSION_STRING);
+        std::replace(myserialno.begin(), myserialno.end(), '.', 'X');
+
+        std::vector<std::pair<std::string, std::string>> userspaceBootOpts = getUserspaceBootProperties(
                 opts,
                 kTarget.androidArch,
+                myserialno.c_str(),
                 isQemu2,
                 hw->hw_lcd_width,
                 hw->hw_lcd_height,
@@ -2502,6 +2506,11 @@ extern "C" int main(int argc, char** argv) {
                 hw->hw_gltransport_drawFlushInterval,
                 hw->display_settings_xml);
 
+        std::vector<std::string> kernelCmdLineUserspaceBootOpts;
+        for (const auto& kv: userspaceBootOpts) {
+            kernelCmdLineUserspaceBootOpts.push_back(kv.first + "=" + kv.second);
+        }
+
         std::string append_arg = emulator_getKernelParameters(
                 opts,
                 kTarget.androidArch,
@@ -2514,7 +2523,7 @@ extern "C" int main(int argc, char** argv) {
                 pstore,
                 isQemu2,
                 hw->hw_arc /* isCros */,
-                std::move(userspaceBootOpts));
+                std::move(kernelCmdLineUserspaceBootOpts));
 
         if (append_arg.empty()) {
             return 1;

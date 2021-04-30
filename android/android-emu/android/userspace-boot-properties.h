@@ -18,9 +18,10 @@
 
 ANDROID_BEGIN_HEADER
 
-std::vector<std::string>
+std::vector<std::pair<std::string, std::string>>
 getUserspaceBootProperties(const AndroidOptions* opts,
                            const char* targetArch,
+                           const char* serialno,
                            bool isQemu2,
                            uint32_t lcd_width,
                            uint32_t lcd_height,
