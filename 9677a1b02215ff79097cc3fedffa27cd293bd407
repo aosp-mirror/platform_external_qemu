@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2efb7aff_8273174e",
+        "filename": "android/android-emugl/combined/GfxStreamAgents.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1561731
+      },
+      "writtenOn": "2021-04-30T13:59:10Z",
+      "side": 1,
+      "message": "Should this be \u003e\u003d ?",
+      "range": {
+        "startLine": 162,
+        "startChar": 37,
+        "endLine": 162,
+        "endChar": 38
+      },
+      "revId": "9677a1b02215ff79097cc3fedffa27cd293bd407",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "00de628e_3d1dae5b",
+        "filename": "android/android-emugl/combined/GfxStreamAgents.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1561731
+      },
+      "writtenOn": "2021-04-30T13:59:10Z",
+      "side": 1,
+      "message": "optional: I believe erase() just does nothing if the key doesn\u0027t exist so you don\u0027t need to special case.",
+      "range": {
+        "startLine": 189,
+        "startChar": 12,
+        "endLine": 191,
+        "endChar": 13
+      },
+      "revId": "9677a1b02215ff79097cc3fedffa27cd293bd407",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
