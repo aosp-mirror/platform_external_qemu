@@ -2495,8 +2495,13 @@ extern "C" int main(int argc, char** argv) {
                 hw->display_settings_xml);
 
         std::vector<std::string> kernelCmdLineUserspaceBootOpts;
-        for (const auto& kv: userspaceBootOpts) {
-            kernelCmdLineUserspaceBootOpts.push_back(kv.first + "=" + kv.second);
+        if (fc::isEnabled(fc::AndroidbootProps)) {
+            // TODO: append userspaceBootOpts to the ramdisk
+            kernelCmdLineUserspaceBootOpts.push_back("bootconfig");
+        } else {
+            for (const auto& kv: userspaceBootOpts) {
+                kernelCmdLineUserspaceBootOpts.push_back(kv.first + "=" + kv.second);
+            }
         }
 
         std::string append_arg = emulator_getKernelParameters(
