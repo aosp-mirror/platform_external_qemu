@@ -16,6 +16,23 @@
       "message": "Of course Darwin is not implementing the actual C++11 spec.",
       "revId": "17fe19f44816afbc32ed4a2d1d50dd37eacd2737",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "985a3b24_adf91f87",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 14
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1076123
+      },
+      "writtenOn": "2021-05-02T05:38:51Z",
+      "side": 1,
+      "message": "I compiled and ran nimble_advertiser with RootCanal, and validated that the packets arrive:\n\n\u003cHCI_Hdr  type\u003dEvent |\u003cHCI_Event_Hdr  code\u003d0x3e len\u003d33 |\u003cHCI_Event_LE_Meta  event\u003dadvertising_report |\u003cHCI_LE_Meta_Advertising_Reports  len\u003d1 reports\u003d[\u003cHCI_LE_Meta_Advertising_Report  type\u003d2 atype\u003drandom addr\u003d05:67:32:7b:23:c6 len\u003d21 data\u003d[\u003cEIR_Hdr  len\u003d2 type\u003dflags |\u003cEIR_Flags  flags\u003dgeneral_disc_mode |\u003e\u003e, \u003cEIR_Hdr  len\u003d14 type\u003dcomplete_local_name |\u003cEIR_CompleteLocalName  local_name\u003d\u0027Apache Mynewt\u0027 |\u003e\u003e, \u003cEIR_Hdr  len\u003d2 type\u003dtx_power_level |\u003cEIR_TX_Power_Level  level\u003d0 |\u003e\u003e] rssi\u003d-4 |\u003e] |\u003e\u003e\u003e\u003e",
+      "revId": "17fe19f44816afbc32ed4a2d1d50dd37eacd2737",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
