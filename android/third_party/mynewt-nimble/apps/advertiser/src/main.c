@@ -127,6 +127,7 @@ main(int argc, char **argv)
     rc = ble_svc_gap_device_name_set(device_name);
     assert(rc == 0);
 
+    MODLOG_DFLT(INFO, "Starting loop");
     /* As the last thing, process events from default event queue. */
     while (1) {
         os_eventq_run(os_eventq_dflt_get());

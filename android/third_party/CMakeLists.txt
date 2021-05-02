@@ -114,6 +114,7 @@ else()
 endif()
 
 
+add_subdirectory(mynewt-nimble)
 if (WEBRTC OR BLUETOOTH_EMULATION)
   add_subdirectory(abseil-cpp)
 endif()

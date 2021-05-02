@@ -24,6 +24,12 @@
 #include <assert.h>
 #include <stdbool.h>
 #include "syscfg/syscfg.h"
+
+// Work around for clang-cl
+#ifndef static_assert
+#define static_assert _Static_assert
+#endif
+
 #if !MYNEWT_VAL(OS_SYSVIEW_TRACE_MEMPOOL)
 #define OS_TRACE_DISABLE_FILE_API
 #endif
