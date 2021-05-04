@@ -2786,13 +2786,15 @@ ble_gap_test_util_conn_forever(void)
 static void
 ble_gap_test_util_conn_timeout(int32_t duration_ms)
 {
+    // The emulator has no "official" support to move the system clock forward
+    // so this has to be emulated by waiting. This makes these tests *EXTREMELY* slow.
     struct ble_gap_conn_complete evt;
     uint32_t duration_ticks;
-    int32_t ticks_from_now;
+    int32_t ticks_from_now, ticks_start;
     int rc;
 
     TEST_ASSERT_FATAL(duration_ms != BLE_HS_FOREVER);
-
+    ticks_start = ble_gap_timer();
     /* Initiate a connect procedure with the specified timeout. */
     ble_hs_test_util_connect(
         BLE_OWN_ADDR_PUBLIC,
