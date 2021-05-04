@@ -109,4 +109,6 @@ enum Feature {
     GnssGrpcV1 = 61;
 
     DeviceSkinOverlay = 62;
+    // Emulated bluetooth stack
+    BluetoothEmulation = 63;
 }
