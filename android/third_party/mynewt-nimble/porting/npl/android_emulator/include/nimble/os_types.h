@@ -118,7 +118,7 @@ void ble_npl_task_yield(void);
 #define os_time_delay ble_npl_time_delay
 
 #define os_start()  printf("Starting os\n");
-#define os_time_advance(x)
+#define os_time_advance  ble_npl_time_delay
 
 #define OS_TICKS_PER_SEC 1000
 #define os_get_current_task_id ble_npl_get_current_task_id
