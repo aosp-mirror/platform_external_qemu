@@ -1,0 +1,439 @@
+// Copyright (C) 2021 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Note that if you add/remove methods in this file you must update
+// the metrics sql as well ./android/scripts/gen-grpc-sql.py
+//
+// Please group deleted methods in a block including the date (MM/DD/YY)
+// it was removed. This enables us to easily keep metrics around after removal
+//
+// List of deleted methods
+// rpc iWasDeleted (03/12/12)
+// ...
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.android.emulator.bluetooth";
+
+package android.emulation.bluetooth;
+import "google/protobuf/empty.proto";
+
+// A RootCanal Service exposes the emulated bluetooth chip from the android
+// emulator. It allows you to register emulated bluetooth devices and control
+// the H4 packets that are exchanged between the device and the world.
+//
+// This service enables you to establish a "virtual network" of emulated
+// bluetooth devices that can interact with each other.
+//
+// Note: This is not yet finalized, it is likely that these definitions will
+// evolve.
+service RootcanalService {
+    // Connect device to link layer. This will establish a direct connection
+    // to root canal and execute the following:
+    //
+    // - Each connection creates a new device and attaches it to the link layer
+    // - Link Layer packets are transmitted directly to the phy
+    //
+    // This is used to directly connect various android emulators together.
+    // For example a wear device can connect to an android emulator through
+    // this.
+    rpc registerLinkLayerDevice(stream H4Packet) returns (stream H4Packet);
+
+    // Connect the device to the emulated bluetooth chip. The device will
+    // participate in the network. You can configure the chip to scan, advertise
+    // and setup connections with other devices that are connected to the
+    // network.
+    //
+    // This is usually used when you have a need for an emulated bluetooth chip
+    // and have a bluetooth stack that can interpret and handle the packets
+    // correctly.
+    //
+    // For example the apache nimble stack can use this endpoint as the
+    // transport layer.
+    rpc registerNetworkDevice(stream H4Packet) returns (stream H4Packet);
+
+    // Registers the emulated bluetooth device. The emulator will reach out to
+    // the emulated device to read/write and subscribe to properties.
+    //
+    // The following gRPC error codes can be returned:
+    // -  FAILED_PRECONDITION (code 9) root canal is not available on this
+    // device
+    // -  INTERNAL (code 13) if there was an internal emulator failure.
+    rpc registerBluetoothDevice(EmulatedBluetoothDevice)
+            returns (RegistrationStatus);
+}
+
+// An EmulatedBluetoothService represents a bluetooth Gatt device.
+// The android emulator will connect to this service to read/write and
+// observe characteristics if the emulator establishes a connection
+// to this device.
+//
+// You will need to implement this service and register the endpoint with
+// the emulator to make this device discoverable.
+service EmulatedBluetoothService {
+    // Read the given characteristic from the emulated device.
+    rpc ReadCharacteristic(BluetoothGattCharacteristicId)
+            returns (BluetoothGattCharacteristicValue);
+
+    // Write the given characteristic to the emulated device.
+    rpc WriteCharecteristic(BluetoothGattCharacteristicValue)
+            returns (BluetoothGattCharacteristicValue);
+
+    // Listens for notifications from the emulated device, the device should
+    // write to the stream with a response when a change has occurred.
+    rpc Observe(BluetoothGattCharacteristicId)
+            returns (stream BluetoothGattCharacteristicValue);
+};
+
+// A packet that is exchanged between the bluetooth chip and higher layers.
+message H4Packet {
+    enum PacketType {
+        PACKETTYPE_UNSPECIFIED = 0;
+
+        // HCI Command Packets: commands are issued by the HCI Driver to the
+        // Host Controller:
+        PACKETTYPE_HCI_COMMAND = 1;
+
+        // ACL (asynchronous connectionless) packet.
+        PACKETTYPE_ACL = 2;
+
+        // SCO (synchronous connection orientated) packet.
+        PACKETTYPE_SCO = 3;
+
+        // HCI Event Packets
+        PACKETTYPE_EVENT = 4;
+
+        // Isochronous Channel, a data transmissions that are time-sensitive
+        // and synchronized rendering of these data streams across multiple
+        // receivers. See
+        // https://www.novelbits.io/bluetooth-version-5-2-le-audio/ for an
+        // overview of ISO channels.
+        PACKETTYPE_ISO = 5;
+    }
+
+    // Indicates the type of packet contained in the packet bytes.
+    PacketType type = 1;
+
+    // The actual packet that was transferred.
+    bytes packet = 2;
+}
+
+message RegistrationStatus {
+    // The address of the registered device. The emulator will provide this
+    // address when executing a request for a  BluetoothGattCharacteristicId
+    string bt_addr = 1;
+
+    // [Output Only] A human readable error message, or empty if the request
+    // succeeded.
+    string error_message = 2;
+}
+
+// Data exchanged to read/write bluetooth characteristics
+message BluetoothGattCharacteristicId {
+    // The address of the device we are making this request to. The gRPC
+    // service for the emulated device must route the request to the actual
+    // device that emulates this bt_addr.
+    string bt_addr = 1;
+
+    // The characteristic of interest
+    string characteristic_uuid = 2;
+}
+
+// Data exchanged to read/write bluetooth characteristics
+message BluetoothGattCharacteristicValue {
+    // The value of interest
+    CharacteristicValue value = 2;
+
+    // [Output Only] A human readable error message, or empty if the  request
+    // succeeded.
+    string error_message = 3;
+}
+
+// A value of a characteristic
+message CharacteristicValue {
+    // The UUID identifying this characteristic, for a list of UUIDS:
+    // https://www.bluetooth.com/specifications/assigned-numbers/
+    //
+    // Or (the much easier to use) XML definitions:
+    // https://github.com/sputnikdev/bluetooth-gatt-parser/tree/master/src/main/resources/gatt/characteristic
+    //
+    // For example the uuid=0x2A37 indicates a "Heart Rate Measurement"
+    string uuid = 1;
+
+    // List of fields with actual values.
+    //
+    // For example a "Heart Rate Measurement" (0x2A37) could have two fields:
+    // An 8-bit bitfield, indicating what fields are present, e.g., 0x06.
+    // An 8-bit UINT value indicating the beats per minute, e.g., 90.
+    repeated CharacteristicField field = 2;
+}
+
+message CharacteristicField {
+    enum Format {
+        FORMAT_UNSPECIFIED = 0;  // Unknown, not specified.
+        FORMAT_BOOLEAN = 0x01;   //  unsigned 1-bit; 0 = false, 1 = true
+        FORMAT_2BIT = 0x02;      //  unsigned 2-bit integer/bitfield
+        FORMAT_NIBBLE = 0x03;    //  unsigned 4-bit integer/bitfield
+        FORMAT_UINT8 = 0x04;     //  unsigned 8-bit integer/bitfield
+        FORMAT_UINT12 = 0x05;    //  unsigned 12-bit integer/bitfield
+        FORMAT_UINT16 = 0x06;    //  unsigned 16-bit integer/bitfield
+        FORMAT_UINT24 = 0x07;    //  unsigned 24-bit integer/bitfield
+        FORMAT_UINT32 = 0x08;    //  unsigned 32-bit integer/bitfield
+        FORMAT_UINT48 = 0x09;    //  unsigned 48-bit integer
+        FORMAT_UINT64 = 0x0A;    //  unsigned 64-bit integer
+        FORMAT_UINT128 = 0x0B;   //  unsigned 128-bit integer
+        FORMAT_SINT8 = 0x0C;     //  signed 8-bit integer
+        FORMAT_SINT12 = 0x0D;    //  signed 12-bit integer
+        FORMAT_SINT16 = 0x0E;    //  signed 16-bit integer
+        FORMAT_SINT24 = 0x0F;    //  signed 24-bit integer
+        FORMAT_SINT32 = 0x10;    //  signed 32-bit integer
+        FORMAT_SINT48 = 0x11;    //  signed 48-bit integer
+        FORMAT_SINT64 = 0x12;    //  signed 64-bit integer
+        FORMAT_SINT128 = 0x13;   //  signed 128-bit integer
+        FORMAT_FLOAT32 = 0x14;   //  IEEE-754 32-bit floating point
+        FORMAT_FLOAT64 = 0x15;   //  IEEE-754 64-bit floating point
+        FORMAT_SFLOAT = 0x16;    //  IEEE-11073 16-bit SFLOAT
+        FORMAT_FLOAT = 0x17;     //  IEEE-11073 32-bit FLOAT
+        FORMAT_DUINT16 = 0x18;   //  IEEE-20601 format
+        FORMAT_UTF8S = 0x19;     //  UTF-8 string
+        FORMAT_UTF16S = 0x1A;    //  UTF-16 string
+        FORMAT_STRUCT = 0x1B;    //  Opaque structure
+    }
+
+    // Format of the value, if known.
+    Format format = 1;
+
+    one_of value {
+        // The data will be interpreted depending on the UUID of the
+        // characteristic.
+        //
+        // Some things to note:
+        //
+        // - If a format is not a whole number of octets, then the
+        //   data shall be stored in the smallest number of octets that can
+        //   contain the value. The data shall occupy the whole of each octet
+        //   except the most significant bits of the last octet; all other bits
+        //   in the last octet shall be reserved for future use. Signed integers
+        //   shall use two's-complement representation. (See section 3.3.3.5.2)
+        //
+        // - Multi-octet fields within the GATT profile shall be sent least
+        //   significant octet first (little-endian) with the exception of the
+        //   Characteristic Value field. The Characteristic Value and any
+        //   fields within it shall be little-endian unless otherwise defined
+        //   in the specification which defines the characteristic.
+        //
+        // The value should be used if the format is one of:
+        // {FORMAT_UNSPECIFIED, FORMAT_UTF8S, FORMAT_UTF16S, FORMAT_STRUCT}
+        bytes value = 2;
+
+        // Convenience method, to access the value if the property was registed
+        // as a float format: {FORMAT_FLOAT32, FORMAT_FLOAT64, FORMAT_SFLOAT,
+        // FORMAT_FLOAT}
+        double double_value = 3;
+
+        // Convenience method, to access the value if the property was
+        // registered as an integer format, including FORMAT_2BIT,
+        // FORMAT_NIBBLE and excluding FORMAT_SINT128.
+        int64 int_value = 4;
+
+        // Convenience method, to access the value if it was registered as
+        // FORMAT_BOOLEAN
+        bool bool_value = 5;
+    }
+}
+
+message BluetoothGattCharacteristic {
+    // The Characteristic Properties bit field determines how the Characteristic
+    // Value can be used, or how the characteristic descriptors can be accessed.
+
+    // Properties Value Description.
+    enum Properties {
+        PROPERTY_UNSPECIFIED = 0;
+
+        // If set, permits broadcasts of the Characteristic
+        // Value using Server Characteristic Configuration Descriptor. If set,
+        // the Server Characteristic Configuration Descriptor shall exist.
+        PROPERTY_BROADCAST = 0x01;
+
+        // If set, permits reads of the Characteristic Value using procedures
+        // defined in Section 4.8
+        PROPERTY_READ = 0x02;
+
+        // If set, permit writes of the Characteristic Value without response
+        // using procedures defined in Section 4.9.1.
+        PROPERTY_WRITE_NO_RESPONSE = 0x04;
+
+        // If set, permits writes of the Characteristic Value with response
+        // using procedures defined in Section 4.9.3 or Section 4.9.4.
+        PROPERTY_WRITE = 0x08;
+
+        // If set, permits notifications of a Characteristic Value without
+        // acknowledgment using the procedure defined in Section 4.10. If
+        // set, the Client Characteristic Configuration Descriptor shall exist.
+        PROPERTY_NOTIFY = 0x10;
+
+        // If set, permits indications of a Characteristic Value with
+        // acknowledgment using the procedure defined in Section 4.11. If set,
+        // the Client Characteristic Configuration Descriptor shall exist.
+        PROPERTY_INDICATE = 0x20;
+
+        // If set, permits signed writes to the Characteristic Value using the
+        // procedure defined in Section 4.9.2.
+        PROPERTY_SIGNED_WRITE = 0x40;
+
+        // If set, additional characteristic properties are defined in the
+        // Characteristic Extended Properties Descriptor defined in Section
+        // 3.3.3.1. If set, the Characteristic Extended Properties Descriptor
+        PROPERTY_EXTENDED_PROPS = 0x80;
+    }
+
+    // An attribute has a set of permission values associated with it. The
+    // permissions associated with an attribute specifies that it may be read
+    // and/or written. The permissions associated with the attribute specifies
+    // the security level required for read and/or write access, as well as
+    // notification and/or indication. The permissions of a given attribute are
+    // defined by a higher layer specification, and are not discoverable using
+    // the Attribute protocol.
+    enum Permissions {
+        PERMISSION_UNSPECIFIED = 0;
+
+        //  Characteristic read permission
+        PERMISSION_READ = 0x01;
+
+        // Characteristic permission: Allow encrypted read operations
+        PERMISSION_READ_ENCRYPTED = 0x02;
+
+        // Characteristic permission: Allow reading with person-in-the-middle
+        // protection
+        PERMISSION_READ_ENCRYPTED_MITM = 0x04;
+
+        // Characteristic write permission
+        PERMISSION_WRITE = 0x10;
+
+        // Characteristic permission: Allow encrypted writes
+        PERMISSION_WRITE_ENCRYPTED = 0x20;
+
+        // Characteristic permission: Allow encrypted writes with
+        // person-in-the-middle protection
+        PERMISSION_WRITE_ENCRYPTED_MITM = 0x40;
+
+        // Characteristic permission: Allow signed write operations
+        PERMISSION_WRITE_SIGNED = 0x80;
+
+        // Characteristic permission: Allow signed write operations with
+        // person-in-the-middle protection
+        PERMISSION_WRITE_SIGNED_MITM = 0x100;
+    }
+
+    // Contains a mask of the properties described in the properties enum.
+    // Property definitions are *ONLY* required during device registration.
+    int32 properties = 1;
+
+    // Contains a mask of the permissions described in the permissions enum.
+    // Permission definitions are *ONLY* required during device registration.
+    int32 permissions = 2;
+
+    // The UUID identifying this characteristic, for a list of UUIDS:
+    // https://www.bluetooth.com/specifications/assigned-numbers/
+    //
+    // Or (the much easier to use) XML definitions:
+    // https://github.com/sputnikdev/bluetooth-gatt-parser/tree/master/src/main/resources/gatt/characteristic
+    //
+    // For example the uuid=0x2A19 indicates the "The current charge level of a
+    // battery."
+    string uuid = 3;
+}
+
+// A Gatt service definition.
+message BluetoothGattService {
+    enum GattServiceType {
+        // Primary service
+        SERVICE_TYPE_PRIMARY = 0x0;
+
+        // Secondary service (included by primary services)
+        SERVICE_TYPE_SECONDARY = 0x01;
+    }
+
+    // The uuid of this service. This can be a: 16, 32 or 128  bit uuid.  This
+    // is usually a well defined UUID from the bluetooth specification. For
+    // example 180D indicates a heart rate monitor. See
+    // https://www.bluetooth.com/specifications/assigned-numbers/service-discovery/
+    // for a list of well known uuid's.
+    string uuid = 1;
+    GattServiceType service_type = 2;
+    repeated BluetoothGattCharacteristic characteristics = 3;
+}
+
+// A Bluetooth profile consists of a series of services that are offered
+// to clients.  Bluetooth profiles are well defined in the spec. You can find
+// more information about the various profiles:
+//
+// - The official specifications:
+// https://www.bluetooth.com/specifications/specs/
+// - Service definitions in XML:
+// https://github.com/sputnikdev/bluetooth-gatt-parser/tree/master/src/main/resources/gatt/service
+//
+// A concrete example is the Heart Rate Monitor:
+// https://www.bluetooth.com/specifications/specs/heart-rate-service-1-0/
+message BluetoothProfile {
+    repeated BluetoothGattService services = 1;
+}
+
+// A set of gRPC credentials that can be used to authenticate.
+message GrpcCredentials {
+    // the PEM encoding of the server root certificates.
+    string pem_root_certs = 1;
+
+    // the PEM encoding of the client's private key.
+    string pem_private_key = 2;
+
+    //  the PEM encoding of the client's certificate chain.
+    string pem_cert_chain = 3;
+}
+
+message GrpcEndpoint {
+    // Address where this endpoint can be reached.
+    string address = 1;
+
+    // Tls credentials to use, if any to establish a connection to the given
+    // endpoint. The emulated bluetooth device will use these credentials
+    // to establish a connection and read/write/subscribe to the data
+    // of interest.
+    GrpcCredentials tlsCredentials = 2;
+}
+
+// The advertisement definition, this will be used to advertise the
+// bluetooth device to android emulator. Every device that is registered
+// will be discoverable by the emulator.
+message BluetoothAdvertisement {
+    // The name of the device this is how the device will show up when
+    // android scans for devices. Only the first 29 bytes will show up in
+    // initial scan.
+    string device_name = 1;
+
+    // TODO(jansene): We can add more advertising details as required.
+    // (appearance/non-discoverable etc.)
+}
+
+message EmulatedBluetoothDevice {
+    // The endpoint where the emulated device can be found. This endpoint should
+    // provide an implementation of the EmulatedBluetoothService.
+    GrpcEndpoint endpoint = 1;
+
+    // How this device will be advertised.
+    BluetoothAdvertisement advertisement = 2;
+
+    // The bluetooth profile that is made available.
+    BluetoothProfile profile = 3;
+}
