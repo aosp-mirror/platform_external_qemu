@@ -131,6 +131,29 @@
       },
       "revId": "871d56706f08ef38f77be77a25689282a5f04c6a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e8c12f7a_c4114db7",
+        "filename": "android/third_party/mynewt-nimble/nimble/transport/socket/src/ble_hci_socket.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1076123
+      },
+      "writtenOn": "2021-05-04T18:36:56Z",
+      "side": 1,
+      "message": "If we don\u0027t rename these, this change becomes a lot more compact",
+      "range": {
+        "startLine": 163,
+        "startChar": 0,
+        "endLine": 166,
+        "endChar": 40
+      },
+      "revId": "871d56706f08ef38f77be77a25689282a5f04c6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
