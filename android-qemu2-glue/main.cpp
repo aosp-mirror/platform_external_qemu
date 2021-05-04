@@ -1162,6 +1162,16 @@ static int startEmulatorWithMinConfig(
     return 0;
 }
 
+static std::string getWriteableFilename(const char* disk_dataPartition_path,
+                                        const char* filename) {
+    ScopedCPtr<char> userdata_dir(path_dirname(disk_dataPartition_path));
+    if (userdata_dir) {
+        return PathUtils::join(userdata_dir.get(), filename);
+    } else {
+        return "";
+    }
+}
+
 extern "C" AndroidProxyCB* gAndroidProxyCB;
 extern "C" int main(int argc, char** argv) {
 
@@ -2049,11 +2059,8 @@ extern "C" int main(int argc, char** argv) {
     }
 
     if (fc::isEnabled(fc::KernelDeviceTreeBlobSupport)) {
-        ScopedCPtr<char> userdata_dir(path_dirname(hw->disk_dataPartition_path));
-        assert(userdata_dir);
-
-        const std::string dtbFileName =
-            PathUtils::join(userdata_dir.get(), "default.dtb");
+        const std::string dtbFileName = getWriteableFilename(hw->disk_dataPartition_path,
+                                                             "default.dtb");
 
         if (android_op_wipe_data || !path_exists(dtbFileName.c_str())) {
             ::dtb::Params params;
