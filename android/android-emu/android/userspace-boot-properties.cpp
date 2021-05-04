@@ -11,6 +11,9 @@
 
 #include "android/userspace-boot-properties.h"
 
+#include <algorithm>
+#include <string>
+
 #include "android/base/StringFormat.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/version.h"
@@ -23,6 +26,7 @@ static const char kSysfsAndroidDtDir[] =
         "/sys/bus/platform/devices/ANDR0001:00/properties/android/";
 static const char kSysfsAndroidDtDirDtb[] =
         "/proc/device-tree/firmware/android/";
+
 }  // namespace
 
 using android::base::StringFormat;
@@ -47,7 +51,77 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     const bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
     const bool hasShellConsole = opts->logcat || opts->shell;
 
+    const char* checkjniProp;
+    const char* bootanimProp;
+    const char* bootanimPropValue;
+    const char* qemuGlesProp;
+    const char* qemuScreenOffTimeoutProp;
+    const char* qemuEncryptProp;
+    const char* qemuMediaProfileVideoProp;
+    const char* qemuVsyncProp;
+    const char* qemuGltransportNameProp;
+    const char* qemuDrawFlushIntervalProp;
+    const char* qemuOpenglesVersionProp;
+    const char* qemuUirendererProp;
+    const char* dalvikVmHeapsizeProp;
+    const char* qemuLegacyFakeCameraProp;
+    const char* qemuCameraProtocolVerProp;
+    const char* qemuDisplaySettingsXmlProp;
+    const char* qemuVirtioWifiProp;
+    const char* qemuWifiProp;
+    const char* androidQemudProp;
+    const char* qemuHwcodecAvcdecProp;
+    const char* qemuHwcodecVpxdecProp;
+    const char* androidbootLogcatProp;
+
     namespace fc = android::featurecontrol;
+    if (fc::isEnabled(fc::AndroidbootProps)) {
+        checkjniProp = "androidboot.dalvik.vm.checkjni";
+        bootanimProp = "androidboot.debug.sf.nobootanimation";
+        bootanimPropValue = "1";
+        qemuGlesProp = nullptr;  // deprecated
+        qemuScreenOffTimeoutProp = "androidboot.qemu.settings.system.screen_off_timeout";
+        qemuEncryptProp = nullptr;  // deprecated
+        qemuMediaProfileVideoProp = nullptr;  // deprecated
+        qemuVsyncProp = "androidboot.qemu.vsync";
+        qemuGltransportNameProp = "androidboot.qemu.gltransport.name";
+        qemuDrawFlushIntervalProp = "androidboot.qemu.gltransport.drawFlushInterval";
+        qemuOpenglesVersionProp = "androidboot.opengles.version";
+        qemuUirendererProp = "androidboot.debug.hwui.renderer";
+        dalvikVmHeapsizeProp = "androidboot.dalvik.vm.heapsize";
+        qemuLegacyFakeCameraProp = "androidboot.qemu.legacy_fake_camera";
+        qemuCameraProtocolVerProp = "androidboot.qemu.camera_protocol_ver";
+        qemuDisplaySettingsXmlProp = nullptr;  // deprecated
+        qemuVirtioWifiProp = "androidboot.qemu.virtiowifi";
+        qemuWifiProp = "androidboot.qemu.wifi";
+        androidQemudProp = nullptr;  // deprecated
+        qemuHwcodecAvcdecProp = "androidboot.qemu.hwcodec.avcdec";
+        qemuHwcodecVpxdecProp = "androidboot.qemu.hwcodec.vpxdec";
+        androidbootLogcatProp = "androidboot.logcat";
+    } else {
+        checkjniProp = "android.checkjni";
+        bootanimProp = "android.bootanim";
+        bootanimPropValue = "0";
+        qemuGlesProp = "qemu.gles";
+        qemuScreenOffTimeoutProp = "qemu.settings.system.screen_off_timeout";
+        qemuEncryptProp = "qemu.encrypt";
+        qemuMediaProfileVideoProp = "qemu.mediaprofile.video";
+        qemuVsyncProp = "qemu.vsync";
+        qemuGltransportNameProp = "qemu.gltransport";
+        qemuDrawFlushIntervalProp = "qemu.gltransport.drawFlushInterval";
+        qemuOpenglesVersionProp = "qemu.opengles.version";
+        qemuUirendererProp = "qemu.uirenderer";
+        dalvikVmHeapsizeProp = "qemu.dalvik.vm.heapsize";
+        qemuLegacyFakeCameraProp = "qemu.legacy_fake_camera";
+        qemuCameraProtocolVerProp = "qemu.camera_protocol_ver";
+        qemuDisplaySettingsXmlProp = "qemu.display.settings.xml";
+        qemuVirtioWifiProp = "qemu.virtiowifi";
+        qemuWifiProp = "qemu.wifi";
+        androidQemudProp = "android.qemud";
+        qemuHwcodecAvcdecProp = "qemu.hwcodec.avcdec";
+        qemuHwcodecVpxdecProp = "qemu.hwcodec.vpxdec";
+        androidbootLogcatProp = nullptr;
+    }
 
     std::vector<std::pair<std::string, std::string>> params;
 
@@ -65,75 +139,89 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     }
 
     if (!opts->no_jni) {
-        params.push_back({"android.checkjni", "1"});
+        params.push_back({checkjniProp, "1"});
     }
     if (opts->no_boot_anim) {
-        params.push_back({"android.bootanim", "0"});
+        params.push_back({bootanimProp, bootanimPropValue});
     }
 
     // qemu.gles is used to pass the GPU emulation mode to the guest
     // through kernel parameters. Note that the ro.opengles.version
     // boot property must also be defined for |gles > 0|, but this
     // is not handled here (see vl-android.c for QEMU1).
-    {
+    if (qemuGlesProp) {
         int gles;
         switch (glesMode) {
             case kAndroidGlesEmulationHost: gles = 1; break;
             case kAndroidGlesEmulationGuest: gles = 2; break;
             default: gles = 0;
         }
-        params.push_back({"qemu.gles", StringFormat("%d", gles)});
+        params.push_back({qemuGlesProp, StringFormat("%d", gles)});
     }
 
     // To save battery, set the screen off timeout to a high value.
     // Using int32_max here. The unit is milliseconds.
-    params.push_back({"qemu.settings.system.screen_off_timeout", "2147483647"}); // 596 hours
+    params.push_back({qemuScreenOffTimeoutProp, "2147483647"}); // 596 hours
 
-    if (isQemu2 && fc::isEnabled(fc::EncryptUserData)) {
-        params.push_back({"qemu.encrypt", "1"});
+    if (isQemu2 && fc::isEnabled(fc::EncryptUserData) && qemuEncryptProp) {
+        params.push_back({qemuEncryptProp, "1"});
     }
 
     // Android media profile selection
     // 1. If the SelectMediaProfileConfig is on, then select
     // <media_profile_name> if the resolution is above 1080p (1920x1080).
-    if (isQemu2 && fc::isEnabled(fc::DynamicMediaProfile)) {
+    if (isQemu2 && fc::isEnabled(fc::DynamicMediaProfile) && qemuMediaProfileVideoProp) {
         if ((lcd_width > 1920 && lcd_height > 1080) ||
             (lcd_width > 1080 && lcd_height > 1920)) {
             fprintf(stderr, "Display resolution > 1080p. Using different media profile.\n");
             params.push_back({
-                "qemu.mediaprofile.video",
+                qemuMediaProfileVideoProp,
                 "/data/vendor/etc/media_codecs_google_video_v2.xml"
             });
         }
     }
 
     // Set vsync rate
-    params.push_back({"qemu.vsync", StringFormat("%u", lcd_vsync)});
+    params.push_back({qemuVsyncProp, StringFormat("%u", lcd_vsync)});
 
     // Set gl transport props
-    params.push_back({"qemu.gltransport", gltransport});
+    params.push_back({qemuGltransportNameProp, gltransport});
     params.push_back({
-        "qemu.gltransport.drawFlushInterval",
+        qemuDrawFlushIntervalProp,
         StringFormat("%u", gltransport_drawFlushInterval)});
 
     // OpenGL ES related setup
     // 1. Set opengles.version and set Skia as UI renderer if
     // GLESDynamicVersion = on (i.e., is a reasonably good driver)
     params.push_back({
-        "qemu.opengles.version",
+        qemuOpenglesVersionProp,
         StringFormat("%d", bootPropOpenglesVersion)
     });
 
     if (fc::isEnabled(fc::GLESDynamicVersion)) {
-        params.push_back({"qemu.uirenderer", "skiagl"});
+        params.push_back({qemuUirendererProp, "skiagl"});
     }
 
-    if (opts->logcat) {
-        std::string param = opts->logcat;
-        // Replace any space with a comma.
-        std::replace(param.begin(), param.end(), ' ', ',');
-        std::replace(param.begin(), param.end(), '\t', ',');
-        params.push_back({"androidboot.logcat", param});
+    if (androidbootLogcatProp) {
+        if (opts->logcat) {
+            std::string param = opts->logcat;
+
+            // Replace any space with a comma.
+            std::replace_if(param.begin(), param.end(), [](char c){
+                switch (c) {
+                case ' ':
+                case '\t':
+                    return true;
+
+                default:
+                    return false;
+                }
+            }, ',');
+
+            params.push_back({androidbootLogcatProp, param});
+        } else {
+            params.push_back({androidbootLogcatProp, "*:V"});
+        }
     }
 
     if (opts->bootchart) {
@@ -146,17 +234,17 @@ getUserspaceBootProperties(const AndroidOptions* opts,
 
     if (vm_heapSize > 0) {
         params.push_back({
-            "qemu.dalvik.vm.heapsize",
+            dalvikVmHeapsizeProp,
             StringFormat("%dm", vm_heapSize)
         });
     }
 
     if (opts->legacy_fake_camera) {
-        params.push_back({"qemu.legacy_fake_camera", "1"});
+        params.push_back({qemuLegacyFakeCameraProp, "1"});
     }
 
     if (apiLevel > 29) {
-        params.push_back({"qemu.camera_protocol_ver", "1"});
+        params.push_back({qemuCameraProtocolVerProp, "1"});
     }
 
     const bool isDynamicPartition = fc::isEnabled(fc::DynamicPartition);
@@ -182,21 +270,21 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     }
 
     // display settings file name
-    if (displaySettingsXml && displaySettingsXml[0]) {
-        params.push_back({"qemu.display.settings.xml", displaySettingsXml});
+    if (displaySettingsXml && displaySettingsXml[0] && qemuDisplaySettingsXmlProp) {
+        params.push_back({qemuDisplaySettingsXmlProp, displaySettingsXml});
     }
 
     if (isQemu2) {
         if (fc::isEnabled(fc::VirtioWifi)) {
-            params.push_back({"qemu.virtiowifi", "1"});
+            params.push_back({qemuVirtioWifiProp, "1"});
         } else if (fc::isEnabled(fc::Wifi)) {
-            params.push_back({"qemu.wifi", "1"});
+            params.push_back({qemuWifiProp, "1"});
         }
     }
 
     if (fc::isEnabled(fc::HardwareDecoder)) {
-        params.push_back({"qemu.hwcodec.avcdec", "2"});
-        params.push_back({"qemu.hwcodec.vpxdec", "2"});
+        params.push_back({qemuHwcodecAvcdecProp, "2"});
+        params.push_back({qemuHwcodecVpxdecProp, "2"});
     }
 
     if (isQemu2) {
@@ -207,7 +295,9 @@ getUserspaceBootProperties(const AndroidOptions* opts,
             });
         }
 
-        params.push_back({"android.qemud", "1"});
+        if (androidQemudProp) {
+            params.push_back({androidQemudProp, "1"});
+        }
     } else {  // !isQemu2
         // Technical note: There are several important constraints when
         // setting up QEMU1 virtual ttys:
@@ -247,10 +337,9 @@ getUserspaceBootProperties(const AndroidOptions* opts,
 
         int logcatSerial = 1;
         if (apiLevel < 14) {
-            params.push_back({
-                "android.qemud",
-                StringFormat("%s1", kernelSerialPrefix)
-            });
+            if (androidQemudProp) {
+                params.push_back({androidQemudProp, StringFormat("%s1", kernelSerialPrefix)});
+            }
 
             if (isX86ish) {
                 logcatSerial = 0;
@@ -260,7 +349,9 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         } else {
             // The rild daemon, used for GSM emulation, checks for qemud,
             // just set it to a dummy value instead of a serial port.
-            params.push_back({"android.qemud", "1"});
+            if (androidQemudProp) {
+                params.push_back({androidQemudProp, "1"});
+            }
         }
 
         if (hasShellConsole) {

@@ -6,6 +6,7 @@ set(android-qemu2-glue_src
     base/async/CpuLooper.cpp
     base/async/Looper.cpp
     base/files/QemuFileStream.cpp
+    bootconfig.cpp
     display.cpp
     drive-share.cpp
     dtb.cpp
