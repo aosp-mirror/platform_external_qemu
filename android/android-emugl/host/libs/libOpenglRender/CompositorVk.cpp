@@ -2,9 +2,11 @@
 
 #include <string.h>
 
+#include <cinttypes>
 #include <glm/gtc/matrix_transform.hpp>
 #include <optional>
 
+#include "ErrorLog.h"
 #include "vulkan/vk_util.h"
 
 namespace CompositorVkShader {
@@ -24,124 +26,99 @@ static VkShaderModule createShaderModule(const goldfish_vk::VulkanDispatch &vk,
     return res;
 }
 
-Composition::Composition(VkSampler vkSampler, uint32_t width, uint32_t height,
-            const std::vector<ComposeLayerVk>& composeLayers)
+ComposeLayerVk::ComposeLayerVk(VkSampler vkSampler, VkImageView vkImageView,
+                               const LayerTransform &layerTransform)
     : m_vkSampler(vkSampler),
-      m_width(width),
-      m_height(height),
-      m_composeLayers(composeLayers) {
-    setTransforms();
-}
+      m_vkImageView(vkImageView),
+      m_layerTransform(
+          {.pos = layerTransform.pos, .texcoord = layerTransform.texcoord}) {}
 
-Composition::Composition(VkImageView vkImageView, VkSampler vkSampler, uint32_t width, uint32_t height)
-    : m_vkSampler(vkSampler),
-      m_width(width),
-      m_height(height) {
+std::unique_ptr<ComposeLayerVk> ComposeLayerVk::createFromHwc2ComposeLayer(
+    VkSampler vkSampler, VkImageView vkImageView,
+    const ComposeLayer &composeLayer, uint32_t cbWidth, uint32_t cbHeight,
+    uint32_t dstWidth, uint32_t dstHeight) {
+    // Calculate the posTransform and the texcoordTransform needed in the
+    // uniform of the Compositor.vert shader. The posTransform should transform
+    // the square(top = -1, bottom = 1, left = -1, right = 1) to the position
+    // where the layer should be drawn in NDC space given the composeLayer.
+    // texcoordTransform should transform the unit square(top = 0, bottom = 1,
+    // left = 0, right = 1) to where we should sample the layer in the
+    // normalized uv space given the composeLayer.
+    const hwc_rect_t &posRect = composeLayer.displayFrame;
+    const hwc_frect_t &texcoordRect = composeLayer.crop;
 
-    ComposeLayerVk composeLayer;
-    composeLayer.imageView = vkImageView;
-    composeLayer.layerInfo =
-            (ComposeLayer){
-                0,
-                HWC2_COMPOSITION_DEVICE,
-                { 0, 0, (int)width, (int)height },
-                { 0.0f, 0.0f, (float)width, (float)height },
-                HWC2_BLEND_MODE_PREMULTIPLIED,
-                1.0f,
-                { 0, 0, 0, 0},
-                (hwc_transform_t)0 /* transform */
-            };
-    std::vector<ComposeLayerVk> composeLayers = {
-        composeLayer,
+    int posWidth = posRect.right - posRect.left;
+    int posHeight = posRect.bottom - posRect.top;
+
+    float posScaleX = float(posWidth) / dstWidth;
+    float posScaleY = float(posHeight) / dstHeight;
+
+    float posTranslateX =
+        -1.0f + posScaleX + 2.0f * float(posRect.left) / dstWidth;
+    float posTranslateY =
+        -1.0f + posScaleY + 2.0f * float(posRect.top) / dstHeight;
+
+    float texcoordScalX =
+        (texcoordRect.right - texcoordRect.left) / float(cbWidth);
+    float texCoordScaleY =
+        (texcoordRect.bottom - texcoordRect.top) / float(cbHeight);
+
+    float texCoordTranslateX = texcoordRect.left / float(cbWidth);
+    float texCoordTranslateY = texcoordRect.top / float(cbHeight);
+
+    float texcoordRotation = 0.0f;
+
+    const float pi = glm::pi<float>();
+
+    switch (composeLayer.transform) {
+        case HWC_TRANSFORM_ROT_90:
+            texcoordRotation = pi * 0.5f;
+            break;
+        case HWC_TRANSFORM_ROT_180:
+            texcoordRotation = pi;
+            break;
+        case HWC_TRANSFORM_ROT_270:
+            texcoordRotation = pi * 1.5f;
+            break;
+        case HWC_TRANSFORM_FLIP_H:
+            texcoordScalX *= -1.0f;
+            break;
+        case HWC_TRANSFORM_FLIP_V:
+            texCoordScaleY *= -1.0f;
+            break;
+        case HWC_TRANSFORM_FLIP_H_ROT_90:
+            texcoordRotation = pi * 0.5f;
+            texcoordScalX *= -1.0f;
+            break;
+        case HWC_TRANSFORM_FLIP_V_ROT_90:
+            texcoordRotation = pi * 0.5f;
+            texCoordScaleY *= -1.0f;
+            break;
+        default:
+            break;
+    }
+
+    ComposeLayerVk::LayerTransform layerTransform = {
+        .pos =
+            glm::translate(glm::mat4(1.0f),
+                           glm::vec3(posTranslateX, posTranslateY, 0.0f)) *
+            glm::scale(glm::mat4(1.0f), glm::vec3(posScaleX, posScaleY, 1.0f)),
+        .texcoord = glm::translate(glm::mat4(1.0f),
+                                   glm::vec3(texCoordTranslateX,
+                                             texCoordTranslateY, 0.0f)) *
+                    glm::scale(glm::mat4(1.0f),
+                               glm::vec3(texcoordScalX, texCoordScaleY, 1.0f)) *
+                    glm::rotate(glm::mat4(1.0f), texcoordRotation,
+                                glm::vec3(0.0f, 0.0f, 1.0f)),
     };
 
-    m_composeLayers = composeLayers;
-    setTransforms();
+    return std::unique_ptr<ComposeLayerVk>(
+        new ComposeLayerVk(vkSampler, vkImageView, layerTransform));
 }
 
-void Composition::setTransforms() {
-    float pos_scaleX;
-    float pos_scaleY;
-    float pos_trX;
-    float pos_trY;
-
-    float texcoord_scaleX;
-    float texcoord_scaleY;
-    float texcoord_trX;
-    float texcoord_trY;
-
-    float dst_width = (float)m_width;
-    float dst_height = (float)m_height;
-
-    uint32_t i = 0;
-
-    for (const auto& info : m_composeLayers) {
-        uint32_t cbWidth = info.cbWidth;
-        uint32_t cbHeight = info.cbHeight;
-        const auto& li = info.layerInfo;
-        const auto& pos_rect = li.displayFrame;
-        const auto& texcoord_rect = li.crop;
-
-        int pos_width = pos_rect.right - pos_rect.left;
-        int pos_height = pos_rect.bottom - pos_rect.top;
-
-        pos_scaleX = float(pos_width) / dst_width;
-        pos_scaleY = float(pos_height) / dst_height;
-
-        pos_trX = -1.0f + pos_scaleX + 2.0f * float(pos_rect.left) / dst_width;
-        pos_trY = -1.0f + pos_scaleY + 2.0f * float(pos_rect.top) / dst_height;
-
-        texcoord_scaleX = (texcoord_rect.right - texcoord_rect.left) / float(cbWidth);
-        texcoord_scaleY = (texcoord_rect.bottom - texcoord_rect.top) / float(cbHeight);
-
-        texcoord_trX = texcoord_rect.left / float(cbWidth);
-        texcoord_trY = texcoord_rect.top / float(cbHeight);
-        
-        float texcoord_rot = 0.0f;
-
-        const float pi = 3.14159265358979324f;
-
-        switch (li.transform) {
-            case HWC_TRANSFORM_ROT_90:
-                texcoord_rot = pi * 0.5f;
-                break;
-            case HWC_TRANSFORM_ROT_180:
-                texcoord_rot = pi;
-                break;
-            case HWC_TRANSFORM_ROT_270:
-                texcoord_rot = pi * 1.5f;
-                break;
-            case HWC_TRANSFORM_FLIP_H:
-                texcoord_scaleX *= -1.0f;
-                break;
-            case HWC_TRANSFORM_FLIP_V:
-                texcoord_scaleY *= -1.0f;
-                break;
-            case HWC_TRANSFORM_FLIP_H_ROT_90:
-                texcoord_rot = pi * 0.5f;
-                texcoord_scaleX *= -1.0f;
-                break;
-            case HWC_TRANSFORM_FLIP_V_ROT_90:
-                texcoord_rot = pi * 0.5f;
-                texcoord_scaleY *= -1.0f;
-                break;
-            default:
-                break;
-
-        }
-
-        m_transformsPerLayer.push_back({
-            glm::translate(
-                glm::mat4(1.0f), glm::vec3(pos_trX, pos_trY, 0.0f)) *
-            glm::scale( glm::mat4(1.0f), glm::vec3(pos_scaleX, pos_scaleY, 1.0f)),
-            glm::translate(
-                glm::mat4(1.0f), glm::vec3(texcoord_trX, texcoord_trY, 0.0f)) *
-            glm::scale( glm::mat4(1.0f), glm::vec3(texcoord_scaleX, texcoord_scaleY, 1.0f)),
-        });
-
-        ++i;
-    }
-}
+Composition::Composition(
+    std::vector<std::unique_ptr<ComposeLayerVk>> composeLayers)
+    : m_composeLayers(std::move(composeLayers)) {}
 
 const std::vector<CompositorVk::Vertex> CompositorVk::k_vertices = {
     {{-1.0f, -1.0f}, {0.0f, 0.0f}},
@@ -172,11 +149,9 @@ std::unique_ptr<CompositorVk> CompositorVk::create(
     res->setUpEmptyComposition(format);
     res->m_currentCompositions.resize(renderTargets.size());
     for (auto i = 0; i < renderTargets.size(); i++) {
-        res->setComposition(
-            i, std::make_unique<Composition>(res->m_emptyCompositionVkImageView,
-                                             res->m_emptyCompositionVkSampler,
-                                             k_emptyCompositionExtent.width,
-                                             k_emptyCompositionExtent.height));
+        std::vector<std::unique_ptr<ComposeLayerVk>> emptyCompositionLayers;
+        res->setComposition(i, std::make_unique<Composition>(
+                                   std::move(emptyCompositionLayers)));
     }
     return res;
 }
@@ -195,6 +170,9 @@ CompositorVk::CompositorVk(const goldfish_vk::VulkanDispatch &vk,
       m_emptyCompositionVkSampler(VK_NULL_HANDLE),
       m_currentCompositions(0),
       m_uniformStorage({VK_NULL_HANDLE, VK_NULL_HANDLE, nullptr, 0}) {
+    (void)m_renderTargetWidth;
+    (void)m_renderTargetHeight;
+
     VkPhysicalDeviceProperties physicalDeviceProperties;
     m_vk.vkGetPhysicalDeviceProperties(m_vkPhysicalDevice,
                                        &physicalDeviceProperties);
@@ -544,6 +522,9 @@ void CompositorVk::setUpFramebuffers(
     }
 }
 
+// We don't see composition requests with more than 10 layers from the guest for
+// now. If we see rendering error or significant time spent on updating
+// descriptors in setComposition, we should tune this number.
 static const uint32_t kMaxLayersPerFrame = 10;
 
 void CompositorVk::setUpDescriptorSets() {
@@ -630,9 +611,10 @@ void CompositorVk::setUpCommandBuffers(uint32_t width, uint32_t height) {
         m_vk.vkCmdBindIndexBuffer(cmdBuffer, m_indexVkBuffer, 0,
                                   VK_INDEX_TYPE_UINT16);
         for (uint32_t j = 0; j < kMaxLayersPerFrame; ++j) {
-            m_vk.vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                         m_vkPipelineLayout, 0, 1,
-                                         &m_vkDescriptorSets[i * kMaxLayersPerFrame + j], 0, nullptr);
+            m_vk.vkCmdBindDescriptorSets(
+                cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_vkPipelineLayout,
+                0, 1, &m_vkDescriptorSets[i * kMaxLayersPerFrame + j], 0,
+                nullptr);
             m_vk.vkCmdDrawIndexed(
                 cmdBuffer, static_cast<uint32_t>(k_indices.size()), 1, 0, 0, 0);
         }
@@ -734,7 +716,8 @@ void CompositorVk::setUpEmptyComposition(VkFormat format) {
 
 void CompositorVk::setUpUniformBuffers() {
     auto numOfFrames = m_renderTargetVkFrameBuffers.size();
-    VkDeviceSize size = m_uniformStorage.m_stride * numOfFrames * kMaxLayersPerFrame;
+    VkDeviceSize size =
+        m_uniformStorage.m_stride * numOfFrames * kMaxLayersPerFrame;
     auto maybeBuffer = createBuffer(size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                                         VK_MEMORY_PROPERTY_HOST_COHERENT_BIT |
@@ -798,33 +781,46 @@ void CompositorVk::setComposition(uint32_t rtIndex,
                                   std::unique_ptr<Composition> &&composition) {
     m_currentCompositions[rtIndex] = std::move(composition);
     const auto &currentComposition = *m_currentCompositions[rtIndex];
-
-    memset(reinterpret_cast<uint8_t *>(m_uniformStorage.m_data) +
-           (rtIndex * kMaxLayersPerFrame + 0) * m_uniformStorage.m_stride,
-           0,
-           sizeof(Composition::LayerTransform) * kMaxLayersPerFrame);
-
-    for (size_t i = 0; i < currentComposition.m_composeLayers.size(); ++i) {
-        VkDescriptorImageInfo imageInfo = {
-            .sampler = currentComposition.m_vkSampler,
-            .imageView = currentComposition.m_composeLayers[i].imageView,
-            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
-        VkWriteDescriptorSet descriptorSetWrite = {
-            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-            .dstSet = m_vkDescriptorSets[rtIndex * kMaxLayersPerFrame + i],
-            .dstBinding = 0,
-            .dstArrayElement = 0,
-            .descriptorCount = 1,
-            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .pImageInfo = &imageInfo};
-        m_vk.vkUpdateDescriptorSets(m_vkDevice, 1, &descriptorSetWrite, 0, nullptr);
-        memcpy(reinterpret_cast<uint8_t *>(m_uniformStorage.m_data) +
-               (rtIndex * kMaxLayersPerFrame + i) * m_uniformStorage.m_stride,
-               currentComposition.m_transformsPerLayer.data() + i,
-               sizeof(Composition::LayerTransform));
+    if (currentComposition.m_composeLayers.size() > kMaxLayersPerFrame) {
+        ERR("%s(%s:%d): CompositorVk can't compose more than %" PRIu32
+            " layers, %" PRIu32 " layers asked.\n",
+            __FUNCTION__, __FILE__, static_cast<int>(__LINE__),
+            kMaxLayersPerFrame,
+            static_cast<uint32_t>(currentComposition.m_composeLayers.size()));
     }
 
-    for (size_t i = currentComposition.m_composeLayers.size(); i < kMaxLayersPerFrame; ++i) {
+    memset(reinterpret_cast<uint8_t *>(m_uniformStorage.m_data) +
+               (rtIndex * kMaxLayersPerFrame + 0) * m_uniformStorage.m_stride,
+           0, sizeof(ComposeLayerVk::LayerTransform) * kMaxLayersPerFrame);
+
+    std::vector<VkDescriptorImageInfo> imageInfos(
+        currentComposition.m_composeLayers.size());
+    std::vector<VkWriteDescriptorSet> descriptorWrites;
+    for (size_t i = 0; i < currentComposition.m_composeLayers.size(); ++i) {
+        const auto &layer = currentComposition.m_composeLayers[i];
+        imageInfos[i] = VkDescriptorImageInfo(
+            {.sampler = layer->m_vkSampler,
+             .imageView = layer->m_vkImageView,
+             .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL});
+        const VkDescriptorImageInfo &imageInfo = imageInfos[i];
+        descriptorWrites.emplace_back(VkWriteDescriptorSet(
+            {.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+             .dstSet = m_vkDescriptorSets[rtIndex * kMaxLayersPerFrame + i],
+             .dstBinding = 0,
+             .dstArrayElement = 0,
+             .descriptorCount = 1,
+             .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+             .pImageInfo = &imageInfo}));
+        memcpy(
+            reinterpret_cast<uint8_t *>(m_uniformStorage.m_data) +
+                (rtIndex * kMaxLayersPerFrame + i) * m_uniformStorage.m_stride,
+            &layer->m_layerTransform, sizeof(ComposeLayerVk::LayerTransform));
+    }
+    m_vk.vkUpdateDescriptorSets(m_vkDevice, descriptorWrites.size(),
+                                descriptorWrites.data(), 0, nullptr);
+
+    for (size_t i = currentComposition.m_composeLayers.size();
+         i < kMaxLayersPerFrame; ++i) {
         VkDescriptorImageInfo imageInfo = {
             .sampler = m_emptyCompositionVkSampler,
             .imageView = m_emptyCompositionVkImageView,
@@ -837,7 +833,8 @@ void CompositorVk::setComposition(uint32_t rtIndex,
             .descriptorCount = 1,
             .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
             .pImageInfo = &imageInfo};
-        m_vk.vkUpdateDescriptorSets(m_vkDevice, 1, &descriptorSetWrite, 0, nullptr);
+        m_vk.vkUpdateDescriptorSets(m_vkDevice, 1, &descriptorSetWrite, 0,
+                                    nullptr);
     }
 }
 

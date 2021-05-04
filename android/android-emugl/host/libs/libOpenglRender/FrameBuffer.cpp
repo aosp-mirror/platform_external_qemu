@@ -2872,47 +2872,46 @@ bool FrameBuffer::compose(uint32_t bufferSize, void* buffer, bool needPost) {
        // support for multi-display
        ComposeDevice_v2* p2 = (ComposeDevice_v2*)buffer;
        if (p2->displayId != 0) {
-            mutex.unlock();
-            setDisplayColorBuffer(p2->displayId, p2->targetHandle);
-            mutex.lock();
+           mutex.unlock();
+           setDisplayColorBuffer(p2->displayId, p2->targetHandle);
+           mutex.lock();
        }
-       Post composeCmd;
-       composeCmd.composeVersion = 2;
-       composeCmd.composeBuffer.resize(bufferSize);
-       memcpy(composeCmd.composeBuffer.data(), buffer, bufferSize);
-       composeCmd.cmd = PostCmd::Compose;
        if (m_displayVk) {
+           // We don't copy the render result to the targetHandle color buffer
+           // when using the Vulkan native host swapchain, because we directly
+           // render to the swapchain image instead of rendering onto a
+           // ColorBuffer, and we don't readback from the ColorBuffer so far.
            ColorBufferMap::iterator c;
 
            std::vector<ColorBufferPtr> cbs; // Keep ColorBuffers alive
            std::vector<std::shared_ptr<DisplayVk::DisplayBufferInfo>> composeBuffers;
-           ComposeDevice_v2* composeDevice = (ComposeDevice_v2*)buffer;
-           ComposeLayer* l = (ComposeLayer*)composeDevice->layer;
-           for (int i = 0; i < composeDevice->numLayers; ++i, ++l) {
-                c = m_colorbuffers.find(l->cbHandle);
-                cbs.push_back(c->second.cb);
-                auto db = c->second.cb->getDisplayBufferVk();
-                if (!db) {
-                    mutex.unlock();
-                    goldfish_vk::setupVkColorBuffer(l->cbHandle);
-                    mutex.lock();
-                    db = c->second.cb->getDisplayBufferVk();
-                }
-                composeBuffers.push_back(db);
+           ComposeDevice_v2* const composeDevice = p2;
+           const ComposeLayer* const l = (ComposeLayer*)composeDevice->layer;
+           for (int i = 0; i < composeDevice->numLayers; ++i) {
+               c = m_colorbuffers.find(l[i].cbHandle);
+               if (c == m_colorbuffers.end()) {
+                   composeBuffers.push_back(nullptr);
+                   continue;
+               }
+               cbs.push_back(c->second.cb);
+               auto db = c->second.cb->getDisplayBufferVk();
+               if (!db) {
+                   mutex.unlock();
+                   goldfish_vk::setupVkColorBuffer(l[i].cbHandle);
+                   mutex.lock();
+                   db = c->second.cb->getDisplayBufferVk();
+               }
+               composeBuffers.push_back(db);
            }
 
-           c = m_colorbuffers.find(p2->targetHandle);
-           auto db = c->second.cb->getDisplayBufferVk();
-
-           if (!db) {
-               mutex.unlock();
-               goldfish_vk::setupVkColorBuffer(p2->targetHandle);
-               mutex.lock();
-               db = c->second.cb->getDisplayBufferVk();
-           }
-
-           m_displayVk->compose(composeCmd, composeBuffers, db);
+           m_displayVk->compose(composeDevice->numLayers, l, composeBuffers);
+           m_justVkComposed = true;
        } else {
+           Post composeCmd;
+           composeCmd.composeVersion = 2;
+           composeCmd.composeBuffer.resize(bufferSize);
+           memcpy(composeCmd.composeBuffer.data(), buffer, bufferSize);
+           composeCmd.cmd = PostCmd::Compose;
            sendPostWorkerCmd(composeCmd);
            if (p2->displayId == 0 && needPost) {
                post(p2->targetHandle, false);

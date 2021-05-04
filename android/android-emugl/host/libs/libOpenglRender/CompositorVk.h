@@ -17,31 +17,32 @@
 #include "Hwc2.h"
 
 class ComposeLayerVk {
-public:
-    VkImageView imageView;
-    uint32_t cbWidth;
-    uint32_t cbHeight;
-    ComposeLayer layerInfo;
-};
-
-class Composition {
-public:
+   public:
     VkSampler m_vkSampler;
-    uint32_t m_width;
-    uint32_t m_height;
-
-    std::vector<ComposeLayerVk> m_composeLayers;
+    VkImageView m_vkImageView;
     struct LayerTransform {
         glm::mat4 pos;
         glm::mat4 texcoord;
-    };
-    std::vector<LayerTransform> m_transformsPerLayer;
+    } m_layerTransform;
+
+    static std::unique_ptr<ComposeLayerVk> createFromHwc2ComposeLayer(
+        VkSampler, VkImageView, const ComposeLayer &, uint32_t cbWidth,
+        uint32_t cbHeight, uint32_t dstWidth, uint32_t dstHeight);
+
+   private:
+    ComposeLayerVk() = delete;
+    explicit ComposeLayerVk(VkSampler, VkImageView, const LayerTransform &);
+};
+
+// If we want to apply transform to all layers to rotate/clip/position the
+// virtual display, we should add that functionality here.
+class Composition {
+   public:
+    std::vector<std::unique_ptr<ComposeLayerVk>> m_composeLayers;
 
     Composition() = delete;
-    explicit Composition(VkSampler, uint32_t width, uint32_t height, const std::vector<ComposeLayerVk>& composeLayers);
-    explicit Composition(VkImageView, VkSampler, uint32_t width, uint32_t height);
-private:
-    void setTransforms();
+    explicit Composition(
+        std::vector<std::unique_ptr<ComposeLayerVk>> composeLayers);
 };
 
 struct CompositorVkBase
