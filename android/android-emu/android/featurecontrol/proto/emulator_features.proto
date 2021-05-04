@@ -107,4 +107,7 @@ enum Feature {
     Minigbm = 60;
 
     GnssGrpcV1 = 61;
+
+    // Emulated bluetooth stack
+    BluetoothEmulation = 62;
 }
