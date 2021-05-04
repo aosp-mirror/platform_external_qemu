@@ -1,0 +1,136 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d59ce1f7_64d2138a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1076123
+      },
+      "writtenOn": "2021-05-04T18:34:27Z",
+      "side": 1,
+      "message": "I think it would be nice to split this into multiple (three?) CLs:\n- Adding scan responses to the examples\n- Fixing the memory allocation\n- Debugging/logging fixes",
+      "revId": "871d56706f08ef38f77be77a25689282a5f04c6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9faf7a3a_58f41631",
+        "filename": "android/third_party/mynewt-nimble/apps/blehr/src/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1076123
+      },
+      "writtenOn": "2021-05-04T18:34:27Z",
+      "side": 1,
+      "message": "used?",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 26
+      },
+      "revId": "871d56706f08ef38f77be77a25689282a5f04c6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "28ebee05_a8c85928",
+        "filename": "android/third_party/mynewt-nimble/apps/blehr/src/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1076123
+      },
+      "writtenOn": "2021-05-04T18:34:27Z",
+      "side": 1,
+      "message": ":)",
+      "range": {
+        "startLine": 39,
+        "startChar": 34,
+        "endLine": 39,
+        "endChar": 39
+      },
+      "revId": "871d56706f08ef38f77be77a25689282a5f04c6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2fe3a972_0f5a475d",
+        "filename": "android/third_party/mynewt-nimble/nimble/host/src/ble_gatts.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1076123
+      },
+      "writtenOn": "2021-05-04T18:34:27Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 327,
+        "startChar": 0,
+        "endLine": 327,
+        "endChar": 113
+      },
+      "revId": "871d56706f08ef38f77be77a25689282a5f04c6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e39e491c_c1d7513a",
+        "filename": "android/third_party/mynewt-nimble/nimble/host/test/src/ble_gap_test.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2795,
+      "author": {
+        "id": 1076123
+      },
+      "writtenOn": "2021-05-04T18:34:27Z",
+      "side": 1,
+      "message": "needed?",
+      "range": {
+        "startLine": 2795,
+        "startChar": 0,
+        "endLine": 2795,
+        "endChar": 34
+      },
+      "revId": "871d56706f08ef38f77be77a25689282a5f04c6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "00b488ab_0a371417",
+        "filename": "android/third_party/mynewt-nimble/nimble/host/test/src/ble_hs_test_util_hci.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1076123
+      },
+      "writtenOn": "2021-05-04T18:34:27Z",
+      "side": 1,
+      "message": "unused?",
+      "range": {
+        "startLine": 108,
+        "startChar": 1,
+        "endLine": 108,
+        "endChar": 36
+      },
+      "revId": "871d56706f08ef38f77be77a25689282a5f04c6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
