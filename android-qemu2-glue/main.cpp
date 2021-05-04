@@ -23,6 +23,7 @@
 #include "android/base/threads/Async.h"
 #include "android/base/threads/Thread.h"
 #include "android/boot-properties.h"
+#include "android/bootconfig.h"
 #include "android/camera/camera-virtualscene.h"
 #include "android/cmdline-option.h"
 #include "android/config/BluetoothConfig.h"
@@ -2031,6 +2032,8 @@ extern "C" int main(int argc, char** argv) {
     // won't appreciate it.
     args.add("-nodefaults");
 
+    std::string bootconfigInitrdPath;
+
     if (hw->hw_arc) {
         args.add2("-kernel", hw->kernel_path);
 
@@ -2047,7 +2050,15 @@ extern "C" int main(int argc, char** argv) {
                        avd_dir, avd_dir, avd_dir);
     } else {
         if (hw->disk_ramdisk_path) {
-            args.add({"-kernel", hw->kernel_path, "-initrd", hw->disk_ramdisk_path});
+            args.add2("-kernel", hw->kernel_path);
+
+            if (fc::isEnabled(fc::AndroidbootProps)) {
+                bootconfigInitrdPath =
+                    getWriteableFilename(hw->disk_dataPartition_path, "initrd");
+                args.add2("-initrd", bootconfigInitrdPath.c_str());
+            } else {
+                args.add2("-initrd", hw->disk_ramdisk_path);
+            }
         } else {
             derror("disk_ramdisk_path is required but missing");
             return 1;
@@ -2127,7 +2138,10 @@ extern "C" int main(int argc, char** argv) {
                 args.add("null,id=forhvc1");
             }
 
-            boot_property_add_logcat_pipe_virtconsole("*:V");
+            if (!fc::isEnabled(fc::AndroidbootProps)) {
+                // it is going to bootconfig, `androidboot.logcat`
+                boot_property_add_logcat_pipe_virtconsole("*:V");
+            }
         } else {
             args.add("null,id=forhvc1");
         }
@@ -2502,8 +2516,24 @@ extern "C" int main(int argc, char** argv) {
                 hw->display_settings_xml);
 
         std::vector<std::string> kernelCmdLineUserspaceBootOpts;
-        for (const auto& kv: userspaceBootOpts) {
-            kernelCmdLineUserspaceBootOpts.push_back(kv.first + "=" + kv.second);
+        if (fc::isEnabled(fc::AndroidbootProps)) {
+            const int r = createRamdiskWithBootconfig(
+                hw->disk_ramdisk_path,
+                bootconfigInitrdPath.c_str(),
+                userspaceBootOpts);
+            if (r) {
+                fprintf(stderr, "%s:%d Could not prepare the ramdisk with bootconfig, "
+                        "error=%d src=%s dst=%s\n", __func__, __LINE__,
+                        r, hw->disk_ramdisk_path, bootconfigInitrdPath.c_str());
+
+                return r;
+            }
+
+            kernelCmdLineUserspaceBootOpts.push_back("bootconfig");
+        } else {
+            for (const auto& kv: userspaceBootOpts) {
+                kernelCmdLineUserspaceBootOpts.push_back(kv.first + "=" + kv.second);
+            }
         }
 
         std::string append_arg = emulator_getKernelParameters(
