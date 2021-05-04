@@ -461,7 +461,7 @@ android_add_library(
           base/allocator/partition_allocator/page_allocator.cc
           base/allocator/partition_allocator/partition_tls_win.cc
           base/allocator/partition_allocator/random.cc
-         # base/allocator/winheap_stubs_win.cc # Allocator shim
+          # base/allocator/winheap_stubs_win.cc # Allocator shim
           base/base_paths_win.cc
           base/debug/close_handle_hook_win.cc
           base/debug/debugger_win.cc
@@ -556,6 +556,7 @@ android_add_library(
 # android_target_include_directories(libchrome darwin-x86_64 PRIVATE posix})
 target_include_directories(
   libchrome PUBLIC . ${LIBCHROME_ROOT} ${CMAKE_CURRENT_BINARY_DIR}
+                   ${AOSP_ROOT}/external/webrtc
   PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android)
 
 target_link_libraries(libchrome PUBLIC gtest absl::variant ssl absl::strings
@@ -609,8 +610,13 @@ android_target_link_libraries(libchrome linux-x86_64 PRIVATE GLIB2::GLIB2
 
 android_target_link_libraries(
   libchrome darwin-x86_64
-  PRIVATE "-framework Foundation" "-framework CoreGraphics" "-framework IOKit"
-          "-framework CoreText" "-framework Security" "-framework AppKit" bsm)
+  PRIVATE "-framework Foundation"
+          "-framework CoreGraphics"
+          "-framework IOKit"
+          "-framework CoreText"
+          "-framework Security"
+          "-framework AppKit"
+          bsm)
 
 android_target_link_libraries(
   libchrome windows
