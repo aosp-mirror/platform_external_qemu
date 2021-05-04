@@ -15,12 +15,12 @@
 // This contains abstractions to run NimBLE against rootcanal (emulated
 // bluetooth chip)
 
-#include <stdint.h>
+#include <stdint.h>             // for uint32_t
+#include <mutex>                // for recursive_mutex
 
-#include <mutex>
-#include "nimble/nimble_npl.h"
+#include "nimble/nimble_npl.h"  // for ble_npl_hw_enter_critical, ble_npl_hw...
 
-std::mutex s_mutex;
+std::recursive_mutex s_mutex;
 
 extern "C" {
 
