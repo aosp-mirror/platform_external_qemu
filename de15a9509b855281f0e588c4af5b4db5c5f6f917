@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4a2a618d_8a34287d",
+        "filename": "android/third_party/mynewt-nimble/nimble/host/src/ble_hs_hci.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1076123
+      },
+      "writtenOn": "2021-05-04T22:08:45Z",
+      "side": 0,
+      "message": "maybe we should define this to minimize the change?",
+      "range": {
+        "startLine": 259,
+        "startChar": 15,
+        "endLine": 259,
+        "endChar": 36
+      },
+      "revId": "de15a9509b855281f0e588c4af5b4db5c5f6f917",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
