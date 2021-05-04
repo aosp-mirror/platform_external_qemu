@@ -485,6 +485,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::MIGRATABLE_SNAPSHOT_SAVE;
         case android::featurecontrol::AndroidbootProps:
             return android_studio::EmulatorFeatureFlagState::ANDROIDBOOT_PROPS;
+        case android::featurecontrol::BluetoothEmulation:
+            return android_studio::EmulatorFeatureFlagState::BLUETOOTH_EMULATION;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }
