@@ -24,8 +24,8 @@
 #include "host/ble_uuid.h"
 #include "blehr_sens.h"
 
-static const char *manuf_name = "Apache Mynewt";
-static const char *model_num = "Mynewt HR Sensor";
+static const char *manuf_name = "Acme Corp.";
+static const char *model_num = "Roadrunners' HR";
 uint16_t hrs_hrm_handle;
 
 static int
