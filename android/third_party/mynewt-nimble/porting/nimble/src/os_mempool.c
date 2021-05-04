@@ -151,7 +151,8 @@ os_mempool_init_internal(struct os_mempool *mp, uint16_t blocks,
     }
 
     /* Initialize the memory pool structure */
-    mp->mp_block_size = block_size;
+    // Make sure the block size is large enough to hold the memblock structure.
+    mp->mp_block_size = max(block_size, sizeof(struct os_memblock));
     mp->mp_num_free = blocks;
     mp->mp_min_free = blocks;
     mp->mp_flags = flags;
@@ -168,6 +169,9 @@ os_mempool_init_internal(struct os_mempool *mp, uint16_t blocks,
         /* Chain the memory blocks to the free list */
         block_addr = (uint8_t *)membuf;
         block_ptr = (struct os_memblock *)block_addr;
+
+        // This was not always true, causing memory corruption.
+        assert(sizeof(struct os_memblock) <= true_block_size);
         for (i = 1; i < blocks; i++) {
             block_addr += true_block_size;
             os_mempool_poison(mp, block_addr);

@@ -19,6 +19,8 @@
 
 #include "android/base/async/RecurrentTask.h"
 #include "android/base/async/ThreadLooper.h"
+#include "android/base/Log.h"
+#include <atomic>
 extern "C" {
 #include "nimble/nimble_npl.h"
 #include "nimble/nimble_port.h"
@@ -29,6 +31,7 @@ extern "C" {
 extern void os_msys_init(void);
 extern void os_mempool_module_init(void);
 extern void ble_store_config_init(void);
+extern int ble_hs_reset(void);
 }
 
 
@@ -55,6 +58,14 @@ void* ble_looper_task(void* param) {
 extern "C" void sysinit(void) {
     // Make sure we have a looper object, we will run the looper ourselves.
 
+    static std::atomic_bool initialized{false};
+    bool expected = false;
+    if (!initialized.compare_exchange_strong(expected, true)) {
+        LOG(INFO) << "System already initialized..";
+        ble_hs_init();
+        return;
+    }
+
     ThreadLooper::get();
     nimble_port_init();
 
@@ -69,6 +80,10 @@ extern "C" void sysinit(void) {
                       TASK_DEFAULT_STACK, TASK_DEFAULT_STACK_SIZE);
 }
 
+
+extern "C" void sysdown_reset(void) {
+
+}
 
 extern "C"  void
 nimble_port_init(void)
