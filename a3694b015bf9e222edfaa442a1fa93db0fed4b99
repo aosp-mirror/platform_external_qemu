@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "60f28389_9ca7d6fe",
+        "filename": "android/third_party/mynewt-nimble/nimble/host/test/src/ble_gap_test.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 841,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-04T22:28:46Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "d4d01384_39c30611",
+      "range": {
+        "startLine": 841,
+        "startChar": 35,
+        "endLine": 841,
+        "endChar": 112
+      },
+      "revId": "a3694b015bf9e222edfaa442a1fa93db0fed4b99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c1158b53_e09c5132",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-05-04T22:08:45Z",
       "side": 1,
       "message": "define it?",
+      "range": {
+        "startLine": 28,
+        "startChar": 3,
+        "endLine": 28,
+        "endChar": 29
+      },
+      "revId": "a3694b015bf9e222edfaa442a1fa93db0fed4b99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "50e8b9e0_d9332bc6",
+        "filename": "android/third_party/mynewt-nimble/nimble/host/test/src/ble_hs_test.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-04T22:28:46Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "c1158b53_e09c5132",
       "range": {
         "startLine": 28,
         "startChar": 3,
