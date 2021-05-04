@@ -18,6 +18,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7407030b_0e967da3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-04T20:44:49Z",
+      "side": 1,
+      "message": "Will separate them out.",
+      "parentUuid": "d59ce1f7_64d2138a",
+      "revId": "871d56706f08ef38f77be77a25689282a5f04c6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9faf7a3a_58f41631",
@@ -64,6 +82,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4d6b477c_f659f2de",
+        "filename": "android/third_party/mynewt-nimble/apps/blehr/src/main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-04T20:44:49Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "28ebee05_a8c85928",
+      "range": {
+        "startLine": 39,
+        "startChar": 34,
+        "endLine": 39,
+        "endChar": 39
+      },
+      "revId": "871d56706f08ef38f77be77a25689282a5f04c6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2fe3a972_0f5a475d",
@@ -77,6 +119,30 @@
       "writtenOn": "2021-05-04T18:34:27Z",
       "side": 1,
       "message": "?",
+      "range": {
+        "startLine": 327,
+        "startChar": 0,
+        "endLine": 327,
+        "endChar": 113
+      },
+      "revId": "871d56706f08ef38f77be77a25689282a5f04c6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ec560a83_ab85e516",
+        "filename": "android/third_party/mynewt-nimble/nimble/host/src/ble_gatts.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-04T20:44:49Z",
+      "side": 1,
+      "message": "Let me remove this, was used during debugging.",
+      "parentUuid": "2fe3a972_0f5a475d",
       "range": {
         "startLine": 327,
         "startChar": 0,
@@ -135,6 +201,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "50692b49_845af59f",
+        "filename": "android/third_party/mynewt-nimble/nimble/host/test/src/ble_hs_test_util_hci.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-04T20:44:49Z",
+      "side": 1,
+      "message": "Left  over from debugging.",
+      "parentUuid": "00b488ab_0a371417",
+      "range": {
+        "startLine": 108,
+        "startChar": 1,
+        "endLine": 108,
+        "endChar": 36
+      },
+      "revId": "871d56706f08ef38f77be77a25689282a5f04c6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "e8c12f7a_c4114db7",
         "filename": "android/third_party/mynewt-nimble/nimble/transport/socket/src/ble_hci_socket.c",
         "patchSetId": 1
@@ -146,6 +236,30 @@
       "writtenOn": "2021-05-04T18:36:56Z",
       "side": 1,
       "message": "If we don\u0027t rename these, this change becomes a lot more compact",
+      "range": {
+        "startLine": 163,
+        "startChar": 0,
+        "endLine": 166,
+        "endChar": 40
+      },
+      "revId": "871d56706f08ef38f77be77a25689282a5f04c6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6c6cd452_b0242fe2",
+        "filename": "android/third_party/mynewt-nimble/nimble/transport/socket/src/ble_hci_socket.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-04T20:44:49Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "e8c12f7a_c4114db7",
       "range": {
         "startLine": 163,
         "startChar": 0,
