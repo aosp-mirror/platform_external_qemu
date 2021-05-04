@@ -87,11 +87,27 @@ blehr_advertise(void)
     fields.name_len = strlen(device_name);
     fields.name_is_complete = 1;
 
+    /* advertising payload is split into advertising data and advertising
+       response, because all data cannot fit into single packet; name of device
+       is sent as response to scan request */
+    // Android for some reason expect these to be there, or it will not
+    // discover this device.
+    struct ble_hs_adv_fields rsp_fields = {0};
+    rsp_fields.tx_pwr_lvl = 0xaa;
+    rsp_fields.tx_pwr_lvl_is_present = 1;
+
     rc = ble_gap_adv_set_fields(&fields);
     if (rc != 0) {
         MODLOG_DFLT(ERROR, "error setting advertisement data; rc=%d\n", rc);
         return;
     }
+
+    rc = ble_gap_adv_rsp_set_fields(&rsp_fields);
+    if (rc != 0) {
+        MODLOG_DFLT(ERROR, "error setting advertisement data; rc=%d\n", rc);
+        return;
+    }
+
 
     /* Begin advertising */
     memset(&adv_params, 0, sizeof(adv_params));

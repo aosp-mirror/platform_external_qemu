@@ -87,7 +87,22 @@ advertise(void)
     fields.name_is_complete = 1;
 
     rc = ble_gap_adv_set_fields(&fields);
-    assert(rc == 0);
+    if (rc != 0) {
+        MODLOG_DFLT(ERROR, "error setting advertisement data; rc=%d\n", rc);
+        return;
+    }
+
+    // Android for some reason expect these to be there, or it will not
+    // discover this device.
+    struct ble_hs_adv_fields rsp_fields = {0};
+    rsp_fields.tx_pwr_lvl = 0xaa;
+    rsp_fields.tx_pwr_lvl_is_present = 1;
+
+    rc = ble_gap_adv_rsp_set_fields(&rsp_fields);
+    if (rc != 0) {
+        MODLOG_DFLT(ERROR, "error setting advanced advertisement data; rc=%d\n", rc);
+        return;
+    }
 
     MODLOG_DFLT(INFO, "Starting advertising...\n");
 
