@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "26ef3290_47722f92",
+        "filename": "android-qemu2-glue/bootconfig.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-05-04T23:43:15Z",
+      "side": 1,
+      "message": "Bootconfig seems to be testable via maintaining pairs of (\u003cparams\u003e, \u003coutput bytestoappend\u003e). Could we add a few test cases like this?\n\nAlso, for easier unit testing purposes, can this code go in android-emu instead?",
+      "revId": "522b65ebe69806bbf74fdb56ff263621689478e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "00020f4b_c1e1afa5",
+        "filename": "android/android-emu/android/userspace-boot-properties_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-05-04T23:43:15Z",
+      "side": 1,
+      "message": "Yeah this kind of test but also comparing bits of the rendered bootconfig output that we append to the ramdisk against golden data.",
+      "revId": "522b65ebe69806bbf74fdb56ff263621689478e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
