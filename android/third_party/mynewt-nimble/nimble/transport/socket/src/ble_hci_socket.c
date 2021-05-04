@@ -165,6 +165,12 @@ static void *ble_hci_sock_rx_cmd_arg;
 static ble_hci_trans_rx_acl_fn *ble_hci_sock_rx_acl_cb;
 static void *ble_hci_sock_rx_acl_arg;
 
+// Link layer variants (mainly for testing)
+static ble_hci_trans_rx_cmd_fn *ble_hci_sock_rx_cmd_ll_cb = NULL;
+static void *ble_hci_sock_rx_cmd_ll_arg;
+static ble_hci_trans_rx_acl_fn *ble_hci_sock_rx_acl_ll_cb = NULL;
+static void *ble_hci_sock_rx_acl_ll_arg;
+
 static struct ble_hci_sock_state {
     int sock;
     struct ble_npl_eventq evq;
@@ -214,18 +220,20 @@ ble_hci_sock_acl_tx(struct os_mbuf *om)
 
     ch = BLE_HCI_UART_H4_ACL;
     i = socketSend(ble_hci_sock_state.sock, &ch, sizeof(ch));
-    i = 1;
     for (m = om; m; m = SLIST_NEXT(m, om_next)) {
         i += socketSend(ble_hci_sock_state.sock, m->om_data, m->om_len);
     }
-
-    STATS_INCN(hci_sock_stats, obytes, OS_MBUF_PKTLEN(om) + 1);
+    if (ble_hci_sock_rx_acl_ll_cb)  {
+        ble_hci_sock_rx_acl_ll_cb(om, ble_hci_sock_rx_acl_ll_arg);
+    }
+    size_t slen = OS_MBUF_PKTLEN(om) + 1;
+    STATS_INCN(hci_sock_stats, obytes, slen);
     os_mbuf_free_chain(om);
-    if (i != OS_MBUF_PKTLEN(om) + 1) {
+    if (i != slen) {
         if (i < 0) {
             derror("socketSend() failed : %d\n", errno);
         } else {
-            derror("socketSend() partial write: %d\n", i);
+            derror("socketSend() partial write: %d, expected: %d\n", i, slen);
         }
         STATS_INC(hci_sock_stats, oerr);
         return BLE_ERR_MEM_CAPACITY;
@@ -258,7 +266,11 @@ ble_hci_sock_cmdevt_tx(uint8_t *hci_ev, uint8_t h4_type)
     STATS_INCN(hci_sock_stats, obytes, len + 1);
 
     i += socketSend(ble_hci_sock_state.sock, hci_ev, len);
-    dprint("Send %d bytes", i);
+
+    // These callbacks are only used by E2E tests.
+    if (ble_hci_sock_rx_cmd_ll_cb) {
+        ble_hci_sock_rx_cmd_ll_cb(hci_ev, ble_hci_sock_rx_cmd_ll_arg);
+    }
     ble_hci_trans_buf_free(hci_ev);
     if (i != len + 1) {
         if (i < 0) {
@@ -289,7 +301,6 @@ ble_hci_sock_rx_msg(void)
     }
     len = socketRecv(bhss->sock, bhss->rx_data + bhss->rx_off,
                sizeof(bhss->rx_data) - bhss->rx_off);
-               dprint("Received %d bytes", len);
     if (len < 0) {
         return -2;
     }
@@ -414,12 +425,12 @@ ble_hci_sock_config(void)
     int s;
     int rc;
 
-#if 0
+    // Close open socket if any..
     if (bhss->sock >= 0) {
-        close(bhss->sock);
+        socketClose(bhss->sock);
         bhss->sock = -1;
     }
-#endif
+
     if (bhss->sock < 0) {
         s = socketTcp4LoopbackClient(s_ble_hci_device);
         if (s < 0) {
@@ -550,10 +561,10 @@ ble_hci_trans_cfg_ll(ble_hci_trans_rx_cmd_fn *cmd_cb,
                      ble_hci_trans_rx_acl_fn *acl_cb,
                      void *acl_arg)
 {
-    ble_hci_sock_rx_cmd_cb = cmd_cb;
-    ble_hci_sock_rx_cmd_arg = cmd_arg;
-    ble_hci_sock_rx_acl_cb = acl_cb;
-    ble_hci_sock_rx_acl_arg = acl_arg;
+    ble_hci_sock_rx_cmd_ll_cb = cmd_cb;
+    ble_hci_sock_rx_cmd_ll_arg = cmd_arg;
+    ble_hci_sock_rx_acl_ll_cb = acl_cb;
+    ble_hci_sock_rx_acl_ll_arg = acl_arg;
 }
 
 /**

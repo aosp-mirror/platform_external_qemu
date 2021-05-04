@@ -6,7 +6,7 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
@@ -92,6 +92,7 @@ tu_case_set_post_test_cb(tu_post_test_fn_t *cb, void *cb_arg)
 void
 tu_case_init(const char *name)
 {
+    dinfo("        ------------- start: %s/%s %s", tu_config.ts_suite_name, name);
     tu_case_reported = 0;
     tu_case_failed = 0;
     tu_case_set_name(name);

@@ -6,7 +6,7 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
@@ -88,6 +88,7 @@ tu_suite_complete(void)
 void
 tu_suite_init(const char *name)
 {
+    dinfo("------------------------------ starting suite: %s ------------------------------", name);
     tu_suite_failed = 0;
     tu_suite_set_name(name);
 }

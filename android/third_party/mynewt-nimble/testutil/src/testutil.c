@@ -62,14 +62,14 @@ tu_set_fail_cb(tu_case_report_fn_t *cb, void *cb_arg)
 static void
 tu_pass_cb_self(const char *msg, void *arg)
 {
-    printf("[pass] %s/%s %s\n", tu_config.ts_suite_name, tu_case_name, msg);
+    dinfo("        ------------- [pass] %s/%s %s", tu_config.ts_suite_name, tu_case_name, msg);
     fflush(stdout);
 }
 
 static void
 tu_fail_cb_self(const char *msg, void *arg)
 {
-    printf("[FAIL] %s/%s %s\n", tu_config.ts_suite_name, tu_case_name, msg);
+    dinfo("        ------------- [FAIL] %s/%s %s", tu_config.ts_suite_name, tu_case_name, msg);
     fflush(stdout);
 }
 #endif
@@ -82,7 +82,6 @@ tu_init(void)
 
 #if MYNEWT_VAL(SELFTEST)
     // os_init(NULL);
-    printf("TODO INIT OS\n");
     tu_set_pass_cb(tu_pass_cb_self, NULL);
     tu_set_fail_cb(tu_fail_cb_self, NULL);
 #endif
