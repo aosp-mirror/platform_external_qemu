@@ -18,6 +18,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "14efebd8_0ce068fc",
+        "filename": "android-qemu2-glue/bootconfig.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-05-05T02:49:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "26ef3290_47722f92",
+      "revId": "522b65ebe69806bbf74fdb56ff263621689478e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "00020f4b_c1e1afa5",
@@ -31,6 +49,24 @@
       "writtenOn": "2021-05-04T23:43:15Z",
       "side": 1,
       "message": "Yeah this kind of test but also comparing bits of the rendered bootconfig output that we append to the ramdisk against golden data.",
+      "revId": "522b65ebe69806bbf74fdb56ff263621689478e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "dc632a80_1222b62a",
+        "filename": "android/android-emu/android/userspace-boot-properties_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-05-05T02:49:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "00020f4b_c1e1afa5",
       "revId": "522b65ebe69806bbf74fdb56ff263621689478e9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
