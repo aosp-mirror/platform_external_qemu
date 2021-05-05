@@ -70,6 +70,30 @@
       },
       "revId": "de15a9509b855281f0e588c4af5b4db5c5f6f917",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b853aad3_3f70c301",
+        "filename": "android/third_party/mynewt-nimble/nimble/host/src/ble_hs_hci.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-05T16:11:08Z",
+      "side": 0,
+      "message": "The problem is that nimble builds a different library for testing, v.s. one that actually works. The test library will have the BLE_HS_PHONY_HCI_AKCS #define, the real one will not.\n\nOne option might be to turn this function call into a function pointer that we can override in the unit tests.",
+      "parentUuid": "8b4c999f_7e2b63fb",
+      "range": {
+        "startLine": 259,
+        "startChar": 15,
+        "endLine": 259,
+        "endChar": 36
+      },
+      "revId": "de15a9509b855281f0e588c4af5b4db5c5f6f917",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
