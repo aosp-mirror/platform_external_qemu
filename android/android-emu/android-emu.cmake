@@ -23,6 +23,7 @@ set(android-emu-common
     android/base/async/CallbackRegistry.cpp
     android/base/LayoutResolver.cpp
     android/boot-properties.c
+    android/bootconfig.cpp
     android/car-cluster.cpp
     android/car.cpp
     android/cmdline-option.cpp
@@ -818,6 +819,7 @@ if(NOT LINUX_AARCH64)
       android/base/IOVector_unittest.cpp
       android/base/LayoutResolver_unittest.cpp
       android/base/testing/ProtobufMatchers.cpp
+      android/bootconfig_unittest.cpp
       android/camera/CameraFormatConverters_unittest.cpp
       android/cmdline-option_unittest.cpp
       android/CommonReportedInfo_unittest.cpp
