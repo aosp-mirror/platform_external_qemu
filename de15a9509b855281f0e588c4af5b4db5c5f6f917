@@ -46,6 +46,30 @@
       },
       "revId": "de15a9509b855281f0e588c4af5b4db5c5f6f917",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8b4c999f_7e2b63fb",
+        "filename": "android/third_party/mynewt-nimble/nimble/host/src/ble_hs_hci.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1076123
+      },
+      "writtenOn": "2021-05-05T15:57:32Z",
+      "side": 0,
+      "message": "Can we define it for the tests?  It seems fragile to remove the ifdef\u0027s and add a return to make a mixture of the two cases.",
+      "parentUuid": "2580999d_11fdf147",
+      "range": {
+        "startLine": 259,
+        "startChar": 15,
+        "endLine": 259,
+        "endChar": 36
+      },
+      "revId": "de15a9509b855281f0e588c4af5b4db5c5f6f917",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
