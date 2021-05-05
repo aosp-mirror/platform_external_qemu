@@ -16,6 +16,29 @@
       "message": "Looks great Erwin, thanks!",
       "revId": "7b97c03f815859998a25c0aaf3566d67f9d971f4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "81825120_19c6c62b",
+        "filename": "android/third_party/bluetooth/rootcanal/emulated_bluetooth.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1349530
+      },
+      "writtenOn": "2021-05-05T14:51:56Z",
+      "side": 1,
+      "message": "One question though: In our use case, we use the Gatt service for configuring how the device advertises. The advertisement consists of raw packets, that are changed periodically.\nI\u0027m not sure how to use this interface for this case (I guess we\u0027ll need to discuss the details).",
+      "range": {
+        "startLine": 329,
+        "startChar": 4,
+        "endLine": 329,
+        "endChar": 45
+      },
+      "revId": "7b97c03f815859998a25c0aaf3566d67f9d971f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
