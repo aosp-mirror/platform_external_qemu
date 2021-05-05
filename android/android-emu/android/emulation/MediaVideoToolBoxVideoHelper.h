@@ -175,6 +175,9 @@ private:
     // for all platforms
     std::unique_ptr<MediaFfmpegVideoHelper> mFfmpegVideoHelper;
 
+    // save this last output pts for out of order frame check
+    uint64_t mLastOutputPts = 0;
+    bool mHasOutOfOrderFrames {false};
     // vtb decoder does not reorder output frames, that means
     // the video could see jumps all the times
     int mVtbBufferSize = 8;
