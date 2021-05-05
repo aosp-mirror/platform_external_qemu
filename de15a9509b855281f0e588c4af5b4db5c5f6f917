@@ -94,6 +94,30 @@
       },
       "revId": "de15a9509b855281f0e588c4af5b4db5c5f6f917",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d1e6b81e_60c9861d",
+        "filename": "android/third_party/mynewt-nimble/nimble/host/src/ble_hs_hci.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1076123
+      },
+      "writtenOn": "2021-05-05T16:48:05Z",
+      "side": 0,
+      "message": "It still makes me nervous to combine the two cases, but in the end it\u0027s up to you.",
+      "parentUuid": "b853aad3_3f70c301",
+      "range": {
+        "startLine": 259,
+        "startChar": 15,
+        "endLine": 259,
+        "endChar": 36
+      },
+      "revId": "de15a9509b855281f0e588c4af5b4db5c5f6f917",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
