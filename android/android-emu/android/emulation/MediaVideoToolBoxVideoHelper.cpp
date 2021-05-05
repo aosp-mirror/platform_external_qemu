@@ -67,6 +67,8 @@ void MediaVideoToolBoxVideoHelper::deInit() {
 bool MediaVideoToolBoxVideoHelper::init() {
     VTB_DPRINT("init calling");
     constexpr int numthreads = 1;
+    mFfmpegVideoHelper.reset(new MediaFfmpegVideoHelper(264, numthreads));
+    mFfmpegVideoHelper->init();
     mVtbReady = false;
     return true;
 }
@@ -89,16 +91,39 @@ static void dumpBytes(const uint8_t* img, size_t szBytes, bool all = false) {
     fflush(stdout);
 }
 
+void MediaVideoToolBoxVideoHelper::extractFrameInfo() {
+    // at this moment, ffmpeg should have decoded the first frame to obtain
+    // w/h/colorspace info and number of b frame buffers
+
+    if (mObtainedAuxInfo) return;
+
+    mFfmpegVideoHelper->flush();
+    MediaSnapshotState::FrameInfo frame;
+    bool success = mFfmpegVideoHelper->receiveFrame(&frame);
+    if (success) {
+        mColorAspects = frame.color;
+        mVtbBufferSize = mFfmpegVideoHelper->frameReorderBufferSize();
+    }
+    mObtainedAuxInfo = true;
+}
+
 void MediaVideoToolBoxVideoHelper::decode(const uint8_t* frame,
                                           size_t szBytes,
                                           uint64_t inputPts) {
     VTB_DPRINT("%s(frame=%p, sz=%zu)", __func__, frame, szBytes);
+    if (!mObtainedAuxInfo) {
+        // uses ffmpeg to preprocess until vtb is ready
+        VTB_DPRINT("before ffmpeg decode");
+        mFfmpegVideoHelper->decode(frame, szBytes, inputPts);
+        VTB_DPRINT("after ffmpeg decode");
+    }
 
     parseInputFrames(frame, szBytes);
 
     // has to go in the FIFO order
     for (int i = 0; i < mInputFrames.size(); ++i) {
         InputFrame& f = mInputFrames[i];
+        bool isidr=false;
         switch (f.type) {
             case H264NaluType::SPS:
                 mSPS.assign(f.data, f.data + f.size);
@@ -114,8 +139,13 @@ void MediaVideoToolBoxVideoHelper::decode(const uint8_t* frame,
                 break;
             case H264NaluType::CodedSliceIDR:
                 VTB_DPRINT("this is an IDR frame");
+                isidr=true;
             case H264NaluType::CodedSliceNonIDR:
+                if(isidr==false) {
+                    VTB_DPRINT("this is an non-IDR frame");
+                }
                 if (!mVtbReady) {
+                    extractFrameInfo();
                     createCMFormatDescription();
                     Boolean needNewSession = ( VTDecompressionSessionCanAcceptFormatDescription(mDecoderSession, mCmFmtDesc) == false);
                     if (needNewSession) {
@@ -203,11 +233,13 @@ void MediaVideoToolBoxVideoHelper::handleIDRFrame(const uint8_t* ptr,
 void MediaVideoToolBoxVideoHelper::parseInputFrames(const uint8_t* frame,
                                                     size_t sz) {
     mInputFrames.clear();
+    VTB_DPRINT("input frame %d bytes", (int)sz);
     while (1) {
         const uint8_t* remainingFrame = parseOneFrame(frame, sz);
         if (remainingFrame == nullptr)
             break;
         int consumed = (remainingFrame - frame);
+        VTB_DPRINT("consumed %d bytes", consumed);
         frame = remainingFrame;
         sz = sz - consumed;
     }
@@ -238,8 +270,11 @@ const uint8_t* MediaVideoToolBoxVideoHelper::parseOneFrame(const uint8_t* frame,
     // frame as one frame from guest, we need to separate SEI out from IDR:
     // video tool box cannot handle SEI+IDR combo-frame; for other cases, there
     // is no need to check.
-    if (H264NaluType::SEI ==
-        H264NaluParser::getFrameNaluType(frame, szBytes, nullptr)) {
+    if (H264NaluType::SEI == H264NaluParser::getFrameNaluType(frame, szBytes, nullptr)
+     || H264NaluType::SPS == H264NaluParser::getFrameNaluType(frame, szBytes, nullptr)
+     || H264NaluType::PPS == H264NaluParser::getFrameNaluType(frame, szBytes, nullptr)
+
+        ) {
         nextNalu = H264NaluParser::getNextStartCodeHeader(currentNalu + 3,
                                                           remaining - 3);
         if (nextNalu != nullptr) {
@@ -646,7 +681,7 @@ void MediaVideoToolBoxVideoHelper::copyFrame() {
         copyFrameToCPU();
     }
 
-    if (mVtbBufferMap.size() >= mVtbBufferSize) {
+    if (mVtbBufferMap.size() > mVtbBufferSize) {
         mSavedDecodedFrames.push_back(std::move(mVtbBufferMap.begin()->second));
         mVtbBufferMap.erase(mVtbBufferMap.begin());
     }

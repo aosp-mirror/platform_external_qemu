@@ -174,6 +174,9 @@ private:
     // TODO: replace it with webrtc h264 parser once it is built
     // for all platforms
     std::unique_ptr<MediaFfmpegVideoHelper> mFfmpegVideoHelper;
+    // true once ffmpeg has processed first IDR
+    bool mObtainedAuxInfo {false};
+    void extractFrameInfo();
 
     // vtb decoder does not reorder output frames, that means
     // the video could see jumps all the times
