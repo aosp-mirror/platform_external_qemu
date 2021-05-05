@@ -39,6 +39,7 @@ ble_npl_error_t ble_npl_mutex_release(struct ble_npl_mutex* mu) {
 
     std::timed_mutex* mtx = reinterpret_cast<std::timed_mutex*>(mu->lock);
     mtx->unlock();
+    mu->mu_owner = NULL;
     return BLE_NPL_OK;
 }
 
@@ -57,6 +58,6 @@ ble_npl_error_t ble_npl_mutex_pend(struct ble_npl_mutex* mu, uint32_t timeout) {
             return BLE_NPL_TIMEOUT;
         }
     }
-
+    mu->mu_owner = ble_npl_get_current_task_id();
     return BLE_NPL_OK;
 }

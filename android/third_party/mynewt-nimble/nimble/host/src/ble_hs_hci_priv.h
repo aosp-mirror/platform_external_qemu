@@ -90,10 +90,10 @@ uint32_t ble_hs_hci_get_le_supported_feat(void);
 void ble_hs_hci_set_hci_version(uint8_t hci_version);
 uint8_t ble_hs_hci_get_hci_version(void);
 
-#if MYNEWT_VAL(BLE_HS_PHONY_HCI_ACKS)
+
 typedef int ble_hs_hci_phony_ack_fn(uint8_t *ack, int ack_buf_len);
 void ble_hs_hci_set_phony_ack_cb(ble_hs_hci_phony_ack_fn *cb);
-#endif
+
 
 int ble_hs_hci_util_read_adv_tx_pwr(int8_t *out_pwr);
 int ble_hs_hci_util_rand(void *dst, int len);

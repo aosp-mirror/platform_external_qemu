@@ -25,7 +25,7 @@
 #ifndef _NPL_OS_TYPES_H
 #define _NPL_OS_TYPES_H
 #include <stdint.h>
-
+#include <stdbool.h>
 
 
 /* The highest and lowest task priorities */
@@ -57,11 +57,6 @@ struct ble_npl_callout {
     bool                    c_active;
 };
 
-struct ble_npl_mutex {
-    void*             lock;
-    int32_t           attr; // Spec out attributes (Enum)
-    uint64_t          wait;
-};
 
 struct ble_npl_sem {
     void*                   lock; // std::timed_mutex*
@@ -73,6 +68,14 @@ struct ble_npl_task {
     int64_t /* pthread_attr_t */         attr;
     void* /* struct sched_param */      param;
     const char*             name;
+};
+
+
+struct ble_npl_mutex {
+    void*             lock;
+    int32_t           attr; // Spec out attributes (Enum)
+    uint64_t          wait;
+    void*              mu_owner; // Thread id.
 };
 
 typedef void *(*ble_npl_task_func_t)(void *);
@@ -96,7 +99,37 @@ void ble_npl_task_yield(void);
 #define os_callout_reset  ble_npl_callout_reset
 #define os_callout_stop ble_npl_callout_stop
 #define os_event ble_npl_event
+#define os_stack_t ble_npl_stack_t
+#define os_task ble_npl_task
+#define os_task_init ble_npl_task_init
 
+#define os_started ble_npl_os_started
+#define os_task_func_t ble_npl_task_func_t
+
+#define os_sem ble_npl_sem
+#define os_sem_init ble_npl_sem_init
+#define os_sem_release ble_npl_sem_release
+#define os_sem_pend ble_npl_sem_pend
 // We simulate a tick to be 1 ms
+
+#define os_time_ms_to_ticks ble_npl_time_ms_to_ticks
+#define os_time_ms_to_ticks32 ble_npl_time_ms_to_ticks32
+#define os_time_t ble_npl_time_t
+#define os_time_delay ble_npl_time_delay
+
+#define os_start()  printf("Starting os\n");
+#define os_time_advance  ble_npl_time_delay
+
 #define OS_TICKS_PER_SEC 1000
+#define os_get_current_task_id ble_npl_get_current_task_id
+
+
+// Timeouts we don't even really use
+#define OS_TIMEOUT_NEVER 2^31
+#define OS_WAIT_FOREVER 2^31
+#define OS_STACK_ALIGN(x)              __ALIGN_MASK(x,(typeof(x))(2)-1)
+#define __ALIGN_MASK(x,mask)    (((x)+(mask))&~(mask))
+#define os_malloc malloc
+
+#define MYNEWT 1
 #endif // _NPL_OS_TYPES_H

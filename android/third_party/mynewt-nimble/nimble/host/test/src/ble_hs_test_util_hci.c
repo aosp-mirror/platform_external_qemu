@@ -20,7 +20,8 @@
 #include "testutil/testutil.h"
 #include "nimble/ble.h"
 #include "nimble/hci_common.h"
-#include "transport/ram/ble_hci_ram.h"
+// #include "transport/ram/ble_hci_ram.h"
+#include "nimble/ble_hci_trans.h"
 #include "ble_hs_test_util.h"
 
 #define BLE_HCI_EVENT_CMD_COMPLETE_HDR_LEN  (5)
