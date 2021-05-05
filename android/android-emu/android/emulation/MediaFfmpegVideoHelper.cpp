@@ -185,6 +185,12 @@ void MediaFfmpegVideoHelper::fetchAllFrames() {
     }
 }
 
+int MediaFfmpegVideoHelper::frameReorderBufferSize() const {
+    if (!mCodecCtx) return 0;
+    // the has_bframe: Size of the frame reordering buffer in the decoder.
+    return mCodecCtx->has_b_frames;
+}
+
 void MediaFfmpegVideoHelper::decode(const uint8_t* data,
                                     size_t len,
                                     uint64_t pts) {
