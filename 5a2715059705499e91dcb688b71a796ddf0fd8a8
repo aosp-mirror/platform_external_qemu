@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "06e274a6_eb04b08b",
+        "filename": "android/third_party/mynewt-nimble/nimble/host/test/src/ble_hs_test.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1076123
+      },
+      "writtenOn": "2021-05-05T00:01:15Z",
+      "side": 1,
+      "message": "This is surprising, since GATT works when it\u0027s not a test.",
+      "range": {
+        "startLine": 71,
+        "startChar": 31,
+        "endLine": 71,
+        "endChar": 61
+      },
+      "revId": "5a2715059705499e91dcb688b71a796ddf0fd8a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
