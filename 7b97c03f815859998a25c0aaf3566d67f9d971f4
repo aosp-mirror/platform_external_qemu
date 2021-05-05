@@ -60,6 +60,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "3f76dc29_dc1f973d",
+        "filename": "android/third_party/bluetooth/rootcanal/emulated_bluetooth.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-05T17:34:44Z",
+      "side": 1,
+      "message": "We have automated scripts that converts every method into a unique hash that can be used to track metrics. Unfortunately we have no easy way to track if we remove/rename methods. As a workaround we have a script that parses out the \"deleted\" block so we know where older hashes came from.",
+      "parentUuid": "f60f8be3_5d6b45ec",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 6
+      },
+      "revId": "7b97c03f815859998a25c0aaf3566d67f9d971f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "81825120_19c6c62b",
         "filename": "android/third_party/bluetooth/rootcanal/emulated_bluetooth.proto",
         "patchSetId": 1
