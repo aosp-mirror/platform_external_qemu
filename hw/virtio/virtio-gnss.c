@@ -51,31 +51,30 @@ static int count=0;
 static void virtio_gnss_process_output(VirtIOGNSS *vgnss) {
     //fprintf(stderr, "%s %d calling\n", __func__, __LINE__);
 
+    if (!qemu_chr_fe_backend_connected(&vgnss->chr)) {
+        fprintf(stderr, "%s %d cannot write from guest to host: chardev not connected yet\n", __func__, __LINE__);
+        return;
+    }
+
     size_t size;
     int offset, len;
     VirtIODevice *vdev = VIRTIO_DEVICE(vgnss);
     VirtQueueElement *elem;
 
-    char buf[1024];
+    uint8_t buf[1024];
     int bufsize = sizeof(buf);
 
-    count = 0;
-
-    offset = 0;
-    while (offset < bufsize) {
+    while (true) {
         elem = virtqueue_pop(vgnss->ovq, sizeof(VirtQueueElement));
         if (!elem) {
             break;
         }
-        len = iov_to_buf(elem->out_sg, elem->out_num, 0, buf + offset,
-                         bufsize - offset);
-        offset += len;
-
+        // TODO: iterate through the elem and write all without of using buf
+        len = iov_to_buf(elem->out_sg, elem->out_num, 0, buf, bufsize);
+        qemu_chr_fe_write(&vgnss->chr, buf, len);
         virtqueue_push(vgnss->ovq, elem, len);
         g_free(elem);
     }
-    buf[offset] = '\0';
-    fprintf(stderr, "%s %d got message of size %d from guest:'%s'\n", __func__, __LINE__, offset, buf);
     virtio_notify(vdev, vgnss->ovq);
 }
 
