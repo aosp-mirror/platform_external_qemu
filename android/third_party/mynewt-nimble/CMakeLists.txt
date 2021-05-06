@@ -34,6 +34,11 @@ if(NOT ANDROID_QEMU_VERSION)
                    gtest)
   add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/android/android-emu-base
                    android-emu-base)
+  if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+    # This will help you find issues.
+    set(CMAKE_C_FLAGS "-fsanitize=address -fno-omit-frame-pointer -g3 -O0")
+    set(CMAKE_EXE_LINKER_FLAGS "-fsanitize=address")
+  endif()
 endif()
 
 message(STATUS "Including apache-nimble bluetooth stack.")
@@ -58,7 +63,6 @@ target_include_directories(
             nimble/include)
 
 add_subdirectory(porting)
-add_subdirectory(testutil)
 
 add_subdirectory(ext/tinycrypt)
 add_subdirectory(nimble/transport)
@@ -77,13 +81,16 @@ target_link_libraries(
   INTERFACE _nimble_os_abstraction_headers
             _nimble_os_abstraction
             _nimble_os_impl
-            _nimble_transport_socket
             _nimble_store_ram
             _nimble_util
             _nimble_host_layer
             _nimble_service_layer
-            _nimble_os_sysinit)
+            _nimble_os_sysinit
+            _nimble_transport_socket)
 
 # Now include some sample apps
 add_subdirectory(apps)
+
+# Setup the unit tests.
+add_subdirectory(testutil)
 add_subdirectory(nimble/host/test)

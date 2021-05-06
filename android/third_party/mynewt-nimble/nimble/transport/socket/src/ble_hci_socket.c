@@ -266,11 +266,6 @@ ble_hci_sock_cmdevt_tx(uint8_t *hci_ev, uint8_t h4_type)
     STATS_INCN(hci_sock_stats, obytes, len + 1);
 
     i += socketSend(ble_hci_sock_state.sock, hci_ev, len);
-
-    // These callbacks are only used by E2E tests.
-    if (ble_hci_sock_rx_cmd_ll_cb) {
-        ble_hci_sock_rx_cmd_ll_cb(hci_ev, ble_hci_sock_rx_cmd_ll_arg);
-    }
     ble_hci_trans_buf_free(hci_ev);
     if (i != len + 1) {
         if (i < 0) {
@@ -716,7 +711,7 @@ ble_hci_sock_set_device(int dev)
  *                              A BLE_ERR_[...] error code on failure.
  */
 void
-ble_hci_sock_init(void)
+ble_hci_transport_init(void)
 {
     int rc;
 

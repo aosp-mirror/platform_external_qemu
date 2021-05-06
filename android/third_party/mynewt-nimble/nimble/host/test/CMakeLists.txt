@@ -2,7 +2,7 @@
 # These tests require rootcanal HCI on port 6402
 # The test currently fail.
 android_add_executable(
-  TARGET rootcanal_nimble_tests
+  TARGET nimble_e2e_tests
   LICENSE Apache-2.0
   SRC src/ble_att_clt_test.c
       src/ble_att_svr_test.c
@@ -34,10 +34,10 @@ android_add_executable(
       src/ble_sm_test_util.c
       src/ble_store_test.c
       src/ble_uuid_test.c)
-target_link_libraries(rootcanal_nimble_tests PRIVATE _nimble_test_util nimble_bluetooth)
-target_include_directories(rootcanal_nimble_tests PRIVATE src ../src)
+target_link_libraries(nimble_e2e_tests PRIVATE _nimble_test_util _nimble_host_layer _nimble_store_config _nimble_service_layer _nimble_transport_test _nimble_os_sysinit)
+target_include_directories(nimble_e2e_tests PRIVATE src ../src)
 target_compile_options(
-  rootcanal_nimble_tests
+  nimble_e2e_tests
   PRIVATE -Wno-implicit-function-declaration
           -Wno-tentative-definition-incomplete-type -Wno-parentheses-equality
           -Wno-incompatible-pointer-types)
