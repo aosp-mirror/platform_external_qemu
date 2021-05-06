@@ -17,22 +17,15 @@
  * under the License.
  */
 
-#ifndef _BLE_HCI_SOCKET_H_
-#define _BLE_HCI_SOCKET_H_
+#ifndef H_BLE_HCI_NOP_
+#define H_BLE_HCI_NOP_
+
+#include "nimble/ble_hci_trans.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct os_eventq;
-void ble_hci_sock_set_evq(struct os_eventq*);
-
-/**
- * Initializes the UART HCI transport module.
- *
- * @return                      0 on success;
- *                              A BLE_ERR_[...] error code on failure.
- */
 void ble_hci_transport_init(void);
 
 #ifdef __cplusplus

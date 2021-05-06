@@ -35,5 +35,5 @@ android_add_library(TARGET _nimble_os_sysinit LICENSE Apache-2.0
 target_link_libraries(
     _nimble_os_sysinit
     PUBLIC _nimble_os_abstraction_headers _nimble_host_layer
-           _nimble_transport_socket _nimble_store_config android-emu-base)
+            _nimble_store_config android-emu-base)
 target_compile_options(_nimble_os_sysinit PRIVATE -Wno-extern-c-compat)
