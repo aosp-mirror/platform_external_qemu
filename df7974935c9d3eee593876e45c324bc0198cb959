@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1599cba5_c889c7ee",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-06T17:42:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f0c16644_6da88ed0",
+      "range": {
+        "startLine": 65,
+        "startChar": 3,
+        "endLine": 65,
+        "endChar": 69
+      },
+      "revId": "df7974935c9d3eee593876e45c324bc0198cb959",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2fb40bac_97d02d77",
@@ -93,6 +117,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "06a85aab_37c6e8dc",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-06T17:42:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9c2a6af2_57e189b3",
+      "range": {
+        "startLine": 81,
+        "startChar": 64,
+        "endLine": 81,
+        "endChar": 69
+      },
+      "revId": "df7974935c9d3eee593876e45c324bc0198cb959",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "86e76fc5_f1bb47e8",
@@ -116,6 +164,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "01e5103d_069022c8",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-06T17:42:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "86e76fc5_f1bb47e8",
+      "range": {
+        "startLine": 82,
+        "startChar": 64,
+        "endLine": 82,
+        "endChar": 75
+      },
+      "revId": "df7974935c9d3eee593876e45c324bc0198cb959",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "23bf86ca_88459b68",
@@ -129,6 +201,30 @@
       "writtenOn": "2021-04-01T22:40:57Z",
       "side": 1,
       "message": "There is no such thing as center edge.",
+      "range": {
+        "startLine": 88,
+        "startChar": 64,
+        "endLine": 88,
+        "endChar": 75
+      },
+      "revId": "df7974935c9d3eee593876e45c324bc0198cb959",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1da10f8a_6e3c7f92",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 5
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-06T17:42:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "23bf86ca_88459b68",
       "range": {
         "startLine": 88,
         "startChar": 64,
