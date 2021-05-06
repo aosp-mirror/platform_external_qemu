@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bfc398f6_ee265d19",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-05-06T18:37:55Z",
+      "side": 1,
+      "message": "Gets -\u003e Returns",
+      "range": {
+        "startLine": 35,
+        "startChar": 7,
+        "endLine": 35,
+        "endChar": 11
+      },
+      "revId": "0bb1dac08d1392b87a9ba0cf1610c81c41641f10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e10b28b1_08f6dc60",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 6
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-05-06T18:37:55Z",
+      "side": 1,
+      "message": "Terminate with a period.",
+      "range": {
+        "startLine": 36,
+        "startChar": 57,
+        "endLine": 36,
+        "endChar": 66
+      },
+      "revId": "0bb1dac08d1392b87a9ba0cf1610c81c41641f10",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
