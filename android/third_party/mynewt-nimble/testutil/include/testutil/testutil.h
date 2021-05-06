@@ -72,6 +72,13 @@ void tu_suite_pre_test(void);
 void tu_suite_complete(void);
 int tu_suite_register(tu_testsuite_fn_t* ts, const char *name);
 
+
+ /**
+   * Returns true iff left and right are  values within tolerance of
+   * each other.
+   */
+bool equal_within_tolerance(int left, int right, int tolerance);
+
 struct ts_suite {
     SLIST_ENTRY(ts_suite) ts_next;
     const char *ts_name;
