@@ -306,6 +306,15 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->overview_button->setHidden(true);
     }
 
+    if (android_cmdLineOptions->fuchsia) {
+        // These don't apply to Fuchsia
+        mToolsUi->prev_layout_button->setHidden(true);
+        mToolsUi->next_layout_button->setHidden(true);
+        mToolsUi->back_button->setHidden(true);
+        mToolsUi->home_button->setHidden(true);
+        mToolsUi->overview_button->setHidden(true);
+    }
+
 #ifndef Q_OS_MAC
     // Swap minimize and close buttons on non-apple OSes
     auto closeBtn = mToolsUi->winButtonsLayout->takeAt(0);
