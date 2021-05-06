@@ -438,7 +438,7 @@ TEST_CASE_SELF(ble_gatt_disc_s_test_oom_all)
 
     /* Verify that we will resume the stalled GATT procedure in one second. */
     ticks_until = ble_gattc_timer();
-    TEST_ASSERT(ticks_until == os_time_ms_to_ticks32(MYNEWT_VAL(BLE_GATT_RESUME_RATE)));
+    TEST_ASSERT(equal_within_tolerance(ticks_until, os_time_ms_to_ticks32(MYNEWT_VAL(BLE_GATT_RESUME_RATE)), 100));
 
     /* Verify the procedure proceeds after mbufs become available. */
     rc = os_mbuf_free_chain(oms);
@@ -458,7 +458,7 @@ TEST_CASE_SELF(ble_gatt_disc_s_test_oom_all)
 
     /* Verify that we will resume the stalled GATT procedure in one second. */
     ticks_until = ble_gattc_timer();
-    TEST_ASSERT(ticks_until == os_time_ms_to_ticks32(MYNEWT_VAL(BLE_GATT_RESUME_RATE)));
+    TEST_ASSERT(equal_within_tolerance(ticks_until, os_time_ms_to_ticks32(MYNEWT_VAL(BLE_GATT_RESUME_RATE)), 100));
 
     rc = os_mbuf_free_chain(oms);
     TEST_ASSERT_FATAL(rc == 0);
@@ -517,7 +517,7 @@ TEST_CASE_SELF(ble_gatt_disc_s_test_oom_uuid)
 
     /* Verify that we will resume the stalled GATT procedure in one second. */
     ticks_until = ble_gattc_timer();
-    TEST_ASSERT(ticks_until == os_time_ms_to_ticks32(MYNEWT_VAL(BLE_GATT_RESUME_RATE)));
+    TEST_ASSERT(equal_within_tolerance(ticks_until, os_time_ms_to_ticks32(MYNEWT_VAL(BLE_GATT_RESUME_RATE)), 100));
 
     /* Verify the procedure proceeds after mbufs become available. */
     rc = os_mbuf_free_chain(oms);
@@ -537,7 +537,7 @@ TEST_CASE_SELF(ble_gatt_disc_s_test_oom_uuid)
 
     /* Verify that we will resume the stalled GATT procedure in one second. */
     ticks_until = ble_gattc_timer();
-    TEST_ASSERT(ticks_until == os_time_ms_to_ticks32(MYNEWT_VAL(BLE_GATT_RESUME_RATE)));
+    TEST_ASSERT(equal_within_tolerance(ticks_until, os_time_ms_to_ticks32(MYNEWT_VAL(BLE_GATT_RESUME_RATE)), 100));
 
     /* Verify that procedure completes when mbufs are available. */
     rc = os_mbuf_free_chain(oms);
@@ -600,10 +600,13 @@ TEST_CASE_SELF(ble_gatt_disc_s_test_oom_timeout)
          * second.
          */
         ticks_until = ble_gattc_timer();
-        TEST_ASSERT(ticks_until == os_time_ms_to_ticks32(MYNEWT_VAL(BLE_GATT_RESUME_RATE)));
+        TEST_ASSERT(equal_within_tolerance(ticks_until, os_time_ms_to_ticks32(MYNEWT_VAL(BLE_GATT_RESUME_RATE)), 100));
 
         os_time_advance(ticks_until);
     }
+
+    // We most definitely should have timed out now.
+    os_time_advance(os_time_ms_to_ticks32(MYNEWT_VAL(BLE_GATT_RESUME_RATE)));
 
     /* Verify the procedure has timed out.  The connection should now be
      * in the process of being terminated.  XXX: Check this.
