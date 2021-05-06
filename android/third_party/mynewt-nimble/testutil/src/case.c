@@ -92,7 +92,7 @@ tu_case_set_post_test_cb(tu_post_test_fn_t *cb, void *cb_arg)
 void
 tu_case_init(const char *name)
 {
-    dinfo("        ------------- start: %s/%s %s", tu_config.ts_suite_name, name);
+    dinfo("        ------------- start: %s/%s", tu_config.ts_suite_name, name);
     tu_case_reported = 0;
     tu_case_failed = 0;
     tu_case_set_name(name);
