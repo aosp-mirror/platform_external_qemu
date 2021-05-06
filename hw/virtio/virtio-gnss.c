@@ -79,53 +79,9 @@ static void virtio_gnss_process_output(VirtIOGNSS *vgnss) {
 }
 
 static void virtio_gnss_process_input(VirtIOGNSS *vgnss) {
-    size_t size;
-    int offset, len;
-    VirtIODevice *vdev = VIRTIO_DEVICE(vgnss);
-    VirtQueueElement *elem;
-
     fprintf(stderr, "%s %d got read request from guest\n", __func__, __LINE__);
 
-    if (0 && count >= 100) {
-        fprintf(stderr, "%s %d cunter >= 100 return \n", __func__, __LINE__);
-        return;
-    }
-    ++count;
-
-    //fprintf(stderr, "%s %d calling\n", __func__, __LINE__);
-    char buf[1024] = "hello from host\n";
-    int bufsize = strlen(buf);
-
-    //sleep(1);
-
-    if (!is_guest_ready_to_recv(vgnss)) {
-        fprintf(stderr, "guest is not ready %s %d\n", __func__, __LINE__);
-        return;
-    }
-
-    size = get_request_size_to_recv(vgnss->ivq);
-
-    if (!size) {
-        fprintf(stderr, "guest is does not have capacity to receive %s %d\n", __func__, __LINE__);
-        return;
-    }
-
-    offset = 0;
-    while (offset < size && offset < bufsize) {
-        elem = virtqueue_pop(vgnss->ivq, sizeof(VirtQueueElement));
-        if (!elem) {
-            break;
-        }
-        len = iov_from_buf(elem->in_sg, elem->in_num, 0, buf + offset,
-                           bufsize - offset);
-        offset += len;
-
-        virtqueue_push(vgnss->ivq, elem, len);
-        g_free(elem);
-    }
-    fprintf(stderr, "%s %d send message to guest:'%s'\n", __func__, __LINE__, buf);
-    //virtio_notify(vdev, vgnss->ovq);
-    virtio_notify(vdev, vgnss->ivq);
+    // pretty much nothing to do right now
 }
 
 static void handle_input(VirtIODevice *vdev, VirtQueue *vq) {
@@ -147,8 +103,55 @@ static void virtio_gnss_vm_state_change(void *opaque, int running,
     VirtIOGNSS *vgnss = opaque;
 
     if (running && is_guest_ready_to_recv(vgnss)) {
-        virtio_gnss_process_input(vgnss);
+        // virtio_gnss_process_input(vgnss);
     }
+}
+
+static int gnss_can_read(void *opaque)
+{
+    VirtIOGNSS *vgnss = opaque;
+    int size;
+
+    if (is_guest_ready_to_recv(vgnss)) {
+        size = get_request_size_to_recv(vgnss->ivq);
+        return size;
+    }
+    return 0;
+}
+
+static void gnss_send_to_guest(VirtIOGNSS* vgnss, const uint8_t *buf, const int size)
+{
+    VirtQueueElement *elem;
+    int offset, len;
+    offset = 0;
+    VirtIODevice *vdev = VIRTIO_DEVICE(vgnss);
+    while (offset < size) {
+        elem = virtqueue_pop(vgnss->ivq, sizeof(VirtQueueElement));
+        if (!elem) {
+            break;
+        }
+        len = iov_from_buf(elem->in_sg, elem->in_num, 0, buf + offset,
+                           size - offset);
+        offset += len;
+
+        virtqueue_push(vgnss->ivq, elem, len);
+        g_free(elem);
+    }
+    if (1) {
+        char tmpbuf[1024];
+        memcpy(tmpbuf, buf, size > 1000 ? 1000 : size);
+        tmpbuf[size] = '\0';
+        fprintf(stderr, "%s %d send message to guest:'%s'\n", __func__, __LINE__, tmpbuf);
+    }
+    virtio_notify(vdev, vgnss->ivq);
+}
+
+/* Send data from a char device over to the guest */
+static void gnss_read(void *opaque, const uint8_t *buf, int size)
+{
+    VirtIOGNSS* vgnss = opaque;
+
+    gnss_send_to_guest(vgnss, buf, size);
 }
 
 static void virtio_gnss_device_realize(DeviceState *dev, Error **errp) {
@@ -162,6 +165,13 @@ static void virtio_gnss_device_realize(DeviceState *dev, Error **errp) {
 
     vgnss->ivq = virtio_add_queue(vdev, 8, handle_input);
     vgnss->ovq = virtio_add_queue(vdev, 8, handle_output);
+
+    if (qemu_chr_fe_backend_connected(&vgnss->chr)) {
+        qemu_chr_fe_set_handlers(&vgnss->chr, gnss_can_read, gnss_read,
+                             NULL, NULL, vgnss, NULL, true);
+    } else {
+        fprintf(stderr, "%s %d cannot set chardev handler : chardev not connected yet\n", __func__, __LINE__);
+    }
 
     vgnss->vmstate =
         qemu_add_vm_change_state_handler(virtio_gnss_vm_state_change, vgnss);
