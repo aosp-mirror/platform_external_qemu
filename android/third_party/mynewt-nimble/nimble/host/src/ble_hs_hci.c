@@ -229,6 +229,8 @@ ble_hs_hci_process_ack(uint16_t expected_opcode,
             out_ack->bha_params_len = 0;
         } else {
             if (out_ack->bha_params_len > params_buf_len) {
+                BLE_HS_LOG_ERROR("Unexpected parameter length: %d > %d",
+                                 out_ack->bha_params_len, params_buf_len);
                 out_ack->bha_params_len = params_buf_len;
                 rc = BLE_HS_ECONTROLLER;
             }
@@ -238,6 +240,13 @@ ble_hs_hci_process_ack(uint16_t expected_opcode,
 
         if (out_ack->bha_opcode != expected_opcode) {
             rc = BLE_HS_ECONTROLLER;
+            BLE_HS_LOG_ERROR(
+                    "Unexpected ack: OCF: %d != %d (expected), OGF: %d != "
+                    "%d (expected)",
+                    BLE_HCI_OCF(out_ack->bha_opcode),
+                    BLE_HCI_OCF(expected_opcode),
+                    BLE_HCI_OGF(out_ack->bha_opcode),
+                    BLE_HCI_OGF(expected_opcode));
         }
     }
 
