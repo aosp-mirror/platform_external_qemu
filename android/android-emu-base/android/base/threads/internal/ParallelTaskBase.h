@@ -19,7 +19,7 @@
 #include "android/base/threads/Thread.h"
 #include "android/base/threads/Types.h"
 
-#include <memory>
+#include <atomic>
 
 namespace android {
 namespace base {
@@ -53,7 +53,13 @@ private:
             : Thread(flags), mManager(manager) {}
 
         intptr_t main() {
+            fprintf(stderr, "%s:%s:%d this=%p\n", "ParallelTaskBase", __func__, __LINE__, this);
             mManager->taskImpl();
+            fprintf(stderr, "%s:%s:%d this=%p\n", "ParallelTaskBase", __func__, __LINE__, this);
+            mManager->isRunning = false;
+            fprintf(stderr, "%s:%s:%d this=%p\n", "ParallelTaskBase", __func__, __LINE__, this);
+            mManager->taskDoneImpl();
+            fprintf(stderr, "%s:%s:%d this=%p\n", "ParallelTaskBase", __func__, __LINE__, this);
             // This return value is ignored.
             return 0;
         }
@@ -62,18 +68,11 @@ private:
         ParallelTaskBase* mManager;
     };
 
-    // Called prediodically to |tryJoin| the launched thread.
-    static void tryWaitTillJoinedStatic(void* opaqueThis,
-                                        android::base::Looper::Timer* timer);
-
-    void tryWaitTillJoined(android::base::Looper::Timer* timer);
+    friend ManagedThread;
 
     android::base::Looper* mLooper;
-    android::base::Looper::Duration mCheckTimeoutMs;
     ManagedThread mManagedThread;
-
-    bool isRunning = false;
-    std::unique_ptr<android::base::Looper::Timer> mTimer;
+    std::atomic<bool> isRunning = false;
 
     DISALLOW_COPY_AND_ASSIGN(ParallelTaskBase);
 };

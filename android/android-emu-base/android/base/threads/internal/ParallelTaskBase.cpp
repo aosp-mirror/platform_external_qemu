@@ -22,38 +22,24 @@ ParallelTaskBase::ParallelTaskBase(Looper* looper,
                                    Looper::Duration checkTimeoutMs,
                                    ThreadFlags flags)
     : mLooper(looper),
-      mCheckTimeoutMs(checkTimeoutMs),
       mManagedThread(this, flags) {}
 
 bool ParallelTaskBase::start() {
-    if (!mManagedThread.start()) {
-        return false;
-    }
-    mTimer.reset(mLooper->createTimer(&tryWaitTillJoinedStatic, this));
-    mTimer->startRelative(0);
+    fprintf(stderr, "%s:%s:%d this=%p\n", "ParallelTaskBase", __func__, __LINE__, this);
     isRunning = true;
-    return true;
+    if (!mManagedThread.start()) {
+        fprintf(stderr, "%s:%s:%d this=%p\n", "ParallelTaskBase", __func__, __LINE__, this);
+        isRunning = false;
+        return false;
+    } else {
+        fprintf(stderr, "%s:%s:%d this=%p\n", "ParallelTaskBase", __func__, __LINE__, this);
+        return true;
+    }
 }
 
 bool ParallelTaskBase::inFlight() const {
+    fprintf(stderr, "%s:%s:%d this=%p isRunning=%d\n", "ParallelTaskBase", __func__, __LINE__, this, isRunning.load());
     return isRunning;
-}
-
-// static
-void ParallelTaskBase::tryWaitTillJoinedStatic(void* opaqueThis,
-                                               Looper::Timer* timer) {
-    static_cast<ParallelTaskBase*>(opaqueThis)->tryWaitTillJoined(timer);
-}
-
-void ParallelTaskBase::tryWaitTillJoined(Looper::Timer* timer) {
-
-    if (!mManagedThread.tryWait(nullptr)) {
-        mTimer->startRelative(mCheckTimeoutMs);
-        return;
-    }
-
-    isRunning = false;
-    taskDoneImpl();
 }
 
 }  // namespace internal

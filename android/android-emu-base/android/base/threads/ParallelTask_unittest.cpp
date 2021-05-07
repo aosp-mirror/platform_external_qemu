@@ -48,18 +48,25 @@ public:
                         10) {}
 
     void taskFunction(Result* outResult) {
+        fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
         while (!mShouldRun) {
             android::base::System::get()->sleepMs(10);
         }
+        fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
         outResult->mExitStatus = 42;
     }
 
     void taskDoneFunction(const Result& result) {
+        fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
         mResult = result;
         mResult.mWasJoined = true;
+        fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     }
 
-    void unblock() { mShouldRun = true; }
+    void unblock() {
+        fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
+        mShouldRun = true;
+    }
 
 protected:
     TestLooper mLooper;
@@ -69,48 +76,74 @@ protected:
 };
 
 TEST_F(ParallelTaskTest, start) {
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     unblock();
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     EXPECT_TRUE(mParallelTask.start());
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     mLooper.runWithTimeoutMs(2000);
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
 
     EXPECT_FALSE(mParallelTask.inFlight());
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     EXPECT_TRUE(mResult.mWasJoined);
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     EXPECT_EQ(42, mResult.mExitStatus);
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
 }
 
 TEST_F(ParallelTaskTest, inFlight) {
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     EXPECT_TRUE(mParallelTask.start());
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     // The test will actually block here till timeout. Use a small value.
     mLooper.runWithTimeoutMs(100);
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     EXPECT_FALSE(mResult.mWasJoined);
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     EXPECT_TRUE(mParallelTask.inFlight());
-
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     unblock();
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     mLooper.runWithTimeoutMs(2000);
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     EXPECT_FALSE(mParallelTask.inFlight());
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     EXPECT_EQ(42, mResult.mExitStatus);
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     EXPECT_TRUE(mResult.mWasJoined);
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
 }
 
 static bool parJoined = false;
 
 static void setPar(int* outResult) {
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     *outResult = 42;
 }
 
 static void onJoined(const int& outResult) {
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     EXPECT_EQ(42, outResult);
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     parJoined = true;
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
 }
 
 TEST(ParallelTaskFunctionTest, basic) {
     parJoined = false;
 
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     TestLooper looper;
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     EXPECT_TRUE(android::base::runParallelTask<int>(&looper, &setPar, &onJoined, 10));
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     EXPECT_FALSE(parJoined);
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     looper.runWithTimeoutMs(2000);
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
     EXPECT_TRUE(parJoined);
+    fprintf(stderr, "%s:%s:%d\n", "ParallelTaskTest", __func__, __LINE__);
 }
 
 }  // namespace
