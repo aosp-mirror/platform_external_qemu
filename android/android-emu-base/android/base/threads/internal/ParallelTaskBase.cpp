@@ -25,10 +25,10 @@ ParallelTaskBase::ParallelTaskBase(Looper* looper,
                                    ThreadFlags flags)
     : mLooper(looper),
       mCheckTimeoutMs(checkTimeoutMs),
-      mManagedThread(new ManagedThread(this, flags)) {}
+      mManagedThread(this, flags) {}
 
 bool ParallelTaskBase::start() {
-    if (!mManagedThread->start()) {
+    if (!mManagedThread.start()) {
         return false;
     }
     mTimer.reset(mLooper->createTimer(&tryWaitTillJoinedStatic, this));
@@ -49,7 +49,7 @@ void ParallelTaskBase::tryWaitTillJoinedStatic(void* opaqueThis,
 
 void ParallelTaskBase::tryWaitTillJoined(Looper::Timer* timer) {
 
-    if (!mManagedThread->tryWait(nullptr)) {
+    if (!mManagedThread.tryWait(nullptr)) {
         mTimer->startRelative(mCheckTimeoutMs);
         return;
     }
