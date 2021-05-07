@@ -19,6 +19,7 @@
 #include "android/base/threads/Thread.h"
 #include "android/base/threads/Types.h"
 
+#include <atomic>
 #include <memory>
 
 namespace android {
@@ -34,9 +35,7 @@ public:
     virtual ~ParallelTaskBase() = default;
 
 protected:
-    ParallelTaskBase(android::base::Looper* looper,
-                     android::base::Looper::Duration checkTimeoutMs,
-                     ThreadFlags flags);
+    ParallelTaskBase(android::base::Looper* looper, ThreadFlags flags);
 
     // API functions.
     bool start();
@@ -54,6 +53,7 @@ private:
 
         intptr_t main() {
             mManager->taskImpl();
+            mManager->scheduleTaskDone();
             // This return value is ignored.
             return 0;
         }
@@ -65,15 +65,19 @@ private:
     // Called prediodically to |tryJoin| the launched thread.
     static void tryWaitTillJoinedStatic(void* opaqueThis,
                                         android::base::Looper::Timer* timer);
-
     void tryWaitTillJoined(android::base::Looper::Timer* timer);
 
-    android::base::Looper* mLooper;
-    android::base::Looper::Duration mCheckTimeoutMs;
-    ManagedThread mManagedThread;
+    void scheduleTaskDone();
+    static void runTaskDoneStatic(void* opaqueThis,
+                                  android::base::Looper::Timer* timer);
+    void runTaskDone(android::base::Looper::Timer* timer);
 
-    bool isRunning = false;
+    friend ManagedThread;
+
+    android::base::Looper* mLooper;
+    ManagedThread mManagedThread;
     std::unique_ptr<android::base::Looper::Timer> mTimer;
+    std::atomic<bool> isRunning = false;
 
     DISALLOW_COPY_AND_ASSIGN(ParallelTaskBase);
 };
