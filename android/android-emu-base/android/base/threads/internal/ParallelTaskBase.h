@@ -70,7 +70,7 @@ private:
 
     android::base::Looper* mLooper;
     android::base::Looper::Duration mCheckTimeoutMs;
-    std::unique_ptr<ManagedThread> mManagedThread;
+    ManagedThread mManagedThread;
 
     bool isRunning = false;
     std::unique_ptr<android::base::Looper::Timer> mTimer;
