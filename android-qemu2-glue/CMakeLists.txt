@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 set(android-qemu2-glue_src
     android_qemud.cpp
     audio-capturer.cpp
+    audio-input.cpp
     audio-output.cpp
     base/async/CpuLooper.cpp
     base/async/Looper.cpp

@@ -99,8 +99,8 @@
             "osx": {
                 "args": [
                     "@R",
-                    "-verbose",
-                    "-experimental-enable-multidisplay",
+                    // "-verbose",
+                    // "-experimental-enable-multidisplay",
                     // "-qt-hide-window",
                     "-feature",
                     "-HVF"

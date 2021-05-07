@@ -51,3 +51,5 @@ void android::emulation::injectConsoleAgents(const AndroidConsoleFactory& factor
     ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_AGENT_SETTER);
     isInitialized = true;
 }
+
+extern "C" const QAndroidAudioAgent* const gQAndroidAudioAgent = nullptr;

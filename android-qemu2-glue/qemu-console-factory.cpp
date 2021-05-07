@@ -94,6 +94,7 @@ extern "C" const QAndroidVmOperations* const gQAndroidVmOperations;
 
 extern "C" const QAndroidMultiDisplayAgent* const gQAndroidMultiDisplayAgent;
 extern "C" const QAndroidLibuiAgent* const gQAndroidLibuiAgent;
+extern "C" const QAndroidAudioAgent* const gQAndroidAudioAgent;
 
 #define ANDROID_DEFINE_CONSOLE_GETTER_IMPL(typ, name) \
     const typ* const android_get_##typ() const override { return g##typ; };

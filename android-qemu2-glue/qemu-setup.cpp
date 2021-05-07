@@ -41,6 +41,7 @@ extern "C" {
 
 #include "android-qemu2-glue/android_qemud.h"
 #include "android-qemu2-glue/audio-capturer.h"
+#include "android-qemu2-glue/audio-input.h"
 #include "android-qemu2-glue/audio-output.h"
 #include "android-qemu2-glue/base/async/CpuLooper.h"
 #include "android-qemu2-glue/base/async/Looper.h"
@@ -247,6 +248,9 @@ bool qemu_android_emulation_early_setup() {
 
     android::emulation::AudioOutputEngine::set(
             new android::qemu::QemuAudioOutputEngine());
+
+    static android::qemu::QemuAudioInputEngine inp;
+    inp.open({11500, SAMPLE_FORMAT_S16, 2}, [](uint8_t* buf, int size) {return 1;});
     return true;
 }
 

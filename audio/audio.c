@@ -1215,6 +1215,7 @@ bool qemu_is_real_audio_allowed() {
 
 int AUD_read (SWVoiceIn *sw, void *buf, int size)
 {
+    printf("AUD_read %s \n", sw->name);
     if (!sw) {
         /* XXX: Consider options */
         return size;
@@ -1298,6 +1299,7 @@ void AUD_set_active_in (SWVoiceIn *sw, int on)
 
     hw = sw->hw;
     if (sw->active != on) {
+        printf("Setting active voice in: %s\n", sw->name);
         AudioState *s = &glob_audio_state;
         SWVoiceIn *temp_sw;
 

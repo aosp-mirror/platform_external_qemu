@@ -197,12 +197,12 @@ bool MultiDisplay::getMultiDisplay(uint32_t id,
     if (enabled) {
         *enabled = mMultiDisplay[id].enabled;
     }
-    LOG(VERBOSE) << "getMultiDisplay " << id << " x " << mMultiDisplay[id].pos_x
-                 << " y " << mMultiDisplay[id].pos_y << " w "
-                 << mMultiDisplay[id].width << " h " << mMultiDisplay[id].height
-                 << " dpi " << mMultiDisplay[id].dpi << " flag "
-                 << mMultiDisplay[id].flag << " enable "
-                 << mMultiDisplay[id].enabled;
+    // LOG(VERBOSE) << "getMultiDisplay " << id << " x " << mMultiDisplay[id].pos_x
+    //              << " y " << mMultiDisplay[id].pos_y << " w "
+    //              << mMultiDisplay[id].width << " h " << mMultiDisplay[id].height
+    //              << " dpi " << mMultiDisplay[id].dpi << " flag "
+    //              << mMultiDisplay[id].flag << " enable "
+    //              << mMultiDisplay[id].enabled;
     return mMultiDisplay[id].enabled;
 }
 

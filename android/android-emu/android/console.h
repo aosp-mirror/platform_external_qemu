@@ -34,6 +34,7 @@
 #include "android/emulation/control/window_agent.h"
 #include "android/utils/compiler.h"
 #include "emulation/control/cellular_agent.h"
+#include "emulation/control/audio_agent.h"
 ANDROID_BEGIN_HEADER
 
 typedef struct QAndroidAutomationAgent QAndroidAutomationAgent;
@@ -63,7 +64,8 @@ typedef struct QAndroidAutomationAgent QAndroidAutomationAgent;
     X(QAndroidVirtualSceneAgent, virtual_scene) \
     X(QAndroidVmOperations, vm)                 \
     X(QCarDataAgent, car)                       \
-    X(QGrpcAgent, grpc)
+    X(QGrpcAgent, grpc)                         \
+    X(QAndroidAudioAgent, audio)
 
 // A structure used to group pointers to all agent interfaces used by the
 // Android console.

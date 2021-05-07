@@ -22,6 +22,7 @@ int QemuAudioOutputEngine::open(const char *name,
 {
     struct audsettings as;
 
+    printf("%s:  -------------------- %s", __func__, name);
     if (nchannels != 1 && nchannels != 2) {
         derror("Invalid channels value audio capture\n");
         return -1;
