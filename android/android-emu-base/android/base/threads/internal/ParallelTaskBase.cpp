@@ -18,26 +18,32 @@ namespace android {
 namespace base {
 namespace internal {
 
-ParallelTaskBase::ParallelTaskBase(Looper* looper,
-                                   Looper::Duration checkTimeoutMs,
-                                   ThreadFlags flags)
+ParallelTaskBase::ParallelTaskBase(Looper* looper, ThreadFlags flags)
     : mLooper(looper),
-      mCheckTimeoutMs(checkTimeoutMs),
       mManagedThread(this, flags) {}
 
 bool ParallelTaskBase::start() {
     if (!mManagedThread.start()) {
         return false;
     }
-    mTimer.reset(mLooper->createTimer(&tryWaitTillJoinedStatic, this));
-    mTimer->startRelative(0);
+
     isRunning = true;
+    mTimer.reset(mLooper->createTimer(&tryWaitTillJoinedStatic, this));
+    mTimer->startRelative(INT32_MAX);
     return true;
 }
 
 bool ParallelTaskBase::inFlight() const {
     return isRunning;
 }
+
+void ParallelTaskBase::scheduleTaskDone() {
+    isRunning = false;
+    mTimer->stop();
+    mTimer.reset(mLooper->createTimer(&runTaskDoneStatic, this));
+    mTimer->startRelative(1);
+}
+
 
 // static
 void ParallelTaskBase::tryWaitTillJoinedStatic(void* opaqueThis,
@@ -46,13 +52,17 @@ void ParallelTaskBase::tryWaitTillJoinedStatic(void* opaqueThis,
 }
 
 void ParallelTaskBase::tryWaitTillJoined(Looper::Timer* timer) {
-
     if (!mManagedThread.tryWait(nullptr)) {
-        mTimer->startRelative(mCheckTimeoutMs);
-        return;
+        mTimer->startRelative(INT32_MAX);
     }
+}
 
-    isRunning = false;
+void ParallelTaskBase::runTaskDoneStatic(void* opaqueThis,
+                                         Looper::Timer* timer) {
+    static_cast<ParallelTaskBase*>(opaqueThis)->runTaskDone(timer);
+}
+
+void ParallelTaskBase::runTaskDone(Looper::Timer* timer) {
     taskDoneImpl();
 }
 

@@ -36,7 +36,6 @@ struct Result {
 
 class ParallelTaskTest : public testing::Test {
 public:
-    // set mCheckTimeoutMs to 10 to speed things up.
     ParallelTaskTest()
         : mParallelTask(&mLooper,
                         std::bind(&ParallelTaskTest::taskFunction,
@@ -44,8 +43,7 @@ public:
                                   std::placeholders::_1),
                         std::bind(&ParallelTaskTest::taskDoneFunction,
                                   this,
-                                  std::placeholders::_1),
-                        10) {}
+                                  std::placeholders::_1)) {}
 
     void taskFunction(Result* outResult) {
         while (!mShouldRun) {
@@ -107,7 +105,7 @@ TEST(ParallelTaskFunctionTest, basic) {
     parJoined = false;
 
     TestLooper looper;
-    EXPECT_TRUE(android::base::runParallelTask<int>(&looper, &setPar, &onJoined, 10));
+    EXPECT_TRUE(android::base::runParallelTask<int>(&looper, &setPar, &onJoined));
     EXPECT_FALSE(parJoined);
     looper.runWithTimeoutMs(2000);
     EXPECT_TRUE(parJoined);
