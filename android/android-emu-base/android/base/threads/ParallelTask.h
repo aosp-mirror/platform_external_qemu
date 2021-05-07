@@ -105,10 +105,9 @@ public:
     ParallelTask(android::base::Looper* looper,
                  TaskFunction taskFunction,
                  TaskDoneFunction taskDoneFunction,
-                 android::base::Looper::Duration checkTimeoutMs = 1 * 1000,
                  ThreadFlags flags = ThreadFlags::MaskSignals)
-        : ParallelTaskBase(looper, checkTimeoutMs, flags),
-        mTaskFunction(taskFunction), mTaskDoneFunction(taskDoneFunction) {}
+        : ParallelTaskBase(looper, flags),
+          mTaskFunction(taskFunction), mTaskDoneFunction(taskDoneFunction) {}
 
     // Start the thread instance. Returns true on success, false otherwise.
     // (e.g. if the thread was already started or terminated).
@@ -143,15 +142,13 @@ public:
 
     SelfDeletingParallelTask(android::base::Looper* looper,
                              TaskFunction taskFunction,
-                             TaskDoneFunction taskDoneFunction,
-                             android::base::Looper::Duration checkTimeoutMs)
+                             TaskDoneFunction taskDoneFunction)
         : mTaskDoneFunction(taskDoneFunction),
           mParallelTask(looper,
                         taskFunction,
                         std::bind(&SelfDeletingParallelTask::taskDoneFunction,
                                   this,
-                                  std::placeholders::_1),
-                        checkTimeoutMs) {}
+                                  std::placeholders::_1)) {}
 
     bool start() { return mParallelTask.start(); };
 
@@ -172,12 +169,10 @@ private:
 template<class ResultType>
 bool runParallelTask(android::base::Looper* looper,
                      std::function<void(ResultType*)> taskFunction,
-                     std::function<void(const ResultType&)> taskDoneFunction,
-                     android::base::Looper::Duration checkTimeoutMs = 1 * 1000) {
+                     std::function<void(const ResultType&)> taskDoneFunction) {
     auto flyaway = new internal::SelfDeletingParallelTask<ResultType>(
-            looper, taskFunction, taskDoneFunction, checkTimeoutMs);
+            looper, taskFunction, taskDoneFunction);
     return flyaway->start();
-
 }
 
 }  // namespace base
