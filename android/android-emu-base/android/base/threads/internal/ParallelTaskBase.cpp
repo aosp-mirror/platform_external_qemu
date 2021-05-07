@@ -18,8 +18,6 @@ namespace android {
 namespace base {
 namespace internal {
 
-using std::unique_ptr;
-
 ParallelTaskBase::ParallelTaskBase(Looper* looper,
                                    Looper::Duration checkTimeoutMs,
                                    ThreadFlags flags)
