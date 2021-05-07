@@ -594,8 +594,7 @@ void AdbThroughExe::start(int checkTimeoutMs) {
                 },
                 [shared](const OptionalAdbCommandResult& result) {
                     shared->taskDoneFunction(result);
-                },
-                checkTimeoutMs));
+                }));
         mTask->start();
         mStart = System::get()->getUnixTimeUs();
     }
