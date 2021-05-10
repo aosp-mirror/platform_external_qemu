@@ -4069,12 +4069,20 @@ static int do_unfold(ControlClient client, char* args) {
 }
 
 static int do_no_draw(ControlClient client, char* args) {
+    if (args == nullptr) {
+        control_write(client, "KO: expecting nodraw parameter: on/off.\r\n");
+        return -1;
+    }
     std::string args_lower = args;
     std::transform(args_lower.begin(), args_lower.end(), args_lower.begin(), ::tolower);
     if (args_lower == "on" || args_lower == "true" || args_lower == "yes") {
         android::featurecontrol::setEnabledOverride(android::featurecontrol::NoDraw, true);
-    } else {
+    } else if (args_lower == "off" || args_lower == "false" ||
+               args_lower == "no") {
         android::featurecontrol::setEnabledOverride(android::featurecontrol::NoDraw, false);
+    } else {
+        control_write(client, "KO: expecting nodraw parameter: on/off.\r\n");
+        return -1;
     }
     return 0;
 }
