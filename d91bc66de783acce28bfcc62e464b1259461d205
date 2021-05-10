@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6b520823_d1dc462f",
+        "filename": "android/android-emu-base/android/base/threads/internal/ParallelTaskBase.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-10T16:16:49Z",
+      "side": 1,
+      "message": "Does this mean that we don\u0027t really need it? Or could you add a comment explaining what this means?",
+      "range": {
+        "startLine": 32,
+        "startChar": 25,
+        "endLine": 32,
+        "endChar": 26
+      },
+      "revId": "d91bc66de783acce28bfcc62e464b1259461d205",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
