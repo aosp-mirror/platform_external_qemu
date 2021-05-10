@@ -140,6 +140,9 @@
     <property name="enabled">
      <bool>true</bool>
     </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>229</x>
