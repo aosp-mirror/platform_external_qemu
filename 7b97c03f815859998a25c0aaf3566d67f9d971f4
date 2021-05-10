@@ -108,6 +108,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "0ccc87d4_a3c39285",
+        "filename": "android/third_party/bluetooth/rootcanal/emulated_bluetooth.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-10T21:22:12Z",
+      "side": 1,
+      "message": "Too be removed, we can bring this back in case it is needed.",
+      "revId": "7b97c03f815859998a25c0aaf3566d67f9d971f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "81825120_19c6c62b",
         "filename": "android/third_party/bluetooth/rootcanal/emulated_bluetooth.proto",
         "patchSetId": 1
