@@ -30,6 +30,8 @@ extern "C" {
 #include "android/network/mac80211_hwsim.h"
 
 using android::base::IOVector;
+using android::base::Looper;
+using android::base::RecurrentTask;
 using android::base::ScopedSocket;
 using android::base::socketCreatePair;
 using android::base::socketRecv;
@@ -107,6 +109,7 @@ struct ieee8023_hdr {
 
 const char* const VirtioWifiForwarder::kNicModel = "virtio-wifi-device";
 const char* const VirtioWifiForwarder::kNicName = "virtio-wifi-device";
+static constexpr float kTUtoMS = 1.024f;
 
 VirtioWifiForwarder::VirtioWifiForwarder(
         const uint8_t* bssid,
@@ -121,8 +124,7 @@ VirtioWifiForwarder::VirtioWifiForwarder(
       mCanReceive(std::move(canReceive)),
       mOnFrameSentCallback(std::move(onFrameSentCallback)),
       mLooper(ThreadLooper::get()),
-      mNicConf(conf),
-      mRemotePeer(nullptr) {}
+      mNicConf(conf) {}
 
 VirtioWifiForwarder::~VirtioWifiForwarder() {
     stop();
@@ -132,6 +134,7 @@ bool VirtioWifiForwarder::init() {
     // init socket pair.
     int fds[2];
     if (socketCreatePair(&fds[0], &fds[1])) {
+        LOG(ERROR) << "Unable to create socket pair";
         return false;
     }
     mVirtIOSock = ScopedSocket(fds[1]);
@@ -169,6 +172,8 @@ bool VirtioWifiForwarder::init() {
         mRemotePeer->init();
         mRemotePeer->run();
     }
+    resetBeaconTask();
+    mBeaconTask->start();
     return true;
 }
 
@@ -234,6 +239,7 @@ int VirtioWifiForwarder::forwardFrame(const IOVector& iov) {
 }
 
 void VirtioWifiForwarder::stop() {
+    mBeaconTask.clear();
     HostapdController::getInstance()->terminate(false);
     mNic = nullptr;
     if (mRemotePeer) {
@@ -313,10 +319,37 @@ void VirtioWifiForwarder::onHostApd(void* opaque, int fd, unsigned events) {
     if (size < 0) {
         return;
     }
-    sendToGuest(forwarder, std::make_unique<Ieee80211Frame>(
-                                   buf, size, forwarder->mFrameInfo));
+    auto frame =
+            std::make_unique<Ieee80211Frame>(buf, size, forwarder->mFrameInfo);
+    if (frame->isBeacon()) {
+        forwarder->mBeaconFrame = std::move(frame);
+        struct ieee80211_mgmt* hdr = (struct ieee80211_mgmt*)buf;
+        Looper::Duration newBeaconInt = hdr->u.beacon.beacon_int * kTUtoMS;
+        if (newBeaconInt != forwarder->mBeaconIntMs) {
+            forwarder->mBeaconIntMs = newBeaconInt;
+            forwarder->resetBeaconTask();
+            forwarder->mBeaconTask->start();
+        }
+    } else {
+        sendToGuest(forwarder, std::move(frame));
+    }
 }
 
+void VirtioWifiForwarder::resetBeaconTask() {
+    // set up periodic job of sending beacons.
+    mBeaconTask.emplace(
+            mLooper,
+            [this]() {
+                if (mBeaconFrame != nullptr && mBeaconFrame->isBeacon()) {
+                    sendToGuest(this, std::make_unique<Ieee80211Frame>(
+                                              mBeaconFrame->data(),
+                                              mBeaconFrame->size(),
+                                              mBeaconFrame->info()));
+                }
+                return true;
+            },
+            mBeaconIntMs);
+}
 size_t VirtioWifiForwarder::onRemoteData(const uint8_t* data, size_t size) {
     size_t offset = 0;
     while (offset < size) {
