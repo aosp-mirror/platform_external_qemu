@@ -48,6 +48,42 @@ static void apic_update_irq(APICCommonState *s);
 static void apic_get_delivery_bitmask(uint32_t *deliver_bitmask,
                                       uint8_t dest, uint8_t dest_mode);
 
+static uint64_t startTime = 0;
+static uint64_t elapsedSeconds = 0;
+static uint64_t writeCount = 0;
+static uint64_t readCount = 0;
+static uint64_t writelCount = 0;
+static uint64_t readlCount = 0;
+
+static uint64_t apicWriteCase0x02 = 0;
+static uint64_t apicWriteCase0x03 = 0;
+static uint64_t apicWriteCase0x08 = 0;
+static uint64_t apicWriteCase0x09 = 0;
+static uint64_t apicWriteCase0x0b = 0;
+static uint64_t apicWriteCase0x0d = 0;
+static uint64_t apicWriteCase0x0e = 0;
+static uint64_t apicWriteCase0x0f = 0;
+static uint64_t apicWriteCase0x10 = 0;
+static uint64_t apicWriteCase0x30 = 0;
+static uint64_t apicWriteCase0x31 = 0;
+static uint64_t apicWriteCase0x32 = 0;
+static uint64_t apicWriteCase0x38 = 0;
+static uint64_t apicWriteCase0x39 = 0;
+static uint64_t apicWriteCase0x3e = 0;
+static uint64_t apicWriteCaseDefault = 0;
+
+static uint64_t apicWriteLvtTimer = 0;
+static uint64_t currTime() {
+    struct timespec ts;
+    clock_gettime(_CLOCK_REALTIME, &ts);
+    uint64_t ns = ts.tv_nsec + ts.tv_sec * 1000000000ULL;
+    return ns;
+}
+
+static float nsAsFloatSeconds(uint64_t ns) {
+    return (float)(ns) / 1000000000.0f;
+}
+
 /* Find first bit starting from msb */
 static int apic_fls_bit(uint32_t value)
 {
@@ -640,24 +676,30 @@ static void apic_timer(void *opaque)
 
 static uint32_t apic_mem_readb(void *opaque, hwaddr addr)
 {
+    ++readCount;
     return 0;
 }
 
 static uint32_t apic_mem_readw(void *opaque, hwaddr addr)
 {
+    ++readCount;
     return 0;
 }
 
 static void apic_mem_writeb(void *opaque, hwaddr addr, uint32_t val)
 {
+    ++writeCount;
 }
 
 static void apic_mem_writew(void *opaque, hwaddr addr, uint32_t val)
 {
+    ++writeCount;
 }
 
 static uint32_t apic_mem_readl(void *opaque, hwaddr addr)
 {
+    ++readCount;
+    ++readlCount;
     DeviceState *dev;
     APICCommonState *s;
     uint32_t val;
@@ -752,9 +794,58 @@ static void apic_send_msi(MSIMessage *msi)
     /* XXX: Ignore redirection hint. */
     apic_deliver_irq(dest, dest_mode, delivery, vector, trigger_mode);
 }
-
 static void apic_mem_writel(void *opaque, hwaddr addr, uint32_t val)
 {
+    ++writeCount;
+    ++writelCount;
+    if (0 == startTime) {
+        startTime = currTime();
+    }
+    if (writeCount % 10000 == 0) {
+        uint64_t elapsedNs = currTime() - startTime;
+        fprintf(stderr, "%s: apic stats: read %llu write %llu readl %llu writel %llu elapsed %f s\n", __func__,
+                (unsigned long long)readCount,
+                (unsigned long long)writeCount,
+                (unsigned long long)readlCount,
+                (unsigned long long)writelCount,
+                nsAsFloatSeconds(elapsedNs));
+        fprintf(stderr, "%s: write cases: "
+                "0x02 %llu "
+                "0x03 %llu "
+                "0x08 %llu "
+                "0x09 %llu "
+                "0x0b %llu "
+                "0x0d %llu "
+                "0x0e %llu "
+                "0x0f %llu "
+                "0x10 %llu "
+                "0x30 %llu "
+                "0x31 %llu "
+                "0x32 %llu "
+                "0x38 %llu "
+                "0x39 %llu "
+                "0x3e %llu "
+                "0xdefault %llu "
+                "lvttimer %llu \n",
+                __func__,
+                apicWriteCase0x02,
+                apicWriteCase0x03,
+                apicWriteCase0x08,
+                apicWriteCase0x09,
+                apicWriteCase0x0b,
+                apicWriteCase0x0d,
+                apicWriteCase0x0e,
+                apicWriteCase0x0f,
+                apicWriteCase0x10,
+                apicWriteCase0x30,
+                apicWriteCase0x31,
+                apicWriteCase0x32,
+                apicWriteCase0x38,
+                apicWriteCase0x39,
+                apicWriteCase0x3e,
+                apicWriteCaseDefault,
+                apicWriteLvtTimer);
+    }
     DeviceState *dev;
     APICCommonState *s;
     int index = (addr >> 4) & 0xff;
@@ -780,10 +871,13 @@ static void apic_mem_writel(void *opaque, hwaddr addr, uint32_t val)
     switch(index) {
     case 0x02:
         s->id = (val >> 24);
+        ++apicWriteCase0x02;
         break;
     case 0x03:
+        ++apicWriteCase0x03;
         break;
     case 0x08:
+        ++apicWriteCase0x08;
         if (apic_report_tpr_access) {
             cpu_report_tpr_access(&s->cpu->env, TPR_ACCESS_WRITE);
         }
@@ -793,17 +887,22 @@ static void apic_mem_writel(void *opaque, hwaddr addr, uint32_t val)
         break;
     case 0x09:
     case 0x0a:
+        ++apicWriteCase0x09;
         break;
     case 0x0b: /* EOI */
+        ++apicWriteCase0x0b;
         apic_eoi(s);
         break;
     case 0x0d:
+        ++apicWriteCase0x0d;
         s->log_dest = val >> 24;
         break;
     case 0x0e:
+        ++apicWriteCase0x0e;
         s->dest_mode = val >> 28;
         break;
     case 0x0f:
+        ++apicWriteCase0x0f;
         s->spurious_vec = val & 0x1ff;
         apic_update_irq(s);
         break;
@@ -811,21 +910,26 @@ static void apic_mem_writel(void *opaque, hwaddr addr, uint32_t val)
     case 0x18 ... 0x1f:
     case 0x20 ... 0x27:
     case 0x28:
+        ++apicWriteCase0x10;
         break;
     case 0x30:
+        ++apicWriteCase0x30;
         s->icr[0] = val;
         apic_deliver(dev, (s->icr[1] >> 24) & 0xff, (s->icr[0] >> 11) & 1,
                      (s->icr[0] >> 8) & 7, (s->icr[0] & 0xff),
                      (s->icr[0] >> 15) & 1);
         break;
     case 0x31:
+        ++apicWriteCase0x31;
         s->icr[1] = val;
         break;
     case 0x32 ... 0x37:
         {
+        ++apicWriteCase0x32;
             int n = index - 0x32;
             s->lvt[n] = val;
             if (n == APIC_LVT_TIMER) {
+                ++apicWriteLvtTimer;
                 apic_timer_update(s, qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL));
             } else if (n == APIC_LVT_LINT0 && apic_check_pic(s)) {
                 apic_update_irq(s);
@@ -833,13 +937,16 @@ static void apic_mem_writel(void *opaque, hwaddr addr, uint32_t val)
         }
         break;
     case 0x38:
+        ++apicWriteCase0x38;
         s->initial_count = val;
         s->initial_count_load_time = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
         apic_timer_update(s, s->initial_count_load_time);
         break;
     case 0x39:
+        ++apicWriteCase0x39;
         break;
     case 0x3e:
+        ++apicWriteCase0x3e;
         {
             int v;
             s->divide_conf = val & 0xb;
@@ -848,6 +955,7 @@ static void apic_mem_writel(void *opaque, hwaddr addr, uint32_t val)
         }
         break;
     default:
+        ++apicWriteCaseDefault;
         s->esr |= APIC_ESR_ILLEGAL_ADDRESS;
         break;
     }
