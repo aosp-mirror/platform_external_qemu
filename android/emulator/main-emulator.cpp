@@ -44,6 +44,7 @@
 #include "android/base/system/System.h"
 #include "android/camera/camera-list.h"
 #include "android/emulation/ConfigDirs.h"
+#include "android/emulation/USBAssist.h"
 #include "android/main-emugl.h"
 #include "android/main-help.h"
 #include "android/opengl/emugl_config.h"
@@ -302,6 +303,7 @@ int main(int argc, char** argv)
     const char* sysDir = NULL;
     bool doAccelCheck = false;
     bool doListAvds = false;
+    bool doListUSB = false;
     bool force32bit = false;
     bool isHeadless = false;
     bool useSystemLibs = false;
@@ -558,6 +560,13 @@ int main(int argc, char** argv)
             continue;
         }
 
+#ifdef _WIN32
+        if (!strcmp(opt, "-list-usb")) {
+            doListUSB = true;
+            continue;
+        }
+#endif // _WIN32
+
         if (!strcmp(opt, "-launcher-test")) {
             isLauncherTest = true;
             launcherTestArg = nullptr;
@@ -657,6 +666,13 @@ int main(int argc, char** argv)
         avdScanner_free(scanner);
         return 0;
     }
+
+#ifdef _WIN32
+    if (doListUSB) {
+        listUSBDevices();
+        return 0;
+    }
+#endif //_WIN32
 
     if (isLauncherTest) {
         if (!launcherTestArg) {

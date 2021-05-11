@@ -87,6 +87,7 @@ class Licensing(object):
         "crypt32::crypt32",
         "mincore::mincore",
         "imagehlp::imagehlp",
+        "setupapi::setupapi",
     ]
 
     def __init__(self, build_dir, qemu_root):
