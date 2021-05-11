@@ -14,7 +14,9 @@
 #include <memory>
 
 #include "android/base/Compiler.h"
+#include "android/base/Optional.h"
 #include "android/base/async/Looper.h"
+#include "android/base/async/RecurrentTask.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/network/GenericNetlinkMessage.h"
 #include "android/network/Ieee80211Frame.h"
@@ -73,6 +75,7 @@ private:
             std::unique_ptr<android::network::Ieee80211Frame> frame);
     static const char* const kNicModel;
     static const char* const kNicName;
+    void resetBeaconTask();
     size_t onRemoteData(const uint8_t* data, size_t size);
     void sendToRemoteVM(std::unique_ptr<android::network::Ieee80211Frame> frame,
                         android::network::FrameType type);
@@ -87,9 +90,14 @@ private:
     CanReceive mCanReceive;
     android::base::Looper* mLooper;
     android::base::ScopedSocket mVirtIOSock;
+
     NICState* mNic = nullptr;
     std::unique_ptr<android::network::WifiForwardPeer> mRemotePeer;
     android::base::Looper::FdWatch* mFdWatch = nullptr;
+    android::base::Optional<android::base::RecurrentTask> mBeaconTask;
+    android::base::Looper::Duration mBeaconIntMs = 1024;
+    std::unique_ptr<android::network::Ieee80211Frame> mBeaconFrame;
+
     NICConf* mNicConf = nullptr;
     android::network::FrameInfo mFrameInfo;
     DISALLOW_COPY_AND_ASSIGN(VirtioWifiForwarder);
