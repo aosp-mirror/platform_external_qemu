@@ -15,12 +15,17 @@
 #include "android/emulation/control/window_agent.h"
 
 #include "android/base/threads/Thread.h"
-#include "android/emulator-window.h"
 #include "android/emulation/MultiDisplay.h"
+#include "android/emulator-window.h"
+#include "android/globals.h"
 #include "android/hw-sensors.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/winsys.h"
 #include "android/utils/debug.h"
+
+// Set this to true if you wish to enable debugging of the window position.
+constexpr bool DEBUG_GRPC_ENDPOINT = false;
+std::mutex s_extendedWindow;
 
 static_assert(WINDOW_MESSAGE_GENERIC == int(Ui::OverlayMessageType::None),
               "Bad message type enum value (None)");
@@ -153,6 +158,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     }
                     return false;
                 },
+
         .setNoSkin =
                 []() {
                     if (const auto win = EmulatorQtWindow::getInstance()) {
@@ -179,30 +185,63 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         return false;
                     }
                 },
+        .moveExtendedWindow =
+                [](uint32_t x,
+                   uint32_t y,
+                   HorizontalAnchor horizontal,
+                   VerticalAnchor vertical) {
+                        int unused;
+                        auto userConfig = aemu_get_userConfigPtr();
+                        if (auserConfig_getExtendedControlsPos(
+                                        userConfig, &unused, &unused, &unused,
+                                        &unused) == 0 ||
+                            DEBUG_GRPC_ENDPOINT) {
+                                auserConfig_setExtendedControlsPos(
+                                        userConfig, x, y, (int)horizontal,
+                                        (int)vertical);
+                    }
+                },
         .startExtendedWindow =
                 [](ExtendedWindowPane pane) {
+                    std::lock_guard<std::mutex> extended(s_extendedWindow);
                     auto* win = EmulatorQtWindow::getInstance();
                     bool visibilityChanged = false;
                     if (win) {
+                        QSemaphore completed;
                         visibilityChanged =
                                 !win->toolWindow()->isExtendedWindowVisible();
                         win->runOnUiThread([win, pane]() {
                             win->toolWindow()->showExtendedWindow(pane);
-                        });
+                        }, &completed);
+                        completed.acquire();
                     }
                     return visibilityChanged;
                 },
         .quitExtendedWindow =
                 []() {
+                    std::lock_guard<std::mutex> extended(s_extendedWindow);
                     auto* win = EmulatorQtWindow::getInstance();
                     bool visibilityChanged = false;
                     if (win) {
+                        QSemaphore completed;
                         visibilityChanged =
                                 win->toolWindow()->isExtendedWindowVisible();
-                        win->runOnUiThread(
-                            [win]() { win->toolWindow()->hideExtendedWindow(); });
+                        win->runOnUiThread([win]() {
+                            win->toolWindow()->hideExtendedWindow();
+                        }, &completed);
+                        completed.acquire();
                     }
                     return visibilityChanged;
+                },
+        .waitForExtendedWindowVisibility =
+                [](bool visible) {
+                    auto* win = EmulatorQtWindow::getInstance();
+                    if (win) {
+                        win->toolWindow()->waitForExtendedWindowVisibility(
+                                visible);
+                        assert(visible ==
+                               win->toolWindow()->isExtendedWindowVisible());
+                    }
                 },
         .setUiTheme = [](SettingsTheme type) {
                     skin_winsys_touch_qt_extended_virtual_sensors();
@@ -214,7 +253,6 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     } else {
                         return false;
                     }
-
                 },
         .runOnUiThread =
                 [](UiUpdateFunc f, void* data, bool wait) {
