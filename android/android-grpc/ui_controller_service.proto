@@ -31,6 +31,22 @@ service UiController {
     rpc closeExtendedControls(google.protobuf.Empty)
             returns (ExtendedControlsStatus) {}
     rpc setUiTheme(ThemingStyle) returns (google.protobuf.Empty) {}
+
+    // Returns the user configuration of the running emulator. The user
+    // configuration contains information about the user interface.
+    rpc getUserConfig(google.protobuf.Empty) returns (UserConfig) {}
+}
+
+message UserConfigEntry {
+    string key = 1;
+    string value = 2;
+}
+
+// The user configuration of the running emulator as
+// key value pairs. This contains the data you normally find
+// in emulator-user.ini
+message UserConfig {
+    repeated UserConfigEntry entries = 1;
 }
 
 message ThemingStyle {
