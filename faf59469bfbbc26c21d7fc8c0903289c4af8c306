@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "093eae10_3f140ec0",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 7
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-11T16:27:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ed2f486_b7acf369",
+      "range": {
+        "startLine": 84,
+        "startChar": 44,
+        "endLine": 84,
+        "endChar": 48
+      },
+      "revId": "faf59469bfbbc26c21d7fc8c0903289c4af8c306",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ef87b3e8_195a05f0",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-05-06T17:59:57Z",
       "side": 1,
       "message": "edge -\u003e edges",
+      "range": {
+        "startLine": 94,
+        "startChar": 44,
+        "endLine": 94,
+        "endChar": 48
+      },
+      "revId": "faf59469bfbbc26c21d7fc8c0903289c4af8c306",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "828c0b2a_ba060128",
+        "filename": "android/android-grpc/ui_controller_service.proto",
+        "patchSetId": 7
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-11T16:27:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ef87b3e8_195a05f0",
       "range": {
         "startLine": 94,
         "startChar": 44,
