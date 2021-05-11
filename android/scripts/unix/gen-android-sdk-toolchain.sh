@@ -922,7 +922,7 @@ prepare_build_for_windows_msvc() {
     var_append CLANG_LINK_FLAGS "-Wl,-nodefaultlib:libcmt,-defaultlib:msvcrt,-defaultlib:oldnames"
     # Other linker flags to make cross-compiling upstream-qemu work without adding any additional
     # flags to it's makefile.
-    var_append CLANG_LINK_FLAGS "-lshell32 -luser32 -ladvapi32 -liphlpapi -lwldap32 -lmfuuid -lwinmm"
+    var_append CLANG_LINK_FLAGS "-lshell32 -luser32 -ladvapi32 -liphlpapi -lwldap32 -lmfuuid -lwinmm -lsetupapi"
 
     if [ $(get_verbosity) -gt 3 ]; then
       # This will get pretty crazy, but useful if you want to debug linker issues.
