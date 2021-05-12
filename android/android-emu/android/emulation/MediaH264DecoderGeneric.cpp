@@ -146,9 +146,9 @@ void MediaH264DecoderGeneric::initH264ContextInternal(unsigned int width,
         }
     }
 #else
-    //TODO: once all the CTS passed with VTB, remove this
-    const bool is_vtb_allowed = android::base::System::getEnvironmentVariable(
-                            "ANDROID_EMU_MEDIA_DECODER_VTB") == "1";
+    // enable vtb by default, unless it is explicitly disallowed (for test purpose)
+    const bool is_vtb_allowed = !(android::base::System::getEnvironmentVariable(
+                            "ANDROID_EMU_MEDIA_DECODER_VTB") == "0");
 
     if (is_vtb_allowed) {
         MediaVideoToolBoxVideoHelper::FrameStorageMode fMode =
