@@ -56,6 +56,7 @@
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/ServiceUtils.h"
+#include "android/emulation/control/audio/AudioStream.h"
 #include "android/emulation/control/battery_agent.h"
 #include "android/emulation/control/camera/VirtualSceneCamera.h"
 #include "android/emulation/control/clipboard/Clipboard.h"
@@ -118,6 +119,7 @@ using namespace android::base;
 using namespace android::control::interceptor;
 using namespace std::chrono_literals;
 using ::google::protobuf::Empty;
+using namespace std::chrono_literals;
 
 namespace android {
 namespace emulation {
@@ -473,44 +475,29 @@ public:
         format->set_format(request->format());
         format->set_samplingrate(sampleRate);
 
-        constexpr int kMaxAudioFrames = 50;
-        using TimedAudioFrame = std::pair<System::Duration, std::string>;
-        android::base::MessageChannel<TimedAudioFrame, kMaxAudioFrames>
-                audioFrames;
-        auto audioProducer = android::recording::createAudioProducer(
-                sampleRate, kSrcNumSamples, sampleFormat, channels);
+        auto kTimeToWaitForAudioFrame = std::chrono::milliseconds(30);
+        AudioInputStream audioStream(*format, kTimeToWaitForAudioFrame);
 
-        // Callback that is responsible for copying the incoming packets
-        // into the audioframe channel.
-        audioProducer->attachCallback(
-                [&audioFrames,
-                 &packet](const android::recording::Frame* frame) {
-                    auto audioFrame =
-                            std::make_pair<System::Duration, std::string>(
-                                    System::get()->getUnixTimeUs(),
-                                    std::string((char*)frame->dataVec.data(),
-                                                frame->dataVec.size()));
-                    return audioFrames.trySend(std::move(audioFrame));
-                });
 
-        audioProducer->start();
+        int32_t kBytesPerSample = AudioUtils::getBytesPerSample(*format);
+        int32_t kSamplesPerFrame =
+                (sampleRate / 1000) * kTimeToWaitForAudioFrame.count();
+        size_t kBytesPerFrame = kBytesPerSample * kSamplesPerFrame * channels;
 
-        // Write out the incoming audio packets.
-        constexpr std::chrono::microseconds kTimeToWaitForAudioFrame =
-                std::chrono::milliseconds(125);
+        // Pre allocate the packet buffer.
+        auto buffer = new std::string(kBytesPerFrame, 0);
+        packet.set_allocated_audio(buffer);
+
         bool clientAlive = true;
         do {
-            auto audioFrame =
-                    audioFrames.timedReceive(kTimeToWaitForAudioFrame.count());
-            if (audioFrame) {
-                packet.set_timestamp(audioFrame->first);
-                packet.set_audio(std::move(audioFrame->second));
+            buffer->resize(kBytesPerFrame);
+            auto size = audioStream.read(&packet);
+            if (size > 0) {
                 clientAlive = writer->Write(packet);
             }
             clientAlive = clientAlive && !context->IsCancelled();
         } while (clientAlive);
 
-        audioProducer->stop();
         return Status::OK;
     }
 
@@ -585,8 +572,8 @@ public:
                 getScreenshot(context, request, &reply);
 
                 // The invariant that the pixel buffer does not decrease should
-                // hold. Clients likely rely on the buffer size to match the actual
-                // number of available pixels.
+                // hold. Clients likely rely on the buffer size to match the
+                // actual number of available pixels.
                 assert(reply.image().size() >= cPixels);
                 cPixels = reply.image().size();
 
@@ -795,10 +782,14 @@ public:
         } else {
             // Make sure the image field has a string that is large enough.
             // Usually there are 2 cases:
-            // - A single screenshot is requested, we need to allocate a buffer of sufficient size
-            // - The first screenshot in a series is requested and we need to allocate the first frame.
+            // - A single screenshot is requested, we need to allocate a buffer
+            // of sufficient size
+            // - The first screenshot in a series is requested and we need to
+            // allocate the first frame.
             if (reply->mutable_image()->size() < cPixels) {
-                LOG(VERBOSE) << "Allocation of string object. " << reply->mutable_image()->size() << " < " << cPixels;
+                LOG(VERBOSE)
+                        << "Allocation of string object. "
+                        << reply->mutable_image()->size() << " < " << cPixels;
                 auto buffer = new std::string(cPixels, 0);
                 // The protobuf message takes ownership of the pointer.
                 reply->set_allocated_image(buffer);
@@ -819,8 +810,9 @@ public:
         // Update format information with the retrieved width, height.
         format->set_height(height);
         format->set_width(width);
-        LOG(VERBOSE) << "Screenshot " << width << "x" << height << ", cPixels: " << cPixels
-                     << ", in: " << sw.elapsedUs() << " us";
+        LOG(VERBOSE) << "Screenshot " << width << "x" << height
+                     << ", cPixels: " << cPixels << ", in: " << sw.elapsedUs()
+                     << " us";
 
         return Status::OK;
     }
@@ -923,10 +915,12 @@ public:
         }
 
         if (updatingDisplayIds.size() > avdInfo_maxMultiDisplayEntries()) {
-             return Status(::grpc::StatusCode::INVALID_ARGUMENT,
-                              "At most: " + std::to_string(avdInfo_maxMultiDisplayEntries()) +
-                                      " can be configured.",
-                              "");
+            return Status(
+                    ::grpc::StatusCode::INVALID_ARGUMENT,
+                    "At most: " +
+                            std::to_string(avdInfo_maxMultiDisplayEntries()) +
+                            " can be configured.",
+                    "");
         }
 
         std::set<int> updatedDisplays;
@@ -1211,7 +1205,7 @@ private:
             mLogcatBuffer;  // A ring buffer that tracks the logcat output.
 
     static constexpr uint32_t k128KB = (128 * 1024) - 1;
-    static constexpr std::chrono::seconds k5SecondsWait = 5s;
+    static constexpr std::chrono::milliseconds k5SecondsWait = 5s;
     const std::chrono::milliseconds kNoWait = 0ms;
 };
 
