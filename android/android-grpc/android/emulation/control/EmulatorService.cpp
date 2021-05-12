@@ -116,6 +116,7 @@ using grpc::ServerWriter;
 using grpc::Status;
 using namespace android::base;
 using namespace android::control::interceptor;
+using namespace std::chrono_literals;
 using ::google::protobuf::Empty;
 
 namespace android {
@@ -1210,8 +1211,8 @@ private:
             mLogcatBuffer;  // A ring buffer that tracks the logcat output.
 
     static constexpr uint32_t k128KB = (128 * 1024) - 1;
-    static constexpr uint16_t k5SecondsWait = 5 * 1000;
-    const uint16_t kNoWait = 0;
+    static constexpr std::chrono::seconds k5SecondsWait = 5s;
+    const std::chrono::milliseconds kNoWait = 0ms;
 };
 
 grpc::Service* getEmulatorController(const AndroidConsoleAgents* agents) {
