@@ -1404,6 +1404,19 @@ function(android_build_qemu_variant)
   # Make the common dependency explicit, as some generators might not detect it
   # properly (Xcode/MSVC native)
   add_dependencies(${qemu_build_EXE} qemu2-common)
+  if(APPLE AND OPTION_DEVELOPMENT)
+      # If you are on Big Sur you will not be able to use HVF since
+      # Apple has made changes to the hypervisor entitlements.
+      # So let's sign the qemu executables, so you can use HVF locally during development.
+      add_custom_command(
+          TARGET ${qemu_build_EXE}
+          POST_BUILD
+          COMMENT "Signing $<TARGET_FILE:${qemu_build_EXE}>"
+          COMMAND
+          codesign --deep -s - --entitlements
+          ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist
+          $<TARGET_FILE:${qemu_build_EXE}>)
+  endif()
   # XCode bin places this not where we want this...
   if(qemu_build_INSTALL)
     set_target_properties(

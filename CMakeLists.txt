@@ -36,6 +36,7 @@ message(
 include(android)
 include(prebuilts)
 
+set(OPTION_DEVELOPMENT FALSE CACHE BOOL "Enable developer options, such as signing QEMU during build.")
 set(OPTION_CRASHUPLOAD "NONE" CACHE STRING "Destination of crash reports.")
 set(OPTION_SDK_TOOLS_REVISION "" CACHE STRING
                                        "The tools revision to use, if any")
