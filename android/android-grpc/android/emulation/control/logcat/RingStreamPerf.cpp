@@ -23,7 +23,7 @@
 #include "benchmark/benchmark_api.h"                         // for State
 
 using android::emulation::control::RingStreambuf;
-
+using namespace std::chrono_literals;
 #define BASIC_BENCHMARK_TEST(x) \
     BENCHMARK(x)->RangeMultiplier(2)->Range(1 << 10, 1 << 14)
 
@@ -63,7 +63,7 @@ void BM_WriteLogcatScenario(benchmark::State& state) {
     int offset = 0;
     while (state.KeepRunning()) {
         stream << src;
-        auto message = buf.bufferAtOffset(offset, 0);
+        auto message = buf.bufferAtOffset(offset, 0ms);
         offset += message.second.size();
     }
 }

@@ -15,7 +15,8 @@
 
 #include <string.h>   // for memcpy
 #include <algorithm>  // for max, min
-#include <iostream>   // for streamsize
+
+#include "android/base/EnumFlags.h"  // for operator!
 
 namespace android {
 namespace emulation {
@@ -27,14 +28,15 @@ using namespace base;
 static uint64_t next_pow2(uint64_t x) {
     return x == 1 ? 1 : 1 << (64 - __builtin_clzl(x - 1));
 }
-RingStreambuf::RingStreambuf(uint32_t capacity) {
+RingStreambuf::RingStreambuf(uint32_t capacity, milliseconds timeout)
+    : mTimeout(timeout) {
     uint64_t cap = next_pow2(capacity + 1);
     mRingbuffer.resize(cap);
 }
 
 std::streamsize RingStreambuf::xsputn(const char* s, std::streamsize n) {
     // Usually n >> 1..
-    AutoLock lock(mLock);
+    std::unique_lock<std::mutex> lock(mLock);
     std::streamsize capacity = mRingbuffer.capacity();
     std::streamsize maxWrite = std::max(n, capacity);
 
@@ -45,7 +47,7 @@ std::streamsize RingStreambuf::xsputn(const char* s, std::streamsize n) {
         mHead = capacity;
         mTail = 0;
         mHeadOffset += n;
-        mCanRead.signal();
+        mCanRead.notify_all();
         return n;
     }
 
@@ -80,7 +82,7 @@ std::streamsize RingStreambuf::xsputn(const char* s, std::streamsize n) {
     if (updateTail)
         mTail = (mHead + 1) & (capacity - 1);
     mHeadOffset += n;
-    mCanRead.signal();
+    mCanRead.notify_all();
     return n;
 }
 
@@ -99,8 +101,11 @@ std::streamsize RingStreambuf::showmanyc() {
 }
 
 std::streamsize RingStreambuf::xsgetn(char* s, std::streamsize n) {
-    AutoLock lock(mLock);
-    mCanRead.wait(&mLock, [this]() { return mTail != mHead; });
+    std::unique_lock<std::mutex> lock(mLock);
+    if (!mCanRead.wait_for(lock, mTimeout,
+                           [this]() { return mTail != mHead; })) {
+        return 0;
+    }
     std::streamsize toRead = std::min(showmanyc(), n);
     std::streamsize capacity = mRingbuffer.capacity();
     // 2 Cases:
@@ -120,14 +125,20 @@ std::streamsize RingStreambuf::xsgetn(char* s, std::streamsize n) {
 }
 
 int RingStreambuf::underflow() {
-    AutoLock lock(mLock);
-    mCanRead.wait(&mLock, [this]() { return mTail != mHead; });
+    std::unique_lock<std::mutex> lock(mLock);
+    if (!mCanRead.wait_for(lock, mTimeout,
+                           [this]() { return mTail != mHead; })) {
+        return traits_type::eof();
+    }
     return mRingbuffer[mTail];
 };
 
 int RingStreambuf::uflow() {
-    AutoLock lock(mLock);
-    mCanRead.wait(&mLock, [this]() { return mTail != mHead; });
+    std::unique_lock<std::mutex> lock(mLock);
+    if (!mCanRead.wait_for(lock, mTimeout,
+                           [this]() { return mTail != mHead; })) {
+        return traits_type::eof();
+    }
     int val = mRingbuffer[mTail];
     mTail = (mTail + 1) & (mRingbuffer.capacity() - 1);
     return val;
@@ -135,15 +146,13 @@ int RingStreambuf::uflow() {
 
 std::pair<int, std::string> RingStreambuf::bufferAtOffset(
         std::streamsize offset,
-        System::Duration timeoutMs) {
-    AutoLock lock(mLock);
+        milliseconds timeoutMs) {
+    std::unique_lock<std::mutex> lock(mLock);
     std::string res;
-    while (offset >= mHeadOffset && timeoutMs > 0) {
-        System::Duration waitUntilUs =
-                System::get()->getUnixTimeUs() + timeoutMs * 1000;
-        if (!mCanRead.timedWait(&mLock, waitUntilUs)) {
-            return std::make_pair(mHeadOffset, res);
-        }
+    if (!mCanRead.wait_for(lock, timeoutMs, [offset, this]() {
+            return offset < mHeadOffset;
+        })) {
+        return std::make_pair(mHeadOffset, res);
     }
 
     // Prepare the outgoing buffer.
@@ -151,7 +160,6 @@ std::pair<int, std::string> RingStreambuf::bufferAtOffset(
     std::streamsize toRead = showmanyc();
     std::streamsize startOffset = mHeadOffset - toRead;
     std::streamsize skip = std::max(startOffset, offset) - startOffset;
-
 
     // Let's find the starting point where we should be reading.
     uint16_t read = (mTail + skip) & (capacity - 1);
