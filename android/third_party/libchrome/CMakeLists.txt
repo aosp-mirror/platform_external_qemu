@@ -555,7 +555,7 @@ android_add_library(
 
 # android_target_include_directories(libchrome darwin-x86_64 PRIVATE posix})
 target_include_directories(
-  libchrome PUBLIC . ${LIBCHROME_ROOT} ${CMAKE_CURRENT_BINARY_DIR}
+  libchrome PUBLIC . ${LIBCHROME_ROOT} ${CMAKE_CURRENT_BINARY_DIR} ${AOSP_ROOT}/external/webrtc
   PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android)
 
 target_link_libraries(libchrome PUBLIC gtest absl::variant ssl absl::strings
