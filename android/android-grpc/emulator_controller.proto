@@ -139,7 +139,11 @@ service EmulatorController {
 
   // Streams a series of audio packets in the desired format.
   // A new frame will be delivered whenever the emulated device
-  // produces a new audio frame.
+  // produces a new audio frame. You can expect packets to be
+  // delivered in intervals of 20-30ms.
+  //
+  // Be aware that this can block when the emulator does not
+  // produce any audio whatsoever!
   rpc streamAudio(AudioFormat) returns (stream AudioPacket) {}
 
   // Returns the last 128Kb of logcat output from the emulator
