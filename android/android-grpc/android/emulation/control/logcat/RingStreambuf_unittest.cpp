@@ -25,6 +25,7 @@ namespace android {
 namespace emulation {
 namespace control {
 
+using namespace std::chrono_literals;
 TEST(RingStreambuf, basic_stream_avail) {
     RingStreambuf buf(4);
     std::ostream stream(&buf);
@@ -103,7 +104,7 @@ TEST(RingStreambuf, stream_overwrites_ring) {
     stream << "aaaaaaa";
     stream << "bbbbbbb";
 
-    auto res = buf.bufferAtOffset(0, 1000);
+    auto res = buf.bufferAtOffset(0, 1s);
     EXPECT_EQ(res.first, 7);
     EXPECT_STREQ("bbbbbbb", res.second.c_str());
 
@@ -120,6 +121,21 @@ TEST(RingStreambuf, stream_not_yet_available_no_block) {
     auto res = buf.bufferAtOffset(7);
     EXPECT_EQ(res.first, 7);
     EXPECT_STREQ("", res.second.c_str());
+}
+TEST(RingStreambuf, istream_times_out_when_empty) {
+    // String buffer that will block at most 10ms.
+    RingStreambuf buf(4, 10ms);
+    std::istream in(&buf);
+    std::string read;
+    auto start = std::chrono::high_resolution_clock::now();
+
+    in >> read;
+
+    auto finish = std::chrono::high_resolution_clock::now();
+    auto waited = std::chrono::duration_cast<milliseconds>(finish - start);
+    // We should have waited at least 10ms.
+    EXPECT_GE(waited, 10ms);
+    SUCCEED();
 }
 
 TEST(RingStreambuf, stream_not_yet_available_no_block_gives_proper_distance) {
@@ -143,7 +159,7 @@ TEST(RingStreambuf, stream_offset_blocks_until_available) {
         stream << "ccccccc";
     });
     FunctorThread reader([&buf] {
-        auto res = buf.bufferAtOffset(14, 1000);
+        auto res = buf.bufferAtOffset(14, 1s);
         EXPECT_EQ(res.first, 14);
         EXPECT_STREQ("ccccccc", res.second.c_str());
     });
