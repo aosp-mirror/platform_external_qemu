@@ -298,6 +298,14 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->next_layout_button->setHidden(true);
     }
 
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR) {
+        // Wear OS shouldn't get rotate nor volume up/down buttons.
+        mToolsUi->prev_layout_button->setHidden(true);
+        mToolsUi->next_layout_button->setHidden(true);
+        mToolsUi->volume_up_button->setHidden(true);
+        mToolsUi->volume_down_button->setHidden(true);
+    }
+
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         // Android Auto doesn't supoort rotate, home, back, recent
         mToolsUi->prev_layout_button->setHidden(true);
