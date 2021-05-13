@@ -1860,6 +1860,14 @@ help_feature(stralloc_t* out)
 }
 
 static void
+help_icc_profile(stralloc_t* out)
+{
+    PRINTF(
+    "  ICC configuration file for SIM card\n\n"
+    );
+}
+
+static void
 help_sim_access_rules_file(stralloc_t* out)
 {
     PRINTF(

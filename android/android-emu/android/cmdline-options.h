@@ -220,6 +220,7 @@ OPT_FLAG(detect_image_hang, "Enable the detection of system image hangs.")
 
 OPT_LIST(feature, "<name|-name>", "Force-enable or disable (-name) the features")
 
+OPT_PARAM(icc_profile, "<file>", "Use icc profile from specified file")
 OPT_PARAM(sim_access_rules_file, "<file>", "Use SIM access rules from specified file")
 OPT_PARAM(phone_number, "<phone_number>", "Sets the phone number of the emulated device")
 
