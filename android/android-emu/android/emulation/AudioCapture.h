@@ -65,6 +65,7 @@ public:
         return mChannels;
     }
 
+    virtual bool good() = 0;
 private:
 
     int mSamplingRate;
