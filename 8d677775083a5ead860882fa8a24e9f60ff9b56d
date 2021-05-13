@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "095f22a2_c300b490",
+        "filename": "android/android-emu/android/userspace-boot-properties.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-05-13T20:35:05Z",
+      "side": 1,
+      "message": "You want to do this only if fc::isEnabled(fc::AndroidbootProps) is true, otherwise it is too long for the kernel command line.",
+      "range": {
+        "startLine": 235,
+        "startChar": 19,
+        "endLine": 235,
+        "endChar": 28
+      },
+      "revId": "8d677775083a5ead860882fa8a24e9f60ff9b56d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
