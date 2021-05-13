@@ -3484,7 +3484,7 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
                 !((format == GL_DEPTH_COMPONENT && internalformat == GL_DEPTH_COMPONENT)
                 || (format == GL_LUMINANCE && internalformat == GL_LUMINANCE)), GL_INVALID_OPERATION);
 
-        VALIDATE(!GLESv2Validate::pixelOp(format,type) && internalformat == ((GLint)format),GL_INVALID_OPERATION);
+        VALIDATE(!GLESv2Validate::pixelOp(format,type),GL_INVALID_OPERATION);
         VALIDATE(!GLESv2Validate::pixelSizedFrmt(ctx, internalformat, format, type), GL_INVALID_OPERATION);
     }
 
