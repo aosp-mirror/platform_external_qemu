@@ -14,7 +14,7 @@ $(obj)/generated-helpers-wrappers.h-timestamp: $(SRC_PATH)/trace-events $(BUILD_
 		--group=root \
 		--format=tcg-helper-wrapper-h \
 		--backend=$(TRACE_BACKENDS) \
-		$< > $@,"GEN","$(patsubst %-timestamp,%,$@)")
+		$<  $@,"GEN","$(patsubst %-timestamp,%,$@)")
 
 $(obj)/generated-helpers.h: $(obj)/generated-helpers.h-timestamp
 	@cmp $< $@ >/dev/null 2>&1 || cp $< $@
@@ -23,7 +23,7 @@ $(obj)/generated-helpers.h-timestamp: $(SRC_PATH)/trace-events $(BUILD_DIR)/conf
 		--group=root \
 		--format=tcg-helper-h \
 		--backend=$(TRACE_BACKENDS) \
-		$< > $@,"GEN","$(patsubst %-timestamp,%,$@)")
+		$<  $@,"GEN","$(patsubst %-timestamp,%,$@)")
 
 $(obj)/generated-helpers.c: $(obj)/generated-helpers.c-timestamp
 	@cmp $< $@ >/dev/null 2>&1 || cp $< $@
@@ -32,7 +32,7 @@ $(obj)/generated-helpers.c-timestamp: $(SRC_PATH)/trace-events $(BUILD_DIR)/conf
 		--group=root \
 		--format=tcg-helper-c \
 		--backend=$(TRACE_BACKENDS) \
-		$< > $@,"GEN","$(patsubst %-timestamp,%,$@)")
+		$<  $@,"GEN","$(patsubst %-timestamp,%,$@)")
 
 $(obj)/generated-helpers.o: $(obj)/generated-helpers.c
 
@@ -46,7 +46,7 @@ $(obj)/generated-tcg-tracers.h-timestamp: $(SRC_PATH)/trace-events $(BUILD_DIR)/
 		--group=root \
 		--format=tcg-h \
 		--backend=$(TRACE_BACKENDS) \
-		$< > $@,"GEN","$(patsubst %-timestamp,%,$@)")
+		$<  $@,"GEN","$(patsubst %-timestamp,%,$@)")
 
 
 ######################################################################
