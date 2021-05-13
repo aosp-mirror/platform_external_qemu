@@ -761,7 +761,7 @@ static void enter_qemu_main_loop(int argc, char** argv) {
 // the radio configs come from the image/<arch>/data/misc/modem_simulator
 // folder, make a copy of that folder to avd/modem_simulator/ and create
 // the necessary dir strucutres that modem simulator expects
-static bool create_modem_simulator_configs_if_needed(AndroidHwConfig* hw) {
+static bool create_modem_simulator_configs_if_needed(AndroidHwConfig* hw, const char* opticcprofile) {
     ScopedCPtr<char> avd_dir(path_dirname(hw->disk_dataPartition_path));
     if (!avd_dir) {
         return false;
@@ -773,7 +773,12 @@ static bool create_modem_simulator_configs_if_needed(AndroidHwConfig* hw) {
         path_delete_file(iccprofile_path.c_str());
     }
 
+
+    const bool need_overwrite_iccprofile = opticcprofile && path_exists(opticcprofile);
     if (path_exists(iccprofile_path.c_str())) {
+        if (need_overwrite_iccprofile) {
+            path_copy_file(iccprofile_path.c_str(), opticcprofile);
+        }
         return true;
     }
 
@@ -781,6 +786,10 @@ static bool create_modem_simulator_configs_if_needed(AndroidHwConfig* hw) {
     std::string org_modem_config_dir = PathUtils::join(sysimg_dir.get(), "data", "misc", "modem_simulator");
 
     path_copy_dir(modem_config_dir.c_str(), org_modem_config_dir.c_str());
+    if (need_overwrite_iccprofile) {
+        // need to overwite as the copy dir will copy everything
+        path_copy_file(iccprofile_path.c_str(), opticcprofile);
+    }
     return path_exists(iccprofile_path.c_str());
 }
 
@@ -2171,7 +2180,7 @@ extern "C" int main(int argc, char** argv) {
     }
 
     if (feature_is_enabled(kFeature_ModemSimulator)) {
-        if (create_modem_simulator_configs_if_needed(hw)) {
+        if (create_modem_simulator_configs_if_needed(hw, opts->icc_profile)) {
             init_modem_simulator();
             bool isIpv4 = false;
             // start modem now, so qemu can proceed with virtioport setup
