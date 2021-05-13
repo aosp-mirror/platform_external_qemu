@@ -1,4 +1,4 @@
-// Copyright (C) 2017 The Android Open Source Project
+// Copyright (C) 2021 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,22 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include "audio/audio.h"
 
-#include "android/emulation/AudioOutputEngine.h"
-
-#include "android/base/Log.h"
-
-namespace android {
-namespace emulation {
-
-AudioOutputEngine* AudioOutputEngine::mInstance = nullptr;
-
-AudioOutputEngine* AudioOutputEngine::get() {
-    CHECK(mInstance);
-    return mInstance;
-}
-
-
-
-}  // namespace emulation
-}  // namespace android
+// Note, the audio_capture_ops struct should provide the
+// capture function that will be called whenever a new sample
+// is being requested.
+//
+// Only one forwarder can be active.
+int enable_forwarder(struct audsettings* as, struct audio_capture_ops* ops, void* opaque);
+void disable_forwarder();

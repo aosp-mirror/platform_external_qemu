@@ -42,6 +42,12 @@ class AudioCapturer;
 //    4) Call AudioCaptureEngine::stop() with the instance created in (1) to stop capture
 //
 class AudioCaptureEngine {
+public:
+     enum class AudioMode {
+         AUDIO_OUTPUT = 0,
+         AUDIO_INPUT = 1,
+    };
+
 protected:
      AudioCaptureEngine() = default;
      virtual ~AudioCaptureEngine() = default;
@@ -56,17 +62,13 @@ public:
      // set the audio capture engine
      // The set() needs to be called at the point where no races are possible
      // for example, during the period where vm setups
-     static void set(AudioCaptureEngine* engine) {
-         mInstance = engine;
-     }
+     static void set(AudioCaptureEngine* engine, AudioMode type = AudioMode::AUDIO_OUTPUT);
 
-     static AudioCaptureEngine* get() {
-         CHECK(mInstance);
-         return mInstance;
-     }
+     static AudioCaptureEngine* get(AudioMode mode = AudioMode::AUDIO_OUTPUT);
 
 private:
-    static AudioCaptureEngine *mInstance;
+    static AudioCaptureEngine *mOutputInstance;
+    static AudioCaptureEngine *mInputInstance;
 
     DISALLOW_COPY_AND_ASSIGN(AudioCaptureEngine);
 };
