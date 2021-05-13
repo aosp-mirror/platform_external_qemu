@@ -2086,14 +2086,14 @@ static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc
         break;
 
     case GL_NUM_COMPRESSED_TEXTURE_FORMATS:
-        *params = (T)getCompressedFormats(NULL);
+        *params = (T)getCompressedFormats(2, NULL);
         break;
     case GL_COMPRESSED_TEXTURE_FORMATS:
         {
-            int nparams = getCompressedFormats(NULL);
+            int nparams = getCompressedFormats(2, NULL);
             if (nparams > 0) {
                 int* iparams = new int[nparams];
-                getCompressedFormats(iparams);
+                getCompressedFormats(2, iparams);
                 for (int i = 0; i < nparams; i++) {
                     params[i] = (T)iparams[i];
                 }
