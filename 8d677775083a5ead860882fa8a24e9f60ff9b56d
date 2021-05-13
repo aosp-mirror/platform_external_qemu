@@ -3,6 +3,29 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "2e45f54b_2ba2039e",
+        "filename": "android/android-emu/android/userspace-boot-properties.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-05-13T20:37:46Z",
+      "side": 1,
+      "message": "Is it required?",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 36
+      },
+      "revId": "8d677775083a5ead860882fa8a24e9f60ff9b56d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "095f22a2_c300b490",
         "filename": "android/android-emu/android/userspace-boot-properties.cpp",
         "patchSetId": 2
