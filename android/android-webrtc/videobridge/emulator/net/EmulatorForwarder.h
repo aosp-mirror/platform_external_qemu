@@ -35,6 +35,7 @@ class EmulatorControllerService;
 using emulator::webrtc::EmulatorGrpcClient;
 using Properties = std::unordered_map<std::string, std::string>;
 using emulator::webrtc::StandaloneConnection;
+using android::emulation::control::TurnConfig;
 
 using namespace android::base;
 // An EmulatorForwarder opens up an EmulatorController service that
@@ -50,7 +51,7 @@ using namespace android::base;
 // TODO(jansene): Fake avds show up in list-avds, but are not launchable.
 class EmulatorForwarder {
 public:
-    EmulatorForwarder(EmulatorGrpcClient* client, int adbPort);
+    EmulatorForwarder(EmulatorGrpcClient* client, int adbPort, TurnConfig turnConfig);
     ~EmulatorForwarder();
 
     // Establish a remote connection.
