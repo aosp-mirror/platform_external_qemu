@@ -15,8 +15,8 @@ target_include_directories(
   win_clang_unittests
   PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/target-x86_64
           ${ANDROID_QEMU2_TOP_DIR}/target/i386
-          ${ANDROID_QEMU2_TOP_DIR}/qemu2-auto-generated
-          ${ANDROID_QEMU2_TOP_DIR}/qemu2-auto-generated/tcg)
+          ${ANDROID_AUTOGEN}
+          ${ANDROID_AUTOGEN}/tcg)
 
 target_link_libraries(win_clang_unittests PRIVATE android-qemu-deps gmock_main
                                                   GLIB2::GLIB2)

@@ -6,7 +6,6 @@
 # Defines targets:
 #   libqemuutil
 #   qemu-img
-#   qemu-io
 #   qemu-system-aarch64
 #   qemu-system-arm
 #   qemu-system-i386
@@ -790,111 +789,6 @@ scsi/utils.c)
 set(qemu-img_generated_sources ""
 ${ANDROID_AUTOGEN}/)
 set(qemu-img_dep libqemuutil)
-
-## TARGET: qemu-io ##
-set(qemu-io_sources ""
-block.c
-block/accounting.c
-block/backup.c
-block/blkdebug.c
-block/blkreplay.c
-block/blkverify.c
-block/block-backend.c
-block/bochs.c
-block/cat.c
-block/cloop.c
-block/commit.c
-block/create.c
-block/crypto.c
-block/dirty-bitmap.c
-block/dmg.c
-block/file-win32.c
-block/io.c
-block/mirror.c
-block/nbd-client.c
-block/nbd.c
-block/null.c
-block/parallels.c
-block/qapi.c
-block/qcow.c
-block/qcow2-bitmap.c
-block/qcow2-cache.c
-block/qcow2-cluster.c
-block/qcow2-refcount.c
-block/qcow2-snapshot.c
-block/qcow2.c
-block/qed-check.c
-block/qed-cluster.c
-block/qed-l2-cache.c
-block/qed-table.c
-block/qed.c
-block/quorum.c
-block/raw-format.c
-block/replication.c
-block/sheepdog.c
-block/snapshot.c
-block/throttle-groups.c
-block/throttle.c
-block/vdi.c
-block/vhdx-endian.c
-block/vhdx-log.c
-block/vhdx.c
-block/vmdk.c
-block/vpc.c
-block/vvfat.c
-block/win32-aio.c
-block/write-threshold.c
-blockjob.c
-crypto/aes.c
-crypto/afsplit.c
-crypto/block-luks.c
-crypto/block-qcow.c
-crypto/block.c
-crypto/cipher.c
-crypto/desrfb.c
-crypto/hash-glib.c
-crypto/hash.c
-crypto/hmac-glib.c
-crypto/hmac.c
-crypto/init.c
-crypto/ivgen-essiv.c
-crypto/ivgen-plain.c
-crypto/ivgen-plain64.c
-crypto/ivgen.c
-crypto/pbkdf.c
-crypto/random-platform.c
-crypto/secret.c
-crypto/tlscreds.c
-crypto/tlscredsanon.c
-crypto/tlscredsx509.c
-crypto/tlssession.c
-crypto/xts.c
-io/channel-buffer.c
-io/channel-command.c
-io/channel-file.c
-io/channel-socket.c
-io/channel-tls.c
-io/channel-util.c
-io/channel-watch.c
-io/channel-websock.c
-io/channel.c
-io/dns-resolver.c
-io/net-listener.c
-io/task.c
-nbd/client.c
-nbd/common.c
-nbd/server.c
-qemu-io-cmds.c
-qemu-io.c
-qom/container.c
-qom/object.c
-qom/object_interfaces.c
-qom/qom-qobject.c
-replication.c
-scsi/utils.c)
-set(qemu-io_generated_sources ""
-${ANDROID_AUTOGEN}/)
-set(qemu-io_dep libqemuutil)
 
 ## TARGET: qemu-system-aarch64 ##
 set(qemu-system-aarch64_sources ""
@@ -1968,7 +1862,7 @@ PROPERTIES COMPILE_FLAGS " -I ${ANDROID_AUTOGEN}/accel/stubs")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/accel/tcg/cpu-exec-common.c ${ANDROID_QEMU2_TOP_DIR}/accel/tcg/cpu-exec.c ${ANDROID_QEMU2_TOP_DIR}/accel/tcg/cputlb.c ${ANDROID_QEMU2_TOP_DIR}/accel/tcg/tcg-all.c ${ANDROID_QEMU2_TOP_DIR}/accel/tcg/tcg-runtime-gvec.c ${ANDROID_QEMU2_TOP_DIR}/accel/tcg/tcg-runtime.c ${ANDROID_QEMU2_TOP_DIR}/accel/tcg/translate-all.c ${ANDROID_QEMU2_TOP_DIR}/accel/tcg/translator.c
 ${ANDROID_AUTOGEN}/accel/tcg/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_AUTOGEN}/accel/tcg")
 
-set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/arch_init.c ${ANDROID_QEMU2_TOP_DIR}/balloon.c ${ANDROID_QEMU2_TOP_DIR}/block.c ${ANDROID_QEMU2_TOP_DIR}/blockdev-nbd.c ${ANDROID_QEMU2_TOP_DIR}/blockdev.c ${ANDROID_QEMU2_TOP_DIR}/blockjob.c ${ANDROID_QEMU2_TOP_DIR}/bootdevice.c ${ANDROID_QEMU2_TOP_DIR}/bt-host.c ${ANDROID_QEMU2_TOP_DIR}/bt-vhci.c ${ANDROID_QEMU2_TOP_DIR}/cpus-common.c ${ANDROID_QEMU2_TOP_DIR}/cpus.c ${ANDROID_QEMU2_TOP_DIR}/device-hotplug.c ${ANDROID_QEMU2_TOP_DIR}/device_tree.c ${ANDROID_QEMU2_TOP_DIR}/disas.c ${ANDROID_QEMU2_TOP_DIR}/dma-helpers.c ${ANDROID_QEMU2_TOP_DIR}/dump.c ${ANDROID_QEMU2_TOP_DIR}/exec.c ${ANDROID_QEMU2_TOP_DIR}/gdbstub.c ${ANDROID_QEMU2_TOP_DIR}/hmp.c ${ANDROID_QEMU2_TOP_DIR}/ioport.c ${ANDROID_QEMU2_TOP_DIR}/iothread.c ${ANDROID_QEMU2_TOP_DIR}/memory.c ${ANDROID_QEMU2_TOP_DIR}/memory_mapping.c ${ANDROID_QEMU2_TOP_DIR}/monitor.c ${ANDROID_QEMU2_TOP_DIR}/numa.c ${ANDROID_QEMU2_TOP_DIR}/os-win32.c ${ANDROID_QEMU2_TOP_DIR}/qdev-monitor.c ${ANDROID_QEMU2_TOP_DIR}/qemu-img.c ${ANDROID_QEMU2_TOP_DIR}/qemu-io-cmds.c ${ANDROID_QEMU2_TOP_DIR}/qemu-io.c ${ANDROID_QEMU2_TOP_DIR}/qmp.c ${ANDROID_QEMU2_TOP_DIR}/qtest.c ${ANDROID_QEMU2_TOP_DIR}/replication.c ${ANDROID_QEMU2_TOP_DIR}/tpm.c
+set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/arch_init.c ${ANDROID_QEMU2_TOP_DIR}/balloon.c ${ANDROID_QEMU2_TOP_DIR}/block.c ${ANDROID_QEMU2_TOP_DIR}/blockdev-nbd.c ${ANDROID_QEMU2_TOP_DIR}/blockdev.c ${ANDROID_QEMU2_TOP_DIR}/blockjob.c ${ANDROID_QEMU2_TOP_DIR}/bootdevice.c ${ANDROID_QEMU2_TOP_DIR}/bt-host.c ${ANDROID_QEMU2_TOP_DIR}/bt-vhci.c ${ANDROID_QEMU2_TOP_DIR}/cpus-common.c ${ANDROID_QEMU2_TOP_DIR}/cpus.c ${ANDROID_QEMU2_TOP_DIR}/device-hotplug.c ${ANDROID_QEMU2_TOP_DIR}/device_tree.c ${ANDROID_QEMU2_TOP_DIR}/disas.c ${ANDROID_QEMU2_TOP_DIR}/dma-helpers.c ${ANDROID_QEMU2_TOP_DIR}/dump.c ${ANDROID_QEMU2_TOP_DIR}/exec.c ${ANDROID_QEMU2_TOP_DIR}/gdbstub.c ${ANDROID_QEMU2_TOP_DIR}/hmp.c ${ANDROID_QEMU2_TOP_DIR}/ioport.c ${ANDROID_QEMU2_TOP_DIR}/iothread.c ${ANDROID_QEMU2_TOP_DIR}/memory.c ${ANDROID_QEMU2_TOP_DIR}/memory_mapping.c ${ANDROID_QEMU2_TOP_DIR}/monitor.c ${ANDROID_QEMU2_TOP_DIR}/numa.c ${ANDROID_QEMU2_TOP_DIR}/os-win32.c ${ANDROID_QEMU2_TOP_DIR}/qdev-monitor.c ${ANDROID_QEMU2_TOP_DIR}/qemu-img.c ${ANDROID_QEMU2_TOP_DIR}/qemu-io-cmds.c ${ANDROID_QEMU2_TOP_DIR}/qmp.c ${ANDROID_QEMU2_TOP_DIR}/qtest.c ${ANDROID_QEMU2_TOP_DIR}/replication.c ${ANDROID_QEMU2_TOP_DIR}/tpm.c
 ${ANDROID_AUTOGEN}/trace-root.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_AUTOGEN}/")
 
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/audio/audio.c ${ANDROID_QEMU2_TOP_DIR}/audio/audio_win_int.c ${ANDROID_QEMU2_TOP_DIR}/audio/dsoundaudio.c ${ANDROID_QEMU2_TOP_DIR}/audio/mixeng.c ${ANDROID_QEMU2_TOP_DIR}/audio/noaudio.c ${ANDROID_QEMU2_TOP_DIR}/audio/wavaudio.c ${ANDROID_QEMU2_TOP_DIR}/audio/wavcapture.c

@@ -14,7 +14,7 @@ if(OPTION_GFXSTREAM_BACKEND)
     PRIVATE
       ${VIRGLRENDERER_INCLUDE_DIR}
       ${ANDROID_QEMU2_TOP_DIR}/include
-      ${ANDROID_QEMU2_TOP_DIR}/qemu2-auto-generated
+      ${ANDROID_AUTOGEN}
       ${GOLDFISH_EMUGL_DIR}/host/include/libOpenglRender
       ${GOLDFISH_EMUGL_DIR}/system/include
       ${ANDROID_EMUGL_DIR}/guest
