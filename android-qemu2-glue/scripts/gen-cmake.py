@@ -270,7 +270,7 @@ def source_properties(source_list, git_fs):
     sources = '${ANDROID_QEMU2_TOP_DIR}/' + ' ${ANDROID_QEMU2_TOP_DIR}/'.join(
         sources)
     cmake += ('set_source_files_properties(%s PROPERTIES COMPILE_FLAGS " '
-              '-I ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/%s")\n') % (
+              '-I ${ANDROID_AUTOGEN}/%s")\n') % (
                   sources, dir_name)
   return cmake
 

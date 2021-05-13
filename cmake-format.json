@@ -5,6 +5,17 @@
   "first_comment_is_literal": true,
   "command_case": "lower",
   "additional_commands": {
+    "generate_trace": {
+      "flags": [],
+      "kwargs": {
+        "DEST": "*",
+        "GROUP": "*",
+        "FORMAT": "*",
+        "BACKEND": "*",
+        "GENERATED": "*",
+        "SRC": "*"
+      }
+    },
     "android_bluetooth_packet_gen": {
       "flags": [],
       "kwargs": {
