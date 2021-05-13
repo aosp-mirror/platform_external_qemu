@@ -23,8 +23,10 @@ extern "C" {
 #include "qemu/osdep.h"
 #include "qemu/error-report.h"
 #include "audio/audio.h"
+#include "audio/audio_forwarder.h"
 }
 
+#include <atomic>
 #include <unordered_map>
 
 struct AudioState {
@@ -135,6 +137,63 @@ int QemuAudioCaptureEngine::stop(android::emulation::AudioCapturer* capturer)
 
     return rc;
 }
+
+// Callback that obtains the microhphone input sample from the capturer.
+static void my_microphone(void* opaque, void* buf, int size)
+{
+    emulation::AudioCapturer* capturer = reinterpret_cast<emulation::AudioCapturer*>(opaque);
+    capturer->onSample(buf, size);
+}
+
+
+int QemuAudioInputEngine::start(android::emulation::AudioCapturer* capturer)
+{
+    bool expected = false;
+    if (!mRunning.compare_exchange_strong(expected, true)) {
+        derror("Already running a capture engine\n");
+        return -1;
+    }
+
+    int freq = capturer->getSamplingRate();
+    int bits = capturer->getBits();
+    int nchannels = capturer->getChannels();
+
+    if (bits != 8 && bits != 16) {
+        derror("Invalid bits value audio capture\n");
+        return -1;
+    }
+
+    if (nchannels != 1 && nchannels != 2) {
+        derror("Invalid channels value audio capture\n");
+        return -1;
+    }
+
+    int stereo = (nchannels == 2);
+    int bits16 = (bits == 16);
+
+    audsettings as;
+    as.freq = freq;
+    as.nchannels = 1 << stereo;
+    as.fmt = bits16 ? AUD_FMT_S16 : AUD_FMT_U8;
+    as.endianness = 0;
+
+    audio_capture_ops ops;
+    ops.notify = my_notify;
+    ops.capture = my_microphone;
+    ops.destroy = my_destroy;
+
+    return enable_forwarder(&as, &ops, capturer);
+}
+
+
+int QemuAudioInputEngine::stop(android::emulation::AudioCapturer* capturer)
+{
+   disable_forwarder();
+   mRunning = false;
+   return 0;
+}
+
+
 
 }  // namespace qemu
 }  // namespace android

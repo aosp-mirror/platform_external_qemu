@@ -14,6 +14,7 @@
 #include "android/emulation/AudioCapture.h"
 #include "android/emulation/AudioCaptureEngine.h"
 #include "android/utils/compiler.h"
+#include <atomic>
 
 namespace android {
 namespace qemu {
@@ -51,6 +52,27 @@ public:
 
 private:
     DISALLOW_COPY_AND_ASSIGN(QemuAudioCaptureEngine);
+};
+
+
+// A minimalistic input engine that allows you to override the active microphone input.
+//
+// Some things to note:
+//   - Only one can be active, no mixing of sources is taking place. This means
+//     that calling start will disable the *real* microphone, and starting a 2nd
+//     input engine will fail.
+//   - Overrides the UI setting that supresses "real" microphone usage.
+class QemuAudioInputEngine : public android::emulation::AudioCaptureEngine {
+public:
+    QemuAudioInputEngine() = default;
+    virtual ~QemuAudioInputEngine() = default;
+
+    virtual int start(android::emulation::AudioCapturer* capturer) override;
+    virtual int stop(android::emulation::AudioCapturer* capturer) override;
+
+private:
+    std::atomic_bool mRunning;
+    DISALLOW_COPY_AND_ASSIGN(QemuAudioInputEngine);
 };
 
 }  // namespace qemu

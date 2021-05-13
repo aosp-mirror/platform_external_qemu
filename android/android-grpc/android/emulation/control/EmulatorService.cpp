@@ -451,6 +451,49 @@ public:
 
         return Status::OK;
     }
+    Status injectAudio(ServerContext* context,
+                       ::grpc::ServerReader<AudioPacket>* reader,
+                       ::google::protobuf::Empty* reply) override {
+        AudioPacket pkt;
+        if (!reader->Read(&pkt)) {
+            return Status::OK;
+        }
+
+        if (pkt.format().samplingrate() > 48000) {
+            return Status(::grpc::StatusCode::INVALID_ARGUMENT,
+                          "The desired sampling rate is too high (>48khz) ",
+                          "");
+        }
+
+        QemuAudioInputStream aos(pkt.format());
+        if (!aos.good()) {
+            return Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "Unable to register microphone.", "");
+        }
+        bool clientAlive = !context->IsCancelled();
+        while (clientAlive) {
+            // Let's not accept extremely large packets..
+            if (pkt.audio().size() > aos.capacity()) {
+                return Status(::grpc::StatusCode::INVALID_ARGUMENT,
+                              "The audio buffer can store at most " +
+                                      std::to_string(aos.capacity()) + " bytes",
+                              "");
+            }
+
+            // Write out a packet while we are alive..
+            const char* buf = pkt.audio().data();
+            size_t cBuf = pkt.audio().size();
+            while (cBuf > 0 && !context->IsCancelled()) {
+                size_t written = aos.write(buf, cBuf);
+                buf = buf + written;
+                cBuf -= written;
+            }
+
+            // Get the next packet if we are alive.
+            clientAlive = !context->IsCancelled() && reader->Read(&pkt);
+        }
+        return Status::OK;
+    }
 
     Status streamAudio(ServerContext* context,
                        const AudioFormat* request,
@@ -476,8 +519,7 @@ public:
         format->set_samplingrate(sampleRate);
 
         auto kTimeToWaitForAudioFrame = std::chrono::milliseconds(30);
-        AudioInputStream audioStream(*format, kTimeToWaitForAudioFrame);
-
+        QemuAudioOutputStream audioStream(*format, kTimeToWaitForAudioFrame);
 
         int32_t kBytesPerSample = AudioUtils::getBytesPerSample(*format);
         int32_t kSamplesPerFrame =

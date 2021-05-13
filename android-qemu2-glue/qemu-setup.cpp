@@ -243,6 +243,9 @@ bool qemu_android_emulation_early_setup() {
     android::emulation::AudioCaptureEngine::set(
             new android::qemu::QemuAudioCaptureEngine());
 
+    android::emulation::AudioCaptureEngine::set(
+            new android::qemu::QemuAudioInputEngine(), android::emulation::AudioCaptureEngine::AudioMode::AUDIO_INPUT);
+
     android::emulation::AudioOutputEngine::set(
             new android::qemu::QemuAudioOutputEngine());
     return true;

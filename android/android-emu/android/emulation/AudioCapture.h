@@ -65,6 +65,8 @@ public:
         return mChannels;
     }
 
+    // True if this capturer is configured properly and running.
+    virtual bool good() = 0;
 private:
 
     int mSamplingRate;
