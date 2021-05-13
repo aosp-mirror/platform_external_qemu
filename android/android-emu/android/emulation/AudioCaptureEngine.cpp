@@ -12,13 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/AudioCapture.h"
 #include "android/emulation/AudioCaptureEngine.h"
+#include "android/emulation/AudioCapture.h"
 
 namespace android {
 namespace emulation {
 
-AudioCaptureEngine *AudioCaptureEngine::mInstance = nullptr;
+AudioCaptureEngine* AudioCaptureEngine::mOutputInstance = nullptr;
+AudioCaptureEngine* AudioCaptureEngine::mInputInstance = nullptr;
 
+AudioCaptureEngine* AudioCaptureEngine::get(AudioMode mode) {
+    switch (mode) {
+        case AudioMode::AUDIO_OUTPUT:
+            return mOutputInstance;
+        case AudioMode::AUDIO_INPUT:
+            return mInputInstance;
+    }
+}
+
+void AudioCaptureEngine::set(AudioCaptureEngine* engine, AudioMode type) {
+    switch (type) {
+        case AudioMode::AUDIO_OUTPUT:
+            mOutputInstance = engine;
+        case AudioMode::AUDIO_INPUT:
+            mInputInstance = engine;
+    }
+}
 }  // namespace emulation
 }  // namespace android

@@ -248,4 +248,7 @@ static inline int audio_ring_dist (int dst, int src, int len)
 #define AUDIO_STRINGIFY_(n) #n
 #define AUDIO_STRINGIFY(n) AUDIO_STRINGIFY_(n)
 
+// AEMU
+int audio_driver_init (AudioState *s, struct audio_driver *drv);
+
 #endif /* QEMU_AUDIO_INT_H */

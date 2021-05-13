@@ -58,7 +58,8 @@ public:
             return false;
         }
 
-        return engine->start(this) == 0;
+        mRunning = engine->start(this) == 0;
+        return mRunning;
     }
 
     // Stop the audio capturer
@@ -68,7 +69,8 @@ public:
             return false;
         }
 
-        return engine->stop(this) == 0;
+        mRunning = engine->stop(this) == 0;
+        return mRunning;
     }
 
     virtual ~AudioCapturerImpl() {
@@ -85,8 +87,11 @@ public:
         return mCallback(buf, size);
     }
 
+    bool good() override { return mRunning; }
+
 private:
     Callback mCallback;
+    bool mRunning = false;
 };  // class AudioCapturerImpl
 
 // Implementation of Producer class for audio data
