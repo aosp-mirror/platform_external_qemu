@@ -15,6 +15,8 @@
 #include <string>
 
 #include "android/base/StringFormat.h"
+#include "android/boot-properties.h"
+#include "android/emulation/control/adb/adbkey.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/version.h"
 
@@ -221,6 +223,19 @@ getUserspaceBootProperties(const AndroidOptions* opts,
             params.push_back({androidbootLogcatProp, param});
         } else {
             params.push_back({androidbootLogcatProp, "*:V"});
+        }
+    }
+
+    // Send adb public key to device
+    {
+        auto privkey = getPrivateAdbKeyPath();
+        std::string key = "";
+
+        if (!privkey.empty() && pubkey_from_privkey(privkey, &key)) {
+            params.push_back({"androidboot.qemu.adb.pubkey", key});
+            LOG(INFO) << "Sending adb public key [" << key << "]";
+        } else {
+            LOG(WARNING) << "No adb private key exists";
         }
     }
 
