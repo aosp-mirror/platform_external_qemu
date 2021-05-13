@@ -272,6 +272,8 @@ static void hda_audio_set_amp(HDAAudioStream *st)
     }
 }
 
+static HDAAudioStream *g_stream = NULL;
+
 static void hda_audio_setup(HDAAudioStream *st)
 {
     if (st->node == NULL) {
@@ -287,11 +289,13 @@ static void hda_audio_setup(HDAAudioStream *st)
                                      st->node->name, st,
                                      hda_audio_output_cb, &st->as);
     } else {
+        g_stream = st;
         st->voice.in = AUD_open_in(&st->state->card, st->voice.in,
                                    st->node->name, st,
                                    hda_audio_input_cb, &st->as);
     }
 }
+
 
 static void hda_audio_command(HDACodecDevice *hda, uint32_t nid, uint32_t data)
 {
@@ -727,5 +731,38 @@ static void hda_audio_register_types(void)
     type_register_static(&hda_audio_duplex_info);
     type_register_static(&hda_audio_micro_info);
 }
+
+// AEMU
+// The hda-codec has a hard reference to the active open input device (voice.in), which means
+// 1. Only one input device can be active.
+// 2. We have no mechanism to attach a different input device once it has been configured.
+//
+// the functions below enable us to set and retrieve the active input device.
+SWVoiceIn* set_hda_voice_in(SWVoiceIn *voice, struct audsettings *as)
+{
+    if (g_stream)
+    {
+        // TODO(jansene): We actually should reconfigure the stream
+        // to use the different harware settings
+        // hda_audio_command with AC_VERB_SET_STREAM_FORMAT
+        g_stream->voice.in = AUD_open_in(&g_stream->state->card, voice,
+                                         g_stream->node->name, g_stream,
+                                         hda_audio_input_cb, as);
+        return g_stream->voice.in;
+    }
+    return NULL;
+}
+SWVoiceIn *get_hda_voice_in()
+{
+    return g_stream ? g_stream->voice.in : NULL;
+}
+
+struct audsettings* get_hda_aud_settings() {
+      // TODO(jansene): We actually should get the stream data using
+      // hda_audio_command. Better yet, if we could reconfigure
+      // the audio sw object itself we don't need this.
+    return g_stream ? &g_stream->as : NULL;
+}
+// AEMU END
 
 type_init(hda_audio_register_types)

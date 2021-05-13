@@ -25,7 +25,7 @@ from aemu.discovery.emulator_discovery import get_default_emulator
 from aemu.proto.emulator_controller_pb2 import AudioFormat
 
 
-def streamAudioToWave(wavefile, bitrate=44100):
+def streamAudioToWave(wavefile, bitrate=16000):
     """Produces the audio stream, from the gRPC endpoint."""
 
     # Create a client

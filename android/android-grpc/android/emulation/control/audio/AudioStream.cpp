@@ -13,8 +13,8 @@
 // limitations under the License.
 #include "android/emulation/control/audio/AudioStream.h"
 
-#include <functional>                                    // for __base, func...
-#include <string>                                        // for string
+#include <functional>  // for __base, func...
+#include <string>      // for string
 
 #include "android/base/system/System.h"                  // for System
 #include "android/emulation/AudioCapture.h"              // for AudioCapturer
@@ -43,26 +43,35 @@ class AudioStreamCapturer : public android::emulation::AudioCapturer {
 public:
     // create an instance with the specified audio stream, qemu will publish
     // the audio packets to the given stream.
-    AudioStreamCapturer(const AudioFormat& fmt, AudioCallback audioCallback)
+    AudioStreamCapturer(const AudioFormat& fmt,
+                        AudioCallback audioCallback,
+                        AudioCaptureEngine::AudioMode mode =
+                                AudioCaptureEngine::AudioMode::AUDIO_OUTPUT)
         : AudioCapturer(fmt.samplingrate(),
                         fmt.format() == AudioFormat::AUD_FMT_U8 ? 8 : 16,
                         fmt.channels() == AudioFormat::Mono ? 1 : 2),
-          mAudioReceivedCallback(audioCallback) {
-        AudioCaptureEngine::get()->start(this);
+          mAudioReceivedCallback(audioCallback),
+          mAudioMode(mode) {
+        mRunning = (AudioCaptureEngine::get(mAudioMode)->start(this) == 0);
     }
 
-    ~AudioStreamCapturer() { AudioCaptureEngine::get()->stop(this); }
-    virtual int onSample(void* buf, int size) {
+    ~AudioStreamCapturer() { AudioCaptureEngine::get(mAudioMode)->stop(this); }
+
+    int onSample(void* buf, int size) override {
         return mAudioReceivedCallback((char*)buf, (std::streamsize)size);
     }
 
+    bool good() override { return mRunning; }
+
 private:
     AudioCallback mAudioReceivedCallback;
+    AudioCaptureEngine::AudioMode mAudioMode;
+    bool mRunning;
 };
 
-AudioInputStream::AudioInputStream(const AudioFormat fmt,
-                                   milliseconds blockingTime,
-                                   milliseconds bufferSize)
+QemuAudioOutputStream::QemuAudioOutputStream(const AudioFormat fmt,
+                                             milliseconds blockingTime,
+                                             milliseconds bufferSize)
     : AudioStream(fmt, blockingTime, bufferSize) {
     mAudioCapturer = std::make_unique<AudioStreamCapturer>(
             fmt, [this](char* data, std::streamsize len) {
@@ -70,8 +79,8 @@ AudioInputStream::AudioInputStream(const AudioFormat fmt,
             });
 }
 
-// Blocks and waits until we can fill an audio packet with
-std::streamsize AudioInputStream::read(AudioPacket* packet) {
+// Blocks and waits until we can fill an audio packet with the received packet.
+std::streamsize QemuAudioOutputStream::read(AudioPacket* packet) {
     if (packet->mutable_audio()->size() == 0) {
         // Oh, oh we have to make up a buffer size..
         packet->mutable_audio()->resize(4096);
@@ -84,6 +93,36 @@ std::streamsize AudioInputStream::read(AudioPacket* packet) {
     packet->set_timestamp(base::System::get()->getUnixTimeUs());
     packet->mutable_audio()->resize(actualSize);
     return actualSize;
+}
+
+QemuAudioInputStream::QemuAudioInputStream(const AudioFormat fmt,
+                                           milliseconds blockingTime,
+                                           milliseconds bufferSize)
+    : AudioStream(fmt, blockingTime, bufferSize) {
+    mAudioCapturer = std::make_unique<AudioStreamCapturer>(
+            fmt,
+            [this](char* data, std::streamsize len) {
+                int before = mAudioBuffer.in_avail();
+                int rd = mAudioBuffer.sgetn(data, len);
+                return rd;
+            },
+            AudioCaptureEngine::AudioMode::AUDIO_INPUT);
+}
+
+void QemuAudioInputStream::write(const AudioPacket* pkt) {
+    const char* buf = pkt->audio().data();
+    size_t cBuf = pkt->audio().size();
+    while (cBuf > 0) {
+        size_t written = write(buf, cBuf);
+        buf = buf + written;
+        cBuf -= written;
+    }
+}
+
+size_t QemuAudioInputStream::write(const char* buffer, size_t cBuffer) {
+    size_t toWrite = mAudioBuffer.waitForAvailableSpace(cBuffer);
+    toWrite = std::min(toWrite, cBuffer);
+    return mAudioBuffer.sputn(buffer, toWrite);
 }
 
 }  // namespace control

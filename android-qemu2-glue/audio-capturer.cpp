@@ -23,6 +23,7 @@ extern "C" {
 #include "qemu/osdep.h"
 #include "qemu/error-report.h"
 #include "audio/audio.h"
+#include "audio/audio_forwarder.h"
 }
 
 #include <unordered_map>
@@ -135,6 +136,54 @@ int QemuAudioCaptureEngine::stop(android::emulation::AudioCapturer* capturer)
 
     return rc;
 }
+
+static void my_microphone(void* opaque, void* buf, int size)
+{
+    emulation::AudioCapturer* capturer = reinterpret_cast<emulation::AudioCapturer*>(opaque);
+    capturer->onSample(buf, size);
+}
+
+
+int QemuAudioInputEngine::start(android::emulation::AudioCapturer* capturer)
+{
+    bool expected = false;
+    if (!mRunning.compare_exchange_strong(expected, true)) {
+        derror("Already running a capture engine");
+        return -1;
+    }
+
+    int freq = capturer->getSamplingRate();
+    int bits = capturer->getBits();
+    int nchannels = capturer->getChannels();
+
+
+    int stereo = (nchannels == 2);
+    int bits16 = (bits == 16);
+
+    audsettings as;
+    as.freq = freq;
+    as.nchannels = 1 << stereo;
+    as.fmt = bits16 ? AUD_FMT_S16 : AUD_FMT_U8;
+    as.endianness = 0;
+
+
+    audio_capture_ops ops;
+    ops.notify = my_notify;
+    ops.capture = my_microphone;
+    ops.destroy = my_destroy;
+
+    return enable_forwarder(&as, &ops, capturer);
+}
+
+
+int QemuAudioInputEngine::stop(android::emulation::AudioCapturer* capturer)
+{
+   disable_forwarder();
+   mRunning = false;
+   return 0;
+}
+
+
 
 }  // namespace qemu
 }  // namespace android
