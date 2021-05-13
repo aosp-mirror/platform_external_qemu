@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "07cc490f_ebaa68be",
+        "filename": "android/android-grpc/android/emulation/control/audio/AudioStream.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1710786
+      },
+      "writtenOn": "2021-05-13T14:28:11Z",
+      "side": 1,
+      "message": "In case of qemu doesn\u0027t produce any sound, will this function been called with silent data or not been called?\n\nIn case of buffer full, what is the behaviour of sputn? Does it drop the eldest data or reset whole buffer?",
+      "revId": "7ba4236ca24b0e23edd7e3edcb710f0d602acfc3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e174b0f1_3602b36b",
+        "filename": "android/android-grpc/android/emulation/control/audio/AudioStream.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1710786
+      },
+      "writtenOn": "2021-05-13T14:28:11Z",
+      "side": 1,
+      "message": "If no audio data in the ring buffer, will the sgetn function return 0?",
+      "revId": "7ba4236ca24b0e23edd7e3edcb710f0d602acfc3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
