@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "fd536395_105f5627",
+        "filename": "android/android-emu/android/userspace-boot-properties.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2021-05-14T04:34:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2e45f54b_2ba2039e",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 36
+      },
+      "revId": "8d677775083a5ead860882fa8a24e9f60ff9b56d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "095f22a2_c300b490",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-05-13T20:35:05Z",
       "side": 1,
       "message": "You want to do this only if fc::isEnabled(fc::AndroidbootProps) is true, otherwise it is too long for the kernel command line.",
+      "range": {
+        "startLine": 235,
+        "startChar": 19,
+        "endLine": 235,
+        "endChar": 28
+      },
+      "revId": "8d677775083a5ead860882fa8a24e9f60ff9b56d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f3bc5743_a1efda91",
+        "filename": "android/android-emu/android/userspace-boot-properties.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2021-05-14T04:34:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "095f22a2_c300b490",
       "range": {
         "startLine": 235,
         "startChar": 19,
