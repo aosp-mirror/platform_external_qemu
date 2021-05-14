@@ -43,7 +43,7 @@ struct AndroidNativeBufferInfo {
     int stride;
     uint32_t colorBufferHandle;
     bool externallyBacked = false;
-    bool isGlTexture = false;
+    bool useVulkanNativeImage = false;
 
     // We will be using separate allocations for image versus staging memory,
     // because not all host Vulkan drivers will support directly rendering to

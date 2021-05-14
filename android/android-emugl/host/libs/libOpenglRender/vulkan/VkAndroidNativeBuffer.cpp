@@ -77,7 +77,7 @@ VkResult prepareAndroidNativeBufferImage(
 
     if (colorBufferVulkanCompatible && externalMemoryCompatible &&
         setupVkColorBuffer(out->colorBufferHandle, false /* not Vulkan only */,
-                           0u /* memoryProperty */, &out->isGlTexture)) {
+                           0u /* memoryProperty */, &out->useVulkanNativeImage)) {
         out->externallyBacked = true;
     }
 
@@ -458,8 +458,9 @@ VkResult setAndroidNativeImageSemaphoreSignaled(
         const AndroidNativeBufferInfo::QueueState& queueState =
                 anbInfo->queueStates[anbInfo->lastUsedQueueFamilyIndex];
 
-        // For GL interop, transfer back to present layout from general.
-        if (anbInfo->isGlTexture) {
+        // If we used the Vulkan image without copying it back
+        // to the CPU, reset the layout to PRESENT.
+        if (anbInfo->useVulkanNativeImage) {
             fb->setColorBufferInUse(anbInfo->colorBufferHandle, true);
 
             VkCommandBufferBeginInfo beginInfo = {
@@ -561,8 +562,9 @@ VkResult syncImageToColorBuffer(
 
     vk->vkBeginCommandBuffer(queueState.cb, &beginInfo);
 
-    // If GL texture, transfer image layout to "general" for GL interop.
-    if (anbInfo->isGlTexture) {
+    // If using the Vulkan image directly (rather than copying it back to
+    // the CPU), change its layout for that use.
+    if (anbInfo->useVulkanNativeImage) {
         VkImageMemoryBarrier present2GeneralBarrier = {
             VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER, 0,
             VK_ACCESS_HOST_READ_BIT, 0,
@@ -688,10 +690,9 @@ VkResult syncImageToColorBuffer(
 
     fb->unlock();
 
-    if (anbInfo->isGlTexture) {
+    if (anbInfo->useVulkanNativeImage) {
         fb->setColorBufferInUse(anbInfo->colorBufferHandle, false);
     } else {
-
         VkMappedMemoryRange toInvalidate = {
             VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE, 0,
             anbInfo->stagingMemory,
