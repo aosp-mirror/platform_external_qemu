@@ -713,6 +713,7 @@ android_target_include_directories(android-qemu-deps linux-x86_64 INTERFACE
                                    linux-headers)
 android_target_include_directories(android-qemu-deps linux-aarch64 INTERFACE
                                    linux-headers)
+target_include_directories(android-qemu-deps INTERFACE ${ANDROID_AUTOGEN})
 android_target_compile_options(
   android-qemu-deps
   linux-x86_64
@@ -776,7 +777,6 @@ if(NEED_RELINK_ASM)
             "${ANDROID_AUTOGEN}/asm" WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR})
 endif()
 
-set(ANDROID_QEMU2_TOP_DIR ${ANDROID_QEMU2_TOP_DIR})
 include(cmake-main.${ANDROID_TARGET_TAG}.inc)
 
 android_add_library(
