@@ -107,4 +107,6 @@ enum Feature {
     Minigbm = 60;
 
     GnssGrpcV1 = 61;
+
+    DeviceSkinOverlay = 62;
 }
