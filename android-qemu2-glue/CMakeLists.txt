@@ -57,11 +57,11 @@ android_add_library(
 
 target_include_directories(
   libqemu2-glue
-  PRIVATE .. ../include ../qemu2-auto-generated ../slirp
+  PRIVATE .. ../include  ../slirp
           ${VIRGLRENDERER_INCLUDE_DIR}
           ${ANDROID_QEMU2_TOP_DIR}/android/third_party/libdtb/include/)
 
-target_link_libraries(libqemu2-glue PRIVATE android-grpc android-ui-controller)
+target_link_libraries(libqemu2-glue PRIVATE android-grpc android-ui-controller qemu-qapi)
 if(WEBRTC)
   target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
 endif()
@@ -74,9 +74,9 @@ android_add_library(
   SRC # cmake-format: sortable
       ${ANDROID_HW_CONFIG_H} qemu-vm-operations-impl.cpp)
 target_include_directories(libqemu2-glue-vm-operations
-                           PRIVATE .. ../include ../qemu2-auto-generated)
+                           PRIVATE .. ../include)
 target_link_libraries(
   libqemu2-glue-vm-operations
-  PRIVATE android-emu GLIB2::GLIB2 android-hw-config
+  PRIVATE android-emu GLIB2::GLIB2 android-hw-config qemu-qapi
           nlohmann_json::nlohmann_json
           PIXMAN::PIXMAN)

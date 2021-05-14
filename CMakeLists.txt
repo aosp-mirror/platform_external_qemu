@@ -609,6 +609,8 @@ target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN
 
 target_link_libraries(android-qemu-deps INTERFACE virglrenderer-headers)
 
+target_link_libraries(qemu-qapi PRIVATE android-qemu-deps)
+target_link_libraries(qemu-qapi-test PRIVATE android-qemu-deps)
 # Now we add the normal android libs, so we can use them
 add_subdirectory(android)
 add_subdirectory(android-qemu2-glue)
@@ -786,7 +788,7 @@ android_add_library(
   NOTICE "REPO/LICENSE"
   SRC # cmake-format: sortable
       ${libqemuutil_generated_sources} ${libqemuutil_sources})
-target_link_libraries(libqemu2-util PRIVATE android-qemu-deps FDT)
+target_link_libraries(libqemu2-util PRIVATE android-qemu-deps FDT qemu-qapi-headers)
 android_target_link_libraries(
   libqemu2-util windows PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
 target_compile_definitions(libqemu2-util PRIVATE "-DPOISON_CONFIG_ANDROID")
@@ -807,7 +809,7 @@ android_add_library(
 target_compile_definitions(qemu2-common PRIVATE "-DPOISON_CONFIG_ANDROID")
 target_compile_options(qemu2-common PRIVATE "-Wno-string-plus-int"
                                             "-Wno-return-type")
-target_link_libraries(qemu2-common PUBLIC android-qemu-deps emulator-libusb libqemu2-util)
+target_link_libraries(qemu2-common PUBLIC android-qemu-deps emulator-libusb libqemu2-util qemu-qapi-headers)
 
 if(NOT OPTION_AEMU_LIBS_ONLY)
 
@@ -870,7 +872,7 @@ if(NOT OPTION_AEMU_LIBS_ONLY)
     NOTICE "REPO/LICENSE"
     SRC # cmake-format: sortable
         ${libqemustub_sources} ${libqemuutil_generated_sources})
-  target_link_libraries(libqemustub PRIVATE android-qemu-deps)
+  target_link_libraries(libqemustub PRIVATE android-qemu-deps qemu-qapi)
   target_compile_definitions(libqemustub PRIVATE "-DLIBQEMUSTUB")
 
   # Qemu-img
@@ -886,7 +888,7 @@ if(NOT OPTION_AEMU_LIBS_ONLY)
     SRC # cmake-format: sortable
         ${qemu-img_sources} block/qcow2-bitmap.c
     LINUX scsi/pr-manager.c)
-  target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub
+  target_link_libraries(qemu-img PRIVATE libqemu2-util libqemustub qemu-qapi
                                          android-qemu-deps android-emu)
 
   # Create the qemu targets.
@@ -925,10 +927,10 @@ if(NOT OPTION_AEMU_LIBS_ONLY)
       armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
   endif()
 
-  # The tests currently work on linux x86 only.
-  if(LINUX_X86_64)
-    include(qemu-test.cmake)
-  endif()
+# The tests currently work on linux x86 only.
+if(LINUX_X86_64)
+  include(qemu-test.cmake)
+endif()
 
 endif()
 
