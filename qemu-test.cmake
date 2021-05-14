@@ -4,7 +4,7 @@ android_add_library(
   SRC # cmake-format: sortable
       ${ANDROID_AUTOGEN}/tests/test-qapi-events.c ${ANDROID_AUTOGEN}/tests/test-qapi-introspect.c
       ${ANDROID_AUTOGEN}/tests/test-qapi-types.c ${ANDROID_AUTOGEN}/tests/test-qapi-visit.c tests/libqtest.c)
-target_link_libraries(libqemu-test PUBLIC android-qemu-deps android-emu-base)
+target_link_libraries(libqemu-test PUBLIC android-qemu-deps android-emu-base qemu-qapi-test)
 
 android_add_library(
   TARGET libqemu-test-crypto
@@ -12,7 +12,7 @@ android_add_library(
   SRC # cmake-format: sortable
       ${ANDROID_AUTOGEN}/tests/test-qapi-events.c ${ANDROID_AUTOGEN}/tests/test-qapi-introspect.c
       ${ANDROID_AUTOGEN}/tests/test-qapi-types.c ${ANDROID_AUTOGEN}/tests/test-qapi-visit.c tests/libqtest.c)
-target_link_libraries(libqemu-test-crypto PRIVATE libqemu-test crypto)
+target_link_libraries(libqemu-test-crypto PRIVATE libqemu-test crypto qemu-qapi-test)
 
 # Adds a qemu test, note that these test should never bring in an android dependency
 function(add_qtest NAME DEPENDENCY)
@@ -21,7 +21,7 @@ function(add_qtest NAME DEPENDENCY)
   android_target_dependency(${NAME} linux-x86_64 TCMALLOC_OS_DEPENDENCIES)
   target_compile_definitions(${NAME} PRIVATE -DCONFIG_ANDROID)
   target_include_directories(${NAME} PUBLIC ${ANDROID_AUTOGEN}/tests)
-  target_link_libraries(${NAME} PRIVATE "-fuse-ld=ld" ${DEPENDENCY} qemu2-common libqemu2-util android-qemu-deps)
+  target_link_libraries(${NAME} PRIVATE "-fuse-ld=ld" ${DEPENDENCY} qemu2-common libqemu2-util android-qemu-deps qemu-qapi-test)
 endfunction()
 
 # These tests rely on interaction with the qemu binary. These require a non- trivial test runner as they interact with a running

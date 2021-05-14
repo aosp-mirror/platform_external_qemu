@@ -251,6 +251,10 @@ def group_by_dir(list_of_files):
 def split_by_generated(file_list, git_fs):
   """Splits the files into generated and non-generated."""
   generated = [fname for fname in file_list if git_fs.is_generated(fname)]
+
+  # Filter out qapi from the generated files, these will be libs..
+  generated = [fname for fname in generated if 'qapi-' not in fname]
+
   files = [fname for fname in file_list if not git_fs.is_generated(fname)]
   return generated, files
 

@@ -18,6 +18,6 @@ target_include_directories(
           ${ANDROID_QEMU2_TOP_DIR}/qemu2-auto-generated
           ${ANDROID_QEMU2_TOP_DIR}/qemu2-auto-generated/tcg)
 
-target_link_libraries(win_clang_unittests PRIVATE android-qemu-deps gmock_main
+target_link_libraries(win_clang_unittests PRIVATE android-qemu-deps qemu-qapi gmock_main
                                                   GLIB2::GLIB2)
 target_compile_definitions(win_clang_unittests PRIVATE -DNEED_CPU_H)
