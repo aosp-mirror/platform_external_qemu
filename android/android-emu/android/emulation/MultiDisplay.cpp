@@ -82,10 +82,6 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
         return -1;
     }
 
-    if (android_cmdLineOptions->qt_hide_window &&
-        !android_cmdLineOptions->experimental_enable_multidisplay) {
-        return -1;
-    }
     if (mGuestMode) {
         return -1;
     }
