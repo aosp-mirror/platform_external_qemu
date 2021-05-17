@@ -615,7 +615,7 @@ set(ANDROID_QEMU_COMMON_DEVICES "${ANDROID_QEMU_ARM_DEVICES};hw/i386/pc_piix.c")
 set(ANDROID_QEMU_i386_DEVICES_darwin-x86_64
     "hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
 set(ANDROID_QEMU_arm_DEVICES_darwin-x86_64
-    "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
+    "accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 # TODO: unstub the hvf for darwin on arm
 set(ANDROID_QEMU_arm_DEVICES_darwin-aarch64
     "accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
@@ -655,9 +655,9 @@ android_target_link_libraries(android-qemu-deps darwin-aarch64 INTERFACE
 
 # Windows x86 definitions
 set(ANDROID_QEMU_arm_DEVICES_windows_msvc-x86_64
-    "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
+    "accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 set(ANDROID_QEMU_i386_DEVICES_windows_msvc-x86_64
-    "hvf-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
+    "hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
 android_target_compile_options(
   android-qemu-deps
   windows_msvc-x86_64
@@ -688,16 +688,16 @@ android_target_compile_definitions(
 
 # Linux settings
 set(ANDROID_QEMU_i386_DEVICES_linux-x86_64
-    "hvf-stub.c;accel/stubs/hax-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}"
+    "accel/stubs/hax-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}"
 )
 set(ANDROID_QEMU_arm_DEVICES_linux-x86_64
-    "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
+    "accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 
 set(ANDROID_QEMU_i386_DEVICES_linux-aarch64
-    "hvf-stub.c;accel/stubs/hax-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}"
+    "accel/stubs/hax-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}"
 )
 set(ANDROID_QEMU_arm_DEVICES_linux-aarch64
-    "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
+    "accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 
 android_target_include_directories(android-qemu-deps linux-x86_64 INTERFACE
                                    linux-headers)
@@ -736,7 +736,7 @@ android_target_link_libraries(android-qemu-deps darwin-aarch64 INTERFACE
 android_target_link_libraries(android-qemu-deps windows_msvc-x86_64 INTERFACE
                               android-emu-base)
 
-set(ANDROID_AUTOGEN "qemu2-auto-generated")
+set(ANDROID_AUTOGEN "${ANDROID_QEMU2_TOP_DIR}/qemu2-auto-generated")
 if(LINUX_AARCH64)
   set(ASM_DIR_TARGET "../linux-headers/asm-arm64")
 else()
@@ -744,14 +744,14 @@ else()
 endif()
 
 set(NEED_RELINK_ASM FALSE)
-if(EXISTS ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/asm)
+if(EXISTS ${ANDROID_AUTOGEN}/asm)
   # check the link is correct
   if(LINUX_AARCH64)
-    if(EXISTS ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/asm/unistd_x32.h)
+    if(EXISTS ${ANDROID_AUTOGEN}/asm/unistd_x32.h)
       set(NEED_RELINK_ASM TRUE)
     endif()
   else()
-    if(NOT EXISTS ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/asm/unistd_x32.h)
+    if(NOT EXISTS ${ANDROID_AUTOGEN}/asm/unistd_x32.h)
       set(NEED_RELINK_ASM TRUE)
     endif()
   endif()
