@@ -211,6 +211,26 @@ static void miscPipeSetPaddingAndCutout(emulation::AdbInterface* adbInterface, A
 }
 
 void miscPipeSetAndroidOverlay(emulation::AdbInterface* adbInterface) {
+    // overlay for pixels with system after O
+    if (fc::isEnabled(fc::DeviceSkinOverlay) &&
+        avdInfo_getApiLevel(android_avdInfo) >= 28) {
+        char* skinName = nullptr;
+        char* skinDir = nullptr;
+        avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+        if (avdInfo_skinHasOverlay(skinName)) {
+            std::string androidOverlay("com.android.internal.emulation.");
+            std::string systemUIOverlay("com.android.systemui.emulation.");
+            androidOverlay += skinName;
+            systemUIOverlay += skinName;
+            adbInterface->enqueueCommand({ "shell", "cmd", "overlay",
+                                           "enable-exclusive", "--category",
+                                           androidOverlay.c_str() });
+            adbInterface->enqueueCommand({ "shell", "cmd", "overlay",
+                                           "enable-exclusive", "--category",
+                                           systemUIOverlay.c_str() });
+            return;
+        }
+    }
     AConfig* foregroundConfig = miscPipeGetForegroundConfig();
     if (foregroundConfig != nullptr) {
         miscPipeSetPaddingAndCutout(adbInterface, foregroundConfig);

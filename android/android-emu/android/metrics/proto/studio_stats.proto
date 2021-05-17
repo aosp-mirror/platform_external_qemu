@@ -1492,7 +1492,8 @@ message EmulatorFeatureFlagState {
     GNSS_GRPC_V1 = 80;
     MIGRATABLE_SNAPSHOT_SAVE = 81;
     ANDROIDBOOT_PROPS = 82;
-    // Next tag: 83
+    DEVICESKINOVERLAY = 83;
+    // Next tag: 84
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
