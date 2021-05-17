@@ -444,6 +444,7 @@ EOF
             --disable-bluez \
             --disable-brlapi \
             --disable-blobs \
+            --disable-gcrypt \
             --disable-bzip2 \
             --disable-cap-ng \
             --disable-capstone \

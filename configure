@@ -800,7 +800,7 @@ Darwin)
   cocoa="yes"
   audio_drv_list="coreaudio"
   audio_possible_drivers="coreaudio sdl"
-  LDFLAGS="-framework CoreFoundation -framework IOKit $LDFLAGS"
+  LDFLAGS="-framework CoreFoundation -framework IOKit -framework AudioToolbox  $LDFLAGS"
   libs_softmmu="-F/System/Library/Frameworks -framework Cocoa -framework IOKit $libs_softmmu"
   # Disable attempts to use ObjectiveC features in os/object.h since they
   # won't work when we're compiling with gcc as a C compiler.
@@ -5017,7 +5017,7 @@ fi
 # There is no point enabling this if cpuid.h is not usable,
 # since we won't be able to select the new routines.
 
-if test $cpuid_h = yes -a test "$mingw32" != "yes"; then
+if test $cpuid_h = yes && test "$mingw32" != "yes"; then
   cat > $TMPC << EOF
 #pragma GCC push_options
 #pragma GCC target("avx2")
