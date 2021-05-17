@@ -2390,16 +2390,24 @@ bool FrameBuffer::unbind_locked() {
     return true;
 }
 
-void FrameBuffer::createTrivialContext(HandleType shared,
+void FrameBuffer::getTrivialContextForCurrentRenderThread(HandleType shared,
                                        HandleType* contextOut,
                                        HandleType* surfOut) {
     assert(contextOut);
     assert(surfOut);
 
-    *contextOut = createRenderContext(0, shared, GLESApi_2);
-    // Zero size is formally allowed here, but SwiftShader doesn't like it and
-    // fails.
-    *surfOut = createWindowSurface(0, 1, 1);
+    RenderThreadInfo* tInfo = RenderThreadInfo::get();
+    if (!tInfo->trivialContext) {
+        printf("creating trivial context puid %d thread %p\n", (int)tInfo->m_puid, tInfo);
+        tInfo->trivialContext = createRenderContext(0, shared, GLESApi_2);
+    }
+    if (!tInfo->trivialSurface) {
+        // Zero size is formally allowed here, but SwiftShader doesn't like it and
+        // fails.
+        tInfo->trivialSurface = createWindowSurface(0, 1, 1);
+    }
+    *contextOut = tInfo->trivialContext;
+    *surfOut = tInfo->trivialSurface;
 }
 
 void FrameBuffer::createAndBindTrivialSharedContext(EGLContext* contextOut,
