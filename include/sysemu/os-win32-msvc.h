@@ -270,6 +270,20 @@ ssize_t qemu_recv_wrap(int sockfd, void *buf, size_t len, int flags);
 ssize_t qemu_recvfrom_wrap(int sockfd, void *buf, size_t len, int flags,
                            struct sockaddr *addr, socklen_t *addrlen);
 
+#ifdef QEMU_BASE_BUILD
+
+// We are building plain qemu
+#define win32_stat _stati64
+#define win32_lstat _stati64
+#define win32CreateFile CreateFile
+#define win32GetCurrentDirectory GetCurrentDirectory
+#define win32GetModuleFileName GetModuleFileName
+#else
+
+// We are not building base qemu
+
+int win32_stat(const char* filepath, struct _stati64* st);
+int win32_lstat(const char* filepath, struct _stati64* st);
 // ANDROID_BEGIN
 /* These are wrappers around Win32 functions. When building against the
  * Android emulator, they will treat file names as UTF-8 encoded strings,
@@ -292,8 +306,7 @@ DWORD win32GetModuleFileName(
         LPTSTR  lpFilename,
         DWORD   nSize);
 
-int win32_stat(const char* filepath, struct _stati64* st);
-int win32_lstat(const char* filepath, struct _stati64* st);
+#endif
 
 // ANDROID_END
 

@@ -192,7 +192,13 @@ all-obj-$(CONFIG_SOFTMMU) += $(io-obj-y)
 
 $(QEMU_PROG_BUILD): config-devices.mak
 
-COMMON_LDADDS = ../libqemuutil.a
+######################################################################
+# MSVC compat layer
+msvc-compat-$(CONFIG_WIN32) += $(SRC_PATH)/android/msvc-posix-compat/src/getopt.o
+msvc-compat-$(CONFIG_WIN32) += $(SRC_PATH)/android/msvc-posix-compat/src/gettimeofday.o
+msvc-compat-$(CONFIG_WIN32) += $(SRC_PATH)/android/msvc-posix-compat/src/msvc-posix.o
+
+COMMON_LDADDS = ../libqemuutil.a $(msvc-compat-y)
 
 # build either PROG or PROGW
 $(QEMU_PROG_BUILD): $(all-obj-y) $(COMMON_LDADDS)
