@@ -231,6 +231,10 @@ gen_wrapper_program ()
                 DST_PROG=llvm-$PROG
                 DST_PREFIX=$CLANG_BINDIR/
                 ;;
+            windres)
+                DST_PROG=llvm-rc
+                DST_PREFIX=$CLANG_BINDIR/
+                ;;
             lib)
                 DST_PROG=llvm-lib
                 DST_PREFIX=$CLANG_BINDIR/
@@ -402,7 +406,7 @@ gen_wrapper_toolchain () {
     local PROG
     case "$CURRENT_HOST" in
         windows_msvc*)
-          local COMPILERS="cc gcc clang c++ cl g++ clang++ cpp ld clang-tidy ar as ranlib strings nm objdump objcopy link lib rc"
+          local COMPILERS="cc gcc clang c++ cl g++ clang++ cpp ld clang-tidy ar as ranlib strings nm objdump objcopy link lib rc windres"
           local PROGRAMS="dlltool"
           ;;
         linux-aarch64)
@@ -429,11 +433,6 @@ gen_wrapper_toolchain () {
     # Symlink symbolizer, asan really wants this to be named llvm-symbolizer..
     ln -sf ${CLANG_BINDIR}/llvm-symbolizer ${DST_DIR}/llvm-symbolizer
 
-    case "$CURRENT_HOST" in
-        windows_msvc*)
-            PROGRAMS="$PROGRAMS windres"
-            ;;
-    esac
 
     if [ "$CCACHE" ]; then
         # If this is clang, disable ccache-induced warnings and
