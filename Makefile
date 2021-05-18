@@ -518,7 +518,7 @@ ALL_SUBDIRS=$(TARGET_DIRS) $(patsubst %,pc-bios/%, $(ROMS))
 recurse-all: $(SUBDIR_RULES) $(ROMSUBDIR_RULES)
 
 $(BUILD_DIR)/version.o: $(SRC_PATH)/version.rc config-host.h
-	$(call quiet-command,$(WINDRES) -I$(BUILD_DIR) -o $@ $<,"RC","version.o")
+	$(call quiet-command,$(WINDRES) /I $(BUILD_DIR) /FO $@ $<,"RC","version.o")
 
 Makefile: $(version-obj-y)
 
@@ -529,8 +529,13 @@ libqemuutil.a: $(util-obj-y) $(trace-obj-y) $(stub-obj-y)
 libvhost-user.a: $(libvhost-user-obj-y)
 
 ######################################################################
+# MSVC compat layer
+msvc-compat-$(CONFIG_WIN32) += $(SRC_PATH)/android/msvc-posix-compat/src/getopt.o
+msvc-compat-$(CONFIG_WIN32) += $(SRC_PATH)/android/msvc-posix-compat/src/gettimeofday.o
+msvc-compat-$(CONFIG_WIN32) += $(SRC_PATH)/android/msvc-posix-compat/src/msvc-posix.o
 
-COMMON_LDADDS = libqemuutil.a
+######################################################################
+COMMON_LDADDS = libqemuutil.a $(msvc-compat-y)
 
 qemu-img.o: qemu-img-cmds.h
 
