@@ -238,7 +238,7 @@ build_qemu_android () {
                EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Carbon"
                ;;
            windows_msvc*)
-               EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ladvapi32"
+               EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ladvapi32 -lkernel32"
                ;;
            *)
                EXTRA_LDFLAGS="$EXTRA_LDFLAGS -static-libgcc -stdlib=libc++"
@@ -261,8 +261,11 @@ build_qemu_android () {
                 # Necessary to build version.rc properly.
                 # VS_VERSION_INFO is a relatively new features that is
                 # not supported by the cross-toolchain's windres tool.
+                EXTRA_CFLAGS="$EXTRA_CFLAGS -DQEMU_BASE_BUILD=1 -DUSE_CLANG_JMP=1"
                 EXTRA_CFLAGS="$EXTRA_CFLAGS -DVS_VERSION_INFO=1 -Wno-unused-command-line-argument"
                 EXTRA_CFLAGS="$EXTRA_CFLAGS -Wno-incompatible-ms-struct -Wno-c++11-narrowing"
+                EXTRA_CFLAGS="$EXTRA_CFLAGS -I$QEMU_SRCDIR/android/msvc-posix-compat/include"
+                # EXTRA_CFLAGS="$EXTRA_CFLAGS -I$QEMU_SRCDIR/android/android-emu-base"
                 ;;
             darwin-*)
                 EXTRA_CFLAGS="$EXTRA_CFLAGS -mmacosx-version-min=10.8"
