@@ -240,7 +240,7 @@ build_qemu_android () {
            windows_msvc*)
                EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ladvapi32 -lkernel32"
                ;;
-           *)
+           linux-x86_64)
                EXTRA_LDFLAGS="$EXTRA_LDFLAGS -static-libgcc -stdlib=libc++"
                ;;
         esac
