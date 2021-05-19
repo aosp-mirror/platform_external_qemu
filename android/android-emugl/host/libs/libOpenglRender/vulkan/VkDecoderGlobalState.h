@@ -763,6 +763,11 @@ public:
         VkDescriptorPool descriptorPool,
         uint32_t* pPoolIdCount,
         uint64_t* pPoolIds);
+    VkResult on_vkQueueBindSparse(
+        android::base::BumpPool* pool,
+        VkQueue queue,
+        uint32_t bindInfoCount,
+        const VkBindSparseInfo* pBindInfo, VkFence fence);
 
     // Fence waits
     VkResult waitForFence(VkFence boxed_fence, uint64_t timeout);
