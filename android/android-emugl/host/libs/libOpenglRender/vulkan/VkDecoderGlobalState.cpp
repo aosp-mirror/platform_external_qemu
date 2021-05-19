@@ -4254,15 +4254,113 @@ public:
         return res;
     }
 
-    void on_vkQueueBindSparseAsyncGOOGLE(
+    VkResult on_vkQueueBindSparse(
         android::base::BumpPool* pool,
         VkQueue boxed_queue,
         uint32_t bindInfoCount,
         const VkBindSparseInfo* pBindInfo, VkFence fence) {
+
+        // If pBindInfo contains VkTimelineSemaphoreSubmitInfo, then it's
+        // possible the host driver isn't equipped to deal with them yet.  To
+        // work around this, send empty vkQueueSubmits before and after the
+        // call to vkQueueBindSparse that contain the right values for
+        // wait/signal semaphores and contains the user's
+        // VkTimelineSemaphoreSubmitInfo structure, following the *submission
+        // order* implied by the indices of pBindInfo.
+
+        // TODO: Detect if we are running on a driver that supports timeline
+        // semaphore signal/wait operations in vkQueueBindSparse
+        const bool needTimelineSubmitInfoWorkaround = true;
+
+        bool hasTimelineSemaphoreSubmitInfo = false;
+
+        for (uint32_t i = 0; i < bindInfoCount; ++i) {
+            const VkTimelineSemaphoreSubmitInfoKHR* tsSi =
+                vk_find_struct<VkTimelineSemaphoreSubmitInfoKHR>(pBindInfo + i);
+            if (tsSi) {
+                hasTimelineSemaphoreSubmitInfo = true;
+            }
+        }
+
         auto queue = unbox_VkQueue(boxed_queue);
         auto vk = dispatch_VkQueue(boxed_queue);
-        (void)pool;
-        vk->vkQueueBindSparse(queue, bindInfoCount, pBindInfo, fence);
+
+        if (!hasTimelineSemaphoreSubmitInfo) {
+            (void)pool;
+            return vk->vkQueueBindSparse(queue, bindInfoCount, pBindInfo, fence);
+        } else {
+            std::vector<VkPipelineStageFlags> waitDstStageMasks;
+            VkTimelineSemaphoreSubmitInfoKHR currTsSi = {
+                VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO, 0,
+                0, nullptr,
+                0, nullptr,
+            };
+
+            VkSubmitInfo currSi = {
+                VK_STRUCTURE_TYPE_SUBMIT_INFO, &currTsSi,
+                0, nullptr,
+                nullptr,
+                0, nullptr, // No commands
+                0, nullptr,
+            };
+
+            VkBindSparseInfo currBi;
+
+            VkResult res;
+
+            for (uint32_t i = 0; i < bindInfoCount; ++i) {
+                const VkTimelineSemaphoreSubmitInfoKHR* tsSi =
+                    vk_find_struct<VkTimelineSemaphoreSubmitInfoKHR>(pBindInfo + i);
+                if (!tsSi) {
+                    res = vk->vkQueueBindSparse(queue, 1, pBindInfo + i, fence);
+                    if (VK_SUCCESS != res) return res;
+                    continue;
+                }
+
+                currTsSi.waitSemaphoreValueCount = tsSi->waitSemaphoreValueCount;
+                currTsSi.pWaitSemaphoreValues = tsSi->pWaitSemaphoreValues;
+                currTsSi.signalSemaphoreValueCount = 0;
+                currTsSi.pSignalSemaphoreValues = nullptr;
+
+                currSi.waitSemaphoreCount = pBindInfo[i].waitSemaphoreCount;
+                currSi.pWaitSemaphores = pBindInfo[i].pWaitSemaphores;
+                waitDstStageMasks.resize(pBindInfo[i].waitSemaphoreCount, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+                currSi.pWaitDstStageMask = waitDstStageMasks.data();
+                
+                currSi.signalSemaphoreCount = 0;
+                currSi.pSignalSemaphores = nullptr;
+
+                res = vk->vkQueueSubmit(queue, 1, &currSi, nullptr);
+                if (VK_SUCCESS != res) return res;
+
+                currBi = pBindInfo[i];
+
+                vk_struct_chain_remove(tsSi, &currBi);
+
+                currBi.waitSemaphoreCount = 0;
+                currBi.pWaitSemaphores = nullptr;
+                currBi.signalSemaphoreCount = 0;
+                currBi.pSignalSemaphores = nullptr;
+
+                res = vk->vkQueueBindSparse(queue, 1, &currBi, nullptr);
+                if (VK_SUCCESS != res) return res;
+
+                currTsSi.waitSemaphoreValueCount = 0;
+                currTsSi.pWaitSemaphoreValues = nullptr;
+                currTsSi.signalSemaphoreValueCount = tsSi->signalSemaphoreValueCount;
+                currTsSi.pSignalSemaphoreValues = tsSi->pSignalSemaphoreValues;
+
+                currSi.waitSemaphoreCount = 0;
+                currSi.pWaitSemaphores = nullptr;
+                currSi.signalSemaphoreCount = pBindInfo[i].signalSemaphoreCount;
+                currSi.pSignalSemaphores = pBindInfo[i].pSignalSemaphores;
+
+                res = vk->vkQueueSubmit(queue, 1, &currSi, i == bindInfoCount - 1 ? fence : nullptr);
+                if (VK_SUCCESS != res) return res;
+            }
+
+            return VK_SUCCESS;
+        }
     }
 
     void on_vkGetLinearImageLayoutGOOGLE(
@@ -7507,7 +7605,7 @@ void VkDecoderGlobalState::on_vkQueueBindSparseAsyncGOOGLE(
     VkQueue queue,
     uint32_t bindInfoCount,
     const VkBindSparseInfo* pBindInfo, VkFence fence) {
-    mImpl->on_vkQueueBindSparseAsyncGOOGLE(pool, queue, bindInfoCount, pBindInfo, fence);
+    mImpl->on_vkQueueBindSparse(pool, queue, bindInfoCount, pBindInfo, fence);
 }
 
 void VkDecoderGlobalState::on_vkGetLinearImageLayoutGOOGLE(
@@ -7551,6 +7649,14 @@ void VkDecoderGlobalState::on_vkCollectDescriptorPoolIdsGOOGLE(
     uint32_t* pPoolIdCount,
     uint64_t* pPoolIds) {
     mImpl->on_vkCollectDescriptorPoolIdsGOOGLE(pool, device, descriptorPool, pPoolIdCount, pPoolIds);
+}
+
+VkResult VkDecoderGlobalState::on_vkQueueBindSparse(
+    android::base::BumpPool* pool,
+    VkQueue queue,
+    uint32_t bindInfoCount,
+    const VkBindSparseInfo* pBindInfo, VkFence fence) {
+    return mImpl->on_vkQueueBindSparse(pool, queue, bindInfoCount, pBindInfo, fence);
 }
 
 VkResult VkDecoderGlobalState::waitForFence(VkFence boxed_fence,
