@@ -226,7 +226,7 @@ supported_hvf_target() {
     test "$hvf" = "yes" || return 1
     glob "$1" "*-softmmu" || return 1
     case "${1%-softmmu}:$cpu" in
-        x86_64:x86_64 | aarch64:aarch64)
+        x86_64:x86_64 | i386:x86_64 | aarch64:aarch64)
             return 0
         ;;
     esac
