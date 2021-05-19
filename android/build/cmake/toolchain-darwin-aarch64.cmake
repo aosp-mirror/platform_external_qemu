@@ -29,7 +29,18 @@ set(RUNTIME_OS_PROPERTIES
 )
 
 if(NOT APPLE)
-    # cross compilation of darwin-aarch64 from non-darwin is not yet considered.
+  set(CMAKE_SYSTEM_NAME "Darwin")
+  toolchain_generate("darwin-aarch64")
+  # search for programs in the build host directories
+  set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+  # for libraries and headers in the target directories
+  set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+  set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+  set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+  set(ENV{PKG_CONFIG_LIBDIR} "${OSXCROSS_TARGET_DIR}/macports/pkgs/opt/local/lib/pkgconfig")
+  set(ENV{PKG_CONFIG_SYSROOT_DIR} "${OSXCROSS_TARGET_DIR}/macports/pkgs")
+
+  set(CMAKE_INSTALL_DO_STRIP TRUE)
 else()
   toolchain_generate("darwin-aarch64")
   # Configure how we strip executables.

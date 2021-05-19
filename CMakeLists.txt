@@ -16,7 +16,7 @@ if(NOT DEFINED ANDROID_TARGET_TAG)
 endif()
 
 
-if(ANDROID_HOST_TAG STREQUAL "darwin-aarch64")
+if(ANDROID_TARGET_TAG STREQUAL "darwin-aarch64")
     set(BUILDING_FOR_AARCH64 TRUE)
 elseif(LINUX_AARCH64)
     set(BUILDING_FOR_AARCH64 TRUE)
@@ -425,7 +425,6 @@ endif()
 if(MSVC AND WINDOWS_MSVC_X86_64)
   set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
 endif()
-
 # We now have configured our base compiler.
 
 # Unit tests please!

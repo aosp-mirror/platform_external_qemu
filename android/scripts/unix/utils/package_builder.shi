@@ -116,18 +116,8 @@ _shu_builder_setup_local_systems () {
     LOCAL_HOST_SYSTEMS=$HOST_SYSTEMS
     if [ "$DARWIN_SYSTEMS" -a "$(get_build_os)" != "darwin" ]; then
         if [ -z "$DARWIN_SSH" ]; then
-            panic "Cannot build Darwin binaries on this machine, please use --darwin-ssh=<host>."
+            warn "Cross compiling to darwin"
         fi
-        LOCAL_HOST_SYSTEMS=
-        for SYSTEM in $HOST_SYSTEMS; do
-            case $SYSTEM in
-                darwin*)
-                    ;;
-                *)
-                    var_append LOCAL_HOST_SYSTEMS "$SYSTEM"
-                    ;;
-            esac
-        done
     fi
 }
 
