@@ -16,6 +16,7 @@
 
 #include "GLEScmContext.h"
 #include "GLEScmUtils.h"
+#include <algorithm>
 #include <GLcommon/GLutils.h>
 #include <GLcommon/GLconversion_macros.h>
 #include <string.h>
@@ -577,36 +578,49 @@ bool GLEScmContext::doConvert(GLESConversionArrays& cArrs,GLint first,GLsizei co
     return needConvert(cArrs, first, count, type, indices, direct, p, array_id);
 }
 
-std::vector<float> GLEScmContext::getColor() const {
+void GLEScmContext::getColor(uint32_t count, std::vector<float>& out) const {
+    std::vector<float> vec(4);
     switch (mColor.type) {
         case GL_UNSIGNED_BYTE:
-            return
-            { mColor.val.ubyteVal[0] / 255.0f,
-              mColor.val.ubyteVal[1] / 255.0f,
-              mColor.val.ubyteVal[2] / 255.0f,
-              mColor.val.ubyteVal[3] / 255.0f, };
+            vec = { mColor.val.ubyteVal[0] / 255.0f,
+                    mColor.val.ubyteVal[1] / 255.0f,
+                    mColor.val.ubyteVal[2] / 255.0f,
+                    mColor.val.ubyteVal[3] / 255.0f, };
         default:
-        case GL_FLOAT:
-            return { mColor.val.floatVal[0],
-                     mColor.val.floatVal[1],
-                     mColor.val.floatVal[2],
-                     mColor.val.floatVal[3], };
+            vec = { mColor.val.floatVal[0],
+                    mColor.val.floatVal[1],
+                    mColor.val.floatVal[2],
+                    mColor.val.floatVal[3], };
     }
+
+    appendRepeatedVector(count, vec, out);
 }
 
-std::vector<float> GLEScmContext::getNormal() const {
-    return
-        { mNormal.val.floatVal[0],
+void GLEScmContext::getNormal(uint32_t count, std::vector<float>& out) const {
+    std::vector<float> vec = { mNormal.val.floatVal[0],
           mNormal.val.floatVal[1],
           mNormal.val.floatVal[2] };
+
+    appendRepeatedVector(count, vec, out);
 }
 
-std::vector<float> GLEScmContext::getMultiTexCoord(uint32_t index) const {
-    return // s, t, r, qcomponents
-        { mMultiTexCoord[index].floatVal[0],
+void GLEScmContext::getMultiTexCoord(uint32_t count, uint32_t index, std::vector<float>& out) const {
+    // s, t, r, qcomponents
+    std::vector<float> vec = { mMultiTexCoord[index].floatVal[0],
           mMultiTexCoord[index].floatVal[1],
           mMultiTexCoord[index].floatVal[2],
           mMultiTexCoord[index].floatVal[3] };
+
+    appendRepeatedVector(count, vec, out);
+}
+
+void GLEScmContext::appendRepeatedVector(uint32_t count, std::vector<float>& in, std::vector<float>& out) const {
+    out.reserve(out.size() + (count * in.size()));
+    auto it = out.begin() + out.size();
+    for (int i = 0; i < count; i++) {
+        std::copy(in.begin(), in.end(), it);
+        it += in.size();
+    }
 }
 
 GLenum GLEScmContext::getTextureEnvMode() {
