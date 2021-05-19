@@ -25,6 +25,7 @@ PROGRAM_DESCRIPTION=\
 "Build dEQP against emulator combined guest/host driver."
 
 option_register_var "--case=<dEQP-case-pattern>" OPT_DEQP_CASE "Run a particular set of dEQP tests"
+option_register_var "--casefile=<caselist-file-path>" OPT_DEQP_CASEFILE "Run a test list that can be found at some path"
 option_register_var "--validation=<enable|disable>" OPT_VALIDATION "Enable vulkan validation layer while running tests"
 
 aosp_dir_register_option
@@ -50,6 +51,11 @@ DEQP_VK_EXEC_DIR=$DEQP_BUILD_DIR/external/vulkancts/modules/vulkan/
 DEQP_TESTLOG_DST=$AOSP_DIR/external/qemu/dEQP-Log.qpa
 DEQP_CASES="--deqp-caselist-file=$VK_CTS_MUSTPASS_CASELIST"
 
+if [ "$OPT_DEQP_CASEFILE" ]; then
+DEQP_CASES="--deqp-caselist-file=$OPT_DEQP_CASEFILE"
+fi
+
+# Specifying cases overrides the casefiles
 if [ "$OPT_DEQP_CASE" ]; then
 DEQP_CASES="--deqp-case=$OPT_DEQP_CASE"
 fi
