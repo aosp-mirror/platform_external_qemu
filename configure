@@ -225,8 +225,8 @@ supported_xen_target() {
 supported_hvf_target() {
     test "$hvf" = "yes" || return 1
     glob "$1" "*-softmmu" || return 1
-    case "${1%-softmmu}" in
-        x86_64)
+    case "${1%-softmmu}:$cpu" in
+        x86_64:x86_64 | aarch64:aarch64)
             return 0
         ;;
     esac
@@ -7047,13 +7047,10 @@ if test "$whpx" = "yes" ; then
   fi
 fi
 
-if test "$hvf" = "yes" ; then
-  case "$target_name" in
-  i386|x86_64)
+if supported_hvf_target $target; then
     echo "CONFIG_HVF=y" >> $config_target_mak
-  ;;
-  esac
 fi
+
 if supported_whpx_target $target; then
     echo "CONFIG_WHPX=y" >> $config_target_mak
 fi
