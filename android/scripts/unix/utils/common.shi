@@ -288,11 +288,15 @@ get_build_os () {
 #     x86
 #     x86_64
 #     aarch64
+#     arm64
 get_build_arch () {
     local TEST
     if [ -z "$_SHU_BUILD_ARCH" ]; then
         case $(get_build_os) in
-            linux|darwin)
+            darwin)
+                _SHU_BUILD_ARCH=$(uname -m)
+                ;;
+            linux)
                 _SHU_BUILD_ARCH=$(uname -m)
                 # Kernel bitness might not match user space, so test
                 # the bitness of our shell to know what the user is

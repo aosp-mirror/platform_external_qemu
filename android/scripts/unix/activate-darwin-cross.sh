@@ -84,7 +84,7 @@ function build_sdk() {
     run cp $OPT_SDK /tmp/xcode-build
     run cp $(dirname "$0")/Dockerfile.darwin.cross /tmp/xcode-build/Dockerfile
     sed -i -e "s/\${base}/${OPT_BASE}/" /tmp/xcode-build/Dockerfile
-    run sudo docker build -t osxcross:1015 /tmp/xcode-build
+    run docker build -t osxcross:1015 /tmp/xcode-build
     id=$(docker create osxcross:1015)
     run sudo docker cp $id:/opt/osxcross /tmp/osxcross
     run sudo docker rm -v $id
