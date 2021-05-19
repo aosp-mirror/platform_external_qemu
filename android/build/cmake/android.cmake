@@ -24,8 +24,8 @@ set(ANDROID_CROSS_BUILD_DIRECTORY ${CMAKE_BINARY_DIR}/build/${ANDROID_HOST_TAG})
 
 set(ANDROID_XCODE_SIGN_ADHOC FALSE)
 
-if (APPLE)
-    set(ANDROID_XCODE_SIGN_ADHOC TRUE)
+if(APPLE)
+  set(ANDROID_XCODE_SIGN_ADHOC TRUE)
 endif()
 
 # Checks to make sure the TAG is valid.
@@ -342,9 +342,9 @@ function(android_nasm_compile)
     set(ASM_INC ${ASM_INC} -I ${INCLUDE})
   endforeach()
 
-  if (LINUX OR APPLE)
-      # Asan can report leaks in nasm..
-      set(NO_ASAN "ASAN_OPTIONS=detect_leaks=0")
+  if(LINUX OR APPLE)
+    # Asan can report leaks in nasm..
+    set(NO_ASAN "ASAN_OPTIONS=detect_leaks=0")
   endif()
 
   # Configure the nasm compile command.
@@ -353,8 +353,8 @@ function(android_nasm_compile)
     set(DST ${CMAKE_CURRENT_BINARY_DIR}/${asm_base}.o)
     add_custom_command(
       OUTPUT ${DST}
-      COMMAND ${NO_ASAN} ${nasm_EXECUTABLE} -f ${ANDROID_ASM_TYPE} -o ${DST} ${asm}
-              ${ASM_INC}
+      COMMAND ${NO_ASAN} ${nasm_EXECUTABLE} -f ${ANDROID_ASM_TYPE} -o ${DST}
+              ${asm} ${ASM_INC}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       VERBATIM
       DEPENDS ${nasm_EXECUTABLE} ${asm})
@@ -465,22 +465,22 @@ function(prefix_sources)
 endfunction()
 
 # ~~~
-# ~~~
 # Registers the given target, by calculating the source set and setting
 # licensens.
 #
-# ``TARGET``  The library/executable target. For example emulatory-libyuv
-# ``LIBNAME`` Public library name, this is how it is known in the world. For
-# example libyuv. ``SOURCES`` List of source files to be compiled, part of every
-# target. ``LINUX``   List of source files to be compiled if the current target
-# is LINUX_X86_64 ``DARWIN``  List of source files to be compiled if the current
-# target is DARWIN_X86_64 ``WINDOWS`` List of source files to be compiled if the
-# current target is WINDOWS_MSVC_X86_64 ``MSVC``    List of source files to be
-# compiled if the current target is WINDOWS_MSVC_X86_64 ``URL``     URL where
-# the source code can be found. ``REPO``    Internal location where the, where
-# the notice can be found. ``LICENSE`` SPDX License identifier. ``NOTICE``
-# Location where the NOTICE can be found ``SOURCE_DIR`` Root source directory.
-# This will be prepended to every source
+# ``TARGET``     The library/executable target. For example emulatory-libyuv
+# ``LIBNAME``    Public library name, this is how it is known in the world.
+#                 For example libyuv.
+# ``SOURCES``    List of source files to be compiled, part of every target.
+# ``LINUX``      LINUX_X86_64 only sources.
+# ``DARWIN``     DARWIN_X86_64 only sources.
+# ``WINDOWS``    WINDOWS_MSVC_X86_64 only sources.
+# ``MSVC``       WINDOWS_MSVC_X86_64 only sources.
+# ``URL``        URL where the source code can be found.
+# ``REPO``       Internal location where the, where the notice can be found.
+#  `LICENSE``    SPDX License identifier.
+# ``NOTICE``     Location where the NOTICE can be found
+# ``SOURCE_DIR`` Root source directory. This will be prepended to every source
 # ~~~
 function(_register_target)
   set(options NODISTRIBUTE)
@@ -492,7 +492,14 @@ function(_register_target)
       URL
       NOTICE
       SOURCE_DIR)
-  set(multiValueArgs INCLUDES SRC LINUX MSVC WINDOWS DARWIN POSIX)
+  set(multiValueArgs
+      INCLUDES
+      SRC
+      LINUX
+      MSVC
+      WINDOWS
+      DARWIN
+      POSIX)
   cmake_parse_arguments(build "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN})
   if(NOT DEFINED build_TARGET)
@@ -561,10 +568,11 @@ function(_register_target)
 endfunction()
 
 function(android_sign path)
-    if (ANDROID_XCODE_SIGN_ADHOC)
-        install(
-            CODE "message(\"android_sign ${path}\")\nexecute_process(COMMAND codesign --deep -s - --entitlements ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist ${path})")
-    endif()
+  if(ANDROID_XCODE_SIGN_ADHOC)
+    install(
+      CODE "message(\"android_sign ${path}\")\nexecute_process(COMMAND codesign --deep -s - --entitlements ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist ${path})"
+    )
+  endif()
 endfunction()
 
 # ~~~
@@ -1013,7 +1021,8 @@ function(protobuf_generate_with_plugin)
 
   if(NOT protobuf_generate_with_plugin_GENERATE_EXTENSIONS)
     if(protobuf_generate_with_plugin_LANGUAGE STREQUAL cpp)
-        set(protobuf_generate_with_plugin_GENERATE_EXTENSIONS  ${protobuf_generate_with_plugin_HEADERFILEEXTENSION} .pb.cc)
+      set(protobuf_generate_with_plugin_GENERATE_EXTENSIONS
+          ${protobuf_generate_with_plugin_HEADERFILEEXTENSION} .pb.cc)
     elseif(protobuf_generate_with_plugin_LANGUAGE STREQUAL python)
       set(protobuf_generate_with_plugin_GENERATE_EXTENSIONS _pb2.py)
     else()
@@ -1392,10 +1401,15 @@ function(android_build_qemu_variant)
     REPO "${ANDROID_QEMU2_TOP_DIR}"
     NOTICE "REPO/LICENSES/LICENSE.APACHE2"
     SRC ${qemu-system-${QEMU_AARCH}_generated_sources}
-        ${qemu-system-${QEMU_AARCH}_sources} ${qemu_build_SOURCES})
+        ${qemu-system-${QEMU_AARCH}_sources} ${qemu_build_SOURCES}
+        # These are autogenerated.
+        ${ANDROID_AUTOGEN}/trace/generated-helpers-wrappers.h
+        ${ANDROID_AUTOGEN}/trace/generated-tcg-tracers.h
+        )
   target_include_directories(
     ${qemu_build_EXE} PRIVATE android-qemu2-glue/config/target-${CONFIG_AARCH}
-                              target/${CPU})
+                              target/${CPU}
+                              ${ANDROID_AUTOGEN})
   target_compile_definitions(${qemu_build_EXE}
                              PRIVATE ${qemu_build_DEFINITIONS})
   target_link_libraries(${qemu_build_EXE} PRIVATE ${QEMU_COMPLETE_LIB}
@@ -1405,17 +1419,17 @@ function(android_build_qemu_variant)
   # properly (Xcode/MSVC native)
   add_dependencies(${qemu_build_EXE} qemu2-common)
   if(APPLE AND OPTION_DEVELOPMENT)
-      # If you are on Big Sur you will not be able to use HVF since
-      # Apple has made changes to the hypervisor entitlements.
-      # So let's sign the qemu executables, so you can use HVF locally during development.
-      add_custom_command(
-          TARGET ${qemu_build_EXE}
-          POST_BUILD
-          COMMENT "Signing $<TARGET_FILE:${qemu_build_EXE}>"
-          COMMAND
-          codesign --deep -s - --entitlements
-          ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist
-          $<TARGET_FILE:${qemu_build_EXE}>)
+    # If you are on Big Sur you will not be able to use HVF since Apple has made
+    # changes to the hypervisor entitlements. So let's sign the qemu
+    # executables, so you can use HVF locally during development.
+    add_custom_command(
+      TARGET ${qemu_build_EXE}
+      POST_BUILD
+      COMMENT "Signing $<TARGET_FILE:${qemu_build_EXE}>"
+      COMMAND
+        codesign --deep -s - --entitlements
+        ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist
+        $<TARGET_FILE:${qemu_build_EXE}>)
   endif()
   # XCode bin places this not where we want this...
   if(qemu_build_INSTALL)
@@ -1696,18 +1710,17 @@ function(android_crosvm_build DEP)
 endfunction()
 
 function(android_symlink TARGET SYMLINK WORKDIR)
-    file(MAKE_DIRECTORY ${WORKDIR})
-    if (WIN32 AND NOT CROSSCOMPILE)
-        # message("Creating symlink,  mklink ${WIN_PATH} ${WIN_TGT}")
-        file(TO_NATIVE_PATH "${TARGET}" WIN_TGT)
-        file(TO_NATIVE_PATH "${WORKDIR}/${SYMLINK}" WIN_PATH)
-        execute_process(
-            COMMAND cmd.exe /c mklink ${WIN_PATH} ${WIN_TGT}
-            WORKING_DIRECTORY ${WORKDIR})
-    else()
-        # message("Creating symlink, create_symlink: ${WORKDIR}/${SYMLINK} -> ${TARGET}")
-        execute_process(
-            COMMAND ${CMAKE_COMMAND} -E create_symlink "${TARGET}" "${SYMLINK}"
-            WORKING_DIRECTORY ${WORKDIR})
-    endif()
+  file(MAKE_DIRECTORY ${WORKDIR})
+  if(WIN32 AND NOT CROSSCOMPILE)
+    # message("Creating symlink,  mklink ${WIN_PATH} ${WIN_TGT}")
+    file(TO_NATIVE_PATH "${TARGET}" WIN_TGT)
+    file(TO_NATIVE_PATH "${WORKDIR}/${SYMLINK}" WIN_PATH)
+    execute_process(COMMAND cmd.exe /c mklink ${WIN_PATH} ${WIN_TGT}
+                    WORKING_DIRECTORY ${WORKDIR})
+  else()
+    # message("Creating symlink, create_symlink: ${WORKDIR}/${SYMLINK} ->
+    # ${TARGET}")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${TARGET}"
+                            "${SYMLINK}" WORKING_DIRECTORY ${WORKDIR})
+  endif()
 endfunction()

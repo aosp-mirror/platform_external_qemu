@@ -35,9 +35,11 @@ message(
 
 include(android)
 include(prebuilts)
+include(qemu2-src-gen)
 
 set(OPTION_DEVELOPMENT FALSE CACHE BOOL "Enable developer options, such as signing QEMU during build.")
 set(OPTION_CRASHUPLOAD "NONE" CACHE STRING "Destination of crash reports.")
+set(OPTION_TRACE "nop" CACHE STRING "The qemu tracing backend to use. Should be one of: [nop, dtrace, ftrace, log, simple, syslog, ust]")
 set(OPTION_SDK_TOOLS_REVISION "" CACHE STRING
                                        "The tools revision to use, if any")
 set(OPTION_SDK_TOOLS_BUILD_NUMBER ""
@@ -205,6 +207,11 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
     file(COPY ${ANDROID_QEMU2_TOP_DIR}/android/scripts/unix/darwin-aarch64-replace.sh
          DESTINATION ${CMAKE_INSTALL_PREFIX})
 endif()
+
+# Create the needed qemu2 sources, with the desired backend.
+generate_qemu2_sources(TRACE_BACKEND ${OPTION_TRACE} DEST ${CMAKE_CURRENT_BINARY_DIR}/generated-sources)
+string(TOUPPER "${OPTION_TRACE}" TRACE_CONFIG)
+set(TRACE_CONFIG "CONFIG_TRACE_${TRACE_CONFIG}")
 
 if(LINUX_AARCH64)
     file(COPY ${ANDROID_QEMU2_TOP_DIR}/android/scripts/unix/linux-aarch64-fixgcc.sh
@@ -419,7 +426,7 @@ if(MSVC AND WINDOWS_MSVC_X86_64)
   set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
 endif()
 
-# We now have configured our base compiler..
+# We now have configured our base compiler.
 
 # Unit tests please!
 enable_testing()
@@ -552,9 +559,10 @@ target_include_directories(
     disas/libvixl
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_BINARY_DIR}
-    qemu2-auto-generated
+    ${ANDROID_AUTOGEN}
     ../../prebuilts/android-emulator-build/qemu-android-deps/${ANDROID_TARGET_TAG}/include
     android-qemu2-glue/config/${ANDROID_TARGET_TAG}/)
+
 
 # These are the rules that every qemu component needs, regardless of the
 # platform you are compiling on. Please document any flags you set as not
@@ -562,7 +570,9 @@ target_include_directories(
 target_compile_definitions(
   android-qemu-deps
   INTERFACE # Enable faster migration code when saving RAM to a snapshot
-            "-DCONFIG_MIGRATION_RAM_SINGLE_ITERATION")
+            "-DCONFIG_MIGRATION_RAM_SINGLE_ITERATION"
+            "${TRACE_CONFIG}"
+            )
 target_compile_definitions(android-qemu-deps INTERFACE # Enable VIRGL
                                                        "-DCONFIG_VIRGL")
 
@@ -615,7 +625,7 @@ set(ANDROID_QEMU_COMMON_DEVICES "${ANDROID_QEMU_ARM_DEVICES};hw/i386/pc_piix.c")
 set(ANDROID_QEMU_i386_DEVICES_darwin-x86_64
     "hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
 set(ANDROID_QEMU_arm_DEVICES_darwin-x86_64
-    "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
+    "accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 # TODO: unstub the hvf for darwin on arm
 set(ANDROID_QEMU_arm_DEVICES_darwin-aarch64
     "accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
@@ -655,9 +665,9 @@ android_target_link_libraries(android-qemu-deps darwin-aarch64 INTERFACE
 
 # Windows x86 definitions
 set(ANDROID_QEMU_arm_DEVICES_windows_msvc-x86_64
-    "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
+    "accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 set(ANDROID_QEMU_i386_DEVICES_windows_msvc-x86_64
-    "hvf-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
+    "hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}")
 android_target_compile_options(
   android-qemu-deps
   windows_msvc-x86_64
@@ -688,21 +698,22 @@ android_target_compile_definitions(
 
 # Linux settings
 set(ANDROID_QEMU_i386_DEVICES_linux-x86_64
-    "hvf-stub.c;accel/stubs/hax-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}"
+    "accel/stubs/hax-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}"
 )
 set(ANDROID_QEMU_arm_DEVICES_linux-x86_64
-    "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
+    "accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 
 set(ANDROID_QEMU_i386_DEVICES_linux-aarch64
-    "hvf-stub.c;accel/stubs/hax-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}"
+    "accel/stubs/hax-stub.c;hw/i386/acpi-build.c;${ANDROID_QEMU_COMMON_DEVICES}"
 )
 set(ANDROID_QEMU_arm_DEVICES_linux-aarch64
-    "hvf-stub.c;accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
+    "accel/stubs/hax-stub.c;${ANDROID_QEMU_ARM_DEVICES}")
 
 android_target_include_directories(android-qemu-deps linux-x86_64 INTERFACE
                                    linux-headers)
 android_target_include_directories(android-qemu-deps linux-aarch64 INTERFACE
                                    linux-headers)
+target_include_directories(android-qemu-deps INTERFACE ${ANDROID_AUTOGEN})
 android_target_compile_options(
   android-qemu-deps
   linux-x86_64
@@ -736,22 +747,22 @@ android_target_link_libraries(android-qemu-deps darwin-aarch64 INTERFACE
 android_target_link_libraries(android-qemu-deps windows_msvc-x86_64 INTERFACE
                               android-emu-base)
 
-set(ANDROID_AUTOGEN "qemu2-auto-generated")
 if(LINUX_AARCH64)
-  set(ASM_DIR_TARGET "../linux-headers/asm-arm64")
+  set(ASM_DIR_TARGET "${ANDROID_QEMU2_TOP_DIR}/linux-headers/asm-arm64")
 else()
-  set(ASM_DIR_TARGET "../linux-headers/asm-x86")
+  set(ASM_DIR_TARGET "${ANDROID_QEMU2_TOP_DIR}/linux-headers/asm-x86")
 endif()
 
+
 set(NEED_RELINK_ASM FALSE)
-if(EXISTS ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/asm)
+if(EXISTS ${ANDROID_AUTOGEN}/asm)
   # check the link is correct
   if(LINUX_AARCH64)
-    if(EXISTS ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/asm/unistd_x32.h)
+    if(EXISTS ${ANDROID_AUTOGEN}/asm/unistd_x32.h)
       set(NEED_RELINK_ASM TRUE)
     endif()
   else()
-    if(NOT EXISTS ${ANDROID_QEMU2_TOP_DIR}/${ANDROID_AUTOGEN}/asm/unistd_x32.h)
+    if(NOT EXISTS ${ANDROID_AUTOGEN}/asm/unistd_x32.h)
       set(NEED_RELINK_ASM TRUE)
     endif()
   endif()
@@ -766,8 +777,23 @@ if(NEED_RELINK_ASM)
             "${ANDROID_AUTOGEN}/asm" WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR})
 endif()
 
-set(ANDROID_QEMU2_TOP_DIR ${ANDROID_QEMU2_TOP_DIR})
 include(cmake-main.${ANDROID_TARGET_TAG}.inc)
+
+android_add_library(
+  TARGET libqemu2-util
+  LICENSE "GPL-2.0-only"
+  LIBNAME
+    qemu
+    URL
+    "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
+  REPO "${ANDROID_QEMU2_TOP_DIR}"
+  NOTICE "REPO/LICENSE"
+  SRC # cmake-format: sortable
+      ${libqemuutil_generated_sources} ${libqemuutil_sources})
+target_link_libraries(libqemu2-util PRIVATE android-qemu-deps FDT)
+android_target_link_libraries(
+  libqemu2-util windows PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
+target_compile_definitions(libqemu2-util PRIVATE "-DPOISON_CONFIG_ANDROID")
 
 # Once we have a newer version of cmake we can generate the object library in a
 # platform independent way b/121393952
@@ -785,7 +811,7 @@ android_add_library(
 target_compile_definitions(qemu2-common PRIVATE "-DPOISON_CONFIG_ANDROID")
 target_compile_options(qemu2-common PRIVATE "-Wno-string-plus-int"
                                             "-Wno-return-type")
-target_link_libraries(qemu2-common PUBLIC android-qemu-deps emulator-libusb)
+target_link_libraries(qemu2-common PUBLIC android-qemu-deps emulator-libusb libqemu2-util)
 
 if(NOT OPTION_AEMU_LIBS_ONLY)
 
@@ -836,22 +862,6 @@ if(NOT OPTION_AEMU_LIBS_ONLY)
 
   android_target_link_libraries(android-qemu-deps-headless linux-aarch64
                                 INTERFACE headless-paaudio)
-
-  android_add_library(
-    TARGET libqemu2-util
-    LICENSE "GPL-2.0-only"
-    LIBNAME
-      qemu
-      URL
-      "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
-    REPO "${ANDROID_QEMU2_TOP_DIR}"
-    NOTICE "REPO/LICENSE"
-    SRC # cmake-format: sortable
-        ${libqemuutil_generated_sources} ${libqemuutil_sources})
-  target_link_libraries(libqemu2-util PRIVATE android-qemu-deps FDT)
-  android_target_link_libraries(
-    libqemu2-util windows PRIVATE psapi::psapi winmm::winmm dxguid::dxguid)
-  target_compile_definitions(libqemu2-util PRIVATE "-DPOISON_CONFIG_ANDROID")
 
   android_add_library(
     TARGET libqemustub
