@@ -179,6 +179,7 @@ display_darwin_warning() {
 # $2: AOSP source directory
 build_qemu_android () {
     builder_prepare_for_host $1 "$2"
+    BUILD_HOST=$(get_build_os)-$(get_build_arch)¶
 
     QEMU_TARGETS=
     QEMU_TARGET_LIST=
@@ -339,6 +340,22 @@ build_qemu_android () {
                 # Use the host version, or the build will freeze.
                 PKG_CONFIG=`which pkg-config`
                 ;;
+           darwin-aarch64)
+              if [[ "$BUILD_HOST"  != "darwin_arm64" ]]; then
+                # Use the host version, or the build will freeze.
+                PKG_CONFIG=`which pkg-config`
+              else
+                PKG_CONFIG=$PREFIX/bin/pkg-config
+              fi
+              ;;
+           darwin-x86_64)
+              if [[ "$BUILD_HOST"  != "darwin_x86_64" ]]; then
+                # Use the host version, or the build will freeze.
+                PKG_CONFIG=`which pkg-config`
+              else
+                PKG_CONFIG=$PREFIX/bin/pkg-config
+              fi
+              ;;
             *)
                 PKG_CONFIG=$PREFIX/bin/pkg-config
                 ;;
