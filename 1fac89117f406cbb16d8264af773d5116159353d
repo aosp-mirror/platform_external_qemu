@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e4170036_dccd7632",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-20T02:16:37Z",
+      "side": 1,
+      "message": "Verified on all M1 \u0026 Mac, rest is checked on presubmit.",
+      "revId": "1fac89117f406cbb16d8264af773d5116159353d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
