@@ -419,7 +419,6 @@ static void drive_info_del(DriveInfo *dinfo)
         return;
     }
     qemu_opts_del(dinfo->opts);
-    g_free(dinfo->serial);
     g_free(dinfo);
 }
 
@@ -768,6 +767,11 @@ void blk_remove_bs(BlockBackend *blk)
 
     blk_update_root_state(blk);
 
+    /* bdrv_root_unref_child() will cause blk->root to become stale and may
+     * switch to a completion coroutine later on. Let's drain all I/O here
+     * to avoid that and a potential QEMU crash.
+     */
+    blk_drain(blk);
     bdrv_root_unref_child(blk->root);
     blk->root = NULL;
 }
@@ -1865,13 +1869,7 @@ void blk_op_unblock_all(BlockBackend *blk, Error *reason)
 
 AioContext *blk_get_aio_context(BlockBackend *blk)
 {
-    BlockDriverState *bs = blk_bs(blk);
-
-    if (bs) {
-        return bdrv_get_aio_context(bs);
-    } else {
-        return qemu_get_aio_context();
-    }
+    return bdrv_get_aio_context(blk_bs(blk));
 }
 
 static AioContext *blk_aiocb_get_aio_context(BlockAIOCB *acb)
@@ -2216,4 +2214,22 @@ void blk_register_buf(BlockBackend *blk, void *host, size_t size)
 void blk_unregister_buf(BlockBackend *blk, void *host)
 {
     bdrv_unregister_buf(blk_bs(blk), host);
+}
+
+int coroutine_fn blk_co_copy_range(BlockBackend *blk_in, int64_t off_in,
+                                   BlockBackend *blk_out, int64_t off_out,
+                                   int bytes, BdrvRequestFlags flags)
+{
+    int r;
+    r = blk_check_byte_request(blk_in, off_in, bytes);
+    if (r) {
+        return r;
+    }
+    r = blk_check_byte_request(blk_out, off_out, bytes);
+    if (r) {
+        return r;
+    }
+    return bdrv_co_copy_range(blk_in->root, off_in,
+                              blk_out->root, off_out,
+                              bytes, flags);
 }

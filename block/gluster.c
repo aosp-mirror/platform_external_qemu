@@ -11,6 +11,7 @@
 #include "qemu/osdep.h"
 #include <glusterfs/api/glfs.h>
 #include "block/block_int.h"
+#include "block/qdict.h"
 #include "qapi/error.h"
 #include "qapi/qmp/qdict.h"
 #include "qapi/qmp/qerror.h"
@@ -650,7 +651,7 @@ static int qemu_gluster_parse_json(BlockdevOptionsGluster *gconf,
         }
         gsconf = NULL;
 
-        QDECREF(backing_options);
+        qobject_unref(backing_options);
         backing_options = NULL;
         g_free(str);
         str = NULL;
@@ -663,7 +664,7 @@ out:
     qapi_free_SocketAddress(gsconf);
     qemu_opts_del(opts);
     g_free(str);
-    QDECREF(backing_options);
+    qobject_unref(backing_options);
     errno = EINVAL;
     return -errno;
 }
@@ -1194,8 +1195,10 @@ static coroutine_fn int qemu_gluster_co_readv(BlockDriverState *bs,
 static coroutine_fn int qemu_gluster_co_writev(BlockDriverState *bs,
                                                int64_t sector_num,
                                                int nb_sectors,
-                                               QEMUIOVector *qiov)
+                                               QEMUIOVector *qiov,
+                                               int flags)
 {
+    assert(!flags);
     return qemu_gluster_co_rw(bs, sector_num, nb_sectors, qiov, 1);
 }
 

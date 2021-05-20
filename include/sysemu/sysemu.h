@@ -67,6 +67,7 @@ typedef enum WakeupReason {
     QEMU_WAKEUP_REASON_OTHER,
 } WakeupReason;
 
+void qemu_exit_preconfig_request(void);
 void qemu_system_reset_request(ShutdownCause reason);
 void qemu_system_suspend_request(void);
 void qemu_register_suspend_notifier(Notifier *notifier);
@@ -253,9 +254,12 @@ void hmp_pcie_aer_inject_error(Monitor *mon, const QDict *qdict);
 
 /* serial ports */
 
-#define MAX_SERIAL_PORTS 4
-
-extern Chardev *serial_hds[MAX_SERIAL_PORTS];
+/* Return the Chardev for serial port i, or NULL if none */
+Chardev *serial_hd(int i);
+/* return the number of serial ports defined by the user. serial_hd(i)
+ * will always return NULL for any i which is greater than or equal to this.
+ */
+int serial_max_hds(void);
 
 /* parallel ports */
 

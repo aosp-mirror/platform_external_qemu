@@ -44,8 +44,6 @@
 #include "hw/ppc/ppc4xx.h"
 #include "ppc405.h"
 
-#include "sysemu/block-backend.h"
-
 #define EPAPR_MAGIC    (0x45504150)
 #define FLASH_SIZE     (16 * 1024 * 1024)
 
@@ -251,7 +249,7 @@ static void virtex_init(MachineState *machine)
     }
 
     serial_mm_init(address_space_mem, UART16550_BASEADDR, 2, irq[UART16550_IRQ],
-                   115200, serial_hds[0], DEVICE_LITTLE_ENDIAN);
+                   115200, serial_hd(0), DEVICE_LITTLE_ENDIAN);
 
     /* 2 timers at irq 2 @ 62 Mhz.  */
     dev = qdev_create(NULL, "xlnx.xps-timer");

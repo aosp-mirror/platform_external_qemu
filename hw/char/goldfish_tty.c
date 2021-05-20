@@ -227,12 +227,6 @@ static void goldfish_tty_realize(DeviceState *dev, Error **errp)
     SysBusDevice *sbdev = SYS_BUS_DEVICE(dev);
     struct tty_state *s = GOLDFISH_TTY(dev);
 
-    if ((instance_id + 1) == MAX_SERIAL_PORTS) {
-        cpu_abort(current_cpu,
-                  "goldfish_tty: MAX_SERIAL_PORTS(%d) reached\n",
-                  MAX_SERIAL_PORTS);
-    }
-
     s->index = instance_id;
 
     memory_region_init_io(&s->iomem, OBJECT(s), &mips_qemu_ops, s,
@@ -240,8 +234,8 @@ static void goldfish_tty_realize(DeviceState *dev, Error **errp)
     sysbus_init_mmio(sbdev, &s->iomem);
     sysbus_init_irq(sbdev, &s->irq);
 
-    if (serial_hds[s->index]) {
-        s->cs = serial_hds[s->index];
+    if (serial_hd(s->index)) {
+        s->cs = serial_hd(s->index);
         s->cs->be = NULL;
 
         qemu_chr_fe_init(&s->chr_be, s->cs, &error_abort);

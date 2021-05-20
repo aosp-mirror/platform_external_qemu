@@ -15,14 +15,16 @@ static uint32_t ncsi_calculate_checksum(uint16_t *data, int len)
 {
     uint32_t checksum = 0;
     int i;
-     /*
+
+    /*
      * 32-bit unsigned sum of the NC-SI packet header and NC-SI packet
      * payload interpreted as a series of 16-bit unsigned integer values.
      */
     for (i = 0; i < len; i++) {
         checksum += htons(data[i]);
     }
-     checksum = (~checksum + 1);
+
+    checksum = (~checksum + 1);
     return checksum;
 }
 
@@ -54,12 +56,14 @@ static int ncsi_rsp_handler_gls(struct ncsi_rsp_pkt_hdr *rnh)
 static int ncsi_rsp_handler_gp(struct ncsi_rsp_pkt_hdr *rnh)
 {
     struct ncsi_rsp_gp_pkt *rsp = (struct ncsi_rsp_gp_pkt *) rnh;
-     /* no MAC address filters or VLAN filters on the channel */
+
+    /* no MAC address filters or VLAN filters on the channel */
     rsp->mac_cnt = 0;
     rsp->mac_enable = 0;
     rsp->vlan_cnt = 0;
     rsp->vlan_enable = 0;
-     return 0;
+
+    return 0;
 }
 
 static const struct ncsi_rsp_handler {

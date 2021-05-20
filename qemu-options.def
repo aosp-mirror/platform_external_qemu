@@ -165,9 +165,8 @@ DEF("blockdev", HAS_ARG, QEMU_OPTION_blockdev,
 
 DEF("drive", HAS_ARG, QEMU_OPTION_drive,
 "-drive [file=file][,if=type][,bus=n][,unit=m][,media=d][,index=i]\n"
-"       [,cyls=c,heads=h,secs=s[,trans=t]][,snapshot=on|off]\n"
 "       [,cache=writethrough|writeback|none|directsync|unsafe][,format=f]\n"
-"       [,serial=s][,addr=A][,rerror=ignore|stop|report]\n"
+"       [,snapshot=on|off][,rerror=ignore|stop|report]\n"
 "       [,werror=ignore|stop|report|enospc][,id=name][,aio=threads|native]\n"
 "       [,readonly=on|off][,copy-on-read=on|off]\n"
 "       [,discard=ignore|unmap][,detect-zeroes=on|off|unmap]\n"
@@ -240,7 +239,7 @@ DEFHEADING(Display options:)
 
 DEF("display", HAS_ARG, QEMU_OPTION_display,
 "-display sdl[,frame=on|off][,alt_grab=on|off][,ctrl_grab=on|off]\n"
-"            [,window_close=on|off][,gl=on|off]\n"
+"            [,window_close=on|off][,gl=on|core|es|off]\n"
 "-display gtk[,grab_on_hover=on|off][,gl=on|off]|\n"
 "-display vnc=<display>[,<optargs>]\n"
 "-display curses\n"
@@ -393,8 +392,8 @@ DEF("netdev", HAS_ARG, QEMU_OPTION_netdev,
 "-netdev user,id=str[,ipv4[=on|off]][,net=addr[/mask]][,host=addr]\n"
 "         [,ipv6[=on|off]][,ipv6-net=addr[/int]][,ipv6-host=addr]\n"
 "         [,restrict=on|off][,hostname=host][,dhcpstart=addr]\n"
-"         [,dns=addr][,ipv6-dns=addr][,dnssearch=domain][,tftp=dir]\n"
-"         [,bootfile=f][,hostfwd=rule][,guestfwd=rule]"
+"         [,dns=addr][,ipv6-dns=addr][,dnssearch=domain][,domainname=domain]\n"
+"         [,tftp=dir][,bootfile=f][,hostfwd=rule][,guestfwd=rule]"
 #ifndef _WIN32
 "[,smb=dir[,smbserver=addr]]\n"
 #endif
@@ -490,7 +489,7 @@ DEF("netdev", HAS_ARG, QEMU_OPTION_netdev,
 "                configure a vhost-user network, backed by a chardev 'dev'\n"
 #endif
 "-netdev hubport,id=str,hubid=n[,netdev=nd]\n"
-"                configure a hub port on QEMU VLAN 'n'\n", QEMU_ARCH_ALL)
+"                configure a hub port on the hub with ID 'n'\n", QEMU_ARCH_ALL)
 DEF("nic", HAS_ARG, QEMU_OPTION_nic,
 "--nic [tap|bridge|"
 #ifdef CONFIG_SLIRP
@@ -515,10 +514,9 @@ DEF("nic", HAS_ARG, QEMU_OPTION_nic,
 "                provided a 'user' network connection)\n",
 QEMU_ARCH_ALL)
 DEF("net", HAS_ARG, QEMU_OPTION_net,
-"-net nic[,vlan=n][,netdev=nd][,macaddr=mac][,model=type][,name=str][,addr=str][,vectors=v]\n"
+"-net nic[,macaddr=mac][,model=type][,name=str][,addr=str][,vectors=v]\n"
 "                configure or create an on-board (or machine default) NIC and\n"
-"                connect it either to VLAN 'n' or the netdev 'nd' (for pluggable\n"
-"                NICs please use '-device devtype,netdev=nd' instead)\n"
+"                connect it to hub 0 (please use -nic unless you need a hub)\n"
 "-net ["
 #ifdef CONFIG_SLIRP
 "user|"
@@ -531,7 +529,7 @@ DEF("net", HAS_ARG, QEMU_OPTION_net,
 #ifdef CONFIG_NETMAP
 "netmap|"
 #endif
-"socket][,vlan=n][,option][,option][,...]\n"
+"socket][,option][,option][,...]\n"
 "                old way to initialize a host network interface\n"
 "                (use the -netdev option if possible instead)\n", QEMU_ARCH_ALL)
 
@@ -675,6 +673,10 @@ DEF("pidfile", HAS_ARG, QEMU_OPTION_pidfile, \
 
 DEF("singlestep", 0, QEMU_OPTION_singlestep, \
 "-singlestep     always run in singlestep mode\n", QEMU_ARCH_ALL)
+
+DEF("preconfig", 0, QEMU_OPTION_preconfig, \
+"--preconfig     pause QEMU before machine is initialized\n",
+QEMU_ARCH_ALL)
 
 DEF("S", 0, QEMU_OPTION_S, \
 "-S              freeze CPU at startup (use 'c' to start execution)\n",
@@ -837,7 +839,8 @@ QEMU_ARCH_ALL)
 
 #ifndef _WIN32
 DEF("runas", HAS_ARG, QEMU_OPTION_runas, \
-"-runas user     change to user id user just before starting the VM\n",
+"-runas user     change to user id user just before starting the VM\n" \
+"                user can be numeric uid:gid instead\n",
 QEMU_ARCH_ALL)
 #endif
 
@@ -898,13 +901,6 @@ QEMU_ARCH_ALL)
 #endif
 
 DEF("no-kvm", 0, QEMU_OPTION_no_kvm, "", QEMU_ARCH_I386)
-
-DEF("no-kvm-pit-reinjection", 0, QEMU_OPTION_no_kvm_pit_reinjection,
-"", QEMU_ARCH_I386)
-
-DEF("no-kvm-irqchip", 0, QEMU_OPTION_no_kvm_irqchip, "", QEMU_ARCH_I386)
-
-DEF("tdf", 0, QEMU_OPTION_tdf,"", QEMU_ARCH_ALL)
 
 DEF("msg", HAS_ARG, QEMU_OPTION_msg,
 "-msg timestamp[=on|off]\n"
@@ -997,6 +993,7 @@ DEF("read-only", 0, QEMU_OPTION_read_only,
 DEF("fuchsia", 0, QEMU_OPTION_fuchsia,
 "-fuchsia Fuchsia kernel/image run. Only standard QEMU options are allowed after, and emulator does not start Android virtual devices automatically.", QEMU_ARCH_ALL)
 
+
 DEF("allow-host-audio", 0, QEMU_OPTION_allow_host_audio,
 "-allow-host-audio Allows sending of audio from audio input devices. Otherwise, zeroes out audio.", QEMU_ARCH_ALL)
 
@@ -1026,6 +1023,5 @@ DEF("crostini", 0, QEMU_OPTION_crostini,
 
 DEF("wear-auto-forward", 0, QEMU_OPTION_wear_auto_forward,
 "-wear-auto-forward automatically forward tcp:5601 on the host to tcp:5601 on a connected phone if a connected virtual watch is detected.", QEMU_ARCH_ALL)
-
 #endif  // CONFIG_ANDROID
 

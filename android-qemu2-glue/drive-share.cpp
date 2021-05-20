@@ -44,6 +44,8 @@ extern "C" {
 #include "sysemu/block-backend.h"
 #include "sysemu/blockdev.h"
 #include "sysemu/sysemu.h"
+#include "block/qdict.h"
+
 }
 
 #define DEBUG 0

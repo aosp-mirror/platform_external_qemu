@@ -39,7 +39,7 @@
 #include "qemu-common.h"
 #include "qemu/error-report.h"
 #include "hw/usb.h"
-#include "hw/usb/desc.h"
+#include "desc.h"
 
 #include "ccid.h"
 
@@ -329,8 +329,8 @@ static const uint8_t qemu_ccid_descriptor[] = {
                      */
         0x07,       /* u8  bVoltageSupport; 01h - 5.0v, 02h - 3.0, 03 - 1.8 */
 
-        0x00, 0x00, /* u32 dwProtocols; RRRR PPPP. RRRR = 0000h.*/
-        0x01, 0x00, /* PPPP: 0001h = Protocol T=0, 0002h = Protocol T=1 */
+        0x01, 0x00, /* u32 dwProtocols; RRRR PPPP. RRRR = 0000h.*/
+        0x00, 0x00, /* PPPP: 0001h = Protocol T=0, 0002h = Protocol T=1 */
                     /* u32 dwDefaultClock; in kHZ (0x0fa0 is 4 MHz) */
         0xa0, 0x0f, 0x00, 0x00,
                     /* u32 dwMaximumClock; */
@@ -786,7 +786,7 @@ static void ccid_write_data_block(USBCCIDState *s, uint8_t slot, uint8_t seq,
         DPRINTF(s, D_VERBOSE, "error %d\n", p->b.bError);
     }
     if (len) {
-        g_assert_nonnull(data);
+        assert(data);
         memcpy(p->abData, data, len);
     }
     ccid_reset_error_status(s);
@@ -1064,7 +1064,8 @@ err:
     return;
 }
 
-static void ccid_bulk_in_copy_to_guest(USBCCIDState *s, USBPacket *p)
+static void ccid_bulk_in_copy_to_guest(USBCCIDState *s, USBPacket *p,
+    unsigned int max_packet_size)
 {
     int len = 0;
 
@@ -1072,10 +1073,13 @@ static void ccid_bulk_in_copy_to_guest(USBCCIDState *s, USBPacket *p)
     if (s->current_bulk_in != NULL) {
         len = MIN(s->current_bulk_in->len - s->current_bulk_in->pos,
                   p->iov.size);
-        usb_packet_copy(p, s->current_bulk_in->data +
-                        s->current_bulk_in->pos, len);
+        if (len) {
+            usb_packet_copy(p, s->current_bulk_in->data +
+                            s->current_bulk_in->pos, len);
+        }
         s->current_bulk_in->pos += len;
-        if (s->current_bulk_in->pos == s->current_bulk_in->len) {
+        if (s->current_bulk_in->pos == s->current_bulk_in->len
+            && len != max_packet_size) {
             ccid_bulk_in_release(s);
         }
     } else {
@@ -1107,7 +1111,7 @@ static void ccid_handle_data(USBDevice *dev, USBPacket *p)
     case USB_TOKEN_IN:
         switch (p->ep->nr) {
         case CCID_BULK_IN_EP:
-            ccid_bulk_in_copy_to_guest(s, p);
+            ccid_bulk_in_copy_to_guest(s, p, dev->ep_ctl.max_packet_size);
             break;
         case CCID_INT_IN_EP:
             if (s->notify_slot_change) {

@@ -18,6 +18,7 @@
 #include "qapi/qmp/qdict.h"
 #include "qapi/qmp/qjson.h"
 #include "qapi/qmp/qbool.h"
+#include "sysemu/sysemu.h"
 
 QDict *qmp_dispatch_check_obj(const QObject *request, Error **errp)
 {
@@ -101,11 +102,18 @@ static QObject *do_qmp_dispatch(QmpCommandList *cmds, QObject *request,
         return NULL;
     }
 
+    if (runstate_check(RUN_STATE_PRECONFIG) &&
+        !(cmd->options & QCO_ALLOW_PRECONFIG)) {
+        error_setg(errp, "The command '%s' isn't permitted in '%s' state",
+                   cmd->name, RunState_str(RUN_STATE_PRECONFIG));
+        return NULL;
+    }
+
     if (!qdict_haskey(dict, "arguments")) {
         args = qdict_new();
     } else {
         args = qdict_get_qdict(dict, "arguments");
-        QINCREF(args);
+        qobject_ref(args);
     }
 
     cmd->fn(args, &ret, &local_err);
@@ -117,7 +125,7 @@ static QObject *do_qmp_dispatch(QmpCommandList *cmds, QObject *request,
         ret = QOBJECT(qdict_new());
     }
 
-    QDECREF(args);
+    qobject_unref(args);
 
     return ret;
 }
@@ -166,7 +174,7 @@ QObject *qmp_dispatch(QmpCommandList *cmds, QObject *request)
     } else if (ret) {
         qdict_put_obj(rsp, "return", ret);
     } else {
-        QDECREF(rsp);
+        qobject_unref(rsp);
         return NULL;
     }
 

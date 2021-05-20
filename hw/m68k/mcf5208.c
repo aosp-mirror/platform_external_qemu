@@ -247,9 +247,9 @@ static void mcf5208evb_init(MachineState *machine)
     /* Internal peripherals.  */
     pic = mcf_intc_init(address_space_mem, 0xfc048000, cpu);
 
-    mcf_uart_mm_init(0xfc060000, pic[26], serial_hds[0]);
-    mcf_uart_mm_init(0xfc064000, pic[27], serial_hds[1]);
-    mcf_uart_mm_init(0xfc068000, pic[28], serial_hds[2]);
+    mcf_uart_mm_init(0xfc060000, pic[26], serial_hd(0));
+    mcf_uart_mm_init(0xfc064000, pic[27], serial_hd(1));
+    mcf_uart_mm_init(0xfc068000, pic[28], serial_hd(2));
 
     mcf5208_sys_init(address_space_mem, pic);
 
@@ -315,7 +315,7 @@ static void mcf5208evb_init(MachineState *machine)
 
 static void mcf5208evb_machine_init(MachineClass *mc)
 {
-    mc->desc = "MCF5206EVB";
+    mc->desc = "MCF5208EVB";
     mc->init = mcf5208evb_init;
     mc->is_default = 1;
     mc->default_cpu_type = M68K_CPU_TYPE_NAME("m5208");

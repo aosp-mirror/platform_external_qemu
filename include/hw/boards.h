@@ -181,7 +181,6 @@ struct MachineClass {
     unsigned int no_serial:1,
         no_parallel:1,
         use_virtcon:1,
-        use_sclp:1,
         no_floppy:1,
         no_cdrom:1,
         no_sdcard:1,
@@ -216,6 +215,17 @@ struct MachineClass {
 };
 
 /**
+ * DeviceMemoryState:
+ * @base: address in guest physical address space where the memory
+ * address space for memory devices starts
+ * @mr: address space container for memory devices
+ */
+typedef struct DeviceMemoryState {
+    hwaddr base;
+    MemoryRegion mr;
+} DeviceMemoryState;
+
+/**
  * MachineState:
  */
 struct MachineState {
@@ -245,6 +255,7 @@ struct MachineState {
     bool enforce_config_section;
     bool enable_graphics;
     char *memory_encryption;
+    DeviceMemoryState *device_memory;
 
     ram_addr_t ram_size;
     ram_addr_t maxram_size;

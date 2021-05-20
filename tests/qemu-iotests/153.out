@@ -92,6 +92,11 @@ _qemu_img_wrapper bench -w -c 1 TEST_DIR/t.qcow2
 qemu-img: Could not open 'TEST_DIR/t.qcow2': Failed to get "write" lock
 Is another process using the image?
 
+_qemu_img_wrapper create -f qcow2 TEST_DIR/t.qcow2 -b TEST_DIR/t.qcow2.base
+qemu-img: TEST_DIR/t.qcow2: Failed to get "write" lock
+Is another process using the image?
+file format: IMGFMT
+
 == Running utility commands -U ==
 
 _qemu_io_wrapper -U -c read 0 512 TEST_DIR/t.qcow2
@@ -209,6 +214,11 @@ _qemu_img_wrapper bench -w -c 1 TEST_DIR/t.qcow2
 qemu-img: Could not open 'TEST_DIR/t.qcow2': Failed to get "write" lock
 Is another process using the image?
 
+_qemu_img_wrapper create -f qcow2 TEST_DIR/t.qcow2 -b TEST_DIR/t.qcow2.base
+qemu-img: TEST_DIR/t.qcow2: Failed to get "write" lock
+Is another process using the image?
+file format: IMGFMT
+
 == Running utility commands -U ==
 
 _qemu_io_wrapper -U -c read 0 512 TEST_DIR/t.qcow2
@@ -309,6 +319,9 @@ _qemu_img_wrapper bench -c 1 TEST_DIR/t.qcow2
 
 _qemu_img_wrapper bench -w -c 1 TEST_DIR/t.qcow2
 
+_qemu_img_wrapper create -f qcow2 TEST_DIR/t.qcow2 -b TEST_DIR/t.qcow2.base
+file format: IMGFMT
+
 == Running utility commands -U ==
 
 _qemu_io_wrapper -U -c read 0 512 TEST_DIR/t.qcow2
@@ -399,4 +412,20 @@ Is another process using the image?
 Closing the other
 
 _qemu_io_wrapper TEST_DIR/t.qcow2 -c write 0 512
+
+== Detecting -U and force-share conflicts ==
+
+No conflict:
+image: null-co://
+file format: null-co
+virtual size: 1.0G (1073741824 bytes)
+disk size: unavailable
+
+Conflict:
+qemu-img: --force-share/-U conflicts with image options
+
+No conflict:
+
+Conflict:
+-U conflicts with image options
 *** done

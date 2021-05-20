@@ -31,10 +31,14 @@ static inline AddressSpaceDispatch *address_space_to_dispatch(AddressSpace *as)
     return flatview_to_dispatch(address_space_to_flatview(as));
 }
 
+FlatView *address_space_get_flatview(AddressSpace *as);
+void flatview_unref(FlatView *view);
+
 extern const MemoryRegionOps unassigned_mem_ops;
 
 bool memory_region_access_valid(MemoryRegion *mr, hwaddr addr,
-                                unsigned size, bool is_write);
+                                unsigned size, bool is_write,
+                                MemTxAttrs attrs);
 
 void flatview_add_to_dispatch(FlatView *fv, MemoryRegionSection *section);
 AddressSpaceDispatch *address_space_dispatch_new(FlatView *fv);

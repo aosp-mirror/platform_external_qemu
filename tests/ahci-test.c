@@ -180,12 +180,12 @@ static AHCIQState *ahci_boot(const char *cli, ...)
         s = ahci_vboot(cli, ap);
         va_end(ap);
     } else {
-        cli = "-drive if=none,id=drive0,file=%s,cache=writeback,serial=%s"
-            ",format=%s"
+        cli = "-drive if=none,id=drive0,file=%s,cache=writeback,format=%s"
             " -M q35 "
             "-device ide-hd,drive=drive0 "
+            "-global ide-hd.serial=%s "
             "-global ide-hd.ver=%s";
-        s = ahci_boot(cli, tmp_path, "testdisk", imgfmt, "version");
+        s = ahci_boot(cli, tmp_path, imgfmt, "testdisk", "version");
     }
 
     return s;
@@ -1566,7 +1566,7 @@ static void atapi_wait_tray(bool open)
     } else {
         g_assert(!qdict_get_bool(data, "tray-open"));
     }
-    QDECREF(rsp);
+    qobject_unref(rsp);
 }
 
 static void test_atapi_tray(void)
@@ -1596,7 +1596,7 @@ static void test_atapi_tray(void)
                "'arguments': {'id': 'cd0'}}");
     atapi_wait_tray(true);
     rsp = qmp_receive();
-    QDECREF(rsp);
+    qobject_unref(rsp);
 
     qmp_discard_response("{'execute': 'blockdev-remove-medium', "
                          "'arguments': {'id': 'cd0'}}");
@@ -1623,7 +1623,7 @@ static void test_atapi_tray(void)
                "'arguments': {'id': 'cd0'}}");
     atapi_wait_tray(false);
     rsp = qmp_receive();
-    QDECREF(rsp);
+    qobject_unref(rsp);
 
     /* Now, to convince ATAPI we understand the media has changed... */
     ahci_atapi_test_ready(ahci, port, false, SENSE_NOT_READY);
