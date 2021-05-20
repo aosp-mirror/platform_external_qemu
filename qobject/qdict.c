@@ -14,13 +14,8 @@
 #include "qapi/qmp/qnum.h"
 #include "qapi/qmp/qdict.h"
 #include "qapi/qmp/qbool.h"
-#include "qapi/qmp/qlist.h"
 #include "qapi/qmp/qnull.h"
 #include "qapi/qmp/qstring.h"
-#include "qapi/error.h"
-#include "qemu/queue.h"
-#include "qemu-common.h"
-#include "qemu/cutils.h"
 
 /**
  * qdict_new(): Create a new QDict
@@ -123,7 +118,7 @@ void qdict_put_obj(QDict *qdict, const char *key, QObject *value)
     entry = qdict_find(qdict, key, bucket);
     if (entry) {
         /* replace key's value */
-        qobject_decref(entry->value);
+        qobject_unref(entry->value);
         entry->value = value;
     } else {
         /* allocate a new entry */
@@ -373,8 +368,7 @@ QDict *qdict_clone_shallow(const QDict *src)
 
     for (i = 0; i < QDICT_BUCKET_MAX; i++) {
         QLIST_FOREACH(entry, &src->table[i], next) {
-            qobject_incref(entry->value);
-            qdict_put_obj(dest, entry->key, entry->value);
+            qdict_put_obj(dest, entry->key, qobject_ref(entry->value));
         }
     }
 
@@ -390,7 +384,7 @@ static void qentry_destroy(QDictEntry *e)
     assert(e->key != NULL);
     assert(e->value != NULL);
 
-    qobject_decref(e->value);
+    qobject_unref(e->value);
     g_free(e->key);
     g_free(e);
 }
@@ -464,6 +458,7 @@ void qdict_destroy_obj(QObject *obj)
 
     g_free(qdict);
 }
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
 
 /**
  * qdict_copy_default(): If no entry mapped by 'key' exists in 'dst' yet, the
@@ -1099,3 +1094,5 @@ bool qdict_rename_keys(QDict *qdict, const QDictRenames *renames, Error **errp)
     }
     return true;
 }
+=======
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)

@@ -16,7 +16,7 @@
 #include "hw/ide.h"
 #include "hw/timer/i8254.h"
 #include "hw/char/serial.h"
-#include "hw/hppa/hppa_sys.h"
+#include "hppa_sys.h"
 #include "qemu/cutils.h"
 #include "qapi/error.h"
 #include "qemu/log.h"
@@ -108,10 +108,10 @@ static void machine_hppa_init(MachineState *machine)
     mc146818_rtc_init(isa_bus, 2000, rtc_irq);
 
     /* Serial code setup.  */
-    if (serial_hds[0]) {
+    if (serial_hd(0)) {
         uint32_t addr = DINO_UART_HPA + 0x800;
         serial_mm_init(addr_space, addr, 0, serial_irq,
-                       115200, serial_hds[0], DEVICE_BIG_ENDIAN);
+                       115200, serial_hd(0), DEVICE_BIG_ENDIAN);
     }
 
     /* SCSI disk setup. */

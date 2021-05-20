@@ -11,9 +11,13 @@
 #include "qemu/osdep.h"
 #include "cpu.h"
 #include "exec/address-spaces.h"
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
 #include "exec/exec-all.h"
 #include "exec/ram_addr.h"
 #include "exec/memory-remap.h"
+=======
+#include "qemu/error-report.h"
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
 
 #include "target/i386/hax-i386.h"
 #include "qemu/queue.h"

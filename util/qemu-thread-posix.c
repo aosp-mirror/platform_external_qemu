@@ -510,11 +510,22 @@ static void __attribute__((constructor)) qemu_thread_atexit_init(void)
 }
 
 
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
 /* Attempt to set the threads name; note that this is for debug, so
  * we're not going to fail if we can't set it.
  */
 static void qemu_thread_set_name(QemuThread *thread, const char *name)
+=======
+typedef struct {
+    void *(*start_routine)(void *);
+    void *arg;
+    char *name;
+} QemuThreadArgs;
+
+static void *qemu_thread_start(void *args)
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
 {
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
 #ifdef CONFIG_PTHREAD_SETNAME_NP
     pthread_setname_np(thread->thread, name);
 #endif
@@ -563,6 +574,23 @@ static void* qemu_thread_trampoline(void* data_) {
     pthread_setspecific(exit_key, NULL);
 
     return res;
+=======
+    QemuThreadArgs *qemu_thread_args = args;
+    void *(*start_routine)(void *) = qemu_thread_args->start_routine;
+    void *arg = qemu_thread_args->arg;
+
+#ifdef CONFIG_PTHREAD_SETNAME_NP
+    /* Attempt to set the threads name; note that this is for debug, so
+     * we're not going to fail if we can't set it.
+     */
+    if (name_threads && qemu_thread_args->name) {
+        pthread_setname_np(pthread_self(), qemu_thread_args->name);
+    }
+#endif
+    g_free(qemu_thread_args->name);
+    g_free(qemu_thread_args);
+    return start_routine(arg);
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
 }
 
 void qemu_thread_create(QemuThread *thread, const char *name,
@@ -572,6 +600,7 @@ void qemu_thread_create(QemuThread *thread, const char *name,
     sigset_t set, oldset;
     int err;
     pthread_attr_t attr;
+    QemuThreadArgs *qemu_thread_args;
 
     err = pthread_attr_init(&attr);
     if (err) {
@@ -582,17 +611,29 @@ void qemu_thread_create(QemuThread *thread, const char *name,
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, &oldset);
 
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
     /* Create heap-allocated ThreadStartData object and pass its ownership
      * to the trampoline. */
     ThreadStartData* data = malloc(sizeof(*data));
     data->start_routine = start_routine;
     data->arg = arg;
+=======
+    qemu_thread_args = g_new0(QemuThreadArgs, 1);
+    qemu_thread_args->name = g_strdup(name);
+    qemu_thread_args->start_routine = start_routine;
+    qemu_thread_args->arg = arg;
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
 
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
     err = pthread_create(&thread->thread, &attr, qemu_thread_trampoline, data);
     if (err) {
         free(data);
         error_exit(err, __func__);
     }
+=======
+    err = pthread_create(&thread->thread, &attr,
+                         qemu_thread_start, qemu_thread_args);
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
 
     if (name_threads) {
         qemu_thread_set_name(thread, name);

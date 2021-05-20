@@ -15,8 +15,11 @@
 #include "arm-powerctl.h"
 #include "qemu/log.h"
 #include "qemu/main-loop.h"
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
 #include "exec/exec-all.h"
 #include "sysemu/hvf.h"
+=======
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
 
 #ifndef DEBUG_ARM_POWERCTL
 #define DEBUG_ARM_POWERCTL 0

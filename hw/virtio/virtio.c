@@ -126,7 +126,12 @@ static void virtio_free_region_cache(VRingMemoryRegionCaches *caches)
 static void virtio_virtqueue_reset_region_cache(struct VirtQueue *vq)
 {
     VRingMemoryRegionCaches *caches;
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
      caches = atomic_read(&vq->vring.caches);
+=======
+
+    caches = atomic_read(&vq->vring.caches);
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
     atomic_rcu_set(&vq->vring.caches, NULL);
     if (caches) {
         call_rcu(caches, virtio_free_region_cache, rcu);
@@ -2474,6 +2479,19 @@ void virtio_queue_host_notifier_read(EventNotifier *n)
 EventNotifier *virtio_queue_get_host_notifier(VirtQueue *vq)
 {
     return &vq->host_notifier;
+}
+
+int virtio_queue_set_host_notifier_mr(VirtIODevice *vdev, int n,
+                                      MemoryRegion *mr, bool assign)
+{
+    BusState *qbus = qdev_get_parent_bus(DEVICE(vdev));
+    VirtioBusClass *k = VIRTIO_BUS_GET_CLASS(qbus);
+
+    if (k->set_host_notifier_mr) {
+        return k->set_host_notifier_mr(qbus->parent, n, mr, assign);
+    }
+
+    return -1;
 }
 
 void virtio_device_set_child_bus_name(VirtIODevice *vdev, char *bus_name)

@@ -11,7 +11,6 @@
 #include "qemu/osdep.h"
 #include "cpu.h"
 #include "exec/address-spaces.h"
-#include "exec/exec-all.h"
 #include "exec/ioport.h"
 #include "exec/ram_addr.h"
 #include "exec/memory-remap.h"
@@ -29,7 +28,11 @@
 #include "qemu/error-report.h"
 #include "qemu/queue.h"
 #include "qapi/error.h"
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
 #include "migration/migration.h"
+=======
+#include "migration/blocker.h"
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
 #include "whp-dispatch.h"
 
 #include "./WinHvPlatformDefs.h"
@@ -169,9 +172,14 @@ struct whpx_vcpu {
 };
 
 static bool whpx_allowed;
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
 static bool whp_dispatch_initialized = false;
 static HMODULE hWinHvPlatform, hWinHvEmulation;
 static WHV_PROCESSOR_XSAVE_FEATURES whpx_xsave_cap;
+=======
+static bool whp_dispatch_initialized;
+static HMODULE hWinHvPlatform, hWinHvEmulation;
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
 
 struct whpx_state whpx_global;
 struct WHPDispatch whp_dispatch;
@@ -722,6 +730,7 @@ static int whpx_handle_mmio(CPUState *cpu, WHV_MEMORY_ACCESS_CONTEXT *ctx)
     }
 
     if (!emu_status.EmulationSuccessful) {
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
         if (emu_status.GuestCannotBeFaulted) {
             /* Resume the VP. This is a workaround for a WHP bug until the
              * fix is available in the OS.
@@ -787,6 +796,10 @@ static int whpx_handle_mmio(CPUState *cpu, WHV_MEMORY_ACCESS_CONTEXT *ctx)
             ctx_copy.Gpa,
             ctx_copy.Gva);
 
+=======
+        error_report("WHPX: Failed to emulate MMIO access with"
+                     " EmulatorReturnStatus: %u", emu_status.AsUINT32);
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
         return -1;
     }
 
@@ -1116,6 +1129,8 @@ static int whpx_vcpu_run(CPUState *cpu)
 
             memset(reg_values, 0, sizeof(reg_values));
 
+            memset(reg_values, 0, sizeof(reg_values));
+
             rip = vcpu->exit_ctx.VpContext.Rip +
                   vcpu->exit_ctx.VpContext.InstructionLength;
             switch (vcpu->exit_ctx.CpuidAccess.Rax) {
@@ -1290,6 +1305,7 @@ int whpx_init_vcpu(CPUState *cpu)
     //            "State blocked due to non-migratable CPUID feature support,"
     //            "dirty memory tracking support, and XSAVE/XRSTOR support");
 
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
     //     (void)migrate_add_blocker(whpx_migration_blocker, &local_error);
     //     if (local_error) {
     //         error_report_err(local_error);
@@ -1298,6 +1314,16 @@ int whpx_init_vcpu(CPUState *cpu)
     //         return -EINVAL;
     //     }
     // }
+=======
+        (void)migrate_add_blocker(whpx_migration_blocker, &local_error);
+        if (local_error) {
+            error_report_err(local_error);
+            migrate_del_blocker(whpx_migration_blocker);
+            error_free(whpx_migration_blocker);
+            return -EINVAL;
+        }
+    }
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
 
     vcpu = g_malloc0(sizeof(struct whpx_vcpu));
 
@@ -1306,7 +1332,13 @@ int whpx_init_vcpu(CPUState *cpu)
         return -ENOMEM;
     }
 
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
     hr = whp_dispatch.WHvEmulatorCreateEmulator(&whpx_emu_callbacks, &vcpu->emulator);
+=======
+    hr = whp_dispatch.WHvEmulatorCreateEmulator(
+        &whpx_emu_callbacks,
+        &vcpu->emulator);
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
     if (FAILED(hr)) {
         error_report("WHPX: Failed to setup instruction completion support,"
                      " hr=%08lx", hr);
@@ -1314,7 +1346,12 @@ int whpx_init_vcpu(CPUState *cpu)
         return -EINVAL;
     }
 
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
     hr = whp_dispatch.WHvCreateVirtualProcessor(whpx->partition, cpu->cpu_index, 0);
+=======
+    hr = whp_dispatch.WHvCreateVirtualProcessor(
+        whpx->partition, cpu->cpu_index, 0);
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
     if (FAILED(hr)) {
         error_report("WHPX: Failed to create a virtual processor,"
                      " hr=%08lx", hr);
@@ -1368,7 +1405,12 @@ void whpx_destroy_vcpu(CPUState *cpu)
 void whpx_vcpu_kick(CPUState *cpu)
 {
     struct whpx_state *whpx = &whpx_global;
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
     whp_dispatch.WHvCancelRunVirtualProcessor(whpx->partition, cpu->cpu_index, 0);
+=======
+    whp_dispatch.WHvCancelRunVirtualProcessor(
+        whpx->partition, cpu->cpu_index, 0);
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
 }
 
 /*
@@ -1532,6 +1574,7 @@ static void whpx_update_mapping(hwaddr start_pa, ram_addr_t size,
     }
     */
 
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
     whpx_set_ram(host_va,
                  start_pa,
                  size,
@@ -1539,6 +1582,28 @@ static void whpx_update_mapping(hwaddr start_pa, ram_addr_t size,
                   WHvMapGpaRangeFlagExecute |
                   (rom ? 0 : WHvMapGpaRangeFlagWrite)),
                  add);
+=======
+    if (add) {
+        hr = whp_dispatch.WHvMapGpaRange(whpx->partition,
+                                         host_va,
+                                         start_pa,
+                                         size,
+                                         (WHvMapGpaRangeFlagRead |
+                                          WHvMapGpaRangeFlagExecute |
+                                          (rom ? 0 : WHvMapGpaRangeFlagWrite)));
+    } else {
+        hr = whp_dispatch.WHvUnmapGpaRange(whpx->partition,
+                                           start_pa,
+                                           size);
+    }
+
+    if (FAILED(hr)) {
+        error_report("WHPX: Failed to %s GPA range '%s' PA:%p, Size:%p bytes,"
+                     " Host:%p, hr=%08lx",
+                     (add ? "MAP" : "UNMAP"), name,
+                     (void *)(uintptr_t)start_pa, (void *)size, host_va, hr);
+    }
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
 }
 
 static void whpx_process_section(MemoryRegionSection *section, int add)
@@ -1574,6 +1639,7 @@ static void whpx_process_section(MemoryRegionSection *section, int add)
 
     whpx_update_mapping(start_pa, size, (void *)(uintptr_t)host_va, add,
                         memory_region_is_rom(mr), mr->name);
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
 }
 
 // User backed memory region API
@@ -1621,6 +1687,8 @@ static void whpx_user_backed_ram_unmap(uint64_t gpa, uint64_t size) {
             (unsigned long long)gpa,
             (unsigned long long)(gpa + size));
     }
+=======
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
 }
 
 static void whpx_region_add(MemoryListener *listener,
@@ -1720,7 +1788,11 @@ static int whpx_accel_init(MachineState *ms)
 
     whpx = &whpx_global;
 
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
     if (!init_whp_dispatch()){
+=======
+    if (!init_whp_dispatch()) {
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
         ret = -ENOSYS;
         goto error;
     }
@@ -1812,6 +1884,15 @@ static int whpx_accel_init(MachineState *ms)
         goto error;
     }
 
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
+=======
+    UINT32 cpuidExitList[] = {1};
+    hr = whp_dispatch.WHvSetPartitionProperty(
+        whpx->partition,
+        WHvPartitionPropertyCodeCpuidExitList,
+        cpuidExitList,
+        RTL_NUMBER_OF(cpuidExitList) * sizeof(UINT32));
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
     if (FAILED(hr)) {
         error_report("WHPX: Failed to enable partition extended X64MsrExit and CpuidExit's"
                      " hr=%08lx", hr);
@@ -1868,6 +1949,7 @@ static void whpx_type_init(void)
     type_register_static(&whpx_accel_type);
 }
 
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
 bool init_whp_dispatch() {
     char* lib_name;
     HMODULE hLib;
@@ -1910,6 +1992,55 @@ bool init_whp_dispatch() {
         FreeLibrary(hWinHvPlatform);
     if (hWinHvEmulation)
         FreeLibrary(hWinHvEmulation);
+=======
+bool init_whp_dispatch(void)
+{
+    const char *lib_name;
+    HMODULE hLib;
+
+    if (whp_dispatch_initialized) {
+        return true;
+    }
+
+    #define WHP_LOAD_FIELD(return_type, function_name, signature) \
+        whp_dispatch.function_name = \
+            (function_name ## _t)GetProcAddress(hLib, #function_name); \
+        if (!whp_dispatch.function_name) { \
+            error_report("Could not load function %s from library %s.", \
+                         #function_name, lib_name); \
+            goto error; \
+        } \
+
+    lib_name = "WinHvPlatform.dll";
+    hWinHvPlatform = LoadLibrary(lib_name);
+    if (!hWinHvPlatform) {
+        error_report("Could not load library %s.", lib_name);
+        goto error;
+    }
+    hLib = hWinHvPlatform;
+    LIST_WINHVPLATFORM_FUNCTIONS(WHP_LOAD_FIELD)
+
+    lib_name = "WinHvEmulation.dll";
+    hWinHvEmulation = LoadLibrary(lib_name);
+    if (!hWinHvEmulation) {
+        error_report("Could not load library %s.", lib_name);
+        goto error;
+    }
+    hLib = hWinHvEmulation;
+    LIST_WINHVEMULATION_FUNCTIONS(WHP_LOAD_FIELD)
+
+    whp_dispatch_initialized = true;
+    return true;
+
+    error:
+
+    if (hWinHvPlatform) {
+        FreeLibrary(hWinHvPlatform);
+    }
+    if (hWinHvEmulation) {
+        FreeLibrary(hWinHvEmulation);
+    }
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
     return false;
 }
 

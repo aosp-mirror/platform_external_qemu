@@ -33,9 +33,9 @@
 #include "qemu/timer.h"
 #include "qemu/envlist.h"
 #include "elf.h"
-#include "exec/log.h"
 #include "trace/control.h"
 #include "target_elf.h"
+#include "cpu_loop-common.h"
 
 char *exec_path;
 
@@ -49,17 +49,6 @@ static const char *cpu_type;
 unsigned long mmap_min_addr;
 unsigned long guest_base;
 int have_guest_base;
-
-#define EXCP_DUMP(env, fmt, ...)                                        \
-do {                                                                    \
-    CPUState *cs = ENV_GET_CPU(env);                                    \
-    fprintf(stderr, fmt , ## __VA_ARGS__);                              \
-    cpu_dump_state(cs, stderr, fprintf, 0);                             \
-    if (qemu_log_separate()) {                                          \
-        qemu_log(fmt, ## __VA_ARGS__);                                  \
-        log_cpu_state(cs, 0);                                           \
-    }                                                                   \
-} while (0)
 
 /*
  * When running 32-on-64 we should make sure we can fit all of the possible
@@ -159,6 +148,7 @@ void fork_end(int child)
     }
 }
 
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
 #ifdef TARGET_I386
 /***********************************************************/
 /* CPUX86 core interface */
@@ -4022,6 +4012,8 @@ void cpu_loop(CPUXtensaState *env)
 
 #endif /* TARGET_XTENSA */
 
+=======
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
 __thread CPUState *thread_cpu;
 
 bool qemu_cpu_is_self(CPUState *cpu)
@@ -4544,9 +4536,8 @@ int main(int argc, char **argv, char **envp)
     }
     cpu_type = parse_cpu_model(cpu_model);
 
+    /* init tcg before creating CPUs and to get qemu_host_page_size */
     tcg_exec_init(0);
-    /* NOTE: we need to init the CPU at this stage to get
-       qemu_host_page_size */
 
     cpu = cpu_create(cpu_type);
     env = cpu->env_ptr;
@@ -4566,7 +4557,7 @@ int main(int argc, char **argv, char **envp)
     envlist_free(envlist);
 
     /*
-     * Now that page sizes are configured in cpu_init() we can do
+     * Now that page sizes are configured in tcg_exec_init() we can do
      * proper page alignment for guest_base.
      */
     guest_base = HOST_PAGE_ALIGN(guest_base);
@@ -4677,6 +4668,7 @@ int main(int argc, char **argv, char **envp)
     tcg_prologue_init(tcg_ctx);
     tcg_region_init();
 
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
 #if defined(TARGET_I386)
     env->cr[0] = CR0_PG_MASK | CR0_WP_MASK | CR0_PE_MASK;
     env->hflags |= HF_PE_MASK | HF_CPL_MASK;
@@ -5076,6 +5068,9 @@ int main(int argc, char **argv, char **envp)
     /* This will be filled in on the first SYS_HEAPINFO call.  */
     ts->heap_limit = 0;
 #endif
+=======
+    target_cpu_copy_regs(env, regs);
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
 
     if (gdbstub_port) {
         if (gdbserver_start(gdbstub_port) < 0) {

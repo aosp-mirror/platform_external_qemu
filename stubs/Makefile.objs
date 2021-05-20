@@ -34,8 +34,12 @@ stub-obj-y += uuid.o
 stub-obj-y += vm-stop.o
 stub-obj-y += vmstate.o
 stub-obj-$(CONFIG_WIN32) += fd-register.o
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
 stub-obj-$(CONFIG_WIN32) += win32-stubs.o
 stub-obj-y += qmp_pc_dimm.o
+=======
+stub-obj-y += qmp_memory_device.o
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)
 stub-obj-y += target-monitor-defs.o
 stub-obj-y += target-get-monitor-def.o
 stub-obj-y += pc_madt_cpu_entry.o

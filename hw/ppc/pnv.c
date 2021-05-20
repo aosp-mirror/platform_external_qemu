@@ -36,6 +36,7 @@
 #include "monitor/monitor.h"
 #include "hw/intc/intc.h"
 #include "hw/ipmi/ipmi.h"
+#include "target/ppc/mmu-hash64.h"
 
 #include "hw/ppc/xics.h"
 #include "hw/ppc/pnv_xscom.h"
@@ -120,9 +121,9 @@ static int get_cpus_node(void *fdt)
  */
 static void pnv_dt_core(PnvChip *chip, PnvCore *pc, void *fdt)
 {
-    CPUState *cs = CPU(DEVICE(pc->threads));
+    PowerPCCPU *cpu = pc->threads[0];
+    CPUState *cs = CPU(cpu);
     DeviceClass *dc = DEVICE_GET_CLASS(cs);
-    PowerPCCPU *cpu = POWERPC_CPU(cs);
     int smt_threads = CPU_CORE(pc)->nr_threads;
     CPUPPCState *env = &cpu->env;
     PowerPCCPUClass *pcc = POWERPC_CPU_GET_CLASS(cs);
@@ -179,7 +180,7 @@ static void pnv_dt_core(PnvChip *chip, PnvCore *pc, void *fdt)
 
     _FDT((fdt_setprop_cell(fdt, offset, "timebase-frequency", tbfreq)));
     _FDT((fdt_setprop_cell(fdt, offset, "clock-frequency", cpufreq)));
-    _FDT((fdt_setprop_cell(fdt, offset, "ibm,slb-size", env->slb_nr)));
+    _FDT((fdt_setprop_cell(fdt, offset, "ibm,slb-size", cpu->hash64_opts->slb_size)));
     _FDT((fdt_setprop_string(fdt, offset, "status", "okay")));
     _FDT((fdt_setprop(fdt, offset, "64-bit", NULL, 0)));
 
@@ -187,7 +188,7 @@ static void pnv_dt_core(PnvChip *chip, PnvCore *pc, void *fdt)
         _FDT((fdt_setprop(fdt, offset, "ibm,purr", NULL, 0)));
     }
 
-    if (env->mmu_model & POWERPC_MMU_1TSEG) {
+    if (ppc_hash64_has(cpu, PPC_HASH64_1TSEG)) {
         _FDT((fdt_setprop(fdt, offset, "ibm,processor-segment-sizes",
                            segs, sizeof(segs))));
     }
@@ -209,8 +210,8 @@ static void pnv_dt_core(PnvChip *chip, PnvCore *pc, void *fdt)
         _FDT((fdt_setprop_cell(fdt, offset, "ibm,dfp", 1)));
     }
 
-    page_sizes_prop_size = ppc_create_page_sizes_prop(env, page_sizes_prop,
-                                                  sizeof(page_sizes_prop));
+    page_sizes_prop_size = ppc_create_page_sizes_prop(cpu, page_sizes_prop,
+                                                      sizeof(page_sizes_prop));
     if (page_sizes_prop_size) {
         _FDT((fdt_setprop(fdt, offset, "ibm,segment-page-sizes",
                            page_sizes_prop, page_sizes_prop_size)));
@@ -648,7 +649,7 @@ static void pnv_init(MachineState *machine)
     pnv->isa_bus = pnv_isa_create(pnv->chips[0]);
 
     /* Create serial port */
-    serial_hds_isa_init(pnv->isa_bus, 0, MAX_SERIAL_PORTS);
+    serial_hds_isa_init(pnv->isa_bus, 0, MAX_ISA_SERIAL_PORTS);
 
     /* Create an RTC ISA device too */
     mc146818_rtc_init(pnv->isa_bus, 2000, NULL);
@@ -848,9 +849,8 @@ static void pnv_chip_icp_realize(PnvChip *chip, Error **errp)
     }
 }
 
-static void pnv_chip_realize(DeviceState *dev, Error **errp)
+static void pnv_chip_core_realize(PnvChip *chip, Error **errp)
 {
-    PnvChip *chip = PNV_CHIP(dev);
     Error *error = NULL;
     PnvChipClass *pcc = PNV_CHIP_GET_CLASS(chip);
     const char *typename = pnv_chip_core_typename(chip);
@@ -861,14 +861,6 @@ static void pnv_chip_realize(DeviceState *dev, Error **errp)
         error_setg(errp, "Unable to find PowerNV CPU Core '%s'", typename);
         return;
     }
-
-    /* XSCOM bridge */
-    pnv_xscom_realize(chip, &error);
-    if (error) {
-        error_propagate(errp, error);
-        return;
-    }
-    sysbus_mmio_map(SYS_BUS_DEVICE(chip), 0, PNV_XSCOM_BASE(chip));
 
     /* Cores */
     pnv_chip_core_sanitize(chip, &error);
@@ -916,6 +908,27 @@ static void pnv_chip_realize(DeviceState *dev, Error **errp)
         pnv_xscom_add_subregion(chip, xscom_core_base,
                                 &PNV_CORE(pnv_core)->xscom_regs);
         i++;
+    }
+}
+
+static void pnv_chip_realize(DeviceState *dev, Error **errp)
+{
+    PnvChip *chip = PNV_CHIP(dev);
+    Error *error = NULL;
+
+    /* XSCOM bridge */
+    pnv_xscom_realize(chip, &error);
+    if (error) {
+        error_propagate(errp, error);
+        return;
+    }
+    sysbus_mmio_map(SYS_BUS_DEVICE(chip), 0, PNV_XSCOM_BASE(chip));
+
+    /* Cores */
+    pnv_chip_core_realize(chip, &error);
+    if (error) {
+        error_propagate(errp, error);
+        return;
     }
 
     /* Create LPC controller */

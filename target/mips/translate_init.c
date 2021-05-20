@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (f87ae6 Merge "Fix build break." into emu-master-dev)
 /*
  *  MIPS emulation for qemu: CPU initialisation routines.
  *
@@ -882,3 +883,5 @@ static void msa_reset(CPUMIPSState *env)
     /* set proper signanling bit meaning ("1" means "quiet") */
     set_snan_bit_is_one(0, &env->active_tc.msa_fp_status);
 }
+=======
+>>>>>>> BRANCH (bc753d audio/hda: enable new timer code by default.)

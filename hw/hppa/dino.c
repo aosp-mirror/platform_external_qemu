@@ -137,7 +137,8 @@ static void gsc_to_pci_forwarding(DinoState *s)
 }
 
 static bool dino_chip_mem_valid(void *opaque, hwaddr addr,
-                                unsigned size, bool is_write)
+                                unsigned size, bool is_write,
+                                MemTxAttrs attrs)
 {
     switch (addr) {
     case DINO_IAR0:
@@ -403,13 +404,10 @@ static void dino_set_irq(void *opaque, int irq, int level)
 static int dino_pci_map_irq(PCIDevice *d, int irq_num)
 {
     int slot = d->devfn >> 3;
-    int local_irq;
 
     assert(irq_num >= 0 && irq_num <= 3);
 
-    local_irq = slot & 0x03;
-
-    return local_irq;
+    return slot & 0x03;
 }
 
 static void dino_set_timer_irq(void *opaque, int irq, int level)
