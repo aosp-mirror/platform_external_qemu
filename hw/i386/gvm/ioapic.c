@@ -143,7 +143,7 @@ static void gvm_ioapic_realize(DeviceState *dev, Error **errp)
 {
     IOAPICCommonState *s = IOAPIC_COMMON(dev);
 
-    memory_region_init_reservation(&s->io_memory, NULL, "gvm-ioapic", 0x1000);
+    memory_region_init_io(&s->io_memory, OBJECT(dev), NULL, NULL, "gvm-ioapic", 0x1000);
 
     qdev_init_gpio_in(dev, gvm_ioapic_set_irq, IOAPIC_NUM_PINS);
 }

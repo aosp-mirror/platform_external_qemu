@@ -12,7 +12,9 @@
 
 #include "qemu/osdep.h"
 #include <sys/ioctl.h>
+#ifdef __linux__
 #include <linux/vfio.h>
+#endif
 #include "qapi/error.h"
 #include "exec/ramlist.h"
 #include "exec/cpu-common.h"

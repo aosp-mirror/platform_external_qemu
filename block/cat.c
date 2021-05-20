@@ -191,7 +191,7 @@ cat_co_readv(BlockDriverState *bs, int64_t sector_num, int nb_sectors, QEMUIOVec
 
 static int coroutine_fn
 cat_co_writev(BlockDriverState *bs, int64_t sector_num, int nb_sectors,
-              QEMUIOVector *qiov)
+              QEMUIOVector *qiov, int flags)
 {
     return cat_co_rw(bs, sector_num, nb_sectors, qiov, 1);
 }

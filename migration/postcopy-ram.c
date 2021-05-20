@@ -320,7 +320,9 @@ static bool ufd_check_and_apply(int ufd, MigrationIncomingState *mis)
 /* Callback from postcopy_ram_supported_by_host block iterator.
  */
 static int test_ramblock_postcopiable(const char *block_name, void *host_addr,
-                             ram_addr_t offset, ram_addr_t length, void *opaque)
+                             ram_addr_t offset, ram_addr_t length,
+                             uint32_t flags, const char* path, bool readonly, // Android
+                             void *opaque)
 {
     RAMBlock *rb = qemu_ram_block_by_name(block_name);
     size_t pagesize = qemu_ram_pagesize(rb);
@@ -374,7 +376,7 @@ bool postcopy_ram_supported_by_host(MigrationIncomingState *mis)
     }
 
     /* We don't support postcopy with shared RAM yet */
-    if (qemu_ram_foreach_migratable_block(test_ramblock_postcopiable, NULL)) {
+    if (qemu_ram_foreach_migrate_block_with_file_info(test_ramblock_postcopiable, NULL)) {
         goto out;
     }
 
@@ -444,7 +446,9 @@ out:
  * opaque should be the MIS.
  */
 static int init_range(const char *block_name, void *host_addr,
-                      ram_addr_t offset, ram_addr_t length, void *opaque)
+                      ram_addr_t offset, ram_addr_t length,
+                      uint32_t flags, const char* path, bool readonly, // Android
+                      void *opaque)
 {
     trace_postcopy_init_range(block_name, host_addr, offset, length);
 
@@ -466,7 +470,9 @@ static int init_range(const char *block_name, void *host_addr,
  * opaque should be the MIS.
  */
 static int cleanup_range(const char *block_name, void *host_addr,
-                        ram_addr_t offset, ram_addr_t length, void *opaque)
+                        ram_addr_t offset, ram_addr_t length,
+                        uint32_t flags, const char* path, bool readonly, // Android
+                        void *opaque)
 {
     MigrationIncomingState *mis = opaque;
     struct uffdio_range range_struct;
@@ -502,7 +508,7 @@ static int cleanup_range(const char *block_name, void *host_addr,
  */
 int postcopy_ram_incoming_init(MigrationIncomingState *mis, size_t ram_pages)
 {
-    if (qemu_ram_foreach_migratable_block(init_range, NULL)) {
+    if (qemu_ram_foreach_migrate_block_with_file_info(init_range, NULL)) {
         return -1;
     }
 
@@ -524,7 +530,7 @@ int postcopy_ram_incoming_cleanup(MigrationIncomingState *mis)
             return -1;
         }
 
-        if (qemu_ram_foreach_migratable_block(cleanup_range, mis)) {
+        if (qemu_ram_foreach_migrate_block_with_file_info(cleanup_range, mis)) {
             return -1;
         }
         /* Let the fault thread quit */
@@ -572,7 +578,9 @@ int postcopy_ram_incoming_cleanup(MigrationIncomingState *mis)
  * Disable huge pages on an area
  */
 static int nhp_range(const char *block_name, void *host_addr,
-                    ram_addr_t offset, ram_addr_t length, void *opaque)
+                    ram_addr_t offset, ram_addr_t length,
+                    uint32_t flags, const char* path, bool readonly, // Android
+                    void *opaque)
 {
     trace_postcopy_nhp_range(block_name, host_addr, offset, length);
 
@@ -593,7 +601,7 @@ static int nhp_range(const char *block_name, void *host_addr,
  */
 int postcopy_ram_prepare_discard(MigrationIncomingState *mis)
 {
-    if (qemu_ram_foreach_migratable_block(nhp_range, mis)) {
+    if (qemu_ram_foreach_migrate_block_with_file_info(nhp_range, mis)) {
         return -1;
     }
 
@@ -613,6 +621,7 @@ int postcopy_ram_prepare_discard(MigrationIncomingState *mis)
  */
 static int ram_block_enable_notify(const char *block_name, void *host_addr,
                                    ram_addr_t offset, ram_addr_t length,
+                                   uint32_t flags, const char* path, bool readonly, // Android
                                    void *opaque)
 {
     MigrationIncomingState *mis = opaque;
@@ -1099,7 +1108,7 @@ int postcopy_ram_enable_notify(MigrationIncomingState *mis)
     mis->have_fault_thread = true;
 
     /* Mark so that we get notified of accesses to unwritten areas */
-    if (qemu_ram_foreach_migratable_block(ram_block_enable_notify, mis)) {
+    if (qemu_ram_foreach_migrate_block_with_file_info(ram_block_enable_notify, mis)) {
         return -1;
     }
 

@@ -619,7 +619,11 @@ static int rdma_add_block(RDMAContext *rdma, const char *block_name,
  * are so that we can register them individually.
  */
 static int qemu_rdma_init_one_block(const char *block_name, void *host_addr,
-    ram_addr_t block_offset, ram_addr_t length, void *opaque)
+    ram_addr_t block_offset, ram_addr_t length,
+    uint32_t flags, const char* path, bool readonly, // Android
+    void *opaque)
+
+    void *opaque)
 {
     return rdma_add_block(opaque, block_name, host_addr, block_offset, length);
 }
@@ -635,7 +639,7 @@ static int qemu_rdma_init_ram_blocks(RDMAContext *rdma)
 
     assert(rdma->blockmap == NULL);
     memset(local, 0, sizeof *local);
-    qemu_ram_foreach_migratable_block(qemu_rdma_init_one_block, rdma);
+    qemu_ram_foreach_migratable_block_with_file_info(qemu_rdma_init_one_block, rdma);
     trace_qemu_rdma_init_ram_blocks(local->nb_blocks);
     rdma->dest_blocks = g_new0(RDMADestBlock,
                                rdma->local_ram_blocks.nb_blocks);

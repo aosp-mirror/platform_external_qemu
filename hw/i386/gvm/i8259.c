@@ -123,8 +123,8 @@ static void gvm_pic_realize(DeviceState *dev, Error **errp)
     PICCommonState *s = PIC_COMMON(dev);
     GVMPICClass *kpc = GVM_PIC_GET_CLASS(dev);
 
-    memory_region_init_reservation(&s->base_io, NULL, "gvm-pic", 2);
-    memory_region_init_reservation(&s->elcr_io, NULL, "gvm-elcr", 1);
+    memory_region_init_io(&s->base_io, OBJECT(dev), NULL, NULL, "gvim-pic", 2);
+    memory_region_init_io(&s->elcr_io, OBJECT(dev), NULL, NULL, "gvim-elcr", 1);
 
     kpc->parent_realize(dev, errp);
 }
