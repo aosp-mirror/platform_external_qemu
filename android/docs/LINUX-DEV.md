@@ -135,21 +135,47 @@ If all went well you can now target windows as follows:
 
 ***It is higly recommended to use a mac for mac development, vs cross compilation.***
 
-It is possible to cross compile from linux to mac os. This is mainly useful to quickly discover compilation issues, as you will not be able to actually run the code.
+It is possible to cross compile from linux to mac os. This is mainly useful to
+quickly discover compilation issues, as you will not be able to actually run the
+code.  The cross compiler toolchain can target both arm64 as well as x86_64. The
+instructions below assume you are on a Debian/Ubuntu based system.
 
-The windows target requires you to install the a cross compilers. These libraries need manual intervention to be installed on your linux machine. You will need to
-obtain a xcode.xip with MacOS-SDK (10.13-10.15) (Xcode 11.3 has been tested). You can obtain it from [go/xcode](http://go/xcode) if you're within Google or from
-[Apple](https://developer.apple.com/download/more.).
+Make sure you have llvm-11 available on your local system. (See
+https://apt.llvm.org/ if the lines below fail)
+
+```sh
+   sudo apt-get update
+   sudo apt-get install -y llvm-11-dev clang-11 llvm-11
+```
+
+If you are withing Google you can get started by using one of the prebuilt
+toolchains and install it as follows:
+
+```sh
+   gsutil cp gs://emu-dev-development/osxcross-debian-buster-slim-MacOSX11.3.sdk.tar.gz /tmp
+   ./android/scripts/unix/activate-darwin-cross.sh --xcode-tar=/tmp/osxcross-debian-buster-slim-MacOSX11.3.sdk.tar.gz --install
+```
+
+If you are outside of Google you will have to construct the toolchain yourself.
+You will need to obtain a xcode.xip with MacOS-SDK (11.0>) (Xcode 12.3 has been
+tested). You can obtain it from [go/xcode](http://go/xcode) if you're within
+Google or from [Apple](https://developer.apple.com/download/more.).
+
 
 Once you have obtained the .xip you can create the toolchain as follows:
 
 ```sh
-  ./android/scripts/unix/activate-darwin-cross.sh --xcode=/data/.../Xcode_11.3.xip
+  ./android/scripts/unix/activate-darwin-cross.sh --xcode=/data/.../Xcode_12.3.xip --install
 ```
+
 
 After that succeeds you should be able to target darwin:
 
     ./android/rebuild.sh --target darwin
+
+Or the arm target:
+
+    ./android/rebuild.sh --target darwin_aarch64
 
 
 ### Sending patches
