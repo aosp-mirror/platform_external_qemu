@@ -17,6 +17,7 @@ import json
 import logging
 import os
 import platform
+import re
 import subprocess
 
 
@@ -148,6 +149,40 @@ def read_simple_properties(fname):
     return res
 
 
+def infer_target(target):
+    target = target.lower().strip()
+    host = platform.system().lower()
+    match = re.match("(windows|linux|darwin)([-_](aarch64|x86_64))?", target)
+
+    if match:
+        if not match.group(3):
+            # Let's infer the architecture
+            aarch = platform.machine()
+
+            # Note, this is far from complete, and is best effort, if this does
+            # not work you should specify the architecture yourself as the
+            # warning is pointing out.
+            if aarch == "arm64":
+                aarch = "aarch64"
+            if aarch != "aarch64":
+              aarch = "x86_64"
+
+            if host != target:
+                logging.warning("\n\n-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+                logging.warning("--- WARNNG ---  You are cross compiling on %s with target %s and did not specify a machine architecture. Assuming: %s", host, target, aarch)
+                logging.warning("--- WARNNG ---  If this does not work you should really specify the desired machine architecture")
+                logging.warning("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n")
+
+            target = target + "-" + aarch
+        else:
+            target = match.group(1) + "-" + match.group(3)
+
+    if target not in ENUMS["Toolchain"]:
+        raise Exception("Target {} does not exist, we only support: {}.".format(target, ", ".join(ENUMS["Toolchain"].keys())))
+
+    return target
+
+
 ENUMS = {
     "Crash": {
         "prod": ["-DOPTION_CRASHUPLOAD=PROD"],
@@ -166,10 +201,10 @@ ENUMS = {
         "visualstudio": ["-G", "Visual Studio 15 2017 Win64"],
     },
     "Toolchain": {
-        "windows": "toolchain-windows_msvc-x86_64.cmake",
-        "linux": "toolchain-linux-x86_64.cmake",
-        "darwin": "toolchain-darwin-x86_64.cmake",
-        "linux_aarch64": "toolchain-linux-aarch64.cmake",
-        "darwin_aarch64": "toolchain-darwin-aarch64.cmake",
+        "windows-x86_64": "toolchain-windows_msvc-x86_64.cmake",
+        "linux-x86_64": "toolchain-linux-x86_64.cmake",
+        "darwin-x86_64": "toolchain-darwin-x86_64.cmake",
+        "linux-aarch64": "toolchain-linux-aarch64.cmake",
+        "darwin-aarch64": "toolchain-darwin-aarch64.cmake",
     },
 }
