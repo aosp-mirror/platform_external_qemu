@@ -74,8 +74,6 @@ else()
         "True if the emulator should be build with WEBRTC support. Defaults on for Linux"
   )
 endif()
-set(QEMU_UPSTREAM TRUE
-    CACHE BOOL "True if the upstream version of qemu should be build.")
 set(ANDROIDSTUDIO FALSE
     CACHE BOOL
           "Deprecated. Android studio is using the gRPC interface directly.")
@@ -131,7 +129,6 @@ endif()
 if(BUILDING_FOR_AARCH64)
   set(OPTION_MINBUILD TRUE)
   set(QTWEBENGINE FALSE)
-  set(QEMU_UPSTREAM FALSE)
   set(WEBRTC FALSE)
 endif()
 
@@ -913,19 +910,6 @@ if(NOT OPTION_AEMU_LIBS_ONLY)
     android_add_qemu_headless_executable(
       i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
     android_add_qemu_headless_executable(
-      armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
-  endif()
-
-  # and the upstream qemu targets, if desired.
-  if(QEMU_UPSTREAM)
-    message(STATUS "Building upstream qemu.")
-    android_add_qemu_upstream_executable(
-      i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
-    android_add_qemu_upstream_executable(
-      x86_64 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
-    android_add_qemu_upstream_executable(
-      aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
-    android_add_qemu_upstream_executable(
       armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
   endif()
 
