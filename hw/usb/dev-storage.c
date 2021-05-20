@@ -14,13 +14,12 @@
 #include "qemu/option.h"
 #include "qemu/config-file.h"
 #include "hw/usb.h"
-#include "hw/usb/desc.h"
+#include "desc.h"
 #include "hw/scsi/scsi.h"
 #include "ui/console.h"
 #include "monitor/monitor.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/block-backend.h"
-#include "sysemu/blockdev.h"
 #include "qapi/visitor.h"
 #include "qemu/cutils.h"
 
@@ -589,13 +588,6 @@ static const struct SCSIBusInfo usb_msd_scsi_info_bot = {
     .load_request = usb_msd_load_request,
 };
 
-static void usb_msd_unrealize_storage(USBDevice *dev, Error **errp)
-{
-    MSDState *s = USB_STORAGE_DEV(dev);
-
-    object_unref(OBJECT(&s->bus));
-}
-
 static void usb_msd_storage_realize(USBDevice *dev, Error **errp)
 {
     MSDState *s = USB_STORAGE_DEV(dev);
@@ -607,7 +599,6 @@ static void usb_msd_storage_realize(USBDevice *dev, Error **errp)
         return;
     }
 
-    blkconf_serial(&s->conf, &dev->serial);
     blkconf_blocksizes(&s->conf);
     if (!blkconf_apply_backend_options(&s->conf, blk_is_read_only(blk), true,
                                        errp)) {
@@ -642,13 +633,6 @@ static void usb_msd_storage_realize(USBDevice *dev, Error **errp)
     }
     usb_msd_handle_reset(dev);
     s->scsi_dev = scsi_dev;
-}
-
-static void usb_msd_bot_unrealize(USBDevice *dev, Error **errp)
-{
-    MSDState *s = USB_STORAGE_DEV(dev);
-
-    object_unref(OBJECT(&s->bus));
 }
 
 static void usb_msd_bot_realize(USBDevice *dev, Error **errp)
@@ -714,7 +698,6 @@ static void usb_msd_class_storage_initfn(ObjectClass *klass, void *data)
     USBDeviceClass *uc = USB_DEVICE_CLASS(klass);
 
     uc->realize = usb_msd_storage_realize;
-    uc->unrealize = usb_msd_unrealize_storage;
     dc->props = msd_properties;
 }
 
@@ -777,7 +760,6 @@ static void usb_msd_class_bot_initfn(ObjectClass *klass, void *data)
     USBDeviceClass *uc = USB_DEVICE_CLASS(klass);
 
     uc->realize = usb_msd_bot_realize;
-    uc->unrealize = usb_msd_bot_unrealize;
     uc->attached_settable = true;
 }
 

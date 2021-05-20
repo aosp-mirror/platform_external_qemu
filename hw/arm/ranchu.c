@@ -427,7 +427,7 @@ static void create_serial_device(int serial_index, const VirtBoardInfo *vbi,
                                  int num_clocks)
 {
     DeviceState *dev = qdev_create(NULL, sysbus_name);
-    qdev_prop_set_chr(dev, "chardev", serial_hds[serial_index]);
+    qdev_prop_set_chr(dev, "chardev", serial_hd(serial_index));
     init_simple_device(dev, vbi, pic, devid, sysbus_name, compat,
                        num_compat_strings, clocks, num_clocks);
 }

@@ -17,7 +17,6 @@
 #include "qemu/error-report.h"
 #include "qapi/error.h"
 #include "hw/hw.h"
-#include "sysemu/blockdev.h"
 #include "hw/boards.h"
 #include "sysemu/kvm.h"
 #include "kvm_ppc.h"
@@ -27,8 +26,8 @@
 #include "elf.h"
 #include "exec/address-spaces.h"
 #include "exec/memory.h"
-#include "hw/ppc/ppc440.h"
-#include "hw/ppc/ppc405.h"
+#include "ppc440.h"
+#include "ppc405.h"
 #include "hw/block/flash.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/qtest.h"
@@ -522,14 +521,14 @@ static void sam460ex_init(MachineState *machine)
 
     /* SoC has 4 UARTs
      * but board has only one wired and two are present in fdt */
-    if (serial_hds[0] != NULL) {
+    if (serial_hd(0) != NULL) {
         serial_mm_init(address_space_mem, 0x4ef600300, 0, uic[1][1],
-                       PPC_SERIAL_MM_BAUDBASE, serial_hds[0],
+                       PPC_SERIAL_MM_BAUDBASE, serial_hd(0),
                        DEVICE_BIG_ENDIAN);
     }
-    if (serial_hds[1] != NULL) {
+    if (serial_hd(1) != NULL) {
         serial_mm_init(address_space_mem, 0x4ef600400, 0, uic[0][1],
-                       PPC_SERIAL_MM_BAUDBASE, serial_hds[1],
+                       PPC_SERIAL_MM_BAUDBASE, serial_hd(1),
                        DEVICE_BIG_ENDIAN);
     }
 

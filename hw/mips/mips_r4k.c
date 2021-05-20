@@ -30,7 +30,6 @@
 #include "hw/timer/mc146818rtc.h"
 #include "hw/input/i8042.h"
 #include "hw/timer/i8254.h"
-#include "sysemu/block-backend.h"
 #include "exec/address-spaces.h"
 #include "sysemu/qtest.h"
 #include "qemu/error-report.h"
@@ -274,7 +273,7 @@ void mips_r4k_init(MachineState *machine)
 
     pit = i8254_pit_init(isa_bus, 0x40, 0, NULL);
 
-    serial_hds_isa_init(isa_bus, 0, MAX_SERIAL_PORTS);
+    serial_hds_isa_init(isa_bus, 0, MAX_ISA_SERIAL_PORTS);
 
     isa_vga_init(isa_bus);
 

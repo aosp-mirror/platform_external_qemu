@@ -78,6 +78,11 @@ enum {
  */
 #define personality(pers)       (pers & PER_MASK)
 
+int info_is_fdpic(struct image_info *info)
+{
+    return info->personality == PER_LINUX_FDPIC;
+}
+
 /* this flag is uneffective under linux too, should be deleted */
 #ifndef MAP_DENYWRITE
 #define MAP_DENYWRITE 0
@@ -287,6 +292,25 @@ static inline void init_thread(struct target_pt_regs *regs,
     /* For uClinux PIC binaries.  */
     /* XXX: Linux does this only on ARM with no MMU (do we care ?) */
     regs->uregs[10] = infop->start_data;
+
+    /* Support ARM FDPIC.  */
+    if (info_is_fdpic(infop)) {
+        /* As described in the ABI document, r7 points to the loadmap info
+         * prepared by the kernel. If an interpreter is needed, r8 points
+         * to the interpreter loadmap and r9 points to the interpreter
+         * PT_DYNAMIC info. If no interpreter is needed, r8 is zero, and
+         * r9 points to the main program PT_DYNAMIC info.
+         */
+        regs->uregs[7] = infop->loadmap_addr;
+        if (infop->interpreter_loadmap_addr) {
+            /* Executable is dynamically loaded.  */
+            regs->uregs[8] = infop->interpreter_loadmap_addr;
+            regs->uregs[9] = infop->interpreter_pt_dynamic_addr;
+        } else {
+            regs->uregs[8] = 0;
+            regs->uregs[9] = infop->pt_dynamic_addr;
+        }
+    }
 }
 
 #define ELF_NREG    18
@@ -557,6 +581,7 @@ static uint32_t get_elf_hwcap(void)
     GET_FEATURE(ARM_FEATURE_V8_SHA512, ARM_HWCAP_A64_SHA512);
     GET_FEATURE(ARM_FEATURE_V8_FP16,
                 ARM_HWCAP_A64_FPHP | ARM_HWCAP_A64_ASIMDHP);
+    GET_FEATURE(ARM_FEATURE_V8_ATOMICS, ARM_HWCAP_A64_ATOMICS);
     GET_FEATURE(ARM_FEATURE_V8_RDM, ARM_HWCAP_A64_ASIMDRDM);
     GET_FEATURE(ARM_FEATURE_V8_FCMA, ARM_HWCAP_A64_FCMA);
 #undef GET_FEATURE
@@ -1681,7 +1706,19 @@ static void zero_bss(abi_ulong elf_bss, abi_ulong last_bss, int prot)
     }
 }
 
-#ifdef CONFIG_USE_FDPIC
+#ifdef TARGET_ARM
+static int elf_is_fdpic(struct elfhdr *exec)
+{
+    return exec->e_ident[EI_OSABI] == ELFOSABI_ARM_FDPIC;
+}
+#else
+/* Default implementation, always false.  */
+static int elf_is_fdpic(struct elfhdr *exec)
+{
+    return 0;
+}
+#endif
+
 static abi_ulong loader_build_fdpic_loadmap(struct image_info *info, abi_ulong sp)
 {
     uint16_t n;
@@ -1706,7 +1743,6 @@ static abi_ulong loader_build_fdpic_loadmap(struct image_info *info, abi_ulong s
 
     return sp;
 }
-#endif
 
 static abi_ulong create_elf_tables(abi_ulong p, int argc, int envc,
                                    struct elfhdr *exec,
@@ -1725,7 +1761,6 @@ static abi_ulong create_elf_tables(abi_ulong p, int argc, int envc,
 
     sp = p;
 
-#ifdef CONFIG_USE_FDPIC
     /* Needs to be before we load the env/argc/... */
     if (elf_is_fdpic(exec)) {
         /* Need 4 byte alignment for these structs */
@@ -1735,9 +1770,13 @@ static abi_ulong create_elf_tables(abi_ulong p, int argc, int envc,
         if (interp_info) {
             interp_info->other_info = info;
             sp = loader_build_fdpic_loadmap(interp_info, sp);
+            info->interpreter_loadmap_addr = interp_info->loadmap_addr;
+            info->interpreter_pt_dynamic_addr = interp_info->pt_dynamic_addr;
+        } else {
+            info->interpreter_loadmap_addr = 0;
+            info->interpreter_pt_dynamic_addr = 0;
         }
     }
-#endif
 
     u_platform = 0;
     k_platform = ELF_PLATFORM;
@@ -2153,10 +2192,8 @@ static void load_elf_image(const char *image_name, int image_fd,
     }
     bswap_phdr(phdr, ehdr->e_phnum);
 
-#ifdef CONFIG_USE_FDPIC
     info->nsegs = 0;
     info->pt_dynamic_addr = 0;
-#endif
 
     mmap_lock();
 
@@ -2173,9 +2210,7 @@ static void load_elf_image(const char *image_name, int image_fd,
             if (a > hiaddr) {
                 hiaddr = a;
             }
-#ifdef CONFIG_USE_FDPIC
             ++info->nsegs;
-#endif
         }
     }
 
@@ -2200,8 +2235,7 @@ static void load_elf_image(const char *image_name, int image_fd,
     }
     load_bias = load_addr - loaddr;
 
-#ifdef CONFIG_USE_FDPIC
-    {
+    if (elf_is_fdpic(ehdr)) {
         struct elf32_fdpic_loadseg *loadsegs = info->loadsegs =
             g_malloc(sizeof(*loadsegs) * info->nsegs);
 
@@ -2219,7 +2253,6 @@ static void load_elf_image(const char *image_name, int image_fd,
             }
         }
     }
-#endif
 
     info->load_bias = load_bias;
     info->load_addr = load_addr;

@@ -26,7 +26,6 @@
 #include "qemu/host-utils.h"
 #include "exec/helper-proto.h"
 #include "qemu/timer.h"
-#include "exec/address-spaces.h"
 #include "exec/exec-all.h"
 #include "exec/cpu_ldst.h"
 
@@ -206,7 +205,7 @@ uint32_t HELPER(stsi)(CPUS390XState *env, uint64_t a0, uint64_t r0, uint64_t r1)
     const MachineState *ms = MACHINE(qdev_get_machine());
     uint16_t total_cpus = 0, conf_cpus = 0, reserved_cpus = 0;
     S390CPU *cpu = s390_env_get_cpu(env);
-    SysIB sysib = { 0 };
+    SysIB sysib = { };
     int i, cc = 0;
 
     if ((r0 & STSI_R0_FC_MASK) > STSI_R0_FC_LEVEL_3) {

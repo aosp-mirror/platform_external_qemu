@@ -9,7 +9,7 @@
  */
 
 #include "qemu/osdep.h"
-#include <cacard/vscard_common.h>
+#include <libcacard.h>
 #include "chardev/char-fe.h"
 #include "qemu/error-report.h"
 #include "qemu/sockets.h"
@@ -345,7 +345,7 @@ static void passthru_realize(CCIDCardState *base, Error **errp)
     card->vscard_in_pos = 0;
     card->vscard_in_hdr = 0;
     if (qemu_chr_fe_backend_connected(&card->cs)) {
-        error_setg(errp, "ccid-card-passthru: initing chardev");
+        DPRINTF(card, D_INFO, "ccid-card-passthru: initing chardev");
         qemu_chr_fe_set_handlers(&card->cs,
             ccid_card_vscard_can_read,
             ccid_card_vscard_read,

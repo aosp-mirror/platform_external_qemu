@@ -36,7 +36,7 @@ void qapi_event_send_event_a(Error **errp)
     emit(TEST_QAPI_EVENT_EVENT_A, qmp, &err);
 
     error_propagate(errp, err);
-    QDECREF(qmp);
+    qobject_unref(qmp);
 }
 
 void qapi_event_send_event_b(Error **errp)
@@ -55,7 +55,7 @@ void qapi_event_send_event_b(Error **errp)
     emit(TEST_QAPI_EVENT_EVENT_B, qmp, &err);
 
     error_propagate(errp, err);
-    QDECREF(qmp);
+    qobject_unref(qmp);
 }
 
 void qapi_event_send_event_c(bool has_a, int64_t a, bool has_b, UserDefOne *b, const char *c, Error **errp)
@@ -98,7 +98,7 @@ void qapi_event_send_event_c(bool has_a, int64_t a, bool has_b, UserDefOne *b, c
 out:
     visit_free(v);
     error_propagate(errp, err);
-    QDECREF(qmp);
+    qobject_unref(qmp);
 }
 
 void qapi_event_send_event_d(EventStructOne *a, const char *b, bool has_c, const char *c, bool has_enum3, EnumOne enum3, Error **errp)
@@ -141,7 +141,7 @@ void qapi_event_send_event_d(EventStructOne *a, const char *b, bool has_c, const
 out:
     visit_free(v);
     error_propagate(errp, err);
-    QDECREF(qmp);
+    qobject_unref(qmp);
 }
 
 void qapi_event_send_event_e(UserDefZero *arg, Error **errp)
@@ -172,7 +172,7 @@ void qapi_event_send_event_e(UserDefZero *arg, Error **errp)
 out:
     visit_free(v);
     error_propagate(errp, err);
-    QDECREF(qmp);
+    qobject_unref(qmp);
 }
 
 void qapi_event_send_event_f(UserDefAlternate *arg, Error **errp)
@@ -203,7 +203,7 @@ void qapi_event_send_event_f(UserDefAlternate *arg, Error **errp)
 out:
     visit_free(v);
     error_propagate(errp, err);
-    QDECREF(qmp);
+    qobject_unref(qmp);
 }
 
 void qapi_event_send___org_qemu_x_event(__org_qemu_x_Enum __org_qemu_x_member1, const char *__org_qemu_x_member2, bool has_q_wchar_t, int64_t q_wchar_t, Error **errp)
@@ -238,7 +238,7 @@ void qapi_event_send___org_qemu_x_event(__org_qemu_x_Enum __org_qemu_x_member1, 
 out:
     visit_free(v);
     error_propagate(errp, err);
-    QDECREF(qmp);
+    qobject_unref(qmp);
 }
 
 const QEnumLookup test_QAPIEvent_lookup = {

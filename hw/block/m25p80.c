@@ -24,7 +24,6 @@
 #include "qemu/osdep.h"
 #include "hw/hw.h"
 #include "sysemu/block-backend.h"
-#include "sysemu/blockdev.h"
 #include "hw/ssi/ssi.h"
 #include "qemu/bitops.h"
 #include "qemu/log.h"
@@ -699,6 +698,7 @@ static void complete_collecting_data(Flash *s)
         case MAN_MACRONIX:
             s->quad_enable = extract32(s->data[0], 6, 1);
             if (s->len > 1) {
+                s->volatile_cfg = s->data[1];
                 s->four_bytes_address_mode = extract32(s->data[1], 5, 1);
             }
             break;

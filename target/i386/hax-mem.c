@@ -14,6 +14,7 @@
 #include "exec/exec-all.h"
 #include "exec/ram_addr.h"
 #include "exec/memory-remap.h"
+#include "qemu/error-report.h"
 
 #include "target/i386/hax-i386.h"
 #include "qemu/queue.h"
