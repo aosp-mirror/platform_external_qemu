@@ -814,9 +814,8 @@ ETEXI
 
 DEF("drive", HAS_ARG, QEMU_OPTION_drive,
     "-drive [file=file][,if=type][,bus=n][,unit=m][,media=d][,index=i]\n"
-    "       [,cyls=c,heads=h,secs=s[,trans=t]][,snapshot=on|off]\n"
     "       [,cache=writethrough|writeback|none|directsync|unsafe][,format=f]\n"
-    "       [,serial=s][,addr=A][,rerror=ignore|stop|report]\n"
+    "       [,snapshot=on|off][,rerror=ignore|stop|report]\n"
     "       [,werror=ignore|stop|report|enospc][,id=name][,aio=threads|native]\n"
     "       [,readonly=on|off][,copy-on-read=on|off]\n"
     "       [,discard=ignore|unmap][,detect-zeroes=on|off|unmap]\n"
@@ -857,10 +856,6 @@ This option defines where is connected the drive by using an index in the list
 of available connectors of a given interface type.
 @item media=@var{media}
 This option defines the type of the media: disk or cdrom.
-@item cyls=@var{c},heads=@var{h},secs=@var{s}[,trans=@var{t}]
-Force disk physical geometry and the optional BIOS translation (trans=none or
-lba). These parameters are deprecated, use the corresponding parameters
-of @code{-device} instead.
 @item snapshot=@var{snapshot}
 @var{snapshot} is "on" or "off" and controls snapshot mode for the given drive
 (see @option{-snapshot}).
@@ -894,13 +889,6 @@ The default mode is @option{cache=writeback}.
 Specify which disk @var{format} will be used rather than detecting
 the format.  Can be used to specify format=raw to avoid interpreting
 an untrusted format header.
-@item serial=@var{serial}
-This option specifies the serial number to assign to the device. This
-parameter is deprecated, use the corresponding parameter of @code{-device}
-instead.
-@item addr=@var{addr}
-Specify the controller's PCI address (if=virtio only). This parameter is
-deprecated, use the corresponding parameter of @code{-device} instead.
 @item werror=@var{action},rerror=@var{action}
 Specify which @var{action} to take on write and read errors. Valid actions are:
 "ignore" (ignore the error and try to continue), "stop" (pause QEMU),
@@ -1250,7 +1238,7 @@ ETEXI
 
 DEF("display", HAS_ARG, QEMU_OPTION_display,
     "-display sdl[,frame=on|off][,alt_grab=on|off][,ctrl_grab=on|off]\n"
-    "            [,window_close=on|off][,gl=on|off]\n"
+    "            [,window_close=on|off][,gl=on|core|es|off]\n"
     "-display gtk[,grab_on_hover=on|off][,gl=on|off]|\n"
     "-display vnc=<display>[,<optargs>]\n"
     "-display curses\n"
@@ -1916,8 +1904,8 @@ DEF("netdev", HAS_ARG, QEMU_OPTION_netdev,
     "-netdev user,id=str[,ipv4[=on|off]][,net=addr[/mask]][,host=addr]\n"
     "         [,ipv6[=on|off]][,ipv6-net=addr[/int]][,ipv6-host=addr]\n"
     "         [,restrict=on|off][,hostname=host][,dhcpstart=addr]\n"
-    "         [,dns=addr][,ipv6-dns=addr][,dnssearch=domain][,tftp=dir]\n"
-    "         [,bootfile=f][,hostfwd=rule][,guestfwd=rule]"
+    "         [,dns=addr][,ipv6-dns=addr][,dnssearch=domain][,domainname=domain]\n"
+    "         [,tftp=dir][,bootfile=f][,hostfwd=rule][,guestfwd=rule]"
 #ifndef _WIN32
                                              "[,smb=dir[,smbserver=addr]]\n"
 #endif
@@ -2013,7 +2001,7 @@ DEF("netdev", HAS_ARG, QEMU_OPTION_netdev,
     "                configure a vhost-user network, backed by a chardev 'dev'\n"
 #endif
     "-netdev hubport,id=str,hubid=n[,netdev=nd]\n"
-    "                configure a hub port on QEMU VLAN 'n'\n", QEMU_ARCH_ALL)
+    "                configure a hub port on the hub with ID 'n'\n", QEMU_ARCH_ALL)
 DEF("nic", HAS_ARG, QEMU_OPTION_nic,
     "--nic [tap|bridge|"
 #ifdef CONFIG_SLIRP
@@ -2038,10 +2026,9 @@ DEF("nic", HAS_ARG, QEMU_OPTION_nic,
     "                provided a 'user' network connection)\n",
     QEMU_ARCH_ALL)
 DEF("net", HAS_ARG, QEMU_OPTION_net,
-    "-net nic[,vlan=n][,netdev=nd][,macaddr=mac][,model=type][,name=str][,addr=str][,vectors=v]\n"
+    "-net nic[,macaddr=mac][,model=type][,name=str][,addr=str][,vectors=v]\n"
     "                configure or create an on-board (or machine default) NIC and\n"
-    "                connect it either to VLAN 'n' or the netdev 'nd' (for pluggable\n"
-    "                NICs please use '-device devtype,netdev=nd' instead)\n"
+    "                connect it to hub 0 (please use -nic unless you need a hub)\n"
     "-net ["
 #ifdef CONFIG_SLIRP
     "user|"
@@ -2054,7 +2041,7 @@ DEF("net", HAS_ARG, QEMU_OPTION_net,
 #ifdef CONFIG_NETMAP
     "netmap|"
 #endif
-    "socket][,vlan=n][,option][,option][,...]\n"
+    "socket][,option][,option][,...]\n"
     "                old way to initialize a host network interface\n"
     "                (use the -netdev option if possible instead)\n", QEMU_ARCH_ALL)
 STEXI
@@ -2145,6 +2132,9 @@ Example:
 @example
 qemu-system-i386 -nic user,dnssearch=mgmt.example.org,dnssearch=example.org
 @end example
+
+@item domainname=@var{domain}
+Specifies the client domain name reported by the built-in DHCP server.
 
 @item tftp=@var{dir}
 When using the user mode network stack, activate a built-in TFTP
@@ -2472,17 +2462,14 @@ qemu -m 512 -object memory-backend-file,id=mem,size=512M,mem-path=/hugetlbfs,sha
 Create a hub port on the emulated hub with ID @var{hubid}.
 
 The hubport netdev lets you connect a NIC to a QEMU emulated hub instead of a
-single netdev. @code{-net} and @code{-device} with the parameter @option{vlan}
-(deprecated), or @code{-nic hubport} can also be used to connect a
-network device or a NIC to a hub. Alternatively, you can also connect the
-hubport to another netdev with ID @var{nd} by using the @option{netdev=@var{nd}}
-option.
+single netdev. Alternatively, you can also connect the hubport to another
+netdev with ID @var{nd} by using the @option{netdev=@var{nd}} option.
 
-@item -net nic[,vlan=@var{n}][,netdev=@var{nd}][,macaddr=@var{mac}][,model=@var{type}] [,name=@var{name}][,addr=@var{addr}][,vectors=@var{v}]
+@item -net nic[,netdev=@var{nd}][,macaddr=@var{mac}][,model=@var{type}] [,name=@var{name}][,addr=@var{addr}][,vectors=@var{v}]
 @findex -net
 Legacy option to configure or create an on-board (or machine default) Network
-Interface Card(NIC) and connect it either to the emulated hub port ("vlan")
-with number @var{n} (@var{n} = 0 is the default), or to the netdev @var{nd}.
+Interface Card(NIC) and connect it either to the emulated hub with ID 0 (i.e.
+the default hub), or to the netdev @var{nd}.
 The NIC is an e1000 by default on the PC target. Optionally, the MAC address
 can be changed to @var{mac}, the device address set to @var{addr} (PCI cards
 only), and a @var{name} can be assigned for use in monitor commands.
@@ -2492,11 +2479,10 @@ that the card should have; this option currently only affects virtio cards; set
 NIC is created.  QEMU can emulate several different models of network card.
 Use @code{-net nic,model=help} for a list of available devices for your target.
 
-@item -net user|tap|bridge|socket|l2tpv3|vde[,...][,vlan=@var{n}][,name=@var{name}]
+@item -net user|tap|bridge|socket|l2tpv3|vde[,...][,name=@var{name}]
 Configure a host network backend (with the options corresponding to the same
-@option{-netdev} option) and connect it to the emulated hub ("vlan") with the
-number @var{n} (default is number 0). Use @var{name} to specify the name of the
-hub port.
+@option{-netdev} option) and connect it to the emulated hub 0 (the default
+hub). Use @var{name} to specify the name of the hub port.
 ETEXI
 
 STEXI
@@ -3503,6 +3489,19 @@ STEXI
 Run the emulation in single step mode.
 ETEXI
 
+DEF("preconfig", 0, QEMU_OPTION_preconfig, \
+    "--preconfig     pause QEMU before machine is initialized\n",
+    QEMU_ARCH_ALL)
+STEXI
+@item --preconfig
+@findex --preconfig
+Pause QEMU for interactive configuration before the machine is created,
+which allows querying and configuring properties that will affect
+machine initialization. Use the QMP command 'exit-preconfig' to exit
+the preconfig state and move to the next state (ie. run guest if -S
+isn't used or pause the second time if -S is used).
+ETEXI
+
 DEF("S", 0, QEMU_OPTION_S, \
     "-S              freeze CPU at startup (use 'c' to start execution)\n",
     QEMU_ARCH_ALL)
@@ -3912,10 +3911,7 @@ STEXI
 @item -virtioconsole @var{c}
 @findex -virtioconsole
 Set virtio console.
-
-This option is maintained for backward compatibility.
-
-Please use @code{-device virtconsole} for the new way of invocation.
+This option is deprecated, please use @option{-device virtconsole} instead.
 ETEXI
 
 DEF("show-cursor", 0, QEMU_OPTION_show_cursor, \
@@ -4002,7 +3998,8 @@ ETEXI
 
 #ifndef _WIN32
 DEF("runas", HAS_ARG, QEMU_OPTION_runas, \
-    "-runas user     change to user id user just before starting the VM\n",
+    "-runas user     change to user id user just before starting the VM\n" \
+    "                user can be numeric uid:gid instead\n",
     QEMU_ARCH_ALL)
 #endif
 STEXI
@@ -4152,16 +4149,6 @@ ETEXI
 
 HXCOMM Deprecated by -machine accel=tcg property
 DEF("no-kvm", 0, QEMU_OPTION_no_kvm, "", QEMU_ARCH_I386)
-
-HXCOMM Deprecated by kvm-pit driver properties
-DEF("no-kvm-pit-reinjection", 0, QEMU_OPTION_no_kvm_pit_reinjection,
-    "", QEMU_ARCH_I386)
-
-HXCOMM Deprecated by -machine kernel_irqchip=on|off property
-DEF("no-kvm-irqchip", 0, QEMU_OPTION_no_kvm_irqchip, "", QEMU_ARCH_I386)
-
-HXCOMM Deprecated (ignored)
-DEF("tdf", 0, QEMU_OPTION_tdf,"", QEMU_ARCH_ALL)
 
 DEF("msg", HAS_ARG, QEMU_OPTION_msg,
     "-msg timestamp[=on|off]\n"

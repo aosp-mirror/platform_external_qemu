@@ -398,10 +398,11 @@ static int blkdebug_open(BlockDriverState *bs, QDict *options, int flags,
         goto out;
     }
 
-    bs->supported_write_flags = BDRV_REQ_FUA &
-        bs->file->bs->supported_write_flags;
-    bs->supported_zero_flags = (BDRV_REQ_FUA | BDRV_REQ_MAY_UNMAP) &
-        bs->file->bs->supported_zero_flags;
+    bs->supported_write_flags = BDRV_REQ_WRITE_UNCHANGED |
+        (BDRV_REQ_FUA & bs->file->bs->supported_write_flags);
+    bs->supported_zero_flags = BDRV_REQ_WRITE_UNCHANGED |
+        ((BDRV_REQ_FUA | BDRV_REQ_MAY_UNMAP) &
+            bs->file->bs->supported_zero_flags);
     ret = -EINVAL;
 
     /* Set alignment overrides */
@@ -845,13 +846,12 @@ static void blkdebug_refresh_filename(BlockDriverState *bs, QDict *options)
     opts = qdict_new();
     qdict_put_str(opts, "driver", "blkdebug");
 
-    QINCREF(bs->file->bs->full_open_options);
-    qdict_put(opts, "image", bs->file->bs->full_open_options);
+    qdict_put(opts, "image", qobject_ref(bs->file->bs->full_open_options));
 
     for (e = qdict_first(options); e; e = qdict_next(options, e)) {
         if (strcmp(qdict_entry_key(e), "x-image")) {
-            qobject_incref(qdict_entry_value(e));
-            qdict_put_obj(opts, qdict_entry_key(e), qdict_entry_value(e));
+            qdict_put_obj(opts, qdict_entry_key(e),
+                          qobject_ref(qdict_entry_value(e)));
         }
     }
 

@@ -117,19 +117,7 @@ static void fsl_imx25_realize(DeviceState *dev, Error **errp)
             { FSL_IMX25_UART5_ADDR, FSL_IMX25_UART5_IRQ }
         };
 
-        if (i < MAX_SERIAL_PORTS) {
-            Chardev *chr;
-
-            chr = serial_hds[i];
-
-            if (!chr) {
-                char label[20];
-                snprintf(label, sizeof(label), "imx31.uart%d", i);
-                chr = qemu_chr_new(label, "null");
-            }
-
-            qdev_prop_set_chr(DEVICE(&s->uart[i]), "chardev", chr);
-        }
+        qdev_prop_set_chr(DEVICE(&s->uart[i]), "chardev", serial_hd(i));
 
         object_property_set_bool(OBJECT(&s->uart[i]), true, "realized", &err);
         if (err) {

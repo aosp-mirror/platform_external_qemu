@@ -447,6 +447,8 @@ F: hw/timer/cmsdk-apb-timer.c
 F: include/hw/timer/cmsdk-apb-timer.h
 F: hw/char/cmsdk-apb-uart.c
 F: include/hw/char/cmsdk-apb-uart.h
+F: hw/misc/tz-ppc.c
+F: include/hw/misc/tz-ppc.h
 
 ARM cores
 M: Peter Maydell <peter.maydell@linaro.org>
@@ -515,8 +517,11 @@ M: Peter Maydell <peter.maydell@linaro.org>
 L: qemu-arm@nongnu.org
 S: Maintained
 F: hw/arm/mps2.c
-F: hw/misc/mps2-scc.c
-F: include/hw/misc/mps2-scc.h
+F: hw/arm/mps2-tz.c
+F: hw/misc/mps2-*.c
+F: include/hw/misc/mps2-*.h
+F: hw/arm/iotkit.c
+F: include/hw/arm/iotkit.h
 
 Musicpal
 M: Jan Kiszka <jan.kiszka@web.de>
@@ -761,8 +766,11 @@ F: hw/ppc/mac_newworld.c
 F: hw/pci-host/uninorth.c
 F: hw/pci-bridge/dec.[hc]
 F: hw/misc/macio/
-F: include/hw/ppc/mac_dbdma.h
+F: hw/misc/mos6522.c
 F: hw/nvram/mac_nvram.c
+F: include/hw/misc/macio/
+F: include/hw/misc/mos6522.h
+F: include/hw/ppc/mac_dbdma.h
 
 Old World
 M: Alexander Graf <agraf@suse.de>
@@ -909,7 +917,7 @@ X86 Machines
 ------------
 PC
 M: Michael S. Tsirkin <mst@redhat.com>
-M: Marcel Apfelbaum <marcel@redhat.com>
+M: Marcel Apfelbaum <marcel.apfelbaum@gmail.com>
 S: Supported
 F: include/hw/i386/
 F: hw/i386/
@@ -959,7 +967,7 @@ F: include/hw/timer/mc146818rtc*
 
 Machine core
 M: Eduardo Habkost <ehabkost@redhat.com>
-M: Marcel Apfelbaum <marcel@redhat.com>
+M: Marcel Apfelbaum <marcel.apfelbaum@gmail.com>
 S: Supported
 F: hw/core/machine.c
 F: hw/core/null-machine.c
@@ -998,6 +1006,7 @@ F: hw/block/cdrom.c
 F: hw/block/hd-geometry.c
 F: tests/ide-test.c
 F: tests/ahci-test.c
+F: tests/cdrom-test.c
 F: tests/libqos/ahci*
 T: git git://github.com/jnsnow/qemu.git ide
 
@@ -1033,7 +1042,7 @@ F: hw/ipack/
 
 PCI
 M: Michael S. Tsirkin <mst@redhat.com>
-M: Marcel Apfelbaum <marcel@redhat.com>
+M: Marcel Apfelbaum <marcel.apfelbaum@gmail.com>
 S: Supported
 F: include/hw/pci/*
 F: hw/misc/pci-testdev.c
@@ -1314,6 +1323,33 @@ S: Maintained
 F: include/hw/misc/unimp.h
 F: hw/misc/unimp.c
 
+Standard VGA
+M: Gerd Hoffmann <kraxel@redhat.com>
+S: Maintained
+F: hw/display/vga*
+F: hw/display/bochs-display.c
+F: include/hw/display/vga.h
+F: include/hw/display/bochs-vbe.h
+
+ramfb
+M: Gerd Hoffmann <kraxel@redhat.com>
+S: Maintained
+F: hw/display/ramfb*.c
+F: include/hw/display/ramfb.h
+
+virtio-gpu
+M: Gerd Hoffmann <kraxel@redhat.com>
+S: Maintained
+F: hw/display/virtio-gpu*
+F: hw/display/virtio-vga.c
+F: include/hw/virtio/virtio-gpu.h
+
+Cirrus VGA
+M: Gerd Hoffmann <kraxel@redhat.com>
+S: Odd Fixes
+W: https://www.kraxel.org/blog/2014/10/qemu-using-cirrus-considered-harmful/
+F: hw/display/cirrus*
+
 Subsystems
 ----------
 Audio
@@ -1339,6 +1375,8 @@ F: qemu-img*
 F: qemu-io*
 F: tests/qemu-iotests/
 F: util/qemu-progress.c
+F: qobject/block-qdict.c
+F: test/check-block-qdict.c
 T: git git://repo.or.cz/qemu/kevin.git block
 
 Block I/O path
@@ -1369,10 +1407,14 @@ L: qemu-block@nongnu.org
 S: Supported
 F: blockjob.c
 F: include/block/blockjob.h
+F: job.c
+F: job-qmp.c
+F: include/block/job.h
 F: block/backup.c
 F: block/commit.c
 F: block/stream.c
 F: block/mirror.c
+F: qapi/job.json
 T: git git://github.com/codyprime/qemu-kvm-jtc.git block
 
 Block QAPI, monitor, command line
@@ -1645,6 +1687,7 @@ S: Maintained
 F: slirp/
 F: net/slirp.c
 F: include/net/slirp.h
+T: git https://people.debian.org/~sthibault/qemu.git slirp
 T: git git://git.kiszka.org/qemu.git queues/slirp
 
 Stubs
@@ -1656,6 +1699,8 @@ Tracing
 M: Stefan Hajnoczi <stefanha@redhat.com>
 S: Maintained
 F: trace/
+F: trace-events
+F: qemu-option-trace.texi
 F: scripts/tracetool.py
 F: scripts/tracetool/
 F: docs/devel/tracing.txt
@@ -1780,6 +1825,12 @@ F: net/filter-replay.c
 F: include/sysemu/replay.h
 F: docs/replay.txt
 F: stubs/replay.c
+
+IOVA Tree
+M: Peter Xu <peterx@redhat.com>
+S: Maintained
+F: include/qemu/iova-tree.h
+F: util/iova-tree.c
 
 Usermode Emulation
 ------------------
@@ -2075,7 +2126,7 @@ F: docs/block-replication.txt
 
 PVRDMA
 M: Yuval Shaia <yuval.shaia@oracle.com>
-M: Marcel Apfelbaum <marcel@redhat.com>
+M: Marcel Apfelbaum <marcel.apfelbaum@gmail.com>
 S: Maintained
 F: hw/rdma/*
 F: hw/rdma/vmw/*

@@ -20,6 +20,7 @@
 #include "qemu/osdep.h"
 #include "channel.h"
 #include "exec.h"
+#include "migration.h"
 #include "io/channel-command.h"
 #include "trace.h"
 
@@ -48,6 +49,9 @@ static gboolean exec_accept_incoming_migration(QIOChannel *ioc,
 {
     migration_channel_process_incoming(ioc);
     object_unref(OBJECT(ioc));
+    if (!migrate_use_multifd()) {
+        migration_incoming_process();
+    }
     return G_SOURCE_REMOVE;
 }
 
@@ -65,9 +69,8 @@ void exec_start_incoming_migration(const char *command, Error **errp)
     }
 
     qio_channel_set_name(ioc, "migration-exec-incoming");
-    qio_channel_add_watch(ioc,
-                          G_IO_IN,
-                          exec_accept_incoming_migration,
-                          NULL,
-                          NULL);
+    qio_channel_add_watch_full(ioc, G_IO_IN,
+                               exec_accept_incoming_migration,
+                               NULL, NULL,
+                               g_main_context_get_thread_default());
 }

@@ -1074,7 +1074,9 @@ static void xlnx_dp_avbufm_write(void *opaque, hwaddr offset, uint64_t value,
     case AV_BUF_STC_SNAPSHOT1:
     case AV_BUF_HCOUNT_VCOUNT_INT0:
     case AV_BUF_HCOUNT_VCOUNT_INT1:
-        qemu_log_mask(LOG_UNIMP, "avbufm: unimplmented");
+        qemu_log_mask(LOG_UNIMP, "avbufm: unimplemented register 0x%04"
+                                 PRIx64 "\n",
+                      offset << 2);
         break;
     default:
         s->avbufm_registers[offset] = value;
@@ -1221,7 +1223,7 @@ static void xlnx_dp_init(Object *obj)
     object_property_add_link(obj, "dpdma", TYPE_XLNX_DPDMA,
                              (Object **) &s->dpdma,
                              xlnx_dp_set_dpdma,
-                             OBJ_PROP_LINK_UNREF_ON_RELEASE,
+                             OBJ_PROP_LINK_STRONG,
                              &error_abort);
 
     /*

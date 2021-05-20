@@ -46,6 +46,7 @@
 #include "hw/acpi/vmgenid.h"
 #include "sysemu/tpm_backend.h"
 #include "hw/timer/mc146818rtc_regs.h"
+#include "hw/mem/memory-device.h"
 #include "sysemu/numa.h"
 
 /* Supported chipsets: */
@@ -206,21 +207,21 @@ static void acpi_get_pm_info(AcpiPmInfo *pm)
     } else {
         pm->s3_disabled = false;
     }
-    qobject_decref(o);
+    qobject_unref(o);
     o = object_property_get_qobject(obj, ACPI_PM_PROP_S4_DISABLED, NULL);
     if (o) {
         pm->s4_disabled = qnum_get_uint(qobject_to(QNum, o));
     } else {
         pm->s4_disabled = false;
     }
-    qobject_decref(o);
+    qobject_unref(o);
     o = object_property_get_qobject(obj, ACPI_PM_PROP_S4_VAL, NULL);
     if (o) {
         pm->s4_val = qnum_get_uint(qobject_to(QNum, o));
     } else {
         pm->s4_val = false;
     }
-    qobject_decref(o);
+    qobject_unref(o);
 
     pm->pcihp_bridge_en =
         object_property_get_bool(obj, "acpi-pci-hotplug-with-bridge-support",
@@ -578,7 +579,7 @@ static void build_append_pci_bus_devices(Aml *parent_scope, PCIBus *bus,
         }
     }
     aml_append(parent_scope, method);
-    qobject_decref(bsel);
+    qobject_unref(bsel);
 }
 
 /**
@@ -2451,7 +2452,7 @@ build_tpm2(GArray *table_data, BIOSLinker *linker, GArray *tcpalog)
 static void build_srat_hotpluggable_memory(GArray *table_data, uint64_t base,
                                            uint64_t len, int default_node)
 {
-    MemoryDeviceInfoList *info_list = qmp_pc_dimm_device_list();
+    MemoryDeviceInfoList *info_list = qmp_memory_device_list();
     MemoryDeviceInfoList *info;
     MemoryDeviceInfo *mi;
     PCDIMMDeviceInfo *di;
@@ -2510,7 +2511,7 @@ build_srat(GArray *table_data, BIOSLinker *linker, MachineState *machine)
     const CPUArchIdList *apic_ids = mc->possible_cpu_arch_ids(machine);
     PCMachineState *pcms = PC_MACHINE(machine);
     ram_addr_t hotplugabble_address_space_size =
-        object_property_get_int(OBJECT(pcms), PC_MACHINE_MEMHP_REGION_SIZE,
+        object_property_get_int(OBJECT(pcms), PC_MACHINE_DEVMEM_REGION_SIZE,
                                 NULL);
 
     srat_start = table_data->len;
@@ -2608,7 +2609,7 @@ build_srat(GArray *table_data, BIOSLinker *linker, MachineState *machine)
      * providing _PXM method if necessary.
      */
     if (hotplugabble_address_space_size) {
-        build_srat_hotpluggable_memory(table_data, pcms->hotplug_memory.base,
+        build_srat_hotpluggable_memory(table_data, machine->device_memory->base,
                                        hotplugabble_address_space_size,
                                        pcms->numa_nodes - 1);
     }
@@ -2812,12 +2813,12 @@ static bool acpi_get_mcfg(AcpiMcfgInfo *mcfg)
         return false;
     }
     mcfg->mcfg_base = qnum_get_uint(qobject_to(QNum, o));
-    qobject_decref(o);
+    qobject_unref(o);
 
     o = object_property_get_qobject(pci_host, PCIE_HOST_MCFG_SIZE, NULL);
     assert(o);
     mcfg->mcfg_size = qnum_get_uint(qobject_to(QNum, o));
-    qobject_decref(o);
+    qobject_unref(o);
     return true;
 }
 

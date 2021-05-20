@@ -38,7 +38,6 @@
 #include "net/net.h"
 #include "hw/sysbus.h"
 #include "hw/block/flash.h"
-#include "sysemu/block-backend.h"
 #include "chardev/char.h"
 #include "sysemu/device_tree.h"
 #include "qemu/error-report.h"
@@ -278,12 +277,8 @@ static void xtfpga_init(const XtfpgaBoardDesc *board, MachineState *machine)
                 xtensa_get_extint(env, 1), nd_table);
     }
 
-    if (!serial_hds[0]) {
-        serial_hds[0] = qemu_chr_new("serial0", "null");
-    }
-
     serial_mm_init(system_io, 0x0d050020, 2, xtensa_get_extint(env, 0),
-            115200, serial_hds[0], DEVICE_NATIVE_ENDIAN);
+            115200, serial_hd(0), DEVICE_NATIVE_ENDIAN);
 
     dinfo = drive_get(IF_PFLASH, 0, 0);
     if (dinfo) {

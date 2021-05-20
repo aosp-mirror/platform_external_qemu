@@ -1080,10 +1080,10 @@ static void mips_ranchu_init(MachineState *machine)
 
     /* Make sure the first 3 serial ports are associated with a device. */
     for (i = 0; i < 3; i++) {
-        if (!serial_hds[i]) {
+        if (!serial_hd(i]) {
             char label[32];
             snprintf(label, sizeof(label), "serial%d", i);
-            serial_hds[i] = qemu_chr_new(label, "null");
+            serial_hd(i] = qemu_chr_new(label, "null");
         }
     }
 

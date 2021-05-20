@@ -474,13 +474,14 @@
 
 {
 .name       = "migrate",
-.args_type  = "detach:-d,blk:-b,inc:-i,uri:s",
-.params     = "[-d] [-b] [-i] uri",
+.args_type  = "detach:-d,blk:-b,inc:-i,resume:-r,uri:s",
+.params     = "[-d] [-b] [-i] [-r] uri",
 .help       = "migrate to URI (using -d to not wait for completion)"
 "\n\t\t\t -b for migration without shared storage with"
 " full copy of disk\n\t\t\t -i for migration without "
 "shared storage with incremental copy of disk "
-"(base image shared between src and destination)",
+"(base image shared between src and destination)"
+"\n\t\t\t -r to resume a paused migration",
 .cmd        = hmp_migrate,
 },
 
@@ -509,6 +510,24 @@
 .params     = "uri",
 .help       = "Continue an incoming migration from an -incoming defer",
 .cmd        = hmp_migrate_incoming,
+},
+
+
+{
+.name       = "migrate_recover",
+.args_type  = "uri:s",
+.params     = "uri",
+.help       = "Continue a paused incoming postcopy migration",
+.cmd        = hmp_migrate_recover,
+},
+
+
+{
+.name       = "migrate_pause",
+.args_type  = "",
+.params     = "",
+.help       = "Pause an ongoing migration (postcopy-only)",
+.cmd        = hmp_migrate_pause,
 },
 
 
@@ -713,7 +732,6 @@
 .params     = "[-n] [[<domain>:]<bus>:]<slot>\n"
 "[file=file][,if=type][,bus=n]\n"
 "[,unit=m][,media=d][,index=i]\n"
-"[,cyls=c,heads=h,secs=s[,trans=t]]\n"
 "[,snapshot=on|off][,cache=on|off]\n"
 "[,readonly=on|off][,copy-on-read=on|off]",
 .help       = "add drive to PCI storage controller",

@@ -11,7 +11,6 @@
 #include "qemu/osdep.h"
 #include "cpu.h"
 #include "exec/address-spaces.h"
-#include "exec/exec-all.h"
 #include "exec/ioport.h"
 #include "exec/ram_addr.h"
 #include "exec/memory-remap.h"
@@ -29,7 +28,7 @@
 #include "qemu/error-report.h"
 #include "qemu/queue.h"
 #include "qapi/error.h"
-#include "migration/migration.h"
+#include "migration/blocker.h"
 #include "whp-dispatch.h"
 
 #include "./WinHvPlatformDefs.h"
@@ -1116,6 +1115,8 @@ static int whpx_vcpu_run(CPUState *cpu)
 
             memset(reg_values, 0, sizeof(reg_values));
 
+            memset(reg_values, 0, sizeof(reg_values));
+
             rip = vcpu->exit_ctx.VpContext.Rip +
                   vcpu->exit_ctx.VpContext.InstructionLength;
             switch (vcpu->exit_ctx.CpuidAccess.Rax) {
@@ -1299,6 +1300,7 @@ int whpx_init_vcpu(CPUState *cpu)
     //     }
     // }
 
+
     vcpu = g_malloc0(sizeof(struct whpx_vcpu));
 
     if (!vcpu) {
@@ -1306,7 +1308,10 @@ int whpx_init_vcpu(CPUState *cpu)
         return -ENOMEM;
     }
 
-    hr = whp_dispatch.WHvEmulatorCreateEmulator(&whpx_emu_callbacks, &vcpu->emulator);
+
+    hr = whp_dispatch.WHvEmulatorCreateEmulator(
+        &whpx_emu_callbacks,
+        &vcpu->emulator);
     if (FAILED(hr)) {
         error_report("WHPX: Failed to setup instruction completion support,"
                      " hr=%08lx", hr);
@@ -1314,7 +1319,9 @@ int whpx_init_vcpu(CPUState *cpu)
         return -EINVAL;
     }
 
-    hr = whp_dispatch.WHvCreateVirtualProcessor(whpx->partition, cpu->cpu_index, 0);
+
+    hr = whp_dispatch.WHvCreateVirtualProcessor(
+        whpx->partition, cpu->cpu_index, 0);
     if (FAILED(hr)) {
         error_report("WHPX: Failed to create a virtual processor,"
                      " hr=%08lx", hr);
@@ -1368,7 +1375,8 @@ void whpx_destroy_vcpu(CPUState *cpu)
 void whpx_vcpu_kick(CPUState *cpu)
 {
     struct whpx_state *whpx = &whpx_global;
-    whp_dispatch.WHvCancelRunVirtualProcessor(whpx->partition, cpu->cpu_index, 0);
+    whp_dispatch.WHvCancelRunVirtualProcessor(
+        whpx->partition, cpu->cpu_index, 0);
 }
 
 /*
@@ -1720,7 +1728,8 @@ static int whpx_accel_init(MachineState *ms)
 
     whpx = &whpx_global;
 
-    if (!init_whp_dispatch()){
+
+    if (!init_whp_dispatch()) {
         ret = -ENOSYS;
         goto error;
     }
@@ -1804,13 +1813,6 @@ static int whpx_accel_init(MachineState *ms)
         WHvPartitionPropertyCodeCpuidExitList,
         cpuidExitList,
         RTL_NUMBER_OF(cpuidExitList) * sizeof(UINT32));
-
-    if (FAILED(hr)) {
-        error_report("WHPX: Failed to enable partition extended CpuidExitList"
-                     " hr=%08lx", hr);
-        ret = -EINVAL;
-        goto error;
-    }
 
     if (FAILED(hr)) {
         error_report("WHPX: Failed to enable partition extended X64MsrExit and CpuidExit's"
@@ -1906,10 +1908,12 @@ bool init_whp_dispatch() {
 
     error:
 
-    if (hWinHvPlatform)
+    if (hWinHvPlatform) {
         FreeLibrary(hWinHvPlatform);
-    if (hWinHvEmulation)
+    }
+    if (hWinHvEmulation) {
         FreeLibrary(hWinHvEmulation);
+    }
     return false;
 }
 

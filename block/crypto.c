@@ -21,15 +21,15 @@
 #include "qemu/osdep.h"
 
 #include "block/block_int.h"
+#include "block/qdict.h"
 #include "sysemu/block-backend.h"
 #include "crypto/block.h"
 #include "qapi/opts-visitor.h"
 #include "qapi/qapi-visit-crypto.h"
-#include "qapi/qmp/qdict.h"
 #include "qapi/qobject-input-visitor.h"
 #include "qapi/error.h"
 #include "qemu/option.h"
-#include "block/crypto.h"
+#include "crypto.h"
 
 typedef struct BlockCrypto BlockCrypto;
 
@@ -159,7 +159,10 @@ block_crypto_open_opts_init(QCryptoBlockFormat format,
     ret = g_new0(QCryptoBlockOpenOptions, 1);
     ret->format = format;
 
-    v = qobject_input_visitor_new_keyval(QOBJECT(opts));
+    v = qobject_input_visitor_new_flat_confused(opts, &local_err);
+    if (local_err) {
+        goto out;
+    }
 
     visit_start_struct(v, NULL, NULL, 0, &local_err);
     if (local_err) {
@@ -210,7 +213,10 @@ block_crypto_create_opts_init(QCryptoBlockFormat format,
     ret = g_new0(QCryptoBlockCreateOptions, 1);
     ret->format = format;
 
-    v = qobject_input_visitor_new_keyval(QOBJECT(opts));
+    v = qobject_input_visitor_new_flat_confused(opts, &local_err);
+    if (local_err) {
+        goto out;
+    }
 
     visit_start_struct(v, NULL, NULL, 0, &local_err);
     if (local_err) {
@@ -305,7 +311,7 @@ static int block_crypto_open_generic(QCryptoBlockFormat format,
 
     ret = 0;
  cleanup:
-    QDECREF(cryptoopts);
+    qobject_unref(cryptoopts);
     qapi_free_QCryptoBlockOpenOptions(open_opts);
     return ret;
 }
@@ -635,7 +641,7 @@ static int coroutine_fn block_crypto_co_create_opts_luks(const char *filename,
 fail:
     bdrv_unref(bs);
     qapi_free_QCryptoBlockCreateOptions(create_opts);
-    QDECREF(cryptoopts);
+    qobject_unref(cryptoopts);
     return ret;
 }
 

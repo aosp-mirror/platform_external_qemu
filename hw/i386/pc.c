@@ -69,7 +69,6 @@
 #include "hw/acpi/acpi.h"
 #include "hw/acpi/cpu_hotplug.h"
 #include "hw/boards.h"
-#include "hw/pci/pci_host.h"
 #include "acpi-build.h"
 #include "hw/mem/pc-dimm.h"
 #include "qapi/error.h"
@@ -491,7 +490,7 @@ void pc_cmos_init(PCMachineState *pcms,
                              TYPE_ISA_DEVICE,
                              (Object **)&pcms->rtc,
                              object_property_allow_set_link,
-                             OBJ_PROP_LINK_UNREF_ON_RELEASE, &error_abort);
+                             OBJ_PROP_LINK_STRONG, &error_abort);
     object_property_set_link(OBJECT(pcms), OBJECT(s),
                              "rtc_state", &error_abort);
 
@@ -1387,11 +1386,13 @@ void pc_memory_init(PCMachineState *pcms,
         exit(EXIT_FAILURE);
     }
 
-    /* initialize hotplug memory address space */
+    /* always allocate the device memory information */
+    machine->device_memory = g_malloc0(sizeof(*machine->device_memory));
+
+    /* initialize device memory address space */
     if (pcmc->has_reserved_memory &&
         (machine->ram_size < machine->maxram_size)) {
-        ram_addr_t hotplug_mem_size =
-            machine->maxram_size - machine->ram_size;
+        ram_addr_t device_mem_size = machine->maxram_size - machine->ram_size;
 
         if (machine->ram_slots > ACPI_MAX_RAM_SLOTS) {
             error_report("unsupported amount of memory slots: %"PRIu64,
@@ -1406,25 +1407,25 @@ void pc_memory_init(PCMachineState *pcms,
             exit(EXIT_FAILURE);
         }
 
-        pcms->hotplug_memory.base =
+        machine->device_memory->base =
             ROUND_UP(0x100000000ULL + pcms->above_4g_mem_size, 1ULL << 30);
 
         if (pcmc->enforce_aligned_dimm) {
-            /* size hotplug region assuming 1G page max alignment per slot */
-            hotplug_mem_size += (1ULL << 30) * machine->ram_slots;
+            /* size device region assuming 1G page max alignment per slot */
+            device_mem_size += (1ULL << 30) * machine->ram_slots;
         }
 
-        if ((pcms->hotplug_memory.base + hotplug_mem_size) <
-            hotplug_mem_size) {
+        if ((machine->device_memory->base + device_mem_size) <
+            device_mem_size) {
             error_report("unsupported amount of maximum memory: " RAM_ADDR_FMT,
                          machine->maxram_size);
             exit(EXIT_FAILURE);
         }
 
-        memory_region_init(&pcms->hotplug_memory.mr, OBJECT(pcms),
-                           "hotplug-memory", hotplug_mem_size);
-        memory_region_add_subregion(system_memory, pcms->hotplug_memory.base,
-                                    &pcms->hotplug_memory.mr);
+        memory_region_init(&machine->device_memory->mr, OBJECT(pcms),
+                           "device-memory", device_mem_size);
+        memory_region_add_subregion(system_memory, machine->device_memory->base,
+                                    &machine->device_memory->mr);
     }
 
     /* Initialize PC system firmware */
@@ -1445,13 +1446,13 @@ void pc_memory_init(PCMachineState *pcms,
 
     rom_set_fw(fw_cfg);
 
-    if (pcmc->has_reserved_memory && pcms->hotplug_memory.base) {
+    if (pcmc->has_reserved_memory && machine->device_memory->base) {
         uint64_t *val = g_malloc(sizeof(*val));
         PCMachineClass *pcmc = PC_MACHINE_GET_CLASS(pcms);
-        uint64_t res_mem_end = pcms->hotplug_memory.base;
+        uint64_t res_mem_end = machine->device_memory->base;
 
         if (!pcmc->broken_reserved_end) {
-            res_mem_end += memory_region_size(&pcms->hotplug_memory.mr);
+            res_mem_end += memory_region_size(&machine->device_memory->mr);
         }
         *val = cpu_to_le64(ROUND_UP(res_mem_end, 0x1ULL << 30));
         fw_cfg_add_file(fw_cfg, "etc/reserved-memory-end", val, sizeof(*val));
@@ -1501,12 +1502,13 @@ uint64_t pc_pci_hole64_start(void)
 {
     PCMachineState *pcms = PC_MACHINE(qdev_get_machine());
     PCMachineClass *pcmc = PC_MACHINE_GET_CLASS(pcms);
+    MachineState *ms = MACHINE(pcms);
     uint64_t hole64_start = 0;
 
-    if (pcmc->has_reserved_memory && pcms->hotplug_memory.base) {
-        hole64_start = pcms->hotplug_memory.base;
+    if (pcmc->has_reserved_memory && ms->device_memory->base) {
+        hole64_start = ms->device_memory->base;
         if (!pcmc->broken_reserved_end) {
-            hole64_start += memory_region_size(&pcms->hotplug_memory.mr);
+            hole64_start += memory_region_size(&ms->device_memory->mr);
         }
     } else {
         hole64_start = 0x100000000ULL + pcms->above_4g_mem_size;
@@ -1563,7 +1565,7 @@ static void pc_superio_init(ISABus *isa_bus, bool create_fdctrl, bool no_vmport)
     qemu_irq *a20_line;
     ISADevice *i8042, *port92, *vmmouse;
 
-    serial_hds_isa_init(isa_bus, 0, MAX_SERIAL_PORTS);
+    serial_hds_isa_init(isa_bus, 0, MAX_ISA_SERIAL_PORTS);
     parallel_hds_isa_init(isa_bus, MAX_PARALLEL_PORTS);
 
     for (i = 0; i < MAX_FD; i++) {
@@ -1752,7 +1754,7 @@ static void pc_dimm_plug(HotplugHandler *hotplug_dev,
         goto out;
     }
 
-    pc_dimm_memory_plug(dev, &pcms->hotplug_memory, mr, align, &local_err);
+    pc_dimm_memory_plug(dev, MACHINE(pcms), align, &local_err);
     if (local_err) {
         goto out;
     }
@@ -1802,16 +1804,8 @@ static void pc_dimm_unplug(HotplugHandler *hotplug_dev,
                            DeviceState *dev, Error **errp)
 {
     PCMachineState *pcms = PC_MACHINE(hotplug_dev);
-    PCDIMMDevice *dimm = PC_DIMM(dev);
-    PCDIMMDeviceClass *ddc = PC_DIMM_GET_CLASS(dimm);
-    MemoryRegion *mr;
     HotplugHandlerClass *hhc;
     Error *local_err = NULL;
-
-    mr = ddc->get_memory_region(dimm, &local_err);
-    if (local_err) {
-        goto out;
-    }
 
     hhc = HOTPLUG_HANDLER_GET_CLASS(pcms->acpi_dev);
     hhc->unplug(HOTPLUG_HANDLER(pcms->acpi_dev), dev, &local_err);
@@ -1820,7 +1814,7 @@ static void pc_dimm_unplug(HotplugHandler *hotplug_dev,
         goto out;
     }
 
-    pc_dimm_memory_unplug(dev, &pcms->hotplug_memory, mr);
+    pc_dimm_memory_unplug(dev, MACHINE(pcms));
     object_unparent(OBJECT(dev));
 
  out:
@@ -2097,24 +2091,21 @@ static void pc_machine_device_unplug_cb(HotplugHandler *hotplug_dev,
 static HotplugHandler *pc_get_hotpug_handler(MachineState *machine,
                                              DeviceState *dev)
 {
-    PCMachineClass *pcmc = PC_MACHINE_GET_CLASS(machine);
-
     if (object_dynamic_cast(OBJECT(dev), TYPE_PC_DIMM) ||
         object_dynamic_cast(OBJECT(dev), TYPE_CPU)) {
         return HOTPLUG_HANDLER(machine);
     }
 
-    return pcmc->get_hotplug_handler ?
-        pcmc->get_hotplug_handler(machine, dev) : NULL;
+    return NULL;
 }
 
 static void
-pc_machine_get_hotplug_memory_region_size(Object *obj, Visitor *v,
-                                          const char *name, void *opaque,
-                                          Error **errp)
+pc_machine_get_device_memory_region_size(Object *obj, Visitor *v,
+                                         const char *name, void *opaque,
+                                         Error **errp)
 {
-    PCMachineState *pcms = PC_MACHINE(obj);
-    int64_t value = memory_region_size(&pcms->hotplug_memory.mr);
+    MachineState *ms = MACHINE(obj);
+    int64_t value = memory_region_size(&ms->device_memory->mr);
 
     visit_type_int(v, name, &value, errp);
 }
@@ -2235,6 +2226,32 @@ static void pc_machine_set_nvdimm(Object *obj, bool value, Error **errp)
     PCMachineState *pcms = PC_MACHINE(obj);
 
     pcms->acpi_nvdimm_state.is_enabled = value;
+}
+
+static char *pc_machine_get_nvdimm_persistence(Object *obj, Error **errp)
+{
+    PCMachineState *pcms = PC_MACHINE(obj);
+
+    return g_strdup(pcms->acpi_nvdimm_state.persistence_string);
+}
+
+static void pc_machine_set_nvdimm_persistence(Object *obj, const char *value,
+                                               Error **errp)
+{
+    PCMachineState *pcms = PC_MACHINE(obj);
+    AcpiNVDIMMState *nvdimm_state = &pcms->acpi_nvdimm_state;
+
+    if (strcmp(value, "cpu") == 0)
+        nvdimm_state->persistence = 3;
+    else if (strcmp(value, "mem-ctrl") == 0)
+        nvdimm_state->persistence = 2;
+    else {
+        error_report("-machine nvdimm-persistence=%s: unsupported option", value);
+        exit(EXIT_FAILURE);
+    }
+
+    g_free(nvdimm_state->persistence_string);
+    nvdimm_state->persistence_string = g_strdup(value);
 }
 
 static bool pc_machine_get_smbus(Object *obj, Error **errp)
@@ -2391,7 +2408,6 @@ static void pc_machine_class_init(ObjectClass *oc, void *data)
     HotplugHandlerClass *hc = HOTPLUG_HANDLER_CLASS(oc);
     NMIClass *nc = NMI_CLASS(oc);
 
-    pcmc->get_hotplug_handler = mc->get_hotplug_handler;
     pcmc->pci_enabled = true;
     pcmc->has_acpi_build = true;
     pcmc->rsdp_in_ram = true;
@@ -2406,6 +2422,7 @@ static void pc_machine_class_init(ObjectClass *oc, void *data)
     pcmc->acpi_data_size = 0x20000 + 0x8000;
     pcmc->save_tsc_khz = true;
     pcmc->linuxboot_dma_enabled = true;
+    assert(!mc->get_hotplug_handler);
     mc->get_hotplug_handler = pc_get_hotpug_handler;
     mc->cpu_index_to_instance_props = pc_cpu_index_to_props;
     mc->get_default_cpu_node_id = pc_get_default_cpu_node_id;
@@ -2424,8 +2441,8 @@ static void pc_machine_class_init(ObjectClass *oc, void *data)
     nc->nmi_monitor_handler = x86_nmi;
     mc->default_cpu_type = TARGET_DEFAULT_CPU_TYPE;
 
-    object_class_property_add(oc, PC_MACHINE_MEMHP_REGION_SIZE, "int",
-        pc_machine_get_hotplug_memory_region_size, NULL,
+    object_class_property_add(oc, PC_MACHINE_DEVMEM_REGION_SIZE, "int",
+        pc_machine_get_device_memory_region_size, NULL,
         NULL, NULL, &error_abort);
 
     object_class_property_add(oc, PC_MACHINE_MAX_RAM_BELOW_4G, "size",
@@ -2449,6 +2466,10 @@ static void pc_machine_class_init(ObjectClass *oc, void *data)
 
     object_class_property_add_bool(oc, PC_MACHINE_NVDIMM,
         pc_machine_get_nvdimm, pc_machine_set_nvdimm, &error_abort);
+
+    object_class_property_add_str(oc, PC_MACHINE_NVDIMM_PERSIST,
+        pc_machine_get_nvdimm_persistence,
+        pc_machine_set_nvdimm_persistence, &error_abort);
 
     object_class_property_add_bool(oc, PC_MACHINE_SMBUS,
         pc_machine_get_smbus, pc_machine_set_smbus, &error_abort);

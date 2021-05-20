@@ -57,8 +57,12 @@ typedef enum {
     BDRV_REQ_FUA                = 0x10,
     BDRV_REQ_WRITE_COMPRESSED   = 0x20,
 
+    /* Signifies that this write request will not change the visible disk
+     * content. */
+    BDRV_REQ_WRITE_UNCHANGED    = 0x40,
+
     /* Mask of valid flags */
-    BDRV_REQ_MASK               = 0x3f,
+    BDRV_REQ_MASK               = 0x7f,
 } BdrvRequestFlags;
 
 typedef struct BlockSizes {
@@ -208,6 +212,9 @@ enum {
      * This permission (which is weaker than BLK_PERM_WRITE) is both enough and
      * required for writes to the block node when the caller promises that
      * the visible disk content doesn't change.
+     *
+     * As the BLK_PERM_WRITE permission is strictly stronger, either is
+     * sufficient to perform an unchanging write.
      */
     BLK_PERM_WRITE_UNCHANGED    = 0x04,
 
@@ -339,7 +346,8 @@ int bdrv_check(BlockDriverState *bs, BdrvCheckResult *res, BdrvCheckMode fix);
 typedef void BlockDriverAmendStatusCB(BlockDriverState *bs, int64_t offset,
                                       int64_t total_work_size, void *opaque);
 int bdrv_amend_options(BlockDriverState *bs_new, QemuOpts *opts,
-                       BlockDriverAmendStatusCB *status_cb, void *cb_opaque);
+                       BlockDriverAmendStatusCB *status_cb, void *cb_opaque,
+                       Error **errp);
 
 /* external snapshots */
 bool bdrv_recurse_is_first_non_filter(BlockDriverState *bs,
@@ -403,6 +411,7 @@ bool bdrv_is_read_only(BlockDriverState *bs);
 int bdrv_can_set_read_only(BlockDriverState *bs, bool read_only,
                            bool ignore_allow_rdw, Error **errp);
 int bdrv_set_read_only(BlockDriverState *bs, bool read_only, Error **errp);
+bool bdrv_is_writable(BlockDriverState *bs);
 bool bdrv_is_sg(BlockDriverState *bs);
 bool bdrv_is_inserted(BlockDriverState *bs);
 void bdrv_lock_medium(BlockDriverState *bs, bool locked);
@@ -415,6 +424,7 @@ BlockDriverState *bdrv_lookup_bs(const char *device,
                                  Error **errp);
 bool bdrv_chain_contains(BlockDriverState *top, BlockDriverState *base);
 BlockDriverState *bdrv_next_node(BlockDriverState *bs);
+BlockDriverState *bdrv_next_all_states(BlockDriverState *bs);
 
 typedef struct BdrvNextIterator {
     enum {
@@ -551,7 +561,8 @@ void bdrv_io_unplug(BlockDriverState *bs);
  * Begin a quiesced section of all users of @bs. This is part of
  * bdrv_drained_begin.
  */
-void bdrv_parent_drained_begin(BlockDriverState *bs, BdrvChild *ignore);
+void bdrv_parent_drained_begin(BlockDriverState *bs, BdrvChild *ignore,
+                               bool ignore_bds_parents);
 
 /**
  * bdrv_parent_drained_end:
@@ -559,7 +570,23 @@ void bdrv_parent_drained_begin(BlockDriverState *bs, BdrvChild *ignore);
  * End a quiesced section of all users of @bs. This is part of
  * bdrv_drained_end.
  */
-void bdrv_parent_drained_end(BlockDriverState *bs, BdrvChild *ignore);
+void bdrv_parent_drained_end(BlockDriverState *bs, BdrvChild *ignore,
+                             bool ignore_bds_parents);
+
+/**
+ * bdrv_drain_poll:
+ *
+ * Poll for pending requests in @bs, its parents (except for @ignore_parent),
+ * and if @recursive is true its children as well (used for subtree drain).
+ *
+ * If @ignore_bds_parents is true, parents that are BlockDriverStates must
+ * ignore the drain request because they will be drained separately (used for
+ * drain_all).
+ *
+ * This is part of bdrv_drained_begin.
+ */
+bool bdrv_drain_poll(BlockDriverState *bs, bool recursive,
+                     BdrvChild *ignore_parent, bool ignore_bds_parents);
 
 /**
  * bdrv_drained_begin:
@@ -572,6 +599,15 @@ void bdrv_parent_drained_end(BlockDriverState *bs, BdrvChild *ignore);
  * This function can be recursive.
  */
 void bdrv_drained_begin(BlockDriverState *bs);
+
+/**
+ * bdrv_do_drained_begin_quiesce:
+ *
+ * Quiesces a BDS like bdrv_drained_begin(), but does not wait for already
+ * running requests to complete.
+ */
+void bdrv_do_drained_begin_quiesce(BlockDriverState *bs,
+                                   BdrvChild *parent, bool ignore_bds_parents);
 
 /**
  * Like bdrv_drained_begin, but recursively begins a quiesced section for
@@ -607,4 +643,36 @@ bool bdrv_can_store_new_dirty_bitmap(BlockDriverState *bs, const char *name,
  */
 void bdrv_register_buf(BlockDriverState *bs, void *host, size_t size);
 void bdrv_unregister_buf(BlockDriverState *bs, void *host);
+
+/**
+ *
+ * bdrv_co_copy_range:
+ *
+ * Do offloaded copy between two children. If the operation is not implemented
+ * by the driver, or if the backend storage doesn't support it, a negative
+ * error code will be returned.
+ *
+ * Note: block layer doesn't emulate or fallback to a bounce buffer approach
+ * because usually the caller shouldn't attempt offloaded copy any more (e.g.
+ * calling copy_file_range(2)) after the first error, thus it should fall back
+ * to a read+write path in the caller level.
+ *
+ * @src: Source child to copy data from
+ * @src_offset: offset in @src image to read data
+ * @dst: Destination child to copy data to
+ * @dst_offset: offset in @dst image to write data
+ * @bytes: number of bytes to copy
+ * @flags: request flags. Must be one of:
+ *         0 - actually read data from src;
+ *         BDRV_REQ_ZERO_WRITE - treat the @src range as zero data and do zero
+ *                               write on @dst as if bdrv_co_pwrite_zeroes is
+ *                               called. Used to simplify caller code, or
+ *                               during BlockDriver.bdrv_co_copy_range_from()
+ *                               recursion.
+ *
+ * Returns: 0 if succeeded; negative error code if failed.
+ **/
+int coroutine_fn bdrv_co_copy_range(BdrvChild *src, uint64_t src_offset,
+                                    BdrvChild *dst, uint64_t dst_offset,
+                                    uint64_t bytes, BdrvRequestFlags flags);
 #endif
