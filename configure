@@ -6527,9 +6527,10 @@ if test "$pragma_diagnostic_available" = "yes" ; then
   echo "CONFIG_PRAGMA_DIAGNOSTIC_AVAILABLE=y" >> $config_host_mak
 fi
 
-if test "$valgrind_h" = "yes" ; then
-  echo "CONFIG_VALGRIND_H=y" >> $config_host_mak
-fi
+#if test "$valgrind_h" = "yes" ; then
+  # Do not enable valgrind (AEMU)
+  # echo "CONFIG_VALGRIND_H=y" >> $config_host_mak
+#fi
 
 if test "$have_asan_iface_fiber" = "yes" ; then
     echo "CONFIG_ASAN_IFACE_FIBER=y" >> $config_host_mak
