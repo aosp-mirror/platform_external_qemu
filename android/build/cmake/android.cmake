@@ -609,7 +609,7 @@ function(android_add_library)
   endif()
   android_clang_tidy(${build_TARGET})
   # Clang on mac os does not get properly recognized by cmake
-  if(NOT DARWIN_X86_64 AND NOT DARWIN_AARCH64)
+  if(NOT DARWIN_X86_64)
     target_compile_features(${build_TARGET} PRIVATE cxx_std_17)
   endif()
 
@@ -905,7 +905,7 @@ function(android_add_executable)
 
   add_executable(${build_TARGET} ${REGISTERED_SRC})
   # Clang on mac os does not get properly recognized by cmake
-  if(NOT DARWIN_X86_64 AND NOT DARWIN_AARCH64)
+  if(NOT DARWIN_X86_64)
     target_compile_features(${build_TARGET} PRIVATE cxx_std_17)
   endif()
 
