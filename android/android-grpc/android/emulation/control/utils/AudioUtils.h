@@ -28,6 +28,9 @@ public:
 
     // Extracts the number of channels from the enum for usage with qemu.
     static int getChannels(const AudioFormat& fmt);
+
+    // Number of bytes in a sample
+    static int getBytesPerSample(const AudioFormat& fmt);
 };
 
 }  // namespace control
