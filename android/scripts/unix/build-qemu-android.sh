@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Copyright 2015 The Android Open Source Project
 #
@@ -516,13 +516,19 @@ EOF
                     # the generated config-host.mak file.
                     sed -i -e '/^ROMS=/d' config-host.mak
 
-                    # For Windows, config-host.h must be created after
-                    # before the rest, or the parallel build will
-                    # fail miserably.
-                    run make config-host.h $BUILD_FLAGS
                     run make version.o  $BUILD_FLAGS
                     ;;
             esac
+
+            # Now patch up config.h and remove directory specific things
+            run make config-host.h
+
+            STANDARDIZE=$AOSP_DIR/prebuilts/android-emulator-build/qemu-android-deps
+            run sed -i 's@'"$STANDARDIZE"'@unused@' config-host.h
+
+            # Remove unused host dso, cross compile toolchains do not detect it
+            # properly
+            run sed -i 's@.*HOST_DSOSUF.*@@' config-host.h
 
             # Now build everything else in parallel.
             run make -j$NUM_JOBS $BUILD_FLAGS $LINKPROG_FLAGS V=1
