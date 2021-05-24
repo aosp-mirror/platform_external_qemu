@@ -104,6 +104,16 @@ private:
     // colorbuffer w/h/format, could be different
     int mCbWidth = 0;
     int mCbHeight = 0;
+
+    // sw decoders are using YV12 and codec2 tends
+    // to create read/wrtie buffers when actually
+    // write buffer is needed as decoder output.
+    // on M1(not on intel mac), the get texture
+    // operation is too expensive
+    // 1080p will take 150ms + to read one yuv frame
+    // so create a cache
+    std::vector<uint8_t> mYv12pixels;
+
     FrameworkFormat mCbFormat;
     // We need the following GL objects:
     GLuint mProgram = 0;
