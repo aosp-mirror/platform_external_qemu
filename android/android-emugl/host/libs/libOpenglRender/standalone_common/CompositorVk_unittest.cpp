@@ -342,12 +342,35 @@ TEST_F(CompositorVkTest, SimpleComposition) {
     ASSERT_TRUE(texture->write(pixels));
     auto compositor = createCompositor();
     ASSERT_NE(compositor, nullptr);
-    auto composition = std::make_unique<Composition>(
-        texture->m_vkImageView, sampler, textureWidth, textureHeight);
-    auto transform = glm::translate(glm::mat3(1.0f),
-                                    glm::vec2(static_cast<float>(textureLeft),
-                                              static_cast<float>(textureTop)));
-    composition->m_transform = transform;
+
+    ComposeLayer composeLayer = {
+        0 /* No color buffer handle */,
+        HWC2_COMPOSITION_DEVICE,
+        { /* frame in which the texture shows up on the display */
+            textureLeft, textureTop, textureRight, textureBottom,
+        },
+        { /* how much of the texture itself to show */
+            0.0, 0.0, static_cast<float>(textureWidth), static_cast<float>(textureHeight),
+        },
+        HWC2_BLEND_MODE_PREMULTIPLIED /* blend mode */,
+        1.0 /* alpha */,
+        { 0, 0, 0, 0 } /* color (N/A) */,
+        HWC_TRANSFORM_NONE /* transform (no rotation */,
+    };
+
+    std::unique_ptr<ComposeLayerVk> composeLayerVkPtr =
+        ComposeLayerVk::createFromHwc2ComposeLayer(
+            sampler, texture->m_vkImageView,
+            composeLayer,
+            textureWidth,
+            textureHeight,
+            k_renderTargetWidth,
+            k_renderTargetHeight);
+
+    std::vector<std::unique_ptr<ComposeLayerVk>> layers;
+    layers.emplace_back(std::move(composeLayerVkPtr));
+
+    auto composition = std::make_unique<Composition>(std::move(layers));
     compositor->setComposition(0, std::move(composition));
     VkCommandBuffer cmdBuff = compositor->getCommandBuffer(0);
     VkSubmitInfo submitInfo = {.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
@@ -384,21 +407,34 @@ TEST_F(CompositorVkTest, SimpleComposition) {
 TEST_F(CompositorVkTest, CompositingWithDifferentCompositionOnMultipleTargets) {
     constexpr uint32_t textureWidth = 20;
     constexpr uint32_t textureHeight = 30;
-    struct Rect {
-        uint32_t m_top;
-        uint32_t m_bottom;
-        uint32_t m_left;
-        uint32_t m_right;
+
+    ComposeLayer defaultComposeLayer = {
+        0 /* No color buffer handle */,
+        HWC2_COMPOSITION_DEVICE,
+        { /* display frame (to be replaced for each of k_numOfRenderTargets */
+            0, 0, 0, 0,
+        },
+        { /* how much of the texture itself to show */
+            0.0, 0.0, static_cast<float>(textureWidth), static_cast<float>(textureHeight),
+        },
+        HWC2_BLEND_MODE_PREMULTIPLIED /* blend mode */,
+        1.0 /* alpha */,
+        { 0, 0, 0, 0 } /* color (N/A) */,
+        HWC_TRANSFORM_NONE /* transform (no rotation */,
     };
-    std::vector<Rect> texturePositions(k_numOfRenderTargets);
+
+    std::vector<ComposeLayer> composeLayers(k_numOfRenderTargets);
     for (int i = 0; i < k_numOfRenderTargets; i++) {
-        auto left = (i * 30) % (k_renderTargetWidth - textureWidth);
-        auto top = (i * 20) % (k_renderTargetHeight - textureHeight);
-        texturePositions[i].m_top = top;
-        texturePositions[i].m_bottom = top + textureHeight;
-        texturePositions[i].m_left = left;
-        texturePositions[i].m_right = left + textureWidth;
+        composeLayers[i] = defaultComposeLayer;
+        int left = (i * 30) % (k_renderTargetWidth - textureWidth);
+        int top = (i * 20) % (k_renderTargetHeight - textureHeight);
+        int right = left + textureWidth;
+        int bottom = top + textureHeight;
+        composeLayers[i].displayFrame = {
+            left, top, right, bottom,
+        };
     }
+
     auto sampler = createSampler();
     auto texture = RenderTexture::create(*k_vk, m_vkDevice, m_vkPhysicalDevice,
                                          m_compositorVkQueue, m_vkCommandPool,
@@ -414,13 +450,19 @@ TEST_F(CompositorVkTest, CompositingWithDifferentCompositionOnMultipleTargets) {
     auto compositor = createCompositor();
     ASSERT_NE(compositor, nullptr);
     for (int i = 0; i < k_numOfRenderTargets; i++) {
-        const auto &pos = texturePositions[i];
-        auto composition = std::make_unique<Composition>(
-            texture->m_vkImageView, sampler, textureWidth, textureHeight);
-        auto transform = glm::translate(
-            glm::mat3(1.0f), glm::vec2(static_cast<float>(pos.m_left),
-                                       static_cast<float>(pos.m_top)));
-        composition->m_transform = transform;
+        std::unique_ptr<ComposeLayerVk> composeLayerVkPtr =
+            ComposeLayerVk::createFromHwc2ComposeLayer(
+                sampler, texture->m_vkImageView,
+                composeLayers[i],
+                textureWidth,
+                textureHeight,
+                k_renderTargetWidth,
+                k_renderTargetHeight);
+
+        std::vector<std::unique_ptr<ComposeLayerVk>> layers;
+        layers.emplace_back(std::move(composeLayerVkPtr));
+
+        auto composition = std::make_unique<Composition>(std::move(layers));
         compositor->setComposition(i, std::move(composition));
         VkCommandBuffer cmdBuff = compositor->getCommandBuffer(i);
         VkSubmitInfo submitInfo = {.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
@@ -435,16 +477,18 @@ TEST_F(CompositorVkTest, CompositingWithDifferentCompositionOnMultipleTargets) {
         ASSERT_TRUE(maybeImagePixels.has_value());
         const auto &imagePixels = maybeImagePixels.value();
 
-        for (uint32_t i = 0; i < k_renderTargetHeight; i++) {
-            for (uint32_t j = 0; j < k_renderTargetWidth; j++) {
-                uint32_t offset = i * k_renderTargetWidth + j;
+        for (uint32_t j = 0; j < k_renderTargetHeight; j++) {
+            for (uint32_t k = 0; k < k_renderTargetWidth; k++) {
+                uint32_t offset = j * k_renderTargetWidth + k;
                 const uint8_t *pixel =
                     reinterpret_cast<const uint8_t *>(&imagePixels[offset]);
                 EXPECT_EQ(pixel[1], 0);
                 EXPECT_EQ(pixel[2], 0);
                 EXPECT_EQ(pixel[3], 0xff);
-                if (i >= pos.m_top && i < pos.m_bottom && j >= pos.m_left &&
-                    j < pos.m_right) {
+                if (j >= composeLayers[i].displayFrame.top &&
+                    j < composeLayers[i].displayFrame.bottom &&
+                    k >= composeLayers[i].displayFrame.left &&
+                    k < composeLayers[i].displayFrame.right) {
                     EXPECT_EQ(pixel[0], 0xff);
                 } else {
                     EXPECT_EQ(pixel[0], 0);

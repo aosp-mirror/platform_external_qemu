@@ -2905,7 +2905,6 @@ bool FrameBuffer::compose(uint32_t bufferSize, void* buffer, bool needPost) {
            }
 
            m_displayVk->compose(composeDevice->numLayers, l, composeBuffers);
-           m_justVkComposed = true;
        } else {
            Post composeCmd;
            composeCmd.composeVersion = 2;
