@@ -377,7 +377,7 @@ out:
     visit_free(v);
 }
 
-void qmp_marshal_an_oob_command(QDict *args, QObject **ret, Error **errp)
+void qmp_marshal_test_flags_command(QDict *args, QObject **ret, Error **errp)
 {
     Error *err = NULL;
     Visitor *v = NULL;
@@ -398,7 +398,7 @@ void qmp_marshal_an_oob_command(QDict *args, QObject **ret, Error **errp)
         }
     }
 
-    qmp_an_oob_command(&err);
+    qmp_test_flags_command(&err);
 
 out:
     error_propagate(errp, err);
@@ -487,8 +487,8 @@ void test_qmp_init_marshal(QmpCommandList *cmds)
                          qmp_marshal_boxed_struct, QCO_NO_OPTIONS);
     qmp_register_command(cmds, "boxed-union",
                          qmp_marshal_boxed_union, QCO_NO_OPTIONS);
-    qmp_register_command(cmds, "an-oob-command",
-                         qmp_marshal_an_oob_command, QCO_ALLOW_OOB);
+    qmp_register_command(cmds, "test-flags-command",
+                         qmp_marshal_test_flags_command, QCO_ALLOW_OOB | QCO_ALLOW_PRECONFIG);
     qmp_register_command(cmds, "__org.qemu_x-command",
                          qmp_marshal___org_qemu_x_command, QCO_NO_OPTIONS);
 }

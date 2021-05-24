@@ -83,7 +83,7 @@ struct mbuf {
 	struct	mbuf *m_prevpkt;	/* Flags aren't used in the output queue */
 	int	m_flags;		/* Misc flags */
 
-	int	m_size;			/* Size of mbuf, from m_dat, or m_ext */
+	int	m_size;			/* Size of mbuf, from m_dat or m_ext */
 	struct	socket *m_so;
 
 	caddr_t	m_data;			/* Current location of data */

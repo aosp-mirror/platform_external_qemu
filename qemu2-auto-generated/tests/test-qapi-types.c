@@ -99,6 +99,7 @@ const QEnumLookup EnumOne_lookup = {
         [ENUM_ONE_VALUE1] = "value1",
         [ENUM_ONE_VALUE2] = "value2",
         [ENUM_ONE_VALUE3] = "value3",
+        [ENUM_ONE_VALUE4] = "value4",
     },
     .size = ENUM_ONE__MAX
 };

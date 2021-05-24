@@ -6,6 +6,7 @@
 .params     = "",
 .help       = "show the version of QEMU",
 .cmd        = hmp_info_version,
+.flags      = "p",
 },
 
 
@@ -24,6 +25,7 @@
 .params     = "",
 .help       = "show the character devices",
 .cmd        = hmp_info_chardev,
+.flags      = "p",
 },
 
 
@@ -102,6 +104,7 @@
 .params     = "",
 .help       = "show the command line history",
 .cmd        = hmp_info_history,
+.flags      = "p",
 },
 
 
@@ -256,6 +259,7 @@ defined(TARGET_PPC) || defined(TARGET_XTENSA) || defined(TARGET_M68K)
 .params     = "",
 .help       = "show the current VM status (running|paused)",
 .cmd        = hmp_info_status,
+.flags      = "p",
 },
 
 
@@ -294,6 +298,7 @@ defined(TARGET_PPC) || defined(TARGET_XTENSA) || defined(TARGET_M68K)
 .params     = "",
 .help       = "show the current VM name",
 .cmd        = hmp_info_name,
+.flags      = "p",
 },
 
 
@@ -303,6 +308,7 @@ defined(TARGET_PPC) || defined(TARGET_XTENSA) || defined(TARGET_M68K)
 .params     = "",
 .help       = "show the current VM UUID",
 .cmd        = hmp_info_uuid,
+.flags      = "p",
 },
 
 
@@ -395,6 +401,7 @@ defined(TARGET_PPC) || defined(TARGET_XTENSA) || defined(TARGET_M68K)
 .params     = "[path]",
 .help       = "show QOM composition tree",
 .cmd        = hmp_info_qom_tree,
+.flags      = "p",
 },
 
 
@@ -433,6 +440,7 @@ defined(TARGET_PPC) || defined(TARGET_XTENSA) || defined(TARGET_M68K)
 .params     = "",
 .help       = "show memory backends",
 .cmd        = hmp_info_memdev,
+.flags      = "p",
 },
 
 
@@ -451,6 +459,7 @@ defined(TARGET_PPC) || defined(TARGET_XTENSA) || defined(TARGET_M68K)
 .params     = "",
 .help       = "show iothreads",
 .cmd        = hmp_info_iothreads,
+.flags      = "p",
 },
 
 
@@ -536,6 +545,7 @@ defined(TARGET_PPC) || defined(TARGET_XTENSA) || defined(TARGET_M68K)
 .params     = "",
 .help       = "Show information about hotpluggable CPUs",
 .cmd        = hmp_hotpluggable_cpus,
+.flags      = "p",
 },
 
 

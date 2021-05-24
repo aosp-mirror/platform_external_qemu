@@ -49,7 +49,8 @@ typedef enum EnumOne {
     ENUM_ONE_VALUE1 = 0,
     ENUM_ONE_VALUE2 = 1,
     ENUM_ONE_VALUE3 = 2,
-    ENUM_ONE__MAX = 3,
+    ENUM_ONE_VALUE4 = 3,
+    ENUM_ONE__MAX = 4,
 } EnumOne;
 
 #define EnumOne_str(val) \

@@ -179,6 +179,7 @@ display_darwin_warning() {
 # $2: AOSP source directory
 build_qemu_android () {
     builder_prepare_for_host $1 "$2"
+    BUILD_HOST=$(get_build_os)-$(get_build_arch)¶
 
     QEMU_TARGETS=
     QEMU_TARGET_LIST=
@@ -268,7 +269,6 @@ build_qemu_android () {
                 # EXTRA_CFLAGS="$EXTRA_CFLAGS -I$QEMU_SRCDIR/android/android-emu-base"
                 ;;
             darwin-*)
-                EXTRA_CFLAGS="$EXTRA_CFLAGS -mmacosx-version-min=10.8"
                 ;;
         esac
 
@@ -339,6 +339,22 @@ build_qemu_android () {
                 # Use the host version, or the build will freeze.
                 PKG_CONFIG=`which pkg-config`
                 ;;
+           darwin-aarch64)
+              if [[ "$BUILD_HOST"  != "darwin_arm64" ]]; then
+                # Use the host version, or the build will freeze.
+                PKG_CONFIG=`which pkg-config`
+              else
+                PKG_CONFIG=$PREFIX/bin/pkg-config
+              fi
+              ;;
+           darwin-x86_64)
+              if [[ "$BUILD_HOST"  != "darwin_x86_64" ]]; then
+                # Use the host version, or the build will freeze.
+                PKG_CONFIG=`which pkg-config`
+              else
+                PKG_CONFIG=$PREFIX/bin/pkg-config
+              fi
+              ;;
             *)
                 PKG_CONFIG=$PREFIX/bin/pkg-config
                 ;;
@@ -500,13 +516,19 @@ EOF
                     # the generated config-host.mak file.
                     sed -i -e '/^ROMS=/d' config-host.mak
 
-                    # For Windows, config-host.h must be created after
-                    # before the rest, or the parallel build will
-                    # fail miserably.
-                    run make config-host.h $BUILD_FLAGS
                     run make version.o  $BUILD_FLAGS
                     ;;
             esac
+
+            # Now patch up config.h and remove directory specific things
+            run make config-host.h
+
+            STANDARDIZE=$AOSP_DIR/prebuilts/android-emulator-build/qemu-android-deps
+            run sed -i 's@'"$STANDARDIZE"'@unused@' config-host.h
+
+            # Remove unused host dso, cross compile toolchains do not detect it
+            # properly
+            run sed -i 's@.*HOST_DSOSUF.*@@' config-host.h
 
             # Now build everything else in parallel.
             run make -j$NUM_JOBS $BUILD_FLAGS $LINKPROG_FLAGS V=1

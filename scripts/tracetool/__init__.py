@@ -67,8 +67,6 @@ ALLOWED_TYPES = [
     "bool",
     "unsigned",
     "signed",
-    "float",
-    "double",
     "int8_t",
     "uint8_t",
     "int16_t",
@@ -82,6 +80,7 @@ ALLOWED_TYPES = [
     "ssize_t",
     "uintptr_t",
     "ptrdiff_t",
+    "float",
     # Magic substitution is done by tracetool
     "TCGv",
 ]

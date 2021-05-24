@@ -15,6 +15,7 @@
 const QLitObject test_qmp_schema_qlit = QLIT_QLIST(((QLitObject[]) {
     QLIT_QDICT(((QLitDictEntry[]) {
         { "allow-oob", QLIT_QBOOL(false) },
+        { "allow-preconfig", QLIT_QBOOL(false) },
         { "arg-type", QLIT_QSTR("0") },
         { "meta-type", QLIT_QSTR("command") },
         { "name", QLIT_QSTR("user_def_cmd0") },
@@ -23,6 +24,7 @@ const QLitObject test_qmp_schema_qlit = QLIT_QLIST(((QLitObject[]) {
     })),
     QLIT_QDICT(((QLitDictEntry[]) {
         { "allow-oob", QLIT_QBOOL(false) },
+        { "allow-preconfig", QLIT_QBOOL(false) },
         { "arg-type", QLIT_QSTR("1") },
         { "meta-type", QLIT_QSTR("command") },
         { "name", QLIT_QSTR("user_def_cmd") },
@@ -31,6 +33,7 @@ const QLitObject test_qmp_schema_qlit = QLIT_QLIST(((QLitObject[]) {
     })),
     QLIT_QDICT(((QLitDictEntry[]) {
         { "allow-oob", QLIT_QBOOL(false) },
+        { "allow-preconfig", QLIT_QBOOL(false) },
         { "arg-type", QLIT_QSTR("2") },
         { "meta-type", QLIT_QSTR("command") },
         { "name", QLIT_QSTR("user_def_cmd1") },
@@ -39,6 +42,7 @@ const QLitObject test_qmp_schema_qlit = QLIT_QLIST(((QLitObject[]) {
     })),
     QLIT_QDICT(((QLitDictEntry[]) {
         { "allow-oob", QLIT_QBOOL(false) },
+        { "allow-preconfig", QLIT_QBOOL(false) },
         { "arg-type", QLIT_QSTR("3") },
         { "meta-type", QLIT_QSTR("command") },
         { "name", QLIT_QSTR("user_def_cmd2") },
@@ -47,6 +51,7 @@ const QLitObject test_qmp_schema_qlit = QLIT_QLIST(((QLitObject[]) {
     })),
     QLIT_QDICT(((QLitDictEntry[]) {
         { "allow-oob", QLIT_QBOOL(false) },
+        { "allow-preconfig", QLIT_QBOOL(false) },
         { "arg-type", QLIT_QSTR("5") },
         { "meta-type", QLIT_QSTR("command") },
         { "name", QLIT_QSTR("guest-get-time") },
@@ -55,6 +60,7 @@ const QLitObject test_qmp_schema_qlit = QLIT_QLIST(((QLitObject[]) {
     })),
     QLIT_QDICT(((QLitDictEntry[]) {
         { "allow-oob", QLIT_QBOOL(false) },
+        { "allow-preconfig", QLIT_QBOOL(false) },
         { "arg-type", QLIT_QSTR("6") },
         { "meta-type", QLIT_QSTR("command") },
         { "name", QLIT_QSTR("guest-sync") },
@@ -63,6 +69,7 @@ const QLitObject test_qmp_schema_qlit = QLIT_QLIST(((QLitObject[]) {
     })),
     QLIT_QDICT(((QLitDictEntry[]) {
         { "allow-oob", QLIT_QBOOL(false) },
+        { "allow-preconfig", QLIT_QBOOL(false) },
         { "arg-type", QLIT_QSTR("7") },
         { "meta-type", QLIT_QSTR("command") },
         { "name", QLIT_QSTR("boxed-struct") },
@@ -71,6 +78,7 @@ const QLitObject test_qmp_schema_qlit = QLIT_QLIST(((QLitObject[]) {
     })),
     QLIT_QDICT(((QLitDictEntry[]) {
         { "allow-oob", QLIT_QBOOL(false) },
+        { "allow-preconfig", QLIT_QBOOL(false) },
         { "arg-type", QLIT_QSTR("8") },
         { "meta-type", QLIT_QSTR("command") },
         { "name", QLIT_QSTR("boxed-union") },
@@ -79,9 +87,10 @@ const QLitObject test_qmp_schema_qlit = QLIT_QLIST(((QLitObject[]) {
     })),
     QLIT_QDICT(((QLitDictEntry[]) {
         { "allow-oob", QLIT_QBOOL(true) },
+        { "allow-preconfig", QLIT_QBOOL(true) },
         { "arg-type", QLIT_QSTR("1") },
         { "meta-type", QLIT_QSTR("command") },
-        { "name", QLIT_QSTR("an-oob-command") },
+        { "name", QLIT_QSTR("test-flags-command") },
         { "ret-type", QLIT_QSTR("1") },
         {}
     })),
@@ -129,6 +138,7 @@ const QLitObject test_qmp_schema_qlit = QLIT_QLIST(((QLitObject[]) {
     })),
     QLIT_QDICT(((QLitDictEntry[]) {
         { "allow-oob", QLIT_QBOOL(false) },
+        { "allow-preconfig", QLIT_QBOOL(false) },
         { "arg-type", QLIT_QSTR("13") },
         { "meta-type", QLIT_QSTR("command") },
         { "name", QLIT_QSTR("__org.qemu_x-command") },
@@ -787,6 +797,7 @@ const QLitObject test_qmp_schema_qlit = QLIT_QLIST(((QLitObject[]) {
             QLIT_QSTR("value1"),
             QLIT_QSTR("value2"),
             QLIT_QSTR("value3"),
+            QLIT_QSTR("value4"),
             {}
         })) },
         {}
@@ -827,6 +838,11 @@ const QLitObject test_qmp_schema_qlit = QLIT_QLIST(((QLitObject[]) {
             QLIT_QDICT(((QLitDictEntry[]) {
                 { "case", QLIT_QSTR("value3") },
                 { "type", QLIT_QSTR("42") },
+                {}
+            })),
+            QLIT_QDICT(((QLitDictEntry[]) {
+                { "case", QLIT_QSTR("value4") },
+                { "type", QLIT_QSTR("1") },
                 {}
             })),
             {}
