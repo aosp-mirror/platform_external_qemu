@@ -507,9 +507,9 @@ public:
     // GL state.
     // It can be unsafe / leaky to change the structure of contexts
     // outside the facilities the FrameBuffer class provides.
-    void getTrivialContextForCurrentRenderThread(HandleType shared,
-                                                 HandleType* contextOut,
-                                                 HandleType* surfOut);
+    void createTrivialContext(HandleType shared,
+                              HandleType* contextOut,
+                              HandleType* surfOut);
     // createAndBindTrivialSharedContext(), but with a m_pbufContext
     // as shared, and not adding itself to the context map at all.
     void createAndBindTrivialSharedContext(EGLContext* contextOut,
