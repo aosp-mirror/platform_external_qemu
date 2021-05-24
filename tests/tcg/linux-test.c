@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (430b0d Merge "c2-codecs: use YV12 caches to work around slow textur)
 /*
  *  linux and CPU test
  *
@@ -539,3 +540,5 @@ int main(int argc, char **argv)
     test_shm();
     return 0;
 }
+=======
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)

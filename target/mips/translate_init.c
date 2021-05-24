@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (430b0d Merge "c2-codecs: use YV12 caches to work around slow textur)
 /*
  *  MIPS emulation for qemu: CPU initialisation routines.
  *
@@ -882,3 +883,5 @@ static void msa_reset(CPUMIPSState *env)
     /* set proper signanling bit meaning ("1" means "quiet") */
     set_snan_bit_is_one(0, &env->active_tc.msa_fp_status);
 }
+=======
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)

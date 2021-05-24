@@ -15,8 +15,11 @@
 #include "arm-powerctl.h"
 #include "qemu/log.h"
 #include "qemu/main-loop.h"
+<<<<<<< HEAD   (430b0d Merge "c2-codecs: use YV12 caches to work around slow textur)
 #include "exec/exec-all.h"
 #include "sysemu/hvf.h"
+=======
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 
 #ifndef DEBUG_ARM_POWERCTL
 #define DEBUG_ARM_POWERCTL 0

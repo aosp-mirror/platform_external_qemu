@@ -34,8 +34,12 @@ stub-obj-y += uuid.o
 stub-obj-y += vm-stop.o
 stub-obj-y += vmstate.o
 stub-obj-$(CONFIG_WIN32) += fd-register.o
+<<<<<<< HEAD   (430b0d Merge "c2-codecs: use YV12 caches to work around slow textur)
 stub-obj-$(CONFIG_WIN32) += win32-stubs.o
 stub-obj-y += qmp_pc_dimm.o
+=======
+stub-obj-y += qmp_memory_device.o
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 stub-obj-y += target-monitor-defs.o
 stub-obj-y += target-get-monitor-def.o
 stub-obj-y += pc_madt_cpu_entry.o

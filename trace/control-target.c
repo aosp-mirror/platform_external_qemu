@@ -11,7 +11,10 @@
 #include "cpu.h"
 #include "trace-root.h"
 #include "trace/control.h"
+<<<<<<< HEAD   (430b0d Merge "c2-codecs: use YV12 caches to work around slow textur)
 #include "accel/tcg/translate-all.h"
+=======
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 
 
 void trace_event_set_state_dynamic_init(TraceEvent *ev, bool state)

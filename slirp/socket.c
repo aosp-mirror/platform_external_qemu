@@ -715,9 +715,15 @@ tcp_listen(Slirp *slirp, uint32_t haddr, u_int hport, uint32_t laddr,
 
 	DEBUG_CALL("tcp_listen");
 	DEBUG_ARG("haddr = %s", inet_ntoa((struct in_addr){.s_addr = haddr}));
+<<<<<<< HEAD   (430b0d Merge "c2-codecs: use YV12 caches to work around slow textur)
 	DEBUG_ARG("hport = %d", hport);
 	DEBUG_ARG("laddr = %s", inet_ntoa((struct in_addr){.s_addr = laddr}));
 	DEBUG_ARG("lport = %d", lport);
+=======
+	DEBUG_ARG("hport = %d", ntohs(hport));
+	DEBUG_ARG("laddr = %s", inet_ntoa((struct in_addr){.s_addr = laddr}));
+	DEBUG_ARG("lport = %d", ntohs(lport));
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 	DEBUG_ARG("flags = %x", flags);
 
 	so = socreate(slirp);

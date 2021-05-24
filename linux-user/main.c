@@ -17,6 +17,7 @@
  *  along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 #include "qemu/osdep.h"
+#include "qemu/units.h"
 #include "qemu-version.h"
 #include <sys/syscall.h>
 #include <sys/resource.h>
@@ -33,9 +34,9 @@
 #include "qemu/timer.h"
 #include "qemu/envlist.h"
 #include "elf.h"
-#include "exec/log.h"
 #include "trace/control.h"
 #include "target_elf.h"
+#include "cpu_loop-common.h"
 
 char *exec_path;
 
@@ -49,17 +50,6 @@ static const char *cpu_type;
 unsigned long mmap_min_addr;
 unsigned long guest_base;
 int have_guest_base;
-
-#define EXCP_DUMP(env, fmt, ...)                                        \
-do {                                                                    \
-    CPUState *cs = ENV_GET_CPU(env);                                    \
-    fprintf(stderr, fmt , ## __VA_ARGS__);                              \
-    cpu_dump_state(cs, stderr, fprintf, 0);                             \
-    if (qemu_log_separate()) {                                          \
-        qemu_log(fmt, ## __VA_ARGS__);                                  \
-        log_cpu_state(cs, 0);                                           \
-    }                                                                   \
-} while (0)
 
 /*
  * When running 32-on-64 we should make sure we can fit all of the possible
@@ -88,14 +78,7 @@ do {                                                                    \
 # endif
 #endif
 
-/* That said, reserving *too* much vm space via mmap can run into problems
-   with rlimits, oom due to page table creation, etc.  We will still try it,
-   if directed by the command-line option, but not by default.  */
-#if HOST_LONG_BITS == 64 && TARGET_VIRT_ADDR_SPACE_BITS <= 32
-unsigned long reserved_va = MAX_RESERVED_VA;
-#else
 unsigned long reserved_va;
-#endif
 
 static void usage(int exitcode);
 
@@ -130,7 +113,6 @@ int cpu_get_pic_interrupt(CPUX86State *env)
 void fork_start(void)
 {
     mmap_fork_start();
-    qemu_mutex_lock(&tb_ctx.tb_lock);
     cpu_list_lock();
 }
 
@@ -146,19 +128,18 @@ void fork_end(int child)
                 QTAILQ_REMOVE(&cpus, cpu, node);
             }
         }
-        qemu_mutex_init(&tb_ctx.tb_lock);
         qemu_init_cpu_list();
         gdbserver_fork(thread_cpu);
         /* qemu_init_cpu_list() takes care of reinitializing the
          * exclusive state, so we don't need to end_exclusive() here.
          */
     } else {
-        qemu_mutex_unlock(&tb_ctx.tb_lock);
         cpu_list_unlock();
         end_exclusive();
     }
 }
 
+<<<<<<< HEAD   (430b0d Merge "c2-codecs: use YV12 caches to work around slow textur)
 #ifdef TARGET_I386
 /***********************************************************/
 /* CPUX86 core interface */
@@ -4022,6 +4003,8 @@ void cpu_loop(CPUXtensaState *env)
 
 #endif /* TARGET_XTENSA */
 
+=======
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 __thread CPUState *thread_cpu;
 
 bool qemu_cpu_is_self(CPUState *cpu)
@@ -4150,9 +4133,9 @@ static void handle_arg_stack_size(const char *arg)
     }
 
     if (*p == 'M') {
-        guest_stack_size *= 1024 * 1024;
+        guest_stack_size *= MiB;
     } else if (*p == 'k' || *p == 'K') {
-        guest_stack_size *= 1024;
+        guest_stack_size *= KiB;
     }
 }
 
@@ -4544,9 +4527,20 @@ int main(int argc, char **argv, char **envp)
     }
     cpu_type = parse_cpu_model(cpu_model);
 
+    /* init tcg before creating CPUs and to get qemu_host_page_size */
     tcg_exec_init(0);
-    /* NOTE: we need to init the CPU at this stage to get
-       qemu_host_page_size */
+
+    /* Reserving *too* much vm space via mmap can run into problems
+       with rlimits, oom due to page table creation, etc.  We will still try it,
+       if directed by the command-line option, but not by default.  */
+    if (HOST_LONG_BITS == 64 &&
+        TARGET_VIRT_ADDR_SPACE_BITS <= 32 &&
+        reserved_va == 0) {
+        /* reserved_va must be aligned with the host page size
+         * as it is used with mmap()
+         */
+        reserved_va = MAX_RESERVED_VA & qemu_host_page_mask;
+    }
 
     cpu = cpu_create(cpu_type);
     env = cpu->env_ptr;
@@ -4566,7 +4560,7 @@ int main(int argc, char **argv, char **envp)
     envlist_free(envlist);
 
     /*
-     * Now that page sizes are configured in cpu_init() we can do
+     * Now that page sizes are configured in tcg_exec_init() we can do
      * proper page alignment for guest_base.
      */
     guest_base = HOST_PAGE_ALIGN(guest_base);
@@ -4677,6 +4671,7 @@ int main(int argc, char **argv, char **envp)
     tcg_prologue_init(tcg_ctx);
     tcg_region_init();
 
+<<<<<<< HEAD   (430b0d Merge "c2-codecs: use YV12 caches to work around slow textur)
 #if defined(TARGET_I386)
     env->cr[0] = CR0_PG_MASK | CR0_WP_MASK | CR0_PE_MASK;
     env->hflags |= HF_PE_MASK | HF_CPL_MASK;
@@ -5076,6 +5071,9 @@ int main(int argc, char **argv, char **envp)
     /* This will be filled in on the first SYS_HEAPINFO call.  */
     ts->heap_limit = 0;
 #endif
+=======
+    target_cpu_copy_regs(env, regs);
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 
     if (gdbstub_port) {
         if (gdbserver_start(gdbstub_port) < 0) {

@@ -11,9 +11,13 @@
 #include "qemu/osdep.h"
 #include "cpu.h"
 #include "exec/address-spaces.h"
+<<<<<<< HEAD   (430b0d Merge "c2-codecs: use YV12 caches to work around slow textur)
 #include "exec/exec-all.h"
 #include "exec/ram_addr.h"
 #include "exec/memory-remap.h"
+=======
+#include "qemu/error-report.h"
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 
 #include "target/i386/hax-i386.h"
 #include "qemu/queue.h"

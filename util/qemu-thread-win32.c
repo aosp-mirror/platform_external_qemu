@@ -21,7 +21,11 @@
 #include "qemu/thread.h"
 #include "qemu/thread_local.h"
 #include "qemu/notify.h"
+<<<<<<< HEAD   (430b0d Merge "c2-codecs: use YV12 caches to work around slow textur)
 #include "sysemu/sysemu.h"
+=======
+#include "qemu-thread-common.h"
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 #include <process.h>
 
 static bool name_threads;
@@ -53,7 +57,7 @@ static void error_exit(int err, const char *msg)
 void qemu_mutex_init(QemuMutex *mutex)
 {
     InitializeSRWLock(&mutex->lock);
-    mutex->initialized = true;
+    qemu_mutex_post_init(mutex);
 }
 
 void qemu_mutex_destroy(QemuMutex *mutex)
@@ -66,7 +70,15 @@ void qemu_mutex_destroy(QemuMutex *mutex)
 void qemu_mutex_lock_impl(QemuMutex *mutex, const char *file, const int line)
 {
     assert(mutex->initialized);
+<<<<<<< HEAD   (430b0d Merge "c2-codecs: use YV12 caches to work around slow textur)
+=======
+    qemu_mutex_pre_lock(mutex, file, line);
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
     AcquireSRWLockExclusive(&mutex->lock);
+<<<<<<< HEAD   (430b0d Merge "c2-codecs: use YV12 caches to work around slow textur)
+=======
+    qemu_mutex_post_lock(mutex, file, line);
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 }
 
 int qemu_mutex_trylock_impl(QemuMutex *mutex, const char *file, const int line)
@@ -76,6 +88,10 @@ int qemu_mutex_trylock_impl(QemuMutex *mutex, const char *file, const int line)
     assert(mutex->initialized);
     owned = TryAcquireSRWLockExclusive(&mutex->lock);
     if (owned) {
+<<<<<<< HEAD   (430b0d Merge "c2-codecs: use YV12 caches to work around slow textur)
+=======
+        qemu_mutex_post_lock(mutex, file, line);
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
         return 0;
     }
     return -EBUSY;
@@ -84,6 +100,10 @@ int qemu_mutex_trylock_impl(QemuMutex *mutex, const char *file, const int line)
 void qemu_mutex_unlock_impl(QemuMutex *mutex, const char *file, const int line)
 {
     assert(mutex->initialized);
+<<<<<<< HEAD   (430b0d Merge "c2-codecs: use YV12 caches to work around slow textur)
+=======
+    qemu_mutex_pre_unlock(mutex, file, line);
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
     ReleaseSRWLockExclusive(&mutex->lock);
 }
 
@@ -147,7 +167,15 @@ void qemu_cond_broadcast(QemuCond *cond)
 void qemu_cond_wait_impl(QemuCond *cond, QemuMutex *mutex, const char *file, const int line)
 {
     assert(cond->initialized);
+<<<<<<< HEAD   (430b0d Merge "c2-codecs: use YV12 caches to work around slow textur)
+=======
+    qemu_mutex_pre_unlock(mutex, file, line);
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
     SleepConditionVariableSRW(&cond->var, &mutex->lock, INFINITE, 0);
+<<<<<<< HEAD   (430b0d Merge "c2-codecs: use YV12 caches to work around slow textur)
+=======
+    qemu_mutex_post_lock(mutex, file, line);
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 }
 
 void qemu_sem_init(QemuSemaphore *sem, int init)
