@@ -648,6 +648,15 @@ void YUVConverter::readPixels(uint8_t* pixels, uint32_t pixels_size) {
     uint32_t yoff, uoff, voff, ywidth, cwidth;
     getYUVOffsets(width, height, mFormat, &yoff, &uoff, &voff, &ywidth,
                   &cwidth);
+    if (mFormat == FRAMEWORK_FORMAT_YV12) {
+      const int len = ywidth * height +  cwidth * height;
+      if (mYv12pixels.size() == len) {
+        memcpy(pixels, mYv12pixels.data(), len);
+      } else {
+        // we have not saved a valid copy yet, nothing to read
+      }
+      return;
+    }
 
     if (mFormat == FRAMEWORK_FORMAT_YUV_420_888) {
         if (emugl::emugl_feature_is_enabled(
@@ -750,6 +759,15 @@ void YUVConverter::drawConvertFromFormat(FrameworkFormat format, int x, int y, i
 
         restoreGLState();
         return;
+    } else {
+      // save a copy
+      if (mFormat == FRAMEWORK_FORMAT_YV12) {
+        const int len = ywidth * height + 2 * cwidth * cheight;
+        if (mYv12pixels.size() != len) {
+          mYv12pixels.resize(len);
+        }
+        memcpy(mYv12pixels.data(), pixels, len);
+      }
     }
 
     subUpdateYUVGLTex(GL_TEXTURE0, mYtex,
