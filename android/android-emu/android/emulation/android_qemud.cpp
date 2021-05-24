@@ -460,7 +460,9 @@ void android_qemud_init(CSerialLine* sl) {
      * so we will initialize both qemud machineries, the legacy (over serial
      * port), and the new one (over qemu pipe). Then we let the guest to connect
      * via one, or the other. */
-    _android_qemud_serial_init(sl);
+    if (sl) {
+        _android_qemud_serial_init(sl);
+    }
     _android_qemud_pipe_init();
     isInited = true;
 }
