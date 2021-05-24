@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "59eb9a59_dddbbb2f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-05-24T23:11:44Z",
+      "side": 1,
+      "message": "Build bots have been updated...",
+      "revId": "4e00bf4c25c8f7c578fff78c9fa8c271a8408e94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
