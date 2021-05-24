@@ -203,10 +203,8 @@ bool qemu_android_emulation_early_setup() {
     // Ensure charpipes i/o are handled properly.
     main_loop_register_poll_callback(qemu_charpipe_poll);
 
-    if (android_qemu_mode) {
-        // Register qemud-related snapshot callbacks.
-        android_qemu2_qemud_init();
-    }
+    // Setup qemud and register qemud-related snapshot callbacks.
+    android_qemu2_qemud_init();
 
     // Ensure the VmLock implementation is setup.
     VmLock* vmLock = new qemu2::VmLock();
