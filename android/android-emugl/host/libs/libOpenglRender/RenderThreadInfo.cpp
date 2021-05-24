@@ -47,15 +47,6 @@ RenderThreadInfo::RenderThreadInfo() {
 
 RenderThreadInfo::~RenderThreadInfo() {
     s_threadInfoPtr = nullptr;
-    FrameBuffer *fb = FrameBuffer::getFB();
-    if (trivialContext) {
-        fb->DestroyRenderContext(trivialContext);
-        trivialContext = 0;
-    }
-    if (trivialSurface) {
-        fb->DestroyWindowSurface(trivialSurface);
-        trivialSurface = 0;
-    }
     AutoLock lock(sRegistry.lock);
     sRegistry.threadInfos.erase(this);
 }
