@@ -146,6 +146,17 @@ service EmulatorController {
   // produce any audio whatsoever!
   rpc streamAudio(AudioFormat) returns (stream AudioPacket) {}
 
+  // Injects a series of audio packets to the android microphone.
+  // Delivered frames will be placed in a ringbuffer and delivered
+  // to the emulator when audio packets are requested.
+  //
+  //  ** Not yet implemented **
+  //
+  // -  INVALID_ARGUMENT (code 3) if:
+  //     - The format is not supported.
+  // -  FAILED_PRECONDITION (code 9) If there was a microphone registered already.
+  rpc injectAudio(stream AudioPacket) returns (google.protobuf.Empty) {}
+
   // Returns the last 128Kb of logcat output from the emulator
   // Note that parsed logcat messages are only available after L (Api >23).
   // it is possible that the logcat buffer gets overwritten, or falls behind.
