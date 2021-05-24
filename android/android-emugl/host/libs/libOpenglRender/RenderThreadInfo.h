@@ -54,6 +54,9 @@ struct RenderThreadInfo {
     HandleType currDrawSurfHandleFromLoad;
     HandleType currReadSurfHandleFromLoad;
 
+    HandleType trivialContext = 0;
+    HandleType trivialSurface = 0;
+
     RenderContextPtr currContext;
     WindowSurfacePtr currDrawSurf;
     WindowSurfacePtr currReadSurf;
