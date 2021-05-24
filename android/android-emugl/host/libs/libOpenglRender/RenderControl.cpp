@@ -1180,7 +1180,7 @@ static EGLint rcClientWaitSyncKHR(uint64_t handle,
     // In this case, create a context on the host just for syncing.
     if (!tInfo->currContext) {
         uint32_t gralloc_sync_cxt, gralloc_sync_surf;
-        fb->createTrivialContext(0, // There is no context to share.
+        fb->getTrivialContextForCurrentRenderThread(0, // There is no context to share.
                                  &gralloc_sync_cxt,
                                  &gralloc_sync_surf);
         fb->bindContext(gralloc_sync_cxt,
@@ -1208,7 +1208,7 @@ static void rcWaitSyncKHR(uint64_t handle,
     // In this case, create a context on the host just for syncing.
     if (!tInfo->currContext) {
         uint32_t gralloc_sync_cxt, gralloc_sync_surf;
-        fb->createTrivialContext(0, // There is no context to share.
+        fb->getTrivialContextForCurrentRenderThread(0, // There is no context to share.
                                  &gralloc_sync_cxt,
                                  &gralloc_sync_surf);
         fb->bindContext(gralloc_sync_cxt,

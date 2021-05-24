@@ -511,6 +511,7 @@ intptr_t RenderThread::main() {
     // Don't check for snapshots here: if we're already exiting then snapshot
     // should not contain this thread information at all.
     if (!FrameBuffer::getFB()->isShuttingDown()) {
+        tInfo.release();
         // Release references to the current thread's context/surfaces if any
         FrameBuffer::getFB()->bindContext(0, 0, 0);
         if (tInfo.currContext || tInfo.currDrawSurf || tInfo.currReadSurf) {
