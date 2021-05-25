@@ -131,7 +131,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     params.push_back({"androidboot.hardware", isQemu2 ? "ranchu" : "goldfish"});
 
     if (opts->guest_angle) {
-        params.push_back({"androidboot.hardware.egl", "angle"});
+        params.push_back({"androidboot.hardwareegl", "angle"});
     }
 
     if (serialno) {
