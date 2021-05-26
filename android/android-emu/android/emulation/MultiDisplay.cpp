@@ -42,6 +42,8 @@
 #include "android/skin/file.h"                           // for SkinLayout
 #include "android/skin/rect.h"                           // for SKIN_ROTATION_0
 
+#define MULTI_DISPLAY_DEBUG 0
+
 using android::base::AutoLock;
 
 namespace android {
@@ -193,12 +195,14 @@ bool MultiDisplay::getMultiDisplay(uint32_t id,
     if (enabled) {
         *enabled = mMultiDisplay[id].enabled;
     }
+#if MULTI_DISPLAY_DEBUG
     LOG(VERBOSE) << "getMultiDisplay " << id << " x " << mMultiDisplay[id].pos_x
                  << " y " << mMultiDisplay[id].pos_y << " w "
                  << mMultiDisplay[id].width << " h " << mMultiDisplay[id].height
                  << " dpi " << mMultiDisplay[id].dpi << " flag "
                  << mMultiDisplay[id].flag << " enable "
                  << mMultiDisplay[id].enabled;
+#endif
     return mMultiDisplay[id].enabled;
 }
 
