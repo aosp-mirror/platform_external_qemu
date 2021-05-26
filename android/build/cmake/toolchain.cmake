@@ -153,7 +153,7 @@ function(_get_host_tag RET_VAL)
     if (APPLE)
         # arm/x86?
         execute_process(COMMAND uname -m OUTPUT_VARIABLE CPU_ARCH)
-        if (CPU_ARCH EQUAL "x86_64")
+        if (CPU_ARCH MATCHES ".*x86_64.*")
             set (${RET_VAL} "darwin-x86_64" PARENT_SCOPE)
         else()
             set (${RET_VAL} "darwin-aarch64" PARENT_SCOPE)
