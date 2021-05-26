@@ -200,6 +200,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
 
     if (fc::isEnabled(fc::GLESDynamicVersion)) {
         params.push_back({qemuUirendererProp, "skiagl"});
+        params.push_back({"androidboot.debug.renderengine.backend", "skia"});
     }
 
     if (androidbootLogcatProp) {
