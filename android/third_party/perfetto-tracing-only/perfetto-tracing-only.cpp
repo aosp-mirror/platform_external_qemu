@@ -67,14 +67,21 @@ struct SavedTraceInfo {
     bool first;
 };
 
+static bool sTraceStorageDestroyed = false;
+
 class TraceStorage {
 public:
+    ~TraceStorage() { sTraceStorageDestroyed = true; }
     void add(TraceContext* context) {
+        if (sTraceStorageDestroyed)
+            return;
         std::lock_guard<std::mutex> lock(mContextsLock);
         mContexts.insert(context);
     }
 
     void remove(TraceContext* context) {
+        if (sTraceStorageDestroyed)
+            return;
         std::lock_guard<std::mutex> lock(mContextsLock);
         mContexts.erase(context);
     }
@@ -84,17 +91,23 @@ public:
     }
 
     void onTracingDisabled() {
+        if (sTraceStorageDestroyed)
+            return;
         saveTracesToDisk();
     }
 
     // When a thread exited early before tracing was disabled
     void saveTrace(const SavedTraceInfo& trace) {
+        if (sTraceStorageDestroyed)
+            return;
         std::lock_guard<std::mutex> lock(mContextsLock);
         saveTraceLocked(trace);
     }
 
 private:
     void saveTraceLocked(const SavedTraceInfo& trace) {
+        if (sTraceStorageDestroyed)
+            return;
         if (trace.data)
             mSavedTraces.push_back(trace);
     }
