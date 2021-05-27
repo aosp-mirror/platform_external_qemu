@@ -500,6 +500,7 @@ config NPCM7XX
     select MAX34451
     select ISL_PMBUS_VR
     select PCA_I2C_GPIO
+    select MAX_16600
     select PL310  # cache controller
     select PMBUS
     select SERIAL

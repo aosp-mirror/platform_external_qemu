@@ -47,3 +47,7 @@ config MAX31785
 config AMDSBTSI
     bool
     depends on I2C
+
+config MAX_16600
+    bool
+    depends on I2C

@@ -249,6 +249,7 @@ qos_test_ss.add(
   'ipoctal232-test.c',
   'lsm303dlhc-mag-test.c',
   'isl_pmbus_vr-test.c',
+  'max16600-test.c',
   'max34451-test.c',
   'megasas-test.c',
   'ne2000-test.c',
