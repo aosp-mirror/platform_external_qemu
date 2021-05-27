@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "afe65a18_6dd4c3f5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 13
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1576895
+      },
+      "writtenOn": "2021-05-27T16:44:28Z",
+      "side": 1,
+      "message": "Thanks. What\u0027s your plan on porting the difference, especially FrameBuffer::ensureDisplayBufferForColorBuffer and VkEmulation::useNativeSwapchain, back to the vulkan-cereal repo?",
+      "revId": "5e5fc984a259f8e7af7498fe264328822409b4cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
