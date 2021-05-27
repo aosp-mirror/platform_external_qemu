@@ -1248,7 +1248,8 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
             return;
         }
     }
-    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV) {
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV ||
+        avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR) {
         if (pane == PANE_IDX_MULTIDISPLAY) {
             return;
         }
