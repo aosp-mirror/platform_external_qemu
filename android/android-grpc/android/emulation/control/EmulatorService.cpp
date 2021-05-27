@@ -567,6 +567,7 @@ public:
             // there. (All clients get disconnected on emulator shutdown).
             auto arrived = frameEvent->next(kTimeToWaitForFrame);
             if (arrived > 0 && !context->IsCancelled()) {
+                AEMU_SCOPED_TRACE("streamScreenshot::frame");
                 frame += arrived;
                 Stopwatch sw;
                 getScreenshot(context, request, &reply);
@@ -586,6 +587,7 @@ public:
                 bool emptyFrame = reply.format().width() == 0;
                 if (!context->IsCancelled() &&
                     (!lastFrameWasEmpty || !emptyFrame)) {
+                    AEMU_SCOPED_TRACE("streamScreenshot::write");
                     clientAvailable = writer->Write(reply);
                     perfEstimator.addSample(sw.elapsedUs());
                 }
