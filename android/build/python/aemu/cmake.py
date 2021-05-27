@@ -294,7 +294,7 @@ def launch():
         "--cmake_option",
         action="append",
         help="Options that should be passed on directly to cmake. These will be passed on directly to the underlying cmake project. For example: "
-        "--cmake_option QEMU_UPSTREAM=FALSE",
+        "--cmake_option WEBRTC=TRUE",
     )
     parser.add_argument(
         "--strip", dest="strip", action="store_true", help="Strip debug symbols."
