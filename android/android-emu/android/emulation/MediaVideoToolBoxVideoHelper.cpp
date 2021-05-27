@@ -152,6 +152,9 @@ void MediaVideoToolBoxVideoHelper::decode(const uint8_t* frame,
                         resetDecoderSession();
                     }
                     if (!mDecoderSession) {
+                        // all the previously decoded frames need to be
+                        // retrieved
+                        flush();
                         recreateDecompressionSession();
                     }
                     if (mIsGood) {
