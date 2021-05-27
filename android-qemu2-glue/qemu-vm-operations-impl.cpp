@@ -68,6 +68,7 @@ extern "C" {
 #include "sysemu/sysemu.h"                            // for vm_start, vm_stop
 #include "sysemu/whpx.h"                              // for whpx_gpa2hva
 #include "ui/console.h"
+#include "block/qdict.h"
 
 extern   int guest_boot_completed;
 }

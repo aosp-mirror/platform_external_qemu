@@ -673,8 +673,32 @@ uint64_t qemu_get_be64(QEMUFile *f)
     return swap_endianness_64(v);
 }
 
-/* Compress size bytes of data start at p with specific compression
- * level and store the compressed data to the buffer of f.
+/* return the size after compression, or negative value on error */
+static int qemu_compress_data(z_stream *stream, uint8_t *dest, size_t dest_len,
+                              const uint8_t *source, size_t source_len)
+{
+    int err;
+
+    err = deflateReset(stream);
+    if (err != Z_OK) {
+        return -1;
+    }
+
+    stream->avail_in = source_len;
+    stream->next_in = (uint8_t *)source;
+    stream->avail_out = dest_len;
+    stream->next_out = dest;
+
+    err = deflate(stream, Z_FINISH);
+    if (err != Z_STREAM_END) {
+        return -1;
+    }
+
+    return stream->next_out - dest;
+}
+
+/* Compress size bytes of data start at p and store the compressed
+ * data to the buffer of f.
  *
  * When f is not writable, return -1 if f has no space to save the
  * compressed data.

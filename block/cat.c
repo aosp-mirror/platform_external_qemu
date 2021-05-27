@@ -161,9 +161,11 @@ cat_co_rw(BlockDriverState *bs, int64_t sector_num, int nb_sectors, QEMUIOVector
                 cnt = s->backings[i]->bs->total_sectors - start;
         }
         if (write) {
-          ret = bdrv_co_writev(s->backings[i],  start, cnt, c_iov);
+          ret = bdrv_co_pwritev(s->backings[i], start * BDRV_SECTOR_SIZE,
+                                cnt * BDRV_SECTOR_SIZE, c_iov, 0);
         } else {
-          ret = bdrv_co_readv(s->backings[i],  start, cnt, c_iov);
+          ret = bdrv_co_preadv(s->backings[i], start * BDRV_SECTOR_SIZE,
+                                cnt * BDRV_SECTOR_SIZE, c_iov, 0);
         }
         if (ret < 0) {
             qemu_iovec_destroy(&tmp);
@@ -191,7 +193,7 @@ cat_co_readv(BlockDriverState *bs, int64_t sector_num, int nb_sectors, QEMUIOVec
 
 static int coroutine_fn
 cat_co_writev(BlockDriverState *bs, int64_t sector_num, int nb_sectors,
-              QEMUIOVector *qiov)
+              QEMUIOVector *qiov, int flags)
 {
     return cat_co_rw(bs, sector_num, nb_sectors, qiov, 1);
 }

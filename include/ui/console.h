@@ -299,6 +299,7 @@ bool dpy_ui_info_supported(QemuConsole *con);
 int dpy_set_ui_info(QemuConsole *con, QemuUIInfo *info);
 
 void dpy_gfx_update(QemuConsole *con, int x, int y, int w, int h);
+void dpy_gfx_update_full(QemuConsole *con);
 void dpy_gfx_replace_surface(QemuConsole *con,
                              DisplaySurface *surface);
 void dpy_text_cursor(QemuConsole *con, int x, int y);
@@ -449,23 +450,8 @@ void surface_gl_setup_viewport(QemuGLShader *gls,
 #endif
 
 /* sdl.c */
-#if defined(CONFIG_SDL)
 void sdl_display_early_init(DisplayOptions *opts);
 int sdl_display_init(DisplayState *ds, DisplayOptions *opts);
-#else
-static inline void sdl_display_early_init(DisplayOptions *opts)
-{
-    /* This must never be called if CONFIG_SDL is disabled */
-    error_report("SDL support is disabled");
-    abort();
-}
-static inline int sdl_display_init(DisplayState *ds, DisplayOptions *opts)
-{
-    /* This must never be called if CONFIG_SDL is disabled */
-    error_report("SDL support is disabled");
-    return false;
-}
-#endif
 
 typedef struct {
     DisplayType type;

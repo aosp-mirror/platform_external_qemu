@@ -682,6 +682,8 @@ void visit_type_UserDefFlatUnion_members(Visitor *v, UserDefFlatUnion *obj, Erro
     case ENUM_ONE_VALUE3:
         visit_type_UserDefB_members(v, &obj->u.value3, &err);
         break;
+    case ENUM_ONE_VALUE4:
+        break;
     default:
         abort();
     }

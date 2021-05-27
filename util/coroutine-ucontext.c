@@ -23,10 +23,13 @@
 #undef _FORTIFY_SOURCE
 #endif
 #include "qemu/osdep.h"
-#include <ucontext.h>
+#include <sys/ucontext.h>
 #include "qemu-common.h"
 #include "qemu/coroutine_int.h"
 
+#ifdef __linux
+#include <ucontext.h>
+#endif
 #ifdef CONFIG_VALGRIND_H
 #include <valgrind/valgrind.h>
 #endif

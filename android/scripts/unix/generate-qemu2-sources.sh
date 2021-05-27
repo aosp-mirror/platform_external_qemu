@@ -79,6 +79,7 @@ KEYCODEMAP_FILES="\
 		 ui/input-keymap-xorgkbd-to-qcode.c \
 		 ui/input-keymap-xorgxquartz-to-qcode.c \
 		 ui/input-keymap-xorgxwin-to-qcode.c \
+         ui/input-keymap-osx-to-qcode.c \
 "
 
 KEYCODEMAP_GEN=$QEMU2_TOP_DIR/ui/keycodemapdb/tools/keymap-gen

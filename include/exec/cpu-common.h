@@ -23,7 +23,7 @@ typedef struct CPUListState {
     FILE *file;
 } CPUListState;
 
-/* The CPU list lock nests outside tb_lock/tb_unlock.  */
+/* The CPU list lock nests outside page_(un)lock or mmap_(un)lock */
 void qemu_init_cpu_list(void);
 void cpu_list_lock(void);
 void cpu_list_unlock(void);
@@ -77,6 +77,9 @@ bool qemu_ram_is_migrate(RAMBlock* rb);
 bool qemu_ram_is_shared(RAMBlock *rb);
 bool qemu_ram_is_uf_zeroable(RAMBlock *rb);
 void qemu_ram_set_uf_zeroable(RAMBlock *rb);
+bool qemu_ram_is_migratable(RAMBlock *rb);
+void qemu_ram_set_migratable(RAMBlock *rb);
+void qemu_ram_unset_migratable(RAMBlock *rb);
 
 size_t qemu_ram_pagesize(RAMBlock *block);
 size_t qemu_ram_pagesize_largest(void);
@@ -126,9 +129,6 @@ extern struct MemoryRegion io_mem_notdirty;
 typedef int (RAMBlockIterFunc)(const char *block_name, void *host_addr,
     ram_addr_t offset, ram_addr_t length, void *opaque);
 
-int qemu_ram_foreach_block(RAMBlockIterFunc func, void *opaque);
-int ram_block_discard_range(RAMBlock *rb, uint64_t start, size_t length);
-
 typedef int (RAMBlockIterFuncWithFileInfo)(
     const char *block_name,
     void *host_addr,
@@ -139,9 +139,9 @@ typedef int (RAMBlockIterFuncWithFileInfo)(
     bool readonly,
     void *opaque);
 
-int qemu_ram_foreach_migrate_block_with_file_info(
-    RAMBlockIterFuncWithFileInfo func,
-    void *opaque);
+int qemu_ram_foreach_block(RAMBlockIterFunc func, void *opaque);
+int qemu_ram_foreach_migrate_block_with_file_info(RAMBlockIterFuncWithFileInfo func, void *opaque);
+int ram_block_discard_range(RAMBlock *rb, uint64_t start, size_t length);
 
 #endif
 

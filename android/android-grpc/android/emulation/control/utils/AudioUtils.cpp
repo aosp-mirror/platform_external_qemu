@@ -42,10 +42,6 @@ int AudioUtils::getChannels(const AudioFormat& fmt) {
     }
 }
 
-int AudioUtils::getBytesPerSample(const AudioFormat& fmt) {
-    return fmt.format() == AudioFormat::AUD_FMT_U8 ? 1 : 2;
-}
-
 }  // namespace control
 }  // namespace emulation
 }  // namespace android

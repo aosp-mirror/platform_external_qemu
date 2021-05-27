@@ -175,7 +175,6 @@ void MediaVideoToolBoxVideoHelper::flush() {
     for (auto& iter : mVtbBufferMap) {
         mSavedDecodedFrames.push_back(std::move(iter.second));
     }
-    mVtbBufferMap.clear();
     VTB_DPRINT("done one flushing");
 }
 
