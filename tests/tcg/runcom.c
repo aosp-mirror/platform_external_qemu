@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (afdf6f Merge "Remove upstream qemu from cmake." into emu-master-dev)
 /*
  * Simple example of use of vm86: launch a basic .com DOS executable
  */
@@ -192,3 +193,5 @@ int main(int argc, char **argv)
         }
     }
 }
+=======
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)

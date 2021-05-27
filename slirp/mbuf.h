@@ -83,7 +83,11 @@ struct mbuf {
 	struct	mbuf *m_prevpkt;	/* Flags aren't used in the output queue */
 	int	m_flags;		/* Misc flags */
 
+<<<<<<< HEAD   (afdf6f Merge "Remove upstream qemu from cmake." into emu-master-dev)
 	int	m_size;			/* Size of mbuf, from m_dat, or m_ext */
+=======
+	int	m_size;			/* Size of mbuf, from m_dat or m_ext */
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 	struct	socket *m_so;
 
 	caddr_t	m_data;			/* Current location of data */

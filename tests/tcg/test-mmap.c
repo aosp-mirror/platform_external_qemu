@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (afdf6f Merge "Remove upstream qemu from cmake." into emu-master-dev)
 /*
  * Small test program to verify simulated mmap behaviour.
  *
@@ -484,3 +485,5 @@ int main(int argc, char **argv)
 
 	return EXIT_SUCCESS;
 }
+=======
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)

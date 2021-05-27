@@ -464,8 +464,13 @@ int tcp_fconnect(struct socket *so, unsigned short af)
     socket_set_fast_reuse(s);
     opt = 1;
     qemu_setsockopt(s, SOL_SOCKET, SO_OOBINLINE, &opt, sizeof(opt));
+<<<<<<< HEAD   (afdf6f Merge "Remove upstream qemu from cmake." into emu-master-dev)
 	opt = 1;
 	qemu_setsockopt(s, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt));
+=======
+    opt = 1;
+    qemu_setsockopt(s, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt));
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 
 	/* We don't care what port we get */
     ret = connect(s, (struct sockaddr *)&addr, sockaddr_size(&addr));

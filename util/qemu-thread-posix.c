@@ -19,8 +19,12 @@
 #include "qemu/thread.h"
 #include "qemu/atomic.h"
 #include "qemu/notify.h"
+<<<<<<< HEAD   (afdf6f Merge "Remove upstream qemu from cmake." into emu-master-dev)
 #include "sysemu/sysemu.h"
 #include "trace.h"
+=======
+#include "qemu-thread-common.h"
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 
 #include <stdbool.h>
 
@@ -61,7 +65,7 @@ void qemu_mutex_init(QemuMutex *mutex)
     err = pthread_mutex_init(&mutex->lock, NULL);
     if (err)
         error_exit(err, __func__);
-    mutex->initialized = true;
+    qemu_mutex_post_init(mutex);
 }
 
 void qemu_mutex_destroy(QemuMutex *mutex)
@@ -80,13 +84,11 @@ void qemu_mutex_lock_impl(QemuMutex *mutex, const char *file, const int line)
     int err;
 
     assert(mutex->initialized);
-    trace_qemu_mutex_lock(mutex, file, line);
-
+    qemu_mutex_pre_lock(mutex, file, line);
     err = pthread_mutex_lock(&mutex->lock);
     if (err)
         error_exit(err, __func__);
-
-    trace_qemu_mutex_locked(mutex, file, line);
+    qemu_mutex_post_lock(mutex, file, line);
 }
 
 int qemu_mutex_trylock_impl(QemuMutex *mutex, const char *file, const int line)
@@ -96,7 +98,7 @@ int qemu_mutex_trylock_impl(QemuMutex *mutex, const char *file, const int line)
     assert(mutex->initialized);
     err = pthread_mutex_trylock(&mutex->lock);
     if (err == 0) {
-        trace_qemu_mutex_locked(mutex, file, line);
+        qemu_mutex_post_lock(mutex, file, line);
         return 0;
     }
     if (err != EBUSY) {
@@ -110,11 +112,10 @@ void qemu_mutex_unlock_impl(QemuMutex *mutex, const char *file, const int line)
     int err;
 
     assert(mutex->initialized);
+    qemu_mutex_pre_unlock(mutex, file, line);
     err = pthread_mutex_unlock(&mutex->lock);
     if (err)
         error_exit(err, __func__);
-
-    trace_qemu_mutex_unlock(mutex, file, line);
 }
 
 void qemu_rec_mutex_init(QemuRecMutex *mutex)
@@ -178,9 +179,9 @@ void qemu_cond_wait_impl(QemuCond *cond, QemuMutex *mutex, const char *file, con
     int err;
 
     assert(cond->initialized);
-    trace_qemu_mutex_unlock(mutex, file, line);
+    qemu_mutex_pre_unlock(mutex, file, line);
     err = pthread_cond_wait(&cond->cond, &mutex->lock);
-    trace_qemu_mutex_locked(mutex, file, line);
+    qemu_mutex_post_lock(mutex, file, line);
     if (err)
         error_exit(err, __func__);
 }
@@ -510,11 +511,22 @@ static void __attribute__((constructor)) qemu_thread_atexit_init(void)
 }
 
 
+<<<<<<< HEAD   (afdf6f Merge "Remove upstream qemu from cmake." into emu-master-dev)
 /* Attempt to set the threads name; note that this is for debug, so
  * we're not going to fail if we can't set it.
  */
 static void qemu_thread_set_name(QemuThread *thread, const char *name)
+=======
+typedef struct {
+    void *(*start_routine)(void *);
+    void *arg;
+    char *name;
+} QemuThreadArgs;
+
+static void *qemu_thread_start(void *args)
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 {
+<<<<<<< HEAD   (afdf6f Merge "Remove upstream qemu from cmake." into emu-master-dev)
 #ifdef CONFIG_PTHREAD_SETNAME_NP
     pthread_setname_np(thread->thread, name);
 #endif
@@ -563,6 +575,23 @@ static void* qemu_thread_trampoline(void* data_) {
     pthread_setspecific(exit_key, NULL);
 
     return res;
+=======
+    QemuThreadArgs *qemu_thread_args = args;
+    void *(*start_routine)(void *) = qemu_thread_args->start_routine;
+    void *arg = qemu_thread_args->arg;
+
+#ifdef CONFIG_PTHREAD_SETNAME_NP
+    /* Attempt to set the threads name; note that this is for debug, so
+     * we're not going to fail if we can't set it.
+     */
+    if (name_threads && qemu_thread_args->name) {
+        pthread_setname_np(pthread_self(), qemu_thread_args->name);
+    }
+#endif
+    g_free(qemu_thread_args->name);
+    g_free(qemu_thread_args);
+    return start_routine(arg);
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 }
 
 void qemu_thread_create(QemuThread *thread, const char *name,
@@ -572,6 +601,7 @@ void qemu_thread_create(QemuThread *thread, const char *name,
     sigset_t set, oldset;
     int err;
     pthread_attr_t attr;
+    QemuThreadArgs *qemu_thread_args;
 
     err = pthread_attr_init(&attr);
     if (err) {
@@ -582,17 +612,29 @@ void qemu_thread_create(QemuThread *thread, const char *name,
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, &oldset);
 
+<<<<<<< HEAD   (afdf6f Merge "Remove upstream qemu from cmake." into emu-master-dev)
     /* Create heap-allocated ThreadStartData object and pass its ownership
      * to the trampoline. */
     ThreadStartData* data = malloc(sizeof(*data));
     data->start_routine = start_routine;
     data->arg = arg;
+=======
+    qemu_thread_args = g_new0(QemuThreadArgs, 1);
+    qemu_thread_args->name = g_strdup(name);
+    qemu_thread_args->start_routine = start_routine;
+    qemu_thread_args->arg = arg;
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 
+<<<<<<< HEAD   (afdf6f Merge "Remove upstream qemu from cmake." into emu-master-dev)
     err = pthread_create(&thread->thread, &attr, qemu_thread_trampoline, data);
     if (err) {
         free(data);
         error_exit(err, __func__);
     }
+=======
+    err = pthread_create(&thread->thread, &attr,
+                         qemu_thread_start, qemu_thread_args);
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 
     if (name_threads) {
         qemu_thread_set_name(thread, name);

@@ -11,7 +11,10 @@
 #include "cpu.h"
 #include "trace-root.h"
 #include "trace/control.h"
+<<<<<<< HEAD   (afdf6f Merge "Remove upstream qemu from cmake." into emu-master-dev)
 #include "accel/tcg/translate-all.h"
+=======
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 
 
 void trace_event_set_state_dynamic_init(TraceEvent *ev, bool state)

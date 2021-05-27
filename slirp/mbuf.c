@@ -151,12 +151,22 @@ m_cat(struct mbuf *m, struct mbuf *n)
 void
 m_inc(struct mbuf *m, int size)
 {
+<<<<<<< HEAD   (afdf6f Merge "Remove upstream qemu from cmake." into emu-master-dev)
 	int gapsize;
 	/* some compiles throw up on gotos.  This one we can fake. */
 	if (M_ROOM(m) > size) {
 		return;
 	}
+=======
+    int datasize;
 
+    /* some compilers throw up on gotos.  This one we can fake. */
+    if (M_ROOM(m) > size) {
+        return;
+    }
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
+
+<<<<<<< HEAD   (afdf6f Merge "Remove upstream qemu from cmake." into emu-master-dev)
 	if (m->m_flags & M_EXT) {
 		gapsize = m->m_data - m->m_ext;
 		m->m_ext = g_realloc(m->m_ext, size + gapsize);
@@ -166,9 +176,25 @@ m_inc(struct mbuf *m, int size)
 		memcpy(m->m_ext, m->m_dat, m->m_size);
 		m->m_flags |= M_EXT;
 	}
+=======
+    if (m->m_flags & M_EXT) {
+        datasize = m->m_data - m->m_ext;
+        m->m_ext = g_realloc(m->m_ext, size + datasize);
+    } else {
+        datasize = m->m_data - m->m_dat;
+        m->m_ext = g_malloc(size + datasize);
+        memcpy(m->m_ext, m->m_dat, m->m_size);
+        m->m_flags |= M_EXT;
+    }
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 
+<<<<<<< HEAD   (afdf6f Merge "Remove upstream qemu from cmake." into emu-master-dev)
 	m->m_data = m->m_ext + gapsize;
 	m->m_size = size + gapsize;
+=======
+    m->m_data = m->m_ext + datasize;
+    m->m_size = size + datasize;
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
 }
 
 

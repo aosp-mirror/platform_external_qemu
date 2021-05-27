@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (afdf6f Merge "Remove upstream qemu from cmake." into emu-master-dev)
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -57,3 +58,5 @@ int main(int argc, char **argv)
     test_pthread();
     return 0;
 }
+=======
+>>>>>>> BRANCH (384417 Update version for v3.0.0 release)
