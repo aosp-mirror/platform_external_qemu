@@ -615,8 +615,9 @@ void GLEScmContext::getMultiTexCoord(uint32_t count, uint32_t index, std::vector
 }
 
 void GLEScmContext::appendRepeatedVector(uint32_t count, std::vector<float>& in, std::vector<float>& out) const {
-    out.reserve(out.size() + (count * in.size()));
-    auto it = out.begin() + out.size();
+    size_t previousOutSize = out.size();
+    out.resize(previousOutSize + (count * in.size()));
+    auto it = out.begin() + previousOutSize;
     for (int i = 0; i < count; i++) {
         std::copy(in.begin(), in.end(), it);
         it += in.size();
