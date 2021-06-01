@@ -15,6 +15,7 @@
 #include <string>
 
 #include "android/base/StringFormat.h"
+#include "android/emulation/control/adb/adbkey.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/version.h"
 
@@ -73,6 +74,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     const char* qemuHwcodecAvcdecProp;
     const char* qemuHwcodecVpxdecProp;
     const char* androidbootLogcatProp;
+    const char* adbKeyProp;
 
     namespace fc = android::featurecontrol;
     if (fc::isEnabled(fc::AndroidbootProps)) {
@@ -98,6 +100,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         qemuHwcodecAvcdecProp = "androidboot.qemu.hwcodec.avcdec";
         qemuHwcodecVpxdecProp = "androidboot.qemu.hwcodec.vpxdec";
         androidbootLogcatProp = "androidboot.logcat";
+        adbKeyProp = "androidboot.qemu.adb.pubkey";
     } else {
         checkjniProp = "android.checkjni";
         bootanimProp = "android.bootanim";
@@ -121,6 +124,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         qemuHwcodecAvcdecProp = "qemu.hwcodec.avcdec";
         qemuHwcodecVpxdecProp = "qemu.hwcodec.vpxdec";
         androidbootLogcatProp = nullptr;
+        adbKeyProp = nullptr;
     }
 
     std::vector<std::pair<std::string, std::string>> params;
@@ -221,6 +225,19 @@ getUserspaceBootProperties(const AndroidOptions* opts,
             params.push_back({androidbootLogcatProp, param});
         } else {
             params.push_back({androidbootLogcatProp, "*:V"});
+        }
+    }
+
+    // Send adb public key to device
+    if (adbKeyProp) {
+        auto privkey = getPrivateAdbKeyPath();
+        std::string key = "";
+
+        if (!privkey.empty() && pubkey_from_privkey(privkey, &key)) {
+            params.push_back({adbKeyProp, key});
+            LOG(INFO) << "Sending adb public key [" << key << "]";
+        } else {
+            LOG(WARNING) << "No adb private key exists";
         }
     }
 
