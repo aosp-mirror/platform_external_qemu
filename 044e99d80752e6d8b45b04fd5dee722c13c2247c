@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9894a515_2bbbdcec",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-06-01T18:03:04Z",
+      "side": 1,
+      "message": "Are you sure you want us to ship the shared lib, vs having this in the studio tree? ",
+      "revId": "044e99d80752e6d8b45b04fd5dee722c13c2247c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "88504500_1d881285",
+        "filename": "android/image_converter/ImageConverter.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-06-01T18:03:04Z",
+      "side": 1,
+      "message": "A small explanation of what is happening here would be nice. It is not easy to immediately understand why we are shifting and masking bits.",
+      "revId": "044e99d80752e6d8b45b04fd5dee722c13c2247c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ca4933ca_2566f18d",
+        "filename": "android/image_converter/ImageConverter.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-06-01T18:03:04Z",
+      "side": 1,
+      "message": "A comment/link to what is happening would be useful for the future.",
+      "revId": "044e99d80752e6d8b45b04fd5dee722c13c2247c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e5866f55_3ae24db9",
+        "filename": "android/image_converter/ImageConverter.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-06-01T18:03:04Z",
+      "side": 1,
+      "message": "Do we want to explicitly check for length \u003c 0?",
+      "revId": "044e99d80752e6d8b45b04fd5dee722c13c2247c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
