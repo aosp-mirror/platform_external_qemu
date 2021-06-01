@@ -16,6 +16,24 @@
       "message": "Gerrit claims the file is unchanged.",
       "revId": "4be46a318a6488e1445355ee4391c62c9a202f5c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "96732d74_1c1327fb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-06-01T18:58:44Z",
+      "side": 1,
+      "message": "Oops. Should be ok now.",
+      "parentUuid": "f600d315_be721035",
+      "revId": "4be46a318a6488e1445355ee4391c62c9a202f5c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
