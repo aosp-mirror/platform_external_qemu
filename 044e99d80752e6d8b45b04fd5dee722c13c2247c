@@ -18,6 +18,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2038a893_c195768e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-06-01T18:42:19Z",
+      "side": 1,
+      "message": "The library will be included in the Studio tree, but I would like to leverage the emulator\u0027s multi-platform build infrastructure. The side effect of that is an extra tiny shared library included in the emulator installation that is not used by the emulator. Hopefully, this is acceptable.",
+      "parentUuid": "9894a515_2bbbdcec",
+      "revId": "044e99d80752e6d8b45b04fd5dee722c13c2247c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "88504500_1d881285",
@@ -31,6 +49,24 @@
       "writtenOn": "2021-06-01T18:03:04Z",
       "side": 1,
       "message": "A small explanation of what is happening here would be nice. It is not easy to immediately understand why we are shifting and masking bits.",
+      "revId": "044e99d80752e6d8b45b04fd5dee722c13c2247c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a252e6e3_35e032c6",
+        "filename": "android/image_converter/ImageConverter.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-06-01T18:42:19Z",
+      "side": 1,
+      "message": "Explained as well as I could.",
+      "parentUuid": "88504500_1d881285",
       "revId": "044e99d80752e6d8b45b04fd5dee722c13c2247c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
@@ -52,6 +88,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b2ed2828_8a2a296a",
+        "filename": "android/image_converter/ImageConverter.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-06-01T18:42:19Z",
+      "side": 1,
+      "message": "Added a comment.",
+      "parentUuid": "ca4933ca_2566f18d",
+      "revId": "044e99d80752e6d8b45b04fd5dee722c13c2247c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e5866f55_3ae24db9",
@@ -65,6 +119,24 @@
       "writtenOn": "2021-06-01T18:03:04Z",
       "side": 1,
       "message": "Do we want to explicitly check for length \u003c 0?",
+      "revId": "044e99d80752e6d8b45b04fd5dee722c13c2247c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "03b6b0eb_7d22c6a6",
+        "filename": "android/image_converter/ImageConverter.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-06-01T18:42:19Z",
+      "side": 1,
+      "message": "Added two more checks.",
+      "parentUuid": "e5866f55_3ae24db9",
       "revId": "044e99d80752e6d8b45b04fd5dee722c13c2247c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
