@@ -15,11 +15,12 @@
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/network/Ieee80211Frame.h"
 
-
+#include <atomic>
 #include <memory>
 #include <string>
-#include <atomic>
+#include <vector>
 
 namespace android {
 namespace qemu2 {
@@ -29,6 +30,8 @@ public:
     ~HostapdController();
     bool initAndRun(bool verbose);
     void setDriverSocket(android::base::ScopedSocket sock);
+    bool isWPA2();
+    android::network::CipherScheme getCipherScheme();
     void terminate(bool wait);
     static HostapdController* getInstance();
 
