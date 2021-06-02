@@ -42,6 +42,7 @@ extern int wpa_debug_level;
     } while (0)
 
 using namespace android::base;
+using android::network::CipherScheme;
 
 namespace android {
 namespace qemu2 {
@@ -99,6 +100,21 @@ void HostapdController::terminate(bool wait) {
         mCvLoopExit.wait(&lock, [this]() {
             return eloop_terminated();
         });
+    }
+}
+
+bool HostapdController::usingWPA2() {
+    struct key_data ptk = ::get_active_ptk();
+    struct key_data gtk = ::get_active_gtk();
+    return ptk.key_len != 0 && gtk.key_len != 0;
+}
+
+android::network::CipherScheme HostapdController::getCipherScheme() {
+    if (usingWPA2()) {
+        // TODO(wdu@) Add support for more than CCMP cipher
+        return CipherScheme::CCMP;
+    } else {
+        return CipherScheme::NONE;
     }
 }
 

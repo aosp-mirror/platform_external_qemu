@@ -13,6 +13,7 @@
 
 #include <memory>
 
+#include "android-qemu2-glue/emulation/HostapdController.h"
 #include "android/base/Compiler.h"
 #include "android/base/Optional.h"
 #include "android/base/async/Looper.h"
@@ -59,7 +60,6 @@ public:
     static VirtioWifiForwarder* getInstance(NetClientState* nc);
     static const uint32_t kWifiForwardMagic = 0xD6C4B3A2;
     static const uint8_t kWifiForwardVersion = 0x02;
-
 private:
     // Wrapper functions for passing C-sytle func ptr to C API.
     static int canReceive(NetClientState* nc);
@@ -97,9 +97,10 @@ private:
     android::base::Optional<android::base::RecurrentTask> mBeaconTask;
     android::base::Looper::Duration mBeaconIntMs = 1024;
     std::unique_ptr<android::network::Ieee80211Frame> mBeaconFrame;
-
+    android::qemu2::HostapdController* mHostapd = nullptr;
     NICConf* mNicConf = nullptr;
     android::network::FrameInfo mFrameInfo;
+
     DISALLOW_COPY_AND_ASSIGN(VirtioWifiForwarder);
 };
 
