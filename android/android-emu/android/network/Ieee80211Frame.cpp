@@ -26,6 +26,9 @@
 
 extern "C" {
 #include "common/ieee802_11_defs.h"
+#include "crypto/aes.h"
+#include "crypto/aes_wrap.h"
+#include "drivers/driver_virtio_wifi.h"
 }
 
 namespace {
@@ -76,6 +79,8 @@ FrameInfo::FrameInfo(MacAddress transmitter,
 //       2         2           6        6        6       2       6
 // Frame-Ctl | Duration ID | Addr1 | Addr2 | Addr3 | Seq-Ctl | Addr4 | Frame
 // Body
+
+std::atomic<int64_t> Ieee80211Frame::sTxPn = {1};
 
 Ieee80211Frame::Ieee80211Frame(const uint8_t* data, size_t size, FrameInfo info)
     : mData(data, data + size), mInfo(info) {}
@@ -330,7 +335,7 @@ std::string Ieee80211Frame::toStr() {
     }
     ss << std::endl;
     if (LOG_IS_ON(VERBOSE)) {
-        for (int i = 0; i < mData.size(); i++)
+        for (int i = 0; i < size(); i++)
             ss << std::hex << mData[i] << std::setw(2) << ' ';
     }
     return ss.str();
@@ -342,6 +347,32 @@ bool Ieee80211Frame::isData() const {
 
 bool Ieee80211Frame::isMgmt() const {
     return WLAN_FC_GET_TYPE(hdr().frame_control) == WLAN_FC_TYPE_MGMT;
+}
+
+// Reference linux kernel include/linux/ieee80211.h
+
+bool Ieee80211Frame::isRobustMgmt() const {
+    if (size() < 25)
+        return false;
+    if (isDisassoc() || isDeauth())
+        return true;
+    if (isAction()) {
+        /*
+         * Action frames, excluding Public Action frames, are Robust
+         * Management Frames. However, if we are looking at a Protected
+         * frame, skip the check since the data may be encrypted and
+         * the frame has already been found to be a Robust Management
+         * Frame (by the other end).
+         */
+        if (isProtected())
+            return true;
+
+        const uint8_t* category = reinterpret_cast<const uint8_t*>(&hdr()) + 24;
+        return *category != WLAN_ACTION_PUBLIC && *category != WLAN_ACTION_HT &&
+               *category != WLAN_ACTION_SELF_PROTECTED &&
+               *category != WLAN_ACTION_VENDOR_SPECIFIC;
+    }
+    return true;
 }
 
 bool Ieee80211Frame::isDataQoS() const {
@@ -366,6 +397,36 @@ bool Ieee80211Frame::isFromDS() const {
     return isData() && (hdr().frame_control & WLAN_FC_FROMDS);
 }
 
+bool Ieee80211Frame::isProtected() const {
+    return hdr().frame_control & WLAN_FC_ISWEP;
+}
+
+void Ieee80211Frame::setProtected(bool protect) {
+    ieee80211_hdr* hdr = (ieee80211_hdr*)mData.data();
+    if (protect)
+        hdr->frame_control |= WLAN_FC_ISWEP;
+    else
+        hdr->frame_control &= ~WLAN_FC_ISWEP;
+}
+
+bool Ieee80211Frame::isEAPoL() const {
+    return getEtherType() == ETH_P_EAPOL;
+}
+
+bool Ieee80211Frame::isDisassoc() const {
+    return isMgmt() &&
+           WLAN_FC_GET_STYPE(hdr().frame_control) == WLAN_FC_STYPE_DISASSOC;
+}
+
+bool Ieee80211Frame::isDeauth() const {
+    return isMgmt() &&
+           WLAN_FC_GET_STYPE(hdr().frame_control) == WLAN_FC_STYPE_DEAUTH;
+}
+
+bool Ieee80211Frame::isAction() const {
+    return isMgmt() &&
+           WLAN_FC_GET_STYPE(hdr().frame_control) == WLAN_FC_STYPE_ACTION;
+}
 bool Ieee80211Frame::uses4Addresses() const {
     return (mData[1] & WLAN_FC_TODS) && (mData[1] & WLAN_FC_FROMDS);
 }
@@ -376,14 +437,196 @@ uint16_t Ieee80211Frame::getQoSControl() const {
     return *reinterpret_cast<const uint16_t*>(addr);
 }
 
+std::vector<uint8_t> Ieee80211Frame::getPacketNumber(
+        const CipherScheme cs) const {
+    if (cs == CipherScheme::CCMP) {
+        std::vector<uint8_t> pn(IEEE80211_CCMP_PN_LEN, 0);
+        const auto* ccmpHdr = frameBody();
+        pn[0] = ccmpHdr[7];
+        pn[1] = ccmpHdr[6];
+        pn[2] = ccmpHdr[5];
+        pn[3] = ccmpHdr[4];
+        pn[4] = ccmpHdr[1];
+        pn[5] = ccmpHdr[0];
+        return pn;
+    } else {
+        return std::vector<uint8_t>();
+    }
+}
+
+uint8_t Ieee80211Frame::getQosTid() const {
+    uint8_t qos_tid;
+    if (isDataQoS())
+        qos_tid = (getQoSControl() >> 8) & 0xff;
+    else
+        qos_tid = 0;
+    return qos_tid;
+}
+
+std::vector<uint8_t> Ieee80211Frame::getNonce(
+        const std::vector<uint8_t>& pn) const {
+    /* Nonce: Nonce Flags | A2 | PN
+     * Nonce Flags: Priority (b0..b3) | Management (b4) | Reserved (b5..b7)
+     */
+    std::vector<uint8_t> nonce(1 + ETH_ALEN + IEEE80211_CCMP_PN_LEN, 0);
+    uint8_t qos_tid = getQosTid();
+    int mgmt = isMgmt();
+    nonce[0] = qos_tid | (mgmt << 4);
+
+    memcpy(&nonce[1], hdr().addr2, ETH_ALEN);
+    memcpy(&nonce[7], pn.data(), IEEE80211_CCMP_PN_LEN);
+    return nonce;
+}
+
+std::vector<uint8_t> Ieee80211Frame::getAad() const {
+    uint8_t qos_tid = getQosTid();
+    std::vector<uint8_t> aad(hdrLength() - 2, 0);
+    uint16_t mask_fc = hdr().frame_control;
+    mask_fc &= ~(WLAN_FC_RETRY | WLAN_FC_PWRMGT | WLAN_FC_MOREDATA);
+    if (!isMgmt())
+        mask_fc &= ~0x0070;
+    mask_fc |= WLAN_FC_ISWEP;
+
+    int a4_included = uses4Addresses();
+
+    aad[0] = (mask_fc)&0xff;
+    aad[1] = (mask_fc >> 8) & 0xff;
+    // put_unaligned(mask_fc, (__le16 *)&aad[2]);
+    memcpy(&aad[2], hdr().addr1, 3 * ETH_ALEN);
+
+    /* Mask Seq#, leave Frag# */
+    aad[20] = *((uint8_t*)(&hdr().seq_ctrl)) & 0x0f;
+    aad[21] = 0;
+
+    if (a4_included) {
+        memcpy(&aad[22], data() + IEEE80211_HDRLEN, ETH_ALEN);
+        aad[28] = qos_tid;
+        aad[29] = 0;
+    } else {
+        memset(&aad[22], 0, ETH_ALEN + IEEE80211_QOS_CTL_LEN);
+        aad[22] = qos_tid;
+    }
+    return aad;
+}
+
+// Return true if decryption is successful
+bool Ieee80211Frame::decrypt(const CipherScheme cs) {
+    if (!isProtected())
+        return false;
+    if (cs != CipherScheme::CCMP) {
+        LOG(ERROR) << "Currently only CCMP is supported.";
+        return false;
+    }
+    if (!isData() && !isRobustMgmt())
+        return false;
+    ssize_t keyIdx = getKeyIndex();
+    const MacAddress dst = addr1();
+    struct key_data key;
+    if (dst.isBroadcast() || dst.isMulticast()) {
+        key = ::get_active_gtk();
+    } else {
+        key = ::get_active_ptk();
+    }
+    if (key.key_len == 0) {
+        LOG(ERROR) << "Unable to obtain the key material.";
+        return false;
+    }
+    // compute special ccmp block
+    ssize_t dataLen = size() - hdrLength() - IEEE80211_CCMP_HDR_LEN -
+                      IEEE80211_CCMP_MIC_LEN;
+    if (dataLen < 0) {
+        LOG(ERROR) << "Not enough data in the encrypted message";
+        return false;
+    }
+
+    auto pn = getPacketNumber(cs);
+    auto aad = getAad();
+    auto nonce = getNonce(pn);
+
+    std::vector<uint8_t> plain(dataLen, 0);
+
+    if (::aes_ccm_ad(key.key_material, key.key_len, nonce.data(),
+                     IEEE80211_CCMP_MIC_LEN,
+                     frameBody() + IEEE80211_CCMP_HDR_LEN, dataLen, aad.data(),
+                     aad.size(), mData.data() + size() - IEEE80211_CCMP_MIC_LEN,
+                     plain.data())) {
+        LOG(ERROR) << "Failed to decrypt the Ieee80211 Frame";
+        return false;
+    } else {
+        // rebuild message in-place
+        // Todo(wdu@) figure out the most efficient way of memcpy here
+        memcpy(frameBody(), plain.data(), plain.size());
+        setProtected(false);
+        mData.resize(size() - IEEE80211_CCMP_MIC_LEN - IEEE80211_CCMP_HDR_LEN);
+        return true;
+    }
+}
+
+bool Ieee80211Frame::encrypt(const CipherScheme cs) {
+    if (cs == CipherScheme::NONE) {
+        return true;
+    } else if (cs != CipherScheme::CCMP) {
+        LOG(ERROR) << "Currently only CCMP is supported.";
+        return false;
+    }
+    size_t dataLen = size() - hdrLength();
+    mData.resize(size() + IEEE80211_CCMP_MIC_LEN + IEEE80211_CCMP_HDR_LEN);
+    memmove(frameBody() + IEEE80211_CCMP_HDR_LEN, frameBody(), dataLen);
+
+    int64_t pn64 = sTxPn.fetch_add(1, std::memory_order_relaxed);
+    std::vector<uint8_t> pn(IEEE80211_CCMP_PN_LEN, 0);
+    pn[5] = pn64;
+    pn[4] = pn64 >> 8;
+    pn[3] = pn64 >> 16;
+    pn[2] = pn64 >> 24;
+    pn[1] = pn64 >> 32;
+    pn[0] = pn64 >> 40;
+    auto nonce = getNonce(pn);
+    auto aad = getAad();
+    uint8_t* ccmpHdr = frameBody();
+    // Todo (wdu@) We need to obtain key_id from hostapd driver interface
+    int keyIdx = 0;
+    const MacAddress dst = addr1();
+    struct key_data key;
+    if (dst.isBroadcast() || dst.isMulticast()) {
+        // HACK towdo(wdu@) Fix the hard-coded keyIdx.
+        keyIdx = 1;
+        key = ::get_active_gtk();
+    } else {
+        key = ::get_active_ptk();
+    }
+    ccmpHdr[0] = pn[5];
+    ccmpHdr[1] = pn[4];
+    ccmpHdr[2] = 0;
+    ccmpHdr[3] = 0x20 | (keyIdx << 6);
+    ccmpHdr[4] = pn[3];
+    ccmpHdr[5] = pn[2];
+    ccmpHdr[6] = pn[1];
+    ccmpHdr[7] = pn[0];
+
+    if (key.key_len == 0) {
+        LOG(ERROR) << "Unable to obtain the key material.";
+        return false;
+    }
+
+    std::vector<uint8_t> crypt(dataLen, 0);
+    if (::aes_ccm_ae(key.key_material, key.key_len, nonce.data(), IEEE80211_CCMP_MIC_LEN,
+                     frameBody() + IEEE80211_CCMP_HDR_LEN, dataLen, aad.data(),
+                     aad.size(), crypt.data(),
+                     data() + size() - IEEE80211_CCMP_MIC_LEN)) {
+        LOG(ERROR) << " Unable to encrypt the IEEE80211 frame.";
+        return false;
+    } else {
+        memcpy(frameBody() + IEEE80211_CCMP_HDR_LEN, crypt.data(),
+               crypt.size());
+        setProtected(true);
+        return true;
+    }
+}
+
 const IOVector Ieee80211Frame::toEthernet() {
     IOVector ret;
-    uint16_t ethertype;
-    if (!memcmp(frameBody(), kRfc1042Header, ETH_ALEN)) {
-        ethertype = (frameBody()[ETH_ALEN] << 8) | frameBody()[ETH_ALEN + 1];
-    } else {
-        ethertype = (frameBody()[0] << 8) | frameBody()[1];
-    }
+    uint16_t ethertype = getEtherType();
     if (!validEtherType(ethertype)) {
         LOG(VERBOSE) << "Unexpected ether type. Dump frame: "
                      << toStr().c_str();
@@ -396,11 +639,27 @@ const IOVector Ieee80211Frame::toEthernet() {
     memcpy(eth->src, &(addr2()[0]), ETH_ALEN);
 
     ret.push_back({.iov_base = eth, .iov_len = ETH_HLEN});
-    size_t offset = hdrLength() + ETH_ALEN + sizeof(eth->ethertype);
+    size_t offset = hdrLength() + ETH_ALEN + sizeof(ethertype);
     IOVector inSg;
     inSg.push_back({.iov_base = data(), .iov_len = size()});
     inSg.appendEntriesTo(&ret, offset, size() - offset);
     return ret;
+}
+
+uint16_t Ieee80211Frame::getEtherType() const {
+    if (!memcmp(frameBody(), kRfc1042Header, ETH_ALEN)) {
+        return (frameBody()[ETH_ALEN] << 8) | frameBody()[ETH_ALEN + 1];
+    } else {
+        return (frameBody()[0] << 8) | frameBody()[1];
+    }
+}
+
+// Assume the cipher scheme is CCMP
+ssize_t Ieee80211Frame::getKeyIndex() const {
+    size_t minlen = hdrLength() + IEEE80211_WEP_IV_LEN;
+    size_t keyIdxOff = 3;
+    size_t keyIdxShift = 6;
+    return (size() < minlen) ? -1 : frameBody()[keyIdxOff] >> keyIdxShift;
 }
 
 bool Ieee80211Frame::validEtherType(uint16_t ethertype) {
