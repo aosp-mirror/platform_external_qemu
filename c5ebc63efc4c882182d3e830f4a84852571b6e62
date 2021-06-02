@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3bf4b186_9e55abbf",
+        "filename": "android-qemu2-glue/emulation/VirtioWifiForwarder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1278660
+      },
+      "writtenOn": "2021-06-02T18:44:10Z",
+      "side": 1,
+      "message": "Do you want unique_ptr here? Or maybe just Ieee80211Frame without pointers?",
+      "range": {
+        "startLine": 99,
+        "startChar": 36,
+        "endLine": 99,
+        "endChar": 37
+      },
+      "revId": "c5ebc63efc4c882182d3e830f4a84852571b6e62",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
