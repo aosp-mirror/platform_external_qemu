@@ -22,6 +22,30 @@
       },
       "revId": "c5ebc63efc4c882182d3e830f4a84852571b6e62",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f1db3ff4_17e6d5b0",
+        "filename": "android-qemu2-glue/emulation/VirtioWifiForwarder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-06-02T20:54:10Z",
+      "side": 1,
+      "message": "Good call. I agree the raw pointer is a memory leak. Thanks for pointing out. I will update with a new version.",
+      "parentUuid": "3bf4b186_9e55abbf",
+      "range": {
+        "startLine": 99,
+        "startChar": 36,
+        "endLine": 99,
+        "endChar": 37
+      },
+      "revId": "c5ebc63efc4c882182d3e830f4a84852571b6e62",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
