@@ -96,6 +96,7 @@ static TypeInfo ipmi_core_type_info = {
     .name = TYPE_IPMI_CORE,
     .parent = TYPE_DEVICE,
     .instance_size = sizeof(IPMICore),
+    .class_size = sizeof(IPMICoreClass),
     .abstract = true,
 };
 
