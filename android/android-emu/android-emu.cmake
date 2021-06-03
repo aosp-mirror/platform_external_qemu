@@ -63,6 +63,7 @@ set(android-emu-common
     android/emulation/ClipboardPipe.cpp
     android/emulation/ComponentVersion.cpp
     android/emulation/ConfigDirs.cpp
+    android/emulation/HostapdController.cpp
     android/emulation/control/adb/AdbConnection.cpp
     android/emulation/control/adb/AdbInterface.cpp
     android/emulation/control/adb/adbkey.cpp
