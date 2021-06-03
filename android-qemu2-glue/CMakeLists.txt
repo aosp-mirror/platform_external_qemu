@@ -22,7 +22,6 @@ set(android-qemu2-glue_src
     emulation/virtio-input-rotary.c
     emulation/virtio_vsock_device.cpp
     emulation/virtio-wifi.cpp
-    emulation/HostapdController.cpp
     emulation/VirtioWifiForwarder.cpp
     looper-qemu.cpp
     net-android.cpp

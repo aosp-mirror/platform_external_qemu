@@ -13,12 +13,11 @@
 
 #include <memory>
 
-#include "android-qemu2-glue/emulation/HostapdController.h"
+#include "android/emulation/HostapdController.h"
 #include "android/base/Compiler.h"
 #include "android/base/Optional.h"
 #include "android/base/async/Looper.h"
 #include "android/base/async/RecurrentTask.h"
-#include "android/base/sockets/ScopedSocket.h"
 #include "android/network/GenericNetlinkMessage.h"
 #include "android/network/Ieee80211Frame.h"
 #include "android/network/WifiForwardPeer.h"
@@ -89,7 +88,7 @@ private:
     OnFrameSentCallback mOnFrameSentCallback;
     CanReceive mCanReceive;
     android::base::Looper* mLooper;
-    android::base::ScopedSocket mVirtIOSock;
+    int mVirtIOSock = -1;
 
     NICState* mNic = nullptr;
     std::unique_ptr<android::network::WifiForwardPeer> mRemotePeer;
@@ -97,7 +96,7 @@ private:
     android::base::Optional<android::base::RecurrentTask> mBeaconTask;
     android::base::Looper::Duration mBeaconIntMs = 1024;
     std::unique_ptr<android::network::Ieee80211Frame> mBeaconFrame;
-    android::qemu2::HostapdController* mHostapd = nullptr;
+    android::emulation::HostapdController* mHostapd = nullptr;
     NICConf* mNicConf = nullptr;
     android::network::FrameInfo mFrameInfo;
 

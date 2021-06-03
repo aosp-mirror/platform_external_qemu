@@ -25,6 +25,9 @@
 #include <string>
 #include <vector>
 #include <atomic>
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#endif
 
 typedef struct ieee80211_hdr ieee80211_hdr;
 
