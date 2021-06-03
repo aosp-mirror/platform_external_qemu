@@ -2022,7 +2022,12 @@ extern "C" int main(int argc, char** argv) {
     args.add("-m");
     args.addFormat("%d", hw->hw_ramSize);
 
-    int apiLevel = avd ? avdInfo_getApiLevel(avd) : 1000;
+    const int apiLevel = avd ? avdInfo_getApiLevel(avd) : 1000;
+    if (apiLevel < 30) {
+        // We have an unfortunate bug in gralloc in QT in the shared slots
+        // host memory allocator and it is too late to fix it there.
+        fc::setIfNotOverriden(fc::HasSharedSlotsHostMemoryAllocator, false);
+    }
 
     // Support for changing default lcd-density
     if (hw->hw_lcd_density) {
