@@ -133,17 +133,11 @@ VirtioWifiForwarder::~VirtioWifiForwarder() {
 }
 
 bool VirtioWifiForwarder::init() {
-    // init socket pair.
-    int fds[2];
-    if (socketCreatePair(&fds[0], &fds[1])) {
-        LOG(ERROR) << "Unable to create socket pair";
-        return false;
-    }
-    mVirtIOSock = ScopedSocket(fds[1]);
-    mHostapd = HostapdController::getInstance();
-    mHostapd->setDriverSocket(ScopedSocket(fds[0]));
+    mHostapd = android::emulation::HostapdController::getInstance();
+    mVirtIOSock = mHostapd->getDriverSocket();
+
     //  Looper FdWatch and set callback functions
-    mFdWatch = mLooper->createFdWatch(mVirtIOSock.get(),
+    mFdWatch = mLooper->createFdWatch(mVirtIOSock,
                                       &VirtioWifiForwarder::onHostApd, this);
     mFdWatch->wantRead();
     mFdWatch->dontWantWrite();
@@ -200,6 +194,10 @@ void VirtioWifiForwarder::ackLocalFrame(const Ieee80211Frame* frame) {
 }
 
 int VirtioWifiForwarder::forwardFrame(const IOVector& iov) {
+    if (!mHostapd || !mHostapd->isRunning()) {
+        return 0;
+    }
+
     if (iov.summedLength() < IEEE80211_HDRLEN) {
         return 0;
     }
@@ -225,8 +223,7 @@ int VirtioWifiForwarder::forwardFrame(const IOVector& iov) {
     if (frame->isData()) {
         // EAPoL is used in Wi-Fi 4-way handshake.
         if (frame->isEAPoL()) {
-            if (socketSend(mVirtIOSock.get(), frame->data(), frame->size()) <
-                0) {
+            if (socketSend(mVirtIOSock, frame->data(), frame->size()) < 0) {
                 LOG(VERBOSE) << "Failed to send frame to hostapd.";
             }
         } else if (addr1 != mBssID) {
@@ -237,8 +234,7 @@ int VirtioWifiForwarder::forwardFrame(const IOVector& iov) {
     } else { /*Mgmt frame or Ctrl frame*/
         if (addr1.isBroadcast() || addr1.isMulticast() || addr1 == mBssID) {
             // TODO (wdu@) Experiement with shared memory approach
-            if (socketSend(mVirtIOSock.get(), frame->data(), frame->size()) <
-                0) {
+            if (socketSend(mVirtIOSock, frame->data(), frame->size()) < 0) {
                 LOG(VERBOSE) << "Failed to send frame to hostapd.";
             }
         }
@@ -313,6 +309,10 @@ ssize_t VirtioWifiForwarder::onNICFrameAvailable(NetClientState* nc,
     if (!forwarder->mCanReceive(nc)) {
         return -1;
     }
+    if (!forwarder->mHostapd || !forwarder->mHostapd->isRunning()) {
+        return -1;
+    }
+
     std::unique_ptr<Ieee80211Frame> frame =
             Ieee80211Frame::buildFromEthernet(buf, size, forwarder->mBssID);
     // encrypt will be no-op if cipher scheme is none.
@@ -338,6 +338,7 @@ void VirtioWifiForwarder::onHostApd(void* opaque, int fd, unsigned events) {
     if (size < 0) {
         return;
     }
+
     auto frame =
             std::make_unique<Ieee80211Frame>(buf, size, forwarder->mFrameInfo);
     if (frame->isBeacon()) {
