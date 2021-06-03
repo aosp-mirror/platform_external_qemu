@@ -23,16 +23,21 @@
 #include <vector>
 
 namespace android {
-namespace qemu2 {
+namespace emulation {
 class HostapdController {
 public:
     HostapdController();
     ~HostapdController();
     bool initAndRun(bool verbose);
-    void setDriverSocket(android::base::ScopedSocket sock);
     bool usingWPA2();
+    bool isRunning();
+    int getDriverSocket();
     android::network::CipherScheme getCipherScheme();
     void terminate(bool wait);
+
+    // Currently doesn't support multiple BSS. Assume there is
+    // only one ssid at a time.
+    bool setSsid(const std::string ssid, const std::string password);
     static HostapdController* getInstance();
 
 private:
@@ -50,7 +55,12 @@ private:
     // mLock is used to wait for hostapd event loop termination.
     android::base::Lock mLock;
     android::base::ConditionVariable mCvLoopExit;
-    android::base::ScopedSocket mSock;
+    std::string mSsid;
+    std::string mPassword;
+    android::base::ScopedSocket mVirtioSock1;
+    android::base::ScopedSocket mVirtioSock2;
+    const std::string getTempConfigurationFile();
+    bool writeToConfig(FILE* fp);
     DISALLOW_COPY_ASSIGN_AND_MOVE(HostapdController);
 };
 }  // namespace qemu2
