@@ -13,7 +13,7 @@
 
 #include <memory>
 
-#include "android-qemu2-glue/emulation/HostapdController.h"
+#include "android/emulation/HostapdController.h"
 #include "android/base/Compiler.h"
 #include "android/base/Optional.h"
 #include "android/base/async/Looper.h"

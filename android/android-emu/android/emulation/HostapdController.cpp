@@ -13,7 +13,7 @@ extern "C" {
 #include "sysemu/os-win32-msvc.h"
 }
 #endif
-#include "android-qemu2-glue/emulation/HostapdController.h"
+#include "android/emulation/HostapdController.h"
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
@@ -24,7 +24,7 @@ extern "C" {
 #include "android/utils/debug.h"
 
 extern "C" {
-#include "qemu/osdep.h"
+//#include "qemu/osdep.h"
 #include "common/ieee802_11_defs.h"
 #include "drivers/driver_virtio_wifi.h"
 int run_hostapd_main(int argc,
