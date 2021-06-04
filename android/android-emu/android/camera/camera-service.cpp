@@ -1966,14 +1966,7 @@ _camera_client_recv(void*         opaque,
                     QemudClient*  client)
 {
     CameraClient* cc = (CameraClient*)opaque;
-    if (V1) {
-        if (!cc->eventHandlerThread.isStarted()) {
-            cc->eventHandlerThread.start();
-        }
-        cc->eventHandlerThread.enqueue({OPERATION, msg, msglen, client});
-    } else {
-        camera_client_handle_event(cc, msg, msglen, client);
-    }
+    camera_client_handle_event(cc, msg, msglen, client);
 }
 
 /* Emulated camera client has been disconnected from the service. */
