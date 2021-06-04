@@ -24,6 +24,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <atomic>
 
 typedef struct ieee80211_hdr ieee80211_hdr;
 
@@ -59,6 +60,22 @@ struct FrameInfo {
     Rates mTxRates;
 };
 
+enum class CipherScheme {
+    NONE = 0,
+    WEP40,
+    WEP104,
+    TKIP,
+    CCMP,
+    AES_128_CMAC,
+    GCMP,
+    SMS4,
+    GCMP_256,
+    CCMP_256,
+    BIP_GMAC_128,
+    BIP_GMAC_256,
+    BIP_CMAC_256,
+};
+
 class Ieee80211Frame {
 public:
     Ieee80211Frame(const uint8_t* data, size_t size, FrameInfo info);
@@ -83,21 +100,50 @@ public:
     std::string toStr();
     bool isData() const;
     bool isMgmt() const;
+    bool isRobustMgmt() const;
     bool isDataQoS() const;
     bool isDataNull() const;
     bool isBeacon() const;
     bool isToDS() const;
     bool isFromDS() const;
+    bool isProtected() const;
+    void setProtected(bool protect);
+    bool isEAPoL() const;
+    bool isAction() const;
+    bool isDisassoc() const;
+    bool isDeauth() const;
     bool uses4Addresses() const;
     uint16_t getQoSControl() const;
+    // decrypt a protected frame in place.
+    bool decrypt(const CipherScheme cs);
+    // encrypt a frame in place.
+    bool encrypt(const CipherScheme cs);
     const android::base::IOVector toEthernet();
     static constexpr uint32_t MAX_FRAME_LEN = 2352;
     static constexpr uint32_t TX_MAX_RATES = 4;
+    static constexpr uint32_t WPA_GTK_MAX_LEN = 32;
+    static constexpr uint32_t WPA_PTK_MAX_LEN = 32;
+    static constexpr uint32_t IEEE80211_QOS_CTL_LEN = 2;
+    static constexpr uint32_t IEEE80211_CCMP_PN_LEN = 6;
+    static constexpr uint32_t IEEE80211_CCMP_HDR_LEN = 8;
+    static constexpr uint32_t IEEE80211_CCMP_MIC_LEN = 8;
+    static constexpr uint32_t IEEE80211_WEP_IV_LEN = 4;
+    static constexpr uint32_t NUM_DEFAULT_KEYS = 4;
     static bool validEtherType(uint16_t ethertype);
-
 private:
+    // Todo(wdu@) Only support CCMP at this point.
+    ssize_t getKeyIndex() const;
+    uint16_t getEtherType() const;
+    std::vector<uint8_t> getPacketNumber(const CipherScheme cs) const;
+    std::vector<uint8_t> getNonce(const std::vector<uint8_t>& pn) const;
+    std::vector<uint8_t> getAad() const;
+    uint8_t getQosTid() const;
+
     std::vector<uint8_t> mData;
     android::network::FrameInfo mInfo;
+    std::vector<uint8_t> mPTK;
+    std::vector<uint8_t> mGTK;
+    static std::atomic<int64_t> sTxPn;
 };
 
 }  // namespace network
