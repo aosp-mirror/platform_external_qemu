@@ -164,10 +164,10 @@ JNIEXPORT void JNICALL Java_com_android_emulator_ImageConverter_unpackRgb888(
             unpackRgb888Universal(bytes + numPixelsRounded * 3, tailLength,
                     pixels + numPixelsRounded);
         }
-        return;
     }
-#endif
+#else
     unpackRgb888Universal(bytes, numPixels, pixels);
+#endif
 
     (*env)->ReleasePrimitiveArrayCritical(env, pixelArray, pixels, 0);
     (*env)->ReleasePrimitiveArrayCritical(env, byteArray, bytes, 0);
