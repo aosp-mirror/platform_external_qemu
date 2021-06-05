@@ -66,9 +66,6 @@ void MediaVideoToolBoxVideoHelper::deInit() {
 
 bool MediaVideoToolBoxVideoHelper::init() {
     VTB_DPRINT("init calling");
-    constexpr int numthreads = 1;
-    mFfmpegVideoHelper.reset(new MediaFfmpegVideoHelper(264, numthreads));
-    mFfmpegVideoHelper->init();
     mVtbReady = false;
     return true;
 }
@@ -95,8 +92,6 @@ void MediaVideoToolBoxVideoHelper::extractFrameInfo() {
     // at this moment, ffmpeg should have decoded the first frame to obtain
     // w/h/colorspace info and number of b frame buffers
 
-    if (mObtainedAuxInfo) return;
-
     mFfmpegVideoHelper->flush();
     MediaSnapshotState::FrameInfo frame;
     bool success = mFfmpegVideoHelper->receiveFrame(&frame);
@@ -104,31 +99,28 @@ void MediaVideoToolBoxVideoHelper::extractFrameInfo() {
         mColorAspects = frame.color;
         mVtbBufferSize = mFfmpegVideoHelper->frameReorderBufferSize();
     }
-    mObtainedAuxInfo = true;
 }
 
 void MediaVideoToolBoxVideoHelper::decode(const uint8_t* frame,
                                           size_t szBytes,
                                           uint64_t inputPts) {
     VTB_DPRINT("%s(frame=%p, sz=%zu)", __func__, frame, szBytes);
-    if (!mObtainedAuxInfo) {
-        // uses ffmpeg to preprocess until vtb is ready
-        VTB_DPRINT("before ffmpeg decode");
-        mFfmpegVideoHelper->decode(frame, szBytes, inputPts);
-        VTB_DPRINT("after ffmpeg decode");
-    }
 
     parseInputFrames(frame, szBytes);
 
     // has to go in the FIFO order
     for (int i = 0; i < mInputFrames.size(); ++i) {
         InputFrame& f = mInputFrames[i];
-        bool isidr=false;
         switch (f.type) {
             case H264NaluType::SPS:
                 mSPS.assign(f.data, f.data + f.size);
                 // dumpBytes(mSPS.data(), mSPS.size());
                 mVtbReady = false;
+                {   // create ffmpeg decoder with only 1 thread to avoid frame delay
+                    constexpr int numthreads = 1;
+                    mFfmpegVideoHelper.reset(new MediaFfmpegVideoHelper(264, numthreads));
+                    mFfmpegVideoHelper->init();
+                }
                 break;
             case H264NaluType::PPS:
                 mPPS.assign(f.data, f.data + f.size);
@@ -139,13 +131,12 @@ void MediaVideoToolBoxVideoHelper::decode(const uint8_t* frame,
                 break;
             case H264NaluType::CodedSliceIDR:
                 VTB_DPRINT("this is an IDR frame");
-                isidr=true;
-            case H264NaluType::CodedSliceNonIDR:
-                if(isidr==false) {
-                    VTB_DPRINT("this is an non-IDR frame");
+                if (mFfmpegVideoHelper) {
+                    mFfmpegVideoHelper->decode(frame, szBytes, inputPts);
+                    extractFrameInfo();
+                    mFfmpegVideoHelper.reset();
                 }
                 if (!mVtbReady) {
-                    extractFrameInfo();
                     createCMFormatDescription();
                     Boolean needNewSession = ( VTDecompressionSessionCanAcceptFormatDescription(mDecoderSession, mCmFmtDesc) == false);
                     if (needNewSession) {
@@ -163,11 +154,20 @@ void MediaVideoToolBoxVideoHelper::decode(const uint8_t* frame,
                 }
                 handleIDRFrame(f.data, f.size, inputPts);
                 break;
+            case H264NaluType::CodedSliceNonIDR:
+                VTB_DPRINT("this is an non-IDR frame");
+                handleIDRFrame(f.data, f.size, inputPts);
+                break;
             default:
                 VTB_DPRINT("Support for nalu_type=%u not implemented",
                            (uint8_t)f.type);
                 break;
         }
+    }
+
+    if (mFfmpegVideoHelper) {
+        // we have not reached idr frame yet, keep decoding
+        mFfmpegVideoHelper->decode(frame, szBytes, inputPts);
     }
 
     mInputFrames.clear();
