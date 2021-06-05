@@ -111,6 +111,8 @@ SwapChainStateVk::createSwapChainCi(
     VK_CHECK(vk.vkGetPhysicalDeviceSurfacePresentModesKHR(
         physicalDevice, surface, &presentModeCount, nullptr));
     std::vector<VkPresentModeKHR> presentModes(presentModeCount);
+    VK_CHECK(vk.vkGetPhysicalDeviceSurfacePresentModesKHR(
+        physicalDevice, surface, &presentModeCount, presentModes.data()));
     auto iPresentMode =
         std::find_if(presentModes.begin(), presentModes.end(),
                      [](const VkPresentModeKHR &presentMode) {
