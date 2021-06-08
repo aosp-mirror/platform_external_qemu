@@ -24,6 +24,30 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "117ed3d8_bc35733b",
+        "filename": "android-qemu2-glue/emulation/VirtioWifiForwarder.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-06-08T20:07:10Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "43812834_dfe8b821",
+      "range": {
+        "startLine": 128,
+        "startChar": 6,
+        "endLine": 129,
+        "endChar": 27
+      },
+      "revId": "f4f0cfea4f070b9657c8db70692e8ac64ed922a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "98a84358_b138921d",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-06-03T02:00:49Z",
       "side": 1,
       "message": "\u003d std::move(frame);",
+      "range": {
+        "startLine": 327,
+        "startChar": 31,
+        "endLine": 327,
+        "endChar": 55
+      },
+      "revId": "f4f0cfea4f070b9657c8db70692e8ac64ed922a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "48b231f2_f694873b",
+        "filename": "android-qemu2-glue/emulation/VirtioWifiForwarder.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-06-08T20:07:10Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "98a84358_b138921d",
       "range": {
         "startLine": 327,
         "startChar": 31,
