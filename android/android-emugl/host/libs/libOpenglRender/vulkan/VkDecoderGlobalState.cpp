@@ -546,110 +546,138 @@ public:
         fb->unregisterProcessCleanupCallback(instance);
     }
 
-    VkResult on_vkEnumeratePhysicalDevices(
-            android::base::BumpPool* pool,
-            VkInstance boxed_instance,
-            uint32_t* physicalDeviceCount,
-            VkPhysicalDevice* physicalDevices) {
-
+    VkResult on_vkEnumeratePhysicalDevices(android::base::BumpPool* pool,
+                                           VkInstance boxed_instance,
+                                           uint32_t* physicalDeviceCount,
+                                           VkPhysicalDevice* physicalDevices) {
         auto instance = unbox_VkInstance(boxed_instance);
         auto vk = dispatch_VkInstance(boxed_instance);
 
-        auto res = vk->vkEnumeratePhysicalDevices(instance, physicalDeviceCount, physicalDevices);
+        uint32_t physicalDevicesSize = 0;
+        if (physicalDeviceCount) {
+            physicalDevicesSize = *physicalDeviceCount;
+        }
 
+        uint32_t actualPhysicalDeviceCount;
+        auto res = vk->vkEnumeratePhysicalDevices(
+            instance, &actualPhysicalDeviceCount, nullptr);
+        if (res != VK_SUCCESS) {
+            return res;
+        }
+        std::vector<VkPhysicalDevice> validPhysicalDevices(
+            actualPhysicalDeviceCount);
+        res = vk->vkEnumeratePhysicalDevices(
+            instance, &actualPhysicalDeviceCount, validPhysicalDevices.data());
         if (res != VK_SUCCESS) return res;
 
         AutoLock lock(mLock);
 
-        VkPhysicalDevice advertisedPhysicalDevice = VK_NULL_HANDLE;
+        if (m_emu->instanceSupportsExternalMemoryCapabilities) {
+            PFN_vkGetPhysicalDeviceProperties2KHR getPhysdevProps2Func =
+                (PFN_vkGetPhysicalDeviceProperties2KHR)(vk->vkGetInstanceProcAddr(
+                    instance, "vkGetPhysicalDeviceProperties2KHR"));
+
+            if (!getPhysdevProps2Func) {
+                getPhysdevProps2Func =
+                    (PFN_vkGetPhysicalDeviceProperties2KHR)(vk->vkGetInstanceProcAddr(
+                        instance, "vkGetPhysicalDeviceProperties2"));
+            }
+
+            if (!getPhysdevProps2Func) {
+                PFN_vkGetPhysicalDeviceProperties2KHR khrFunc =
+                    vk->vkGetPhysicalDeviceProperties2KHR;
+                PFN_vkGetPhysicalDeviceProperties2KHR coreFunc =
+                    vk->vkGetPhysicalDeviceProperties2;
+
+                if (coreFunc) getPhysdevProps2Func = coreFunc;
+                if (!getPhysdevProps2Func && khrFunc)
+                    getPhysdevProps2Func = khrFunc;
+            }
+
+            if (getPhysdevProps2Func) {
+                validPhysicalDevices.erase(std::remove_if(
+                    validPhysicalDevices.begin(), validPhysicalDevices.end(),
+                    [getPhysdevProps2Func,
+                     this](VkPhysicalDevice physicalDevice) {
+                        // We can get the device UUID.
+                        VkPhysicalDeviceIDPropertiesKHR idProps = {
+                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES_KHR,
+                            nullptr,
+                        };
+                        VkPhysicalDeviceProperties2KHR propsWithId = {
+                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR,
+                            &idProps,
+                        };
+                        getPhysdevProps2Func(physicalDevice, &propsWithId);
+
+                        // Remove those devices whose UUIDs don't match the one
+                        // in VkCommonOperations.
+                        return memcmp(m_emu->deviceInfo.idProps.deviceUUID,
+                                      idProps.deviceUUID, VK_UUID_SIZE) != 0;
+                    }), validPhysicalDevices.end());
+            } else {
+                fprintf(stderr,
+                        "%s: warning: failed to "
+                        "vkGetPhysicalDeviceProperties2KHR\n",
+                        __func__);
+            }
+        } else {
+            // If we don't support ID properties then just advertise only the
+            // first physical device.
+            fprintf(stderr,
+                    "%s: device id properties not supported, using first "
+                    "physical device\n",
+                    __func__);
+        }
+        if (!validPhysicalDevices.empty()) {
+            validPhysicalDevices.erase(std::next(validPhysicalDevices.begin()),
+                                       validPhysicalDevices.end());
+        }
+
+        if (physicalDeviceCount) {
+            *physicalDeviceCount = validPhysicalDevices.size();
+        }
 
         auto emu = getGlobalVkEmulation();
 
         if (physicalDeviceCount && physicalDevices) {
             // Box them up
-            for (uint32_t i = 0; i < *physicalDeviceCount; ++i) {
-                mPhysicalDeviceToInstance[physicalDevices[i]] = instance;
+            for (uint32_t i = 0;
+                 i < std::min(*physicalDeviceCount, physicalDevicesSize); ++i) {
+                mPhysicalDeviceToInstance[validPhysicalDevices[i]] = instance;
 
-                auto& physdevInfo = mPhysdevInfo[physicalDevices[i]];
+                auto& physdevInfo = mPhysdevInfo[validPhysicalDevices[i]];
 
+                physdevInfo.boxed = new_boxed_VkPhysicalDevice(
+                    validPhysicalDevices[i], vk,
+                    false /* does not own dispatch */);
 
-                physdevInfo.boxed =
-                    new_boxed_VkPhysicalDevice(physicalDevices[i], vk, false /* does not own dispatch */);
-
-                vk->vkGetPhysicalDeviceProperties(physicalDevices[i],
-                        &physdevInfo.props);
+                vk->vkGetPhysicalDeviceProperties(validPhysicalDevices[i],
+                                                  &physdevInfo.props);
 
                 if (physdevInfo.props.apiVersion > kMaxSafeVersion) {
                     physdevInfo.props.apiVersion = kMaxSafeVersion;
                 }
 
                 vk->vkGetPhysicalDeviceMemoryProperties(
-                        physicalDevices[i], &physdevInfo.memoryProperties);
+                    validPhysicalDevices[i], &physdevInfo.memoryProperties);
 
                 uint32_t queueFamilyPropCount = 0;
 
                 vk->vkGetPhysicalDeviceQueueFamilyProperties(
-                        physicalDevices[i], &queueFamilyPropCount, nullptr);
+                    validPhysicalDevices[i], &queueFamilyPropCount, nullptr);
 
                 physdevInfo.queueFamilyProperties.resize(
-                        (size_t)queueFamilyPropCount);
+                    (size_t)queueFamilyPropCount);
 
                 vk->vkGetPhysicalDeviceQueueFamilyProperties(
-                        physicalDevices[i], &queueFamilyPropCount,
-                        physdevInfo.queueFamilyProperties.data());
+                    validPhysicalDevices[i], &queueFamilyPropCount,
+                    physdevInfo.queueFamilyProperties.data());
 
-                VkPhysicalDevice physdevForIdQuery = physicalDevices[i];
                 physicalDevices[i] = (VkPhysicalDevice)physdevInfo.boxed;
-
-                if (emu->instanceSupportsExternalMemoryCapabilities) {
-                    PFN_vkGetPhysicalDeviceProperties2KHR getPhysdevProps2Func = (PFN_vkGetPhysicalDeviceProperties2KHR)(
-                        vk->vkGetInstanceProcAddr(
-                            instance, "vkGetPhysicalDeviceProperties2KHR"));
-
-                    if (!getPhysdevProps2Func) {
-                        PFN_vkGetPhysicalDeviceProperties2KHR khrFunc = vk->vkGetPhysicalDeviceProperties2KHR;
-                        PFN_vkGetPhysicalDeviceProperties2KHR coreFunc = vk->vkGetPhysicalDeviceProperties2;
-
-                        if (coreFunc) getPhysdevProps2Func = coreFunc;
-                        if (!getPhysdevProps2Func && khrFunc) getPhysdevProps2Func = khrFunc;
-                    }
-
-                    if (getPhysdevProps2Func) {
-                        // We can get the device UUID.
-                        VkPhysicalDeviceIDPropertiesKHR idProps = {
-                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES_KHR, nullptr,
-                        };
-                        VkPhysicalDeviceProperties2KHR propsWithId = {
-                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR, &idProps,
-                        };
-                        getPhysdevProps2Func(physdevForIdQuery, &propsWithId);
-
-                        // The device UUID matches the one in VkCommonOperations.
-                        if (0 == memcmp(emu->deviceInfo.idProps.deviceUUID, idProps.deviceUUID, VK_UUID_SIZE)) {
-                            advertisedPhysicalDevice = physicalDevices[i];
-                        }
-                    } else {
-                        fprintf(stderr, "%s: warning: failed to vkGetPhysicalDeviceProperties2KHR\n", __func__);
-                    }
-                } else {
-                    // If we don't support ID properties then just advertise only the first physical device.
-                    fprintf(stderr, "%s: device id properties not supported, using first physical device\n", __func__);
-                    advertisedPhysicalDevice = physicalDevices[0];
-                }
             }
-        }
-
-        if (physicalDeviceCount && (*physicalDeviceCount > 0)) {
-            // Hide all physical devices except for the advertised one (the one whose UUID matches
-            // the one in VkCommonOperations.cpp)
-            *physicalDeviceCount = 1;
-
-            if (physicalDevices) {
-                if (!advertisedPhysicalDevice) {
-                    *physicalDevices = physicalDevices[0];
-                } else {
-                    *physicalDevices = advertisedPhysicalDevice;
-                }
+            if (physicalDevicesSize < *physicalDeviceCount) {
+                res = VK_INCOMPLETE;
             }
         }
 
