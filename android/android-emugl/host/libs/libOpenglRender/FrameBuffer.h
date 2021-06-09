@@ -38,6 +38,9 @@
 #include "OpenglRender/Renderer.h"
 
 #include <EGL/egl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <vulkan/vulkan.h>
 
 #include <functional>
 #include <map>
@@ -874,5 +877,14 @@ private:
 
     android::base::MessageChannel<HandleType, 1024>
         mOutstandingColorBufferDestroys;
+<<<<<<< HEAD   (8ef0ff Merge "Fix crashes on Google Play page Update clicks" into s)
+=======
+
+    // UUIDs of physical devices for Vulkan and GLES, respectively.  In most
+    // cases, this determines whether we can support zero-copy interop.
+    uint8_t m_vulkanUUID[VK_UUID_SIZE];
+    uint8_t m_glesUUID[GL_UUID_SIZE_EXT];
+    static_assert(VK_UUID_SIZE == GL_UUID_SIZE_EXT);
+>>>>>>> CHANGE (68a7f4 vulkan: always enumerate all physical devices)
 };
 #endif

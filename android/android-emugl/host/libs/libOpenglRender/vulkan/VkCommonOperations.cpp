@@ -651,6 +651,28 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         if (sVkEmulation->instanceSupportsExternalMemoryCapabilities) {
             deviceInfos[i].supportsExternalMemory = extensionsSupported(
                     deviceExts, externalMemoryDeviceExtNames);
+<<<<<<< HEAD   (8ef0ff Merge "Fix crashes on Google Play page Update clicks" into s)
+=======
+            deviceInfos[i].supportsIdProperties =
+                sVkEmulation->getPhysicalDeviceProperties2Func != nullptr;
+            if (!sVkEmulation->getPhysicalDeviceProperties2Func) {
+                fprintf(stderr, "%s: warning: device claims to support ID properties "
+                        "but vkGetPhysicalDeviceProperties2 could not be found\n", __func__);
+            }
+        }
+
+        if (deviceInfos[i].supportsIdProperties) {
+            VkPhysicalDeviceIDPropertiesKHR idProps = {
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES_KHR, nullptr,
+            };
+            VkPhysicalDeviceProperties2KHR propsWithId = {
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR, &idProps,
+            };
+            sVkEmulation->getPhysicalDeviceProperties2Func(
+                physdevs[i],
+                &propsWithId);
+            deviceInfos[i].idProps = idProps;
+>>>>>>> CHANGE (68a7f4 vulkan: always enumerate all physical devices)
         }
 
         uint32_t queueFamilyCount = 0;

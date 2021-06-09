@@ -758,6 +758,11 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
      setDisplayPose(displayId, 0, 0, getWidth(), getHeight(), 0);
      m_perfThread->start();
 
+<<<<<<< HEAD   (8ef0ff Merge "Fix crashes on Google Play page Update clicks" into s)
+=======
+     memset(m_vulkanUUID, 0x0, VK_UUID_SIZE);
+     memset(m_glesUUID, 0x0, GL_UUID_SIZE_EXT);
+>>>>>>> CHANGE (68a7f4 vulkan: always enumerate all physical devices)
 }
 
 FrameBuffer::~FrameBuffer() {
