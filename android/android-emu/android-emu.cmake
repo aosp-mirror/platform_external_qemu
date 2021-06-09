@@ -498,6 +498,7 @@ target_include_directories(
     # are a lot of externs that are actually defined in qemu2-glue. this has to
     # be sorted out,
     ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG}
+    ${ANDROID_QEMU2_TOP_DIR}
     # If you use our library, you get access to our headers.
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${DARWINN_INCLUDE_DIRS})

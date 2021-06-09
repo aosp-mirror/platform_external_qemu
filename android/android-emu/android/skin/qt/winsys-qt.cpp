@@ -751,6 +751,9 @@ extern void skin_winsys_start(bool no_window) {
     } else {
         g->app = new QApplication(g->argc, g->argv);
         g->app->setAttribute(Qt::AA_UseHighDpiPixmaps);
+        // Enable compression of Pen/Tablet events
+        g->app->setAttribute(Qt::AA_CompressHighFrequencyEvents);
+        g->app->setAttribute(Qt::AA_CompressTabletEvents);
         androidQtDefaultInit();
 
         EmulatorQtWindow::create();

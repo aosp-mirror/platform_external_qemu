@@ -348,6 +348,24 @@ bool skin_ui_process_events(SkinUI* ui) {
             skin_window_process_event(ui->window, &ev);
             break;
 
+        case kEventPenMove:
+            DE("EVENT: kEventPenMove x=%d y=%d id=%d pressure=%d \
+                orientation=%d button=%d pointer=%d\n",
+                ev.u.pen.x, ev.u.pen.y, ev.u.pen.tracking_id,
+                ev.u.pen.pressure, ev.u.pen.orientation,
+                ev.u.pen.button_pressed, ev.u.pen.rubber_pointer);
+            skin_window_process_pen_event(ui->window, &ev);
+            break;
+        case kEventPenPress:
+        case kEventPenRelease:
+            DE("EVENT: kEventPen x=%d y=%d id=%d pressure=%d \
+                orientation=%d button=%d pointer=%d\n",
+                ev.u.pen.x, ev.u.pen.y, ev.u.pen.tracking_id,
+                ev.u.pen.pressure, ev.u.pen.orientation,
+                ev.u.pen.button_pressed, ev.u.pen.rubber_pointer);
+            skin_window_process_pen_event(ui->window, &ev);
+            break;
+
         case kEventScrollBarChanged:
             DE("EVENT: kEventScrollBarChanged x=%d xmax=%d y=%d ymax=%d ignored=%d\n",
                ev.u.scroll.x, ev.u.scroll.xmax, ev.u.scroll.y, ev.u.scroll.ymax, ignoreScroll);

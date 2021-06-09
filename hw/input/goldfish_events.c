@@ -13,6 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+#include "android/multitouch-screen.h"
 #include "qemu/osdep.h"
 #include "qemu/log.h"
 #include "hw/sysbus.h"
@@ -832,8 +833,8 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
         /* QEMU provides absolute coordinates in the [0,0x7fff] range
          * regardless of the display resolution.
          */
-        abs_values[ABS_X].max = 0x7fff;
-        abs_values[ABS_Y].max = 0x7fff;
+        abs_values[ABS_X].max = INPUT_EVENT_ABS_MAX;
+        abs_values[ABS_Y].max = INPUT_EVENT_ABS_MAX;
         abs_values[ABS_Z].max = 1;
 
         if (s->have_multitouch) {
@@ -841,22 +842,32 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
              * Setup multitouch.
              */
             goldfish_events_set_bit(s, EV_ABS, ABS_MT_SLOT);
+            goldfish_events_set_bit(s, EV_ABS, ABS_MT_TOUCH_MAJOR);
+            goldfish_events_set_bit(s, EV_ABS, ABS_MT_TOUCH_MINOR);
+            goldfish_events_set_bit(s, EV_ABS, ABS_MT_ORIENTATION);
             goldfish_events_set_bit(s, EV_ABS, ABS_MT_POSITION_X);
             goldfish_events_set_bit(s, EV_ABS, ABS_MT_POSITION_Y);
+            goldfish_events_set_bit(s, EV_ABS, ABS_MT_TOOL_TYPE);
             goldfish_events_set_bit(s, EV_ABS, ABS_MT_TRACKING_ID);
-            goldfish_events_set_bit(s, EV_ABS, ABS_MT_TOUCH_MAJOR);
             goldfish_events_set_bit(s, EV_ABS, ABS_MT_PRESSURE);
+
+            goldfish_events_set_bit(s, EV_SYN, EV_KEY);
+            goldfish_events_set_bit(s, EV_KEY, BTN_TOOL_RUBBER);
+            goldfish_events_set_bit(s, EV_KEY, BTN_STYLUS);
 
             if (s_multitouch_funcs) {
                 abs_values[ABS_MT_SLOT].max =
-                        s_multitouch_funcs->get_max_slot();
-                abs_values[ABS_MT_TRACKING_ID].max =
-                        abs_values[ABS_MT_SLOT].max + 1;
-                abs_values[ABS_MT_POSITION_X].max = abs_values[ABS_X].max;
-                abs_values[ABS_MT_POSITION_Y].max = abs_values[ABS_Y].max;
+                                        s_multitouch_funcs->get_max_slot();
                 /* TODO : make next 2 less random */
-                abs_values[ABS_MT_TOUCH_MAJOR].max = 0x7fffffff;
-                abs_values[ABS_MT_PRESSURE].max = 0x100;
+                abs_values[ABS_MT_TOUCH_MAJOR].max = MTS_TOUCH_AXIS_RANGE_MAX;
+                abs_values[ABS_MT_TOUCH_MINOR].max = MTS_TOUCH_AXIS_RANGE_MAX;
+                abs_values[ABS_MT_ORIENTATION].max = MTS_ORIENTATION_RANGE_MAX;
+                abs_values[ABS_MT_POSITION_X].max  = abs_values[ABS_X].max;
+                abs_values[ABS_MT_POSITION_Y].max  = abs_values[ABS_Y].max;
+                abs_values[ABS_MT_TOOL_TYPE].max   = MT_TOOL_MAX;
+                abs_values[ABS_MT_TRACKING_ID].max =
+                                            abs_values[ABS_MT_SLOT].max + 1;
+                abs_values[ABS_MT_PRESSURE].max    = MTS_PRESSURE_RANGE_MAX;
             }
         }
     }

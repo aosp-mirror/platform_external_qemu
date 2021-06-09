@@ -25,6 +25,8 @@ typedef struct SkinWindow  SkinWindow;
 typedef struct SkinWindowFuncs {
     void (*key_event)(unsigned keycode, int down);
     void (*mouse_event)(unsigned x, unsigned y, unsigned state, int displayId);
+    void (*pen_event)(unsigned x, unsigned y, const SkinEvent* ev,
+                                              unsigned state, int displayId);
     void (*mouse_wheel_event)(int x_delta, int y_delta, int displayId);
     void (*rotary_input_event)(int delta);
     void (*set_device_orientation)(SkinRotation rotation);
@@ -63,6 +65,7 @@ extern int              skin_window_reset ( SkinWindow*  window, SkinLayout*  la
 extern void             skin_window_free  ( SkinWindow*  window );
 extern void             skin_window_redraw( SkinWindow*  window, SkinRect*  rect );
 extern void             skin_window_process_event( SkinWindow*  window, SkinEvent*  ev );
+extern void             skin_window_process_pen_event(SkinWindow* window, SkinEvent* ev);
 
 extern void             skin_window_set_onion( SkinWindow*   window,
                                                SkinImage*    onion,
