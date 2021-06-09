@@ -812,8 +812,8 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
      setDisplayPose(displayId, 0, 0, getWidth(), getHeight(), 0);
      m_perfThread->start();
 
-     memset(m_vulkanUUID, 0x0, 16);
-     memset(m_glesUUID, 0x0, 16);
+     memset(m_vulkanUUID, 0x0, VK_UUID_SIZE);
+     memset(m_glesUUID, 0x0, GL_UUID_SIZE_EXT);
 }
 
 FrameBuffer::~FrameBuffer() {
