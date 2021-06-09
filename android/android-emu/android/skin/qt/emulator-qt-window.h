@@ -407,7 +407,7 @@ private:
     void checkNestedAndWarn();
 
     bool mouseInside();
-    SkinMouseButtonType getSkinMouseButton(QMouseEvent* event) const;
+    SkinMouseButtonType getSkinMouseButton(const QMouseEvent* event) const;
 
     void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
     void forwardGenericEventToEmulator(int type, int code, int value);
@@ -570,9 +570,15 @@ private:
 
     /* State of pen event type translation state machine. */
     TouchState mPenTouchState = TouchState::NOT_TOUCHING;
+    /* State of mouse event type translation state machine. */
+    TouchState mMouseTouchState = TouchState::NOT_TOUCHING;
+
     SkinEventType translatePenEventType(SkinEventType type,
                                         Qt::MouseButton button,
                                         Qt::MouseButtons buttons);
+    SkinEventType translateMouseEventType(SkinEventType type,
+                                          Qt::MouseButton button,
+                                          Qt::MouseButtons buttons);
     int tiltToRotation(int xTiltDeg, int yTiltDeg);
     int penOrientation(int rotation);
 };

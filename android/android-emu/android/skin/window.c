@@ -2113,7 +2113,7 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
     // single-touch, which only uses the first bit.
     int button_state = multitouch_create_buttons_state(
             ev->type != kEventMouseButtonUp, ev->u.mouse.skip_sync,
-            ev->u.mouse.button);
+            ev->u.mouse.button == kMouseButtonSecondaryTouch);
 
     FingerState* finger;
     if (ev->u.mouse.button == kMouseButtonSecondaryTouch) {
