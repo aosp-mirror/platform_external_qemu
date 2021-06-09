@@ -666,7 +666,7 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
             deviceInfos[i].supportsIdProperties =
                 sVkEmulation->getPhysicalDeviceProperties2Func != nullptr;
             if (!sVkEmulation->getPhysicalDeviceProperties2Func) {
-                fprintf(stderr, "%s: warning: device should support ID properties "
+                fprintf(stderr, "%s: warning: device claims to support ID properties "
                         "but vkGetPhysicalDeviceProperties2 could not be found\n", __func__);
             }
         }
