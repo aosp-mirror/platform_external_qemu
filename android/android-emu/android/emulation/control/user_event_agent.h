@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "android/skin/event.h"
 #include "android/skin/generic-event-buffer.h"
 #include "android/utils/compiler.h"
 
@@ -36,6 +37,12 @@ typedef struct QAndroidUserEventAgent {
                            int dz,
                            int buttonsState,
                            int displayId);
+    // Pen event.
+    void (*sendPenEvent)(int dx,
+                         int dy,
+                         const SkinEvent* ev,
+                         int buttonsState,
+                         int displayId);
     // Mouse wheel event.
     void (*sendMouseWheelEvent)(int dx, int dy, int displayId);
 

@@ -29,6 +29,7 @@
 #include "android/hw-sensors.h"                          // for android_sens...
 #include "android/network/globals.h"                     // for android_net_...
 #include "android/opengles.h"                            // for android_redr...
+#include "android/skin/event.h"                          // for SkinEventType
 #include "android/skin/generic-event-buffer.h"           // for SkinGenericE...
 #include "android/skin/keycode.h"                        // for SkinKeyCode
 #include "android/skin/trackball.h"                      // for SkinTrackBal...
@@ -102,13 +103,21 @@ static void emulator_window_generic_event(SkinGenericEventCode* events,
 }
 
 static void emulator_window_window_mouse_event(unsigned x,
-                                         unsigned y,
-                                         unsigned state,
-                                         int displayId) {
+                                               unsigned y,
+                                               unsigned state,
+                                               int displayId) {
     /* NOTE: the 0 is used in hw/android/goldfish/events_device.c to
      * differentiate between a touch-screen and a trackball event
      */
     user_event_agent->sendMouseEvent(x, y, 0, state, displayId);
+}
+
+static void emulator_window_window_pen_event(unsigned x,
+                                             unsigned y,
+                                             const SkinEvent* ev,
+                                             unsigned state,
+                                             int displayId) {
+    user_event_agent->sendPenEvent(x, y, ev, state, displayId);
 }
 
 static void emulator_window_window_mouse_wheel_event(int x_delta,
@@ -218,6 +227,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
     static const SkinWindowFuncs my_window_funcs = {
         .key_event = &emulator_window_window_key_event,
         .mouse_event = &emulator_window_window_mouse_event,
+        .pen_event = &emulator_window_window_pen_event,
         .mouse_wheel_event = &emulator_window_window_mouse_wheel_event,
         .rotary_input_event = &emulator_window_window_rotary_input_event,
         .set_device_orientation = &emulator_window_set_device_orientation,

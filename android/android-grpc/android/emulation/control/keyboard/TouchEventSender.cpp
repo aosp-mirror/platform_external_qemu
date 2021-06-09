@@ -9,21 +9,19 @@
 #include "android/base/async/ThreadLooper.h"             // for ThreadLooper
 #include "android/emulation/control/user_event_agent.h"  // for QAndroidUser...
 #include "android/hw-events.h"                           // for EV_ABS, EV_SYN
+#include "android/multitouch-screen.h"                   // for MTS_*
 #include "android/skin/generic-event-buffer.h"           // for SkinGenericE...
 #include "android/skin/linux_keycodes.h"                 // for LINUX_ABS_MT...
 #include "emulator_controller.pb.h"                      // for Touch, Touch...
+#include "glib-compat.h"                                 // for guint, guint16
 #include "google/protobuf/repeated_field.h"              // for RepeatedPtrF...
+#include "qemu/notify.h"                                 // for Notifier
+#include "qemu/typedefs.h"                               // for Error, QNull...
+#include "ui/input.h"                                    // for INPUT_EVENT_*
+
 namespace android {
 namespace emulation {
 namespace control {
-
-/* Maximum number of pointers, supported by multi-touch emulation. */
-#define MTS_POINTERS_NUM 10
-/* Signals that pointer is not tracked (or is "up"). */
-#define MTS_POINTER_UP -1
-
-#define EV_ABS_MIN 0x0000
-#define EV_ABS_MAX 0x7FFF
 
 TouchEventSender::TouchEventSender(
         const AndroidConsoleAgents* const consoleAgents)
@@ -49,8 +47,8 @@ bool TouchEventSender::sendOnThisThread(const TouchEvent* request) {
 
 // Scales an axis to the proper EVDEV value..
 static int scaleAxis(int value, int min_in, int max_in) {
-    constexpr int64_t min_out = EV_ABS_MIN;
-    constexpr int64_t max_out = EV_ABS_MAX;
+    constexpr int64_t min_out = INPUT_EVENT_ABS_MIN;
+    constexpr int64_t max_out = INPUT_EVENT_ABS_MAX;
     constexpr int64_t range_out = (int64_t)max_out - min_out;
 
     int64_t range_in = (int64_t)max_in - min_in;

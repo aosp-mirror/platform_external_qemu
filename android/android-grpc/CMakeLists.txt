@@ -103,9 +103,11 @@ android_add_library(
       android/emulation/control/waterfall/WaterfallFactory.cpp)
 
 target_link_libraries(android-grpc PRIVATE png PUBLIC libprotobuf android-emu
-                                                      android-net grpc++)
+                                                      android-net grpc++
+                                                      GLIB2::GLIB2)
 target_include_directories(android-grpc PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
-                                               ${CMAKE_CURRENT_SOURCE_DIR})
+                                               ${CMAKE_CURRENT_SOURCE_DIR}
+                                               ${ANDROID_AUTOGEN})
 target_compile_options(android-grpc PRIVATE -Wno-return-type-c-linkage)
 set_target_properties(android-grpc PROPERTIES CXX_STANDARD 17)
 
