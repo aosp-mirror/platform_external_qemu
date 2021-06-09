@@ -561,6 +561,10 @@ public:
 
         AutoLock lock(mLock);
 
+        VkPhysicalDevice advertisedPhysicalDevice = VK_NULL_HANDLE;
+
+        auto emu = getGlobalVkEmulation();
+
         if (physicalDeviceCount && physicalDevices) {
             // Box them up
             for (uint32_t i = 0; i < *physicalDeviceCount; ++i) {
@@ -594,7 +598,49 @@ public:
                         physicalDevices[i], &queueFamilyPropCount,
                         physdevInfo.queueFamilyProperties.data());
 
+                VkPhysicalDevice physdevForIdQuery = physicalDevices[i];
                 physicalDevices[i] = (VkPhysicalDevice)physdevInfo.boxed;
+
+                if (emu->instanceSupportsExternalMemoryCapabilities) {
+                    fprintf(stderr, "%s: VkCommonOperations suggests we can query device id properties\n", __func__);
+
+                    PFN_vkGetPhysicalDeviceProperties2KHR getPhysdevProps2Func = (PFN_vkGetPhysicalDeviceProperties2KHR)(
+                        vk->vkGetInstanceProcAddr(
+                            instance, "vkGetPhysicalDeviceProperties2KHR"));
+
+                    if (getPhysdevProps2Func) {
+                        fprintf(stderr, "%s: Id props supported. Getting id props.\n", __func__);
+                        VkPhysicalDeviceIDPropertiesKHR idProps = {
+                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES_KHR, nullptr,
+                        };
+                        VkPhysicalDeviceProperties2KHR propsWithId = {
+                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR, &idProps,
+                        };
+                        getPhysdevProps2Func(physdevForIdQuery, &propsWithId);
+                        if (0 == memcmp(emu->deviceInfo.idProps.deviceUUID, idProps.deviceUUID, VK_UUID_SIZE)) {
+                            fprintf(stderr, "%s: Found matching physical device id for phys dev %p\n", __func__, physdevForIdQuery);
+                            advertisedPhysicalDevice = physicalDevices[i];
+                        }
+                    }
+                } else {
+                    // If we don't support ID properties then just advertise only the first physical device.
+                    fprintf(stderr, "%s: device id properties not supported, using first physical device\n", __func__);
+                    advertisedPhysicalDevice = physicalDevices[0];
+                }
+            }
+        }
+
+        if (physicalDeviceCount && (*physicalDeviceCount > 0)) {
+            // Hide all physical devices except for the advertised one (the one whose UUID matches
+            // the one in VkCommonOperations.cpp)
+            fprintf(stderr, "%s: Hiding other physical devices\n", __func__);
+            *physicalDeviceCount = 1;
+
+            if (physicalDevices) {
+                if (!advertisedPhysicalDevice) {
+                    fprintf(stderr, "%s: warning: No enumerated physical devices match UUID of the one selected in VkCommonOperations!\n", __func__);
+                }
+                *physicalDevices = advertisedPhysicalDevice;
             }
         }
 

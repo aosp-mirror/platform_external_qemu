@@ -594,6 +594,13 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
                 ivk->vkGetInstanceProcAddr(
                         sVkEmulation->instance,
                         "vkGetPhysicalDeviceImageFormatProperties2KHR"));
+        sVkEmulation->getPhysicalDeviceProperties2Func = reinterpret_cast<
+                PFN_vkGetPhysicalDeviceProperties2KHR>(
+                ivk->vkGetInstanceProcAddr(
+                        sVkEmulation->instance,
+                        "vkGetPhysicalDeviceProperties2KHR"));
+        fprintf(stderr, "%s: support for vkGetPhysicalDeviceProperties2KHR: %p\n", __func__,
+                sVkEmulation->getPhysicalDeviceProperties2Func);
     }
 
     if (sVkEmulation->instanceSupportsMoltenVK) {
@@ -651,6 +658,21 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         if (sVkEmulation->instanceSupportsExternalMemoryCapabilities) {
             deviceInfos[i].supportsExternalMemory = extensionsSupported(
                     deviceExts, externalMemoryDeviceExtNames);
+            deviceInfos[i].supportsIdProperties = true;
+        }
+
+        if (deviceInfos[i].supportsIdProperties) {
+            fprintf(stderr, "%s: Id props supported. Getting id props.\n", __func__);
+            VkPhysicalDeviceIDPropertiesKHR idProps = {
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES_KHR, nullptr,
+            };
+            VkPhysicalDeviceProperties2KHR propsWithId = {
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR, &idProps,
+            };
+            sVkEmulation->getPhysicalDeviceProperties2Func(
+                physdevs[i],
+                &propsWithId);
+            deviceInfos[i].idProps = idProps;
         }
 
         uint32_t queueFamilyCount = 0;
@@ -717,17 +739,35 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
         uint32_t deviceScore = 0;
         if (deviceInfos[i].hasGraphicsQueueFamily) deviceScore += 100;
         if (deviceInfos[i].supportsExternalMemory) deviceScore += 10;
-        if (deviceInfos[i].hasComputeQueueFamily) deviceScore += 1;
+        if (deviceInfos[i].hasGraphicsQueueFamily) deviceScore += 10000;
+        if (deviceInfos[i].supportsExternalMemory) deviceScore += 1000;
+        if (deviceInfos[i].physdevProps.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU ||
+            deviceInfos[i].physdevProps.deviceType == VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU) {
+            fprintf(stderr, "%s: Found discrete/virtual GPU, device score +100\n", __func__);
+            deviceScore += 100;
+        }
+        if (deviceInfos[i].physdevProps.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU) {
+            fprintf(stderr, "%s: Found integrated GPU, device score +50\n", __func__);
+            deviceScore += 50;
+        }
         deviceScores[i] = deviceScore;
     }
 
     uint32_t maxScoringIndex = 0;
     uint32_t maxScore = 0;
 
-    for (uint32_t i = 0; i < physdevCount; ++i) {
-        if (deviceScores[i] > maxScore) {
-            maxScoringIndex = i;
-            maxScore = deviceScores[i];
+    // If we don't support physical devce ID properties,
+    // just pick the first physical device.
+    if (!sVkEmulation->instanceSupportsExternalMemoryCapabilities) {
+        fprintf(stderr, "%s: warning: instance doesn't support "
+            "external memory capabilities, picking first physical device\n", __func__);
+        maxScoringIndex = 0;
+    } else {
+        for (uint32_t i = 0; i < physdevCount; ++i) {
+            if (deviceScores[i] > maxScore) {
+                maxScoringIndex = i;
+                maxScore = deviceScores[i];
+            }
         }
     }
 
