@@ -16,16 +16,22 @@
 
 
 import argparse
-import logging
 import multiprocessing
 import os
 import platform
 import shutil
 import sys
+import logging
 
-from aemu.definitions import (ENUMS, find_aosp_root, get_aosp_root, get_cmake,
-                              get_qemu_root, infer_target,
-                              read_simple_properties, set_aosp_root)
+from aemu.definitions import (
+    ENUMS,
+    get_aosp_root,
+    get_cmake,
+    get_qemu_root,
+    read_simple_properties,
+    find_aosp_root,
+    set_aosp_root,
+)
 from aemu.distribution import create_distribution
 from aemu.process import run
 from aemu.run_tests import run_tests
@@ -40,11 +46,10 @@ def ensure_requests():
         run([sys.executable, "-m", "pip", "install", "--user", "requests"])
 
 
-def configure(args, target):
+def configure(args):
     """Configures the cmake project."""
 
     # Clear out the existing directory.
-    toolchain = ENUMS["Toolchain"][target]
     if args.clean:
         if os.path.exists(args.out):
             logging.info("Clearing out %s", args.out)
@@ -63,7 +68,7 @@ def configure(args, target):
                 "android",
                 "build",
                 "cmake",
-                toolchain,
+                ENUMS["Toolchain"][args.target],
             )
         )
     ]
@@ -75,8 +80,7 @@ def configure(args, target):
     build_qtwebengine = False
     if args.qtwebengine and args.no_qtwebengine:
         logging.error(
-            "--qtwebengine and --no-qtwebengine cannot be set at the same time!"
-        )
+            "--qtwebengine and --no-qtwebengine cannot be set at the same time!")
         sys.exit(1)
     if args.qtwebengine or args.target == "darwin" or args.target == "windows":
         build_qtwebengine = True
@@ -141,14 +145,13 @@ def get_build_cmd(args):
 
 def main(args):
     version = sys.version_info
-    target = infer_target(args.target)
     logging.info(
-        "Running under Python {0[0]}.{0[1]}.{0[2]}, Platform: {1}, target: {2}".format(
-            version, platform.platform(), target
+        "Running under Python {0[0]}.{0[1]}.{0[2]}, Platform: {1}".format(
+            version, platform.platform()
         )
     )
 
-    configure(args, target)
+    configure(args)
     if args.build == "config":
         print("You can now build with: %s " % " ".join(get_build_cmd(args)))
         return
@@ -159,14 +162,14 @@ def main(args):
     # Test.
     if args.tests:
         cross_compile = platform.system().lower() != args.target
-        if not cross_compile or target == 'darwin_aarch64':
+        if not cross_compile:
             run_tests_opts = []
             if args.gfxstream or args.crosvm or args.gfxstream_only:
                 run_tests_opts.append("--skip-emulator-check")
 
             run_tests(args.out, args.test_jobs, args.crash != "none", run_tests_opts)
         else:
-            logging.info("Not running tests for cross compile or darwin aarch64.")
+            logging.info("Not running tests for cross compile.")
 
     # Create a distribution if needed.
     if args.dist:
@@ -262,9 +265,9 @@ def launch():
     parser.add_argument(
         "--target",
         default=platform.system().lower(),
-        help="Which platform to target (windows|linux|darwin)([-_](aarch64|x86_64))?. The system will infer the architecture if possible. Supported targets: [{}],  Default: ({}). ".format(
-            ", ".join(ENUMS["Toolchain"].keys()),
-            infer_target(platform.system().lower()),
+        choices=ENUMS["Toolchain"].keys(),
+        help="Which platform to target. This will attempt to cross compile if the target does not match the current platform ({})".format(
+            (platform.system().lower())
         ),
     )
     parser.add_argument(
