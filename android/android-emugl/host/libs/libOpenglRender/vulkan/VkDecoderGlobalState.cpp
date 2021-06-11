@@ -92,6 +92,7 @@ kEmulatedExtensions[] = {
     "VK_KHR_external_fence_capabilities",
     "VK_KHR_external_fence",
     "VK_KHR_external_fence_fd",
+    "VK_EXT_device_memory_report",
 };
 
 static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 1, 0);
