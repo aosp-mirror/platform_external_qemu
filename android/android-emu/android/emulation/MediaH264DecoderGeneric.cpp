@@ -33,7 +33,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MEDIA_H264_DEBUG 0
+#define MEDIA_H264_DEBUG 1
 
 #if MEDIA_H264_DEBUG
 #define H264_DPRINT(fmt, ...)                                                \
@@ -111,8 +111,8 @@ void MediaH264DecoderGeneric::initH264ContextInternal(unsigned int width,
                                                       unsigned int outWidth,
                                                       unsigned int outHeight,
                                                       PixelFormat outPixFmt) {
-    H264_DPRINT("%s(w=%u h=%u out_w=%u out_h=%u pixfmt=%u)", __func__, width,
-                height, outWidth, outHeight, (uint8_t)outPixFmt);
+    H264_DPRINT("%s(w=%u h=%u out_w=%u out_h=%u pixfmt=%u) version %d", __func__, width,
+                height, outWidth, outHeight, (uint8_t)outPixFmt, mParser.version());
     mWidth = width;
     mHeight = height;
     mOutputWidth = outWidth;
@@ -120,7 +120,11 @@ void MediaH264DecoderGeneric::initH264ContextInternal(unsigned int width,
     mOutPixFmt = outPixFmt;
 
 #ifndef __APPLE__
-    if (canUseCudaDecoder() && mParser.version() >= 200) {
+    if (canUseCudaDecoder() && mParser.version() >= 100) {
+        if (mParser.version() < 200) {
+            // decoding into memory, cannot use texture
+            mUseGpuTexture = false;
+        }
         MediaCudaVideoHelper::OutputTreatmentMode oMode =
                 MediaCudaVideoHelper::OutputTreatmentMode::SAVE_RESULT;
 

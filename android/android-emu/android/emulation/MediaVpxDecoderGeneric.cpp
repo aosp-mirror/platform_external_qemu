@@ -62,7 +62,7 @@ static bool cudaVpxAllowed() {
         }
     });
 
-    return s_cuda_vpx_allowed && s_cuvid_good;
+    return s_cuvid_good;
 }
 
 bool canUseCudaDecoder() {
@@ -115,7 +115,10 @@ void MediaVpxDecoderGeneric::initVpxContext(void* ptr) {
     VPX_DPRINT("calling init context");
 
 #ifndef __APPLE__
-    if (canUseCudaDecoder() && mParser.version() >= 200) {
+    if (canUseCudaDecoder() && mParser.version() >= 100) {
+        if (mParser.version() < 200) {
+            mUseGpuTexture = false;
+        }
         MediaCudaVideoHelper::OutputTreatmentMode oMode =
                 MediaCudaVideoHelper::OutputTreatmentMode::SAVE_RESULT;
 
@@ -156,9 +159,12 @@ void MediaVpxDecoderGeneric::createAndInitSoftVideoHelper() {
                 mType == MediaCodecType::VP8Codec ? 8 : 9,
                 mParser.version() < 200 ? 1 : 4));
     } else {
+        int numcores = 4;
+        if (mType == MediaCodecType::VP8Codec) {
+            numcores = 1;
+        }
         mSwVideoHelper.reset(new MediaVpxVideoHelper(
-                mType == MediaCodecType::VP8Codec ? 8 : 9,
-                mParser.version() < 200 ? 1 : 4));
+                mType == MediaCodecType::VP8Codec ? 8 : 9, numcores));
     }
     mSwVideoHelper->init();
 }
@@ -288,8 +294,7 @@ void MediaVpxDecoderGeneric::getImage(void* ptr) {
                                               pFrame->data.data());
         }
     } else {
-        memcpy(param.p_dst, pFrame->data.data(),
-               pFrame->width * pFrame->height * 3 / 2);
+        memcpy(param.p_dst, pFrame->data.data(), pFrame->width * pFrame->height * 3 / 2);
     }
     mSnapshotHelper.discardFrontFrame();
     VPX_DPRINT("completed getImage with colorid %d",
