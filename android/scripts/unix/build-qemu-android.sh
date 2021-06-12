@@ -524,11 +524,11 @@ EOF
             run make config-host.h
 
             STANDARDIZE=$AOSP_DIR/prebuilts/android-emulator-build/qemu-android-deps
-            run sed -i 's@'"$STANDARDIZE"'@unused@' config-host.h
+            run sed -i.bak 's@'"$STANDARDIZE"'@unused@' config-host.h
 
             # Remove unused host dso, cross compile toolchains do not detect it
             # properly
-            run sed -i 's@.*HOST_DSOSUF.*@@' config-host.h
+            run sed -i.bak 's@.*HOST_DSOSUF.*@@' config-host.h
 
             # Now build everything else in parallel.
             run make -j$NUM_JOBS $BUILD_FLAGS $LINKPROG_FLAGS V=1
