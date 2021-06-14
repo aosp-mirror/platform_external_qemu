@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "731e857e_b48426f9",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1099,
+      "author": {
+        "id": 1883030
+      },
+      "writtenOn": "2021-06-14T07:16:33Z",
+      "side": 1,
+      "message": "Note: Without the upcoming Multitouch implementation, this results in finger contacts with the screen not being handled in any way, because they are sent by Qt as synthesized mouse events.",
+      "range": {
+        "startLine": 1097,
+        "startChar": 0,
+        "endLine": 1099,
+        "endChar": 44
+      },
+      "revId": "a694b7deef7d09905e220d79352ee70619cf4648",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1726530f_c994b898",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1132,
+      "author": {
+        "id": 1883030
+      },
+      "writtenOn": "2021-06-14T07:16:33Z",
+      "side": 1,
+      "message": "Note: Without the upcoming Multitouch implementation, this results in finger contacts with the screen not being handled in any way, because they are sent by Qt as synthesized mouse events.",
+      "range": {
+        "startLine": 1127,
+        "startChar": 0,
+        "endLine": 1132,
+        "endChar": 9
+      },
+      "revId": "a694b7deef7d09905e220d79352ee70619cf4648",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "82a6d537_712d5a48",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1193,
+      "author": {
+        "id": 1883030
+      },
+      "writtenOn": "2021-06-14T07:16:33Z",
+      "side": 1,
+      "message": "Note: Without the upcoming Multitouch implementation, this results in finger contacts with the screen not being handled in any way, because they are sent by Qt as synthesized mouse events.",
+      "range": {
+        "startLine": 1188,
+        "startChar": 0,
+        "endLine": 1193,
+        "endChar": 5
+      },
+      "revId": "a694b7deef7d09905e220d79352ee70619cf4648",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "086caf0d_ad8287c0",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1202,
+      "author": {
+        "id": 1883030
+      },
+      "writtenOn": "2021-06-14T07:16:33Z",
+      "side": 1,
+      "message": "Note: Without the upcoming Multitouch implementation, this results in finger contacts with the screen not being handled in any way, because they are sent by Qt as synthesized mouse events.",
+      "range": {
+        "startLine": 1197,
+        "startChar": 0,
+        "endLine": 1202,
+        "endChar": 5
+      },
+      "revId": "a694b7deef7d09905e220d79352ee70619cf4648",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
