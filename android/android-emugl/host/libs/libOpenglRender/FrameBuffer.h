@@ -874,5 +874,10 @@ private:
 
     android::base::MessageChannel<HandleType, 1024>
         mOutstandingColorBufferDestroys;
+
+    // UUIDs of physical devices for Vulkan and GLES, respectively.  In most
+    // cases, this determines whether we can support zero-copy interop.
+    uint8_t m_vulkanUUID[16];
+    uint8_t m_glesUUID[16];
 };
 #endif
