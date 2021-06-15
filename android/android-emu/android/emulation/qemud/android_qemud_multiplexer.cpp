@@ -148,7 +148,7 @@ void qemud_multiplexer_control_recv(void* opaque,
         int channel, ret;
         char* q = strchr(service_name, ':');
         if (q == NULL || q + 3 != (char*) msgend) {
-            D("%s: malformed connect message: '%.*s' (offset=%d)",
+            D("%s: malformed connect message: '%.*s' (offset=%ld)",
               __FUNCTION__, msglen, (const char*) msg, q ? q - (char*) msg : -1);
             return;
         }

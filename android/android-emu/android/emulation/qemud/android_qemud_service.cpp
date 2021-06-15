@@ -114,7 +114,7 @@ char* qemud_service_load_name(Stream* f) {
         service_name[name_len - 1] = '\0';  /* make buffer contents printable */
         D("%s: service name load failed: expecting NULL-terminated string, but "
                   "last char is '%c' (buffer contents: '%s%c')\n",
-          __FUNCTION__, name_len, last, service_name, last);
+          __FUNCTION__, last, service_name, last);
         AFREE(service_name);
         return NULL;
     }
