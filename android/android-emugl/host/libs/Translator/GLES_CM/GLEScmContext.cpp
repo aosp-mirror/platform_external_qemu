@@ -989,7 +989,7 @@ void GLEScmContext::orthof(GLfloat left, GLfloat right, GLfloat bottom, GLfloat 
     if (m_coreProfileEngine) {
         core().orthof(left, right, bottom, top, zNear, zFar);
     } else {
-        dispatcher().glOrtho(left,right,bottom,top,zNear,zFar);
+        dispatcher().glOrthof(left,right,bottom,top,zNear,zFar);
     }
 }
 
