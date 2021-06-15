@@ -469,7 +469,7 @@ void goldfish_pipe_signal_wake(void *pipe_raw, unsigned flags_raw) {
     GoldfishPipeWakeFlags flags = flags_raw;
     PipeDevice *dev = pipe->dev;
 
-    DD("%s: id=%d channel=0x%llx flags=%d", __func__, (int)pipe->id,
+    DD("%s: id=%d channel=0x%lx flags=%d", __func__, (int)pipe->id,
        pipe->channel, flags);
 
     hwpipe_set_wanted(pipe, (unsigned char)flags);
@@ -487,7 +487,7 @@ void goldfish_pipe_signal_wake(void *pipe_raw, unsigned flags_raw) {
 void goldfish_pipe_close_from_host(void *pipe_raw) {
     GoldfishHwPipe *pipe = pipe_raw;
 
-    D("%s: id=%d channel=0x%llx (closed=%d)", __func__, (int)pipe->id,
+    D("%s: id=%d channel=0x%lx (closed=%d)", __func__, (int)pipe->id,
         pipe->channel, pipe->closed);
 
     if (!pipe->closed) {

@@ -234,7 +234,7 @@ void qemud_client_recv(void* opaque, uint8_t* msg, int msglen) {
                 continue;
             }
             if (frame_size < 0) {
-                D("%s: ignoring corrupted frame header '.*s'",
+                D("%s: ignoring corrupted frame header '%.*s'",
                   __FUNCTION__, FRAME_HEADER_SIZE, c->header0);
                 continue;
             }

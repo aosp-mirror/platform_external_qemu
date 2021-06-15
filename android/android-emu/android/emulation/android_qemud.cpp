@@ -270,7 +270,7 @@ _qemudPipe_recvBuffers(void* opaque, AndroidPipeBuffer* buffers, int numBuffers)
         client->ProtocolSelector.Pipe.last_msg = NULL;
     }
 
-    D("%s: -> %u (of %u)", __FUNCTION__, sent_bytes, buffers->size);
+    D("%s: -> %lu (of %lu)", __FUNCTION__, sent_bytes, buffers->size);
 
     return sent_bytes;
 }
