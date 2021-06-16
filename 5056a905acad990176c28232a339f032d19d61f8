@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "669495eb_ffc75776",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2021-06-16T22:32:26Z",
+      "side": 1,
+      "message": "build failure on Linux.\nIn file included from ../android/android-emu/android/crashreport/CrashReporter_linux.cpp:20:\nIn file included from ../../google-breakpad/src/client/linux/handler/exception_handler.h:42:\nIn file included from ../../google-breakpad/src/client/linux/minidump_writer/minidump_writer.h:41:\n../../google-breakpad/src/client/linux/minidump_writer/linux_dumper.h:67:9: error: unknown type name \u0027Elf64_auxv_t\u0027\ntypedef Elf64_auxv_t elf_aux_entry;\n        ^\n../../google-breakpad/src/client/linux/minidump_writer/linux_dumper.h:70:40: error: member reference base type \u0027google_breakpad::elf_aux_entry\u0027 (aka \u0027int\u0027) is not a structure or union\ntypedef __typeof__(((elf_aux_entry*) 0)-\u003ea_un.a_val) elf_aux_val_t;\n                   ~~~~~~~~~~~~~~~~~~~~^ ~~~~\n2 errors generated.\n\n",
+      "revId": "5056a905acad990176c28232a339f032d19d61f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
