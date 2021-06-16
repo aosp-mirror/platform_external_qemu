@@ -16,6 +16,24 @@
       "message": "Is this simply for the sake of saving space? Since on line 147, it is still converted uint32_t.",
       "revId": "b97b793440a0c023e7746cfb8ba3a0c710e73ff3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "94846254_90d0658d",
+        "filename": "android/image_converter/ImageConverter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1152904
+      },
+      "writtenOn": "2021-06-16T22:17:24Z",
+      "side": 1,
+      "message": "Yes, to save space.",
+      "parentUuid": "12ac3737_afa1ef0f",
+      "revId": "b97b793440a0c023e7746cfb8ba3a0c710e73ff3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
