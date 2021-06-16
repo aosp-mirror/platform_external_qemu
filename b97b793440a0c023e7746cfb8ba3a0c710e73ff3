@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "12ac3737_afa1ef0f",
+        "filename": "android/image_converter/ImageConverter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-06-16T22:11:20Z",
+      "side": 1,
+      "message": "Is this simply for the sake of saving space? Since on line 147, it is still converted uint32_t.",
+      "revId": "b97b793440a0c023e7746cfb8ba3a0c710e73ff3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
