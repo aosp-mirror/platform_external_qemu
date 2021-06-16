@@ -50,12 +50,14 @@ public:
                     SendNmeaReply* reply) override;
 
     void sendToSerial(const char* data = nullptr, int len = 0);
+    void sendGnssRawToSerial();
 
     void StartServer();
 
     void StartReadFileThread();
 
     void ReadNmeaFromLocalFile();
+    void ReadGnssRawMeasurement();
 
     void oneShotSendNmea(const char* data, int len);
 
@@ -75,6 +77,10 @@ private:
     std::string cached_nmea;
     std::string legacy_nmea;  // from console and GUI
     std::mutex cached_nmea_mutex;
+
+    std::string cached_gnss_raw;
+    std::mutex cached_gnss_raw_mutex;
+
 };
 
 }  // namespace cuttlefish

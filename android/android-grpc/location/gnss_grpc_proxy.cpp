@@ -80,6 +80,30 @@ void GnssGrpcProxyServiceImpl::sendToSerial(const char* data, int len) {
     }
 }
 
+void GnssGrpcProxyServiceImpl::sendGnssRawToSerial() {
+      LOG(DEBUG) << "Send Gnss Raw to serial: size " << cached_gnss_raw.size()
+                 << " at " << std::time(0) * 1000LL;
+      LOG(DEBUG) << cached_gnss_raw;
+      std::lock_guard<std::mutex> lock(cached_gnss_raw_mutex);
+      // HACK: limit data size
+      // std::string str = "";
+      // std::istringstream iss(cached_gnss_raw);
+      // for (int i = 0; i < 3; i++) {
+      //   std::string s = "";
+      //   iss >> s;
+      //   str += s + "\n";
+      // }
+      // LOG(DEBUG) << "Send Gnss Raw to serial:  " << str << " at " <<
+      // std::time(0) * 1000LL;
+      //
+      ssize_t bytes_written = cuttlefish::WriteAll(gnss_in_, cached_gnss_raw);
+      // ssize_t bytes_written = cuttlefish::WriteAll(gnss_in_, str);
+      if (bytes_written < 0) {
+        LOG(ERROR) << "Error writing to fd: " << gnss_in_->StrError();
+      }
+}
+
+
 void GnssGrpcProxyServiceImpl::StartServer() {
     // Create a new thread to handle writes to the gnss and to the any client
     // connected to the socket.
@@ -89,7 +113,8 @@ void GnssGrpcProxyServiceImpl::StartServer() {
 void GnssGrpcProxyServiceImpl::StartReadFileThread() {
     // Create a new thread to handle writes to the gnss and to the any client
     // connected to the socket.
-    file_read_thread_ = std::thread([this]() { ReadNmeaFromLocalFile(); });
+    //file_read_thread_ = std::thread([this]() { ReadNmeaFromLocalFile(); });
+    file_read_thread_ = std::thread([this]() { ReadGnssRawMeasurement(); });
 }
 
 void GnssGrpcProxyServiceImpl::ReadNmeaFromLocalFile() {
@@ -127,6 +152,78 @@ void GnssGrpcProxyServiceImpl::ReadNmeaFromLocalFile() {
     }
 }
 
+// find the Nth occurrence of the character
+static int findNthOccur(std::string str, char ch, int N) {
+      int occur = 0;
+      for (int i = 0; i < str.length(); i++) {
+        if (str[i] == ch) {
+          occur += 1;
+        }
+        if (occur == N) {
+          return i;
+        }
+      }
+      return -1;
+}
+
+
+void GnssGrpcProxyServiceImpl::ReadGnssRawMeasurement() {
+      LOG(DEBUG) << "Starting GNSS PROXY ReadGnssRawMeasurement...";
+      std::ifstream file(gnss_file_path_);
+
+      if (file.is_open()) {
+        std::string line;
+        std::string cacheLine = "";
+        std::string header = "";
+
+        while (!cacheLine.empty() || std::getline(file, line)) {
+          if (!cacheLine.empty()) {
+            line = cacheLine;
+            cacheLine = "";
+          }
+          // Get header
+          if (header.empty() && line.rfind("#", 0) == 0 &&
+              line.find("Raw") != std::string::npos) {
+            header = line;
+            LOG(DEBUG) << "Header...: " << header;
+            continue;
+          }
+
+          // Ignore not raw measurement data
+          if (line.rfind("Raw,", 0) != 0) {
+            continue;
+          }
+
+          {
+            std::lock_guard<std::mutex> lock(cached_gnss_raw_mutex);
+            cached_gnss_raw = header + "\n" + line;
+
+            std::string newLine = "";
+            while (std::getline(file, newLine)) {
+              // LOG(DEBUG) << "Header...: " << newLine;
+              // Group raw data by TimeNanos
+              if (newLine.substr(findNthOccur(newLine, ',', 2),
+                                 findNthOccur(newLine, ',', 3) -
+                                     findNthOccur(newLine, ',', 2)) ==
+                  line.substr(findNthOccur(line, ',', 2),
+                              findNthOccur(line, ',', 3) -
+                                  findNthOccur(line, ',', 2))) {
+                cached_gnss_raw += "\n" + newLine;
+              } else {
+                cacheLine = newLine;
+                break;
+              }
+            }
+          }
+          std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        }
+        file.close();
+      } else {
+        LOG(ERROR) << "Can not open GNSS Raw file: " << gnss_file_path_;
+        return;
+      }
+    }
+
 [[noreturn]] void GnssGrpcProxyServiceImpl::ReadLoop() {
     std::vector<char> buffer(GNSS_SERIAL_BUFFER_SIZE);
     int total_read = 0;
@@ -149,6 +246,12 @@ void GnssGrpcProxyServiceImpl::ReadNmeaFromLocalFile() {
                 gnss_cmd_str = "";
                 total_read = 0;
             }
+            if (gnss_cmd_str.find("CMD_GET_RAWMEASUREMENT") != std::string::npos) {
+                sendGnssRawToSerial();
+                gnss_cmd_str = "";
+                total_read = 0;
+            }
+
         } else {
             // just sleep
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
