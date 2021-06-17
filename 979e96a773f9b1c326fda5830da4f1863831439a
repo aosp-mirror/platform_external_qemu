@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2240cd3a_36ae9fa9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1883376
+      },
+      "writtenOn": "2021-06-17T14:43:45Z",
+      "side": 1,
+      "message": "Patchset 2: Fixed Linux build issue caused by include path change.\nAdded a few additional checks.",
+      "revId": "979e96a773f9b1c326fda5830da4f1863831439a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
