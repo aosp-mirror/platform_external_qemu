@@ -34,6 +34,24 @@
       "parentUuid": "669495eb_ffc75776",
       "revId": "5056a905acad990176c28232a339f032d19d61f8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dd74758a_fe42cd66",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1883030
+      },
+      "writtenOn": "2021-06-17T16:41:49Z",
+      "side": 1,
+      "message": "Hi Huan, we fixed the issue in patchset 2, it should compile now on Linux also.\nWe tried to add another include target: \".../qemu/include\", but this resulted in other issues which we could not fix by fiddling with cmake. So we copied some #defines to a header that we used in other sources.\nPlease let us know if this is ok.",
+      "parentUuid": "08cbf007_5471cba0",
+      "revId": "5056a905acad990176c28232a339f032d19d61f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
