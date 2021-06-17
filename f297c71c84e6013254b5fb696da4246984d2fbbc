@@ -37,6 +37,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "3d0b27a9_ff7a66b5",
+        "filename": "android-qemu2-glue/emulation/virtio-input-multi-touch.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1883030
+      },
+      "writtenOn": "2021-06-17T22:23:18Z",
+      "side": 1,
+      "message": "I\u0027m not sure if any changes are necessary in the virtio-input driver, the configuration structure is generic and we are just adding more configurations.\nSo far in tests, all the new event properties were correctly received by the Linux kernel.",
+      "parentUuid": "a7c37335_753d5da4",
+      "revId": "f297c71c84e6013254b5fb696da4246984d2fbbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "58f358bd_439d3e56",
         "filename": "android/android-emu/android-emu.cmake",
         "patchSetId": 2
@@ -48,6 +66,24 @@
       "writtenOn": "2021-06-17T17:50:21Z",
       "side": 1,
       "message": "lfy@ Do we want to have \"android-emu\" include from ${ANDROID_QEMU2_TOP_DIR}? I thought these were hacks that will be dealt with later.",
+      "revId": "f297c71c84e6013254b5fb696da4246984d2fbbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8bc51e9c_8477b5ef",
+        "filename": "android/android-emu/android-emu.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 1883030
+      },
+      "writtenOn": "2021-06-17T22:23:18Z",
+      "side": 1,
+      "message": "This include target change was needed in order to be able to include \"android-qemu2-glue/emulation/virtio-input-multi-touch.h\" header in source file \"android/android-emu/android/multitouch-screen.c\", to use the \"VIRTIO_INPUT_MAX_NUM\" define.",
+      "parentUuid": "58f358bd_439d3e56",
       "revId": "f297c71c84e6013254b5fb696da4246984d2fbbc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
