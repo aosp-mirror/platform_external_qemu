@@ -38,6 +38,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "b750ee72_77babe2f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-06-17T17:38:23Z",
+      "side": 1,
+      "message": "Hi Andrei. Having smaller commits would be easier for us to understand the code better. If possible, you can still upload each CL and attach the links here, so we can review faster.",
+      "parentUuid": "0afc9ee6_b8ea714f",
+      "revId": "a694b7deef7d09905e220d79352ee70619cf4648",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "731e857e_b48426f9",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
