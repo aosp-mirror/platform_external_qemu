@@ -16,6 +16,24 @@
       "message": "build failure on Linux.\nIn file included from ../android/android-emu/android/crashreport/CrashReporter_linux.cpp:20:\nIn file included from ../../google-breakpad/src/client/linux/handler/exception_handler.h:42:\nIn file included from ../../google-breakpad/src/client/linux/minidump_writer/minidump_writer.h:41:\n../../google-breakpad/src/client/linux/minidump_writer/linux_dumper.h:67:9: error: unknown type name \u0027Elf64_auxv_t\u0027\ntypedef Elf64_auxv_t elf_aux_entry;\n        ^\n../../google-breakpad/src/client/linux/minidump_writer/linux_dumper.h:70:40: error: member reference base type \u0027google_breakpad::elf_aux_entry\u0027 (aka \u0027int\u0027) is not a structure or union\ntypedef __typeof__(((elf_aux_entry*) 0)-\u003ea_un.a_val) elf_aux_val_t;\n                   ~~~~~~~~~~~~~~~~~~~~^ ~~~~\n2 errors generated.\n\n",
       "revId": "5056a905acad990176c28232a339f032d19d61f8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "08cbf007_5471cba0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2021-06-17T14:08:25Z",
+      "side": 1,
+      "message": "Hi Huan! We\u0027re looking into this and expect to upload a fix in the next few hours. We tried to use some header files for constant definitions but that seems to have caused the Linux build system to include the wrong elf.h. We will #define those constants where needed and remove the change made to the include path.",
+      "parentUuid": "669495eb_ffc75776",
+      "revId": "5056a905acad990176c28232a339f032d19d61f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
