@@ -52,6 +52,24 @@
       "parentUuid": "08cbf007_5471cba0",
       "revId": "5056a905acad990176c28232a339f032d19d61f8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6c1170e8_78eb29bc",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1883030
+      },
+      "writtenOn": "2021-06-17T17:48:46Z",
+      "side": 1,
+      "message": "Hi Huan, the fix was actually uploaded in patchset 2, but in the other CL: https://android-review.googlesource.com/c/platform/external/qemu/+/1734794,\nbecause that is where the issue had it\u0027s root cause.\nAlso keep in mind that this CL is dependent of the other one, they must be used together.",
+      "parentUuid": "dd74758a_fe42cd66",
+      "revId": "5056a905acad990176c28232a339f032d19d61f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
