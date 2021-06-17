@@ -56,6 +56,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "e174bb84_7fc50846",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1883030
+      },
+      "writtenOn": "2021-06-17T17:45:35Z",
+      "side": 1,
+      "message": "Hello Weilun, that\u0027s what we intended to do initially, upload some smaller and more atomic commits, but Gerrit warned us about uploading too many.\nIs there any way to upload a number of different commits under the same Change List (CL) ? So that they are organized better.",
+      "parentUuid": "b750ee72_77babe2f",
+      "revId": "a694b7deef7d09905e220d79352ee70619cf4648",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "731e857e_b48426f9",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
