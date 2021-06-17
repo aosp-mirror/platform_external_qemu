@@ -16,6 +16,23 @@
       "message": "I assume the virtio-input driver in Linux kernel will need to handle the changes in configuration. If there is any breaking change, we might want to introduce versioning if ncessary. virtio-input.c has \"#define VIRTIO_INPUT_VM_VERSION 1\"",
       "revId": "f297c71c84e6013254b5fb696da4246984d2fbbc",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "58f358bd_439d3e56",
+        "filename": "android/android-emu/android-emu.cmake",
+        "patchSetId": 2
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-06-17T17:50:21Z",
+      "side": 1,
+      "message": "lfy@ Do we want to have \"android-emu\" include from ${ANDROID_QEMU2_TOP_DIR}? I thought these were hacks that will be dealt with later.",
+      "revId": "f297c71c84e6013254b5fb696da4246984d2fbbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
