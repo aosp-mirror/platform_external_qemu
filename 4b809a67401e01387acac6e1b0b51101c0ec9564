@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f4b1668e_2b228488",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 617,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2021-06-17T16:31:25Z",
+      "side": 1,
+      "message": "FYI, without this part, we might get a crash",
+      "range": {
+        "startLine": 617,
+        "startChar": 14,
+        "endLine": 617,
+        "endChar": 52
+      },
+      "revId": "4b809a67401e01387acac6e1b0b51101c0ec9564",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
