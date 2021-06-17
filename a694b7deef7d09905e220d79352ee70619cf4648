@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2db1fd34_f1369571",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-06-17T00:06:43Z",
+      "side": 1,
+      "message": "I wonder if it is possible to check in CL individually instead of squashing smaller commits.",
+      "revId": "a694b7deef7d09905e220d79352ee70619cf4648",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "731e857e_b48426f9",
