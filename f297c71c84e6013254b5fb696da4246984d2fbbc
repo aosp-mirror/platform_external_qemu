@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a7c37335_753d5da4",
+        "filename": "android-qemu2-glue/emulation/virtio-input-multi-touch.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-06-17T17:47:08Z",
+      "side": 1,
+      "message": "I assume the virtio-input driver in Linux kernel will need to handle the changes in configuration. If there is any breaking change, we might want to introduce versioning if ncessary. virtio-input.c has \"#define VIRTIO_INPUT_VM_VERSION 1\"",
+      "revId": "f297c71c84e6013254b5fb696da4246984d2fbbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
