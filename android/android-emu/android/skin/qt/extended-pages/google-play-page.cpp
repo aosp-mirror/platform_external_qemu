@@ -11,6 +11,8 @@
 
 #include "android/skin/qt/extended-pages/google-play-page.h"
 
+#include "android/skin/qt/emulator-qt-window.h"        // for EmulatorQtWindow
+
 #include <qapplication.h>                  // for QApplication (ptr only), qApp
 #include <QApplication>                    // for QApplication
 #include <QObject>                         // for QObject
@@ -90,19 +92,21 @@ void GooglePlayPage::queryPlayVersions() {
 void GooglePlayPage::bootCompletionPropertyDone(
         GooglePlayServices::Result result,
         StringView outString) {
-    if (result == GooglePlayServices::Result::Success && !outString.empty() &&
-        outString[0] == '1') {
-        // TODO: remove this once we have android properties to wait on.
-        mTimer.disconnect();
-        QObject::connect(&mTimer, &QTimer::timeout, this,
-                         &GooglePlayPage::queryPlayVersions);
-        mTimer.setSingleShot(false);
-        mTimer.setInterval(10000); // 10 sec
-        mTimer.start();
-    } else {
-        // Continue to wait until it is finished booting.
-        mTimer.start();
-    }
+    EmulatorQtWindow::getInstance()->runOnUiThread([this, result, outString] {
+        if (result == GooglePlayServices::Result::Success && !outString.empty() &&
+            outString[0] == '1') {
+            // TODO: remove this once we have android properties to wait on.
+            mTimer.disconnect();
+            QObject::connect(&mTimer, &QTimer::timeout, this,
+                             &GooglePlayPage::queryPlayVersions);
+            mTimer.setSingleShot(false);
+            mTimer.setInterval(10000); // 10 sec
+            mTimer.start();
+        } else {
+            // Continue to wait until it is finished booting.
+            mTimer.start();
+        }
+    });
 }
 
 QString GooglePlayPage::getPlayPageDescription(PlayPages page) {
@@ -140,16 +144,18 @@ void GooglePlayPage::showPlayServicesPage() {
 
 void GooglePlayPage::playPageDone(GooglePlayServices::Result result,
                                   PlayPages page) {
-    QString msg;
-    switch (result) {
-        case GooglePlayServices::Result::Success:
-        case GooglePlayServices::Result::OperationInProgress:
-            return;
-        default:
-            msg = tr("There was an unknown error while opening %1.")
-                          .arg(getPlayPageDescription(page));
-    }
-    showErrorDialog(msg, getPlayPageDescription(page));
+    EmulatorQtWindow::getInstance()->runOnUiThread([this, result, page] {
+        QString msg;
+        switch (result) {
+            case GooglePlayServices::Result::Success:
+            case GooglePlayServices::Result::OperationInProgress:
+                return;
+            default:
+                msg = tr("There was an unknown error while opening %1.")
+                              .arg(getPlayPageDescription(page));
+        }
+        showErrorDialog(msg, getPlayPageDescription(page));
+    });
 }
 
 void GooglePlayPage::getPlayServicesVersion() {
@@ -163,32 +169,34 @@ void GooglePlayPage::getPlayServicesVersion() {
 void GooglePlayPage::playVersionDone(GooglePlayServices::Result result,
                                      PlayApps app,
                                      StringView outString) {
-    QString msg;
-    QPlainTextEdit* textEdit = nullptr;
+    EmulatorQtWindow::getInstance()->runOnUiThread([this, result, app, outString] {
+        QString msg;
+        QPlainTextEdit* textEdit = nullptr;
 
-    switch (app) {
-        case PlayApps::PlayServices:
-            textEdit = mUi->goog_playServicesVersionBox;
-            break;
-        default:
-            return;
-    }
+        switch (app) {
+            case PlayApps::PlayServices:
+                textEdit = mUi->goog_playServicesVersionBox;
+                break;
+            default:
+                return;
+        }
 
-    switch (result) {
-        case GooglePlayServices::Result::Success:
-            textEdit->setPlainText(QString::fromUtf8(outString.data(),
-                                                     outString.size()));
-            return;
+        switch (result) {
+            case GooglePlayServices::Result::Success:
+                textEdit->setPlainText(QString::fromUtf8(outString.data(),
+                                                         outString.size()));
+                return;
 
-        case GooglePlayServices::Result::AppNotInstalled:
-            textEdit->setPlainText(tr("Not Installed"));
-            break;
-        case GooglePlayServices::Result::OperationInProgress:
-            textEdit->setPlainText(tr("Loading..."));
-            break;
-        default:
-            textEdit->setPlainText(tr("Unknown Error"));
-    }
+            case GooglePlayServices::Result::AppNotInstalled:
+                textEdit->setPlainText(tr("Not Installed"));
+                break;
+            case GooglePlayServices::Result::OperationInProgress:
+                textEdit->setPlainText(tr("Loading..."));
+                break;
+            default:
+                textEdit->setPlainText(tr("Unknown Error"));
+        }
+    });
 }
 
 void GooglePlayPage::on_goog_updateServicesButton_clicked() {
