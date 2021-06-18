@@ -38,6 +38,9 @@
 #include "OpenglRender/Renderer.h"
 
 #include <EGL/egl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <vulkan/vulkan.h>
 
 #include <functional>
 #include <map>
@@ -877,7 +880,8 @@ private:
 
     // UUIDs of physical devices for Vulkan and GLES, respectively.  In most
     // cases, this determines whether we can support zero-copy interop.
-    uint8_t m_vulkanUUID[16];
-    uint8_t m_glesUUID[16];
+    uint8_t m_vulkanUUID[VK_UUID_SIZE];
+    uint8_t m_glesUUID[GL_UUID_SIZE_EXT];
+    static_assert(VK_UUID_SIZE == GL_UUID_SIZE_EXT);
 };
 #endif
