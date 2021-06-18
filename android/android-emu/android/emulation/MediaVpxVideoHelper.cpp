@@ -127,14 +127,43 @@ void MediaVpxVideoHelper::copyYV12FrameToOutputBuffer(size_t outputBufferWidth,
     }
 }
 
+static void convertYUV420Planar16ToYUV420Planar(
+        uint8_t *dstY, uint8_t *dstU, uint8_t *dstV,
+        const uint16_t *srcY, const uint16_t *srcU, const uint16_t *srcV,
+        size_t srcYStride, size_t srcUStride, size_t srcVStride,
+        size_t dstYStride, size_t dstUVStride,
+        size_t width, size_t height) {
+
+    for (size_t y = 0; y < height; ++y) {
+        for (size_t x = 0; x < width; ++x) {
+            dstY[x] = (uint8_t)(srcY[x] >> 2);
+        }
+
+        srcY += srcYStride;
+        dstY += dstYStride;
+    }
+
+    for (size_t y = 0; y < (height + 1) / 2; ++y) {
+        for (size_t x = 0; x < (width + 1) / 2; ++x) {
+            dstU[x] = (uint8_t)(srcU[x] >> 2);
+            dstV[x] = (uint8_t)(srcV[x] >> 2);
+        }
+
+        srcU += srcUStride;
+        srcV += srcVStride;
+        dstU += dstUVStride;
+        dstV += dstUVStride;
+    }
+    return;
+}
+
 void MediaVpxVideoHelper::copyImgToGuest(vpx_image_t* mImg,
                                          std::vector<uint8_t>& byteBuffer) {
     size_t outputBufferWidth = mImg->d_w;
     size_t outputBufferHeight = mImg->d_h;
     size_t mWidth = mImg->d_w;
     size_t mHeight = mImg->d_h;
-    // assert(mImg->fmt == VPX_IMG_FMT_I420 || mImg->fmt == VPX_IMG_FMT_I42016)
-    assert(mImg->fmt == VPX_IMG_FMT_I420);
+    assert(mImg->fmt == VPX_IMG_FMT_I420 || mImg->fmt == VPX_IMG_FMT_I42016);
     int32_t bpp = (mImg->fmt == VPX_IMG_FMT_I420) ? 1 : 2;
 
     byteBuffer.resize(mWidth * mHeight * bpp * 3 / 2);
@@ -150,9 +179,24 @@ void MediaVpxVideoHelper::copyImgToGuest(vpx_image_t* mImg,
     size_t srcUStride = mImg->stride[VPX_PLANE_U];
     size_t srcVStride = mImg->stride[VPX_PLANE_V];
 
-    copyYV12FrameToOutputBuffer(outputBufferWidth, outputBufferHeight,
+    if (bpp == 2) {
+        size_t dstYStride = outputBufferWidth;
+        size_t dstUVStride = dstYStride / 2;
+        uint8_t *dstY = dst;
+        uint8_t *dstU = dst + dstYStride * outputBufferHeight;
+        uint8_t *dstV = dst + (5 * dstYStride * outputBufferHeight) / 4;
+        convertYUV420Planar16ToYUV420Planar(dstY, dstU, dstV,
+                (const uint16_t*)(srcY), (const uint16_t*)(srcU), (const uint16_t*)(srcV),
+                srcYStride>>1, srcUStride>>1, srcVStride>>1,
+                dstYStride, dstUVStride,
+                outputBufferWidth, outputBufferHeight
+                );
+
+    } else {
+        copyYV12FrameToOutputBuffer(outputBufferWidth, outputBufferHeight,
                                 mImg->d_w, mImg->d_h, bpp, dst, srcY, srcU,
                                 srcV, srcYStride, srcUStride, srcVStride);
+    }
 }
 
 void MediaVpxVideoHelper::fetchAllFrames() {
