@@ -21,3 +21,5 @@ void eglWaitImageFenceANDROID(EGLDisplay display, void* fence);
 void eglAddLibrarySearchPathANDROID(const char* path);
 EGLBoolean eglQueryVulkanInteropSupportANDROID(void);
 EGLBoolean eglGetSyncAttribKHR(EGLDisplay display, EGLSync sync, EGLint attribute, EGLint *value);
+EGLBoolean eglSetSurfaceImageANDROID(EGLDisplay display, EGLSurface surface, EGLImageKHR image);
+EGLBoolean eglFlushSurfaceImageANDROID(EGLDisplay display, EGLSurface surface);

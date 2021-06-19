@@ -21,5 +21,7 @@ EGLAPI void EGLAPIENTRY eglWaitImageFenceANDROID(EGLDisplay display, void* fence
 EGLAPI void EGLAPIENTRY eglAddLibrarySearchPathANDROID(const char* path);
 EGLAPI EGLBoolean EGLAPIENTRY eglQueryVulkanInteropSupportANDROID();
 EGLAPI EGLBoolean EGLAPIENTRY eglGetSyncAttribKHR(EGLDisplay display, EGLSync sync, EGLint attribute, EGLint * value);
+EGLAPI EGLBoolean EGLAPIENTRY eglSetSurfaceImageANDROID(EGLDisplay display, EGLSurface surface, EGLImageKHR image);
+EGLAPI EGLBoolean EGLAPIENTRY eglFlushSurfaceImageANDROID(EGLDisplay display, EGLSurface surface);
 } // namespace translator
 } // namespace egl

@@ -797,7 +797,9 @@ static uint32_t rcCreateWindowSurface(uint32_t config,
         return 0;
     }
 
-    return fb->createWindowSurface(config, width, height);
+    uint32_t res = fb->createWindowSurface(config, width, height);
+    fprintf(stderr, "%s: new window surface. handle %u\n", __func__, res);
+    return res;
 }
 
 static void rcDestroyWindowSurface(uint32_t windowSurface)
@@ -807,6 +809,7 @@ static void rcDestroyWindowSurface(uint32_t windowSurface)
         return;
     }
 
+    fprintf(stderr, "%s: destroy window surface. handle %u\n", __func__, windowSurface);
     fb->DestroyWindowSurface( windowSurface );
 }
 
@@ -923,12 +926,14 @@ static void rcSetWindowColorBuffer(uint32_t windowSurface,
     if (!fb) {
         return;
     }
+    fprintf(stderr, "%s: set ws %u to cb %u\n", __func__, windowSurface, colorBuffer);
     fb->setWindowSurfaceColorBuffer(windowSurface, colorBuffer);
 }
 
 static EGLint rcMakeCurrent(uint32_t context,
                             uint32_t drawSurf, uint32_t readSurf)
 {
+    fprintf(stderr, "%s: ctx %u draw %u read %u\n", __func__, context, drawSurf, readSurf);
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return EGL_FALSE;
@@ -1183,6 +1188,7 @@ static EGLint rcClientWaitSyncKHR(uint64_t handle,
         fb->getTrivialContextForCurrentRenderThread(0, // There is no context to share.
                                  &gralloc_sync_cxt,
                                  &gralloc_sync_surf);
+        fprintf(stderr, "%s: gralloc sync cxt surf: %u %u\n", __func__, gralloc_sync_cxt, gralloc_sync_surf);
         fb->bindContext(gralloc_sync_cxt,
                         gralloc_sync_surf,
                         gralloc_sync_surf);
@@ -1474,6 +1480,7 @@ static void rcSetTracingForPuid(uint64_t puid, uint32_t enable, uint64_t time) {
 }
 
 static void rcMakeCurrentAsync(uint32_t context, uint32_t drawSurf, uint32_t readSurf) {
+    fprintf(stderr, "%s: ctx %u draw %u read %u\n", __func__, context, drawSurf, readSurf);
     AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) { return; }

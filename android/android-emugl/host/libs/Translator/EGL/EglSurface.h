@@ -59,6 +59,12 @@ public:
     GLuint glRboColor = 0;
     GLuint glRboDepth = 0;
 
+    // For attached image (no-blit)
+    EGLImageKHR imgHandle = 0;
+
+    // For when we reset the attached image and need to reset emulated fbo 0
+    EGLContext attachedContext = 0;
+
 private:
     static unsigned int s_nextSurfaceHndl;
 

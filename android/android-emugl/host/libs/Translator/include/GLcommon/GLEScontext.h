@@ -301,9 +301,13 @@ public:
     // to pick up on the right functions.
     virtual void initDefaultFBO(
             GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+            GLuint colorBufferTextureId,
             GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
             GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
+            GLuint readColorBufferTextureId,
             GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId);
+    void setupAttachedColorBufferTextureDraw(GLuint texId);
+    void setupAttachedColorBufferTextureRead(GLuint texId);
     void initEmulatedEGLSurface(GLint width, GLint height,
                              GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
                              GLuint rboColor, GLuint rboDepth);

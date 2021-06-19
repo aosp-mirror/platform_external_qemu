@@ -152,6 +152,8 @@ def gen_functions_header(entries, prefix_name, verbatim, filename, with_args):
         "eglAddLibrarySearchPathANDROID",
         "eglQueryVulkanInteropSupportANDROID",
         "eglQueryVulkanInteropSupportANDROID",
+        "eglSetSurfaceImageANDROID",
+        "eglFlushSurfaceImageANDROID",
         # For snapshotting
         "eglLoadConfig",
         "eglLoadContext",

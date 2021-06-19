@@ -624,33 +624,42 @@ void TextureDraw::drawLayer(ComposeLayer* l, int frameWidth, int frameHeight,
                         (-edges[3] - edges[1])/2);
     s_gles2.glUniform2f(mScaleSlot, (edges[2] - edges[0])/2,
                         (edges[1] - edges[3])/2);
-    s_gles2.glUniform2f(mCoordTranslation, crop[0], crop[3]);
-    s_gles2.glUniform2f(mCoordScale, crop[2] - crop[0], crop[1] - crop[3]);
+    s_gles2.glUniform2f(mCoordTranslation, crop[0], crop[1]);
+    fprintf(stderr, "%s: coord tr scale: %f %f %f %f\n", __func__, crop[0], crop[3], crop[2] - crop[0], crop[3] - crop[1]);
+    s_gles2.glUniform2f(mCoordScale, crop[2] - crop[0], crop[3] - crop[1]);
 
     intptr_t indexShift;
     switch(l->transform) {
     case HWC_TRANSFORM_ROT_90:
+        fprintf(stderr, "%s: rot 90\n", __func__);
         indexShift = 1 * kIndicesPerDraw;
         break;
     case HWC_TRANSFORM_ROT_180:
+        fprintf(stderr, "%s: rot 180\n", __func__);
         indexShift = 2 * kIndicesPerDraw;
         break;
     case HWC_TRANSFORM_ROT_270:
+        fprintf(stderr, "%s: rot 270\n", __func__);
         indexShift = 3 * kIndicesPerDraw;
         break;
     case HWC_TRANSFORM_FLIP_H:
+        fprintf(stderr, "%s: flip h\n", __func__);
         indexShift = 4 * kIndicesPerDraw;
         break;
     case HWC_TRANSFORM_FLIP_V:
+        fprintf(stderr, "%s: flip v\n", __func__);
         indexShift = 5 * kIndicesPerDraw;
         break;
     case HWC_TRANSFORM_FLIP_H_ROT_90:
+        fprintf(stderr, "%s: flip h rot 90\n", __func__);
         indexShift = 6 * kIndicesPerDraw;
         break;
     case HWC_TRANSFORM_FLIP_V_ROT_90:
+        fprintf(stderr, "%s: flip v rot 90\n", __func__);
         indexShift = 7 * kIndicesPerDraw;
         break;
     default:
+        fprintf(stderr, "%s: no rotation\n", __func__);
         indexShift = 0;
     }
     s_gles2.glDrawElements(GL_TRIANGLES, kIndicesPerDraw, GL_UNSIGNED_BYTE,
