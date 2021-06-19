@@ -74,6 +74,10 @@ void WindowSurface::setColorBuffer(ColorBufferPtr p_colorBuffer) {
     if (cbWidth != mWidth || cbHeight != mHeight) {
         resize(cbWidth, cbHeight);
     }
+
+    if (mAttachedColorBuffer->isNoBlitSupported()) {
+        s_egl.eglSetSurfaceImageANDROID(mDisplay, mSurface, mAttachedColorBuffer->getEGLImage());
+    }
 }
 
 void WindowSurface::bind(RenderContextPtr p_ctx, BindType p_bindType) {
@@ -127,7 +131,11 @@ bool WindowSurface::flushColorBuffer() {
         }
     }
 
-    mAttachedColorBuffer->blitFromCurrentReadBuffer();
+    if (mAttachedColorBuffer->isNoBlitSupported()) {
+        s_egl.eglFlushSurfaceImageANDROID(mDisplay, mSurface);
+    } else {
+        mAttachedColorBuffer->blitFromCurrentReadBuffer();
+    }
 
     if (needToSet) {
         // restore current context/surface

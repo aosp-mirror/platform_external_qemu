@@ -121,6 +121,8 @@ EGLAPI void EGLAPIENTRY eglWaitImageFenceANDROID(EGLDisplay display, void* fence
 EGLAPI void EGLAPIENTRY eglAddLibrarySearchPathANDROID(const char* path);
 EGLAPI EGLBoolean EGLAPIENTRY eglQueryVulkanInteropSupportANDROID(void);
 EGLAPI EGLBoolean EGLAPIENTRY eglGetSyncAttribKHR(EGLDisplay display, EGLSyncKHR sync, EGLint attribute, EGLint *value);
+EGLAPI EGLBoolean EGLAPIENTRY eglSetSurfaceImageANDROID(EGLDisplay display, EGLSurface surface, EGLImageKHR image);
+EGLAPI EGLBoolean EGLAPIENTRY eglFlushSurfaceImageANDROID(EGLDisplay display, EGLSurface surface);
 
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveConfig(EGLDisplay display, EGLConfig config, EGLStream stream);
 EGLAPI EGLConfig EGLAPIENTRY eglLoadConfig(EGLDisplay display, EGLStream stream);
@@ -174,6 +176,10 @@ static const ExtensionDescriptor s_eglExtensions[] = {
                 (__eglMustCastToProperFunctionPointerType)eglQueryVulkanInteropSupportANDROID },
         {"eglGetSyncAttribKHR",
                 (__eglMustCastToProperFunctionPointerType)eglGetSyncAttribKHR },
+        {"eglSetSurfaceImageANDROID",
+                (__eglMustCastToProperFunctionPointerType)eglSetSurfaceImageANDROID },
+        {"eglFlushSurfaceImageANDROID",
+                (__eglMustCastToProperFunctionPointerType)eglFlushSurfaceImageANDROID },
 };
 
 static const int s_eglExtensionsSize =
@@ -1033,7 +1039,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroyContext(EGLDisplay display, EGLContext c
 static void sGetPbufferSurfaceGLProperties(
         EglPbufferSurface* surface,
         EGLint* width, EGLint* height, GLint* multisamples,
-        GLint* colorFormat, GLint* depthStencilFormat) {
+        GLint* colorFormat, GLint* depthStencilFormat,
+        GLuint* colorBufferTextureId) {
 
     assert(width);
     assert(height);
@@ -1071,6 +1078,15 @@ static void sGetPbufferSurfaceGLProperties(
 
     // TODO: Support more if necessary, or even restrict
     // EGL configs from host display to only these ones.
+    if (colorBufferTextureId) {
+        *colorBufferTextureId = 0;
+        ImagePtr img = getEGLImage(SafeUIntFromPointer(surface->imgHandle));
+        if (img) {
+            // fprintf(stderr, "%s: EGL Image %p with this surface %p, global tex obj %u\n", __func__,
+            //         surface->imgHandle, surface, img->globalTexObj->getGlobalName());
+            *colorBufferTextureId = img->globalTexObj->getGlobalName();
+        }
+    }
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
@@ -1115,6 +1131,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
             else {
                 // Make sure previous context is detached from surfaces
                 releaseContext = true;
+                newDrawPtr->attachedContext = 0;
+                newReadPtr->attachedContext = 0;
             }
         }
 
@@ -1169,28 +1187,37 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
             EGLint width, height, readWidth, readHeight;
             GLint colorFormat, depthStencilFormat, multisamples;
             GLint readColorFormat, readDepthStencilFormat, readMultisamples;
+            GLuint colorBufferTextureId;
+            GLuint readColorBufferTextureId;
 
             sGetPbufferSurfaceGLProperties(
                     tmpPbSurfacePtr,
                     &width, &height,
                     &multisamples,
-                    &colorFormat, &depthStencilFormat);
+                    &colorFormat, &depthStencilFormat,
+                    &colorBufferTextureId);
 
             sGetPbufferSurfaceGLProperties(
                     tmpReadPbSurfacePtr,
                     &readWidth, &readHeight,
                     &readMultisamples,
-                    &readColorFormat, &readDepthStencilFormat);
+                    &readColorFormat, &readDepthStencilFormat,
+                    &readColorBufferTextureId);
 
             newCtx->getGlesContext()->initDefaultFBO(
                     width, height,
                     colorFormat, depthStencilFormat, multisamples,
+                    colorBufferTextureId,
                     &tmpPbSurfacePtr->glRboColor,
                     &tmpPbSurfacePtr->glRboDepth,
                     readWidth, readHeight,
                     readColorFormat, readDepthStencilFormat, readMultisamples,
+                    readColorBufferTextureId,
                     &tmpReadPbSurfacePtr->glRboColor,
                     &tmpReadPbSurfacePtr->glRboDepth);
+
+            newDrawPtr->attachedContext = context;
+            newReadPtr->attachedContext = context;
         }
 
         // Initialize the GLES extension function table used in
@@ -1581,6 +1608,61 @@ EGLAPI EGLBoolean EGLAPIENTRY eglQueryVulkanInteropSupportANDROID(void) {
     MEM_TRACE("EMUGL");
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     return iface->vulkanInteropSupported() ? EGL_TRUE : EGL_FALSE;
+}
+
+EGLAPI EGLBoolean EGLAPIENTRY eglSetSurfaceImageANDROID(EGLDisplay display, EGLSurface surface, EGLImageKHR image) {
+    MEM_TRACE("EMUGL");
+    VALIDATE_DISPLAY(display);
+    VALIDATE_SURFACE_RETURN(surface, EGL_FALSE, underlyingSurface);
+
+    underlyingSurface->imgHandle = image;
+
+    EGLContext context = underlyingSurface->attachedContext;
+    if (context && context == eglGetCurrentContext()) {
+        // fprintf(stderr, "%s: set surface image has current context, refresh it live!\n", __func__);
+        VALIDATE_CONTEXT_RETURN(context, EGL_FALSE);
+        ContextPtr currCtx = ctx;
+        SurfacePtr currRead = currCtx->read();
+        SurfacePtr currDraw = currCtx->draw();
+
+        GLuint texId = 0;
+
+        ImagePtr img = getEGLImage(SafeUIntFromPointer(image));
+        if (img) {
+            // fprintf(stderr, "%s: EGL Image %p with this surface %p, global tex obj %u\n", __func__,
+            //         underlyingSurface->imgHandle, underlyingSurface.get(), img->globalTexObj->getGlobalName());
+            texId = img->globalTexObj->getGlobalName();
+        }
+
+        if (currRead.get() == currDraw.get()) {
+            if (underlyingSurface.get() == currDraw.get()) {
+                currCtx->getGlesContext()->setupAttachedColorBufferTextureDraw(texId);
+            }
+        } else {
+            if (underlyingSurface.get() == currDraw.get()) {
+                currCtx->getGlesContext()->setupAttachedColorBufferTextureDraw(texId);
+            }
+            if (underlyingSurface.get() == currRead.get()) {
+                currCtx->getGlesContext()->setupAttachedColorBufferTextureRead(texId);
+            }
+        }
+    }
+
+    return EGL_TRUE;
+}
+
+EGLAPI EGLBoolean EGLAPIENTRY eglFlushSurfaceImageANDROID(EGLDisplay display, EGLSurface surface) {
+    MEM_TRACE("EMUGL");
+    VALIDATE_DISPLAY(display);
+    VALIDATE_SURFACE_RETURN(surface, EGL_FALSE, underlyingSurface);
+
+    EGLContext context = underlyingSurface->attachedContext;
+    if (context && context == eglGetCurrentContext()) {
+        VALIDATE_CONTEXT_RETURN(context, EGL_FALSE);
+        // fprintf(stderr, "%s: flushing current surface %p context %p\n", __func__, underlyingSurface.get(), ctx.get());
+        g_eglInfo->getIface(ctx->version())->flush();
+    }
+    return EGL_TRUE;
 }
 
 /*********************************************************************************/

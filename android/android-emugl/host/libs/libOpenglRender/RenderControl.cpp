@@ -797,7 +797,8 @@ static uint32_t rcCreateWindowSurface(uint32_t config,
         return 0;
     }
 
-    return fb->createWindowSurface(config, width, height);
+    uint32_t res = fb->createWindowSurface(config, width, height);
+    return res;
 }
 
 static void rcDestroyWindowSurface(uint32_t windowSurface)
@@ -1474,6 +1475,7 @@ static void rcSetTracingForPuid(uint64_t puid, uint32_t enable, uint64_t time) {
 }
 
 static void rcMakeCurrentAsync(uint32_t context, uint32_t drawSurf, uint32_t readSurf) {
+    fprintf(stderr, "%s: ctx %u draw %u read %u\n", __func__, context, drawSurf, readSurf);
     AEMU_SCOPED_THRESHOLD_TRACE_CALL();
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) { return; }

@@ -83,13 +83,17 @@ void GLEScmContext::initGlobal(EGLiface* eglIface) {
 
 void GLEScmContext::initDefaultFBO(
         GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+        GLuint colorBufferTextureId,
         GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
         GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthstencilFormat, GLint readMultisamples,
+        GLuint readColorBufferTextureId,
         GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) {
     GLEScontext::initDefaultFBO(
             width, height, colorFormat, depthstencilFormat, multisamples,
+            colorBufferTextureId,
             eglSurfaceRBColorId, eglSurfaceRBDepthId,
             readWidth, readHeight, readColorFormat, readDepthstencilFormat, readMultisamples,
+            readColorBufferTextureId,
             eglReadSurfaceRBColorId, eglReadSurfaceRBDepthId
             );
 }

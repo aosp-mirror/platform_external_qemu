@@ -212,7 +212,8 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  FrameworkFormat p_frameworkFormat,
                                  HandleType hndl,
                                  Helper* helper,
-                                 bool fastBlitSupported) {
+                                 bool fastBlitSupported,
+                                 bool noBlitSupported) {
     GLenum texFormat = 0;
     GLenum pixelType = GL_UNSIGNED_BYTE;
     int bytesPerPixel = 4;
@@ -317,6 +318,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     }
 
     cb->m_fastBlitSupported = fastBlitSupported;
+    cb->m_noBlitSupported = noBlitSupported;
 
     // desktop GL only: use GL_UNSIGNED_INT_8_8_8_8_REV for faster readback.
     if (emugl::getRenderer() == SELECTED_RENDERER_HOST) {
@@ -587,7 +589,7 @@ void ColorBuffer::subUpdateFromFrameworkFormat(int x,
                                 p_type, pixels);
     }
 
-    if (m_fastBlitSupported) {
+    if (m_fastBlitSupported || m_noBlitSupported) {
         s_gles2.glFlush();
         m_sync = (GLsync)s_egl.eglSetImageFenceANDROID(m_display, m_eglImage);
     }
@@ -620,7 +622,7 @@ bool ColorBuffer::replaceContents(const void* newContents, size_t numBytes) {
     s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, m_format,
                             m_type, newContents);
 
-    if (m_fastBlitSupported) {
+    if (m_fastBlitSupported || m_noBlitSupported) {
         s_gles2.glFlush();
         m_sync = (GLsync)s_egl.eglSetImageFenceANDROID(m_display, m_eglImage);
     }
@@ -656,7 +658,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
 
     touch();
 
-    if (m_fastBlitSupported) {
+    if (m_fastBlitSupported || m_noBlitSupported) {
         s_egl.eglBlitFromCurrentReadBufferANDROID(m_display, m_eglImage);
         m_sync = (GLsync)s_egl.eglSetImageFenceANDROID(m_display, m_eglImage);
     } else {
@@ -937,7 +939,8 @@ void ColorBuffer::onSave(android::base::Stream* stream) {
 ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
                                  EGLDisplay p_display,
                                  Helper* helper,
-                                 bool fastBlitSupported) {
+                                 bool fastBlitSupported,
+                                 bool noBlitSupported) {
     HandleType hndl = static_cast<HandleType>(stream->getBe32());
     GLuint width = static_cast<GLuint>(stream->getBe32());
     GLuint height = static_cast<GLuint>(stream->getBe32());
@@ -950,7 +953,7 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
 
     if (!eglImage) {
         return create(p_display, width, height, internalFormat, frameworkFormat,
-                      hndl, helper, fastBlitSupported);
+                      hndl, helper, fastBlitSupported, noBlitSupported);
     }
     ColorBuffer* cb = new ColorBuffer(p_display, hndl, helper);
     cb->mNeedRestore = true;
@@ -962,6 +965,7 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
     cb->m_internalFormat = internalFormat;
     cb->m_frameworkFormat = frameworkFormat;
     cb->m_fastBlitSupported = fastBlitSupported;
+    cb->m_noBlitSupported = noBlitSupported;
     cb->m_needFormatCheck = needFormatCheck;
     return cb;
 }

@@ -1273,6 +1273,7 @@ HandleType FrameBuffer::createColorBufferWithHandleLocked(
     ColorBufferPtr cb(ColorBuffer::create(getDisplay(), p_width, p_height,
                                           p_internalFormat, p_frameworkFormat,
                                           handle, m_colorBufferHelper,
+                                          m_fastBlitSupported,
                                           m_fastBlitSupported));
     if (cb.get() != NULL) {
         assert(m_colorbuffers.count(handle) == 0);
@@ -1538,6 +1539,7 @@ std::vector<HandleType> FrameBuffer::DestroyWindowSurfaceLocked(HandleType p_sur
         if (puid) {
             auto ite = m_procOwnedWindowSurfaces.find(puid);
             if (ite != m_procOwnedWindowSurfaces.end()) {
+                // fprintf(stderr, "%s: destroy window surface %u\n", __func__, p_surface);
                 ite->second.erase(p_surface);
             }
         } else {
@@ -1783,6 +1785,7 @@ std::vector<HandleType> FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, 
                             }
                         }
                     }
+                    // fprintf(stderr, "%s: destroy window surface %u\n", __func__, whndl);
                     m_windows.erase(w);
                 }
                 m_procOwnedWindowSurfaces.erase(procIte);
@@ -2261,6 +2264,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
     }
 
     if (bindDraw.get() != NULL && bindRead.get() != NULL) {
+        // if (draw) fprintf(stderr, "%s: call, binding a new context. Does the window surface %u have a color buffer? %d\n", __func__, p_drawSurface, draw->hasColorBuffer());
         if (bindDraw.get() != bindRead.get()) {
             bindDraw->bind(ctx, WindowSurface::BIND_DRAW);
             bindRead->bind(ctx, WindowSurface::BIND_READ);
@@ -3126,6 +3130,7 @@ bool FrameBuffer::onLoad(Stream* stream,
                    [this, now](Stream* stream) -> ColorBufferMap::value_type {
         ColorBufferPtr cb(ColorBuffer::onLoad(stream, m_eglDisplay,
                                               m_colorBufferHelper,
+                                              m_fastBlitSupported,
                                               m_fastBlitSupported));
         const HandleType handle = cb->getHndl();
         const unsigned refCount = stream->getBe32();
