@@ -141,7 +141,8 @@ public:
                                FrameworkFormat p_frameworkFormat,
                                HandleType hndl,
                                Helper* helper,
-                               bool fastBlitSupported);
+                               bool fastBlitSupported,
+                               bool noBlitSupported);
 
     // Sometimes things happen and we need to reformat the GL texture
     // used. This function replaces the format of the underlying texture
@@ -258,11 +259,13 @@ public:
     static ColorBuffer* onLoad(android::base::Stream* stream,
                                EGLDisplay p_display,
                                Helper* helper,
-                               bool fastBlitSupported);
+                               bool fastBlitSupported,
+                               bool noBlitSupported);
 
     HandleType getHndl() const;
 
     bool isFastBlitSupported() const { return m_fastBlitSupported; }
+    bool isNoBlitSupported() const { return m_noBlitSupported; }
     void postLayer(ComposeLayer* l, int frameWidth, int frameHeight);
     GLuint getTexture();
 
@@ -284,6 +287,8 @@ public:
     void setDisplay(uint32_t displayId) { m_displayId = displayId; }
     uint32_t getDisplay() { return m_displayId; }
     FrameworkFormat getFrameworkFormat() { return m_frameworkFormat; }
+
+    EGLImageKHR getEGLImage() { return m_eglImage; }
 public:
     void restore();
 
@@ -324,6 +329,7 @@ private:
 
     GLsync m_sync = nullptr;
     bool m_fastBlitSupported = false;
+    bool m_noBlitSupported = false;
 
     GLenum m_asyncReadbackType = GL_UNSIGNED_BYTE;
     size_t m_numBytes = 0;

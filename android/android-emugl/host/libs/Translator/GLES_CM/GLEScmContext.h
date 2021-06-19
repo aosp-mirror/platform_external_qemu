@@ -54,8 +54,10 @@ public:
 
     virtual void initDefaultFBO(
             GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+            GLuint colorBufferTextureId,
             GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
             GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
+            GLuint readColorBufferTextureId,
             GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) override;
     ~GLEScmContext();
     static void setMaxGlesVersion(GLESVersion version);

@@ -52,6 +52,9 @@ public:
     // IMPORTANT: This automatically resizes the Pbuffer's to the ColorBuffer's
     // dimensions. Potentially losing pixel values in the process.
     void setColorBuffer(ColorBufferPtr p_colorBuffer);
+    bool hasColorBuffer() const {
+        return nullptr != mAttachedColorBuffer.get();
+    }
 
     // Retrieves a pointer to the attached color buffer.
     ColorBuffer* getAttachedColorBuffer() const {

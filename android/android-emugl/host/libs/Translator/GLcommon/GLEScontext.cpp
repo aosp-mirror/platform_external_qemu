@@ -2150,8 +2150,10 @@ void GLEScontext::initEmulatedEGLSurface(GLint width, GLint height,
 
 void GLEScontext::initDefaultFBO(
         GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+        GLuint colorBufferTextureId,
         GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
         GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
+        GLuint readColorBufferTextureId,
         GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) {
 
     if (!m_defaultFBO) {
@@ -2231,6 +2233,10 @@ void GLEScontext::initDefaultFBO(
         dispatcher().glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, *eglReadSurfaceRBDepthId);
     }
 
+    // May replace GL_COLOR_ATTACHMENT0 with textures.
+    setupAttachedColorBufferTextureDraw(colorBufferTextureId);
+    setupAttachedColorBufferTextureRead(readColorBufferTextureId);
+
     dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, prevRbo);
     GLuint prevDrawFBOBinding = getFramebufferBinding(GL_FRAMEBUFFER);
     GLuint prevReadFBOBinding = getFramebufferBinding(GL_READ_FRAMEBUFFER);
@@ -2255,6 +2261,42 @@ void GLEScontext::initDefaultFBO(
     }
 }
 
+void GLEScontext::setupAttachedColorBufferTextureDraw(GLuint texId) {
+    if (!texId) return;
+
+    GLuint prevDrawFBOBinding = getFramebufferBinding(GL_FRAMEBUFFER);
+
+    dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
+    dispatcher().glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texId, 0);
+
+    if (m_defaultFBODrawBuffer != GL_COLOR_ATTACHMENT0) {
+        dispatcher().glDrawBuffers(1, &m_defaultFBODrawBuffer);
+    }
+    if (m_defaultFBOReadBuffer != GL_COLOR_ATTACHMENT0) {
+        dispatcher().glReadBuffer(m_defaultFBOReadBuffer);
+    }
+
+    if (prevDrawFBOBinding)
+        dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, getFBOGlobalName(prevDrawFBOBinding));
+}
+
+void GLEScontext::setupAttachedColorBufferTextureRead(GLuint texId) {
+    if (!texId) return;
+
+    GLuint prevReadFBOBinding = getFramebufferBinding(GL_READ_FRAMEBUFFER);
+
+    dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, m_defaultReadFBO);
+    dispatcher().glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texId, 0);
+    if (m_defaultFBODrawBuffer != GL_COLOR_ATTACHMENT0) {
+        dispatcher().glDrawBuffers(1, &m_defaultFBODrawBuffer);
+    }
+    if (m_defaultFBOReadBuffer != GL_COLOR_ATTACHMENT0) {
+        dispatcher().glReadBuffer(m_defaultFBOReadBuffer);
+    }
+
+    if (prevReadFBOBinding)
+        dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, getFBOGlobalName(prevReadFBOBinding));
+}
 
 void GLEScontext::prepareCoreProfileEmulatedTexture(TextureData* texData, bool is3d, GLenum target,
                                                     GLenum format, GLenum type,

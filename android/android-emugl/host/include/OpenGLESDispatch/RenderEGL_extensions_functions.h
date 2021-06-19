@@ -21,6 +21,8 @@
   X(void, eglAddLibrarySearchPathANDROID, (const char* path)) \
   X(EGLBoolean, eglQueryVulkanInteropSupportANDROID, ()) \
   X(EGLBoolean, eglGetSyncAttribKHR, (EGLDisplay display, EGLSync sync, EGLint attribute, EGLint * value)) \
+  X(EGLBoolean, eglSetSurfaceImageANDROID, (EGLDisplay display, EGLSurface surface, EGLImageKHR image)) \
+  X(EGLBoolean, eglFlushSurfaceImageANDROID, (EGLDisplay display, EGLSurface surface)) \
 
 EGLAPI EGLint EGLAPIENTRY eglGetMaxGLESVersion(EGLDisplay display);
 EGLAPI void EGLAPIENTRY eglBlitFromCurrentReadBufferANDROID(EGLDisplay display, EGLImageKHR image);
@@ -28,5 +30,7 @@ EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay display, EGLImageKHR
 EGLAPI void EGLAPIENTRY eglWaitImageFenceANDROID(EGLDisplay display, void* fence);
 EGLAPI void EGLAPIENTRY eglAddLibrarySearchPathANDROID(const char* path);
 EGLAPI EGLBoolean EGLAPIENTRY eglQueryVulkanInteropSupportANDROID();
+EGLAPI EGLBoolean EGLAPIENTRY eglSetSurfaceImageANDROID(EGLDisplay display, EGLSurface surface, EGLImageKHR image);
+EGLAPI EGLBoolean EGLAPIENTRY eglFlushSurfaceImageANDROID(EGLDisplay display, EGLSurface surface);
 
 #endif  // RENDER_EGL_EXTENSIONS_FUNCTIONS_H
