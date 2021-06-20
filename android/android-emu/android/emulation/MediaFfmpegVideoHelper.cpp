@@ -83,7 +83,13 @@ bool MediaFfmpegVideoHelper::init() {
 
     mCodecCtx = avcodec_alloc_context3(mCodec);
 
-    if (mThreadCount > 1) {
+    // b/191362585
+    // disable multi-threading as it could fail to decode
+    // some video, ffmpeg will trade robustness over speed
+    // here
+    // TODO: re-evaluate when upgrade to newer version of
+    // ffmpeg
+    if (mThreadCount > 1 && false) {
         mCodecCtx->thread_count = std::min(mThreadCount, 4);
         mCodecCtx->thread_type = FF_THREAD_FRAME;
         mCodecCtx->active_thread_type = FF_THREAD_FRAME;
