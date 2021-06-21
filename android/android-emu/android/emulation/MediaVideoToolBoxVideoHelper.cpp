@@ -98,6 +98,7 @@ void MediaVideoToolBoxVideoHelper::extractFrameInfo() {
     if (success) {
         mColorAspects = frame.color;
         mVtbBufferSize = mFfmpegVideoHelper->frameReorderBufferSize();
+        VTB_DPRINT("vtb buffer size is %d", mVtbBufferSize);
     }
 }
 
@@ -106,7 +107,15 @@ void MediaVideoToolBoxVideoHelper::decode(const uint8_t* frame,
                                           uint64_t inputPts) {
     VTB_DPRINT("%s(frame=%p, sz=%zu)", __func__, frame, szBytes);
 
-    parseInputFrames(frame, szBytes);
+    ++mTotalFrames;
+    const bool parseOk = parseInputFrames(frame, szBytes);
+    if (!parseOk) {
+        // cannot parse, probably cannot decode either
+        // just fail
+        VTB_DPRINT("Failed to parse frame=%p, sz=%zu, give up.", frame, szBytes);
+        mIsGood = false;
+        return;
+    }
 
     // has to go in the FIFO order
     for (int i = 0; i < mInputFrames.size(); ++i) {
@@ -114,6 +123,7 @@ void MediaVideoToolBoxVideoHelper::decode(const uint8_t* frame,
         switch (f.type) {
             case H264NaluType::SPS:
                 mSPS.assign(f.data, f.data + f.size);
+                VTB_DPRINT("this is an SPS frame");
                 // dumpBytes(mSPS.data(), mSPS.size());
                 mVtbReady = false;
                 {   // create ffmpeg decoder with only 1 thread to avoid frame delay
@@ -123,11 +133,13 @@ void MediaVideoToolBoxVideoHelper::decode(const uint8_t* frame,
                 }
                 break;
             case H264NaluType::PPS:
+                VTB_DPRINT("this is an PPS frame");
                 mPPS.assign(f.data, f.data + f.size);
                 // dumpBytes(mPPS.data(), mPPS.size());
                 mVtbReady = false;
                 break;
             case H264NaluType::SEI:
+                VTB_DPRINT("this is SEI frame");
                 break;
             case H264NaluType::CodedSliceIDR:
                 VTB_DPRINT("this is an IDR frame");
@@ -234,7 +246,7 @@ void MediaVideoToolBoxVideoHelper::handleIDRFrame(const uint8_t* ptr,
 
 // chop the frame into sub frames that video tool box will consume
 // one by one
-void MediaVideoToolBoxVideoHelper::parseInputFrames(const uint8_t* frame,
+bool MediaVideoToolBoxVideoHelper::parseInputFrames(const uint8_t* frame,
                                                     size_t sz) {
     mInputFrames.clear();
     VTB_DPRINT("input frame %d bytes", (int)sz);
@@ -247,6 +259,7 @@ void MediaVideoToolBoxVideoHelper::parseInputFrames(const uint8_t* frame,
         frame = remainingFrame;
         sz = sz - consumed;
     }
+    return mInputFrames.size() > 0;
 }
 
 const uint8_t* MediaVideoToolBoxVideoHelper::parseOneFrame(const uint8_t* frame,
@@ -585,7 +598,8 @@ void MediaVideoToolBoxVideoHelper::copyFrameToTextures() {
             std::chrono::steady_clock::now() - startTime);
     VTB_DPRINT("used %d ms", (int)elapsed.count());
 
-    mVtbBufferMap[mOutputPts] = MediaSnapshotState::FrameInfo{
+    auto ptspair = std::make_pair(mOutputPts, mTotalFrames);
+    mVtbBufferMap[ptspair] = MediaSnapshotState::FrameInfo{
             std::vector<uint8_t>(),
             std::vector<uint32_t>{texFrame.Ytex, texFrame.UVtex},
             (int)mOutputWidth,
@@ -668,11 +682,12 @@ void MediaVideoToolBoxVideoHelper::copyFrameToCPU() {
     }
     CVPixelBufferUnlockBaseAddress(mDecodedFrame, kCVPixelBufferLock_ReadOnly);
 
-    mVtbBufferMap[mOutputPts] = MediaSnapshotState::FrameInfo{
+    auto ptspair = std::make_pair(mOutputPts, mTotalFrames);
+    mVtbBufferMap[ptspair] = MediaSnapshotState::FrameInfo{
             std::vector<uint8_t>(), std::vector<uint32_t>{},
             (int)mOutputWidth,      (int)mOutputHeight,
             (uint64_t)(mOutputPts), ColorAspects{mColorAspects}};
-    mVtbBufferMap[mOutputPts].data.swap(mSavedDecodedFrame);
+    mVtbBufferMap[ptspair].data.swap(mSavedDecodedFrame);
 }
 
 void MediaVideoToolBoxVideoHelper::copyFrame() {
