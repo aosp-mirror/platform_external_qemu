@@ -77,7 +77,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     const char* adbKeyProp;
 
     namespace fc = android::featurecontrol;
-    if (fc::isEnabled(fc::AndroidbootProps)) {
+    if (fc::isEnabled(fc::AndroidbootProps) || fc::isEnabled(fc::AndroidbootProps2)) {
         checkjniProp = "androidboot.dalvik.vm.checkjni";
         bootanimProp = "androidboot.debug.sf.nobootanimation";
         bootanimPropValue = "1";
@@ -130,7 +130,11 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     std::vector<std::pair<std::string, std::string>> params;
 
     // We always force qemu=1 when running inside QEMU.
-    params.push_back({"qemu", "1"});
+    if (fc::isEnabled(fc::AndroidbootProps2)) {
+        params.push_back({"androidboot.qemu", "1"});
+    } else {
+        params.push_back({"qemu", "1"});
+    }
 
     params.push_back({"androidboot.hardware", isQemu2 ? "ranchu" : "goldfish"});
 

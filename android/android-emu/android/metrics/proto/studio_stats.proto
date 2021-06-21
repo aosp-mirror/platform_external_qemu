@@ -1493,7 +1493,8 @@ message EmulatorFeatureFlagState {
     MIGRATABLE_SNAPSHOT_SAVE = 81;
     ANDROIDBOOT_PROPS = 82;
     DEVICESKINOVERLAY = 83;
-    // Next tag: 84
+    ANDROIDBOOT_PROPS2 = 84;
+    // Next tag: 85
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

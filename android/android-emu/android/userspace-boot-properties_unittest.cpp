@@ -42,6 +42,7 @@ TEST(getUserspaceBootProperties, BootconfigOff) {
     opts.selinux = (char*)"selinux";
 
     fc::setEnabledOverride(fc::AndroidbootProps, false);
+    fc::setEnabledOverride(fc::AndroidbootProps2, false);
 
     const auto params = getUserspaceBootProperties(
         &opts,
@@ -96,6 +97,7 @@ TEST(getUserspaceBootProperties, BootconfigOn) {
     opts.selinux = (char*)"selinux";
 
     fc::setEnabledOverride(fc::AndroidbootProps, true);
+    fc::setEnabledOverride(fc::AndroidbootProps2, false);
 
     const auto params = getUserspaceBootProperties(
         &opts,
@@ -132,6 +134,48 @@ TEST(getUserspaceBootProperties, BootconfigOn) {
     EXPECT_STREQ(paramsMap["androidboot.selinux"].c_str(), "selinux");
     EXPECT_STREQ(paramsMap["androidboot.dalvik.vm.heapsize"].c_str(), "64m");
     EXPECT_STREQ(paramsMap["verifiedBootParameters.foo"].c_str(), "value");
+}
+
+TEST(getUserspaceBootProperties, Bootconfig2On) {
+    const std::vector<std::string> verifiedBootParameters = {
+        "verifiedBootParameters.foo=value"
+    };
+
+    AndroidOptions opts = makeAndroidOptions();
+
+    opts.logcat = (char*)"logcat";
+    opts.bootchart = (char*)"bootchart";
+    opts.selinux = (char*)"selinux";
+
+    fc::setEnabledOverride(fc::AndroidbootProps, false);
+    fc::setEnabledOverride(fc::AndroidbootProps2, true);
+
+    const auto params = getUserspaceBootProperties(
+        &opts,
+        "x86_64",                   // targetArch
+        "serialno",                 // serialno
+        true,                       // isQemu2
+        600,                        // lcd_width
+        800,                        // lcd_height
+        60,                         // lcd_vsync
+        kAndroidGlesEmulationHost,  // glesMode
+        123,                        // bootPropOpenglesVersion
+        64,                         // vm_heapSize
+        29,                         // apiLevel
+        "kernelSerialPrefix",       // kernelSerialPrefix
+        &verifiedBootParameters,    // verifiedBootParameters
+        "gltransport",              // gltransport
+        77,                         // gltransport_drawFlushInterval
+        "displaySettingsXml");      // displaySettingsXml
+
+    std::map<std::string, std::string> paramsMap;
+    for (const auto& kv : params) {
+        EXPECT_TRUE(paramsMap.insert(kv).second);
+    }
+
+    EXPECT_EQ(paramsMap.count("qemu"), 0);
+    EXPECT_STREQ(paramsMap["androidboot.qemu"].c_str(), "1");
+    EXPECT_STREQ(paramsMap["androidboot.serialno"].c_str(), "serialno");
 }
 
 }  // namespace android
