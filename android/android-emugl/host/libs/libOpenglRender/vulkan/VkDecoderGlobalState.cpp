@@ -1099,13 +1099,6 @@ public:
         auto physicalDevice = unbox_VkPhysicalDevice(boxed_physicalDevice);
         auto vk = dispatch_VkPhysicalDevice(boxed_physicalDevice);
 
-        if (!m_emu->instanceSupportsMoltenVK) {
-            return vk->vkEnumerateDeviceExtensionProperties(
-                physicalDevice, pLayerName, pPropertyCount, pProperties);
-        }
-
-        // If MoltenVK is supported on host, we need to ensure that we include
-        // VK_MVK_moltenvk extenstion in returned properties.
         std::vector<VkExtensionProperties> properties;
         uint32_t propertyCount = 0u;
         VkResult result = vk->vkEnumerateDeviceExtensionProperties(
@@ -1121,7 +1114,10 @@ public:
             return result;
         }
 
-        if (std::find_if(properties.begin(), properties.end(),
+        // If MoltenVK is supported on host, we need to ensure that we include
+        // VK_MVK_moltenvk extenstion in returned properties.
+        if (m_emu->instanceSupportsMoltenVK &&
+        std::find_if(properties.begin(), properties.end(),
             [](const VkExtensionProperties& props) {
                 return strcmp(props.extensionName, VK_MVK_MOLTENVK_EXTENSION_NAME) == 0;
             }) == properties.end()) {
@@ -1132,6 +1128,17 @@ public:
             properties.push_back(mvk_props);
         }
 
+        if (std::find_if(properties.begin(), properties.end(),
+            [](const VkExtensionProperties& props) {
+                return strcmp(props.extensionName, VK_EXT_DEVICE_MEMORY_REPORT_EXTENSION_NAME) == 0;
+            }) == properties.end()) {
+            VkExtensionProperties property;
+            strncpy(property.extensionName, VK_EXT_DEVICE_MEMORY_REPORT_EXTENSION_NAME,
+                    sizeof(property.extensionName));
+            property.specVersion = 2;
+            properties.push_back(property);
+        }
+        
         if (*pPropertyCount == 0) {
             *pPropertyCount = properties.size();
         } else {
