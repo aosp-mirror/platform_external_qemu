@@ -21,6 +21,7 @@
 
 #include "android/base/synchronization/Lock.h"              // for Lock, Aut...
 #include "android/emulation/control/record_screen_agent.h"  // for QAndroidR...
+#include "android/emulation/control/vm_operations.h"        // for vmOpratons
 #include "android/emulation/control/window_agent.h"         // for QAndroidE...
 #include "android/base/EventNotificationSupport.h"
 
@@ -62,6 +63,7 @@ class MultiDisplay :  public base::EventNotificationSupport<DisplayChangeEvent> 
 public:
     MultiDisplay(const QAndroidEmulatorWindowAgent* const windowAgent,
                  const QAndroidRecordScreenAgent* const recordAgent,
+                 const QAndroidVmOperations* const vmAgent,
                  bool isGuestMode);
     static MultiDisplay* getInstance();
     bool isMultiDisplayEnabled() { base::AutoLock lock(mLock); return mMultiDisplay.size() > 1; }
@@ -129,6 +131,7 @@ public:
 private:
     const QAndroidEmulatorWindowAgent* mWindowAgent;
     const QAndroidRecordScreenAgent* mRecordAgent;
+    const QAndroidVmOperations* mVmAgent;
     bool mGuestMode;
     std::map<uint32_t, MultiDisplayInfo> mMultiDisplay;
     android::base::Lock mLock;
@@ -152,4 +155,5 @@ private:
 
 void android_init_multi_display(const QAndroidEmulatorWindowAgent* const windowAgent,
                                 const QAndroidRecordScreenAgent* const recordAgent,
+                                const QAndroidVmOperations* const vmAgent,
                                 bool isGUestMode = false);

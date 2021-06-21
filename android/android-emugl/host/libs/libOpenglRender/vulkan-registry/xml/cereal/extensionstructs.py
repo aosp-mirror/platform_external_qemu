@@ -33,6 +33,11 @@ class VulkanExtensionStructs(VulkanWrapperGenerator):
 
         self.structTypeRetType = \
             makeVulkanTypeSimple(False, "uint32_t", 0)
+
+        self.rootTypeVarName = "rootType"
+        self.rootTypeParam = \
+            makeVulkanTypeSimple(False, "VkStructureType",
+                                 0, self.rootTypeVarName)
         self.structTypePrototype = \
             VulkanAPI(STRUCT_TYPE_API_NAME,
                       self.structTypeRetType,
@@ -43,14 +48,14 @@ class VulkanExtensionStructs(VulkanWrapperGenerator):
         self.extensionStructSizePrototype = \
             VulkanAPI(EXTENSION_SIZE_API_NAME,
                       self.extensionStructSizeRetType,
-                      [STRUCT_EXTENSION_PARAM])
+                      [self.rootTypeParam, STRUCT_EXTENSION_PARAM])
 
         self.streamFeaturesType = makeVulkanTypeSimple(False, "uint32_t", 0, "streamFeatures")
 
         self.extensionStructSizeWithStreamFeaturesPrototype = \
             VulkanAPI(EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME,
                       self.extensionStructSizeRetType,
-                      [self.streamFeaturesType, STRUCT_EXTENSION_PARAM])
+                      [self.streamFeaturesType, self.rootTypeParam, STRUCT_EXTENSION_PARAM])
     def onBegin(self,):
         VulkanWrapperGenerator.onBegin(self)
         self.module.appendHeader(self.codegen.makeFuncDecl(
@@ -106,7 +111,8 @@ class VulkanExtensionStructs(VulkanWrapperGenerator):
                     cgen,
                     self.extensionStructSizeRetType,
                     STRUCT_EXTENSION_PARAM,
-                    forEachExtensionReturnSize, autoBreak=False)))
+                    forEachExtensionReturnSize, autoBreak=False,
+                    rootTypeVar=self.rootTypeParam)))
 
         self.module.appendImpl(
             self.codegen.makeFuncImpl(
@@ -115,4 +121,5 @@ class VulkanExtensionStructs(VulkanWrapperGenerator):
                     cgen,
                     self.extensionStructSizeRetType,
                     STRUCT_EXTENSION_PARAM,
-                    forEachExtensionReturnSizeProtectedByFeature, autoBreak=False)))
+                    forEachExtensionReturnSizeProtectedByFeature, autoBreak=False,
+                    rootTypeVar=self.rootTypeParam)))

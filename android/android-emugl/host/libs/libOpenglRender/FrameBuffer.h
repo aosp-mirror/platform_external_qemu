@@ -396,6 +396,9 @@ public:
     bool updateColorBuffer(HandleType p_colorbuffer,
                            int x, int y, int width, int height,
                            GLenum format, GLenum type, void *pixels);
+    bool updateColorBufferFromFrameworkFormat(HandleType p_colorbuffer,
+                           int x, int y, int width, int height,
+                           FrameworkFormat fwkFormat, GLenum format, GLenum type, void *pixels);
     // Replaces contents completely using the color buffer's current format,
     // with row length equal to width of a row in bytes.
     // The number of bytes is passed as a check.
@@ -504,9 +507,9 @@ public:
     // GL state.
     // It can be unsafe / leaky to change the structure of contexts
     // outside the facilities the FrameBuffer class provides.
-    void createTrivialContext(HandleType shared,
-                              HandleType* contextOut,
-                              HandleType* surfOut);
+    void getTrivialContextForCurrentRenderThread(HandleType shared,
+                                                 HandleType* contextOut,
+                                                 HandleType* surfOut);
     // createAndBindTrivialSharedContext(), but with a m_pbufContext
     // as shared, and not adding itself to the context map at all.
     void createAndBindTrivialSharedContext(EGLContext* contextOut,
@@ -601,6 +604,7 @@ public:
     uint32_t* getProcessSequenceNumberPtr(uint64_t puid);
 
     int createDisplay(uint32_t *displayId);
+    int createDisplay(uint32_t displayId);
     int destroyDisplay(uint32_t displayId);
     int setDisplayColorBuffer(uint32_t displayId, uint32_t colorBuffer);
     int getDisplayColorBuffer(uint32_t displayId, uint32_t* colorBuffer);

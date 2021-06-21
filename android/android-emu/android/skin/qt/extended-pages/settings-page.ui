@@ -626,7 +626,7 @@
       </font>
      </property>
      <property name="text">
-      <string>RESET NOTIFICATION PREFERENCES</string>
+      <string>Reset Notification Preferences</string>
      </property>
      <property name="flat">
       <bool>true</bool>
@@ -677,7 +677,7 @@
       </font>
      </property>
      <property name="text">
-      <string>LOAD NOW</string>
+      <string>Load Now</string>
      </property>
      <property name="flat">
       <bool>true</bool>
@@ -706,7 +706,7 @@
       </font>
      </property>
      <property name="text">
-      <string>SAVE NOW</string>
+      <string>Save Now</string>
      </property>
      <property name="flat">
       <bool>true</bool>
@@ -1066,7 +1066,7 @@
       </font>
      </property>
      <property name="text">
-      <string>APPLY</string>
+      <string>Apply</string>
      </property>
      <property name="flat">
       <bool>true</bool>
@@ -1303,7 +1303,7 @@
       </font>
      </property>
      <property name="text">
-      <string>PERFORMANCE STATS</string>
+      <string>Performance Stats</string>
      </property>
      <property name="flat">
       <bool>true</bool>

@@ -268,6 +268,12 @@ public:
             get_emugl_address_space_device_control_ops().control_get_hw_funcs()) {
             mUseOldMemoryCleanupPath = 0 == get_emugl_address_space_device_control_ops().control_get_hw_funcs()->getPhysAddrStartLocked();
         }
+
+        if (mVerbosePrints) {
+            fprintf(stderr, "%s: memory cleanup path is old? %d\n", __func__, mUseOldMemoryCleanupPath);
+            fprintf(stderr, "%s: vk cleanup enabled? %d\n", __func__, mVkCleanupEnabled);
+        }
+
         mGuestUsesAngle =
             emugl::emugl_feature_is_enabled(
                 android::featurecontrol::GuestUsesAngle);
@@ -294,6 +300,7 @@ public:
         mBufferInfo.clear();
         mMapInfo.clear();
         mSemaphoreInfo.clear();
+        mFenceInfo.clear();
 #ifdef _WIN32
         mSemaphoreId = 1;
         mExternalSemaphoresById.clear();
@@ -1805,6 +1812,59 @@ public:
         return res;
     }
 
+    VkResult on_vkCreateFence(android::base::BumpPool* pool,
+                              VkDevice boxed_device,
+                              const VkFenceCreateInfo* pCreateInfo,
+                              const VkAllocationCallbacks* pAllocator,
+                              VkFence* pFence) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        VkResult res =
+                vk->vkCreateFence(device, pCreateInfo, pAllocator, pFence);
+        if (res != VK_SUCCESS) {
+            return res;
+        }
+
+        {
+            AutoLock lock(mLock);
+
+            DCHECK(mFenceInfo.find(*pFence) == mFenceInfo.end());
+            // Create FenceInfo for *pFence.
+            auto& fenceInfo = mFenceInfo[*pFence];
+            fenceInfo.device = device;
+            fenceInfo.vk = vk;
+
+            *pFence = new_boxed_non_dispatchable_VkFence(*pFence);
+            fenceInfo.boxed = *pFence;
+        }
+
+        return res;
+    }
+
+    VkResult on_vkResetFences(android::base::BumpPool* pool,
+                              VkDevice boxed_device,
+                              uint32_t fenceCount,
+                              const VkFence* pFences) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        VkResult res = vk->vkResetFences(device, fenceCount, pFences);
+        if (res != VK_SUCCESS) {
+            return res;
+        }
+
+        // Reset all fences' states to kNotWaitable.
+        {
+            AutoLock lock(mLock);
+            for (uint32_t i = 0; i < fenceCount; i++) {
+                DCHECK(mFenceInfo.find(pFences[i]) != mFenceInfo.end());
+                mFenceInfo[pFences[i]].state = FenceInfo::State::kNotWaitable;
+            }
+        }
+        return VK_SUCCESS;
+    }
+
     VkResult on_vkImportSemaphoreFdKHR(
             android::base::BumpPool* pool,
             VkDevice boxed_device,
@@ -1899,6 +1959,21 @@ public:
         }
 #endif
         vk->vkDestroySemaphore(device, semaphore, pAllocator);
+    }
+
+    void on_vkDestroyFence(android::base::BumpPool* pool,
+                           VkDevice boxed_device,
+                           VkFence fence,
+                           const VkAllocationCallbacks* pAllocator) {
+        auto device = unbox_VkDevice(boxed_device);
+        auto vk = dispatch_VkDevice(boxed_device);
+
+        {
+            AutoLock lock(mLock);
+            mFenceInfo.erase(fence);
+        }
+
+        vk->vkDestroyFence(device, fence, pAllocator);
     }
 
     VkResult on_vkCreateDescriptorSetLayout(
@@ -2833,6 +2908,12 @@ public:
         };
 
         if (!mUseOldMemoryCleanupPath) {
+
+            if (mVerbosePrints) {
+                fprintf(stderr, "%s: Registering deallocation callback for host-visible memory at gpa 0x%llx\n", __func__,
+                        (unsigned long long)gpa);
+            }
+
             get_emugl_address_space_device_control_ops().register_deallocation_callback(
                 this, gpa, [](void* thisPtr, uint64_t gpa) {
                 Impl* implPtr = (Impl*)thisPtr;
@@ -3540,10 +3621,11 @@ public:
         }
         AutoLock lock(mLock);
         mCmdPoolInfo[*pCommandPool] = CommandPoolInfo();
-        mCmdPoolInfo[*pCommandPool].device = device;
+        auto& cmdPoolInfo = mCmdPoolInfo[*pCommandPool];
+        cmdPoolInfo.device = device;
 
         *pCommandPool = new_boxed_non_dispatchable_VkCommandPool(*pCommandPool);
-        mCmdPoolInfo[*pCommandPool].boxed = *pCommandPool;
+        cmdPoolInfo.boxed = *pCommandPool;
 
         return result;
     }
@@ -3635,7 +3717,21 @@ public:
 
         AutoLock qlock(*ql);
 
-        return vk->vkQueueSubmit(queue, submitCount, pSubmits, fence);
+        auto result = vk->vkQueueSubmit(queue, submitCount, pSubmits, fence);
+
+        // After vkQueueSubmit is called, we can signal the conditional variable
+        // in FenceInfo, so that other threads (e.g. SyncThread) can call
+        // waitForFence() on this fence.
+        lock.lock();
+        auto fenceInfo = mFenceInfo.find(fence);
+        if (fenceInfo != mFenceInfo.end()) {
+            fenceInfo->second.state = FenceInfo::State::kWaitable;
+            fenceInfo->second.lock.lock();
+            fenceInfo->second.cv.signalAndUnlock(&fenceInfo->second.lock);
+        }
+        lock.unlock();
+
+        return result;
     }
 
     VkResult on_vkQueueWaitIdle(
@@ -4158,15 +4254,113 @@ public:
         return res;
     }
 
-    void on_vkQueueBindSparseAsyncGOOGLE(
+    VkResult on_vkQueueBindSparse(
         android::base::BumpPool* pool,
         VkQueue boxed_queue,
         uint32_t bindInfoCount,
         const VkBindSparseInfo* pBindInfo, VkFence fence) {
+
+        // If pBindInfo contains VkTimelineSemaphoreSubmitInfo, then it's
+        // possible the host driver isn't equipped to deal with them yet.  To
+        // work around this, send empty vkQueueSubmits before and after the
+        // call to vkQueueBindSparse that contain the right values for
+        // wait/signal semaphores and contains the user's
+        // VkTimelineSemaphoreSubmitInfo structure, following the *submission
+        // order* implied by the indices of pBindInfo.
+
+        // TODO: Detect if we are running on a driver that supports timeline
+        // semaphore signal/wait operations in vkQueueBindSparse
+        const bool needTimelineSubmitInfoWorkaround = true;
+
+        bool hasTimelineSemaphoreSubmitInfo = false;
+
+        for (uint32_t i = 0; i < bindInfoCount; ++i) {
+            const VkTimelineSemaphoreSubmitInfoKHR* tsSi =
+                vk_find_struct<VkTimelineSemaphoreSubmitInfoKHR>(pBindInfo + i);
+            if (tsSi) {
+                hasTimelineSemaphoreSubmitInfo = true;
+            }
+        }
+
         auto queue = unbox_VkQueue(boxed_queue);
         auto vk = dispatch_VkQueue(boxed_queue);
-        (void)pool;
-        vk->vkQueueBindSparse(queue, bindInfoCount, pBindInfo, fence);
+
+        if (!hasTimelineSemaphoreSubmitInfo) {
+            (void)pool;
+            return vk->vkQueueBindSparse(queue, bindInfoCount, pBindInfo, fence);
+        } else {
+            std::vector<VkPipelineStageFlags> waitDstStageMasks;
+            VkTimelineSemaphoreSubmitInfoKHR currTsSi = {
+                VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO, 0,
+                0, nullptr,
+                0, nullptr,
+            };
+
+            VkSubmitInfo currSi = {
+                VK_STRUCTURE_TYPE_SUBMIT_INFO, &currTsSi,
+                0, nullptr,
+                nullptr,
+                0, nullptr, // No commands
+                0, nullptr,
+            };
+
+            VkBindSparseInfo currBi;
+
+            VkResult res;
+
+            for (uint32_t i = 0; i < bindInfoCount; ++i) {
+                const VkTimelineSemaphoreSubmitInfoKHR* tsSi =
+                    vk_find_struct<VkTimelineSemaphoreSubmitInfoKHR>(pBindInfo + i);
+                if (!tsSi) {
+                    res = vk->vkQueueBindSparse(queue, 1, pBindInfo + i, fence);
+                    if (VK_SUCCESS != res) return res;
+                    continue;
+                }
+
+                currTsSi.waitSemaphoreValueCount = tsSi->waitSemaphoreValueCount;
+                currTsSi.pWaitSemaphoreValues = tsSi->pWaitSemaphoreValues;
+                currTsSi.signalSemaphoreValueCount = 0;
+                currTsSi.pSignalSemaphoreValues = nullptr;
+
+                currSi.waitSemaphoreCount = pBindInfo[i].waitSemaphoreCount;
+                currSi.pWaitSemaphores = pBindInfo[i].pWaitSemaphores;
+                waitDstStageMasks.resize(pBindInfo[i].waitSemaphoreCount, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+                currSi.pWaitDstStageMask = waitDstStageMasks.data();
+                
+                currSi.signalSemaphoreCount = 0;
+                currSi.pSignalSemaphores = nullptr;
+
+                res = vk->vkQueueSubmit(queue, 1, &currSi, nullptr);
+                if (VK_SUCCESS != res) return res;
+
+                currBi = pBindInfo[i];
+
+                vk_struct_chain_remove(tsSi, &currBi);
+
+                currBi.waitSemaphoreCount = 0;
+                currBi.pWaitSemaphores = nullptr;
+                currBi.signalSemaphoreCount = 0;
+                currBi.pSignalSemaphores = nullptr;
+
+                res = vk->vkQueueBindSparse(queue, 1, &currBi, nullptr);
+                if (VK_SUCCESS != res) return res;
+
+                currTsSi.waitSemaphoreValueCount = 0;
+                currTsSi.pWaitSemaphoreValues = nullptr;
+                currTsSi.signalSemaphoreValueCount = tsSi->signalSemaphoreValueCount;
+                currTsSi.pSignalSemaphoreValues = tsSi->pSignalSemaphoreValues;
+
+                currSi.waitSemaphoreCount = 0;
+                currSi.pWaitSemaphores = nullptr;
+                currSi.signalSemaphoreCount = pBindInfo[i].signalSemaphoreCount;
+                currSi.pSignalSemaphores = pBindInfo[i].pSignalSemaphores;
+
+                res = vk->vkQueueSubmit(queue, 1, &currSi, i == bindInfoCount - 1 ? fence : nullptr);
+                if (VK_SUCCESS != res) return res;
+            }
+
+            return VK_SUCCESS;
+        }
     }
 
     void on_vkGetLinearImageLayoutGOOGLE(
@@ -4425,7 +4619,69 @@ public:
         }
     }
 
-#define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA)
+    VkResult waitForFence(VkFence boxed_fence, uint64_t timeout) {
+        AutoLock lock(mLock);
+
+        VkFence fence = unbox_VkFence(boxed_fence);
+        if (fence == VK_NULL_HANDLE || mFenceInfo.find(fence) == mFenceInfo.end()) {
+            // No fence, could be a semaphore.
+            // TODO: Async wait for semaphores
+            return VK_SUCCESS;
+        }
+
+        // Vulkan specs require fences of vkQueueSubmit to be *externally
+        // synchronized*, i.e. we cannot submit a queue while waiting for the
+        // fence in another thread. For threads that call this function, they
+        // have to wait until a vkQueueSubmit() using this fence is called
+        // before calling vkWaitForFences(). So we use a conditional variable
+        // and mutex for thread synchronization.
+        //
+        // See:
+        // https://www.khronos.org/registry/vulkan/specs/1.2/html/vkspec.html#fundamentals-threadingbehavior
+        // https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers/issues/519
+
+        const VkDevice device = mFenceInfo[fence].device;
+        const VulkanDispatch* vk = mFenceInfo[fence].vk;
+        auto& fenceLock = mFenceInfo[fence].lock;
+        auto& cv = mFenceInfo[fence].cv;
+        lock.unlock();
+
+        fenceLock.lock();
+        cv.wait(&fenceLock, [this, fence] {
+            AutoLock lock(mLock);
+            if (mFenceInfo[fence].state == FenceInfo::State::kWaitable) {
+                mFenceInfo[fence].state = FenceInfo::State::kWaiting;
+                return true;
+            }
+            return false;
+        });
+        fenceLock.unlock();
+
+        return vk->vkWaitForFences(device, /* fenceCount */ 1u, &fence,
+                                   /* waitAll */ false, timeout);
+    }
+
+    VkResult getFenceStatus(VkFence boxed_fence) {
+        AutoLock lock(mLock);
+
+        VkFence fence = unbox_VkFence(boxed_fence);
+        if (fence == VK_NULL_HANDLE || mFenceInfo.find(fence) == mFenceInfo.end()) {
+            // No fence, could be a semaphore.
+            // TODO: Async get status for semaphores
+            return VK_SUCCESS;
+        }
+
+        const VkDevice device = mFenceInfo[fence].device;
+        const VulkanDispatch* vk = mFenceInfo[fence].vk;
+        lock.unlock();
+
+        return vk->vkGetFenceStatus(device, fence);
+    }
+
+#define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES                                \
+    (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | \
+     VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA |         \
+     VK_EXTERNAL_MEMORY_HANDLE_TYPE_ZIRCON_VMO_BIT_FUCHSIA)
 
     // Transforms
 
@@ -6153,6 +6409,22 @@ private:
         VkSampler emulatedborderSampler = VK_NULL_HANDLE;
     };
 
+    struct FenceInfo {
+        VkDevice device = VK_NULL_HANDLE;
+        VkFence boxed = VK_NULL_HANDLE;
+        VulkanDispatch* vk = nullptr;
+
+        android::base::StaticLock lock;
+        android::base::ConditionVariable cv;
+
+        enum class State {
+            kWaitable,
+            kNotWaitable,
+            kWaiting,
+        };
+        State state = State::kNotWaitable;
+    };
+
     struct SemaphoreInfo {
         int externalHandleId = 0;
         VK_EXT_MEMORY_HANDLE externalHandle =
@@ -6313,6 +6585,7 @@ private:
     std::unordered_map<VkDeviceMemory, MappedMemoryInfo> mMapInfo;
 
     std::unordered_map<VkSemaphore, SemaphoreInfo> mSemaphoreInfo;
+    std::unordered_map<VkFence, FenceInfo> mFenceInfo;
 
     std::unordered_map<VkDescriptorSetLayout, DescriptorSetLayoutInfo> mDescriptorSetLayoutInfo;
     std::unordered_map<VkDescriptorPool, DescriptorPoolInfo> mDescriptorPoolInfo;
@@ -6721,6 +6994,31 @@ void VkDecoderGlobalState::on_vkDestroySemaphore(
     VkSemaphore semaphore,
     const VkAllocationCallbacks* pAllocator) {
     mImpl->on_vkDestroySemaphore(pool, device, semaphore, pAllocator);
+}
+
+VkResult VkDecoderGlobalState::on_vkCreateFence(
+        android::base::BumpPool* pool,
+        VkDevice device,
+        const VkFenceCreateInfo* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkFence* pFence) {
+    return mImpl->on_vkCreateFence(pool, device, pCreateInfo, pAllocator,
+                                   pFence);
+}
+
+VkResult VkDecoderGlobalState::on_vkResetFences(android::base::BumpPool* pool,
+                                                VkDevice device,
+                                                uint32_t fenceCount,
+                                                const VkFence* pFences) {
+    return mImpl->on_vkResetFences(pool, device, fenceCount, pFences);
+}
+
+void VkDecoderGlobalState::on_vkDestroyFence(
+        android::base::BumpPool* pool,
+        VkDevice device,
+        VkFence fence,
+        const VkAllocationCallbacks* pAllocator) {
+    return mImpl->on_vkDestroyFence(pool, device, fence, pAllocator);
 }
 
 VkResult VkDecoderGlobalState::on_vkCreateDescriptorSetLayout(
@@ -7307,7 +7605,7 @@ void VkDecoderGlobalState::on_vkQueueBindSparseAsyncGOOGLE(
     VkQueue queue,
     uint32_t bindInfoCount,
     const VkBindSparseInfo* pBindInfo, VkFence fence) {
-    mImpl->on_vkQueueBindSparseAsyncGOOGLE(pool, queue, bindInfoCount, pBindInfo, fence);
+    mImpl->on_vkQueueBindSparse(pool, queue, bindInfoCount, pBindInfo, fence);
 }
 
 void VkDecoderGlobalState::on_vkGetLinearImageLayoutGOOGLE(
@@ -7351,6 +7649,23 @@ void VkDecoderGlobalState::on_vkCollectDescriptorPoolIdsGOOGLE(
     uint32_t* pPoolIdCount,
     uint64_t* pPoolIds) {
     mImpl->on_vkCollectDescriptorPoolIdsGOOGLE(pool, device, descriptorPool, pPoolIdCount, pPoolIds);
+}
+
+VkResult VkDecoderGlobalState::on_vkQueueBindSparse(
+    android::base::BumpPool* pool,
+    VkQueue queue,
+    uint32_t bindInfoCount,
+    const VkBindSparseInfo* pBindInfo, VkFence fence) {
+    return mImpl->on_vkQueueBindSparse(pool, queue, bindInfoCount, pBindInfo, fence);
+}
+
+VkResult VkDecoderGlobalState::waitForFence(VkFence boxed_fence,
+                                            uint64_t timeout) {
+    return mImpl->waitForFence(boxed_fence, timeout);
+}
+
+VkResult VkDecoderGlobalState::getFenceStatus(VkFence boxed_fence) {
+    return mImpl->getFenceStatus(boxed_fence);
 }
 
 void VkDecoderGlobalState::deviceMemoryTransform_tohost(

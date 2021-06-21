@@ -9,6 +9,7 @@ from .transform import TransformCodegen, genTransformsForVulkanType
 from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL, API_PREFIX_RESERVEDUNMARSHAL
 from .wrapperdefs import VULKAN_STREAM_TYPE
+from .wrapperdefs import ROOT_TYPE_DEFAULT_VALUE
 from .wrapperdefs import RELAXED_APIS
 
 from copy import copy
@@ -116,6 +117,7 @@ def emit_unmarshal(typeInfo, param, cgen, output = False, destroy = False, noUnb
         iterateVulkanType(typeInfo, param, VulkanReservedMarshalingCodegen(
             cgen,
             READ_STREAM,
+            ROOT_TYPE_DEFAULT_VALUE,
             param.paramName,
             "readStreamPtrPtr",
             API_PREFIX_RESERVEDUNMARSHAL,
@@ -142,6 +144,7 @@ def emit_unmarshal(typeInfo, param, cgen, output = False, destroy = False, noUnb
         iterateVulkanType(typeInfo, param, VulkanReservedMarshalingCodegen(
             cgen,
             READ_STREAM,
+            ROOT_TYPE_DEFAULT_VALUE,
             param.paramName,
             "readStreamPtrPtr",
             API_PREFIX_RESERVEDUNMARSHAL,
@@ -155,6 +158,7 @@ def emit_dispatch_unmarshal(typeInfo, param, cgen, globalWrapped):
         iterateVulkanType(typeInfo, param, VulkanReservedMarshalingCodegen(
             cgen,
             READ_STREAM,
+            ROOT_TYPE_DEFAULT_VALUE,
             param.paramName,
             "readStreamPtrPtr",
             API_PREFIX_RESERVEDUNMARSHAL,
@@ -167,6 +171,7 @@ def emit_dispatch_unmarshal(typeInfo, param, cgen, globalWrapped):
         iterateVulkanType(typeInfo, param, VulkanReservedMarshalingCodegen(
             cgen,
             READ_STREAM,
+            ROOT_TYPE_DEFAULT_VALUE,
             param.paramName,
             "readStreamPtrPtr",
             API_PREFIX_RESERVEDUNMARSHAL,
@@ -190,6 +195,7 @@ def emit_marshal(typeInfo, param, cgen, handleMapOverwrites=False):
     iterateVulkanType(typeInfo, param, VulkanMarshalingCodegen(
         cgen,
         WRITE_STREAM,
+        ROOT_TYPE_DEFAULT_VALUE,
         param.paramName,
         API_PREFIX_MARSHAL,
         direction="write",
@@ -648,6 +654,10 @@ custom_decodes = {
     "vkImportSemaphoreFdKHR" : emit_global_state_wrapped_decoding,
     "vkDestroySemaphore" : emit_global_state_wrapped_decoding,
 
+    "vkCreateFence" : emit_global_state_wrapped_decoding,
+    "vkResetFences" : emit_global_state_wrapped_decoding,
+    "vkDestroyFence" : emit_global_state_wrapped_decoding,
+
     # VK_GOOGLE_gfxstream
     "vkFreeMemorySyncGOOGLE" : emit_global_state_wrapped_decoding,
     "vkMapMemoryIntoAddressSpaceGOOGLE" : emit_global_state_wrapped_decoding,
@@ -679,6 +689,8 @@ custom_decodes = {
     "vkQueueFlushCommandsGOOGLE" : emit_global_state_wrapped_decoding,
     "vkQueueCommitDescriptorSetUpdatesGOOGLE" : emit_global_state_wrapped_decoding,
     "vkCollectDescriptorPoolIdsGOOGLE" : emit_global_state_wrapped_decoding,
+
+    "vkQueueBindSparse" : emit_global_state_wrapped_decoding,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):

@@ -199,12 +199,20 @@ Builder& Builder::withPortRange(int start, int end) {
         android::base::ScopedSocket s0(socketTcp4LoopbackServer(port));
         if (s0.valid()) {
             mPort = android::base::socketGetPort(s0.get());
+            mIpMode = IpMode::Ipv4;
             found = true;
+        } else {
+            // Try ipv6 port
+            s0 = socketTcp6LoopbackServer(port);
+            if (s0.valid()) {
+                mPort = android::base::socketGetPort(s0.get());
+                mIpMode = IpMode::Ipv6;
+                found = true;
+            }
         }
     }
-
     return *this;
-}  // namespace control
+}
 
 //  Human readable logging.
 template <typename tstream>
@@ -243,7 +251,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     }
 
     if (!mCredentials) {
-        if (mBindAddress == "localhost" || mBindAddress == "127.0.0.1") {
+        if (mBindAddress == "localhost" || mBindAddress == "[::1]") {
             mCredentials = LocalServerCredentials(LOCAL_TCP);
             mSecurity = Security::Local;
         } else {
@@ -254,7 +262,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
 
     if (!mAuthToken.empty()) {
         if (mSecurity == Security::Insecure) {
-            mBindAddress = "127.0.0.1";
+            mBindAddress = "[::1]";
             mCredentials = LocalServerCredentials(LOCAL_TCP);
             mSecurity = Security::Local;
             LOG(WARNING) << "Token auth requested without tls, restricting "
@@ -262,6 +270,12 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
         }
         mCredentials->SetAuthMetadataProcessor(
                 std::make_shared<StaticTokenAuth>(mAuthToken));
+    }
+
+    // Translate loopback Ipv4/Ipv6 preference ourselves. gRPC resolver can
+    // do it slightly differently than us, leading to unexpected results.
+    if (mBindAddress == "[::1]" || mBindAddress == "127.0.0.1" || mBindAddress == "localhost") {
+        mBindAddress = (mIpMode == IpMode::Ipv4 ? "127.0.0.1" : "[::1]");
     }
 
     std::string server_address = mBindAddress + ":" + std::to_string(mPort);

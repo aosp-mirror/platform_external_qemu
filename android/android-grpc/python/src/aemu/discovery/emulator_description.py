@@ -28,31 +28,40 @@ from aemu.proto.ui_controller_service_pb2_grpc import UiControllerStub
 class EmulatorDescription(dict):
     """A description of a (possibly) running emulator.
 
-       The description comes from the parsed discovery file.
+    The description comes from the parsed discovery file.
     """
 
     def __init__(self, pid, description_dict):
         self._description = description_dict
         self._description["pid"] = pid
 
-    def get_grpc_channel(self):
+    def get_grpc_channel(self, use_async=False):
         """Gets a gRPC channel to the emulator
 
-           It will inject the proper tokens when needed.
+        It will inject the proper tokens when needed.
 
-           Note: Currently only produces insecure channels.
+        Note: Currently only produces insecure channels.
         """
         # This should default to max
         MAX_MESSAGE_LENGTH = -1
 
         addr = "localhost:{}".format(self.get("grpc.port", 8554))
-        channel = grpc.insecure_channel(
-            addr,
-            options=[
-                ("grpc.max_send_message_length", MAX_MESSAGE_LENGTH),
-                ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
-            ],
-        )
+        if use_async:
+            channel = grpc.aio.insecure_channel(
+                addr,
+                options=[
+                    ("grpc.max_send_message_length", MAX_MESSAGE_LENGTH),
+                    ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+                ],
+            )
+        else:
+            channel = grpc.insecure_channel(
+                addr,
+                options=[
+                    ("grpc.max_send_message_length", MAX_MESSAGE_LENGTH),
+                    ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+                ],
+            )
         if "grpc.token" in self._description:
             bearer = "Bearer {}".format(self.get("grpc.token", ""))
             logging.debug("Insecure Channel with token to: %s", addr)
@@ -63,33 +72,46 @@ class EmulatorDescription(dict):
         logging.debug("Insecure channel to %s", addr)
         return channel
 
-    def get_emulator_controller(self):
+    def get_async_grpc_channel(self):
+        """Gets an async gRPC channel to the emulator
+
+        It will inject the proper tokens when needed.
+
+        Note: Currently only produces insecure channels.
+        """
+        return self.get_grpc_channel(True)
+
+    def get_emulator_controller(self, use_async=False):
         """Returns a stub to the emulator controller service."""
-        return EmulatorControllerStub(self.get_grpc_channel())
+        channel = self.get_grpc_channel(use_async)
+        return EmulatorControllerStub(channel)
 
     def get_snapshot_service(self):
         """Returns a stub to the snapshot service."""
         return SnapshotServiceStub(self.get_grpc_channel())
 
-    def get_waterfall_service(self):
+    def get_waterfall_service(self, use_async=False):
         """Returns a stub to the waterfall service.
 
         Note: Requires an image with a waterfall service installed,
         or an emulator running with a waterfall extension.
         """
-        return WaterfallStub(self.get_grpc_channel())
+        channel = self.get_grpc_channel(use_async)
+        return WaterfallStub(channel)
 
-    def get_rtc_service(self):
+    def get_rtc_service(self, use_async=False):
         """Returns a stub to the Rtc service.
 
         Note: Requires an emulator with WebRTC support. Usually this
         means you are running the emulator under linux.
         """
-        return RtcStub(self.get_grpc_channel())
+        channel = self.get_grpc_channel(use_async)
+        return RtcStub(channel)
 
-    def get_ui_controller_service(self):
+    def get_ui_controller_service(self, use_async=False):
         """Returns a stub to the Ui Controller service."""
-        return UiControllerStub(self.get_grpc_channel())
+        channel = self.get_grpc_channel(use_async)
+        return UiControllerStub(channel)
 
     def name(self):
         """Returns the name of the emulator.

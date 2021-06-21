@@ -14,7 +14,7 @@
 import pytest
 import os
 import platform
-from aemu.discovery.emulator_discovery import get_discovery_directory
+from aemu.discovery.emulator_discovery import get_discovery_directories
 
 test_expected = [
     ("Linux", {"XDG_RUNTIME_DIR": "foo"}, "foo"),
@@ -33,8 +33,8 @@ def test_get_discovery_directory(platform, env, expected, mocker):
     mocker.patch.dict(os.environ, env)
     mocker.patch.object(os.path, "exists", return_value=True)
     mocker.patch("platform.system", return_value=platform)
-    disc = get_discovery_directory()
-    assert disc == os.path.join(expected, "avd", "running")
+    disc = get_discovery_directories()
+    assert os.path.join(expected, "avd", "running") in disc
 
 
 test_fallback = [
@@ -50,8 +50,8 @@ def test_get_discovery_directory_fallback(platform, env, mocker):
     mocker.patch.dict(os.environ, env)
     mocker.patch.object(os, "getuid", return_value="bar")
     mocker.patch("platform.system", return_value=platform)
-    disc = get_discovery_directory()
-    assert disc == os.path.join("bar", "avd", "running")
+    disc = get_discovery_directories()
+    assert os.path.join("bar", "avd", "running") in disc
 
 
 @pytest.mark.parametrize("platform,env", test_fallback)
@@ -60,5 +60,5 @@ def test_get_discovery_directory_fallback(platform, env, mocker):
     mocker.patch.dict(os.environ, env)
     mocker.patch.object(os, "getuid", return_value="bar")
     mocker.patch("platform.system", return_value=platform)
-    disc = get_discovery_directory()
-    assert disc == os.path.join("bar", ".android", "avd", "running")
+    disc = get_discovery_directories()
+    assert os.path.join("bar", ".android", "avd", "running") in disc

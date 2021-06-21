@@ -147,7 +147,7 @@
           </font>
          </property>
          <property name="text">
-          <string>START RECORDING</string>
+          <string>Start Recording</string>
          </property>
          <property name="flat">
           <bool>true</bool>
@@ -269,7 +269,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>RECORD AGAIN</string>
+                <string>Record Again</string>
                </property>
                <property name="flat">
                 <bool>true</bool>
@@ -405,7 +405,7 @@
              </font>
             </property>
             <property name="text">
-             <string>SAVE</string>
+             <string>Save</string>
             </property>
             <property name="flat">
              <bool>true</bool>

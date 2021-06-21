@@ -50,26 +50,18 @@ function download_sdk() {
     echo "Downloading to $MOUNT_POINT"
 
     # Download the windows sdk
-    local DEPOT_TOOLS="android/third_party/chromium/depot_tools"
-    # This is the hash of the msvc version we are using (VS 2017)
-    local MSVC_HASH="3bc0ec615cf20ee342f3bc29bc991b5ad66d8d2c"
+    # local DEPOT_TOOLS="android/third_party/chromium/depot_tools"
+    git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git /tmp/depot_tools
+    local DEPOT_TOOLS="/tmp/depot_tools"
+    # This is the hash of the msvc version we are using (VS 2019)
+    local MSVC_HASH="20d5f2553f"
 
     [[ -d $DEPOT_TOOLS ]] || gbash::die "Cannot find depot tools: $DEPOT_TOOLS, are you running the script for {aosp}/external/qemu ?"
 
     LOG INFO "Looking to get tools version: ${MSVC_HASH}"
     LOG INFO "Downloading and copying the SDK (this might take a couple of minutes ...)"
     rm ${HOME}/.boto.bak
-    ${DEPOT_TOOLS}/win_toolchain/get_toolchain_if_necessary.py --force --toolchain-dir=$MOUNT_POINT $MSVC_HASH
-    if [ $? -ne 0 ]; then
-      echo "${RED}Likely not authenticated... Trying to authenticate${RESET}"
-      echo "${RED}Please follow the instructions below. ${RESET}"
-      echo "${RED}Your project code is 0.${RESET}"
-
-
-      ${DEPOT_TOOLS}/download_from_google_storage --config
-      LOG INFO "Downloading and copying the SDK (this might take a couple of minutes ...)"
-      ${DEPOT_TOOLS}/win_toolchain/get_toolchain_if_necessary.py --force --toolchain-dir=$MOUNT_POINT $MSVC_HASH || gbash::die "Unable to fetch toolchain"
-    fi
+    vpython3 ${DEPOT_TOOLS}/win_toolchain/get_toolchain_if_necessary.py --force --toolchain-dir=$MOUNT_POINT $MSVC_HASH
 
     # Setup the symlink to a well known location for the build system.
     ln -sf $MOUNT_POINT/vs_files/$MSVC_HASH $MOUNT_POINT/win8sdk
@@ -149,7 +141,7 @@ function setup_jfs() {
 
     # Create a OS/2 case insensitive loopback fs.
     echo "Creating empty img in /tmp/jfs.img"
-    dd if=/dev/zero of=/tmp/jfs.img bs=1M count=4096
+    dd if=/dev/zero of=/tmp/jfs.img bs=1M count=8192
     chmod a+rwx /tmp/jfs.img
     echo "Making filesystem"
     mkfs.jfs -q -O /tmp/jfs.img

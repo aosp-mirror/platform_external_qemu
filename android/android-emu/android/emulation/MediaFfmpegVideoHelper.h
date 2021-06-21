@@ -59,6 +59,9 @@ public:
     void flush() override;
     void deInit() override;
 
+    // this is special helper function, mostly used by apple vtb
+    // to reorder the output frames
+    int frameReorderBufferSize() const;
 private:
     std::vector<uint8_t> mDecodedFrame;
 

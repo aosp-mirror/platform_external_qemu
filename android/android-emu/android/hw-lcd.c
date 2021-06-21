@@ -27,8 +27,10 @@ hwLcd_mapDensity(int density) {
             density = LCD_DENSITY_140;
         else if (density < (LCD_DENSITY_MDPI + LCD_DENSITY_180)/2)
             density = LCD_DENSITY_MDPI;
-        else if (density < (LCD_DENSITY_180 + LCD_DENSITY_HDPI)/2)
+        else if (density < (LCD_DENSITY_180 + LCD_DENSITY_200)/2)
             density = LCD_DENSITY_180;
+        else if (density < (LCD_DENSITY_200 + LCD_DENSITY_HDPI)/2)
+            density = LCD_DENSITY_200;
         else if (density < (LCD_DENSITY_HDPI + LCD_DENSITY_260DPI)/2)
             density = LCD_DENSITY_HDPI;
         else if (density < (LCD_DENSITY_260DPI + LCD_DENSITY_280DPI)/2)

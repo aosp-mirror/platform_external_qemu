@@ -65,7 +65,7 @@
             "program": "${command:cmake.launchTargetPath}",
             "cwd": "${workspaceFolder}",
             "args": [
-                "--emulator" ,"localhost:9554" ,"--fwd", "--adb", "7555"
+                //"--emulator" ,"localhost:9554" ,"--fwd", "--adb", "7555"
 
                 // "--verbose"
               //  "--gtest_repeat=0", "--gtest_break_on_failure"
@@ -100,6 +100,8 @@
                 "args": [
                     "@R",
                     "-verbose",
+                    "-experimental-enable-multidisplay",
+                    // "-qt-hide-window",
                     "-feature",
                     "-HVF"
                 ],

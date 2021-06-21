@@ -225,8 +225,8 @@ supported_xen_target() {
 supported_hvf_target() {
     test "$hvf" = "yes" || return 1
     glob "$1" "*-softmmu" || return 1
-    case "${1%-softmmu}" in
-        x86_64)
+    case "${1%-softmmu}:$cpu" in
+        x86_64:x86_64 | i386:x86_64 | aarch64:aarch64)
             return 0
         ;;
     esac
@@ -800,7 +800,7 @@ Darwin)
   cocoa="yes"
   audio_drv_list="coreaudio"
   audio_possible_drivers="coreaudio sdl"
-  LDFLAGS="-framework CoreFoundation -framework IOKit $LDFLAGS"
+  LDFLAGS="-framework CoreFoundation -framework IOKit -framework AudioToolbox  $LDFLAGS"
   libs_softmmu="-F/System/Library/Frameworks -framework Cocoa -framework IOKit $libs_softmmu"
   # Disable attempts to use ObjectiveC features in os/object.h since they
   # won't work when we're compiling with gcc as a C compiler.
@@ -885,7 +885,7 @@ if test "$mingw32" = "yes" ; then
   local_statedir=
   confsuffix=""
   hax="yes"
-  libs_qga="-lws2_32 -lwinmm -lpowrprof -lwtsapi32 -lwininet -liphlpapi -lnetapi32 $libs_qga"
+  libs_qga="-lws2_32 -lwinmm -lpowrprof -lwtsapi32 -lwininet -liphlpapi -lnetapi32 -lkernel32  $libs_qga"
 fi
 
 werror=""
@@ -5017,7 +5017,7 @@ fi
 # There is no point enabling this if cpuid.h is not usable,
 # since we won't be able to select the new routines.
 
-if test $cpuid_h = yes -a test "$mingw32" != "yes"; then
+if test $cpuid_h = yes && test "$mingw32" != "yes"; then
   cat > $TMPC << EOF
 #pragma GCC push_options
 #pragma GCC target("avx2")
@@ -6527,9 +6527,10 @@ if test "$pragma_diagnostic_available" = "yes" ; then
   echo "CONFIG_PRAGMA_DIAGNOSTIC_AVAILABLE=y" >> $config_host_mak
 fi
 
-if test "$valgrind_h" = "yes" ; then
-  echo "CONFIG_VALGRIND_H=y" >> $config_host_mak
-fi
+#if test "$valgrind_h" = "yes" ; then
+  # Do not enable valgrind (AEMU)
+  # echo "CONFIG_VALGRIND_H=y" >> $config_host_mak
+#fi
 
 if test "$have_asan_iface_fiber" = "yes" ; then
     echo "CONFIG_ASAN_IFACE_FIBER=y" >> $config_host_mak
@@ -7047,13 +7048,10 @@ if test "$whpx" = "yes" ; then
   fi
 fi
 
-if test "$hvf" = "yes" ; then
-  case "$target_name" in
-  i386|x86_64)
+if supported_hvf_target $target; then
     echo "CONFIG_HVF=y" >> $config_target_mak
-  ;;
-  esac
 fi
+
 if supported_whpx_target $target; then
     echo "CONFIG_WHPX=y" >> $config_target_mak
 fi

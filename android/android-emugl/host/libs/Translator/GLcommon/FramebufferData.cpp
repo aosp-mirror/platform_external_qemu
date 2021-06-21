@@ -217,6 +217,39 @@ void FramebufferData::makeTextureDirty(const getObjDataPtr_t& getObjDataPtr) {
     }
 }
 
+void FramebufferData::rebindTextures(ObjectLocalName localName, GLEScontext* ctx) {
+    if (!delayedBindTexture) {
+        return;
+    }
+    GLDispatch& dispatcher = ctx->dispatcher();
+    GLuint prevFboBinding = ctx->getFBOGlobalName(ctx->getFramebufferBinding(GL_DRAW_FRAMEBUFFER_BINDING));
+    unsigned int globalName = ctx->getFBOGlobalName(localName);
+    dispatcher.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, globalName);
+    for (int i = 0; i < MAX_ATTACH_POINTS; i++) {
+        auto& attachPoint = m_attachPoints[i];
+        if (!attachPoint.name) continue; // bound to nothing
+        if (attachPoint.obj) { // binding a render buffer
+            RenderbufferData *rbData = (RenderbufferData*)attachPoint.obj.get();
+            if (rbData->eglImageGlobalTexObject) {
+                fprintf(stderr, "FramebufferData::restore: warning: "
+                        "binding egl image unsupported\n");
+            }
+        } else { // binding a texture.
+            TextureData *texData = (TextureData*)ctx->shareGroup()->getObjectData(
+                NamedObjectType::TEXTURE, attachPoint.name);
+            texData->reallocateTexture(attachPoint.name, ctx);
+            dispatcher.glFramebufferTexture2D(GL_FRAMEBUFFER,
+                    s_index2Attachment(i),
+                    attachPoint.target,
+                    attachPoint.globalName,
+                    0);
+        }
+    }
+    dispatcher.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFboBinding);
+    delayedBindTexture = false;
+}
+
+
 void FramebufferData::setAttachment(
                class GLEScontext* ctx,
                GLenum attachment,

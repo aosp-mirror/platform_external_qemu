@@ -49,7 +49,6 @@ public:
                     void** newPipePtr) override;
     void onGuestWantWakeOn(int flags) override {
         android::base::AutoLock lock(mLock);
-        mWakeOnRead = (flags & PIPE_WAKE_READ) != 0;
         wakeGuestIfNeededLocked();
     }
 
@@ -128,7 +127,6 @@ private:
     ReadWriteState mGuestReadState;
 
     mutable android::base::Lock mLock; // protects mWakeOnRead
-    bool mWakeOnRead = false;
 
     static bool sEnabled;
 };

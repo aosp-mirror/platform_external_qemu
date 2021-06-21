@@ -50,7 +50,7 @@ def test_no_pid_file_means_no_emulator(mocker):
 def test_bad_pid_file_means_no_emulator(mocker, bad_emu_pid_file):
     path = os.path.dirname(bad_emu_pid_file)
     mocker.patch.object(
-        aemu.discovery.emulator_discovery, "get_discovery_directory", return_value=path
+        aemu.discovery.emulator_discovery, "get_discovery_directories", return_value=[path]
     )
     emu = EmulatorDiscovery()
     assert emu.available() == 0
@@ -60,7 +60,7 @@ def test_can_parse_and_read_emu_file(mocker, fake_emu_pid_file):
     path = os.path.dirname(fake_emu_pid_file)
     pid_file = os.path.basename(fake_emu_pid_file)
     mocker.patch.object(
-        aemu.discovery.emulator_discovery, "get_discovery_directory", return_value=path
+        aemu.discovery.emulator_discovery, "get_discovery_directories", return_value=[path]
     )
     mocker.patch.object(os, "listdir", return_value=[pid_file])
     emu = EmulatorDiscovery()
@@ -73,7 +73,7 @@ def test_finds_default_emulator(mocker, fake_emu_pid_file):
     path = os.path.dirname(fake_emu_pid_file)
     pid_file = os.path.basename(fake_emu_pid_file)
     mocker.patch.object(
-        aemu.discovery.emulator_discovery, "get_discovery_directory", return_value=path
+        aemu.discovery.emulator_discovery, "get_discovery_directories", return_value=[path]
     )
     mocker.patch.object(os, "listdir", return_value=[pid_file])
     assert get_default_emulator() is not None

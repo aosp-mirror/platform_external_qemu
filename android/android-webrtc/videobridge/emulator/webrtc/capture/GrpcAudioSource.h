@@ -41,6 +41,7 @@ public:
 
     ~GrpcAudioSource();
 
+    const cricket::AudioOptions options() const override;
 protected:
     void cancel();
     void run();

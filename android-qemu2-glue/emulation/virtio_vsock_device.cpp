@@ -336,6 +336,14 @@ struct VirtIOVSockDev {
         }
     }
 
+    void vqWriteHostToGuestExternalLocked() {
+        VirtIODevice *vdev = VIRTIO_DEVICE(mS);
+
+        if (vdev->vm_running) {
+            vqWriteHostToGuestLocked();
+        }
+    }
+
     uint64_t hostToGuestOpen(const uint32_t guestPort,
                              IVsockHostCallbacks *callbacks) {
         android::RecursiveScopedVmLock lock;
@@ -352,7 +360,7 @@ struct VirtIOVSockDev {
         const auto stream = createStreamLocked(&request, callbacks);
         if (stream) {
             stream->sendOp(VIRTIO_VSOCK_OP_REQUEST);
-            vqWriteHostToGuestLocked();
+            vqWriteHostToGuestExternalLocked();
             return makeStreamKey(request.src_port, request.dst_port);
         } else {
             return 0;
@@ -367,7 +375,7 @@ struct VirtIOVSockDev {
             stream->mHostCallbacks = nullptr;  // to prevent recursion in dctor
             stream->sendOp(VIRTIO_VSOCK_OP_SHUTDOWN);
             closeStreamLocked(std::move(stream));
-            vqWriteHostToGuestLocked();
+            vqWriteHostToGuestExternalLocked();
             return true;
         } else {
             return false;   // it was closed by the guest side
@@ -380,10 +388,23 @@ struct VirtIOVSockDev {
         const auto stream = findStreamLocked(key);
         if (stream) {
             stream->hostToGuestBufAppend(data, size);
-            vqWriteHostToGuestLocked();
+            vqWriteHostToGuestExternalLocked();
             return size;
         } else {
             return 0;
+        }
+    }
+
+    bool hostToGuestPing(const uint64_t key) {
+        android::RecursiveScopedVmLock lock;
+
+        const auto stream = findStreamLocked(key);
+        if (stream) {
+            stream->sendOp(VIRTIO_VSOCK_OP_CREDIT_REQUEST);
+            vqWriteHostToGuestExternalLocked();
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -877,7 +898,7 @@ void VSockStream::signalWake(const bool write) {
         ::crashhandler_die("%s:%d: No data source", __func__, __LINE__);
     }
     if (write) {
-        mDev->vqWriteHostToGuestLocked();
+        mDev->vqWriteHostToGuestExternalLocked();
     }
 }
 
@@ -949,6 +970,10 @@ size_t virtio_vsock_host_to_guest_send(uint64_t handle,
     return g_impl ? g_impl->hostToGuestSend(handle, data, size) : 0;
 }
 
+bool virtio_vsock_host_to_guest_ping(uint64_t handle) {
+    return g_impl ? g_impl->hostToGuestPing(handle) : false;
+}
+
 bool virtio_vsock_host_to_guest_close(uint64_t handle) {
     return g_impl ? g_impl->hostToGuestClose(handle) : false;
 }
@@ -956,6 +981,7 @@ bool virtio_vsock_host_to_guest_close(uint64_t handle) {
 const virtio_vsock_device_ops_t virtio_vsock_device_host_ops = {
     .open = &virtio_vsock_host_to_guest_open,
     .send = &virtio_vsock_host_to_guest_send,
+    .ping = &virtio_vsock_host_to_guest_ping,
     .close = &virtio_vsock_host_to_guest_close,
 };
 }  // namespace

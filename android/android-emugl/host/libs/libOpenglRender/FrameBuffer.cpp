@@ -17,6 +17,7 @@
 #include "FrameBuffer.h"
 
 #include "DispatchTables.h"
+#include "EglGlobalInfo.h"
 #include "GLESVersionDetector.h"
 #include "NativeSubWindow.h"
 #include "RenderControl.h"
@@ -24,19 +25,22 @@
 #include "YUVConverter.h"
 #include "gles2_dec.h"
 
+#include "MediaNative.h"
+
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "vulkan/VkCommonOperations.h"
 #include "vulkan/VkDecoderGlobalState.h"
 
-#include "android/base/LayoutResolver.h"
 #include "android/base/CpuUsage.h"
+#include "android/base/LayoutResolver.h"
+#include "android/base/Tracing.h"
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/MemoryTracker.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
-#include "android/base/Tracing.h"
+#include "android/utils/debug.h"
 
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/feature_control.h"
@@ -113,9 +117,9 @@ static unsigned int getUptimeMs() {
 static void dumpPerfStats() {
     auto usage = System::get()->getMemUsage();
     std::string memoryStats =
-        emugl::getMemoryTracker()
-                ? emugl::getMemoryTracker()->printUsage()
-                : "";
+            emugl::getMemoryTracker()
+                    ? emugl::getMemoryTracker()->printUsage(android_verbose)
+                    : "";
     auto cpuUsage = emugl::getCpuUsage();
     std::string lastStats =
         cpuUsage ? cpuUsage->printUsage() : "";
@@ -1925,11 +1929,6 @@ void FrameBuffer::destroyYUVTextures(uint32_t type,
     }
 }
 
-extern "C" {
-typedef void (*yuv_updater_t)(void* privData,
-                              uint32_t type,
-                              uint32_t* textures);
-}
 
 void FrameBuffer::updateYUVTextures(uint32_t type,
                                     uint32_t* textures,
@@ -1950,7 +1949,20 @@ void FrameBuffer::updateYUVTextures(uint32_t type,
         gtextures[2] = s_gles2.glGetGlobalTexName(textures[2]);
     }
 
-    updater(privData, type, gtextures);
+#ifdef __APPLE__
+    EGLContext prevContext = s_egl.eglGetCurrentContext();
+    long long hndl = reinterpret_cast<long long>(prevContext);
+    auto mydisp = EglGlobalInfo::getInstance()->getDisplay(EGL_DEFAULT_DISPLAY);
+    void* nativecontext = mydisp->getLowLevelContext(prevContext);
+    struct MediaNativeCallerData callerdata;
+    callerdata.ctx = nativecontext;
+    callerdata.converter = nsConvertVideoFrameToNV12Textures;
+    void* pcallerdata = &callerdata;
+#else
+    void* pcallerdata = nullptr;
+#endif
+
+    updater(privData, type, gtextures, pcallerdata);
 }
 
 void FrameBuffer::swapTexturesAndUpdateColorBuffer(uint32_t p_colorbuffer,
@@ -1997,6 +2009,33 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
     }
 
     (*c).second.cb->subUpdate(x, y, width, height, format, type, pixels);
+
+    return true;
+}
+
+bool FrameBuffer::updateColorBufferFromFrameworkFormat(
+    HandleType p_colorbuffer,
+    int x,
+    int y,
+    int width,
+    int height,
+    FrameworkFormat fwkFormat,
+    GLenum format,
+    GLenum type,
+    void* pixels) {
+    if (width == 0 || height == 0) {
+        return false;
+    }
+
+    AutoLock mutex(m_lock);
+
+    ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
+    if (c == m_colorbuffers.end()) {
+        // bad colorbuffer handle
+        return false;
+    }
+
+    (*c).second.cb->subUpdateFromFrameworkFormat(x, y, width, height, fwkFormat, format, type, pixels);
 
     return true;
 }
@@ -2351,16 +2390,23 @@ bool FrameBuffer::unbind_locked() {
     return true;
 }
 
-void FrameBuffer::createTrivialContext(HandleType shared,
+void FrameBuffer::getTrivialContextForCurrentRenderThread(HandleType shared,
                                        HandleType* contextOut,
                                        HandleType* surfOut) {
     assert(contextOut);
     assert(surfOut);
 
-    *contextOut = createRenderContext(0, shared, GLESApi_2);
-    // Zero size is formally allowed here, but SwiftShader doesn't like it and
-    // fails.
-    *surfOut = createWindowSurface(0, 1, 1);
+    RenderThreadInfo* tInfo = RenderThreadInfo::get();
+    if (!tInfo->trivialContext) {
+        tInfo->trivialContext = createRenderContext(0, shared, GLESApi_2);
+    }
+    if (!tInfo->trivialSurface) {
+        // Zero size is formally allowed here, but SwiftShader doesn't like it and
+        // fails.
+        tInfo->trivialSurface = createWindowSurface(0, 1, 1);
+    }
+    *contextOut = tInfo->trivialContext;
+    *surfOut = tInfo->trivialSurface;
 }
 
 void FrameBuffer::createAndBindTrivialSharedContext(EGLContext* contextOut,
@@ -3146,6 +3192,10 @@ uint32_t* FrameBuffer::getProcessSequenceNumberPtr(uint64_t puid) {
 
 int FrameBuffer::createDisplay(uint32_t *displayId) {
     return emugl::get_emugl_multi_display_operations().createDisplay(displayId);
+}
+
+int FrameBuffer::createDisplay(uint32_t displayId) {
+    return emugl::get_emugl_multi_display_operations().createDisplay(&displayId);
 }
 
 int FrameBuffer::destroyDisplay(uint32_t displayId) {

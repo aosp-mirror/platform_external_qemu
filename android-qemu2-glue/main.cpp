@@ -23,6 +23,7 @@
 #include "android/base/threads/Async.h"
 #include "android/base/threads/Thread.h"
 #include "android/boot-properties.h"
+#include "android/bootconfig.h"
 #include "android/camera/camera-virtualscene.h"
 #include "android/cmdline-option.h"
 #include "android/config/BluetoothConfig.h"
@@ -53,6 +54,7 @@
 #include "android/main-common-ui.h"
 #include "android/main-common.h"
 #include "android/main-kernel-parameters.h"
+#include "android/userspace-boot-properties.h"
 #include "android/multi-instance.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
@@ -83,6 +85,7 @@
 // modem simulator
 extern "C" {
 #include "android_modem_v2.h"
+extern void (*android_gnssgrpcv1_send_nmea)(const char*, int);
 }
 #include "modem_main.h"
 
@@ -133,6 +136,9 @@ extern "C" {
 
 extern "C" bool android_op_wipe_data;
 extern "C" bool android_op_writable_system;
+extern int start_android_gnss_grpc_detached(bool& isIpv4,
+                                            std::string grpcport,
+                                            std::string gnssfilepath);
 
 // Check if we are running multiple emulators on the same AVD
 static bool is_multi_instance = false;
@@ -391,9 +397,18 @@ static void prepareDataFolder(const char* destDirectory,
 
 static bool creatUserDataExt4Img(AndroidHwConfig* hw,
                                  const char* dataDirectory) {
-    android_createExt4ImageFromDir(hw->disk_dataPartition_path, dataDirectory,
-                                   android_hw->disk_dataPartition_size, "data");
-
+    std::string empty_data_path =
+            PathUtils::join(dataDirectory, "empty_data_disk");
+    const bool shouldUseEmptyDataImg = path_exists(empty_data_path.c_str());
+    if (shouldUseEmptyDataImg) {
+        android_createEmptyExt4Image(hw->disk_dataPartition_path,
+                                     android_hw->disk_dataPartition_size,
+                                     "data");
+    } else {
+        android_createExt4ImageFromDir(
+                hw->disk_dataPartition_path, dataDirectory,
+                android_hw->disk_dataPartition_size, "data");
+    }
     // Check if creating user data img succeed
     System::FileSize diskSize;
     if (System::get()->pathFileSize(hw->disk_dataPartition_path, &diskSize) &&
@@ -746,7 +761,7 @@ static void enter_qemu_main_loop(int argc, char** argv) {
 // the radio configs come from the image/<arch>/data/misc/modem_simulator
 // folder, make a copy of that folder to avd/modem_simulator/ and create
 // the necessary dir strucutres that modem simulator expects
-static bool create_modem_simulator_configs_if_needed(AndroidHwConfig* hw) {
+static bool create_modem_simulator_configs_if_needed(AndroidHwConfig* hw, const char* opticcprofile) {
     ScopedCPtr<char> avd_dir(path_dirname(hw->disk_dataPartition_path));
     if (!avd_dir) {
         return false;
@@ -758,7 +773,12 @@ static bool create_modem_simulator_configs_if_needed(AndroidHwConfig* hw) {
         path_delete_file(iccprofile_path.c_str());
     }
 
+
+    const bool need_overwrite_iccprofile = opticcprofile && path_exists(opticcprofile);
     if (path_exists(iccprofile_path.c_str())) {
+        if (need_overwrite_iccprofile) {
+            path_copy_file(iccprofile_path.c_str(), opticcprofile);
+        }
         return true;
     }
 
@@ -766,6 +786,10 @@ static bool create_modem_simulator_configs_if_needed(AndroidHwConfig* hw) {
     std::string org_modem_config_dir = PathUtils::join(sysimg_dir.get(), "data", "misc", "modem_simulator");
 
     path_copy_dir(modem_config_dir.c_str(), org_modem_config_dir.c_str());
+    if (need_overwrite_iccprofile) {
+        // need to overwite as the copy dir will copy everything
+        path_copy_file(iccprofile_path.c_str(), opticcprofile);
+    }
     return path_exists(iccprofile_path.c_str());
 }
 
@@ -1083,7 +1107,9 @@ static int startEmulatorWithMinConfig(
                             WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
         }
     }
-    android_init_multi_display(getConsoleAgents()->emu, getConsoleAgents()->record);
+    android_init_multi_display(getConsoleAgents()->emu,
+                               getConsoleAgents()->record,
+                               getConsoleAgents()->vm);
 
     RendererConfig rendererConfig;
     configAndStartRenderer(avd, opts, hw, getConsoleAgents()->vm,
@@ -1144,6 +1170,16 @@ static int startEmulatorWithMinConfig(
     cuttlefish::stop_android_modem_simulator();
     process_late_teardown();
     return 0;
+}
+
+static std::string getWriteableFilename(const char* disk_dataPartition_path,
+                                        const char* filename) {
+    ScopedCPtr<char> userdata_dir(path_dirname(disk_dataPartition_path));
+    if (userdata_dir) {
+        return PathUtils::join(userdata_dir.get(), filename);
+    } else {
+        return "";
+    }
 }
 
 extern "C" AndroidProxyCB* gAndroidProxyCB;
@@ -1986,7 +2022,13 @@ extern "C" int main(int argc, char** argv) {
     args.add("-m");
     args.addFormat("%d", hw->hw_ramSize);
 
-    int apiLevel = avd ? avdInfo_getApiLevel(avd) : 1000;
+    const int apiLevel = avd ? avdInfo_getApiLevel(avd) : 1000;
+    if (apiLevel < 30) {
+        // We have an unfortunate bug (b/189970804) in gralloc in QT in the
+        // shared slots host memory allocator and it is too late to fix
+        // it there.
+        fc::setIfNotOverriden(fc::HasSharedSlotsHostMemoryAllocator, false);
+    }
 
     // Support for changing default lcd-density
     if (hw->hw_lcd_density) {
@@ -2005,6 +2047,8 @@ extern "C" int main(int argc, char** argv) {
     // won't appreciate it.
     args.add("-nodefaults");
 
+    std::string bootconfigInitrdPath;
+
     if (hw->hw_arc) {
         args.add2("-kernel", hw->kernel_path);
 
@@ -2021,7 +2065,15 @@ extern "C" int main(int argc, char** argv) {
                        avd_dir, avd_dir, avd_dir);
     } else {
         if (hw->disk_ramdisk_path) {
-            args.add({"-kernel", hw->kernel_path, "-initrd", hw->disk_ramdisk_path});
+            args.add2("-kernel", hw->kernel_path);
+
+            if (fc::isEnabled(fc::AndroidbootProps)) {
+                bootconfigInitrdPath =
+                    getWriteableFilename(hw->disk_dataPartition_path, "initrd");
+                args.add2("-initrd", bootconfigInitrdPath.c_str());
+            } else {
+                args.add2("-initrd", hw->disk_ramdisk_path);
+            }
         } else {
             derror("disk_ramdisk_path is required but missing");
             return 1;
@@ -2033,11 +2085,8 @@ extern "C" int main(int argc, char** argv) {
     }
 
     if (fc::isEnabled(fc::KernelDeviceTreeBlobSupport)) {
-        ScopedCPtr<char> userdata_dir(path_dirname(hw->disk_dataPartition_path));
-        assert(userdata_dir);
-
-        const std::string dtbFileName =
-            PathUtils::join(userdata_dir.get(), "default.dtb");
+        const std::string dtbFileName = getWriteableFilename(hw->disk_dataPartition_path,
+                                                             "default.dtb");
 
         if (android_op_wipe_data || !path_exists(dtbFileName.c_str())) {
             ::dtb::Params params;
@@ -2104,7 +2153,10 @@ extern "C" int main(int argc, char** argv) {
                 args.add("null,id=forhvc1");
             }
 
-            boot_property_add_logcat_pipe_virtconsole("*:V");
+            if (!fc::isEnabled(fc::AndroidbootProps)) {
+                // it is going to bootconfig, `androidboot.logcat`
+                boot_property_add_logcat_pipe_virtconsole("*:V");
+            }
         } else {
             args.add("null,id=forhvc1");
         }
@@ -2134,19 +2186,15 @@ extern "C" int main(int argc, char** argv) {
     }
 
     if (feature_is_enabled(kFeature_ModemSimulator)) {
-        if (create_modem_simulator_configs_if_needed(hw)) {
+        if (create_modem_simulator_configs_if_needed(hw, opts->icc_profile)) {
             init_modem_simulator();
             bool isIpv4 = false;
             // start modem now, so qemu can proceed with virtioport setup
             int modem_simulator_guest_port =
                     cuttlefish::start_android_modem_simulator_detached(isIpv4);
 
-            // BUG: 180115054
-            if (!createVirtconsoles) {
-                args.add("-device");
-                args.add("virtio-serial,ioeventfd=off");
-
-            }
+            args.add("-device");
+            args.add("virtio-serial,ioeventfd=off");
             args.add("-chardev");
             args.addFormat(
                     "socket,port=%d,host=%s,nowait,nodelay,%s,id="
@@ -2160,6 +2208,27 @@ extern "C" int main(int argc, char** argv) {
                     "Could not setup modem simulator config files, modem "
                     "simulator disabled.");
         }
+    }
+
+    if (feature_is_enabled(kFeature_GnssGrpcV1)) {
+        bool isIpv4 = false;
+        // start gnss grpc now, so qemu can proceed with virtioport setup
+        int gnss_guest_port = start_android_gnss_grpc_detached(
+                isIpv4, opts->gnss_grpc_port ? opts->gnss_grpc_port : "",
+                opts->gnss_file_path ? opts->gnss_file_path : "");
+
+        args.add("-device");
+        args.add("virtio-serial,ioeventfd=off");
+        args.add("-chardev");
+        args.addFormat(
+                "socket,port=%d,host=%s,nowait,nodelay,%s,id="
+                "gnss",
+                gnss_guest_port, isIpv4 ? "127.0.0.1" : "::1",
+                isIpv4 ? "ipv4" : "ipv6");
+        args.add("-device");
+        args.add("virtserialport,chardev=gnss,name=gnss");
+
+        getConsoleAgents()->location->gpsEnableGnssGrpcV1();
     }
 
     getConsoleAgents()->location->gpsSetPassiveUpdate(!opts->no_passive_gps);
@@ -2193,15 +2262,12 @@ extern "C" int main(int argc, char** argv) {
         args.add("virtio-gpu-pci");
     }
     initialize_virtio_input_devs(args, hw);
-#ifndef AEMU_GFXSTREAM_BACKEND
     if (feature_is_enabled(kFeature_VirtioWifi)) {
         args.add("-netdev");
         args.add("user,id=virtio-wifi,dhcpstart=10.0.2.16");
         args.add("-device");
         args.add("virtio-wifi-pci,netdev=virtio-wifi");
     }
-#endif
-
 
     if (feature_is_enabled(kFeature_VirtioVsockPipe)) {
         args.add("-device");
@@ -2255,7 +2321,9 @@ extern "C" int main(int argc, char** argv) {
         battery->setHasBattery(android_hw->hw_battery);
     }
 
-    android_init_multi_display(getConsoleAgents()->emu, getConsoleAgents()->record);
+    android_init_multi_display(getConsoleAgents()->emu,
+                               getConsoleAgents()->record,
+                               getConsoleAgents()->vm);
 
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.
@@ -2433,39 +2501,75 @@ extern "C" int main(int argc, char** argv) {
           }
         }
 
-        // hardware codec feature
-        std::vector<std::string> hwcodec_boot_params;
-        if (feature_is_enabled(kFeature_HardwareDecoder)) {
-            hwcodec_boot_params.push_back("qemu.hwcodec.avcdec=2");
-            hwcodec_boot_params.push_back("qemu.hwcodec.vpxdec=2");
-        }
-
-        auto all_boot_params = std::move(verified_boot_params);
-        all_boot_params.insert(all_boot_params.end(),
-                               hwcodec_boot_params.begin(),
-                               hwcodec_boot_params.end());
-
         const char* real_console_tty_prefix = kTarget.ttyPrefix;
 
         if (opts->virtio_console) {
             real_console_tty_prefix = "hvc";
         }
 
-        ScopedCPtr<char> kernel_parameters(emulator_getKernelParameters(
-                opts, kTarget.androidArch, apiLevel, real_console_tty_prefix,
-                hw->kernel_parameters, hw->kernel_path, &all_boot_params,
-                rendererConfig.glesMode, rendererConfig.bootPropOpenglesVersion,
-                rendererConfig.glFramebufferSizeBytes, pstore, hw->vm_heapSize,
-                true /* isQemu2 */, hw->hw_arc, hw->hw_lcd_width,
-                hw->hw_lcd_height, hw->hw_lcd_vsync, hw->hw_gltransport,
-                hw->hw_gltransport_drawFlushInterval));
+        constexpr bool isQemu2 = true;
 
-        if (!kernel_parameters.get()) {
+        std::string myserialno("EMULATOR" EMULATOR_VERSION_STRING);
+        std::replace(myserialno.begin(), myserialno.end(), '.', 'X');
+
+        std::vector<std::pair<std::string, std::string>> userspaceBootOpts = getUserspaceBootProperties(
+                opts,
+                kTarget.androidArch,
+                myserialno.c_str(),
+                isQemu2,
+                hw->hw_lcd_width,
+                hw->hw_lcd_height,
+                hw->hw_lcd_vsync,
+                rendererConfig.glesMode,
+                rendererConfig.bootPropOpenglesVersion,
+                hw->vm_heapSize,
+                apiLevel,
+                real_console_tty_prefix,
+                &verified_boot_params,
+                hw->hw_gltransport,
+                hw->hw_gltransport_drawFlushInterval,
+                hw->display_settings_xml);
+
+        std::vector<std::string> kernelCmdLineUserspaceBootOpts;
+        if (fc::isEnabled(fc::AndroidbootProps)) {
+            const int r = createRamdiskWithBootconfig(
+                hw->disk_ramdisk_path,
+                bootconfigInitrdPath.c_str(),
+                userspaceBootOpts);
+            if (r) {
+                fprintf(stderr, "%s:%d Could not prepare the ramdisk with bootconfig, "
+                        "error=%d src=%s dst=%s\n", __func__, __LINE__,
+                        r, hw->disk_ramdisk_path, bootconfigInitrdPath.c_str());
+
+                return r;
+            }
+
+            kernelCmdLineUserspaceBootOpts.push_back("bootconfig");
+        } else {
+            for (const auto& kv: userspaceBootOpts) {
+                kernelCmdLineUserspaceBootOpts.push_back(kv.first + "=" + kv.second);
+            }
+        }
+
+        std::string append_arg = emulator_getKernelParameters(
+                opts,
+                kTarget.androidArch,
+                apiLevel,
+                real_console_tty_prefix,
+                hw->kernel_parameters,
+                hw->kernel_path,
+                &verified_boot_params,
+                rendererConfig.glFramebufferSizeBytes,
+                pstore,
+                isQemu2,
+                hw->hw_arc /* isCros */,
+                std::move(kernelCmdLineUserspaceBootOpts));
+
+        if (append_arg.empty()) {
             return 1;
         }
 
         /* append the kernel parameters after -qemu */
-        std::string append_arg(kernel_parameters.get());
         for (int i = 0; i < argc; ++i) {
             if (!strcmp(argv[i], "-append")) {
                 if (++i < argc) {
@@ -2512,12 +2616,10 @@ extern "C" int main(int argc, char** argv) {
         // Dump final command-line option to make debugging the core easier
         printf("Concatenated QEMU options:\n %s\n", args.toString().c_str());
     }
-#ifndef AEMU_GFXSTREAM_BACKEND
     if (fc::isEnabled(fc::VirtioWifi)) {
         auto* hostapd = android::qemu2::HostapdController::getInstance();
         hostapd->initAndRun(VERBOSE_CHECK(wifi));
     }
-#endif
     if (opts->check_snapshot_loadable) {
         android_check_snapshot_loadable(opts->check_snapshot_loadable);
         stopRenderer();

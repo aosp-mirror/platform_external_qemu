@@ -13,7 +13,6 @@
 // limitations under the License.
 #pragma once
 #include <api/scoped_refptr.h>                             // for scoped_refptr
-#include <rtc_base/critical_section.h>                     // for CriticalSe...
 #include <stdint.h>                                        // for uint16_t
 #include <map>                                             // for map
 #include <memory>                                          // for shared_ptr
@@ -26,7 +25,7 @@
 #include "android/base/system/System.h"                    // for System
 #include "android/emulation/control/RtcBridge.h"           // for RtcBridge:...
 #include "emulator/webrtc/RtcConnection.h"                 // for RtcConnection
-#include "android/emulation/control/TurnConfig.h"                    // for TurnConfig
+#include "android/emulation/control/TurnConfig.h"          // for TurnConfig
 #include "emulator/webrtc/capture/VideoCapturerFactory.h"  // for VideoCaptu...
 
 namespace emulator {
