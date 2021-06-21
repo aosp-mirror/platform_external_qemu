@@ -320,11 +320,59 @@ static std::string initDrivePath(const char* id,
     }
 }
 
-static void mirrorTmpCache(const char* dst, const char* src) {
-    // Cache image doesn't work well with bdrv_snapshot_create.
-    // It complaints when loading a snapshot.
-    // Thus we directly copy the qcow2 file.
-    // TODO (yahan@): figure out why
+// On arm64 encrypt image doesn't work well with bdrv_snapshot_create, while on
+// x86, cache image doesn't work well with bdrv_snapshot_create.
+#if defined(__aarch64__)
+#define MIRROR_IMG_NAME "encrypt"
+#define MIRROR_IMG_FIELD disk_encryptionKeyPartition_path
+#else
+#define MIRROR_IMG_NAME "cache"
+#define MIRROR_IMG_FIELD disk_cachePartition_path
+#endif
+// We need at least one of the qcow2 files to hold the original snapshot
+// information, and this file needs to be the one that corresponds to the
+// BlockDriverState bs_vm_state in migration/savevm.c:qemu_loadvm.
+//
+// In qemu_loadvm, we determine if there is nonzero vmstate size to load via
+// taking the BlockDriverState obatined from bdrv_all_find_vmstate_bs.
+//
+// bdrv_all_find_vmstate_bs only returns the first snapshottable image. The
+// first snapshottable image in the list must have the full vmstate snapshot
+// information available, so we can't create those images qcow2-on-qcow2 with
+// bdrv_snapshot_create: that returns a vmstate size of 0 and snapshot fails.
+//
+// The check is as follows:
+//
+// bs_vm_state = bdrv_all_find_vmstate_bs(); // <--returns file corresponding to cache.img on x86, and encryptionkey.img on arm64
+// if (!bs_vm_state) {
+//     if (s_snapshot_callbacks.loadvm.on_quick_fail) {
+//         s_snapshot_callbacks.loadvm.on_quick_fail(name, -ENOTSUP);
+//     }
+//     messages->err(messages->opaque, NULL,
+//                  "No block device supports snapshots");
+//     fprintf(stderr, "No block device supports snapshots\n");
+//     return -ENOTSUP;
+// }
+// aio_context = bdrv_get_aio_context(bs_vm_state);
+// /* Don't even try to load empty VM states */
+// aio_context_acquire(aio_context);
+// ret = bdrv_snapshot_find(bs_vm_state, &sn, name); // <-- at this point, sn.vm_state_size must be nonzero and the size of the snapshot in order to load. This means on x86 we must mirror the cache image, and on arm64, we must mirror the encrypt image.
+// aio_context_release(aio_context);
+// if (ret < 0) {
+//     if (s_snapshot_callbacks.loadvm.on_quick_fail) {
+//         s_snapshot_callbacks.loadvm.on_quick_fail(name, ret);
+//     }
+//     return ret;
+// } else if (sn.vm_state_size == 0) { // <-- the snapshot failure path when we've ended up clearing cache or encrypt with a fresh bdrv_snapshot_create in drive-share.cpp
+//     if (s_snapshot_callbacks.loadvm.on_quick_fail) {
+//         s_snapshot_callbacks.loadvm.on_quick_fail(name, -EINVAL);
+//     }
+//     messages->err(messages->opaque, NULL,
+//                  "This is a disk-only snapshot. Revert to it offline "
+//                  "using qemu-img.");
+//     return -EINVAL;
+// }
+static void mirrorTmpImg(const char* dst, const char* src) {
     path_copy_file(dst, src);
     Error *local_err = NULL;
 
@@ -336,7 +384,7 @@ static void mirrorTmpCache(const char* dst, const char* src) {
         return;
     }
     char* absPath = nullptr;
-    char* backingFile = android_hw->disk_cachePartition_path;
+    char* backingFile = android_hw->MIRROR_IMG_FIELD;
     if (!android::base::PathUtils::isAbsolute(backingFile)) {
         absPath =
                 path_join(avdInfo_getContentPath(android_avdInfo), backingFile);
@@ -345,9 +393,9 @@ static void mirrorTmpCache(const char* dst, const char* src) {
             backingFile = absPath;
         }
     }
-    D("backing cache.img path: %s\n", backingFile);
+    D("backing " MIRROR_IMG_NAME ".img path: %s\n", backingFile);
     int res = bdrv_change_backing_file(bs, backingFile, NULL);
-    D("cache changing backing file result: %d\n", res);
+    D(MIRROR_IMG_NAME " changing backing file result: %d\n", res);
     bdrv_unref(bs);
     free(absPath);
 }
@@ -361,7 +409,7 @@ static int drive_init(void* opaque, QemuOpts* opts, Error** errp) {
         std::string path = initDrivePath(id, param->shareMode, opts, false);
         qemu_opt_set(opts, "file", path.c_str(), errp);
         if (needCreateTmp(id, param->shareMode, opts) && param->snapshotName) {
-            if (strcmp(id, "cache")) {
+            if (strcmp(id, MIRROR_IMG_NAME)) {
                 int res = 0;
                 if (param->baseNeedApplySnapshot) {
                     // handle the snapshot
@@ -385,8 +433,8 @@ static int drive_init(void* opaque, QemuOpts* opts, Error** errp) {
                     blk_unref(blkNew);
                 }
             } else {
-                mirrorTmpCache(path.c_str(),
-                        sDriveShare->srcImagePaths[id].c_str());
+                mirrorTmpImg(path.c_str(),
+                    sDriveShare->srcImagePaths[id].c_str());
             }
         }
     }
@@ -412,8 +460,8 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
     BlockDriverState* oldbs = blk_bs(blk);
     AioContext* aioCtx = bdrv_get_aio_context(oldbs);
     aio_context_acquire(aioCtx);
-    bool isCache = !strcmp(id, "cache");
-    if (needCreateTmp(id, param->shareMode, opts) && !isCache) {
+    bool needsMirror = !strcmp(id, MIRROR_IMG_NAME);
+    if (needCreateTmp(id, param->shareMode, opts) && !needsMirror) {
         bdrv_flush(oldbs);
         // Set the base file to use the snapshot
         int res = bdrv_snapshot_goto(oldbs, snapshotName, errp);
@@ -435,11 +483,10 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
         D("Closing old image %s\n", oldPath);
         tempfile_unref_and_close(oldPath);
     }
-    // Don't write file contents if it is for cache
-    std::string path = initDrivePath(id, param->shareMode, opts, isCache);
-    if (needCreateTmp(id, param->shareMode, opts) && isCache) {
-        mirrorTmpCache(path.c_str(),
-                    sDriveShare->srcImagePaths[id].c_str());
+    // Don't write file contents if it needs mirroring
+    std::string path = initDrivePath(id, param->shareMode, opts, needsMirror);
+    if (needCreateTmp(id, param->shareMode, opts) && needsMirror) {
+        mirrorTmpImg(path.c_str(), sDriveShare->srcImagePaths[id].c_str());
     }
 
     // Mount the drive
@@ -480,7 +527,7 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
         return 1;
     }
 
-    if (needCreateTmp(id, param->shareMode, opts) && !isCache) {
+    if (needCreateTmp(id, param->shareMode, opts) && !needsMirror) {
         // fake an empty snapshot
         // We don't worry if it fails.
         createEmptySnapshot(bs, param->snapshotName);
