@@ -212,7 +212,9 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay) &&
         !android_foldable_any_folded_area_configured() &&
         !android_foldable_hinge_configured() &&
-        !android_foldable_rollable_configured()) {
+        !android_foldable_rollable_configured() &&
+        avdInfo_getAvdFlavor(android_avdInfo) != AVD_TV &&
+        avdInfo_getAvdFlavor(android_avdInfo) != AVD_WEAR) {
         mSidebarButtons.addButton(mExtendedUi->displaysButton);
         mExtendedUi->displaysButton->setVisible(true);
     } else {
