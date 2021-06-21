@@ -355,15 +355,22 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     // used by underlying EGL driver might become invalid,
     // preventing new contexts from being created that share
     // against those contexts.
+    goldfish_vk::VkEmulation* vkEmu = nullptr;
     if (emugl::emugl_feature_is_enabled(android::featurecontrol::Vulkan)) {
         auto dispatch = emugl::vkDispatch(false /* not for testing */);
-        auto emu = goldfish_vk::createOrGetGlobalVkEmulation(dispatch);
+        vkEmu = goldfish_vk::createOrGetGlobalVkEmulation(dispatch);
         bool useDeferredCommands =
             android::base::System::get()->envGet("ANDROID_EMU_VK_DISABLE_DEFERRED_COMMANDS").empty();
         bool useCreateResourcesWithRequirements =
             android::base::System::get()->envGet("ANDROID_EMU_VK_DISABLE_USE_CREATE_RESOURCES_WITH_REQUIREMENTS").empty();
-        goldfish_vk::setUseDeferredCommands(emu, useDeferredCommands);
-        goldfish_vk::setUseCreateResourcesWithRequirements(emu, useCreateResourcesWithRequirements);
+        goldfish_vk::setUseDeferredCommands(vkEmu, useDeferredCommands);
+        goldfish_vk::setUseCreateResourcesWithRequirements(vkEmu, useCreateResourcesWithRequirements);
+        if (vkEmu->deviceInfo.supportsIdProperties) {
+            GL_LOG("Supports id properties, got a vulkan device UUID");
+            memcpy(fb->m_vulkanUUID, vkEmu->deviceInfo.idProps.deviceUUID, 16);
+        } else {
+            GL_LOG("Doesn't support id properties, no vulkan device UUID");
+        }
     }
 
     if (s_egl.eglUseOsEglApi)
@@ -622,6 +629,50 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     fb->m_glRenderer = std::string((const char*)s_gles2.glGetString(GL_RENDERER));
     fb->m_glVersion = std::string((const char*)s_gles2.glGetString(GL_VERSION));
 
+    // Attempt to get the device UUID of the gles and match with Vulkan. If
+    // they match, interop is possible. If they don't, then don't trust the
+    // result of interop query to egl and fall back to CPU copy, as we might
+    // have initialized Vulkan devices and GLES contexts from different
+    // physical devices.
+
+    bool vkglesUuidsGood = true;
+
+    // First, if the VkEmulation instance doesn't support ext memory capabilities,
+    // it won't support uuids.
+    if (!vkEmu || !vkEmu->instanceSupportsExternalMemoryCapabilities) {
+        vkglesUuidsGood = false;
+    }
+
+    s_gles2.glGetError();
+
+    GLint numDeviceUuids = 0;
+    s_gles2.glGetIntegerv(GL_NUM_DEVICE_UUIDS_EXT, &numDeviceUuids);
+
+    // If underlying gles doesn't support UUID query, we definitely don't
+    // support interop and should not proceed further.
+
+    if (!numDeviceUuids) {
+        vkglesUuidsGood = false;
+    }
+
+    // If numDeviceUuids != 1 it's unclear what gles we're using (SLI? Xinerama?)
+    // and we shouldn't try to interop.
+    if (1 != numDeviceUuids) {
+        vkglesUuidsGood = false;
+    }
+
+    if (vkglesUuidsGood && 1 == numDeviceUuids) {
+        s_gles2.glGetUnsignedBytei_vEXT(GL_DEVICE_UUID_EXT, 0, fb->m_glesUUID);
+        if (0 == memcmp(fb->m_vulkanUUID, fb->m_glesUUID, 16)) {
+            GL_LOG("vk/gles UUIDs match");
+        } else {
+            GL_LOG("vk/gles UUIDs don't match");
+            vkglesUuidsGood = false;
+        }
+    }
+
+    s_gles2.glGetError();
+
     DBG("GL Vendor %s\n", fb->m_glVendor.c_str());
     DBG("GL Renderer %s\n", fb->m_glRenderer.c_str());
     DBG("GL Extensions %s\n", fb->m_glVersion.c_str());
@@ -639,6 +690,9 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     if (s_egl.eglQueryVulkanInteropSupportANDROID) {
         fb->m_vulkanInteropSupported =
             s_egl.eglQueryVulkanInteropSupportANDROID();
+        if (!vkglesUuidsGood) {
+            fb->m_vulkanInteropSupported = false;
+        }
     }
 
     // TODO: 0-copy gl interop on swiftshader vk
@@ -758,6 +812,8 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
      setDisplayPose(displayId, 0, 0, getWidth(), getHeight(), 0);
      m_perfThread->start();
 
+     memset(m_vulkanUUID, 0x0, VK_UUID_SIZE);
+     memset(m_glesUUID, 0x0, GL_UUID_SIZE_EXT);
 }
 
 FrameBuffer::~FrameBuffer() {
