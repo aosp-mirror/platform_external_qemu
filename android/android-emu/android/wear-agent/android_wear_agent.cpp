@@ -32,7 +32,6 @@ void android_wear_agent_start(CLooper* looper) {
 }
 
 void android_wear_agent_stop(void) {
-    DCHECK(sAgent);
     android::wear::WearAgent* agent = sAgent;
     sAgent = NULL;
     delete agent;

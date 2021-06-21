@@ -13,6 +13,8 @@
 // limitations under the License.
 #pragma once
 
+#include "android/base/Allocator.h"
+
 #include <unordered_set>
 
 #include <inttypes.h>
@@ -25,7 +27,7 @@ namespace base {
 // Class to make it easier to set up memory regions where it is fast
 // to allocate/deallocate buffers that have size within
 // the specified range.
-class Pool {
+class Pool : public Allocator {
 public:
     // minSize/maxSize: the target range of sizes for which we want to
     // make allocations fast. the greater the range, the more space
@@ -40,50 +42,16 @@ public:
          size_t maxSize = 4096,
          size_t chunksPerSize = 1024);
 
-
     // All memory allocated by this pool
     // is automatically deleted when the pool
     // is deconstructed.
     ~Pool();
 
-    void* alloc(size_t wantedSize);
+    void* alloc(size_t wantedSize) override;
     void free(void* ptr);
 
     // Convenience function to free everything currently allocated.
     void freeAll();
-
-    // Convenience function to allocate an array
-    // of objects of type T.
-    template <class T>
-    T* allocArray(size_t count) {
-        size_t bytes = sizeof(T) * count;
-        void* res = alloc(bytes);
-        return (T*) res;
-    }
-
-    char* strDup(const char* toCopy) {
-        size_t bytes = strlen(toCopy) + 1;
-        void* res = alloc(bytes);
-        memset(res, 0x0, bytes);
-        memcpy(res, toCopy, bytes);
-        return (char*)res;
-    }
-
-    char** strDupArray(const char* const* arrayToCopy, size_t count) {
-        char** res = allocArray<char*>(count);
-
-        for (size_t i = 0; i < count; i++) {
-            res[i] = strDup(arrayToCopy[i]);
-        }
-
-        return res;
-    }
-
-    void* dupArray(const void* buf, size_t bytes) {
-        void* res = alloc(bytes);
-        memcpy(res, buf, bytes);
-        return res;
-    }
 
 private:
     class Impl;

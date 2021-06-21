@@ -93,7 +93,7 @@
     <string notr="true"></string>
    </property>
    <property name="text">
-    <string>UPDATE</string>
+    <string>Update</string>
    </property>
    <property name="flat">
     <bool>true</bool>

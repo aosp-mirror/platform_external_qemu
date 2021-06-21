@@ -34,6 +34,10 @@ void amodem_receive_sms_vx(AModem modem, SmsPDU sms) {
     s_modem->receive_sms(modem, sms);
 }
 
+ACall amodem_find_call_by_number_vx(AModem modem, const char* args) {
+    return s_modem->find_call_by_number(modem, args);
+}
+
 int amodem_add_inbound_call_vx(AModem modem, const char* args) {
     return s_modem->add_inbound_call(modem, args);
 }
@@ -58,8 +62,24 @@ void amodem_set_data_registration_vx(AModem modem, ARegistrationState state) {
     s_modem->set_data_registration(modem, state);
 }
 
+ARegistrationState amodem_get_data_registration_vx(AModem modem) {
+    return s_modem->get_data_registration(modem);
+}
+
+ARegistrationState amodem_get_voice_registration_vx(AModem modem) {
+    return s_modem->get_voice_registration(modem);
+}
+
 void amodem_set_voice_registration_vx(AModem modem, ARegistrationState state) {
     s_modem->set_voice_registration(modem, state);
+}
+
+void amodem_state_save_vx(AModem modem, SysFile* file) {
+    s_modem->save_sate(modem, file);
+}
+
+int amodem_state_load_vx(AModem modem, SysFile* file, int version_id) {
+    return s_modem->load_sate(modem, file, version_id);
 }
 
 void amodem_set_notification_callback_vx(AModem modem,

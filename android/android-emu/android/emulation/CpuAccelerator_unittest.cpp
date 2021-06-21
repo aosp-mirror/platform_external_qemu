@@ -68,8 +68,13 @@ TEST_F(CpuAcceleratorTest, Default) {
     case CPU_ACCELERATOR_HVF:
         printf("HVF acceleration usable on this machine!\n");
         break;
-
-    default:
+    case CPU_ACCELERATOR_WHPX:
+        printf("WHPX acceleration usable on this machine!\n");
+        break;
+    case CPU_ACCELERATOR_GVM:
+        printf("GVM acceleration usable on this machine!\n");
+        break;
+    case  CPU_ACCELERATOR_MAX:
         ASSERT_FALSE(1) << "Invalid accelerator value: " << accel;
     }
     printf("Status: %s\n", status.c_str());

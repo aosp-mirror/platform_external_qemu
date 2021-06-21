@@ -200,8 +200,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay) &&
         !android_foldable_any_folded_area_configured() &&
         !android_foldable_hinge_configured() &&
-        !android_foldable_rollable_configured() &&
-        !android_cmdLineOptions->qt_hide_window) {
+        !android_foldable_rollable_configured()) {
         mSidebarButtons.addButton(mExtendedUi->displaysButton);
         mExtendedUi->displaysButton->setVisible(true);
     } else {
@@ -317,7 +316,7 @@ ExtendedWindow::~ExtendedWindow() {
     if (android_cmdLineOptions->qt_hide_window && !mFirstShowEvent) {
         auto userConfig = aemu_get_userConfigPtr();
         QRect geom = geometry();
-        auserConfig_setExtendedControlsPos(userConfig, geom.x(), geom.y());
+        auserConfig_setExtendedControlsPos(userConfig, geom.x(), geom.y(), mHAnchor, mVAnchor);
     }
 }
 
@@ -590,7 +589,23 @@ void ExtendedWindow::showEvent(QShowEvent* e) {
             setWindowIcon(icon);
             auto userConfig = aemu_get_userConfigPtr();
             int x, y;
-            if (auserConfig_getExtendedControlsPos(userConfig, &x, &y)) {
+            if (auserConfig_getExtendedControlsPos(userConfig, &x, &y,
+                                                   &mHAnchor, &mVAnchor)) {
+                VerticalAnchor v = (VerticalAnchor)mVAnchor;
+                HorizontalAnchor h = (HorizontalAnchor)mHAnchor;
+                auto size = geometry();
+                if (h == HCENTER) {
+                    x -= (size.width() / 2);
+                } else if (h == RIGHT) {
+                    x -= size.width();
+                }
+
+                if (v == VCENTER) {
+                    y -= (size.height() / 2);
+                } else if (v == BOTTOM) {
+                    y -= size.height();
+                }
+
                 move(x, y);
                 moved = true;
             }
@@ -621,8 +636,26 @@ void ExtendedWindow::showEvent(QShowEvent* e) {
         }
     }
     QFrame::showEvent(e);
+    {
+        std::lock_guard<std::mutex> lk(mMutexVisible);
+        mVisible = true;
+    }
+    mCvVisible.notify_all();
 }
 
+void ExtendedWindow::hideEvent(QHideEvent* e) {
+    QFrame::hideEvent(e);
+    {
+        std::lock_guard<std::mutex> lk(mMutexVisible);
+        mVisible = false;
+    }
+    mCvVisible.notify_all();
+}
+
+void ExtendedWindow::waitForVisibility(bool visible) {
+    std::unique_lock lk(mMutexVisible);
+    mCvVisible.wait(lk, [&] { return visible == mVisible;});
+}
 void ExtendedWindow::showMacroRecordPage() {
     show();
     on_recordButton_clicked();

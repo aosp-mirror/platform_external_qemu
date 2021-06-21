@@ -155,6 +155,7 @@ typedef struct QemuUIInfo {
     int       yoff;
     uint32_t  width;
     uint32_t  height;
+    uint32_t  dpi;
 } QemuUIInfo;
 
 /* cursor data format is 32bit RGBA */
@@ -448,23 +449,8 @@ void surface_gl_setup_viewport(QemuGLShader *gls,
 #endif
 
 /* sdl.c */
-#if defined(CONFIG_SDL)
 void sdl_display_early_init(DisplayOptions *opts);
 int sdl_display_init(DisplayState *ds, DisplayOptions *opts);
-#else
-static inline void sdl_display_early_init(DisplayOptions *opts)
-{
-    /* This must never be called if CONFIG_SDL is disabled */
-    error_report("SDL support is disabled");
-    abort();
-}
-static inline int sdl_display_init(DisplayState *ds, DisplayOptions *opts)
-{
-    /* This must never be called if CONFIG_SDL is disabled */
-    error_report("SDL support is disabled");
-    return false;
-}
-#endif
 
 typedef struct {
     DisplayType type;

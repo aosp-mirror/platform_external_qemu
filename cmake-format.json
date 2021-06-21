@@ -5,6 +5,77 @@
   "first_comment_is_literal": true,
   "command_case": "lower",
   "additional_commands": {
+    "generate_trace": {
+      "flags": [],
+      "kwargs": {
+        "DEST": "*",
+        "GROUP": "*",
+        "FORMAT": "*",
+        "BACKEND": "*",
+        "GENERATED": "*",
+        "SRC": "*"
+      }
+    },
+    "android_bluetooth_packet_gen": {
+      "flags": [],
+      "kwargs": {
+        "SOURCE_DIR": "*",
+        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "OUTPUT_DIR": "*",
+        "INCLUDES": "*",
+        "GENERATED": "*"
+      }
+    },
+    "android_validate_sha": {
+      "flags": [],
+      "kwargs": {
+        "FILE": "*",
+        "EXPECTED": "*",
+        "ERROR": "*"
+      }
+    },
+    "android_flex_compile": {
+      "flags": [],
+      "kwargs": {
+        "SOURCE_DIR": "*",
+        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "OUTPUT_DIR": "*",
+        "GENERATED": "*"
+      }
+    },
+    "prefix_sources": {
+      "flags": [],
+      "kwargs": {
+        "PREFIX": "*",
+        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "OUT": "*"
+      }
+    },
+    "android_yacc_compile": {
+      "flags": [],
+      "kwargs": {
+        "SOURCE_DIR": "*",
+        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "OUTPUT_DIR": "*",
+        "GENERATED": "*"
+      }
+    },
+    "protobuf_generate_with_plugin": {
+      "flags": ["APPEND_PATH"],
+      "kwargs": {
+        "EXPORT_MACRO": "*",
+        "HEADERFILEEXTENSION": "*",
+        "INCLUDES": "*",
+        "LANGUAGE": "*",
+        "OUT_VAR": "*",
+        "PLUGIN": "*",
+        "PLUGINOUT": "*",
+        "PROTOC_OUT_DIR": "*",
+        "PROTOPATH": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "PROTOS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "TARGET": "*"
+      }
+    },
     "protobuf_generate_grpc_cpp": {
       "flags": [],
       "kwargs": {
@@ -40,7 +111,12 @@
         "WINDOWS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
         "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
         "LINUX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
+        "POSIX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "SOURCE_DIR": "*",
+        "WINDOWS_SOURCE_DIR": "*",
+        "LINUX_SOURCE_DIR": "*",
+        "DARWIN_SOURCE_DIR": "*"
       }
     },
     "android_nasm_compile": {
@@ -55,9 +131,9 @@
         "REPO_DIR": "*",
         "NOTICE": "*",
         "DARWIN": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "WINDOWS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
         "LINUX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "POSIX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
         "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
       }
     },
@@ -90,12 +166,17 @@
     "android_add_test": {
       "flags": [],
       "kwargs": {
-        "TARGET": "*",
         "DARWIN": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "WINDOWS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
         "LINUX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
-        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
+        "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "POSIX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "SOURCE_DIR": "*",
+        "WINDOWS_SOURCE_DIR": "*",
+        "LINUX_SOURCE_DIR": "*",
+        "DARWIN_SOURCE_DIR": "*",
+        "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "TARGET": "*",
+        "WINDOWS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
       }
     },
     "android_build_qemu_variant": {
@@ -131,6 +212,13 @@
         "PRIVATE": "*"
       }
     },
+    "android_target_compile_definitions": {
+      "flags": [],
+      "kwargs": {
+        "PUBLIC": "*",
+        "PRIVATE": "*"
+      }
+    },
     "android_target_link_libraries": {
       "flags": [],
       "kwargs": {
@@ -153,6 +241,7 @@
         "WINDOWS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
         "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
         "LINUX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "POSIX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
         "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
       }
     }

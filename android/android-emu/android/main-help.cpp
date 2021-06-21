@@ -19,7 +19,7 @@
 #include <string.h>
 
 int emulator_parseHelpOption(const char* opt) {
-    if (!strcmp(opt, "-help")) {
+    if (!strcmp(opt, "-help") || !strcmp(opt, "--help")) {
         STRALLOC_DEFINE(out);
         android_help_main(out);
         printf("%.*s", out->n, out->s);
@@ -41,7 +41,7 @@ int emulator_parseHelpOption(const char* opt) {
             /* ok */
         }
         if (out->n > 0) {
-            printf("\n%.*s", out->n, out->s);
+            printf("\n%.*s\n", out->n, out->s);
             return 0;
         }
 

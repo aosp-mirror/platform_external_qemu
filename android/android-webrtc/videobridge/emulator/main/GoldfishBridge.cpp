@@ -282,7 +282,8 @@ int main(int argc, char* argv[]) {
 
     if (FLAG_fwd) {
         auto forwarder = std::make_shared<EmulatorForwarder>(client.get(),
-                                                             FLAG_adb_port);
+                                                             FLAG_adb_port,
+                                                             turnCfg);
         sForwarder = forwarder;
         if (!forwarder->createRemoteConnection()) {
             LOG(ERROR) << "Unable to establish a connection to the remote "

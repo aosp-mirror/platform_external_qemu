@@ -595,6 +595,20 @@ public:
         VkSemaphore semaphore,
         const VkAllocationCallbacks* pAllocator);
 
+    VkResult on_vkCreateFence(android::base::BumpPool* pool,
+                              VkDevice device,
+                              const VkFenceCreateInfo* pCreateInfo,
+                              const VkAllocationCallbacks* pAllocator,
+                              VkFence* pFence);
+    VkResult on_vkResetFences(android::base::BumpPool* pool,
+                              VkDevice device,
+                              uint32_t fenceCount,
+                              const VkFence* pFences);
+    void on_vkDestroyFence(android::base::BumpPool* pool,
+                           VkDevice device,
+                           VkFence fence,
+                           const VkAllocationCallbacks* pAllocator);
+
     // Descriptor update templates
     VkResult on_vkCreateDescriptorUpdateTemplate(
         android::base::BumpPool* pool,
@@ -749,6 +763,16 @@ public:
         VkDescriptorPool descriptorPool,
         uint32_t* pPoolIdCount,
         uint64_t* pPoolIds);
+    VkResult on_vkQueueBindSparse(
+        android::base::BumpPool* pool,
+        VkQueue queue,
+        uint32_t bindInfoCount,
+        const VkBindSparseInfo* pBindInfo, VkFence fence);
+
+    // Fence waits
+    VkResult waitForFence(VkFence boxed_fence, uint64_t timeout);
+
+    VkResult getFenceStatus(VkFence boxed_fence);
 
     // Transformations
     void deviceMemoryTransform_tohost(

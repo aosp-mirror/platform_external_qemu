@@ -422,6 +422,8 @@ public:
     void deleteFBO(ObjectLocalName p_localName);
     FramebufferData* getFBOData(ObjectLocalName p_localName) const;
     ObjectDataPtr getFBODataPtr(ObjectLocalName p_localName) const;
+    void rebindCurrentFramebufferTextures();
+    void rebindFramebufferTextures(ObjectLocalName p_framebuffer);
     unsigned int getFBOGlobalName(ObjectLocalName p_localName) const;
     ObjectLocalName getFBOLocalName(unsigned int p_globalName) const;
     int queryCurrFboBits(ObjectLocalName localFboName, GLenum pname);
@@ -636,7 +638,6 @@ protected:
             };
 
     GLuint m_useProgram = 0;
-    bool m_drawDisabled;
 
 private:
 

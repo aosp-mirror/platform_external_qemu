@@ -55,6 +55,7 @@ public:
     // the host color buffer
     // (rcUpdateColorBuffer)
     void drawConvert(int x, int y, int width, int height, char* pixels);
+    void drawConvertFromFormat(FrameworkFormat format, int x, int y, int width, int height, char* pixels);
 
     uint32_t getDataSize();
     // read YUV data into pixels, exactly pixels_size bytes;
@@ -103,6 +104,16 @@ private:
     // colorbuffer w/h/format, could be different
     int mCbWidth = 0;
     int mCbHeight = 0;
+
+    // sw decoders are using YV12 and codec2 tends
+    // to create read/wrtie buffers when actually
+    // write buffer is needed as decoder output.
+    // on M1(not on intel mac), the get texture
+    // operation is too expensive
+    // 1080p will take 150ms + to read one yuv frame
+    // so create a cache
+    std::vector<uint8_t> mYv12pixels;
+
     FrameworkFormat mCbFormat;
     // We need the following GL objects:
     GLuint mProgram = 0;
@@ -113,6 +124,7 @@ private:
     GLuint mVtex = 0;
     GLuint mVUtex = 0;
     GLuint mUVtex = 0;
+    bool mTexturesSwapped = false;
     // shader uniform locations
     GLint mYWidthCutoffLoc = -1;
     GLint mCWidthCutoffLoc = -1;

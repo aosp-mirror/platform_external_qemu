@@ -72,7 +72,10 @@ def get_system_env():
         vs = get_visual_studio()
         env_lines = subprocess.check_output([vs, "&&", "set"]).splitlines()
         for env_line in env_lines:
-            line = str(env_line)
+            if sys.version_info[0] == 3:
+                line = env_line.decode("ascii")
+            else:
+                line = str(env_line)
             if "=" in line:
                 env = line.split("=")
                 # Variables in windows are case insensitive, but not in python dict!

@@ -894,7 +894,9 @@ static void _hwSensors_init(HwSensors* h) {
         }
     }
 
-    if (android_hw->hw_sensors_heart_rate) {
+    if (android_hw->hw_sensors_heart_rate ||
+        (avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR
+         && avdInfo_getApiLevel(android_avdInfo) >= 28)) {
         h->sensors[ANDROID_SENSOR_HEART_RATE].enabled = true;
     }
 

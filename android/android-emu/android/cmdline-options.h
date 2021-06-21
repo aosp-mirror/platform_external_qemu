@@ -163,6 +163,8 @@ OPT_FLAG( no_sim, "device has no SIM card" )
 OPT_FLAG( lowram, "device is a low ram device" )
 OPT_FLAG( version, "display emulator version number" )
 OPT_FLAG( no_passive_gps, "disable passive gps updates" )
+CFG_PARAM( gnss_file_path, "<path>", "Use the specified filepath to read gnss data" )
+CFG_PARAM( gnss_grpc_port, "<port number>", "Use the specified port number to start grpc service to receive gnss data" )
 OPT_FLAG( virtio_console, "using virtio console as console")
 OPT_FLAG( read_only, "allow running multiple instances of emulators on the same"
         " AVD, but cannot save snapshot.")
@@ -218,6 +220,7 @@ OPT_FLAG(detect_image_hang, "Enable the detection of system image hangs.")
 
 OPT_LIST(feature, "<name|-name>", "Force-enable or disable (-name) the features")
 
+OPT_PARAM(icc_profile, "<file>", "Use icc profile from specified file")
 OPT_PARAM(sim_access_rules_file, "<file>", "Use SIM access rules from specified file")
 OPT_PARAM(phone_number, "<phone_number>", "Sets the phone number of the emulated device")
 
@@ -272,6 +275,9 @@ OPT_FLAG(no_hidpi_scaling, "Disable HiDPI scaling of guest display on macOS devi
 OPT_FLAG(no_mouse_reposition,
          "Do not reposition the mouse to emulator window center if mouse "
          "pointer gets out of the window.")
+
+OPT_FLAG(guest_angle,
+         "Enable guest ANGLE as system driver.")
 
 #undef CFG_FLAG
 #undef CFG_PARAM

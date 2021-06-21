@@ -23,6 +23,7 @@ set(android-emu-common
     android/base/async/CallbackRegistry.cpp
     android/base/LayoutResolver.cpp
     android/boot-properties.c
+    android/bootconfig.cpp
     android/car-cluster.cpp
     android/car.cpp
     android/cmdline-option.cpp
@@ -252,6 +253,7 @@ set(android-emu-common
     android/uncompress.cpp
     android/update-check/UpdateChecker.cpp
     android/update-check/VersionExtractor.cpp
+    android/userspace-boot-properties.cpp
     android/user-config.cpp
     android/utils/aconfig-file.c
     android/utils/assert.c
@@ -377,6 +379,8 @@ android_add_library(
          android/camera/camera-capture-mac.m
          android/crashreport/CrashReporter_darwin.cpp
          android/emulation/MediaH264DecoderVideoToolBox.cpp
+         android/emulation/MediaVideoToolBoxVideoHelper.cpp
+         android/emulation/MediaVideoToolBoxUtils.cpp
          android/emulation/MediaH264DecoderVideoToolBoxProxy.cpp
          android/opengl/macTouchOpenGL.m
          android/opengl/NativeGpuInfo_darwin.cpp
@@ -431,8 +435,8 @@ target_link_libraries(
 target_link_libraries(android-emu PRIVATE hostapd)
 
 if(NOT OPTION_GFXSTREAM_BACKEND)
-  target_link_libraries(android-emu PRIVATE modem_simulator_lib)
-  target_link_libraries(android-emu PUBLIC modem_simulator_lib)
+  target_link_libraries(android-emu PRIVATE modem_simulator_lib gnss_proxy_lib)
+  target_link_libraries(android-emu PUBLIC modem_simulator_lib gnss_proxy_lib)
 endif()
 
 # Here are the windows library and link dependencies. They are public and will
@@ -815,6 +819,7 @@ if(NOT LINUX_AARCH64)
       android/base/IOVector_unittest.cpp
       android/base/LayoutResolver_unittest.cpp
       android/base/testing/ProtobufMatchers.cpp
+      android/bootconfig_unittest.cpp
       android/camera/CameraFormatConverters_unittest.cpp
       android/cmdline-option_unittest.cpp
       android/CommonReportedInfo_unittest.cpp
@@ -912,6 +917,7 @@ if(NOT LINUX_AARCH64)
       android/telephony/TagLengthValue_unittest.cpp
       android/update-check/UpdateChecker_unittest.cpp
       android/update-check/VersionExtractor_unittest.cpp
+      android/userspace-boot-properties_unittest.cpp
       android/utils/aconfig-file_unittest.cpp
       android/utils/dns_unittest.cpp
       android/utils/file_data_unittest.cpp

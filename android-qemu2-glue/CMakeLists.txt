@@ -57,7 +57,7 @@ android_add_library(
 
 target_include_directories(
   libqemu2-glue
-  PRIVATE .. ../include ../qemu2-auto-generated ../slirp
+  PRIVATE .. ../include ${ANDROID_AUTOGEN} ../slirp
           ${VIRGLRENDERER_INCLUDE_DIR}
           ${ANDROID_QEMU2_TOP_DIR}/android/third_party/libdtb/include/)
 
@@ -74,8 +74,9 @@ android_add_library(
   SRC # cmake-format: sortable
       ${ANDROID_HW_CONFIG_H} qemu-vm-operations-impl.cpp)
 target_include_directories(libqemu2-glue-vm-operations
-                           PRIVATE .. ../include ../qemu2-auto-generated)
+                           PRIVATE .. ../include ${ANDROID_AUTOGEN})
 target_link_libraries(
   libqemu2-glue-vm-operations
   PRIVATE android-emu GLIB2::GLIB2 android-hw-config
-          nlohmann_json::nlohmann_json)
+          nlohmann_json::nlohmann_json
+          PIXMAN::PIXMAN)

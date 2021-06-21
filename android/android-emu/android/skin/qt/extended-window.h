@@ -17,7 +17,9 @@
 #include <QFrame>                                    // for QFrame
 #include <QString>                                   // for QString
 #include <map>                                       // for map
-#include <memory>                                    // for unique_ptr
+#include <memory>                                    // for shared_ptr, uniq...
+#include <mutex>
+#include <condition_variable>
 
 #include "android/settings-agent.h"                  // for SettingsTheme
 #include "android/skin/qt/extended-window-styles.h"  // for ExtendedWindowPane
@@ -25,8 +27,10 @@
 #include "android/skin/qt/size-tweaker.h"            // for SizeTweaker
 #include "android/ui-emu-agent.h"                    // for UiEmuAgent
 
+
 class EmulatorQtWindow;
 class QCloseEvent;
+class QHideEvent;
 class QKeyEvent;
 class QObject;
 class QPushButton;
@@ -68,6 +72,10 @@ public:
     void show();
     void showPane(ExtendedWindowPane pane);
 
+    // Wait until this component has reached the visibility
+    // state.
+    void waitForVisibility(bool visible);
+
     void connectVirtualSceneWindow(
             VirtualSceneControlWindow* virtualSceneWindow);
 
@@ -106,6 +114,7 @@ private:
     void keyPressEvent(QKeyEvent* e) override;
     void adjustTabs(ExtendedWindowPane thisIndex);
     void showEvent(QShowEvent* e) override;
+    void hideEvent(QHideEvent* e) override;
 
     EmulatorQtWindow* mEmulatorWindow;
     ToolWindow*  mToolWindow;
@@ -117,4 +126,9 @@ private:
     SizeTweaker mSizeTweaker;
     QButtonGroup mSidebarButtons;
     bool mExtendedWindowWasShown = false;
+    int mHAnchor = 0;
+    int mVAnchor = 0;
+    std::condition_variable mCvVisible;
+    std::mutex mMutexVisible;
+    bool mVisible{false};
 };

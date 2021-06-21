@@ -13,6 +13,7 @@
 #include "android/hw-qemud.h"
 
 #include "android/emulation/android_qemud.h"
+#include "android/globals.h"
 #include "android/utils/debug.h"
 
 #include <stddef.h>
@@ -58,6 +59,14 @@
 static CSerialLine* android_qemud_serial_line = NULL;
 
 CSerialLine* android_qemud_get_serial_line(void) {
+    // On minimum configuration mode (Fuchsia mode) we cannot set up
+    // the serial charpipe, but we can still set up qemud using legacy
+    // goldfish pipe mode.
+    if (min_config_qemu_mode || !android_qemu_mode) {
+        android_qemud_init(nullptr);
+        return nullptr;
+    }
+
     if (!android_qemud_serial_line) {
         CSerialLine* slIn;
         CSerialLine* slOut;

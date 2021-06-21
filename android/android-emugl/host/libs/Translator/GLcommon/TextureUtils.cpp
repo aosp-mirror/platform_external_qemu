@@ -64,26 +64,30 @@ static constexpr size_t kASTCFormatsCount = 28;
     EXPAND_MACRO(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR, astc_codec::FootprintType::k12x10, true) \
     EXPAND_MACRO(GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR, astc_codec::FootprintType::k12x12, true) \
 
-int getCompressedFormats(int* formats) {
+int getCompressedFormats(int majorVersion, int* formats) {
     static constexpr size_t kCount = MAX_SUPPORTED_PALETTE + MAX_ETC_SUPPORTED + kASTCFormatsCount;
+    int res = kCount;
+
+    if (majorVersion > 1) {
+        res -= MAX_SUPPORTED_PALETTE;
+    }
 
     if (formats) {
         size_t i = 0;
 
-        // Palette
-        formats[i++] = GL_PALETTE4_RGBA8_OES;
-        formats[i++] = GL_PALETTE4_RGBA4_OES;
-        formats[i++] = GL_PALETTE8_RGBA8_OES;
-        formats[i++] = GL_PALETTE8_RGBA4_OES;
-        formats[i++] = GL_PALETTE4_RGB8_OES;
-        formats[i++] = GL_PALETTE8_RGB8_OES;
-        formats[i++] = GL_PALETTE4_RGB5_A1_OES;
-        formats[i++] = GL_PALETTE8_RGB5_A1_OES;
-        formats[i++] = GL_PALETTE4_R5_G6_B5_OES;
-        formats[i++] = GL_PALETTE8_R5_G6_B5_OES;
-
-        assert(i == MAX_SUPPORTED_PALETTE &&
-               "getCompressedFormats size mismatch");
+        if (1 == majorVersion) {
+            // Palette
+            formats[i++] = GL_PALETTE4_RGBA8_OES;
+            formats[i++] = GL_PALETTE4_RGBA4_OES;
+            formats[i++] = GL_PALETTE8_RGBA8_OES;
+            formats[i++] = GL_PALETTE8_RGBA4_OES;
+            formats[i++] = GL_PALETTE4_RGB8_OES;
+            formats[i++] = GL_PALETTE8_RGB8_OES;
+            formats[i++] = GL_PALETTE4_RGB5_A1_OES;
+            formats[i++] = GL_PALETTE8_RGB5_A1_OES;
+            formats[i++] = GL_PALETTE4_R5_G6_B5_OES;
+            formats[i++] = GL_PALETTE8_R5_G6_B5_OES;
+        }
 
         // ETC
         formats[i++] = GL_ETC1_RGB8_OES;
@@ -99,9 +103,6 @@ int getCompressedFormats(int* formats) {
         formats[i++] = GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
         formats[i++] = GL_COMPRESSED_R11_EAC;
 
-        assert(i == MAX_SUPPORTED_PALETTE + MAX_ETC_SUPPORTED &&
-               "getCompressedFormats size mismatch");
-
         // ASTC
 #define ASTC_FORMAT(typeName, footprintType, srgbValue) \
         formats[i++] = typeName;
@@ -109,10 +110,9 @@ int getCompressedFormats(int* formats) {
         ASTC_FORMATS_LIST(ASTC_FORMAT)
 #undef ASTC_FORMAT
 
-        assert(i == kCount && "getCompressedFormats size mismatch");
     }
 
-    return kCount;
+    return res;
 }
 
 ETC2ImageFormat getEtcFormat(GLenum internalformat) {

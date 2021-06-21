@@ -96,7 +96,7 @@ color: #f0f0f0</string>
         <string notr="true"/>
        </property>
        <property name="text">
-        <string>RECORDING ONGOING </string>
+        <string>Recording Ongoing </string>
        </property>
        <property name="icon">
         <iconset resource="resources.qrc">

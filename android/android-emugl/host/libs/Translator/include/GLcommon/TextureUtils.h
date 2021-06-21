@@ -37,7 +37,7 @@ bool isEtc2Format(GLenum internalformat);
 bool isBptcFormat(GLenum internalformat);
 bool isS3tcFormat(GLenum internalformat);
 bool isPaletteFormat(GLenum internalformat);
-int getCompressedFormats(int* formats);
+int getCompressedFormats(int majorVersion, int* formats);
 void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
                             GLenum internalformat, GLsizei width,
                             GLsizei height, GLint border, GLsizei imageSize,

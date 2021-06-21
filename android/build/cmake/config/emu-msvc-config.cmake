@@ -14,16 +14,27 @@ get_filename_component(
   "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/msvc/"
   ABSOLUTE)
 set(MSVC_FOUND TRUE)
-set(MSVC_DEPENDENCIES
-    "${PREBUILT_ROOT}/msvcp140.dll>./msvcp140.dll"
-    "${PREBUILT_ROOT}/vcruntime140.dll>./vcruntime140.dll"
-    "${PREBUILT_ROOT}/msvcp140.dll>lib64/msvcp140.dll"
-    "${PREBUILT_ROOT}/vcruntime140.dll>lib64/vcruntime140.dll")
+set(MSVC_REDIST_DLL
+concrt140.dll
+msvcp140.dll
+msvcp140_1.dll
+msvcp140_2.dll
+msvcp140_atomic_wait.dll
+msvcp140_codecvt_ids.dll
+vccorlib140.dll
+vcruntime140.dll
+vcruntime140_1.dll
+)
+set(MSVC_DEPENDENCIES "")
+foreach(DEP ${MSVC_REDIST_DLL})
+    list(APPEND MSVC_DEPENDENCIES "${PREBUILT_ROOT}/2019/${DEP}>./${DEP}") 
+    list(APPEND MSVC_DEPENDENCIES "${PREBUILT_ROOT}/2019/${DEP}>lib64/${DEP}")
+endforeach()
 set(PACKAGE_EXPORT "MSVC_DEPENDENCIES;MSVC_FOUND")
 android_license(
   TARGET MSVC_DEPENDENCIES
-  LIBNAME vcredist
-  EXECUTABLES msvcp140.dll vcruntime140.dll msvcp140.dll vcruntime140.dll
+  LIBNAME vcredist 
+  EXECUTABLES ${MSVC_REDIST_DLL}
   URL "https://docs.microsoft.com/en-us/visualstudio/productinfo/2017-redistribution-vs"
   SPDX "2017-redistribution-vs"
   LICENSE

@@ -54,6 +54,7 @@ public:
 class EmulatorControllerService::Builder {
 public:
     enum class Security { Insecure = 0, Tls, Local };
+    enum class IpMode { Ipv4, Ipv6 };
 
     Builder();
 
@@ -126,6 +127,7 @@ private:
     bool mVerbose{false};
     bool mLogging{true};
     bool mCaCerts{false};
+    IpMode mIpMode{IpMode::Ipv4};
 };
 
 }  // namespace control

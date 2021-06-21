@@ -75,25 +75,6 @@ void setupVirtualSerialPorts(ParameterList* kernelParams,
             if (optionShowKernel) {
                 kernelParams->addFormat("console=%s0", kernelSerialPrefix);
             }
-            int logcatSerial = 1;
-            if (apiLevel < 14) {
-                kernelParams->addFormat("android.qemud=%s1",
-                                        kernelSerialPrefix);
-                if (isX86ish) {
-                    logcatSerial = 0;
-                } else {
-                    logcatSerial = 2;
-                }
-            } else {
-                // The rild daemon, used for GSM emulation, checks for qemud,
-                // just set it to a dummy value instead of a serial port.
-                kernelParams->add("android.qemud=1");
-            }
-
-            if (hasShellConsole) {
-                kernelParams->addFormat("androidboot.console=%s%d",
-                                        kernelSerialPrefix, logcatSerial);
-            }
         }
 
         if (qemuParams) {
@@ -135,15 +116,6 @@ void setupVirtualSerialPorts(ParameterList* kernelParams,
                 kernelParams->add("keep_bootcon");
                 kernelParams->addFormat("earlyprintk=%s0", kernelSerialPrefix);
             }
-
-            if (hasShellConsole) {
-                kernelParams->addFormat("androidboot.console=%s0",
-                                        kernelSerialPrefix);
-            }
-
-            // The rild daemon, used for GSM emulation, checks for qemud, just
-            // set it to a dummy value instead of a serial port.
-            kernelParams->add("android.qemud=1");
         }
 
         if (qemuParams) {

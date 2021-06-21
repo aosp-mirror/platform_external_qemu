@@ -22,7 +22,7 @@
 # Gets the desired clang version used by the various toolchains.
 # Update this if you need to change the compiler
 function(get_clang_version RET_VAL)
-  set(${RET_VAL} "clang-r399163b" PARENT_SCOPE)
+  set(${RET_VAL} "clang-r416183b" PARENT_SCOPE)
 endfunction()
 
 
@@ -142,6 +142,7 @@ function(toolchain_generate TARGET_OS)
     set(CMAKE_RANLIB ${COMPILER_PREFIX}ranlib CACHE PATH "Ranlib")
     set(CMAKE_OBJCOPY ${COMPILER_PREFIX}objcopy CACHE PATH "Objcopy")
     set(CMAKE_STRIP ${COMPILER_PREFIX}strip CACHE PATH "strip")
+    set(CMAKE_INSTALL_NAME_TOOL ${COMPILER_PREFIX}install_name_tool)
     set(ANDROID_SYSROOT ${ANDROID_SYSROOT} CACHE PATH "Sysroot")
     set(ANDROID_LLVM_SYMBOLIZER ${PROJECT_BINARY_DIR}/toolchain/llvm-symbolizer CACHE PATH "symbolizer")
 endfunction()
@@ -150,7 +151,13 @@ function(_get_host_tag RET_VAL)
     # Prebuilts to be used on the host os should fall under one of
     # the below tags
     if (APPLE)
-        set (${RET_VAL} "darwin-x86_64" PARENT_SCOPE)
+        # arm/x86?
+        execute_process(COMMAND uname -m OUTPUT_VARIABLE CPU_ARCH)
+        if (CPU_ARCH MATCHES ".*x86_64.*")
+            set (${RET_VAL} "darwin-x86_64" PARENT_SCOPE)
+        else()
+            set (${RET_VAL} "darwin-aarch64" PARENT_SCOPE)
+        endif()
     elseif (UNIX)
         set (${RET_VAL} "linux-x86_64" PARENT_SCOPE)
     else ()
@@ -191,11 +198,7 @@ function(toolchain_configure_tags tag)
     string(REGEX REPLACE "-.*" "" ANDROID_TARGET_OS ${tag})
     string(REGEX REPLACE "[-_].*" "" ANDROID_TARGET_OS_FLAVOR ${tag})
 
-    if (ANDROID_TARGET_TAG STREQUAL "darwin-aarch64")
-        set(ANDROID_HOST_TAG "darwin-aarch64")
-    else()
-        _get_host_tag(ANDROID_HOST_TAG)
-    endif()
+    _get_host_tag(ANDROID_HOST_TAG)
 
     if (NOT ANDROID_TARGET_TAG STREQUAL ANDROID_HOST_TAG)
         set(CROSSCOMPILE TRUE PARENT_SCOPE)
@@ -219,7 +222,6 @@ function(toolchain_configure_tags tag)
         set(DARWIN_AARCH64 TRUE PARENT_SCOPE)
         set(BUILDING_FOR_AARCH64 TRUE)
         set(BUILDING_FOR_AARCH64 TRUE PARENT_SCOPE)
-        set(ANDROID_HOST_TAG "darwin-aarch64")
     endif()
 
     if (ANDOID_HOST_TAG STREQUAL "windows_msvc-x86_64")

@@ -297,7 +297,7 @@ static GLuint getIndex(GLenum indices_type, const GLvoid* indices, unsigned int 
 }
 
 bool GLEScontext::drawDisabled() const {
-    return m_drawDisabled;
+    return emugl_feature_is_enabled(android::featurecontrol::NoDraw);
 }
 
 void GLEScontext::addVertexArrayObjects(GLsizei n, GLuint* arrays) {
@@ -450,12 +450,10 @@ void GLEScontext::setActiveTexture(GLenum tex) {
 }
 
 GLEScontext::GLEScontext() {
-    m_drawDisabled = emugl_feature_is_enabled(android::featurecontrol::NoDraw);
 }
 
 GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
         android::base::Stream* stream, GlLibrary* glLib) {
-    m_drawDisabled = emugl_feature_is_enabled(android::featurecontrol::NoDraw);
     if (stream) {
         m_initialized = stream->getByte();
         m_glesMajorVersion = stream->getBe32();
@@ -2334,6 +2332,20 @@ unsigned int GLEScontext::getFBOGlobalName(ObjectLocalName p_localName) const {
 
 ObjectLocalName GLEScontext::getFBOLocalName(unsigned int p_globalName) const {
     return m_fboNameSpace->getLocalName(p_globalName);
+}
+
+void GLEScontext::rebindCurrentFramebufferTextures() {
+    rebindFramebufferTextures(getFramebufferBinding(GL_DRAW_FRAMEBUFFER));
+}
+
+void GLEScontext::rebindFramebufferTextures(ObjectLocalName p_framebuffer) {
+    if (0 == p_framebuffer || drawDisabled()) {
+        return;
+    }
+    FramebufferData* fbObj = getFBOData(p_framebuffer);
+    if (fbObj) {
+        fbObj->rebindTextures(p_framebuffer, this);
+    }
 }
 
 int GLEScontext::queryCurrFboBits(ObjectLocalName localFboName, GLenum pname) {

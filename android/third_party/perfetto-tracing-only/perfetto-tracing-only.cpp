@@ -67,14 +67,21 @@ struct SavedTraceInfo {
     bool first;
 };
 
+static bool sTraceStorageDestroyed = false;
+
 class TraceStorage {
 public:
+    ~TraceStorage() { sTraceStorageDestroyed = true; }
     void add(TraceContext* context) {
+        if (sTraceStorageDestroyed)
+            return;
         std::lock_guard<std::mutex> lock(mContextsLock);
         mContexts.insert(context);
     }
 
     void remove(TraceContext* context) {
+        if (sTraceStorageDestroyed)
+            return;
         std::lock_guard<std::mutex> lock(mContextsLock);
         mContexts.erase(context);
     }
@@ -84,17 +91,23 @@ public:
     }
 
     void onTracingDisabled() {
+        if (sTraceStorageDestroyed)
+            return;
         saveTracesToDisk();
     }
 
     // When a thread exited early before tracing was disabled
     void saveTrace(const SavedTraceInfo& trace) {
+        if (sTraceStorageDestroyed)
+            return;
         std::lock_guard<std::mutex> lock(mContextsLock);
         saveTraceLocked(trace);
     }
 
 private:
     void saveTraceLocked(const SavedTraceInfo& trace) {
+        if (sTraceStorageDestroyed)
+            return;
         if (trace.data)
             mSavedTraces.push_back(trace);
     }
@@ -389,6 +402,7 @@ private:
         static const size_t kPacketHeaderSize = 4;
         size_t neededSpace = kPacketHeaderSize + 4 + kTrackEventPadding;
         if (mWriter.bytes_available() < neededSpace) {
+            // We ran out of memory, incoming events will be dropped until we save.
             finishAndRefresh();
         }
 
@@ -635,16 +649,25 @@ PERFETTO_TRACING_ONLY_EXPORT void enableTracing() {
     // Don't enable it twice
     if (!sTraceConfig.tracingDisabled) return;
 
+    const char* bufferSizeByEnv = std::getenv("VPERFETTO_MAX_KB");
+    int perThreadStorageMb = 1;
+
+    if (bufferSizeByEnv && sscanf(bufferSizeByEnv, "%d", &perThreadStorageMb)  != 1) {
+        fprintf(stderr, "Unable to extract max buffer size from VPERFETTO_MAX_KB\n");
+    }
+
     fprintf(stderr, "%s: Tracing begins================================================================================\n", __func__);
     fprintf(stderr, "%s: Configuration:\n", __func__);
     fprintf(stderr, "%s: host filename: %s (possibly set via $VPERFETTO_HOST_FILE)\n", __func__, sTraceConfig.hostFilename);
     fprintf(stderr, "%s: guest filename: %s (possibly set via $VPERFETTO_GUEST_FILE)\n", __func__, sTraceConfig.guestFilename);
     fprintf(stderr, "%s: combined filename: %s (possibly set via $VPERFETTO_COMBINED_FILE)\n", __func__, sTraceConfig.combinedFilename);
     fprintf(stderr, "%s: guest time diff to add to host time: %llu\n", __func__, (unsigned long long)sTraceConfig.guestTimeDiff);
+    fprintf(stderr, "%s: using at most %d MB of thread storage.\n", __func__, perThreadStorageMb);
 
     sTraceConfig.packetsWritten = 0;
     sTraceConfig.currentInterningId = 1;
     sTraceConfig.currentThreadId = 1;
+    sTraceConfig.perThreadStorageMb = perThreadStorageMb;
 
     sTraceStorage.onTracingEnabled();
     sTraceConfig.tracingDisabled = 0;

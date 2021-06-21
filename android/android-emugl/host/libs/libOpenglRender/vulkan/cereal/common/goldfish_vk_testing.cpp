@@ -8891,10 +8891,10 @@ void checkEqual_VkMetalSurfaceCreateInfoEXT(
 }
 
 #endif
-#ifdef VK_GOOGLE_color_buffer
-void checkEqual_VkImportColorBufferGOOGLE(
-    const VkImportColorBufferGOOGLE* a,
-    const VkImportColorBufferGOOGLE* b,
+#ifdef VK_EXT_fragment_density_map
+void checkEqual_VkPhysicalDeviceFragmentDensityMapFeaturesEXT(
+    const VkPhysicalDeviceFragmentDensityMapFeaturesEXT* a,
+    const VkPhysicalDeviceFragmentDensityMapFeaturesEXT* b,
     OnFailCompareFunc onFail)
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
@@ -8902,12 +8902,14 @@ void checkEqual_VkImportColorBufferGOOGLE(
     {
         checkEqual_extension_struct(a->pNext, b->pNext, onFail);
     }
-    if (!((a->colorBuffer) == (b->colorBuffer))) { onFail("a->colorBuffer (Error: Value not equal)"); };
+    if (!((a->fragmentDensityMap) == (b->fragmentDensityMap))) { onFail("a->fragmentDensityMap (Error: Value not equal)"); };
+    if (!((a->fragmentDensityMapDynamic) == (b->fragmentDensityMapDynamic))) { onFail("a->fragmentDensityMapDynamic (Error: Value not equal)"); };
+    if (!((a->fragmentDensityMapNonSubsampledImages) == (b->fragmentDensityMapNonSubsampledImages))) { onFail("a->fragmentDensityMapNonSubsampledImages (Error: Value not equal)"); };
 }
 
-void checkEqual_VkImportBufferGOOGLE(
-    const VkImportBufferGOOGLE* a,
-    const VkImportBufferGOOGLE* b,
+void checkEqual_VkPhysicalDeviceFragmentDensityMapPropertiesEXT(
+    const VkPhysicalDeviceFragmentDensityMapPropertiesEXT* a,
+    const VkPhysicalDeviceFragmentDensityMapPropertiesEXT* b,
     OnFailCompareFunc onFail)
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
@@ -8915,12 +8917,14 @@ void checkEqual_VkImportBufferGOOGLE(
     {
         checkEqual_extension_struct(a->pNext, b->pNext, onFail);
     }
-    if (!((a->buffer) == (b->buffer))) { onFail("a->buffer (Error: Value not equal)"); };
+    checkEqual_VkExtent2D(&a->minFragmentDensityTexelSize, &b->minFragmentDensityTexelSize, onFail);
+    checkEqual_VkExtent2D(&a->maxFragmentDensityTexelSize, &b->maxFragmentDensityTexelSize, onFail);
+    if (!((a->fragmentDensityInvocations) == (b->fragmentDensityInvocations))) { onFail("a->fragmentDensityInvocations (Error: Value not equal)"); };
 }
 
-void checkEqual_VkImportPhysicalAddressGOOGLE(
-    const VkImportPhysicalAddressGOOGLE* a,
-    const VkImportPhysicalAddressGOOGLE* b,
+void checkEqual_VkRenderPassFragmentDensityMapCreateInfoEXT(
+    const VkRenderPassFragmentDensityMapCreateInfoEXT* a,
+    const VkRenderPassFragmentDensityMapCreateInfoEXT* b,
     OnFailCompareFunc onFail)
 {
     if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
@@ -8928,11 +8932,7 @@ void checkEqual_VkImportPhysicalAddressGOOGLE(
     {
         checkEqual_extension_struct(a->pNext, b->pNext, onFail);
     }
-    if (!((a->physicalAddress) == (b->physicalAddress))) { onFail("a->physicalAddress (Error: Value not equal)"); };
-    if (!((a->size) == (b->size))) { onFail("a->size (Error: Value not equal)"); };
-    if (!((a->format) == (b->format))) { onFail("a->format (Error: Value not equal)"); };
-    if (!((a->tiling) == (b->tiling))) { onFail("a->tiling (Error: Value not equal)"); };
-    if (!((a->tilingParameter) == (b->tilingParameter))) { onFail("a->tilingParameter (Error: Value not equal)"); };
+    checkEqual_VkAttachmentReference(&a->fragmentDensityMapAttachment, &b->fragmentDensityMapAttachment, onFail);
 }
 
 #endif
@@ -10153,6 +10153,49 @@ void checkEqual_VkDirectFBSurfaceCreateInfoEXT(
 
 #endif
 #ifdef VK_GOOGLE_gfxstream
+void checkEqual_VkImportColorBufferGOOGLE(
+    const VkImportColorBufferGOOGLE* a,
+    const VkImportColorBufferGOOGLE* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->colorBuffer) == (b->colorBuffer))) { onFail("a->colorBuffer (Error: Value not equal)"); };
+}
+
+void checkEqual_VkImportBufferGOOGLE(
+    const VkImportBufferGOOGLE* a,
+    const VkImportBufferGOOGLE* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->buffer) == (b->buffer))) { onFail("a->buffer (Error: Value not equal)"); };
+}
+
+void checkEqual_VkImportPhysicalAddressGOOGLE(
+    const VkImportPhysicalAddressGOOGLE* a,
+    const VkImportPhysicalAddressGOOGLE* b,
+    OnFailCompareFunc onFail)
+{
+    if (!((a->sType) == (b->sType))) { onFail("a->sType (Error: Value not equal)"); };
+    if (a->pNext)
+    {
+        checkEqual_extension_struct(a->pNext, b->pNext, onFail);
+    }
+    if (!((a->physicalAddress) == (b->physicalAddress))) { onFail("a->physicalAddress (Error: Value not equal)"); };
+    if (!((a->size) == (b->size))) { onFail("a->size (Error: Value not equal)"); };
+    if (!((a->format) == (b->format))) { onFail("a->format (Error: Value not equal)"); };
+    if (!((a->tiling) == (b->tiling))) { onFail("a->tiling (Error: Value not equal)"); };
+    if (!((a->tilingParameter) == (b->tilingParameter))) { onFail("a->tilingParameter (Error: Value not equal)"); };
+}
+
 #endif
 #ifdef VK_KHR_acceleration_structure
 void checkEqual_VkDeviceOrHostAddressKHR(
@@ -11780,20 +11823,20 @@ void checkEqual_extension_struct(
             break;
         }
 #endif
-#ifdef VK_GOOGLE_color_buffer
-        case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
+#ifdef VK_EXT_fragment_density_map
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_FEATURES_EXT:
         {
-            checkEqual_VkImportColorBufferGOOGLE(reinterpret_cast<const VkImportColorBufferGOOGLE*>(structExtension), reinterpret_cast<const VkImportColorBufferGOOGLE*>(structExtension2), onFail);
+            checkEqual_VkPhysicalDeviceFragmentDensityMapFeaturesEXT(reinterpret_cast<const VkPhysicalDeviceFragmentDensityMapFeaturesEXT*>(structExtension), reinterpret_cast<const VkPhysicalDeviceFragmentDensityMapFeaturesEXT*>(structExtension2), onFail);
             break;
         }
-        case VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE:
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_PROPERTIES_EXT:
         {
-            checkEqual_VkImportBufferGOOGLE(reinterpret_cast<const VkImportBufferGOOGLE*>(structExtension), reinterpret_cast<const VkImportBufferGOOGLE*>(structExtension2), onFail);
+            checkEqual_VkPhysicalDeviceFragmentDensityMapPropertiesEXT(reinterpret_cast<const VkPhysicalDeviceFragmentDensityMapPropertiesEXT*>(structExtension), reinterpret_cast<const VkPhysicalDeviceFragmentDensityMapPropertiesEXT*>(structExtension2), onFail);
             break;
         }
-        case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
+        case VK_STRUCTURE_TYPE_RENDER_PASS_FRAGMENT_DENSITY_MAP_CREATE_INFO_EXT:
         {
-            checkEqual_VkImportPhysicalAddressGOOGLE(reinterpret_cast<const VkImportPhysicalAddressGOOGLE*>(structExtension), reinterpret_cast<const VkImportPhysicalAddressGOOGLE*>(structExtension2), onFail);
+            checkEqual_VkRenderPassFragmentDensityMapCreateInfoEXT(reinterpret_cast<const VkRenderPassFragmentDensityMapCreateInfoEXT*>(structExtension), reinterpret_cast<const VkRenderPassFragmentDensityMapCreateInfoEXT*>(structExtension2), onFail);
             break;
         }
 #endif
@@ -12140,6 +12183,23 @@ void checkEqual_extension_struct(
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_4444_FORMATS_FEATURES_EXT:
         {
             checkEqual_VkPhysicalDevice4444FormatsFeaturesEXT(reinterpret_cast<const VkPhysicalDevice4444FormatsFeaturesEXT*>(structExtension), reinterpret_cast<const VkPhysicalDevice4444FormatsFeaturesEXT*>(structExtension2), onFail);
+            break;
+        }
+#endif
+#ifdef VK_GOOGLE_gfxstream
+        case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
+        {
+            checkEqual_VkImportColorBufferGOOGLE(reinterpret_cast<const VkImportColorBufferGOOGLE*>(structExtension), reinterpret_cast<const VkImportColorBufferGOOGLE*>(structExtension2), onFail);
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_BUFFER_GOOGLE:
+        {
+            checkEqual_VkImportBufferGOOGLE(reinterpret_cast<const VkImportBufferGOOGLE*>(structExtension), reinterpret_cast<const VkImportBufferGOOGLE*>(structExtension2), onFail);
+            break;
+        }
+        case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
+        {
+            checkEqual_VkImportPhysicalAddressGOOGLE(reinterpret_cast<const VkImportPhysicalAddressGOOGLE*>(structExtension), reinterpret_cast<const VkImportPhysicalAddressGOOGLE*>(structExtension2), onFail);
             break;
         }
 #endif

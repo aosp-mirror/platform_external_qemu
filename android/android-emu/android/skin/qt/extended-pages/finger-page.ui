@@ -54,7 +54,7 @@
     </font>
    </property>
    <property name="text">
-    <string>TOUCH THE SENSOR</string>
+    <string>Touch Sensor</string>
    </property>
    <property name="flat">
     <bool>true</bool>

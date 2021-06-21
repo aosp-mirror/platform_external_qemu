@@ -12,18 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <stdint.h>                                          // for uint16_t
-#include <stdio.h>                                           // for EOF
-#include <ios>                                               // for streamsize
-#include <streambuf>                                         // for streambuf
-#include <string>                                            // for string
-#include <utility>                                           // for pair
-#include <vector>                                            // for vector
+#include <stdint.h>                // for uint32_t, uint64_t
+#include <stdio.h>                 // for EOF
+#include <chrono>                  // for milliseconds
+#include <condition_variable>      // for condition_variable
+#include <ios>                     // for streamsize, streambuf
+#include <streambuf>               // for streambuf
+#include <mutex>                   // for condition_variable, mutex
+#include <string>                  // for string
+#include <utility>                 // for pair
+#include <vector>                  // for vector
 
-#include "android/base/CpuTime.h"                            // for base
-#include "android/base/synchronization/ConditionVariable.h"  // for Conditio...
-#include "android/base/synchronization/Lock.h"               // for Lock
-#include "android/base/system/System.h"                      // for System
+#include "android/base/CpuTime.h"  // for base
+
+using std::chrono::milliseconds;
 
 namespace android {
 namespace emulation {
@@ -44,15 +46,16 @@ using namespace base;
 //   stream << "Hello";
 //
 // Be very careful when using this as an input stream!
-// - It will block when nothing is available
+// - It can block when nothing is available, for up to timeout ms.
 // - It will consume the stream (i.e. read pointers will move)
 class RingStreambuf : public std::streambuf {
 public:
     // |capacity| the minimum number of chars that can be stored.
+    // |timeout| the max time to wait for data when using it in a stream.
     // The real capacity will be a power of 2 above capacity.
     // For example:
     // A capacity of 4 allows you to store 7 characters, and takes up 2^3
-    RingStreambuf(uint32_t capacity);
+    RingStreambuf(uint32_t capacity, std::chrono::milliseconds timeout = milliseconds::max());
 
     // Retrieves the string stored at the given offset.
     // It will block at most timeoutMs.
@@ -60,7 +63,7 @@ public:
     // the first character was retrieved.
     // This call will not modify any read pointers.
     std::pair<int, std::string> bufferAtOffset(std::streamsize offset,
-                                               System::Duration timeoutMs = 0);
+                                               milliseconds timeoutMs = milliseconds(0));
 
 protected:
     // Implement streambuf interface, not that writes can overwrite existing
@@ -80,9 +83,10 @@ private:
     uint32_t mTail{0};        // Ringbuffer read pointer (tail)
     uint64_t mHeadOffset{0};  // Accumulated offset.
     bool     mFull{false};
+    std::chrono::milliseconds mTimeout;
 
-    Lock mLock;
-    ConditionVariable mCanRead;
+    std::mutex mLock;
+    std::condition_variable mCanRead;
 };  // namespace control
 
 }  // namespace control

@@ -14,7 +14,6 @@
 #include "emulator/webrtc/Switchboard.h"
 
 #include <api/scoped_refptr.h>            // for scoped_refptr
-#include <rtc_base/critical_section.h>    // for CritScope
 #include <rtc_base/logging.h>             // for Val, RTC_LOG
 #include <rtc_base/ref_counted_object.h>  // for RefCountedObject
 #include <map>                            // for map, operator==
@@ -115,17 +114,17 @@ bool Switchboard::connect(std::string identity) {
         mMapLock.unlockRead();
     }
 
-    auto participant = std::make_shared<Participant>(this, identity, nullptr);
-    if (!participant->Initialize()) {
-        return false;
-    }
-    mConnections[identity] = participant;
-
     // Inform the client we are going to start, this is the place
     // where we should send the turn config to the client.
     // Turn is really only needed when your server is
     // locked down pretty well. (Google gce environment for example)
     json turnConfig = mTurnConfig.getConfig();
+
+    auto participant = std::make_shared<Participant>(this, identity, turnConfig, nullptr);
+    if (!participant->Initialize()) {
+        return false;
+    }
+    mConnections[identity] = participant;
 
     // The format is json: {"start" : RTCPeerConnection config}
     // (i.e. result from

@@ -20,12 +20,19 @@
 #include <utility>   // for make_pair, pair
 
 #include "android/base/Log.h"  // for LogStreamVoidify
+<<<<<<< HEAD   (7ae1e5 Merge "Merge cherrypicks of [1688578] into emu-30-release" i)
+=======
+#include "android/base/Tracing.h"
+>>>>>>> BRANCH (ec1c92 Merge "Revert "c2-codecs: use display sizes when rendering t)
 #include "android/console.h"
 #include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
 #include "android/hw-sensors.h"                       // for ANDROID_SENSOR_...
 #include "android/opengles.h"
 #include "android/physics/GlmHelpers.h"  // for vecNearEqual
+<<<<<<< HEAD   (7ae1e5 Merge "Merge cherrypicks of [1688578] into emu-30-release" i)
 
+=======
+>>>>>>> BRANCH (ec1c92 Merge "Revert "c2-codecs: use display sizes when rendering t)
 namespace android {
 namespace emulation {
 namespace control {
@@ -154,6 +161,10 @@ bool ScreenshotUtils::getScreenshot(int displayId,
                                     uint32_t* finalWidth,
                                     uint32_t* finalHeight,
                                     SkinRect rect) {
+<<<<<<< HEAD   (7ae1e5 Merge "Merge cherrypicks of [1688578] into emu-30-release" i)
+=======
+    AEMU_SCOPED_TRACE("ScreenshotUtils::getScreenshot");
+>>>>>>> BRANCH (ec1c92 Merge "Revert "c2-codecs: use display sizes when rendering t)
     // Screenshots can come from either the gl renderer, or the guest.
     const auto& renderer = android_getOpenglesRenderer();
     android::emulation::ImageFormat desiredFormat =

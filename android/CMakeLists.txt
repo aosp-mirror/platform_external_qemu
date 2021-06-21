@@ -27,3 +27,5 @@ if(ANDROIDSTUDIO)
   message(STATUS "Including android-studio")
   add_subdirectory(android-studio)
 endif()
+
+add_subdirectory(image_converter)

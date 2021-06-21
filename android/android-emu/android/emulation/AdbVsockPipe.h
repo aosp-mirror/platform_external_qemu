@@ -37,7 +37,7 @@ public:
         Service(AdbHostAgent* hostAgent);
         ~Service();
 
-        void onHostConnection(android::base::ScopedSocket&& socket,
+        void onHostConnection(android::base::ScopedSocket socket,
                               AdbPortType portType) override;
 
         void resetActiveGuestPipeConnection() override;
@@ -53,22 +53,14 @@ public:
         void destroyPipe(AdbVsockPipe *);
 
         void pollGuestAdbdThreadLoop();
-        bool checkIfGuestAdbdAlive();
-
-        void startPollGuestAdbdThread();
-        void stopPollGuestAdbdThread(int newState);
 
         void reset();
         void saveImpl(base::Stream* stream) const;
         bool loadImpl(base::Stream* stream);
         IVsockHostCallbacks* getHostCallbacksImpl(uint64_t key) const;
 
-        static constexpr int kAdbdPollingThreadIdle = 0;
-        static constexpr int kAdbdPollingThreadRunning = 1;
-        static constexpr int kAdbdPollingThreadDisabled = 2;
-
         AdbHostAgent* mHostAgent;
-        std::atomic<int> mGuestAdbdPollingThreadState = kAdbdPollingThreadIdle;
+        std::atomic<bool> mGuestAdbdPollingThreadRunning = true;
         std::vector<std::unique_ptr<AdbVsockPipe>> mPipes;
         base::MessageChannel<AdbVsockPipe *, 4> mPipesToDestroy;
         std::thread mGuestAdbdPollingThread;

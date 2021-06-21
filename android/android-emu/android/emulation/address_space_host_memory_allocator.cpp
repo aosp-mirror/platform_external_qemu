@@ -160,6 +160,7 @@ void AddressSpaceHostMemoryAllocatorContext::clear() {
                              phys_addr, host_ptr, size);
         }
     }
+    m_paddr2ptr.clear();
 }
 
 }  // namespace emulation

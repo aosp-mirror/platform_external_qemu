@@ -455,4 +455,7 @@ void avdInfo_replaceMultiDisplayInConfigIni(AvdInfo* i, int index,
 /* Maximum number of supported multi display entries in an avd. */
 int avdInfo_maxMultiDisplayEntries();
 
+/* Whether the skin has corresponding system overlay */
+bool avdInfo_skinHasOverlay(const char* skinName);
+
 ANDROID_END_HEADER

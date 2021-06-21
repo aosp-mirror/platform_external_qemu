@@ -43,6 +43,9 @@ struct RenderThreadInfo {
     // Destructor.
     ~RenderThreadInfo();
 
+    // Release handles to contexts and surfaces it holds.
+    void release();
+
     // Return the current thread's instance, if any, or NULL.
     static RenderThreadInfo* get();
 
@@ -53,6 +56,9 @@ struct RenderThreadInfo {
     HandleType currContextHandleFromLoad;
     HandleType currDrawSurfHandleFromLoad;
     HandleType currReadSurfHandleFromLoad;
+
+    HandleType trivialContext = 0;
+    HandleType trivialSurface = 0;
 
     RenderContextPtr currContext;
     WindowSurfacePtr currDrawSurf;

@@ -74,4 +74,9 @@ extern int android_gps_get_location(double* outLatitude, double* outLongitude,
  * run. */
 extern void android_gps_set_passive_update(bool enable);
 
+/* enable the gps to use GnssGrpcV1 apis to work with S and afterwards that
+ * accept GnssGrpcV1 feature
+ */
+extern void android_gps_enable_gnssgrpcv1();
+
 extern bool android_gps_get_passive_update();

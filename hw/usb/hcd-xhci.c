@@ -3084,6 +3084,10 @@ static void xhci_runtime_write(void *ptr, hwaddr reg,
         if (val & ERDP_EHB) {
             intr->erdp_low &= ~ERDP_EHB;
         }
+        if ((intr->erdp_low & ~ERDP_EHB) == (val & ~ERDP_EHB)) {
+            DPRINTF("xhci: ignoring ERDP update that didn't advance.\n");
+            break;
+        }
         intr->erdp_low = (val & ~ERDP_EHB) | (intr->erdp_low & ERDP_EHB);
         if (val & ERDP_EHB) {
             dma_addr_t erdp = xhci_addr64(intr->erdp_low, intr->erdp_high);

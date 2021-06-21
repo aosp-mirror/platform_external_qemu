@@ -157,6 +157,8 @@ int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
     glGetSyncivAEMU = s_glGetSyncivAEMU;
     glDeleteSyncAEMU = s_glDeleteSyncAEMU;
 
+    glBufferDataSyncAEMU = s_glBufferDataSyncAEMU;
+
     OVERRIDE_DEC(glCreateShader)
     OVERRIDE_DEC(glCreateProgram)
 
@@ -685,6 +687,12 @@ GLboolean GLESv2Decoder::s_glIsSyncAEMU(void* self, uint64_t sync) {
 void GLESv2Decoder::s_glGetSyncivAEMU(void* self, uint64_t sync, GLenum pname, GLsizei bufSize, GLsizei *length, GLint *values) {
     GLESv2Decoder *ctx = (GLESv2Decoder *)self;
     ctx->glGetSynciv((GLsync)(uintptr_t)sync, pname, bufSize, length, values);
+}
+
+GLboolean GLESv2Decoder::s_glBufferDataSyncAEMU(void* self, GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage) {
+    GLESv2Decoder *ctx = (GLESv2Decoder *)self;
+    ctx->glBufferData(target, size, data, usage);
+    return GL_TRUE;
 }
 
 GLuint GLESv2Decoder::s_glCreateShader(void* self, GLenum shaderType) {

@@ -45,6 +45,7 @@
 #include "emulator_controller.pb.h"                      // for KeyboardEvent
 #include "google/protobuf/empty.pb.h"                    // for Empty
 #include "nlohmann/json.hpp"                             // for basic_json
+#include "emulator/webrtc/RtcConfig.h"
 
 namespace android {
 namespace base {
@@ -59,7 +60,7 @@ using MediaStreamPair =
 namespace emulator {
 namespace webrtc {
 
-const std::string Participant::kStunUri = "stun:stun.l.google.com:19302";
+
 const std::string Participant::kAudioTrack = "grpcAudioTrack";
 const std::string Participant::kVideoTrack = "grpcDisplay-";
 
@@ -223,8 +224,12 @@ void EventForwarder::OnMessage(const ::webrtc::DataBuffer& buffer) {
 
 Participant::Participant(RtcConnection* board,
                          std::string id,
+                         json rtcConfig,
                          VideoTrackReceiver* vtr)
-    : mRtcConnection(board), mPeerId(id), mVideoReceiver(vtr) {}
+    : mRtcConnection(board),
+      mPeerId(id),
+      mRtcConfig(std::move(rtcConfig)),
+      mVideoReceiver(vtr) {}
 
 Participant::~Participant() {
     RTC_LOG(INFO) << "Participant " << mPeerId << ", completed.";
@@ -299,7 +304,8 @@ void Participant::Close() {
     if (mRtcConnection->signalingThread()->IsCurrent()) {
         DoClose();
     } else {
-        mRtcConnection->signalingThread()->Invoke<void>(RTC_FROM_HERE, [&] { DoClose(); });
+        mRtcConnection->signalingThread()->Invoke<void>(RTC_FROM_HERE,
+                                                        [&] { DoClose(); });
     }
 }
 void Participant::WaitForClose() {
@@ -521,7 +527,7 @@ void Participant::AddDataChannel(const DataChannelLabel label) {
 }
 
 bool Participant::Initialize() {
-    bool success = CreatePeerConnection({});
+    bool success = CreatePeerConnection(mRtcConfig);
     if (success) {
         AddDataChannel(DataChannelLabel::mouse);
         AddDataChannel(DataChannelLabel::touch);
@@ -530,56 +536,11 @@ bool Participant::Initialize() {
     return success;
 }
 
-static ::webrtc::PeerConnectionInterface::IceServer parseIce(json desc) {
-    ::webrtc::PeerConnectionInterface::IceServer ice;
-    if (desc.count("credential")) {
-        ice.password = desc["credential"];
-    }
-    if (desc.count("username")) {
-        ice.username = desc["username"];
-    }
-    if (desc.count("urls")) {
-        auto urls = desc["urls"];
-        if (urls.is_string()) {
-            ice.urls.push_back(urls.get<std::string>());
-        } else {
-            for (const auto& uri : urls) {
-                ice.urls.push_back(uri.get<std::string>());
-            }
-        }
-    }
-    return ice;
-}
-
-static ::webrtc::PeerConnectionInterface::RTCConfiguration
-parseRTCConfiguration(json rtcConfiguration) {
-    ::webrtc::PeerConnectionInterface::RTCConfiguration configuration;
-    // TODO(jansene) handle additional properties?
-    // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/RTCPeerConnection#rtcconfiguration_dictionary
-    if (rtcConfiguration.count("iceServers")) {
-        auto iceServers = rtcConfiguration["iceServers"];
-        for (const auto& iceServer : iceServers) {
-            configuration.servers.push_back(parseIce(iceServer));
-        }
-    }
-
-    // Modern webrtc with multiple audio & video channels.
-    configuration.sdp_semantics = ::webrtc::SdpSemantics::kUnifiedPlan;
-
-    // Let's add at least a default stun server if none is present.
-    if (configuration.servers.empty()) {
-        ::webrtc::PeerConnectionInterface::IceServer server;
-        server.uri = Participant::kStunUri;
-        configuration.servers.push_back(server);
-    }
-    return configuration;
-}
-
 bool Participant::CreatePeerConnection(const json& rtcConfiguration) {
     RTC_DCHECK(mPeerConnection.get() == nullptr);
     mPeerConnection =
             mRtcConnection->getPeerConnectionFactory()->CreatePeerConnection(
-                    parseRTCConfiguration(rtcConfiguration),
+                   RtcConfig::parse(rtcConfiguration),
                     ::webrtc::PeerConnectionDependencies(this));
     return mPeerConnection.get() != nullptr;
 }

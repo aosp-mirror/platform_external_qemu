@@ -1410,12 +1410,12 @@ do_gsm_status( ControlClient  client, char*  args )
         control_write( client, "KO: modem emulation not running\r\n" );
         return -1;
     }
-    control_write( client, "gsm voice state: %s\r\n",
-                   gsm_state_to_string(
-                       amodem_get_voice_registration(android_modem_get()) ) );
-    control_write( client, "gsm data state:  %s\r\n",
-                   gsm_state_to_string(
-                       amodem_get_data_registration(android_modem_get()) ) );
+    control_write(client, "gsm voice state: %s\r\n",
+                  gsm_state_to_string(amodem_get_voice_registration_vx(
+                          android_modem_get())));
+    control_write(client, "gsm data state:  %s\r\n",
+                  gsm_state_to_string(amodem_get_data_registration_vx(
+                          android_modem_get())));
     return 0;
 }
 
@@ -1495,7 +1495,7 @@ do_gsm_data( ControlClient  client, char*  args )
                 control_write( client, "KO: modem emulation not running\r\n" );
                 return -1;
             }
-            amodem_set_data_registration( android_modem_get(), state );
+            amodem_set_data_registration_vx(android_modem_get(), state);
             android_net_disable = (state != A_REGISTRATION_HOME    &&
                                 state != A_REGISTRATION_ROAMING );
             return 0;
@@ -1547,7 +1547,7 @@ do_gsm_voice( ControlClient  client, char*  args )
                 control_write( client, "KO: modem emulation not running\r\n" );
                 return -1;
             }
-            amodem_set_voice_registration( android_modem_get(), state );
+            amodem_set_voice_registration_vx(android_modem_get(), state);
             return 0;
         }
     }
@@ -1610,7 +1610,7 @@ do_gsm_cancel( ControlClient  client, char*  args )
         control_write( client, "KO: modem emulation not running\r\n" );
         return -1;
     }
-    if ( amodem_disconnect_call( android_modem_get(), args ) < 0 ) {
+    if (amodem_disconnect_call_vx(android_modem_get(), args) < 0) {
         control_write( client, "KO: could not cancel this number\r\n" );
         return -1;
     }
@@ -1664,7 +1664,7 @@ do_gsm_busy( ControlClient  client, char*  args )
         control_write( client, "KO: missing argument, try 'gsm busy <phonenumber>'\r\n" );
         return -1;
     }
-    call = amodem_find_call_by_number( android_modem_get(), args );
+    call = amodem_find_call_by_number_vx(android_modem_get(), args);
     if (call == NULL || call->dir != A_CALL_OUTBOUND) {
         control_write( client, "KO: no current outbound call to number '%s' (call %p)\r\n", args, call );
         return -1;
@@ -1685,7 +1685,7 @@ do_gsm_hold( ControlClient  client, char*  args )
         control_write( client, "KO: missing argument, try 'gsm hold <phonenumber>'\r\n" );
         return -1;
     }
-    call = amodem_find_call_by_number( android_modem_get(), args );
+    call = amodem_find_call_by_number_vx(android_modem_get(), args);
     if (call == NULL) {
         control_write( client, "KO: no current call to/from number '%s'\r\n", args );
         return -1;
@@ -1707,12 +1707,12 @@ do_gsm_accept( ControlClient  client, char*  args )
         control_write( client, "KO: missing argument, try 'gsm accept <phonenumber>'\r\n" );
         return -1;
     }
-    call = amodem_find_call_by_number( android_modem_get(), args );
+    call = amodem_find_call_by_number_vx(android_modem_get(), args);
     if (call == NULL) {
         control_write( client, "KO: no current call to/from number '%s'\r\n", args );
         return -1;
     }
-    if ( amodem_update_call( android_modem_get(), args, A_CALL_ACTIVE ) < 0 ) {
+    if (amodem_update_call_vx(android_modem_get(), args, A_CALL_ACTIVE) < 0) {
         control_write( client, "KO: could not activate this call\r\n" );
         return -1;
     }
@@ -4082,6 +4082,25 @@ static int do_unfold(ControlClient client, char* args) {
     return -1;
 }
 
+static int do_no_draw(ControlClient client, char* args) {
+    if (args == nullptr) {
+        control_write(client, "KO: expecting nodraw parameter: on/off.\r\n");
+        return -1;
+    }
+    std::string args_lower = args;
+    std::transform(args_lower.begin(), args_lower.end(), args_lower.begin(), ::tolower);
+    if (args_lower == "on" || args_lower == "true" || args_lower == "yes") {
+        android::featurecontrol::setEnabledOverride(android::featurecontrol::NoDraw, true);
+    } else if (args_lower == "off" || args_lower == "false" ||
+               args_lower == "no") {
+        android::featurecontrol::setEnabledOverride(android::featurecontrol::NoDraw, false);
+    } else {
+        control_write(client, "KO: expecting nodraw parameter: on/off.\r\n");
+        return -1;
+    }
+    return 0;
+}
+
 /* NOTE: The names of all commands are listed when the 'help' command
  *       is received.
  *       Android Studio uses the 'help' command and requires that the
@@ -4214,6 +4233,9 @@ extern const CommandDefRec main_commands[] = {
          "allows emulator to automatically take snapshot on uncaught "
          "exceptions, for test and debug purpose. (experimental)",
          NULL, NULL, icebox_commands},
+
+        {"nodraw", "turn on/off NoDraw mode. (experimental)",
+         NULL, NULL, do_no_draw, NULL},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 

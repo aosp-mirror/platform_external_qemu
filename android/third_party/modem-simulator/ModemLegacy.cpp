@@ -23,6 +23,10 @@ int ModemLegacy::add_inbound_call(AModem modem, const char* args) {
     return amodem_add_inbound_call(modem, args);
 }
 
+ACall ModemLegacy::find_call_by_number(AModem modem, const char* args) {
+    return amodem_find_call_by_number(modem, args);
+}
+
 int ModemLegacy::disconnect_call(AModem modem, const char* args) {
     return amodem_disconnect_call(modem, args);
 }
@@ -44,9 +48,25 @@ void ModemLegacy::set_data_registration(AModem modem,
     amodem_set_data_registration(modem, state);
 }
 
+ARegistrationState ModemLegacy::get_data_registration(AModem modem) {
+    return amodem_get_data_registration(modem);
+}
+
+ARegistrationState ModemLegacy::get_voice_registration(AModem modem) {
+    return amodem_get_voice_registration(modem);
+}
+
 void ModemLegacy::set_voice_registration(AModem modem,
                                          ARegistrationState state) {
     amodem_set_voice_registration(modem, state);
+}
+
+void ModemLegacy::save_sate(AModem modem, SysFile* file) {
+    amodem_state_save(modem, file);
+}
+
+int ModemLegacy::load_sate(AModem modem, SysFile* file, int version_id) {
+    return amodem_state_load(modem, file, version_id);
 }
 
 void ModemLegacy::set_notification_callback_vx(AModem modem,
