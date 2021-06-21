@@ -217,7 +217,7 @@ public:
                 bool success = mVulkanLibs.addLibrary(VULKAN_LOADER_FILENAME);
 #ifdef __linux__
                 if (!success) {
-                    mVulkanLibs.addLibrary("libvulkan.so.1");
+                    success = mVulkanLibs.addLibrary("libvulkan.so.1");
                 }
 #endif // __linux__
             } else {
@@ -226,7 +226,7 @@ public:
 
                 if (!success) {
                     loaderPath = getLoaderPath(System::get()->getLauncherDirectory(), mForTesting);
-                    mVulkanLibs.addLibrary(loaderPath);
+                    success = mVulkanLibs.addLibrary(loaderPath);
                 }
 
 #ifdef __linux__
@@ -234,7 +234,7 @@ public:
                 // Try libvulkan.so.1 if that doesn't work.
                 if (!success) {
                     loaderPath = pj(System::get()->getLauncherDirectory(), "lib64", "vulkan", "libvulkan.so.1");
-                    mVulkanLibs.addLibrary(loaderPath);
+                    success = mVulkanLibs.addLibrary(loaderPath);
                 }
 #endif // __linux__
 #ifdef __APPLE__
