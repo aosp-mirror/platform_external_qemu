@@ -116,7 +116,7 @@ private:
 
     std::vector<InputFrame> mInputFrames;
 
-    void parseInputFrames(const uint8_t* frame, size_t sz);
+    bool parseInputFrames(const uint8_t* frame, size_t sz);
 
     // returns the remaining part of the frame, nullptr if none
     const uint8_t* parseOneFrame(const uint8_t* frame, size_t szBytes);
@@ -176,10 +176,12 @@ private:
     std::unique_ptr<MediaFfmpegVideoHelper> mFfmpegVideoHelper;
     void extractFrameInfo();
 
+    uint64_t mTotalFrames = 0;
     // vtb decoder does not reorder output frames, that means
     // the video could see jumps all the times
     int mVtbBufferSize = 8;
-    std::map<uint64_t, MediaSnapshotState::FrameInfo> mVtbBufferMap;
+    using PtsPair = std::pair<uint64_t, uint64_t>;
+    std::map<PtsPair, MediaSnapshotState::FrameInfo> mVtbBufferMap;
 
 };  // MediaVideoToolBoxVideoHelper
 
