@@ -207,13 +207,11 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     auto* win = EmulatorQtWindow::getInstance();
                     bool visibilityChanged = false;
                     if (win) {
-                        QSemaphore completed;
                         visibilityChanged =
                                 !win->toolWindow()->isExtendedWindowVisible();
                         win->runOnUiThread([win, pane]() {
                             win->toolWindow()->showExtendedWindow(pane);
-                        }, &completed);
-                        completed.acquire();
+                        });
                     }
                     return visibilityChanged;
                 },
@@ -223,13 +221,11 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     auto* win = EmulatorQtWindow::getInstance();
                     bool visibilityChanged = false;
                     if (win) {
-                        QSemaphore completed;
                         visibilityChanged =
                                 win->toolWindow()->isExtendedWindowVisible();
                         win->runOnUiThread([win]() {
                             win->toolWindow()->hideExtendedWindow();
-                        }, &completed);
-                        completed.acquire();
+                        });
                     }
                     return visibilityChanged;
                 },
