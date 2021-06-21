@@ -50,6 +50,19 @@ void* finalizePixelFormat(
 int getPixelFormatAttrib(int i, int attrib);
 
 void* nsCreateContext(void* finalizedPixelFormat,void* share);
+void* nsGetLowLevelContext(void* context);
+// convert to NV12 textures from decoded output iosurface
+void nsConvertVideoFrameToNV12Textures(void* context,
+                                       void* iosurface,
+                                       int Ytex,
+                                       int UVtex);
+
+// copy texture "from" to "to"
+// from: GL_TEXTURE_RECTANGLE
+// to:   GL_TEXTURE_2D
+
+void nsCopyTexture(void* context, int from, int to, int w, int h);
+
 void nsWindowMakeCurrent(void* context,void* nativeWin);
 void nsPBufferMakeCurrent(void* context,void* nativePBuffer,int level);
 void nsSwapBuffers();

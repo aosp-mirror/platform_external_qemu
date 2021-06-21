@@ -230,6 +230,7 @@ using OnFailCompareFunc = std::function<void(const char*)>;
         poolInclude = """
 #include "goldfish_vk_private_defs.h"
 #include "android/base/BumpPool.h"
+using android::base::Allocator;
 using android::base::BumpPool;
 """
         handleMapInclude = """
@@ -255,6 +256,7 @@ using android::base::BumpPool;
         poolIncludeGuest = """
 #include "goldfish_vk_private_defs.h"
 #include "android/base/BumpPool.h"
+using android::base::Allocator;
 using android::base::BumpPool;
 // Stuff we are not going to use but if included,
 // will cause compile errors. These are Android Vulkan

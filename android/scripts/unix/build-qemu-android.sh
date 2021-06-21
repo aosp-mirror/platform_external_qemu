@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Copyright 2015 The Android Open Source Project
 #
@@ -179,6 +179,7 @@ display_darwin_warning() {
 # $2: AOSP source directory
 build_qemu_android () {
     builder_prepare_for_host $1 "$2"
+    BUILD_HOST=$(get_build_os)-$(get_build_arch)¶
 
     QEMU_TARGETS=
     QEMU_TARGET_LIST=
@@ -238,9 +239,9 @@ build_qemu_android () {
                EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Carbon"
                ;;
            windows_msvc*)
-               EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ladvapi32"
+               EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ladvapi32 -lkernel32"
                ;;
-           *)
+           linux-x86_64)
                EXTRA_LDFLAGS="$EXTRA_LDFLAGS -static-libgcc -stdlib=libc++"
                ;;
         esac
@@ -261,11 +262,13 @@ build_qemu_android () {
                 # Necessary to build version.rc properly.
                 # VS_VERSION_INFO is a relatively new features that is
                 # not supported by the cross-toolchain's windres tool.
+                EXTRA_CFLAGS="$EXTRA_CFLAGS -DQEMU_BASE_BUILD=1 -DUSE_CLANG_JMP=1"
                 EXTRA_CFLAGS="$EXTRA_CFLAGS -DVS_VERSION_INFO=1 -Wno-unused-command-line-argument"
                 EXTRA_CFLAGS="$EXTRA_CFLAGS -Wno-incompatible-ms-struct -Wno-c++11-narrowing"
+                EXTRA_CFLAGS="$EXTRA_CFLAGS -I$QEMU_SRCDIR/android/msvc-posix-compat/include"
+                # EXTRA_CFLAGS="$EXTRA_CFLAGS -I$QEMU_SRCDIR/android/android-emu-base"
                 ;;
             darwin-*)
-                EXTRA_CFLAGS="$EXTRA_CFLAGS -mmacosx-version-min=10.8"
                 ;;
         esac
 
@@ -298,6 +301,17 @@ build_qemu_android () {
                 ;;
         esac
 
+        GVM_FLAG=
+        case $1 in
+            windows*)
+                # gvm is only available on windows.
+                GVM_FLAG="--enable-gvm"
+                ;;
+            *)
+                GVM_FLAG="--disable-gvm"
+                ;;
+        esac
+
         LIBUSB_FLAGS=
         case $1 in
             windows*)
@@ -325,6 +339,22 @@ build_qemu_android () {
                 # Use the host version, or the build will freeze.
                 PKG_CONFIG=`which pkg-config`
                 ;;
+           darwin-aarch64)
+              if [[ "$BUILD_HOST"  != "darwin_arm64" ]]; then
+                # Use the host version, or the build will freeze.
+                PKG_CONFIG=`which pkg-config`
+              else
+                PKG_CONFIG=$PREFIX/bin/pkg-config
+              fi
+              ;;
+           darwin-x86_64)
+              if [[ "$BUILD_HOST"  != "darwin_x86_64" ]]; then
+                # Use the host version, or the build will freeze.
+                PKG_CONFIG=`which pkg-config`
+              else
+                PKG_CONFIG=$PREFIX/bin/pkg-config
+              fi
+              ;;
             *)
                 PKG_CONFIG=$PREFIX/bin/pkg-config
                 ;;
@@ -436,11 +466,13 @@ EOF
             $DEBUG_FLAGS \
             $LIBUSB_FLAGS \
             $AUDIO_BACKENDS_FLAG \
+            $GVM_FLAG \
             $WHPX_FLAG \
             --disable-attr \
             --disable-bluez \
             --disable-brlapi \
             --disable-blobs \
+            --disable-gcrypt \
             --disable-bzip2 \
             --disable-cap-ng \
             --disable-capstone \
@@ -484,13 +516,19 @@ EOF
                     # the generated config-host.mak file.
                     sed -i -e '/^ROMS=/d' config-host.mak
 
-                    # For Windows, config-host.h must be created after
-                    # before the rest, or the parallel build will
-                    # fail miserably.
-                    run make config-host.h $BUILD_FLAGS
                     run make version.o  $BUILD_FLAGS
                     ;;
             esac
+
+            # Now patch up config.h and remove directory specific things
+            run make config-host.h
+
+            STANDARDIZE=$AOSP_DIR/prebuilts/android-emulator-build/qemu-android-deps
+            run sed -i.bak 's@'"$STANDARDIZE"'@unused@' config-host.h
+
+            # Remove unused host dso, cross compile toolchains do not detect it
+            # properly
+            run sed -i.bak 's@.*HOST_DSOSUF.*@@' config-host.h
 
             # Now build everything else in parallel.
             run make -j$NUM_JOBS $BUILD_FLAGS $LINKPROG_FLAGS V=1

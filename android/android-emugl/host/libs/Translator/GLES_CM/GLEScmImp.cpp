@@ -550,6 +550,9 @@ GL_API void GL_APIENTRY  glBufferSubData( GLenum target, GLintptr offset, GLsize
 
 GL_API void GL_APIENTRY  glClear( GLbitfield mask) {
     GET_CTX()
+    if (ctx->drawDisabled()) {
+        return;
+    }
     GLES_CM_TRACE()
     ERRCHECK()
     ctx->drawValidate();
@@ -732,6 +735,9 @@ GL_API void GL_APIENTRY  glTexImage2D( GLenum target, GLint level, GLint interna
 GL_API void GL_APIENTRY  glCompressedTexImage2D( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data) {
     GET_CTX_CM()
     GLES_CM_TRACE()
+    if (ctx->drawDisabled()) {
+        return;
+    }
     SET_ERROR_IF(!GLEScmValidate::textureTargetEx(target),GL_INVALID_ENUM);
     SET_ERROR_IF(!data,GL_INVALID_OPERATION);
 
@@ -1075,14 +1081,14 @@ GL_API void GL_APIENTRY  glGetBooleanv( GLenum pname, GLboolean *params) {
         }
         break;
     case GL_NUM_COMPRESSED_TEXTURE_FORMATS:
-        *params = (GLboolean)getCompressedFormats(NULL);
+        *params = (GLboolean)getCompressedFormats(1, NULL);
         break;
     case GL_COMPRESSED_TEXTURE_FORMATS:
         {
-            int nparams = getCompressedFormats(NULL);
+            int nparams = getCompressedFormats(1, NULL);
             if (nparams>0) {
                 int * iparams = new int[nparams];
-                getCompressedFormats(iparams);
+                getCompressedFormats(1, iparams);
                 for (int i=0; i<nparams; i++) params[i] = (GLboolean)iparams[i];
                 delete [] iparams;
             }
@@ -1173,15 +1179,15 @@ GL_API void GL_APIENTRY  glGetFixedv( GLenum pname, GLfixed *params) {
         glGetFloatv(pname,&fParams[0]);
         break;
     case GL_NUM_COMPRESSED_TEXTURE_FORMATS:
-        *params = I2X(getCompressedFormats(NULL));
+        *params = I2X(getCompressedFormats(1, NULL));
         return;
         break;
     case GL_COMPRESSED_TEXTURE_FORMATS:
         {
-            int nparams = getCompressedFormats(NULL);
+            int nparams = getCompressedFormats(1, NULL);
             if (nparams>0) {
                 int * iparams = new int[nparams];
-                getCompressedFormats(iparams);
+                getCompressedFormats(1, iparams);
                 for (int i=0; i<nparams; i++) params[i] = I2X(iparams[i]);
                 delete [] iparams;
             }
@@ -1219,14 +1225,14 @@ GL_API void GL_APIENTRY  glGetFloatv( GLenum pname, GLfloat *params) {
         *params = (GLfloat)i;
         break;
     case GL_NUM_COMPRESSED_TEXTURE_FORMATS:
-        *params = (GLfloat)getCompressedFormats(NULL);
+        *params = (GLfloat)getCompressedFormats(1, NULL);
         break;
     case GL_COMPRESSED_TEXTURE_FORMATS:
         {
-            int nparams = getCompressedFormats(NULL);
+            int nparams = getCompressedFormats(1, NULL);
             if (nparams>0) {
                 int * iparams = new int[nparams];
-                getCompressedFormats(iparams);
+                getCompressedFormats(1, iparams);
                 for (int i=0; i<nparams; i++) params[i] = (GLfloat)iparams[i];
                 delete [] iparams;
             }
@@ -1277,10 +1283,10 @@ GL_API void GL_APIENTRY  glGetIntegerv( GLenum pname, GLint *params) {
         }
         break;
     case GL_NUM_COMPRESSED_TEXTURE_FORMATS:
-        *params = getCompressedFormats(NULL);
+        *params = getCompressedFormats(1, NULL);
         break;
     case GL_COMPRESSED_TEXTURE_FORMATS:
-        getCompressedFormats(params);
+        getCompressedFormats(1, params);
         break;
     case GL_MAX_CLIP_PLANES:
         ctx->dispatcher().glGetIntegerv(pname,params);
@@ -1831,7 +1837,9 @@ GL_API void GL_APIENTRY  glPushMatrix(void) {
 GL_API void GL_APIENTRY  glReadPixels( GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *pixels) {
     GET_CTX()
     GLES_CM_TRACE()
-
+    if (ctx->drawDisabled()) {
+        return;
+    }
     SET_ERROR_IF(!(GLEScmValidate::pixelFrmt(ctx,format) && GLEScmValidate::pixelType(ctx,type)),GL_INVALID_ENUM);
     SET_ERROR_IF(!(GLEScmValidate::pixelOp(format,type)),GL_INVALID_OPERATION);
 
@@ -1991,7 +1999,9 @@ GL_API void GL_APIENTRY  glTexEnvxv( GLenum target, GLenum pname, const GLfixed 
 GL_API void GL_APIENTRY  glTexImage2D( GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *pixels) {
     GET_CTX()
     GLES_CM_TRACE()
-
+    if (ctx->drawDisabled()) {
+        return;
+    }
     SET_ERROR_IF(!(GLEScmValidate::textureTargetEx(target) &&
                      GLEScmValidate::pixelFrmt(ctx,internalformat) &&
                      GLEScmValidate::pixelFrmt(ctx,format) &&
@@ -2289,6 +2299,10 @@ GL_API void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GL
     rbData->saveableTexture = img->saveableTexture;
     img->saveableTexture->makeDirty();
 
+    if (ctx->drawDisabled()) {
+        return;
+    }
+
     //
     // if the renderbuffer is attached to a framebuffer
     // change the framebuffer attachment in the undelying OpenGL
@@ -2307,18 +2321,20 @@ GL_API void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GL
                         rbData->attachedFB);
             }
         }
-        if (isCoreProfile() || isGles2Gles()) {
-            ctx->dispatcher().glFramebufferTexture2D(GL_FRAMEBUFFER,
-                    rbData->attachedPoint,
-                    GL_TEXTURE_2D,
-                    img->globalTexObj->getGlobalName(),
-                    0);
-        } else {
-            ctx->dispatcher().glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-                    rbData->attachedPoint,
-                    GL_TEXTURE_2D,
-                    img->globalTexObj->getGlobalName(),
-                    0);
+        if (!ctx->drawDisabled()) {
+            if (isCoreProfile() || isGles2Gles()) {
+                ctx->dispatcher().glFramebufferTexture2D(GL_FRAMEBUFFER,
+                        rbData->attachedPoint,
+                        GL_TEXTURE_2D,
+                        img->globalTexObj->getGlobalName(),
+                        0);
+            } else {
+                ctx->dispatcher().glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                        rbData->attachedPoint,
+                        GL_TEXTURE_2D,
+                        img->globalTexObj->getGlobalName(),
+                        0);
+            }
         }
         if (prevFB != rbData->attachedFB) {
             if (isCoreProfile() || isGles2Gles()) {
@@ -2399,10 +2415,12 @@ GL_API void GLAPIENTRY glBindRenderbufferOES(GLenum target, GLuint renderbuffer)
                     ? ctx->shareGroup()->getGlobalName(
                               NamedObjectType::RENDERBUFFER, renderbuffer)
                     : 0;
-    if (isCoreProfile() || isGles2Gles()) {
-        ctx->dispatcher().glBindRenderbuffer(target,globalBufferName);
-    } else {
-        ctx->dispatcher().glBindRenderbufferEXT(target,globalBufferName);
+    if (!ctx->drawDisabled()) {
+        if (isCoreProfile() || isGles2Gles()) {
+            ctx->dispatcher().glBindRenderbuffer(target,globalBufferName);
+        } else {
+            ctx->dispatcher().glBindRenderbufferEXT(target,globalBufferName);
+        }
     }
 
     // update renderbuffer binding state
@@ -2458,7 +2476,9 @@ GL_API void GLAPIENTRY glRenderbufferStorageOES(GLenum target, GLenum internalfo
     rbData->eglImageGlobalTexObject.reset();
     rbData->saveableTexture.reset();
 
-    ctx->dispatcher().glRenderbufferStorageEXT(target,internalformat,width,height);
+    if (!ctx->drawDisabled()) {
+        ctx->dispatcher().glRenderbufferStorageEXT(target,internalformat,width,height);
+    }
 }
 
 GL_API void GLAPIENTRY glGetRenderbufferParameterivOES(GLenum target, GLenum pname, GLint* params) {
@@ -2558,10 +2578,12 @@ GL_API void GLAPIENTRY glBindFramebufferOES(GLenum target, GLuint framebuffer) {
             (framebuffer != 0)
                     ? ctx->getFBOGlobalName(framebuffer)
                     : ctx->getDefaultFBOGlobalName();
-    if (isCoreProfile() || isGles2Gles()) {
-        ctx->dispatcher().glBindFramebuffer(target,globalBufferName);
-    } else {
-        ctx->dispatcher().glBindFramebufferEXT(target,globalBufferName);
+    if (!ctx->drawDisabled()) {
+        if (isCoreProfile() || isGles2Gles()) {
+            ctx->dispatcher().glBindFramebuffer(target,globalBufferName);
+        } else {
+            ctx->dispatcher().glBindFramebufferEXT(target,globalBufferName);
+        }
     }
 
     // update framebuffer binding state
@@ -2574,8 +2596,9 @@ GL_API void GLAPIENTRY glDeleteFramebuffersOES(GLsizei n, const GLuint *framebuf
     SET_ERROR_IF(!ctx->getCaps()->GL_EXT_FRAMEBUFFER_OBJECT,GL_INVALID_OPERATION);
     GLuint fbName = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
     for (int i=0;i<n;++i) {
-        if (framebuffers[i] == fbName)
+        if (framebuffers[i] == fbName && !ctx->drawDisabled()) {
             glBindFramebufferOES(GL_FRAMEBUFFER_EXT, 0);
+        }
         ctx->deleteFBO(framebuffers[i]);
     }
 }
@@ -2622,7 +2645,9 @@ GL_API void GLAPIENTRY glFramebufferTexture2DOES(GLenum target, GLenum attachmen
                 NamedObjectType::TEXTURE, texname);
     }
 
-    ctx->dispatcher().glFramebufferTexture2DEXT(target,attachment,textarget,globalTexName,level);
+    if (!ctx->drawDisabled()) {
+        ctx->dispatcher().glFramebufferTexture2DEXT(target,attachment,textarget,globalTexName,level);
+    }
 
     // Update the the current framebuffer object attachment state
     GLuint fbName = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
@@ -2675,7 +2700,7 @@ GL_API void GLAPIENTRY glFramebufferRenderbufferOES(GLenum target, GLenum attach
 
     if (renderbuffer && obj.get() != NULL) {
         RenderbufferData *rbData = (RenderbufferData *)obj.get();
-        if (rbData->eglImageGlobalTexObject) {
+        if (rbData->eglImageGlobalTexObject && !ctx->drawDisabled()) {
             //
             // This renderbuffer object is an eglImage target
             // attach the eglimage's texture instead the renderbuffer.

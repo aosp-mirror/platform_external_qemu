@@ -125,6 +125,9 @@ public:
     void showExtendedWindow(ExtendedWindowPane pane);
     void hideExtendedWindow();
 
+    void waitForExtendedWindowVisibility(bool visible);
+    QRect extendedWindowGeometry();
+
 signals:
     void guestClipboardChanged(QString text);
     void haveClipboardSharingKnown(bool have);

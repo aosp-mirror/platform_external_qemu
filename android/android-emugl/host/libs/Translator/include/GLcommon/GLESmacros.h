@@ -54,7 +54,8 @@
     GLESv2Context* ctx =                                               \
             static_cast<GLESv2Context*>(s_eglIface->getGLESContext()); \
     if (!ctx)                                                          \
-        return;
+        return;                                                        \
+    ctx->rebindCurrentFramebufferTextures();
 
 #define GET_CTX_RET(failure_ret)                               \
     MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL") \

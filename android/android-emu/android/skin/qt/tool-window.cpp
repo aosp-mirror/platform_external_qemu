@@ -298,11 +298,28 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->next_layout_button->setHidden(true);
     }
 
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR) {
+        // Wear OS shouldn't get rotate nor volume up/down buttons.
+        mToolsUi->prev_layout_button->setHidden(true);
+        mToolsUi->next_layout_button->setHidden(true);
+        mToolsUi->volume_up_button->setHidden(true);
+        mToolsUi->volume_down_button->setHidden(true);
+    }
+
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         // Android Auto doesn't supoort rotate, home, back, recent
         mToolsUi->prev_layout_button->setHidden(true);
         mToolsUi->next_layout_button->setHidden(true);
         mToolsUi->back_button->setHidden(true);
+        mToolsUi->overview_button->setHidden(true);
+    }
+
+    if (android_cmdLineOptions->fuchsia) {
+        // These don't apply to Fuchsia
+        mToolsUi->prev_layout_button->setHidden(true);
+        mToolsUi->next_layout_button->setHidden(true);
+        mToolsUi->back_button->setHidden(true);
+        mToolsUi->home_button->setHidden(true);
         mToolsUi->overview_button->setHidden(true);
     }
 
@@ -496,8 +513,18 @@ void ToolWindow::showExtendedWindow(ExtendedWindowPane pane) {
     }
 }
 
+void ToolWindow::waitForExtendedWindowVisibility(bool visible) {
+    if (!visible && !mExtendedWindow.hasInstance()) {
+        // No extended window and we are wating to be hidden..
+        // so no need to wait
+        return;
+    }
+    ensureExtendedWindowExists();
+    mExtendedWindow.get()->waitForVisibility(visible);
+}
+
 void ToolWindow::hideExtendedWindow() {
-    mExtendedWindow.ifExists([&] { mExtendedWindow.get()->hide(); });
+        mExtendedWindow.ifExists([&] { mExtendedWindow.get()->hide(); });
 }
 
 void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) {
@@ -1205,17 +1232,35 @@ void ToolWindow::onHostClipboardChanged() {
                 (const uint8_t*)bytes.data(), bytes.size());
 }
 
+static bool isPaneEnabled(ExtendedWindowPane pane) {
+    // Snapshot pane is disabled in embedded emulator.
+    if (pane == PANE_IDX_SNAPSHOT && android_cmdLineOptions->qt_hide_window) {
+        return false;
+    }
+
+    return true;
+}
+
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         if (pane == PANE_IDX_DPAD || pane == PANE_IDX_BATTERY ||
-            pane == PANE_IDX_FINGER) {
+            pane == PANE_IDX_FINGER || pane == PANE_IDX_CAMERA) {
             return;
         }
     }
-    // Snapshot and multidisplay panes are disabled in embedded emulator.
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV ||
+        avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR) {
+        if (pane == PANE_IDX_MULTIDISPLAY) {
+            return;
+        }
+    }
+    if (!androidHwConfig_hasVirtualSceneCamera(android_hw) &&
+        pane == PANE_IDX_CAMERA) {
+        return;
+    }
+
     // Set to default location pane.
-    if (android_cmdLineOptions->qt_hide_window &&
-        (pane == PANE_IDX_MULTIDISPLAY || pane == PANE_IDX_SNAPSHOT)) {
+    if (!isPaneEnabled(pane)) {
         pane = PANE_IDX_LOCATION;
     }
     // Show the tabbed pane
@@ -1230,6 +1275,10 @@ void ToolWindow::on_more_button_clicked() {
         mExtendedWindow.get()->raise();
         mExtendedWindow.get()->activateWindow();
     }
+}
+
+QRect ToolWindow::extendedWindowGeometry() {
+    return mExtendedWindow.get()->frameGeometry();
 }
 
 void ToolWindow::paintEvent(QPaintEvent*) {

@@ -300,7 +300,7 @@
               <string notr="true"/>
              </property>
              <property name="text">
-              <string>GOT IT</string>
+              <string>Got It</string>
              </property>
              <property name="ColorGroup" stdset="0">
               <string>RaisedColoredButton</string>

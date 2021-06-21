@@ -271,7 +271,7 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->replayIcon->hide();
             mUi->playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
             mUi->playStopButton->setProperty("themeIconName", "play_arrow");
-            mUi->playStopButton->setText(tr("PLAY "));
+            mUi->playStopButton->setText(tr("Play "));
             mUi->playStopButton->setEnabled(false);
             break;
         }
@@ -281,7 +281,7 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->replayIcon->hide();
             mUi->playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
             mUi->playStopButton->setProperty("themeIconName", "play_arrow");
-            mUi->playStopButton->setText(tr("PLAY "));
+            mUi->playStopButton->setText(tr("Play "));
             mUi->playStopButton->setEnabled(true);
             break;
         }
@@ -293,7 +293,7 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->replayIcon->show();
             mUi->playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
             mUi->playStopButton->setProperty("themeIconName", "play_arrow");
-            mUi->playStopButton->setText(tr("PLAY "));
+            mUi->playStopButton->setText(tr("Play "));
             mUi->playStopButton->setEnabled(true);
             break;
         }
@@ -304,7 +304,7 @@ void RecordMacroPage::setMacroUiState(MacroUiState state) {
             mUi->replayIcon->hide();
             mUi->playStopButton->setIcon(getIconForCurrentTheme("stop_red"));
             mUi->playStopButton->setProperty("themeIconName", "stop_red");
-            mUi->playStopButton->setText(tr("STOP "));
+            mUi->playStopButton->setText(tr("Stop "));
             mUi->playStopButton->setEnabled(true);
             break;
         }
@@ -718,7 +718,7 @@ void RecordMacroPage::stopRecording() {
 
 void RecordMacroPage::setRecordState() {
     if (!mRecording) {
-        mUi->recButton->setText(tr("RECORD NEW "));
+        mUi->recButton->setText(tr("Record New "));
         mUi->recButton->setIcon(getIconForCurrentTheme("recordCircle"));
         mUi->recButton->setProperty("themeIconName", "recordCircle");
         mUi->recButton->setIconSize(QSize(26, 18));
@@ -763,7 +763,7 @@ void RecordMacroPage::setRecordState() {
             mUi->recButton->setEnabled(true);
             mUi->recButton->setIcon(getIconForCurrentTheme("stop_red"));
             mUi->recButton->setProperty("themeIconName", "stop_red");
-            mUi->recButton->setText(tr("STOP RECORDING "));
+            mUi->recButton->setText(tr("Stop Recording "));
             // Update every second
             mUi->recordingLabel->setText(tr(SECONDS_RECORDING).arg(0));
             mSec = 0;

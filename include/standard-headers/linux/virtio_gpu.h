@@ -41,6 +41,7 @@
 #include "standard-headers/linux/types.h"
 
 #define VIRTIO_GPU_F_VIRGL 0
+#define VIRTIO_GPU_F_EDID  1
 #define VIRTIO_GPU_F_RESOURCE_BLOB 3
 
 enum virtio_gpu_ctrl_type {
@@ -298,6 +299,21 @@ struct virtio_gpu_get_capset {
 struct virtio_gpu_resp_capset {
 	struct virtio_gpu_ctrl_hdr hdr;
 	uint8_t capset_data[];
+};
+
+/* VIRTIO_GPU_CMD_GET_EDID */
+struct virtio_gpu_cmd_get_edid {
+	struct virtio_gpu_ctrl_hdr hdr;
+	uint32_t scanout;
+	uint32_t padding;
+};
+
+/* VIRTIO_GPU_RESP_OK_EDID */
+struct virtio_gpu_resp_edid {
+	struct virtio_gpu_ctrl_hdr hdr;
+	uint32_t size;
+	uint32_t padding;
+	uint8_t edid[1024];
 };
 
 /* VIRTIO_GPU_CMD_RESOURCE_CREATE_BLOB */

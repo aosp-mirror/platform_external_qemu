@@ -390,7 +390,7 @@ namespace goldfish_vk {
 #endif
 #ifdef VK_EXT_metal_surface
 #endif
-#ifdef VK_GOOGLE_color_buffer
+#ifdef VK_EXT_fragment_density_map
 #endif
 #ifdef VK_EXT_scalar_block_layout
 #endif
@@ -1068,10 +1068,6 @@ void init_vulkan_dispatch_from_system_loader(
 #ifdef VK_AMD_display_native_hdr
     out->vkSetLocalDimmingAMD = (PFN_vkSetLocalDimmingAMD)dlSymFunc(lib, "vkSetLocalDimmingAMD");
 #endif
-#ifdef VK_GOOGLE_color_buffer
-    out->vkRegisterImageColorBufferGOOGLE = (PFN_vkRegisterImageColorBufferGOOGLE)dlSymFunc(lib, "vkRegisterImageColorBufferGOOGLE");
-    out->vkRegisterBufferColorBufferGOOGLE = (PFN_vkRegisterBufferColorBufferGOOGLE)dlSymFunc(lib, "vkRegisterBufferColorBufferGOOGLE");
-#endif
 #ifdef VK_EXT_buffer_device_address
     out->vkGetBufferDeviceAddressEXT = (PFN_vkGetBufferDeviceAddressEXT)dlSymFunc(lib, "vkGetBufferDeviceAddressEXT");
 #endif
@@ -1131,6 +1127,8 @@ void init_vulkan_dispatch_from_system_loader(
     out->vkGetPhysicalDeviceDirectFBPresentationSupportEXT = (PFN_vkGetPhysicalDeviceDirectFBPresentationSupportEXT)dlSymFunc(lib, "vkGetPhysicalDeviceDirectFBPresentationSupportEXT");
 #endif
 #ifdef VK_GOOGLE_gfxstream
+    out->vkRegisterImageColorBufferGOOGLE = (PFN_vkRegisterImageColorBufferGOOGLE)dlSymFunc(lib, "vkRegisterImageColorBufferGOOGLE");
+    out->vkRegisterBufferColorBufferGOOGLE = (PFN_vkRegisterBufferColorBufferGOOGLE)dlSymFunc(lib, "vkRegisterBufferColorBufferGOOGLE");
     out->vkMapMemoryIntoAddressSpaceGOOGLE = (PFN_vkMapMemoryIntoAddressSpaceGOOGLE)dlSymFunc(lib, "vkMapMemoryIntoAddressSpaceGOOGLE");
     out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)dlSymFunc(lib, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
     out->vkBeginCommandBufferAsyncGOOGLE = (PFN_vkBeginCommandBufferAsyncGOOGLE)dlSymFunc(lib, "vkBeginCommandBufferAsyncGOOGLE");
@@ -1765,10 +1763,6 @@ void init_vulkan_dispatch_from_instance(
 #ifdef VK_AMD_display_native_hdr
     out->vkSetLocalDimmingAMD = (PFN_vkSetLocalDimmingAMD)vk->vkGetInstanceProcAddr(instance, "vkSetLocalDimmingAMD");
 #endif
-#ifdef VK_GOOGLE_color_buffer
-    out->vkRegisterImageColorBufferGOOGLE = (PFN_vkRegisterImageColorBufferGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkRegisterImageColorBufferGOOGLE");
-    out->vkRegisterBufferColorBufferGOOGLE = (PFN_vkRegisterBufferColorBufferGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkRegisterBufferColorBufferGOOGLE");
-#endif
 #ifdef VK_EXT_buffer_device_address
     out->vkGetBufferDeviceAddressEXT = (PFN_vkGetBufferDeviceAddressEXT)vk->vkGetInstanceProcAddr(instance, "vkGetBufferDeviceAddressEXT");
 #endif
@@ -1828,6 +1822,8 @@ void init_vulkan_dispatch_from_instance(
     out->vkGetPhysicalDeviceDirectFBPresentationSupportEXT = (PFN_vkGetPhysicalDeviceDirectFBPresentationSupportEXT)vk->vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceDirectFBPresentationSupportEXT");
 #endif
 #ifdef VK_GOOGLE_gfxstream
+    out->vkRegisterImageColorBufferGOOGLE = (PFN_vkRegisterImageColorBufferGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkRegisterImageColorBufferGOOGLE");
+    out->vkRegisterBufferColorBufferGOOGLE = (PFN_vkRegisterBufferColorBufferGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkRegisterBufferColorBufferGOOGLE");
     out->vkMapMemoryIntoAddressSpaceGOOGLE = (PFN_vkMapMemoryIntoAddressSpaceGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkMapMemoryIntoAddressSpaceGOOGLE");
     out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
     out->vkBeginCommandBufferAsyncGOOGLE = (PFN_vkBeginCommandBufferAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkBeginCommandBufferAsyncGOOGLE");
@@ -2454,10 +2450,6 @@ void init_vulkan_dispatch_from_device(
 #ifdef VK_AMD_display_native_hdr
     out->vkSetLocalDimmingAMD = (PFN_vkSetLocalDimmingAMD)vk->vkGetDeviceProcAddr(device, "vkSetLocalDimmingAMD");
 #endif
-#ifdef VK_GOOGLE_color_buffer
-    out->vkRegisterImageColorBufferGOOGLE = (PFN_vkRegisterImageColorBufferGOOGLE)vk->vkGetDeviceProcAddr(device, "vkRegisterImageColorBufferGOOGLE");
-    out->vkRegisterBufferColorBufferGOOGLE = (PFN_vkRegisterBufferColorBufferGOOGLE)vk->vkGetDeviceProcAddr(device, "vkRegisterBufferColorBufferGOOGLE");
-#endif
 #ifdef VK_EXT_buffer_device_address
     out->vkGetBufferDeviceAddressEXT = (PFN_vkGetBufferDeviceAddressEXT)vk->vkGetDeviceProcAddr(device, "vkGetBufferDeviceAddressEXT");
 #endif
@@ -2517,6 +2509,8 @@ void init_vulkan_dispatch_from_device(
     out->vkGetPhysicalDeviceDirectFBPresentationSupportEXT = (PFN_vkGetPhysicalDeviceDirectFBPresentationSupportEXT)vk->vkGetDeviceProcAddr(device, "vkGetPhysicalDeviceDirectFBPresentationSupportEXT");
 #endif
 #ifdef VK_GOOGLE_gfxstream
+    out->vkRegisterImageColorBufferGOOGLE = (PFN_vkRegisterImageColorBufferGOOGLE)vk->vkGetDeviceProcAddr(device, "vkRegisterImageColorBufferGOOGLE");
+    out->vkRegisterBufferColorBufferGOOGLE = (PFN_vkRegisterBufferColorBufferGOOGLE)vk->vkGetDeviceProcAddr(device, "vkRegisterBufferColorBufferGOOGLE");
     out->vkMapMemoryIntoAddressSpaceGOOGLE = (PFN_vkMapMemoryIntoAddressSpaceGOOGLE)vk->vkGetDeviceProcAddr(device, "vkMapMemoryIntoAddressSpaceGOOGLE");
     out->vkUpdateDescriptorSetWithTemplateSizedGOOGLE = (PFN_vkUpdateDescriptorSetWithTemplateSizedGOOGLE)vk->vkGetDeviceProcAddr(device, "vkUpdateDescriptorSetWithTemplateSizedGOOGLE");
     out->vkBeginCommandBufferAsyncGOOGLE = (PFN_vkBeginCommandBufferAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkBeginCommandBufferAsyncGOOGLE");

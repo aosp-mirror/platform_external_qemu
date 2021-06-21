@@ -648,6 +648,15 @@ void YUVConverter::readPixels(uint8_t* pixels, uint32_t pixels_size) {
     uint32_t yoff, uoff, voff, ywidth, cwidth;
     getYUVOffsets(width, height, mFormat, &yoff, &uoff, &voff, &ywidth,
                   &cwidth);
+    if (mFormat == FRAMEWORK_FORMAT_YV12) {
+      const int len = ywidth * height +  cwidth * height;
+      if (mYv12pixels.size() == len) {
+        memcpy(pixels, mYv12pixels.data(), len);
+      } else {
+        // we have not saved a valid copy yet, nothing to read
+      }
+      return;
+    }
 
     if (mFormat == FRAMEWORK_FORMAT_YUV_420_888) {
         if (emugl::emugl_feature_is_enabled(
@@ -692,6 +701,7 @@ void YUVConverter::swapTextures(uint32_t type, uint32_t* textures) {
     } else {
         FATAL("Unknown format: 0x%x", type);
     }
+    mTexturesSwapped = true;
 }
 
 // drawConvert: per-frame updates.
@@ -701,15 +711,30 @@ void YUVConverter::swapTextures(uint32_t type, uint32_t* textures) {
 void YUVConverter::drawConvert(int x, int y,
                                int width, int height,
                                char* pixels) {
+    drawConvertFromFormat(mFormat, x, y, width, height, pixels);
+}
+
+void YUVConverter::drawConvertFromFormat(FrameworkFormat format, int x, int y, int width, int height, char* pixels) {
+
     saveGLState();
     if (pixels && (width != mWidth || height != mHeight)) {
         reset();
     }
 
-    if (mProgram == 0) {
+    bool uploadFormatChanged = !mTexturesSwapped && pixels && (format != mFormat);
+    bool initNeeded = (mProgram == 0) || uploadFormatChanged;
+
+    if (initNeeded) {
+        if (uploadFormatChanged) {
+            mFormat = format;
+            mCbFormat = format;
+            reset();
+        }
         init(width, height, mFormat);
     }
+
     s_gles2.glViewport(x, y, width, height);
+
     uint32_t yoff, uoff, voff, ywidth, cwidth, cheight;
     getYUVOffsets(width, height, mFormat, &yoff, &uoff, &voff, &ywidth,
                   &cwidth);
@@ -734,6 +759,15 @@ void YUVConverter::drawConvert(int x, int y,
 
         restoreGLState();
         return;
+    } else {
+      // save a copy
+      if (mFormat == FRAMEWORK_FORMAT_YV12) {
+        const int len = ywidth * height + 2 * cwidth * cheight;
+        if (mYv12pixels.size() != len) {
+          mYv12pixels.resize(len);
+        }
+        memcpy(mYv12pixels.data(), pixels, len);
+      }
     }
 
     subUpdateYUVGLTex(GL_TEXTURE0, mYtex,

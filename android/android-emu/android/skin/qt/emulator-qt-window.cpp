@@ -2365,6 +2365,10 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
 }
 
 void EmulatorQtWindow::resizeAndChangeAspectRatio(int x, int y, int w, int h) {
+    if (!mBackingSurface) {
+        return;
+    }
+
     QRect windowGeo = this->geometry();
     QSize backingSize = mBackingSurface->bitmap->size();
     if (backingSize.width() == w && backingSize.height() == h) {

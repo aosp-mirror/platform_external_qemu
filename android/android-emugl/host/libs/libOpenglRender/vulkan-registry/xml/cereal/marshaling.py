@@ -22,12 +22,14 @@ from .common.vulkantypes import \
 
 from .wrapperdefs import VulkanWrapperGenerator
 from .wrapperdefs import VULKAN_STREAM_VAR_NAME
+from .wrapperdefs import ROOT_TYPE_VAR_NAME, ROOT_TYPE_PARAM
 from .wrapperdefs import STREAM_RET_TYPE
 from .wrapperdefs import MARSHAL_INPUT_VAR_NAME
 from .wrapperdefs import UNMARSHAL_INPUT_VAR_NAME
 from .wrapperdefs import PARAMETERS_MARSHALING
 from .wrapperdefs import PARAMETERS_MARSHALING_GUEST
-from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE, EXTENSION_SIZE_API_NAME, EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME
+from .wrapperdefs import STYPE_OVERRIDE
+from .wrapperdefs import STRUCT_EXTENSION_PARAM, STRUCT_EXTENSION_PARAM_FOR_WRITE, EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME
 from .wrapperdefs import API_PREFIX_MARSHAL
 from .wrapperdefs import API_PREFIX_UNMARSHAL
 
@@ -38,6 +40,7 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
     def __init__(self,
                  cgen,
                  streamVarName,
+                 rootTypeVarName,
                  inputVarName,
                  marshalPrefix,
                  direction = "write",
@@ -54,6 +57,7 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         self.checked = False
 
         self.streamVarName = streamVarName
+        self.rootTypeVarName = rootTypeVarName
         self.inputVarName = inputVarName
         self.marshalPrefix = marshalPrefix
 
@@ -423,7 +427,7 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         accessWithCast = "%s(%s)" % (self.makeCastExpr(
             self.getTypeForStreaming(vulkanType)), access)
 
-        callParams = [self.streamVarName, accessWithCast]
+        callParams = [self.streamVarName, self.rootTypeVarName, accessWithCast]
 
         for (bindName, localName) in vulkanType.binds.items():
             callParams.append(self.getEnvAccessExpr(localName))
@@ -478,7 +482,27 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
         finalLenExpr = "%s * %s" % (lenAccess, self.cgen.sizeofExpr(vulkanType))
         self.genStreamCall(vulkanType, access, finalLenExpr)
 
+    # Old version VkEncoder may have some sType values conflict with VkDecoder
+    # of new versions. For host decoder, it should not carry the incorrect old
+    # sType values to the |forUnmarshaling| struct. Instead it should overwrite
+    # the sType value.
+    def overwriteSType(self, vulkanType):
+        if self.direction == "read":
+            sTypeParam = copy(vulkanType)
+            sTypeParam.paramName = "sType"
+            sTypeAccess = self.exprAccessor(sTypeParam)
+
+            typeName = vulkanType.parent.typeName
+            if typeName in STYPE_OVERRIDE:
+                self.cgen.stmt("%s = %s" %
+                               (sTypeAccess, STYPE_OVERRIDE[typeName]))
+
     def onStructExtension(self, vulkanType):
+        self.overwriteSType(vulkanType)
+
+        sTypeParam = copy(vulkanType)
+        sTypeParam.paramName = "sType"
+
         access = self.exprAccessor(vulkanType)
         sizeVar = "%s_size" % vulkanType.paramName
 
@@ -486,6 +510,12 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
             castedAccessExpr = "(%s)(%s)" % ("void*", access)
         else:
             castedAccessExpr = access
+
+        sTypeAccess = self.exprAccessor(sTypeParam)
+        self.cgen.beginIf("%s == VK_STRUCTURE_TYPE_MAX_ENUM" %
+                          self.rootTypeVarName)
+        self.cgen.stmt("%s = %s" % (self.rootTypeVarName, sTypeAccess))
+        self.cgen.endIf()
 
         if self.direction == "read" and self.dynAlloc:
             self.cgen.stmt("size_t %s" % sizeVar)
@@ -500,17 +530,17 @@ class VulkanMarshalingCodegen(VulkanTypeIterator):
             self.genStreamCall(vulkanType, access, "sizeof(VkStructureType)")
             self.cgen.stmt("VkStructureType extType = *(VkStructureType*)(%s)" % access)
             self.cgen.stmt( \
-                    "%s->alloc((void**)&%s, %s(%s->getFeatureBits(), %s))" %
-                    (self.streamVarName, access, EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME, self.streamVarName, access))
+                "%s->alloc((void**)&%s, %s(%s->getFeatureBits(), %s, %s))" %
+                (self.streamVarName, access, EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME, self.streamVarName, self.rootTypeVarName, access))
             self.cgen.stmt("*(VkStructureType*)%s = extType" % access)
 
             self.cgen.funcCall(None, self.marshalPrefix + "extension_struct",
-                [self.streamVarName, castedAccessExpr])
+                               [self.streamVarName, self.rootTypeVarName, castedAccessExpr])
             self.cgen.endIf()
         else:
 
             self.cgen.funcCall(None, self.marshalPrefix + "extension_struct",
-                [self.streamVarName, castedAccessExpr])
+                               [self.streamVarName, self.rootTypeVarName, castedAccessExpr])
 
 
     def onPointer(self, vulkanType):
@@ -609,6 +639,7 @@ class VulkanMarshaling(VulkanWrapperGenerator):
             VulkanMarshalingCodegen(
                 None,
                 VULKAN_STREAM_VAR_NAME,
+                ROOT_TYPE_VAR_NAME,
                 MARSHAL_INPUT_VAR_NAME,
                 API_PREFIX_MARSHAL,
                 direction = "write")
@@ -617,6 +648,7 @@ class VulkanMarshaling(VulkanWrapperGenerator):
             VulkanMarshalingCodegen(
                 None,
                 VULKAN_STREAM_VAR_NAME,
+                ROOT_TYPE_VAR_NAME,
                 UNMARSHAL_INPUT_VAR_NAME,
                 API_PREFIX_UNMARSHAL,
                 direction = "read",
@@ -701,10 +733,13 @@ class VulkanMarshaling(VulkanWrapperGenerator):
             def structMarshalingCustom(cgen):
                 self.writeCodegen.cgen = cgen
                 self.writeCodegen.currentStructInfo = structInfo
+                self.writeCodegen.cgen.stmt("(void)%s" % ROOT_TYPE_VAR_NAME)
+
                 marshalingCode = \
                     CUSTOM_MARSHAL_TYPES[name]["common"] + \
                     CUSTOM_MARSHAL_TYPES[name]["marshaling"].format(
                         streamVarName=self.writeCodegen.streamVarName, 
+                        rootTypeVarName=self.writeCodegen.rootTypeVarName,
                         inputVarName=self.writeCodegen.inputVarName,
                         newInputVarName=self.writeCodegen.inputVarName + "_new")
                 for line in marshalingCode.split('\n'):
@@ -713,6 +748,7 @@ class VulkanMarshaling(VulkanWrapperGenerator):
             def structMarshalingDef(cgen):
                 self.writeCodegen.cgen = cgen
                 self.writeCodegen.currentStructInfo = structInfo
+                self.writeCodegen.cgen.stmt("(void)%s" % ROOT_TYPE_VAR_NAME)
 
                 if category == "struct":
                     # marshal 'let' parameters first
@@ -728,6 +764,8 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 self.writeCodegen.cgen = cgen
                 self.writeCodegen.currentStructInfo = structInfo
                 self.writeCodegen.doFiltering = False
+                self.writeCodegen.cgen.stmt("(void)%s" % ROOT_TYPE_VAR_NAME)
+
                 if category == "struct":
                     # marshal 'let' parameters first
                     for letp in letParams:
@@ -771,10 +809,13 @@ class VulkanMarshaling(VulkanWrapperGenerator):
             def structUnmarshalingCustom(cgen):
                 self.readCodegen.cgen = cgen
                 self.readCodegen.currentStructInfo = structInfo
+                self.writeCodegen.cgen.stmt("(void)%s" % ROOT_TYPE_VAR_NAME)
+
                 unmarshalingCode = \
                     CUSTOM_MARSHAL_TYPES[name]["common"] + \
                     CUSTOM_MARSHAL_TYPES[name]["unmarshaling"].format(
-                        streamVarName=self.readCodegen.streamVarName, 
+                        streamVarName=self.readCodegen.streamVarName,
+                        rootTypeVarName=self.readCodegen.rootTypeVarName,
                         inputVarName=self.readCodegen.inputVarName,
                         newInputVarName=self.readCodegen.inputVarName + "_new")
                 for line in unmarshalingCode.split('\n'):
@@ -783,6 +824,8 @@ class VulkanMarshaling(VulkanWrapperGenerator):
             def structUnmarshalingDef(cgen):
                 self.readCodegen.cgen = cgen
                 self.readCodegen.currentStructInfo = structInfo
+                self.writeCodegen.cgen.stmt("(void)%s" % ROOT_TYPE_VAR_NAME)
+
                 if category == "struct":
                     # unmarshal 'let' parameters first
                     for letp in letParams:
@@ -797,6 +840,8 @@ class VulkanMarshaling(VulkanWrapperGenerator):
                 self.readCodegen.cgen = cgen
                 self.readCodegen.currentStructInfo = structInfo
                 self.readCodegen.doFiltering = False
+                self.writeCodegen.cgen.stmt("(void)%s" % ROOT_TYPE_VAR_NAME)
+
                 if category == "struct":
                     # unmarshal 'let' parameters first
                     for letp in letParams:
@@ -854,12 +899,14 @@ class VulkanMarshaling(VulkanWrapperGenerator):
         accessVar = "structAccess"
         sizeVar = "currExtSize"
         cgen.stmt("VkInstanceCreateInfo* %s = (VkInstanceCreateInfo*)(%s)" % (accessVar, extParam.paramName))
-        cgen.stmt("size_t %s = %s(%s->getFeatureBits(), %s)" % (sizeVar, EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME, VULKAN_STREAM_VAR_NAME, extParam.paramName))
+        cgen.stmt("size_t %s = %s(%s->getFeatureBits(), %s, %s)" % (sizeVar,
+                                                                    EXTENSION_SIZE_WITH_STREAM_FEATURES_API_NAME, VULKAN_STREAM_VAR_NAME, ROOT_TYPE_VAR_NAME, extParam.paramName))
 
         cgen.beginIf("!%s && %s" % (sizeVar, extParam.paramName))
 
         cgen.line("// unknown struct extension; skip and call on its pNext field");
-        cgen.funcCall(None, funcproto.name, ["vkStream", "(void*)%s->pNext" % accessVar])
+        cgen.funcCall(None, funcproto.name, [
+                      "vkStream", ROOT_TYPE_VAR_NAME, "(void*)%s->pNext" % accessVar])
         cgen.stmt("return")
 
         cgen.endIf()
@@ -898,18 +945,19 @@ class VulkanMarshaling(VulkanWrapperGenerator):
             retType,
             extParam,
             forEach,
-            defaultEmit=fatalDefault)
+            defaultEmit=fatalDefault,
+            rootTypeVar=ROOT_TYPE_PARAM)
 
     def onEnd(self,):
         VulkanWrapperGenerator.onEnd(self)
 
         def forEachExtensionMarshal(ext, castedAccess, cgen):
             cgen.funcCall(None, API_PREFIX_MARSHAL + ext.name,
-                          [VULKAN_STREAM_VAR_NAME, castedAccess])
+                          [VULKAN_STREAM_VAR_NAME, ROOT_TYPE_VAR_NAME, castedAccess])
 
         def forEachExtensionUnmarshal(ext, castedAccess, cgen):
             cgen.funcCall(None, API_PREFIX_UNMARSHAL + ext.name,
-                          [VULKAN_STREAM_VAR_NAME, castedAccess])
+                          [VULKAN_STREAM_VAR_NAME, ROOT_TYPE_VAR_NAME, castedAccess])
 
         self.module.appendImpl(
             self.cgenImpl.makeFuncImpl(

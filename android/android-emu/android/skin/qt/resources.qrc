@@ -537,6 +537,19 @@
         <file alias="trip_destination">images/studio-light/ic_directions_destination_24dp.svg</file>
         <file alias="virtSensors">images/studio-light/Virtual_Sensors_666.svg</file>
         <file alias="walk">images/studio-light/ic_directions_walk_666_48dp.svg</file>
+        <file alias="tv_remote_back">images/studio-light/tv_remote_back.svg</file>
+        <file alias="tv_remote_back_pressed">images/studio-light/tv_remote_back_pressed.svg</file>
+        <file alias="tv_remote_bookmark">images/studio-light/tv_remote_bookmark.svg</file>
+        <file alias="tv_remote_bookmark_pressed">images/studio-light/tv_remote_bookmark_pressed.svg</file>
+        <file alias="tv_remote_dashboard">images/studio-light/tv_remote_dashboard.svg</file>
+        <file alias="tv_remote_dashboard_pressed">images/studio-light/tv_remote_dashboard_pressed.svg</file>
+        <file alias="tv_remote_home">images/studio-light/tv_remote_home.svg</file>
+        <file alias="tv_remote_home_pressed">images/studio-light/tv_remote_home_pressed.svg</file>
+        <file alias="tv_remote_live_tv">images/studio-light/tv_remote_live_tv.svg</file>
+        <file alias="tv_remote_live_tv_pressed">images/studio-light/tv_remote_live_tv_pressed.svg</file>
+        <file alias="tv_remote_settings">images/studio-light/tv_remote_settings.svg</file>
+        <file alias="tv_remote_settings_pressed">images/studio-light/tv_remote_settings_pressed.svg</file>
+
     </qresource>
 
     <qresource prefix="/studio-dark">
@@ -684,6 +697,19 @@
         <file alias="trip_destination">images/studio-dark/ic_directions_destination_white_24dp.svg</file>
         <file alias="virtSensors">images/studio-dark/Virtual_Sensors_ABB.svg</file>
         <file alias="walk">images/studio-dark/ic_directions_walk_666_48dp.svg</file>
+        <file alias="tv_remote_back">images/studio-dark/tv_remote_back.svg</file>
+        <file alias="tv_remote_back_pressed">images/studio-dark/tv_remote_back_pressed.svg</file>
+        <file alias="tv_remote_bookmark">images/studio-dark/tv_remote_bookmark.svg</file>
+        <file alias="tv_remote_bookmark_pressed">images/studio-dark/tv_remote_bookmark_pressed.svg</file>
+        <file alias="tv_remote_dashboard">images/studio-dark/tv_remote_dashboard.svg</file>
+        <file alias="tv_remote_dashboard_pressed">images/studio-dark/tv_remote_dashboard_pressed.svg</file>
+        <file alias="tv_remote_home">images/studio-dark/tv_remote_home.svg</file>
+        <file alias="tv_remote_home_pressed">images/studio-dark/tv_remote_home_pressed.svg</file>
+        <file alias="tv_remote_live_tv">images/studio-dark/tv_remote_live_tv.svg</file>
+        <file alias="tv_remote_live_tv_pressed">images/studio-dark/tv_remote_live_tv_pressed.svg</file>
+        <file alias="tv_remote_settings">images/studio-dark/tv_remote_settings.svg</file>
+        <file alias="tv_remote_settings_pressed">images/studio-dark/tv_remote_settings_pressed.svg</file>
+
     </qresource>
 
     <qresource prefix="/cursor">

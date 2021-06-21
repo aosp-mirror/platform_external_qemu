@@ -51,6 +51,21 @@ RenderThreadInfo::~RenderThreadInfo() {
     sRegistry.threadInfos.erase(this);
 }
 
+void RenderThreadInfo::release() {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb || fb->isShuttingDown()) {
+        return;
+    }
+    if (trivialContext) {
+        fb->DestroyRenderContext(trivialContext);
+        trivialContext = 0;
+    }
+    if (trivialSurface) {
+        fb->DestroyWindowSurface(trivialSurface);
+        trivialSurface = 0;
+    }
+}
+
 RenderThreadInfo* RenderThreadInfo::get() {
     return s_threadInfoPtr;
 }

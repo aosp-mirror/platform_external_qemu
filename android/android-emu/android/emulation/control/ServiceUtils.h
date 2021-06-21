@@ -23,6 +23,7 @@ namespace control {
 
 std::unordered_map<std::string, std::string> getQemuConfig();
 
+std::unordered_map<std::string, std::string> getUserConfig();
 // Returns if the emulator has booted at least once.
 //
 // 1. For API >= 28 we rely on a boot services that informs qemu that boot has

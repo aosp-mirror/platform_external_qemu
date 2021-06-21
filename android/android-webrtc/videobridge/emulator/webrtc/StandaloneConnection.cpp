@@ -38,8 +38,9 @@ using grpc::Status;
 using grpc::StatusCode;
 
 StandaloneConnection::StandaloneConnection(EmulatorGrpcClient* client,
-                                           int adbPort)
-    : RtcConnection(client), mAdbPort(adbPort){};
+                                           int adbPort,
+                                           TurnConfig turnconfig)
+    : RtcConnection(client), mAdbPort(adbPort), mTurnConfig(turnconfig) {};
 
 StandaloneConnection::~StandaloneConnection() {
     close();
@@ -157,8 +158,9 @@ void StandaloneConnection::driveJsep() {
         return;
     }
 
-    participant =
-            std::make_shared<Participant>(this, mGuid.guid(), &mVideoReceiver);
+    json turnConfig = mTurnConfig.getConfig();
+    participant = std::make_shared<Participant>(this, mGuid.guid(), turnConfig,
+                                                &mVideoReceiver);
     mParticipant = participant;
 
     if (mAdbPort > 0) {

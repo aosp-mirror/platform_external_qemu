@@ -479,6 +479,14 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::MINIGBM;
         case android::featurecontrol::NoDraw:
             return android_studio::EmulatorFeatureFlagState::NO_DRAW;
+        case android::featurecontrol::GnssGrpcV1:
+            return android_studio::EmulatorFeatureFlagState::GNSS_GRPC_V1;
+        case android::featurecontrol::MigratableSnapshotSave:
+            return android_studio::EmulatorFeatureFlagState::MIGRATABLE_SNAPSHOT_SAVE;
+        case android::featurecontrol::AndroidbootProps:
+            return android_studio::EmulatorFeatureFlagState::ANDROIDBOOT_PROPS;
+        case android::featurecontrol::DeviceSkinOverlay:
+            return android_studio::EmulatorFeatureFlagState::DEVICESKINOVERLAY;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }

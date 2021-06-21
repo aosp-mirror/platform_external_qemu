@@ -248,4 +248,16 @@ template <class T> void vk_append_struct(vk_struct_chain_iterator* i, T* vk_stru
     *i = vk_make_chain_iterator(vk_struct);
 }
 
+template <class S, class T> void vk_struct_chain_remove(S* unwanted, T* vk_struct)
+{
+    if (!unwanted) return;
+
+    vk_foreach_struct(current, vk_struct) {
+        if ((void*)unwanted == current->pNext) {
+            const vk_struct_common* unwanted_as_common =
+                reinterpret_cast<const vk_struct_common*>(unwanted);
+            current->pNext = unwanted_as_common->pNext;
+        }
+    }
+}
 #endif /* VK_UTIL_H */

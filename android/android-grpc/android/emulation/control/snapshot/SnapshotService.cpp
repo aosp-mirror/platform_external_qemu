@@ -120,106 +120,119 @@ public:
         // Exports all qcow2 images..
         SnapshotLineConsumer slc(&result);
         bool exp;
+        Status status = Status::OK;
+        // Put everything in main thread, to avoid calling export during
+        // snapshot operations.
         android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
-                [&snapshot, &tmpdir, &slc, &exp] {
+                [&snapshot, &tmpdir, &slc, &exp, &writer, &status, &sw, &result,
+                 request] {
                     exp = getConsoleAgents()->vm->snapshotExport(
                             snapshot->name().data(), tmpdir.data(),
                             slc.opaque(), LineConsumer::Callback);
+                    if (!exp) {
+                        writer->Write(*slc.error());
+                        return;
+                    }
+                    LOG(VERBOSE) << "Exported snapshot in " << sw.restartUs()
+                                 << " us";
+                    // Stream the tmpdir out as a tar.gz..
+
+                    std::unique_ptr<CallbackStreambufWriter> csb;
+                    std::unique_ptr<std::ofstream> dstFile;
+                    std::streambuf* streamBufPtr = nullptr;
+                    if (request->path() == "") {
+                        csb.reset(new CallbackStreambufWriter(
+                                k256KB, [writer](char* bytes, std::size_t len) {
+                                    SnapshotPackage msg;
+                                    msg.set_payload(std::string(bytes, len));
+                                    msg.set_success(true);
+                                    return writer->Write(msg);
+                                }));
+                        streamBufPtr = csb.get();
+                    } else {
+                        dstFile.reset(new std::ofstream(
+                                request->path().c_str(),
+                                std::ios::binary | std::ios::out));
+                        if (!dstFile->is_open()) {
+                            result.set_success(false);
+                            result.set_err("Failed to write to " +
+                                           request->path());
+                            writer->Write(result);
+                            status = Status::OK;
+                            return;
+                        }
+                        streamBufPtr = dstFile->rdbuf();
+                    }
+
+                    std::unique_ptr<std::ostream> stream;
+                    std::ostream* streamPtr = nullptr;
+                    if (request->format() == SnapshotPackage::TARGZ) {
+                        stream = std::make_unique<GzipOutputStream>(
+                                streamBufPtr);
+                        streamPtr = stream.get();
+                    } else if (request->path() == "") {
+                        stream = std::make_unique<std::ostream>(streamBufPtr);
+                        streamPtr = stream.get();
+                    } else {
+                        streamPtr = dstFile.get();
+                    }
+
+                    // Use of  a 64 KB  buffer gives good performance (see
+                    // performance tests.)
+                    TarWriter tw(tmpdir, *streamPtr, k64KB);
+                    result.set_success(tw.addDirectory("."));
+                    if (tw.fail()) {
+                        result.set_err(tw.error_msg());
+                    }
+                    LOG(VERBOSE) << "Completed writing in " << sw.restartUs()
+                                 << " us";
+                    int success = iniFile_saveToFile(
+                            avdInfo_getConfigIni(android_avdInfo),
+                            PathUtils::join(snapshot->dataDir(),
+                                            CORE_CONFIG_INI)
+                                    .c_str());
+                    if (success != 0) {
+                        result.set_err("Failed to save snapshot meta data");
+                    }
+
+                    // Now add in the metadata.
+                    auto entries = System::get()->scanDirEntries(
+                            snapshot->dataDir(), true);
+                    for (const auto& fname : entries) {
+                        if (!System::get()->pathIsFile(fname)) {
+                            continue;
+                        }
+                        struct stat sb;
+                        android::base::StringView name;
+                        char buf[k64KB];
+                        PathUtils::split(fname, nullptr, &name);
+
+                        // Use of  a 64 KB  buffer gives good performance (see
+                        // performance tests.)
+                        std::ifstream ifs(fname, std::ios_base::in |
+                                                         std::ios_base::binary);
+                        ifs.rdbuf()->pubsetbuf(buf, sizeof(buf));
+
+                        if (android_stat(fname.c_str(), &sb) != 0 ||
+                            !tw.addFileEntryFromStream(ifs, name, sb)) {
+                            result.set_err("Unable to tar " + fname);
+                            break;
+                        }
+                    }
+                    LOG(VERBOSE)
+                            << "Wrote metadata in " << sw.restartUs() << " us";
+
+                    tw.close();
+                    if (tw.fail()) {
+                        result.set_err(tw.error_msg());
+                    }
+
+                    writer->Write(result);
+                    status = Status::OK;
                 });
 
         crashreport::CrashReporter::get()->hangDetector().pause(false);
-
-        if (!exp) {
-            writer->Write(*slc.error());
-            return Status::OK;
-        }
-
-        LOG(VERBOSE) << "Exported snapshot in " << sw.restartUs() << " us";
-
-        // Stream the tmpdir out as a tar.gz..
-
-        std::unique_ptr<CallbackStreambufWriter> csb;
-        std::unique_ptr<std::ofstream> dstFile;
-        std::streambuf* streamBufPtr = nullptr;
-        if (request->path() == "") {
-            csb.reset(new CallbackStreambufWriter(
-                    k256KB, [writer](char* bytes, std::size_t len) {
-                        SnapshotPackage msg;
-                        msg.set_payload(std::string(bytes, len));
-                        msg.set_success(true);
-                        return writer->Write(msg);
-                    }));
-            streamBufPtr = csb.get();
-        } else {
-            dstFile.reset(new std::ofstream(request->path().c_str(),
-                          std::ios::binary | std::ios::out));
-            if (!dstFile->is_open()) {
-                result.set_success(false);
-                result.set_err("Failed to write to " + request->path());
-                writer->Write(result);
-                return Status::OK;
-            }
-            streamBufPtr = dstFile->rdbuf();
-        }
-
-        std::unique_ptr<std::ostream> stream;
-        std::ostream* streamPtr = nullptr;
-        if (request->format() == SnapshotPackage::TARGZ) {
-            stream = std::make_unique<GzipOutputStream>(streamBufPtr);
-            streamPtr = stream.get();
-        } else if (request->path() == "") {
-            stream = std::make_unique<std::ostream>(streamBufPtr);
-            streamPtr = stream.get();
-        } else {
-            streamPtr = dstFile.get();
-        }
-
-        // Use of  a 64 KB  buffer gives good performance (see performance
-        // tests.)
-        TarWriter tw(tmpdir, *streamPtr, k64KB);
-        result.set_success(tw.addDirectory("."));
-        if (tw.fail()) {
-            result.set_err(tw.error_msg());
-        }
-        LOG(VERBOSE) << "Completed writing in " << sw.restartUs() << " us";
-        int success = iniFile_saveToFile(
-                avdInfo_getConfigIni(android_avdInfo),
-                PathUtils::join(snapshot->dataDir(), CORE_CONFIG_INI).c_str());
-        if (success != 0) {
-            result.set_err("Failed to save snapshot meta data");
-        }
-
-        // Now add in the metadata.
-        auto entries = System::get()->scanDirEntries(snapshot->dataDir(), true);
-        for (const auto& fname : entries) {
-            if (!System::get()->pathIsFile(fname)) {
-                continue;
-            }
-            struct stat sb;
-            android::base::StringView name;
-            char buf[k64KB];
-            PathUtils::split(fname, nullptr, &name);
-
-            // Use of  a 64 KB  buffer gives good performance (see performance
-            // tests.)
-            std::ifstream ifs(fname, std::ios_base::in | std::ios_base::binary);
-            ifs.rdbuf()->pubsetbuf(buf, sizeof(buf));
-
-            if (android_stat(fname.c_str(), &sb) != 0 ||
-                !tw.addFileEntryFromStream(ifs, name, sb)) {
-                result.set_err("Unable to tar " + fname);
-                break;
-            }
-        }
-        LOG(VERBOSE) << "Wrote metadata in " << sw.restartUs() << " us";
-
-        tw.close();
-        if (tw.fail()) {
-            result.set_err(tw.error_msg());
-        }
-
-        writer->Write(result);
-        return Status::OK;
+        return status;
     }
 
     Status PushSnapshot(ServerContext* context,

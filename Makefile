@@ -204,7 +204,7 @@ tracetool-y += $(shell find $(SRC_PATH)/scripts/tracetool -name "*.py")
 		--group=$(call trace-group-name,$@) \
 		--format=h \
 		--backends=$(TRACE_BACKENDS) \
-		$< > $@,"GEN","$(@:%-timestamp=%)")
+		$<  $@,"GEN","$(@:%-timestamp=%)")
 
 %/trace.c: %/trace.c-timestamp
 	@cmp $< $@ >/dev/null 2>&1 || cp $< $@
@@ -213,7 +213,7 @@ tracetool-y += $(shell find $(SRC_PATH)/scripts/tracetool -name "*.py")
 		--group=$(call trace-group-name,$@) \
 		--format=c \
 		--backends=$(TRACE_BACKENDS) \
-		$< > $@,"GEN","$(@:%-timestamp=%)")
+		$<  $@,"GEN","$(@:%-timestamp=%)")
 
 %/trace-ust.h: %/trace-ust.h-timestamp
 	@cmp $< $@ >/dev/null 2>&1 || cp $< $@
@@ -222,7 +222,7 @@ tracetool-y += $(shell find $(SRC_PATH)/scripts/tracetool -name "*.py")
 		--group=$(call trace-group-name,$@) \
 		--format=ust-events-h \
 		--backends=$(TRACE_BACKENDS) \
-		$< > $@,"GEN","$(@:%-timestamp=%)")
+		$<  $@,"GEN","$(@:%-timestamp=%)")
 
 %/trace-dtrace.dtrace: %/trace-dtrace.dtrace-timestamp
 	@cmp $< $@ >/dev/null 2>&1 || cp $< $@
@@ -231,7 +231,7 @@ tracetool-y += $(shell find $(SRC_PATH)/scripts/tracetool -name "*.py")
 		--group=$(call trace-group-name,$@) \
 		--format=d \
 		--backends=$(TRACE_BACKENDS) \
-		$< > $@,"GEN","$(@:%-timestamp=%)")
+		$<  $@,"GEN","$(@:%-timestamp=%)")
 
 %/trace-dtrace.h: %/trace-dtrace.dtrace $(tracetool-y)
 	$(call quiet-command,dtrace -o $@ -h -s $<, "GEN","$@")
@@ -246,7 +246,7 @@ trace-root.h-timestamp: $(SRC_PATH)/trace-events $(tracetool-y)
 		--group=root \
 		--format=h \
 		--backends=$(TRACE_BACKENDS) \
-		$< > $@,"GEN","$(@:%-timestamp=%)")
+		$<  $@,"GEN","$(@:%-timestamp=%)")
 
 trace-root.c: trace-root.c-timestamp
 	@cmp $< $@ >/dev/null 2>&1 || cp $< $@
@@ -255,7 +255,7 @@ trace-root.c-timestamp: $(SRC_PATH)/trace-events $(tracetool-y)
 		--group=root \
 		--format=c \
 		--backends=$(TRACE_BACKENDS) \
-		$< > $@,"GEN","$(@:%-timestamp=%)")
+		$<  $@,"GEN","$(@:%-timestamp=%)")
 
 trace-ust-root.h: trace-ust-root.h-timestamp
 	@cmp $< $@ >/dev/null 2>&1 || cp $< $@
@@ -264,7 +264,7 @@ trace-ust-root.h-timestamp: $(SRC_PATH)/trace-events $(tracetool-y)
 		--group=root \
 		--format=ust-events-h \
 		--backends=$(TRACE_BACKENDS) \
-		$< > $@,"GEN","$(@:%-timestamp=%)")
+		$<  $@,"GEN","$(@:%-timestamp=%)")
 
 trace-ust-all.h: trace-ust-all.h-timestamp
 	@cmp $< $@ >/dev/null 2>&1 || cp $< $@
@@ -273,7 +273,7 @@ trace-ust-all.h-timestamp: $(trace-events-files) $(tracetool-y)
 		--group=all \
 		--format=ust-events-h \
 		--backends=$(TRACE_BACKENDS) \
-		$(trace-events-files) > $@,"GEN","$(@:%-timestamp=%)")
+		$(trace-events-files)  $@,"GEN","$(@:%-timestamp=%)")
 
 trace-ust-all.c: trace-ust-all.c-timestamp
 	@cmp $< $@ >/dev/null 2>&1 || cp $< $@
@@ -282,7 +282,7 @@ trace-ust-all.c-timestamp: $(trace-events-files) $(tracetool-y)
 		--group=all \
 		--format=ust-events-c \
 		--backends=$(TRACE_BACKENDS) \
-		$(trace-events-files) > $@,"GEN","$(@:%-timestamp=%)")
+		$(trace-events-files)  $@,"GEN","$(@:%-timestamp=%)")
 
 trace-dtrace-root.dtrace: trace-dtrace-root.dtrace-timestamp
 	@cmp $< $@ >/dev/null 2>&1 || cp $< $@
@@ -291,7 +291,7 @@ trace-dtrace-root.dtrace-timestamp: $(SRC_PATH)/trace-events $(BUILD_DIR)/config
 		--group=root \
 		--format=d \
 		--backends=$(TRACE_BACKENDS) \
-		$< > $@,"GEN","$(@:%-timestamp=%)")
+		$<  $@,"GEN","$(@:%-timestamp=%)")
 
 trace-dtrace-root.h: trace-dtrace-root.dtrace
 	$(call quiet-command,dtrace -o $@ -h -s $<, "GEN","$@")
@@ -518,7 +518,7 @@ ALL_SUBDIRS=$(TARGET_DIRS) $(patsubst %,pc-bios/%, $(ROMS))
 recurse-all: $(SUBDIR_RULES) $(ROMSUBDIR_RULES)
 
 $(BUILD_DIR)/version.o: $(SRC_PATH)/version.rc config-host.h
-	$(call quiet-command,$(WINDRES) -I$(BUILD_DIR) -o $@ $<,"RC","version.o")
+	$(call quiet-command,$(WINDRES) /I $(BUILD_DIR) /FO $@ $<,"RC","version.o")
 
 Makefile: $(version-obj-y)
 
@@ -529,8 +529,13 @@ libqemuutil.a: $(util-obj-y) $(trace-obj-y) $(stub-obj-y)
 libvhost-user.a: $(libvhost-user-obj-y)
 
 ######################################################################
+# MSVC compat layer
+msvc-compat-$(CONFIG_WIN32) += $(SRC_PATH)/android/msvc-posix-compat/src/getopt.o
+msvc-compat-$(CONFIG_WIN32) += $(SRC_PATH)/android/msvc-posix-compat/src/gettimeofday.o
+msvc-compat-$(CONFIG_WIN32) += $(SRC_PATH)/android/msvc-posix-compat/src/msvc-posix.o
 
-COMMON_LDADDS = libqemuutil.a
+######################################################################
+COMMON_LDADDS = libqemuutil.a $(msvc-compat-y)
 
 qemu-img.o: qemu-img-cmds.h
 

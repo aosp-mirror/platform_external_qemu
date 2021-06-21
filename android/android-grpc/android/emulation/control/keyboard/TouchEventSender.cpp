@@ -73,7 +73,7 @@ int TouchEventSender::pickNextSlot() {
 
 void TouchEventSender::doSend(const TouchEvent request) {
     // Obtain display width, height for the given display id.
-    auto displayId = request.device();
+    auto displayId = request.display();
     uint32_t w = 0;
     uint32_t h = 0;
     if (!mAgents->emu->getMultiDisplay(displayId, NULL, NULL, &w, &h, NULL,

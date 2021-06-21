@@ -63,6 +63,10 @@ public:
     bool isCoreProfile() const {
         return mCoreProfile;
     }
+
+    // as of now, only osx has this non-nullptr, needed by media decoder
+    virtual void* lowLevelContext() { return nullptr; }
+
 protected:
     ~Context() = default;
 private:

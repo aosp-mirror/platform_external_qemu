@@ -60,17 +60,21 @@ struct virtio_gpu_scanout {
 struct virtio_gpu_requested_state {
     uint32_t width, height;
     int x, y;
+    uint32_t dpi;
 };
 
 enum virtio_gpu_conf_flags {
     VIRTIO_GPU_FLAG_VIRGL_ENABLED = 1,
     VIRTIO_GPU_FLAG_STATS_ENABLED,
+    VIRTIO_GPU_FLAG_EDID_ENABLED,
 };
 
 #define virtio_gpu_virgl_enabled(_cfg) \
     (_cfg.flags & (1 << VIRTIO_GPU_FLAG_VIRGL_ENABLED))
 #define virtio_gpu_stats_enabled(_cfg) \
     (_cfg.flags & (1 << VIRTIO_GPU_FLAG_STATS_ENABLED))
+#define virtio_gpu_edid_enabled(_cfg) \
+    (_cfg.flags & (1 << VIRTIO_GPU_FLAG_EDID_ENABLED))
 
 struct virtio_gpu_conf {
     uint64_t max_hostmem;
@@ -171,6 +175,8 @@ void virtio_gpu_ctrl_response_nodata(VirtIOGPU *g,
                                      enum virtio_gpu_ctrl_type type);
 void virtio_gpu_get_display_info(VirtIOGPU *g,
                                  struct virtio_gpu_ctrl_command *cmd);
+void virtio_gpu_get_edid(VirtIOGPU *g,
+                         struct virtio_gpu_ctrl_command *cmd);
 int virtio_gpu_create_mapping_iov(struct virtio_gpu_resource_attach_backing *ab,
                                   struct virtio_gpu_ctrl_command *cmd,
                                   uint64_t **addr, struct iovec **iov);
@@ -185,5 +191,8 @@ void virtio_gpu_virgl_reset(VirtIOGPU *g);
 void virtio_gpu_gl_block(void *opaque, bool block);
 int virtio_gpu_virgl_init(VirtIOGPU *g);
 int virtio_gpu_virgl_get_num_capsets(VirtIOGPU *g);
+
+void virtio_gpu_save_ram_slots(void* qemufile, VirtIOGPU* g);
+void virtio_gpu_load_ram_slots(void* qemufile, VirtIOGPU* g);
 
 #endif

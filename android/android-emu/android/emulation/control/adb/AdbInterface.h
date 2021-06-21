@@ -118,7 +118,7 @@ public:
     using ResultCallback = std::function<void(const OptionalAdbCommandResult&)>;
 
     virtual AdbCommandPtr runAdbCommand(const std::vector<std::string>& args,
-                                        ResultCallback&& result_callback,
+                                        ResultCallback result_callback,
                                         base::System::Duration timeout_ms,
                                         bool want_output = true) = 0;
 
@@ -129,7 +129,7 @@ public:
     // The caller can provide a callback that will receive
     // the results of the final attempt.
     virtual void enqueueCommand(const std::vector<std::string>& args,
-                                ResultCallback&& result_callback = [](const OptionalAdbCommandResult&){}
+                                ResultCallback result_callback = [](const OptionalAdbCommandResult&){}
                                ) = 0;
 
     // Creates a new instance of the AdbInterface.

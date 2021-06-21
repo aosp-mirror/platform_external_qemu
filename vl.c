@@ -204,7 +204,7 @@ int main(int argc, char **argv)
 
 #include "hw/input/goldfish_events.h"
 #include "hw/misc/goldfish_pstore.h"
-
+#include "hw/virtio/virtio-vsock.h"
 
 #define QEMU_CORE_VERSION "qemu2 " QEMU_VERSION
 
@@ -214,6 +214,7 @@ int main(int argc, char **argv)
 #define  LCD_DENSITY_140       140
 #define  LCD_DENSITY_MDPI      160
 #define  LCD_DENSITY_180       180
+#define  LCD_DENSITY_200       200
 #define  LCD_DENSITY_TVDPI     213
 #define  LCD_DENSITY_HDPI      240
 #define  LCD_DENSITY_280DPI    280
@@ -302,6 +303,8 @@ int icount_align_option;
  */
 QemuUUID qemu_uuid;
 bool qemu_uuid_set;
+
+extern bool migratable_snapshot;
 
 static NotifierList exit_notifiers =
     NOTIFIER_LIST_INITIALIZER(exit_notifiers);
@@ -4522,6 +4525,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                     case LCD_DENSITY_140:
                     case LCD_DENSITY_MDPI:
                     case LCD_DENSITY_180:
+                    case LCD_DENSITY_200:
                     case LCD_DENSITY_TVDPI:
                     case LCD_DENSITY_HDPI:
                     case LCD_DENSITY_280DPI:
@@ -4803,6 +4807,8 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         goldfish_fb_set_display_depth(32);
         goldfish_fb_set_use_host_gpu(1);
     }
+
+    migratable_snapshot = feature_is_enabled(kFeature_MigratableSnapshotSave);
 
 #endif // CONFIG_ANDROID
 
@@ -5718,7 +5724,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #ifdef CONFIG_ANDROID
     qemu_android_emulation_teardown();
     android_wear_agent_stop();
-    if (android_qemu_mode) {
+    if (android_qemu_mode || is_fuchsia) {
         android_reporting_teardown();
     }
     android_devices_teardown();
