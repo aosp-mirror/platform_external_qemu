@@ -2067,7 +2067,7 @@ extern "C" int main(int argc, char** argv) {
         if (hw->disk_ramdisk_path) {
             args.add2("-kernel", hw->kernel_path);
 
-            if (fc::isEnabled(fc::AndroidbootProps)) {
+            if (fc::isEnabled(fc::AndroidbootProps) || fc::isEnabled(fc::AndroidbootProps2)) {
                 bootconfigInitrdPath =
                     getWriteableFilename(hw->disk_dataPartition_path, "initrd");
                 args.add2("-initrd", bootconfigInitrdPath.c_str());
@@ -2153,7 +2153,7 @@ extern "C" int main(int argc, char** argv) {
                 args.add("null,id=forhvc1");
             }
 
-            if (!fc::isEnabled(fc::AndroidbootProps)) {
+            if (!(fc::isEnabled(fc::AndroidbootProps) || fc::isEnabled(fc::AndroidbootProps2))) {
                 // it is going to bootconfig, `androidboot.logcat`
                 boot_property_add_logcat_pipe_virtconsole("*:V");
             }
@@ -2531,7 +2531,7 @@ extern "C" int main(int argc, char** argv) {
                 hw->display_settings_xml);
 
         std::vector<std::string> kernelCmdLineUserspaceBootOpts;
-        if (fc::isEnabled(fc::AndroidbootProps)) {
+        if (fc::isEnabled(fc::AndroidbootProps) || fc::isEnabled(fc::AndroidbootProps2)) {
             const int r = createRamdiskWithBootconfig(
                 hw->disk_ramdisk_path,
                 bootconfigInitrdPath.c_str(),

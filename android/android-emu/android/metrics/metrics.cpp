@@ -485,6 +485,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::MIGRATABLE_SNAPSHOT_SAVE;
         case android::featurecontrol::AndroidbootProps:
             return android_studio::EmulatorFeatureFlagState::ANDROIDBOOT_PROPS;
+        case android::featurecontrol::AndroidbootProps2:
+            return android_studio::EmulatorFeatureFlagState::ANDROIDBOOT_PROPS2;
         case android::featurecontrol::DeviceSkinOverlay:
             return android_studio::EmulatorFeatureFlagState::DEVICESKINOVERLAY;
     }
