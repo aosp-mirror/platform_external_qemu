@@ -342,6 +342,7 @@ void MediaVideoToolBoxVideoHelper::videoToolboxDecompressCallback(
 
     if (!image_buffer) {
         VTB_DPRINT("%s: output image buffer is null", __func__);
+        ptr->mIsGood = false;
         return;
     }
 
