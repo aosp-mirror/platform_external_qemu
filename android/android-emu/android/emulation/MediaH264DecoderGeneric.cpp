@@ -151,6 +151,14 @@ void MediaH264DecoderGeneric::initH264ContextInternal(unsigned int width,
                             "ANDROID_EMU_MEDIA_DECODER_VTB") == "0");
 
     if (is_vtb_allowed) {
+        if (width < 256 || height < 256) {
+            // when it is small size, just copy memory
+            // instead of texture transfer which has accuracy
+            // issue with small sizes b/191768035
+            mUseGpuTexture = false;
+            H264_DPRINT("OSX: gpu texture mode is turned off for w %" PRIu32 " h %" PRIu32,
+                    width, height);
+        }
         MediaVideoToolBoxVideoHelper::FrameStorageMode fMode =
             (mParser.version() >= 200 && mUseGpuTexture)
                     ? MediaVideoToolBoxVideoHelper::FrameStorageMode::
