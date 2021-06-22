@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <stdint.h>                                          // for uint32_t
-#include <chrono>                                            // for operator...
-#include <ios>                                               // for streamsize
-#include <memory>                                            // for unique_ptr
+#include <stdint.h>  // for uint32_t
+#include <chrono>    // for operator...
+#include <ios>       // for streamsize
+#include <memory>    // for unique_ptr
 
 #include "android/emulation/AudioCapture.h"                  // for AudioCap...
 #include "android/emulation/control/logcat/RingStreambuf.h"  // for millisec...
@@ -29,7 +29,7 @@ namespace control {
 
 // An audio stream contains a ringbuffer that can be used to
 // send and receive audio from qemu.
-class AudioStream {
+class AudioStream  {
 public:
     AudioStream(const AudioFormat fmt,
                 milliseconds blockingTime = 30ms,
@@ -39,38 +39,77 @@ public:
 
     const AudioFormat getFormat() const { return mFormat; }
 
+    std::streamsize capacity() {
+        return mAudioBuffer.capacity();
+    }
+
+    virtual bool good() = 0;
+
 protected:
     uint32_t bytesPerMillisecond(const AudioFormat fmt) const;
     RingStreambuf mAudioBuffer;
+    std::streamsize mAudioBufferSize;
 
 private:
     AudioFormat mFormat;
 };
 
-// An input audio stream will register an audio receiver with QEMU.
+// A qemu audio output stream will register an audio receiver with QEMU.
 // all the incoming data will be placed on the ringbuffer.
 //
 // Typically you would use this like this:
 //
 // AudioPacket pkt;
-// AudioInputSteam ais(desiredFormat, 30ms, 500ms);
+// QemuAudioOutputStream ais(desiredFormat, 30ms, 500ms);
 // while(wantAudio) {
 //    int bytesRec = ais.read(&pkt);
 //    if (bytesRec > 0)
 //      sendThePacket(pkt);
 // }
-class AudioInputStream : public AudioStream {
+class QemuAudioOutputStream : public AudioStream {
 public:
-    AudioInputStream(const AudioFormat fmt,
-                     milliseconds blockingTime = 30ms,
-                     milliseconds bufferSize = 500ms);
+    QemuAudioOutputStream(const AudioFormat fmt,
+                          milliseconds blockingTime = 300ms,
+                          milliseconds bufferSize = 500ms);
 
-    ~AudioInputStream() = default;
+    ~QemuAudioOutputStream() = default;
     // Blocks and waits until we can fill an audio packet with audio data.
     // This will block for at most the configured blocking time during
     // construction.
     std::streamsize read(AudioPacket* packet);
 
+    bool good() override { return mAudioCapturer->good(); };
+
+private:
+    std::unique_ptr<emulation::AudioCapturer> mAudioCapturer;
+};
+
+// A QemuAudioInputStream will register a microphone with QEMU.
+// all the incoming data will be placed on the ringbuffer and
+// given to QEMU when requested.
+//
+// Typically you would use this like this:
+//
+//  QemuAudioInputStream ais(pkt.format());
+//  while(reader->Read(&pkt)) {
+//   ais.write(pkt);
+// }
+class QemuAudioInputStream : public AudioStream {
+public:
+    QemuAudioInputStream(const AudioFormat fmt,
+                         milliseconds blockingTime = 300ms,
+                         milliseconds bufferSize = 500ms);
+    ~QemuAudioInputStream() = default;
+
+    // Blocks and waits until we can write an entire audio packet.
+    void write(const AudioPacket* packet);
+
+    // Blocks and waits until we can write cBuffer bytes from
+    // the buffer. Returns the number of bytes written.
+    // Note: This can be 0, in case qemu is not requesting any audio!
+    size_t write(const char* buffer, size_t cBuffer);
+
+    bool good() override { return mAudioCapturer->good(); };
 private:
     std::unique_ptr<emulation::AudioCapturer> mAudioCapturer;
 };

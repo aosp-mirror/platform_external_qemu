@@ -138,7 +138,8 @@ static struct {
     .try_poll_out = 1,
 };
 
-static AudioState glob_audio_state;
+// AEMU makes this extern visible.
+AudioState glob_audio_state;
 
 const struct mixeng_volume nominal_volume = {
     .mute = 0,
@@ -1225,11 +1226,9 @@ int AUD_read (SWVoiceIn *sw, void *buf, int size)
         return 0;
     }
 
-    int bytes =  sw->hw->pcm_ops->read(sw, buf, size);
+    int bytes = sw->hw->pcm_ops->read(sw, buf, size);
 
     if (!allow_real_audio) {
-        // TODO: Also a potential way to pipe fake audio input
-        // that is not just all zeroes.
         memset(buf, 0x0, size);
     }
 
@@ -1784,7 +1783,8 @@ void AUD_help (void)
         );
 }
 
-static int audio_driver_init (AudioState *s, struct audio_driver *drv)
+// AEMU makes this visible for microphone override.
+int audio_driver_init (AudioState *s, struct audio_driver *drv)
 {
     if (drv->options) {
         audio_process_options (drv->name, drv->options);
@@ -1878,6 +1878,12 @@ static const VMStateDescription vmstate_audio = {
     }
 };
 
+
+// AEMU
+audio_driver *g_fwd_audio_driver;
+void *g_fwd_audio_driver_opaque;
+// AEMU
+
 static void audio_init (void)
 {
     size_t i;
@@ -1902,6 +1908,10 @@ static void audio_init (void)
 
     s->nb_hw_voices_out = conf.fixed_out.nb_voices;
     s->nb_hw_voices_in = conf.fixed_in.nb_voices;
+
+    // AEMU dynamically adds/removes input devices and we want to be able
+    // to configure the input quality separately.
+    conf.fixed_in.enabled = 0;
 
     if (s->nb_hw_voices_out <= 0) {
         dolog ("Bogus number of playback voices %d, setting to 1\n",

@@ -146,6 +146,20 @@ service EmulatorController {
   // produce any audio whatsoever!
   rpc streamAudio(AudioFormat) returns (stream AudioPacket) {}
 
+
+  // Injects a series of audio packets to the android microphone.
+  // A new frame will be delivered whenever the emulated device
+  // requests a new audio frame. Audio is usually delivered at a rate
+  // that the emulator is requesting frames. Audio will be stored in a
+  // temporary buffer that can hold 500ms of audio.
+  //
+  // Note: Currently the emulator will downsample to 16khz.
+  //
+  // -  INVALID_ARGUMENT (code 3) The sampling rate was too high
+  // -  INVALID_ARGUMENT (code 3) The audio packet was too large to handle.
+  // -  FAILED_PRECONDITION (code 9) If there was a microphone registered already.
+  rpc injectAudio(stream AudioPacket) returns (google.protobuf.Empty) {}
+
   // Returns the last 128Kb of logcat output from the emulator
   // Note that parsed logcat messages are only available after L (Api >23).
   // it is possible that the logcat buffer gets overwritten, or falls behind.

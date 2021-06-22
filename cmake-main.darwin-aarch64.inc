@@ -11,6 +11,7 @@
 ## TARGET: qemu2-shared ##
 set(qemu2-shared_sources ""
 audio/audio.c
+audio/audio_forwarder.c
 audio/coreaudio.c
 audio/mixeng.c
 audio/noaudio.c
@@ -1189,7 +1190,7 @@ ${ANDROID_AUTOGEN}/accel/tcg/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_AUT
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/arch_init.c ${ANDROID_QEMU2_TOP_DIR}/balloon.c ${ANDROID_QEMU2_TOP_DIR}/block.c ${ANDROID_QEMU2_TOP_DIR}/blockdev-nbd.c ${ANDROID_QEMU2_TOP_DIR}/blockdev.c ${ANDROID_QEMU2_TOP_DIR}/blockjob.c ${ANDROID_QEMU2_TOP_DIR}/bootdevice.c ${ANDROID_QEMU2_TOP_DIR}/bt-host.c ${ANDROID_QEMU2_TOP_DIR}/bt-vhci.c ${ANDROID_QEMU2_TOP_DIR}/cpus-common.c ${ANDROID_QEMU2_TOP_DIR}/cpus.c ${ANDROID_QEMU2_TOP_DIR}/device-hotplug.c ${ANDROID_QEMU2_TOP_DIR}/device_tree.c ${ANDROID_QEMU2_TOP_DIR}/disas.c ${ANDROID_QEMU2_TOP_DIR}/dma-helpers.c ${ANDROID_QEMU2_TOP_DIR}/dump.c ${ANDROID_QEMU2_TOP_DIR}/exec.c ${ANDROID_QEMU2_TOP_DIR}/gdbstub.c ${ANDROID_QEMU2_TOP_DIR}/hmp.c ${ANDROID_QEMU2_TOP_DIR}/ioport.c ${ANDROID_QEMU2_TOP_DIR}/iothread.c ${ANDROID_QEMU2_TOP_DIR}/memory.c ${ANDROID_QEMU2_TOP_DIR}/memory_mapping.c ${ANDROID_QEMU2_TOP_DIR}/monitor.c ${ANDROID_QEMU2_TOP_DIR}/numa.c ${ANDROID_QEMU2_TOP_DIR}/os-posix.c ${ANDROID_QEMU2_TOP_DIR}/qdev-monitor.c ${ANDROID_QEMU2_TOP_DIR}/qemu-img.c ${ANDROID_QEMU2_TOP_DIR}/qemu-io-cmds.c ${ANDROID_QEMU2_TOP_DIR}/qmp.c ${ANDROID_QEMU2_TOP_DIR}/qtest.c ${ANDROID_QEMU2_TOP_DIR}/replication.c ${ANDROID_QEMU2_TOP_DIR}/tpm.c
 ${ANDROID_AUTOGEN}/trace-root.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_AUTOGEN}/")
 
-set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/audio/audio.c ${ANDROID_QEMU2_TOP_DIR}/audio/coreaudio.c ${ANDROID_QEMU2_TOP_DIR}/audio/mixeng.c ${ANDROID_QEMU2_TOP_DIR}/audio/noaudio.c ${ANDROID_QEMU2_TOP_DIR}/audio/wavaudio.c ${ANDROID_QEMU2_TOP_DIR}/audio/wavcapture.c
+set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/audio/audio.c ${ANDROID_QEMU2_TOP_DIR}/audio/audio_forwarder.c ${ANDROID_QEMU2_TOP_DIR}/audio/coreaudio.c ${ANDROID_QEMU2_TOP_DIR}/audio/mixeng.c ${ANDROID_QEMU2_TOP_DIR}/audio/noaudio.c ${ANDROID_QEMU2_TOP_DIR}/audio/wavaudio.c ${ANDROID_QEMU2_TOP_DIR}/audio/wavcapture.c
 ${ANDROID_AUTOGEN}/audio/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_AUTOGEN}/audio")
 
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/backends/cryptodev-builtin.c ${ANDROID_QEMU2_TOP_DIR}/backends/cryptodev-vhost.c ${ANDROID_QEMU2_TOP_DIR}/backends/cryptodev.c ${ANDROID_QEMU2_TOP_DIR}/backends/hostmem-ram.c ${ANDROID_QEMU2_TOP_DIR}/backends/hostmem.c ${ANDROID_QEMU2_TOP_DIR}/backends/rng-egd.c ${ANDROID_QEMU2_TOP_DIR}/backends/rng-random-generic.c ${ANDROID_QEMU2_TOP_DIR}/backends/rng.c ${ANDROID_QEMU2_TOP_DIR}/backends/tpm.c

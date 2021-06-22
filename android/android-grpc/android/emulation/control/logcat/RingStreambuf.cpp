@@ -90,6 +90,18 @@ int RingStreambuf::overflow(int c) {
     return EOF;
 }
 
+std::streamsize RingStreambuf::waitForAvailableSpace(
+        std::streamsize n) {
+    std::unique_lock<std::mutex> lock(mLock);
+    mCanRead.wait_for(lock, mTimeout, [this, n]() { return showmanyw() >= n; });
+    return showmanyw();
+}
+
+
+std::streamsize RingStreambuf::showmanyw() {
+    return mRingbuffer.capacity() - 1 - showmanyc();
+}
+
 std::streamsize RingStreambuf::showmanyc() {
     // Note that:
     // Full state is mHead + 1 == mTail
@@ -149,9 +161,8 @@ std::pair<int, std::string> RingStreambuf::bufferAtOffset(
         milliseconds timeoutMs) {
     std::unique_lock<std::mutex> lock(mLock);
     std::string res;
-    if (!mCanRead.wait_for(lock, timeoutMs, [offset, this]() {
-            return offset < mHeadOffset;
-        })) {
+    if (!mCanRead.wait_for(lock, timeoutMs,
+                           [offset, this]() { return offset < mHeadOffset; })) {
         return std::make_pair(mHeadOffset, res);
     }
 

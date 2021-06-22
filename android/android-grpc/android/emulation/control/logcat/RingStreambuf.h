@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <stdint.h>                // for uint32_t, uint64_t
-#include <stdio.h>                 // for EOF
-#include <chrono>                  // for milliseconds
-#include <condition_variable>      // for condition_variable
-#include <ios>                     // for streamsize, streambuf
-#include <streambuf>               // for streambuf
-#include <mutex>                   // for condition_variable, mutex
-#include <string>                  // for string
-#include <utility>                 // for pair
-#include <vector>                  // for vector
+#include <stdint.h>            // for uint32_t, uint64_t
+#include <stdio.h>             // for EOF
+#include <chrono>              // for milliseconds
+#include <condition_variable>  // for condition_variable
+#include <ios>                 // for streamsize, streambuf
+#include <mutex>               // for condition_variable, mutex
+#include <streambuf>           // for streambuf
+#include <string>              // for string
+#include <utility>             // for pair
+#include <vector>              // for vector
 
 #include "android/base/CpuTime.h"  // for base
 
@@ -55,15 +55,28 @@ public:
     // The real capacity will be a power of 2 above capacity.
     // For example:
     // A capacity of 4 allows you to store 7 characters, and takes up 2^3
-    RingStreambuf(uint32_t capacity, std::chrono::milliseconds timeout = milliseconds::max());
+    RingStreambuf(uint32_t capacity,
+                  std::chrono::milliseconds timeout = milliseconds::max());
 
     // Retrieves the string stored at the given offset.
     // It will block at most timeoutMs.
     // Returns the available data, and the offset at which
     // the first character was retrieved.
     // This call will not modify any read pointers.
-    std::pair<int, std::string> bufferAtOffset(std::streamsize offset,
-                                               milliseconds timeoutMs = milliseconds(0));
+    std::pair<int, std::string> bufferAtOffset(
+            std::streamsize offset,
+            milliseconds timeoutMs = milliseconds(0));
+
+    // Blocks and waits until at least n bytes can be written, or
+    // the timeout has expired. Returns the number of bytes that
+    // can be written if no other threads have written to the
+    // buffer.
+    //
+    // Note: The return value can be less than n, in case of a timeout.
+    std::streamsize waitForAvailableSpace(std::streamsize n);
+
+    // The total number of bytes that can be stored in the buffer.
+    size_t capacity() { return mRingbuffer.capacity() - 1; }
 
 protected:
     // Implement streambuf interface, not that writes can overwrite existing
@@ -71,10 +84,13 @@ protected:
     std::streamsize xsputn(const char* s, std::streamsize n) override;
     int overflow(int c = EOF) override;
     std::streamsize showmanyc() override;
+
+    // Amount of space available for writing, without erasing
+    // the previous data.
+    std::streamsize showmanyw();
     std::streamsize xsgetn(char* s, std::streamsize n) override;
     int underflow() override;
     int uflow() override;
-
 
 private:
     std::vector<char> mRingbuffer;
@@ -82,7 +98,7 @@ private:
     uint32_t mHead{0};        // Ringbuffer write pointer (front)
     uint32_t mTail{0};        // Ringbuffer read pointer (tail)
     uint64_t mHeadOffset{0};  // Accumulated offset.
-    bool     mFull{false};
+    bool mFull{false};
     std::chrono::milliseconds mTimeout;
 
     std::mutex mLock;
