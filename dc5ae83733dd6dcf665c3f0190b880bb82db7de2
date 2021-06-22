@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a9d86e23_c53f37b6",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2948,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2021-06-22T23:52:42Z",
+      "side": 1,
+      "message": "fyi: we have a lot of guest code using PAGE_SIZE (e.g. goldfish_address_space_fuchsia.impl) which is hard-coded as 4096; i was wondering if they will be affected on arm64 macOS...",
+      "range": {
+        "startLine": 2945,
+        "startChar": 0,
+        "endLine": 2948,
+        "endChar": 5
+      },
+      "revId": "dc5ae83733dd6dcf665c3f0190b880bb82db7de2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
