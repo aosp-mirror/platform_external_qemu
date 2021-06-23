@@ -19,11 +19,13 @@
 #include "android/globals.h"  /* for android_hw */
 #include "android/hw-events.h"
 #include "android/skin/charmap.h"
+#include "android/skin/event.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
 #include "android-qemu2-glue/emulation/virtio-input-multi-touch.h"
 
 #include <assert.h>
+#include <stdint.h>
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
@@ -38,6 +40,8 @@
 #define  T(...)
 #endif
 
+/* Special tracking ID for the pen pointer, the next one after the fingers.*/
+#define MTS_POINTER_PEN         MTS_POINTERS_NUM
 
 /* Special tracking ID for a mouse pointer. */
 #define MTS_POINTER_MOUSE   -2
@@ -52,6 +56,24 @@ typedef struct MTSPointerState {
     /* Current pressure value. */
     int pressure;
 } MTSPointerState;
+
+/* Describes state of a pen pointer  */
+typedef struct MTSPenState {
+    /* Tracking ID assigned to the pen pointer */
+    int64_t tracking_id;
+    /* X - coordinate of the tracked pointer. */
+    int x;
+    /* Y - coordinate of the tracked pointer. */
+    int y;
+    /* Current pressure value. */
+    int pressure;
+    /* Current orientation of pen. */
+    int orientation;
+    /* Current state of pen side button. */
+    bool button_pressed;
+    /* Current state of pointer type. */
+    bool rubber_pointer;
+} MTSPenState;
 
 /* Describes state of an emulated multi-touch screen. */
 typedef struct MTSState {
@@ -69,6 +91,8 @@ typedef struct MTSState {
     int             touch_major;
     /* Array of multi-touch pointers. */
     MTSPointerState tracked_pointers[MTS_POINTERS_NUM];
+    /* Pen pointer. */
+    MTSPenState     tracked_pen;
     /* Header collecting framebuffer information and updates. */
     MTFrameHeader   fb_header;
     /* Boolean value indicating if framebuffer updates are currently being
@@ -171,6 +195,49 @@ _mts_pointer_down(MTSState* mts_state, int tracking_id, int x, int y, int pressu
     }
 }
 
+/* Handles a "pointer down" pen event
+ * Param:
+ *  mts_state - MTS state descriptor.
+ *  ev - pointer to struct of the "downed" pen pointer event.
+ *  x, y - "Downed" pointer coordinates,
+ */
+static void
+_mts_pointer_pen_down(MTSState* mts_state, const SkinEvent* ev, int x, int y)
+{
+    /* The tracked pointer for the pen has a fixed tracking ID. */
+    const int slot_index = MTS_POINTER_PEN;
+
+    /* Initialize pointer's entry. */
+    mts_state->tracked_pen.tracking_id = ev->u.pen.tracking_id;
+    mts_state->tracked_pen.x = x;
+    mts_state->tracked_pen.y = y;
+    mts_state->tracked_pen.pressure = ev->u.pen.pressure;
+    mts_state->tracked_pen.orientation = ev->u.pen.orientation;
+    mts_state->tracked_pen.button_pressed = ev->u.pen.button_pressed;
+    mts_state->tracked_pen.rubber_pointer = ev->u.pen.rubber_pointer;
+
+    /* Send events indicating a "pointer down" to the EventHub */
+    /* Make sure that correct slot is selected. */
+    if (slot_index != mts_state->current_slot) {
+        _push_event(EV_ABS, LINUX_ABS_MT_SLOT, slot_index);
+        mts_state->current_slot = slot_index;
+    }
+    _push_event(EV_ABS, LINUX_ABS_MT_TRACKING_ID, slot_index);
+    _push_event(EV_ABS, LINUX_ABS_MT_POSITION_X, x);
+    _push_event(EV_ABS, LINUX_ABS_MT_POSITION_Y, y);
+    if (!ev->u.pen.rubber_pointer) {
+        _push_event(EV_ABS, LINUX_ABS_MT_TOOL_TYPE, MT_TOOL_PEN);
+    } else {
+        _push_event(EV_ABS, LINUX_ABS_MT_TOOL_TYPE, MT_TOOL_MAX);
+        _push_event(EV_KEY, LINUX_BTN_TOOL_RUBBER, MTS_BTN_DOWN);
+    }
+    _push_event(EV_ABS, LINUX_ABS_MT_PRESSURE, ev->u.pen.pressure);
+    _push_event(EV_ABS, LINUX_ABS_MT_ORIENTATION, ev->u.pen.orientation);
+    if (ev->u.pen.button_pressed) {
+        _push_event(EV_KEY, LINUX_BTN_STYLUS, MTS_BTN_DOWN);
+    }
+}
+
 /* Handles a "pointer up" event
  * Param:
  *  mts_state - MTS state descriptor.
@@ -202,6 +269,45 @@ _mts_pointer_up(MTSState* mts_state, int slot_index)
     assert(mts_state->tracked_ptr_num >= 0);
 }
 
+/* Handles a "pointer up" pen event
+ * Param:
+ *  mts_state - MTS state descriptor.
+ */
+static void
+_mts_pointer_pen_up(MTSState* mts_state)
+{
+    /* The tracked pointer for the pen has a fixed tracking ID. */
+    const int slot_index = MTS_POINTER_PEN;
+
+    /* Make sure that correct slot is selected. */
+    if (slot_index != mts_state->current_slot) {
+        _push_event(EV_ABS, LINUX_ABS_MT_SLOT, slot_index);
+    }
+    /* Send event indicating "pointer up" to the EventHub. */
+    _push_event(EV_ABS, LINUX_ABS_MT_PRESSURE, 0);
+    _push_event(EV_ABS, LINUX_ABS_MT_ORIENTATION, 0);
+    if (mts_state->tracked_pen.rubber_pointer) {
+        _push_event(EV_KEY, LINUX_BTN_TOOL_RUBBER, MTS_BTN_UP);
+    }
+    if (mts_state->tracked_pen.button_pressed) {
+        _push_event(EV_KEY, LINUX_BTN_STYLUS, MTS_BTN_UP);
+    }
+    _push_event(EV_ABS, LINUX_ABS_MT_TRACKING_ID, MTS_POINTER_UP);
+
+    /* Update MTS descriptor, removing the tracked pointer. */
+    mts_state->tracked_pen.tracking_id = MTS_POINTER_UP;
+    mts_state->tracked_pen.x = 0;
+    mts_state->tracked_pen.y = 0;
+    mts_state->tracked_pen.pressure = 0;
+    mts_state->tracked_pen.orientation = 0;
+    mts_state->tracked_pen.button_pressed = false;
+    mts_state->tracked_pen.rubber_pointer = false;
+
+    /* Since current slot is no longer tracked, make sure we will do a "select"
+     * next time we send events to the EventHub. */
+    mts_state->current_slot = -1;
+}
+
 /* Handles a "pointer move" event
  * Param:
  *  mts_state - MTS state descriptor.
@@ -231,6 +337,34 @@ _mts_pointer_move(MTSState* mts_state, int slot_index, int x, int y, int pressur
         _push_event(EV_ABS, LINUX_ABS_MT_PRESSURE, pressure);
         ptr_state->pressure = pressure;
     }
+}
+
+/* Handles a "pointer move" pen event
+ * Param:
+ *  mts_state - MTS state descriptor.
+ *  ev - pointer to struct of the "downed" pen pointer event.
+ *  x, y - New pointer coordinates,
+ */
+static void
+_mts_pointer_pen_move(MTSState* mts_state, const SkinEvent* ev, int x, int y)
+{
+    MTSPenState* ptr_state = &mts_state->tracked_pen;
+    /* The tracked pointer for the pen has a fixed tracking ID. */
+    const int slot_index = MTS_POINTER_PEN;
+
+    /* Make sure that coordinates or button state have really changed. */
+    if ((ptr_state->x == x) && (ptr_state->y == y) &&
+            (ptr_state->button_pressed == ev->u.pen.button_pressed)) {
+        /* Coordinates and button state didn't change. Bail out. */
+        return;
+    }
+
+    /* Make sure that the right slot is selected. */
+    if (slot_index != mts_state->current_slot) {
+        _push_event(EV_ABS, LINUX_ABS_MT_SLOT, slot_index);
+        mts_state->current_slot = slot_index;
+    }
+    /* Push the changes down. */
     if (ptr_state->x != x) {
         _push_event(EV_ABS, LINUX_ABS_MT_POSITION_X, x);
         ptr_state->x = x;
@@ -238,6 +372,18 @@ _mts_pointer_move(MTSState* mts_state, int slot_index, int x, int y, int pressur
     if (ptr_state->y != y) {
         _push_event(EV_ABS, LINUX_ABS_MT_POSITION_Y, y);
         ptr_state->y = y;
+    }
+    if (ptr_state->pressure != ev->u.pen.pressure) {
+        _push_event(EV_ABS, LINUX_ABS_MT_PRESSURE, ev->u.pen.pressure);
+        ptr_state->pressure = ev->u.pen.pressure;
+    }
+    if (ptr_state->orientation != ev->u.pen.orientation) {
+        _push_event(EV_ABS, LINUX_ABS_MT_ORIENTATION, ev->u.pen.orientation);
+        ptr_state->orientation = ev->u.pen.orientation;
+    }
+    if (ptr_state->button_pressed != ev->u.pen.button_pressed) {
+        _push_event(EV_KEY, LINUX_BTN_STYLUS, ev->u.pen.button_pressed);
+        ptr_state->button_pressed = ev->u.pen.button_pressed;
     }
 }
 
@@ -440,6 +586,7 @@ void multitouch_init(AndroidMTSPort* mtsp,
         for (index = 0; index < MTS_POINTERS_NUM; index++) {
             mts_state->tracked_pointers[index].tracking_id = MTS_POINTER_UP;
         }
+        mts_state->tracked_pen.tracking_id = MTS_POINTER_UP;
         mts_state->mtsp = mtsp;
         mts_state->fb_header.header_size = sizeof(MTFrameHeader);
         mts_state->fb_transfer_in_progress = 0;
@@ -552,8 +699,70 @@ void multitouch_update_pointer(MTESource source,
     }
 }
 
+/* Handles a MT pen pointer event.
+ * Param:
+ *  source - Identifies the source of the event (pen).
+ *  ev - pointer to struct of the pen pointer event.
+ *  x, y - Pointer coordinates,
+ *  skip_sync - specifies if sync should be skipped.
+ */
+void multitouch_update_pen_pointer(MTESource source,
+                                   const SkinEvent* ev,
+                                   int x,
+                                   int y,
+                                   bool skip_sync) {
+    MTSState* const mts_state = &_MTSState;
+
+    /* The tracked pointer is occupied with a different valid pen tracking ID,
+     * it means that currently there is another pen touching the screen
+     * so we just ignore the new one, because we only support one pen.  */
+    if ( (mts_state->tracked_pen.tracking_id != MTS_POINTER_UP) &&
+         (mts_state->tracked_pen.tracking_id != ev->u.pen.tracking_id) ) {
+        D("Only one pen at a time is suported in MTS.");
+        return;
+    }
+
+    switch (ev->type) {
+    case kEventPenPress:
+        /* This should be a new pointer. */
+        if (mts_state->tracked_pen.tracking_id != MTS_POINTER_UP) {
+            D("Pen tracking pointer should be free before Press.");
+            return;
+        }
+        /* This is a "pointer down" event */
+        _mts_pointer_pen_down(mts_state, ev, x, y);
+        break;
+    case kEventPenRelease:
+        /* This pointer should be occupied. */
+        if (mts_state->tracked_pen.tracking_id == MTS_POINTER_UP) {
+            D("Pen tracking pointer should be occupied before Release.");
+        }
+        /* This is a "pointer up" event */
+        _mts_pointer_pen_up(mts_state);
+        break;
+    case kEventPenMove:
+        /* This pointer should be occupied. */
+        if (mts_state->tracked_pen.tracking_id == MTS_POINTER_UP) {
+            D("Pen tracking pointer should be occupied before Move.");
+            return;
+        }
+        /* This is a "pointer move" event */
+        _mts_pointer_pen_move(mts_state, ev, x, y);
+        break;
+    default:
+        break;
+    }
+
+    /* The EV_SYN can be skipped if multitouch events were intended to be
+     * delivered at the same time, which is how real devices report events
+     * that occur simultaneously. */
+    if (!skip_sync) {
+        _push_event(EV_SYN, LINUX_SYN_REPORT, 0);
+    }
+}
+
 int
 multitouch_get_max_slot()
 {
-    return MTS_POINTERS_NUM - 1;
+    return MTS_POINTERS_NUM;
 }

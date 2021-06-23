@@ -19,6 +19,7 @@
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/sdk-controller-socket.h"
+#include "android/skin/event.h"
 #include "android/multitouch-port.h"
 #include "android/utils/compiler.h"
 
@@ -59,9 +60,17 @@ ANDROID_BEGIN_HEADER
 typedef enum MTESource {
     /* The event is associated with a mouse. */
     MTES_MOUSE,
+    /* The event is associated with a pen. */
+    MTES_PEN,
     /* The event is associated with an actual android device. */
     MTES_DEVICE,
 } MTESource;
+
+/* Defines the states of a BTN_* event */
+typedef enum MTSButtonState {
+    MTS_BTN_UP = 0,
+    MTS_BTN_DOWN = 1
+} MTSButtonState;
 
 /* Initializes MTSState instance.
  * Param:
@@ -97,6 +106,19 @@ extern void multitouch_update_pointer(MTESource source,
                                       int y,
                                       int pressure,
                                       bool skip_sync);
+
+/* Handles a MT pen pointer event.
+ * Param:
+ *  source - Identifies the source of the event (pen).
+ *  ev - pointer to struct of the pen pointer event.
+ *  x, y - Pointer coordinates,
+ *  skip_sync - specifies if sync should be skipped.
+ */
+extern void multitouch_update_pen_pointer(MTESource source,
+                                          const SkinEvent* ev,
+                                          int x,
+                                          int y,
+                                          bool skip_sync);
 
 /* Gets maximum slot index available for the multi-touch emulation. */
 extern int multitouch_get_max_slot();

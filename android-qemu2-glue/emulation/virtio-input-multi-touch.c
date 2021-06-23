@@ -15,6 +15,7 @@
 
 #include "android/console.h"
 #include "android/multitouch-screen.h"
+#include "android/skin/event.h"
 
 #include "qemu/osdep.h"
 
@@ -57,6 +58,17 @@ static void translate_mouse_event(int x,
     multitouch_update_displayId(displayId);
     multitouch_update_pointer(MTES_DEVICE, finger, x, y, pressure,
                               multitouch_should_skip_sync(buttons_state));
+    multitouch_update_displayId(0);
+}
+
+static void translate_pen_event(int x,
+                                int y,
+                                const SkinEvent* ev,
+                                int buttons_state,
+                                int displayId) {
+    multitouch_update_displayId(displayId);
+    multitouch_update_pen_pointer(MTES_PEN, ev, x, y,
+                                  multitouch_should_skip_sync(buttons_state));
     multitouch_update_displayId(0);
 }
 
@@ -399,4 +411,29 @@ void android_virtio_kbd_mouse_event(int dx,
                                INPUT_EVENT_ABS_MAX);
 
     translate_mouse_event(dx, dy, buttonsState, displayId);
+}
+
+void android_virtio_pen_event(int dx,
+                              int dy,
+                              const SkinEvent* ev,
+                              int buttonsState,
+                              int displayId) {
+    uint32_t w, h = 0;
+
+    if (displayId < 0 || displayId >= VIRTIO_INPUT_MAX_NUM) {
+        displayId = 0;
+    }
+
+    if (!getConsoleAgents()->multi_display->getMultiDisplay(displayId, NULL, NULL, &w,
+                                                  &h, NULL, NULL, NULL)) {
+        getConsoleAgents()->display->getFrameBuffer((int*)&w, (int*)&h, NULL, NULL,
+                                              NULL);
+    }
+
+    dx = qemu_input_scale_axis(dx, 0, w, INPUT_EVENT_ABS_MIN,
+                               INPUT_EVENT_ABS_MAX);
+    dy = qemu_input_scale_axis(dy, 0, h, INPUT_EVENT_ABS_MIN,
+                               INPUT_EVENT_ABS_MAX);
+
+    translate_pen_event(dx, dy, ev, buttonsState, displayId);
 }

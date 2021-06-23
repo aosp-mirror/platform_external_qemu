@@ -17,6 +17,7 @@
 #include "android-qemu2-glue/qemu-control-impl.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/multitouch-screen.h"
+#include "android/skin/event.h"
 #include "android/skin/generic-event-buffer.h"
 #include "android/utils/debug.h"
 #include "hw/input/goldfish_events.h"
@@ -108,6 +109,17 @@ static void user_event_mouse(int dx,
         kbd_mouse_event(dx, dy, dz, buttonsState);
 }
 
+static void user_event_pen(int dx,
+                           int dy,
+                           const SkinEvent* ev,
+                           int buttonsState,
+                           int displayId) {
+    if (VERBOSE_CHECK(keys)) {
+        printf(">> PEN [%d %d : 0x%04x]\n", dx, dy, buttonsState);
+    }
+    android_virtio_pen_event(dx, dy, ev, buttonsState, displayId);
+}
+
 static void user_event_mouse_wheel(int dx, int dy, int displayId) {
     if (VERBOSE_CHECK(keys)) {
         printf(">> MOUSE WHEEL [%d %d]\n", dx, dy);
@@ -136,6 +148,7 @@ static const QAndroidUserEventAgent sQAndroidUserEventAgent = {
         .sendKeyCode = user_event_keycode,
         .sendKeyCodes = user_event_keycodes,
         .sendMouseEvent = user_event_mouse,
+        .sendPenEvent = user_event_pen,
         .sendMouseWheelEvent = user_event_mouse_wheel,
         .sendRotaryEvent = user_event_rotary,
         .sendGenericEvent = user_event_generic,

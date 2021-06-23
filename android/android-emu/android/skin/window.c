@@ -1051,6 +1051,7 @@ struct SkinWindow {
     SkinPos       pos;
     FingerState   finger;
     FingerState   secondary_finger;
+    FingerState   pen;
     MouseState mouse;
     ButtonState   button;
     BallState     ball;
@@ -1140,6 +1141,50 @@ add_finger_event(SkinWindow* window,
         }
     }
     window->win_funcs->mouse_event(posX, posY, state, id);
+}
+
+static void
+add_pen_event(SkinWindow* window,
+              FingerState* pen,
+              unsigned x,
+              unsigned y,
+              const SkinEvent* ev,
+              unsigned state)
+{
+    unsigned posX = x;
+    unsigned posY = y;
+    uint32_t id = 0;
+
+    if (pen->display) {
+        if (android_foldable_is_folded()) {
+            int fx, fy, fw, fh;
+            android_foldable_get_folded_area(&fx, &fy, &fw, &fh);
+            switch (pen->display->rotation) {
+            case SKIN_ROTATION_0:
+                posX = x + fx;
+                posY = y + fy;
+                break;
+            case SKIN_ROTATION_180:
+                posX = x + fx + fw - android_hw->hw_lcd_width;
+                posY = y + fy + fh - android_hw->hw_lcd_height;
+                break;
+            case SKIN_ROTATION_90:
+                posX = x + fx;
+                posY = y + fy + fh - android_hw->hw_lcd_height;
+                break;
+            case SKIN_ROTATION_270:
+                posX = x + fx + fw - android_hw->hw_lcd_width;
+                posY = y + fy;
+                break;
+            }
+        } else {
+            const QAndroidMultiDisplayAgent* const multiDisplayAgent =
+                emulator_window_get()->uiEmuAgent->multiDisplay;
+            multiDisplayAgent->translateCoordination(&posX, &posY, &id);
+        }
+    }
+
+    window->win_funcs->pen_event(posX, posY, ev, state, id);
 }
 
 static void
@@ -1852,6 +1897,7 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
 
     finger_state_reset( &window->finger );
     finger_state_reset( &window->secondary_finger );
+    finger_state_reset( &window->pen );
     button_state_reset( &window->button );
     ball_state_reset( &window->ball, window );
     mouse_state_reset(&window->mouse);
@@ -2337,7 +2383,186 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
     default:
         ;
     }
+}
 
+// Processing of pen events
+void
+skin_window_process_pen_event(SkinWindow* window, SkinEvent* ev)
+{
+    Button* button;
+    int     mx, my;
+
+    int button_state = multitouch_create_buttons_state(
+                ev->type != kEventPenRelease, ev->u.pen.skip_sync, false);
+    FingerState* pen = &window->pen;
+
+    if (!window->surface)
+        return;
+
+    switch (ev->type) {
+    case kEventPenPress:
+        if ( window->ball.tracking ) {
+            skin_window_trackball_press( window, 1 );
+            break;
+        }
+
+        mx = ev->u.pen.x;
+        my = ev->u.pen.y;
+        skin_window_map_to_scale( window, &mx, &my );
+        skin_window_move_mouse( window, pen, mx, my );
+        skin_window_find_finger( window, pen, mx, my );
+
+        if (pen->inside) {
+            // The click is inside the touch screen
+            pen->tracking = 1;
+            add_pen_event(window, pen, pen->pos.x, pen->pos.y, ev, button_state);
+        } else if (!multitouch_should_skip_sync(button_state)) {
+            // This is a single click outside the touch screen
+            window->button.pressed = NULL;
+            button = window->button.hover;
+            if(button) {
+                // The click is on a hard button
+                button->down += 1;
+                skin_window_redraw( window, &button->rect );
+                window->button.pressed = button;
+                if(button->keycode) {
+                    window->win_funcs->key_event(button->keycode, 1);
+                }
+            } else if (!skin_winsys_window_has_frame()) {
+                // Drag or resize the device window
+                window->drag_x_start = ev->u.pen.x_global;
+                window->drag_y_start = ev->u.pen.y_global;
+                skin_winsys_get_frame_pos(&window->window_x_start, &window->window_y_start);
+                if (pen->at_corner) {
+                    skin_winsys_set_window_overlay_for_resize(pen->which_corner);
+                }
+            }
+        }
+        break;
+
+    case kEventPenRelease:
+        if (window->drag_x_start != 0  &&  window->drag_y_start != 0) {
+            if (!pen->at_corner) {
+                // Finished moving the window. If updates got backed up,
+                // the motion could have been erratic. Ensure the window
+                // is visible.
+                if (skin_winsys_is_window_off_screen()) {
+                    skin_winsys_set_window_pos(0, 0);
+                }
+                window->drag_x_start = 0;
+                window->drag_y_start = 0;
+                return;
+            }
+            // Finished resizing
+            pen->at_corner = 0;
+            skin_winsys_clear_window_overlay();
+            int window_pos_x, window_pos_y;
+            int window_width, window_height;
+            skin_winsys_get_frame_pos(&window_pos_x, &window_pos_y);
+            skin_winsys_get_window_size(&window_width, &window_height);
+
+            int delta_x = ev->u.pen.x_global - window->drag_x_start;
+            int delta_y = ev->u.pen.y_global - window->drag_y_start;
+
+            window->drag_x_start = 0;
+            window->drag_y_start = 0;
+
+            switch (pen->which_corner) {
+                case CORNER_BOTTOM_RIGHT:
+                    // Just resize the window, don't move it.
+                    window_width  += delta_x;
+                    window_height += delta_y;
+                    break;
+                case CORNER_TOP_RIGHT:
+                    // Resize. Move the window's Y.
+                    window_pos_y  += delta_y;
+                    window_width  += delta_x;
+                    window_height -= delta_y;
+                    break;
+                case CORNER_BOTTOM_LEFT:
+                    // Resize. Move the window's X.
+                    window_pos_x  += delta_x;
+                    window_width  -= delta_x;
+                    window_height += delta_y;
+                    break;
+                case CORNER_TOP_LEFT:
+                    // Resize. Move the window's top and left.
+                    window_pos_x  += delta_x;
+                    window_pos_y  += delta_y;
+                    window_width  -= delta_x;
+                    window_height -= delta_y;
+                    break;
+            }
+            skin_winsys_set_window_pos(window_pos_x, window_pos_y);
+            skin_winsys_set_window_size(window_width, window_height);
+            skin_winsys_set_window_cursor_normal();
+            return;
+        }
+        window->drag_x_start = 0;
+        window->drag_y_start = 0;
+
+        if ( window->ball.tracking ) {
+            skin_window_trackball_press( window, 0 );
+            break;
+        }
+        button = window->button.pressed;
+        mx = ev->u.pen.x;
+        my = ev->u.pen.y;
+        skin_window_map_to_scale( window, &mx, &my );
+        if (button)
+        {
+            button->down = 0;
+            skin_window_redraw( window, &button->rect );
+            if(button->keycode) {
+                window->win_funcs->key_event(button->keycode, 0);
+            }
+            window->button.pressed = NULL;
+            window->button.hover   = NULL;
+            skin_window_move_mouse( window, pen, mx, my );
+        } else if (pen->tracking) {
+            skin_window_move_mouse( window, pen, mx, my );
+            pen->tracking = 0;
+            add_pen_event(window, pen, pen->pos.x, pen->pos.y, ev, button_state);
+        }
+        break;
+
+    case kEventPenMove:
+        mx = ev->u.pen.x;
+        my = ev->u.pen.y;
+        skin_window_map_to_scale( window, &mx, &my );
+        skin_window_move_mouse( window, pen, mx, my );
+
+        if (window->drag_x_start == 0  &&  window->drag_y_start == 0) {
+            // Button is not pressed. Check the position and set the cursor.
+            skin_window_find_finger( window, pen, mx, my);
+        } else {
+            if (pen->at_corner) {
+                // Resize: just update the overlay until the mouse button is released
+                skin_winsys_paint_overlay_for_resize(mx, my);
+                break;
+            }
+            // The user is dragging the window
+            int posX = window->window_x_start + ev->u.pen.x_global - window->drag_x_start;
+            int posY = window->window_y_start + ev->u.pen.y_global - window->drag_y_start;
+            skin_winsys_set_window_pos(posX, posY);
+            break;
+        }
+
+        mx = ev->u.pen.x;
+        my = ev->u.pen.y;
+        skin_window_map_to_scale( window, &mx, &my );
+        if ( !window->button.pressed )
+        {
+            skin_window_move_mouse( window, pen, mx, my );
+            if (pen->tracking) {
+                add_pen_event(window, pen, pen->pos.x, pen->pos.y, ev, button_state);
+            }
+        }
+        break;
+
+    default:
+        break;
+    }
 }
 
 static ADisplay*
