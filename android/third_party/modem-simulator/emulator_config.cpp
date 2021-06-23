@@ -36,7 +36,7 @@ uint16_t android_modem_simulator_port = 0;
 namespace cuttlefish {
 namespace modem {
 
-int DeviceConfig::host_port() {
+int DeviceConfig::host_id() {
     // TODO:
     // this is the modem port, right now
     // emulator has 5554 as telnet port
