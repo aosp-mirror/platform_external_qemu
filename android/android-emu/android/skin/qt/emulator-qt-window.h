@@ -563,6 +563,11 @@ private:
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
     void saveMultidisplayToConfig();
 
+    /* Current values of Pen event data. */
+    int  mPenPosX = 0;
+    int  mPenPosY = 0;
+    bool mPenButtonPressed = false;
+
     /* State of pen event type translation state machine. */
     TouchState mPenTouchState = TouchState::NOT_TOUCHING;
 

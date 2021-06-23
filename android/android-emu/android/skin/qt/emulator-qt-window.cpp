@@ -1190,27 +1190,47 @@ void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent* event) {
 // Event handler for pen events as defined by Qt
 void EmulatorQtWindow::tabletEvent(QTabletEvent* event) {
     SkinEventType eventType = kEventPenRelease;
+    bool button_pressed = false;
 
     switch (event->type()) {
         case QEvent::TabletPress:
         {
+            button_pressed =
+                    ((event->buttons() & Qt::RightButton) == Qt::RightButton);
             eventType = translatePenEventType(kEventPenPress,
                                         event->button(), event->buttons());
             handlePenEvent(eventType, event);
+            mPenPosX = event->pos().x();
+            mPenPosY = event->pos().y();
+            mPenButtonPressed = button_pressed;
             break;
         }
         case QEvent::TabletRelease:
         {
+            button_pressed =
+                    ((event->buttons() & Qt::RightButton) == Qt::RightButton);
             eventType = translatePenEventType(kEventPenRelease,
                                         event->button(), event->buttons());
             handlePenEvent(eventType, event);
+            mPenPosX = event->pos().x();
+            mPenPosY = event->pos().y();
+            mPenButtonPressed = button_pressed;
             break;
         }
         case QEvent::TabletMove:
         {
+            button_pressed =
+                    ((event->buttons() & Qt::RightButton) == Qt::RightButton);
+            if ((event->pos().x() != mPenPosX) ||
+                (event->pos().y() != mPenPosY) ||
+                (button_pressed   != mPenButtonPressed)) {
                 eventType = translatePenEventType(kEventPenMove,
                                         event->button(), event->buttons());
                 handlePenEvent(eventType, event);
+                mPenPosX = event->pos().x();
+                mPenPosY = event->pos().y();
+                mPenButtonPressed = button_pressed;
+            }
             break;
         }
         default:
