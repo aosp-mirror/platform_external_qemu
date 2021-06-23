@@ -88,6 +88,7 @@
 #include <QToolTip>
 #include <QWindow>
 #include <QtCore>
+#include <QtMath>
 
 #ifdef _WIN32
 #include <io.h>
@@ -98,6 +99,7 @@
 #endif
 
 #include <array>
+#include <cmath>
 #include <string>
 #include <vector>
 
@@ -3212,4 +3214,74 @@ void EmulatorQtWindow::saveMultidisplayToConfig() {
                                                    flag);
         }
     }
+}
+
+/* Convert from tilt coordinates to rotation of pen
+ * xTilt: the plane angle (in degrees, range [-60,60]) between
+ * the Y-Z plane and the plane containing both the pen and the Y axis
+ *      positive values are towards the screen's physical right
+ * yTilt: the plane angle (in degrees, range [-60,60]) between
+ * the X-Z plane and the plane containing both the pen and the X axis
+ *      positive values are towards the bottom of the screen (user)
+ * rotation: the azimuth angle (in degrees, range (-180,180]) of the pen,
+ * where 0 represents a pen whose cap is pointing down (tip points up),
+ * +90 to the left, -90 to the right, 180 cap points up, clockwise.
+ * When the pen is perpendicular to the screen the rotation is 0. */
+int EmulatorQtWindow::tiltToRotation(int xTiltDeg, int yTiltDeg) {
+    int rotationDeg = 0;
+    // The equations used, in an X-Y-Z coordinate system:
+    // tan(X Tilt) = X / Z
+    // tan(Y Tilt) = Y / Z
+    // tan(azimuth) = Y / X = tan(Y Tilt) / tan(X Tilt)
+    // azimuth = arctan( tan(Y Tilt) / tan(X Tilt) )
+
+    if ((xTiltDeg != 0) && (yTiltDeg != 0)) {
+        // domain error may occur if both arguments x,y of atan2 are 0
+
+        // pen is not parallel to any axis, nor perpendicular to screen
+        // use the south-clockwise convention for azimuth: (-X, -Y)
+        // the Y axis is already reversed on a screen (down, not up)
+        double xTiltRad = -qDegreesToRadians((double)xTiltDeg);
+        double yTiltRad =  qDegreesToRadians((double)yTiltDeg);
+
+        // atan2 function computes the arc tangent of y/x using the signs
+        // of arguments to determine the correct quadrant
+        rotationDeg = (int)qRadiansToDegrees(std::atan2(std::tan(xTiltRad),
+                                                        std::tan(yTiltRad)));
+    } else if (xTiltDeg != 0) {
+        // pen is parallel to the X axis, not perpendicular to screen
+        rotationDeg = (xTiltDeg > 0) ? -90 : 90;
+    } else {
+        // pen is parallel to the Y axis, or perpendicular to screen
+        rotationDeg = (yTiltDeg >= 0) ? 0 : 180;
+    }
+
+    return rotationDeg;
+}
+
+// Adapt the rotation angle depending on screen rotation
+int EmulatorQtWindow::penOrientation(int rotation) {
+    int orientation = rotation;
+
+    switch (mOrientation) {
+    case SKIN_ROTATION_0:
+        break;
+    case SKIN_ROTATION_90:
+        orientation -= 90;
+        break;
+    case SKIN_ROTATION_180:
+        orientation -= 180;
+        break;
+    case SKIN_ROTATION_270:
+        orientation -= 270;
+        break;
+    default:
+        break;
+    }
+    // keep the orientation in the range (-180, 180] degrees
+    if (orientation <= -180) {
+        orientation += 360;
+    }
+
+    return orientation;
 }

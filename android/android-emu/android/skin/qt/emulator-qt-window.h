@@ -557,6 +557,8 @@ private:
 
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
     void saveMultidisplayToConfig();
+    int tiltToRotation(int xTiltDeg, int yTiltDeg);
+    int penOrientation(int rotation);
 };
 
 class SkinSurfaceBitmap {
