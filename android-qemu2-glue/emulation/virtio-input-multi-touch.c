@@ -217,7 +217,12 @@ static struct virtio_input_config multi_touch_config[] = {
         {/* end of list */},
 };
 
-const unsigned short ev_abs_keys[] = {
+static const unsigned short ev_key_codes[] = {
+    BTN_TOOL_RUBBER,
+    BTN_STYLUS
+};
+
+static const unsigned short ev_abs_codes[] = {
     ABS_X,
     ABS_Y,
     ABS_Z,
@@ -232,14 +237,17 @@ const unsigned short ev_abs_keys[] = {
     ABS_MT_PRESSURE
 };
 
-static void configure_multi_touch_ev_abs(VirtIOInput* vinput) {
+// Configure an EV_* class of codes
+static void virtio_multi_touch_ev_config(VirtIOInput* vinput,
+                                         const unsigned short* ev_codes,
+                                         size_t ev_size,
+                                         uint8_t ev_type) {
     virtio_input_config keys;
     int i, bit, byte, bmax = 0;
 
-    // Configure EV_ABS
     memset(&keys, 0, sizeof(keys));
-    for (i = 0; i < sizeof(ev_abs_keys) / sizeof(unsigned short); i++) {
-        bit = ev_abs_keys[i];
+    for (i = 0; i < ev_size; i++) {
+        bit = ev_codes[i];
         byte = bit / 8;
         bit = bit % 8;
         keys.u.bitmap[byte] |= (1 << bit);
@@ -248,10 +256,20 @@ static void configure_multi_touch_ev_abs(VirtIOInput* vinput) {
         }
     }
     keys.select = VIRTIO_INPUT_CFG_EV_BITS;
-    keys.subsel = EV_ABS;
+    keys.subsel = ev_type;
     keys.size = bmax;
     virtio_input_add_config(vinput, &keys);
-    i = 0;
+}
+
+static void configure_multi_touch_ev(VirtIOInput* vinput) {
+    // Configure EV_KEY
+    virtio_multi_touch_ev_config(vinput, ev_key_codes,
+                                        ARRAY_SIZE(ev_key_codes), EV_KEY);
+    // Configure EV_ABS
+    virtio_multi_touch_ev_config(vinput, ev_abs_codes,
+                                        ARRAY_SIZE(ev_abs_codes), EV_ABS);
+
+    int i = 0;
     while (multi_touch_config[i].select) {
         virtio_input_add_config(vinput, multi_touch_config + i);
         i++;
@@ -263,7 +281,7 @@ static void virtio_input_multi_touch_init##id(Object* obj) { \
     VirtIOInput* vinput = VIRTIO_INPUT(obj); \
     s_virtio_input_multi_touch[(id)-1] = vinput; \
     virtio_input_init_config(vinput, virtio_input_multi_touch_config##id); \
-    configure_multi_touch_ev_abs(vinput); \
+    configure_multi_touch_ev(vinput); \
 };
 
 VIRTIO_INPUT_MT_INSTANCE_INIT(1)
@@ -340,7 +358,7 @@ static const TypeInfo types[] = {
 DEFINE_TYPES(types)
 
 int android_virtio_input_send(int type, int code, int value, int displayId) {
-    if (type != EV_ABS && type != EV_SYN && type != EV_SW) {
+    if (type != EV_ABS && type != EV_KEY && type != EV_SYN && type != EV_SW) {
         return 0;
     }
     if (displayId < 0 || displayId >= VIRTIO_INPUT_MAX_NUM) {
