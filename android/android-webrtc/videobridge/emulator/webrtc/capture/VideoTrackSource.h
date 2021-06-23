@@ -16,6 +16,7 @@
 #include <absl/types/optional.h>                    // for optional
 #include <api/media_stream_interface.h>             // for MediaSourceInterf...
 #include <media/base/adapted_video_track_source.h>  // for AdaptedVideoTrack...
+#include <rtc_base/platform_thread.h>               // for PlatformThread
 #include <stdint.h>                                 // for uint32_t, int64_t
 
 #include <atomic>  // for atomic_int
@@ -58,7 +59,7 @@ private:
     uint64_t mPrevTimestamp = 0;
     bool mActive = false;
 
-    std::unique_ptr<rtc::PlatformThread> mCaptureThread;
+    rtc::PlatformThread mCaptureThread;
 };
 }  // namespace webrtc
 }  // namespace emulator

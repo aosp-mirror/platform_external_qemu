@@ -59,7 +59,7 @@ set(OPTION_CLANG_TIDY
 set(OPTION_CLANG_TIDY_FIX FALSE
     CACHE BOOL "True if you wish clang-tidy to auto fix issues it encounters.")
 set(QTWEBENGINE FALSE CACHE BOOL "True if the webengine should be enabled.")
-if(LINUX_X86_64)
+if(LINUX_X86_64 OR LINUX_AARCH64)
   set(WEBRTC
       TRUE
       CACHE
@@ -129,7 +129,6 @@ endif()
 if(BUILDING_FOR_AARCH64)
   set(OPTION_MINBUILD TRUE)
   set(QTWEBENGINE FALSE)
-  set(WEBRTC FALSE)
 endif()
 
 if (DARWIN_AARCH64)
