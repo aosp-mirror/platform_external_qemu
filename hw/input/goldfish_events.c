@@ -832,8 +832,8 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
         /* QEMU provides absolute coordinates in the [0,0x7fff] range
          * regardless of the display resolution.
          */
-        abs_values[ABS_X].max = 0x7fff;
-        abs_values[ABS_Y].max = 0x7fff;
+        abs_values[ABS_X].max = INPUT_EVENT_ABS_MAX;
+        abs_values[ABS_Y].max = INPUT_EVENT_ABS_MAX;
         abs_values[ABS_Z].max = 1;
 
         if (s->have_multitouch) {

@@ -25,9 +25,6 @@
 #include "ui/console.h"
 #include "ui/input.h"
 
-/* Maximum number of pointers, supported by multi-touch emulation. */
-#define MTS_POINTERS_NUM 10
-
 #if DEBUG
 #include <stdio.h>
 

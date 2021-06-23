@@ -34,6 +34,11 @@ ANDROID_BEGIN_HEADER
  * important for proper tracking of pointer IDs when multitouch is in play.
  */
 
+/* Maximum number of pointers, supported by multi-touch emulation. */
+#define MTS_POINTERS_NUM    10
+/* Signals that pointer is not tracked (or is "up"). */
+#define MTS_POINTER_UP      -1
+
 /* Defines a source of multi-touch event. This is used to properly track
  * pointer IDs.
  */

@@ -21,6 +21,7 @@
 #include "android/skin/charmap.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
+#include "android-qemu2-glue/emulation/virtio-input-multi-touch.h"
 
 #include <assert.h>
 
@@ -38,14 +39,8 @@
 #endif
 
 
-/* Maximum number of pointers, supported by multi-touch emulation. */
-#define MTS_POINTERS_NUM    10
-/* Signals that pointer is not tracked (or is "up"). */
-#define MTS_POINTER_UP      -1
 /* Special tracking ID for a mouse pointer. */
 #define MTS_POINTER_MOUSE   -2
-/* Maximum number of virtio input devices*/
-#define VIRTIO_INPUT_MAX_NUM 11
 /* Describes state of a multi-touch pointer  */
 typedef struct MTSPointerState {
     /* Tracking ID assigned to the pointer by an app emulating multi-touch. */
