@@ -20,10 +20,12 @@ target_compile_definitions(android-webrtc PUBLIC -DANDROID_WEBRTC)
 target_link_libraries(android-webrtc PUBLIC android-net android-grpc
                       PRIVATE android-emu)
 
-android_add_test(
-  TARGET android-webrtc_unittest
-  SRC # cmake-format: sortable
-      android/emulation/control/TurnConfig_unittest.cpp
-      android/emulation/control/WebRtcBridge_unittest.cpp)
-target_link_libraries(android-webrtc_unittest
-                      PRIVATE android-webrtc android-emu-base gmock_main)
+if(NOT LINUX_AARCH64)
+  android_add_test(
+    TARGET android-webrtc_unittest
+    SRC # cmake-format: sortable
+        android/emulation/control/TurnConfig_unittest.cpp
+        android/emulation/control/WebRtcBridge_unittest.cpp)
+  target_link_libraries(android-webrtc_unittest
+                        PRIVATE android-webrtc android-emu-base gmock_main)
+endif()

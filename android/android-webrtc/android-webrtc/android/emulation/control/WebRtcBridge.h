@@ -16,6 +16,7 @@
 
 #include <stdint.h>  // for uint16_t
 
+#include <condition_variable>
 #include <map>     // for map
 #include <memory>  // for shared_ptr
 #include <mutex>   // for condition...

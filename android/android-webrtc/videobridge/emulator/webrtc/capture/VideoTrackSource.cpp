@@ -31,16 +31,16 @@ VideoTrackSource::VideoTrackSource(VideoCapturer* videoCapturer)
         return;
 
     mActive = true;
-    mCaptureThread.reset(new rtc::PlatformThread(
-            VideoTrackSource::captureThread, this, "VideoTrackSourceThread",
-            rtc::kHighPriority));
-    mCaptureThread->Start();
+    mCaptureThread = rtc::PlatformThread::SpawnJoinable(
+            [this](){ captureFrames(); }, "VideoTrackSourceThread");
 }
 
 VideoTrackSource::~VideoTrackSource() {
     if (mActive) {
         mActive = false;
-        mCaptureThread->Stop();
+    }
+    if (!mCaptureThread.empty()) {
+        mCaptureThread.Finalize();
     }
 }
 
