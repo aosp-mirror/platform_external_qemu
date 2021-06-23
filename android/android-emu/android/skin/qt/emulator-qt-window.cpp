@@ -2460,9 +2460,17 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(int x, int y, int w, int h) {
 }
 
 SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
-        QMouseEvent* event) const {
-    return (event->button() == Qt::RightButton) ? kMouseButtonRight
-                                                : kMouseButtonLeft;
+                                    const QMouseEvent* event) const {
+    switch (event->button()) {
+    case Qt::LeftButton:
+        return kMouseButtonLeft;
+    case Qt::RightButton:
+        return kMouseButtonRight;
+    case Qt::MiddleButton:
+        return kMouseButtonMiddle;
+    default:
+        return kMouseButtonLeft;
+    }
 }
 
 void EmulatorQtWindow::handleMouseEvent(SkinEventType type,

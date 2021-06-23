@@ -407,7 +407,7 @@ private:
     void checkNestedAndWarn();
 
     bool mouseInside();
-    SkinMouseButtonType getSkinMouseButton(QMouseEvent* event) const;
+    SkinMouseButtonType getSkinMouseButton(const QMouseEvent* event) const;
 
     void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
     void forwardGenericEventToEmulator(int type, int code, int value);
