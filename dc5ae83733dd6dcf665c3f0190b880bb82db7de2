@@ -22,6 +22,30 @@
       },
       "revId": "dc5ae83733dd6dcf665c3f0190b880bb82db7de2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "22d114b6_1fc03632",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/vulkan/VkDecoderGlobalState.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2948,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2021-06-23T00:14:03Z",
+      "side": 1,
+      "message": "talked with lfy@; only gpa and hva are required to be aligned to 16KB on arm64 macOS machines and both are totally handled by the host (the guest cannot decide the offset in pci memory space), and gva alignment doesn\u0027t matter in this case.\n\nSo no guest code needs to be modified in order to support 16kb page size.",
+      "parentUuid": "a9d86e23_c53f37b6",
+      "range": {
+        "startLine": 2945,
+        "startChar": 0,
+        "endLine": 2948,
+        "endChar": 5
+      },
+      "revId": "dc5ae83733dd6dcf665c3f0190b880bb82db7de2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
