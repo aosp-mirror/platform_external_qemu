@@ -851,6 +851,10 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
             goldfish_events_set_bit(s, EV_ABS, ABS_MT_TRACKING_ID);
             goldfish_events_set_bit(s, EV_ABS, ABS_MT_PRESSURE);
 
+            goldfish_events_set_bit(s, EV_SYN, EV_KEY);
+            goldfish_events_set_bit(s, EV_KEY, BTN_TOOL_RUBBER);
+            goldfish_events_set_bit(s, EV_KEY, BTN_STYLUS);
+
             if (s_multitouch_funcs) {
                 abs_values[ABS_MT_SLOT].max =
                                         s_multitouch_funcs->get_max_slot();
