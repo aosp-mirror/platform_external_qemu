@@ -1052,7 +1052,7 @@ struct SkinWindow {
     FingerState   finger;
     FingerState   secondary_finger;
     FingerState   pen;
-    MouseState mouse;
+    MouseState    mouse;
     ButtonState   button;
     BallState     ball;
     bool          use_emugl_subwindow;
@@ -1900,7 +1900,7 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
     finger_state_reset( &window->pen );
     button_state_reset( &window->button );
     ball_state_reset( &window->ball, window );
-    mouse_state_reset(&window->mouse);
+    mouse_state_reset( &window->mouse );
 
     skin_window_redraw( window, NULL );
 

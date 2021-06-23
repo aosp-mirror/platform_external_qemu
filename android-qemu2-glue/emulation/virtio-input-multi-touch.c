@@ -53,10 +53,11 @@ static void translate_mouse_event(int x,
                                   int y,
                                   int buttons_state,
                                   int displayId) {
-    int pressure = multitouch_is_touch_down(buttons_state) ? 0x81 : 0;
+    int pressure = multitouch_is_touch_down(buttons_state) ?
+                                            MTS_PRESSURE_RANGE_MAX : 0;
     int finger = multitouch_is_second_finger(buttons_state);
     multitouch_update_displayId(displayId);
-    multitouch_update_pointer(MTES_DEVICE, finger, x, y, pressure,
+    multitouch_update_pointer(MTES_MOUSE, finger, x, y, pressure,
                               multitouch_should_skip_sync(buttons_state));
     multitouch_update_displayId(0);
 }
@@ -397,7 +398,6 @@ void android_virtio_kbd_mouse_event(int dx,
     if (displayId < 0 || displayId >= VIRTIO_INPUT_MAX_NUM) {
         displayId = 0;
     }
-
 
     if (!getConsoleAgents()->multi_display->getMultiDisplay(displayId, NULL, NULL, &w,
                                                   &h, NULL, NULL, NULL)) {

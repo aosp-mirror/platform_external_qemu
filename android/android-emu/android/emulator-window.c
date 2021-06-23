@@ -103,9 +103,9 @@ static void emulator_window_generic_event(SkinGenericEventCode* events,
 }
 
 static void emulator_window_window_mouse_event(unsigned x,
-                                         unsigned y,
-                                         unsigned state,
-                                         int displayId) {
+                                               unsigned y,
+                                               unsigned state,
+                                               int displayId) {
     /* NOTE: the 0 is used in hw/android/goldfish/events_device.c to
      * differentiate between a touch-screen and a trackball event
      */

@@ -42,9 +42,9 @@
 
 /* Special tracking ID for the pen pointer, the next one after the fingers.*/
 #define MTS_POINTER_PEN         MTS_POINTERS_NUM
+/* Default value for TOUCH_MAJOR and TOUCH_MINOR*/
+#define MTS_TOUCH_AXIS_DEFAULT  0x500
 
-/* Special tracking ID for a mouse pointer. */
-#define MTS_POINTER_MOUSE   -2
 /* Describes state of a multi-touch pointer  */
 typedef struct MTSPointerState {
     /* Tracking ID assigned to the pointer by an app emulating multi-touch. */
@@ -87,8 +87,6 @@ typedef struct MTSState {
      * ABS_MT_SLOT was sent. -1 indicates that no slot selection has been made
      * yet. */
     int             current_slot;
-    /* Accumulator for ABS_TOUCH_MAJOR value. */
-    int             touch_major;
     /* Array of multi-touch pointers. */
     MTSPointerState tracked_pointers[MTS_POINTERS_NUM];
     /* Pen pointer. */
@@ -182,13 +180,16 @@ _mts_pointer_down(MTSState* mts_state, int tracking_id, int x, int y, int pressu
         /* Make sure that correct slot is selected. */
         if (slot_index != mts_state->current_slot) {
             _push_event(EV_ABS, LINUX_ABS_MT_SLOT, slot_index);
+            mts_state->current_slot = slot_index;
         }
         _push_event(EV_ABS, LINUX_ABS_MT_TRACKING_ID, slot_index);
-        _push_event(EV_ABS, LINUX_ABS_MT_TOUCH_MAJOR, ++mts_state->touch_major);
-        _push_event(EV_ABS, LINUX_ABS_MT_PRESSURE, pressure);
         _push_event(EV_ABS, LINUX_ABS_MT_POSITION_X, x);
         _push_event(EV_ABS, LINUX_ABS_MT_POSITION_Y, y);
-        mts_state->current_slot = slot_index;
+        _push_event(EV_ABS, LINUX_ABS_MT_TOOL_TYPE, MT_TOOL_FINGER);
+        _push_event(EV_ABS, LINUX_ABS_MT_PRESSURE, pressure);
+        _push_event(EV_ABS, LINUX_ABS_MT_ORIENTATION, 0);
+        _push_event(EV_ABS, LINUX_ABS_MT_TOUCH_MAJOR, MTS_TOUCH_AXIS_DEFAULT);
+        _push_event(EV_ABS, LINUX_ABS_MT_TOUCH_MINOR, MTS_TOUCH_AXIS_DEFAULT);
     } else {
         D("MTS pointer count is exceeded.");
         return;
@@ -250,11 +251,9 @@ _mts_pointer_up(MTSState* mts_state, int slot_index)
     if (slot_index != mts_state->current_slot) {
         _push_event(EV_ABS, LINUX_ABS_MT_SLOT, slot_index);
     }
-
     /* Send event indicating "pointer up" to the EventHub. */
     _push_event(EV_ABS, LINUX_ABS_MT_PRESSURE, 0);
-
-    _push_event(EV_ABS, LINUX_ABS_MT_TRACKING_ID, -1);
+    _push_event(EV_ABS, LINUX_ABS_MT_TRACKING_ID, MTS_POINTER_UP);
 
     /* Update MTS descriptor, removing the tracked pointer. */
     mts_state->tracked_pointers[slot_index].tracking_id = MTS_POINTER_UP;
@@ -331,9 +330,16 @@ _mts_pointer_move(MTSState* mts_state, int slot_index, int x, int y, int pressur
         _push_event(EV_ABS, LINUX_ABS_MT_SLOT, slot_index);
         mts_state->current_slot = slot_index;
     }
-
     /* Push the changes down. */
-    if (ptr_state->pressure != pressure && pressure != 0) {
+    if (ptr_state->x != x) {
+        _push_event(EV_ABS, LINUX_ABS_MT_POSITION_X, x);
+        ptr_state->x = x;
+    }
+    if (ptr_state->y != y) {
+        _push_event(EV_ABS, LINUX_ABS_MT_POSITION_Y, y);
+        ptr_state->y = y;
+    }
+    if (ptr_state->pressure != pressure) {
         _push_event(EV_ABS, LINUX_ABS_MT_PRESSURE, pressure);
         ptr_state->pressure = pressure;
     }
@@ -663,10 +669,6 @@ void multitouch_update_pointer(MTESource source,
                                int pressure,
                                bool skip_sync) {
     MTSState* const mts_state = &_MTSState;
-    /* Assign a fixed tracking ID to the mouse pointer. */
-    if (source == MTES_MOUSE) {
-        tracking_id = MTS_POINTER_MOUSE;
-    }
 
     /* Find the tracked pointer for the tracking ID. */
     const int slot_index = _mtsstate_get_pointer_index(mts_state, tracking_id);
@@ -674,10 +676,8 @@ void multitouch_update_pointer(MTESource source,
         /* This is the first time the pointer is seen. Must be "pressed",
          * otherwise it's "hoovering", which we don't support yet. */
         if (pressure == 0) {
-            if (tracking_id != MTS_POINTER_MOUSE) {
-                D("Unexpected MTS pointer update for tracking id: %d",
-                   tracking_id);
-            }
+            D("Unexpected MTS pointer update for tracking id: %d",
+                    tracking_id);
             return;
         }
 
