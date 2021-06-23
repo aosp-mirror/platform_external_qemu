@@ -1097,7 +1097,9 @@ void EmulatorQtWindow::mouseMoveEvent(QMouseEvent* event) {
                         (event->source() == Qt::MouseEventNotSynthesized)) {
             // Pen long press generates synthesized mouse events,
             // which need to be filtered out
-            handleMouseEvent(kEventMouseMotion, getSkinMouseButton(event),
+            SkinEventType eventType = translateMouseEventType(
+                    kEventMouseMotion, event->button(), event->buttons());
+            handleMouseEvent(eventType, getSkinMouseButton(event),
                              event->pos(), event->globalPos());
         }
 
@@ -1127,8 +1129,10 @@ void EmulatorQtWindow::mouseMoveEvent(QMouseEvent* event) {
         // Pen long press generates synthesized mouse events,
         // which need to be filtered out
         if (event->source() == Qt::MouseEventNotSynthesized) {
-        handleMouseEvent(kEventMouseMotion, getSkinMouseButton(event),
-                         event->pos(), event->globalPos());
+            SkinEventType eventType = translateMouseEventType(
+                    kEventMouseMotion, event->button(), event->buttons());
+            handleMouseEvent(eventType, getSkinMouseButton(event),
+                             event->pos(), event->globalPos());
         }
     }
 }
@@ -1188,8 +1192,10 @@ void EmulatorQtWindow::mousePressEvent(QMouseEvent* event) {
     // Pen long press generates synthesized mouse events,
     // which need to be filtered out
     if (event->source() == Qt::MouseEventNotSynthesized) {
-    handleMouseEvent(kEventMouseButtonDown, getSkinMouseButton(event),
-                     event->pos(), event->globalPos());
+        SkinEventType eventType = translateMouseEventType(
+                    kEventMouseButtonDown, event->button(), event->buttons());
+        handleMouseEvent(eventType, getSkinMouseButton(event),
+                         event->pos(), event->globalPos());
     }
 }
 
@@ -1197,8 +1203,10 @@ void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent* event) {
     // Pen long press generates synthesized mouse events,
     // which need to be filtered out
     if (event->source() == Qt::MouseEventNotSynthesized) {
-    handleMouseEvent(kEventMouseButtonUp, getSkinMouseButton(event),
-                     event->pos(), event->globalPos());
+        SkinEventType eventType = translateMouseEventType(
+                    kEventMouseButtonUp, event->button(), event->buttons());
+        handleMouseEvent(eventType, getSkinMouseButton(event),
+                         event->pos(), event->globalPos());
     }
 }
 
@@ -3412,6 +3420,44 @@ SkinEventType EmulatorQtWindow::translatePenEventType(SkinEventType type,
     default:
         mPenTouchState = TouchState::NOT_TOUCHING;
         newType = kEventPenRelease;
+        break;
+    }
+
+    return newType;
+}
+
+// State machine that translates the mouse event types based on button states
+// If during a touching state the button is pressed this generates unwanted
+// Press and Release events which are translated to Move events
+SkinEventType EmulatorQtWindow::translateMouseEventType(SkinEventType type,
+                                                    Qt::MouseButton button,
+                                                    Qt::MouseButtons buttons) {
+    SkinEventType newType = type;
+
+    switch (mMouseTouchState) {
+    case TouchState::NOT_TOUCHING:
+        // Only the first Press event can have the same pressed buttons
+        // button:  only the button that caused the event
+        // buttons: all the pressed buttons
+        if ((type == kEventMouseButtonDown) && (button == buttons)) {
+            mMouseTouchState = TouchState::TOUCHING;
+            newType = kEventMouseButtonDown;
+        } else {
+            newType = kEventMouseButtonUp;
+        }
+        break;
+    case TouchState::TOUCHING:
+        // Only the last Release event can have no pressed buttons
+        if ((type == kEventMouseButtonUp) && (buttons == Qt::NoButton)) {
+            mMouseTouchState = TouchState::NOT_TOUCHING;
+            newType = kEventMouseButtonUp;
+        } else {
+            newType = kEventMouseMotion;
+        }
+        break;
+    default:
+        mMouseTouchState = TouchState::NOT_TOUCHING;
+        newType = kEventMouseButtonUp;
         break;
     }
 
