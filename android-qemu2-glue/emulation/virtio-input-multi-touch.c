@@ -154,7 +154,26 @@ static struct virtio_input_config multi_touch_config[] = {
                 .select = VIRTIO_INPUT_CFG_ABS_INFO,
                 .subsel = ABS_MT_SLOT,
                 .size = sizeof(virtio_input_absinfo),
-                .u.abs.max = const_le32(MTS_POINTERS_NUM - 1),
+                // SLOT max value seems to be TRACKING_ID-1
+                .u.abs.max = const_le32(MTS_POINTERS_NUM),
+        },
+        {
+                .select = VIRTIO_INPUT_CFG_ABS_INFO,
+                .subsel = ABS_MT_TOUCH_MAJOR,
+                .size = sizeof(virtio_input_absinfo),
+                .u.abs.max = const_le32(MTS_TOUCH_AXIS_RANGE_MAX),
+        },
+        {
+                .select = VIRTIO_INPUT_CFG_ABS_INFO,
+                .subsel = ABS_MT_TOUCH_MINOR,
+                .size = sizeof(virtio_input_absinfo),
+                .u.abs.max = const_le32(MTS_TOUCH_AXIS_RANGE_MAX),
+        },
+        {
+                .select = VIRTIO_INPUT_CFG_ABS_INFO,
+                .subsel = ABS_MT_ORIENTATION,
+                .size = sizeof(virtio_input_absinfo),
+                .u.abs.max = const_le32(MTS_ORIENTATION_RANGE_MAX),
         },
         {
                 .select = VIRTIO_INPUT_CFG_ABS_INFO,
@@ -170,21 +189,22 @@ static struct virtio_input_config multi_touch_config[] = {
         },
         {
                 .select = VIRTIO_INPUT_CFG_ABS_INFO,
-                .subsel = ABS_MT_TRACKING_ID,
+                .subsel = ABS_MT_TOOL_TYPE,
                 .size = sizeof(virtio_input_absinfo),
-                .u.abs.max = const_le32(MTS_POINTERS_NUM),
+                .u.abs.max = const_le32(MT_TOOL_MAX),
         },
         {
                 .select = VIRTIO_INPUT_CFG_ABS_INFO,
-                .subsel = ABS_MT_TOUCH_MAJOR,
+                .subsel = ABS_MT_TRACKING_ID,
                 .size = sizeof(virtio_input_absinfo),
-                .u.abs.max = const_le32(0x7fffffff),
+                // TRACKING_ID max value seems to be 0xFFFF
+                .u.abs.max = const_le32(MTS_POINTERS_NUM + 1),
         },
         {
                 .select = VIRTIO_INPUT_CFG_ABS_INFO,
                 .subsel = ABS_MT_PRESSURE,
                 .size = sizeof(virtio_input_absinfo),
-                .u.abs.max = const_le32(0x100),
+                .u.abs.max = const_le32(MTS_PRESSURE_RANGE_MAX),
         },
         {       // Needed for fold/unfold (EV_SW)
                 .select    = VIRTIO_INPUT_CFG_EV_BITS,
@@ -202,11 +222,14 @@ const unsigned short ev_abs_keys[] = {
     ABS_Y,
     ABS_Z,
     ABS_MT_SLOT,
+    ABS_MT_TOUCH_MAJOR,
+    ABS_MT_TOUCH_MINOR,
+    ABS_MT_ORIENTATION,
     ABS_MT_POSITION_X,
     ABS_MT_POSITION_Y,
+    ABS_MT_TOOL_TYPE,
     ABS_MT_TRACKING_ID,
-    ABS_MT_TOUCH_MAJOR,
-    ABS_MT_PRESSURE,
+    ABS_MT_PRESSURE
 };
 
 static void configure_multi_touch_ev_abs(VirtIOInput* vinput) {

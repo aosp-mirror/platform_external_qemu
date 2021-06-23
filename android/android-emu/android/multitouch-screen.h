@@ -39,6 +39,20 @@ ANDROID_BEGIN_HEADER
 /* Signals that pointer is not tracked (or is "up"). */
 #define MTS_POINTER_UP      -1
 
+/* Range maximum value of the major and minor touch axis*/
+#define MTS_TOUCH_AXIS_RANGE_MAX    0x7fffffff
+/* Range maximum value of orientation, corresponds to 90 degrees*/
+#define MTS_ORIENTATION_RANGE_MAX   90
+/* Range maximum value of pressure, corresponds to 1024 levels of pressure */
+#define MTS_PRESSURE_RANGE_MAX      0x400
+
+/*
+ * MT_TOOL types, duplicated from include\standard-headers\linux\input.h
+ */
+#define MT_TOOL_FINGER      0
+#define MT_TOOL_PEN         1
+#define MT_TOOL_MAX         0x0F
+
 /* Defines a source of multi-touch event. This is used to properly track
  * pointer IDs.
  */
