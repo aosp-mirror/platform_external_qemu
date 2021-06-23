@@ -44,6 +44,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QProgressDialog>
+#include <QTabletEvent>
 #include <QWidget>
 
 #include <functional>
@@ -126,6 +127,7 @@ public:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
+    void tabletEvent(QTabletEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
     void startThread(StartFunction f, int argc, char** argv);
@@ -229,6 +231,9 @@ public:
                           const QPoint& pos,
                           const QPoint& gPos,
                           bool skipSync = false);
+    void handlePenEvent(SkinEventType type,
+                        const QTabletEvent* event,
+                        bool skipSync = false);
     void handleMouseWheelEvent(int delta, Qt::Orientation orientation);
     void panHorizontal(bool left);
     void panVertical(bool up);
@@ -557,6 +562,13 @@ private:
 
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
     void saveMultidisplayToConfig();
+
+    /* State of pen event type translation state machine. */
+    TouchState mPenTouchState = TouchState::NOT_TOUCHING;
+
+    SkinEventType translatePenEventType(SkinEventType type,
+                                        Qt::MouseButton button,
+                                        Qt::MouseButtons buttons);
     int tiltToRotation(int xTiltDeg, int yTiltDeg);
     int penOrientation(int rotation);
 };

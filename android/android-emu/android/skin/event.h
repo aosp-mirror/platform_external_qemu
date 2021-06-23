@@ -48,6 +48,9 @@ typedef enum {
     kEventRestoreSkin,
     kEventMouseStartTracking,
     kEventMouseStopTracking,
+    kEventPenPress,
+    kEventPenRelease,
+    kEventPenMove
 } SkinEventType;
 
 typedef enum {
@@ -84,6 +87,19 @@ typedef struct {
     int button;
     int skip_sync;
 } SkinEventMouseData;
+
+typedef struct {
+    int x;
+    int y;
+    int x_global;
+    int y_global;
+    int64_t tracking_id;
+    int pressure;
+    int orientation;
+    bool button_pressed;
+    bool rubber_pointer;
+    bool skip_sync;
+} SkinEventPenData;
 
 typedef struct {
     int x_delta;
@@ -135,6 +151,7 @@ typedef struct {
         SkinEventKeyData key;
         SkinEventGenericData generic_event;
         SkinEventMouseData mouse;
+        SkinEventPenData pen;
         SkinEventWheelData wheel;
         SkinEventScrollData scroll;
         SkinEventRotaryInputData rotary_input;

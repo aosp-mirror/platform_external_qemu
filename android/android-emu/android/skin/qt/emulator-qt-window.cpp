@@ -35,6 +35,7 @@
 #include "android/hw-sensors.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/metrics.h"
+#include "android/multitouch-screen.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/skin/event.h"
@@ -69,6 +70,7 @@
 #define D(...) ((void)0)
 #endif
 
+#include <Qt>
 #include <QBitmap>
 #include <QCheckBox>
 #include <QCursor>
@@ -85,6 +87,7 @@
 #include <QScrollBar>
 #include <QSemaphore>
 #include <QSettings>
+#include <QTabletEvent>
 #include <QToolTip>
 #include <QWindow>
 #include <QtCore>
@@ -1182,6 +1185,38 @@ void EmulatorQtWindow::mousePressEvent(QMouseEvent* event) {
 void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent* event) {
     handleMouseEvent(kEventMouseButtonUp, getSkinMouseButton(event),
                      event->pos(), event->globalPos());
+}
+
+// Event handler for pen events as defined by Qt
+void EmulatorQtWindow::tabletEvent(QTabletEvent* event) {
+    SkinEventType eventType = kEventPenRelease;
+
+    switch (event->type()) {
+        case QEvent::TabletPress:
+        {
+            eventType = translatePenEventType(kEventPenPress,
+                                        event->button(), event->buttons());
+            handlePenEvent(eventType, event);
+            break;
+        }
+        case QEvent::TabletRelease:
+        {
+            eventType = translatePenEventType(kEventPenRelease,
+                                        event->button(), event->buttons());
+            handlePenEvent(eventType, event);
+            break;
+        }
+        case QEvent::TabletMove:
+        {
+                eventType = translatePenEventType(kEventPenMove,
+                                        event->button(), event->buttons());
+                handlePenEvent(eventType, event);
+            break;
+        }
+        default:
+            break;
+    }
+    event->accept();
 }
 
 // Set the window flags based on whether we should
@@ -2411,6 +2446,30 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
     queueSkinEvent(skin_event);
 }
 
+// Stores all the information of a pen event and
+// adds the skin event to the queue
+void EmulatorQtWindow::handlePenEvent(SkinEventType type,
+                                      const QTabletEvent* event,
+                                      bool skipSync) {
+    SkinEvent* skin_event = createSkinEvent(type);
+    skin_event->u.pen.tracking_id = event->uniqueId();
+    skin_event->u.pen.pressure =
+                        (int)(event->pressure() * MTS_PRESSURE_RANGE_MAX);
+    skin_event->u.pen.orientation =
+                penOrientation(tiltToRotation(event->xTilt(), event->yTilt()));
+    skin_event->u.pen.button_pressed =
+                    ((event->buttons() & Qt::RightButton) == Qt::RightButton);
+    skin_event->u.pen.rubber_pointer =
+                            (event->pointerType() == QTabletEvent::Eraser);
+    skin_event->u.pen.x = event->pos().x();
+    skin_event->u.pen.y = event->pos().y();
+    skin_event->u.pen.x_global = event->globalPos().x();
+    skin_event->u.pen.y_global = event->globalPos().y();
+    skin_event->u.pen.skip_sync = skipSync;
+
+    queueSkinEvent(skin_event);
+}
+
 void EmulatorQtWindow::handleMouseWheelEvent(int delta,
                                              Qt::Orientation orientation) {
     SkinEvent* skin_event = createSkinEvent(kEventMouseWheel);
@@ -3284,4 +3343,42 @@ int EmulatorQtWindow::penOrientation(int rotation) {
     }
 
     return orientation;
+}
+
+// State machine that translates the pen event types based on button states
+// If during a touching state the button is pressed this generates unwanted
+// Press and Release events which are translated to Move events
+SkinEventType EmulatorQtWindow::translatePenEventType(SkinEventType type,
+                                                    Qt::MouseButton button,
+                                                    Qt::MouseButtons buttons) {
+    SkinEventType newType = type;
+
+    switch (mPenTouchState) {
+    case TouchState::NOT_TOUCHING:
+        // Only the first Press event can have the same pressed buttons
+        // button:  only the button that caused the event
+        // buttons: all the pressed buttons
+        if ((type == kEventPenPress) && (button == buttons)) {
+            mPenTouchState = TouchState::TOUCHING;
+            newType = kEventPenPress;
+        } else {
+            newType = kEventPenRelease;
+        }
+        break;
+    case TouchState::TOUCHING:
+        // Only the last Release event can have no pressed buttons
+        if ((type == kEventPenRelease) && (buttons == Qt::NoButton)) {
+            mPenTouchState = TouchState::NOT_TOUCHING;
+            newType = kEventPenRelease;
+        } else {
+            newType = kEventPenMove;
+        }
+        break;
+    default:
+        mPenTouchState = TouchState::NOT_TOUCHING;
+        newType = kEventPenRelease;
+        break;
+    }
+
+    return newType;
 }
