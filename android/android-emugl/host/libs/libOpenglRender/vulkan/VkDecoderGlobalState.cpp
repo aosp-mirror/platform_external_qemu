@@ -417,15 +417,29 @@ public:
             }
         }
 
-        VkInstanceCreateInfo createInfoFiltered = *pCreateInfo;
-        VkApplicationInfo applicationInfo = {};
-        createInfoFiltered.enabledExtensionCount = (uint32_t)finalExts.size();
+        VkInstanceCreateInfo createInfoFiltered;
+        deepcopy_VkInstanceCreateInfo(pool,
+                                      VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+                                      pCreateInfo, &createInfoFiltered);
+
+        createInfoFiltered.enabledExtensionCount =
+                static_cast<uint32_t>(finalExts.size());
         createInfoFiltered.ppEnabledExtensionNames = finalExts.data();
-        if (createInfoFiltered.pApplicationInfo) {
-            applicationInfo = *createInfoFiltered.pApplicationInfo;
-            createInfoFiltered.pApplicationInfo = &applicationInfo;
+        if (createInfoFiltered.pApplicationInfo != nullptr) {
+            const_cast<VkApplicationInfo*>(createInfoFiltered.pApplicationInfo)
+                    ->apiVersion = apiVersion;
         }
-        applicationInfo.apiVersion = apiVersion;
+
+        // remove VkDebugReportCallbackCreateInfoEXT from the chain.
+        auto* curr = reinterpret_cast<vk_struct_common*>(&createInfoFiltered);
+        while (curr != nullptr) {
+            if (curr->pNext != nullptr &&
+                curr->pNext->sType ==
+                        VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT) {
+                curr->pNext = curr->pNext->pNext;
+            }
+            curr = curr->pNext;
+        }
 
         // bug: 155795731 (see below)
         AutoLock lock(mLock);
