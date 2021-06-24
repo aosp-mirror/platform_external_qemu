@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b2f484b2_5bfc6b74",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-06-24T21:03:19Z",
+      "side": 1,
+      "message": "This requires the removal of validation of config files. See associated cl.",
+      "revId": "4657dce25255230912082bd4209bad82b492ea38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
