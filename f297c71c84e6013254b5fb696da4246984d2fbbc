@@ -18,6 +18,23 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e0a9a4cc_943e3278",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1883030
+      },
+      "writtenOn": "2021-06-24T16:49:02Z",
+      "side": 1,
+      "message": "This entire change is now uploaded in some smaller commits, under the topic:\nhttps://android-review.googlesource.com/q/topic:native_host_pen_support_atomic_commits\nShould we abandon this CL ?",
+      "revId": "f297c71c84e6013254b5fb696da4246984d2fbbc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a7c37335_753d5da4",
