@@ -656,16 +656,28 @@ prepare_build_for_linux_x86_64() {
     var_append POST_LDFLAGS "-lgcc_s"
 }
 
+load_osxcross_env() {
+    # Read the configuration as reported by osxcross
+    # This will set the OSXCROSS_ env variables.
+    if ! command -v osxcross-conf &> /dev/null
+    then
+      eval $(/opt/osxcross/osxcross/bin/osxcross-conf)
+    else
+      eval $(osxcross-conf)
+    fi
+}
+
 prepare_build_for_cross_darwin() {
 
     local DST_ARCH=$1
+    load_osxcross_env
+
     CLANG_BINDIR=
     CLANG_DIR=
     GNU_CONFIG_HOST=
     CLANG_VERSION=
     CROSSCOMPILE_DARWIN=y
-    VER=$(ls -1 /opt/osxcross/osxcross/bin/$DST_ARCH-apple-darwin*-cc | egrep -o "darwin.*-" | head -n 1)
-    DST_PREFIX=/opt/osxcross/osxcross/bin/$DST_ARCH-apple-$VER
+    DST_PREFIX=$OSXCROSS_CCTOOLS_PATH/$DST_ARCH-apple-$OSXCROSS_TARGET-
 
     log2 "Using compiler prefix: $DST_PREFIX"
     # OSXCross can loop if the compiler links to itself.
@@ -1042,6 +1054,11 @@ print_info () {
             ;;
         libasan-dir)
             printf "%s" "$CLANG_DIR/lib64/clang/5.0/lib/linux/"
+            ;;
+        OSXCROSS*)
+            load_osxcross_env
+            VAL=$(var_value $PRINT)
+            printf "%s" "$VAL"
             ;;
         *)
             printf "%s\n" "${BINPREFIX}$PRINT"
