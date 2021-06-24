@@ -333,6 +333,7 @@ bool android_foldable_folded_area_configured(int area);
 bool android_foldable_is_folded();
 bool android_foldable_fold();
 bool android_foldable_unfold();
+bool android_foldable_set_posture(int posture);
 bool android_foldable_get_folded_area(int* x, int* y, int* w, int* h);
 bool android_foldable_rollable_configured();
 bool android_hw_sensors_is_loading_snapshot();

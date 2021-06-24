@@ -4068,6 +4068,28 @@ static int do_unfold(ControlClient client, char* args) {
     return -1;
 }
 
+static int do_set_posture(ControlClient client, char* args) {
+    if (args) {
+        int posture;
+        if (sscanf(args, "%d", &posture) == 1) {
+            if (posture <= POSTURE_UNKNOWN || posture >= POSTURE_MAX) {
+                control_write(client, "KO: Posture %d not supported\n", posture);
+                return -1;
+            }
+            if (client->global->emu_agent->setPosture(posture)) {
+                return 0;
+            } else {
+                control_write(client, "KO: Failed to set posture\n");
+                return -1;
+            }
+        }
+    }
+
+    control_write(client, "KO: Usage: \"posture <posture_id>\" "
+                  "1: closed\t2: half-opened\t3: opened\t4: flipped\t5: tent\n");
+    return -1;
+}
+
 static int do_no_draw(ControlClient client, char* args) {
     if (args == nullptr) {
         control_write(client, "KO: expecting nodraw parameter: on/off.\r\n");
@@ -4204,6 +4226,8 @@ extern const CommandDefRec main_commands[] = {
         {"fold", "fold the device", NULL, NULL, do_fold, NULL},
 
         {"unfold", "unfold the device", NULL, NULL, do_unfold, NULL},
+
+        {"posture", "set the device posture", NULL, NULL, do_set_posture, NULL},
 
         {"multidisplay", "configure the multi-display",
          "allows you to create/modify/delete displays besides the default "
