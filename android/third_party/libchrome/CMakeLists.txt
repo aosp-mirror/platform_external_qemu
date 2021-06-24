@@ -566,6 +566,8 @@ target_compile_options(libchrome PRIVATE -Wno-undefined-var-template
                                          -Wno-c++11-narrowing)
 android_target_compile_definitions(
   libchrome darwin-x86_64 PUBLIC -DOS_MAC=1 -DOS_APPLE=1 -DSYSTEM_NATIVE_UTF8)
+android_target_compile_definitions(
+  libchrome darwin-aarch64 PUBLIC -DOS_MAC=1 -DOS_APPLE=1 -DSYSTEM_NATIVE_UTF8)
 
 if(LINUX_X86_64 OR LINUX_AARCH64)
   android_add_library(
@@ -606,9 +608,16 @@ android_target_compile_definitions(
 
 android_target_link_libraries(libchrome linux-x86_64 PRIVATE GLIB2::GLIB2
                                                              symbolize libevent)
+android_target_link_libraries(libchrome linux-aarch64 PRIVATE GLIB2::GLIB2
+                                                             symbolize libevent)
 
 android_target_link_libraries(
   libchrome darwin-x86_64
+  PRIVATE "-framework Foundation" "-framework CoreGraphics" "-framework IOKit"
+          "-framework CoreText" "-framework Security" "-framework AppKit" bsm)
+
+android_target_link_libraries(
+  libchrome darwin-aarch64
   PRIVATE "-framework Foundation" "-framework CoreGraphics" "-framework IOKit"
           "-framework CoreText" "-framework Security" "-framework AppKit" bsm)
 
