@@ -251,6 +251,7 @@ qos_test_ss.add(
   'isl_pmbus_vr-test.c',
   'max16600-test.c',
   'max34451-test.c',
+  'max31790_fan_ctrl-test.c',
   'megasas-test.c',
   'ne2000-test.c',
   'tulip-test.c',
