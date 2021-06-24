@@ -348,8 +348,32 @@ class AdbLocatorImpl : public AdbLocator {
     Optional<int> getAdbProtocolVersion(StringView adbPath) override;
 };
 
-// Construct the platform path with adb executable, or Nothing if it doesn't
-// exist.
+// Gets the reported adb protocol version from the given executable
+// This is the last digit in the adb version string.
+static Optional<int> extractProtocolVersion(StringView adbPath) {
+    if (!android_qemu_mode) return {};
+    const std::vector<std::string> adbVersion = {adbPath, "version"};
+    int protocol = 0;
+    // Retrieve the adb version.
+    const int maxAdbRetrievalTimeMs = 500;
+    auto read = System::get()->runCommandWithResult(
+            adbVersion, maxAdbRetrievalTimeMs, nullptr);
+    if (!read ||
+        sscanf(read->c_str(), "Android Debug Bridge version %*d.%*d.%d",
+               &protocol) != 1) {
+        LOG(VERBOSE) << "Failed obtain protocol version from " << adbPath;
+        return {};
+    }
+    LOG(VERBOSE) << "Path:" << adbPath << " protocol version: " << protocol;
+    return Optional<int>(protocol);
+}
+
+
+// Construct the platform path with adb executable:
+// Returns nothing:
+// - if the path does not exist.
+// - if the path is not executable.
+// - if the executable does not produce a version string.
 static Optional<std::string> platformPath(base::StringView root) {
     if (root.empty()) {
         LOG(VERBOSE) << " no root specified: ";
@@ -366,19 +390,19 @@ std::vector<std::string> AdbLocatorImpl::availableAdb() {
     std::vector<std::string> available = {};
     // First try finding ADB by the environment variable.
     auto adb = platformPath(android::ConfigDirs::getSdkRootDirectoryByEnv());
-    if (adb) {
+    if (adb && extractProtocolVersion(*adb)) {
         available.push_back(std::move(*adb));
     }
 
     // Try finding it based on the emulator executable
     adb = platformPath(android::ConfigDirs::getSdkRootDirectoryByPath());
-    if (adb) {
+    if (adb && extractProtocolVersion(*adb)) {
         available.push_back(std::move(*adb));
     }
 
     // See if it is on the path.
     adb = System::get()->which(PathUtils::toExecutableName("adb"));
-    if (adb) {
+    if (adb && extractProtocolVersion(*adb)) {
         available.push_back(std::move(*adb));
     }
 
@@ -393,21 +417,7 @@ std::vector<std::string> AdbLocatorImpl::availableAdb() {
 // Gets the reported adb protocol version from the given executable
 // This is the last digit in the adb version string.
 Optional<int> AdbLocatorImpl::getAdbProtocolVersion(StringView adbPath) {
-    if (!android_qemu_mode) return {};
-    const std::vector<std::string> adbVersion = {adbPath, "version"};
-    int protocol = 0;
-    // Retrieve the adb version.
-    const int maxAdbRetrievalTimeMs = 500;
-    auto read = System::get()->runCommandWithResult(
-            adbVersion, maxAdbRetrievalTimeMs, nullptr);
-    if (!read ||
-        sscanf(read->c_str(), "Android Debug Bridge version %*d.%*d.%d",
-               &protocol) != 1) {
-        LOG(VERBOSE) << "Failed obtain protocol version from " << adbPath;
-        return {};
-    }
-    LOG(VERBOSE) << "Path:" << adbPath << " protocol version: " << protocol;
-    return Optional<int>(protocol);
+    return extractProtocolVersion(adbPath);
 }
 
 std::unique_ptr<AdbInterface> AdbInterface::Builder::build() {
