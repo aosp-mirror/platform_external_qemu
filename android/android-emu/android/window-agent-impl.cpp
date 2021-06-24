@@ -132,6 +132,10 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         });
                     }
                 },
+        .setPosture =
+                [](int posture) -> bool {
+                    return android_foldable_set_posture(posture);
+                },
         .setUIDisplayRegion =
                 [](int x, int y, int w, int h) {
                     // The UI display region needs to be updated when we add additional displays, or when we

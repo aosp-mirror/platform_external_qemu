@@ -108,6 +108,10 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     return android_foldable_get_folded_area(x, y, w, h);
                 },
         .updateFoldablePostureIndicator = [](bool) {},
+        .setPosture =
+                [](int posture) -> bool {
+                    return android_foldable_set_posture(posture);
+                },
         .setUIDisplayRegion = [](int x, int y, int w, int h) {},
         .getMultiDisplay = [](uint32_t id,
                               int32_t* x,

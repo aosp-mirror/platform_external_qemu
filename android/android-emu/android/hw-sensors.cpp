@@ -1260,6 +1260,30 @@ bool android_foldable_unfold() {
     return true;
 }
 
+bool android_foldable_set_posture(int posture) {
+    if (!android_foldable_hinge_configured()) {
+        return false;
+    }
+    struct FoldableState state;
+    if (android_foldable_get_state(&state) < 0) {
+        return false;
+    }
+    if (posture <= POSTURE_UNKNOWN || posture >= POSTURE_MAX) {
+        return false;
+    }
+    if (!state.config.supportedFoldablePostures[posture]) {
+        return false;
+    }
+    if (android_physical_model_set(PHYSICAL_PARAMETER_POSTURE,
+                                  (float)posture,
+                                  0.0f,
+                                  0.0f,
+                                  PHYSICAL_INTERPOLATION_SMOOTH) < 0) {
+        return false;
+    }
+    return true;
+}
+
 bool android_foldable_get_folded_area(int* x, int* y, int* w, int* h) {
     return physicalModel_getFoldedArea(android_physical_model_instance(), x, y, w, h);
 }
