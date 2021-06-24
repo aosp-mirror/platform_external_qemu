@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "android/emulation/control/adb/AdbInterface.h"
-#include "android/emulation/control/TestAdbInterface.h"
 #include "android/base/Optional.h"
+#include "android/emulation/control/TestAdbInterface.h"
 
 #include "android/base/async/Looper.h"
 #include "android/base/files/PathUtils.h"
@@ -24,8 +24,8 @@
 
 #include <gtest/gtest.h>
 
-#include <memory>
 #include <fstream>
+#include <memory>
 
 using android::base::AsyncThreadWithLooper;
 using android::base::Looper;
@@ -41,7 +41,8 @@ using android::emulation::StaticAdbLocator;
 class AdbInterfaceTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        if (!mAsyncThread) mAsyncThread.reset(new AsyncThreadWithLooper);
+        if (!mAsyncThread)
+            mAsyncThread.reset(new AsyncThreadWithLooper);
         mLooper = mAsyncThread->getLooper();
     }
 
@@ -54,14 +55,60 @@ protected:
     Looper* mLooper;
 };
 
+class AdbTestSystem : public TestSystem {
+public:
+    AdbTestSystem(bool success = true)
+        : TestSystem("/progdir",
+                     System::kProgramBitness,
+                     "/homedir",
+                     "/appdir"),
+          mSuccess(success) {}
+
+    Optional<std::string> runCommandWithResult(
+            const std::vector<std::string>& commandLine,
+            System::Duration timeoutMs = kInfinite,
+            System::ProcessExitCode* outExitCode = nullptr) override {
+        if (!mSuccess)
+            return {};
+
+        return Optional(std::string("Android Debug Bridge version 2.3.41"));
+    }
+
+private:
+    bool mSuccess;
+};
+
 TEST_F(AdbInterfaceTest, create) {
     // Default creation still works..
     EXPECT_NE(nullptr, AdbInterface::create(nullptr).get());
 }
 
+TEST_F(AdbInterfaceTest, findAdbFromAndroidSdkRootIgnoreBadExec) {
+    // We should not find an ADB executable that does not provide a proper
+    // version string. or fails to execute.
+    AdbTestSystem system(false);
+    TestTempDir* dir = system.getTempRoot();
+    ASSERT_TRUE(dir->makeSubDir("Sdk"));
+    ASSERT_TRUE(dir->makeSubDir("Sdk/platforms"));
+    ASSERT_TRUE(dir->makeSubDir("Sdk/platform-tools"));
+    ASSERT_TRUE(
+            dir->makeSubFile(PathUtils::join("Sdk", "platform-tools",
+                                             PathUtils::toExecutableName("adb"))
+                                     .c_str()));
+    std::string sdkRoot = PathUtils::join(dir->path(), "Sdk");
+    system.envSet("ANDROID_SDK_ROOT", sdkRoot);
+
+    auto adb = AdbInterface::Builder()
+                       .setLooper(mLooper)
+                       .setAdbDaemon(new FakeAdbDaemon())
+                       .build();
+    std::string expectedAdbPath = PathUtils::join(
+            sdkRoot, "platform-tools", PathUtils::toExecutableName("adb"));
+    EXPECT_NE(expectedAdbPath, adb->detectedAdbPath());
+}
+
 TEST_F(AdbInterfaceTest, findAdbFromAndroidSdkRoot) {
-    TestSystem system("/progdir", System::kProgramBitness, "/homedir",
-                      "/appdir");
+    AdbTestSystem system;
     TestTempDir* dir = system.getTempRoot();
     ASSERT_TRUE(dir->makeSubDir("Sdk"));
     ASSERT_TRUE(dir->makeSubDir("Sdk/platforms"));
@@ -83,8 +130,7 @@ TEST_F(AdbInterfaceTest, findAdbFromAndroidSdkRoot) {
 }
 
 TEST_F(AdbInterfaceTest, deriveAdbFromExecutable) {
-    TestSystem system("", System::kProgramBitness, "/homedir",
-                      "/appdir");
+    AdbTestSystem system;
     TestTempDir* dir = system.getTempRoot();
 
     ASSERT_TRUE(dir->makeSubDir("Sdk"));
@@ -109,17 +155,16 @@ TEST_F(AdbInterfaceTest, deriveAdbFromExecutable) {
 }
 
 TEST_F(AdbInterfaceTest, findAdbOnPath) {
-    TestSystem system("", System::kProgramBitness, "/homedir",
-                      "/appdir");
+    AdbTestSystem system;
     TestTempDir* dir = system.getTempRoot();
 
     ASSERT_TRUE(dir->makeSubDir("some_dir"));
-    ASSERT_TRUE(
-            dir->makeSubFile(PathUtils::join("some_dir",
-                                             PathUtils::toExecutableName("adb"))
-                                     .c_str()));
+    ASSERT_TRUE(dir->makeSubFile(
+            PathUtils::join("some_dir", PathUtils::toExecutableName("adb"))
+                    .c_str()));
     std::string execPath = PathUtils::join(dir->path(), "some_dir");
-    std::string expectedAdbPath = PathUtils::join(execPath, PathUtils::toExecutableName("adb"));
+    std::string expectedAdbPath =
+            PathUtils::join(execPath, PathUtils::toExecutableName("adb"));
     system.setWhich(expectedAdbPath);
     auto adb = AdbInterface::Builder()
                        .setLooper(mLooper)
@@ -140,7 +185,6 @@ TEST_F(AdbInterfaceTest, staleAdbVersion) {
     // We should have selected an ancient adb version as we have no new ones.
     EXPECT_FALSE(adb->isAdbVersionCurrent());
 }
-
 
 TEST_F(AdbInterfaceTest, noStaleAdbVersion) {
     auto daemon = new FakeAdbDaemon();
@@ -169,7 +213,6 @@ TEST_F(AdbInterfaceTest, recentAdbVersion) {
     EXPECT_EQ("v3", adb->adbPath());
     EXPECT_TRUE(adb->isAdbVersionCurrent());
 }
-
 
 TEST_F(AdbInterfaceTest, selectMatchingAdb) {
     auto daemon = new FakeAdbDaemon();
