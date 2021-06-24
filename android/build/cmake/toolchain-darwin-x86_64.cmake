@@ -29,14 +29,21 @@ set(RUNTIME_OS_PROPERTIES
 )
 
 if(NOT APPLE)
-  set(CMAKE_SYSTEM_NAME "Darwin")
+  get_osxcross_settings("darwin-x86_64")
   toolchain_generate("darwin-x86_64")
+  set(CMAKE_SYSTEM_NAME "Darwin")
+  set(CMAKE_SYSTEM_PROCESSOR "x86_64")
+
   # search for programs in the build host directories
   set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
   # for libraries and headers in the target directories
   set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
   set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
   set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+  # where is the target environment
+  set(CMAKE_FIND_ROOT_PATH
+      "${OSXCROSS_SDK}"
+      "${OSXCROSS_TARGET_DIR}/macports/pkgs/opt/local")
   set(ENV{PKG_CONFIG_LIBDIR} "${OSXCROSS_TARGET_DIR}/macports/pkgs/opt/local/lib/pkgconfig")
   set(ENV{PKG_CONFIG_SYSROOT_DIR} "${OSXCROSS_TARGET_DIR}/macports/pkgs")
 
