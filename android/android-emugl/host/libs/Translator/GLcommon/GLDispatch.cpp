@@ -17,6 +17,8 @@
 #include "GLcommon/GLDispatch.h"
 #include "GLcommon/GLLibrary.h"
 
+#include "android/base/threads/Thread.h"
+
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/shared_library.h"
@@ -46,8 +48,14 @@ static const std::unordered_map<std::string, std::string> sAliasExtra = {
     {"glClearDepthf", "glClearDepth"},
 };
 
+#if CHECK_ALL_GL_CALLS
+#define GL_FUNC_NAME(func_name) func_name##_priv
+#else
+#define GL_FUNC_NAME(func_name) func_name
+#endif
+
 #define LOAD_GL_FUNC(return_type, func_name, signature, args)  do { \
-        if (!func_name) { \
+        if (!GL_FUNC_NAME(func_name)) { \
             void* address = (void *)getGLFuncAddress(#func_name, glLib); \
             /*Check alias*/ \
             if (!address) { \
@@ -69,19 +77,19 @@ static const std::unordered_map<std::string, std::string> sAliasExtra = {
                 } \
             } \
             if (address) { \
-                func_name = (__typeof__(func_name))(address); \
+                GL_FUNC_NAME(func_name) = (__typeof__(GL_FUNC_NAME(func_name)))(address); \
             } else { \
                 GL_LOG("%s not found", #func_name); \
-                func_name = (__typeof__(func_name))(dummy_##func_name); \
+                GL_FUNC_NAME(func_name) = (__typeof__(GL_FUNC_NAME(func_name)))(dummy_##func_name); \
             } \
         } \
     } while (0);
 
 #define LOAD_GLEXT_FUNC(return_type, func_name, signature, args) do { \
-        if (!func_name) { \
+        if (!GL_FUNC_NAME(func_name)) { \
             void* address = (void *)getGLFuncAddress(#func_name, glLib); \
             if (address) { \
-                func_name = (__typeof__(func_name))(address); \
+                GL_FUNC_NAME(func_name) = (__typeof__(GL_FUNC_NAME(func_name)))(address); \
             } \
         } \
     } while (0);
@@ -109,14 +117,34 @@ static return_type dummy_##func_name signature { \
 
 LIST_GLES_FUNCTIONS(DEFINE_DUMMY_FUNCTION, DEFINE_DUMMY_EXTENSION_FUNCTION)
 
+GLDispatchChecker::~GLDispatchChecker() {
+    if (strcmp(mFuncName, "glGetError")) {
+        GLuint err = GLDispatch::glGetError();
+        if (err != GL_NO_ERROR) {
+            fprintf (stderr, "0x%llx: GLDispatch error 0x%x generated while running %s\n", (unsigned long long)android::base::getCurrentThreadId(), err, mFuncName);
+        }
+    }
+}
+
 // Initializing static GLDispatch members*/
 
 emugl::Mutex GLDispatch::s_lock;
 
 #define GL_DISPATCH_DEFINE_POINTER(return_type, function_name, signature, args) \
-    GL_APICALL return_type (GL_APIENTRY *GLDispatch::function_name) signature = NULL;
+    GL_APICALL return_type (GL_APIENTRY *GLDispatch::GL_FUNC_NAME(function_name)) signature = NULL;
+
+#define GL_DISPATCH_DEFINE_WRAP(return_type, function_name, signature, args) \
+    return_type GLDispatch::function_name signature { \
+        GLDispatchChecker checker (__FUNCTION__); \
+        checker.printArgs args ; \
+        return function_name##_priv args ; \
+    }
 
 LIST_GLES_FUNCTIONS(GL_DISPATCH_DEFINE_POINTER, GL_DISPATCH_DEFINE_POINTER)
+
+#if CHECK_ALL_GL_CALLS
+LIST_GLES_FUNCTIONS(GL_DISPATCH_DEFINE_WRAP, GL_DISPATCH_DEFINE_WRAP)
+#endif
 
 // Constructor.
 GLDispatch::GLDispatch() : m_isLoaded(false) {}

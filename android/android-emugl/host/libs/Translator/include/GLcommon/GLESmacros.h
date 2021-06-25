@@ -1,6 +1,14 @@
 #ifndef GLES_MACROS_H
 #define GLES_MACROS_H
 
+#define CHECK_ALL_GL_CALLS 0
+
+#if CHECK_ALL_GL_CALLS
+#define CONTEXT_CHECK ScopedGLContextChecker ctx_checker (ctx, __FUNCTION__);
+#else
+#define CONTEXT_CHECK
+#endif
+
 #if defined(__linux__) || defined(__APPLE__)
 
 #include <mutex>
@@ -29,14 +37,14 @@
 
 #define MEM_TRACE(group) MEM_TRACE_IF(true, group)
 
-
 #define GET_CTX()                                              \
     MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL") \
     if (!s_eglIface)                                           \
         return;                                                \
     GLEScontext* ctx = s_eglIface->getGLESContext();           \
     if (!ctx)                                                  \
-        return;
+        return;                                                \
+    CONTEXT_CHECK
 
 #define GET_CTX_CM()                                                   \
     MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL")         \
@@ -45,7 +53,8 @@
     GLEScmContext* ctx =                                               \
             static_cast<GLEScmContext*>(s_eglIface->getGLESContext()); \
     if (!ctx)                                                          \
-        return;
+        return;                                                        \
+    CONTEXT_CHECK
 
 #define GET_CTX_V2()                                                   \
     MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL")         \
@@ -55,7 +64,8 @@
             static_cast<GLESv2Context*>(s_eglIface->getGLESContext()); \
     if (!ctx)                                                          \
         return;                                                        \
-    ctx->rebindCurrentFramebufferTextures();
+    ctx->rebindCurrentFramebufferTextures();                           \
+    CONTEXT_CHECK
 
 #define GET_CTX_RET(failure_ret)                               \
     MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL") \
@@ -63,7 +73,8 @@
         return failure_ret;                                    \
     GLEScontext* ctx = s_eglIface->getGLESContext();           \
     if (!ctx)                                                  \
-        return failure_ret;
+        return failure_ret;                                    \
+    CONTEXT_CHECK
 
 #define GET_CTX_CM_RET(failure_ret)                                    \
     MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL")         \
@@ -72,7 +83,8 @@
     GLEScmContext* ctx =                                               \
             static_cast<GLEScmContext*>(s_eglIface->getGLESContext()); \
     if (!ctx)                                                          \
-        return failure_ret;
+        return failure_ret;                                            \
+    CONTEXT_CHECK
 
 #define GET_CTX_V2_RET(failure_ret)                                    \
     MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL")         \
@@ -81,7 +93,8 @@
     GLESv2Context* ctx =                                               \
             static_cast<GLESv2Context*>(s_eglIface->getGLESContext()); \
     if (!ctx)                                                          \
-        return failure_ret;
+        return failure_ret;                                            \
+    CONTEXT_CHECK
 
 #define SET_ERROR_IF(condition,err) if((condition)) {                            \
                         fprintf(stderr, "%s:%s:%d error 0x%x\n", __FILE__, __FUNCTION__, __LINE__, err); \
