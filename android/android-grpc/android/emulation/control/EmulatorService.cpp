@@ -1235,6 +1235,22 @@ public:
         return Status::OK;
     }
 
+    Status setPosture(ServerContext* context,
+                      const Posture* requestPtr,
+                      ::google::protobuf::Empty* reply) override {
+        auto agent = mAgents->emu;
+
+        // Make a copy
+        Posture request = *requestPtr;
+
+        android::base::ThreadLooper::runOnMainLooper([agent, request]() {
+            agent->setPosture((int)request.value());
+        });
+
+        return Status::OK;
+    }
+
+
 private:
     const AndroidConsoleAgents* mAgents;
     keyboard::EmulatorKeyEventSender mKeyEventSender;
