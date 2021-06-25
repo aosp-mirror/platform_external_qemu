@@ -475,9 +475,16 @@ void GLESv2Context::validateAtt0PreDraw(unsigned int count)
         m_attribute0valueChanged = false;
     }
 
-    s_glDispatch.glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0,
-            m_att0Array.get());
+    GLuint prevArrayBuffer;
+    s_glDispatch.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*)&prevArrayBuffer);
+
+    s_glDispatch.glBindBuffer(GL_ARRAY_BUFFER, m_emulatedClientVBOs[0]);
+    s_glDispatch.glBufferData(GL_ARRAY_BUFFER, m_att0ArrayLength * sizeof(GLfloat), m_att0Array.get(), GL_STREAM_DRAW);
+
+    s_glDispatch.glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
     s_glDispatch.glEnableVertexAttribArray(0);
+
+    s_glDispatch.glBindBuffer(GL_ARRAY_BUFFER, prevArrayBuffer);
 
     m_att0NeedsDisable = true;
 }
