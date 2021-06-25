@@ -1235,6 +1235,20 @@ public:
         return Status::OK;
     }
 
+    Status setPosture(ServerContext* context,
+                      const Posture* requestPtr,
+                      ::google::protobuf::Empty* reply) override {
+        auto agent = mAgents->emu;
+
+        if (agent->setPosture((int)requestPtr->value()) == false) {
+            return Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "Unable to set posture.", "");
+        }
+
+        return Status::OK;
+    }
+
+
 private:
     const AndroidConsoleAgents* mAgents;
     keyboard::EmulatorKeyEventSender mKeyEventSender;

@@ -219,6 +219,8 @@ service EmulatorController {
   // Velocity is absolute
   rpc setVirtualSceneCameraVelocity(Velocity)
           returns (google.protobuf.Empty) {}
+  // Set foldable posture
+  rpc setPosture(Posture) returns (google.protobuf.Empty) {}
 }
 
 // A Run State that describes the state of the Virtual Machine.
@@ -1084,4 +1086,18 @@ message Velocity {
     float x = 1;  // x axis is horizontal and orthogonal to the view direction.
     float y = 2;  // y axis points up and is perpendicular to the floor.
     float z = 3;  // z axis is the view direction
+}
+
+// must follow the definition in "external/qemu/android/hw-sensors.h"
+message Posture {
+  enum PostureValue {
+    POSTURE_UNKNOWN = 0;
+    POSTURE_CLOSED = 1;
+    POSTURE_HALF_OPENED = 2;
+    POSTURE_OPENED = 3;
+    POSTURE_FLIPPED = 4;
+    POSTURE_TENT = 5;
+    POSTURE_MAX = 6;
+  }
+  PostureValue value = 3;
 }
