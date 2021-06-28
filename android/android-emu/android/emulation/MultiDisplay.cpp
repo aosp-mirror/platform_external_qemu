@@ -83,7 +83,11 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
     if (android_foldable_any_folded_area_configured()) {
         return -1;
     }
-
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV ||
+        avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR) {
+        LOG(ERROR) << "Multidisplay does not support TV or WEAR";
+        return -1;
+    }
     if (mGuestMode) {
         return -1;
     }
