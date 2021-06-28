@@ -2504,10 +2504,6 @@ void FrameBuffer::unbindAndDestroyTrivialSharedContext(EGLContext context,
 }
 
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
-    if (m_guestUsesAngle) {
-        goldfish_vk::updateColorBufferFromVkImage(p_colorbuffer);
-    }
-
     bool res = postImpl(p_colorbuffer, needLockAndBind);
     if (res) setGuestPostedAFrame();
     return res;
