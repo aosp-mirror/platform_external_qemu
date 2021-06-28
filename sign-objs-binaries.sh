@@ -29,4 +29,3 @@
 ./sign-vm-entitlement.sh objs/lib64/OpenglRender.dylib
 ./sign-vm-entitlement.sh objs/lib64/libandroid-emu-shared.dylib
 ./sign-vm-entitlement.sh objs/lib64/libOpenglRender.dylib
-./sign-vm-entitlement.sh objs/lib64/vulkan/libvk_swiftshader.dylib
