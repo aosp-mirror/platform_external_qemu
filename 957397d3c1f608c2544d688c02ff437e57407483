@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "84b57940_472ed036",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2021-06-28T23:38:15Z",
+      "side": 1,
+      "message": "Tested with multidisplay, freeform display and foldable AVDs. No issue seen with input.",
+      "revId": "957397d3c1f608c2544d688c02ff437e57407483",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
