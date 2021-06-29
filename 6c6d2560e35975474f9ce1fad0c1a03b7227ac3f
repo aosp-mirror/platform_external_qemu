@@ -33,6 +33,24 @@
       "message": "This looks very cool. \n\nCan you explain how a specific usb device (specified with custom vid/pid) gets intercepted by this driver and redirects its traffic to fixed google vid/pid?",
       "revId": "6c6d2560e35975474f9ce1fad0c1a03b7227ac3f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8e4c6509_7e110935",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129123
+      },
+      "writtenOn": "2021-06-29T20:14:54Z",
+      "side": 1,
+      "message": "This used to be one of the designed features of the driver. However, after a close examination of QEMU with libusb, I found it was not needed at all. libusb with WinUsb does not rely on these QUERY ID ioctls to reach the device instance. libusb can get a handle to the device without any issue with the device\u0027s original VID/PID. So these QEURY ID ioctls are simply used here to fool Windows Device Manager to load WinUsb driver. Beyond this, no more changes are made to your original CL.",
+      "parentUuid": "dbb37815_c57d8c2e",
+      "revId": "6c6d2560e35975474f9ce1fad0c1a03b7227ac3f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
