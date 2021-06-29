@@ -28,6 +28,7 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
+#include "android/base/synchronization/Lock.h"
 #include "OpenglCodecCommon/ErrorLog.h"
 #include "GLESv2Context.h"
 #include "GLESv2Validate.h"
@@ -64,6 +65,7 @@
 #define GLES2_NAMESPACED(f) translator::gles2::f
 
 using android::base::c_str;
+using android::base::AutoLock;
 
 namespace translator {
 namespace gles2 {
@@ -114,6 +116,8 @@ static void internal_glGetSynciv(GLsync sync, GLenum pname, GLsizei bufsize, GLs
 typedef std::unordered_map<std::string, __translatorMustCastToProperFunctionPointerType> ProcTableMap;
 ProcTableMap *s_gles2Extensions = NULL;
 /****************************************************************************************************************/
+
+static android::base::Lock sTexImageLock;
 
 static EGLiface*  s_eglIface = NULL;
 static GLESiface s_glesIface = {
@@ -863,6 +867,8 @@ GL_APICALL void  GL_APIENTRY glCompressedTexImage2D(GLenum target, GLint level, 
     SET_ERROR_IF(!GLESv2Validate::textureTargetEx(ctx, target),GL_INVALID_ENUM);
     SET_ERROR_IF(level < 0 || imageSize < 0, GL_INVALID_VALUE);
 
+    AutoLock lock(sTexImageLock);
+
     auto funcPtr = translator::gles2::glTexImage2D;
 
     if (shouldPassthroughCompressedFormat(ctx, internalformat)) {
@@ -889,6 +895,9 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
 GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid* data){
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::textureTargetEx(ctx, target),GL_INVALID_ENUM);
+
+    AutoLock lock(sTexImageLock);
+
     if (ctx->drawDisabled()) {
         return;
     }
@@ -1018,9 +1027,13 @@ void s_glInitTexImage3D(GLenum target, GLint level, GLint internalformat,
 
 GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border){
     GET_CTX_V2();
+
     if (ctx->drawDisabled()) {
         return;
     }
+
+    AutoLock lock(sTexImageLock);
+
     SET_ERROR_IF(!(GLESv2Validate::pixelFrmt(ctx,internalformat) &&
                    (GLESv2Validate::textureTarget(ctx, target) ||
                     GLESv2Validate::textureTargetEx(ctx, target))), GL_INVALID_ENUM);
@@ -1055,8 +1068,12 @@ GL_APICALL void  GL_APIENTRY glCopyTexSubImage2D(GLenum target, GLint level, GLi
     if (ctx->drawDisabled()) {
         return;
     }
+
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) ||
                    GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
+
+    AutoLock lock(sTexImageLock);
+
     TextureData* texData = getTextureTargetData(target);
     if (texData) {
         texData->makeDirty();
@@ -3521,6 +3538,8 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
         fprintf(stderr, "%s: got err pre :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
     }
 
+    AutoLock lock(sTexImageLock);
+
     sPrepareTexImage2D(target, level, internalformat, width, height, border, format, type, 0, pixels, &type, &internalformat, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
 
@@ -3630,6 +3649,9 @@ GL_APICALL void  GL_APIENTRY glTexParameteriv(GLenum target, GLenum pname, const
 
 GL_APICALL void  GL_APIENTRY glGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, GLvoid* pixels){
     GET_CTX_V2();
+
+    AutoLock lock(sTexImageLock);
+
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) ||
                    GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelFrmt(ctx,format), GL_INVALID_ENUM);
@@ -3658,6 +3680,9 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
     // set an error if level < 0 or level > log 2 max
     SET_ERROR_IF(level < 0 || 1<<level > ctx->getMaxTexSize(), GL_INVALID_VALUE);
     SET_ERROR_IF(xoffset < 0 || yoffset < 0 || width < 0 || height < 0, GL_INVALID_VALUE);
+
+    AutoLock lock(sTexImageLock);
+
     if (ctx->drawDisabled()) {
         return;
     }
@@ -4039,6 +4064,9 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
 {
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::textureTargetLimited(target),GL_INVALID_ENUM);
+
+    AutoLock lock(sTexImageLock);
+
     unsigned int imagehndl = SafeUIntFromPointer(image);
     ImagePtr img = s_eglIface->getEGLImage(imagehndl);
     if (img) {
@@ -4443,6 +4471,9 @@ GL_APICALL void GL_APIENTRY glGetMemoryObjectParameterivEXT(GLuint memoryObject,
 
 GL_APICALL void GL_APIENTRY glTexStorageMem2DEXT(GLenum target, GLsizei levels, GLenum internalFormat, GLsizei width, GLsizei height, GLuint memory, GLuint64 offset) {
     GET_CTX_V2();
+
+    AutoLock lock(sTexImageLock);
+
     gles30usages->set_is_used(true);
     GLint err = GL_NO_ERROR;
     GLenum format, type;
