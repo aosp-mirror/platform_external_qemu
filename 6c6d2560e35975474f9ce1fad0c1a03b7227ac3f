@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f504c94a_0f7978a1",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129123
+      },
+      "writtenOn": "2021-06-29T16:57:51Z",
+      "side": 1,
+      "message": "Hi,\n\nPlease help to review the UsbAssist driver. This is a WIP CL aiming to get feedbacks.",
+      "revId": "6c6d2560e35975474f9ce1fad0c1a03b7227ac3f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
