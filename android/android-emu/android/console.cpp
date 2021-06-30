@@ -2446,6 +2446,7 @@ static int do_snapshot_del(ControlClient client, char* args) {
         return -1;
     }
 
+    androidSnapshot_delete(args);
     bool success =
             vmopers(client)->snapshotDelete(args, client, control_write_err_cb);
     return success ? 0 : -1;
