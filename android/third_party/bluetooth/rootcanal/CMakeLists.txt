@@ -37,7 +37,6 @@ android_add_library(
       "bluetooth/uuid.cc")
 target_include_directories(libbt-rootcanal-types
                            PUBLIC ${BT_ROOT}/vendor_libs/test_vendor_lib/types)
-target_link_libraries(libbt-rootcanal-types PUBLIC libchrome)
 
 android_add_test(
   TARGET rootcanal-test_types
@@ -127,7 +126,7 @@ android_add_library(
          net/posix/posix_async_socket_server.cc)
 
 target_link_libraries(
-  libbt-rootcanal PRIVATE libscriptedbeaconpayload-protos-lite libchrome jsoncpp
+  libbt-rootcanal PRIVATE libscriptedbeaconpayload-protos-lite jsoncpp android-emu-base
                           BluetoothPacketSources)
 target_include_directories(
   libbt-rootcanal PUBLIC ${VL_LIB} ${VL_LIB}/include ${BT_ROOT}/gd ${BT_ROOT}
