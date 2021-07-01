@@ -8,10 +8,9 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
+#include <memory>
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/sockets/SocketWaiter.h"
-#include "android/base/memory/ScopedPtr.h"
 
 #include <gtest/gtest.h>
 
@@ -20,7 +19,7 @@ namespace base {
 
 // Check that initialization / destruction works without crashing.
 TEST(SocketWaiter, init) {
-    ScopedPtr<SocketWaiter> waiter(SocketWaiter::create());
+    std::unique_ptr<SocketWaiter> waiter(SocketWaiter::create());
 
     unsigned events = ~0U;
     EXPECT_EQ(-1, waiter->nextPendingFd(&events));
@@ -28,7 +27,7 @@ TEST(SocketWaiter, init) {
 }
 
 TEST(SocketWaiter, reset) {
-    ScopedPtr<SocketWaiter> waiter(SocketWaiter::create());
+    std::unique_ptr<SocketWaiter> waiter(SocketWaiter::create());
 
     EXPECT_FALSE(waiter->hasFds());
 
@@ -46,7 +45,7 @@ TEST(SocketWaiter, reset) {
 }
 
 TEST(SocketWaiter, update) {
-    ScopedPtr<SocketWaiter> waiter(SocketWaiter::create());
+    std::unique_ptr<SocketWaiter> waiter(SocketWaiter::create());
 
     int s1, s2;
 
@@ -80,7 +79,7 @@ TEST(SocketWaiter, update) {
 }
 
 TEST(SocketWaiter, waitOnReadEvent) {
-    ScopedPtr<SocketWaiter> waiter(SocketWaiter::create());
+    std::unique_ptr<SocketWaiter> waiter(SocketWaiter::create());
 
     int s1, s2;
 
@@ -102,7 +101,7 @@ TEST(SocketWaiter, waitOnReadEvent) {
 }
 
 TEST(SocketWaiter, waitOnWriteEvent) {
-    ScopedPtr<SocketWaiter> waiter(SocketWaiter::create());
+    std::unique_ptr<SocketWaiter> waiter(SocketWaiter::create());
 
     int s1, s2;
 
