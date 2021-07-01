@@ -127,9 +127,7 @@ endif()
 if(BLUETOOTH_EMULATION)
   message(
     STATUS "Including bluetooth emulation (and dependencies) from rootcanal")
-  add_subdirectory(libchrome)
   add_subdirectory(bluetooth)
-
   if (NOT WEBRTC)
     # We need jsoncpp, which is part of webrtc.
     add_subdirectory(${AOSP_ROOT}/external/webrtc/third_party/jsoncpp jsoncpp)
