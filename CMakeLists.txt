@@ -135,6 +135,12 @@ if (DARWIN_AARCH64)
     set(OPTION_TCMALLOC FALSE)
 endif()
 
+# Only linux & darwin can use root canal at this time.
+if (LINUX_X86_64 OR DARWIN_X86_64)
+    set(BLUETOOTH_EMULATION TRUE)
+endif()
+
+
 if(CROSVM OR GFXSTREAM)
   set(OPTION_AEMU_LIBS_ONLY TRUE)
   set(OPTION_GFXSTREAM_BACKEND TRUE)
