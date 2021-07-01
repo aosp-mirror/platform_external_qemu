@@ -1446,7 +1446,7 @@ extern "C" int main(int argc, char** argv) {
     if (!emulator_parseInputCommandLineOptions(opts)) {
         return 1;
     }
-    
+
     if (!emulator_parseUiCommandLineOptions(opts, avd, hw)) {
         return 1;
     }
@@ -2166,6 +2166,7 @@ extern "C" int main(int argc, char** argv) {
         // the order of virtconsoles must be preserved
         args.add2("-device", "virtconsole,chardev=forhvc0");
         args.add2("-device", "virtconsole,chardev=forhvc1");
+
     } else {
         // no virtconsoles here
 
@@ -2183,6 +2184,14 @@ extern "C" int main(int argc, char** argv) {
                 }
             }
         }
+    }
+
+    if (fc::isEnabled(fc::BluetoothEmulation)) {
+        const int blue_port = 9321;
+        args.add("-chardev");
+        args.addFormat("socket,port=%d,host=localhost,server,nowait,ipv4,id=blue_sock", blue_port);
+        args.add2("-device", "virtserialport,chardev=blue_sock,name=bluetooth");
+        LOG(INFO) << "Enabling /dev/vhci on port: " << blue_port << " forward this to rootcanal.";
     }
 
     if (feature_is_enabled(kFeature_ModemSimulator)) {
