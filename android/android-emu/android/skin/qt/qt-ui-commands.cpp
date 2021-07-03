@@ -49,6 +49,7 @@ constexpr CommandInfo kCommands[] = {
         INIT_COMMAND(SHOW_PANE_HELP, "Help"),
         INIT_COMMAND(SHOW_PANE_PERFSTATS, "Performance Stats"),
         INIT_COMMAND(SHOW_PANE_MULTIDISPLAY, "Multiple displays"),
+        INIT_COMMAND(SHOW_PANE_SENSOR_REPLAY, "Sensor Replay"),
         INIT_COMMAND(SHOW_MULTITOUCH,
                      "Multitouch (left click to pinch/zoom, right click to "
                      "vertical swipe)"),

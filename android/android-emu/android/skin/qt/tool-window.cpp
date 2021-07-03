@@ -243,6 +243,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         default_shortcuts += "Ctrl+Shift+T SHOW_PANE_CAR\n";
         default_shortcuts += "Ctrl+Shift+O SHOW_PANE_CAR_ROTARY\n";
+        default_shortcuts += "Ctrl+Shift+M SHOW_PANE_SENSOR_REPLAY\n";
     }
 
     QTextStream stream(&default_shortcuts);
@@ -713,6 +714,11 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) 
         case QtUICommand::ROTATE_LEFT:
             if (down) {
                 emulator_window_rotate_90(cmd == QtUICommand::ROTATE_RIGHT);
+            }
+            break;
+        case QtUICommand::SHOW_PANE_SENSOR_REPLAY:
+            if (down) {
+                showOrRaiseExtendedWindow(PANE_IDX_SENSOR_REPLAY);
             }
             break;
         case QtUICommand::TOGGLE_TRACKBALL:
