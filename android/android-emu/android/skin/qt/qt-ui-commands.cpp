@@ -87,6 +87,7 @@ constexpr CommandInfo kCommands[] = {
                      "Enable virtual scene camera controls"),
         INIT_COMMAND(FOLD, "Fold"),
         INIT_COMMAND(UNFOLD, "Unfold"),
+        INIT_COMMAND(REPLAY_SENSOR_MACRO, "Start sensor macro replay"),
 };
 
 bool parseQtUICommand(const QString& string, QtUICommand* command) {
