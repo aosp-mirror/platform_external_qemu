@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "313bbb1e_fcb5628b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129123
+      },
+      "writtenOn": "2021-07-07T22:54:45Z",
+      "side": 1,
+      "message": "Compared with Huihong\u0027s original patch, this just simplifies things a bit.",
+      "revId": "87a34f0cedbb23044c76848858abad76e9bd188f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
