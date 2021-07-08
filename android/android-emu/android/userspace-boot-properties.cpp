@@ -93,7 +93,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         dalvikVmHeapsizeProp = "androidboot.dalvik.vm.heapsize";
         qemuLegacyFakeCameraProp = "androidboot.qemu.legacy_fake_camera";
         qemuCameraProtocolVerProp = "androidboot.qemu.camera_protocol_ver";
-        qemuDisplaySettingsXmlProp = nullptr;  // deprecated
+        qemuDisplaySettingsXmlProp = "androidboot.qemu.display.settings.xml";
         qemuVirtioWifiProp = "androidboot.qemu.virtiowifi";
         qemuWifiProp = "androidboot.qemu.wifi";
         androidQemudProp = nullptr;  // deprecated
