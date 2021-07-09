@@ -1132,6 +1132,17 @@ static void rcCreateSyncKHR(EGLenum type,
     bool hasNativeFence =
         type == EGL_SYNC_NATIVE_FENCE_ANDROID;
 
+    bool needBind = false;
+
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+
+    if (!tInfo->currContext) {
+        needBind = true;
+        FrameBuffer *fb = FrameBuffer::getFB();
+        fb->lock();
+        fb->bind_locked();
+    }
+
     // Usually we expect rcTriggerWait to be registered
     // at the beginning in rcGetRendererVersion, called
     // on init for all contexts.
@@ -1152,6 +1163,12 @@ static void rcCreateSyncKHR(EGLenum type,
         uint64_t res = (uint64_t)(uintptr_t)fenceSync;
         *eglsync_out = res;
         EGLSYNC_DPRINT("send out eglsync 0x%llx", res);
+    }
+
+    if (needBind) {
+        FrameBuffer *fb = FrameBuffer::getFB();
+        fb->unbind_locked();
+        fb->unlock();
     }
 }
 

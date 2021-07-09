@@ -133,9 +133,14 @@ void SyncThread::cleanup() {
 
 void SyncThread::initSyncContext() {
     DPRINT("enter");
-    SyncThreadCmd to_send;
-    to_send.opCode = SYNC_THREAD_INIT;
-    sendAndWaitForResult(to_send);
+    // TODO(b/187082169, warty): The thread pool's command-assignment strategy
+    //     // is round-robin, so as a hack, create one command for each worker.
+    for (int i = 0; i < mWorkerThreadPool.numWorkers(); ++i) {
+        SyncThreadCmd to_send;
+        to_send.opCode = SYNC_THREAD_INIT;
+        sendAndWaitForResult(to_send);
+    }
+
     DPRINT("exit");
 }
 
