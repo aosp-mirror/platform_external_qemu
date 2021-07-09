@@ -19,6 +19,7 @@
 #include <usbioctl.h>
 #include <SetupAPI.h>
 #include <strsafe.h>
+#include "USBAssistInterface.h"
 
 static int GetStringDescriptor(HANDLE hub, ULONG port, UCHAR index, USHORT langID, PUCHAR buf, size_t buf_size)
 {
@@ -367,6 +368,168 @@ int listUSBDevices(void)
 
     libusb_exit(NULL);
     return 0;
+}
+
+static int findUSBDevice(uint16_t *vid, uint16_t *pid,
+        uint32_t *bus, uint8_t *port, uint8_t *numPorts)
+{
+    libusb_device **devs = NULL;
+    struct libusb_device_descriptor ddesc;
+    uint8_t path[8];
+    int path_depth, r, i, j, n,found=0;
+
+    r = libusb_init(NULL);
+    if (r < 0)
+        return r;
+
+    n = libusb_get_device_list(NULL, &devs);
+    for (i = 0; i < n; i++) {
+        path_depth = libusb_get_port_numbers(devs[i], path, sizeof(path));
+        if (libusb_get_device_descriptor(devs[i], &ddesc) != 0)
+            continue;
+        if (ddesc.bDeviceClass == LIBUSB_CLASS_HUB)
+            continue;
+
+        if (*bus > 0 && *bus != libusb_get_bus_number(devs[i]))
+            continue;
+        if (*numPorts > 0) {
+            if (*numPorts != path_depth)
+                continue;
+            for (j = 0; j < path_depth; j++)
+                if (path[j] != port[j])
+                    continue;
+        }
+        if (*vid > 0 &&
+            *vid != ddesc.idVendor) {
+            continue;
+        }
+        if (*pid > 0 &&
+            *pid != ddesc.idProduct) {
+            continue;
+        }
+        // match
+        found = 1;
+        if (*bus == 0)
+            *bus = libusb_get_bus_number(devs[i]);
+        if (*numPorts == 0) {
+            *numPorts = path_depth;
+            for (j = 0; j < path_depth; j++)
+                port[j] = path[j];
+        }
+        if (*vid == 0)
+            *vid = ddesc.idVendor;
+        if (*pid == 0)
+            *pid = ddesc.idProduct;
+	break;
+    }
+
+    libusb_free_device_list(devs, 1);
+    libusb_exit(NULL);
+
+    return found - 1;
+}
+
+static int parseUSBOptions(char *options, uint16_t *vid, uint16_t *pid,
+        uint32_t *bus, uint8_t *port, uint8_t *numPorts)
+{
+    char *params = options;
+    char *params1 = NULL;
+    char *param = NULL, *context = NULL;
+    char *param1 = NULL, *context1 = NULL;
+    unsigned long temp = 0;
+    uint8_t i = 0;
+
+    for (param = strtok_s(params, ",", &context);  param != NULL;
+            param = strtok_s(NULL, ",", &context)) {
+        if (!strncmp(param, "vendorid=", 9)) {
+            temp = strtol(param + 9, NULL, 16);
+            if (temp > USHRT_MAX) {
+                fprintf(stderr, "Error: vendorid exceeds 16 bits\n");
+                goto error_out;
+            }
+            *vid = (unsigned short)temp;
+            continue;
+        }
+        if (!strncmp(param, "productid=", 10)) {
+            temp = strtol(param + 10, NULL, 16);
+            if (temp > USHRT_MAX) {
+                fprintf(stderr, "Error: productid exceeds 16 bits\n");
+                goto error_out;
+            }
+            *pid = (unsigned short)temp;
+            continue;
+        }
+        if (!strncmp(param, "hostbus=", 8)) {
+            *bus = strtol(param + 8, NULL, 10);
+            continue;
+        }
+        if (!strncmp(param, "hostport=", 9)) {
+            params1 = param + 9;
+            for (param1 = strtok_s(params1, ".", &context1);
+                    param1 != NULL && i < 6;
+                    param1 = strtok_s(NULL, ",", &context1), i++) {
+                temp = strtol(param1, NULL, 10);
+                if (temp > UCHAR_MAX) {
+                    fprintf(stderr, "Error: port number exceeds 8 bits\n");
+                    goto error_out;
+                }
+                *(port + i) = (unsigned char)temp;
+            }
+            if (param1 != NULL) {
+                fprintf(stderr, "Error: number of ports exceeds 6.\n");
+                goto error_out;
+            }
+            continue;
+        }
+        fprintf(stderr, "Error: invalid parametes for USB Passthrough!!\n"
+            "Expected Format:  vendorid=0x..., productid=0x..."
+            "[,hostbus=...,hostport=...]");
+        goto error_out;
+    }
+    *numPorts = i;
+    return 0;
+
+error_out:
+    return -1;
+}
+
+static HANDLE usbAssistHandle = INVALID_HANDLE_VALUE;
+
+int usbassist_winusb_load(char *dev_opt)
+{
+    uint16_t vid = 0, pid = 0;
+    uint32_t bus = 0;
+    uint8_t port[6] = { 0 }, num_ports = 0;
+    unsigned long i = 0, nbytes = 0;
+    USB_PASSTHROUGH_TARGET target = { 0 };
+    BOOL success;
+
+    if (parseUSBOptions(dev_opt, &vid, &pid, &bus, (uint8_t *)port, &num_ports))
+        return -1;
+
+    if (findUSBDevice(&vid, &pid, &bus, (uint8_t *)port, &num_ports))
+        return -1;
+
+    if (usbAssistHandle == INVALID_HANDLE_VALUE &&
+        (usbAssistHandle = CreateFileW(L"\\\\.\\UsbAssist",
+        GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS,
+        FILE_ATTRIBUTE_NORMAL, NULL)) == INVALID_HANDLE_VALUE) {
+        return -1;
+    }
+
+    target.bus = bus;
+    target.vid = vid;
+    target.pid = pid;
+    for (i = 0; i < num_ports; i++)
+        target.port[i] = port[i];
+    target.flags = USB_PASSTHROUGH_ONESHOT;
+    target.ops = USB_PASSTHROUGH_DEV_ADD;
+
+    success = DeviceIoControl(usbAssistHandle,
+        (DWORD)USBASSIST_IOCTL_DEVICE_OPS,
+        &target, sizeof(target), NULL, 0, &nbytes, NULL);
+
+    return success - 1;
 }
 
 #endif // _WIN32
