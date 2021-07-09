@@ -1969,6 +1969,10 @@ static void help_guest_angle(stralloc_t* out) {
     PRINTF(" Enables ANGLE as the guest system GLES driver, using Vulkan to render on the host.\n");
 }
 
+static void help_usb_passthrough(stralloc_t* out) {
+    PRINTF(" Pass Through a HOST USB device to the guest.\n");
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

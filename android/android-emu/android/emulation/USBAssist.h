@@ -13,3 +13,4 @@
 
 // List Available USB Devices (Windows) for USB Passthrough
 int listUSBDevices();
+int usbassist_winusb_load(char *dev_opt);
