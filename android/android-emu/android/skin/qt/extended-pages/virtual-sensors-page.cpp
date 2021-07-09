@@ -1006,6 +1006,9 @@ void VirtualSensorsPage::updateUIPosture() {
 }
 
 void VirtualSensorsPage::disableHeartRateSensor() {
+    mUi->heartRateSensorValueWidget->setHidden(true);
+    mUi->label_16->setHidden(true);
+    mUi->helpHeartRate->setHidden(true);
     mUi->heartRateSensorValueWidget->setEnabled(false);
     mUi->heartRateSensorValueWidget->setToolTip("The running system image doesn't support this sensor.");
 }
