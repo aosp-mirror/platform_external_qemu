@@ -43,6 +43,7 @@ using nlohmann::json;
 static std::string FLAG_logdir("");
 static std::string FLAG_emulator("localhost:8554");
 static std::string FLAG_turn("");
+static std::string FLAG_audio_dump("");
 static bool FLAG_help = false;
 static bool FLAG_verbose = true;
 static int FLAG_port = 9554;
@@ -67,6 +68,7 @@ static struct option long_options[] = {
         {"grpc-tls-key", required_argument, 0, 'x'},
         {"grpc-tls-cer", required_argument, 0, 'y'},
         {"grpc-tls-ca", required_argument, 0, 'z'},
+        {"dump-grpc-audio", required_argument, 0, 'd'},
         {0, 0, 0, 0}};
 
 using android::base::testing::LogOutput;
@@ -95,6 +97,7 @@ static void printUsage() {
            "enable gRPC TLS to the remote emulator) type: string.\n"
            "--grpc-tls-ca (File with the Certificate Authorities used to "
            "validate the emulator certificate.)\n"
+           "--dump-grpc-audio (Dump grpc audio to apointed file) type: string\n"
            "--help (Prints this message)\n");
 }
 
@@ -139,6 +142,9 @@ static void parseArgs(int argc, char** argv) {
                 break;
             case 'i':
                 FLAG_disc = optarg;
+                break;
+            case 'd':
+                FLAG_audio_dump = optarg;
                 break;
             case 'h':
             default:
@@ -294,7 +300,7 @@ int main(int argc, char* argv[]) {
     } else {
         // Initalize the RTC service.
 
-        Switchboard sw(client.get(), "", turnCfg, FLAG_adb_port);
+        Switchboard sw(client.get(), "", turnCfg, FLAG_adb_port, FLAG_audio_dump);
         auto bridge = android::emulation::control::getRtcService(&sw);
 
         auto builder = EmulatorControllerService::Builder()
