@@ -18,6 +18,7 @@
 #include <memory>                                 // for unique_ptr
 #include <thread>                                 // for thread
 #include <vector>                                 // for vector
+#include <fstream>                                // for ofstream
 #include <rtc_base/ref_counted_object.h>           // for RefCountedObject
 #include "emulator/webrtc/capture/AudioSource.h"  // for AudioSource
 #include "emulator_controller.grpc.pb.h"          // for EmulatorController
@@ -42,6 +43,8 @@ public:
     ~GrpcAudioSource();
 
     const cricket::AudioOptions options() const override;
+
+    void setAudioDumpFile(const std::string & audioDumpFile);
 protected:
     void cancel();
     void run();
@@ -58,6 +61,7 @@ private:
     EmulatorGrpcClient* mClient;
     std::weak_ptr<grpc::ClientContext> mContext;
     bool mCaptureAudio{true};
+    std::ofstream mAudioDump;
 };
 
 using GrpcAudioMediaSource = MediaSource<GrpcAudioSource>;

@@ -43,6 +43,19 @@ GrpcAudioSource::GrpcAudioSource(EmulatorGrpcClient* client)
     mPartialFrame.reserve(kBytesPerFrame);
 }
 
+void GrpcAudioSource::setAudioDumpFile(const std::string & audioDumpFile) {
+    if (mAudioDump.is_open()) {
+        RTC_LOG(INFO) << "Already dumpping, ignoring the request";
+        return;
+    }
+    if (audioDumpFile.empty()) {
+        return;
+    }
+    mAudioDump.open(audioDumpFile.c_str(), std::ios::out|std::ios::binary);
+    if (!mAudioDump.is_open()) {
+        RTC_LOG(WARNING) << "Could not open " << audioDumpFile << " for write. Ignoring the audio dump request";
+    }
+}
 void GrpcAudioSource::run() {
     StreamAudio();
 }
@@ -69,6 +82,10 @@ void GrpcAudioSource::StreamAudio() {
     AudioPacket audio_packet;
     while (stream->Read(&audio_packet)) {
         ConsumeAudioPacket(audio_packet);
+        if (mAudioDump.is_open()) {
+            mAudioDump.write(audio_packet.audio().data(), audio_packet.audio().size());
+            mAudioDump.flush();
+        }
     }
 }
 
@@ -98,7 +115,11 @@ void GrpcAudioSource::ConsumeAudioPacket(const AudioPacket& audio_packet) {
             audio_packet.audio().data() + audio_packet.audio().size());
 }
 
-GrpcAudioSource::~GrpcAudioSource() {}
+GrpcAudioSource::~GrpcAudioSource() {
+    if (mAudioDump.is_open()) {
+        mAudioDump.close();
+    }
+}
 
 const cricket::AudioOptions GrpcAudioSource::options() const {
     cricket::AudioOptions options;
