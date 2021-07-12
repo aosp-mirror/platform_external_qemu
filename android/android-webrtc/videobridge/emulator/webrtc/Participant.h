@@ -130,7 +130,7 @@ public:
             ::webrtc::SessionDescriptionInterface* desc);
     void IncomingMessage(json msg);
     bool AddVideoTrack(int displayId);
-    bool AddAudioTrack();
+    bool AddAudioTrack(const std::string & audioDumpFile="");
 
     bool Initialize();
     void SendToDataChannel(DataChannelLabel label, std::string data);
