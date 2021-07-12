@@ -40,6 +40,10 @@ public:
     std::unique_ptr<grpc::ClientContext> newContext();
     bool hasOpenChannel(bool tryConnect = true);
     std::string address() { return mAddress; }
+    void setAudioDumpFile(std::string audioDump) {
+        mAudioDumpFile = audioDump;
+    }
+    std::string getAudioDumpFile() {return mAudioDumpFile;}
 
 private:
     bool initializeChannel();
@@ -48,6 +52,7 @@ private:
     std::shared_ptr<grpc_impl::CallCredentials> mCredentials;
     std::string mDiscoveryFile;
     std::string mAddress;
+    std::string mAudioDumpFile;
 };
 
 }  // namespace webrtc
