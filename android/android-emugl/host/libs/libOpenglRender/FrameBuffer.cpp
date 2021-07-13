@@ -359,17 +359,19 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     if (emugl::emugl_feature_is_enabled(android::featurecontrol::Vulkan)) {
         auto dispatch = emugl::vkDispatch(false /* not for testing */);
         vkEmu = goldfish_vk::createOrGetGlobalVkEmulation(dispatch);
-        bool useDeferredCommands =
-            android::base::System::get()->envGet("ANDROID_EMU_VK_DISABLE_DEFERRED_COMMANDS").empty();
-        bool useCreateResourcesWithRequirements =
-            android::base::System::get()->envGet("ANDROID_EMU_VK_DISABLE_USE_CREATE_RESOURCES_WITH_REQUIREMENTS").empty();
-        goldfish_vk::setUseDeferredCommands(vkEmu, useDeferredCommands);
-        goldfish_vk::setUseCreateResourcesWithRequirements(vkEmu, useCreateResourcesWithRequirements);
-        if (vkEmu->deviceInfo.supportsIdProperties) {
-            GL_LOG("Supports id properties, got a vulkan device UUID");
-            memcpy(fb->m_vulkanUUID, vkEmu->deviceInfo.idProps.deviceUUID, 16);
-        } else {
-            GL_LOG("Doesn't support id properties, no vulkan device UUID");
+        if (vkEmu) {
+            bool useDeferredCommands =
+                android::base::System::get()->envGet("ANDROID_EMU_VK_DISABLE_DEFERRED_COMMANDS").empty();
+            bool useCreateResourcesWithRequirements =
+                android::base::System::get()->envGet("ANDROID_EMU_VK_DISABLE_USE_CREATE_RESOURCES_WITH_REQUIREMENTS").empty();
+            goldfish_vk::setUseDeferredCommands(vkEmu, useDeferredCommands);
+            goldfish_vk::setUseCreateResourcesWithRequirements(vkEmu, useCreateResourcesWithRequirements);
+            if (vkEmu->deviceInfo.supportsIdProperties) {
+                GL_LOG("Supports id properties, got a vulkan device UUID");
+                memcpy(fb->m_vulkanUUID, vkEmu->deviceInfo.idProps.deviceUUID, 16);
+            } else {
+                GL_LOG("Doesn't support id properties, no vulkan device UUID");
+            }
         }
     }
 
