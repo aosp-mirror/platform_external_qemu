@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f228a1b0_a1e5df26",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 10
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-07-13T16:00:36Z",
+      "side": 1,
+      "message": "Sorry this I lost track of this fix. The previous patch will cause some issue with e2e tests. I think we can just deprecate the console commands because they are no longer necessary. ",
+      "revId": "72613c71de24c39f5bf6f15e219d3d3f8dea5d51",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
