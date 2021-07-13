@@ -48,7 +48,8 @@ getUserspaceBootProperties(const AndroidOptions* opts,
                            const std::vector<std::string>* verifiedBootParameters,
                            const char* gltransport,
                            const uint32_t gltransport_drawFlushInterval,
-                           const char* displaySettingsXml) {
+                           const char* displaySettingsXml,
+                           const char* avdName) {
     const bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
     const bool hasShellConsole = opts->logcat || opts->shell;
 
@@ -75,6 +76,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     const char* qemuHwcodecVpxdecProp;
     const char* androidbootLogcatProp;
     const char* adbKeyProp;
+    const char* avdNameProp;
 
     namespace fc = android::featurecontrol;
     if (fc::isEnabled(fc::AndroidbootProps) || fc::isEnabled(fc::AndroidbootProps2)) {
@@ -101,6 +103,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         qemuHwcodecVpxdecProp = "androidboot.qemu.hwcodec.vpxdec";
         androidbootLogcatProp = "androidboot.logcat";
         adbKeyProp = "androidboot.qemu.adb.pubkey";
+        avdNameProp = "androidboot.qemu.avd_name";
     } else {
         checkjniProp = "android.checkjni";
         bootanimProp = "android.bootanim";
@@ -125,6 +128,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         qemuHwcodecVpxdecProp = "qemu.hwcodec.vpxdec";
         androidbootLogcatProp = nullptr;
         adbKeyProp = nullptr;
+        avdNameProp = "qemu.avd_name";
     }
 
     std::vector<std::pair<std::string, std::string>> params;
@@ -382,6 +386,8 @@ getUserspaceBootProperties(const AndroidOptions* opts,
             });
         }
     }
+
+    params.push_back({avdNameProp, avdName});
 
     return params;
 }

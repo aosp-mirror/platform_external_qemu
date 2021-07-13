@@ -34,6 +34,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
                            const std::vector<std::string>* verifiedBootParameters,
                            const char* gltransport,
                            uint32_t gltransport_drawFlushInterval,
-                           const char* displaySettingsXml);
+                           const char* displaySettingsXml,
+                           const char* avdName);
 
 ANDROID_END_HEADER
