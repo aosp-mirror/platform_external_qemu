@@ -2528,7 +2528,8 @@ extern "C" int main(int argc, char** argv) {
                 &verified_boot_params,
                 hw->hw_gltransport,
                 hw->hw_gltransport_drawFlushInterval,
-                hw->display_settings_xml);
+                hw->display_settings_xml,
+                hw->avd_name);
 
         std::vector<std::string> kernelCmdLineUserspaceBootOpts;
         if (fc::isEnabled(fc::AndroidbootProps) || fc::isEnabled(fc::AndroidbootProps2)) {

@@ -60,7 +60,8 @@ TEST(getUserspaceBootProperties, BootconfigOff) {
         &verifiedBootParameters,    // verifiedBootParameters
         "gltransport",              // gltransport
         77,                         // gltransport_drawFlushInterval
-        "displaySettingsXml");      // displaySettingsXml
+        "displaySettingsXml",       // displaySettingsXml
+        "avd_1");                   // avdName
 
     std::map<std::string, std::string> paramsMap;
     for (const auto& kv : params) {
@@ -83,6 +84,7 @@ TEST(getUserspaceBootProperties, BootconfigOff) {
     EXPECT_STREQ(paramsMap["qemu.dalvik.vm.heapsize"].c_str(), "64m");
     EXPECT_STREQ(paramsMap["verifiedBootParameters.foo"].c_str(), "value");
     EXPECT_STREQ(paramsMap["qemu.display.settings.xml"].c_str(), "displaySettingsXml");
+    EXPECT_STREQ(paramsMap["qemu.avd_name"].c_str(), "avd_1");
 }
 
 TEST(getUserspaceBootProperties, BootconfigOn) {
@@ -115,7 +117,8 @@ TEST(getUserspaceBootProperties, BootconfigOn) {
         &verifiedBootParameters,    // verifiedBootParameters
         "gltransport",              // gltransport
         77,                         // gltransport_drawFlushInterval
-        "displaySettingsXml");      // displaySettingsXml
+        "displaySettingsXml",       // displaySettingsXml
+        "avd_1");                   // avdName
 
     std::map<std::string, std::string> paramsMap;
     for (const auto& kv : params) {
@@ -134,6 +137,7 @@ TEST(getUserspaceBootProperties, BootconfigOn) {
     EXPECT_STREQ(paramsMap["androidboot.selinux"].c_str(), "selinux");
     EXPECT_STREQ(paramsMap["androidboot.dalvik.vm.heapsize"].c_str(), "64m");
     EXPECT_STREQ(paramsMap["verifiedBootParameters.foo"].c_str(), "value");
+    EXPECT_STREQ(paramsMap["androidboot.qemu.avd_name"].c_str(), "avd_1");
 }
 
 TEST(getUserspaceBootProperties, Bootconfig2On) {
@@ -166,7 +170,8 @@ TEST(getUserspaceBootProperties, Bootconfig2On) {
         &verifiedBootParameters,    // verifiedBootParameters
         "gltransport",              // gltransport
         77,                         // gltransport_drawFlushInterval
-        "displaySettingsXml");      // displaySettingsXml
+        "displaySettingsXml",       // displaySettingsXml
+        "avd_1");                   // avdName
 
     std::map<std::string, std::string> paramsMap;
     for (const auto& kv : params) {
