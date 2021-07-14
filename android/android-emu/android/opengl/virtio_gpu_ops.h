@@ -11,8 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#ifndef ANDROID_VIRTIO_GPU_OPS
-#define ANDROID_VIRTIO_GPU_OPS
+#pragma once
+
+#ifdef __cplusplus
+#include <functional>
+#endif
 
 /* virtio-gpu interface for color buffers
  * (triggered by minigbm/egl calling virtio-gpu ioctls) */
@@ -96,6 +99,15 @@ typedef bool (*platform_resource_info_t)(uint32_t handle, int32_t* width, int32_
 typedef void* (*platform_create_shared_egl_context_t)(void);
 typedef bool (*platform_destroy_shared_egl_context_t)(void* context);
 
+#ifdef __cplusplus
+using FenceCompletionCallback = std::function<void()>;
+typedef void (*async_wait_for_gpu_with_cb_t)(uint64_t eglsync, FenceCompletionCallback);
+typedef void (*async_wait_for_gpu_vulkan_with_cb_t)(uint64_t device, uint64_t fence, FenceCompletionCallback);
+#else
+typedef void* async_wait_for_gpu_with_cb_t;
+typedef void* async_wait_for_gpu_vulkan_with_cb_t;
+#endif
+
 struct AndroidVirtioGpuOps {
     create_color_buffer_with_handle_t create_color_buffer_with_handle;
     open_color_buffer_t open_color_buffer;
@@ -118,6 +130,8 @@ struct AndroidVirtioGpuOps {
     wait_for_gpu_t wait_for_gpu;
     wait_for_gpu_vulkan_t wait_for_gpu_vulkan;
     set_guest_managed_color_buffer_lifetime_t set_guest_managed_color_buffer_lifetime;
+    async_wait_for_gpu_with_cb_t async_wait_for_gpu_with_cb;
+    async_wait_for_gpu_vulkan_with_cb_t async_wait_for_gpu_vulkan_with_cb;
 
     update_color_buffer_from_framework_format_t update_color_buffer_from_framework_format;
 
@@ -126,5 +140,3 @@ struct AndroidVirtioGpuOps {
     platform_create_shared_egl_context_t platform_create_shared_egl_context;
     platform_destroy_shared_egl_context_t platform_destroy_shared_egl_context;
 };
-
-#endif // ANDROID_VIRTIO_GPU_OPS

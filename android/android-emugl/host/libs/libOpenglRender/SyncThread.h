@@ -30,6 +30,7 @@
 #include "android/base/threads/ThreadPool.h"
 #include "emugl/common/thread.h"
 #include "vulkan/VkDecoderGlobalState.h"
+#include "android/opengl/virtio_gpu_ops.h"
 
 // SyncThread///////////////////////////////////////////////////////////////////
 // The purpose of SyncThread is to track sync device timelines and give out +
@@ -68,6 +69,9 @@ struct SyncThreadCmd {
     android::base::Lock* lock = nullptr;
     android::base::ConditionVariable* cond = nullptr;
     android::base::Optional<int>* result = nullptr;
+
+    bool useFenceCompletionCallback = false;
+    FenceCompletionCallback fenceCompletionCallback;;
 };
 
 struct RenderThreadInfo;
@@ -101,6 +105,10 @@ public:
     // for use with the virtio-gpu path; is meant to have a current context
     // while waiting.
     void triggerBlockedWaitNoTimeline(FenceSync* fenceSync);
+
+    // For use with virtio-gpu and async fence completion callback. This is async like triggerWait, but takes a fence completion callback instead of incrementing some timeline directly.
+    void triggerWaitWithCompletionCallback(FenceSync* fenceSync, FenceCompletionCallback);
+    void triggerWaitVkWithCompletionCallback(VkFence fenceHandle, FenceCompletionCallback);
 
     // |cleanup|: for use with destructors and other cleanup functions.
     // it destroys the sync context and exits the sync thread.

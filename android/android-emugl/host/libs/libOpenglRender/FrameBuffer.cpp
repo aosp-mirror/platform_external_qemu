@@ -50,6 +50,7 @@
 #include "emugl/common/vm_operations.h"
 
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <time.h>
 
@@ -3332,8 +3333,25 @@ void FrameBuffer::waitForGpuVulkan(uint64_t deviceHandle, uint64_t fenceHandle) 
     // Note: this will always be nullptr.
     FenceSync* fenceSync = FenceSync::getFromHandle(fenceHandle);
 
-    // Note: this will always signal right away.
+    // Note: This will always signal right away.
     SyncThread::get()->triggerBlockedWaitNoTimeline(fenceSync);
+}
+
+void FrameBuffer::asyncWaitForGpuWithCb(uint64_t eglsync, FenceCompletionCallback cb) {
+    FenceSync* fenceSync = FenceSync::getFromHandle(eglsync);
+
+    if (!fenceSync) {
+        fprintf(stderr, "%s: err: fence sync 0x%llx not found\n", __func__,
+                (unsigned long long)eglsync);
+        return;
+    }
+
+    SyncThread::get()->triggerWaitWithCompletionCallback(fenceSync, std::move(cb));
+}
+
+void FrameBuffer::asyncWaitForGpuVulkanWithCb(uint64_t deviceHandle, uint64_t fenceHandle, FenceCompletionCallback cb) {
+    (void)deviceHandle;
+    SyncThread::get()->triggerWaitVkWithCompletionCallback((VkFence)fenceHandle, std::move(cb));
 }
 
 void FrameBuffer::setGuestManagedColorBufferLifetime(bool guestManaged) {
