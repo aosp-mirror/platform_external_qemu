@@ -34,6 +34,24 @@
       "parentUuid": "4b0380b9_333fe7c6",
       "revId": "106861022f3993e307f2020caee70051c0ce5dcd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "eb34c8f8_7eef5369",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1883030
+      },
+      "writtenOn": "2021-07-14T23:02:17Z",
+      "side": 1,
+      "message": "The Multitouch CL (https://android-review.googlesource.com/c/platform/external/qemu/+/1737613/) belongs to my colleague Gabriel Grigoras, and it\u0027s not really a conflict with it, but until it is also merged, this CL (mine) will disable finger touches.\nTo prevent this I will remove this CL from the \"topic\" now and add it later when Multitouch is ready to be merged. Until then the topic \"native_host_pen_support_atomic_commits\" is ready for merging.\nThank you!",
+      "parentUuid": "dec22649_e3157b4a",
+      "revId": "106861022f3993e307f2020caee70051c0ce5dcd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
