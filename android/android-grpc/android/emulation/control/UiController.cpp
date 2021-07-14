@@ -142,6 +142,8 @@ public:
         android::base::ThreadLooper::runOnMainLooper([agent, request]() {
             if (request->style() == ThemingStyle::LIGHT)
                 agent->setUiTheme(SETTINGS_THEME_STUDIO_LIGHT);
+            else if (request->style() == ThemingStyle::CONTRAST)
+                agent->setUiTheme(SETTINGS_THEME_STUDIO_CONTRAST);
             else if (request->style() == ThemingStyle::DARK)
                 agent->setUiTheme(SETTINGS_THEME_STUDIO_DARK);
         });

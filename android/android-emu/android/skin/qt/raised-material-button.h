@@ -44,6 +44,8 @@ public:
                 mShadowEffect->setColor(QColor(0, 0, 0,0));
             } else if (theme == SETTINGS_THEME_STUDIO_DARK) {
                 mShadowEffect->setColor(QColor(0, 0, 0, 0));
+            } else if (theme == SETTINGS_THEME_STUDIO_CONTRAST) {
+                mShadowEffect->setColor(QColor(0, 0, 0, 0));
             }
         }
     }

@@ -53,6 +53,7 @@ message ThemingStyle {
     enum Style {
         LIGHT = 0;
         DARK = 1;
+        CONTRAST = 2;
     }
     Style style = 1;
 }
