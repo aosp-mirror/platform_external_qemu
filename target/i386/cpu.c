@@ -2972,7 +2972,8 @@ static uint32_t x86_cpu_get_supported_feature_word(FeatureWord w,
     } else {
         return ~0;
     }
-    if (migratable_only) {
+    //if (migratable_only) {
+    if (true) {
         r &= x86_cpu_get_migratable_flags(w);
     }
     return r;
