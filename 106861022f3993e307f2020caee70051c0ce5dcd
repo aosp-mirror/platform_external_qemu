@@ -16,6 +16,24 @@
       "message": "Note: Without the Multitouch implementation (https://android-review.googlesource.com/c/platform/external/qemu/+/1737613/), merging this commit will result in finger contacts with the screen not being handled in any way, because they will be sent by Qt as synthesized mouse events.\nThe options are to merge all the other pen commits without this one (in which case pen long press will generate a synthesized mouse event) to have working finger touches, and merge this commit together with Multitouch. Or merge all the pen commits, but have finger touch basically disabled until Multitouch is merged.",
       "revId": "106861022f3993e307f2020caee70051c0ce5dcd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dec22649_e3157b4a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2021-07-14T17:42:31Z",
+      "side": 1,
+      "message": "If there is a conflict between the commits. Could you reorganize the CLs under the \"topic\" and move out the conflicting one?\nThanks!",
+      "parentUuid": "4b0380b9_333fe7c6",
+      "revId": "106861022f3993e307f2020caee70051c0ce5dcd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
