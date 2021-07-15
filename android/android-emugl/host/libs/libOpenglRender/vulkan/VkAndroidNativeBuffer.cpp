@@ -21,10 +21,51 @@
 #include "GrallocDefs.h"
 #include "VkCommonOperations.h"
 #include "VulkanDispatch.h"
+#include "SyncThread.h"
 
 #include <string.h>
 
+#define VK_ANB_DEBUG(fmt,...)
+#define VK_ANB_DEBUG_OBJ(obj, fmt,...)
+
+using android::base::AutoLock;
+using android::base::Lock;
+
 namespace goldfish_vk {
+
+VkFence AndroidNativeBufferInfo::QsriWaitInfo::getFenceFromPoolLocked() {
+    VK_ANB_DEBUG("enter");
+
+    if (!vk) return VK_NULL_HANDLE;
+
+    if (fencePool.empty()) {
+        VkFence fence;
+        VkFenceCreateInfo fenceCreateInfo = {
+            VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, 0, 0,
+        };
+        vk->vkCreateFence(device, &fenceCreateInfo, nullptr, &fence);
+        VK_ANB_DEBUG("no fences in pool, created %p", fence);
+        return fence;
+    } else {
+        VkFence res = fencePool.back();
+        fencePool.pop_back();
+        vk->vkResetFences(device, 1, &res);
+        VK_ANB_DEBUG("existing fence in pool: %p. also reset the fence", res);
+        return res;
+    }
+}
+
+AndroidNativeBufferInfo::QsriWaitInfo::~QsriWaitInfo() {
+    VK_ANB_DEBUG("enter");
+    if (!vk) return;
+    if (!device) return;
+    // Nothing in the fence pool is unsignaled
+    for (auto fence : fencePool) {
+        VK_ANB_DEBUG("destroy fence %p", fence);
+        vk->vkDestroyFence(device, fence, nullptr);
+    }
+    VK_ANB_DEBUG("exit");
+}
 
 bool parseAndroidNativeBufferInfo(
     const VkImageCreateInfo* pCreateInfo,
@@ -48,8 +89,7 @@ VkResult prepareAndroidNativeBufferImage(
     const VkPhysicalDeviceMemoryProperties* memProps,
     AndroidNativeBufferInfo* out) {
 
-    *out = {};
-
+    out->vk = vk;
     out->device = device;
     out->vkFormat = pCreateInfo->format;
     out->extent = pCreateInfo->extent;
@@ -289,6 +329,7 @@ void teardownAndroidNativeBufferImage(
     for (auto queueState : anbInfo->queueStates) {
         queueState.teardown(vk, device);
     }
+
     anbInfo->queueStates.clear();
 
     anbInfo->acquireQueueState.teardown(vk, device);
@@ -297,7 +338,17 @@ void teardownAndroidNativeBufferImage(
         teardownVkColorBuffer(anbInfo->colorBufferHandle);
     }
 
-    *anbInfo = {};
+    anbInfo->vk = nullptr;
+    anbInfo->device = VK_NULL_HANDLE;
+    anbInfo->image = VK_NULL_HANDLE;
+    anbInfo->imageMemory = VK_NULL_HANDLE;
+    anbInfo->stagingBuffer = VK_NULL_HANDLE;
+    anbInfo->mappedStagingPtr = nullptr;
+    anbInfo->stagingMemory = VK_NULL_HANDLE;
+
+    AutoLock lock(anbInfo->qsriWaitInfo.lock);
+    anbInfo->qsriWaitInfo.presentCount = 0;
+    anbInfo->qsriWaitInfo.requestedPresentCount = 0;
 }
 
 void getGralloc0Usage(VkFormat format, VkImageUsageFlags imageUsage,
@@ -523,6 +574,8 @@ VkResult setAndroidNativeImageSemaphoreSignaled(
     return VK_SUCCESS;
 }
 
+static constexpr uint64_t kTimeoutNs = 3ULL * 1000000000ULL;
+
 VkResult syncImageToColorBuffer(
     VulkanDispatch* vk,
     uint32_t queueFamilyIndex,
@@ -530,7 +583,14 @@ VkResult syncImageToColorBuffer(
     uint32_t waitSemaphoreCount,
     const VkSemaphore* pWaitSemaphores,
     int* pNativeFenceFd,
-    AndroidNativeBufferInfo* anbInfo) {
+    std::shared_ptr<AndroidNativeBufferInfo> anbInfo) {
+
+    auto anbInfoPtr = anbInfo.get();
+    {
+        AutoLock lock(anbInfo->qsriWaitInfo.lock);
+        VK_ANB_DEBUG_OBJ(anbInfoPtr, "ensure dispatch %p device %p", vk, anbInfo->device);
+        anbInfo->qsriWaitInfo.ensureDispatchAndDevice(vk, anbInfo->device);
+    }
 
     auto fb = FrameBuffer::getFB();
     fb->lock();
@@ -679,13 +739,46 @@ VkResult syncImageToColorBuffer(
         0, nullptr,
     };
 
-    vk->vkQueueSubmit(queueState.queue, 1, &submitInfo, VK_NULL_HANDLE);
-
+    VkFence qsriFence = VK_NULL_HANDLE;
+    {
+        VK_ANB_DEBUG_OBJ(anbInfoPtr, "trying to get qsri fence");
+        AutoLock lock(anbInfo->qsriWaitInfo.lock);
+        VK_ANB_DEBUG_OBJ(anbInfoPtr, "trying to get qsri fence (got lock)");
+        qsriFence = anbInfo->qsriWaitInfo.getFenceFromPoolLocked();
+        VK_ANB_DEBUG_OBJ(anbInfoPtr, "got qsri fence %p", qsriFence);
+    }
+    vk->vkQueueSubmit(queueState.queue, 1, &submitInfo, qsriFence);
     fb->unlock();
 
     if (anbInfo->useVulkanNativeImage) {
+        VK_ANB_DEBUG_OBJ(anbInfoPtr, "using native image, so use sync thread to wait");
         fb->setColorBufferInUse(anbInfo->colorBufferHandle, false);
+        VkDevice device = anbInfo->device;
+        // Queue wait to sync thread with completion callback
+        // Pass anbInfo by value to get a ref
+        SyncThread::get()->triggerGeneral([anbInfoPtr, anbInfo, vk, device, qsriFence] {
+            VK_ANB_DEBUG_OBJ(anbInfoPtr, "wait callback: enter");
+            if (qsriFence) {
+                VK_ANB_DEBUG_OBJ(anbInfoPtr, "wait callback: wait for fence %p...", qsriFence);
+                vk->vkWaitForFences(device, 1, &qsriFence, VK_FALSE, kTimeoutNs);
+                VK_ANB_DEBUG_OBJ(anbInfoPtr, "wait callback: wait for fence %p...(done)", qsriFence);
+            }
+            AutoLock lock(anbInfo->qsriWaitInfo.lock);
+            VK_ANB_DEBUG_OBJ(anbInfoPtr, "wait callback: return fence and signal");
+            if (qsriFence) {
+                anbInfo->qsriWaitInfo.returnFenceLocked(qsriFence);
+            }
+            ++anbInfo->qsriWaitInfo.presentCount;
+            VK_ANB_DEBUG_OBJ(anbInfoPtr, "wait callback: done, present count is now %llu", (unsigned long long)anbInfo->qsriWaitInfo.presentCount);
+            anbInfo->qsriWaitInfo.cv.signal();
+            VK_ANB_DEBUG_OBJ(anbInfoPtr, "wait callback: exit");
+        });
     } else {
+        VK_ANB_DEBUG_OBJ(anbInfoPtr, "not using native image, so wait right away");
+        if (qsriFence) {
+            vk->vkWaitForFences(anbInfo->device, 1, &qsriFence, VK_FALSE, kTimeoutNs);
+        }
+
         VkMappedMemoryRange toInvalidate = {
             VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE, 0,
             anbInfo->stagingMemory,
@@ -718,6 +811,14 @@ VkResult syncImageToColorBuffer(
                 colorBufferHandle,
                 anbInfo->mappedStagingPtr,
                 bpp * anbInfo->extent.width * anbInfo->extent.height);
+
+        AutoLock lock(anbInfo->qsriWaitInfo.lock);
+        ++anbInfo->qsriWaitInfo.presentCount;
+        VK_ANB_DEBUG_OBJ(anbInfoPtr, "done, present count is now %llu", (unsigned long long)anbInfo->qsriWaitInfo.presentCount);
+        anbInfo->qsriWaitInfo.cv.signal();
+        if (qsriFence) {
+            anbInfo->qsriWaitInfo.returnFenceLocked(qsriFence);
+        }
     }
 
     return VK_SUCCESS;

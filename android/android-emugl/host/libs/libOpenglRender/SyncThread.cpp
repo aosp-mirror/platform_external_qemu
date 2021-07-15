@@ -140,6 +140,36 @@ void SyncThread::triggerWaitVkWithCompletionCallback(VkFence vkFence, FenceCompl
     DPRINT("exit");
 }
 
+void SyncThread::triggerWaitVkQsriWithCompletionCallback(VkImage vkImage, FenceCompletionCallback cb) {
+    DPRINT("fenceSyncInfo=0x%llx ...", fenceSync);
+    SyncThreadCmd to_send;
+    to_send.opCode = SYNC_THREAD_WAIT_VK_QSRI;
+    to_send.vkImage = vkImage;
+    to_send.useFenceCompletionCallback = true;
+    to_send.fenceCompletionCallback = cb;
+    DPRINT("opcode=%u", to_send.opCode);
+    sendAsync(to_send);
+    DPRINT("exit");
+}
+
+void SyncThread::triggerWaitVkQsriBlockedNoTimeline(VkImage vkImage) {
+    DPRINT("fenceSyncInfo=0x%llx ...", fenceSync);
+    SyncThreadCmd to_send;
+    to_send.opCode = SYNC_THREAD_WAIT_VK_QSRI;
+    to_send.vkImage = vkImage;
+    DPRINT("opcode=%u", to_send.opCode);
+    sendAndWaitForResult(to_send);
+    DPRINT("exit");
+}
+
+void SyncThread::triggerGeneral(FenceCompletionCallback cb) {
+    SyncThreadCmd to_send;
+    to_send.opCode = SYNC_THREAD_GENERAL;
+    to_send.useFenceCompletionCallback = true;
+    to_send.fenceCompletionCallback = cb;
+    sendAsync(to_send);
+}
+
 void SyncThread::cleanup() {
     DPRINT("enter");
     SyncThreadCmd to_send;
@@ -327,6 +357,52 @@ int SyncThread::doSyncWaitVk(SyncThreadCmd* cmd) {
     return result;
 }
 
+int SyncThread::doSyncWaitVkQsri(SyncThreadCmd* cmd) {
+    DPRINT("enter");
+
+    auto decoder = goldfish_vk::VkDecoderGlobalState::get();
+    DPRINT("doSyncWaitVkQsri for image %p", cmd->vkImage);
+    auto result = decoder->waitQsri(cmd->vkImage, kDefaultTimeoutNsecs);
+    DPRINT("doSyncWaitVkQsri for image %p (done, do signal/callback)", cmd->vkImage);
+    if (result == VK_TIMEOUT) {
+        fprintf(stderr, "SyncThread::%s: SYNC_WAIT_VK_QSRI timeout: vkImage=%p\n",
+                __func__, cmd->vkImage);
+    } else if (result != VK_SUCCESS) {
+        fprintf(stderr, "SyncThread::%s: SYNC_WAIT_VK_QSRI error: %d vkImage=%p\n",
+                __func__, result, cmd->vkImage);
+    }
+
+    DPRINT("issue timeline increment");
+
+    // We always unconditionally increment timeline at this point, even
+    // if the call to vkWaitForFences returned abnormally.
+    // See comments in |doSyncWait| about the rationale.
+    if (cmd->useFenceCompletionCallback) {
+        DPRINT("wait done, use completion callback");
+        cmd->fenceCompletionCallback();
+    } else {
+        DPRINT("wait done, use goldfish sync timeline inc");
+        emugl::emugl_sync_timeline_inc(cmd->timeline, kTimelineInterval);
+    }
+
+    DPRINT("done timeline increment");
+
+    DPRINT("exit");
+    return result;
+}
+
+int SyncThread::doSyncGeneral(SyncThreadCmd* cmd) {
+    DPRINT("enter");
+    if (cmd->useFenceCompletionCallback) {
+        DPRINT("wait done, use completion callback");
+        cmd->fenceCompletionCallback();
+    } else {
+        DPRINT("warning, completion callback not provided in general op!");
+    }
+
+    return 0;
+}
+
 void SyncThread::doSyncBlockedWaitNoTimeline(SyncThreadCmd* cmd) {
     DPRINT("enter");
 
@@ -386,6 +462,14 @@ int SyncThread::doSyncThreadCmd(SyncThreadCmd* cmd) {
     case SYNC_THREAD_WAIT_VK:
         DPRINT("exec SYNC_THREAD_WAIT_VK");
         result = doSyncWaitVk(cmd);
+        break;
+    case SYNC_THREAD_WAIT_VK_QSRI:
+        DPRINT("exec SYNC_THREAD_WAIT_VK_QSRI");
+        result = doSyncWaitVkQsri(cmd);
+        break;
+    case SYNC_THREAD_GENERAL:
+        DPRINT("exec SYNC_THREAD_GENERAL");
+        result = doSyncGeneral(cmd);
         break;
     case SYNC_THREAD_EXIT:
         DPRINT("exec SYNC_THREAD_EXIT");

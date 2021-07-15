@@ -528,7 +528,7 @@ const uint32_t kVirtioGpuNativeSyncCreateImportFd = 0x9001;
 const uint32_t kVirtioGpuNativeSyncVulkanCreateExportFd = 0xa000;
 const uint32_t kVirtioGpuNativeSyncVulkanCreateImportFd = 0xa001;
 
-const uint32_t kVirtioGpuNativeSyncVulkanCreateExportFdForQueueSignalReleaseImage = 0xa002;
+const uint32_t kVirtioGpuNativeSyncVulkanQsriExport = 0xa002;
 
 class PipeVirglRenderer {
 public:
@@ -845,7 +845,7 @@ public:
                     AutoLock lock(mCtxPendingFencesLock);
                     mCtxNeededFencingTypes[ctxId] = CtxFencingType::AsyncSignal;
                     mVirtioGpuOps->async_wait_for_gpu_with_cb(sync_handle, [this, ctxId] {
-                            this->completionCallback(ctxId);
+                        this->completionCallback(ctxId);
                     });
                 } else {
                     mVirtioGpuOps->wait_for_gpu(sync_handle);
@@ -864,28 +864,32 @@ public:
 
                 VGPLOG("wait for gpu vk ctx id %u", ctxId);
                 if (mUseAsyncFenceCb) {
+                    AutoLock lock(mCtxPendingFencesLock);
+                    mCtxNeededFencingTypes[ctxId] = CtxFencingType::AsyncSignal;
                     mVirtioGpuOps->async_wait_for_gpu_vulkan_with_cb(device_handle, fence_handle, [this, ctxId] {
-                            this->completionCallback(ctxId);
+                        this->completionCallback(ctxId);
                     });
                 } else {
                     mVirtioGpuOps->wait_for_gpu_vulkan(device_handle, fence_handle);
                 }
                 break;
             }
-            // case kVirtioGpuNativeSyncVulkanCreateExportFdForQueueSignalReleaseImage: {
-            //     uint64_t queue_handle_lo = dwords[1];
-            //     uint64_t queue_handle_hi = dwords[2];
-            //     uint64_t queue_handle = convert32to64(device_handle_lo, device_handle_hi);
-            //     fprintf(stderr, "%s: wait for gpu vk qsri id %u queue 0x%llx\n", __func__, ctxId, (unsigned long long)queue_handle);
-            //     if (mUseAsyncFenceCb) {
-            //         mVirtioGpuOps->async_wait_for_gpu_vulkan_qsri_with_cb(queue_handle, [this, ctxId] {
-            //                 this->completionCallback(ctxId);
-            //         });
-            //     } else {
-            //         mVirtioGpuOps->wait_for_gpu_vulkan_qsri(queue_handle);
-            //     }
-            //     break;
-            // }
+            case kVirtioGpuNativeSyncVulkanQsriExport: {
+                uint64_t image_handle_lo = dwords[1];
+                uint64_t image_handle_hi = dwords[2];
+                uint64_t image_handle = convert32to64(image_handle_lo, image_handle_hi);
+                VGPLOG("wait for gpu vk qsri id %u image 0x%llx", ctxId, (unsigned long long)image_handle);
+                if (mUseAsyncFenceCb) {
+                    AutoLock lock(mCtxPendingFencesLock);
+                    mCtxNeededFencingTypes[ctxId] = CtxFencingType::AsyncSignal;
+                    mVirtioGpuOps->async_wait_for_gpu_vulkan_qsri_with_cb(image_handle, [this, ctxId] {
+                        this->completionCallback(ctxId);
+                    });
+                } else {
+                    mVirtioGpuOps->wait_for_gpu_vulkan_qsri(image_handle);
+                }
+                break;
+            }
             default:
                 return -1;
         }
@@ -944,8 +948,7 @@ public:
 
     int contextCreateFence(uint32_t fence_id, uint32_t ctx_id, uint32_t fence_ctx_idx) {
         AutoLock lock(mLock);
-        fprintf(stderr, "%s: fence id %u ctx id %u fence_ctx_idx %u\n", __func__, fence_id, ctx_id, fence_ctx_idx);
-        VGPLOG("fenceid: %u cmdtype: %u", fence_id, ctx_id);
+        VGPLOG("fenceid: %u cmdtype: %u fence_ctx_idx: %u", fence_id, ctx_id, fence_ctx_idx);
         if (mUseAsyncFenceCb) {
             fprintf(stderr, "%s: create fence using async fence cb\n", __func__);
             if (0 == ctx_id) {
@@ -2002,7 +2005,11 @@ private:
 
             if (pendingState.type == CtxFencingType::SyncSignal) {
                 VGPLOG("This was a sync signal, write fence, erase it and continue")
-                mVirglRendererCallbacks.write_fence2(mCookie, fence_value, ctx_id, 0 /* ring_idx */);
+                if (mUseAsyncFenceCb) {
+                    mVirglRendererCallbacks.write_fence2(mCookie, fence_value, ctx_id, 0 /* ring_idx */);
+                } else {
+                    mVirglRendererCallbacks.write_fence(mCookie, fence_value);
+                }
                 it = pendingFencesThisCtx.erase(it);
             } else {
                 if (CtxFencingType::AsyncSignal != pendingState.type) {

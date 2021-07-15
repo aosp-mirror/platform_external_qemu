@@ -103,10 +103,14 @@ typedef bool (*platform_destroy_shared_egl_context_t)(void* context);
 using FenceCompletionCallback = std::function<void()>;
 typedef void (*async_wait_for_gpu_with_cb_t)(uint64_t eglsync, FenceCompletionCallback);
 typedef void (*async_wait_for_gpu_vulkan_with_cb_t)(uint64_t device, uint64_t fence, FenceCompletionCallback);
+typedef void (*async_wait_for_gpu_vulkan_qsri_with_cb_t)(uint64_t image, FenceCompletionCallback);
 #else
 typedef void* async_wait_for_gpu_with_cb_t;
 typedef void* async_wait_for_gpu_vulkan_with_cb_t;
+typedef void* async_wait_for_gpu_vulkan_qsri_with_cb_t;
 #endif
+
+typedef void (*wait_for_gpu_vulkan_qsri_t)(uint64_t image);
 
 struct AndroidVirtioGpuOps {
     create_color_buffer_with_handle_t create_color_buffer_with_handle;
@@ -132,6 +136,9 @@ struct AndroidVirtioGpuOps {
     set_guest_managed_color_buffer_lifetime_t set_guest_managed_color_buffer_lifetime;
     async_wait_for_gpu_with_cb_t async_wait_for_gpu_with_cb;
     async_wait_for_gpu_vulkan_with_cb_t async_wait_for_gpu_vulkan_with_cb;
+
+    async_wait_for_gpu_vulkan_qsri_with_cb_t async_wait_for_gpu_vulkan_qsri_with_cb;
+    wait_for_gpu_vulkan_qsri_t wait_for_gpu_vulkan_qsri;
 
     update_color_buffer_from_framework_format_t update_color_buffer_from_framework_format;
 

@@ -645,6 +645,8 @@ public:
     void waitForGpuVulkan(uint64_t deviceHandle, uint64_t fenceHandle);
     void asyncWaitForGpuWithCb(uint64_t eglsync, FenceCompletionCallback cb);
     void asyncWaitForGpuVulkanWithCb(uint64_t deviceHandle, uint64_t fenceHandle, FenceCompletionCallback cb);
+    void asyncWaitForGpuVulkanQsriWithCb(uint64_t image, FenceCompletionCallback cb);
+    void waitForGpuVulkanQsri(uint64_t image);
 
     bool platformImportResource(uint32_t handle, uint32_t type, void* resource);
     void* platformCreateSharedEglContext(void);

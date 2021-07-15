@@ -3354,6 +3354,16 @@ void FrameBuffer::asyncWaitForGpuVulkanWithCb(uint64_t deviceHandle, uint64_t fe
     SyncThread::get()->triggerWaitVkWithCompletionCallback((VkFence)fenceHandle, std::move(cb));
 }
 
+void FrameBuffer::asyncWaitForGpuVulkanQsriWithCb(uint64_t image, FenceCompletionCallback cb) {
+    SyncThread::get()->triggerWaitVkQsriWithCompletionCallback((VkImage)image, std::move(cb));
+}
+
+void FrameBuffer::waitForGpuVulkanQsri(uint64_t image) {
+    (void)image;
+    // Signal immediately, because this was a sync wait and it's vulkan.
+    SyncThread::get()->triggerBlockedWaitNoTimeline(nullptr);
+}
+
 void FrameBuffer::setGuestManagedColorBufferLifetime(bool guestManaged) {
     m_guestManagedColorBufferLifetime = guestManaged;
 }

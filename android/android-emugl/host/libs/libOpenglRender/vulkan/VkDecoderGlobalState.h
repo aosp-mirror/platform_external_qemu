@@ -785,6 +785,13 @@ public:
 
     VkResult getFenceStatus(VkFence boxed_fence);
 
+    // Wait for present (vkQueueSignalReleaseImageANDROID). This explicitly
+    // requires the image to be presented again versus how many times it's been
+    // presented so far, so it ends up incrementing a "target present count"
+    // for this image, and then waiting for the image to get vkQSRI'ed at least
+    // that many times.
+    VkResult waitQsri(VkImage boxed_image, uint64_t timeout);
+
     // Transformations
     void deviceMemoryTransform_tohost(
         VkDeviceMemory* memory, uint32_t memoryCount,
