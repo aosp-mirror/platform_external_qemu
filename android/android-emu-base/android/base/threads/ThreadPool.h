@@ -119,7 +119,6 @@ public:
     }
 
     void enqueue(Item&& item) {
-        // Iterate over the worker threads until we find a one that's running.
         for (;;) {
             int currentIndex =
                     mNextWorkerIndex.fetch_add(1, std::memory_order_relaxed);
@@ -128,6 +127,51 @@ public:
                 workerPtr->enqueue(std::move(item));
                 break;
             }
+        }
+    }
+
+    void enqueueIndexed(const Item& item) {
+        for (;;) {
+            int currentIndex =
+                    mNextWorkerIndex.fetch_add(1, std::memory_order_relaxed);
+            int workerIndex = currentIndex % mWorkers.size();
+            auto& workerPtr = mWorkers[workerIndex];
+            if (workerPtr) {
+                Item itemCopy = item;
+                itemCopy.setIndex(workerIndex);
+                workerPtr->enqueue(std::move(itemCopy));
+                break;
+            }
+        }
+    }
+
+    // Runs the same Item for all workers.
+    void broadcast(const Item& item) {
+        for (auto workerOpt : mWorkers) {
+            if (!workerOpt) continue;
+            Item itemCopy = item;
+            workerOpt->enqueue(std::move(itemCopy));
+        }
+    }
+
+    // broadcast(), except the Item type must support a method to expose the
+    // worker id.
+    void broadcastIndexed(const Item& item) {
+        int i = 0;
+        for (auto& workerOpt : mWorkers) {
+            if (!workerOpt) continue;
+            Item itemCopy = item;
+            itemCopy.setIndex(i);
+            workerOpt->enqueue(std::move(itemCopy));
+            ++i;
+        }
+    }
+
+    void waitAllItems() {
+        if (0 == mValidWorkersCount) return;
+        for (auto& workerOpt : mWorkers) {
+            if (!workerOpt) continue;
+            workerOpt->waitQueuedItems();
         }
     }
 

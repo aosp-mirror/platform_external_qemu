@@ -56,6 +56,11 @@ enum SyncThreadOpCode {
 };
 
 struct SyncThreadCmd {
+    // For use with initialization in multiple thread pools.
+    int workerId = 0;
+    // For use with ThreadPool::broadcastIndexed
+    void setIndex(int id) { workerId = id; }
+
     SyncThreadOpCode opCode = SYNC_THREAD_INIT;
     union {
         FenceSync* fenceSync = nullptr;
@@ -137,17 +142,19 @@ private:
     // |doSyncThreadCmd| and related functions below
     // execute the actual commands. These run on the sync thread.
     int doSyncThreadCmd(SyncThreadCmd* cmd);
-    void doSyncContextInit();
+    void doSyncContextInit(SyncThreadCmd* cmd);
     void doSyncWait(SyncThreadCmd* cmd);
     int doSyncWaitVk(SyncThreadCmd* cmd);
     void doSyncBlockedWaitNoTimeline(SyncThreadCmd* cmd);
-    void doExit();
+    void doExit(SyncThreadCmd* cmd);
 
     // EGL objects / object handles specific to
     // a sync thread.
+    static const uint32_t kNumWorkerThreads = 4u;
+
     EGLDisplay mDisplay = EGL_NO_DISPLAY;
-    EGLContext mContext = EGL_NO_CONTEXT;
-    EGLSurface mSurface = EGL_NO_SURFACE;
+    EGLSurface mSurface[kNumWorkerThreads];
+    EGLContext mContext[kNumWorkerThreads];
 
     bool mExiting = false;
     android::base::Lock mLock;
