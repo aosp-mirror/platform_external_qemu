@@ -16,6 +16,24 @@
       "message": "Is the shortcuts removal going to be a separate CL?",
       "revId": "3a2569d808de077ed687d66a2434d66de8ccc649",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b0bb8692_bd02ba7f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1836382
+      },
+      "writtenOn": "2021-07-15T14:23:52Z",
+      "side": 1,
+      "message": "Yes, since there already are two bugs, I wanted to make separate CLs as well.",
+      "parentUuid": "3df0dc89_6f1ae465",
+      "revId": "3a2569d808de077ed687d66a2434d66de8ccc649",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
