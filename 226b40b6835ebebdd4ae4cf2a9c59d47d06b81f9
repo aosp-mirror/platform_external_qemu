@@ -33,6 +33,24 @@
       "message": "Nit. blank spaces and formatting.",
       "revId": "226b40b6835ebebdd4ae4cf2a9c59d47d06b81f9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "873cd9b4_9e403a35",
+        "filename": "android/android-emu/android/skin/qt/stylesheet.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 555,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-07-15T20:11:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f00725ed_ea0cab7f",
+      "revId": "226b40b6835ebebdd4ae4cf2a9c59d47d06b81f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
