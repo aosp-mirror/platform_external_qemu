@@ -6999,6 +6999,7 @@ void unmarshal_VkImportPhysicalAddressGOOGLE(
 #define OP_vkQueueFlushCommandsGOOGLE 20340
 #define OP_vkQueueCommitDescriptorSetUpdatesGOOGLE 267932433
 #define OP_vkCollectDescriptorPoolIdsGOOGLE 213659202
+#define OP_vkQueueSignalReleaseImageANDROIDAsyncGOOGLE 243985229
 #endif
 #ifdef VK_KHR_acceleration_structure
 void marshal_VkDeviceOrHostAddressKHR(

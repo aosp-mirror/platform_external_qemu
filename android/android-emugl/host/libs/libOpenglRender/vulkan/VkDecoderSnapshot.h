@@ -4122,6 +4122,14 @@ public:
         VkDescriptorPool descriptorPool,
         uint32_t* pPoolIdCount,
         uint64_t* pPoolIds);
+    void vkQueueSignalReleaseImageANDROIDAsyncGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::BumpPool* pool,
+        VkQueue queue,
+        uint32_t waitSemaphoreCount,
+        const VkSemaphore* pWaitSemaphores,
+        VkImage image);
 #endif
 #ifdef VK_KHR_acceleration_structure
     void vkCreateAccelerationStructureKHR(

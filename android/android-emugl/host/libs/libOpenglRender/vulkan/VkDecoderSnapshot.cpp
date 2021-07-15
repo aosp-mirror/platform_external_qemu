@@ -5980,6 +5980,17 @@ void vkCollectDescriptorPoolIdsGOOGLE(
 {
     // TODO: Implement
 }
+void vkQueueSignalReleaseImageANDROIDAsyncGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::BumpPool* pool,
+    VkQueue queue,
+    uint32_t waitSemaphoreCount,
+    const VkSemaphore* pWaitSemaphores,
+    VkImage image)
+{
+    // TODO: Implement
+}
 #endif
 #ifdef VK_KHR_acceleration_structure
 void vkCreateAccelerationStructureKHR(
@@ -12154,6 +12165,19 @@ void VkDecoderSnapshot::vkCollectDescriptorPoolIdsGOOGLE(
     uint64_t* pPoolIds)
 {
     mImpl->vkCollectDescriptorPoolIdsGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, device, descriptorPool, pPoolIdCount, pPoolIds);
+}
+#endif
+#ifdef VK_GOOGLE_gfxstream
+void VkDecoderSnapshot::vkQueueSignalReleaseImageANDROIDAsyncGOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::BumpPool* pool,
+    VkQueue queue,
+    uint32_t waitSemaphoreCount,
+    const VkSemaphore* pWaitSemaphores,
+    VkImage image)
+{
+    mImpl->vkQueueSignalReleaseImageANDROIDAsyncGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, queue, waitSemaphoreCount, pWaitSemaphores, image);
 }
 #endif
 #ifdef VK_KHR_acceleration_structure

@@ -9441,6 +9441,13 @@ typedef void <name>CAMetalLayer</name>;
             <param optiona="false,true"><type>uint32_t</type>* <name>pPoolIdCount</name></param>
             <param optional="true" len="pPoolIdCount"><type>uint64_t</type>* <name>pPoolIds</name></param>
         </command>
+        <command>
+            <proto><type>void</type> <name>vkQueueSignalReleaseImageANDROIDAsyncGOOGLE</name></proto>
+            <param><type>VkQueue</type> <name>queue</name></param>
+            <param optional="true"><type>uint32_t</type> <name>waitSemaphoreCount</name></param>
+            <param noautovalidity="true" len="waitSemaphoreCount">const <type>VkSemaphore</type>* <name>pWaitSemaphores</name></param>
+            <param><type>VkImage</type> <name>image</name></param>
+        </command>
     </commands>
 
     <feature api="vulkan" name="VK_VERSION_1_0" number="1.0" comment="Vulkan core API interface definitions">
@@ -14722,6 +14729,7 @@ typedef void <name>CAMetalLayer</name>;
                 <command name="vkQueueFlushCommandsGOOGLE"/>
                 <command name="vkQueueCommitDescriptorSetUpdatesGOOGLE"/>
                 <command name="vkCollectDescriptorPoolIdsGOOGLE"/>
+                <command name="vkQueueSignalReleaseImageANDROIDAsyncGOOGLE"/>
             </require>
         </extension>
     </extensions>

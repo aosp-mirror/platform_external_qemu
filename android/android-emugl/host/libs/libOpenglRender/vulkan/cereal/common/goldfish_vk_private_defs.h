@@ -274,6 +274,7 @@ typedef VkResult (VKAPI_PTR *PFN_vkGetLinearImageLayoutGOOGLE)(VkDevice device, 
 typedef void (VKAPI_PTR *PFN_vkQueueFlushCommandsGOOGLE)(VkQueue queue, VkDeviceSize dataSize, const void* pData);
 typedef void (VKAPI_PTR *PFN_vkQueueCommitDescriptorSetUpdatesGOOGLE)(VkQueue queue, uint32_t descriptorPoolCount, const VkDescriptorPool* pDescriptorPools, uint32_t descriptorSetCount, const VkDescriptorSetLayout* pDescriptorSetLayouts, const uint64_t* pDescriptorSetPoolIds, const uint32_t* pDescriptorSetWhichPool, const uint32_t* pDescriptorSetPendingAllocation, const uint32_t* pDescriptorWriteStartingIndices, uint32_t pendingDescriptorWriteCount, const VkWriteDescriptorSet* pPendingDescriptorWrites);
 typedef void (VKAPI_PTR *PFN_vkCollectDescriptorPoolIdsGOOGLE)(VkDevice device, VkDescriptorPool descriptorPool, uint32_t* pPoolIdCount, uint64_t* pPoolIds);
+typedef void (VKAPI_PTR *PFN_vkQueueSignalReleaseImageANDROIDAsyncGOOGLE)(VkQueue queue, uint32_t waitSemaphoreCount, const VkSemaphore* pWaitSemaphores, VkImage image);
 
 #ifdef __cplusplus
 } // extern "C"
