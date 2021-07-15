@@ -16,6 +16,24 @@
       "message": "please remove the TODO comment",
       "revId": "a089a8fe35f0afe8f49bb3e6da4cecd4e7364dd7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4f50b852_d3c78a0d",
+        "filename": "hw/input/goldfish_events.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 857,
+      "author": {
+        "id": 1883030
+      },
+      "writtenOn": "2021-07-15T08:54:22Z",
+      "side": 1,
+      "message": "Hello Huan, can the topic be merged with this unresolved comment ?\nOr do you want me to upload a new patch set to solve the comment before merge ?\nThanks.",
+      "parentUuid": "26f73288_ba91dcd4",
+      "revId": "a089a8fe35f0afe8f49bb3e6da4cecd4e7364dd7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
