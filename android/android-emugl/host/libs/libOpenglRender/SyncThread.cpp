@@ -67,7 +67,6 @@ static LazyInstance<GlobalSyncThread> sGlobalSyncThread = LAZY_INSTANCE_INIT;
 
 static const uint32_t kTimelineInterval = 1;
 static const uint64_t kDefaultTimeoutNsecs = 5ULL * 1000ULL * 1000ULL * 1000ULL;
-static const uint64_t kNumWorkerThreads = 4u;
 
 SyncThread::SyncThread()
     : emugl::Thread(android::base::ThreadFlags::MaskSignals, 512 * 1024),
@@ -133,14 +132,10 @@ void SyncThread::cleanup() {
 
 void SyncThread::initSyncContext() {
     DPRINT("enter");
-    // TODO(b/187082169, warty): The thread pool's command-assignment strategy
-    //     // is round-robin, so as a hack, create one command for each worker.
-    for (int i = 0; i < mWorkerThreadPool.numWorkers(); ++i) {
-        SyncThreadCmd to_send;
-        to_send.opCode = SYNC_THREAD_INIT;
-        sendAndWaitForResult(to_send);
-    }
-
+    SyncThreadCmd to_send;
+    to_send.opCode = SYNC_THREAD_INIT;
+    mWorkerThreadPool.broadcastIndexed(to_send);
+    mWorkerThreadPool.waitAllItems();
     DPRINT("exit");
 }
 
@@ -178,7 +173,7 @@ void SyncThread::sendAsync(SyncThreadCmd& cmd) {
     mWorkerThreadPool.enqueue(std::move(cmd));
 }
 
-void SyncThread::doSyncContextInit() {
+void SyncThread::doSyncContextInit(SyncThreadCmd* cmd) {
     const EGLDispatch* egl = emugl::LazyLoadedEGLDispatch::get();
 
     mDisplay = egl->eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -205,13 +200,13 @@ void SyncThread::doSyncContextInit() {
         EGL_NONE,
     };
 
-    mSurface =
+    mSurface[cmd->workerId] =
         egl->eglCreatePbufferSurface(mDisplay, config, pbufferAttribs);
 
     const EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
-    mContext = egl->eglCreateContext(mDisplay, config, EGL_NO_CONTEXT, contextAttribs);
+    mContext[cmd->workerId] = egl->eglCreateContext(mDisplay, config, EGL_NO_CONTEXT, contextAttribs);
 
-    egl->eglMakeCurrent(mDisplay, mSurface, mSurface, mContext);
+    egl->eglMakeCurrent(mDisplay, mSurface[cmd->workerId], mSurface[cmd->workerId], mContext[cmd->workerId]);
 }
 
 void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
@@ -324,17 +319,16 @@ void SyncThread::doSyncBlockedWaitNoTimeline(SyncThreadCmd* cmd) {
     }
 }
 
-void SyncThread::doExit() {
-
-    if (mContext == EGL_NO_CONTEXT) return;
+void SyncThread::doExit(SyncThreadCmd* cmd) {
 
     const EGLDispatch* egl = emugl::LazyLoadedEGLDispatch::get();
 
     egl->eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-    egl->eglDestroyContext(mDisplay, mContext);
-    egl->eglDestroySurface(mDisplay, mContext);
-    mContext = EGL_NO_CONTEXT;
-    mSurface = EGL_NO_SURFACE;
+
+    egl->eglDestroyContext(mDisplay, mContext[cmd->workerId]);
+    egl->eglDestroySurface(mDisplay, mSurface[cmd->workerId]);
+    mContext[cmd->workerId] = EGL_NO_CONTEXT;
+    mSurface[cmd->workerId] = EGL_NO_SURFACE;
 }
 
 int SyncThread::doSyncThreadCmd(SyncThreadCmd* cmd) {
@@ -349,7 +343,7 @@ int SyncThread::doSyncThreadCmd(SyncThreadCmd* cmd) {
     switch (cmd->opCode) {
     case SYNC_THREAD_INIT:
         DPRINT("exec SYNC_THREAD_INIT");
-        doSyncContextInit();
+        doSyncContextInit(cmd);
         break;
     case SYNC_THREAD_WAIT:
         DPRINT("exec SYNC_THREAD_WAIT");
@@ -361,7 +355,7 @@ int SyncThread::doSyncThreadCmd(SyncThreadCmd* cmd) {
         break;
     case SYNC_THREAD_EXIT:
         DPRINT("exec SYNC_THREAD_EXIT");
-        doExit();
+        doExit(cmd);
         break;
     case SYNC_THREAD_BLOCKED_WAIT_NO_TIMELINE:
         DPRINT("exec SYNC_THREAD_BLOCKED_WAIT_NO_TIMELINE");
