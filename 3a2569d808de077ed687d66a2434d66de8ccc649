@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3df0dc89_6f1ae465",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1607423
+      },
+      "writtenOn": "2021-07-15T11:08:30Z",
+      "side": 1,
+      "message": "Is the shortcuts removal going to be a separate CL?",
+      "revId": "3a2569d808de077ed687d66a2434d66de8ccc649",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
