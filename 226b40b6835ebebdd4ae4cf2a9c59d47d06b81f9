@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3bd91a5c_4599090b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-07-15T19:33:52Z",
+      "side": 1,
+      "message": "Overall, LGTM. I am wondering if sprigogin@ has tried to set theme to high contrast from Android Studio side. ",
+      "revId": "226b40b6835ebebdd4ae4cf2a9c59d47d06b81f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f00725ed_ea0cab7f",
+        "filename": "android/android-emu/android/skin/qt/stylesheet.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 555,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2021-07-15T19:33:52Z",
+      "side": 1,
+      "message": "Nit. blank spaces and formatting.",
+      "revId": "226b40b6835ebebdd4ae4cf2a9c59d47d06b81f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
