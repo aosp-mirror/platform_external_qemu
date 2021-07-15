@@ -29,7 +29,7 @@
 *[ColorGroup="Instruction"] {
     color: %%INSTRUCTION_COLOR%%;
 }
-*::disabled[ColorGroup="Button"] { color: %%DISABLED_BUTTON_COLOR%%; background: %%BUTTON_BKG_COLOR%% }
+*::disabled[ColorGroup="Button"] { color: %%DISABLED_BUTTON_COLOR%%; background: %%BUTTON_BKG_COLOR%%; border: %%DISABLED_BUTTON_BORDER%% }
 *[ColorGroup="Button"] { color: %%BUTTON_COLOR%%; background: %%BUTTON_BKG_COLOR%% }
 
 *::disabled[ColorGroup="Tool"] { color: %%DISABLED_TOOL_COLOR%%}

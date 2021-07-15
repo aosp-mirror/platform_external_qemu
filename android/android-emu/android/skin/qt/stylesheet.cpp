@@ -261,6 +261,7 @@ struct StylesheetValues {
     QString lightStylesheet;
     QString studioDarkStylesheet;
     QString studioLightStylesheet;
+    QString studioContrastStylesheet;
     QString hiDensityFontStylesheet;
 
     // These are the colors used in the themes
@@ -273,6 +274,7 @@ struct StylesheetValues {
         {"BUTTON_BKG_PRESSED_COLOR",        "#e6e6e6"},  // Background of push buttons
         {"BUTTON_COLOR",                    "#757575"},  // Text in push buttons
         {"BUTTON_BORDER",                   "0px solid #FFFFFF"}, //Raise button border
+        {"DISABLED_BUTTON_BORDER",        "0px solid #FFFFFFs"}, //Raise button border pressed
         {"DISABLED_BUTTON_COLOR",           "#bbbbbb"},  // Text in disabled push buttons
         {"DISABLED_PULLDOWN_COLOR",         "#c0c0c0"},  // Text in disabled combo box
         {"DISABLED_TOOL_COLOR",             "#baeae4"},  // Grayed-out tool text
@@ -322,6 +324,7 @@ struct StylesheetValues {
         {"BUTTON_BKG_PRESSED_COLOR",     "#20292e"},  // Background of push buttons
         {"BUTTON_COLOR",                 "#bec1c3"},
         {"BUTTON_BORDER",                "0px solid #FFFFFF"}, //Raise button border
+        {"DISABLED_BUTTON_BORDER",        "0px solid #FFFFFF"}, //Raise button border pressed
         {"DISABLED_BUTTON_COLOR",        "#5f6162"},
         {"DISABLED_PULLDOWN_COLOR",      "#808080"},
         {"DISABLED_TOOL_COLOR",          "#1b5c58"},
@@ -371,6 +374,7 @@ struct StylesheetValues {
         {"BUTTON_BKG_PRESSED_COLOR",        "#CFCFCF"},  // Background of push buttons
         {"BUTTON_COLOR",                    "#1D1D1D"},  // Text in push buttons
         {"BUTTON_BORDER",                   "1px solid #C4C4C4"}, //Raise button border
+        {"DISABLED_BUTTON_BORDER",        "1px solid #C4C4C4"}, //Raise button border pressed
        {"DISABLED_BUTTON_COLOR",           "#8C8C8C"},  // Text in disabled push buttons
         {"DISABLED_BUTTON_BKG_COLOR",       "#F2F2F2"},
         {"DISABLED_PULLDOWN_COLOR",         "#8C8C8C"},  // Text in disabled combo box
@@ -421,6 +425,7 @@ struct StylesheetValues {
         {"BUTTON_BKG_PRESSED_COLOR",     "#5C6164"},  // Background of push buttons
         {"BUTTON_COLOR",                 "#BBBBBB"},
         {"BUTTON_BORDER",                "1px solid #5E6060"}, //Raise button border
+        {"DISABLED_BUTTON_BORDER",        "1px solid #5E6060"}, //Raise button border pressed
         {"DISABLED_BUTTON_COLOR",        "#777777"},
         {"DISABLED_BUTTON_BKG_COLOR",    "#3C3F41"},
         {"DISABLED_PULLDOWN_COLOR",      "#777777"},
@@ -462,6 +467,57 @@ struct StylesheetValues {
         {"TEXT_INPUT_BKG",               "#4C5052"},  // Background for text input
     };
 
+   QHash<QString, QString> studioContrastValues = {
+        {"BOX_COLOR",                    "#E6E6E6"},
+        {"BKG_COLOR",                    "#000000"},
+        {"DISABLED_BKG_COLOR","rgba(224,134,31,60%)"},
+        {"BKG_COLOR_OVERLAY", "rgba(35,46,52,175)"},
+        {"BUTTON_BKG_COLOR",             "#000000"},
+        {"BUTTON_BKG_PRESSED_COLOR",     "#1aebff"},  // Background of push buttons
+        {"BUTTON_COLOR",                 "#FFFFFF"},
+        {"BUTTON_BORDER",                "1px solid #FFFFFF"}, //Raise button border
+        {"DISABLED_BUTTON_BORDER",        "1px solid #E0861F"}, //Raise button border pressed
+        {"DISABLED_BUTTON_COLOR",        "#E0861F"},
+        {"DISABLED_BUTTON_BKG_COLOR",    "#33210C"},
+        {"DISABLED_PULLDOWN_COLOR",      "#E0861F"},
+        {"DISABLED_TOOL_COLOR",          "#E0861F"},
+        {"DIVIDER_COLOR",                "#E6E6E6"},
+        {"EDIT_COLOR",                   "#E6E6E6"},
+        {"INSTRUCTION_COLOR",            "#E0861F"},
+        {"LARGE_DIVIDER_COLOR",  "E6E6E6"},
+        {MAJOR_TAB_COLOR_VAR,            "#FFFFFF"},
+        {MAJOR_TAB_SELECTED_COLOR_VAR,   "#FFFFFF"},
+       {"MAJOR_TITLE_COLOR",            "#FFFFFF"},
+        {"SCROLL_BKG_COLOR",             "#000000"},
+        {"SCROLL_HANDLE_COLOR",          "#B3B3B3"},
+        {"SNAPSHOT_INFO_BKG",            "#000000"},
+        {TAB_BKG_COLOR_VAR,              "#000000"},
+        {TAB_SELECTED_COLOR_VAR,         "#3333FF"},
+        {HORIZ_DIVIDER_COLOR_VAR,        "#323232"},
+        {"TAB_DARKENED_COLOR",           "#3333FF"},
+        {"TABLE_BOTTOM_COLOR",           "#FFFFFF"},
+        {"TABLE_SELECTED",               "#3333FF"},
+        {"TEXT_COLOR",                   "#FFFFFF"},
+        {"INACTIVE_TEXT_COLOR",          "#E0861F"},
+        {"TITLE_COLOR",                  "#FFFFFF"},
+        {"DISABLED_TITLE_COLOR",         "#E0861F"},
+        {"TOOL_COLOR",                   "#1AEBFF"},
+        {"TOOL_ON_COLOR",                "#000000"},
+        {"TREE_WIDGET_BKG",              "#000000"},
+        {"TREE_WIDGET_BORDER",           "#B3B3B3"},
+        {"LIST_WIDGET_BORDER",           "B3B3B3"},
+        {MACRO_BKG_COLOR_VAR, "000000"},
+        {"LINK_COLOR",                   "#D2F53C"},
+        {"PREVIEW_IMAGE_BKG",            "#000000"},
+        {"RAISED_COLORED_BKG_COLOR",     "#87AFDA"},
+        {"RAISED_COLORED_PRESSED_COLOR", "#87AFDA"},
+        {"RAISED_COLORED_COLOR",         "#ffffff"},
+        {"DROP_TARGET_BKG_COLOR", "#B3B3B3"},
+        {THEME_PATH_VAR,                 "studio-contrast"},
+        {"VHAL_PROPERTY_BKG",            "#000000"},
+        {"TEXT_INPUT_BKG",               "#000000"},  // Background for text input
+    };
+    
     StylesheetValues() {
         if (!initializeStylesheets()) {
             qCWarning(emu, "Failed to initialize UI stylesheets!");
@@ -496,6 +552,11 @@ private:
             return false;
         }
 
+        QTextStream studio_contrast_stylesheet_stream(&studioContrastStylesheet);
+        if (!tpl.render(studioContrastValues, &studio_contrast_stylesheet_stream)) {
+            return false;
+        }
+
         StylesheetTemplate font_tpl(":/styles/fonts_stylesheet_template.css");
         if (!font_tpl.isOk()) {
             qCWarning(emu, "Failed to load font stylesheet template!");
@@ -515,6 +576,8 @@ static android::base::LazyInstance<StylesheetValues> sStylesheetValues = {};
 
 const QString& stylesheetForTheme(SettingsTheme theme) {
     switch (theme) {
+        case SETTINGS_THEME_STUDIO_CONTRAST:
+            return sStylesheetValues->studioContrastStylesheet;
         case SETTINGS_THEME_STUDIO_DARK:
             return sStylesheetValues->studioDarkStylesheet;
         case SETTINGS_THEME_STUDIO_LIGHT:
@@ -534,6 +597,8 @@ const QString& fontStylesheet(bool hi_density) {
 
 const QHash<QString, QString>& stylesheetValues(SettingsTheme theme) {
     switch (theme) {
+        case SETTINGS_THEME_STUDIO_CONTRAST:
+            return sStylesheetValues->studioContrastValues;
         case SETTINGS_THEME_STUDIO_DARK:
             return sStylesheetValues->studioDarkValues;
         case SETTINGS_THEME_STUDIO_LIGHT:
