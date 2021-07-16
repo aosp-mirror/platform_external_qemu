@@ -16,6 +16,24 @@
       "message": "Do we need to leave the id reserved? (I\u0027m not familiar on how fields are deprecated in protos)",
       "revId": "526065e5d5c6ca5206ee4b736528e495b9e7f463",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "22fbef57_163a37ac",
+        "filename": "android/android-emu/android/metrics/proto/studio_stats.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 1471,
+      "author": {
+        "id": 1219061
+      },
+      "writtenOn": "2021-07-16T00:55:35Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "f67b3799_9838eac0",
+      "revId": "526065e5d5c6ca5206ee4b736528e495b9e7f463",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
