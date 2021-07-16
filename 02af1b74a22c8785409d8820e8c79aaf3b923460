@@ -16,6 +16,23 @@
       "message": "Patchset 3:\nResolve Linux build issues.\nImprove sync mechanism for Stationary type touch events.(kEventTouchStationary)",
       "revId": "02af1b74a22c8785409d8820e8c79aaf3b923460",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8a6af728_9f30b6db",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2021-07-16T16:58:47Z",
+      "side": 1,
+      "message": "please rebase and resolve the conflict.",
+      "revId": "02af1b74a22c8785409d8820e8c79aaf3b923460",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
