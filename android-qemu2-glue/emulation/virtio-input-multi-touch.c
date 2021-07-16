@@ -15,6 +15,7 @@
 
 #include "android/console.h"
 #include "android/multitouch-screen.h"
+#include "android/skin/event.h"
 
 #include "qemu/osdep.h"
 
@@ -24,9 +25,6 @@
 #include "standard-headers/linux/input.h"
 #include "ui/console.h"
 #include "ui/input.h"
-
-/* Maximum number of pointers, supported by multi-touch emulation. */
-#define MTS_POINTERS_NUM 10
 
 #if DEBUG
 #include <stdio.h>
@@ -55,11 +53,23 @@ static void translate_mouse_event(int x,
                                   int y,
                                   int buttons_state,
                                   int displayId) {
-    int pressure = multitouch_is_touch_down(buttons_state) ? 0x81 : 0;
+    int pressure = multitouch_is_touch_down(buttons_state) ?
+                                            MTS_PRESSURE_RANGE_MAX : 0;
     int finger = multitouch_is_second_finger(buttons_state);
     multitouch_update_displayId(displayId);
-    multitouch_update_pointer(MTES_DEVICE, finger, x, y, pressure,
+    multitouch_update_pointer(MTES_MOUSE, finger, x, y, pressure,
                               multitouch_should_skip_sync(buttons_state));
+    multitouch_update_displayId(0);
+}
+
+static void translate_pen_event(int x,
+                                int y,
+                                const SkinEvent* ev,
+                                int buttons_state,
+                                int displayId) {
+    multitouch_update_displayId(displayId);
+    multitouch_update_pen_pointer(MTES_PEN, ev, x, y,
+                                  multitouch_should_skip_sync(buttons_state));
     multitouch_update_displayId(0);
 }
 
@@ -157,7 +167,26 @@ static struct virtio_input_config multi_touch_config[] = {
                 .select = VIRTIO_INPUT_CFG_ABS_INFO,
                 .subsel = ABS_MT_SLOT,
                 .size = sizeof(virtio_input_absinfo),
-                .u.abs.max = const_le32(MTS_POINTERS_NUM - 1),
+                // SLOT max value seems to be TRACKING_ID-1
+                .u.abs.max = const_le32(MTS_POINTERS_NUM),
+        },
+        {
+                .select = VIRTIO_INPUT_CFG_ABS_INFO,
+                .subsel = ABS_MT_TOUCH_MAJOR,
+                .size = sizeof(virtio_input_absinfo),
+                .u.abs.max = const_le32(MTS_TOUCH_AXIS_RANGE_MAX),
+        },
+        {
+                .select = VIRTIO_INPUT_CFG_ABS_INFO,
+                .subsel = ABS_MT_TOUCH_MINOR,
+                .size = sizeof(virtio_input_absinfo),
+                .u.abs.max = const_le32(MTS_TOUCH_AXIS_RANGE_MAX),
+        },
+        {
+                .select = VIRTIO_INPUT_CFG_ABS_INFO,
+                .subsel = ABS_MT_ORIENTATION,
+                .size = sizeof(virtio_input_absinfo),
+                .u.abs.max = const_le32(MTS_ORIENTATION_RANGE_MAX),
         },
         {
                 .select = VIRTIO_INPUT_CFG_ABS_INFO,
@@ -173,21 +202,22 @@ static struct virtio_input_config multi_touch_config[] = {
         },
         {
                 .select = VIRTIO_INPUT_CFG_ABS_INFO,
-                .subsel = ABS_MT_TRACKING_ID,
+                .subsel = ABS_MT_TOOL_TYPE,
                 .size = sizeof(virtio_input_absinfo),
-                .u.abs.max = const_le32(MTS_POINTERS_NUM),
+                .u.abs.max = const_le32(MT_TOOL_MAX),
         },
         {
                 .select = VIRTIO_INPUT_CFG_ABS_INFO,
-                .subsel = ABS_MT_TOUCH_MAJOR,
+                .subsel = ABS_MT_TRACKING_ID,
                 .size = sizeof(virtio_input_absinfo),
-                .u.abs.max = const_le32(0x7fffffff),
+                // TRACKING_ID max value seems to be 0xFFFF
+                .u.abs.max = const_le32(MTS_POINTERS_NUM + 1),
         },
         {
                 .select = VIRTIO_INPUT_CFG_ABS_INFO,
                 .subsel = ABS_MT_PRESSURE,
                 .size = sizeof(virtio_input_absinfo),
-                .u.abs.max = const_le32(0x100),
+                .u.abs.max = const_le32(MTS_PRESSURE_RANGE_MAX),
         },
         {       // Needed for fold/unfold (EV_SW)
                 .select    = VIRTIO_INPUT_CFG_EV_BITS,
@@ -200,26 +230,37 @@ static struct virtio_input_config multi_touch_config[] = {
         {/* end of list */},
 };
 
-const unsigned short ev_abs_keys[] = {
+static const unsigned short ev_key_codes[] = {
+    BTN_TOOL_RUBBER,
+    BTN_STYLUS
+};
+
+static const unsigned short ev_abs_codes[] = {
     ABS_X,
     ABS_Y,
     ABS_Z,
     ABS_MT_SLOT,
+    ABS_MT_TOUCH_MAJOR,
+    ABS_MT_TOUCH_MINOR,
+    ABS_MT_ORIENTATION,
     ABS_MT_POSITION_X,
     ABS_MT_POSITION_Y,
+    ABS_MT_TOOL_TYPE,
     ABS_MT_TRACKING_ID,
-    ABS_MT_TOUCH_MAJOR,
-    ABS_MT_PRESSURE,
+    ABS_MT_PRESSURE
 };
 
-static void configure_multi_touch_ev_abs(VirtIOInput* vinput) {
+// Configure an EV_* class of codes
+static void virtio_multi_touch_ev_config(VirtIOInput* vinput,
+                                         const unsigned short* ev_codes,
+                                         size_t ev_size,
+                                         uint8_t ev_type) {
     virtio_input_config keys;
     int i, bit, byte, bmax = 0;
 
-    // Configure EV_ABS
     memset(&keys, 0, sizeof(keys));
-    for (i = 0; i < sizeof(ev_abs_keys) / sizeof(unsigned short); i++) {
-        bit = ev_abs_keys[i];
+    for (i = 0; i < ev_size; i++) {
+        bit = ev_codes[i];
         byte = bit / 8;
         bit = bit % 8;
         keys.u.bitmap[byte] |= (1 << bit);
@@ -228,10 +269,20 @@ static void configure_multi_touch_ev_abs(VirtIOInput* vinput) {
         }
     }
     keys.select = VIRTIO_INPUT_CFG_EV_BITS;
-    keys.subsel = EV_ABS;
+    keys.subsel = ev_type;
     keys.size = bmax;
     virtio_input_add_config(vinput, &keys);
-    i = 0;
+}
+
+static void configure_multi_touch_ev(VirtIOInput* vinput) {
+    // Configure EV_KEY
+    virtio_multi_touch_ev_config(vinput, ev_key_codes,
+                                        ARRAY_SIZE(ev_key_codes), EV_KEY);
+    // Configure EV_ABS
+    virtio_multi_touch_ev_config(vinput, ev_abs_codes,
+                                        ARRAY_SIZE(ev_abs_codes), EV_ABS);
+
+    int i = 0;
     while (multi_touch_config[i].select) {
         virtio_input_add_config(vinput, multi_touch_config + i);
         i++;
@@ -243,7 +294,7 @@ static void virtio_input_multi_touch_init##id(Object* obj) { \
     VirtIOInput* vinput = VIRTIO_INPUT(obj); \
     s_virtio_input_multi_touch[(id)-1] = vinput; \
     virtio_input_init_config(vinput, virtio_input_multi_touch_config##id); \
-    configure_multi_touch_ev_abs(vinput); \
+    configure_multi_touch_ev(vinput); \
 };
 
 VIRTIO_INPUT_MT_INSTANCE_INIT(1)
@@ -320,7 +371,7 @@ static const TypeInfo types[] = {
 DEFINE_TYPES(types)
 
 int android_virtio_input_send(int type, int code, int value, int displayId) {
-    if (type != EV_ABS && type != EV_SYN && type != EV_SW) {
+    if (type != EV_ABS && type != EV_KEY && type != EV_SYN && type != EV_SW) {
         return 0;
     }
     if (displayId < 0 || displayId >= VIRTIO_INPUT_MAX_NUM) {
@@ -348,7 +399,6 @@ void android_virtio_kbd_mouse_event(int dx,
         displayId = 0;
     }
 
-
     if (!getConsoleAgents()->multi_display->getMultiDisplay(displayId, NULL, NULL, &w,
                                                   &h, NULL, NULL, NULL)) {
         getConsoleAgents()->display->getFrameBuffer((int*)&w, (int*)&h, NULL, NULL,
@@ -361,4 +411,29 @@ void android_virtio_kbd_mouse_event(int dx,
                                INPUT_EVENT_ABS_MAX);
 
     translate_mouse_event(dx, dy, buttonsState, displayId);
+}
+
+void android_virtio_pen_event(int dx,
+                              int dy,
+                              const SkinEvent* ev,
+                              int buttonsState,
+                              int displayId) {
+    uint32_t w, h = 0;
+
+    if (displayId < 0 || displayId >= VIRTIO_INPUT_MAX_NUM) {
+        displayId = 0;
+    }
+
+    if (!getConsoleAgents()->multi_display->getMultiDisplay(displayId, NULL, NULL, &w,
+                                                  &h, NULL, NULL, NULL)) {
+        getConsoleAgents()->display->getFrameBuffer((int*)&w, (int*)&h, NULL, NULL,
+                                              NULL);
+    }
+
+    dx = qemu_input_scale_axis(dx, 0, w, INPUT_EVENT_ABS_MIN,
+                               INPUT_EVENT_ABS_MAX);
+    dy = qemu_input_scale_axis(dy, 0, h, INPUT_EVENT_ABS_MIN,
+                               INPUT_EVENT_ABS_MAX);
+
+    translate_pen_event(dx, dy, ev, buttonsState, displayId);
 }

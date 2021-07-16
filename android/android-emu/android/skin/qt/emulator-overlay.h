@@ -23,6 +23,11 @@
 
 #include <functional>
 
+enum TouchState {
+    NOT_TOUCHING,
+    TOUCHING
+};
+
 class EmulatorQtWindow;
 class EmulatorContainer;
 
@@ -113,7 +118,8 @@ private:
     bool mReleaseOnClose;
 
     int  mResizeCorner;
-
+    /* State of mouse event type translation state machine. */
+    TouchState mMouseTouchState = TouchState::NOT_TOUCHING;
 
     QVariantAnimation mTouchPointAnimation;
     double mLerpValue;

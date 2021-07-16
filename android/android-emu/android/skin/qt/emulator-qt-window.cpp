@@ -35,6 +35,7 @@
 #include "android/hw-sensors.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/metrics.h"
+#include "android/multitouch-screen.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/skin/event.h"
@@ -69,6 +70,7 @@
 #define D(...) ((void)0)
 #endif
 
+#include <Qt>
 #include <QBitmap>
 #include <QCheckBox>
 #include <QCursor>
@@ -85,9 +87,11 @@
 #include <QScrollBar>
 #include <QSemaphore>
 #include <QSettings>
+#include <QTabletEvent>
 #include <QToolTip>
 #include <QWindow>
 #include <QtCore>
+#include <QtMath>
 
 #ifdef _WIN32
 #include <io.h>
@@ -98,6 +102,7 @@
 #endif
 
 #include <array>
+#include <cmath>
 #include <string>
 #include <vector>
 
@@ -1088,8 +1093,13 @@ void EmulatorQtWindow::mouseMoveEvent(QMouseEvent* event) {
         !android_cmdLineOptions->no_mouse_reposition) {
         // Block all the incoming mouse events if mouse is being moved to
         // center of the screen.
-        if (!mMouseRepositioning) {
-            handleMouseEvent(kEventMouseMotion, getSkinMouseButton(event),
+        if (!mMouseRepositioning &&
+                        (event->source() == Qt::MouseEventNotSynthesized)) {
+            // Pen long press generates synthesized mouse events,
+            // which need to be filtered out
+            SkinEventType eventType = translateMouseEventType(
+                    kEventMouseMotion, event->button(), event->buttons());
+            handleMouseEvent(eventType, getSkinMouseButton(event),
                              event->pos(), event->globalPos());
         }
 
@@ -1116,8 +1126,14 @@ void EmulatorQtWindow::mouseMoveEvent(QMouseEvent* event) {
             }
         }
     } else {
-        handleMouseEvent(kEventMouseMotion, getSkinMouseButton(event),
-                         event->pos(), event->globalPos());
+        // Pen long press generates synthesized mouse events,
+        // which need to be filtered out
+        if (event->source() == Qt::MouseEventNotSynthesized) {
+            SkinEventType eventType = translateMouseEventType(
+                    kEventMouseMotion, event->button(), event->buttons());
+            handleMouseEvent(eventType, getSkinMouseButton(event),
+                             event->pos(), event->globalPos());
+        }
     }
 }
 
@@ -1173,13 +1189,77 @@ void EmulatorQtWindow::mousePressEvent(QMouseEvent* event) {
         mMouseGrabbed = true;
     }
 
-    handleMouseEvent(kEventMouseButtonDown, getSkinMouseButton(event),
-                     event->pos(), event->globalPos());
+    // Pen long press generates synthesized mouse events,
+    // which need to be filtered out
+    if (event->source() == Qt::MouseEventNotSynthesized) {
+        SkinEventType eventType = translateMouseEventType(
+                    kEventMouseButtonDown, event->button(), event->buttons());
+        handleMouseEvent(eventType, getSkinMouseButton(event),
+                         event->pos(), event->globalPos());
+    }
 }
 
 void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent* event) {
-    handleMouseEvent(kEventMouseButtonUp, getSkinMouseButton(event),
-                     event->pos(), event->globalPos());
+    // Pen long press generates synthesized mouse events,
+    // which need to be filtered out
+    if (event->source() == Qt::MouseEventNotSynthesized) {
+        SkinEventType eventType = translateMouseEventType(
+                    kEventMouseButtonUp, event->button(), event->buttons());
+        handleMouseEvent(eventType, getSkinMouseButton(event),
+                         event->pos(), event->globalPos());
+    }
+}
+
+// Event handler for pen events as defined by Qt
+void EmulatorQtWindow::tabletEvent(QTabletEvent* event) {
+    SkinEventType eventType = kEventPenRelease;
+    bool button_pressed = false;
+
+    switch (event->type()) {
+        case QEvent::TabletPress:
+        {
+            button_pressed =
+                    ((event->buttons() & Qt::RightButton) == Qt::RightButton);
+            eventType = translatePenEventType(kEventPenPress,
+                                        event->button(), event->buttons());
+            handlePenEvent(eventType, event);
+            mPenPosX = event->pos().x();
+            mPenPosY = event->pos().y();
+            mPenButtonPressed = button_pressed;
+            break;
+        }
+        case QEvent::TabletRelease:
+        {
+            button_pressed =
+                    ((event->buttons() & Qt::RightButton) == Qt::RightButton);
+            eventType = translatePenEventType(kEventPenRelease,
+                                        event->button(), event->buttons());
+            handlePenEvent(eventType, event);
+            mPenPosX = event->pos().x();
+            mPenPosY = event->pos().y();
+            mPenButtonPressed = button_pressed;
+            break;
+        }
+        case QEvent::TabletMove:
+        {
+            button_pressed =
+                    ((event->buttons() & Qt::RightButton) == Qt::RightButton);
+            if ((event->pos().x() != mPenPosX) ||
+                (event->pos().y() != mPenPosY) ||
+                (button_pressed   != mPenButtonPressed)) {
+                eventType = translatePenEventType(kEventPenMove,
+                                        event->button(), event->buttons());
+                handlePenEvent(eventType, event);
+                mPenPosX = event->pos().x();
+                mPenPosY = event->pos().y();
+                mPenButtonPressed = button_pressed;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    event->accept();
 }
 
 // Set the window flags based on whether we should
@@ -2380,9 +2460,17 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(int x, int y, int w, int h) {
 }
 
 SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
-        QMouseEvent* event) const {
-    return (event->button() == Qt::RightButton) ? kMouseButtonRight
-                                                : kMouseButtonLeft;
+                                    const QMouseEvent* event) const {
+    switch (event->button()) {
+    case Qt::LeftButton:
+        return kMouseButtonLeft;
+    case Qt::RightButton:
+        return kMouseButtonRight;
+    case Qt::MiddleButton:
+        return kMouseButtonMiddle;
+    default:
+        return kMouseButtonLeft;
+    }
 }
 
 void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
@@ -2405,6 +2493,30 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
     skin_event->u.mouse.xrel = pos.x() - mPrevMousePosition.x();
     skin_event->u.mouse.yrel = pos.y() - mPrevMousePosition.y();
     mPrevMousePosition = pos;
+
+    queueSkinEvent(skin_event);
+}
+
+// Stores all the information of a pen event and
+// adds the skin event to the queue
+void EmulatorQtWindow::handlePenEvent(SkinEventType type,
+                                      const QTabletEvent* event,
+                                      bool skipSync) {
+    SkinEvent* skin_event = createSkinEvent(type);
+    skin_event->u.pen.tracking_id = event->uniqueId();
+    skin_event->u.pen.pressure =
+                        (int)(event->pressure() * MTS_PRESSURE_RANGE_MAX);
+    skin_event->u.pen.orientation =
+                penOrientation(tiltToRotation(event->xTilt(), event->yTilt()));
+    skin_event->u.pen.button_pressed =
+                    ((event->buttons() & Qt::RightButton) == Qt::RightButton);
+    skin_event->u.pen.rubber_pointer =
+                            (event->pointerType() == QTabletEvent::Eraser);
+    skin_event->u.pen.x = event->pos().x();
+    skin_event->u.pen.y = event->pos().y();
+    skin_event->u.pen.x_global = event->globalPos().x();
+    skin_event->u.pen.y_global = event->globalPos().y();
+    skin_event->u.pen.skip_sync = skipSync;
 
     queueSkinEvent(skin_event);
 }
@@ -3212,4 +3324,150 @@ void EmulatorQtWindow::saveMultidisplayToConfig() {
                                                    flag);
         }
     }
+}
+
+/* Convert from tilt coordinates to rotation of pen
+ * xTilt: the plane angle (in degrees, range [-60,60]) between
+ * the Y-Z plane and the plane containing both the pen and the Y axis
+ *      positive values are towards the screen's physical right
+ * yTilt: the plane angle (in degrees, range [-60,60]) between
+ * the X-Z plane and the plane containing both the pen and the X axis
+ *      positive values are towards the bottom of the screen (user)
+ * rotation: the azimuth angle (in degrees, range (-180,180]) of the pen,
+ * where 0 represents a pen whose cap is pointing down (tip points up),
+ * +90 to the left, -90 to the right, 180 cap points up, clockwise.
+ * When the pen is perpendicular to the screen the rotation is 0. */
+int EmulatorQtWindow::tiltToRotation(int xTiltDeg, int yTiltDeg) {
+    int rotationDeg = 0;
+    // The equations used, in an X-Y-Z coordinate system:
+    // tan(X Tilt) = X / Z
+    // tan(Y Tilt) = Y / Z
+    // tan(azimuth) = Y / X = tan(Y Tilt) / tan(X Tilt)
+    // azimuth = arctan( tan(Y Tilt) / tan(X Tilt) )
+
+    if ((xTiltDeg != 0) && (yTiltDeg != 0)) {
+        // domain error may occur if both arguments x,y of atan2 are 0
+
+        // pen is not parallel to any axis, nor perpendicular to screen
+        // use the south-clockwise convention for azimuth: (-X, -Y)
+        // the Y axis is already reversed on a screen (down, not up)
+        double xTiltRad = -qDegreesToRadians((double)xTiltDeg);
+        double yTiltRad =  qDegreesToRadians((double)yTiltDeg);
+
+        // atan2 function computes the arc tangent of y/x using the signs
+        // of arguments to determine the correct quadrant
+        rotationDeg = (int)qRadiansToDegrees(std::atan2(std::tan(xTiltRad),
+                                                        std::tan(yTiltRad)));
+    } else if (xTiltDeg != 0) {
+        // pen is parallel to the X axis, not perpendicular to screen
+        rotationDeg = (xTiltDeg > 0) ? -90 : 90;
+    } else {
+        // pen is parallel to the Y axis, or perpendicular to screen
+        rotationDeg = (yTiltDeg >= 0) ? 0 : 180;
+    }
+
+    return rotationDeg;
+}
+
+// Adapt the rotation angle depending on screen rotation
+int EmulatorQtWindow::penOrientation(int rotation) {
+    int orientation = rotation;
+
+    switch (mOrientation) {
+    case SKIN_ROTATION_0:
+        break;
+    case SKIN_ROTATION_90:
+        orientation -= 90;
+        break;
+    case SKIN_ROTATION_180:
+        orientation -= 180;
+        break;
+    case SKIN_ROTATION_270:
+        orientation -= 270;
+        break;
+    default:
+        break;
+    }
+    // keep the orientation in the range (-180, 180] degrees
+    if (orientation <= -180) {
+        orientation += 360;
+    }
+
+    return orientation;
+}
+
+// State machine that translates the pen event types based on button states
+// If during a touching state the button is pressed this generates unwanted
+// Press and Release events which are translated to Move events
+SkinEventType EmulatorQtWindow::translatePenEventType(SkinEventType type,
+                                                    Qt::MouseButton button,
+                                                    Qt::MouseButtons buttons) {
+    SkinEventType newType = type;
+
+    switch (mPenTouchState) {
+    case TouchState::NOT_TOUCHING:
+        // Only the first Press event can have the same pressed buttons
+        // button:  only the button that caused the event
+        // buttons: all the pressed buttons
+        if ((type == kEventPenPress) && (button == buttons)) {
+            mPenTouchState = TouchState::TOUCHING;
+            newType = kEventPenPress;
+        } else {
+            newType = kEventPenRelease;
+        }
+        break;
+    case TouchState::TOUCHING:
+        // Only the last Release event can have no pressed buttons
+        if ((type == kEventPenRelease) && (buttons == Qt::NoButton)) {
+            mPenTouchState = TouchState::NOT_TOUCHING;
+            newType = kEventPenRelease;
+        } else {
+            newType = kEventPenMove;
+        }
+        break;
+    default:
+        mPenTouchState = TouchState::NOT_TOUCHING;
+        newType = kEventPenRelease;
+        break;
+    }
+
+    return newType;
+}
+
+// State machine that translates the mouse event types based on button states
+// If during a touching state the button is pressed this generates unwanted
+// Press and Release events which are translated to Move events
+SkinEventType EmulatorQtWindow::translateMouseEventType(SkinEventType type,
+                                                    Qt::MouseButton button,
+                                                    Qt::MouseButtons buttons) {
+    SkinEventType newType = type;
+
+    switch (mMouseTouchState) {
+    case TouchState::NOT_TOUCHING:
+        // Only the first Press event can have the same pressed buttons
+        // button:  only the button that caused the event
+        // buttons: all the pressed buttons
+        if ((type == kEventMouseButtonDown) && (button == buttons)) {
+            mMouseTouchState = TouchState::TOUCHING;
+            newType = kEventMouseButtonDown;
+        } else {
+            newType = kEventMouseButtonUp;
+        }
+        break;
+    case TouchState::TOUCHING:
+        // Only the last Release event can have no pressed buttons
+        if ((type == kEventMouseButtonUp) && (buttons == Qt::NoButton)) {
+            mMouseTouchState = TouchState::NOT_TOUCHING;
+            newType = kEventMouseButtonUp;
+        } else {
+            newType = kEventMouseMotion;
+        }
+        break;
+    default:
+        mMouseTouchState = TouchState::NOT_TOUCHING;
+        newType = kEventMouseButtonUp;
+        break;
+    }
+
+    return newType;
 }

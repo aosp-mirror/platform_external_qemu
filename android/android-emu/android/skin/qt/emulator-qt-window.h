@@ -44,6 +44,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QProgressDialog>
+#include <QTabletEvent>
 #include <QWidget>
 
 #include <functional>
@@ -126,6 +127,7 @@ public:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
+    void tabletEvent(QTabletEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
     void startThread(StartFunction f, int argc, char** argv);
@@ -229,6 +231,9 @@ public:
                           const QPoint& pos,
                           const QPoint& gPos,
                           bool skipSync = false);
+    void handlePenEvent(SkinEventType type,
+                        const QTabletEvent* event,
+                        bool skipSync = false);
     void handleMouseWheelEvent(int delta, Qt::Orientation orientation);
     void panHorizontal(bool left);
     void panVertical(bool up);
@@ -402,7 +407,7 @@ private:
     void checkNestedAndWarn();
 
     bool mouseInside();
-    SkinMouseButtonType getSkinMouseButton(QMouseEvent* event) const;
+    SkinMouseButtonType getSkinMouseButton(const QMouseEvent* event) const;
 
     void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
     void forwardGenericEventToEmulator(int type, int code, int value);
@@ -557,6 +562,25 @@ private:
 
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
     void saveMultidisplayToConfig();
+
+    /* Current values of Pen event data. */
+    int  mPenPosX = 0;
+    int  mPenPosY = 0;
+    bool mPenButtonPressed = false;
+
+    /* State of pen event type translation state machine. */
+    TouchState mPenTouchState = TouchState::NOT_TOUCHING;
+    /* State of mouse event type translation state machine. */
+    TouchState mMouseTouchState = TouchState::NOT_TOUCHING;
+
+    SkinEventType translatePenEventType(SkinEventType type,
+                                        Qt::MouseButton button,
+                                        Qt::MouseButtons buttons);
+    SkinEventType translateMouseEventType(SkinEventType type,
+                                          Qt::MouseButton button,
+                                          Qt::MouseButtons buttons);
+    int tiltToRotation(int xTiltDeg, int yTiltDeg);
+    int penOrientation(int rotation);
 };
 
 class SkinSurfaceBitmap {
