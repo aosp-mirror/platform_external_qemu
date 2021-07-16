@@ -16,6 +16,8 @@
 
 #include "android/physics/physical_state_agent.h"
 
+#include <stddef.h>
+
 ANDROID_BEGIN_HEADER
 
 typedef struct QAndroidSensorsAgent {
@@ -28,9 +30,10 @@ typedef struct QAndroidSensorsAgent {
     //                              i.e.
     //                              PHYSICAL_INTERPOLATION_SMOOTH,
     //                              PHYSICAL_INTERPOLATION_STEP
-    int (*setPhysicalParameterTarget)(
-            int parameterId, float a, float b, float c,
-            int interpolationMethod);
+    int (*setPhysicalParameterTarget)(int parameterId,
+                                      const float* val,
+                                      const size_t count,
+                                      int interpolationMethod);
 
     // Gets the target values of a given physical parameter.
     // Input: |parameterId| determines which parameter's values to retrieve.
@@ -39,9 +42,14 @@ typedef struct QAndroidSensorsAgent {
     //                         value, i.e.
     //                         PARAMETER_VALUE_TYPE_TARGET,
     //                         PARAMETER_VALUE_TYPE_CURRENT
-    int (*getPhysicalParameter)(
-            int parameterId, float *a, float *b, float *c,
-            int parameterValueType);
+    int (*getPhysicalParameter)(int parameterId,
+                                float* const* out,
+                                const size_t count,
+                                int parameterValueType);
+
+    // Gets the number of elements of a given physical parameter vector.
+    // Input: |parameterId| determines which parameter's values to retrieve.
+    int (*getPhysicalParameterSize)(int parameterId, size_t* size);
 
     // Sets the coarse orientation of the modeled device.
     // Input: |orientation| determines which coarse orientation to use, i.e.
@@ -55,14 +63,23 @@ typedef struct QAndroidSensorsAgent {
     //                   ANDROID_SENSOR_ACCELERATION,
     //                   ANDROID_SENSOR_GYROSCOPE,
     //                   etc.
-    int (*setSensorOverride)(int sensorId, float a, float b, float c);
+    int (*setSensorOverride)(int sensorId,
+                             const float* val,
+                             const size_t count);
 
     // Reads the values from a given sensor.
     // Input: |sensorId| determines which sensor's values to retrieve, i.e.
     //                   ANDROID_SENSOR_ACCELERATION,
     //                   ANDROID_SENSOR_GYROSCOPE,
     //                   etc.
-    int (*getSensor)(int sensorId, float *a, float *b, float *c);
+    int (*getSensor)(int sensorId, float* const* out, const size_t count);
+
+    // Gets the number of elements of the sensor vector.
+    // Input: |sensorId| determines which sensor's values to retrieve, i.e.
+    //                   ANDROID_SENSOR_ACCELERATION,
+    //                   ANDROID_SENSOR_GYROSCOPE,
+    //                   etc.
+    int (*getSensorSize)(int sensorId, size_t* size);
 
     // Gets the current sensor update delay in milliseconds.
     int (*getDelayMs)();
