@@ -942,6 +942,44 @@ public:
         return 0;
     }
 
+    int contextCreateFence(uint32_t fence_id, uint32_t ctx_id, uint32_t fence_ctx_idx) {
+        AutoLock lock(mLock);
+        fprintf(stderr, "%s: fence id %u ctx id %u fence_ctx_idx %u\n", __func__, fence_id, ctx_id, fence_ctx_idx);
+        VGPLOG("fenceid: %u cmdtype: %u", fence_id, ctx_id);
+        if (mUseAsyncFenceCb) {
+            fprintf(stderr, "%s: create fence using async fence cb\n", __func__);
+            if (0 == ctx_id) {
+                fprintf(stderr, "%s: is 0 ctx id, signal right away as everything's serialized to this point\n", __func__);
+                mVirglRendererCallbacks.write_fence(mCookie, fence_id);
+            } else {
+                // Check what fencing type was needed.
+                AutoLock lock(mCtxPendingFencesLock);
+                {
+                    if (mCtxNeededFencingTypes.find(ctx_id) == mCtxNeededFencingTypes.end()) {
+                        fprintf(stderr, "%s: init new fencing type for ctx %u as sync signaled\n", __func__, ctx_id);
+                        mCtxNeededFencingTypes[ctx_id] = CtxFencingType::SyncSignal;
+                    } else {
+                        fprintf(stderr, "%s: this ctx had signal type of 0x%x\n", __func__,
+                                (uint32_t)(mCtxNeededFencingTypes[ctx_id]));
+                    }
+                }
+
+                fprintf(stderr, "%s: is Not 0 ctx id (%u), do not signal right away if async signal on top.. the client fence id was %d\n", __func__, ctx_id, fence_id);
+                enqueueFenceLocked(ctx_id, fence_id, mCtxNeededFencingTypes[ctx_id]);
+
+                // Regardless of what fencing type was needed, set it back to sync signal after enqueue.
+                mCtxNeededFencingTypes[ctx_id] = CtxFencingType::SyncSignal;
+
+                // Process any sync-signaled fences.
+                signalOutstandingSyncSignaledFencesLocked(ctx_id);
+            }
+        } else {
+            fprintf(stderr, "%s: create fence without async fence cb\n", __func__);
+            mFenceDeque.push_back(fence_id);
+        }
+        return 0;
+    }
+
     void poll() {
         VGPLOG("start");
         AutoLock lock(mLock);
@@ -1931,7 +1969,7 @@ private:
 
             if (pendingState.type == CtxFencingType::AsyncSignal) {
                 VGPLOG("This was an async signal, write fence, erase it and continue");
-                mVirglRendererCallbacks.write_fence(mCookie, fence_value);
+                mVirglRendererCallbacks.write_fence2(mCookie, fence_value, ctx_id, 0 /* ring idx */);
                 it = pendingFencesThisCtx.erase(it);
             } else {
                 VGPLOG("This was Not an async signal, quit and process them in subsequent call to signalOutstandingSyncSignaledFences");
@@ -1964,7 +2002,7 @@ private:
 
             if (pendingState.type == CtxFencingType::SyncSignal) {
                 VGPLOG("This was a sync signal, write fence, erase it and continue")
-                mVirglRendererCallbacks.write_fence(mCookie, fence_value);
+                mVirglRendererCallbacks.write_fence2(mCookie, fence_value, ctx_id, 0 /* ring_idx */);
                 it = pendingFencesThisCtx.erase(it);
             } else {
                 if (CtxFencingType::AsyncSignal != pendingState.type) {
@@ -2192,6 +2230,12 @@ VG_EXPORT void pipe_virgl_renderer_load_snapshot(void* qemufile) {
 
 VG_EXPORT int pipe_virgl_renderer_resource_attach_iov_with_addrs(int res_handle, struct iovec *iov, int num_iovs, uint64_t* addrs) {
     return sRenderer->attachIov(res_handle, iov, num_iovs, addrs);
+}
+
+VG_EXPORT int stream_renderer_context_create_fence(
+    uint32_t fence_id, uint32_t ctx_id, uint32_t fence_ctx_idx) {
+    sRenderer->contextCreateFence(fence_id, ctx_id, fence_ctx_idx);
+    return 0;
 }
 
 VG_EXPORT int stream_renderer_platform_import_resource(int res_handle, int res_type, void* resource) {
