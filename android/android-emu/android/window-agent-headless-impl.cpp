@@ -39,9 +39,10 @@ static SkinRotation getRotation() {
         return SKIN_ROTATION_0;
     sensorsAgent->advanceTime();
     glm::vec3 device_accelerometer;
-    sensorsAgent->getSensor(ANDROID_SENSOR_ACCELERATION,
-                            &device_accelerometer.x, &device_accelerometer.y,
-                            &device_accelerometer.z);
+    auto out = {&device_accelerometer.x, &device_accelerometer.y,
+                &device_accelerometer.z};
+    sensorsAgent->getSensor(ANDROID_SENSOR_ACCELERATION, out.begin(),
+                            out.size());
     glm::vec3 normalized_accelerometer = glm::normalize(device_accelerometer);
 
     static const std::array<std::pair<glm::vec3, SkinRotation>, 4> directions{

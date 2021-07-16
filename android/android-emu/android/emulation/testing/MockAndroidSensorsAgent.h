@@ -29,22 +29,26 @@ public:
 
     static const QAndroidSensorsAgent* getAgent();
 
-    // int setPhysicalParameterTarget(int parameterId, float a, float b,
-    //                                float c, int interpolationMethod)
-    SENSORS_MOCK(MOCK_METHOD5, setPhysicalParameterTarget);
+    // int setPhysicalParameterTarget(int parameterId, const float* val,
+    //                                const size_t count,
+    //                                int interpolationMethod)
+    SENSORS_MOCK(MOCK_METHOD4, setPhysicalParameterTarget);
 
-    // int getPhysicalParameter(int parameterId, float* a, float* b, float* c,
+    // int getPhysicalParameter(int parameterId, float* out, const size_t count,
     //                          int parameterValueType)
-    SENSORS_MOCK(MOCK_METHOD5, getPhysicalParameter);
+    SENSORS_MOCK(MOCK_METHOD4, getPhysicalParameter);
 
     // int setCoarseOrientation(int orientation)
     SENSORS_MOCK(MOCK_METHOD1, setCoarseOrientation);
 
-    // int setSensorOverride(int sensorId, float a, float b, float c)
-    SENSORS_MOCK(MOCK_METHOD4, setSensorOverride);
+    // int setSensorOverride(int sensorId, const float* val, const size_t count)
+    SENSORS_MOCK(MOCK_METHOD3, setSensorOverride);
 
-    // int getSensor(int sensorId, float* a, float* b, float* c)
-    SENSORS_MOCK(MOCK_METHOD4, getSensor);
+    // int getSensor(int sensorId, float* out, const size_t count)
+    SENSORS_MOCK(MOCK_METHOD3, getSensor);
+
+    // int getSensorSize(int sensorId, size_t* size)
+    SENSORS_MOCK(MOCK_METHOD2, getSensorSize);
 
     // int getDelayMs()
     SENSORS_MOCK(MOCK_METHOD0, getDelayMs);
