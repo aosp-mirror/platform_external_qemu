@@ -68,6 +68,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     const char* dalvikVmHeapsizeProp;
     const char* qemuLegacyFakeCameraProp;
     const char* qemuCameraProtocolVerProp;
+    const char* qemuCameraHqEdgeProp;
     const char* qemuDisplaySettingsXmlProp;
     const char* qemuVirtioWifiProp;
     const char* qemuWifiProp;
@@ -95,6 +96,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         dalvikVmHeapsizeProp = "androidboot.dalvik.vm.heapsize";
         qemuLegacyFakeCameraProp = "androidboot.qemu.legacy_fake_camera";
         qemuCameraProtocolVerProp = "androidboot.qemu.camera_protocol_ver";
+        qemuCameraHqEdgeProp = "androidboot.qemu.camera_hq_edge_processing";
         qemuDisplaySettingsXmlProp = "androidboot.qemu.display.settings.xml";
         qemuVirtioWifiProp = "androidboot.qemu.virtiowifi";
         qemuWifiProp = "androidboot.qemu.wifi";
@@ -120,6 +122,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         dalvikVmHeapsizeProp = "qemu.dalvik.vm.heapsize";
         qemuLegacyFakeCameraProp = "qemu.legacy_fake_camera";
         qemuCameraProtocolVerProp = "qemu.camera_protocol_ver";
+        qemuCameraHqEdgeProp = "qemu.camera_hq_edge_processing";
         qemuDisplaySettingsXmlProp = "qemu.display.settings.xml";
         qemuVirtioWifiProp = "qemu.virtiowifi";
         qemuWifiProp = "qemu.wifi";
@@ -270,6 +273,10 @@ getUserspaceBootProperties(const AndroidOptions* opts,
 
     if (apiLevel > 29) {
         params.push_back({qemuCameraProtocolVerProp, "1"});
+    }
+
+    if (opts->no_camera_hq_edge) {
+        params.push_back({qemuCameraHqEdgeProp, "0"});
     }
 
     const bool isDynamicPartition = fc::isEnabled(fc::DynamicPartition);
