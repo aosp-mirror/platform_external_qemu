@@ -724,21 +724,20 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) 
             break;
         case QtUICommand::CHANGE_FOLDABLE_POSTURE:
             if (down && mLastRequestedFoldablePosture != -1) {
-                sUiEmuAgent->sensors->setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSTURE,
-                                                                 (float)mLastRequestedFoldablePosture,
-                                                                 0.0f,
-                                                                 0.0f,
-                                                                 PHYSICAL_INTERPOLATION_SMOOTH);
+                float posture =
+                        static_cast<float>(mLastRequestedFoldablePosture);
+                sUiEmuAgent->sensors->setPhysicalParameterTarget(
+                        PHYSICAL_PARAMETER_POSTURE, &posture, 1,
+                        PHYSICAL_INTERPOLATION_SMOOTH);
             }
             break;
         case QtUICommand::UPDATE_FOLDABLE_POSTURE_INDICATOR:
             if (down) {
-                float posture, unused1, unused2;
-                sUiEmuAgent->sensors->getPhysicalParameter(PHYSICAL_PARAMETER_POSTURE,
-                                                        &posture,
-                                                        &unused1,
-                                                        &unused2,
-                                                        PARAMETER_VALUE_TYPE_CURRENT);
+                float posture = 0;
+                float* out = &posture;
+                sUiEmuAgent->sensors->getPhysicalParameter(
+                        PHYSICAL_PARAMETER_POSTURE, &out, 1,
+                        PARAMETER_VALUE_TYPE_CURRENT);
                 switch ((enum FoldablePostures) posture) {
                     case POSTURE_OPENED:
                         ChangeIcon(mToolsUi->change_posture_button,

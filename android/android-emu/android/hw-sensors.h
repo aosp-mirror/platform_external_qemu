@@ -58,6 +58,30 @@ struct vec3 {
 
 typedef struct vec3 vec3;
 
+/* struct for use in sensor values */
+struct vec4 {
+    float x;
+    float y;
+    float z;
+    float w;
+
+#ifdef __cplusplus
+    bool operator==(const vec4& rhs) const {
+        const float kEpsilon = 0.00001f;
+
+        const double diffX = fabs(x - rhs.x);
+        const double diffY = fabs(y - rhs.y);
+        const double diffZ = fabs(z - rhs.z);
+        const double diffW = fabs(w - rhs.w);
+        return (diffX < kEpsilon && diffY < kEpsilon && diffZ < kEpsilon &&
+                diffW < kEpsilon);
+    }
+
+    bool operator!=(const vec4& rhs) const { return !(*this == rhs); }
+#endif  // __cplusplus
+};
+
+typedef struct vec4 vec4;
 
 /* NOTE: Sensor status Error definition, It will be used in the Sensors Command
  *       part in android-qemu1-glue/console.c. Details:
@@ -163,12 +187,17 @@ extern int android_sensors_set_coarse_orientation(
         AndroidCoarseOrientation  orient, float tilt_degrees);
 
 /* get sensor values */
-extern int android_sensors_get( int sensor_id,
-        float* out_a, float* out_b, float* out_c );
+extern int android_sensors_get(int sensor_id,
+                               float* const* out,
+                               const size_t count);
+
+/* get sensor values size */
+extern int android_sensors_get_size(int sensor_id, size_t* size);
 
 /* set sensor override values */
-extern int android_sensors_override_set(
-        int sensor_id, float a, float b, float c );
+extern int android_sensors_override_set(int sensor_id,
+                                        const float* val,
+                                        const size_t count);
 
 /* Get sensor id from sensor name */
 extern int android_sensors_get_id_from_name( const char* sensorname );
@@ -188,15 +217,21 @@ extern int32_t android_sensors_get_delay_ms();
 /* Get the physical model instance. */
 extern PhysicalModel* android_physical_model_instance();
 
+/* Get physical model values size */
+extern int android_physical_model_get_size(int physical_parameter,
+                                           size_t* size);
+
 /* Get physical model values */
-extern int android_physical_model_get(
-    int physical_parameter, float* out_a, float* out_b, float* out_c,
-    ParameterValueType parameter_value_type);
+extern int android_physical_model_get(int physical_parameter,
+                                      float* const* out,
+                                      const size_t count,
+                                      ParameterValueType parameter_value_type);
 
 /* Set physical model target values */
-extern int android_physical_model_set(
-    int physical_parameter, float a, float b, float c,
-    int interpolation_method);
+extern int android_physical_model_set(int physical_parameter,
+                                      const float* val,
+                                      const size_t count,
+                                      int interpolation_method);
 
 /* Set agent to receive physical state change callbacks */
 extern int android_physical_agent_set(

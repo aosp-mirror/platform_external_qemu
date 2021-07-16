@@ -452,6 +452,14 @@ void setProtoCurrentValue(pb::PhysicalModelEvent* event, vec3 value) {
     pbValue->add_data(value.z);
 }
 
+void setProtoCurrentValue(pb::PhysicalModelEvent* event, vec4 value) {
+    pb::ParameterValue* pbValue = event->mutable_current_value();
+    pbValue->add_data(value.x);
+    pbValue->add_data(value.y);
+    pbValue->add_data(value.z);
+    pbValue->add_data(value.w);
+}
+
 void setProtoTargetValue(pb::PhysicalModelEvent* event, float value) {
     event->mutable_target_value()->add_data(value);
 }
@@ -461,6 +469,14 @@ void setProtoTargetValue(pb::PhysicalModelEvent* event, vec3 value) {
     pbValue->add_data(value.x);
     pbValue->add_data(value.y);
     pbValue->add_data(value.z);
+}
+
+void setProtoTargetValue(pb::PhysicalModelEvent* event, vec4 value) {
+    pb::ParameterValue* pbValue = event->mutable_target_value();
+    pbValue->add_data(value.x);
+    pbValue->add_data(value.y);
+    pbValue->add_data(value.z);
+    pbValue->add_data(value.w);
 }
 
 void PhysicalModelImpl::setCurrentTime(int64_t time_ns) {
@@ -986,6 +1002,13 @@ void PhysicalModelImpl::setAutomationController(
     mAutomationController = controller;
 }
 
+static void readValueFromStream(Stream* f, vec4* value) {
+    value->x = stream_get_float(f);
+    value->y = stream_get_float(f);
+    value->z = stream_get_float(f);
+    value->w = stream_get_float(f);
+}
+
 static void readValueFromStream(Stream* f, vec3* value) {
     value->x = stream_get_float(f);
     value->y = stream_get_float(f);
@@ -994,6 +1017,13 @@ static void readValueFromStream(Stream* f, vec3* value) {
 
 static void readValueFromStream(Stream* f, float* value) {
     *value = stream_get_float(f);
+}
+
+static void writeValueToStream(Stream* f, vec4 value) {
+    stream_put_float(f, value.x);
+    stream_put_float(f, value.y);
+    stream_put_float(f, value.z);
+    stream_put_float(f, value.w);
 }
 
 static void writeValueToStream(Stream* f, vec3 value) {
@@ -1143,6 +1173,13 @@ static bool valueNearEqual(const vec3& lhs, const vec3& rhs) {
     return glm::epsilonEqual(lhs.x, rhs.x, kPhysicsEpsilon) &&
            glm::epsilonEqual(lhs.y, rhs.y, kPhysicsEpsilon) &&
            glm::epsilonEqual(lhs.z, rhs.z, kPhysicsEpsilon);
+}
+
+static bool valueNearEqual(const vec4& lhs, const vec4& rhs) {
+    return glm::epsilonEqual(lhs.x, rhs.x, kPhysicsEpsilon) &&
+           glm::epsilonEqual(lhs.y, rhs.y, kPhysicsEpsilon) &&
+           glm::epsilonEqual(lhs.z, rhs.z, kPhysicsEpsilon) &&
+           glm::epsilonEqual(lhs.w, rhs.w, kPhysicsEpsilon);
 }
 
 template <typename ValueType>

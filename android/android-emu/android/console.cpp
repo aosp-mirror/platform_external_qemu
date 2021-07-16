@@ -3009,7 +3009,7 @@ static const CommandDefRec  geo_commands[] =
 /* For sensors user prompt string size.*/
 #define SENSORS_INFO_SIZE 150
 
-/* Get sensor data - (a,b,c) from sensor name */
+/* Get sensor data - |val| from sensor name */
 static int
 do_sensors_get( ControlClient client, char* args )
 {
@@ -3032,12 +3032,27 @@ do_sensors_get( ControlClient client, char* args )
             goto SENSOR_STATUS_ERROR;
         }
         {
-            float a, b, c;
-            status = android_sensors_get( sensor_id, &a, &b, &c );
+            size_t size = 0;
+            status = android_sensors_get_size(sensor_id, &size);
+            if (status != SENSOR_STATUS_OK) {
+                goto SENSOR_STATUS_ERROR;
+            }
+
+            std::vector<float> val(size, 0);
+            std::vector<float*> ptr;
+            for (int i = 0; i < val.size(); i++) {
+                ptr.push_back(&val[i]);
+            }
+
+            status = android_sensors_get(sensor_id, ptr.data(), ptr.size());
             if (status != SENSOR_STATUS_OK)
                 goto SENSOR_STATUS_ERROR;
 
-            snprintf( buffer, sizeof(buffer), "%s = %g:%g:%g\r\n", sensor, a, b, c );
+            int n = snprintf(buffer, sizeof(buffer), "%s = ", sensor);
+            for (size_t i = 0; i < val.size(); i++) {
+                n += snprintf(buffer + n, sizeof(buffer) - n, "%g%s", val[i],
+                              i == val.size() - 1 ? "\r\n" : ":");
+            }
             do_control_write( client, buffer );
             return 0;
         }
@@ -3105,17 +3120,24 @@ do_sensors_set( ControlClient client, char* args )
             status = sensor_id;
             goto SENSOR_STATUS_ERROR;
         } else {
-            float fvalues[3];
-            status = android_sensors_get( sensor_id, &fvalues[0], &fvalues[1], &fvalues[2] );
+            std::vector<float> fvalues(10, 0);
+            std::vector<float*> ptr;
+            for (int i = 0; i < fvalues.size(); i++) {
+                ptr.push_back(&fvalues[i]);
+            }
+            size_t actual_size = 0;
+
+            status = android_sensors_get(sensor_id, ptr.data(), ptr.size());
             if (status != SENSOR_STATUS_OK)
                 goto SENSOR_STATUS_ERROR;
+            fvalues.resize(actual_size);
 
             {
                 /* Parsing the value part to get the sensor values(a, b, c) */
                 int i;
                 char* pnext;
                 char* pend = value + strlen(value);
-                for (i = 0; i < 3; i++, value = pnext + 1) {
+                for (i = 0; i < fvalues.size(); i++, value = pnext + 1) {
                     pnext=strchr( value, ':' );
                     if (pnext) {
                         *pnext = 0;
@@ -3130,8 +3152,8 @@ do_sensors_set( ControlClient client, char* args )
                 }
             }
 
-            status = android_sensors_override_set(
-                    sensor_id, fvalues[0], fvalues[1], fvalues[2] );
+            status = android_sensors_override_set(sensor_id, fvalues.data(),
+                                                  fvalues.size());
             if (status != SENSOR_STATUS_OK)
                 goto SENSOR_STATUS_ERROR;
 
@@ -3183,22 +3205,21 @@ do_sensors_status( ControlClient client, char* args )
 }
 
 /* Sensor commands for get/set sensor values and get available sensor names. */
-static const CommandDefRec sensor_commands[] =
-{
-    { "status", "list all sensors and their status.",
-      "'status': list all sensors and their status.\r\n",
-      NULL, do_sensors_status, NULL },
+static const CommandDefRec sensor_commands[] = {
+        {"status", "list all sensors and their status.",
+         "'status': list all sensors and their status.\r\n", NULL,
+         do_sensors_status, NULL},
 
-    { "get", "get sensor values",
-      "'get <sensorname>' returns the values of a given sensor.\r\n",
-      NULL, do_sensors_get, NULL },
+        {"get", "get sensor values",
+         "'get <sensorname>' returns the values of a given sensor.\r\n", NULL,
+         do_sensors_get, NULL},
 
-    { "set", "set sensor values",
-      "'set <sensorname> <value-a>[:<value-b>[:<value-c>]]' set the values of a given sensor.\r\n",
-      NULL, do_sensors_set, NULL },
+        {"set", "set sensor values",
+         "'set <sensorname> <value-a>[:<value-b>[:<value-c>[...]]]' set the "
+         "values of a given sensor.\r\n",
+         NULL, do_sensors_set, NULL},
 
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
+        {NULL, NULL, NULL, NULL, NULL, NULL}};
 
 /********************************************************************************************/
 /********************************************************************************************/

@@ -325,8 +325,9 @@ glm::vec3 VirtualSensorsPage::getPhysicalParameterTargetVec3(
         PhysicalParameter parameter_id) {
     glm::vec3 result;
     if (sSensorsAgent) {
-        sSensorsAgent->getPhysicalParameter(parameter_id, &result.x, &result.y,
-                                            &result.z,
+        std::vector<float*> params = {&result.x, &result.y, &result.z};
+        sSensorsAgent->getPhysicalParameter(parameter_id, params.data(),
+                                            params.size(),
                                             PARAMETER_VALUE_TYPE_TARGET);
     }
 
@@ -342,9 +343,11 @@ void VirtualSensorsPage::setPhysicalParameterTarget(
     reportVirtualSensorsInteraction();
     if (sSensorsAgent) {
         mIsUIModifyingPhysicalState = true;
-        sSensorsAgent->setPhysicalParameterTarget(
-                parameter_id, static_cast<float>(v1), static_cast<float>(v2),
-                static_cast<float>(v3), mode);
+        std::vector<float> val = {static_cast<float>(v1),
+                                  static_cast<float>(v2),
+                                  static_cast<float>(v3)};
+        sSensorsAgent->setPhysicalParameterTarget(parameter_id, val.data(),
+                                                  val.size(), mode);
         mIsUIModifyingPhysicalState = false;
     }
 }
@@ -722,15 +725,19 @@ void VirtualSensorsPage::updateUIFromModelCurrentState() {
 
     if (sSensorsAgent != nullptr) {
         glm::vec3 position;
+        std::vector<float*> outPosition = {&position.x, &position.y,
+                                           &position.z};
         sSensorsAgent->getPhysicalParameter(
-                PHYSICAL_PARAMETER_POSITION, &position.x, &position.y,
-                &position.z, PARAMETER_VALUE_TYPE_CURRENT);
+                PHYSICAL_PARAMETER_POSITION, outPosition.data(),
+                outPosition.size(), PARAMETER_VALUE_TYPE_CURRENT);
         position = (1.f / kMetersPerInch) * position;
 
         glm::vec3 eulerDegrees;
+        std::vector<float*> outEulerDegrees = {&position.x, &position.y,
+                                               &position.z};
         sSensorsAgent->getPhysicalParameter(
-                PHYSICAL_PARAMETER_ROTATION, &eulerDegrees.x, &eulerDegrees.y,
-                &eulerDegrees.z, PARAMETER_VALUE_TYPE_CURRENT);
+                PHYSICAL_PARAMETER_ROTATION, outEulerDegrees.data(),
+                outEulerDegrees.size(), PARAMETER_VALUE_TYPE_CURRENT);
 
         mUi->accelWidget->update();
 
@@ -822,9 +829,11 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
         glm::vec3 gravity_vector(0.0f, 9.81f, 0.0f);
 
         glm::vec3 device_accelerometer;
-        sSensorsAgent->getSensor(
-                ANDROID_SENSOR_ACCELERATION, &device_accelerometer.x,
-                &device_accelerometer.y, &device_accelerometer.z);
+        std::vector<float*> out = {&device_accelerometer.x,
+                                   &device_accelerometer.y,
+                                   &device_accelerometer.z};
+        sSensorsAgent->getSensor(ANDROID_SENSOR_ACCELERATION, out.data(),
+                                 out.size());
 
         if (!mBypassOrientationChecks) {
             glm::vec3 normalized_accelerometer =
@@ -859,13 +868,18 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
         }
 
         glm::vec3 device_magnetometer;
+        std::vector<float*> outMagnetometer = {&device_magnetometer.x,
+                                               &device_magnetometer.y,
+                                               &device_magnetometer.z};
         sSensorsAgent->getSensor(ANDROID_SENSOR_MAGNETIC_FIELD,
-                                 &device_magnetometer.x, &device_magnetometer.y,
-                                 &device_magnetometer.z);
+                                 outMagnetometer.data(),
+                                 outMagnetometer.size());
 
         glm::vec3 device_gyroscope;
-        sSensorsAgent->getSensor(ANDROID_SENSOR_GYROSCOPE, &device_gyroscope.x,
-                                 &device_gyroscope.y, &device_gyroscope.z);
+        std::vector<float*> outGyroscope = {
+                &device_gyroscope.x, &device_gyroscope.y, &device_gyroscope.z};
+        sSensorsAgent->getSensor(ANDROID_SENSOR_GYROSCOPE, outGyroscope.data(),
+                                 outGyroscope.size());
 
         // Emit a signal to update the UI. We cannot just update
         // the UI here because the current function is sometimes
