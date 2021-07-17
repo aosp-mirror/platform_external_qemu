@@ -1156,6 +1156,18 @@ help_ports(stralloc_t*  out)
 }
 
 static void
+help_modem_simulator_port(stralloc_t*  out)
+{
+    PRINTF(
+    "  by default the emulator tries to bind a free port for modem simulator.\n\n"
+
+    "  use '-modem-simulaotor-port <port>' to force an emulator instance\n"
+    "  to use a given modem simulaotor port\n\n"
+
+    "  If the specified port isn't available on startup, the emulator will exit.\n\n");
+}
+
+static void
 help_grpc(stralloc_t*  out)
 {
     PRINTF(
