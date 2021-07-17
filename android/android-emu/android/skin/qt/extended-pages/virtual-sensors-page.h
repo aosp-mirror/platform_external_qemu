@@ -144,10 +144,8 @@ private:
     float getPhysicalParameterTarget(PhysicalParameter parameter_id);
     glm::vec3 getPhysicalParameterTargetVec3(PhysicalParameter parameter_id);
     void setPhysicalParameterTarget(PhysicalParameter parameter_id,
-            PhysicalInterpolation mode,
-            double v1,
-            double v2 = 0.0,
-            double v3 = 0.0);
+                                    PhysicalInterpolation mode,
+                                    const std::vector<float>& v);
     void setCoarseOrientation(AndroidCoarseOrientation orientation);
 
     void onTargetStateChanged();
