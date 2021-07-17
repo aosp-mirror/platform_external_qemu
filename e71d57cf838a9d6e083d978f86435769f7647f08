@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4501e0c6_ccdb61d1",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1879221
+      },
+      "writtenOn": "2021-07-17T06:46:27Z",
+      "side": 1,
+      "message": "Hi, \n\nMaybe I saw you at https://github.com/google/android-emulator-m1-preview \nNice to meet you. :)\n\nThis is my first time to send a patch to AOSP. \nI appreciate it if you check this patch.\n\nThanks, Masayuki.\n",
+      "revId": "e71d57cf838a9d6e083d978f86435769f7647f08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
