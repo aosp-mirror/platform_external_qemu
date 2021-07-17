@@ -317,11 +317,24 @@ static glm::vec3 toGlm(vec3 input) {
     return glm::vec3(input.x, input.y, input.z);
 }
 
+static glm::vec4 toGlm(vec4 input) {
+    return glm::vec4(input.x, input.y, input.z, input.w);
+}
+
 static vec3 fromGlm(glm::vec3 input) {
     vec3 value;
     value.x = input.x;
     value.y = input.y;
     value.z = input.z;
+    return value;
+}
+
+static vec4 fromGlm(glm::vec4 input) {
+    vec4 value;
+    value.x = input.x;
+    value.y = input.y;
+    value.z = input.z;
+    value.w = input.w;
     return value;
 }
 
@@ -439,6 +452,18 @@ vec3 getProtoValue<vec3>(const pb::ParameterValue& parameter) {
         return vec3{0.f, 0.f, 0.f};
     }
     return vec3{parameter.data(0), parameter.data(1), parameter.data(2)};
+}
+
+template <>
+vec4 getProtoValue<vec4>(const pb::ParameterValue& parameter) {
+    if (parameter.data_size() != 4) {
+        W("%s: Error in parsed physics command.  Vec4 parameters should have "
+          "exactly four values.  Found %d.",
+          __FUNCTION__, parameter.data_size());
+        return vec4{0.f, 0.f, 0.f, 0.f};
+    }
+    return vec4{parameter.data(0), parameter.data(1), parameter.data(2),
+                parameter.data(3)};
 }
 
 void setProtoCurrentValue(pb::PhysicalModelEvent* event, float value) {
@@ -717,6 +742,16 @@ void PhysicalModelImpl::setTargetInternalHeartRate(float bpm,
     targetStateChanged();
 }
 
+void PhysicalModelImpl::setTargetInternalRgbcLight(vec4 light,
+                                                   PhysicalInterpolation mode) {
+    physicalStateChanging();
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mAmbientEnvironment.setRgbcLight(toGlm(light), mode);
+    }
+    targetStateChanged();
+}
+
 vec3 PhysicalModelImpl::getParameterPosition(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -827,6 +862,12 @@ float PhysicalModelImpl::getParameterHeartRate(
     return mBodyModel.getHeartRate(parameterValueType);
 }
 
+vec4 PhysicalModelImpl::getParameterRgbcLight(
+        ParameterValueType parameterValueType) const {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    return fromGlm(mAmbientEnvironment.getRgbcLight(parameterValueType));
+}
+
 #define GET_FUNCTION_NAME(x) get##x
 #define OVERRIDE_FUNCTION_NAME(x) override##x
 #define OVERRIDE_NAME(x) m##x##Override
@@ -914,6 +955,10 @@ vec3 PhysicalModelImpl::getPhysicalMagnetometerUncalibrated() const {
 vec3 PhysicalModelImpl::getPhysicalGyroscopeUncalibrated() const {
     return fromGlm(glm::conjugate(mInertialModel.getRotation()) *
                    mInertialModel.getRotationalVelocity());
+}
+
+vec4 PhysicalModelImpl::getPhysicalRgbcLight() const {
+    return fromGlm(mAmbientEnvironment.getRgbcLight());
 }
 
 void PhysicalModelImpl::getTransform(float* out_translation_x,

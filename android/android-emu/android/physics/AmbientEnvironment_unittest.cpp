@@ -115,3 +115,13 @@ TEST(AmbientEnvironment, SetHumidity) {
     ambientEnvironment.setHumidity(0.67f, PHYSICAL_INTERPOLATION_STEP);
     EXPECT_EQ(0.67f, ambientEnvironment.getHumidity());
 }
+
+TEST(AmbientEnvironment, SetRgbcLight) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    mTestSystem.setLiveUnixTime(false);
+    mTestSystem.setUnixTime(1);
+    AmbientEnvironment ambientEnvironment;
+    const glm::vec4 kTarget = glm::vec4(100, 200, 300, 400);
+    ambientEnvironment.setRgbcLight(kTarget, PHYSICAL_INTERPOLATION_STEP);
+    EXPECT_EQ(kTarget, ambientEnvironment.getRgbcLight());
+}
