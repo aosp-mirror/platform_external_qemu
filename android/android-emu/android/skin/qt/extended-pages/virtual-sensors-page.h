@@ -60,6 +60,13 @@ private slots:
     void on_pressureSensorValueWidget_valueChanged(double value);
     void on_humiditySensorValueWidget_valueChanged(double value);
     void on_heartRateSensorValueWidget_valueChanged(double value);
+
+    void on_rgbcSensorValueWidget_valueChanged();
+    void on_rgbcRedSensorValueWidget_valueChanged(double value);
+    void on_rgbcGreenSensorValueWidget_valueChanged(double value);
+    void on_rgbcBlueSensorValueWidget_valueChanged(double value);
+    void on_rgbcClearSensorValueWidget_valueChanged(double value);
+
     void on_accelModeRotate_toggled();
     void on_accelModeMove_toggled();
     void on_accelModeFold_toggled();
@@ -156,6 +163,7 @@ private:
     void setupRollableUI();
     void updateUIPosture();
     void disableHeartRateSensor();
+    void setupRgbcLightUI();
 
     static void onTargetStateChanged(void* context);
     static void onPhysicalStateChanging(void* context);
