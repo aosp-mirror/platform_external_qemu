@@ -337,17 +337,12 @@ glm::vec3 VirtualSensorsPage::getPhysicalParameterTargetVec3(
 void VirtualSensorsPage::setPhysicalParameterTarget(
         PhysicalParameter parameter_id,
         PhysicalInterpolation mode,
-        double v1,
-        double v2,
-        double v3) {
+        const std::vector<float>& v) {
     reportVirtualSensorsInteraction();
     if (sSensorsAgent) {
         mIsUIModifyingPhysicalState = true;
-        std::vector<float> val = {static_cast<float>(v1),
-                                  static_cast<float>(v2),
-                                  static_cast<float>(v3)};
-        sSensorsAgent->setPhysicalParameterTarget(parameter_id, val.data(),
-                                                  val.size(), mode);
+        sSensorsAgent->setPhysicalParameterTarget(parameter_id, v.data(),
+                                                  v.size(), mode);
         mIsUIModifyingPhysicalState = false;
     }
 }
@@ -368,102 +363,117 @@ void VirtualSensorsPage::on_temperatureSensorValueWidget_valueChanged(
         double value) {
     mSensorTracker->increment("TEMPERATURE");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_TEMPERATURE,
-                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+                               PHYSICAL_INTERPOLATION_SMOOTH,
+                               {static_cast<float>(value)});
 }
 
 void VirtualSensorsPage::on_proximitySensorValueWidget_valueChanged(
         double value) {
     mSensorTracker->increment("PROXIMITY");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_PROXIMITY,
-                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+                               PHYSICAL_INTERPOLATION_SMOOTH,
+                               {static_cast<float>(value)});
 }
 
 void VirtualSensorsPage::on_lightSensorValueWidget_valueChanged(double value) {
     mSensorTracker->increment("LIGHT");
 
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_LIGHT,
-                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+                               PHYSICAL_INTERPOLATION_SMOOTH,
+                               {static_cast<float>(value)});
 }
 
 void VirtualSensorsPage::on_pressureSensorValueWidget_valueChanged(
         double value) {
             mSensorTracker->increment("PRESSURE");
-    setPhysicalParameterTarget(PHYSICAL_PARAMETER_PRESSURE,
-                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+            setPhysicalParameterTarget(PHYSICAL_PARAMETER_PRESSURE,
+                                       PHYSICAL_INTERPOLATION_SMOOTH,
+                                       {static_cast<float>(value)});
 }
 
 void VirtualSensorsPage::on_heartRateSensorValueWidget_valueChanged(
         double value) {
             mSensorTracker->increment("HEART_RATE");
-    setPhysicalParameterTarget(PHYSICAL_PARAMETER_HEART_RATE,
-                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+            setPhysicalParameterTarget(PHYSICAL_PARAMETER_HEART_RATE,
+                                       PHYSICAL_INTERPOLATION_SMOOTH,
+                                       {static_cast<float>(value)});
 }
 
 void VirtualSensorsPage::on_humiditySensorValueWidget_valueChanged(
         double value) {
             mSensorTracker->increment("HUMIDITY");
-    setPhysicalParameterTarget(PHYSICAL_PARAMETER_HUMIDITY,
-                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+            setPhysicalParameterTarget(PHYSICAL_PARAMETER_HUMIDITY,
+                                       PHYSICAL_INTERPOLATION_SMOOTH,
+                                       {static_cast<float>(value)});
 }
 
 void VirtualSensorsPage::on_magNorthWidget_valueChanged(double value) {
     mSensorTracker->increment("MAG_FIELD_NORTH");
     setPhysicalParameterTarget(
             PHYSICAL_PARAMETER_MAGNETIC_FIELD, PHYSICAL_INTERPOLATION_SMOOTH,
-            mUi->magNorthWidget->value(), mUi->magEastWidget->value(),
-            mUi->magVerticalWidget->value());
+            {static_cast<float>(mUi->magNorthWidget->value()),
+             static_cast<float>(mUi->magEastWidget->value()),
+             static_cast<float>(mUi->magVerticalWidget->value())});
 }
 
 void VirtualSensorsPage::on_magEastWidget_valueChanged(double value) {
     mSensorTracker->increment("MAG_FIELD_EAST");
     setPhysicalParameterTarget(
             PHYSICAL_PARAMETER_MAGNETIC_FIELD, PHYSICAL_INTERPOLATION_SMOOTH,
-            mUi->magNorthWidget->value(), mUi->magEastWidget->value(),
-            mUi->magVerticalWidget->value());
+            {static_cast<float>(mUi->magNorthWidget->value()),
+             static_cast<float>(mUi->magEastWidget->value()),
+             static_cast<float>(mUi->magVerticalWidget->value())});
 }
 
 void VirtualSensorsPage::on_magVerticalWidget_valueChanged(double value) {
     mSensorTracker->increment("MAG_FIELD_VERT");
     setPhysicalParameterTarget(
             PHYSICAL_PARAMETER_MAGNETIC_FIELD, PHYSICAL_INTERPOLATION_SMOOTH,
-            mUi->magNorthWidget->value(), mUi->magEastWidget->value(),
-            mUi->magVerticalWidget->value());
+            {static_cast<float>(mUi->magNorthWidget->value()),
+             static_cast<float>(mUi->magEastWidget->value()),
+             static_cast<float>(mUi->magVerticalWidget->value())});
 }
 
 void VirtualSensorsPage::on_hinge0Slider_valueChanged(double value) {
     mSensorTracker->increment("HINGE_ANGLE0");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE0,
-                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+                               PHYSICAL_INTERPOLATION_SMOOTH,
+                               {static_cast<float>(value)});
 }
 
 void VirtualSensorsPage::on_hinge1Slider_valueChanged(double value) {
     mSensorTracker->increment("HINGE_ANGLE1");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE1,
-                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+                               PHYSICAL_INTERPOLATION_SMOOTH,
+                               {static_cast<float>(value)});
 }
 
 void VirtualSensorsPage::on_hinge2Slider_valueChanged(double value) {
     mSensorTracker->increment("HINGE_ANGLE2");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_HINGE_ANGLE2,
-                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+                               PHYSICAL_INTERPOLATION_SMOOTH,
+                               {static_cast<float>(value)});
 }
 
 void VirtualSensorsPage::on_roll0Slider_valueChanged(double value) {
     mSensorTracker->increment("ROLLABLE0");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROLLABLE0,
-                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+                               PHYSICAL_INTERPOLATION_SMOOTH,
+                               {static_cast<float>(value)});
 }
 
 void VirtualSensorsPage::on_roll1Slider_valueChanged(double value) {
     mSensorTracker->increment("ROLLABLE1");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROLLABLE1,
-                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+                               PHYSICAL_INTERPOLATION_SMOOTH,
+                               {static_cast<float>(value)});
 }
 
 void VirtualSensorsPage::on_roll2Slider_valueChanged(double value) {
     mSensorTracker->increment("ROLLABLE2");
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROLLABLE2,
-                               PHYSICAL_INTERPOLATION_SMOOTH, value);
+                               PHYSICAL_INTERPOLATION_SMOOTH,
+                               {static_cast<float>(value)});
 }
 
 void VirtualSensorsPage::on_zRotSlider_valueChanged(double) {
@@ -565,8 +575,8 @@ void VirtualSensorsPage::setTargetHeadingDegrees(double heading) {
         heading += 360.0;
     }
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROTATION,
-                               PHYSICAL_INTERPOLATION_STEP, -90.0, 0.0,
-                               -heading);
+                               PHYSICAL_INTERPOLATION_STEP,
+                               {-90.0F, 0.0F, static_cast<float>(-heading)});
 }
 
 void VirtualSensorsPage::onTargetStateChanged() {
@@ -680,15 +690,15 @@ void VirtualSensorsPage::updateModelFromAccelWidget(
             getPhysicalParameterTargetVec3(PHYSICAL_PARAMETER_POSITION);
     if (!vecNearEqual(position, currentPosition)) {
         setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSITION, mode,
-                                   position.x, position.y, position.z);
+                                   {position.x, position.y, position.z});
     }
 
     const glm::vec3 currentRotationDegrees =
             getPhysicalParameterTargetVec3(PHYSICAL_PARAMETER_ROTATION);
     if (!vecNearEqual(rotationDegrees, currentRotationDegrees)) {
-        setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROTATION, mode,
-                                   rotationDegrees.x, rotationDegrees.y,
-                                   rotationDegrees.z);
+        setPhysicalParameterTarget(
+                PHYSICAL_PARAMETER_ROTATION, mode,
+                {rotationDegrees.x, rotationDegrees.y, rotationDegrees.z});
     }
 }
 
@@ -709,11 +719,11 @@ void VirtualSensorsPage::updateModelFromSliders(PhysicalInterpolation mode) {
 
     position = kMetersPerInch * position;
 
-    setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSITION, mode, position.x,
-                               position.y, position.z);
-    setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROTATION, mode,
-                               rotationDegrees.x, rotationDegrees.y,
-                               rotationDegrees.z);
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSITION, mode,
+                               {position.x, position.y, position.z});
+    setPhysicalParameterTarget(
+            PHYSICAL_PARAMETER_ROTATION, mode,
+            {rotationDegrees.x, rotationDegrees.y, rotationDegrees.z});
 }
 
 /*
@@ -939,7 +949,7 @@ void VirtualSensorsPage::on_posture_valueChanged(int index) {
     mCurrentPosture = (enum FoldablePostures)index;
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSTURE,
                                PHYSICAL_INTERPOLATION_SMOOTH,
-                               (double)mCurrentPosture);
+                               {static_cast<float>(mCurrentPosture)});
 }
 
 void VirtualSensorsPage::on_helpMagneticField_clicked() {
