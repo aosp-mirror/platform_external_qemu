@@ -22,7 +22,6 @@
 #include <array>
 
 #include "android/physics/Physics.h"
-
 namespace android {
 namespace physics {
 
@@ -90,6 +89,11 @@ public:
     void setHumidity(float percent, PhysicalInterpolation mode);
 
     /*
+     * Sets the target ambient light value.
+     */
+    void setRgbcLight(glm::vec4 light, PhysicalInterpolation mode);
+
+    /*
      * Gets current simulated state of the ambient environment.
      */
     glm::vec3 getMagneticField(
@@ -106,6 +110,8 @@ public:
             ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
     float getHumidity(
             ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+    glm::vec4 getRgbcLight(ParameterValueType parameterValueType =
+                                   PARAMETER_VALUE_TYPE_CURRENT) const;
 
 private:
     static constexpr glm::vec3 kDefaultMagneticField =
@@ -122,6 +128,9 @@ private:
     static constexpr float kDefaultPressure = 0.f;
     /* percent */
     static constexpr float kDefaultHumidity = 0.f;
+    /* raw RGBC value */
+    static constexpr glm::vec4 kDefaultRgbcLight =
+            glm::vec4(glm::vec3(0, 0, 0), 0);
 
     glm::vec3 mMagneticField = kDefaultMagneticField;
     glm::vec3 mGravity = kDefaultGravity;
@@ -130,6 +139,7 @@ private:
     float mLight = kDefaultLight;
     float mPressure = kDefaultPressure;
     float mHumidity = kDefaultHumidity;
+    glm::vec4 mRgbcLight = kDefaultRgbcLight;
 };
 
 }  // namespace physics

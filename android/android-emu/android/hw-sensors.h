@@ -104,6 +104,7 @@ typedef enum{
  *       DO NOT CHANGE THE ORDER IN THIS LIST, UNLESS YOU INTEND
  *       TO BREAK SNAPSHOTS!
  */
+// clang-format off
 #define  SENSORS_LIST  \
     SENSOR_(ACCELERATION,"acceleration",Accelerometer,vec3,"acceleration:%g:%g:%g") \
     SENSOR_(GYROSCOPE,"gyroscope",Gyroscope,vec3,"gyroscope:%g:%g:%g") \
@@ -120,7 +121,8 @@ typedef enum{
     SENSOR_(HINGE_ANGLE1, "hinge-angle1", HingeAngle1, float, "hinge-angle1:%g") \
     SENSOR_(HINGE_ANGLE2, "hinge-angle2", HingeAngle2, float, "hinge-angle2:%g") \
     SENSOR_(HEART_RATE, "heart-rate", HeartRate, float, "heart-rate:%g") \
-
+    SENSOR_(RGBC_LIGHT, "rgbc-light", RgbcLight, vec4, "rgbc-light:%g:%g:%g:%g") \
+// clang-format on
 typedef enum {
 #define  SENSOR_(x,y,z,v,w)  ANDROID_SENSOR_##x,
     SENSORS_LIST
@@ -145,6 +147,7 @@ typedef enum{
  * Note: DO NOT CHANGE THE ORDER IN THIS LIST, UNLESS YOU INTEND
  *       TO BREAK SNAPSHOTS!
  */
+// clang-format off
 #define  PHYSICAL_PARAMETERS_LIST  \
     PHYSICAL_PARAMETER_(POSITION,"position",Position,vec3) \
     PHYSICAL_PARAMETER_(ROTATION,"rotation",Rotation,vec3) \
@@ -164,7 +167,8 @@ typedef enum{
     PHYSICAL_PARAMETER_(ROLLABLE2,"rollable2",Rollable2,float) \
     PHYSICAL_PARAMETER_(POSTURE,"posture",Posture,float) \
     PHYSICAL_PARAMETER_(HEART_RATE, "heart-rate", HeartRate, float) \
-
+    PHYSICAL_PARAMETER_(RGBC_LIGHT, "rgbc-light", RgbcLight, vec4) \
+// clang-format on
 typedef enum {
 #define PHYSICAL_PARAMETER_(x,y,z,w)  PHYSICAL_PARAMETER_##x,
     PHYSICAL_PARAMETERS_LIST
