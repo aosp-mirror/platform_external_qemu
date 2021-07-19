@@ -53,12 +53,10 @@ typedef enum {
     kEventPenMove
 } SkinEventType;
 
-// The numeric values represent the bit positions in the button state
 typedef enum {
-    kMouseButtonLeft = 0,
-    kMouseButtonRight = 1,
-    kMouseButtonMiddle = 2,
-    kMouseButtonSecondaryTouch
+    kMouseButtonLeft,
+    kMouseButtonSecondaryTouch,
+    kMouseButtonRight
 } SkinMouseButtonType;
 
 typedef struct {
@@ -87,7 +85,7 @@ typedef struct {
     int x_global;
     int y_global;
     int button;
-    bool skip_sync;
+    int skip_sync;
 } SkinEventMouseData;
 
 typedef struct {
