@@ -23,11 +23,6 @@
 
 #include <functional>
 
-enum TouchState {
-    NOT_TOUCHING,
-    TOUCHING
-};
-
 class EmulatorQtWindow;
 class EmulatorContainer;
 
