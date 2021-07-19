@@ -16,6 +16,24 @@
       "message": "nit: Clang format will likely change it to std::string\u0026",
       "revId": "3295381c11b08fd565b59033da986a75f3f3cca2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "09e79398_83580ec4",
+        "filename": "android/android-webrtc/videobridge/emulator/webrtc/Participant.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1710786
+      },
+      "writtenOn": "2021-07-19T20:22:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ff91833e_769c2fa2",
+      "revId": "3295381c11b08fd565b59033da986a75f3f3cca2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
