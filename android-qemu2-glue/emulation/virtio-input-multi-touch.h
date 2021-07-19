@@ -14,7 +14,6 @@
 
 #pragma once
 
-#include "android/skin/event.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
@@ -31,9 +30,4 @@ extern void android_virtio_kbd_mouse_event(int dx,
                                            int dz,
                                            int buttonsState,
                                            int displayId);
-extern void android_virtio_pen_event(int dx,
-                                     int dy,
-                                     const SkinEvent* ev,
-                                     int buttonsState,
-                                     int displayId);
 ANDROID_END_HEADER
