@@ -52,11 +52,13 @@ Switchboard::~Switchboard() {}
 Switchboard::Switchboard(EmulatorGrpcClient* client,
                          const std::string& shmPath,
                          TurnConfig turnConfig,
-                         int adbPort)
+                         int adbPort,
+                         const std::string& audioDumpFile)
     : RtcConnection(client),
       mShmPath(shmPath),
       mAdbPort(adbPort),
-      mTurnConfig(turnConfig) {}
+      mTurnConfig(turnConfig),
+      mAudioDumpFile(audioDumpFile) {}
 
 void Switchboard::rtcConnectionClosed(const std::string participant) {
     const std::lock_guard<std::mutex> lock(mCleanupMutex);
@@ -134,7 +136,7 @@ bool Switchboard::connect(std::string identity) {
     // Note: Dynamically adding new tracks will likely require participant
     // re-negotiation.
     participant->AddVideoTrack(0);
-    participant->AddAudioTrack();
+    participant->AddAudioTrack(mAudioDumpFile);
     if (mAdbPort >= 0) {
         auto adbSocket = std::make_shared<android::base::AsyncSocket>(
                 getLooper(), mAdbPort);

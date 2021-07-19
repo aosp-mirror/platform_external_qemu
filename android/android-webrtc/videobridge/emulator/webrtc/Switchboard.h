@@ -51,7 +51,8 @@ public:
     Switchboard(EmulatorGrpcClient* client,
                 const std::string& shmPath,
                 TurnConfig turnconfig,
-                int adbPort);
+                int adbPort,
+                const std::string& audioDumpFile="");
     ~Switchboard();
 
     // Connect will initiate the RTC stream if not yet in progress.
@@ -111,6 +112,9 @@ private:
 
     // Network/communication things.
     std::mutex mCleanupMutex;
+
+    // For gRPC audio Dump
+    std::string mAudioDumpFile;
 };
 }  // namespace webrtc
 }  // namespace emulator

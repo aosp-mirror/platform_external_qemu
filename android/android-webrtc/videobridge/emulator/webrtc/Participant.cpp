@@ -469,13 +469,15 @@ bool Participant::AddVideoTrack(int displayId) {
     return true;
 }
 
-bool Participant::AddAudioTrack() {
+bool Participant::AddAudioTrack(const std::string& audioDumpFile) {
     if (mActiveTracks.count(kAudioTrack) != 0) {
         RTC_LOG(LS_ERROR) << "Track " << kAudioTrack
                           << " already active, not adding again.";
     }
     RTC_LOG(INFO) << "Adding audio track: [" << kAudioTrack << "]";
     auto track = mRtcConnection->getMediaSourceLibrary()->getAudioSource();
+    track->setAudioDumpFile(audioDumpFile);
+
     scoped_refptr<::webrtc::AudioTrackInterface> audio_track(
             mRtcConnection->getPeerConnectionFactory()->CreateAudioTrack(
                     kAudioTrack, track));
