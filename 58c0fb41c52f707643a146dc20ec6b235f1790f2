@@ -33,6 +33,24 @@
       "message": "Looks like we\u0027ll need to increment kSnapshotVersion in android/android-emu/android/snapshot/Snapshot.cpp.",
       "revId": "58c0fb41c52f707643a146dc20ec6b235f1790f2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "89256867_14e59435",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1571059
+      },
+      "writtenOn": "2021-07-19T17:57:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d1bc1aea_587764ed",
+      "revId": "58c0fb41c52f707643a146dc20ec6b235f1790f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
