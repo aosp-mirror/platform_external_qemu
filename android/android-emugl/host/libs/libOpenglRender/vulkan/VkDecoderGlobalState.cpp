@@ -7769,6 +7769,18 @@ VkResult VkDecoderGlobalState::on_vkQueueBindSparse(
     return mImpl->on_vkQueueBindSparse(pool, queue, bindInfoCount, pBindInfo, fence);
 }
 
+void VkDecoderGlobalState::on_vkQueueSignalReleaseImageANDROIDAsyncGOOGLE(
+    android::base::BumpPool* pool,
+    VkQueue queue,
+    uint32_t waitSemaphoreCount,
+    const VkSemaphore* pWaitSemaphores,
+    VkImage image) {
+    int fenceFd;
+    mImpl->on_vkQueueSignalReleaseImageANDROID(
+        pool, queue, waitSemaphoreCount, pWaitSemaphores,
+        image, &fenceFd);
+}
+
 VkResult VkDecoderGlobalState::waitForFence(VkFence boxed_fence,
                                             uint64_t timeout) {
     return mImpl->waitForFence(boxed_fence, timeout);

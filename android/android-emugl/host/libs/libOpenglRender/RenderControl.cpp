@@ -237,6 +237,9 @@ static constexpr android::base::StringView kVulkanBatchedDescriptorSetUpdate = "
 // Synchronized glBufferData call
 static constexpr android::base::StringView kSyncBufferData = "ANDROID_EMU_sync_buffer_data";
 
+// Async vkQSRI
+static constexpr android::base::StringView kVulkanAsyncQsri = "ANDROID_EMU_vulkan_async_qsri";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -356,6 +359,12 @@ static bool shouldEnableBatchedDescriptorSetUpdate() {
     return shouldEnableVulkan() &&
         shouldEnableQueueSubmitWithCommands() &&
         emugl_feature_is_enabled(android::featurecontrol::VulkanBatchedDescriptorSetUpdate);
+}
+
+static bool shouldEnableVulkanAsyncQsri() {
+    return shouldEnableVulkan() &&
+        (emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap) ||
+         emugl_feature_is_enabled(android::featurecontrol::VirtioGpuNativeSync));
 }
 
 android::base::StringView maxVersionToFeatureString(GLESDispatchMaxVersion version) {
@@ -484,6 +493,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
     bool vulkanQueueSubmitWithCommands = shouldEnableQueueSubmitWithCommands();
     bool vulkanBatchedDescriptorSetUpdate = shouldEnableBatchedDescriptorSetUpdate();
     bool syncBufferDataEnabled = true;
+    bool vulkanAsyncQsri = shouldEnableVulkanAsyncQsri();
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -611,6 +621,13 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         glStr += kSyncBufferData;
         glStr += " ";
     }
+
+    // Bug: 193809913
+    // Only switch on after everything else about this is merged / works.
+    // if (vulkanAsyncQsri) {
+    //     glStr += kVulkanAsyncQsri;
+    //     glStr += " ";
+    // }
 
     if (name == GL_EXTENSIONS) {
 

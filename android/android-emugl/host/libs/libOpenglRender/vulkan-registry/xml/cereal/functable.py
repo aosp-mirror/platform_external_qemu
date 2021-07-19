@@ -69,6 +69,7 @@ RESOURCE_TRACKER_ENTRIES = [
     "vkCmdBindDescriptorSets",
     "vkDestroyDescriptorSetLayout",
     "vkAllocateCommandBuffers",
+    "vkQueueSignalReleaseImageANDROID",
 ]
 
 SUCCESS_VAL = {

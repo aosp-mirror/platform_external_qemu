@@ -689,6 +689,7 @@ custom_decodes = {
     "vkQueueFlushCommandsGOOGLE" : emit_global_state_wrapped_decoding,
     "vkQueueCommitDescriptorSetUpdatesGOOGLE" : emit_global_state_wrapped_decoding,
     "vkCollectDescriptorPoolIdsGOOGLE" : emit_global_state_wrapped_decoding,
+    "vkQueueSignalReleaseImageANDROIDAsyncGOOGLE" : emit_global_state_wrapped_decoding,
 
     "vkQueueBindSparse" : emit_global_state_wrapped_decoding,
 }
