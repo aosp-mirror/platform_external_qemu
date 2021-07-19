@@ -622,10 +622,12 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         glStr += " ";
     }
 
-    if (vulkanAsyncQsri) {
-        glStr += kVulkanAsyncQsri;
-        glStr += " ";
-    }
+    // Bug: 193809913
+    // Only switch on after everything else about this is merged / works.
+    // if (vulkanAsyncQsri) {
+    //     glStr += kVulkanAsyncQsri;
+    //     glStr += " ";
+    // }
 
     if (name == GL_EXTENSIONS) {
 
