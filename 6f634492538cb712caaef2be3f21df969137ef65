@@ -105,6 +105,24 @@
       "parentUuid": "a25a099b_4f44f9d1",
       "revId": "6f634492538cb712caaef2be3f21df969137ef65",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2c3d255b_fccb5d0b",
+        "filename": "android/android-webrtc/videobridge/emulator/net/EmulatorGrcpClient.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1710786
+      },
+      "writtenOn": "2021-07-19T19:15:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8db79f6f_f25ec685",
+      "revId": "6f634492538cb712caaef2be3f21df969137ef65",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
