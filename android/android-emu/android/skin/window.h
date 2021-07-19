@@ -23,6 +23,8 @@
 typedef struct SkinWindow  SkinWindow;
 
 typedef struct SkinWindowFuncs {
+    void (*touch_events)(const SkinEvent * const data,
+                         int displayId);
     void (*key_event)(unsigned keycode, int down);
     void (*mouse_event)(unsigned x, unsigned y, unsigned state, int displayId);
     void (*pen_event)(unsigned x, unsigned y, const SkinEvent* ev,
@@ -66,6 +68,7 @@ extern void             skin_window_free  ( SkinWindow*  window );
 extern void             skin_window_redraw( SkinWindow*  window, SkinRect*  rect );
 extern void             skin_window_process_event( SkinWindow*  window, SkinEvent*  ev );
 extern void             skin_window_process_pen_event(SkinWindow* window, SkinEvent* ev);
+extern void             skin_window_process_touch_event( SkinWindow* window, SkinEvent* ev );
 
 extern void             skin_window_set_onion( SkinWindow*   window,
                                                SkinImage*    onion,

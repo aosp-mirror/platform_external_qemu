@@ -102,6 +102,11 @@ static void emulator_window_generic_event(SkinGenericEventCode* events,
     user_event_agent->sendGenericEvents(events, count);
 }
 
+static void emulator_window_touch_events(const SkinEvent* const data,
+                                         int displayId) {
+    user_event_agent->sendTouchEvents(data, displayId);
+}
+
 static void emulator_window_window_mouse_event(unsigned x,
                                                unsigned y,
                                                unsigned state,
@@ -225,6 +230,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
     user_event_agent = emulator->uiEmuAgent->userEvents;
 
     static const SkinWindowFuncs my_window_funcs = {
+        .touch_events = &emulator_window_touch_events,
         .key_event = &emulator_window_window_key_event,
         .mouse_event = &emulator_window_window_mouse_event,
         .pen_event = &emulator_window_window_pen_event,

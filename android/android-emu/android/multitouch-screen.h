@@ -64,6 +64,8 @@ typedef enum MTESource {
     MTES_PEN,
     /* The event is associated with an actual android device. */
     MTES_DEVICE,
+    /* The event is associated with a touch event. */
+    MTES_FINGER
 } MTESource;
 
 /* Defines the states of a BTN_* event */
@@ -71,6 +73,7 @@ typedef enum MTSButtonState {
     MTS_BTN_UP = 0,
     MTS_BTN_DOWN = 1
 } MTSButtonState;
+
 
 /* Initializes MTSState instance.
  * Param:
@@ -92,6 +95,11 @@ extern bool multitouch_should_skip_sync(int buttons_state);
 extern bool multitouch_is_second_finger(int buttons_state);
 
 extern void multitouch_update_displayId(int displayId);
+
+extern void multitouch_update(MTESource source,
+                              const SkinEvent* const data,
+                              int dx,
+                              int dy);
 
 /* Handles a MT pointer event.
  * Param:
