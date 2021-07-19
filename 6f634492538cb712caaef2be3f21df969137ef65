@@ -51,6 +51,24 @@
       "message": "Would it be possible to store this somewhere else? The gRPC client does not really have anything to do with audio.",
       "revId": "6f634492538cb712caaef2be3f21df969137ef65",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "69687580_1d157cbe",
+        "filename": "android/android-webrtc/videobridge/emulator/net/EmulatorGrcpClient.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1710786
+      },
+      "writtenOn": "2021-07-19T16:44:58Z",
+      "side": 1,
+      "message": "What is the recommendation? The GrpcAudioSource has no other interface to get information from the GoldFishBridge.",
+      "parentUuid": "db84483c_aa68c50b",
+      "revId": "6f634492538cb712caaef2be3f21df969137ef65",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
