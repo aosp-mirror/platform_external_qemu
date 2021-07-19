@@ -33,6 +33,24 @@
       "message": "please rebase and resolve the conflict.",
       "revId": "02af1b74a22c8785409d8820e8c79aaf3b923460",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "47aae636_e85014a0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1725507
+      },
+      "writtenOn": "2021-07-19T13:23:27Z",
+      "side": 1,
+      "message": "Hi Huan!\n\nWe\u0027re working on fixing the conflict and will upload a new patchset as soon as we go through our internal processes.\n\nThank you,\nEmilian",
+      "parentUuid": "8a6af728_9f30b6db",
+      "revId": "02af1b74a22c8785409d8820e8c79aaf3b923460",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
