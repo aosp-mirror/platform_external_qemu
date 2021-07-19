@@ -507,14 +507,7 @@ void EmulatorOverlay::generateTouchEvents(QMouseEvent* event) {
             mTouchPointAnimation.start();
             updateTouchPoints(event);
         }
-        if (mMouseTouchState == TouchState::NOT_TOUCHING) {
-            // First Press event in NOT_TOUCHING changes state
-            eventType = kEventMouseButtonDown;
-            mMouseTouchState = TouchState::TOUCHING;
-        } else {
-            // Press event in TOUCHING state is translated to Motion
-            eventType = kEventMouseMotion;
-        }
+        eventType = kEventMouseButtonDown;
     } else if (event->type() == QMouseEvent::MouseButtonRelease) {
         if (event->button() == Qt::RightButton) {
             mLerpValue = 0.0;
@@ -522,15 +515,7 @@ void EmulatorOverlay::generateTouchEvents(QMouseEvent* event) {
             mTouchPointAnimation.start();
             updateTouchPoints(event);
         }
-        if (mMouseTouchState == TouchState::TOUCHING &&
-                                        event->buttons() == Qt::NoButton) {
-            // Last Release event in TOUCHING changes state
-            eventType = kEventMouseButtonUp;
-            mMouseTouchState = TouchState::NOT_TOUCHING;
-        } else {
-            // Release event which is NOT last is translated to Motion
-            eventType = kEventMouseMotion;
-        }
+        eventType = kEventMouseButtonUp;
     } else if (event->type() == QMouseEvent::MouseMove) {
         eventType = kEventMouseMotion;
     }
