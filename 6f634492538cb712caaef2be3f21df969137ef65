@@ -69,6 +69,24 @@
       "parentUuid": "db84483c_aa68c50b",
       "revId": "6f634492538cb712caaef2be3f21df969137ef65",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a25a099b_4f44f9d1",
+        "filename": "android/android-webrtc/videobridge/emulator/net/EmulatorGrcpClient.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1710786
+      },
+      "writtenOn": "2021-07-19T16:50:36Z",
+      "side": 1,
+      "message": "What about store it in Switchboard and pass it to Participant::AddAudioTrack() then pass to GprcAudioSource?",
+      "parentUuid": "69687580_1d157cbe",
+      "revId": "6f634492538cb712caaef2be3f21df969137ef65",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
