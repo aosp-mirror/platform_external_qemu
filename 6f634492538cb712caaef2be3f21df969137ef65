@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c25d98e0_5a5d3dd0",
+        "filename": "android/android-webrtc/videobridge/emulator/main/GoldfishBridge.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-07-19T16:32:51Z",
+      "side": 1,
+      "message": "Nit: whitespace",
+      "revId": "6f634492538cb712caaef2be3f21df969137ef65",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "db84483c_aa68c50b",
+        "filename": "android/android-webrtc/videobridge/emulator/net/EmulatorGrcpClient.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-07-19T16:32:51Z",
+      "side": 1,
+      "message": "Would it be possible to store this somewhere else? The gRPC client does not really have anything to do with audio.",
+      "revId": "6f634492538cb712caaef2be3f21df969137ef65",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
