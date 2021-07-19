@@ -667,12 +667,19 @@ void VirtualSceneControlWindow::aggregateMovementMetrics(bool reset) {
 
     glm::vec3 eulerDegrees;
     glm::vec3 position;
+    auto outEulerDegrees = {&eulerDegrees.x, &eulerDegrees.y, &eulerDegrees.z};
+    auto outPosition = {
+            &position.x,
+            &position.y,
+            &position.z,
+    };
     sSensorsAgent->getPhysicalParameter(
-            PHYSICAL_PARAMETER_ROTATION, &eulerDegrees.x, &eulerDegrees.y,
-            &eulerDegrees.z, PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION);
-    sSensorsAgent->getPhysicalParameter(
-            PHYSICAL_PARAMETER_POSITION, &position.x, &position.y, &position.z,
+            PHYSICAL_PARAMETER_ROTATION, outEulerDegrees.begin(),
+            outEulerDegrees.size(),
             PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION);
+    sSensorsAgent->getPhysicalParameter(
+            PHYSICAL_PARAMETER_POSITION, outPosition.begin(),
+            outPosition.size(), PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION);
 
     const glm::quat rotation = fromEulerAnglesXYZ(glm::radians(eulerDegrees));
 

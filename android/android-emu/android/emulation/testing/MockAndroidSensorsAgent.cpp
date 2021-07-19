@@ -18,24 +18,23 @@
 static const QAndroidSensorsAgent sQAndroidSensorsAgent = {
         .setPhysicalParameterTarget =
                 [](int parameterId,
-                   float a,
-                   float b,
-                   float c,
+                   const float* val,
+                   const size_t count,
                    int interpolationMethod) {
                     CHECK(android::MockAndroidSensorsAgent::mock);
                     return android::MockAndroidSensorsAgent::mock
-                            ->setPhysicalParameterTarget(parameterId, a, b, c,
+                            ->setPhysicalParameterTarget(parameterId, val,
+                                                         count,
                                                          interpolationMethod);
                 },
         .getPhysicalParameter =
                 [](int parameterId,
-                   float* a,
-                   float* b,
-                   float* c,
+                   float* const* out,
+                   const size_t count,
                    int parameterValueType) {
                     CHECK(android::MockAndroidSensorsAgent::mock);
                     return android::MockAndroidSensorsAgent::mock
-                            ->getPhysicalParameter(parameterId, a, b, c,
+                            ->getPhysicalParameter(parameterId, out, count,
                                                    parameterValueType);
                 },
         .setCoarseOrientation =
@@ -45,16 +44,16 @@ static const QAndroidSensorsAgent sQAndroidSensorsAgent = {
                             ->setCoarseOrientation(orientation);
                 },
         .setSensorOverride =
-                [](int sensorId, float a, float b, float c) {
+                [](int sensorId, const float* val, const size_t count) {
                     CHECK(android::MockAndroidSensorsAgent::mock);
                     return android::MockAndroidSensorsAgent::mock
-                            ->setSensorOverride(sensorId, a, b, c);
+                            ->setSensorOverride(sensorId, val, count);
                 },
         .getSensor =
-                [](int sensorId, float* a, float* b, float* c) {
+                [](int sensorId, float* const* val, const size_t count) {
                     CHECK(android::MockAndroidSensorsAgent::mock);
                     return android::MockAndroidSensorsAgent::mock->getSensor(
-                            sensorId, a, b, c);
+                            sensorId, val, count);
                 },
         .getDelayMs =
                 []() {

@@ -16,6 +16,7 @@
 
 #include <assert.h>
 
+#include <initializer_list>
 #include <memory>
 #include <vector>
 
@@ -26,9 +27,18 @@ void fakeCameraSensorDecodeAndExecute(const std::vector<uint8_t>& input,
     std::vector<uint8_t> & output = *outputp;
     output.resize(9*sizeof(float));
     float *p = reinterpret_cast<float*>(&(output[0]));
-    android_sensors_get(ANDROID_SENSOR_ACCELERATION, p, p+1, p+2);
-    android_sensors_get(ANDROID_SENSOR_MAGNETIC_FIELD, p+3, p+4, p+5);
-    android_sensors_get(ANDROID_SENSOR_ORIENTATION, p+6, p+7, p+8);
+
+    auto p_accel = {p, p + 1, p + 2};
+    android_sensors_get(ANDROID_SENSOR_ACCELERATION, p_accel.begin(),
+                        p_accel.size());
+
+    auto p_magnetic = {p + 3, p + 4, p + 5};
+    android_sensors_get(ANDROID_SENSOR_MAGNETIC_FIELD, p_magnetic.begin(),
+                        p_magnetic.size());
+
+    auto p_orientation = {p + 6, p + 7, p + 8};
+    android_sensors_get(ANDROID_SENSOR_ORIENTATION, p_orientation.begin(),
+                        p_orientation.size());
 }
 
 void registerFakeRotatingCameraSensorServicePipe() {
