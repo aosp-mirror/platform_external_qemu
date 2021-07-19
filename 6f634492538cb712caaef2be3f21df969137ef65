@@ -18,6 +18,24 @@
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a6bda271_2bc04522",
+        "filename": "android/android-webrtc/videobridge/emulator/main/GoldfishBridge.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1710786
+      },
+      "writtenOn": "2021-07-19T16:36:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c25d98e0_5a5d3dd0",
+      "revId": "6f634492538cb712caaef2be3f21df969137ef65",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "db84483c_aa68c50b",
