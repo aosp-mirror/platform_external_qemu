@@ -16,6 +16,23 @@
       "message": "CL on the emulator part to enable usb-passthrough. To use,\nrun \"emulator -usb-passthrough vendorid\u003dVID,productid\u003dPID[,hostbus\u003dBusBum,hostport\u003dPortArray\"",
       "revId": "a1d51d5edcf4dbc392a6abaf6568b24528a5b7bd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "053d1494_d6afa236",
+        "filename": "android/android-emu/android/help.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1973,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2021-07-20T17:36:21Z",
+      "side": 1,
+      "message": "It is better to include a simple example in the printf.",
+      "revId": "a1d51d5edcf4dbc392a6abaf6568b24528a5b7bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
