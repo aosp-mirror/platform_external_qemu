@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e9dad305_0e279553",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129123
+      },
+      "writtenOn": "2021-07-20T17:28:18Z",
+      "side": 1,
+      "message": "CL on the emulator part to enable usb-passthrough. To use,\nrun \"emulator -usb-passthrough vendorid\u003dVID,productid\u003dPID[,hostbus\u003dBusBum,hostport\u003dPortArray\"",
+      "revId": "a1d51d5edcf4dbc392a6abaf6568b24528a5b7bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
