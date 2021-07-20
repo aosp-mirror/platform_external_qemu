@@ -1093,10 +1093,7 @@ void EmulatorQtWindow::mouseMoveEvent(QMouseEvent* event) {
         !android_cmdLineOptions->no_mouse_reposition) {
         // Block all the incoming mouse events if mouse is being moved to
         // center of the screen.
-        if (!mMouseRepositioning &&
-                        (event->source() == Qt::MouseEventNotSynthesized)) {
-            // Pen long press generates synthesized mouse events,
-            // which need to be filtered out
+        if (!mMouseRepositioning) {
             handleMouseEvent(kEventMouseMotion, getSkinMouseButton(event),
                              event->pos(), event->globalPos());
         }
@@ -1124,12 +1121,8 @@ void EmulatorQtWindow::mouseMoveEvent(QMouseEvent* event) {
             }
         }
     } else {
-        // Pen long press generates synthesized mouse events,
-        // which need to be filtered out
-        if (event->source() == Qt::MouseEventNotSynthesized) {
         handleMouseEvent(kEventMouseMotion, getSkinMouseButton(event),
                          event->pos(), event->globalPos());
-        }
     }
 }
 
@@ -1185,21 +1178,13 @@ void EmulatorQtWindow::mousePressEvent(QMouseEvent* event) {
         mMouseGrabbed = true;
     }
 
-    // Pen long press generates synthesized mouse events,
-    // which need to be filtered out
-    if (event->source() == Qt::MouseEventNotSynthesized) {
     handleMouseEvent(kEventMouseButtonDown, getSkinMouseButton(event),
                      event->pos(), event->globalPos());
-    }
 }
 
 void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent* event) {
-    // Pen long press generates synthesized mouse events,
-    // which need to be filtered out
-    if (event->source() == Qt::MouseEventNotSynthesized) {
     handleMouseEvent(kEventMouseButtonUp, getSkinMouseButton(event),
                      event->pos(), event->globalPos());
-    }
 }
 
 // Event handler for pen events as defined by Qt
