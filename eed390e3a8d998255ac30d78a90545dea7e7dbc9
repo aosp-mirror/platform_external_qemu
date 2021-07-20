@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "307623ca_99fe02a9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1883030
+      },
+      "writtenOn": "2021-07-20T19:48:01Z",
+      "side": 1,
+      "message": "Conflict free variant of: https://android-review.googlesource.com/c/platform/external/qemu/+/1773125\nWe tried to upload a new patch set there but Gerrit would not allow it.",
+      "revId": "eed390e3a8d998255ac30d78a90545dea7e7dbc9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
