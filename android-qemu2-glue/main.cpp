@@ -2187,11 +2187,10 @@ extern "C" int main(int argc, char** argv) {
     }
 
     if (fc::isEnabled(fc::BluetoothEmulation)) {
-        const int blue_port = 9321;
+        // Register the rootcanal device, this will activate rootcanal
         args.add("-chardev");
-        args.addFormat("socket,port=%d,host=localhost,server,nowait,ipv4,id=blue_sock", blue_port);
-        args.add2("-device", "virtserialport,chardev=blue_sock,name=bluetooth");
-        LOG(INFO) << "Enabling /dev/vhci on port: " << blue_port << " forward this to rootcanal.";
+        args.addFormat("rootcanal,id=rootcanal");
+        args.add2("-device", "virtserialport,chardev=rootcanal,name=bluetooth");
     }
 
     if (feature_is_enabled(kFeature_ModemSimulator)) {
