@@ -16,6 +16,24 @@
       "message": "I would prefer squashing this one into its parent.",
       "revId": "68562e3b71d0f76fb9ef6d146b912533e1ddfe66",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1fdfa685_ab9b13d9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2021-07-20T13:41:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "96b4d275_1c2b4725",
+      "revId": "68562e3b71d0f76fb9ef6d146b912533e1ddfe66",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
