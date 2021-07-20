@@ -47,9 +47,13 @@ android_add_test(
 target_link_libraries(rootcanal-test_types PRIVATE libbt-rootcanal-types gtest
                                                    gtest_main)
 
+add_library(libbt-rootcanal.headers INTERFACE)
+target_include_directories(libbt-rootcanal.headers INTERFACE ${VL_LIB})
+android_license(TARGET "libbt-rootcanal.headers" LIBNAME None SPDX Apache-2.0
+                LICENSE Apache-2.0 LOCAL REPO/LICENSES/LICENSE.APACHE2)
 # Rootcanal does not yet build under msvc
 if(WINDOWS_MSVC_X86_64)
-  # return()
+  return()
 endif()
 
 android_add_library(
@@ -87,6 +91,7 @@ android_add_library(
       ${BT_ROOT}/gd/hci/address.cc
       ${BT_ROOT}/gd/hci/class_of_device.cc
       ${RootCanalGeneratedPackets_h}
+      desktop/test_environment.cc
       model/controller/acl_connection.cc
       model/controller/acl_connection_handler.cc
       model/controller/dual_mode_controller.cc
@@ -137,12 +142,17 @@ target_compile_options(libbt-rootcanal
 
 # Compatibility layer for android emulator.
 android_add_library(
-  TARGET libbt-rootcanal-compat-layer LICENSE Apache-2.0
+  TARGET libbt-rootcanal-qemu
+  LICENSE Apache-2.0
   SRC # cmake-format: sortable
-      async_manager.cc)
+      async_manager.cc net/hci_datachannel_server.cpp net/qemu_datachannel.cpp
+      root_canal_qemu.cpp)
 
-target_link_libraries(libbt-rootcanal-compat-layer PRIVATE libbt-rootcanal
-                                                           android-emu)
+target_link_libraries(libbt-rootcanal-qemu PRIVATE libbt-rootcanal android-emu)
+target_compile_definitions(libbt-rootcanal-qemu PUBLIC ANDROID_BLUETOOTH)
+target_include_directories(
+  libbt-rootcanal-qemu PUBLIC .
+  PRIVATE ${BT_ROOT}/vendor_libs/test_vendor_lib/desktop/)
 
 android_add_test(
   TARGET test-vendor_test_host
@@ -158,17 +168,14 @@ android_add_test(
 target_compile_definitions(test-vendor_test_host PRIVATE -DLOG_NDEBUG=1)
 target_link_libraries(
   test-vendor_test_host
-  PRIVATE libbt-rootcanal libbt-rootcanal-compat-layer libbt-rootcanal-types
+  PRIVATE libbt-rootcanal libbt-rootcanal-qemu libbt-rootcanal-types
           android-emu gtest gtest_main)
 
 android_add_executable(
-  TARGET rootcanal
-  LICENSE Apache-2.0 SOURCE_DIR
-  SRC # cmake-format: sortable
-      ${BT_ROOT}/vendor_libs/test_vendor_lib/desktop/test_environment.cc
-      root_canal_main.cc)
+  TARGET rootcanal LICENSE Apache-2.0 SOURCE_DIR SRC # cmake-format: sortable
+                                                     root_canal_main.cc)
 target_link_libraries(
-  rootcanal PRIVATE libbt-rootcanal libbt-rootcanal-types
-                    libbt-rootcanal-compat-layer absl::flags absl::flags_parse)
+  rootcanal PRIVATE libbt-rootcanal libbt-rootcanal-types libbt-rootcanal-qemu
+                    absl::flags absl::flags_parse)
 target_include_directories(
   rootcanal PRIVATE ${BT_ROOT}/vendor_libs/test_vendor_lib/desktop/)
