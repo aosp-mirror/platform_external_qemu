@@ -26,6 +26,7 @@
 #include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/control/net_agent.h"
 #include "android/emulation/control/record_screen_agent.h"
+#include "android/emulation/control/rootcanal_hci_agent.h"
 #include "android/emulation/control/sensors_agent.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
@@ -63,7 +64,8 @@ typedef struct QAndroidAutomationAgent QAndroidAutomationAgent;
     X(QAndroidVirtualSceneAgent, virtual_scene) \
     X(QAndroidVmOperations, vm)                 \
     X(QCarDataAgent, car)                       \
-    X(QGrpcAgent, grpc)
+    X(QGrpcAgent, grpc)                         \
+    X(QAndroidHciAgent, rootcanal)
 
 // A structure used to group pointers to all agent interfaces used by the
 // Android console.
