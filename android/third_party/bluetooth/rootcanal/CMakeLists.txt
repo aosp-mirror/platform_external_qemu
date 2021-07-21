@@ -145,7 +145,13 @@ android_add_library(
   TARGET libbt-rootcanal-qemu
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
-      async_manager.cc net/hci_datachannel_server.cpp net/qemu_datachannel.cpp
+      async_manager.cc
+      net/hci_datachannel_server.cpp
+      net/mutli_datachannel_server.cpp
+      net/qemu_datachannel.cpp
+      net/sockets/async_socket.cc
+      net/sockets/loopback_async_socket_connector.cc
+      net/sockets/loopback_async_socket_server.cc
       root_canal_qemu.cpp)
 
 target_link_libraries(libbt-rootcanal-qemu PRIVATE libbt-rootcanal android-emu)
@@ -170,12 +176,3 @@ target_link_libraries(
   test-vendor_test_host
   PRIVATE libbt-rootcanal libbt-rootcanal-qemu libbt-rootcanal-types
           android-emu gtest gtest_main)
-
-android_add_executable(
-  TARGET rootcanal LICENSE Apache-2.0 SOURCE_DIR SRC # cmake-format: sortable
-                                                     root_canal_main.cc)
-target_link_libraries(
-  rootcanal PRIVATE libbt-rootcanal libbt-rootcanal-types libbt-rootcanal-qemu
-                    absl::flags absl::flags_parse)
-target_include_directories(
-  rootcanal PRIVATE ${BT_ROOT}/vendor_libs/test_vendor_lib/desktop/)
