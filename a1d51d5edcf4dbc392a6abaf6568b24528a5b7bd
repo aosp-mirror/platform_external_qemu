@@ -37,6 +37,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "9d5d7f47_ab6ea3d1",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 2315,
+      "author": {
+        "id": 1791310
+      },
+      "writtenOn": "2021-07-21T11:26:31Z",
+      "side": 1,
+      "message": "this patch applies to linux/mac too, right?*** is what i meant",
+      "parentUuid": "877d22ce_4c7b79f8",
+      "revId": "a1d51d5edcf4dbc392a6abaf6568b24528a5b7bd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "83ee09a6_4a07ad68",
         "filename": "android-qemu2-glue/main.cpp",
         "patchSetId": 3
