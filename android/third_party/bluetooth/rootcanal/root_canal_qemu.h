@@ -13,9 +13,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-namespace android {
+#pragma once
+#include <string>
 
 // Connects and activates the root canal module, returns true if
 // the activation succeeded.
-bool connect_rootcanal();
+namespace android {
+namespace bluetooth {
+class Rootcanal {
+public:
+    class Builder;
+    virtual ~Rootcanal() {};
+
+    // Starts the root canal service.
+    virtual bool start() = 0;
+
+    // Closes the root canal service
+    virtual void close() = 0;
+};
+
+class Rootcanal::Builder {
+public:
+    Builder& withHciPort(int port);
+    Builder& withHciPort(const char* portStr);
+    Builder& withTestPort(int port);
+    Builder& withTestPort(const char* portStr);
+    Builder& withLinkPort(int port);
+    Builder& withLinkPort(const char* portStr);
+    Builder& withControllerProperties(const char* props);
+    Builder& withCommandFile(const char* cmdFile);
+    std::unique_ptr<Rootcanal> build();
+
+private:
+    int mHci = -1;
+    int mTest = -1;
+    int mLink = -1;
+    std::string mDefaultControllerProperties;
+    std::string mCmdFile;
+};
+}  // namespace bluetooth
 }  // namespace android

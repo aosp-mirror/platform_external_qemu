@@ -251,6 +251,14 @@ OPT_PARAM(turncfg, "cmd", "Command to execute to obtain turn configuration for t
 OPT_PARAM(rtcfps, "<fps>", "The frequency at which frames are delivered to webrtc video bridge.")
 #endif
 
+#ifdef ANDROID_BLUETOOTH
+OPT_PARAM(rootcanal_hci_port, "<port>", "Rootcanal virtual hci port.")
+OPT_PARAM(rootcanal_test_port, "<port>", "Rootcanal testing port.")
+OPT_PARAM(rootcanal_link_port, "<port>", "Rootcanal link layer port.")
+OPT_PARAM(rootcanal_controller_properties_file, "<file>", "Rootcanal controller_properties.json file.")
+OPT_PARAM(rootcanal_default_commands_file, "<file>", "Rootcanal commands file to run on launch.")
+#endif
+
 OPT_PARAM(multidisplay, "index width height dpi flag", "config multiple displays.")
 
 OPT_PARAM(google_maps_key, "<API key>", "API key to use with the Google Maps GUI.")

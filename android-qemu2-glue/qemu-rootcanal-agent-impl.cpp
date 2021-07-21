@@ -12,19 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <ctype.h>                                          // for isprint
-#include <errno.h>                                          // for EAGAIN
-#include <stdio.h>                                          // for printf
-#include <string.h>                                         // for memcpy
-#include <sys/types.h>                                      // for ssize_t
-#include <algorithm>                                        // for min
-#include <cstdint>                                          // for uint8_t
-#include <mutex>                                            // for mutex
-#include <ostream>                                          // for char_traits
-#include <vector>                                           // for vector
+#include <ctype.h>      // for isprint
+#include <errno.h>      // for EAGAIN
+#include <stdio.h>      // for printf
+#include <string.h>     // for memcpy
+#include <sys/types.h>  // for ssize_t
+#include <algorithm>    // for min
+#include <cstdint>      // for uint8_t
+#include <mutex>        // for mutex
+#include <ostream>      // for char_traits
+#include <vector>       // for vector
 
-#include "android/base/Log.h"                               // for LogStream...
+#include "android/base/Log.h"  // for LogStream...
+#include "android/cmdline-option.h"
 #include "android/emulation/control/rootcanal_hci_agent.h"  // for QAndroidH...
+
+#ifdef ANDROID_BLUETOOTH
+#include "root_canal_qemu.h"
+#endif
 
 // clang-format off
 extern "C" {
@@ -36,10 +41,9 @@ extern "C" {
 // clang-format on
 
 #ifdef _MSC_VER
- #undef send
- #undef recv
+#undef send
+#undef recv
 #endif
-
 
 /* set  for very verbose debugging */
 #ifndef DEBUG
@@ -61,22 +65,19 @@ extern "C" {
 
 #endif
 
-#ifdef ANDROID_BLUETOOTH
-namespace android {
-bool connect_rootcanal();
-}
-#endif
-
 #define TYPE_CHARDEV_ROOTCANAL "chardev-rootcanal"
 #define ROOTCANAL_CHARDEV(obj) \
     OBJECT_CHECK(RootcanalChardev, (obj), TYPE_CHARDEV_ROOTCANAL)
-
 
 static std::vector<uint8_t> sIncomingHciBuffer;
 static std::mutex sHciMutex;
 static dataAvailableCallback sHciCallback = nullptr;
 static void* sOpaque = nullptr;
 Chardev* sChrRootcanal;
+
+#ifdef ANDROID_BLUETOOTH
+std::unique_ptr<android::bluetooth::Rootcanal> sRootcanal;
+#endif
 
 ssize_t rootcanal_recv(uint8_t* buffer, uint64_t bufferSize) {
     std::unique_lock<std::mutex> guard(sHciMutex);
@@ -92,7 +93,7 @@ ssize_t rootcanal_recv(uint8_t* buffer, uint64_t bufferSize) {
 }
 
 ssize_t rootcanal_send(const uint8_t* buffer, uint64_t bufferSize) {
-    qemu_chr_be_write(sChrRootcanal, (uint8_t*) buffer, bufferSize);
+    qemu_chr_be_write(sChrRootcanal, (uint8_t*)buffer, bufferSize);
     return bufferSize;
 };
 
@@ -112,8 +113,7 @@ static const QAndroidHciAgent sQAndroidHciAgent = {
         .available = rootcanal_available,
         .registerDataAvailableCallback = rootcanal_register_callback};
 
-extern "C" const QAndroidHciAgent* const gQAndroidHciAgent =
-        &sQAndroidHciAgent;
+extern "C" const QAndroidHciAgent* const gQAndroidHciAgent = &sQAndroidHciAgent;
 
 static int rootcanal_chr_write(Chardev* chr, const uint8_t* buf, int len) {
     {
@@ -135,9 +135,27 @@ static void rootcanal_chr_open(Chardev* chr,
     sChrRootcanal = chr;
     *be_opened = false;
 #ifdef ANDROID_BLUETOOTH
-    *be_opened = android::connect_rootcanal();
+    android::bluetooth::Rootcanal::Builder builder;
+    builder.withHciPort(android_cmdLineOptions->rootcanal_hci_port)
+            .withTestPort(android_cmdLineOptions->rootcanal_test_port)
+            .withLinkPort(android_cmdLineOptions->rootcanal_link_port)
+            .withControllerProperties(
+                    android_cmdLineOptions
+                            ->rootcanal_controller_properties_file)
+            .withCommandFile(
+                    android_cmdLineOptions->rootcanal_default_commands_file);
+    sRootcanal = builder.build();
+    *be_opened = sRootcanal->start();
 #endif
-    LOG(INFO) << "Rootcanal has " << (*be_opened ? "" : "**NOT**") << " been activated.";
+    LOG(INFO) << "Rootcanal has " << (*be_opened ? "" : "**NOT**")
+              << " been activated.";
+}
+
+static void rootcanal_chr_cleanup(Object* o) {
+#ifdef ANDROID_BLUETOOTH
+    LOG(INFO) << "Closing down rootcanal.";
+    sRootcanal->close();
+#endif
 }
 
 static void char_rootcanal_class_init(ObjectClass* oc, void* data) {
@@ -150,6 +168,7 @@ static const TypeInfo char_rootcanal_type_info = {
         .name = TYPE_CHARDEV_ROOTCANAL,
         .parent = TYPE_CHARDEV,
         .instance_size = sizeof(Chardev),
+        .instance_finalize = rootcanal_chr_cleanup,
         .class_init = char_rootcanal_class_init,
 };
 
