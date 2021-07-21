@@ -12,6 +12,7 @@
 #pragma once
 
 #include "android/utils/compiler.h"
+#include "android/avd/info.h"
 
 ANDROID_BEGIN_HEADER
 
@@ -21,6 +22,7 @@ ANDROID_BEGIN_HEADER
 extern int android_drive_share_init(bool wipe_data,
                                     bool read_only,
                                     const char* snapshot_name,
-                                    BlockInterfaceType blockDefaultType);
+                                    BlockInterfaceType blockDefaultType,
+                                    const AvdInfo* avdInfo);
 
 ANDROID_END_HEADER
