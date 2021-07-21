@@ -540,20 +540,19 @@ static int drive_reinit(void* opaque, QemuOpts* opts, Error** errp) {
 }
 }
 
-static std::string getReadSnapshotFileName() {
+static std::string getReadSnapshotFileName(const AvdInfo* avdInfo) {
     const char* kReadSnapshotFileName = "read-snapshot.txt";
-    char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = avdInfo_getContentPath(avdInfo);
     if (avdPath) {
         std::string baseSnapshotFileName(avdPath);
-        free(avdPath);
         return baseSnapshotFileName + PATH_SEP + kReadSnapshotFileName;
     } else {
         return kReadSnapshotFileName;
     }
 }
 
-static bool isBaseOnDifferentSnapshot(const char* snapshot_name) {
-    std::string baseSnapshotFileName = getReadSnapshotFileName();
+static bool isBaseOnDifferentSnapshot(const char* snapshot_name, const AvdInfo* avdInfo) {
+    std::string baseSnapshotFileName = getReadSnapshotFileName(avdInfo);
     FILE* baseSnapshotNameFile = fsopenWithTimeout(baseSnapshotFileName.c_str(),
             "r", android::base::FileShare::Read, 5000);
     if (!baseSnapshotNameFile) {
@@ -590,13 +589,14 @@ static bool updateDriveShareMode(const char* snapshotName,
 extern "C" int android_drive_share_init(bool wipe_data,
                                         bool read_only,
                                         const char* snapshot_name,
-                                        BlockInterfaceType blockDefaultType) {
+                                        BlockInterfaceType blockDefaultType,
+                                        const AvdInfo* avdInfo) {
     if (!parseQemuOptForQcow2(wipe_data)) {
         return -1;
     }
 
     android::multiinstance::setUpdateDriveShareModeFunc(updateDriveShareMode);
-    bool needApplySnapshot = read_only && isBaseOnDifferentSnapshot(snapshot_name);
+    bool needApplySnapshot = read_only && isBaseOnDifferentSnapshot(snapshot_name, avdInfo);
     DriveInitParam param = {blockDefaultType, snapshot_name,
                             read_only ? android::base::FileShare::Read
                                       : android::base::FileShare::Write,
@@ -605,7 +605,7 @@ extern "C" int android_drive_share_init(bool wipe_data,
     if (needApplySnapshot || !read_only) {
         // For read-only we open a file to record the snapshot name
         // For writable we wipe that snapshot name because it might change later
-        std::string baseSnapshotFileName = getReadSnapshotFileName();
+        std::string baseSnapshotFileName = getReadSnapshotFileName(avdInfo);
         baseSnapshotNameFile = fsopenWithTimeout(baseSnapshotFileName.c_str(),
             "w", android::base::FileShare::Write, 5000);
     }
