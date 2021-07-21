@@ -2110,25 +2110,36 @@ extern "C" int main(int argc, char** argv) {
     }
 
     // Network
-    args.add("-netdev");
-    if (opts->net_tap) {
-        const char* upScript =
-                opts->net_tap_script_up ? opts->net_tap_script_up : "no";
-        const char* downScript =
-                opts->net_tap_script_down ? opts->net_tap_script_down : "no";
-        args.addFormat("tap,id=mynet,script=%s,downscript=%s,ifname=%s",
-                       upScript, downScript, opts->net_tap);
+    // b/192710732, TODO (wdu@) VirtioWifi exposes network interface as eth0 in Android
+    // guest system and will therefore turn on Ethernet for AAOS if the guest sytem has
+    // Ethernet hardware feature configured. By design, Wi-Fi will not be kept as the default
+    // network if Ethernet is present. Thus, we disable VirtioNet device for AAOS for now.
+    // In the future, we should make virtio network device configurable part of emulator.
+    bool disableVirtioNet = feature_is_enabled(kFeature_VirtioWifi) &&
+            avdInfo_getAvdFlavor(avd) == AVD_ANDROID_AUTO;
+    if (disableVirtioNet) {
+        D("Disable virtio net device for Android Auto AVD.");
     } else {
-        if (opts->net_tap_script_up) {
-            dwarning("-net-tap-script-up ignored without -net-tap option");
+        args.add("-netdev");
+        if (opts->net_tap) {
+            const char* upScript =
+                    opts->net_tap_script_up ? opts->net_tap_script_up : "no";
+            const char* downScript =
+                    opts->net_tap_script_down ? opts->net_tap_script_down : "no";
+            args.addFormat("tap,id=mynet,script=%s,downscript=%s,ifname=%s",
+                           upScript, downScript, opts->net_tap);
+        } else {
+            if (opts->net_tap_script_up) {
+                dwarning("-net-tap-script-up ignored without -net-tap option");
+            }
+            if (opts->net_tap_script_down) {
+                dwarning("-net-tap-script-down ignored without -net-tap option");
+            }
+            args.add("user,id=mynet");
         }
-        if (opts->net_tap_script_down) {
-            dwarning("-net-tap-script-down ignored without -net-tap option");
-        }
-        args.add("user,id=mynet");
+        args.add("-device");
+        args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
     }
-    args.add("-device");
-    args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
 
     const bool createVirtconsoles =
         opts->virtio_console ||
