@@ -762,6 +762,7 @@ void host_vendor_fms(char *vendor, int *family, int *model, int *stepping)
 
     host_cpuid(0x0, 0, &eax, &ebx, &ecx, &edx);
     x86_cpu_vendor_words2str(vendor, ebx, edx, ecx);
+    strcpy(vendor, "Goldfish-Cpu");
 
     host_cpuid(0x1, 0, &eax, &ebx, &ecx, &edx);
     if (family) {
