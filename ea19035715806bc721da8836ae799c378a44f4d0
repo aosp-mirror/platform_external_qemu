@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c553628c_2aebe5f8",
+        "filename": "android/android-emu-base/android/base/sockets/SocketWaiter.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-07-21T21:33:15Z",
+      "side": 0,
+      "message": "maybe keep those checks ?",
+      "range": {
+        "startLine": 86,
+        "startChar": 8,
+        "endLine": 86,
+        "endChar": 14
+      },
+      "revId": "ea19035715806bc721da8836ae799c378a44f4d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "92b3f612_c12a9656",
+        "filename": "android/android-emu-base/android/base/sockets/SocketWaiter.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-07-21T21:33:15Z",
+      "side": 0,
+      "message": "keep it ?",
+      "range": {
+        "startLine": 163,
+        "startChar": 11,
+        "endLine": 163,
+        "endChar": 39
+      },
+      "revId": "ea19035715806bc721da8836ae799c378a44f4d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b145d751_b4c91c7c",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 16
+      },
+      "lineNbr": 2194,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-07-21T21:33:15Z",
+      "side": 1,
+      "message": "probably need to detect whether ipv4 is supported\nthe blue_port is hard coded, it is ok for now but please\nadd TODO here and let emulator pick a port ? otherwise,\nit will be a problem.\n\nin addition, windows has problem handling too many fds",
+      "range": {
+        "startLine": 2190,
+        "startChar": 7,
+        "endLine": 2194,
+        "endChar": 98
+      },
+      "revId": "a6c6eb1a216918544ce5ccfc36dcf15158287baf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cc798dff_066a925b",
+        "filename": "android/third_party/bluetooth/rootcanal/root_canal_main.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-07-21T21:33:15Z",
+      "side": 1,
+      "message": "nit: 2021",
+      "range": {
+        "startLine": 2,
+        "startChar": 13,
+        "endLine": 2,
+        "endChar": 17
+      },
+      "revId": "a6c6eb1a216918544ce5ccfc36dcf15158287baf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8243ac3e_bbc555fc",
+        "filename": "android/third_party/bluetooth/rootcanal/root_canal_main.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2021-07-21T21:33:15Z",
+      "side": 1,
+      "message": "why this has to run as separate binary ?",
+      "range": {
+        "startLine": 50,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 8
+      },
+      "revId": "a6c6eb1a216918544ce5ccfc36dcf15158287baf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
