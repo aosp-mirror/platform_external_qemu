@@ -32,7 +32,9 @@
 
 #define D(...) VERBOSE_PRINT(init,__VA_ARGS__)
 
-/* Return the path to the AVD's root configuration .ini file. it is located in
+/* Prefer using avdInfo_getRootIniPath() instead.
+ *
+ * Return the path to the AVD's root configuration .ini file. it is located in
  * ~/.android/avd/<name>.ini or Windows equivalent
  *
  * This file contains the path to the AVD's content directory, which
@@ -54,6 +56,7 @@ path_getRootIniPath( const char*  avdName )
     return ASTRDUP(temp);
 }
 
+// Prefer using avdInfo_getContentPath() instead.
 char*
 path_getAvdContentPath(const char* avdName)
 {

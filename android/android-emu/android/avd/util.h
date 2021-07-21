@@ -26,7 +26,9 @@ ANDROID_BEGIN_HEADER
  */
 char* path_getSdkRoot();
 
-/* Return the path to the AVD's root configuration .ini file. it is located in
+/* Prefer using avdInfo_getRootIniPath() instead.
+ *
+ * Return the path to the AVD's root configuration .ini file. it is located in
  * ~/.android/avd/<name>.ini or Windows equivalent
  *
  * This file contains the path to the AVD's content directory, which
@@ -34,7 +36,9 @@ char* path_getSdkRoot();
  */
 char* path_getRootIniPath( const char*  avdName );
 
-/* Return the path to the AVD's content directory. it is located in
+/* Prefer using avdInfo_getContentPath() instead.
+ *
+ * Return the path to the AVD's content directory. it is located in
  *  ~/.android/avd/<name>.avd or Windows equivalent
  * Caller must free() returned string.
  */

@@ -5299,9 +5299,11 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #ifdef CONFIG_ANDROID
     if (android_qemu_mode) {
         if (android_drive_share_init(
-                android_op_wipe_data, read_only,
+                android_op_wipe_data,
+                read_only,
                 loadvm ? loadvm : android_get_quick_boot_name(),
-                machine_class->block_default_type)) {
+                machine_class->block_default_type,
+                android_avdInfo)) {
             return 1;
         }
     } else {
