@@ -46,6 +46,8 @@ typedef std::shared_ptr<SaveableTexture> SaveableTexturePtr;
 struct EglImage
 {
     ~EglImage(){};
+    bool isNative;
+    EGLImage nativeImage;
     unsigned int imageId;
     NamedObjectPtr globalTexObj;
     unsigned int width;

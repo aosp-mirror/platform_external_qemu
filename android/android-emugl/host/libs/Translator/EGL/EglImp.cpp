@@ -1359,10 +1359,39 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
     VALIDATE_DISPLAY(display);
     VALIDATE_CONTEXT(context);
 
-    // We only support EGL_GL_TEXTURE_2D images
-    if (target != EGL_GL_TEXTURE_2D_KHR) {
-        RETURN_ERROR(EGL_NO_IMAGE_KHR,EGL_BAD_PARAMETER);
-    }
+	if (target != EGL_GL_TEXTURE_2D_KHR) {
+		// Create image from underlying and add to registry
+		EGLImage image = dpy->createNativeImage(dpy->getNativeDisplay(), 0, target, buffer, attrib_list);
+
+		if (image == EGL_NO_IMAGE_KHR) {
+			return EGL_NO_IMAGE_KHR;
+		}
+
+		ImagePtr img( new EglImage() );
+		img->isNative = true;
+		img->nativeImage = image;
+		img->width = 0;
+		img->height = 0;
+		if (attrib_list) {
+			const EGLint* current = attrib_list;
+			while (EGL_NONE != *current) {
+				switch (*current) {
+					case EGL_WIDTH:
+						img->width = current[1];
+						break;
+					case EGL_HEIGHT:
+						img->height = current[1];
+						break;
+					case EGL_LINUX_DRM_FOURCC_EXT:
+					    // TODO: Translate drm fourcc to internal format
+						// img->fourcc = current[1];
+						break;
+				}
+				current += 2;
+			}
+		}
+		return dpy->addImageKHR(img);
+	}
 
     ThreadInfo* thread  = getThreadInfo();
     ShareGroupPtr sg = thread->shareGroup;
@@ -1411,6 +1440,10 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR
     if (img->sync) {
         iface->deleteSync((GLsync)img->sync);
         img->sync = nullptr;
+    }
+
+    if (img->isNative) {
+        dpy->destroyNativeImage(dpy->getNativeDisplay(), img->nativeImage);
     }
 
     return dpy->destroyImageKHR(image) ? EGL_TRUE:EGL_FALSE;
