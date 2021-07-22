@@ -80,7 +80,6 @@ private:
                     const char* content,
                     size_t length);
     std::string generateUniqueBugreportName();
-    void handleFailure(const char* message, const char* title);
     android::emulation::AdbInterface* mAdb = nullptr;
     QMessageBox* mDeviceDetailsDialog;
     std::unique_ptr<Ui::BugreportPage> mUi;

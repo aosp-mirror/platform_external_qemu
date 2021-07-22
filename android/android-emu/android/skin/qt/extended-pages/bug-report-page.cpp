@@ -34,14 +34,12 @@
 #include <vector>                                      // for vector
 
 #include "android/avd/info.h"                          // for avdInfo_getApi...
-#include "android/base/Log.h"
 #include "android/base/StringFormat.h"                 // for StringFormat
 #include "android/base/Uri.h"                          // for Uri
 #include "android/base/Uuid.h"                         // for Uuid
 #include "android/base/async/ThreadLooper.h"           // for ThreadLooper
 #include "android/base/files/PathUtils.h"              // for PathUtils
 #include "android/base/system/System.h"                // for System, System...
-#include "android/cmdline-option.h"
 #include "android/emulation/control/ScreenCapturer.h"  // for captureScreenshot
 #include "android/globals.h"                           // for android_avdInfo
 #include "android/metrics/AdbLivenessChecker.h"        // for AdbLivenessChecker
@@ -206,11 +204,10 @@ void BugreportPage::refreshContents() {
         loadAdbBugreport();
         loadScreenshotImage();
     } else {
-        handleFailure(
-                "The bugreport save location is not set.<br/>"
-                "Check the settings page and ensure the directory "
-                "exists and is writeable.",
-                "Bugreport");
+        showErrorDialog(tr("The bugreport save location is not set.<br/>"
+                           "Check the settings page and ensure the directory "
+                           "exists and is writeable."),
+                        tr("Bugreport"));
     }
 }
 
@@ -270,11 +267,10 @@ void BugreportPage::on_bug_saveButton_clicked() {
     mSavingStates.bugreportSavedSucceed = future.result();
     enableInput(true);
     if (!mSavingStates.bugreportSavedSucceed) {
-        handleFailure(
-                "The bugreport save location is invalid.<br/>"
-                "Check the settings page and ensure the directory "
-                "exists and is writeable.",
-                "Bug Report");
+        showErrorDialog(tr("The bugreport save location is invalid.<br/>"
+                           "Check the settings page and ensure the directory "
+                           "exists and is writeable."),
+                        tr("Bug Report"));
     }
 }
 
@@ -288,10 +284,10 @@ void BugreportPage::on_bug_sendToGoogle_clicked() {
             QtConcurrent::run(this, &BugreportPage::launchIssueTracker);
     bool success = future.result();
     if (!success) {
-        const char* errMsg =
-                "There was an error while opening the Google issue "
-                "tracker.<br/>";
-        handleFailure(errMsg, "File a Bug for Google");
+        QString errMsg =
+                tr("There was an error while opening the Google issue "
+                   "tracker.<br/>");
+        showErrorDialog(errMsg, tr("File a Bug for Google"));
     }
 }
 
@@ -420,11 +416,11 @@ void BugreportPage::loadAdbBugreport() {
                     } else {
                         // TODO(wdu) Better error handling for failed adb bugreport
                         // generation
-                        handleFailure(
-                                "Bug report interrupted by snapshot load? "
-                                "There was an error while generating "
-                                "adb bugreport",
-                                "Bug Report");
+                        showErrorDialog(
+                                tr("Bug report interrupted by snapshot load? "
+                                   "There was an error while generating "
+                                   "adb bugreport"),
+                                tr("Bug Report"));
                     }
                 });
             },
@@ -522,12 +518,4 @@ std::string BugreportPage::generateUniqueBugreportName() {
     return StringFormat("bugreport-%s-%s-%s",
                         deviceName ? deviceName : "UNKNOWN_DEVICE", date,
                         Uuid::generate().toString());
-}
-
-void BugreportPage::handleFailure(const char* message, const char* title) {
-    if (android_cmdLineOptions->qt_hide_window) {
-        LOG(ERROR) << title << ": " << message;
-    } else {
-        showErrorDialog(tr(message), tr(title));
-    }
 }
