@@ -1923,6 +1923,7 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
 }
 
 void GLEScmContext::clientActiveTexture(GLenum texture) {
+    setClientActiveTexture(texture);
     if (m_coreProfileEngine) {
         core().clientActiveTexture(texture);
     } else {
