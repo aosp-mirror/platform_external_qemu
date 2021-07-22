@@ -1116,6 +1116,70 @@ bool ColorBuffer::importMemory(
     return true;
 }
 
+bool ColorBuffer::importEglNativePixmap(void* pixmap) {
+
+    EGLImageKHR image = s_egl.eglCreateImageKHR(m_display, EGL_NO_CONTEXT, EGL_NATIVE_PIXMAP_KHR, pixmap, nullptr);
+
+    if (image == EGL_NO_IMAGE_KHR) return false;
+
+    // Assume pixmap is compatible with ColorBuffer's current dimensions and internal format.
+    EGLBoolean setInfoRes = s_egl.eglSetImageInfoANDROID(m_display, image, m_width, m_height, m_internalFormat);
+
+    if (EGL_TRUE != setInfoRes) {
+        s_egl.eglDestroyImageKHR(m_display, image);
+        return false;
+    }
+
+    rebindEglImage(image);
+    return true;
+}
+
+bool ColorBuffer::importEglImage(void* nativeEglImage) {
+    EGLImageKHR image = s_egl.eglImportImageANDROID(m_display, (EGLImage)nativeEglImage);
+
+    if (image == EGL_NO_IMAGE_KHR) return false;
+
+    // Assume nativeEglImage is compatible with ColorBuffer's current dimensions and internal format.
+    EGLBoolean setInfoRes = s_egl.eglSetImageInfoANDROID(m_display, image, m_width, m_height, m_internalFormat);
+
+    if (EGL_TRUE != setInfoRes) {
+        s_egl.eglDestroyImageKHR(m_display, image);
+        return false;
+    }
+
+    rebindEglImage(image);
+    return true;
+}
+
+std::vector<uint8_t> ColorBuffer::getContentsAndClearStorage() {
+    // Assume there is a current context.
+    size_t bytes;
+    readContents(&bytes, nullptr);
+    std::vector<uint8_t> prevContents(bytes);
+    readContents(&bytes, prevContents.data());
+    s_gles2.glDeleteTextures(1, &m_tex);
+    s_egl.eglDestroyImageKHR(m_display, m_eglImage);
+    m_tex = 0;
+    m_eglImage = (EGLImageKHR)0;
+    return prevContents;
+}
+
+void ColorBuffer::restoreContentsAndEglImage(const std::vector<uint8_t>& contents, EGLImageKHR image) {
+    s_gles2.glGenTextures(1, &m_tex);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+
+    m_eglImage = image;
+    s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, (GLeglImageOES)m_eglImage);
+
+    replaceContents(contents.data(), m_numBytes);
+}
+
+void ColorBuffer::rebindEglImage(EGLImageKHR image) {
+    RecursiveScopedHelperContext context(m_helper);
+    auto contents = getContentsAndClearStorage();
+    restoreContentsAndEglImage(contents, image);
+}
+
 void ColorBuffer::setInUse(bool inUse) {
     m_inUse = inUse;
 }

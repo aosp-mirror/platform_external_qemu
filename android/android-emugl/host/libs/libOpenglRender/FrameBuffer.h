@@ -514,12 +514,10 @@ public:
     void getTrivialContextForCurrentRenderThread(HandleType shared,
                                                  HandleType* contextOut,
                                                  HandleType* surfOut);
-    // createAndBindTrivialSharedContext(), but with a m_pbufContext
+    // createTrivialContext(), but with a m_pbufContext
     // as shared, and not adding itself to the context map at all.
-    void createAndBindTrivialSharedContext(EGLContext* contextOut,
-                                           EGLSurface* surfOut);
-    void unbindAndDestroyTrivialSharedContext(EGLContext context,
-                                              EGLSurface surf);
+    void createSharedTrivialContext(EGLContext* contextOut, EGLSurface* surfOut);
+    void destroySharedTrivialContext(EGLContext context, EGLSurface surf);
 
     void setShuttingDown() { m_shuttingDown = true; }
     bool isShuttingDown() const { return m_shuttingDown; }
@@ -644,6 +642,10 @@ public:
     HandleType getLastPostedColorBuffer() { return m_lastPostedColorBuffer; }
     void waitForGpu(uint64_t eglsync);
     void waitForGpuVulkan(uint64_t deviceHandle, uint64_t fenceHandle);
+
+    bool platformImportResource(uint32_t handle, uint32_t type, void* resource);
+    void* platformCreateSharedEglContext(void);
+    bool platformDestroySharedEglContext(void* context);
 
     void setGuestManagedColorBufferLifetime(bool guestManaged);
 
@@ -909,5 +911,13 @@ private:
     };
     std::map<int, DisplayConfig> mDisplayConfigs;
     int mDisplayActiveConfigId = -1;
+
+    // Tracks platform EGL contexts that have been handed out to other users,
+    // indexed by underlying native EGL context object.
+    struct PlatformEglContextInfo {
+        EGLContext context;
+        EGLSurface surface;
+    };
+    std::unordered_map<void*, PlatformEglContextInfo> m_platformEglContexts;
 };
 #endif

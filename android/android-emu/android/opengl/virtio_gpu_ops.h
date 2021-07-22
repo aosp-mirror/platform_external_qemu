@@ -87,6 +87,15 @@ typedef void (*update_color_buffer_from_framework_format_t)(
     uint32_t handle, int x, int y, int width, int height,
     uint32_t fwkFormat, uint32_t format, uint32_t type, void* pixels);
 
+// Platform resources and contexts support
+#define RESOURCE_TYPE_EGL_NATIVE_PIXMAP 0x01
+#define RESOURCE_TYPE_EGL_IMAGE 0x02
+
+typedef bool (*platform_import_resource_t)(uint32_t handle, uint32_t type, void* resource);
+typedef bool (*platform_resource_info_t)(uint32_t handle, int32_t* width, int32_t* height, int32_t* internal_format);
+typedef void* (*platform_create_shared_egl_context_t)(void);
+typedef bool (*platform_destroy_shared_egl_context_t)(void* context);
+
 struct AndroidVirtioGpuOps {
     create_color_buffer_with_handle_t create_color_buffer_with_handle;
     open_color_buffer_t open_color_buffer;
@@ -109,7 +118,13 @@ struct AndroidVirtioGpuOps {
     wait_for_gpu_t wait_for_gpu;
     wait_for_gpu_vulkan_t wait_for_gpu_vulkan;
     set_guest_managed_color_buffer_lifetime_t set_guest_managed_color_buffer_lifetime;
+
     update_color_buffer_from_framework_format_t update_color_buffer_from_framework_format;
+
+    platform_import_resource_t platform_import_resource;
+    platform_resource_info_t platform_resource_info;
+    platform_create_shared_egl_context_t platform_create_shared_egl_context;
+    platform_destroy_shared_egl_context_t platform_destroy_shared_egl_context;
 };
 
 #endif // ANDROID_VIRTIO_GPU_OPS

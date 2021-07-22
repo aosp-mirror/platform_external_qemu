@@ -1508,6 +1508,33 @@ public:
         return entry.hvSlot;
     }
 
+    int platformImportResource(int res_handle, int res_type, void* resource) {
+        AutoLock lock(mLock);
+        auto it = mResources.find(res_handle);
+        if (it == mResources.end()) return -1;
+        bool success =
+            mVirtioGpuOps->platform_import_resource(res_handle, res_type, resource);
+        return success ? 0 : -1;
+    }
+
+    int platformResourceInfo(int res_handle, int* width, int* height, int* internal_format) {
+        AutoLock lock(mLock);
+        auto it = mResources.find(res_handle);
+        if (it == mResources.end()) return -1;
+        bool success =
+            mVirtioGpuOps->platform_resource_info(res_handle, width, height, internal_format);
+        return success ? 0 : -1;
+    }
+
+    void* platformCreateSharedEglContext() {
+        return mVirtioGpuOps->platform_create_shared_egl_context();
+    }
+
+    int platformDestroySharedEglContext(void* context) {
+        bool success = mVirtioGpuOps->platform_destroy_shared_egl_context(context);
+        return success ? 0 : -1;
+    }
+
 private:
     void allocResource(PipeResEntry& entry, iovec* iov, int num_iovs, uint64_t* addrs = nullptr) {
         VGPLOG("entry linear: %p", entry.linear);
@@ -1962,6 +1989,22 @@ VG_EXPORT void pipe_virgl_renderer_load_snapshot(void* qemufile) {
 
 VG_EXPORT int pipe_virgl_renderer_resource_attach_iov_with_addrs(int res_handle, struct iovec *iov, int num_iovs, uint64_t* addrs) {
     return sRenderer->attachIov(res_handle, iov, num_iovs, addrs);
+}
+
+VG_EXPORT int stream_renderer_platform_import_resource(int res_handle, int res_type, void* resource) {
+    return sRenderer->platformImportResource(res_handle, res_type, resource);
+}
+
+VG_EXPORT int stream_renderer_platform_resource_info(int res_handle, int* width, int*  height, int* internal_format) {
+    return sRenderer->platformResourceInfo(res_handle, width, height, internal_format);
+}
+
+VG_EXPORT void* stream_renderer_platform_create_shared_egl_context() {
+    return sRenderer->platformCreateSharedEglContext();
+}
+
+VG_EXPORT int stream_renderer_platform_destroy_shared_egl_context(void* context) {
+    return sRenderer->platformDestroySharedEglContext(context);
 }
 
 #define VIRGLRENDERER_API_PIPE_STRUCT_DEF(api) pipe_##api,
