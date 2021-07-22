@@ -3231,6 +3231,9 @@ void kvm_arch_update_guest_debug(CPUState *cpu, struct kvm_guest_debug *dbg)
 
 static bool host_supports_vmx(void)
 {
+    if (migratable_snapshot) {
+        return false;
+    }
     uint32_t ecx, unused;
 
     host_cpuid(1, 0, &unused, &unused, &ecx, &unused);

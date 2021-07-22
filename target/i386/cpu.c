@@ -3047,12 +3047,17 @@ static void x86_cpu_load_def(X86CPU *cpu, X86CPUDefinition *def, Error **errp)
      * KVM's sysenter/syscall emulation in compatibility mode and
      * when doing cross vendor migration
      */
-    vendor = def->vendor;
-    if (kvm_enabled() || gvm_enabled()) {
-        uint32_t  ebx = 0, ecx = 0, edx = 0;
-        host_cpuid(0, 0, NULL, &ebx, &ecx, &edx);
-        x86_cpu_vendor_words2str(host_vendor, ebx, edx, ecx);
-        vendor = host_vendor;
+    if (migratable_snapshot) {
+        // Report a 12-letter generic CPU name.
+        vendor = "Goldfish-CPU";
+    } else {
+        vendor = def->vendor;
+        if (kvm_enabled() || gvm_enabled()) {
+            uint32_t  ebx = 0, ecx = 0, edx = 0;
+            host_cpuid(0, 0, NULL, &ebx, &ecx, &edx);
+            x86_cpu_vendor_words2str(host_vendor, ebx, edx, ecx);
+            vendor = host_vendor;
+        }
     }
 
     object_property_set_str(OBJECT(cpu), vendor, "vendor", errp);
