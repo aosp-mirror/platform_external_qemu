@@ -141,6 +141,12 @@ EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable);
 EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version);
 EGLAPI void EGLAPIENTRY eglFillUsages(void* usages);
 
+EGLAPI EGLDisplay EGLAPIENTRY eglGetNativeDisplayANDROID(EGLDisplay);
+EGLAPI EGLContext EGLAPIENTRY eglGetNativeContextANDROID(EGLDisplay, EGLContext);
+EGLAPI EGLImage EGLAPIENTRY eglGetNativeImageANDROID(EGLDisplay, EGLImage);
+EGLAPI EGLBoolean EGLAPIENTRY eglSetImageInfoANDROID(EGLDisplay, EGLImage, EGLint, EGLint, EGLint);
+EGLAPI EGLImage EGLAPIENTRY eglImportImageANDROID(EGLDisplay, EGLImage);
+
 } // namespace translator
 } // namespace egl
 
@@ -1769,6 +1775,46 @@ EGLAPI void EGLAPIENTRY eglFillUsages(void* usages) {
     //     g_eglInfo->getIface(GLES_2_0)->fillGLESUsages(
     //         (android_studio::EmulatorGLESUsages*)usages);
     // }
+}
+
+EGLAPI EGLDisplay EGLAPIENTRY eglGetNativeDisplayANDROID(EGLDisplay display) {
+    VALIDATE_DISPLAY_RETURN(display, (EGLDisplay)0);
+    return dpy->getNativeDisplay();
+}
+
+EGLAPI EGLContext EGLAPIENTRY eglGetNativeContextANDROID(EGLDisplay display, EGLContext context) {
+    VALIDATE_DISPLAY_RETURN(display, (EGLContext)0);
+    VALIDATE_CONTEXT_RETURN(context, (EGLContext)0);
+    return dpy->getNativeContext(context);
+}
+
+EGLAPI EGLImage EGLAPIENTRY eglGetNativeImageANDROID(EGLDisplay display, EGLImage image) {
+    VALIDATE_DISPLAY_RETURN(display, (EGLImage)0);
+    unsigned int imagehndl = SafeUIntFromPointer(image);
+    ImagePtr img = getEGLImage(imagehndl);
+    if (!img || !img->isNative) return (EGLImage)0;
+    return img->nativeImage;
+}
+
+EGLAPI EGLBoolean EGLAPIENTRY eglSetImageInfoANDROID(EGLDisplay display, EGLImage image, EGLint width, EGLint height, EGLint internalFormat) {
+    VALIDATE_DISPLAY_RETURN(display, EGL_FALSE);
+    unsigned int imagehndl = SafeUIntFromPointer(image);
+    ImagePtr img = getEGLImage(imagehndl);
+    if (!img) return EGL_FALSE;
+
+    img->width = width;
+    img->height = height;
+    img->internalFormat = internalFormat;
+
+    return EGL_TRUE;
+}
+
+EGLImage eglImportImageANDROID(EGLDisplay display, EGLImage nativeImage) {
+    VALIDATE_DISPLAY_RETURN(display, (EGLImage)0);
+	ImagePtr img( new EglImage() );
+	img->isNative = true;
+	img->nativeImage = nativeImage;
+    return dpy->addImageKHR(img);
 }
 
 static const GLint kAuxiliaryContextAttribsCompat[] = {
