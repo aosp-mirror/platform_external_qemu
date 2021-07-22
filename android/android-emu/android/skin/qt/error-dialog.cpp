@@ -16,8 +16,9 @@
 #include <functional>                      // for __base
 #include <tuple>                           // for tuple
 
+#include "android/base/Log.h"              // for LOG
 #include "android/base/memory/OnDemand.h"  // for OnDemand
-
+#include "android/cmdline-option.h"        // for android_cmdLineOptions
 class QString;
 class QWidget;
 
@@ -40,7 +41,12 @@ void initErrorDialog(QWidget* parent) {
 }
 
 void showErrorDialog(const QString& message, const QString& title) {
-    if (sErrorDialog) {
+    // b/194152586 Showing error dialog in embedded mode caused
+    // emulator to crash. To workaround, print to terminal instead
+    // when running as embedded emulator.
+    if (android_cmdLineOptions->qt_hide_window) {
+        LOG(ERROR) << title.toStdString() << ": " << message.toStdString();
+    } else if (sErrorDialog) {
         sErrorDialog->get().setModal(true);
         sErrorDialog->get().setText(message);
         sErrorDialog->get().setWindowTitle(title);
