@@ -61,6 +61,35 @@ public:
         return nativeType()->getMaxGlesVersion();
     }
 
+    const char* getExtensionString() {
+        return nativeType()->getExtensionString();
+    }
+
+    EGLImage createNativeImage(
+            EGLDisplay dpy,
+            EGLContext ctx,
+            EGLenum target,
+            EGLClientBuffer buffer,
+            const EGLint *attrib_list) {
+        return nativeType()->createImage(dpy, ctx, target, buffer, attrib_list);
+    }
+
+    EGLBoolean destroyNativeImage(
+            EGLDisplay dpy,
+            EGLImage image) {
+        return nativeType()->destroyImage(dpy, image);
+    }
+
+    EGLDisplay getNativeDisplay() {
+        return nativeType()->getNative();
+    }
+
+    void* getNativeContext(EGLContext ctx) const {
+        auto dispContext = getContext(ctx);
+        if (!dispContext) return nullptr;
+        return dispContext->nativeType()->getNative();
+    }
+
     // Write up to |config_size| EGLConfig values into the |configs| array.
     // Return the number if values written.
     int getConfigs(EGLConfig* configs,int config_size) const;

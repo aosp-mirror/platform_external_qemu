@@ -1403,11 +1403,16 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR
     VALIDATE_DISPLAY(display);
     unsigned int imagehndl = SafeUIntFromPointer(image);
     ImagePtr img = getEGLImage(imagehndl);
+
+    if (!img) return EGL_FALSE;
+
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
-    if(img && img->sync) {
+
+    if (img->sync) {
         iface->deleteSync((GLsync)img->sync);
         img->sync = nullptr;
     }
+
     return dpy->destroyImageKHR(image) ? EGL_TRUE:EGL_FALSE;
 }
 
