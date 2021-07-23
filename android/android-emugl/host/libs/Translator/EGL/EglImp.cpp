@@ -1367,7 +1367,7 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
 
 	if (target != EGL_GL_TEXTURE_2D_KHR) {
 		// Create image from underlying and add to registry
-		EGLImage image = dpy->createNativeImage(dpy->getNativeDisplay(), 0, target, buffer, attrib_list);
+		EGLImage image = dpy->createNativeImage(dpy->getHostDriverDisplay(), 0, target, buffer, attrib_list);
 
 		if (image == EGL_NO_IMAGE_KHR) {
 			return EGL_NO_IMAGE_KHR;
@@ -1449,7 +1449,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR
     }
 
     if (img->isNative) {
-        dpy->destroyNativeImage(dpy->getNativeDisplay(), img->nativeImage);
+        dpy->destroyNativeImage(dpy->getHostDriverDisplay(), img->nativeImage);
     }
 
     return dpy->destroyImageKHR(image) ? EGL_TRUE:EGL_FALSE;
@@ -1779,7 +1779,7 @@ EGLAPI void EGLAPIENTRY eglFillUsages(void* usages) {
 
 EGLAPI EGLDisplay EGLAPIENTRY eglGetNativeDisplayANDROID(EGLDisplay display) {
     VALIDATE_DISPLAY_RETURN(display, (EGLDisplay)0);
-    return dpy->getNativeDisplay();
+    return dpy->getHostDriverDisplay();
 }
 
 EGLAPI EGLContext EGLAPIENTRY eglGetNativeContextANDROID(EGLDisplay display, EGLContext context) {
