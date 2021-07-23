@@ -1959,7 +1959,14 @@ public:
         auto device = unbox_VkDevice(boxed_device);
         auto vk = dispatch_VkDevice(boxed_device);
 
-        VkResult res = vk->vkResetFences(device, fenceCount, pFences);
+        std::vector<VkFence> cleanedFences;
+        for (uint32_t i = 0; i < fenceCount; ++i) {
+            if (pFences[i] != VK_NULL_HANDLE)
+                cleanedFences.push_back(pFences[i]);
+        }
+
+        VkResult res = vk->vkResetFences(device, (uint32_t)cleanedFences.size(), cleanedFences.data());
+
         if (res != VK_SUCCESS) {
             return res;
         }
