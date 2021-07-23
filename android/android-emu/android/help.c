@@ -1281,6 +1281,63 @@ help_rtcfps(stralloc_t*  out)
     );
 }
 
+static void
+help_rootcanal_hci_port(stralloc_t*  out)
+{
+    PRINTF(
+    "  Enables the (unsecure) rootcanal HCI chip on the given port. \n\n"
+    "   <port> The port where devices can find a virtual HCI chip.\n\n"
+    "  WARNING. This is an open local port and should only be used for testing. \n"
+    "  Connected devices will participate in the local bluetooth network of this \n"
+    "  emulator.\n\n"
+    "  For example:\n\n"
+    "  -rootcanal-hci-port 6402\n\n"
+    );
+}
+
+static void
+help_rootcanal_test_port(stralloc_t*  out)
+{
+    PRINTF(
+    "  Enables the (unsecure) rootcanal test environment on the given port. \n\n"
+    "   <port> The port where the test environment lives.\n\n"
+    "  WARNING. This is an open local port and should only be used for testing. \n\n"
+    "  For example:\n\n"
+    "  -rootcanal-test-port 6401\n\n"
+    );
+}
+
+
+static void
+help_rootcanal_link_port(stralloc_t*  out)
+{
+    PRINTF(
+    "  Enables the (unsecure) rootcanal link layer on the given port. \n\n"
+    "   <port> The port where the link layer can be accessed.\n\n"
+    "  WARNING. This is an open local port and should only be used for linking. \n\n"
+    "  For example:\n\n"
+    "  -rootcanal-link-port 6403\n\n"
+    );
+}
+
+static void
+help_rootcanal_controller_properties_file(stralloc_t*  out)
+{
+    PRINTF(
+    "  Loads the controller properties on launch. \n\n"
+    "  This is not officially supported, and is for internal testing only. \n\n"
+    );
+}
+
+
+static void
+help_rootcanal_default_commands_file(stralloc_t*  out)
+{
+    PRINTF(
+    "  Loads the test commands on launch. \n\n"
+    "  This is not officially supported, and is for internal testing only. \n\n"
+    );
+}
 
 static void
 help_onion(stralloc_t*  out)

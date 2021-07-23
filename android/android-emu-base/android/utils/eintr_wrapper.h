@@ -8,14 +8,15 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-
 #pragma once
 
 #include <errno.h>
 
-#include "android/utils/compiler.h"
-
-ANDROID_BEGIN_HEADER
+#ifdef __cplusplus
+extern "C" {
+#else
+/* nothing */
+#endif
 
 // Set EINTR_WRAPPER_DEBUG to 1 to force the debug version of HANDLE_EINTR
 // which will call android_eintr_wrapper_fatal() is the system call loops
@@ -115,4 +116,8 @@ void __attribute__((noreturn)) android_eintr_wrapper_fatal(
         const char* call);
 #endif  // !_WIN32
 
-ANDROID_END_HEADER
+#ifdef __cplusplus
+}
+#else
+/* nothing */
+#endif

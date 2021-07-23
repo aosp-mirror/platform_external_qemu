@@ -11,7 +11,6 @@
 
 #include "android/base/sockets/SocketWaiter.h"
 
-#include "android/base/Log.h"
 #include "android/base/sockets/SocketErrors.h"
 
 #ifdef _WIN32
@@ -83,8 +82,6 @@ public:
     }
 
     virtual void update(int fd, unsigned events) {
-        DCHECK(isValidFd(fd)) << "fd " << fd << " max " << FD_SETSIZE;
-
         // Compute current flags for fd.
         unsigned oldEvents = wantedEventsFor(fd);
         if (events == oldEvents) {
@@ -159,9 +156,6 @@ public:
             }
         } while (ret < 0 && errno == EINTR);
 
-        if (ret < 0) {
-            LOG(ERROR) << LogString("Error: %s\n", strerror(errno));
-        }
         return ret;
     }
 

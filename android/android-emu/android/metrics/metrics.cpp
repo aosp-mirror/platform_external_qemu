@@ -487,6 +487,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::ANDROIDBOOT_PROPS2;
         case android::featurecontrol::DeviceSkinOverlay:
             return android_studio::EmulatorFeatureFlagState::DEVICESKINOVERLAY;
+        case android::featurecontrol::BluetoothEmulation:
+            return android_studio::EmulatorFeatureFlagState::BLUETOOTH_EMULATION;
     }
     return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
 }

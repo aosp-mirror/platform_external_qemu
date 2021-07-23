@@ -1446,7 +1446,7 @@ extern "C" int main(int argc, char** argv) {
     if (!emulator_parseInputCommandLineOptions(opts)) {
         return 1;
     }
-    
+
     if (!emulator_parseUiCommandLineOptions(opts, avd, hw)) {
         return 1;
     }
@@ -2166,6 +2166,7 @@ extern "C" int main(int argc, char** argv) {
         // the order of virtconsoles must be preserved
         args.add2("-device", "virtconsole,chardev=forhvc0");
         args.add2("-device", "virtconsole,chardev=forhvc1");
+
     } else {
         // no virtconsoles here
 
@@ -2183,6 +2184,13 @@ extern "C" int main(int argc, char** argv) {
                 }
             }
         }
+    }
+
+    if (fc::isEnabled(fc::BluetoothEmulation)) {
+        // Register the rootcanal device, this will activate rootcanal
+        args.add("-chardev");
+        args.addFormat("rootcanal,id=rootcanal");
+        args.add2("-device", "virtserialport,chardev=rootcanal,name=bluetooth");
     }
 
     if (feature_is_enabled(kFeature_ModemSimulator)) {

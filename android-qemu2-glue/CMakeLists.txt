@@ -44,6 +44,7 @@ set(android-qemu2-glue_src
     qemu-sensors-agent-impl.cpp
     qemu-setup-dns-servers.cpp
     qemu-setup.cpp
+    qemu-rootcanal-agent-impl.cpp
     qemu-telephony-agent-impl.c
     qemu-user-event-agent-impl.c
     qemu-virtual-scene-agent-impl.cpp
@@ -65,8 +66,13 @@ target_link_libraries(libqemu2-glue PRIVATE android-grpc android-ui-controller)
 if(WEBRTC)
   target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
 endif()
-target_link_libraries(libqemu2-glue PRIVATE android-emu GLIB2::GLIB2
-                                            PIXMAN::PIXMAN emulator-libdtb ssl hostapd)
+if(BLUETOOTH_EMULATION)
+  target_link_libraries(libqemu2-glue PRIVATE libbt-rootcanal-qemu)
+endif()
+
+target_link_libraries(
+  libqemu2-glue PRIVATE android-emu GLIB2::GLIB2 PIXMAN::PIXMAN emulator-libdtb
+                        ssl hostapd)
 
 target_compile_definitions(libqemu2-glue INTERFACE "-DCONFIG_VIRGL")
 android_add_library(
@@ -78,5 +84,4 @@ target_include_directories(libqemu2-glue-vm-operations
 target_link_libraries(
   libqemu2-glue-vm-operations
   PRIVATE android-emu GLIB2::GLIB2 android-hw-config
-          nlohmann_json::nlohmann_json
-          PIXMAN::PIXMAN)
+          nlohmann_json::nlohmann_json PIXMAN::PIXMAN)
