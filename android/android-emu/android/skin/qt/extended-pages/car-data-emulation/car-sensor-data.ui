@@ -50,6 +50,9 @@
     <property name="accessibleName">
      <string>Car speed</string>
     </property>
+    <property name="minimum">
+     <number>-50</number>
+    </property>
     <property name="maximum">
      <number>250</number>
     </property>
