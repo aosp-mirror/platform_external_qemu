@@ -311,7 +311,7 @@ message PhysicalModelValue {
   // [Output Only]
   State status = 2;
 
-  // Value interpretation depends on sensor.
+  // Value interpretation depends on sensor, will contain at most 3 values.
   ParameterValue value = 3;
 }
 
@@ -362,7 +362,8 @@ message SensorValue {
   // [Output Only]
   State status = 2;
 
-  // Value interpretation depends on sensor enum.
+  // Value interpretation depends on sensor enum, will contain at most 3
+  // values.
   ParameterValue value = 3;
 }
 

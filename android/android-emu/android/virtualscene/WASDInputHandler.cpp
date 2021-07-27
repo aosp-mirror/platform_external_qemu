@@ -33,11 +33,9 @@ PhysicalModel::PhysicalModel(const QAndroidSensorsAgent* sensorsAgent)
 void PhysicalModel::onEnable() {
     // Get the starting rotation.
     glm::vec3 eulerDegrees;
-    std::vector<float*> out = {&eulerDegrees.x, &eulerDegrees.y,
-                               &eulerDegrees.z};
-    mSensorsAgent->getPhysicalParameter(PHYSICAL_PARAMETER_ROTATION, out.data(),
-                                        out.size(),
-                                        PARAMETER_VALUE_TYPE_TARGET);
+    mSensorsAgent->getPhysicalParameter(
+            PHYSICAL_PARAMETER_ROTATION, &eulerDegrees.x, &eulerDegrees.y,
+            &eulerDegrees.z, PARAMETER_VALUE_TYPE_TARGET);
 
     VLOG(virtualscene) << "Starting WASD, initial rotation: (" << eulerDegrees.x
                        << ", " << eulerDegrees.y << ", " << eulerDegrees.z
@@ -58,17 +56,15 @@ void PhysicalModel::onEnable() {
                        << mEulerRotationRadians.y << ", "
                        << mEulerRotationRadians.z << ")";
 
-    std::vector<float> val = {kAmbientMotionExtentMeters};
-    mSensorsAgent->setPhysicalParameterTarget(PHYSICAL_PARAMETER_AMBIENT_MOTION,
-                                              val.data(), val.size(),
-                                              PHYSICAL_INTERPOLATION_SMOOTH);
+    mSensorsAgent->setPhysicalParameterTarget(
+            PHYSICAL_PARAMETER_AMBIENT_MOTION, kAmbientMotionExtentMeters, 0.0f,
+            0.0f, PHYSICAL_INTERPOLATION_SMOOTH);
 }
 
 void PhysicalModel::onDisable() {
     mVelocity = {0.0f, 0.0f, 0.0f};
-    std::vector<float> val = {0.0f};
     mSensorsAgent->setPhysicalParameterTarget(PHYSICAL_PARAMETER_AMBIENT_MOTION,
-                                              val.data(), val.size(),
+                                              0.0f, 0.0f, 0.0f,
                                               PHYSICAL_INTERPOLATION_SMOOTH);
 }
 
@@ -89,11 +85,10 @@ void PhysicalModel::updateRotation(glm::vec3 radianDelta) {
     // Y Z order for the physical model.
     const glm::vec3 rotationDegrees = glm::degrees(
             toEulerAnglesXYZ(fromEulerAnglesYXZ(mEulerRotationRadians)));
-    std::vector<float> val = {rotationDegrees.x, rotationDegrees.y,
-                              rotationDegrees.z};
-    mSensorsAgent->setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROTATION,
-                                              val.data(), val.size(),
-                                              PHYSICAL_INTERPOLATION_SMOOTH);
+
+    mSensorsAgent->setPhysicalParameterTarget(
+            PHYSICAL_PARAMETER_ROTATION, rotationDegrees.x, rotationDegrees.y,
+            rotationDegrees.z, PHYSICAL_INTERPOLATION_SMOOTH);
 }
 
 void PhysicalModel::updateVelocity(glm::vec3 baseVelocity) {
@@ -103,10 +98,9 @@ void PhysicalModel::updateVelocity(glm::vec3 baseVelocity) {
 
     if (velocity != mVelocity) {
         mVelocity = velocity;
-        std::vector<float> val = {velocity.x, velocity.y, velocity.z};
 
         mSensorsAgent->setPhysicalParameterTarget(
-                PHYSICAL_PARAMETER_VELOCITY, val.data(), val.size(),
+                PHYSICAL_PARAMETER_VELOCITY, velocity.x, velocity.y, velocity.z,
                 PHYSICAL_INTERPOLATION_SMOOTH);
     }
 }

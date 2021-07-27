@@ -49,7 +49,6 @@ message PhysicalModelEvent {
         ROLLABLE2 = 15;
         POSTURE = 16;
         HEART_RATE = 17;
-        RGBC_LIGHT = 18;
     }
 
     optional ParameterType type = 1;
@@ -81,7 +80,6 @@ message SensorOverrideEvent {
         HINGE_ANGLE1 = 12;
         HINGE_ANGLE2 = 13;
         HEART_RATE = 14;
-        RGBC_LIGHT = 15;
     }
 
     optional Sensor sensor = 1;

@@ -58,30 +58,6 @@ struct vec3 {
 
 typedef struct vec3 vec3;
 
-/* struct for use in sensor values */
-struct vec4 {
-    float x;
-    float y;
-    float z;
-    float w;
-
-#ifdef __cplusplus
-    bool operator==(const vec4& rhs) const {
-        const float kEpsilon = 0.00001f;
-
-        const double diffX = fabs(x - rhs.x);
-        const double diffY = fabs(y - rhs.y);
-        const double diffZ = fabs(z - rhs.z);
-        const double diffW = fabs(w - rhs.w);
-        return (diffX < kEpsilon && diffY < kEpsilon && diffZ < kEpsilon &&
-                diffW < kEpsilon);
-    }
-
-    bool operator!=(const vec4& rhs) const { return !(*this == rhs); }
-#endif  // __cplusplus
-};
-
-typedef struct vec4 vec4;
 
 /* NOTE: Sensor status Error definition, It will be used in the Sensors Command
  *       part in android-qemu1-glue/console.c. Details:
@@ -104,7 +80,6 @@ typedef enum{
  *       DO NOT CHANGE THE ORDER IN THIS LIST, UNLESS YOU INTEND
  *       TO BREAK SNAPSHOTS!
  */
-// clang-format off
 #define  SENSORS_LIST  \
     SENSOR_(ACCELERATION,"acceleration",Accelerometer,vec3,"acceleration:%g:%g:%g") \
     SENSOR_(GYROSCOPE,"gyroscope",Gyroscope,vec3,"gyroscope:%g:%g:%g") \
@@ -121,8 +96,7 @@ typedef enum{
     SENSOR_(HINGE_ANGLE1, "hinge-angle1", HingeAngle1, float, "hinge-angle1:%g") \
     SENSOR_(HINGE_ANGLE2, "hinge-angle2", HingeAngle2, float, "hinge-angle2:%g") \
     SENSOR_(HEART_RATE, "heart-rate", HeartRate, float, "heart-rate:%g") \
-    SENSOR_(RGBC_LIGHT, "rgbc-light", RgbcLight, vec4, "rgbc-light:%g:%g:%g:%g") \
-// clang-format on
+
 typedef enum {
 #define  SENSOR_(x,y,z,v,w)  ANDROID_SENSOR_##x,
     SENSORS_LIST
@@ -147,7 +121,6 @@ typedef enum{
  * Note: DO NOT CHANGE THE ORDER IN THIS LIST, UNLESS YOU INTEND
  *       TO BREAK SNAPSHOTS!
  */
-// clang-format off
 #define  PHYSICAL_PARAMETERS_LIST  \
     PHYSICAL_PARAMETER_(POSITION,"position",Position,vec3) \
     PHYSICAL_PARAMETER_(ROTATION,"rotation",Rotation,vec3) \
@@ -167,8 +140,7 @@ typedef enum{
     PHYSICAL_PARAMETER_(ROLLABLE2,"rollable2",Rollable2,float) \
     PHYSICAL_PARAMETER_(POSTURE,"posture",Posture,float) \
     PHYSICAL_PARAMETER_(HEART_RATE, "heart-rate", HeartRate, float) \
-    PHYSICAL_PARAMETER_(RGBC_LIGHT, "rgbc-light", RgbcLight, vec4) \
-// clang-format on
+
 typedef enum {
 #define PHYSICAL_PARAMETER_(x,y,z,w)  PHYSICAL_PARAMETER_##x,
     PHYSICAL_PARAMETERS_LIST
@@ -191,17 +163,12 @@ extern int android_sensors_set_coarse_orientation(
         AndroidCoarseOrientation  orient, float tilt_degrees);
 
 /* get sensor values */
-extern int android_sensors_get(int sensor_id,
-                               float* const* out,
-                               const size_t count);
-
-/* get sensor values size */
-extern int android_sensors_get_size(int sensor_id, size_t* size);
+extern int android_sensors_get( int sensor_id,
+        float* out_a, float* out_b, float* out_c );
 
 /* set sensor override values */
-extern int android_sensors_override_set(int sensor_id,
-                                        const float* val,
-                                        const size_t count);
+extern int android_sensors_override_set(
+        int sensor_id, float a, float b, float c );
 
 /* Get sensor id from sensor name */
 extern int android_sensors_get_id_from_name( const char* sensorname );
@@ -221,21 +188,15 @@ extern int32_t android_sensors_get_delay_ms();
 /* Get the physical model instance. */
 extern PhysicalModel* android_physical_model_instance();
 
-/* Get physical model values size */
-extern int android_physical_model_get_size(int physical_parameter,
-                                           size_t* size);
-
 /* Get physical model values */
-extern int android_physical_model_get(int physical_parameter,
-                                      float* const* out,
-                                      const size_t count,
-                                      ParameterValueType parameter_value_type);
+extern int android_physical_model_get(
+    int physical_parameter, float* out_a, float* out_b, float* out_c,
+    ParameterValueType parameter_value_type);
 
 /* Set physical model target values */
-extern int android_physical_model_set(int physical_parameter,
-                                      const float* val,
-                                      const size_t count,
-                                      int interpolation_method);
+extern int android_physical_model_set(
+    int physical_parameter, float a, float b, float c,
+    int interpolation_method);
 
 /* Set agent to receive physical state change callbacks */
 extern int android_physical_agent_set(

@@ -26,7 +26,7 @@
     <string notr="true"/>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -1331,110 +1331,6 @@
      </property>
      <property name="helpButton" stdset="0">
       <bool>true</bool>
-     </property>
-    </widget>
-    <widget class="QTabWidget" name="tabRgbcSensor">
-     <property name="geometry">
-      <rect>
-       <x>310</x>
-       <y>400</y>
-       <width>280</width>
-       <height>121</height>
-      </rect>
-     </property>
-     <property name="layoutDirection">
-      <enum>Qt::LeftToRight</enum>
-     </property>
-     <property name="tabPosition">
-      <enum>QTabWidget::North</enum>
-     </property>
-     <property name="currentIndex">
-      <number>0</number>
-     </property>
-     <widget class="QWidget" name="tabRed">
-      <attribute name="title">
-       <string>Red</string>
-      </attribute>
-      <widget class="EditableSliderWidget" name="rgbcRedSensorValueWidget" native="true">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>10</y>
-         <width>280</width>
-         <height>80</height>
-        </rect>
-       </property>
-       <property name="report_metrics" stdset="0">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="tabGreen">
-      <attribute name="title">
-       <string>Green</string>
-      </attribute>
-      <widget class="EditableSliderWidget" name="rgbcGreenSensorValueWidget" native="true">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>10</y>
-         <width>280</width>
-         <height>80</height>
-        </rect>
-       </property>
-       <property name="report_metrics" stdset="0">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="tabBlue">
-      <attribute name="title">
-       <string>Blue</string>
-      </attribute>
-      <widget class="EditableSliderWidget" name="rgbcBlueSensorValueWidget" native="true">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>10</y>
-         <width>280</width>
-         <height>80</height>
-        </rect>
-       </property>
-       <property name="report_metrics" stdset="0">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="tabClear">
-      <attribute name="title">
-       <string>Clear</string>
-      </attribute>
-      <widget class="EditableSliderWidget" name="rgbcClearSensorValueWidget" native="true">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>10</y>
-         <width>280</width>
-         <height>80</height>
-        </rect>
-       </property>
-       <property name="report_metrics" stdset="0">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </widget>
-    </widget>
-    <widget class="QLabel" name="labelRgbcLight">
-     <property name="geometry">
-      <rect>
-       <x>324</x>
-       <y>380</y>
-       <width>130</width>
-       <height>15</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string notr="true">RGBC light intensity</string>
      </property>
     </widget>
    </widget>
