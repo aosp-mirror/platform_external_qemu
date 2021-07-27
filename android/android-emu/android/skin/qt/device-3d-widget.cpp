@@ -758,18 +758,15 @@ void Device3DWidget::repaintGL() {
     glm::mat4 rotation = glm::mat4();
 
     if (mSensorsAgent) {
-        auto outPosition = {&position.x, &position.y, &position.z};
         mSensorsAgent->getPhysicalParameter(
-                PHYSICAL_PARAMETER_POSITION, outPosition.begin(),
-                outPosition.size(), PARAMETER_VALUE_TYPE_CURRENT);
+                PHYSICAL_PARAMETER_POSITION, &position.x, &position.y,
+                &position.z, PARAMETER_VALUE_TYPE_CURRENT);
         position = (1.f / kMetersPerInch) * position;
 
         glm::vec3 eulerDegrees;
-        auto outEulerDegrees = {&eulerDegrees.x, &eulerDegrees.y,
-                                &eulerDegrees.z};
         mSensorsAgent->getPhysicalParameter(
-                PHYSICAL_PARAMETER_ROTATION, outEulerDegrees.begin(),
-                outEulerDegrees.size(), PARAMETER_VALUE_TYPE_CURRENT);
+                PHYSICAL_PARAMETER_ROTATION, &eulerDegrees.x, &eulerDegrees.y,
+                &eulerDegrees.z, PARAMETER_VALUE_TYPE_CURRENT);
 
         // Clamp the position to the visible range.
         position = clampPosition(position);
@@ -926,9 +923,8 @@ void Device3DWidget::repaintGL() {
         FoldablePostures posture = POSTURE_UNKNOWN;
         if (mSensorsAgent) {
             glm::vec3 result;
-            auto out = {&result.x, &result.y, &result.z};
             mSensorsAgent->getPhysicalParameter(PHYSICAL_PARAMETER_POSTURE,
-                                                out.begin(), out.size(),
+                                                &result.x, &result.y, &result.z,
                                                 PARAMETER_VALUE_TYPE_CURRENT);
             posture = (FoldablePostures)result.x;
         }
@@ -1196,56 +1192,52 @@ bool Device3DWidget::updateHingeAngles() {
         return ret;
     }
     if (android_foldable_rollable_configured()) {
-        float result0 = 0;
-        float result1 = 0;
-        float* out0 = &result0;
-        float* out1 = &result1;
-
-        mSensorsAgent->getPhysicalParameter(PHYSICAL_PARAMETER_ROLLABLE0, &out0,
-                                            1, PARAMETER_VALUE_TYPE_CURRENT);
-        mSensorsAgent->getPhysicalParameter(PHYSICAL_PARAMETER_ROLLABLE1, &out1,
-                                            1, PARAMETER_VALUE_TYPE_CURRENT);
-        if (abs(mFoldableState.currentRolledPercent[0] - result0) >
-                    kHingeAngleDelta ||
-            abs(mFoldableState.currentRolledPercent[1] - result1) >
-                    kHingeAngleDelta) {
-            mFoldableState.currentRolledPercent[0] = result0;
-            mFoldableState.currentRolledPercent[1] = result1;
+        glm::vec3 result0, result1;
+        mSensorsAgent->getPhysicalParameter(
+                        PHYSICAL_PARAMETER_ROLLABLE0, &result0.x, &result0.y,
+                        &result0.z, PARAMETER_VALUE_TYPE_CURRENT);
+        mSensorsAgent->getPhysicalParameter(
+                        PHYSICAL_PARAMETER_ROLLABLE1, &result1.x, &result1.y,
+                        &result1.z, PARAMETER_VALUE_TYPE_CURRENT);
+        if (abs(mFoldableState.currentRolledPercent[0] - result0.x) >
+                kHingeAngleDelta ||
+            abs(mFoldableState.currentRolledPercent[1] - result1.x) >
+                kHingeAngleDelta) {
+            mFoldableState.currentRolledPercent[0] = result0.x;
+            mFoldableState.currentRolledPercent[1] = result1.x;
             ret = true;
         }
         if (ret) {
             ret = initAbstractDeviceRollModel();
         }
     } else if (android_foldable_hinge_configured()) {
-        float result = 0;
-        float* out = &result;
-
+        glm::vec3 result;
         switch (mFoldableState.config.numHinges) {
             case 3:
                 mSensorsAgent->getPhysicalParameter(
-                        PHYSICAL_PARAMETER_HINGE_ANGLE2, &out, 1,
-                        PARAMETER_VALUE_TYPE_CURRENT);
-                if (abs(mFoldableState.currentHingeDegrees[2] - result) >
+                        PHYSICAL_PARAMETER_HINGE_ANGLE2, &result.x, &result.y,
+                        &result.z, PARAMETER_VALUE_TYPE_CURRENT);
+                if (abs(mFoldableState.currentHingeDegrees[2] - result.x) >
                     kHingeAngleDelta) {
-                    mFoldableState.currentHingeDegrees[2] = result;
+                    mFoldableState.currentHingeDegrees[2] = result.x;
                     ret = true;
                 }
             case 2:
                 mSensorsAgent->getPhysicalParameter(
-                        PHYSICAL_PARAMETER_HINGE_ANGLE1, &out, 1,
-                        PARAMETER_VALUE_TYPE_CURRENT);
-                if (abs(mFoldableState.currentHingeDegrees[1] - result) >
+                        PHYSICAL_PARAMETER_HINGE_ANGLE1, &result.x, &result.y,
+                        &result.z, PARAMETER_VALUE_TYPE_CURRENT);
+                if (abs(mFoldableState.currentHingeDegrees[1] - result.x) >
                     kHingeAngleDelta) {
-                    mFoldableState.currentHingeDegrees[1] = result;
+                    mFoldableState.currentHingeDegrees[1] = result.x;
                     ret = true;
                 }
             case 1:
                 mSensorsAgent->getPhysicalParameter(
-                        PHYSICAL_PARAMETER_HINGE_ANGLE0, &out, 1,
-                        PARAMETER_VALUE_TYPE_CURRENT);
-                if (abs(mFoldableState.currentHingeDegrees[0] - result) >
+                        PHYSICAL_PARAMETER_HINGE_ANGLE0, &result.x, &result.y,
+                        &result.z, PARAMETER_VALUE_TYPE_CURRENT);
+                if (abs(mFoldableState.currentHingeDegrees[0] - result.x) >
                     kHingeAngleDelta) {
-                    mFoldableState.currentHingeDegrees[0] = result;
+                    mFoldableState.currentHingeDegrees[0] = result.x;
                     ret = true;
                 }
             default:;

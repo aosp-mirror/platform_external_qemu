@@ -280,9 +280,13 @@ public:
                             const PhysicalModelValue* request,
                             Empty* reply) override {
         auto values = request->value();
+        int size = values.data().size();
+        float a = size > 0 ? values.data(0) : 0;
+        float b = size > 1 ? values.data(1) : 0;
+        float c = size > 2 ? values.data(2) : 0;
+
         mAgents->sensors->setPhysicalParameterTarget(
-                (int)request->target(), values.data().data(),
-                values.data().size(),
+                (int)request->target(), a, b, c,
                 PhysicalInterpolation::PHYSICAL_INTERPOLATION_STEP);
         return Status::OK;
     }
@@ -290,22 +294,14 @@ public:
     Status getPhysicalModel(ServerContext* context,
                             const PhysicalModelValue* request,
                             PhysicalModelValue* reply) override {
-        size_t size;
-        mAgents->sensors->getPhysicalParameterSize((int)request->target(),
-                                                   &size);
-        std::vector<float> val(size, 0);
-        std::vector<float*> out;
-        for (size_t i = 0; i < val.size(); i++) {
-            out.push_back(&val[i]);
-        }
-
+        float a = 0, b = 0, c = 0;
         int state = mAgents->sensors->getPhysicalParameter(
-                (int)request->target(), out.data(), out.size(),
+                (int)request->target(), &a, &b, &c,
                 PARAMETER_VALUE_TYPE_CURRENT);
         auto value = reply->mutable_value();
-        for (size_t i = 0; i < val.size(); i++) {
-            value->add_data(val[i]);
-        }
+        value->add_data(a);
+        value->add_data(b);
+        value->add_data(c);
         reply->set_status((PhysicalModelValue_State)state);
         reply->set_target(request->target());
         return Status::OK;
@@ -360,9 +356,10 @@ public:
         android::base::ThreadLooper::runOnMainLooper([agent, request]() {
             auto values = request.value();
             int size = values.data().size();
-            agent->setSensorOverride((int)request.target(),
-                                     values.data().data(),
-                                     values.data().size());
+            float a = size > 0 ? values.data(0) : 0;
+            float b = size > 1 ? values.data(1) : 0;
+            float c = size > 2 ? values.data(2) : 0;
+            agent->setSensorOverride((int)request.target(), a, b, c);
         });
         return Status::OK;
     }
@@ -370,21 +367,13 @@ public:
     Status getSensor(ServerContext* context,
                      const SensorValue* request,
                      SensorValue* reply) override {
-        size_t size;
-        mAgents->sensors->getSensorSize((int)request->target(), &size);
-        std::vector<float> val(size, 0);
-        std::vector<float*> out;
-        for (size_t i = 0; i < val.size(); i++) {
-            out.push_back(&val[i]);
-        }
-
-        int state = mAgents->sensors->getSensor((int)request->target(),
-                                                out.data(), out.size());
-
+        float a = 0, b = 0, c = 0;
+        int state =
+                mAgents->sensors->getSensor((int)request->target(), &a, &b, &c);
         auto value = reply->mutable_value();
-        for (size_t i = 0; i < size; i++) {
-            value->add_data(val[i]);
-        }
+        value->add_data(a);
+        value->add_data(b);
+        value->add_data(c);
         reply->set_status((SensorValue_State)state);
         reply->set_target(request->target());
         return Status::OK;
@@ -714,12 +703,11 @@ public:
                 ScreenshotUtils::translate(request->format());
 
         float xaxis = 0, yaxis = 0, zaxis = 0;
-        auto out = {&xaxis, &yaxis, &zaxis};
 
         // TODO(jansene): Not clear if the rotation impacts displays other
         // than 0.
         mAgents->sensors->getPhysicalParameter(PHYSICAL_PARAMETER_ROTATION,
-                                               out.begin(), out.size(),
+                                               &xaxis, &yaxis, &zaxis,
                                                PARAMETER_VALUE_TYPE_CURRENT);
         auto rotation = ScreenshotUtils::deriveRotation(mAgents->sensors);
         // Calculate the desired rotation and width we should use..

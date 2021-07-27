@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <initializer_list>
 #include <string>
 #include <vector>
 
@@ -314,14 +313,6 @@ static void serializeValue_vec3(Sensor* sensor,
                      format, value.x, value.y, value.z);
 }
 
-static void serializeValue_vec4(Sensor* sensor,
-                                const char* format,
-                                vec4 value) {
-    sensor->serialized.length =
-            snprintf(sensor->serialized.value, sizeof(sensor->serialized.value),
-                     format, value.x, value.y, value.z, value.w);
-}
-
 // a function to serialize the sensor value based on its ID
 static void serializeSensorValue(PhysicalModel* physical_model,
                                  Sensor* sensor,
@@ -574,33 +565,29 @@ static QemudClient* _hwSensors_connect(void* opaque,
     return client;
 }
 
-vec3 get_vec3_value(const float* val, const size_t count) {
-    return vec3{count > 0 ? val[0] : 0, count > 1 ? val[1] : 0,
-                count > 2 ? val[2] : 0};
+vec3 get_vec3_value(float a, float b, float c) {
+    vec3 result = {a, b, c};
+    return result;
 }
 
-vec4 get_vec4_value(const float* val, const size_t count) {
-    return vec4{count > 0 ? val[0] : 0, count > 1 ? val[1] : 0,
-                count > 2 ? val[2] : 0, count > 3 ? val[3] : 0};
-}
-
-float get_float_value(const float* val, const size_t count) {
-    return count > 0 ? val[0] : 0;
+float get_float_value(float a, float b, float c) {
+    return a;
 }
 
 /* change the value of the emulated sensor vector */
 static void _hwSensors_setSensorValue(HwSensors* h,
                                       int sensor_id,
-                                      const float* val,
-                                      const size_t count) {
+                                      float a,
+                                      float b,
+                                      float c) {
     switch (sensor_id) {
 #define OVERRIDE_FUNCTION_NAME(x) physicalModel_override##x
 #define GET_TYPE_VALUE_FUNCTION_NAME(x) get_##x##_value
 #define ENUM_NAME(x) ANDROID_SENSOR_##x
-#define SENSOR_(x, y, z, v, w)                                            \
-    case ENUM_NAME(x):                                                    \
-        OVERRIDE_FUNCTION_NAME(z)                                         \
-        (h->physical_model, GET_TYPE_VALUE_FUNCTION_NAME(v)(val, count)); \
+#define SENSOR_(x, y, z, v, w)                                         \
+    case ENUM_NAME(x):                                                 \
+        OVERRIDE_FUNCTION_NAME(z)                                      \
+        (h->physical_model, GET_TYPE_VALUE_FUNCTION_NAME(v)(a, b, c)); \
         break;
         SENSORS_LIST
 #undef SENSOR_
@@ -613,96 +600,39 @@ static void _hwSensors_setSensorValue(HwSensors* h,
     }
 }
 
-void vec3_get_size(size_t* size) {
-    if (size != nullptr) {
-        *size = 3;
-    }
-}
-
-void vec4_get_size(size_t* size) {
-    if (size != nullptr) {
-        *size = 4;
-    }
-}
-
-void float_get_size(size_t* size) {
-    if (size != nullptr) {
-        *size = 1;
-    }
-}
-
-void vec3_get_values(const vec3 value, float* const* out, const size_t count) {
-    if (count > 0)
-        *out[0] = value.x;
-    if (count > 1)
-        *out[1] = value.y;
-    if (count > 2)
-        *out[2] = value.z;
-}
-
-void vec4_get_values(const vec4 value, float* const* out, const size_t count) {
-    if (count > 0) {
-        *out[0] = value.x;
-    }
-    if (count > 1) {
-        *out[1] = value.y;
-    }
-    if (count > 2) {
-        *out[2] = value.z;
-    }
-    if (count > 3) {
-        *out[3] = value.w;
-    }
+void vec3_get_values(const vec3 value,
+                     float* out_a,
+                     float* out_b,
+                     float* out_c) {
+    *out_a = value.x;
+    *out_b = value.y;
+    *out_c = value.z;
 }
 
 void float_get_values(const float value,
-                      float* const* out,
-                      const size_t count) {
-    if (count > 0) {
-        *out[0] = value;
-    }
+                      float* out_a,
+                      float* out_b,
+                      float* out_c) {
+    *out_a = value;
+    *out_b = 0.f;
+    *out_c = 0.f;
 }
 
 /* get the value of the emulated sensor vector */
 static void _hwSensors_getSensorValue(HwSensors* h,
                                       int sensor_id,
-                                      float* const* out,
-                                      const size_t count) {
+                                      float* a,
+                                      float* b,
+                                      float* c) {
     long measurement_id;
     switch (sensor_id) {
 #define GET_FUNCTION_NAME(x) physicalModel_get##x
 #define TYPE_GET_VALUES_FUNCTION_NAME(x) x##_get_values
 #define ENUM_NAME(x) ANDROID_SENSOR_##x
-#define SENSOR_(x, y, z, v, w)                                          \
-    case ENUM_NAME(x):                                                  \
-        TYPE_GET_VALUES_FUNCTION_NAME(v)                                \
-        (GET_FUNCTION_NAME(z)(h->physical_model, &measurement_id), out, \
-         count);                                                        \
-        break;
-        SENSORS_LIST
-#undef SENSOR_
-#undef ENUM_NAME
-#undef TYPE_GET_VALUES_FUNCTION_NAME
-#undef GET_FUNCTION_NAME
-        default:
-            assert(false);  // should never happen
-            break;
-    }
-}
-
-/* get the size of the emulated sensor vector */
-static void _hwSensors_getSensorValueSize(HwSensors* h,
-                                          int sensor_id,
-                                          size_t* size) {
-    long measurement_id;
-    switch (sensor_id) {
-#define GET_FUNCTION_NAME(x) physicalModel_get##x
-#define TYPE_GET_VALUES_FUNCTION_NAME(x) x##_get_size
-#define ENUM_NAME(x) ANDROID_SENSOR_##x
-#define SENSOR_(x, y, z, v, w)           \
-    case ENUM_NAME(x):                   \
-        TYPE_GET_VALUES_FUNCTION_NAME(v) \
-        (size);                          \
+#define SENSOR_(x, y, z, v, w)                                               \
+    case ENUM_NAME(x):                                                       \
+        TYPE_GET_VALUES_FUNCTION_NAME(v)                                     \
+        (GET_FUNCTION_NAME(z)(h->physical_model, &measurement_id), a, b, c); \
         break;
         SENSORS_LIST
 #undef SENSOR_
@@ -718,18 +648,19 @@ static void _hwSensors_getSensorValueSize(HwSensors* h,
 /* change the value of the physical parameter */
 static void _hwSensors_setPhysicalParameterValue(HwSensors* h,
                                                  int parameter_id,
-                                                 const float* val,
-                                                 const size_t count,
+                                                 float a,
+                                                 float b,
+                                                 float c,
                                                  int interpolation_mode) {
     switch (parameter_id) {
 #define ENUM_NAME(x) PHYSICAL_PARAMETER_##x
 #define GET_TYPE_VALUE_FUNCTION_NAME(x) get_##x##_value
 #define SET_TARGET_FUNCTION_NAME(x) physicalModel_setTarget##x
-#define PHYSICAL_PARAMETER_(x, y, z, w)                                  \
-    case ENUM_NAME(x):                                                   \
-        SET_TARGET_FUNCTION_NAME(z)                                      \
-        (h->physical_model, GET_TYPE_VALUE_FUNCTION_NAME(w)(val, count), \
-         (PhysicalInterpolation)interpolation_mode);                     \
+#define PHYSICAL_PARAMETER_(x, y, z, w)                               \
+    case ENUM_NAME(x):                                                \
+        SET_TARGET_FUNCTION_NAME(z)                                   \
+        (h->physical_model, GET_TYPE_VALUE_FUNCTION_NAME(w)(a, b, c), \
+         (PhysicalInterpolation)interpolation_mode);                  \
         break;
         PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
@@ -746,8 +677,9 @@ static void _hwSensors_setPhysicalParameterValue(HwSensors* h,
 static void _hwSensors_getPhysicalParameterValue(
         HwSensors* h,
         int parameter_id,
-        float* const* out,
-        const size_t count,
+        float* a,
+        float* b,
+        float* c,
         ParameterValueType parameter_value_type) {
     switch (parameter_id) {
 #define ENUM_NAME(x) PHYSICAL_PARAMETER_##x
@@ -758,37 +690,12 @@ static void _hwSensors_getPhysicalParameterValue(
         TYPE_GET_VALUES_FUNCTION_NAME(w)                       \
         (GET_PARAMETER_FUNCTION_NAME(z)(h->physical_model,     \
                                         parameter_value_type), \
-         out, count);                                          \
+         a, b, c);                                             \
         break;
         PHYSICAL_PARAMETERS_LIST
 #undef GET_PARAMETER_FUNCTION_NAME
 #undef TYPE_GET_VALUES_FUNCTION_NAME
 #undef ENUM_NAME
-#undef PHYSICAL_PARAMETER_
-        default:
-            assert(false);  // should never happen
-            break;
-    }
-}
-
-/* get the value of the physical parameter */
-static void _hwSensors_getPhysicalParameterValueSize(HwSensors* h,
-                                                     int parameter_id,
-                                                     size_t* size) {
-    switch (parameter_id) {
-#define ENUM_NAME(x) PHYSICAL_PARAMETER_##x
-#define TYPE_GET_VALUES_FUNCTION_NAME(x) x##_get_size
-#define GET_PARAMETER_FUNCTION_NAME(x) physicalModel_getParameter##x
-#define PHYSICAL_PARAMETER_(x, y, z, w)  \
-    case ENUM_NAME(x):                   \
-        TYPE_GET_VALUES_FUNCTION_NAME(w) \
-        (size);                          \
-        break;
-        PHYSICAL_PARAMETERS_LIST
-#undef GET_PARAMETER_FUNCTION_NAME
-#undef TYPE_GET_VALUES_FUNCTION_NAME
-#undef ENUM_NAME
-#undef PHYSICAL_PARAMETER_
         default:
             assert(false);  // should never happen
             break;
@@ -874,13 +781,14 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
     if (VERBOSE_CHECK(rotation)) {
         fprintf(stderr, "setCoarseOrientation - HwSensors %p\n", h);
     }
-    std::initializer_list<float> rotation = {};
     switch (orient) {
         case ANDROID_COARSE_PORTRAIT:
             if (VERBOSE_CHECK(rotation)) {
                 fprintf(stderr, "Setting coarse orientation to portrait\n");
             }
-            rotation = {-tilt_degrees, 0.f, 0.f};
+            _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_ROTATION,
+                                                 -tilt_degrees, 0.f, 0.f,
+                                                 PHYSICAL_INTERPOLATION_STEP);
             break;
 
         case ANDROID_COARSE_REVERSE_LANDSCAPE:
@@ -888,7 +796,9 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
                 fprintf(stderr,
                         "Setting coarse orientation to reverse landscape\n");
             }
-            rotation = {0.f, -tilt_degrees, -90.f};
+            _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_ROTATION,
+                                                 0.f, -tilt_degrees, -90.f,
+                                                 PHYSICAL_INTERPOLATION_STEP);
             break;
 
         case ANDROID_COARSE_REVERSE_PORTRAIT:
@@ -896,25 +806,24 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
                 fprintf(stderr,
                         "Setting coarse orientation to reverse portrait\n");
             }
-            rotation = {tilt_degrees, 0.f, 180.f};
+            _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_ROTATION,
+                                                 tilt_degrees, 0.f, 180.f,
+                                                 PHYSICAL_INTERPOLATION_STEP);
             break;
 
         case ANDROID_COARSE_LANDSCAPE:
             if (VERBOSE_CHECK(rotation)) {
                 fprintf(stderr, "Setting coarse orientation to landscape\n");
             }
-            rotation = {0.f, tilt_degrees, 90.f};
+            _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_ROTATION,
+                                                 0.f, tilt_degrees, 90.f,
+                                                 PHYSICAL_INTERPOLATION_STEP);
             break;
         default:
             if (VERBOSE_CHECK(rotation)) {
                 fprintf(stderr, "Invalid orientation\n");
             }
-            return;
     }
-
-    _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_ROTATION,
-                                         rotation.begin(), rotation.size(),
-                                         PHYSICAL_INTERPOLATION_STEP);
 }
 
 /* initialize the sensors state */
@@ -994,15 +903,11 @@ static void _hwSensors_init(HwSensors* h) {
     /* XXX: TODO: Add other tests when we add the corresponding
      * properties to hardware-properties.ini et al. */
 
-    const float kPressure = 1013.25F;
     _hwSensors_setPhysicalParameterValue(
-            h, PHYSICAL_PARAMETER_PRESSURE, &kPressure, 1u,
+            h, PHYSICAL_PARAMETER_PRESSURE, 1013.25f, 0.f, 0.f,
             PHYSICAL_INTERPOLATION_SMOOTH);  // One "standard atmosphere"
-
-    const float kProximity = 1.F;
-    _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_PROXIMITY,
-                                         &kProximity, 1u,
-                                         PHYSICAL_INTERPOLATION_STEP);
+    _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_PROXIMITY, 1.f,
+                                         0.f, 0.f, PHYSICAL_INTERPOLATION_STEP);
 }
 
 static HwSensors _sensorsState[1] = {};
@@ -1079,9 +984,14 @@ extern int android_sensors_get_id_from_name(const char* sensorname) {
 
 /* Interface of reading the data for all sensors */
 extern int android_sensors_get(int sensor_id,
-                               float* const* out,
-                               const size_t count) {
+                               float* out_a,
+                               float* out_b,
+                               float* out_c) {
     HwSensors* hw = _sensorsState;
+
+    *out_a = 0;
+    *out_b = 0;
+    *out_c = 0;
 
     if (sensor_id < 0 || sensor_id >= MAX_SENSORS)
         return SENSOR_STATUS_UNKNOWN;
@@ -1094,34 +1004,16 @@ extern int android_sensors_get(int sensor_id,
         return SENSOR_STATUS_NO_SERVICE;
     }
 
-    _hwSensors_getSensorValue(hw, sensor_id, out, count);
-
-    return SENSOR_STATUS_OK;
-}
-
-extern int android_sensors_get_size(int sensor_id, size_t* size) {
-    HwSensors* hw = _sensorsState;
-
-    if (sensor_id < 0 || sensor_id >= MAX_SENSORS)
-        return SENSOR_STATUS_UNKNOWN;
-
-    Sensor* sensor = &hw->sensors[sensor_id];
-    if (hw->service != NULL) {
-        if (!sensor->enabled)
-            return SENSOR_STATUS_DISABLED;
-    } else {
-        return SENSOR_STATUS_NO_SERVICE;
-    }
-
-    _hwSensors_getSensorValueSize(hw, sensor_id, size);
+    _hwSensors_getSensorValue(hw, sensor_id, out_a, out_b, out_c);
 
     return SENSOR_STATUS_OK;
 }
 
 /* Interface of setting the data for all sensors */
 extern int android_sensors_override_set(int sensor_id,
-                                        const float* val,
-                                        const size_t count) {
+                                        float a,
+                                        float b,
+                                        float c) {
     HwSensors* hw = _sensorsState;
 
     if (sensor_id < 0 || sensor_id >= MAX_SENSORS)
@@ -1135,7 +1027,7 @@ extern int android_sensors_override_set(int sensor_id,
         return SENSOR_STATUS_NO_SERVICE;
     }
 
-    _hwSensors_setSensorValue(hw, sensor_id, val, count);
+    _hwSensors_setSensorValue(hw, sensor_id, a, b, c);
 
     return SENSOR_STATUS_OK;
 }
@@ -1180,28 +1072,15 @@ extern PhysicalModel* android_physical_model_instance() {
 
 /* Get a physical model parameter target value*/
 extern int android_physical_model_get(int physical_parameter,
-                                      float* const* out,
-                                      const size_t count,
+                                      float* out_a,
+                                      float* out_b,
+                                      float* out_c,
                                       ParameterValueType parameter_value_type) {
     HwSensors* hw = _sensorsState;
 
-    if (physical_parameter < 0 || physical_parameter >= MAX_PHYSICAL_PARAMETERS)
-        return PHYSICAL_PARAMETER_STATUS_UNKNOWN;
-
-    if (hw->physical_model == NULL) {
-        return PHYSICAL_PARAMETER_STATUS_NO_SERVICE;
-    }
-
-    _hwSensors_getPhysicalParameterValue(hw, physical_parameter, out, count,
-                                         parameter_value_type);
-
-    return PHYSICAL_PARAMETER_STATUS_OK;
-}
-
-/* Get a physical model parameter target value*/
-extern int android_physical_model_get_size(int physical_parameter,
-                                           size_t* size) {
-    HwSensors* hw = _sensorsState;
+    *out_a = 0;
+    *out_b = 0;
+    *out_c = 0;
 
     if (physical_parameter < 0 || physical_parameter >= MAX_PHYSICAL_PARAMETERS)
         return PHYSICAL_PARAMETER_STATUS_UNKNOWN;
@@ -1210,15 +1089,17 @@ extern int android_physical_model_get_size(int physical_parameter,
         return PHYSICAL_PARAMETER_STATUS_NO_SERVICE;
     }
 
-    _hwSensors_getPhysicalParameterValueSize(hw, physical_parameter, size);
+    _hwSensors_getPhysicalParameterValue(hw, physical_parameter, out_a, out_b,
+                                         out_c, parameter_value_type);
 
     return PHYSICAL_PARAMETER_STATUS_OK;
 }
 
 /* Set a physical model parameter */
 extern int android_physical_model_set(int physical_parameter,
-                                      const float* val,
-                                      const size_t count,
+                                      float a,
+                                      float b,
+                                      float c,
                                       int interpolation_mode) {
     HwSensors* hw = _sensorsState;
 
@@ -1229,7 +1110,7 @@ extern int android_physical_model_set(int physical_parameter,
         return PHYSICAL_PARAMETER_STATUS_NO_SERVICE;
     }
 
-    _hwSensors_setPhysicalParameterValue(hw, physical_parameter, val, count,
+    _hwSensors_setPhysicalParameterValue(hw, physical_parameter, a, b, c,
                                          interpolation_mode);
     return PHYSICAL_PARAMETER_STATUS_OK;
 }
@@ -1351,10 +1232,14 @@ bool android_foldable_fold() {
     if (android_foldable_get_state(&state) < 0) {
         return false;
     }
-    auto posture = {(float)state.config.foldAtPosture};
-    return android_physical_model_set(PHYSICAL_PARAMETER_POSTURE,
-                                      posture.begin(), posture.size(),
-                                      PHYSICAL_INTERPOLATION_SMOOTH) >= 0;
+    if (android_physical_model_set(PHYSICAL_PARAMETER_POSTURE,
+                                  (float)state.config.foldAtPosture,
+                                  0.0f,
+                                  0.0f,
+                                  PHYSICAL_INTERPOLATION_SMOOTH) < 0) {
+        return false;
+    }
+    return true;
 }
 
 bool android_foldable_unfold() {
@@ -1365,10 +1250,14 @@ bool android_foldable_unfold() {
         // "unfold" not clear for rollable
         return false;
     }
-    auto posture = {(float)POSTURE_OPENED};
-    return android_physical_model_set(PHYSICAL_PARAMETER_POSTURE,
-                                      posture.begin(), posture.size(),
-                                      PHYSICAL_INTERPOLATION_SMOOTH) >= 0;
+    if (android_physical_model_set(PHYSICAL_PARAMETER_POSTURE,
+                                  (float)POSTURE_OPENED,
+                                  0.0f,
+                                  0.0f,
+                                  PHYSICAL_INTERPOLATION_SMOOTH) < 0) {
+        return false;
+    }
+    return true;
 }
 
 bool android_foldable_set_posture(int posture) {
@@ -1385,10 +1274,14 @@ bool android_foldable_set_posture(int posture) {
     if (!state.config.supportedFoldablePostures[posture]) {
         return false;
     }
-    auto f_posture = static_cast<float>(posture);
-    return static_cast<bool>(
-            android_physical_model_set(PHYSICAL_PARAMETER_POSTURE, &f_posture,
-                                       1, PHYSICAL_INTERPOLATION_SMOOTH) >= 0);
+    if (android_physical_model_set(PHYSICAL_PARAMETER_POSTURE,
+                                  (float)posture,
+                                  0.0f,
+                                  0.0f,
+                                  PHYSICAL_INTERPOLATION_SMOOTH) < 0) {
+        return false;
+    }
+    return true;
 }
 
 bool android_foldable_get_folded_area(int* x, int* y, int* w, int* h) {
