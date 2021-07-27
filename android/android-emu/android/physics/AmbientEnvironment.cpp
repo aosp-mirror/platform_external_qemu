@@ -59,11 +59,6 @@ void AmbientEnvironment::setHumidity(
     mHumidity = percent;
 }
 
-void AmbientEnvironment::setRgbcLight(glm::vec4 light,
-                                      PhysicalInterpolation mode) {
-    mRgbcLight = light;
-}
-
 glm::vec3 AmbientEnvironment::getMagneticField(
         ParameterValueType valueType) const {
     return valueType == PARAMETER_VALUE_TYPE_DEFAULT ? kDefaultMagneticField
@@ -97,11 +92,6 @@ float AmbientEnvironment::getPressure(ParameterValueType valueType) const {
 float AmbientEnvironment::getHumidity(ParameterValueType valueType) const {
     return valueType == PARAMETER_VALUE_TYPE_DEFAULT ? kDefaultHumidity
                                                      : mHumidity;
-}
-
-glm::vec4 AmbientEnvironment::getRgbcLight(ParameterValueType valueType) const {
-    return valueType == PARAMETER_VALUE_TYPE_DEFAULT ? kDefaultRgbcLight
-                                                     : mRgbcLight;
 }
 
 }  // namespace physics
