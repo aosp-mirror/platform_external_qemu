@@ -54,6 +54,7 @@ Supported devices
  * Tachometer
  * Peripheral SPI controller (PSPI)
  * BIOS POST code FIFO
+ * PCI Mailbox
 
 Missing devices
 ---------------
