@@ -76,10 +76,6 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
     mUi->heartRateSensorValueWidget->setRange(0, 500, false);
     mUi->humiditySensorValueWidget->setRange(0, 100, false);
     mUi->proximitySensorValueWidget->setRange(0, 10, false);
-    mUi->rgbcRedSensorValueWidget->setRange(0, 65535, false);
-    mUi->rgbcGreenSensorValueWidget->setRange(0, 65535, false);
-    mUi->rgbcBlueSensorValueWidget->setRange(0, 65535, false);
-    mUi->rgbcClearSensorValueWidget->setRange(0, 65535, false);
     mUi->magNorthWidget->setLocale(QLocale::c());
     mUi->magEastWidget->setLocale(QLocale::c());
     mUi->magVerticalWidget->setLocale(QLocale::c());
@@ -95,7 +91,6 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
                                    false);
     setupHingeSensorUI();
     setupRollableUI();
-    setupRgbcLightUI();
     connect(mUi->accelWidget, SIGNAL(targetRotationChanged()), this,
             SLOT(propagateAccelWidgetChange()));
     connect(mUi->accelWidget, SIGNAL(targetPositionChanged()), this,
@@ -221,13 +216,6 @@ void VirtualSensorsPage::setupHingeSensorUI() {
                 mUi->hinge0Slider->setHidden(false);
             default:;
         }
-    }
-}
-
-void VirtualSensorsPage::setupRgbcLightUI() {
-    if (!is_fuchsia) {
-        mUi->labelRgbcLight->setHidden(true);
-        mUi->tabRgbcSensor->setHidden(true);
     }
 }
 
@@ -417,62 +405,6 @@ void VirtualSensorsPage::on_humiditySensorValueWidget_valueChanged(
             setPhysicalParameterTarget(PHYSICAL_PARAMETER_HUMIDITY,
                                        PHYSICAL_INTERPOLATION_SMOOTH,
                                        {static_cast<float>(value)});
-}
-
-void VirtualSensorsPage::on_rgbcSensorValueWidget_valueChanged() {
-    mSensorTracker->increment("RGBC_LIGHT");
-    setPhysicalParameterTarget(
-            PHYSICAL_PARAMETER_RGBC_LIGHT, PHYSICAL_INTERPOLATION_SMOOTH,
-            {
-                    static_cast<float>(
-                            mUi->rgbcRedSensorValueWidget->getValue()),
-                    static_cast<float>(
-                            mUi->rgbcGreenSensorValueWidget->getValue()),
-                    static_cast<float>(
-                            mUi->rgbcBlueSensorValueWidget->getValue()),
-                    static_cast<float>(
-                            mUi->rgbcClearSensorValueWidget->getValue()),
-            });
-}
-
-void VirtualSensorsPage::on_rgbcRedSensorValueWidget_valueChanged(
-        double value) {
-    auto* slider = mUi->rgbcRedSensorValueWidget;
-    auto oldState = slider->blockSignals(true);
-    // Round the value to integer.
-    slider->setValue(std::round(value));
-    on_rgbcSensorValueWidget_valueChanged();
-    slider->blockSignals(oldState);
-}
-
-void VirtualSensorsPage::on_rgbcGreenSensorValueWidget_valueChanged(
-        double value) {
-    auto* slider = mUi->rgbcGreenSensorValueWidget;
-    auto oldState = slider->blockSignals(true);
-    // Round the value to integer.
-    slider->setValue(std::round(value));
-    on_rgbcSensorValueWidget_valueChanged();
-    slider->blockSignals(oldState);
-}
-
-void VirtualSensorsPage::on_rgbcBlueSensorValueWidget_valueChanged(
-        double value) {
-    auto* slider = mUi->rgbcBlueSensorValueWidget;
-    auto oldState = slider->blockSignals(true);
-    // Round the value to integer.
-    slider->setValue(std::round(value));
-    on_rgbcSensorValueWidget_valueChanged();
-    slider->blockSignals(oldState);
-}
-
-void VirtualSensorsPage::on_rgbcClearSensorValueWidget_valueChanged(
-        double value) {
-    auto* slider = mUi->rgbcClearSensorValueWidget;
-    auto oldState = slider->blockSignals(true);
-    // Round the value to integer.
-    slider->setValue(std::round(value));
-    on_rgbcSensorValueWidget_valueChanged();
-    slider->blockSignals(oldState);
 }
 
 void VirtualSensorsPage::on_magNorthWidget_valueChanged(double value) {
