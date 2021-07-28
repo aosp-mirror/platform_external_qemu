@@ -92,7 +92,7 @@ VG_EXPORT uint32_t stream_renderer_resource_get_hv_slot(uint32_t res_handle);
 VG_EXPORT int stream_renderer_resource_map(uint32_t res_handle, void** hvaOut, uint64_t* sizeOut);
 VG_EXPORT int stream_renderer_resource_unmap(uint32_t res_handle);
 VG_EXPORT int stream_renderer_context_create_fence(
-    uint32_t fence_id, uint32_t ctx_id, uint32_t fence_ctx_idx);
+    uint64_t fence_id, uint32_t ctx_id, uint32_t fence_ctx_idx);
 
 // Platform resources and contexts support
 #define STREAM_RENDERER_PLATFORM_RESOURCE_TYPE_EGL_NATIVE_PIXMAP 0x01

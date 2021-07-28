@@ -1300,7 +1300,7 @@ static int proxy_virgl_make_context_current(
 static struct virgl_renderer_callbacks proxy_3d_cbs = {
     .version             = 1,
     .write_fence         = proxy_virgl_write_fence,
-    .write_fence2        = NULL,
+    .write_context_fence = NULL,
     .create_gl_context   = proxy_virgl_create_context,
     .destroy_gl_context  = proxy_virgl_destroy_context,
     .make_current        = proxy_virgl_make_context_current,
