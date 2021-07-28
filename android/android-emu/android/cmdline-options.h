@@ -117,8 +117,9 @@ OPT_FLAG ( netfast, "disable network shaping" )
 OPT_PARAM( code_profile, "<name>", "enable code profiling" )
 OPT_FLAG ( show_kernel, "display kernel messages" )
 OPT_FLAG ( shell, "enable root shell on current terminal" )
-OPT_FLAG ( no_jni, "disable JNI checks in the Dalvik runtime" )
-OPT_FLAG ( nojni, "same as -no-jni" )
+OPT_FLAG ( no_jni, "deprecated, see dalvik_vm_checkjni" )
+OPT_FLAG ( nojni, "deprecated, see dalvik_vm_checkjni" )
+OPT_FLAG ( dalvik_vm_checkjni, "Enable dalvik.vm.checkjni" )
 OPT_PARAM( logcat, "<tags>", "enable logcat output with given tags" )
 
 #ifdef __linux__
