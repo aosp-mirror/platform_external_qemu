@@ -153,7 +153,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         params.push_back({"androidboot.serialno", serialno});
     }
 
-    if (!opts->no_jni) {
+    if (opts->dalvik_vm_checkjni) {
         params.push_back({checkjniProp, "1"});
     }
     if (opts->no_boot_anim) {

@@ -71,7 +71,6 @@ TEST(getUserspaceBootProperties, BootconfigOff) {
     EXPECT_STREQ(paramsMap["qemu"].c_str(), "1");
     EXPECT_STREQ(paramsMap["androidboot.hardware"].c_str(), "ranchu");
     EXPECT_STREQ(paramsMap["androidboot.serialno"].c_str(), "serialno");
-    EXPECT_STREQ(paramsMap["android.checkjni"].c_str(), "1");
     EXPECT_STREQ(paramsMap["qemu.gles"].c_str(), "1");
     EXPECT_STREQ(paramsMap["qemu.settings.system.screen_off_timeout"].c_str(), "2147483647");
     EXPECT_STREQ(paramsMap["qemu.vsync"].c_str(), "60");
@@ -128,7 +127,6 @@ TEST(getUserspaceBootProperties, BootconfigOn) {
     EXPECT_STREQ(paramsMap["qemu"].c_str(), "1");
     EXPECT_STREQ(paramsMap["androidboot.hardware"].c_str(), "ranchu");
     EXPECT_STREQ(paramsMap["androidboot.serialno"].c_str(), "serialno");
-    EXPECT_STREQ(paramsMap["androidboot.dalvik.vm.checkjni"].c_str(), "1");
     EXPECT_STREQ(paramsMap["androidboot.qemu.gltransport.name"].c_str(), "gltransport");
     EXPECT_STREQ(paramsMap["androidboot.qemu.gltransport.drawFlushInterval"].c_str(), "77");
     EXPECT_STREQ(paramsMap["androidboot.opengles.version"].c_str(), "123");

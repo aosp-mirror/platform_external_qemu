@@ -2043,6 +2043,7 @@ static void help_guest_angle(stralloc_t* out) {
 #define  help_nocache      NULL
 #define  help_no_jni       NULL
 #define  help_nojni        NULL
+#define  help_dalvik_vm_checkjni NULL
 #define  help_initdata     NULL
 #define  help_no_sim       NULL
 #define  help_lowram       NULL

@@ -307,11 +307,6 @@ static void sanitizeOptions(AndroidOptions* opts) {
         str_reset_null(&opts->system);
     }
 
-    if (opts->nojni) {
-        opts->no_jni = opts->nojni;
-        opts->nojni  = 0;
-    }
-
     if (opts->nocache) {
         opts->no_cache = opts->nocache;
         opts->nocache  = 0;
