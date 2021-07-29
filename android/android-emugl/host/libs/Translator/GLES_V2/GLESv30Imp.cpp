@@ -780,6 +780,9 @@ GL_APICALL void GL_APIENTRY glTexStorage2D(GLenum target, GLsizei levels, GLenum
     if (ctx->drawDisabled()) {
         return;
     }
+
+    AutoLock lock(sTexImageLock);
+
     gles30usages->set_is_used(true);
     GLint err = GL_NO_ERROR;
     GLenum format, type;
@@ -1100,6 +1103,9 @@ GL_APICALL void GL_APIENTRY glTexImage3D(GLenum target, GLint level, GLint inter
     if (ctx->drawDisabled()) {
         return;
     }
+
+    AutoLock lock(sTexImageLock);
+
     gles30usages->set_is_used(true);
     SET_ERROR_IF(!GLESv2Validate::pixelItnlFrmt(ctx,internalFormat), GL_INVALID_VALUE);
     SET_ERROR_IF(!GLESv2Validate::isCompressedFormat(internalFormat) &&
@@ -1129,6 +1135,9 @@ GL_APICALL void GL_APIENTRY glTexStorage3D(GLenum target, GLsizei levels, GLenum
     if (ctx->drawDisabled()) {
         return;
     }
+
+    AutoLock lock(sTexImageLock);
+
     gles30usages->set_is_used(true);
     GLenum format, type;
     GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalformat, &format, &type);
@@ -1149,6 +1158,9 @@ GL_APICALL void GL_APIENTRY glTexSubImage3D(GLenum target, GLint level, GLint xo
     if (ctx->drawDisabled()) {
         return;
     }
+
+    AutoLock lock(sTexImageLock);
+
     gles30usages->set_is_used(true);
     if (isCoreProfile() &&
         isCoreProfileEmulatedFormat(format)) {
@@ -1164,6 +1176,7 @@ GL_APICALL void GL_APIENTRY glTexSubImage3D(GLenum target, GLint level, GLint xo
 
 GL_APICALL void GL_APIENTRY glCompressedTexImage3D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, const GLvoid * data) {
     GET_CTX_V2();
+
     gles30usages->set_is_used(true);
     ctx->dispatcher().glCompressedTexImage3D(target, level, internalformat, width, height, depth, border, imageSize, data);
     if (ctx->shareGroup().get()) {
@@ -1180,6 +1193,7 @@ GL_APICALL void GL_APIENTRY glCompressedTexImage3D(GLenum target, GLint level, G
 
 GL_APICALL void GL_APIENTRY glCompressedTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const GLvoid * data) {
     GET_CTX_V2();
+
     gles30usages->set_is_used(true);
     TextureData* texData = getTextureTargetData(target);
     if (texData) {
@@ -1190,6 +1204,9 @@ GL_APICALL void GL_APIENTRY glCompressedTexSubImage3D(GLenum target, GLint level
 
 GL_APICALL void GL_APIENTRY glCopyTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height) {
     GET_CTX_V2();
+
+    AutoLock lock(sTexImageLock);
+
     gles30usages->set_is_used(true);
     TextureData* texData = getTextureTargetData(target);
     if (texData) {

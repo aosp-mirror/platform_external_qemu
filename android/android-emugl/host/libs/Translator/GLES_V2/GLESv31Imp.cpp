@@ -643,6 +643,9 @@ GL_APICALL void GL_APIENTRY glDrawElementsIndirect(GLenum mode, GLenum type, con
 GL_APICALL void GL_APIENTRY glTexStorage2DMultisample(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLboolean fixedsamplelocations) {
     GET_CTX_V2();
     SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glTexStorage2DMultisample);
+
+    AutoLock lock(sTexImageLock);
+
     GLint err = GL_NO_ERROR;
     GLenum format, type;
     GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalformat, &format, &type);
