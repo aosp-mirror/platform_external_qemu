@@ -3340,3 +3340,13 @@ void FrameBuffer::setVsyncHz(int vsyncHz) {
         m_vsyncThread->setPeriod(kOneSecondNs / (uint64_t)m_vsyncHz);
     }
 }
+
+void FrameBuffer::scheduleVsyncTask(VsyncThread::VsyncTask task) {
+    if (!m_vsyncThread) {
+        fprintf(stderr, "%s: warning: no vsync thread exists\n", __func__);
+        task(0);
+        return;
+    }
+
+    m_vsyncThread->schedule(task);
+}

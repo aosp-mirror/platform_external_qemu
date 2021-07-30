@@ -115,6 +115,14 @@ public:
         return false;
     }
 
+    void setIsCompositionFence(bool isComposition) {
+        mIsCompositionFence = isComposition;
+    }
+
+    bool isCompositionFence() const {
+        return mIsCompositionFence;
+    }
+
     // Tracks current active set of fences. Useful for snapshotting.
     void addToRegistry();
     void removeFromRegistry();
@@ -131,6 +139,10 @@ private:
     // EGL state needed for calling OpenGL sync operations.
     EGLDisplay mDisplay;
     EGLSyncKHR mSync;
+
+    // Whether this fence was against composition, in which case
+    // we should make this wait till next vsync.
+    bool mIsCompositionFence = false;
 
     // destroy() wraps eglDestroySyncKHR. This is private, because we need
     // careful control of when eglDestroySyncKHR is actually called.

@@ -81,6 +81,9 @@ struct RenderThreadInfo {
     // The unique id of owner guest process of this render thread
     uint64_t                        m_puid = 0;
 
+    // Whether this thread was used to perform composition.
+    bool m_isCompositionThread = false;
+
     // Functions to save / load a snapshot
     // They must be called after Framebuffer snapshot
     void onSave(android::base::Stream* stream);

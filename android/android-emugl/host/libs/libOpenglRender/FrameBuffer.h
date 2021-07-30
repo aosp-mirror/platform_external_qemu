@@ -648,6 +648,7 @@ public:
     void setGuestManagedColorBufferLifetime(bool guestManaged);
 
     void setVsyncHz(int vsyncHz);
+    void scheduleVsyncTask(VsyncThread::VsyncTask task);
 
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
