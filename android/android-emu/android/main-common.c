@@ -2255,6 +2255,9 @@ bool configAndStartRenderer(
                     "android_startOpenglesRenderer failed. "
                     "Error: %d\n", renderer_startup_res);
             }
+        } else {
+            fprintf(stderr, "%s: setting vsync to %d hz\n", __func__, hw->hw_lcd_vsync);
+            android_setVsyncHz(hw->hw_lcd_vsync);
         }
     }
 

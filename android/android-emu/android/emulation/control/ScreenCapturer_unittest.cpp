@@ -281,6 +281,8 @@ public:
     void addListener(FrameBufferChangeEventListener* listener) override {};
     void removeListener(FrameBufferChangeEventListener* listener)  override {};
 
+    void setVsyncHz(int vsyncHz) override { (void)vsyncHz; }
+
 private:
     bool mHasValidScreenshot = false;
     bool mGuestPostedAFrame = false;

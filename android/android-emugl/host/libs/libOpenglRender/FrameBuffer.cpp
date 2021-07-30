@@ -704,6 +704,10 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
 
     goldfish_vk::setGlInteropSupported(fb->m_vulkanInteropSupported);
 
+    // Start the vsync thread
+    const uint64_t kOneSecondNs = 1000000000ULL;
+    fb->m_vsyncThread.reset(new VsyncThread((uint64_t)kOneSecondNs / (uint64_t)fb->m_vsyncHz));
+
     //
     // Keep the singleton framebuffer pointer
     //
@@ -840,6 +844,7 @@ FrameBuffer::~FrameBuffer() {
 
     m_postWorker.reset();
     m_readbackWorker.reset();
+    m_vsyncThread.reset();
 }
 
 WorkerProcessingResult
@@ -3326,4 +3331,12 @@ void FrameBuffer::waitForGpuVulkan(uint64_t deviceHandle, uint64_t fenceHandle) 
 
 void FrameBuffer::setGuestManagedColorBufferLifetime(bool guestManaged) {
     m_guestManagedColorBufferLifetime = guestManaged;
+}
+
+void FrameBuffer::setVsyncHz(int vsyncHz) {
+    const uint64_t kOneSecondNs = 1000000000ULL;
+    m_vsyncHz = vsyncHz;
+    if (m_vsyncThread) {
+        m_vsyncThread->setPeriod(kOneSecondNs / (uint64_t)m_vsyncHz);
+    }
 }

@@ -32,6 +32,7 @@
 #include "ReadbackWorker.h"
 #include "RenderContext.h"
 #include "TextureDraw.h"
+#include "VsyncThread.h"
 #include "WindowSurface.h"
 
 #include "OpenglRender/render_api.h"
@@ -646,6 +647,8 @@ public:
 
     void setGuestManagedColorBufferLifetime(bool guestManaged);
 
+    void setVsyncHz(int vsyncHz);
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();
@@ -883,5 +886,10 @@ private:
     uint8_t m_vulkanUUID[VK_UUID_SIZE];
     uint8_t m_glesUUID[GL_UUID_SIZE_EXT];
     static_assert(VK_UUID_SIZE == GL_UUID_SIZE_EXT);
+
+    int m_vsyncHz = 60;
+
+    // Vsync thread.
+    std::unique_ptr<VsyncThread> m_vsyncThread = {};
 };
 #endif

@@ -295,6 +295,7 @@ public:
             android::snapshot::Snapshotter::Operation op,
             android::snapshot::Snapshotter::Stage stage) = 0;
 
+    virtual void setVsyncHz(int vsyncHz) = 0;
 protected:
     ~Renderer() = default;
 };
