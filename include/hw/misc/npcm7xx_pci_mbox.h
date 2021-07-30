@@ -31,6 +31,13 @@
 #define NPCM7XX_PCI_REVISION    0
 #define NPCM7XX_PCI_CLASS_CODE  0xff
 
+typedef enum NPCM7xxPCIMBoxHostState {
+    NPCM7XX_PCI_MBOX_STATE_IDLE,
+    NPCM7XX_PCI_MBOX_STATE_OFFSET,
+    NPCM7XX_PCI_MBOX_STATE_SIZE,
+    NPCM7XX_PCI_MBOX_STATE_DATA,
+} NPCM7xxPCIMBoxHostState ;
+
 /*
  * Maximum amount of control registers in PCI Mailbox module. Do not increase
  * this value without bumping vm version.
@@ -44,6 +51,8 @@
  * @iomem: Memory region through which registers are accessed.
  * @content: The content of the PCI mailbox, initialized to 0.
  * @regs: The MMIO registers.
+ * @chr: The chardev backend used to communicate with core CPU.
+ * @offset: The offset to start transfer.
  */
 typedef struct NPCM7xxPCIMBoxState {
     SysBusDevice parent;
@@ -54,6 +63,15 @@ typedef struct NPCM7xxPCIMBoxState {
     qemu_irq irq;
     uint8_t content[NPCM7XX_PCI_MBOX_RAM_SIZE];
     uint32_t regs[NPCM7XX_PCI_MBOX_NR_REGS];
+    CharBackend chr;
+
+    /* aux data for receiving host commands. */
+    NPCM7xxPCIMBoxHostState state;
+    uint8_t op;
+    hwaddr offset;
+    uint8_t size;
+    uint64_t data;
+    int receive_count;
 } NPCM7xxPCIMBoxState;
 
 #define TYPE_NPCM7XX_PCI_MBOX "npcm7xx-pci-mbox"
