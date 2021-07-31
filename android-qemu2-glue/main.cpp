@@ -2313,7 +2313,7 @@ extern "C" int main(int argc, char** argv) {
     bool targetIsX86 = false;
 #endif
 
-    if (apiLevel >= 30 || targetIsX86) {
+    if (apiLevel >= 28 || targetIsX86) {
         args.add2("-soundhw", "hda");
     }
 
