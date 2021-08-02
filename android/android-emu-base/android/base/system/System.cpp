@@ -1185,6 +1185,92 @@ public:
         Thread::sleepUs(n);
     }
 
+    void sleepToUs(WallDuration absTimeUs) const override {
+        // Approach will vary based on platform.
+        //
+        // Linux has clock_nanosleep with TIMER_ABSTIME which does
+        // exactly what we want, a sleep to some absolute time.
+        //
+        // Mac only has relative nanosleep(), so we'll need to calculate a time
+        // difference.
+        //
+        // Windows has waitable timers. Pre Windows 10 1803, 1 ms was the best resolution. Past that, we can use high resolution waitable timers.
+#ifdef __APPLE__
+        WallDuration current = getHighResTimeUs();
+
+        // Already passed deadline, return.
+        if (absTimeUs < current) return;
+        WallDuration diff = absTimeUs - current;
+
+        struct timespec ts;
+        ts.tv_sec = diff / 1000000ULL;
+        ts.tv_nsec = diff * 1000ULL - ts.tv_sec * 1000000000ULL;
+        int ret;
+        do {
+            ret = nanosleep(&ts, nullptr);
+        } while (ret == -1 && errno == EINTR);
+#elif defined(__linux__)
+        struct timespec ts;
+        ts.tv_sec = absTimeUs / 1000000ULL;
+        ts.tv_nsec = absTimeUs * 1000ULL - ts.tv_sec * 1000000000ULL;
+        int ret;
+        do {
+            ret = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, nullptr);
+        } while (ret == -1 && errno == EINTR);
+#else // _WIN32
+
+        // Create a persistent thread local timer object
+        struct ThreadLocalTimerState {
+            ThreadLocalTimerState() {
+                timerHandle = CreateWaitableTimerEx(
+                    nullptr /* no security attributes */,
+                    nullptr /* no timer name */,
+                    CREATE_WAITABLE_TIMER_HIGH_RESOLUTION,
+                    TIMER_ALL_ACCESS);
+
+                if (!timerHandle) {
+                    // Use an older version of waitable timer as backup.
+                    timerHandle = CreateWaitableTimer(nullptr, FALSE, nullptr);
+                }
+            }
+
+            ~ThreadLocalTimerState() {
+                if (timerHandle) {
+                    CloseHandle(timerHandle);
+                }
+            }
+
+            HANDLE timerHandle = 0;
+        };
+
+        static thread_local ThreadLocalTimerState tl_timerInfo;
+
+        WallDuration current = getHighResTimeUs();
+        // Already passed deadline, return.
+        if (absTimeUs < current) return;
+        WallDuration diff = absTimeUs - current;
+
+        // Waitable Timer appraoch
+
+        // We failed to create ANY usable timer. Sleep instead.
+        if (!tl_timerInfo.timerHandle) {
+            Thread::sleepUs(diff);
+            return;
+        }
+
+        LARGE_INTEGER dueTime;
+        dueTime.QuadPart = -1LL * diff * 10LL; // 1 us = 1x 100ns
+        SetWaitableTimer(
+            tl_timerInfo.timerHandle,
+            &dueTime,
+            0 /* one shot timer */,
+            0 /* no callback on finish */,
+            NULL /* no arg to completion routine */,
+            FALSE /* no suspend */);
+        WaitForSingleObject(tl_timerInfo.timerHandle, INFINITE);
+#endif
+    }
+
     void yield() const override {
         Thread::yield();
     }
