@@ -44,6 +44,11 @@ int tu_any_failed;
 
 struct ts_testsuite_list *ts_suites;
 
+bool
+equal_within_tolerance(int left, int right, int tolerance)
+{
+    return abs(left - right) <= abs(tolerance);
+}
 void
 tu_set_pass_cb(tu_case_report_fn_t *cb, void *cb_arg)
 {
