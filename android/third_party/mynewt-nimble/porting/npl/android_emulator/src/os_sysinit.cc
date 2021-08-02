@@ -25,13 +25,13 @@ extern "C" {
 #include "nimble/nimble_npl.h"
 #include "nimble/nimble_port.h"
 #include "nimble/os_types.h"
-#include "socket/ble_hci_socket.h"
 #include "host/ble_hs.h"
 
 extern void os_msys_init(void);
 extern void os_mempool_module_init(void);
 extern void ble_store_config_init(void);
 extern int ble_hs_reset(void);
+extern void ble_hci_transport_init(void);
 }
 
 
@@ -71,7 +71,7 @@ extern "C" void sysinit(void) {
 
     /* Setup the socket to rootcanal */
     // TODO(jansene): Make this properly configurable vs the hardcoded socket.
-    ble_hci_sock_init();
+    ble_hci_transport_init();
 
     // Let's setup our own looper.
     // TODO(jansene): QEMU provides its own looper..
