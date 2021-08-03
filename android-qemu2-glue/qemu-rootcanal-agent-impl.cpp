@@ -80,10 +80,12 @@ std::unique_ptr<android::bluetooth::Rootcanal> sRootcanal;
 #endif
 
 ssize_t rootcanal_recv(uint8_t* buffer, uint64_t bufferSize) {
+    errno = 0;
     std::unique_lock<std::mutex> guard(sHciMutex);
     if (sIncomingHciBuffer.empty()) {
-        LOG(INFO) << "rootcanal_recv: EAGAIN";
-        return EAGAIN;
+        DD("rootcanal_recv: EAGAIN");
+        errno = EAGAIN;
+        return -1;
     }
     auto readCount = std::min<uint64_t>(sIncomingHciBuffer.size(), bufferSize);
     memcpy(buffer, sIncomingHciBuffer.data(), readCount);
