@@ -146,6 +146,8 @@ public:
 
     void addListener(emugl::Renderer::FrameBufferChangeEventListener* listener);
     void removeListener(emugl::Renderer::FrameBufferChangeEventListener* listener);
+
+    void setVsyncHz(int vsyncHz);
 private:
     bool processMessage(const RenderWindowMessage& msg);
     bool useThread() const { return mThread != nullptr; }

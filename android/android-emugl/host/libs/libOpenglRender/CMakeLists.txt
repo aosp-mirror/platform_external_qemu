@@ -102,6 +102,7 @@ android_add_library(
       TextureDraw.cpp
       TextureResize.cpp
       WindowSurface.cpp
+      VsyncThread.cpp
       YUVConverter.cpp
   LINUX NativeSubWindow_x11.cpp
   DARWIN NativeSubWindow_cocoa.m
@@ -186,6 +187,7 @@ if(NOT LINUX_AARCH64)
         TextureDraw.cpp
         TextureResize.cpp
         WindowSurface.cpp
+        VsyncThread.cpp
         YUVConverter.cpp
     LINUX NativeSubWindow_x11.cpp
     DARWIN NativeSubWindow_cocoa.m
@@ -242,7 +244,8 @@ if(NOT LINUX_AARCH64)
         tests/OpenGL_unittest.cpp
         tests/OpenGLTestContext.cpp
         tests/StalePtrRegistry_unittest.cpp
-        tests/TextureDraw_unittest.cpp)
+        tests/TextureDraw_unittest.cpp
+        tests/VsyncThread_unittest.cpp)
   target_link_libraries(
     OpenglRender_unittests PRIVATE OpenglRender_standalone_common
                                    android-emu-test-launcher android-emu)

@@ -439,6 +439,12 @@ public:
         sleepMs(n / 1000);
     }
 
+    virtual void sleepToUs(WallDuration absTime) const override {
+        // Don't sleep in tests, use the static functions from Thread class
+        // if you need a delay (you don't!).
+        Thread::yield();  // Add a small delay to mimic the intended behavior.
+    }
+
     virtual void yield() const override { Thread::yield(); }
 
     virtual void configureHost() const override {   }

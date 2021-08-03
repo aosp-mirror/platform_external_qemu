@@ -661,4 +661,10 @@ void RendererImpl::snapshotOperationCallback(
     }
 }
 
+void RendererImpl::setVsyncHz(int vsyncHz) {
+    if (mRenderWindow) {
+        mRenderWindow->setVsyncHz(vsyncHz);
+    }
+}
+
 }  // namespace emugl

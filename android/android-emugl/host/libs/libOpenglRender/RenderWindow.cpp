@@ -63,6 +63,7 @@ enum Command {
     CMD_REPAINT,
     CMD_HAS_GUEST_POSTED_A_FRAME,
     CMD_RESET_GUEST_POSTED_A_FRAME,
+    CMD_SET_VSYNC_HZ,
     CMD_FINALIZE,
 };
 
@@ -112,6 +113,9 @@ struct RenderWindowMessage {
 
         // CMD_SET_ROTATION
         float rotation;
+
+        // CMD_SET_VSYNC_HZ
+        int vsyncHz;
 
         // result of operations.
         bool result;
@@ -252,6 +256,17 @@ struct RenderWindowMessage {
                 }
                 break;
 
+            case CMD_SET_VSYNC_HZ:
+                GL_LOG("CMD_SET_VSYNC_HZ");
+                D("CMD_SET_VSYNC_HZ\n");
+                fb = FrameBuffer::getFB();
+                if (fb) {
+                    fb->setVsyncHz(msg.vsyncHz);
+                    result = true;
+                } else {
+                    GL_LOG("CMD_RESET_GUEST_POSTED_A_FRAME: no FrameBuffer");
+                }
+                break;
 
             default:
                 ;
@@ -584,6 +599,15 @@ void RenderWindow::resetGuestPostedAFrame() {
     D("Entering\n");
     RenderWindowMessage msg = {};
     msg.cmd = CMD_RESET_GUEST_POSTED_A_FRAME;
+    (void) processMessage(msg);
+    D("Exiting\n");
+}
+
+void RenderWindow::setVsyncHz(int vsyncHz) {
+    D("Entering\n");
+    RenderWindowMessage msg = {};
+    msg.cmd = CMD_SET_VSYNC_HZ;
+    msg.vsyncHz = vsyncHz;
     (void) processMessage(msg);
     D("Exiting\n");
 }

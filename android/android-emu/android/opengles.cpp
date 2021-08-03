@@ -689,3 +689,9 @@ const void* android_getEGLDispatch() {
 const void* android_getGLESv2Dispatch() {
     return sGlesv2;
 }
+
+void android_setVsyncHz(int vsyncHz) {
+    if (sRenderer) {
+        sRenderer->setVsyncHz(vsyncHz);
+    }
+}

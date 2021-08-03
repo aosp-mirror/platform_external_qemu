@@ -405,6 +405,9 @@ public:
     // Sleep for |n| microseconds
     virtual void sleepUs(unsigned n) const = 0;
 
+    // Sleep to the specified WallDuration from getHighResTimeUs().
+    virtual void sleepToUs(WallDuration absTimeUs) const = 0;
+
     // Yield the remaining part of current thread's CPU time slice to another
     // thread that's ready to run.
     virtual void yield() const = 0;

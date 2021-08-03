@@ -123,6 +123,7 @@ public:
     void addListener(FrameBufferChangeEventListener* listener) override;
     void removeListener(FrameBufferChangeEventListener* listener) override;
 
+    void setVsyncHz(int vsyncHz) final;
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RendererImpl);
 

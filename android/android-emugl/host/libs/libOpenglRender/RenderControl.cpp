@@ -367,6 +367,10 @@ static bool shouldEnableVulkanAsyncQsri() {
          emugl_feature_is_enabled(android::featurecontrol::VirtioGpuNativeSync));
 }
 
+static bool shouldEnableVsyncGatedSyncFences() {
+    return shouldEnableAsyncSwap();
+}
+
 android::base::StringView maxVersionToFeatureString(GLESDispatchMaxVersion version) {
     switch (version) {
         case GLES_DISPATCH_MAX_VERSION_2:
@@ -1125,11 +1129,22 @@ static void rcTriggerWait(uint64_t eglsync_ptr,
                                          timeline);
     } else {
         FenceSync* fenceSync = reinterpret_cast<FenceSync*>(eglsync_ptr);
-        EGLSYNC_DPRINT(
-                "eglsync=0x%llx fenceSync=%p thread_ptr=0x%llx "
-                "timeline=0x%llx",
-                eglsync_ptr, fenceSync, thread_ptr, timeline);
-        SyncThread::get()->triggerWait(fenceSync, timeline);
+        FrameBuffer *fb = FrameBuffer::getFB();
+        if (fb && fenceSync->isCompositionFence()) {
+            fb->scheduleVsyncTask([eglsync_ptr, fenceSync, timeline](uint64_t) {
+                EGLSYNC_DPRINT(
+                    "vsync: eglsync=0x%llx fenceSync=%p thread_ptr=0x%llx "
+                    "timeline=0x%llx",
+                    eglsync_ptr, fenceSync, thread_ptr, timeline);
+                SyncThread::get()->triggerWait(fenceSync, timeline);
+            });
+        } else {
+            EGLSYNC_DPRINT(
+                    "eglsync=0x%llx fenceSync=%p thread_ptr=0x%llx "
+                    "timeline=0x%llx",
+                    eglsync_ptr, fenceSync, thread_ptr, timeline);
+            SyncThread::get()->triggerWait(fenceSync, timeline);
+        }
     }
 }
 
@@ -1169,6 +1184,10 @@ static void rcCreateSyncKHR(EGLenum type,
     emugl_sync_register_trigger_wait(rcTriggerWait);
     FenceSync* fenceSync = new FenceSync(hasNativeFence,
                                          destroy_when_signaled);
+
+    if (shouldEnableVsyncGatedSyncFences()) {
+        fenceSync->setIsCompositionFence(tInfo->m_isCompositionThread);
+    }
 
     // This MUST be present, or we get a deadlock effect.
     s_gles2.glFlush();
@@ -1269,6 +1288,9 @@ static void rcSetPuid(uint64_t puid) {
 }
 
 static int rcCompose(uint32_t bufferSize, void* buffer) {
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    if (tInfo) tInfo->m_isCompositionThread = true;
+
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return -1;
@@ -1277,6 +1299,9 @@ static int rcCompose(uint32_t bufferSize, void* buffer) {
 }
 
 static int rcComposeWithoutPost(uint32_t bufferSize, void* buffer) {
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    if (tInfo) tInfo->m_isCompositionThread = true;
+
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return -1;
@@ -1516,6 +1541,9 @@ static void rcMakeCurrentAsync(uint32_t context, uint32_t drawSurf, uint32_t rea
 }
 
 static void rcComposeAsync(uint32_t bufferSize, void* buffer) {
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    if (tInfo) tInfo->m_isCompositionThread = true;
+
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return;
@@ -1524,6 +1552,9 @@ static void rcComposeAsync(uint32_t bufferSize, void* buffer) {
 }
 
 static void rcComposeAsyncWithoutPost(uint32_t bufferSize, void* buffer) {
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    if (tInfo) tInfo->m_isCompositionThread = true;
+
     FrameBuffer *fb = FrameBuffer::getFB();
     if (!fb) {
         return;
