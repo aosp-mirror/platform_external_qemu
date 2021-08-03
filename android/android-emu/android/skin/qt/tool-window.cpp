@@ -203,7 +203,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             "Ctrl+Shift+F SHOW_PANE_FINGER\n"
             "Ctrl+Shift+D SHOW_PANE_DPAD\n"
             "Ctrl+Shift+S SHOW_PANE_SETTINGS\n"
-            "Ctrl+Shift+M SHOW_PANE_MULTIDISPLAY\n"
 #ifdef __APPLE__
             "Ctrl+/     SHOW_PANE_HELP\n"
 #else
@@ -239,11 +238,15 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         default_shortcuts += "Ctrl+Shift+R SHOW_PANE_RECORD\n";
     }
 
-    if (android_avdInfo &&
-        avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
-        default_shortcuts += "Ctrl+Shift+T SHOW_PANE_CAR\n";
-        default_shortcuts += "Ctrl+Shift+O SHOW_PANE_CAR_ROTARY\n";
-        default_shortcuts += "Ctrl+Shift+I SHOW_PANE_SENSOR_REPLAY\n";
+    if (android_avdInfo) {
+        if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+            default_shortcuts += "Ctrl+Shift+T SHOW_PANE_CAR\n";
+            default_shortcuts += "Ctrl+Shift+O SHOW_PANE_CAR_ROTARY\n";
+            default_shortcuts += "Ctrl+Shift+I SHOW_PANE_SENSOR_REPLAY\n";
+        } else {
+            // Multi display pane should not be available on cars.
+            default_shortcuts += "Ctrl+Shift+M SHOW_PANE_MULTIDISPLAY\n";
+        }
     }
 
     QTextStream stream(&default_shortcuts);
@@ -1250,7 +1253,8 @@ static bool isPaneEnabled(ExtendedWindowPane pane) {
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         if (pane == PANE_IDX_DPAD || pane == PANE_IDX_BATTERY ||
-            pane == PANE_IDX_FINGER || pane == PANE_IDX_CAMERA) {
+            pane == PANE_IDX_FINGER || pane == PANE_IDX_CAMERA ||
+            pane == PANE_IDX_MULTIDISPLAY) {
             return;
         }
     }
