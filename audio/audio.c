@@ -1880,8 +1880,13 @@ static const VMStateDescription vmstate_audio = {
 
 
 // AEMU
-audio_driver *g_fwd_audio_driver;
-void *g_fwd_audio_driver_opaque;
+void disable_fixed_input_conf() {
+    conf.fixed_in.enabled = 0;
+}
+
+void enabled_fixed_input_conf() {
+    conf.fixed_in.enabled = 1;
+}
 // AEMU
 
 static void audio_init (void)
@@ -1909,9 +1914,11 @@ static void audio_init (void)
     s->nb_hw_voices_out = conf.fixed_out.nb_voices;
     s->nb_hw_voices_in = conf.fixed_in.nb_voices;
 
-    // AEMU dynamically adds/removes input devices and we want to be able
-    // to configure the input quality separately.
-    conf.fixed_in.enabled = 0;
+    // AEMU can only operate on a fixed configuration
+    if (!conf.fixed_in.enabled) {
+        dolog ("Warning! Hardware (coreaudio/pulse) is configured only once! This might have unexpected results.");
+    }
+
 
     if (s->nb_hw_voices_out <= 0) {
         dolog ("Bogus number of playback voices %d, setting to 1\n",
