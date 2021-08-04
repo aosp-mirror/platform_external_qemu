@@ -47,6 +47,7 @@ struct EglImage
 {
     EglImage() :
         isNative(false),
+        isImported(false),
         nativeImage((EGLImage)0),
         imageId(0),
         globalTexObj(nullptr),
@@ -62,6 +63,7 @@ struct EglImage
         sync(nullptr) { }
     ~EglImage(){};
     bool isNative;
+    bool isImported;
     EGLImage nativeImage;
     unsigned int imageId;
     NamedObjectPtr globalTexObj;
