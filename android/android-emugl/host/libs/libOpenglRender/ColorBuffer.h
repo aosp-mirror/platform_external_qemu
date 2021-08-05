@@ -284,6 +284,8 @@ public:
     void setDisplay(uint32_t displayId) { m_displayId = displayId; }
     uint32_t getDisplay() { return m_displayId; }
     FrameworkFormat getFrameworkFormat() { return m_frameworkFormat; }
+
+    bool isReadPixelsDirty() const { return m_readPixelsDirty; }
 public:
     void restore();
 
@@ -335,6 +337,7 @@ private:
     GLuint m_buf = 0;
     uint32_t m_displayId = 0;
     bool m_BRSwizzle = false;
+    bool m_readPixelsDirty = true;
 };
 
 typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;

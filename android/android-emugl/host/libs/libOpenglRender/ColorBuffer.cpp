@@ -17,6 +17,7 @@
 
 #include "android/base/Log.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/Tracing.h"
 
 #include "DispatchTables.h"
 #include "GLcommon/GLutils.h"
@@ -49,11 +50,13 @@ namespace {
 // returns true in case of success, false on failure.
 bool bindFbo(GLuint* fbo, GLuint tex) {
     if (*fbo) {
+        AEMU_SCOPED_TRACE("bindFbo fast path");
         // fbo already exist - just bind
         s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, *fbo);
         return true;
     }
 
+    AEMU_SCOPED_TRACE("bindFbo slow path");
     s_gles2.glGenFramebuffers(1, fbo);
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, *fbo);
     s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_OES,
@@ -213,6 +216,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  HandleType hndl,
                                  Helper* helper,
                                  bool fastBlitSupported) {
+    AEMU_SCOPED_TRACE("ColorBuffer::create");
     GLenum texFormat = 0;
     GLenum pixelType = GL_UNSIGNED_BYTE;
     int bytesPerPixel = 4;
@@ -227,25 +231,31 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
         return NULL;
     }
 
+    android::base::beginTrace("initialImageAlloc");
     const unsigned long bufsize = ((unsigned long)bytesPerPixel) * p_width
             * p_height;
-    android::base::ScopedCPtr<char> initialImage(
-                static_cast<char*>(::malloc(bufsize)));
-    if (!initialImage) {
-        fprintf(stderr,
-                "error: failed to allocate initial memory for ColorBuffer "
-                "of size %dx%dx%d (%lu KB)\n",
-                p_width, p_height, bytesPerPixel * 8, bufsize / 1024);
-        return nullptr;
-    }
-    memset(initialImage.get(), 0x0, bufsize);
+    // android::base::ScopedCPtr<char> initialImage(
+    //             static_cast<char*>(::malloc(bufsize)));
+    // if (!initialImage) {
+    //     fprintf(stderr,
+    //             "error: failed to allocate initial memory for ColorBuffer "
+    //             "of size %dx%dx%d (%lu KB)\n",
+    //             p_width, p_height, bytesPerPixel * 8, bufsize / 1024);
+    //     return nullptr;
+    // }
+    // memset(initialImage.get(), 0x0, bufsize);
+    android::base::endTrace();
 
+    android::base::beginTrace("BindContext");
     RecursiveScopedHelperContext context(helper);
+    android::base::endTrace();
     if (!context.isOk()) {
         return NULL;
     }
 
+    android::base::beginTrace("colorBuffer ctor");
     ColorBuffer* cb = new ColorBuffer(p_display, hndl, helper);
+    android::base::endTrace();
 
     GLint prevUnpackAlignment;
     s_gles2.glGetIntegerv(GL_UNPACK_ALIGNMENT, &prevUnpackAlignment);
@@ -254,10 +264,13 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     s_gles2.glGenTextures(1, &cb->m_tex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
 
+    android::base::beginTrace("initialImage upload");
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, p_internalFormat, p_width, p_height,
-                         0, texFormat, pixelType,
-                         initialImage.get());
-    initialImage.reset();
+                         0, texFormat, pixelType, 0);
+    android::base::endTrace();
+    android::base::beginTrace("initialImage dtor");
+    // initialImage.reset();
+    android::base::endTrace();
 
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -275,8 +288,10 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     //
     s_gles2.glGenTextures(1, &cb->m_blitTex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_blitTex);
+    android::base::beginTrace("secondary blit upload");
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, p_internalFormat, p_width, p_height,
                          0, texFormat, pixelType, NULL);
+    android::base::endTrace();
 
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -296,6 +311,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     cb->m_format = texFormat;
     cb->m_type = pixelType;
 
+    android::base::beginTrace("eglcreateimage");
     cb->m_eglImage = s_egl.eglCreateImageKHR(
             p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
             (EGLClientBuffer)SafePointerFromUInt(cb->m_tex), NULL);
@@ -303,8 +319,11 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     cb->m_blitEGLImage = s_egl.eglCreateImageKHR(
             p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
             (EGLClientBuffer)SafePointerFromUInt(cb->m_blitTex), NULL);
+    android::base::endTrace();
 
+    android::base::beginTrace("TextureResize create");
     cb->m_resizer = new TextureResize(p_width, p_height);
+    android::base::endTrace();
 
     cb->m_frameworkFormat = p_frameworkFormat;
     switch (cb->m_frameworkFormat) {
@@ -329,7 +348,9 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 
     s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, prevUnpackAlignment);
 
-    s_gles2.glFinish();
+    android::base::beginTrace("glFinish");
+    // s_gles2.glFinish();
+    android::base::endTrace();
     return cb;
 }
 
@@ -386,12 +407,19 @@ void ColorBuffer::readPixels(int x,
 
     if (bindFbo(&m_fbo, m_tex)) {
         GLint prevAlignment = 0;
+        AEMU_SCOPED_TRACE("readPixels api calls inner");
+        if (m_readPixelsDirty) {
+            AEMU_SCOPED_TRACE("readPixelsDirty!");
+        } else {
+            AEMU_SCOPED_TRACE("readPixelsNotDirty!");
+        }
         s_gles2.glGetIntegerv(GL_PACK_ALIGNMENT, &prevAlignment);
         s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, 1);
         s_gles2.glReadPixels(x, y, width, height, p_format, p_type, pixels);
         s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, prevAlignment);
         unbindFbo();
     }
+    m_readPixelsDirty = false;
 }
 
 void ColorBuffer::readPixelsScaled(int width,
@@ -625,6 +653,7 @@ bool ColorBuffer::replaceContents(const void* newContents, size_t numBytes) {
         m_sync = (GLsync)s_egl.eglSetImageFenceANDROID(m_display, m_eglImage);
     }
 
+    m_readPixelsDirty = true;
     return true;
 }
 
@@ -822,6 +851,7 @@ bool ColorBuffer::bindToTexture() {
     } else {
         s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
     }
+    m_readPixelsDirty = true;
     return true;
 }
 
@@ -831,6 +861,7 @@ bool ColorBuffer::bindToTexture2() {
     }
 
     s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
+    m_readPixelsDirty = true;
     return true;
 }
 
@@ -850,6 +881,7 @@ bool ColorBuffer::bindToRenderbuffer() {
         s_gles1.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES,
                                                        m_eglImage);
     }
+    m_readPixelsDirty = true;
     return true;
 }
 
