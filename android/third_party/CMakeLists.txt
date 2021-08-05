@@ -100,6 +100,7 @@ if(WINDOWS)
   if(WINDOWS_MSVC_X86_64)
     add_subdirectory(dirent-win32)
   endif()
+  add_subdirectory(usbpassthrough-prebuilt-win32)
 endif()
 
 set(JSON_BuildTests OFF CACHE INTERNAL "")

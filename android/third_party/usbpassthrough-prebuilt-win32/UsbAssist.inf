@@ -1,0 +1,55 @@
+; Copyright 2021 Google LLC
+
+; This program is free software; you can redistribute it and/or
+; modify it under the terms of the GNU General Public License
+; version 2 as published by the Free Software Foundation.
+
+; This program is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+; GNU General Public License for more details.
+
+[Version]
+Signature = "$Windows NT$"
+Provider = Google
+Class = System
+ClassGuid = {4d36e97d-e325-11ce-bfc1-08002be10318}
+DriverVer = 08/04/2021,0.9.0.0
+DriverPackageType = KernelService
+CatalogFile = UsbAssist.cat
+
+[DestinationDirs]
+DefaultDestDir = 12
+
+[DefaultInstall]
+CopyFiles = UsbAssist.DriverFiles
+
+[DefaultInstall.Services]
+AddService = UsbAssist,0x00000002,UsbAssist.Service
+
+[DefaultUninstall]
+LegacyUninstall=1
+DelFiles = UsbAssist.DriverFiles
+
+[DefaultUninstall.Services]
+DelService = UsbAssist,0x200
+
+[SourceDisksFiles]
+UsbAssist.sys = 1
+
+[SourceDisksNames]
+1 = %DISK_NAME%,
+
+[UsbAssist.DriverFiles]
+UsbAssist.sys
+
+[UsbAssist.Service]
+DisplayName    = Android Emulator USB Passthrough Assistance Driver
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 1                  ; SERVICE_SYSTEM_START
+ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\UsbAssist.sys
+
+[Strings]
+DISK_NAME = "Android Emulator USB Passthrough Assistance Driver Installation Media"
+
