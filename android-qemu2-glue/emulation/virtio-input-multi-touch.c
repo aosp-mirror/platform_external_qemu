@@ -73,6 +73,31 @@ static void translate_pen_event(int x,
     multitouch_update_displayId(0);
 }
 
+void android_virtio_touch_event(const SkinEvent* const data,
+                                int displayId) {
+    uint32_t w, h = 0;
+
+    if (displayId < 0 || displayId >= VIRTIO_INPUT_MAX_NUM) {
+        displayId = 0;
+    }
+
+    if (!getConsoleAgents()->multi_display->getMultiDisplay(
+                displayId, NULL, NULL, &w, &h, NULL, NULL, NULL)) {
+        getConsoleAgents()->display->getFrameBuffer((int*)&w, (int*)&h, NULL,
+                                                    NULL, NULL);
+    }
+
+    int dx = qemu_input_scale_axis(data->u.multi_touch_point.x, 0, w, INPUT_EVENT_ABS_MIN,
+                                   INPUT_EVENT_ABS_MAX);
+    int dy = qemu_input_scale_axis(data->u.multi_touch_point.y, 0, h, INPUT_EVENT_ABS_MIN,
+                                   INPUT_EVENT_ABS_MAX);
+
+
+    multitouch_update_displayId(displayId);
+    multitouch_update(MTES_FINGER, data, dx, dy);
+    multitouch_update_displayId(0);
+}
+
 #define VIRTIO_INPUT_MT_STRUCT(id) \
 typedef struct VirtIOInputMultiTouch##id { \
     VirtIOInput parent_obj; \

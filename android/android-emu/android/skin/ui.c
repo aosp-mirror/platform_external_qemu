@@ -331,6 +331,13 @@ bool skin_ui_process_events(SkinUI* ui) {
                ev.u.mouse.button);
             skin_window_process_event(ui->window, &ev);
             break;
+        case kEventTouchBegin:
+        case kEventTouchEnd:
+        case kEventTouchUpdate:
+            DE("EVENT: kEventMultiTouch x=%f y=%f id=%d\n", ev.u.multi_touch_point.x,
+               ev.u.multi_touch_point.y, ev.u.multi_touch_point.id);
+            skin_window_process_touch_event(ui->window, &ev);
+            break;
 
         case kEventMouseWheel:
             DE("EVENT: kEventMouseWheel x_delta=%d y_delta=%d\n",

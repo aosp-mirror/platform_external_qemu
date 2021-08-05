@@ -50,7 +50,10 @@ typedef enum {
     kEventMouseStopTracking,
     kEventPenPress,
     kEventPenRelease,
-    kEventPenMove
+    kEventPenMove,
+    kEventTouchBegin,
+    kEventTouchEnd,
+    kEventTouchUpdate
 } SkinEventType;
 
 // The numeric values represent the bit positions in the button state
@@ -102,6 +105,19 @@ typedef struct {
     bool rubber_pointer;
     bool skip_sync;
 } SkinEventPenData;
+
+typedef struct {
+    int id;
+    int pressure;
+    int orientation;
+    int x;
+    int y;
+    int x_global;
+    int y_global;
+    int touch_major;
+    int touch_minor;
+    bool skip_sync;
+} SkinEventTouchData;
 
 typedef struct {
     int x_delta;
@@ -162,6 +178,7 @@ typedef struct {
         SkinEventLayoutRotateData layout_rotation;
         SkinEventDisplayRegion display_region;
         SkinEventMultiDisplay multi_display;
+        SkinEventTouchData multi_touch_point;
     } u;
 } SkinEvent;
 

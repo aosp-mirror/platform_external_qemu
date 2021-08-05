@@ -30,6 +30,8 @@ typedef struct QAndroidUserEventAgent {
     void (*sendKey)(unsigned key, bool down);
     void (*sendKeyCode)(int key);
     void (*sendKeyCodes)(int* keycodes, int count);
+    void (*sendTouchEvents)(const SkinEvent* const data,
+                            int displayId);
 
     // Mouse event.
     void (*sendMouseEvent)(int dx,

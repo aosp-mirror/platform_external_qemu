@@ -26,14 +26,19 @@ extern int android_virtio_input_send(int type,
                                      int code,
                                      int value,
                                      int displayId);
+
 extern void android_virtio_kbd_mouse_event(int dx,
                                            int dy,
                                            int dz,
                                            int buttonsState,
                                            int displayId);
+
 extern void android_virtio_pen_event(int dx,
                                      int dy,
                                      const SkinEvent* ev,
                                      int buttonsState,
                                      int displayId);
+
+extern void android_virtio_touch_event(const SkinEvent* const data,
+                                       int displayId);
 ANDROID_END_HEADER

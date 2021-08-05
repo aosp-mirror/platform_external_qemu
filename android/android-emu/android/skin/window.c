@@ -33,6 +33,9 @@
 #include "android/utils/duff.h"                 // for DUFF4
 #include "android/utils/system.h"               // for AFREE, AARRAY_NEW0
 
+/* default id of free slot in multitouch_fingers_ids vector*/
+#define FINGER_SLOT_FREE -1
+
 /* when shrinking, we reduce the pixel ratio by this fixed amount */
 #define  SHRINK_SCALE  0.6
 
@@ -1052,6 +1055,8 @@ struct SkinWindow {
     FingerState   finger;
     FingerState   secondary_finger;
     FingerState   pen;
+    FingerState   multitouch_fingers[MTS_POINTERS_NUM];
+    int           multitouch_fingers_ids[MTS_POINTERS_NUM ];
     MouseState    mouse;
     ButtonState   button;
     BallState     ball;
@@ -1086,6 +1091,43 @@ struct SkinWindow {
     int           scroll_h; // Needed for OSX
 };
 
+const FingerState empty_touch_point_state = {0};
+
+static int getIndexOfMultitouchPoint(int idToSearchFor,
+                                     const SkinWindow* const data) {
+    for (unsigned i = 0; i < MTS_POINTERS_NUM ; ++i) {
+        if (data->multitouch_fingers_ids[i] == idToSearchFor) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+static int removeMultitouchFinger(int idOfTouchPointToRemove,
+                                   SkinWindow* const data) {
+    for (unsigned i = 0; i < MTS_POINTERS_NUM ; ++i) {
+        if (data->multitouch_fingers_ids[i] == idOfTouchPointToRemove) {
+            data->multitouch_fingers[i] = empty_touch_point_state;
+            data->multitouch_fingers_ids[i] = FINGER_SLOT_FREE;
+            return 0;
+        }
+    }
+    return -1;
+}
+
+static int addMultitouchFinger(int idOfTouchPoint, SkinWindow* const data) {
+    for (unsigned i = 0; i < MTS_POINTERS_NUM ; ++i) {
+        if (data->multitouch_fingers_ids[i] == FINGER_SLOT_FREE) {
+            data->multitouch_fingers_ids[i] = idOfTouchPoint;
+            data->multitouch_fingers[i] = empty_touch_point_state;
+            return i;
+        }
+    }
+    return -1;
+}
+
+
+
 static void add_mouse_event(SkinWindow* window, int32_t rel_x, int32_t rel_y) {
     uint32_t id = 0;
     // TODO(liyl): handle multi-display and display rotation.
@@ -1099,6 +1141,47 @@ static void add_mouse_wheel_event(SkinWindow* window,
     uint32_t id = 0;
     // TODO(liyl): handle multi-display and display rotation.
     window->win_funcs->mouse_wheel_event(x_delta, y_delta, id);
+}
+
+static  void 
+generate_touch_event(FingerState* finger,
+                                 int* x,
+                                 int* y,
+                                 int* device_id) {
+    unsigned posX = *x;
+    unsigned posY = *y;
+    uint32_t id = 0;
+    if (finger->display) {
+        if (android_foldable_is_folded()) {
+            int fx, fy, fw, fh;
+            android_foldable_get_folded_area(&fx, &fy, &fw, &fh);
+            switch (finger->display->rotation) {
+                case SKIN_ROTATION_0:
+                    posX = *x + fx;
+                    posY = *y + fy;
+                    break;
+                case SKIN_ROTATION_180:
+                    posX = *x + fx + fw - android_hw->hw_lcd_width;
+                    posY = *y + fy + fh - android_hw->hw_lcd_height;
+                    break;
+                case SKIN_ROTATION_90:
+                    posX = *x + fx;
+                    posY = *y + fy + fh - android_hw->hw_lcd_height;
+                    break;
+                case SKIN_ROTATION_270:
+                    posX = *x + fx + fw - android_hw->hw_lcd_width;
+                    posY = *y + fy;
+                    break;
+            }
+        } else {
+            const QAndroidMultiDisplayAgent* const multiDisplayAgent =
+                    emulator_window_get()->uiEmuAgent->multiDisplay;
+            multiDisplayAgent->translateCoordination(&posX, &posY, &id);
+        }
+    }
+    *x = posX;
+    *y = posY;
+    *device_id = id;
 }
 
 static void
@@ -1912,6 +1995,11 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
         window->win_funcs->set_device_orientation(layout.displays->rotation);
     }
 
+    for(unsigned i=0;i<MTS_POINTERS_NUM;++i)
+    {
+         window->multitouch_fingers_ids[i] = FINGER_SLOT_FREE;
+         window->multitouch_fingers[i] = empty_touch_point_state;
+    }
     return 0;
 }
 
@@ -2102,6 +2190,202 @@ skin_window_map_to_scale( SkinWindow*  window, int  *x, int  *y )
 {
     skin_surface_reverse_map(window->surface, x, y);
 }
+
+
+void
+skin_window_process_touch_event(SkinWindow*  window, SkinEvent* ev){
+    Button*  button;
+    int      mx, my;
+    int button_state = 0;
+    int deviceId = 0;
+    FingerState* touchFinger = NULL;
+    if (ev->type == kEventTouchBegin || ev->type == kEventTouchEnd ||
+        ev->type == kEventTouchUpdate) {
+        button_state = multitouch_create_buttons_state(
+                ev->type != kEventTouchEnd, ev->u.multi_touch_point.skip_sync,
+                false);
+        int index = 0;
+        if (ev->type == kEventTouchBegin) {
+            index = addMultitouchFinger(ev->u.multi_touch_point.id,window);
+        } else{
+            index = getIndexOfMultitouchPoint(
+                    ev->u.multi_touch_point.id,
+                    window);
+        }
+        if(index == -1){
+            return;
+        }
+        touchFinger = &window->multitouch_fingers[index];
+    } else {
+        return;
+    }
+    switch (ev->type) {
+       case kEventTouchBegin:
+       {
+            if (window->ball.tracking) {
+                skin_window_trackball_press(window, 1);
+                break;
+            }
+            mx = ev->u.multi_touch_point.x;
+            my = ev->u.multi_touch_point.y;
+            skin_window_map_to_scale(window, &mx, &my);
+            skin_window_move_mouse(window, touchFinger, mx, my);
+            skin_window_find_finger(window, touchFinger, mx, my);
+            if (touchFinger->inside) {
+                touchFinger->tracking = 1;
+                generate_touch_event(touchFinger, &touchFinger->pos.x,
+                                     &touchFinger->pos.y, &deviceId);
+                ev->u.multi_touch_point.x = touchFinger->pos.x;
+                ev->u.multi_touch_point.y = touchFinger->pos.y;
+                window->win_funcs->touch_events(ev, deviceId);
+            } else if (!multitouch_should_skip_sync(button_state)) {
+                window->button.pressed = NULL;
+                button = window->button.hover;
+                if (button) {
+                    button->down += 1;
+                    skin_window_redraw(window, &button->rect);
+                    window->button.pressed = button;
+                    if (button->keycode) {
+                        window->win_funcs->key_event(button->keycode, 1);
+                    }
+                } else if (!skin_winsys_window_has_frame()) {
+                    window->drag_x_start = ev->u.multi_touch_point.x_global;
+                    window->drag_y_start = ev->u.multi_touch_point.y_global;
+                    skin_winsys_get_frame_pos(&window->window_x_start,
+                                              &window->window_y_start);
+                    if (touchFinger->at_corner) {
+                        skin_winsys_set_window_overlay_for_resize(
+                                touchFinger->which_corner);
+                    }
+                }
+            }
+            break;
+       }
+       case kEventTouchEnd:
+       {
+            if (window->drag_x_start != 0 && window->drag_y_start != 0) {
+                if (!touchFinger->at_corner) {
+                    if (skin_winsys_is_window_off_screen()) {
+                        skin_winsys_set_window_pos(0, 0);
+                    }
+                    window->drag_x_start = 0;
+                    window->drag_y_start = 0;
+                    return;
+                }
+                touchFinger->at_corner = 0;
+                skin_winsys_clear_window_overlay();
+                int window_pos_x, window_pos_y;
+                int window_width, window_height;
+                skin_winsys_get_frame_pos(&window_pos_x, &window_pos_y);
+                skin_winsys_get_window_size(&window_width, &window_height);
+                int delta_x =
+                        ev->u.multi_touch_point.x_global - window->drag_x_start;
+                int delta_y =
+                        ev->u.multi_touch_point.y_global - window->drag_y_start;
+                window->drag_x_start = 0;
+                window->drag_y_start = 0;
+                switch (touchFinger->which_corner) {
+                    case CORNER_BOTTOM_RIGHT:
+                        window_width += delta_x;
+                        window_height += delta_y;
+                        break;
+                    case CORNER_TOP_RIGHT:
+                        window_pos_y += delta_y;
+                        window_width += delta_x;
+                        window_height -= delta_y;
+                        break;
+                    case CORNER_BOTTOM_LEFT:
+                        window_pos_x += delta_x;
+                        window_width -= delta_x;
+                        window_height += delta_y;
+                        break;
+                    case CORNER_TOP_LEFT:
+                        window_pos_x += delta_x;
+                        window_pos_y += delta_y;
+                        window_width -= delta_x;
+                        window_height -= delta_y;
+                        break;
+                }
+                skin_winsys_set_window_pos(window_pos_x, window_pos_y);
+                skin_winsys_set_window_size(window_width, window_height);
+                skin_winsys_set_window_cursor_normal();
+                return;
+            }
+            window->drag_x_start = 0;
+            window->drag_y_start = 0;
+            if (window->ball.tracking) {
+                skin_window_trackball_press(window, 0);
+                break;
+            }
+            button = window->button.pressed;
+            mx = ev->u.multi_touch_point.x;
+            my = ev->u.multi_touch_point.y;
+            skin_window_map_to_scale(window, &mx, &my);
+            if (button) {
+                button->down = 0;
+                skin_window_redraw(window, &button->rect);
+                if (button->keycode) {
+                    window->win_funcs->key_event(button->keycode, 0);
+                }
+                window->button.pressed = NULL;
+                window->button.hover = NULL;
+                skin_window_move_mouse(window, touchFinger, mx, my);
+            } else if(touchFinger->tracking){
+                deviceId = 0;
+                touchFinger->tracking = 0;
+                skin_window_move_mouse(window, touchFinger, mx, my);
+                generate_touch_event(touchFinger, &touchFinger->pos.x,
+                                     &touchFinger->pos.y, &deviceId);
+                ev->u.multi_touch_point.x = touchFinger->pos.x;
+                ev->u.multi_touch_point.y = touchFinger->pos.y;
+                removeMultitouchFinger(ev->u.multi_touch_point.id,window);
+                window->win_funcs->touch_events(ev, deviceId);
+            }
+            break;
+        }
+       case kEventTouchUpdate:
+       {
+            mx = ev->u.multi_touch_point.x;
+            my = ev->u.multi_touch_point.y;
+            skin_window_map_to_scale(window, &mx, &my);
+            skin_window_move_mouse(window, touchFinger, mx, my);
+            if (window->drag_x_start == 0 && window->drag_y_start == 0) {
+                skin_window_find_finger(window, touchFinger, mx, my);
+            } else {
+                if (touchFinger->at_corner) {
+                    skin_winsys_paint_overlay_for_resize(mx, my);
+                    break;
+                }
+                int posX = window->window_x_start +
+                           ev->u.multi_touch_point.x_global -
+                           window->drag_x_start;
+                int posY = window->window_y_start +
+                           ev->u.multi_touch_point.y_global -
+                           window->drag_y_start;
+                skin_winsys_set_window_pos(posX, posY);
+                break;
+            }
+            mx = ev->u.multi_touch_point.x;
+            my = ev->u.multi_touch_point.y;
+            skin_window_map_to_scale(window, &mx, &my);
+            if (!window->button.pressed) {
+                skin_window_move_mouse(window, touchFinger, mx, my);
+                if (touchFinger->tracking) {
+                    generate_touch_event(touchFinger, &touchFinger->pos.x,
+                                         &touchFinger->pos.y, &deviceId);
+                    ev->u.multi_touch_point.x = touchFinger->pos.x;
+                    ev->u.multi_touch_point.y = touchFinger->pos.y;
+                    window->win_funcs->touch_events(ev, deviceId);
+                }
+            }
+            break;
+       }
+       default:
+            fprintf(stderr, "%s: Invalid enum value passed to function. Only accepts: kEventTouchBegin,kEventTouchEnd,kEventTouchUpdate", __FUNCTION__);
+            break;
+    }
+}
+
 
 void
 skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
