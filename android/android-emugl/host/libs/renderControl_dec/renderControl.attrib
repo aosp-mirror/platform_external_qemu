@@ -111,3 +111,9 @@ rcComposeAsyncWithoutPost
     dir buffer in
     len buffer bufferSize
     flag flushOnEncode
+
+rcReadColorBufferDMA
+    dir pixels out
+    len pixels pixels_size
+    var_flag pixels DMA
+
