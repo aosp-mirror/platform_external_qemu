@@ -36,6 +36,7 @@
 #include "android/emulation/LogcatPipe.h"
 #include "android/emulation/MultiDisplay.h"
 #include "android/emulation/ParameterList.h"
+#include "android/emulation/USBAssist.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/adb/adbkey.h"
 #include "android/emulation/control/automation_agent.h"
@@ -2315,6 +2316,26 @@ extern "C" int main(int argc, char** argv) {
 
     if (apiLevel >= 28 || targetIsX86) {
         args.add2("-soundhw", "hda");
+    }
+
+    // USB
+    #define usb_passthrough_driver "Android USB Assistant Driver"
+    if (targetIsX86 && apiLevel >= 29) {
+        args.add2("-device", "qemu-xhci");
+
+        if (opts->usb_passthrough)
+            for (const ParamList* pl = opts->usb_passthrough; pl != NULL; pl = pl->next) {
+#ifdef _WIN32
+                if (usbassist_winusb_load(pl->param)) {
+                    fprintf(stderr, "Cannot load %s for USB device \"%s\". "
+                            "USB pass-through might not work.\n",
+                            usb_passthrough_driver, pl->param);
+                    continue;
+                }
+#endif
+                args.add("-device");
+                args.addFormat("usb-host,%s", pl->param);
+            }
     }
 
     /* append extra qemu parameters if any */

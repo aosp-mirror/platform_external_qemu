@@ -290,6 +290,8 @@ OPT_FLAG(no_mouse_reposition,
 OPT_FLAG(guest_angle,
          "Enable guest ANGLE as system driver.")
 
+OPT_LIST(usb_passthrough, "VID PID BUS PORTS", "Host USB device Passthrough")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

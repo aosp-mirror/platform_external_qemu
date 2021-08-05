@@ -115,6 +115,7 @@ set(android-emu-common
     android/emulation/SerialLine.cpp
     android/emulation/SetupParameters.cpp
     android/emulation/testing/TestVmLock.cpp
+    android/emulation/USBAssist.cpp
     android/emulation/VmLock.cpp
     android/emulation/VpxFrameParser.cpp
     android/emulation/VpxPingInfoParser.cpp
@@ -444,6 +445,8 @@ endif()
 android_target_link_libraries(
   android-emu windows
   PUBLIC emulator-libmman-win32
+         emulator-libusb
+         setupapi::setupapi
          d3d9::d3d9
          mfuuid::mfuuid
          # For CoTaskMemFree used in camera-capture-windows.cpp
@@ -695,6 +698,8 @@ target_link_libraries(
 android_target_link_libraries(
   android-emu-shared windows
   PRIVATE emulator-libmman-win32
+          emulator-libusb
+          setupapi::setupapi
           d3d9::d3d9
           # IID_IMFSourceReaderCallback
           mfuuid::mfuuid
