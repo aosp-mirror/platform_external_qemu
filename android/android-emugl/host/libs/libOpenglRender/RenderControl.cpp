@@ -240,6 +240,9 @@ static constexpr android::base::StringView kSyncBufferData = "ANDROID_EMU_sync_b
 // Async vkQSRI
 static constexpr android::base::StringView kVulkanAsyncQsri = "ANDROID_EMU_vulkan_async_qsri";
 
+// Read color buffer DMA
+static constexpr android::base::StringView kReadColorBufferDma = "ANDROID_EMU_read_color_buffer_dma";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -498,6 +501,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
     bool vulkanBatchedDescriptorSetUpdate = shouldEnableBatchedDescriptorSetUpdate();
     bool syncBufferDataEnabled = true;
     bool vulkanAsyncQsri = shouldEnableVulkanAsyncQsri();
+    bool readColorBufferDma = directMemEnabled && hasSharedSlotsHostMemoryAllocatorEnabled;
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -632,6 +636,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
     //     glStr += kVulkanAsyncQsri;
     //     glStr += " ";
     // }
+
+    if (readColorBufferDma) {
+        glStr += kReadColorBufferDma;
+        glStr += " ";
+    }
 
     if (name == GL_EXTENSIONS) {
 
@@ -1573,6 +1582,23 @@ static void rcDestroySyncKHRAsync(uint64_t handle) {
     fenceSync->decRef();
 }
 
+static int rcReadColorBufferDMA(uint32_t colorBuffer,
+                                GLint x, GLint y,
+                                GLint width, GLint height,
+                                GLenum format, GLenum type, void* pixels, uint32_t pixels_size)
+{
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return -1;
+    }
+
+    // Update from Vulkan if necessary
+    goldfish_vk::updateColorBufferFromVkImage(colorBuffer);
+
+    fb->readColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
+    return 0;
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1639,4 +1665,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcComposeAsyncWithoutPost = rcComposeAsyncWithoutPost;
     dec->rcCreateDisplayById = rcCreateDisplayById;
     dec->rcSetDisplayPoseDpi = rcSetDisplayPoseDpi;
+    dec->rcReadColorBufferDMA = rcReadColorBufferDMA;
 }

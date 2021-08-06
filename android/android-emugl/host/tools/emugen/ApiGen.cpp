@@ -793,11 +793,19 @@ int ApiGen::genEncoderImpl(const std::string &filename)
                     if (evars[j].guestUnpackExpression() != "") {
                         fprintf(fp, "%s%s;\n", indent, evars[j].guestUnpackExpression().c_str());
                     } else {
-                        fprintf(fp, "%sstream->readback(%s, __size_%s);\n",
+                        if (evars[j].isDMA()) {
+                            fprintf(fp, "%s// Skip readback for var %s as it's DMA\n", indent, varname);
+                        } else {
+                            fprintf(fp, "%sstream->readback(%s, __size_%s);\n",
+                                    indent, varname, varname);
+                        }
+                    }
+                    if (evars[j].isDMA()) {
+                        fprintf(fp, "%s// Skip checksum for var %s as it's DMA\n", indent, varname);
+                    } else {
+                        fprintf(fp, "%sif (useChecksum) checksumCalculator->addBuffer(%s, __size_%s);\n",
                                 indent, varname, varname);
                     }
-                    fprintf(fp, "%sif (useChecksum) checksumCalculator->addBuffer(%s, __size_%s);\n",
-                            indent, varname, varname);
                     if (evars[j].nullAllowed()) {
                         fprintf(fp, "\t}\n");
                     }
