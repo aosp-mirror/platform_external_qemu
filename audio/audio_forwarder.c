@@ -53,11 +53,15 @@ void *g_active_opaque;
 
 void qemu_allow_real_audio(bool allow);
 bool qemu_is_real_audio_allowed(void);
+void disable_fixed_input_conf();
+void enabled_fixed_input_conf();
+
 
 int enable_forwarder(struct audsettings *as, struct audio_capture_ops *ops, void *opaque)
 {
     // Initialize the forward driver..
     AudioState *s = &glob_audio_state;
+    disable_fixed_input_conf();
 
     // Store previous state, and disable current microphone.
     g_prev_drv = s->drv;
@@ -96,6 +100,8 @@ int enable_forwarder(struct audsettings *as, struct audio_capture_ops *ops, void
 
 void disable_forwarder()
 {
+    enabled_fixed_input_conf();
+
     // Disable us if we were active.
     if (g_active_sw)
     {
