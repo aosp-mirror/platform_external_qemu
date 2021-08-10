@@ -119,6 +119,7 @@ int main(void) {
                                     task_test_runner, NULL, 1, 0, NULL, 0),
                   "task: error initializing");
 
-    while (1) {
+    // Use volatile to avoid the compiler marking the loop as unreachable.
+    for (volatile int i = 0;; i++) {
     }
 }
