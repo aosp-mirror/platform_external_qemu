@@ -672,7 +672,8 @@ static void initialize_virtio_input_devs(android::ParameterList& args, AndroidHw
             }
         }
 
-        if (hw->hw_rotaryInput) {
+        if (hw->hw_rotaryInput ||
+            (android_avdInfo && avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR)) {
             args.add("-device");
             args.add("virtio_input_rotary_pci");
         }

@@ -225,7 +225,8 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     mSidebarButtons.addButton(mExtendedUi->batteryButton);
     mSidebarButtons.addButton(mExtendedUi->telephoneButton);
     mSidebarButtons.addButton(mExtendedUi->dpadButton);
-    if (android_hw->hw_rotaryInput) {
+    if (android_hw->hw_rotaryInput ||
+        avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR) {
         mSidebarButtons.addButton(mExtendedUi->rotaryInputButton);
     } else {
         mExtendedUi->rotaryInputButton->hide();
