@@ -175,6 +175,7 @@ LocationPage::LocationPage(QWidget *parent) :
     // Connect the tab signaling
     connect(mUi->locationTabs, SIGNAL(currentChanged(int)), this, SLOT(on_tabChanged()));
 
+    mUi->locationTabs->setTabBarAutoHide(true);
     if (useLocationV2) {
         // Hide the old tab on the Location page
         mOfflineTab = mUi->locationTabs->widget(3);
@@ -339,6 +340,17 @@ void LocationPage::updateTheme() {
     //  properties to get 'iconThemeName'.)
     points_updateTheme();
     routes_updateTheme();
+}
+
+void LocationPage::handle_gpsSignalSwitch_toggled(bool checked) {
+    if (sLocationAgent && sLocationAgent->gpsGetGpsSignal && sLocationAgent->gpsSetGpsSignal) {
+        sLocationAgent->gpsSetGpsSignal(checked);
+#ifdef USE_WEBENGINE
+        mUi->loc_gpsSignalSwitch->setChecked(checked);
+        mUi->loc_gpsSignalSwitch_route->setChecked(checked);
+#endif  // USE_WEBENGINE
+    }
+
 }
 
 void LocationPage::on_loc_GpxKmlButton_clicked()

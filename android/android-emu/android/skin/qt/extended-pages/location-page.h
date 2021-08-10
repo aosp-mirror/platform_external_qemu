@@ -146,9 +146,13 @@ private slots:
 #ifdef USE_WEBENGINE
     void on_loc_importGpxKmlButton_clicked() { handle_importGpxKmlButton_clicked(); }
     void on_loc_importGpxKmlButton_route_clicked() { handle_importGpxKmlButton_clicked(); }
+    void on_loc_gpsSignalSwitch_route_toggled(bool checked) {
+        handle_gpsSignalSwitch_toggled(checked);
+    }
     void keyPressEvent(QKeyEvent* e) override;
 #endif // USE_WEBENGINE
 
+    void on_loc_gpsSignalSwitch_toggled(bool checked) { handle_gpsSignalSwitch_toggled(checked); }
     void on_loc_GpxKmlButton_clicked();
     void on_loc_pathTable_cellChanged(int row, int col);
     void on_loc_playStopButton_clicked();
@@ -222,6 +226,7 @@ private:
     void validateCoordinates();
     void fallbackToOfflineUi();
     void handle_importGpxKmlButton_clicked();
+    void handle_gpsSignalSwitch_toggled(bool checked);
     void saveGpxKmlPoint(double lat, double lng, double elevation);
     void saveGpxKmlRoute(const QString& gpxKmlFilename, const QString& jsonString);
     void setLoadingOverlayVisible(bool visible, QString text = QString(""));
