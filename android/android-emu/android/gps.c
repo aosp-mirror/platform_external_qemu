@@ -20,6 +20,7 @@
 CSerialLine* android_gps_serial_line;
 // Set to true to ping guest for location updates every few seconds
 static bool s_enable_passive_location_update = true;
+static bool s_enable_gps_signal = true;
 static bool s_enable_gnssgrpcv1 = false;
 
 // Last state of the gps, initial coordinates point to Googleplex.
@@ -239,7 +240,9 @@ android_gps_send_location(double latitude, double longitude,
     }
 
     // Send it
-    android_gps_send_nmea( stralloc_cstr(rmcStr) );
+    if (s_enable_gps_signal) {
+        android_gps_send_nmea( stralloc_cstr(rmcStr) );
+    }
 
     // Free it
     stralloc_reset(rmcStr);
@@ -296,3 +299,12 @@ void android_gps_set_send_nmea_func(void* fptr) {
             (android_gnssgrpcv1_send_nmea_func)(fptr);
     s_gnssgrpcv1_send_nmea = myf;
 }
+
+bool android_gps_get_gps_signal() {
+    return s_enable_gps_signal;
+}
+
+void android_gps_set_gps_signal(bool enable) {
+     s_enable_gps_signal = enable;
+}
+

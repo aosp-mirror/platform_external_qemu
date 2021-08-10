@@ -29,6 +29,8 @@ static const QAndroidLocationAgent sQAndroidLocationAgent = {
         .gpsSendGnss = android_gps_send_gnss,
         .gpsSetPassiveUpdate = android_gps_set_passive_update,
         .gpsEnableGnssGrpcV1 = android_gps_enable_gnssgrpcv1,
-        .gpsGetPassiveUpdate = android_gps_get_passive_update};
+        .gpsGetPassiveUpdate = android_gps_get_passive_update,
+        .gpsGetGpsSignal = android_gps_get_gps_signal,
+        .gpsSetGpsSignal = android_gps_set_gps_signal};
 const QAndroidLocationAgent* const gQAndroidLocationAgent =
         &sQAndroidLocationAgent;

@@ -72,6 +72,11 @@ typedef struct QAndroidLocationAgent {
     bool (*gpsGetPassiveUpdate)();
     // enable GnssGrpcV1
     void (*gpsEnableGnssGrpcV1)();
+
+    // Query whether gps signal emulation is enabled
+    bool (*gpsGetGpsSignal)(void);
+    // Toggle gps signal emulation on/off
+    void (*gpsSetGpsSignal)(bool enable);
 } QAndroidLocationAgent;
 
 ANDROID_END_HEADER

@@ -80,3 +80,7 @@ extern void android_gps_set_passive_update(bool enable);
 extern void android_gps_enable_gnssgrpcv1();
 
 extern bool android_gps_get_passive_update();
+
+// For gps signal emulation
+extern bool android_gps_get_gps_signal();
+extern void android_gps_set_gps_signal(bool enable);
