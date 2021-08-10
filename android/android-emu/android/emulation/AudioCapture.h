@@ -67,6 +67,9 @@ public:
 
     // True if this capturer is configured properly and running.
     virtual bool good() = 0;
+
+    // Returns the number of bytes available for reading/writing
+    virtual int available() { return 0; };
 private:
 
     int mSamplingRate;

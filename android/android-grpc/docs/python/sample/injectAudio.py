@@ -58,9 +58,6 @@ def readAudioFile(wavefile):
             byts = wav_r.readframes(chunk_size)
             yield AudioPacket(format=aud_fmt, audio=byts)
 
-            # Wait a bit, so we do not slam the endpoint
-            wait = len(byts) / bps
-            time.sleep(wait)
 
 
 def main(args):

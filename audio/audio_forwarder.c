@@ -33,6 +33,7 @@ typedef struct FWDVoiceIn
     HWVoiceIn hw;
     int64_t old_ticks;
     void *pcm_buf;
+    int pcm_size;
 } FWDVoiceIn;
 
 // The global audio state, containing the driver information
@@ -50,6 +51,7 @@ SWVoiceIn *g_active_sw = NULL;
 struct audsettings g_active_settings;
 struct audio_capture_ops g_active_capture;
 void *g_active_opaque;
+read_available g_active_avail;
 
 void qemu_allow_real_audio(bool allow);
 bool qemu_is_real_audio_allowed(void);
@@ -57,7 +59,9 @@ void disable_fixed_input_conf();
 void enabled_fixed_input_conf();
 
 
-int enable_forwarder(struct audsettings *as, struct audio_capture_ops *ops, void *opaque)
+int enable_forwarder(struct audsettings *as, struct audio_capture_ops *ops,
+                     read_available available_fn,
+                     void *opaque)
 {
     // Initialize the forward driver..
     AudioState *s = &glob_audio_state;
@@ -69,6 +73,7 @@ int enable_forwarder(struct audsettings *as, struct audio_capture_ops *ops, void
     g_prev_sw = get_hda_voice_in();
     g_prev_settings = *get_hda_aud_settings();
     g_prev_is_real_audio_allowed = qemu_is_real_audio_allowed();
+    g_active_avail = available_fn;
     AUD_set_active_in(g_prev_sw, 0);
 
     // Activate our forward driver.
@@ -125,11 +130,12 @@ void disable_forwarder()
 
 static int fwd_init_in(HWVoiceIn *hw, struct audsettings *unused, void *drv_opaque)
 {
-    struct audsettings *as = (struct audsettings*) drv_opaque;
+    struct audsettings *as = (struct audsettings *)drv_opaque;
     FWDVoiceIn *fwdin = (FWDVoiceIn *)hw;
     audio_pcm_init_info(&hw->info, as);
-    hw->samples = 1024;
-    fwdin->pcm_buf = audio_calloc(__func__, hw->samples, 1 << hw->info.shift);
+    hw->samples = 4096;
+    fwdin->pcm_buf = audio_calloc(__func__, 2 * hw->samples, 1 << hw->info.shift);
+    fwdin->pcm_size = hw->samples * (1 << hw->info.shift);
     return 0;
 }
 
@@ -140,6 +146,7 @@ static void fwd_fini_in(HWVoiceIn *hw)
     fwdin->pcm_buf = NULL;
 }
 
+
 static int fwd_run_in(HWVoiceIn *hw)
 {
     FWDVoiceIn *fwdin = (FWDVoiceIn *)hw;
@@ -147,38 +154,42 @@ static int fwd_run_in(HWVoiceIn *hw)
     int dead = hw->samples - live;
     int samples = 0;
 
+    // dead contains the number of samples that can be filled in.
     if (dead)
     {
+        // We are now going to calculate at what rate we consume samples.
         int64_t now = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
         int64_t ticks = now - fwdin->old_ticks;
         int64_t bytes =
             muldiv64(ticks, hw->info.bytes_per_second, NANOSECONDS_PER_SECOND);
 
         fwdin->old_ticks = now;
-        bytes = audio_MIN(bytes, INT_MAX);
+
+        // And see how much we can pull from our external queue.
+        int64_t avail = g_active_avail(g_active_opaque);
+        bytes = audio_MIN(bytes, avail);
         samples = bytes >> hw->info.shift;
         samples = audio_MIN(samples, dead);
     }
 
+    // Now we are going to fill the ring buffer.
     int to_grab = samples;
-    int wpos = hw->wpos;
     while (to_grab)
     {
-        // Setup our buffers.
-        int chunk = audio_MIN(to_grab, hw->samples - wpos);
-        void *buf = advance(fwdin->pcm_buf, wpos);
+        // Check how many samples we can fill until we reach the end of our ring
+        int chunk = audio_MIN(to_grab, hw->samples - hw->wpos);
 
-        // Obtain the samples from our input module.
-        g_active_capture.capture(g_active_opaque, buf, chunk);
+        // Obtain the samples from our input module (converting samples to # of bytes)
+        g_active_capture.capture(g_active_opaque, fwdin->pcm_buf, chunk << hw->info.shift);
 
         // And convert them to the SW voice format.
-        hw->conv(hw->conv_buf + wpos, buf, chunk);
+        hw->conv(hw->conv_buf + hw->wpos, fwdin->pcm_buf, chunk);
 
         // And get the next.
-        wpos = (wpos + chunk) % hw->samples;
+        hw->wpos = (hw->wpos + chunk) % hw->samples;
         to_grab -= chunk;
     }
-    hw->wpos = wpos;
+
     return samples;
 }
 

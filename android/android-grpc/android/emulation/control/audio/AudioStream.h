@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
+#include <stddef.h>  // for size_t
 #include <stdint.h>  // for uint32_t
 #include <chrono>    // for operator...
 #include <ios>       // for streamsize
 #include <memory>    // for unique_ptr
 
 #include "android/emulation/AudioCapture.h"                  // for AudioCap...
+#include "android/emulation/AudioCaptureEngine.h"            // for AudioCap...
 #include "android/emulation/control/logcat/RingStreambuf.h"  // for millisec...
 #include "emulator_controller.pb.h"                          // for AudioFormat
 
@@ -29,7 +31,7 @@ namespace control {
 
 // An audio stream contains a ringbuffer that can be used to
 // send and receive audio from qemu.
-class AudioStream  {
+class AudioStream {
 public:
     AudioStream(const AudioFormat fmt,
                 milliseconds blockingTime = 30ms,
@@ -39,16 +41,19 @@ public:
 
     const AudioFormat getFormat() const { return mFormat; }
 
-    std::streamsize capacity() {
-        return mAudioBuffer.capacity();
-    }
+    std::streamsize capacity() { return mAudioBuffer.capacity(); }
 
     virtual bool good() = 0;
 
 protected:
+    virtual int onSample(void* buf, int n) = 0;
+    virtual int available() { return 0; }
     uint32_t bytesPerMillisecond(const AudioFormat fmt) const;
+
     RingStreambuf mAudioBuffer;
     std::streamsize mAudioBufferSize;
+
+    friend class AudioStreamCapturer;
 
 private:
     AudioFormat mFormat;
@@ -80,6 +85,9 @@ public:
 
     bool good() override { return mAudioCapturer->good(); };
 
+protected:
+    int onSample(void* buf, int n) override;
+
 private:
     std::unique_ptr<emulation::AudioCapturer> mAudioCapturer;
 };
@@ -98,7 +106,7 @@ class QemuAudioInputStream : public AudioStream {
 public:
     QemuAudioInputStream(const AudioFormat fmt,
                          milliseconds blockingTime = 300ms,
-                         milliseconds bufferSize = 500ms);
+                         milliseconds bufferSize = 1000ms);
     ~QemuAudioInputStream() = default;
 
     // Blocks and waits until we can write an entire audio packet.
@@ -110,8 +118,32 @@ public:
     size_t write(const char* buffer, size_t cBuffer);
 
     bool good() override { return mAudioCapturer->good(); };
+
+protected:
+    int onSample(void* buf, int n) override;
+    int available() override;
+
 private:
     std::unique_ptr<emulation::AudioCapturer> mAudioCapturer;
+};
+
+class AudioStreamCapturer : public android::emulation::AudioCapturer {
+public:
+    // the audio packets to the given stream.
+    AudioStreamCapturer(const AudioFormat& fmt,
+                        AudioStream* stream,
+                        AudioCaptureEngine::AudioMode mode =
+                                AudioCaptureEngine::AudioMode::AUDIO_OUTPUT);
+    ~AudioStreamCapturer();
+
+    int onSample(void* buf, int size) override;
+    bool good() override;
+    int available() override;
+
+private:
+    AudioStream* mStream;
+    AudioCaptureEngine::AudioMode mAudioMode;
+    bool mRunning;
 };
 
 }  // namespace control
