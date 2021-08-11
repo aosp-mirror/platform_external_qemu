@@ -76,6 +76,7 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(tvremote, "TV remote")                                        \
     _VERBOSE_TAG(time, "Prefix a timestamp when logging")                      \
     _VERBOSE_TAG(ini, "Log details around ini files.")                         \
+    _VERBOSE_TAG(bluetooth, "Log bluetooth details.")                          \
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {
