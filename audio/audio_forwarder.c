@@ -16,6 +16,7 @@
 #include "qemu/timer.h"
 #include "audio.h"
 #include "audio_forwarder.h"
+#include "qemu/thread.h"
 
 #define AUDIO_CAP "fwd"
 #include "audio_int.h"
@@ -45,6 +46,7 @@ void *g_prev_drv_opaque = NULL;
 SWVoiceIn *g_prev_sw = NULL;
 struct audsettings g_prev_settings;
 bool g_prev_is_real_audio_allowed;
+QemuMutex g_deactivation_mutex = {.initialized = false };
 
 // Our current active configuration that is swapped in.
 SWVoiceIn *g_active_sw = NULL;
@@ -63,6 +65,10 @@ int enable_forwarder(struct audsettings *as, struct audio_capture_ops *ops,
                      read_available available_fn,
                      void *opaque)
 {
+    if (!g_deactivation_mutex.initialized) {
+        qemu_mutex_init(&g_deactivation_mutex);
+    }
+
     // Initialize the forward driver..
     AudioState *s = &glob_audio_state;
     disable_fixed_input_conf();
@@ -105,6 +111,7 @@ int enable_forwarder(struct audsettings *as, struct audio_capture_ops *ops,
 
 void disable_forwarder()
 {
+    qemu_mutex_lock(&g_deactivation_mutex);
     enabled_fixed_input_conf();
 
     // Disable us if we were active.
@@ -123,9 +130,11 @@ void disable_forwarder()
     set_hda_voice_in(g_prev_sw, &g_prev_settings);
     AUD_set_active_in(g_prev_sw, 1);
 
+
     // TODO(jansene): Is this what we really want?
     // (We could also refactor this by disabling the sw voice, which would do the same)
     qemu_allow_real_audio(g_prev_is_real_audio_allowed);
+    qemu_mutex_unlock(&g_deactivation_mutex);
 }
 
 static int fwd_init_in(HWVoiceIn *hw, struct audsettings *unused, void *drv_opaque)
@@ -144,11 +153,16 @@ static void fwd_fini_in(HWVoiceIn *hw)
     FWDVoiceIn *fwdin = (FWDVoiceIn *)hw;
     g_free(fwdin->pcm_buf);
     fwdin->pcm_buf = NULL;
-}
-
+ }
 
 static int fwd_run_in(HWVoiceIn *hw)
 {
+    qemu_mutex_lock(&g_deactivation_mutex);
+    if (!g_active_sw) {
+        qemu_mutex_unlock(&g_deactivation_mutex);
+        return 0;
+    }
+
     FWDVoiceIn *fwdin = (FWDVoiceIn *)hw;
     int live = audio_pcm_hw_get_live_in(hw);
     int dead = hw->samples - live;
@@ -190,6 +204,7 @@ static int fwd_run_in(HWVoiceIn *hw)
         to_grab -= chunk;
     }
 
+    qemu_mutex_unlock(&g_deactivation_mutex);
     return samples;
 }
 
