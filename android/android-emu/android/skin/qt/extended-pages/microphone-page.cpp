@@ -57,11 +57,11 @@ void MicrophonePage::on_mic_hasMic_toggled(bool checked) {
 }
 
 void MicrophonePage::on_mic_hookButton_pressed() {
-    forwardGenericEventToEmulator(EV_KEY, KEY_HEADSETHOOK, 1);
+    forwardKeyToEmulator(KEY_HEADSETHOOK, true);
 }
 
 void MicrophonePage::on_mic_hookButton_released() {
-    forwardGenericEventToEmulator(EV_KEY, KEY_HEADSETHOOK, 0);
+    forwardKeyToEmulator(KEY_HEADSETHOOK, false);
 }
 
 void MicrophonePage::on_mic_inserted_toggled(bool checked) {
@@ -94,11 +94,11 @@ void MicrophonePage::on_mic_allowRealAudio_toggled(bool checked) {
 }
 
 void MicrophonePage::on_mic_voiceAssistButton_pressed() {
-    forwardGenericEventToEmulator(EV_KEY, KEY_SEND, 1);
+    forwardKeyToEmulator(KEY_SEND, true);
 }
 
 void MicrophonePage::on_mic_voiceAssistButton_released() {
-    forwardGenericEventToEmulator(EV_KEY, KEY_SEND, 0);
+    forwardKeyToEmulator(KEY_SEND, false);
 }
 
 void MicrophonePage::setEmulatorWindow(EmulatorQtWindow* eW) {
@@ -118,4 +118,12 @@ void MicrophonePage::forwardGenericEventToEmulator(int type,
 
         mEmulatorWindow->queueSkinEvent(skin_event);
     }
+}
+
+void MicrophonePage::forwardKeyToEmulator(uint32_t keycode, bool down) {
+    SkinEvent* skin_event = new SkinEvent();
+    skin_event->type = down ? kEventKeyDown : kEventKeyUp;
+    skin_event->u.key.keycode = keycode;
+    skin_event->u.key.mod = 0;
+    mEmulatorWindow->queueSkinEvent(skin_event);
 }

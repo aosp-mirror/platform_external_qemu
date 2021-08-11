@@ -358,8 +358,9 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             code == LINUX_KEY_ENTER || code == LINUX_KEY_VOLUMEDOWN ||
             code == LINUX_KEY_FASTFORWARD || code == LINUX_KEY_VOLUMEUP ||
             code == LINUX_KEY_HOME || code == LINUX_KEY_SLEEP ||
-            code == KEY_STEM_1 || code == KEY_STEM_2 ||
-            code == KEY_STEM_3 || code == KEY_STEM_PRIMARY) {
+            code == LINUX_KEY_HEADSETHOOK || code == LINUX_KEY_SEND ||
+            code == KEY_STEM_1 || code == KEY_STEM_2 || code == KEY_STEM_3 ||
+            code == KEY_STEM_PRIMARY) {
             skin_keyboard_add_key_event(kb, code, down);
             skin_keyboard_flush(kb);
             return;

@@ -48,6 +48,7 @@ private slots:
 
 private:
     void forwardGenericEventToEmulator(int type, int code, int value);
+    void forwardKeyToEmulator(uint32_t keycode, bool down);
 
 private:
     std::unique_ptr<Ui::MicrophonePage> mUi;
