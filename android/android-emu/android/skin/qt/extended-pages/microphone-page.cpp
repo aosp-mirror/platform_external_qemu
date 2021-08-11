@@ -44,6 +44,12 @@ MicrophonePage::MicrophonePage(QWidget* parent)
         // Android Auto doesn't support the key event used in voice assist button
         mUi->mic_voiceAssistButton->setHidden(true);
     }
+
+    if (avdInfo_getApiLevel(android_avdInfo) < 24) {
+        // Older api levels do not support the key event used in
+        // voice assist button
+        mUi->mic_voiceAssistButton->setHidden(true);
+    }
 }
 
 void MicrophonePage::on_mic_hasMic_toggled(bool checked) {
