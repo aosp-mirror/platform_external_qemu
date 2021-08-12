@@ -251,8 +251,11 @@ static Optional<System::Pid> launchAsDaemon(std::string executable,
             executable,    "--daemon",
             "--logdir",    System::get()->getTempDir(),
             "--discovery", ConfigDirs::getCurrentDiscoveryPath(),
-            "--port",      std::to_string(port),
-            "--turn",      turnConfig};
+            "--port",      std::to_string(port)};
+    if (!turnConfig.empty()) {
+        cmdArgs.push_back("--turn");
+        cmdArgs.push_back(turnConfig);
+    }
 
     System::Pid bridgePid;
     std::string invoke = "";
@@ -290,9 +293,12 @@ static Optional<System::Pid> launchInBackground(std::string executable,
                                      "--port",
                                      std::to_string(port),
                                      "--adb",
-                                     std::to_string(adbPort),
-                                     "--turn",
-                                     turnConfig};
+                                     std::to_string(adbPort)};
+    if (!turnConfig.empty()) {
+        cmdArgs.push_back("--turn");
+        cmdArgs.push_back(turnConfig);
+    }
+
     System::Pid bridgePid;
     std::string invoke = "";
     for (auto arg : cmdArgs) {
