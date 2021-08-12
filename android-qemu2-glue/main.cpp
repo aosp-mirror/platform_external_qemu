@@ -2187,8 +2187,9 @@ extern "C" int main(int argc, char** argv) {
         }
     }
 
-    if (fc::isEnabled(fc::BluetoothEmulation)) {
+    if (feature_is_enabled(kFeature_BluetoothEmulation) || feature_is_enabled_by_guest(kFeature_BluetoothEmulation)) {
         // Register the rootcanal device, this will activate rootcanal
+        LOG(VERBOSE) << "Bluetooth requested by " << (feature_is_enabled(kFeature_BluetoothEmulation) ? "user" : "guest");
         args.add("-chardev");
         args.addFormat("rootcanal,id=rootcanal");
         args.add2("-device", "virtserialport,chardev=rootcanal,name=bluetooth");
