@@ -13,7 +13,8 @@
 // limitations under the License.
 #include "android/emulation/control/audio/AudioStream.h"
 
-#include <functional>  // for __base, func...
+#include <algorithm>   // for min
+#include <functional>  // for function
 #include <string>      // for string
 
 #include "android/base/system/System.h"                  // for System
@@ -39,44 +40,11 @@ uint32_t AudioStream::bytesPerMillisecond(const AudioFormat fmt) const {
 
 using AudioCallback = std::function<int(char*, std::streamsize)>;
 
-class AudioStreamCapturer : public android::emulation::AudioCapturer {
-public:
-    // create an instance with the specified audio stream, qemu will publish
-    // the audio packets to the given stream.
-    AudioStreamCapturer(const AudioFormat& fmt,
-                        AudioCallback audioCallback,
-                        AudioCaptureEngine::AudioMode mode =
-                                AudioCaptureEngine::AudioMode::AUDIO_OUTPUT)
-        : AudioCapturer(fmt.samplingrate(),
-                        fmt.format() == AudioFormat::AUD_FMT_U8 ? 8 : 16,
-                        fmt.channels() == AudioFormat::Mono ? 1 : 2),
-          mAudioReceivedCallback(audioCallback),
-          mAudioMode(mode) {
-        mRunning = (AudioCaptureEngine::get(mAudioMode)->start(this) == 0);
-    }
-
-    ~AudioStreamCapturer() { AudioCaptureEngine::get(mAudioMode)->stop(this); }
-
-    int onSample(void* buf, int size) override {
-        return mAudioReceivedCallback((char*)buf, (std::streamsize)size);
-    }
-
-    bool good() override { return mRunning; }
-
-private:
-    AudioCallback mAudioReceivedCallback;
-    AudioCaptureEngine::AudioMode mAudioMode;
-    bool mRunning;
-};
-
 QemuAudioOutputStream::QemuAudioOutputStream(const AudioFormat fmt,
                                              milliseconds blockingTime,
                                              milliseconds bufferSize)
     : AudioStream(fmt, blockingTime, bufferSize) {
-    mAudioCapturer = std::make_unique<AudioStreamCapturer>(
-            fmt, [this](char* data, std::streamsize len) {
-                return mAudioBuffer.sputn(data, len);
-            });
+    mAudioCapturer = std::make_unique<AudioStreamCapturer>(fmt, this);
 }
 
 // Blocks and waits until we can fill an audio packet with the received packet.
@@ -95,18 +63,16 @@ std::streamsize QemuAudioOutputStream::read(AudioPacket* packet) {
     return actualSize;
 }
 
+int QemuAudioOutputStream::onSample(void* buf, int n) {
+    return mAudioBuffer.sputn(reinterpret_cast<char*>(buf), n);
+}
+
 QemuAudioInputStream::QemuAudioInputStream(const AudioFormat fmt,
                                            milliseconds blockingTime,
                                            milliseconds bufferSize)
     : AudioStream(fmt, blockingTime, bufferSize) {
     mAudioCapturer = std::make_unique<AudioStreamCapturer>(
-            fmt,
-            [this](char* data, std::streamsize len) {
-                int before = mAudioBuffer.in_avail();
-                int rd = mAudioBuffer.sgetn(data, len);
-                return rd;
-            },
-            AudioCaptureEngine::AudioMode::AUDIO_INPUT);
+            fmt, this, AudioCaptureEngine::AudioMode::AUDIO_INPUT);
 }
 
 void QemuAudioInputStream::write(const AudioPacket* pkt) {
@@ -124,6 +90,41 @@ size_t QemuAudioInputStream::write(const char* buffer, size_t cBuffer) {
     toWrite = std::min(toWrite, cBuffer);
     return mAudioBuffer.sputn(buffer, toWrite);
 }
+
+int QemuAudioInputStream::onSample(void* buf, int n) {
+    return mAudioBuffer.sgetn(reinterpret_cast<char*>(buf), n);
+}
+
+int QemuAudioInputStream::available() {
+    return mAudioBuffer.in_avail();
+}
+
+AudioStreamCapturer::AudioStreamCapturer(const AudioFormat& fmt,
+                                         AudioStream* stream,
+                                         AudioCaptureEngine::AudioMode mode)
+    : AudioCapturer(fmt.samplingrate(),
+                    fmt.format() == AudioFormat::AUD_FMT_U8 ? 8 : 16,
+                    fmt.channels() == AudioFormat::Mono ? 1 : 2),
+      mStream(stream),
+      mAudioMode(mode) {
+    mRunning = (AudioCaptureEngine::get(mAudioMode)->start(this) == 0);
+}
+
+AudioStreamCapturer::~AudioStreamCapturer() {
+    AudioCaptureEngine::get(mAudioMode)->stop(this);
+}
+
+int AudioStreamCapturer::onSample(void* buf, int size)  {
+    return mStream->onSample(buf, size);
+}
+
+bool AudioStreamCapturer::good()  {
+    return mRunning;
+}
+
+int AudioStreamCapturer::available()  {
+    return mStream->available();
+};
 
 }  // namespace control
 }  // namespace emulation

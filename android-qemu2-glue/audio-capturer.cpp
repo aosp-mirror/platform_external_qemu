@@ -145,6 +145,11 @@ static void my_microphone(void* opaque, void* buf, int size)
     capturer->onSample(buf, size);
 }
 
+static int my_microphone_avail(void* opaque) {
+    emulation::AudioCapturer* capturer = reinterpret_cast<emulation::AudioCapturer*>(opaque);
+    return capturer->available();
+}
+
 
 int QemuAudioInputEngine::start(android::emulation::AudioCapturer* capturer)
 {
@@ -182,7 +187,7 @@ int QemuAudioInputEngine::start(android::emulation::AudioCapturer* capturer)
     ops.capture = my_microphone;
     ops.destroy = my_destroy;
 
-    return enable_forwarder(&as, &ops, capturer);
+    return enable_forwarder(&as, &ops, my_microphone_avail, capturer);
 }
 
 
