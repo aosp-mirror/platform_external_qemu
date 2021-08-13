@@ -24,6 +24,7 @@ void feature_initialize();
 
 // Get the access rules given by |name| if they exist, otherwise returns NULL
 bool feature_is_enabled(Feature feature);
+bool feature_is_enabled_by_guest(Feature feature);
 void feature_set_enabled_override(Feature feature, bool isEnabled);
 void feature_reset_enabled_to_default(Feature feature);
 

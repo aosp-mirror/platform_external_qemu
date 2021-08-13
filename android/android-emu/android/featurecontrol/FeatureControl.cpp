@@ -20,6 +20,10 @@ bool isEnabled(Feature feature) {
     return FeatureControlImpl::get().isEnabled(feature);
 }
 
+bool isEnabledByGuest(Feature feature) {
+    return FeatureControlImpl::get().isEnabledByGuest(feature);
+}
+
 void setEnabledOverride(Feature feature, bool isEnabled) {
     FeatureControlImpl::get().setEnabledOverride(feature, isEnabled);
 }

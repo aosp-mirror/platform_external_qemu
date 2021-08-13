@@ -21,6 +21,11 @@ bool feature_is_enabled(Feature feature) {
     return android::featurecontrol::isEnabled(value);
 }
 
+bool feature_is_enabled_by_guest(Feature feature) {
+    auto value = static_cast<android::featurecontrol::Feature>(feature);
+    return android::featurecontrol::isEnabledByGuest(value);
+}
+
 void feature_set_enabled_override(Feature feature, bool isEnabled) {
     auto value = static_cast<android::featurecontrol::Feature>(feature);
     android::featurecontrol::setEnabledOverride(value, isEnabled);
