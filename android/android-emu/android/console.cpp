@@ -28,7 +28,9 @@
 #include "android/automation/AutomationController.h"
 #include "android/avd/BugreportInfo.h"
 #include "android/avd/info.h"
+#include "android/base/ProcessControl.h"
 #include "android/base/StringView.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/cmdline-option.h"
 #include "android/console_auth.h"
@@ -47,8 +49,9 @@
 #include "android/recording/screen-recorder-constants.h"
 #include "android/shaper.h"
 #include "android/snapshot/Icebox.h"
-#include "android/snapshot/interface.h"
 #include "android/snapshot/PathUtils.h"
+#include "android/snapshot/SnapshotUtils.h"
+#include "android/snapshot/interface.h"
 #include "android/tcpdump.h"
 #include "android/telephony/modem_driver.h"
 
@@ -72,8 +75,10 @@
 #include "config-host.h"
 
 #include <atomic>
-#include <vector>
+#include <fstream>
+#include <memory>
 #include <sstream>
+#include <vector>
 
 #include <assert.h>
 #include <ctype.h>
@@ -2488,55 +2493,117 @@ static int do_snapshot_last_loaded(ControlClient client, char* args) {
     return success ? 0 : -1;
 }
 
-static const CommandDefRec  snapshot_commands[] =
-{
-    { "list", "list available state snapshots",
-    "'avd snapshot list' will show a list of all state snapshots that can be loaded\r\n",
-    NULL, do_snapshot_list, NULL },
+static int do_snapshot_pull(ControlClient client, char* args) {
+    // The implementation allows spaces in the file name as long as users
+    // quote the file name correctly. But it only works with telnet, not with
+    // the "adb emu" command, the later of which hides the quotes.
+    std::vector<std::string> arg_strings =
+            android::base::parseEscapedLaunchString(args);
+    if (arg_strings.size() != 2) {
+        control_write(client,
+                      "KO: Expecting 2 parameters, actual: %zu parameters\r\n",
+                      arg_strings.size());
+        return -1;
+    }
+    std::string& filename = arg_strings[1];
+    std::unique_ptr<std::ofstream> dstFile;
+    dstFile.reset(new std::ofstream(
+            android::base::PathUtils::asUnicodePath(filename).c_str(),
+            std::ios::binary | std::ios::out));
+    if (!dstFile->is_open()) {
+        control_write(client, "KO: Failed to write to %s\r\n",
+                      filename.c_str());
+        return -1;
+    }
+    android::emulation::control::FileFormat format =
+            android::emulation::control::TAR;
+    const char* kTarGzExt = ".tar.gz";
+    const char* kTarExt = ".tar";
+    if (android::base::EndsWith(filename, kTarGzExt)) {
+        format = android::emulation::control::TARGZ;
+    } else if (!android::base::EndsWith(filename, kTarExt)) {
+        // Unknown format. Print a warning and treat it as tar.
+        control_write(client, "WARNING: unrecognized file format %s\r\n",
+                      filename.c_str());
+    }
+    bool succeed = android::emulation::control::pullSnapshot(
+            arg_strings[0].c_str(), dstFile->rdbuf(), false, format, client,
+            control_write_err_cb);
+    return succeed ? 0 : -1;
+}
 
-    { "save", "save state snapshot",
-    "'avd snapshot save <name>' will save the current (run-time) state to a snapshot with the given name\r\n",
-    NULL, do_snapshot_save, NULL },
+static const CommandDefRec snapshot_commands[] = {
+        {"list", "list available state snapshots",
+         "'avd snapshot list' will show a list of all state snapshots that can "
+         "be loaded\r\n",
+         NULL, do_snapshot_list, NULL},
 
-    { "load", "load state snapshot",
-    "'avd snapshot load <name>' will load the state snapshot of the given name\r\n",
-    NULL, do_snapshot_load, NULL },
+        {"save", "save state snapshot",
+         "'avd snapshot save <name>' will save the current (run-time) state to "
+         "a snapshot with the given name\r\n",
+         NULL, do_snapshot_save, NULL},
 
-    { "del", "delete state snapshot",
-    "'avd snapshot del <name>' will delete the state snapshot with the given name\r\n",
-    NULL, do_snapshot_del, NULL },
+        {"load", "load state snapshot",
+         "'avd snapshot load <name>' will load the state snapshot of the given "
+         "name\r\n",
+         NULL, do_snapshot_load, NULL},
 
-    { "delete", "delete state snapshot",
-    "'avd snapshot delete <name>' will delete the state snapshot with the given name\r\n",
-    NULL, do_snapshot_del, NULL },
+        {"del", "delete state snapshot",
+         "'avd snapshot del <name>' will delete the state snapshot with the "
+         "given name\r\n",
+         NULL, do_snapshot_del, NULL},
 
-    { "remap", "remap current snapshot RAM",
-    "'avd snapshot remap <auto-save>' will activate or shut off Quickboot auto-saving\r\n"
-    "while the emulator is running.\r\n"
-    "<auto-save> value of 0: deactivate auto-save\r\n"
-    "<auto-save> value of 1: activate auto-save\r\n"
-    "- It is required that the current loaded snapshot be the Quickboot snapshot (default_boot).\r\n"
-    "- If auto-saving is currently active and gets deactivated, a snapshot will be saved\r\n"
-    "  to establish the last state.\r\n"
-    "- If the emulator is not currently auto-saving and a remap command is issued,\r\n"
-    "  the Quickboot snapshot will be reloaded with auto-saving enabled or disabled\r\n"
-    "  according to the value of the <auto-save> argument.\r\n"
-    "- This allows the user to set a checkpoint in the middle of running the emulator:\r\n"
-    "  by starting the emulator with auto-save enabled, then issuing 'avd snapshot remap 0'\r\n"
-    "  to disable auto-save and thus set the checkpoint. Subsequent 'avd snapshot remap 0'\r\n"
-    "  commands will then repeatedly rewind to that checkpoint.\r\n"
-    "  Issuing 'avd snapshot remap 1' after that will rewind again but activate auto-saving.\r\n",
-    NULL, do_snapshot_remap, NULL },
+        {"delete", "delete state snapshot",
+         "'avd snapshot delete <name>' will delete the state snapshot with the "
+         "given name\r\n",
+         NULL, do_snapshot_del, NULL},
 
-    { "get", "print the name of the snapshot loaded into the current session",
-    "'avd snapshot get' will print the name of the snapshot loaded into the current session\r\n"
-    "It will print (null) if no snapshot has been loaded.",
-    NULL, do_snapshot_last_loaded, NULL },
+        {"remap", "remap current snapshot RAM",
+         "'avd snapshot remap <auto-save>' will activate or shut off Quickboot "
+         "auto-saving\r\n"
+         "while the emulator is running.\r\n"
+         "<auto-save> value of 0: deactivate auto-save\r\n"
+         "<auto-save> value of 1: activate auto-save\r\n"
+         "- It is required that the current loaded snapshot be the Quickboot "
+         "snapshot (default_boot).\r\n"
+         "- If auto-saving is currently active and gets deactivated, a "
+         "snapshot will be saved\r\n"
+         "  to establish the last state.\r\n"
+         "- If the emulator is not currently auto-saving and a remap command "
+         "is issued,\r\n"
+         "  the Quickboot snapshot will be reloaded with auto-saving enabled "
+         "or disabled\r\n"
+         "  according to the value of the <auto-save> argument.\r\n"
+         "- This allows the user to set a checkpoint in the middle of running "
+         "the emulator:\r\n"
+         "  by starting the emulator with auto-save enabled, then issuing 'avd "
+         "snapshot remap 0'\r\n"
+         "  to disable auto-save and thus set the checkpoint. Subsequent 'avd "
+         "snapshot remap 0'\r\n"
+         "  commands will then repeatedly rewind to that checkpoint.\r\n"
+         "  Issuing 'avd snapshot remap 1' after that will rewind again but "
+         "activate auto-saving.\r\n",
+         NULL, do_snapshot_remap, NULL},
 
-    { NULL, NULL, NULL, NULL, NULL, NULL }
-};
+        {"get",
+         "print the name of the snapshot loaded into the current session",
+         "'avd snapshot get' will print the name of the snapshot loaded into "
+         "the current session\r\n"
+         "It will print (null) if no snapshot has been loaded.",
+         NULL, do_snapshot_last_loaded, NULL},
 
+        {"pull",
+         "print the name of the snapshot loaded into the current session",
+         "'avd snapshot pull <src_snapshot_name> <dst_file_name> ' will "
+         "export an existing snapshot from the emulator into a file.\r\n"
+         "src_snapshot_name: name of an existing snapshot.\r\n"
+         "dst_file_name: absolute path to the file it would be written to. The "
+         "file "
+         "should be .tar or .tar.gz "
+         "format.",
+         NULL, do_snapshot_pull, NULL},
 
+        {NULL, NULL, NULL, NULL, NULL, NULL}};
 
 /********************************************************************************************/
 /********************************************************************************************/
