@@ -612,7 +612,7 @@ bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
         apacket reply;
         _RECV_PACKET(reply);
         if (reply.mesg.command == ADB_CLSE) {
-            return true;
+            break;
         }
         // we wait for the snapshot before replying OK, to avoid any concurrency
         // issue between pipe receive and snapshots.
