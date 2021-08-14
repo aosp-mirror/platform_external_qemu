@@ -22,7 +22,7 @@
 #include <atomic>
 
 namespace android {
-namespace qemu2 {
+namespace emulation {
 class HostapdController {
 public:
     HostapdController();

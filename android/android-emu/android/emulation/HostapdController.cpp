@@ -8,12 +8,11 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
+#include "android/emulation/HostapdController.h"
+
 #ifdef _MSC_VER
-extern "C" {
-#include "sysemu/os-win32-msvc.h"
-}
+#include "msvc-posix.h"
 #endif
-#include "android-qemu2-glue/emulation/HostapdController.h"
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
@@ -24,7 +23,6 @@ extern "C" {
 #include "android/utils/debug.h"
 
 extern "C" {
-#include "qemu/osdep.h"
 #include "common/ieee802_11_defs.h"
 #include "drivers/driver_virtio_wifi.h"
 int run_hostapd_main(int argc,
@@ -44,7 +42,7 @@ extern int wpa_debug_level;
 using namespace android::base;
 
 namespace android {
-namespace qemu2 {
+namespace emulation {
 
 static LazyInstance<HostapdController> sInstance = LAZY_INSTANCE_INIT;
 
