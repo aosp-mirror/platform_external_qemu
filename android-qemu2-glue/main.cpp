@@ -36,6 +36,7 @@
 #include "android/emulation/LogcatPipe.h"
 #include "android/emulation/MultiDisplay.h"
 #include "android/emulation/ParameterList.h"
+#include "android/emulation/HostapdController.h"
 #include "android/emulation/USBAssist.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/adb/adbkey.h"
@@ -96,7 +97,6 @@ extern "C" {
 }
 
 #include "android-qemu2-glue/dtb.h"
-#include "android-qemu2-glue/emulation/HostapdController.h"
 #include "android-qemu2-glue/emulation/serial_line.h"
 #include "android-qemu2-glue/emulation/virtio-input-multi-touch.h"
 #include "android-qemu2-glue/emulation/virtio-input-rotary.h"
@@ -2648,7 +2648,7 @@ extern "C" int main(int argc, char** argv) {
         printf("Concatenated QEMU options:\n %s\n", args.toString().c_str());
     }
     if (fc::isEnabled(fc::VirtioWifi)) {
-        auto* hostapd = android::qemu2::HostapdController::getInstance();
+        auto* hostapd = android::emulation::HostapdController::getInstance();
         hostapd->initAndRun(VERBOSE_CHECK(wifi));
     }
     if (opts->check_snapshot_loadable) {

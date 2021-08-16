@@ -84,6 +84,7 @@ set(android-emu-common
     android/emulation/GoldfishSyncCommandQueue.cpp
     android/emulation/H264NaluParser.cpp
     android/emulation/H264PingInfoParser.cpp
+    android/emulation/HostapdController.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/hostdevices/HostGoldfishPipe.cpp
     android/emulation/HostmemIdMapping.cpp

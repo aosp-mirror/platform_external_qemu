@@ -16,7 +16,7 @@ extern "C" {
 #endif
 #include "android-qemu2-glue/emulation/VirtioWifiForwarder.h"
 
-#include "android-qemu2-glue/emulation/HostapdController.h"
+#include "android/emulation/HostapdController.h"
 #include "android/base/Log.h"
 #include "android/base/StringFormat.h"
 #include "android/base/async/ThreadLooper.h"
@@ -38,6 +38,7 @@ using android::base::socketRecv;
 using android::base::socketSend;
 using android::base::StringFormat;
 using android::base::ThreadLooper;
+using android::emulation::HostapdController;
 using android::network::FrameInfo;
 using android::network::FrameType;
 using android::network::GenericNetlinkMessage;
