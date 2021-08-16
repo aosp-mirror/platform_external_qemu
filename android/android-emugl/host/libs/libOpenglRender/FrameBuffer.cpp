@@ -377,6 +377,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
                 GL_LOG("Doesn't support id properties, no vulkan device UUID");
             }
         }
+        fb->m_glRenderer = std::string(vkEmu->deviceInfo.physdevProps.deviceName);
     }
 
     if (s_egl.eglUseOsEglApi)
