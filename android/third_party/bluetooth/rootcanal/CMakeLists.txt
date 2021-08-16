@@ -51,10 +51,6 @@ add_library(libbt-rootcanal.headers INTERFACE)
 target_include_directories(libbt-rootcanal.headers INTERFACE ${VL_LIB})
 android_license(TARGET "libbt-rootcanal.headers" LIBNAME None SPDX Apache-2.0
                 LICENSE Apache-2.0 LOCAL REPO/LICENSES/LICENSE.APACHE2)
-# Rootcanal does not yet build under msvc
-if(WINDOWS_MSVC_X86_64)
-  return()
-endif()
 
 android_add_library(
   TARGET BluetoothPacketSources
