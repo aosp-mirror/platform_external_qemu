@@ -53,6 +53,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     const bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
     const bool hasShellConsole = opts->logcat || opts->shell;
 
+    const char* androidbootVerityMode;
     const char* checkjniProp;
     const char* bootanimProp;
     const char* bootanimPropValue;
@@ -81,6 +82,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
 
     namespace fc = android::featurecontrol;
     if (fc::isEnabled(fc::AndroidbootProps) || fc::isEnabled(fc::AndroidbootProps2)) {
+        androidbootVerityMode = "androidboot.veritymode";
         checkjniProp = "androidboot.dalvik.vm.checkjni";
         bootanimProp = "androidboot.debug.sf.nobootanimation";
         bootanimPropValue = "1";
@@ -107,6 +109,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         adbKeyProp = "androidboot.qemu.adb.pubkey";
         avdNameProp = "androidboot.qemu.avd_name";
     } else {
+        androidbootVerityMode = nullptr;
         checkjniProp = "android.checkjni";
         bootanimProp = "android.bootanim";
         bootanimPropValue = "0";
@@ -177,6 +180,9 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     // To save battery, set the screen off timeout to a high value.
     // Using int32_max here. The unit is milliseconds.
     params.push_back({qemuScreenOffTimeoutProp, "2147483647"}); // 596 hours
+    if (apiLevel >= 31 && androidbootVerityMode) {
+        params.push_back({androidbootVerityMode, "enforcing"});
+    }
 
     if (isQemu2 && fc::isEnabled(fc::EncryptUserData) && qemuEncryptProp) {
         params.push_back({qemuEncryptProp, "1"});
