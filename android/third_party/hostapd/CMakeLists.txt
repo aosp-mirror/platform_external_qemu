@@ -62,6 +62,9 @@ set(hostapd_src
     ${WPA_SUPPLICANT_ROOT}/src/crypto/tls_none.c
     ${WPA_SUPPLICANT_ROOT}/src/crypto/crypto_openssl.c
     ${WPA_SUPPLICANT_ROOT}/src/crypto/fips_prf_openssl.c
+    ${WPA_SUPPLICANT_ROOT}/src/crypto/aes-ccm.c
+    ${WPA_SUPPLICANT_ROOT}/src/crypto/aes-internal.c
+    ${WPA_SUPPLICANT_ROOT}/src/crypto/aes-wrap.c
     ${WPA_SUPPLICANT_ROOT}/src/crypto/aes-siv.c
     ${WPA_SUPPLICANT_ROOT}/src/crypto/aes-ctr.c
     ${WPA_SUPPLICANT_ROOT}/src/crypto/aes-omac1.c
@@ -169,6 +172,7 @@ target_compile_definitions(
           -DCONFIG_HS20
           -DCONFIG_INTERWORKING
           -DCONFIG_ACS
+          -DCONFIG_OPENSSL_INTERNAL_AES_WRAP
           -DCONFIG_DRIVER_VIRTIO_WIFI)
 
 android_target_compile_definitions(hostapd windows PRIVATE
