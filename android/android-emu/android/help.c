@@ -2075,6 +2075,7 @@ static void help_usb_passthrough(stralloc_t* out) {
 #define help_allow_host_audio NULL
 #define help_restart_when_stalled NULL
 #define help_perf_stat NULL
+#define help_append_userspace_opt NULL
 
 typedef struct {
     const char*  name;

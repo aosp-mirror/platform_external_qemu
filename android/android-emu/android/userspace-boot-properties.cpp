@@ -402,5 +402,15 @@ getUserspaceBootProperties(const AndroidOptions* opts,
 
     params.push_back({avdNameProp, avdName});
 
+    for (auto i = opts->append_userspace_opt; i; i = i->next) {
+        const char* const val = i->param;
+        const char* const eq = strchr(val, '=');
+        if (eq) {
+            params.push_back({std::string(val, eq), eq + 1});
+        } else {
+            params.push_back({val, ""});
+        }
+    }
+
     return params;
 }
