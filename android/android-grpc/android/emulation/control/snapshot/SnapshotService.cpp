@@ -46,6 +46,7 @@
 #include "android/snapshot/Icebox.h"
 #include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Snapshot.h"
+#include "android/snapshot/SnapshotUtils.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/utils/file_io.h"
 #include "android/utils/ini.h"
@@ -85,7 +86,6 @@ public:
         mStatus->set_err("Operation failed due to: " + errMsg);
         return mStatus;
     }
-
 private:
     SnapshotPackage* mStatus;
 };
@@ -96,143 +96,38 @@ public:
                         const SnapshotPackage* request,
                         ServerWriter<SnapshotPackage>* writer) override {
         SnapshotPackage result;
-        auto snapshot =
-                snapshot::Snapshot::getSnapshotById(request->snapshot_id());
-
-        if (!snapshot) {
-            // Nope, the snapshot doesn't exist.
-            result.set_success(false);
-            result.set_err("Could not find " + request->snapshot_id());
-            writer->Write(result);
-            return Status::OK;
+        SnapshotLineConsumer errorConsumer(&result);
+        std::unique_ptr<CallbackStreambufWriter> csb;
+        std::unique_ptr<std::ofstream> dstFile;
+        std::streambuf* streamBufPtr = nullptr;
+        if (request->path() == "") {
+            csb.reset(new CallbackStreambufWriter(
+                    k256KB, [writer](char* bytes, std::size_t len) {
+                        SnapshotPackage msg;
+                        msg.set_payload(std::string(bytes, len));
+                        msg.set_success(true);
+                        return writer->Write(msg);
+                    }));
+            streamBufPtr = csb.get();
+        } else {
+            dstFile.reset(new std::ofstream(
+                    android::base::PathUtils::asUnicodePath(request->path())
+                            .c_str(),
+                    std::ios::binary | std::ios::out));
+            if (!dstFile->is_open()) {
+                result.set_success(false);
+                result.set_err("Failed to write to " + request->path());
+                writer->Write(result);
+                return Status::OK;
+            }
+            streamBufPtr = dstFile->rdbuf();
         }
 
-        Stopwatch sw;
-        auto tmpdir = pj(System::get()->getTempDir(), snapshot->name());
-        const auto tmpdir_deleter =
-                base::makeCustomScopedPtr(&tmpdir, [](std::string* tmpdir) {
-                    // Best effort to cleanup the mess.
-                    path_delete_dir(tmpdir->c_str());
-                });
-        android_mkdir(tmpdir.data(), 0700);
-
-        crashreport::CrashReporter::get()->hangDetector().pause(true);
-        // Exports all qcow2 images..
-        SnapshotLineConsumer slc(&result);
-        bool exp;
-        Status status = Status::OK;
-        // Put everything in main thread, to avoid calling export during
-        // snapshot operations.
-        android::base::ThreadLooper::runOnMainLooperAndWaitForCompletion(
-                [&snapshot, &tmpdir, &slc, &exp, &writer, &status, &sw, &result,
-                 request] {
-                    exp = getConsoleAgents()->vm->snapshotExport(
-                            snapshot->name().data(), tmpdir.data(),
-                            slc.opaque(), LineConsumer::Callback);
-                    if (!exp) {
-                        writer->Write(*slc.error());
-                        return;
-                    }
-                    LOG(VERBOSE) << "Exported snapshot in " << sw.restartUs()
-                                 << " us";
-                    // Stream the tmpdir out as a tar.gz..
-
-                    std::unique_ptr<CallbackStreambufWriter> csb;
-                    std::unique_ptr<std::ofstream> dstFile;
-                    std::streambuf* streamBufPtr = nullptr;
-                    if (request->path() == "") {
-                        csb.reset(new CallbackStreambufWriter(
-                                k256KB, [writer](char* bytes, std::size_t len) {
-                                    SnapshotPackage msg;
-                                    msg.set_payload(std::string(bytes, len));
-                                    msg.set_success(true);
-                                    return writer->Write(msg);
-                                }));
-                        streamBufPtr = csb.get();
-                    } else {
-                        dstFile.reset(new std::ofstream(
-                                request->path().c_str(),
-                                std::ios::binary | std::ios::out));
-                        if (!dstFile->is_open()) {
-                            result.set_success(false);
-                            result.set_err("Failed to write to " +
-                                           request->path());
-                            writer->Write(result);
-                            status = Status::OK;
-                            return;
-                        }
-                        streamBufPtr = dstFile->rdbuf();
-                    }
-
-                    std::unique_ptr<std::ostream> stream;
-                    std::ostream* streamPtr = nullptr;
-                    if (request->format() == SnapshotPackage::TARGZ) {
-                        stream = std::make_unique<GzipOutputStream>(
-                                streamBufPtr);
-                        streamPtr = stream.get();
-                    } else if (request->path() == "") {
-                        stream = std::make_unique<std::ostream>(streamBufPtr);
-                        streamPtr = stream.get();
-                    } else {
-                        streamPtr = dstFile.get();
-                    }
-
-                    // Use of  a 64 KB  buffer gives good performance (see
-                    // performance tests.)
-                    TarWriter tw(tmpdir, *streamPtr, k64KB);
-                    result.set_success(tw.addDirectory("."));
-                    if (tw.fail()) {
-                        result.set_err(tw.error_msg());
-                    }
-                    LOG(VERBOSE) << "Completed writing in " << sw.restartUs()
-                                 << " us";
-                    int success = iniFile_saveToFile(
-                            avdInfo_getConfigIni(android_avdInfo),
-                            PathUtils::join(snapshot->dataDir(),
-                                            CORE_CONFIG_INI)
-                                    .c_str());
-                    if (success != 0) {
-                        result.set_err("Failed to save snapshot meta data");
-                    }
-
-                    // Now add in the metadata.
-                    auto entries = System::get()->scanDirEntries(
-                            snapshot->dataDir(), true);
-                    for (const auto& fname : entries) {
-                        if (!System::get()->pathIsFile(fname)) {
-                            continue;
-                        }
-                        struct stat sb;
-                        android::base::StringView name;
-                        char buf[k64KB];
-                        PathUtils::split(fname, nullptr, &name);
-
-                        // Use of  a 64 KB  buffer gives good performance (see
-                        // performance tests.)
-                        std::ifstream ifs(fname, std::ios_base::in |
-                                                         std::ios_base::binary);
-                        ifs.rdbuf()->pubsetbuf(buf, sizeof(buf));
-
-                        if (android_stat(fname.c_str(), &sb) != 0 ||
-                            !tw.addFileEntryFromStream(ifs, name, sb)) {
-                            result.set_err("Unable to tar " + fname);
-                            break;
-                        }
-                    }
-                    LOG(VERBOSE)
-                            << "Wrote metadata in " << sw.restartUs() << " us";
-
-                    tw.close();
-                    if (tw.fail()) {
-                        result.set_err(tw.error_msg());
-                    }
-
-                    writer->Write(result);
-                    status = Status::OK;
-                });
-
-        crashreport::CrashReporter::get()->hangDetector().pause(false);
-        return status;
+        result.set_success(pullSnapshot(
+                request->snapshot_id().c_str(), streamBufPtr, false,
+                request->format() == SnapshotPackage::TARGZ ? TARGZ : TAR,
+                errorConsumer.opaque(), LineConsumer::Callback));
+        return Status::OK;
     }
 
     Status PushSnapshot(ServerContext* context,

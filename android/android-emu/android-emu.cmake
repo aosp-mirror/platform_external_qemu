@@ -237,6 +237,7 @@ set(android-emu-common
     android/snapshot/RamSnapshotTesting.cpp
     android/snapshot/Saver.cpp
     android/snapshot/Snapshot.cpp
+    android/snapshot/SnapshotUtils.cpp
     android/snapshot/Snapshotter.cpp
     android/snapshot/TextureLoader.cpp
     android/snapshot/TextureSaver.cpp

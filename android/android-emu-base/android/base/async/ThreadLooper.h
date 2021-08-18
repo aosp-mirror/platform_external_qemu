@@ -43,7 +43,8 @@ public:
 
     // runOnMainLooper(), except waits until |func| finishes, then
     // returns to the calling thread.
-    // WARNING: Please make sure you don't call this on the actual main looper
+    // If callled in actual main looper, it will immediately execute func and
+    // return.
     static void runOnMainLooperAndWaitForCompletion(Closure&& func);
 
     // Reset the main runner, used by test code when clearing the main looper.

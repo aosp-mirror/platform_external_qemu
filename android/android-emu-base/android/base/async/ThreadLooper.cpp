@@ -133,6 +133,11 @@ void ThreadLooper::runOnMainLooperAndWaitForCompletion(ThreadLooper::Closure&& f
         return;
     }
 
+    if (looper_getForThread() ==
+        android_getMainLooper()) {  // We are on mainlooop.
+        func();
+        return;
+    }
     android::base::Event e;
     ThreadLooper::Closure funcWithSignal = [func, &e]() {
         func();
