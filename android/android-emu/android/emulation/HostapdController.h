@@ -13,13 +13,11 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/sockets/ScopedSocket.h"
-#include "android/base/synchronization/ConditionVariable.h"
-#include "android/base/synchronization/Lock.h"
+#include "android/network/Ieee80211Frame.h"
 
-
+#include <atomic>
 #include <memory>
 #include <string>
-#include <atomic>
 
 namespace android {
 namespace emulation {
@@ -27,12 +25,23 @@ class HostapdController {
 public:
     HostapdController();
     ~HostapdController();
-    bool initAndRun(bool verbose);
+    bool init(bool verbose);
+    bool run();
+    // Assuming hostapd event loop is already running.
     void setDriverSocket(android::base::ScopedSocket sock);
-    void terminate(bool wait);
+    // Return false if ssid is empty. If [ssid] and [password] match
+    // with current configurations, do not update the config file.
+    // Otherwise, update the config file and reload config in hostapd.
+    bool setSsid(const std::string ssid, const std::string password);
+    // Non-blocking.
+    void terminate();
+    bool isRunning();
+    bool usingWPA2();
+    android::network::CipherScheme getCipherScheme();
     static HostapdController* getInstance();
 
 private:
+    static const char* const kAndroidWifiSsid;
     enum class DebugLevel {
         MSG_EXCESSIVE,
         MSG_MSGDUMP,
@@ -42,12 +51,16 @@ private:
         MSG_ERROR,
         MSG_DISABLE,
     };
-    std::string mTemplateConf;
+    const std::string genConfigFile();
+    const std::string mTemplateConf;
+    std::string mConfigFile;
+    std::atomic<bool> mInitialized{false};
     std::atomic<bool> mRunning{false};
-    // mLock is used to wait for hostapd event loop termination.
-    android::base::Lock mLock;
-    android::base::ConditionVariable mCvLoopExit;
-    android::base::ScopedSocket mSock;
+    std::string mSsid;
+    std::string mPassword;
+    android::base::ScopedSocket mDataSock;
+    android::base::ScopedSocket mCtrlSock1;
+    android::base::ScopedSocket mCtrlSock2;
     DISALLOW_COPY_ASSIGN_AND_MOVE(HostapdController);
 };
 }  // namespace qemu2

@@ -11,11 +11,17 @@
 
 #include "android/network/wifi.h"
 
+#include "android/emulation/HostapdController.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/network/NetworkPipe.h"
+#include "android/utils/debug.h"
 
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
+
+namespace fc = android::featurecontrol;
+using android::emulation::HostapdController;
 
 static int send_command(const char* fmt, ...) {
     char buffer[1024];
@@ -40,9 +46,17 @@ static int send_command(const char* fmt, ...) {
 
 extern "C"
 int android_wifi_add_ssid(const char* ssid, const char* password) {
-    return send_command("wifi add %s %s\n",
-                        ssid,
-                        (password && *password) ? password : "");
+    if (fc::isEnabled(fc::Wifi)) {
+        return send_command("wifi add %s %s\n", ssid,
+                            (password && *password) ? password : "");
+    } else if (fc::isEnabled(fc::VirtioWifi)) {
+        auto* hostapd = HostapdController::getInstance();
+        return hostapd->setSsid(ssid, (password && *password) ? password : "")
+                       ? 0
+                       : -1;
+    } else {
+        return -1;
+    }
 }
 
 extern "C"
