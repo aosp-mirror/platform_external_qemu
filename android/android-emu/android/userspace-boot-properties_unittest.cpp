@@ -43,25 +43,27 @@ TEST(getUserspaceBootProperties, BootconfigOff) {
 
     fc::setEnabledOverride(fc::AndroidbootProps, false);
     fc::setEnabledOverride(fc::AndroidbootProps2, false);
+    AndroidHwConfig hw;
+    hw.hw_lcd_width = 600;
+    hw.hw_lcd_height = 800;
+    hw.hw_lcd_vsync = 60;
+    hw.hw_gltransport = (char*)"gltransport";
+    hw.hw_gltransport_drawFlushInterval = 77;
+    hw.vm_heapSize = 64;
+    hw.display_settings_xml = (char*)"displaySettingsXml";
+    hw.avd_name = (char*)"avd_1";
 
     const auto params = getUserspaceBootProperties(
         &opts,
         "x86_64",                   // targetArch
         "serialno",                 // serialno
         true,                       // isQemu2
-        600,                        // lcd_width
-        800,                        // lcd_height
-        60,                         // lcd_vsync
         kAndroidGlesEmulationHost,  // glesMode
         123,                        // bootPropOpenglesVersion
-        64,                         // vm_heapSize
         29,                         // apiLevel
         "kernelSerialPrefix",       // kernelSerialPrefix
         &verifiedBootParameters,    // verifiedBootParameters
-        "gltransport",              // gltransport
-        77,                         // gltransport_drawFlushInterval
-        "displaySettingsXml",       // displaySettingsXml
-        "avd_1");                   // avdName
+        &hw);                       // hwConfig
 
     std::map<std::string, std::string> paramsMap;
     for (const auto& kv : params) {
@@ -100,24 +102,27 @@ TEST(getUserspaceBootProperties, BootconfigOn) {
     fc::setEnabledOverride(fc::AndroidbootProps, true);
     fc::setEnabledOverride(fc::AndroidbootProps2, false);
 
+    AndroidHwConfig hw;
+    hw.hw_lcd_width = 600;
+    hw.hw_lcd_height = 800;
+    hw.hw_lcd_vsync = 60;
+    hw.hw_gltransport = (char*)"gltransport";
+    hw.hw_gltransport_drawFlushInterval = 77;
+    hw.vm_heapSize = 64;
+    hw.display_settings_xml = (char*)"displaySettingsXml";
+    hw.avd_name = (char*)"avd_1";
+
     const auto params = getUserspaceBootProperties(
         &opts,
         "x86_64",                   // targetArch
         "serialno",                 // serialno
         true,                       // isQemu2
-        600,                        // lcd_width
-        800,                        // lcd_height
-        60,                         // lcd_vsync
         kAndroidGlesEmulationHost,  // glesMode
         123,                        // bootPropOpenglesVersion
-        64,                         // vm_heapSize
         29,                         // apiLevel
         "kernelSerialPrefix",       // kernelSerialPrefix
         &verifiedBootParameters,    // verifiedBootParameters
-        "gltransport",              // gltransport
-        77,                         // gltransport_drawFlushInterval
-        "displaySettingsXml",       // displaySettingsXml
-        "avd_1");                   // avdName
+        &hw);                       // hwConfig
 
     std::map<std::string, std::string> paramsMap;
     for (const auto& kv : params) {
@@ -152,24 +157,27 @@ TEST(getUserspaceBootProperties, Bootconfig2On) {
     fc::setEnabledOverride(fc::AndroidbootProps, false);
     fc::setEnabledOverride(fc::AndroidbootProps2, true);
 
+    AndroidHwConfig hw;
+    hw.hw_lcd_width = 600;
+    hw.hw_lcd_height = 800;
+    hw.hw_lcd_vsync = 60;
+    hw.hw_gltransport = (char*)"gltransport";
+    hw.hw_gltransport_drawFlushInterval = 77;
+    hw.vm_heapSize = 64;
+    hw.display_settings_xml = (char*)"displaySettingsXml";
+    hw.avd_name = (char*)"avd_1";
+
     const auto params = getUserspaceBootProperties(
         &opts,
         "x86_64",                   // targetArch
         "serialno",                 // serialno
         true,                       // isQemu2
-        600,                        // lcd_width
-        800,                        // lcd_height
-        60,                         // lcd_vsync
         kAndroidGlesEmulationHost,  // glesMode
         123,                        // bootPropOpenglesVersion
-        64,                         // vm_heapSize
         29,                         // apiLevel
         "kernelSerialPrefix",       // kernelSerialPrefix
         &verifiedBootParameters,    // verifiedBootParameters
-        "gltransport",              // gltransport
-        77,                         // gltransport_drawFlushInterval
-        "displaySettingsXml",       // displaySettingsXml
-        "avd_1");                   // avdName
+        &hw);                       // hwConfig 
 
     std::map<std::string, std::string> paramsMap;
     for (const auto& kv : params) {

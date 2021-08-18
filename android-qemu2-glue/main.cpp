@@ -2548,19 +2548,12 @@ extern "C" int main(int argc, char** argv) {
                 kTarget.androidArch,
                 myserialno.c_str(),
                 isQemu2,
-                hw->hw_lcd_width,
-                hw->hw_lcd_height,
-                hw->hw_lcd_vsync,
                 rendererConfig.glesMode,
                 rendererConfig.bootPropOpenglesVersion,
-                hw->vm_heapSize,
                 apiLevel,
                 real_console_tty_prefix,
                 &verified_boot_params,
-                hw->hw_gltransport,
-                hw->hw_gltransport_drawFlushInterval,
-                hw->display_settings_xml,
-                hw->avd_name);
+                hw);
 
         std::vector<std::string> kernelCmdLineUserspaceBootOpts;
         if (fc::isEnabled(fc::AndroidbootProps) || fc::isEnabled(fc::AndroidbootProps2)) {

@@ -15,6 +15,7 @@
 #include <vector>
 #include "android/cmdline-option.h"
 #include "android/opengl/emugl_config.h"
+#include "android/avd/hw-config.h"
 
 ANDROID_BEGIN_HEADER
 
@@ -23,18 +24,11 @@ getUserspaceBootProperties(const AndroidOptions* opts,
                            const char* targetArch,
                            const char* serialno,
                            bool isQemu2,
-                           uint32_t lcd_width,
-                           uint32_t lcd_height,
-                           uint32_t lcd_vsync,
                            AndroidGlesEmulationMode glesMode,
                            int bootPropOpenglesVersion,
-                           int vm_heapSize,
                            int apiLevel,
                            const char* kernelSerialPrefix,
                            const std::vector<std::string>* verifiedBootParameters,
-                           const char* gltransport,
-                           uint32_t gltransport_drawFlushInterval,
-                           const char* displaySettingsXml,
-                           const char* avdName);
+                           const AndroidHwConfig* hw);
 
 ANDROID_END_HEADER
