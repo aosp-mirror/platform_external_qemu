@@ -37,19 +37,12 @@ getUserspaceBootProperties(const AndroidOptions* opts,
                            const char* targetArch,
                            const char* serialno,
                            const bool isQemu2,
-                           const uint32_t lcd_width,
-                           const uint32_t lcd_height,
-                           const uint32_t lcd_vsync,
                            const AndroidGlesEmulationMode glesMode,
                            const int bootPropOpenglesVersion,
-                           const int vm_heapSize,
                            const int apiLevel,
                            const char* kernelSerialPrefix,
                            const std::vector<std::string>* verifiedBootParameters,
-                           const char* gltransport,
-                           const uint32_t gltransport_drawFlushInterval,
-                           const char* displaySettingsXml,
-                           const char* avdName) {
+                           const AndroidHwConfig* hw) {
     const bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
     const bool hasShellConsole = opts->logcat || opts->shell;
 
@@ -192,8 +185,8 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     // 1. If the SelectMediaProfileConfig is on, then select
     // <media_profile_name> if the resolution is above 1080p (1920x1080).
     if (isQemu2 && fc::isEnabled(fc::DynamicMediaProfile) && qemuMediaProfileVideoProp) {
-        if ((lcd_width > 1920 && lcd_height > 1080) ||
-            (lcd_width > 1080 && lcd_height > 1920)) {
+        if ((hw->hw_lcd_width > 1920 && hw->hw_lcd_height > 1080) ||
+            (hw->hw_lcd_width > 1080 && hw->hw_lcd_height > 1920)) {
             fprintf(stderr, "Display resolution > 1080p. Using different media profile.\n");
             params.push_back({
                 qemuMediaProfileVideoProp,
@@ -203,13 +196,13 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     }
 
     // Set vsync rate
-    params.push_back({qemuVsyncProp, StringFormat("%u", lcd_vsync)});
+    params.push_back({qemuVsyncProp, StringFormat("%u", hw->hw_lcd_vsync)});
 
     // Set gl transport props
-    params.push_back({qemuGltransportNameProp, gltransport});
+    params.push_back({qemuGltransportNameProp, hw->hw_gltransport});
     params.push_back({
         qemuDrawFlushIntervalProp,
-        StringFormat("%u", gltransport_drawFlushInterval)});
+        StringFormat("%u", hw->hw_gltransport_drawFlushInterval)});
 
     // OpenGL ES related setup
     // 1. Set opengles.version and set Skia as UI renderer if
@@ -266,10 +259,10 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         params.push_back({"androidboot.selinux", opts->selinux});
     }
 
-    if (vm_heapSize > 0) {
+    if (hw->vm_heapSize > 0) {
         params.push_back({
             dalvikVmHeapsizeProp,
-            StringFormat("%dm", vm_heapSize)
+            StringFormat("%dm", hw->vm_heapSize)
         });
     }
 
@@ -308,8 +301,10 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     }
 
     // display settings file name
-    if (displaySettingsXml && displaySettingsXml[0] && qemuDisplaySettingsXmlProp) {
-        params.push_back({qemuDisplaySettingsXmlProp, displaySettingsXml});
+    if (hw->display_settings_xml &&
+        hw->display_settings_xml[0]
+        && qemuDisplaySettingsXmlProp) {
+        params.push_back({qemuDisplaySettingsXmlProp, hw->display_settings_xml});
     }
 
     if (isQemu2) {
@@ -400,7 +395,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         }
     }
 
-    params.push_back({avdNameProp, avdName});
+    params.push_back({avdNameProp, hw->avd_name});
 
     return params;
 }
