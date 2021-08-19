@@ -15,7 +15,10 @@
 # -*- coding: utf-8 -*-
 from google.protobuf import empty_pb2
 from aemu.discovery.emulator_discovery import get_default_emulator
-from aemu.proto.emulator_controller_pb2 import DisplayConfigurations, DisplayConfiguration
+from aemu.proto.emulator_controller_pb2 import (
+    DisplayConfigurations,
+    DisplayConfiguration,
+)
 
 # Create a client
 stub = get_default_emulator().get_emulator_controller()
@@ -25,10 +28,21 @@ print("--- Erase all:")
 stub.setDisplayConfigurations(DisplayConfigurations(displays=[]))
 print(stub.getDisplayConfigurations(empty_pb2.Empty()))
 print("--- Set to two:")
-stub.setDisplayConfigurations(DisplayConfigurations(displays=[DisplayConfiguration(width=480, height=720, dpi=142), DisplayConfiguration(width=720, height=1280, dpi=213)]))
+stub.setDisplayConfigurations(
+    DisplayConfigurations(
+        displays=[
+            DisplayConfiguration(display=1, width=480, height=720, dpi=142),
+            DisplayConfiguration(display=7, width=720, height=1280, dpi=213),
+        ]
+    )
+)
 print(stub.getDisplayConfigurations(empty_pb2.Empty()))
 print("--- Set to one:")
-stub.setDisplayConfigurations(DisplayConfigurations(displays=[DisplayConfiguration(width=720, height=1280, dpi=213)]))
+stub.setDisplayConfigurations(
+    DisplayConfigurations(
+        displays=[DisplayConfiguration(display=1, width=720, height=1280, dpi=213)]
+    )
+)
 print(stub.getDisplayConfigurations(empty_pb2.Empty()))
 print("--- Erase all:")
 stub.setDisplayConfigurations(DisplayConfigurations(displays=[]))

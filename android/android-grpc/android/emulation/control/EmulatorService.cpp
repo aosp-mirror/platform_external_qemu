@@ -910,7 +910,7 @@ public:
 
         uint32_t width, height, dpi, flags;
         bool enabled;
-        for (int i = 0; i <= avdInfo_maxMultiDisplayEntries(); i++) {
+        for (int i = 0; i <= MultiDisplay::s_maxNumMultiDisplay; i++) {
             if (mAgents->multi_display->getMultiDisplay(i, nullptr, nullptr,
                                                         &width, &height, &dpi,
                                                         &flags, &enabled)) {
@@ -923,6 +923,8 @@ public:
             }
         }
 
+        reply->set_maxdisplays(android::MultiDisplay::s_maxNumMultiDisplay);
+        reply->set_userconfigurable(avdInfo_maxMultiDisplayEntries());
         return Status::OK;
     }
 
@@ -961,16 +963,18 @@ public:
                                       " is an invalid configuration.",
                               "");
             }
-            updatingDisplayIds.insert(display.display());
-        }
 
-        if (updatingDisplayIds.size() > avdInfo_maxMultiDisplayEntries()) {
-            return Status(
-                    ::grpc::StatusCode::INVALID_ARGUMENT,
-                    "At most: " +
-                            std::to_string(avdInfo_maxMultiDisplayEntries()) +
-                            " can be configured.",
-                    "");
+            if (display.display() > avdInfo_maxMultiDisplayEntries() ||
+                display.display() < 1) {
+                return Status(
+                        ::grpc::StatusCode::INVALID_ARGUMENT,
+                        "Display id has to be in the set: [1, " +
+                                std::to_string(
+                                        avdInfo_maxMultiDisplayEntries()) +
+                                "].",
+                        "");
+            }
+            updatingDisplayIds.insert(display.display());
         }
 
         std::set<int> updatedDisplays;
@@ -982,18 +986,21 @@ public:
         int failureDisplay = 0;
         // Reconfigure to the desired state
         for (const auto& display : request->displays()) {
-            // Check if this display is non zero and is different
-            // than any existing one.
+            // Check if this display is in the set of displays that can be
+            // modified and is different than any existing one.
             auto unchanged = std::find_if(
                     std::begin(existingDisplays), std::end(existingDisplays),
                     [&display](const DisplayConfiguration& cfg) {
-                        return display.display() == 0 ||
+                        return display.display() < 1 ||
+                               display.display() >
+                                       avdInfo_maxMultiDisplayEntries() ||
                                ScreenshotUtils::equals(cfg, display);
                     });
 
             if (unchanged != std::end(existingDisplays)) {
-                // We are trying to change display 0, or we are trying to update
-                // a display with the exact same configuration.
+                // We are trying to change a display outside the set [1,3], or
+                // we are trying to update a display with the exact same
+                // configuration.
                 continue;
             }
 
