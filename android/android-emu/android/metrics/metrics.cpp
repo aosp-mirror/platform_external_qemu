@@ -277,8 +277,12 @@ static void fillAvdMetrics(android_studio::AndroidStudioEvent* event) {
                             isEnabled(android::featurecontrol::PlayStoreImage)
                     ? android_studio::EmulatorAvdInfo::PLAY_STORE_KIND
                     : avdInfo_isGoogleApis(android_avdInfo)
-                              ? android_studio::EmulatorAvdInfo::GOOGLE
-                              : android_studio::EmulatorAvdInfo::AOSP);
+                              ? avdInfo_isAtd(android_avdInfo)
+                                ? android_studio::EmulatorAvdInfo::GOOGLE_ATD
+                                : android_studio::EmulatorAvdInfo::GOOGLE
+                              : avdInfo_isAtd(android_avdInfo)
+                                ? android_studio::EmulatorAvdInfo::AOSP_ATD
+                                : android_studio::EmulatorAvdInfo::AOSP);
     eventAvdInfo->set_arch(toClearcutLogGuestArch(android_hw->hw_cpu_arch));
     if (avdInfo_inAndroidBuild(android_avdInfo)) {
         // no real AVD, so no creation times or file infos.
