@@ -13,12 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-#include <stdio.h>                                        // for sscanf
-#include <future>                                         // for promise
-#include <memory>                                         // for shared_ptr
-#include <string>                                         // for string
-#include <utility>                                        // for move
-#include <vector>                                         // for vector
+#include <stdio.h>  // for sscanf
+#include <future>   // for promise
+#include <memory>   // for shared_ptr
+#include <string>   // for string
+#include <utility>  // for move
+#include <vector>   // for vector
 
 #include "android/base/async/ThreadLooper.h"              // for ThreadLooper
 #include "model/setup/async_manager.h"                    // for AsyncManager
@@ -55,7 +55,10 @@ public:
     };
 
     // Closes the root canal service
-    void close() override { mRootcanal->close(); };
+    void close() override {
+        mRootcanal->close();
+        mRootcanal = nullptr;
+    }
 
 private:
     std::unique_ptr<TestEnvironment> mRootcanal;
