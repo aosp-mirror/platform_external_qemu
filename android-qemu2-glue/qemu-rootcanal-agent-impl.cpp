@@ -89,6 +89,8 @@ ssize_t rootcanal_recv(uint8_t* buffer, uint64_t bufferSize) {
     }
     auto readCount = std::min<uint64_t>(sIncomingHciBuffer.size(), bufferSize);
     memcpy(buffer, sIncomingHciBuffer.data(), readCount);
+
+    DD_BUF(buffer, bufferSize);
     sIncomingHciBuffer.erase(sIncomingHciBuffer.begin(),
                              sIncomingHciBuffer.begin() + readCount);
     return readCount;
