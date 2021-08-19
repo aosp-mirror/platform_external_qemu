@@ -1053,7 +1053,7 @@ message DisplayConfiguration {
   // The primary (default) display has the display ID of 0.
   // A secondary display has a display ID not 0.
   //
-  // A display with the id in the range [1..userConfigurable]
+  // A display with the id in the range [1, userConfigurable]
   // can be modified. See DisplayConfigurations below for details.
   //
   // The id can be used to get or stream a screenshot.
