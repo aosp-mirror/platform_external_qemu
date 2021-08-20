@@ -82,8 +82,8 @@ private:
                         android::network::FrameType type);
     int sendToNIC(std::unique_ptr<android::network::Ieee80211Frame> frame);
     void ackLocalFrame(const android::network::Ieee80211Frame* frame);
-    std::unique_ptr<android::network::Ieee80211Frame> parseFrame(
-            const android::base::IOVector& iov);
+    std::unique_ptr<android::network::Ieee80211Frame> parseHwsimCmdFrame(
+            const android::network::GenericNetlinkMessage& msg);
     android::network::MacAddress mBssID;
     OnFrameAvailableCallback mOnFrameAvailableCallback;
     OnLinkStatusChanged mOnLinkStatusChanged;

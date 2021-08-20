@@ -211,8 +211,12 @@ int VirtioWifiForwarder::forwardFrame(const IOVector& iov) {
     if (iov.summedLength() < IEEE80211_HDRLEN) {
         return 0;
     }
+    const GenericNetlinkMessage msg(iov);
+    if (msg.genericNetlinkHeader()->cmd != HWSIM_CMD_FRAME) {
+        return 0;
+    }
 
-    std::unique_ptr<Ieee80211Frame> frame = parseFrame(iov);
+    std::unique_ptr<Ieee80211Frame> frame = parseHwsimCmdFrame(msg);
     if (frame == nullptr) {
         LOG(VERBOSE) << "Not a HWSIM_CMD_FRAME netlink message";
         return 0;
@@ -480,12 +484,8 @@ int VirtioWifiForwarder::sendToNIC(
     return res ? 0 : -EBUSY;
 }
 
-std::unique_ptr<Ieee80211Frame> VirtioWifiForwarder::parseFrame(
-        const IOVector& in) {
-    const GenericNetlinkMessage msg(in);
-    if (msg.genericNetlinkHeader()->cmd != HWSIM_CMD_FRAME) {
-        return nullptr;
-    }
+std::unique_ptr<Ieee80211Frame> VirtioWifiForwarder::parseHwsimCmdFrame(
+        const GenericNetlinkMessage& msg) {
     MacAddress transmitter;
     if (!msg.getAttribute(HWSIM_ATTR_ADDR_TRANSMITTER, transmitter.mAddr,
                           ETH_ALEN)) {
