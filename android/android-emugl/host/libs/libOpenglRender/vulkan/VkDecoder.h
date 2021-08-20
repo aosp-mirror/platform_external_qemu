@@ -48,6 +48,7 @@ public:
     VkDecoder();
     ~VkDecoder();
     void setForSnapshotLoad(bool forSnapshotLoad);
+    void onThreadTeardown();
     size_t decode(void* buf, size_t bufsize, IOStream* stream, uint32_t* seqnoPtr);
 private:
     class Impl;

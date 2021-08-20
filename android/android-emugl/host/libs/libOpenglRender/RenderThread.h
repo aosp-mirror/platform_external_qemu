@@ -58,9 +58,16 @@ public:
     void resume();
     void save(android::base::Stream* stream);
 
+    // Calls |mOnTeardown| callback to notify the main() thread function
+    // the thread is going to be torn down.
+    void notifyTeardown();
+
 private:
-    virtual intptr_t main();
+    intptr_t main() override;
     void setFinished();
+    void setOnTeardown(std::function<void()> callback = []{}) {
+        mOnTeardown = std::move(callback);
+    }
 
     // Snapshot support.
     enum class SnapshotState {
@@ -101,6 +108,8 @@ private:
     android::base::Optional<android::base::MemStream> mStream;
 
     bool mRunInLimitedMode = false;
+
+    std::function<void()> mOnTeardown = []{};
 };
 
 }  // namespace emugl

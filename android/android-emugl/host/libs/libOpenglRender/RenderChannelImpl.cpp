@@ -182,6 +182,7 @@ void RenderChannelImpl::resume() {
 
 RenderChannelImpl::~RenderChannelImpl() {
     // Make sure the render thread is stopped before the channel is gone.
+    mRenderThread->notifyTeardown();
     mRenderThread->wait();
 }
 
