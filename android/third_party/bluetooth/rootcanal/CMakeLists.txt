@@ -132,7 +132,7 @@ android_add_library(
 
 target_link_libraries(
   libbt-rootcanal PRIVATE libscriptedbeaconpayload-protos-lite jsoncpp
-                          BluetoothPacketSources)
+                          BluetoothPacketSources android-emu-base)
 target_include_directories(
   libbt-rootcanal PUBLIC ${VL_LIB} ${VL_LIB}/include ${BT_ROOT}/gd ${BT_ROOT}
                          ${CMAKE_CURRENT_BINARY_DIR}/packet_gen)
