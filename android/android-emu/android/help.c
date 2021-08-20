@@ -2038,6 +2038,14 @@ static void help_usb_passthrough(stralloc_t* out) {
            "  -usb-passthrough vendorid=VID,productid=PID[,hostbus=BUS,hostport=PORT]\n");
 }
 
+static void help_save_path(stralloc_t* out) {
+    PRINTF(" Override save path for screenshot and bug report. The value will "
+           " not be persisted on host OS.\n"
+           " -save-path <path>\n"
+           " <path> must be a writable full path. If <path> is invalid, "
+           "default path will still be used.\n");
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper

@@ -95,8 +95,13 @@ bool directoryIsWritable(const QString& dirName) {
 QString getScreenshotSaveDirectory()
 {
     QSettings settings;
-    QString savePath = settings.value(Ui::Settings::SAVE_PATH, "").toString();
-
+    QString savePath;
+    // Override savePath if it is set from cmdline option.
+    if (android_cmdLineOptions->save_path) {
+        savePath = android_cmdLineOptions->save_path;
+    } else {
+        savePath = settings.value(Ui::Settings::SAVE_PATH, "").toString();
+    }
     if ( !directoryIsWritable(savePath) ) {
         // This path is not writable.
         // Clear it, so we'll try the default instead.

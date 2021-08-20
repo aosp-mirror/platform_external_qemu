@@ -294,6 +294,11 @@ OPT_LIST(usb_passthrough, "VID PID BUS PORTS", "Host USB device Passthrough")
 
 OPT_LIST(append_userspace_opt, "key=value", "Appends a property which is passed to the userspace.")
 
+OPT_PARAM(save_path,
+          "<file path>",
+          "Override save path for screenshot and bug report. The value will "
+          "not be persisted on host OS.")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG
