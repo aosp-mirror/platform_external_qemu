@@ -215,14 +215,22 @@ VkResult prepareAndroidNativeBufferImage(
         }
 
         VkBufferCreateInfo stagingBufferCreateInfo = {
-            VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO, 0, 0,
+            VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            0,
+            0,
             out->memReqs.size,
-            VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-            out->sharingMode,
-            (uint32_t)out->queueFamilyIndices.size(),
-            out->queueFamilyIndices.size() ? out->queueFamilyIndices.data() : nullptr,
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            VK_SHARING_MODE_EXCLUSIVE,
+            0,
+            nullptr,
         };
+        if (out->queueFamilyIndices.size() > 1) {
+            stagingBufferCreateInfo.sharingMode = VK_SHARING_MODE_CONCURRENT;
+            stagingBufferCreateInfo.queueFamilyIndexCount =
+                static_cast<uint32_t>(out->queueFamilyIndices.size());
+            stagingBufferCreateInfo.pQueueFamilyIndices =
+                out->queueFamilyIndices.data();
+        }
 
         if (VK_SUCCESS !=
             vk->vkCreateBuffer(
