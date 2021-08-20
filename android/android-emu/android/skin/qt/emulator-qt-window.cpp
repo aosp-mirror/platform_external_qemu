@@ -3166,7 +3166,9 @@ void EmulatorQtWindow::checkNestedAndWarn() {
         accelerator == ANDROID_CPU_ACCELERATOR_WHPX) {
         return;
     }
-
+    if (android_cmdLineOptions->no_nested_warnings) {
+        return;
+    }
     QSettings settings;
     if (settings.value(Ui::Settings::SHOW_NESTED_WARNING, true).toBool()) {
         QObject::connect(mNestedWarningBox.ptr(),

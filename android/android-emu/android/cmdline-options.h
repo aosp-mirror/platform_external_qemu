@@ -299,6 +299,9 @@ OPT_PARAM(save_path,
           "Override save path for screenshot and bug report. The value will "
           "not be persisted on host OS.")
 
+OPT_FLAG(no_nested_warnings,
+         "Disable the warning dialog when emulator is running in nested "
+         "virtualization.")
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG
