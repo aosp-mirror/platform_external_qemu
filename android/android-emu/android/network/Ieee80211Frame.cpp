@@ -637,6 +637,8 @@ bool Ieee80211Frame::encrypt(const CipherScheme cs) {
     if (isProtected()) {
         return false;
     }
+    if (!isData() && !isRobustMgmt())
+        return false;
     size_t dataLen = size() - hdrLength();
     mData.resize(size() + IEEE80211_CCMP_MIC_LEN + IEEE80211_CCMP_HDR_LEN);
     memmove(frameBody() + IEEE80211_CCMP_HDR_LEN, frameBody(), dataLen);

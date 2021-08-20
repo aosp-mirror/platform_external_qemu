@@ -18,6 +18,7 @@
 #include "android/base/async/Looper.h"
 #include "android/base/async/RecurrentTask.h"
 #include "android/base/sockets/ScopedSocket.h"
+#include "android/emulation/HostapdController.h"
 #include "android/network/GenericNetlinkMessage.h"
 #include "android/network/Ieee80211Frame.h"
 #include "android/network/WifiForwardPeer.h"
@@ -94,6 +95,7 @@ private:
     NICState* mNic = nullptr;
     std::unique_ptr<android::network::WifiForwardPeer> mRemotePeer;
     android::base::Looper::FdWatch* mFdWatch = nullptr;
+    android::emulation::HostapdController* mHostapd = nullptr;
     android::base::Optional<android::base::RecurrentTask> mBeaconTask;
     android::base::Looper::Duration mBeaconIntMs = 1024;
     std::unique_ptr<android::network::Ieee80211Frame> mBeaconFrame;

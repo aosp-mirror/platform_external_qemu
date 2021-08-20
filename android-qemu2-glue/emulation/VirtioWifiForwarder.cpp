@@ -16,7 +16,6 @@ extern "C" {
 #endif
 #include "android-qemu2-glue/emulation/VirtioWifiForwarder.h"
 
-#include "android/emulation/HostapdController.h"
 #include "android/base/Log.h"
 #include "android/base/StringFormat.h"
 #include "android/base/async/ThreadLooper.h"
@@ -39,6 +38,7 @@ using android::base::socketSend;
 using android::base::StringFormat;
 using android::base::ThreadLooper;
 using android::emulation::HostapdController;
+using android::network::CipherScheme;
 using android::network::FrameInfo;
 using android::network::FrameType;
 using android::network::GenericNetlinkMessage;
@@ -54,6 +54,8 @@ extern "C" {
 #include "qemu/osdep.h"
 #include "net/net.h"
 #include "common/ieee802_11_defs.h"
+#include "drivers/driver_virtio_wifi.h"
+
 
 /* The port to use for WiFi forwarding as a server */
 extern uint16_t android_wifi_server_port;
@@ -139,7 +141,12 @@ bool VirtioWifiForwarder::init() {
         return false;
     }
     mVirtIOSock = ScopedSocket(fds[1]);
-    HostapdController::getInstance()->setDriverSocket(ScopedSocket(fds[0]));
+    mHostapd = HostapdController::getInstance();
+    if (!mHostapd) {
+        LOG(ERROR) << "HostapdController instance must be non-null.";
+        return false;
+    }
+    mHostapd->setDriverSocket(ScopedSocket(fds[0]));
     //  Looper FdWatch and set callback functions
     mFdWatch = mLooper->createFdWatch(mVirtIOSock.get(),
                                       &VirtioWifiForwarder::onHostApd, this);
@@ -198,6 +205,9 @@ void VirtioWifiForwarder::ackLocalFrame(const Ieee80211Frame* frame) {
 }
 
 int VirtioWifiForwarder::forwardFrame(const IOVector& iov) {
+    if (!mHostapd->isRunning()) {
+        return 0;
+    }
     if (iov.summedLength() < IEEE80211_HDRLEN) {
         return 0;
     }
@@ -208,23 +218,28 @@ int VirtioWifiForwarder::forwardFrame(const IOVector& iov) {
         return 0;
     }
     const MacAddress addr1 = frame->addr1();
-    const MacAddress addr2 = frame->addr2();
-    const MacAddress addr3 = frame->addr3();
     // Ack every frame from local
     ackLocalFrame(frame.get());
-
-    // fprintf(stderr, "Mac addr1: " PRIMAC " addr2: " PRIMAC " addr3: " PRIMAC
-    // "\n",
-    //        MACARG(addr1), MACARG(addr2), MACARG(addr3));
-
+    if (frame->isProtected()) {
+        if (!frame->decrypt(mHostapd->getCipherScheme())) {
+            LOG(ERROR) << "Unable to decrypt WPA-protected frame.";
+            return 0;
+        }
+    }
     // Data frames
     if (frame->isData()) {
-        if (addr1 != mBssID) {
+        // EAPoL is used in Wi-Fi 4-way handshake.
+        if (frame->isEAPoL()) {
+            if (socketSend(mVirtIOSock.get(), frame->data(), frame->size()) <
+                0) {
+                LOG(VERBOSE) << "Failed to send frame to hostapd.";
+            }
+        } else if (addr1 != mBssID) {
             sendToRemoteVM(std::move(frame), FrameType::Data);
         } else if (frame->isToDS() && !frame->isFromDS()) {
             sendToNIC(std::move(frame));
         }
-    } else {  // Management frames.
+    } else {  // Mgmt or Ctrl frames.
         if (addr1.isBroadcast() || addr1.isMulticast() || addr1 == mBssID) {
             // TODO (wdu@) Experiement with shared memory approach
             if (socketSend(mVirtIOSock.get(), frame->data(), frame->size()) <
@@ -241,8 +256,10 @@ int VirtioWifiForwarder::forwardFrame(const IOVector& iov) {
 
 void VirtioWifiForwarder::stop() {
     mBeaconTask.clear();
-    HostapdController::getInstance()->terminate(false);
     mNic = nullptr;
+    if (mHostapd) {
+        mHostapd->terminate();
+    }
     if (mRemotePeer) {
         mRemotePeer->stop();
         mRemotePeer.reset(nullptr);
@@ -298,11 +315,19 @@ ssize_t VirtioWifiForwarder::onNICFrameAvailable(NetClientState* nc,
         return -1;
     }
     auto forwarder = getInstance(nc);
+    if (!forwarder->mHostapd->isRunning()) {
+        return -1;
+    }
     if (!forwarder->mCanReceive(nc)) {
         return -1;
     }
     std::unique_ptr<Ieee80211Frame> frame =
             Ieee80211Frame::buildFromEthernet(buf, size, forwarder->mBssID);
+    // encrypt will be no-op if cipher scheme is none.
+    if (!frame->encrypt(forwarder->mHostapd->getCipherScheme())) {
+        LOG(ERROR) << "Unable to encrypt the IEEE80211 frame with CCMP.";
+        return 0;
+    }
     auto& info = frame->info();
     info = forwarder->mFrameInfo;
     return sendToGuest(forwarder, std::move(frame));

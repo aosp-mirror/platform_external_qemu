@@ -2643,7 +2643,13 @@ extern "C" int main(int argc, char** argv) {
     }
     if (fc::isEnabled(fc::VirtioWifi)) {
         auto* hostapd = android::emulation::HostapdController::getInstance();
-        hostapd->initAndRun(VERBOSE_CHECK(wifi));
+        if (hostapd->init(VERBOSE_CHECK(wifi))) {
+            hostapd->run();
+        } else {
+            fprintf(stderr,
+                    "%s: Error: could not initialize hostpad event loop.",
+                    __func__);
+        }
     }
     if (opts->check_snapshot_loadable) {
         android_check_snapshot_loadable(opts->check_snapshot_loadable);
