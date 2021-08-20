@@ -82,6 +82,7 @@ kEmulatedExtensions[] = {
     "VK_FUCHSIA_buffer_collection",
     "VK_FUCHSIA_external_memory",
     "VK_FUCHSIA_external_semaphore",
+    "VK_FUCHSIA_buffer_collection_x",
     "VK_EXT_queue_family_foreign",
     "VK_KHR_external_memory",
     "VK_KHR_external_memory_capabilities",
