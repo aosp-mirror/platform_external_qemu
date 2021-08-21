@@ -23,6 +23,7 @@ set(android-qemu2-glue_src
     emulation/virtio_vsock_device.cpp
     emulation/virtio_vsock_transport.cpp
     emulation/virtio-wifi.cpp
+    emulation/VirtioGpuTimelines.cpp
     emulation/VirtioWifiForwarder.cpp
     looper-qemu.cpp
     net-android.cpp
@@ -88,3 +89,16 @@ target_link_libraries(
   libqemu2-glue-vm-operations
   PRIVATE android-emu GLIB2::GLIB2 android-hw-config
           nlohmann_json::nlohmann_json PIXMAN::PIXMAN)
+
+android_add_test(
+  TARGET libqemu2-glue_unittests SRC tests/VirtioGpuTimelines_unittest.cpp)
+
+target_link_libraries(
+  libqemu2-glue_unittests
+  PRIVATE libqemu2-glue gmock gtest gmock_main)
+
+target_include_directories(
+  libqemu2-glue_unittests
+          
+  PRIVATE . ../include ../android/android-emu-base ../android/android-emu 
+          ${VIRGLRENDERER_INCLUDE_DIR})
