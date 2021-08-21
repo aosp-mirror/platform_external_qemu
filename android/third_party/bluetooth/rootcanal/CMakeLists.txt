@@ -156,6 +156,7 @@ target_include_directories(
   libbt-rootcanal-qemu PUBLIC .
   PRIVATE ${BT_ROOT}/vendor_libs/test_vendor_lib/desktop/)
 
+
 android_add_test(
   TARGET test-vendor_test_host
   SOURCE_DIR ${BT_ROOT}/vendor_libs/test_vendor_lib/
@@ -163,9 +164,11 @@ android_add_test(
       test/async_manager_unittest.cc test/h4_parser_unittest.cc
       test/security_manager_unittest.cc
   LINUX # cmake-format: sortable
-        test/posix_socket_unittest.cc
-  DARWIN # cmake-format: sortable
-         test/posix_socket_unittest.cc)
+        test/posix_socket_unittest.cc)
+
+  # Disable until we stabilise the non determinism
+  # DARWIN # cmake-format: sortable
+  #        test/posix_socket_unittest.cc)
 
 target_compile_definitions(test-vendor_test_host PRIVATE -DLOG_NDEBUG=1)
 target_link_libraries(
