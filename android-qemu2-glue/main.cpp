@@ -2323,9 +2323,9 @@ extern "C" int main(int argc, char** argv) {
     // USB
     #define usb_passthrough_driver "Android USB Assistant Driver"
     if (targetIsX86 && apiLevel >= 29) {
-        args.add2("-device", "qemu-xhci");
-
         if (opts->usb_passthrough)
+            args.add2("-device", "qemu-xhci");
+
             for (const ParamList* pl = opts->usb_passthrough; pl != NULL; pl = pl->next) {
 #ifdef _WIN32
                 if (usbassist_winusb_load(pl->param)) {
