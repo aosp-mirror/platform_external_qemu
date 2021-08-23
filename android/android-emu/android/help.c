@@ -2084,6 +2084,7 @@ static void help_save_path(stralloc_t* out) {
 #define help_restart_when_stalled NULL
 #define help_perf_stat NULL
 #define help_append_userspace_opt NULL
+#define help_no_nested_warnings NULL
 
 typedef struct {
     const char*  name;
