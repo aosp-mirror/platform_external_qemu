@@ -253,6 +253,7 @@ void* RendererImpl::addressSpaceGraphicsConsumerCreate(
 
 void RendererImpl::addressSpaceGraphicsConsumerDestroy(void* consumer) {
     RenderThread* thread = (RenderThread*)consumer;
+    thread->notifyTeardown();
     thread->wait();
     delete thread;
 }

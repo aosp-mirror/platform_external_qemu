@@ -31,6 +31,7 @@ public:
     VkDecoder();
     ~VkDecoder();
     void setForSnapshotLoad(bool forSnapshotLoad);
+    void onThreadTeardown();
     size_t decode(void* buf, size_t bufsize, IOStream* stream, uint32_t* seqnoPtr);
 private:
     class Impl;
@@ -62,11 +63,16 @@ public:
         m_forSnapshotLoad = forSnapshotLoad;
     }
 
+    void onThreadTeardown() {
+        m_threadTeardown = true;
+    }
+
     size_t decode(void* buf, size_t bufsize, IOStream* stream, uint32_t* seqnoPtr);
 
 private:
     bool m_logCalls;
     bool m_forSnapshotLoad = false;
+    bool m_threadTeardown = false;
     VulkanDispatch* m_vk;
     VkDecoderGlobalState* m_state;
     %s m_vkStream { nullptr };
@@ -86,6 +92,10 @@ VkDecoder::~VkDecoder() = default;
 
 void VkDecoder::setForSnapshotLoad(bool forSnapshotLoad) {
     mImpl->setForSnapshotLoad(forSnapshotLoad);
+}
+
+void VkDecoder::onThreadTeardown() {
+    mImpl->onThreadTeardown();
 }
 
 size_t VkDecoder::decode(void* buf, size_t bufsize, IOStream* stream, uint32_t* seqnoPtr) {
@@ -733,10 +743,10 @@ class VulkanDecoder(VulkanWrapperGenerator):
         self.cgen.stmt("uint8_t* snapshotTraceBegin = %s->beginTrace()" % READ_STREAM)
         self.cgen.stmt("%s->setHandleMapping(&m_boxedHandleUnwrapMapping)" % READ_STREAM)
         self.cgen.line("""
-                 if (queueSubmitWithCommandsEnabled && ((opcode >= OP_vkFirst && opcode < OP_vkLast) || (opcode >= OP_vkFirst_old && opcode < OP_vkLast_old))) {
+        if (queueSubmitWithCommandsEnabled && ((opcode >= OP_vkFirst && opcode < OP_vkLast) || (opcode >= OP_vkFirst_old && opcode < OP_vkLast_old))) {
             uint32_t seqno; memcpy(&seqno, *readStreamPtrPtr, sizeof(uint32_t)); *readStreamPtrPtr += sizeof(uint32_t);
             if (seqnoPtr && !m_forSnapshotLoad) {
-                while ((seqno - __atomic_load_n(seqnoPtr, __ATOMIC_SEQ_CST) != 1));
+                while (!m_threadTeardown && (seqno - __atomic_load_n(seqnoPtr, __ATOMIC_SEQ_CST) != 1));
             }
         }
         """)
