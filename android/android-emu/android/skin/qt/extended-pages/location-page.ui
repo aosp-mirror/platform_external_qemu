@@ -170,7 +170,7 @@
     <widget class="RaisedMaterialButton" name="loc_importGpxKmlButton">
      <property name="geometry">
       <rect>
-       <x>20</x>
+       <x>332</x>
        <y>520</y>
        <width>132</width>
        <height>36</height>
@@ -198,6 +198,59 @@
      </property>
      <property name="ColorGroup" stdset="0">
       <string notr="true">Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="loc_gpsSignalLabel">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>520</y>
+       <width>251</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Enable GPS signal</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Title</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="loc_gpsSignalSwitch">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>538</y>
+       <width>211</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Enable GPS signal</string>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Toggle</string>
      </property>
      <property name="report_metrics" stdset="0">
       <bool>false</bool>
@@ -504,7 +557,7 @@
     <widget class="RaisedMaterialButton" name="loc_importGpxKmlButton_route">
      <property name="geometry">
       <rect>
-       <x>20</x>
+       <x>332</x>
        <y>520</y>
        <width>132</width>
        <height>36</height>
@@ -532,6 +585,59 @@
      </property>
      <property name="ColorGroup" stdset="0">
       <string notr="true">Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="loc_gpsSignalLabel_2">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>520</y>
+       <width>251</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Enable GPS signal</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string notr="true">Title</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="loc_gpsSignalSwitch_route">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>538</y>
+       <width>211</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Enable GPS signal</string>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Toggle</string>
      </property>
      <property name="report_metrics" stdset="0">
       <bool>false</bool>
