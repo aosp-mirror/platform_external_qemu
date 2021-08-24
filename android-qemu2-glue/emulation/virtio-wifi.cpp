@@ -272,6 +272,17 @@ void virtio_wifi_set_mac_prefix(int prefix) {
     sGlobal.macPrefix = prefix;
 }
 
+const uint8_t* virtio_wifi_ssid_to_ethaddr(const char* ssid) {
+    if (sGlobal.wifi) {
+        auto mac = sGlobal.wifiForwarder->getStaMacAddr(ssid);
+        if (!mac.empty()) {
+            std::memcpy(sGlobal.wifi->mac, mac.mAddr, ETH_ALEN);
+            return reinterpret_cast<const uint8_t*>(sGlobal.wifi->mac);
+        }
+    }
+    return nullptr;
+}
+
 static void virtio_wifi_handle_tx(VirtIODevice* vdev, VirtQueue* vq) {
     VirtIOWifi* n = VIRTIO_WIFI(vdev);
     VirtIOWifiQueue* q = getWifiQueue(vq);

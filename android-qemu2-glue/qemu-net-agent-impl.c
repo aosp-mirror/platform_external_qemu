@@ -14,10 +14,11 @@
 
 #include "android/emulation/control/net_agent.h"
 
+#include "android-qemu2-glue/emulation/virtio-wifi.h"
 #include "android/utils/sockets.h"
+#include "net/slirp.h"
 #include "qemu/osdep.h"
 #include "qemu/sockets.h"
-#include "net/slirp.h"
 
 #ifdef CONFIG_SLIRP
 #include "libslirp.h"
@@ -39,11 +40,22 @@ bool slirpUnredir(bool isUdp, int hostPort) {
     return slirp_remove_hostfwd(net_slirp_state(), isUdp, host, hostPort) == 0;
 }
 
+static bool slirpBlockSsid(const char* ssid, bool enable) {
+    const uint8_t* ethaddr = virtio_wifi_ssid_to_ethaddr(ssid);
+    if (ethaddr) {
+        slirp_block_src_ethaddr(ethaddr, enable);
+        return true;
+    }
+    else {
+        return false;
+    }
+}
 
 static const QAndroidNetAgent netAgent = {
         .isSlirpInited = &isSlirpInited,
         .slirpRedir = &slirpRedir,
-        .slirpUnredir = &slirpUnredir
+        .slirpUnredir = &slirpUnredir,
+        .slirpBlockSsid = &slirpBlockSsid,
 };
 const QAndroidNetAgent* const gQAndroidNetAgent = &netAgent;
 

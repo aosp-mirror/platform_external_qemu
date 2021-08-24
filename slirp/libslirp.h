@@ -68,7 +68,8 @@ void slirp_socket_recv(Slirp *slirp, struct in_addr guest_addr,
 size_t slirp_socket_can_recv(Slirp *slirp, struct in_addr guest_addr,
                              int guest_port);
 
-
 void slirp_set_cleanup_ip_on_load(bool enable);
+
+void slirp_block_src_ethaddr(const uint8_t *ethaddr, bool enable);
 
 #endif

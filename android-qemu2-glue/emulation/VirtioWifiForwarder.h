@@ -57,6 +57,7 @@ public:
     int forwardFrame(const android::base::IOVector& iov);
     void stop();
     NICState* getNic() { return mNic; }
+    android::network::MacAddress getStaMacAddr(const char* ssid);
     static VirtioWifiForwarder* getInstance(NetClientState* nc);
     static const uint32_t kWifiForwardMagic = 0xD6C4B3A2;
     static const uint8_t kWifiForwardVersion = 0x02;
