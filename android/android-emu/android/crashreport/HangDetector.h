@@ -102,7 +102,7 @@ private:
     std::vector<std::pair<HangPredicate, std::string>> mPredicates;
     std::vector<std::unique_ptr<StatefulHangdetector>> mRegistered;
 
-    bool mPaused = false;
+    int mPaused = 0;
     bool mStopping = false;
     base::Lock mLock;
     base::ConditionVariable mWorkerThreadCv;
