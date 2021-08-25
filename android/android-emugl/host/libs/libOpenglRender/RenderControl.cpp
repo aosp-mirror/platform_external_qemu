@@ -637,7 +637,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
     //     glStr += " ";
     // }
 
-    if (readColorBufferDma) {
+    if (readColorBufferDma && name == GL_EXTENSIONS) {
         glStr += kReadColorBufferDma;
         glStr += " ";
     }
