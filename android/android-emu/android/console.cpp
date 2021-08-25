@@ -2497,6 +2497,11 @@ static int do_snapshot_pull(ControlClient client, char* args) {
     // The implementation allows spaces in the file name as long as users
     // quote the file name correctly. But it only works with telnet, not with
     // the "adb emu" command, the later of which hides the quotes.
+    if (!args || 0 == strlen(args)) {
+        control_write(client,
+                      "KO: Expecting 2 parameters, actual: 0 parameters\r\n");
+        return -1;
+    }
     std::vector<std::string> arg_strings =
             android::base::parseEscapedLaunchString(args);
     if (arg_strings.size() != 2) {
