@@ -12,6 +12,7 @@
 #include <stdio.h>                                     // for fprintf, stderr
 
 #include <atomic>
+#include <cstdlib>
 #include <functional>                                  // for __base
 #include <memory>                                      // for static_pointer...
 
@@ -309,7 +310,10 @@ extern void skin_winsys_quit_request() {
             if (arm_snapshot_save_completed) break;
         }
         printf("saving done.... !!!\n\n");
-        exit(0);
+        // We did not exit all threads at this point, thus we should do an
+        // std::quick_exit(). But std::quick_exit() is not available on Mac M1.
+        // Thus we call abort() instead.
+        std::abort();
     } else {
 #ifdef _WIN32
     if ( !SetEvent(sWakeEvent) ) {
