@@ -83,8 +83,10 @@ Rotation_SkinRotation ScreenshotUtils::deriveRotation(
         const QAndroidSensorsAgent* sensorAgent) {
     glm::vec3 gravity_vector(0.0f, 9.81f, 0.0f);
     glm::vec3 device_accelerometer;
-    sensorAgent->getSensor(ANDROID_SENSOR_ACCELERATION, &device_accelerometer.x,
-                           &device_accelerometer.y, &device_accelerometer.z);
+    auto out = {&device_accelerometer.x, &device_accelerometer.y,
+                &device_accelerometer.z};
+    sensorAgent->getSensor(ANDROID_SENSOR_ACCELERATION, out.begin(),
+                           out.size());
 
     glm::vec3 normalized_accelerometer = glm::normalize(device_accelerometer);
 
