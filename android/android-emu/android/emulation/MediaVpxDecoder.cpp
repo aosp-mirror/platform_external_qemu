@@ -187,7 +187,7 @@ bool MediaVpxDecoder::load(base::Stream* stream) {
             decoder->load(stream);
             continue;
         }
-        fprintf(stderr, "Error, un-implemented %s %d\n", __func__, __LINE__);
+        dfatal("Error, un-implemented %s.", __func__);
         exit(1);
     }
 

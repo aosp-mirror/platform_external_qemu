@@ -15,6 +15,7 @@
 #include "android/emulation/android_pipe_host.h"
 #include "android/utils/looper.h"
 #include "android/utils/system.h"
+#include "android/utils/debug.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,13 +23,13 @@
 #define DEBUG 0
 
 #if DEBUG >= 1
-#  define D(...)  fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
+#  define D(...)  dprint( __VA_ARGS__)
 #else
 #  define D(...)  (void)0
 #endif
 
 #if DEBUG >= 2
-#  define DD(...)  fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
+#  define DD(...) D(__VA_ARGS__)
 #else
 #  define DD(...)  (void)0
 #endif

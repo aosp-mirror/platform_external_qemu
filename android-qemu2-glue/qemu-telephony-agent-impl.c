@@ -22,6 +22,7 @@
 
 #include <ctype.h>
 #include <stdio.h>
+#include "android/utils/debug.h"
 
 static int gsm_number_is_bad(const char*);
 
@@ -38,7 +39,7 @@ static TelephonyResponse telephony_telephonyCmd(TelephonyOperation op,
             }
 
             if (!android_modem) {
-                printf("%s: Do not have an Android modem\n", __FILE__);
+                derror("%s: Do not have an Android modem\n", __func__);
                 return Tel_Resp_Action_Failed;
             }
 
@@ -54,7 +55,7 @@ static TelephonyResponse telephony_telephonyCmd(TelephonyOperation op,
         case Tel_Op_Accept_Call:
         case Tel_Op_Reject_Call_Explicit:
         case Tel_Op_Reject_Call_Busy:
-            printf("===== telephony-agents-impl.c: Operation is not implemented\n"); // ??
+            derror("===== telephony-agents-impl.c: Operation is not implemented"); // ??
 
         case Tel_Op_Disconnect_Call:
             if (gsm_number_is_bad(phoneNumber)) {
@@ -62,7 +63,7 @@ static TelephonyResponse telephony_telephonyCmd(TelephonyOperation op,
             }
 
             if (!android_modem) {
-                printf("%s: Do not have an Android modem\n", __FILE__);
+                dwarning("%s: Do not have an Android modem", __func__);
                 return Tel_Resp_Action_Failed;
             }
 
@@ -76,7 +77,7 @@ static TelephonyResponse telephony_telephonyCmd(TelephonyOperation op,
             }
 
             if (!android_modem) {
-                printf("%s: Do not have an Android modem\n", __FILE__);
+                dwarning("%s: Do not have an Android modem", __func__);
                 return Tel_Resp_Action_Failed;
             }
 

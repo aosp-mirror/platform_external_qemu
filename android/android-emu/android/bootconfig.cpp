@@ -4,6 +4,7 @@
 #include <memory>
 #include <string_view>
 #include <stdio.h>
+#include "android/utils/debug.h"
 
 namespace {
 using namespace std::literals;
@@ -104,20 +105,20 @@ int createRamdiskWithBootconfig(const char* srcRamdiskPath,
 
     std::unique_ptr<FILE, FILE_deleter> srcRamdisk(::fopen(srcRamdiskPath, "rb"));
     if (!srcRamdisk) {
-        fprintf(stderr, "%s:%d Can't open '%s' for reading\n", __func__, __LINE__, srcRamdiskPath);
+        derror("%s Can't open '%s' for reading\n", __func__, srcRamdiskPath);
         return 1;
     }
 
     std::unique_ptr<FILE, FILE_deleter> dstRamdisk(::fopen(dstRamdiskPath, "wb"));
     if (!dstRamdisk) {
-        fprintf(stderr, "%s:%d Can't open '%s' for writing\n", __func__, __LINE__, dstRamdiskPath);
+        derror("%s:  Can't open '%s' for writing", __func__, dstRamdiskPath);
         return 1;
     }
 
     const auto r = copyFile(srcRamdisk.get(), dstRamdisk.get());
     if (r.first) {
-        fprintf(stderr, "%s:%d Error copying '%s' into '%s'\n",
-                __func__, __LINE__, srcRamdiskPath, dstRamdiskPath);
+        derror("%s Error copying '%s' into '%s'\n",
+                __func__,  srcRamdiskPath, dstRamdiskPath);
         return r.first;
     }
 

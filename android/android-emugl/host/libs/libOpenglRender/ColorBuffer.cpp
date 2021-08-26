@@ -496,7 +496,7 @@ void ColorBuffer::reformat(GLint internalformat, GLenum type) {
     bool isBlob = false;
     if (!sGetFormatParameters(&internalformat, &texFormat, &pixelType, &bpp,
                               &sizedInternalFormat, &isBlob)) {
-        fprintf(stderr, "%s: WARNING: reformat failed. internal format: 0x%x\n",
+        dwarning("%s: reformat failed. internal format: 0x%x",
                 __func__, internalformat);
     }
 

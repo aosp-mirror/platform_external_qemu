@@ -29,7 +29,7 @@
 #ifdef _WIN32
 #include <malloc.h>
 #endif
-
+#include "android/utils/debug.h"
 namespace android {
 
 template <class T, size_t align>
@@ -125,7 +125,7 @@ private:
 #else
         void* res;
         if (posix_memalign(&res, actualAlign, sizeBytes)) {
-            fprintf(stderr, "%s: failed to alloc aligned memory\n", __func__);
+            derror("%s: failed to alloc aligned memory", __func__);
             abort();
         }
         return res;

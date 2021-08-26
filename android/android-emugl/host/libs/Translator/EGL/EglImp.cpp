@@ -1628,8 +1628,7 @@ EGLAPI EGLConfig EGLAPIENTRY eglLoadConfig(EGLDisplay display, EGLStream stream)
     EGLint cfgId = stm->getBe32();
     EglConfig* cfg = dpy->getConfig(cfgId);
     if (!cfg) {
-        fprintf(stderr,
-                "WARNING: EGL config mismatch, fallback to default configs\n");
+        dwarning("EGL config mismatch, fallback to default configs");
         cfg = dpy->getDefaultConfig();
     }
     return static_cast<EGLConfig>(cfg);

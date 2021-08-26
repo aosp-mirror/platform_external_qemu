@@ -282,7 +282,7 @@ public:
             auto &desc = contexts[handle];
             desc.pingInfoGpa = pingInfoGpa;
             if (desc.pingInfoGpa == ~0ULL) {
-                fprintf(stderr, "%s: warning: restoring hva-only ping\n", __func__);
+                dwarning("%s: warning: restoring hva-only ping", __func__);
             } else {
                 desc.pingInfo = (AddressSpaceDevicePingInfo*)
                     sVmOps->physicalMemoryGetAddr(pingInfoGpa);
@@ -381,7 +381,7 @@ private:
             sVmOps->mapUserBackedRam(gpa, ptr, size);
             return true;
         } else {
-            fprintf(stderr, "%s: failed: hva %p -> gpa [0x%llx 0x%llx]\n", __func__,
+            derror("%s: failed: hva %p -> gpa [0x%llx 0x%llx]", __func__,
                     ptr,
                     (unsigned long long)gpa,
                     (unsigned long long)size);
@@ -394,7 +394,7 @@ private:
             sVmOps->unmapUserBackedRam(gpa, size);
             return true;
         } else {
-            fprintf(stderr, "%s: failed: gpa [0x%llx 0x%llx]\n", __func__,
+            derror("%s: failed: gpa [0x%llx 0x%llx]", __func__,
                     (unsigned long long)gpa,
                     (unsigned long long)size);
             *(uint32_t*)(123) = 12;

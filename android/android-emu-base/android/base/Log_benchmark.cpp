@@ -21,29 +21,31 @@
 
 #define BASIC_BENCHMARK_TEST(x) BENCHMARK(x)->Arg(8)->Arg(512)->Arg(8192)
 
+using android::base::setMinLogLevel;
+
 void BM_LG_Log_simple_string(benchmark::State& state) {
-    setMinLogLevel(android::base::LogSeverity::LOG_INFO);
+    setMinLogLevel(EMULATOR_LOG_INFO);
     while (state.KeepRunning()) {
         LOG(INFO) << "Hello world!";
     }
 }
 
 void BM_LG_Log_simple_string_logging_off(benchmark::State& state) {
-    setMinLogLevel(android::base::LogSeverity::LOG_FATAL);
+    setMinLogLevel(EMULATOR_LOG_FATAL);
     while (state.KeepRunning()) {
         LOG(INFO) << "Hello world!";
     }
 }
 
 void BM_LG_QLog_simple_string(benchmark::State& state) {
-    setMinLogLevel(android::base::LogSeverity::LOG_INFO);
+    setMinLogLevel(EMULATOR_LOG_INFO);
     while (state.KeepRunning()) {
         QLOG(INFO) << "Hello world!";
     }
 }
 
 void BM_LG_VLog_simple_string_off(benchmark::State& state) {
-    setMinLogLevel(android::base::LogSeverity::LOG_INFO);
+    setMinLogLevel(EMULATOR_LOG_INFO);
     android_verbose = 0;
     while (state.KeepRunning()) {
         VLOG(virtualscene) << "Hello virtual world!";
@@ -51,7 +53,7 @@ void BM_LG_VLog_simple_string_off(benchmark::State& state) {
 }
 
 void BM_LG_VLog_simple_string_on(benchmark::State& state) {
-    setMinLogLevel(android::base::LogSeverity::LOG_INFO);
+    setMinLogLevel(EMULATOR_LOG_INFO);
     VERBOSE_ENABLE(virtualscene);
     while (state.KeepRunning()) {
         VLOG(virtualscene) << "Hello virtual world!";
@@ -59,7 +61,7 @@ void BM_LG_VLog_simple_string_on(benchmark::State& state) {
 }
 
 void BM_LG_Log_simple_int(benchmark::State& state) {
-    setMinLogLevel(android::base::LogSeverity::LOG_INFO);
+    setMinLogLevel(EMULATOR_LOG_INFO);
 
     int i = 0;
     while (state.KeepRunning()) {
@@ -69,7 +71,7 @@ void BM_LG_Log_simple_int(benchmark::State& state) {
 }
 
 void BM_LG_Log_complex_msg(benchmark::State& state) {
-    setMinLogLevel(android::base::LogSeverity::LOG_INFO);
+    setMinLogLevel(EMULATOR_LOG_INFO);
 
     int i = 0;
     int j = 0;

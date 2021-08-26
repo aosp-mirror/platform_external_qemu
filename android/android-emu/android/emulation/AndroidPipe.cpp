@@ -39,18 +39,18 @@
 
 #if DEBUG >= 1
 #include <stdio.h>
-#define D(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
+#define D(...) dprint(__VA_ARGS__)
 #else
 #define D(...) (void)0
 #endif
 
 #if DEBUG >= 2
-#define DD(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
+#define DD(...) dprint(__VA_ARGS__)
 #else
 #define DD(...) (void)0
 #endif
 
-#define E(...) fprintf(stderr, "ERROR:" __VA_ARGS__), fprintf(stderr, "\n")
+#define E(...) derror(__VA_ARGS__)
 
 static const AndroidPipeHwFuncs* getPipeHwFuncs(const void* hwPipe) {
     return *static_cast<const AndroidPipeHwFuncs* const *>(hwPipe);

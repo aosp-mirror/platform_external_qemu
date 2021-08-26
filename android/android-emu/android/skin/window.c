@@ -1143,7 +1143,7 @@ static void add_mouse_wheel_event(SkinWindow* window,
     window->win_funcs->mouse_wheel_event(x_delta, y_delta, id);
 }
 
-static  void 
+static  void
 generate_touch_event(FingerState* finger,
                                  int* x,
                                  int* y,
@@ -1640,7 +1640,7 @@ static void skin_window_ensure_fully_visible(void* ptr) {
 
         /* Done */
         skin_winsys_set_window_pos(new_x, new_y);
-        dprint( "emulator window was out of view and was recentered\n" );
+        dprint( "emulator window was out of view and was recentered" );
     }
     AFREE(data);
 }
@@ -1990,7 +1990,7 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
     if ( layout.displays ) {
         // TODO(grigoryj): debug output for investigating the rotation bug.
         if (VERBOSE_CHECK(rotation)) {
-            fprintf(stderr, "Setting device orientation %d\n", layout.displays->rotation);
+            dinfo("Setting device orientation %d", layout.displays->rotation);
         }
         window->win_funcs->set_device_orientation(layout.displays->rotation);
     }
@@ -2381,7 +2381,7 @@ skin_window_process_touch_event(SkinWindow*  window, SkinEvent* ev){
             break;
        }
        default:
-            fprintf(stderr, "%s: Invalid enum value passed to function. Only accepts: kEventTouchBegin,kEventTouchEnd,kEventTouchUpdate", __FUNCTION__);
+            derror("%s: Invalid enum value passed to function. Only accepts: kEventTouchBegin,kEventTouchEnd,kEventTouchUpdate", __FUNCTION__);
             break;
     }
 }
@@ -2889,7 +2889,7 @@ void skin_window_update_gpu_frame(SkinWindow* window,
 
     ADisplay* disp = skin_window_display(window);
     if (!disp || disp->datasize.w != w || disp->datasize.h != h) {
-        fprintf(stderr, "%s: bad values!\n", __FUNCTION__);
+        derror("%s: bad values!", __FUNCTION__);
         return;
     }
 

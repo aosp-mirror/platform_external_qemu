@@ -33,6 +33,7 @@ std::string bt() {
 #include <errno.h>
 #include <libunwind.h>
 #include <stdio.h>
+#include "android/utils/debug.h"
 
 
 namespace android {
@@ -42,7 +43,7 @@ namespace base {
 // https://eli.thegreenplace.net/2015/programmatic-access-to-the-call-stack-in-c/
 
 #define E(fmt,...) \
-    fprintf(stderr, "%s: " fmt "\n", __func__, ##__VA_ARGS__);
+    derror("%s: " fmt, __func__, ##__VA_ARGS__);
 
 std::string bt() {
     unw_cursor_t cursor;
@@ -74,7 +75,7 @@ std::string bt() {
             ss << " (" << nameptr << ")+" << std::hex << offset << "\n";
             free(demangled);
         } else {
-            printf(" -- error: unable to obtain symbol name for this frame\n");
+            derror(" -- error: unable to obtain symbol name for this frame");
         }
     }
 

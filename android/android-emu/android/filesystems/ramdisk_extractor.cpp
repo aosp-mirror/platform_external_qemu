@@ -24,14 +24,14 @@
 #define DEBUG 0
 
 #if DEBUG
-#  define D(...)   printf(__VA_ARGS__), fflush(stdout)
+#  define D(...)   dprint(__VA_ARGS__), fflush(stdout)
 #else
 #  define D(...)   ((void)0)
 #endif
 
 // Ramdisk images are gzipped cpio archives using the new ASCII
 // format as described at [1]. Hence this source file first implements
-// a gzip-based input stream class, then 
+// a gzip-based input stream class, then
 //
 // [1] http://people.freebsd.org/~kientzle/libarchive/man/cpio.5.txt
 

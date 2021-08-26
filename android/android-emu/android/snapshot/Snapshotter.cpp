@@ -514,7 +514,7 @@ void Snapshotter::appendSuccessfulLoad(const char* name,
 void Snapshotter::showError(const std::string& message) {
     mWindowAgent.showMessage(message.c_str(), WINDOW_MESSAGE_ERROR,
                              kDefaultMessageTimeoutMs);
-    dwarning(message.c_str());
+    dwarning("%s", message.c_str());
 }
 
 bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
@@ -790,7 +790,7 @@ OperationStatus Snapshotter::loadGeneric(const char* name) {
 
 void Snapshotter::deleteSnapshot(const char* name) {
     std::string nameWithStorage(name);
-    fprintf(stderr, "%s: for %s\n", __func__, nameWithStorage.c_str());
+    dinfo("Deleting snapshot %s", nameWithStorage.c_str());
     invalidateSnapshot(nameWithStorage.c_str());
 
     // then delete the folder and refresh hierarchy

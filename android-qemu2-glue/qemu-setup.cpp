@@ -339,7 +339,7 @@ int qemu_setup_grpc() {
     if (android_cmdLineOptions->turncfg &&
         !android::emulation::control::TurnConfig::producesValidTurn(
                 android_cmdLineOptions->turncfg)) {
-        printf("command `%s` does not produce a valid turn configuration.\n",
+        derror("command `%s` does not produce a valid turn configuration.",
                android_cmdLineOptions->turncfg);
         exit(1);
     }
@@ -368,9 +368,9 @@ int qemu_setup_grpc() {
                          android_cmdLineOptions->grpc_tls_ca ||
                          android_cmdLineOptions->grpc_use_token;
     if (!grpcService && userWantsGrpc) {
-        fprintf(stderr,
+        derror(
                 "Failed to start grpc service, even though it was explicitly "
-                "requested.\n");
+                "requested.");
         exit(1);
     }
 

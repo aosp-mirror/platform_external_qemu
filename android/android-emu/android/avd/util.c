@@ -400,10 +400,10 @@ path_getAvdSystemPath(const char* avdName,
         }
         free(searchPath);
         if (p >= end || !path_is_dir(temp)) {
-            D(" Not a directory: %s\n", temp);
+            D(" Not a directory: %s", temp);
             continue;
         }
-        D(" Found directory: %s\n", temp);
+        D(" Found directory: %s", temp);
         result = ASTRDUP(temp);
         break;
     }

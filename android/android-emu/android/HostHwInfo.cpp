@@ -28,7 +28,7 @@
 #if DEBUG
 
 #define D(fmt,...) do { \
-    fprintf(stderr, "%s: " fmt "\n", __func__, ##__VA_ARGS__); \
+    dprint("%s: " fmt, __func__, ##__VA_ARGS__); \
 } while(0) \
 
 #else

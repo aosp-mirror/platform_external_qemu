@@ -151,7 +151,7 @@ static int tryConnect() {
         fd = socketTcp6LoopbackClient(s_adb_port);
     }
     if (fd < 0) {
-        fprintf(stderr, "failed to connect to adb port %d\n", s_adb_port);
+        derror("failed to connect to adb port %d", s_adb_port);
         return -1;
     }
     android::base::ScopedFd s(fd);
@@ -214,7 +214,7 @@ static int tryConnect() {
             if (!sign_auth_token((const char*)pack_recv.data.data(),
                                  pack_recv.mesg.data_length,
                                  (char*)pack_send.data.data(), sigLen)) {
-                fprintf(stderr, "Fail to authenticate adb\n");
+                derror("Failed to authenticate adb.");
                 return -1;
             }
             assert(sigLen <= pack_send.data.size());
@@ -333,7 +333,7 @@ bool track_async(int pid,
 }
 bool track(int pid, const std::string snapshot_name, int max_snapshot_number) {
     if (s_adb_port == -1) {
-        fprintf(stderr, "adb port uninitialized\n");
+        derror("adb port uninitialized");
         return false;
     }
     metrics::MetricsReporter* reporter = &metrics::MetricsReporter::get();

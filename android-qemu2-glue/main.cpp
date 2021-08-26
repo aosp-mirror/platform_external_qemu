@@ -315,16 +315,16 @@ static int genHwIniFile(AndroidHwConfig* hw, const char* coreHwIniPath) {
         auto file = makeCustomScopedPtr(android_fopen(coreHwIniPath, "rt"), fclose);
         if (file.get() == NULL) {
             derror("Could not open hardware configuration file: "
-                   "%s\n",
+                   "%s",
                    coreHwIniPath);
         } else {
             LineInput* input = lineInput_newFromStdFile(file.get());
             const char* line;
-            printf("Content of hardware configuration file:\n");
+            dinfo("Content of hardware configuration file:");
             while ((line = lineInput_getLine(input)) != NULL) {
-                printf("  %s\n", line);
+                dinfo("\t%s", line);
             }
-            printf(".\n");
+            dinfo(".");
             lineInput_free(input);
         }
     }
@@ -346,7 +346,7 @@ static void prepareDisplaySettingXml(AndroidHwConfig* hw,
     std::string guestDisplaySettingXmlPath = PathUtils::join(guestXmlDir,
                                                              guestDisplaySettingXmlFile);
     if (!path_exists(guestDisplaySettingXmlPath.c_str())) {
-        dwarning("Could not locate display settings file: %s\n",
+        dwarning("Could not locate display settings file: %s",
                  guestDisplaySettingXmlPath.c_str());
         return;
     }
@@ -388,7 +388,7 @@ static void prepareDataFolder(const char* destDirectory,
             FILE* pubKeyFile = fopen(guestAdbKeyPath.c_str(), "w");
             fprintf(pubKeyFile, "%s", pubKey.c_str());
             fclose(pubKeyFile);
-            D("Fall back to adbkey %s successfully\n", adbKeyPrivPath.c_str());
+            D("Fall back to adbkey %s successfully", adbKeyPrivPath.c_str());
         }
     } else {
         path_copy_file(guestAdbKeyPath.c_str(), adbKeyPubPath.c_str());
@@ -437,7 +437,7 @@ static int createUserData(AvdInfo* avd,
 
     if (needCopyDataPartition) {
         if (path_exists(hw->disk_dataPartition_initPath)) {
-            D("Creating: %s by copying from %s \n", hw->disk_dataPartition_path,
+            D("Creating: %s by copying from %s ", hw->disk_dataPartition_path,
               hw->disk_dataPartition_initPath);
 
             if (path_copy_file(hw->disk_dataPartition_path,
@@ -617,7 +617,7 @@ private:
                 }
                 break;
             default:
-                dwarning("Unknown Image type %d\n", type);
+                dwarning("Unknown Image type %d", type);
                 return {};
         }
 
@@ -721,7 +721,7 @@ static void enter_qemu_main_loop(int argc, char** argv) {
 #endif
 // stick a version here for qemu-system binary
 #if defined ANDROID_SDK_TOOLS_BUILD_NUMBER
-    D("Android qemu version %s (CL:%s)\n",
+    D("Android qemu version %s (CL:%s)",
       EMULATOR_VERSION_STRING
       " (build_id " STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER) ")",
       EMULATOR_CL_SHA1);
@@ -829,7 +829,7 @@ static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
 bool handleCpuAccelerationForMinConfig(int argc, char** argv,
         CpuAccelMode* accel_mode, char** accel_status) {
 
-    printf("%s: configure CPU acceleration\n", __func__);
+    dprint("%s: configure CPU acceleration", __func__);
 
     int hasEnableKvm = 0;
     int hasEnableHax = 0;
@@ -859,8 +859,8 @@ bool handleCpuAccelerationForMinConfig(int argc, char** argv,
         hasEnableGvm;
 
     if (totalEnabled > 1) {
-        fprintf(stderr, "%s: ERROR: tried to enable more than once acceleration mode. "
-                "Attempted enables: kvm %d haxm %d hvf %d whpx %d gvm %d\n", __func__,
+        derror("%s: tried to enable more than once acceleration mode. "
+                "Attempted enables: kvm %d haxm %d hvf %d whpx %d gvm %d", __func__,
                 hasEnableKvm,
                 hasEnableHax,
                 hasEnableHvf,
@@ -869,7 +869,7 @@ bool handleCpuAccelerationForMinConfig(int argc, char** argv,
         exit(1);
     }
 
-    printf("%s: Checking CPU acceleration capability on host...\n", __func__);
+    dprint("%s: Checking CPU acceleration capability on host...", __func__);
 
     // Check acceleration capabilities on the host.
     AndroidCpuAcceleration accel_capability =
@@ -879,16 +879,16 @@ bool handleCpuAccelerationForMinConfig(int argc, char** argv,
 
     // Print the current status.
     if (accel_ok) {
-        printf("%s: Host can use CPU acceleration\n", __func__);
+        dprint("%s: Host can use CPU acceleration", __func__);
     } else {
-        printf("%s: Host cannot use CPU acceleration\n", __func__);
+        dprint("%s: Host cannot use CPU acceleration", __func__);
     }
 
-    printf("%s: Host CPU acceleration capability status string: [%s]\n",
+    dprint("%s: Host CPU acceleration capability status string: [%s]",
            __func__, *accel_status);
 
     if (0 == totalEnabled) {
-        printf("%s: CPU acceleration disabled by user (no enabled hypervisors)\n", __func__);
+        dprint("%s: CPU acceleration disabled by user (no enabled hypervisors)", __func__);
         androidCpuAcceleration_resetCpuAccelerator(
                 ANDROID_CPU_ACCELERATOR_NONE);
         *accel_mode = ACCEL_OFF;
@@ -898,23 +898,23 @@ bool handleCpuAccelerationForMinConfig(int argc, char** argv,
     *accel_mode = ACCEL_ON;
 
     if (hasEnableKvm) {
-        printf("%s: Selecting KVM for CPU acceleration\n", __func__);
+        dprint("%s: Selecting KVM for CPU acceleration", __func__);
         androidCpuAcceleration_resetCpuAccelerator(
                 ANDROID_CPU_ACCELERATOR_KVM);
     } else if (hasEnableHax) {
-        printf("%s: Selecting HAXM for CPU acceleration\n", __func__);
+        dprint("%s: Selecting HAXM for CPU acceleration", __func__);
         androidCpuAcceleration_resetCpuAccelerator(
                 ANDROID_CPU_ACCELERATOR_HAX);
     } else if (hasEnableHvf) {
-        printf("%s: Selecting HVF for CPU acceleration\n", __func__);
+        dprint("%s: Selecting HVF for CPU acceleration", __func__);
         androidCpuAcceleration_resetCpuAccelerator(
                 ANDROID_CPU_ACCELERATOR_HVF);
     } else if (hasEnableWhpx) {
-        printf("%s: Selecting WHPX for CPU acceleration\n", __func__);
+        dprint("%s: Selecting WHPX for CPU acceleration", __func__);
         androidCpuAcceleration_resetCpuAccelerator(
                 ANDROID_CPU_ACCELERATOR_WHPX);
     } else if (hasEnableGvm) {
-        printf("%s: Selecting GVM for CPU acceleration\n", __func__);
+        dprint("%s: Selecting GVM for CPU acceleration", __func__);
         androidCpuAcceleration_resetCpuAccelerator(
                 ANDROID_CPU_ACCELERATOR_GVM);
     }
@@ -1042,7 +1042,7 @@ static int startEmulatorWithMinConfig(
     android::base::Thread::maskAllSignals();
     skin_winsys_init_args(argc, argv);
     if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
-        fprintf(stderr, "%s: warning: user interface init failed\n",
+        dwarning("%s: user interface init failed",
                 __func__);
     }
 
@@ -1054,7 +1054,7 @@ static int startEmulatorWithMinConfig(
     });
 
 #if (SNAPSHOT_PROFILE > 1)
-    printf("skin_winsys_init and UI finishing at uptime %" PRIu64 " ms\n",
+    dinfo("skin_winsys_init and UI finishing at uptime %" PRIu64 " ms",
            get_uptime_ms());
 #endif
 
@@ -1154,9 +1154,9 @@ static int startEmulatorWithMinConfig(
 
     // Generate a hardware-qemu.ini for this AVD.
     if (VERBOSE_CHECK(init)) {
-        printf("QEMU options list (startEmulatorWithMinConfig):\n");
+        dprint("QEMU options list (startEmulatorWithMinConfig):");
         for (int i = 0; i < argc; i++) {
-            printf("emulator: argv[%02d] = \"%s\"\n", i, argv[i]);
+            dprint("\targv[%02d] = \"%s\"", i, argv[i]);
         }
     }
 
@@ -1188,7 +1188,7 @@ extern "C" AndroidProxyCB* gAndroidProxyCB;
 extern "C" int main(int argc, char** argv) {
 
     if (argc < 1) {
-        fprintf(stderr, "Invalid invocation (no program path)\n");
+        derror("Invalid invocation (no program path)");
         return 1;
     }
 
@@ -1211,22 +1211,22 @@ extern "C" int main(int argc, char** argv) {
                 D("Target files limit: %u", desiredLimit);
             }
         } else {
-            fprintf(stderr, "%s: Failed to query files limit. errno %d\n", __func__, errno);
+            derror("%s: Failed to query files limit. errno %d", __func__, errno);
         }
 
         if (raiseLimit) {
             rl.rlim_cur = desiredLimit;
             ret = setrlimit(RLIMIT_NOFILE, &rl);
             if (0 == ret) {
-                D("Raised open files limit to %u\n", __func__, desiredLimit);
+                D("Raised open files limit to %u", __func__, desiredLimit);
             } else {
-                fprintf(stderr, "%s: Failed to raise files limit. errno %d\n", __func__, errno);
+                derror("%s: Failed to raise files limit. errno %d", __func__, errno);
             }
             ret = getrlimit(RLIMIT_NOFILE, &rl);
             if (0 == ret) {
-                D("Num files limit (after): cur max %u %u\n", __func__, rl.rlim_cur, rl.rlim_max);
+                D("Num files limit (after): cur max %u %u", __func__, rl.rlim_cur, rl.rlim_max);
             } else {
-                fprintf(stderr, "%s: Failed to query files limit. errno %d\n", __func__, errno);
+                derror("%s: Failed to query files limit. errno %d", __func__, errno);
             }
         }
     }
@@ -1312,7 +1312,7 @@ extern "C" int main(int argc, char** argv) {
                 int lcdHeight = 720;
                 if (opts->window_size) {
                     if (sscanf(opts->window_size, "%dx%d", &lcdWidth, &lcdHeight) != 2) {
-                        fprintf(stderr, "%s: invalid window size: %s\n",
+                        derror("%s: invalid window size: %s",
                                 __func__, opts->window_size);
                         return -1;
                     }
@@ -1346,7 +1346,7 @@ extern "C" int main(int argc, char** argv) {
             }
 
             for (int i = 0; i < args.size(); i++) {
-                fprintf(stderr, "%s: arg: %s\n", __func__, args[i].c_str());
+                dinfo("%s: arg: %s", __func__, args[i].c_str());
             }
 
             // Skip the translation of command-line options and jump
@@ -1369,7 +1369,7 @@ extern "C" int main(int argc, char** argv) {
 
     bool lowDisk = System::isUnderDiskPressure(avdInfo_getContentPath(avd));
     if (lowDisk) {
-        derror("Not enough disk space to run AVD '%s'. Exiting...\n",
+        derror("Not enough disk space to run AVD '%s'. Exiting...",
                avdInfo_getName(avd));
         return 1;
     }
@@ -1393,7 +1393,7 @@ extern "C" int main(int argc, char** argv) {
     if (!snapshotLock) {
         // Some snapshot operation took too long.
         derror("A snapshot operation for '%s' is pending "
-               "and timeout has expired. Exiting...\n",
+               "and timeout has expired. Exiting...",
                avdInfo_getName(avd));
         return 1;
     }
@@ -1408,9 +1408,9 @@ extern "C" int main(int argc, char** argv) {
         /* The AVD is already in use, we still support this as an
          * experimental feature. Use a temporary hardware-qemu.ini
          * file though to avoid overwriting the existing one. */
-        derror("Running multiple emulators with the same AVD "
-               "is an experimental feature.\n"
-               "Please use -read-only flag to enable this feature.\n");
+        derror("Running multiple emulators with the same AVD ");
+        derror("is an experimental feature.");
+        derror("Please use -read-only flag to enable this feature.");
         return 1;
     }
 
@@ -1429,15 +1429,15 @@ extern "C" int main(int argc, char** argv) {
     // since that calls createAVD which sets up critical info needed
     // by featurecontrol component itself.
 #if (SNAPSHOT_PROFILE > 1)
-    printf("Starting feature flag application and host hw query with uptime "
-           "%" PRIu64 " ms\n",
+    dprint("Starting feature flag application and host hw query with uptime "
+           "%" PRIu64 " ms",
            get_uptime_ms());
 #endif
     feature_initialize();
     feature_update_from_server();
 #if (SNAPSHOT_PROFILE > 1)
-    printf("Finished feature flag application and host hw query with uptime "
-           "%" PRIu64 " ms\n",
+    dprint("Finished feature flag application and host hw query with uptime "
+           "%" PRIu64 " ms",
            get_uptime_ms());
 #endif
 
@@ -1614,9 +1614,9 @@ extern "C" int main(int argc, char** argv) {
                 androidSnapshot_setRamFileDirty(nullptr, true);
             }
         } else {
-            fprintf(stderr, "Warning: could not initialize Quickboot RAM file. "
+            dwarning("could not initialize Quickboot RAM file. "
                             "Please ensure enough disk space for the guest RAM size "
-                            "(%d MB) along with a safety factor.\n", hw->hw_ramSize);
+                            "(%d MB) along with a safety factor.", hw->hw_ramSize);
             feature_set_enabled_override(kFeature_QuickbootFileBacked, false);
         }
     }
@@ -1674,8 +1674,8 @@ extern "C" int main(int argc, char** argv) {
 
     for (const ParamList* pl = opts->prop; pl != NULL; pl = pl->next) {
         if (strncmp(pl->param, "qemu.", 5)) {
-            fprintf(stderr, "WARNING: unexpected '-prop' value ('%s'), only "
-                            "'qemu.*' properties are supported\n", pl->param);
+            dwarning("unexpected '-prop' value ('%s'), only "
+                            "'qemu.*' properties are supported", pl->param);
         }
         args.add2("-boot-property", pl->param);
     }
@@ -1817,7 +1817,7 @@ extern "C" int main(int argc, char** argv) {
                 if (needed > available) {
                     derror("Not enough space to create userdata partition. "
                            "Available: %f MB at %s, "
-                           "need %f MB.\n",
+                           "need %f MB.",
                            available, dataPartitionPathAsDir->c_str(), needed);
                     return 1;
                 }
@@ -1846,7 +1846,7 @@ extern "C" int main(int argc, char** argv) {
                 current_data_size < partition_size) {
                 dwarning(
                         "userdata partition is resized from %d M to %d "
-                        "M\n",
+                        "M",
                         (int)(current_data_size / (1024 * 1024)),
                         (int)(partition_size / (1024 * 1024)));
                 if (!resizeExt4Partition(android_hw->disk_dataPartition_path,
@@ -2329,8 +2329,8 @@ extern "C" int main(int argc, char** argv) {
             for (const ParamList* pl = opts->usb_passthrough; pl != NULL; pl = pl->next) {
 #ifdef _WIN32
                 if (usbassist_winusb_load(pl->param)) {
-                    fprintf(stderr, "Cannot load %s for USB device \"%s\". "
-                            "USB pass-through might not work.\n",
+                    derror("Cannot load %s for USB device \"%s\". "
+                            "USB pass-through might not work.",
                             usb_passthrough_driver, pl->param);
                     continue;
                 }
@@ -2392,7 +2392,7 @@ extern "C" int main(int argc, char** argv) {
          */
         enableSignalTermination();
 #if (SNAPSHOT_PROFILE > 1)
-        printf("skin_winsys_init and UI starting at uptime %" PRIu64 " ms\n",
+        dprint("skin_winsys_init and UI starting at uptime %" PRIu64 " ms",
                get_uptime_ms());
 #endif
         skin_winsys_init_args(argc, argv);
@@ -2412,7 +2412,7 @@ extern "C" int main(int argc, char** argv) {
         });
 
 #if (SNAPSHOT_PROFILE > 1)
-        printf("skin_winsys_init and UI finishing at uptime %" PRIu64 " ms\n",
+        dprint("skin_winsys_init and UI finishing at uptime %" PRIu64 " ms",
                get_uptime_ms());
 #endif
 
@@ -2562,8 +2562,8 @@ extern "C" int main(int argc, char** argv) {
                 bootconfigInitrdPath.c_str(),
                 userspaceBootOpts);
             if (r) {
-                fprintf(stderr, "%s:%d Could not prepare the ramdisk with bootconfig, "
-                        "error=%d src=%s dst=%s\n", __func__, __LINE__,
+                derror("%s:%d Could not prepare the ramdisk with bootconfig, "
+                        "error=%d src=%s dst=%s", __func__, __LINE__,
                         r, hw->disk_ramdisk_path, bootconfigInitrdPath.c_str());
 
                 return r;
@@ -2634,19 +2634,19 @@ extern "C" int main(int argc, char** argv) {
     crashhandler_copy_attachment(CRASH_AVD_HARDWARE_INFO, coreHwIniPath);
 
     if (VERBOSE_CHECK(init)) {
-        printf("QEMU options list:\n");
+        dinfo("QEMU options list:");
         for (int i = 0; i < args.size(); i++) {
-            printf("emulator: argv[%02d] = \"%s\"\n", i, args[i].c_str());
+            dinfo("\t argv[%02d] = \"%s\"", i, args[i].c_str());
         }
         // Dump final command-line option to make debugging the core easier
-        printf("Concatenated QEMU options:\n %s\n", args.toString().c_str());
+        dinfo("Concatenated QEMU options: %s", args.toString().c_str());
     }
     if (fc::isEnabled(fc::VirtioWifi)) {
         auto* hostapd = android::emulation::HostapdController::getInstance();
         if (hostapd->init(VERBOSE_CHECK(wifi))) {
             hostapd->run();
         } else {
-            fprintf(stderr,
+            derror(
                     "%s: Error: could not initialize hostpad event loop.",
                     __func__);
         }

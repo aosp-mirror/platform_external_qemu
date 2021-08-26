@@ -11,46 +11,28 @@
 
 #pragma once
 
-#include <errno.h>                // for errno
-#include <stddef.h>               // for size_t
-#include <stdio.h>                // for EOF
-#include <iostream>               // for operator<<, ostream, streambuf
-#include <vector>                 // for vector
+#include <errno.h>                       // for errno
+#include <stdio.h>                       // for size_t, EOF
+#include <iostream>                      // for ostream, operator<<, streambuf
+#include <vector>                        // for vector
 
-#include "android/utils/debug.h"  // for VERBOSE_CHECK
+#include "android/utils/debug.h"         // for VERBOSE_CHECK
+#include "android/utils/log_severity.h"  // for LogSeverity, LOG_VERBOSE
 
 namespace android {
 namespace base {
 
-class LogStream;
-class LogStreamVoidify;
 // Forward declarations.
 class StringView;
 
-enum LogSeverity {
-    LOG_DEBUG = -2,
-    LOG_VERBOSE = -1,
-    LOG_INFO = 0,
-    LOG_WARNING = 1,
-    LOG_ERROR = 2,
-    LOG_FATAL = 3,
-    LOG_NUM_SEVERITIES,
-
-// DFATAL will be ERROR in release builds, and FATAL in debug ones.
-#ifdef NDEBUG
-    LOG_DFATAL = LOG_ERROR,
-#else
-    LOG_DFATAL = LOG_FATAL,
-#endif
-};
 
 // Returns the minimal log level.
-LogSeverity getMinLogLevel();
-void setMinLogLevel(LogSeverity level);
+::LogSeverity getMinLogLevel();
+void setMinLogLevel(::LogSeverity level);
 
 // Convert a log level name (e.g. 'INFO') into the equivalent
 // ::android::base LOG_<name> constant.
-#define LOG_SEVERITY_FROM(x) ::android::base::LOG_##x
+#define LOG_SEVERITY_FROM(x) EMULATOR_LOG_##x
 
 // Helper macro used to test if logging for a given log level is
 // currently enabled. |severity| must be a log level without the LOG_
@@ -282,7 +264,7 @@ struct LogParams {
 
     const char* file = nullptr;
     int lineno = -1;
-    LogSeverity severity = LOG_VERBOSE;
+    LogSeverity severity = LOG_SEVERITY_FROM(VERBOSE);
     bool quiet = false;
 };
 

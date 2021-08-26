@@ -272,7 +272,7 @@ public:
                 if (!previous_handler_exists() ||
                         forward_to_old_exception_handler(0, &current_request) !=
                         MACH_MSG_SUCCESS) {
-                    fprintf(stderr, "%s: failed forward or no exc handler installed\n", __func__);
+                    derror("%s: failed forward or no exc handler installed", __func__);
                     // If there wasn't a previous handler, or the exception forwarding
                     // failed, build and send the current reply with KERN_FAILURE.
                     build_reply(&current_reply, &current_request, KERN_FAILURE);
@@ -387,7 +387,7 @@ void MacSegvHandler::clearRegistered() {
  * http://www.mikeash.com/pyblog/friday-qa-2013-01-11-mach-exception-handlers.html
  */
 static mach_msg_return_t forward_to_old_exception_handler(
-    uint32_t index, 
+    uint32_t index,
     __Request__mach_exception_raise_state_identity_t* request) {
     fprintf(stderr, "%s: call\n", __func__);
 
@@ -484,18 +484,18 @@ static mach_msg_return_t forward_to_old_exception_handler(
  * Copyright (C) 2013-2016 Ravenbrook Limited <http://www.ravenbrook.com/>.
  * All rights reserved.  This is an open source license.  Contact
  * Ravenbrook for commercial licensing options.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * 
+ *
  * 3. Redistributions in any form must be accompanied by information on how
  * to obtain complete source code for this software and any accompanying
  * software that uses this software.  The source code must either be
@@ -506,7 +506,7 @@ static mach_msg_return_t forward_to_old_exception_handler(
  * include source code for modules or files that typically accompany the
  * major components of the operating system on which the executable file
  * runs.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
  * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR

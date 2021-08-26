@@ -18,6 +18,7 @@
 #include <string.h>                 // for strcmp, strlen, memcpy, memset
 
 #include "android/skin/resource.h"  // for skin_resource_find
+#include "android/utils/debug.h"
 
 #define  DEBUG  0
 
@@ -161,19 +162,19 @@ skin_image_load( SkinImage*  image )
 
         base = skin_resource_find( path+1, &size );
         if (base == NULL) {
-            fprintf(stderr, "failed to locate built-in image file '%s'\n", path );
+            derror("failed to locate built-in image file '%s'", path );
             return -1;
         }
 
         image->surface = skin_surface_create_from_data(base, size);
         if (!image->surface) {
-            fprintf(stderr, "failed to load built-in image file '%s'\n", path );
+            derror("failed to load built-in image file '%s'", path );
             return -1;
         }
     } else {
         image->surface = skin_surface_create_from_file(path);
         if (!image->surface) {
-            fprintf(stderr, "failed to load image file '%s'\n", path );
+            derror("failed to load image file '%s'", path );
             return -1;
         }
     }

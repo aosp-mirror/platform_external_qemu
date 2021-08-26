@@ -59,7 +59,7 @@ void Metric::commit() {
     if (mSamples.empty())
         return;
 
-    fprintf(stderr, "%s: out dir: %s\n", __func__, mOutputDirectory.c_str());
+    dinfo("%s: out dir: %s", __func__, mOutputDirectory.c_str());
 
     std::string outputPath = pj(mOutputDirectory, mName + ".json");
     path_mkdir_if_needed(mOutputDirectory.c_str(), 0755);

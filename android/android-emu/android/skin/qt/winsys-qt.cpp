@@ -197,7 +197,7 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
 
             sigemptyset (&mask);
             if (sigprocmask(SIG_BLOCK, &mask, &origMask) < 0) {
-                fprintf(stderr, "%s %s: sigprocmask() failed!\n", __FILE__, __FUNCTION__);
+                derror("%s %s: sigprocmask() failed!\n", __FILE__, __FUNCTION__);
                 break;
             }
             sigsuspend(&mask);
@@ -477,11 +477,11 @@ extern void skin_winsys_quit_request()
         sMainLoopShouldExit = true;
 #ifdef _WIN32
         if ( !SetEvent(sWakeEvent) ) {
-            fprintf(stderr, "%s %s: SetEvent() failed!\n", __FILE__, __FUNCTION__);
+            derror("%s %s: SetEvent() failed!\n", __FILE__, __FUNCTION__);
         }
 #else
         if ( kill(getpid(), SIGUSR1) ) {
-           fprintf(stderr, "%s %s: kill() failed!\n", __FILE__, __FUNCTION__);
+           derror("%s %s: kill() failed!\n", __FILE__, __FUNCTION__);
         }
 #endif
     } else {

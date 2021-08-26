@@ -32,7 +32,7 @@
 #include "android/base/Log.h"                   // for LogStreamVoidify, Log...
 #include "android/base/sockets/SocketUtils.h"   // for socketRecv, socketSet...
 #include "android/base/sockets/SocketWaiter.h"  // for SocketWaiter, SocketW...
-#include "os/log.h"                             // for LOG_ERROR, LOG_WARN
+#include "android/utils/debug.h"
 
 namespace test_vendor_lib {
 // Implementation of AsyncManager is divided between two classes, three if
@@ -113,7 +113,7 @@ class AsyncManager::AsyncFdWatcher {
     // start the thread if not started yet
     int started = tryStartThread();
     if (started != 0) {
-      LOG_ERROR("%s: Unable to start thread", __func__);
+      derror("%s: Unable to start thread", __func__);
       return started;
     }
 
@@ -144,7 +144,7 @@ class AsyncManager::AsyncFdWatcher {
     if (std::this_thread::get_id() != thread_.get_id()) {
       thread_.join();
     } else {
-      LOG_WARN("%s: Starting thread stop from inside the reading thread itself", __func__);
+      dwarning("%s: Starting thread stop from inside the reading thread itself", __func__);
     }
 
     {
@@ -164,7 +164,7 @@ class AsyncManager::AsyncFdWatcher {
     }
     // set up the communication channel
     if (android::base::socketCreatePair(&notification_listen_fd_, &notification_write_fd_)) {
-      LOG_ERROR(
+      derror(
           "%s:Unable to establish a communication channel to the reading "
           "thread",
           __func__);
@@ -175,7 +175,7 @@ class AsyncManager::AsyncFdWatcher {
 
     thread_ = std::thread([this]() { ThreadRoutine(); });
     if (!thread_.joinable()) {
-      LOG_ERROR("%s: Unable to start reading thread", __func__);
+      derror("%s: Unable to start reading thread", __func__);
       return -1;
     }
     return 0;
@@ -184,7 +184,7 @@ class AsyncManager::AsyncFdWatcher {
   int notifyThread() {
     char buffer = '0';
     if (android::base::socketSend(notification_write_fd_, &buffer, 1) < 0) {
-      LOG_ERROR("%s: Unable to send message to reading thread", __func__);
+      derror("%s: Unable to send message to reading thread", __func__);
       return -1;
     }
     return 0;
@@ -243,7 +243,7 @@ class AsyncManager::AsyncFdWatcher {
       // wait until there is data available to read on some FD
       int retval = read_fds->wait(std::numeric_limits<int64_t>::max());
       if (retval <= 0) {  // there was some error or a timeout
-        LOG_ERROR(
+        derror(
             "%s: There was an error while waiting for data on the file "
             "descriptors: %s",
             __func__, strerror(errno));
@@ -333,7 +333,7 @@ class AsyncManager::AsyncTaskManager {
     if (std::this_thread::get_id() != thread_.get_id()) {
       thread_.join();
     } else {
-      LOG_WARN("%s: Starting thread stop from inside the task thread itself", __func__);
+      dwarning("%s: Starting thread stop from inside the task thread itself", __func__);
     }
     return 0;
   }
@@ -412,7 +412,7 @@ class AsyncManager::AsyncTaskManager {
     // start thread if necessary
     int started = tryStartThread();
     if (started != 0) {
-      LOG_ERROR("%s: Unable to start thread", __func__);
+      derror("%s: Unable to start thread", __func__);
       return kInvalidTaskId;
     }
     // notify the thread so that it knows of the new task
@@ -436,7 +436,7 @@ class AsyncManager::AsyncTaskManager {
     running_ = true;
     thread_ = std::thread([this]() { ThreadRoutine(); });
     if (!thread_.joinable()) {
-      LOG_ERROR("%s: Unable to start task thread", __func__);
+      derror("%s: Unable to start task thread", __func__);
       return -1;
     }
     return 0;

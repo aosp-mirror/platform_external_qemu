@@ -16,7 +16,6 @@
 #include "android/base/Log.h"  // for LogMessage, LOG_ERROR, LOG_INFO, LOG_V...
 
 using android::base::LogMessage;
-using android::base::LogSeverity;
 
 namespace android {
 namespace emulation {
@@ -26,15 +25,15 @@ void gpr_log_to_android_log(gpr_log_func_args* args) {
     if (!args)
         return;
 
-    LogSeverity severity = android::base::LOG_VERBOSE;
+    LogSeverity severity = EMULATOR_LOG_VERBOSE;
     switch (args->severity) {
         case GPR_LOG_SEVERITY_DEBUG:
             break;
         case GPR_LOG_SEVERITY_INFO:
-            severity = ::android::base::LOG_INFO;
+            severity = EMULATOR_LOG_INFO;
             break;
         case GPR_LOG_SEVERITY_ERROR:
-            severity = ::android::base::LOG_ERROR;
+            severity = EMULATOR_LOG_ERROR;
             break;
     };
     LogMessage(args->file, args->line, severity).stream() << args->message;

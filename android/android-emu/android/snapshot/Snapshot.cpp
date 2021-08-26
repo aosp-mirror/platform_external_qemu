@@ -333,7 +333,7 @@ bool Snapshot::verifyConfig(const pb::Config& config, bool writeFailure) {
     if (config.has_selected_renderer() &&
         config.selected_renderer() != int(emuglConfig_get_current_renderer())) {
 #ifdef ALLOW_CHANGE_RENDERER
-        fprintf(stderr, "WARNING: change of renderer detected.\n");
+        dwarning("change of renderer detected.");
 #else   // ALLOW_CHANGE_RENDERER
         if (writeFailure) {
             saveFailure(FailureReason::ConfigMismatchRenderer);
@@ -821,7 +821,7 @@ const bool Snapshot::checkValid(bool writeFailure) {
     androidHwConfig_stripDefaults(reinterpret_cast<CIniFile*>(&actualConfig),
                                   reinterpret_cast<CIniFile*>(&actualStripped));
     if (!areHwConfigsEqual(expectedStripped, actualStripped)) {
-        fprintf(stderr, "%s: hw configs not eq\n", __func__);
+        derror("%s: Hardware configurations not equal while validating snapshot.", __func__);
         if (writeFailure)
             saveFailure(FailureReason::ConfigMismatchAvd);
         return false;

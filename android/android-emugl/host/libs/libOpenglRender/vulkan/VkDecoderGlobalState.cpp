@@ -2848,16 +2848,15 @@ public:
             if (srcBarrier.newLayout !=
                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL &&
                     srcBarrier.newLayout != VK_IMAGE_LAYOUT_GENERAL) {
-                fprintf(stderr,
-                        "WARNING: unexpected usage to transfer "
-                        "compressed image layout from %d to %d\n",
+                dwarning("unexpected usage to transfer "
+                        "compressed image layout from %d to %d",
                         srcBarrier.oldLayout, srcBarrier.newLayout);
             }
 
             VkResult result = it->second.cmpInfo.initDecomp(
                     vk, cmdBufferInfoIt->second.device, image);
             if (result != VK_SUCCESS) {
-                fprintf(stderr, "WARNING: texture decompression failed\n");
+                dwarning(" texture decompression failed");
                 continue;
             }
 
@@ -2998,7 +2997,7 @@ public:
 
         if (existingMemoryInfo) {
 
-            fprintf(stderr, "%s: WARNING: already mapped gpa 0x%llx, replacing",
+            dwarning("%s: already mapped gpa 0x%llx, replacing",
                     __func__,
                     (unsigned long long)gpa);
 
@@ -4444,7 +4443,7 @@ public:
                 currSi.pWaitSemaphores = pBindInfo[i].pWaitSemaphores;
                 waitDstStageMasks.resize(pBindInfo[i].waitSemaphoreCount, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
                 currSi.pWaitDstStageMask = waitDstStageMasks.data();
-                
+
                 currSi.signalSemaphoreCount = 0;
                 currSi.pSignalSemaphores = nullptr;
 
@@ -5092,7 +5091,7 @@ private:
         SpvFileEntry invalid = {
             filename, nullptr, 0,
         };
-        fprintf(stderr, "WARNING: shader source open failed! %s\n",
+        dwarning("shader source open failed! %s",
                 filename);
         return invalid;
     }

@@ -43,7 +43,7 @@ public:
             if (nextIndex < maxIndex) {
                 uint64_t resultHandle = mEntityManager.add(data, type);
                 if (EM::getHandleIndex(resultHandle) != nextIndex) {
-                    fprintf(stderr, "%s: fatal: handle indices mismatch. wanted 0x%llx got 0x%llx\n", __func__,
+                    dfatal("%s: fatal: handle indices mismatch. wanted 0x%llx got 0x%llx", __func__,
                             (unsigned long long)nextIndex,
                             (unsigned long long)EM::getHandleIndex(resultHandle));
                     abort();

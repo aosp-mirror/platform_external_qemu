@@ -55,7 +55,7 @@ public:
         Display* display = XOpenDisplay(NULL);
 
         if (!display) {
-            fprintf(stderr, "%s: warning: cannot get x11 display info\n", __func__);
+            dwarning("%s: warning: cannot get x11 display info", __func__);
             return;
         }
 
@@ -63,12 +63,12 @@ public:
                 XkbGetMap(display, XkbAllComponentsMask, XkbUseCoreKbd);
 
         if (!xkb) {
-            fprintf(stderr, "%s: warning: cannot get mod mask info\n", __func__);
+            dwarning("%s: warning: cannot get mod mask info", __func__);
             return;
         }
 
         if (XkbGetNames(display, XkbKeycodesNameMask, xkb) != 0) {
-            fprintf(stderr, "%s: warning: cannot get xkb keycodes names\n", __func__);
+            dwarning("%s: warning: cannot get xkb keycodes names", __func__);
             return;
         }
 

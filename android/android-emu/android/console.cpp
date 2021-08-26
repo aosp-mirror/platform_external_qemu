@@ -810,9 +810,9 @@ int android_console_start(int control_port,
         // we output the error message on stderr there.  Do the same here.
         char* emulator_console_auth_token_path =
                 android_console_auth_token_path_dup();
-        fprintf(stderr,
-                "ERROR: Unable to access '%s': emulator console will not "
-                "work\n",
+        derror(
+                "Unable to access '%s': emulator console will not "
+                "work",
                 emulator_console_auth_token_path);
         free(emulator_console_auth_token_path);
     }

@@ -60,8 +60,8 @@ bool AdbHostListener::reset(int adbPort) {
                     },
                     mode, android::base::ThreadLooper::get());
             if (!mJdwpServer) {
-                fprintf(stderr, "WARNING: jdwp port creation fails,"
-                        " Icebox will not work.\n");
+                dwarning("jdwp port creation fails,"
+                        " Icebox will not work.");
             }
         }
         // Don't start listening until startListening() is called.

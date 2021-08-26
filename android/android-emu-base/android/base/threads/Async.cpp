@@ -38,7 +38,7 @@ public:
     }
 
     bool wait(intptr_t* exitStatus) override {
-        fprintf(stderr, "FATAL: tried to wait on a self deleting thread (for Async)\n");
+        dfatal("tried to wait on a self deleting thread (for Async)");
         abort();
     }
 };

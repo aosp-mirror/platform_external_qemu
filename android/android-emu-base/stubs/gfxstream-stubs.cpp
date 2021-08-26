@@ -8,9 +8,10 @@
 #include "android/metrics/StudioConfig.h"
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
+#include "android/utils/debug.h"
 
 void crashhandler_die(const char* message) {
-    fprintf(stderr, "%s: fatal: %s\n", __func__, message);
+    dfatal("%s: fatal: %s", __func__, message);
     abort();
 }
 
@@ -55,7 +56,7 @@ namespace studio {
 namespace crashreport {
 
     void CrashReporter::GenerateDumpAndDie(const char* msg) {
-        fprintf(stderr, "%s: fatal: %s\n", __func__, msg);
+        dfatal("%s: fatal: %s", __func__, msg);
         abort(); }
 
     CrashReporter* CrashReporter::get() { return 0; }

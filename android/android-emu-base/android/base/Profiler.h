@@ -16,6 +16,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
+#include "android/utils/debug.h"
 
 #include <functional>
 #include <string>
@@ -82,7 +83,7 @@ private:
                               MemoryProfiler::MemoryUsageBytes currentResident,
                               MemoryProfiler::MemoryUsageBytes change) {
         double megabyte = 1024.0 * 1024.0;
-        fprintf(stderr, "%s %s: %f mb current. change: %f mb\n",
+        derror("%s %s: %f mb current. change: %f mb",
                 c_str(tag).get(), c_str(stage).get(),
                 (double)currentResident / megabyte, (double)change / megabyte);
     }};

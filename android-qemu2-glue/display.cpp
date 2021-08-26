@@ -18,6 +18,7 @@
 
 #include "android/emulator-window.h"
 #include "android/globals.h"
+#include "android/utils/debug.h"
 
 extern "C" {
 #include "qemu/osdep.h"
@@ -127,7 +128,7 @@ extern void android_gl_scanout_flush(DisplayChangeListener *, uint32_t,
                                      uint32_t, uint32_t, uint32_t);
 
 static void android_gl_scanout_disable(DisplayChangeListener *dcl) {
-    fprintf(stderr, "stub %s\n", __func__);
+    dinfo("stub %s", __func__);
 }
 
 static QemuConsole* find_graphic_console() {

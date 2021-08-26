@@ -822,7 +822,7 @@ static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
     const int32_t version_number = stream_get_be32(f);
     if (version_number != SENSOR_FILE_VERSION) {
         D("%s: cannot load: snapshot requires file version %d.  Saved file is "
-          "version %d\n",
+          "version %d",
           __FUNCTION__, SENSOR_FILE_VERSION, version_number);
         return -EIO;
     }
@@ -830,7 +830,7 @@ static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
     /* check number of sensors */
     const int32_t num_sensors = stream_get_be32(f);
     if (num_sensors > MAX_SENSORS) {
-        D("%s: cannot load: snapshot requires %d sensors, %d available\n",
+        D("%s: cannot load: snapshot requires %d sensors, %d available",
           __FUNCTION__, num_sensors, MAX_SENSORS);
         return -EIO;
     }
@@ -872,42 +872,42 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
      * If the phone is completely vertical, rotating it will not do anything !
      */
     if (VERBOSE_CHECK(rotation)) {
-        fprintf(stderr, "setCoarseOrientation - HwSensors %p\n", h);
+        dprint( "setCoarseOrientation - HwSensors %p", h);
     }
     std::initializer_list<float> rotation = {};
     switch (orient) {
         case ANDROID_COARSE_PORTRAIT:
             if (VERBOSE_CHECK(rotation)) {
-                fprintf(stderr, "Setting coarse orientation to portrait\n");
+                dprint( "Setting coarse orientation to portrait");
             }
             rotation = {-tilt_degrees, 0.f, 0.f};
             break;
 
         case ANDROID_COARSE_REVERSE_LANDSCAPE:
             if (VERBOSE_CHECK(rotation)) {
-                fprintf(stderr,
-                        "Setting coarse orientation to reverse landscape\n");
+                dprint(
+                        "Setting coarse orientation to reverse landscape");
             }
             rotation = {0.f, -tilt_degrees, -90.f};
             break;
 
         case ANDROID_COARSE_REVERSE_PORTRAIT:
             if (VERBOSE_CHECK(rotation)) {
-                fprintf(stderr,
-                        "Setting coarse orientation to reverse portrait\n");
+                dprint(
+                        "Setting coarse orientation to reverse portrait");
             }
             rotation = {tilt_degrees, 0.f, 180.f};
             break;
 
         case ANDROID_COARSE_LANDSCAPE:
             if (VERBOSE_CHECK(rotation)) {
-                fprintf(stderr, "Setting coarse orientation to landscape\n");
+                dprint( "Setting coarse orientation to landscape");
             }
             rotation = {0.f, tilt_degrees, 90.f};
             break;
         default:
             if (VERBOSE_CHECK(rotation)) {
-                fprintf(stderr, "Invalid orientation\n");
+                dprint( "Invalid orientation");
             }
             return;
     }
@@ -1033,7 +1033,7 @@ void android_hw_sensors_init_remote_controller(void) {
         hw->sensors_port = sensors_port_create(hw);
         if (hw->sensors_port == NULL) {
             V("Realistic sensor emulation is not available, since the remote "
-              "controller is not accessible:\n %s",
+              "controller is not accessible: %s",
               strerror(errno));
         }
     }

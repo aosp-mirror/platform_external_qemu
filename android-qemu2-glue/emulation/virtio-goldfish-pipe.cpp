@@ -51,15 +51,14 @@ extern "C" {
 #if DEBUG_VIRTIO_GOLDFISH_PIPE
 
 #define VGPLOG(fmt,...) \
-    fprintf(stderr, "%s:%d: " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
+    dprint(fmt, ##__VA_ARGS__)
 
 #else
 #define VGPLOG(fmt,...)
 #endif
 
 #define VGP_FATAL(fmt,...) do { \
-    fprintf(stderr, "virto-goldfish-pipe fatal error: %s:%d: " fmt "\n", __func__, __LINE__, ##__VA_ARGS__); \
-    abort(); \
+    dfatal("virto-goldfish-pipe fatal error: %s: " fmt "\n", __func__, ##__VA_ARGS__); \
 } while(0);
 
 #ifdef VIRTIO_GOLDFISH_EXPORT_API
@@ -244,6 +243,7 @@ static inline bool virgl_format_is_yuv(uint32_t format) {
             return true;
         default:
             VGP_FATAL("Unknown virgl format: 0x%x", format);
+            std::abort();
     }
 }
 
@@ -367,7 +367,7 @@ static inline size_t virgl_format_to_total_xfer_len(
         uint32_t yHeight = totalHeight;
         uint32_t yStride = align_up_power_of_2(yWidth, align);
         uint32_t ySize = yStride * yHeight;
-        
+
         uint32_t uvWidth;
         uint32_t uvPlaneCount;
 
@@ -384,7 +384,7 @@ static inline size_t virgl_format_to_total_xfer_len(
         uint32_t uvHeight = totalHeight / 2;
         uint32_t uvStride = align_up_power_of_2(uvWidth, align);
         uint32_t uvSize = uvStride * uvHeight * uvPlaneCount;
-        
+
         uint32_t dataSize = ySize + uvSize;
         return dataSize;
     } else {
@@ -553,8 +553,8 @@ public:
         VirglCtxId asCtxId = (VirglCtxId)(uintptr_t)hwPipe;
         auto it = mContexts.find(asCtxId);
         if (it == mContexts.end()) {
-            fprintf(stderr, "%s: fatal: pipe id %u not found\n", __func__, asCtxId);
-            abort();
+            dfatal("%s: fatal: pipe id %u not found", __func__, asCtxId);
+            std::abort();
         }
 
         auto& entry = it->second;
@@ -572,7 +572,7 @@ public:
         for (auto resId : resIds) {
             auto resEntryIt = mResources.find(resId);
             if (resEntryIt == mResources.end()) {
-                fprintf(stderr, "%s: fatal: res id %u entry not found\n", __func__, resId);
+                derror("%s: fatal: res id %u entry not found", __func__, resId);
                 abort();
             }
 
@@ -590,7 +590,7 @@ public:
             0x1 /* is virtio */);
 
         if (!hostPipe) {
-            fprintf(stderr, "%s: failed to create hw pipe!\n", __func__);
+            derror("%s: failed to create hw pipe!", __func__);
             return -1;
         }
 
@@ -613,7 +613,7 @@ public:
 
         auto it = mContexts.find(handle);
         if (it == mContexts.end()) {
-            fprintf(stderr, "%s: could not find context handle %u\n", __func__, handle);
+            derror("%s: could not find context handle %u", __func__, handle);
             return -1;
         }
 
@@ -626,7 +626,7 @@ public:
         auto hostPipe = it->second.hostPipe;
 
         if (!hostPipe) {
-            fprintf(stderr, "%s: 0 is not a valid hostpipe\n", __func__);
+            derror("%s: 0 is not a valid hostpipe", __func__);
             return -1;
         }
 
@@ -639,7 +639,7 @@ public:
     void setContextAddressSpaceHandleLocked(VirglCtxId ctxId, uint32_t handle) {
         auto ctxIt = mContexts.find(ctxId);
         if (ctxIt == mContexts.end()) {
-            fprintf(stderr, "%s: fatal: ctx id %u not found\n", __func__,
+            derror("%s: fatal: ctx id %u not found", __func__,
                     ctxId);
             abort();
         }
@@ -652,7 +652,7 @@ public:
     uint32_t getAddressSpaceHandleLocked(VirglCtxId ctxId) {
         auto ctxIt = mContexts.find(ctxId);
         if (ctxIt == mContexts.end()) {
-            fprintf(stderr, "%s: fatal: ctx id %u not found\n", __func__,
+            derror("%s: fatal: ctx id %u not found", __func__,
                     ctxId);
             abort();
         }
@@ -660,7 +660,7 @@ public:
         auto& ctxEntry = ctxIt->second;
 
         if (!ctxEntry.hasAddressSpaceHandle) {
-            fprintf(stderr, "%s: fatal: ctx id %u doesn't have address space handle\n", __func__,
+            derror("%s: fatal: ctx id %u doesn't have address space handle", __func__,
                     ctxId);
             abort();
         }
@@ -672,14 +672,14 @@ public:
 
         auto resEntryIt = mResources.find(resId);
         if (resEntryIt == mResources.end()) {
-            fprintf(stderr, "%s: fatal: resid %u not found\n", __func__, resId);
+            derror("%s: fatal: resid %u not found", __func__, resId);
             abort();
         }
 
         auto& resEntry = resEntryIt->second;
 
         if (!resEntry.iov) {
-            fprintf(stderr, "%s: fatal:resid %u had empty iov\n", __func__, resId);
+            derror("%s: fatal:resid %u had empty iov", __func__, resId);
             abort();
         }
 
@@ -802,7 +802,7 @@ public:
         VGPLOG("ctxid: %u buffer: %p dwords: %d", ctxId, buffer, dwordCount);
 
         if (!buffer) {
-            fprintf(stderr, "%s: error: buffer null\n", __func__);
+            derror("%s: error: buffer null", __func__);
             return -1;
         }
 
@@ -810,7 +810,7 @@ public:
         uint32_t* dwords = (uint32_t*)buffer;
 
         if (dwordCount < 1) {
-            fprintf(stderr, "%s: error: not enough dwords (got %d)\n", __func__, dwordCount);
+            derror("%s: error: not enough dwords (got %d)", __func__, dwordCount);
             return -1;
         }
 
@@ -997,7 +997,7 @@ public:
         if (entry.hvaId) {
             // gfxstream manages when to actually remove the hostmem id and storage
             //
-            // fprintf(stderr, "%s: unref a hostmem resource. hostmem id: 0x%llx\n", __func__,
+            // derror("%s: unref a hostmem resource. hostmem id: 0x%llx", __func__,
             //         (unsigned long long)(entry.hvaId));
             // HostmemIdMapping::get()->remove(entry.hvaId);
             // auto ownedIt = mOwnedHostmemIdBuffers.find(entry.hvaId);
@@ -1607,8 +1607,8 @@ private:
         qemu_put_be32(file, pipeResEntry.numIovs);
 
         if (!pipeResEntry.addrs && pipeResEntry.iov) {
-            fprintf(stderr, "%s: fatal: did not save GPAs for virtio-gpu resources that are non-blob\n", __func__);
-            abort();
+            dfatal("%s: fatal: did not save GPAs for virtio-gpu resources that are non-blob", __func__);
+            std::abort();
         }
 
         // Save the gpa and size
@@ -1725,10 +1725,10 @@ private:
         auto entry = HostmemIdMapping::get()->get(pipeResEntry.hvaId);
 
         if (entry.size != pipeResEntry.hvaSize) {
-            fprintf(stderr, "%s: FATAL: HostmemIdMapping's hvaSize (0x%llx) doesn't match renderer's saved size (0x%llx)\n", __func__,
+            dfatal("%s: FATAL: HostmemIdMapping's hvaSize (0x%llx) doesn't match renderer's saved size (0x%llx)", __func__,
                     (unsigned long long)entry.size,
                     (unsigned long long)pipeResEntry.hvaSize);
-            abort();
+            std::abort();
         }
 
         pipeResEntry.hva = entry.hva;

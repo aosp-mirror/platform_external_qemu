@@ -99,7 +99,7 @@ get_zoneinfo_timezone( void )
         if (tz == NULL) {
             int   len = readlink(LOCALTIME_FILE, buff, sizeof(buff));
             if (len < 0) {
-                dprint( "### WARNING: Could not read %s, something is very wrong on your system",
+                dwarning("Could not read %s, something is very wrong on your system",
                         LOCALTIME_FILE);
                 return NULL;
             }
@@ -110,7 +110,7 @@ get_zoneinfo_timezone( void )
             if ( zoneinfo_dir = strstr(buff, ZONEINFO_DIR) ) {
                 tz = zoneinfo_dir + sizeof(ZONEINFO_DIR) - 1;
                 if ( !check_timezone_is_zoneinfo(tz) ) {
-                    dprint( "### WARNING: %s does not point to zoneinfo-compatible timezone name\n", LOCALTIME_FILE );
+                    dwarning("%s does not point to zoneinfo-compatible timezone name", LOCALTIME_FILE );
                     return NULL;
                 }
             }
@@ -309,8 +309,7 @@ get_zoneinfo_timezone( void )
 
                 if ( android_access( env, R_OK ) != 0 ) {
                     if ( env == zoneinfo_dir ) {
-                        fprintf( stderr,
-                                 "### WARNING: could not find %s directory. unable to determine host timezone\n", env );
+                        dwarning("could not find %s directory. unable to determine host timezone", env);
                     } else {
                         D( "%s: TZDIR does not point to valid directory, using %s instead\n",
                            __FUNCTION__, zoneinfo_dir );
@@ -334,7 +333,7 @@ get_zoneinfo_timezone( void )
 
                 p = bufprint( p, end, "%s/%s", tzdir.c_str(), "localtime" );
                 if (p >= end || android_access( temp, R_OK ) != 0 ) {
-                    fprintf( stderr, "### WARNING: could not find %s or %s. unable to determine host timezone\n",
+                    dwarning("could not find %s or %s. unable to determine host timezone",
                                      LOCALTIME_FILE1, temp );
                     goto Exit;
                 }
@@ -368,7 +367,7 @@ get_zoneinfo_timezone( void )
                 ScanDataRec  scan[1];
 
                 if ( stat( localtime.c_str(), &scan->localtime_st ) < 0 ) {
-                    fprintf( stderr, "### WARNING: can't access '%s', unable to determine host timezone\n",
+                    dwarning("can't access '%s', unable to determine host timezone",
                              localtime.c_str() );
                     goto Exit;
                 }

@@ -60,7 +60,7 @@ void TextureSaver::done() {
     writeIndex();
     mEndTime = System::get()->getHighResTimeUs();
 #if SNAPSHOT_PROFILE > 1
-    printf("Texture saving time: %.03f\n",
+    dprint("Texture saving time: %.03f",
            (mEndTime - mStartTime) / 1000.0);
 #endif
     mHasError = ferror(mStream.get()) != 0;
@@ -82,7 +82,7 @@ void TextureSaver::writeIndex() {
     auto end = ftello64(mStream.get());
     mDiskSize = uint64_t(end);
 #if SNAPSHOT_PROFILE > 1
-    printf("texture: index size: %d\n", int(end - start));
+    dprint("texture: index size: %d", int(end - start));
 #endif
 
     fseeko64(mStream.get(), 0, SEEK_SET);

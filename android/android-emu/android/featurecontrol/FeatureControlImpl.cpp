@@ -169,14 +169,13 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
                     }
                 }
                 if (unexpectedGuestFeatures.size()) {
-                    LOG(VERBOSE) << "WARNING: unexpected system image feature string, "
+                    LOG(WARNING) << "unexpected system image feature string, "
                            "emulator might not function correctly, "
-                           "please try updating the emulator.\n";
-                    LOG(VERBOSE) << "Unexpected feature list:\n";
+                           "please try updating the emulator.";
+                    LOG(VERBOSE) << "Unexpected feature list:";
                     for (const auto& guestFeature : unexpectedGuestFeatures) {
                         LOG(VERBOSE) << guestFeature.c_str();
                     }
-                    LOG(VERBOSE) << "\n";
                 }
 #define FEATURE_CONTROL_ITEM(item)                                         \
                 initGuestFeatureAndParseDefault(defaultIniHost, defaultIniGuest, item, #item);

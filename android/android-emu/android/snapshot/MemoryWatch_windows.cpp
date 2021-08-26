@@ -179,7 +179,7 @@ private:
     bool protectHostRange(void* start, uint64_t size, DWORD protect) {
         DWORD oldProtect;
         if (::VirtualProtect(start, size, protect, &oldProtect) == 0) {
-            fprintf(stderr, "Cannot protect range [%p - %p] (protect flags 0x%lx)\n",
+            derror("Cannot protect range [%p - %p] (protect flags 0x%lx)",
                     start, (void *)((size_t)start + size), protect);
             return false;
         }

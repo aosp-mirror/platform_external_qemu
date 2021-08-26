@@ -284,49 +284,49 @@ bool skin_ui_process_events(SkinUI* ui) {
     while(skin_event_poll(&ev)) {
         switch(ev.type) {
         case kEventForceRedraw:
-            DE("EVENT: kEventForceRedraw\n");
+            DE("EVENT: kEventForceRedraw");
             skin_window_redraw(ui->window, NULL);
             break;
 
         case kEventKeyDown:
-            DE("EVENT: kEventKeyDown scancode=%d mod=0x%x\n",
+            DE("EVENT: kEventKeyDown scancode=%d mod=0x%x",
                ev.u.key.keycode, ev.u.key.mod);
             skin_keyboard_process_event(ui->keyboard, &ev, 1);
             break;
 
         case kEventKeyUp:
-            DE("EVENT: kEventKeyUp scancode=%d mod=0x%x\n",
+            DE("EVENT: kEventKeyUp scancode=%d mod=0x%x",
                ev.u.key.keycode, ev.u.key.mod);
             skin_keyboard_process_event(ui->keyboard, &ev, 0);
             break;
 
         case kEventGeneric:
-            DE("EVENT: kEventGeneric type=0x%02x code=0x%03x val=%x\n",
+            DE("EVENT: kEventGeneric type=0x%02x code=0x%03x val=%x",
                ev.u.generic_event.type, ev.u.generic_event.code,
                ev.u.generic_event.value);
             skin_generic_event_process_event(ui->generic_events, &ev);
             break;
 
         case kEventTextInput:
-            DE("EVENT: kEventTextInput text=[%s] down=%s\n",
+            DE("EVENT: kEventTextInput text=[%s] down=%s",
                ev.u.text.text, ev.u.text.down ? "true" : "false");
             skin_keyboard_process_event(ui->keyboard, &ev, ev.u.text.down);
             break;
 
         case kEventMouseMotion:
-            DE("EVENT: kEventMouseMotion x=%d y=%d xrel=%d yrel=%d button=%d\n",
+            DE("EVENT: kEventMouseMotion x=%d y=%d xrel=%d yrel=%d button=%d",
                ev.u.mouse.x, ev.u.mouse.y, ev.u.mouse.xrel, ev.u.mouse.yrel,
                ev.u.mouse.button);
             skin_window_process_event(ui->window, &ev);
             break;
         case kEventLayoutRotate:
-            DE("EVENT: kEventLayoutRotate orientation=%d\n",
+            DE("EVENT: kEventLayoutRotate orientation=%d",
                 ev.u.layout_rotation.rotation);
             skin_ui_rotate(ui, ev.u.layout_rotation.rotation);
             break;
         case kEventMouseButtonDown:
         case kEventMouseButtonUp:
-            DE("EVENT: kEventMouseButton x=%d y=%d xrel=%d yrel=%d button=%d\n",
+            DE("EVENT: kEventMouseButton x=%d y=%d xrel=%d yrel=%d button=%d",
                ev.u.mouse.x, ev.u.mouse.y, ev.u.mouse.xrel, ev.u.mouse.yrel,
                ev.u.mouse.button);
             skin_window_process_event(ui->window, &ev);
@@ -334,30 +334,30 @@ bool skin_ui_process_events(SkinUI* ui) {
         case kEventTouchBegin:
         case kEventTouchEnd:
         case kEventTouchUpdate:
-            DE("EVENT: kEventMultiTouch x=%f y=%f id=%d\n", ev.u.multi_touch_point.x,
+            DE("EVENT: kEventMultiTouch x=%f y=%f id=%d", ev.u.multi_touch_point.x,
                ev.u.multi_touch_point.y, ev.u.multi_touch_point.id);
             skin_window_process_touch_event(ui->window, &ev);
             break;
 
         case kEventMouseWheel:
-            DE("EVENT: kEventMouseWheel x_delta=%d y_delta=%d\n",
+            DE("EVENT: kEventMouseWheel x_delta=%d y_delta=%d",
                ev.u.wheel.x_delta, ev.u.wheel.y_delta);
             skin_window_process_event(ui->window, &ev);
             break;
 
         case kEventMouseStartTracking:
-            DE("EVENT: kEventMouseStartTracking\n");
+            DE("EVENT: kEventMouseStartTracking");
             skin_window_process_event(ui->window, &ev);
             break;
 
         case kEventMouseStopTracking:
-            DE("EVENT: kEventMouseStopTracking\n");
+            DE("EVENT: kEventMouseStopTracking");
             skin_window_process_event(ui->window, &ev);
             break;
 
         case kEventPenMove:
             DE("EVENT: kEventPenMove x=%d y=%d id=%d pressure=%d \
-                orientation=%d button=%d pointer=%d\n",
+                orientation=%d button=%d pointer=%d",
                 ev.u.pen.x, ev.u.pen.y, ev.u.pen.tracking_id,
                 ev.u.pen.pressure, ev.u.pen.orientation,
                 ev.u.pen.button_pressed, ev.u.pen.rubber_pointer);
@@ -366,7 +366,7 @@ bool skin_ui_process_events(SkinUI* ui) {
         case kEventPenPress:
         case kEventPenRelease:
             DE("EVENT: kEventPen x=%d y=%d id=%d pressure=%d \
-                orientation=%d button=%d pointer=%d\n",
+                orientation=%d button=%d pointer=%d",
                 ev.u.pen.x, ev.u.pen.y, ev.u.pen.tracking_id,
                 ev.u.pen.pressure, ev.u.pen.orientation,
                 ev.u.pen.button_pressed, ev.u.pen.rubber_pointer);
@@ -374,7 +374,7 @@ bool skin_ui_process_events(SkinUI* ui) {
             break;
 
         case kEventScrollBarChanged:
-            DE("EVENT: kEventScrollBarChanged x=%d xmax=%d y=%d ymax=%d ignored=%d\n",
+            DE("EVENT: kEventScrollBarChanged x=%d xmax=%d y=%d ymax=%d ignored=%d",
                ev.u.scroll.x, ev.u.scroll.xmax, ev.u.scroll.y, ev.u.scroll.ymax, ignoreScroll);
             if (!ignoreScroll) {
                 skin_window_scroll_updated(ui->window, ev.u.scroll.x, ev.u.scroll.xmax,
@@ -382,13 +382,13 @@ bool skin_ui_process_events(SkinUI* ui) {
             }
             break;
         case kEventRotaryInput:
-            DE("EVENT: kEventRotaryInput delta=%d\n",
+            DE("EVENT: kEventRotaryInput delta=%d",
                ev.u.rotary_input.delta);
             skin_window_process_event(ui->window, &ev);
             break;
 
         case kEventSetDisplayRegion:
-            DE("EVENT: kEventSetDisplayRegion (%d, %d) %d x %d\n",
+            DE("EVENT: kEventSetDisplayRegion (%d, %d) %d x %d",
                ev.u.display_region.xOffset, ev.u.display_region.yOffset,
                ev.u.display_region.width, ev.u.display_region.height);
 
@@ -398,7 +398,7 @@ bool skin_ui_process_events(SkinUI* ui) {
             break;
 
         case kEventSetDisplayRegionAndUpdate:
-            DE("EVENT: kEventSetDisplayRegionAndUpdate (%d, %d) %d x %d\n",
+            DE("EVENT: kEventSetDisplayRegionAndUpdate (%d, %d) %d x %d",
                ev.u.display_region.xOffset, ev.u.display_region.yOffset,
                ev.u.display_region.width, ev.u.display_region.height);
             skin_window_set_display_region_and_update(ui->window,
@@ -409,40 +409,40 @@ bool skin_ui_process_events(SkinUI* ui) {
             break;
 
         case kEventSetScale:
-            DE("EVENT: kEventSetScale scale=%f\n", ev.u.window.scale);
+            DE("EVENT: kEventSetScale scale=%f", ev.u.window.scale);
             ignoreScroll = true;
             skin_window_set_scale(ui->window, ev.u.window.scale);
             break;
 
         case kEventSetZoom:
-            DE("EVENT: kEventSetZoom x=%d y=%d zoom=%f scroll_h=%d\n",
+            DE("EVENT: kEventSetZoom x=%d y=%d zoom=%f scroll_h=%d",
                ev.u.window.x, ev.u.window.y, ev.u.window.scale, ev.u.window.scroll_h);
             skin_window_set_zoom(ui->window, ev.u.window.scale, ev.u.window.x, ev.u.window.y,
                                              ev.u.window.scroll_h);
             break;
 
         case kEventQuit:
-            DE("EVENT: kEventQuit\n");
+            DE("EVENT: kEventQuit");
             /* only save emulator config through clean exit */
             return true;
 
         case kEventWindowMoved:
-            DE("EVENT: kEventWindowMoved x=%d y=%d\n", ev.u.window.x, ev.u.window.y);
+            DE("EVENT: kEventWindowMoved x=%d y=%d", ev.u.window.x, ev.u.window.y);
             skin_window_position_changed(ui->window, ev.u.window.x, ev.u.window.y);
             break;
 
         case kEventScreenChanged:
-            DE("EVENT: kEventScreenChanged\n");
+            DE("EVENT: kEventScreenChanged");
             skin_window_process_event(ui->window, &ev);
             break;
 
         case kEventWindowChanged:
-            DE("EVENT: kEventWindowChanged\n");
+            DE("EVENT: kEventWindowChanged");
             skin_window_process_event(ui->window, &ev);
             break;
 
         case kEventZoomedWindowResized:
-            DE("EVENT: kEventZoomedWindowResized dx=%d dy=%d w=%d h=%d\n",
+            DE("EVENT: kEventZoomedWindowResized dx=%d dy=%d w=%d h=%d",
                ev.u.scroll.x, ev.u.scroll.y, ev.u.scroll.xmax, ev.u.scroll.ymax);
             skin_window_zoomed_window_resized(ui->window, ev.u.scroll.x, ev.u.scroll.y,
                                                           ev.u.scroll.xmax, ev.u.scroll.ymax,

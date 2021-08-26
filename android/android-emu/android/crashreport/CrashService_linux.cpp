@@ -33,7 +33,7 @@
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
 #define D(...) VERBOSE_PRINT(init, __VA_ARGS__)
-#define I(...) printf(__VA_ARGS__)
+#define I(...) dprint(__VA_ARGS__)
 
 #define HWINFO_CMD "lshw"
 
@@ -123,7 +123,7 @@ bool HostCrashService::getHWInfo() {
     std::string syscmd(HWINFO_CMD);
     syscmd += " > ";
     syscmd += file_path;
-    fprintf(stderr, "Running '%s' to get hardware info", syscmd.c_str());
+    dwarning("Running '%s' to get hardware info", syscmd.c_str());
     int status = system(syscmd.c_str());
 
     if (status != 0) {

@@ -56,13 +56,13 @@
 #define DEBUG 0
 
 #if DEBUG >= 1
-#define D(...) printf(__VA_ARGS__), printf("\n")
+#define D(...) dprint(__VA_ARGS__)
 #else
 #define D(...) ((void)0)
 #endif
 
 #if DEBUG >= 2
-#define DD(...) printf(__VA_ARGS__), printf("\n")
+#define DD(...) dprint(__VA_ARGS__)
 #else
 #define DD(...) ((void)0)
 #endif

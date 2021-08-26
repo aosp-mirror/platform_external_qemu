@@ -131,8 +131,8 @@ QemuParameters* qemu_parameters_create(const char* argv0,
 
     for (const ParamList* pl = opts->prop; pl != NULL; pl = pl->next) {
         if (strncmp(pl->param, "qemu.", 5)) {
-            fprintf(stderr, "WARNING: unexpected '-prop' value ('%s'), only "
-                            "'qemu.*' properties are supported\n", pl->param);
+            dwarning("unexpected '-prop' value ('%s'), only "
+                            "'qemu.*' properties are supported", pl->param);
         }
         params.add2("-boot-property", pl->param);
     }
@@ -230,24 +230,25 @@ QemuParameters* qemu_parameters_create(const char* argv0,
     }
 
     if(VERBOSE_CHECK(init)) {
-        printf("QEMU options list:\n");
+        dinfo("QEMU options list:");
         for(size_t i = 0; i < params.size(); i++) {
-            printf("emulator: argv[%02d] = \"%s\"\n", static_cast<int>(i),
+            dinfo("\targv[%02d] = \"%s\"\n", static_cast<int>(i),
                    params[i].c_str());
         }
         /* Dump final command-line option to make debugging the core easier */
-        printf("Concatenated QEMU options:\n");
+        dinfo("Concatenated QEMU options:");
+        std::string concat;
         for (size_t i = 0; i < params.size(); i++) {
             /* To make it easier to copy-paste the output to a command-line,
              * quote anything that contains spaces.
              */
             if (::strchr(params[i].c_str(), ' ') != nullptr) {
-                printf(" '%s'", params[i].c_str());
+                concat += " '" + params[i] + "'";
             } else {
-                printf(" %s", params[i].c_str());
+                concat += " " + params[i];
             }
         }
-        printf("\n");
+        dinfo("\t%s", concat.c_str());
     }
 
     return result.release();

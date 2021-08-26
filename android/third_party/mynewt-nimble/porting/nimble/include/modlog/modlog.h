@@ -25,6 +25,11 @@
 #include "log_common/log_common.h"
 #include "log/log.h"
 
+#undef dprint
+#undef dinfo
+#undef dwarning
+#undef derror
+
 extern void   dprint( const char*  format, ... );
 extern void   dinfo( const char*  format, ... );
 extern void   dwarning( const char*  format, ... );

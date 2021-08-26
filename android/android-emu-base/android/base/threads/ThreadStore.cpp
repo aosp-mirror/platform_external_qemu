@@ -18,6 +18,7 @@
 #include "android/base/memory/LazyInstance.h"
 #endif
 
+#include "android/utils/debug.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,7 +28,7 @@
 #define DEBUG_THREAD_STORE  0
 
 #if DEBUG_THREAD_STORE
-#  define D(...)   do { printf("%s:%d: ", __FUNCTION__, __LINE__); printf(__VA_ARGS__); fflush(stdout); } while (0)
+#  define D(...)   do { dprint(__VA_ARGS__); fflush(stdout); } while (0)
 #else
 #  define D(...)   ((void)0)
 #endif
@@ -229,8 +230,8 @@ void ThreadStoreBase::OnThreadExit() {
 ThreadStoreBase::ThreadStoreBase(Destructor* destroy) {
     int ret = pthread_key_create(&mKey, destroy);
     if (ret != 0) {
-        fprintf(stderr,
-                "Could not create thread store key: %s\n",
+        dfatal(
+                "Could not create thread store key: %s",
                 strerror(ret));
         exit(1);
     }

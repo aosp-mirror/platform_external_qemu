@@ -15,7 +15,6 @@
 #include <stdint.h>                // for uint64_t
 #include <stdio.h>                 // for fileno, fprintf, printf, stdout
 
-#include "android/utils/system.h"  // for android_get_thread_id, ANDROID_THR...
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #else
@@ -24,7 +23,15 @@
 #include <unistd.h>                // for dup2, close, dup
 #endif
 
+
+// TODO(jansene): Some external libraries (nibmle) still rely on these, so we cannot remove them yet.
+#undef dprint
+#undef dinfo
+#undef derror
+#undef dwarning
+
 uint64_t android_verbose = 0;
+LogSeverity android_log_severity = EMULATOR_LOG_INFO;
 
 void dprint(const char* format, ...) {
     va_list args;
@@ -88,25 +95,6 @@ void derror(const char* format, ...) {
     va_end(args);
 }
 
-void android_tid_function_print(bool use_emulator_prefix,
-                                const char* function,
-                                const char* format,
-                                ...) {
-    android_thread_id_t tid = android_get_thread_id();
-    va_list args;
-    va_start(args, format);
-    const char* prefix = use_emulator_prefix ? "emulator: " : "";
-    if (function) {
-        printf("%stid=0x%" ANDROID_THREADID_FMT ": %s: ", prefix, tid,
-               function);
-    } else {
-        printf("%stid=0x%" ANDROID_THREADID_FMT ": ", prefix, tid);
-    }
-
-    vprintf(format, args);
-    printf("\n");
-    va_end(args);
-}
 
 /** STDOUT/STDERR REDIRECTION
  **

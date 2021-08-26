@@ -29,6 +29,7 @@
 #include "android/utils/path.h"
 #include "android/utils/system.h"
 #include "android/utils/timezone.h"
+#include "android/utils/debug.h"
 
 #ifdef _WIN32
 #  include "android/base/sockets/Winsock.h"
@@ -1242,7 +1243,7 @@ static const char*
 unknownCommand( const char*  cmd, AModem  modem )
 {
     modem=modem;
-    fprintf(stderr, ">>> unknown command '%s'\n", cmd );
+    derror(">>> unknown command '%s'", cmd );
     return "ERROR: unknown command\r";
 }
 

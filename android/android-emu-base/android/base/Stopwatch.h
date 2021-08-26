@@ -12,7 +12,7 @@
 #pragma once
 
 #include "android/base/system/System.h"
-
+#include "android/utils/debug.h"
 #include <stdio.h>
 
 namespace android {
@@ -76,13 +76,11 @@ auto measureMs(Counter& time, Func&& f) -> decltype(f()) {
 }
 
 // Some macros to have standard format of time measurements printed out.
-#define STOPWATCH_PRINT_SPLIT(sw)                           \
-    fprintf(stderr, "%s:%d %.03f ms\n", __func__, __LINE__, \
-            (sw).restartUs() / 1000.0f);
+#define STOPWATCH_PRINT_SPLIT(sw) \
+    dinfo("%s %.03f ms", __func__, (sw).restartUs() / 1000.0f);
 
-#define STOPWATCH_PRINT(sw)                                       \
-    fprintf(stderr, "%s:%d %.03f ms total\n", __func__, __LINE__, \
-            (sw).elapsedUs() / 1000.0f);
+#define STOPWATCH_PRINT(sw) \
+    dinfo("%s %.03f ms total\n", __func__, (sw).elapsedUs() / 1000.0f);
 
 }  // namespace base
 }  // namespace android

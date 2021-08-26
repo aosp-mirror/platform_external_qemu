@@ -187,7 +187,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     if (isQemu2 && fc::isEnabled(fc::DynamicMediaProfile) && qemuMediaProfileVideoProp) {
         if ((hw->hw_lcd_width > 1920 && hw->hw_lcd_height > 1080) ||
             (hw->hw_lcd_width > 1080 && hw->hw_lcd_height > 1920)) {
-            fprintf(stderr, "Display resolution > 1080p. Using different media profile.\n");
+            dwarning("Display resolution > 1080p. Using different media profile.");
             params.push_back({
                 qemuMediaProfileVideoProp,
                 "/data/vendor/etc/media_codecs_google_video_v2.xml"

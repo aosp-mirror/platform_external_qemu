@@ -11,17 +11,25 @@
 
 #include "android/base/Log.h"
 
-
 #include <stdarg.h>                        // for va_end, va_list, va_start
-#include <stdio.h>                         // for fprintf, fflush, vsnprintf
-#include <stdlib.h>                        // for free, malloc
+#include <stdio.h>                         // for fprintf, size_t, fflush
+#include <stdlib.h>                        // for abort
 #include <string.h>                        // for memcpy, strerror
+#include <string>                          // for basic_string
 
 #include "android/base/ArraySize.h"        // for arraySize
 #include "android/base/Debug.h"            // for DebugBreak, IsDebuggerAtta...
+#include "android/base/StringFormat.h"     // for StringFormat
 #include "android/base/StringView.h"       // for StringView, c_str, CStrWra...
 #include "android/base/files/PathUtils.h"  // for PathUtils
-#include "android/utils/debug.h"
+#include "android/base/threads/Thread.h"   // for getCurrentThreadId
+#include "android/utils/debug.h"           // for VERBOSE_CHECK, VERBOSE_log
+#ifdef _MSC_VER
+#include "msvc-posix.h"
+#else
+#include <sys/time.h>                      // for gettimeofday, timeval
+#include <time.h>                          // for localtime, tm, time_t
+#endif
 
 #define ENABLE_THREAD_ID 0
 
@@ -34,69 +42,101 @@ namespace {
 testing::LogOutput* gLogOutput = NULL;
 
 bool gDcheckLevel = false;
-LogSeverity gMinLogLevel = LOG_INFO;
+LogSeverity gMinLogLevel = EMULATOR_LOG_INFO;
 
-// Convert a severity level into a string.
-const char* severityLevelToString(LogSeverity severity) {
-    const char* kSeverityStrings[] = {
-            "INFO",
-            "WARNING",
-            "ERROR",
-            "FATAL",
-    };
-    if (severity >= 0 && severity < LOG_NUM_SEVERITIES)
-        return kSeverityStrings[severity];
-    if (severity == -1) {
-        return "VERBOSE";
+// Set to one to see fancy colors. Beware of the unexpected side effects!
+// #define PRINT_WITH_COLOR 0
+
+inline static const char* translate_sev(LogSeverity value) {
+#define SEV(p, str)        \
+    case (LogSeverity::p): \
+        return str;        \
+        break;
+
+    switch (value) {
+        SEV(EMULATOR_LOG_VERBOSE, "VERBOSE")
+        SEV(EMULATOR_LOG_DEBUG, "DEBUG  ")
+        SEV(EMULATOR_LOG_INFO, "INFO   ")
+        SEV(EMULATOR_LOG_WARNING, "WARNING")
+        SEV(EMULATOR_LOG_ERROR, "ERROR  ")
+        SEV(EMULATOR_LOG_FATAL, "FATAL  ")
+        default:
+            return "UNKWOWN";
     }
-    return "UNKNOWN";
+#undef SEV
 }
 
-// Default log output function
-void defaultLogMessage(const LogParams& params,
-                       const char* message,
-                       size_t messageLen) {
-    const char* tidStr = "";
-#if ENABLE_THREAD_ID
-    // Obtaining current thread's id is expensive. Only do this for
-    // verbose logs.
-    std::string tidStrData;
-    if (params.severity <= LOG_VERBOSE) {
-        tidStr = android::base::StringFormat("[%lu]:", getCurrentThreadId());
+inline static const char* translate_color(LogSeverity value) {
+#define SEV(p, col)           \
+    case (LogSeverity::p):    \
+        return col "\x1b[0m"; \
+        break;
+
+    switch (value) {
+        SEV(EMULATOR_LOG_VERBOSE, "\x1b[94mVERBOSE")
+        SEV(EMULATOR_LOG_DEBUG, "\x1b[36mDEBUG  ")
+        SEV(EMULATOR_LOG_INFO, "\x1b[32mINFO   ")
+        SEV(EMULATOR_LOG_WARNING, "\x1b[33mWARNING")
+        SEV(EMULATOR_LOG_ERROR, "\x1b[31mERROR  ")
+        SEV(EMULATOR_LOG_FATAL, "\x1b[35mFATAL  ")
+        default:
+            return "\x1b[94mUNKNOWN";
     }
+#undef SEV
+}
+
+extern "C" void __emu_log_print(LogSeverity prio,
+                                const char* file,
+                                int line,
+                                const char* fmt,
+                                ...) {
+    FILE* fp = prio >= LOG_SEVERITY_FROM(WARNING) ? stderr : stdout;
+
+    if (VERBOSE_CHECK(log) || VERBOSE_CHECK(time)) {
+        struct timeval tv;
+        gettimeofday(&tv, 0);
+        time_t now = tv.tv_sec;
+        struct tm* time = localtime(&now);
+        fprintf(fp, "%02d:%02d:%02d.%06ld ", time->tm_hour, time->tm_min,
+                time->tm_sec, tv.tv_usec);
+    }
+
+    if (VERBOSE_CHECK(log)) {
+        fprintf(fp, "%-15lu ", android::base::getCurrentThreadId());
+    }
+
+#ifdef PRINT_WITH_COLOR
+    // Warning! This looks cool and all, but likely has all sorts
+    // of unexpected side effects. Handy during debugging of prints though.
+    fprintf(fp, "%s ", translate_color(prio));
+#else
+    fprintf(fp, "%s ", translate_sev(prio));
 #endif
 
-    FILE* output = params.severity >= LOG_WARNING ? stderr : stdout;
-    if (params.quiet) {
-        fdprintf(output, "%s: %.*s",
-                severityLevelToString(params.severity), int(messageLen),
-                message);
-    } else {
-        StringView path = params.file;
+    // Always log the location for errors, so someone can follow up if needed.
+    if (VERBOSE_CHECK(log) || prio >= LOG_SEVERITY_FROM(FATAL)) {
+        StringView path = file;
         StringView filename;
         if (!PathUtils::split(path, nullptr, &filename)) {
             filename = path;
         }
-        fdprintf(output, "%s%s: %s:%d: %.*s", tidStr,
-                severityLevelToString(params.severity), c_str(filename).get(),
-                params.lineno, int(messageLen), message);
-
-        if (params.severity >= LOG_WARNING) {
-            // Note: by default, stderr is non buffered, but the program might
-            // have altered this setting, so always flush explicitly to ensure
-            // that the log is displayed as soon as possible. This avoids log
-            // messages being lost when a crash happens, and makes debugging
-            // easier. On the other hand, it means lots of logging will impact
-            // performance.
-            fflush(stderr);
-        }
+        auto location = android::base::StringFormat("%s:%d ", c_str(filename).get(), line);
+        fprintf(fp, "%-34s ", location.c_str());
     }
 
-    if (params.severity >= LOG_FATAL) {
-        if (IsDebuggerAttached()) {
+    fprintf(fp, "| ");
+    va_list args;
+    va_start(args, fmt);
+    vfprintf(fp, fmt, args);
+    va_end(args);
+    fprintf(fp, "\n");
+
+    if (prio >= LOG_SEVERITY_FROM(FATAL)) {
+        fflush(stderr);
+        if (android::base::IsDebuggerAttached()) {
             android::base::DebugBreak();
         }
-        _exit(1);
+        std::abort();
     }
 }
 
@@ -106,7 +146,8 @@ void logMessage(const LogParams& params,
     if (gLogOutput) {
         gLogOutput->logMessage(params, message, messageLen);
     } else {
-        defaultLogMessage(params, message, messageLen);
+        __emu_log_print(params.severity, params.file, params.lineno, "%.*s",
+                        messageLen, message);
     }
 }
 
@@ -182,24 +223,27 @@ size_t LogstreamBuf::size() {
 
 int LogstreamBuf::overflow(int c) {
     if (mLongString.empty()) {
-        // Case 1, we have been using our fast small buffer, but decided to log a really long line.
-        // We now transfer ownership of the buffer to a std::vector that will manage allocation.
-        // We resize to 2x size of our current size.
+        // Case 1, we have been using our fast small buffer, but decided to log
+        // a really long line. We now transfer ownership of the buffer to a
+        // std::vector that will manage allocation. We resize to 2x size of our
+        // current size.
         mLongString.resize(arraySize(mStr) * 2);
         memcpy(&mLongString[0], &mStr[0], arraySize(mStr));
     } else {
-        // Case 2: The std::vector is already managing the buffer, but the current log line no longer fits.
-        // We are going to resize the vector. The resize will reallocate the existing elements properly.
+        // Case 2: The std::vector is already managing the buffer, but the
+        // current log line no longer fits. We are going to resize the vector.
+        // The resize will reallocate the existing elements properly.
         mLongString.resize(mLongString.size() * 2);
     }
 
-    // We have just resized the std::vector so we know we have enough space available and can
-    // add our overflow character at the proper offset.
+    // We have just resized the std::vector so we know we have enough space
+    // available and can add our overflow character at the proper offset.
     int offset = pptr() - pbase();
     mLongString[offset] = c;
 
-    // We let std::streambuf know that it can use the memory area covered by std::vector.
-    // this call resets pptr, so we will move it back to the right offset later on.
+    // We let std::streambuf know that it can use the memory area covered by
+    // std::vector. this call resets pptr, so we will move it back to the right
+    // offset later on.
     setp(mLongString.data(), mLongString.data() + mLongString.size());
 
     // We bump pptr to our offset + 1, which can be used for future writes.

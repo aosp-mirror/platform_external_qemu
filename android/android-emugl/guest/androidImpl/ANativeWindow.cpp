@@ -19,6 +19,7 @@
 #define LOG_TAG "ANativeWindow"
 
 #include <stdio.h>
+#include "android/utils/debug.h"
 
 static int32_t query(ANativeWindow* window, int what) {
     int value;
@@ -137,7 +138,7 @@ int32_t ANativeWindow_getBuffersDataSpace(ANativeWindow* window) {
  * vndk-stable
  **************************************************************************************************/
 AHardwareBuffer* ANativeWindowBuffer_getHardwareBuffer(ANativeWindowBuffer* anwb) {
-    fprintf(stderr, "%s: Not implemented!\n", __func__);
+    derror("%s: Not implemented!", __func__);
     return NULL;
 }
 int ANativeWindow_setSwapInterval(ANativeWindow* window, int interval) {

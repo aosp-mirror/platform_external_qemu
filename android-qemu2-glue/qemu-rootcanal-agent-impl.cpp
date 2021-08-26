@@ -53,14 +53,13 @@ extern "C" {
 #define DD(...) dinfo(__VA_ARGS__)
 #define DD_BUF(buf, len)                                \
     do {                                                \
-        printf("chardev-rootcanal %s:", __func__);      \
+        dprint("chardev-rootcanal %s:", __func__);      \
         for (int x = 0; x < len; x++) {                 \
             if (isprint((int)buf[x]))                   \
-                printf("%c", buf[x]);                   \
+                dprint("%c", buf[x]);                   \
             else                                        \
-                printf("[0x%02x]", 0xff & (int)buf[x]); \
+                dprint("[0x%02x]", 0xff & (int)buf[x]); \
         }                                               \
-        printf("\n");                                   \
     } while (0)
 
 #endif

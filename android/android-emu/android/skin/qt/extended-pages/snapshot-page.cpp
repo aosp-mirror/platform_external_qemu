@@ -545,9 +545,8 @@ void SnapshotPage::changeUiFromSaveOnExitSetting(SaveSnapshotOnExit choice) {
             android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         default:
-            fprintf(stderr,
-                    "%s: WARNING: unknown 'Save snapshot on exit' preference value 0x%x. "
-                    "Setting to Always.\n",
+            dwarning("%s: unknown 'Save snapshot on exit' preference value 0x%x. "
+                    "Setting to Always.",
                     __func__, (unsigned int)choice);
             mUi->saveQuickBootOnExit->setCurrentIndex(
                     static_cast<int>(SaveSnapshotOnExitUiOrder::Always));
@@ -1509,9 +1508,9 @@ void SnapshotPage::slot_confirmAutosaveChoiceAndRestart(
             case SaveSnapshotOnExit::Never:
                 break;
             case SaveSnapshotOnExit::Ask:
-                fprintf(stderr, "%s: WARNING: previous setting for save on exit was Ask!\n", __func__);
+                dwarning("%s: previous setting for save on exit was Ask!", __func__);
             default:
-                fprintf(stderr, "%s: WARNING: unknown auto-save setting 0x%x\n",
+                dwarning("%s: unknown auto-save setting 0x%x",
                         __func__, (unsigned int)previousSetting);
                 break;
         }

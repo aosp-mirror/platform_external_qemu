@@ -361,7 +361,7 @@ emulator_window_fb_update( void*   _emulator, int  x, int  y, int  w, int  h )
 static void
 emulator_window_fb_rotate( void*  _emulator, int  rotation )
 {
-    D("%s\n", __FUNCTION__);
+    D("%s", __FUNCTION__);
     EmulatorWindow*  emulator = _emulator;
 
     emulator_window_setup( emulator );

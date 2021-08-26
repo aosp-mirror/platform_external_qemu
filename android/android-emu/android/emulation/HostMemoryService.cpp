@@ -97,7 +97,7 @@ public:
         void onSubRegionFreedLocked(uint64_t offset) {
             auto it = subRegions.find(offset);
             if (it == subRegions.end()) {
-                fprintf(stderr, "%s: warning: subregion offset 0x%llx not found\n", __func__,
+                dwarning("%s: subregion offset 0x%llx not found", __func__,
                         (unsigned long long)offset);
             }
             subRegions.erase(it);
@@ -123,7 +123,7 @@ private:
     void onMessage(const std::vector<uint8_t>& input) override {
         uint32_t size = (uint32_t)input.size();
         if (size < sizeof(uint32_t)) {
-            fprintf(stderr, "HostMemoryService::%s: unexpected size from guest: %u\n",
+            dwarning("HostMemoryService::%s: unexpected size from guest: %u",
                     __func__, size);
             return;
         }
@@ -158,7 +158,7 @@ private:
             case HostMemoryServiceCommand::AllocSubRegion:
             case HostMemoryServiceCommand::FreeSubRegion:
                 if (payloadBytes < 2 * sizeof(uint64_t)) {
-                    fprintf(stderr, "%s: Error: not enough bytes to read region cmd info\n",
+                    derror("%s: not enough bytes to read region cmd info",
                             __func__);
                     return;
                 } else {
@@ -195,7 +195,7 @@ private:
                 service->onSubRegionFreedLocked(addr);
                 break;
             default:
-                fprintf(stderr, "%s: invalid command 0x%x\n",
+                derror("%s: invalid command 0x%x",
                         __func__, (uint32_t)(cmd));
                 break;
         }

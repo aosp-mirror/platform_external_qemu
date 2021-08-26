@@ -179,7 +179,7 @@ void OpenGLLogger::stopFineLogLocked() {
     // Only print message when fine-grained
     // logging is turned on.
     if (!mFineLog.empty()) {
-        fprintf(stderr,
+        dinfo(
                 "Writing fine-grained GL log to %s...",
                 mFineLogFileName.c_str());
     }
@@ -203,7 +203,7 @@ void OpenGLLogger::stopFineLogLocked() {
         }
         mFineLogFileHandle.close();
         if (!mFineLog.empty()) {
-            fprintf(stderr, "done\n");
+            dinfo("done");
         }
     }
     mFineLog.clear();

@@ -651,7 +651,7 @@ static int socketTcpLoopbackClientFor(int port, int domain) {
 
         if (ret != 0) {
             auto err = WSAGetLastError();
-            fprintf(stderr, "%s: failed eventsetup! res: %d err %d 0x%x\n", __func__, ret, err, err);
+            derror("%s: failed eventsetup! res: %d err %d 0x%x", __func__, ret, err, err);
             return -1;
         }
 
@@ -661,7 +661,7 @@ static int socketTcpLoopbackClientFor(int port, int domain) {
 
         if (ret == WAIT_FAILED) {
             auto err = GetLastError();
-            fprintf(stderr, "%s: WaitForSingleObject failed. err %d 0x%x\n", __func__, err, err);
+            derror("%s: WaitForSingleObject failed. err %d 0x%x", __func__, err, err);
             return -1;
         }
 

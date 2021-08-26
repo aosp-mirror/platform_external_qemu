@@ -26,6 +26,7 @@
 
 #include "android/base/synchronization/Lock.h"
 #include "android/base/threads/WorkerThread.h"
+#include "android/utils/debug.h"
 
 #include <atomic>
 #include <unordered_map>
@@ -33,7 +34,7 @@
 #include <stdio.h>
 
 #define E(fmt,...) \
-    fprintf(stderr, "%s: " fmt "\n", __func__, ##__VA_ARGS__);
+    derror("%s: " fmt, __func__, ##__VA_ARGS__);
 
 using android::base::AutoLock;
 using android::base::WorkerProcessingResult;
@@ -141,7 +142,7 @@ private:
             gl_Position = vec4(pos, 0.0, 1.0);
             texcoord_varying = texcoord;
         })";
-         
+
         static constexpr char blitFshaderSrc[] = R"(
         precision highp float;
 
@@ -156,7 +157,7 @@ private:
         mProgram =
             compileAndLinkShaderProgram(
                 blitVshaderSrc, blitFshaderSrc);
-        
+
         GLint samplerLoc = glGetUniformLocation(mProgram, "tex");
 
         glGenBuffers(1, &mVbo);

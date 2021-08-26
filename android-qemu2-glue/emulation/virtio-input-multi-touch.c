@@ -30,7 +30,7 @@
 #include <stdio.h>
 
 #include "android/utils/misc.h"
-#define D(...) (fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n"))
+#define D(...) derror(__VA_ARGS__)
 #else
 #define D(...) ((void)0)
 #endif

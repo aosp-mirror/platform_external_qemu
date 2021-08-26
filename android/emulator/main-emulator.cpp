@@ -90,7 +90,7 @@ using android::ConfigDirs;
 #define DEBUG 1
 
 #if DEBUG
-#  define D(format, ...)  do { if (android_verbose) printf("emulator: " format "\n", ##__VA_ARGS__); } while (0)
+#  define D(...)  do { if (android_verbose) dinfo(__VA_ARGS__); } while (0)
 #else
 #  define D(...)  do{}while(0)
 #endif
@@ -509,6 +509,10 @@ int main(int argc, char** argv)
             base_enable_verbose_logs();
         }
 
+         if (!strcmp(opt,"-debug-log")) {
+             VERBOSE_ENABLE(log);
+         }
+
         if (!strcmp(opt,"-gpu") && nn + 1 < argc) {
             nn++;
             continue;
@@ -741,7 +745,7 @@ int main(int argc, char** argv)
 
     // print a version string and build id for easier debugging
 #if defined ANDROID_SDK_TOOLS_BUILD_NUMBER
-    dprint("Android emulator version %s (CL:%s)", EMULATOR_VERSION_STRING
+    dinfo("Android emulator version %s (CL:%s)", EMULATOR_VERSION_STRING
       " (build_id " STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER) ")",
       EMULATOR_CL_SHA1);
 #endif
@@ -772,12 +776,10 @@ int main(int argc, char** argv)
                 envName = "ANDROID_SDK_HOME";
                 searchDir = kSdkHomeSearchDir;
             }
-            derror("Unknown AVD name [%s], use -list-avds to see valid list.\n"
-                   "%s is defined but there is no file %s.ini in %s\n"
-                   "(Note: Directories are searched in the order "
-                   "$ANDROID_AVD_HOME, %s and %s)",
-                   avdName, envName, avdName, searchDir, kSdkHomeSearchDir,
-                   kHomeSearchDir);
+            derror("Unknown AVD name [%s], use -list-avds to see valid list.",avdName);
+            derror("%s is defined but there is no file %s.ini in %s", envName, avdName, searchDir);
+            derror("(Note: Directories are searched in the order $ANDROID_AVD_HOME, %s and %s)",
+                    kSdkHomeSearchDir, kHomeSearchDir);
             return 1;
         }
         avdArch = path_getAvdTargetArch(avdName);
@@ -966,23 +968,23 @@ int main(int argc, char** argv)
 
     if (android_verbose) {
         int i;
-        printf("emulator: Running :%s\n", emulatorPath);
+        dprint("emulator: Running :%s", emulatorPath);
         for(i = 0; i < argc; i++) {
-            printf("emulator: qemu backend: argv[%02d] = \"%s\"\n", i, argv[i]);
+            dprint("qemu backend: argv[%02d] = \"%s\"", i, argv[i]);
         }
-        /* Dump final command-line parameters to make debugging easier */
-        printf("emulator: Concatenated backend parameters:\n");
+        std::string concat;
         for (i = 0; i < argc; i++) {
             /* To make it easier to copy-paste the output to a command-line,
              * quote anything that contains spaces.
              */
             if (strchr(argv[i], ' ') != NULL) {
-                printf(" '%s'", argv[i]);
+                concat += " '" + std::string(argv[i]) + " '";
             } else {
-                printf(" %s", argv[i]);
+                concat += " " + std::string(argv[i]);
             }
         }
-        printf("\n");
+         /* Dump final command-line parameters to make debugging easier */
+        dprint("Concatenated backend parameters: %s", concat.c_str());
     }
 
     // Launch it with the same set of options !

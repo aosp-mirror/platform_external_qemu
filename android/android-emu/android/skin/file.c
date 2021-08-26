@@ -305,7 +305,7 @@ static SkinLocation* skin_location_create_from_v2(const AConfig* node,
     SkinLocation*  location;
 
     if (partname == NULL) {
-        dprint( "### WARNING: ignoring part location without 'name' element" );
+        dwarning("ignoring part location without 'name' element" );
         return NULL;
     }
 
@@ -314,7 +314,7 @@ static SkinLocation* skin_location_create_from_v2(const AConfig* node,
             break;
 
     if (part == NULL) {
-        dprint( "### WARNING: ignoring part location with unknown name '%s'", partname );
+        dwarning("ignoring part location with unknown name '%s'", partname );
         return NULL;
     }
 
@@ -501,7 +501,7 @@ skin_layout_event_decode( const char*  event, int  *ptype, int  *pcode, int *pva
         y = strchr(x+1, ':');
 
     if (x == NULL || y == NULL) {
-        dprint( "### WARNING: invalid skin layout event format: '%s', should be '<TYPE>:<CODE>:<VALUE>'", event );
+        dwarning("invalid skin layout event format: '%s', should be '<TYPE>:<CODE>:<VALUE>'", event );
         return -1;
     }
 
@@ -510,7 +510,7 @@ skin_layout_event_decode( const char*  event, int  *ptype, int  *pcode, int *pva
             break;
 
     if (!ev->name) {
-        dprint( "### WARNING: unrecognized skin layout event name: %.*s", x-event, event );
+        dwarning("unrecognized skin layout event name: %.*s", x-event, event );
         return -1;
     }
 
@@ -900,7 +900,7 @@ static int skin_file_load_from_v2(SkinFile* file,
             SkinPart*  part = skin_part_create_from_v2(
                     node, basepath, fb_funcs);
             if (part == NULL) {
-                dprint( "## WARNING: can't load part '%s' from skin\n", node->name ? node->name : "<NULL>");
+                dwarning("can't load part '%s' from skin\n", node->name ? node->name : "<NULL>");
                 continue;
             }
 
@@ -958,7 +958,7 @@ static int skin_file_load_from_v2(SkinFile* file,
                 layout = layout->next;
                 layout->next = NULL;
             } else {
-                dprint("## WARNING: failed to auto-generate rotated layout");
+                dwarning("failed to auto-generate rotated layout");
             }
         }
     }
@@ -984,7 +984,7 @@ SkinFile* skin_file_create_from_aconfig(const AConfig* aconfig,
         file->version = aconfig_int(aconfig, "version", 2);
         /* The file version must be 1 or higher */
         if (file->version <= 0) {
-            dprint( "## WARNING: invalid skin version: %d", file->version);
+            dwarning("invalid skin version: %d", file->version);
             goto BAD_FILE;
         }
     }

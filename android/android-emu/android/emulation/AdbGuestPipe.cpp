@@ -46,18 +46,18 @@
 
 #if DEBUG >= 1
 #include <stdio.h>
-#define D(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
+#define D(...) dprint( __VA_ARGS__)
 #else
 #define D(...) (void)0
 #endif
 
 #if DEBUG >= 2
-#define DD(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
+#define DD(...) dprint( __VA_ARGS__)
 #else
 #define DD(...) (void)0
 #endif
 
-#define E(...) fprintf(stderr, "ERROR:" __VA_ARGS__), fprintf(stderr, "\n")
+#define E(...) derror(__VA_ARGS__)
 
 #define DINIT(...) do { if (DEBUG || VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
@@ -733,7 +733,7 @@ int AdbGuestPipe::onGuestRecvData(AndroidPipeBuffer* buffers, int numBuffers) {
                     len = android::base::socketRecv(
                             mHostSocket.fd(), data, dataSize);
                 } else {
-                    fprintf(stderr, "WARNING: AdbGuestPipe socket closed in the middle of recv\n");
+                    dwarning("AdbGuestPipe socket closed in the middle of recv");
                     mState = State::ClosedByHost;
                     len = -1;
                 }
@@ -812,7 +812,7 @@ int AdbGuestPipe::onGuestSendData(const AndroidPipeBuffer* buffers,
                     }
 #endif
                 } else {
-                    fprintf(stderr, "WARNING: AdbGuestPipe socket closed in the middle of send\n");
+                    dwarning("AdbGuestPipe socket closed in the middle of send");
                     mState = State::ClosedByHost;
                     len = -1;
                 }

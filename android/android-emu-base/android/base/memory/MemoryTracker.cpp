@@ -29,9 +29,11 @@
 #include <vector>
 #endif
 
+#include "android/utils/debug.h"
+
 using android::base::LazyInstance;
 
-#define E(fmt, ...) fprintf(stderr, "%s: " fmt "\n", __func__, ##__VA_ARGS__);
+#define E(fmt, ...) derror("%s: " fmt, __func__, ##__VA_ARGS__);
 
 namespace android {
 namespace base {

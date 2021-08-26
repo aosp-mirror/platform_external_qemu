@@ -104,7 +104,7 @@ static void watchDogFunction(int sleep_minutes) {
         int now = guest_heart_beat_count.load();
         if (now <= current) {
             // reboot
-            printf("emulator: Guest seems stalled, reboot now.\n");
+            dinfo("Guest seems stalled, reboot now.");
             fflush(stdout);
             android::base::restartEmulator();
             break;
@@ -129,11 +129,11 @@ static void watchHostCtsFunction(int sleep_minutes) {
 
         time_t curtime;
         time(&curtime);
-        printf("emulator : cts heart beat %d at %s\n", now, ctime(&curtime));
+        dinfo("cts heart beat %d at %s", now, ctime(&curtime));
         fflush(stdout);
         if (current > 0 && now <= current && restart_when_stalled) {
             // reboot
-            printf("emulator: host cts seems stalled, reboot now.\n");
+            dinfo("host cts seems stalled, reboot now.");
             fflush(stdout);
             android::base::restartEmulator();
             break;
@@ -277,11 +277,10 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
         return;
     } else if (beginWith(input, "bootcomplete")) {
         fillWithOK(output);
-        printf("emulator: INFO: boot completed\n");
+        dinfo("boot completed");
         // bug: 152636877
 #ifndef _WIN32
-        printf(
-            "emulator: INFO: boot time %lld ms\n",
+        dinfo("boot time %lld ms",
             (long long)(get_uptime_ms() - s_reset_request_uptime_ms));
 #endif
         fflush(stdout);
@@ -294,8 +293,8 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             auto adbInterface = emulation::AdbInterface::getGlobal();
             if (!adbInterface) return;
 
-            printf("emulator: Increasing screen off timeout, "
-                    "logcat buffer size to 2M.\n");
+            dinfo("Increasing screen off timeout, "
+                    "logcat buffer size to 2M.");
 
             adbInterface->enqueueCommand(
                 { "shell", "settings", "put", "system",
@@ -319,12 +318,12 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             // If we allowed host audio, don't revoke
             // microphone perms.
             if (getConsoleAgents()->vm->isRealAudioAllowed()) {
-                printf("emulator: Not revoking microphone permissions "
-                       "for Google App.\n");
+                dinfo("Not revoking microphone permissions "
+                       "for Google App.");
                 return;
             } else {
-                printf("emulator: Revoking microphone permissions "
-                       "for Google App.\n");
+                dinfo("Revoking microphone permissions "
+                       "for Google App.");
             }
 
             adbInterface->enqueueCommand(
@@ -408,23 +407,23 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             }
 
             if (changing_language_country_locale) {
-                printf("Changing language, country or locale...\n");
+                dinfo("Changing language, country or locale...");
                 if (to_set_language) {
-                    printf("Changing language to %s\n", to_set_language);
+                    dinfo("Changing language to %s", to_set_language);
                     adbInterface->enqueueCommand(
                         { "shell", "su", "0",
                           "setprop", "persist.sys.language", to_set_language });
                 }
 
                 if (to_set_country) {
-                    printf("Changing country to %s\n", to_set_country);
+                    dinfo("Changing country to %s", to_set_country);
                     adbInterface->enqueueCommand(
                         { "shell", "su", "0",
                           "setprop", "persist.sys.country", to_set_country });
                 }
 
                 if (to_set_locale) {
-                    printf("Changing locale to %s\n", to_set_locale);
+                    dinfo("Changing locale to %s", to_set_locale);
                     adbInterface->enqueueCommand(
                         { "shell", "su", "0",
                           "setprop", "persist.sys.locale", to_set_locale });
@@ -456,7 +455,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             }
 
             if (restartFrameWork) {
-                printf("Restarting framework.\n");
+                dinfo("Restarting framework.");
                 adbInterface->enqueueCommand(
                     { "shell", "su", "0",
                       "setprop", "ctl.restart", "zygote" });

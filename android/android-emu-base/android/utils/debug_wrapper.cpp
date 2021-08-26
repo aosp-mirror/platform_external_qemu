@@ -15,10 +15,12 @@
 
 void base_enable_verbose_logs() {
     VERBOSE_ENABLE(init);
-    android::base::setMinLogLevel(android::base::LOG_VERBOSE);
+    android::base::setMinLogLevel(EMULATOR_LOG_VERBOSE);
+    android_log_severity = EMULATOR_LOG_VERBOSE;
 }
 
 void base_disable_verbose_logs() {
     VERBOSE_DISABLE(init);
-    android::base::setMinLogLevel(android::base::LOG_INFO);
+    android::base::setMinLogLevel(EMULATOR_LOG_INFO);
+    android_log_severity = EMULATOR_LOG_INFO;
 }

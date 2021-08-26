@@ -19,6 +19,7 @@
 #include <dlfcn.h>
 #include <stdio.h>
 #include <string.h>
+#include "android/utils/debug.h"
 
 extern "C" {
 
@@ -36,10 +37,10 @@ EXPORT android_vulkan_dispatch* load_android_vulkan_dispatch(const char* path) {
 
     void* lib = dlopen(libPath, RTLD_NOW);
     if (!lib) {
-        fprintf(stderr, "%s: libvulkan_android not found!\n", __func__);
+        derror("%s: libvulkan_android not found!", __func__);
         return out;
     } else {
-        fprintf(stderr, "%s: libvulkan_android found\n", __func__);
+        derror("%s: libvulkan_android found", __func__);
     }
 
 #ifdef VK_VERSION_1_0

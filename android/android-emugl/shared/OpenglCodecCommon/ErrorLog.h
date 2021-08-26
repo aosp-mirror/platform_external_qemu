@@ -16,10 +16,11 @@
 #ifndef _ERROR_LOG_H_
 #define _ERROR_LOG_H_
 
+#include "android/utils/debug.h"
 #include <stdio.h>
-#define ERR(...)    fprintf(stderr, __VA_ARGS__)
+#define ERR(...)    derror(__VA_ARGS__)
 #ifdef EMUGL_DEBUG
-#    define DBG(...)    fprintf(stderr, __VA_ARGS__)
+#    define DBG(...)    dprint(__VA_ARGS__)
 #else
 #    define DBG(...)    ((void)0)
 #endif

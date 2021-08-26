@@ -712,9 +712,9 @@ private:
                     if (stream) {
                         stream->sendOp(VIRTIO_VSOCK_OP_RESPONSE);
                     } else {
-                        fprintf(stderr, "%s:%d {src_port=%u dst_port=%u} could not create "
-                                "the stream - already exists\n",
-                                __func__, __LINE__, request->src_port, request->dst_port);
+                        derror("%s {src_port=%u dst_port=%u} could not create "
+                                "the stream - already exists",
+                                __func__, request->src_port, request->dst_port);
                         queueOrphanFrameHostToGuestLocked(request, VIRTIO_VSOCK_OP_RST);
                     }
                 }
@@ -730,8 +730,8 @@ private:
                 break;
 
             default:
-                fprintf(stderr, "%s:%d {src_port=%u dst_port=%u} unexpected dst_port\n",
-                        __func__, __LINE__, request->src_port, request->dst_port);
+                derror( "%s: {src_port=%u dst_port=%u} unexpected dst_port",
+                        __func__,  request->src_port, request->dst_port);
 
                 queueOrphanFrameHostToGuestLocked(request, VIRTIO_VSOCK_OP_RST);
                 break;
@@ -769,8 +769,8 @@ private:
                     break;
 
                 default:
-                    fprintf(stderr, "%s:%d unexpected op, op=%s (%d)\n",
-                            __func__, __LINE__,
+                    derror("%s unexpected op, op=%s (%d)",
+                            __func__,
                             op2str(request->op), request->op);
 
                     stream->sendOp(VIRTIO_VSOCK_OP_RST);
