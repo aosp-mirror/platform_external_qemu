@@ -93,9 +93,16 @@ static void fillWithOK(std::vector<uint8_t> &output) {
 static void watchDogFunction(int sleep_minutes) {
     if (sleep_minutes <= 0) return;
 
+    int waitCount = 3;
     int current = guest_heart_beat_count.load();
-    // guest does not have heartbeat, do nothing
-    if (current <= 0) return;
+    while (current <= 0) {
+        base::Thread::sleepMs(sleep_minutes * 60 * 1000);
+        current = guest_heart_beat_count.load();
+        --waitCount;
+        if (waitCount <= 0) {
+            break;
+        }
+    }
 
     num_watchdog ++;
     while (1) {

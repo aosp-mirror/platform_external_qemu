@@ -4603,7 +4603,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
               read_only = true;
               break;
             case QEMU_OPTION_restart_when_stalled:
-                set_restart_when_stalled();
+                if (avdInfo_getApiLevel(android_avdInfo) >= 30) {
+                    set_restart_when_stalled();
+                }
                 break;
             case QEMU_OPTION_wear_auto_forward:
                 wear_auto_forward = true;
