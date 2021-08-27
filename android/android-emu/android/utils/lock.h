@@ -38,4 +38,12 @@ extern void android_lock_acquire(CLock* l);
 extern void android_lock_release(CLock* l);
 extern void android_lock_free(CLock* l);
 
+typedef struct CReadWriteLock CReadWriteLock;
+extern CReadWriteLock* android_rw_lock_new();
+extern void android_rw_lock_read_acquire(CReadWriteLock* l);
+extern void android_rw_lock_read_release(CReadWriteLock* l);
+extern void android_rw_lock_write_acquire(CReadWriteLock* l);
+extern void android_rw_lock_write_release(CReadWriteLock* l);
+extern void android_rw_lock_free(CReadWriteLock* l);
+
 ANDROID_END_HEADER
