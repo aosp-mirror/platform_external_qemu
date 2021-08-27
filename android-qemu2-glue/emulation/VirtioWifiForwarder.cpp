@@ -270,6 +270,13 @@ void VirtioWifiForwarder::stop() {
     }
 }
 
+MacAddress VirtioWifiForwarder::getStaMacAddr(const char* ssid) {
+    if (!mHostapd->getSsid().compare(ssid))
+        return mFrameInfo.mTransmitter;
+    else
+        return MacAddress();
+}
+
 VirtioWifiForwarder* VirtioWifiForwarder::getInstance(NetClientState* nc) {
     return static_cast<VirtioWifiForwarder*>(qemu_get_nic_opaque(nc));
 }

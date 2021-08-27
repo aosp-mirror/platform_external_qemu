@@ -37,6 +37,9 @@ public:
     void terminate();
     bool isRunning();
     bool usingWPA2();
+    std::string getSsid() const {
+        return mSsid;
+    };
     android::network::CipherScheme getCipherScheme();
     static HostapdController* getInstance();
 

@@ -61,6 +61,12 @@ static u_int dns6_addr_time;
 
 static int enable_cleanup_ip_on_load = 0;
 
+static bool enable_block_src_ethaddr = 0;
+
+static uint8_t blocked_ethaddr[ETH_ALEN] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
 #define TIMEOUT_FAST 2  /* milliseconds */
 #define TIMEOUT_SLOW 499  /* milliseconds */
 /* for the aging of certain requests like DNS */
@@ -984,6 +990,15 @@ static void arp_input(Slirp *slirp, const uint8_t *pkt, int pkt_len)
     }
 }
 
+void slirp_block_src_ethaddr(const uint8_t* ethaddr, bool enable) {
+    enable_block_src_ethaddr = enable;
+    if (enable) {
+        memcpy(blocked_ethaddr, ethaddr, ETH_ALEN);
+    } else {
+        memset(blocked_ethaddr, 0, ETH_ALEN);
+    }
+}
+
 void slirp_input(Slirp *slirp, const uint8_t *pkt, int pkt_len)
 {
     struct mbuf *m;
@@ -1002,6 +1017,15 @@ void slirp_input(Slirp *slirp, const uint8_t *pkt, int pkt_len)
         m = m_get(slirp);
         if (!m)
             return;
+        /* Note: block internet access for destination ethernet address
+         * on request. ARP packets are NOT blocked.
+         */
+        if (enable_block_src_ethaddr) {
+            struct eth_header* eth_hdr = (struct eth_header*)pkt;
+            if (!memcmp(eth_hdr->h_source, blocked_ethaddr, ETH_ALEN)) {
+                return;
+            }
+        }
         /* Note: we add 2 to align the IP header on 4 bytes,
          * and add the margin for the tcpiphdr overhead  */
         if (M_FREEROOM(m) < pkt_len + TCPIPHDR_DELTA + 2) {

@@ -43,6 +43,8 @@ typedef struct VirtIOWifi {
 // address prefix so that mac addresses won't clash.
 extern void virtio_wifi_set_mac_prefix(int prefix);
 
+// Translate ssid to the mac address of the wifi router.
+extern const uint8_t* virtio_wifi_ssid_to_ethaddr(const char* ssid);
 #ifdef __cplusplus
 }
 #else

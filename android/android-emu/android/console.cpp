@@ -1042,7 +1042,12 @@ static void describe_wifi_add(ControlClient client)
 
 static int do_wifi_block(ControlClient client, char* args)
 {
-    return android_wifi_set_ssid_block_on(args, true);
+    if (android::featurecontrol::isEnabled(
+                android::featurecontrol::VirtioWifi)) {
+        return client->global->net_agent->slirpBlockSsid(args, true) ? 0 : -1;
+    } else {
+        return android_wifi_set_ssid_block_on(args, true);
+    }
 }
 
 static void describe_wifi_block(ControlClient client)
@@ -1055,7 +1060,12 @@ static void describe_wifi_block(ControlClient client)
 
 static int do_wifi_unblock(ControlClient client, char* args)
 {
-    return android_wifi_set_ssid_block_on(args, false);
+    if (android::featurecontrol::isEnabled(
+                android::featurecontrol::VirtioWifi)) {
+        return client->global->net_agent->slirpBlockSsid(args, false);
+    } else {
+        return android_wifi_set_ssid_block_on(args, false);
+    }
 }
 
 static void describe_wifi_unblock(ControlClient client)
