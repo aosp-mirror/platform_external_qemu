@@ -3080,10 +3080,28 @@ public:
         VkMemoryAllocateInfo localAllocInfo = vk_make_orphan_copy(*pAllocateInfo);
         vk_struct_chain_iterator structChainIter = vk_make_chain_iterator(&localAllocInfo);
 
+        VkMemoryAllocateFlagsInfo allocFlagsInfo;
+        VkMemoryOpaqueCaptureAddressAllocateInfo opaqueCaptureAddressAllocInfo;
         VkExportMemoryAllocateInfo exportAllocInfo;
         VkImportColorBufferGOOGLE importCbInfo;
         VkImportPhysicalAddressGOOGLE importPhysAddrInfo;
         VkMemoryDedicatedAllocateInfo dedicatedAllocInfo;
+
+        // Add buffer device address capture structs
+        const VkMemoryAllocateFlagsInfo* allocFlagsInfoPtr =
+            vk_find_struct<VkMemoryAllocateFlagsInfo>(pAllocateInfo);
+        const VkMemoryOpaqueCaptureAddressAllocateInfo* opaqueCaptureAddressAllocInfoPtr =
+            vk_find_struct<VkMemoryOpaqueCaptureAddressAllocateInfo>(pAllocateInfo);
+
+        if (allocFlagsInfoPtr) {
+            allocFlagsInfo = *allocFlagsInfoPtr;
+            vk_append_struct(&structChainIter, &allocFlagsInfo);
+        }
+
+        if (opaqueCaptureAddressAllocInfoPtr) {
+            opaqueCaptureAddressAllocInfo = *opaqueCaptureAddressAllocInfoPtr;
+            vk_append_struct(&structChainIter, &opaqueCaptureAddressAllocInfo);
+        }
 
         // handle type should already be converted in unmarshaling
         const VkExportMemoryAllocateInfo* exportAllocInfoPtr =
