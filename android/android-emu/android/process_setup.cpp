@@ -85,13 +85,12 @@ void process_early_setup(int argc, char** argv) {
 
         android::crashreport::CrashReporter::get()->attachData(
                 "command-line-and-environment.txt", arguments);
-
-        // Make sure we don't report any hangs until all related loopers
-        // actually get started.
-        android::crashreport::CrashReporter::get()->hangDetector().pause(true);
     } else {
         LOG(VERBOSE) << "Crash handling not initialized";
     }
+    // Make sure we don't report any hangs until all related loopers
+    // actually get started.
+    android::crashreport::CrashReporter::get()->hangDetector().pause(true);
 
     // libcurl initialization is thread-unsafe, so let's call it first
     // to make sure no other thread could be doing the same

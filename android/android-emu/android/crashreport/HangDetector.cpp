@@ -158,12 +158,17 @@ void HangDetector::addWatchedLooper(base::Looper* looper) {
 
 void HangDetector::pause(bool paused) {
     base::AutoLock lock(mLock);
-    mPaused = paused;
     if (paused) {
+        mPaused ++;
+    } else {
+        mPaused --;
+    }
+    // Only the first pause and last resume will actually trigger the pause/resume.
+    if (paused && mPaused == 1) {
         for (auto&& lw : mLoopers) {
             lw->cancelHangCheck();
         }
-    } else {
+    } else if (mPaused == 0) {
         mWorkerThreadCv.signalAndUnlock(&lock);
     }
 }
