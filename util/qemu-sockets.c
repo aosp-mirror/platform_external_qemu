@@ -45,21 +45,26 @@
 #endif
 
 
-static int inet_getport(struct addrinfo *e)
+int sockaddr_getport(const struct sockaddr *addr)
 {
-    struct sockaddr_in *i4;
-    struct sockaddr_in6 *i6;
+    const struct sockaddr_in *i4;
+    const struct sockaddr_in6 *i6;
 
-    switch (e->ai_family) {
+    switch (addr->sa_family) {
     case PF_INET6:
-        i6 = (void*)e->ai_addr;
+        i6 = (void *)addr;
         return ntohs(i6->sin6_port);
     case PF_INET:
-        i4 = (void*)e->ai_addr;
+        i4 = (void *)addr;
         return ntohs(i4->sin_port);
     default:
         return 0;
     }
+}
+
+static int inet_getport(struct addrinfo *e)
+{
+    return sockaddr_getport(e->ai_addr);
 }
 
 static void inet_setport(struct addrinfo *e, int port)

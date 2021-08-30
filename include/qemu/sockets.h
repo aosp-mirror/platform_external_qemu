@@ -58,6 +58,8 @@ int socket_set_fast_reuse(int fd);
 #define SHUT_RDWR 2
 #endif
 
+int sockaddr_getport(const struct sockaddr *addr);
+
 int inet_ai_family_from_address(InetSocketAddress *addr,
                                 Error **errp);
 const char *inet_parse_host_port(InetSocketAddress *addr,

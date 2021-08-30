@@ -716,14 +716,106 @@ static SlirpState *slirp_lookup(Monitor *mon, const char *id)
     }
 }
 
+static const char *parse_protocol(const char *str, bool *is_udp,
+                                  Error **errp)
+{
+    char buf[10];
+    const char *p = str;
+
+    if (get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
+        error_setg(errp, "missing protocol name separator");
+        return NULL;
+    }
+
+    if (!strcmp(buf, "tcp") || buf[0] == '\0') {
+        *is_udp = false;
+    } else if (!strcmp(buf, "udp")) {
+        *is_udp = true;
+    } else {
+        error_setg(errp, "bad protocol name '%s'", buf);
+        return NULL;
+    }
+
+    return p;
+}
+
+static int parse_hostfwd_sockaddr(const char *str, int socktype,
+                                  struct sockaddr_storage *saddr,
+                                  Error **errp)
+{
+    struct addrinfo hints, *res = NULL, *e;
+    InetSocketAddress *addr = g_new(InetSocketAddress, 1);
+    int gai_rc;
+    int rc = -1;
+
+    const char *optstr = inet_parse_host_port(addr, str, errp);
+    if (optstr == NULL) {
+        goto fail_return;
+    }
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_flags = AI_PASSIVE; /* ignored if host is not ""(->NULL) */
+    hints.ai_flags |= AI_NUMERICHOST | AI_NUMERICSERV;
+    hints.ai_socktype = socktype;
+    hints.ai_family = PF_INET;
+
+    /*
+     * Calling getaddrinfo for guest addresses is dubious, but addresses are
+     * restricted to numeric only. Convert "" to NULL for getaddrinfo's
+     * benefit.
+     */
+    gai_rc = getaddrinfo(*addr->host ? addr->host : NULL,
+                         *addr->port ? addr->port : NULL, &hints, &res);
+    if (gai_rc != 0) {
+        error_setg(errp, "address resolution failed for '%s': %s",
+                   str, gai_strerror(gai_rc));
+        goto fail_return;
+    }
+    if (res->ai_next != NULL) {
+        /*
+         * The caller only wants one address, and except for "any" for both
+         * ipv4 and ipv6 (which we've already precluded above), we shouldn't
+         * get more than one. To assist debugging print all we find.
+         */
+        GString *s = g_string_new(NULL);
+        for (e = res; e != NULL; e = e->ai_next) {
+            char host[NI_MAXHOST];
+            char serv[NI_MAXSERV];
+            int ret = getnameinfo((struct sockaddr *)e->ai_addr, e->ai_addrlen,
+                                  host, sizeof(host),
+                                  serv, sizeof(serv),
+                                  NI_NUMERICHOST | NI_NUMERICSERV);
+            if (ret == 0) {
+                g_string_append_printf(s, "\n  %s:%s", host, serv);
+            } else {
+                g_string_append_printf(s, "\n  unknown, got: %s",
+                                       gai_strerror(ret));
+            }
+        }
+        error_setg(errp, "multiple addresses resolved for '%s':%s",
+                   str, s->str);
+        g_string_free(s, TRUE);
+        goto fail_return;
+    }
+
+    memcpy(saddr, res->ai_addr, res->ai_addrlen);
+    rc = 0;
+
+ fail_return:
+    qapi_free_InetSocketAddress(addr);
+    if (res) {
+        freeaddrinfo(res);
+    }
+    return rc;
+}
+
 void hmp_hostfwd_remove(Monitor *mon, const QDict *qdict)
 {
-    struct in_addr host_addr = { .s_addr = INADDR_ANY };
-    int host_port;
-    char buf[256];
+    struct sockaddr_storage host_addr;
     const char *src_str, *p;
     SlirpState *s;
-    int is_udp = 0;
+    bool is_udp;
+    Error *error = NULL;
     int err;
     const char *arg1 = qdict_get_str(qdict, "arg1");
     const char *arg2 = qdict_get_try_str(qdict, "arg2");
@@ -739,110 +831,130 @@ void hmp_hostfwd_remove(Monitor *mon, const QDict *qdict)
         return;
     }
 
+    g_assert(src_str != NULL);
     p = src_str;
-    if (!p || get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
+
+    p = parse_protocol(p, &is_udp, &error);
+    if (p == NULL) {
         goto fail_syntax;
     }
 
-    if (!strcmp(buf, "tcp") || buf[0] == '\0') {
-        is_udp = 0;
-    } else if (!strcmp(buf, "udp")) {
-        is_udp = 1;
+    if (parse_hostfwd_sockaddr(p, is_udp ? SOCK_DGRAM : SOCK_STREAM,
+                               &host_addr, &error) < 0) {
+        goto fail_syntax;
+    }
+
+#if SLIRP_CHECK_VERSION(4, 5, 0)
+    {
+        int flags = is_udp ? SLIRP_HOSTFWD_UDP : 0;
+        err = slirp_remove_hostxfwd(s->slirp, (struct sockaddr *) &host_addr,
+                                    sizeof(host_addr), flags);
+    }
+#else
+    if (host_addr.ss_family != AF_INET) {
+        monitor_printf(mon,
+                       "Could not remove host forwarding rule '%s':"
+                       " only IPv4 supported",
+                       src_str);
+        return;
     } else {
-        goto fail_syntax;
+        struct sockaddr_in *host_in_addr = (struct sockaddr_in *) &host_addr;
+        err = slirp_remove_hostfwd(s->slirp, is_udp,
+                                   host_in_addr->sin_addr,
+                                   ntohs(host_in_addr->sin_port));
     }
-
-    if (get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
-        goto fail_syntax;
-    }
-    if (buf[0] != '\0' && !inet_aton(buf, &host_addr)) {
-        goto fail_syntax;
-    }
-
-    if (qemu_strtoi(p, NULL, 10, &host_port)) {
-        goto fail_syntax;
-    }
-
-    err = slirp_remove_hostfwd(s->slirp, is_udp, host_addr, host_port);
+#endif
 
     monitor_printf(mon, "host forwarding rule for %s %s\n", src_str,
                    err ? "not found" : "removed");
     return;
 
  fail_syntax:
-    monitor_printf(mon, "invalid format\n");
+    monitor_printf(mon, "Invalid format: %s\n", error_get_pretty(error));
+    error_free(error);
 }
 
 static int slirp_hostfwd(SlirpState *s, const char *redir_str, Error **errp)
 {
-    struct in_addr host_addr = { .s_addr = INADDR_ANY };
-    struct in_addr guest_addr = { .s_addr = 0 };
-    int host_port, guest_port;
+    struct sockaddr_storage host_addr, guest_addr;
     const char *p;
     char buf[256];
-    int is_udp;
-    char *end;
-    const char *fail_reason = "Unknown reason";
+    bool is_udp;
+    Error *error = NULL;
+    int port;
 
+    g_assert(redir_str != NULL);
     p = redir_str;
-    if (!p || get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
-        fail_reason = "No : separators";
-        goto fail_syntax;
-    }
-    if (!strcmp(buf, "tcp") || buf[0] == '\0') {
-        is_udp = 0;
-    } else if (!strcmp(buf, "udp")) {
-        is_udp = 1;
-    } else {
-        fail_reason = "Bad protocol name";
-        goto fail_syntax;
-    }
 
-    if (get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
-        fail_reason = "Missing : separator";
-        goto fail_syntax;
-    }
-    if (buf[0] != '\0' && !inet_aton(buf, &host_addr)) {
-        fail_reason = "Bad host address";
+    p = parse_protocol(p, &is_udp, &error);
+    if (p == NULL) {
         goto fail_syntax;
     }
 
     if (get_str_sep(buf, sizeof(buf), &p, '-') < 0) {
-        fail_reason = "Bad host port separator";
-        goto fail_syntax;
-    }
-    host_port = strtol(buf, &end, 0);
-    if (*end != '\0' || host_port < 0 || host_port > 65535) {
-        fail_reason = "Bad host port";
+        error_setg(&error, "missing host-guest separator");
         goto fail_syntax;
     }
 
-    if (get_str_sep(buf, sizeof(buf), &p, ':') < 0) {
-        fail_reason = "Missing guest address";
-        goto fail_syntax;
-    }
-    if (buf[0] != '\0' && !inet_aton(buf, &guest_addr)) {
-        fail_reason = "Bad guest address";
+    if (parse_hostfwd_sockaddr(buf, is_udp ? SOCK_DGRAM : SOCK_STREAM,
+                               &host_addr, &error) < 0) {
+        error_prepend(&error, "For host address: ");
         goto fail_syntax;
     }
 
-    guest_port = strtol(p, &end, 0);
-    if (*end != '\0' || guest_port < 1 || guest_port > 65535) {
-        fail_reason = "Bad guest port";
+    if (parse_hostfwd_sockaddr(p, is_udp ? SOCK_DGRAM : SOCK_STREAM,
+                               &guest_addr, &error) < 0) {
+        error_prepend(&error, "For guest address: ");
+        goto fail_syntax;
+    }
+    port = sockaddr_getport((struct sockaddr *) &guest_addr);
+    if (port == 0) {
+        error_setg(&error, "For guest address: invalid port '0'");
         goto fail_syntax;
     }
 
-    if (slirp_add_hostfwd(s->slirp, is_udp, host_addr, host_port, guest_addr,
-                          guest_port) < 0) {
-        error_setg(errp, "Could not set up host forwarding rule '%s'",
+#if SLIRP_CHECK_VERSION(4, 5, 0)
+    {
+        int flags = is_udp ? SLIRP_HOSTFWD_UDP : 0;
+        if (slirp_add_hostxfwd(s->slirp,
+                               (struct sockaddr *) &host_addr,
+                               sizeof(host_addr),
+                               (struct sockaddr *) &guest_addr,
+                               sizeof(guest_addr),
+                               flags) < 0) {
+            error_setg(errp, "Could not set up host forwarding rule '%s': %s",
+                       redir_str, strerror(errno));
+            return -1;
+        }
+    }
+#else
+    if (host_addr.ss_family != AF_INET || guest_addr.ss_family != AF_INET) {
+        error_setg(errp,
+                   "Could not set up host forwarding rule '%s':"
+                   " only IPv4 supported",
                    redir_str);
         return -1;
+    } else {
+        struct sockaddr_in *host_in_addr = (struct sockaddr_in *) &host_addr;
+        struct sockaddr_in *guest_in_addr = (struct sockaddr_in *) &guest_addr;
+        if (slirp_add_hostfwd(s->slirp, is_udp,
+                              host_in_addr->sin_addr,
+                              ntohs(host_in_addr->sin_port),
+                              guest_in_addr->sin_addr,
+                              ntohs(guest_in_addr->sin_port)) < 0) {
+            error_setg(errp, "Could not set up host forwarding rule '%s'",
+                       redir_str);
+            return -1;
+        }
     }
+#endif
+
     return 0;
 
  fail_syntax:
     error_setg(errp, "Invalid host forwarding rule '%s' (%s)", redir_str,
-               fail_reason);
+               error_get_pretty(error));
+    error_free(error);
     return -1;
 }
 
