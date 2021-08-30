@@ -739,25 +739,55 @@ static const char *parse_protocol(const char *str, bool *is_udp,
     return p;
 }
 
-static int parse_hostfwd_sockaddr(const char *str, int socktype,
+static int parse_hostfwd_sockaddr(const char *str, int family, int socktype,
                                   struct sockaddr_storage *saddr,
-                                  Error **errp)
+                                  bool *v6_only, Error **errp)
 {
     struct addrinfo hints, *res = NULL, *e;
     InetSocketAddress *addr = g_new(InetSocketAddress, 1);
     int gai_rc;
     int rc = -1;
+    Error *err = NULL;
 
     const char *optstr = inet_parse_host_port(addr, str, errp);
     if (optstr == NULL) {
         goto fail_return;
     }
 
+    if (inet_parse_ipv46(addr, optstr, errp) < 0) {
+        goto fail_return;
+    }
+
+    if (v6_only) {
+        bool v4 = addr->has_ipv4 && addr->ipv4;
+        bool v6 = addr->has_ipv6 && addr->ipv6;
+        *v6_only = v6 && !v4;
+    }
+
     memset(&hints, 0, sizeof(hints));
     hints.ai_flags = AI_PASSIVE; /* ignored if host is not ""(->NULL) */
     hints.ai_flags |= AI_NUMERICHOST | AI_NUMERICSERV;
     hints.ai_socktype = socktype;
-    hints.ai_family = PF_INET;
+    hints.ai_family = inet_ai_family_from_address(addr, &err);
+    if (err) {
+        error_propagate(errp, err);
+        goto fail_return;
+    }
+    if (family != PF_UNSPEC) {
+        /* Guest must use same family as host (for now). */
+        if (hints.ai_family != PF_UNSPEC && hints.ai_family != family) {
+            error_setg(errp,
+                       "unexpected address family for %s: expecting %s",
+                       str, family == PF_INET ? "ipv4" : "ipv6");
+            goto fail_return;
+        }
+        hints.ai_family = family;
+    }
+
+    /* For backward compatibility, treat an empty host spec as IPv4. */
+    if (*addr->host == '\0' && hints.ai_family == PF_UNSPEC) {
+        hints.ai_family = PF_INET;
+    }
 
     /*
      * Calling getaddrinfo for guest addresses is dubious, but addresses are
@@ -839,8 +869,8 @@ void hmp_hostfwd_remove(Monitor *mon, const QDict *qdict)
         goto fail_syntax;
     }
 
-    if (parse_hostfwd_sockaddr(p, is_udp ? SOCK_DGRAM : SOCK_STREAM,
-                               &host_addr, &error) < 0) {
+    if (parse_hostfwd_sockaddr(p, PF_UNSPEC, is_udp ? SOCK_DGRAM : SOCK_STREAM,
+                               &host_addr, /*v6_only=*/NULL, &error) < 0) {
         goto fail_syntax;
     }
 
@@ -882,6 +912,7 @@ static int slirp_hostfwd(SlirpState *s, const char *redir_str, Error **errp)
     bool is_udp;
     Error *error = NULL;
     int port;
+    bool v6_only;
 
     g_assert(redir_str != NULL);
     p = redir_str;
@@ -896,14 +927,16 @@ static int slirp_hostfwd(SlirpState *s, const char *redir_str, Error **errp)
         goto fail_syntax;
     }
 
-    if (parse_hostfwd_sockaddr(buf, is_udp ? SOCK_DGRAM : SOCK_STREAM,
-                               &host_addr, &error) < 0) {
+    if (parse_hostfwd_sockaddr(buf, PF_UNSPEC,
+                               is_udp ? SOCK_DGRAM : SOCK_STREAM,
+                               &host_addr, &v6_only, &error) < 0) {
         error_prepend(&error, "For host address: ");
         goto fail_syntax;
     }
 
-    if (parse_hostfwd_sockaddr(p, is_udp ? SOCK_DGRAM : SOCK_STREAM,
-                               &guest_addr, &error) < 0) {
+    if (parse_hostfwd_sockaddr(p, host_addr.ss_family,
+                               is_udp ? SOCK_DGRAM : SOCK_STREAM,
+                               &guest_addr, /*v6_only=*/NULL, &error) < 0) {
         error_prepend(&error, "For guest address: ");
         goto fail_syntax;
     }
@@ -916,6 +949,9 @@ static int slirp_hostfwd(SlirpState *s, const char *redir_str, Error **errp)
 #if SLIRP_CHECK_VERSION(4, 5, 0)
     {
         int flags = is_udp ? SLIRP_HOSTFWD_UDP : 0;
+        if (v6_only) {
+            flags |= SLIRP_HOSTFWD_V6ONLY;
+        }
         if (slirp_add_hostxfwd(s->slirp,
                                (struct sockaddr *) &host_addr,
                                sizeof(host_addr),

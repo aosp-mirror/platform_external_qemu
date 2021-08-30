@@ -37,6 +37,17 @@ class Hostfwd(Test):
         self.assertEquals(self.hmc('hostfwd_add udp::65042-:42'), '')
         self.assertEquals(self.hmc('hostfwd_remove udp::65042'),
                           'host forwarding rule for udp::65042 removed\r\n')
+        self.assertEquals(self.hmc('hostfwd_add vnet tcp::65022,ipv4-:22'), '')
+        self.assertEquals(self.hmc('hostfwd_remove vnet tcp::65022,ipv4'),
+                          'host forwarding rule for tcp::65022,ipv4 removed\r\n')
+        self.assertEquals(self.hmc('hostfwd_add vnet tcp::65022,ipv4=on-:22'),
+                          '')
+        self.assertEquals(self.hmc('hostfwd_remove vnet tcp::65022,ipv4=on'),
+                          'host forwarding rule for tcp::65022,ipv4=on removed\r\n')
+        self.assertEquals(self.hmc('hostfwd_add vnet tcp::65022,ipv6=off-:22'),
+                          '')
+        self.assertEquals(self.hmc('hostfwd_remove vnet tcp::65022,ipv6=off'),
+                          'host forwarding rule for tcp::65022,ipv6=off removed\r\n')
 
     def test_qmp_hostfwd_ipv4_functional_errors(self):
         """Verify handling of various kinds of errors given valid addresses."""
@@ -89,3 +100,86 @@ class Hostfwd(Test):
         self.assertEquals(self.hmc('hostfwd_add ::66-:0'),
                           "Invalid host forwarding rule '::66-:0'" + \
                           " (For guest address: invalid port '0')\r\n")
+        self.assertEquals(self.hmc('hostfwd_add vnet tcp::65022,ipv4=abc-:22'),
+                          "Invalid host forwarding rule" + \
+                          " 'tcp::65022,ipv4=abc-:22' (For host address:" + \
+                          " error parsing 'ipv4' flag '=abc')\r\n")
+
+    def test_qmp_hostfwd_ipv6(self):
+        self.vm.add_args('-nodefaults',
+                         '-netdev', 'user,id=vnet',
+                         '-device', 'virtio-net,netdev=vnet')
+        self.vm.launch()
+        self.assertEquals(self.hmc('hostfwd_add vnet tcp:[::1]:65022-[fe80::1]:22'),
+                          '')
+        self.assertEquals(self.hmc('hostfwd_remove vnet tcp:[::1]:65022'),
+                          'host forwarding rule for tcp:[::1]:65022 removed\r\n')
+        self.assertEquals(self.hmc('hostfwd_add udp:[::1]:65042-[fe80::1]:42'),
+                          '')
+        self.assertEquals(self.hmc('hostfwd_remove udp:[::1]:65042'),
+                          'host forwarding rule for udp:[::1]:65042 removed\r\n')
+        self.assertEquals(self.hmc('hostfwd_add vnet tcp::65022,ipv6=on-:22'), '')
+        self.assertEquals(self.hmc('hostfwd_remove vnet tcp::65022,ipv6=on'),
+                          'host forwarding rule for tcp::65022,ipv6=on removed\r\n')
+        self.assertEquals(self.hmc('hostfwd_add vnet tcp::65022,ipv4=off-:22'), '')
+        self.assertEquals(self.hmc('hostfwd_remove vnet tcp::65022,ipv4=off'),
+                          'host forwarding rule for tcp::65022,ipv4=off removed\r\n')
+
+    def test_qmp_hostfwd_ipv6_functional_errors(self):
+        """Verify handling of various kinds of errors given valid addresses."""
+        self.vm.add_args('-nodefaults',
+                         '-netdev', 'user,id=vnet',
+                         '-device', 'virtio-net,netdev=vnet')
+        self.vm.launch()
+        self.assertEquals(self.hmc('hostfwd_remove :[::1]:65022'),
+                          'host forwarding rule for :[::1]:65022 not found\r\n')
+        self.assertEquals(self.hmc('hostfwd_add udp:[::1]:65042-[fe80::1]:42'),
+                          '')
+        self.assertEquals(self.hmc('hostfwd_add udp:[::1]:65042-[fe80::1]:42'),
+                          "Could not set up host forwarding rule" + \
+                          " 'udp:[::1]:65042-[fe80::1]:42': Address already in use\r\n")
+        self.assertEquals(self.hmc('hostfwd_remove :[::1]:65042'),
+                          'host forwarding rule for :[::1]:65042 not found\r\n')
+        self.assertEquals(self.hmc('hostfwd_remove udp:[::1]:65042'),
+                          'host forwarding rule for udp:[::1]:65042 removed\r\n')
+        self.assertEquals(self.hmc('hostfwd_remove udp:[::1]:65042'),
+                          'host forwarding rule for udp:[::1]:65042 not found\r\n')
+
+    def test_qmp_hostfwd_ipv6_errors(self):
+        """Verify handling of various kinds of errors."""
+        self.vm.add_args('-nodefaults',
+                         '-netdev', 'user,id=vnet',
+                         '-device', 'virtio-net,netdev=vnet')
+        self.vm.launch()
+        self.assertEquals(self.hmc('hostfwd_add :[::1-'),
+                          "Invalid host forwarding rule ':[::1-'" + \
+                          " (For host address: error parsing address '[::1')\r\n")
+        self.assertEquals(self.hmc('hostfwd_add :[::1]:66-[fe80::1'),
+                          "Invalid host forwarding rule ':[::1]:66-[fe80::1'" + \
+                          " (For guest address: error parsing address" + \
+                          " '[fe80::1')\r\n")
+        self.assertEquals(self.hmc('hostfwd_add :[:::]:66-foo'),
+                          "Invalid host forwarding rule ':[:::]:66-foo'" + \
+                          " (For host address: address resolution failed for" + \
+                          " '[:::]:66': Name or service not known)\r\n")
+        self.assertEquals(self.hmc('hostfwd_add :[::1]-foo'),
+                          "Invalid host forwarding rule ':[::1]-foo'" + \
+                          " (For host address: error parsing address '[::1]')\r\n")
+        self.assertEquals(self.hmc('hostfwd_add :[::1]:66-[foo]'),
+                          "Invalid host forwarding rule ':[::1]:66-[foo]'" + \
+                          " (For guest address: error parsing address '[foo]')\r\n")
+        self.assertEquals(self.hmc('hostfwd_add :[::1]:66-[fe80::1]:0'),
+                          "Invalid host forwarding rule ':[::1]:66-[fe80::1]:0'" + \
+                          " (For guest address: invalid port '0')\r\n")
+        self.assertEquals(self.hmc('hostfwd_add :[::1]:66-1.2.3.4:66'),
+                          "Invalid host forwarding rule ':[::1]:66-1.2.3.4:66'" + \
+                          " (For guest address: address resolution failed for" + \
+                          " '1.2.3.4:66': Address family for hostname not supported)\r\n")
+        self.assertEquals(self.hmc('hostfwd_add :1.2.3.4:66-[fe80::1]:66'),
+                          "Invalid host forwarding rule ':1.2.3.4:66-[fe80::1]:66'" + \
+                          " (For guest address: address resolution failed for" + \
+                          " '[fe80::1]:66': Address family for hostname not" + \
+                          " supported)\r\n")
+        self.assertEquals(self.hmc('hostfwd_add vnet tcp::65022,ipv6=abc-:22'),
+                          "Invalid host forwarding rule 'tcp::65022,ipv6=abc-:22'" + \
+                          " (For host address: error parsing 'ipv6' flag '=abc')\r\n")

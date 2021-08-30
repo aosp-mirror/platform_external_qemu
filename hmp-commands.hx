@@ -1370,7 +1370,8 @@ ERST
     {
         .name       = "hostfwd_add",
         .args_type  = "arg1:s,arg2:s?",
-        .params     = "[netdev_id] [tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport",
+        .params     = "[netdev_id] [tcp|udp]:[hostaddr]:hostport\n"
+                      "[,ipv4=on|off][,ipv6=on|off]-[guestaddr]:guestport",
         .help       = "redirect TCP or UDP connections from host to guest (requires -net user)",
         .cmd        = hmp_hostfwd_add,
     },
@@ -1378,13 +1379,20 @@ ERST
 SRST
 ``hostfwd_add``
   Redirect TCP or UDP connections from host to guest (requires -net user).
+  IPV6 addresses are wrapped in square brackets, IPV4 addresses are not.
+
+  Examples:
+  hostfwd_add net0 tcp:127.0.0.1:10022-:22
+  hostfwd_add net0 tcp:[::1]:10022-[fe80::1:2:3:4]:22
+  hostfwd_add net0 ::10022,ipv6-:22
 ERST
 
 #ifdef CONFIG_SLIRP
     {
         .name       = "hostfwd_remove",
         .args_type  = "arg1:s,arg2:s?",
-        .params     = "[netdev_id] [tcp|udp]:[hostaddr]:hostport",
+        .params     = "[netdev_id] [tcp|udp]:[hostaddr]:hostport\n"
+                      "[,ipv4=on|off][,ipv6=on|off]",
         .help       = "remove host-to-guest TCP or UDP redirection",
         .cmd        = hmp_hostfwd_remove,
     },
@@ -1393,6 +1401,12 @@ ERST
 SRST
 ``hostfwd_remove``
   Remove host-to-guest TCP or UDP redirection.
+  IPV6 addresses are wrapped in square brackets, IPV4 addresses are not.
+
+  Examples:
+  hostfwd_remove net0 tcp:127.0.0.1:10022
+  hostfwd_remove net0 tcp:[::1]:10022
+  hostfwd_remove net0 ::10022,ipv6
 ERST
 
     {
