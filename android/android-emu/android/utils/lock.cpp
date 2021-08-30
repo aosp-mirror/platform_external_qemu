@@ -17,6 +17,7 @@
 #include "android/base/synchronization/Lock.h"
 
 using android::base::Lock;
+using android::base::ReadWriteLock;
 
 static Lock* asBaseLock(CLock* l) {
     return reinterpret_cast<Lock*>(l);
@@ -41,3 +42,40 @@ void android_lock_release(CLock* l) {
 void android_lock_free(CLock* l) {
     delete asBaseLock(l);
 }
+
+static ReadWriteLock* asReadWriteLock(CReadWriteLock* l) {
+    return reinterpret_cast<ReadWriteLock*>(l);
+}
+
+CReadWriteLock* android_rw_lock_new() {
+    return reinterpret_cast<CReadWriteLock*>(new ReadWriteLock());
+}
+
+void android_rw_lock_read_acquire(CReadWriteLock* l) {
+    if (l) {
+        asReadWriteLock(l)->lockRead();
+    }
+}
+
+void android_rw_lock_read_release(CReadWriteLock* l) {
+    if (l) {
+        asReadWriteLock(l)->unlockRead();
+    }
+}
+
+void android_rw_lock_write_acquire(CReadWriteLock* l) {
+    if (l) {
+        asReadWriteLock(l)->lockWrite();
+    }
+}
+
+void android_rw_lock_write_release(CReadWriteLock* l) {
+    if (l) {
+        asReadWriteLock(l)->unlockWrite();
+    }
+}
+
+void android_rw_lock_free(CReadWriteLock* l) {
+    delete asReadWriteLock(l);
+}
+
