@@ -620,14 +620,12 @@ static int inet_parse_flag(const char *flagname, const char *optstr, bool *val,
     return 0;
 }
 
-int inet_parse(InetSocketAddress *addr, const char *str, Error **errp)
+const char *inet_parse_host_port(InetSocketAddress *addr, const char *str,
+                                 Error **errp)
 {
-    const char *optstr, *h;
     char host[65];
     char port[33];
-    int to;
     int pos;
-    char *begin;
 
     memset(addr, 0, sizeof(*addr));
 
@@ -637,38 +635,32 @@ int inet_parse(InetSocketAddress *addr, const char *str, Error **errp)
         host[0] = '\0';
         if (sscanf(str, ":%32[^,]%n", port, &pos) != 1) {
             error_setg(errp, "error parsing port in address '%s'", str);
-            return -1;
+            return NULL;
         }
     } else if (str[0] == '[') {
         /* IPv6 addr */
         if (sscanf(str, "[%64[^]]]:%32[^,]%n", host, port, &pos) != 2) {
             error_setg(errp, "error parsing IPv6 address '%s'", str);
-            return -1;
+            return NULL;
         }
     } else {
         /* hostname or IPv4 addr */
         if (sscanf(str, "%64[^:]:%32[^,]%n", host, port, &pos) != 2) {
             error_setg(errp, "error parsing address '%s'", str);
-            return -1;
+            return NULL;
         }
     }
 
     addr->host = g_strdup(host);
     addr->port = g_strdup(port);
 
-    /* parse options */
-    optstr = str + pos;
-    h = strstr(optstr, ",to=");
-    if (h) {
-        h += 4;
-        if (sscanf(h, "%d%n", &to, &pos) != 1 ||
-            (h[pos] != '\0' && h[pos] != ',')) {
-            error_setg(errp, "error parsing to= argument");
-            return -1;
-        }
-        addr->has_to = true;
-        addr->to = to;
-    }
+    return str + pos;
+}
+
+int inet_parse_ipv46(InetSocketAddress *addr, const char *optstr, Error **errp)
+{
+    char *begin;
+
     begin = strstr(optstr, ",ipv4");
     if (begin) {
         if (inet_parse_flag("ipv4", begin + 5, &addr->ipv4, errp) < 0) {
@@ -682,6 +674,39 @@ int inet_parse(InetSocketAddress *addr, const char *str, Error **errp)
             return -1;
         }
         addr->has_ipv6 = true;
+    }
+
+    return 0;
+}
+
+int inet_parse(InetSocketAddress *addr, const char *str, Error **errp)
+{
+    const char *optstr, *h;
+    int to;
+    int pos;
+    char *begin;
+
+    optstr = inet_parse_host_port(addr, str, errp);
+    if (optstr == NULL) {
+        return -1;
+    }
+
+    /* parse options */
+
+    if (inet_parse_ipv46(addr, optstr, errp) < 0) {
+        return -1;
+    }
+
+    h = strstr(optstr, ",to=");
+    if (h) {
+        h += 4;
+        if (sscanf(h, "%d%n", &to, &pos) != 1 ||
+            (h[pos] != '\0' && h[pos] != ',')) {
+            error_setg(errp, "error parsing to= argument");
+            return -1;
+        }
+        addr->has_to = true;
+        addr->to = to;
     }
     begin = strstr(optstr, ",keep-alive");
     if (begin) {

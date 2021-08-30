@@ -60,6 +60,9 @@ int socket_set_fast_reuse(int fd);
 
 int inet_ai_family_from_address(InetSocketAddress *addr,
                                 Error **errp);
+const char *inet_parse_host_port(InetSocketAddress *addr,
+                                 const char *str, Error **errp);
+int inet_parse_ipv46(InetSocketAddress *addr, const char *optstr, Error **errp);
 int inet_parse(InetSocketAddress *addr, const char *str, Error **errp);
 int inet_connect(const char *str, Error **errp);
 int inet_connect_saddr(InetSocketAddress *saddr, Error **errp);
