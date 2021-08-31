@@ -113,6 +113,8 @@ constexpr char LOCATION_RECENT_LATITUDE[] = "loc/recent_latitude";
 constexpr char LOCATION_RECENT_LONGITUDE[] = "loc/recent_longitude";
 constexpr char LOCATION_RECENT_VELOCITY[] = "loc/recent_velocity";
 
+constexpr char RESIZABLE_SIZE[] = "resizable/size";
+
 constexpr char SCREENREC_SAVE_PATH[] = "rec/savePath";
 
 
@@ -152,5 +154,7 @@ constexpr char PER_AVD_CELLULAR_SIGNAL_STRENGTH[] = "perAvd/cell/signal_strength
 constexpr char PER_AVD_CELLULAR_VOICE_STATUS[]    = "perAvd/cell/voice_status";
 constexpr char PER_AVD_CELLULAR_METER_STATUS[]    = "perAvd/cell/meter_status";
 constexpr char PER_AVD_CELLULAR_DATA_STATUS[]     = "perAvd/cell/data_status";
+
+constexpr char PER_AVD_RESIZABLE_SIZE[]     = "perAvd/resizable/size";
 }  // namespace Settings
 }  // namespace Ui

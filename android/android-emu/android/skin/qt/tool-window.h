@@ -22,6 +22,7 @@
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/qt-ui-commands.h"
+#include "android/skin/qt/resizable-dialog.h"
 #include "android/skin/qt/shortcut-key-store.h"
 #include "android/skin/qt/size-tweaker.h"
 #include "android/skin/qt/ui-event-recorder.h"
@@ -42,6 +43,7 @@
 class EmulatorQtWindow;
 class ExtendedWindow;
 class PostureSelectionDialog;
+class ResizableDialog;
 
 class ToolWindow : public QFrame {
     Q_OBJECT
@@ -206,6 +208,7 @@ private:
     android::base::ConditionVariable mCv;
     bool mFoldableSyncToAndroidSuccess;
     bool mFoldableSyncToAndroidTimeout;
+    ResizableDialog* mResizableDialog;
 
 public slots:
     void raise();
@@ -237,7 +240,9 @@ private slots:
     void on_change_posture_button_clicked();
     void on_new_posture_requested(int newPosture);
     void on_dismiss_posture_selection_dialog();
-
+    void on_new_resizable_requested(PresetEmulatorSizeType newSize);
+    void on_dismiss_resizable_dialog();
+    void on_resizable_button_clicked();
     void onGuestClipboardChanged(QString text);
     void onHostClipboardChanged();
 };

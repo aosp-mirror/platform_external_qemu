@@ -86,7 +86,6 @@
 #include "android/skin/qt/posture-selection-dialog.h"     // for PostureSelectionDialog
 #include "android/skin/qt/qt-settings.h"                  // for SaveSnapsho...
 #include "android/skin/qt/qt-ui-commands.h"               // for QtUICommand
-#include "android/skin/qt/shortcut-key-store.h"           // for ShortcutKey...
 #include "android/skin/qt/stylesheet.h"                   // for stylesheetF...
 #include "android/skin/qt/tool-window.h"                  // for ToolWindow
 #include "android/skin/qt/ui-event-recorder.h"            // for UIEventReco...
@@ -144,6 +143,8 @@ ToolWindow::WindowHolder<T>::~WindowHolder() {
     mWindow->deleteLater();
 }
 
+static bool isResizable();
+
 const UiEmuAgent* ToolWindow::sUiEmuAgent = nullptr;
 static ToolWindow* sToolWindow = nullptr;
 
@@ -160,6 +161,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
       mUIEventRecorder(event_recorder),
       mUserActionsCounter(user_actions_counter),
       mPostureSelectionDialog(new PostureSelectionDialog(this)),
+      mResizableDialog(new ResizableDialog(this)),
       mFoldableSyncToAndroidSuccess(false),
       mFoldableSyncToAndroidTimeout(false),
       mFoldableSyncToAndroid([this](FoldableSyncToAndroidItem&& item) {
@@ -349,6 +351,16 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             SLOT(on_new_posture_requested(int)));
     connect(mPostureSelectionDialog, SIGNAL(finished(int)), this,
             SLOT(on_dismiss_posture_selection_dialog()));
+    connect(mResizableDialog, SIGNAL(newResizableRequested(PresetEmulatorSizeType)),
+            this, SLOT(on_new_resizable_requested(PresetEmulatorSizeType)));
+    connect(mResizableDialog, SIGNAL(finished(int)), this,
+            SLOT(on_dismiss_resizable_dialog()));
+
+    if (isResizable()) {
+        on_new_resizable_requested(mResizableDialog->getSize());
+    } else {
+        mToolsUi->resizable_button->setHidden(true);
+    }
 
     sToolWindow = this;
 }
@@ -800,6 +812,33 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) 
             }
 
             break;
+        case QtUICommand::PRESET_SIZE_ADVANCE:
+            if (down && isResizable()) {
+                PresetEmulatorSizeType newSize =
+                    static_cast<PresetEmulatorSizeType>(stoi(extra));
+                switch(newSize) {
+                    case PRESET_SIZE_PHONE:
+                        ChangeIcon(mToolsUi->resizable_button,
+                                   "display_mode_phone_expand", "Display mode: phone");
+                        break;
+                    case PRESET_SIZE_UNFOLDED:
+                        ChangeIcon(mToolsUi->resizable_button,
+                                   "display_mode_foldable_expand", "Display mode: foldable");
+                        break;
+                    case PRESET_SIZE_TABLET:
+                        ChangeIcon(mToolsUi->resizable_button,
+                                   "display_mode_tablet_expand", "Display mode: tablet");
+                        break;
+                    case PRESET_SIZE_DESKTOP:
+                        ChangeIcon(mToolsUi->resizable_button,
+                                   "display_mode_desktop_expand", "Display mode: desktop");
+                        break;
+                    default:
+                        LOG(ERROR) << "Invalid display mode " << newSize;
+                }
+                mEmulatorWindow->presetSizeAdvance(newSize);
+            }
+            break;
         case QtUICommand::SHOW_MULTITOUCH:
         // Multitouch is handled in EmulatorQtWindow, and doesn't
         // really need an element in the QtUICommand enum. This
@@ -1185,6 +1224,22 @@ void ToolWindow::on_dismiss_posture_selection_dialog() {
     mToolsUi->change_posture_button->setChecked(false);
 }
 
+void ToolWindow::on_dismiss_resizable_dialog() {
+    mToolsUi->resizable_button->setChecked(false);
+}
+
+void ToolWindow::on_resizable_button_clicked() {
+    // ChangeIcon(mToolsUi->tablet_mode_button,
+    //            tablet_mode ? "laptop_mode" : "tablet_mode",
+    //            tablet_mode ? "Switch to laptop mode" : "Switch to tablet mode");
+    mResizableDialog->show();
+}
+
+void ToolWindow::on_new_resizable_requested(PresetEmulatorSizeType newSize) {
+    mEmulatorWindow->activateWindow();
+    handleUICommand(QtUICommand::PRESET_SIZE_ADVANCE, true, std::to_string(newSize));
+}
+
 void ToolWindow::on_volume_up_button_pressed() {
     mEmulatorWindow->raise();
     handleUICommand(QtUICommand::VOLUME_UP, true);
@@ -1448,4 +1503,8 @@ WorkerProcessingResult ToolWindow::foldableSyncToAndroidItemFunction(const Folda
             return WorkerProcessingResult::Stop;
     }
     return WorkerProcessingResult::Continue;
+}
+
+static bool isResizable() {
+    return android_hw->hw_device_name && !strcmp(android_hw->hw_device_name, "resizable");
 }

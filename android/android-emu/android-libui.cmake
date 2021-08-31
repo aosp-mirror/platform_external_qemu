@@ -159,6 +159,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/qt-ui-commands.cpp
     android/skin/qt/QtLooper.cpp
     android/skin/qt/QtThreading.cpp
+    android/skin/qt/resizable-dialog.cpp
     android/skin/qt/screen-mask.cpp
     android/skin/qt/size-tweaker.cpp
     android/skin/qt/stylesheet.cpp
@@ -215,6 +216,7 @@ set(ANDROID_SKIN_QT_UI_SRC_FILES
     android/skin/qt/extended.ui
     android/skin/qt/poster-image-well.ui
     android/skin/qt/postureselectiondialog.ui
+    android/skin/qt/resizable-dialog.ui
     android/skin/qt/tools.ui
     android/skin/qt/virtualscene-controls.ui
     android/skin/qt/virtualscene-info-dialog.ui)
@@ -274,6 +276,7 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
     android/skin/qt/posture-selection-dialog.h
     android/skin/qt/QtLooperImpl.h
     android/skin/qt/raised-material-button.h
+    android/skin/qt/resizable-dialog.h
     android/skin/qt/screen-mask.h
     android/skin/qt/size-tweaker.h
     android/skin/qt/tool-window.h
