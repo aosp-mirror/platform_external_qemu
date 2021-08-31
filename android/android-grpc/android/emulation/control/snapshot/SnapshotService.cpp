@@ -127,6 +127,7 @@ public:
                 request->snapshot_id().c_str(), streamBufPtr, false,
                 request->format() == SnapshotPackage::TARGZ ? TARGZ : TAR,
                 errorConsumer.opaque(), LineConsumer::Callback));
+        writer->Write(result);
         return Status::OK;
     }
 
