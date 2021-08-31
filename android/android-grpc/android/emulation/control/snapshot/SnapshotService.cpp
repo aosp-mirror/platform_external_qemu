@@ -136,19 +136,9 @@ public:
                         SnapshotPackage* reply) override {
         SnapshotPackage msg;
 
-        // Create a temporary directory for the snapshot..
-        std::string id = Uuid::generate().toString();
-        std::string tmpSnap = snapshot::getSnapshotDir(id.c_str());
-
-        const auto tmpdir_deleter = base::makeCustomScopedPtr(
-                &tmpSnap,
-                [](std::string* tmpSnap) {  // Best effort to cleanup the mess.
-                    path_delete_dir(tmpSnap->c_str());
-                });
-
         reply->set_success(true);
-        auto cb = [reader, &msg, &id](char** new_eback, char** new_gptr,
-                                      char** new_egptr) {
+        auto cb = [reader, &msg](char** new_eback, char** new_gptr,
+                                 char** new_egptr) {
             bool incoming = reader->Read(&msg);
 
             // Setup the buffer pointers.
@@ -159,6 +149,7 @@ public:
             return incoming;
         };
 
+        std::string id;
         // First read desired format
         auto incoming = reader->Read(&msg);
         // First message likely only has snapshot id information and no
@@ -171,69 +162,17 @@ public:
         std::unique_ptr<std::istream> stream;
         if (msg.path() == "") {
             csr.reset(new CallbackStreambufReader(cb));
-            if (msg.format() == SnapshotPackage::TARGZ) {
-                stream = std::make_unique<GzipInputStream>(csr.get());
-            } else {
-                stream = std::make_unique<std::istream>(csr.get());
-            }
+            stream = std::make_unique<std::istream>(csr.get());
         } else {
-            if (msg.format() == SnapshotPackage::TARGZ) {
-                stream = std::make_unique<GzipInputStream>(msg.path().c_str());
-            } else {
                 stream = std::make_unique<std::ifstream>(
                         msg.path().c_str(),
                         std::ios_base::in | std::ios_base::binary);
-            }
         }
 
-        TarReader tr(tmpSnap, *stream);
-        for (auto entry = tr.first(); tr.good(); entry = tr.next(entry)) {
-            tr.extract(entry);
-        }
-
-        if (tr.fail()) {
-            reply->set_success(false);
-            reply->set_err(tr.error_msg());
-            return Status::OK;
-        }
-
-        reply->set_snapshot_id(id);
-        std::string finalDest = snapshot::getSnapshotDir(id.c_str());
-        if (System::get()->pathExists(finalDest) &&
-            path_delete_dir(finalDest.c_str()) != 0) {
-            reply->set_success(false);
-            reply->set_err("Failed to delete: " + finalDest);
-            LOG(INFO) << "Failed to delete: " + finalDest;
-            return Status::OK;
-        }
-
-        if (!android::base::PathUtils::move(tmpSnap.c_str(),
-                                            finalDest.c_str())) {
-            reply->set_success(false);
-            reply->set_err("Failed to rename: " + tmpSnap + " --> " +
-                           finalDest);
-            LOG(INFO) << "Failed to rename: " + tmpSnap + " --> " + finalDest;
-            return Status::OK;
-        }
-
-        // Okay, now we have to fix up (i.e. import) the snapshot
-        auto snapshot = android::snapshot::Snapshot::getSnapshotById(id);
-        if (!snapshot) {
-            // It might fail if snapshot preload fails.
-            reply->set_success(false);
-            reply->set_err("Snapshot incompatible");
-            // Best effort to cleanup mess.
-            path_delete_dir(finalDest.c_str());
-            return Status::OK;
-        }
-
-        if (!snapshot->fixImport()) {
-            reply->set_success(false);
-            reply->set_err("Failed to import snapshot.");
-            // Best effort to cleanup mess.
-            path_delete_dir(finalDest.c_str());
-        }
-
+        SnapshotLineConsumer errorConsumer(reply);
+        pushSnapshot(id.c_str(), stream.get(),
+                     msg.format() == SnapshotPackage::TARGZ ? TARGZ : TAR,
+                     errorConsumer.opaque(), LineConsumer::Callback);
         return Status::OK;
     }
 

@@ -42,6 +42,12 @@ bool pullSnapshot(const char* snapshotName,
                   void* opaque,
                   LineConsumerCallback errConsumer);
 
+bool pushSnapshot(const char* snapshotName,
+                  std::istream* input,
+                  FileFormat format,
+                  void* opaque,
+                  LineConsumerCallback errConsumer);
+
 }  // namespace control
 }  // namespace emulation
 }  // namespace android
