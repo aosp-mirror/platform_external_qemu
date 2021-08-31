@@ -1697,7 +1697,7 @@ static void append_q35_prt_entry(Aml *ctx, uint32_t nr, const char *name)
     g_free(s);
 }
 
-static Aml *build_q35_routing_table(const char *str)
+static Aml* build_q35_routing_table(const char* str, bool use_inta) 
 {
     int i;
     Aml *pkg;
@@ -1712,16 +1712,17 @@ static Aml *build_q35_routing_table(const char *str)
     name[3] = 'E';
     append_q35_prt_entry(pkg, 0x18, name);
 
-    /* INTA -> PIRQA for slot 25 - 31, see the default value of D<N>IR */
+    /* INTA -> PIRQA (or INTE -> PIRQE if |use_inta| is false) */
+    /* for slot 25 - 31, see the default value of D<N>IR       */
     for (i = 0x0019; i < 0x1e; i++) {
-        name[3] = 'A';
+        name[3] = use_inta ? 'A' : 'E';
         append_q35_prt_entry(pkg, i, name);
     }
 
     /* PCIe->PCI bridge. use PIRQ[E-H] */
     name[3] = 'E';
     append_q35_prt_entry(pkg, 0x1e, name);
-    name[3] = 'A';
+    name[3] = use_inta ? 'A' : 'E';
     append_q35_prt_entry(pkg, 0x1f, name);
 
     g_free(name);
@@ -1743,10 +1744,15 @@ static void build_q35_pci0_int(Aml *table)
     }
     aml_append(table, method);
 
-    aml_append(pci0_scope,
-        aml_name_decl("PRTP", build_q35_routing_table("LNK")));
-    aml_append(pci0_scope,
-        aml_name_decl("PRTA", build_q35_routing_table("GSI")));
+    /* Fuchsia needs dedicated IRQ pins for ACPI devices like goldfish-pipe */
+    /* and goldfish-sync, thus we reserve GSIA-GSID (16-19) dedicatedly     */
+    /* for these ACPI devices.                                              */
+    bool use_inta_d = !is_fuchsia;
+
+    aml_append(pci0_scope, aml_name_decl("PRTP", build_q35_routing_table(
+                                                         "LNK", use_inta_d)));
+    aml_append(pci0_scope, aml_name_decl("PRTA", build_q35_routing_table(
+                                                         "GSI", use_inta_d)));
 
     method = aml_method("_PRT", 0, AML_NOTSERIALIZED);
     {
@@ -1768,11 +1774,13 @@ static void build_q35_pci0_int(Aml *table)
     aml_append(sb_scope, pci0_scope);
 
     field = aml_field("PCI0.ISA.PIRQ", AML_BYTE_ACC, AML_NOLOCK, AML_PRESERVE);
-    aml_append(field, aml_named_field("PRQA", 8));
-    aml_append(field, aml_named_field("PRQB", 8));
-    aml_append(field, aml_named_field("PRQC", 8));
-    aml_append(field, aml_named_field("PRQD", 8));
-    aml_append(field, aml_reserved_field(0x20));
+    if (use_inta_d) {
+        aml_append(field, aml_named_field("PRQA", 8));
+        aml_append(field, aml_named_field("PRQB", 8));
+        aml_append(field, aml_named_field("PRQC", 8));
+        aml_append(field, aml_named_field("PRQD", 8));
+        aml_append(field, aml_reserved_field(0x20));
+    }
     aml_append(field, aml_named_field("PRQE", 8));
     aml_append(field, aml_named_field("PRQF", 8));
     aml_append(field, aml_named_field("PRQG", 8));
@@ -1782,19 +1790,23 @@ static void build_q35_pci0_int(Aml *table)
     aml_append(sb_scope, build_irq_status_method());
     aml_append(sb_scope, build_iqcr_method(false));
 
-    aml_append(sb_scope, build_link_dev("LNKA", 0, aml_name("PRQA")));
-    aml_append(sb_scope, build_link_dev("LNKB", 1, aml_name("PRQB")));
-    aml_append(sb_scope, build_link_dev("LNKC", 2, aml_name("PRQC")));
-    aml_append(sb_scope, build_link_dev("LNKD", 3, aml_name("PRQD")));
+    if (use_inta_d) {
+        aml_append(sb_scope, build_link_dev("LNKA", 0, aml_name("PRQA")));
+        aml_append(sb_scope, build_link_dev("LNKB", 1, aml_name("PRQB")));
+        aml_append(sb_scope, build_link_dev("LNKC", 2, aml_name("PRQC")));
+        aml_append(sb_scope, build_link_dev("LNKD", 3, aml_name("PRQD")));
+    }
     aml_append(sb_scope, build_link_dev("LNKE", 4, aml_name("PRQE")));
     aml_append(sb_scope, build_link_dev("LNKF", 5, aml_name("PRQF")));
     aml_append(sb_scope, build_link_dev("LNKG", 6, aml_name("PRQG")));
     aml_append(sb_scope, build_link_dev("LNKH", 7, aml_name("PRQH")));
 
-    aml_append(sb_scope, build_gsi_link_dev("GSIA", 0x10, 0x10));
-    aml_append(sb_scope, build_gsi_link_dev("GSIB", 0x11, 0x11));
-    aml_append(sb_scope, build_gsi_link_dev("GSIC", 0x12, 0x12));
-    aml_append(sb_scope, build_gsi_link_dev("GSID", 0x13, 0x13));
+    if (use_inta_d) {
+        aml_append(sb_scope, build_gsi_link_dev("GSIA", 0x10, 0x10));
+        aml_append(sb_scope, build_gsi_link_dev("GSIB", 0x11, 0x11));
+        aml_append(sb_scope, build_gsi_link_dev("GSIC", 0x12, 0x12));
+        aml_append(sb_scope, build_gsi_link_dev("GSID", 0x13, 0x13));
+    }
     aml_append(sb_scope, build_gsi_link_dev("GSIE", 0x14, 0x14));
     aml_append(sb_scope, build_gsi_link_dev("GSIF", 0x15, 0x15));
     aml_append(sb_scope, build_gsi_link_dev("GSIG", 0x16, 0x16));
