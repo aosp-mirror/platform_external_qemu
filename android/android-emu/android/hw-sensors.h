@@ -377,5 +377,5 @@ bool android_foldable_get_folded_area(int* x, int* y, int* w, int* h);
 bool android_foldable_rollable_configured();
 bool android_hw_sensors_is_loading_snapshot();
 bool android_heart_rate_sensor_configured();
-
+bool android_foldable_posture_name(int posture, char* name);
 ANDROID_END_HEADER

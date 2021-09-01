@@ -18,6 +18,7 @@
 
 #include "android/base/misc/StringUtils.h"
 #include "android/emulation/control/adb/AdbInterface.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 
 #define D(...) VERBOSE_PRINT(sensors, __VA_ARGS__)
@@ -94,6 +95,7 @@ static bool compareAnglesToPosture(AnglesToPosture v1, AnglesToPosture v2) {
 }
 
 void FoldableModel::initFoldableHinge() {
+
     if (!android_hw->hw_sensor_hinge) {
         mState.config.numHinges = 0;
         return;
@@ -527,6 +529,9 @@ float FoldableModel::getPosture(ParameterValueType parameterValueType) const {
 void FoldableModel::sendPostureToSystem(enum FoldablePostures p) {
     auto adbInterface = emulation::AdbInterface::getGlobal();
     if (!adbInterface) return;
+    if (featurecontrol::isEnabled(android::featurecontrol::DeviceStateOnBoot)) {
+        return;
+    }
     adbInterface->enqueueCommand({ "shell", "settings", "put",
                                     "global", "device_posture",
                                     std::to_string((int)p).c_str() });

@@ -1391,6 +1391,34 @@ bool android_foldable_set_posture(int posture) {
                                        1, PHYSICAL_INTERPOLATION_SMOOTH) >= 0);
 }
 
+bool android_foldable_posture_name(int posture, char* name) {
+    if (!name) {
+       return false;
+    }
+    switch(posture) {
+        case 0:
+            strcpy(name, "UNKNOWN");
+            return true;
+        case 1:
+            strcpy(name, "CLOSED");
+            return true;
+        case 2:
+            strcpy(name, "HALF_OPENED");
+            return true;
+        case 3:
+            strcpy(name, "OPENED");
+            return true;
+        case 4:
+            strcpy(name, "FLIPPED");
+            return true;
+        case 5:
+            strcpy(name, "TENT");
+            return true;
+        default:
+            return false;
+    }
+}
+
 bool android_foldable_get_folded_area(int* x, int* y, int* w, int* h) {
     return physicalModel_getFoldedArea(android_physical_model_instance(), x, y, w, h);
 }
