@@ -2547,6 +2547,49 @@ static int do_snapshot_pull(ControlClient client, char* args) {
     return succeed ? 0 : -1;
 }
 
+static int do_snapshot_push(ControlClient client, char* args) {
+    // The implementation allows spaces in the file name as long as users
+    // quote the file name correctly. But it only works with telnet, not with
+    // the "adb emu" command, the later of which hides the quotes.
+    if (!args || 0 == strlen(args)) {
+        control_write(client,
+                      "KO: Expecting 2 parameters, actual: 0 parameters\r\n");
+        return -1;
+    }
+    std::vector<std::string> arg_strings =
+            android::base::parseEscapedLaunchString(args);
+    if (arg_strings.size() != 2) {
+        control_write(client,
+                      "KO: Expecting 2 parameters, actual: %zu parameters\r\n",
+                      arg_strings.size());
+        return -1;
+    }
+    std::string& filename = arg_strings[1];
+    std::unique_ptr<std::ifstream> srcFile(new std::ifstream(
+            android::base::PathUtils::asUnicodePath(filename).c_str(),
+            std::ios::binary | std::ios::in));
+    if (!srcFile->is_open()) {
+        control_write(client, "KO: Failed to write to %s\r\n",
+                      filename.c_str());
+        return -1;
+    }
+    android::emulation::control::FileFormat format =
+            android::emulation::control::TAR;
+    const char* kTarGzExt = ".tar.gz";
+    const char* kTarExt = ".tar";
+    if (android::base::EndsWith(filename, kTarGzExt)) {
+        format = android::emulation::control::TARGZ;
+    } else if (!android::base::EndsWith(filename, kTarExt)) {
+        // Unknown format. Print a warning and treat it as tar.
+        control_write(client, "WARNING: unrecognized file format %s\r\n",
+                      filename.c_str());
+    }
+    bool succeed = android::emulation::control::pushSnapshot(
+            arg_strings[0].c_str(), srcFile.get(), format, client,
+            control_write_err_cb);
+    return succeed ? 0 : -1;
+}
+
 static const CommandDefRec snapshot_commands[] = {
         {"list", "list available state snapshots",
          "'avd snapshot list' will show a list of all state snapshots that can "
@@ -2607,8 +2650,7 @@ static const CommandDefRec snapshot_commands[] = {
          "It will print (null) if no snapshot has been loaded.",
          NULL, do_snapshot_last_loaded, NULL},
 
-        {"pull",
-         "print the name of the snapshot loaded into the current session",
+        {"pull", "export an existing snapshot from the emulator into a file",
          "'avd snapshot pull <src_snapshot_name> <dst_file_name> ' will "
          "export an existing snapshot from the emulator into a file.\r\n"
          "src_snapshot_name: name of an existing snapshot.\r\n"
@@ -2617,6 +2659,18 @@ static const CommandDefRec snapshot_commands[] = {
          "should be .tar or .tar.gz "
          "format.",
          NULL, do_snapshot_pull, NULL},
+
+        {"push", "import a snapshot from a file into the emulator",
+         "'avd snapshot push <snapshot_name> <src_file_name> ' will "
+         "import a snapshot from a file into the emulator.\r\n"
+         "snapshot_name: name of the imported snapshot. Must match the name "
+         "when taking the snapshot.\r\n"
+         "src_file_name: absolute path to the file it would be loaded from. "
+         "The "
+         "file "
+         "should be .tar or .tar.gz "
+         "format.",
+         NULL, do_snapshot_push, NULL},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 

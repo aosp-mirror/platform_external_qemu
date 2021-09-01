@@ -23,6 +23,7 @@
 #include "android/android.h"
 #include "android/avd/info.h"
 #include "android/base/Stopwatch.h"
+#include "android/base/Uuid.h"  // for Uuid
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/GzipStreambuf.h"
 #include "android/base/files/PathUtils.h"
@@ -31,6 +32,7 @@
 #include "android/console.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/globals.h"
+#include "android/snapshot/PathUtils.h"
 #include "android/snapshot/Snapshot.h"
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
@@ -40,6 +42,13 @@ namespace emulation {
 namespace control {
 
 static constexpr uint32_t k64KB = 64 * 1024;
+
+static void logError(std::string errorMessage,
+                     void* opaque,
+                     LineConsumerCallback errConsumer) {
+    LOG(WARNING) << errorMessage;
+    errConsumer(opaque, errorMessage.c_str(), errorMessage.length());
+}
 
 bool pullSnapshot(const char* snapshotName,
                   std::streambuf* output,
@@ -51,9 +60,8 @@ bool pullSnapshot(const char* snapshotName,
 
     if (!snapshot) {
         // Nope, the snapshot doesn't exist.
-        std::string errorMessage =
-                std::string("Could not find ") + snapshotName;
-        errConsumer(opaque, errorMessage.c_str(), errorMessage.length());
+        logError(std::string("Could not find ") + snapshotName, opaque,
+                 errConsumer);
         return false;
     }
 
@@ -99,8 +107,7 @@ bool pullSnapshot(const char* snapshotName,
                 base::TarWriter tw(tmpdir, *streamPtr, k64KB);
                 tw.addDirectory(".");
                 if (tw.fail()) {
-                    errConsumer(opaque, tw.error_msg().c_str(),
-                                tw.error_msg().length());
+                    logError(tw.error_msg(), opaque, errConsumer);
                     succeed = false;
                     return;
                 }
@@ -113,10 +120,8 @@ bool pullSnapshot(const char* snapshotName,
                                               CORE_CONFIG_INI)
                                 .c_str());
                 if (!succeed) {
-                    const char* errorMessage =
-                            "Failed to save snapshot meta data";
-                    LOG(VERBOSE) << errorMessage;
-                    errConsumer(opaque, errorMessage, strlen(errorMessage));
+                    logError("Failed to save snapshot meta data", opaque,
+                             errConsumer);
                     return;
                 }
 
@@ -140,9 +145,7 @@ bool pullSnapshot(const char* snapshotName,
                     LOG(VERBOSE) << "Zipping " << name;
                     if (android_stat(fname.c_str(), &sb) != 0 ||
                         !tw.addFileEntryFromStream(ifs, name, sb)) {
-                        std::string errorMessage = "Unable to tar " + fname;
-                        errConsumer(opaque, errorMessage.c_str(),
-                                    errorMessage.length());
+                        logError("Unable to tar " + fname, opaque, errConsumer);
                         succeed = false;
                         break;
                     }
@@ -151,13 +154,79 @@ bool pullSnapshot(const char* snapshotName,
 
                 tw.close();
                 if (tw.fail()) {
-                    errConsumer(opaque, tw.error_msg().c_str(),
-                                tw.error_msg().length());
+                    logError(tw.error_msg(), opaque, errConsumer);
                 }
             });
 
     crashreport::CrashReporter::get()->hangDetector().pause(false);
     return succeed;
+}
+
+bool pushSnapshot(const char* snapshotName,
+                  std::istream* input,
+                  FileFormat format,
+                  void* opaque,
+                  LineConsumerCallback errConsumer) {
+    // Create a temporary directory for the snapshot..
+    std::string id = base::Uuid::generate().toString();
+    std::string tmpSnap = snapshot::getSnapshotDir(id.c_str());
+
+    const auto tmpdir_deleter = base::makeCustomScopedPtr(
+            &tmpSnap,
+            [](std::string* tmpSnap) {  // Best effort to cleanup the mess.
+                path_delete_dir(tmpSnap->c_str());
+            });
+
+    std::unique_ptr<base::GzipInputStream> gzipInputStream;
+    std::istream* actualInputStream;
+
+    if (format == TARGZ) {
+        gzipInputStream = std::make_unique<base::GzipInputStream>(*input);
+        actualInputStream = gzipInputStream.get();
+    } else {
+        actualInputStream = input;
+    }
+
+    base::TarReader tr(tmpSnap, *actualInputStream);
+    for (auto entry = tr.first(); tr.good(); entry = tr.next(entry)) {
+        tr.extract(entry);
+    }
+
+    if (tr.fail()) {
+        logError(tr.error_msg(), opaque, errConsumer);
+        return false;
+    }
+
+    std::string finalDest = snapshot::getSnapshotDir(snapshotName);
+    if (base::System::get()->pathExists(finalDest) &&
+        path_delete_dir(finalDest.c_str()) != 0) {
+        logError(std::string("Failed to delete: ") + finalDest, opaque,
+                 errConsumer);
+        return false;
+    }
+
+    if (!android::base::PathUtils::move(tmpSnap.c_str(), finalDest.c_str())) {
+        logError(std::string("Failed to rename: ") + tmpSnap + " --> " +
+                         finalDest,
+                 opaque, errConsumer);
+        return false;
+    }
+
+    // Okay, now we have to fix up (i.e. import) the snapshot
+    auto snapshot = android::snapshot::Snapshot::getSnapshotById(snapshotName);
+    if (!snapshot) {
+        logError("Snasphot incompatible", opaque, errConsumer);
+        return false;
+    }
+
+    if (!snapshot->fixImport()) {
+        logError("Failed to fix import", opaque, errConsumer);
+        // Best effort to cleanup mess.
+        path_delete_dir(finalDest.c_str());
+        return false;
+    }
+
+    return true;
 }
 
 }  // namespace control
