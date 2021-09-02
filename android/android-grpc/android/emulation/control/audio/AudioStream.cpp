@@ -91,6 +91,10 @@ size_t QemuAudioInputStream::write(const char* buffer, size_t cBuffer) {
     return mAudioBuffer.sputn(buffer, toWrite);
 }
 
+size_t QemuAudioInputStream::capacity() {
+    return mAudioBuffer.capacity();
+}
+
 int QemuAudioInputStream::onSample(void* buf, int n) {
     return mAudioBuffer.sgetn(reinterpret_cast<char*>(buf), n);
 }
@@ -114,15 +118,15 @@ AudioStreamCapturer::~AudioStreamCapturer() {
     AudioCaptureEngine::get(mAudioMode)->stop(this);
 }
 
-int AudioStreamCapturer::onSample(void* buf, int size)  {
+int AudioStreamCapturer::onSample(void* buf, int size) {
     return mStream->onSample(buf, size);
 }
 
-bool AudioStreamCapturer::good()  {
+bool AudioStreamCapturer::good() {
     return mRunning;
 }
 
-int AudioStreamCapturer::available()  {
+int AudioStreamCapturer::available() {
     return mStream->available();
 };
 

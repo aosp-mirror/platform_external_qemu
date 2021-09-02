@@ -119,6 +119,10 @@ public:
 
     bool good() override { return mAudioCapturer->good(); };
 
+    // The capacity (in bytes) of the underlying circular audio buffer.
+    // This buffer should likely be flushed before closing the audio stack.
+    size_t capacity();
+
 protected:
     int onSample(void* buf, int n) override;
     int available() override;
