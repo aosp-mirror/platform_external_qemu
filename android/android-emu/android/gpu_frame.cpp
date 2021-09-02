@@ -42,8 +42,8 @@ using android::base::AutoLock;
 #ifndef DEBUG
 #define DD(...) (void)0
 #else
-#define DD(fmt, ...)                                                   \
-    fprintf(stderr, "gpu_frame: %s:%d| " fmt "\n", __func__, __LINE__, \
+#define DD(fmt, ...)                                     \
+    dprint("gpu_frame: %s:%d| " fmt, __func__, __LINE__, \
             ##__VA_ARGS__)
 #endif
 

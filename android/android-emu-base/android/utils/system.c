@@ -24,6 +24,8 @@
 
 #include "android/utils/system.h"
 #include "android/utils/assert.h"
+#include "android/utils/debug.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #ifdef _WIN32
@@ -34,6 +36,7 @@
 #  include <sys/syscall.h> // For getting thread id's
 #  include <sys/types.h>
 #endif
+
 
 void*
 android_alloc( size_t  size )
@@ -47,7 +50,7 @@ android_alloc( size_t  size )
     if (block != NULL)
         return block;
 
-    fprintf(stderr, "PANIC: not enough memory\n");
+    dfatal("PANIC: not enough memory");
     exit(1);
     return NULL;
 }
@@ -64,7 +67,7 @@ android_alloc0( size_t  size )
     if (block != NULL)
         return block;
 
-    fprintf(stderr, "PANIC: not enough memory\n");
+    dfatal("PANIC: not enough memory");
     exit(1);
     return NULL;
 }
@@ -82,7 +85,7 @@ android_realloc( void*  block, size_t  size )
     if (block2 != NULL)
         return block2;
 
-    fprintf(stderr, "PANIC: not enough memory to reallocate %u bytes\n",
+    dfatal("PANIC: not enough memory to reallocate %u bytes",
             (unsigned)size);
     exit(1);
     return NULL;

@@ -65,8 +65,8 @@ bool EntryPoint::parse(unsigned int lc, const std::string & str)
     if (!parseTypeDeclaration(field, &retTypeName, &error)) {
         fprintf(stderr,
                 "line: %d: Parsing error in field <%s>: %s\n",
-                lc, 
-                field.c_str(), 
+                lc,
+                field.c_str(),
                 error.c_str());
         return false;
     }

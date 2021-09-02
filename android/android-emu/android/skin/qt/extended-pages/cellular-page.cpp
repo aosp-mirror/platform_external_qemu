@@ -22,6 +22,7 @@
 #include "android/emulation/control/cellular_agent.h"  // for QAndroidCellul...
 #include "android/emulator-window.h"                   // for emulator_windo...
 #include "android/globals.h"                           // for android_hw
+#include "android/utils/debug.h"
 #include "android/main-common.h"                       // for emulator_has_n...
 #include "android/metrics/UiEventTracker.h"
 #include "android/skin/qt/qt-settings.h"  // for PER_AVD_SETTIN...
@@ -57,7 +58,7 @@ static std::string translate_idx(CellularStatus value) {
         STATE(Cellular_Stat_Denied);
         STATE(Cellular_Stat_Unregistered);
         default:
-            fprintf(stderr, "%s: Unseen value for cellular status: 0x%x\n", __func__, value);
+            derror("%s: Unseen value for cellular status: 0x%x", __func__, value);
             return "Unknown";
     }
     // Chop off "Cellular_"
@@ -77,7 +78,7 @@ static std::string translate_idx(CellularStandard value) {
         STATE(Cellular_Std_full);
         STATE(Cellular_Std_5G);
         default:
-            fprintf(stderr, "%s: Unseen value for cellular standasrd: 0x%x\n", __func__, value);
+            derror("%s: Unseen value for cellular standasrd: 0x%x", __func__, value);
             return "Unknown";
     }
     // Chop off "Cellular_"
@@ -93,7 +94,7 @@ static std::string translate_idx(CellularSignal value) {
         STATE(Cellular_Signal_Good);
         STATE(Cellular_Signal_Great);
         default:
-            fprintf(stderr, "%s: Unseen value for cellular signal: 0x%x\n", __func__, value);
+            derror("%s: Unseen value for cellular signal: 0x%x", __func__, value);
             return "Unknown";
     }
     // Chop off "Cellular_"

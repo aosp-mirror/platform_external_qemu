@@ -36,7 +36,7 @@ android_add_library(
   SRC # cmake-format: sortable
       "bluetooth/uuid.cc")
 target_include_directories(libbt-rootcanal-types
-                           PUBLIC ${BT_ROOT}/vendor_libs/test_vendor_lib/types)
+                           PUBLIC . ${BT_ROOT}/vendor_libs/test_vendor_lib/types)
 
 android_add_test(
   TARGET rootcanal-test_types
@@ -48,7 +48,7 @@ target_link_libraries(rootcanal-test_types PRIVATE libbt-rootcanal-types gtest
                                                    gtest_main)
 
 add_library(libbt-rootcanal.headers INTERFACE)
-target_include_directories(libbt-rootcanal.headers INTERFACE ${VL_LIB})
+target_include_directories(libbt-rootcanal.headers INTERFACE . ${VL_LIB})
 android_license(TARGET "libbt-rootcanal.headers" LIBNAME None SPDX Apache-2.0
                 LICENSE Apache-2.0 LOCAL REPO/LICENSES/LICENSE.APACHE2)
 
@@ -66,8 +66,9 @@ android_add_library(
       view.cc)
 
 target_include_directories(
-  BluetoothPacketSources PUBLIC ${VL_LIB} ${VL_LIB}/include ${BT_ROOT}/gd
+  BluetoothPacketSources PUBLIC . ${VL_LIB} ${VL_LIB}/include ${BT_ROOT}/gd
                                 ${BT_ROOT})
+target_link_libraries(BluetoothPacketSources PRIVATE android-emu-base)
 target_compile_options(BluetoothPacketSources
                        PUBLIC -Wno-inconsistent-missing-override)
 
@@ -130,9 +131,8 @@ target_link_libraries(
   libbt-rootcanal PRIVATE libscriptedbeaconpayload-protos-lite jsoncpp
                           BluetoothPacketSources android-emu-base)
 target_include_directories(
-  libbt-rootcanal PUBLIC ${VL_LIB} ${VL_LIB}/include ${BT_ROOT}/gd ${BT_ROOT}
+  libbt-rootcanal PUBLIC . ${VL_LIB} ${VL_LIB}/include ${BT_ROOT}/gd ${BT_ROOT}
                          ${CMAKE_CURRENT_BINARY_DIR}/packet_gen)
-target_compile_definitions(libbt-rootcanal PUBLIC -DANDROID_EMULATOR=1)
 target_compile_options(libbt-rootcanal
                        PUBLIC -Wno-inconsistent-missing-override)
 
@@ -151,7 +151,6 @@ android_add_library(
       root_canal_qemu.cpp)
 
 target_link_libraries(libbt-rootcanal-qemu PRIVATE libbt-rootcanal android-emu)
-target_compile_definitions(libbt-rootcanal-qemu PUBLIC ANDROID_BLUETOOTH)
 target_include_directories(
   libbt-rootcanal-qemu PUBLIC .
   PRIVATE ${BT_ROOT}/vendor_libs/test_vendor_lib/desktop/)
@@ -171,6 +170,7 @@ android_add_test(
   #        test/posix_socket_unittest.cc)
 
 target_compile_definitions(test-vendor_test_host PRIVATE -DLOG_NDEBUG=1)
+target_include_directories(test-vendor_test_host PRIVATE .)
 target_link_libraries(
   test-vendor_test_host
   PRIVATE libbt-rootcanal libbt-rootcanal-qemu libbt-rootcanal-types

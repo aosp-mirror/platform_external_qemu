@@ -42,7 +42,7 @@
 #define DEBUG 0
 
 #if DEBUG
-#define D(...) printf(__VA_ARGS__)
+#define D(...) dprint(__VA_ARGS__)
 #else
 #define D(...) ((void)0)
 #endif
@@ -110,16 +110,14 @@ void EmulatorNoQtNoWindow::startThread(std::function<void()> looperFunction) {
                                 0,        // Default creation flags
                                 &threadId);
     if (threadHandle == nullptr) {
-        fprintf(stderr, "%s %s: CreateThread() failed!\n", __FILE__,
-                __FUNCTION__);
+        derror("%s: CreateThread() failed!", __FUNCTION__);
     }
 #else
     int createFailed =
             pthread_create(&eventThread, nullptr, threadWrapper, nullptr);
 
     if (createFailed) {
-        fprintf(stderr, "%s %s: pthread_create() failed!\n", __FILE__,
-                __FUNCTION__);
+        derror("%s: pthread_create() failed!", __FUNCTION__);
     }
 #endif
 }

@@ -64,7 +64,7 @@
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
 #define D(...) VERBOSE_PRINT(init, __VA_ARGS__)
-#define I(...) printf(__VA_ARGS__)
+#define I(...) dprint(__VA_ARGS__)
 
 #define WAIT_INTERVAL_MS 100
 
@@ -112,7 +112,7 @@ CrashService::CrashService(const std::string& version,
       mReportId(),
       mComments(),
       mDidCrashOnExit(false) {
-    fprintf(stderr, "%s: version: %s\n", __func__, version.c_str());
+    dinfo("%s: version: %s", __func__, version.c_str());
     mVersionId = version;
     mVersionId += "-";
     mVersionId += build;

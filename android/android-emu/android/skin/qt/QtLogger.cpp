@@ -65,7 +65,7 @@ void QtLogger::write(const char* fmt, ...) {
     vsnprintf(buf, sizeof(buf) - 1, fmt, ap);
     va_end(ap);
 
-    LOG(INFO) << buf << "\n";
+    LOG(INFO) << buf;
 
     if (!mFileHandle) return;
 

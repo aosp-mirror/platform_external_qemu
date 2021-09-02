@@ -327,7 +327,7 @@ int MediaCudaVideoHelper::HandlePictureDisplay(CUVIDPARSERDISPINFO* pDispInfo) {
     if (mNumOutputFrame == 0 && mNumInputFrame > MAX_NUM_INPUT_WITHOUT_OUTPUT) {
         // after more than 16 inputs, there is still no output,
         // probably corrupted stream, ignore everything from now on
-        dprint("WARNING: %d frames decoded witout any output, possibly bad "
+        dwarning("%d frames decoded witout any output, possibly bad "
                "input stream. Ignore output frames (they might be corrupted) "
                "from now on.",
                MAX_NUM_INPUT_WITHOUT_OUTPUT);

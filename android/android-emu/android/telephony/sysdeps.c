@@ -23,7 +23,7 @@
 #define  D_ACTIVE  DEBUG
 
 #if DEBUG
-#define  D(...)  do { if (D_ACTIVE) fprintf(stderr, __VA_ARGS__); } while (0)
+#define  D(...)  do { if (D_ACTIVE) dprint(__VA_ARGS__); } while (0)
 #else
 #define  D(...)  ((void)0)
 #endif
@@ -125,7 +125,7 @@ sys_timer_set( SysTimer  timer, SysTime  when, SysCallback callback, void*  opaq
     }
 
     timer->timer = loopTimer_newWithClock(
-            looper_getForThread(), &sys_timer_callback, 
+            looper_getForThread(), &sys_timer_callback,
             timer, LOOPER_CLOCK_REALTIME);
     timer->callback = callback;
     timer->opaque   = opaque;

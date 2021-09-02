@@ -21,8 +21,7 @@
 #include <stdio.h>
 #define D(...)                                     \
     do {                                           \
-        printf("%s:%d: ", __FUNCTION__, __LINE__); \
-        printf(__VA_ARGS__);                       \
+        dprint(__VA_ARGS__);                       \
         fflush(stdout);                            \
     } while (0)
 #else

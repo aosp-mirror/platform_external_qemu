@@ -37,7 +37,7 @@
 #define DD(...) (void)0
 #endif
 
-#define E(fmt,...) fprintf(stderr, "DmaMap: ERROR: %s: " fmt "\n", __func__, ##__VA_ARGS__);
+#define E(fmt,...) derror("DmaMap error %s: " fmt , __func__, ##__VA_ARGS__);
 
 namespace android {
 

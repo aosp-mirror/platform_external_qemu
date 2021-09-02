@@ -1093,7 +1093,7 @@ static void build_android_dt_aml(Aml *scope,
         }
         iniFile_free(acpiIni);
     } else {
-        D("No acpi ini file provided, using default\n");
+        D("No acpi ini file provided, using default");
         char *system_device_in_guest, *vendor_device_in_guest;
         /* 5 properties per partition, plus 2 more "compatible" nodes */
         int nproperties = 2;

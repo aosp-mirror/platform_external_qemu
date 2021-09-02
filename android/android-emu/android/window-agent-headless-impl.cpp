@@ -67,13 +67,16 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .getRotation = [] { return getRotation(); },
         .showMessage =
                 [](const char* message, WindowMessageType type, int timeoutMs) {
-                    const auto printer =
-                            (type == WINDOW_MESSAGE_ERROR)
-                                    ? &derror
-                                    : (type == WINDOW_MESSAGE_WARNING)
-                                              ? &dwarning
-                                              : &dprint;
-                    printer("%s", message);
+                        switch(type) {
+                            case WINDOW_MESSAGE_ERROR:
+                                derror("%s", message);
+                                break;
+                            case WINDOW_MESSAGE_WARNING:
+                                dwarning("%s", message);
+                                break;
+                            default:
+                                dinfo("%s", message);
+                        }
                 },
         .showMessageWithDismissCallback =
                 [](const char* message,
@@ -82,15 +85,18 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                    void* context,
                    void (*func)(void*),
                    int timeoutMs) {
-                    const auto printer =
-                            (type == WINDOW_MESSAGE_ERROR)
-                                    ? &derror
-                                    : (type == WINDOW_MESSAGE_WARNING)
-                                              ? &dwarning
-                                              : &dprint;
-                    printer("%s", message);
                     // Don't necessarily perform the func since the
                     // user doesn't get a chance to dismiss.
+                     switch(type) {
+                            case WINDOW_MESSAGE_ERROR:
+                                derror("%s", message);
+                                break;
+                            case WINDOW_MESSAGE_WARNING:
+                                dwarning("%s", message);
+                                break;
+                            default:
+                                dinfo("%s", message);
+                        }
                 },
         .fold =
                 [](bool is_fold) -> bool {

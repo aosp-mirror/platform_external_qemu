@@ -165,19 +165,19 @@ public:
                     size_t messageLen) override {
         rtc::LoggingSeverity severity = rtc::LS_NONE;
         switch (params.severity) {
-            case android::base::LOG_DEBUG:
-            case android::base::LOG_VERBOSE:
+            case EMULATOR_LOG_DEBUG:
+            case EMULATOR_LOG_VERBOSE:
                 severity = rtc::LS_VERBOSE;
                 break;
-            case android::base::LOG_INFO:
+            case EMULATOR_LOG_INFO:
                 severity = rtc::LS_INFO;
                 break;
-            case android::base::LOG_WARNING:
+            case EMULATOR_LOG_WARNING:
                 severity = rtc::LS_WARNING;
                 break;
-            case android::base::LOG_ERROR:
-            case android::base::LOG_FATAL:
-            case android::base::LOG_NUM_SEVERITIES:
+            case EMULATOR_LOG_ERROR:
+            case EMULATOR_LOG_FATAL:
+            case EMULATOR_LOG_NUM_SEVERITIES:
                 severity = rtc::LS_ERROR;
                 break;
         }

@@ -300,7 +300,7 @@ DEFAULT_SKIN:
 
         layout_base = skin_resource_find( "layout", &layout_size );
         if (layout_base == NULL) {
-            fprintf(stderr, "Couldn't load builtin skin\n");
+            dfatal("Couldn't load builtin skin");
             exit(1);
         }
         base = malloc( layout_size+1 );
@@ -509,7 +509,7 @@ ui_init(const AConfig* skinConfig,
             winsys_ret = skin_winsys_snapshot_control_start();
             ret_OK = (winsys_ret == 0);
         } else {
-            fprintf(stderr, "Unknown \"-ui-only\" feature: \"%s\"\n", opts->ui_only);
+            derror("Unknown \"-ui-only\" feature: \"%s\"", opts->ui_only);
         }
         return ret_OK;
     }

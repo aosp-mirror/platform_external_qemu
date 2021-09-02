@@ -40,7 +40,7 @@
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
 #define D(...) VERBOSE_PRINT(init, __VA_ARGS__)
-#define I(...) printf(__VA_ARGS__)
+#define I(...) dprint(__VA_ARGS__)
 
 using android::base::AutoLock;
 using android::base::c_str;
@@ -359,7 +359,7 @@ void crashhandler_append_message_format(const char* format, ...) {
 
 void crashhandler_die(const char* message) {
     if (const auto reporter = CrashReporter::get()) {
-        fprintf(stderr, "%s: fatal: %s\n", __func__, message);
+        derror("%s: fatal: %s", __func__, message);
         reporter->GenerateDumpAndDie(message);
         } else {
         I("Emulator: exiting becase of the internal error '%s'\n", message);

@@ -203,13 +203,13 @@ public:
         auto& entry = mEntries[handle];
 
         if (entry.blocks.find(off) != entry.blocks.end()) {
-            fprintf(stderr, "%s: failed, entry already owns offset 0x%llx\n", __func__,
+            derror("%s: failed, entry already owns offset 0x%llx", __func__,
                     (unsigned long long)off);
             return -EINVAL;
         }
 
         if (!enclosingSharedRegionExists(mSharedRegions, off, size)) {
-            fprintf(stderr, "%s: failed, no shared region enclosing [0x%llx 0x%llx]\n", __func__,
+            derror("%s: failed, no shared region enclosing [0x%llx 0x%llx]", __func__,
                     (unsigned long long)off,
                     (unsigned long long)off + size);
             return -EINVAL;
@@ -224,13 +224,13 @@ public:
         auto& entry = mEntries[handle];
 
         if (entry.blocks.find(off) == entry.blocks.end()) {
-            fprintf(stderr, "%s: failed, entry does not own offset 0x%llx\n", __func__,
+            derror("%s: failed, entry does not own offset 0x%llx", __func__,
                     (unsigned long long)off);
             return -EINVAL;
         }
 
         if (!enclosingSharedRegionExists(mSharedRegions, off, entry.blocks[off].size)) {
-            fprintf(stderr, "%s: failed, no shared region enclosing [0x%llx 0x%llx]\n", __func__,
+            derror("%s: failed, no shared region enclosing [0x%llx 0x%llx]", __func__,
                     (unsigned long long)off,
                     (unsigned long long)off + entry.blocks[off].size);
             return -EINVAL;
@@ -293,7 +293,7 @@ public:
 
     int freeSharedHostRegionLocked(uint64_t offset) {
         if (mSharedRegions.find(offset) == mSharedRegions.end()) {
-            fprintf(stderr, "%s: could not free shared region, offset 0x%llx is not a start\n", __func__,
+            derror("%s: could not free shared region, offset 0x%llx is not a start", __func__,
                     (unsigned long long)offset);
             return -EINVAL;
         }
@@ -348,7 +348,7 @@ private:
         const BlockMemory& block,
         uint64_t physAddr) const {
         if (!blockContainsOffset(offset, block, physAddr)) {
-            fprintf(stderr, "%s: block at [0x%" PRIx64 " 0x%" PRIx64"] does not contain 0x%" PRIx64 "!\n", __func__,
+            derror("%s: block at [0x%" PRIx64 " 0x%" PRIx64"] does not contain 0x%" PRIx64 "!", __func__,
                     offset,
                     offset + block.size,
                     physAddr);

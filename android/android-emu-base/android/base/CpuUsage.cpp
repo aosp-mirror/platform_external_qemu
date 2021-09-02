@@ -165,7 +165,7 @@ void CpuUsage::forEachUsage(UsageArea area, CpuTimeReader readerFunc) {
     } else if (area >= UsageArea::RenderThreads && area < UsageArea::Max) {
         mImpl->forEachMeasurement(UsageArea::RenderThreads, UsageArea::Max, readerFunc);
     } else {
-        fprintf(stderr, "%s: warning: invalid usage area %d detected.\n", __func__, area);
+        dwarning("%s: warning: invalid usage area %d detected.", __func__, area);
     }
 }
 

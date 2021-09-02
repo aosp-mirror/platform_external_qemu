@@ -21,7 +21,7 @@
 
 #if DEBUG
 #  include <stdio.h>
-#  define D(...)  printf(__VA_ARGS__)
+#  define D(...)  dprint(__VA_ARGS__)
 #else
 #  define D(...)  ((void)0)
 #endif

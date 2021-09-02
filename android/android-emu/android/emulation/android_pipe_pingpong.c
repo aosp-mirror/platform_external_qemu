@@ -21,7 +21,7 @@
 #define DEBUG 0
 
 #if DEBUG >= 1
-#  define D(...)  fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
+#  define D(...)  dprint(__VA_ARGS__)
 #else
 #  define D(...)  (void)0
 #endif

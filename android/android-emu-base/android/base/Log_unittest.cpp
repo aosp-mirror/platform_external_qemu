@@ -22,7 +22,7 @@ namespace base {
 
 // Create a severity level which is guaranteed to never generate a log
 // message. See LogOnlyEvaluatesArgumentsIfNeeded for usage.
-const LogSeverity LOG_INVISIBLE = static_cast<LogSeverity>(-10000);
+const LogSeverity EMULATOR_LOG_INVISIBLE = static_cast<LogSeverity>(-10000);
 
 class LogTest : public ::testing::Test, android::base::testing::LogOutput {
 public:
@@ -53,7 +53,7 @@ public:
             messageLen = sizeof(mBuffer) - 1;
         ::memcpy(mBuffer, message, messageLen);
         mBuffer[messageLen] = '\0';
-        mFatal = (params.severity >= LOG_FATAL);
+        mFatal = (params.severity >= EMULATOR_LOG_FATAL);
     }
 
 protected:
@@ -177,20 +177,20 @@ TEST(LogString, FormattedString) {
 }
 
 TEST_F(LogTest, LogInfoEmpty) {
-    setExpected(LOG_INFO, __LINE__ + 1, "");
+    setExpected(EMULATOR_LOG_INFO, __LINE__ + 1, "");
     LOG(INFO) << "";
     CHECK_EXPECTATIONS();
 }
 
 TEST_F(LogTest, LogInfoWithString) {
     static const char kString[] = "Hello World!";
-    setExpected(LOG_INFO, __LINE__ + 1, kString);
+    setExpected(EMULATOR_LOG_INFO, __LINE__ + 1, kString);
     LOG(INFO) << kString;
     CHECK_EXPECTATIONS();
 }
 
 TEST_F(LogTest, LogInfoWithTwoStrings) {
-    setExpected(LOG_INFO, __LINE__ + 1, "Hello Globe!");
+    setExpected(EMULATOR_LOG_INFO, __LINE__ + 1, "Hello Globe!");
     LOG(INFO) << "Hello " << "Globe!";
     CHECK_EXPECTATIONS();
 }
@@ -200,7 +200,7 @@ TEST_F(LogTest, LogAReallyLongString) {
     for(int i = 0; i < 8;  i++) {
         longString += longString;
     }
-    setExpected(LOG_INFO, __LINE__ + 1, longString.c_str());
+    setExpected(EMULATOR_LOG_INFO, __LINE__ + 1, longString.c_str());
     LOG(INFO) << longString;
     CHECK_EXPECTATIONS();
 }
@@ -208,21 +208,21 @@ TEST_F(LogTest, LogAReallyLongString) {
 
 TEST_F(LogTest, LogInfoWithLogString) {
     LogString ls("Hello You!");
-    setExpected(LOG_INFO, __LINE__ + 1, ls.string());
+    setExpected(EMULATOR_LOG_INFO, __LINE__ + 1, ls.string());
     LOG(INFO) << ls;
     CHECK_EXPECTATIONS();
 }
 
 TEST_F(LogTest, LogWarning) {
     static const char kWarning[] = "Elvis has left the building!";
-    setExpected(LOG_WARNING, __LINE__ + 1, kWarning);
+    setExpected(EMULATOR_LOG_WARNING, __LINE__ + 1, kWarning);
     LOG(WARNING) << kWarning;
     CHECK_EXPECTATIONS();
 }
 
 TEST_F(LogTest, LogError) {
     static const char kError[] = "Bad Bad Robot!";
-    setExpected(LOG_ERROR, __LINE__ + 1, kError);
+    setExpected(EMULATOR_LOG_ERROR, __LINE__ + 1, kError);
     LOG(ERROR) << kError;
 
     CHECK_EXPECTATIONS();
@@ -230,16 +230,16 @@ TEST_F(LogTest, LogError) {
 
 TEST_F(LogTest, LogFatal) {
     static const char kFatalMessage[] = "I'm dying";
-    setExpected(LOG_FATAL, __LINE__ + 1, kFatalMessage);
+    setExpected(EMULATOR_LOG_FATAL, __LINE__ + 1, kFatalMessage);
     LOG(FATAL) << kFatalMessage;
     CHECK_EXPECTATIONS();
     EXPECT_TRUE(mFatal);
 }
 
 TEST_F(LogTest, LogEvaluatesArgumentsIfNeeded) {
-    // Use LOG_FATAL since it is always active.
+    // Use EMULATOR_LOG_FATAL since it is always active.
     bool flag = false;
-    setExpected(LOG_FATAL, __LINE__ + 1, "PANIC: Flag was set!");
+    setExpected(EMULATOR_LOG_FATAL, __LINE__ + 1, "PANIC: Flag was set!");
     LOG(FATAL) << "PANIC: " << setFlag(&flag, "Flag was set!");
     CHECK_EXPECTATIONS();
     EXPECT_TRUE(mFatal);
@@ -256,14 +256,14 @@ TEST_F(LogTest, LogOnlyEvaluatesArgumentsIfNeeded) {
 // TODO(digit): Convert this to a real death test when this is supported
 // by our version of GTest.
 TEST_F(CheckTest, CheckFalse) {
-    setExpected(LOG_FATAL, __LINE__ + 1, "Check failed: false. ");
+    setExpected(EMULATOR_LOG_FATAL, __LINE__ + 1, "Check failed: false. ");
     CHECK(false);
     CHECK_EXPECTATIONS();
 }
 
 TEST_F(CheckTest, CheckFalseEvaluatesArguments) {
     bool flag = false;
-    setExpected(LOG_FATAL, __LINE__ + 1, "Check failed: false. Flag was set!");
+    setExpected(EMULATOR_LOG_FATAL, __LINE__ + 1, "Check failed: false. Flag was set!");
     CHECK(false) << setFlag(&flag, "Flag was set!");
     EXPECT_TRUE(flag);
     CHECK_EXPECTATIONS();
@@ -288,7 +288,7 @@ TEST_F(DCheckEnabledTest, DCheckIsOnReturnsTrue) {
 
 TEST_F(DCheckEnabledTest, DCheckFalse) {
     bool flag = false;
-    setExpected(LOG_FATAL, __LINE__ + 1, "Check failed: false. Flag was set!");
+    setExpected(EMULATOR_LOG_FATAL, __LINE__ + 1, "Check failed: false. Flag was set!");
     DCHECK(false) << setFlag(&flag, "Flag was set!");
     CHECK_EXPECTATIONS();
 }
@@ -319,7 +319,7 @@ TEST_F(DCheckDisabledTest, DCheckTrue) {
 #endif  // ENABLE_DCHECK != 2
 
 TEST_F(PLogTest, PLogInfoEmpty) {
-    setExpectedErrno(LOG_INFO, __LINE__ + 2, EINVAL, "");
+    setExpectedErrno(EMULATOR_LOG_INFO, __LINE__ + 2, EINVAL, "");
     errno = EINVAL;
     PLOG(INFO) << "";
     CHECK_EXPECTATIONS();
@@ -330,7 +330,7 @@ TEST_F(PLogTest, PLogInfoPreservesErrno) {
     // machinery.
     const int kErrnoCode = ENOEXEC;
     setForcedErrno(EINVAL);
-    setExpectedErrno(LOG_INFO, __LINE__ + 2, kErrnoCode, "Hi");
+    setExpectedErrno(EMULATOR_LOG_INFO, __LINE__ + 2, kErrnoCode, "Hi");
     errno = kErrnoCode;
     PLOG(INFO) << "Hi";
     EXPECT_EQ(kErrnoCode, errno);
@@ -339,7 +339,7 @@ TEST_F(PLogTest, PLogInfoPreservesErrno) {
 
 #if ENABLE_DLOG
 TEST_F(PLogTest, DPlogInfoEmpty) {
-    setExpectedErrno(LOG_INFO, __LINE__ + 2, EINVAL, "");
+    setExpectedErrno(EMULATOR_LOG_INFO, __LINE__ + 2, EINVAL, "");
     errno = EINVAL;
     DPLOG(INFO) << "";
     CHECK_EXPECTATIONS();
@@ -350,7 +350,7 @@ TEST_F(PLogTest, DPlogInfoPreservesErrno) {
     // machinery.
     const int kErrnoCode = ENOEXEC;
     setForcedErrno(EINVAL);
-    setExpectedErrno(LOG_INFO, __LINE__ + 2, kErrnoCode, "Hi");
+    setExpectedErrno(EMULATOR_LOG_INFO, __LINE__ + 2, kErrnoCode, "Hi");
     errno = kErrnoCode;
     DPLOG(INFO) << "Hi";
     EXPECT_EQ(kErrnoCode, errno);

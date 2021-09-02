@@ -813,9 +813,9 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
 
     // Check if < HAXM_INSTALLER_VERSION_MINIMUM_APPLE for best Mac compatibility.
     if (version < HAXM_INSTALLER_VERSION_MINIMUM_APPLE) {
-        fprintf(stderr, "WARNING: HAXM %s is installed. "
+        dwarning("HAXM %s is installed. "
                         "Please install HAXM >= %s to fix compatibility "
-                        "issues on Mac.\n",
+                        "issues on Mac.",
                         cpuAcceleratorFormatVersion(version).c_str(),
                         cpuAcceleratorFormatVersion(HAXM_INSTALLER_VERSION_MINIMUM_APPLE).c_str());
     }

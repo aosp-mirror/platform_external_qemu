@@ -38,13 +38,13 @@ void generateAvd(const AvdGenerateInfo& genInfo) {
     std::string configIniPath = pj(avdDir, "config.ini");
 
     if (path_mkdir_if_needed_no_cow(avdRoot.c_str(), 0755) < 0) {
-        fprintf(stderr, "%s: could not create dir %s!\n",
+        derror("%s: could not create dir %s!",
                 __func__, avdDir.c_str());
         return;
     }
 
     if (path_mkdir_if_needed_no_cow(avdDir.c_str(), 0755) < 0) {
-        fprintf(stderr, "%s: could not create dir %s!\n",
+        derror("%s: could not create dir %s!",
                 __func__, avdDir.c_str());
         return;
     }

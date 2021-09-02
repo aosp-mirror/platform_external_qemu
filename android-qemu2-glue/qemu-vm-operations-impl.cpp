@@ -93,7 +93,7 @@ extern   int guest_boot_completed;
 
 #if DEBUG >= 1
 #define DD(fmt, ...) \
-    printf("%s:%s:%d| " fmt "\n", __FILE__, __func__, __LINE__, ##__VA_ARGS__)
+    dprint("%s| " fmt ,  __func__, ##__VA_ARGS__)
 #else
 #define DD(...) (void)0
 #endif
@@ -906,7 +906,7 @@ static bool vm_resume() {
 
 static void* physical_memory_get_addr(uint64_t gpa) {
     if (!gpa2hva_call) {
-        fprintf(stderr, "%s: ERROR: No gpa2hva!\n", __func__);
+        derror("%s: No gpa2hva!", __func__);
         return nullptr;
     }
     bool found;

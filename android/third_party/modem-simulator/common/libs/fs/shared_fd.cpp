@@ -254,8 +254,7 @@ int Select(SharedFDSet* read_set,
            struct timeval* timeout) {
     if (write_set || error_set) {
         // just ignore them
-        fprintf(stdout, "WARNING: %s %d ignore write and error\n", __func__,
-                __LINE__);
+        dwarning("%s ignore write and error", __func__);
     }
 
     if (!read_set) {

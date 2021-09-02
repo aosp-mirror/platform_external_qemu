@@ -411,9 +411,8 @@ static SkinKeyboard* skin_keyboard_create_from_charmap_name(
     if (!kb->charmap) {
         // Charmap name was not found. Default to "qwerty2" */
         kb->charmap = skin_charmap_get_by_name(DEFAULT_ANDROID_CHARMAP);
-        fprintf(stderr,
-                "warning, skin requires unknown '%s' charmap, reverting to "
-                "'%s'\n",
+        dwarning("skin requires unknown '%s' charmap, reverting to "
+                "'%s'",
                 charmap_name, kb->charmap->name);
     }
     skin_keycode_buffer_init(kb->keycodes, keycode_flush);
@@ -514,19 +513,19 @@ const char* skin_keyboard_host_layout_name() {
     Display* display = XOpenDisplay(NULL);
 
     if (!display) {
-        fprintf(stderr, "%s: warning: cannot get x11 display info\n", __func__);
+        dwarning("%s: warning: cannot get x11 display info", __func__);
         return NULL;
     }
 
     XkbDescPtr xkb = XkbGetMap(display, XkbAllComponentsMask, XkbUseCoreKbd);
 
     if (!xkb) {
-        fprintf(stderr, "%s: warning: cannot get mod mask info\n", __func__);
+        dwarning("%s: warning: cannot get mod mask info", __func__);
         return NULL;
     }
 
     if (XkbGetNames(display, XkbGroupNamesMask, xkb) != 0) {
-        fprintf(stderr, "%s: warning: cannot get xkb group names\n", __func__);
+        dwarning("%s: warning: cannot get xkb group names", __func__);
         return NULL;
     }
 

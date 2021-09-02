@@ -1,5 +1,6 @@
 #include "android/loadpng.h"
 #include "android/utils/file_io.h"
+#include "android/utils/debug.h"
 #include <png.h>
 
 #include <stdint.h>
@@ -133,11 +134,11 @@ int write_png_user_function(png_structp p,
                              SkinRotation rotation,
                              void* pixels) {
     if (nChannels != 3 && nChannels != 4) {
-        fprintf(stderr, "write_png only support 3 or 4 channel images\n");
+        derror("write_png only support 3 or 4 channel images");
         return 0;
     }
     if (!pixels) {
-        fprintf(stderr, "Pixels are null.\n");
+        derror("Pixels are null.");
         return 0;
     }
 
@@ -224,7 +225,7 @@ void savepng(const char* fn,
              SkinRotation rotation,
              void* pixels) {
     if (nChannels != 3 && nChannels != 4) {
-        fprintf(stderr, "savepng only support 3 or 4 channel images\n");
+        derror("savepng only support 3 or 4 channel images");
     }
 
     FILE* fp = android_fopen(fn, "wb");
@@ -266,7 +267,7 @@ static void putUint16_t(unsigned char* dst, uint16_t data) {
 void savebmp(const char* fn, unsigned int nChannels, unsigned int width,
         unsigned int height, void* pixels) {
     if (nChannels != 1 && nChannels != 3 && nChannels != 4) {
-        fprintf(stderr, "savebmp only support 1, 3 or 4 channel images\n");
+        derror("savebmp only support 1, 3 or 4 channel images");
         return;
     }
     FILE *fp = android_fopen(fn, "wb");

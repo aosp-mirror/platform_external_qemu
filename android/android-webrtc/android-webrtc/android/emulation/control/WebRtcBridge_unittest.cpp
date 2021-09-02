@@ -28,7 +28,7 @@
 #include <string>      // for string, to_string
 #include <vector>      // for vector
 
-#include "android/base/Log.h"                    // for setMinLogLevel, LOG_...
+#include "android/base/Log.h"                    // for setMinLogLevel, EMULATOR_LOG_...
 #include "android/base/Optional.h"               // for Optional
 #include "android/base/StringView.h"             // for StringView
 #include "android/base/files/PathUtils.h"        // for PathUtils
@@ -48,7 +48,7 @@ class TestAsyncSocketAdapter : public AsyncSocketAdapter {
 public:
     TestAsyncSocketAdapter(std::vector<std::string> recv) : mRecv(recv) {
         // Let's not get chatty during unit tests.
-        base::setMinLogLevel(base::LOG_ERROR);
+        base::setMinLogLevel(EMULATOR_LOG_ERROR);
     }
     ~TestAsyncSocketAdapter() = default;
     void close() override {

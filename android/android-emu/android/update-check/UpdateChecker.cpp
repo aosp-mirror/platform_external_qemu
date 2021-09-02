@@ -198,7 +198,7 @@ public:
     virtual void reportNewerVersion(
             const android::base::Version& /*existing*/,
             const android::base::Version& /*newer*/) override {
-        printf("%s\n", kNewerVersionMessage);
+        dinfo("%s", kNewerVersionMessage);
     }
 };
 

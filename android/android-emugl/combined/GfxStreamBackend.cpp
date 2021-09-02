@@ -458,7 +458,7 @@ extern "C" VG_EXPORT void gfxstream_backend_init(
     auto openglesRenderer = android_getOpenglesRenderer().get();
 
     if (!openglesRenderer) {
-        fprintf(stderr, "%s: no renderer started, fatal\n", __func__);
+        dfatal("%s: no renderer started, fatal", __func__);
         abort();
     }
 

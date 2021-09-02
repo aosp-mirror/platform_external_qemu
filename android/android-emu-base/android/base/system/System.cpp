@@ -29,6 +29,7 @@
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
 #include "android/utils/tempfile.h"
+#include "android/utils/tempfile.h"
 
 #ifdef _WIN32
 #include "android/base/files/ScopedRegKey.h"
@@ -482,8 +483,8 @@ public:
         if (system("file -L \"$SHELL\" | grep -q \"x86[_-]64\"") == 0) {
                 return 64;
         } else if (system("file -L \"$SHELL\" > /dev/null")) {
-            fprintf(stderr, "WARNING: Cannot decide host bitness because "
-                    "$SHELL is not properly defined; 32 bits assumed.\n");
+            dwarning("Cannot decide host bitness because "
+                    "$SHELL is not properly defined; 32 bits assumed.");
         }
         return 32;
 #endif // !_WIN32
@@ -2530,7 +2531,7 @@ System::FileSize System::getFilePageSizeForPath(StringView path) {
         pageSize = (System::FileSize)getpagesize();
     } else {
         if (fsStatus.f_type == HUGETLBFS_MAGIC) {
-            fprintf(stderr, "hugepage detected. size: %lu\n",
+            dinfo("hugepage detected. size: %lu",
                     fsStatus.f_bsize);
             /* It's hugepage, return the huge page size */
             pageSize = (System::FileSize)fsStatus.f_bsize;
@@ -2845,7 +2846,7 @@ std::vector<System::Pid> System::queryRunningProcessPids(
     // TODO: It seems quite error prone to try to list processes on Linux,
     // as opening and iterating through /proc/ seems needed.
     // We only want to use this for Windows anyway. YAGNI.
-    fprintf(stderr, "FATAL: Process listing not implemented for Linux.\n");
+    dfatal("FATAL: Process listing not implemented for Linux.");
     abort();
 #endif
 
@@ -2911,37 +2912,37 @@ void System::deleteTempDir() {
     };
 
 #ifdef __linux__
-    printf("Temp directory deletion not supported on Linux. Skipping.\n");
+    dinfo("Temp directory deletion not supported on Linux. Skipping.");
 #else // !__linux__
-    printf("Checking if path is safe for deletion: %s\n", tempDir.c_str());
+    dinfo("Checking if path is safe for deletion: %s", tempDir.c_str());
 
     if (!looksLikeTempDir(tempDir)) {
-        printf("WARNING: %s does not look like a standard temp directory.\n",
+        dwarning("%s does not look like a standard temp directory.",
                tempDir.c_str());
-        printf("Please remove files in there manually.\n");
+        dwarning("Please remove files in there manually.");
         return;
     }
 
-    printf("Checking for other emulator instances...");
+    dinfo("Checking for other emulator instances...");
 
     std::vector<System::Pid> emuPids =
         queryRunningProcessPids(emulatorExePatterns);
 
     if (!emuPids.empty()) {
 #ifdef _WIN32
-        printf("Detected running emulator processes.\n");
-        printf("Marking existing files for deletion on reboot...\n");
+        dinfo("Detected running emulator processes.");
+        dinfo("Marking existing files for deletion on reboot...");
         path_delete_dir_contents_on_reboot(tempDir.c_str());
-        printf("Done.\n");
+        dinfo("Done.");
 #else // !_WIN32
-        printf("Detected running emulator processes. Skipping.\n");
+        dinfo("Detected running emulator processes. Skipping.");
 #endif // !_WIN32
         return;
     }
 
-    printf("Deleting emulator temp directory contents...");
+    dinfo("Deleting emulator temp directory contents...");
     path_delete_dir_contents(tempDir.c_str());
-    printf("done\n");
+    dinfo("done");
 #endif // !__linux__
 }
 

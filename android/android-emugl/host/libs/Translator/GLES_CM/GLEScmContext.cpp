@@ -367,7 +367,7 @@ void GLEScmContext::postLoadRestoreCtx() {
                             mColor.val.ubyteVal[3]);
                     break;
                 default:
-                    fprintf(stderr, "WARNING: glColor with unknown type 0x%x\n",
+                    dwarning("glColor with unknown type 0x%x",
                             mColor.type);
                     break;
             }
@@ -378,7 +378,7 @@ void GLEScmContext::postLoadRestoreCtx() {
                             mNormal.val.floatVal[2]);
                     break;
                 default:
-                    fprintf(stderr, "WARNING: glNormal with unknown type 0x%x\n",
+                    dwarning("glNormal with unknown type 0x%x",
                             mNormal.type);
                     break;
             }

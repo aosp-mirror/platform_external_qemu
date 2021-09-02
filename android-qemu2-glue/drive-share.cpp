@@ -49,7 +49,7 @@ extern "C" {
 #define DEBUG 0
 
 #if DEBUG
-#define D(...) printf(__VA_ARGS__)
+#define D(...) dprint(__VA_ARGS__)
 #else
 #define D(...) ((void)0)
 #endif

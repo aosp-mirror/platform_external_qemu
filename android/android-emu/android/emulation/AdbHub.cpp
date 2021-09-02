@@ -21,7 +21,7 @@
 
 #if DEBUG >= 1
 #include <stdio.h>
-#define D(...) fprintf(stderr, __VA_ARGS__), fprintf(stderr, "\n")
+#define D(...) dprint(__VA_ARGS__)
 #else
 #define D(...) (void)0
 #endif
@@ -386,7 +386,7 @@ AdbProxy* AdbHub::onNewConnection(const apacket& requestPacket,
         mProxies.emplace(proxy->guestId(), proxy);
         return proxy;
     } else {
-        fprintf(stderr, "WARNING: multiple jdwp connection to %d\n", jdwpId);
+        dwarning("multiple jdwp connection to %d", jdwpId);
         return nullptr;
     }
 }

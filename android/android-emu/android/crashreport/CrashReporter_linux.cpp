@@ -24,7 +24,7 @@
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
 #define D(...) VERBOSE_PRINT(init, __VA_ARGS__)
-#define I(...) printf(__VA_ARGS__)
+#define I(...) dprint(__VA_ARGS__)
 
 // Taken from breakpad to allow child based crash server out of process crash
 // handling. See https://breakpad.appspot.com/166001/show

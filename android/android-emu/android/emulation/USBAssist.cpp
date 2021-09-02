@@ -21,6 +21,10 @@
 #include <strsafe.h>
 #include "USBAssistInterface.h"
 
+// A clash with a windows type that is #defined causing breakage.
+#undef LogSeverity
+#include "android/utils/debug.h"
+
 static int GetStringDescriptor(HANDLE hub, ULONG port, UCHAR index, USHORT langID, PUCHAR buf, size_t buf_size)
 {
     BOOL success = 0;
@@ -306,7 +310,7 @@ static void print_devs(libusb_device** devs)
         struct libusb_device_descriptor desc;
         int r = libusb_get_device_descriptor(dev, &desc);
         if (r < 0) {
-            fprintf(stderr, "failed to get device descriptor");
+            derror("failed to get device descriptor");
             return;
         }
         /* Do not list hubs */
@@ -444,7 +448,7 @@ static int parseUSBOptions(char *options, uint16_t *vid, uint16_t *pid,
         if (!strncmp(param, "vendorid=", 9)) {
             temp = strtol(param + 9, NULL, 16);
             if (temp > USHRT_MAX) {
-                fprintf(stderr, "Error: vendorid exceeds 16 bits\n");
+                derror("Vendorid exceeds 16 bits");
                 goto error_out;
             }
             *vid = (unsigned short)temp;
@@ -453,7 +457,7 @@ static int parseUSBOptions(char *options, uint16_t *vid, uint16_t *pid,
         if (!strncmp(param, "productid=", 10)) {
             temp = strtol(param + 10, NULL, 16);
             if (temp > USHRT_MAX) {
-                fprintf(stderr, "Error: productid exceeds 16 bits\n");
+                derror("productid exceeds 16 bits");
                 goto error_out;
             }
             *pid = (unsigned short)temp;
@@ -481,7 +485,7 @@ static int parseUSBOptions(char *options, uint16_t *vid, uint16_t *pid,
             }
             continue;
         }
-        fprintf(stderr, "Error: invalid parametes for USB Passthrough!!\n"
+        derror("invalid parametes for USB Passthrough!!"
             "Expected Format:  vendorid=0x..., productid=0x..."
             "[,hostbus=...,hostport=...]");
         goto error_out;

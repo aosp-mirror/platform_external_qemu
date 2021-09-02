@@ -437,9 +437,8 @@ void RenderWindow::setPaused(bool paused) {
     // If pausing, flush commands
     if (!mPaused && paused) {
         if (useThread()) {
-            fprintf(stderr,
-                    "WARNING: flushMessages unsupported for RenderWindowThread. "
-                    "Generic snapshot load might segfault.\n");
+            dwarning("flushMessages unsupported for RenderWindowThread. "
+                    "Generic snapshot load might segfault.");
         } else {
             mRepostCommands.waitForEmpty();
         }

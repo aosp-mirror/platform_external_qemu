@@ -14,6 +14,7 @@
 #include "android/emulation/control/AndroidAgentFactory.h"
 
 #include <stdio.h>
+#include "android/utils/debug.h"
 
 struct QAndroidAutomationAgent;
 
@@ -27,7 +28,7 @@ const AndroidConsoleAgents* getConsoleAgents() {
     if (!isInitialized) {
         // Let's not get involved with undefined behavior, if this happens the
         // developer is not calling injectConsoleAgents early enough.
-        fprintf(stderr, "Accessing console agents before injecting them.\n");
+        dfatal("Accessing console agents before injecting them.");
         exit(-1);
     }
     return &sConsoleAgents;

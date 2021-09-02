@@ -19,7 +19,6 @@
 
 #include "android/base/async/RecurrentTask.h"
 #include "android/base/async/ThreadLooper.h"
-#include "android/base/Log.h"
 #include <atomic>
 extern "C" {
 #include "nimble/nimble_npl.h"
@@ -61,7 +60,7 @@ extern "C" void sysinit(void) {
     static std::atomic_bool initialized{false};
     bool expected = false;
     if (!initialized.compare_exchange_strong(expected, true)) {
-        LOG(INFO) << "System already initialized..";
+        dinfo("System already initialized..");
         ble_hs_init();
         return;
     }

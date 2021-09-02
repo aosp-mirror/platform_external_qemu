@@ -320,7 +320,7 @@ bool ScreenRecorder::parseRecordingInfo(RecordingInfo& info) {
     }
 
     if (info.fps == 0) {
-        fprintf(stderr, "Defaulting fps to %u fps\n", kFPS);
+        dwarning("Defaulting fps to %u fps", kFPS);
         info.fps = kFPS;
     }
     return true;
@@ -355,13 +355,13 @@ static void screen_recorder_record_session(const char* cmdLineArgs) {
     });
 
     if (tokens.size() < 2) {
-        fprintf(stderr, "Not enough arguments for record-session\n");
+        derror("Not enough arguments for record-session");
         return;
     }
 
     // Validate filename
     if (!android::base::endsWith(tokens[0], ".webm")) {
-        fprintf(stderr, "Filename must end with .webm extension\n");
+        derror("Filename must end with .webm extension");
         return;
     }
 

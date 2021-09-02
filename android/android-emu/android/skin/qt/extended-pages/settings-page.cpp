@@ -159,9 +159,9 @@ SettingsPage::SettingsPage(QWidget* parent)
                     Ui::Settings::CRASHREPORT_COMBOBOX_NEVER);
             break;
         default:
-            fprintf(stderr,
-                    "%s: warning: unknown crash report preference value 0x%x. "
-                    "Setting to Ask.\n",
+            dwarning(
+                    "%s: unknown crash report preference value 0x%x. "
+                    "Setting to Ask.",
                     __func__, (unsigned int)report_pref);
             mUi->set_crashReportPrefComboBox->setCurrentIndex(
                     Ui::Settings::CRASHREPORT_COMBOBOX_ASK);
@@ -210,9 +210,9 @@ SettingsPage::SettingsPage(QWidget* parent)
                 android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
                 break;
             default:
-                fprintf(stderr,
-                        "%s: warning: unknown 'Save snapshot on exit' preference value 0x%x. "
-                        "Setting to Always.\n",
+                dwarning(
+                        "%s: unknown 'Save snapshot on exit' preference value 0x%x. "
+                        "Setting to Always.",
                         __func__, (unsigned int)saveOnExitChoice);
                 mUi->set_saveSnapshotOnExit->setCurrentIndex(
                         static_cast<int>(SaveSnapshotOnExitUiOrder::Always));
@@ -270,9 +270,9 @@ SettingsPage::SettingsPage(QWidget* parent)
                     mUi->set_glesBackendPrefComboBox->setCurrentIndex(i);
                     break;
                 default:
-                    fprintf(stderr,
-                            "%s: warning: unknown GLES backend preference value 0x%x. "
-                            "Setting to auto.\n",
+                    dwarning(
+                            "%s: unknown GLES backend preference value 0x%x. "
+                            "Setting to auto.",
                             __func__, (unsigned int)settings_glesbackend_pref);
                     mUi->set_glesBackendPrefComboBox->setCurrentIndex(
                             WINSYS_GLESBACKEND_PREFERENCE_AUTO);
@@ -299,8 +299,8 @@ SettingsPage::SettingsPage(QWidget* parent)
                 WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT);
         break;
     default:
-        fprintf(stderr,
-                "%s: warning: unknown GLES API level preference value 0x%x. "
+        dwarning(
+                "%s: unknown GLES API level preference value 0x%x. "
                 "Setting to Auto.\n",
                 __func__, (unsigned int)glesapilevel_pref);
         mUi->set_glesApiLevelPrefComboBox->setCurrentIndex(

@@ -72,7 +72,7 @@ void cpuUsageCurrentThread_macImpl(
             info.system_time.seconds * 1000000ULL +
             info.system_time.microseconds;
     } else {
-        fprintf(stderr, "%s: WARNING: could not get thread info for CPU usage\n", __func__);
+        dwarning("%s: could not get thread info for CPU usage", __func__);
     }
 
     mach_port_deallocate(mach_task_self(), thread);

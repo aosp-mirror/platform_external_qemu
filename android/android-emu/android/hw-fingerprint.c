@@ -90,7 +90,7 @@ android_hw_fingerprint_init( void )
     if (fp->qemu_listen_service == NULL) {
         fp->qemu_listen_service = qemud_service_register("fingerprintlisten", 0, fp,
                 _hwFingerprint_connect, _hwFingerprint_save, _hwFingerprint_load);
-        D("%s: fingerprint qemud listen service initialized\n", __FUNCTION__);
+        D("%s: fingerprint qemud listen service initialized", __FUNCTION__);
     }
 }
 
@@ -98,7 +98,7 @@ void
 android_hw_fingerprint_touch(int fingerid)
 {
     HwFingerprintService*  fp = _fingerprintState;
-    D("touched fingerprint sensor with finger id %d\n", fingerid);
+    D("touched fingerprint sensor with finger id %d", fingerid);
     fp->fingerid = fingerid;
     fp->finger_is_on_sensor = 1;
     _hwFingerprint_send();
@@ -108,7 +108,7 @@ void
 android_hw_fingerprint_remove()
 {
     HwFingerprintService*  fp = _fingerprintState;
-    D("finger removed from the fingerprint sensor\n");
+    D("finger removed from the fingerprint sensor");
     fp->finger_is_on_sensor = 0;
     _hwFingerprint_send();
 }
@@ -167,7 +167,7 @@ _hwFingerprint_connect(void*  opaque,
     qemud_client_set_framing(client, 1);
     fp_client->qemu_client = client;
 
-    D("%s: connect finger print listen is called\n", __FUNCTION__);
+    D("%s: connect finger print listen is called", __FUNCTION__);
     return client;
 }
 
@@ -176,7 +176,7 @@ _hwFingerprintClient_recv(void* opaque, uint8_t* msg, int msglen,
                       QemudClient*  client )
 {
     /* HwFingerprintClient*       fp_client = opaque; */
-    D("got message from guest system fingerprint HAL\n");
+    D("got message from guest system fingerprint HAL");
     guest_data_partition_mounted = 1;
 }
 

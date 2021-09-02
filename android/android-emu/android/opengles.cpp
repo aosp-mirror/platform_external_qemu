@@ -419,7 +419,7 @@ void android_getOpenglesHardwareStrings(char** vendor,
 
 void android_getOpenglesVersion(int* maj, int* min) {
     sRenderLib->getGlesVersion(maj, min);
-    fprintf(stderr, "%s: maj min %d %d\n", __func__, *maj, *min);
+    dinfo("%s: maj min %d %d", __func__, *maj, *min);
 }
 
 void

@@ -42,7 +42,7 @@ public:
     virtual void logMessage(const android::base::LogParams& params,
                             const char* message,
                             size_t messageLen) {
-        mFatal = (params.severity == LOG_FATAL);
+        mFatal = (params.severity == EMULATOR_LOG_FATAL);
         mLogged = true;
         if (mFatal)
             longjmp(mJumper, 1);

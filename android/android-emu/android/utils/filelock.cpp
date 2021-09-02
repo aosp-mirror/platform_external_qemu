@@ -45,7 +45,7 @@ using android::base::System;
 
 // Set to 1 to enable debug traces here.
 #if 0
-#define  D(...)  printf(__VA_ARGS__), printf("\n"), fflush(stdout)
+#define  D(...)  dprint(__VA_ARGS__), fflush(stdout)
 #else
 #define D(...) ((void)0)
 #endif
@@ -164,7 +164,8 @@ static int filelock_lock(FileLock* lock, int timeout) {
         bool slept = false;
         if (!::CreateDirectoryW(unicodeDir.c_str(), nullptr) &&
             ::GetLastError() != ERROR_ALREADY_EXISTS) {
-            fprintf(stderr, "%s: error not already exists\n", __func__);
+            derror("Unexpected error while creating: %s (error: %d)", unicodeDir.c_str(),
+            ::GetLastError());
             continue;
         }
 
@@ -329,8 +330,8 @@ static int filelock_lock(FileLock* lock, int timeout) {
             // The .lock file is a directory. This can only happen
             // when the AVD was previously used by a Win32 emulator
             // instance running under Wine on the same machine.
-            fprintf(stderr,
-                    "Stale Win32 lock file detected: %s\n",
+            dwarning(
+                    "Stale Win32 lock file detected: %s",
                     lock->lock);
 
             /* Try deleting the pid file dropped in windows.

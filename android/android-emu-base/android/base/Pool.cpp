@@ -21,7 +21,7 @@
 
 #if DEBUG_POOL
 
-#define D(fmt,...) fprintf(stderr, "%s: " fmt "\n", __func__, ##__VA_ARGS__);
+#define D(fmt,...) dinfo("%s: " fmt, __func__, ##__VA_ARGS__);
 
 #else
 
@@ -86,10 +86,9 @@ static size_t ilog2Floor(size_t n) {
 struct Block {
     Block(size_t _chunkSize, size_t _numChunks) {
         if (_chunkSize < sizeof(void*)) {
-            fprintf(
-                stderr,
+            dfatal(
                 "FATAL: Cannot allocate block with chunk size "
-                "less then %zu (wanted: %zu)!\n",
+                "less then %zu (wanted: %zu)!",
                 sizeof(void*),
                 _chunkSize);
             abort();

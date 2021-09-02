@@ -159,17 +159,17 @@ public:
 
     bool addLibrary(const std::string& path) {
         if (size() >= mSizeLimit) {
-            fprintf(stderr, "cannot add library %s: full\n", path.c_str());
+            dwarning("cannot add library %s: full", path.c_str());
             return false;
         }
 
         auto library = emugl::SharedLibrary::open(path.c_str());
         if (library) {
             mLibs.push_back(library);
-            fprintf(stderr, "added library %s\n", path.c_str());
+            dinfo("added library %s", path.c_str());
             return true;
         } else {
-            fprintf(stderr, "cannot add library %s: failed\n", path.c_str());
+            dwarning("cannot add library %s: failed", path.c_str());
             return false;
         }
     }

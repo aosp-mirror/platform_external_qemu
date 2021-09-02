@@ -79,7 +79,7 @@ bool TextureLoader::readIndex() {
         mIndex.emplace(tex, filePos);
     }
 #if SNAPSHOT_PROFILE > 1
-    printf("Texture readIndex() time: %.03f\n",
+    dprint("Texture readIndex() time: %.03f",
            (android::base::System::get()->getHighResTimeUs() - start) / 1000.0);
 #endif
     return true;

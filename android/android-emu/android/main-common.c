@@ -1107,7 +1107,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
              * to use an SD Card image that is equal or larger than 9 MB
              */
             if (size < 9*1024*1024ULL) {
-                fprintf(stderr, "### WARNING: SD Card files must be at least 9MB, ignoring '%s'\n", opts->sdcard);
+                dwarning("SD Card files must be at least 9MB, ignoring '%s'", opts->sdcard);
             } else {
                 str_reset(&hw->hw_sdCard_path, opts->sdcard);
                 avdInfo_setImageFile(avd, AVD_IMAGE_SDCARD, opts->sdcard);
@@ -1233,7 +1233,10 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         hw->hw_ramSize = 4096;
     }
     else {
-        D("Physical RAM size: %dMB\n", hw->hw_ramSize);
+        D("Physical RAM size: %dMB", hw->hw_ramSize);
+
+        // 101135008
+        // 101268816
     }
 
     // Set the VM heap size to min vm heap per api level, but make sure we don't
@@ -1367,7 +1370,7 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
 #else
         if (!strncmp(abi, "x86", 3)) {
 #endif
-            fprintf(stderr, "%s: feature check for hvf\n", __func__);
+            dprint("%s: feature check for hvf", __func__);
             // select HVF on Mac if available and we are running on x86
             // TODO: Fix x86_64 support in HVF
             const bool hvf_is_ok = feature_is_enabled(kFeature_HVF) &&
@@ -1440,10 +1443,9 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                      * to stdout and filtered out by AVD Manager. But we want
                      * the AVD Manager user to see this warning, so we resort to
                      * fprintf(..). */
-                    fprintf(stderr, "emulator: WARNING: Host CPU is missing the"
-                            " following feature(s) required for %s emulation:%s"
-                            "\nHardware-accelerated emulation may not work"
-                            " properly!\n", abi, buf);
+                    dwarning("Host CPU is missing the"
+                            " following feature(s) required for %s emulation:%s", abi, buf);
+                    dwarning("Hardware-accelerated emulation may not work properly!");
                 }
 #endif
 
@@ -2251,7 +2253,7 @@ bool configAndStartRenderer(
                     "Error: %d\n", renderer_startup_res);
             }
         } else {
-            fprintf(stderr, "%s: setting vsync to %d hz\n", __func__, hw->hw_lcd_vsync);
+            dinfo("%s: setting vsync to %d hz", __func__, hw->hw_lcd_vsync);
             android_setVsyncHz(hw->hw_lcd_vsync);
         }
     }

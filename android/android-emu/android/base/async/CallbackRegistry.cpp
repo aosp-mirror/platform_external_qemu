@@ -21,7 +21,7 @@
 #define DEBUG 0
 #if DEBUG >= 1
 #define DD(fmt, ...)                                                          \
-    fprintf(stderr, "CallbackRegistry: %s:%d| " fmt "\n", __func__, __LINE__, \
+    dinfo("CallbackRegistry: %s:%d| " fmt "\n", __func__, __LINE__, \
             ##__VA_ARGS__)
 #else
 #define DD(...) (void)0

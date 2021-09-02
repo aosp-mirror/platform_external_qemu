@@ -281,9 +281,9 @@ std::string ConfigDirs::getDiscoveryDirectory() {
     if (root.empty()) {
         // Reverting to the alternative root if these environment variables do
         // not exist.
-        fprintf(stderr,
-                "WARNING. Using fallback path for the emulator registration "
-                "directory.\n");
+        dwarning(
+                "Using fallback path for the emulator registration "
+                "directory.");
         root = getAlternativeRoot();
     } else {
         root = pj(root, discovery.subdir);

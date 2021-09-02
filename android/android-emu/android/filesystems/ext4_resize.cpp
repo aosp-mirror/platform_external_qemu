@@ -62,10 +62,10 @@ void explainSystemErrors(const char* msg) {
     char* pstr = NULL;
     FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
                   NULL, GetLastError(), 0, (LPTSTR)&pstr, 2, NULL);
-    fprintf(stderr, "ERROR: %s - %s\n", msg, pstr);
+    derror("%s - %s\n", msg, pstr);
     LocalFree(pstr);
 #else
-    fprintf(stderr, "ERROR: %s - %s\n", msg, strerror(errno));
+    derror("%s - %s\n", msg, strerror(errno));
 #endif
 }
 
@@ -73,7 +73,7 @@ static int runExt4Program(StringView program,
                           std::initializer_list<std::string> params) {
     std::string executable = System::get()->findBundledExecutable(program);
     if (executable.empty()) {
-        fprintf(stderr, "ERROR: couldn't get path to %s binary\n",
+        derror("couldn't get path to %s binary",
                 c_str(program).get());
         return -1;
     }
@@ -87,13 +87,12 @@ static int runExt4Program(StringView program,
                                              System::kInfinite, &exitCode);
 
     if (!success) {
-        fprintf(stderr, "ERROR: resizing partition failed to launch %s\n",
+        derror("resizing partition failed to launch %s",
                 executable.c_str());
         return -1;
     }
     if (exitCode != 0) {
-        fprintf(stderr,
-                "ERROR: resizing partition %s failed with exit code %d\n",
+        derror("resizing partition %s failed with exit code %d",
                 c_str(program).get(), (int)exitCode);
         return exitCode;
     }
@@ -121,7 +120,7 @@ int resizeExt4Partition(const char* partitionPath, int64_t newByteSize) {
                           convertBytesToMB(newByteSize));
     size_in_MB[sizeof(size_in_MB) - 1] = '\0';
     if (copied < 0 || static_cast<size_t>(copied) >= sizeof(size_in_MB)) {
-        fprintf(stderr, "ERROR: failed to format size in resize2fs command\n");
+        derror("failed to format size in resize2fs command");
         return -1;
     }
 

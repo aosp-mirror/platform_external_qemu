@@ -32,7 +32,7 @@ static void user_event_key(unsigned code, bool down) {
         return;
     }
     if (VERBOSE_CHECK(keys))
-        printf(">> %s KEY [0x%03x,%s]\n", __func__, (code & 0x3ff), down ? "down" : " up ");
+        dprint(">> %s KEY [0x%03x,%s]", __func__, (code & 0x3ff), down ? "down" : " up ");
 
     goldfish_event_send(0x01, code, down);
 }
@@ -40,7 +40,7 @@ static void user_event_key(unsigned code, bool down) {
 static void user_event_keycode(int code) {
     bool down = code & 0x400;
     if (VERBOSE_CHECK(keys))
-        printf(">> %s KEY [0x%03x,%s]\n", __func__, (code & 0x3ff), down ? "down" : " up ");
+        dprint(">> %s KEY [0x%03x,%s]", __func__, (code & 0x3ff), down ? "down" : " up ");
 
     // Android already translates all the keycodes, so
     // we do not want to go through the Qemu keycode stack, as it will
@@ -106,7 +106,7 @@ static void user_event_mouse(int dx,
                              int buttonsState,
                              int displayId) {
     if (VERBOSE_CHECK(keys))
-        printf(">> MOUSE [%d %d %d : 0x%04x]\n", dx, dy, dz, buttonsState);
+        dprint(">> MOUSE [%d %d %d : 0x%04x]", dx, dy, dz, buttonsState);
     if (feature_is_enabled(kFeature_VirtioInput) &&
         !feature_is_enabled(kFeature_VirtioMouse))
         android_virtio_kbd_mouse_event(dx, dy, dz, buttonsState, displayId);
@@ -120,14 +120,14 @@ static void user_event_pen(int dx,
                            int buttonsState,
                            int displayId) {
     if (VERBOSE_CHECK(keys)) {
-        printf(">> PEN [%d %d : 0x%04x]\n", dx, dy, buttonsState);
+        dprint(">> PEN [%d %d : 0x%04x]", dx, dy, buttonsState);
     }
     android_virtio_pen_event(dx, dy, ev, buttonsState, displayId);
 }
 
 static void user_event_mouse_wheel(int dx, int dy, int displayId) {
     if (VERBOSE_CHECK(keys)) {
-        printf(">> MOUSE WHEEL [%d %d]\n", dx, dy);
+        dprint(">> MOUSE WHEEL [%d %d]", dx, dy);
     }
     if (feature_is_enabled(kFeature_VirtioMouse)) {
         kbd_mouse_wheel_event(dx, dy);

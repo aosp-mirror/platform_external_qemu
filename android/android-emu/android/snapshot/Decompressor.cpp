@@ -15,6 +15,7 @@
 
 #include <stdio.h>
 #include <cassert>
+#include "android/utils/debug.h"
 
 namespace android {
 namespace snapshot {
@@ -27,7 +28,7 @@ bool Decompressor::decompress(const uint8_t* data,
                                         reinterpret_cast<char*>(outData), size,
                                         outSize);
     if (res != outSize) {
-        fprintf(stderr, "Decompression failed: %d\n", res);
+        derror("Decompression failed: %d", res);
     }
     return res == outSize;
 }

@@ -75,7 +75,7 @@ FILE* android::base::fsopen(const char* filename,
 bool android::base::updateFileShare(FILE* file, FileShare fileshare) {
     // TODO: have windows support
     // BUG: 112265408
-    fprintf(stderr, "Error: updateFileShare not supported on windows\n");
+    derror("Error: updateFileShare not supported on windows");
     return false;
 }
 

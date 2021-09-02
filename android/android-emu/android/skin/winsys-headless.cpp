@@ -145,7 +145,7 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
 
         sigemptyset (&mask);
         if (sigprocmask(SIG_BLOCK, &mask, &origMask) < 0) {
-            fprintf(stderr, "%s %s: sigprocmask() failed!\n", __FILE__, __FUNCTION__);
+            derror("%s %s: sigprocmask() failed!\n", __FILE__, __FUNCTION__);
             break;
         }
         sigsuspend(&mask);
@@ -317,11 +317,11 @@ extern void skin_winsys_quit_request() {
     } else {
 #ifdef _WIN32
     if ( !SetEvent(sWakeEvent) ) {
-        fprintf(stderr, "%s %s: SetEvent() failed!\n", __FILE__, __FUNCTION__);
+        derror("%s %s: SetEvent() failed!\n", __FILE__, __FUNCTION__);
     }
 #else
     if ( kill(getpid(), SIGUSR1) ) {
-       fprintf(stderr, "%s %s: kill() failed!\n", __FILE__, __FUNCTION__);
+       derror("%s %s: kill() failed!\n", __FILE__, __FUNCTION__);
     }
 #endif
     }
@@ -398,7 +398,7 @@ extern void skin_winsys_init_args(int argc, char** argv) {
 }
 
 extern int skin_winsys_snapshot_control_start() {
-    fprintf(stderr, "%s: Snapshot UI not available yet in headless mode\n", __func__);
+    derror("%s: Snapshot UI not available yet in headless mode", __func__);
     return 0;
 }
 
@@ -420,7 +420,7 @@ void skin_winsys_run_ui_update(SkinGenericFunction f, void* data,
 }
 
 extern void skin_winsys_error_dialog(const char* message, const char* title) {
-    fprintf(stderr, "%s: error dialog: title: [%s] msg: [%s]\n", __func__, title, message);
+    derror("%s: error dialog: title: [%s] msg: [%s]\n", __func__, title, message);
 }
 
 void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {

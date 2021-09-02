@@ -1,16 +1,18 @@
-#include "android/base/async/Looper.h"
-#include "android/base/async/ThreadLooper.h"
-#include "android/crashreport/crash-handler.h"
-#include "android/crashreport/CrashReporter.h"
-#include "android/crashreport/HangDetector.h"
-#include "android/emulation/CpuAccelerator.h"
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/metrics/StudioConfig.h"
+#include <stdarg.h>                                 // for va_list, va_start
+#include <stdio.h>                                  // for vsnprintf
+#include <stdlib.h>                                 // for abort
 
-#include "OpenGLESDispatch/GLESv2Dispatch.h"
+#include "android/crashreport/CrashReporter.h"      // for CrashReporter
+#include "android/crashreport/crash-handler.h"      // for crashhandler_appe...
+#include "android/emulation/CpuAccelerator.h"       // for CPU_ACCELERATOR_HVF
+#include "android/featurecontrol/FeatureControl.h"  // for applyCachedServer...
+#include "android/metrics/StudioConfig.h"           // for UpdateChannel
+#include "android/utils/debug.h"                    // for dfatal
+
+struct GLESv2Dispatch;
 
 void crashhandler_die(const char* message) {
-    fprintf(stderr, "%s: fatal: %s\n", __func__, message);
+    dfatal("%s: fatal: %s", __func__, message);
     abort();
 }
 
@@ -55,18 +57,11 @@ namespace studio {
 namespace crashreport {
 
     void CrashReporter::GenerateDumpAndDie(const char* msg) {
-        fprintf(stderr, "%s: fatal: %s\n", __func__, msg);
+        dfatal("%s: fatal: %s", __func__, msg);
         abort(); }
 
     CrashReporter* CrashReporter::get() { return 0; }
 }
-
-namespace base {
-
-// int Looper::FdWatch::fd() const { return -1; }
-// Looper* ThreadLooper::get() { return 0; }
-
-} // namespace base
 
 CpuAccelerator GetCurrentCpuAccelerator() {
 #if defined(__linux__)

@@ -18,6 +18,7 @@
 #include "android/globals.h"
 #include "android/opengl/EmuglBackendList.h"
 #include "android/skin/winsys.h"
+#include "android/utils/debug.h"
 
 #include <string>
 
@@ -30,7 +31,7 @@
 #define DEBUG 0
 
 #if DEBUG
-#define D(...)  printf(__VA_ARGS__)
+#define D(...)  dprint(__VA_ARGS__)
 #else
 #define D(...)  crashhandler_append_message_format(__VA_ARGS__)
 #endif
@@ -381,7 +382,7 @@ bool emuglConfig_init(EmuglConfig* config,
             }
 
             D("%s: Error: [%s]\n", __func__, error.c_str());
-            fprintf(stderr, "%s: %s\n", __func__, error.c_str());
+            derror("%s: %s", __func__, error.c_str());
 
             config->enabled = false;
             gpu_mode = "error";
@@ -466,8 +467,8 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
             config->backend, EmuglBackendList::LIBRARY_GLESv1, &lib)) {
         system->envSet("ANDROID_GLESv1_LIB", lib);
     } else if (strcmp(config->backend, "mesa")) {
-        fprintf(stderr, "OpenGL backend '%s' without OpenGL ES 1.x library detected. "
-                        "Using GLESv2 only.\n",
+        derror("OpenGL backend '%s' without OpenGL ES 1.x library detected. "
+                        "Using GLESv2 only.",
                         config->backend);
         // A GLESv1 lib is optional---we can deal with a GLESv2 only
         // backend by using CoreProfileEngine in the Translator.
@@ -479,8 +480,8 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     }
 
     if (!strcmp(config->backend, "mesa")) {
-        fprintf(stderr, "WARNING: The Mesa software renderer is deprecated. "
-                        "Use Swiftshader (-gpu swiftshader) for software rendering.\n");
+        dwarning("The Mesa software renderer is deprecated. ")
+        dwarning("Use Swiftshader (-gpu swiftshader) for software rendering.");
         system->envSet("ANDROID_GL_LIB", "mesa");
         system->envSet("ANDROID_GL_SOFTWARE_RENDERER", "1");
     }
