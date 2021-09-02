@@ -811,8 +811,8 @@ void VirtualSensorsPage::updateUIFromModelCurrentState() {
         position = (1.f / kMetersPerInch) * position;
 
         glm::vec3 eulerDegrees;
-        std::vector<float*> outEulerDegrees = {&position.x, &position.y,
-                                               &position.z};
+        std::vector<float*> outEulerDegrees = {&eulerDegrees.x, &eulerDegrees.y,
+                                               &eulerDegrees.z};
         sSensorsAgent->getPhysicalParameter(
                 PHYSICAL_PARAMETER_ROTATION, outEulerDegrees.data(),
                 outEulerDegrees.size(), PARAMETER_VALUE_TYPE_CURRENT);
