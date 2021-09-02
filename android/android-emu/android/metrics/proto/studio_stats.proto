@@ -1495,7 +1495,8 @@ message EmulatorFeatureFlagState {
     DEVICESKINOVERLAY = 83;
     ANDROIDBOOT_PROPS2 = 84;
     BLUETOOTH_EMULATION = 85;
-    // Next tag: 86
+    DEVICESTATE_ON_BOOT = 86;
+    // Next tag: 87
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

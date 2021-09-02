@@ -14,9 +14,11 @@
 #include <algorithm>
 #include <string>
 
+#include "android/base/misc/StringUtils.h"
 #include "android/base/StringFormat.h"
 #include "android/emulation/control/adb/adbkey.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/hw-sensors.h"
 #include "android/version.h"
 
 namespace {
@@ -31,6 +33,79 @@ static const char kSysfsAndroidDtDirDtb[] =
 }  // namespace
 
 using android::base::StringFormat;
+using android::base::splitTokens;
+
+std::string getDeviceStateString(const AndroidHwConfig* hw) {
+    if (android_foldable_hinge_configured()) {
+        int numHinges = hw->hw_sensor_hinge_count;
+        if (numHinges < 0 || numHinges > ANDROID_FOLDABLE_MAX_HINGES) {
+            LOG(ERROR) << "Incorrect hinge count " <<hw->hw_sensor_hinge_count;
+            return std::string();
+        }
+        std::string postureList(hw->hw_sensor_posture_list);
+        std::string postureValues(hw->hw_sensor_hinge_angles_posture_definitions);
+        std::vector<std::string> postureListTokens, postureValuesTokens;
+        splitTokens(postureList, &postureListTokens, ",");
+        splitTokens(postureValues, &postureValuesTokens, ",");
+        if (postureList.empty() || postureValues.empty() ||
+            postureListTokens.size() != postureValuesTokens.size()) {
+            LOG(ERROR) << "Incorrect posture list " << postureList
+                       << " or posture mapping " << postureValues;
+            return std::string();
+        }
+        std::string ret("<device-state-config>");
+        std::vector<std::string> valuesToken;
+        for (int i = 0; i < postureListTokens.size(); i++) {
+            char name[16];
+            ret += "<device-state>";
+            ret += "<identifier>" + postureListTokens[i] + "</identifier>";
+            if (!android_foldable_posture_name(std::stoi(postureListTokens[i], nullptr), name)) {
+                return std::string();
+            }
+            ret += "<name>" + std::string(name) + "</name>";
+            ret += "<conditions>";
+            splitTokens(postureValuesTokens[i], &valuesToken,
+                                       "&");
+            if ( valuesToken.size() != numHinges) {
+                LOG(ERROR) << "Incorrect posture mapping " << postureValuesTokens[i];
+                return std::string();
+            }
+            std::vector<std::string> values;
+            struct AnglesToPosture valuesToPosture;
+            for (int j = 0; j < valuesToken.size(); j++) {
+                ret += "<sensor>";
+                ret += "<type>android.sensor.hinge_angle</type>";
+                ret += "<name>Goldfish hinge sensor" + std::to_string(j) + " (in degrees)</name>";
+                splitTokens(valuesToken[j], &values, "-");
+                size_t tokenCount = values.size();
+                if (tokenCount != 2 && tokenCount != 3) {
+                    LOG(ERROR) << "Incorrect posture mapping " << valuesToken[j];
+                    return std::string();
+                }
+                ret += "<value>";
+                ret += "<min-inclusive>" + values[0] + "</min-inclusive>";
+                ret += "<max-inclusive>" + values[1] + "</max-inclusive>";
+                ret += "</value>";
+                ret += "</sensor>";
+            }
+            ret += "</conditions>";
+            ret += "</device-state>";
+        }
+        ret += "</device-state-config>";
+        return ret;
+    }
+
+    if (android_foldable_rollable_configured()) {
+        return std::string("<device-state-config><device-state><identifier>1</identifier>"
+                           "<name>CLOSED</name><conditions><lid-switch><open>false</open>"
+                           "</lid-switch></conditions></device-state><device-state>"
+                           "<identifier>3</identifier><name>OPENED</name><conditions>"
+                           "<lid-switch><open>true</open></lid-switch></conditions>"
+                           "</device-state></device-state-config>");
+    }
+
+    return std::string();
+}
 
 std::vector<std::pair<std::string, std::string>>
 getUserspaceBootProperties(const AndroidOptions* opts,
@@ -72,6 +147,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     const char* androidbootLogcatProp;
     const char* adbKeyProp;
     const char* avdNameProp;
+    const char* deviceStateProp;
 
     namespace fc = android::featurecontrol;
     if (fc::isEnabled(fc::AndroidbootProps) || fc::isEnabled(fc::AndroidbootProps2)) {
@@ -101,6 +177,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         androidbootLogcatProp = "androidboot.logcat";
         adbKeyProp = "androidboot.qemu.adb.pubkey";
         avdNameProp = "androidboot.qemu.avd_name";
+        deviceStateProp = "androidboot.qemu.device_state";
     } else {
         androidbootVerityMode = nullptr;
         checkjniProp = "android.checkjni";
@@ -128,6 +205,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         androidbootLogcatProp = nullptr;
         adbKeyProp = nullptr;
         avdNameProp = "qemu.avd_name";
+        deviceStateProp = "qemu.device_state";
     }
 
     std::vector<std::pair<std::string, std::string>> params;
@@ -397,6 +475,15 @@ getUserspaceBootProperties(const AndroidOptions* opts,
 
     params.push_back({avdNameProp, hw->avd_name});
 
+    if (deviceStateProp &&
+        android::featurecontrol::isEnabled(android::featurecontrol::DeviceStateOnBoot)) {
+        std::string deviceState = getDeviceStateString(hw);
+        if (deviceState != "") {
+            LOG(INFO) <<" sending device_state_config: " << deviceState;
+            params.push_back({deviceStateProp, deviceState});
+        }
+    }
+
     for (auto i = opts->append_userspace_opt; i; i = i->next) {
         const char* const val = i->param;
         const char* const eq = strchr(val, '=');
@@ -406,6 +493,5 @@ getUserspaceBootProperties(const AndroidOptions* opts,
             params.push_back({val, ""});
         }
     }
-
     return params;
 }

@@ -111,4 +111,6 @@ enum Feature {
     DeviceSkinOverlay = 62;
     // Emulated bluetooth stack
     BluetoothEmulation = 63;
+
+    DeviceStateOnBoot = 64;
 }
