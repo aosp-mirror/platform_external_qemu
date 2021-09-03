@@ -874,7 +874,7 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
     if (VERBOSE_CHECK(rotation)) {
         dprint( "setCoarseOrientation - HwSensors %p", h);
     }
-    std::initializer_list<float> rotation = {};
+    std::vector<float> rotation;
     switch (orient) {
         case ANDROID_COARSE_PORTRAIT:
             if (VERBOSE_CHECK(rotation)) {
@@ -913,7 +913,7 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
     }
 
     _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_ROTATION,
-                                         rotation.begin(), rotation.size(),
+                                         rotation.data(), rotation.size(),
                                          PHYSICAL_INTERPOLATION_STEP);
 }
 
