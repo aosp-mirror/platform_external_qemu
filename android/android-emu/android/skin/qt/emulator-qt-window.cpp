@@ -2447,7 +2447,7 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
                 case SKIN_ROTATION_0:
                     if (backingSize.width() == displayXFolded &&
                         backingSize.height() == displayYFolded) {
-                        return;
+                        break;
                     }
                     windowGeo.setWidth((int)(displayXFolded * scale));
                     windowGeo.setHeight((int)(displayYFolded * scale));
@@ -2458,7 +2458,7 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
                 case SKIN_ROTATION_270:
                     if (backingSize.width() == displayYFolded &&
                         backingSize.height() == displayXFolded) {
-                        return;
+                        break;
                     }
                     backingSize.setWidth(displayYFolded);
                     backingSize.setHeight(displayXFolded);
@@ -2473,7 +2473,7 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
             case SKIN_ROTATION_180:
                 if (backingSize.width() == displayX &&
                     backingSize.height() == displayY) {
-                    return;
+                    break;
                 }
                 windowGeo.setWidth((int)(displayX * scale));
                 windowGeo.setHeight((int)(displayY * scale));
@@ -2484,7 +2484,7 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
             case SKIN_ROTATION_270:
                 if (backingSize.width() == displayY &&
                     backingSize.height() == displayX) {
-                    return;
+                    break;
                 }
                 windowGeo.setWidth((int)(displayY* scale));
                 windowGeo.setHeight((int)(displayX* scale));
