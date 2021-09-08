@@ -11,15 +11,20 @@
 
 #include "android/userspace-boot-properties.h"
 
-#include <algorithm>
-#include <string>
+#include <string.h>                                 // for strcmp, strchr
+#include <algorithm>                                // for replace_if
+#include <ostream>                                  // for operator<<, ostream
+#include <string>                                   // for string, operator+
 
-#include "android/base/misc/StringUtils.h"
-#include "android/base/StringFormat.h"
-#include "android/emulation/control/adb/adbkey.h"
-#include "android/featurecontrol/FeatureControl.h"
-#include "android/hw-sensors.h"
-#include "android/version.h"
+#include "android/base/Log.h"                       // for LOG, LogMessage
+#include "android/base/StringFormat.h"              // for StringFormat
+#include "android/base/misc/StringUtils.h"          // for splitTokens
+#include "android/emulation/control/adb/adbkey.h"   // for getPrivateAdbKeyPath
+#include "android/featurecontrol/FeatureControl.h"  // for isEnabled
+#include "android/featurecontrol/Features.h"        // for AndroidbootProps2
+#include "android/hw-sensors.h"                     // for android_foldable_...
+#include "android/utils/debug.h"                    // for dwarning
+#include "android/utils/log_severity.h"             // for EMULATOR_LOG_ERROR
 
 namespace {
 
@@ -42,8 +47,8 @@ std::string getDeviceStateString(const AndroidHwConfig* hw) {
             LOG(ERROR) << "Incorrect hinge count " <<hw->hw_sensor_hinge_count;
             return std::string();
         }
-        std::string postureList(hw->hw_sensor_posture_list);
-        std::string postureValues(hw->hw_sensor_hinge_angles_posture_definitions);
+        std::string postureList(hw->hw_sensor_posture_list ? hw->hw_sensor_posture_list : "");
+        std::string postureValues(hw->hw_sensor_hinge_angles_posture_definitions ? hw->hw_sensor_hinge_angles_posture_definitions : "");
         std::vector<std::string> postureListTokens, postureValuesTokens;
         splitTokens(postureList, &postureListTokens, ",");
         splitTokens(postureValues, &postureValuesTokens, ",");
