@@ -3133,7 +3133,7 @@ SRST
 
         Note that a SAMBA server must be installed on the host OS.
 
-    ``hostfwd=[tcp|udp]:[hostaddr]:hostport-[guestaddr]:guestport``
+    ``hostfwd=[tcp|udp]:[hostaddr]:hostport[,ipv4=on|off][,ipv6=on|off]-[guestaddr]:guestport``
         Redirect incoming TCP or UDP connections to the host port
         hostport to the guest IP address guestaddr on guest port
         guestport. If guestaddr is not specified, its value is x.x.x.15
@@ -3163,6 +3163,17 @@ SRST
 
         Then when you use on the host ``telnet localhost 5555``, you
         connect to the guest telnet server.
+
+        The same example, using ipv6, and only ipv6:
+
+        .. parsed-literal::
+
+            # on the host
+            |qemu_system| -nic user,hostfwd=tcp::5555,,ipv6-:23
+            telnet -6 localhost 5555
+
+        The double comma ",," is necessary because the comma is part of
+        the "hostfwd" option, and doesn't introduce a new option.
 
     ``guestfwd=[tcp]:server:port-dev``; \ ``guestfwd=[tcp]:server:port-cmd:command``
         Forward guest TCP connections to the IP address server on port

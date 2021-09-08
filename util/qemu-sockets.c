@@ -649,9 +649,9 @@ const char *inet_parse_host_port(InetSocketAddress *addr, const char *str,
          *
          * sscanf %[ doesn't recognize empty contents.
          */
-        if (sscanf(str, "[]:%32s%n", port, &pos) == 1) {
+        if (sscanf(str, "[]:%32[^,]%n", port, &pos) == 1) {
             host[0] = '\0';
-        } else if (sscanf(str, "[%64[^]]]:%32s%n", host, port, &pos) != 2) {
+        } else if (sscanf(str, "[%64[^]]]:%32[^,]%n", host, port, &pos) != 2) {
             error_setg(errp, "error parsing address '%s'", str);
             return NULL;
         }

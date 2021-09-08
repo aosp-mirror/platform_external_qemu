@@ -121,6 +121,9 @@ class Hostfwd(Test):
         self.assertEquals(self.hmc('hostfwd_add vnet tcp::65022,ipv6=on-:22'), '')
         self.assertEquals(self.hmc('hostfwd_remove vnet tcp::65022,ipv6=on'),
                           'host forwarding rule for tcp::65022,ipv6=on removed\r\n')
+        self.assertEquals(self.hmc('hostfwd_add vnet tcp:[::1]:65022,ipv6-:22'), '')
+        self.assertEquals(self.hmc('hostfwd_remove vnet tcp:[::1]:65022,ipv6'),
+                          'host forwarding rule for tcp:[::1]:65022,ipv6 removed\r\n')
         self.assertEquals(self.hmc('hostfwd_add vnet tcp::65022,ipv4=off-:22'), '')
         self.assertEquals(self.hmc('hostfwd_remove vnet tcp::65022,ipv4=off'),
                           'host forwarding rule for tcp::65022,ipv4=off removed\r\n')
