@@ -53,8 +53,11 @@ class VirtioGpuTimelines {
         std::variant<std::unique_ptr<Fence>, std::shared_ptr<Task>>;
     android::base::Lock mLock;
     std::atomic<TaskId> mNextId;
-    std::unordered_map<CtxId, std::list<TimelineItem>> mTimelineQueues;
+    // The mTaskIdToTask cache must be destroyed after the actual owner of Task,
+    // mTimelineQueues, is destroyed, because the deleter of Task will
+    // automatically remove the entry in mTaskIdToTask.
     std::unordered_map<TaskId, std::weak_ptr<Task>> mTaskIdToTask;
+    std::unordered_map<CtxId, std::list<TimelineItem>> mTimelineQueues;
     // Go over the timeline, signal any fences without pending tasks, and remove
     // timeline items that are no longer needed.
     void poll_locked(CtxId);

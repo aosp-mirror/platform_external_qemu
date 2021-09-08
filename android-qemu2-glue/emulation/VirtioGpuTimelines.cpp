@@ -28,7 +28,10 @@ TaskId VirtioGpuTimelines::enqueueTask(CtxId ctxId) {
     AutoLock lock(mLock);
 
     TaskId id = mNextId++;
-    auto task = std::make_shared<Task>(id, ctxId);
+    std::shared_ptr<Task> task(new Task(id, ctxId), [this](Task *task) {
+        mTaskIdToTask.erase(task->mId);
+        delete task;
+    });
     mTaskIdToTask[id] = task;
     mTimelineQueues[ctxId].emplace_back(std::move(task));
     return id;
