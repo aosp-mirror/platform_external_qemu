@@ -121,6 +121,9 @@ typedef enum {
 /* Determine the flavor of system image. */
 AvdFlavor propertyFile_getAvdFlavor(const FileData* data);
 
+/* Determine whether a ATD system image is used. */
+bool propertyFile_isAtd(const FileData* data);
+
 /* Determine whether a Google API's system image is used. */
 bool propertyFile_isGoogleApis(const FileData* data);
 

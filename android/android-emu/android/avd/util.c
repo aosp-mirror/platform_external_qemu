@@ -226,8 +226,14 @@ AvdFlavor propertyFile_getAvdFlavor(const FileData* data) {
     return res;
 }
 
+bool propertyFile_isAtd(const FileData* data) {
+    const char* atd_names[] = {"aosp_atd", "google_atd"};
+    return propertyFile_findProductName(
+            data, atd_names, ARRAY_SIZE(atd_names), false /*prefix*/);
+}
+
 bool propertyFile_isGoogleApis(const FileData* data) {
-    const char* google_names[] = {"sdk_google", "google_sdk", "sdk_gphone"};
+    const char* google_names[] = {"sdk_google", "google_sdk", "sdk_gphone", "google_atd"};
     return propertyFile_findProductName(
             data, google_names, ARRAY_SIZE(google_names), false /*prefix*/);
 }

@@ -147,6 +147,7 @@ struct AvdInfo {
     bool      isMarshmallowOrHigher;
     bool      isGoogleApis;
     bool      isUserBuild;
+    bool      isAtd;
     AvdFlavor flavor;
     char*     skinName;     /* skin name */
     char*     skinDirPath;  /* skin directory */
@@ -607,6 +608,11 @@ avdInfo_isUserBuild(const AvdInfo* i) {
     return i->isUserBuild;
 }
 
+bool
+avdInfo_isAtd(const AvdInfo* i) {
+    return i->isAtd;
+}
+
 AvdFlavor avdInfo_getAvdFlavor(const AvdInfo* i) {
     return i->flavor;
 }
@@ -909,6 +915,7 @@ _avdInfo_extractBuildProperties(AvdInfo* i) {
 
     i->isGoogleApis = propertyFile_isGoogleApis(i->buildProperties);
     i->isUserBuild = propertyFile_isUserBuild(i->buildProperties);
+    i->isAtd = propertyFile_isAtd(i->buildProperties);
     i->incrementalVersion = propertyFile_getInt(
         i->buildProperties,
         "ro.build.version.incremental",

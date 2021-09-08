@@ -186,6 +186,9 @@ bool   avdInfo_isGoogleApis( const AvdInfo*  i );
 /* Returns true if the AVD is a user build. */
 bool avdInfo_isUserBuild(const AvdInfo* i);
 
+/* Returns true if the AVD is an Automated Test Device. */
+bool avdInfo_isAtd(const AvdInfo* i);
+
 /* Querying AVD flavors. */
 AvdFlavor avdInfo_getAvdFlavor( const AvdInfo* i);
 
