@@ -766,6 +766,9 @@ Object *object_new(const char *type_name)
 {
     TypeImpl *ti = type_get_by_name(type_name);
 
+    if (ti == NULL) {  // GOOGLE CHANGE: diagnostics.
+        error_report("Failed to find type for '%s'\n", type_name);
+    }
     return object_new_with_type(ti);
 }
 
@@ -1100,7 +1103,7 @@ static void object_class_foreach_tramp(gpointer key, gpointer value,
         return;
     }
 
-    if (data->implements_type && 
+    if (data->implements_type &&
         !object_class_dynamic_cast(k, data->implements_type)) {
         return;
     }
