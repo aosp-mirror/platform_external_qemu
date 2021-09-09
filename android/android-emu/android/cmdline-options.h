@@ -302,6 +302,11 @@ OPT_PARAM(save_path,
 OPT_FLAG(no_nested_warnings,
          "Disable the warning dialog when emulator is running in nested "
          "virtualization.")
+
+OPT_PARAM( wifi_tap, "<interface>", "use this TAP interface for Virtio Wi-Fi" )
+OPT_PARAM( wifi_tap_script_up, "<script>", "script to run when the TAP interface goes up" )
+OPT_PARAM( wifi_tap_script_down, "<script>", "script to run when the TAP interface goes down" )
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

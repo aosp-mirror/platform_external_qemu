@@ -2275,7 +2275,23 @@ extern "C" int main(int argc, char** argv) {
     initialize_virtio_input_devs(args, hw);
     if (feature_is_enabled(kFeature_VirtioWifi)) {
         args.add("-netdev");
-        args.add("user,id=virtio-wifi,dhcpstart=10.0.2.16");
+        if (opts->wifi_tap) {
+            const char* upScript =
+                    opts->wifi_tap_script_up ? opts->wifi_tap_script_up : "no";
+            const char* downScript =
+                    opts->wifi_tap_script_down ? opts->wifi_tap_script_down : "no";
+            args.addFormat("tap,id=virtio-wifi,script=%s,downscript=%s,ifname=%s",
+                           upScript, downScript, opts->wifi_tap);
+        } else {
+            if (opts->wifi_tap_script_up) {
+                dwarning("-wifi-tap-script-up ignored without -wifi-tap option");
+            }
+            if (opts->wifi_tap_script_down) {
+                dwarning("-wifi-tap-script-down ignored without -wifi-tap option");
+            }
+            args.add("user,id=virtio-wifi,dhcpstart=10.0.2.16");
+        }
+
         args.add("-device");
         args.add("virtio-wifi-pci,netdev=virtio-wifi");
     }

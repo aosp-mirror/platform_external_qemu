@@ -2046,6 +2046,61 @@ static void help_save_path(stralloc_t* out) {
            "default path will still be used.\n");
 }
 
+static void
+help_wifi_tap(stralloc_t*  out)
+{
+    PRINTF(
+    "  by default, the emulator's virtio wifi device uses user mode networking which\n"
+    "  does address translation of all network traffic. Use -wifi-tap <tap interface>\n"
+    "  to switch to TAP network mode where Virtio Wi-Fi will use a TAP interface to\n"
+    "  connect to the host network directly. Android will attempt to configure the TAP\n"
+    "  network using DHCP for IPv4 and SLAAC for IPv6. To be able to access the\n"
+    "  network that the host is connected to the TAP interface should be bridged\n"
+    "  with another network interface on the host.\n\n"
+
+    "  <tap interface> is the name of a TAP network interface such as tap0. It\n"
+    "  is NOT the path to the TAP device, just the name of the device. Also, the name\n"
+    "  should Not be the same as the network interface used by net-tap option. \n\n"
+    );
+}
+
+static void
+help_wifi_tap_script_up(stralloc_t*  out)
+{
+    PRINTF(
+    "  when using the -wifi-tap option it is sometimes useful to run a script when\n"
+    "  TAP interface is enabled. Depending on the host system the TAP interface\n"
+    "  might not be up until the emulator enables it. A common operation in such\n"
+    "  a script is to add the TAP interface to a bridge so that it can be part of\n"
+    "  the host network.\n"
+
+    "  <script> the path to a script to be run when the TAP interface goes up.\n"
+
+    "  NOTE: The script will be run with the same privileges as the emulator.\n"
+    "        Ensure that this is sufficient for whatever operations the script\n"
+    "        performs.\n\n"
+    );
+}
+
+static void
+help_wifi_tap_script_down(stralloc_t*  out)
+{
+    PRINTF(
+    "  when using the -wifi-tap option it is sometimes useful to run a script when\n"
+    "  TAP interface is disabled. Depending on the host system the TAP interface\n"
+    "  might be disabled when the emulator exits. A common operation in such\n"
+    "  a script is to remove the TAP interface from a bridge that it was previously\n"
+    "  part of.\n"
+
+    "  <script> the path to a script to be run when the TAP interface goes down.\n"
+
+    "  NOTE: The script will be run with the same privileges as the emulator.\n"
+    "        Ensure that this is sufficient for whatever operations the script\n"
+    "        performs.\n\n"
+    );
+}
+
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
