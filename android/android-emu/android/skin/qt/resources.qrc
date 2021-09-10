@@ -217,6 +217,16 @@
         <file alias="posture_half-open">images/light/posture_half-open.svg</file>
         <file alias="posture_open">images/light/posture_open.svg</file>
         <file alias="posture_tent">images/light/posture_tent.svg</file>
+
+        <!-- Used in the resizable display selection tool mini-window -->
+        <file alias="display_mode_phone">images/light/phone_mode.svg</file>
+        <file alias="display_mode_phone_expand">images/light/phone_expand.svg</file>
+        <file alias="display_mode_foldable">images/light/foldable_mode.svg</file>
+        <file alias="display_mode_foldable_expand">images/light/foldable_expand.svg</file>
+        <file alias="display_mode_tablet">images/light/tablet_mode.svg</file>
+        <file alias="display_mode_tablet_expand">images/light/tablet_expand.svg</file>
+        <file alias="display_mode_desktop">images/light/laptop_mode.svg</file>
+        <file alias="display_mode_desktop_expand">images/light/desktop_expand.svg</file>
     </qresource>
     <qresource prefix="/dark">
         <!-- Main list of tool buttons -->
@@ -385,7 +395,17 @@
         <file alias="posture_half-open">images/dark/posture_half-open.svg</file>
         <file alias="posture_open">images/dark/posture_open.svg</file>
         <file alias="posture_tent">images/dark/posture_tent.svg</file>
-    </qresource>
+
+        <!-- Used in the resizable display selection tool mini-window -->
+        <file alias="display_mode_phone">images/dark/phone_mode.svg</file>
+        <file alias="display_mode_phone_expand">images/dark/phone_expand.svg</file>
+        <file alias="display_mode_foldable">images/dark/foldable_mode.svg</file>
+        <file alias="display_mode_foldable_expand">images/dark/foldable_expand.svg</file>
+        <file alias="display_mode_tablet">images/dark/tablet_mode_dark.svg</file>
+        <file alias="display_mode_tablet_expand">images/dark/tablet_expand.svg</file>
+        <file alias="display_mode_desktop">images/dark/laptop_mode_dark.svg</file>
+        <file alias="display_mode_desktop_expand">images/dark/desktop_expand.svg</file>
+     </qresource>
 
     <qresource prefix="/studio-light">
         <!-- Main list of tool buttons -->

@@ -29,6 +29,7 @@
 #include "android/skin/qt/emulator-overlay.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h"
+#include "android/skin/qt/resizable-dialog.h"
 #include "android/skin/qt/tool-window.h"
 #include "android/skin/qt/ui-event-recorder.h"
 #include "android/skin/qt/user-actions-counter.h"
@@ -227,6 +228,7 @@ public:
                   bool isKbdShortcut = false);
     void resizeAndChangeAspectRatio(bool isFolded);
     void resizeAndChangeAspectRatio(int x, int y, int w, int h);
+    void presetSizeAdvance(PresetEmulatorSizeType newSize);
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
                           const QPoint& pos,

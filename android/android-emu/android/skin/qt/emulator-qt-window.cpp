@@ -2514,6 +2514,72 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(int x, int y, int w, int h) {
     simulateSetScale(std::max(.2, (double)scale));
 }
 
+void EmulatorQtWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
+    struct PresetEmulatorSizeInfo {
+        PresetEmulatorSizeType type;
+        int width;
+        int height;
+        int dpi;
+    };
+
+    static PresetEmulatorSizeInfo presetSizeInfos[] = {
+        { PRESET_SIZE_NONE, 0, 0, 0, },
+        { PRESET_SIZE_PHONE, 1080, 2340, 420, },
+        { PRESET_SIZE_UNFOLDED, 1768, 2208, 420, },
+        { PRESET_SIZE_TABLET, 1920, 1200, 240, },
+        { PRESET_SIZE_DESKTOP, 1920, 1080, 160, },
+    };
+
+    auto adbInterface = getAdbInterface();
+
+    LOG(INFO) << "resizable current preset: " << newSize;
+
+    if (!adbInterface) {
+        LOG(ERROR) << "adb interface not ready, cancel";
+        return;
+    }
+
+    const auto& info = presetSizeInfos[newSize];
+
+    PresetEmulatorSizeType resultType = info.type;
+
+    int targetWidth = android_hw->hw_lcd_width;
+    int targetHeight = android_hw->hw_lcd_height;
+    int targetDpi = android_hw->hw_lcd_density;
+
+    if (PRESET_SIZE_NONE == resultType) {
+        /* no-op; later, we might change back the UI aspect ratio */
+    } else {
+        targetWidth = info.width;
+        targetHeight = info.height;
+        targetDpi = info.dpi;
+    }
+
+    char wmSizeCmd[64];
+    sprintf(wmSizeCmd, "size %dx%d",
+            targetWidth,
+            targetHeight);
+    char wmDensityCmd[64];
+    sprintf(wmDensityCmd, "density %d",
+            targetDpi);
+    std::string sendSize(wmSizeCmd);
+    std::string sendDensity(wmDensityCmd);
+
+    adbInterface->enqueueCommand(
+        {"shell", "wm", wmSizeCmd},
+        [targetWidth, targetHeight](const android::emulation::OptionalAdbCommandResult& result) {
+        if (result && result->exit_code == 0) {
+            LOG(INFO) << "success! wm size " << targetWidth << "x" << targetHeight;
+        }});
+
+    adbInterface->enqueueCommand(
+        {"shell", "wm", wmDensityCmd},
+        [targetDpi](const android::emulation::OptionalAdbCommandResult& result) {
+        if (result && result->exit_code == 0) {
+            LOG(INFO) << "success! wm density " << targetDpi;
+        }});
+}
+
 SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
                                     const QMouseEvent* event) const {
     switch (event->button()) {

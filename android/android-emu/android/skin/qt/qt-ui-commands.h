@@ -67,6 +67,7 @@ enum class QtUICommand {
     UNFOLD,
     CHANGE_FOLDABLE_POSTURE,
     UPDATE_FOLDABLE_POSTURE_INDICATOR,
+    PRESET_SIZE_ADVANCE,
 };
 
 enum class QtKeyEventSource {
