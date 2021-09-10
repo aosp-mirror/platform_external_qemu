@@ -63,7 +63,7 @@ static constexpr int REFRESH_START = 1;
 static constexpr int REFRESH_STOP = 2;
 static constexpr int REFRESH_PAUSE = 3;
 
-static constexpr int64_t REFRESH_INTERVAL_MILLISECONDS = 1000000LL;
+static constexpr int64_t REFRESH_INTERVAL_USECONDS = 1000000LL;
 
 VhalTable::VhalTable(QWidget* parent)
     : QWidget(parent),
@@ -470,7 +470,7 @@ void VhalTable::hide_all() {
 
 // Ask property update every 1s
 android::base::System::Duration VhalTable::nextRefreshAbsolute() {
-    return android::base::System::get()->getUnixTimeUs() + REFRESH_INTERVAL_MILLISECONDS;
+    return android::base::System::get()->getUnixTimeUs() + REFRESH_INTERVAL_USECONDS;
 }
 
 void VhalTable::setVhalPropertyTableRefreshThread() {
