@@ -119,6 +119,7 @@ private:
     float getSpeedMetersPerSecond(int speed, int unitIndex);
     int getIndexFromVehicleGear(int gear);
     void parseEventsFromJsonFile(QString jsonPath);
+    void updateCarSpeedText(int speed);
 
     // Vhal replay
     std::unique_ptr<emulator::VhalEventLoaderThread> mVhalEventLoader;

@@ -118,13 +118,18 @@ void CarSensorData::sendIgnitionChangeMsg(const int ignition,
     mSendEmulatorMsg(emulatorMsg, log);
 }
 
-void CarSensorData::on_car_speedSlider_valueChanged(int speed) {
+void CarSensorData::updateCarSpeedText(int speed) {
     mUi->car_speedLabel->setText(QString::number(speed));
+}
+
+void CarSensorData::on_car_speedSlider_valueChanged(int speed) {
     float speedMetersPerSecond =
             (float)speed *
             ((mUi->comboBox_speedUnit->currentIndex() == MILES_PER_HOUR)
                      ? MILES_PER_HOUR_TO_METERS_PER_SEC
                      : KILOMETERS_PER_HOUR_TO_METERS_PER_SEC);
+
+    updateCarSpeedText(speed);
 
     if (mSendEmulatorMsg != nullptr) {
         EmulatorMessage emulatorMsg = makeSetPropMsg();
@@ -227,7 +232,9 @@ void CarSensorData::processMsg(emulator::EmulatorMessage emulatorMsg) {
                 int gear_vhal = getIndexFromVehicleGear(val.int32_values(0));
                 int gear_state = mUi->comboBox_gear->currentIndex();
                 if (gear_state != gear_vhal) {
+                    bool lastState = mUi->comboBox_gear->blockSignals(true);
                     mUi->comboBox_gear->setCurrentIndex(gear_vhal);
+                    mUi->comboBox_gear->blockSignals(lastState);
                 }
                 break;
             }
@@ -235,7 +242,9 @@ void CarSensorData::processMsg(emulator::EmulatorMessage emulatorMsg) {
                 bool fuelLow_vhal = val.int32_values(0) == 1;
                 bool fuelLow = mUi->checkBox_fuel_low->isChecked();
                 if (fuelLow != fuelLow_vhal) {
+                    bool lastState = mUi->checkBox_fuel_low->blockSignals(true);
                     mUi->checkBox_fuel_low->setChecked(fuelLow_vhal);
+                    mUi->checkBox_fuel_low->blockSignals(lastState);
                 }
                 break;
             }
@@ -243,7 +252,9 @@ void CarSensorData::processMsg(emulator::EmulatorMessage emulatorMsg) {
                 bool parkingBreak_vhal = val.int32_values(0) == 1;
                 bool parkingBreak = mUi->checkBox_park->isChecked();
                 if (parkingBreak != parkingBreak_vhal) {
+                    bool lastState = mUi->checkBox_park->blockSignals(true);
                     mUi->checkBox_park->setChecked(parkingBreak_vhal);
+                    mUi->checkBox_park->blockSignals(lastState);
                 }
                 break;
             }
@@ -251,7 +262,9 @@ void CarSensorData::processMsg(emulator::EmulatorMessage emulatorMsg) {
                 bool night_vhal = val.int32_values(0) == 1;
                 bool night = mUi->checkBox_night->isChecked();
                 if (night != night_vhal) {
+                    bool lastState = mUi->checkBox_night->blockSignals(true);
                     mUi->checkBox_night->setChecked(night_vhal);
+                    mUi->checkBox_night->blockSignals(lastState);
                 }
                 break;
             }
@@ -264,7 +277,10 @@ void CarSensorData::processMsg(emulator::EmulatorMessage emulatorMsg) {
                                  ? MILES_PER_HOUR_TO_METERS_PER_SEC
                                  : KILOMETERS_PER_HOUR_TO_METERS_PER_SEC));
                 if (speed != mUi->car_speedSlider->value()) {
+                    bool lastState = mUi->car_speedSlider->blockSignals(true);
                     mUi->car_speedSlider->setValue(speed);
+                    mUi->car_speedSlider->blockSignals(lastState);
+                    updateCarSpeedText(speed);
                 }
                 break;
             }
@@ -272,8 +288,9 @@ void CarSensorData::processMsg(emulator::EmulatorMessage emulatorMsg) {
                 int ignition_state_vhal = val.int32_values(0);
                 int ignition_state = mUi->comboBox_ignition->currentIndex();
                 if (ignition_state != ignition_state_vhal) {
-                    mUi->comboBox_ignition->setCurrentIndex(
-                            ignition_state_vhal);
+                    bool lastState = mUi->comboBox_ignition->blockSignals(true);
+                    mUi->comboBox_ignition->setCurrentIndex(ignition_state_vhal);
+                    mUi->comboBox_ignition->blockSignals(lastState);
                 }
                 break;
             }
