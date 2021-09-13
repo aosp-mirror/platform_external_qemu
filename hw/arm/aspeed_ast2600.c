@@ -258,6 +258,8 @@ static void aspeed_soc_ast2600_init(Object *obj)
 
     object_initialize_child(obj, "sbc", &s->sbc, TYPE_ASPEED_SBC);
 
+    object_initialize_child(obj, "ibt", &s->ibt, TYPE_ASPEED_IBT);
+
     object_initialize_child(obj, "iomem", &s->iomem, TYPE_UNIMPLEMENTED_DEVICE);
     object_initialize_child(obj, "video", &s->video, TYPE_UNIMPLEMENTED_DEVICE);
     object_initialize_child(obj, "dpmcu", &s->dpmcu, TYPE_UNIMPLEMENTED_DEVICE);
@@ -625,6 +627,16 @@ static void aspeed_soc_ast2600_realize(DeviceState *dev, Error **errp)
         return;
     }
     aspeed_mmio_map(s, SYS_BUS_DEVICE(&s->sbc), 0, sc->memmap[ASPEED_DEV_SBC]);
+
+    /* iBT */
+    if (!sysbus_realize(SYS_BUS_DEVICE(&s->ibt), errp)) {
+        return;
+    }
+    memory_region_add_subregion(&s->lpc.iomem,
+                   sc->memmap[ASPEED_DEV_IBT] - sc->memmap[ASPEED_DEV_LPC],
+                   &s->ibt.iomem);
+    sysbus_connect_irq(SYS_BUS_DEVICE(&s->ibt), 0,
+                       aspeed_soc_get_irq(s, ASPEED_DEV_IBT));
 }
 
 static void aspeed_soc_ast2600_class_init(ObjectClass *oc, void *data)
