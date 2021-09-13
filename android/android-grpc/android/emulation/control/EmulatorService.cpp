@@ -482,7 +482,10 @@ public:
                           "");
         }
 
-        QemuAudioInputStream aos(pkt.format());
+        // Increasing the buffer size can result in longer waiting periods
+        // before closing down the emulator.
+        milliseconds audioQueueTime = 300ms;
+        QemuAudioInputStream aos(pkt.format(), 100ms, audioQueueTime);
         if (!aos.good()) {
             return Status(::grpc::StatusCode::FAILED_PRECONDITION,
                           "Unable to register microphone.", "");
@@ -509,6 +512,21 @@ public:
             // Get the next packet if we are alive.
             clientAlive = !context->IsCancelled() && reader->Read(&pkt);
         }
+
+        // The circular buffer contains at most audioQueueTime ms of samples,
+        // We need to deliver those before disconnecting the audio stack to
+        // guarantee we deliver all the samples.
+        const char silence[512] = {0};
+        size_t toWrite = aos.capacity();
+        auto timeout = std::chrono::system_clock::now() + audioQueueTime;
+
+        // 2 cases:
+        // - The emulator is requesting audio, we deliver the whole queue
+        // - The emulator is not requesting audio, we time out.
+        while(toWrite > 0 && std::chrono::system_clock::now() < timeout) {
+            toWrite -= aos.write(silence, sizeof(silence));
+        }
+
         return Status::OK;
     }
 

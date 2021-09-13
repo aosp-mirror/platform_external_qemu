@@ -100,7 +100,7 @@
       },
       "osx": {
         "args": [
-          "@S",
+          "@30",
           "-verbose",
           // "-qt-hide-window",
           "-no-snapshot",
@@ -128,7 +128,7 @@
       "type": "lldb",
       "request": "attach",
       // Replace this with the process executable you want to attach to
-      "pid": 58495, // replace pid with your real pid
+      "pid": 94625, // replace pid with your real pid
       // Ignore signal SIGUSR1
       "postRunCommands": [
         "pro hand -p true -s false SIGUSR1",
