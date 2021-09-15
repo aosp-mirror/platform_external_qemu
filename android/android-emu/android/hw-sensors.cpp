@@ -974,6 +974,10 @@ static void _hwSensors_init(HwSensors* h) {
         h->sensors[ANDROID_SENSOR_HUMIDITY].enabled = true;
     }
 
+    if (android_hw->hw_sensors_rgbclight) {
+        h->sensors[ANDROID_SENSOR_RGBC_LIGHT].enabled = true;
+    }
+
     if (android_hw->hw_sensor_hinge) {
         h->sensors[ANDROID_SENSOR_HINGE_ANGLE0].enabled = true;
         switch (android_hw->hw_sensor_hinge_count) {

@@ -1009,6 +1009,9 @@ static int startEmulatorWithMinConfig(
     hw->hw_lcd_height = lcdHeight;
     hw->hw_lcd_density = lcdDensity;
 
+    // Enable RGBC light sensor for Fuchsia devices.
+    hw->hw_sensors_rgbclight = true;
+
     auto battery = getConsoleAgents()->battery;
     if (battery &&
         battery->setHasBattery) {

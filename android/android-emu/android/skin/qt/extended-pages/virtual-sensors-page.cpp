@@ -225,7 +225,7 @@ void VirtualSensorsPage::setupHingeSensorUI() {
 }
 
 void VirtualSensorsPage::setupRgbcLightUI() {
-    if (!is_fuchsia) {
+    if (!android_hw->hw_sensors_rgbclight) {
         mUi->labelRgbcLight->setHidden(true);
         mUi->tabRgbcSensor->setHidden(true);
     }
