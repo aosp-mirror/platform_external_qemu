@@ -152,7 +152,7 @@ bool MediaCudaVideoHelper::init() {
     videoParserParameters.CodecType = mCudaVideoCodecType;
 
     videoParserParameters.ulMaxNumDecodeSurfaces = 1;
-    videoParserParameters.ulMaxDisplayDelay = 1;
+    videoParserParameters.ulMaxDisplayDelay = 0;
     videoParserParameters.pUserData = this;
     videoParserParameters.pfnSequenceCallback = HandleVideoSequenceProc;
     videoParserParameters.pfnDecodePicture = HandlePictureDecodeProc;
@@ -180,7 +180,7 @@ void MediaCudaVideoHelper::decode(const uint8_t* frame,
     CUVIDSOURCEDATAPACKET packet = {0};
     packet.payload = frame;
     packet.payload_size = szBytes;
-    packet.flags = CUVID_PKT_TIMESTAMP;
+    packet.flags = CUVID_PKT_TIMESTAMP | CUVID_PKT_ENDOFPICTURE;
     packet.timestamp = inputPts;
     if (!frame || szBytes == 0) {
         packet.flags |= CUVID_PKT_ENDOFSTREAM;
