@@ -56,6 +56,11 @@ namespace {
 
 bool canUseCudaDecoder() {
 #ifndef __APPLE__
+    // enable cuda by default, unless it is explicitly disallowed
+    const bool is_cuda_disabled = (android::base::System::getEnvironmentVariable(
+                            "ANDROID_EMU_MEDIA_DECODER_CUDA") == "0");
+    if (is_cuda_disabled) return false;
+
     if (MediaCudaDriverHelper::initCudaDrivers()) {
         H264_DPRINT("Using Cuvid decoder on Linux/Windows");
         return true;
