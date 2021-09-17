@@ -140,7 +140,7 @@ set(android-emu-common
     android/gpu_frame.cpp
     android/help.c
     android/HostHwInfo.cpp
-    android/hw-control.c
+    android/hw-control.cpp
     android/hw-events.c
     android/hw-fingerprint.c
     android/hw-kmsg.c

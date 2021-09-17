@@ -21,6 +21,7 @@
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/grpc_agent.h"
 #include "android/emulation/control/http_proxy_agent.h"
+#include "android/emulation/control/hw_control_agent.h"
 #include "android/emulation/control/libui_agent.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/multi_display_agent.h"
@@ -65,7 +66,8 @@ typedef struct QAndroidAutomationAgent QAndroidAutomationAgent;
     X(QAndroidVmOperations, vm)                 \
     X(QCarDataAgent, car)                       \
     X(QGrpcAgent, grpc)                         \
-    X(QAndroidHciAgent, rootcanal)
+    X(QAndroidHciAgent, rootcanal)              \
+    X(QAndroidHwControlAgent, hw_control)
 
 // A structure used to group pointers to all agent interfaces used by the
 // Android console.

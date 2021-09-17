@@ -25,6 +25,7 @@
 #include "android/emulation/control/finger_agent.h"         // for QAndroidF...
 #include "android/emulation/control/grpc_agent.h"           // for QGrpcAgent
 #include "android/emulation/control/http_proxy_agent.h"     // for QAndroidH...
+#include "android/emulation/control/hw_control_agent.h"
 #include "android/emulation/control/libui_agent.h"          // for QAndroidL...
 #include "android/emulation/control/location_agent.h"       // for QAndroidL...
 #include "android/emulation/control/multi_display_agent.h"  // for QAndroidM...
@@ -99,6 +100,9 @@ extern "C" const QAndroidLibuiAgent* const gQAndroidLibuiAgent;
 
 // android-qemu2-glue/qemu-rootcanal-agent-impl.cpp
 extern "C" const QAndroidHciAgent* const gQAndroidHciAgent;
+
+// Defined in android-qemu2-glue/qemu-hw-control-agent-impl.cpp
+extern "C" const QAndroidHwControlAgent* const gQAndroidHwControlAgent;
 
 #define ANDROID_DEFINE_CONSOLE_GETTER_IMPL(typ, name) \
     const typ* const android_get_##typ() const override { return g##typ; };
