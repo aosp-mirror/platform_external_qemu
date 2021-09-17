@@ -243,6 +243,8 @@
 # @queues: number of queues to be created for multiqueue capable tap
 #
 # @poll-us: maximum number of microseconds that could
+#
+# @vmnet: whether to vmnet framework for Mac OS only. Default to false.
 # be spent on busy polling for tap (since 2.7)
 #
 # Since: 1.2
@@ -263,7 +265,8 @@
     '*vhostfds':   'str',
     '*vhostforce': 'bool',
     '*queues':     'uint32',
-    '*poll-us':    'uint32'} }
+    '*poll-us':    'uint32',
+    '*vmnet':      'bool'} }
 
 ##
 # @NetdevSocketOptions:

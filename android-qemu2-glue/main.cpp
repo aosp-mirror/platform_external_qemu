@@ -2285,13 +2285,17 @@ extern "C" int main(int argc, char** argv) {
     initialize_virtio_input_devs(args, hw);
     if (feature_is_enabled(kFeature_VirtioWifi)) {
         args.add("-netdev");
-        if (opts->wifi_tap) {
+        if (opts->wifi_vmnet) {
+            args.addFormat("tap,id=virtio-wifi,ifname=%s,vmnet=on",
+                           opts->wifi_vmnet);
+        } else if (opts->wifi_tap) {
             const char* upScript =
                     opts->wifi_tap_script_up ? opts->wifi_tap_script_up : "no";
             const char* downScript =
                     opts->wifi_tap_script_down ? opts->wifi_tap_script_down : "no";
-            args.addFormat("tap,id=virtio-wifi,script=%s,downscript=%s,ifname=%s",
-                           upScript, downScript, opts->wifi_tap);
+            args.addFormat(
+                    "tap,id=virtio-wifi,script=%s,downscript=%s,ifname=%s",
+                    upScript, downScript, opts->wifi_tap);
         } else {
             if (opts->wifi_tap_script_up) {
                 dwarning("-wifi-tap-script-up ignored without -wifi-tap option");
