@@ -390,6 +390,66 @@ public:
         return Status::OK;
     }
 
+    static const char* getBacklightName(BrightnessValue::LightType lightType) {
+        switch (lightType) {
+            case BrightnessValue_LightType_LCD:
+                return "lcd_backlight";
+            case BrightnessValue_LightType_KEYBOARD:
+                return "keyboard_backlight";
+            case BrightnessValue_LightType_BUTTON:
+                return "button_backlight";
+            default:
+                DCHECK(false) << "Unreachable";
+                return "INVALID";
+        }
+    }
+
+    Status setBrightness(ServerContext* context,
+                         const BrightnessValue* requestPtr,
+                         ::google::protobuf::Empty* reply) override {
+        auto agent = mAgents->hw_control;
+        BrightnessValue request = *requestPtr;
+
+        if (agent == nullptr || agent->setBrightness == nullptr) {
+            return Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "setBrightness: hw-control agent function not "
+                          "available.",
+                          "");
+        }
+
+        if (request.value() > UINT8_MAX) {
+            return Status(::grpc::StatusCode::INVALID_ARGUMENT,
+                          "setBrightness: brightness value out of boundary.",
+                          "");
+        }
+
+        android::base::ThreadLooper::runOnMainLooper([agent, request]() {
+            const char* light_name = getBacklightName(request.target());
+            auto value = request.value();
+            agent->setBrightness(light_name, value);
+        });
+        return Status::OK;
+    }
+
+    Status getBrightness(ServerContext* context,
+                         const BrightnessValue* request,
+                         BrightnessValue* reply) override {
+        const char* light_name = getBacklightName(request->target());
+
+        auto agent = mAgents->hw_control;
+        if (agent == nullptr || agent->getBrightness == nullptr) {
+            return Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "getBrightness: hw-control agent function not "
+                          "available.",
+                          "");
+        }
+
+        auto value = agent->getBrightness(light_name);
+        reply->set_target(request->target());
+        reply->set_value(value);
+        return Status::OK;
+    }
+
     Status sendFingerprint(ServerContext* context,
                            const Fingerprint* requestPtr,
                            ::google::protobuf::Empty* reply) override {

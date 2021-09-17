@@ -159,6 +159,9 @@ public:
 
     fwdMany(streamNotification, Empty, Notification);
 
+    fwdOne(getBrightness, BrightnessValue, BrightnessValue);
+    fwdOne(setBrightness, BrightnessValue, Empty);
+
     Status getScreenshot(ServerContext* context,
                          const ImageFormat* request,
                          Image* reply) override {
