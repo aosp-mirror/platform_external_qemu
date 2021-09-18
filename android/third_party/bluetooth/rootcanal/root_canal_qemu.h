@@ -40,6 +40,8 @@ public:
     Builder& withTestPort(const char* portStr);
     Builder& withLinkPort(int port);
     Builder& withLinkPort(const char* portStr);
+    Builder& withLinkBlePort(int port);
+    Builder& withLinkBlePort(const char* portStr);
     Builder& withControllerProperties(const char* props);
     Builder& withCommandFile(const char* cmdFile);
     std::unique_ptr<Rootcanal> build();
@@ -48,6 +50,7 @@ private:
     int mHci = -1;
     int mTest = -1;
     int mLink = -1;
+    int mLinkBle = -1;
     std::string mDefaultControllerProperties;
     std::string mCmdFile;
 };

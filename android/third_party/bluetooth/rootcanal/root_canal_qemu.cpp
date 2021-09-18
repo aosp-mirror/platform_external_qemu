@@ -103,6 +103,16 @@ RootcanalBuilder& RootcanalBuilder::withLinkPort(const char* portStr) {
     return withLinkPort(getPortNumber(portStr));
 }
 
+RootcanalBuilder& RootcanalBuilder::withLinkBlePort(int port) {
+    mLinkBle = port;
+    return *this;
+}
+
+RootcanalBuilder& RootcanalBuilder::withLinkBlePort(const char* portStr) {
+    return withLinkBlePort(getPortNumber(portStr));
+}
+
+
 RootcanalBuilder& RootcanalBuilder::withControllerProperties(
         const char* props) {
     if (props)
@@ -139,11 +149,12 @@ std::unique_ptr<Rootcanal> RootcanalBuilder::build() {
     auto hciServer = std::make_shared<net::MultiDataChannelServer>(hciServers);
     auto testServer = getChannelServer(mTest, asyncManager.get());
     auto linkServer = getChannelServer(mLink, asyncManager.get());
+    auto linkBleServer = getChannelServer(mLinkBle, asyncManager.get());
     auto localConnector = std::make_shared<net::LoopbackAsyncSocketConnector>(
             asyncManager.get());
 
     auto testEnv = std::make_unique<TestEnvironment>(
-            testServer, hciServer, linkServer, localConnector,
+            testServer, hciServer, linkServer, linkBleServer, localConnector,
             mDefaultControllerProperties, mCmdFile);
 
     return std::make_unique<RootcanalImpl>(std::move(testEnv),
