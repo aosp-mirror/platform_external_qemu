@@ -858,7 +858,6 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
             if (s_multitouch_funcs) {
                 abs_values[ABS_MT_SLOT].max =
                                         s_multitouch_funcs->get_max_slot();
-                /* TODO : make next 2 less random */
                 abs_values[ABS_MT_TOUCH_MAJOR].max = MTS_TOUCH_AXIS_RANGE_MAX;
                 abs_values[ABS_MT_TOUCH_MINOR].max = MTS_TOUCH_AXIS_RANGE_MAX;
                 abs_values[ABS_MT_ORIENTATION].max = MTS_ORIENTATION_RANGE_MAX;
