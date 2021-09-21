@@ -222,6 +222,17 @@ service EmulatorController {
           returns (google.protobuf.Empty) {}
   // Set foldable posture
   rpc setPosture(Posture) returns (google.protobuf.Empty) {}
+
+  // Get the backlight brightness.
+  // The following gRPC error codes can be returned:
+  // -  FAILED_PRECONDITION (code 9) if the AVD does not support hw-control.
+  rpc getBrightness(BrightnessValue) returns (BrightnessValue) {}
+
+  // Set the backlight brightness.
+  // The following gRPC error codes can be returned:
+  // -  FAILED_PRECONDITION (code 9) if the AVD does not support hw-control.
+  // -  INVALID_ARGUMENT (code 3) The brightness exceeds the valid range.
+  rpc setBrightness(BrightnessValue) returns (google.protobuf.Empty) {}
 }
 
 // A Run State that describes the state of the Virtual Machine.
@@ -386,6 +397,22 @@ message SensorValue {
 
   // Value interpretation depends on sensor enum.
   ParameterValue value = 3;
+}
+
+// A single backlight brightness value.
+message BrightnessValue {
+    enum LightType {
+        // Display backlight. This will affect all displays.
+        LCD = 0;
+        KEYBOARD = 1;
+        BUTTON = 2;
+    }
+
+    // Type of light
+    LightType target = 1;
+
+    // Light intensity, ranges from 0-255.
+    uint32 value = 2;
 }
 
 message LogMessage {
