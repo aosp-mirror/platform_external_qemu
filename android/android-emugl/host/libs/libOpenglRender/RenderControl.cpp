@@ -1599,6 +1599,30 @@ static int rcReadColorBufferDMA(uint32_t colorBuffer,
     return 0;
 }
 
+static int rcGetFBDisplayConfigsCount() {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return -1;
+    }
+    return fb->getDisplayConfigsCount();
+}
+
+static int rcGetFBDisplayConfigsParam(int configId, GLint param) {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return -1;
+    }
+    return fb->getDisplayConfigsParam(configId, param);
+}
+
+static int rcGetFBDisplayActiveConfig() {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return -1;
+    }
+    return fb->getDisplayActiveConfig();
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1666,4 +1690,7 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateDisplayById = rcCreateDisplayById;
     dec->rcSetDisplayPoseDpi = rcSetDisplayPoseDpi;
     dec->rcReadColorBufferDMA = rcReadColorBufferDMA;
+    dec->rcGetFBDisplayConfigsCount = rcGetFBDisplayConfigsCount;
+    dec->rcGetFBDisplayConfigsParam = rcGetFBDisplayConfigsParam;
+    dec->rcGetFBDisplayActiveConfig = rcGetFBDisplayActiveConfig;
 }

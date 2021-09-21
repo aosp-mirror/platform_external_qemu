@@ -63,3 +63,6 @@ GL_ENTRY(void, rcComposeAsyncWithoutPost, uint32_t bufferSize, void *buffer);
 GL_ENTRY(int, rcCreateDisplayById, uint32_t displayId);
 GL_ENTRY(int, rcSetDisplayPoseDpi, uint32_t displayId, GLint x, GLint y, uint32_t w, uint32_t h, uint32_t dpi);
 GL_ENTRY(int, rcReadColorBufferDMA, uint32_t colorbuffer, GLint x, GLint y, GLint width, GLint height, GLenum format, GLenum type, void* pixels, uint32_t pixels_size)
+GL_ENTRY(int, rcGetFBDisplayConfigsCount);
+GL_ENTRY(int, rcGetFBDisplayConfigsParam, int configId, EGLint param);
+GL_ENTRY(int, rcGetFBDisplayActiveConfig);
