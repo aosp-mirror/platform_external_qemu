@@ -194,7 +194,8 @@ static void emulator_window_opengles_redraw_window(void) {
 
 bool emulator_window_opengles_resizable_enabled() {
     return android_hw->hw_device_name &&
-           !strcmp(android_hw->hw_device_name, "resizable");
+           !strcmp(android_hw->hw_device_name, "resizable") &&
+           feature_is_enabled(kFeature_HWCMultiConfigs);
 }
 
 static struct PresetEmulatorSizeInfo presetSizeInfos[] = {

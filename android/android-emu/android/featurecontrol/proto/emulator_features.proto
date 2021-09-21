@@ -113,4 +113,6 @@ enum Feature {
     BluetoothEmulation = 63;
 
     DeviceStateOnBoot = 64;
+
+    HWCMultiConfigs = 65;
 }

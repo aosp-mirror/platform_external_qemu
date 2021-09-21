@@ -1498,7 +1498,8 @@ message EmulatorFeatureFlagState {
     ANDROIDBOOT_PROPS2 = 84;
     BLUETOOTH_EMULATION = 85;
     DEVICESTATE_ON_BOOT = 86;
-    // Next tag: 87
+    HWC_MULTI_CONFIGS = 87;
+    // Next tag: 88
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

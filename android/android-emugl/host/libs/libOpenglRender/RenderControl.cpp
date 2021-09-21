@@ -243,6 +243,9 @@ static constexpr android::base::StringView kVulkanAsyncQsri = "ANDROID_EMU_vulka
 // Read color buffer DMA
 static constexpr android::base::StringView kReadColorBufferDma = "ANDROID_EMU_read_color_buffer_dma";
 
+// Multiple display configs
+static constexpr android::base::StringView kHWCMultiConfigs= "ANDROID_EMU_hwc_multi_configs";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -502,6 +505,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
     bool syncBufferDataEnabled = true;
     bool vulkanAsyncQsri = shouldEnableVulkanAsyncQsri();
     bool readColorBufferDma = directMemEnabled && hasSharedSlotsHostMemoryAllocatorEnabled;
+    bool hwcMultiConfigs = emugl_feature_is_enabled(android::featurecontrol::HWCMultiConfigs);
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -639,6 +643,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
     if (readColorBufferDma && name == GL_EXTENSIONS) {
         glStr += kReadColorBufferDma;
+        glStr += " ";
+    }
+
+    if (hwcMultiConfigs && name == GL_EXTENSIONS) {
+        glStr += kHWCMultiConfigs;
         glStr += " ";
     }
 
