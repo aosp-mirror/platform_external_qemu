@@ -306,6 +306,17 @@ message PhysicalModelValue {
     ROLLABLE0 = 13;
     ROLLABLE1 = 14;
     ROLLABLE2 = 15;
+
+    // Describing the device posture; the value should be an enum defined
+    // in Posture::PostureValue.
+    POSTURE = 16;
+
+    // Heart rate in bpm
+    HEART_RATE = 17;
+
+    // Ambient RGBC light intensity. Values are in order (Red, Green, Blue,
+    // Clear).
+    RGBC_LIGHT = 18;
   }
   PhysicalType target = 1;
 
@@ -355,6 +366,16 @@ message SensorValue {
     HUMIDITY = 8;
     MAGNETIC_FIELD_UNCALIBRATED = 9;
     GYROSCOPE_UNCALIBRATED = 10;
+
+    // HINGE_ANGLE0 (11), HINGE_ANGLE1 (12), HINGE_ANGLE2 (13) are
+    // skipped; clients should use get/setPhysicalModel() instead for these
+    // "sensors".
+
+    // Measures the heart rate in bpm.
+    HEART_RATE = 14;
+    // Measures the ambient RGBC light intensity.
+    // Values are in order (Red, Green, Blue, Clear).
+    RGBC_LIGHT = 15;
   }
 
   // Type of sensor

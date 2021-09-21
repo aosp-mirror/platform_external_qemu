@@ -74,7 +74,7 @@ image.
        This is used to modify the color of the notification LED on the
        emulated phone as well as provide on/off timeouts for flashing.
 
-       cCrrently unsupported by the emulator.
+       Currently unsupported by the emulator.
 
     3/ Client sends "vibrator:<timeout>", where <timeout> is a decimal value.
        used to enable vibrator emulation for <timeout> milli-seconds.
@@ -82,7 +82,7 @@ image.
        Currently unsupported by the emulator.
 
 
-  Implementation: android/hw-control.c
+  Implementation: android/hw-control.cpp
   Since:          SDK 1.0
 
 
