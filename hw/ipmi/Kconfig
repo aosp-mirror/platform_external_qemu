@@ -40,3 +40,9 @@ config IPMI_SSIF
     bool
     depends on I2C
     select IPMI
+
+config NUVOTON_PCI_IPMI_KCS
+    bool
+    depends on PCI
+    depends on ISA_BUS
+    select IPMI

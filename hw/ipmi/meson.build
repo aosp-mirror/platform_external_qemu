@@ -11,5 +11,6 @@ ipmi_ss.add(when: 'CONFIG_IPMI_HOST', if_true: files('ipmi_host_extern.c'))
 ipmi_ss.add(when: 'CONFIG_NPCM7XX', if_true: files('npcm7xx_kcs.c'))
 ipmi_ss.add(when: 'CONFIG_IPMI_HOST', if_true: files('smbus_ipmi_host.c'))
 ipmi_ss.add(when: 'CONFIG_IPMI_HOST', if_true: files('aspeed_ibt.c'))
+ipmi_ss.add(when: 'CONFIG_NUVOTON_PCI_IPMI_KCS', if_true: files('nuvoton_pci_ipmi_kcs.c'))
 
 system_ss.add_all(when: 'CONFIG_IPMI', if_true: ipmi_ss)
