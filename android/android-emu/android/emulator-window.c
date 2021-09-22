@@ -205,6 +205,8 @@ static struct PresetEmulatorSizeInfo presetSizeInfos[] = {
     { PRESET_SIZE_DESKTOP, 1920, 1080, 160, },
 };
 
+static enum PresetEmulatorSizeType sActiveConfig;
+
 /* pre-set display configs for resizable AVD */
 static void emulator_window_opengles_resizable_display_config_init() {
     if (!s_use_emugl_subwindow||
@@ -225,6 +227,7 @@ static void emulator_window_opengles_resizable_display_config_init() {
                                           presetSizeInfos[i].dpi);
     }
     android_setOpenglesDisplayActiveConfig(activeConfig);
+    sActiveConfig = activeConfig;
 }
 
 extern void enqueueAdbCommand(char* channel, char* command);
@@ -240,7 +243,18 @@ static void emulator_window_opengles_set_display_active_config(int configId) {
         enqueueAdbCommand("shell", cmd);
         sprintf(cmd, "wm density %d", presetSizeInfos[configId].dpi);
         enqueueAdbCommand("shell", cmd);
+        sActiveConfig = configId;
     }
+}
+
+bool emulator_window_get_resizable_size(int* w, int* h) {
+    if (sActiveConfig < 0 ||
+        sActiveConfig >= sizeof(presetSizeInfos)/sizeof(struct PresetEmulatorSizeInfo)) {
+        return false;
+    }
+    *w = presetSizeInfos[sActiveConfig].width;
+    *h = presetSizeInfos[sActiveConfig].height;
+    return true;
 }
 
 bool emulator_window_start_recording(const RecordingInfo* info) {

@@ -2098,10 +2098,28 @@ skin_window_set_display_region_and_update(SkinWindow* window, int xOffset,
 {
     int displayIdx;
     for (displayIdx = 0; displayIdx < window->layout.num_displays; displayIdx++) {
-        window->layout.displays[displayIdx].rect.pos.x = xOffset;
-        window->layout.displays[displayIdx].rect.pos.y = yOffset;
-        window->layout.displays[displayIdx].rect.size.w = width;
-        window->layout.displays[displayIdx].rect.size.h = height;
+        ADisplay* disp = &(window->layout.displays[displayIdx]);
+        disp->rect.pos.x = xOffset;
+        disp->rect.pos.y = yOffset;
+        disp->rect.size.w = width;
+        disp->rect.size.h = height;
+        switch(disp->rotation) {
+          case SKIN_ROTATION_0:
+              disp->origin = disp->rect.pos;
+              break;
+          case SKIN_ROTATION_90:
+              disp->origin.x = disp->rect.pos.x + disp->rect.size.w;
+              disp->origin.y = disp->rect.pos.y;
+              break;
+          case SKIN_ROTATION_180:
+              disp->origin.x = disp->rect.pos.x + disp->rect.size.w;
+              disp->origin.y = disp->rect.pos.y + disp->rect.size.h;
+              break;
+          case SKIN_ROTATION_270:
+              disp->origin.x = disp->rect.pos.x;
+              disp->origin.y = disp->rect.pos.y + disp->rect.size.h;
+              break;
+        }
     }
 
     window->layout.rect.size.w = width;
