@@ -2717,6 +2717,22 @@ do_avd_heartbeat( ControlClient  client, char*  args )
     return 0;
 }
 
+static int
+
+do_avd_grpc_port( ControlClient  client, char*  args )
+{
+    int active = client->global->grpc_agent->active_port();
+     if (active < 0) {
+                control_write( client, "KO: No active gRPC service\n" );
+                return -1;
+            }
+
+    control_write(client, "%d\n", active);
+    return 0;
+}
+
+
+
 static bool s_rewind_audio_requested = false;
 extern "C" int qemu_wav_audio_rewind_input_wave() {
     bool ret = s_rewind_audio_requested;
@@ -2909,6 +2925,13 @@ static const CommandDefRec  vm_commands[] =
     { "name", "query virtual device name",
     "'avd name' will return the name of this virtual device\r\n",
     NULL, do_avd_name, NULL },
+
+    {"grpc",
+         "query the grpc port",
+         "'avd grpc' will return grpc port of this virtual device\r\n",
+         NULL,
+         do_avd_grpc_port,
+         NULL},
 
     { "snapshot", "state snapshot commands",
     "allows you to save and restore the virtual device state in snapshots\r\n",
@@ -4101,6 +4124,7 @@ do_crash( ControlClient  client, char*  args )
     crash();
 }
 
+
 static int
 
 do_start_grpc( ControlClient  client, char*  args )
@@ -4454,6 +4478,12 @@ static const CommandDefRec vm_commands_preauth[] = {
          "'avd name' will return the name of this virtual device\r\n",
          NULL,
          do_avd_name,
+         NULL},
+         {"grpc",
+         "query the grpc port",
+         "'avd grpc' will return grpc port of this virtual device\r\n",
+         NULL,
+         do_avd_grpc_port,
          NULL},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};

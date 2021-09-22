@@ -18,6 +18,9 @@ ANDROID_BEGIN_HEADER
 
 typedef struct QGrpcAgent {
     int (*start)(int port, const char* turn_cfg);
+
+    // Returns the active port, or -1 if not active.
+    int (*active_port)();
 } QGrpcAgent;
 
 ANDROID_END_HEADER

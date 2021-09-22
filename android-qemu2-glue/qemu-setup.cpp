@@ -277,6 +277,14 @@ static std::string generateToken(int cnt) {
     return std::string(base64, len);
 }
 
+int qemu_grpc_port() {
+    if (grpcService) {
+        return grpcService->port();
+    }
+
+    return -1;
+}
+
 int qemu_setup_grpc() {
     if (grpcService)
         return grpcService->port();
