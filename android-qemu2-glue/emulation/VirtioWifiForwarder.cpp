@@ -241,7 +241,7 @@ int VirtioWifiForwarder::forwardFrame(const IOVector& iov) {
         } else if (addr1 != mBssID) {
             sendToRemoteVM(std::move(frame), FrameType::Data);
         } else if (frame->isToDS() && !frame->isFromDS()) {
-            sendToNIC(std::move(frame));
+            return sendToNIC(std::move(frame));
         }
     } else {  // Mgmt or Ctrl frames.
         if (addr1.isBroadcast() || addr1.isMulticast() || addr1 == mBssID) {
