@@ -226,12 +226,19 @@ static void emulator_window_opengles_resizable_display_config_init() {
     android_setOpenglesDisplayActiveConfig(activeConfig);
 }
 
+extern void enqueueAdbCommand(char* channel, char* command);
+
 static void emulator_window_opengles_set_display_active_config(int configId) {
     if (s_use_emugl_subwindow) {
         android_setOpenglesDisplayActiveConfig(configId);
         // SurfaceFlinger index the configId in reverse order
         int sfConfigId = sizeof(presetSizeInfos)/sizeof(struct PresetEmulatorSizeInfo)
                             - configId - 1;
+        char cmd[64];
+        sprintf(cmd, "su 0 service call SurfaceFlinger 1035 i32 %d", sfConfigId);
+        enqueueAdbCommand("shell", cmd);
+        sprintf(cmd, "wm density %d", presetSizeInfos[configId].dpi);
+        enqueueAdbCommand("shell", cmd);
     }
 }
 
