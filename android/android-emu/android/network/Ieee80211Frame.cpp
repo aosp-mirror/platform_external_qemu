@@ -37,12 +37,6 @@ static constexpr uint16_t ETH_P_ARP = 0x0806; /* Address Resolution packet */
 static constexpr uint16_t ETH_P_IPV6 = 0x86dd;
 static constexpr uint16_t ETH_P_NCSI = 0x88f8;
 
-struct ieee8023_hdr {
-    uint8_t dest[ETH_ALEN]; /* destination eth addr */
-    uint8_t src[ETH_ALEN];  /* source ether addr    */
-    uint16_t ethertype;     /* packet type ID field */
-} __attribute__((__packed__));
-
 /* See IEEE 802.1H for LLC/SNAP encapsulation/decapsulation */
 /* Ethernet-II snap header (RFC1042 for most EtherTypes) */
 static constexpr uint8_t kRfc1042Header[] = {0xaa, 0xaa, 0x03,
@@ -701,13 +695,13 @@ const IOVector Ieee80211Frame::toEthernet() {
                      << toStr().c_str();
         return ret;
     }
-    struct ieee8023_hdr* eth = new struct ieee8023_hdr;
-    eth->ethertype = htons(ethertype);
-    // Order of addresses: RA SA DA
-    memcpy(eth->dest, &(addr3()[0]), ETH_ALEN);
-    memcpy(eth->src, &(addr2()[0]), ETH_ALEN);
 
-    ret.push_back({.iov_base = eth, .iov_len = ETH_HLEN});
+    mEthHdr.ethertype = htons(ethertype);
+    // Order of addresses: RA SA DA
+    memcpy(mEthHdr.dest, &(addr3()[0]), ETH_ALEN);
+    memcpy(mEthHdr.src, &(addr2()[0]), ETH_ALEN);
+
+    ret.push_back({.iov_base = &mEthHdr, .iov_len = ETH_HLEN});
     size_t offset = hdrLength() + ETH_ALEN + sizeof(ethertype);
     IOVector inSg;
     inSg.push_back({.iov_base = data(), .iov_len = size()});
