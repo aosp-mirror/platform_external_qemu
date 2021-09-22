@@ -23,7 +23,7 @@
 #include <Hypervisor/hv_vmx.h>
 #endif
  
-TEST(HypervisorTest, HypervisorFrameworkVmCreate) {
+TEST(HypervisorTest, DISABLED_HypervisorFrameworkVmCreate) {
 #ifdef __arm64__
     int res = hv_vm_create(0);
     EXPECT_EQ(HV_SUCCESS, res);
