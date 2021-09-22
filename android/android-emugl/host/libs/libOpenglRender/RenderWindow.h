@@ -148,6 +148,8 @@ public:
     void removeListener(emugl::Renderer::FrameBufferChangeEventListener* listener);
 
     void setVsyncHz(int vsyncHz);
+    void setDisplayConfigs(int configId, int w, int h, int dpiX, int dpiY);
+    void setDisplayActiveConfig(int configId);
 private:
     bool processMessage(const RenderWindowMessage& msg);
     bool useThread() const { return mThread != nullptr; }

@@ -282,6 +282,8 @@ public:
     void removeListener(FrameBufferChangeEventListener* listener)  override {};
 
     void setVsyncHz(int vsyncHz) override { (void)vsyncHz; }
+    void setDisplayConfigs(int configId, int w, int h, int dpiX, int dpiY) override {}
+    void setDisplayActiveConfig(int configId) override {}
 
 private:
     bool mHasValidScreenshot = false;

@@ -64,6 +64,8 @@ enum Command {
     CMD_HAS_GUEST_POSTED_A_FRAME,
     CMD_RESET_GUEST_POSTED_A_FRAME,
     CMD_SET_VSYNC_HZ,
+    CMD_SET_DISPLAY_CONFIGS,
+    CMD_SET_DISPLAY_ACTIVE_CONFIG,
     CMD_FINALIZE,
 };
 
@@ -116,6 +118,17 @@ struct RenderWindowMessage {
 
         // CMD_SET_VSYNC_HZ
         int vsyncHz;
+
+        // CMD_SET_COMPOSE_DIMENSIONS
+        struct {
+            int configId;
+            int width;
+            int height;
+            int dpiX;
+            int dpiY;
+        } displayConfigs;
+
+        int displayActiveConfig;
 
         // result of operations.
         bool result;
@@ -265,6 +278,34 @@ struct RenderWindowMessage {
                     result = true;
                 } else {
                     GL_LOG("CMD_RESET_GUEST_POSTED_A_FRAME: no FrameBuffer");
+                }
+                break;
+
+            case CMD_SET_DISPLAY_CONFIGS:
+                GL_LOG("CMD_SET_DISPLAY_CONFIGS");
+                D("CMD_SET_DISPLAY_CONFIGS");
+                fb = FrameBuffer::getFB();
+                if (fb) {
+                    fb->setDisplayConfigs(msg.displayConfigs.configId,
+                                          msg.displayConfigs.width,
+                                          msg.displayConfigs.height,
+                                          msg.displayConfigs.dpiX,
+                                          msg.displayConfigs.dpiY);
+                    result = true;
+                } else {
+                    GL_LOG("CMD_SET_DISPLAY_CONFIGS: no FrameBuffer");
+                }
+                break;
+
+            case CMD_SET_DISPLAY_ACTIVE_CONFIG:
+                GL_LOG("CMD_SET_DISPLAY_ACTIVE_CONFIG");
+                D("CMD_SET_DISPLAY_ACTIVE_CONFIG");
+                fb = FrameBuffer::getFB();
+                if (fb) {
+                    fb->setDisplayActiveConfig(msg.displayActiveConfig);
+                    result = true;
+                } else {
+                    GL_LOG("CMD_SET_DISPLAY_ACTIVE_CONFIG: no FrameBuffer");
                 }
                 break;
 
@@ -607,6 +648,29 @@ void RenderWindow::setVsyncHz(int vsyncHz) {
     RenderWindowMessage msg = {};
     msg.cmd = CMD_SET_VSYNC_HZ;
     msg.vsyncHz = vsyncHz;
+    (void) processMessage(msg);
+    D("Exiting\n");
+}
+
+void RenderWindow::setDisplayConfigs(int configId, int w, int h,
+                                     int dpiX, int dpiY) {
+    D("Entering\n");
+    RenderWindowMessage msg = {};
+    msg.cmd = CMD_SET_DISPLAY_CONFIGS;
+    msg.displayConfigs.configId = configId;
+    msg.displayConfigs.width = w;
+    msg.displayConfigs.height= h;
+    msg.displayConfigs.dpiX= dpiX;
+    msg.displayConfigs.dpiY = dpiY;
+    (void) processMessage(msg);
+    D("Exiting\n");
+}
+
+void RenderWindow::setDisplayActiveConfig(int configId) {
+    D("Entering\n");
+    RenderWindowMessage msg = {};
+    msg.cmd = CMD_SET_DISPLAY_ACTIVE_CONFIG;
+    msg.displayActiveConfig = configId;
     (void) processMessage(msg);
     D("Exiting\n");
 }
