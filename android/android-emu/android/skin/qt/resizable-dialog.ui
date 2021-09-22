@@ -85,7 +85,7 @@
       </size>
      </property>
      <property name="toolTip">
-      <string>Unfolded foldable phone</string>
+      <string>Foldable</string>
      </property>
      <property name="text">
       <string/>
@@ -135,7 +135,7 @@
       </size>
      </property>
      <property name="toolTip">
-      <string>T`ablet</string>
+      <string>Tablet</string>
      </property>
      <property name="text">
       <string/>

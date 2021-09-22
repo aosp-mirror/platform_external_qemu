@@ -23,12 +23,14 @@
 #include "android/emulation/control/user_event_agent.h"  // for QAndroidUser...
 #include "android/emulation/control/vm_operations.h"     // for QEMU_SHUTDOW...
 #include "android/emulation/control/window_agent.h"      // for EmulatorWindow
+#include "android/featurecontrol/feature_control.h"
 #include "android/framebuffer.h"                         // for QFrameBuffer
 #include "android/globals.h"                             // for android_hw
 #include "android/hw-control.h"                          // for android_hw_c...
 #include "android/hw-sensors.h"                          // for android_sens...
 #include "android/network/globals.h"                     // for android_net_...
 #include "android/opengles.h"                            // for android_redr...
+#include "android/resizable_display_config.h"
 #include "android/skin/event.h"                          // for SkinEventType
 #include "android/skin/generic-event-buffer.h"           // for SkinGenericE...
 #include "android/skin/keycode.h"                        // for SkinKeyCode
@@ -190,6 +192,49 @@ static void emulator_window_opengles_redraw_window(void) {
     }
 }
 
+bool emulator_window_opengles_resizable_enabled() {
+    return android_hw->hw_device_name &&
+           !strcmp(android_hw->hw_device_name, "resizable");
+}
+
+static struct PresetEmulatorSizeInfo presetSizeInfos[] = {
+    { PRESET_SIZE_PHONE, 1080, 2340, 420, },
+    { PRESET_SIZE_UNFOLDED, 1768, 2208, 420, },
+    { PRESET_SIZE_TABLET, 1920, 1200, 240, },
+    { PRESET_SIZE_DESKTOP, 1920, 1080, 160, },
+};
+
+/* pre-set display configs for resizable AVD */
+static void emulator_window_opengles_resizable_display_config_init() {
+    if (!s_use_emugl_subwindow||
+        !emulator_window_opengles_resizable_enabled()) {
+        return;
+    }
+    int activeConfig = (int)PRESET_SIZE_UNFOLDED;
+    for (int i = 0; i < sizeof(presetSizeInfos)/sizeof(struct PresetEmulatorSizeInfo); i++) {
+        if (presetSizeInfos[i].width == android_hw->hw_lcd_width &&
+            presetSizeInfos[i].height == android_hw->hw_lcd_height &&
+            presetSizeInfos[i].dpi == android_hw->hw_lcd_density) {
+            activeConfig = i;
+        }
+        android_setOpenglesDisplayConfigs(presetSizeInfos[i].type,
+                                          presetSizeInfos[i].width,
+                                          presetSizeInfos[i].height,
+                                          presetSizeInfos[i].dpi,
+                                          presetSizeInfos[i].dpi);
+    }
+    android_setOpenglesDisplayActiveConfig(activeConfig);
+}
+
+static void emulator_window_opengles_set_display_active_config(int configId) {
+    if (s_use_emugl_subwindow) {
+        android_setOpenglesDisplayActiveConfig(configId);
+        // SurfaceFlinger index the configId in reverse order
+        int sfConfigId = sizeof(presetSizeInfos)/sizeof(struct PresetEmulatorSizeInfo)
+                            - configId - 1;
+    }
+}
+
 bool emulator_window_start_recording(const RecordingInfo* info) {
     return screen_recorder_start(info, false);
 }
@@ -240,6 +285,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .opengles_show = &emulator_window_opengles_show_window,
         .opengles_setTranslation = &emulator_window_opengles_set_translation,
         .opengles_redraw = &emulator_window_opengles_redraw_window,
+        .opengles_setDisplayActiveConfig = &emulator_window_opengles_set_display_active_config,
     };
 
     static const SkinTrackBallParameters my_trackball_params = {
@@ -304,6 +350,9 @@ emulator_window_setup( EmulatorWindow*  emulator )
     } else {
         VERBOSE_PRINT(gles, "Using guest rendering for display");
     }
+
+    // pre-set display configs for resizable AVD
+    emulator_window_opengles_resizable_display_config_init();
 
     emulator->ui = skin_ui_create(
             emulator->layout_file, android_hw->hw_initialOrientation,

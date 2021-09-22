@@ -102,4 +102,6 @@ void emulator_window_set_screen_mask(int width, int height, const unsigned char*
 void emulator_window_set_no_skin();
 
 void emulator_window_restore_skin();
+
+bool emulator_window_opengles_resizable_enabled();
 ANDROID_END_HEADER

@@ -44,6 +44,7 @@ typedef struct SkinWindowFuncs {
                          bool deleteExisting);
     void (*opengles_setTranslation)(float px, float py);
     void (*opengles_redraw)(void);
+    void (*opengles_setDisplayActiveConfig)(int configId);
 } SkinWindowFuncs;
 
 /* Note: if scale is <= 0, we interpret this as 'auto-detect'.
@@ -126,3 +127,5 @@ extern void             skin_window_update_display( SkinWindow*  window, int  x,
 extern void skin_window_update_gpu_frame(SkinWindow* window, int w, int h, const void* pixels);
 
 extern void skin_window_update_rotation(SkinWindow* window, SkinRotation rotation);
+
+extern void skin_window_run_set_display_active_config(SkinWindow* window, int configId);

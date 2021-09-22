@@ -12,18 +12,11 @@
 #define RESIZABLEDIALOG_H
 
 #include <QDialog>
+#include "android/resizable_display_config.h"
 
 namespace Ui {
 class ResizableDialog;
 }
-
-enum PresetEmulatorSizeType {
-        PRESET_SIZE_NONE, // Treated specially, meant to default to the current
-        PRESET_SIZE_PHONE,
-        PRESET_SIZE_UNFOLDED,
-        PRESET_SIZE_TABLET,
-        PRESET_SIZE_DESKTOP,
-};
 
 class ResizableDialog : public QDialog
 {

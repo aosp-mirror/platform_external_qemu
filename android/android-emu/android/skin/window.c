@@ -2926,3 +2926,11 @@ void skin_window_update_rotation(SkinWindow* window, SkinRotation rotation) {
 
     skin_winsys_update_rotation(rotation);
 }
+
+void
+skin_window_run_set_display_active_config(SkinWindow* window, int configId) {
+    if (!window->win_funcs->opengles_setDisplayActiveConfig) {
+        return;
+    }
+    window->win_funcs->opengles_setDisplayActiveConfig(configId);
+}

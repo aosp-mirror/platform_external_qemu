@@ -53,7 +53,9 @@ typedef enum {
     kEventPenMove,
     kEventTouchBegin,
     kEventTouchEnd,
-    kEventTouchUpdate
+    kEventTouchUpdate,
+    kEventSetDisplayConfigs,
+    kEventSetDisplayActiveConfig,
 } SkinEventType;
 
 // The numeric values represent the bit positions in the button state
@@ -164,6 +166,14 @@ typedef struct {
 } SkinEventRotaryInputData;
 
 typedef struct {
+    int configId;
+    int width;
+    int height;
+    int dpiX;
+    int dpiY;
+} SkinEventSetDisplayConfigs;
+
+typedef struct {
     SkinEventType type;
     union {
         SkinEventKeyData key;
@@ -179,6 +189,8 @@ typedef struct {
         SkinEventDisplayRegion display_region;
         SkinEventMultiDisplay multi_display;
         SkinEventTouchData multi_touch_point;
+        SkinEventSetDisplayConfigs display_configs;
+        int display_active_config;
     } u;
 } SkinEvent;
 
