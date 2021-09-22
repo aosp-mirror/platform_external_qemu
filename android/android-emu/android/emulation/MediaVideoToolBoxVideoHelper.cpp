@@ -173,6 +173,9 @@ void MediaVideoToolBoxVideoHelper::decode(const uint8_t* frame,
             default:
                 VTB_DPRINT("Support for nalu_type=%u not implemented",
                            (uint8_t)f.type);
+                // cannot handle such video, give up so we can fall
+                // back to ffmpeg
+                mIsGood = false;
                 break;
         }
     }
