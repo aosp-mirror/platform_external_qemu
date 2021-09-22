@@ -2518,14 +2518,35 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(int x, int y, int w, int h) {
     if (!mBackingSurface) {
         return;
     }
-
     QRect windowGeo = this->geometry();
     QSize backingSize = mBackingSurface->bitmap->size();
-    if (backingSize.width() == w && backingSize.height() == h) {
-        return;
-    }
     float scale = (float)windowGeo.width() / (float)backingSize.width();
-    setDisplayRegionAndUpdate(x, y, w, h);
+    switch(mOrientation) {
+        default:
+        case SKIN_ROTATION_0:
+        case SKIN_ROTATION_180:
+            if (backingSize.width() == w &&
+                backingSize.height() == h) {
+                break;
+            }
+            windowGeo.setWidth((int)(w * scale));
+            windowGeo.setHeight((int)(h * scale));
+            backingSize.setWidth(w);
+            backingSize.setHeight(h);
+            break;
+        case SKIN_ROTATION_90:
+        case SKIN_ROTATION_270:
+            if (backingSize.width() == h &&
+                backingSize.height() == w) {
+                break;
+            }
+            windowGeo.setWidth((int)(h * scale));
+            windowGeo.setHeight((int)(w * scale));
+            backingSize.setWidth(h);
+            backingSize.setHeight(w);
+            break;
+    }
+    setDisplayRegionAndUpdate(x, y, backingSize.width(), backingSize.height());
     simulateSetScale(std::max(.2, (double)scale));
     QRect containerGeo = mContainer.geometry();
     mContainer.setGeometry(containerGeo.x(), containerGeo.y(), windowGeo.width(), windowGeo.height());
@@ -3237,6 +3258,12 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
 
     if (android_foldable_is_folded()) {
         resizeAndChangeAspectRatio(true);
+    }
+
+    if (emulator_window_opengles_resizable_enabled()) {
+        int targetWidth = 0, targetHeight = 0;
+        emulator_window_get_resizable_size(&targetWidth, &targetHeight);
+        resizeAndChangeAspectRatio(0, 0, targetWidth, targetHeight);
     }
 
 #ifdef __APPLE__
