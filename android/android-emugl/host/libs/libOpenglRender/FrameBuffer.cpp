@@ -3119,6 +3119,7 @@ bool FrameBuffer::onLoad(Stream* stream,
     m_framebufferHeight = stream->getBe32();
     m_dpr = stream->getFloat();
     mDisplayActiveConfigId = stream->getBe32();
+    emugl::get_emugl_window_operations().setResizableIcon(mDisplayActiveConfigId);
     loadCollection(stream, &mDisplayConfigs,
                    [](Stream* s) -> std::map<int, DisplayConfig>::value_type {
                        int idx = static_cast<int>(s->getBe32());

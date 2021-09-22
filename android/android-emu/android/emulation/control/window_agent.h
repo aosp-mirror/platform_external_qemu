@@ -125,6 +125,7 @@ typedef struct QAndroidEmulatorWindowAgent {
     bool (*setUiTheme)(SettingsTheme type);
     void (*runOnUiThread)(UiUpdateFunc f, void* data, bool wait);
     bool (*isRunningInUiThread)(void);
+    void (*setResizableIcon)(int presetSize);
 } QAndroidEmulatorWindowAgent;
 
 ANDROID_END_HEADER
