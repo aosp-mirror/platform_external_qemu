@@ -461,6 +461,11 @@ bool skin_ui_process_events(SkinUI* ui) {
         case kEventRestoreSkin:
             emulator_window_restore_skin();
             break;
+        case kEventSetDisplayActiveConfig:
+            skin_window_run_set_display_active_config(ui->window,
+                                                      ev.u.display_active_config);
+            break;
+        default: ;
         }
     }
 

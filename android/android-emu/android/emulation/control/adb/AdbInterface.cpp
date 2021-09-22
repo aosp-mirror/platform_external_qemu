@@ -668,3 +668,15 @@ AdbCommandResult::~AdbCommandResult() {
 
 }  // namespace emulation
 }  // namespace android
+
+extern "C" void enqueueAdbCommand(char* channel, char* command) {
+  android::emulation::AdbInterface* interface =
+      android::emulation::AdbInterface::getGlobal();
+  if (!interface) {
+      fprintf(stderr, "adb interface not available\n");
+      return;
+  }
+  std::vector<std::string> cmd{channel, command};
+  interface->enqueueCommand(cmd);
+  return;
+}

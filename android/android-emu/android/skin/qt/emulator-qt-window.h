@@ -29,7 +29,6 @@
 #include "android/skin/qt/emulator-overlay.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h"
-#include "android/skin/qt/resizable-dialog.h"
 #include "android/skin/qt/tool-window.h"
 #include "android/skin/qt/ui-event-recorder.h"
 #include "android/skin/qt/user-actions-counter.h"
@@ -584,6 +583,7 @@ private:
                                           Qt::MouseButtons buttons);
     int tiltToRotation(int xTiltDeg, int yTiltDeg);
     int penOrientation(int rotation);
+    void setDisplayActiveConfig(int configId);
 };
 
 class SkinSurfaceBitmap {

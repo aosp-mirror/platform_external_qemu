@@ -810,6 +810,8 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       m_postThread([this](FrameBuffer::Post&& post) {
           return postWorkerFunc(post);
       }) {
+     mDisplayActiveConfigId = 0;
+     mDisplayConfigs[0] = {p_width, p_height, 160, 160};
      uint32_t displayId = 0;
      if (createDisplay(&displayId) < 0) {
          fprintf(stderr, "Failed to create default display\n");
@@ -2418,8 +2420,8 @@ bool FrameBuffer::bindFakeWindow_locked() {
                 getGlesMaxContextAttribs());
 
         static const EGLint kFakeWindowPbufAttribs[] = {
-                EGL_WIDTH,          m_framebufferWidth, EGL_HEIGHT,
-                m_framebufferWidth, EGL_NONE,
+                EGL_WIDTH, getHeight(), EGL_HEIGHT,
+                getHeight(), EGL_NONE,
         };
 
         m_eglFakeWindowSurface = s_egl.eglCreatePbufferSurface(
@@ -2939,7 +2941,15 @@ void FrameBuffer::onSave(Stream* stream,
     stream->putBe32(m_framebufferWidth);
     stream->putBe32(m_framebufferHeight);
     stream->putFloat(m_dpr);
-
+    stream->putBe32(mDisplayActiveConfigId);
+    saveCollection(stream, mDisplayConfigs,
+                   [](Stream* s, const std::map<int, DisplayConfig>::value_type& pair) {
+                       s->putBe32(pair.first);
+                       s->putBe32(pair.second.w);
+                       s->putBe32(pair.second.h);
+                       s->putBe32(pair.second.dpiX);
+                       s->putBe32(pair.second.dpiY);
+                   });
     stream->putBe32(m_useSubWindow);
     stream->putBe32(m_eglContextInitialized);
 
@@ -3108,6 +3118,18 @@ bool FrameBuffer::onLoad(Stream* stream,
     m_framebufferWidth = stream->getBe32();
     m_framebufferHeight = stream->getBe32();
     m_dpr = stream->getFloat();
+    mDisplayActiveConfigId = stream->getBe32();
+    emugl::get_emugl_window_operations().setResizableIcon(mDisplayActiveConfigId);
+    loadCollection(stream, &mDisplayConfigs,
+                   [](Stream* s) -> std::map<int, DisplayConfig>::value_type {
+                       int idx = static_cast<int>(s->getBe32());
+                       int w = static_cast<int>(s->getBe32());
+                       int h = static_cast<int>(s->getBe32());
+                       int dpiX =  static_cast<int>(s->getBe32());
+                       int dpiY = static_cast<int>(s->getBe32());
+                       return {idx, {w, h, dpiX, dpiY}};
+                   });
+
     // TODO: resize the window
     //
     m_useSubWindow = stream->getBe32();
@@ -3349,4 +3371,60 @@ void FrameBuffer::scheduleVsyncTask(VsyncThread::VsyncTask task) {
     }
 
     m_vsyncThread->schedule(task);
+}
+
+void FrameBuffer::setDisplayConfigs(int configId, int w, int h,
+                                    int dpiX, int dpiY) {
+    AutoLock mutex(m_lock);
+    mDisplayConfigs[configId] = {w, h, dpiX, dpiY};
+    LOG(INFO) << "setDisplayConfigs w " << w << " h " << h <<
+              " dpiX " << dpiX << " dpiY " << dpiY;
+}
+
+void FrameBuffer::setDisplayActiveConfig(int configId) {
+    AutoLock mutex(m_lock);
+    if (mDisplayConfigs.find(configId) == mDisplayConfigs.end()) {
+        LOG(ERROR) << "config " << configId << " not set";
+        return;
+    }
+    mDisplayActiveConfigId = configId;
+    m_framebufferWidth = mDisplayConfigs[configId].w;
+    m_framebufferHeight = mDisplayConfigs[configId].h;
+    setDisplayPose(0, 0, 0, getWidth(), getHeight(), 0);
+    LOG(INFO) << "setDisplayActiveConfig " << configId;
+}
+
+const int FrameBuffer::getDisplayConfigsCount() {
+    AutoLock mutex(m_lock);
+    return mDisplayConfigs.size();
+}
+
+const int FrameBuffer::getDisplayConfigsParam(int configId, EGLint param) {
+    AutoLock mutex(m_lock);
+    if (mDisplayConfigs.find(configId) == mDisplayConfigs.end()) {
+        return -1;
+    }
+    switch (param) {
+        case FB_WIDTH:
+            return mDisplayConfigs[configId].w;
+        case FB_HEIGHT:
+            return mDisplayConfigs[configId].h;
+        case FB_XDPI:
+            return mDisplayConfigs[configId].dpiX;
+        case FB_YDPI:
+            return mDisplayConfigs[configId].dpiY;
+        case FB_FPS:
+            return 60;
+        case FB_MIN_SWAP_INTERVAL:
+            return -1;
+        case FB_MAX_SWAP_INTERVAL:
+            return -1;
+        default:
+            return -1;
+    }
+}
+
+const int FrameBuffer::getDisplayActiveConfig() {
+    AutoLock mutex(m_lock);
+    return mDisplayActiveConfigId >= 0 ? mDisplayActiveConfigId : -1;
 }

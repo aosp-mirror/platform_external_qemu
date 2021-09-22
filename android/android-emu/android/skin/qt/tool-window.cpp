@@ -143,8 +143,6 @@ ToolWindow::WindowHolder<T>::~WindowHolder() {
     mWindow->deleteLater();
 }
 
-static bool isResizable();
-
 const UiEmuAgent* ToolWindow::sUiEmuAgent = nullptr;
 static ToolWindow* sToolWindow = nullptr;
 
@@ -356,9 +354,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     connect(mResizableDialog, SIGNAL(finished(int)), this,
             SLOT(on_dismiss_resizable_dialog()));
 
-    if (isResizable()) {
-        on_new_resizable_requested(mResizableDialog->getSize());
-    } else {
+    if (!emulator_window_opengles_resizable_enabled()) {
         mToolsUi->resizable_button->setHidden(true);
     }
 
@@ -813,7 +809,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) 
 
             break;
         case QtUICommand::PRESET_SIZE_ADVANCE:
-            if (down && isResizable()) {
+            if (down && emulator_window_opengles_resizable_enabled()) {
                 PresetEmulatorSizeType newSize =
                     static_cast<PresetEmulatorSizeType>(stoi(extra));
                 switch(newSize) {
@@ -1503,8 +1499,4 @@ WorkerProcessingResult ToolWindow::foldableSyncToAndroidItemFunction(const Folda
             return WorkerProcessingResult::Stop;
     }
     return WorkerProcessingResult::Continue;
-}
-
-static bool isResizable() {
-    return android_hw->hw_device_name && !strcmp(android_hw->hw_device_name, "resizable");
 }

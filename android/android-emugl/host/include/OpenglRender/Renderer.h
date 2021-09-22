@@ -296,6 +296,8 @@ public:
             android::snapshot::Snapshotter::Stage stage) = 0;
 
     virtual void setVsyncHz(int vsyncHz) = 0;
+    virtual void setDisplayConfigs(int configId, int w, int h, int dpiX, int dpiY) = 0;
+    virtual void setDisplayActiveConfig(int configId) = 0;
 protected:
     ~Renderer() = default;
 };

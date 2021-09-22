@@ -158,7 +158,9 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     f(data);
                 },
         .isRunningInUiThread =
-                []() { return false; }
+                []() { return false; },
+        .setResizableIcon =
+                [](int presetSize) { },
 };
 
 extern "C" const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

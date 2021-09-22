@@ -243,6 +243,9 @@ static constexpr android::base::StringView kVulkanAsyncQsri = "ANDROID_EMU_vulka
 // Read color buffer DMA
 static constexpr android::base::StringView kReadColorBufferDma = "ANDROID_EMU_read_color_buffer_dma";
 
+// Multiple display configs
+static constexpr android::base::StringView kHWCMultiConfigs= "ANDROID_EMU_hwc_multi_configs";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -502,6 +505,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
     bool syncBufferDataEnabled = true;
     bool vulkanAsyncQsri = shouldEnableVulkanAsyncQsri();
     bool readColorBufferDma = directMemEnabled && hasSharedSlotsHostMemoryAllocatorEnabled;
+    bool hwcMultiConfigs = emugl_feature_is_enabled(android::featurecontrol::HWCMultiConfigs);
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -639,6 +643,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
 
     if (readColorBufferDma && name == GL_EXTENSIONS) {
         glStr += kReadColorBufferDma;
+        glStr += " ";
+    }
+
+    if (hwcMultiConfigs && name == GL_EXTENSIONS) {
+        glStr += kHWCMultiConfigs;
         glStr += " ";
     }
 
@@ -1599,6 +1608,30 @@ static int rcReadColorBufferDMA(uint32_t colorBuffer,
     return 0;
 }
 
+static int rcGetFBDisplayConfigsCount() {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return -1;
+    }
+    return fb->getDisplayConfigsCount();
+}
+
+static int rcGetFBDisplayConfigsParam(int configId, GLint param) {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return -1;
+    }
+    return fb->getDisplayConfigsParam(configId, param);
+}
+
+static int rcGetFBDisplayActiveConfig() {
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return -1;
+    }
+    return fb->getDisplayActiveConfig();
+}
+
 void initRenderControlContext(renderControl_decoder_context_t *dec)
 {
     dec->rcGetRendererVersion = rcGetRendererVersion;
@@ -1666,4 +1699,7 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcCreateDisplayById = rcCreateDisplayById;
     dec->rcSetDisplayPoseDpi = rcSetDisplayPoseDpi;
     dec->rcReadColorBufferDMA = rcReadColorBufferDMA;
+    dec->rcGetFBDisplayConfigsCount = rcGetFBDisplayConfigsCount;
+    dec->rcGetFBDisplayConfigsParam = rcGetFBDisplayConfigsParam;
+    dec->rcGetFBDisplayActiveConfig = rcGetFBDisplayActiveConfig;
 }

@@ -37,6 +37,7 @@
 #include "android/base/files/IniFile.h"
 #include "android/cmdline-option.h"
 #include "android/emulation/control/multi_display_agent.h"
+#include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/Features.h"
 #include "android/globals.h"
@@ -213,6 +214,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
         !android_foldable_any_folded_area_configured() &&
         !android_foldable_hinge_configured() &&
         !android_foldable_rollable_configured() &&
+        !emulator_window_opengles_resizable_enabled() &&
         avdInfo_getAvdFlavor(android_avdInfo) != AVD_TV &&
         avdInfo_getAvdFlavor(android_avdInfo) != AVD_WEAR &&
         avdInfo_getAvdFlavor(android_avdInfo) != AVD_ANDROID_AUTO) {

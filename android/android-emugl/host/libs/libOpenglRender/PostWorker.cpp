@@ -157,8 +157,12 @@ void PostWorker::postImpl(ColorBuffer* cb) {
     }
     else {
         // render the color buffer to the window and apply the overlay
-        GLuint tex = cb->scale();
-        cb->postWithOverlay(tex, zRot, dx, dy);
+        cb->postWithOverlay(cb->getTexture(), zRot, dx, dy);
+        DD("post tex %dx%d to window %dx%d viewport %dx%d fb(%dx%d) dx %f dy %f\n",
+            cb->getWidth(), cb->getHeight(), windowWidth, windowHeight,
+            m_viewportWidth, m_viewportHeight,
+            mFb->getWidth(), mFb->getHeight(),
+            dx, dy);
     }
 
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());

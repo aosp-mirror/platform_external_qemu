@@ -695,3 +695,16 @@ void android_setVsyncHz(int vsyncHz) {
         sRenderer->setVsyncHz(vsyncHz);
     }
 }
+
+void android_setOpenglesDisplayConfigs(int configId, int w, int h, int dpiX,
+                                       int dpiY) {
+    if (sRenderer) {
+        sRenderer->setDisplayConfigs(configId, w, h, dpiX, dpiY);
+    }
+}
+
+void android_setOpenglesDisplayActiveConfig(int configId) {
+    if (sRenderer) {
+        sRenderer->setDisplayActiveConfig(configId);
+    }
+}
