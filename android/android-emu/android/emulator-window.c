@@ -205,7 +205,20 @@ static struct PresetEmulatorSizeInfo presetSizeInfos[] = {
     { PRESET_SIZE_DESKTOP, 1920, 1080, 160, },
 };
 
+extern void enqueueAdbCommand(char* channel, char* command);
+
 static enum PresetEmulatorSizeType sActiveConfig;
+
+void updateAndroidDisplayConfigPath(enum PresetEmulatorSizeType activeConfig) {
+    struct PresetEmulatorSizeInfo* info = &presetSizeInfos[activeConfig];
+    int size = info->width < info->height ? info->width : info->height;
+    if (size * 160 / info->dpi >= 600) {
+        // dp >=600, tablet display config
+        enqueueAdbCommand("shell", "cmd window set-ignore-orientation-request true");
+    } else {
+        enqueueAdbCommand("shell", "cmd window set-ignore-orientation-request false");
+    }
+}
 
 /* pre-set display configs for resizable AVD */
 static void emulator_window_opengles_resizable_display_config_init() {
@@ -227,10 +240,9 @@ static void emulator_window_opengles_resizable_display_config_init() {
                                           presetSizeInfos[i].dpi);
     }
     android_setOpenglesDisplayActiveConfig(activeConfig);
+    updateAndroidDisplayConfigPath(activeConfig);
     sActiveConfig = activeConfig;
 }
-
-extern void enqueueAdbCommand(char* channel, char* command);
 
 static void emulator_window_opengles_set_display_active_config(int configId) {
     if (s_use_emugl_subwindow) {
@@ -243,18 +255,23 @@ static void emulator_window_opengles_set_display_active_config(int configId) {
         enqueueAdbCommand("shell", cmd);
         sprintf(cmd, "wm density %d", presetSizeInfos[configId].dpi);
         enqueueAdbCommand("shell", cmd);
+        updateAndroidDisplayConfigPath(configId);
         sActiveConfig = configId;
     }
 }
 
-bool emulator_window_get_resizable_size(int* w, int* h) {
+int emulator_window_get_resizable(int* w, int* h) {
     if (sActiveConfig < 0 ||
         sActiveConfig >= sizeof(presetSizeInfos)/sizeof(struct PresetEmulatorSizeInfo)) {
-        return false;
+        return -1;
     }
-    *w = presetSizeInfos[sActiveConfig].width;
-    *h = presetSizeInfos[sActiveConfig].height;
-    return true;
+    if (w) {
+        *w = presetSizeInfos[sActiveConfig].width;
+    }
+    if (h) {
+        *h = presetSizeInfos[sActiveConfig].height;
+    }
+    return sActiveConfig;
 }
 
 bool emulator_window_start_recording(const RecordingInfo* info) {

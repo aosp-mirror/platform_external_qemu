@@ -309,17 +309,22 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             adbInterface->enqueueCommand(
                 { "shell", "logcat", "-G", "2M" });
 
-            // If hw.display.settings.xml set as freeform, config guest
-            if ((android_op_wipe_data || !path_exists(android_hw->disk_dataPartition_path))
-                && !strcmp(android_hw->display_settings_xml, "freeform")) {
-                adbInterface->enqueueCommand(
-                    { "shell", "settings", "put", "global", "sf", "1" });
-                adbInterface->enqueueCommand(
-                    { "shell", "settings", "put", "global",
-                      "enable_freeform_support", "1" });
-                adbInterface->enqueueCommand(
-                    { "shell", "settings", "put", "global",
-                      "force_resizable_activities", "1" });
+            if (getConsoleAgents()->emu->isResizableEnabled()) {
+                getConsoleAgents()->emu->setResizableIcon(-1);
+            } else {
+                // If hw.display.settings.xml set as freeform, config guest
+                if ((android_op_wipe_data || !path_exists(android_hw->disk_dataPartition_path))) {
+                    if (!strcmp(android_hw->display_settings_xml, "freeform")) {
+                        adbInterface->enqueueCommand(
+                            { "shell", "settings", "put", "global", "sf", "1" });
+                        adbInterface->enqueueCommand(
+                            { "shell", "settings", "put", "global",
+                              "enable_freeform_support", "1" });
+                        adbInterface->enqueueCommand(
+                            { "shell", "settings", "put", "global",
+                              "force_resizable_activities", "1" });
+                    }
+                }
             }
 
             // If we allowed host audio, don't revoke
