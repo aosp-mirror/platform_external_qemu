@@ -254,7 +254,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     }
 
     android::base::beginTrace("colorBuffer ctor");
-    ColorBuffer* cb = new ColorBuffer(p_display, hndl, helper);
+    std::unique_ptr<ColorBuffer> cb(new ColorBuffer(p_display, hndl, helper));
     android::base::endTrace();
 
     GLint prevUnpackAlignment;
@@ -265,9 +265,16 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
 
     android::base::beginTrace("initialImage upload");
+    GLenum err = s_gles2.glGetError();
+    if (err) {
+        ERR("ColorBuffer::create get gl error 0x%x before creating textures", err);
+    }
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, p_internalFormat, p_width, p_height,
                          0, texFormat, pixelType, 0);
     android::base::endTrace();
+    if (s_gles2.glGetError()) {
+        return nullptr;
+    }
     android::base::beginTrace("initialImage dtor");
     // initialImage.reset();
     android::base::endTrace();
@@ -351,7 +358,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     android::base::beginTrace("glFinish");
     // s_gles2.glFinish();
     android::base::endTrace();
-    return cb;
+    return cb.release();
 }
 
 ColorBuffer::ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper)
