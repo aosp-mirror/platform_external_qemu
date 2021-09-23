@@ -137,6 +137,12 @@ private:
         std::vector<uint8_t> mKeyMaterial;
         int mKeyIdx;
     };
+
+    struct ieee8023_hdr {
+        uint8_t dest[ETH_ALEN]; /* destination eth addr */
+        uint8_t src[ETH_ALEN];  /* source ether addr    */
+        uint16_t ethertype;     /* packet type ID field */
+    } __attribute__((__packed__));
     uint16_t getEtherType() const;
     std::vector<uint8_t> getPacketNumber(const CipherScheme cs) const;
     std::vector<uint8_t> getNonce(const std::vector<uint8_t>& pn) const;
@@ -149,6 +155,7 @@ private:
     android::network::FrameInfo mInfo;
     KeyData mPTK;
     KeyData mGTK;
+    ieee8023_hdr mEthHdr;
 
     static bool sForTesting;
     static std::atomic<int64_t> sTxPn;
