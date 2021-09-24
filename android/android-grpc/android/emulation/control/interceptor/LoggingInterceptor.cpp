@@ -13,14 +13,15 @@
 // limitations under the License.
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
 
-#include <android/base/Log.h>             // for LogStream, LOG, LogMessage
 #include <assert.h>                       // for assert
 #include <google/protobuf/message.h>      // for Message
 #include <google/protobuf/text_format.h>  // for TextFormat::Printer, TextFo...
+#include <inttypes.h>                     // for PRIu64
 #include <algorithm>                      // for min
 #include <utility>                        // for move
 
-#include "android/base/system/System.h"   // for System
+#include "android/base/system/System.h"  // for System
+#include "android/utils/debug.h"         // for VERBOSE_PRINT, VERBOSE_grpc
 
 namespace android {
 namespace control {
@@ -49,13 +50,6 @@ std::array<std::string, 17> kStatus{"OK",
                                     "DATA_LOSS",
                                     "UNAUTHENTICATED"};
 
-static std::string statusToString(grpc::Status status) {
-    if (status.error_code() == grpc::StatusCode::OK)
-        return "OK";
-    return kStatus[std::min<int>(static_cast<int>(status.error_code()), 16)]
-             +  ":" + status.error_message();
-}
-
 static uint64_t getTimeDiffUs(InvocationRecord loginfo,
                               InterceptionHookPoints from,
                               InterceptionHookPoints to) {
@@ -67,13 +61,17 @@ static uint64_t getTimeDiffUs(InvocationRecord loginfo,
 }
 
 static void printLog(const InvocationRecord& loginfo) {
-    LOG(INFO) << loginfo.mTimestamps[InvocationRecord::kStartTimeIdx]
-              << ", rcvTime: " << loginfo.rcvTime
-              << ", sndTime: " << loginfo.sndTime << ", "
-              << InvocationRecord::kTypes[static_cast<int>(loginfo.type)]
-              << ", rcv: " << loginfo.rcvBytes << ", snd: " << loginfo.sndBytes
-              << ", " << loginfo.method << "(" << loginfo.incoming << ") -> ["
-              << loginfo.response << "], " << statusToString(loginfo.status);
+    auto status_msg = kStatus[std::min<int>(
+            static_cast<int>(loginfo.status.error_code()), 16)];
+    VERBOSE_PRINT(grpc,
+                  "start: %" PRIu64 ", rcvTime: %" PRIu64 ", sndTime: %" PRIu64
+                  ", rcv: %" PRIu64 ", snd: %" PRIu64 ", %s %s, %s(%s) -> [%s]",
+                  loginfo.mTimestamps[InvocationRecord::kStartTimeIdx],
+                  loginfo.rcvTime, loginfo.sndTime, loginfo.rcvBytes,
+                  loginfo.sndBytes, status_msg.c_str(),
+                  loginfo.status.error_message().c_str(),
+                  loginfo.method.c_str(), loginfo.incoming.c_str(),
+                  loginfo.response.c_str());
 };
 
 LoggingInterceptor::LoggingInterceptor(ServerRpcInfo* info,

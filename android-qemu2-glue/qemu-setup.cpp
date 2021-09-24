@@ -319,6 +319,7 @@ int qemu_setup_grpc() {
     auto adb = android::emulation::control::getAdbService();
     auto builder = EmulatorControllerService::Builder()
                            .withConsoleAgents(getConsoleAgents())
+                           .withLogging(VERBOSE_CHECK(grpc))
                            .withPortRange(grpc_start, grpc_end)
                            .withCertAndKey(android_cmdLineOptions->grpc_tls_cer,
                                            android_cmdLineOptions->grpc_tls_key,
