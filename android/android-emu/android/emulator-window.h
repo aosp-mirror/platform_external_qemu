@@ -105,5 +105,5 @@ void emulator_window_restore_skin();
 
 bool emulator_window_opengles_resizable_enabled();
 
-bool emulator_window_get_resizable_size(int* w, int* h);
+int emulator_window_get_resizable(int* w, int* h);
 ANDROID_END_HEADER

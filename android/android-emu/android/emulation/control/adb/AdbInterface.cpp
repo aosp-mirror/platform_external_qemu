@@ -673,7 +673,7 @@ extern "C" void enqueueAdbCommand(char* channel, char* command) {
   android::emulation::AdbInterface* interface =
       android::emulation::AdbInterface::getGlobal();
   if (!interface) {
-      fprintf(stderr, "adb interface not available\n");
+      LOG(WARNING) << "adb interface not available";
       return;
   }
   std::vector<std::string> cmd{channel, command};

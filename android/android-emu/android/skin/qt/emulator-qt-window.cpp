@@ -3262,8 +3262,9 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
 
     if (emulator_window_opengles_resizable_enabled()) {
         int targetWidth = 0, targetHeight = 0;
-        emulator_window_get_resizable_size(&targetWidth, &targetHeight);
-        resizeAndChangeAspectRatio(0, 0, targetWidth, targetHeight);
+        if (emulator_window_get_resizable(&targetWidth, &targetHeight) >= 0) {
+            resizeAndChangeAspectRatio(0, 0, targetWidth, targetHeight);
+        }
     }
 
 #ifdef __APPLE__
