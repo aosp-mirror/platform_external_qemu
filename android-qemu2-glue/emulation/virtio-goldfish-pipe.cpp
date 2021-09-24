@@ -940,7 +940,7 @@ public:
         return 0;
     }
 
-    int contextCreateFence(uint64_t fence_id, uint32_t ctx_id, uint32_t fence_ctx_idx) {
+    int contextCreateFence(uint64_t fence_id, uint32_t ctx_id, uint8_t fence_ctx_idx) {
         AutoLock lock(mLock);
         VGPLOG("fenceid: %llu cmdtype: %u fence_ctx_idx: %u", (unsigned long long)fence_id, ctx_id, fence_ctx_idx);
         if (mVirtioGpuTimelines) {
@@ -2125,7 +2125,7 @@ VG_EXPORT int pipe_virgl_renderer_resource_attach_iov_with_addrs(int res_handle,
 }
 
 VG_EXPORT int stream_renderer_context_create_fence(
-    uint64_t fence_id, uint32_t ctx_id, uint32_t fence_ctx_idx) {
+    uint64_t fence_id, uint32_t ctx_id, uint8_t fence_ctx_idx) {
     sRenderer->contextCreateFence(fence_id, ctx_id, fence_ctx_idx);
     return 0;
 }
