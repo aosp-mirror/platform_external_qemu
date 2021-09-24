@@ -15,6 +15,7 @@
 
 extern const AndroidConsoleAgents* getConsoleAgents();
 extern int qemu_setup_grpc(void);
+extern int qemu_grpc_port(void);
 
 int start_grpc(int port, const char* turncfg) {
     return qemu_setup_grpc();
@@ -22,6 +23,7 @@ int start_grpc(int port, const char* turncfg) {
 
 static const QGrpcAgent grpcAgent = {
         .start = start_grpc,
+        .active_port = &qemu_grpc_port,
 };
 
 extern "C" const QGrpcAgent* const gQGrpcAgent = &grpcAgent;
