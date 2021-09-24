@@ -68,6 +68,9 @@
 #include "android/globals.h"
 #include "hw/acpi/goldfish_defs.h"
 #include "android/utils/debug.h"
+#else
+// Default qemu != fuchsia
+bool is_fuchsia = false;
 #endif
 
 /* These are used to size the ACPI tables for -M pc-i440fx-1.7 and
@@ -1697,7 +1700,7 @@ static void append_q35_prt_entry(Aml *ctx, uint32_t nr, const char *name)
     g_free(s);
 }
 
-static Aml* build_q35_routing_table(const char* str, bool use_inta) 
+static Aml* build_q35_routing_table(const char* str, bool use_inta)
 {
     int i;
     Aml *pkg;
