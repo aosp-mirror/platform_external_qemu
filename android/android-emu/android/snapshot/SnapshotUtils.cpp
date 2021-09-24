@@ -26,6 +26,7 @@
 #include "android/base/Uuid.h"  // for Uuid
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/GzipStreambuf.h"
+#include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/TarStream.h"
 #include "android/base/memory/ScopedPtr.h"
@@ -125,6 +126,20 @@ bool pullSnapshot(const char* snapshotName,
                     return;
                 }
 
+                std::string exportdIniPath = base::PathUtils::join(
+                        snapshot->dataDir(), "exported.ini");
+                base::IniFile exportedIni(exportdIniPath);
+                exportedIni.setString("avdId",
+                                      avdInfo_getName(android_avdInfo));
+                exportedIni.setString("snasphotName", snapshot->name());
+                exportedIni.setString("target",
+                                      avdInfo_getTarget(android_avdInfo));
+                succeed = exportedIni.write();
+                if (!succeed) {
+                    logError("Failed to save snapshot meta data", opaque,
+                             errConsumer);
+                    return;
+                }
                 // Now add in the metadata.
                 auto entries = base::System::get()->scanDirEntries(
                         snapshot->dataDir(), true);

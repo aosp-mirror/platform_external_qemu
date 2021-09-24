@@ -123,6 +123,7 @@ struct AvdInfo {
     char*     targetArch;
     char*     targetAbi;
     char*     acpiIniPath;
+    char* target;  // The target string in rootIni.
 
     /* for the normal virtual device case */
     char*     deviceName;
@@ -476,6 +477,9 @@ _avdInfo_getRootIni( AvdInfo*  i )
         derror("Corrupt virtual device config file!");
         return -1;
     }
+#define ROOT_TARGET_KEY "target"
+
+    i->target = iniFile_getString(i->rootIni, ROOT_TARGET_KEY, NULL);
     return 0;
 }
 
@@ -522,14 +526,11 @@ _avdInfo_getContentPath( AvdInfo*  i )
 static int
 _avdInfo_getApiLevel(AvdInfo* i, bool* isMarshmallowOrHigher)
 {
-    char*       target;
     const char* p;
     const int   defaultLevel = kUnknownApiLevel;
     int         level        = defaultLevel;
+    const char* target = i->target;
 
-#    define ROOT_TARGET_KEY   "target"
-
-    target = iniFile_getString(i->rootIni, ROOT_TARGET_KEY, NULL);
     if (target == NULL) {
         D("No target field in root AVD .ini file?");
         D("Defaulting to API level %d", level);
@@ -585,7 +586,6 @@ _avdInfo_getApiLevel(AvdInfo* i, bool* isMarshmallowOrHigher)
         D("Found AVD target API level: %d", level);
     }
 EXIT:
-    AFREE(target);
     return level;
 
 NOT_A_NUMBER:
@@ -620,6 +620,10 @@ AvdFlavor avdInfo_getAvdFlavor(const AvdInfo* i) {
 int
 avdInfo_getApiLevel(const AvdInfo* i) {
     return i->apiLevel;
+}
+
+const char* avdInfo_getTarget(const AvdInfo* i) {
+    return i->target;
 }
 
 // This information was taken from the SDK Manager:
@@ -955,6 +959,7 @@ avdInfo_new( const char*  name, AvdInfoParams*  params )
     str_reset(&i->deviceName, name);
     str_reset(&i->deviceId, name);
     i->noChecks = false;
+    i->target = NULL;
 
     if ( _avdInfo_getSdkRoot(i) < 0     ||
          _avdInfo_getRootIni(i) < 0     ||
