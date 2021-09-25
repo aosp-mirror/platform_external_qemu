@@ -45,7 +45,7 @@ set(OPTION_SDK_TOOLS_REVISION "" CACHE STRING
 set(OPTION_SDK_TOOLS_BUILD_NUMBER ""
     CACHE STRING "The sdk buildnumber to use, if any.")
 set(OPTION_ASAN "" CACHE STRING "The list of build sanitizers to user")
-set(OPTION_COVERAGE_IN_DEBUG TRUE
+set(OPTION_COVERAGE_IN_DEBUG FALSE
     CACHE BOOL "True if code coverage should be enabled in debug builds.")
 set(OPTION_ASAN_IN_DEBUG TRUE
     CACHE BOOL "True if asan should be turned on for debug builds.")
