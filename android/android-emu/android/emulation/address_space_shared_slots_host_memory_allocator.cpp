@@ -48,6 +48,23 @@ uint64_t allocateAddressSpaceBlock(const AddressSpaceHwFuncs* hw, uint32_t size)
     }
 }
 
+uint64_t allocateAddressSpaceBlockFixed(uint64_t gpa, const AddressSpaceHwFuncs* hw, uint32_t size) {
+    uint64_t offset = gpa - hw->getPhysAddrStartLocked();
+    if (hw->allocSharedHostRegionFixedLocked(size, offset)) {
+        // Note: even if we do not succeed in allocSharedHostRegionFixedLocked,
+        // assume this is because we're doing a snapshot load, and the VMSTATE
+        // description of memory slots in hw/pci/goldfish_address_space.c
+        // already contains the entry we wanted. TODO: Consider always
+        // allowing allocSharedHostRegionFixedLocked succeed if it encounters
+        // an unavailable block at the same offset and size, and/or add a
+        // "forSnapshotLoad" flag to allocSharedHostRegionFixedLocked in order
+        // to specifically account for this case.
+        return hw->getPhysAddrStartLocked() + offset;
+    } else {
+        return hw->getPhysAddrStartLocked() + offset;
+    }
+}
+
 int freeAddressBlock(const AddressSpaceHwFuncs* hw, uint64_t phys) {
     const uint64_t start = hw->getPhysAddrStartLocked();
     if (phys < start) { return -1; }
@@ -237,7 +254,7 @@ bool MemBlock::load(base::Stream* stream,
         android::aligned_buf_free(bits);
         return false;
     }
-    const uint64_t physBase = allocateAddressSpaceBlock(hw, bitsSize);
+    const uint64_t physBase = allocateAddressSpaceBlockFixed(physBaseLoaded, hw, bitsSize);
     if (!physBase) {
         android::aligned_buf_free(bits);
         return false;
