@@ -23,8 +23,8 @@ void AudioSource::OnData(const void* audio_data,
                          size_t number_of_channels,
                          size_t number_of_frames) {
     const std::lock_guard<std::mutex> lock(mMutex);
-    if ((mSink != nullptr) && (audio_data != nullptr)) {
-        mSink->OnData(audio_data, bits_per_sample, sample_rate,
+    for (auto sink : mSinks) {
+        sink->OnData(audio_data, bits_per_sample, sample_rate,
                       number_of_channels, number_of_frames);
     }
 }

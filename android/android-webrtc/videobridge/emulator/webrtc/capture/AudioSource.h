@@ -15,6 +15,7 @@
 
 #include <stdio.h>                       // for size_t
 #include <mutex>                         // for mutex, lock_guard
+#include <set>
 
 #include "api/media_stream_interface.h"  // for MediaSourceInterface::Source...
 
@@ -26,11 +27,11 @@ public:
     AudioSource() = default;
     void AddSink(::webrtc::AudioTrackSinkInterface* sink) override {
         const std::lock_guard<std::mutex> lock(mMutex);
-        mSink = sink;
+        mSinks.insert(sink);
     }
     void RemoveSink(::webrtc::AudioTrackSinkInterface* sink) override {
         const std::lock_guard<std::mutex> lock(mMutex);
-        mSink = nullptr;
+        mSinks.erase(sink);
     }
 
     ::webrtc::MediaSourceInterface::SourceState state() const override {
@@ -51,7 +52,7 @@ public:
 
 private:
     std::mutex mMutex;
-    ::webrtc::AudioTrackSinkInterface* mSink = nullptr;
+    std::set<::webrtc::AudioTrackSinkInterface*> mSinks;
 };
 }  // namespace webrtc
 }  // namespace emulator
