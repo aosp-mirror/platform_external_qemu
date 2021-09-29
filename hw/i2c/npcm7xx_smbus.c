@@ -264,6 +264,7 @@ static void npcm7xx_smbus_stop_target_device_transfer(NPCM7xxSMBusState *s)
 {
     i2c_end_transfer(s->bus);
     s->st |= NPCM7XX_SMBST_STP;
+    s->st &= ~NPCM7XX_SMBST_SDAST;
     npcm7xx_smbus_update_irq(s);
 }
 
@@ -382,9 +383,12 @@ static void npcm7xx_smbus_recv_fifo(NPCM7xxSMBusState *s)
         s->rxf_ctl &= ~NPCM7XX_SMBRXF_CTL_LAST;
     }
     if (received_bytes == NPCM7XX_SMBUS_FIFO_SIZE) {
-        s->st |= NPCM7XX_SMBST_SDAST;
+        if (!(s->st & NPCM7XX_SMBST_STP)) {
+            s->st |= NPCM7XX_SMBST_SDAST;
+        }
         s->fif_cts |= NPCM7XX_SMBFIF_CTS_RXF_TXE;
-    } else if (!(s->rxf_ctl & NPCM7XX_SMBRXF_CTL_THR_RXIE)) {
+    } else if (!(s->rxf_ctl & NPCM7XX_SMBRXF_CTL_THR_RXIE)
+               && !(s->st & NPCM7XX_SMBST_STP)) {
         s->st |= NPCM7XX_SMBST_SDAST;
     } else {
         s->st &= ~NPCM7XX_SMBST_SDAST;
@@ -507,16 +511,40 @@ static int npcm7xx_smbus_device_initiated_transfer(I2CBus *bus, uint8_t address,
         for (i  = 0; i < NPCM7XX_SMBST_NMATCH; i++) {
             if ((address == NPCM7XX_ADDR_A(s->addr[i]) &&
                 (s->addr[i] & NPCM7XX_ADDR_EN)) &&
-                 !s->target_device_mode_active) {
-
+                 !s->target_device_mode_active &&
+                 !s->target_device_mode_initiated) {
                 s->st |= NPCM7XX_SMBST_NMATCH;
                 s->cst |= NPCM7XX_SMBCST_MATCH;
                 npcm7xx_smbus_set_matchf(s, i, true);
 
                 s->target_device_send_bytes = send_length;
-                s->target_device_mode_active = true;
 
-                npcm7xx_smbus_send_address(s, recv | (address << 1));
+                if (recv) {
+                    /*
+                     * For receive mode, we don't start the i2c transaction
+                     * until after the NMATCH bit is cleared to avoid clashing
+                     * with the previous transaction.
+                     */
+                    s->target_device_mode_active = false;
+                    s->target_device_mode_initiated = true;
+                    s->target_device_address = recv | (address << 1);
+
+                    npcm7xx_smbus_clear_buffer(s);
+                    s->st &= ~NPCM7XX_SMBST_NEGACK;
+                    if (recv) {
+                        s->status = NPCM7XX_SMBUS_STATUS_RECEIVING;
+                        s->st &= ~NPCM7XX_SMBST_XMIT;
+                    } else {
+                        s->status = NPCM7XX_SMBUS_STATUS_SENDING;
+                        s->st |= NPCM7XX_SMBST_XMIT;
+                        s->st |= NPCM7XX_SMBST_SDAST;
+                    }
+                    npcm7xx_smbus_update_irq(s);
+                } else {
+                    s->target_device_mode_active = true;
+                    s->target_device_mode_initiated = false;
+                    npcm7xx_smbus_send_address(s, recv | (address << 1));
+                }
                 ret = 1;
                 break;
             }
@@ -635,11 +663,17 @@ static void npcm7xx_smbus_write_st(NPCM7xxSMBusState *s, uint8_t value)
         s->status = NPCM7XX_SMBUS_STATUS_IDLE;
         s->cst3 |= NPCM7XX_SMBCST3_EO_BUSY;
         s->target_device_mode_active = false;
+        s->target_device_mode_initiated = false;
     }
 
     if (value & NPCM7XX_SMBST_NMATCH) {
         for (i = 0; i < NPCM7XX_SMBUS_NR_ADDRS; i++) {
             npcm7xx_smbus_set_matchf(s, i, false);
+        }
+        if (s->target_device_mode_initiated) {
+            s->target_device_mode_initiated = false;
+            s->target_device_mode_active = true;
+            npcm7xx_smbus_send_address(s, s->target_device_address);
         }
     }
 
@@ -779,7 +813,8 @@ static void npcm7xx_smbus_write_rxf_ctl(NPCM7xxSMBusState *s, uint8_t value)
         new_ctl = KEEP_OLD_BIT(s->rxf_ctl, new_ctl, NPCM7XX_SMBRXF_CTL_LAST);
     }
     s->rxf_ctl = new_ctl;
-    if (s->status == NPCM7XX_SMBUS_STATUS_RECEIVING) {
+    if (s->status == NPCM7XX_SMBUS_STATUS_RECEIVING &&
+        !s->target_device_mode_initiated) {
         npcm7xx_smbus_recv_fifo(s);
     }
 }
@@ -1161,7 +1196,9 @@ static void npcm7xx_smbus_enter_reset(Object *obj, ResetType type)
     s->rx_cur = 0;
 
     s->target_device_mode_active = false;
+    s->target_device_mode_initiated = false;
     s->target_device_send_bytes = 0;
+    s->target_device_address = 0;
 }
 
 static void npcm7xx_smbus_hold_reset(Object *obj)

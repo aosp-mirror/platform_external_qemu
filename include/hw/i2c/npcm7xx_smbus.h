@@ -107,6 +107,8 @@ struct NPCM7xxSMBusState {
     uint8_t      rx_fifo[NPCM7XX_SMBUS_FIFO_SIZE];
     uint8_t      rx_cur;
 
+    bool         target_device_mode_initiated;
+    uint8_t      target_device_address;
     bool         target_device_mode_active;
     int          target_device_send_bytes;
 
