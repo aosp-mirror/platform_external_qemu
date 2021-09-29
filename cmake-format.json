@@ -34,6 +34,13 @@
         "ERROR": "*"
       }
     },
+    "android_sign": {
+      "flags": [],
+      "kwargs": {
+        "INSTALL": "*",
+        "TARGET": "*"
+      }
+    },
     "android_flex_compile": {
       "flags": [],
       "kwargs": {
