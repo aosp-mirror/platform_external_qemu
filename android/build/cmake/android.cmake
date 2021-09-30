@@ -28,6 +28,7 @@ if(APPLE)
   set(ANDROID_XCODE_SIGN_ADHOC TRUE)
 endif()
 
+
 # Checks to make sure the TAG is valid.
 function(_check_target_tag TAG)
   set(VALID_TARGETS
@@ -567,11 +568,42 @@ function(_register_target)
   endif()
 endfunction()
 
-function(android_sign path)
-  if(ANDROID_XCODE_SIGN_ADHOC)
+
+# ~~~
+# Sign the given binary when using MacOS. This signs the binary
+# wtih the entitlements.plist, which is needed to get HVF access.
+#
+# Entitlements can be find in ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist
+#
+# ``INSTALL`` Sign the given path during the installation step.
+# ``TARGET`   Sign the given target as a post build step.
+# ~~~
+function(android_sign)
+  if (NOT APPLE)
+    return()
+  endif()
+  set(options "")
+  set(oneValueArgs INSTALL TARGET)
+  set(multiValueArgs "")
+  cmake_parse_arguments(sign "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  if(sign_INSTALL)
     install(
-      CODE "message(\"android_sign ${path}\")\nexecute_process(COMMAND codesign --deep -s - --entitlements ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist ${path})"
+      CODE "message(STATUS \"Signing   : ${sign_INSTALL}\")\nexecute_process(COMMAND codesign --deep -s - --entitlements ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist ${sign_INSTALL})"
     )
+  else()
+    # Code signing cannot be done when cross compiling, unless we port
+    # something like https://github.com/thefloweringash/sigtool
+    if (DARWIN_X86_64 AND CROSSCOMPILE)
+      return()
+    endif()
+    add_custom_command(
+      TARGET ${sign_TARGET}
+      POST_BUILD
+      COMMAND
+        codesign --deep -s - --entitlements
+        ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist
+        $<TARGET_FILE:${sign_TARGET}>
+      COMMENT "Signing ${sign_TARGET}")
   endif()
 endfunction()
 
@@ -1418,19 +1450,8 @@ function(android_build_qemu_variant)
   # Make the common dependency explicit, as some generators might not detect it
   # properly (Xcode/MSVC native)
   add_dependencies(${qemu_build_EXE} qemu2-common)
-  if(APPLE AND OPTION_DEVELOPMENT)
-    # If you are on Big Sur you will not be able to use HVF since Apple has made
-    # changes to the hypervisor entitlements. So let's sign the qemu
-    # executables, so you can use HVF locally during development.
-    add_custom_command(
-      TARGET ${qemu_build_EXE}
-      POST_BUILD
-      COMMENT "Signing $<TARGET_FILE:${qemu_build_EXE}>"
-      COMMAND
-        codesign --deep -s - --entitlements
-        ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist
-        $<TARGET_FILE:${qemu_build_EXE}>)
-  endif()
+  android_sign(TARGET ${qemu_build_EXE})
+
   # XCode bin places this not where we want this...
   if(qemu_build_INSTALL)
     set_target_properties(
@@ -1610,7 +1631,7 @@ function(android_install_exe TGT DST)
   android_extract_symbols(${TGT})
   android_upload_symbols(${TGT})
   android_install_license(${TGT} ${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
-  android_sign(${CMAKE_INSTALL_PREFIX}/${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
+  android_sign(INSTALL ${CMAKE_INSTALL_PREFIX}/${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
 endfunction()
 
 # Installs the given shared library. The shared library will end up in ../lib64
@@ -1624,8 +1645,7 @@ function(android_install_shared TGT)
   android_upload_symbols(${TGT})
   android_install_license(${TGT} ${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
   # Account for lib prefix when signing
-  android_sign(
-    ${CMAKE_INSTALL_PREFIX}/lib64/lib${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
+  android_sign(INSTALL ${CMAKE_INSTALL_PREFIX}/lib64/lib${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
 endfunction()
 
 # Strips the given prebuilt executable during install..

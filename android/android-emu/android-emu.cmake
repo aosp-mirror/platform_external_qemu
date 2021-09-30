@@ -974,16 +974,7 @@ if(NOT LINUX_AARCH64)
 
 
   # Sign unit test if needed.
-  if(ANDROID_XCODE_SIGN_ADHOC AND NOT CROSSCOMPILE)
-    add_custom_command(
-      TARGET android-emu_unittests
-      POST_BUILD
-      COMMAND
-        codesign --deep -s - --entitlements
-        ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist
-        $<TARGET_FILE:android-emu_unittests>
-      COMMENT "Signing android-emu_unittests")
-  endif()
+  android_sign(TARGET android-emu_unittests)
 
   # Settings needed for darwin
   android_target_compile_definitions(

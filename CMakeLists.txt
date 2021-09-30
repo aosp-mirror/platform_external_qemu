@@ -37,7 +37,6 @@ include(android)
 include(prebuilts)
 include(qemu2-src-gen)
 
-set(OPTION_DEVELOPMENT FALSE CACHE BOOL "Enable developer options, such as signing QEMU during build.")
 set(OPTION_CRASHUPLOAD "NONE" CACHE STRING "Destination of crash reports.")
 set(OPTION_TRACE "nop" CACHE STRING "The qemu tracing backend to use. Should be one of: [nop, dtrace, ftrace, log, simple, syslog, ust]")
 set(OPTION_SDK_TOOLS_REVISION "" CACHE STRING
