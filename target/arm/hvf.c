@@ -92,7 +92,17 @@ struct hvf_accel_state {
     AccelState parent;
     hvf_slot slots[HVF_MAX_SLOTS];
     int num_slots;
+    uint64_t vtimer_offset;
 };
+
+typedef struct HVFVTimer {
+    /* Vtimer value during migration and paused state */
+    uint64_t vtimer_val;
+} HVFVTimer;
+
+static HVFVTimer vtimer;
+
+#define WFX_IS_WFE (1 << 0)
 
 struct hvf_migration_state {
     uint64_t ticks;
@@ -1176,36 +1186,86 @@ static void hvf_write_rt(CPUState* cpu, unsigned long rt, uint64_t val) {
     }
 }
 
-static void hvf_handle_wfx(CPUState* cpu) {
-    ARMCPU *armcpu = ARM_CPU(cpu);
-    CPUARMState *env = &armcpu->env;
+static uint64_t hvf_vtimer_val_raw(void)
+{
+    /*
+     * mach_absolute_time() returns the vtimer value without the VM
+     * offset that we define. Add our own offset on top.
+     */
+    return mach_absolute_time() - hvf_state->vtimer_offset;
+}
 
+static uint64_t hvf_vtimer_val(void)
+{
+    if (!runstate_is_running()) {
+        /* VM is paused, the vtimer value is in vtimer.vtimer_val */
+        return vtimer.vtimer_val;
+    }
+
+    return hvf_vtimer_val_raw();
+}
+
+static void hvf_wait_for_ipi(CPUState *cpu, struct timespec *ts)
+{
+    /*
+     * Use pselect to sleep so that other threads can IPI us while we're
+     * sleeping.
+     */
+    atomic_mb_set(&cpu->thread_kicked, false);
+    qemu_mutex_unlock_iothread();
+    sigset_t ipimask;
+    sigprocmask(SIG_SETMASK, 0, &ipimask);
+    sigdelset(&ipimask, SIG_IPI);
+    pselect(0, 0, 0, 0, ts, &ipimask);
+    qemu_mutex_lock_iothread();
+}
+
+static void hvf_wfi(CPUState *cpu)
+{
+    ARMCPU *arm_cpu = ARM_CPU(cpu);
+    struct timespec ts;
+    hv_return_t r;
+    uint64_t ctl;
     uint64_t cval;
-    HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CVAL_EL0, &cval));
+    int64_t ticks_to_sleep;
+    uint64_t seconds;
+    uint64_t nanos;
+    uint32_t cntfrq;
 
-    // mach_absolute_time() is an absolute host tick number. We
-    // have set up the guest to use the host tick number offset
-    // by env->cp15.cntvoff_el2.
-    int64_t ticks_to_sleep = cval - (mach_absolute_time() - env->cp15.cntvoff_el2);
+    if (cpu->interrupt_request & (CPU_INTERRUPT_HARD | CPU_INTERRUPT_FIQ)) {
+        /* Interrupt pending, no need to wait */
+        return;
+    }
+
+    HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CTL_EL0, &ctl));
+    if (!(ctl & 1) || (ctl & 2)) {
+        /* Timer disabled or masked, just wait for an IPI. */
+        hvf_wait_for_ipi(cpu, NULL);
+        return;
+    }
+
+    HVF_CHECKED_CALL(hv_vcpu_get_sys_reg(cpu->hvf_fd, HV_SYS_REG_CNTV_CVAL_EL0, &cval));
+    ticks_to_sleep = cval - hvf_vtimer_val();
     if (ticks_to_sleep < 0) {
         return;
     }
 
-    uint64_t cntfrq;
     __asm__ __volatile__("mrs %0, cntfrq_el0" : "=r"(cntfrq));
+    seconds = muldiv64(ticks_to_sleep, cntfrq, NANOSECONDS_PER_SECOND);
+    ticks_to_sleep -= muldiv64(seconds, NANOSECONDS_PER_SECOND, cntfrq);
+    nanos = ticks_to_sleep * cntfrq;
 
-    uint64_t seconds = ticks_to_sleep / cntfrq;
-    uint64_t nanos = (ticks_to_sleep - cntfrq * seconds) * 1000000000 / cntfrq;
-    struct timespec ts = { seconds, nanos };
+    /*
+     * Don't sleep for less than the time a context switch would take,
+     * so that we can satisfy fast timer requests on the same CPU.
+     * Measurements on M1 show the sweet spot to be ~2ms.
+     */
+    if (!seconds && nanos < (2 * SCALE_MS)) {
+        return;
+    }
 
-    atomic_mb_set(&cpu->thread_kicked, false);
-    qemu_mutex_unlock_iothread();
-    // Use pselect to sleep so that other threads can IPI us while we're sleeping.
-    sigset_t ipimask;
-    sigprocmask(SIG_SETMASK, 0, &ipimask);
-    sigdelset(&ipimask, SIG_IPI);
-    pselect(0, 0, 0, 0, &ts, &ipimask);
-    qemu_mutex_lock_iothread();
+    ts = (struct timespec) { seconds, nanos };
+    hvf_wait_for_ipi(cpu, &ts);
 }
 
 static void hvf_handle_cp(CPUState* cpu, uint32_t ec) {
@@ -1464,7 +1524,10 @@ static void hvf_handle_exception(CPUState* cpu) {
 
     switch (ec) {
         case ESR_ELx_EC_WFx:
-            hvf_handle_wfx(cpu);
+            if (!(syndrome & WFX_IS_WFE)) {
+                hvf_wfi(cpu);
+            }
+            hvf_skip_instr(cpu);
             break;
         case ESR_ELx_EC_CP15_32:
         case ESR_ELx_EC_CP15_64:
@@ -1631,6 +1694,30 @@ int hvf_smp_cpu_exec(CPUState * cpu)
     return ret;
 }
 
+static const VMStateDescription vmstate_hvf_vtimer = {
+    .name = "hvf-vtimer",
+    .version_id = 1,
+    .minimum_version_id = 1,
+    .fields = (VMStateField[]) {
+        VMSTATE_UINT64(vtimer_val, HVFVTimer),
+        VMSTATE_END_OF_LIST()
+    },
+};
+
+static void hvf_vm_state_change(void *opaque, bool running, RunState state)
+{
+    HVFVTimer *s = opaque;
+
+    if (running) {
+        /* Update vtimer offset on all CPUs */
+        hvf_state->vtimer_offset = mach_absolute_time() - s->vtimer_val;
+        cpu_synchronize_all_states();
+    } else {
+        /* Remember vtimer value on every pause */
+        s->vtimer_val = hvf_vtimer_val_raw();
+    }
+}
+
 static int hvf_accel_init(MachineState *ms) {
     int x;
     DPRINTF("%s: call. hv vm create?\n", __func__);
@@ -1661,6 +1748,10 @@ static int hvf_accel_init(MachineState *ms) {
         hvf_user_backed_ram_unmap);
 
     vmstate_register(NULL, 0, &vmstate_hvf_migration, &mig_state);
+
+    hvf_state->vtimer_offset = mach_absolute_time();
+    vmstate_register(NULL, 0, &vmstate_hvf_vtimer, &vtimer);
+    qemu_add_vm_change_state_handler(hvf_vm_state_change, &vtimer);
 
     return 0;
 }
