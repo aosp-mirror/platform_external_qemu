@@ -65,6 +65,13 @@ extern bool android_parse_ports_option(const char* ports_string,
                                        int* console_port,
                                        int* adb_port);
 
+/* Parse |port_string| into |modem_simulator_port|. Error checking is
+ * done and approriate warning or error messages shown if needed. If the
+ * function returns false the output parameter is not touched.
+ */
+bool modem_simulator_parse_port_option(const char* port_string,
+                                       int* modem_simulator_port);
+
 /* Validates the ports in use and warns the user if they are likely to cause
  * problems. Also announces the serial number of the emulator as seen from adb.
  *

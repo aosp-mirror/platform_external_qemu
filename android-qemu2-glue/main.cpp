@@ -2203,9 +2203,16 @@ extern "C" int main(int argc, char** argv) {
         if (create_modem_simulator_configs_if_needed(hw, opts->icc_profile)) {
             init_modem_simulator();
             bool isIpv4 = false;
+            int modem_simulator_port = 0;
+            if (opts->modem_simulator_port) {
+                if(!modem_simulator_parse_port_option(opts->modem_simulator_port, &modem_simulator_port)) {
+                    return 1;
+                }
+            }
+
             // start modem now, so qemu can proceed with virtioport setup
             int modem_simulator_guest_port =
-                    cuttlefish::start_android_modem_simulator_detached(isIpv4);
+                    cuttlefish::start_android_modem_simulator_detached(modem_simulator_port, isIpv4);
 
             args.add("-device");
             args.add("virtio-serial,ioeventfd=off");

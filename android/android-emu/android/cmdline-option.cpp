@@ -402,3 +402,23 @@ bool android_parse_ports_option(const char* ports_string,
     *adb_port = second_port;
     return true;
 }
+
+bool modem_simulator_parse_port_option(const char* port_string,
+                                       int* modem_simulator_port) {
+    if (port_string == NULL) {
+        return false;
+    }
+
+    char* end;
+    errno = 0;
+    int port = strtol(port_string, &end, 0);
+    if (end == NULL || *end || errno || port < 1 || port > UINT16_MAX) {
+        derror("option -modem_simulator_port must be followed by an integer. "
+               "'%s' is not a valid input.", port_string);
+        return false;
+    }
+
+    *modem_simulator_port = port;
+    dprint("Requested modem simulator port %d.", *modem_simulator_port);
+    return true;
+}

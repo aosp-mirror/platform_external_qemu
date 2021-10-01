@@ -360,9 +360,8 @@ static int start_android_modem_host_server(std::string server_port) {
 
 static FdList modem_guest_servers;
 
-static int start_android_modem_guest_server(bool& isIpv4) {
-    int request_port = 0; // pick an available port
-    auto shared_fd = cuttlefish::SharedFD::SocketLocalServer(request_port);
+static int start_android_modem_guest_server(int modem_simulator_port, bool& isIpv4) {
+    auto shared_fd = cuttlefish::SharedFD::SocketLocalServer(modem_simulator_port);
     isIpv4 = shared_fd.isIpv4();
     modem_guest_servers.push_back(shared_fd);
     int actual_port = android::base::socketGetPort(shared_fd->getFd());
@@ -437,10 +436,10 @@ struct MyThread {
 static MyThread s_mythread;
 
 // start with a given guest fd, and host fd
-int start_android_modem_simulator_detached(bool& isIpv4) {
+int start_android_modem_simulator_detached(int modem_simulator_port, bool& isIpv4) {
     android_modem_version = 2;
 
-    int actual_guest_server_port = start_android_modem_guest_server(isIpv4);
+    int actual_guest_server_port = start_android_modem_guest_server(modem_simulator_port, isIpv4);
 
     char buffer[1024];
     bufprint_zoneinfo_timezone(buffer, buffer + sizeof(buffer));

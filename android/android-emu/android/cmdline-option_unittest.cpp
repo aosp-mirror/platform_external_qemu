@@ -161,3 +161,29 @@ TEST(CmdLineOptions, parseDebug) {
                 << (data.option ? data.option : "null") << ")";
     }
 }
+
+TEST(CmdLineOptions, parseModemSimulatorPort) {
+    struct {
+        const char* input;
+        bool expectSuccess;
+        int expectModemSimulatorPort;
+    } kData[] = {
+        {"10000", true, 10000},
+        {"0", false, 0},            // No ports below 1
+        {"65536", false, 0},        // No ports above 65535
+        {"foo", false, 0},
+        {"5554trailingText", false, 0},
+        {"", false, 0},
+        {nullptr, false, 0},
+    };
+
+    for (const auto& data : kData) {
+        int modemSimulatorPort = 0;
+        bool result = modem_simulator_parse_port_option(data.input, &modemSimulatorPort);
+        EXPECT_EQ(data.expectSuccess, result)
+                << "Failed on test case: (" << data.input << ")";
+        EXPECT_EQ(data.expectModemSimulatorPort, modemSimulatorPort)
+                << "Failed on test case: (" << data.input << ")";
+    }
+}
+
