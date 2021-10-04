@@ -286,6 +286,15 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
         }
     }
 
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV) {
+        mExtendedUi->locationButton->setVisible(false);
+        mExtendedUi->cellularButton->setVisible(false);
+        mExtendedUi->virtSensorsButton->setVisible(false);
+        mExtendedUi->fingerButton->setVisible(false);
+        mExtendedUi->batteryButton->setVisible(false);
+        mExtendedUi->telephoneButton->setVisible(false);
+    }
+
     mExtendedUi->carRotaryButton->setVisible(false);
 
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {

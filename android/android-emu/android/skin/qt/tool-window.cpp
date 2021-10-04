@@ -191,17 +191,10 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     updateTheme(Ui::stylesheetForTheme(theme));
 
     QString default_shortcuts =
-            "Ctrl+Shift+L SHOW_PANE_LOCATION\n"
-            "Ctrl+Shift+C SHOW_PANE_CELLULAR\n"
-            "Ctrl+Shift+B SHOW_PANE_BATTERY\n"
             "Ctrl+Shift+A SHOW_PANE_CAMERA\n"
             "Ctrl+Shift+U SHOW_PANE_BUGREPORT\n"
-            "Ctrl+Shift+P SHOW_PANE_PHONE\n"
             "Ctrl+Shift+M SHOW_PANE_MICROPHONE\n"
-            "Ctrl+Shift+V SHOW_PANE_VIRTSENSORS\n"
             "Ctrl+Shift+N SHOW_PANE_SNAPSHOT\n"
-            "Ctrl+Shift+F SHOW_PANE_FINGER\n"
-            "Ctrl+Shift+D SHOW_PANE_DPAD\n"
             "Ctrl+Shift+S SHOW_PANE_SETTINGS\n"
 #ifdef __APPLE__
             "Ctrl+/     SHOW_PANE_HELP\n"
@@ -247,6 +240,25 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             // Multi display pane should not be available on cars.
             default_shortcuts += "Ctrl+Shift+M SHOW_PANE_MULTIDISPLAY\n";
         }
+    }
+
+    if (fc::isEnabled(fc::TvRemote) &&
+        android_avdInfo &&
+        avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV) {
+            default_shortcuts += "Ctrl+Shift+D SHOW_PANE_TV_REMOTE\n";
+    } else {
+        default_shortcuts += "Ctrl+Shift+D SHOW_PANE_DPAD\n";
+    }
+
+    if (!android_avdInfo ||
+        avdInfo_getAvdFlavor(android_avdInfo) != AVD_TV) {
+        default_shortcuts +=
+                "Ctrl+Shift+L SHOW_PANE_LOCATION\n"
+                "Ctrl+Shift+C SHOW_PANE_CELLULAR\n"
+                "Ctrl+Shift+B SHOW_PANE_BATTERY\n"
+                "Ctrl+Shift+P SHOW_PANE_PHONE\n"
+                "Ctrl+Shift+V SHOW_PANE_VIRTSENSORS\n"
+                "Ctrl+Shift+F SHOW_PANE_FINGER\n";
     }
 
     QTextStream stream(&default_shortcuts);
