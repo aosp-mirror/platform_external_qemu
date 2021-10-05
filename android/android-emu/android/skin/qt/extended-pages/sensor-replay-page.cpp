@@ -53,6 +53,14 @@ static constexpr SensorReplayPage::DurationNs TIMELINE_INTERVAL =
 
 // https://developer.android.com/reference/android/hardware/Sensor#TYPE_GYROSCOPE
 static constexpr int ANDROID_SENSOR_TYPE_GYROSCOPE = 4;
+// https://developer.android.com/reference/android/hardware/Sensor#TYPE_GYROSCOPE_UNCALIBRATED
+static constexpr int ANDROID_SENSOR_TYPE_GYROSCOPE_UNCALIBRATED = 16;
+// https://developer.android.com/reference/android/hardware/Sensor#TYPE_ACCELEROMETER
+static constexpr int ANDROID_SENSOR_TYPE_ACCELEROMETER = 1;
+// https://developer.android.com/reference/android/hardware/Sensor#TYPE_MAGNETIC_FIELD
+static constexpr int ANDROID_SENSOR_TYPE_MAGNETIC_FIELD = 2;
+// https://developer.android.com/reference/android/hardware/Sensor#TYPE_PRESSURE
+static constexpr int ANDROID_SENSOR_TYPE_PRESSURE = 6;
 
 const QCarDataAgent* SensorReplayPage::sCarDataAgent = nullptr;
 const QAndroidLocationAgent* SensorReplayPage::sLocationAgent = nullptr;
@@ -525,6 +533,14 @@ EmulatorMessage SensorReplayPage::makePropMsg(
 int SensorReplayPage::convertSensorTypeToSensorId(int sensorType) {
     if(sensorType == ANDROID_SENSOR_TYPE_GYROSCOPE) {
         return ANDROID_SENSOR_GYROSCOPE;
+    } else if(sensorType == ANDROID_SENSOR_TYPE_GYROSCOPE_UNCALIBRATED) {
+        return ANDROID_SENSOR_GYROSCOPE_UNCALIBRATED;
+    } else if(sensorType == ANDROID_SENSOR_TYPE_ACCELEROMETER) {
+        return ANDROID_SENSOR_ACCELERATION;
+    } else if(sensorType == ANDROID_SENSOR_TYPE_MAGNETIC_FIELD) {
+        return ANDROID_SENSOR_MAGNETIC_FIELD;
+    } else if(sensorType == ANDROID_SENSOR_TYPE_PRESSURE) {
+        return ANDROID_SENSOR_PRESSURE;
     } else {
         return -1;
     }
