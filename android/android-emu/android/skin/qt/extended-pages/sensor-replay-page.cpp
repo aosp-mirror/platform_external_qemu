@@ -19,9 +19,12 @@
 // TODO: (b/120444474) rename ERROR_INVALID_OPERATION & remove this undef
 #undef ERROR_INVALID_OPERATION
 #include "VehicleHalProto.pb.h"
+#include "android/base/Log.h"  // for DCHECK
 #include "android/base/StringFormat.h"  // for StringFormat
 #include "android/emulation/control/car_data_agent.h"
 #include "android/emulation/control/location_agent.h"
+#include "android/emulation/control/sensors_agent.h"
+#include "android/hw-sensors.h"  // for ANDROID_SENSOR_ACCEL...
 #include "android/skin/qt/extended-pages/car-data-emulation/car-property-utils.h"
 #include "android/skin/qt/extended-pages/common.h"   // for setButtonEnabled
 #include "android/skin/qt/extended-pages/location-page.h"
@@ -48,8 +51,12 @@ static constexpr double MPS_TO_KNOTS = 1.94384;
 static constexpr SensorReplayPage::DurationNs TIMELINE_INTERVAL =
         1000 * 1000 * 1000;
 
+// https://developer.android.com/reference/android/hardware/Sensor#TYPE_GYROSCOPE
+static constexpr int ANDROID_SENSOR_TYPE_GYROSCOPE = 4;
+
 const QCarDataAgent* SensorReplayPage::sCarDataAgent = nullptr;
 const QAndroidLocationAgent* SensorReplayPage::sLocationAgent = nullptr;
+const QAndroidSensorsAgent* SensorReplayPage::sSensorAgent = nullptr;
 
 SensorReplayPage::SensorReplayPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::SensorReplayPage) {
@@ -166,8 +173,11 @@ void SensorReplayPage::on_sensor_loadSensorButton_clicked() {
 
 void SensorReplayPage::registerSensorSessionPlaybackCallback(
         SensorSessionPlayback* sensorSessionPlayback) {
+    google::protobuf::Map<std::string, emulator::SensorSession::SessionMetadata::Sensor>
+        subscribedSensors = sensorSessionPlayback->metadata().subscribed_sensors();
+
     sensorSessionPlayback->registerCallback(
-            [this](emulator::SensorSession::SensorRecord record) {
+            [this, subscribedSensors](emulator::SensorSession::SensorRecord record) {
 
                 if (record.car_property_values_size() > 0) {
                     std::map<int32_t, emulator::SensorSession::SensorRecord::
@@ -207,6 +217,31 @@ void SensorReplayPage::registerSensorSessionPlaybackCallback(
                     // To sync with LocationPage, update location to settings
                     LocationPage::writeDeviceLocationToSettings(
                             latitude, longitude, altitude, velocity, heading);
+                }
+
+                if (sSensorAgent != nullptr && record.sensor_events_size() > 0) {
+                    std::map<std::string, emulator::SensorSession::SensorRecord::
+                                              SensorEvent>
+                            sensor_map(
+                                    record.sensor_events().begin(),
+                                    record.sensor_events().end());
+                    std::map<std::string, emulator::SensorSession::SensorRecord::
+                                              SensorEvent>::iterator it;
+
+                    for (it = sensor_map.begin();
+                         it != sensor_map.end(); it++) {
+                        std::string sensorKey = it->first;
+                        emulator::SensorSession::SessionMetadata::Sensor subscribedSensor =
+                            subscribedSensors.at(it->first);
+                        int sensorId = convertSensorTypeToSensorId(subscribedSensor.type());
+                        if(sensorId >= 0 && !subscribedSensor.wake_up_sensor()) {
+                            size_t sensorVectorSize;
+                            sSensorAgent->getSensorSize(sensorId, &sensorVectorSize);
+                            DCHECK(sensorVectorSize == it->second.values_size());
+                            sSensorAgent->setSensorOverride(sensorId, it->second.values().data(),
+                                                            it->second.values_size());
+                        }
+                    }
                 }
                 // update slider and time ticker,
                 // reset playbacksession if it's the end
@@ -487,6 +522,14 @@ EmulatorMessage SensorReplayPage::makePropMsg(
     return emulatorMsg;
 }
 
+int SensorReplayPage::convertSensorTypeToSensorId(int sensorType) {
+    if(sensorType == ANDROID_SENSOR_TYPE_GYROSCOPE) {
+        return ANDROID_SENSOR_GYROSCOPE;
+    } else {
+        return -1;
+    }
+}
+
 // Add SensorRecord to history list
 void SensorReplayPage::addSensorRecord(
         QString itemName,
@@ -593,7 +636,8 @@ void SensorReplayPage::on_sensor_savedSensorRecordList_currentItemChanged(
 
 // static
 void SensorReplayPage::setAgent(const QCarDataAgent* carDataAgent,
-                                const QAndroidLocationAgent* locationAgent) {
+                                const QAndroidLocationAgent* locationAgent,
+                                const QAndroidSensorsAgent* sensorAgent) {
     if (carDataAgent == nullptr) {
         D("car data agent null");
     }
@@ -603,4 +647,9 @@ void SensorReplayPage::setAgent(const QCarDataAgent* carDataAgent,
         D("location agent null");
     }
     sLocationAgent = locationAgent;
+
+    if (sensorAgent == nullptr) {
+        D("sensor agent null");
+    }
+    sSensorAgent = sensorAgent;
 }

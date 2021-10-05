@@ -410,7 +410,7 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         RecordScreenPage::setRecordScreenAgent(agentPtr->record);
         if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
             CarDataPage::setCarDataAgent(agentPtr->car);
-            SensorReplayPage::setAgent(agentPtr->car, agentPtr->location);
+            SensorReplayPage::setAgent(agentPtr->car, agentPtr->location, agentPtr->sensors);
         }
     }
 }

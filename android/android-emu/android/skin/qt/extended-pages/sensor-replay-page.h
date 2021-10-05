@@ -31,6 +31,7 @@ class QObject;
 class SensorReplayItem;
 struct QAndroidLocationAgent;
 struct QCarDataAgent;
+struct QAndroidSensorsAgent;
 
 namespace emulator {
 class EmulatorMessage;
@@ -45,7 +46,8 @@ public:
     explicit SensorReplayPage(QWidget* parent = nullptr);
 
     static void setAgent(const QCarDataAgent* carDataAgent,
-                         const QAndroidLocationAgent* locationAgent);
+                         const QAndroidLocationAgent* locationAgent,
+                         const QAndroidSensorsAgent* sensorAgent);
 
 private slots:
     void on_sensor_loadSensorButton_clicked();
@@ -96,6 +98,7 @@ private:
 
     static const QCarDataAgent* sCarDataAgent;
     static const QAndroidLocationAgent* sLocationAgent;
+    static const QAndroidSensorsAgent* sSensorAgent;
 
     static void sendCarEmulatorMessageLogged(
             const emulator::EmulatorMessage& msg,
@@ -103,6 +106,7 @@ private:
     static emulator::EmulatorMessage makePropMsg(
             int propId,
             emulator::SensorSession::SensorRecord::CarPropertyValue val);
+    static int convertSensorTypeToSensorId(int sensorType);
 
     bool isPlaying;
     std::unique_ptr<Ui::SensorReplayPage> mUi;
