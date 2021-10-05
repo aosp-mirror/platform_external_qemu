@@ -91,12 +91,12 @@ union sockaddr_in_in6 {
     struct sockaddr_in6 in6;
 };
 
-inline size_t sockaddr_in_in6_size(const union sockaddr_in_in6 *saddr) {
+static inline size_t sockaddr_in_in6_size(const union sockaddr_in_in6 *saddr) {
     return saddr->saddr.sa_family == AF_INET ?
         sizeof(saddr->in) : sizeof(saddr->in6);
 }
 
-inline int sockaddr_in_in6_port(const union sockaddr_in_in6 *saddr) {
+static inline int sockaddr_in_in6_port(const union sockaddr_in_in6 *saddr) {
     return ntohs(saddr->saddr.sa_family == AF_INET ?
                  saddr->in.sin_port : saddr->in6.sin6_port);
 }
