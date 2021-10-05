@@ -33,6 +33,7 @@
 #include "android/console.h"                             // for getConsoleAg...
 #include "android/emulation/AndroidMessagePipe.h"        // for AndroidMessa...
 #include "android/emulation/AndroidPipe.h"               // for AndroidPipe
+#include "android/emulation/resizable_display_config.h"
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
 #include "android/emulation/control/vm_operations.h"     // for QAndroidVmOp...
 #include "android/featurecontrol/FeatureControl.h"       // for isEnabled
@@ -309,8 +310,10 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             adbInterface->enqueueCommand(
                 { "shell", "logcat", "-G", "2M" });
 
-            if (getConsoleAgents()->emu->isResizableEnabled()) {
-                getConsoleAgents()->emu->setResizableIcon(-1);
+            if (resizableEnabled()) {
+                // adb interface may not be ready when initializing resizable configs,
+                // resend resizable large screen settings to window manager.
+                updateAndroidDisplayConfigPath(getResizableActiveConfigId());
             } else {
                 // If hw.display.settings.xml set as freeform, config guest
                 if ((android_op_wipe_data || !path_exists(android_hw->disk_dataPartition_path))) {

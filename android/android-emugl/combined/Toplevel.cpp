@@ -466,8 +466,6 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 },
         .setResizableIcon =
                 [](int presetSize) {},
-        .isResizableEnabled =
-                []() { return false; },
 };
 
 class ToplevelConsoleFactory

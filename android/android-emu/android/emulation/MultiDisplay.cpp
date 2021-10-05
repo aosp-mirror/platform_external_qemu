@@ -33,6 +33,7 @@
 #include "android/cmdline-option.h"                      // for android_cmdL...
 #include "android/emulation/MultiDisplayPipe.h"          // for MultiDisplay...
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
+#include "android/emulation/resizable_display_config.h"
 #include "android/emulator-window.h"                     // for emulator_win...
 #include "android/featurecontrol/FeatureControl.h"       // for isEnabled
 #include "android/featurecontrol/Features.h"             // for MultiDisplay
@@ -83,7 +84,7 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
     if (android_foldable_any_folded_area_configured()) {
         return -1;
     }
-    if (mWindowAgent->isResizableEnabled()) {
+    if (resizableEnabled()) {
         return -1;
     }
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV ||

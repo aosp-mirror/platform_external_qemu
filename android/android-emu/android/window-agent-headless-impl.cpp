@@ -161,8 +161,6 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 []() { return false; },
         .setResizableIcon =
                 [](int presetSize) { },
-        .isResizableEnabled =
-                []() { return false; },
 };
 
 extern "C" const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

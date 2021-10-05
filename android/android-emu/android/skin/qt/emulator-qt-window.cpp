@@ -2554,18 +2554,16 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(int x, int y, int w, int h) {
 
 void EmulatorQtWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
     LOG(INFO) << "resizable current preset: " << newSize;
-    static struct PresetEmulatorSizeInfo presetSizeInfos[] = {
-        { PRESET_SIZE_PHONE, 1080, 2340, 420, },
-        { PRESET_SIZE_UNFOLDED, 1768, 2208, 420, },
-        { PRESET_SIZE_TABLET, 1920, 1200, 240, },
-        { PRESET_SIZE_DESKTOP, 1920, 1080, 160, },
-    };
-    const auto& info = presetSizeInfos[newSize];
-    int targetWidth = info.width;
-    int targetHeight = info.height;
+    if (getResizableActiveConfigId() == newSize) {
+        return;
+    }
+    PresetEmulatorSizeInfo info;
+    if (!getResizableConfig(newSize, &info)) {
+        return;
+    }
 
     setDisplayActiveConfig(static_cast<int>(newSize));
-    resizeAndChangeAspectRatio(0, 0, targetWidth, targetHeight);
+    resizeAndChangeAspectRatio(0, 0, info.width, info.height);
 }
 
 SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
@@ -3260,10 +3258,10 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
         resizeAndChangeAspectRatio(true);
     }
 
-    if (emulator_window_opengles_resizable_enabled()) {
-        int targetWidth = 0, targetHeight = 0;
-        if (emulator_window_get_resizable(&targetWidth, &targetHeight) >= 0) {
-            resizeAndChangeAspectRatio(0, 0, targetWidth, targetHeight);
+    if (resizableEnabled()) {
+        PresetEmulatorSizeInfo info;
+        if (getResizableConfig(getResizableActiveConfigId(), &info)) {
+            resizeAndChangeAspectRatio(0, 0, info.width, info.height);
         }
     }
 
