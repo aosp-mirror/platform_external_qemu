@@ -309,6 +309,12 @@ OPT_PARAM( wifi_tap, "<interface>", "use this TAP interface for Virtio Wi-Fi" )
 OPT_PARAM( wifi_tap_script_up, "<script>", "script to run when the TAP interface goes up" )
 OPT_PARAM( wifi_tap_script_down, "<script>", "script to run when the TAP interface goes down" )
 
+OPT_PARAM(wifi_vmnet,
+          "<interface>",
+          " Use this network <interface> and enable vmnet framework as the "
+          "backend of tap netdev on MacOS.")
+
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

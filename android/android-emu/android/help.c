@@ -2128,6 +2128,13 @@ help_wifi_tap_script_down(stralloc_t*  out)
     );
 }
 
+static void
+help_wifi_vmnet(stralloc_t*  out)
+{
+    PRINTF(" Enable vmnet framework as the backend for tap network on MacOS\n"
+           " <interface> is the name of the host network interface that QEMU "
+           "virtual NIC is connected to. \n\n");
+}
 
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
