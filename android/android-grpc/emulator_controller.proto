@@ -233,6 +233,12 @@ service EmulatorController {
   // -  FAILED_PRECONDITION (code 9) if the AVD does not support hw-control.
   // -  INVALID_ARGUMENT (code 3) The brightness exceeds the valid range.
   rpc setBrightness(BrightnessValue) returns (google.protobuf.Empty) {}
+
+  // Sets the size of the primary display of a resizable AVD. Fails if the AVD is
+  // not resizable.
+  // The following gRPC error codes can be returned:
+  // -  FAILED_PRECONDITION (code 9) if the AVD is not resizable.
+  rpc setDisplayMode(DisplayMode) returns (google.protobuf.Empty) {}
 }
 
 // A Run State that describes the state of the Virtual Machine.
@@ -413,6 +419,18 @@ message BrightnessValue {
 
     // Light intensity, ranges from 0-255.
     uint32 value = 2;
+}
+
+message DisplayMode{
+    // in line with android/emulation/resizable_display_config.h
+    enum DisplayModeValue {
+        PHONE = 0;
+        FOLDABLE = 1;
+        TABLET = 2;
+        DESKTOP = 3;
+    }
+
+    DisplayModeValue value = 1;
 }
 
 message LogMessage {

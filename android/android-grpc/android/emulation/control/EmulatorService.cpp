@@ -53,6 +53,7 @@
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
 #include "android/emulation/MultiDisplay.h"
+#include "android/emulation/resizable_display_config.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/ServiceUtils.h"
@@ -447,6 +448,25 @@ public:
         auto value = agent->getBrightness(light_name);
         reply->set_target(request->target());
         reply->set_value(value);
+        return Status::OK;
+    }
+
+    Status setDisplayMode(ServerContext* context,
+                          const DisplayMode* requestPtr,
+                          ::google::protobuf::Empty* reply) override {
+        if (!resizableEnabled()) {
+            return Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          ":setDisplayMode the AVD is not resizable.",
+                          "");
+        }
+        auto agent = mAgents->emu;
+        if (agent == nullptr || agent->changeResizableDisplay == nullptr) {
+            return Status(::grpc::StatusCode::INTERNAL,
+                          "setDisplayMode: window agent function is not "
+                          "available.",
+                          "");
+        }
+        agent->changeResizableDisplay(static_cast<PresetEmulatorSizeType>(requestPtr->value()));
         return Status::OK;
     }
 
