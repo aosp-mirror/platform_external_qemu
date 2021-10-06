@@ -823,6 +823,15 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) 
             break;
         case QtUICommand::PRESET_SIZE_ADVANCE:
             if (down && resizableEnabled()) {
+                RecorderStates state = emulator_window_recorder_state_get();
+                if (state.displayId == 0 && state.state == RECORDER_RECORDING) {
+                    // Do not allow resizing when recording is in progress.
+                    if (sUiEmuAgent && sUiEmuAgent->window) {
+                        sUiEmuAgent->window->showMessage("Cannot resize emulator: recording in progress!",
+                                                         WINDOW_MESSAGE_ERROR, 3000);
+                    }
+                    break;
+                }
                 PresetEmulatorSizeType newSize =
                     static_cast<PresetEmulatorSizeType>(stoi(extra));
                 switch(newSize) {
