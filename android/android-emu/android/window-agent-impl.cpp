@@ -272,11 +272,8 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 []() {
                     return android::base::isRunningInUiThread();
                 },
-        .setResizableIcon =
+        .changeResizableDisplay =
                 [](int presetSize) {
-                    if (presetSize < 0) {
-                        presetSize = emulator_window_get_resizable(NULL, NULL);
-                    }
                     if (const auto win = EmulatorQtWindow::getInstance()) {
                         QtUICommand cmd = QtUICommand::PRESET_SIZE_ADVANCE;
                         win->runOnUiThread([win, cmd, presetSize]() {
@@ -284,10 +281,6 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         });
                     }
                 },
-        .isResizableEnabled =
-                []() {
-                    return emulator_window_opengles_resizable_enabled();
-                }
 };
 
 extern "C" const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =

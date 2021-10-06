@@ -340,10 +340,8 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         *h = 1600;
                     return true;
                 },
-        .setResizableIcon =
+        .changeResizableDisplay =
                 [](int presetSize) {},
-        .isResizableEnabled =
-                []() { return false; },
 };
 
 static const QAndroidVmOperations sQAndroidVmOperations = {

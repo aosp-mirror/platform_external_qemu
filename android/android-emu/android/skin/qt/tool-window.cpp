@@ -366,7 +366,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     connect(mResizableDialog, SIGNAL(finished(int)), this,
             SLOT(on_dismiss_resizable_dialog()));
 
-    if (!emulator_window_opengles_resizable_enabled()) {
+    if (!resizableEnabled()) {
         mToolsUi->resizable_button->setHidden(true);
     }
 
@@ -642,7 +642,8 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) 
                 if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)
                     && !android_foldable_any_folded_area_configured()
                     && !android_foldable_hinge_configured()
-                    && !android_foldable_rollable_configured()) {
+                    && !android_foldable_rollable_configured()
+                    && !resizableEnabled()) {
                     showOrRaiseExtendedWindow(PANE_IDX_MULTIDISPLAY);
                 }
             }
@@ -821,7 +822,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) 
 
             break;
         case QtUICommand::PRESET_SIZE_ADVANCE:
-            if (down && emulator_window_opengles_resizable_enabled()) {
+            if (down && resizableEnabled()) {
                 PresetEmulatorSizeType newSize =
                     static_cast<PresetEmulatorSizeType>(stoi(extra));
                 switch(newSize) {

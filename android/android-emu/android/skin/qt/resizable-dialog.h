@@ -12,7 +12,7 @@
 #define RESIZABLEDIALOG_H
 
 #include <QDialog>
-#include "android/resizable_display_config.h"
+#include "android/emulation/resizable_display_config.h"
 
 namespace Ui {
 class ResizableDialog;
