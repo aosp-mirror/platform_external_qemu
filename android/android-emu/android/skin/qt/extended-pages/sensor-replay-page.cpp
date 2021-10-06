@@ -187,7 +187,7 @@ void SensorReplayPage::registerSensorSessionPlaybackCallback(
     sensorSessionPlayback->registerCallback(
             [this, subscribedSensors](emulator::SensorSession::SensorRecord record) {
 
-                if (record.car_property_values_size() > 0) {
+                if (sCarDataAgent != nullptr && record.car_property_values_size() > 0) {
                     std::map<int32_t, emulator::SensorSession::SensorRecord::
                                               CarPropertyValue>
                             vhal_property_map(
@@ -205,7 +205,7 @@ void SensorReplayPage::registerSensorSessionPlaybackCallback(
                     }
                 }
 
-                if (record.locations_size() > 0) {
+                if (sLocationAgent != nullptr && record.locations_size() > 0) {
                     double latitude =
                             ((int)record.locations(0).point().lat_e7()) / E7;
                     double longitude =
