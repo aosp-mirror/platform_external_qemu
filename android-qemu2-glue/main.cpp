@@ -2191,7 +2191,12 @@ extern "C" int main(int argc, char** argv) {
         }
     }
 
-    if (feature_is_enabled(kFeature_BluetoothEmulation) || feature_is_enabled_by_guest(kFeature_BluetoothEmulation)) {
+    bool bluetooth_explicitly_disabled =
+            !feature_is_enabled(kFeature_BluetoothEmulation) &&
+            fc::isOverridden(fc::BluetoothEmulation);
+    if ((feature_is_enabled(kFeature_BluetoothEmulation) ||
+         feature_is_enabled_by_guest(kFeature_BluetoothEmulation)) &&
+        !bluetooth_explicitly_disabled) {
         // Register the rootcanal device, this will activate rootcanal
         LOG(VERBOSE) << "Bluetooth requested by " << (feature_is_enabled(kFeature_BluetoothEmulation) ? "user" : "guest");
         args.add("-chardev");
