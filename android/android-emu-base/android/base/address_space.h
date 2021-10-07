@@ -139,11 +139,15 @@ static int address_space_allocator_find_available_block_at_offset(
     uint64_t size_at_index = 0;
     int i;
 
-    address_space_assert(n_blocks >= 1);
+    if (n_blocks <= 0) {
+        return -1;
+    }
 
     for (i = 0; i < n_blocks; ++i, ++block) {
         uint64_t this_size = block->size;
-        address_space_assert(this_size > 0);
+        if (this_size <= 0) {
+            return -1;
+        }
 
         if (this_size >= size_at_least && block->available &&
             offset >= block->offset &&
