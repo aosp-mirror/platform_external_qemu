@@ -85,6 +85,7 @@ qtests_i386 = \
   (unpack_edk2_blobs and                                                                    \
    config_all_devices.has_key('CONFIG_HPET') and                                            \
    config_all_devices.has_key('CONFIG_PARALLEL') ? ['bios-tables-test'] : []) +             \
+  (config_all_devices.has_key('CONFIG_NUVOTON_PCI_IPMI_KCS') ? ['nuvoton-host-pcimbx-test'] : []) + \
   qtests_pci +                                                                              \
   qtests_cxl +                                                                              \
   ['fdc-test',
