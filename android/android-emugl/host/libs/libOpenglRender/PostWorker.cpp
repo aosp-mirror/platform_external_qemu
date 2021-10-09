@@ -65,11 +65,16 @@ void PostWorker::fillMultiDisplayPostStruct(ComposeLayer* l,
     l->crop = cropArea;
 }
 
-void PostWorker::postImpl(ColorBuffer* cb) {
+void PostWorker::postImpl(HandleType cbHandle) {
+    ColorBuffer* cb = mFb->findColorBuffer(cbHandle).get();
+    if (cb == nullptr) {
+        return;
+    }
     // bind the subwindow eglSurface
     if (!m_mainThreadPostingOnly && !m_initialized) {
         m_initialized = mBindSubwin();
     }
+
     float dpr = mFb->getDpr();
     int windowWidth = mFb->windowWidth();
     int windowHeight = mFb->windowHeight();
@@ -359,7 +364,7 @@ PostWorker::~PostWorker() {
     }
 }
 
-void PostWorker::post(ColorBuffer* cb) {
+void PostWorker::post(HandleType cb) {
     if (m_mainThreadPostingOnly) {
         PostArgs args = {
             .postCb = cb,

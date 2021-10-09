@@ -2552,20 +2552,6 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(int x, int y, int w, int h) {
     mContainer.setGeometry(containerGeo.x(), containerGeo.y(), windowGeo.width(), windowGeo.height());
 }
 
-void EmulatorQtWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
-    LOG(INFO) << "resizable current preset: " << newSize;
-    if (getResizableActiveConfigId() == newSize) {
-        return;
-    }
-    PresetEmulatorSizeInfo info;
-    if (!getResizableConfig(newSize, &info)) {
-        return;
-    }
-
-    setDisplayActiveConfig(static_cast<int>(newSize));
-    resizeAndChangeAspectRatio(0, 0, info.width, info.height);
-}
-
 SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
                                     const QMouseEvent* event) const {
     switch (event->button()) {
@@ -3586,10 +3572,4 @@ SkinEventType EmulatorQtWindow::translateMouseEventType(SkinEventType type,
     }
 
     return newType;
-}
-
-void EmulatorQtWindow::setDisplayActiveConfig(int configId) {
-    SkinEvent* event = createSkinEvent(kEventSetDisplayActiveConfig);
-    event->u.display_active_config = configId;
-    queueSkinEvent(event);
 }

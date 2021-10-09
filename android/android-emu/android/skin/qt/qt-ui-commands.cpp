@@ -88,7 +88,6 @@ constexpr CommandInfo kCommands[] = {
                      "Enable virtual scene camera controls"),
         INIT_COMMAND(FOLD, "Fold"),
         INIT_COMMAND(UNFOLD, "Unfold"),
-        INIT_COMMAND(PRESET_SIZE_ADVANCE, "Change emulator WM size to the next preset resolution/DPI"),
 };
 
 bool parseQtUICommand(const QString& string, QtUICommand* command) {

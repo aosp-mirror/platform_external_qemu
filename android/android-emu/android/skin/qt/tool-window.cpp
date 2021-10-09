@@ -368,6 +368,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 
     if (!resizableEnabled()) {
         mToolsUi->resizable_button->setHidden(true);
+    } else {
+        resizableChangeIcon(getResizableActiveConfigId());
     }
 
     sToolWindow = this;
@@ -821,48 +823,67 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) 
             }
 
             break;
-        case QtUICommand::PRESET_SIZE_ADVANCE:
-            if (down && resizableEnabled()) {
-                RecorderStates state = emulator_window_recorder_state_get();
-                if (state.displayId == 0 && state.state == RECORDER_RECORDING) {
-                    // Do not allow resizing when recording is in progress.
-                    if (sUiEmuAgent && sUiEmuAgent->window) {
-                        sUiEmuAgent->window->showMessage("Cannot resize emulator: recording in progress!",
-                                                         WINDOW_MESSAGE_ERROR, 3000);
-                    }
-                    break;
-                }
-                PresetEmulatorSizeType newSize =
-                    static_cast<PresetEmulatorSizeType>(stoi(extra));
-                switch(newSize) {
-                    case PRESET_SIZE_PHONE:
-                        ChangeIcon(mToolsUi->resizable_button,
-                                   "display_mode_phone_expand", "Display mode: phone");
-                        break;
-                    case PRESET_SIZE_UNFOLDED:
-                        ChangeIcon(mToolsUi->resizable_button,
-                                   "display_mode_foldable_expand", "Display mode: foldable");
-                        break;
-                    case PRESET_SIZE_TABLET:
-                        ChangeIcon(mToolsUi->resizable_button,
-                                   "display_mode_tablet_expand", "Display mode: tablet");
-                        break;
-                    case PRESET_SIZE_DESKTOP:
-                        ChangeIcon(mToolsUi->resizable_button,
-                                   "display_mode_desktop_expand", "Display mode: desktop");
-                        break;
-                    default:
-                        LOG(ERROR) << "Invalid display mode " << newSize;
-                }
-                mEmulatorWindow->presetSizeAdvance(newSize);
-            }
-            break;
         case QtUICommand::SHOW_MULTITOUCH:
         // Multitouch is handled in EmulatorQtWindow, and doesn't
         // really need an element in the QtUICommand enum. This
         // enum element exists solely for the purpose of displaying
         // it in the list of keyboard shortcuts in the Help page.
         default:;
+    }
+}
+
+void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
+    if (!resizableEnabled()) {
+        return;
+    }
+    if (getResizableActiveConfigId() == newSize) {
+        return;
+    }
+    RecorderStates state = emulator_window_recorder_state_get();
+    if (state.displayId == 0 && state.state == RECORDER_RECORDING) {
+        // Do not allow resizing when recording is in progress.
+        if (sUiEmuAgent && sUiEmuAgent->window) {
+            sUiEmuAgent->window->showMessage("Cannot resize emulator: recording in progress!",
+                                                         WINDOW_MESSAGE_ERROR, 3000);
+        }
+        LOG(ERROR) << "Cannot resize emulator: recording in progress!";
+        return;
+    }
+    PresetEmulatorSizeInfo info;
+    if (!getResizableConfig(newSize, &info)) {
+        LOG(ERROR) << "Failed to get size information of resizable type " << newSize;
+        return;
+    }
+
+    LOG(INFO) << "Resizable: change to new size: " << newSize;
+    resizableChangeIcon(newSize);
+    SkinEvent* skin_event = new SkinEvent();
+    skin_event->type = kEventSetDisplayActiveConfig;
+    skin_event->u.display_active_config = static_cast<int>(newSize);
+    mEmulatorWindow->queueSkinEvent(skin_event);
+    mEmulatorWindow->resizeAndChangeAspectRatio(0, 0, info.width, info.height);
+}
+
+void ToolWindow::resizableChangeIcon(PresetEmulatorSizeType type) {
+    switch(type) {
+        case PRESET_SIZE_PHONE:
+            ChangeIcon(mToolsUi->resizable_button,
+                       "display_mode_phone_expand", "Display mode: phone");
+            break;
+        case PRESET_SIZE_UNFOLDED:
+            ChangeIcon(mToolsUi->resizable_button,
+                       "display_mode_foldable_expand", "Display mode: foldable");
+            break;
+        case PRESET_SIZE_TABLET:
+            ChangeIcon(mToolsUi->resizable_button,
+                       "display_mode_tablet_expand", "Display mode: tablet");
+            break;
+        case PRESET_SIZE_DESKTOP:
+            ChangeIcon(mToolsUi->resizable_button,
+                       "display_mode_desktop_expand", "Display mode: desktop");
+            break;
+        default:
+            LOG(ERROR) << "Invalid display mode " << type;
     }
 }
 
@@ -1255,7 +1276,7 @@ void ToolWindow::on_resizable_button_clicked() {
 
 void ToolWindow::on_new_resizable_requested(PresetEmulatorSizeType newSize) {
     mEmulatorWindow->activateWindow();
-    handleUICommand(QtUICommand::PRESET_SIZE_ADVANCE, true, std::to_string(newSize));
+    presetSizeAdvance(newSize);
 }
 
 void ToolWindow::on_volume_up_button_pressed() {
