@@ -944,11 +944,11 @@ void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
     // For now, this fixes a screenshot issue on macOS.
     if (postOnlyOnMainThread && (PostCmd::Screenshot == post.cmd) &&
         emugl::get_emugl_window_operations().isRunningInUiThread()) {
-        post.cb->readPixelsScaled(post.screenshot.screenwidth,
-                                  post.screenshot.screenheight,
-                                  post.screenshot.format, post.screenshot.type,
-                                  post.screenshot.rotation,
-                                  post.screenshot.pixels, post.screenshot.rect);
+        findColorBuffer(post.cb)->readPixelsScaled(post.screenshot.screenwidth,
+                                                   post.screenshot.screenheight,
+                                                   post.screenshot.format, post.screenshot.type,
+                                                   post.screenshot.rotation,
+                                                   post.screenshot.pixels, post.screenshot.rect);
     } else {
         m_postThread.enqueue(Post(post));
         if (!postOnlyOnMainThread) {
@@ -2542,7 +2542,7 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
 
         Post postCmd;
         postCmd.cmd = PostCmd::Post;
-        postCmd.cb = c->second.cb.get();
+        postCmd.cb = p_colorbuffer; 
         sendPostWorkerCmd(postCmd);
     } else {
         markOpened(&c->second);
@@ -3119,7 +3119,6 @@ bool FrameBuffer::onLoad(Stream* stream,
     m_framebufferHeight = stream->getBe32();
     m_dpr = stream->getFloat();
     mDisplayActiveConfigId = stream->getBe32();
-    emugl::get_emugl_window_operations().changeResizableDisplay(mDisplayActiveConfigId);
     loadCollection(stream, &mDisplayConfigs,
                    [](Stream* s) -> std::map<int, DisplayConfig>::value_type {
                        int idx = static_cast<int>(s->getBe32());
@@ -3129,7 +3128,7 @@ bool FrameBuffer::onLoad(Stream* stream,
                        int dpiY = static_cast<int>(s->getBe32());
                        return {idx, {w, h, dpiX, dpiY}};
                    });
-
+    emugl::get_emugl_window_operations().changeResizableDisplay(mDisplayActiveConfigId);
     // TODO: resize the window
     //
     m_useSubWindow = stream->getBe32();

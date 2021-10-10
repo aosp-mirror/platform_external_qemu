@@ -129,6 +129,7 @@ public:
 
     void waitForExtendedWindowVisibility(bool visible);
     QRect extendedWindowGeometry();
+    void presetSizeAdvance(PresetEmulatorSizeType newSize);
 
 signals:
     void guestClipboardChanged(QString text);
@@ -151,7 +152,7 @@ private:
         return mIsExiting;
     }
     bool askWhetherToSaveSnapshot();
-
+    void resizableChangeIcon(PresetEmulatorSizeType type);
 
     void showOrRaiseExtendedWindow(ExtendedWindowPane pane);
     void updateButtonUiCommand(QPushButton* button, const char* uiCommand);

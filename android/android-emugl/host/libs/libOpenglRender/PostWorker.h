@@ -34,6 +34,7 @@
 class ColorBuffer;
 class FrameBuffer;
 struct RenderThreadInfo;
+typedef uint32_t HandleType;
 
 class PostWorker {
 public:
@@ -47,7 +48,7 @@ public:
 
     // post: posts the next color buffer.
     // Assumes framebuffer lock is held.
-    void post(ColorBuffer* cb);
+    void post(HandleType cb);
 
     // viewport: (re)initializes viewport dimensions.
     // Assumes framebuffer lock is held.
@@ -76,7 +77,7 @@ public:
 
 private:
     // Impl versions of the above, so we can run it from separate threads
-    void postImpl(ColorBuffer* cb);
+    void postImpl(HandleType cbHandle);
     void viewportImpl(int width, int height);
     void composeImpl(ComposeDevice* p);
     void composev2Impl(ComposeDevice_v2* p);
@@ -95,7 +96,7 @@ private:
 private:
     using UiThreadRunner = std::function<void(UiUpdateFunc, void*, bool)>;
     struct PostArgs {
-        ColorBuffer* postCb;
+        HandleType postCb;
         int width;
         int height;
         std::vector<char> composeBuffer;

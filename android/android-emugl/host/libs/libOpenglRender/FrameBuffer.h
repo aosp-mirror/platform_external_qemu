@@ -854,7 +854,7 @@ private:
         int composeVersion;
         std::vector<char> composeBuffer;
         union {
-            ColorBuffer* cb;
+            HandleType cb;
             struct {
                 int width;
                 int height;

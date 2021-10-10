@@ -227,7 +227,6 @@ public:
                   bool isKbdShortcut = false);
     void resizeAndChangeAspectRatio(bool isFolded);
     void resizeAndChangeAspectRatio(int x, int y, int w, int h);
-    void presetSizeAdvance(PresetEmulatorSizeType newSize);
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
                           const QPoint& pos,
@@ -583,7 +582,6 @@ private:
                                           Qt::MouseButtons buttons);
     int tiltToRotation(int xTiltDeg, int yTiltDeg);
     int penOrientation(int rotation);
-    void setDisplayActiveConfig(int configId);
 };
 
 class SkinSurfaceBitmap {
