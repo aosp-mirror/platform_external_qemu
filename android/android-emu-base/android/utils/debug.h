@@ -78,7 +78,8 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(time, "Prefix a timestamp when logging")                      \
     _VERBOSE_TAG(ini, "Log details around ini files.")                         \
     _VERBOSE_TAG(bluetooth, "Log bluetooth details.")                          \
-    _VERBOSE_TAG(log, "Include timestamp, thread and location in logs")
+    _VERBOSE_TAG(log, "Include timestamp, thread and location in logs")        \
+    _VERBOSE_TAG(grpc, "Log grpc calls.")
 
 #define _VERBOSE_TAG(x, y) VERBOSE_##x,
 typedef enum {
@@ -87,6 +88,11 @@ typedef enum {
 #undef _VERBOSE_TAG
 
 extern uint64_t android_verbose;
+
+#ifdef __cplusplus
+// Make sure we don't accidentally add in to many tags..
+static_assert(VERBOSE_MAX <= (sizeof(android_verbose) * 8));
+#endif
 
 // Enable/disable verbose logs from the base/* family.
 extern void base_enable_verbose_logs();
