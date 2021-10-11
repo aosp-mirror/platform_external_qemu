@@ -181,7 +181,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     mToolsUi->mainLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->winButtonsLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->controlsLayout->setAlignment(Qt::AlignCenter);
-    if (android_foldable_any_folded_area_configured()) {
+    if (android_foldable_any_folded_area_configured() ||
+        resizableEnabled()) {
         mToolsUi->zoom_button->hide();
         mToolsUi->zoom_button->setEnabled(false);
     }
@@ -202,9 +203,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             "F1         SHOW_PANE_HELP\n"
 #endif
             "Ctrl+S     TAKE_SCREENSHOT\n"
-            "Ctrl+Z     ENTER_ZOOM\n"
-            "Ctrl+Up    ZOOM_IN\n"
-            "Ctrl+Down  ZOOM_OUT\n"
             "Ctrl+Shift+Up    PAN_UP\n"
             "Ctrl+Shift+Down  PAN_DOWN\n"
             "Ctrl+Shift+Left  PAN_LEFT\n"
@@ -224,6 +222,15 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             "Ctrl+Left ROTATE_LEFT\n"
             "Ctrl+Right ROTATE_RIGHT\n";
 
+    if (!android_foldable_any_folded_area_configured() &&
+        !android_foldable_hinge_configured() &&
+        !android_foldable_rollable_configured() &&
+        !resizableEnabled()) {
+        // Zoom is not available for foldable and resizable AVDs
+        default_shortcuts += "Ctrl+Z    ENTER_ZOOM\n";
+        default_shortcuts += "Ctrl+Up   ZOOM_IN\n";
+        default_shortcuts += "Ctrl+Down ZOOM_OUT\n";
+    }
     if (fc::isEnabled(fc::PlayStoreImage)) {
         default_shortcuts += "Ctrl+Shift+G SHOW_PANE_GPLAY\n";
     }
@@ -236,8 +243,14 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             default_shortcuts += "Ctrl+Shift+T SHOW_PANE_CAR\n";
             default_shortcuts += "Ctrl+Shift+O SHOW_PANE_CAR_ROTARY\n";
             default_shortcuts += "Ctrl+Shift+I SHOW_PANE_SENSOR_REPLAY\n";
-        } else {
+        } else if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)
+                   && !android_foldable_any_folded_area_configured()
+                   && !android_foldable_hinge_configured()
+                   && !android_foldable_rollable_configured()
+                   && !resizableEnabled()) {
             // Multi display pane should not be available on cars.
+            // Multi display pane should not be available on foldable
+            // or resizable AVDs
             default_shortcuts += "Ctrl+Shift+M SHOW_PANE_MULTIDISPLAY\n";
         }
     }
@@ -641,13 +654,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) 
             break;
         case QtUICommand::SHOW_PANE_MULTIDISPLAY:
             if (down) {
-                if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)
-                    && !android_foldable_any_folded_area_configured()
-                    && !android_foldable_hinge_configured()
-                    && !android_foldable_rollable_configured()
-                    && !resizableEnabled()) {
-                    showOrRaiseExtendedWindow(PANE_IDX_MULTIDISPLAY);
-                }
+                showOrRaiseExtendedWindow(PANE_IDX_MULTIDISPLAY);
             }
             break;
         case QtUICommand::SHOW_PANE_SETTINGS:
