@@ -470,6 +470,18 @@ public:
         return Status::OK;
     }
 
+    Status getDisplayMode(ServerContext* context,
+                          const ::google::protobuf::Empty* empty,
+                          DisplayMode* reply) override {
+        if (!resizableEnabled()) {
+            return Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          ":getDisplayMode the AVD is not resizable.",
+                          "");
+        }
+        reply->set_value(static_cast<DisplayMode_DisplayModeValue>(getResizableActiveConfigId()));
+        return Status::OK;
+    }
+
     Status sendFingerprint(ServerContext* context,
                            const Fingerprint* requestPtr,
                            ::google::protobuf::Empty* reply) override {

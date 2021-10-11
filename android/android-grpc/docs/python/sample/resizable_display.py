@@ -14,15 +14,22 @@
 # -*- coding: utf-8 -*-
 import time
 
+from google.protobuf import empty_pb2
 from aemu.discovery.emulator_discovery import get_default_emulator
 from aemu.proto.emulator_controller_pb2 import DisplayMode
+_EMPTY_ = empty_pb2.Empty()
 
 # Create a client
 stub = get_default_emulator().get_emulator_controller()
 stub.setDisplayMode(DisplayMode(value = 0))
 time.sleep(3)
+print(stub.getDisplayMode(_EMPTY_))
 stub.setDisplayMode(DisplayMode(value = 1))
 time.sleep(3)
+print(stub.getDisplayMode(_EMPTY_))
 stub.setDisplayMode(DisplayMode(value = 2))
 time.sleep(3)
+print(stub.getDisplayMode(_EMPTY_))
 stub.setDisplayMode(DisplayMode(value = 3))
+time.sleep(3)
+print(stub.getDisplayMode(_EMPTY_))
