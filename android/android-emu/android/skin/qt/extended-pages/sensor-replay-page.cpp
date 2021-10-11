@@ -206,25 +206,33 @@ void SensorReplayPage::registerSensorSessionPlaybackCallback(
                 }
 
                 if (sLocationAgent != nullptr && record.locations_size() > 0) {
-                    double latitude =
-                            ((int)record.locations(0).point().lat_e7()) / E7;
-                    double longitude =
-                            ((int)record.locations(0).point().lng_e7()) / E7;
-                    double altitude = record.locations(0).altitude_m();
-                    double velocity = (double)record.locations(0).speed_mps() *
-                                      MPS_TO_KNOTS;
-                    double heading = (double)record.locations(0)
-                                             .bearing_deg_full_accuracy() -
-                                     180.0;
+                    const auto& locations = record.locations();
+                    auto locationIterator =
+                        std::find_if(locations.begin(), locations.end(),
+                                     [](const SensorSession::SensorRecord::PositionProto& location)
+                                     {return location.has_provider() && (location.provider() ==
+                                       SensorSession::SensorRecord::PositionProto::GPS);});
 
-                    timeval timeVal = {};
-                    gettimeofday(&timeVal, nullptr);
-                    sLocationAgent->gpsSendLoc(latitude, longitude, altitude,
-                                               velocity, heading, 4, &timeVal);
+                    if (locationIterator != locations.end()) {
+                        double latitude =
+                                ((int)locationIterator->point().lat_e7()) / E7;
+                        double longitude =
+                                ((int)locationIterator->point().lng_e7()) / E7;
+                        double altitude = locationIterator->altitude_m();
+                        double velocity = (double)locationIterator->speed_mps() *
+                                          MPS_TO_KNOTS;
+                        double heading = (double)locationIterator->bearing_deg_full_accuracy() -
+                                         180.0;
 
-                    // To sync with LocationPage, update location to settings
-                    LocationPage::writeDeviceLocationToSettings(
-                            latitude, longitude, altitude, velocity, heading);
+                        timeval timeVal = {};
+                        gettimeofday(&timeVal, nullptr);
+                        sLocationAgent->gpsSendLoc(latitude, longitude, altitude,
+                                                   velocity, heading, 4, &timeVal);
+
+                        // To sync with LocationPage, update location to settings
+                        LocationPage::writeDeviceLocationToSettings(
+                                latitude, longitude, altitude, velocity, heading);
+                    }
                 }
 
                 if (sSensorAgent != nullptr && record.sensor_events_size() > 0) {
