@@ -101,7 +101,7 @@ set(GFXSTREAM
       "True if we should build gfxstream, crosvm, and its accompanying libraries/tests."
 )
 set(OPTIONS_BUILD_PACKET_GEN FALSE CACHE BOOL "True if you wish to generate the bluetooth packet generator .yy and .ll files (posix only)")
-set(BLUETOOTH_EMULATION FALSE CACHE BOOL "True if you wish to build the emulated bluetooth stack")
+set(BLUETOOTH_EMULATION TRUE CACHE BOOL "True if you wish to build the emulated bluetooth stack")
 
 set(OPTION_AEMU_LIBS_ONLY FALSE
     CACHE BOOL "True if we should build only AEMU libraries and their tests.")
@@ -133,12 +133,6 @@ endif()
 if (DARWIN_AARCH64)
     set(OPTION_TCMALLOC FALSE)
 endif()
-
-# Only linux & darwin can use root canal at this time.
-if (LINUX_X86_64 OR DARWIN_X86_64)
-    set(BLUETOOTH_EMULATION TRUE)
-endif()
-
 
 if(CROSVM OR GFXSTREAM)
   set(OPTION_AEMU_LIBS_ONLY TRUE)

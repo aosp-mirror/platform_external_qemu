@@ -1,6 +1,7 @@
 #pragma once
 // #include_next "os/log.h"
 #include "android/utils/debug.h"
+#include <cstdlib>
 
 #define LOGWRAPPER(level, fmt, args...)                                 \
     do {                                                                \
@@ -19,7 +20,7 @@
 #define LOG_ALWAYS_FATAL(...)                                                 \
     do {                                                                      \
         __emu_log_print(EMULATOR_LOG_FATAL, __FILE__, __LINE__, __VA_ARGS__); \
-        abort();                                                              \
+        std::abort();                                                         \
     } while (false)
 #endif
 
