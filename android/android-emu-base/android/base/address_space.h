@@ -257,6 +257,16 @@ address_space_allocator_split_block_at_offset(
     address_space_assert(i >= 0);
     address_space_assert(i < allocator->size);
     address_space_assert(size < allocator->blocks[i].size);
+    address_space_assert(offset >= allocator->blocks[i].offset);
+    if (offset == allocator->blocks[i].offset) {
+        // special case, return the current block (after spliting its tail).
+        if (size < allocator->blocks[i].size) {
+            // split the tail if necessary
+            address_space_allocator_split_block_at_offset(allocator, i,
+                    allocator->blocks[i].size - size, offset + size);
+        }
+        return &allocator->blocks[i];
+    }
 
     need_extra_block =
         (allocator->blocks[i].size - size - (offset - allocator->blocks[i].offset)) != 0;
