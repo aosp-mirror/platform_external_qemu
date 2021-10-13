@@ -51,7 +51,8 @@ endif()
 add_library(libbt-rootcanal.headers INTERFACE)
 target_include_directories(libbt-rootcanal.headers INTERFACE . ${VL_LIB})
 android_license(TARGET "libbt-rootcanal.headers" LIBNAME None SPDX Apache-2.0
-                LICENSE Apache-2.0 LOCAL REPO/LICENSES/LICENSE.APACHE2)
+                LICENSE Apache-2.0 LOCAL "${BT_ROOT}/NOTICE")
+
 
 android_add_library(
   TARGET BluetoothPacketSources

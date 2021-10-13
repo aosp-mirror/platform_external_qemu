@@ -124,16 +124,3 @@ endif()
 if(LINUX_X86_64 OR LINUX_AARCH64)
   add_subdirectory(libevent)
 endif()
-
-if(BLUETOOTH_EMULATION)
-  message(
-    STATUS "Including bluetooth emulation (and dependencies) from rootcanal")
-  add_subdirectory(bluetooth)
-
-  if (NOT WEBRTC)
-    # We need jsoncpp, which is part of webrtc.
-    add_subdirectory(${AOSP_ROOT}/external/webrtc/third_party/jsoncpp jsoncpp)
-  endif()
-else()
-  message(STATUS "Bluetooth emulation disabled.")
-endif()
