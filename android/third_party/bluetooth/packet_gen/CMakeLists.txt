@@ -56,8 +56,6 @@ else()
 
   target_compile_options(bluetooth_packetgen_parser
                          PRIVATE -Wno-inconsistent-missing-override)
-  android_target_link_libraries(bluetooth_packetgen_parser windows
-                                PRIVATE msvc-posix-compat)
   android_target_compile_options(bluetooth_packetgen_parser darwin-x86_64
                                  PRIVATE "-mmacosx-version-min=10.15")
 endif()

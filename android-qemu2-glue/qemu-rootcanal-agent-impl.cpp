@@ -20,6 +20,7 @@
 #include <algorithm>    // for min
 #include <cstdint>      // for uint8_t
 #include <mutex>        // for mutex
+#include <memory>       // for unique_ptr
 #include <ostream>      // for char_traits
 #include <vector>       // for vector
 

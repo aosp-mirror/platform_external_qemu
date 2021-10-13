@@ -17,6 +17,7 @@
 
 #include <errno.h>                              // for errno
 #include <atomic>                               // for atomic_bool, atomic_e...
+#include <condition_variable>                   // for condition_variable
 #include <cstring>                              // for strerror
 #include <limits>                               // for numeric_limits
 #include <map>                                  // for map<>::value_type, map
