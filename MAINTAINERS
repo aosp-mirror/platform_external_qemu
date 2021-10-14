@@ -2443,6 +2443,12 @@ S: Maintained
 F: hw/i2c/i2c_mux_pca954x.c
 F: include/hw/i2c/i2c_mux_pca954x.h
 
+DesignWare I2C
+M: Chris Rauer <crauer@google.com>
+S: Maintained
+F: hw/i2c/designware_i2c.c
+F: include/hw/i2c/designware_i2c.h
+
 Generic Loader
 M: Alistair Francis <alistair@alistair23.me>
 S: Maintained
