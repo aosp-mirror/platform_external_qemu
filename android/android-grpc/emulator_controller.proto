@@ -426,15 +426,15 @@ message BrightnessValue {
     uint32 value = 2;
 }
 
-message DisplayMode{
-    // in line with android/emulation/resizable_display_config.h
-    enum DisplayModeValue {
-        PHONE = 0;
-        FOLDABLE = 1;
-        TABLET = 2;
-        DESKTOP = 3;
-    }
+// in line with android/emulation/resizable_display_config.h
+enum DisplayModeValue {
+    PHONE = 0;
+    FOLDABLE = 1;
+    TABLET = 2;
+    DESKTOP = 3;
+}
 
+message DisplayMode{
     DisplayModeValue value = 1;
 }
 
@@ -892,6 +892,9 @@ message ImageFormat {
   // [Output Only] Display configuration when screen is folded. The value is the
   // original configuration before scaling.
   FoldedDisplay foldedDisplay = 7;
+
+  // [Output Only] Display mode when AVD is resizable.
+  DisplayModeValue displayMode = 8;
 }
 
 message Image {

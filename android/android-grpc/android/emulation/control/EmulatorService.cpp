@@ -478,7 +478,7 @@ public:
                           ":getDisplayMode the AVD is not resizable.",
                           "");
         }
-        reply->set_value(static_cast<DisplayMode_DisplayModeValue>(getResizableActiveConfigId()));
+        reply->set_value(static_cast<DisplayModeValue>(getResizableActiveConfigId()));
         return Status::OK;
     }
 
@@ -823,6 +823,10 @@ public:
             foldedDisplay->set_yoffset(rect.pos.y);
         } else {
             reply->mutable_format()->clear_foldeddisplay();
+        }
+        if (resizableEnabled()) {
+            reply->mutable_format()->set_displaymode(
+                static_cast<DisplayModeValue>(getResizableActiveConfigId()));
         }
 
         reply->set_timestampus(System::get()->getUnixTimeUs());
