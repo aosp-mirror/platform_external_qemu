@@ -65,6 +65,7 @@
 #define ADM1272_VOLTAGE_COEFF_DEFAULT   1
 #define ADM1272_CURRENT_COEFF_DEFAULT   3
 #define ADM1272_PWR_COEFF_DEFAULT       7
+#define ADM1272_TEMP_COEFF_DEFAULT      8
 #define ADM1272_IOUT_OFFSET             0x5000
 #define ADM1272_IOUT_OFFSET             0x5000
 
@@ -185,6 +186,22 @@ static uint32_t adm1272_direct_to_watts(uint16_t value)
     return pmbus_direct_mode2data(c, value);
 }
 
+static uint16_t adm1272_millidegrees_to_direct(uint32_t value)
+{
+    PMBusCoefficients c = adm1272_coefficients[ADM1272_TEMP_COEFF_DEFAULT];
+    c.b = c.b * 1000;
+    c.R = c.R - 3;
+    return pmbus_data2direct_mode(c, value);
+}
+
+static uint32_t adm1272_direct_to_millidegrees(uint16_t value)
+{
+    PMBusCoefficients c = adm1272_coefficients[ADM1272_TEMP_COEFF_DEFAULT];
+    c.b = c.b * 1000;
+    c.R = c.R - 3;
+    return pmbus_direct_mode2data(c, value);
+}
+
 static void adm1272_exit_reset(Object *obj)
 {
     ADM1272State *s = ADM1272(obj);
@@ -219,7 +236,7 @@ static void adm1272_exit_reset(Object *obj)
         = adm1272_millivolts_to_direct(ADM1272_VOLT_DEFAULT);
     pmdev->pages[0].read_iout
         = adm1272_milliamps_to_direct(ADM1272_IOUT_DEFAULT);
-    pmdev->pages[0].read_temperature_1 = 0;
+    pmdev->pages[0].read_temperature_1 = adm1272_millidegrees_to_direct(30000);
     pmdev->pages[0].read_pin = adm1272_watts_to_direct(ADM1272_PWR_DEFAULT);
     pmdev->pages[0].revision = ADM1272_PMBUS_REVISION_DEFAULT;
     pmdev->pages[0].mfr_id = ADM1272_MFR_ID_DEFAULT;
@@ -422,6 +439,8 @@ static void adm1272_get(Object *obj, Visitor *v, const char *name, void *opaque,
         value = adm1272_direct_to_milliamps(*(uint16_t *)opaque);
     } else if (strcmp(name, "pin") == 0) {
         value = adm1272_direct_to_watts(*(uint16_t *)opaque);
+    } else if (strcmp(name, "temperature") == 0) {
+        value = adm1272_direct_to_millidegrees(*(uint16_t *)opaque);
     } else {
         value = *(uint16_t *)opaque;
     }
@@ -446,6 +465,8 @@ static void adm1272_set(Object *obj, Visitor *v, const char *name, void *opaque,
         *internal = adm1272_milliamps_to_direct(value);
     } else if (strcmp(name, "pin") == 0) {
         *internal = adm1272_watts_to_direct(value);
+    } else if (strcmp(name, "temperature") == 0) {
+        *internal = adm1272_millidegrees_to_direct(value);
     } else {
         *internal = value;
     }
@@ -508,6 +529,10 @@ static void adm1272_init(Object *obj)
     object_property_add(obj, "pin", "uint16",
                         adm1272_get,
                         adm1272_set, NULL, &pmdev->pages[0].read_pin);
+
+    object_property_add(obj, "temperature", "uint16",
+                        adm1272_get,
+                        adm1272_set, NULL, &pmdev->pages[0].read_temperature_1);
 
 }
 
