@@ -175,7 +175,7 @@ setup(
     # projects.
     extras_require={
         "dev": ["check-manifest", "black"],
-        "test": ["coverage", "mock", "tox", "pytest", "pytest-mock"],
+        "test": ["coverage", "mock", "tox", "pytest", "pytest-mock", "pillow"],
     },  # Optional
     # If there are data files included in your packages that need to be
     # installed, specify them here.

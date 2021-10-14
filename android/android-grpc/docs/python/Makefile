@@ -32,4 +32,5 @@ QEMU_ROOT := $(abspath $(MAKEFILE_PATH)/../../../../..)
 
 deps:
 	pushd $(QEMU_ROOT)/android/android-grpc/python && $(PYTHON) setup.py develop && popd
+	pip install pillow
 
