@@ -26,7 +26,7 @@
 #     On success, this defines AOSP_DIR and AOSP_PREBUILTS_GCC_DIR
 
 shell_import utils/option_parser.shi
-OPT_AOSP_CLANG_VERSION=clang-r428724
+OPT_AOSP_CLANG_VERSION=clang-r433403b
 
 aosp_dir_register_option () {
 

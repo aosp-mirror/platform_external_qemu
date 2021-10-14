@@ -40,7 +40,7 @@ android_add_library(
       ${PNG_SRC_DIR}/pngwtran.c
       ${PNG_SRC_DIR}/pngwutil.c)
 target_compile_options(
-  png PRIVATE -std=gnu89 -Wall -Wno-unused-parameter
+  png PRIVATE -std=gnu89 -Wall -Wno-unused-parameter -Wno-unused-but-set-variable
               -Wno-tautological-constant-out-of-range-compare)
 target_compile_definitions(png PRIVATE -DPNG_INTEL_SSE_OPT=1)
 target_include_directories(png PUBLIC ${PNG_SRC_DIR})

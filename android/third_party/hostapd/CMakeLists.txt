@@ -182,6 +182,7 @@ if(NOT BUILDING_FOR_AARCH64)
   target_compile_options(hostapd PRIVATE -Wall
                                          -Werror
                                          -Wno-error-deprecated-declarations
+                                         -Wno-unused-but-set-variable
                                          -Wno-unused-parameter
                                          -Wno-unused-variable
                                          -Wno-macro-redefined)
