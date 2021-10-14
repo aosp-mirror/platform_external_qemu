@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <chrono>                                // for seconds
-#include <memory>                                // for shared_ptr, unique_ptr
-#include <string>                                // for string
-#include <vector>                                // for vector
+#include <chrono>  // for seconds
+#include <memory>  // for shared_ptr, unique_ptr
+#include <string>  // for string
+#include <vector>  // for vector
 
+#include <grpcpp/grpcpp.h>
 #include "android/console.h"                     // for AndroidConsoleAgents
 #include "grpcpp/impl/codegen/service_type.h"    // IWYU pragma: keep
 #include "grpcpp/security/server_credentials.h"  // for ServerCredentials
@@ -28,6 +29,8 @@
 namespace android {
 namespace emulation {
 namespace control {
+
+using grpc::ServerCompletionQueue;
 
 // Controller class for the gRPC endpoint, can be used to stop the service or
 // inspect some of its properties.
@@ -47,6 +50,15 @@ public:
 
     // Block and wait until the server is completed.
     virtual void wait() = 0;
+
+    // Returns a new completionQueue, for those services that
+    // wish to do their own async processing.
+    //
+    // Note: You can never request more completion queues than there
+    // are configured with the builder.
+    //
+    // The service will return a nullptr when no more queue's are available.
+    virtual ServerCompletionQueue* newCompletionQueue() = 0;
 };
 
 // A Factory class that is capable of constructing a proper gRPC service that
@@ -69,8 +81,8 @@ public:
                             const char* privateKeyFile,
                             const char* certAuthority);
 
-    // Reject any request with the status UNAUTHORIZED if the following header is not
-    // present: Authorization: Bearer <token>
+    // Reject any request with the status UNAUTHORIZED if the following header
+    // is not present: Authorization: Bearer <token>
     //
     // |token| Token to use.
     Builder& withAuthToken(std::string token);
@@ -97,6 +109,14 @@ public:
 
     // Add a service only if tls and client-ca is enabled.
     Builder& withSecureService(::grpc::Service* service);
+
+    // Register count number of completion queues.
+    //
+    // Completion queues are needed if you wish to host
+    // async services that require a completion queue.
+    //
+    // One thread should use one completion queue.
+    Builder& withCompletionQueues(int count);
 
     // Shutdown the emulator after timeout seconds of gRPC inactivity.
     // The timeout should be at least 1 second, otherwise it will
@@ -127,6 +147,7 @@ private:
     bool mVerbose{false};
     bool mLogging{true};
     bool mCaCerts{false};
+    int mCompletionQueueCount{0};
     IpMode mIpMode{IpMode::Ipv4};
 };
 
