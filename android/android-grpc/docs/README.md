@@ -13,6 +13,9 @@ In the python directory you will find a few examples. The examples require Pytho
   $ make deps
 ```
 
+**Note:** This installs the pillow package. If you see failures you might need
+to install tkInter. (See details in the Screenshot section).
+
 Next you need to launch an emulator with the gRPC port enabled on port 8554:
 
 ```sh
