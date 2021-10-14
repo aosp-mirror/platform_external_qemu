@@ -24,10 +24,10 @@
 #include "GLcommon/GLutils.h"
 #include "GLcommon/TextureData.h"
 #include "GLcommon/TranslatorIfaces.h"
-#include "OpenglCodecCommon/ErrorLog.h"
 #include "ThreadInfo.h"
 #include "android/base/files/Stream.h"
 #include "android/base/system/System.h"
+#include "emugl/common/logging.h"
 #include "emugl/common/shared_library.h"
 
 #include "EglWindowSurface.h"
@@ -97,7 +97,7 @@ static const EGLiface s_eglIface = {
 static void initGLESx(GLESVersion version) {
     const GLESiface* iface = g_eglInfo->getIface(version);
     if (!iface) {
-        DBG("EGL failed to initialize GLESv%d; incompatible interface\n", version);
+        ERR("EGL failed to initialize GLESv%d; incompatible interface", version);
         return;
     }
     iface->initGLESx(EglGlobalInfo::isEgl2Egl());

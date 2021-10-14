@@ -25,6 +25,7 @@
 
 #include "common/goldfish_vk_dispatch.h"
 #include "emugl/common/crash_reporter.h"
+#include "emugl/common/logging.h"
 #include "emugl/common/vm_operations.h"
 
 #include <GLES2/gl2.h>

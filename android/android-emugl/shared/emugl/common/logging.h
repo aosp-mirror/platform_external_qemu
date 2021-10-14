@@ -62,3 +62,9 @@ EMUGL_COMMON_API void set_emugl_cxt_logger(emugl_logger_t f);
 #else
 #define DECODER_DEBUG_LOG(...) ((void)0)
 #endif
+
+#define ERR(...)             \
+    do {                     \
+        GL_LOG(__VA_ARGS__); \
+        derror(__VA_ARGS__); \
+    } while (0)

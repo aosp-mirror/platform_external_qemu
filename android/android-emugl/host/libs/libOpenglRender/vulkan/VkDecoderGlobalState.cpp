@@ -47,6 +47,7 @@
 #include "emugl/common/address_space_device_control_ops.h"
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/feature_control.h"
+#include "emugl/common/logging.h"
 #include "emugl/common/vm_operations.h"
 #include "vk_util.h"
 

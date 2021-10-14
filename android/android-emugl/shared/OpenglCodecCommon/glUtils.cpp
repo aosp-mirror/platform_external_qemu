@@ -14,9 +14,11 @@
 * limitations under the License.
 */
 #include "glUtils.h"
-#include "ErrorLog.h"
+
 #include <string.h>
 #include <GLES3/gl31.h>
+
+#include "emugl/common/logging.h"
 
 size_t glSizeof(GLenum type)
 {
@@ -118,7 +120,7 @@ size_t glSizeof(GLenum type)
         retval = 4 + 4;
         break;
     default:
-        ERR("**** ERROR unknown type 0x%x (%s,%d)\n", type, __FUNCTION__,__LINE__);
+        ERR("**** ERROR unknown type 0x%x", type);
         retval = 4;
     }
     return retval;
@@ -372,7 +374,7 @@ size_t glUtilsParamSize(GLenum param)
         s = 16;
     break;
     default:
-        ERR("glUtilsParamSize: unknow param 0x%08x\n", param);
+        ERR("glUtilsParamSize: unknown param 0x%08x", param);
         s = 1; // assume 1
     }
     return s;
@@ -424,7 +426,7 @@ int glUtilsPixelBitSize(GLenum format, GLenum type)
         pixelsize = 32;
         break;
     default:
-        ERR("glUtilsPixelBitSize: unknown pixel type - assuming pixel data 0\n");
+        ERR("glUtilsPixelBitSize: unknown pixel type - assuming pixel data 0");
         componentsize = 0;
     }
 
@@ -455,7 +457,7 @@ int glUtilsPixelBitSize(GLenum format, GLenum type)
             components = 4;
             break;
         default:
-            ERR("glUtilsPixelBitSize: unknown pixel format...\n");
+            ERR("glUtilsPixelBitSize: unknown pixel format...");
             components = 0;
         }
         pixelsize = components * componentsize;
