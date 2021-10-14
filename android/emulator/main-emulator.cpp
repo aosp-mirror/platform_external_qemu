@@ -889,6 +889,22 @@ int main(int argc, char** argv)
           D("force headless for auto on forge");
         }
       }
+      const int apiLevel = avdInfo_getApiLevel(myavdinfo);
+      {
+          char* avdarch = avdInfo_getTargetCpuArch(myavdinfo);
+          const std::string sarch(avdarch);
+          free(avdarch);
+#ifdef __x86_64__
+          if (sarch == "arm64" && apiLevel >=28) {
+              APANIC("Avd's CPU Architecture '%s' is not supported by the QEMU2 emulator on x86_64 host.\n", avdarch);
+          }
+#endif
+#if defined(__aarch64__)
+          if (sarch != "arm64") {
+              APANIC("Avd's CPU Architecture '%s' is not supported by the QEMU2 emulator on aarch64 host.\n", avdarch);
+          }
+#endif
+      }
     }
 
     bool force64bitTarget = is32bitImageOn64bitRanchuKernel(avdName, avdArch,
