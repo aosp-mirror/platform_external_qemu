@@ -80,6 +80,7 @@
 #include "hw/virtio/virtio-md-pci.h"
 #include "hw/virtio/virtio-iommu.h"
 #include "hw/char/pl011.h"
+#include "hw/i2c/designware_i2c.h"
 #include "qemu/guest-random.h"
 
 #define DEFINE_VIRT_MACHINE_LATEST(major, minor, latest) \
@@ -156,6 +157,7 @@ static const MemMapEntry base_memmap[] = {
     [VIRT_NVDIMM_ACPI] =        { 0x09090000, NVDIMM_ACPI_IO_LEN},
     [VIRT_PVTIME] =             { 0x090a0000, 0x00010000 },
     [VIRT_SECURE_GPIO] =        { 0x090b0000, 0x00001000 },
+    [VIRT_SMBUS] =              { 0x090c0000, 0x00001000 },
     [VIRT_MMIO] =               { 0x0a000000, 0x00000200 },
     /* ...repeating for a total of NUM_VIRTIO_TRANSPORTS, each of that size */
     [VIRT_PLATFORM_BUS] =       { 0x0c000000, 0x02000000 },
@@ -198,6 +200,7 @@ static const int a15irqmap[] = {
     [VIRT_GPIO] = 7,
     [VIRT_SECURE_UART] = 8,
     [VIRT_ACPI_GED] = 9,
+    [VIRT_SMBUS] = 10,
     [VIRT_MMIO] = 16, /* ...to 16 + NUM_VIRTIO_TRANSPORTS - 1 */
     [VIRT_GIC_V2M] = 48, /* ...to 48 + NUM_GICV2M_SPIS - 1 */
     [VIRT_SMMU] = 74,    /* ...to 74 + NUM_SMMU_IRQS - 1 */
@@ -923,6 +926,32 @@ static void create_rtc(const VirtMachineState *vms)
     qemu_fdt_setprop(ms->fdt, nodename, "compatible", compat, sizeof(compat));
     qemu_fdt_setprop_sized_cells(ms->fdt, nodename, "reg",
                                  2, base, 2, size);
+    qemu_fdt_setprop_cells(ms->fdt, nodename, "interrupts",
+                           GIC_FDT_IRQ_TYPE_SPI, irq,
+                           GIC_FDT_IRQ_FLAGS_LEVEL_HI);
+    qemu_fdt_setprop_cell(ms->fdt, nodename, "clocks", vms->clock_phandle);
+    qemu_fdt_setprop_string(ms->fdt, nodename, "clock-names", "apb_pclk");
+    g_free(nodename);
+}
+
+static void create_smbus(VirtMachineState *vms)
+{
+    char *nodename;
+    hwaddr base = vms->memmap[VIRT_SMBUS].base;
+    hwaddr size = vms->memmap[VIRT_SMBUS].size;
+    int irq = vms->irqmap[VIRT_SMBUS];
+    const char compat[] = "snps,designware-i2c";
+    MachineState *ms = MACHINE(vms);
+    DeviceState *dev;
+
+    dev = sysbus_create_simple(TYPE_DESIGNWARE_I2C, base,
+                               qdev_get_gpio_in(vms->gic, irq));
+    vms->smbus = (I2CBus *)qdev_get_child_bus(dev, "i2c-bus");
+
+    nodename = g_strdup_printf("/i2c@%" PRIx64, base);
+    qemu_fdt_add_subnode(ms->fdt, nodename);
+    qemu_fdt_setprop(ms->fdt, nodename, "compatible", compat, sizeof(compat));
+    qemu_fdt_setprop_sized_cells(ms->fdt, nodename, "reg", 2, base, 2, size);
     qemu_fdt_setprop_cells(ms->fdt, nodename, "interrupts",
                            GIC_FDT_IRQ_TYPE_SPI, irq,
                            GIC_FDT_IRQ_FLAGS_LEVEL_HI);
@@ -2285,6 +2314,10 @@ static void machvirt_init(MachineState *machine)
 
     vms->highmem_ecam &= (!firmware_loaded || aarch64);
 
+    if (vms->smbus_enabled) {
+        create_smbus(vms);
+    }
+
     create_rtc(vms);
 
     create_pcie(vms);
@@ -2642,6 +2675,20 @@ static void virt_set_default_bus_bypass_iommu(Object *obj, bool value,
     VirtMachineState *vms = VIRT_MACHINE(obj);
 
     vms->default_bus_bypass_iommu = value;
+}
+
+static bool virt_machine_get_smbus(Object *obj, Error **errp)
+{
+    VirtMachineState *vms = VIRT_MACHINE(obj);
+
+    return vms->smbus_enabled;
+}
+
+static void virt_machine_set_smbus(Object *obj, bool value, Error **errp)
+{
+    VirtMachineState *vms = VIRT_MACHINE(obj);
+
+    vms->smbus_enabled = value;
 }
 
 static CpuInstanceProperties
@@ -3099,6 +3146,11 @@ static void virt_machine_class_init(ObjectClass *oc, void *data)
                                           "in ACPI table header."
                                           "The string may be up to 8 bytes in size");
 
+    object_class_property_add_bool(oc, "smbus",
+                                   virt_machine_get_smbus,
+                                   virt_machine_set_smbus);
+    object_class_property_set_description(oc, "smbus",
+                                          "Enable SMBUS controller. ");
 }
 
 static void virt_instance_init(Object *obj)
@@ -3151,6 +3203,9 @@ static void virt_instance_init(Object *obj)
 
     /* Supply kaslr-seed and rng-seed by default */
     vms->dtb_randomness = true;
+
+    /* smbus is disabled by default.  */
+    vms->smbus_enabled = false;
 
     vms->irqmap = a15irqmap;
 
