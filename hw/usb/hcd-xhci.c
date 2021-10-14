@@ -595,10 +595,6 @@ static void xhci_intr_raise(XHCIState *xhci, int v)
     PCIDevice *pci_dev = PCI_DEVICE(xhci);
     bool pending = (xhci->intr[v].erdp_low & ERDP_EHB);
 
-    xhci->intr[v].erdp_low |= ERDP_EHB;
-    xhci->intr[v].iman |= IMAN_IP;
-    xhci->usbsts |= USBSTS_EINT;
-
     if (pending) {
         return;
     }
@@ -609,6 +605,10 @@ static void xhci_intr_raise(XHCIState *xhci, int v)
     if (!(xhci->usbcmd & USBCMD_INTE)) {
         return;
     }
+
+    xhci->intr[v].erdp_low |= ERDP_EHB;
+    xhci->intr[v].iman |= IMAN_IP;
+    xhci->usbsts |= USBSTS_EINT;
 
     if (msix_enabled(pci_dev)) {
         trace_usb_xhci_irq_msix(v);
