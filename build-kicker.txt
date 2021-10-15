@@ -1,2 +1,2 @@
 This is a simple file to trigger a build
-kick=1
+kick=2
