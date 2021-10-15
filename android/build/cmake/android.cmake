@@ -596,6 +596,9 @@ function(android_sign)
     if (DARWIN_X86_64 AND CROSSCOMPILE)
       return()
     endif()
+    if (DARWIN_AARCH64 AND CROSSCOMPILE)
+      return()
+    endif()
     add_custom_command(
       TARGET ${sign_TARGET}
       POST_BUILD
