@@ -128,7 +128,7 @@ function(android_bluetooth_packet_gen)
   # Configure packet_gen
   android_compile_for_host(
     bluetooth_packetgen
-    ${ANDROID_QEMU2_TOP_DIR}/android/third_party/bluetooth/packet_gen
+    ${ANDROID_QEMU2_TOP_DIR}/android/bluetooth/packet_gen
     bluetooth_packetgen_EXECUTABLE)
 
   set(BLUE_GEN "")
