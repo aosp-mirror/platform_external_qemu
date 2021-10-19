@@ -30,8 +30,14 @@ namespace emulation {
 
 class ResizableConfig {
 public:
-    ResizableConfig() {
+    ResizableConfig() {}
+
+    void init() {
         std::string configStr(android_hw->hw_resizable_configs);
+        if (configStr == "") {
+            configStr = "phone-0-1080-2340-420, unfolded-1-1768-2208-420,"
+                        "tablet-2-1920-1200-240, desktop-3-1920-1080-160";
+        }
         std::vector<std::string> entrys;
         android::base::splitTokens(configStr, &entrys, ",");
         if (entrys.size() != PRESET_SIZE_MAX) {
@@ -68,9 +74,6 @@ public:
                 mActiveConfigId = static_cast<PresetEmulatorSizeType>(id);
             }
         }
-    }
-
-    void init() {
         for (auto config : mConfigs) {
             android_setOpenglesDisplayConfigs(
                     (int)config.first, config.second.width,
