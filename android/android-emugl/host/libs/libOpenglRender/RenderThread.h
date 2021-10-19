@@ -65,7 +65,7 @@ public:
 private:
     intptr_t main() override;
     void setFinished();
-    void setOnTeardown(std::function<void()> callback = []{}) {
+    void setOnTeardownLocked(std::function<void()> callback = []{}) {
         mOnTeardown = std::move(callback);
     }
 

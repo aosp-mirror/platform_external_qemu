@@ -241,15 +241,17 @@ void RenderThread::setFinished() {
     // save to snapshot while it was not even going to.
     AutoLock lock(mLock);
     mFinished.store(true, std::memory_order_relaxed);
+    setOnTeardownLocked([] {});
     if (mState != SnapshotState::Empty) {
         mCondVar.broadcastAndUnlock(&lock);
     }
 }
 
 void RenderThread::notifyTeardown() {
+    AutoLock lock(mLock);
     if (!isFinished()) {
         mOnTeardown();
-        setOnTeardown([] {});
+        setOnTeardownLocked([] {});
     }
 }
 
@@ -270,14 +272,18 @@ intptr_t RenderThread::main() {
     tInfo.m_glDec.initGL(gles1_dispatch_get_proc_func, nullptr);
     tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, nullptr);
     initRenderControlContext(&tInfo.m_rcDec);
-    setOnTeardown([vkDec = &tInfo.m_vkDec] {
-        vkDec->onThreadTeardown();
-    });
+    {
+        AutoLock lock(mLock);
+        setOnTeardownLocked([vkDec = &tInfo.m_vkDec] {
+            vkDec->onThreadTeardown();
+        });
+    }
 
     if (!mChannel && !mRingStream) {
         DBG("Exited a loader RenderThread @%p\n", this);
+        AutoLock lock(mLock);
         mFinished.store(true, std::memory_order_relaxed);
-        setOnTeardown([] {});
+        setOnTeardownLocked([] {});
         return 0;
     }
 
@@ -312,7 +318,6 @@ intptr_t RenderThread::main() {
             // Stream read may fail because of a pending snapshot.
             if (!doSnapshotOperation(snapshotObjects, SnapshotState::StartSaving)) {
                 setFinished();
-                setOnTeardown([] {});
                 DBG("Exited a RenderThread @%p early\n", this);
                 return 0;
             }
@@ -536,7 +541,6 @@ intptr_t RenderThread::main() {
     }
 
     setFinished();
-    setOnTeardown([] {});
 
     DBG("Exited a RenderThread @%p\n", this);
     return 0;
