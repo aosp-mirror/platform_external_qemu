@@ -962,7 +962,7 @@ public:
             // of sufficient size
             // - The first screenshot in a series is requested and we need to
             // allocate the first frame.
-            if (reply->mutable_image()->size() < cPixels) {
+            if (reply->mutable_image()->size() != cPixels) {
                 LOG(VERBOSE)
                         << "Allocation of string object. "
                         << reply->mutable_image()->size() << " < " << cPixels;
