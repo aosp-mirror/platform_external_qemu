@@ -944,11 +944,13 @@ void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
     // For now, this fixes a screenshot issue on macOS.
     if (postOnlyOnMainThread && (PostCmd::Screenshot == post.cmd) &&
         emugl::get_emugl_window_operations().isRunningInUiThread()) {
-        findColorBuffer(post.cb)->readPixelsScaled(post.screenshot.screenwidth,
-                                                   post.screenshot.screenheight,
-                                                   post.screenshot.format, post.screenshot.type,
-                                                   post.screenshot.rotation,
-                                                   post.screenshot.pixels, post.screenshot.rect);
+        post.screenshot.cb->readPixelsScaled(post.screenshot.screenwidth,
+                                             post.screenshot.screenheight,
+                                             post.screenshot.format,
+                                             post.screenshot.type,
+                                             post.screenshot.rotation,
+                                             post.screenshot.pixels,
+                                             post.screenshot.rect);
     } else {
         m_postThread.enqueue(Post(post));
         if (!postOnlyOnMainThread) {
