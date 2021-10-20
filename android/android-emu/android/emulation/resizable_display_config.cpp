@@ -19,11 +19,15 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
+#include "android/metrics/MetricsReporter.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"
 #include "android/opengles.h"
+#include "studio_stats.pb.h"
 
 #include <map>
+
+using android::metrics::MetricsReporter;
 
 namespace android {
 namespace emulation {
@@ -80,7 +84,10 @@ public:
                     config.second.height, config.second.dpi, config.second.dpi);
         }
         android_setOpenglesDisplayActiveConfig(mActiveConfigId);
+        mTypeCount[mActiveConfigId]++;
         updateAndroidDisplayConfigPath(mActiveConfigId);
+
+        registerMetrics();
     }
 
     void updateAndroidDisplayConfigPath(enum PresetEmulatorSizeType configId) {
@@ -120,6 +127,7 @@ public:
             return;
         }
         mActiveConfigId = configId;
+        mTypeCount[mActiveConfigId]++;
 
         android_setOpenglesDisplayActiveConfig(configId);
 
@@ -151,9 +159,25 @@ public:
         return false;
     }
 
+    void registerMetrics() {
+        MetricsReporter::get().reportOnExit(
+            [&](android_studio::AndroidStudioEvent* event) {
+              android_studio::EmulatorResizableDisplay metrics;
+              metrics.set_display_phone_count(mTypeCount[PRESET_SIZE_PHONE]);
+              metrics.set_display_foldable_count(mTypeCount[PRESET_SIZE_UNFOLDED]);
+              metrics.set_display_tablet_count(mTypeCount[PRESET_SIZE_TABLET]);
+              metrics.set_display_desktop_count(mTypeCount[PRESET_SIZE_DESKTOP]);
+              event->mutable_emulator_details()
+                   ->mutable_resizable_display()
+                   ->CopyFrom(metrics);
+            }
+        );
+    }
+
 private:
     std::map<PresetEmulatorSizeType, PresetEmulatorSizeInfo> mConfigs;
     PresetEmulatorSizeType mActiveConfigId = PRESET_SIZE_MAX;
+    std::map<PresetEmulatorSizeType, uint32_t> mTypeCount;
 };
 
 static android::base::LazyInstance<ResizableConfig> sResizableConfig =
