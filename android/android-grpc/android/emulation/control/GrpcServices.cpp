@@ -49,6 +49,7 @@ using Builder = EmulatorControllerService::Builder;
 using namespace android::base;
 using namespace android::control::interceptor;
 using grpc::ServerBuilder;
+using grpc::ServerCompletionQueue;
 using grpc::Service;
 
 // This class owns all the created resources, and is responsible for stopping
@@ -59,22 +60,46 @@ public:
         auto deadline = std::chrono::system_clock::now() +
                         std::chrono::milliseconds(500);
         mServer->Shutdown(deadline);
+
+        // Shutdown the completion queues.
+        void* ignored_tag;
+        bool ignored_ok;
+        for (auto& queue : mCompletionQueues) {
+            queue->Shutdown();
+            while (queue->Next(&ignored_tag, &ignored_ok))
+                ;
+        }
     }
 
     EmulatorControllerServiceImpl(
             int port,
             std::vector<std::shared_ptr<Service>> services,
-            grpc::Server* server)
-        : mPort(port), mRegisteredServices(services), mServer(server) {}
+            grpc::Server* server,
+            std::vector<std::unique_ptr<ServerCompletionQueue>> queue)
+        : mPort(port),
+          mRegisteredServices(services),
+          mServer(server),
+          mCompletionQueues(std::move(queue)) {}
 
     int port() override { return mPort; }
 
     void wait() override { mServer->Wait(); }
 
+    // Returns a new completionQueue if possible.
+    ServerCompletionQueue* newCompletionQueue() override {
+        if (queueidx == mCompletionQueues.size()) {
+            LOG(ERROR) << "Too many queues requested, no new queues available";
+            return nullptr;
+        }
+        return mCompletionQueues[queueidx++].get();
+    }
+
 private:
     std::unique_ptr<grpc::Server> mServer;
     std::vector<std::shared_ptr<Service>> mRegisteredServices;
+    std::vector<std::unique_ptr<ServerCompletionQueue>> mCompletionQueues;
     int mPort;
+    int queueidx = 0;
     std::string mCert;
 };
 
@@ -214,6 +239,11 @@ Builder& Builder::withPortRange(int start, int end) {
     return *this;
 }
 
+Builder& Builder::withCompletionQueues(int count) {
+    mCompletionQueueCount = count;
+    return *this;
+}
+
 //  Human readable logging.
 template <typename tstream>
 tstream& operator<<(tstream& out, const Builder::Security value) {
@@ -274,7 +304,8 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
 
     // Translate loopback Ipv4/Ipv6 preference ourselves. gRPC resolver can
     // do it slightly differently than us, leading to unexpected results.
-    if (mBindAddress == "[::1]" || mBindAddress == "127.0.0.1" || mBindAddress == "localhost") {
+    if (mBindAddress == "[::1]" || mBindAddress == "127.0.0.1" ||
+        mBindAddress == "localhost") {
         mBindAddress = (mIpMode == IpMode::Ipv4 ? "127.0.0.1" : "[::1]");
     }
 
@@ -305,8 +336,13 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
         creators.emplace_back(
                 std::make_unique<IdleInterceptorFactory>(mTimeout, mAgents));
     }
-
     builder.experimental().SetInterceptorCreators(std::move(creators));
+
+    // Create a separate cq for each potential handler.
+    std::vector<std::unique_ptr<ServerCompletionQueue>> cqs;
+    for (int i = 0; i < mCompletionQueueCount; i++) {
+        cqs.push_back(builder.AddCompletionQueue(false));
+    }
 
     auto service = builder.BuildAndStart();
     if (!service)
@@ -317,7 +353,8 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
               << (mAuthToken.empty() ? "" : "+token");
     return std::unique_ptr<EmulatorControllerService>(
             new EmulatorControllerServiceImpl(mPort, std::move(mServices),
-                                              service.release()));
+                                              service.release(),
+                                              std::move(cqs)));
 }
 }  // namespace control
 }  // namespace emulation

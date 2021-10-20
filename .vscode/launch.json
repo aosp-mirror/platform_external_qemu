@@ -86,40 +86,14 @@
       // As there lldb is not capable of following child processes (like gdb can with follow-fork-mode)
       "program": "${workspaceFolder}/build/emulator",
       "args": [
-        "@S" // Pick the image you would like to use
+        "@31", // Pick the image you would like to use
+        "-no-snapshot"
       ],
-      "linux": {
-        "env": {
-          // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
-          "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1",
-          // Setup the LD_LIBRARY_PATH so we can resolve all the dynamic libs properly.
-          "LD_LIBRARY_PATH": "./lib64:./lib64/gles_mesa:./lib64/gles_swiftshader:./lib64/qt:./lib64/qt/lib:./lib64/qt/plugins:./lib64/qt/plugins/imageformats:./lib64/qt/plugins/iconengines:./lib64/qt/plugins/platforms:./lib64/qt/plugins/platforminputcontexts:./lib64/vulkan",
-          // The default location of ANDROID_SDK_ROOT for most, change this as needed.
-          "ANDROID_SDK_ROOT": "${env:HOME}/Android/Sdk"
-        }
-      },
-      "osx": {
-        "args": [
-          "@30",
-          "-verbose",
-          // "-qt-hide-window",
-          "-no-snapshot",
-          "-feature",
-          "-HVF",
-          "-feature",
-          "BluetoothEmulation"
-        ],
-        "env": {
-          // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
-          "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1",
-          // Setup the LD_LIBRARY_PATH so we can resolve all the dynamic libs properly.
-          "DYLD_LIBRARY_PATH": "./lib64:./lib64/gles_mesa:./lib64/gles_swiftshader:./lib64/qt:./lib64/qt/lib:./lib64/qt/plugins:./lib64/qt/plugins/imageformats:./lib64/qt/plugins/iconengines:./lib64/qt/plugins/platforms:./lib64/qt/plugins/platforminputcontexts:./lib64/vulkan"
-        }
-      },
       "postRunCommands": [
         "pro handle -p true -s false SIGUSR1",
-        "pro handle -p true -s false SIGUSR2"
+        "pro handle -p true -s false SIGUSR2",
       ],
+      "stopOnEntry": false,
       "cwd": "${workspaceFolder}/build"
     },
     {
