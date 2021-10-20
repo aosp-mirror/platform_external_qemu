@@ -221,8 +221,7 @@ void SensorReplayPage::registerSensorSessionPlaybackCallback(
                         double altitude = locationIterator->altitude_m();
                         double velocity = (double)locationIterator->speed_mps() *
                                           MPS_TO_KNOTS;
-                        double heading = (double)locationIterator->bearing_deg_full_accuracy() -
-                                         180.0;
+                        double heading = (double)locationIterator->bearing_deg_full_accuracy();
 
                         timeval timeVal = {};
                         gettimeofday(&timeVal, nullptr);
