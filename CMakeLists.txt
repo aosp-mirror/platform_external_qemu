@@ -203,6 +203,11 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
          DESTINATION ${CMAKE_INSTALL_PREFIX})
 endif()
 
+if(DARWIN_X86_64 OR DARWIN_AARCH64)
+    file(COPY ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist
+         DESTINATION ${CMAKE_INSTALL_PREFIX}/_codesign/entitlements.xml)
+endif()
+
 # Create the needed qemu2 sources, with the desired backend.
 generate_qemu2_sources(TRACE_BACKEND ${OPTION_TRACE} DEST ${CMAKE_CURRENT_BINARY_DIR}/generated-sources)
 string(TOUPPER "${OPTION_TRACE}" TRACE_CONFIG)
