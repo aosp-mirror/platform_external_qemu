@@ -34,9 +34,7 @@ namespace emulation {
 
 class ResizableConfig {
 public:
-    ResizableConfig() {}
-
-    void init() {
+    ResizableConfig() {
         std::string configStr(android_hw->hw_resizable_configs);
         if (configStr == "") {
             configStr = "phone-0-1080-2340-420, unfolded-1-1768-2208-420,"
@@ -78,14 +76,16 @@ public:
                 mActiveConfigId = static_cast<PresetEmulatorSizeType>(id);
             }
         }
-        for (auto config : mConfigs) {
+    }
+
+    void init() {
+       for (auto config : mConfigs) {
             android_setOpenglesDisplayConfigs(
                     (int)config.first, config.second.width,
                     config.second.height, config.second.dpi, config.second.dpi);
         }
         android_setOpenglesDisplayActiveConfig(mActiveConfigId);
         mTypeCount[mActiveConfigId]++;
-        updateAndroidDisplayConfigPath(mActiveConfigId);
 
         registerMetrics();
     }
