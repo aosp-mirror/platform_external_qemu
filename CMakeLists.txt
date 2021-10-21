@@ -189,7 +189,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/archives)
 set(CMAKE_PDB_OUTPUT_DIRECTORY ${DBG_INFO})
 # Feeling courageous? Set this to $ANDROID_SDK_ROOT
+if(DARWIN_X86_64 OR DARWIN_AARCH64)
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/distribution/emulator/emulator)
+set(CMAKE_INSTALL_CODESIGN ${CMAKE_BINARY_DIR}/distribution/emulator/_codesign)
+else()
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/distribution/emulator)
+endif()
 
 # Pthreads from the prebuilts please!
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
@@ -205,7 +210,7 @@ endif()
 
 if(DARWIN_X86_64 OR DARWIN_AARCH64)
     install(FILES ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist
-         DESTINATION ${CMAKE_INSTALL_PREFIX}/_codesign RENAME entitlements.xml)
+         DESTINATION ${CMAKE_INSTALL_CODESIGN} RENAME entitlements.xml)
 endif()
 
 # Create the needed qemu2 sources, with the desired backend.
