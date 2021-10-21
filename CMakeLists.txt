@@ -204,8 +204,8 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
 endif()
 
 if(DARWIN_X86_64 OR DARWIN_AARCH64)
-    file(COPY ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist
-         DESTINATION ${CMAKE_INSTALL_PREFIX}/_codesign/entitlements.xml)
+    install(FILES ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist
+         DESTINATION ${CMAKE_INSTALL_PREFIX}/_codesign RENAME entitlements.xml)
 endif()
 
 # Create the needed qemu2 sources, with the desired backend.
