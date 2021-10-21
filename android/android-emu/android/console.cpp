@@ -4225,6 +4225,10 @@ static int do_rotate_90_clockwise(ControlClient client, char* args) {
 }
 
 static int do_fold(ControlClient client, char* args) {
+    if (args) {
+        control_write(client, "KO: Usage: \"fold\"\n");
+        return -1;
+    }
     if (client->global->emu_agent->fold(true)) {
           return 0;
     }
@@ -4232,6 +4236,10 @@ static int do_fold(ControlClient client, char* args) {
 }
 
 static int do_unfold(ControlClient client, char* args) {
+    if (args) {
+        control_write(client, "KO: Usage: \"unfold\"\n");
+        return -1;
+    }
     if (client->global->emu_agent->fold(false)) {
         return 0;
     }
