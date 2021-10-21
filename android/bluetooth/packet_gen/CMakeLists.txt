@@ -38,7 +38,7 @@ else()
     # Sha validation only works on posix for some reason.
     android_validate_sha(
       FILE ${PACKET_GEN_ROOT}/language_y.yy
-      EXPECTED ed01576f2ff772e2b785d3ba9984ee13c58892dfd21f0579899ce1258467bc66
+      EXPECTED 764c1f7cda8c6eb6aa80cb6634b9fe0351218d0fa21ec1e845d1c2c826c07958
       ERROR
         "Please regenerate the precompiled yacc files, rebuild with --cmake_option OPTIONS_BUILD_PACKET_GEN=TRUE and update the files in ${CMAKE_CURRENT_LIST_DIR}/yacc"
     )
