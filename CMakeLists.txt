@@ -201,16 +201,11 @@ set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 prebuilt(Threads)
 
-# Bug: 175067895
-# Copy emulator replacement script to the install dir.
-if(DARWIN_X86_64 OR DARWIN_AARCH64)
-    file(COPY ${ANDROID_QEMU2_TOP_DIR}/android/scripts/unix/darwin-aarch64-replace.sh
-         DESTINATION ${CMAKE_INSTALL_PREFIX})
-endif()
-
 if(DARWIN_X86_64 OR DARWIN_AARCH64)
     install(FILES ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist
          DESTINATION ${CMAKE_INSTALL_CODESIGN} RENAME entitlements.xml)
+    install(FILES ${ANDROID_QEMU2_TOP_DIR}/filelist
+         DESTINATION ${CMAKE_INSTALL_CODESIGN})
 endif()
 
 # Create the needed qemu2 sources, with the desired backend.
