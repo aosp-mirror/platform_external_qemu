@@ -1131,6 +1131,16 @@ void __hvf_cpu_synchronize_post_reset(CPUState* cpu_state, run_on_cpu_data data)
     // wvmcs(cpu_state->hvf_fd, VMCS_ENTRY_CTLS, 0);
 
     cpu_state->hvf_vcpu_dirty = false;
+    // Reset vtimer mask
+    // System reset could happen when vcpu run gets an exit with
+    // HV_EXIT_REASON_VTIMER_ACTIVATED but before the vcpu writes EOI for
+    // vtimer interrupt. According to hvf arm64, vtimer is masked when exiting
+    // with HV_EXIT_REASON_VTIMER_ACTIVATED and that exit happens only once.
+    // Without unmasking, future exits with HV_EXIT_REASON_VTIMER_ACTIVATED
+    // won't happen. Unmasking is done when vcpu writes EOI for vtimer
+    // interrupt, which is not possible for this type of system reset. This
+    // will block all future vtimer interrupts in that vcpu thread.
+    hv_vcpu_set_vtimer_mask(cpu_state->hvf_fd, false);
 }
 
 void hvf_cpu_synchronize_post_reset(CPUState *cpu_state) {
