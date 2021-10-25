@@ -53,7 +53,6 @@ target_include_directories(libbt-rootcanal.headers INTERFACE . ${VL_LIB})
 android_license(TARGET "libbt-rootcanal.headers" LIBNAME None SPDX Apache-2.0
                 LICENSE Apache-2.0 LOCAL "${BT_ROOT}/NOTICE")
 
-
 android_add_library(
   TARGET BluetoothPacketSources
   LICENSE Apache-2.0
@@ -74,12 +73,20 @@ target_link_libraries(BluetoothPacketSources PRIVATE android-emu-base)
 target_compile_options(BluetoothPacketSources
                        PUBLIC -Wno-inconsistent-missing-override)
 
-# android_add_library( TARGET libbt-rootcanal-net LICENSE Apache-2.0 SOURCE_DIR
-# ${BT_ROOT}/vendor_libs/test_vendor_lib SRC # cmake-format: sortable #
-# net/posix/DefaultAsyncSocket.cc # net/posix/DefaultAsyncSocketConnector.cc #
-# net/posix/DefaultAsyncSocketServer.cc )
+android_add_library(
+  TARGET libbt-crypto_toolbox LICENSE Apache-2.0
+  SOURCE_DIR ${BT_ROOT}/gd/crypto_toolbox/ SRC aes.cc aes_cmac.cc
+                                               crypto_toolbox.cc)
 
-# target_include_directories(libbt-rootcanal-net PUBLIC ${VL_LIB})
+target_include_directories(libbt-crypto_toolbox PUBLIC include ${BT_ROOT}/gd/)
+
+android_add_test(
+  TARGET test-libbt-crypto_toolbox SOURCE_DIR ${BT_ROOT}/gd/crypto_toolbox/
+  SRC # cmake-format: sortable
+      crypto_toolbox_test.cc)
+
+target_link_libraries(test-libbt-crypto_toolbox PRIVATE libbt-crypto_toolbox
+                                                        gmock_main)
 
 android_add_library(
   TARGET libbt-rootcanal
@@ -130,8 +137,9 @@ android_add_library(
          net/posix/posix_async_socket_server.cc)
 
 target_link_libraries(
-  libbt-rootcanal PRIVATE libscriptedbeaconpayload-protos-lite jsoncpp
-                          BluetoothPacketSources android-emu-base)
+  libbt-rootcanal
+  PRIVATE libscriptedbeaconpayload-protos-lite jsoncpp libbt-crypto_toolbox
+          BluetoothPacketSources android-emu-base)
 target_include_directories(
   libbt-rootcanal PUBLIC . ${VL_LIB} ${VL_LIB}/include ${BT_ROOT}/gd ${BT_ROOT}
                          ${CMAKE_CURRENT_BINARY_DIR}/packet_gen)
