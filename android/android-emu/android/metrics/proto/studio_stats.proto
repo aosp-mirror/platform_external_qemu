@@ -1927,6 +1927,15 @@ message EmulatorMultiDisplay {
   optional uint32 max_displays = 2;
 }
 
+// Metrics for resizable display details
+message EmulatorResizableDisplay {
+  // Counts for different display size types
+  optional uint32 display_phone_count = 1;
+  optional uint32 display_foldable_count = 2;
+  optional uint32 display_tablet_count = 3;
+  optional uint32 display_desktop_count = 4;
+}
+
 // Metrics for LocationV2
 message EmulatorLocationV2 {
   // Count for "Set Location" button
@@ -2030,7 +2039,9 @@ message EmulatorDetails {
   optional EmulatorStreamScreenshot screenshot = 34;
   // Metrics for Icebox
   repeated EmulatorIcebox icebox = 35;
-  // Next tag: 36
+  // Metrics for resizable display
+  optional EmulatorResizableDisplay resizable_display = 36;
+  // Next tag: 37
 
 
   // Emulator instance liveness as determined via adb connectivity.
