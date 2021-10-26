@@ -37,22 +37,19 @@
 
 // We communicate with the sync thread in 3 ways:
 enum SyncThreadOpCode {
-    // Nonblocking command to initialize sync thread's contents,
-    // such as the EGL context for sync operations
-    SYNC_THREAD_INIT = 0,
     // Nonblocking command to wait on a given FenceSync object
     // and timeline handle.
     // A fence FD object in the guest is signaled.
-    SYNC_THREAD_WAIT = 1,
+    SYNC_THREAD_WAIT = 0,
     // Blocking command to clean up and exit the sync thread.
-    SYNC_THREAD_EXIT = 2,
+    SYNC_THREAD_EXIT = 1,
     // Blocking command to wait on a given FenceSync object.
     // No timeline handling is done.
-    SYNC_THREAD_BLOCKED_WAIT_NO_TIMELINE = 3,
+    SYNC_THREAD_BLOCKED_WAIT_NO_TIMELINE = 2,
     // Nonblocking command to wait on a given VkFence
     // and timeline handle.
     // A fence FD object / Zircon eventpair in the guest is signaled.
-    SYNC_THREAD_WAIT_VK = 4,
+    SYNC_THREAD_WAIT_VK = 3,
 };
 
 struct SyncThreadCmd {
@@ -61,7 +58,7 @@ struct SyncThreadCmd {
     // For use with ThreadPool::broadcastIndexed
     void setIndex(int id) { workerId = id; }
 
-    SyncThreadOpCode opCode = SYNC_THREAD_INIT;
+    SyncThreadOpCode opCode = SYNC_THREAD_WAIT;
     union {
         FenceSync* fenceSync = nullptr;
         VkFence vkFence;
@@ -120,11 +117,6 @@ public:
     static void recreate();
 
 private:
-    // |initSyncContext| creates an EGL context expressly for calling
-    // eglClientWaitSyncKHR in the processing caused by |triggerWait|.
-    // This is used by the constructor only. It is non-blocking.
-    // - Triggers a |SyncThreadCmd| with op code |SYNC_THREAD_INIT|
-    void initSyncContext();
 
     // Thread function.
     // It keeps the workers runner until |mExiting| is set.
