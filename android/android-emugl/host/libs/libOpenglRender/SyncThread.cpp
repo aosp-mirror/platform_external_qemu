@@ -75,7 +75,6 @@ SyncThread::SyncThread()
       }) {
     this->start();
     mWorkerThreadPool.start();
-    initSyncContext();
 }
 
 SyncThread::~SyncThread() {
@@ -129,15 +128,6 @@ void SyncThread::cleanup() {
 }
 
 // Private methods below////////////////////////////////////////////////////////
-
-void SyncThread::initSyncContext() {
-    DPRINT("enter");
-    SyncThreadCmd to_send;
-    to_send.opCode = SYNC_THREAD_INIT;
-    mWorkerThreadPool.broadcastIndexed(to_send);
-    mWorkerThreadPool.waitAllItems();
-    DPRINT("exit");
-}
 
 intptr_t SyncThread::main() {
     DPRINT("in sync thread");
@@ -340,11 +330,10 @@ int SyncThread::doSyncThreadCmd(SyncThreadCmd* cmd) {
 #endif  // DEBUG
 
     int result = 0;
-    switch (cmd->opCode) {
-    case SYNC_THREAD_INIT:
-        DPRINT("exec SYNC_THREAD_INIT");
+    if (!mContext[cmd->workerId]) {
         doSyncContextInit(cmd);
-        break;
+    }
+    switch (cmd->opCode) {
     case SYNC_THREAD_WAIT:
         DPRINT("exec SYNC_THREAD_WAIT");
         doSyncWait(cmd);
