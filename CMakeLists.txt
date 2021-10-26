@@ -192,6 +192,7 @@ set(CMAKE_PDB_OUTPUT_DIRECTORY ${DBG_INFO})
 if(DARWIN_X86_64 OR DARWIN_AARCH64)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/distribution/emulator/emulator)
 set(CMAKE_INSTALL_CODESIGN ${CMAKE_BINARY_DIR}/distribution/emulator/_codesign)
+set(CMAKE_INSTALL_TOPDIR ${CMAKE_BINARY_DIR}/distribution/emulator)
 else()
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/distribution/emulator)
 endif()
@@ -206,6 +207,8 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
          DESTINATION ${CMAKE_INSTALL_CODESIGN} RENAME entitlements.xml)
     install(FILES ${ANDROID_QEMU2_TOP_DIR}/filelist
          DESTINATION ${CMAKE_INSTALL_CODESIGN})
+    file(COPY ${ANDROID_QEMU2_TOP_DIR}/android/scripts/unix/selfsign.sh
+         DESTINATION ${CMAKE_INSTALL_TOPDIR})
 endif()
 
 # Create the needed qemu2 sources, with the desired backend.
