@@ -6,7 +6,10 @@ typedef int WINBOOL;
 #define __C89_NAMELESS
 #endif
 
-#include "./WinHvPlatformDefs.h"
+#include <sdkddkver.h>
+#if !defined(NTDDI_WIN10_CO)
+
+#include "./whpx-headers/WinHvPlatformDefs.h"
 
 typedef struct WHV_DOORBELL_MATCH_DATA {
     WHV_GUEST_PHYSICAL_ADDRESS GuestAddress;
@@ -16,6 +19,8 @@ typedef struct WHV_DOORBELL_MATCH_DATA {
     UINT32 MatchOnLength:1;
     UINT32 Reserved:30;
 } WHV_DOORBELL_MATCH_DATA;
+
+#endif
 
 #include <WinHvPlatform.h>
 #include <WinHvEmulation.h>
