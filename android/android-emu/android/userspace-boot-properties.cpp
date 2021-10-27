@@ -59,11 +59,18 @@ std::string getDeviceStateString(const AndroidHwConfig* hw) {
                        << " or posture mapping " << postureValues;
             return std::string();
         }
+        int foldAtPosture = hw->hw_sensor_hinge_fold_to_displayRegion_0_1_at_posture;
         std::string ret("<device-state-config>");
         std::vector<std::string> valuesToken;
         for (int i = 0; i < postureListTokens.size(); i++) {
             char name[16];
             ret += "<device-state>";
+            if (foldAtPosture != 1 && postureListTokens[i] == std::to_string(foldAtPosture)) {
+                // "device/generic/goldfish/overlay/frameworks/base/core/res/res/values/config.xml"
+                // specified "config_foldedDeviceStates" as "1" (CLOSED).
+                // If foldablbe AVD configs "fold" at other deviceState, rewrite it to "1"
+                postureListTokens[i] = "1";
+            }
             ret += "<identifier>" + postureListTokens[i] + "</identifier>";
             if (!android_foldable_posture_name(std::stoi(postureListTokens[i], nullptr), name)) {
                 return std::string();
