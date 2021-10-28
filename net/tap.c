@@ -48,8 +48,104 @@
 #ifdef CONFIG_DARWIN
 
 #include "qemu/main-loop.h"
+#include <dlfcn.h>
 /* macOS vmnet framework header */
 #include <vmnet/vmnet.h>
+
+typedef void *handle_type;
+typedef void (*function_ptr)(void);
+
+static const char s_vmnet_libname[] =
+        "/System/Library/Frameworks/vmnet.framework/vmnet";
+
+static handle_type s_vmnet_handle = NULL;
+
+typedef struct vmnet_lib {
+    bool is_loaded;
+    vmnet_return_t (*vmnet_read)(interface_ref, struct vmpktdesc *, int *);
+    vmnet_return_t (*vmnet_write)(interface_ref, struct vmpktdesc *, int *);
+    xpc_object_t (*vmnet_copy_shared_interface_list)(void);
+    interface_ref (*vmnet_start_interface)(
+            xpc_object_t, dispatch_queue_t,
+            vmnet_start_interface_completion_handler_t);
+    vmnet_return_t (*vmnet_interface_set_event_callback)(
+        interface_ref , interface_event_t,
+        dispatch_queue_t, vmnet_interface_event_callback_t);
+    const char **vmnet_interface_id_key;
+    const char **vmnet_shared_interface_name_key;
+    const char **vmnet_mac_address_key;
+    const char **vmnet_max_packet_size_key;
+    const char **vmnet_mtu_key;
+    const char **vmnet_operation_mode_key;
+} vmnet_lib_t;
+
+static vmnet_lib_t s_vmnet_lib;
+
+handle_type shared_library_open(const char* lib_name,
+                               char* error,
+                               size_t error_size) {
+    // clear dlerror first.
+    dlerror();
+    handle_type lib = dlopen(lib_name, RTLD_NOW);
+    if (!lib) {
+        snprintf(error, error_size, "%s", dlerror());
+    }
+    return lib;
+
+}
+
+void shared_library_close(handle_type handle) {
+    if (handle) {
+        dlclose(handle);
+    }
+}
+
+function_ptr shared_library_find_symbol(handle_type handle, const char* symbol,
+                    char* error, size_t error_size) {
+    if (!handle || !symbol) {
+        return NULL;
+    }
+    dlerror();
+    function_ptr res = (function_ptr)(dlsym(handle, symbol));
+    if (!res) {
+        snprintf(error, error_size, "%s", dlerror());
+    }
+    return res;
+}
+
+#define LOAD_VMNET_FUNC(func_name) \
+    do { \
+        if (!s_vmnet_lib.is_loaded) { \
+            void* address = (void *)shared_library_find_symbol(s_vmnet_handle, #func_name, error, sizeof(error)); \
+            if (address) { \
+                s_vmnet_lib.func_name = (__typeof__(s_vmnet_lib.func_name))(address); \
+            } else { \
+                error_printf("Failed to load symbol: %s\n", #func_name); \
+                return -1; \
+            } \
+        } \
+    } while (0); \
+
+#define LOAD_VMNET_GLOBAL(x) LOAD_VMNET_FUNC(x)
+
+bool dispatch_functions(char* error,
+                        size_t error_size) {
+    s_vmnet_lib.is_loaded = 0;
+    LOAD_VMNET_FUNC(vmnet_read)
+    LOAD_VMNET_FUNC(vmnet_write)
+    LOAD_VMNET_FUNC(vmnet_copy_shared_interface_list)
+    LOAD_VMNET_FUNC(vmnet_start_interface)
+    LOAD_VMNET_FUNC(vmnet_interface_set_event_callback)
+    LOAD_VMNET_GLOBAL(vmnet_interface_id_key)
+    LOAD_VMNET_GLOBAL(vmnet_shared_interface_name_key)
+    LOAD_VMNET_GLOBAL(vmnet_mac_address_key)
+    LOAD_VMNET_GLOBAL(vmnet_max_packet_size_key)
+    LOAD_VMNET_GLOBAL(vmnet_mtu_key)
+    LOAD_VMNET_GLOBAL(vmnet_operation_mode_key)
+    s_vmnet_lib.is_loaded = 1;
+    return 0;
+}
+
 typedef struct vmnet_state {
   NetClientState nc;
   interface_ref vmnet_iface_ref;
@@ -122,7 +218,7 @@ static ssize_t vmnet_receive_iov(NetClientState *nc,
   /* Finally, write the packet to the vmnet interface */
   int packet_count = 1;
   vmnet_return_t result =
-      vmnet_write(s->vmnet_iface_ref, packet, &packet_count);
+      (*s_vmnet_lib.vmnet_write)(s->vmnet_iface_ref, packet, &packet_count);
   if (result != VMNET_SUCCESS || packet_count != 1) {
       error_printf("Failed to send packet to host: %s\n",
           _vmnet_status_repr(result));
@@ -149,27 +245,28 @@ static NetClientInfo net_vmnet_macos_info = {
 
 static bool _validate_ifname_is_valid_bridge_target(const char *ifname)
 {
-  /* Iterate available bridge interfaces, ensure the provided one is valid */
-  xpc_object_t bridge_interfaces = vmnet_copy_shared_interface_list();
-  bool failed_to_match_iface_name = xpc_array_apply(
-      bridge_interfaces,
-      ^bool(size_t index, xpc_object_t  _Nonnull value) {
-          // Stop iterating if a matched ifname is found.
-          return strcmp(xpc_string_get_string_ptr(value), ifname) != 0;
-  });
+    /* Iterate available bridge interfaces, ensure the provided one is valid */
+    xpc_object_t bridge_interfaces =
+        (*s_vmnet_lib.vmnet_copy_shared_interface_list)();
+    bool failed_to_match_iface_name = xpc_array_apply(
+        bridge_interfaces,
+        ^bool(size_t index, xpc_object_t  _Nonnull value) {
+            // Stop iterating if a matched ifname is found.
+            return strcmp(xpc_string_get_string_ptr(value), ifname) != 0;
+    });
 
-  if (failed_to_match_iface_name) {
-      error_printf("Invalid bridge interface name provided: %s\n", ifname);
-      error_printf("Valid bridge interfaces:\n");
-      xpc_array_apply(
-          vmnet_copy_shared_interface_list(),
-          ^bool(size_t index, xpc_object_t  _Nonnull value) {
-          error_printf("\t%s\n", xpc_string_get_string_ptr(value));
-          /* Keep iterating */
-          return true;
-      });
-      return false;
-  }
+    if (failed_to_match_iface_name) {
+        error_printf("Invalid bridge interface name provided: %s\n", ifname);
+        error_printf("Valid bridge interfaces:\n");
+        xpc_array_apply(
+            (*s_vmnet_lib.vmnet_copy_shared_interface_list)(), ^bool(
+                                size_t index, xpc_object_t  _Nonnull value) {
+            error_printf("\t%s\n", xpc_string_get_string_ptr(value));
+            /* Keep iterating */
+            return true;
+        });
+        return false;
+    }
 
   return true;
 }
@@ -182,11 +279,8 @@ static xpc_object_t _construct_vmnet_interface_description(operating_modes_t mod
         exit(1);
     }
     xpc_object_t interface_desc = xpc_dictionary_create(NULL, NULL, 0);
-    xpc_dictionary_set_uint64(
-        interface_desc,
-        vmnet_operation_mode_key,
-        mode
-    );
+    xpc_dictionary_set_uint64(interface_desc,
+            *s_vmnet_lib.vmnet_operation_mode_key, mode);
 
     /* Bridge with en0 by default */
     const char *physical_ifname = ifname ? ifname : "en0";
@@ -195,9 +289,9 @@ static xpc_object_t _construct_vmnet_interface_description(operating_modes_t mod
         exit(1);
     }
     xpc_dictionary_set_string(interface_desc,
-                              vmnet_shared_interface_name_key,
+                              *s_vmnet_lib.vmnet_shared_interface_name_key,
                               physical_ifname);
-  return interface_desc;
+    return interface_desc;
 }
 
 int net_init_vmnet(const Netdev *netdev, const char *name,
@@ -238,7 +332,8 @@ int net_init_vmnet(const Netdev *netdev, const char *name,
 
     /* Create the vmnet interface */
     dispatch_semaphore_t vmnet_iface_sem = dispatch_semaphore_create(0);
-    interface_ref vmnet_iface_ref = vmnet_start_interface(
+
+    interface_ref vmnet_iface_ref = (*s_vmnet_lib.vmnet_start_interface)(
         iface_desc,
         vmnet_dispatch_queue,
         ^(vmnet_return_t status, xpc_object_t  _Nullable interface_param) {
@@ -257,20 +352,20 @@ int net_init_vmnet(const Netdev *netdev, const char *name,
             */
             vmnet_iface_mtu = xpc_dictionary_get_uint64(
                 interface_param,
-                vmnet_mtu_key
+                *s_vmnet_lib.vmnet_mtu_key
             );
             vmnet_max_packet_size = xpc_dictionary_get_uint64(
                 interface_param,
-                vmnet_max_packet_size_key
+                *s_vmnet_lib.vmnet_max_packet_size_key
             );
             vmnet_mac_address = strdup(xpc_dictionary_get_string(
                 interface_param,
-                vmnet_mac_address_key
+                *s_vmnet_lib.vmnet_mac_address_key
             ));
 
             const uint8_t *iface_uuid = xpc_dictionary_get_uuid(
               interface_param,
-              vmnet_interface_id_key
+              *s_vmnet_lib.vmnet_interface_id_key
             );
             uuid_unparse_upper(iface_uuid, *vmnet_iface_uuid_ptr);
             dispatch_semaphore_signal(vmnet_iface_sem);
@@ -297,7 +392,7 @@ int net_init_vmnet(const Netdev *netdev, const char *name,
 
     /* The interface is up! Set a block to run when packets are received */
     vmnet_client_state->vmnet_iface_ref = vmnet_iface_ref;
-    vmnet_return_t event_cb_stat = vmnet_interface_set_event_callback(
+    vmnet_return_t event_cb_stat = (*s_vmnet_lib.vmnet_interface_set_event_callback)(
         vmnet_iface_ref,
         VMNET_INTERFACE_PACKETS_AVAILABLE,
         vmnet_dispatch_queue,
@@ -330,7 +425,7 @@ int net_init_vmnet(const Netdev *netdev, const char *name,
         packet->vm_pkt_iovcnt = 1;
         packet->vm_flags = 0;
 
-        vmnet_return_t result = vmnet_read(vmnet_iface_ref, packet, &pktcnt);
+        vmnet_return_t result = (*s_vmnet_lib.vmnet_read)(vmnet_iface_ref, packet, &pktcnt);
         if (result != VMNET_SUCCESS) {
             error_printf("Failed to read packet from host: %s\n",
                 _vmnet_status_repr(result));
@@ -646,7 +741,6 @@ static void tap_exit_notify(Notifier *notifier, void *data)
 static void tap_cleanup(NetClientState *nc)
 {
     TAPState *s = DO_UPCAST(TAPState, nc, nc);
-
     if (s->vhost_net) {
         vhost_net_cleanup(s->vhost_net);
         g_free(s->vhost_net);
@@ -1091,14 +1185,24 @@ int net_init_tap(const Netdev *netdev, const char *name,
 {
     const NetdevTapOptions *tap = &netdev->u.tap;
 #ifdef CONFIG_DARWIN
-
-    // If tap network is configured and it doesn't have any of the options
-    // including fd and script/downscript being set, we assume vmnet is should
-    // instead be used as the backend.
     // TODO (wdu@) Remove this special logic once we migrate vmnet macos
     // to its own device.
     if (tap->has_vmnet && tap->vmnet) {
-        return net_init_vmnet(netdev, name, peer, errp);
+        char error[256];
+        s_vmnet_handle =
+            shared_library_open(s_vmnet_libname, error, sizeof(error));
+        if (!s_vmnet_handle) {
+            error_printf("Vmnet is only supported on macOS 10.15+. Error: %s\n",
+                    s_vmnet_libname, error);
+            return -1;
+        }
+        if (!dispatch_functions(error, sizeof(error))) {
+            return net_init_vmnet(netdev, name, peer, errp);
+        } else {
+            error_printf("Vmnet library could not be initialized! error: %s\n", error);
+            shared_library_close(s_vmnet_handle);
+            return -1;
+        }
     }
 #endif
 
