@@ -1694,6 +1694,23 @@ static void whpx_disable_xsave(struct whpx_state *whpx)
     WHV_PROCESSOR_XSAVE_FEATURES xsave_cap;
     HRESULT hr;
 
+    typedef int(CALLBACK* PFN_RTLGETVERSION) (PRTL_OSVERSIONINFOW lpVersionInformation);
+    PFN_RTLGETVERSION pRtlGetVersion;
+    HMODULE hDll = LoadLibrary("Ntdll.dll");
+    pRtlGetVersion = (PFN_RTLGETVERSION)GetProcAddress(hDll, "RtlGetVersion");
+    if (pRtlGetVersion) {
+        RTL_OSVERSIONINFOW ovi = { 0 };
+        ovi.dwOSVersionInfoSize = sizeof(ovi);
+        int ntStatus = pRtlGetVersion(&ovi);
+        // On Windows 11 (10.0.22000), CET will require xsave
+        if (ntStatus == 0) {
+            printf("WHPX on Windows %d.%d.%d detected.\n",
+                   ovi.dwMajorVersion, ovi.dwMinorVersion, ovi.dwBuildNumber);
+            if(ovi.dwMajorVersion >= 10 && ovi.dwBuildNumber >= 22000)
+                return;
+        }
+    }
+
     if (!whpx_has_xsave()) {
         return;
     }
