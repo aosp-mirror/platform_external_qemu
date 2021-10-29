@@ -659,9 +659,9 @@ android_target_compile_options(
 android_target_compile_definitions(android-qemu-deps darwin-x86_64 INTERFACE
                                    "-D_DARWIN_C_SOURCE=1")
 android_target_link_libraries(android-qemu-deps darwin-x86_64 INTERFACE
-                              "-framework IOKit" "-framework CoreFoundation" "-framework vmnet")
+                              "-framework IOKit" "-framework CoreFoundation")
 android_target_link_libraries(android-qemu-deps darwin-aarch64 INTERFACE
-                              "-framework IOKit" "-framework CoreFoundation" "-framework vmnet")
+                              "-framework IOKit" "-framework CoreFoundation")
 
 # Windows x86 definitions
 set(ANDROID_QEMU_arm_DEVICES_windows_msvc-x86_64
