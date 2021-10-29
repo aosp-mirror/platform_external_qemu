@@ -1247,7 +1247,9 @@ static void hvf_handle_sys_reg(CPUState* cpu) {
         }
         default:
             DPRINTF("%s: sys reg unhandled\n", __func__);
-            abort();
+            // TODO: b/204582046
+            // We dont support  performance measurement unit on M1 yet
+            // but should consider implement that; for now ignore this
     }
 
     hvf_skip_instr(cpu);
