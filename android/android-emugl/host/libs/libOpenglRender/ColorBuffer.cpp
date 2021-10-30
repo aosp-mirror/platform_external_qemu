@@ -490,6 +490,7 @@ void ColorBuffer::readPixelsYUVCached(int x,
     assert(m_yuv_converter.get());
 #endif
 
+
     m_yuv_converter->readPixels((uint8_t*)pixels, pixels_size);
 
     return;

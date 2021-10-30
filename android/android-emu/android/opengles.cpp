@@ -34,6 +34,7 @@
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/dll.h"
+#include "android/utils/GfxstreamFatalError.h"
 #include "android/utils/path.h"
 #include "config-host.h"
 

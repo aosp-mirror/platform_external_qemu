@@ -18,6 +18,7 @@
 #define EMUGL_DEBUG_LEVEL  0
 #include "emugl/common/debug.h"
 #include "emugl/common/dma_device.h"
+#include "android/utils/GfxstreamFatalError.h"
 
 #include <assert.h>
 #include <memory.h>
@@ -106,8 +107,8 @@ int ChannelStream::writeFully(const void* buf, size_t len) {
 }
 
 const unsigned char *ChannelStream::readFully( void *buf, size_t len) {
-    fprintf(stderr, "%s: FATAL: not intended for use with ChannelStream\n", __func__);
-    abort();
+    GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER))
+        << "not intended for use with ChannelStream";
 }
 
 void ChannelStream::onSave(android::base::Stream* stream) {

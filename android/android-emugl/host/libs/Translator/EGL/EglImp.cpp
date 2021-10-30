@@ -27,6 +27,7 @@
 #include "ThreadInfo.h"
 #include "android/base/files/Stream.h"
 #include "android/base/system/System.h"
+#include "android/utils/GfxstreamFatalError.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/shared_library.h"
 
@@ -1070,9 +1071,8 @@ static void sGetPbufferSurfaceGLProperties(
     } else if (r == 5 && g == 5 && b == 5 && a == 1) {
         *colorFormat = GL_RGB5_A1;
     } else {
-        fprintf(stderr, "%s:%d: invalid color format R%dG%dB%dA%d\n", __func__,
-                __LINE__, r, g, b, a);
-        abort();
+        GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER))
+            << "invalid color format R" << r << "G" << g << "B" << b << "A" << a;
     }
 
     // Blanket provide 24/8 depth/stencil format for now.

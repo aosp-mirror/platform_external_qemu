@@ -779,7 +779,6 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 
     sVkEmulation->physdev = physdevs[maxScoringIndex];
     sVkEmulation->deviceInfo = deviceInfos[maxScoringIndex];
-
     // Postcondition: sVkEmulation has valid device support info
 
     // Ask about image format support here.
@@ -1852,7 +1851,6 @@ bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle) {
     bool readRes = FrameBuffer::getFB()->
         readColorBufferContents(
             colorBufferHandle, &cbNumBytes, nullptr);
-
     if (!readRes) {
         fprintf(stderr, "%s: Failed to read color buffer 0x%x\n",
                 __func__, colorBufferHandle);
@@ -1984,7 +1982,7 @@ bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle) {
             });
         }
     }
-        
+
     vk->vkCmdCopyBufferToImage(
         sVkEmulation->commandBuffer,
         sVkEmulation->staging.buffer,

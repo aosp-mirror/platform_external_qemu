@@ -41,6 +41,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/utils/debug.h"
+#include "android/utils/GfxstreamFatalError.h"
 
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/feature_control.h"
@@ -1325,13 +1326,13 @@ HandleType FrameBuffer::createBufferWithHandleLocked(int p_size,
     if (m_colorbuffers.count(handle) != 0) {
         emugl::emugl_crash_reporter(
                 "FATAL: color buffer with handle %u already exists", handle);
-        abort();
+        GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER));
     }
 
     if (m_buffers.count(handle) != 0) {
         emugl::emugl_crash_reporter(
                 "FATAL: buffer with handle %u already exists", handle);
-        abort();
+        GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER));
     }
 
     BufferPtr buffer(Buffer::create(p_size, handle));
