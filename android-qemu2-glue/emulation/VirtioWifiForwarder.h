@@ -39,7 +39,7 @@ public:
     // when communicating with the remote VM, it should return zero.
 
     using OnFrameAvailableCallback =
-            std::function<size_t(const uint8_t*, size_t)>;
+            std::function<ssize_t(const uint8_t*, size_t)>;
     // Used when the outbound frame has been transmitted.
     // It is possible that the network device is busy therefore the client needs
     // to handle retransmission.
