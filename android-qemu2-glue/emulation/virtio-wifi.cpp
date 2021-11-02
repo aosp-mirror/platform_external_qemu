@@ -7,6 +7,7 @@ extern "C" {
 #include "android-qemu2-glue/utils/stream.h"
 #include "android/base/Log.h"
 #include "android/telephony/sysdeps.h"
+#include <android/android-emu/android/emulation/VmLock.h>
 
 extern "C" {
 #include "android-qemu2-glue/emulation/virtio-wifi.h"
@@ -43,7 +44,7 @@ constexpr uint16_t VIRTIO_LINK_UP = 1;
 static const uint8_t kBssID[] = {0x00, 0x13, 0x10, 0x85, 0xfe, 0x01};
 static const uint8_t kMacAddr[] = {0x02, 0x15, 0xb2, 0x00, 0x00, 0x00};
 
-static size_t virtio_wifi_on_frame_available(const uint8_t*, size_t);
+static ssize_t virtio_wifi_on_frame_available(const uint8_t*, size_t);
 
 static void virtio_wifi_set_link_status(NetClientState* nc);
 
@@ -99,18 +100,22 @@ static ssize_t virtio_wifi_add_buf(VirtIODevice* vdev,
                                    VirtQueue* vq,
                                    const uint8_t* buf,
                                    uint32_t size) {
+    android::RecursiveScopedVmLock lock;
     if (!virtio_wifi_has_buffers(vq)) {
         LOG(VERBOSE) << "VirtIO WiFi: unexpected full virtqueue";
         return 0;
     }
-
     VirtQueueElement* elem = static_cast<VirtQueueElement*>(
             virtqueue_pop(vq, sizeof(VirtQueueElement)));
     if (!elem) {
         LOG(VERBOSE) << "VirtIO WiFi: unexpected empty virtqueue";
-        return 0;
+        return -1;
     }
-
+    if (elem->in_num < 1) {
+        virtqueue_detach_element(vq, elem, 0);
+        g_free(elem);
+        return -1;
+    }
     IOVector iovec(elem->in_sg, elem->in_sg + elem->in_num);
     size = std::min(size, Ieee80211Frame::MAX_FRAME_LEN);
     iovec.copyFrom(buf, 0, size);
@@ -123,16 +128,14 @@ static ssize_t virtio_wifi_add_buf(VirtIODevice* vdev,
     return size;
 }
 
-static size_t virtio_wifi_on_frame_available(const uint8_t* buf, size_t size) {
+static ssize_t virtio_wifi_on_frame_available(const uint8_t* buf, size_t size) {
     VirtIOWifi* n = sGlobal.wifi;
     VirtIODevice* vdev = VIRTIO_DEVICE(n);
-    size_t ret = 0;
+    ssize_t ret = 0;
     if (size > 0) {
         NetClientState* nc = qemu_get_queue(sGlobal.wifiForwarder->getNic());
         size_t index = nc->queue_index;
-        rcu_read_lock();
         ret = virtio_wifi_add_buf(vdev, n->vqs[index].rx, buf, size);
-        rcu_read_unlock();
     }
     return ret;
 }
