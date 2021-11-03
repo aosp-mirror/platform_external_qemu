@@ -41,10 +41,13 @@ extern "C" {
 #include <android/android-emu/android/featurecontrol/feature_control.h>
 #include <android/crashreport/crash-handler.h>
 #include <android-qemu2-glue/base/files/QemuFileStream.h>
+#include <android-qemu2-glue/emulation/virtio_vsock_transport.h>
 
 namespace {
 using android::emulation::AdbVsockPipe;
 using android::emulation::SocketBuffer;
+using android::emulation::IVsockNewTransport;
+using android::emulation::vsock_create_transport_connector;
 
 constexpr uint32_t VMADDR_CID_HOST = 2;
 constexpr uint32_t kHostBufAlloc = 1024 * 1024;
@@ -53,6 +56,7 @@ constexpr uint32_t kSrcHostPortMin = 50000;
 enum class DstPort {
     Data = 5000,
     Ping = 5001,
+    DataNewTransport = 5002,
 };
 
 const char* op2str(int op) {
@@ -95,6 +99,7 @@ struct VSockStream {
 
     VSockStream(struct VirtIOVSockDev *d,
                 IVsockHostCallbacks *hostCallbacks,
+                std::shared_ptr<IVsockNewTransport> newTransport,
                 uint64_t guest_cid,
                 uint64_t host_cid,
                 uint32_t guest_port,
@@ -104,13 +109,14 @@ struct VSockStream {
         : vtblPtr(&vtblMain)
         , mDev(d)
         , mHostCallbacks(hostCallbacks)
+        , mNewTransport(std::move(newTransport))
         , mGuestCid(guest_cid)
         , mHostCid(host_cid)
         , mGuestPort(guest_port)
         , mHostPort(host_port)
         , mGuestBufAlloc(guest_buf_alloc)
         , mGuestFwdCnt(guest_fwd_cnt) {
-        if (!hostCallbacks) {
+        if (!hostCallbacks && !mNewTransport) {
             mPipe = android_pipe_guest_open(this);
         }
     }
@@ -125,7 +131,7 @@ struct VSockStream {
     }
 
     bool ok() const {
-        return mPipe || mHostCallbacks;
+        return mPipe || mHostCallbacks || mNewTransport;
     }
 
     void setGuestPos(uint32_t buf_alloc, uint32_t fwd_cnt) {
@@ -133,7 +139,7 @@ struct VSockStream {
         mGuestFwdCnt = fwd_cnt;
     }
 
-    void writeGuestToHost(const void *buf, size_t size) {
+    bool writeGuestToHost(const void *buf, const size_t size) {
         if (mPipe) {
             AndroidPipeBuffer abuf;
             abuf.data = static_cast<uint8_t *>(const_cast<void *>(buf));
@@ -142,12 +148,30 @@ struct VSockStream {
             android_pipe_guest_send(&mPipe, &abuf, 1);
         } else if (mHostCallbacks) {
             mHostCallbacks->onReceive(buf, size);
+        } else if (mNewTransport) {
+            const uint8_t *buf8 = static_cast<const uint8_t *>(buf);
+            size_t to_send = size;
+            while (to_send > 0) {
+                std::shared_ptr<IVsockNewTransport> nextStage;
+                const int n = mNewTransport->writeGuestToHost(buf8, to_send, &nextStage);
+                if (n < 0) {
+                    return false;
+                }
+
+                buf8 += n;
+                to_send -= n;
+
+                if (nextStage) {
+                    mNewTransport = std::move(nextStage);
+                }
+            }
         } else {
             ::crashhandler_die("%s:%s:%d: No data sink",
                                "VSockStream", __func__, __LINE__);
         }
 
         mHostFwdCnt += size;
+        return true;
     }
 
     void hostToGuestBufAppend(const void *data, size_t size) {
@@ -176,7 +200,8 @@ struct VSockStream {
     void signalWake(bool write);
 
     bool canSave() const {
-        return mPipe || (mHostCallbacks && mHostCallbacks->canSave());
+        return mPipe || (mHostCallbacks && mHostCallbacks->canSave())
+                     || (mNewTransport && mNewTransport->canSave());
     }
 
     void save(android::base::Stream *stream) const {
@@ -198,6 +223,9 @@ struct VSockStream {
             android_pipe_guest_save(mPipe, asCStream(stream));
         } else if (mHostCallbacks) {
             stream->putByte(2);  // see `load` below
+        } else if (mNewTransport) {
+            stream->putByte(3);
+            mNewTransport->save();
         } else {
             ::crashhandler_die("%s:%s:%d unexpected stream state",
                                "VSockStream", __func__, __LINE__);
@@ -240,6 +268,10 @@ struct VSockStream {
             }
             break;
 
+        case 3:
+            // TODO
+            break;
+
         default:
             return LoadResult::Error;
         }
@@ -266,6 +298,7 @@ struct VSockStream {
     struct VirtIOVSockDev *const mDev;
     IVsockHostCallbacks *mHostCallbacks = nullptr;
     void *mPipe = nullptr;
+    std::shared_ptr<IVsockNewTransport> mNewTransport;
     uint64_t mGuestCid = 0;
     uint64_t mHostCid = 0;
     uint32_t mGuestPort = 0;
@@ -357,7 +390,7 @@ struct VirtIOVSockDev {
             .buf_alloc = 0,  // the guest has not sent us this value yet
         };
 
-        const auto stream = createStreamLocked(&request, callbacks);
+        const auto stream = createStreamLocked(&request, callbacks, nullptr);
         if (stream) {
             stream->sendOp(VIRTIO_VSOCK_OP_REQUEST);
             vqWriteHostToGuestExternalLocked();
@@ -651,9 +684,11 @@ private:
     }
 
     std::shared_ptr<VSockStream> createStreamLocked(const struct virtio_vsock_hdr *request,
-                                                    IVsockHostCallbacks *callbacks) {
+                                                    IVsockHostCallbacks *callbacks,
+                                                    std::shared_ptr<IVsockNewTransport> newTransport) {
         auto stream = std::make_shared<VSockStream>(this,
                                                     callbacks,
+                                                    std::move(newTransport),
                                                     request->src_cid,
                                                     request->dst_cid,
                                                     request->src_port,
@@ -672,6 +707,11 @@ private:
         } else {
             return nullptr;
         }
+    }
+
+    std::shared_ptr<VSockStream> createNewStreamLocked(const struct virtio_vsock_hdr *request) {
+        const uint64_t key = makeStreamKey(request->src_port, request->dst_port);
+        return createStreamLocked(request, nullptr, vsock_create_transport_connector(key));
     }
 
     std::shared_ptr<VSockStream> findStreamLocked(uint64_t key) {
@@ -708,7 +748,7 @@ private:
         if (request->op == VIRTIO_VSOCK_OP_REQUEST) {
             switch (static_cast<DstPort>(request->dst_port)) {
             case DstPort::Data: {
-                    auto stream = createStreamLocked(request, nullptr);
+                    auto stream = createStreamLocked(request, nullptr, nullptr);
                     if (stream) {
                         stream->sendOp(VIRTIO_VSOCK_OP_RESPONSE);
                     } else {
@@ -727,6 +767,19 @@ private:
 
                 // this port is not intended to be open
                 queueOrphanFrameHostToGuestLocked(request, VIRTIO_VSOCK_OP_RST);
+                break;
+
+            case DstPort::DataNewTransport: {
+                    auto stream = createNewStreamLocked(request);
+                    if (stream) {
+                        stream->sendOp(VIRTIO_VSOCK_OP_RESPONSE);
+                    } else {
+                        derror("%s {src_port=%u dst_port=%u} could not create "
+                                "the stream - already exists",
+                                __func__, request->src_port, request->dst_port);
+                        queueOrphanFrameHostToGuestLocked(request, VIRTIO_VSOCK_OP_RST);
+                    }
+                }
                 break;
 
             default:
@@ -751,8 +804,13 @@ private:
 
                 case VIRTIO_VSOCK_OP_RW:
                     stream->setGuestPos(request->buf_alloc, request->fwd_cnt);
-                    stream->writeGuestToHost(request + 1, request->len);
-                    stream->sendOp(VIRTIO_VSOCK_OP_CREDIT_UPDATE);
+                    if (stream->writeGuestToHost(request + 1, request->len)) {
+                        stream->sendOp(VIRTIO_VSOCK_OP_CREDIT_UPDATE);
+                    } else {
+                        stream->sendOp(VIRTIO_VSOCK_OP_CREDIT_UPDATE);
+                        stream->sendOp(VIRTIO_VSOCK_OP_SHUTDOWN);
+                        closeStreamLocked(std::move(stream));
+                    }
                     break;
 
                 case VIRTIO_VSOCK_OP_RESPONSE:
@@ -959,7 +1017,6 @@ int virtio_vsock_is_enabled() {
     return feature_is_enabled(kFeature_VirtioVsockPipe);
 }
 
-namespace {
 uint64_t virtio_vsock_host_to_guest_open(uint32_t guest_port,
                                          IVsockHostCallbacks *callbacks) {
     return g_impl ? g_impl->hostToGuestOpen(guest_port, callbacks) : 0;
@@ -978,6 +1035,7 @@ bool virtio_vsock_host_to_guest_close(uint64_t handle) {
     return g_impl ? g_impl->hostToGuestClose(handle) : false;
 }
 
+namespace {
 const virtio_vsock_device_ops_t virtio_vsock_device_host_ops = {
     .open = &virtio_vsock_host_to_guest_open,
     .send = &virtio_vsock_host_to_guest_send,

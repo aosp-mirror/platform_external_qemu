@@ -54,6 +54,7 @@ extern "C" {
 #include "android-qemu2-glue/emulation/charpipe.h"
 #include "android-qemu2-glue/emulation/goldfish_sync.h"
 #include "android-qemu2-glue/emulation/virtio-wifi.h"
+#include "android-qemu2-glue/emulation/virtio_vsock_transport.h"
 #include "android-qemu2-glue/looper-qemu.h"
 #include "android-qemu2-glue/net-android.h"
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
@@ -504,6 +505,8 @@ bool qemu_android_emulation_setup() {
     if (!qemu_android_setup_http_proxy(op_http_proxy)) {
         return false;
     }
+
+    android::emulation::virtio_vsock_new_transport_init();
 
     if (!android_emulation_setup(getConsoleAgents(), true)) {
         return false;
