@@ -866,7 +866,8 @@ F: hw/net/mv88w8618_eth.c
 F: include/hw/net/mv88w8618_eth.h
 F: docs/system/arm/musicpal.rst
 
-Nuvoton NPCM7xx
+Nuvoton NPCM
+M: Havard Skinnemoen <hskinnemoen@google.com>
 M: Tyrone Ting <kfting@nuvoton.com>
 M: Hao Wu <wuhaotsh@google.com>
 L: qemu-arm@nongnu.org
