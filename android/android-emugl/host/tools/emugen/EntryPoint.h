@@ -42,6 +42,7 @@ public:
         return m_customHostApi;
     }
     VarsArray & vars() { return m_vars; }
+    const VarsArray & vars() const { return m_vars; }
     Var & retval() { return m_retval; }
     Var * var(const std::string & name);
     const Var * var(const std::string & name) const;

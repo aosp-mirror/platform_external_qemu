@@ -537,6 +537,27 @@ static void addGuestTimePrinting(const EntryPoint* e, bool hasTimeBeforeReadback
 #endif
 }
 
+static void addEncoderDebugLog(const EntryPoint* e, FILE* fp) {
+    fprintf(fp, "\tENCODER_DEBUG_LOG(\"%s(", e->name().c_str());
+
+    const VarsArray& vars = e->vars();
+    for (size_t i = 0; i < vars.size(); i++) {
+        const Var& var = vars[i];
+        if (i != 0) {
+            fprintf(fp, ", ");
+        }
+        fprintf(fp, "%s:%s", var.name().c_str(), var.type()->printFormat().c_str());
+    }
+
+    fprintf(fp, ")\"");
+    for (size_t i = 0; i < vars.size(); i++) {
+        const Var& var = vars[i];
+        fprintf(fp, ", %s", var.name().c_str());
+    }
+
+    fprintf(fp, ");\n");
+}
+
 int ApiGen::genEncoderImpl(const std::string &filename)
 {
     FILE *fp = fopen(filename.c_str(), "wt");
@@ -552,7 +573,8 @@ int ApiGen::genEncoderImpl(const std::string &filename)
     fprintf(fp, "#include \"%s_enc.h\"\n\n\n", m_basename.c_str());
     fprintf(fp, "#include <vector>\n\n");
     fprintf(fp, "#include <stdio.h>\n\n");
-    fprintf(fp, "#include \"android/base/Tracing.h\"\n");
+    fprintf(fp, "#include \"android/base/Tracing.h\"\n\n");
+    fprintf(fp, "#include \"EncoderDebug.h\"\n\n");
     fprintf(fp, "namespace {\n\n");
 
     // unsupport printout
@@ -573,9 +595,8 @@ int ApiGen::genEncoderImpl(const std::string &filename)
 
         e->print(fp, true, "_enc", /* classname + "::" */"", "void *self");
         fprintf(fp, "{\n");
-#if DLOG_ALL_ENCODES
-        fprintf(fp, "ALOGD(\"%%s: enter\", __FUNCTION__);\n");
-#endif
+
+        addEncoderDebugLog(e, fp);
 
         fprintf(fp, "\tAEMU_SCOPED_TRACE(\"%s encode\");\n", e->name().c_str());
 
