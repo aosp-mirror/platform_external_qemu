@@ -39,7 +39,7 @@
 
 #include <memory>
 #include <string>
-#include <vector>
+#include <unordered_set>
 
 // Sockets includes
 #ifndef _MSC_VER
@@ -68,7 +68,7 @@
 #endif
 
 struct GlobalState {
-    std::vector<std::string> allowedPaths;
+    std::unordered_set<std::string> allowedPaths;
 };
 
 static android::base::LazyInstance<GlobalState> sGlobal = LAZY_INSTANCE_INIT;
@@ -77,13 +77,7 @@ static bool android_unix_pipe_check_path(const char* path) {
     if (path) {
         D("%s: Checking for [%s]", __FUNCTION__, path);
         GlobalState* global = sGlobal.ptr();
-        for (const auto& it : global->allowedPaths) {
-            if (it == path) {
-                D("   OK\n");
-                return true;
-            }
-        }
-        D("  UNKNOWN\N");
+        return global->allowedPaths.count(path) > 0;
     }
     return false;
 }
@@ -613,7 +607,7 @@ void android_unix_pipes_add_allowed_path(const char* path) {
     if (path && path[0]) {
         D("%s: Adding [%s]", __FUNCTION__, path);
         GlobalState* global = sGlobal.ptr();
-        global->allowedPaths.emplace_back(std::string(path));
+        global->allowedPaths.insert(path);
     }
 }
 
