@@ -2514,38 +2514,31 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
     mContainer.setGeometry(containerGeo.x(), containerGeo.y(), windowGeo.width(), windowGeo.height());
 }
 
-void EmulatorQtWindow::resizeAndChangeAspectRatio(int x, int y, int w, int h) {
+void EmulatorQtWindow::resizeAndChangeAspectRatio(int x, int y, int w, int h,
+                                                  bool ignoreOrientation) {
     if (!mBackingSurface) {
         return;
     }
     QRect windowGeo = this->geometry();
     QSize backingSize = mBackingSurface->bitmap->size();
     float scale = (float)windowGeo.width() / (float)backingSize.width();
-    switch(mOrientation) {
-        default:
-        case SKIN_ROTATION_0:
-        case SKIN_ROTATION_180:
-            if (backingSize.width() == w &&
-                backingSize.height() == h) {
+    if (!ignoreOrientation) {
+        switch(mOrientation) {
+            case SKIN_ROTATION_90:
+            case SKIN_ROTATION_270:
+                std::swap(w, h);
+                std::swap(x, y);
                 break;
-            }
-            windowGeo.setWidth((int)(w * scale));
-            windowGeo.setHeight((int)(h * scale));
-            backingSize.setWidth(w);
-            backingSize.setHeight(h);
-            break;
-        case SKIN_ROTATION_90:
-        case SKIN_ROTATION_270:
-            if (backingSize.width() == h &&
-                backingSize.height() == w) {
+            case SKIN_ROTATION_0:
+            case SKIN_ROTATION_180:
+            default:
                 break;
-            }
-            windowGeo.setWidth((int)(h * scale));
-            windowGeo.setHeight((int)(w * scale));
-            backingSize.setWidth(h);
-            backingSize.setHeight(w);
-            break;
+        }
     }
+    windowGeo.setWidth((int)(w * scale));
+    windowGeo.setHeight((int)(h * scale));
+    backingSize.setWidth(w);
+    backingSize.setHeight(h);
     setDisplayRegionAndUpdate(x, y, backingSize.width(), backingSize.height());
     simulateSetScale(std::max(.2, (double)scale));
     QRect containerGeo = mContainer.geometry();
@@ -3391,8 +3384,8 @@ void EmulatorQtWindow::restoreSkin() {
     });
 }
 
-void EmulatorQtWindow::setUIDisplayRegion(int x, int y, int w, int h) {
-    runOnUiThread([this, x, y, w, h]() {this->resizeAndChangeAspectRatio(x, y, w, h);});
+void EmulatorQtWindow::setUIDisplayRegion(int x, int y, int w, int h, bool ignoreOrientation) {
+    runOnUiThread([this, x, y, w, h, ignoreOrientation]() {this->resizeAndChangeAspectRatio(x, y, w, h, ignoreOrientation);});
 }
 
 bool EmulatorQtWindow::multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h,

@@ -379,7 +379,7 @@ int MultiDisplay::destroyDisplay(uint32_t displayId) {
             states.state == RECORDER_RECORDING) {
             mRecordAgent->stopRecording();
         }
-        mWindowAgent->setUIDisplayRegion(0, 0, width, height);
+        mWindowAgent->setUIDisplayRegion(0, 0, width, height, true);
         if (restoreSkin) {
             mWindowAgent->restoreSkin();
         }
@@ -434,7 +434,7 @@ int MultiDisplay::setDisplayPose(uint32_t displayId,
         }
     }
     if (UIUpdate) {
-        mWindowAgent->setUIDisplayRegion(0, 0, width, height);
+        mWindowAgent->setUIDisplayRegion(0, 0, width, height, true);
     }
     LOG(VERBOSE) << "setDisplayPose " << displayId << " x " << x << " y " << y
                  << " w " << w << " h " << h << " dpi " << dpi;
@@ -496,11 +496,13 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId,
         mMultiDisplay[displayId].cb = colorBuffer;
     }
     if (noSkin) {
+        LOG(VERBOSE) << "disable skin";
         mWindowAgent->setNoSkin();
     }
     if (needUpdate) {
         // Explicitly adjust host window size
-        mWindowAgent->setUIDisplayRegion(0, 0, width, height);
+        LOG(VERBOSE) << "change window size to " << width << "x" << height;
+        mWindowAgent->setUIDisplayRegion(0, 0, width, height, true);
     }
     if (needUpdate && featurecontrol::isEnabled(android::featurecontrol::Minigbm)) {
         // b/131884992 b/186124236
@@ -839,11 +841,11 @@ void MultiDisplay::onLoad(base::Stream* stream) {
             mWindowAgent->setNoSkin();
         }
         mWindowAgent->setUIDisplayRegion(0, 0, combinedDisplayWidth,
-                                         combinedDisplayHeight);
+                                         combinedDisplayHeight, true);
     } else {
         if (activeBeforeLoad) {
             mWindowAgent->setUIDisplayRegion(0, 0, combinedDisplayWidth,
-                                             combinedDisplayHeight);
+                                             combinedDisplayHeight, true);
             mWindowAgent->restoreSkin();
         }
     }

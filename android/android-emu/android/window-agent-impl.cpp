@@ -143,7 +143,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     return android_foldable_set_posture(posture);
                 },
         .setUIDisplayRegion =
-                [](int x, int y, int w, int h) {
+                [](int x, int y, int w, int h, bool ignoreOrientation) {
                     // The UI display region needs to be updated when we add additional displays, or when we
                     // resize the screen. In the embedded case we do not have a visible UI, so we do not need
                     // to update display regions.
@@ -151,7 +151,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         return;
                     }
                     if (const auto win = EmulatorQtWindow::getInstance()) {
-                        win->setUIDisplayRegion(x, y, w, h);
+                        win->setUIDisplayRegion(x, y, w, h, ignoreOrientation);
                     };
                 },
         .getMultiDisplay =
