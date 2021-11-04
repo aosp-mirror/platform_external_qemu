@@ -68,6 +68,8 @@ typedef struct vmnet_lib {
     interface_ref (*vmnet_start_interface)(
             xpc_object_t, dispatch_queue_t,
             vmnet_start_interface_completion_handler_t);
+    vmnet_return_t (*vmnet_stop_interface)(interface_ref, dispatch_queue_t,
+            vmnet_interface_completion_handler_t);
     vmnet_return_t (*vmnet_interface_set_event_callback)(
         interface_ref , interface_event_t,
         dispatch_queue_t, vmnet_interface_event_callback_t);
@@ -135,6 +137,7 @@ bool dispatch_functions(char* error,
     LOAD_VMNET_FUNC(vmnet_write)
     LOAD_VMNET_FUNC(vmnet_copy_shared_interface_list)
     LOAD_VMNET_FUNC(vmnet_start_interface)
+    LOAD_VMNET_FUNC(vmnet_stop_interface)
     LOAD_VMNET_FUNC(vmnet_interface_set_event_callback)
     LOAD_VMNET_GLOBAL(vmnet_interface_id_key)
     LOAD_VMNET_GLOBAL(vmnet_shared_interface_name_key)
@@ -149,6 +152,7 @@ bool dispatch_functions(char* error,
 typedef struct vmnet_state {
   NetClientState nc;
   interface_ref vmnet_iface_ref;
+  dispatch_queue_t queue;
   /* Switched on after vmnet informs us that the interface has started */
   bool link_up;
   /*
@@ -156,6 +160,7 @@ typedef struct vmnet_state {
    * delivery callback is invoked
    */
   bool qemu_ready_to_receive;
+  Notifier exit;
 } vmnet_state_t;
 
 static const char *_vmnet_status_repr(vmnet_return_t status)
@@ -187,6 +192,23 @@ static const char *_vmnet_status_repr(vmnet_return_t status)
   default:
       return "unknown status code";
   }
+}
+
+static void vmnet_exit_notify(Notifier *notifier, void *data)
+{
+    vmnet_state_t *s = container_of(notifier, vmnet_state_t, exit);
+    s->qemu_ready_to_receive = false;
+    s->link_up = false;
+}
+
+static void vmnet_cleanup(NetClientState *nc)
+{
+    vmnet_state_t *s = DO_UPCAST(vmnet_state_t, nc, nc);
+    qemu_purge_queued_packets(nc);
+    vmnet_exit_notify(&s->exit, NULL);
+    (*s_vmnet_lib.vmnet_stop_interface)(s->vmnet_iface_ref, s->queue, NULL);
+    shared_library_close(s_vmnet_handle);
+    qemu_remove_exit_notifier(&s->exit);
 }
 
 static bool vmnet_can_receive(NetClientState *nc)
@@ -241,6 +263,7 @@ static NetClientInfo net_vmnet_macos_info = {
   .size = sizeof(vmnet_state_t),
   .receive_iov = vmnet_receive_iov,
   .can_receive = vmnet_can_receive,
+  .cleanup = vmnet_cleanup,
 };
 
 static bool _validate_ifname_is_valid_bridge_target(const char *ifname)
@@ -310,12 +333,13 @@ int net_init_vmnet(const Netdev *netdev, const char *name,
     NetClientState *nc = qemu_new_net_client(&net_vmnet_macos_info, peer,
                                            "tap", name);
     vmnet_state_t *vmnet_client_state = DO_UPCAST(vmnet_state_t, nc, nc);
-
+    vmnet_client_state->exit.notify = vmnet_exit_notify;
+    qemu_add_exit_notifier(&vmnet_client_state->exit);
     dispatch_queue_t vmnet_dispatch_queue = dispatch_queue_create(
         "org.qemu.vmnet.iface_queue",
         DISPATCH_QUEUE_SERIAL
     );
-
+    vmnet_client_state->queue = vmnet_dispatch_queue;
     __block vmnet_return_t vmnet_start_status = 0;
     __block uint64_t vmnet_iface_mtu = 0;
     __block uint64_t vmnet_max_packet_size = 0;
@@ -435,8 +459,6 @@ int net_init_vmnet(const Netdev *netdev, const char *name,
         assert(pktcnt == 1);
 
         dispatch_async(dispatch_get_main_queue(), ^{
-            qemu_mutex_lock_iothread();
-
             /*
             * Deliver the packet to the guest
             * If the delivery succeeded synchronously, this returns the length
@@ -456,8 +478,6 @@ int net_init_vmnet(const Netdev *netdev, const char *name,
             g_free(packet);
             g_free(iov);
             g_free(packet_buf);
-
-            qemu_mutex_unlock_iothread();
         });
     });
 
