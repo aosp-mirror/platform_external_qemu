@@ -91,7 +91,7 @@ CarRotaryPage::CarRotaryPage(QWidget* parent)
                     "cmd car_service inject-rotary", false, "CCW rotation"},
             {mUi->carrotary_clockwiseButton,
                     "cmd car_service inject-rotary -c true", false, "CW rotation"},
-            {mUi->carrotary_backButton, "input keyevent 4", false, "Back"},
+            {mUi->carrotary_backButton, "cmd car_service inject-key 4", true, "Back"},
             {mUi->carrotary_homeButton, "input keyevent 3", false, "Home"}};
 
     for (const auto& button_info : buttons) {
