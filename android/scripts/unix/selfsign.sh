@@ -1,9 +1,7 @@
 #!/bin/bash
-set -e
-
 
 emudir=$PWD/emulator
 entitlexml=$PWD/_codesign/entitlements.xml
-codesign -s - --entitlements $entitlexml --deep --force $emudir/qemu/*/*
-codesign -s - --entitlements $entitlexml --deep --force $emudir/emulator
+codesign -s - --entitlements $entitlexml $emudir/qemu/*/*
+codesign -s - --entitlements $entitlexml $emudir/lib64/*.dylib
 xattr -dr com.apple.quarantine $emudir
