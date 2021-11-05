@@ -33,6 +33,7 @@
 #include "android/base/BumpPool.h"
 #include "android/base/system/System.h"
 #include "android/base/Tracing.h"
+#include "android/utils/GfxstreamFatalError.h"
 
 #include "IOStream.h"
 #include "emugl/common/feature_control.h"
@@ -1643,7 +1644,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         uint64_t readStream = 0;
                         memcpy(&readStream, *readStreamPtrPtr, sizeof(uint64_t)); *readStreamPtrPtr += sizeof(uint64_t);
                         auto hostPtr = m_state->getMappedHostPointer(memory);
-                        if (!hostPtr && readStream > 0) abort();
+                        if (!hostPtr && readStream > 0) GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER));
                         if (!hostPtr) continue;
                         uint8_t* targetRange = hostPtr + offset;
                         memcpy(targetRange, *readStreamPtrPtr, readStream); *readStreamPtrPtr += readStream;
