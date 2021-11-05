@@ -204,6 +204,16 @@ static int ipmi_load_readbuf(SMBusIPMIDevice *sid)
     return 0;
 }
 
+static int ipmi_can_write_data(SMBusDevice *dev, uint8_t c, uint8_t offset)
+{
+    SMBusIPMIDevice *sid = SMBUS_IPMI(dev);
+
+    if (offset == 0 && c == SSIF_IPMI_RESPONSE && sid->outlen == 0) {
+        return 1; /* NAK if response is not ready */
+    }
+    return 0;
+}
+
 static int ipmi_write_data(SMBusDevice *dev, uint8_t *buf, uint8_t len)
 {
     SMBusIPMIDevice *sid = SMBUS_IPMI(dev);
@@ -362,6 +372,7 @@ static void smbus_ipmi_class_init(ObjectClass *oc, void *data)
 
     sc->receive_byte = ipmi_receive_byte;
     sc->write_data = ipmi_write_data;
+    sc->can_write_data = ipmi_can_write_data;
     dc->vmsd = &vmstate_smbus_ipmi;
     dc->realize = smbus_ipmi_realize;
     iic->set_atn = smbus_ipmi_set_atn;
