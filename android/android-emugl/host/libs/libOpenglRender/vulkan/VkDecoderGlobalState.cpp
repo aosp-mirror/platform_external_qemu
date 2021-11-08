@@ -722,6 +722,14 @@ public:
         vk->vkGetPhysicalDeviceFeatures(physicalDevice, pFeatures);
         pFeatures->textureCompressionETC2 = true;
         pFeatures->textureCompressionASTC_LDR |= kEmulateAstc;
+
+#ifdef __APPLE__
+        // MoltenVK does not support geometryShader, and dEQP expects it to be
+        // supported if multiViewport is supported.
+        if (!pFeatures->geometryShader) {
+            pFeatures->multiViewport = false;
+        }
+#endif  // __APPLE__
     }
 
     void on_vkGetPhysicalDeviceFeatures2(
@@ -762,6 +770,14 @@ public:
 
         pFeatures->features.textureCompressionETC2 = true;
         pFeatures->features.textureCompressionASTC_LDR |= kEmulateAstc;
+
+#ifdef __APPLE__
+        // MoltenVK does not support geometryShader, and dEQP expects it to be
+        // supported if multiViewport is supported.
+        if (!pFeatures->features.geometryShader) {
+            pFeatures->features.multiViewport = false;
+        }
+#endif  // __APPLE__
     }
 
     VkResult on_vkGetPhysicalDeviceImageFormatProperties(
