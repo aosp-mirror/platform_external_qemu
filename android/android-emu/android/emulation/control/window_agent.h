@@ -87,7 +87,7 @@ typedef struct QAndroidEmulatorWindowAgent {
     bool (*setPosture)(int posture);
 
     // Set the UI display region
-    void (*setUIDisplayRegion)(int, int, int, int);
+    void (*setUIDisplayRegion)(int, int, int, int, bool);
     bool (*getMultiDisplay)(uint32_t,
                             int32_t*,
                             int32_t*,

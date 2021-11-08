@@ -226,7 +226,8 @@ public:
     void doResize(const QSize& size,
                   bool isKbdShortcut = false);
     void resizeAndChangeAspectRatio(bool isFolded);
-    void resizeAndChangeAspectRatio(int x, int y, int w, int h);
+    void resizeAndChangeAspectRatio(int x, int y, int w, int h,
+                                    bool ignoreOrientation = false);
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
                           const QPoint& pos,
@@ -290,7 +291,7 @@ public:
     bool multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h,
                                    uint32_t dpi, uint32_t flag);
     void updateUIMultiDisplayPage(uint32_t id);
-    void setUIDisplayRegion(int x, int y, int w, int h);
+    void setUIDisplayRegion(int x, int y, int w, int h, bool ignoreOrientation = false);
     const QPixmap* getRawSkinPixmap() { getSkinPixmap(); return mRawSkinPixmap; }
 
     static bool sClosed;
