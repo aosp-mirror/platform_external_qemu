@@ -314,7 +314,6 @@ set(android_emu_dependent_src
     android/emulation/control/ScreenCapturer.cpp
     android/emulation/FakeRotatingCameraSensor.cpp
     android/emulation/HostMemoryService.cpp
-    android/emulation/Keymaster3.cpp
     android/emulation/QemuMiscPipe.cpp
     android/emulation/resizable_display_config.cpp
     android/http_proxy.c
