@@ -48,7 +48,7 @@ struct ASN1_TYPE_Delete {
 
 typedef struct km_root_of_trust {
     ASN1_OCTET_STRING* verified_boot_key;
-    ASN1_BOOLEAN* device_locked;
+    ASN1_BOOLEAN device_locked;
     ASN1_ENUMERATED* verified_boot_state;
 } KM_ROOT_OF_TRUST;
 
@@ -559,7 +559,7 @@ keymaster_error_t build_attestation_record(const AuthorizationSet& attestation_p
     key_desc->tee_enforced->root_of_trust = KM_ROOT_OF_TRUST_new();
     memset(key_desc->tee_enforced->root_of_trust, 0, sizeof(KM_ROOT_OF_TRUST));
     key_desc->tee_enforced->root_of_trust->verified_boot_key = ASN1_OCTET_STRING_new();
-    key_desc->tee_enforced->root_of_trust->device_locked = ASN1_NULL_new();
+    key_desc->tee_enforced->root_of_trust->device_locked = 0xff;
     key_desc->tee_enforced->root_of_trust->verified_boot_state = ASN1_INTEGER_new();
     ASN1_OCTET_STRING_set(key_desc->tee_enforced->root_of_trust->verified_boot_key,
              reinterpret_cast<const uint8_t*>("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
