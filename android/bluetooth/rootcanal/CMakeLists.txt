@@ -1,15 +1,15 @@
-set(BT_ROOT ${AOSP_ROOT}/system/bt)
+set(BT_ROOT ${AOSP_ROOT}/packages/modules/Bluetooth/system)
 set(VL_LIB ${BT_ROOT}/vendor_libs/test_vendor_lib)
 
 android_bluetooth_packet_gen(
-  GENERATED BluetoothGeneratedPackets_h INCLUDES system/bt/gd
+  GENERATED BluetoothGeneratedPackets_h INCLUDES gd
   SRC hci/hci_packets.pdl l2cap/l2cap_packets.pdl security/smp_packets.pdl
-  SOURCE_DIR ${AOSP_ROOT})
+  SOURCE_DIR ${BT_ROOT})
 
 android_bluetooth_packet_gen(
   GENERATED RootCanalGeneratedPackets_h
-  INCLUDES system/bt/vendor_libs/test_vendor_lib NAMESPACE model
-  SRC packets/link_layer_packets.pdl SOURCE_DIR ${AOSP_ROOT})
+  INCLUDES vendor_libs/test_vendor_lib NAMESPACE model
+  SRC packets/link_layer_packets.pdl SOURCE_DIR ${BT_ROOT})
 
 android_add_library(
   TARGET libscriptedbeaconpayload-protos-lite LICENSE Apache-2.0
@@ -51,7 +51,7 @@ endif()
 add_library(libbt-rootcanal.headers INTERFACE)
 target_include_directories(libbt-rootcanal.headers INTERFACE . ${VL_LIB})
 android_license(TARGET "libbt-rootcanal.headers" LIBNAME None SPDX Apache-2.0
-                LICENSE Apache-2.0 LOCAL "${BT_ROOT}/NOTICE")
+                LICENSE Apache-2.0 LOCAL "${BT_ROOT}/../NOTICE")
 
 android_add_library(
   TARGET BluetoothPacketSources
