@@ -1297,6 +1297,18 @@ extern "C" int main(int argc, char** argv) {
                     args.add(argv[n]);
                 }
 
+                // Setup console ports if requested.
+                args.add2If("-android-ports", opts->ports);
+                if (opts->port) {
+                    int console_port = -1;
+                    int adb_port = -1;
+                    if (!android_parse_port_option(opts->port, &console_port, &adb_port)) {
+                        return 1;
+                    }
+                    args.add("-android-ports");
+                    args.addFormat("%d,%d", console_port, adb_port);
+                }
+
                 fc::setIfNotOverriden(fc::HVF, true);
                 fc::setIfNotOverriden(fc::Vulkan, true);
                 fc::setIfNotOverriden(fc::GLDirectMem, true);
