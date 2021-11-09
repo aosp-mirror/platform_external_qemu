@@ -343,6 +343,10 @@ ssize_t VirtioWifiForwarder::onNICFrameAvailable(NetClientState* nc,
     }
     std::unique_ptr<Ieee80211Frame> frame =
             Ieee80211Frame::buildFromEthernet(buf, size, forwarder->mBssID);
+    if (frame == nullptr) {
+        LOG(VERBOSE) << "Unable to convert from Ethernet to Ieee80211.";
+        return -1;
+    }
     // encrypt will be no-op if cipher scheme is none.
     if (!frame->encrypt(forwarder->mHostapd->getCipherScheme())) {
         LOG(ERROR) << "Unable to encrypt the IEEE80211 frame with CCMP.";
