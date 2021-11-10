@@ -600,6 +600,7 @@ static void npcm7xx_realize(DeviceState *dev, Error **errp)
     for (i = 0; i < ARRAY_SIZE(s->gpio); i++) {
         Object *obj = OBJECT(&s->gpio[i]);
 
+        object_property_set_uint(obj, "controller-num", i, &error_abort);
         object_property_set_uint(obj, "reset-pullup",
                                  npcm7xx_gpio[i].reset_pu, &error_abort);
         object_property_set_uint(obj, "reset-pulldown",

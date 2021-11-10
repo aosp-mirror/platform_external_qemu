@@ -35,6 +35,7 @@ typedef struct NPCM7xxGPIOState {
     uint32_t reset_pd;
     uint32_t reset_osrc;
     uint32_t reset_odsc;
+    uint8_t  controller_num;
 
     MemoryRegion mmio;
 
