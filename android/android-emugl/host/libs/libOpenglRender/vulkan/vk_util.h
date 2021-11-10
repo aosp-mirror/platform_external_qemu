@@ -199,13 +199,13 @@ __vk_find_struct(void *start, VkStructureType sType)
 
 template <class T, class H> T* vk_find_struct(H* head)
 {
-    vk_get_vk_struct_id<H>::id;
+    (void)vk_get_vk_struct_id<H>::id;
     return static_cast<T*>(__vk_find_struct(static_cast<void*>(head), vk_get_vk_struct_id<T>::id));
 }
 
 template <class T, class H> const T* vk_find_struct(const H* head)
 {
-    vk_get_vk_struct_id<H>::id;
+    (void)vk_get_vk_struct_id<H>::id;
     return static_cast<const T*>(__vk_find_struct(const_cast<void*>(static_cast<const void*>(head)),
                                  vk_get_vk_struct_id<T>::id));
 }
@@ -260,4 +260,15 @@ template <class S, class T> void vk_struct_chain_remove(S* unwanted, T* vk_struc
         }
     }
 }
+
+#define VK_CHECK(x)                                                      \
+    do {                                                                 \
+        VkResult err = x;                                                \
+        if (err != VK_SUCCESS) {                                         \
+            ::fprintf(stderr, "%s(%u) %s: %s failed, error code = %d\n", \
+                      __FILE__, __LINE__, __FUNCTION__, #x, err);        \
+            ::abort();                                                   \
+        }                                                                \
+    } while (0)
+
 #endif /* VK_UTIL_H */
