@@ -1,5 +1,8 @@
 prebuilt(ANGLE)
 prebuilt(VULKAN)
+if(LINUX)
+  prebuilt(X11_XCB)
+endif()
 
 # Adds the proper graphic driver dependencies to the given target.
 function(add_opengl_dependencies TGT)
@@ -30,10 +33,16 @@ android_add_library(
   WINDOWS standalone_common/angle-util/windows/win32/Win32Window.cpp
           standalone_common/angle-util/windows/WindowsTimer.cpp)
 
-android_target_link_libraries(OSWindow linux-x86_64 PUBLIC "-lX11" "-lrt"
-                                                           android-emu-shared)
-android_target_link_libraries(OSWindow linux-aarch64 PUBLIC "-lX11" "-lrt"
+if(LINUX)
+  android_target_include_directories(OSWindow linux-x86_64 PUBLIC ${X11_XCB_INCLUDE_DIRS})
+  android_target_link_libraries(OSWindow linux-x86_64 PUBLIC "-lX11" "-lrt"
+                                                            ${X11_XCB_LIBRARIES}
                                                             android-emu-shared)
+  android_target_include_directories(OSWindow linux-aarch64 PUBLIC ${X11_XCB_INCLUDE_DIRS})
+  android_target_link_libraries(OSWindow linux-aarch64 PUBLIC "-lX11" "-lrt"
+                                                              ${X11_XCB_LIBRARIES}
+                                                              android-emu-shared)
+endif()
 
 android_target_link_libraries(OSWindow windows PUBLIC "gdi32::gdi32")
 android_target_link_libraries(OSWindow darwin-x86_64 PUBLIC "-framework AppKit")

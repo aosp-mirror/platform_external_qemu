@@ -13,6 +13,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xresource.h>
+#include <X11/Xlib-xcb.h>
 
 #include "OSWindow.h"
 
@@ -28,6 +29,7 @@ class X11Window : public OSWindow
 
     EGLNativeWindowType getNativeWindow() const override;
     EGLNativeDisplayType getNativeDisplay() const override;
+    void* getNativeDisplayConnection() const override;
     void* getFramebufferNativeWindow() const override;
 
     void messageLoop() override;

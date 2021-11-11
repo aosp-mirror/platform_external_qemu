@@ -42,6 +42,7 @@ class OSXWindow : public OSWindow
 
     EGLNativeWindowType getNativeWindow() const override;
     EGLNativeDisplayType getNativeDisplay() const override;
+    void* getNativeDisplayConnection() const override;
     void* getFramebufferNativeWindow() const override;
     float getDevicePixelRatio() const override;
 
