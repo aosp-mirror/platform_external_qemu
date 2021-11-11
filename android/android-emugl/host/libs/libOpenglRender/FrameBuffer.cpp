@@ -1063,9 +1063,12 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
     }
 
 #if SNAPSHOT_PROFILE > 1
-    printf("FrameBuffer::%s(%s): start at %lld ms\n", __func__,
+    printf("FrameBuffer::%s(%s): start at %lld ms x %d y %d w %d h %d"
+           " viewport %dx%d\n",
+           __func__,
            deleteExisting ? "deleteExisting" : "keepExisting",
-           (long long)System::get()->getProcessTimes().wallClockMs);
+           (long long)System::get()->getProcessTimes().wallClockMs,
+           wx, wy, ww, wh, fbw, fbh);
 #endif
 
     AutoLock mutex(m_lock);
