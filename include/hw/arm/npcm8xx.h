@@ -57,6 +57,26 @@
 
 #define NPCM8XX_NR_PWM_MODULES 3
 
+typedef struct NPCM8xxMachine {
+    MachineState        parent;
+    /*
+     * PWM fan splitter. each splitter connects to one PWM output and
+     * multiple MFT inputs.
+     */
+    SplitIRQ            fan_splitter[NPCM8XX_NR_PWM_MODULES *
+                                     NPCM7XX_PWM_PER_MODULE];
+} NPCM8xxMachine;
+
+
+typedef struct NPCM8xxMachineClass {
+    MachineClass        parent;
+
+    const char          *soc_type;
+} NPCM8xxMachineClass;
+
+#define TYPE_NPCM8XX_MACHINE MACHINE_TYPE_NAME("npcm8xx")
+OBJECT_DECLARE_TYPE(NPCM8xxMachine, NPCM8xxMachineClass, NPCM8XX_MACHINE)
+
 typedef struct NPCM8xxState {
     DeviceState         parent;
 
