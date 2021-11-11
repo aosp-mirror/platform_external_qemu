@@ -95,14 +95,19 @@ void VulkanStream::loadStringInPlaceWithStreamPtr(char** forOutput, uint8_t** st
     *streamPtr += sizeof(uint32_t);
     android::base::Stream::fromBe32((uint8_t*)&len);
 
+    if (len == UINT32_MAX) {
+        fprintf(stderr,
+                "%s: FATAL: VulkanStream can't allocate %u bytes\n",
+                __func__, UINT32_MAX);
+        abort();
+    }
+
     alloc((void**)forOutput, len + 1);
-
-    memset(*forOutput, 0x0, len + 1);
-
     if (len > 0) {
         memcpy(*forOutput, *streamPtr, len);
         *streamPtr += len;
     }
+    (*forOutput)[len] = 0;
 }
 
 void VulkanStream::loadStringArrayInPlaceWithStreamPtr(char*** forOutput, uint8_t** streamPtr) {
