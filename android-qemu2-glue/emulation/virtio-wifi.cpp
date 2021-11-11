@@ -103,7 +103,7 @@ static ssize_t virtio_wifi_add_buf(VirtIODevice* vdev,
     android::RecursiveScopedVmLock lock;
     if (!virtio_wifi_has_buffers(vq)) {
         LOG(VERBOSE) << "VirtIO WiFi: unexpected full virtqueue";
-        return 0;
+        return -1;
     }
     VirtQueueElement* elem = static_cast<VirtQueueElement*>(
             virtqueue_pop(vq, sizeof(VirtQueueElement)));
