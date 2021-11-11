@@ -404,4 +404,14 @@ memcpy((uint64_t*)&{newInputVarName}->accelerationStructureReference, *ptr, size
 *ptr += sizeof(uint64_t);
 """,
     },
+    "VkXcbSurfaceCreateInfoKHR": {
+        "common": """
+// This struct should never be marshaled / unmarshaled.
+__builtin_trap();
+""",
+        "marshaling": "",
+        "unmarshaling": "",
+        "reservedmarshaling": "",
+        "reservedunmarshaling": "",
+    },
 }

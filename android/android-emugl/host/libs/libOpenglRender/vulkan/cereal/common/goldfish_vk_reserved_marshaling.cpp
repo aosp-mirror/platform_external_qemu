@@ -8859,41 +8859,10 @@ void reservedunmarshal_VkXcbSurfaceCreateInfoKHR(
     VkXcbSurfaceCreateInfoKHR* forUnmarshaling,
     uint8_t** ptr)
 {
-    memcpy((VkStructureType*)&forUnmarshaling->sType, *ptr, sizeof(VkStructureType));
-    *ptr += sizeof(VkStructureType);
-    if (rootType == VK_STRUCTURE_TYPE_MAX_ENUM)
-    {
-        rootType = forUnmarshaling->sType;
-    }
-    uint32_t pNext_size;
-    memcpy((uint32_t*)&pNext_size, *ptr, sizeof(uint32_t));
-    android::base::Stream::fromBe32((uint8_t*)&pNext_size);
-    *ptr += sizeof(uint32_t);
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        memcpy((void*)forUnmarshaling->pNext, *ptr, sizeof(VkStructureType));
-        *ptr += sizeof(VkStructureType);
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), rootType, forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        reservedunmarshal_extension_struct(vkStream, rootType, (void*)(forUnmarshaling->pNext), ptr);
-    }
-    memcpy((VkXcbSurfaceCreateFlagsKHR*)&forUnmarshaling->flags, *ptr, sizeof(VkXcbSurfaceCreateFlagsKHR));
-    *ptr += sizeof(VkXcbSurfaceCreateFlagsKHR);
-    // WARNING PTR CHECK
-    memcpy((xcb_connection_t**)&forUnmarshaling->connection, (*ptr), 8);
-    android::base::Stream::fromBe64((uint8_t*)&forUnmarshaling->connection);
-    *ptr += 8;
-    if (forUnmarshaling->connection)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->connection, sizeof(xcb_connection_t));
-        memcpy((xcb_connection_t*)forUnmarshaling->connection, *ptr, sizeof(xcb_connection_t));
-        *ptr += sizeof(xcb_connection_t);
-    }
-    memcpy((xcb_window_t*)&forUnmarshaling->window, *ptr, sizeof(xcb_window_t));
-    *ptr += sizeof(xcb_window_t);
+    
+    // This struct should never be marshaled / unmarshaled.
+    __builtin_trap();
+    
 }
 
 #endif
