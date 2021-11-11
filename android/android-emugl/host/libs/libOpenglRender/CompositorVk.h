@@ -88,22 +88,25 @@ struct CompositorVkBase
 
 class CompositorVk : protected CompositorVkBase {
    public:
-    static std::unique_ptr<CompositorVk> create(
-        const goldfish_vk::VulkanDispatch &vk, VkDevice, VkPhysicalDevice,
-        VkQueue, VkFormat, VkImageLayout initialLayout,
-        VkImageLayout finalLayout, uint32_t width, uint32_t height,
-        const std::vector<VkImageView> &renderTargets, VkCommandPool);
-    static bool validatePhysicalDeviceFeatures(
-        const VkPhysicalDeviceFeatures2 &features);
-    static bool validateQueueFamilyProperties(
-        const VkQueueFamilyProperties &properties);
-    static bool enablePhysicalDeviceFeatures(
-        VkPhysicalDeviceFeatures2 &features);
-    static std::vector<const char *> getRequiredDeviceExtensions();
+       static std::unique_ptr<CompositorVk> create(
+               const goldfish_vk::VulkanDispatch& vk,
+               VkDevice,
+               VkPhysicalDevice,
+               VkQueue,
+               VkFormat,
+               VkImageLayout initialLayout,
+               VkImageLayout finalLayout,
+               uint32_t width,
+               uint32_t height,
+               const std::vector<VkImageView>& renderTargets,
+               VkCommandPool);
+       static bool validateQueueFamilyProperties(
+               const VkQueueFamilyProperties& properties);
 
-    ~CompositorVk();
-    VkCommandBuffer getCommandBuffer(uint32_t i) const;
-    void setComposition(uint32_t i, std::unique_ptr<Composition> &&composition);
+       ~CompositorVk();
+       VkCommandBuffer getCommandBuffer(uint32_t i) const;
+       void setComposition(uint32_t i,
+                           std::unique_ptr<Composition>&& composition);
 
    private:
     explicit CompositorVk(const goldfish_vk::VulkanDispatch &, VkDevice,

@@ -266,23 +266,14 @@ void CompositorVk::setUpGraphicsPipeline(uint32_t width, uint32_t height,
     layoutBindings[1].pImmutableSamplers = nullptr;
     layoutBindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-    VkDescriptorBindingFlagsEXT bindingFlags[] = {
-        VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT_EXT, 0};
-    VkDescriptorSetLayoutBindingFlagsCreateInfoEXT bindingFlagsCi = {};
-    bindingFlagsCi.sType =
-        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
-    bindingFlagsCi.bindingCount =
-        static_cast<uint32_t>(std::size(bindingFlags));
-    bindingFlagsCi.pBindingFlags = bindingFlags;
     VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCi = {};
     descriptorSetLayoutCi.sType =
         VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     descriptorSetLayoutCi.bindingCount =
         static_cast<uint32_t>(std::size(layoutBindings));
     descriptorSetLayoutCi.pBindings = layoutBindings;
-    descriptorSetLayoutCi.pNext = &bindingFlagsCi;
-    descriptorSetLayoutCi.flags =
-        VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT;
+    descriptorSetLayoutCi.pNext = nullptr;
+    descriptorSetLayoutCi.flags = {};
     VK_CHECK(m_vk.vkCreateDescriptorSetLayout(
         m_vkDevice, &descriptorSetLayoutCi, nullptr, &m_vkDescriptorSetLayout));
 
@@ -492,8 +483,7 @@ void CompositorVk::setUpDescriptorSets() {
         static_cast<uint32_t>(std::size(descriptorPoolSizes));
     descriptorPoolCi.pPoolSizes = descriptorPoolSizes;
     descriptorPoolCi.maxSets = static_cast<uint32_t>(numOfFrames);
-    descriptorPoolCi.flags =
-        VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT;
+    descriptorPoolCi.flags = {};
     VK_CHECK(m_vk.vkCreateDescriptorPool(m_vkDevice, &descriptorPoolCi, nullptr,
                                          &m_vkDescriptorPool));
     std::vector<VkDescriptorSetLayout> layouts(numOfFrames,
@@ -696,38 +686,9 @@ void CompositorVk::setUpUniformBuffers() {
         reinterpret_cast<void **>(&m_uniformStorage.m_data)));
 }
 
-bool CompositorVk::validatePhysicalDeviceFeatures(
-    const VkPhysicalDeviceFeatures2 &features) {
-    auto descIndexingFeatures =
-        vk_find_struct<VkPhysicalDeviceDescriptorIndexingFeaturesEXT>(
-            &features);
-    if (descIndexingFeatures == nullptr) {
-        return false;
-    }
-    return descIndexingFeatures->descriptorBindingSampledImageUpdateAfterBind ==
-           VK_TRUE;
-}
-
 bool CompositorVk::validateQueueFamilyProperties(
     const VkQueueFamilyProperties &properties) {
     return properties.queueFlags & VK_QUEUE_GRAPHICS_BIT;
-}
-
-bool CompositorVk::enablePhysicalDeviceFeatures(
-    VkPhysicalDeviceFeatures2 &features) {
-    auto descIndexingFeatures =
-        vk_find_struct<VkPhysicalDeviceDescriptorIndexingFeaturesEXT>(
-            &features);
-    if (descIndexingFeatures == nullptr) {
-        return false;
-    }
-    descIndexingFeatures->descriptorBindingSampledImageUpdateAfterBind =
-        VK_TRUE;
-    return true;
-}
-
-std::vector<const char *> CompositorVk::getRequiredDeviceExtensions() {
-    return {VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME};
 }
 
 VkCommandBuffer CompositorVk::getCommandBuffer(uint32_t i) const {
