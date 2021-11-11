@@ -1,5 +1,8 @@
 prebuilt(ANGLE)
 prebuilt(VULKAN)
+if(LINUX)
+  prebuilt(X11_XCB)
+endif()
 
 # Adds the proper graphic driver dependencies to the given target.
 function(add_opengl_dependencies TGT)
@@ -30,10 +33,16 @@ android_add_library(
   WINDOWS standalone_common/angle-util/windows/win32/Win32Window.cpp
           standalone_common/angle-util/windows/WindowsTimer.cpp)
 
-android_target_link_libraries(OSWindow linux-x86_64 PUBLIC "-lX11" "-lrt"
-                                                           android-emu-shared)
-android_target_link_libraries(OSWindow linux-aarch64 PUBLIC "-lX11" "-lrt"
+if(LINUX)
+  android_target_include_directories(OSWindow linux-x86_64 PUBLIC ${X11_XCB_INCLUDE_DIRS})
+  android_target_link_libraries(OSWindow linux-x86_64 PUBLIC "-lX11" "-lrt"
+                                                            ${X11_XCB_LIBRARIES}
                                                             android-emu-shared)
+  android_target_include_directories(OSWindow linux-aarch64 PUBLIC ${X11_XCB_INCLUDE_DIRS})
+  android_target_link_libraries(OSWindow linux-aarch64 PUBLIC "-lX11" "-lrt"
+                                                              ${X11_XCB_LIBRARIES}
+                                                              android-emu-shared)
+endif()
 
 android_target_link_libraries(OSWindow windows PUBLIC "gdi32::gdi32")
 android_target_link_libraries(OSWindow darwin-x86_64 PUBLIC "-framework AppKit")
@@ -51,8 +60,8 @@ android_add_library(
       vulkan/VkDecoder.cpp
       vulkan/VkDecoderGlobalState.cpp
       vulkan/VkDecoderSnapshot.cpp
-      vulkan/VkReconstruction.cpp
       vulkan/VulkanDispatch.cpp
+      vulkan/VkReconstruction.cpp
       vulkan/VulkanHandleMapping.cpp
       vulkan/VulkanStream.cpp)
 
@@ -61,6 +70,10 @@ target_link_libraries(
   PRIVATE emugl_base GLcommon)
 android_target_compile_definitions(OpenglRender_vulkan windows PRIVATE
                                    -DVK_USE_PLATFORM_WIN32_KHR)
+android_target_compile_definitions(OpenglRender_vulkan linux-x86_64 PRIVATE
+                                   -DVK_USE_PLATFORM_XCB_KHR)
+android_target_compile_definitions(OpenglRender_vulkan linux-aarch64 PRIVATE
+                                   -DVK_USE_PLATFORM_XCB_KHR)
 target_compile_options(
   OpenglRender_vulkan PRIVATE -fvisibility=hidden -Wno-unused-value
                               -Wno-return-type -Wno-return-type-c-linkage)
@@ -121,6 +134,10 @@ target_link_libraries(
 target_compile_definitions(OpenglRender PRIVATE -DVK_ANDROID_native_buffer)
 android_target_compile_definitions(OpenglRender windows PRIVATE
                                    -DVK_USE_PLATFORM_WIN32_KHR)
+android_target_compile_definitions(OpenglRender linux-x86_64 PRIVATE
+                                   -DVK_USE_PLATFORM_XCB_KHR)
+android_target_compile_definitions(OpenglRender linux-aarch64 PRIVATE
+                                   -DVK_USE_PLATFORM_XCB_KHR)
 target_compile_options(OpenglRender PRIVATE -fvisibility=hidden)
 target_compile_options(OpenglRender PUBLIC -Wno-return-type-c-linkage)
 target_link_libraries(OpenglRender PRIVATE emugl_base)
@@ -209,6 +226,10 @@ if(NOT LINUX_AARCH64)
                          PRIVATE -fvisibility=hidden)
   android_target_compile_definitions(OpenglRender_standalone_common windows
                                      PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
+  android_target_compile_definitions(OpenglRender_standalone_common linux-x86_64 PRIVATE
+                                    -DVK_USE_PLATFORM_XCB_KHR)
+  android_target_compile_definitions(OpenglRender_standalone_common linux-aarch64 PRIVATE
+                                    -DVK_USE_PLATFORM_XCB_KHR)
   target_include_directories(
     OpenglRender_standalone_common
     PUBLIC ${ANDROID_EMUGL_DIR}/host/include/OpenglRender standalone_common
@@ -251,6 +272,10 @@ if(NOT LINUX_AARCH64)
                                    android-emu-test-launcher android-emu)
   android_target_compile_definitions(OpenglRender_unittests windows PRIVATE
                                      -DVK_USE_PLATFORM_WIN32_KHR)
+  android_target_compile_definitions(OpenglRender_unittests linux-x86_64 PRIVATE
+                                    -DVK_USE_PLATFORM_XCB_KHR)
+  android_target_compile_definitions(OpenglRender_unittests linux-aarch64 PRIVATE
+                                    -DVK_USE_PLATFORM_XCB_KHR)
   add_opengl_dependencies(OpenglRender_unittests)
 
   # Unit tests

@@ -38,6 +38,7 @@ class OSWindow
 
     virtual EGLNativeWindowType getNativeWindow() const = 0;
     virtual EGLNativeDisplayType getNativeDisplay() const = 0;
+    virtual void* getNativeDisplayConnection() const = 0;
 
     virtual void* getFramebufferNativeWindow() const = 0;
 

@@ -10,6 +10,7 @@
 
 #include "android/base/system/System.h"
 
+#include <X11/Xlib-xcb.h>
 #include <assert.h>
 
 using android::base::System;
@@ -297,6 +298,11 @@ EGLNativeWindowType X11Window::getNativeWindow() const
 EGLNativeDisplayType X11Window::getNativeDisplay() const
 {
     return mDisplay;
+}
+
+void* X11Window::getNativeDisplayConnection() const
+{
+    return XGetXCBConnection(mDisplay);
 }
 
 void* X11Window::getFramebufferNativeWindow() const

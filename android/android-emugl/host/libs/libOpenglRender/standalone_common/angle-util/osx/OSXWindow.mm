@@ -602,6 +602,12 @@ EGLNativeDisplayType OSXWindow::getNativeDisplay() const
     return static_cast<EGLNativeDisplayType>(0);
 }
 
+void* OSXWindow::getNativeDisplayConnection() const
+{
+    // Not supported.
+    return nullptr;
+}
+
 void* OSXWindow::getFramebufferNativeWindow() const
 {
     return static_cast<void*>(mWindow);
