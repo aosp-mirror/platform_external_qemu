@@ -45,8 +45,8 @@ if(LINUX)
 endif()
 
 android_target_link_libraries(OSWindow windows PUBLIC "gdi32::gdi32")
-android_target_link_libraries(OSWindow darwin-x86_64 PUBLIC "-framework AppKit")
-android_target_link_libraries(OSWindow darwin-aarch64 PUBLIC "-framework AppKit")
+android_target_link_libraries(OSWindow darwin-x86_64 PUBLIC "-framework AppKit -framework QuartzCore")
+android_target_link_libraries(OSWindow darwin-aarch64 PUBLIC "-framework AppKit -framework QuartzCore")
 target_link_libraries(OSWindow PRIVATE emugl_base)
 target_include_directories(OSWindow PUBLIC ${ANDROID_EMUGL_DIR}/host/include
                                            standalone_common/angle-util)
@@ -74,6 +74,10 @@ android_target_compile_definitions(OpenglRender_vulkan linux-x86_64 PRIVATE
                                    -DVK_USE_PLATFORM_XCB_KHR)
 android_target_compile_definitions(OpenglRender_vulkan linux-aarch64 PRIVATE
                                    -DVK_USE_PLATFORM_XCB_KHR)
+android_target_compile_definitions(OpenglRender_vulkan darwin-x86_64 PRIVATE
+                                  -DVK_USE_PLATFORM_METAL_EXT)
+android_target_compile_definitions(OpenglRender_vulkan darwin-aarch64 PRIVATE
+                                  -DVK_USE_PLATFORM_METAL_EXT)
 target_compile_options(
   OpenglRender_vulkan PRIVATE -fvisibility=hidden -Wno-unused-value
                               -Wno-return-type -Wno-return-type-c-linkage)
@@ -140,6 +144,10 @@ android_target_compile_definitions(OpenglRender linux-x86_64 PRIVATE
                                    -DVK_USE_PLATFORM_XCB_KHR)
 android_target_compile_definitions(OpenglRender linux-aarch64 PRIVATE
                                    -DVK_USE_PLATFORM_XCB_KHR)
+android_target_compile_definitions(OpenglRender darwin-x86_64 PRIVATE
+                                  -DVK_USE_PLATFORM_METAL_EXT)
+android_target_compile_definitions(OpenglRender darwin-aarch64 PRIVATE
+                                  -DVK_USE_PLATFORM_METAL_EXT)
 target_compile_options(OpenglRender PRIVATE -fvisibility=hidden)
 target_compile_options(OpenglRender PUBLIC -Wno-return-type-c-linkage)
 target_link_libraries(OpenglRender PRIVATE emugl_base)
@@ -234,6 +242,10 @@ if(NOT LINUX_AARCH64)
                                     -DVK_USE_PLATFORM_XCB_KHR)
   android_target_compile_definitions(OpenglRender_standalone_common linux-aarch64 PRIVATE
                                     -DVK_USE_PLATFORM_XCB_KHR)
+  android_target_compile_definitions(OpenglRender_standalone_common darwin-x86_64 PRIVATE
+                                    -DVK_USE_PLATFORM_METAL_EXT)
+  android_target_compile_definitions(OpenglRender_standalone_common darwin-aarch64 PRIVATE
+                                    -DVK_USE_PLATFORM_METAL_EXT)
   target_include_directories(
     OpenglRender_standalone_common
     PUBLIC ${ANDROID_EMUGL_DIR}/host/include/OpenglRender standalone_common
@@ -282,6 +294,10 @@ if(NOT LINUX_AARCH64)
                                     -DVK_USE_PLATFORM_XCB_KHR)
   android_target_compile_definitions(OpenglRender_unittests linux-aarch64 PRIVATE
                                     -DVK_USE_PLATFORM_XCB_KHR)
+  android_target_compile_definitions(OpenglRender_unittests darwin-x86_64 PRIVATE
+                                    -DVK_USE_PLATFORM_METAL_EXT)
+  android_target_compile_definitions(OpenglRender_unittests darwin-aarch64 PRIVATE
+                                    -DVK_USE_PLATFORM_METAL_EXT)
   add_opengl_dependencies(OpenglRender_unittests)
 
   # Unit tests

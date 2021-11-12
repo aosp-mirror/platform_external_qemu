@@ -79,7 +79,6 @@ class SwapChainStateVkTest : public ::testing::Test {
     void createWindowAndSurface() {
         m_window = emugl::createOrGetTestWindow(0, 0, k_width, k_height);
         ASSERT_NE(m_window, nullptr);
-        // TODO(kaiyili, b/179477624): add support for other platforms
 #if defined(_WIN32)
         VkWin32SurfaceCreateInfoKHR surfaceCi = {};
         surfaceCi.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
@@ -99,6 +98,17 @@ class SwapChainStateVkTest : public ::testing::Test {
         };
         ASSERT_EQ(k_vk->vkCreateXcbSurfaceKHR(m_vkInstance, &surfaceCi,
                                               nullptr, &m_vkSurface),
+                  VK_SUCCESS);
+#elif defined(__APPLE__)
+        VkMetalSurfaceCreateInfoEXT surfaceCi = {
+                .sType = VK_STRUCTURE_TYPE_METAL_SURFACE_CREATE_INFO_EXT,
+                .pNext = nullptr,
+                .flags = {},
+                .pLayer = reinterpret_cast<const CAMetalLayer*>(
+                        m_window->getNativeWindow()),
+        };
+        ASSERT_EQ(k_vk->vkCreateMetalSurfaceEXT(m_vkInstance, &surfaceCi,
+                                                nullptr, &m_vkSurface),
                   VK_SUCCESS);
 #endif
     }
