@@ -1,0 +1,2 @@
+py scripts/glsl-shader-to-spv-c-array.py stream-servers/vulkan/Compositor.vert stream-servers/vulkan/CompositorVertexShader.h compositorVertexShader
+py scripts/glsl-shader-to-spv-c-array.py stream-servers/vulkan/Compositor.frag stream-servers/vulkan/CompositorFragmentShader.h compositorFragmentShader

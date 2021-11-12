@@ -94,6 +94,7 @@ android_add_library(
   SRC # cmake-format: sortable
       ChannelStream.cpp
       ColorBuffer.cpp
+      CompositorVk.cpp
       FbConfig.cpp
       FenceSync.cpp
       FrameBuffer.cpp
@@ -111,6 +112,7 @@ android_add_library(
       RenderThreadInfo.cpp
       RenderWindow.cpp
       RingStream.cpp
+      SwapChainStateVk.cpp
       SyncThread.cpp
       TextureDraw.cpp
       TextureResize.cpp
@@ -180,6 +182,7 @@ if(NOT LINUX_AARCH64)
         ../Translator/GLES_V2/ANGLEShaderParser.cpp
         ChannelStream.cpp
         ColorBuffer.cpp
+        CompositorVk.cpp
         FbConfig.cpp
         FenceSync.cpp
         FrameBuffer.cpp
@@ -200,6 +203,7 @@ if(NOT LINUX_AARCH64)
         standalone_common/SampleApplication.cpp
         standalone_common/SearchPathsSetup.cpp
         standalone_common/ShaderUtils.cpp
+        SwapChainStateVk.cpp
         SyncThread.cpp
         TextureDraw.cpp
         TextureResize.cpp
@@ -241,6 +245,7 @@ if(NOT LINUX_AARCH64)
     TARGET OpenglRender_unittests
     SRC # cmake-format: sortable
         samples/HelloTriangleImp.cpp
+        tests/CompositorVk_unittest.cpp
         tests/DefaultFramebufferBlit_unittest.cpp
         tests/FrameBuffer_unittest.cpp
         tests/GLSnapshot_unittest.cpp
@@ -265,6 +270,7 @@ if(NOT LINUX_AARCH64)
         tests/OpenGL_unittest.cpp
         tests/OpenGLTestContext.cpp
         tests/StalePtrRegistry_unittest.cpp
+        tests/SwapChainStateVk_unittest.cpp
         tests/TextureDraw_unittest.cpp
         tests/VsyncThread_unittest.cpp)
   target_link_libraries(
