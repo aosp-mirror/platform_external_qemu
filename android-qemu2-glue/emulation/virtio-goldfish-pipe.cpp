@@ -362,7 +362,8 @@ static inline size_t virgl_format_to_total_xfer_len(
     uint32_t totalWidth, uint32_t totalHeight,
     uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
     if (virgl_format_is_yuv(format)) {
-        uint32_t align = (format == VIRGL_FORMAT_YV12) ?  1 : 16;
+        uint32_t align = (format == VIRGL_FORMAT_YV12) ?  32 : 16;
+
         uint32_t yWidth = totalWidth;
         uint32_t yHeight = totalHeight;
         uint32_t yStride = align_up_power_of_2(yWidth, align);

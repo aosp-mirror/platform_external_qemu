@@ -1052,18 +1052,21 @@ static void sGetPbufferSurfaceGLProperties(
     surface->getAttrib(EGL_STENCIL_SIZE, &s);
     surface->getAttrib(EGL_SAMPLES, multisamples);
 
-    // Currently supported: RGBA8888/RGB888/RGB565/RGBA4
+    // Currently supported: RGBA8888/RGB888/RGB565/RGBA4/RGB5A1
     if (r == 8 && g == 8 && b == 8 && a == 8) {
         *colorFormat = GL_RGBA8;
-    }
-    if (r == 8 && g == 8 && b == 8 && a == 0) {
+    } else if (r == 8 && g == 8 && b == 8 && a == 0) {
         *colorFormat = GL_RGB8;
-    }
-    if (r == 5 && g == 6 && b == 5 && a == 0) {
+    } else if (r == 5 && g == 6 && b == 5 && a == 0) {
         *colorFormat = GL_RGB565;
-    }
-    if (r == 4 && g == 4 && b == 4 && a == 4) {
+    } else if (r == 4 && g == 4 && b == 4 && a == 4) {
         *colorFormat = GL_RGBA4;
+    } else if (r == 5 && g == 5 && b == 5 && a == 1) {
+        *colorFormat = GL_RGB5_A1;
+    } else {
+        fprintf(stderr, "%s:%d: invalid color format R%dG%dB%dA%d\n", __func__,
+                __LINE__, r, g, b, a);
+        abort();
     }
 
     // Blanket provide 24/8 depth/stencil format for now.

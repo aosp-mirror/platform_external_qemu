@@ -58,7 +58,7 @@ static void getYUVOffsets(int width, int height, FrameworkFormat format,
     uint32_t totalSize, yStride, cStride, cHeight, cSize, align;
     switch (format) {
     case FRAMEWORK_FORMAT_YV12:
-        align = 16;
+        align = 32;
         yStride = (width + (align - 1)) & ~(align - 1);
         cStride = (yStride / 2 + (align - 1)) & ~(align - 1);
         cHeight = height / 2;

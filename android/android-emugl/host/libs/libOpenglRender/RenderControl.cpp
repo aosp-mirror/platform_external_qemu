@@ -489,7 +489,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         emugl_feature_is_enabled(android::featurecontrol::YUV420888toNV21);
     bool YUVCacheEnabled =
         emugl_feature_is_enabled(android::featurecontrol::YUVCache);
-    bool AsyncUnmapBufferEnabled = true;
+    bool AsyncUnmapBufferEnabled = false;
     bool vulkanIgnoredHandlesEnabled =
         shouldEnableVulkan() && emugl_feature_is_enabled(android::featurecontrol::VulkanIgnoredHandles);
     bool virtioGpuNextEnabled =
@@ -683,8 +683,8 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize) {
         glStr += " ";
 
         // Async makecurrent support.
-        glStr += kAsyncFrameCommands;
-        glStr += " ";
+       // glStr += kAsyncFrameCommands;
+       // glStr += " ";
 
         if (emugl_feature_is_enabled(android::featurecontrol::IgnoreHostOpenGLErrors)) {
             glStr += kGLESNoHostError;
