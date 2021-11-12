@@ -96,7 +96,11 @@ kEmulatedExtensions[] = {
     "VK_EXT_device_memory_report",
 };
 
+#if defined(__APPLE__) || defined(__MACOSX)
+static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 0, 0);
+#else
 static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 1, 0);
+#endif
 static constexpr uint32_t kMinVersion = VK_MAKE_VERSION(1, 0, 0);
 
 #define DEFINE_BOXED_HANDLE_TYPE_TAG(type) \

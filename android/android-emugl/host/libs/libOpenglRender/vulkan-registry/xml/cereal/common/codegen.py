@@ -52,11 +52,11 @@ class Module(object):
 
     def getCMakeSrcEntry(self):
         if self.customAbsDir:
-            return self.basename + ".cpp "
+            return "\n" + self.basename + ".cpp "
         dirName = self.directory
         baseName = self.basename
         joined = os.path.join(dirName, baseName)
-        return "    " + joined + ".cpp "
+        return "\n    " + joined + ".cpp "
 
     def begin(self, globalDir):
         if self.suppress:
@@ -135,12 +135,12 @@ class Proto(object):
 
     def getCMakeSrcEntry(self):
         if self.customAbsDir:
-            return self.basename + ".proto "
+            return "\n" + self.basename + ".proto "
 
         dirName = self.directory
         baseName = self.basename
         joined = os.path.join(dirName, baseName)
-        return "    " + joined + ".proto "
+        return "\n    " + joined + ".proto "
 
     def begin(self, globalDir):
         if self.suppress:

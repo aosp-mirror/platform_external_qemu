@@ -567,6 +567,11 @@ def decode_vkInvalidateMappedMemoryRanges(typeInfo, api, cgen):
     emit_pool_free(cgen)
     emit_seqno_incr(api, cgen)
 
+def decode_unsupported_api(typeInfo, api, cgen):
+    cgen.line(f"// Decoding {api.name} is not supported. This should not run.")
+    cgen.stmt(f"fprintf(stderr, \"stream %p: fatal: decoding unsupported API {api.name}\\n\", ioStream)");
+    cgen.stmt("__builtin_trap()")
+
 custom_decodes = {
     "vkEnumerateInstanceVersion" : emit_global_state_wrapped_decoding,
     "vkCreateInstance" : emit_global_state_wrapped_decoding,
@@ -702,6 +707,10 @@ custom_decodes = {
     "vkQueueSignalReleaseImageANDROIDAsyncGOOGLE" : emit_global_state_wrapped_decoding,
 
     "vkQueueBindSparse" : emit_global_state_wrapped_decoding,
+
+    # VK_KHR_xcb_surface
+    "vkCreateXcbSurfaceKHR": decode_unsupported_api,
+    "vkGetPhysicalDeviceXcbPresentationSupportKHR": decode_unsupported_api,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):
