@@ -28,6 +28,7 @@ class Win32Window : public OSWindow
 
     EGLNativeWindowType getNativeWindow() const override;
     EGLNativeDisplayType getNativeDisplay() const override;
+    void* getNativeDisplayConnection() const override;
     void* getFramebufferNativeWindow() const override;
 
     void messageLoop() override;

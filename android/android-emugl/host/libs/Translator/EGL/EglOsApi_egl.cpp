@@ -16,10 +16,12 @@
 
 #include "EglOsApi.h"
 
-#include "android/base/system/System.h"
 #include "GLcommon/GLLibrary.h"
 #include "OpenglCodecCommon/ErrorLog.h"
+#include "ShaderCache.h"
+#include "android/base/system/System.h"
 #include "emugl/common/lazy_instance.h"
+#include "emugl/common/misc.h"
 #include "emugl/common/shared_library.h"
 
 #include <EGL/egl.h>
@@ -68,16 +70,13 @@ static const char* kGLES2LibName = "libGLESv2.dylib";
 
 // List of EGL functions of interest to probe with GetProcAddress()
 #define LIST_EGL_FUNCTIONS(X)                                                  \
-    X(EGLBoolean, eglGetProcAddress,                                           \
-      (const char* procname))                                                  \
-    X(const char*, eglQueryString,                                             \
-      (EGLDisplay dpy, EGLint id))                                             \
-    X(EGLDisplay, eglGetPlatformDisplay,                                    \
-      (EGLenum platform, void *native_display, const EGLint *attrib_list))     \
+    X(EGLBoolean, eglGetProcAddress, (const char* procname))                   \
+    X(const char*, eglQueryString, (EGLDisplay dpy, EGLint id))                \
+    X(EGLDisplay, eglGetPlatformDisplay,                                       \
+      (EGLenum platform, void* native_display, const EGLAttrib* attrib_list))  \
     X(EGLDisplay, eglGetPlatformDisplayEXT,                                    \
-      (EGLenum platform, void *native_display, const EGLint *attrib_list))     \
-    X(EGLBoolean, eglBindAPI,                                    \
-      (EGLenum api)) \
+      (EGLenum platform, void* native_display, const EGLint* attrib_list))     \
+    X(EGLBoolean, eglBindAPI, (EGLenum api))                                   \
     X(EGLBoolean, eglChooseConfig,                                             \
       (EGLDisplay display, EGLint const* attrib_list, EGLConfig* configs,      \
        EGLint config_size, EGLint* num_config))                                \
@@ -102,8 +101,10 @@ static const char* kGLES2LibName = "libGLESv2.dylib";
     X(EGLSurface, eglCreateWindowSurface,                                      \
       (EGLDisplay display, EGLConfig config,                                   \
        EGLNativeWindowType native_window, EGLint const* attrib_list))          \
-    X(EGLBoolean, eglSwapInterval,                                             \
-      (EGLDisplay display, EGLint interval))                                   \
+    X(EGLBoolean, eglSwapInterval, (EGLDisplay display, EGLint interval))      \
+    X(void, eglSetBlobCacheFuncsANDROID,                                       \
+      (EGLDisplay display, EGLSetBlobFuncANDROID set,                          \
+       EGLGetBlobFuncANDROID get))
 
 using android::base::System;
 
@@ -285,7 +286,27 @@ private:
 EglOsEglDisplay::EglOsEglDisplay() {
     mVerbose = System::getEnvironmentVariable("ANDROID_EMUGL_VERBOSE") == "1";
 
-    mDisplay = mDispatcher.eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if (System::getEnvironmentVariable("ANDROID_EMUGL_EXPERIMENTAL_FAST_PATH") == "1") {
+        const EGLAttrib attr[] = {
+            EGL_PLATFORM_ANGLE_TYPE_ANGLE,
+            EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE,
+            EGL_EXPERIMENTAL_PRESENT_PATH_ANGLE,
+            EGL_EXPERIMENTAL_PRESENT_PATH_FAST_ANGLE,
+            EGL_NONE
+        };
+
+        mDisplay = mDispatcher.eglGetPlatformDisplay(EGL_PLATFORM_ANGLE_ANGLE,
+            (void*)EGL_DEFAULT_DISPLAY,
+            attr);
+
+        if (mDisplay == EGL_NO_DISPLAY) {
+            fprintf(stderr, "%s: no display found that supports the requested extensions\n", __func__);
+        }
+    }
+    else {
+        mDisplay = mDispatcher.eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    }
+
     mDispatcher.eglInitialize(mDisplay, nullptr, nullptr);
     mDispatcher.eglSwapInterval(mDisplay, 0);
     auto clientExts = mDispatcher.eglQueryString(mDisplay, EGL_EXTENSIONS);
@@ -303,6 +324,11 @@ EglOsEglDisplay::EglOsEglDisplay() {
     if (mHeadless) mGlxDisplay = nullptr;
     else mGlxDisplay = XOpenDisplay(0);
 #endif // __linux__
+
+    if (clientExts != nullptr &&
+        emugl::hasExtension(clientExts, "EGL_ANDROID_blob_cache")) {
+        mDispatcher.eglSetBlobCacheFuncsANDROID(mDisplay, SetBlob, GetBlob);
+    }
 };
 
 EglOsEglDisplay::~EglOsEglDisplay() {
@@ -475,7 +501,8 @@ Surface* EglOsEglDisplay::createWindowSurface(PixelFormat* pf,
                                               EGLNativeWindowType win) {
     D("%s\n", __FUNCTION__);
     std::vector<EGLint> surface_attribs;
-    if (System::getEnvironmentVariable("ANDROID_EMUGL_ANGLE_DIRECT_COMPOSITION") == "1") {
+    auto exts = mDispatcher.eglQueryString(mDisplay, EGL_EXTENSIONS);
+    if (exts != nullptr && emugl::hasExtension(exts, "EGL_ANGLE_direct_composition")) {
         surface_attribs.push_back(EGL_DIRECT_COMPOSITION_ANGLE);
         surface_attribs.push_back(EGL_TRUE);
     }

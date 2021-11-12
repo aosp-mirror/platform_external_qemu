@@ -712,6 +712,12 @@ EGLNativeDisplayType Win32Window::getNativeDisplay() const
     return mNativeDisplay;
 }
 
+void* Win32Window::getNativeDisplayConnection() const
+{
+    // Not supported.
+    return nullptr;
+}
+
 void* Win32Window::getFramebufferNativeWindow() const
 {
     return mNativeWindow;
