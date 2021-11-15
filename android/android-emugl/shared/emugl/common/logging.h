@@ -55,3 +55,10 @@ EMUGL_COMMON_API void set_emugl_cxt_logger(emugl_logger_t f);
 #else
 #define GL_LOG(...) 0
 #endif
+
+//#define ENABLE_DECODER_LOG 1
+#if defined(ENABLE_DECODER_LOG)
+#define DECODER_DEBUG_LOG(...) GL_LOG(stderr, "I", __VA_ARGS__)
+#else
+#define DECODER_DEBUG_LOG(...) ((void)0)
+#endif
