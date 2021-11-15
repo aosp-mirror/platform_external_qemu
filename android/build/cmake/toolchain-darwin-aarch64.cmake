@@ -47,6 +47,7 @@ else()
   toolchain_generate("darwin-aarch64")
   # Configure how we strip executables.
   set(CMAKE_STRIP_CMD "${CMAKE_STRIP} -S")
+  set(CMAKE_HOST_SYSTEM_PROCESSOR "arm64")
 
 endif()
 
