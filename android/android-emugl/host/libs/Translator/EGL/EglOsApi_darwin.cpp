@@ -70,7 +70,7 @@ public:
     explicit MacContext(bool isCoreProfile, void* context) :
         EglOS::Context(isCoreProfile), mContext(context) {}
 
-    ~MacContext() {
+    virtual ~MacContext() {
         nsDestroyContext(mContext);
     }
 

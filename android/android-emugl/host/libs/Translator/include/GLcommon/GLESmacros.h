@@ -37,63 +37,60 @@
 
 #define MEM_TRACE(group) MEM_TRACE_IF(true, group)
 
-#define GET_CTX()                                              \
-    MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL") \
-    if (!s_eglIface)                                           \
-        return;                                                \
-    GLEScontext* ctx = s_eglIface->getGLESContext();           \
-    if (!ctx)                                                  \
-        return;                                                \
+#define FAIL_IF(condition, description) if((condition)) {                                      \
+        fprintf(stderr, "%s:%s:%d error %s\n", __FILE__, __FUNCTION__, __LINE__, description); \
+        return;                                                                                \
+    }
+
+#define RET_AND_FAIL_IF(condition, description, ret) if((condition)) {                         \
+        fprintf(stderr, "%s:%s:%d error %s\n", __FILE__, __FUNCTION__, __LINE__, description); \
+        return ret;                                                                            \
+    }
+
+#define GET_CTX()                                                             \
+    MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL")                \
+    FAIL_IF(!s_eglIface, "null s_eglIface")                                   \
+    GLEScontext* ctx = s_eglIface->getGLESContext();                          \
+    FAIL_IF(!ctx, "null ctx")                                                 \
     CONTEXT_CHECK
 
-#define GET_CTX_CM()                                                   \
-    MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL")         \
-    if (!s_eglIface)                                                   \
-        return;                                                        \
-    GLEScmContext* ctx =                                               \
-            static_cast<GLEScmContext*>(s_eglIface->getGLESContext()); \
-    if (!ctx)                                                          \
-        return;                                                        \
+#define GET_CTX_CM()                                                          \
+    MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL")                \
+    FAIL_IF(!s_eglIface, "null s_eglIface")                                   \
+    GLEScmContext* ctx =                                                      \
+            static_cast<GLEScmContext*>(s_eglIface->getGLESContext());        \
+    FAIL_IF(!ctx, "null ctx")                                                 \
     CONTEXT_CHECK
 
-#define GET_CTX_V2()                                                   \
-    MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL")         \
-    if (!s_eglIface)                                                   \
-        return;                                                        \
-    GLESv2Context* ctx =                                               \
-            static_cast<GLESv2Context*>(s_eglIface->getGLESContext()); \
-    if (!ctx)                                                          \
-        return;                                                        \
-    ctx->rebindCurrentFramebufferTextures();                           \
+#define GET_CTX_V2()                                                          \
+    MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL")                \
+    FAIL_IF(!s_eglIface, "null s_eglIface")                                   \
+    GLESv2Context* ctx =                                                      \
+            static_cast<GLESv2Context*>(s_eglIface->getGLESContext());        \
+    FAIL_IF(!ctx, "null ctx")                                                 \
     CONTEXT_CHECK
 
-#define GET_CTX_RET(failure_ret)                               \
-    MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL") \
-    if (!s_eglIface)                                           \
-        return failure_ret;                                    \
-    GLEScontext* ctx = s_eglIface->getGLESContext();           \
-    if (!ctx)                                                  \
-        return failure_ret;                                    \
+#define GET_CTX_RET(failure_ret)                                              \
+    MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL")                \
+    RET_AND_FAIL_IF(!s_eglIface, "null s_eglIface", failure_ret)              \
+    GLEScontext* ctx = s_eglIface->getGLESContext();                          \
+    RET_AND_FAIL_IF(!ctx, "null ctx", failure_ret)                            \
     CONTEXT_CHECK
 
-#define GET_CTX_CM_RET(failure_ret)                                    \
-    MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL")         \
-    if (!s_eglIface)                                                   \
-        return failure_ret;                                            \
-    GLEScmContext* ctx =                                               \
-            static_cast<GLEScmContext*>(s_eglIface->getGLESContext()); \
-    if (!ctx)                                                          \
-        return failure_ret;                                            \
+#define GET_CTX_CM_RET(failure_ret)                                           \
+    MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL")                \
+    RET_AND_FAIL_IF(!s_eglIface, "null s_eglIface", failure_ret)              \
+    GLEScmContext* ctx =                                                      \
+            static_cast<GLEScmContext*>(s_eglIface->getGLESContext());        \
+    RET_AND_FAIL_IF(!ctx, "null ctx", failure_ret)                            \
     CONTEXT_CHECK
 
-#define GET_CTX_V2_RET(failure_ret)                                    \
-    MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL")         \
-    if (!s_eglIface)                                                   \
-        return failure_ret;                                            \
-    GLESv2Context* ctx =                                               \
-            static_cast<GLESv2Context*>(s_eglIface->getGLESContext()); \
-    if (!ctx)                                                          \
-        return failure_ret;                                            \
+#define GET_CTX_V2_RET(failure_ret)                                           \
+    MEM_TRACE_IF(strncmp(__FUNCTION__, "gl", 2) == 0, "EMUGL")                \
+    RET_AND_FAIL_IF(!s_eglIface, "null s_eglIface", failure_ret)              \
+    GLESv2Context* ctx =                                                      \
+            static_cast<GLESv2Context*>(s_eglIface->getGLESContext());        \
+    RET_AND_FAIL_IF(!ctx, "null ctx", failure_ret)                            \
     CONTEXT_CHECK
 
 #define SET_ERROR_IF(condition,err) if((condition)) {                            \

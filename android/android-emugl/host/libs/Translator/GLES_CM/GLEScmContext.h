@@ -136,9 +136,9 @@ public:
 
     bool doConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
 
-    std::vector<float> getColor() const;
-    std::vector<float> getNormal() const;
-    std::vector<float> getMultiTexCoord(uint32_t index) const;
+    void getColor(uint32_t count, std::vector<float>& out) const;
+    void getNormal(uint32_t count, std::vector<float>& out) const;
+    void getMultiTexCoord(uint32_t count, uint32_t index, std::vector<float>& out) const;
     GLenum getTextureEnvMode();
     GLenum getTextureGenMode();
 
@@ -199,6 +199,9 @@ private:
     void setupArrayPointerHelper(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLenum array_id,GLESpointer* p);
     void setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int pointsIndex = -1, bool isInt = false);
     void drawPoints(PointSizeIndices* points);
+    // appendRepeatedVector appends the input vector "in" count times
+    // to the vector "out".
+    void appendRepeatedVector(uint32_t count, std::vector<float>& in, std::vector<float>& out) const;
     void drawPointsData(GLESConversionArrays& arrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices_in,bool isElemsDraw);
     void initExtensionString();
     void restoreVertexAttrib(GLenum attrib);
