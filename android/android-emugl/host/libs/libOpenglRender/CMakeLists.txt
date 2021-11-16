@@ -18,9 +18,7 @@ function(add_opengl_dependencies TGT)
     ${TGT} linux-aarch64
     "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
   android_target_properties(
-    ${TGT} darwin-x86_64 "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
-  android_target_properties(
-    ${TGT} darwin-aarch64 "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
+    ${TGT} darwin "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
 endfunction()
 
 android_add_library(
@@ -34,19 +32,14 @@ android_add_library(
           standalone_common/angle-util/windows/WindowsTimer.cpp)
 
 if(LINUX)
-  android_target_include_directories(OSWindow linux-x86_64 PUBLIC ${X11_XCB_INCLUDE_DIRS})
-  android_target_link_libraries(OSWindow linux-x86_64 PUBLIC "-lX11" "-lrt"
-                                                            ${X11_XCB_LIBRARIES}
-                                                            android-emu-shared)
-  android_target_include_directories(OSWindow linux-aarch64 PUBLIC ${X11_XCB_INCLUDE_DIRS})
-  android_target_link_libraries(OSWindow linux-aarch64 PUBLIC "-lX11" "-lrt"
-                                                              ${X11_XCB_LIBRARIES}
-                                                              android-emu-shared)
+  android_target_include_directories(OSWindow linux PUBLIC ${X11_XCB_INCLUDE_DIRS})
+  android_target_link_libraries(OSWindow linux PUBLIC "-lX11" "-lrt"
+                                                      ${X11_XCB_LIBRARIES}
+                                                      android-emu-shared)
 endif()
 
 android_target_link_libraries(OSWindow windows PUBLIC "gdi32::gdi32")
-android_target_link_libraries(OSWindow darwin-x86_64 PUBLIC "-framework AppKit")
-android_target_link_libraries(OSWindow darwin-aarch64 PUBLIC "-framework AppKit")
+android_target_link_libraries(OSWindow darwin PUBLIC "-framework AppKit -framework QuartzCore")
 target_link_libraries(OSWindow PRIVATE emugl_base)
 target_include_directories(OSWindow PUBLIC ${ANDROID_EMUGL_DIR}/host/include
                                            standalone_common/angle-util)
@@ -70,10 +63,10 @@ target_link_libraries(
   PRIVATE emugl_base GLcommon)
 android_target_compile_definitions(OpenglRender_vulkan windows PRIVATE
                                    -DVK_USE_PLATFORM_WIN32_KHR)
-android_target_compile_definitions(OpenglRender_vulkan linux-x86_64 PRIVATE
+android_target_compile_definitions(OpenglRender_vulkan linux PRIVATE
                                    -DVK_USE_PLATFORM_XCB_KHR)
-android_target_compile_definitions(OpenglRender_vulkan linux-aarch64 PRIVATE
-                                   -DVK_USE_PLATFORM_XCB_KHR)
+android_target_compile_definitions(OpenglRender_vulkan darwin PRIVATE
+                                  -DVK_USE_PLATFORM_METAL_EXT)
 target_compile_options(
   OpenglRender_vulkan PRIVATE -fvisibility=hidden -Wno-unused-value
                               -Wno-return-type -Wno-return-type-c-linkage)
@@ -136,10 +129,10 @@ target_link_libraries(
 target_compile_definitions(OpenglRender PRIVATE -DVK_ANDROID_native_buffer)
 android_target_compile_definitions(OpenglRender windows PRIVATE
                                    -DVK_USE_PLATFORM_WIN32_KHR)
-android_target_compile_definitions(OpenglRender linux-x86_64 PRIVATE
+android_target_compile_definitions(OpenglRender linux PRIVATE
                                    -DVK_USE_PLATFORM_XCB_KHR)
-android_target_compile_definitions(OpenglRender linux-aarch64 PRIVATE
-                                   -DVK_USE_PLATFORM_XCB_KHR)
+android_target_compile_definitions(OpenglRender darwin PRIVATE
+                                  -DVK_USE_PLATFORM_METAL_EXT)
 target_compile_options(OpenglRender PRIVATE -fvisibility=hidden)
 target_compile_options(OpenglRender PUBLIC -Wno-return-type-c-linkage)
 target_link_libraries(OpenglRender PRIVATE emugl_base)
@@ -149,15 +142,10 @@ target_include_directories(
                       ${ANDROID_EMUGL_DIR}/host/include/OpenglRender)
 android_target_link_libraries(OpenglRender linux-x86_64
                               PRIVATE "-WL,--version-script=render_api.entries")
-
 android_target_link_libraries(
-    OpenglRender darwin-x86_64
+    OpenglRender darwin
     PRIVATE "-WL,-exported_symbols_list,render_api.entries")
-android_target_link_libraries(OpenglRender darwin-aarch64 PUBLIC "-framework IOSurface")
-android_target_link_libraries(OpenglRender darwin-x86_64 PUBLIC "-framework IOSurface")
-android_target_link_libraries(
-    OpenglRender darwin-aarch64
-    PRIVATE "-WL,-exported_symbols_list,render_api.entries")
+android_target_link_libraries(OpenglRender darwin PUBLIC "-framework IOSurface")
 android_install_shared(OpenglRender)
 
 if(LINUX_AARCH64)
@@ -230,10 +218,10 @@ if(NOT LINUX_AARCH64)
                          PRIVATE -fvisibility=hidden)
   android_target_compile_definitions(OpenglRender_standalone_common windows
                                      PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
-  android_target_compile_definitions(OpenglRender_standalone_common linux-x86_64 PRIVATE
+  android_target_compile_definitions(OpenglRender_standalone_common linux PRIVATE
                                     -DVK_USE_PLATFORM_XCB_KHR)
-  android_target_compile_definitions(OpenglRender_standalone_common linux-aarch64 PRIVATE
-                                    -DVK_USE_PLATFORM_XCB_KHR)
+  android_target_compile_definitions(OpenglRender_standalone_common darwin PRIVATE
+                                    -DVK_USE_PLATFORM_METAL_EXT)
   target_include_directories(
     OpenglRender_standalone_common
     PUBLIC ${ANDROID_EMUGL_DIR}/host/include/OpenglRender standalone_common
@@ -272,16 +260,17 @@ if(NOT LINUX_AARCH64)
         tests/StalePtrRegistry_unittest.cpp
         tests/SwapChainStateVk_unittest.cpp
         tests/TextureDraw_unittest.cpp
-        tests/VsyncThread_unittest.cpp)
+        tests/VsyncThread_unittest.cpp
+    LINUX tests/X11TestingSupport.cpp)
   target_link_libraries(
     OpenglRender_unittests PRIVATE OpenglRender_standalone_common
                                    android-emu-test-launcher android-emu)
   android_target_compile_definitions(OpenglRender_unittests windows PRIVATE
                                      -DVK_USE_PLATFORM_WIN32_KHR)
-  android_target_compile_definitions(OpenglRender_unittests linux-x86_64 PRIVATE
+  android_target_compile_definitions(OpenglRender_unittests linux PRIVATE
                                     -DVK_USE_PLATFORM_XCB_KHR)
-  android_target_compile_definitions(OpenglRender_unittests linux-aarch64 PRIVATE
-                                    -DVK_USE_PLATFORM_XCB_KHR)
+  android_target_compile_definitions(OpenglRender_unittests darwin PRIVATE
+                                    -DVK_USE_PLATFORM_METAL_EXT)
   add_opengl_dependencies(OpenglRender_unittests)
 
   # Unit tests

@@ -92,4 +92,7 @@ void forEachS3tcForamt(std::function<void(GLint format)>);
 bool isEtc2OrAstcFormat(GLenum format);
 
 bool shouldPassthroughCompressedFormat(GLEScontext* ctx, GLenum internalformat);
+
+GLenum getFormatFromInternalFormat(GLint internalFormat);
+GLenum getTypeFromInternalFormat(GLint internalFormat);
 #endif

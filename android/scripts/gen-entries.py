@@ -91,7 +91,7 @@ def parse_entries_file(lines):
             verbatim.append(line[1:])
             continue
         if line.startswith("namespaces"): # Namespaces
-            namespaces = list(map(lambda t: t.strip(), line.split("namespaces")[1].strip().split(",")))
+            namespaces = map(lambda t: t.strip(), line.split("namespaces")[1].strip().split(","))
             continue
         # Must be a function signature.
         m = re_func.match(line)

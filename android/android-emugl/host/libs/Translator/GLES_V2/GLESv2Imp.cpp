@@ -364,15 +364,29 @@ static void blitFromCurrentReadBufferANDROID(EGLImage image) {
     }
 
     // Could be a bad snapshot load
-    if (!img->saveableTexture || !img->globalTexObj) {
-        return;
+    if (!img->isNative) {
+        if (!img->saveableTexture) {
+            return;
+        }
     }
 
-    img->saveableTexture->makeDirty();
-    GLuint globalTexObj = img->globalTexObj->getGlobalName();
-    ctx->blitFromReadBufferToTextureFlipped(
-            globalTexObj, img->width, img->height,
-            img->internalFormat, img->format, img->type);
+    if (img->globalTexObj) {
+        img->saveableTexture->makeDirty();
+        GLuint globalTexObj = img->globalTexObj->getGlobalName();
+        ctx->blitFromReadBufferToTextureFlipped(
+                globalTexObj, img->width, img->height,
+                img->internalFormat, img->format, img->type);
+    } else if (img->isNative) {
+        if (!img->width || !img->height || !img->internalFormat) {
+            fprintf(stderr, "%s: error: Tried to blit to internal image, "
+                    "but we don't know the width, height or internalformat.\n", __func__);
+            return;
+        }
+        ctx->blitFromReadBufferToEGLImage(
+		    img->nativeImage,
+			img->internalFormat,
+			img->width, img->height);
+    }
 }
 
 }  // extern "C"
@@ -4111,6 +4125,40 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
     ImagePtr img = s_eglIface->getEGLImage(imagehndl);
     if (img) {
 
+        // For native underlying EGL images, call underlying native
+        // glEGLImageTargetTexture2DOES and exit, without replacing it with
+        // another global tex obj ourselves. This will implicitly replace the
+        // underlying texture that's stored in our global info.
+        if (img->isNative) {
+            if (!ctx->dispatcher().glEGLImageTargetTexture2DOES) {
+                fprintf(stderr, "%s: warning, glEGLImageTargetTexture2DOES not found\n", __func__);
+			} else {
+				ctx->dispatcher().glEGLImageTargetTexture2DOES(target, (GLeglImageOES)img->nativeImage);
+			}
+
+            // We need to update our records about this texture.
+            if (ctx->shareGroup().get()) {
+                TextureData *texData = getTextureTargetData(target);
+                SET_ERROR_IF(texData==NULL,GL_INVALID_OPERATION);
+                texData->width = img->width;
+                texData->height = img->height;
+                texData->border = img->border;
+                texData->internalFormat = img->internalFormat;
+                texData->format = img->format;
+                texData->type = img->type;
+                texData->texStorageLevels = img->texStorageLevels;
+                texData->sourceEGLImage = imagehndl;
+                if (img->sync) {
+                    // insert gpu side fence to make sure we are done with any blit ops.
+                    ctx->dispatcher().glWaitSync(img->sync, 0, GL_TIMEOUT_IGNORED);
+                }
+                if (!imagehndl) {
+                    fprintf(stderr, "glEGLImageTargetTexture2DOES with empty handle\n");
+                }
+            }
+            return;
+        }
+
         // Could be from a bad snapshot; in this case, skip.
         if (!img->globalTexObj) return;
 
@@ -4157,6 +4205,15 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
     ImagePtr img = s_eglIface->getEGLImage(imagehndl);
     SET_ERROR_IF(!img,GL_INVALID_VALUE);
     SET_ERROR_IF(!ctx->shareGroup().get(),GL_INVALID_OPERATION);
+
+    if (img->isNative) {
+        if (!ctx->dispatcher().glEGLImageTargetRenderbufferStorageOES) {
+            fprintf(stderr, "%s: warning, glEGLImageTargetRenderbufferStorageOES not found\n", __func__);
+        } else {
+            ctx->dispatcher().glEGLImageTargetRenderbufferStorageOES(target, (GLeglImageOES)img->nativeImage);
+        }
+        return;
+    }
 
     // Get current bounded renderbuffer
     // raise INVALID_OPERATIOn if no renderbuffer is bounded

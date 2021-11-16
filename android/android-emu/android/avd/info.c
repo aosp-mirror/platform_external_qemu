@@ -530,7 +530,6 @@ _avdInfo_getApiLevel(AvdInfo* i, bool* isMarshmallowOrHigher)
     const int   defaultLevel = kUnknownApiLevel;
     int         level        = defaultLevel;
     const char* target = i->target;
-
     if (target == NULL) {
         D("No target field in root AVD .ini file?");
         D("Defaulting to API level %d", level);
@@ -563,8 +562,13 @@ _avdInfo_getApiLevel(AvdInfo* i, bool* isMarshmallowOrHigher)
     if (p == NULL || !isdigit(*p)) {
         // preview versions usually have a single letter instead of the API
         // level.
-        if (p && isalpha(p[0]) && p[1] == 0) {
-            level = avdInfo_getApiLevelFromLetter(p[0]);
+        if (p && isalpha(p[0])) {
+            if (p[1] == 0) {
+                level = avdInfo_getApiLevelFromLetter(p[0]);
+            } else {
+                // Bug: 202464864 Handle the special case for android-Sv2
+                level = avdInfo_getApiLevelFromDessertName(p);
+            }
             if (level > 99 && toupper(p[0]) >= 'M') {
                 *isMarshmallowOrHigher = true;
             }
@@ -651,7 +655,8 @@ static const struct {
     { 28, "Pie", "9.0 (Pie) - API 28" },
     { 29, "Q", "10.0 (Q) - API 29" },
     { 30, "R", "11.0 (R) - API 30"},
-    { 31, "S", "12.0 (S) - API 31"}
+    { 31, "S", "12.0 (S) - API 31"},
+    { 32, "Sv2", "12.0 (S) - API 32"}
 };
 
 const char* avdInfo_getApiDessertName(int apiLevel) {
@@ -678,6 +683,16 @@ void avdInfo_getFullApiName(int apiLevel, char* nameStr, int strLen) {
         }
     }
     snprintf(nameStr, strLen, "API %d", apiLevel);
+}
+
+int avdInfo_getApiLevelFromDessertName(const char* dessertName) {
+    int i = 0;
+    for (; i < ARRAY_SIZE(kApiLevelInfo); ++i) {
+        if (!strcmp(dessertName, kApiLevelInfo[i].dessertName)) {
+            return kApiLevelInfo[i].apiLevel;
+        }
+    }
+    return kUnknownApiLevel;
 }
 
 int avdInfo_getApiLevelFromLetter(char letter) {

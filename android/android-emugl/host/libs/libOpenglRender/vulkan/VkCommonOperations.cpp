@@ -1432,6 +1432,9 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
 
     // Already setup
     if (infoPtr) {
+        // Setting exported is required for on_vkCreateImage backed by
+        // an AHardwareBuffer.
+        if (exported) *exported = infoPtr->glExported;
         // Update the allocation size to what the host driver wanted, or we
         // might get VK_ERROR_OUT_OF_DEVICE_MEMORY and a host crash
         if (allocSize) *allocSize = infoPtr->memory.size;

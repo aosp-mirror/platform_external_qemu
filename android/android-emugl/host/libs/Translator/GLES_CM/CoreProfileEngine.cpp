@@ -487,42 +487,34 @@ void CoreProfileEngine::setupArrayForDraw(
             gl.glEnableVertexAttribArray(attribNum);
             gl.glBindBuffer(GL_ARRAY_BUFFER, getVboFor(arrayType));
 
-            // Use vertex attrib divisor to avoid creating a buffer
-            // that repeats the same value for as many verts.
-
-            GLint size = 4;
-            GLenum dataType = GL_FLOAT;
-            std::vector<float> data(4, 0.f);
+            GLint size;
+            std::vector<float> buffer;
             switch (arrayType) {
-                case GL_VERTEX_ARRAY:
-                    size = 4;
-                    fprintf(stderr, "Error: GLES1 does not support immediate vertices\n");
-                    mCtx->setGLerror(GL_INVALID_OPERATION);
-                    break;
                 case GL_COLOR_ARRAY:
                     size = 4;
-                    data = mCtx->getColor();
+                    mCtx->getColor(count, buffer);
                     break;
                 case GL_NORMAL_ARRAY:
                     size = 3;
-                    data = mCtx->getNormal();
-                    break;
-                case GL_POINT_SIZE_ARRAY_OES:
-                    data = mCtx->getColor();
+                    mCtx->getNormal(count, buffer);
                     break;
                 case GL_TEXTURE_COORD_ARRAY:
                     size = 4;
-                    data = mCtx->getMultiTexCoord(mCtx->getActiveTextureUnit());
+                    mCtx->getMultiTexCoord(count, mCtx->getActiveTextureUnit(), buffer);
                     break;
                 default:
-                    break;
+                    fprintf(stderr, "Error: Invalid array type %d.\n", arrayType);
+                    mCtx->setGLerror(GL_INVALID_OPERATION);
+                    return;
             }
-            GLsizei stride = size * sizeof(float);
-            gl.glBufferData(GL_ARRAY_BUFFER, stride, (GLvoid*)&data[0], GL_STREAM_DRAW);
-            gl.glVertexAttribDivisor(attribNum, 1);
-            gl.glVertexAttribPointer(attribNum, size, dataType,
-                                     GL_FALSE /* normalized */,
-                                     stride, nullptr /* no offset into vbo */);
+
+            // We need a buffer large enough to hold `count` copies of the vertex attributes provided
+            // above.
+            GLsizei bufSize = count * size * sizeof(float);
+            gl.glBufferData(GL_ARRAY_BUFFER, bufSize, buffer.data(), GL_STREAM_DRAW);
+            // Stride is set to 0 to indicate that our values are tightly packed -- the driver will
+            // do the calculation.
+            gl.glVertexAttribPointer(attribNum, size, GL_FLOAT, GL_FALSE, 0, nullptr);
             gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
         } else {
             gl.glDisableVertexAttribArray(attribNum);
