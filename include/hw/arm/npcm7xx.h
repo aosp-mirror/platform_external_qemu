@@ -32,6 +32,7 @@
 #include "hw/misc/npcm7xx_rng.h"
 #include "hw/net/npcm7xx_emc.h"
 #include "hw/nvram/npcm7xx_otp.h"
+#include "hw/peci/npcm7xx_peci.h"
 #include "hw/timer/npcm7xx_timer.h"
 #include "hw/ssi/npcm7xx_fiu.h"
 #include "hw/ssi/npcm_pspi.h"
@@ -79,7 +80,7 @@ typedef struct NPCM7xxMachineClass {
 #define NPCM7XX_MACHINE_GET_CLASS(obj)                                  \
     OBJECT_GET_CLASS(NPCM7xxMachineClass, (obj), TYPE_NPCM7XX_MACHINE)
 
-struct NPCM7xxState {
+typedef struct NPCM7xxState {
     DeviceState         parent;
 
     ARMCPU              cpu[NPCM7XX_MAX_NUM_CPUS];
@@ -110,7 +111,8 @@ struct NPCM7xxState {
     NPCM7xxPCIMBoxState pci_mbox;
     NPCM7xxSDHCIState   mmc;
     NPCMPSPIState       pspi[2];
-};
+    NPCM7xxPECIState    peci;
+} NPCM7xxState;
 
 #define TYPE_NPCM7XX    "npcm7xx"
 OBJECT_DECLARE_TYPE(NPCM7xxState, NPCM7xxClass, NPCM7XX)
