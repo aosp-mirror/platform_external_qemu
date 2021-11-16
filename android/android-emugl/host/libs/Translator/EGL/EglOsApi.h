@@ -66,6 +66,7 @@ public:
 
     // as of now, only osx has this non-nullptr, needed by media decoder
     virtual void* lowLevelContext() { return nullptr; }
+    virtual void* getNative() { return nullptr; }
 
 protected:
     ~Context() = default;
@@ -162,6 +163,7 @@ public:
     virtual ~Display() {}
 
     virtual GlesVersion getMaxGlesVersion() = 0;
+    virtual const char* getExtensionString() { return ""; }
 
     virtual void queryConfigs(int renderableType,
                               AddConfigCallback* addConfigFunc,
@@ -182,6 +184,21 @@ public:
 
     virtual Surface* createPbufferSurface(
             const PixelFormat* pixelFormat, const PbufferInfo* info) = 0;
+
+    virtual EGLImage createImage(
+            EGLDisplay,
+            EGLContext,
+            EGLenum,
+            EGLClientBuffer,
+            const EGLint* attribs) {
+        return (EGLImage)0;
+    }
+
+    virtual EGLBoolean destroyImage(
+            EGLDisplay,
+            EGLImage) { return EGL_FALSE; }
+
+    virtual EGLDisplay getNative() { return (EGLDisplay)0; }
 
     virtual bool releasePbuffer(Surface* pb) = 0;
 

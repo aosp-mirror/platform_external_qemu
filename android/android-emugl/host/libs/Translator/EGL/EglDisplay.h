@@ -47,8 +47,8 @@ public:
     // this will be considered the default diplay.
     EglDisplay(EGLNativeDisplayType dpy, EglOS::Display* idpy);
 
-    // Return the native display handle for this EglDisplay.
-    EGLNativeDisplayType getNativeDisplay() const { return m_dpy; }
+    // Return the EglOs Engine display handle for this EglDisplay.
+    EGLNativeDisplayType getEglOsEngineDisplay() const { return m_dpy; }
 
     // Return the native internal display handle for this EglDisplay.
     EglOS::Display* nativeType() const { return m_idpy; }
@@ -59,6 +59,35 @@ public:
     // Returns the max supported GLES version
     EglOS::GlesVersion getMaxGlesVersion() const {
         return nativeType()->getMaxGlesVersion();
+    }
+
+    const char* getExtensionString() {
+        return nativeType()->getExtensionString();
+    }
+
+    EGLImage createNativeImage(
+            EGLDisplay dpy,
+            EGLContext ctx,
+            EGLenum target,
+            EGLClientBuffer buffer,
+            const EGLint *attrib_list) {
+        return nativeType()->createImage(dpy, ctx, target, buffer, attrib_list);
+    }
+
+    EGLBoolean destroyNativeImage(
+            EGLDisplay dpy,
+            EGLImage image) {
+        return nativeType()->destroyImage(dpy, image);
+    }
+
+    EGLDisplay getHostDriverDisplay() {
+        return nativeType()->getNative();
+    }
+
+    void* getNativeContext(EGLContext ctx) const {
+        auto dispContext = getContext(ctx);
+        if (!dispContext) return nullptr;
+        return dispContext->nativeType()->getNative();
     }
 
     // Write up to |config_size| EGLConfig values into the |configs| array.

@@ -362,13 +362,13 @@ static inline size_t virgl_format_to_total_xfer_len(
     uint32_t totalWidth, uint32_t totalHeight,
     uint32_t x, uint32_t y, uint32_t w, uint32_t h) {
     if (virgl_format_is_yuv(format)) {
-        uint32_t align = (format == VIRGL_FORMAT_YV12) ?  32 : 16;
-
+        uint32_t yAlign = (format == VIRGL_FORMAT_YV12) ?  32 : 16;
         uint32_t yWidth = totalWidth;
         uint32_t yHeight = totalHeight;
-        uint32_t yStride = align_up_power_of_2(yWidth, align);
+        uint32_t yStride = align_up_power_of_2(yWidth, yAlign);
         uint32_t ySize = yStride * yHeight;
 
+        uint32_t uvAlign = 16;
         uint32_t uvWidth;
         uint32_t uvPlaneCount;
 
@@ -383,7 +383,7 @@ static inline size_t virgl_format_to_total_xfer_len(
         }
 
         uint32_t uvHeight = totalHeight / 2;
-        uint32_t uvStride = align_up_power_of_2(uvWidth, align);
+        uint32_t uvStride = align_up_power_of_2(uvWidth, uvAlign);
         uint32_t uvSize = uvStride * uvHeight * uvPlaneCount;
 
         uint32_t dataSize = ySize + uvSize;
@@ -1508,6 +1508,33 @@ public:
         return entry.hvSlot;
     }
 
+    int platformImportResource(int res_handle, int res_type, void* resource) {
+        AutoLock lock(mLock);
+        auto it = mResources.find(res_handle);
+        if (it == mResources.end()) return -1;
+        bool success =
+            mVirtioGpuOps->platform_import_resource(res_handle, res_type, resource);
+        return success ? 0 : -1;
+    }
+
+    int platformResourceInfo(int res_handle, int* width, int* height, int* internal_format) {
+        AutoLock lock(mLock);
+        auto it = mResources.find(res_handle);
+        if (it == mResources.end()) return -1;
+        bool success =
+            mVirtioGpuOps->platform_resource_info(res_handle, width, height, internal_format);
+        return success ? 0 : -1;
+    }
+
+    void* platformCreateSharedEglContext() {
+        return mVirtioGpuOps->platform_create_shared_egl_context();
+    }
+
+    int platformDestroySharedEglContext(void* context) {
+        bool success = mVirtioGpuOps->platform_destroy_shared_egl_context(context);
+        return success ? 0 : -1;
+    }
+
 private:
     void allocResource(PipeResEntry& entry, iovec* iov, int num_iovs, uint64_t* addrs = nullptr) {
         VGPLOG("entry linear: %p", entry.linear);
@@ -1962,6 +1989,22 @@ VG_EXPORT void pipe_virgl_renderer_load_snapshot(void* qemufile) {
 
 VG_EXPORT int pipe_virgl_renderer_resource_attach_iov_with_addrs(int res_handle, struct iovec *iov, int num_iovs, uint64_t* addrs) {
     return sRenderer->attachIov(res_handle, iov, num_iovs, addrs);
+}
+
+VG_EXPORT int stream_renderer_platform_import_resource(int res_handle, int res_type, void* resource) {
+    return sRenderer->platformImportResource(res_handle, res_type, resource);
+}
+
+VG_EXPORT int stream_renderer_platform_resource_info(int res_handle, int* width, int*  height, int* internal_format) {
+    return sRenderer->platformResourceInfo(res_handle, width, height, internal_format);
+}
+
+VG_EXPORT void* stream_renderer_platform_create_shared_egl_context() {
+    return sRenderer->platformCreateSharedEglContext();
+}
+
+VG_EXPORT int stream_renderer_platform_destroy_shared_egl_context(void* context) {
+    return sRenderer->platformDestroySharedEglContext(context);
 }
 
 #define VIRGLRENDERER_API_PIPE_STRUCT_DEF(api) pipe_##api,

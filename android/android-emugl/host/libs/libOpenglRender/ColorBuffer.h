@@ -266,6 +266,10 @@ public:
     void postLayer(ComposeLayer* l, int frameWidth, int frameHeight);
     GLuint getTexture();
 
+    // ColorBuffer backing change methods
+    //
+    // Change to opaque fd or opaque win32 handle-backed VkDeviceMemory
+    // via GL_EXT_memory_objects
     bool importMemory(
 #ifdef _WIN32
         void* handle,
@@ -276,6 +280,13 @@ public:
         bool dedicated,
         bool linearTiling,
         bool vulkanOnly);
+
+    // Change to EGL native pixmap
+    bool importEglNativePixmap(void* pixmap);
+    // Change to some other native EGL image.  nativeEglImage must not have
+    // been created from our s_egl.eglCreateImage.
+    bool importEglImage(void* nativeEglImage);
+
     void setInUse(bool inUse);
     bool isInUse() const { return m_inUse; }
 
@@ -291,6 +302,12 @@ public:
 
 private:
     ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper);
+    // Helper function to get contents and clear current texture and EGL image.
+    std::vector<uint8_t> getContentsAndClearStorage();
+    // Helper function to rebind EGL image as texture. Assumes storage cleared.
+    void restoreContentsAndEglImage(const std::vector<uint8_t>& contents, EGLImageKHR image);
+    // Helper function that does the above two operations in one go.
+    void rebindEglImage(EGLImageKHR image);
 
 private:
     GLuint m_tex = 0;
@@ -302,6 +319,10 @@ private:
     GLuint m_fbo = 0;
     GLint m_internalFormat = 0;
     GLint m_sizedInternalFormat = 0;
+
+    // This is helpful for bindFbo which may skip too many steps after the egl
+    // image is replaced.
+    bool m_needFboReattach = false;
 
     // |m_format| and |m_type| are for reformatting purposes only
     // to work around bugs in the guest. No need to snapshot those.

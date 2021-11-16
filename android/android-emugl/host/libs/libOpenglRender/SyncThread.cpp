@@ -307,6 +307,8 @@ void SyncThread::doSyncBlockedWaitNoTimeline(SyncThreadCmd* cmd) {
         fprintf(stderr, "error: eglClientWaitSync abnormal exit 0x%x\n",
                 wait_result);
     }
+
+    FenceSync::incrementTimelineAndDeleteOldFences();
 }
 
 void SyncThread::doExit(SyncThreadCmd* cmd) {

@@ -2922,6 +2922,111 @@ void GLEScontext::blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
     gl.glFlush();
 }
 
+void GLEScontext::blitFromReadBufferToEGLImage(EGLImage image, GLint internalFormat, int width, int height) {
+
+    auto& gl = dispatcher();
+    GLint prevViewport[4];
+    getViewport(prevViewport);
+
+    setupImageBlitState();
+    bool shouldBlit = setupImageBlitForTexture(width, height, internalFormat);
+
+    if (!shouldBlit) return;
+
+    // b/159670873: The texture to blit doesn't necessarily match the display
+    // size. If it doesn't match, then we might not be using the right mipmap
+    // level, which can result in a black screen. Set to always use level 0.
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    if (!m_blitState.eglImageTex) {
+        gl.glGenTextures(1, &m_blitState.eglImageTex);
+    }
+
+    gl.glBindTexture(GL_TEXTURE_2D, m_blitState.eglImageTex);
+    gl.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, image);
+    gl.glBindTexture(GL_TEXTURE_2D, m_blitState.tex);
+    gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_blitState.fbo);
+    gl.glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                              GL_TEXTURE_2D, m_blitState.eglImageTex, 0);
+
+    gl.glDisable(GL_BLEND);
+    gl.glDisable(GL_SCISSOR_TEST);
+    gl.glDisable(GL_DEPTH_TEST);
+    gl.glDisable(GL_STENCIL_TEST);
+    gl.glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+    gl.glDisable(GL_SAMPLE_COVERAGE);
+    gl.glDisable(GL_CULL_FACE);
+    gl.glDisable(GL_POLYGON_OFFSET_FILL);
+    gl.glDisable(GL_RASTERIZER_DISCARD);
+
+    gl.glViewport(0, 0, width, height);
+    if (isGles2Gles()) {
+        gl.glDepthRangef(0.0f, 1.0f);
+    } else {
+        gl.glDepthRange(0.0f, 1.0f);
+    }
+    gl.glColorMask(1, 1, 1, 1);
+
+    gl.glUseProgram(m_blitState.program);
+    gl.glUniform1i(m_blitState.samplerLoc, m_activeTexture);
+
+    gl.glBindVertexArray(m_blitState.vao);
+    gl.glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    // state restore
+    const GLuint globalProgramName = shareGroup()->getGlobalName(
+        NamedObjectType::SHADER_OR_PROGRAM, m_useProgram);
+    gl.glUseProgram(globalProgramName);
+
+    gl.glBindVertexArray(getVAOGlobalName(m_currVaoState.vaoId()));
+
+    gl.glBindTexture(
+        GL_TEXTURE_2D,
+        shareGroup()->getGlobalName(
+            NamedObjectType::TEXTURE,
+            getTextureLocalName(GL_TEXTURE_2D,
+                                getBindedTexture(GL_TEXTURE_2D))));
+
+    GLuint drawFboBinding = getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
+    GLuint readFboBinding = getFramebufferBinding(GL_READ_FRAMEBUFFER);
+
+    gl.glBindFramebuffer(
+        GL_DRAW_FRAMEBUFFER,
+        drawFboBinding ? getFBOGlobalName(drawFboBinding) : m_defaultFBO);
+    gl.glBindFramebuffer(
+        GL_READ_FRAMEBUFFER,
+        readFboBinding ? getFBOGlobalName(readFboBinding) : m_defaultReadFBO);
+
+    if (isEnabled(GL_BLEND)) gl.glEnable(GL_BLEND);
+    if (isEnabled(GL_SCISSOR_TEST)) gl.glEnable(GL_SCISSOR_TEST);
+    if (isEnabled(GL_DEPTH_TEST)) gl.glEnable(GL_DEPTH_TEST);
+    if (isEnabled(GL_STENCIL_TEST)) gl.glEnable(GL_STENCIL_TEST);
+    if (isEnabled(GL_SAMPLE_ALPHA_TO_COVERAGE)) gl.glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+    if (isEnabled(GL_SAMPLE_COVERAGE)) gl.glEnable(GL_SAMPLE_COVERAGE);
+    if (isEnabled(GL_CULL_FACE)) gl.glEnable(GL_CULL_FACE);
+    if (isEnabled(GL_POLYGON_OFFSET_FILL)) gl.glEnable(GL_POLYGON_OFFSET_FILL);
+    if (isEnabled(GL_RASTERIZER_DISCARD)) gl.glEnable(GL_RASTERIZER_DISCARD);
+
+    gl.glViewport(prevViewport[0], prevViewport[1],
+                  prevViewport[2], prevViewport[3]);
+
+    if (isGles2Gles()) {
+        gl.glDepthRangef(m_zNear, m_zFar);
+    } else {
+        gl.glDepthRange(m_zNear, m_zFar);
+    }
+
+    gl.glColorMask(m_colorMaskR, m_colorMaskG, m_colorMaskB, m_colorMaskA);
+
+    gl.glFlush();
+}
+
 // Primitive restart emulation
 #define GL_PRIMITIVE_RESTART              0x8F9D
 #define GL_PRIMITIVE_RESTART_INDEX        0x8F9E

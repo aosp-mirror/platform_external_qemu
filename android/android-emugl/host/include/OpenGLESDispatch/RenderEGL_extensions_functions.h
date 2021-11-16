@@ -21,6 +21,11 @@
   X(void, eglAddLibrarySearchPathANDROID, (const char* path)) \
   X(EGLBoolean, eglQueryVulkanInteropSupportANDROID, ()) \
   X(EGLBoolean, eglGetSyncAttribKHR, (EGLDisplay display, EGLSync sync, EGLint attribute, EGLint * value)) \
+  X(EGLDisplay, eglGetNativeDisplayANDROID, (EGLDisplay display)) \
+  X(EGLContext, eglGetNativeContextANDROID, (EGLDisplay display, EGLContext context)) \
+  X(EGLImage, eglGetNativeImageANDROID, (EGLDisplay display, EGLImage image)) \
+  X(EGLBoolean, eglSetImageInfoANDROID, (EGLDisplay display, EGLImage image, EGLint width, EGLint height, EGLint internalformat)) \
+  X(EGLImage, eglImportImageANDROID, (EGLDisplay display, EGLImage image)) \
 
 EGLAPI EGLint EGLAPIENTRY eglGetMaxGLESVersion(EGLDisplay display);
 EGLAPI void EGLAPIENTRY eglBlitFromCurrentReadBufferANDROID(EGLDisplay display, EGLImageKHR image);

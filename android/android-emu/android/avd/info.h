@@ -178,6 +178,10 @@ const char* avdInfo_getApiDessertName(int apiLevel);
  */
 void avdInfo_getFullApiName(int apiLevel, char* nameStr, int strLen);
 
+/* Return the api level corresponding to dessert name,
+ * e.g. 'Sv2' -> 32
+ */
+int avdInfo_getApiLevelFromDessertName(const char* dessertName);
 /* Return the api level corresponding to a single-letter API code,
  * e.g. 'N' -> 24
  */

@@ -822,3 +822,64 @@ bool shouldPassthroughCompressedFormat(GLEScontext* ctx, GLenum internalformat) 
     }
     return false;
 }
+
+GLenum getFormatFromInternalFormat(GLint internalFormat) {
+    switch (internalFormat) {
+        case GL_R8:
+            return GL_RED;
+        case GL_RG8:
+            return GL_RG;
+        case GL_RGB8:
+        case GL_RGB565:
+        case GL_RGB16F:
+            return GL_RGB;
+        case GL_RGBA8:
+        case GL_RGB5_A1_OES:
+        case GL_RGBA4_OES:
+        case GL_UNSIGNED_INT_10_10_10_2_OES:
+        case GL_RGB10_A2:
+        case GL_RGBA16F:
+            return GL_RGBA;
+        case GL_BGRA8_EXT:
+            return GL_BGRA_EXT;
+        default: // already unsized
+            return internalFormat;
+    }
+}
+
+GLenum getTypeFromInternalFormat(GLint internalFormat) {
+    switch (internalFormat) {
+        case GL_RGB:
+        case GL_RGB8:
+            return GL_UNSIGNED_BYTE;
+        case GL_RGB565_OES:
+            return GL_UNSIGNED_SHORT_5_6_5;
+        case GL_RGBA:
+        case GL_RGBA8:
+        case GL_RGB5_A1_OES:
+        case GL_RGBA4_OES:
+            return GL_UNSIGNED_BYTE;
+        case GL_UNSIGNED_INT_10_10_10_2_OES:
+            return GL_UNSIGNED_SHORT;
+        case GL_RGB10_A2:
+            return GL_UNSIGNED_INT_2_10_10_10_REV;
+        case GL_RGB16F:
+            return GL_HALF_FLOAT;
+        case GL_RGBA16F:
+            return GL_HALF_FLOAT;
+        case GL_LUMINANCE:
+            return GL_UNSIGNED_SHORT;
+        case GL_BGRA_EXT:
+            return GL_UNSIGNED_BYTE;
+        case GL_R8:
+        case GL_RED:
+            return GL_UNSIGNED_BYTE;
+        case GL_RG8:
+        case GL_RG:
+            return GL_UNSIGNED_BYTE;
+        default:
+            fprintf(stderr, "%s: Unknown format 0x%x\n", __func__,
+                    internalFormat);
+            return GL_UNSIGNED_BYTE;
+    }
+}

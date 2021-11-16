@@ -1747,7 +1747,7 @@ GL_API void GL_APIENTRY  glOrthof( GLfloat left, GLfloat right, GLfloat bottom, 
 GL_API void GL_APIENTRY  glOrthox( GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar) {
     GET_CTX_CM()
     GLES_CM_TRACE()
-    ctx->orthof(left,right,bottom,top,zNear,zFar);
+    ctx->orthof(X2F(left),X2F(right),X2F(bottom),X2F(top),X2F(zNear),X2F(zFar));
 }
 
 GL_API void GL_APIENTRY  glPixelStorei( GLenum pname, GLint param) {
