@@ -130,8 +130,6 @@ target_compile_definitions(OpenglRender_vulkan_cereal_dispatch PRIVATE -DVK_ANDR
 android_target_compile_definitions(OpenglRender_vulkan_cereal_dispatch windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
 android_target_compile_definitions(OpenglRender_vulkan_cereal_dispatch linux-x86_64 PRIVATE -DVK_USE_PLATFORM_XCB_KHR)
 android_target_compile_definitions(OpenglRender_vulkan_cereal_dispatch linux-aarch64 PRIVATE -DVK_USE_PLATFORM_XCB_KHR)
-android_target_compile_definitions(OpenglRender_vulkan_cereal_dispatch darwin-x86_64 PRIVATE -DVK_USE_PLATFORM_METAL_EXT)
-android_target_compile_definitions(OpenglRender_vulkan_cereal_dispatch darwin-aarch64 PRIVATE -DVK_USE_PLATFORM_METAL_EXT)
 target_include_directories(OpenglRender_vulkan_cereal_dispatch
                            PUBLIC
                            ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/vulkan/cereal
