@@ -23,7 +23,6 @@
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/GLutils.h"
 #include "GLcommon/TextureData.h"
-#include "GLcommon/TextureUtils.h"
 #include "GLcommon/TranslatorIfaces.h"
 #include "OpenglCodecCommon/ErrorLog.h"
 #include "ThreadInfo.h"
@@ -1357,11 +1356,6 @@ ImagePtr getEGLImage(unsigned int imageId)
         const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
         return dpy->getImage(reinterpret_cast<EGLImageKHR>(imageId),
                 iface->restoreTexture);
-    } else {
-        // Maybe this is a native image, so we don't need a current gl context.
-        const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
-        return dpy->getImage(reinterpret_cast<EGLImageKHR>(imageId),
-                iface->restoreTexture);
     }
     return nullptr;
 }
@@ -1369,6 +1363,7 @@ ImagePtr getEGLImage(unsigned int imageId)
 EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext context, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list)
 {
     VALIDATE_DISPLAY(display);
+    VALIDATE_CONTEXT(context);
 
 	if (target != EGL_GL_TEXTURE_2D_KHR) {
 		// Create image from underlying and add to registry
@@ -1805,16 +1800,11 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSetImageInfoANDROID(EGLDisplay display, EGLImag
     VALIDATE_DISPLAY_RETURN(display, EGL_FALSE);
     unsigned int imagehndl = SafeUIntFromPointer(image);
     ImagePtr img = getEGLImage(imagehndl);
-    if (!img) {
-        fprintf(stderr, "%s: error: Could not find image %p\n", __func__, image);
-        return EGL_FALSE;
-    }
+    if (!img) return EGL_FALSE;
 
     img->width = width;
     img->height = height;
     img->internalFormat = internalFormat;
-    img->format = getFormatFromInternalFormat(internalFormat);
-    img->type = getTypeFromInternalFormat(internalFormat);
 
     return EGL_TRUE;
 }
