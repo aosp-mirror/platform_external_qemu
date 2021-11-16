@@ -14,6 +14,7 @@
 #include <mutex>
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/MemoryTracker.h"
+#include "android/utils/debug.h"
 #include "emugl/common/misc.h"
 
 #define MEM_TRACE_IF(condition, group)                                  \
@@ -37,14 +38,18 @@
 
 #define MEM_TRACE(group) MEM_TRACE_IF(true, group)
 
-#define FAIL_IF(condition, description) if((condition)) {                                      \
-        fprintf(stderr, "%s:%s:%d error %s\n", __FILE__, __FUNCTION__, __LINE__, description); \
-        return;                                                                                \
+#define FAIL_IF(condition, description)                                    \
+    if ((condition)) {                                                     \
+        VERBOSE_PRINT(gles, "%s:%s:%d error %s\n", __FILE__, __FUNCTION__, \
+                      __LINE__, description);                              \
+        return;                                                            \
     }
 
-#define RET_AND_FAIL_IF(condition, description, ret) if((condition)) {                         \
-        fprintf(stderr, "%s:%s:%d error %s\n", __FILE__, __FUNCTION__, __LINE__, description); \
-        return ret;                                                                            \
+#define RET_AND_FAIL_IF(condition, description, ret)                       \
+    if ((condition)) {                                                     \
+        VERBOSE_PRINT(gles, "%s:%s:%d error %s\n", __FILE__, __FUNCTION__, \
+                      __LINE__, description);                              \
+        return ret;                                                        \
     }
 
 #define GET_CTX()                                                             \
@@ -93,18 +98,21 @@
     RET_AND_FAIL_IF(!ctx, "null ctx", failure_ret)                            \
     CONTEXT_CHECK
 
-#define SET_ERROR_IF(condition,err) if((condition)) {                            \
-                        fprintf(stderr, "%s:%s:%d error 0x%x\n", __FILE__, __FUNCTION__, __LINE__, err); \
-                        ctx->setGLerror(err);                                    \
-                        return;                                                  \
-                    }
+#define SET_ERROR_IF(condition, err)                                         \
+    if ((condition)) {                                                       \
+        VERBOSE_PRINT(gles, "%s:%s:%d error 0x%x\n", __FILE__, __FUNCTION__, \
+                      __LINE__, err);                                        \
+        ctx->setGLerror(err);                                                \
+        return;                                                              \
+    }
 
-
-#define RET_AND_SET_ERROR_IF(condition,err,ret) if((condition)) {                \
-                        fprintf(stderr, "%s:%s:%d error 0x%x\n", __FILE__, __FUNCTION__, __LINE__, err); \
-                        ctx->setGLerror(err);                                    \
-                        return ret;                                              \
-                    }
+#define RET_AND_SET_ERROR_IF(condition, err, ret)                            \
+    if ((condition)) {                                                       \
+        VERBOSE_PRINT(gles, "%s:%s:%d error 0x%x\n", __FILE__, __FUNCTION__, \
+                      __LINE__, err);                                        \
+        ctx->setGLerror(err);                                                \
+        return ret;                                                          \
+    }
 
 #define SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(func) \
             SET_ERROR_IF(!ctx->dispatcher().func, GL_INVALID_OPERATION)
