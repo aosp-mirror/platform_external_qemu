@@ -3323,6 +3323,7 @@ if have_system
     'hw/nvram',
     'hw/pci',
     'hw/pci-host',
+    'hw/peci',
     'hw/ppc',
     'hw/rdma',
     'hw/rdma/vmw',

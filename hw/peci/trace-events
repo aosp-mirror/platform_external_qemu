@@ -1,0 +1,5 @@
+# See docs/devel/tracing.rst for syntax documentation.
+
+# peci-core.c
+peci_handle_cmd(const char* s) "%s"
+peci_rd_pkg_cfg(const char* s) "%s"

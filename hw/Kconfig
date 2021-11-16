@@ -24,6 +24,7 @@ source net/Kconfig
 source nubus/Kconfig
 source nvme/Kconfig
 source nvram/Kconfig
+source peci/Kconfig
 source pci-bridge/Kconfig
 source pci-host/Kconfig
 source pcmcia/Kconfig

@@ -3559,6 +3559,13 @@ F: tests/qtest/adm1272-test.c
 F: tests/qtest/max34451-test.c
 F: tests/qtest/isl_pmbus_vr-test.c
 
+PECI
+M: Titus Rwantare <titusr@google.com>
+S: Maintained
+F: hw/peci/peci-core.c
+F: hw/peci/peci-client.c
+F: include/hw/peci/peci.h
+
 Firmware schema specifications
 M: Philippe Mathieu-Daudé <philmd@linaro.org>
 R: Daniel P. Berrange <berrange@redhat.com>
