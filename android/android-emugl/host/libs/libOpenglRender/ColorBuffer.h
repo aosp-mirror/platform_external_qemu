@@ -320,10 +320,6 @@ private:
     GLint m_internalFormat = 0;
     GLint m_sizedInternalFormat = 0;
 
-    // This is helpful for bindFbo which may skip too many steps after the egl
-    // image is replaced.
-    bool m_needFboReattach = false;
-
     // |m_format| and |m_type| are for reformatting purposes only
     // to work around bugs in the guest. No need to snapshot those.
     bool m_needFormatCheck = true;

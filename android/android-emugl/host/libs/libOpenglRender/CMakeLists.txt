@@ -260,8 +260,7 @@ if(NOT LINUX_AARCH64)
         tests/StalePtrRegistry_unittest.cpp
         tests/SwapChainStateVk_unittest.cpp
         tests/TextureDraw_unittest.cpp
-        tests/VsyncThread_unittest.cpp
-    LINUX tests/X11TestingSupport.cpp)
+        tests/VsyncThread_unittest.cpp)
   target_link_libraries(
     OpenglRender_unittests PRIVATE OpenglRender_standalone_common
                                    android-emu-test-launcher android-emu)
