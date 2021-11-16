@@ -23170,10 +23170,20 @@ void marshal_VkMetalSurfaceCreateInfoEXT(
     const VkMetalSurfaceCreateInfoEXT* forMarshaling)
 {
     (void)rootType;
-    
-    // This struct should never be marshaled / unmarshaled.
-    __builtin_trap();
-    
+    vkStream->write((VkStructureType*)&forMarshaling->sType, sizeof(VkStructureType));
+    if (rootType == VK_STRUCTURE_TYPE_MAX_ENUM)
+    {
+        rootType = forMarshaling->sType;
+    }
+    marshal_extension_struct(vkStream, rootType, forMarshaling->pNext);
+    vkStream->write((VkMetalSurfaceCreateFlagsEXT*)&forMarshaling->flags, sizeof(VkMetalSurfaceCreateFlagsEXT));
+    // WARNING PTR CHECK
+    uint64_t cgen_var_0 = (uint64_t)(uintptr_t)forMarshaling->pLayer;
+    vkStream->putBe64(cgen_var_0);
+    if (forMarshaling->pLayer)
+    {
+        vkStream->write((const CAMetalLayer*)forMarshaling->pLayer, sizeof(const CAMetalLayer));
+    }
 }
 
 void unmarshal_VkMetalSurfaceCreateInfoEXT(
@@ -23182,10 +23192,31 @@ void unmarshal_VkMetalSurfaceCreateInfoEXT(
     VkMetalSurfaceCreateInfoEXT* forUnmarshaling)
 {
     (void)rootType;
-    
-    // This struct should never be marshaled / unmarshaled.
-    __builtin_trap();
-    
+    vkStream->read((VkStructureType*)&forUnmarshaling->sType, sizeof(VkStructureType));
+    if (rootType == VK_STRUCTURE_TYPE_MAX_ENUM)
+    {
+        rootType = forUnmarshaling->sType;
+    }
+    size_t pNext_size;
+    pNext_size = vkStream->getBe32();
+    forUnmarshaling->pNext = nullptr;
+    if (pNext_size)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
+        vkStream->read((void*)forUnmarshaling->pNext, sizeof(VkStructureType));
+        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
+        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), rootType, forUnmarshaling->pNext));
+        *(VkStructureType*)forUnmarshaling->pNext = extType;
+        unmarshal_extension_struct(vkStream, rootType, (void*)(forUnmarshaling->pNext));
+    }
+    vkStream->read((VkMetalSurfaceCreateFlagsEXT*)&forUnmarshaling->flags, sizeof(VkMetalSurfaceCreateFlagsEXT));
+    // WARNING PTR CHECK
+    forUnmarshaling->pLayer = (const CAMetalLayer*)(uintptr_t)vkStream->getBe64();
+    if (forUnmarshaling->pLayer)
+    {
+        vkStream->alloc((void**)&forUnmarshaling->pLayer, sizeof(const CAMetalLayer));
+        vkStream->read((CAMetalLayer*)forUnmarshaling->pLayer, sizeof(const CAMetalLayer));
+    }
 }
 
 #endif
