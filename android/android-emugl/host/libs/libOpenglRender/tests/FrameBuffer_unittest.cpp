@@ -39,12 +39,8 @@
 #include <sys/time.h>
 #endif
 
-#ifdef __linux__
-#include "X11TestingSupport.h"
-#endif
-
-using android::base::StdioStream;
 using android::base::System;
+using android::base::StdioStream;
 using android::snapshot::TextureLoader;
 using android::snapshot::TextureSaver;
 
@@ -888,114 +884,4 @@ TEST_F(FrameBufferTest, ComposeMultiDisplay) {
     mFb->destroyDisplay(ids[2]);
     mFb->DestroyWindowSurface(surface);
 }
-
-#ifdef __linux__
-// Tests basic pixmap import. Can we import a native pixmap and successfully
-// upload and read back some color?
-TEST_F(FrameBufferTest, PixmapImport_Basic) {
-    const int kWidth = 16;
-    const int kHeight = 16;
-    const int kBytesPerPixel = 4;
-
-    // Only run this test on display :0.
-    auto disp =  System::getEnvironmentVariable("DISPLAY");
-    if (disp != ":0" ) {
-        fprintf(stderr, "%s: Wawrning: Skipping test because DISPLAY is [%s] (not :0)\n", __func__,
-                disp.c_str());
-        return;
-    }
-
-    void* pixmap = createNativePixmap(kWidth, kHeight, kBytesPerPixel);
-    EXPECT_NE(nullptr, pixmap);
-
-    HandleType cb =
-        mFb->createColorBuffer(kWidth, kHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
-    TestTexture forUpdate = createTestTextureRGBA8888SingleColor(kWidth, kHeight, 1.0f, 0.0f, 1.0f, 1.0f);
-    EXPECT_EQ(0, mFb->openColorBuffer(cb));
-    mFb->updateColorBuffer(cb, 0, 0, kWidth, kHeight, GL_RGBA, GL_UNSIGNED_BYTE, forUpdate.data());
-
-    EXPECT_TRUE(mFb->platformImportResource(cb, RESOURCE_TYPE_EGL_NATIVE_PIXMAP, pixmap));
-
-    TestTexture forRead = createTestTextureRGBA8888SingleColor(kWidth, kHeight, 0.0f, 0.0f, 0.0f, 0.0f);
-    mFb->readColorBuffer(cb, 0, 0, kWidth, kHeight, GL_RGBA, GL_UNSIGNED_BYTE, forRead.data());
-
-    EXPECT_TRUE(ImageMatches(kWidth, kHeight, 4, kWidth, forUpdate.data(), forRead.data()));
-
-    mFb->closeColorBuffer(cb);
-
-    freeNativePixmap(pixmap);
-}
-
-// Similar to BasicBlit, except the color buffer is backed by a pixmap.
-// Can we render to the pixmap and read back contents?
-TEST_F(FrameBufferTest, PixmapImport_Blit) {
-    // Only run this test on display :0.
-    auto disp =  System::getEnvironmentVariable("DISPLAY");
-    if (disp != ":0" ) {
-        fprintf(stderr, "%s: Wawrning: Skipping test because DISPLAY is [%s] (not :0)\n", __func__,
-                disp.c_str());
-        return;
-    }
-
-    auto gl = LazyLoadedGLESv2Dispatch::get();
-
-    void* pixmap = createNativePixmap(mWidth, mHeight, 4);
-    EXPECT_NE(nullptr, pixmap);
-
-    HandleType colorBuffer =
-        mFb->createColorBuffer(mWidth, mHeight, GL_RGBA, FRAMEWORK_FORMAT_GL_COMPATIBLE);
-
-    EXPECT_TRUE(mFb->platformImportResource(colorBuffer, RESOURCE_TYPE_EGL_NATIVE_PIXMAP, pixmap));
-
-    HandleType context = mFb->createRenderContext(0, 0, GLESApi_3_0);
-    HandleType surface = mFb->createWindowSurface(0, mWidth, mHeight);
-
-    EXPECT_TRUE(mFb->bindContext(context, surface, surface));
-    EXPECT_TRUE(mFb->setWindowSurfaceColorBuffer(surface, colorBuffer));
-
-    float colors[3][4] = {
-        { 1.0f, 0.0f, 0.0f, 1.0f},
-        { 0.0f, 1.0f, 0.0f, 1.0f},
-        { 0.0f, 0.0f, 1.0f, 1.0f},
-    };
-
-    for (int i = 0; i < 3; i++) {
-        float* color = colors[i];
-
-        gl->glClearColor(color[0], color[1], color[2], color[3]);
-        gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        mFb->flushWindowSurfaceColorBuffer(surface);
-
-        TestTexture targetBuffer =
-            createTestTextureRGBA8888SingleColor(
-                mWidth, mHeight, color[0], color[1], color[2], color[3]);
-
-        TestTexture forRead =
-            createTestTextureRGBA8888SingleColor(
-                mWidth, mHeight, 0.0f, 0.0f, 0.0f, 0.0f);
-
-        mFb->readColorBuffer(
-            colorBuffer, 0, 0, mWidth, mHeight,
-            GL_RGBA, GL_UNSIGNED_BYTE, forRead.data());
-
-        EXPECT_TRUE(
-            ImageMatches(
-                mWidth, mHeight, 4, mWidth,
-                targetBuffer.data(), forRead.data()));
-
-        if (mUseSubWindow) {
-            mFb->post(colorBuffer);
-            mWindow->messageLoop();
-        }
-    }
-
-    EXPECT_TRUE(mFb->bindContext(0, 0, 0));
-    mFb->closeColorBuffer(colorBuffer);
-    mFb->closeColorBuffer(colorBuffer);
-    mFb->DestroyWindowSurface(surface);
-
-    freeNativePixmap(pixmap);
-}
-#endif // __linux__
-
 }  // namespace emugl
