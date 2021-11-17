@@ -34,8 +34,10 @@ function(_check_target_tag TAG)
   set(VALID_TARGETS
       windows
       windows_msvc-x86_64
+      linux
       linux-x86_64
       linux-aarch64
+      darwin
       darwin-x86_64
       darwin-aarch64
       all

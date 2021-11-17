@@ -115,10 +115,10 @@ if(NOT BUILDING_FOR_AARCH64)
                             EMULATOR_FEATURE_DEPENDENCIES)
   android_target_dependency(vulkanhal_unittests all SWIFTSHADER_DEPENDENCIES)
   android_target_properties(
-    vulkanhal_unittests darwin-x86_64
+    vulkanhal_unittests darwin
     "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
   android_target_properties(
-    vulkanhal_unittests linux-x86_64
+    vulkanhal_unittests linux
     "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
 
 endif()
