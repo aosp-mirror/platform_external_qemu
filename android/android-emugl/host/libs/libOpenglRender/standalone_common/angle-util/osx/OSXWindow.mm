@@ -11,7 +11,6 @@
 #include <set>
 // Include Carbon to use the keycode names in Carbon's Event.h
 #include <Carbon/Carbon.h>
-#include <QuartzCore/CAMetalLayer.h>
 
 // On OSX 10.12 a number of AppKit interfaces have been renamed for consistency, and the previous
 // symbols tagged as deprecated. However we can't simply use the new symbols as it would break
@@ -561,9 +560,6 @@ bool OSXWindow::initialize(const std::string &name, size_t width, size_t height)
     {
         return false;
     }
-
-    mLayer = [CAMetalLayer layer];
-    [mView setLayer:mLayer];
     [mView setWantsLayer:YES];
 
     [mWindow setContentView: mView];

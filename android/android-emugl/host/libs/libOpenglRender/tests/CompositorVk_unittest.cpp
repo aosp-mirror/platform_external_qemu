@@ -371,9 +371,9 @@ class CompositorVkTest : public ::testing::Test {
         k_renderTargetWidth * k_renderTargetHeight;
 
     void SetUp() override {
-#if (!defined(__linux__) && !defined(__APPLE__))
+#ifndef __linux__
         // TODO(b/179477624): Currently we only ensure the test works
-        // on Linux. SwiftShader on Windows needs to be
+        // on Linux. SwiftShader on Windows and macOS needs to be
         // updated before these tests can be run there.
         m_earlySkipped = true;
         GTEST_SKIP_("System not supported. Test skipped.");

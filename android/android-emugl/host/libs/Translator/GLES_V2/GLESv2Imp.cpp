@@ -364,10 +364,8 @@ static void blitFromCurrentReadBufferANDROID(EGLImage image) {
     }
 
     // Could be a bad snapshot load
-    if (!img->isNative) {
-        if (!img->saveableTexture) {
-            return;
-        }
+    if (!img->saveableTexture || (!img->globalTexObj && !img->isNative)) {
+        return;
     }
 
     if (img->globalTexObj) {
@@ -4135,27 +4133,6 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
 			} else {
 				ctx->dispatcher().glEGLImageTargetTexture2DOES(target, (GLeglImageOES)img->nativeImage);
 			}
-
-            // We need to update our records about this texture.
-            if (ctx->shareGroup().get()) {
-                TextureData *texData = getTextureTargetData(target);
-                SET_ERROR_IF(texData==NULL,GL_INVALID_OPERATION);
-                texData->width = img->width;
-                texData->height = img->height;
-                texData->border = img->border;
-                texData->internalFormat = img->internalFormat;
-                texData->format = img->format;
-                texData->type = img->type;
-                texData->texStorageLevels = img->texStorageLevels;
-                texData->sourceEGLImage = imagehndl;
-                if (img->sync) {
-                    // insert gpu side fence to make sure we are done with any blit ops.
-                    ctx->dispatcher().glWaitSync(img->sync, 0, GL_TIMEOUT_IGNORED);
-                }
-                if (!imagehndl) {
-                    fprintf(stderr, "glEGLImageTargetTexture2DOES with empty handle\n");
-                }
-            }
             return;
         }
 

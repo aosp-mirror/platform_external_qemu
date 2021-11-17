@@ -48,15 +48,11 @@ namespace {
 // |tex| is the name of a texture that is attached to the framebuffer object
 // on creation only. I.e. all rendering operations will target it.
 // returns true in case of success, false on failure.
-bool bindFbo(GLuint* fbo, GLuint tex, bool ensureTextureAttached) {
+bool bindFbo(GLuint* fbo, GLuint tex) {
     if (*fbo) {
         AEMU_SCOPED_TRACE("bindFbo fast path");
         // fbo already exist - just bind
         s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, *fbo);
-        if (ensureTextureAttached) {
-            s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_OES,
-                                           GL_TEXTURE_2D, tex, 0);
-        }
         return true;
     }
 
@@ -416,8 +412,7 @@ void ColorBuffer::readPixels(int x,
     p_format = sGetUnsizedColorBufferFormat(p_format);
     touch();
 
-    if (bindFbo(&m_fbo, m_tex, m_needFboReattach)) {
-        m_needFboReattach = false;
+    if (bindFbo(&m_fbo, m_tex)) {
         GLint prevAlignment = 0;
         AEMU_SCOPED_TRACE("readPixels api calls inner");
         if (m_readPixelsDirty) {
@@ -460,8 +455,7 @@ void ColorBuffer::readPixelsScaled(int width,
     p_format = sGetUnsizedColorBufferFormat(p_format);
     touch();
     GLuint tex = m_resizer->update(m_tex, width, height, rotation);
-    if (bindFbo(&m_scaleRotationFbo, tex, m_needFboReattach)) {
-        m_needFboReattach = false;
+    if (bindFbo(&m_scaleRotationFbo, tex)) {
         GLint prevAlignment = 0;
         s_gles2.glGetIntegerv(GL_PACK_ALIGNMENT, &prevAlignment);
         s_gles2.glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -613,7 +607,7 @@ void ColorBuffer::subUpdateFromFrameworkFormat(int x,
 
         // This FBO will convert the YUV frame to RGB
         // and render it to |m_tex|.
-        bindFbo(&m_yuv_conversion_fbo, m_tex, m_needFboReattach);
+        bindFbo(&m_yuv_conversion_fbo, m_tex);
         m_yuv_converter->drawConvertFromFormat(fwkFormat, x, y, width, height, (char*)pixels);
         unbindFbo();
 
@@ -826,7 +820,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
             return false;
         }
 
-        if (!bindFbo(&m_fbo, m_tex, m_needFboReattach)) {
+        if (!bindFbo(&m_fbo, m_tex)) {
             return false;
         }
 
@@ -934,8 +928,7 @@ void ColorBuffer::readback(unsigned char* img, bool readbackBgra) {
     touch();
     waitSync();
 
-    if (bindFbo(&m_fbo, m_tex, m_needFboReattach)) {
-        m_needFboReattach = false;
+    if (bindFbo(&m_fbo, m_tex)) {
         // Flip the readback format if RED/BLUE components are swizzled.
         bool shouldReadbackBgra = m_BRSwizzle ? !readbackBgra : readbackBgra;
         GLenum format = shouldReadbackBgra ? GL_BGRA_EXT : GL_RGBA;
@@ -953,8 +946,7 @@ void ColorBuffer::readbackAsync(GLuint buffer, bool readbackBgra) {
     touch();
     waitSync();
 
-    if (bindFbo(&m_fbo, m_tex, m_needFboReattach)) {
-        m_needFboReattach = false;
+    if (bindFbo(&m_fbo, m_tex)) {
         s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer);
         bool shouldReadbackBgra = m_BRSwizzle ? !readbackBgra : readbackBgra;
         GLenum format = shouldReadbackBgra ? GL_BGRA_EXT : GL_RGBA;
@@ -1128,16 +1120,12 @@ bool ColorBuffer::importEglNativePixmap(void* pixmap) {
 
     EGLImageKHR image = s_egl.eglCreateImageKHR(m_display, EGL_NO_CONTEXT, EGL_NATIVE_PIXMAP_KHR, pixmap, nullptr);
 
-    if (image == EGL_NO_IMAGE_KHR) {
-        fprintf(stderr, "%s: error: failed to import pixmap\n", __func__);
-        return false;
-    }
+    if (image == EGL_NO_IMAGE_KHR) return false;
 
     // Assume pixmap is compatible with ColorBuffer's current dimensions and internal format.
     EGLBoolean setInfoRes = s_egl.eglSetImageInfoANDROID(m_display, image, m_width, m_height, m_internalFormat);
 
     if (EGL_TRUE != setInfoRes) {
-        fprintf(stderr, "%s: error: failed to set image info\n", __func__);
         s_egl.eglDestroyImageKHR(m_display, image);
         return false;
     }
@@ -1182,7 +1170,6 @@ void ColorBuffer::restoreContentsAndEglImage(const std::vector<uint8_t>& content
 
     m_eglImage = image;
     s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, (GLeglImageOES)m_eglImage);
-    m_needFboReattach = true;
 
     replaceContents(contents.data(), m_numBytes);
 }
