@@ -3287,10 +3287,14 @@ do_sensors_set( ControlClient client, char* args )
             }
             size_t actual_size = 0;
 
-            status = android_sensors_get(sensor_id, ptr.data(), ptr.size());
+            status = android_sensors_get_size(sensor_id, &actual_size);
             if (status != SENSOR_STATUS_OK)
                 goto SENSOR_STATUS_ERROR;
             fvalues.resize(actual_size);
+
+            status = android_sensors_get(sensor_id, ptr.data(), ptr.size());
+            if (status != SENSOR_STATUS_OK)
+                goto SENSOR_STATUS_ERROR;
 
             {
                 /* Parsing the value part to get the sensor values(a, b, c) */
