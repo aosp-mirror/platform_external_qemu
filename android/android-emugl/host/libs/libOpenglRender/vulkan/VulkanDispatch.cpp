@@ -71,15 +71,15 @@ static void initIcdPaths(bool forTesting) {
         if (forTesting || androidIcd == "swiftshader") {
             auto res = pj(System::get()->getProgramDirectory(), "lib64", "vulkan");
             LOG(VERBOSE) << "In test environment or ICD set to swiftshader, using "
-                            "Swiftshader ICD";
-            auto libPath = pj(System::get()->getProgramDirectory(), "lib64",
-                              "vulkan", getTestIcdFilename());
+                         << "Swiftshader ICD " << getTestIcdFilename();
+            auto libPath = pj(System::get()->getProgramDirectory(), "lib64", "vulkan",
+                              getTestIcdFilename());
             if (path_exists(libPath.c_str())) {
                 LOG(VERBOSE) << "Swiftshader library exists";
             } else {
                 LOG(VERBOSE) << "Swiftshader library doesn't exist, trying launcher path";
-                libPath = pj(System::get()->getLauncherDirectory(), "lib64",
-                             "vulkan", getTestIcdFilename());
+                libPath = pj(System::get()->getLauncherDirectory(), "lib64", "vulkan",
+                             getTestIcdFilename());
                 if (path_exists(libPath.c_str())) {
                     LOG(VERBOSE) << "Swiftshader library found in launcher path";
                 } else {
@@ -161,6 +161,7 @@ static std::string getMoltenVkPath(const std::string& directory, bool forTesting
         LOG(VERBOSE) << "Skipping loader and using ICD directly: " << path;
         return path;
     }
+
 #endif
     return "";
 }
