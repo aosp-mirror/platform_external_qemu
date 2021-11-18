@@ -414,4 +414,14 @@ __builtin_trap();
         "reservedmarshaling": "",
         "reservedunmarshaling": "",
     },
+    "VkMetalSurfaceCreateInfoEXT": {
+        "common": """
+// This struct should never be marshaled / unmarshaled.
+__builtin_trap();
+""",
+        "marshaling": "",
+        "unmarshaling": "",
+        "reservedmarshaling": "",
+        "reservedunmarshaling": "",
+    },
 }

@@ -58,6 +58,7 @@ class OSXWindow : public OSWindow
     NSWindow *getNSWindow() const;
 
   private:
+    CALayer *mLayer;
     NSWindow *mWindow;
     WindowDelegate *mDelegate;
     ContentView *mView;
