@@ -1,4 +1,8 @@
 #!/bin/sh
+./sign-vm-entitlement.sh objs/qemu/darwin-x86_64/qemu-system-i386
+./sign-vm-entitlement.sh objs/qemu/darwin-x86_64/qemu-system-x86_64
+./sign-vm-entitlement.sh objs/qemu/darwin-x86_64/qemu-system-i386-headless
+./sign-vm-entitlement.sh objs/qemu/darwin-x86_64/qemu-system-x86_64-headless
 ./sign-vm-entitlement.sh objs/qemu/darwin-aarch64/qemu-system-aarch64
 ./sign-vm-entitlement.sh objs/qemu/darwin-aarch64/qemu-system-aarch64-headless
 ./sign-vm-entitlement.sh objs/lib64/libemugl_common.dylib
@@ -25,3 +29,6 @@
 ./sign-vm-entitlement.sh objs/lib64/OpenglRender.dylib
 ./sign-vm-entitlement.sh objs/lib64/libandroid-emu-shared.dylib
 ./sign-vm-entitlement.sh objs/lib64/libOpenglRender.dylib
+./sign-vm-entitlement.sh objs/lib64/vulkan/libvk_swiftshader.dylib
+./sign-vm-entitlement.sh objs/lib64/vulkan/libvulkan.dylib
+./sign-vm-entitlement.sh objs/lib64/vulkan/libMoltenVK.dylib
