@@ -166,6 +166,7 @@ typedef struct PECIClientProperties {
     uint32_t cpu_family;
     uint8_t cpus;
     uint8_t dimms;
+    uint8_t dimms_per_channel;
 } PECIClientProperties;
 
 /* Creates a PECI client with the specified cpu and dimm count */

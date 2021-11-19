@@ -86,33 +86,38 @@ PECIClientDevice *peci_add_client(PECIBus *bus,
     if (!props->cpu_family) {
         props->cpu_family = FAM6_ICELAKE_X;
     }
+    if (!props->dimms_per_channel ||
+        props->dimms_per_channel > PECI_DIMMS_PER_CHANNEL_MAX) {
+        props->dimms_per_channel = 2;
+    }
 
+    client->cpu_id = props->cpu_family;
     client->cpus = props->cpus;
     client->dimms = props->dimms;
-    client->cpu_id = props->cpu_family;
+    client->dimms_per_channel = props->dimms_per_channel;
 
     /* TODO: find real revisions and TJ max for supported families */
     client->tjmax = 90;
     client->tcontrol = -5;
-    client->dimms_per_channel = 2;
 
     switch (props->cpu_family) {
     case FAM6_HASWELL_X:
         client->revision = 0x31;
-        client->dimms_per_channel = 3;
         break;
+
     case FAM6_BROADWELL_X:
         client->revision = 0x32;
-        client->dimms_per_channel = 3;
         break;
+
     case FAM6_SKYLAKE_X:
     case FAM6_SKYLAKE_XD:
         client->revision = 0x36;
         break;
+
     case FAM6_ICELAKE_X:
         client->revision = 0x40;
-        client->dimms_per_channel = 2;
         break;
+
     default:
         qemu_log_mask(LOG_UNIMP, "%s: unsupported cpu: 0x%x",
                       __func__, props->cpu_family);
