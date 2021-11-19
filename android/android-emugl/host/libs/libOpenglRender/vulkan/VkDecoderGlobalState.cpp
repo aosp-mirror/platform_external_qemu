@@ -2995,7 +2995,11 @@ public:
 
         info->guestPhysAddr = physAddr;
 
+#if defined(__APPLE__) && defined(__aarch64__)
+        constexpr size_t kPageBits = 14;
+#else
         constexpr size_t kPageBits = 12;
+#endif
         constexpr size_t kPageSize = 1u << kPageBits;
         constexpr size_t kPageOffsetMask = kPageSize - 1;
 
@@ -3678,7 +3682,11 @@ public:
         uint64_t hva = (uint64_t)(uintptr_t)(info->ptr);
         uint64_t size = (uint64_t)(uintptr_t)(info->size);
 
+#if defined(__APPLE__) && defined(__aarch64__)
+        constexpr size_t kPageBits = 14;
+#else
         constexpr size_t kPageBits = 12;
+#endif
         constexpr size_t kPageSize = 1u << kPageBits;
         constexpr size_t kPageOffsetMask = kPageSize - 1;
 

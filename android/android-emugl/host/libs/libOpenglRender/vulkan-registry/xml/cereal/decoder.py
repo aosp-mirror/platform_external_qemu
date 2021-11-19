@@ -711,6 +711,9 @@ custom_decodes = {
     # VK_KHR_xcb_surface
     "vkCreateXcbSurfaceKHR": decode_unsupported_api,
     "vkGetPhysicalDeviceXcbPresentationSupportKHR": decode_unsupported_api,
+
+    # VK_EXT_metal_surface
+    "vkCreateMetalSurfaceEXT": decode_unsupported_api,
 }
 
 class VulkanDecoder(VulkanWrapperGenerator):

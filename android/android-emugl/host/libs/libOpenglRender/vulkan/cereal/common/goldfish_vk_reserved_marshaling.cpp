@@ -17151,39 +17151,10 @@ void reservedunmarshal_VkMetalSurfaceCreateInfoEXT(
     VkMetalSurfaceCreateInfoEXT* forUnmarshaling,
     uint8_t** ptr)
 {
-    memcpy((VkStructureType*)&forUnmarshaling->sType, *ptr, sizeof(VkStructureType));
-    *ptr += sizeof(VkStructureType);
-    if (rootType == VK_STRUCTURE_TYPE_MAX_ENUM)
-    {
-        rootType = forUnmarshaling->sType;
-    }
-    uint32_t pNext_size;
-    memcpy((uint32_t*)&pNext_size, *ptr, sizeof(uint32_t));
-    android::base::Stream::fromBe32((uint8_t*)&pNext_size);
-    *ptr += sizeof(uint32_t);
-    forUnmarshaling->pNext = nullptr;
-    if (pNext_size)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pNext, sizeof(VkStructureType));
-        memcpy((void*)forUnmarshaling->pNext, *ptr, sizeof(VkStructureType));
-        *ptr += sizeof(VkStructureType);
-        VkStructureType extType = *(VkStructureType*)(forUnmarshaling->pNext);
-        vkStream->alloc((void**)&forUnmarshaling->pNext, goldfish_vk_extension_struct_size_with_stream_features(vkStream->getFeatureBits(), rootType, forUnmarshaling->pNext));
-        *(VkStructureType*)forUnmarshaling->pNext = extType;
-        reservedunmarshal_extension_struct(vkStream, rootType, (void*)(forUnmarshaling->pNext), ptr);
-    }
-    memcpy((VkMetalSurfaceCreateFlagsEXT*)&forUnmarshaling->flags, *ptr, sizeof(VkMetalSurfaceCreateFlagsEXT));
-    *ptr += sizeof(VkMetalSurfaceCreateFlagsEXT);
-    // WARNING PTR CHECK
-    memcpy((CAMetalLayer**)&forUnmarshaling->pLayer, (*ptr), 8);
-    android::base::Stream::fromBe64((uint8_t*)&forUnmarshaling->pLayer);
-    *ptr += 8;
-    if (forUnmarshaling->pLayer)
-    {
-        vkStream->alloc((void**)&forUnmarshaling->pLayer, sizeof(const CAMetalLayer));
-        memcpy((CAMetalLayer*)forUnmarshaling->pLayer, *ptr, sizeof(const CAMetalLayer));
-        *ptr += sizeof(const CAMetalLayer);
-    }
+    
+    // This struct should never be marshaled / unmarshaled.
+    __builtin_trap();
+    
 }
 
 #endif
