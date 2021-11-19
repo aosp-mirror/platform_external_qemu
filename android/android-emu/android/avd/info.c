@@ -2123,7 +2123,8 @@ bool avdInfo_skinHasOverlay(const char* skinName) {
     if (skinName == NULL || skinName[0] == '\0') {
         return false;
     }
-    if (!strcmp(skinName, "pixel_4") ||
+    if (!strcmp(skinName, "pixel_5") ||
+        !strcmp(skinName, "pixel_4") ||
         !strcmp(skinName, "pixel_4a") ||
         !strcmp(skinName, "pixel_4_xl") ||
         !strcmp(skinName, "pixel_3") ||
