@@ -21603,64 +21603,9 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
             case OP_vkCreateMetalSurfaceEXT:
             {
                 android::base::beginTrace("vkCreateMetalSurfaceEXT decode");
-                VkInstance instance;
-                const VkMetalSurfaceCreateInfoEXT* pCreateInfo;
-                const VkAllocationCallbacks* pAllocator;
-                VkSurfaceKHR* pSurface;
-                // Begin non wrapped dispatchable handle unboxing for instance;
-                uint64_t cgen_var_0;
-                memcpy((uint64_t*)&cgen_var_0, *readStreamPtrPtr, 1 * 8);
-                *readStreamPtrPtr += 1 * 8;
-                *(VkInstance*)&instance = (VkInstance)(VkInstance)((VkInstance)(*&cgen_var_0));
-                auto unboxed_instance = unbox_VkInstance(instance);
-                auto vk = dispatch_VkInstance(instance);
-                // End manual dispatchable handle unboxing for instance;
-                vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkMetalSurfaceCreateInfoEXT));
-                reservedunmarshal_VkMetalSurfaceCreateInfoEXT(vkReadStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkMetalSurfaceCreateInfoEXT*)(pCreateInfo), readStreamPtrPtr);
-                // WARNING PTR CHECK
-                memcpy((VkAllocationCallbacks**)&pAllocator, (*readStreamPtrPtr), 8);
-                android::base::Stream::fromBe64((uint8_t*)&pAllocator);
-                *readStreamPtrPtr += 8;
-                if (pAllocator)
-                {
-                    vkReadStream->alloc((void**)&pAllocator, sizeof(const VkAllocationCallbacks));
-                    reservedunmarshal_VkAllocationCallbacks(vkReadStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkAllocationCallbacks*)(pAllocator), readStreamPtrPtr);
-                }
-                // Begin manual dispatchable handle unboxing for pSurface;
-                vkReadStream->unsetHandleMapping();
-                vkReadStream->alloc((void**)&pSurface, sizeof(VkSurfaceKHR));
-                uint64_t cgen_var_2;
-                memcpy((uint64_t*)&cgen_var_2, *readStreamPtrPtr, 8);
-                *readStreamPtrPtr += 8;
-                *(VkSurfaceKHR*)pSurface = (VkSurfaceKHR)(VkSurfaceKHR)((VkSurfaceKHR)(*&cgen_var_2));
-                if (pCreateInfo)
-                {
-                    transform_tohost_VkMetalSurfaceCreateInfoEXT(m_state, (VkMetalSurfaceCreateInfoEXT*)(pCreateInfo));
-                }
-                if (pAllocator)
-                {
-                    transform_tohost_VkAllocationCallbacks(m_state, (VkAllocationCallbacks*)(pAllocator));
-                }
-                if (m_logCalls)
-                {
-                    fprintf(stderr, "stream %p: call vkCreateMetalSurfaceEXT 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)instance, (unsigned long long)pCreateInfo, (unsigned long long)pAllocator, (unsigned long long)pSurface);
-                }
-                VkResult vkCreateMetalSurfaceEXT_VkResult_return = (VkResult)0;
-                vkCreateMetalSurfaceEXT_VkResult_return = vk->vkCreateMetalSurfaceEXT(unboxed_instance, pCreateInfo, pAllocator, pSurface);
-                vkStream->unsetHandleMapping();
-                uint64_t cgen_var_3;
-                vkStream->handleMapping()->mapHandles_VkSurfaceKHR_u64(pSurface, &cgen_var_3, 1);
-                vkStream->write((uint64_t*)&cgen_var_3, 8);
-                vkStream->write(&vkCreateMetalSurfaceEXT_VkResult_return, sizeof(VkResult));
-                vkStream->commitWrite();
-                vkReadStream->setReadPos((uintptr_t)(*readStreamPtrPtr) - (uintptr_t)snapshotTraceBegin);
-                size_t snapshotTraceBytes = vkReadStream->endTrace();
-                if (m_state->snapshotsEnabled())
-                {
-                    m_state->snapshot()->vkCreateMetalSurfaceEXT(snapshotTraceBegin, snapshotTraceBytes, &m_pool, vkCreateMetalSurfaceEXT_VkResult_return, instance, pCreateInfo, pAllocator, pSurface);
-                }
-                vkReadStream->clearPool();
-                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                // Decoding vkCreateMetalSurfaceEXT is not supported. This should not run.
+                fprintf(stderr, "stream %p: fatal: decoding unsupported API vkCreateMetalSurfaceEXT\n", ioStream);
+                __builtin_trap();
                 android::base::endTrace();
                 break;
             }

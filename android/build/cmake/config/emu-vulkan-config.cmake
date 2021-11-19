@@ -76,6 +76,11 @@ elseif(DARWIN_X86_64)
       ${VULKAN_COMMON_DEPENDENCIES})
 elseif(DARWIN_AARCH64)
   set(VULKAN_DEPENDENCIES
+      # Loader
+      "${PREBUILT_ROOT}/libvulkan.dylib>lib64/vulkan/libvulkan.dylib"
+      # Swiftshader
+      "${PREBUILT_ROOT}/icds/libvk_swiftshader.dylib>lib64/vulkan/libvk_swiftshader.dylib"
+      "${PREBUILT_ROOT}/icds/vk_swiftshader_icd.json>lib64/vulkan/vk_swiftshader_icd.json"
       # MoltenVK
       "${PREBUILT_ROOT}/icds/libMoltenVK.dylib>lib64/vulkan/libMoltenVK.dylib"
       "${PREBUILT_ROOT}/icds/MoltenVK_icd.json>lib64/vulkan/MoltenVK_icd.json")
