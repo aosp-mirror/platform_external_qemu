@@ -13,19 +13,20 @@
 #include <cstdio>     // for stderr
 
 #include "GLES/gl.h"  // for GL_NO_ERROR, GLint, GLuint
+#include "android/utils/debug.h"
 
 struct GLESv2Dispatch;
 
 // Helper macro for checking error status and cleaning up.
 #define CHECK_GL_ERROR(error_msg) \
     if (mGLES2->glGetError() != GL_NO_ERROR) {  \
-        fprintf(stderr, error_msg); \
+        VERBOSE_PRINT(gles, error_msg); \
         return; \
     }
 
 #define CHECK_GL_ERROR_RETURN(error_msg, retval) \
     if (mGLES2->glGetError() != GL_NO_ERROR) {  \
-        fprintf(stderr, error_msg); \
+        VERBOSE_PRINT(gles, error_msg); \
         return (retval); \
     }
 

@@ -1424,8 +1424,37 @@ void EmulatorQtWindow::getSkinPixmap() {
     QString skinPath = QString(skinDir) + QDir::separator()
                        + skinName + QDir::separator()
                        + skinFileName;
-
-    mRawSkinPixmap = new QPixmap(skinPath);
+    // Emulator UI hides the border of the skin image (frameless style), which
+    // is done by mask off the transparent pixels of the skin image.
+    // But from pixel4_a, the skin image also sets transparent pixels for the
+    // display. To avoid masking off the display, we replace the alpha vaule of
+    // these pixels as 255 (opage).
+    QImage img(skinPath);
+    for (int row = 0; row < img.height(); row++) {
+        int left = -1, right = -1;
+        for (int col = 0; col < img.width(); col++) {
+            if (qAlpha(img.pixel(col, row)) != 0) {
+                left = col;
+                break;
+            }
+        }
+        for (int col = img.width(); col >= 0; col--) {
+            if (qAlpha(img.pixel(col, row)) != 0) {
+                right = col;
+                break;
+            }
+        }
+        if (left == -1 || right == -1 || left == right) {
+            continue;
+        }
+        for (int col = left; col <= right; col++) {
+            QRgb pixel = img.pixel(col, row);
+            if (qAlpha(pixel) == 0) {
+                img.setPixel(col, row, qRgba(qRed(pixel), qGreen(pixel), qBlue(pixel), 255));
+            }
+        }
+    }
+    mRawSkinPixmap = new QPixmap(QPixmap::fromImage(img));
 }
 
 void EmulatorQtWindow::paintEvent(QPaintEvent*) {
