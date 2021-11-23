@@ -177,7 +177,7 @@ else()
     PROPERTY ENVIRONMENT "CRASHPAD_TEST_DATA_ROOT=${CRASHPAD_TEST_DATA_ROOT}")
 endif()
 
-if(DARWIN_X86_64 OR DARWIN_AARCH64)
+if(TARGET crashpad_snapshot_test AND (DARWIN_X86_64 OR DARWIN_AARCH64))
   android_add_library(
     TARGET crashpad_snapshot_test_module_crashy_initializer SHARED NODISTRIBUTE
     SRC mac/mach_o_image_annotations_reader_test_module_crashy_initializer.cc)
