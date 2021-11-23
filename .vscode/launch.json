@@ -16,7 +16,7 @@
       "request": "launch",
       "program": "${command:cmake.launchTargetPath}",
       "args": ["--gtest_break_on_failure"],
-      "stopAtEntry": false,
+      "stopAtEntry": true,
       "cwd": "${workspaceFolder}",
       "environment": [
         {
@@ -70,7 +70,7 @@
         // "--verbose"
         // "--gtest_repeat=-1",
         // // "--gtest_break_on_failure",
-        // "--gtest_filter=PosixSocketTest.data_results_in_read_event"
+        "--gtest_filter=ElfImageReader.MainExecutableChild"
         // "--benchmark_filter=BM_cnv.*"
       ],
       "env": {
