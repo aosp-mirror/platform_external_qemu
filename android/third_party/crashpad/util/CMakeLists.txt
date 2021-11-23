@@ -234,7 +234,8 @@ target_link_libraries(crashpad_util PUBLIC mini_chromium crashpad_compat)
 
 if(WINDOWS_MSVC_X86_64)
 
-  # We have setup git to covert \n -> \r\n causing these tests to fail.
+  # We have setup git to covert \n -> \r\n causing these tests to fail, these will succeed if you
+  # have configued git properly.
   set(CRASHPAD_UTIL_TEST_FILTER
       "--gtest_filter=-FileReaderHTTPBodyStream.ReadASCIIFile:HTTPMultipartBuilder.ThreeFileAttachments:HTTPMultipartBuilder.OverwriteFileAttachment:VariableBufferSize*"
   )
@@ -258,7 +259,8 @@ if(WINDOWS_MSVC_X86_64)
     crashpad_util PUBLIC crashpad_util_asm_lib
     PRIVATE user32::user32 version::version winhttp::winhttp)
 elseif(LINUX)
-  # There is some bizarre configuration issue on our bots, preventing us from setting thread priorities
+  # There is some bizarre configuration issue on our bots, preventing us from
+  # setting thread priorities, these will pass on your dev box.
   set(CRASHPAD_UTIL_TEST_FILTER "--gtest_filter=-.*Thread.*")
   target_link_libraries(crashpad_util PRIVATE crypto ssl)
   target_compile_definitions(
@@ -278,6 +280,12 @@ else()
   target_link_libraries(
     crashpad_util PRIVATE crashpad_macos_mig "-framework CoreFoundation"
                           "-framework Foundation" "-framework IOKit" bsm)
+
+  # There is some bizarre configuration issue on our bots, which seems to cause
+  # issues with the launchd service, these tests will succeed on your dev box.
+  set(CRASHPAD_UTIL_TEST_FILTER
+      "--gtest_filter=-ServiceManagement.SubmitRemoveJob:Bootstrap.BootstrapCheckInAndLookUp:Bootstrap.SystemCrashReporterHandler"
+  )
 endif()
 
 target_compile_definitions(crashpad_util PUBLIC CRASHPAD_ZLIB_SOURCE_SYSTEM
