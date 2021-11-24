@@ -431,8 +431,8 @@ gen_wrapper_toolchain () {
           local PROGRAMS="as ar ranlib strings nm objdump objcopy dlltool install_name_tool"
           ;;
         *)
-          local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy"
-          local PROGRAMS="as ar ranlib strings nm objdump objcopy dlltool"
+          local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy as ar ranlib strings nm objdump"
+          local PROGRAMS=""
     esac
 
     if [ "$CROSSCOMPILE_DARWIN" ]; then

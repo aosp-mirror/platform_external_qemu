@@ -48,7 +48,7 @@ if(NOT APPLE)
       "${OSXCROSS_TARGET_DIR}/macports/pkgs/opt/local")
   set(ENV{PKG_CONFIG_LIBDIR} "${OSXCROSS_TARGET_DIR}/macports/pkgs/opt/local/lib/pkgconfig")
   set(ENV{PKG_CONFIG_SYSROOT_DIR} "${OSXCROSS_TARGET_DIR}/macports/pkgs")
-
+  set(CMAKE_OSX_SYSROOT ${OSXCROSS_SDK})
   set(CMAKE_INSTALL_DO_STRIP TRUE)
 else()
 

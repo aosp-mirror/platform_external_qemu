@@ -49,6 +49,7 @@ set(WINDOWS_LIBS
     user32
     version
     wininet
+    winhttp
     winmm
     wldap32
     wmcodecdspuuid

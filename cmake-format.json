@@ -177,6 +177,7 @@
         "LINUX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
         "MSVC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
         "POSIX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "TEST_PARAMS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
         "SOURCE_DIR": "*",
         "WINDOWS_SOURCE_DIR": "*",
         "LINUX_SOURCE_DIR": "*",
