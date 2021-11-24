@@ -161,6 +161,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     const char* adbKeyProp;
     const char* avdNameProp;
     const char* deviceStateProp;
+    const char* qemuCpuVulkanVersionProp;
 
     namespace fc = android::featurecontrol;
     if (fc::isEnabled(fc::AndroidbootProps) || fc::isEnabled(fc::AndroidbootProps2)) {
@@ -191,6 +192,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         adbKeyProp = "androidboot.qemu.adb.pubkey";
         avdNameProp = "androidboot.qemu.avd_name";
         deviceStateProp = "androidboot.qemu.device_state";
+        qemuCpuVulkanVersionProp = "androidboot.qemu.cpuvulkan.version";
     } else {
         androidbootVerityMode = nullptr;
         checkjniProp = "android.checkjni";
@@ -219,6 +221,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         adbKeyProp = nullptr;
         avdNameProp = "qemu.avd_name";
         deviceStateProp = "qemu.device_state";
+        qemuCpuVulkanVersionProp = nullptr;
     }
 
     std::vector<std::pair<std::string, std::string>> params;
@@ -259,6 +262,15 @@ getUserspaceBootProperties(const AndroidOptions* opts,
             default: gles = 0;
         }
         params.push_back({qemuGlesProp, StringFormat("%d", gles)});
+    }
+
+    if (qemuCpuVulkanVersionProp
+            && glesMode == kAndroidGlesEmulationHost) {
+        // Put our swiftshader version string there, which is currently
+        // Vulkan 1.1 (0x402000)
+        params.push_back({
+            qemuCpuVulkanVersionProp,StringFormat("%d", 0x402000)
+            });
     }
 
     // To save battery, set the screen off timeout to a high value.
