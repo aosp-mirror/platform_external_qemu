@@ -48,11 +48,6 @@ class SymbolFileServer(object):
         "DUPLICATE_DATA": "The symbol data was identical to data already in storage, so no changes were made.",
     }
 
-    # Old school api, we use this if we have no api key..
-    CLASSIC_API_URL = {
-        "staging": "https://clients2.google.com/cr/staging_symbol",
-        "prod": "https://clients2.google.com/cr/symbol",
-    }
     CLASSIC_PRODUCT = "AndroidEmulator"
 
     # Timeout for individual web requests.  an exception is raised if the server has not issued a response for timeout
@@ -63,15 +58,9 @@ class SymbolFileServer(object):
     MAX_RETRY = 5
 
     def __init__(self, environment="prod", api_key=None):
-        endpoint = (
-            SymbolFileServer.API_URL if api_key else SymbolFileServer.CLASSIC_API_URL
-        )
+        endpoint = SymbolFileServer.API_URL
         self.api_url = endpoint[environment.lower()]
-        self.api_key = api_key or ""
-
-    def use_classic_api(self):
-        """Returns true if we should use the classic api."""
-        return not self.api_key
+        self.api_key = api_key
 
     def _extract_symbol_info(self, symbol_file):
         """Extracts os, archictecture, debug id and debug file.
@@ -125,8 +114,7 @@ class SymbolFileServer(object):
         resp = self._exec_request_with_retry(oper, url, **kwargs)
         if resp.status_code > 399:
             # Make sure we don't leak secret keys by accident.
-            if not self.use_classic_api():
-                resp.url = resp.url.replace(quote(self.api_key), "XX-HIDDEN-XX")
+            resp.url = resp.url.replace(quote(self.api_key), "XX-HIDDEN-XX")
             logging.error(
                 'Url: %s, Status: %s, response: "%s", in: %s',
                 resp.url,
@@ -142,41 +130,13 @@ class SymbolFileServer(object):
 
     def is_available(self, symbol_file):
         """True if the symbol_file is available on the server."""
-
-        # The classic api cannot answer this, so assume the symbol_file
-        # is unavailable.
-        if self.use_classic_api():
-            return False
-
         _, _, dbg_id, dbg_file = self._extract_symbol_info(symbol_file)
         url = "{}/symbols/{}/{}:checkStatus".format(self.api_url, dbg_file, dbg_id)
         status = self._exec_request("get", url)
         return status["status"] == "FOUND"
 
-    def _upload_with_classic_api(self, symbol_file):
-        """Uploads the symbols to old api end point. This is very slow."""
-        _, _, dbg_id, dbg_file = self._extract_symbol_info(symbol_file)
-
-        self._exec_request(
-            "post",
-            self.api_url,
-            data={
-                "product": SymbolFileServer.CLASSIC_PRODUCT,
-                "codeIdentifier": dbg_id,
-                "debugIdentifier": dbg_id,
-                "codeFile": dbg_file,
-                "debugFile": dbg_file,
-            },
-            files={"symbolFile": open(symbol_file, "rb")},
-        )
-        # We will get exceptions when this fails.
-        return "OK"
-
     def upload(self, symbol_file):
         """Makes the symbol_file available on the server, returning the status result."""
-        if self.use_classic_api():
-            return self._upload_with_classic_api(symbol_file)
-
         _, _, dbg_id, dbg_file = self._extract_symbol_info(symbol_file)
         upload = self._exec_request("post", "{}/uploads:create".format(self.api_url))
         self._exec_request(
@@ -239,9 +199,11 @@ def main(args):
                 api_key = f.read()
         except IOError as e:
             logging.error(
-                "Unable to read api key due to: %s, reverting to (slow) classic behavior",
+                "Unable to read api key due to: %s.",
                 e,
             )
+            logging.error("Please provide a valid api key.")
+            sys.exit(1)
 
     server = SymbolFileServer(args.environment, api_key)
     if args.force or not server.is_available(args.symbol_file):
@@ -262,7 +224,7 @@ def main(args):
         available = True
 
     # api key -> symbol file should have been made available.
-    sys.exit(0 if not api_key or available else 1)
+    sys.exit(0 if available else 1)
 
 
 def launch():
