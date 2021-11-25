@@ -44,7 +44,6 @@ extern AudioState glob_audio_state;
 struct audio_driver *g_prev_drv = NULL;
 void *g_prev_drv_opaque = NULL;
 SWVoiceIn *g_prev_sw = NULL;
-struct audsettings g_prev_settings;
 bool g_prev_is_real_audio_allowed;
 QemuMutex g_deactivation_mutex = {.initialized = false };
 
@@ -86,7 +85,6 @@ int enable_forwarder(struct audsettings *as, struct audio_capture_ops *ops,
     g_prev_info = g_prev_hw->info;
 
     g_prev_hw->info = g_empty_info;
-    g_prev_settings = *get_hda_aud_settings();
     g_prev_is_real_audio_allowed = qemu_is_real_audio_allowed();
     g_active_avail = available_fn;
     AUD_set_active_in(g_prev_sw, 0);
@@ -107,10 +105,7 @@ int enable_forwarder(struct audsettings *as, struct audio_capture_ops *ops,
     g_active_opaque = opaque;
     g_active_settings = *as;
 
-    // Activate and initialize our voice HW, note that we currently
-    // cannot re-activate and enable the lower level stream config.
-    // This translate currently into likely having only 16khz audio.
-    g_active_sw = set_hda_voice_in(NULL, as);
+    g_active_sw = set_hda_voice_in(NULL);
 
     // gRPC means we will allow audio for now..
     qemu_allow_real_audio(true);
@@ -137,7 +132,7 @@ void disable_forwarder()
     AudioState *s = &glob_audio_state;
     s->drv = g_prev_drv;
     s->drv_opaque = g_prev_drv_opaque;
-    set_hda_voice_in(g_prev_sw, &g_prev_settings);
+    set_hda_voice_in(g_prev_sw);
     AUD_set_active_in(g_prev_sw, 1);
 
 

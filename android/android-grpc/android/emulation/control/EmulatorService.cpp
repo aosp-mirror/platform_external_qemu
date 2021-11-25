@@ -568,11 +568,6 @@ public:
                           "");
         }
 
-        if (pkt.format().samplingrate() < 44000) {
-            return Status(::grpc::StatusCode::INVALID_ARGUMENT,
-                          "Upsampling is not yet supported (b/195497352) ",
-                          "");
-        }
 
         // Increasing the buffer size can result in longer waiting periods
         // before closing down the emulator.
