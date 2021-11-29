@@ -738,7 +738,7 @@ static void hda_audio_register_types(void)
 // 2. We have no mechanism to attach a different input device once it has been configured.
 //
 // the functions below enable us to set and retrieve the active input device.
-SWVoiceIn* set_hda_voice_in(SWVoiceIn *voice, struct audsettings *as)
+SWVoiceIn* set_hda_voice_in(SWVoiceIn *voice)
 {
     if (g_stream)
     {
@@ -747,7 +747,7 @@ SWVoiceIn* set_hda_voice_in(SWVoiceIn *voice, struct audsettings *as)
         // hda_audio_command with AC_VERB_SET_STREAM_FORMAT
         g_stream->voice.in = AUD_open_in(&g_stream->state->card, voice,
                                          g_stream->node->name, g_stream,
-                                         hda_audio_input_cb, as);
+                                         hda_audio_input_cb, &g_stream->as);
         return g_stream->voice.in;
     }
     return NULL;
@@ -755,13 +755,6 @@ SWVoiceIn* set_hda_voice_in(SWVoiceIn *voice, struct audsettings *as)
 SWVoiceIn *get_hda_voice_in()
 {
     return g_stream ? g_stream->voice.in : NULL;
-}
-
-struct audsettings* get_hda_aud_settings() {
-      // TODO(jansene): We actually should get the stream data using
-      // hda_audio_command. Better yet, if we could reconfigure
-      // the audio sw object itself we don't need this.
-    return g_stream ? &g_stream->as : NULL;
 }
 // AEMU END
 
