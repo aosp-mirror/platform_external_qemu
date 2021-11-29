@@ -940,9 +940,9 @@ public:
         return 0;
     }
 
-    int contextCreateFence(uint64_t fence_id, uint32_t ctx_id, uint8_t fence_ctx_idx) {
+    int contextCreateFence(uint64_t fence_id, uint32_t ctx_id, uint8_t ring_idx) {
         AutoLock lock(mLock);
-        VGPLOG("fenceid: %llu cmdtype: %u fence_ctx_idx: %u", (unsigned long long)fence_id, ctx_id, fence_ctx_idx);
+        VGPLOG("fenceid: %llu cmdtype: %u ring_idx: %u", (unsigned long long)fence_id, ctx_id, ring_idx);
         if (mVirtioGpuTimelines) {
             VGPLOG("create fence using async fence cb");
             if (0 == ctx_id) {
@@ -954,9 +954,9 @@ public:
                 mVirtioGpuTimelines->enqueueFence(
                     static_cast<VirtioGpuTimelines::CtxId>(ctx_id),
                     static_cast<VirtioGpuTimelines::FenceId>(fence_id),
-                    [this, fence_id, ctx_id, fence_ctx_idx]() {
+                    [this, fence_id, ctx_id, ring_idx]() {
                         mVirglRendererCallbacks.write_context_fence(
-                            mCookie, fence_id, ctx_id, fence_ctx_idx);
+                            mCookie, fence_id, ctx_id, ring_idx);
                     });
             }
         } else {
@@ -2125,8 +2125,8 @@ VG_EXPORT int pipe_virgl_renderer_resource_attach_iov_with_addrs(int res_handle,
 }
 
 VG_EXPORT int stream_renderer_context_create_fence(
-    uint64_t fence_id, uint32_t ctx_id, uint8_t fence_ctx_idx) {
-    sRenderer->contextCreateFence(fence_id, ctx_id, fence_ctx_idx);
+    uint64_t fence_id, uint32_t ctx_id, uint8_t ring_idx) {
+    sRenderer->contextCreateFence(fence_id, ctx_id, ring_idx);
     return 0;
 }
 
