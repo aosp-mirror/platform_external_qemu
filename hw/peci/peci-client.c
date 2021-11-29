@@ -128,7 +128,9 @@ PECIClientDevice *peci_add_client(PECIBus *bus,
 static void peci_client_get(Object *obj, Visitor *v, const char *name,
                                    void *opaque, Error **errp)
 {
-    visit_type_uint8(v, name, (uint8_t *)opaque, errp);
+    /* use millidegrees convention */
+    uint32_t value = *(uint8_t *)opaque * 1000;
+    visit_type_uint32(v, name, &value, errp);
 }
 
 static void peci_client_set(Object *obj, Visitor *v, const char *name,
@@ -136,13 +138,15 @@ static void peci_client_set(Object *obj, Visitor *v, const char *name,
 {
     PECIClientDevice *client = PECI_CLIENT(obj);
     uint8_t *internal = opaque;
-    uint8_t value;
+    uint32_t value;
 
-    if (!visit_type_uint8(v, name, &value, errp)) {
+    if (!visit_type_uint32(v, name, &value, errp)) {
         return;
     }
 
-    *internal = value;
+    g_assert(value <= 255000);
+
+    *internal = value / 1000;
     peci_client_update_temps(client);
 }
 
