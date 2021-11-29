@@ -893,7 +893,6 @@ int main(int argc, char** argv)
       {
           char* avdarch = avdInfo_getTargetCpuArch(myavdinfo);
           const std::string sarch(avdarch);
-          free(avdarch);
 #ifdef __x86_64__
           if (sarch == "arm64" && apiLevel >=28) {
               APANIC("Avd's CPU Architecture '%s' is not supported by the QEMU2 emulator on x86_64 host.\n", avdarch);
@@ -904,6 +903,7 @@ int main(int argc, char** argv)
               APANIC("Avd's CPU Architecture '%s' is not supported by the QEMU2 emulator on aarch64 host.\n", avdarch);
           }
 #endif
+          free(avdarch);
       }
     }
 
