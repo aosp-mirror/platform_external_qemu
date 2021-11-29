@@ -728,10 +728,12 @@ static int virgl_make_context_current(void *opaque, int scanout_idx,
 static struct virgl_renderer_callbacks standard_3d_cbs = {
     .version             = 1,
     .write_fence         = virgl_write_fence,
-    .write_context_fence = NULL,
     .create_gl_context   = virgl_create_context,
     .destroy_gl_context  = virgl_destroy_context,
     .make_current        = virgl_make_context_current,
+#ifdef VIRGL_RENDERER_UNSTABLE_APIS
+    .write_context_fence = NULL,
+#endif
 };
 
 static void virtio_gpu_print_stats(void *opaque)

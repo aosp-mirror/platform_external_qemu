@@ -951,6 +951,7 @@ public:
             } else {
                 VGPLOG("is Not 0 ctx id (%u), do not signal right away if async signal on top.. the client fence id was %llu",
                        ctx_id, (unsigned long long)fence_id);
+#ifdef VIRGL_RENDERER_UNSTABLE_APIS
                 mVirtioGpuTimelines->enqueueFence(
                     static_cast<VirtioGpuTimelines::CtxId>(ctx_id),
                     static_cast<VirtioGpuTimelines::FenceId>(fence_id),
@@ -958,6 +959,10 @@ public:
                         mVirglRendererCallbacks.write_context_fence(
                             mCookie, fence_id, ctx_id, ring_idx);
                     });
+#else
+                VGPLOG("enable unstable apis for this feature");
+                return -EINVAL;
+#endif
             }
         } else {
             fprintf(stderr, "%s: create fence without async fence cb\n", __func__);
