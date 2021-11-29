@@ -153,8 +153,6 @@ service EmulatorController {
   // that the emulator is requesting frames. Audio will be stored in a
   // temporary buffer that can hold 500ms of audio.
   //
-  // Note: Currently the emulator will only accept samples between 44 - 48 khz.
-  //
   // -  INVALID_ARGUMENT (code 3) The sampling rate was too high/low
   // -  INVALID_ARGUMENT (code 3) The audio packet was too large to handle.
   // -  FAILED_PRECONDITION (code 9) If there was a microphone registered already.
