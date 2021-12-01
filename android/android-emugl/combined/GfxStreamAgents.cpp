@@ -347,7 +347,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     return true;
                 },
         .changeResizableDisplay =
-                [](int presetSize) {},
+                [](int presetSize) { return false; },
 };
 
 static const QAndroidVmOperations sQAndroidVmOperations = {
