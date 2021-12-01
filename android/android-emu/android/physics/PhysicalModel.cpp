@@ -752,6 +752,16 @@ void PhysicalModelImpl::setTargetInternalRgbcLight(vec4 light,
     targetStateChanged();
 }
 
+void PhysicalModelImpl::setTargetInternalWristTilt(float value,
+                                                   PhysicalInterpolation mode) {
+    physicalStateChanging();
+    {
+        std::lock_guard<std::recursive_mutex> lock(mMutex);
+        mInertialModel.setWristTilt(value, mode);
+    }
+    targetStateChanged();
+}
+
 vec3 PhysicalModelImpl::getParameterPosition(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -866,6 +876,12 @@ vec4 PhysicalModelImpl::getParameterRgbcLight(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     return fromGlm(mAmbientEnvironment.getRgbcLight(parameterValueType));
+}
+
+float PhysicalModelImpl::getParameterWristTilt(
+        ParameterValueType parameterValueType) const {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    return mInertialModel.getWristTilt(parameterValueType);
 }
 
 #define GET_FUNCTION_NAME(x) get##x
@@ -1002,6 +1018,10 @@ float PhysicalModelImpl::getPhysicalHingeAngle2() const {
 
 float PhysicalModelImpl::getPhysicalHeartRate() const {
     return mBodyModel.getHeartRate();
+}
+
+float PhysicalModelImpl::getPhysicalWristTilt() const {
+    return mInertialModel.getWristTilt();
 }
 
 void PhysicalModelImpl::setPhysicalStateAgent(
