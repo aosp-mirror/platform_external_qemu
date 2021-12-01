@@ -5390,6 +5390,13 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     migration_object_init();
 
 #if defined(CONFIG_ANDROID)
+    if (android_qemu_mode || is_fuchsia) {
+        if (!qemu_android_ports_setup()) {
+            // Errors have already been reported inside this function
+            return 1;
+        }
+    }
+
     if (android_qemu_mode) {
 
         /* Configure goldfish events device */
@@ -5472,12 +5479,6 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         // Parse the System boot parameters from the command line last,
         // so they take precedence
         process_cmd_properties();
-        if (android_qemu_mode || is_fuchsia) {
-            if (!qemu_android_ports_setup()) {
-                // Errors have already been reported inside this function
-                return 1;
-            }
-        }
 
         extern void android_emulator_set_base_port(int);
         android_emulator_set_base_port(android_base_port);
@@ -5509,7 +5510,6 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             current_machine->kernel_cmdline = combined;
         }
     }
-
 #endif  // CONFIG_ANDROID
 
     /* This checkpoint is required by replay to separate prior clock
