@@ -6,7 +6,10 @@
 #include <QApplication>      // for QApplication
 #include <QCheckBox>         // for QCheckBox
 #include <QComboBox>         // for QComboBox
+#if QT_VERSION >= 0x060000
+#else
 #include <QDesktopWidget>    // for QDesktopWidget
+#endif  // QT_VERSION
 #include <QEvent>            // for QEvent
 #include <QRadioButton>      // for QRadioButton
 #include <QScreen>           // for QScreen

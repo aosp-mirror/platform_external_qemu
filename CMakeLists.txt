@@ -127,6 +127,9 @@ endif()
 
 if(BUILDING_FOR_AARCH64)
   set(OPTION_MINBUILD TRUE)
+endif()
+
+if (LINUX_AARCH64)
   set(QTWEBENGINE FALSE)
 endif()
 
