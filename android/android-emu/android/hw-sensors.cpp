@@ -995,6 +995,12 @@ static void _hwSensors_init(HwSensors* h) {
         h->sensors[ANDROID_SENSOR_HEART_RATE].enabled = true;
     }
 
+    if (android_hw->hw_sensors_wrist_tilt ||
+        (avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR
+         && avdInfo_getApiLevel(android_avdInfo) >= 28)) {
+        h->sensors[ANDROID_SENSOR_WRIST_TILT].enabled = true;
+    }
+
     /* XXX: TODO: Add other tests when we add the corresponding
      * properties to hardware-properties.ini et al. */
 
