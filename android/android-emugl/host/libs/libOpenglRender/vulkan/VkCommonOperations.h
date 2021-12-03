@@ -351,6 +351,11 @@ bool importExternalMemoryDedicatedImage(
 
 bool isColorBufferVulkanCompatible(uint32_t colorBufferHandle);
 
+std::unique_ptr<VkImageCreateInfo> generateColorBufferVkImageCreateInfo(VkFormat format,
+                                                                        uint32_t width,
+                                                                        uint32_t height,
+                                                                        VkImageTiling tiling);
+
 bool setupVkColorBuffer(uint32_t colorBufferHandle,
                         bool vulkanOnly = false,
                         uint32_t memoryProperty = 0,
