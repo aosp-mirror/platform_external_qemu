@@ -99,6 +99,8 @@ typedef struct QAndroidEmulatorWindowAgent {
     void (*setNoSkin)(void);
     void (*restoreSkin)(void);
     void (*updateUIMultiDisplayPage)(uint32_t);
+    bool (*addMultiDisplayWindow)(uint32_t, bool, uint32_t, uint32_t);
+    bool (*paintMultiDisplayWindow)(uint32_t, uint32_t);
     bool (*getMonitorRect)(uint32_t*, uint32_t*);
     // moves the extended window to the given position if the window was never displayed. This does nothing
     // if the window has been show once during the lifetime of the avd.

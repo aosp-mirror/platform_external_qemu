@@ -952,6 +952,11 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         mCarClusterWindow->setEnabled(false);
     }
 
+    for (auto const& iter : mMultiDisplayWindow) {
+        if (iter.second != nullptr)
+            iter.second->setEnabled(false);
+    }
+
     saveMultidisplayToConfig();
 
     const bool alreadyClosed = mClosed;
@@ -1015,6 +1020,10 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         }
         if (mCarClusterWindow) {
             mCarClusterWindow->hide();
+        }
+        for (auto const& iter : mMultiDisplayWindow) {
+            if (iter.second != nullptr)
+                iter.second->hide();
         }
         mContainer.hide();
         mOverlay.hide();
@@ -3512,6 +3521,44 @@ void EmulatorQtWindow::restoreSkin() {
 
 void EmulatorQtWindow::setUIDisplayRegion(int x, int y, int w, int h, bool ignoreOrientation) {
     runOnUiThread([this, x, y, w, h, ignoreOrientation]() {this->resizeAndChangeAspectRatio(x, y, w, h, ignoreOrientation);});
+}
+
+bool EmulatorQtWindow::addMultiDisplayWindow(uint32_t id, bool add, uint32_t w, uint32_t h) {
+    if (add) {
+        QRect windowGeo = this->geometry();
+        if (!mBackingSurface) {
+            LOG(ERROR) << "backing surface not ready, cancel window creation";
+            return false;
+        }
+        QSize backingSize = mBackingSurface->bitmap->size();
+        float scale = (float)windowGeo.width() / (float)backingSize.width();
+        if (mMultiDisplayWindow[id] == nullptr) {
+            // create qt window for the 1st time.
+            mMultiDisplayWindow[id].reset(new MultiDisplayWidget(w, h, id));
+            char title[16];
+            snprintf(title, 16, "Display %d", id);
+            mMultiDisplayWindow[id]->setWindowTitle(title);
+            QRect geoTool = mToolWindow->geometry();
+            mMultiDisplayWindow[id]->move(geoTool.right() + (mMultiDisplayWindow.size() - 1) * 100,
+                                          geoTool.top());
+        }
+        mMultiDisplayWindow[id]->setFixedSize(QSize((int)(w * scale), (int)(h * scale)));
+        mMultiDisplayWindow[id]->show();
+    } else {
+        auto iter = mMultiDisplayWindow.find(id);
+        if (iter != mMultiDisplayWindow.end()) {
+            mMultiDisplayWindow.erase(iter);
+        }
+    }
+    return true;
+}
+
+bool EmulatorQtWindow::paintMultiDisplayWindow(uint32_t id, uint32_t texture) {
+    if (mMultiDisplayWindow[id] == nullptr || mMultiDisplayWindow[id]->isHidden()) {
+        return true;
+    }
+    mMultiDisplayWindow[id]->paintWindow(texture);
+    return true;
 }
 
 bool EmulatorQtWindow::multiDisplayParamValidate(uint32_t id, uint32_t w, uint32_t h,

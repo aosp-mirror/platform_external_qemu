@@ -29,6 +29,7 @@
 #include "android/skin/qt/emulator-overlay.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/car-cluster-connector/car-cluster-connector.h"
+#include "android/skin/qt/multi-display-widget.h"
 #include "android/skin/qt/tool-window.h"
 #include "android/skin/qt/ui-event-recorder.h"
 #include "android/skin/qt/user-actions-counter.h"
@@ -304,6 +305,8 @@ public:
                                    uint32_t dpi, uint32_t flag);
     void updateUIMultiDisplayPage(uint32_t id);
     void setUIDisplayRegion(int x, int y, int w, int h, bool ignoreOrientation = false);
+    bool addMultiDisplayWindow(uint32_t id, bool add, uint32_t w, uint32_t h);
+    bool paintMultiDisplayWindow(uint32_t id, uint32_t texture);
     const QPixmap* getRawSkinPixmap() { getSkinPixmap(); return mRawSkinPixmap; }
 
     static bool sClosed;
@@ -600,6 +603,7 @@ private:
                                           Qt::MouseButtons buttons);
     int tiltToRotation(int xTiltDeg, int yTiltDeg);
     int penOrientation(int rotation);
+    std::map<uint32_t, std::unique_ptr<MultiDisplayWidget>> mMultiDisplayWindow;
 };
 
 class SkinSurfaceBitmap {

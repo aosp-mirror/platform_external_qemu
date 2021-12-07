@@ -2367,8 +2367,6 @@ bool FrameBuffer::bind_locked() {
                 ERR("eglMakeCurrent failed");
             return false;
         }
-    } else {
-        ERR("Nested %s call detected, should never happen\n", __func__);
     }
 
     m_prevContext = prevContext;
