@@ -86,7 +86,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                     return true;
                 },
         .changeResizableDisplay =
-                [](int presetSize) {},
+                [](int presetSize) { return false; },
 };
 
 extern "C" const QAndroidEmulatorWindowAgent* const
