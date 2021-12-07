@@ -302,6 +302,7 @@ void VhalTable::showEditableArea(VehiclePropValue val) {
     bool pressedOk;
     int32_t int32Value;
     float floatValue;
+    std::string stringValue;
 
     EmulatorMessage writeMsg;
     string writeLog;
@@ -336,6 +337,17 @@ void VhalTable::showEditableArea(VehiclePropValue val) {
             writeLog = "Setting value for " + label.toStdString();
             mSendEmulatorMsg(writeMsg, writeLog);
             break;
+
+        case (int32_t)VehiclePropertyType::STRING:
+            stringValue = getUserStringValue(propDesc, value, &pressedOk).toStdString();
+            if (!pressedOk) {
+                return;
+            }
+            writeMsg = makeSetPropMsgString(prop, stringValue, areaId);
+            writeLog = "Setting string value for " + label.toStdString();
+            mSendEmulatorMsg(writeMsg, writeLog);
+            break;
+
         case (int32_t)VehiclePropertyType::INT32_VEC:
             const std::vector<int32_t>* int32VecValue =
                     getUserInt32VecValue(propDesc, value, &pressedOk);
@@ -410,6 +422,14 @@ float VhalTable::getUserFloatValue(PropertyDescription propDesc, QString oldValu
     return value;
 }
 
+QString VhalTable::getUserStringValue(PropertyDescription propDesc, QString oldValueString,
+                                           bool* pressedOk) {
+    QString value = QInputDialog::getText(this, propDesc.label, nullptr,
+                                            QLineEdit::EchoMode::Normal, oldValueString,
+                                            pressedOk);
+    return value;
+}
+
 EmulatorMessage VhalTable::makeSetPropMsgInt32(int32_t propId, int val, int areaId) {
     VehiclePropValue* value;
     EmulatorMessage emulatorMsg = makeSetPropMsg(propId, &value, areaId);
@@ -421,6 +441,13 @@ EmulatorMessage VhalTable::makeSetPropMsgFloat(int32_t propId, float val, int ar
     VehiclePropValue* value;
     EmulatorMessage emulatorMsg = makeSetPropMsg(propId, &value, areaId);
     value->add_float_values(val);
+    return emulatorMsg;
+}
+
+EmulatorMessage VhalTable::makeSetPropMsgString(int32_t propId, const std::string val, int areaId) {
+    VehiclePropValue* value;
+    EmulatorMessage emulatorMsg = makeSetPropMsg(propId, &value, areaId);
+    value->set_string_value(val);
     return emulatorMsg;
 }
 

@@ -4291,6 +4291,26 @@ static int do_no_draw(ControlClient client, char* args) {
     return 0;
 }
 
+static int do_resize_display(ControlClient client, char* args) {
+    if (args) {
+        int newSize;
+        if (sscanf(args, "%d", &newSize) == 1) {
+           if (newSize < 0 || newSize > 3) {
+                control_write(client, "KO: size index %d not supported\n", newSize);
+                return -1;
+           }
+           if (!client->global->emu_agent->changeResizableDisplay(newSize)) {
+                control_write(client, "KO: Failed to resize display\n");
+                return -1;
+           }
+           return 0;
+        }
+    }
+    control_write(client, "KO usage: \"resize_display <index>\" "
+                  "0: phone\t1: unfolded\t2: tablet\t3: desktop\n");
+    return -1;
+}
+
 /* NOTE: The names of all commands are listed when the 'help' command
  *       is received.
  *       Android Studio uses the 'help' command and requires that the
@@ -4422,6 +4442,16 @@ extern const CommandDefRec main_commands[] = {
 
         {"nodraw", "turn on/off NoDraw mode. (experimental)",
          NULL, NULL, do_no_draw, NULL},
+
+        {"resize-display", "resize the display resolution to the preset size",
+          "Allows you to resize the default display resolution to the following preset sizes\n"
+          "\tindex: size type, width-height-dpi\n"
+          "\t0: phone size, 1080-2340-420\n"
+          "\t1: unfolded size, 1768-2208-420\n"
+          "\t2: tablet size, 1920-1200-240\n"
+          "\t3: desktop size, 1920-1080-160\n"
+          "As an example: 'resize-display 2' resizes the default display to the size of tablet",
+          NULL, do_resize_display, NULL},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
