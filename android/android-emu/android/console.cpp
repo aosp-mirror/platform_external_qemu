@@ -4306,7 +4306,7 @@ static int do_resize_display(ControlClient client, char* args) {
            return 0;
         }
     }
-    control_write(client, "KO usage: \"resize_display <index>\" "
+    control_write(client, "KO usage: \"resize-display <index>\" "
                   "0: phone\t1: unfolded\t2: tablet\t3: desktop\n");
     return -1;
 }
