@@ -13,21 +13,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <grpcpp/grpcpp.h>
+#include <grpcpp/grpcpp.h>  // for Status
+#include <stdint.h>         // for uint8_t
+#include <cstdint>                                            // for uint8_t
+#include <memory>                                             // for unique_ptr
+#include <type_traits>                                        // for move
+#include <utility>          // for move
+#include <vector>                                             // for vector
 
-#include <vector>
+#include "android/emulation/control/async/AsyncGrcpStream.h"  // for ServerC...
+#include "grpcpp/impl/codegen/completion_queue.h"             // for ServerC...
+#include "grpcpp/impl/codegen/server_context.h"               // for ServerC...
+#include "grpcpp/impl/codegen/status.h"                       // for Status
+#include "grpcpp/impl/codegen/sync_stream.h"                  // for ServerR...
+#include "test_echo_service.grpc.pb.h"                        // for TestEcho
 
-#include "test_echo_service.grpc.pb.h"  // for TestEcho
-#include "test_echo_service.pb.h"       // for Msg
+namespace google {
+namespace protobuf {
+class Empty;
+}  // namespace protobuf
+}  // namespace google
 
 namespace android {
 namespace emulation {
 namespace control {
+class Msg;
 
 using grpc::ServerContext;
 using grpc::Status;
 
-class TestEchoServiceImpl final : public TestEcho::Service {
+class TestEchoServiceImpl : public TestEcho::Service {
 public:
     Status echo(ServerContext* context,
                 const Msg* request,
@@ -41,11 +56,34 @@ public:
 
     void moveData(std::vector<uint8_t> data) { mData = std::move(data); }
 
+    void plusOne() { mCounter++; }
+
 private:
     int mCounter{0};
     std::vector<uint8_t> mData;
 };
 
-}  // namespace control
+class HeartbeatService : public TestEcho::Service {
+public:
+    ::grpc::Status streamEcho(
+            ::grpc::ServerContext* /*context*/,
+            ::grpc::ServerReaderWriter<
+                    ::android::emulation::control::Msg,
+                    ::android::emulation::control::Msg>* /*stream*/) override;
+};
+
+using AsyncTestEchoService =
+        TestEcho::WithAsyncMethod_streamEcho<TestEchoServiceImpl>;
+
+using AsyncHeartbeatService = TestEcho::WithAsyncMethod_streamEcho<HeartbeatService>;
+
+std::unique_ptr<AsyncGrpcHandler<Msg, Msg>> asyncStreamEcho(
+        AsyncTestEchoService* service,
+        const std::vector<::grpc::ServerCompletionQueue*>& cqs);
+
+std::unique_ptr<AsyncGrpcHandler<Msg, Msg>> asyncHeartBeat(
+        AsyncHeartbeatService* testService,
+        const std::vector<::grpc::ServerCompletionQueue*>& cqs);
+        }  // namespace control
 }  // namespace emulation
 }  // namespace android

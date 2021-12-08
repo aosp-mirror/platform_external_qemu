@@ -36,12 +36,13 @@
 #include "android/emulation/control/GrpcServices.h"  // for control
 #include "benchmark/benchmark_api.h"                 // for State, Benchmark
 #include "google/protobuf/empty.pb.h"                // for Empty
-#include "grpcpp/security/credentials.h"             // for InsecureChannelC...
-#include "grpcpp/support/channel_arguments.h"        // for ChannelArguments
-#include "ipc_test_service.grpc.pb.h"                // for TestRunner::Stub
-#include "ipc_test_service.pb.h"                     // for Test, Test::Grpc
-#include "test_echo_service.grpc.pb.h"               // for TestEcho, TestEc...
-#include "test_echo_service.pb.h"                    // for Msg
+#include "grpcpp/impl/grpc_library.h"  // Hack Attack! Needed for static initializer
+#include "grpcpp/security/credentials.h"       // for InsecureChannelC...
+#include "grpcpp/support/channel_arguments.h"  // for ChannelArguments
+#include "ipc_test_service.grpc.pb.h"          // for TestRunner::Stub
+#include "ipc_test_service.pb.h"               // for Test, Test::Grpc
+#include "test_echo_service.grpc.pb.h"         // for TestEcho, TestEc...
+#include "test_echo_service.pb.h"              // for Msg
 
 // This contains a series of benchmarks that can be used to determine which mode
 // of ipc is best suited for sharing large blobs of memory (i.e. image frame
@@ -174,7 +175,7 @@ public:
     virtual uint64_t expected() { return mConfig.chksum(); }
 
     // Configure the remote process for the upcoming test
-    void setup(uint64_t size) {
+    virtual void setup(uint64_t size) {
         mTest.set_size(size);
         mConfig = sGrpcDriver->prepare(mTest);
     }
@@ -278,6 +279,23 @@ private:
     std::vector<uint8_t> mData;
 };
 
+class ThreadTest : public GrpcTest {
+public:
+    ThreadTest(Test_TestType typ) { mTest.set_target(typ); }
+
+    std::shared_ptr<::grpc::Channel> getChannel() {
+        auto address = "localhost:" + std::to_string(mConfig.port());
+        grpc::ChannelArguments ch_args;
+        ch_args.SetMaxReceiveMessageSize(-1);
+        return grpc::CreateCustomChannel(
+                address, ::grpc::InsecureChannelCredentials(), ch_args);
+    }
+
+    uint64_t chksum() override { return 0; }
+
+    uint64_t expected() override { return 0; }
+};
+
 // Actual test runner, call setup, prepare and checksum when needed.
 void do_test(PerfTest* perf,
              benchmark::State& state,
@@ -366,6 +384,60 @@ void BM_read_grpc_reuse_ext_chk(benchmark::State& state) {
     auto grpc = GrpcTest();
     do_test(&grpc, state, true);
 }
+
+class SetupSyncHeartbeat {
+    SetupSyncHeartbeat() { mSyncTest.setup(0); }
+
+public:
+    static ThreadTest* connection() {
+        static SetupSyncHeartbeat setup;
+        return &setup.mSyncTest;
+    }
+
+private:
+    ThreadTest mSyncTest{Test::SyncStreamPerf};
+};
+
+class SetupASyncHeartbeat {
+    SetupASyncHeartbeat() { mSyncTest.setup(0); }
+
+public:
+    static ThreadTest* connection() {
+        static SetupASyncHeartbeat setup;
+        return &setup.mSyncTest;
+    }
+
+private:
+    ThreadTest mSyncTest{Test::AsyncStreamPerf};
+};
+
+void read_heartbeat(ThreadTest* grpc, benchmark::State& state) {
+    auto channel = grpc->getChannel();
+    auto stub = TestEcho::NewStub(channel);
+    grpc::ClientContext ctx;
+    Msg response;
+    auto thingie = stub->streamEcho(&ctx);
+    while (state.KeepRunning()) {
+        thingie->Read(&response);
+    }
+}
+
+void BM_sync_grpc_heartbeat(benchmark::State& state) {
+    auto grpc = SetupSyncHeartbeat::connection();
+    read_heartbeat(grpc, state);
+}
+
+void BM_async_grpc_heartbeat(benchmark::State& state) {
+    auto grpc = SetupASyncHeartbeat::connection();
+    read_heartbeat(grpc, state);
+}
+
+
+BENCHMARK(BM_sync_grpc_heartbeat)->Threads(512);
+BENCHMARK(BM_async_grpc_heartbeat)->Threads(512); 
+
+// BENCHMARK(BM_sync_grpc_heartbeat)->Threads(2048 + 1024); // Crash server 
+// BENCHMARK(BM_async_grpc_heartbeat)->Threads(2048 + 1024); 
 
 BASIC_BENCHMARK_TEST(BM_read_new_within_proc);  // Baseline malloc only.
 BASIC_BENCHMARK_TEST(BM_read_socket_ext_chk);   // Baseline tcp/ip layer
