@@ -326,6 +326,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                         adbInterface->enqueueCommand(
                             { "shell", "settings", "put", "global",
                               "force_resizable_activities", "1" });
+                        restartFrameWork = true;
                     }
                 }
             }
