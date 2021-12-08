@@ -53,7 +53,6 @@
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
 #include "android/emulation/MultiDisplay.h"
-#include "android/emulation/resizable_display_config.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/ServiceUtils.h"
@@ -79,6 +78,7 @@
 #include "android/emulation/control/utils/SharedMemoryLibrary.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
+#include "android/emulation/resizable_display_config.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/Features.h"
 #include "android/globals.h"
@@ -456,8 +456,7 @@ public:
                           ::google::protobuf::Empty* reply) override {
         if (!resizableEnabled()) {
             return Status(::grpc::StatusCode::FAILED_PRECONDITION,
-                          ":setDisplayMode the AVD is not resizable.",
-                          "");
+                          ":setDisplayMode the AVD is not resizable.", "");
         }
         auto agent = mAgents->emu;
         if (agent == nullptr || agent->changeResizableDisplay == nullptr) {
@@ -466,7 +465,8 @@ public:
                           "available.",
                           "");
         }
-        agent->changeResizableDisplay(static_cast<PresetEmulatorSizeType>(requestPtr->value()));
+        agent->changeResizableDisplay(
+                static_cast<PresetEmulatorSizeType>(requestPtr->value()));
         return Status::OK;
     }
 
@@ -475,10 +475,10 @@ public:
                           DisplayMode* reply) override {
         if (!resizableEnabled()) {
             return Status(::grpc::StatusCode::FAILED_PRECONDITION,
-                          ":getDisplayMode the AVD is not resizable.",
-                          "");
+                          ":getDisplayMode the AVD is not resizable.", "");
         }
-        reply->set_value(static_cast<DisplayModeValue>(getResizableActiveConfigId()));
+        reply->set_value(
+                static_cast<DisplayModeValue>(getResizableActiveConfigId()));
         return Status::OK;
     }
 
@@ -568,7 +568,6 @@ public:
                           "");
         }
 
-
         // Increasing the buffer size can result in longer waiting periods
         // before closing down the emulator.
         milliseconds audioQueueTime = 300ms;
@@ -583,7 +582,9 @@ public:
             if (pkt.audio().size() > aos.capacity()) {
                 return Status(::grpc::StatusCode::INVALID_ARGUMENT,
                               "The audio buffer can store at most " +
-                                      std::to_string(aos.capacity()) + " bytes",
+                                      std::to_string(aos.capacity()) +
+                                      " bytes, not: " +
+                                      std::to_string(pkt.audio().size()),
                               "");
             }
 
@@ -610,7 +611,7 @@ public:
         // 2 cases:
         // - The emulator is requesting audio, we deliver the whole queue
         // - The emulator is not requesting audio, we time out.
-        while(toWrite > 0 && std::chrono::system_clock::now() < timeout) {
+        while (toWrite > 0 && std::chrono::system_clock::now() < timeout) {
             toWrite -= aos.write(silence, sizeof(silence));
         }
 
@@ -821,7 +822,8 @@ public:
         }
         if (resizableEnabled()) {
             reply->mutable_format()->set_displaymode(
-                static_cast<DisplayModeValue>(getResizableActiveConfigId()));
+                    static_cast<DisplayModeValue>(
+                            getResizableActiveConfigId()));
         }
 
         reply->set_timestampus(System::get()->getUnixTimeUs());
@@ -1381,7 +1383,6 @@ public:
 
         return Status::OK;
     }
-
 
 private:
     const AndroidConsoleAgents* mAgents;
