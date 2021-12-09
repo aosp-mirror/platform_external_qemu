@@ -94,8 +94,6 @@ android_target_dependency(emulator windows_msvc-x86_64
                           GLIB2_WINDOWS_DEPENDENCIES)
 android_target_dependency(emulator windows_msvc-x86_64
                           ANGLE_RENDERER_DEPENDENCIES)
-android_target_dependency(emulator darwin
-                          ANGLE_RENDERER_DEPENDENCIES)
 android_target_dependency(emulator windows_msvc-x86_64 MSVC_DEPENDENCIES)
 # And install them for a release.
 # TODO(b/141205876): prebuilt executables are losing their execute permission on
