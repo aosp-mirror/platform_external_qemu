@@ -574,8 +574,11 @@ Surface* EglOsEglDisplay::createWindowSurface(PixelFormat* pf,
         surface_attribs.push_back(EGL_TRUE);
     }
     surface_attribs.push_back(EGL_NONE);
+#ifdef __APPLE__
+    win = nsGetLayer(win);
+#endif
     EGLSurface surface = mDispatcher.eglCreateWindowSurface(
-            mDisplay, ((EglOsEglPixelFormat*)pf)->mConfigId, nsGetLayer(win), surface_attribs.data()
+            mDisplay, ((EglOsEglPixelFormat*)pf)->mConfigId, win, surface_attribs.data()
     );
     CHECK_EGL_ERR
     if (surface == EGL_NO_SURFACE) {
