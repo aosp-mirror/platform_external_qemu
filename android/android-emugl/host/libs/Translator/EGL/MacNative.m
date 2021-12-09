@@ -416,8 +416,3 @@ bool  nsCheckColor(void* win,int colorSize){
    return false;
 
 }
-
-void* nsGetLayer(void* win) {
-    NSView* view = (NSView*)win;
-    return view.layer;
-}

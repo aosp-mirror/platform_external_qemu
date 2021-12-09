@@ -914,9 +914,7 @@ FrameBuffer::postWorkerFunc(const Post& post) {
 
 void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
 #ifdef __APPLE__
-    bool postOnlyOnMainThread = m_subWin &&
-        ((emugl::getRenderer() == SELECTED_RENDERER_HOST) ||
-            (emugl::getRenderer() == SELECTED_RENDERER_ANGLE_INDIRECT));
+    bool postOnlyOnMainThread = m_subWin && (emugl::getRenderer() == SELECTED_RENDERER_HOST);
 #else
     bool postOnlyOnMainThread = false;
 #endif
