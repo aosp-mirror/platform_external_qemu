@@ -482,12 +482,16 @@ if(NOT LINUX_AARCH64)
 
 endif()
 
-if(WINDOWS_MSVC_X86_64)
+if(WINDOWS_MSVC_X86_64 OR DARWIN_X86_64)
   set(ANGLE_RENDERER_DEPENDENCIES
-      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/windows-x86_64/lib/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
-      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/windows-x86_64/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
-      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/windows-x86_64/lib/d3dcompiler_47${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/d3dcompiler_47${CMAKE_SHARED_LIBRARY_SUFFIX}"
+      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
+      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
   )
+  if(WINDOWS_MSVC_X86_64)
+    set(ANGLE_RENDERER_DEPENDENCIES
+      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/windows-x86_64/lib/d3dcompiler_47${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/d3dcompiler_47${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    )
+  endif()
 
   # Angle executables licensing information.
   android_license(

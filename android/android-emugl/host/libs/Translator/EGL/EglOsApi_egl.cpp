@@ -575,7 +575,8 @@ Surface* EglOsEglDisplay::createWindowSurface(PixelFormat* pf,
     }
     surface_attribs.push_back(EGL_NONE);
     EGLSurface surface = mDispatcher.eglCreateWindowSurface(
-            mDisplay, ((EglOsEglPixelFormat*)pf)->mConfigId, win, surface_attribs.data());
+            mDisplay, ((EglOsEglPixelFormat*)pf)->mConfigId, nsGetLayer(win), surface_attribs.data()
+    );
     CHECK_EGL_ERR
     if (surface == EGL_NO_SURFACE) {
         D("create window surface failed\n");
@@ -630,8 +631,9 @@ void EglOsEglDisplay::swapBuffers(Surface* surface) {
 }
 
 bool EglOsEglDisplay::isValidNativeWin(Surface* win) {
-    if (!win)
+    if (!win) {
         return false;
+    }
     EglOsEglSurface* surface = (EglOsEglSurface*)win;
     return surface->type() == EglOsEglSurface::WINDOW &&
            isValidNativeWin(surface->getWin());
