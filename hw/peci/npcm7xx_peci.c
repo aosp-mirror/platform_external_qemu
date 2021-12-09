@@ -104,9 +104,7 @@ static void npcm7xx_peci_write(void *opaque, hwaddr offset, uint64_t input,
         ps->status = data;
         /* STS_START busy is set by the bmc when the request is written */
         if (data & PECI_CTL_STS_START_BUSY) {
-            if (!peci_handle_cmd(ps->bus, &(ps->pcmd))) {
-                ps->status |= PECI_CTL_STS_ABRT_ERR;
-            }
+            peci_handle_cmd(ps->bus, &(ps->pcmd));
             ps->status |= PECI_CTL_STS_DONE;
             ps->status &= ~PECI_CTL_STS_START_BUSY;
             qemu_irq_raise(ps->irq);
