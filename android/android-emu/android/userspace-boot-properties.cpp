@@ -377,7 +377,7 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         params.push_back({qemuCameraProtocolVerProp, "1"});
     }
 
-    if (opts->no_camera_hq_edge) {
+    if (!opts->camera_hq_edge) {
         params.push_back({qemuCameraHqEdgeProp, "0"});
     }
 

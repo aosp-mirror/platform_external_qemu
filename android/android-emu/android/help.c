@@ -2026,10 +2026,10 @@ help_legacy_fake_camera(stralloc_t* out)
 }
 
 static void
-help_no_camera_hq_edge(stralloc_t* out)
+help_camera_hq_edge(stralloc_t* out)
 {
     PRINTF(
-    "  Disable high quality edge processing for emulated camera.\n\n"
+    "  Enable high quality edge processing for emulated camera.\n\n"
     );
 }
 
