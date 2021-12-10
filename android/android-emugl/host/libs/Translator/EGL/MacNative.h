@@ -72,6 +72,7 @@ void* nsCreatePBuffer(GLenum target,GLenum format,int maxMip,int width,int heigh
 void nsDestroyPBuffer(void* pbuffer);
 bool nsGetWinDims(void* win,unsigned int* width,unsigned int* height);
 bool nsCheckColor(void* win,int colorSize);
+void* nsGetLayer(void* nativeWin);
 
 }
 
