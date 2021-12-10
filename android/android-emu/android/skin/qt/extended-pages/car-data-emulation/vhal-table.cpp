@@ -91,7 +91,8 @@ VhalTable::~VhalTable() {
 void VhalTable::initVhalPropertyTableRefreshThread() {
     int msg;
     while (true) {
-        mRefreshMsg.tryReceive(&msg);
+        // Receive only the last message (bug :210075881)
+        while(mRefreshMsg.tryReceive(&msg));
         if (msg == REFRESH_STOP) {
             break;
         }
