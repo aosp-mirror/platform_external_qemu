@@ -26,7 +26,6 @@
 #include "GLEScmValidate.h"
 #include "GLEScmUtils.h"
 #include <GLcommon/TextureUtils.h>
-#include <OpenglCodecCommon/ErrorLog.h>
 
 #include <GLcommon/GLDispatch.h>
 #include <GLcommon/GLconversion_macros.h>
@@ -35,6 +34,7 @@
 #include <GLcommon/FramebufferData.h>
 
 #include "emugl/common/crash_reporter.h"
+#include "emugl/common/logging.h"
 #include "emugl/common/metrics.h"
 
 #include <cmath>

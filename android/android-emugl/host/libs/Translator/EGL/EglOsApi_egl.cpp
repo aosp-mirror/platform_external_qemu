@@ -17,10 +17,10 @@
 #include "EglOsApi.h"
 
 #include "GLcommon/GLLibrary.h"
-#include "OpenglCodecCommon/ErrorLog.h"
 #include "ShaderCache.h"
 #include "android/base/system/System.h"
 #include "emugl/common/lazy_instance.h"
+#include "emugl/common/logging.h"
 #include "emugl/common/misc.h"
 #include "emugl/common/shared_library.h"
 

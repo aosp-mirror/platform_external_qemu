@@ -19,11 +19,10 @@
 
 #include "CoreProfileConfigs.h"
 #include "emugl/common/lazy_instance.h"
+#include "emugl/common/logging.h"
 #include "emugl/common/mutex.h"
 #include "emugl/common/shared_library.h"
 #include "GLcommon/GLLibrary.h"
-
-#include "OpenglCodecCommon/ErrorLog.h"
 
 #include <string.h>
 #include <X11/Xlib.h>
