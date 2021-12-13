@@ -164,6 +164,11 @@ void MediaH264DecoderGeneric::initH264ContextInternal(unsigned int width,
             H264_DPRINT("OSX: gpu texture mode is turned off for w %" PRIu32 " h %" PRIu32,
                     width, height);
         }
+#ifdef __x86_64__
+        // b/210512774
+        // texture copy breaks on Intel Monterey
+        mUseGpuTexture = false;
+#endif
         MediaVideoToolBoxVideoHelper::FrameStorageMode fMode =
             (mParser.version() >= 200 && mUseGpuTexture)
                     ? MediaVideoToolBoxVideoHelper::FrameStorageMode::
