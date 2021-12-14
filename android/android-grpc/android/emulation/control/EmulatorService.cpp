@@ -557,6 +557,22 @@ public:
     Status injectAudio(ServerContext* context,
                        ::grpc::ServerReader<AudioPacket>* reader,
                        ::google::protobuf::Empty* reply) override {
+        // We currently only support one microphone, so make sure we
+        // don't have multiple microphones registered.
+        int8_t expectActive = 0;
+        if (!mInjectAudioCount.compare_exchange_strong(expectActive, 1)) {
+            return Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "There can be only one microphone active", "");
+        }
+
+        // Make sure we decrement the active microphone counter.
+        assert(mInjectAudioCount == 1);
+        auto decrementActiveCount = android::base::makeCustomScopedPtr(
+                &mInjectAudioCount, [](auto counter) {
+                    assert(*counter == 1);
+                    counter->fetch_sub(1);
+                    assert(*counter == 0); });
+
         AudioPacket pkt;
         if (!reader->Read(&pkt)) {
             return Status::OK;
@@ -1397,6 +1413,7 @@ private:
     RingStreambuf
             mLogcatBuffer;  // A ring buffer that tracks the logcat output.
 
+    std::atomic_int8_t mInjectAudioCount{0}; // # of active inject audio.
     static constexpr uint32_t k128KB = (128 * 1024) - 1;
     static constexpr std::chrono::milliseconds k5SecondsWait = 5s;
     const std::chrono::milliseconds kNoWait = 0ms;
