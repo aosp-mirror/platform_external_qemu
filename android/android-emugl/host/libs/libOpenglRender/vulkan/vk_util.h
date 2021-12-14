@@ -33,6 +33,8 @@
 #include <optional>
 
 #include "common/vk_struct_id.h"
+#include "VkCommonOperations.h"
+#include "android/utils/GfxstreamFatalError.h"
 
 struct vk_struct_common {
     VkStructureType sType;
@@ -265,9 +267,7 @@ template <class S, class T> void vk_struct_chain_remove(S* unwanted, T* vk_struc
     do {                                                                 \
         VkResult err = x;                                                \
         if (err != VK_SUCCESS) {                                         \
-            ::fprintf(stderr, "%s(%u) %s: %s failed, error code = %d\n", \
-                      __FILE__, __LINE__, __FUNCTION__, #x, err);        \
-            ::abort();                                                   \
+            GFXSTREAM_ABORT(FatalError(err));                            \
         }                                                                \
     } while (0)
 

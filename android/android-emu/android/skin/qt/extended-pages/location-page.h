@@ -30,7 +30,10 @@
 
 #include <QDateTime>
 #include <QListWidgetItem>
+#if QT_VERSION >= 0x060000
+#else
 #include <QtNetwork/QNetworkConfigurationManager>
+#endif  // QT_VERSION
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QTimer>
@@ -373,9 +376,14 @@ public:
         updateTheme();
         setTitle(mPointElement.logicalName);
         QString subtitle;
+#if QT_VERSION >= 0x060000
+        subtitle = QString("%1, %2").arg(mPointElement.latitude, 0, 'f', 4)
+                        .arg(mPointElement.longitude, 0, 'f', 4);
+#else
         subtitle.sprintf("%.4f, %.4f",
                          mPointElement.latitude,
                          mPointElement.longitude);
+#endif
         setSubtitle(subtitle);
     }
 

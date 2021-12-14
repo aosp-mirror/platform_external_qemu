@@ -12,17 +12,13 @@
 #pragma once
 #ifdef USE_WEBENGINE
 #include <QObject>
-#include <QtNetwork/QNetworkConfigurationManager>
-#include <QtNetwork/QNetworkSession>
-#include <QTimer>
 
 class NetworkConnectivityManager: public QObject
 {
     Q_OBJECT
 
 public:
-    NetworkConnectivityManager(QObject *parent = nullptr);
-    ~NetworkConnectivityManager();
+    virtual ~NetworkConnectivityManager() = default;
 
     enum State {
         Unknown = 0,
@@ -30,21 +26,16 @@ public:
         Connected = 3
     };
 
-    inline bool isOnline() const { return mState == State::Connected; }
+    bool isOnline() const { return mState == State::Connected; }
+    static NetworkConnectivityManager* create(QObject* parent = nullptr);
 
 Q_SIGNALS:
     void connectivityStateChanged(NetworkConnectivityManager::State);
 
-private Q_SLOTS:
-    void onNetworkStateChanged(QNetworkSession::State state);
-    void updateCompleted();
+protected:
+    NetworkConnectivityManager(QObject* parent = nullptr) :
+        QObject(parent) { }
 
-private:
-    bool isValidNetworkConfiguration(const QNetworkConfiguration& ncfg) const;
-    void updateConnectivityState(State previousState);
-
-    QNetworkConfigurationManager* mNetworkConfigurationManager;
-    QList<QNetworkSession *> mNetworkSessions;
     State mState;
 };
 #endif

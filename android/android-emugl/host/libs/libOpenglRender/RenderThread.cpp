@@ -17,7 +17,6 @@
 
 #include "ChannelStream.h"
 #include "RingStream.h"
-#include "ErrorLog.h"
 #include "FrameBuffer.h"
 #include "ReadBuffer.h"
 #include "RenderControl.h"
@@ -40,6 +39,7 @@
 #define EMUGL_DEBUG_LEVEL 0
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/debug.h"
+#include "emugl/common/logging.h"
 
 #include <assert.h>
 
@@ -257,7 +257,7 @@ void RenderThread::notifyTeardown() {
 
 intptr_t RenderThread::main() {
     if (mFinished.load(std::memory_order_relaxed)) {
-        DBG("Error: fail loading a RenderThread @%p\n", this);
+        ERR("Error: fail loading a RenderThread @%p", this);
         return 0;
     }
 
@@ -280,7 +280,7 @@ intptr_t RenderThread::main() {
     }
 
     if (!mChannel && !mRingStream) {
-        DBG("Exited a loader RenderThread @%p\n", this);
+        GL_LOG("Exited a loader RenderThread @%p", this);
         AutoLock lock(mLock);
         mFinished.store(true, std::memory_order_relaxed);
         setOnTeardownLocked([] {});
@@ -308,7 +308,7 @@ intptr_t RenderThread::main() {
     // But the context bind / restoration will be delayed after receiving
     // the first GL command.
     if (doSnapshotOperation(snapshotObjects, SnapshotState::StartLoading)) {
-        DBG("Loaded RenderThread @%p from snapshot\n", this);
+        GL_LOG("Loaded RenderThread @%p from snapshot", this);
         needRestoreFromSnapshot = true;
     } else {
         // Not loading from a snapshot: continue regular startup, read
@@ -318,7 +318,7 @@ intptr_t RenderThread::main() {
             // Stream read may fail because of a pending snapshot.
             if (!doSnapshotOperation(snapshotObjects, SnapshotState::StartSaving)) {
                 setFinished();
-                DBG("Exited a RenderThread @%p early\n", this);
+                GL_LOG("Exited a RenderThread @%p early", this);
                 return 0;
             }
         }
@@ -532,8 +532,7 @@ intptr_t RenderThread::main() {
         // Release references to the current thread's context/surfaces if any
         FrameBuffer::getFB()->bindContext(0, 0, 0);
         if (tInfo.currContext || tInfo.currDrawSurf || tInfo.currReadSurf) {
-            fprintf(stderr,
-                    "ERROR: RenderThread exiting with current context/surfaces\n");
+            ERR("ERROR: RenderThread exiting with current context/surfaces");
         }
 
         FrameBuffer::getFB()->drainWindowSurface();
@@ -542,7 +541,7 @@ intptr_t RenderThread::main() {
 
     setFinished();
 
-    DBG("Exited a RenderThread @%p\n", this);
+    GL_LOG("Exited a RenderThread @%p", this);
     return 0;
 }
 

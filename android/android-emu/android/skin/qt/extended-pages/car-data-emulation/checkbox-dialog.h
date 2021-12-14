@@ -23,7 +23,11 @@ class QDialogButtonBox;
 class QObject;
 class QString;
 class QWidget;
+
+#if QT_VERSION >= 0x060000
+#else
 template <class T1, class T2> struct QPair;
+#endif  // QT_VERSION
 template <typename T> class QSet;
 
 // This CheckboxDialog is for user input for VHAL property whose type is

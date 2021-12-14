@@ -33,6 +33,7 @@
 #include "android/base/BumpPool.h"
 #include "android/base/system/System.h"
 #include "android/base/Tracing.h"
+#include "android/utils/GfxstreamFatalError.h"
 
 #include "IOStream.h"
 #include "emugl/common/feature_control.h"
@@ -1643,7 +1644,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                         uint64_t readStream = 0;
                         memcpy(&readStream, *readStreamPtrPtr, sizeof(uint64_t)); *readStreamPtrPtr += sizeof(uint64_t);
                         auto hostPtr = m_state->getMappedHostPointer(memory);
-                        if (!hostPtr && readStream > 0) abort();
+                        if (!hostPtr && readStream > 0) GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER));
                         if (!hostPtr) continue;
                         uint8_t* targetRange = hostPtr + offset;
                         memcpy(targetRange, *readStreamPtrPtr, readStream); *readStreamPtrPtr += readStream;
@@ -3269,6 +3270,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 *(VkImage*)pImage = (VkImage)(VkImage)((VkImage)(*&cgen_var_2));
                 if (pCreateInfo)
                 {
+                    m_state->transformImpl_VkImageCreateInfo_tohost(pCreateInfo, 1);
                     transform_tohost_VkImageCreateInfo(m_state, (VkImageCreateInfo*)(pCreateInfo));
                 }
                 if (pAllocator)
@@ -23904,6 +23906,7 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 reservedunmarshal_VkMemoryRequirements(vkReadStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkMemoryRequirements*)(pMemoryRequirements), readStreamPtrPtr);
                 if (pCreateInfo)
                 {
+                    m_state->transformImpl_VkImageCreateInfo_tohost(pCreateInfo, 1);
                     transform_tohost_VkImageCreateInfo(m_state, (VkImageCreateInfo*)(pCreateInfo));
                 }
                 if (pAllocator)

@@ -8,17 +8,15 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#include <gtest/gtest.h>                  // for Asser...
-
-#include "android/emulation/control/GrpcServices.h"
-
 #include <grpcpp/grpcpp.h>                // for OK
 #include <grpcpp/security/credentials.h>  // for Insec...
-
-#include <fstream>      // for ifstream
-#include <iterator>     // for istre...
-#include <memory>       // for alloc...
-#include <string>       // for char_...
+#include <gtest/gtest.h>                  // for Asser...
+#include <chrono>
+#include <fstream>   // for ifstream
+#include <iterator>  // for istre...
+#include <memory>    // for alloc...
+#include <string>    // for char_...
+#include <thread>
 #include <tuple>        // for tuple...
 #include <type_traits>  // for add_c...
 
@@ -27,10 +25,14 @@
 #include "android/base/system/System.h"        // for System
 #include "android/base/testing/TestSystem.h"   // for TestS...
 #include "android/base/testing/TestTempDir.h"  // for TestT...
+#include "android/emulation/control/GrpcServices.h"
+#include "android/emulation/control/async/AsyncGrcpStream.h"
 #include "android/emulation/control/test/BasicTokenAuthenticator.h"
 #include "android/emulation/control/test/CertificateFactory.h"  // for Certi...
 #include "android/emulation/control/test/TestEchoService.h"     // for getTe...
+#include "android/utils/debug.h"
 #include "grpc/grpc_security_constants.h"
+#include "gtest/gtest_pred_impl.h"
 #include "test_echo_service.grpc.pb.h"  // for TestEcho
 #include "test_echo_service.pb.h"       // for Msg
 
@@ -60,8 +62,9 @@ protected:
 
     void SetUp() {
         mTestSystem.host()->setEnvironmentVariable("GRPC_VERBOSITY", "DEBUG");
-       // mTestSystem.host()->setEnvironmentVariable("GRPC_VERBOSITY", "DEBUG");
-        mEchoService = new TestEchoServiceImpl();
+        // mTestSystem.host()->setEnvironmentVariable("GRPC_VERBOSITY",
+        // "DEBUG");
+        mEchoService = new AsyncTestEchoService();
         mHelloWorld.set_msg(HELLO);
     }
 
@@ -85,7 +88,7 @@ protected:
 
     std::tuple<Msg, grpc::Status> sayHello(
             const std::shared_ptr<grpc::ChannelCredentials>& creds,
-            const bool wait_for_ready=true,
+            const bool wait_for_ready = true,
             const std::shared_ptr<grpc::CallCredentials>& call_creds =
                     nullptr) {
         // Now let's connect with a client.
@@ -107,14 +110,16 @@ protected:
                 std::make_unique<BasicTokenAuthenticator>(mToken));
     }
 
-    TestEchoServiceImpl* mEchoService;
+    AsyncTestEchoService* mEchoService;
     TestSystem mTestSystem;
     Msg mHelloWorld;
     EmulatorControllerService::Builder mBuilder;
+    std::unique_ptr<AsyncGrpcHandler<Msg, Msg>> mAsyncHandler;
     std::unique_ptr<EmulatorControllerService> mEmuController;
     std::string mToken{"super_secret_token"};
 
     const std::string HELLO{"Hello World"};
+
 };
 
 TEST_F(GrpcServiceTest, BasicRegistrationSucceeds) {
@@ -271,9 +276,7 @@ TEST_F(GrpcServiceTest, ServerSecureDoesNotDemandClientSecure) {
 // TOKEN BASED TESTS
 // ------------------------------------------------------------------------------------
 TEST_F(GrpcServiceTest, DoNotLaunchWithEmptyToken) {
-    mBuilder.withService(mEchoService)
-            .withPortRange(0, 1)
-            .withAuthToken("");
+    mBuilder.withService(mEchoService).withPortRange(0, 1).withAuthToken("");
     EXPECT_FALSE(construct());
 }
 
@@ -303,8 +306,8 @@ TEST_F(GrpcServiceTest, InsecureWithGoodTokenAccepts) {
 
     auto token = getTokenCredentials();
     // Note! ::grpc::InsecureChannel WILL NOT INJECT HEADERS!
-    auto [msg, status] =
-            sayHello(::grpc::experimental::LocalCredentials(LOCAL_TCP), true, token);
+    auto [msg, status] = sayHello(
+            ::grpc::experimental::LocalCredentials(LOCAL_TCP), true, token);
     EXPECT_EQ(HELLO, msg.msg());
     EXPECT_EQ(grpc::StatusCode::OK, status.error_code());
 
@@ -378,6 +381,42 @@ TEST_F(GrpcServiceTest, SecureWithGoodTokenAccepts) {
 
     // Underlying methods was called.
     EXPECT_EQ(invocations + 1, mEchoService->invocations());
+}
+
+TEST_F(GrpcServiceTest, AsyncBidiServerWorks) {
+    VERBOSE_ENABLE(grpc);
+    mBuilder.withService(mEchoService)
+            .withPortRange(0, 1)
+            .withCompletionQueues(1);
+
+    EXPECT_TRUE(construct());
+    mAsyncHandler = asyncStreamEcho(mEchoService,
+                                    mEmuController->newCompletionQueue(1));
+    mAsyncHandler->start();
+
+    // Let's send and receive just one thing..
+    auto creds = ::grpc::experimental::LocalCredentials(LOCAL_TCP);
+    auto channel = grpc::CreateChannel(address(), creds);
+    auto client = TestEcho::NewStub(channel);
+    grpc::ClientContext ctx;
+    Msg response;
+    auto thingie = client->streamEcho(&ctx);
+    Msg hello;
+    hello.set_counter(1);
+    hello.set_data("Hello World!");
+    thingie->Write(hello);
+    thingie->Read(&response);
+    thingie->WritesDone();
+
+    // Our server should have replied.
+    EXPECT_EQ(1, response.counter());
+
+    // Now let's just cancel the whole thing.
+    ctx.TryCancel();
+
+    // Give our server a chance to close down.
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    EXPECT_EQ(1, mEchoService->invocations());
 }
 
 }  // namespace control

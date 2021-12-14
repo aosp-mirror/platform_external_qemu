@@ -19,7 +19,6 @@
 #include <GLES/glext.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
-#include <OpenglCodecCommon/ErrorLog.h>
 
 
 bool  GLESvalidate::textureEnum(GLenum e,unsigned int maxTex) {

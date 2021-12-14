@@ -25,6 +25,8 @@
 #include <string>
 #include <vector>
 
+#include "android/utils/GfxstreamFatalError.h"
+
 #ifdef _WIN32
 const void* memmem(const void* haystack, size_t haystackLen,
                    const void* needle, size_t needleLen) {
@@ -126,7 +128,7 @@ void splitTokens(const std::string& input,
 
 #define CHECK_NE(a, b) \
     if ((a) == (b))    \
-        abort();
+        GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER));
 
 std::vector<std::string> Split(const std::string& s,
                                const std::string& delimiters) {

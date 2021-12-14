@@ -23,7 +23,7 @@ import "google/protobuf/empty.proto";
 // A simplistic echo service that can be used by unit tests to validate
 // some of the grpc behavior.
 service TestEcho {
-  rpc streamEcho(Msg) returns (stream Msg) {}
+  rpc streamEcho(stream Msg) returns (stream Msg) {}
   rpc echo(Msg) returns (Msg) {}
   rpc data(google.protobuf.Empty) returns (Msg) {}
   rpc streamData(google.protobuf.Empty) returns (stream Msg) {}

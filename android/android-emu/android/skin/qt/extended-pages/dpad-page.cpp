@@ -18,7 +18,10 @@
 #include <stddef.h>                                 // for NULL
 #include <QAbstractButton>                          // for QAbstractButton
 #include <QBitmap>                                  // for QBitmap
+#if QT_VERSION >= 0x060000
+#else
 #include <QDesktopWidget>                           // for QDesktopWidget
+#endif  // QT_VERSION
 #include <QEvent>                                   // for QEvent
 #include <QHash>                                    // for QHash
 #include <QIcon>                                    // for QIcon
@@ -148,7 +151,12 @@ void DPadPage::remaskButtons() {
                 mask_scale *= dpr;
             }
 #endif
+#if QT_VERSION >= 0x060000
+            button->setMask(QBitmap::fromPixmap(
+                    mask_pixmap.mask().scaled(mask_pixmap.size() * mask_scale)));
+#else
             button->setMask(mask_pixmap.mask().scaled(mask_pixmap.size() * mask_scale));
+#endif
             button->setStyleSheet("border: none;");
         }
     }

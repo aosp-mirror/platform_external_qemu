@@ -16,7 +16,7 @@
       "request": "launch",
       "program": "${command:cmake.launchTargetPath}",
       "args": ["--gtest_break_on_failure"],
-      "stopAtEntry": true,
+      "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [
         {
@@ -68,9 +68,11 @@
         //"--emulator" ,"localhost:9554" ,"--fwd", "--adb", "7555"
 
         // "--verbose"
+        "--port", "13121",
+        "--gtest_filter=GrpcServiceTest.AsyncBidiServerWorks",
         // "--gtest_repeat=-1",
         // // "--gtest_break_on_failure",
-        "--gtest_filter=ElfImageReader.MainExecutableChild"
+        // "--gtest_filter=GrpcServiceTest.AsyncBidiServerWorks"
         // "--benchmark_filter=BM_cnv.*"
       ],
       "env": {

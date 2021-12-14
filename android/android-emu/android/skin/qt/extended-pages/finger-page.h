@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <QByteArrayData>    // for Q_OBJECT, slots
+#include <QObject>           // for Q_OBJECT, slots
 #include <QString>           // for QString
 #include <QWidget>           // for QWidget
 #include <memory>            // for shared_ptr, unique_ptr
