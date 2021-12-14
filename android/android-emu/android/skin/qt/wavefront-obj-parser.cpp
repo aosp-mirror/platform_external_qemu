@@ -14,8 +14,11 @@
 #include <qloggingcategory.h>                  // for qCWarning
 #include <qstring.h>                           // for QString::SkipEmptyParts
 #include <qtextstream.h>                       // for QTextStream::Ok, QText...
+#if QT_VERSION >= 0x060000
+#else
 #include <QChar>                               // for QChar
 #include <QCharRef>                            // for QCharRef
+#endif
 #include <QList>                               // for QList
 #include <QString>                             // for QString
 #include <QStringList>                         // for QStringList
@@ -94,7 +97,11 @@ bool parseWavefrontOBJ(QTextStream& stream,
             size_t vp, vt, vn;
             for (size_t i = 0; i < 3; i++) {
                 stream >> v;
+#if QT_VERSION >= 0x060000
+                QStringList components = v.split('/', Qt::SkipEmptyParts);
+#else
                 QStringList components = v.split('/', QString::SkipEmptyParts);
+#endif  // QT_VERSION
                 if (components.size() != 3) {
                     qCWarning(emu, "OBJ parser: invalid face specification");
                     return false;

@@ -61,7 +61,10 @@ class SkinSurfaceBitmap;
 
 using RunOnUiThreadFunc = std::function<void()>;
 Q_DECLARE_METATYPE(QPainter::CompositionMode);
+#if QT_VERSION >= 0x060000
+#else
 Q_DECLARE_METATYPE(RunOnUiThreadFunc);
+#endif
 Q_DECLARE_METATYPE(SkinGenericFunction);
 Q_DECLARE_METATYPE(SkinRotation);
 Q_DECLARE_METATYPE(Ui::OverlayMessageType);
@@ -228,11 +231,19 @@ public:
     void resizeAndChangeAspectRatio(bool isFolded);
     void resizeAndChangeAspectRatio(int x, int y, int w, int h,
                                     bool ignoreOrientation = false);
+#if QT_VERSION >= 0x060000
+    void handleMouseEvent(SkinEventType type,
+                          SkinMouseButtonType button,
+                          const QPointF& pos,
+                          const QPointF& gPos,
+                          bool skipSync = false);
+#else
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
                           const QPoint& pos,
                           const QPoint& gPos,
                           bool skipSync = false);
+#endif  // QT_VERSION
     void handlePenEvent(SkinEventType type,
                         const QTabletEvent* event,
                         bool skipSync = false);
@@ -550,7 +561,11 @@ private:
 
     bool mIgnoreWheelEvent = false;
     QTimer mWheelScrollTimer;
+#if QT_VERSION >= 0x060000
+    QPointF mWheelScrollPos;
+#else
     QPoint mWheelScrollPos;
+#endif  // QT_VERSION
     bool mStartedAdbStopProcess;
 
     bool         mFrameAlways;       // true = no floating emulator

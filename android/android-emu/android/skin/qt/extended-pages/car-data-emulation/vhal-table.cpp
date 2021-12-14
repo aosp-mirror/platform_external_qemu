@@ -399,8 +399,12 @@ const std::vector<int32_t>* VhalTable::getUserInt32VecValue(
         carpropertyutils::PropertyDescription propDesc,
         QString oldValueString,
         bool* pressedOk) {
-    QStringList valueStringList= oldValueString.split("; ");
+    QStringList valueStringList = oldValueString.split("; ");
+#if QT_VERSION >= 0x060000
+    QSet<QString> oldStringSet(valueStringList.constBegin(), valueStringList.constEnd());
+#else
     QSet<QString> oldStringSet = QSet<QString>::fromList(valueStringList);
+#endif
 
     if (propDesc.lookupTable != nullptr) {
         CheckboxDialog checkboxDialog(this, propDesc.lookupTable, &oldStringSet, propDesc.label);
