@@ -554,8 +554,8 @@ void EmulatorContainer::adjustModalOverlayGeometry() {
     auto overlaySize = QSize(std::min(300, width()), std::min(300, height()));
     mModalOverlay->resize(overlaySize, size());
     mModalOverlay->move(
-            mapToGlobal({(width() - mModalOverlay->width()) / 2,
-                         (height() - mModalOverlay->height()) / 2}));
+            mapToGlobal(QPoint((width() - mModalOverlay->width()) / 2,
+                         (height() - mModalOverlay->height()) / 2)));
 }
 
 void EmulatorContainer::adjustVirtualSceneDialogGeometry() {
@@ -565,8 +565,8 @@ void EmulatorContainer::adjustVirtualSceneDialogGeometry() {
 
     mVirtualSceneInfo->resize(size());
     mVirtualSceneInfo->move(
-            mapToGlobal({(width() - mVirtualSceneInfo->width()) / 2,
-                         (height() - mVirtualSceneInfo->height()) / 2}));
+            mapToGlobal(QPoint((width() - mVirtualSceneInfo->width()) / 2,
+                         (height() - mVirtualSceneInfo->height()) / 2)));
 }
 
 void EmulatorContainer::adjustMessagesOverlayGeometry() {
@@ -580,5 +580,5 @@ void EmulatorContainer::adjustMessagesOverlayGeometry() {
                                          (width() - 2 * 150 * scaleFactor)));
     mMessages->setFixedWidth(w);
     mMessages->adjustSize();
-    mMessages->move(mapToGlobal({}) += {(width() - mMessages->width()) / 2, 0});
+    mMessages->move(mapToGlobal(QPoint()) += {(width() - mMessages->width()) / 2, 0});
 }

@@ -56,11 +56,18 @@ using grpc::Service;
 // and properly releasing resources.
 class EmulatorControllerServiceImpl : public EmulatorControllerService {
 public:
+
+    ~EmulatorControllerServiceImpl() {
+        stop();
+    }
+
     void stop() override {
+        LOG(INFO) << "Shutting down gRPC endpoint";
         auto deadline = std::chrono::system_clock::now() +
                         std::chrono::milliseconds(500);
         mServer->Shutdown(deadline);
 
+        VERBOSE_PRINT(grpc, "Taking down server queues");
         // Shutdown the completion queues.
         void* ignored_tag;
         bool ignored_ok;
@@ -86,12 +93,16 @@ public:
     void wait() override { mServer->Wait(); }
 
     // Returns a new completionQueue if possible.
-    ServerCompletionQueue* newCompletionQueue() override {
-        if (queueidx == mCompletionQueues.size()) {
+    std::vector<ServerCompletionQueue*> newCompletionQueue(size_t nr)  override {
+        if (queueidx + nr  > mCompletionQueues.size()) {
             LOG(ERROR) << "Too many queues requested, no new queues available";
-            return nullptr;
+            return {};
         }
-        return mCompletionQueues[queueidx++].get();
+        std::vector<ServerCompletionQueue*> queues;
+        for(int i = 0; i < nr; i++) {
+            queues.push_back(mCompletionQueues[queueidx++].get());
+        }
+        return queues;
     }
 
 private:

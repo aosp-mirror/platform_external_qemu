@@ -41,6 +41,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/utils/debug.h"
+#include "android/utils/GfxstreamFatalError.h"
 
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/feature_control.h"
@@ -195,8 +196,7 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
     int n;
     if (!s_egl.eglChooseConfig(p_dpy, configAttribs, &config, 1, &n) ||
         n == 0) {
-        GL_LOG("Could not find GLES 2.x config!", __FUNCTION__);
-        ERR("%s: Could not find GLES 2.x config!\n", __FUNCTION__);
+        ERR("Could not find GLES 2.x config!");
         return NULL;
     }
 
@@ -204,23 +204,20 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
 
     surface = s_egl.eglCreatePbufferSurface(p_dpy, config, pbufAttribs);
     if (surface == EGL_NO_SURFACE) {
-        GL_LOG("Could not create GLES 2.x Pbuffer!");
-        ERR("%s: Could not create GLES 2.x Pbuffer!\n", __FUNCTION__);
+        ERR("Could not create GLES 2.x Pbuffer!");
         return NULL;
     }
 
     EGLContext ctx = s_egl.eglCreateContext(p_dpy, config, EGL_NO_CONTEXT,
                                             getGlesMaxContextAttribs());
     if (ctx == EGL_NO_CONTEXT) {
-        GL_LOG("Could not create GLES 2.x Context!");
-        ERR("%s: Could not create GLES 2.x Context!\n", __FUNCTION__);
+        ERR("Could not create GLES 2.x Context!");
         s_egl.eglDestroySurface(p_dpy, surface);
         return NULL;
     }
 
     if (!s_egl.eglMakeCurrent(p_dpy, surface, surface, ctx)) {
-        GL_LOG("Could not make GLES 2.x context current!");
-        ERR("%s: Could not make GLES 2.x context current!\n", __FUNCTION__);
+        ERR("Could not make GLES 2.x context current!");
         s_egl.eglDestroySurface(p_dpy, surface);
         s_egl.eglDestroyContext(p_dpy, ctx);
         return NULL;
@@ -232,10 +229,7 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
 
     // It is rare but some drivers actually fail this...
     if (!s_egl.eglMakeCurrent(p_dpy, NULL, NULL, NULL)) {
-        GL_LOG("Could not unbind context. Please try updating graphics card driver!");
-        ERR("%s: Could not unbind context. Please try updating graphics card "
-            "driver!\n",
-            __FUNCTION__);
+        ERR("Could not unbind context. Please try updating graphics card driver!");
         free(extString);
         extString = NULL;
     }
@@ -400,7 +394,6 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         return false;
     }
 
-    DBG("egl: %d %d\n", fb->m_caps.eglMajor, fb->m_caps.eglMinor);
     GL_LOG("egl: %d %d", fb->m_caps.eglMajor, fb->m_caps.eglMinor);
     s_egl.eglBindAPI(EGL_OPENGL_ES_API);
 
@@ -417,15 +410,12 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     int glesMaj, glesMin;
     emugl::getGlesVersion(&glesMaj, &glesMin);
 
-    DBG("gles version: %d %d\n", glesMaj, glesMin);
     GL_LOG("gles version: %d %d\n", glesMaj, glesMin);
 
     fb->m_asyncReadbackSupported = glesMaj > 2;
     if (fb->m_asyncReadbackSupported) {
-        DBG("Async readback supported\n");
         GL_LOG("Async readback supported");
     } else {
-        DBG("Async readback not supported\n");
         GL_LOG("Async readback not supported");
     }
 
@@ -448,8 +438,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
             getGLES2ExtensionString(fb->m_eglDisplay));
     if (!gles2Extensions) {
         // Could not create GLES2 context - drop GL2 capability
-        GL_LOG("Failed to obtain GLES 2.x extensions string!");
-        ERR("Failed to obtain GLES 2.x extensions string!\n");
+        ERR("Failed to obtain GLES 2.x extensions string!");
         return false;
     }
 
@@ -505,8 +494,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     fb->m_eglContext = s_egl.eglCreateContext(fb->m_eglDisplay, fb->m_eglConfig,
                                               EGL_NO_CONTEXT, getGlesMaxContextAttribs());
     if (fb->m_eglContext == EGL_NO_CONTEXT) {
-        GL_LOG("Failed to create context 0x%x", s_egl.eglGetError());
-        ERR("Failed to create context 0x%x\n", s_egl.eglGetError());
+        ERR("Failed to create context 0x%x", s_egl.eglGetError());
         return false;
     }
 
@@ -523,8 +511,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
             s_egl.eglCreateContext(fb->m_eglDisplay, fb->m_eglConfig,
                                    fb->m_eglContext, getGlesMaxContextAttribs());
     if (fb->m_pbufContext == EGL_NO_CONTEXT) {
-        GL_LOG("Failed to create Pbuffer Context 0x%x", s_egl.eglGetError());
-        ERR("Failed to create Pbuffer Context 0x%x\n", s_egl.eglGetError());
+        ERR("Failed to create Pbuffer Context 0x%x", s_egl.eglGetError());
         return false;
     }
 
@@ -539,8 +526,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     fb->m_pbufSurface = s_egl.eglCreatePbufferSurface(
             fb->m_eglDisplay, fb->m_eglConfig, pbufAttribs);
     if (fb->m_pbufSurface == EGL_NO_SURFACE) {
-        GL_LOG("Failed to create pbuf surface for FB 0x%x", s_egl.eglGetError());
-        ERR("Failed to create pbuf surface for FB 0x%x\n", s_egl.eglGetError());
+        ERR("Failed to create pbuf surface for FB 0x%x", s_egl.eglGetError());
         return false;
     }
 
@@ -548,8 +534,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     // Make the context current
     ScopedBind bind(fb->m_colorBufferHelper);
     if (!bind.isOk()) {
-        GL_LOG("Failed to make current");
-        ERR("Failed to make current\n");
+        ERR("Failed to make current");
         return false;
     }
     GL_LOG("context-current successful");
@@ -581,8 +566,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     //     GL_OES_EGL_IMAGE (by both GLES implementations [1 and 2])
     //
     if (!fb->m_caps.has_eglimage_texture_2d) {
-        GL_LOG("Failed: Missing egl_image related extension(s)");
-        ERR("Failed: Missing egl_image related extension(s)\n");
+        ERR("Failed: Missing egl_image related extension(s)");
         return false;
     }
 
@@ -592,8 +576,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     //
     fb->m_configs = new FbConfigList(fb->m_eglDisplay);
     if (fb->m_configs->empty()) {
-        GL_LOG("Failed: Initialize set of configs");
-        ERR("Failed: Initialize set of configs\n");
+        ERR("Failed: Initialize set of configs");
         return false;
     }
 
@@ -621,8 +604,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     // If no configs at all, exit
     //
     if (nGLConfigs + nGL2Configs == 0) {
-        GL_LOG("Failed: No GLES 2.x configs found!");
-        ERR("Failed: No GLES 2.x configs found!\n");
+        ERR("Failed: No GLES 2.x configs found!");
         return false;
     }
 
@@ -678,19 +660,13 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         }
     }
 
-    s_gles2.glGetError();
-
-    DBG("GL Vendor %s\n", fb->m_glVendor.c_str());
-    DBG("GL Renderer %s\n", fb->m_glRenderer.c_str());
-    DBG("GL Extensions %s\n", fb->m_glVersion.c_str());
     GL_LOG("GL Vendor %s", fb->m_glVendor.c_str());
     GL_LOG("GL Renderer %s", fb->m_glRenderer.c_str());
     GL_LOG("GL Extensions %s", fb->m_glVersion.c_str());
 
     fb->m_textureDraw = new TextureDraw();
     if (!fb->m_textureDraw) {
-        GL_LOG("Failed: creation of TextureDraw instance");
-        ERR("Failed: creation of TextureDraw instance\n");
+        ERR("Failed: creation of TextureDraw instance");
         return false;
     }
 
@@ -702,11 +678,14 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         }
     }
 
+    GL_LOG("interop? %d", fb->m_vulkanInteropSupported);
     // TODO: 0-copy gl interop on swiftshader vk
     if (System::get()->envGet("ANDROID_EMU_VK_ICD") == "swiftshader") {
         fb->m_vulkanInteropSupported = false;
+        GL_LOG("vk icd swiftshader, disable interop");
     }
 
+    GL_LOG("glvk interop final: %d", fb->m_vulkanInteropSupported);
     goldfish_vk::setGlInteropSupported(fb->m_vulkanInteropSupported);
 
     // Start the vsync thread
@@ -750,7 +729,7 @@ bool FrameBuffer::importMemoryToColorBuffer(
     ColorBufferMap::iterator c(m_colorbuffers.find(colorBufferHandle));
     if (c == m_colorbuffers.end()) {
         // bad colorbuffer handle
-        ERR("FB: importMemoryToColorBuffer cb handle %#x not found\n", colorBufferHandle);
+        ERR("FB: importMemoryToColorBuffer cb handle %#x not found", colorBufferHandle);
         return false;
     }
 
@@ -766,7 +745,7 @@ void FrameBuffer::setColorBufferInUse(
     ColorBufferMap::iterator c(m_colorbuffers.find(colorBufferHandle));
     if (c == m_colorbuffers.end()) {
         // bad colorbuffer handle
-        ERR("FB: setColorBufferInUse cb handle %#x not found\n", colorBufferHandle);
+        ERR("FB: setColorBufferInUse cb handle %#x not found", colorBufferHandle);
         return;
     }
 
@@ -914,7 +893,9 @@ FrameBuffer::postWorkerFunc(const Post& post) {
 
 void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
 #ifdef __APPLE__
-    bool postOnlyOnMainThread = m_subWin && (emugl::getRenderer() == SELECTED_RENDERER_HOST);
+    bool postOnlyOnMainThread = m_subWin &&
+        ((emugl::getRenderer() == SELECTED_RENDERER_HOST) ||
+            (emugl::getRenderer() == SELECTED_RENDERER_ANGLE_INDIRECT));
 #else
     bool postOnlyOnMainThread = false;
 #endif
@@ -1195,8 +1176,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
 
 bool FrameBuffer::removeSubWindow() {
     if (!m_useSubWindow) {
-        ERR("%s: Cannot remove native sub-window in this configuration\n",
-            __FUNCTION__);
+        ERR("Cannot remove native sub-window in this configuration");
         return false;
     }
     AutoLock lock(sGlobals->lock);
@@ -1209,8 +1189,7 @@ bool FrameBuffer::removeSubWindow() {
 
 bool FrameBuffer::removeSubWindow_locked() {
     if (!m_useSubWindow) {
-        ERR("%s: Cannot remove native sub-window in this configuration\n",
-            __FUNCTION__);
+        ERR("Cannot remove native sub-window in this configuration");
         return false;
     }
     bool removed = false;
@@ -1322,7 +1301,7 @@ HandleType FrameBuffer::createColorBufferWithHandleLocked(
         }
     } else {
         handle = 0;
-        DBG("Create color buffer failed.\n");
+        ERR("Create color buffer failed.\n");
     }
     return handle;
 }
@@ -1347,13 +1326,13 @@ HandleType FrameBuffer::createBufferWithHandleLocked(int p_size,
     if (m_colorbuffers.count(handle) != 0) {
         emugl::emugl_crash_reporter(
                 "FATAL: color buffer with handle %u already exists", handle);
-        abort();
+        GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER));
     }
 
     if (m_buffers.count(handle) != 0) {
         emugl::emugl_crash_reporter(
                 "FATAL: buffer with handle %u already exists", handle);
-        abort();
+        GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER));
     }
 
     BufferPtr buffer(Buffer::create(p_size, handle));
@@ -1362,7 +1341,7 @@ HandleType FrameBuffer::createBufferWithHandleLocked(int p_size,
         m_buffers[handle] = {std::move(buffer)};
     } else {
         handle = 0;
-        DBG("Create buffer failed.\n");
+        ERR("Create buffer failed.\n");
     }
     return handle;
 }
@@ -1579,7 +1558,7 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
         // bad colorbuffer handle
-        ERR("FB: openColorBuffer cb handle %#x not found\n", p_colorbuffer);
+        ERR("FB: openColorBuffer cb handle %#x not found", p_colorbuffer);
         return -1;
     }
 
@@ -1634,7 +1613,7 @@ void FrameBuffer::closeBuffer(HandleType p_buffer) {
     AutoLock mutex(m_lock);
 
     if (m_buffers.find(p_buffer) == m_buffers.end()) {
-        ERR("closeColorBuffer: cannot find buffer %u\n",
+        ERR("closeColorBuffer: cannot find buffer %u",
             static_cast<uint32_t>(p_buffer));
     } else {
         goldfish_vk::teardownVkBuffer(p_buffer);
@@ -1866,7 +1845,7 @@ bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface) {
 
     WindowSurfaceMap::iterator w(m_windows.find(p_surface));
     if (w == m_windows.end()) {
-        ERR("FB::flushWindowSurfaceColorBuffer: window handle %#x not found\n",
+        ERR("FB::flushWindowSurfaceColorBuffer: window handle %#x not found",
             p_surface);
         // bad surface handle
         return false;
@@ -1895,13 +1874,13 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
     WindowSurfaceMap::iterator w(m_windows.find(p_surface));
     if (w == m_windows.end()) {
         // bad surface handle
-        ERR("%s: bad window surface handle %#x\n", __FUNCTION__, p_surface);
+        ERR("bad window surface handle %#x", p_surface);
         return false;
     }
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
-        DBG("%s: bad color buffer handle %#x\n", __FUNCTION__, p_colorbuffer);
+        ERR("bad color buffer handle %#x", p_colorbuffer);
         // bad colorbuffer handle
         return false;
     }
@@ -2261,7 +2240,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
                               draw ? draw->getEGLSurface() : EGL_NO_SURFACE,
                               read ? read->getEGLSurface() : EGL_NO_SURFACE,
                               ctx ? ctx->getEGLContext() : EGL_NO_CONTEXT)) {
-        ERR("eglMakeCurrent failed\n");
+        ERR("eglMakeCurrent failed");
         return false;
     }
 
@@ -2382,7 +2361,7 @@ bool FrameBuffer::bind_locked() {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_pbufSurface, m_pbufSurface,
                                   m_pbufContext)) {
             if (!m_shuttingDown)
-                ERR("eglMakeCurrent failed\n");
+                ERR("eglMakeCurrent failed");
             return false;
         }
     } else {
@@ -2404,7 +2383,7 @@ bool FrameBuffer::bindSubwin_locked() {
         prevDrawSurf != m_eglSurface) {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface,
                                   m_eglContext)) {
-            ERR("eglMakeCurrent failed in binding subwindow!\n");
+            ERR("eglMakeCurrent failed in binding subwindow!");
             return false;
         }
     }
@@ -2440,7 +2419,7 @@ bool FrameBuffer::bindFakeWindow_locked() {
 
     if (!s_egl.eglMakeCurrent(m_eglDisplay, m_eglFakeWindowSurface,
                               m_eglFakeWindowSurface, m_eglFakeWindowContext)) {
-        ERR("eglMakeCurrent failed in binding fake window!\n");
+        ERR("eglMakeCurrent failed in binding fake window!");
         return false;
     }
     return true;
@@ -2853,11 +2832,9 @@ int FrameBuffer::getScreenshot(unsigned int nChannels,
 
 void FrameBuffer::onLastColorBufferRef(uint32_t handle) {
     if (!mOutstandingColorBufferDestroys.trySend((HandleType)handle)) {
-        fprintf(
-            stderr,
-            "%s: warning: too many outstanding "
-            "color buffer destroys. leaking handle 0x%x\n",
-            __func__, handle);
+        ERR("warning: too many outstanding "
+            "color buffer destroys. leaking handle 0x%x",
+            handle);
     }
 }
 
@@ -2912,7 +2889,7 @@ bool FrameBuffer::compose(uint32_t bufferSize, void* buffer, bool needPost) {
     }
 
     default:
-       fprintf(stderr, "yet to handle composition device version: %d\n", p->version);
+       ERR("yet to handle composition device version: %d", p->version);
        return false;
     }
 }
@@ -3104,7 +3081,7 @@ bool FrameBuffer::onLoad(Stream* stream,
         assert(m_contexts.empty());
         assert(m_windows.empty());
         if (!m_colorbuffers.empty()) {
-            fprintf(stderr, "%s: warning: on load, stale colorbuffers: %zu\n", __func__, m_colorbuffers.size());
+            ERR("warning: on load, stale colorbuffers: %zu", m_colorbuffers.size());
             m_colorbuffers.clear();
         }
         assert(m_colorbuffers.empty());
@@ -3244,11 +3221,9 @@ void FrameBuffer::unregisterProcessCleanupCallback(void* key) {
 
     auto& callbackMap = m_procOwnedCleanupCallbacks[tInfo->m_puid];
     if (callbackMap.find(key) == callbackMap.end()) {
-        fprintf(
-            stderr,
-            "%s: warning: tried to erase nonexistent key %p "
-            "associated with process %llu\n",
-            __func__, key, (unsigned long long)(tInfo->m_puid));
+        ERR("warning: tried to erase nonexistent key %p "
+            "associated with process %llu",
+            key, (unsigned long long)(tInfo->m_puid));
     }
     callbackMap.erase(key);
 }
@@ -3337,8 +3312,7 @@ void FrameBuffer::waitForGpu(uint64_t eglsync) {
     FenceSync* fenceSync = FenceSync::getFromHandle(eglsync);
 
     if (!fenceSync) {
-        fprintf(stderr, "%s: err: fence sync 0x%llx not found\n", __func__,
-                (unsigned long long)eglsync);
+        ERR("err: fence sync 0x%llx not found", (unsigned long long)eglsync);
         return;
     }
 
@@ -3435,14 +3409,14 @@ const int FrameBuffer::getDisplayActiveConfig() {
 
 bool FrameBuffer::platformImportResource(uint32_t handle, uint32_t type, void* resource) {
     if (!resource) {
-        fprintf(stderr, "%s: Error: resource was null\n", __func__);
+        ERR("Error: resource was null");
     }
 
     AutoLock mutex(m_lock);
 
     ColorBufferMap::iterator c(m_colorbuffers.find(handle));
     if (c == m_colorbuffers.end()) {
-        fprintf(stderr, "%s: Error: resource %u not found as a ColorBuffer\n", __func__, handle);
+        ERR("Error: resource %u not found as a ColorBuffer", handle);
         return false;
     }
 
@@ -3452,7 +3426,7 @@ bool FrameBuffer::platformImportResource(uint32_t handle, uint32_t type, void* r
         case RESOURCE_TYPE_EGL_IMAGE:
             return (*c).second.cb->importEglImage(resource);
         default:
-            fprintf(stderr, "%s: Error: unsupported resource type: %u\n", __func__, type);
+            ERR("Error: unsupported resource type: %u", type);
             return false;
     }
 
@@ -3468,7 +3442,7 @@ void* FrameBuffer::platformCreateSharedEglContext(void) {
 
     void* underlyingContext = s_egl.eglGetNativeContextANDROID(m_eglDisplay, context);
     if (!underlyingContext) {
-        fprintf(stderr, "%s: Error: Underlying egl backend could not produce a native EGL context.\n", __func__);
+        ERR("Error: Underlying egl backend could not produce a native EGL context.");
         return nullptr;
     }
 
@@ -3482,7 +3456,7 @@ bool FrameBuffer::platformDestroySharedEglContext(void* underlyingContext) {
 
     auto it = m_platformEglContexts.find(underlyingContext);
     if (it == m_platformEglContexts.end()) {
-        fprintf(stderr, "%s: Error: Could not find underlying egl context %p (perhaps already destroyed?)\n", __func__, underlyingContext);
+        ERR("Error: Could not find underlying egl context %p (perhaps already destroyed?)", underlyingContext);
         return false;
     }
 

@@ -34,7 +34,11 @@
 #include <QPainter>
 #include <QPlainTextEdit>
 #include <QSettings>
+#if QT_VERSION >= 0x060000
+#include <QtWebEngineCore/QWebEngineScriptCollection>
+#else
 #include <QWebEngineScriptCollection>
+#endif  // QT_VERSION
 
 #include <fstream>
 
@@ -79,7 +83,11 @@ bool addJavascriptFromResource(QWebEnginePage* const webEnginePage,
     }
 
     QByteArray jscode = jsFile.readAll();
+#if QT_VERSION >= 0x060000
+    jscode.append(appendString.toUtf8());
+#else
     jscode.append(appendString);
+#endif  // QT_VERSION
     script.setSourceCode(jscode);
     script.setName(scriptName);
     script.setWorldId(QWebEngineScript::MainWorld);

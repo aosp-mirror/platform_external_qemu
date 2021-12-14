@@ -124,7 +124,8 @@ android_target_link_libraries(android-emu-base windows_msvc-x86_64
                               PUBLIC dirent-win32)
 
 # Anyone who takes a dependency gets to use our header files.
-target_include_directories(android-emu-base PUBLIC .)
+target_include_directories(android-emu-base
+                           PUBLIC . ../android-emugl/host/include)
 
 # Library dependencies, these are public so they will propagate, if you link
 # against the base you will link against LZ4 & UUID

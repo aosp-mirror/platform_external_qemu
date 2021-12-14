@@ -29,7 +29,11 @@
 #include <QByteArray>                                     // for QByteArray
 #include <QClipboard>                                     // for QClipboard
 #include <QCloseEvent>                                    // for QCloseEvent
+#if QT_VERSION >= 0x060000
+#include <QWindow>                                        // for QWindow
+#else
 #include <QDesktopWidget>                                 // for QDesktopWidget
+#endif  // QT_VERSION
 #include <QEvent>                                         // for QEvent
 #include <QFlags>                                         // for QFlags
 #include <QFrame>                                         // for QFrame
@@ -106,7 +110,10 @@ class QPaintEvent;
 class QPushButton;
 class QScreen;
 class QWidget;
+#if QT_VERSION >= 0x060000
+#else
 template <typename T> class QVector;
+#endif  // QT_VERSION
 
 
 namespace {
@@ -932,8 +939,13 @@ bool ToolWindow::handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source) {
 
     // We don't care about the keypad modifier for anything, and it gets added
     // to the arrow keys of OSX by default, so remove it.
+#if QT_VERSION >= 0x060000
+    QKeySequence event_key_sequence(event->key() |
+                                    (event->modifiers() & ~Qt::KeypadModifier));
+#else
     QKeySequence event_key_sequence(event->key() +
                                     (event->modifiers() & ~Qt::KeypadModifier));
+#endif  // QT_VERSION
     bool down = event->type() == QEvent::KeyPress;
     bool h = mShortcutKeyStore.handle(event_key_sequence,
                                       [this, down](QtUICommand cmd) {
@@ -1400,6 +1412,13 @@ void ToolWindow::paintEvent(QPaintEvent*) {
     p.setPen(pen);
 
     double dpr = 1.0;
+#if QT_VERSION >= 0x060000
+    auto newScreen = window()->windowHandle()->screen();
+    if (!newScreen) {
+        newScreen = qGuiApp->primaryScreen();
+    }
+    dpr = newScreen->devicePixelRatio();
+#else
     int primary_screen_idx = qApp->desktop()->screenNumber(this);
     if (primary_screen_idx < 0) {
         primary_screen_idx = qApp->desktop()->primaryScreen();
@@ -1411,6 +1430,7 @@ void ToolWindow::paintEvent(QPaintEvent*) {
             dpr = primary_screen->devicePixelRatio();
         }
     }
+#endif  // QT_VERSION
 
     if (dpr > 1.0) {
         // Normally you'd draw the border with a (0, 0, w-1, h-1) rectangle.

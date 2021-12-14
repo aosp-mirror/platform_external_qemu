@@ -345,6 +345,9 @@ message PhysicalModelValue {
     // Ambient RGBC light intensity. Values are in order (Red, Green, Blue,
     // Clear).
     RGBC_LIGHT = 18;
+
+    // Wrist tilt gesture (1 = gaze, 0 = ungaze)
+    WRIST_TILT = 19;
   }
   PhysicalType target = 1;
 
@@ -404,6 +407,8 @@ message SensorValue {
     // Measures the ambient RGBC light intensity.
     // Values are in order (Red, Green, Blue, Clear).
     RGBC_LIGHT = 15;
+    // WIRST_TILT (16) is skipped; clients should use get/setPhysicalModel()
+    // instead.
   }
 
   // Type of sensor

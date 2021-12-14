@@ -58,7 +58,7 @@ public:
     // are configured with the builder.
     //
     // The service will return a nullptr when no more queue's are available.
-    virtual ServerCompletionQueue* newCompletionQueue() = 0;
+    virtual std::vector<ServerCompletionQueue*> newCompletionQueue(size_t nr) = 0;
 };
 
 // A Factory class that is capable of constructing a proper gRPC service that

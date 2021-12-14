@@ -348,13 +348,22 @@ android_add_library(
   LINUX ${emulator-libui_linux-x86_64_src}
   MSVC ${emulator-libui_windows_msvc-x86_64_src})
 
+if (DARWIN_AARCH64 AND QTWEBENGINE)
+  set(QT_MAJOR_VERSION 6)
+else()
+  set(QT_MAJOR_VERSION 5)
+endif()
+
 # TODO: Remove this and the "USE_WEBENGINE" defines once we have: --no-window
 # mode has no dependency on Qt
 if(QTWEBENGINE)
   target_compile_definitions(emulator-libui PRIVATE "-DUSE_WEBENGINE")
   target_link_libraries(
-    emulator-libui PRIVATE Qt5::Network Qt5::WebEngineWidgets Qt5::WebChannel
-                           Qt5::WebSockets)
+    emulator-libui PRIVATE Qt${QT_MAJOR_VERSION}::Network Qt${QT_MAJOR_VERSION}::WebEngineWidgets Qt${QT_MAJOR_VERSION}::WebChannel
+                           Qt${QT_MAJOR_VERSION}::WebSockets)
+  if(QT_MAJOR_VERSION EQUAL 6)
+    target_link_libraries(emulator-libui PRIVATE Qt${QT_MAJOR_VERSION}::WebEngineCore)
+  endif()
 endif()
 
 if(NOT BUILDING_FOR_AARCH64)
@@ -388,13 +397,18 @@ target_link_libraries(
   PRIVATE android-emu
           emulator-libyuv
           FFMPEG::FFMPEG
-          Qt5::Core
-          Qt5::Widgets
-          Qt5::Gui
-          Qt5::Svg
+          Qt${QT_MAJOR_VERSION}::Core
+          Qt${QT_MAJOR_VERSION}::Widgets
+          Qt${QT_MAJOR_VERSION}::Gui
+          Qt${QT_MAJOR_VERSION}::Svg
           zlib
           android-hw-config)
 
+if (QT_MAJOR_VERSION EQUAL 6)
+  target_link_libraries(
+    emulator-libui
+    PRIVATE Qt${QT_MAJOR_VERSION}::SvgWidgets)
+endif()
 # gl-widget.cpp needs to call XInitThreads() directly to work around a Qt bug.
 # This implies a direct dependency to libX11.so
 android_target_link_libraries(emulator-libui linux-x86_64 PRIVATE -lX11)

@@ -34,7 +34,10 @@ class QCloseEvent;
 class QObject;
 class QShowEvent;
 class QString;
+#if QT_VERSION >= 0x060000
+#else
 class QStringList;
+#endif  // QT_VERSION
 class QTreeWidget;
 class QWidget;
 namespace emulator_snapshot {

@@ -3884,9 +3884,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
 #endif
             default:
             {
-                fprintf(stderr, "Fatal, unrecognized opcode %u\n", opcode);
-                abort();
-                return ptr - (unsigned char *)buf;
+                GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER)) << "Unrecognized opcode " << opcode;
             }
         }
         ++count; if (count % 1000 == 0) { pool->freeAll(); };

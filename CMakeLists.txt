@@ -127,6 +127,9 @@ endif()
 
 if(BUILDING_FOR_AARCH64)
   set(OPTION_MINBUILD TRUE)
+endif()
+
+if (LINUX_AARCH64)
   set(QTWEBENGINE FALSE)
 endif()
 
@@ -484,11 +487,10 @@ endif()
 
 if(WINDOWS_MSVC_X86_64)
   set(ANGLE_RENDERER_DEPENDENCIES
-      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/windows-x86_64/lib/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
-      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/windows-x86_64/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
+      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
+      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/windows-x86_64/lib/d3dcompiler_47${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/d3dcompiler_47${CMAKE_SHARED_LIBRARY_SUFFIX}"
   )
-
   # Angle executables licensing information.
   android_license(
     TARGET ANGLE_RENDERER_DEPENDENCIES
@@ -497,6 +499,25 @@ if(WINDOWS_MSVC_X86_64)
       "gles_angle/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
       "gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
       "gles_angle/d3dcompiler_47${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    URL "https://chromium.googlesource.com/angle/angle"
+    SPDX "BSD-3-Clause"
+    LICENSE "https://chromium.googlesource.com/angle/angle/LICENSE"
+    LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.ANGLE")
+
+endif()
+
+if(DARWIN_X86_64)
+  set(ANGLE_RENDERER_DEPENDENCIES
+      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
+      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
+  )
+  # Angle executables licensing information.
+  android_license(
+    TARGET ANGLE_RENDERER_DEPENDENCIES
+    LIBNAME angle-renderer
+    EXECUTABLES
+      "gles_angle/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
+      "gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
     URL "https://chromium.googlesource.com/angle/angle"
     SPDX "BSD-3-Clause"
     LICENSE "https://chromium.googlesource.com/angle/angle/LICENSE"

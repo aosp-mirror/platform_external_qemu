@@ -23,8 +23,6 @@
 #include "emugl/common/logging.h"
 #include "emugl/common/shared_library.h"
 
-#include "OpenglCodecCommon/ErrorLog.h"
-
 #ifdef __linux__
 #include <GL/glx.h>
 #elif defined(WIN32)

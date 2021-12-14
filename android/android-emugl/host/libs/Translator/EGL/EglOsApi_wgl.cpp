@@ -24,8 +24,6 @@
 #include "emugl/common/thread_store.h"
 #include "GLcommon/GLLibrary.h"
 
-#include "OpenglCodecCommon/ErrorLog.h"
-
 #include <windows.h>
 #include <wingdi.h>
 
