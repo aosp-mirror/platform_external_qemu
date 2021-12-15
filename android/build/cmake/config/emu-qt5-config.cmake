@@ -9,6 +9,16 @@
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+# TODO(joshuaduong): Only mac-aarch64 is using Qt6 at the moment. Remove once all platforms use
+# the same version of Qt.
+if(QTWEBENGINE AND (ANDROID_TARGET_TAG MATCHES "darwin-aarch64"))
+  set(QT_VERSION_MAJOR 6)
+  set(QT_VERSION_MINOR 2)
+else()
+  set(QT_VERSION_MAJOR 5)
+  set(QT_VERSION_MINOR 12)
+endif()
+
 # TODO: Remove this once we have -no-window working with absolutely no Qt
 # dependencies
 if(NOT QTWEBENGINE AND ((ANDROID_TARGET_TAG MATCHES "linux-x86_64") OR (ANDROID_TARGET_TAG MATCHES "darwin-x86_64") OR (ANDROID_TARGET_TAG MATCHES "darwin-aarch64")))
@@ -29,21 +39,21 @@ else()
     ABSOLUTE)
 
   # Use the host compatible moc, rcc and uic
-  get_filename_component(
-    HOST_PREBUILT_ROOT
-    "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_HOST_TAG}"
-    ABSOLUTE)
+  if (QTWEBENGINE AND (ANDROID_HOST_TAG MATCHES "darwin-x86_64") AND (ANDROID_TARGET_TAG MATCHES "darwin-aarch64"))
+    # We have Qt6 compiler tools specifically for cross-compiling from darwin-x86_64 to
+    # darwin-aarch64 (with QtWebEngine)
+    get_filename_component(
+      HOST_PREBUILT_ROOT
+      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_HOST_TAG}/qt6"
+      ABSOLUTE)
+  else()
+    get_filename_component(
+      HOST_PREBUILT_ROOT
+      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_HOST_TAG}"
+      ABSOLUTE)
+  endif()
 endif()
 
-# TODO(joshuaduong): Only mac-aarch64 is using Qt6 at the moment. Remove once all platforms use
-# the same version of Qt.
-if(QTWEBENGINE AND (ANDROID_TARGET_TAG MATCHES "darwin-aarch64"))
-  set(QT_VERSION_MAJOR 6)
-  set(QT_VERSION_MINOR 2)
-else()
-  set(QT_VERSION_MAJOR 5)
-  set(QT_VERSION_MINOR 12)
-endif()
 set(CMAKE_AUTOMOC TRUE)
 set(CMAKE_AUTOUIC TRUE)
 set(CMAKE_AUTORCC TRUE)
