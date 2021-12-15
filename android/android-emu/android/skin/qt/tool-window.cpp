@@ -1287,10 +1287,11 @@ void ToolWindow::on_dismiss_resizable_dialog() {
 }
 
 void ToolWindow::on_resizable_button_clicked() {
-    // ChangeIcon(mToolsUi->tablet_mode_button,
-    //            tablet_mode ? "laptop_mode" : "tablet_mode",
-    //            tablet_mode ? "Switch to laptop mode" : "Switch to tablet mode");
     mResizableDialog->show();
+    // Align pop-up resizableDialog to the right of resizable button
+    QRect geoTool = this->geometry();
+    mResizableDialog->move(geoTool.right(),
+                           geoTool.top() + mToolsUi->resizable_button->geometry().top());
 }
 
 void ToolWindow::on_new_resizable_requested(PresetEmulatorSizeType newSize) {
