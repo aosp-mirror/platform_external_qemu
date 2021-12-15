@@ -175,7 +175,11 @@ function(_get_host_tag RET_VAL)
   if(APPLE)
     # arm/x86?
     execute_process(COMMAND uname -m OUTPUT_VARIABLE CPU_ARCH)
-    if(CPU_ARCH MATCHES ".*x86_64.*")
+    # cmake is currently ran under rosetta, which set CPU_ARCH above to x86, even on m1 machines.
+    execute_process(COMMAND sysctl -n sysctl.proc_translated
+                    OUTPUT_VARIABLE IS_ARM_TRANSLATED
+                    RESULT_VARIABLE SYSCTL_RESULT)
+    if(CPU_ARCH MATCHES ".*x86_64.*" AND NOT (SYSCL_RESULT EQUAL 0 AND IS_ARM_TRANSLATED MATCHES "1*"))
       set(${RET_VAL} "darwin-x86_64" PARENT_SCOPE)
     else()
       set(${RET_VAL} "darwin-aarch64" PARENT_SCOPE)
