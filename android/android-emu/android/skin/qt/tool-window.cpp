@@ -1276,6 +1276,12 @@ void ToolWindow::on_change_posture_button_clicked() {
         handleUICommand(QtUICommand::SHOW_PANE_VIRTSENSORS, true);
     }
     mPostureSelectionDialog->show();
+    // Align pop-up posture selction dialog to the right of posture button
+    QRect geoTool = this->geometry();
+    mPostureSelectionDialog->move(geoTool.right(),
+                                  geoTool.top() +
+                                  mToolsUi->change_posture_button->geometry().top());
+
 }
 
 void ToolWindow::on_dismiss_posture_selection_dialog() {
