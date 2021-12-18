@@ -179,7 +179,7 @@ function(_get_host_tag RET_VAL)
     execute_process(COMMAND sysctl -n sysctl.proc_translated
                     OUTPUT_VARIABLE IS_ARM_TRANSLATED
                     RESULT_VARIABLE SYSCTL_RESULT)
-    if(CPU_ARCH MATCHES ".*x86_64.*" AND NOT (SYSCL_RESULT EQUAL 0 AND IS_ARM_TRANSLATED MATCHES "1*"))
+    if(CPU_ARCH MATCHES ".*x86_64.*" AND NOT (SYSCTL_RESULT EQUAL 0 AND IS_ARM_TRANSLATED MATCHES "1*"))
       set(${RET_VAL} "darwin-x86_64" PARENT_SCOPE)
     else()
       set(${RET_VAL} "darwin-aarch64" PARENT_SCOPE)
