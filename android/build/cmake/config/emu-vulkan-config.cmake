@@ -90,6 +90,7 @@ elseif(WINDOWS)
     "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/vulkan/windows-x86_64"
     ABSOLUTE)
   set(VULKAN_DEPENDENCIES
+      "${PREBUILT_ROOT}/icds/vk_swiftshader.dll>lib64/vulkan/vulkan-1.dll"
       # Swiftshader
       "${PREBUILT_ROOT}/icds/vk_swiftshader.dll>lib64/vulkan/vk_swiftshader.dll"
       "${PREBUILT_ROOT}/icds/vk_swiftshader_icd.json>lib64/vulkan/vk_swiftshader_icd.json"
