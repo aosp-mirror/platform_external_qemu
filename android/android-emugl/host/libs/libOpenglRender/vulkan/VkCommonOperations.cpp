@@ -383,6 +383,7 @@ static std::vector<VkEmulation::ImageSupportInfo> getBasicImageSupportList() {
 
         VK_FORMAT_A2R10G10B10_UINT_PACK32,
         VK_FORMAT_A2R10G10B10_UNORM_PACK32,
+        VK_FORMAT_A2B10G10R10_UNORM_PACK32,
 
         // Compressed texture formats
         VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK,
