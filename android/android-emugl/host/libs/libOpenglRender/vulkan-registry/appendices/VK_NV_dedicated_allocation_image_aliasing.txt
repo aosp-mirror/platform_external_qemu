@@ -1,0 +1,30 @@
+// Copyright (c) 2019-2020 NVIDIA Corporation
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_NV_dedicated_allocation_image_aliasing.txt[]
+
+=== Other Extension Metadata
+
+*Last Modified Date*::
+    2019-01-04
+*Contributors*::
+  - Nuno Subtil, NVIDIA
+  - Jeff Bolz, NVIDIA
+  - Eric Werness, NVIDIA
+  - Axel Gneiting, id Software
+
+=== Description
+
+This extension allows applications to alias images on dedicated allocations,
+subject to specific restrictions: the extent and the number of layers in the
+image being aliased must be smaller than or equal to those of the original
+image for which the allocation was created, and every other image parameter
+must match.
+
+include::{generated}/interfaces/VK_NV_dedicated_allocation_image_aliasing.txt[]
+
+=== Version History
+
+  * Revision 1, 2019-01-04 (Nuno Subtil)
+    - Internal revisions

@@ -1,8 +1,10 @@
-// Copyright (c) 2016-2018 Khronos Group. This work is licensed under a
-// Creative Commons Attribution 4.0 International License; see
-// http://creativecommons.org/licenses/by/4.0/
+// Copyright 2016-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
-include::meta/VK_KHR_external_fence_fd.txt[]
+include::{generated}/meta/{refprefix}VK_KHR_external_fence_fd.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2017-05-08
@@ -13,38 +15,24 @@ include::meta/VK_KHR_external_fence_fd.txt[]
   - James Jones, NVIDIA
   - Jeff Juliano, NVIDIA
   - Cass Everitt, Oculus
-  - Contributors to `<<VK_KHR_external_semaphore_fd>>`
+  - Contributors to `apiext:VK_KHR_external_semaphore_fd`
+
+=== Description
 
 An application using external memory may wish to synchronize access to that
 memory using fences.
 This extension enables an application to export fence payload to and import
 fence payload from POSIX file descriptors.
 
-=== New Object Types
-
-None.
-
-=== New Enum Constants
-
-  * ename:VK_STRUCTURE_TYPE_IMPORT_FENCE_FD_INFO_KHR
-  * ename:VK_STRUCTURE_TYPE_FENCE_GET_FD_INFO_KHR
-
-=== New Enums
-
-None.
-
-=== New Structs
-
-  * slink:VkImportFenceFdInfoKHR
-  * slink:VkFenceGetFdInfoKHR
-
-=== New Functions
-
-  * flink:vkImportFenceFdKHR
-  * flink:vkGetFenceFdKHR
+include::{generated}/interfaces/VK_KHR_external_fence_fd.txt[]
 
 === Issues
 
 This extension borrows concepts, semantics, and language from
-`<<VK_KHR_external_semaphore_fd>>`.
+`apiext:VK_KHR_external_semaphore_fd`.
 That extension's issues apply equally to this extension.
+
+=== Version History
+
+  * Revision 1, 2017-05-08 (Jesse Hall)
+    - Initial revision

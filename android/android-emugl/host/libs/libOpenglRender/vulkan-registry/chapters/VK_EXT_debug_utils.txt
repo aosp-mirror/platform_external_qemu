@@ -1,3 +1,7 @@
+// Copyright 2018-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
 [[debugging-debug-utils]]
 == Debug Utilities
 
@@ -18,6 +22,7 @@ The <<debugging-debug-messengers,Debug Messengers>> section describes how to
 create debug messenger objects associated with an application supplied
 callback to capture debug messages from a variety of Vulkan components.
 
+
 [[debugging-object-debug-annotation]]
 === Object Debug Annotation
 
@@ -25,6 +30,7 @@ It can be useful for an application to provide its own content relative to a
 specific Vulkan object.
 The following commands allow application developers to associate
 user-defined information with Vulkan objects.
+
 
 [[debugging-object-naming]]
 ==== Object Naming
@@ -34,52 +40,59 @@ fname:vkSetDebugUtilsObjectNameEXT as defined below.
 
 [open,refpage='vkSetDebugUtilsObjectNameEXT',desc='Give a user-friendly name to an object',type='protos']
 --
-
-include::../api/protos/vkSetDebugUtilsObjectNameEXT.txt[]
+include::{generated}/api/protos/vkSetDebugUtilsObjectNameEXT.txt[]
 
   * pname:device is the device that created the object.
-  * pname:pNameInfo is a pointer to an instance of the
-    slink:VkDebugUtilsObjectNameInfoEXT structure specifying the parameters
-    of the name to set on the object.
+  * pname:pNameInfo is a pointer to a slink:VkDebugUtilsObjectNameInfoEXT
+    structure specifying parameters of the name to set on the object.
 
-include::../validity/protos/vkSetDebugUtilsObjectNameEXT.txt[]
+.Valid Usage
+****
+  * [[VUID-vkSetDebugUtilsObjectNameEXT-pNameInfo-02587]]
+    pname:pNameInfo->objectType must: not be ename:VK_OBJECT_TYPE_UNKNOWN
+  * [[VUID-vkSetDebugUtilsObjectNameEXT-pNameInfo-02588]]
+    pname:pNameInfo->objectHandle must: not be dlink:VK_NULL_HANDLE
+****
 
+include::{generated}/validity/protos/vkSetDebugUtilsObjectNameEXT.txt[]
 --
 
 [open,refpage='VkDebugUtilsObjectNameInfoEXT',desc='Specify parameters of a name to give to an object',type='structs']
 --
-
 The sname:VkDebugUtilsObjectNameInfoEXT structure is defined as:
 
-include::../api/structs/VkDebugUtilsObjectNameInfoEXT.txt[]
+include::{generated}/api/structs/VkDebugUtilsObjectNameInfoEXT.txt[]
 
   * pname:sType is the type of this structure.
-  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:pNext is `NULL` or a pointer to a structure extending this
+    structure.
   * pname:objectType is a elink:VkObjectType specifying the type of the
     object to be named.
   * pname:objectHandle is the object to be named.
-  * pname:pObjectName is a null-terminated UTF-8 string specifying the name
-    to apply to pname:objectHandle.
+  * pname:pObjectName is either `NULL` or a null-terminated UTF-8 string
+    specifying the name to apply to pname:objectHandle.
 
 Applications may: change the name associated with an object simply by
 calling fname:vkSetDebugUtilsObjectNameEXT again with a new string.
-If pname:pObjectName is an empty string, then any previously set name is
-removed.
+If pname:pObjectName is either `NULL` or an empty string, then any
+previously set name is removed.
 
 .Valid Usage
 ****
-  * [[VUID-VkDebugUtilsObjectNameInfoEXT-objectType-01905]]
-    pname:objectType must: not be ename:VK_OBJECT_TYPE_UNKNOWN
-  * [[VUID-VkDebugUtilsObjectNameInfoEXT-objectHandle-01906]]
-    pname:objectHandle must: not be dlink:VK_NULL_HANDLE
-  * [[VUID-VkDebugUtilsObjectNameInfoEXT-objectHandle-01907]]
-    pname:objectHandle must: be a Vulkan object of the type associated with
-    pname:objectType as defined in <<debugging-object-types>>.
+  * [[VUID-VkDebugUtilsObjectNameInfoEXT-objectType-02589]]
+    If pname:objectType is ename:VK_OBJECT_TYPE_UNKNOWN, pname:objectHandle
+    must: not be dlink:VK_NULL_HANDLE
+  * [[VUID-VkDebugUtilsObjectNameInfoEXT-objectType-02590]]
+    If pname:objectType is not ename:VK_OBJECT_TYPE_UNKNOWN,
+    pname:objectHandle must: be dlink:VK_NULL_HANDLE or a valid Vulkan
+    handle of the type associated with pname:objectType as defined in the
+    <<debugging-object-types, `VkObjectType` and Vulkan Handle
+    Relationship>> table
 ****
 
-include::../validity/structs/VkDebugUtilsObjectNameInfoEXT.txt[]
-
+include::{generated}/validity/structs/VkDebugUtilsObjectNameInfoEXT.txt[]
 --
+
 
 [[debugging-object-data-association]]
 ==== Object Data Association
@@ -96,34 +109,31 @@ fname:vkSetDebugUtilsObjectTagEXT as defined below.
 
 [open,refpage='vkSetDebugUtilsObjectTagEXT',desc='Attach arbitrary data to an object',type='protos']
 --
-
-include::../api/protos/vkSetDebugUtilsObjectTagEXT.txt[]
+include::{generated}/api/protos/vkSetDebugUtilsObjectTagEXT.txt[]
 
   * pname:device is the device that created the object.
-  * pname:pTagInfo is a pointer to an instance of the
-    slink:VkDebugUtilsObjectTagInfoEXT structure specifying the parameters
-    of the tag to attach to the object.
+  * pname:pTagInfo is a pointer to a slink:VkDebugUtilsObjectTagInfoEXT
+    structure specifying parameters of the tag to attach to the object.
 
-include::../validity/protos/vkSetDebugUtilsObjectTagEXT.txt[]
-
+include::{generated}/validity/protos/vkSetDebugUtilsObjectTagEXT.txt[]
 --
 
 [open,refpage='VkDebugUtilsObjectTagInfoEXT',desc='Specify parameters of a tag to attach to an object',type='structs']
 --
-
 The sname:VkDebugUtilsObjectTagInfoEXT structure is defined as:
 
-include::../api/structs/VkDebugUtilsObjectTagInfoEXT.txt[]
+include::{generated}/api/structs/VkDebugUtilsObjectTagInfoEXT.txt[]
 
   * pname:sType is the type of this structure.
-  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:pNext is `NULL` or a pointer to a structure extending this
+    structure.
   * pname:objectType is a elink:VkObjectType specifying the type of the
     object to be named.
   * pname:objectHandle is the object to be tagged.
   * pname:tagName is a numerical identifier of the tag.
   * pname:tagSize is the number of bytes of data to attach to the object.
-  * pname:pTag is an array of pname:tagSize bytes containing the data to be
-    associated with the object.
+  * pname:pTag is a pointer to an array of pname:tagSize bytes containing
+    the data to be associated with the object.
 
 The pname:tagName parameter gives a name or identifier to the type of data
 being tagged.
@@ -134,15 +144,13 @@ be used by that implementation.
 ****
   * [[VUID-VkDebugUtilsObjectTagInfoEXT-objectType-01908]]
     pname:objectType must: not be ename:VK_OBJECT_TYPE_UNKNOWN
-  * [[VUID-VkDebugUtilsObjectTagInfoEXT-objectHandle-01909]]
-    pname:objectHandle must: not be dlink:VK_NULL_HANDLE
   * [[VUID-VkDebugUtilsObjectTagInfoEXT-objectHandle-01910]]
-    pname:objectHandle must: be a Vulkan object of the type associated with
-    pname:objectType as defined in <<debugging-object-types>>.
+    pname:objectHandle must: be a valid Vulkan handle of the type associated
+    with pname:objectType as defined in the <<debugging-object-types,
+    `VkObjectType` and Vulkan Handle Relationship>> table
 ****
 
-include::../validity/structs/VkDebugUtilsObjectTagInfoEXT.txt[]
-
+include::{generated}/validity/structs/VkDebugUtilsObjectTagInfoEXT.txt[]
 --
 
 
@@ -166,47 +174,42 @@ flink:vkQueueInsertDebugUtilsLabelEXT.
 
 [open,refpage='vkQueueBeginDebugUtilsLabelEXT',desc='Open a queue debug label region',type='protos']
 --
-
 A queue debug label region is opened by calling:
 
-include::../api/protos/vkQueueBeginDebugUtilsLabelEXT.txt[]
+include::{generated}/api/protos/vkQueueBeginDebugUtilsLabelEXT.txt[]
 
   * pname:queue is the queue in which to start a debug label region.
-  * pname:pLabelInfo is a pointer to an instance of the
-    slink:VkDebugUtilsLabelEXT structure specifying the parameters of the
-    label region to open.
+  * pname:pLabelInfo is a pointer to a slink:VkDebugUtilsLabelEXT structure
+    specifying parameters of the label region to open.
 
-include::../validity/protos/vkQueueBeginDebugUtilsLabelEXT.txt[]
-
+include::{generated}/validity/protos/vkQueueBeginDebugUtilsLabelEXT.txt[]
 --
 
 [open,refpage='VkDebugUtilsLabelEXT',desc='Specify parameters of a label region',type='structs']
 --
-
 The sname:VkDebugUtilsLabelEXT structure is defined as:
 
-include::../api/structs/VkDebugUtilsLabelEXT.txt[]
+include::{generated}/api/structs/VkDebugUtilsLabelEXT.txt[]
 
   * pname:sType is the type of this structure.
-  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
-  * pname:pLabelName is a pointer to a null-terminated UTF-8 string that
-    contains the name of the label.
+  * pname:pNext is `NULL` or a pointer to a structure extending this
+    structure.
+  * pname:pLabelName is a pointer to a null-terminated UTF-8 string
+    containing the name of the label.
   * pname:color is an optional RGBA color value that can be associated with
     the label.
     A particular implementation may: choose to ignore this color value.
     The values contain RGBA values in order, in the range 0.0 to 1.0.
     If all elements in pname:color are set to 0.0 then it is ignored.
 
-include::../validity/structs/VkDebugUtilsLabelEXT.txt[]
-
+include::{generated}/validity/structs/VkDebugUtilsLabelEXT.txt[]
 --
 
 [open,refpage='vkQueueEndDebugUtilsLabelEXT',desc='Close a queue debug label region',type='protos']
 --
-
 A queue debug label region is closed by calling:
 
-include::../api/protos/vkQueueEndDebugUtilsLabelEXT.txt[]
+include::{generated}/api/protos/vkQueueEndDebugUtilsLabelEXT.txt[]
 
   * pname:queue is the queue in which a debug label region should be closed.
 
@@ -220,24 +223,20 @@ flink:vkQueueEndDebugUtilsLabelEXT must: be matched and balanced.
     command prior to the fname:vkQueueEndDebugUtilsLabelEXT on the queue
 ****
 
-include::../validity/protos/vkQueueEndDebugUtilsLabelEXT.txt[]
-
+include::{generated}/validity/protos/vkQueueEndDebugUtilsLabelEXT.txt[]
 --
 
 [open,refpage='vkQueueInsertDebugUtilsLabelEXT',desc='Insert a label into a queue',type='protos']
 --
-
 A single label can be inserted into a queue by calling:
 
-include::../api/protos/vkQueueInsertDebugUtilsLabelEXT.txt[]
+include::{generated}/api/protos/vkQueueInsertDebugUtilsLabelEXT.txt[]
 
   * pname:queue is the queue into which a debug label will be inserted.
-  * pname:pLabelInfo is a pointer to an instance of the
-    slink:VkDebugUtilsLabelEXT structure specifying the parameters of the
-    label to insert.
+  * pname:pLabelInfo is a pointer to a slink:VkDebugUtilsLabelEXT structure
+    specifying parameters of the label to insert.
 
-include::../validity/protos/vkQueueInsertDebugUtilsLabelEXT.txt[]
-
+include::{generated}/validity/protos/vkQueueInsertDebugUtilsLabelEXT.txt[]
 --
 
 
@@ -261,27 +260,23 @@ flink:vkCmdInsertDebugUtilsLabelEXT can: be used as defined below.
 
 [open,refpage='vkCmdBeginDebugUtilsLabelEXT',desc='Open a command buffer debug label region',type='protos']
 --
-
 A command buffer debug label region can be opened by calling:
 
-include::../api/protos/vkCmdBeginDebugUtilsLabelEXT.txt[]
+include::{generated}/api/protos/vkCmdBeginDebugUtilsLabelEXT.txt[]
 
   * pname:commandBuffer is the command buffer into which the command is
     recorded.
-  * pname:pLabelInfo is a pointer to an instance of the
-    slink:VkDebugUtilsLabelEXT structure specifying the parameters of the
-    label region to open.
+  * pname:pLabelInfo is a pointer to a slink:VkDebugUtilsLabelEXT structure
+    specifying parameters of the label region to open.
 
-include::../validity/protos/vkCmdBeginDebugUtilsLabelEXT.txt[]
-
+include::{generated}/validity/protos/vkCmdBeginDebugUtilsLabelEXT.txt[]
 --
 
 [open,refpage='vkCmdEndDebugUtilsLabelEXT',desc='Close a command buffer label region',type='protos']
 --
-
 A command buffer label region can be closed by calling:
 
-include::../api/protos/vkCmdEndDebugUtilsLabelEXT.txt[]
+include::{generated}/api/protos/vkCmdEndDebugUtilsLabelEXT.txt[]
 
   * pname:commandBuffer is the command buffer into which the command is
     recorded.
@@ -293,6 +288,18 @@ When viewed from the linear series of submissions to a single queue, the
 calls to flink:vkCmdBeginDebugUtilsLabelEXT and
 flink:vkCmdEndDebugUtilsLabelEXT must: be matched and balanced.
 
+There can: be problems reporting command buffer debug labels during the
+recording process because command buffers may: be recorded out of sequence
+with the resulting execution order.
+Since the recording order may: be different, a solitary command buffer may:
+have an inconsistent view of the debug label regions by itself.
+Therefore, if an issue occurs during the recording of a command buffer, and
+the environment requires returning debug labels, the implementation may:
+return only those labels it is aware of.
+This is true even if the implementation is aware of only the debug labels
+within the command buffer being actively recorded.
+
+
 .Valid Usage
 ****
   * [[VUID-vkCmdEndDebugUtilsLabelEXT-commandBuffer-01912]]
@@ -303,28 +310,24 @@ flink:vkCmdEndDebugUtilsLabelEXT must: be matched and balanced.
     If pname:commandBuffer is a secondary command buffer, there must: be an
     outstanding fname:vkCmdBeginDebugUtilsLabelEXT command recorded to
     pname:commandBuffer that has not previously been ended by a call to
-    fname:vkCmdEndDebugUtilsLabelEXT.
+    fname:vkCmdEndDebugUtilsLabelEXT
 ****
 
-include::../validity/protos/vkCmdEndDebugUtilsLabelEXT.txt[]
-
+include::{generated}/validity/protos/vkCmdEndDebugUtilsLabelEXT.txt[]
 --
 
 [open,refpage='vkCmdInsertDebugUtilsLabelEXT',desc='Insert a label into a command buffer',type='protos']
 --
-
 A single debug label can be inserted into a command buffer by calling:
 
-include::../api/protos/vkCmdInsertDebugUtilsLabelEXT.txt[]
+include::{generated}/api/protos/vkCmdInsertDebugUtilsLabelEXT.txt[]
 
   * pname:commandBuffer is the command buffer into which the command is
     recorded.
-  * pname:pInfo is a pointer to an instance of the
-    slink:VkDebugUtilsLabelEXT structure specifying the parameters of the
-    label to insert.
+  * pname:pInfo is a pointer to a slink:VkDebugUtilsLabelEXT structure
+    specifying parameters of the label to insert.
 
-include::../validity/protos/vkCmdInsertDebugUtilsLabelEXT.txt[]
-
+include::{generated}/validity/protos/vkCmdInsertDebugUtilsLabelEXT.txt[]
 --
 
 
@@ -340,13 +343,12 @@ An application can: register callbacks even when no validation layers are
 enabled, but they will only be called for the Vulkan loader and, if
 implemented, other layer and driver events.
 
-[open,refpage='VkDebugUtilsMessengerEXT',desc='Opaque handle to a debug messenger object',type='structs']
+[open,refpage='VkDebugUtilsMessengerEXT',desc='Opaque handle to a debug messenger object',type='handles']
 --
-
 A sname:VkDebugUtilsMessengerEXT is a messenger object which handles passing
 along debug messages to a provided debug callback.
 
-include::../api/handles/VkDebugUtilsMessengerEXT.txt[]
+include::{generated}/api/handles/VkDebugUtilsMessengerEXT.txt[]
 
 The debug messenger will provide detailed feedback on the application's use
 of Vulkan when events of interest occur.
@@ -355,45 +357,47 @@ debug message to the debug callback that was provided during its creation.
 Additionally, the debug messenger is responsible with filtering out debug
 messages that the callback is not interested in and will only provide
 desired debug messages.
-
 --
 
 [open,refpage='vkCreateDebugUtilsMessengerEXT',desc='Create a debug messenger object',type='protos']
 --
-
 A debug messenger triggers a debug callback with a debug message when an
 event of interest occurs.
 To create a debug messenger which will trigger a debug callback, call:
 
-include::../api/protos/vkCreateDebugUtilsMessengerEXT.txt[]
+include::{generated}/api/protos/vkCreateDebugUtilsMessengerEXT.txt[]
 
-  * pname:instance the instance the messenger will be used with.
-  * pname:pCreateInfo points to a slink:VkDebugUtilsMessengerCreateInfoEXT
-    structure which contains the callback pointer as well as defines the
-    conditions under which this messenger will trigger the callback.
+  * pname:instance is the instance the messenger will be used with.
+  * pname:pCreateInfo is a pointer to a
+    slink:VkDebugUtilsMessengerCreateInfoEXT structure containing the
+    callback pointer, as well as defining conditions under which this
+    messenger will trigger the callback.
   * pname:pAllocator controls host memory allocation as described in the
     <<memory-allocation, Memory Allocation>> chapter.
-  * pname:pMessenger is a pointer to record the
-    sname:VkDebugUtilsMessengerEXT object created.
+  * pname:pMessenger is a pointer to a slink:VkDebugUtilsMessengerEXT handle
+    in which the created object is returned.
 
-include::../validity/protos/vkCreateDebugUtilsMessengerEXT.txt[]
+include::{generated}/validity/protos/vkCreateDebugUtilsMessengerEXT.txt[]
 
+The application must: ensure that flink:vkCreateDebugUtilsMessengerEXT is
+not executed in parallel with any Vulkan command that is also called with
+pname:instance or child of pname:instance as the dispatchable argument.
 --
 
 [open,refpage='VkDebugUtilsMessengerCreateInfoEXT',desc='Structure specifying parameters of a newly created debug messenger',type='structs']
 --
-
 The definition of sname:VkDebugUtilsMessengerCreateInfoEXT is:
 
-include::../api/structs/VkDebugUtilsMessengerCreateInfoEXT.txt[]
+include::{generated}/api/structs/VkDebugUtilsMessengerCreateInfoEXT.txt[]
 
   * pname:sType is the type of this structure.
-  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
-  * pname:flags is 0 and reserved for future use.
+  * pname:pNext is `NULL` or a pointer to a structure extending this
+    structure.
+  * pname:flags is `0` and is reserved for future use.
   * pname:messageSeverity is a bitmask of
     elink:VkDebugUtilsMessageSeverityFlagBitsEXT specifying which severity
     of event(s) will cause this callback to be called.
-  * pname:messageTypes is a bitmask of
+  * pname:messageType is a bitmask of
     elink:VkDebugUtilsMessageTypeFlagBitsEXT specifying which type of
     event(s) will cause this callback to be called.
   * pname:pfnUserCallback is the application callback function to call.
@@ -401,23 +405,23 @@ include::../api/structs/VkDebugUtilsMessengerCreateInfoEXT.txt[]
 
 For each sname:VkDebugUtilsMessengerEXT that is created the
 sname:VkDebugUtilsMessengerCreateInfoEXT::pname:messageSeverity and
-sname:VkDebugUtilsMessengerCreateInfoEXT::pname:messageTypes determine when
+sname:VkDebugUtilsMessengerCreateInfoEXT::pname:messageType determine when
 that sname:VkDebugUtilsMessengerCreateInfoEXT::pname:pfnUserCallback is
 called.
-The process to determine if the user's pfnUserCallback is triggered when an
-event occurs is as follows:
+The process to determine if the user's pname:pfnUserCallback is triggered
+when an event occurs is as follows:
 
- . The implementation will perform a bitwise AND of the event's
-   elink:VkDebugUtilsMessageSeverityFlagBitsEXT with the
-   pname:messageSeverity provided during creation of the
-   slink:VkDebugUtilsMessengerEXT object.
- .. If the value is 0, the message is skipped.
- . The implementation will perform bitwise AND of the event's
-   elink:VkDebugUtilsMessageTypeFlagBitsEXT with the pname:messageType
-   provided during the creation of the slink:VkDebugUtilsMessengerEXT
-   object.
- .. If the value is 0, the message is skipped.
- . The callback will trigger a debug message for the current event
+  . The implementation will perform a bitwise AND of the event's
+    elink:VkDebugUtilsMessageSeverityFlagBitsEXT with the
+    pname:messageSeverity provided during creation of the
+    slink:VkDebugUtilsMessengerEXT object.
+  .. If the value is 0, the message is skipped.
+  . The implementation will perform bitwise AND of the event's
+    elink:VkDebugUtilsMessageTypeFlagBitsEXT with the pname:messageType
+    provided during the creation of the slink:VkDebugUtilsMessengerEXT
+    object.
+  .. If the value is 0, the message is skipped.
+  . The callback will trigger a debug message for the current event
 
 The callback will come directly from the component that detected the event,
 unless some other layer intercepts the calls for its own purposes (filter
@@ -438,18 +442,24 @@ application is making Vulkan calls from multiple threads).
     tlink:PFN_vkDebugUtilsMessengerCallbackEXT
 ****
 
-include::../validity/structs/VkDebugUtilsMessengerCreateInfoEXT.txt[]
+include::{generated}/validity/structs/VkDebugUtilsMessengerCreateInfoEXT.txt[]
+--
 
+[open,refpage='VkDebugUtilsMessengerCreateFlagsEXT',desc='Reserved for future use',type='flags']
+--
+include::{generated}/api/flags/VkDebugUtilsMessengerCreateFlagsEXT.txt[]
+
+tname:VkDebugUtilsMessengerCreateFlagsEXT is a bitmask type for setting a
+mask, but is currently reserved for future use.
 --
 
 [open,refpage='VkDebugUtilsMessageSeverityFlagBitsEXT',desc='Bitmask specifying which severities of events cause a debug messenger callback',type='enums']
 --
-
 Bits which can: be set in
 slink:VkDebugUtilsMessengerCreateInfoEXT::pname:messageSeverity, specifying
 event severities which cause a debug messenger to call the callback, are:
 
-include::../api/enums/VkDebugUtilsMessageSeverityFlagBitsEXT.txt[]
+include::{generated}/api/enums/VkDebugUtilsMessageSeverityFlagBitsEXT.txt[]
 
   * ename:VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT specifies the most
     verbose output indicating all diagnostic messages from the Vulkan
@@ -465,41 +475,47 @@ include::../api/enums/VkDebugUtilsMessageSeverityFlagBitsEXT.txt[]
     unintended such as using an image whose memory has not been filled.
     In general if you see a warning but you know that the behavior is
     intended/desired, then simply ignore the warning.
-  * ename:VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT specifies that an
-    error that may cause undefined results, including an application crash.
-
---
+  * ename:VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT specifies that the
+    application has violated a valid usage condition of the specification.
 
 [NOTE]
 .Note
 ====
-The values of ename:VkDebugUtilsMessageSeverityFlagBitsEXT are sorted based
+The values of elink:VkDebugUtilsMessageSeverityFlagBitsEXT are sorted based
 on severity.
 The higher the flag value, the more severe the message.
 This allows for simple boolean operation comparisons when looking at
-ename:VkDebugUtilsMessageSeverityFlagBitsEXT values.
+elink:VkDebugUtilsMessageSeverityFlagBitsEXT values.
 
 For example:
 
 [source,c++]
-----------------------------------------
+~~~~
     if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
         // Do something for warnings and errors
     }
-----------------------------------------
+~~~~
 
 In addition, space has been left between the enums to allow for later
 addition of new severities in between the existing values.
 ====
+--
+
+[open,refpage='VkDebugUtilsMessageSeverityFlagsEXT',desc='Bitmask of VkDebugUtilsMessageSeverityFlagBitsEXT',type='flags']
+--
+include::{generated}/api/flags/VkDebugUtilsMessageSeverityFlagsEXT.txt[]
+
+tname:VkDebugUtilsMessageSeverityFlagsEXT is a bitmask type for setting a
+mask of zero or more elink:VkDebugUtilsMessageSeverityFlagBitsEXT.
+--
 
 [open,refpage='VkDebugUtilsMessageTypeFlagBitsEXT',desc='Bitmask specifying which types of events cause a debug messenger callback',type='enums']
 --
-
 Bits which can: be set in
-slink:VkDebugUtilsMessengerCreateInfoEXT::pname:messageTypes, specifying
+slink:VkDebugUtilsMessengerCreateInfoEXT::pname:messageType, specifying
 event types which cause a debug messenger to call the callback, are:
 
-include::../api/enums/VkDebugUtilsMessageTypeFlagBitsEXT.txt[]
+include::{generated}/api/enums/VkDebugUtilsMessageTypeFlagBitsEXT.txt[]
 
   * ename:VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT specifies that some
     general event has occurred.
@@ -512,47 +528,57 @@ include::../api/enums/VkDebugUtilsMessageTypeFlagBitsEXT.txt[]
     flink:vkCmdClearColorImage when setting
     slink:VkAttachmentDescription::pname:loadOp to
     ename:VK_ATTACHMENT_LOAD_OP_CLEAR would have worked.
+--
 
+[open,refpage='VkDebugUtilsMessageTypeFlagsEXT',desc='Bitmask of VkDebugUtilsMessageTypeFlagBitsEXT',type='flags']
+--
+include::{generated}/api/flags/VkDebugUtilsMessageTypeFlagsEXT.txt[]
+
+tname:VkDebugUtilsMessageTypeFlagsEXT is a bitmask type for setting a mask
+of zero or more elink:VkDebugUtilsMessageTypeFlagBitsEXT.
 --
 
 [open,refpage='PFN_vkDebugUtilsMessengerCallbackEXT',desc='Application-defined debug messenger callback function',type='funcpointers']
 --
-
 The prototype for the
 slink:VkDebugUtilsMessengerCreateInfoEXT::pname:pfnUserCallback function
 implemented by the application is:
 
-include::../api/funcpointers/PFN_vkDebugUtilsMessengerCallbackEXT.txt[]
+include::{generated}/api/funcpointers/PFN_vkDebugUtilsMessengerCallbackEXT.txt[]
 
   * pname:messageSeverity specifies the
     elink:VkDebugUtilsMessageSeverityFlagBitsEXT that triggered this
     callback.
-  * pname:messageTypes specifies the
-    elink:VkDebugUtilsMessageTypeFlagBitsEXT that triggered this callback.
+  * pname:messageTypes is a bitmask of
+    elink:VkDebugUtilsMessageTypeFlagBitsEXT specifying which type of
+    event(s) triggered this callback.
   * pname:pCallbackData contains all the callback related data in the
     slink:VkDebugUtilsMessengerCallbackDataEXT structure.
   * pname:pUserData is the user data provided when the
     slink:VkDebugUtilsMessengerEXT was created.
-
-The callback must: not call flink:vkDestroyDebugUtilsMessengerEXT.
 
 The callback returns a basetype:VkBool32, which is interpreted in a
 layer-specified manner.
 The application should: always return ename:VK_FALSE.
 The ename:VK_TRUE value is reserved for use in layer development.
 
+.Valid Usage
+****
+  * [[VUID-PFN_vkDebugUtilsMessengerCallbackEXT-None-04769]]
+    The callback must: not make calls to any Vulkan commands
+****
 --
 
 [open,refpage='VkDebugUtilsMessengerCallbackDataEXT',desc='Structure specifying parameters returned to the callback',type='structs']
 --
-
 The definition of sname:VkDebugUtilsMessengerCallbackDataEXT is:
 
-include::../api/structs/VkDebugUtilsMessengerCallbackDataEXT.txt[]
+include::{generated}/api/structs/VkDebugUtilsMessengerCallbackDataEXT.txt[]
 
   * pname:sType is the type of this structure.
-  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
-  * pname:flags is 0 and reserved for future use.
+  * pname:pNext is `NULL` or a pointer to a structure extending this
+    structure.
+  * pname:flags is `0` and is reserved for future use.
   * pname:pMessageIdName is a null-terminated string that identifies the
     particular message ID that is associated with the provided message.
     If the message corresponds to a validation layer message, then this
@@ -566,13 +592,13 @@ include::../api/structs/VkDebugUtilsMessengerCallbackDataEXT.txt[]
     conditions.
   * pname:queueLabelCount is a count of items contained in the
     pname:pQueueLabels array.
-  * pname:pQueueLabels is NULL or a pointer to an array of
+  * pname:pQueueLabels is `NULL` or a pointer to an array of
     slink:VkDebugUtilsLabelEXT active in the current sname:VkQueue at the
     time the callback was triggered.
     Refer to <<debugging-queue-labels,Queue Labels>> for more information.
   * pname:cmdBufLabelCount is a count of items contained in the
     pname:pCmdBufLabels array.
-  * pname:pCmdBufLabels is NULL or a pointer to an array of
+  * pname:pCmdBufLabels is `NULL` or a pointer to an array of
     slink:VkDebugUtilsLabelEXT active in the current sname:VkCommandBuffer
     at the time the callback was triggered.
     Refer to <<debugging-command-buffer-labels, Command Buffer Labels>> for
@@ -602,12 +628,12 @@ while the last label in each list will be the most recent.
 [NOTE]
 .Note
 ====
-pname:pQueueLabels will only be non-NULL if one of the objects in
+pname:pQueueLabels will only be non-`NULL` if one of the objects in
 pname:pObjects can be related directly to a defined sname:VkQueue which has
 had one or more labels associated with it.
 
-Likewise, pname:pCmdBufLabels will only be non-NULL if one of the objects in
-pname:pObjects can be related directly to a defined sname:VkCommandBuffer
+Likewise, pname:pCmdBufLabels will only be non-`NULL` if one of the objects
+in pname:pObjects can be related directly to a defined sname:VkCommandBuffer
 which has had one or more labels associated with it.
 Additionally, while command buffer labels allow for beginning and ending
 across different command buffers, the debug messaging framework cannot:
@@ -618,23 +644,28 @@ with another may not have been defined at the time the debug message is
 triggered.
 ====
 
-include::../validity/structs/VkDebugUtilsMessengerCallbackDataEXT.txt[]
+include::{generated}/validity/structs/VkDebugUtilsMessengerCallbackDataEXT.txt[]
+--
 
+[open,refpage='VkDebugUtilsMessengerCallbackDataFlagsEXT',desc='Reserved for future use',type='flags']
+--
+include::{generated}/api/flags/VkDebugUtilsMessengerCallbackDataFlagsEXT.txt[]
+
+tname:VkDebugUtilsMessengerCallbackDataFlagsEXT is a bitmask type for
+setting a mask, but is currently reserved for future use.
 --
 
 [open,refpage='vkSubmitDebugUtilsMessageEXT',desc='Inject a message into a debug stream',type='protos']
 --
-
 There may be times that a user wishes to intentionally submit a debug
 message.
 To do this, call:
 
-include::../api/protos/vkSubmitDebugUtilsMessageEXT.txt[]
+include::{generated}/api/protos/vkSubmitDebugUtilsMessageEXT.txt[]
 
   * pname:instance is the debug stream's slink:VkInstance.
-  * pname:messageSeverity is the
-    elink:VkDebugUtilsMessageSeverityFlagBitsEXT severity of this
-    event/message.
+  * pname:messageSeverity is a elink:VkDebugUtilsMessageSeverityFlagBitsEXT
+    value specifying the severity of this event/message.
   * pname:messageTypes is a bitmask of
     elink:VkDebugUtilsMessageTypeFlagBitsEXT specifying which type of
     event(s) to identify with this message.
@@ -647,19 +678,24 @@ The parameters are passed on to the callback in addition to the
 pname:pUserData value that was defined at the time the messenger was
 registered.
 
-include::../validity/protos/vkSubmitDebugUtilsMessageEXT.txt[]
+.Valid Usage
+****
+  * [[VUID-vkSubmitDebugUtilsMessageEXT-objectType-02591]]
+    The pname:objectType member of each element of
+    pname:pCallbackData->pObjects must: not be ename:VK_OBJECT_TYPE_UNKNOWN
+****
 
+include::{generated}/validity/protos/vkSubmitDebugUtilsMessageEXT.txt[]
 --
 
 [open,refpage='vkDestroyDebugUtilsMessengerEXT',desc='Destroy a debug messenger object',type='protos']
 --
-
 To destroy a sname:VkDebugUtilsMessengerEXT object, call:
 
-include::../api/protos/vkDestroyDebugUtilsMessengerEXT.txt[]
+include::{generated}/api/protos/vkDestroyDebugUtilsMessengerEXT.txt[]
 
-  * pname:instance the instance where the callback was created.
-  * pname:messenger the slink:VkDebugUtilsMessengerEXT object to destroy.
+  * pname:instance is the instance where the callback was created.
+  * pname:messenger is the slink:VkDebugUtilsMessengerEXT object to destroy.
     pname:messenger is an externally synchronized object and must: not be
     used on more than one thread at a time.
     This means that fname:vkDestroyDebugUtilsMessengerEXT must: not be
@@ -677,7 +713,10 @@ include::../api/protos/vkDestroyDebugUtilsMessengerEXT.txt[]
     created, pname:pAllocator must: be `NULL`
 ****
 
-include::../validity/protos/vkDestroyDebugUtilsMessengerEXT.txt[]
+include::{generated}/validity/protos/vkDestroyDebugUtilsMessengerEXT.txt[]
 
+The application must: ensure that flink:vkDestroyDebugUtilsMessengerEXT is
+not executed in parallel with any Vulkan command that is also called with
+pname:instance or child of pname:instance as the dispatchable argument.
 --
 

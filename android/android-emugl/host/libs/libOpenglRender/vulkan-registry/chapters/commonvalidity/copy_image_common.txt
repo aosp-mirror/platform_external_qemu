@@ -1,0 +1,322 @@
+// Copyright 2020-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+// Common Valid Usage
+// Common to VkCmdCopyImage* commands
+  * [[VUID-{refpage}-pRegions-00124]]
+    The union of all source regions, and the union of all destination
+    regions, specified by the elements of pname:pRegions, must: not overlap
+    in memory
+ifdef::VK_VERSION_1_1,VK_KHR_maintenance1[]
+  * [[VUID-{refpage}-srcImage-01995]]
+    The <<resources-image-format-features,format features>> of
+    pname:srcImage must: contain ename:VK_FORMAT_FEATURE_TRANSFER_SRC_BIT
+endif::VK_VERSION_1_1,VK_KHR_maintenance1[]
+  * [[VUID-{refpage}-srcImage-00126]]
+    pname:srcImage must: have been created with
+    ename:VK_IMAGE_USAGE_TRANSFER_SRC_BIT usage flag
+ifndef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-{refpage}-srcImage-00127]]
+    If pname:srcImage is non-sparse then it must: be bound completely and
+    contiguously to a single sname:VkDeviceMemory object
+endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-{refpage}-srcImage-01546]]
+    If pname:srcImage is non-sparse then the image or _disjoint_ plane to be
+    copied must: be bound completely and contiguously to a single
+    sname:VkDeviceMemory object
+endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-{refpage}-srcImageLayout-00128]]
+    pname:srcImageLayout must: specify the layout of the image subresources
+    of pname:srcImage specified in pname:pRegions at the time this command
+    is executed on a sname:VkDevice
+ifndef::VK_KHR_shared_presentable_image[]
+  * [[VUID-{refpage}-srcImageLayout-00129]]
+    pname:srcImageLayout must: be ename:VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
+    or ename:VK_IMAGE_LAYOUT_GENERAL
+endif::VK_KHR_shared_presentable_image[]
+ifdef::VK_KHR_shared_presentable_image[]
+  * [[VUID-{refpage}-srcImageLayout-01917]]
+    pname:srcImageLayout must: be
+    ename:VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+    ename:VK_IMAGE_LAYOUT_GENERAL, or
+    ename:VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR
+endif::VK_KHR_shared_presentable_image[]
+ifdef::VK_VERSION_1_1,VK_KHR_maintenance1[]
+  * [[VUID-{refpage}-dstImage-01996]]
+    The <<resources-image-format-features,format features>> of
+    pname:dstImage must: contain ename:VK_FORMAT_FEATURE_TRANSFER_DST_BIT
+endif::VK_VERSION_1_1,VK_KHR_maintenance1[]
+  * [[VUID-{refpage}-dstImage-00131]]
+    pname:dstImage must: have been created with
+    ename:VK_IMAGE_USAGE_TRANSFER_DST_BIT usage flag
+ifndef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-{refpage}-dstImage-00132]]
+    If pname:dstImage is non-sparse then it must: be bound completely and
+    contiguously to a single sname:VkDeviceMemory object
+endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-{refpage}-dstImage-01547]]
+    If pname:dstImage is non-sparse then the image or _disjoint_ plane that
+    is the destination of the copy must: be bound completely and
+    contiguously to a single sname:VkDeviceMemory object
+endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-{refpage}-dstImageLayout-00133]]
+    pname:dstImageLayout must: specify the layout of the image subresources
+    of pname:dstImage specified in pname:pRegions at the time this command
+    is executed on a sname:VkDevice
+ifndef::VK_KHR_shared_presentable_image[]
+  * [[VUID-{refpage}-dstImageLayout-00134]]
+    pname:dstImageLayout must: be ename:VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+    or ename:VK_IMAGE_LAYOUT_GENERAL
+endif::VK_KHR_shared_presentable_image[]
+ifdef::VK_KHR_shared_presentable_image[]
+  * [[VUID-{refpage}-dstImageLayout-01395]]
+    pname:dstImageLayout must: be
+    ename:VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+    ename:VK_IMAGE_LAYOUT_GENERAL, or
+    ename:VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR
+endif::VK_KHR_shared_presentable_image[]
+ifndef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-{refpage}-srcImage-00135]]
+    The elink:VkFormat of each of pname:srcImage and pname:dstImage must: be
+    compatible, as defined <<copies-images-format-compatibility, above>>
+endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-{refpage}-srcImage-01548]]
+    If the elink:VkFormat of each of pname:srcImage and pname:dstImage is
+    not a <<formats-requiring-sampler-ycbcr-conversion,_multi-planar
+    format_>>, the elink:VkFormat of each of pname:srcImage and
+    pname:dstImage must: be compatible, as defined
+    <<copies-images-format-compatibility, above>>
+  * [[VUID-{refpage}-None-01549]]
+    In a copy to or from a plane of a
+    <<formats-requiring-sampler-ycbcr-conversion,multi-planar image>>, the
+    elink:VkFormat of the image and plane must: be compatible according to
+    <<formats-compatible-planes,the description of compatible planes>> for
+    the plane being copied
+endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-{refpage}-srcImage-00136]]
+    The sample count of pname:srcImage and pname:dstImage must: match
+  * [[VUID-{refpage}-srcSubresource-01696]]
+    The pname:srcSubresource.mipLevel member of each element of
+    pname:pRegions must: be less than the pname:mipLevels specified in
+    slink:VkImageCreateInfo when pname:srcImage was created
+  * [[VUID-{refpage}-dstSubresource-01697]]
+    The pname:dstSubresource.mipLevel member of each element of
+    pname:pRegions must: be less than the pname:mipLevels specified in
+    slink:VkImageCreateInfo when pname:dstImage was created
+  * [[VUID-{refpage}-srcSubresource-01698]]
+    The [eq]#pname:srcSubresource.baseArrayLayer {plus}
+    pname:srcSubresource.layerCount# of each element of pname:pRegions must:
+    be less than or equal to the pname:arrayLayers specified in
+    slink:VkImageCreateInfo when pname:srcImage was created
+  * [[VUID-{refpage}-dstSubresource-01699]]
+    The [eq]#pname:dstSubresource.baseArrayLayer {plus}
+    pname:dstSubresource.layerCount# of each element of pname:pRegions must:
+    be less than or equal to the pname:arrayLayers specified in
+    slink:VkImageCreateInfo when pname:dstImage was created
+  * [[VUID-{refpage}-srcOffset-01783]]
+    The pname:srcOffset and pname:extent members of each element of
+    pname:pRegions must: respect the image transfer granularity requirements
+    of pname:commandBuffer's command pool's queue family, as described in
+    slink:VkQueueFamilyProperties
+  * [[VUID-{refpage}-dstOffset-01784]]
+    The pname:dstOffset and pname:extent members of each element of
+    pname:pRegions must: respect the image transfer granularity requirements
+    of pname:commandBuffer's command pool's queue family, as described in
+    slink:VkQueueFamilyProperties
+ifdef::VK_EXT_fragment_density_map[]
+  * [[VUID-{refpage}-dstImage-02542]]
+    pname:dstImage and pname:srcImage must: not have been created with
+    pname:flags containing ename:VK_IMAGE_CREATE_SUBSAMPLED_BIT_EXT
+endif::VK_EXT_fragment_density_map[]
+// The remaining common VU used to be in image_copy_common.txt and have been
+// rewritten to apply to the calling command rather than the structure
+// parameter(s) of that command.
+ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-{refpage}-srcImage-01551]]
+    If neither pname:srcImage nor pname:dstImage has a
+    <<formats-requiring-sampler-ycbcr-conversion, multi-planar image
+    format>> then for each element of pname:pRegions,
+    pname:srcSubresource.aspectMask and pname:dstSubresource.aspectMask
+    must: match
+  * [[VUID-{refpage}-srcImage-01552]]
+    If pname:srcImage has a elink:VkFormat with
+    <<formats-requiring-sampler-ycbcr-conversion,two planes>> then for each
+    element of pname:pRegions, pname:srcSubresource.aspectMask must: be
+    ename:VK_IMAGE_ASPECT_PLANE_0_BIT or ename:VK_IMAGE_ASPECT_PLANE_1_BIT
+  * [[VUID-{refpage}-srcImage-01553]]
+    If pname:srcImage has a elink:VkFormat with
+    <<formats-requiring-sampler-ycbcr-conversion,three planes>> then for
+    each element of pname:pRegions, pname:srcSubresource.aspectMask must: be
+    ename:VK_IMAGE_ASPECT_PLANE_0_BIT, ename:VK_IMAGE_ASPECT_PLANE_1_BIT, or
+    ename:VK_IMAGE_ASPECT_PLANE_2_BIT
+  * [[VUID-{refpage}-dstImage-01554]]
+    If pname:dstImage has a elink:VkFormat with
+    <<formats-requiring-sampler-ycbcr-conversion,two planes>> then for each
+    element of pname:pRegions, pname:dstSubresource.aspectMask must: be
+    ename:VK_IMAGE_ASPECT_PLANE_0_BIT or ename:VK_IMAGE_ASPECT_PLANE_1_BIT
+  * [[VUID-{refpage}-dstImage-01555]]
+    If pname:dstImage has a elink:VkFormat with
+    <<formats-requiring-sampler-ycbcr-conversion,three planes>> then for
+    each element of pname:pRegions, pname:dstSubresource.aspectMask must: be
+    ename:VK_IMAGE_ASPECT_PLANE_0_BIT, ename:VK_IMAGE_ASPECT_PLANE_1_BIT, or
+    ename:VK_IMAGE_ASPECT_PLANE_2_BIT
+  * [[VUID-{refpage}-srcImage-01556]]
+    If pname:srcImage has a
+    <<formats-requiring-sampler-ycbcr-conversion,multi-planar image format>>
+    and the pname:dstImage does not have a multi-planar image format, then
+    for each element of pname:pRegions, pname:dstSubresource.aspectMask
+    must: be ename:VK_IMAGE_ASPECT_COLOR_BIT
+  * [[VUID-{refpage}-dstImage-01557]]
+    If pname:dstImage has a
+    <<formats-requiring-sampler-ycbcr-conversion,multi-planar image format>>
+    and the pname:srcImage does not have a multi-planar image format, then
+    for each element of pname:pRegions, pname:srcSubresource.aspectMask
+    must: be ename:VK_IMAGE_ASPECT_COLOR_BIT
+endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+ifndef::VK_VERSION_1_1,VK_KHR_maintenance1[]
+  * [[VUID-{refpage}-srcImage-00139]]
+    If either pname:srcImage or pname:dstImage is of type
+    ename:VK_IMAGE_TYPE_3D, then for each element of pname:pRegions,
+    pname:srcSubresource.baseArrayLayer and
+    pname:dstSubresource.baseArrayLayer must: each be `0`, and
+    pname:srcSubresource.layerCount and pname:dstSubresource.layerCount
+    must: each be `1`
+endif::VK_VERSION_1_1,VK_KHR_maintenance1[]
+ifdef::VK_VERSION_1_1,VK_KHR_maintenance1[]
+  * [[VUID-{refpage}-srcImage-04443]]
+    If pname:srcImage is of type ename:VK_IMAGE_TYPE_3D, then for each
+    element of pname:pRegions, pname:srcSubresource.baseArrayLayer must: be
+    `0` and pname:srcSubresource.layerCount must: be `1`
+  * [[VUID-{refpage}-dstImage-04444]]
+    If pname:dstImage is of type ename:VK_IMAGE_TYPE_3D, then for each
+    element of pname:pRegions, pname:dstSubresource.baseArrayLayer must: be
+    `0` and pname:dstSubresource.layerCount must: be `1`
+endif::VK_VERSION_1_1,VK_KHR_maintenance1[]
+  * [[VUID-{refpage}-aspectMask-00142]]
+    For each element of pname:pRegions, pname:srcSubresource.aspectMask
+    must: specify aspects present in pname:srcImage
+  * [[VUID-{refpage}-aspectMask-00143]]
+    For each element of pname:pRegions, pname:dstSubresource.aspectMask
+    must: specify aspects present in pname:dstImage
+  * [[VUID-{refpage}-srcOffset-00144]]
+    For each element of pname:pRegions, pname:srcOffset.x and
+    [eq]#(pname:extent.width {plus} pname:srcOffset.x)# must: both be
+    greater than or equal to `0` and less than or equal to the width of the
+    specified pname:srcSubresource of pname:srcImage
+  * [[VUID-{refpage}-srcOffset-00145]]
+    For each element of pname:pRegions, pname:srcOffset.y and
+    [eq]#(pname:extent.height {plus} pname:srcOffset.y)# must: both be
+    greater than or equal to `0` and less than or equal to the height of the
+    specified pname:srcSubresource of pname:srcImage
+  * [[VUID-{refpage}-srcImage-00146]]
+    If pname:srcImage is of type ename:VK_IMAGE_TYPE_1D, then for each
+    element of pname:pRegions, pname:srcOffset.y must: be `0` and
+    pname:extent.height must: be `1`
+  * [[VUID-{refpage}-srcOffset-00147]]
+    For each element of pname:pRegions, pname:srcOffset.z and
+    [eq]#(pname:extent.depth {plus} pname:srcOffset.z)# must: both be
+    greater than or equal to `0` and less than or equal to the depth of the
+    specified pname:srcSubresource of pname:srcImage
+  * [[VUID-{refpage}-srcImage-01785]]
+    If pname:srcImage is of type ename:VK_IMAGE_TYPE_1D, then for each
+    element of pname:pRegions, pname:srcOffset.z must: be `0` and
+    pname:extent.depth must: be `1`
+  * [[VUID-{refpage}-dstImage-01786]]
+    If pname:dstImage is of type ename:VK_IMAGE_TYPE_1D, then for each
+    element of pname:pRegions, pname:dstOffset.z must: be `0` and
+    pname:extent.depth must: be `1`
+  * [[VUID-{refpage}-srcImage-01787]]
+    If pname:srcImage is of type ename:VK_IMAGE_TYPE_2D, then for each
+    element of pname:pRegions, pname:srcOffset.z must: be `0`
+  * [[VUID-{refpage}-dstImage-01788]]
+    If pname:dstImage is of type ename:VK_IMAGE_TYPE_2D, then for each
+    element of pname:pRegions, pname:dstOffset.z must: be `0`
+ifndef::VK_VERSION_1_1,VK_KHR_maintenance1[]
+  * [[VUID-{refpage}-srcImage-01789]]
+    If pname:srcImage or pname:dstImage is of type ename:VK_IMAGE_TYPE_2D,
+    then for each element of pname:pRegions, pname:extent.depth must: be `1`
+endif::VK_VERSION_1_1,VK_KHR_maintenance1[]
+ifdef::VK_VERSION_1_1,VK_KHR_maintenance1[]
+  * [[VUID-{refpage}-srcImage-01790]]
+    If pname:srcImage and pname:dstImage are both of type
+    ename:VK_IMAGE_TYPE_2D, then for each element of pname:pRegions,
+    pname:extent.depth must: be `1`
+  * [[VUID-{refpage}-srcImage-01791]]
+    If pname:srcImage is of type ename:VK_IMAGE_TYPE_2D, and pname:dstImage
+    is of type ename:VK_IMAGE_TYPE_3D, then for each element of
+    pname:pRegions, pname:extent.depth must: equal
+    pname:srcSubresource.layerCount
+  * [[VUID-{refpage}-dstImage-01792]]
+    If pname:dstImage is of type ename:VK_IMAGE_TYPE_2D, and pname:srcImage
+    is of type ename:VK_IMAGE_TYPE_3D, then for each element of
+    pname:pRegions, pname:extent.depth must: equal
+    pname:dstSubresource.layerCount
+endif::VK_VERSION_1_1,VK_KHR_maintenance1[]
+  * [[VUID-{refpage}-dstOffset-00150]]
+    For each element of pname:pRegions, pname:dstOffset.x and
+    [eq]#(pname:extent.width {plus} pname:dstOffset.x)# must: both be
+    greater than or equal to `0` and less than or equal to the width of the
+    specified pname:dstSubresource of pname:dstImage
+  * [[VUID-{refpage}-dstOffset-00151]]
+    For each element of pname:pRegions, pname:dstOffset.y and
+    [eq]#(pname:extent.height {plus} pname:dstOffset.y)# must: both be
+    greater than or equal to `0` and less than or equal to the height of the
+    specified pname:dstSubresource of pname:dstImage
+  * [[VUID-{refpage}-dstImage-00152]]
+    If pname:dstImage is of type ename:VK_IMAGE_TYPE_1D, then for each
+    element of pname:pRegions, pname:dstOffset.y must: be `0` and
+    pname:extent.height must: be `1`
+  * [[VUID-{refpage}-dstOffset-00153]]
+    For each element of pname:pRegions, pname:dstOffset.z and
+    [eq]#(pname:extent.depth {plus} pname:dstOffset.z)# must: both be
+    greater than or equal to `0` and less than or equal to the depth of the
+    specified pname:dstSubresource of pname:dstImage
+  * [[VUID-{refpage}-srcImage-01727]]
+    If pname:srcImage is a <<blocked-image, blocked image>>, then for each
+    element of pname:pRegions, all members of pname:srcOffset must: be a
+    multiple of the corresponding dimensions of the compressed texel block
+  * [[VUID-{refpage}-srcImage-01728]]
+    If pname:srcImage is a <<blocked-image, blocked image>>, then for each
+    element of pname:pRegions, pname:extent.width must: be a multiple of the
+    compressed texel block width or [eq]#(pname:extent.width {plus}
+    pname:srcOffset.x)# must: equal the width of the specified
+    pname:srcSubresource of pname:srcImage
+  * [[VUID-{refpage}-srcImage-01729]]
+    If pname:srcImage is a <<blocked-image, blocked image>>, then for each
+    element of pname:pRegions, pname:extent.height must: be a multiple of
+    the compressed texel block height or [eq]#(pname:extent.height {plus}
+    pname:srcOffset.y)# must: equal the height of the specified
+    pname:srcSubresource of pname:srcImage
+  * [[VUID-{refpage}-srcImage-01730]]
+    If pname:srcImage is a <<blocked-image, blocked image>>, then for each
+    element of pname:pRegions, pname:extent.depth must: be a multiple of the
+    compressed texel block depth or [eq]#(pname:extent.depth {plus}
+    pname:srcOffset.z)# must: equal the depth of the specified
+    pname:srcSubresource of pname:srcImage
+  * [[VUID-{refpage}-dstImage-01731]]
+    If pname:dstImage is a <<blocked-image, blocked image>>, then for each
+    element of pname:pRegions, all members of pname:dstOffset must: be a
+    multiple of the corresponding dimensions of the compressed texel block
+  * [[VUID-{refpage}-dstImage-01732]]
+    If pname:dstImage is a <<blocked-image, blocked image>>, then for each
+    element of pname:pRegions, pname:extent.width must: be a multiple of the
+    compressed texel block width or [eq]#(pname:extent.width {plus}
+    pname:dstOffset.x)# must: equal the width of the specified
+    pname:dstSubresource of pname:dstImage
+  * [[VUID-{refpage}-dstImage-01733]]
+    If pname:dstImage is a <<blocked-image, blocked image>>, then for each
+    element of pname:pRegions, pname:extent.height must: be a multiple of
+    the compressed texel block height or [eq]#(pname:extent.height {plus}
+    pname:dstOffset.y)# must: equal the height of the specified
+    pname:dstSubresource of pname:dstImage
+  * [[VUID-{refpage}-dstImage-01734]]
+    If pname:dstImage is a <<blocked-image, blocked image>>, then for each
+    element of pname:pRegions, pname:extent.depth must: be a multiple of the
+    compressed texel block depth or [eq]#(pname:extent.depth {plus}
+    pname:dstOffset.z)# must: equal the depth of the specified
+    pname:dstSubresource of pname:dstImage
+// Common Valid Usage

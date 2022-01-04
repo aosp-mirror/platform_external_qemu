@@ -1,0 +1,54 @@
+// Copyright 2018-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_EXT_fragment_density_map.txt[]
+
+=== Other Extension Metadata
+
+*Last Modified Date*::
+    2021-09-30
+*Interactions and External Dependencies*::
+  - This extension requires
+    {spirv}/EXT/SPV_EXT_fragment_invocation_density.html[`SPV_EXT_fragment_invocation_density`]
+*Contributors*::
+  - Matthew Netsch, Qualcomm Technologies, Inc.
+  - Robert VanReenen, Qualcomm Technologies, Inc.
+  - Jonathan Wicks, Qualcomm Technologies, Inc.
+  - Tate Hornbeck, Qualcomm Technologies, Inc.
+  - Sam Holmes, Qualcomm Technologies, Inc.
+  - Jeff Leger, Qualcomm Technologies, Inc.
+  - Jan-Harald Fredriksen, ARM
+  - Jeff Bolz, NVIDIA
+  - Pat Brown, NVIDIA
+  - Daniel Rakos, AMD
+  - Piers Daniell, NVIDIA
+
+=== Description
+
+This extension allows an application to specify areas of the render target
+where the fragment shader may be invoked fewer times.
+These fragments are broadcasted out to multiple pixels to cover the render
+target.
+
+The primary use of this extension is to reduce workloads in areas where
+lower quality may not be perceived such as the distorted edges of a lens or
+the periphery of a user's gaze.
+
+include::{generated}/interfaces/VK_EXT_fragment_density_map.txt[]
+
+=== New or Modified Built-In Variables
+
+  * <<interfaces-builtin-variables-fraginvocationcount,code:FragInvocationCountEXT>>
+  * <<interfaces-builtin-variables-fragsize,code:FragSizeEXT>>
+
+=== New SPIR-V Capabilities
+
+  * <<spirvenv-capabilities-table-FragmentDensityEXT,FragmentDensityEXT>>
+
+=== Version History
+
+  * Revision 1, 2018-09-25 (Matthew Netsch)
+    - Initial version
+  * Revision 2, 2021-09-30 (Jon Leech)
+    - Add interaction with `apiext:VK_KHR_format_feature_flags2` to `vk.xml`

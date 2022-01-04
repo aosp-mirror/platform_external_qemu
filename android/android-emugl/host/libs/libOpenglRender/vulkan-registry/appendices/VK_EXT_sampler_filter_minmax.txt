@@ -1,12 +1,22 @@
-include::meta/VK_EXT_sampler_filter_minmax.txt[]
+// Copyright 2017-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_EXT_sampler_filter_minmax.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2017-05-19
+*Interactions and External Dependencies*::
+  - Promoted to Vulkan 1.2 Core
 *IP Status*::
     No known IP claims.
 *Contributors*::
   - Jeff Bolz, NVIDIA
   - Piers Daniell, NVIDIA
+
+=== Description
 
 In unextended Vulkan, minification and magnification filters such as LINEAR
 allow sampled image lookups to return a filtered texel value produced by
@@ -22,47 +32,14 @@ The filter parameters are used to identify the set of texels used to produce
 a final filtered value; the reduction mode identifies how these texels are
 combined.
 
-=== New Object Types
+=== Promotion to Vulkan 1.2
 
-None.
+All functionality in this extension is included in core Vulkan 1.2, with the
+EXT suffix omitted.
+The original type, enum and command names are still available as aliases of
+the core functionality.
 
-=== New Enum Constants
-
-  * Extending elink:VkStructureType:
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_FILTER_MINMAX_PROPERTIES_EXT
-  ** ename:VK_STRUCTURE_TYPE_SAMPLER_REDUCTION_MODE_CREATE_INFO_EXT
-
-  * Extending elink:VkFormatFeatureFlagBits
-  ** ename:VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_MINMAX_BIT_EXT
-
-=== New Enums
-
-  * elink:VkSamplerReductionModeEXT
-
-=== New Structures
-
-  * slink:VkSamplerReductionModeCreateInfoEXT
-  * slink:VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT
-
-=== New Functions
-
-None.
-
-=== New Built-In Variables
-
-None.
-
-=== New SPIR-V Capabilities
-
-None.
-
-=== Issues
-
-None.
-
-=== Examples
-
-None.
+include::{generated}/interfaces/VK_EXT_sampler_filter_minmax.txt[]
 
 === Version History
 

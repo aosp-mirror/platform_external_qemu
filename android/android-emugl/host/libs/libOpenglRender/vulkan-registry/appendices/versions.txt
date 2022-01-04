@@ -1,6 +1,6 @@
-// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
-// Creative Commons Attribution 4.0 International License; see
-// http://creativecommons.org/licenses/by/4.0/
+// Copyright 2015-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
 [appendix]
 
@@ -10,343 +10,302 @@
 New minor versions of the Vulkan API are defined periodically by the Khronos
 Vulkan Working Group.
 These consist of some amount of additional functionality added to the core
-API, some of which may: be promoted from extensions, other parts of which
-may: be new.
-Extensions that are promoted in this way typically have their functionality
-replicated directly in the core, but with extension suffixes dropped.
-The existing values with suffixes are still present in the API itself as
-aliases of the original extension functionality.
-Any differences between the core and extension version of the functionality
-will be documented in the extension appendix, and mentioned briefly in the
-version description in this appendix.
+API, potentially including both new functionality and functionality
+<<extendingvulkan-compatibility-promotion,promoted>> from extensions.
 
-It's possible to build the specification for earlier versions, but to aid
+ifdef::VK_VERSION_1_1[]
+It is possible to build the specification for earlier versions, but to aid
 readability of the latest versions, this appendix gives an overview of the
 changes as compared to earlier versions.
+endif::VK_VERSION_1_1[]
+
+
+ifdef::VK_VERSION_1_2[]
+[[versions-1.2]]
+== Version 1.2
+
+// Unfortunately we can't include titles in an open refpage block, so this
+// is a refpage-specific alternate form of the section.
+ifdef::isrefpage[]
+[open,refpage='VK_VERSION_1_2',desc='Vulkan version 1.2',type='feature',anchor='versions-1.2',xrefs='VK_VERSION_1_0 VK_VERSION_1_1']
+--
+Vulkan Version 1.2 <<extendingvulkan-compatibility-promotion,promoted>> a
+number of key extensions into the core API:
+
+include::{generated}/meta/promoted_extensions_VK_VERSION_1_2.txt[]
+
+All differences in behavior between these extensions and the corresponding
+Vulkan 1.2 functionality are summarized in the <<versions-1.2-promotions,
+Vulkan 1.2 specification appendix>>.
+
+include::{generated}/interfaces/VK_VERSION_1_2.txt[]
+--
+endif::isrefpage[]
+
+// This is the spec-specific form of the section
+[[versions-1.2-promotions]]
+Vulkan Version 1.2 <<extendingvulkan-compatibility-promotion,promoted>> a
+number of key extensions into the core API:
+
+include::{generated}/meta/promoted_extensions_VK_VERSION_1_2.txt[]
+
+All differences in behavior between these extensions and the corresponding
+Vulkan 1.2 functionality are summarized below.
+
+=== Differences relative to `VK_KHR_8bit_storage`
+
+If the `apiext:VK_KHR_8bit_storage` extension is not supported, support for
+the SPIR-V <<features-storageBuffer8BitAccess,
+code:StorageBuffer8BitAccess>> capability in shader modules is optional.
+Support for this feature is defined by
+slink:VkPhysicalDeviceVulkan12Features::pname:storageBuffer8BitAccess when
+queried via flink:vkGetPhysicalDeviceFeatures2.
+
+=== Differences relative to `VK_KHR_draw_indirect_count`
+
+If the `apiext:VK_KHR_draw_indirect_count` extension is not supported,
+support for the entry points flink:vkCmdDrawIndirectCount and
+flink:vkCmdDrawIndexedIndirectCount is optional.
+Support for this feature is defined by
+slink:VkPhysicalDeviceVulkan12Features::pname:drawIndirectCount when queried
+via flink:vkGetPhysicalDeviceFeatures2.
+
+=== Differences relative to `VK_KHR_sampler_mirror_clamp_to_edge`
+
+If the `apiext:VK_KHR_sampler_mirror_clamp_to_edge` extension is not
+supported, support for the elink:VkSamplerAddressMode
+ename:VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE is optional.
+Support for this feature is defined by
+slink:VkPhysicalDeviceVulkan12Features::pname:samplerMirrorClampToEdge when
+queried via flink:vkGetPhysicalDeviceFeatures2.
+
+=== Differences relative to `VK_EXT_descriptor_indexing`
+
+If the `apiext:VK_EXT_descriptor_indexing` extension is not supported,
+support for the <<features-descriptorIndexing,descriptorIndexing>> feature
+is optional.
+Support for this feature is defined by
+slink:VkPhysicalDeviceVulkan12Features::pname:descriptorIndexing when
+queried via flink:vkGetPhysicalDeviceFeatures2.
+
+=== Differences relative to `VK_EXT_scalar_block_layout`
+
+If the `apiext:VK_EXT_scalar_block_layout` extension is not supported,
+support for the <<features-scalarBlockLayout,scalarBlockLayout>> feature is
+optional.
+Support for this feature is defined by
+slink:VkPhysicalDeviceVulkan12Features::pname:scalarBlockLayout when queried
+via flink:vkGetPhysicalDeviceFeatures2.
+
+=== Differences relative to `VK_EXT_shader_viewport_index_layer`
+
+If the `apiext:VK_EXT_shader_viewport_index_layer` extension is not
+supported, support for the code:ShaderViewportIndexLayerEXT SPIR-V
+capability is optional.
+Support for this feature is defined by
+slink:VkPhysicalDeviceVulkan12Features::pname:shaderOutputViewportIndex and
+slink:VkPhysicalDeviceVulkan12Features::pname:shaderOutputLayer when queried
+via flink:vkGetPhysicalDeviceFeatures2.
+
+=== Differences relative to `VK_KHR_buffer_device_address`
+
+If the `apiext:VK_KHR_buffer_device_address` extension is not supported,
+support for the <<features-bufferDeviceAddress,bufferDeviceAddress>> feature
+is optional.
+Support for this feature is defined by
+slink:VkPhysicalDeviceVulkan12Features::pname:bufferDeviceAddress when
+queried via flink:vkGetPhysicalDeviceFeatures2.
+
+=== Differences relative to `VK_KHR_shader_atomic_int64`
+
+If the `apiext:VK_KHR_shader_atomic_int64` extension is not supported,
+support for the
+<<features-shaderBufferInt64Atomics,shaderBufferInt64Atomics>> feature is
+optional.
+Support for this feature is defined by
+slink:VkPhysicalDeviceVulkan12Features::pname:shaderBufferInt64Atomics when
+queried via flink:vkGetPhysicalDeviceFeatures2.
+
+=== Differences relative to `VK_KHR_shader_float16_int8`
+
+If the `apiext:VK_KHR_shader_float16_int8` extension is not supported,
+support for the <<features-shaderFloat16, pname:shaderFloat16>> and
+<<features-shaderInt8, pname:shaderInt8>> features is optional.
+Support for these features are defined by
+slink:VkPhysicalDeviceVulkan12Features::pname:shaderFloat16 and
+slink:VkPhysicalDeviceVulkan12Features::pname:shaderInt8 when queried via
+flink:vkGetPhysicalDeviceFeatures2.
+
+=== Differences relative to `VK_KHR_vulkan_memory_model`
+
+If the `apiext:VK_KHR_vulkan_memory_model` extension is not supported,
+support for the <<features-vulkanMemoryModel,vulkanMemoryModel>> feature is
+optional.
+Support for this feature is defined by
+slink:VkPhysicalDeviceVulkan12Features::pname:vulkanMemoryModel when queried
+via flink:vkGetPhysicalDeviceFeatures2.
+
+=== Additional Vulkan 1.2 Feature Support
+
+[[versions-1.2-new-features]]
+In addition to the promoted extensions described above, Vulkan 1.2 added
+support for:
+
+  * SPIR-V version 1.4.
+  * SPIR-V version 1.5.
+  * The <<features-samplerMirrorClampToEdge,samplerMirrorClampToEdge>>
+    feature which indicates whether the implementation supports the
+    ename:VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE sampler address mode.
+  * The
+    <<spirvenv-capabilities-table-ShaderNonUniform,code:ShaderNonUniform>>
+    capability in SPIR-V version 1.5.
+  * The <<features-shaderOutputViewportIndex,shaderOutputViewportIndex>>
+    feature which indicates that the
+    <<spirvenv-capabilities-table-ShaderViewportIndex,code:ShaderViewportIndex>>
+    capability can be used.
+  * The <<features-shaderOutputLayer,shaderOutputLayer>> feature which
+    indicates that the
+    <<spirvenv-capabilities-table-ShaderLayer,code:ShaderLayer>> capability
+    can be used.
+  * The <<features-subgroupBroadcastDynamicId,subgroupBroadcastDynamicId>>
+    feature which allows the "`Id`" operand of
+    code:OpGroupNonUniformBroadcast to be dynamically uniform within a
+    subgroup, and the "`Index`" operand of
+    code:OpGroupNonUniformQuadBroadcast to be dynamically uniform within a
+    derivative group, in shader modules of version 1.5 or higher.
+  * The <<features-drawIndirectCount,drawIndirectCount>> feature which
+    indicates whether the flink:vkCmdDrawIndirectCount and
+    flink:vkCmdDrawIndexedIndirectCount functions can be used.
+  * The <<features-descriptorIndexing,descriptorIndexing>> feature which
+    indicates the implementation supports the minimum number of descriptor
+    indexing features as defined in the <<features-requirements,Feature
+    Requirements>> section.
+  * The <<features-samplerFilterMinmax,samplerFilterMinmax>> feature which
+    indicates whether the implementation supports the minimum number of
+    image formats that support the
+    ename:VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_MINMAX_BIT feature bit as
+    defined by the
+    <<limits-filterMinmaxSingleComponentFormats-minimum-requirements,pname:filterMinmaxSingleComponentFormats>>
+    property minimum requirements.
+  * The
+    <<limits-framebufferIntegerColorSampleCounts,framebufferIntegerColorSampleCounts>>
+    limit which indicates the color sample counts that are supported for all
+    framebuffer color attachments with integer formats.
+
+include::{generated}/interfaces/VK_VERSION_1_2.txt[]
+
+endif::VK_VERSION_1_2[]
+
 
 ifdef::VK_VERSION_1_1[]
 [[versions-1.1]]
 == Version 1.1
 
+// Unfortunately we can't include titles in an open refpage block, so this
+// is a refpage-specific alternate form of the section.
+ifdef::isrefpage[]
+[open,refpage='VK_VERSION_1_1',desc='Vulkan version 1.1',type='feature',anchor='versions-1.1',xrefs='VK_VERSION_1_0 VK_VERSION_1_2']
+--
+Vulkan Version 1.1 <<extendingvulkan-compatibility-promotion,promoted>> a
+number of key extensions into the core API:
+
+include::{generated}/meta/promoted_extensions_VK_VERSION_1_1.txt[]
+
+All differences in behavior between these extensions and the corresponding
+Vulkan 1.1 functionality are summarized in the <<versions-1.1-promotions,
+Vulkan 1.1 specification appendix>>.
+
+include::{generated}/interfaces/VK_VERSION_1_1.txt[]
+--
+endif::isrefpage[]
+
+// This is the spec-specific form of the section
 [[versions-1.1-promotions]]
-Vulkan Version 1.1 _promoted_ a number of key extensions into the core API:
+Vulkan Version 1.1 <<extendingvulkan-compatibility-promotion,promoted>> a
+number of key extensions into the core API:
 
-include::meta/promoted_extensions_VK_VERSION_1_1.txt[]
+include::{generated}/meta/promoted_extensions_VK_VERSION_1_1.txt[]
 
-The only changes to the functionality added by these extensions were to
-`VK_KHR_shader_draw_parameters`, which had a
-<<features-features-shaderDrawParameters, feature bit>> added to determine
-support in the core API, and
-<<features-features-variablePointersStorageBuffer,
-pname:variablePointersStorageBuffer>> from `VK_KHR_variable_pointers` was
-made optional.
+All differences in behavior between these extensions and the corresponding
+Vulkan 1.1 functionality are summarized below.
+
+=== Differences relative to `VK_KHR_16bit_storage`
+
+If the `apiext:VK_KHR_16bit_storage` extension is not supported, support for
+the <<features-storageBuffer16BitAccess, pname:storageBuffer16BitAccess>>
+feature is optional.
+Support for this feature is defined by
+slink:VkPhysicalDevice16BitStorageFeatures::pname:storageBuffer16BitAccess
+ifdef::VK_VERSION_1_2[]
+or slink:VkPhysicalDeviceVulkan11Features::pname:storageBuffer16BitAccess
+endif::VK_VERSION_1_2[]
+when queried via flink:vkGetPhysicalDeviceFeatures2.
+
+=== Differences relative to `VK_KHR_sampler_ycbcr_conversion`
+
+If the `apiext:VK_KHR_sampler_ycbcr_conversion` extension is not supported,
+support for the
+<<features-samplerYcbcrConversion,pname:samplerYcbcrConversion>> feature is
+optional.
+Support for this feature is defined by
+slink:VkPhysicalDeviceSamplerYcbcrConversionFeatures::pname:samplerYcbcrConversion
+ifdef::VK_VERSION_1_2[]
+or slink:VkPhysicalDeviceVulkan11Features::pname:samplerYcbcrConversion
+endif::VK_VERSION_1_2[]
+when queried via flink:vkGetPhysicalDeviceFeatures2.
+
+=== Differences relative to `VK_KHR_shader_draw_parameters`
+
+If the `apiext:VK_KHR_shader_draw_parameters` extension is not supported,
+support for the
+{spirv}/KHR/SPV_KHR_shader_draw_parameters.html[`SPV_KHR_shader_draw_parameters`]
+SPIR-V extension is optional.
+Support for this feature is defined by
+slink:VkPhysicalDeviceShaderDrawParametersFeatures::pname:shaderDrawParameters
+ifdef::VK_VERSION_1_2[]
+or slink:VkPhysicalDeviceVulkan11Features::pname:shaderDrawParameters
+endif::VK_VERSION_1_2[]
+when queried via flink:vkGetPhysicalDeviceFeatures2.
+
+=== Differences relative to `VK_KHR_variable_pointers`
+
+If the `apiext:VK_KHR_variable_pointers` extension is not supported, support
+for the <<features-variablePointersStorageBuffer,
+pname:variablePointersStorageBuffer>> feature is optional.
+Support for this feature is defined by
+slink:VkPhysicalDeviceVariablePointersFeatures::pname:variablePointersStorageBuffer
+ifdef::VK_VERSION_1_2[]
+or
+slink:VkPhysicalDeviceVulkan11Features::pname:variablePointersStorageBuffer
+endif::VK_VERSION_1_2[]
+when queried via flink:vkGetPhysicalDeviceFeatures2.
+
+=== Additional Vulkan 1.1 Feature Support
 
 [[versions-1.1-new-features]]
-Additionally, Vulkan 1.1 added support for
-<<VkPhysicalDeviceSubgroupProperties, subgroup operations>>,
-<<VkPhysicalDeviceProtectedMemoryFeatures, protected memory>>, and a new
-command to <<vkEnumerateInstanceVersion, enumerate the instance version>>.
+In addition to the promoted extensions described above, Vulkan 1.1 added
+support for:
 
-=== New Object Types
+  * The <<shaders-group-operations, group operations>> and
+    <<shaders-scope-subgroup, subgroup scope>>.
+  * The <<memory-protected-memory, protected memory>> feature.
+  * A new command to enumerate the instance version:
+    flink:vkEnumerateInstanceVersion.
+  * The slink:VkPhysicalDeviceShaderDrawParametersFeatures feature query
+    struct (where the `apiext:VK_KHR_shader_draw_parameters` extension did
+    not have one).
 
-  * slink:VkDescriptorUpdateTemplate
-  * slink:VkSamplerYcbcrConversion
-
-
-=== New Defines
-
-  * dlink:VK_API_VERSION_1_1
-
-
-=== New Enum Constants
-
-  * Extending elink:VkBufferCreateFlagBits:
-  ** ename:VK_BUFFER_CREATE_PROTECTED_BIT
-  * Extending elink:VkCommandPoolCreateFlagBits:
-  ** ename:VK_COMMAND_POOL_CREATE_PROTECTED_BIT
-  * Extending elink:VkDependencyFlagBits:
-  ** ename:VK_DEPENDENCY_DEVICE_GROUP_BIT
-  ** ename:VK_DEPENDENCY_VIEW_LOCAL_BIT
-  * Extending elink:VkDeviceQueueCreateFlagBits:
-  ** ename:VK_DEVICE_QUEUE_CREATE_PROTECTED_BIT
-  * Extending elink:VkFormat:
-  ** ename:VK_FORMAT_G8B8G8R8_422_UNORM
-  ** ename:VK_FORMAT_B8G8R8G8_422_UNORM
-  ** ename:VK_FORMAT_G8_B8_R8_3PLANE_420_UNORM
-  ** ename:VK_FORMAT_G8_B8R8_2PLANE_420_UNORM
-  ** ename:VK_FORMAT_G8_B8_R8_3PLANE_422_UNORM
-  ** ename:VK_FORMAT_G8_B8R8_2PLANE_422_UNORM
-  ** ename:VK_FORMAT_G8_B8_R8_3PLANE_444_UNORM
-  ** ename:VK_FORMAT_R10X6_UNORM_PACK16
-  ** ename:VK_FORMAT_R10X6G10X6_UNORM_2PACK16
-  ** ename:VK_FORMAT_R10X6G10X6B10X6A10X6_UNORM_4PACK16
-  ** ename:VK_FORMAT_G10X6B10X6G10X6R10X6_422_UNORM_4PACK16
-  ** ename:VK_FORMAT_B10X6G10X6R10X6G10X6_422_UNORM_4PACK16
-  ** ename:VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_420_UNORM_3PACK16
-  ** ename:VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16
-  ** ename:VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_422_UNORM_3PACK16
-  ** ename:VK_FORMAT_G10X6_B10X6R10X6_2PLANE_422_UNORM_3PACK16
-  ** ename:VK_FORMAT_G10X6_B10X6_R10X6_3PLANE_444_UNORM_3PACK16
-  ** ename:VK_FORMAT_R12X4_UNORM_PACK16
-  ** ename:VK_FORMAT_R12X4G12X4_UNORM_2PACK16
-  ** ename:VK_FORMAT_R12X4G12X4B12X4A12X4_UNORM_4PACK16
-  ** ename:VK_FORMAT_G12X4B12X4G12X4R12X4_422_UNORM_4PACK16
-  ** ename:VK_FORMAT_B12X4G12X4R12X4G12X4_422_UNORM_4PACK16
-  ** ename:VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_420_UNORM_3PACK16
-  ** ename:VK_FORMAT_G12X4_B12X4R12X4_2PLANE_420_UNORM_3PACK16
-  ** ename:VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_422_UNORM_3PACK16
-  ** ename:VK_FORMAT_G12X4_B12X4R12X4_2PLANE_422_UNORM_3PACK16
-  ** ename:VK_FORMAT_G12X4_B12X4_R12X4_3PLANE_444_UNORM_3PACK16
-  ** ename:VK_FORMAT_G16B16G16R16_422_UNORM
-  ** ename:VK_FORMAT_B16G16R16G16_422_UNORM
-  ** ename:VK_FORMAT_G16_B16_R16_3PLANE_420_UNORM
-  ** ename:VK_FORMAT_G16_B16R16_2PLANE_420_UNORM
-  ** ename:VK_FORMAT_G16_B16_R16_3PLANE_422_UNORM
-  ** ename:VK_FORMAT_G16_B16R16_2PLANE_422_UNORM
-  ** ename:VK_FORMAT_G16_B16_R16_3PLANE_444_UNORM
-  * Extending elink:VkFormatFeatureFlagBits:
-  ** ename:VK_FORMAT_FEATURE_TRANSFER_SRC_BIT
-  ** ename:VK_FORMAT_FEATURE_TRANSFER_DST_BIT
-  ** ename:VK_FORMAT_FEATURE_MIDPOINT_CHROMA_SAMPLES_BIT
-  ** ename:VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_LINEAR_FILTER_BIT
-  ** ename:VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_SEPARATE_RECONSTRUCTION_FILTER_BIT
-  ** ename:VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_CHROMA_RECONSTRUCTION_EXPLICIT_BIT
-  ** ename:VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_CHROMA_RECONSTRUCTION_EXPLICIT_FORCEABLE_BIT
-  ** ename:VK_FORMAT_FEATURE_DISJOINT_BIT
-  ** ename:VK_FORMAT_FEATURE_COSITED_CHROMA_SAMPLES_BIT
-  * Extending elink:VkImageAspectFlagBits:
-  ** ename:VK_IMAGE_ASPECT_PLANE_0_BIT
-  ** ename:VK_IMAGE_ASPECT_PLANE_1_BIT
-  ** ename:VK_IMAGE_ASPECT_PLANE_2_BIT
-  * Extending elink:VkImageCreateFlagBits:
-  ** ename:VK_IMAGE_CREATE_ALIAS_BIT
-  ** ename:VK_IMAGE_CREATE_SPLIT_INSTANCE_BIND_REGIONS_BIT
-  ** ename:VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT
-  ** ename:VK_IMAGE_CREATE_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT
-  ** ename:VK_IMAGE_CREATE_EXTENDED_USAGE_BIT
-  ** ename:VK_IMAGE_CREATE_PROTECTED_BIT
-  ** ename:VK_IMAGE_CREATE_DISJOINT_BIT
-  * Extending elink:VkImageCreateFlagBits:
-  ** ename:VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL
-  ** ename:VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL
-  * Extending elink:VkMemoryHeapFlagBits:
-  ** ename:VK_MEMORY_HEAP_MULTI_INSTANCE_BIT
-  * Extending elink:VkMemoryPropertyFlagBits:
-  ** ename:VK_MEMORY_PROPERTY_PROTECTED_BIT
-  * Extending elink:VkObjectType:
-  ** ename:VK_OBJECT_TYPE_SAMPLER_YCBCR_CONVERSION
-  ** ename:VK_OBJECT_TYPE_DESCRIPTOR_UPDATE_TEMPLATE
-  * Extending elink:VkPipelineCreateFlagBits:
-  ** ename:VK_PIPELINE_CREATE_VIEW_INDEX_FROM_DEVICE_INDEX_BIT
-  ** ename:VK_PIPELINE_CREATE_DISPATCH_BASE
-  * Extending elink:VkQueueFlagBits:
-  ** ename:VK_QUEUE_PROTECTED_BIT
-  * Extending elink:VkResult:
-  ** ename:VK_ERROR_OUT_OF_POOL_MEMORY
-  ** ename:VK_ERROR_INVALID_EXTERNAL_HANDLE
-  * Extending elink:VkStructureType:
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES
-  ** ename:VK_STRUCTURE_TYPE_BIND_BUFFER_MEMORY_INFO
-  ** ename:VK_STRUCTURE_TYPE_BIND_IMAGE_MEMORY_INFO
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES
-  ** ename:VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS
-  ** ename:VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO
-  ** ename:VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO
-  ** ename:VK_STRUCTURE_TYPE_DEVICE_GROUP_RENDER_PASS_BEGIN_INFO
-  ** ename:VK_STRUCTURE_TYPE_DEVICE_GROUP_COMMAND_BUFFER_BEGIN_INFO
-  ** ename:VK_STRUCTURE_TYPE_DEVICE_GROUP_SUBMIT_INFO
-  ** ename:VK_STRUCTURE_TYPE_DEVICE_GROUP_BIND_SPARSE_INFO
-  ** ename:VK_STRUCTURE_TYPE_BIND_BUFFER_MEMORY_DEVICE_GROUP_INFO
-  ** ename:VK_STRUCTURE_TYPE_BIND_IMAGE_MEMORY_DEVICE_GROUP_INFO
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GROUP_PROPERTIES
-  ** ename:VK_STRUCTURE_TYPE_DEVICE_GROUP_DEVICE_CREATE_INFO
-  ** ename:VK_STRUCTURE_TYPE_BUFFER_MEMORY_REQUIREMENTS_INFO_2
-  ** ename:VK_STRUCTURE_TYPE_IMAGE_MEMORY_REQUIREMENTS_INFO_2
-  ** ename:VK_STRUCTURE_TYPE_IMAGE_SPARSE_MEMORY_REQUIREMENTS_INFO_2
-  ** ename:VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2
-  ** ename:VK_STRUCTURE_TYPE_SPARSE_IMAGE_MEMORY_REQUIREMENTS_2
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2
-  ** ename:VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_2
-  ** ename:VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2
-  ** ename:VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2
-  ** ename:VK_STRUCTURE_TYPE_SPARSE_IMAGE_FORMAT_PROPERTIES_2
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SPARSE_IMAGE_FORMAT_INFO_2
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_POINT_CLIPPING_PROPERTIES
-  ** ename:VK_STRUCTURE_TYPE_RENDER_PASS_INPUT_ATTACHMENT_ASPECT_CREATE_INFO
-  ** ename:VK_STRUCTURE_TYPE_IMAGE_VIEW_USAGE_CREATE_INFO
-  ** ename:VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_DOMAIN_ORIGIN_STATE_CREATE_INFO
-  ** ename:VK_STRUCTURE_TYPE_RENDER_PASS_MULTIVIEW_CREATE_INFO
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_FEATURES
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_PROPERTIES
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VARIABLE_POINTER_FEATURES
-  ** ename:VK_STRUCTURE_TYPE_PROTECTED_SUBMIT_INFO
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROTECTED_MEMORY_FEATURES
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROTECTED_MEMORY_PROPERTIES
-  ** ename:VK_STRUCTURE_TYPE_DEVICE_QUEUE_INFO_2
-  ** ename:VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_CREATE_INFO
-  ** ename:VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_INFO
-  ** ename:VK_STRUCTURE_TYPE_BIND_IMAGE_PLANE_MEMORY_INFO
-  ** ename:VK_STRUCTURE_TYPE_IMAGE_PLANE_MEMORY_REQUIREMENTS_INFO
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_YCBCR_CONVERSION_FEATURES
-  ** ename:VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_IMAGE_FORMAT_PROPERTIES
-  ** ename:VK_STRUCTURE_TYPE_DESCRIPTOR_UPDATE_TEMPLATE_CREATE_INFO
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO
-  ** ename:VK_STRUCTURE_TYPE_EXTERNAL_IMAGE_FORMAT_PROPERTIES
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_BUFFER_INFO
-  ** ename:VK_STRUCTURE_TYPE_EXTERNAL_BUFFER_PROPERTIES
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES
-  ** ename:VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO
-  ** ename:VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO
-  ** ename:VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_FENCE_INFO
-  ** ename:VK_STRUCTURE_TYPE_EXTERNAL_FENCE_PROPERTIES
-  ** ename:VK_STRUCTURE_TYPE_EXPORT_FENCE_CREATE_INFO
-  ** ename:VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_SEMAPHORE_INFO
-  ** ename:VK_STRUCTURE_TYPE_EXTERNAL_SEMAPHORE_PROPERTIES
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_3_PROPERTIES
-  ** ename:VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_SUPPORT
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETER_FEATURES
-
-
-=== New Enums
-
-  * elink:VkChromaLocation
-  * elink:VkDescriptorUpdateTemplateType
-  * elink:VkExternalFenceFeatureFlagBits
-  * elink:VkExternalFenceHandleTypeFlagBits
-  * elink:VkExternalMemoryFeatureFlagBits
-  * elink:VkExternalMemoryHandleTypeFlagBits
-  * elink:VkExternalSemaphoreFeatureFlagBits
-  * elink:VkExternalSemaphoreHandleTypeFlagBits
-  * elink:VkFenceImportFlagBits
-  * elink:VkMemoryAllocateFlagBits
-  * elink:VkPeerMemoryFeatureFlagBits
-  * elink:VkPointClippingBehavior
-  * elink:VkSamplerYcbcrModelConversion
-  * elink:VkSamplerYcbcrRange
-  * elink:VkSemaphoreImportFlagBits
-  * elink:VkSubgroupFeatureFlagBits
-  * elink:VkTessellationDomainOrigin
-  * elink:VkCommandPoolTrimFlags
-  * elink:VkDescriptorUpdateTemplateCreateFlags
-  * elink:VkExternalFenceFeatureFlags
-  * elink:VkExternalFenceHandleTypeFlags
-  * elink:VkExternalMemoryFeatureFlags
-  * elink:VkExternalMemoryHandleTypeFlags
-  * elink:VkExternalSemaphoreFeatureFlags
-  * elink:VkExternalSemaphoreHandleTypeFlags
-  * elink:VkFenceImportFlags
-  * elink:VkMemoryAllocateFlags
-  * elink:VkPeerMemoryFeatureFlags
-  * elink:VkSemaphoreImportFlags
-  * elink:VkSubgroupFeatureFlags
-
-
-=== New Structures
-
-  * slink:VkBindBufferMemoryDeviceGroupInfo
-  * slink:VkBindBufferMemoryInfo
-  * slink:VkBindImageMemoryDeviceGroupInfo
-  * slink:VkBindImageMemoryInfo
-  * slink:VkBindImagePlaneMemoryInfo
-  * slink:VkBufferMemoryRequirementsInfo2
-  * slink:VkDescriptorSetLayoutSupport
-  * slink:VkDescriptorUpdateTemplateCreateInfo
-  * slink:VkDescriptorUpdateTemplateEntry
-  * slink:VkDeviceGroupBindSparseInfo
-  * slink:VkDeviceGroupCommandBufferBeginInfo
-  * slink:VkDeviceGroupDeviceCreateInfo
-  * slink:VkDeviceGroupRenderPassBeginInfo
-  * slink:VkDeviceGroupSubmitInfo
-  * slink:VkDeviceQueueInfo2
-  * slink:VkExportFenceCreateInfo
-  * slink:VkExportMemoryAllocateInfo
-  * slink:VkExportSemaphoreCreateInfo
-  * slink:VkExternalBufferProperties
-  * slink:VkExternalFenceProperties
-  * slink:VkExternalImageFormatProperties
-  * slink:VkExternalMemoryBufferCreateInfo
-  * slink:VkExternalMemoryImageCreateInfo
-  * slink:VkExternalMemoryProperties
-  * slink:VkExternalSemaphoreProperties
-  * slink:VkFormatProperties2
-  * slink:VkImageFormatProperties2
-  * slink:VkImageMemoryRequirementsInfo2
-  * slink:VkImagePlaneMemoryRequirementsInfo
-  * slink:VkImageSparseMemoryRequirementsInfo2
-  * slink:VkImageViewUsageCreateInfo
-  * slink:VkInputAttachmentAspectReference
-  * slink:VkMemoryAllocateFlagsInfo
-  * slink:VkMemoryDedicatedAllocateInfo
-  * slink:VkMemoryDedicatedRequirements
-  * slink:VkMemoryRequirements2
-  * slink:VkPhysicalDevice16BitStorageFeatures
-  * slink:VkPhysicalDeviceExternalBufferInfo
-  * slink:VkPhysicalDeviceExternalFenceInfo
-  * slink:VkPhysicalDeviceExternalImageFormatInfo
-  * slink:VkPhysicalDeviceExternalSemaphoreInfo
-  * slink:VkPhysicalDeviceFeatures2
-  * slink:VkPhysicalDeviceGroupProperties
-  * slink:VkPhysicalDeviceIDProperties
-  * slink:VkPhysicalDeviceImageFormatInfo2
-  * slink:VkPhysicalDeviceMaintenance3Properties
-  * slink:VkPhysicalDeviceMemoryProperties2
-  * slink:VkPhysicalDeviceMultiviewFeatures
-  * slink:VkPhysicalDeviceMultiviewProperties
-  * slink:VkPhysicalDevicePointClippingProperties
-  * slink:VkPhysicalDeviceProperties2
-  * slink:VkPhysicalDeviceProtectedMemoryFeatures
-  * slink:VkPhysicalDeviceProtectedMemoryProperties
-  * slink:VkPhysicalDeviceSamplerYcbcrConversionFeatures
-  * slink:VkPhysicalDeviceShaderDrawParameterFeatures
-  * slink:VkPhysicalDeviceSparseImageFormatInfo2
-  * slink:VkPhysicalDeviceSubgroupProperties
-  * slink:VkPhysicalDeviceVariablePointerFeatures
-  * slink:VkPipelineTessellationDomainOriginStateCreateInfo
-  * slink:VkProtectedSubmitInfo
-  * slink:VkQueueFamilyProperties2
-  * slink:VkRenderPassInputAttachmentAspectCreateInfo
-  * slink:VkRenderPassMultiviewCreateInfo
-  * slink:VkSamplerYcbcrConversionCreateInfo
-  * slink:VkSamplerYcbcrConversionImageFormatProperties
-  * slink:VkSamplerYcbcrConversionInfo
-  * slink:VkSparseImageFormatProperties2
-  * slink:VkSparseImageMemoryRequirements2
-
-
-=== New Functions
-
-  * flink:vkBindBufferMemory2
-  * flink:vkBindImageMemory2
-  * flink:vkCmdDispatchBase
-  * flink:vkCmdSetDeviceMask
-  * flink:vkCreateDescriptorUpdateTemplate
-  * flink:vkCreateSamplerYcbcrConversion
-  * flink:vkDestroyDescriptorUpdateTemplate
-  * flink:vkDestroySamplerYcbcrConversion
-  * flink:vkEnumerateInstanceVersion
-  * flink:vkEnumeratePhysicalDeviceGroups
-  * flink:vkGetBufferMemoryRequirements2
-  * flink:vkGetDescriptorSetLayoutSupport
-  * flink:vkGetDeviceGroupPeerMemoryFeatures
-  * flink:vkGetDeviceQueue2
-  * flink:vkGetImageMemoryRequirements2
-  * flink:vkGetImageSparseMemoryRequirements2
-  * flink:vkGetPhysicalDeviceExternalBufferProperties
-  * flink:vkGetPhysicalDeviceExternalFenceProperties
-  * flink:vkGetPhysicalDeviceExternalSemaphoreProperties
-  * flink:vkGetPhysicalDeviceFeatures2
-  * flink:vkGetPhysicalDeviceFormatProperties2
-  * flink:vkGetPhysicalDeviceImageFormatProperties2
-  * flink:vkGetPhysicalDeviceMemoryProperties2
-  * flink:vkGetPhysicalDeviceProperties2
-  * flink:vkGetPhysicalDeviceQueueFamilyProperties2
-  * flink:vkGetPhysicalDeviceSparseImageFormatProperties2
-  * flink:vkTrimCommandPool
-  * flink:vkUpdateDescriptorSetWithTemplate
+include::{generated}/interfaces/VK_VERSION_1_1.txt[]
 
 endif::VK_VERSION_1_1[]
+
+
+[[versions-1.0]]
+== Version 1.0
+
+[open,refpage='VK_VERSION_1_0',desc='Vulkan version 1.0',type='feature',anchor='versions-1.0',xrefs='VK_VERSION_1_1 VK_VERSION_1_2']
+--
+Vulkan Version 1.0 was the initial release of the Vulkan API.
+
+include::{generated}/interfaces/VK_VERSION_1_0.txt[]
+--

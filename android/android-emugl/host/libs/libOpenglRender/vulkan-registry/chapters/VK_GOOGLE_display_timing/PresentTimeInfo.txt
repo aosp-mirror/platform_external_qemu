@@ -1,8 +1,11 @@
+// Copyright (c) 2018-2020 Google LLC
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
 
 [open,refpage='VkPresentTimesInfoGOOGLE',desc='The earliest time each image should be presented',type='structs']
 --
-
-When the `<<VK_GOOGLE_display_timing>>` extension is enabled, additional
+When the `apiext:VK_GOOGLE_display_timing` extension is enabled, additional
 fields can: be specified that allow an application to specify the earliest
 time that an image should be displayed.
 This allows an application to avoid stutter that is caused by an image being
@@ -11,16 +14,17 @@ Such stuttering can occur with both fixed and variable-refresh-rate
 displays, because stuttering occurs when the geometry is not correctly
 positioned for when the image is displayed.
 An application can: instruct the presentation engine that an image should
-not be displayed earlier than a specified time by including the
-sname:VkPresentTimesInfoGOOGLE structure in the pname:pNext chain of the
+not be displayed earlier than a specified time by adding a
+sname:VkPresentTimesInfoGOOGLE structure to the pname:pNext chain of the
 sname:VkPresentInfoKHR structure.
 
 The sname:VkPresentTimesInfoGOOGLE structure is defined as:
 
-include::../../api/structs/VkPresentTimesInfoGOOGLE.txt[]
+include::{generated}/api/structs/VkPresentTimesInfoGOOGLE.txt[]
 
   * pname:sType is the type of this structure.
-  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:pNext is `NULL` or a pointer to a structure extending this
+    structure.
   * pname:swapchainCount is the number of swapchains being presented to by
     this command.
   * pname:pTimes is `NULL` or a pointer to an array of
@@ -34,19 +38,18 @@ include::../../api/structs/VkPresentTimesInfoGOOGLE.txt[]
   * [[VUID-VkPresentTimesInfoGOOGLE-swapchainCount-01247]]
     pname:swapchainCount must: be the same value as
     sname:VkPresentInfoKHR::pname:swapchainCount, where
-    sname:VkPresentInfoKHR is in the pname:pNext chain of this
-    sname:VkPresentTimesInfoGOOGLE structure.
+    sname:VkPresentInfoKHR is included in the pname:pNext chain of this
+    sname:VkPresentTimesInfoGOOGLE structure
 ****
 
-include::../../validity/structs/VkPresentTimesInfoGOOGLE.txt[]
+include::{generated}/validity/structs/VkPresentTimesInfoGOOGLE.txt[]
 --
 
 [open,refpage='VkPresentTimeGOOGLE',desc='The earliest time image should be presented',type='structs']
 --
-
 The sname:VkPresentTimeGOOGLE structure is defined as:
 
-include::../../api/structs/VkPresentTimeGOOGLE.txt[]
+include::{generated}/api/structs/VkPresentTimeGOOGLE.txt[]
 
   * pname:presentID is an application-provided identification value, that
     can: be used with the results of
@@ -62,6 +65,5 @@ include::../../api/structs/VkPresentTimeGOOGLE.txt[]
     A value of zero specifies that the presentation engine may: display the
     image at any time.
     This is useful when the application desires to provide pname:presentID,
-    but doesn't need a specific pname:desiredPresentTime.
-
+    but does not need a specific pname:desiredPresentTime.
 --

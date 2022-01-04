@@ -1,42 +1,26 @@
-include::meta/VK_EXT_vertex_attribute_divisor.txt[]
+// Copyright 2017-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_EXT_vertex_attribute_divisor.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
-    2018-07-16
+    2018-08-03
 *IP Status*::
     No known IP claims.
 *Contributors*::
   - Vikram Kushwaha, NVIDIA
   - Jason Ekstrand, Intel
 
+=== Description
+
 This extension allows instance-rate vertex attributes to be repeated for
 certain number of instances instead of advancing for every instance when
 instanced rendering is enabled.
 
-=== New Object Types
-
-None.
-
-=== New Enum Constants
-
-Extending elink:VkStructureType:
-
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_ATTRIBUTE_DIVISOR_PROPERTIES_EXT
-  ** ename:VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_DIVISOR_STATE_CREATE_INFO_EXT
-
-=== New Enums
-
-None.
-
-=== New Structures
-
-  * Extending slink:VkPipelineVertexInputStateCreateInfo:
-  ** slink:VkPipelineVertexInputDivisorStateCreateInfoEXT
-  * slink:VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT
-  * slink:VkVertexInputBindingDivisorDescriptionEXT
-
-=== New Functions
-
-None.
+include::{generated}/interfaces/VK_EXT_vertex_attribute_divisor.txt[]
 
 === Issues
 
@@ -48,9 +32,8 @@ offsets.
 
 2) Should zero be an allowed divisor?
 
-*RESOLVED*: No.
-The zero case in OpenGL is handled in Vulkan by setting the pname:inputRate
-on the binding to ename:VK_VERTEX_INPUT_RATE_VERTEX.
+*RESOLVED*: Yes.
+A zero divisor means the vertex attribute is repeated for all instances.
 
 
 === Examples
@@ -98,6 +81,9 @@ application could use the following set of structures:
   * Revision 1, 2017-12-04 (Vikram Kushwaha)
     - First Version
   * Revision 2, 2018-07-16 (Jason Ekstrand)
-    - Adjust the interaction between fname:divisor and pname:firstInstance
+    - Adjust the interaction between pname:divisor and pname:firstInstance
       to match the OpenGL convention.
     - Disallow divisors of zero.
+  * Revision 3, 2018-08-03 (Vikram Kushwaha)
+    - Allow a zero divisor.
+    - Add a physical device features structure to query/enable this feature.
