@@ -173,6 +173,14 @@ void handlemap_VkMemoryBarrier(
     }
 }
 
+void handlemap_VkPipelineCacheHeaderVersionOne(
+    VulkanHandleMapping* handlemap,
+    VkPipelineCacheHeaderVersionOne* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+}
+
 void handlemap_VkAllocationCallbacks(
     VulkanHandleMapping* handlemap,
     VkAllocationCallbacks* toMap)
@@ -3427,6 +3435,409 @@ void handlemap_VkWin32SurfaceCreateInfoKHR(
 #endif
 #ifdef VK_KHR_sampler_mirror_clamp_to_edge
 #endif
+#ifdef VK_KHR_video_queue
+void handlemap_VkVideoQueueFamilyProperties2KHR(
+    VulkanHandleMapping* handlemap,
+    VkVideoQueueFamilyProperties2KHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVideoProfileKHR(
+    VulkanHandleMapping* handlemap,
+    VkVideoProfileKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVideoProfilesKHR(
+    VulkanHandleMapping* handlemap,
+    VkVideoProfilesKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap->pProfiles)
+    {
+        handlemap_VkVideoProfileKHR(handlemap, (VkVideoProfileKHR*)(toMap->pProfiles));
+    }
+}
+
+void handlemap_VkVideoCapabilitiesKHR(
+    VulkanHandleMapping* handlemap,
+    VkVideoCapabilitiesKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->videoPictureExtentGranularity));
+    handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->minExtent));
+    handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->maxExtent));
+}
+
+void handlemap_VkPhysicalDeviceVideoFormatInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceVideoFormatInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap->pVideoProfiles)
+    {
+        handlemap_VkVideoProfilesKHR(handlemap, (VkVideoProfilesKHR*)(toMap->pVideoProfiles));
+    }
+}
+
+void handlemap_VkVideoFormatPropertiesKHR(
+    VulkanHandleMapping* handlemap,
+    VkVideoFormatPropertiesKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVideoPictureResourceKHR(
+    VulkanHandleMapping* handlemap,
+    VkVideoPictureResourceKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap_VkOffset2D(handlemap, (VkOffset2D*)(&toMap->codedOffset));
+    handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->codedExtent));
+    handlemap->mapHandles_VkImageView((VkImageView*)&toMap->imageViewBinding);
+}
+
+void handlemap_VkVideoReferenceSlotKHR(
+    VulkanHandleMapping* handlemap,
+    VkVideoReferenceSlotKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap->pPictureResource)
+    {
+        handlemap_VkVideoPictureResourceKHR(handlemap, (VkVideoPictureResourceKHR*)(toMap->pPictureResource));
+    }
+}
+
+void handlemap_VkVideoGetMemoryPropertiesKHR(
+    VulkanHandleMapping* handlemap,
+    VkVideoGetMemoryPropertiesKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap->pMemoryRequirements)
+    {
+        handlemap_VkMemoryRequirements2(handlemap, (VkMemoryRequirements2*)(toMap->pMemoryRequirements));
+    }
+}
+
+void handlemap_VkVideoBindMemoryKHR(
+    VulkanHandleMapping* handlemap,
+    VkVideoBindMemoryKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)&toMap->memory);
+}
+
+void handlemap_VkVideoSessionCreateInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkVideoSessionCreateInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap->pVideoProfile)
+    {
+        handlemap_VkVideoProfileKHR(handlemap, (VkVideoProfileKHR*)(toMap->pVideoProfile));
+    }
+    handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->maxCodedExtent));
+}
+
+void handlemap_VkVideoSessionParametersCreateInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkVideoSessionParametersCreateInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkVideoSessionParametersKHR((VkVideoSessionParametersKHR*)&toMap->videoSessionParametersTemplate);
+    handlemap->mapHandles_VkVideoSessionKHR((VkVideoSessionKHR*)&toMap->videoSession);
+}
+
+void handlemap_VkVideoSessionParametersUpdateInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkVideoSessionParametersUpdateInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVideoBeginCodingInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkVideoBeginCodingInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkVideoSessionKHR((VkVideoSessionKHR*)&toMap->videoSession);
+    handlemap->mapHandles_VkVideoSessionParametersKHR((VkVideoSessionParametersKHR*)&toMap->videoSessionParameters);
+    if (toMap)
+    {
+        if (toMap->pReferenceSlots)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->referenceSlotCount; ++i)
+            {
+                handlemap_VkVideoReferenceSlotKHR(handlemap, (VkVideoReferenceSlotKHR*)(toMap->pReferenceSlots + i));
+            }
+        }
+    }
+}
+
+void handlemap_VkVideoEndCodingInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkVideoEndCodingInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVideoCodingControlInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkVideoCodingControlInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_KHR_video_decode_queue
+void handlemap_VkVideoDecodeInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkVideoDecodeInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap_VkOffset2D(handlemap, (VkOffset2D*)(&toMap->codedOffset));
+    handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->codedExtent));
+    handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->srcBuffer);
+    handlemap_VkVideoPictureResourceKHR(handlemap, (VkVideoPictureResourceKHR*)(&toMap->dstPictureResource));
+    if (toMap->pSetupReferenceSlot)
+    {
+        handlemap_VkVideoReferenceSlotKHR(handlemap, (VkVideoReferenceSlotKHR*)(toMap->pSetupReferenceSlot));
+    }
+    if (toMap)
+    {
+        if (toMap->pReferenceSlots)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->referenceSlotCount; ++i)
+            {
+                handlemap_VkVideoReferenceSlotKHR(handlemap, (VkVideoReferenceSlotKHR*)(toMap->pReferenceSlots + i));
+            }
+        }
+    }
+}
+
+#endif
+#ifdef VK_KHR_dynamic_rendering
+void handlemap_VkRenderingAttachmentInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkRenderingAttachmentInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkImageView((VkImageView*)&toMap->imageView);
+    handlemap->mapHandles_VkImageView((VkImageView*)&toMap->resolveImageView);
+    handlemap_VkClearValue(handlemap, (VkClearValue*)(&toMap->clearValue));
+}
+
+void handlemap_VkRenderingInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkRenderingInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap_VkRect2D(handlemap, (VkRect2D*)(&toMap->renderArea));
+    if (toMap)
+    {
+        if (toMap->pColorAttachments)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->colorAttachmentCount; ++i)
+            {
+                handlemap_VkRenderingAttachmentInfoKHR(handlemap, (VkRenderingAttachmentInfoKHR*)(toMap->pColorAttachments + i));
+            }
+        }
+    }
+    if (toMap->pDepthAttachment)
+    {
+        handlemap_VkRenderingAttachmentInfoKHR(handlemap, (VkRenderingAttachmentInfoKHR*)(toMap->pDepthAttachment));
+    }
+    if (toMap->pStencilAttachment)
+    {
+        handlemap_VkRenderingAttachmentInfoKHR(handlemap, (VkRenderingAttachmentInfoKHR*)(toMap->pStencilAttachment));
+    }
+}
+
+void handlemap_VkPipelineRenderingCreateInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkPipelineRenderingCreateInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkPhysicalDeviceDynamicRenderingFeaturesKHR(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceDynamicRenderingFeaturesKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkCommandBufferInheritanceRenderingInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkCommandBufferInheritanceRenderingInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkRenderingFragmentShadingRateAttachmentInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkRenderingFragmentShadingRateAttachmentInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkImageView((VkImageView*)&toMap->imageView);
+    handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->shadingRateAttachmentTexelSize));
+}
+
+void handlemap_VkRenderingFragmentDensityMapAttachmentInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkRenderingFragmentDensityMapAttachmentInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkImageView((VkImageView*)&toMap->imageView);
+}
+
+void handlemap_VkAttachmentSampleCountInfoAMD(
+    VulkanHandleMapping* handlemap,
+    VkAttachmentSampleCountInfoAMD* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkMultiviewPerViewAttributesInfoNVX(
+    VulkanHandleMapping* handlemap,
+    VkMultiviewPerViewAttributesInfoNVX* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
 #ifdef VK_KHR_multiview
 #endif
 #ifdef VK_KHR_get_physical_device_properties2
@@ -4187,6 +4598,20 @@ void handlemap_VkSurfaceProtectedCapabilitiesKHR(
 #endif
 #ifdef VK_KHR_separate_depth_stencil_layouts
 #endif
+#ifdef VK_KHR_present_wait
+void handlemap_VkPhysicalDevicePresentWaitFeaturesKHR(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDevicePresentWaitFeaturesKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
 #ifdef VK_KHR_uniform_buffer_standard_layout
 #endif
 #ifdef VK_KHR_buffer_device_address
@@ -4278,6 +4703,32 @@ void handlemap_VkPipelineExecutableInternalRepresentationKHR(
 }
 
 #endif
+#ifdef VK_KHR_shader_integer_dot_product
+void handlemap_VkPhysicalDeviceShaderIntegerDotProductFeaturesKHR(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceShaderIntegerDotProductFeaturesKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkPhysicalDeviceShaderIntegerDotProductPropertiesKHR(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceShaderIntegerDotProductPropertiesKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
 #ifdef VK_KHR_pipeline_library
 void handlemap_VkPipelineLibraryCreateInfoKHR(
     VulkanHandleMapping* handlemap,
@@ -4297,6 +4748,304 @@ void handlemap_VkPipelineLibraryCreateInfoKHR(
 
 #endif
 #ifdef VK_KHR_shader_non_semantic_info
+#endif
+#ifdef VK_KHR_present_id
+void handlemap_VkPresentIdKHR(
+    VulkanHandleMapping* handlemap,
+    VkPresentIdKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkPhysicalDevicePresentIdFeaturesKHR(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDevicePresentIdFeaturesKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_KHR_video_encode_queue
+void handlemap_VkVideoEncodeInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->codedExtent));
+    handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->dstBitstreamBuffer);
+    handlemap_VkVideoPictureResourceKHR(handlemap, (VkVideoPictureResourceKHR*)(&toMap->srcPictureResource));
+    if (toMap->pSetupReferenceSlot)
+    {
+        handlemap_VkVideoReferenceSlotKHR(handlemap, (VkVideoReferenceSlotKHR*)(toMap->pSetupReferenceSlot));
+    }
+    if (toMap)
+    {
+        if (toMap->pReferenceSlots)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->referenceSlotCount; ++i)
+            {
+                handlemap_VkVideoReferenceSlotKHR(handlemap, (VkVideoReferenceSlotKHR*)(toMap->pReferenceSlots + i));
+            }
+        }
+    }
+}
+
+void handlemap_VkVideoEncodeRateControlInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeRateControlInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_KHR_synchronization2
+void handlemap_VkMemoryBarrier2KHR(
+    VulkanHandleMapping* handlemap,
+    VkMemoryBarrier2KHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkBufferMemoryBarrier2KHR(
+    VulkanHandleMapping* handlemap,
+    VkBufferMemoryBarrier2KHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkBuffer((VkBuffer*)&toMap->buffer);
+}
+
+void handlemap_VkImageMemoryBarrier2KHR(
+    VulkanHandleMapping* handlemap,
+    VkImageMemoryBarrier2KHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkImage((VkImage*)&toMap->image);
+    handlemap_VkImageSubresourceRange(handlemap, (VkImageSubresourceRange*)(&toMap->subresourceRange));
+}
+
+void handlemap_VkDependencyInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkDependencyInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap)
+    {
+        if (toMap->pMemoryBarriers)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->memoryBarrierCount; ++i)
+            {
+                handlemap_VkMemoryBarrier2KHR(handlemap, (VkMemoryBarrier2KHR*)(toMap->pMemoryBarriers + i));
+            }
+        }
+    }
+    if (toMap)
+    {
+        if (toMap->pBufferMemoryBarriers)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->bufferMemoryBarrierCount; ++i)
+            {
+                handlemap_VkBufferMemoryBarrier2KHR(handlemap, (VkBufferMemoryBarrier2KHR*)(toMap->pBufferMemoryBarriers + i));
+            }
+        }
+    }
+    if (toMap)
+    {
+        if (toMap->pImageMemoryBarriers)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->imageMemoryBarrierCount; ++i)
+            {
+                handlemap_VkImageMemoryBarrier2KHR(handlemap, (VkImageMemoryBarrier2KHR*)(toMap->pImageMemoryBarriers + i));
+            }
+        }
+    }
+}
+
+void handlemap_VkSemaphoreSubmitInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkSemaphoreSubmitInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkSemaphore((VkSemaphore*)&toMap->semaphore);
+}
+
+void handlemap_VkCommandBufferSubmitInfoKHR(
+    VulkanHandleMapping* handlemap,
+    VkCommandBufferSubmitInfoKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkCommandBuffer((VkCommandBuffer*)&toMap->commandBuffer);
+}
+
+void handlemap_VkSubmitInfo2KHR(
+    VulkanHandleMapping* handlemap,
+    VkSubmitInfo2KHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap)
+    {
+        if (toMap->pWaitSemaphoreInfos)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->waitSemaphoreInfoCount; ++i)
+            {
+                handlemap_VkSemaphoreSubmitInfoKHR(handlemap, (VkSemaphoreSubmitInfoKHR*)(toMap->pWaitSemaphoreInfos + i));
+            }
+        }
+    }
+    if (toMap)
+    {
+        if (toMap->pCommandBufferInfos)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->commandBufferInfoCount; ++i)
+            {
+                handlemap_VkCommandBufferSubmitInfoKHR(handlemap, (VkCommandBufferSubmitInfoKHR*)(toMap->pCommandBufferInfos + i));
+            }
+        }
+    }
+    if (toMap)
+    {
+        if (toMap->pSignalSemaphoreInfos)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->signalSemaphoreInfoCount; ++i)
+            {
+                handlemap_VkSemaphoreSubmitInfoKHR(handlemap, (VkSemaphoreSubmitInfoKHR*)(toMap->pSignalSemaphoreInfos + i));
+            }
+        }
+    }
+}
+
+void handlemap_VkPhysicalDeviceSynchronization2FeaturesKHR(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceSynchronization2FeaturesKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkQueueFamilyCheckpointProperties2NV(
+    VulkanHandleMapping* handlemap,
+    VkQueueFamilyCheckpointProperties2NV* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkCheckpointData2NV(
+    VulkanHandleMapping* handlemap,
+    VkCheckpointData2NV* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_KHR_shader_subgroup_uniform_control_flow
+void handlemap_VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_KHR_zero_initialize_workgroup_memory
+void handlemap_VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_KHR_workgroup_memory_explicit_layout
+void handlemap_VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
 #endif
 #ifdef VK_KHR_copy_commands2
 void handlemap_VkBufferCopy2KHR(
@@ -4527,6 +5276,78 @@ void handlemap_VkResolveImageInfo2KHR(
 }
 
 #endif
+#ifdef VK_KHR_format_feature_flags2
+void handlemap_VkFormatProperties3KHR(
+    VulkanHandleMapping* handlemap,
+    VkFormatProperties3KHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_KHR_maintenance4
+void handlemap_VkPhysicalDeviceMaintenance4FeaturesKHR(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceMaintenance4FeaturesKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkPhysicalDeviceMaintenance4PropertiesKHR(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceMaintenance4PropertiesKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkDeviceBufferMemoryRequirementsKHR(
+    VulkanHandleMapping* handlemap,
+    VkDeviceBufferMemoryRequirementsKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap->pCreateInfo)
+    {
+        handlemap_VkBufferCreateInfo(handlemap, (VkBufferCreateInfo*)(toMap->pCreateInfo));
+    }
+}
+
+void handlemap_VkDeviceImageMemoryRequirementsKHR(
+    VulkanHandleMapping* handlemap,
+    VkDeviceImageMemoryRequirementsKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap->pCreateInfo)
+    {
+        handlemap_VkImageCreateInfo(handlemap, (VkImageCreateInfo*)(toMap->pCreateInfo));
+    }
+}
+
+#endif
 #ifdef VK_ANDROID_native_buffer
 void handlemap_VkNativeBufferANDROID(
     VulkanHandleMapping* handlemap,
@@ -4697,6 +5518,46 @@ void handlemap_VkPipelineRasterizationStateStreamCreateInfoEXT(
 }
 
 #endif
+#ifdef VK_NVX_binary_import
+void handlemap_VkCuModuleCreateInfoNVX(
+    VulkanHandleMapping* handlemap,
+    VkCuModuleCreateInfoNVX* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkCuFunctionCreateInfoNVX(
+    VulkanHandleMapping* handlemap,
+    VkCuFunctionCreateInfoNVX* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkCuModuleNVX((VkCuModuleNVX*)&toMap->module);
+}
+
+void handlemap_VkCuLaunchInfoNVX(
+    VulkanHandleMapping* handlemap,
+    VkCuLaunchInfoNVX* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkCuFunctionNVX((VkCuFunctionNVX*)&toMap->function);
+}
+
+#endif
 #ifdef VK_NVX_image_view_handle
 void handlemap_VkImageViewHandleInfoNVX(
     VulkanHandleMapping* handlemap,
@@ -4732,6 +5593,461 @@ void handlemap_VkImageViewAddressPropertiesNVX(
 #ifdef VK_AMD_gpu_shader_half_float
 #endif
 #ifdef VK_AMD_shader_ballot
+#endif
+#ifdef VK_EXT_video_encode_h264
+void handlemap_VkVideoEncodeH264CapabilitiesEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH264CapabilitiesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->minPictureSizeInMbs));
+    handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->maxPictureSizeInMbs));
+    handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->inputImageDataAlignment));
+    handlemap_VkExtensionProperties(handlemap, (VkExtensionProperties*)(&toMap->stdExtensionVersion));
+}
+
+void handlemap_VkVideoEncodeH264SessionCreateInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH264SessionCreateInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->maxPictureSizeInMbs));
+    if (toMap->pStdExtensionVersion)
+    {
+        handlemap_VkExtensionProperties(handlemap, (VkExtensionProperties*)(toMap->pStdExtensionVersion));
+    }
+}
+
+void handlemap_VkVideoEncodeH264SessionParametersAddInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH264SessionParametersAddInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVideoEncodeH264SessionParametersCreateInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH264SessionParametersCreateInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap->pParametersAddInfo)
+    {
+        handlemap_VkVideoEncodeH264SessionParametersAddInfoEXT(handlemap, (VkVideoEncodeH264SessionParametersAddInfoEXT*)(toMap->pParametersAddInfo));
+    }
+}
+
+void handlemap_VkVideoEncodeH264DpbSlotInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH264DpbSlotInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVideoEncodeH264NaluSliceEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH264NaluSliceEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap)
+    {
+        if (toMap->pRefFinalList0Entries)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->refFinalList0EntryCount; ++i)
+            {
+                handlemap_VkVideoEncodeH264DpbSlotInfoEXT(handlemap, (VkVideoEncodeH264DpbSlotInfoEXT*)(toMap->pRefFinalList0Entries + i));
+            }
+        }
+    }
+    if (toMap)
+    {
+        if (toMap->pRefFinalList1Entries)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->refFinalList1EntryCount; ++i)
+            {
+                handlemap_VkVideoEncodeH264DpbSlotInfoEXT(handlemap, (VkVideoEncodeH264DpbSlotInfoEXT*)(toMap->pRefFinalList1Entries + i));
+            }
+        }
+    }
+}
+
+void handlemap_VkVideoEncodeH264VclFrameInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH264VclFrameInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap)
+    {
+        if (toMap->pRefDefaultFinalList0Entries)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->refDefaultFinalList0EntryCount; ++i)
+            {
+                handlemap_VkVideoEncodeH264DpbSlotInfoEXT(handlemap, (VkVideoEncodeH264DpbSlotInfoEXT*)(toMap->pRefDefaultFinalList0Entries + i));
+            }
+        }
+    }
+    if (toMap)
+    {
+        if (toMap->pRefDefaultFinalList1Entries)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->refDefaultFinalList1EntryCount; ++i)
+            {
+                handlemap_VkVideoEncodeH264DpbSlotInfoEXT(handlemap, (VkVideoEncodeH264DpbSlotInfoEXT*)(toMap->pRefDefaultFinalList1Entries + i));
+            }
+        }
+    }
+    if (toMap)
+    {
+        if (toMap->pNaluSliceEntries)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->naluSliceEntryCount; ++i)
+            {
+                handlemap_VkVideoEncodeH264NaluSliceEXT(handlemap, (VkVideoEncodeH264NaluSliceEXT*)(toMap->pNaluSliceEntries + i));
+            }
+        }
+    }
+    if (toMap->pCurrentPictureInfo)
+    {
+        handlemap_VkVideoEncodeH264DpbSlotInfoEXT(handlemap, (VkVideoEncodeH264DpbSlotInfoEXT*)(toMap->pCurrentPictureInfo));
+    }
+}
+
+void handlemap_VkVideoEncodeH264EmitPictureParametersEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH264EmitPictureParametersEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVideoEncodeH264ProfileEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH264ProfileEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_EXT_video_encode_h265
+void handlemap_VkVideoEncodeH265CapabilitiesEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH265CapabilitiesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap_VkExtent2D(handlemap, (VkExtent2D*)(&toMap->inputImageDataAlignment));
+    handlemap_VkExtensionProperties(handlemap, (VkExtensionProperties*)(&toMap->stdExtensionVersion));
+}
+
+void handlemap_VkVideoEncodeH265SessionCreateInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH265SessionCreateInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap->pStdExtensionVersion)
+    {
+        handlemap_VkExtensionProperties(handlemap, (VkExtensionProperties*)(toMap->pStdExtensionVersion));
+    }
+}
+
+void handlemap_VkVideoEncodeH265SessionParametersAddInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH265SessionParametersAddInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVideoEncodeH265SessionParametersCreateInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH265SessionParametersCreateInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap->pParametersAddInfo)
+    {
+        handlemap_VkVideoEncodeH265SessionParametersAddInfoEXT(handlemap, (VkVideoEncodeH265SessionParametersAddInfoEXT*)(toMap->pParametersAddInfo));
+    }
+}
+
+void handlemap_VkVideoEncodeH265DpbSlotInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH265DpbSlotInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVideoEncodeH265ReferenceListsEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH265ReferenceListsEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap)
+    {
+        if (toMap->pReferenceList0Entries)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->referenceList0EntryCount; ++i)
+            {
+                handlemap_VkVideoEncodeH265DpbSlotInfoEXT(handlemap, (VkVideoEncodeH265DpbSlotInfoEXT*)(toMap->pReferenceList0Entries + i));
+            }
+        }
+    }
+    if (toMap)
+    {
+        if (toMap->pReferenceList1Entries)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->referenceList1EntryCount; ++i)
+            {
+                handlemap_VkVideoEncodeH265DpbSlotInfoEXT(handlemap, (VkVideoEncodeH265DpbSlotInfoEXT*)(toMap->pReferenceList1Entries + i));
+            }
+        }
+    }
+}
+
+void handlemap_VkVideoEncodeH265NaluSliceEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH265NaluSliceEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap->pReferenceFinalLists)
+    {
+        handlemap_VkVideoEncodeH265ReferenceListsEXT(handlemap, (VkVideoEncodeH265ReferenceListsEXT*)(toMap->pReferenceFinalLists));
+    }
+}
+
+void handlemap_VkVideoEncodeH265VclFrameInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH265VclFrameInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap->pReferenceFinalLists)
+    {
+        handlemap_VkVideoEncodeH265ReferenceListsEXT(handlemap, (VkVideoEncodeH265ReferenceListsEXT*)(toMap->pReferenceFinalLists));
+    }
+    if (toMap)
+    {
+        if (toMap->pNaluSliceEntries)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->naluSliceEntryCount; ++i)
+            {
+                handlemap_VkVideoEncodeH265NaluSliceEXT(handlemap, (VkVideoEncodeH265NaluSliceEXT*)(toMap->pNaluSliceEntries + i));
+            }
+        }
+    }
+}
+
+void handlemap_VkVideoEncodeH265EmitPictureParametersEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH265EmitPictureParametersEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVideoEncodeH265ProfileEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoEncodeH265ProfileEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_EXT_video_decode_h264
+void handlemap_VkVideoDecodeH264ProfileEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoDecodeH264ProfileEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVideoDecodeH264CapabilitiesEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoDecodeH264CapabilitiesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap_VkOffset2D(handlemap, (VkOffset2D*)(&toMap->fieldOffsetGranularity));
+    handlemap_VkExtensionProperties(handlemap, (VkExtensionProperties*)(&toMap->stdExtensionVersion));
+}
+
+void handlemap_VkVideoDecodeH264SessionCreateInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoDecodeH264SessionCreateInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap->pStdExtensionVersion)
+    {
+        handlemap_VkExtensionProperties(handlemap, (VkExtensionProperties*)(toMap->pStdExtensionVersion));
+    }
+}
+
+void handlemap_VkVideoDecodeH264SessionParametersAddInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoDecodeH264SessionParametersAddInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVideoDecodeH264SessionParametersCreateInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoDecodeH264SessionParametersCreateInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap->pParametersAddInfo)
+    {
+        handlemap_VkVideoDecodeH264SessionParametersAddInfoEXT(handlemap, (VkVideoDecodeH264SessionParametersAddInfoEXT*)(toMap->pParametersAddInfo));
+    }
+}
+
+void handlemap_VkVideoDecodeH264PictureInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoDecodeH264PictureInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVideoDecodeH264MvcEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoDecodeH264MvcEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVideoDecodeH264DpbSlotInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoDecodeH264DpbSlotInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
 #endif
 #ifdef VK_AMD_texture_gather_bias_lod
 void handlemap_VkTextureLODGatherFormatPropertiesAMD(
@@ -5514,6 +6830,19 @@ void handlemap_VkExternalFormatANDROID(
     }
 }
 
+void handlemap_VkAndroidHardwareBufferFormatProperties2ANDROID(
+    VulkanHandleMapping* handlemap,
+    VkAndroidHardwareBufferFormatProperties2ANDROID* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap_VkComponentMapping(handlemap, (VkComponentMapping*)(&toMap->samplerYcbcrConversionComponents));
+}
+
 #endif
 #ifdef VK_EXT_sampler_filter_minmax
 #endif
@@ -5879,6 +7208,36 @@ void handlemap_VkImageDrmFormatModifierPropertiesEXT(
     if (toMap->pNext)
     {
         handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkDrmFormatModifierProperties2EXT(
+    VulkanHandleMapping* handlemap,
+    VkDrmFormatModifierProperties2EXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+}
+
+void handlemap_VkDrmFormatModifierPropertiesList2EXT(
+    VulkanHandleMapping* handlemap,
+    VkDrmFormatModifierPropertiesList2EXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap)
+    {
+        if (toMap->pDrmFormatModifierProperties)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->drmFormatModifierCount; ++i)
+            {
+                handlemap_VkDrmFormatModifierProperties2EXT(handlemap, (VkDrmFormatModifierProperties2EXT*)(toMap->pDrmFormatModifierProperties + i));
+            }
+        }
     }
 }
 
@@ -6373,6 +7732,101 @@ void handlemap_VkCalibratedTimestampInfoEXT(
 void handlemap_VkPhysicalDeviceShaderCorePropertiesAMD(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceShaderCorePropertiesAMD* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_EXT_video_decode_h265
+void handlemap_VkVideoDecodeH265ProfileEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoDecodeH265ProfileEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVideoDecodeH265CapabilitiesEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoDecodeH265CapabilitiesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap_VkExtensionProperties(handlemap, (VkExtensionProperties*)(&toMap->stdExtensionVersion));
+}
+
+void handlemap_VkVideoDecodeH265SessionCreateInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoDecodeH265SessionCreateInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap->pStdExtensionVersion)
+    {
+        handlemap_VkExtensionProperties(handlemap, (VkExtensionProperties*)(toMap->pStdExtensionVersion));
+    }
+}
+
+void handlemap_VkVideoDecodeH265SessionParametersAddInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoDecodeH265SessionParametersAddInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVideoDecodeH265SessionParametersCreateInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoDecodeH265SessionParametersCreateInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap->pParametersAddInfo)
+    {
+        handlemap_VkVideoDecodeH265SessionParametersAddInfoEXT(handlemap, (VkVideoDecodeH265SessionParametersAddInfoEXT*)(toMap->pParametersAddInfo));
+    }
+}
+
+void handlemap_VkVideoDecodeH265PictureInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoDecodeH265PictureInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVideoDecodeH265DpbSlotInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkVideoDecodeH265DpbSlotInfoEXT* toMap)
 {
     (void)handlemap;
     (void)toMap;
@@ -7157,6 +8611,44 @@ void handlemap_VkPhysicalDeviceYcbcrImageArraysFeaturesEXT(
 }
 
 #endif
+#ifdef VK_EXT_provoking_vertex
+void handlemap_VkPhysicalDeviceProvokingVertexFeaturesEXT(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceProvokingVertexFeaturesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkPhysicalDeviceProvokingVertexPropertiesEXT(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceProvokingVertexPropertiesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkPipelineRasterizationProvokingVertexStateCreateInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkPipelineRasterizationProvokingVertexStateCreateInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
 #ifdef VK_EXT_full_screen_exclusive
 void handlemap_VkSurfaceFullScreenExclusiveInfoEXT(
     VulkanHandleMapping* handlemap,
@@ -7281,6 +8773,20 @@ void handlemap_VkPhysicalDeviceIndexTypeUint8FeaturesEXT(
 void handlemap_VkPhysicalDeviceExtendedDynamicStateFeaturesEXT(
     VulkanHandleMapping* handlemap,
     VkPhysicalDeviceExtendedDynamicStateFeaturesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_EXT_shader_atomic_float2
+void handlemap_VkPhysicalDeviceShaderAtomicFloat2FeaturesEXT(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceShaderAtomicFloat2FeaturesEXT* toMap)
 {
     (void)handlemap;
     (void)toMap;
@@ -7504,6 +9010,36 @@ void handlemap_VkGeneratedCommandsMemoryRequirementsInfoNV(
 }
 
 #endif
+#ifdef VK_NV_inherited_viewport_scissor
+void handlemap_VkPhysicalDeviceInheritedViewportScissorFeaturesNV(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceInheritedViewportScissorFeaturesNV* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkCommandBufferInheritanceViewportScissorInfoNV(
+    VulkanHandleMapping* handlemap,
+    VkCommandBufferInheritanceViewportScissorInfoNV* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap->pViewportDepths)
+    {
+        handlemap_VkViewport(handlemap, (VkViewport*)(toMap->pViewportDepths));
+    }
+}
+
+#endif
 #ifdef VK_EXT_texel_buffer_alignment
 void handlemap_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT(
     VulkanHandleMapping* handlemap,
@@ -7594,6 +9130,8 @@ void handlemap_VkDeviceDeviceMemoryReportCreateInfoEXT(
     }
 }
 
+#endif
+#ifdef VK_EXT_acquire_drm_display
 #endif
 #ifdef VK_EXT_robustness2
 void handlemap_VkPhysicalDeviceRobustness2FeaturesEXT(
@@ -7780,6 +9318,115 @@ void handlemap_VkPipelineFragmentShadingRateEnumStateCreateInfoNV(
 }
 
 #endif
+#ifdef VK_NV_ray_tracing_motion_blur
+void handlemap_VkDeviceOrHostAddressConstKHR(
+    VulkanHandleMapping* handlemap,
+    VkDeviceOrHostAddressConstKHR* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+}
+
+void handlemap_VkAccelerationStructureGeometryMotionTrianglesDataNV(
+    VulkanHandleMapping* handlemap,
+    VkAccelerationStructureGeometryMotionTrianglesDataNV* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap_VkDeviceOrHostAddressConstKHR(handlemap, (VkDeviceOrHostAddressConstKHR*)(&toMap->vertexData));
+}
+
+void handlemap_VkAccelerationStructureMotionInfoNV(
+    VulkanHandleMapping* handlemap,
+    VkAccelerationStructureMotionInfoNV* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkAccelerationStructureMatrixMotionInstanceNV(
+    VulkanHandleMapping* handlemap,
+    VkAccelerationStructureMatrixMotionInstanceNV* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    handlemap_VkTransformMatrixKHR(handlemap, (VkTransformMatrixKHR*)(&toMap->transformT0));
+    handlemap_VkTransformMatrixKHR(handlemap, (VkTransformMatrixKHR*)(&toMap->transformT1));
+}
+
+void handlemap_VkSRTDataNV(
+    VulkanHandleMapping* handlemap,
+    VkSRTDataNV* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+}
+
+void handlemap_VkAccelerationStructureSRTMotionInstanceNV(
+    VulkanHandleMapping* handlemap,
+    VkAccelerationStructureSRTMotionInstanceNV* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    handlemap_VkSRTDataNV(handlemap, (VkSRTDataNV*)(&toMap->transformT0));
+    handlemap_VkSRTDataNV(handlemap, (VkSRTDataNV*)(&toMap->transformT1));
+}
+
+void handlemap_VkAccelerationStructureMotionInstanceDataNV(
+    VulkanHandleMapping* handlemap,
+    VkAccelerationStructureMotionInstanceDataNV* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    handlemap_VkAccelerationStructureInstanceKHR(handlemap, (VkAccelerationStructureInstanceKHR*)(&toMap->staticInstance));
+    handlemap_VkAccelerationStructureMatrixMotionInstanceNV(handlemap, (VkAccelerationStructureMatrixMotionInstanceNV*)(&toMap->matrixMotionInstance));
+    handlemap_VkAccelerationStructureSRTMotionInstanceNV(handlemap, (VkAccelerationStructureSRTMotionInstanceNV*)(&toMap->srtMotionInstance));
+}
+
+void handlemap_VkAccelerationStructureMotionInstanceNV(
+    VulkanHandleMapping* handlemap,
+    VkAccelerationStructureMotionInstanceNV* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    handlemap_VkAccelerationStructureMotionInstanceDataNV(handlemap, (VkAccelerationStructureMotionInstanceDataNV*)(&toMap->data));
+}
+
+void handlemap_VkPhysicalDeviceRayTracingMotionBlurFeaturesNV(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceRayTracingMotionBlurFeaturesNV* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_EXT_ycbcr_2plane_444_formats
+void handlemap_VkPhysicalDeviceYcbcr2Plane444FormatsFeaturesEXT(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceYcbcr2Plane444FormatsFeaturesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
 #ifdef VK_EXT_fragment_density_map2
 void handlemap_VkPhysicalDeviceFragmentDensityMap2FeaturesEXT(
     VulkanHandleMapping* handlemap,
@@ -7848,10 +9495,482 @@ void handlemap_VkPhysicalDevice4444FormatsFeaturesEXT(
 }
 
 #endif
+#ifdef VK_EXT_rgba10x6_formats
+void handlemap_VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_NV_acquire_winrt_display
+#endif
 #ifdef VK_EXT_directfb_surface
 void handlemap_VkDirectFBSurfaceCreateInfoEXT(
     VulkanHandleMapping* handlemap,
     VkDirectFBSurfaceCreateInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_VALVE_mutable_descriptor_type
+void handlemap_VkPhysicalDeviceMutableDescriptorTypeFeaturesVALVE(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceMutableDescriptorTypeFeaturesVALVE* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkMutableDescriptorTypeListVALVE(
+    VulkanHandleMapping* handlemap,
+    VkMutableDescriptorTypeListVALVE* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+}
+
+void handlemap_VkMutableDescriptorTypeCreateInfoVALVE(
+    VulkanHandleMapping* handlemap,
+    VkMutableDescriptorTypeCreateInfoVALVE* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap)
+    {
+        if (toMap->pMutableDescriptorTypeLists)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->mutableDescriptorTypeListCount; ++i)
+            {
+                handlemap_VkMutableDescriptorTypeListVALVE(handlemap, (VkMutableDescriptorTypeListVALVE*)(toMap->pMutableDescriptorTypeLists + i));
+            }
+        }
+    }
+}
+
+#endif
+#ifdef VK_EXT_vertex_input_dynamic_state
+void handlemap_VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVertexInputBindingDescription2EXT(
+    VulkanHandleMapping* handlemap,
+    VkVertexInputBindingDescription2EXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkVertexInputAttributeDescription2EXT(
+    VulkanHandleMapping* handlemap,
+    VkVertexInputAttributeDescription2EXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_EXT_physical_device_drm
+void handlemap_VkPhysicalDeviceDrmPropertiesEXT(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceDrmPropertiesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_EXT_primitive_topology_list_restart
+void handlemap_VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_FUCHSIA_external_memory
+void handlemap_VkImportMemoryZirconHandleInfoFUCHSIA(
+    VulkanHandleMapping* handlemap,
+    VkImportMemoryZirconHandleInfoFUCHSIA* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkMemoryZirconHandlePropertiesFUCHSIA(
+    VulkanHandleMapping* handlemap,
+    VkMemoryZirconHandlePropertiesFUCHSIA* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkMemoryGetZirconHandleInfoFUCHSIA(
+    VulkanHandleMapping* handlemap,
+    VkMemoryGetZirconHandleInfoFUCHSIA* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)&toMap->memory);
+}
+
+#endif
+#ifdef VK_FUCHSIA_external_semaphore
+void handlemap_VkImportSemaphoreZirconHandleInfoFUCHSIA(
+    VulkanHandleMapping* handlemap,
+    VkImportSemaphoreZirconHandleInfoFUCHSIA* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkSemaphore((VkSemaphore*)&toMap->semaphore);
+}
+
+void handlemap_VkSemaphoreGetZirconHandleInfoFUCHSIA(
+    VulkanHandleMapping* handlemap,
+    VkSemaphoreGetZirconHandleInfoFUCHSIA* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkSemaphore((VkSemaphore*)&toMap->semaphore);
+}
+
+#endif
+#ifdef VK_FUCHSIA_buffer_collection
+void handlemap_VkBufferCollectionCreateInfoFUCHSIA(
+    VulkanHandleMapping* handlemap,
+    VkBufferCollectionCreateInfoFUCHSIA* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkImportMemoryBufferCollectionFUCHSIA(
+    VulkanHandleMapping* handlemap,
+    VkImportMemoryBufferCollectionFUCHSIA* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkBufferCollectionFUCHSIA((VkBufferCollectionFUCHSIA*)&toMap->collection);
+}
+
+void handlemap_VkBufferCollectionImageCreateInfoFUCHSIA(
+    VulkanHandleMapping* handlemap,
+    VkBufferCollectionImageCreateInfoFUCHSIA* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkBufferCollectionFUCHSIA((VkBufferCollectionFUCHSIA*)&toMap->collection);
+}
+
+void handlemap_VkBufferCollectionConstraintsInfoFUCHSIA(
+    VulkanHandleMapping* handlemap,
+    VkBufferCollectionConstraintsInfoFUCHSIA* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkBufferConstraintsInfoFUCHSIA(
+    VulkanHandleMapping* handlemap,
+    VkBufferConstraintsInfoFUCHSIA* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap_VkBufferCreateInfo(handlemap, (VkBufferCreateInfo*)(&toMap->createInfo));
+    handlemap_VkBufferCollectionConstraintsInfoFUCHSIA(handlemap, (VkBufferCollectionConstraintsInfoFUCHSIA*)(&toMap->bufferCollectionConstraints));
+}
+
+void handlemap_VkBufferCollectionBufferCreateInfoFUCHSIA(
+    VulkanHandleMapping* handlemap,
+    VkBufferCollectionBufferCreateInfoFUCHSIA* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkBufferCollectionFUCHSIA((VkBufferCollectionFUCHSIA*)&toMap->collection);
+}
+
+void handlemap_VkSysmemColorSpaceFUCHSIA(
+    VulkanHandleMapping* handlemap,
+    VkSysmemColorSpaceFUCHSIA* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkBufferCollectionPropertiesFUCHSIA(
+    VulkanHandleMapping* handlemap,
+    VkBufferCollectionPropertiesFUCHSIA* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap_VkSysmemColorSpaceFUCHSIA(handlemap, (VkSysmemColorSpaceFUCHSIA*)(&toMap->sysmemColorSpaceIndex));
+    handlemap_VkComponentMapping(handlemap, (VkComponentMapping*)(&toMap->samplerYcbcrConversionComponents));
+}
+
+void handlemap_VkImageFormatConstraintsInfoFUCHSIA(
+    VulkanHandleMapping* handlemap,
+    VkImageFormatConstraintsInfoFUCHSIA* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap_VkImageCreateInfo(handlemap, (VkImageCreateInfo*)(&toMap->imageCreateInfo));
+    if (toMap->pColorSpaces)
+    {
+        handlemap_VkSysmemColorSpaceFUCHSIA(handlemap, (VkSysmemColorSpaceFUCHSIA*)(toMap->pColorSpaces));
+    }
+}
+
+void handlemap_VkImageConstraintsInfoFUCHSIA(
+    VulkanHandleMapping* handlemap,
+    VkImageConstraintsInfoFUCHSIA* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    if (toMap)
+    {
+        if (toMap->pFormatConstraints)
+        {
+            for (uint32_t i = 0; i < (uint32_t)toMap->formatConstraintsCount; ++i)
+            {
+                handlemap_VkImageFormatConstraintsInfoFUCHSIA(handlemap, (VkImageFormatConstraintsInfoFUCHSIA*)(toMap->pFormatConstraints + i));
+            }
+        }
+    }
+    handlemap_VkBufferCollectionConstraintsInfoFUCHSIA(handlemap, (VkBufferCollectionConstraintsInfoFUCHSIA*)(&toMap->bufferCollectionConstraints));
+}
+
+#endif
+#ifdef VK_HUAWEI_subpass_shading
+void handlemap_VkSubpassShadingPipelineCreateInfoHUAWEI(
+    VulkanHandleMapping* handlemap,
+    VkSubpassShadingPipelineCreateInfoHUAWEI* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkRenderPass((VkRenderPass*)&toMap->renderPass);
+}
+
+void handlemap_VkPhysicalDeviceSubpassShadingFeaturesHUAWEI(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceSubpassShadingFeaturesHUAWEI* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkPhysicalDeviceSubpassShadingPropertiesHUAWEI(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceSubpassShadingPropertiesHUAWEI* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_HUAWEI_invocation_mask
+void handlemap_VkPhysicalDeviceInvocationMaskFeaturesHUAWEI(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceInvocationMaskFeaturesHUAWEI* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_NV_external_memory_rdma
+void handlemap_VkMemoryGetRemoteAddressInfoNV(
+    VulkanHandleMapping* handlemap,
+    VkMemoryGetRemoteAddressInfoNV* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap->mapHandles_VkDeviceMemory((VkDeviceMemory*)&toMap->memory);
+}
+
+void handlemap_VkPhysicalDeviceExternalMemoryRDMAFeaturesNV(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceExternalMemoryRDMAFeaturesNV* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_EXT_extended_dynamic_state2
+void handlemap_VkPhysicalDeviceExtendedDynamicState2FeaturesEXT(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceExtendedDynamicState2FeaturesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_QNX_screen_surface
+void handlemap_VkScreenSurfaceCreateInfoQNX(
+    VulkanHandleMapping* handlemap,
+    VkScreenSurfaceCreateInfoQNX* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_EXT_color_write_enable
+void handlemap_VkPhysicalDeviceColorWriteEnableFeaturesEXT(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceColorWriteEnableFeaturesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkPipelineColorWriteCreateInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkPipelineColorWriteCreateInfoEXT* toMap)
 {
     (void)handlemap;
     (void)toMap;
@@ -7900,18 +10019,121 @@ void handlemap_VkImportPhysicalAddressGOOGLE(
 }
 
 #endif
-#ifdef VK_KHR_acceleration_structure
-void handlemap_VkDeviceOrHostAddressKHR(
+#ifdef VK_EXT_global_priority_query
+void handlemap_VkPhysicalDeviceGlobalPriorityQueryFeaturesEXT(
     VulkanHandleMapping* handlemap,
-    VkDeviceOrHostAddressKHR* toMap)
+    VkPhysicalDeviceGlobalPriorityQueryFeaturesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkQueueFamilyGlobalPriorityPropertiesEXT(
+    VulkanHandleMapping* handlemap,
+    VkQueueFamilyGlobalPriorityPropertiesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_EXT_multi_draw
+void handlemap_VkPhysicalDeviceMultiDrawFeaturesEXT(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceMultiDrawFeaturesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkPhysicalDeviceMultiDrawPropertiesEXT(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceMultiDrawPropertiesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkMultiDrawInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkMultiDrawInfoEXT* toMap)
 {
     (void)handlemap;
     (void)toMap;
 }
 
-void handlemap_VkDeviceOrHostAddressConstKHR(
+void handlemap_VkMultiDrawIndexedInfoEXT(
     VulkanHandleMapping* handlemap,
-    VkDeviceOrHostAddressConstKHR* toMap)
+    VkMultiDrawIndexedInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+}
+
+#endif
+#ifdef VK_EXT_load_store_op_none
+#endif
+#ifdef VK_EXT_border_color_swizzle
+void handlemap_VkPhysicalDeviceBorderColorSwizzleFeaturesEXT(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDeviceBorderColorSwizzleFeaturesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+void handlemap_VkSamplerBorderColorComponentMappingCreateInfoEXT(
+    VulkanHandleMapping* handlemap,
+    VkSamplerBorderColorComponentMappingCreateInfoEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+    handlemap_VkComponentMapping(handlemap, (VkComponentMapping*)(&toMap->components));
+}
+
+#endif
+#ifdef VK_EXT_pageable_device_local_memory
+void handlemap_VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT(
+    VulkanHandleMapping* handlemap,
+    VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT* toMap)
+{
+    (void)handlemap;
+    (void)toMap;
+    if (toMap->pNext)
+    {
+        handlemap_extension_struct(handlemap, (void*)(toMap->pNext));
+    }
+}
+
+#endif
+#ifdef VK_KHR_acceleration_structure
+void handlemap_VkDeviceOrHostAddressKHR(
+    VulkanHandleMapping* handlemap,
+    VkDeviceOrHostAddressKHR* toMap)
 {
     (void)handlemap;
     (void)toMap;
@@ -8703,6 +10925,60 @@ void handlemap_extension_struct(
             break;
         }
 #endif
+#ifdef VK_KHR_video_queue
+        case VK_STRUCTURE_TYPE_VIDEO_QUEUE_FAMILY_PROPERTIES_2_KHR:
+        {
+            handlemap_VkVideoQueueFamilyProperties2KHR(handlemap, reinterpret_cast<VkVideoQueueFamilyProperties2KHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_PROFILE_KHR:
+        {
+            handlemap_VkVideoProfileKHR(handlemap, reinterpret_cast<VkVideoProfileKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_PROFILES_KHR:
+        {
+            handlemap_VkVideoProfilesKHR(handlemap, reinterpret_cast<VkVideoProfilesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_dynamic_rendering
+        case VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR:
+        {
+            handlemap_VkPipelineRenderingCreateInfoKHR(handlemap, reinterpret_cast<VkPipelineRenderingCreateInfoKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR:
+        {
+            handlemap_VkPhysicalDeviceDynamicRenderingFeaturesKHR(handlemap, reinterpret_cast<VkPhysicalDeviceDynamicRenderingFeaturesKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_RENDERING_INFO_KHR:
+        {
+            handlemap_VkCommandBufferInheritanceRenderingInfoKHR(handlemap, reinterpret_cast<VkCommandBufferInheritanceRenderingInfoKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_RENDERING_FRAGMENT_SHADING_RATE_ATTACHMENT_INFO_KHR:
+        {
+            handlemap_VkRenderingFragmentShadingRateAttachmentInfoKHR(handlemap, reinterpret_cast<VkRenderingFragmentShadingRateAttachmentInfoKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_RENDERING_FRAGMENT_DENSITY_MAP_ATTACHMENT_INFO_EXT:
+        {
+            handlemap_VkRenderingFragmentDensityMapAttachmentInfoEXT(handlemap, reinterpret_cast<VkRenderingFragmentDensityMapAttachmentInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_ATTACHMENT_SAMPLE_COUNT_INFO_AMD:
+        {
+            handlemap_VkAttachmentSampleCountInfoAMD(handlemap, reinterpret_cast<VkAttachmentSampleCountInfoAMD*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_MULTIVIEW_PER_VIEW_ATTRIBUTES_INFO_NVX:
+        {
+            handlemap_VkMultiviewPerViewAttributesInfoNVX(handlemap, reinterpret_cast<VkMultiviewPerViewAttributesInfoNVX*>(structExtension_out));
+            break;
+        }
+#endif
 #ifdef VK_KHR_external_memory_win32
         case VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR:
         {
@@ -8846,10 +11122,105 @@ void handlemap_extension_struct(
             break;
         }
 #endif
+#ifdef VK_KHR_present_wait
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRESENT_WAIT_FEATURES_KHR:
+        {
+            handlemap_VkPhysicalDevicePresentWaitFeaturesKHR(handlemap, reinterpret_cast<VkPhysicalDevicePresentWaitFeaturesKHR*>(structExtension_out));
+            break;
+        }
+#endif
 #ifdef VK_KHR_pipeline_executable_properties
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_EXECUTABLE_PROPERTIES_FEATURES_KHR:
         {
             handlemap_VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR(handlemap, reinterpret_cast<VkPhysicalDevicePipelineExecutablePropertiesFeaturesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_shader_integer_dot_product
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INTEGER_DOT_PRODUCT_FEATURES_KHR:
+        {
+            handlemap_VkPhysicalDeviceShaderIntegerDotProductFeaturesKHR(handlemap, reinterpret_cast<VkPhysicalDeviceShaderIntegerDotProductFeaturesKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INTEGER_DOT_PRODUCT_PROPERTIES_KHR:
+        {
+            handlemap_VkPhysicalDeviceShaderIntegerDotProductPropertiesKHR(handlemap, reinterpret_cast<VkPhysicalDeviceShaderIntegerDotProductPropertiesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_present_id
+        case VK_STRUCTURE_TYPE_PRESENT_ID_KHR:
+        {
+            handlemap_VkPresentIdKHR(handlemap, reinterpret_cast<VkPresentIdKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRESENT_ID_FEATURES_KHR:
+        {
+            handlemap_VkPhysicalDevicePresentIdFeaturesKHR(handlemap, reinterpret_cast<VkPhysicalDevicePresentIdFeaturesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_video_encode_queue
+        case VK_STRUCTURE_TYPE_VIDEO_ENCODE_RATE_CONTROL_INFO_KHR:
+        {
+            handlemap_VkVideoEncodeRateControlInfoKHR(handlemap, reinterpret_cast<VkVideoEncodeRateControlInfoKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_synchronization2
+        case VK_STRUCTURE_TYPE_MEMORY_BARRIER_2_KHR:
+        {
+            handlemap_VkMemoryBarrier2KHR(handlemap, reinterpret_cast<VkMemoryBarrier2KHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR:
+        {
+            handlemap_VkPhysicalDeviceSynchronization2FeaturesKHR(handlemap, reinterpret_cast<VkPhysicalDeviceSynchronization2FeaturesKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_QUEUE_FAMILY_CHECKPOINT_PROPERTIES_2_NV:
+        {
+            handlemap_VkQueueFamilyCheckpointProperties2NV(handlemap, reinterpret_cast<VkQueueFamilyCheckpointProperties2NV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_shader_subgroup_uniform_control_flow
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SUBGROUP_UNIFORM_CONTROL_FLOW_FEATURES_KHR:
+        {
+            handlemap_VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR(handlemap, reinterpret_cast<VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_zero_initialize_workgroup_memory
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ZERO_INITIALIZE_WORKGROUP_MEMORY_FEATURES_KHR:
+        {
+            handlemap_VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR(handlemap, reinterpret_cast<VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_workgroup_memory_explicit_layout
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_WORKGROUP_MEMORY_EXPLICIT_LAYOUT_FEATURES_KHR:
+        {
+            handlemap_VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR(handlemap, reinterpret_cast<VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_format_feature_flags2
+        case VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_3_KHR:
+        {
+            handlemap_VkFormatProperties3KHR(handlemap, reinterpret_cast<VkFormatProperties3KHR*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_KHR_maintenance4
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_4_FEATURES_KHR:
+        {
+            handlemap_VkPhysicalDeviceMaintenance4FeaturesKHR(handlemap, reinterpret_cast<VkPhysicalDeviceMaintenance4FeaturesKHR*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_4_PROPERTIES_KHR:
+        {
+            handlemap_VkPhysicalDeviceMaintenance4PropertiesKHR(handlemap, reinterpret_cast<VkPhysicalDeviceMaintenance4PropertiesKHR*>(structExtension_out));
             break;
         }
 #endif
@@ -8905,6 +11276,122 @@ void handlemap_extension_struct(
         case VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_STREAM_CREATE_INFO_EXT:
         {
             handlemap_VkPipelineRasterizationStateStreamCreateInfoEXT(handlemap, reinterpret_cast<VkPipelineRasterizationStateStreamCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_video_encode_h264
+        case VK_STRUCTURE_TYPE_VIDEO_ENCODE_H264_CAPABILITIES_EXT:
+        {
+            handlemap_VkVideoEncodeH264CapabilitiesEXT(handlemap, reinterpret_cast<VkVideoEncodeH264CapabilitiesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_ENCODE_H264_SESSION_CREATE_INFO_EXT:
+        {
+            handlemap_VkVideoEncodeH264SessionCreateInfoEXT(handlemap, reinterpret_cast<VkVideoEncodeH264SessionCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_ENCODE_H264_SESSION_PARAMETERS_ADD_INFO_EXT:
+        {
+            handlemap_VkVideoEncodeH264SessionParametersAddInfoEXT(handlemap, reinterpret_cast<VkVideoEncodeH264SessionParametersAddInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_ENCODE_H264_SESSION_PARAMETERS_CREATE_INFO_EXT:
+        {
+            handlemap_VkVideoEncodeH264SessionParametersCreateInfoEXT(handlemap, reinterpret_cast<VkVideoEncodeH264SessionParametersCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_ENCODE_H264_VCL_FRAME_INFO_EXT:
+        {
+            handlemap_VkVideoEncodeH264VclFrameInfoEXT(handlemap, reinterpret_cast<VkVideoEncodeH264VclFrameInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_ENCODE_H264_EMIT_PICTURE_PARAMETERS_EXT:
+        {
+            handlemap_VkVideoEncodeH264EmitPictureParametersEXT(handlemap, reinterpret_cast<VkVideoEncodeH264EmitPictureParametersEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_ENCODE_H264_PROFILE_EXT:
+        {
+            handlemap_VkVideoEncodeH264ProfileEXT(handlemap, reinterpret_cast<VkVideoEncodeH264ProfileEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_video_encode_h265
+        case VK_STRUCTURE_TYPE_VIDEO_ENCODE_H265_CAPABILITIES_EXT:
+        {
+            handlemap_VkVideoEncodeH265CapabilitiesEXT(handlemap, reinterpret_cast<VkVideoEncodeH265CapabilitiesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_ENCODE_H265_SESSION_CREATE_INFO_EXT:
+        {
+            handlemap_VkVideoEncodeH265SessionCreateInfoEXT(handlemap, reinterpret_cast<VkVideoEncodeH265SessionCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_ENCODE_H265_SESSION_PARAMETERS_ADD_INFO_EXT:
+        {
+            handlemap_VkVideoEncodeH265SessionParametersAddInfoEXT(handlemap, reinterpret_cast<VkVideoEncodeH265SessionParametersAddInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_ENCODE_H265_SESSION_PARAMETERS_CREATE_INFO_EXT:
+        {
+            handlemap_VkVideoEncodeH265SessionParametersCreateInfoEXT(handlemap, reinterpret_cast<VkVideoEncodeH265SessionParametersCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_ENCODE_H265_VCL_FRAME_INFO_EXT:
+        {
+            handlemap_VkVideoEncodeH265VclFrameInfoEXT(handlemap, reinterpret_cast<VkVideoEncodeH265VclFrameInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_ENCODE_H265_EMIT_PICTURE_PARAMETERS_EXT:
+        {
+            handlemap_VkVideoEncodeH265EmitPictureParametersEXT(handlemap, reinterpret_cast<VkVideoEncodeH265EmitPictureParametersEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_ENCODE_H265_PROFILE_EXT:
+        {
+            handlemap_VkVideoEncodeH265ProfileEXT(handlemap, reinterpret_cast<VkVideoEncodeH265ProfileEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_video_decode_h264
+        case VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_PROFILE_EXT:
+        {
+            handlemap_VkVideoDecodeH264ProfileEXT(handlemap, reinterpret_cast<VkVideoDecodeH264ProfileEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_CAPABILITIES_EXT:
+        {
+            handlemap_VkVideoDecodeH264CapabilitiesEXT(handlemap, reinterpret_cast<VkVideoDecodeH264CapabilitiesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_SESSION_CREATE_INFO_EXT:
+        {
+            handlemap_VkVideoDecodeH264SessionCreateInfoEXT(handlemap, reinterpret_cast<VkVideoDecodeH264SessionCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_SESSION_PARAMETERS_ADD_INFO_EXT:
+        {
+            handlemap_VkVideoDecodeH264SessionParametersAddInfoEXT(handlemap, reinterpret_cast<VkVideoDecodeH264SessionParametersAddInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_SESSION_PARAMETERS_CREATE_INFO_EXT:
+        {
+            handlemap_VkVideoDecodeH264SessionParametersCreateInfoEXT(handlemap, reinterpret_cast<VkVideoDecodeH264SessionParametersCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_PICTURE_INFO_EXT:
+        {
+            handlemap_VkVideoDecodeH264PictureInfoEXT(handlemap, reinterpret_cast<VkVideoDecodeH264PictureInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_MVC_EXT:
+        {
+            handlemap_VkVideoDecodeH264MvcEXT(handlemap, reinterpret_cast<VkVideoDecodeH264MvcEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_DPB_SLOT_INFO_EXT:
+        {
+            handlemap_VkVideoDecodeH264DpbSlotInfoEXT(handlemap, reinterpret_cast<VkVideoDecodeH264DpbSlotInfoEXT*>(structExtension_out));
             break;
         }
 #endif
@@ -9090,6 +11577,11 @@ void handlemap_extension_struct(
             handlemap_VkExternalFormatANDROID(handlemap, reinterpret_cast<VkExternalFormatANDROID*>(structExtension_out));
             break;
         }
+        case VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_FORMAT_PROPERTIES_2_ANDROID:
+        {
+            handlemap_VkAndroidHardwareBufferFormatProperties2ANDROID(handlemap, reinterpret_cast<VkAndroidHardwareBufferFormatProperties2ANDROID*>(structExtension_out));
+            break;
+        }
 #endif
 #ifdef VK_EXT_inline_uniform_block
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INLINE_UNIFORM_BLOCK_FEATURES_EXT:
@@ -9199,6 +11691,11 @@ void handlemap_extension_struct(
             handlemap_VkImageDrmFormatModifierExplicitCreateInfoEXT(handlemap, reinterpret_cast<VkImageDrmFormatModifierExplicitCreateInfoEXT*>(structExtension_out));
             break;
         }
+        case VK_STRUCTURE_TYPE_DRM_FORMAT_MODIFIER_PROPERTIES_LIST_2_EXT:
+        {
+            handlemap_VkDrmFormatModifierPropertiesList2EXT(handlemap, reinterpret_cast<VkDrmFormatModifierPropertiesList2EXT*>(structExtension_out));
+            break;
+        }
 #endif
 #ifdef VK_EXT_validation_cache
         case VK_STRUCTURE_TYPE_SHADER_MODULE_VALIDATION_CACHE_CREATE_INFO_EXT:
@@ -9295,6 +11792,43 @@ void handlemap_extension_struct(
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CORE_PROPERTIES_AMD:
         {
             handlemap_VkPhysicalDeviceShaderCorePropertiesAMD(handlemap, reinterpret_cast<VkPhysicalDeviceShaderCorePropertiesAMD*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_video_decode_h265
+        case VK_STRUCTURE_TYPE_VIDEO_DECODE_H265_PROFILE_EXT:
+        {
+            handlemap_VkVideoDecodeH265ProfileEXT(handlemap, reinterpret_cast<VkVideoDecodeH265ProfileEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_DECODE_H265_CAPABILITIES_EXT:
+        {
+            handlemap_VkVideoDecodeH265CapabilitiesEXT(handlemap, reinterpret_cast<VkVideoDecodeH265CapabilitiesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_DECODE_H265_SESSION_CREATE_INFO_EXT:
+        {
+            handlemap_VkVideoDecodeH265SessionCreateInfoEXT(handlemap, reinterpret_cast<VkVideoDecodeH265SessionCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_DECODE_H265_SESSION_PARAMETERS_ADD_INFO_EXT:
+        {
+            handlemap_VkVideoDecodeH265SessionParametersAddInfoEXT(handlemap, reinterpret_cast<VkVideoDecodeH265SessionParametersAddInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_DECODE_H265_SESSION_PARAMETERS_CREATE_INFO_EXT:
+        {
+            handlemap_VkVideoDecodeH265SessionParametersCreateInfoEXT(handlemap, reinterpret_cast<VkVideoDecodeH265SessionParametersCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_DECODE_H265_PICTURE_INFO_EXT:
+        {
+            handlemap_VkVideoDecodeH265PictureInfoEXT(handlemap, reinterpret_cast<VkVideoDecodeH265PictureInfoEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_VIDEO_DECODE_H265_DPB_SLOT_INFO_EXT:
+        {
+            handlemap_VkVideoDecodeH265DpbSlotInfoEXT(handlemap, reinterpret_cast<VkVideoDecodeH265DpbSlotInfoEXT*>(structExtension_out));
             break;
         }
 #endif
@@ -9559,6 +12093,23 @@ void handlemap_extension_struct(
             break;
         }
 #endif
+#ifdef VK_EXT_provoking_vertex
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROVOKING_VERTEX_FEATURES_EXT:
+        {
+            handlemap_VkPhysicalDeviceProvokingVertexFeaturesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceProvokingVertexFeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROVOKING_VERTEX_PROPERTIES_EXT:
+        {
+            handlemap_VkPhysicalDeviceProvokingVertexPropertiesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceProvokingVertexPropertiesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_PROVOKING_VERTEX_STATE_CREATE_INFO_EXT:
+        {
+            handlemap_VkPipelineRasterizationProvokingVertexStateCreateInfoEXT(handlemap, reinterpret_cast<VkPipelineRasterizationProvokingVertexStateCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
 #ifdef VK_EXT_full_screen_exclusive
         case VK_STRUCTURE_TYPE_SURFACE_FULL_SCREEN_EXCLUSIVE_INFO_EXT:
         {
@@ -9614,6 +12165,13 @@ void handlemap_extension_struct(
             break;
         }
 #endif
+#ifdef VK_EXT_shader_atomic_float2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_2_FEATURES_EXT:
+        {
+            handlemap_VkPhysicalDeviceShaderAtomicFloat2FeaturesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceShaderAtomicFloat2FeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
 #ifdef VK_EXT_shader_demote_to_helper_invocation
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DEMOTE_TO_HELPER_INVOCATION_FEATURES_EXT:
         {
@@ -9635,6 +12193,18 @@ void handlemap_extension_struct(
         case VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_SHADER_GROUPS_CREATE_INFO_NV:
         {
             handlemap_VkGraphicsPipelineShaderGroupsCreateInfoNV(handlemap, reinterpret_cast<VkGraphicsPipelineShaderGroupsCreateInfoNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_inherited_viewport_scissor
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INHERITED_VIEWPORT_SCISSOR_FEATURES_NV:
+        {
+            handlemap_VkPhysicalDeviceInheritedViewportScissorFeaturesNV(handlemap, reinterpret_cast<VkPhysicalDeviceInheritedViewportScissorFeaturesNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_VIEWPORT_SCISSOR_INFO_NV:
+        {
+            handlemap_VkCommandBufferInheritanceViewportScissorInfoNV(handlemap, reinterpret_cast<VkCommandBufferInheritanceViewportScissorInfoNV*>(structExtension_out));
             break;
         }
 #endif
@@ -9751,6 +12321,30 @@ void handlemap_extension_struct(
             break;
         }
 #endif
+#ifdef VK_NV_ray_tracing_motion_blur
+        case VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_MOTION_TRIANGLES_DATA_NV:
+        {
+            handlemap_VkAccelerationStructureGeometryMotionTrianglesDataNV(handlemap, reinterpret_cast<VkAccelerationStructureGeometryMotionTrianglesDataNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_MOTION_INFO_NV:
+        {
+            handlemap_VkAccelerationStructureMotionInfoNV(handlemap, reinterpret_cast<VkAccelerationStructureMotionInfoNV*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_MOTION_BLUR_FEATURES_NV:
+        {
+            handlemap_VkPhysicalDeviceRayTracingMotionBlurFeaturesNV(handlemap, reinterpret_cast<VkPhysicalDeviceRayTracingMotionBlurFeaturesNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_ycbcr_2plane_444_formats
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_YCBCR_2_PLANE_444_FORMATS_FEATURES_EXT:
+        {
+            handlemap_VkPhysicalDeviceYcbcr2Plane444FormatsFeaturesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceYcbcr2Plane444FormatsFeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
 #ifdef VK_EXT_fragment_density_map2
         case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_2_FEATURES_EXT:
         {
@@ -9784,6 +12378,120 @@ void handlemap_extension_struct(
             break;
         }
 #endif
+#ifdef VK_EXT_rgba10x6_formats
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RGBA10X6_FORMATS_FEATURES_EXT:
+        {
+            handlemap_VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_VALVE_mutable_descriptor_type
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MUTABLE_DESCRIPTOR_TYPE_FEATURES_VALVE:
+        {
+            handlemap_VkPhysicalDeviceMutableDescriptorTypeFeaturesVALVE(handlemap, reinterpret_cast<VkPhysicalDeviceMutableDescriptorTypeFeaturesVALVE*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_MUTABLE_DESCRIPTOR_TYPE_CREATE_INFO_VALVE:
+        {
+            handlemap_VkMutableDescriptorTypeCreateInfoVALVE(handlemap, reinterpret_cast<VkMutableDescriptorTypeCreateInfoVALVE*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_vertex_input_dynamic_state
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_INPUT_DYNAMIC_STATE_FEATURES_EXT:
+        {
+            handlemap_VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_physical_device_drm
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRM_PROPERTIES_EXT:
+        {
+            handlemap_VkPhysicalDeviceDrmPropertiesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceDrmPropertiesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_primitive_topology_list_restart
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRIMITIVE_TOPOLOGY_LIST_RESTART_FEATURES_EXT:
+        {
+            handlemap_VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT(handlemap, reinterpret_cast<VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_FUCHSIA_external_memory
+        case VK_STRUCTURE_TYPE_IMPORT_MEMORY_ZIRCON_HANDLE_INFO_FUCHSIA:
+        {
+            handlemap_VkImportMemoryZirconHandleInfoFUCHSIA(handlemap, reinterpret_cast<VkImportMemoryZirconHandleInfoFUCHSIA*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_FUCHSIA_buffer_collection
+        case VK_STRUCTURE_TYPE_IMPORT_MEMORY_BUFFER_COLLECTION_FUCHSIA:
+        {
+            handlemap_VkImportMemoryBufferCollectionFUCHSIA(handlemap, reinterpret_cast<VkImportMemoryBufferCollectionFUCHSIA*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_BUFFER_COLLECTION_IMAGE_CREATE_INFO_FUCHSIA:
+        {
+            handlemap_VkBufferCollectionImageCreateInfoFUCHSIA(handlemap, reinterpret_cast<VkBufferCollectionImageCreateInfoFUCHSIA*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_BUFFER_COLLECTION_BUFFER_CREATE_INFO_FUCHSIA:
+        {
+            handlemap_VkBufferCollectionBufferCreateInfoFUCHSIA(handlemap, reinterpret_cast<VkBufferCollectionBufferCreateInfoFUCHSIA*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_HUAWEI_subpass_shading
+        case VK_STRUCTURE_TYPE_SUBPASS_SHADING_PIPELINE_CREATE_INFO_HUAWEI:
+        {
+            handlemap_VkSubpassShadingPipelineCreateInfoHUAWEI(handlemap, reinterpret_cast<VkSubpassShadingPipelineCreateInfoHUAWEI*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBPASS_SHADING_FEATURES_HUAWEI:
+        {
+            handlemap_VkPhysicalDeviceSubpassShadingFeaturesHUAWEI(handlemap, reinterpret_cast<VkPhysicalDeviceSubpassShadingFeaturesHUAWEI*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBPASS_SHADING_PROPERTIES_HUAWEI:
+        {
+            handlemap_VkPhysicalDeviceSubpassShadingPropertiesHUAWEI(handlemap, reinterpret_cast<VkPhysicalDeviceSubpassShadingPropertiesHUAWEI*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_HUAWEI_invocation_mask
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INVOCATION_MASK_FEATURES_HUAWEI:
+        {
+            handlemap_VkPhysicalDeviceInvocationMaskFeaturesHUAWEI(handlemap, reinterpret_cast<VkPhysicalDeviceInvocationMaskFeaturesHUAWEI*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_NV_external_memory_rdma
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_MEMORY_RDMA_FEATURES_NV:
+        {
+            handlemap_VkPhysicalDeviceExternalMemoryRDMAFeaturesNV(handlemap, reinterpret_cast<VkPhysicalDeviceExternalMemoryRDMAFeaturesNV*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_extended_dynamic_state2
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_2_FEATURES_EXT:
+        {
+            handlemap_VkPhysicalDeviceExtendedDynamicState2FeaturesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceExtendedDynamicState2FeaturesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_color_write_enable
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COLOR_WRITE_ENABLE_FEATURES_EXT:
+        {
+            handlemap_VkPhysicalDeviceColorWriteEnableFeaturesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceColorWriteEnableFeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PIPELINE_COLOR_WRITE_CREATE_INFO_EXT:
+        {
+            handlemap_VkPipelineColorWriteCreateInfoEXT(handlemap, reinterpret_cast<VkPipelineColorWriteCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
 #ifdef VK_GOOGLE_gfxstream
         case VK_STRUCTURE_TYPE_IMPORT_COLOR_BUFFER_GOOGLE:
         {
@@ -9798,6 +12506,49 @@ void handlemap_extension_struct(
         case VK_STRUCTURE_TYPE_IMPORT_PHYSICAL_ADDRESS_GOOGLE:
         {
             handlemap_VkImportPhysicalAddressGOOGLE(handlemap, reinterpret_cast<VkImportPhysicalAddressGOOGLE*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_global_priority_query
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GLOBAL_PRIORITY_QUERY_FEATURES_EXT:
+        {
+            handlemap_VkPhysicalDeviceGlobalPriorityQueryFeaturesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceGlobalPriorityQueryFeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_QUEUE_FAMILY_GLOBAL_PRIORITY_PROPERTIES_EXT:
+        {
+            handlemap_VkQueueFamilyGlobalPriorityPropertiesEXT(handlemap, reinterpret_cast<VkQueueFamilyGlobalPriorityPropertiesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_multi_draw
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTI_DRAW_FEATURES_EXT:
+        {
+            handlemap_VkPhysicalDeviceMultiDrawFeaturesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceMultiDrawFeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTI_DRAW_PROPERTIES_EXT:
+        {
+            handlemap_VkPhysicalDeviceMultiDrawPropertiesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceMultiDrawPropertiesEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_border_color_swizzle
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BORDER_COLOR_SWIZZLE_FEATURES_EXT:
+        {
+            handlemap_VkPhysicalDeviceBorderColorSwizzleFeaturesEXT(handlemap, reinterpret_cast<VkPhysicalDeviceBorderColorSwizzleFeaturesEXT*>(structExtension_out));
+            break;
+        }
+        case VK_STRUCTURE_TYPE_SAMPLER_BORDER_COLOR_COMPONENT_MAPPING_CREATE_INFO_EXT:
+        {
+            handlemap_VkSamplerBorderColorComponentMappingCreateInfoEXT(handlemap, reinterpret_cast<VkSamplerBorderColorComponentMappingCreateInfoEXT*>(structExtension_out));
+            break;
+        }
+#endif
+#ifdef VK_EXT_pageable_device_local_memory
+        case VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PAGEABLE_DEVICE_LOCAL_MEMORY_FEATURES_EXT:
+        {
+            handlemap_VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT(handlemap, reinterpret_cast<VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT*>(structExtension_out));
             break;
         }
 #endif
