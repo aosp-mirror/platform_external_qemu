@@ -191,13 +191,6 @@ typedef struct VkMemoryGetZirconHandleInfoFUCHSIA {
     VkExternalMemoryHandleTypeFlagBits    handleType;
 } VkMemoryGetZirconHandleInfoFUCHSIA;
 
-// Deprecated
-#define VK_STRUCTURE_TYPE_TEMP_IMPORT_MEMORY_ZIRCON_HANDLE_INFO_FUCHSIA \
-    ((VkStructureType)1001005000)
-#define VK_STRUCTURE_TYPE_TEMP_MEMORY_ZIRCON_HANDLE_PROPERTIES_FUCHSIA \
-    ((VkStructureType)1001005001)
-#define VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA \
-    ((VkExternalMemoryHandleTypeFlagBits)0x00100000)
 #endif  // VK_FUCHSIA_external_memory
 
 // To be moved inside the ifdef above once spec is updated
