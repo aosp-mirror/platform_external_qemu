@@ -2231,7 +2231,7 @@ public:
             } else {
                 for (auto poolId : info->poolIds) {
                     auto handleInfo = sBoxedHandleManager.get(poolId);
-                    if (handleInfo) handleInfo->underlying = VK_NULL_HANDLE;
+                    if (handleInfo) handleInfo->underlying = reinterpret_cast<uint64_t>(VK_NULL_HANDLE);
                 }
             }
         }
@@ -2374,7 +2374,7 @@ public:
                 auto handleInfo = sBoxedHandleManager.get((uint64_t)*descSetAllocedEntry);
                 if (handleInfo) {
                     if (emugl::emugl_feature_is_enabled(android::featurecontrol::VulkanBatchedDescriptorSetUpdate)) {
-                        handleInfo->underlying = VK_NULL_HANDLE;
+                        handleInfo->underlying = reinterpret_cast<uint64_t>(VK_NULL_HANDLE);
                     } else {
                         delete_VkDescriptorSet(*descSetAllocedEntry);
                     }
