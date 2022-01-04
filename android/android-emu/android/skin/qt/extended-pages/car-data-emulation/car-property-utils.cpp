@@ -374,10 +374,18 @@ QString carpropertyutils::getValueString(VehiclePropValue val) {
             return QObject::tr(val.string_value().data());
 
         case (int32_t) VehiclePropertyType::BOOLEAN :
-            return booleanToString(prop, val.int32_values(0));
+            if (val.int32_values_size() > 0) {
+                return booleanToString(prop, val.int32_values(0));
+            } else {
+                return "N/A";
+            }
 
         case (int32_t) VehiclePropertyType::INT32 :
-            return int32ToString(prop, val.int32_values(0));
+            if (val.int32_values_size() > 0) {
+                return int32ToString(prop, val.int32_values(0));
+            } else {
+                return "N/A";
+            }
 
         case (int32_t) VehiclePropertyType::INT32_VEC :
             for (int i = 0; i < val.int32_values_size(); i++) {
@@ -386,7 +394,11 @@ QString carpropertyutils::getValueString(VehiclePropValue val) {
             return int32VecToString(prop, int32Vals);
 
         case (int32_t) VehiclePropertyType::INT64 :
-            return int64ToString(prop, val.int64_values(0));
+            if (val.int64_values_size() > 0) {
+                return int64ToString(prop, val.int64_values(0));
+            } else {
+                return "N/A";
+            }
 
         // TODO: Int64Vec/FloatVec - Currently only 1 property with either
         // (WHEEL_TICK is Int64Vec), and I think it is too complex to fit in a
@@ -398,7 +410,11 @@ QString carpropertyutils::getValueString(VehiclePropValue val) {
             return int64VecToString(prop, int64Vals);
 
         case (int32_t) VehiclePropertyType::FLOAT :
-            return floatToString(prop, val.float_values(0));
+            if (val.float_values_size() > 0) {
+                return floatToString(prop, val.float_values(0));
+            } else {
+                return "N/A";
+            }
 
         // TODO: See above
         case (int32_t) VehiclePropertyType::FLOAT_VEC :
