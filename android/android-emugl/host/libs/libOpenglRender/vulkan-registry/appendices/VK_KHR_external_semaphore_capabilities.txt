@@ -1,8 +1,10 @@
-// Copyright (c) 2016-2018 Khronos Group. This work is licensed under a
-// Creative Commons Attribution 4.0 International License; see
-// http://creativecommons.org/licenses/by/4.0/
+// Copyright 2016-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
-include::meta/VK_KHR_external_semaphore_capabilities.txt[]
+include::{generated}/meta/{refprefix}VK_KHR_external_semaphore_capabilities.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2016-10-20
@@ -15,38 +17,14 @@ include::meta/VK_KHR_external_semaphore_capabilities.txt[]
   - James Jones, NVIDIA
   - Jeff Juliano, NVIDIA
 
+=== Description
+
 An application may wish to reference device semaphores in multiple Vulkan
 logical devices or instances, in multiple processes, and/or in multiple
 APIs.
 This extension provides a set of capability queries and handle definitions
 that allow an application to determine what types of "`external`" semaphore
 handles an implementation supports for a given set of use cases.
-
-=== New Object Types
-
-None.
-
-=== New Enum Constants
-
-  * ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_SEMAPHORE_INFO_KHR
-  * ename:VK_STRUCTURE_TYPE_EXTERNAL_SEMAPHORE_PROPERTIES_KHR
-  * ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES_KHR
-  * ename:VK_LUID_SIZE_KHR
-
-=== New Enums
-
-  * elink:VkExternalSemaphoreHandleTypeFlagBitsKHR
-  * elink:VkExternalSemaphoreFeatureFlagBitsKHR
-
-=== New Structs
-
-  * slink:VkPhysicalDeviceExternalSemaphoreInfoKHR
-  * slink:VkExternalSemaphorePropertiesKHR
-  * slink:VkPhysicalDeviceIDPropertiesKHR
-
-=== New Functions
-
-  * flink:vkGetPhysicalDeviceExternalSemaphorePropertiesKHR
 
 === Promotion to Vulkan 1.1
 
@@ -55,4 +33,9 @@ KHR suffix omitted.
 The original type, enum and command names are still available as aliases of
 the core functionality.
 
-=== Issues
+include::{generated}/interfaces/VK_KHR_external_semaphore_capabilities.txt[]
+
+=== Version History
+
+  * Revision 1, 2016-10-20 (James Jones)
+    - Initial revision

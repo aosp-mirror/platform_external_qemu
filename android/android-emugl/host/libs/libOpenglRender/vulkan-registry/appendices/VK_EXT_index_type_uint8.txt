@@ -1,0 +1,26 @@
+// Copyright 2019-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_EXT_index_type_uint8.txt[]
+
+=== Other Extension Metadata
+
+*Last Modified Date*::
+    2019-05-02
+*IP Status*::
+    No known IP claims.
+*Contributors*::
+  - Jeff Bolz, NVIDIA
+
+=== Description
+
+This extension allows code:uint8_t indices to be used with
+flink:vkCmdBindIndexBuffer.
+
+include::{generated}/interfaces/VK_EXT_index_type_uint8.txt[]
+
+=== Version History
+
+ * Revision 1, 2019-05-02 (Piers Daniell)
+   - Internal revisions

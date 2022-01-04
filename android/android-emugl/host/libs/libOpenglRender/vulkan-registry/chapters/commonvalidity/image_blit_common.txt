@@ -1,0 +1,13 @@
+// Copyright 2020-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+// Common Valid Usage
+// Common to VkImageBlit* structures
+  * [[VUID-{refpage}-aspectMask-00238]]
+    The pname:aspectMask member of pname:srcSubresource and
+    pname:dstSubresource must: match
+  * [[VUID-{refpage}-layerCount-00239]]
+    The pname:layerCount member of pname:srcSubresource and
+    pname:dstSubresource must: match
+// Common Valid Usage

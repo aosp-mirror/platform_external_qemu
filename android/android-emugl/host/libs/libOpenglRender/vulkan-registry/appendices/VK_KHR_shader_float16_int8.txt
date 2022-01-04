@@ -1,0 +1,56 @@
+// Copyright 2014-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_KHR_shader_float16_int8.txt[]
+
+=== Other Extension Metadata
+
+*Last Modified Date*::
+    2018-03-07
+*Interactions and External Dependencies*::
+  - Promoted to Vulkan 1.2 Core
+  - This extension interacts with `apiext:VK_KHR_8bit_storage`
+  - This extension interacts with `apiext:VK_KHR_16bit_storage`
+  - This extension interacts with `apiext:VK_KHR_shader_float_controls`
+  - This extension provides API support for
+    https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_shader_explicit_arithmetic_types.txt[`GL_EXT_shader_explicit_arithmetic_types`]
+*IP Status*::
+    No known IP claims.
+*Contributors*::
+    - Alexander Galazin, Arm
+    - Jan-Harald Fredriksen, Arm
+    - Jeff Bolz, NVIDIA
+    - Graeme Leese, Broadcom
+    - Daniel Rakos, AMD
+
+=== Description
+
+The `VK_KHR_shader_float16_int8` extension allows use of 16-bit
+floating-point types and 8-bit integer types in shaders for arithmetic
+operations.
+
+It introduces two new optional features pname:shaderFloat16 and
+pname:shaderInt8 which directly map to the code:Float16 and the code:Int8
+SPIR-V capabilities.
+The `VK_KHR_shader_float16_int8` extension also specifies precision
+requirements for half-precision floating-point SPIR-V operations.
+This extension does not enable use of 8-bit integer types or 16-bit
+floating-point types in any <<interfaces-iointerfaces, shader input and
+output interfaces>> and therefore does not supersede the
+`apiext:VK_KHR_8bit_storage` or `apiext:VK_KHR_16bit_storage` extensions.
+
+=== Promotion to Vulkan 1.2
+
+All functionality in this extension is included in core Vulkan 1.2, with the
+KHR suffix omitted.
+However, if Vulkan 1.2 is supported and this extension is not, both the
+code:shaderFloat16 and code:shaderInt8 capabilities are optional.
+The original type, enum and command names are still available as aliases of
+the core functionality.
+
+include::{generated}/interfaces/VK_KHR_shader_float16_int8.txt[]
+
+=== Version History
+  * Revision 1, 2018-03-07 (Alexander Galazin)
+    - Initial draft

@@ -1,8 +1,10 @@
-// Copyright (c) 2016-2018 Khronos Group. This work is licensed under a
-// Creative Commons Attribution 4.0 International License; see
-// http://creativecommons.org/licenses/by/4.0/
+// Copyright 2016-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
-include::meta/VK_KHR_external_semaphore.txt[]
+include::{generated}/meta/{refprefix}VK_KHR_external_semaphore.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2016-10-21
@@ -20,32 +22,13 @@ include::meta/VK_KHR_external_semaphore.txt[]
   - Ray Smith, ARM
   - Chad Versace, Google
 
+=== Description
+
 An application using external memory may wish to synchronize access to that
 memory using semaphores.
 This extension enables an application to create semaphores from which
 non-Vulkan handles that reference the underlying synchronization primitive
 can be exported.
-
-=== New Object Types
-
-None.
-
-=== New Enum Constants
-
-  * ename:VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO_KHR
-  * ename:VK_ERROR_INVALID_EXTERNAL_HANDLE_KHR
-
-=== New Enums
-
-  * elink:VkSemaphoreImportFlagBitsKHR
-
-=== New Structs
-
-  * slink:VkExportSemaphoreCreateInfoKHR
-
-=== New Functions
-
-None.
 
 === Promotion to Vulkan 1.1
 
@@ -54,6 +37,8 @@ KHR suffix omitted.
 The original type, enum and command names are still available as aliases of
 the core functionality.
 
+include::{generated}/interfaces/VK_KHR_external_semaphore.txt[]
+
 === Issues
 
 1) Should there be restrictions on what side effects can occur when waiting
@@ -61,12 +46,12 @@ on imported semaphores that are in an invalid state?
 
 *RESOLVED*: Yes.
 Normally, validating such state would be the responsibility of the
-application, and the implementation would be free to enter an undefined
+application, and the implementation would be free to enter an undefined:
 state if valid usage rules were violated.
 However, this could cause security concerns when using imported semaphores,
 as it would require the importing application to trust the exporting
 application to ensure the state is valid.
-Requiring this level of trust is undesireable for many potential use cases.
+Requiring this level of trust is undesirable for many potential use cases.
 
 2) Must implementations validate external handles the application provides
 as input to semaphore state import operations?
@@ -76,3 +61,8 @@ provided semaphore state handle cannot be used to complete the requested
 import operation.
 However, implementations need not validate handles are of the exact type
 specified by the application.
+
+=== Version History
+
+  * Revision 1, 2016-10-21 (James Jones)
+    - Initial revision

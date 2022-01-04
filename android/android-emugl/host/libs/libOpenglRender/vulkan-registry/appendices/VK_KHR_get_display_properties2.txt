@@ -1,8 +1,10 @@
-// Copyright (c) 2017-2018 Khronos Group. This work is licensed under a
-// Creative Commons Attribution 4.0 International License; see
-// http://creativecommons.org/licenses/by/4.0/
+// Copyright 2017-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
-include::meta/VK_KHR_get_display_properties2.txt[]
+include::{generated}/meta/{refprefix}VK_KHR_get_display_properties2.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2017-02-21
@@ -12,67 +14,39 @@ include::meta/VK_KHR_get_display_properties2.txt[]
   - Ian Elliott, Google
   - James Jones, NVIDIA
 
+=== Description
+
 This extension provides new entry points to query device display properties
 and capabilities in a way that can be easily extended by other extensions,
 without introducing any further entry points.
-This extension can be considered the <<VK_KHR_display,VK_KHR_display>>
-equivalent of the <<VK_KHR_get_physical_device_properties2,
-VK_KHR_get_physical_device_properties2>> extension.
+This extension can be considered the `apiext:VK_KHR_display` equivalent of
+the `apiext:VK_KHR_get_physical_device_properties2` extension.
 
-=== New Object Types
-
-None.
-
-=== New Enum Constants
-
-  * Extending elink:VkStructureType:
-  ** ename:VK_STRUCTURE_TYPE_DISPLAY_PROPERTIES_2_KHR
-  ** ename:VK_STRUCTURE_TYPE_DISPLAY_PLANE_PROPERTIES_2_KHR
-  ** ename:VK_STRUCTURE_TYPE_DISPLAY_MODE_PROPERTIES_2_KHR
-  ** ename:VK_STRUCTURE_TYPE_DISPLAY_PLANE_INFO_2_KHR
-  ** ename:VK_STRUCTURE_TYPE_DISPLAY_PLANE_CAPABILITIES_2_KHR
-
-=== New Enums
-
-None.
-
-=== New Structures
-
-  * slink:VkDisplayProperties2KHR
-  * slink:VkDisplayPlaneProperties2KHR
-  * slink:VkDisplayModeProperties2KHR
-  * slink:VkDisplayPlaneInfo2KHR
-  * slink:VkDisplayPlaneCapabilities2KHR
-
-=== New Functions
-
-  * flink:vkGetPhysicalDeviceDisplayProperties2KHR
-  * flink:vkGetPhysicalDeviceDisplayPlaneProperties2KHR
-  * flink:vkGetDisplayModeProperties2KHR
-  * flink:vkGetDisplayPlaneCapabilities2KHR
+include::{generated}/interfaces/VK_KHR_get_display_properties2.txt[]
 
 === Issues
 
 1) What should this extension be named?
 
-*RESOLVED*: VK_KHR_get_display_properties2.
+*RESOLVED*: `VK_KHR_get_display_properties2`.
 Other alternatives:
 
-  * VK_KHR_display2
-  * One extension, combined with VK_KHR_surface_capabilites2.
+  * `VK_KHR_display2`
+  * One extension, combined with `VK_KHR_surface_capabilites2`.
 
 2) Should extensible input structs be added for these new functions:
 
 *RESOLVED*:
 
   * flink:vkGetPhysicalDeviceDisplayProperties2KHR: No.
-    The only current input is a VkPhysicalDevice.
-    Other inputs wouldn't make sense.
+    The only current input is a slink:VkPhysicalDevice.
+    Other inputs would not make sense.
   * flink:vkGetPhysicalDeviceDisplayPlaneProperties2KHR: No.
-    The only current input is a VkPhysicalDevice.
+    The only current input is a slink:VkPhysicalDevice.
     Other inputs wouldn't make sense.
   * flink:vkGetDisplayModeProperties2KHR: No.
-    The only curent inputs are a VkPhysicalDevice and a VkDisplayModeKHR.
+    The only current inputs are a slink:VkPhysicalDevice and a
+    slink:VkDisplayModeKHR.
     Other inputs wouldn't make sense.
 
 3) Should additional display query functions be extended?

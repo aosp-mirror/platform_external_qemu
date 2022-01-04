@@ -1,4 +1,10 @@
-include::meta/VK_EXT_acquire_xlib_display.txt[]
+// Copyright 2018-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_EXT_acquire_xlib_display.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2016-12-13
@@ -13,6 +19,8 @@ include::meta/VK_EXT_acquire_xlib_display.txt[]
   - Liam Middlebrook, NVIDIA
   - Daniel Vetter, Intel
 
+=== Description
+
 This extension allows an application to take exclusive control on a display
 currently associated with an X11 screen.
 When control is acquired, the display will be deassociated from the X11
@@ -21,22 +29,7 @@ closed.
 Essentially, the X11 screen will behave as if the monitor has been unplugged
 until control is released.
 
-=== New Enum Constants
-
-None.
-
-=== New Enums
-
-None.
-
-=== New Structures
-
-None.
-
-=== New Functions
-
-  * flink:vkAcquireXlibDisplayEXT
-  * flink:vkGetRandROutputDisplayEXT
+include::{generated}/interfaces/VK_EXT_acquire_xlib_display.txt[]
 
 === Issues
 
@@ -45,8 +38,8 @@ Vulkan display handle as input?
 
 *RESOLVED*: A Vulkan display handle.
 Otherwise there would be no way to specify handles to displays that had been
-"`blacklisted`" or prevented from being included in the X11 display list by
-some native platform or vendor-specific mechanism.
+prevented from being included in the X11 display list by some native
+platform or vendor-specific mechanism.
 
 2) How does an application figure out which RandR display corresponds to a
 Vulkan display?
@@ -55,7 +48,7 @@ Vulkan display?
 for this purpose.
 
 3) Should flink:vkGetRandROutputDisplayEXT be part of this extension, or a
-general Vulkan + RandR or Vulkan + Xlib extension?
+general Vulkan / RandR or Vulkan / Xlib extension?
 
 *RESOLVED*: To avoid yet another extension, include it in this extension.
 

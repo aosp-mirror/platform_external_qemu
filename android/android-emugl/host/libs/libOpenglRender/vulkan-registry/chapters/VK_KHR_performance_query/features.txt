@@ -1,0 +1,31 @@
+// Copyright 2019-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+[open,refpage='VkPhysicalDevicePerformanceQueryFeaturesKHR',desc='Structure describing performance query support for an implementation',type='structs']
+--
+The sname:VkPhysicalDevicePerformanceQueryFeaturesKHR structure is defined
+as:
+
+include::{generated}/api/structs/VkPhysicalDevicePerformanceQueryFeaturesKHR.txt[]
+
+This structure describes the following features:
+
+  * pname:sType is the type of this structure.
+  * pname:pNext is `NULL` or a pointer to a structure extending this
+    structure.
+// tag::VK_KHR_performance_query-features[]
+  * [[features-performanceCounterQueryPools]]
+    pname:performanceCounterQueryPools indicates whether the implementation
+    supports performance counter query pools.
+  * [[features-performanceCounterMultipleQueryPools]]
+    pname:performanceCounterMultipleQueryPools indicates whether the
+    implementation supports using multiple performance query pools in a
+    primary command buffer and secondary command buffers executed within it.
+// end::VK_KHR_performance_query-features[]
+
+:refpage: VkPhysicalDevicePerformanceQueryFeaturesKHR
+include::{chapters}/features.txt[tag=features]
+
+include::{generated}/validity/structs/VkPhysicalDevicePerformanceQueryFeaturesKHR.txt[]
+--
