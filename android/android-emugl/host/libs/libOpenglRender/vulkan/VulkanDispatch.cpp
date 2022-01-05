@@ -249,7 +249,7 @@ public:
                 // Try libvulkan.so.1 if that doesn't work.
 #ifdef __linux__
                     loaderPath = pj(System::get()->getLauncherDirectory(), "lib64", "vulkan", "libvulkan.so.1");
-#elif defined __WIN32
+#elif defined _WIN32
                     loaderPath = pj(System::get()->getLauncherDirectory(), "lib64", "vulkan", "vulkan-1.dll");
 #endif // __linux__
                     success = mVulkanLibs.addLibrary(loaderPath);
