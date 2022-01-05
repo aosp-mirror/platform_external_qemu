@@ -383,6 +383,7 @@ static std::vector<VkEmulation::ImageSupportInfo> getBasicImageSupportList() {
 
         VK_FORMAT_A2R10G10B10_UINT_PACK32,
         VK_FORMAT_A2R10G10B10_UNORM_PACK32,
+        VK_FORMAT_A2B10G10R10_UNORM_PACK32,
 
         // Compressed texture formats
         VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK,
@@ -2398,11 +2399,6 @@ transformExternalMemoryHandleTypeFlags_tohost(
 
     if (bits & VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID) {
         res &= ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID;
-        res |= VK_EXT_MEMORY_HANDLE_TYPE_BIT;
-    }
-
-    if (bits & VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA) {
-        res &= ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA;
         res |= VK_EXT_MEMORY_HANDLE_TYPE_BIT;
     }
 

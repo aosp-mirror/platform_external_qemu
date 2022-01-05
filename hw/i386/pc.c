@@ -80,6 +80,13 @@
 #include "hw/i386/intel_iommu.h"
 #include "hw/net/ne2000-isa.h"
 
+#ifdef CONFIG_ANDROID
+#include "android/globals.h"
+#else
+// Default qemu != fuchsia
+static bool is_fuchsia = false;
+#endif
+
 /* debug PC/ISA interrupts */
 //#define DEBUG_IRQ
 
@@ -1665,8 +1672,10 @@ void pc_basic_device_init(ISABus *isa_bus, qemu_irq *gsi,
 
     i8257_dma_init(isa_bus, 0);
 
-    /* Super I/O */
-    pc_superio_init(isa_bus, create_fdctrl, no_vmport);
+    if (is_fuchsia) {
+        /* Super I/O */
+        pc_superio_init(isa_bus, create_fdctrl, no_vmport);
+    }
 }
 
 void pc_nic_init(PCMachineClass *pcmc, ISABus *isa_bus, PCIBus *pci_bus)

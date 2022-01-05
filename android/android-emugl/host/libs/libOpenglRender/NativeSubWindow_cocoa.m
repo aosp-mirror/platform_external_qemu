@@ -56,7 +56,6 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
     }
     [glView setWantsBestResolutionOpenGLSurface:YES];
     [glView setWantsLayer:YES];
-    glView.layer.contentsScale = 1;
     [[win contentView] addSubview:glView];
     [win makeKeyAndOrderFront:nil];
     if (hideWindow) {

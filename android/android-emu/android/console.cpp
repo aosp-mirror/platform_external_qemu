@@ -3481,12 +3481,20 @@ static const CommandDefRec automation_commands[] = {
 
 // Start recording of ground truth to the given file.
 static int do_physics_record_ground_truth(ControlClient client, char* args) {
-    return android_physical_model_record_ground_truth(args);
+    int res = android_physical_model_record_ground_truth(args);
+    if (res < 0) {
+        control_write( client, "KO: failed to record to file %s\r\n", args);
+    }
+    return res;
 }
 
 // Stop the current recording or playback of physical state changes.
 static int do_physics_stop(ControlClient client, char* args) {
-    return android_physical_model_stop_recording();
+    int res = android_physical_model_stop_recording();
+    if (res < 0) {
+        control_write( client, "KO: failed to stop recording\r\n");
+    }
+    return res;
 }
 
 // Physics commands for record/playback physics state.

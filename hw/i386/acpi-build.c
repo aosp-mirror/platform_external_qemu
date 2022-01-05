@@ -70,7 +70,7 @@
 #include "android/utils/debug.h"
 #else
 // Default qemu != fuchsia
-bool is_fuchsia = false;
+static bool is_fuchsia = false;
 #endif
 
 /* These are used to size the ACPI tables for -M pc-i440fx-1.7 and

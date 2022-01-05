@@ -74,7 +74,7 @@ void GooglePlayPage::initialize(android::emulation::AdbInterface* adb) {
 void GooglePlayPage::getBootCompletionProperty() {
     // TODO: Really wish we had some kind of guest property to do
     // asynchronous waiting.
-    const StringView boot_property = "sys.boot_completed";
+    static constexpr StringView boot_property = "sys.boot_completed";
     // Ran in a timer. We have to wait for the package manager
     // to start in order to query the versionName of the Play
     // Store and Play Services.
