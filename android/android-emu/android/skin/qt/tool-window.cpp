@@ -1276,6 +1276,12 @@ void ToolWindow::on_change_posture_button_clicked() {
         handleUICommand(QtUICommand::SHOW_PANE_VIRTSENSORS, true);
     }
     mPostureSelectionDialog->show();
+    // Align pop-up posture selction dialog to the right of posture button
+    QRect geoTool = this->geometry();
+    mPostureSelectionDialog->move(geoTool.right(),
+                                  geoTool.top() +
+                                  mToolsUi->change_posture_button->geometry().top());
+
 }
 
 void ToolWindow::on_dismiss_posture_selection_dialog() {
@@ -1287,10 +1293,11 @@ void ToolWindow::on_dismiss_resizable_dialog() {
 }
 
 void ToolWindow::on_resizable_button_clicked() {
-    // ChangeIcon(mToolsUi->tablet_mode_button,
-    //            tablet_mode ? "laptop_mode" : "tablet_mode",
-    //            tablet_mode ? "Switch to laptop mode" : "Switch to tablet mode");
     mResizableDialog->show();
+    // Align pop-up resizableDialog to the right of resizable button
+    QRect geoTool = this->geometry();
+    mResizableDialog->move(geoTool.right(),
+                           geoTool.top() + mToolsUi->resizable_button->geometry().top());
 }
 
 void ToolWindow::on_new_resizable_requested(PresetEmulatorSizeType newSize) {

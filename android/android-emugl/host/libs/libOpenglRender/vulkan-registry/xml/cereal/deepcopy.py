@@ -218,8 +218,7 @@ class DeepcopyCodegen(VulkanTypeIterator):
 
         self.cgen.stmt( \
             "%s = %s%s->alloc(%s)" % \
-            (rhs, self.makeCastExpr(vulkanType),
-            self.poolVarName, sizeVar))
+            (rhs, self.makeCastExpr(vulkanType.getForNonConstAccess()), self.poolVarName, sizeVar))
 
         self.cgen.funcCall(None, self.prefix + "extension_struct",
                            [self.poolVarName, self.rootVarName, nextVar, rhsExpr])
