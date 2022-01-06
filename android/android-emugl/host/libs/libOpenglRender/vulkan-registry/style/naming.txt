@@ -1,6 +1,6 @@
-// Copyright 2015-2021 The Khronos Group Inc.
-//
-// SPDX-License-Identifier: CC-BY-4.0
+// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
 
 [[naming]]
 = API Naming Conventions
@@ -15,24 +15,25 @@ language provides an explicit namespace mechanism.
 
 == General Naming Rules
 
-Names of identifiers should generally be written with full words, as a
-concise description of what that identifier is.
+Names of identifiers should generally be written with full words, avoiding
+abbreviations, as a concise description of what that identifier is.
 For example, the type of a structure containing information about how to
 create an instance is stext:VkInstanceCreateInfo.
 
-Abbreviations and prefixes are sometimes used in the API when they do not
-impede clarity.
+Abbreviations and prefixes are sometimes used in the API when they are in
+common use.
 All abbreviations and prefixes used in the API must be approved by the
 Vulkan working group, and be added to the <<naming-abbreviations,Common
 Abbreviations>> and <<naming-prefixes,Standard Prefixes>> sections,
 respectively.
-Whenever an approved abbreviation exists for a particular word, it should be
-used in place of the full word unless there is good reason not to.
+
+Whenever an abbreviation exists for a particular word, it should be used in
+place of the full word unless there is good reason not to.
 
 When a number is part of an identifier, it is treated as a word if it is a
 standalone number, such as the extension name token
 ename:VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME for the
-`VK_KHR_get_memory_requirements2` extension.
++VK_KHR_get_memory_requirements2+ extension.
 For uses where the number is part of a common abbreviation such as etext:2D
 or etext:R8B8`, the entire abbreviation is treated as a word.
 
@@ -40,9 +41,9 @@ ifdef::editing-notes[]
 [NOTE]
 .editing-note
 ====
-Unfortunately, there is an internal inconsistency here between extension
-name strings, such as VK_KHR_get_memory_requirements2, and tokens encoding
-those names, such as ename:VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME.
+Unfortunately, there's an internal inconsistency here between extension name
+strings, such as VK_KHR_get_memory_requirements2, and tokens encoding those
+names, such as ename:VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME.
 ====
 endif::editing-notes[]
 
@@ -127,10 +128,10 @@ typedef union VkClearColorValue {
 
 
 [[naming-extension-structures]]
-=== Extending Structure Names
+=== Extension Structure Names
 
-Structures which extend a base structures through its pname:pNext chain
-should reflect the name of the base structure.
+Structures which extend other structures through the pname:pNext chain
+should reflect the name of the base structure they extend.
 Currently there are two examples of such naming schemes.
 
 New structures which add extended object creation parameters to a base
@@ -139,7 +140,7 @@ structure should use this naming scheme:
 .Extended Object Information Structures
 [width="60%",options="header"]
 |====
-| Base Structure Name | Extending Structure Name
+| Base Structure Name | Extension Structure Name
 | `Vk__Object__CreateInfo`
     | `Vk__ObjectName__CreateInfo__Author__`
 |====
@@ -157,7 +158,7 @@ should use this naming scheme:
 .Extended Query Structures
 [width="60%",options="header"]
 |====
-| Base Structure Name | Extending Structure Name
+| Base Structure Name | Extension Structure Name
 | `vkGetPhysicalDeviceFeatures2KHR`
     | `VkPhysicalDevice__Name__Features__Author__`
 | `vkGetPhysicalDeviceProperties2KHR`
@@ -271,12 +272,11 @@ A number of commands in the API are used to determine the properties of some
 object in the implementation.
 
 The queried properties may either be invariant, or they may: change based on
-application behavior.
+application behaviour.
 If the results are not invariant, the lifetime of the results should be
 clearly described in the command description.
-See
-link:html/vkspec.html#fundamentals-commandsyntax-results-lifetime[Lifetime
-of Retrieved Results] in the specification for more information.
+See <<fundamentals-commandsyntax-results-lifetime,Lifetime of Retrieved
+Results>> in the specification for more information.
 
 These commands fall into two categories from a naming perspective:
 
@@ -316,7 +316,7 @@ verbs at the time of writing.
 | Verb       | Meaning
 | Acquire    | Acquire ownership of an object from an external source
 | Allocate   | Allocates memory in a pool or memory heap and creates object - paired with "Free"
-| Begin      | Start of a range of command buffer commands with different behavior than those outside the range - "End" marks the end of the range
+| Begin      | Start of a range of command buffer commands with different behaviour than those outside the range - "End" marks the end of the range
 | Bind       | Binds an object to another object
 | Blit       | Performs a filtered and scaled copy of pixels from one image to another
 | Clear      | Sets all pixels in an image to the same value
@@ -325,7 +325,7 @@ verbs at the time of writing.
 | Destroy    | Destroys an object - paired with "Create"
 | Dispatch   | Kicks off a set of compute tasks
 | Draw       | Kicks off a set of rasterization tasks
-| End        | End of a range of command buffer commands with different behavior than those outside the range - "Begin" marks the start of the range
+| End        | End of a range of command buffer commands with different behaviour than those outside the range - "Begin" marks the start of the range
 | Enumerate  | Queries the capabilities of objects that could be created, before creating them
 | Execute    | Executes commands recorded in another command buffer
 | Fill       | Sets all data units in a buffer to the same value
@@ -392,10 +392,10 @@ sizes (e.g. `sizeCount`).
 If the member is an array length, then the name of length should correspond
 to the name of the array member, usually `XYZCount` for an array named
 `pXYZs`.
-If a structure in a pname:pNext chain is an array whose length must match
-the length of an array of the base structure, then that extending structure
-should include an array length member with the same name as the length in
-the base structure.
+If a member of a chained extension structure is an array whose length must
+match the length of an array of the base structure, then the chained
+extension structure should include an array length member with the same name
+as the length in the base structure.
 
 These rules apply to all function parameters and struct/union members, with
 a single exception:
@@ -487,7 +487,7 @@ typedef struct VkSurfaceFormatKHR {
 } VkSurfaceFormatKHR;
 ----
 
-[[naming-extension-enumerant-names]]
+
 === Extension Enumerant Names
 
 Enumerants defined by extensions have the author ID appended to the end of
@@ -499,8 +499,8 @@ definitions by the generator scripts.
 ====
 There is one exception to this rule in the
 `VK_KHR_sampler_mirror_clamp_to_edge` extension.
-This functionality was included in the original specification, but quickly
-separated out at release.
+This functionality was included in the original spec, but quickly separated
+out at release.
 Due to this late change, the single enum exposed has retained its original
 identifier to avoid compatibility issues:
 ename:VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE
@@ -574,7 +574,7 @@ Mip::
     If referred to some associating with a mipmap, such as levels, sampling
     mode, size, tail images, etc., use "`mip`" as a standalone prefix word,
     e.g. pname:maxMipLevels, ename:VK_MIP_MODE, etc.
-    This is analogous to the <<writing-compound-words,spelling conventions
+    This is analogous to the <<writing-compount-words,spelling conventions
     for mip-related terms>>
 
 [NOTE]

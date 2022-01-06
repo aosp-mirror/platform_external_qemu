@@ -1,8 +1,5 @@
-// Copyright (c) 2018-2020 The Brenwill Workshop Ltd.
-//
-// SPDX-License-Identifier: CC-BY-4.0
-
 [[platformQuerySupport_ios,platformQuerySupport_ios]]
+
 === iOS Platform
 
 On iOS, all physical devices and queue families must: be capable of

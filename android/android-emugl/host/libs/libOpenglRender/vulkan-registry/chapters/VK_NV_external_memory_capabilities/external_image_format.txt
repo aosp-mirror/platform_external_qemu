@@ -1,13 +1,10 @@
-// Copyright (c) 2018-2020 NVIDIA Corporation
-//
-// SPDX-License-Identifier: CC-BY-4.0
-
-[open,refpage='vkGetPhysicalDeviceExternalImageFormatPropertiesNV',desc='Determine image capabilities compatible with external memory handle types',type='protos']
+[open,refpage='vkGetPhysicalDeviceExternalImageFormatPropertiesNV',desc='determine image capabilities compatible with external memory handle types',type='protos']
 --
+
 To determine the image capabilities compatible with an external memory
 handle type, call:
 
-include::{generated}/api/protos/vkGetPhysicalDeviceExternalImageFormatPropertiesNV.txt[]
+include::../../api/protos/vkGetPhysicalDeviceExternalImageFormatPropertiesNV.txt[]
 
   * pname:physicalDevice is the physical device from which to query the
     image capabilities
@@ -22,26 +19,27 @@ include::{generated}/api/protos/vkGetPhysicalDeviceExternalImageFormatProperties
   * pname:flags is a bitmask describing additional parameters of the image,
     corresponding to slink:VkImageCreateInfo::pname:flags.
   * pname:externalHandleType is either one of the bits from
-    elink:VkExternalMemoryHandleTypeFlagBitsNV, or 0.
-  * pname:pExternalImageFormatProperties is a pointer to a
+    slink:VkExternalMemoryHandleTypeFlagBitsNV, or 0.
+  * pname:pExternalImageFormatProperties points to an instance of the
     slink:VkExternalImageFormatPropertiesNV structure in which capabilities
     are returned.
 
 If pname:externalHandleType is 0,
-pname:pExternalImageFormatProperties->imageFormatProperties will return the
+pname:pExternalImageFormatProperties::imageFormatProperties will return the
 same values as a call to flink:vkGetPhysicalDeviceImageFormatProperties, and
 the other members of pname:pExternalImageFormatProperties will all be 0.
 Otherwise, they are filled in as described for
 slink:VkExternalImageFormatPropertiesNV.
 
-include::{generated}/validity/protos/vkGetPhysicalDeviceExternalImageFormatPropertiesNV.txt[]
+include::../../validity/protos/vkGetPhysicalDeviceExternalImageFormatPropertiesNV.txt[]
 --
 
 [open,refpage='VkExternalImageFormatPropertiesNV',desc='Structure specifying external image format properties',type='structs']
 --
+
 The sname:VkExternalImageFormatPropertiesNV structure is defined as:
 
-include::{generated}/api/structs/VkExternalImageFormatPropertiesNV.txt[]
+include::../../api/structs/VkExternalImageFormatPropertiesNV.txt[]
 
   * pname:imageFormatProperties will be filled in as when calling
     flink:vkGetPhysicalDeviceImageFormatProperties, but the values returned
@@ -67,16 +65,17 @@ include::{generated}/api/structs/VkExternalImageFormatPropertiesNV.txt[]
     pname:compatibleHandleTypes will always contain
     flink:vkGetPhysicalDeviceExternalImageFormatPropertiesNV::pname:externalHandleType
 
-include::{generated}/validity/structs/VkExternalImageFormatPropertiesNV.txt[]
+include::../../validity/structs/VkExternalImageFormatPropertiesNV.txt[]
 --
 
 [open,refpage='VkExternalMemoryFeatureFlagBitsNV',desc='Bitmask specifying external memory features',type='enums',xrefs='vkGetPhysicalDeviceExternalImageFormatPropertiesNV VkExternalImageFormatPropertiesNV']
 --
+
 Bits which can: be set in
-slink:VkExternalImageFormatPropertiesNV::pname:externalMemoryFeatures,
+slink:VkExternalMemoryFeatureFlagBitsNV::pname:externalMemoryFeatures,
 indicating properties of the external memory handle type, are:
 
-include::{generated}/api/enums/VkExternalMemoryFeatureFlagBitsNV.txt[]
+include::../../api/enums/VkExternalMemoryFeatureFlagBitsNV.txt[]
 
   * ename:VK_EXTERNAL_MEMORY_FEATURE_DEDICATED_ONLY_BIT_NV specifies that
     external memory of the specified type must: be created as a dedicated
@@ -85,12 +84,13 @@ include::{generated}/api/enums/VkExternalMemoryFeatureFlagBitsNV.txt[]
     implementation supports exporting handles of the specified type.
   * ename:VK_EXTERNAL_MEMORY_FEATURE_IMPORTABLE_BIT_NV specifies that the
     implementation supports importing handles of the specified type.
+
 --
 
-[open,refpage='VkExternalMemoryFeatureFlagsNV',desc='Bitmask of VkExternalMemoryFeatureFlagBitsNV',type='flags']
+[open,refpage='VkExternalMemoryFeatureFlagsNV',desc='Bitmask of VkExternalMemoryFeatureFlagBitsNV',type='enums']
 --
-include::{generated}/api/flags/VkExternalMemoryFeatureFlagsNV.txt[]
+include::../../api/flags/VkExternalMemoryFeatureFlagsNV.txt[]
 
-tname:VkExternalMemoryFeatureFlagsNV is a bitmask type for setting a mask of
-zero or more elink:VkExternalMemoryFeatureFlagBitsNV.
+sname:VkExternalMemoryFeatureFlagsNV is a bitmask type for setting a mask of
+zero or more slink:VkExternalMemoryFeatureFlagBitsNV.
 --

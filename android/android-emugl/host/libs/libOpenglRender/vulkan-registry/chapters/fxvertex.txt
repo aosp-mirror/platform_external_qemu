@@ -1,6 +1,6 @@
-// Copyright 2015-2021 The Khronos Group, Inc.
-//
-// SPDX-License-Identifier: CC-BY-4.0
+// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
 
 [[fxvertex]]
 = Fixed-Function Vertex Processing
@@ -101,33 +101,33 @@ up through its size.
 For single precision types, it is invalid if the sequence of components gets
 larger than 3.
 
-When a vertex shader input variable declared using a 16- or 32-bit scalar or
-vector data type is assigned a location, its value(s) are taken from the
-components of the input attribute specified with the corresponding
+When a vertex shader input variable declared using a scalar or vector 32-bit
+data type is assigned a location, its value(s) are taken from the components
+of the input attribute specified with the corresponding
 sname:VkVertexInputAttributeDescription::pname:location.
 The components used depend on the type of variable and the code:Component
 decoration specified in the variable declaration, as identified in
 <<fxvertex-attrib-components>>.
-Any 16-bit or 32-bit scalar or vector input will consume a single location.
-For 16-bit and 32-bit data types, missing components are filled in with
-default values as described <<fxvertex-input-extraction,below>>.
+Any 32-bit scalar or vector input will consume a single location.
+For 32-bit data types, missing components are filled in with default values
+as described <<fxvertex-input-extraction,below>>.
 
 
 [[fxvertex-attrib-components]]
-.Input attribute components accessed by 16-bit and 32-bit input variables
+.Input attribute components accessed by 32-bit input variables
 [width="65%",cols="<5,<3,<3",options="header"]
 |====
-| 16-bit or 32-bit data type | code:Component decoration | Components consumed
-| scalar                     | 0 or unspecified             | (x, o, o, o)
-| scalar                     | 1                            | (o, y, o, o)
-| scalar                     | 2                            | (o, o, z, o)
-| scalar                     | 3                            | (o, o, o, w)
-| two-component vector       | 0 or unspecified             | (x, y, o, o)
-| two-component vector       | 1                            | (o, y, z, o)
-| two-component vector       | 2                            | (o, o, z, w)
-| three-component vector     | 0 or unspecified             | (x, y, z, o)
-| three-component vector     | 1                            | (o, y, z, w)
-| four-component vector      | 0 or unspecified             | (x, y, z, w)
+| 32-bit data type      | code:Component decoration | Components consumed
+| scalar                | 0 or unspecified             | (x, o, o, o)
+| scalar                | 1                            | (o, y, o, o)
+| scalar                | 2                            | (o, o, z, o)
+| scalar                | 3                            | (o, o, o, w)
+| two-component vector  | 0 or unspecified             | (x, y, o, o)
+| two-component vector  | 1                            | (o, y, z, o)
+| two-component vector  | 2                            | (o, o, z, w)
+| three-component vector| 0 or unspecified             | (x, y, z, o)
+| three-component vector| 1                            | (o, y, z, w)
+| four-component vector | 0 or unspecified             | (x, y, z, w)
 |====
 
 Components indicated by "`o`" are available for use by other input variables
@@ -266,27 +266,19 @@ width integer-type components.
 == Vertex Input Description
 
 Applications specify vertex input attribute and vertex input binding
-descriptions as part of graphics pipeline creation by setting the
-slink:VkGraphicsPipelineCreateInfo::pname:pVertexInputState pointer to a
-slink:VkPipelineVertexInputStateCreateInfo structure.
-ifdef::VK_EXT_vertex_input_dynamic_state[]
-Alternatively, if the graphics pipeline is created with the
-ename:VK_DYNAMIC_STATE_VERTEX_INPUT_EXT dynamic state enabled, then the
-vertex input attribute and vertex input binding descriptions are specified
-dynamically with flink:vkCmdSetVertexInputEXT, and the
-slink:VkGraphicsPipelineCreateInfo::pname:pVertexInputState pointer is
-ignored.
-endif::VK_EXT_vertex_input_dynamic_state[]
+descriptions as part of graphics pipeline creation.
+The slink:VkGraphicsPipelineCreateInfo::pname:pVertexInputState points to a
+structure of type sname:VkPipelineVertexInputStateCreateInfo.
 
 [open,refpage='VkPipelineVertexInputStateCreateInfo',desc='Structure specifying parameters of a newly created pipeline vertex input state',type='structs']
 --
+
 The sname:VkPipelineVertexInputStateCreateInfo structure is defined as:
 
-include::{generated}/api/structs/VkPipelineVertexInputStateCreateInfo.txt[]
+include::../api/structs/VkPipelineVertexInputStateCreateInfo.txt[]
 
   * pname:sType is the type of this structure.
-  * pname:pNext is `NULL` or a pointer to a structure extending this
-    structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
   * pname:flags is reserved for future use.
   * pname:vertexBindingDescriptionCount is the number of vertex binding
     descriptions provided in pname:pVertexBindingDescriptions.
@@ -318,27 +310,30 @@ include::{generated}/api/structs/VkPipelineVertexInputStateCreateInfo.txt[]
     distinct attribute locations
 ****
 
-include::{generated}/validity/structs/VkPipelineVertexInputStateCreateInfo.txt[]
+include::../validity/structs/VkPipelineVertexInputStateCreateInfo.txt[]
 --
 
-[open,refpage='VkPipelineVertexInputStateCreateFlags',desc='Reserved for future use',type='flags']
+[open,refpage='VkPipelineVertexInputStateCreateFlags',desc='Reserved for future use',type='enums']
 --
-include::{generated}/api/flags/VkPipelineVertexInputStateCreateFlags.txt[]
+include::../api/flags/VkPipelineVertexInputStateCreateFlags.txt[]
 
-tname:VkPipelineVertexInputStateCreateFlags is a bitmask type for setting a
+sname:VkPipelineVertexInputStateCreateFlags is a bitmask type for setting a
 mask, but is currently reserved for future use.
 --
 
+Each vertex input binding is specified by an instance of the
+sname:VkVertexInputBindingDescription structure.
+
 [open,refpage='VkVertexInputBindingDescription',desc='Structure specifying vertex input binding description',type='structs']
 --
-Each vertex input binding is specified by the
-sname:VkVertexInputBindingDescription structure, defined as:
 
-include::{generated}/api/structs/VkVertexInputBindingDescription.txt[]
+The sname:VkVertexInputBindingDescription structure is defined as:
+
+include::../api/structs/VkVertexInputBindingDescription.txt[]
 
   * pname:binding is the binding number that this structure describes.
-  * pname:stride is the byte stride between consecutive elements within the
-    buffer.
+  * pname:stride is the distance in bytes between two consecutive elements
+    within the buffer.
   * pname:inputRate is a elink:VkVertexInputRate value specifying whether
     vertex attribute addressing is a function of the vertex index or of the
     instance index.
@@ -351,38 +346,37 @@ include::{generated}/api/structs/VkVertexInputBindingDescription.txt[]
   * [[VUID-VkVertexInputBindingDescription-stride-00619]]
     pname:stride must: be less than or equal to
     sname:VkPhysicalDeviceLimits::pname:maxVertexInputBindingStride
-ifdef::VK_KHR_portability_subset[]
-  * [[VUID-VkVertexInputBindingDescription-stride-04456]]
-    If the `apiext:VK_KHR_portability_subset` extension is enabled,
-    pname:stride must: be a multiple of, and at least as large as,
-    slink:VkPhysicalDevicePortabilitySubsetPropertiesKHR::pname:minVertexInputBindingStrideAlignment
-endif::VK_KHR_portability_subset[]
 ****
 
-include::{generated}/validity/structs/VkVertexInputBindingDescription.txt[]
+include::../validity/structs/VkVertexInputBindingDescription.txt[]
 --
 
 [open,refpage='VkVertexInputRate',desc='Specify rate at which vertex attributes are pulled from buffers',type='enums']
 --
+
 Possible values of slink:VkVertexInputBindingDescription::pname:inputRate,
 specifying the rate at which vertex attributes are pulled from buffers, are:
 
-include::{generated}/api/enums/VkVertexInputRate.txt[]
+include::../api/enums/VkVertexInputRate.txt[]
 
   * ename:VK_VERTEX_INPUT_RATE_VERTEX specifies that vertex attribute
     addressing is a function of the vertex index.
   * ename:VK_VERTEX_INPUT_RATE_INSTANCE specifies that vertex attribute
     addressing is a function of the instance index.
+
 --
 
 [open,refpage='VkVertexInputAttributeDescription',desc='Structure specifying vertex input attribute description',type='structs']
 --
-Each vertex input attribute is specified by the
-sname:VkVertexInputAttributeDescription structure, defined as:
 
-include::{generated}/api/structs/VkVertexInputAttributeDescription.txt[]
+Each vertex input attribute is specified by an instance of the
+sname:VkVertexInputAttributeDescription structure.
 
-  * pname:location is the shader input location number for this attribute.
+The sname:VkVertexInputAttributeDescription structure is defined as:
+
+include::../api/structs/VkVertexInputAttributeDescription.txt[]
+
+  * pname:location is the shader binding location number for this attribute.
   * pname:binding is the binding number which this attribute takes its data
     from.
   * pname:format is the size and type of the vertex attribute data.
@@ -405,199 +399,18 @@ include::{generated}/api/structs/VkVertexInputAttributeDescription.txt[]
     the ename:VK_FORMAT_FEATURE_VERTEX_BUFFER_BIT flag in
     sname:VkFormatProperties::pname:bufferFeatures returned by
     fname:vkGetPhysicalDeviceFormatProperties
-ifdef::VK_KHR_portability_subset[]
-  * [[VUID-VkVertexInputAttributeDescription-vertexAttributeAccessBeyondStride-04457]]
-    If the `apiext:VK_KHR_portability_subset` extension is enabled, and
-    slink:VkPhysicalDevicePortabilitySubsetFeaturesKHR::pname:vertexAttributeAccessBeyondStride
-    is ename:VK_FALSE, the sum of pname:offset plus the size of the vertex
-    attribute data described by pname:format must: not be greater than
-    pname:stride in the slink:VkVertexInputBindingDescription referenced in
-    pname:binding
-endif::VK_KHR_portability_subset[]
 ****
 
-include::{generated}/validity/structs/VkVertexInputAttributeDescription.txt[]
+include::../validity/structs/VkVertexInputAttributeDescription.txt[]
 --
-
-ifdef::VK_EXT_vertex_input_dynamic_state[]
-[open,refpage='vkCmdSetVertexInputEXT',desc='Set the vertex input state dynamically for a command buffer',type='protos']
---
-To <<pipelines-dynamic-state, dynamically set>> the vertex input attribute
-and vertex input binding descriptions, call:
-
-include::{generated}/api/protos/vkCmdSetVertexInputEXT.txt[]
-
-  * pname:commandBuffer is the command buffer into which the command will be
-    recorded.
-  * pname:vertexBindingDescriptionCount is the number of vertex binding
-    descriptions provided in pname:pVertexBindingDescriptions.
-  * pname:pVertexBindingDescriptions is a pointer to an array of
-    sname:VkVertexInputBindingDescription2EXT structures.
-  * pname:vertexAttributeDescriptionCount is the number of vertex attribute
-    descriptions provided in pname:pVertexAttributeDescriptions.
-  * pname:pVertexAttributeDescriptions is a pointer to an array of
-    sname:VkVertexInputAttributeDescription2EXT structures.
-
-This command sets the vertex input attribute and vertex input binding
-descriptions state for subsequent drawing commands when the graphics
-pipeline is created with ename:VK_DYNAMIC_STATE_VERTEX_INPUT_EXT set in
-slink:VkPipelineDynamicStateCreateInfo::pname:pDynamicStates.
-Otherwise, this state is specified by the
-slink:VkGraphicsPipelineCreateInfo::pname:pVertexInputState values used to
-create the currently active pipeline.
-
-ifdef::VK_EXT_extended_dynamic_state[]
-If the bound pipeline state object was also created with the
-ename:VK_DYNAMIC_STATE_VERTEX_INPUT_BINDING_STRIDE_EXT dynamic state
-enabled, then flink:vkCmdBindVertexBuffers2EXT can be used instead of
-fname:vkCmdSetVertexInputEXT to dynamically set the stride.
-endif::VK_EXT_extended_dynamic_state[]
-
-.Valid Usage
-****
-  * [[VUID-vkCmdSetVertexInputEXT-None-04790]]
-    The <<features-vertexInputDynamicState, vertexInputDynamicState>>
-    feature must: be enabled
-  * [[VUID-vkCmdSetVertexInputEXT-vertexBindingDescriptionCount-04791]]
-    pname:vertexBindingDescriptionCount must: be less than or equal to
-    sname:VkPhysicalDeviceLimits::pname:maxVertexInputBindings
-  * [[VUID-vkCmdSetVertexInputEXT-vertexAttributeDescriptionCount-04792]]
-    pname:vertexAttributeDescriptionCount must: be less than or equal to
-    sname:VkPhysicalDeviceLimits::pname:maxVertexInputAttributes
-  * [[VUID-vkCmdSetVertexInputEXT-binding-04793]]
-    For every pname:binding specified by each element of
-    pname:pVertexAttributeDescriptions, a
-    sname:VkVertexInputBindingDescription2EXT must: exist in
-    pname:pVertexBindingDescriptions with the same value of pname:binding
-  * [[VUID-vkCmdSetVertexInputEXT-pVertexBindingDescriptions-04794]]
-    All elements of pname:pVertexBindingDescriptions must: describe distinct
-    binding numbers
-  * [[VUID-vkCmdSetVertexInputEXT-pVertexAttributeDescriptions-04795]]
-    All elements of pname:pVertexAttributeDescriptions must: describe
-    distinct attribute locations
-****
-
-include::{generated}/validity/protos/vkCmdSetVertexInputEXT.txt[]
---
-
-[open,refpage='VkVertexInputBindingDescription2EXT',desc='Structure specifying the extended vertex input binding description',type='structs']
---
-The sname:VkVertexInputBindingDescription2EXT structure is defined as:
-
-include::{generated}/api/structs/VkVertexInputBindingDescription2EXT.txt[]
-
-  * pname:sType is the type of this structure.
-  * pname:pNext is `NULL` or a pointer to a structure extending this
-    structure.
-  * pname:binding is the binding number that this structure describes.
-  * pname:stride is the byte stride between consecutive elements within the
-    buffer.
-  * pname:inputRate is a elink:VkVertexInputRate value specifying whether
-    vertex attribute addressing is a function of the vertex index or of the
-    instance index.
-ifdef::VK_EXT_vertex_attribute_divisor[]
-  * pname:divisor is the number of successive instances that will use the
-    same value of the vertex attribute when instanced rendering is enabled.
-    This member can: be set to a value other than `1` if the
-    <<features-vertexAttributeInstanceRateDivisor,
-    vertexAttributeInstanceRateDivisor>> feature is enabled.
-    For example, if the divisor is N, the same vertex attribute will be
-    applied to N successive instances before moving on to the next vertex
-    attribute.
-    The maximum value of pname:divisor is implementation-dependent and can
-    be queried using
-    sname:VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT::pname:maxVertexAttribDivisor.
-    A value of `0` can: be used for the divisor if the
-    <<features-vertexAttributeInstanceRateZeroDivisor,pname:vertexAttributeInstanceRateZeroDivisor>>
-    feature is enabled.
-    In this case, the same vertex attribute will be applied to all
-    instances.
-endif::VK_EXT_vertex_attribute_divisor[]
-ifndef::VK_EXT_vertex_attribute_divisor[]
-  * pname:divisor must: be set to `1`
-endif::VK_EXT_vertex_attribute_divisor[]
-
-.Valid Usage
-****
-  * [[VUID-VkVertexInputBindingDescription2EXT-binding-04796]]
-    pname:binding must: be less than
-    sname:VkPhysicalDeviceLimits::pname:maxVertexInputBindings
-  * [[VUID-VkVertexInputBindingDescription2EXT-stride-04797]]
-    pname:stride must: be less than or equal to
-    sname:VkPhysicalDeviceLimits::pname:maxVertexInputBindingStride
-  * [[VUID-VkVertexInputBindingDescription2EXT-divisor-04798]]
-    If the <<features-vertexAttributeInstanceRateZeroDivisor,
-    vertexAttributeInstanceRateZeroDivisor>> feature is not enabled,
-    pname:divisor must: not be `0`
-  * [[VUID-VkVertexInputBindingDescription2EXT-divisor-04799]]
-    If the <<features-vertexAttributeInstanceRateDivisor,
-    vertexAttributeInstanceRateDivisor>> feature is not enabled,
-    pname:divisor must: be `1`
-  * [[VUID-VkVertexInputBindingDescription2EXT-divisor-06226]]
-    pname:divisor must: be a value between `0` and
-    sname:VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT::pname:maxVertexAttribDivisor,
-    inclusive
-  * [[VUID-VkVertexInputBindingDescription2EXT-divisor-06227]]
-    If pname:divisor is not `1` then pname:inputRate must: be of type
-    ename:VK_VERTEX_INPUT_RATE_INSTANCE
-****
-
-include::{generated}/validity/structs/VkVertexInputBindingDescription2EXT.txt[]
---
-
-[open,refpage='VkVertexInputAttributeDescription2EXT',desc='Structure specifying the extended vertex input attribute description',type='structs']
---
-The sname:VkVertexInputAttributeDescription2EXT structure is defined as:
-
-include::{generated}/api/structs/VkVertexInputAttributeDescription2EXT.txt[]
-
-  * pname:sType is the type of this structure.
-  * pname:pNext is `NULL` or a pointer to a structure extending this
-    structure.
-  * pname:location is the shader input location number for this attribute.
-  * pname:binding is the binding number which this attribute takes its data
-    from.
-  * pname:format is the size and type of the vertex attribute data.
-  * pname:offset is a byte offset of this attribute relative to the start of
-    an element in the vertex input binding.
-
-.Valid Usage
-****
-  * [[VUID-VkVertexInputAttributeDescription2EXT-location-06228]]
-    pname:location must: be less than
-    sname:VkPhysicalDeviceLimits::pname:maxVertexInputAttributes
-  * [[VUID-VkVertexInputAttributeDescription2EXT-binding-06229]]
-    pname:binding must: be less than
-    sname:VkPhysicalDeviceLimits::pname:maxVertexInputBindings
-  * [[VUID-VkVertexInputAttributeDescription2EXT-offset-06230]]
-    pname:offset must: be less than or equal to
-    sname:VkPhysicalDeviceLimits::pname:maxVertexInputAttributeOffset
-  * [[VUID-VkVertexInputAttributeDescription2EXT-format-04805]]
-    pname:format must: be allowed as a vertex buffer format, as specified by
-    the ename:VK_FORMAT_FEATURE_VERTEX_BUFFER_BIT flag in
-    sname:VkFormatProperties::pname:bufferFeatures returned by
-    fname:vkGetPhysicalDeviceFormatProperties
-ifdef::VK_KHR_portability_subset[]
-  * [[VUID-VkVertexInputAttributeDescription2EXT-vertexAttributeAccessBeyondStride-04806]]
-    If the `apiext:VK_KHR_portability_subset` extension is enabled, and
-    slink:VkPhysicalDevicePortabilitySubsetFeaturesKHR::pname:vertexAttributeAccessBeyondStride
-    is ename:VK_FALSE, the sum of pname:offset plus the size of the vertex
-    attribute data described by pname:format must: not be greater than
-    pname:stride in the slink:VkVertexInputBindingDescription2EXT referenced
-    in pname:binding
-endif::VK_KHR_portability_subset[]
-****
-
-include::{generated}/validity/structs/VkVertexInputAttributeDescription2EXT.txt[]
---
-endif::VK_EXT_vertex_input_dynamic_state[]
 
 [open,refpage='vkCmdBindVertexBuffers',desc='Bind vertex buffers to a command buffer',type='protos']
 --
-To bind vertex buffers to a command buffer for use in subsequent drawing
+
+To bind vertex buffers to a command buffer for use in subsequent draw
 commands, call:
 
-include::{generated}/api/protos/vkCmdBindVertexBuffers.txt[]
+include::../api/protos/vkCmdBindVertexBuffers.txt[]
 
   * pname:commandBuffer is the command buffer into which the command is
     recorded.
@@ -615,17 +428,8 @@ pname:bindingCount)#.
 The vertex input binding is updated to start at the offset indicated by
 pname:pOffsets[i] from the start of the buffer pname:pBuffers[i].
 All vertex input attributes that use each of these bindings will use these
-updated addresses in their address calculations for subsequent drawing
+updated addresses in their address calculations for subsequent draw
 commands.
-ifdef::VK_EXT_robustness2[]
-If the <<features-nullDescriptor,nullDescriptor>> feature is enabled,
-elements of pname:pBuffers can: be dlink:VK_NULL_HANDLE, and can: be used by
-the vertex shader.
-If a vertex input attribute is bound to a vertex input binding that is
-dlink:VK_NULL_HANDLE, the values taken from memory are considered to be
-zero, and missing G, B, or A components are
-<<fxvertex-input-extraction,filled with [eq]#(0,0,1)#>>.
-endif::VK_EXT_robustness2[]
 
 .Valid Usage
 ****
@@ -644,156 +448,37 @@ endif::VK_EXT_robustness2[]
   * [[VUID-vkCmdBindVertexBuffers-pBuffers-00628]]
     Each element of pname:pBuffers that is non-sparse must: be bound
     completely and contiguously to a single sname:VkDeviceMemory object
-  * [[VUID-vkCmdBindVertexBuffers-pBuffers-04001]]
-    If the <<features-nullDescriptor,nullDescriptor>> feature is not
-    enabled, all elements of pname:pBuffers must: not be
-    dlink:VK_NULL_HANDLE
-ifdef::VK_EXT_robustness2[]
-  * [[VUID-vkCmdBindVertexBuffers-pBuffers-04002]]
-    If an element of pname:pBuffers is dlink:VK_NULL_HANDLE, then the
-    corresponding element of pname:pOffsets must: be zero
-endif::VK_EXT_robustness2[]
 ****
 
-include::{generated}/validity/protos/vkCmdBindVertexBuffers.txt[]
+include::../validity/protos/vkCmdBindVertexBuffers.txt[]
 --
-
-ifdef::VK_EXT_extended_dynamic_state[]
-[open,refpage='vkCmdBindVertexBuffers2EXT',desc='Bind vertex buffers to a command buffer and dynamically set strides',type='protos']
---
-Alternatively, to bind vertex buffers, along with their sizes and strides,
-to a command buffer for use in subsequent drawing commands, call:
-
-include::{generated}/api/protos/vkCmdBindVertexBuffers2EXT.txt[]
-
-  * pname:commandBuffer is the command buffer into which the command is
-    recorded.
-  * pname:firstBinding is the index of the first vertex input binding whose
-    state is updated by the command.
-  * pname:bindingCount is the number of vertex input bindings whose state is
-    updated by the command.
-  * pname:pBuffers is a pointer to an array of buffer handles.
-  * pname:pOffsets is a pointer to an array of buffer offsets.
-  * pname:pSizes is `NULL` or a pointer to an array of the size in bytes of
-    vertex data bound from pname:pBuffers.
-  * pname:pStrides is `NULL` or a pointer to an array of buffer strides.
-
-The values taken from elements [eq]#i# of pname:pBuffers and pname:pOffsets
-replace the current state for the vertex input binding
-[eq]#pname:firstBinding {plus} i#, for [eq]#i# in [eq]#[0,
-pname:bindingCount)#.
-The vertex input binding is updated to start at the offset indicated by
-pname:pOffsets[i] from the start of the buffer pname:pBuffers[i].
-If pname:pSizes is not `NULL` then pname:pSizes[i] specifies the bound size
-of the vertex buffer starting from the corresponding elements of
-pname:pBuffers[i] plus pname:pOffsets[i].
-All vertex input attributes that use each of these bindings will use these
-updated addresses in their address calculations for subsequent drawing
-commands.
-ifdef::VK_EXT_robustness2[]
-If the <<features-nullDescriptor,nullDescriptor>> feature is enabled,
-elements of pname:pBuffers can: be dlink:VK_NULL_HANDLE, and can: be used by
-the vertex shader.
-If a vertex input attribute is bound to a vertex input binding that is
-dlink:VK_NULL_HANDLE, the values taken from memory are considered to be
-zero, and missing G, B, or A components are
-<<fxvertex-input-extraction,filled with [eq]#(0,0,1)#>>.
-endif::VK_EXT_robustness2[]
-
-This command also <pipelines-dynamic-state, dynamically sets>> the byte
-strides between consecutive elements within buffer pname:pBuffers[i] to the
-corresponding pname:pStrides[i] value when the graphics pipeline is created
-with ename:VK_DYNAMIC_STATE_VERTEX_INPUT_BINDING_STRIDE_EXT set in
-slink:VkPipelineDynamicStateCreateInfo::pname:pDynamicStates.
-Otherwise, strides are specified by the
-sname:VkVertexInputBindingDescription::pname:stride values used to create
-the currently active pipeline.
-
-ifdef::VK_EXT_vertex_input_dynamic_state[]
-If the bound pipeline state object was also created with the
-ename:VK_DYNAMIC_STATE_VERTEX_INPUT_EXT dynamic state enabled then
-flink:vkCmdSetVertexInputEXT can: be used instead of
-fname:vkCmdBindVertexBuffers2EXT to set the stride.
-endif::VK_EXT_vertex_input_dynamic_state[]
-
-.Valid Usage
-****
-  * [[VUID-vkCmdBindVertexBuffers2EXT-firstBinding-03355]]
-    pname:firstBinding must: be less than
-    sname:VkPhysicalDeviceLimits::pname:maxVertexInputBindings
-  * [[VUID-vkCmdBindVertexBuffers2EXT-firstBinding-03356]]
-    The sum of pname:firstBinding and pname:bindingCount must: be less than
-    or equal to sname:VkPhysicalDeviceLimits::pname:maxVertexInputBindings
-  * [[VUID-vkCmdBindVertexBuffers2EXT-pOffsets-03357]]
-    All elements of pname:pOffsets must: be less than the size of the
-    corresponding element in pname:pBuffers
-  * [[VUID-vkCmdBindVertexBuffers2EXT-pSizes-03358]]
-    If pname:pSizes is not `NULL`, all elements of pname:pOffsets plus
-    pname:pSizes must: be less than or equal to the size of the
-    corresponding element in pname:pBuffers
-  * [[VUID-vkCmdBindVertexBuffers2EXT-pBuffers-03359]]
-    All elements of pname:pBuffers must: have been created with the
-    ename:VK_BUFFER_USAGE_VERTEX_BUFFER_BIT flag
-  * [[VUID-vkCmdBindVertexBuffers2EXT-pBuffers-03360]]
-    Each element of pname:pBuffers that is non-sparse must: be bound
-    completely and contiguously to a single sname:VkDeviceMemory object
-  * [[VUID-vkCmdBindVertexBuffers2EXT-pBuffers-04111]]
-    If the <<features-nullDescriptor,nullDescriptor>> feature is not
-    enabled, all elements of pname:pBuffers must: not be
-    dlink:VK_NULL_HANDLE
-ifdef::VK_EXT_robustness2[]
-  * [[VUID-vkCmdBindVertexBuffers2EXT-pBuffers-04112]]
-    If an element of pname:pBuffers is dlink:VK_NULL_HANDLE, then the
-    corresponding element of pname:pOffsets must: be zero
-endif::VK_EXT_robustness2[]
-  * [[VUID-vkCmdBindVertexBuffers2EXT-pStrides-03362]]
-    If pname:pStrides is not `NULL` each element of pname:pStrides must: be
-    less than or equal to
-    sname:VkPhysicalDeviceLimits::pname:maxVertexInputBindingStride
-  * [[VUID-vkCmdBindVertexBuffers2EXT-pStrides-06209]]
-    If pname:pStrides is not `NULL` each element of pname:pStrides must: be
-    either 0 or greater than or equal to the maximum extent of all vertex
-    input attributes fetched from the corresponding binding, where the
-    extent is calculated as the
-    slink:VkVertexInputAttributeDescription::pname:offset plus
-    slink:VkVertexInputAttributeDescription::pname:format size
-****
-
-include::{generated}/validity/protos/vkCmdBindVertexBuffers2EXT.txt[]
---
-endif::VK_EXT_extended_dynamic_state[]
-
 
 ifdef::VK_EXT_vertex_attribute_divisor[]
 
-[[fxvertex-attribute_divisor]]
 == Vertex Attribute Divisor in Instanced Rendering
 
 [open,refpage='VkPipelineVertexInputDivisorStateCreateInfoEXT',desc='Structure specifying vertex attributes assignment during instanced rendering',type='structs']
 --
-If
-<<features-vertexAttributeInstanceRateDivisor,pname:vertexAttributeInstanceRateDivisor>>
-feature is enabled and the pname:pNext chain of
-slink:VkPipelineVertexInputStateCreateInfo includes a
-sname:VkPipelineVertexInputDivisorStateCreateInfoEXT structure, then that
-structure controls how vertex attributes are assigned to an instance when
-instanced rendering is enabled.
+
+If the pname:pNext chain of slink:VkPipelineVertexInputStateCreateInfo
+includes a sname:VkPipelineVertexInputDivisorStateCreateInfoEXT structure,
+then that structure controls how vertex attributes are assigned to an
+instance when instanced rendering is enabled.
 
 The sname:VkPipelineVertexInputDivisorStateCreateInfoEXT structure is
 defined as:
 
-include::{generated}/api/structs/VkPipelineVertexInputDivisorStateCreateInfoEXT.txt[]
+include::../api/structs/VkPipelineVertexInputDivisorStateCreateInfoEXT.txt[]
 
-  * pname:sType is the type of this structure.
-  * pname:pNext is `NULL` or a pointer to a structure extending this
-    structure.
+  * pname:sType is the type of this structure
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure
   * pname:vertexBindingDivisorCount is the number of elements in the
     pname:pVertexBindingDivisors array.
   * pname:pVertexBindingDivisors is a pointer to an array of
     sname:VkVertexInputBindingDivisorDescriptionEXT structures, which
     specifies the divisor value for each binding.
 
-include::{generated}/validity/structs/VkPipelineVertexInputDivisorStateCreateInfoEXT.txt[]
+include::../validity/structs/VkPipelineVertexInputDivisorStateCreateInfoEXT.txt[]
 --
 
 [open,refpage='VkVertexInputBindingDivisorDescriptionEXT',desc='Structure specifying a divisor used in instanced rendering',type='structs']
@@ -802,24 +487,18 @@ The individual divisor values per binding are specified using the
 sname:VkVertexInputBindingDivisorDescriptionEXT structure which is defined
 as:
 
-include::{generated}/api/structs/VkVertexInputBindingDivisorDescriptionEXT.txt[]
+include::../api/structs/VkVertexInputBindingDivisorDescriptionEXT.txt[]
 
   * pname:binding is the binding number for which the divisor is specified.
   * pname:divisor is the number of successive instances that will use the
     same value of the vertex attribute when instanced rendering is enabled.
-    For example, if the divisor is N, the same vertex attribute will be
-    applied to N successive instances before moving on to the next vertex
-    attribute.
-    The maximum value of pname:divisor is implementation-dependent and can
-    be queried using
+    For example, if the divisor is N, the same vertex attribute will applied
+    to N successive instances before moving on to the next vertex attribute.
+    The maximum value of divisor is implementation dependent and can be
+    queried using
     sname:VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT::pname:maxVertexAttribDivisor.
-    A value of `0` can: be used for the divisor if the
-    <<features-vertexAttributeInstanceRateZeroDivisor,pname:vertexAttributeInstanceRateZeroDivisor>>
-    feature is enabled.
-    In this case, the same vertex attribute will be applied to all
-    instances.
 
-If this structure is not used to define a divisor value for an attribute,
+If this structure is not used to define a divisor value for an attribute
 then the divisor has a logical default value of 1.
 
 .Valid Usage
@@ -827,37 +506,29 @@ then the divisor has a logical default value of 1.
   * [[VUID-VkVertexInputBindingDivisorDescriptionEXT-binding-01869]]
     pname:binding must: be less than
     sname:VkPhysicalDeviceLimits::pname:maxVertexInputBindings
-  * [[VUID-VkVertexInputBindingDivisorDescriptionEXT-vertexAttributeInstanceRateZeroDivisor-02228]]
-    If the pname:vertexAttributeInstanceRateZeroDivisor feature is not
-    enabled, pname:divisor must: not be `0`
-  * [[VUID-VkVertexInputBindingDivisorDescriptionEXT-vertexAttributeInstanceRateDivisor-02229]]
-    If the pname:vertexAttributeInstanceRateDivisor feature is not enabled,
-    pname:divisor must: be `1`
   * [[VUID-VkVertexInputBindingDivisorDescriptionEXT-divisor-01870]]
-    pname:divisor must: be a value between `0` and
+    pname:divisor must: be a value between `1` and
     sname:VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT::pname:maxVertexAttribDivisor,
-    inclusive
+    inclusive.
   * [[VUID-VkVertexInputBindingDivisorDescriptionEXT-inputRate-01871]]
     slink:VkVertexInputBindingDescription::pname:inputRate must: be of type
-    ename:VK_VERTEX_INPUT_RATE_INSTANCE for this pname:binding
+    ename:VK_VERTEX_INPUT_RATE_INSTANCE for this pname:binding.
 ****
 
-include::{generated}/validity/structs/VkVertexInputBindingDivisorDescriptionEXT.txt[]
+include::../validity/structs/VkVertexInputBindingDivisorDescriptionEXT.txt[]
 --
 
 endif::VK_EXT_vertex_attribute_divisor[]
 
-[[fxvertex-input-address-calculation]]
-== Vertex Input Address Calculation
 The address of each attribute for each code:vertexIndex and
 code:instanceIndex is calculated as follows:
 
   * Let code:attribDesc be the member of
-    slink:VkPipelineVertexInputStateCreateInfo::pname:pVertexAttributeDescriptions
+    sname:VkPipelineVertexInputStateCreateInfo::pname:pVertexAttributeDescriptions
     with sname:VkVertexInputAttributeDescription::pname:location equal to
     the vertex input attribute number.
   * Let code:bindingDesc be the member of
-    slink:VkPipelineVertexInputStateCreateInfo::pname:pVertexBindingDescriptions
+    sname:VkPipelineVertexInputStateCreateInfo::pname:pVertexBindingDescriptions
     with sname:VkVertexInputAttributeDescription::pname:binding equal to
     code:attribDesc.binding.
   * Let code:vertexIndex be the index of the vertex within the draw (a value
@@ -868,7 +539,7 @@ code:instanceIndex is calculated as follows:
     pname:firstInstance+pname:instanceCount).
 ifdef::VK_EXT_vertex_attribute_divisor[]
   * Let code:divisor be the member of
-    slink:VkPipelineVertexInputDivisorStateCreateInfoEXT::pname:pVertexBindingDivisors
+    sname:VkPipelineVertexInputDivisorStateCreateInfoEXT::pname:pVertexBindingDivisors
     with sname:VkVertexInputBindingDivisorDescriptionEXT::pname:binding
     equal to code:attribDesc.binding.
 endif::VK_EXT_vertex_attribute_divisor[]
@@ -884,42 +555,80 @@ ifndef::VK_EXT_vertex_attribute_divisor[]
     vertexOffset = instanceIndex * bindingDesc.stride;
 endif::VK_EXT_vertex_attribute_divisor[]
 ifdef::VK_EXT_vertex_attribute_divisor[]
-    if (divisor == 0)
-        vertexOffset = firstInstance * bindingDesc.stride;
-    else
-        vertexOffset = (firstInstance + ((instanceIndex - firstInstance) / divisor)) * bindingDesc.stride;
+    vertexOffset = (firstInstance + ((instanceIndex - firstInstance) / divisor)) * bindingDesc.stride;
 endif::VK_EXT_vertex_attribute_divisor[]
 
 attribAddress = bufferBindingAddress + vertexOffset + attribDesc.offset;
 ---------------------------------------------------
 
 [[fxvertex-input-extraction]]
-=== Vertex Input Extraction
 For each attribute, raw data is extracted starting at `attribAddress` and is
 converted from the sname:VkVertexInputAttributeDescription's pname:format to
-either floating-point, unsigned integer, or signed integer based on the base
-type of the format; the base type of the format must: match the base type of
-the input variable in the shader.
-The input variable in the shader must: be declared as a 64-bit data type if
-and only if pname:format is a 64-bit data type.
+either to floating-point, unsigned integer, or signed integer based on the
+base type of the format; the base type of the format must: match the base
+type of the input variable in the shader.
 If pname:format is a packed format, `attribAddress` must: be a multiple of
 the size in bytes of the whole attribute data type as described in
-<<formats-packed,Packed Formats>>.
+<<features-formats-packed,Packed Formats>>.
 Otherwise, `attribAddress` must: be a multiple of the size in bytes of the
-component type indicated by pname:format (see <<formats,Formats>>).
-For attributes that are not 64-bit data types, each component is converted
-to the format of the input variable based on its type and size (as defined
-in the <<formats-definition,Format Definition>> section for each
-elink:VkFormat), using the appropriate equations in <<fundamentals-fp16,
-16-Bit Floating-Point Numbers>>, <<fundamentals-fp11,Unsigned 11-Bit
-Floating-Point Numbers>>, <<fundamentals-fp10,Unsigned 10-Bit Floating-Point
-Numbers>>, <<fundamentals-fixedconv,Fixed-Point Data Conversion>>, and
-<<textures-sexp-RGB,Shared Exponent to RGB>>.
-Signed integer components smaller than 32 bits are sign-extended.
-Attributes that are not 64-bit data types are expanded to four components in
-the same way as described in <<textures-conversion-to-rgba,conversion to
-RGBA>>.
+component type indicated by pname:format (see <<features-formats,Formats>>).
+If the format does not include G, B, or A components, then those are filled
+with [eq]#(0,0,1)# as needed (using either 1.0f or integer 1 based on the
+format) for attributes that are not 64-bit data types.
 The number of components in the vertex shader input variable need not
 exactly match the number of components in the format.
 If the vertex shader has fewer components, the extra components are
 discarded.
+
+[[fxvertex-example]]
+== Example
+
+To create a graphics pipeline that uses the following vertex description:
+
+[source,c++]
+---------------------------------------------------
+struct Vertex
+{
+    float   x, y, z, w;
+    uint8_t u, v;
+};
+---------------------------------------------------
+
+The application could use the following set of structures:
+
+[source,c++]
+---------------------------------------------------
+const VkVertexInputBindingDescription binding =
+{
+    0,                                          // binding
+    sizeof(Vertex),                             // stride
+    VK_VERTEX_INPUT_RATE_VERTEX                 // inputRate
+};
+
+const VkVertexInputAttributeDescription attributes[] =
+{
+    {
+        0,                                      // location
+        binding.binding,                        // binding
+        VK_FORMAT_R32G32B32A32_SFLOAT,          // format
+        0                                       // offset
+    },
+    {
+        1,                                      // location
+        binding.binding,                        // binding
+        VK_FORMAT_R8G8_UNORM,                   // format
+        4 * sizeof(float)                       // offset
+    }
+};
+
+const VkPipelineVertexInputStateCreateInfo viInfo =
+{
+    VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_CREATE_INFO,    // sType
+    NULL,                         // pNext
+    0,                            // flags
+    1,                            // vertexBindingDescriptionCount
+    &binding,                     // pVertexBindingDescriptions
+    2,                            // vertexAttributeDescriptionCount
+    &attributes[0]                // pVertexAttributeDescriptions
+};
+---------------------------------------------------

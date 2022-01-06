@@ -1,15 +1,16 @@
-// Copyright 2014-2021 The Khronos Group, Inc.
-//
-// SPDX-License-Identifier: CC-BY-4.0
+// Copyright (c) 2014-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
 
 [[create_shared_swapchains,create_shared_swapchains]]
 
 [open,refpage='vkCreateSharedSwapchainsKHR',desc='Create multiple swapchains that share presentable images',type='protos']
 --
+
 When the `VK_KHR_display_swapchain` extension is enabled, multiple
 swapchains that share presentable images are created by calling:
 
-include::{generated}/api/protos/vkCreateSharedSwapchainsKHR.txt[]
+include::../../api/protos/vkCreateSharedSwapchainsKHR.txt[]
 
   * pname:device is the device to create the swapchains for.
   * pname:swapchainCount is the number of swapchains to create.
@@ -22,8 +23,8 @@ include::{generated}/api/protos/vkCreateSharedSwapchainsKHR.txt[]
   * pname:pSwapchains is a pointer to an array of slink:VkSwapchainKHR
     handles in which the created swapchain objects will be returned.
 
-fname:vkCreateSharedSwapchainsKHR is similar to flink:vkCreateSwapchainKHR,
-except that it takes an array of slink:VkSwapchainCreateInfoKHR structures,
+fname:vkCreateSharedSwapchains is similar to flink:vkCreateSwapchainKHR,
+except that it takes an array of sname:VkSwapchainCreateInfoKHR structures,
 and returns an array of swapchain objects.
 
 The swapchain creation parameters that affect the properties and number of
@@ -38,5 +39,5 @@ them before transitioning away from ename:VK_IMAGE_LAYOUT_PRESENT_SRC_KHR.
 After destroying one or more of the swapchains, the remaining swapchains and
 the presentable images can: continue to be used.
 
-include::{generated}/validity/protos/vkCreateSharedSwapchainsKHR.txt[]
+include::../../validity/protos/vkCreateSharedSwapchainsKHR.txt[]
 --

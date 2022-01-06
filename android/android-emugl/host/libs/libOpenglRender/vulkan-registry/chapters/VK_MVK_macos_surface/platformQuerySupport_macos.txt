@@ -1,8 +1,5 @@
-// Copyright (c) 2018-2020 The Brenwill Workshop Ltd.
-//
-// SPDX-License-Identifier: CC-BY-4.0
-
 [[platformQuerySupport_macos,platformQuerySupport_macos]]
+
 === macOS Platform
 
 On macOS, all physical devices and queue families must: be capable of

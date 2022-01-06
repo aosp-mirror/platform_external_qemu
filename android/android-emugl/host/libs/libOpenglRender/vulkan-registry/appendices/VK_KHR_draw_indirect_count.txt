@@ -1,15 +1,13 @@
-// Copyright 2016-2021 The Khronos Group, Inc.
-//
-// SPDX-License-Identifier: CC-BY-4.0
+// Copyright (c) 2016-2017 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
 
-include::{generated}/meta/{refprefix}VK_KHR_draw_indirect_count.txt[]
+include::meta/VK_KHR_draw_indirect_count.txt[]
 
-=== Other Extension Metadata
-
+*Status*::
+    Draft
 *Last Modified Date*::
     2017-08-25
-*Interactions and External Dependencies*::
-  - Promoted to Vulkan 1.2 Core
 *IP Status*::
     No known IP claims.
 *Contributors*::
@@ -20,29 +18,16 @@ include::{generated}/meta/{refprefix}VK_KHR_draw_indirect_count.txt[]
   - Dominik Witczak, AMD
   - Piers Daniell, NVIDIA
 
-=== Description
-
-This extension is based off the `apiext:VK_AMD_draw_indirect_count`
-extension.
-This extension allows an application to source the number of draws for
+This extension is based off the VK_AMD_draw_indirect_count extension.
+This extension allows an application to source the number of draw calls for
 indirect draw calls from a buffer.
+This enables applications to generate arbitrary amounts of draw commands and
+execute them without host intervention.
 
-Applications might want to do culling on the GPU via a compute shader prior
-to drawing.
-This enables the application to generate an arbitrary number of drawing
-commands and execute them without host intervention.
+=== New Functions
 
-=== Promotion to Vulkan 1.2
-
-All functionality in this extension is included in core Vulkan 1.2, with the
-KHR suffix omitted.
-However, if Vulkan 1.2 is supported and this extension is not, the entry
-points flink:vkCmdDrawIndirectCount and flink:vkCmdDrawIndexedIndirectCount
-are optional.
-The original type, enum and command names are still available as aliases of
-the core functionality.
-
-include::{generated}/interfaces/VK_KHR_draw_indirect_count.txt[]
+  * flink:vkCmdDrawIndirectCountKHR
+  * flink:vkCmdDrawIndexedIndirectCountKHR
 
 === Version History
 

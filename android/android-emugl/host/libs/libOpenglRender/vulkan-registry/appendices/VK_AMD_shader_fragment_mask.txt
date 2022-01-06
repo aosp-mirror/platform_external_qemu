@@ -1,24 +1,17 @@
-// Copyright (c) 2017-2020 Advanced Micro Devices, Inc.
-//
-// SPDX-License-Identifier: CC-BY-4.0
-
-include::{generated}/meta/{refprefix}VK_AMD_shader_fragment_mask.txt[]
-
-=== Other Extension Metadata
+include::meta/VK_AMD_shader_fragment_mask.txt[]
 
 *Last Modified Date*::
     2017-08-16
 *IP Status*::
     No known IP claims.
-*Interactions and External Dependencies*::
-  - This extension requires
-    {spirv}/AMD/SPV_AMD_shader_fragment_mask.html[`SPV_AMD_shader_fragment_mask`]
+*Dependencies*::
+  - Requires the
+    https://www.khronos.org/registry/spir-v/extensions/AMD/SPV_AMD_shader_fragment_mask.html[+SPV_AMD_shader_fragment_mask+]
+    SPIR-V extension.
 *Contributors*::
   - Aaron Hagan, AMD
   - Daniel Rakos, AMD
   - Timothy Lottes, AMD
-
-=== Description
 
 This extension provides efficient read access to the fragment mask in
 compressed multisampled color surfaces.
@@ -37,11 +30,29 @@ The color fragment for a particular color sample may then be fetched with
 the corresponding fragment mask value using the code:fragmentFetchAMD shader
 function.
 
-include::{generated}/interfaces/VK_AMD_shader_fragment_mask.txt[]
+=== New Object Types
+
+None.
+
+=== New Enum Constants
+
+None.
+
+=== New Enums
+
+None.
 
 === New SPIR-V Capabilities
 
-  * <<spirvenv-capabilities-table-FragmentMaskAMD, code:FragmentMaskAMD>>
+  * <<spirvenv-capabilities-table-fragmentmaskamd, code:FragmentMaskAMD>>
+
+=== New Structures
+
+None.
+
+=== New Functions
+
+None.
 
 === Examples
 

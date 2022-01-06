@@ -1,10 +1,8 @@
-// Copyright 2014-2021 The Khronos Group, Inc.
-//
-// SPDX-License-Identifier: CC-BY-4.0
+// Copyright (c) 2014-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
 
-include::{generated}/meta/{refprefix}VK_KHR_incremental_present.txt[]
-
-=== Other Extension Metadata
+include::meta/VK_KHR_incremental_present.txt[]
 
 *Last Modified Date*::
     2016-11-02
@@ -21,27 +19,51 @@ include::{generated}/meta/{refprefix}VK_KHR_incremental_present.txt[]
   - Jeff Juliano, NVIDIA
   - Jeff Bolz, NVIDIA
 
-=== Description
-
-This device extension extends flink:vkQueuePresentKHR, from the
-`apiext:VK_KHR_swapchain` extension, allowing an application to specify a
-list of rectangular, modified regions of each image to present.
+This device extension extends slink:vkQueuePresentKHR, from the
+`<<VK_KHR_swapchain>>` extension, allowing an application to specify a list
+of rectangular, modified regions of each image to present.
 This should be used in situations where an application is only changing a
 small portion of the presentable images within a swapchain, since it enables
 the presentation engine to avoid wasting time presenting parts of the
-surface that have not changed.
+surface that haven't changed.
 
-This extension is leveraged from the `EGL_KHR_swap_buffers_with_damage`
+This extension is leveraged from the +EGL_KHR_swap_buffers_with_damage+
 extension.
 
-include::{generated}/interfaces/VK_KHR_incremental_present.txt[]
+=== New Object Types
+
+None.
+
+=== New Enum Constants
+
+  * Extending elink:VkStructureType:
+  ** ename:VK_STRUCTURE_TYPE_PRESENT_REGIONS_KHR
+
+=== New Enums
+
+None.
+
+=== New Structures
+
+  * slink:VkRectLayerKHR
+  * slink:VkPresentRegionKHR
+  * slink:VkPresentRegionsKHR
+
+=== New Functions
+
+None.
+
+=== Examples
+
+None.
 
 === Issues
 
 1) How should we handle steroescopic-3D swapchains? We need to add a layer
 for each rectangle.
-One approach is to create another struct containing the slink:VkRect2D plus
-layer, and have slink:VkPresentRegionsKHR point to an array of that struct.
+One approach is to create another struct that contains the slink:VkRect2D
+plus layer, and have slink:VkPresentRegionsKHR point to an array of that
+struct.
 Another approach is to have two parallel arrays, ptext:pRectangles and
 ptext:pLayers, where ptext:pRectangles[i] and ptext:pLayers[i] must be used
 together.
@@ -75,23 +97,7 @@ the swapchain.
 However, all other semantics of flink:vkQueuePresentKHR must still be
 honored, including waiting for semaphores to signal.
 
-5) When the swapchain is created with
-sname:VkSwapchainCreateInfoKHR::pname:preTransform set to a value other than
-ename:VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR, should the rectangular region,
-slink:VkRectLayerKHR, be transformed to align with the pname:preTransform?
-
-*RESOLVED*: No.
-The rectangular region in slink:VkRectLayerKHR should not be tranformed.
-As such, it may not align with the extents of the swapchain's image(s).
-It is the responsibility of the presentation engine to transform the
-rectangular region.
-This matches the behavior of the Android presentation engine, which set the
-precedent.
-
 === Version History
 
  * Revision 1, 2016-11-02 (Ian Elliott)
    - Internal revisions
- * Revision 2, 2021-03-18 (Ian Elliott)
-   - Clarified alignment of rectangles for presentation engines that support
-     transformed swapchains.

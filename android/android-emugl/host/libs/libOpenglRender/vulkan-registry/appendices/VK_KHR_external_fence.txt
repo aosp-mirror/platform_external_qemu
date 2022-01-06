@@ -1,10 +1,8 @@
-// Copyright 2016-2021 The Khronos Group, Inc.
-//
-// SPDX-License-Identifier: CC-BY-4.0
+// Copyright (c) 2016-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
 
-include::{generated}/meta/{refprefix}VK_KHR_external_fence.txt[]
-
-=== Other Extension Metadata
+include::meta/VK_KHR_external_fence.txt[]
 
 *Last Modified Date*::
     2017-05-08
@@ -17,15 +15,33 @@ include::{generated}/meta/{refprefix}VK_KHR_external_fence.txt[]
   - James Jones, NVIDIA
   - Jeff Juliano, NVIDIA
   - Cass Everitt, Oculus
-  - Contributors to `apiext:VK_KHR_external_semaphore`
-
-=== Description
+  - Contributors to `<<VK_KHR_external_semaphore>>`
 
 An application using external memory may wish to synchronize access to that
 memory using fences.
 This extension enables an application to create fences from which non-Vulkan
 handles that reference the underlying synchronization primitive can be
 exported.
+
+=== New Object Types
+
+None.
+
+=== New Enum Constants
+
+  * ename:VK_STRUCTURE_TYPE_EXPORT_FENCE_CREATE_INFO_KHR
+
+=== New Enums
+
+  * elink:VkFenceImportFlagBitsKHR
+
+=== New Structs
+
+  * slink:VkExportFenceCreateInfoKHR
+
+=== New Functions
+
+None.
 
 === Promotion to Vulkan 1.1
 
@@ -34,15 +50,8 @@ KHR suffix omitted.
 The original type, enum and command names are still available as aliases of
 the core functionality.
 
-include::{generated}/interfaces/VK_KHR_external_fence.txt[]
-
 === Issues
 
 This extension borrows concepts, semantics, and language from
-`apiext:VK_KHR_external_semaphore`.
+`<<VK_KHR_external_semaphore>>`.
 That extension's issues apply equally to this extension.
-
-=== Version History
-
-  * Revision 1, 2017-05-08 (Jesse Hall)
-    - Initial revision

@@ -1,28 +1,22 @@
-// Copyright (c) 2017-2020 NVIDIA Corporation
-//
-// SPDX-License-Identifier: CC-BY-4.0
-
-include::{generated}/meta/{refprefix}VK_NV_geometry_shader_passthrough.txt[]
-
-=== Other Extension Metadata
+include::meta/VK_NV_geometry_shader_passthrough.txt[]
 
 *Last Modified Date*::
     2017-02-15
 *Interactions and External Dependencies*::
-  - This extension requires
-    {spirv}/NV/SPV_NV_geometry_shader_passthrough.html[`SPV_NV_geometry_shader_passthrough`]
-  - This extension provides API support for
-    https://www.khronos.org/registry/OpenGL/extensions/NV/NV_geometry_shader_passthrough.txt[`GL_NV_geometry_shader_passthrough`]
+  - This extension requires the
+    https://www.khronos.org/registry/spir-v/extensions/NV/SPV_NV_geometry_shader_passthrough.html[+SPV_NV_geometry_shader_passthrough+]
+    SPIR-V extension.
+  - This extension requires the
+    https://www.khronos.org/registry/OpenGL/extensions/NV/NV_geometry_shader_passthrough.txt[+GL_NV_geometry_shader_passthrough+]
+    extension for GLSL source languages.
   - This extension requires the pname:geometryShader feature.
 *Contributors*::
   - Piers Daniell, NVIDIA
   - Jeff Bolz, NVIDIA
 
-=== Description
-
 This extension adds support for the following SPIR-V extension in Vulkan:
 
-  * `SPV_NV_geometry_shader_passthrough`
+  * +SPV_NV_geometry_shader_passthrough+
 
 Geometry shaders provide the ability for applications to process each
 primitive sent through the graphics pipeline using a programmable shader.
@@ -40,14 +34,36 @@ Adding this to a geometry shader input variable specifies that the values of
 this input are copied to the corresponding vertex of the output primitive.
 
 When using GLSL source-based shading languages, the code:passthrough layout
-qualifier from `GL_NV_geometry_shader_passthrough` maps to the
+qualifier from +GL_NV_geometry_shader_passthrough+ maps to the
 code:PassthroughNV decoration.
 To use the code:passthrough layout, in GLSL the
-`GL_NV_geometry_shader_passthrough` extension must be enabled.
-Behaviour is described in the `GL_NV_geometry_shader_passthrough` extension
++GL_NV_geometry_shader_passthrough+ extension must be enabled.
+Behaviour is described in the +GL_NV_geometry_shader_passthrough+ extension
 specification.
 
-include::{generated}/interfaces/VK_NV_geometry_shader_passthrough.txt[]
+=== New Object Types
+
+None.
+
+=== New Enum Constants
+
+None.
+
+=== New Enums
+
+None.
+
+=== New Structures
+
+None.
+
+=== New Functions
+
+None.
+
+=== New Built-In Variables
+
+None.
 
 === New Variable Decoration
 
@@ -56,7 +72,7 @@ include::{generated}/interfaces/VK_NV_geometry_shader_passthrough.txt[]
 
 === New SPIR-V Capabilities
 
-  * <<spirvenv-capabilities-table-GeometryShaderPassthroughNV,GeometryShaderPassthroughNV>>
+  * <<spirvenv-capabilities-table-geometryshaderpassthrough,GeometryShaderPassthroughNV>>
 
 === Issues
 
@@ -155,7 +171,7 @@ layout(passthrough) in Inputs {
 
 void main()
 {
-    // The shader simply computes and writes gl_Layer.  We do not
+    // The shader simply computes and writes gl_Layer.  We don't
     // loop over three vertices or call EmitVertex().
     gl_Layer = compute_layer();
 }

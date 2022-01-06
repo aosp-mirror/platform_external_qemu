@@ -1,7 +1,3 @@
-# Copyright 2018-2021 The Khronos Group Inc.
-#
-# SPDX-License-Identifier: Apache-2.0
-
 require 'asciidoctor/extensions' unless RUBY_ENGINE == 'opal'
 
 include ::Asciidoctor
@@ -36,7 +32,7 @@ class Parser
         tip = line[0..3]
         tl = 4
       end
-
+      
       # Hardcoded tilde delimiter, since that's the only thing this
       # function deals with.
       if tip == '~~~~'

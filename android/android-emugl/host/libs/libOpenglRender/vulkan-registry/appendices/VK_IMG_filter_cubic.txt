@@ -1,17 +1,9 @@
-// Copyright (c) 2016-2020 Imagination Technologies Limited
-//
-// SPDX-License-Identifier: CC-BY-4.0
-
-include::{generated}/meta/{refprefix}VK_IMG_filter_cubic.txt[]
-
-=== Other Extension Metadata
+include::meta/VK_IMG_filter_cubic.txt[]
 
 *Last Modified Date*::
     2016-02-23
 *Contributors*::
   - Tobias Hector, Imagination Technologies
-
-=== Description
 
 `VK_IMG_filter_cubic` adds an additional, high quality cubic filtering mode
 to Vulkan, using a Catmull-Rom bicubic filter.
@@ -20,7 +12,13 @@ samples and a number of instructions, but this can be inefficient.
 The cubic filter mode exposes an optimized high quality texture sampling
 using fixed texture sampling functionality.
 
-include::{generated}/interfaces/VK_IMG_filter_cubic.txt[]
+=== New Enum Constants
+
+  * Extending elink:VkFilter:
+  ** ename:VK_FILTER_CUBIC_IMG
+
+  * Extending elink:VkFormatFeatureFlagBits
+  ** ename:VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_CUBIC_BIT_IMG
 
 === Example
 

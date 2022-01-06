@@ -14,8 +14,8 @@
    viewBox="0 0 200.14063 147.16275"
    version="1.1"
    id="svg8653"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
-   sodipodi:docname="primitive_topology_point_list.svg">
+   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
+   sodipodi:docname="primitive_topology_points.svg">
   <defs
      id="defs8647">
     <marker
@@ -735,17 +735,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8284272"
-     inkscape:cx="118.95274"
-     inkscape:cy="44.306863"
+     inkscape:zoom="1.4142136"
+     inkscape:cx="325.60334"
+     inkscape:cy="61.731476"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
-     inkscape:window-width="1920"
-     inkscape:window-height="1001"
-     inkscape:window-x="-9"
-     inkscape:window-y="-9"
-     inkscape:window-maximized="0"
+     inkscape:window-width="1680"
+     inkscape:window-height="987"
+     inkscape:window-x="1672"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
      fit-margin-top="1"
      fit-margin-left="1"
      fit-margin-right="1"
@@ -778,7 +778,18 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(52.301544,180.70697)">
-    <text
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot4701"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       transform="matrix(0.396875,0,0,0.396875,3.9432958,-45.67575)"><flowRegion
+         id="flowRegion4703"><rect
+           id="rect4705"
+           width="240"
+           height="140"
+           x="36.114491"
+           y="-8.2994375" /></flowRegion><flowPara
+         id="flowPara4707" /></flowRoot>    <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.16427398"
        x="12.534395"

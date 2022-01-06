@@ -1,18 +1,14 @@
-// Copyright (c) 2017-2020 NVIDIA Corporation
-//
-// SPDX-License-Identifier: CC-BY-4.0
-
-include::{generated}/meta/{refprefix}VK_NV_viewport_array2.txt[]
-
-=== Other Extension Metadata
+include::meta/VK_NV_viewport_array2.txt[]
 
 *Last Modified Date*::
     2017-02-15
 *Interactions and External Dependencies*::
-  - This extension requires
-    {spirv}/NV/SPV_NV_viewport_array2.html[`SPV_NV_viewport_array2`]
-  - This extension provides API support for
-    https://www.khronos.org/registry/OpenGL/extensions/NV/NV_viewport_array2.txt[`GL_NV_viewport_array2`]
+  - This extension requires the
+    https://www.khronos.org/registry/spir-v/extensions/NV/SPV_NV_viewport_array2.html[+SPV_NV_viewport_array2+]
+    SPIR-V extension.
+  - This extension requires the
+    https://www.khronos.org/registry/OpenGL/extensions/NV/NV_viewport_array2.txt[+GL_NV_viewport_array2+]
+    extension for GLSL source languages.
   - This extension requires the pname:geometryShader and pname:multiViewport
     features.
   - This extension interacts with the pname:tessellationShader feature.
@@ -20,11 +16,9 @@ include::{generated}/meta/{refprefix}VK_NV_viewport_array2.txt[]
   - Piers Daniell, NVIDIA
   - Jeff Bolz, NVIDIA
 
-=== Description
-
 This extension adds support for the following SPIR-V extension in Vulkan:
 
-  * `SPV_NV_viewport_array2`
+  * +SPV_NV_viewport_array2+
 
 which allows a single primitive to be broadcast to multiple viewports and/or
 multiple layers.
@@ -48,9 +42,9 @@ code:ShaderViewportMaskNV capability.
 
 When using GLSL source-based shading languages, the code:gl_ViewportMask[]
 built-in output variable and code:viewport_relative layout qualifier from
-`GL_NV_viewport_array2` map to the code:ViewportMaskNV and
++GL_NV_viewport_array2+ map to the code:ViewportMaskNV and
 code:ViewportRelativeNV decorations, respectively.
-Behaviour is described in the `GL_NV_viewport_array2` extension
+Behaviour is described in the +GL_NV_viewport_array2+ extension
 specificiation.
 
 ifdef::VK_EXT_shader_viewport_index_layer[]
@@ -59,11 +53,30 @@ ifdef::VK_EXT_shader_viewport_index_layer[]
 ====
 The code:ShaderViewportIndexLayerNV capability is equivalent to the
 code:ShaderViewportIndexLayerEXT capability added by
-`apiext:VK_EXT_shader_viewport_index_layer`.
+`<<VK_EXT_shader_viewport_index_layer>>`.
 ====
 endif::VK_EXT_shader_viewport_index_layer[]
 
-include::{generated}/interfaces/VK_NV_viewport_array2.txt[]
+
+=== New Object Types
+
+None.
+
+=== New Enum Constants
+
+None.
+
+=== New Enums
+
+None.
+
+=== New Structures
+
+None.
+
+=== New Functions
+
+None.
 
 === New or Modified Built-In Variables
 
@@ -79,8 +92,12 @@ include::{generated}/interfaces/VK_NV_viewport_array2.txt[]
 
 === New SPIR-V Capabilities
 
-  * <<spirvenv-capabilities-table-ShaderViewportIndexLayerNV,code:ShaderViewportIndexLayerNV>>
-  * <<spirvenv-capabilities-table-ShaderViewportMaskNV,code:ShaderViewportMaskNV>>
+  * <<spirvenv-capabilities-table-viewportarray2,code:ShaderViewportIndexLayerNV>>
+  * <<spirvenv-capabilities-table-viewportarray2,code:ShaderViewportMaskNV>>
+
+=== Issues
+
+None yet!
 
 === Version History
 

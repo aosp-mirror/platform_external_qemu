@@ -1,10 +1,8 @@
-// Copyright 2014-2021 The Khronos Group, Inc.
-//
-// SPDX-License-Identifier: CC-BY-4.0
+// Copyright (c) 2014-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
 
-include::{generated}/meta/{refprefix}VK_KHR_win32_surface.txt[]
-
-=== Other Extension Metadata
+include::meta/VK_KHR_win32_surface.txt[]
 
 *Last Modified Date*::
     2017-04-24
@@ -28,14 +26,32 @@ include::{generated}/meta/{refprefix}VK_KHR_win32_surface.txt[]
   - Jeff Vigil, Qualcomm
   - Chia-I Wu, LunarG
 
-=== Description
-
 The `VK_KHR_win32_surface` extension is an instance extension.
 It provides a mechanism to create a slink:VkSurfaceKHR object (defined by
-the `apiext:VK_KHR_surface` extension) that refers to a Win32 code:HWND, as
+the `<<VK_KHR_surface>>` extension) that refers to a Win32 code:HWND, as
 well as a query to determine support for rendering to the windows desktop.
 
-include::{generated}/interfaces/VK_KHR_win32_surface.txt[]
+=== New Object Types
+
+None
+
+=== New Enum Constants
+
+  * Extending elink:VkStructureType:
+  ** ename:VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR
+
+=== New Enums
+
+None
+
+=== New Structures
+
+  * slink:VkWin32SurfaceCreateInfoKHR
+
+=== New Functions
+
+  * flink:vkCreateWin32SurfaceKHR
+  * flink:vkGetPhysicalDeviceWin32PresentationSupportKHR
 
 === Issues
 
@@ -56,7 +72,7 @@ these uses interfere with each other?
 
 *RESOLVED*: Yes.
 
-Uses of a window object by multiple graphics APIs results in undefined:
+Uses of a window object by multiple graphics APIs results in undefined
 behavior.
 Such behavior may succeed when using one Vulkan implementation but fail when
 using a different Vulkan implementation.
@@ -65,12 +81,15 @@ Potential failures include:
   * Creating then destroying a flip presentation model DXGI swapchain on a
     window object can prevent flink:vkCreateSwapchainKHR from succeeding on
     the same window object.
+
   * Creating then destroying a slink:VkSwapchainKHR on a window object can
     prevent creation of a bitblt model DXGI swapchain on the same window
     object.
+
   * Creating then destroying a slink:VkSwapchainKHR on a window object can
     effectively code:SetPixelFormat to a different format than the format
     chosen by an OpenGL application.
+
   * Creating then destroying a slink:VkSwapchainKHR on a window object on
     one slink:VkPhysicalDevice can prevent flink:vkCreateSwapchainKHR from
     succeeding on the same window object, but on a different
@@ -90,14 +109,16 @@ Technical details include:
     object.
     Mention of this alteration can be found in the remarks section of the
     MSDN documentation for code:DXGI_SWAP_EFFECT.
+
   * Calling GDI's code:SetPixelFormat (needed by OpenGL's WGL layer) on a
     window object alters the object for the remainder of its lifetime.
     The MSDN documentation for code:SetPixelFormat explains that a window
     object's pixel format can be set only one time.
+
   * Creating a slink:VkSwapchainKHR over a window object can alter the
-    object for its remaining lifetime.
-    Either of the above alterations may occur as a side effect of
-    flink:vkCreateSwapchainKHR.
+    object for the remaining life of its lifetime.
+    Either of the above alterations may occur as a side-effect of
+    slink:VkSwapchainKHR.
 
 === Version History
 

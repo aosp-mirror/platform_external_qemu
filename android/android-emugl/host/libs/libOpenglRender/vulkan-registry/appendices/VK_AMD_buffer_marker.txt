@@ -1,10 +1,4 @@
-// Copyright (c) 2018-2020 Advanced Micro Devices, Inc.
-//
-// SPDX-License-Identifier: CC-BY-4.0
-
-include::{generated}/meta/{refprefix}VK_AMD_buffer_marker.txt[]
-
-=== Other Extension Metadata
+include::meta/VK_AMD_buffer_marker.txt[]
 
 *Last Modified Date*::
     2018-01-26
@@ -15,8 +9,6 @@ include::{generated}/meta/{refprefix}VK_AMD_buffer_marker.txt[]
   - Jaakko Konttinen, AMD
   - Daniel Rakos, AMD
 
-=== Description
-
 This extension adds a new operation to execute pipelined writes of small
 marker values into a sname:VkBuffer object.
 
@@ -24,7 +16,25 @@ The primary purpose of these markers is to facilitate the development of
 debugging tools for tracking which pipelined command contributed to device
 loss.
 
-include::{generated}/interfaces/VK_AMD_buffer_marker.txt[]
+=== New Object Types
+
+None.
+
+=== New Enum Constants
+
+None.
+
+=== New Enums
+
+None.
+
+=== New Structures
+
+None.
+
+=== New Functions
+
+  * flink:vkCmdWriteBufferMarkerAMD
 
 === Examples
 

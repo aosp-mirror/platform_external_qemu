@@ -1,18 +1,14 @@
-// Copyright (c) 2017-2020 Advanced Micro Devices, Inc.
-//
-// SPDX-License-Identifier: CC-BY-4.0
-
-include::{generated}/meta/{refprefix}VK_AMD_shader_image_load_store_lod.txt[]
-
-=== Other Extension Metadata
+include::meta/VK_AMD_shader_image_load_store_lod.txt[]
 
 *Last Modified Date*::
     2017-08-21
 *Interactions and External Dependencies*::
+  - This extension requires the
+    https://www.khronos.org/registry/spir-v/extensions/AMD/SPV_AMD_shader_image_load_store_lod.html[+SPV_AMD_shader_image_load_store_lod+]
+    SPIR-V extension.
   - This extension requires
-    {spirv}/AMD/SPV_AMD_shader_image_load_store_lod.html[`SPV_AMD_shader_image_load_store_lod`]
-  - This extension provides API support for
-    https://www.khronos.org/registry/OpenGL/extensions/AMD/AMD_shader_image_load_store_lod.txt[`GL_AMD_shader_image_load_store_lod`]
+    https://www.khronos.org/registry/OpenGL/extensions/AMD/AMD_shader_image_load_store_lod.txt[+GL_AMD_shader_image_load_store_lod+]
+    for GLSL-based source languages.
 *IP Status*::
     No known IP claims.
 *Contributors*::
@@ -20,15 +16,11 @@ include::{generated}/meta/{refprefix}VK_AMD_shader_image_load_store_lod.txt[]
   - Qun Lin, AMD
   - Rex Xu, AMD
 
-=== Description
-
 This extension adds support for the following SPIR-V extension in Vulkan:
 
-  * {spirv}/AMD/SPV_AMD_shader_image_load_store_lod.html[`SPV_AMD_shader_image_load_store_lod`]
-
-include::{generated}/interfaces/VK_AMD_shader_image_load_store_lod.txt[]
+* https://www.khronos.org/registry/spir-v/extensions/AMD/SPV_AMD_shader_image_load_store_lod.html[+SPV_AMD_shader_image_load_store_lod+]
 
 === Version History
 
-  * Revision 1, 2017-08-21 (Dominik Witczak)
-    - Initial draft
+   * Revision 1, 2017-08-21 (Dominik Witczak)
+     - Initial draft
