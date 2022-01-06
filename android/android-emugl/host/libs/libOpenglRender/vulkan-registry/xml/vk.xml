@@ -8959,7 +8959,7 @@ typedef void <name>CAMetalLayer</name>;
             <param externsync="true"><type>VkCommandBuffer</type> <name>commandBuffer</name></param>
             <param><type>VkImage</type> <name>image</name></param>
             <param><type>VkImageLayout</type> <name>imageLayout</name></param>
-            <param noautovalidity="true">const <type>VkClearColorValue</type>* <name>pColor</name></param>
+            <param>const <type>VkClearColorValue</type>* <name>pColor</name></param>
             <param><type>uint32_t</type> <name>rangeCount</name></param>
             <param len="rangeCount">const <type>VkImageSubresourceRange</type>* <name>pRanges</name></param>
         </command>
