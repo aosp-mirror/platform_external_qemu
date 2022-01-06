@@ -1,0 +1,35 @@
+// Copyright 2018-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_EXT_depth_clip_enable.txt[]
+
+=== Other Extension Metadata
+
+*Last Modified Date*::
+    2018-12-20
+*Contributors*::
+  - Daniel Rakos, AMD
+  - Henri Verbeet, CodeWeavers
+  - Jeff Bolz, NVIDIA
+  - Philip Rebohle, DXVK
+  - Tobias Hector, AMD
+
+=== Description
+
+This extension allows the depth clipping operation, that is normally
+implicitly controlled by
+slink:VkPipelineRasterizationStateCreateInfo::pname:depthClampEnable, to
+instead be controlled explicitly by
+slink:VkPipelineRasterizationDepthClipStateCreateInfoEXT::pname:depthClipEnable.
+
+This is useful for translating DX content which assumes depth clamping is
+always enabled, but depth clip can be controlled by the DepthClipEnable
+rasterization state (D3D12_RASTERIZER_DESC).
+
+include::{generated}/interfaces/VK_EXT_depth_clip_enable.txt[]
+
+=== Version History
+
+  * Revision 1, 2018-12-20 (Piers Daniell)
+    - Internal revisions

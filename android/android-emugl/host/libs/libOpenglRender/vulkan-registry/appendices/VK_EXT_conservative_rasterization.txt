@@ -1,13 +1,37 @@
-include::meta/VK_EXT_conservative_rasterization.txt[]
+// Copyright 2017-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
-*Last Modified Data*::
-    2017-08-28
+include::{generated}/meta/{refprefix}VK_EXT_conservative_rasterization.txt[]
+
+=== Other Extension Metadata
+
+*Last Modified Date*::
+    2020-06-09
+*Interactions and External Dependencies*::
+  - This extension requires
+    {spirv}/EXT/SPV_EXT_fragment_fully_covered.html[`SPV_EXT_fragment_fully_covered`]
+    if the
+    sname:VkPhysicalDeviceConservativeRasterizationPropertiesEXT::pname:fullyCoveredFragmentShaderInputVariable
+    feature is used.
+  - This extension requires
+    {spirv}/KHR/SPV_KHR_post_depth_coverage.html[`SPV_KHR_post_depth_coverage`]if
+    the
+    sname:VkPhysicalDeviceConservativeRasterizationPropertiesEXT::pname:conservativeRasterizationPostDepthCoverage
+    feature is used.
+  - This extension provides API support for
+    https://www.khronos.org/registry/OpenGL/extensions/NV/NV_conservative_raster_underestimation.txt[`GL_NV_conservative_raster_underestimation`]
+    if the
+    sname:VkPhysicalDeviceConservativeRasterizationPropertiesEXT::pname:fullyCoveredFragmentShaderInputVariable
+    feature is used.
 *Contributors*::
   - Daniel Koch, NVIDIA
   - Daniel Rakos, AMD
   - Jeff Bolz, NVIDIA
   - Slawomir Grajewski, Intel
   - Stu Smith, Imagination Technologies
+
+=== Description
 
 This extension adds a new rasterization mode called conservative
 rasterization.
@@ -39,36 +63,12 @@ Degenerate triangles are those that end up with zero area after the
 rasterizer quantizes them to the fixed-point pixel grid.
 Degenerate lines are those with zero length after quantization.
 
-=== New Object Types
-
-None.
-
-=== New Enum Constants
-
-  * Extending elink:VkStructureType:
-
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_CONSERVATIVE_RASTERIZATION_PROPERTIES_EXT
-  ** ename:VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_CONSERVATIVE_STATE_CREATE_INFO_EXT
-
-=== New Enums
-
-  * elink:VkPipelineRasterizationConservativeStateCreateFlagsEXT
-  * elink:VkConservativeRasterizationModeEXT
-
-=== New Structures
-
-  * slink:VkPhysicalDeviceConservativeRasterizationPropertiesEXT
-  * slink:VkPipelineRasterizationConservativeStateCreateInfoEXT
-
-=== New Functions
-
-None.
-
-=== Issues
-
-None.
+include::{generated}/interfaces/VK_EXT_conservative_rasterization.txt[]
 
 === Version History
+
+  * Revision 1.1, 2020-09-06 (Piers Daniell)
+    - Add missing SPIR-V and GLSL dependencies.
 
   * Revision 1, 2017-08-28 (Piers Daniell)
     - Internal revisions

@@ -1,9 +1,17 @@
-include::meta/VK_NV_framebuffer_mixed_samples.txt[]
+// Copyright (c) 2017-2020 NVIDIA Corporation
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_NV_framebuffer_mixed_samples.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2017-06-04
 *Contributors*::
   - Jeff Bolz, NVIDIA
+
+=== Description
 
 This extension allows multisample rendering with a raster and depth/stencil
 sample count that is larger than the color sample count.
@@ -45,30 +53,7 @@ The key features of this extension are:
     corresponding to the number of associated raster/depth/stencil samples
     covered.
 
-=== New Object Types
-
-None.
-
-=== New Enum Constants
-
-None.
-
-=== New Enums
-
-  * elink:VkCoverageModulationModeNV
-  * elink:VkPipelineCoverageModulationStateCreateFlagsNV
-
-=== New Structures
-
-  * slink:VkPipelineCoverageModulationStateCreateInfoNV
-
-=== New Functions
-
-None.
-
-=== Issues
-
-None.
+include::{generated}/interfaces/VK_NV_framebuffer_mixed_samples.txt[]
 
 === Version History
 

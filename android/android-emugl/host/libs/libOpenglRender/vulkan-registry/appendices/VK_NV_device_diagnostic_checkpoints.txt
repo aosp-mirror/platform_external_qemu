@@ -1,4 +1,10 @@
-include::meta/VK_NV_device_diagnostic_checkpoints.txt[]
+// Copyright (c) 2018-2020 NVIDIA Corporation
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_NV_device_diagnostic_checkpoints.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2018-07-16
@@ -9,6 +15,7 @@ include::meta/VK_NV_device_diagnostic_checkpoints.txt[]
   - Eric Werness, NVIDIA
   - Daniel Koch, NVIDIA
 
+=== Description
 
 This extension allows applications to insert markers in the command stream
 and associate them with custom data.
@@ -18,38 +25,11 @@ implementation for the last markers to cross specific implementation-defined
 pipeline stages, in order to narrow down which commands were executing at
 the time and might have caused the failure.
 
-
-=== New Object Types
-
-None.
-
-=== New Enum Constants
-
-Extending slink:VkStructureType:
-
-  * ename:VK_STRUCTURE_TYPE_CHECKPOINT_DATA_NV
-  * ename:VK_STRUCTURE_TYPE_QUEUE_FAMILY_CHECKPOINT_PROPERTIES_NV
-
-=== New Enums
-
-None.
-
-=== New Structures
-
-  * slink:VkCheckpointDataNV
-  * slink:VkQueueFamilyCheckpointPropertiesNV
-
-=== New Functions
-
-  * flink:vkCmdSetCheckpointNV
-  * flink:vkGetQueueCheckpointDataNV
-
-=== Issues
-
-None yet!
-
+include::{generated}/interfaces/VK_NV_device_diagnostic_checkpoints.txt[]
 
 === Version History
 
   * Revision 1, 2018-07-16 (Nuno Subtil)
     - Internal revisions
+  * Revision 2, 2018-07-16 (Nuno Subtil)
+    - ???

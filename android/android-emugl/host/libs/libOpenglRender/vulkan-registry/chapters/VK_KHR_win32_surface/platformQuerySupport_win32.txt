@@ -1,18 +1,16 @@
-// Copyright (c) 2014-2018 Khronos Group. This work is licensed under a
-// Creative Commons Attribution 4.0 International License; see
-// http://creativecommons.org/licenses/by/4.0/
+// Copyright 2014-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
 [[platformQuerySupport_win32,platformQuerySupport_win32]]
-
 === Win32 Platform
 
-[open,refpage='vkGetPhysicalDeviceWin32PresentationSupportKHR',desc='query queue family support for presentation on a Win32 display',type='protos']
+[open,refpage='vkGetPhysicalDeviceWin32PresentationSupportKHR',desc='Query queue family support for presentation on a Win32 display',type='protos']
 --
-
 To determine whether a queue family of a physical device supports
 presentation to the Microsoft Windows desktop, call:
 
-include::../../api/protos/vkGetPhysicalDeviceWin32PresentationSupportKHR.txt[]
+include::{generated}/api/protos/vkGetPhysicalDeviceWin32PresentationSupportKHR.txt[]
 
   * pname:physicalDevice is the physical device.
   * pname:queueFamilyIndex is the queue family index.
@@ -28,5 +26,5 @@ This platform-specific function can: be called prior to creating a surface.
     pname:physicalDevice
 ****
 
-include::../../validity/protos/vkGetPhysicalDeviceWin32PresentationSupportKHR.txt[]
+include::{generated}/validity/protos/vkGetPhysicalDeviceWin32PresentationSupportKHR.txt[]
 --
