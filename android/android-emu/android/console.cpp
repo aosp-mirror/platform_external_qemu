@@ -1928,7 +1928,7 @@ do_sms_send( ControlClient  client, char*  args )
     }
 
     if ( sms_address_from_str( &sender, args, p - args ) < 0 ) {
-        control_write( client, "KO: bad phone number format, must be [+](0-9)*\r\n" );
+        control_write( client, "KO: bad phone number format, must be [+](0-9)* or [a-zA-Z0-9]+\r\n" );
         return -1;
     }
 
