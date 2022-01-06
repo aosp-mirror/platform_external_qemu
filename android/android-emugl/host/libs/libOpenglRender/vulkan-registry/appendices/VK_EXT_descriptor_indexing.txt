@@ -1,14 +1,22 @@
-include::meta/VK_EXT_descriptor_indexing.txt[]
+// Copyright 2017-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
-*Status*::
-    Complete
-*Last Modified Data*::
+include::{generated}/meta/{refprefix}VK_EXT_descriptor_indexing.txt[]
+
+=== Other Extension Metadata
+
+*Last Modified Date*::
     2017-10-02
+*Interactions and External Dependencies*::
+  - Promoted to Vulkan 1.2 Core
 *Contributors*::
   - Jeff Bolz, NVIDIA
   - Daniel Rakos, AMD
   - Slawomir Grajewski, Intel
   - Tobias Hector, Imagination Technologies
+
+=== Description
 
 This extension adds several small features which together enable
 applications to create large descriptor sets containing substantially all of
@@ -17,7 +25,7 @@ their resources, and selecting amongst those resources with dynamic
 There are feature enables and SPIR-V capabilities for non-uniform descriptor
 indexing in the shader, and non-uniform indexing in the shader requires use
 of a new code:NonUniformEXT decoration defined in the
-+SPV_EXT_descriptor_indexing+ SPIR-V extension.
+`SPV_EXT_descriptor_indexing` SPIR-V extension.
 There are descriptor set layout binding creation flags enabling several
 features:
 
@@ -28,12 +36,12 @@ features:
     updated, which enables writing new descriptors for frame N+1 while frame
     N is executing.
   * Relax the requirement that all descriptors in a binding that is
-    "statically used" must be valid, such that descriptors that are not
+    "`statically used`" must be valid, such that descriptors that are not
     accessed by a submission need not be valid and can be updated while that
     submission is executing.
   * The final binding in a descriptor set layout can have a variable size
     (and unsized arrays of resources are allowed in the
-    +GL_EXT_nonuniform_qualifier+ and +SPV_EXT_descriptor_indexing+
+    `GL_EXT_nonuniform_qualifier` and `SPV_EXT_descriptor_indexing`
     extensions).
 
 Note that it is valid for multiple descriptor arrays in a shader to use the
@@ -52,49 +60,20 @@ The old limits only count descriptors in non-updateAfterBind descriptor set
 layouts, and the new limits count descriptors in all descriptor set layouts
 in the pipeline layout.
 
-=== New Object Types
+include::{generated}/interfaces/VK_EXT_descriptor_indexing.txt[]
 
-None.
+=== Promotion to Vulkan 1.2
 
-=== New Enum Constants
-
-  * Extending elink:VkStructureType:
-  ** ename:VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES_EXT
-  ** ename:VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO_EXT
-  ** ename:VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_LAYOUT_SUPPORT_EXT
-
-  * Extending elink:VkDescriptorPoolCreateFlagBits:
-  ** ename:VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT
-
-  * Extending elink:VkDescriptorSetLayoutCreateFlagBits:
-  ** ename:VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT
-
-  * Extending elink:VkResult:
-  ** ename:VK_ERROR_FRAGMENTATION_EXT
-
-=== New Enums
-
-  * elink:VkDescriptorBindingFlagBitsEXT
-
-=== New Structures
-
-  * slink:VkDescriptorSetLayoutBindingFlagsCreateInfoEXT
-  * slink:VkPhysicalDeviceDescriptorIndexingFeaturesEXT
-  * slink:VkPhysicalDeviceDescriptorIndexingPropertiesEXT
-  * slink:VkDescriptorSetVariableDescriptorCountAllocateInfoEXT
-  * slink:VkDescriptorSetVariableDescriptorCountLayoutSupportEXT
-
-=== New Functions
-
-None.
-
-=== Issues
-
-None.
+Functionality in this extension is included in core Vulkan 1.2, with the EXT
+suffix omitted.
+However, if Vulkan 1.2 is supported and this extension is not, the
+code:descriptorIndexing capability is optional.
+The original type, enum and command names are still available as aliases of
+the core functionality.
 
 === Version History
 
   * Revision 1, 2017-07-26 (Jeff Bolz)
     - Internal revisions
+  * Revision 2, 2017-10-02 (Jeff Bolz)
+    - ???

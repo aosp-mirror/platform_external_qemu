@@ -1,0 +1,26 @@
+// Copyright 2018-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_EXT_ycbcr_image_arrays.txt[]
+
+=== Other Extension Metadata
+
+*Last Modified Date*::
+    2019-01-15
+*Contributors*::
+  - Piers Daniell, NVIDIA
+
+=== Description
+
+This extension allows images of a format that requires
+<<formats-requiring-sampler-ycbcr-conversion, {YCbCr} conversion>> to be
+created with multiple array layers, which is otherwise restricted.
+
+include::{generated}/interfaces/VK_EXT_ycbcr_image_arrays.txt[]
+
+=== Version History
+
+ * Revision 1, 2019-01-15 (Piers Daniell)
+   - Initial revision
+

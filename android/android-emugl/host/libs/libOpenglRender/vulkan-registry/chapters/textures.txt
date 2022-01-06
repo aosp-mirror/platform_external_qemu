@@ -1,18 +1,22 @@
-// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
-// Creative Commons Attribution 4.0 International License; see
-// http://creativecommons.org/licenses/by/4.0/
+// Copyright 2015-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
 [[textures]]
 = Image Operations
 
 == Image Operations Overview
 
-Image Operations are steps performed by SPIR-V image instructions, where
-those instructions which take an code:OpTypeImage (representing a
+Vulkan Image Operations are operations performed by those SPIR-V Image
+Instructions which take an code:OpTypeImage (representing a
 sname:VkImageView) or code:OpTypeSampledImage (representing a
-(sname:VkImageView, sname:VkSampler) pair) and texel coordinates as
-operands, and return a value based on one or more neighboring texture
-elements (_texels_) in the image.
+(sname:VkImageView, sname:VkSampler) pair).
+Read, write, and atomic operations also take texel coordinates as operands,
+and return a value based on a neighborhood of texture elements (_texels_)
+within the image.
+Query operations return properties of the bound image or of the lookup
+itself.
+The "`Depth`" operand of code:OpTypeImage is ignored.
 
 [NOTE]
 .Note
@@ -24,7 +28,8 @@ The discrete samples remain essentially equivalent, however, so we retain
 the historical term texel to refer to them.
 ====
 
-SPIR-V Image Instructions include the following functionality:
+Image Operations include the functionality of the following SPIR-V Image
+Instructions:
 
   * code:OpImageSample* and code:OpImageSparseSample* read one or more
     neighboring texels of the image, and <<textures-texel-filtering,filter>>
@@ -41,19 +46,30 @@ SPIR-V Image Instructions include the following functionality:
   * code:OpImageFetch and code:OpImageSparseFetch return a single texel of
     the image.
     No sampler is used.
-  * code:OpImage*code:Gather and code:OpImageSparse*code:Gather read
-    neighboring texels and <<textures-gather,return a single component>> of
-    each.
+  * code:OpImage*Gather and code:OpImageSparse*Gather read neighboring
+    texels and <<textures-gather,return a single component>> of each.
   * code:OpImageRead (and code:OpImageSparseRead) and code:OpImageWrite read
     and write, respectively, a texel in the image.
     No sampler is used.
+ifdef::VK_NV_shader_image_footprint[]
+  * code:OpImageSampleFootprintNV identifies and returns information about
+    the set of texels in the image that would be accessed by an equivalent
+    code:OpImageSample* instruction.
+endif::VK_NV_shader_image_footprint[]
   * Instructions with code:Dref in the name apply
     <<textures-depth-compare-operation,depth comparison>> on the texel
     values.
   * Instructions with code:Sparse in the name additionally return a
     <<textures-sparse-residency,sparse residency>> code.
+  * code:OpImageQuerySize, code:OpImageQuerySizeLod,
+    code:OpImageQueryLevels, and code:OpImageQuerySamples return properties
+    of the image descriptor that would be accessed.
+    The image itself is not accessed.
+  * code:OpImageQueryLod returns the lod parameters that would be used in a
+    sample operation.
+    The actual operation is not performed.
 
-
+[[textures-texel-coordinate-systems]]
 === Texel Coordinate Systems
 
 Images are addressed by _texel coordinates_.
@@ -90,11 +106,13 @@ coordinates having the following meanings:
 
 The coordinates are extracted from the SPIR-V operand based on the
 dimensionality of the image variable and type of instruction.
-For code:Proj instructions, the components are in order (s, [t,] [r,] q)
-with t and r being conditionally present based on the code:Dim of the image.
-For non-code:Proj instructions, the coordinates are (s [,t] [,r] [,a]), with
-t and r being conditionally present based on the code:Dim of the image and a
-being conditionally present based on the code:Arrayed property of the image.
+For code:Proj instructions, the components are in order [eq]#(s, [t,] [r,]
+q)#, with [eq]#t# and [eq]#r# being conditionally present based on the
+code:Dim of the image.
+For non-code:Proj instructions, the coordinates are [eq]#(s [,t] [,r]
+[,a])#, with [eq]#t# and [eq]#r# being conditionally present based on the
+code:Dim of the image and [eq]#a# being conditionally present based on the
+code:Arrayed property of the image.
 Projective image instructions are not supported on code:Arrayed images.
 
 Unnormalized texel coordinates are referred to as [eq]#(u,v,w,a)#, with the
@@ -113,45 +131,47 @@ present when the dimensionality is 2D.
 When normalized coordinates are converted to unnormalized coordinates, all
 four coordinates are used.
 
-Integer texel coordinates are referred to as [eq]#(i,j,k,l,n)#, and the
-first four in that order have the same meanings as unnormalized texel
-coordinates.
-They are extracted from the SPIR-V operand in order [eq]#(i, [,j], [,k],
-[,l])#, with [eq]#j# and [eq]#k# conditionally present based on the code:Dim
-of the image, and l conditionally present based on the code:Arrayed property
-of the image.
-n is the sample index and is taken from the code:Sample image operand.
+Integer texel coordinates are referred to as [eq]#(i,j,k,l,n)#, with the
+coordinates having the following meanings:
+
+  * [eq]#i#: Coordinate in the first dimension of an image.
+  * [eq]#j#: Coordinate in the second dimension of an image.
+  * [eq]#k#: Coordinate in the third dimension of an image.
+  * [eq]#l#: Coordinate for array layer.
+  * [eq]#n#: Index of the sample within the texel.
+
+They are extracted from the SPIR-V operand in order [eq]#(i [,j] [,k] [,l]
+[,n])#, with [eq]#j# and [eq]#k# conditionally present based on the code:Dim
+of the image, and [eq]#l# conditionally present based on the code:Arrayed
+property of the image.
+[eq]#n# is conditionally present and is taken from the code:Sample image
+operand.
 
 For all coordinate types, unused coordinates are assigned a value of zero.
 
 [[textures-texel-coordinate-systems-diagrams]]
-[%inline]
-image::images/vulkantexture0.svg[align="center",title="Texel Coordinate Systems"]
+image::{images}/vulkantexture0-ll.svg[align="center",title="Texel Coordinate Systems, Linear Filtering",opts="{imageopts}"]
 The Texel Coordinate Systems - For the example shown of an 8{times}4 texel
 two dimensional image.
 
   * Normalized texel coordinates:
-  ** The [eq]#s# coordinate goes from 0.0 to 1.0, left to right.
-  ** The [eq]#t# coordinate goes from 0.0 to 1.0, top to bottom.
+  ** The [eq]#s# coordinate goes from 0.0 to 1.0.
+  ** The [eq]#t# coordinate goes from 0.0 to 1.0.
   * Unnormalized texel coordinates:
-  ** The [eq]#u# coordinate goes from -1.0 to 9.0, left to right.
-     The [eq]#u# coordinate within the range 0.0 to 8.0 is within the image,
-     otherwise it is within the border.
-  ** The [eq]#v# coordinate goes from -1.0 to 5.0, top to bottom.
-     The [eq]#v# coordinate within the range 0.0 to 4.0 is within the image,
-     otherwise it is within the border.
+  ** The [eq]#u# coordinate within the range 0.0 to 8.0 is within the image,
+     otherwise it is outside the image.
+  ** The [eq]#v# coordinate within the range 0.0 to 4.0 is within the image,
+     otherwise it is outside the image.
   * Integer texel coordinates:
-  ** The [eq]#i# coordinate goes from -1 to 8, left to right.
-     The [eq]#i# coordinate within the range 0 to 7 addresses texels within
-     the image, otherwise it addresses a border texel.
-  ** The [eq]#j# coordinate goes from -1 to 5, top to bottom.
-     The [eq]#j# coordinate within the range 0 to 3 addresses texels within
-     the image, otherwise it addresses a border texel.
+  ** The [eq]#i# coordinate within the range 0 to 7 addresses texels within
+     the image, otherwise it is outside the image.
+  ** The [eq]#j# coordinate within the range 0 to 3 addresses texels within
+     the image, otherwise it is outside the image.
   * Also shown for linear filtering:
   ** Given the unnormalized coordinates [eq]#(u,v)#, the four texels
      selected are [eq]#i~0~j~0~#, [eq]#i~1~j~0~#, [eq]#i~0~j~1~#, and
      [eq]#i~1~j~1~#.
-  ** The weights [eq]#{alpha}# and [eq]#{beta}#.
+  ** The fractions [eq]#{alpha}# and [eq]#{beta}#.
   ** Given the offset [eq]#{DeltaUpper}~i~# and [eq]#{DeltaUpper}~j~#, the
      four texels selected by the offset are [eq]#i~0~j'~0~#,
      [eq]#i~1~j'~0~#, [eq]#i~0~j'~1~#, and [eq]#i~1~j'~1~#.
@@ -160,15 +180,14 @@ ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 [NOTE]
 .Note
 ====
-For formats with reduced-resolution channels, [eq]#{DeltaUpper}~i~# and
+For formats with reduced-resolution components, [eq]#{DeltaUpper}~i~# and
 [eq]#{DeltaUpper}~j~# are relative to the resolution of the
-highest-resolution channel, and therefore may be divided by two relative to
-the unnormalized coordinate space of the lower-resolution channels.
+highest-resolution component, and therefore may be divided by two relative
+to the unnormalized coordinate space of the lower-resolution components.
 ====
 endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 
-[%inline]
-image::images/vulkantexture1.svg[align="center",title="Texel Coordinate Systems"]
+image::{images}/vulkantexture1-ll.svg[align="center",title="Texel Coordinate Systems, Nearest Filtering",opts="{imageopts}"]
 
 The Texel Coordinate Systems - For the example shown of an 8{times}4 texel
 two dimensional image.
@@ -180,6 +199,13 @@ two dimensional image.
   ** Given the offset [eq]#{DeltaUpper}~i~# and [eq]#{DeltaUpper}~j~#, the
      texel selected by the offset is [eq]#ij'#.
 
+ifdef::VK_NV_corner_sampled_image[]
+For corner-sampled images, the texel samples are located at the grid
+intersections instead of the texel centers.
+
+image::{images}/vulkantexture0-corner-alternative-a-ll.svg[align="center",title="Texel Coordinate Systems, Corner Sampling",opts="{imageopts}"]
+
+endif::VK_NV_corner_sampled_image[]
 
 == Conversion Formulas
 
@@ -194,7 +220,6 @@ to RGB)
 ====
 endif::editing-notes[]
 
-
 [[textures-RGB-sexp]]
 === RGB to Shared Exponent Conversion
 
@@ -205,11 +230,11 @@ follows:
 First, the components [eq]#(red, green, blue)# are clamped to
 [eq]#(red~clamped~, green~clamped~, blue~clamped~)# as:
 
-  :: [eq]#red~clamped~ = max(0, min(sharedexp~max~, red))#
-  :: [eq]#green~clamped~ = max(0, min(sharedexp~max~, green))#
-  :: [eq]#blue~clamped~ = max(0, min(sharedexp~max~, blue))#
+  {empty}:: [eq]#red~clamped~ = max(0, min(sharedexp~max~, red))#
+  {empty}:: [eq]#green~clamped~ = max(0, min(sharedexp~max~, green))#
+  {empty}:: [eq]#blue~clamped~ = max(0, min(sharedexp~max~, blue))#
 
-Where:
+where:
 
 [latexmath]
 +++++++++++++++++++
@@ -226,12 +251,13 @@ sharedexp_{max} & = \frac{(2^N-1)}{2^N} \times 2^{(E_{max}-B)}
 ====
 [eq]#NaN#, if supported, is handled as in <<ieee-754,IEEE 754-2008>>
 `minNum()` and `maxNum()`.
-That is the result is a [eq]#NaN# is mapped to zero.
+This results in any [eq]#NaN# being mapped to zero.
 ====
 
 The largest clamped component, [eq]#max~clamped~# is determined:
 
-  :: [eq]#max~clamped~ = max(red~clamped~, green~clamped~, blue~clamped~)#
+  {empty}:: [eq]#max~clamped~ = max(red~clamped~, green~clamped~,
+            blue~clamped~)#
 
 A preliminary shared exponent [eq]#exp'# is computed:
 [latexmath]
@@ -299,14 +325,15 @@ A shared exponent color [eq]#(red~shared~, green~shared~, blue~shared~,
 exp~shared~)# is transformed to an RGB color [eq]#(red, green, blue)# as
 follows:
 
-  :: latexmath:[red = red_{shared} \times {2^{(exp_{shared}-B-N)}}]
-  :: latexmath:[green = green_{shared} \times {2^{(exp_{shared}-B-N)}}]
-  :: latexmath:[blue = blue_{shared} \times {2^{(exp_{shared}-B-N)}}]
+  {empty}:: latexmath:[red = red_{shared} \times {2^{(exp_{shared}-B-N)}}]
+  {empty}:: latexmath:[green = green_{shared} \times
+            {2^{(exp_{shared}-B-N)}}]
+  {empty}:: latexmath:[blue = blue_{shared} \times {2^{(exp_{shared}-B-N)}}]
 
-Where:
+where:
 
-  :: [eq]#N = 9# (number of mantissa bits per component)
-  :: [eq]#B = 15# (exponent bias)
+  {empty}:: [eq]#N = 9# (number of mantissa bits per component)
+  {empty}:: [eq]#B = 15# (exponent bias)
 
 
 == Texel Input Operations
@@ -322,7 +349,9 @@ They include the following steps, which are performed in the listed order:
   ** <<textures-operation-validation,Instruction/Sampler/Image validation>>
   ** <<textures-integer-coordinate-validation,Coordinate validation>>
   ** <<textures-sparse-validation,Sparse validation>>
+ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
   ** <<textures-layout-validation,Layout validation>>
+endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
   * <<textures-format-conversion,Format conversion>>
   * <<textures-texel-replacement,Texel replacement>>
   * <<textures-depth-compare-operation,Depth comparison>>
@@ -330,7 +359,7 @@ They include the following steps, which are performed in the listed order:
   * <<textures-component-swizzle,Component swizzle>>
 ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
   * <<textures-chroma-reconstruction,Chroma reconstruction>>
-  * <<textures-sampler-YCbCr-conversion,Y'C~B~C~R~ conversion>>
+  * <<textures-sampler-YCbCr-conversion,{YCbCr} conversion>>
 endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 
 For texel input instructions involving multiple texels (for sampling or
@@ -344,7 +373,7 @@ ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 If <<textures-chroma-reconstruction,Chroma Reconstruction>> is implicit,
 <<textures-texel-filtering, Texel Filtering>> instead takes place during
 chroma reconstruction, before <<textures-sampler-YCbCr-conversion,sampler
-Y'C~B~C~R~ conversion>> occurs.
+{YCbCr} conversion>> occurs.
 endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 
 
@@ -353,21 +382,18 @@ endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 
 _Texel input validation operations_ inspect instruction/image/sampler state
 or coordinates, and in certain circumstances cause the texel value to be
-replaced or become undefined.
+replaced or become undefined:.
 There are a series of validations that the texel undergoes.
-
 
 [[textures-operation-validation]]
 ==== Instruction/Sampler/Image View Validation
 
 There are a number of cases where a SPIR-V instruction can: mismatch with
-the sampler, the image view, or both.
-There are a number of cases where the sampler can: mismatch with the image
-view.
-In such cases the value of the texel returned is undefined.
+the sampler, the image view, or both, and a number of further cases where
+the sampler can: mismatch with the image view.
+In such cases the value of the texel returned is undefined:.
 
 These cases include:
-
 
   * The sampler pname:borderColor is an integer type and the image view
     pname:format is not one of the elink:VkFormat integer types or a stencil
@@ -375,38 +401,102 @@ These cases include:
   * The sampler pname:borderColor is a float type and the image view
     pname:format is not one of the elink:VkFormat float types or a depth
     component of a depth/stencil format.
+ifndef::VK_EXT_border_color_swizzle[]
   * The sampler pname:borderColor is one of the opaque black colors
     (ename:VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK or
     ename:VK_BORDER_COLOR_INT_OPAQUE_BLACK) and the image view
     elink:VkComponentSwizzle for any of the slink:VkComponentMapping
-    components is not ename:VK_COMPONENT_SWIZZLE_IDENTITY.
+    components is not the <<resources-image-views-identity-mappings,identity
+    swizzle>>.
+endif::VK_EXT_border_color_swizzle[]
+ifdef::VK_EXT_border_color_swizzle[]
+  * The sampler pname:borderColor is one of the opaque black colors
+    (ename:VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK or
+    ename:VK_BORDER_COLOR_INT_OPAQUE_BLACK) and the image view
+    elink:VkComponentSwizzle for any of the slink:VkComponentMapping
+    components is not the <<resources-image-views-identity-mappings,identity
+    swizzle>>, and
+    slink:VkPhysicalDeviceBorderColorSwizzleFeaturesEXT::pname:borderColorSwizzleFromImage
+    feature is not enabled, and
+    slink:VkSamplerBorderColorComponentMappingCreateInfoEXT is not
+    specified.
+  * slink:VkSamplerBorderColorComponentMappingCreateInfoEXT::pname:components,
+    if specified, has a component swizzle that does not match the component
+    swizzle of the image view, and either component swizzle is not a form of
+    identity swizzle.
+  * slink:VkSamplerBorderColorComponentMappingCreateInfoEXT::pname:srgb, if
+    specified, does not match the sRGB encoding of the image view.
+endif::VK_EXT_border_color_swizzle[]
+ifdef::VK_EXT_custom_border_color[]
+  * The sampler pname:borderColor is a custom color
+    (ename:VK_BORDER_COLOR_FLOAT_CUSTOM_EXT or
+    ename:VK_BORDER_COLOR_INT_CUSTOM_EXT) and the supplied
+    slink:VkSamplerCustomBorderColorCreateInfoEXT::pname:customBorderColor
+    is outside the bounds of the values representable in the image view's
+    pname:format.
+ifndef::VK_EXT_border_color_swizzle[]
+  * The sampler pname:borderColor is a custom color
+    (ename:VK_BORDER_COLOR_FLOAT_CUSTOM_EXT or
+    ename:VK_BORDER_COLOR_INT_CUSTOM_EXT) and the image view
+    elink:VkComponentSwizzle for any of the slink:VkComponentMapping
+    components is not the <<resources-image-views-identity-mappings,identity
+    swizzle>>.
+endif::VK_EXT_border_color_swizzle[]
+ifdef::VK_EXT_border_color_swizzle[]
+  * The sampler pname:borderColor is a custom color
+    (ename:VK_BORDER_COLOR_FLOAT_CUSTOM_EXT or
+    ename:VK_BORDER_COLOR_INT_CUSTOM_EXT) and the image view
+    elink:VkComponentSwizzle for any of the slink:VkComponentMapping
+    components is not the <<resources-image-views-identity-mappings,identity
+    swizzle>>, and
+    slink:VkPhysicalDeviceBorderColorSwizzleFeaturesEXT::pname:borderColorSwizzleFromImage
+    feature is not enabled, and
+    slink:VkSamplerBorderColorComponentMappingCreateInfoEXT is not
+    specified.
+endif::VK_EXT_border_color_swizzle[]
+endif::VK_EXT_custom_border_color[]
   * The elink:VkImageLayout of any subresource in the image view does not
     match that specified in slink:VkDescriptorImageInfo::pname:imageLayout
     used to write the image descriptor.
-  * If the instruction is code:OpImageRead or code:OpImageSparseRead and the
-    pname:shaderStorageImageReadWithoutFormat feature is not enabled, or the
-    instruction is code:OpImageWrite and the
-    pname:shaderStorageImageWriteWithoutFormat feature is not enabled, then
-    the SPIR-V Image Format must: be <<spirvenv-image-formats,compatible>>
+  * The SPIR-V Image Format is not <<spirvenv-image-formats,compatible>>
     with the image view's pname:format.
   * The sampler pname:unnormalizedCoordinates is ename:VK_TRUE and any of
     the <<samplers-unnormalizedCoordinates,limitations of unnormalized
     coordinates>> are violated.
-  * The SPIR-V instruction is one of the code:OpImage*code:Dref*
-    instructions and the sampler pname:compareEnable is ename:VK_FALSE
-  * The SPIR-V instruction is not one of the code:OpImage*code:Dref*
-    instructions and the sampler pname:compareEnable is ename:VK_TRUE
-  * The SPIR-V instruction is one of the code:OpImage*code:Dref*
-    instructions and the image view pname:format is not one of the
-    depth/stencil formats with a depth component, or the image view aspect
-    is not ename:VK_IMAGE_ASPECT_DEPTH_BIT.
+ifdef::VK_EXT_fragment_density_map[]
+  * The sampler was created with pname:flags containing
+    ename:VK_SAMPLER_CREATE_SUBSAMPLED_BIT_EXT and the image was not created
+    with pname:flags containing ename:VK_IMAGE_CREATE_SUBSAMPLED_BIT_EXT.
+  * The sampler was not created with pname:flags containing
+    ename:VK_SAMPLER_CREATE_SUBSAMPLED_BIT_EXT and the image was created
+    with pname:flags containing ename:VK_IMAGE_CREATE_SUBSAMPLED_BIT_EXT.
+  * The sampler was created with pname:flags containing
+    ename:VK_SAMPLER_CREATE_SUBSAMPLED_BIT_EXT and is used with a function
+    that is not code:OpImageSampleImplicitLod or
+    code:OpImageSampleExplicitLod, or is used with operands code:Offset or
+    code:ConstOffsets.
+endif::VK_EXT_fragment_density_map[]
+  * The SPIR-V instruction is one of the code:OpImage*Dref* instructions and
+    the sampler pname:compareEnable is ename:VK_FALSE
+  * The SPIR-V instruction is not one of the code:OpImage*Dref* instructions
+    and the sampler pname:compareEnable is ename:VK_TRUE
+ifndef::VK_KHR_format_feature_flags2[]
+  * The SPIR-V instruction is one of the code:OpImage*Dref* instructions and
+    the image view pname:format is not one of the depth/stencil formats with
+    a depth component, or the image view aspect is not
+    ename:VK_IMAGE_ASPECT_DEPTH_BIT.
+endif::VK_KHR_format_feature_flags2[]
+ifdef::VK_KHR_format_feature_flags2[]
+  * The SPIR-V instruction is one of the code:OpImage*Dref* instructions,
+    the image view pname:format is one of the depth/stencil formats, and the
+    image view aspect is not ename:VK_IMAGE_ASPECT_DEPTH_BIT.
+endif::VK_KHR_format_feature_flags2[]
   * The SPIR-V instruction's image variable's properties are not compatible
     with the image view:
   ** Rules for pname:viewType:
   *** ename:VK_IMAGE_VIEW_TYPE_1D must: have code:Dim = 1D, code:Arrayed =
       0, code:MS = 0.
-  *** ename:VK_IMAGE_VIEW_TYPE_2D must: have code:Dim = 2D, code:Arrayed =
-      0.
+  *** ename:VK_IMAGE_VIEW_TYPE_2D must: have code:Dim = 2D, code:Arrayed = 0.
   *** ename:VK_IMAGE_VIEW_TYPE_3D must: have code:Dim = 3D, code:Arrayed =
       0, code:MS = 0.
   *** ename:VK_IMAGE_VIEW_TYPE_CUBE must: have code:Dim = Cube, code:Arrayed
@@ -423,20 +513,56 @@ These cases include:
   ** If the image was created with slink:VkImageCreateInfo::pname:samples
      not equal to ename:VK_SAMPLE_COUNT_1_BIT, the instruction must: have
      code:MS = 1.
+  ** If the code:Sampled code:Type of the code:OpTypeImage does not match
+     the numeric format of the image, as shown in the _SPIR-V Sampled Type_
+     column of the <<formats-numericformat>> table.
+  ** If the <<spirvenv-image-signedness,signedness of any read or sample
+     operation>> does not match the signedness of the image's format.
+ifdef::VK_NV_corner_sampled_image[]
+  * If the image was created with slink:VkImageCreateInfo::pname:flags
+    containing ename:VK_IMAGE_CREATE_CORNER_SAMPLED_BIT_NV, the sampler
+    addressing modes must: only use a elink:VkSamplerAddressMode of
+    ename:VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE.
+endif::VK_NV_corner_sampled_image[]
+ifdef::VK_NV_shader_image_footprint[]
+  * The SPIR-V instruction is code:OpImageSampleFootprintNV with code:Dim =
+    2D and pname:addressModeU or pname:addressModeV in the sampler is not
+    ename:VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE.
+  * The SPIR-V instruction is code:OpImageSampleFootprintNV with code:Dim =
+    3D and pname:addressModeU, pname:addressModeV, or pname:addressModeW in
+    the sampler is not ename:VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE.
+endif::VK_NV_shader_image_footprint[]
+ifdef::VK_EXT_custom_border_color[]
+  * The sampler was created with a specified
+    slink:VkSamplerCustomBorderColorCreateInfoEXT::pname:format which does
+    not match the elink:VkFormat of the image view(s) it is sampling.
+  * The sampler is sampling an image view of
+    ename:VK_FORMAT_B4G4R4A4_UNORM_PACK16,
+    ename:VK_FORMAT_B5G6R5_UNORM_PACK16, or
+    ename:VK_FORMAT_B5G5R5A1_UNORM_PACK16 format without a specified
+    slink:VkSamplerCustomBorderColorCreateInfoEXT::pname:format.
+endif::VK_EXT_custom_border_color[]
 
 ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 Only code:OpImageSample* and code:OpImageSparseSample* can: be used with a
-sampler that enables <<samplers-YCbCr-conversion,sampler Y'C~B~C~R~
+sampler that enables <<samplers-YCbCr-conversion,sampler {YCbCr}
 conversion>>.
 
-code:OpImageFetch, code:OpImageSparseFetch, code:OpImage*code:Gather, and
-code:OpImageSparse*code:Gather must: not be used with a sampler that enables
-<<samplers-YCbCr-conversion,sampler Y\'C~B~C~R~ conversion>>.
+code:OpImageFetch, code:OpImageSparseFetch, code:OpImage*Gather, and
+code:OpImageSparse*Gather must: not be used with a sampler that enables
+<<samplers-YCbCr-conversion,sampler {YCbCr} conversion>>.
 
 The code:ConstOffset and code:Offset operands must: not be used with a
-sampler that enables <<samplers-YCbCr-conversion,sampler Y'C~B~C~R~
+sampler that enables <<samplers-YCbCr-conversion,sampler {YCbCr}
 conversion>>.
 endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+
+ifdef::VK_KHR_format_feature_flags2[]
+If the <<resources-image-view-format-features,image view's format features>>
+do not support
+ename:VK_FORMAT_FEATURE_2_SAMPLED_IMAGE_DEPTH_COMPARISON_BIT_KHR then
+code:OpImage*Dref* instructions must: not be used to sample from it.
+endif::VK_KHR_format_feature_flags2[]
 
 
 [[textures-integer-coordinate-validation]]
@@ -453,19 +579,19 @@ coordinates.
 
 If the integer texel coordinates do not satisfy all of the conditions
 
-  :: [eq]#0 {leq} i < w~s~#
-  :: [eq]#0 {leq} j < h~s~#
-  :: [eq]#0 {leq} k < d~s~#
-  :: [eq]#0 {leq} l < layers#
-  :: [eq]#0 {leq} n < samples#
+  {empty}:: [eq]#0 {leq} i < w~s~#
+  {empty}:: [eq]#0 {leq} j < h~s~#
+  {empty}:: [eq]#0 {leq} k < d~s~#
+  {empty}:: [eq]#0 {leq} l < layers#
+  {empty}:: [eq]#0 {leq} n < samples#
 
 where:
 
-  :: [eq]#w~s~ =# width of the image level
-  :: [eq]#h~s~ =# height of the image level
-  :: [eq]#d~s~ =# depth of the image level
-  :: [eq]#layers =# number of layers in the image
-  :: [eq]#samples =# number of samples per texel in the image
+  {empty}:: [eq]#w~s~ =# width of the image level
+  {empty}:: [eq]#h~s~ =# height of the image level
+  {empty}:: [eq]#d~s~ =# depth of the image level
+  {empty}:: [eq]#layers =# number of layers in the image
+  {empty}:: [eq]#samples =# number of samples per texel in the image
 
 then the texel fails integer texel coordinate validation.
 
@@ -474,7 +600,7 @@ There are four cases to consider:
   . Valid Texel Coordinates
 +
   * If the texel coordinates pass validation (that is, the coordinates lie
-     within the image),
+    within the image),
 +
 then the texel value comes from the value in image memory.
 
@@ -482,7 +608,7 @@ then the texel value comes from the value in image memory.
 +
   * If the texel coordinates fail validation, and
   * If the read is the result of an image sample instruction or image gather
-     instruction, and
+    instruction, and
   * If the image is not a cube image,
 +
 then the texel is a border texel and <<textures-texel-replacement,texel
@@ -499,41 +625,47 @@ replacement>> is performed.
 
   . Cube Map Edge or Corner
 +
-Otherwise the texel coordinates lie on the borders along the edges and
-corners of a cube map image, and <<textures-cubemapedge, Cube map edge
-handling>> is performed.
+Otherwise the texel coordinates lie beyond the edges or corners of the
+selected cube map face, and <<textures-cubemapedge, Cube map edge handling>>
+is performed.
 
 
 [[textures-cubemapedge]]
 ==== Cube Map Edge Handling
 
-If the texel coordinates lie on the borders along the edges and corners of a
-cube map image, the following steps are performed.
-Note that this only occurs when using ename:VK_FILTER_LINEAR filtering
+If the texel coordinates lie beyond the edges or corners of the selected
+cube map face, the following steps are performed.
+Note that this does not occur when using ename:VK_FILTER_NEAREST filtering
 within a mip level, since ename:VK_FILTER_NEAREST is treated as using
 ename:VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE.
 
   * Cube Map Edge Texel
 +
-  ** If the texel lies along the border in either only [eq]#i# or only
-    [eq]#j#
-+
-then the texel lies along an edge, so the coordinates [eq]#(i,j)# and the
-array layer [eq]#l# are transformed to select the adjacent texel from the
-appropriate neighboring face.
+  ** If the texel lies beyond the selected cube map face in either only
+     [eq]#i# or only [eq]#j#, then the coordinates [eq]#(i,j)# and the array
+     layer [eq]#l# are transformed to select the adjacent texel from the
+     appropriate neighboring face.
 
   * Cube Map Corner Texel
 +
-  ** If the texel lies along the border in both [eq]#i# and [eq]#j#
-+
-then the texel lies at a corner and there is no unique neighboring face from
-which to read that texel.
-The texel should: be replaced by the average of the three values of the
-adjacent texels in each incident face.
-However, implementations may: replace the cube map corner texel by other
-methods, subject to the constraint that if the three available samples have
-the same value, the replacement texel also has that value.
-
+  ** If the texel lies beyond the selected cube map face in both [eq]#i# and
+     [eq]#j#, then there is no unique neighboring face from which to read
+     that texel.
+     The texel should: be replaced by the average of the three values of the
+     adjacent texels in each incident face.
+     However, implementations may: replace the cube map corner texel by
+     other methods.
+ifndef::VK_EXT_filter_cubic[]
+The methods are subject to the constraint that if the three available texels
+have the same value, the resulting filtered texel must: have that value.
+endif::VK_EXT_filter_cubic[]
+ifdef::VK_EXT_filter_cubic[]
+The methods are subject to the constraint that for linear filtering if the
+three available texels have the same value, the resulting filtered texel
+must: have that value, and for cubic filtering if the twelve available
+samples have the same value, the resulting filtered texel must: have that
+value.
+endif::VK_EXT_filter_cubic[]
 
 [[textures-sparse-validation]]
 ==== Sparse Validation
@@ -548,9 +680,8 @@ ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 ==== Layout Validation
 
 If all planes of a _disjoint_ _multi-planar_ image are not in the same
-<<resources-image-layouts,image layout>> when the image is sampled with
-<<samplers-YCbCr-conversion,sampler Y'C~B~C~R~ conversion>>, the result of
-texel reads is undefined.
+<<resources-image-layouts,image layout>>, the image must: not be sampled
+with <<samplers-YCbCr-conversion,sampler {YCbCr} conversion>> enabled.
 
 endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 
@@ -569,18 +700,17 @@ present in the format.
     the image view.
 
 Each component is converted based on its type and size (as defined in the
-<<features-formats-definition,Format Definition>> section for each
-elink:VkFormat), using the appropriate equations in
-<<fundamentals-fp16,16-Bit Floating-Point Numbers>>,
-<<fundamentals-fp11,Unsigned 11-Bit Floating-Point Numbers>>,
+<<formats-definition,Format Definition>> section for each elink:VkFormat),
+using the appropriate equations in <<fundamentals-fp16,16-Bit Floating-Point
+Numbers>>, <<fundamentals-fp11,Unsigned 11-Bit Floating-Point Numbers>>,
 <<fundamentals-fp10,Unsigned 10-Bit Floating-Point Numbers>>,
 <<fundamentals-fixedconv,Fixed-Point Data Conversion>>, and
 <<textures-sexp-RGB,Shared Exponent to RGB>>.
 Signed integer components smaller than 32 bits are sign-extended.
 
-If the image format is sRGB, the color components are first converted as if
-they are UNORM, and then sRGB to linear conversion is applied to the R, G,
-and B components as described in the "`sRGB EOTF`" section of the
+If the image view format is sRGB, the color components are first converted
+as if they are UNORM, and then sRGB to linear conversion is applied to the
+R, G, and B components as described in the "`sRGB EOTF`" section of the
 <<data-format,Khronos Data Format Specification>>.
 The A component, if present, is unchanged.
 
@@ -603,17 +733,32 @@ pname:borderColor of the sampler.
 The border color is:
 
 [[textures-border-replacement-color]]
+ifdef::VK_EXT_custom_border_color[]
+.Border Color [eq]#B#, Custom Border Color slink:VkSamplerCustomBorderColorCreateInfoEXT::pname:customBorderColor [eq]#U#
+endif::VK_EXT_custom_border_color[]
+ifndef::VK_EXT_custom_border_color[]
 .Border Color [eq]#B#
+endif::VK_EXT_custom_border_color[]
 [options="header",cols="60%,40%"]
 |====
 | Sampler pname:borderColor                     | Corresponding Border Color
-| ename:VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK | [eq]#B = (0.0, 0.0, 0.0, 0.0)#
-| ename:VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK      | [eq]#B = (0.0, 0.0, 0.0, 1.0)#
-| ename:VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE      | [eq]#B = (1.0, 1.0, 1.0, 1.0)#
-| ename:VK_BORDER_COLOR_INT_TRANSPARENT_BLACK   | [eq]#B = (0, 0, 0, 0)#
-| ename:VK_BORDER_COLOR_INT_OPAQUE_BLACK        | [eq]#B = (0, 0, 0, 1)#
-| ename:VK_BORDER_COLOR_INT_OPAQUE_WHITE        | [eq]#B = (1, 1, 1, 1)#
+| ename:VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK | [eq]#[B~r~, B~g~, B~b~, B~a~] = [0.0, 0.0, 0.0, 0.0]#
+| ename:VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK      | [eq]#[B~r~, B~g~, B~b~, B~a~] = [0.0, 0.0, 0.0, 1.0]#
+| ename:VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE      | [eq]#[B~r~, B~g~, B~b~, B~a~] = [1.0, 1.0, 1.0, 1.0]#
+| ename:VK_BORDER_COLOR_INT_TRANSPARENT_BLACK   | [eq]#[B~r~, B~g~, B~b~, B~a~] = [0, 0, 0, 0]#
+| ename:VK_BORDER_COLOR_INT_OPAQUE_BLACK        | [eq]#[B~r~, B~g~, B~b~, B~a~] = [0, 0, 0, 1]#
+| ename:VK_BORDER_COLOR_INT_OPAQUE_WHITE        | [eq]#[B~r~, B~g~, B~b~, B~a~] = [1, 1, 1, 1]#
+ifdef::VK_EXT_custom_border_color[]
+| ename:VK_BORDER_COLOR_FLOAT_CUSTOM_EXT        | [eq]#[B~r~, B~g~, B~b~, B~a~] = [U~r~, U~g~, U~b~, U~a~]#
+| ename:VK_BORDER_COLOR_INT_CUSTOM_EXT          | [eq]#[B~r~, B~g~, B~b~, B~a~] = [U~r~, U~g~, U~b~, U~a~]#
+endif::VK_EXT_custom_border_color[]
 |====
+
+ifdef::VK_EXT_custom_border_color[]
+The custom border color ([eq]#U#) may: be rounded by implementations prior
+to texel replacement, but the error introduced by such a rounding must: not
+exceed one ULP of the image's pname:format.
+endif::VK_EXT_custom_border_color[]
 
 [NOTE]
 .Note
@@ -631,22 +776,59 @@ components in the image format
 
 [[textures-border-replacement-table]]
 .Border Texel Components After Replacement
-[width="80%",options="header"]
+[width="100%",options="header"]
 |====
 | Texel Aspect or Format      | Component Assignment
-| Depth aspect                | [eq]#D       = B~r~#
-| Stencil aspect              | [eq]#S       = B~r~#
-| One component color format  | [eq]#C~r~    = B~r~#
-| Two component color format  | [eq]#C~rg~   = (B~r~,B~g~)#
-| Three component color format| [eq]#C~rgb~  = (B~r~,B~g~,B~b~)#
-| Four component color format | [eq]#C~rgba~ = (B~r~,B~g~,B~b~,B~a~)#
+| Depth aspect                | [eq]#D                                     = B~r~#
+| Stencil aspect              | [eq]#S                                     = B~r~#
+| One component color format  | [eq]#Color~r~                              = B~r~#
+| Two component color format  | [eq]#[Color~r~,Color~g~]                   = [B~r~,B~g~]#
+| Three component color format| [eq]#[Color~r~,Color~g~,Color~b~]          = [B~r~,B~g~,B~b~]#
+| Four component color format | [eq]#[Color~r~,Color~g~,Color~b~,Color~a~] = [B~r~,B~g~,B~b~,B~a~]#
 |====
 
-The value returned by a read of an invalid texel is undefined, unless that
+The value returned by a read of an invalid texel is undefined:, unless that
 read operation is from a buffer resource and the pname:robustBufferAccess
 feature is enabled.
 In that case, an invalid texel is replaced as described by the
-<<features-features-robustBufferAccess,pname:robustBufferAccess feature>>.
+<<features-robustBufferAccess,pname:robustBufferAccess feature>>.
+ifdef::VK_EXT_image_robustness,VK_EXT_robustness2[]
+If the access is to an image resource and the x, y, z, or layer coordinate
+validation fails and
+ifdef::VK_EXT_image_robustness[]
+<<features-robustImageAccess,pname:robustImageAccess>> is enabled then zero
+must: be returned for the R, G, and B components, if present.
+Either zero or one must: be returned for the A component, if present.
+endif::VK_EXT_image_robustness[]
+ifdef::VK_EXT_image_robustness+VK_EXT_robustness2[If]
+ifdef::VK_EXT_robustness2[]
+<<features-robustImageAccess2,pname:robustImageAccess2>> is enabled, zero
+values must: be returned.
+endif::VK_EXT_robustness2[]
+If only the sample index was invalid, the values returned are undefined:.
+endif::VK_EXT_image_robustness,VK_EXT_robustness2[]
+
+ifdef::VK_EXT_image_robustness[]
+Additionally, if <<features-robustImageAccess,pname:robustImageAccess>> is
+enabled,
+ifdef::VK_EXT_robustness2[]
+but <<features-robustImageAccess2,pname:robustImageAccess2>> is not,
+endif::VK_EXT_robustness2[]
+any invalid texels may: be expanded to four components prior to texel
+replacement.
+This means that components not present in the image format may be replaced
+with 0 or may undergo <<textures-conversion-to-rgba,conversion to RGBA>> as
+normal.
+endif::VK_EXT_image_robustness[]
+
+ifdef::VK_EXT_robustness2[]
+Loads from a null descriptor return a four component color value of all
+zeros.
+However, for storage images and storage texel buffers using an explicit
+SPIR-V Image Format, loads from a null descriptor may: return an alpha value
+of 1 (float or integer, depending on format) if the format does not include
+alpha.
+endif::VK_EXT_robustness2[]
 
 If the
 slink:VkPhysicalDeviceSparseProperties::pname:residencyNonResidentStrict
@@ -655,7 +837,7 @@ values for integer and floating-point components of the image format,
 respectively.
 
 If pname:residencyNonResidentStrict is ename:VK_FALSE, the value of the
-sparse unbound texel is undefined.
+sparse unbound texel is undefined:.
 
 
 [[textures-depth-compare-operation]]
@@ -674,42 +856,42 @@ sampler.
 \begin{aligned}
 D & = 1.0 &
   \begin{cases}
-    D_{\textit{ref}} \leq D & \text{for LEQUAL}   \\
-    D_{\textit{ref}} \geq D & \text{for GEQUAL}   \\
-    D_{\textit{ref}} < D    & \text{for LESS}     \\
-    D_{\textit{ref}} > D    & \text{for GREATER}  \\
-    D_{\textit{ref}} = D    & \text{for EQUAL}    \\
-    D_{\textit{ref}} \neq D & \text{for NOTEQUAL} \\
-    \textit{true}           & \text{for ALWAYS}   \\
-    \textit{false}          & \text{for NEVER}
+    D_{\textit{ref}} \leq D_{\textit{tex}} & \text{for LEQUAL}   \\
+    D_{\textit{ref}} \geq D_{\textit{tex}} & \text{for GEQUAL}   \\
+    D_{\textit{ref}} < D_{\textit{tex}}    & \text{for LESS}     \\
+    D_{\textit{ref}} > D_{\textit{tex}}    & \text{for GREATER}  \\
+    D_{\textit{ref}} = D_{\textit{tex}}    & \text{for EQUAL}    \\
+    D_{\textit{ref}} \neq D_{\textit{tex}} & \text{for NOTEQUAL} \\
+    \textit{true}                          & \text{for ALWAYS}   \\
+    \textit{false}                         & \text{for NEVER}
   \end{cases} \\
 D & = 0.0 & \text{otherwise}
 \end{aligned}
 +++++++++++++++++++
 
-where, in the depth comparison:
-
-  :: [eq]#D~ref~ = shaderOp.D~ref~# (from optional: SPIR-V operand)
-  :: [eq]#D# (texel depth value)
+where [eq]#D~tex~# is the texel depth value and [eq]#D~ref~# is the
+reference value from the SPIR-V operand.
+If the image being sampled has a fixed-point format then the reference value
+is clamped to [0, 1] before the comparison operation.
 
 
 [[textures-conversion-to-rgba]]
 === Conversion to RGBA
 
-The texel is expanded from one, two, or three to four components based on
-the image base color:
+The texel is expanded from one, two, or three components to four components
+based on the image base color:
 
 [[textures-texel-color-rgba-conversion-table]]
 .Texel Color After Conversion To RGBA
-[options="header"]
+[width="100%", options="header", cols="<4,<6"]
 |====
 | Texel Aspect or Format      | RGBA Color
-| Depth aspect                | [eq]#C~rgba~ = (D,0,0,one)#
-| Stencil aspect              | [eq]#C~rgba~ = (S,0,0,one)#
-| One component color format  | [eq]#C~rgba~ = (C~r~,0,0,one)#
-| Two component color format  | [eq]#C~rgba~ = (C~rg~,0,one)#
-| Three component color format| [eq]#C~rgba~ = (C~rgb~,one)#
-| Four component color format | [eq]#C~rgba~ = C~rgba~#
+| Depth aspect                | [eq]#[Color~r~,Color~g~,Color~b~, Color~a~] = [D,0,0,one]#
+| Stencil aspect              | [eq]#[Color~r~,Color~g~,Color~b~, Color~a~] = [S,0,0,one]#
+| One component color format  | [eq]#[Color~r~,Color~g~,Color~b~, Color~a~] = [Color~r~,0,0,one]#
+| Two component color format  | [eq]#[Color~r~,Color~g~,Color~b~, Color~a~] = [Color~r~,Color~g~,0,one]#
+| Three component color format| [eq]#[Color~r~,Color~g~,Color~b~, Color~a~] = [Color~r~,Color~g~,Color~b~,one]#
+| Four component color format | [eq]#[Color~r~,Color~g~,Color~b~, Color~a~] = [Color~r~,Color~g~,Color~b~,Color~a~]#
 |====
 
 where [eq]#one = 1.0f# for floating-point formats and depth aspects, and
@@ -729,34 +911,33 @@ All texel input instructions apply a _swizzle_ based on:
 
   * the elink:VkComponentSwizzle enums in the pname:components member of the
     slink:VkImageViewCreateInfo structure for the image being read if
-    <<samplers-YCbCr-conversion,sampler Y'C~B~C~R~ conversion>> is not
-    enabled, and
+    <<samplers-YCbCr-conversion,sampler {YCbCr} conversion>> is not enabled,
+    and
   * the elink:VkComponentSwizzle enums in the pname:components member of the
     slink:VkSamplerYcbcrConversionCreateInfo structure for the
-    <<samplers-YCbCr-conversion,sampler Y'C~B~C~R~ conversion>> if sampler
-    Y'C~B~C~R~ conversion is enabled.
+    <<samplers-YCbCr-conversion,sampler {YCbCr} conversion>> if sampler
+    {YCbCr} conversion is enabled.
 
 endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 
 The swizzle can: rearrange the components of the texel, or substitute zero
-and one for any components.
-It is defined as follows for the R component, and operates similarly for the
-other components.
+or one for any components.
+It is defined as follows for each color [eq]#component#:
 
 
 [latexmath]
 +++++++++++++++++++
 \begin{aligned}
-C'_{rgba}[R] & =
-  \begin{cases}
-    C_{rgba}[R] & \text{for RED swizzle}   \\
-    C_{rgba}[G] & \text{for GREEN swizzle} \\
-    C_{rgba}[B] & \text{for BLUE swizzle}  \\
-    C_{rgba}[A] & \text{for ALPHA swizzle} \\
-    0           & \text{for ZERO swizzle}  \\
-    one         & \text{for ONE swizzle} \\
-    C_{rgba}[R] & \text{for IDENTITY swizzle}
-  \end{cases}
+Color'_{component} & =
+\begin{cases}
+Color_r          & \text{for RED swizzle}   \\
+Color_g          & \text{for GREEN swizzle} \\
+Color_b          & \text{for BLUE swizzle}  \\
+Color_a          & \text{for ALPHA swizzle} \\
+0                & \text{for ZERO swizzle}  \\
+one              & \text{for ONE swizzle} \\
+identity         & \text{for IDENTITY swizzle}
+\end{cases}
 \end{aligned}
 +++++++++++++++++++
 
@@ -765,25 +946,26 @@ where:
 [latexmath]
 +++++++++++++++++++
 \begin{aligned}
-C_{rgba}[R] & \text{is the RED component} \\
-C_{rgba}[G] & \text{is the GREEN component} \\
-C_{rgba}[B] & \text{is the BLUE component} \\
-C_{rgba}[A] & \text{is the ALPHA component} \\
-one         & = 1.0\text{f}  & \text{for floating point components} \\
-one         & = 1              & \text{for integer components}
+one & =
+\begin{cases}
+& 1.0\text{f}  & \text{for floating point components} \\
+& 1            & \text{for integer components} \\
+\end{cases}
+\\
+identity & =
+\begin{cases}
+& Color_r          & \text{for}\ component = r \\
+& Color_g          & \text{for}\ component = g \\
+& Color_b          & \text{for}\ component = b \\
+& Color_a          & \text{for}\ component = a \\
+\end{cases}
 \end{aligned}
 +++++++++++++++++++
 
-For each component this is applied to, the
-ename:VK_COMPONENT_SWIZZLE_IDENTITY swizzle selects the corresponding
-component from [eq]#C~rgba~#.
-
 If the border color is one of the etext:VK_BORDER_COLOR_*_OPAQUE_BLACK enums
-and the elink:VkComponentSwizzle is not ename:VK_COMPONENT_SWIZZLE_IDENTITY
-for all components (or the
-<<resources-image-views-identity-mappings,equivalent identity mapping>>),
-the value of the texel after swizzle is undefined.
-
+and the elink:VkComponentSwizzle is not the
+<<resources-image-views-identity-mappings,identity swizzle>> for all
+components, the value of the texel after swizzle is undefined:.
 
 [[textures-sparse-residency]]
 === Sparse Residency
@@ -803,31 +985,48 @@ In some color models, the color representation is defined in terms of
 monochromatic light intensity (often called "`luma`") and color differences
 relative to this intensity, often called "`chroma`".
 It is common for color models other than RGB to represent the chroma
-channels at lower spatial resolution than the luma channel.
+components at lower spatial resolution than the luma component.
 This approach is used to take advantage of the eye's lower spatial
 sensitivity to color compared with its sensitivity to brightness.
 Less commonly, the same approach is used with additive color, since the
-green channel dominates the eye's sensitivity to light intensity and the
+green component dominates the eye's sensitivity to light intensity and the
 spatial sensitivity to color introduced by red and blue is lower.
 
-Lower-resolution channels are "`downsampled`" by resizing them to a lower
-spatial resolution than the channel representing luminance.
+Lower-resolution components are "`downsampled`" by resizing them to a lower
+spatial resolution than the component representing luminance.
+This process is also commonly known as "`chroma subsampling`".
+There is one luminance sample in each texture texel, but each chrominance
+sample may be shared among several texels in one or both texture dimensions.
+
+ * "`etext:_444`" formats do not spatially downsample chroma values compared
+   with luma: there are unique chroma samples for each texel.
+
+ * "`etext:_422`" formats have downsampling in the x dimension
+   (corresponding to _u_ or _s_ coordinates): they are sampled at half the
+   resolution of luma in that dimension.
+
+ * "`etext:_420`" formats have downsampling in the x dimension
+   (corresponding to _u_ or _s_ coordinates) and the y dimension
+   (corresponding to _v_ or _t_ coordinates): they are sampled at half the
+   resolution of luma in both dimensions.
+
 The process of reconstructing a full color value for texture access involves
 accessing both chroma and luma values at the same location.
 To generate the color accurately, the values of the lower-resolution
-channels at the location of the luma samples must be reconstructed from the
-lower-resolution sample locations, an operation known here as "`chroma
+components at the location of the luma samples must be reconstructed from
+the lower-resolution sample locations, an operation known here as "`chroma
 reconstruction`" irrespective of the actual color model.
 
 The location of the chroma samples relative to the luma coordinates is
 determined by the pname:xChromaOffset and pname:yChromaOffset members of the
 slink:VkSamplerYcbcrConversionCreateInfo structure used to create the
-sampler Y'C~B~C~R~ conversion.
+sampler {YCbCr} conversion.
 
 The following diagrams show the relationship between unnormalized (_u_,_v_)
-coordinates and (_i_,_j_) integer texel positions in the luma channel (shown
-in black, with circles showing integer sample positions) and the texel
-coordinates of reduced-resolution chroma channels, shown as crosses in red.
+coordinates and (_i_,_j_) integer texel positions in the luma component
+(shown in black, with circles showing integer sample positions) and the
+texel coordinates of reduced-resolution chroma components, shown as crosses
+in red.
 
 [NOTE]
 .Note
@@ -841,41 +1040,36 @@ positions where required for interpolation.
 The limits of a sample for etext:NEAREST sampling is shown as a grid.
 ====
 
-[%inline]
-image::images/chromasamples_422_cosited.svg[align="center",title="422 downsampling, xChromaOffset=COSITED_EVEN"]
+image::{images}/chromasamples_422_cosited.svg[align="center",title="422 downsampling, xChromaOffset=COSITED_EVEN",opts="{imageopts}"]
 
-[%inline]
-image::images/chromasamples_422_midpoint.svg[align="center",title="422 downsampling, xChromaOffset=MIDPOINT"]
+image::{images}/chromasamples_422_midpoint.svg[align="center",title="422 downsampling, xChromaOffset=MIDPOINT",opts="{imageopts}"]
 
-[%inline]
-image::images/chromasamples_420_xcosited_ycosited.svg[align="center",title="420 downsampling, xChromaOffset=COSITED_EVEN, yChromaOffset=COSITED_EVEN"]
+image::{images}/chromasamples_420_xcosited_ycosited.svg[align="center",title="420 downsampling, xChromaOffset=COSITED_EVEN, yChromaOffset=COSITED_EVEN",opts="{imageopts}"]
 
-[%inline]
-image::images/chromasamples_420_xmidpoint_ycosited.svg[align="center",title="420 downsampling, xChromaOffset=MIDPOINT, yChromaOffset=COSITED_EVEN"]
+image::{images}/chromasamples_420_xmidpoint_ycosited.svg[align="center",title="420 downsampling, xChromaOffset=MIDPOINT, yChromaOffset=COSITED_EVEN",opts="{imageopts}"]
 
-[%inline]
-image::images/chromasamples_420_xcosited_ymidpoint.svg[align="center",title="420 downsampling, xChromaOffset=COSITED_EVEN, yChromaOffset=MIDPOINT"]
+image::{images}/chromasamples_420_xcosited_ymidpoint.svg[align="center",title="420 downsampling, xChromaOffset=COSITED_EVEN, yChromaOffset=MIDPOINT",opts="{imageopts}"]
 
-[%inline]
-image::images/chromasamples_420_xmidpoint_ymidpoint.svg[align="center",title="420 downsampling, xChromaOffset=MIDPOINT, yChromaOffset=MIDPOINT"]
+image::{images}/chromasamples_420_xmidpoint_ymidpoint.svg[align="center",title="420 downsampling, xChromaOffset=MIDPOINT, yChromaOffset=MIDPOINT",opts="{imageopts}"]
 
 Reconstruction is implemented in one of two ways:
 
 If the format of the image that is to be sampled sets
 ename:VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_CHROMA_RECONSTRUCTION_EXPLICIT_BIT,
-or the sname:VkSamplerYcbcrConversionCreateInfo's
+or the slink:VkSamplerYcbcrConversionCreateInfo's
 pname:forceExplicitReconstruction is set to ename:VK_TRUE, reconstruction is
 performed as an explicit step independent of filtering, described in the
 <<textures-explicit-reconstruction>> section.
 
 If the format of the image that is to be sampled does not set
 ename:VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_CHROMA_RECONSTRUCTION_EXPLICIT_BIT
-and if the sname:VkSamplerYcbcrConversionCreateInfo's
+and if the slink:VkSamplerYcbcrConversionCreateInfo's
 pname:forceExplicitReconstruction is set to ename:VK_FALSE, reconstruction
 is performed as an implicit part of filtering prior to color model
 conversion, with no separate post-conversion texel filtering step, as
 described in the <<textures-implict-reconstruction,Implicit Reconstruction>>
 section.
+
 
 [[textures-explicit-reconstruction]]
 ==== Explicit Reconstruction
@@ -883,31 +1077,31 @@ section.
   * If the pname:chromaFilter member of the
     slink:VkSamplerYcbcrConversionCreateInfo structure is
     ename:VK_FILTER_NEAREST:
-    ** If the format's R and B channels are reduced in resolution in just
-       width by a factor of two relative to the G channel (i.e. this is a
-       "`etext:_422`" format), the latexmath:[\tau_{ijk}[level\]] values
-       accessed by <<textures-texel-filtering,texel filtering>> are
-       reconstructed as follows:
+  ** If the format's R and B components are reduced in resolution in just
+     width by a factor of two relative to the G component (i.e. this is a
+     "`etext:_422`" format), the latexmath:[\tau_{ijk}[level\]] values
+     accessed by <<textures-texel-filtering,texel filtering>> are
+     reconstructed as follows:
 +
 [latexmath]
 ++++++++++++++
 \begin{aligned}
-\tau_R'(i, j) & = \tau_R(\lfloor{i\times 0.5}\rfloor, j)[level] \\
-\tau_B'(i, j) & = \tau_B(\lfloor{i\times 0.5}\rfloor, j)[level]
+\tau_R'(i, j) & = \tau_R(\left\lfloor{i\times 0.5}\right\rfloor, j)[level] \\
+\tau_B'(i, j) & = \tau_B(\left\lfloor{i\times 0.5}\right\rfloor, j)[level]
 \end{aligned}
 ++++++++++++++
 
-    ** If the format's R and B channels are reduced in resolution in width
-       and height by a factor of two relative to the G channel (i.e. this is
-       a "`etext:_420`" format), the latexmath:[\tau_{ijk}[level\]] values
-       accessed by <<textures-texel-filtering,texel filtering>> are
-       reconstructed as follows:
+  ** If the format's R and B components are reduced in resolution in width
+     and height by a factor of two relative to the G component (i.e. this is
+     a "`etext:_420`" format), the latexmath:[\tau_{ijk}[level\]] values
+     accessed by <<textures-texel-filtering,texel filtering>> are
+     reconstructed as follows:
 +
 [latexmath]
 ++++++++++++++
 \begin{aligned}
-\tau_R'(i, j) & = \tau_R(\lfloor{i\times 0.5}\rfloor, \lfloor{j\times 0.5}\rfloor)[level] \\
-\tau_B'(i, j) & = \tau_B(\lfloor{i\times 0.5}\rfloor, \lfloor{j\times 0.5}\rfloor)[level]
+\tau_R'(i, j) & = \tau_R(\left\lfloor{i\times 0.5}\right\rfloor, \left\lfloor{j\times 0.5}\right\rfloor)[level] \\
+\tau_B'(i, j) & = \tau_B(\left\lfloor{i\times 0.5}\right\rfloor, \left\lfloor{j\times 0.5}\right\rfloor)[level]
 \end{aligned}
 ++++++++++++++
 +
@@ -921,17 +1115,17 @@ pname:chromaFilter is ename:VK_FILTER_NEAREST for explicit reconstruction.
   * If the pname:chromaFilter member of the
     slink:VkSamplerYcbcrConversionCreateInfo structure is
     ename:VK_FILTER_LINEAR:
-  ** If the format's R and B channels are reduced in resolution in just
-     width by a factor of two relative to the G channel (i.e. this is a
-     "`422`" format):
+  ** If the format's R and B components are reduced in resolution in just
+     width by a factor of two relative to the G component (i.e. this is a
+     "`etext:_422`" format):
   *** If pname:xChromaOffset is ename:VK_CHROMA_LOCATION_COSITED_EVEN:
 +
 [latexmath]
 +++++
 \tau_{RB}'(i,j) = \begin{cases}
-\tau_{RB}(\lfloor{i\times 0.5}\rfloor,j)[level], & 0.5 \times i = \lfloor{0.5 \times i}\rfloor\\
-0.5\times\tau_{RB}(\lfloor{i\times 0.5}\rfloor,j)[level] + \\
-0.5\times\tau_{RB}(\lfloor{i\times 0.5}\rfloor + 1,j)[level], & 0.5 \times i \neq \lfloor{0.5 \times i}\rfloor
+\tau_{RB}(\left\lfloor{i\times 0.5}\right\rfloor,j)[level], & 0.5 \times i = \left\lfloor{0.5 \times i}\right\rfloor\\
+0.5\times\tau_{RB}(\left\lfloor{i\times 0.5}\right\rfloor,j)[level] + \\
+0.5\times\tau_{RB}(\left\lfloor{i\times 0.5}\right\rfloor + 1,j)[level], & 0.5 \times i \neq \left\lfloor{0.5 \times i}\right\rfloor
 \end{cases}
 +++++
 +
@@ -939,50 +1133,58 @@ pname:chromaFilter is ename:VK_FILTER_NEAREST for explicit reconstruction.
 +
 [latexmath]
 +++++
-\tau_{RB}(i,j)' = \begin{cases}
-0.25 \times \tau_{RB}(\lfloor{i\times 0.5}\rfloor - 1,j)[level] + \\
-0.75 \times \tau_{RB}(\lfloor{i\times 0.5}\rfloor,j)[level], & 0.5 \times i = \lfloor{0.5 \times i}\rfloor\\
-0.75 \times \tau_{RB}(\lfloor{i\times 0.5}\rfloor,j)[level] + \\
-0.25 \times \tau_{RB}(\lfloor{i\times 0.5}\rfloor + 1,j)[level], & 0.5 \times i \neq \lfloor{0.5 \times i}\rfloor
+\tau_{RB}'(i,j) = \begin{cases}
+0.25 \times \tau_{RB}(\left\lfloor{i\times 0.5}\right\rfloor - 1,j)[level] + \\
+0.75 \times \tau_{RB}(\left\lfloor{i\times 0.5}\right\rfloor,j)[level], & 0.5 \times i = \left\lfloor{0.5 \times i}\right\rfloor\\
+0.75 \times \tau_{RB}(\left\lfloor{i\times 0.5}\right\rfloor,j)[level] + \\
+0.25 \times \tau_{RB}(\left\lfloor{i\times 0.5}\right\rfloor + 1,j)[level], & 0.5 \times i \neq \left\lfloor{0.5 \times i}\right\rfloor
 \end{cases}
 +++++
 
-  ** If the format's R and B channels are reduced in resolution in width and
-     height by a factor of two relative to the G channel (i.e. this is a
-     "`420`" format), a similar relationship applies.
+  ** If the format's R and B components are reduced in resolution in width
+     and height by a factor of two relative to the G component (i.e. this is
+     a "`etext:_420`" format), a similar relationship applies.
      Due to the number of options, these formulae are expressed more
      concisely as follows:
-+
-[width="30%",options="header",cols="5,1"]
-|====
-| pname:xChromaOffset | &#948;~i~
-| etext:COSITED_EVEN  | 0
-| etext:MIDPOINT      | 0.5
-|====
-+
-[width="30%",options="header",cols="5,1"]
-|====
-| pname:yChromaOffset | &#948;~j~
-| etext:COSITED_EVEN  | 0
-| etext:MIDPOINT      | 0.5
-|====
 +
 [latexmath]
 +++++
 \begin{aligned}
-\tau_{RB}'(i,j) = &\\
-&\tau_{RB}(\lfloor 0.5\times(i-\delta_i)\rfloor, \lfloor 0.5\times(j-\delta_j)\rfloor)[level]
-&& \times (1 - (0.5\times(i-\delta_i) - \lfloor 0.5\times(i-\delta_i)\rfloor))
-&& \times (1 - (0.5\times(j-\delta_j) - \lfloor 0.5\times(j-\delta_j)\rfloor)) +\\
-&\tau_{RB}(1+\lfloor 0.5\times(i-\delta_i)\rfloor, \lfloor 0.5\times(j-\delta_j)\rfloor)[level]
-&& \times (0.5\times(i-\delta_i) - \lfloor 0.5\times(i-\delta_i)\rfloor)
-&& \times (1 - (0.5\times(j-\delta_j) - \lfloor 0.5\times(j-\delta_j)\rfloor)) +\\
-&\tau_{RB}(\lfloor 0.5\times(i-\delta_i)\rfloor, 1+\lfloor 0.5\times(j-\delta_j)\rfloor)[level]
-&& \times (1 - (0.5\times(i-\delta_i) - \lfloor 0.5\times(i-\delta_i)\rfloor))
-&& \times (0.5\times(j-\delta_j) - \lfloor 0.5\times(j-\delta_j)\rfloor) +\\
-&\tau_{RB}(1+\lfloor 0.5\times(i-\delta_i)\rfloor, 1+\lfloor 0.5\times(j-\delta_j)\rfloor)[level]
-&& \times (0.5\times(i-\delta_i) - \lfloor 0.5\times(i-\delta_i)\rfloor)
-&& \times (0.5\times(j-\delta_j) - \lfloor 0.5\times(j-\delta_j)\rfloor)
+  i_{RB} & =
+    \begin{cases}
+      0.5 \times (i) & \textrm{xChromaOffset = COSITED}\_\textrm{EVEN} \\
+      0.5 \times (i - 0.5) & \textrm{xChromaOffset = MIDPOINT}
+    \end{cases}\\
+  j_{RB} & =
+    \begin{cases}
+      0.5 \times (j) & \textrm{yChromaOffset = COSITED}\_\textrm{EVEN} \\
+      0.5 \times (j - 0.5) & \textrm{yChromaOffset = MIDPOINT}
+    \end{cases}\\
+  \\
+  i_{floor} & = \left\lfloor i_{RB} \right\rfloor \\
+  j_{floor} & = \left\lfloor j_{RB} \right\rfloor \\
+  \\
+  i_{frac} & = i_{RB} - i_{floor} \\
+  j_{frac} & = j_{RB} - j_{floor}
+\end{aligned}
++++++
++
+[latexmath]
++++++
+\begin{aligned}
+\tau_{RB}'(i,j) =
+    & \tau_{RB}(     i_{floor},     j_{floor})[level]
+        & \times & ( 1 - i_{frac} ) &
+        & \times & ( 1 - j_{frac} ) & + \\
+    & \tau_{RB}( 1 + i_{floor},     j_{floor})[level]
+        & \times & (     i_{frac} ) &
+        & \times & ( 1 - j_{frac} ) & + \\
+    & \tau_{RB}(     i_{floor}, 1 + j_{floor})[level]
+        & \times & ( 1 - i_{frac} ) &
+        & \times & (     j_{frac} ) & + \\
+    & \tau_{RB}( 1 + i_{floor}, 1 + j_{floor})[level]
+        & \times & (     i_{frac} ) &
+        & \times & (     j_{frac} ) &
 \end{aligned}
 +++++
 
@@ -992,7 +1194,7 @@ pname:chromaFilter is ename:VK_FILTER_NEAREST for explicit reconstruction.
 In the case where the texture itself is bilinearly interpolated as described
 in <<textures-texel-filtering,Texel Filtering>>, thus requiring four
 full-color samples for the filtering operation, and where the reconstruction
-of these samples uses bilinear interpolation in the chroma channels due to
+of these samples uses bilinear interpolation in the chroma components due to
 pname:chromaFilter=ename:VK_FILTER_LINEAR, up to nine chroma samples may be
 required, depending on the sample location.
 ====
@@ -1016,9 +1218,10 @@ This will not have any visible effect if the locations of the luma samples
 coincide with the location of the samples used for rasterization.
 ====
 
-The sample coordinates are adjusted by the downsample factor of the channel
-(such that, for example, the sample coordinates are divided by two if the
-channel has a downsample factor of two relative to the luma channel):
+The sample coordinates are adjusted by the downsample factor of the
+component (such that, for example, the sample coordinates are divided by two
+if the component has a downsample factor of two relative to the luma
+component):
 
 [latexmath]
 ++++++
@@ -1038,42 +1241,42 @@ v_{RB}' (420) &=
 
 
 [[textures-sampler-YCbCr-conversion]]
-=== Sampler Y'C~B~C~R~ Conversion
+=== Sampler {YCbCr} Conversion
 
-Sampler Y'C~B~C~R~ conversion performs the following operations, which an
+Sampler {YCbCr} conversion performs the following operations, which an
 implementation may: combine into a single mathematical operation:
 
-  * <<textures-sampler-YCbCr-conversion-rangeexpand,Sampler Y'C~B~C~R~ Range
+  * <<textures-sampler-YCbCr-conversion-rangeexpand,Sampler {YCbCr} Range
     Expansion>>
-  * <<textures-sampler-YCbCr-conversion-modelconversion,Sampler Y'C~B~C~R~
+  * <<textures-sampler-YCbCr-conversion-modelconversion,Sampler {YCbCr}
     Model Conversion>>
 
 [[textures-sampler-YCbCr-conversion-rangeexpand]]
-==== Sampler Y'C~B~C~R~ Range Expansion
+==== Sampler {YCbCr} Range Expansion
 
-Sampler Y'C~B~C~R~ range expansion is applied to color channel values after
-all texel input operations which are not specific to sampler Y'C~B~C~R~
+Sampler {YCbCr} range expansion is applied to color component values after
+all texel input operations which are not specific to sampler {YCbCr}
 conversion.
 For example, the input values to this stage have been converted using the
 normal <<textures-format-conversion,format conversion>> rules.
 
-Sampler Y'C~B~C~R~ range expansion is not applied if pname:ycbcrModel is
+Sampler {YCbCr} range expansion is not applied if pname:ycbcrModel is
 ename:VK_SAMPLER_YCBCR_MODEL_CONVERSION_RGB_IDENTITY.
 That is, the shader receives the vector C'~rgba~ as output by the Component
 Swizzle stage without further modification.
 
 For other values of pname:ycbcrModel, range expansion is applied to the
-texel channel values output by the <<textures-component-swizzle,Component
+texel component values output by the <<textures-component-swizzle,Component
 Swizzle>> defined by the pname:components member of
 slink:VkSamplerYcbcrConversionCreateInfo.
-Range expansion applies independently to each channel of the image.
-For the purposes of range expansion and Y'C~B~C~R~ model conversion, the R
-and B channels contain color difference (chroma) values and the G channel
+Range expansion applies independently to each component of the image.
+For the purposes of range expansion and {YCbCr} model conversion, the R and
+B components contain color difference (chroma) values and the G component
 contains luma.
-The A channel is not modified by sampler Y'C~B~C~R~ range expansion.
+The A component is not modified by sampler {YCbCr} range expansion.
 
 The range expansion to be applied is defined by the pname:ycbcrRange member
-of the sname:VkSamplerYcbcrConversionCreateInfo structure:
+of the slink:VkSamplerYcbcrConversionCreateInfo structure:
 
   * If pname:ycbcrRange is ename:VK_SAMPLER_YCBCR_RANGE_ITU_FULL, the
     following transformations are applied:
@@ -1091,7 +1294,8 @@ C_R &= C'_{rgba}[R] - {{2^{(n-1)}}\over{(2^n) - 1}}
 .Note
 ====
 These formulae correspond to the "`full range`" encoding in the
-<<data-format,Khronos Data Format Specification>>.
+"`Quantization schemes`" chapter of the <<data-format,Khronos Data Format
+Specification>>.
 
 Should any future amendments be made to the ITU specifications from which
 these equations are derived, the formulae used by Vulkan may: also be
@@ -1113,56 +1317,60 @@ C_R &= {{C'_{rgba}[R] \times \left(2^n-1\right) - 128\times 2^{n-8}}\over{224\ti
 .Note
 ====
 These formulae correspond to the "`narrow range`" encoding in the
-<<data-format,Khronos Data Format Specification>>.
+"`Quantization schemes`" chapter of the <<data-format,Khronos Data Format
+Specification>>.
 ====
-  * _n_ is the bit-depth of the channels in the format.
+  * _n_ is the bit-depth of the components in the format.
 
 The precision of the operations performed during range expansion must: be at
 least that of the source format.
 
 An implementation may: clamp the results of these range expansion operations
-such that Y' falls in the range [0,1], and/or such that C~B~ and C~R~ fall
-in the range [-0.5,0.5].
+such that Y{prime} falls in the range [0,1], and/or such that C~B~ and C~R~
+fall in the range [-0.5,0.5].
 
 [[textures-sampler-YCbCr-conversion-modelconversion]]
-==== Sampler Y'C~B~C~R~ Model Conversion
+==== Sampler {YCbCr} Model Conversion
 
 The range-expanded values are converted between color models, according to
 the color model conversion specified in the pname:ycbcrModel member:
 
 ename:VK_SAMPLER_YCBCR_MODEL_CONVERSION_RGB_IDENTITY::
-  The color channels are not modified by the color model conversion since
+  The color components are not modified by the color model conversion since
   they are assumed already to represent the desired color model in which the
-  shader is operating; Y'C~B~C~R~ range expansion is also ignored.
+  shader is operating; {YCbCr} range expansion is also ignored.
 ename:VK_SAMPLER_YCBCR_MODEL_CONVERSION_YCBCR_IDENTITY::
-  The color channels are not modified by the color model conversion and are
-  assumed to be treated as though in Y'C~B~C~R~ form both in memory and in
-  the shader; Y'C~B~C~R~ range expansion is applied to the channels as for
-  other Y'C~B~C~R~ models, with the vector (C~R~,Y',C~B~,A) provided to the
-  shader.
+  The color components are not modified by the color model conversion and
+  are assumed to be treated as though in {YCbCr} form both in memory and in
+  the shader; {YCbCr} range expansion is applied to the components as for
+  other {YCbCr} models, with the vector (C~R~,Y{prime},C~B~,A) provided to
+  the shader.
 ename:VK_SAMPLER_YCBCR_MODEL_CONVERSION_YCBCR_709::
-  The color channels are transformed from a Y'C~B~C~R~ representation to an
-  R'G'B' representation as described in the "`BT.709 Y'C~B~C~R~ conversion`"
-  section of the <<data-format,Khronos Data Format Specification>>.
+  The color components are transformed from a {YCbCr} representation to an
+  {RGBprime} representation as described in the "`BT.709 {YCbCr}
+  conversion`" section of the <<data-format,Khronos Data Format
+  Specification>>.
 ename:VK_SAMPLER_YCBCR_MODEL_CONVERSION_YCBCR_601::
-  The color channels are transformed from a Y'C~B~C~R~ representation to an
-  R'G'B' representation as described in the "`BT.601 Y'C~B~C~R~ conversion`"
-  section of the <<data-format,Khronos Data Format Specification>>.
+  The color components are transformed from a {YCbCr} representation to an
+  {RGBprime} representation as described in the "`BT.601 {YCbCr}
+  conversion`" section of the <<data-format,Khronos Data Format
+  Specification>>.
 ename:VK_SAMPLER_YCBCR_MODEL_CONVERSION_YCBCR_2020::
-  The color channels are transformed from a Y'C~B~C~R~ representation to an
-  R'G'B' representation as described in the "`BT.2020 Y'C~B~C~R~
+  The color components are transformed from a {YCbCr} representation to an
+  {RGBprime} representation as described in the "`BT.2020 {YCbCr}
   conversion`" section of the <<data-format,Khronos Data Format
   Specification>>.
 
-In this operation, each output channel is dependent on each input channel.
+In this operation, each output component is dependent on each input
+component.
 
-An implementation may: clamp the R'G'B' results of these conversions to the
-range [0,1].
+An implementation may: clamp the {RGBprime} results of these conversions to
+the range [0,1].
 
 The precision of the operations performed during model conversion must: be
 at least that of the source format.
 
-The alpha channel is not modified by these model conversions.
+The alpha component is not modified by these model conversions.
 
 [NOTE]
 .Note
@@ -1176,24 +1384,25 @@ follows:
 
   * Calculate the <<textures-normalized-to-unnormalized,unnormalized texel
     coordinates>> corresponding to the desired sample position.
-  * For a pname:minFilter/pname:magFilter of ename:VK_FILTER_NEAREST:
+  * For a pname:minFilter or pname:magFilter of ename:VK_FILTER_NEAREST:
     . Calculate (_i_,_j_) for the sample location as described under the
       "`nearest filtering`" formulae in <<textures-unnormalized-to-integer>>
     . Calculate the normalized texel coordinates corresponding to these
       integer coordinates.
-    . Sample using <<samplers-YCbCr-conversion,sampler Y'C~B~C~R~
-      conversion>> at this location.
-  * For a pname:minFilter/pname:magFilter of ename:VK_FILTER_LINEAR:
+    . Sample using <<samplers-YCbCr-conversion,sampler {YCbCr} conversion>>
+      at this location.
+  * For a pname:minFilter or pname:magFilter of ename:VK_FILTER_LINEAR:
     . Calculate (_i~[0,1]~_,_j~[0,1]~_) for the sample location as described
       under the "`linear filtering`" formulae in
       <<textures-unnormalized-to-integer>>
     . Calculate the normalized texel coordinates corresponding to these
       integer coordinates.
-    . Sample using <<samplers-YCbCr-conversion,sampler Y'C~B~C~R~
-      conversion>> at each of these locations.
-    . Convert the non-linear AR'G'B' outputs of the Y'C~B~C~R~ conversions
-      to linear ARGB values as described in the "`Transfer Functions`"
-      chapter of the <<data-format,Khronos Data Format Specification>>.
+    . Sample using <<samplers-YCbCr-conversion,sampler {YCbCr} conversion>>
+      at each of these locations.
+    . Convert the non-linear A{prime}{RGBprime} outputs of the {YCbCr}
+      conversions to linear ARGB values as described in the "`Transfer
+      Functions`" chapter of the <<data-format,Khronos Data Format
+      Specification>>.
     . Interpolate the linear ARGB values using the [eq]#{alpha}# and
       [eq]#{beta}# values described in the "`linear filtering`" section of
       <<textures-unnormalized-to-integer>> and the equations in
@@ -1201,13 +1410,14 @@ follows:
 
 The additional calculations and, especially, additional number of sampling
 operations in the ename:VK_FILTER_LINEAR case can be expected to have a
-performance impact compared with using the outputs directly; since the
-variation from "`correct`" results are subtle for most content, the
-application author should determine whether a more costly implementation is
-strictly necessary.
-Note that if pname:chromaFilter and pname:minFilter/pname:magFilter are both
+performance impact compared with using the outputs directly.
+Since the variations from "`correct`" results are subtle for most content,
+the application author should determine whether a more costly implementation
+is strictly necessary.
+
+If pname:chromaFilter, and pname:minFilter or pname:magFilter are both
 ename:VK_FILTER_NEAREST, these operations are redundant and sampling using
-<<samplers-YCbCr-conversion,sampler Y'C~B~C~R~ conversion>> at the desired
+<<samplers-YCbCr-conversion,sampler {YCbCr} conversion>> at the desired
 sample coordinates will produce the "`correct`" results without further
 processing.
 ====
@@ -1225,10 +1435,10 @@ They include the following steps, which are performed in the listed order:
 
   * <<textures-output-validation,Validation operations>>
   ** <<textures-format-validation,Format validation>>
+  ** <<textures-type-validation,Type validation>>
   ** <<textures-output-coordinate-validation,Coordinate validation>>
   ** <<textures-output-sparse-validation,Sparse validation>>
   * <<textures-output-format-conversion,Texel output format conversion>>
-
 
 [[textures-output-validation]]
 === Texel Output Validation Operations
@@ -1241,10 +1451,22 @@ There are a series of validations that the texel undergoes.
 [[textures-format-validation]]
 ==== Texel Format Validation
 
-If the image format of the code:OpTypeImage is not compatible with the
-sname:VkImageView's pname:format, the effect of the write on the image
-view's memory is undefined, but the write must: not access memory outside of
-the image view.
+If the image format of the code:OpTypeImage is not
+<<spirvenv-image-formats,compatible>> with the sname:VkImageView's
+pname:format, the write causes the contents of the image's memory to become
+undefined:.
+
+
+[[textures-type-validation]]
+==== Texel Type Validation
+
+If the code:Sampled code:Type of the code:OpTypeImage does not match the
+type defined for the format, as specified in the _SPIR-V Sampled Type_
+column of the <<formats-numericformat>> table, the write causes the value of
+the texel to become undefined:.
+For integer types, if the <<spirvenv-image-signedness,signedness of the
+access>> does not match the signedness of the accessed resource, the write
+causes the value of the texel to become undefined:.
 
 
 [[textures-output-coordinate-validation]]
@@ -1286,75 +1508,13 @@ view.
 Any unused components are ignored.
 
 Each component is converted based on its type and size (as defined in the
-<<features-formats-definition,Format Definition>> section for each
-elink:VkFormat).
+<<formats-definition,Format Definition>> section for each elink:VkFormat).
 Floating-point outputs are converted as described in
 <<fundamentals-fp-conversion,Floating-Point Format Conversions>> and
 <<fundamentals-fixedconv,Fixed-Point Data Conversion>>.
 Integer outputs are converted such that their value is preserved.
 The converted value of any integer that cannot be represented in the target
-format is undefined.
-
-
-== Derivative Operations
-
-SPIR-V derivative instructions include code:OpDPdx, code:OpDPdy,
-code:OpDPdxFine, code:OpDPdyFine, code:OpDPdxCoarse, and code:OpDPdyCoarse.
-Derivative instructions are only available in a fragment shader.
-
-[%inline]
-image::images/vulkantexture2.svg[align="center",title="Implicit Derivatives"]
-
-Derivatives are computed as if there is a 2{times}2 neighborhood of
-fragments for each fragment shader invocation.
-These neighboring fragments are used to compute derivatives with the
-assumption that the values of P in the neighborhood are piecewise linear.
-It is further assumed that the values of P in the neighborhood are locally
-continuous, therefore derivatives in non-uniform control flow are undefined.
-
-[latexmath]
-+++++++++++++++++++
-\begin{aligned}
-dPdx_{i_1,j_0} & = dPdx_{i_0,j_0} & = P_{i_1,j_0} - P_{i_0,j_0}  \\
-dPdx_{i_1,j_1} & = dPdx_{i_0,j_1} & = P_{i_1,j_1} - P_{i_0,j_1}  \\
-\\
-dPdy_{i_0,j_1} & = dPdy_{i_0,j_0} & = P_{i_0,j_1} - P_{i_0,j_0}  \\
-dPdy_{i_1,j_1} & = dPdy_{i_1,j_0} & = P_{i_1,j_1} - P_{i_1,j_0}
-\end{aligned}
-+++++++++++++++++++
-
-The code:Fine derivative instructions must: return the values above, for a
-group of fragments in a 2{times}2 neighborhood.
-Coarse derivatives may: return only two values.
-In this case, the values should: be:
-
-[latexmath]
-+++++++++++++++++++
-\begin{aligned}
-dPdx & =
-  \begin{cases}
-    dPdx_{i_0,j_0} & \text{preferred}\\
-    dPdx_{i_0,j_1}
-  \end{cases} \\
-dPdy & =
-  \begin{cases}
-    dPdy_{i_0,j_0} & \text{preferred}\\
-    dPdy_{i_1,j_0}
-  \end{cases}
-\end{aligned}
-+++++++++++++++++++
-
-code:OpDPdx and code:OpDPdy must: return the same result as either
-code:OpDPdxFine or code:OpDPdxCoarse and either code:OpDPdyFine or
-code:OpDPdyCoarse, respectively.
-Implementations must: make the same choice of either coarse or fine for both
-code:OpDPdx and code:OpDPdy, and implementations should: make the choice
-that is more efficient to compute.
-
-ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
-For multi-planar formats, the derivatives are computed based on the plane
-with the largest dimensions.
-endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+format is undefined:.
 
 
 [[textures-normalized-operations]]
@@ -1394,8 +1554,8 @@ instruction in a fragment shader) or explicit (provided explicitly by shader
 to the image instruction in any shader).
 
 For implicit derivatives image instructions, the derivatives of texel
-coordinates are calculated in the same manner as derivative operations
-above.
+coordinates are calculated in the same manner as
+<<shaders-derivative-operations, derivative operations>>.
 That is:
 
 [latexmath]
@@ -1403,7 +1563,7 @@ That is:
 \begin{aligned}
 \partial{s}/\partial{x} & = dPdx(s), & \partial{s}/\partial{y} & = dPdy(s), & \text{for 1D, 2D, Cube, or 3D image} \\
 \partial{t}/\partial{x} & = dPdx(t), & \partial{t}/\partial{y} & = dPdy(t), & \text{for 2D, Cube, or 3D image} \\
-\partial{u}/\partial{x} & = dPdx(u), & \partial{u}/\partial{y} & = dPdy(u), & \text{for Cube or 3D image}
+\partial{r}/\partial{x} & = dPdx(r), & \partial{r}/\partial{y} & = dPdy(r), & \text{for Cube or 3D image}
 \end{aligned}
 +++++++++++++++++++
 
@@ -1411,44 +1571,33 @@ Partial derivatives not defined above for certain image dimensionalities are
 set to zero.
 
 For explicit LOD image instructions, if the optional: SPIR-V operand
-[eq]#Grad# is provided, then the operand values are used for the
-derivatives.
+code:Grad is provided, then the operand values are used for the derivatives.
 The number of components present in each derivative for a given image
 dimensionality matches the number of partial derivatives computed above.
 
-If the optional: SPIR-V operand [eq]#Lod# is provided, then derivatives are
+If the optional: SPIR-V operand code:Lod is provided, then derivatives are
 set to zero, the cube map derivative transformation is skipped, and the
 scale factor operation is skipped.
 Instead, the floating point scalar coordinate is directly assigned to
 [eq]#{lambda}~base~# as described in <<textures-level-of-detail-operation,
 Level-of-Detail Operation>>.
 
-For implicit derivative image instructions, the partial derivative values
-may: be computed by linear approximation using a 2{times}2 neighborhood of
-shader invocations (known as a _quad_), as described above.
-If the instruction is in control flow that is not uniform across the quad,
-then the derivative values and hence the implicit LOD values are undefined.
-
-ifdef::VK_EXT_descriptor_indexing[]
+ifdef::VK_VERSION_1_2,VK_EXT_descriptor_indexing[]
 If the image or sampler object used by an implicit derivative image
 instruction is not uniform across the quad and
-<<features-limits-quadDivergentImplicitLod,pname:quadDivergentImplicitLod>>
-is not supported, then the derivative and LOD values are undefined.
+<<limits-quadDivergentImplicitLod,pname:quadDivergentImplicitLod>> is not
+supported, then the derivative and LOD values are undefined:.
 Implicit derivatives are well-defined when the image and sampler and control
 flow are uniform across the quad, even if they diverge between different
 quads.
 
-If
-<<features-limits-quadDivergentImplicitLod,pname:quadDivergentImplicitLod>>
-is supported, then derivatives and implicit LOD values are well-defined even
-if the image or sampler object are not uniform within a quad.
+If <<limits-quadDivergentImplicitLod,pname:quadDivergentImplicitLod>> is
+supported, then derivatives and implicit LOD values are well-defined even if
+the image or sampler object are not uniform within a quad.
 The derivatives are computed as specified above, and the implicit LOD
 calculation proceeds for each shader invocation using its respective image
 and sampler object.
-
-For the purposes of implicit derivatives, code:Flat fragment input variables
-are uniform within a quad.
-endif::VK_EXT_descriptor_indexing[]
+endif::VK_VERSION_1_2,VK_EXT_descriptor_indexing[]
 
 
 === Cube Map Face Selection and Transformations
@@ -1607,14 +1756,13 @@ non-dependent texture fetches (pre OpenGL 2.0).
 endif::editing-notes[]
 
 
+[[textures-lod-and-scale-factor]]
 === Scale Factor Operation, Level-of-Detail Operation and Image Level(s) Selection
 
 LOD selection can: be either explicit (provided explicitly by the image
 instruction) or implicit (determined from a scale factor calculated from the
 derivatives).
-The implicit LOD selected can: be queried using the SPIR-V instruction
-code:OpImageQueryLod, which gives access to the [eq]#{lambda}#' and
-[eq]#d~l~# values, defined below.
+The LOD must: be computed with pname:mipmapPrecisionBits of accuracy.
 
 
 [[textures-scale-factor]]
@@ -1622,29 +1770,40 @@ code:OpImageQueryLod, which gives access to the [eq]#{lambda}#' and
 
 The magnitude of the derivatives are calculated by:
 
-  :: [eq]#m~ux~ = {vert}{partial}s/{partial}x{vert} {times} w~base~#
-  :: [eq]#m~vx~ = {vert}{partial}t/{partial}x{vert} {times} h~base~#
-  :: [eq]#m~wx~ = {vert}{partial}r/{partial}x{vert} {times} d~base~#
+  {empty}:: [eq]#m~ux~ = {vert}{partial}s/{partial}x{vert} {times} w~base~#
+  {empty}:: [eq]#m~vx~ = {vert}{partial}t/{partial}x{vert} {times} h~base~#
+  {empty}:: [eq]#m~wx~ = {vert}{partial}r/{partial}x{vert} {times} d~base~#
 
-  :: [eq]#m~uy~ = {vert}{partial}s/{partial}y{vert} {times} w~base~#
-  :: [eq]#m~vy~ = {vert}{partial}t/{partial}y{vert} {times} h~base~#
-  :: [eq]#m~wy~ = {vert}{partial}r/{partial}y{vert} {times} d~base~#
+  {empty}:: [eq]#m~uy~ = {vert}{partial}s/{partial}y{vert} {times} w~base~#
+  {empty}:: [eq]#m~vy~ = {vert}{partial}t/{partial}y{vert} {times} h~base~#
+  {empty}:: [eq]#m~wy~ = {vert}{partial}r/{partial}y{vert} {times} d~base~#
 
 
 where:
 
-  :: [eq]#{partial}t/{partial}x = {partial}t/{partial}y = 0# (for 1D images)
-  :: [eq]#{partial}r/{partial}x = {partial}r/{partial}y = 0# (for 1D, 2D or
-     Cube images)
+  {empty}:: [eq]#{partial}t/{partial}x = {partial}t/{partial}y = 0# (for 1D
+            images)
+  {empty}:: [eq]#{partial}r/{partial}x = {partial}r/{partial}y = 0# (for 1D,
+            2D or Cube images)
 
-and
+and:
 
-  :: [eq]#w~base~ = image.w#
-  :: [eq]#h~base~ = image.h#
-  :: [eq]#d~base~ = image.d#
+  {empty}:: [eq]#w~base~ = image.w#
+  {empty}:: [eq]#h~base~ = image.h#
+  {empty}:: [eq]#d~base~ = image.d#
 
 (for the pname:baseMipLevel, from the image descriptor).
 
+ifdef::VK_NV_corner_sampled_image[]
+
+For corner-sampled images, the [eq]#w~base~#, [eq]#h~base~#, and
+[eq]#d~base~# are instead:
+
+  {empty}:: [eq]#w~base~ = image.w - 1#
+  {empty}:: [eq]#h~base~ = image.h - 1#
+  {empty}:: [eq]#d~base~ = image.d - 1#
+
+endif::VK_NV_corner_sampled_image[]
 
 A point sampled in screen space has an elliptical footprint in texture
 space.
@@ -1706,23 +1865,23 @@ endif::editing-notes[]
 The minimum and maximum scale factors [eq]#({rho}~min~,{rho}~max~)# are
 determined by:
 
-  :: [eq]#{rho}~max~ = max({rho}~x~, {rho}~y~)#
-  :: [eq]#{rho}~min~ = min({rho}~x~, {rho}~y~)#
+  {empty}:: [eq]#{rho}~max~ = max({rho}~x~, {rho}~y~)#
+  {empty}:: [eq]#{rho}~min~ = min({rho}~x~, {rho}~y~)#
 
 The ratio of anisotropy is determined by:
 
-  :: [eq]#{eta} = min({rho}~max~/{rho}~min~, max~Aniso~)#
+  {empty}:: [eq]#{eta} = min({rho}~max~/{rho}~min~, max~Aniso~)#
 
 where:
 
-  :: [eq]#sampler.max~Aniso~ = pname:maxAnisotropy# (from sampler
-     descriptor)
-  :: [eq]#limits.max~Aniso~ = pname:maxSamplerAnisotropy# (from physical
-     device limits)
-  :: [eq]#max~Aniso~ = min(sampler.max~Aniso~, limits.max~Aniso~)#
+  {empty}:: [eq]#sampler.max~Aniso~ = pname:maxAnisotropy# (from sampler
+            descriptor)
+  {empty}:: [eq]#limits.max~Aniso~ = pname:maxSamplerAnisotropy# (from
+            physical device limits)
+  {empty}:: [eq]#max~Aniso~ = min(sampler.max~Aniso~, limits.max~Aniso~)#
 
 If [eq]#{rho}~max~ = {rho}~min~ = 0#, then all the partial derivatives are
-zero, the fragment's footprint in texel space is a point, and [eq]#N#
+zero, the fragment's footprint in texel space is a point, and [eq]#{eta}#
 should: be treated as 1.
 If [eq]#{rho}~max~ {neq} 0# and [eq]#{rho}~min~ = 0# then all partial
 derivatives along one axis are zero, the fragment's footprint in texel space
@@ -1739,7 +1898,7 @@ If [eq]#{eta} > 1#, sampling is anisotropic.
 
 The sampling rate ([eq]#N#) is derived as:
 
-  :: [eq]#N = {lceil}{eta}{rceil}#
+  {empty}:: [eq]#N = {lceil}{eta}{rceil}#
 
 An implementation may: round [eq]#N# up to the nearest supported sampling
 rate.
@@ -1795,7 +1954,7 @@ lod_{max}          & = maxLod & \text{(from sampler descriptor)}
 ++++++++++++++++++++++++
 
 and [eq]#maxSamplerLodBias# is the value of the slink:VkPhysicalDeviceLimits
-feature <<features-limits-maxSamplerLodBias,pname:maxSamplerLodBias>>.
+feature <<limits-maxSamplerLodBias,pname:maxSamplerLodBias>>.
 
 
 [[textures-image-level-selection]]
@@ -1838,10 +1997,10 @@ nearest(d') & =
 \end{aligned}
 ++++++++++++++++++++++++
 
-and
+and:
 
-  :: [eq]#level~base~ = pname:baseMipLevel#
-  :: [eq]#q = pname:levelCount - 1#
+  {empty}:: [eq]#level~base~ = pname:baseMipLevel#
+  {empty}:: [eq]#q = pname:levelCount - 1#
 
 pname:baseMipLevel and pname:levelCount are taken from the
 pname:subresourceRange of the image view.
@@ -1855,37 +2014,39 @@ two neighboring levels are selected:
 [latexmath]
 ++++++++++++++++++++++++
 \begin{aligned}
-d_{hi} & = \lfloor d_{l} \rfloor \\
+d_{hi} & = \left\lfloor d_{l} \right\rfloor \\
 d_{lo} & = min( d_{hi} + 1, q ) \\
 \delta & = d_{l} - d_{hi}
 \end{aligned}
 ++++++++++++++++++++++++
 
-[eq]#{delta}# is the fractional value used for <<textures-texel-filtering,
-linear filtering>> between levels.
-
+[eq]#{delta}# is the fractional value, quantized to the number of
+<<limits-mipmapPrecisionBits,mipmap precision bits>>, used for
+<<textures-texel-filtering, linear filtering>> between levels.
 
 [[textures-normalized-to-unnormalized]]
 === (s,t,r,q,a) to (u,v,w,a) Transformation
 
 The normalized texel coordinates are scaled by the image level dimensions
 and the array layer is selected.
-This transformation is performed once for each level ([eq]#d# or [eq]#d~hi~#
-and [eq]#d~lo~#) used in <<textures-texel-filtering,filtering>>.
+
+This transformation is performed once for each level used in
+<<textures-texel-filtering,filtering>> (either [eq]#d#, or [eq]#d~hi~# and
+[eq]#d~lo~#).
 
 [latexmath]
 ++++++++++++++++++++++++
 \begin{aligned}
-u(x,y) & = s(x,y) \times width_{level} \\
+u(x,y) & = s(x,y) \times width_{scale} + \Delta_i\\
 v(x,y) & =
   \begin{cases}
     0                         & \text{for 1D images} \\
-    t(x,y) \times height_{level} & \text{otherwise}
+    t(x,y) \times height_{scale} + \Delta_j & \text{otherwise}
   \end{cases} \\
 w(x,y) & =
   \begin{cases}
     0                         & \text{for 2D or Cube images} \\
-    r(x,y) \times depth_{level}  & \text{otherwise}
+    r(x,y) \times depth_{scale}  + \Delta_k & \text{otherwise}
   \end{cases} \\
 \\
 a(x,y) & =
@@ -1895,6 +2056,27 @@ a(x,y) & =
   \end{cases}
 \end{aligned}
 ++++++++++++++++++++++++
+
+where:
+
+  {empty}:: [eq]#width~scale~ = width~level~#
+  {empty}:: [eq]#height~scale~ = height~level~#
+  {empty}:: [eq]#depth~scale~ = depth~level~#
+
+ifdef::VK_NV_corner_sampled_image[]
+for conventional images, and:
+
+  {empty}:: [eq]#width~scale~ = width~level~ - 1#
+  {empty}:: [eq]#height~scale~ = height~level~ - 1#
+  {empty}:: [eq]#depth~scale~ = depth~level~ - 1#
+
+for corner-sampled images.
+endif::VK_NV_corner_sampled_image[]
+
+and where [eq]#({DeltaUpper}~i~, {DeltaUpper}~j~, {DeltaUpper}~k~)# are
+taken from the image instruction if it includes a code:ConstOffset or
+code:Offset operand, otherwise they are taken to be zero.
+
 
 Operations then proceed to Unnormalized Texel Coordinate Operations.
 
@@ -1910,8 +2092,8 @@ coordinates relative to the selected mipmap level.
 
 The layer index [eq]#l# is computed as:
 
-  :: [eq]#l = clamp(RNE(a), 0, pname:layerCount - 1) {plus}
-     pname:baseArrayLayer#
+  {empty}:: [eq]#l = clamp(RNE(a), 0, pname:layerCount - 1) {plus}
+            pname:baseArrayLayer#
 
 where pname:layerCount is the number of layers in the image subresource
 range of the image view, pname:baseArrayLayer is the first layer from the
@@ -1928,7 +2110,7 @@ subresource range, and where:
 \end{aligned}
 ++++++++++++++++++++++++
 
-The sample index n is assigned the value zero.
+The sample index [eq]#n# is assigned the value 0.
 
 Nearest filtering (ename:VK_FILTER_NEAREST) computes the integer texel
 coordinates that the unnormalized coordinates lie within:
@@ -1936,11 +2118,22 @@ coordinates that the unnormalized coordinates lie within:
 [latexmath]
 ++++++++++++++++++++++++
 \begin{aligned}
-i &= \lfloor u \rfloor \\
-j &= \lfloor v \rfloor \\
-k &= \lfloor w \rfloor
+i &= \left\lfloor u + shift \right\rfloor \\
+j &= \left\lfloor v + shift \right\rfloor \\
+k &= \left\lfloor w + shift \right\rfloor
 \end{aligned}
 ++++++++++++++++++++++++
+where:
+
+  {empty}:: [eq]#shift = 0.0#
+
+ifdef::VK_NV_corner_sampled_image[]
+for conventional images, and:
+
+  {empty}:: [eq]#shift = 0.5#
+
+for corner-sampled images.
+endif::VK_NV_corner_sampled_image[]
 
 Linear filtering (ename:VK_FILTER_LINEAR) computes a set of neighboring
 coordinates which bound the unnormalized coordinates.
@@ -1951,40 +2144,107 @@ The integer texel coordinates are combinations of [eq]#i~0~# or [eq]#i~1~#,
 [latexmath]
 ++++++++++++++++++++++++
 \begin{aligned}
-i_0 &= \lfloor u - 0.5 \rfloor \\
+i_0 &= \left\lfloor u - shift \right\rfloor \\
 i_1 &= i_0 + 1 \\
-j_0 &= \lfloor v - 0.5 \rfloor \\
+j_0 &= \left\lfloor v - shift \right\rfloor \\
 j_1 &= j_0 + 1 \\
-k_0 &= \lfloor w - 0.5 \rfloor \\
-k_1 &= k_0 + 1 \\
-\alpha &= \left(u - 0.5\right) - i_0 \\
-\beta &= \left(v - 0.5\right) - j_0 \\
-\gamma &= \left(w - 0.5\right) - k_0
+k_0 &= \left\lfloor w - shift \right\rfloor \\
+k_1 &= k_0 + 1
 \end{aligned}
 ++++++++++++++++++++++++
-
-ifdef::VK_IMG_filter_cubic[]
-Cubic filtering (ename:VK_FILTER_CUBIC_IMG) computes a set of neighboring
-coordinates which bound the unnormalized coordinates.
-The integer texel coordinates are combinations of [eq]#i~0~#, [eq]#i~1~#,
-[eq]#i~2~# or [eq]#i~3~#, [eq]#j~0~#, [eq]#j~1~#, [eq]#j~2~# or [eq]#j~3~#,
-as well as weights [eq]#{alpha}# and [eq]#{beta}#.
 
 [latexmath]
 ++++++++++++++++++++++++
 \begin{aligned}
-i_{0}  & = \left \lfloor u - \frac{3}{2} \right \rfloor & i_{1} & = i_{0} + 1 & i_{2} & = i_{1} + 1 & i_{3} & = i_{2} + 1 \\[1em]
-j_{0}  & = \left \lfloor v - \frac{3}{2} \right \rfloor & j_{1} & = j_{0} + 1 & j_{2} & = j_{1} + 1 & j_{3} & = j_{2} + 1 \\
-\\
-\alpha & = \mathbin{frac} \left ( u - \frac{1}{2} \right ) \\[1em]
-\beta  & = \mathbin{frac} \left ( v - \frac{1}{2} \right )
+\alpha &= \mathbin{frac}\left(u - shift\right)  \\[1em]
+\beta &= \mathbin{frac}\left(v - shift\right)  \\[1em]
+\gamma &= \mathbin{frac}\left(w - shift\right)
 \end{aligned}
 ++++++++++++++++++++++++
-endif::VK_IMG_filter_cubic[]
 
-If the image instruction includes a [eq]#ConstOffset# operand, the constant
-offsets [eq]#({DeltaUpper}~i~, {DeltaUpper}~j~, {DeltaUpper}~k~)# are added
-to [eq]#(i,j,k)# components of the integer texel coordinates.
+where:
+
+  {empty}:: [eq]#shift = 0.5#
+
+ifdef::VK_NV_corner_sampled_image[]
+for conventional images, and:
+
+  {empty}:: [eq]#shift = 0.0#
+
+for corner-sampled images,
+endif::VK_NV_corner_sampled_image[]
+and where:
+
+[latexmath]
+++++++++++++++++++++++++
+\mathbin{frac}(x) = x -  \left\lfloor x \right\rfloor
+++++++++++++++++++++++++
+where the number of fraction bits retained is specified by
+sname:VkPhysicalDeviceLimits::pname:subTexelPrecisionBits.
+
+ifdef::VK_IMG_filter_cubic,VK_EXT_filter_cubic[]
+Cubic filtering (ename:VK_FILTER_CUBIC_EXT) computes a set of neighboring
+coordinates which bound the unnormalized coordinates.
+The integer texel coordinates are combinations of [eq]#i~0~#, [eq]#i~1~#,
+[eq]#i~2~# or [eq]#i~3~#, [eq]#j~0~#, [eq]#j~1~#, [eq]#j~2~# or [eq]#j~3~#,
+ifndef::VK_EXT_filter_cubic[]
+as well as weights [eq]#{alpha}# and [eq]#{beta}#.
+endif::VK_EXT_filter_cubic[]
+ifdef::VK_EXT_filter_cubic[]
+[eq]#k~0~#, [eq]#k~1~#, [eq]#k~2~# or [eq]#k~3~#, as well as weights
+[eq]#{alpha}#, [eq]#{beta}#, and [eq]#{gamma}#.
+endif::VK_EXT_filter_cubic[]
+
+ifndef::VK_EXT_filter_cubic[]
+[latexmath]
+++++++++++++++++++++++++
+\begin{aligned}
+i_{0}  & = {\left \lfloor {u - \frac{3}{2}} \right \rfloor} & i_{1} & = i_{0} + 1 & i_{2} & = i_{1} + 1 & i_{3} & = i_{2} + 1 \\[1em]
+j_{0}  & = {\left \lfloor {v - \frac{3}{2}} \right \rfloor} & j_{1} & = j_{0} + 1 & j_{2} & = j_{1} + 1 & j_{3} & = j_{2} + 1
+\end{aligned}
+++++++++++++++++++++++++
+
+[latexmath]
+++++++++++++++++++++++++
+\begin{aligned}
+alpha &= \mathbin{frac}\left(u - \frac{1}{2}\right)  \\[1em]
+\beta &= \mathbin{frac}\left(v - \frac{1}{2}\right)
+\end{aligned}
+++++++++++++++++++++++++
+
+endif::VK_EXT_filter_cubic[]
+
+ifdef::VK_EXT_filter_cubic[]
+[latexmath]
+++++++++++++++++++++++++
+\begin{aligned}
+i_{0}  & = {\left \lfloor {u - \frac{3}{2}} \right \rfloor} & i_{1} & = i_{0} + 1 & i_{2} & = i_{1} + 1 & i_{3} & = i_{2} + 1 \\[1em]
+j_{0}  & = {\left \lfloor {v - \frac{3}{2}} \right \rfloor} & j_{1} & = j_{0} + 1 & j_{2} & = j_{1} + 1 & j_{3} & = j_{2} + 1 \\[1em]
+k_{0}  & = {\left \lfloor {w - \frac{3}{2}} \right \rfloor} & k_{1} & = k_{0} + 1 & k_{2} & = k_{1} + 1 & k_{3} & = k_{2} + 1
+\end{aligned}
+++++++++++++++++++++++++
+
+[latexmath]
+++++++++++++++++++++++++
+\begin{aligned}
+\alpha &= \mathbin{frac}\left(u - \frac{1}{2}\right)  \\[1em]
+\beta &= \mathbin{frac}\left(v - \frac{1}{2}\right)  \\[1em]
+\gamma &= \mathbin{frac}\left(w - \frac{1}{2}\right)
+\end{aligned}
+++++++++++++++++++++++++
+
+endif::VK_EXT_filter_cubic[]
+
+where:
+
+[latexmath]
+++++++++++++++++++++++++
+\mathbin{frac}(x) = x -  \left\lfloor x \right\rfloor
+++++++++++++++++++++++++
+
+where the number of fraction bits retained is specified by
+sname:VkPhysicalDeviceLimits::pname:subTexelPrecisionBits.
+endif::VK_IMG_filter_cubic,VK_EXT_filter_cubic[]
 
 
 [[textures-integer-coordinate-operations]]
@@ -2016,10 +2276,11 @@ d & = level_{base} +
 
 If [eq]#d# does not lie in the range [eq]#[pname:baseMipLevel,
 pname:baseMipLevel {plus} pname:levelCount)# then any values fetched are
-ifndef::VK_AMD_shader_image_load_store_lod[undefined.]
-ifdef::VK_AMD_shader_image_load_store_lod[]
-undefined, and any writes are discarded.
-endif::VK_AMD_shader_image_load_store_lod[]
+ifdef::VK_EXT_robustness2[]
+zero if <<features-robustImageAccess2,pname:robustImageAccess2>> is enabled,
+otherwise are
+endif::VK_EXT_robustness2[]
+undefined:, and any writes (if supported) are discarded.
 
 
 [[textures-sample-operations]]
@@ -2076,8 +2337,7 @@ parameters of the sampler, respectively.
 === Texel Gathering
 
 SPIR-V instructions with code:Gather in the name return a vector derived
-from a 2{times}2 rectangular region of texels in the base level of the image
-view.
+from 4 texels in the base level of the image view.
 The rules for the ename:VK_FILTER_LINEAR minification filter are applied to
 identify the four selected texels.
 Each texel is then converted to an RGBA value according to
@@ -2085,7 +2345,9 @@ Each texel is then converted to an RGBA value according to
 <<textures-component-swizzle,swizzled>>.
 A four-component vector is then assembled by taking the component indicated
 by the code:Component value in the instruction from the swizzled color value
-of the four texels:
+of the four texels.
+If the operation does not use the code:ConstOffsets image operand then the
+four texels form the 2 {times} 2 rectangle used for texture filtering:
 
 [latexmath]
 ++++++++++++++++++++++++
@@ -2094,6 +2356,19 @@ of the four texels:
 \tau[G] &= \tau_{i1j1}[level_{base}][comp] \\
 \tau[B] &= \tau_{i1j0}[level_{base}][comp] \\
 \tau[A] &= \tau_{i0j0}[level_{base}][comp]
+\end{aligned}
+++++++++++++++++++++++++
+
+If the operation does use the code:ConstOffsets image operand then the
+offsets allow a custom filter to be defined:
+
+[latexmath]
+++++++++++++++++++++++++
+\begin{aligned}
+\tau[R] &= \tau_{i0j0 + \Delta_0}[level_{base}][comp] \\
+\tau[G] &= \tau_{i0j0 + \Delta_1}[level_{base}][comp] \\
+\tau[B] &= \tau_{i0j0 + \Delta_2}[level_{base}][comp] \\
+\tau[A] &= \tau_{i0j0 + \Delta_3}[level_{base}][comp]
 \end{aligned}
 ++++++++++++++++++++++++
 
@@ -2115,12 +2390,15 @@ comp & \,\text{from SPIR-V operand Component}
 
 ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 code:OpImage*Gather must: not be used on a sampled image with
-<<samplers-YCbCr-conversion,sampler Y'C~B~C~R~ conversion>> enabled.
+<<samplers-YCbCr-conversion,sampler {YCbCr} conversion>> enabled.
 endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 
 
 [[textures-texel-filtering]]
 === Texel Filtering
+
+Texel filtering is first performed for each level (either [eq]#d# or
+[eq]#d~hi~# and [eq]#d~lo~#).
 
 If [eq]#{lambda}# is less than or equal to zero, the texture is said to be
 _magnified_, and the filter mode within a mip level is selected by the
@@ -2128,6 +2406,9 @@ pname:magFilter in the sampler.
 If [eq]#{lambda}# is greater than zero, the texture is said to be
 _minified_, and the filter mode within a mip level is selected by the
 pname:minFilter in the sampler.
+
+[[textures-texel-nearest-filtering]]
+==== Texel Nearest Filtering
 
 Within a mip level, ename:VK_FILTER_NEAREST filtering selects a single value
 using the [eq]#(i, j, k)# texel coordinates, with all texels taken from
@@ -2145,159 +2426,260 @@ layer l.
 \end{aligned}
 ++++++++++++++++++++++++
 
+[[textures-texel-linear-filtering]]
+==== Texel Linear Filtering
+
 Within a mip level, ename:VK_FILTER_LINEAR filtering combines 8 (for 3D), 4
-(for 2D or Cube), or 2 (for 1D) texel values, using the weights computed
-earlier:
+(for 2D or Cube), or 2 (for 1D) texel values, together with their linear
+weights.
+The linear weights are derived from the fractions computed earlier:
 
 [latexmath]
+
 ++++++++++++++++++++++++
 \begin{aligned}
-\tau_{3D}[level] & = reduce((1-\alpha)(1-\beta)(1-\gamma),\tau_{i0j0k0}[level], \\
-          & \,              (\alpha)(1-\beta)(1-\gamma),\tau_{i1j0k0}[level], \\
-          & \,              (1-\alpha)(\beta)(1-\gamma),\tau_{i0j1k0}[level], \\
-          & \,              (\alpha)(\beta)(1-\gamma),\tau_{i1j1k0}[level],   \\
-          & \,              (1-\alpha)(1-\beta)(\gamma),\tau_{i0j0k1}[level], \\
-          & \,              (\alpha)(1-\beta)(\gamma),\tau_{i1j0k1}[level],   \\
-          & \,              (1-\alpha)(\beta)(\gamma),\tau_{i0j1k1}[level],   \\
-          & \,              (\alpha)(\beta)(\gamma),\tau_{i1j1k1}[level])
+w_{i_0} &= (1-\alpha) \\
+w_{i_1} &= (\alpha)   \\
+w_{j_0} &= (1-\beta)  \\
+w_{j_1} &= (\beta)    \\
+w_{k_0} &= (1-\gamma) \\
+w_{k_1} &= (\gamma)
 \end{aligned}
 ++++++++++++++++++++++++
 
+ifndef::VK_VERSION_1_2,VK_EXT_sampler_filter_minmax[]
+The values of multiple texels, together with their weights, are combined
+using a weighted average to produce a filtered value:
+endif::VK_VERSION_1_2,VK_EXT_sampler_filter_minmax[]
+
+ifdef::VK_VERSION_1_2,VK_EXT_sampler_filter_minmax[]
+The values of multiple texels, together with their weights, are combined to
+produce a filtered value.
+
+The slink:VkSamplerReductionModeCreateInfo::pname:reductionMode can: control
+the process by which multiple texels, together with their weights, are
+combined to produce a filtered texture value.
+
+When the pname:reductionMode is set (explicitly or implicitly) to
+ename:VK_SAMPLER_REDUCTION_MODE_WEIGHTED_AVERAGE, a weighted average is
+computed:
+endif::VK_VERSION_1_2,VK_EXT_sampler_filter_minmax[]
+
 [latexmath]
 ++++++++++++++++++++++++
 \begin{aligned}
-\tau_{2D}[level] & = reduce((1-\alpha)(1-\beta),\tau_{i0j0}[level], \\
-          & \,              (\alpha)(1-\beta),\tau_{i1j0}[level], \\
-          & \,              (1-\alpha)(\beta),\tau_{i0j1}[level], \\
-          & \,              (\alpha)(\beta),\tau_{i1j1}[level])
+\tau_{3D} &= \sum_{k=k_0}^{k_1}\sum_{j=j_0}^{j_1}\sum_{i=i_0}^{i_1}(w_{i})(w_{j})(w_{k})\tau_{ijk} \\
+\tau_{2D} &= \sum_{j=j_0}^{j_1}\sum_{i=i_0}^{i_1}(w_{i})(w_{j})\tau_{ij} \\
+\tau_{1D} &= \sum_{i=i_0}^{i_1}(w_{i})\tau_{i}
 \end{aligned}
 ++++++++++++++++++++++++
 
+ifdef::VK_VERSION_1_2,VK_EXT_sampler_filter_minmax[]
+However, if the reduction mode is ename:VK_SAMPLER_REDUCTION_MODE_MIN or
+ename:VK_SAMPLER_REDUCTION_MODE_MAX, the process operates on the above set
+of multiple texels, together with their weights, computing a component-wise
+minimum or maximum, respectively, of the components of the set of texels
+with non-zero weights.
+endif::VK_VERSION_1_2,VK_EXT_sampler_filter_minmax[]
+
+ifdef::VK_IMG_filter_cubic,VK_EXT_filter_cubic[]
+
+[[textures-texel-cubic-filtering]]
+==== Texel Cubic Filtering
+
+Within a mip level, ename:VK_FILTER_CUBIC_EXT, filtering computes a weighted
+average of
+ifdef::VK_EXT_filter_cubic[]
+64 (for 3D),
+endif::VK_EXT_filter_cubic[]
+16 (for 2D), or 4 (for 1D) texel values, together with their Catmull-Rom
+weights.
+
+Catmull-Rom weights are derived from the fractions computed earlier.
+
+ifndef::VK_EXT_filter_cubic[]
 [latexmath]
 ++++++++++++++++++++++++
 \begin{aligned}
-\tau_{1D}[level] & = reduce((1-\alpha),\tau_{i0}[level], \\
-          & \,              (\alpha),\tau_{i1}[level])
-\end{aligned}
-++++++++++++++++++++++++
-
-[latexmath]
-++++++++++++++++++++++++
-\begin{aligned}
-\tau[level] &=
-  \begin{cases}
-     \tau_{3D}[level], & \text{for 3D image} \\
-     \tau_{2D}[level], & \text{for 2D or Cube image} \\
-     \tau_{1D}[level], & \text{for 1D image}
-   \end{cases}
-\end{aligned}
-++++++++++++++++++++++++
-
-The function [eq]#reduce()# is defined to operate on pairs of weights and
-texel values as follows.
-When using linear or anisotropic filtering, the values of multiple texels
-are combined using a weighted average to produce a filtered texture value.
-ifdef::VK_EXT_sampler_filter_minmax[]
-However, a filtered texture value can: also be produced by computing
-per-component minimum and maximum values over the set of texels that would
-normally be averaged.
-The slink:VkSamplerReductionModeCreateInfoEXT::pname:reductionMode controls
-the process by which multiple texels are combined to produce a filtered
-texture value.
-When set to ename:VK_SAMPLER_REDUCTION_MODE_WEIGHTED_AVERAGE_EXT, a weighted
-average is computed.
-If the reduction mode is ename:VK_SAMPLER_REDUCTION_MODE_MIN_EXT or
-ename:VK_SAMPLER_REDUCTION_MODE_MAX_EXT, [eq]#reduce()# computes a
-component-wise minimum or maximum, respectively, of the components of the
-set of provided texels with non-zero weights.
-endif::VK_EXT_sampler_filter_minmax[]
-
-ifdef::VK_IMG_filter_cubic[]
-Within a mip level, ename:VK_FILTER_CUBIC_IMG filtering computes a weighted
-average of 16 (for 2D), or 4 (for 1D) texel values, using the weights
-computed during texel selection.
-
-Catmull-Rom Spine interpolation of four points is defined by the equation:
-
-[latexmath]
-++++++++++++++++++++++++
-\begin{aligned}
-cinterp(\tau_0, \tau_1, \tau_2, \tau_3, \omega) =
-\frac{1}{2}
-\begin{bmatrix}1 & \omega & \omega^2 & \omega^3 \end{bmatrix}
-\times
 \begin{bmatrix}
- 0 &  2 &  0 &  0 \\
--1 &  0 &  1 &  0 \\
- 2 & -5 &  4 &  1 \\
--1 &  3 & -3 &  1
+w_{i_0}\phantom{,} w_{i_1}\phantom{,} w_{i_2}\phantom{,} w_{i_3}
 \end{bmatrix}
-\times
+= \frac{1}{2}
 \begin{bmatrix}
-\tau_0 \\
-\tau_1 \\
-\tau_2 \\
-\tau_3
+1 & \alpha & \alpha^2 & \alpha^3
+\end{bmatrix}
+\begin{bmatrix}
+\phantom{-}0 &  \phantom{-}2 &  \phantom{-}0 &  \phantom{-}0 \\
+-1 &  \phantom{-}0 &  \phantom{-}1 &  \phantom{-}0 \\
+\phantom{-}2 & -5 &  \phantom{-}4 &  -1 \\
+-1 &  \phantom{-}3 & -3 &  \phantom{-}1
+\end{bmatrix}
+\\
+\begin{bmatrix}
+w_{j_0}\phantom{,} w_{j_1}\phantom{,} w_{j_2}\phantom{,} w_{j_3}
+\end{bmatrix}
+= \frac{1}{2}
+\begin{bmatrix}
+1 & \beta & \beta^2 & \beta^3
+\end{bmatrix}
+\begin{bmatrix}
+\phantom{-}0 &  \phantom{-}2 &  \phantom{-}0 &  \phantom{-}0 \\
+-1 &  \phantom{-}0 &  \phantom{-}1 &  \phantom{-}0 \\
+\phantom{-}2 & -5 &  \phantom{-}4 &  -1 \\
+-1 &  \phantom{-}3 & -3 &  \phantom{-}1
 \end{bmatrix}
 \end{aligned}
 ++++++++++++++++++++++++
 
-Using the values calculated in texel selection, this equation is applied to
-the four points in 1D images.
-For 2D images, the this equation is evaluated first for each row, and the
-result is then fed back into the equation and interpolated again:
-
-  :: [eq]#{tau}~1D~[level] = cinterp({tau}~i0~[level], {tau}~i1~[level],
-     {tau}~i2~[level], {tau}~i3~[level], {alpha})#
-
-  :: [eq]#{tau}~j0~[level] = cinterp({tau}~i0j0~[level], {tau}~i1j0~[level],
-     {tau}~i2j0~[level], {tau}~i3j0~[level], {alpha})#
-  :: [eq]#{tau}~j1~[level] = cinterp({tau}~i0j1~[level], {tau}~i1j1~[level],
-     {tau}~i2j1~[level], {tau}~i3j1~[level], {alpha})#
-  :: [eq]#{tau}~j2~[level] = cinterp({tau}~i0j2~[level], {tau}~i1j2~[level],
-     {tau}~i2j2~[level], {tau}~i3j2~[level], {alpha})#
-  :: [eq]#{tau}~j3~[level] = cinterp({tau}~i0j3~[level], {tau}~i1j3~[level],
-     {tau}~i2j3~[level], {tau}~i3j3~[level], {alpha})#
-  :: [eq]#{tau}~2D~[level] = cinterp({tau}~j0~[level], {tau}~j1~[level],
-     {tau}~j2~[level], {tau}~j3~[level], {beta})#
+The values of multiple texels, together with their weights, are combined
+using a weighted average to produce a filtered value:
 
 [latexmath]
 ++++++++++++++++++++++++
 \begin{aligned}
-\tau[level] &=
-  \begin{cases}
-     \tau_{2D}[level], & \text{for 2D image} \\
-     \tau_{1D}[level], & \text{for 1D image}
-   \end{cases}
+\tau_{2D} &= \sum_{j=j_0}^{j_3}\sum_{i=i_0}^{i_3}(w_{i})(w_{j})\tau_{ij} \\
+\tau_{1D} &= \sum_{i=i_0}^{i_3}(w_{i})\tau_{i}
 \end{aligned}
 ++++++++++++++++++++++++
-endif::VK_IMG_filter_cubic[]
+endif::VK_EXT_filter_cubic[]
 
-Finally, mipmap filtering either selects a value from one mip level or
-computes a weighted average between neighboring mip levels:
+ifdef::VK_EXT_filter_cubic[]
 
 [latexmath]
 ++++++++++++++++++++++++
 \begin{aligned}
-\tau &=
-  \begin{cases}
-    \tau[d], & \text{for mip mode BASE or NEAREST} \\
-    reduce((1-\delta),\tau[d_{hi}],\delta,\tau[d_{lo}]), & \text{for mip mode LINEAR}
-  \end{cases}
+\begin{bmatrix}
+w_{i_0}\phantom{,} w_{i_1}\phantom{,} w_{i_2}\phantom{,} w_{i_3}
+\end{bmatrix}
+= \frac{1}{2}
+\begin{bmatrix}
+1 & \alpha & \alpha^2 & \alpha^3
+\end{bmatrix}
+\begin{bmatrix}
+\phantom{-}0 &  \phantom{-}2 &  \phantom{-}0 &  \phantom{-}0 \\
+-1 &  \phantom{-}0 &  \phantom{-}1 &  \phantom{-}0 \\
+\phantom{-}2 & -5 &  \phantom{-}4 &  -1 \\
+-1 &  \phantom{-}3 & -3 &  \phantom{-}1
+\end{bmatrix}
+\\
+\begin{bmatrix}
+w_{j_0}\phantom{,} w_{j_1}\phantom{,} w_{j_2}\phantom{,} w_{j_3}
+\end{bmatrix}
+= \frac{1}{2}
+\begin{bmatrix}
+1 & \beta & \beta^2 & \beta^3
+\end{bmatrix}
+\begin{bmatrix}
+\phantom{-}0 &  \phantom{-}2 &  \phantom{-}0 &  \phantom{-}0 \\
+-1 &  \phantom{-}0 &  \phantom{-}1 &  \phantom{-}0 \\
+\phantom{-}2 & -5 &  \phantom{-}4 &  -1 \\
+-1 &  \phantom{-}3 & -3 &  \phantom{-}1
+\end{bmatrix}
+\\
+\begin{bmatrix}
+w_{k_0}\phantom{,} w_{k_1}\phantom{,} w_{k_2}\phantom{,} w_{k_3}
+\end{bmatrix}
+= \frac{1}{2}
+\begin{bmatrix}
+1 & \gamma & \gamma^2 & \gamma^3
+\end{bmatrix}
+\begin{bmatrix}
+\phantom{-}0 &  \phantom{-}2 &  \phantom{-}0 &  \phantom{-}0 \\
+-1 &  \phantom{-}0 &  \phantom{-}1 &  \phantom{-}0 \\
+\phantom{-}2 & -5 &  \phantom{-}4 &  -1 \\
+-1 &  \phantom{-}3 & -3 &  \phantom{-}1
+\end{bmatrix}
 \end{aligned}
 ++++++++++++++++++++++++
 
+The values of multiple texels, together with their weights, are combined to
+produce a filtered value.
+
+The slink:VkSamplerReductionModeCreateInfo::pname:reductionMode can: control
+the process by which multiple texels, together with their weights, are
+combined to produce a filtered texture value.
+
+When the pname:reductionMode is set (explicitly or implicitly) to
+ename:VK_SAMPLER_REDUCTION_MODE_WEIGHTED_AVERAGE, a weighted average is
+computed:
+
+[latexmath]
+++++++++++++++++++++++++
+\begin{aligned}
+\tau_{3D} &= \sum_{k=j_0}^{k_3}\sum_{j=j_0}^{j_3}\sum_{i=i_0}^{i_3}(w_{i})(w_{j})(w_{k})\tau_{ijk} \\
+\tau_{2D} &= \sum_{j=j_0}^{j_3}\sum_{i=i_0}^{i_3}(w_{i})(w_{j})\tau_{ij} \\
+\tau_{1D} &= \sum_{i=i_0}^{i_3}(w_{i})\tau_{i}
+\end{aligned}
+++++++++++++++++++++++++
+
+ifdef::VK_VERSION_1_2,VK_EXT_sampler_filter_minmax[]
+However, if the reduction mode is ename:VK_SAMPLER_REDUCTION_MODE_MIN or
+ename:VK_SAMPLER_REDUCTION_MODE_MAX, the process operates on the above set
+of multiple texels, together with their weights, computing a component-wise
+minimum or maximum, respectively, of the components of the set of texels
+with non-zero weights.
+endif::VK_VERSION_1_2,VK_EXT_sampler_filter_minmax[]
+
+endif::VK_EXT_filter_cubic[]
+endif::VK_IMG_filter_cubic,VK_EXT_filter_cubic[]
+
+[[textures-texel-mipmap-filtering]]
+
+==== Texel Mipmap Filtering
+
+ename:VK_SAMPLER_MIPMAP_MODE_NEAREST filtering returns the value of a single
+mipmap level,
+
+[eq]#{tau} = {tau}[d]#.
+
+ename:VK_SAMPLER_MIPMAP_MODE_LINEAR filtering combines the values of
+multiple mipmap levels ({tau}[hi] and {tau}[lo]), together with their linear
+weights.
+
+The linear weights are derived from the fraction computed earlier:
+
+[latexmath]
+++++++++++++++++++++++++
+\begin{aligned}
+w_{hi} &= (1-\delta) \\
+w_{lo} &= (\delta)   \\
+\end{aligned}
+++++++++++++++++++++++++
+
+ifndef::VK_VERSION_1_2,VK_EXT_sampler_filter_minmax[]
+The values of multiple mipmap levels together with their linear weights, are
+combined using a weighted average to produce a final filtered value:
+endif::VK_VERSION_1_2,VK_EXT_sampler_filter_minmax[]
+ifdef::VK_VERSION_1_2,VK_EXT_sampler_filter_minmax[]
+The values of multiple mipmap levels, together with their weights, are
+combined to produce a final filtered value.
+
+The slink:VkSamplerReductionModeCreateInfo::pname:reductionMode can: control
+the process by which multiple texels, together with their weights, are
+combined to produce a filtered texture value.
+
+When the pname:reductionMode is set (explicitly or implicitly) to
+ename:VK_SAMPLER_REDUCTION_MODE_WEIGHTED_AVERAGE, a weighted average is
+computed:
+endif::VK_VERSION_1_2,VK_EXT_sampler_filter_minmax[]
+
+[latexmath]
+++++++++++++++++++++++++
+\begin{aligned}
+\tau &= (w_{hi})\tau[hi]+(w_{lo})\tau[lo]
+\end{aligned}
+++++++++++++++++++++++++
 
 [[textures-texel-anisotropic-filtering]]
-=== Texel Anisotropic Filtering
+==== Texel Anisotropic Filtering
 
 Anisotropic filtering is enabled by the pname:anisotropyEnable in the
 sampler.
 When enabled, the image filtering scheme accounts for a degree of
 anisotropy.
 
-The particular scheme for anisotropic texture filtering is implementation
-dependent.
+The particular scheme for anisotropic texture filtering is
+implementation-dependent.
 Implementations should: consider the pname:magFilter, pname:minFilter and
 pname:mipmapMode of the sampler to control the specifics of the anisotropic
 filtering scheme used.
@@ -2310,9 +2692,9 @@ filtering for the 2D Image case, implementations may: choose other methods:
 Given a pname:magFilter, pname:minFilter of ename:VK_FILTER_LINEAR and a
 pname:mipmapMode of ename:VK_SAMPLER_MIPMAP_MODE_NEAREST:
 
-Instead of a single isotropic sample, N isotropic samples are be sampled
-within the image footprint of the image level [eq]#d# to approximate an
-anisotropic filter.
+Instead of a single isotropic sample, N isotropic samples are sampled within
+the image footprint of the image level [eq]#d# to approximate an anisotropic
+filter.
 The sum [eq]#{tau}~2Daniso~# is defined using the single isotropic
 [eq]#{tau}~2D~(u,v)# at level [eq]#d#.
 
@@ -2323,7 +2705,7 @@ The sum [eq]#{tau}~2Daniso~# is defined using the single isotropic
      \frac{1}{N}\sum_{i=1}^{N}
      {\tau_{2D}\left (
        u \left ( x - \frac{1}{2} + \frac{i}{N+1} , y \right ),
-         \left ( v \left (x-\frac{1}{2}+\frac{i}{N+1} \right ), y
+         \left ( v \left (x-\frac{1}{2}+\frac{i}{N+1}, y \right ),
 \right )
      \right )},
      & \text{when}\  \rho_{x} > \rho_{y} \\
@@ -2338,17 +2720,209 @@ The sum [eq]#{tau}~2Daniso~# is defined using the single isotropic
 \end{aligned}
 ++++++++++++++++++++++++
 
-ifdef::VK_EXT_sampler_filter_minmax[]
+ifdef::VK_VERSION_1_2,VK_EXT_sampler_filter_minmax[]
+When slink:VkSamplerReductionModeCreateInfo::pname:reductionMode is set to
+ename:VK_SAMPLER_REDUCTION_MODE_WEIGHTED_AVERAGE, the above summation is
+used.
+However, if the reduction mode is ename:VK_SAMPLER_REDUCTION_MODE_MIN or
+ename:VK_SAMPLER_REDUCTION_MODE_MAX, the process operates on the above
+values, together with their weights, computing a component-wise minimum or
+maximum, respectively, of the components of the values with non-zero
+weights.
+endif::VK_VERSION_1_2,VK_EXT_sampler_filter_minmax[]
 
-When slink:VkSamplerReductionModeCreateInfoEXT::pname:reductionMode is set
-to ename:VK_SAMPLER_REDUCTION_MODE_WEIGHTED_AVERAGE_EXT, the above summation
-is used.
-If the reduction mode is ename:VK_SAMPLER_REDUCTION_MODE_MIN_EXT or
-ename:VK_SAMPLER_REDUCTION_MODE_MAX_EXT, then the value is instead computed
-as [eq]#\tau_{2Daniso} = reduce(\tau_1, ..., \tau_N)#, combining all texel
-values with non-zero weights.
 
-endif::VK_EXT_sampler_filter_minmax[]
+ifdef::VK_NV_shader_image_footprint[]
+[[textures-footprint]]
+== Texel Footprint Evaluation
+
+The SPIR-V instruction code:OpImageSampleFootprintNV evaluates the set of
+texels from a single mip level that would be accessed during a
+<<textures-texel-filtering, texel filtering>> operation.
+In addition to the inputs that would be accepted by an equivalent
+code:OpImageSample* instruction, code:OpImageSampleFootprintNV accepts two
+additional inputs.
+The code:Granularity input is an integer identifying the size of texel
+groups used to evaluate the footprint.
+Each bit in the returned footprint mask corresponds to an aligned block of
+texels whose size is given by the following table:
+
+.Texel footprint granularity values
+[width="50%",options="header"]
+|=====
+| code:Granularity  | code:Dim = 2D |  code:Dim = 3D
+|         0         |  unsupported  |  unsupported
+|         1         |      2x2      |     2x2x2
+|         2         |      4x2      |  unsupported
+|         3         |      4x4      |     4x4x2
+|         4         |      8x4      |  unsupported
+|         5         |      8x8      |  unsupported
+|         6         |     16x8      |  unsupported
+|         7         |     16x16     |  unsupported
+|         8         |  unsupported  |  unsupported
+|         9         |  unsupported  |  unsupported
+|         10        |  unsupported  |    16x16x16
+|         11        |     64x64     |    32x16x16
+|         12        |    128x64     |    32x32x16
+|         13        |    128x128    |    32x32x32
+|         14        |    256x128    |    64x32x32
+|         15        |    256x256    |  unsupported
+|=====
+
+The code:Coarse input is used to select between the two mip levels that may:
+be accessed during texel filtering when using a pname:mipmapMode of
+ename:VK_SAMPLER_MIPMAP_MODE_LINEAR.
+When filtering between two mip levels, a code:Coarse value of code:true
+requests the footprint in the lower-resolution mip level (higher level
+number), while code:false requests the footprint in the higher-resolution
+mip level.
+If texel filtering would access only a single mip level, the footprint in
+that level would be returned when code:Coarse is set to code:false; an empty
+footprint would be returned when code:Coarse is set to code:true.
+
+The footprint for code:OpImageSampleFootprintNV is returned in a structure
+with six members:
+
+  * The first member is a boolean value that is true if the texel filtering
+    operation would access only a single mip level.
+  * The second member is a two- or three-component integer vector holding
+    the footprint anchor location.
+    For two-dimensional images, the returned components are in units of
+    eight texel groups.
+    For three-dimensional images, the returned components are in units of
+    four texel groups.
+  * The third member is a two- or three-component integer vector holding a
+    footprint offset relative to the anchor.
+    All returned components are in units of texel groups.
+  * The fourth member is a two-component integer vector mask, which holds a
+    bitfield identifying the set of texel groups in an 8x8 or 4x4x4
+    neighborhood relative to the anchor and offset.
+  * The fifth member is an integer identifying the mip level containing the
+    footprint identified by the anchor, offset, and mask.
+  * The sixth member is an integer identifying the granularity of the
+    returned footprint.
+
+For footprints in two-dimensional images (code:Dim2D), the mask returned by
+code:OpImageSampleFootprintNV indicates whether each texel group in a 8x8
+local neighborhood of texel groups would have one or more texels accessed
+during texel filtering.
+In the mask, the texel group with local group coordinates
+latexmath:[(lgx,lgy)] is considered covered if and only if
+
+[latexmath]
++++++++++++++++++++
+\begin{aligned}
+0 \neq ((mask.x + (mask.y << 32)) \text{ \& } (1 << (lgy \times 8 + lgx)))
+\end{aligned}
++++++++++++++++++++
+
+where:
+
+  * latexmath:[0 \leq lgx < 8] and latexmath:[0 \leq lgy < 8]; and
+  * latexmath:[mask] is the returned two-component mask.
+
+The local group with coordinates latexmath:[(lgx,lgy)] in the mask is
+considered covered if and only if the texel filtering operation would access
+one or more texels latexmath:[\tau_{ij}] in the returned miplevel where:
+[latexmath]
++++++++++++++++++++
+\begin{aligned}
+i0 & =
+  \begin{cases}
+    gran.x \times (8 \times anchor.x + lgx), & \text{if } lgx + offset.x < 8 \\
+    gran.x \times (8 \times (anchor.x - 1) + lgx), & \text{otherwise}
+  \end{cases} \\
+i1 & = i0 + gran.x - 1 \\
+j0 & =
+  \begin{cases}
+    gran.y \times (8 \times anchor.y + lgy), & \text{if } lgy + offset.y < 8 \\
+    gran.y \times (8 \times (anchor.y - 1) + lgy), & otherwise
+  \end{cases} \\
+j1 & = j0 + gran.y - 1
+\end{aligned}
++++++++++++++++++++
+and
+
+  * latexmath:[i0 \leq i \leq i1] and latexmath:[j0 \leq j \leq j1];
+  * latexmath:[gran] is a two-component vector holding the width and height
+    of the texel group identified by the granularity;
+  * latexmath:[anchor] is the returned two-component anchor vector; and
+  * latexmath:[offset] is the returned two-component offset vector.
+
+For footprints in three-dimensional images (code:Dim3D), the mask returned
+by code:OpImageSampleFootprintNV indicates whether each texel group in a
+4x4x4 local neighborhood of texel groups would have one or more texels
+accessed during texel filtering.
+In the mask, the texel group with local group coordinates
+latexmath:[(lgx,lgy,lgz)], is considered covered if and only if:
+[latexmath]
++++++++++++++++++++
+\begin{aligned}
+0 \neq ((mask.x + (mask.y << 32)) \text{ \& } (1 << (lgz \times 16 + lgy \times 4 + lgx)))
+\end{aligned}
++++++++++++++++++++
+where:
+
+  * latexmath:[0 \leq lgx < 4], latexmath:[0 \leq lgy < 4], and latexmath:[0
+    \leq lgz < 4]; and
+  * latexmath:[mask] is the returned two-component mask.
+
+The local group with coordinates latexmath:[(lgx,lgy,lgz)] in the mask is
+considered covered if and only if the texel filtering operation would access
+one or more texels latexmath:[\tau_{ijk}] in the returned miplevel where:
+[latexmath]
++++++++++++++++++++
+\begin{aligned}
+i0 & =
+  \begin{cases}
+    gran.x \times (4 \times anchor.x + lgx), & \text{if } lgx + offset.x < 4 \\
+    gran.x \times (4 \times (anchor.x - 1) + lgx), & \text{otherwise}
+  \end{cases} \\
+i1 & = i0 + gran.x - 1 \\
+j0 & =
+  \begin{cases}
+    gran.y \times (4 \times anchor.y + lgy), & \text{if } lgy + offset.y < 4 \\
+    gran.y \times (4 \times (anchor.y - 1) + lgy), & otherwise
+  \end{cases} \\
+j1 & = j0 + gran.y - 1 \\
+k0 & =
+  \begin{cases}
+    gran.z \times (4 \times anchor.z + lgz), & \text{if } lgz + offset.z < 4 \\
+    gran.z \times (4 \times (anchor.z - 1) + lgz), & otherwise
+  \end{cases} \\
+k1 & = k0 + gran.z - 1
+\end{aligned}
++++++++++++++++++++
+and
+
+  * latexmath:[i0 \leq i \leq i1], latexmath:[j0 \leq j \leq j1],
+    latexmath:[k0 \leq k \leq k1];
+  * latexmath:[gran] is a three-component vector holding the width, height,
+    and depth of the texel group identified by the granularity;
+  * latexmath:[anchor] is the returned three-component anchor vector; and
+  * latexmath:[offset] is the returned three-component offset vector.
+
+If the sampler used by code:OpImageSampleFootprintNV enables anisotropic
+texel filtering via pname:anisotropyEnable, it is possible that the set of
+texel groups accessed in a mip level may be too large to be expressed using
+an 8x8 or 4x4x4 mask using the granularity requested in the instruction.
+In this case, the implementation uses a texel group larger than the
+requested granularity.
+When a larger texel group size is used, code:OpImageSampleFootprintNV
+returns an integer granularity value that can: be interpreted in the same
+manner as the granularity value provided to the instruction to determine the
+texel group size used.
+If anisotropic texel filtering is disabled in the sampler, or if an
+anisotropic footprint can be represented as an 8x8 or 4x4x4 mask with the
+requested granularity, code:OpImageSampleFootprintNV will use the requested
+granularity as-is and return a granularity value of zero.
+
+code:OpImageSampleFootprintNV supports only two- and three-dimensional image
+accesses (code:Dim2D and code:Dim3D), and the footprint returned is
+undefined: if a sampler uses an addressing mode other than
+ename:VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE.
+
+endif::VK_NV_shader_image_footprint[]
 
 
 [[textures-instructions]]
@@ -2360,18 +2934,58 @@ instructions:
   * Texel Input Validation Operations, Format Conversion, Texel Replacement,
     Conversion to RGBA, and Component Swizzle: Performed by all instructions
     except code:OpImageWrite.
-  * Depth Comparison: Performed by code:OpImage*code:Dref instructions.
+  * Depth Comparison: Performed by code:OpImage*Dref instructions.
   * All Texel output operations: Performed by code:OpImageWrite.
-  * Projection: Performed by all code:OpImage*code:Proj instructions.
+  * Projection: Performed by all code:OpImage*Proj instructions.
   * Derivative Image Operations, Cube Map Operations, Scale Factor
     Operation, Level-of-Detail Operation and Image Level(s) Selection, and
     Texel Anisotropic Filtering: Performed by all code:OpImageSample* and
     code:OpImageSparseSample* instructions.
   * (s,t,r,q,a) to (u,v,w,a) Transformation, Wrapping, and (u,v,w,a) to
     (i,j,k,l,n) Transformation And Array Layer Selection: Performed by all
-    code:OpImageSample, code:OpImageSparseSample, and
-    code:OpImage*code:Gather instructions.
-  * Texel Gathering: Performed by code:OpImage*code:Gather instructions.
+    code:OpImageSample, code:OpImageSparseSample, and code:OpImage*Gather
+    instructions.
+  * Texel Gathering: Performed by code:OpImage*Gather instructions.
+ifdef::VK_NV_shader_image_footprint[]
+  * Texel Footprint Evaluation: Performed by code:OpImageSampleFootprint
+    instructions.
+endif::VK_NV_shader_image_footprint[]
   * Texel Filtering: Performed by all code:OpImageSample* and
     code:OpImageSparseSample* instructions.
   * Sparse Residency: Performed by all code:OpImageSparse* instructions.
+
+
+[[textures-queries]]
+== Image Query Instructions
+
+=== Image Property Queries
+
+code:OpImageQuerySize, code:OpImageQuerySizeLod, code:OpImageQueryLevels,
+and code:OpImageQuerySamples query properties of the image descriptor that
+would be accessed by a shader image operation.
+ifdef::VK_EXT_robustness2[]
+They return 0 if the bound descriptor is a null descriptor.
+endif::VK_EXT_robustness2[]
+
+code:OpImageQuerySizeLod returns the size of the image level identified by
+the code:Level code:of code:Detail operand.
+If that level does not exist in the image,
+ifdef::VK_EXT_robustness2[and the descriptor is not null,]
+then the value returned is undefined:.
+
+
+=== Lod Query
+
+code:OpImageQueryLod returns the Lod parameters that would be used in an
+image operation with the given image and coordinates.
+ifdef::VK_EXT_robustness2[]
+If the descriptor that would be accessed is a null descriptor then (0, 0) is
+returned.
+endif::VK_EXT_robustness2[]
+ifdef::VK_EXT_robustness2[Otherwise, the]
+ifndef::VK_EXT_robustness2[The]
+steps described in this chapter are performed as if for
+code:OpImageSampleImplicitLod, up to <<textures-lod-and-scale-factor>>.
+The return value is the vector [eq]#({lambda}', d~l~)#.
+These values may: be subject to implementation-specific maxima and minima
+for very large, out-of-range values.

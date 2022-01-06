@@ -1,4 +1,10 @@
-include::meta/VK_AMD_shader_info.txt[]
+// Copyright (c) 2017-2020 Advanced Micro Devices, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_AMD_shader_info.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2017-10-09
@@ -6,6 +12,8 @@ include::meta/VK_AMD_shader_info.txt[]
     No known IP claims.
 *Contributors*::
   - Jaakko Konttinen, AMD
+
+=== Description
 
 This extension adds a way to query certain information about a compiled
 shader which is part of a pipeline.
@@ -20,25 +28,7 @@ Furthermore, all information types are optionally supported, and users
 should not assume every implementation supports querying every type of
 information.
 
-=== New Object Types
-
-None.
-
-=== New Enum Constants
-
-None.
-
-=== New Enums
-
-  * elink:VkShaderInfoTypeAMD
-
-=== New Structures
-
-  * slink:VkShaderStatisticsInfoAMD
-
-=== New Functions
-
-  * flink:vkGetShaderInfoAMD
+include::{generated}/interfaces/VK_AMD_shader_info.txt[]
 
 === Examples
 

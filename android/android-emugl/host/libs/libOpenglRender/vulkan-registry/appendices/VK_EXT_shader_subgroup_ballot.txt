@@ -1,24 +1,30 @@
-include::meta/VK_EXT_shader_subgroup_ballot.txt[]
+// Copyright 2016-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_EXT_shader_subgroup_ballot.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2016-11-28
 *IP Status*::
     No known IP claims.
 *Interactions and External Dependencies*::
-  - This extension requires the
-    https://www.khronos.org/registry/spir-v/extensions/KHR/SPV_KHR_shader_ballot.html[+SPV_KHR_shader_ballot+]
-    SPIR-V extension.
-  - This extension requires the
-    https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_shader_ballot.txt[+GL_ARB_shader_ballot+]
-    extension for GLSL source languages.
+  - This extension requires
+    {spirv}/KHR/SPV_KHR_shader_ballot.html[`SPV_KHR_shader_ballot`]
+  - This extension provides API support for
+    https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_shader_ballot.txt[`GL_ARB_shader_ballot`]
 *Contributors*::
   - Jeff Bolz, NVIDIA
   - Neil Henning, Codeplay
   - Daniel Koch, NVIDIA Corporation
 
+=== Description
+
 This extension adds support for the following SPIR-V extension in Vulkan:
 
-  * +SPV_KHR_shader_ballot+
+  * `SPV_KHR_shader_ballot`
 
 This extension provides the ability for a group of invocations, which
 execute in parallel, to do limited forms of cross-invocation communication
@@ -64,25 +70,16 @@ decorations and instructions:
   * code:readFirstInvocationARB() -> code:OpSubgroupFirstInvocationKHR, and
   * code:readInvocationARB() -> code:OpSubgroupReadInvocationKHR.
 
-=== New Object Types
+=== Deprecated by Vulkan 1.2
 
-None.
+Most of the functionality in this extension is superseded by the core Vulkan
+1.1 <<VkPhysicalDeviceSubgroupProperties, subgroup operations>>.
+However, Vulkan 1.1 required the code:OpGroupNonUniformBroadcast "`Id`" to
+be constant.
+This restriction was removed in Vulkan 1.2 with the addition of the
+<<features-subgroupBroadcastDynamicId,subgroupBroadcastDynamicId>> feature.
 
-=== New Enum Constants
-
-None.
-
-=== New Enums
-
-None.
-
-=== New Structures
-
-None.
-
-=== New Functions
-
-None.
+include::{generated}/interfaces/VK_EXT_shader_subgroup_ballot.txt[]
 
 === New Built-In Variables
 
@@ -96,11 +93,7 @@ None.
 
 === New SPIR-V Capabilities
 
-  * <<spirvenv-capabilities-table-subgroupballot,SubgroupBallotKHR>>
-
-=== Issues
-
-None.
+  * <<spirvenv-capabilities-table-SubgroupBallotKHR,SubgroupBallotKHR>>
 
 === Version History
 
