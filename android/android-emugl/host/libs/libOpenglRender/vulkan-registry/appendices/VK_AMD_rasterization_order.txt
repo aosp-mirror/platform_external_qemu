@@ -1,10 +1,4 @@
-// Copyright (c) 2016-2020 Advanced Micro Devices, Inc.
-//
-// SPDX-License-Identifier: CC-BY-4.0
-
-include::{generated}/meta/{refprefix}VK_AMD_rasterization_order.txt[]
-
-=== Other Extension Metadata
+include::meta/VK_AMD_rasterization_order.txt[]
 
 *Last Modified Date*::
     2016-04-25
@@ -16,8 +10,6 @@ include::{generated}/meta/{refprefix}VK_AMD_rasterization_order.txt[]
   - Daniel Rakos, AMD
   - Graham Sellers, AMD
   - Dominik Witczak, AMD
-
-=== Description
 
 This extension introduces the possibility for the application to control the
 order of primitive rasterization.
@@ -50,7 +42,26 @@ would not have an effect on the final rendering:
   * If depth testing is not used and blending is enabled for all attachments
     with a commutative blend operator.
 
-include::{generated}/interfaces/VK_AMD_rasterization_order.txt[]
+=== New Object Types
+
+None
+
+=== New Enum Constants
+
+  * Extending elink:VkStructureType:
+  ** ename:VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_RASTERIZATION_ORDER_AMD
+
+=== New Enums
+
+  * elink:VkRasterizationOrderAMD
+
+=== New Structures
+
+  * slink:VkPipelineRasterizationStateRasterizationOrderAMD
+
+=== New Functions
+
+None
 
 === Issues
 
@@ -74,7 +85,7 @@ to use the extension.
 using the new relaxed mode?
 
 *RESOLVED*: No.
-In this case the rasterization order is completely implementation-dependent,
+In this case the rasterization order is completely implementation dependent,
 but in practice it is expected to partially still follow the order of
 incoming primitives.
 

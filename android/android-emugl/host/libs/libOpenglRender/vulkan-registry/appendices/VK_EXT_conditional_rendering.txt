@@ -1,10 +1,4 @@
-// Copyright 2018-2021 The Khronos Group Inc.
-//
-// SPDX-License-Identifier: CC-BY-4.0
-
-include::{generated}/meta/{refprefix}VK_EXT_conditional_rendering.txt[]
-
-=== Other Extension Metadata
+include::meta/VK_EXT_conditional_rendering.txt[]
 
 *Last Modified Date*::
     2018-05-21
@@ -18,8 +12,6 @@ include::{generated}/meta/{refprefix}VK_EXT_conditional_rendering.txt[]
   - Piers Daniell, NVIDIA
   - Stuart Smith, Imagination Technologies
 
-=== Description
-
 This extension allows the execution of one or more rendering commands to be
 conditional on a value in buffer memory.
 This may help an application reduce the latency by conditionally discarding
@@ -27,18 +19,48 @@ rendering commands without application intervention.
 The conditional rendering commands are limited to draws, compute dispatches
 and clearing attachments within a conditional rendering block.
 
-include::{generated}/interfaces/VK_EXT_conditional_rendering.txt[]
+=== New Object Types
+
+None.
+
+=== New Enum Constants
+
+  * Extending elink:VkAccessFlagBits:
+  ** ename:VK_ACCESS_CONDITIONAL_RENDERING_READ_BIT_EXT
+  * Extending elink:VkBufferUsageFlagBits:
+  ** ename:VK_BUFFER_USAGE_CONDITIONAL_RENDERING_BIT_EXT
+  * Extending elink:VkPipelineStageFlagBits:
+  ** ename:VK_PIPELINE_STAGE_CONDITIONAL_RENDERING_BIT_EXT
+
+=== New Enums
+
+  * elink:VkConditionalRenderingFlagBitsEXT
+
+=== New Structures
+
+  * slink:VkConditionalRenderingBeginInfoEXT
+  * Extending slink:VkCommandBufferInheritanceInfo:
+  ** slink:VkCommandBufferInheritanceConditionalRenderingInfoEXT
+  * Extending slink:VkPhysicalDeviceFeatures2:
+  ** slink:VkPhysicalDeviceConditionalRenderingFeaturesEXT
+
+None.
+
+=== New Functions
+
+  * flink:vkCmdBeginConditionalRenderingEXT
+  * flink:vkCmdEndConditionalRenderingEXT
 
 === Issues
 
 1) Should conditional rendering affect copy and blit commands?
 
-*RESOLVED*: Conditional rendering should not affect copies and blits.
+RESOLVED: Conditional rendering should not affect copies and blits.
 
 2) Should secondary command buffers be allowed to execute while conditional
 rendering is active in the primary command buffer?
 
-*RESOLVED*: The rendering commands in secondary command buffer will be
+RESOLVED: The rendering commands in secondary command buffer will be
 affected by an active conditional rendering in primary command buffer if the
 pname:conditionalRenderingEnable is set to ename:VK_TRUE.
 Conditional rendering must: not be active in the primary command buffer if
@@ -55,4 +77,4 @@ None.
 
   * Revision 2, 2018-05-21 (Vikram Kushwaha)
     - Add new pipeline stage, access flags and limit conditional rendering
-      to a subpass or entire render pass.
+    to a subpass or entire renderpass.

@@ -68,11 +68,9 @@ fi
 # -dProcessColorModel=/DeviceGray \
 # -dColorConversionStrategy=/Gray \
 
-ERRFILE=$FILE_BASENAME-ERRS.optimize
 "$GS" -q -dNOPAUSE -dBATCH -dSAFER -dNOOUTERSAVE \
   -sDEVICE=pdfwrite \
   -dPDFSETTINGS=/prepress \
-  -dPrinted=false \
   -dCannotEmbedFontPolicy=/Warning \
   -dDownsampleColorImages=$DOWNSAMPLE_IMAGES \
   -dColorImageResolution=$IMAGE_DPI \
@@ -81,19 +79,6 @@ ERRFILE=$FILE_BASENAME-ERRS.optimize
   -dDownsampleMonoImages=$DOWNSAMPLE_IMAGES \
   -dMonoImageResolution=$IMAGE_DPI \
   -sOutputFile="$FILE_OPTIMIZED" \
-  "$FILE" $FILE_PDFMARK 2> $ERRFILE
+  "$FILE" $FILE_PDFMARK
 
-status=$?
-if test $status -ne 0 ; then
-    echo "$0: $GS return status = $status, aborting"
-elif grep -q Error $ERRFILE ; then
-    echo "$0: $GS succeeded but found Error in $ERRFILE (follows), aborting"
-    echo '---------- Errors from $GS ----------'
-    grep Error $ERRFILE
-    echo '-------------------------------------'
-    status=1
-else
-    rm -f $ERRFILE
-fi
-
-exit $status
+exit 0

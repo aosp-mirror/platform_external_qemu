@@ -1,18 +1,10 @@
-// Copyright (c) 2017-2020 NVIDIA Corporation
-//
-// SPDX-License-Identifier: CC-BY-4.0
-
-include::{generated}/meta/{refprefix}VK_NV_clip_space_w_scaling.txt[]
-
-=== Other Extension Metadata
+include::meta/VK_NV_clip_space_w_scaling.txt[]
 
 *Last Modified Date*::
     2017-02-15
 *Contributors*::
   - Eric Werness, NVIDIA
   - Kedarnath Thangudu, NVIDIA
-
-=== Description
 
 Virtual Reality (VR) applications often involve a post-processing step to
 apply a "`barrel`" distortion to the rendered image to correct the
@@ -31,7 +23,7 @@ clip space before perspective divide.
 The clip space [eq]#w# coordinate of the vertices can: be offset as of a
 function of [eq]#x# and [eq]#y# coordinates as follows:
 
-[eq]#w' = w {plus} Ax {plus} By#
+[eq]#w' = w + Ax + By#
 
 In the intended use case for viewport position scaling, an application
 should use a set of four viewports, one for each of the four quadrants of a
@@ -45,11 +37,33 @@ The signs of [eq]#A# and [eq]#B# should match the signs of [eq]#x# and
 [eq]#y# for the quadrant that they represent such that the value of [eq]#w'#
 will always be greater than or equal to the original [eq]#w# value for the
 entire image.
-Since the offset to [eq]#w#, ([eq]#Ax {plus} By#), is always positive, and
+Since the offset to [eq]#w#, ([eq]#Ax + By#), is always positive, and
 increases with the absolute values of [eq]#x# and [eq]#y#, the effective
 resolution will fall off linearly from the center of the image to its edges.
 
-include::{generated}/interfaces/VK_NV_clip_space_w_scaling.txt[]
+=== New Object Types
+
+None.
+
+=== New Enum Constants
+
+  * Extending elink:VkStructureType:
+  ** ename:VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_W_SCALING_STATE_CREATE_INFO_NV
+  * Extending elink:VkDynamicState:
+  ** ename:VK_DYANMIC_STATE_VIEWPORT_W_SCALING_NV
+
+=== New Enums
+
+None.
+
+=== New Structures
+
+  * slink:VkViewportWScalingNV
+  * slink:VkPipelineViewportWScalingStateCreateInfoNV
+
+=== New Functions
+
+  * flink:vkCmdSetViewportWScalingNV
 
 === Issues
 

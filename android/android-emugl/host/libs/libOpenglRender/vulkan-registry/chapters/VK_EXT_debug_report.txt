@@ -1,7 +1,3 @@
-// Copyright 2018-2021 The Khronos Group, Inc.
-//
-// SPDX-License-Identifier: CC-BY-4.0
-
 // This section is included inside the Debugging chapter (debugging.txt)
 
 [[debugging-debug-report-callbacks]]
@@ -9,43 +5,46 @@
 
 [open,refpage='VkDebugReportCallbackEXT',desc='Opaque handle to a debug report callback object',type='handles']
 --
+
 Debug report callbacks are represented by sname:VkDebugReportCallbackEXT
 handles:
 
-include::{generated}/api/handles/VkDebugReportCallbackEXT.txt[]
+include::../api/handles/VkDebugReportCallbackEXT.txt[]
+
 --
 
 [open,refpage='vkCreateDebugReportCallbackEXT',desc='Create a debug report callback object',type='protos']
 --
+
 Debug report callbacks give more detailed feedback on the application's use
 of Vulkan when events of interest occur.
 
 To register a debug report callback, an application uses
 flink:vkCreateDebugReportCallbackEXT.
 
-include::{generated}/api/protos/vkCreateDebugReportCallbackEXT.txt[]
+include::../api/protos/vkCreateDebugReportCallbackEXT.txt[]
 
-  * pname:instance is the instance the callback will be logged on.
-  * pname:pCreateInfo is a pointer to a
-    slink:VkDebugReportCallbackCreateInfoEXT structure defining the
-    conditions under which this callback will be called.
+  * pname:instance the instance the callback will be logged on.
+  * pname:pCreateInfo points to a slink:VkDebugReportCallbackCreateInfoEXT
+    structure which defines the conditions under which this callback will be
+    called.
   * pname:pAllocator controls host memory allocation as described in the
     <<memory-allocation, Memory Allocation>> chapter.
-  * pname:pCallback is a pointer to a slink:VkDebugReportCallbackEXT handle
-    in which the created object is returned.
+  * pname:pCallback is a pointer to record the
+    sname:VkDebugReportCallbackEXT object created.
 
-include::{generated}/validity/protos/vkCreateDebugReportCallbackEXT.txt[]
+include::../validity/protos/vkCreateDebugReportCallbackEXT.txt[]
 --
 
 [open,refpage='VkDebugReportCallbackCreateInfoEXT',desc='Structure specifying parameters of a newly created debug report callback',type='structs']
 --
+
 The definition of slink:VkDebugReportCallbackCreateInfoEXT is:
 
-include::{generated}/api/structs/VkDebugReportCallbackCreateInfoEXT.txt[]
+include::../api/structs/VkDebugReportCallbackCreateInfoEXT.txt[]
 
   * pname:sType is the type of this structure.
-  * pname:pNext is `NULL` or a pointer to a structure extending this
-    structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
   * pname:flags is a bitmask of elink:VkDebugReportFlagBitsEXT specifying
     which event(s) will cause this callback to be called.
   * pname:pfnCallback is the application callback function to call.
@@ -70,19 +69,26 @@ Vulkan call.
 A callback may be called from multiple threads simultaneously (if the
 application is making Vulkan calls from multiple threads).
 
-include::{generated}/validity/structs/VkDebugReportCallbackCreateInfoEXT.txt[]
+.Valid Usage
+****
+  * [[VUID-VkDebugReportCallbackCreateInfoEXT-pfnCallback-01385]]
+    pname:pfnCallback must: be a valid tlink:PFN_vkDebugReportCallbackEXT
+****
+
+include::../validity/structs/VkDebugReportCallbackCreateInfoEXT.txt[]
 --
 
 [open,refpage='VkDebugReportFlagBitsEXT',desc='Bitmask specifying events which cause a debug report callback',type='enums']
 --
+
 Bits which can: be set in
 slink:VkDebugReportCallbackCreateInfoEXT::pname:flags, specifying events
 which cause a debug report, are:
 
-include::{generated}/api/enums/VkDebugReportFlagBitsEXT.txt[]
+include::../api/enums/VkDebugReportFlagBitsEXT.txt[]
 
-  * ename:VK_DEBUG_REPORT_ERROR_BIT_EXT specifies that the application has
-    violated a valid usage condition of the specification.
+  * ename:VK_DEBUG_REPORT_ERROR_BIT_EXT specifies that an error that may
+    cause undefined results, including an application crash.
   * ename:VK_DEBUG_REPORT_WARNING_BIT_EXT specifies use of Vulkan that may:
     expose an app bug.
     Such cases may not be immediately harmful, such as a fragment shader
@@ -101,23 +107,25 @@ include::{generated}/api/enums/VkDebugReportFlagBitsEXT.txt[]
     application.
   * ename:VK_DEBUG_REPORT_DEBUG_BIT_EXT specifies diagnostic information
     from the implementation and layers.
+
 --
 
-[open,refpage='VkDebugReportFlagsEXT',desc='Bitmask of VkDebugReportFlagBitsEXT',type='flags']
+[open,refpage='VkDebugReportFlagsEXT',desc='Bitmask of VkDebugReportFlagBitsEXT',type='enums']
 --
-include::{generated}/api/flags/VkDebugReportFlagsEXT.txt[]
+include::../api/flags/VkDebugReportFlagsEXT.txt[]
 
-tname:VkDebugReportFlagsEXT is a bitmask type for setting a mask of zero or
-more elink:VkDebugReportFlagBitsEXT.
+sname:VkDebugReportFlagsEXT is a bitmask type for setting a mask of zero or
+more slink:VkDebugReportFlagBitsEXT.
 --
 
 [open,refpage='PFN_vkDebugReportCallbackEXT',desc='Application-defined debug report callback function',type='funcpointers']
 --
+
 The prototype for the
 slink:VkDebugReportCallbackCreateInfoEXT::pname:pfnCallback function
 implemented by the application is:
 
-include::{generated}/api/funcpointers/PFN_vkDebugReportCallbackEXT.txt[]
+include::../api/funcpointers/PFN_vkDebugReportCallbackEXT.txt[]
 
   * pname:flags specifies the elink:VkDebugReportFlagBitsEXT that triggered
     this callback.
@@ -126,9 +134,9 @@ include::{generated}/api/funcpointers/PFN_vkDebugReportCallbackEXT.txt[]
     triggered.
   * pname:object is the object where the issue was detected.
     If pname:objectType is ename:VK_DEBUG_REPORT_OBJECT_TYPE_UNKNOWN_EXT,
-    pname:object is undefined:.
-  * pname:location is a component (layer, driver, loader) defined value
-    specifying the _location_ of the trigger.
+    pname:object is undefined.
+  * pname:location is a component (layer, driver, loader) defined value that
+    specifies the _location_ of the trigger.
     This is an optional: value.
   * pname:messageCode is a layer-defined value indicating what test
     triggered this callback.
@@ -148,24 +156,25 @@ layer-specified manner.
 The application should: always return ename:VK_FALSE.
 The ename:VK_TRUE value is reserved for use in layer development.
 
-pname:object must: be a Vulkan object or dlink:VK_NULL_HANDLE.
+pname:object must: be a Vulkan object or ename:VK_NULL_HANDLE.
 If pname:objectType is not ename:VK_DEBUG_REPORT_OBJECT_TYPE_UNKNOWN_EXT and
-pname:object is not dlink:VK_NULL_HANDLE, pname:object must: be a Vulkan
+pname:object is not ename:VK_NULL_HANDLE, pname:object must: be a Vulkan
 object of the corresponding type associated with pname:objectType as defined
 in <<debug-report-object-types>>.
 --
 
 [open,refpage='VkDebugReportObjectTypeEXT',desc='Specify the type of an object handle',type='enums']
 --
+
 Possible values passed to the pname:objectType parameter of the callback
 function specified by
 slink:VkDebugReportCallbackCreateInfoEXT::pname:pfnCallback, specifying the
 type of object handle being reported, are:
 
-include::{generated}/api/enums/VkDebugReportObjectTypeEXT.txt[]
+include::../api/enums/VkDebugReportObjectTypeEXT.txt[]
 
 [[debug-report-object-types]]
-.`VkDebugReportObjectTypeEXT` and Vulkan Handle Relationship
+.VkDebugReportObjectTypeEXT and Vulkan Handle Relationship
 [width="80%",cols="<35,<23",options="header"]
 |====
 | elink:VkDebugReportObjectTypeEXT                            | Vulkan Handle Type
@@ -206,6 +215,10 @@ ifdef::VK_KHR_display[]
 | ename:VK_DEBUG_REPORT_OBJECT_TYPE_DISPLAY_KHR_EXT           | slink:VkDisplayKHR
 | ename:VK_DEBUG_REPORT_OBJECT_TYPE_DISPLAY_MODE_KHR_EXT      | slink:VkDisplayModeKHR
 endif::VK_KHR_display[]
+ifdef::VK_NVX_device_generated_commands[]
+| ename:VK_DEBUG_REPORT_OBJECT_TYPE_OBJECT_TABLE_NVX_EXT | slink:VkObjectTableNVX
+| ename:VK_DEBUG_REPORT_OBJECT_TYPE_INDIRECT_COMMANDS_LAYOUT_NVX_EXT | slink:VkIndirectCommandsLayoutNVX
+endif::VK_NVX_device_generated_commands[]
 ifndef::VK_VERSION_1_1[]
 ifdef::VK_VERSION_1_1,VK_KHR_descriptor_update_template[]
 | ename:VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_UPDATE_TEMPLATE_KHR_EXT | slink:VkDescriptorUpdateTemplate
@@ -224,13 +237,15 @@ validation layer testing.
 It is not expected that an application would see this error code during
 normal use of the validation layers.
 ====
+
 --
 
 [open,refpage='vkDebugReportMessageEXT',desc='Inject a message into a debug stream',type='protos']
 --
+
 To inject its own messages into the debug stream, call:
 
-include::{generated}/api/protos/vkDebugReportMessageEXT.txt[]
+include::../api/protos/vkDebugReportMessageEXT.txt[]
 
   * pname:instance is the debug stream's slink:VkInstance.
   * pname:flags specifies the elink:VkDebugReportFlagBitsEXT classification
@@ -238,8 +253,8 @@ include::{generated}/api/protos/vkDebugReportMessageEXT.txt[]
   * pname:objectType is a elink:VkDebugReportObjectTypeEXT specifying the
     type of object being used or created at the time the event was
     triggered.
-  * pname:object is the object where the issue was detected.
-    pname:object can: be dlink:VK_NULL_HANDLE if there is no object
+  * pname:object this is the object where the issue was detected.
+    pname:object can: be ename:VK_NULL_HANDLE if there is no object
     associated with the event.
   * pname:location is an application defined value.
   * pname:messageCode is an application defined value.
@@ -257,25 +272,26 @@ registered.
 .Valid Usage
 ****
   * [[VUID-vkDebugReportMessageEXT-object-01241]]
-    pname:object must: be a Vulkan object or dlink:VK_NULL_HANDLE
+    pname:object must: be a Vulkan object or ename:VK_NULL_HANDLE
   * [[VUID-vkDebugReportMessageEXT-objectType-01498]]
     If pname:objectType is not ename:VK_DEBUG_REPORT_OBJECT_TYPE_UNKNOWN_EXT
-    and pname:object is not dlink:VK_NULL_HANDLE, pname:object must: be a
+    and pname:object is not ename:VK_NULL_HANDLE, pname:object must: be a
     Vulkan object of the corresponding type associated with pname:objectType
-    as defined in <<debug-report-object-types>>
+    as defined in <<debug-report-object-types>>.
 ****
 
-include::{generated}/validity/protos/vkDebugReportMessageEXT.txt[]
+include::../validity/protos/vkDebugReportMessageEXT.txt[]
 --
 
 [open,refpage='vkDestroyDebugReportCallbackEXT',desc='Destroy a debug report callback object',type='protos']
 --
+
 To destroy a sname:VkDebugReportCallbackEXT object, call:
 
-include::{generated}/api/protos/vkDestroyDebugReportCallbackEXT.txt[]
+include::../api/protos/vkDestroyDebugReportCallbackEXT.txt[]
 
-  * pname:instance is the instance where the callback was created.
-  * pname:callback is the slink:VkDebugReportCallbackEXT object to destroy.
+  * pname:instance the instance where the callback was created.
+  * pname:callback the slink:VkDebugReportCallbackEXT object to destroy.
     pname:callback is an externally synchronized object and must: not be
     used on more than one thread at a time.
     This means that fname:vkDestroyDebugReportCallbackEXT must: not be
@@ -293,5 +309,5 @@ include::{generated}/api/protos/vkDestroyDebugReportCallbackEXT.txt[]
     created, pname:pAllocator must: be `NULL`
 ****
 
-include::{generated}/validity/protos/vkDestroyDebugReportCallbackEXT.txt[]
+include::../validity/protos/vkDestroyDebugReportCallbackEXT.txt[]
 --

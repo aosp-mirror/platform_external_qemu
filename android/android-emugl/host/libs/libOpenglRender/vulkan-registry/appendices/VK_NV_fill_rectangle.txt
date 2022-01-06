@@ -1,17 +1,9 @@
-// Copyright (c) 2016-2020 NVIDIA Corporation
-//
-// SPDX-License-Identifier: CC-BY-4.0
-
-include::{generated}/meta/{refprefix}VK_NV_fill_rectangle.txt[]
-
-=== Other Extension Metadata
+include::meta/VK_NV_fill_rectangle.txt[]
 
 *Last Modified Date*::
     2017-05-22
 *Contributors*::
   - Jeff Bolz, NVIDIA
-
-=== Description
 
 This extension adds a new elink:VkPolygonMode code:enum where a triangle is
 rasterized by computing and filling its axis-aligned screen-space bounding
@@ -21,7 +13,31 @@ triangles with an internal edge.
 It is also useful to minimize the number of primitives that need to be
 drawn, particularly for a user interface.
 
-include::{generated}/interfaces/VK_NV_fill_rectangle.txt[]
+=== New Object Types
+
+None.
+
+=== New Enum Constants
+
+  * Extending elink:VkPolygonMode
+
+  ** ename:VK_POLYGON_MODE_FILL_RECTANGLE_NV
+
+=== New Enums
+
+None.
+
+=== New Structures
+
+None.
+
+=== New Functions
+
+None.
+
+=== Issues
+
+None.
 
 === Version History
 

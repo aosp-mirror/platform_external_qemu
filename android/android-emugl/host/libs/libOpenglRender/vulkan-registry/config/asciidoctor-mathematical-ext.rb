@@ -1,7 +1,3 @@
-# Copyright 2018-2021 The Khronos Group Inc.
-#
-# SPDX-License-Identifier: Apache-2.0
-
 require 'asciidoctor/extensions'
 
 # This script makes [latexmath] blocks work within table cells.

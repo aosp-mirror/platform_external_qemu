@@ -1,8 +1,18 @@
 #!/usr/bin/env python3
 #
-# Copyright 2016-2021 The Khronos Group Inc.
+# Copyright (c) 2016-2018 The Khronos Group Inc.
 #
-# SPDX-License-Identifier: Apache-2.0
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 # Build Promoter submission package for a specified extension or extensions.
 # This consists of one spec with the extension(s) and all dependencies,
@@ -13,6 +23,11 @@
 # Usage: makeSubmit extension targets
 
 import argparse, copy, io, os, pdb, re, string, subprocess, sys
+
+# Ensure config/extDependency.py is up-to-date before we import it.
+subprocess.check_call(['make', 'config/extDependency.py'])
+
+from extDependency import *
 
 def enQuote(str):
     return '"' + str + '"'
@@ -27,7 +42,6 @@ def enQuote(str):
 def makeTarget(outDir, extensionList, submitName, title, target):
     print('make clean_generated')
     print('make OUTDIR=' + outDir,
-          'IMAGEOPTS=',
           'EXTENSIONS="' + ' '.join(extensionList) + '"',
           'APITITLE="' + title + '"', target)
     # Rename into submission directory
@@ -68,35 +82,24 @@ def makeSubmit(submitName, required, target='html'):
 
     # # Reorganize and rename them, and generate the diff spec
     print('')
-    print('cd scripts/htmldiff')
+    print('cd scripts')
     print('./htmldiff',
-          enQuote('../../' + baseSpec),
-          enQuote('../../' + newSpec),
+          enQuote('../' + baseSpec),
+          enQuote('../' + newSpec),
           '>',
-           enQuote('../../submit/html/diff-' + submitName + '.html'))
-    print('cd ../../')
+           enQuote('../submit/html/diff-' + submitName + '.html'))
+    print('cd ..')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-extension', action='append',
-                        default=[],
-                        help='Specify a required extension or extensions to add to targets')
-    parser.add_argument('-genpath', action='store',
-                        default='gen',
-                        help='Path to directory containing generated extDependency.py module')
     parser.add_argument('-title', action='store',
                         default='vkspec',
                         help='Set the document title')
+    parser.add_argument('-extension', action='append',
+                        default=[],
+                        help='Specify a required extension or extensions to add to targets')
 
     results = parser.parse_args()
-
-    # Look for extDependency.py in the specified directory
-    sys.path.insert(0, results.genpath)
-
-    # Ensure gen/extDependency.py is up-to-date before we import it.
-    subprocess.check_call(['make', 'GENERATED=' + results.genpath, 'extDependency'])
-
-    from extDependency import *
 
     makeSubmit(results.title, results.extension)

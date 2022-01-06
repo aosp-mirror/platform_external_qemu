@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
-#
-# Copyright 2018-2021 The Khronos Group, Inc.
-#
-# SPDX-License-Identifier: Apache-2.0
-
 specdir=out
 RHOST=kaylee
 RPATH=/home/khronos/memberftp/vulkan/

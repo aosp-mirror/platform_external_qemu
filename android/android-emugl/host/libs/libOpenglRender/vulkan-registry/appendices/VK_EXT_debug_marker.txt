@@ -1,10 +1,4 @@
-// Copyright 2016-2021 The Khronos Group Inc.
-//
-// SPDX-License-Identifier: CC-BY-4.0
-
-include::{generated}/meta/{refprefix}VK_EXT_debug_marker.txt[]
-
-=== Other Extension Metadata
+include::meta/VK_EXT_debug_marker.txt[]
 
 *Last Modified Date*::
     2017-01-31
@@ -16,19 +10,44 @@ include::{generated}/meta/{refprefix}VK_EXT_debug_marker.txt[]
   - Jon Ashburn, LunarG
   - Kyle Spagnoli, NVIDIA
 
-=== Description
-
 The `VK_EXT_debug_marker` extension is a device extension.
 It introduces concepts of object naming and tagging, for better tracking of
 Vulkan objects, as well as additional commands for recording annotations of
 named sections of a workload to aid organization and offline analysis in
 external tools.
 
-include::{generated}/interfaces/VK_EXT_debug_marker.txt[]
+=== New Object Types
+
+None
+
+=== New Enum Constants
+
+  * Extending elink:VkStructureType:
+  ** ename:VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT
+  ** ename:VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_TAG_INFO_EXT
+  ** ename:VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT
+
+=== New Enums
+
+None
+
+=== New Structures
+
+  * slink:VkDebugMarkerObjectNameInfoEXT
+  * slink:VkDebugMarkerObjectTagInfoEXT
+  * slink:VkDebugMarkerMarkerInfoEXT
+
+=== New Functions
+
+  * flink:vkDebugMarkerSetObjectTagEXT
+  * flink:vkDebugMarkerSetObjectNameEXT
+  * flink:vkCmdDebugMarkerBeginEXT
+  * flink:vkCmdDebugMarkerEndEXT
+  * flink:vkCmdDebugMarkerInsertEXT
 
 === Examples
 
-*Example 1*
+**Example 1**
 
 Associate a name with an image, for easier debugging in external tools or
 with validation layers that can print a friendly name when referring to
@@ -59,7 +78,7 @@ objects in error messages.
     //   command buffer with no memory bound to it.
 ----------------------------------------
 
-*Example 2*
+**Example 2**
 
 Annotating regions of a workload with naming information so that offline
 analysis tools can display a more usable visualisation of the commands

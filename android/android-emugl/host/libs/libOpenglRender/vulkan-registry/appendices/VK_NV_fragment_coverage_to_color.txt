@@ -1,17 +1,9 @@
-// Copyright (c) 2017-2020 NVIDIA Corporation
-//
-// SPDX-License-Identifier: CC-BY-4.0
-
-include::{generated}/meta/{refprefix}VK_NV_fragment_coverage_to_color.txt[]
-
-=== Other Extension Metadata
+include::meta/VK_NV_fragment_coverage_to_color.txt[]
 
 *Last Modified Date*::
     2017-05-21
 *Contributors*::
   - Jeff Bolz, NVIDIA
-
-=== Description
 
 This extension allows the fragment coverage value, represented as an integer
 bitmask, to be substituted for a color output being written to a
@@ -26,7 +18,31 @@ This functionality may be useful for deferred rendering algorithms, where
 the second pass needs to know which samples belong to which original
 fragments.
 
-include::{generated}/interfaces/VK_NV_fragment_coverage_to_color.txt[]
+=== New Object Types
+
+None.
+
+=== New Enum Constants
+
+  * Extending elink:VkStructureType:
+
+  ** ename:VK_STRUCTURE_TYPE_PIPELINE_COVERAGE_TO_COLOR_STATE_CREATE_INFO_NV
+
+=== New Enums
+
+  * elink:VkPipelineCoverageToColorStateCreateFlagsNV
+
+=== New Structures
+
+  * slink:VkPipelineCoverageToColorStateCreateInfoNV
+
+=== New Functions
+
+None.
+
+=== Issues
+
+None.
 
 === Version History
 

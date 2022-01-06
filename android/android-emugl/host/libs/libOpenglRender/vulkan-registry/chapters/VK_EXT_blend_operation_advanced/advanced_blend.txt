@@ -1,6 +1,3 @@
-// Copyright 2018-2021 The Khronos Group, Inc.
-//
-// SPDX-License-Identifier: CC-BY-4.0
 
 [[framebuffer-blend-advanced]]
 === Advanced Blend Operations
@@ -14,6 +11,7 @@ Operations>>.
 
 [open,refpage='VkPipelineColorBlendAdvancedStateCreateInfoEXT',desc='Structure specifying parameters that affect advanced blend operations',type='structs']
 --
+
 If the pname:pNext chain of slink:VkPipelineColorBlendStateCreateInfo
 includes a sname:VkPipelineColorBlendAdvancedStateCreateInfoEXT structure,
 then that structure includes parameters that affect advanced blend
@@ -22,11 +20,10 @@ operations.
 The sname:VkPipelineColorBlendAdvancedStateCreateInfoEXT structure is
 defined as:
 
-include::{generated}/api/structs/VkPipelineColorBlendAdvancedStateCreateInfoEXT.txt[]
+include::../../api/structs/VkPipelineColorBlendAdvancedStateCreateInfoEXT.txt[]
 
   * pname:sType is the type of this structure.
-  * pname:pNext is `NULL` or a pointer to a structure extending this
-    structure.
+  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
   * pname:srcPremultiplied specifies whether the source color of the blend
     operation is treated as premultiplied.
   * pname:dstPremultiplied specifies whether the destination color of the
@@ -42,20 +39,22 @@ ename:VK_BLEND_OVERLAP_UNCORRELATED_EXT.
 .Valid Usage
 ****
   * [[VUID-VkPipelineColorBlendAdvancedStateCreateInfoEXT-srcPremultiplied-01424]]
-    If the <<limits-advancedBlendNonPremultipliedSrcColor,non-premultiplied
+    If the
+    <<features-limits-advancedBlendNonPremultipliedSrcColor,non-premultiplied
     source color>> property is not supported, pname:srcPremultiplied must:
     be ename:VK_TRUE
   * [[VUID-VkPipelineColorBlendAdvancedStateCreateInfoEXT-dstPremultiplied-01425]]
-    If the <<limits-advancedBlendNonPremultipliedDstColor,non-premultiplied
+    If the
+    <<features-limits-advancedBlendNonPremultipliedDstColor,non-premultiplied
     destination color>> property is not supported, pname:dstPremultiplied
     must: be ename:VK_TRUE
   * [[VUID-VkPipelineColorBlendAdvancedStateCreateInfoEXT-blendOverlap-01426]]
-    If the <<limits-advancedBlendCorrelatedOverlap,correlated overlap>>
-    property is not supported, pname:blendOverlap must: be
+    If the <<features-limits-advancedBlendCorrelatedOverlap,correlated
+    overlap>> property is not supported, pname:blendOverlap must: be
     ename:VK_BLEND_OVERLAP_UNCORRELATED_EXT
 ****
 
-include::{generated}/validity/structs/VkPipelineColorBlendAdvancedStateCreateInfoEXT.txt[]
+include::../../validity/structs/VkPipelineColorBlendAdvancedStateCreateInfoEXT.txt[]
 --
 
 When using one of the operations in table
@@ -133,30 +132,17 @@ components are used as the base color:
 \end{aligned}
 +++++++++++++++++++
 
+[open,refpage='VkBlendOverlapEXT',desc='Enumerant specifying the blend overlap parameter',type='enums']
+--
+
 When blending using advanced blend operations, we expect that the R, G, and
 B components of premultiplied source and destination color inputs be stored
 as the product of non-premultiplied R, G, and B component values and the A
 component of the color.
 If any R, G, or B component of a premultiplied input color is non-zero and
 the A component is zero, the color is considered ill-formed, and the
-corresponding component of the blend result is undefined:.
+corresponding component of the blend result is undefined.
 
-All of the advanced blend operation formulas in this chapter compute the
-result as a premultiplied color.
-If pname:dstPremultiplied is ename:VK_FALSE, that result color's R, G, and B
-components are divided by the A component before being written to the
-framebuffer.
-If any R, G, or B component of the color is non-zero and the A component is
-zero, the result is considered ill-formed, and the corresponding component
-of the blend result is undefined:.
-If all components are zero, that value is unchanged.
-
-If the A component of any input or result color is less than zero, the color
-is considered ill-formed, and all components of the blend result are
-undefined:.
-
-[open,refpage='VkBlendOverlapEXT',desc='Enumerant specifying the blend overlap parameter',type='enums']
---
 The weighting functions [eq]#p~0~#, [eq]#p~1~#, and [eq]#p~2~# are defined
 in table <<framebuffer-blend-advanced-overlap-modes,Advanced Blend Overlap
 Modes>>.
@@ -173,7 +159,7 @@ Possible values of
 slink:VkPipelineColorBlendAdvancedStateCreateInfoEXT::pname:blendOverlap,
 specifying the blend overlap functions, are:
 
-include::{generated}/api/enums/VkBlendOverlapEXT.txt[]
+include::../../api/enums/VkBlendOverlapEXT.txt[]
 
   * ename:VK_BLEND_OVERLAP_UNCORRELATED_EXT specifies that there is no
     correlation between the source and destination coverage.
@@ -595,7 +581,7 @@ following pseudocode:
       color = lum + ((color-lum)*lum) / (lum-mincol);
     }
     if (maxcol > 1.0) {
-      color = lum + ((color-lum)*(1-lum)) / (maxcol-lum);
+      color = lum + ((color-lum)*lum) / (maxcol-lum);
     }
     return color;
   }

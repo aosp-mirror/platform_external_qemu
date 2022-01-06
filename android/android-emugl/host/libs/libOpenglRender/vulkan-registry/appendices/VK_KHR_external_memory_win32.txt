@@ -1,10 +1,8 @@
-// Copyright 2016-2021 The Khronos Group, Inc.
-//
-// SPDX-License-Identifier: CC-BY-4.0
+// Copyright (c) 2016-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
 
-include::{generated}/meta/{refprefix}VK_KHR_external_memory_win32.txt[]
-
-=== Other Extension Metadata
+include::meta/VK_KHR_external_memory_win32.txt[]
 
 *Last Modified Date*::
     2016-10-21
@@ -15,8 +13,6 @@ include::{generated}/meta/{refprefix}VK_KHR_external_memory_win32.txt[]
   - Jeff Juliano, NVIDIA
   - Carsten Rohde, NVIDIA
 
-=== Description
-
 An application may wish to reference device memory in multiple Vulkan
 logical devices or instances, in multiple processes, and/or in multiple
 APIs.
@@ -25,7 +21,32 @@ memory objects and to import Vulkan memory objects from Windows handles
 exported from other Vulkan memory objects or from similar resources in other
 APIs.
 
-include::{generated}/interfaces/VK_KHR_external_memory_win32.txt[]
+=== New Object Types
+
+None.
+
+=== New Enum Constants
+
+  * ename:VK_STRUCTURE_TYPE_IMPORT_MEMORY_WIN32_HANDLE_INFO_KHR
+  * ename:VK_STRUCTURE_TYPE_EXPORT_MEMORY_WIN32_HANDLE_INFO_KHR
+  * ename:VK_STRUCTURE_TYPE_MEMORY_WIN32_HANDLE_PROPERTIES_KHR
+  * ename:VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR
+
+=== New Enums
+
+None.
+
+=== New Structs
+
+  * slink:VkImportMemoryWin32HandleInfoKHR
+  * slink:VkExportMemoryWin32HandleInfoKHR
+  * slink:VkMemoryWin32HandlePropertiesKHR
+  * slink:VkMemoryGetWin32HandleInfoKHR
+
+=== New Functions
+
+  * flink:vkGetMemoryWin32HandleKHR
+  * flink:vkGetMemoryWin32HandlePropertiesKHR
 
 === Issues
 
@@ -38,7 +59,7 @@ ifdef::editing-notes[]
 .editing-note
 ====
 (Jon) This issue refers to a token from
-`apiext:VK_KHR_external_semaphore_win32`, but there is no dependency or
+`<<VK_KHR_external_semaphore_win32>>`, but there's no dependency or
 interaction with that extension defined above.
 ====
 endif::editing-notes[]
@@ -65,8 +86,3 @@ The size is determined by the associated image or buffer memory requirements
 for external handle types that require dedicated allocations, and by the
 size specified when creating the object from which the handle was exported
 for other external handle types.
-
-=== Version History
-
-  * Revision 1, 2016-10-21 (James Jones)
-    - Initial revision

@@ -1,10 +1,8 @@
-// Copyright 2016-2021 The Khronos Group, Inc.
-//
-// SPDX-License-Identifier: CC-BY-4.0
+// Copyright (c) 2016-2018 Khronos Group. This work is licensed under a
+// Creative Commons Attribution 4.0 International License; see
+// http://creativecommons.org/licenses/by/4.0/
 
-include::{generated}/meta/{refprefix}VK_KHR_dedicated_allocation.txt[]
-
-=== Other Extension Metadata
+include::meta/VK_KHR_dedicated_allocation.txt[]
 
 *Last Modified Date*::
     2017-09-05
@@ -16,8 +14,6 @@ include::{generated}/meta/{refprefix}VK_KHR_dedicated_allocation.txt[]
   - Jeff Bolz, NVIDIA
   - Jason Ekstrand, Intel
 
-=== Description
-
 This extension enables resources to be bound to a dedicated allocation,
 rather than suballocated.
 For any particular resource, applications can: query whether a dedicated
@@ -27,9 +23,9 @@ Normal device memory allocations must support multiple resources per
 allocation, memory aliasing and sparse binding, which could interfere with
 some optimizations.
 Applications should query the implementation for when a dedicated allocation
-may: be beneficial by adding a sname:VkMemoryDedicatedRequirementsKHR
-structure to the pname:pNext chain of the sname:VkMemoryRequirements2
-structure passed as the pname:pMemoryRequirements parameter of a call to
+may: be beneficial by adding sname:VkMemoryDedicatedRequirementsKHR to the
+pname:pNext chain of the sname:VkMemoryRequirements2 structure passed as the
+pname:pMemoryRequirements parameter to a call to
 fname:vkGetBufferMemoryRequirements2 or fname:vkGetImageMemoryRequirements2.
 Certain external handle types and external images or buffers may: also
 depend on dedicated allocations on implementations that associate image or
@@ -40,6 +36,29 @@ and memory allocation: a new structure that flags whether an image/buffer
 should have a dedicated allocation, and a structure indicating the image or
 buffer that an allocation will be bound to.
 
+=== New Object Types
+
+None.
+
+=== New Enum Constants
+
+  * Extending elink:VkStructureType:
+  ** ename:VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS_KHR
+  ** ename:VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO_KHR
+
+=== New Enums
+
+None.
+
+=== New Structures
+
+  * slink:VkMemoryDedicatedRequirementsKHR
+  * slink:VkMemoryDedicatedAllocateInfoKHR
+
+=== New Functions
+
+None.
+
 === Promotion to Vulkan 1.1
 
 All functionality in this extension is included in core Vulkan 1.1, with the
@@ -47,7 +66,9 @@ KHR suffix omitted.
 The original type, enum and command names are still available as aliases of
 the core functionality.
 
-include::{generated}/interfaces/VK_KHR_dedicated_allocation.txt[]
+=== Issues
+
+None.
 
 === Examples
 
@@ -143,6 +164,6 @@ include::{generated}/interfaces/VK_KHR_dedicated_allocation.txt[]
    - Rework the extension to be query-based
 
  * Revision 3, 2017-07-31 (Jason Ekstrand)
-   - Clarify that memory objects allocated with
+   - Clarify that memory objects created with
      VkMemoryDedicatedAllocateInfoKHR can only have the specified resource
      bound and no others.

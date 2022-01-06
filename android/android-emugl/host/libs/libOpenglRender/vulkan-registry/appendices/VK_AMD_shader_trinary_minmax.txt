@@ -1,18 +1,9 @@
-// Copyright (c) 2016-2020 Advanced Micro Devices, Inc.
-//
-// SPDX-License-Identifier: CC-BY-4.0
-
-include::{generated}/meta/{refprefix}VK_AMD_shader_trinary_minmax.txt[]
-
-=== Other Extension Metadata
+include::meta/VK_AMD_shader_trinary_minmax.txt[]
 
 *Last Modified Date*::
     2016-05-10
 *IP Status*::
     No known IP claims.
-*Interactions and External Dependencies*::
-  - This extension requires
-    {spirv}/AMD/SPV_AMD_shader_trinary_minmax.html[`SPV_AMD_shader_trinary_minmax`]
 *Contributors*::
   - Matthaeus G. Chajdas, AMD
   - Qun Lin, AMD
@@ -20,13 +11,18 @@ include::{generated}/meta/{refprefix}VK_AMD_shader_trinary_minmax.txt[]
   - Graham Sellers, AMD
   - Rex Xu, AMD
 
-=== Description
-
 This extension adds support for the following SPIR-V extension in Vulkan:
 
-  * {spirv}/AMD/SPV_AMD_shader_trinary_minmax.html[`SPV_AMD_shader_trinary_minmax`]
+  * https://www.khronos.org/registry/spir-v/extensions/AMD/SPV_AMD_shader_trinary_minmax.html[+SPV_AMD_shader_trinary_minmax+]
 
-include::{generated}/interfaces/VK_AMD_shader_trinary_minmax.txt[]
+ifdef::editing-notes[]
+[NOTE]
+.editing-note
+====
+Shouldn't the SPV extension be in the Interactions and External Dependencies
+block?
+====
+endif::editing-notes[]
 
 === Version History
 
