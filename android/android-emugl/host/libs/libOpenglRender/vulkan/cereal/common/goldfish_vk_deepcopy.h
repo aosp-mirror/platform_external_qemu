@@ -120,12 +120,6 @@ void deepcopy_VkMemoryBarrier(
     const VkMemoryBarrier* from,
     VkMemoryBarrier* to);
 
-void deepcopy_VkPipelineCacheHeaderVersionOne(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPipelineCacheHeaderVersionOne* from,
-    VkPipelineCacheHeaderVersionOne* to);
-
 void deepcopy_VkAllocationCallbacks(
     Allocator* alloc,
     VkStructureType rootType,
@@ -1577,170 +1571,6 @@ void deepcopy_VkWin32SurfaceCreateInfoKHR(
 #endif
 #ifdef VK_KHR_sampler_mirror_clamp_to_edge
 #endif
-#ifdef VK_KHR_video_queue
-void deepcopy_VkVideoQueueFamilyProperties2KHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoQueueFamilyProperties2KHR* from,
-    VkVideoQueueFamilyProperties2KHR* to);
-
-void deepcopy_VkVideoProfileKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoProfileKHR* from,
-    VkVideoProfileKHR* to);
-
-void deepcopy_VkVideoProfilesKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoProfilesKHR* from,
-    VkVideoProfilesKHR* to);
-
-void deepcopy_VkVideoCapabilitiesKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoCapabilitiesKHR* from,
-    VkVideoCapabilitiesKHR* to);
-
-void deepcopy_VkPhysicalDeviceVideoFormatInfoKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceVideoFormatInfoKHR* from,
-    VkPhysicalDeviceVideoFormatInfoKHR* to);
-
-void deepcopy_VkVideoFormatPropertiesKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoFormatPropertiesKHR* from,
-    VkVideoFormatPropertiesKHR* to);
-
-void deepcopy_VkVideoPictureResourceKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoPictureResourceKHR* from,
-    VkVideoPictureResourceKHR* to);
-
-void deepcopy_VkVideoReferenceSlotKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoReferenceSlotKHR* from,
-    VkVideoReferenceSlotKHR* to);
-
-void deepcopy_VkVideoGetMemoryPropertiesKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoGetMemoryPropertiesKHR* from,
-    VkVideoGetMemoryPropertiesKHR* to);
-
-void deepcopy_VkVideoBindMemoryKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoBindMemoryKHR* from,
-    VkVideoBindMemoryKHR* to);
-
-void deepcopy_VkVideoSessionCreateInfoKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoSessionCreateInfoKHR* from,
-    VkVideoSessionCreateInfoKHR* to);
-
-void deepcopy_VkVideoSessionParametersCreateInfoKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoSessionParametersCreateInfoKHR* from,
-    VkVideoSessionParametersCreateInfoKHR* to);
-
-void deepcopy_VkVideoSessionParametersUpdateInfoKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoSessionParametersUpdateInfoKHR* from,
-    VkVideoSessionParametersUpdateInfoKHR* to);
-
-void deepcopy_VkVideoBeginCodingInfoKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoBeginCodingInfoKHR* from,
-    VkVideoBeginCodingInfoKHR* to);
-
-void deepcopy_VkVideoEndCodingInfoKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEndCodingInfoKHR* from,
-    VkVideoEndCodingInfoKHR* to);
-
-void deepcopy_VkVideoCodingControlInfoKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoCodingControlInfoKHR* from,
-    VkVideoCodingControlInfoKHR* to);
-
-#endif
-#ifdef VK_KHR_video_decode_queue
-void deepcopy_VkVideoDecodeInfoKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoDecodeInfoKHR* from,
-    VkVideoDecodeInfoKHR* to);
-
-#endif
-#ifdef VK_KHR_dynamic_rendering
-void deepcopy_VkRenderingAttachmentInfoKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkRenderingAttachmentInfoKHR* from,
-    VkRenderingAttachmentInfoKHR* to);
-
-void deepcopy_VkRenderingInfoKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkRenderingInfoKHR* from,
-    VkRenderingInfoKHR* to);
-
-void deepcopy_VkPipelineRenderingCreateInfoKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPipelineRenderingCreateInfoKHR* from,
-    VkPipelineRenderingCreateInfoKHR* to);
-
-void deepcopy_VkPhysicalDeviceDynamicRenderingFeaturesKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceDynamicRenderingFeaturesKHR* from,
-    VkPhysicalDeviceDynamicRenderingFeaturesKHR* to);
-
-void deepcopy_VkCommandBufferInheritanceRenderingInfoKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkCommandBufferInheritanceRenderingInfoKHR* from,
-    VkCommandBufferInheritanceRenderingInfoKHR* to);
-
-void deepcopy_VkRenderingFragmentShadingRateAttachmentInfoKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkRenderingFragmentShadingRateAttachmentInfoKHR* from,
-    VkRenderingFragmentShadingRateAttachmentInfoKHR* to);
-
-void deepcopy_VkRenderingFragmentDensityMapAttachmentInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkRenderingFragmentDensityMapAttachmentInfoEXT* from,
-    VkRenderingFragmentDensityMapAttachmentInfoEXT* to);
-
-void deepcopy_VkAttachmentSampleCountInfoAMD(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkAttachmentSampleCountInfoAMD* from,
-    VkAttachmentSampleCountInfoAMD* to);
-
-DEFINE_ALIAS_FUNCTION(deepcopy_VkAttachmentSampleCountInfoAMD, deepcopy_VkAttachmentSampleCountInfoNV)
-
-void deepcopy_VkMultiviewPerViewAttributesInfoNVX(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkMultiviewPerViewAttributesInfoNVX* from,
-    VkMultiviewPerViewAttributesInfoNVX* to);
-
-#endif
 #ifdef VK_KHR_multiview
 DEFINE_ALIAS_FUNCTION(deepcopy_VkRenderPassMultiviewCreateInfo, deepcopy_VkRenderPassMultiviewCreateInfoKHR)
 
@@ -2345,14 +2175,6 @@ DEFINE_ALIAS_FUNCTION(deepcopy_VkAttachmentReferenceStencilLayout, deepcopy_VkAt
 DEFINE_ALIAS_FUNCTION(deepcopy_VkAttachmentDescriptionStencilLayout, deepcopy_VkAttachmentDescriptionStencilLayoutKHR)
 
 #endif
-#ifdef VK_KHR_present_wait
-void deepcopy_VkPhysicalDevicePresentWaitFeaturesKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDevicePresentWaitFeaturesKHR* from,
-    VkPhysicalDevicePresentWaitFeaturesKHR* to);
-
-#endif
 #ifdef VK_KHR_uniform_buffer_standard_layout
 DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceUniformBufferStandardLayoutFeatures, deepcopy_VkPhysicalDeviceUniformBufferStandardLayoutFeaturesKHR)
 
@@ -2415,20 +2237,6 @@ void deepcopy_VkPipelineExecutableInternalRepresentationKHR(
     VkPipelineExecutableInternalRepresentationKHR* to);
 
 #endif
-#ifdef VK_KHR_shader_integer_dot_product
-void deepcopy_VkPhysicalDeviceShaderIntegerDotProductFeaturesKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceShaderIntegerDotProductFeaturesKHR* from,
-    VkPhysicalDeviceShaderIntegerDotProductFeaturesKHR* to);
-
-void deepcopy_VkPhysicalDeviceShaderIntegerDotProductPropertiesKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceShaderIntegerDotProductPropertiesKHR* from,
-    VkPhysicalDeviceShaderIntegerDotProductPropertiesKHR* to);
-
-#endif
 #ifdef VK_KHR_pipeline_library
 void deepcopy_VkPipelineLibraryCreateInfoKHR(
     Allocator* alloc,
@@ -2438,120 +2246,6 @@ void deepcopy_VkPipelineLibraryCreateInfoKHR(
 
 #endif
 #ifdef VK_KHR_shader_non_semantic_info
-#endif
-#ifdef VK_KHR_present_id
-void deepcopy_VkPresentIdKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPresentIdKHR* from,
-    VkPresentIdKHR* to);
-
-void deepcopy_VkPhysicalDevicePresentIdFeaturesKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDevicePresentIdFeaturesKHR* from,
-    VkPhysicalDevicePresentIdFeaturesKHR* to);
-
-#endif
-#ifdef VK_KHR_video_encode_queue
-void deepcopy_VkVideoEncodeInfoKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeInfoKHR* from,
-    VkVideoEncodeInfoKHR* to);
-
-void deepcopy_VkVideoEncodeRateControlInfoKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeRateControlInfoKHR* from,
-    VkVideoEncodeRateControlInfoKHR* to);
-
-#endif
-#ifdef VK_KHR_synchronization2
-void deepcopy_VkMemoryBarrier2KHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkMemoryBarrier2KHR* from,
-    VkMemoryBarrier2KHR* to);
-
-void deepcopy_VkBufferMemoryBarrier2KHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkBufferMemoryBarrier2KHR* from,
-    VkBufferMemoryBarrier2KHR* to);
-
-void deepcopy_VkImageMemoryBarrier2KHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkImageMemoryBarrier2KHR* from,
-    VkImageMemoryBarrier2KHR* to);
-
-void deepcopy_VkDependencyInfoKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkDependencyInfoKHR* from,
-    VkDependencyInfoKHR* to);
-
-void deepcopy_VkSemaphoreSubmitInfoKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkSemaphoreSubmitInfoKHR* from,
-    VkSemaphoreSubmitInfoKHR* to);
-
-void deepcopy_VkCommandBufferSubmitInfoKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkCommandBufferSubmitInfoKHR* from,
-    VkCommandBufferSubmitInfoKHR* to);
-
-void deepcopy_VkSubmitInfo2KHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkSubmitInfo2KHR* from,
-    VkSubmitInfo2KHR* to);
-
-void deepcopy_VkPhysicalDeviceSynchronization2FeaturesKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceSynchronization2FeaturesKHR* from,
-    VkPhysicalDeviceSynchronization2FeaturesKHR* to);
-
-void deepcopy_VkQueueFamilyCheckpointProperties2NV(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkQueueFamilyCheckpointProperties2NV* from,
-    VkQueueFamilyCheckpointProperties2NV* to);
-
-void deepcopy_VkCheckpointData2NV(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkCheckpointData2NV* from,
-    VkCheckpointData2NV* to);
-
-#endif
-#ifdef VK_KHR_shader_subgroup_uniform_control_flow
-void deepcopy_VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR* from,
-    VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR* to);
-
-#endif
-#ifdef VK_KHR_zero_initialize_workgroup_memory
-void deepcopy_VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR* from,
-    VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR* to);
-
-#endif
-#ifdef VK_KHR_workgroup_memory_explicit_layout
-void deepcopy_VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR* from,
-    VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR* to);
-
 #endif
 #ifdef VK_KHR_copy_commands2
 void deepcopy_VkBufferCopy2KHR(
@@ -2619,40 +2313,6 @@ void deepcopy_VkResolveImageInfo2KHR(
     VkStructureType rootType,
     const VkResolveImageInfo2KHR* from,
     VkResolveImageInfo2KHR* to);
-
-#endif
-#ifdef VK_KHR_format_feature_flags2
-void deepcopy_VkFormatProperties3KHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkFormatProperties3KHR* from,
-    VkFormatProperties3KHR* to);
-
-#endif
-#ifdef VK_KHR_maintenance4
-void deepcopy_VkPhysicalDeviceMaintenance4FeaturesKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceMaintenance4FeaturesKHR* from,
-    VkPhysicalDeviceMaintenance4FeaturesKHR* to);
-
-void deepcopy_VkPhysicalDeviceMaintenance4PropertiesKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceMaintenance4PropertiesKHR* from,
-    VkPhysicalDeviceMaintenance4PropertiesKHR* to);
-
-void deepcopy_VkDeviceBufferMemoryRequirementsKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkDeviceBufferMemoryRequirementsKHR* from,
-    VkDeviceBufferMemoryRequirementsKHR* to);
-
-void deepcopy_VkDeviceImageMemoryRequirementsKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkDeviceImageMemoryRequirementsKHR* from,
-    VkDeviceImageMemoryRequirementsKHR* to);
 
 #endif
 #ifdef VK_ANDROID_native_buffer
@@ -2751,26 +2411,6 @@ void deepcopy_VkPipelineRasterizationStateStreamCreateInfoEXT(
     VkPipelineRasterizationStateStreamCreateInfoEXT* to);
 
 #endif
-#ifdef VK_NVX_binary_import
-void deepcopy_VkCuModuleCreateInfoNVX(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkCuModuleCreateInfoNVX* from,
-    VkCuModuleCreateInfoNVX* to);
-
-void deepcopy_VkCuFunctionCreateInfoNVX(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkCuFunctionCreateInfoNVX* from,
-    VkCuFunctionCreateInfoNVX* to);
-
-void deepcopy_VkCuLaunchInfoNVX(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkCuLaunchInfoNVX* from,
-    VkCuLaunchInfoNVX* to);
-
-#endif
 #ifdef VK_NVX_image_view_handle
 void deepcopy_VkImageViewHandleInfoNVX(
     Allocator* alloc,
@@ -2792,174 +2432,6 @@ void deepcopy_VkImageViewAddressPropertiesNVX(
 #ifdef VK_AMD_gpu_shader_half_float
 #endif
 #ifdef VK_AMD_shader_ballot
-#endif
-#ifdef VK_EXT_video_encode_h264
-void deepcopy_VkVideoEncodeH264CapabilitiesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH264CapabilitiesEXT* from,
-    VkVideoEncodeH264CapabilitiesEXT* to);
-
-void deepcopy_VkVideoEncodeH264SessionCreateInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH264SessionCreateInfoEXT* from,
-    VkVideoEncodeH264SessionCreateInfoEXT* to);
-
-void deepcopy_VkVideoEncodeH264SessionParametersAddInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH264SessionParametersAddInfoEXT* from,
-    VkVideoEncodeH264SessionParametersAddInfoEXT* to);
-
-void deepcopy_VkVideoEncodeH264SessionParametersCreateInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH264SessionParametersCreateInfoEXT* from,
-    VkVideoEncodeH264SessionParametersCreateInfoEXT* to);
-
-void deepcopy_VkVideoEncodeH264DpbSlotInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH264DpbSlotInfoEXT* from,
-    VkVideoEncodeH264DpbSlotInfoEXT* to);
-
-void deepcopy_VkVideoEncodeH264NaluSliceEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH264NaluSliceEXT* from,
-    VkVideoEncodeH264NaluSliceEXT* to);
-
-void deepcopy_VkVideoEncodeH264VclFrameInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH264VclFrameInfoEXT* from,
-    VkVideoEncodeH264VclFrameInfoEXT* to);
-
-void deepcopy_VkVideoEncodeH264EmitPictureParametersEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH264EmitPictureParametersEXT* from,
-    VkVideoEncodeH264EmitPictureParametersEXT* to);
-
-void deepcopy_VkVideoEncodeH264ProfileEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH264ProfileEXT* from,
-    VkVideoEncodeH264ProfileEXT* to);
-
-#endif
-#ifdef VK_EXT_video_encode_h265
-void deepcopy_VkVideoEncodeH265CapabilitiesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH265CapabilitiesEXT* from,
-    VkVideoEncodeH265CapabilitiesEXT* to);
-
-void deepcopy_VkVideoEncodeH265SessionCreateInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH265SessionCreateInfoEXT* from,
-    VkVideoEncodeH265SessionCreateInfoEXT* to);
-
-void deepcopy_VkVideoEncodeH265SessionParametersAddInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH265SessionParametersAddInfoEXT* from,
-    VkVideoEncodeH265SessionParametersAddInfoEXT* to);
-
-void deepcopy_VkVideoEncodeH265SessionParametersCreateInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH265SessionParametersCreateInfoEXT* from,
-    VkVideoEncodeH265SessionParametersCreateInfoEXT* to);
-
-void deepcopy_VkVideoEncodeH265DpbSlotInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH265DpbSlotInfoEXT* from,
-    VkVideoEncodeH265DpbSlotInfoEXT* to);
-
-void deepcopy_VkVideoEncodeH265ReferenceListsEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH265ReferenceListsEXT* from,
-    VkVideoEncodeH265ReferenceListsEXT* to);
-
-void deepcopy_VkVideoEncodeH265NaluSliceEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH265NaluSliceEXT* from,
-    VkVideoEncodeH265NaluSliceEXT* to);
-
-void deepcopy_VkVideoEncodeH265VclFrameInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH265VclFrameInfoEXT* from,
-    VkVideoEncodeH265VclFrameInfoEXT* to);
-
-void deepcopy_VkVideoEncodeH265EmitPictureParametersEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH265EmitPictureParametersEXT* from,
-    VkVideoEncodeH265EmitPictureParametersEXT* to);
-
-void deepcopy_VkVideoEncodeH265ProfileEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoEncodeH265ProfileEXT* from,
-    VkVideoEncodeH265ProfileEXT* to);
-
-#endif
-#ifdef VK_EXT_video_decode_h264
-void deepcopy_VkVideoDecodeH264ProfileEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoDecodeH264ProfileEXT* from,
-    VkVideoDecodeH264ProfileEXT* to);
-
-void deepcopy_VkVideoDecodeH264CapabilitiesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoDecodeH264CapabilitiesEXT* from,
-    VkVideoDecodeH264CapabilitiesEXT* to);
-
-void deepcopy_VkVideoDecodeH264SessionCreateInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoDecodeH264SessionCreateInfoEXT* from,
-    VkVideoDecodeH264SessionCreateInfoEXT* to);
-
-void deepcopy_VkVideoDecodeH264SessionParametersAddInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoDecodeH264SessionParametersAddInfoEXT* from,
-    VkVideoDecodeH264SessionParametersAddInfoEXT* to);
-
-void deepcopy_VkVideoDecodeH264SessionParametersCreateInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoDecodeH264SessionParametersCreateInfoEXT* from,
-    VkVideoDecodeH264SessionParametersCreateInfoEXT* to);
-
-void deepcopy_VkVideoDecodeH264PictureInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoDecodeH264PictureInfoEXT* from,
-    VkVideoDecodeH264PictureInfoEXT* to);
-
-void deepcopy_VkVideoDecodeH264MvcEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoDecodeH264MvcEXT* from,
-    VkVideoDecodeH264MvcEXT* to);
-
-void deepcopy_VkVideoDecodeH264DpbSlotInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoDecodeH264DpbSlotInfoEXT* from,
-    VkVideoDecodeH264DpbSlotInfoEXT* to);
-
 #endif
 #ifdef VK_AMD_texture_gather_bias_lod
 void deepcopy_VkTextureLODGatherFormatPropertiesAMD(
@@ -3364,12 +2836,6 @@ void deepcopy_VkExternalFormatANDROID(
     const VkExternalFormatANDROID* from,
     VkExternalFormatANDROID* to);
 
-void deepcopy_VkAndroidHardwareBufferFormatProperties2ANDROID(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkAndroidHardwareBufferFormatProperties2ANDROID* from,
-    VkAndroidHardwareBufferFormatProperties2ANDROID* to);
-
 #endif
 #ifdef VK_EXT_sampler_filter_minmax
 DEFINE_ALIAS_FUNCTION(deepcopy_VkSamplerReductionModeCreateInfo, deepcopy_VkSamplerReductionModeCreateInfoEXT)
@@ -3551,18 +3017,6 @@ void deepcopy_VkImageDrmFormatModifierPropertiesEXT(
     VkStructureType rootType,
     const VkImageDrmFormatModifierPropertiesEXT* from,
     VkImageDrmFormatModifierPropertiesEXT* to);
-
-void deepcopy_VkDrmFormatModifierProperties2EXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkDrmFormatModifierProperties2EXT* from,
-    VkDrmFormatModifierProperties2EXT* to);
-
-void deepcopy_VkDrmFormatModifierPropertiesList2EXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkDrmFormatModifierPropertiesList2EXT* from,
-    VkDrmFormatModifierPropertiesList2EXT* to);
 
 #endif
 #ifdef VK_EXT_validation_cache
@@ -3817,50 +3271,6 @@ void deepcopy_VkPhysicalDeviceShaderCorePropertiesAMD(
     VkStructureType rootType,
     const VkPhysicalDeviceShaderCorePropertiesAMD* from,
     VkPhysicalDeviceShaderCorePropertiesAMD* to);
-
-#endif
-#ifdef VK_EXT_video_decode_h265
-void deepcopy_VkVideoDecodeH265ProfileEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoDecodeH265ProfileEXT* from,
-    VkVideoDecodeH265ProfileEXT* to);
-
-void deepcopy_VkVideoDecodeH265CapabilitiesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoDecodeH265CapabilitiesEXT* from,
-    VkVideoDecodeH265CapabilitiesEXT* to);
-
-void deepcopy_VkVideoDecodeH265SessionCreateInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoDecodeH265SessionCreateInfoEXT* from,
-    VkVideoDecodeH265SessionCreateInfoEXT* to);
-
-void deepcopy_VkVideoDecodeH265SessionParametersAddInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoDecodeH265SessionParametersAddInfoEXT* from,
-    VkVideoDecodeH265SessionParametersAddInfoEXT* to);
-
-void deepcopy_VkVideoDecodeH265SessionParametersCreateInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoDecodeH265SessionParametersCreateInfoEXT* from,
-    VkVideoDecodeH265SessionParametersCreateInfoEXT* to);
-
-void deepcopy_VkVideoDecodeH265PictureInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoDecodeH265PictureInfoEXT* from,
-    VkVideoDecodeH265PictureInfoEXT* to);
-
-void deepcopy_VkVideoDecodeH265DpbSlotInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVideoDecodeH265DpbSlotInfoEXT* from,
-    VkVideoDecodeH265DpbSlotInfoEXT* to);
 
 #endif
 #ifdef VK_AMD_memory_overallocation_behavior
@@ -4287,26 +3697,6 @@ void deepcopy_VkPhysicalDeviceYcbcrImageArraysFeaturesEXT(
     VkPhysicalDeviceYcbcrImageArraysFeaturesEXT* to);
 
 #endif
-#ifdef VK_EXT_provoking_vertex
-void deepcopy_VkPhysicalDeviceProvokingVertexFeaturesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceProvokingVertexFeaturesEXT* from,
-    VkPhysicalDeviceProvokingVertexFeaturesEXT* to);
-
-void deepcopy_VkPhysicalDeviceProvokingVertexPropertiesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceProvokingVertexPropertiesEXT* from,
-    VkPhysicalDeviceProvokingVertexPropertiesEXT* to);
-
-void deepcopy_VkPipelineRasterizationProvokingVertexStateCreateInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPipelineRasterizationProvokingVertexStateCreateInfoEXT* from,
-    VkPipelineRasterizationProvokingVertexStateCreateInfoEXT* to);
-
-#endif
 #ifdef VK_EXT_full_screen_exclusive
 void deepcopy_VkSurfaceFullScreenExclusiveInfoEXT(
     Allocator* alloc,
@@ -4381,14 +3771,6 @@ void deepcopy_VkPhysicalDeviceExtendedDynamicStateFeaturesEXT(
     VkStructureType rootType,
     const VkPhysicalDeviceExtendedDynamicStateFeaturesEXT* from,
     VkPhysicalDeviceExtendedDynamicStateFeaturesEXT* to);
-
-#endif
-#ifdef VK_EXT_shader_atomic_float2
-void deepcopy_VkPhysicalDeviceShaderAtomicFloat2FeaturesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceShaderAtomicFloat2FeaturesEXT* from,
-    VkPhysicalDeviceShaderAtomicFloat2FeaturesEXT* to);
 
 #endif
 #ifdef VK_EXT_shader_demote_to_helper_invocation
@@ -4479,20 +3861,6 @@ void deepcopy_VkGeneratedCommandsMemoryRequirementsInfoNV(
     VkGeneratedCommandsMemoryRequirementsInfoNV* to);
 
 #endif
-#ifdef VK_NV_inherited_viewport_scissor
-void deepcopy_VkPhysicalDeviceInheritedViewportScissorFeaturesNV(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceInheritedViewportScissorFeaturesNV* from,
-    VkPhysicalDeviceInheritedViewportScissorFeaturesNV* to);
-
-void deepcopy_VkCommandBufferInheritanceViewportScissorInfoNV(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkCommandBufferInheritanceViewportScissorInfoNV* from,
-    VkCommandBufferInheritanceViewportScissorInfoNV* to);
-
-#endif
 #ifdef VK_EXT_texel_buffer_alignment
 void deepcopy_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT(
     Allocator* alloc,
@@ -4540,8 +3908,6 @@ void deepcopy_VkDeviceDeviceMemoryReportCreateInfoEXT(
     const VkDeviceDeviceMemoryReportCreateInfoEXT* from,
     VkDeviceDeviceMemoryReportCreateInfoEXT* to);
 
-#endif
-#ifdef VK_EXT_acquire_drm_display
 #endif
 #ifdef VK_EXT_robustness2
 void deepcopy_VkPhysicalDeviceRobustness2FeaturesEXT(
@@ -4643,70 +4009,6 @@ void deepcopy_VkPipelineFragmentShadingRateEnumStateCreateInfoNV(
     VkPipelineFragmentShadingRateEnumStateCreateInfoNV* to);
 
 #endif
-#ifdef VK_NV_ray_tracing_motion_blur
-void deepcopy_VkDeviceOrHostAddressConstKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkDeviceOrHostAddressConstKHR* from,
-    VkDeviceOrHostAddressConstKHR* to);
-
-void deepcopy_VkAccelerationStructureGeometryMotionTrianglesDataNV(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkAccelerationStructureGeometryMotionTrianglesDataNV* from,
-    VkAccelerationStructureGeometryMotionTrianglesDataNV* to);
-
-void deepcopy_VkAccelerationStructureMotionInfoNV(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkAccelerationStructureMotionInfoNV* from,
-    VkAccelerationStructureMotionInfoNV* to);
-
-void deepcopy_VkAccelerationStructureMatrixMotionInstanceNV(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkAccelerationStructureMatrixMotionInstanceNV* from,
-    VkAccelerationStructureMatrixMotionInstanceNV* to);
-
-void deepcopy_VkSRTDataNV(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkSRTDataNV* from,
-    VkSRTDataNV* to);
-
-void deepcopy_VkAccelerationStructureSRTMotionInstanceNV(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkAccelerationStructureSRTMotionInstanceNV* from,
-    VkAccelerationStructureSRTMotionInstanceNV* to);
-
-void deepcopy_VkAccelerationStructureMotionInstanceDataNV(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkAccelerationStructureMotionInstanceDataNV* from,
-    VkAccelerationStructureMotionInstanceDataNV* to);
-
-void deepcopy_VkAccelerationStructureMotionInstanceNV(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkAccelerationStructureMotionInstanceNV* from,
-    VkAccelerationStructureMotionInstanceNV* to);
-
-void deepcopy_VkPhysicalDeviceRayTracingMotionBlurFeaturesNV(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceRayTracingMotionBlurFeaturesNV* from,
-    VkPhysicalDeviceRayTracingMotionBlurFeaturesNV* to);
-
-#endif
-#ifdef VK_EXT_ycbcr_2plane_444_formats
-void deepcopy_VkPhysicalDeviceYcbcr2Plane444FormatsFeaturesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceYcbcr2Plane444FormatsFeaturesEXT* from,
-    VkPhysicalDeviceYcbcr2Plane444FormatsFeaturesEXT* to);
-
-#endif
 #ifdef VK_EXT_fragment_density_map2
 void deepcopy_VkPhysicalDeviceFragmentDensityMap2FeaturesEXT(
     Allocator* alloc,
@@ -4745,246 +4047,12 @@ void deepcopy_VkPhysicalDevice4444FormatsFeaturesEXT(
     VkPhysicalDevice4444FormatsFeaturesEXT* to);
 
 #endif
-#ifdef VK_EXT_rgba10x6_formats
-void deepcopy_VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT* from,
-    VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT* to);
-
-#endif
-#ifdef VK_NV_acquire_winrt_display
-#endif
 #ifdef VK_EXT_directfb_surface
 void deepcopy_VkDirectFBSurfaceCreateInfoEXT(
     Allocator* alloc,
     VkStructureType rootType,
     const VkDirectFBSurfaceCreateInfoEXT* from,
     VkDirectFBSurfaceCreateInfoEXT* to);
-
-#endif
-#ifdef VK_VALVE_mutable_descriptor_type
-void deepcopy_VkPhysicalDeviceMutableDescriptorTypeFeaturesVALVE(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceMutableDescriptorTypeFeaturesVALVE* from,
-    VkPhysicalDeviceMutableDescriptorTypeFeaturesVALVE* to);
-
-void deepcopy_VkMutableDescriptorTypeListVALVE(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkMutableDescriptorTypeListVALVE* from,
-    VkMutableDescriptorTypeListVALVE* to);
-
-void deepcopy_VkMutableDescriptorTypeCreateInfoVALVE(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkMutableDescriptorTypeCreateInfoVALVE* from,
-    VkMutableDescriptorTypeCreateInfoVALVE* to);
-
-#endif
-#ifdef VK_EXT_vertex_input_dynamic_state
-void deepcopy_VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT* from,
-    VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT* to);
-
-void deepcopy_VkVertexInputBindingDescription2EXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVertexInputBindingDescription2EXT* from,
-    VkVertexInputBindingDescription2EXT* to);
-
-void deepcopy_VkVertexInputAttributeDescription2EXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkVertexInputAttributeDescription2EXT* from,
-    VkVertexInputAttributeDescription2EXT* to);
-
-#endif
-#ifdef VK_EXT_physical_device_drm
-void deepcopy_VkPhysicalDeviceDrmPropertiesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceDrmPropertiesEXT* from,
-    VkPhysicalDeviceDrmPropertiesEXT* to);
-
-#endif
-#ifdef VK_EXT_primitive_topology_list_restart
-void deepcopy_VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT* from,
-    VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT* to);
-
-#endif
-#ifdef VK_FUCHSIA_external_memory
-void deepcopy_VkImportMemoryZirconHandleInfoFUCHSIA(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkImportMemoryZirconHandleInfoFUCHSIA* from,
-    VkImportMemoryZirconHandleInfoFUCHSIA* to);
-
-void deepcopy_VkMemoryZirconHandlePropertiesFUCHSIA(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkMemoryZirconHandlePropertiesFUCHSIA* from,
-    VkMemoryZirconHandlePropertiesFUCHSIA* to);
-
-void deepcopy_VkMemoryGetZirconHandleInfoFUCHSIA(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkMemoryGetZirconHandleInfoFUCHSIA* from,
-    VkMemoryGetZirconHandleInfoFUCHSIA* to);
-
-#endif
-#ifdef VK_FUCHSIA_external_semaphore
-void deepcopy_VkImportSemaphoreZirconHandleInfoFUCHSIA(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkImportSemaphoreZirconHandleInfoFUCHSIA* from,
-    VkImportSemaphoreZirconHandleInfoFUCHSIA* to);
-
-void deepcopy_VkSemaphoreGetZirconHandleInfoFUCHSIA(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkSemaphoreGetZirconHandleInfoFUCHSIA* from,
-    VkSemaphoreGetZirconHandleInfoFUCHSIA* to);
-
-#endif
-#ifdef VK_FUCHSIA_buffer_collection
-void deepcopy_VkBufferCollectionCreateInfoFUCHSIA(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkBufferCollectionCreateInfoFUCHSIA* from,
-    VkBufferCollectionCreateInfoFUCHSIA* to);
-
-void deepcopy_VkImportMemoryBufferCollectionFUCHSIA(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkImportMemoryBufferCollectionFUCHSIA* from,
-    VkImportMemoryBufferCollectionFUCHSIA* to);
-
-void deepcopy_VkBufferCollectionImageCreateInfoFUCHSIA(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkBufferCollectionImageCreateInfoFUCHSIA* from,
-    VkBufferCollectionImageCreateInfoFUCHSIA* to);
-
-void deepcopy_VkBufferCollectionConstraintsInfoFUCHSIA(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkBufferCollectionConstraintsInfoFUCHSIA* from,
-    VkBufferCollectionConstraintsInfoFUCHSIA* to);
-
-void deepcopy_VkBufferConstraintsInfoFUCHSIA(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkBufferConstraintsInfoFUCHSIA* from,
-    VkBufferConstraintsInfoFUCHSIA* to);
-
-void deepcopy_VkBufferCollectionBufferCreateInfoFUCHSIA(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkBufferCollectionBufferCreateInfoFUCHSIA* from,
-    VkBufferCollectionBufferCreateInfoFUCHSIA* to);
-
-void deepcopy_VkSysmemColorSpaceFUCHSIA(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkSysmemColorSpaceFUCHSIA* from,
-    VkSysmemColorSpaceFUCHSIA* to);
-
-void deepcopy_VkBufferCollectionPropertiesFUCHSIA(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkBufferCollectionPropertiesFUCHSIA* from,
-    VkBufferCollectionPropertiesFUCHSIA* to);
-
-void deepcopy_VkImageFormatConstraintsInfoFUCHSIA(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkImageFormatConstraintsInfoFUCHSIA* from,
-    VkImageFormatConstraintsInfoFUCHSIA* to);
-
-void deepcopy_VkImageConstraintsInfoFUCHSIA(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkImageConstraintsInfoFUCHSIA* from,
-    VkImageConstraintsInfoFUCHSIA* to);
-
-#endif
-#ifdef VK_HUAWEI_subpass_shading
-void deepcopy_VkSubpassShadingPipelineCreateInfoHUAWEI(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkSubpassShadingPipelineCreateInfoHUAWEI* from,
-    VkSubpassShadingPipelineCreateInfoHUAWEI* to);
-
-void deepcopy_VkPhysicalDeviceSubpassShadingFeaturesHUAWEI(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceSubpassShadingFeaturesHUAWEI* from,
-    VkPhysicalDeviceSubpassShadingFeaturesHUAWEI* to);
-
-void deepcopy_VkPhysicalDeviceSubpassShadingPropertiesHUAWEI(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceSubpassShadingPropertiesHUAWEI* from,
-    VkPhysicalDeviceSubpassShadingPropertiesHUAWEI* to);
-
-#endif
-#ifdef VK_HUAWEI_invocation_mask
-void deepcopy_VkPhysicalDeviceInvocationMaskFeaturesHUAWEI(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceInvocationMaskFeaturesHUAWEI* from,
-    VkPhysicalDeviceInvocationMaskFeaturesHUAWEI* to);
-
-#endif
-#ifdef VK_NV_external_memory_rdma
-void deepcopy_VkMemoryGetRemoteAddressInfoNV(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkMemoryGetRemoteAddressInfoNV* from,
-    VkMemoryGetRemoteAddressInfoNV* to);
-
-void deepcopy_VkPhysicalDeviceExternalMemoryRDMAFeaturesNV(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceExternalMemoryRDMAFeaturesNV* from,
-    VkPhysicalDeviceExternalMemoryRDMAFeaturesNV* to);
-
-#endif
-#ifdef VK_EXT_extended_dynamic_state2
-void deepcopy_VkPhysicalDeviceExtendedDynamicState2FeaturesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceExtendedDynamicState2FeaturesEXT* from,
-    VkPhysicalDeviceExtendedDynamicState2FeaturesEXT* to);
-
-#endif
-#ifdef VK_QNX_screen_surface
-void deepcopy_VkScreenSurfaceCreateInfoQNX(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkScreenSurfaceCreateInfoQNX* from,
-    VkScreenSurfaceCreateInfoQNX* to);
-
-#endif
-#ifdef VK_EXT_color_write_enable
-void deepcopy_VkPhysicalDeviceColorWriteEnableFeaturesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceColorWriteEnableFeaturesEXT* from,
-    VkPhysicalDeviceColorWriteEnableFeaturesEXT* to);
-
-void deepcopy_VkPipelineColorWriteCreateInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPipelineColorWriteCreateInfoEXT* from,
-    VkPipelineColorWriteCreateInfoEXT* to);
 
 #endif
 #ifdef VK_GOOGLE_gfxstream
@@ -5007,76 +4075,18 @@ void deepcopy_VkImportPhysicalAddressGOOGLE(
     VkImportPhysicalAddressGOOGLE* to);
 
 #endif
-#ifdef VK_EXT_global_priority_query
-void deepcopy_VkPhysicalDeviceGlobalPriorityQueryFeaturesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceGlobalPriorityQueryFeaturesEXT* from,
-    VkPhysicalDeviceGlobalPriorityQueryFeaturesEXT* to);
-
-void deepcopy_VkQueueFamilyGlobalPriorityPropertiesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkQueueFamilyGlobalPriorityPropertiesEXT* from,
-    VkQueueFamilyGlobalPriorityPropertiesEXT* to);
-
-#endif
-#ifdef VK_EXT_multi_draw
-void deepcopy_VkPhysicalDeviceMultiDrawFeaturesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceMultiDrawFeaturesEXT* from,
-    VkPhysicalDeviceMultiDrawFeaturesEXT* to);
-
-void deepcopy_VkPhysicalDeviceMultiDrawPropertiesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceMultiDrawPropertiesEXT* from,
-    VkPhysicalDeviceMultiDrawPropertiesEXT* to);
-
-void deepcopy_VkMultiDrawInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkMultiDrawInfoEXT* from,
-    VkMultiDrawInfoEXT* to);
-
-void deepcopy_VkMultiDrawIndexedInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkMultiDrawIndexedInfoEXT* from,
-    VkMultiDrawIndexedInfoEXT* to);
-
-#endif
-#ifdef VK_EXT_load_store_op_none
-#endif
-#ifdef VK_EXT_border_color_swizzle
-void deepcopy_VkPhysicalDeviceBorderColorSwizzleFeaturesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDeviceBorderColorSwizzleFeaturesEXT* from,
-    VkPhysicalDeviceBorderColorSwizzleFeaturesEXT* to);
-
-void deepcopy_VkSamplerBorderColorComponentMappingCreateInfoEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkSamplerBorderColorComponentMappingCreateInfoEXT* from,
-    VkSamplerBorderColorComponentMappingCreateInfoEXT* to);
-
-#endif
-#ifdef VK_EXT_pageable_device_local_memory
-void deepcopy_VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT* from,
-    VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT* to);
-
-#endif
 #ifdef VK_KHR_acceleration_structure
 void deepcopy_VkDeviceOrHostAddressKHR(
     Allocator* alloc,
     VkStructureType rootType,
     const VkDeviceOrHostAddressKHR* from,
     VkDeviceOrHostAddressKHR* to);
+
+void deepcopy_VkDeviceOrHostAddressConstKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkDeviceOrHostAddressConstKHR* from,
+    VkDeviceOrHostAddressConstKHR* to);
 
 void deepcopy_VkAccelerationStructureBuildRangeInfoKHR(
     Allocator* alloc,

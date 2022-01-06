@@ -772,15 +772,8 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 *(VkImage*)&image = (VkImage)unbox_VkImage((VkImage)(*&cgen_var_0));
                 memcpy((VkImageLayout*)&imageLayout, *readStreamPtrPtr, sizeof(VkImageLayout));
                 *readStreamPtrPtr += sizeof(VkImageLayout);
-                // WARNING PTR CHECK
-                memcpy((VkClearColorValue**)&pColor, (*readStreamPtrPtr), 8);
-                android::base::Stream::fromBe64((uint8_t*)&pColor);
-                *readStreamPtrPtr += 8;
-                if (pColor)
-                {
-                    pColor = (VkClearColorValue*)stack_pColor;
-                    reservedunmarshal_VkClearColorValue(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkClearColorValue*)(pColor), readStreamPtrPtr);
-                }
+                pColor = (VkClearColorValue*)stack_pColor;
+                reservedunmarshal_VkClearColorValue(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkClearColorValue*)(pColor), readStreamPtrPtr);
                 memcpy((uint32_t*)&rangeCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
                 if (((rangeCount)) <= MAX_STACK_ITEMS)
@@ -1563,94 +1556,6 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
 #endif
 #ifdef VK_KHR_sampler_mirror_clamp_to_edge
 #endif
-#ifdef VK_KHR_video_queue
-            case OP_vkCmdBeginVideoCodingKHR:
-            {
-                android::base::beginTrace("vkCmdBeginVideoCodingKHR subdecode");
-                const VkVideoBeginCodingInfoKHR* pBeginInfo;
-                VkVideoBeginCodingInfoKHR stack_pBeginInfo[1];
-                pBeginInfo = (VkVideoBeginCodingInfoKHR*)stack_pBeginInfo;
-                reservedunmarshal_VkVideoBeginCodingInfoKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkVideoBeginCodingInfoKHR*)(pBeginInfo), readStreamPtrPtr);
-                if (pBeginInfo)
-                {
-                    transform_tohost_VkVideoBeginCodingInfoKHR(globalstate, (VkVideoBeginCodingInfoKHR*)(pBeginInfo));
-                }
-                vk->vkCmdBeginVideoCodingKHR((VkCommandBuffer)dispatchHandle, pBeginInfo);
-                android::base::endTrace();
-                break;
-            }
-            case OP_vkCmdEndVideoCodingKHR:
-            {
-                android::base::beginTrace("vkCmdEndVideoCodingKHR subdecode");
-                const VkVideoEndCodingInfoKHR* pEndCodingInfo;
-                VkVideoEndCodingInfoKHR stack_pEndCodingInfo[1];
-                pEndCodingInfo = (VkVideoEndCodingInfoKHR*)stack_pEndCodingInfo;
-                reservedunmarshal_VkVideoEndCodingInfoKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkVideoEndCodingInfoKHR*)(pEndCodingInfo), readStreamPtrPtr);
-                if (pEndCodingInfo)
-                {
-                    transform_tohost_VkVideoEndCodingInfoKHR(globalstate, (VkVideoEndCodingInfoKHR*)(pEndCodingInfo));
-                }
-                vk->vkCmdEndVideoCodingKHR((VkCommandBuffer)dispatchHandle, pEndCodingInfo);
-                android::base::endTrace();
-                break;
-            }
-            case OP_vkCmdControlVideoCodingKHR:
-            {
-                android::base::beginTrace("vkCmdControlVideoCodingKHR subdecode");
-                const VkVideoCodingControlInfoKHR* pCodingControlInfo;
-                VkVideoCodingControlInfoKHR stack_pCodingControlInfo[1];
-                pCodingControlInfo = (VkVideoCodingControlInfoKHR*)stack_pCodingControlInfo;
-                reservedunmarshal_VkVideoCodingControlInfoKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkVideoCodingControlInfoKHR*)(pCodingControlInfo), readStreamPtrPtr);
-                if (pCodingControlInfo)
-                {
-                    transform_tohost_VkVideoCodingControlInfoKHR(globalstate, (VkVideoCodingControlInfoKHR*)(pCodingControlInfo));
-                }
-                vk->vkCmdControlVideoCodingKHR((VkCommandBuffer)dispatchHandle, pCodingControlInfo);
-                android::base::endTrace();
-                break;
-            }
-#endif
-#ifdef VK_KHR_video_decode_queue
-            case OP_vkCmdDecodeVideoKHR:
-            {
-                android::base::beginTrace("vkCmdDecodeVideoKHR subdecode");
-                const VkVideoDecodeInfoKHR* pFrameInfo;
-                VkVideoDecodeInfoKHR stack_pFrameInfo[1];
-                pFrameInfo = (VkVideoDecodeInfoKHR*)stack_pFrameInfo;
-                reservedunmarshal_VkVideoDecodeInfoKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkVideoDecodeInfoKHR*)(pFrameInfo), readStreamPtrPtr);
-                if (pFrameInfo)
-                {
-                    transform_tohost_VkVideoDecodeInfoKHR(globalstate, (VkVideoDecodeInfoKHR*)(pFrameInfo));
-                }
-                vk->vkCmdDecodeVideoKHR((VkCommandBuffer)dispatchHandle, pFrameInfo);
-                android::base::endTrace();
-                break;
-            }
-#endif
-#ifdef VK_KHR_dynamic_rendering
-            case OP_vkCmdBeginRenderingKHR:
-            {
-                android::base::beginTrace("vkCmdBeginRenderingKHR subdecode");
-                const VkRenderingInfoKHR* pRenderingInfo;
-                VkRenderingInfoKHR stack_pRenderingInfo[1];
-                pRenderingInfo = (VkRenderingInfoKHR*)stack_pRenderingInfo;
-                reservedunmarshal_VkRenderingInfoKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkRenderingInfoKHR*)(pRenderingInfo), readStreamPtrPtr);
-                if (pRenderingInfo)
-                {
-                    transform_tohost_VkRenderingInfoKHR(globalstate, (VkRenderingInfoKHR*)(pRenderingInfo));
-                }
-                vk->vkCmdBeginRenderingKHR((VkCommandBuffer)dispatchHandle, pRenderingInfo);
-                android::base::endTrace();
-                break;
-            }
-            case OP_vkCmdEndRenderingKHR:
-            {
-                android::base::beginTrace("vkCmdEndRenderingKHR subdecode");
-                vk->vkCmdEndRenderingKHR((VkCommandBuffer)dispatchHandle);
-                android::base::endTrace();
-                break;
-            }
-#endif
 #ifdef VK_KHR_multiview
 #endif
 #ifdef VK_KHR_get_physical_device_properties2
@@ -2011,8 +1916,6 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
 #endif
 #ifdef VK_KHR_separate_depth_stencil_layouts
 #endif
-#ifdef VK_KHR_present_wait
-#endif
 #ifdef VK_KHR_uniform_buffer_standard_layout
 #endif
 #ifdef VK_KHR_buffer_device_address
@@ -2021,178 +1924,9 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
 #endif
 #ifdef VK_KHR_pipeline_executable_properties
 #endif
-#ifdef VK_KHR_shader_integer_dot_product
-#endif
 #ifdef VK_KHR_pipeline_library
 #endif
 #ifdef VK_KHR_shader_non_semantic_info
-#endif
-#ifdef VK_KHR_present_id
-#endif
-#ifdef VK_KHR_video_encode_queue
-            case OP_vkCmdEncodeVideoKHR:
-            {
-                android::base::beginTrace("vkCmdEncodeVideoKHR subdecode");
-                const VkVideoEncodeInfoKHR* pEncodeInfo;
-                VkVideoEncodeInfoKHR stack_pEncodeInfo[1];
-                pEncodeInfo = (VkVideoEncodeInfoKHR*)stack_pEncodeInfo;
-                reservedunmarshal_VkVideoEncodeInfoKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkVideoEncodeInfoKHR*)(pEncodeInfo), readStreamPtrPtr);
-                if (pEncodeInfo)
-                {
-                    transform_tohost_VkVideoEncodeInfoKHR(globalstate, (VkVideoEncodeInfoKHR*)(pEncodeInfo));
-                }
-                vk->vkCmdEncodeVideoKHR((VkCommandBuffer)dispatchHandle, pEncodeInfo);
-                android::base::endTrace();
-                break;
-            }
-#endif
-#ifdef VK_KHR_synchronization2
-            case OP_vkCmdSetEvent2KHR:
-            {
-                android::base::beginTrace("vkCmdSetEvent2KHR subdecode");
-                VkEvent event;
-                const VkDependencyInfoKHR* pDependencyInfo;
-                VkDependencyInfoKHR stack_pDependencyInfo[1];
-                uint64_t cgen_var_0;
-                memcpy((uint64_t*)&cgen_var_0, *readStreamPtrPtr, 1 * 8);
-                *readStreamPtrPtr += 1 * 8;
-                *(VkEvent*)&event = (VkEvent)unbox_VkEvent((VkEvent)(*&cgen_var_0));
-                pDependencyInfo = (VkDependencyInfoKHR*)stack_pDependencyInfo;
-                reservedunmarshal_VkDependencyInfoKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkDependencyInfoKHR*)(pDependencyInfo), readStreamPtrPtr);
-                if (pDependencyInfo)
-                {
-                    transform_tohost_VkDependencyInfoKHR(globalstate, (VkDependencyInfoKHR*)(pDependencyInfo));
-                }
-                vk->vkCmdSetEvent2KHR((VkCommandBuffer)dispatchHandle, event, pDependencyInfo);
-                android::base::endTrace();
-                break;
-            }
-            case OP_vkCmdResetEvent2KHR:
-            {
-                android::base::beginTrace("vkCmdResetEvent2KHR subdecode");
-                VkEvent event;
-                VkPipelineStageFlags2KHR stageMask;
-                uint64_t cgen_var_0;
-                memcpy((uint64_t*)&cgen_var_0, *readStreamPtrPtr, 1 * 8);
-                *readStreamPtrPtr += 1 * 8;
-                *(VkEvent*)&event = (VkEvent)unbox_VkEvent((VkEvent)(*&cgen_var_0));
-                memcpy((VkPipelineStageFlags2KHR*)&stageMask, *readStreamPtrPtr, sizeof(VkPipelineStageFlags2KHR));
-                *readStreamPtrPtr += sizeof(VkPipelineStageFlags2KHR);
-                vk->vkCmdResetEvent2KHR((VkCommandBuffer)dispatchHandle, event, stageMask);
-                android::base::endTrace();
-                break;
-            }
-            case OP_vkCmdWaitEvents2KHR:
-            {
-                android::base::beginTrace("vkCmdWaitEvents2KHR subdecode");
-                uint32_t eventCount;
-                const VkEvent* pEvents;
-                VkEvent stack_pEvents[MAX_STACK_ITEMS];
-                const VkDependencyInfoKHR* pDependencyInfos;
-                VkDependencyInfoKHR stack_pDependencyInfos[MAX_STACK_ITEMS];
-                memcpy((uint32_t*)&eventCount, *readStreamPtrPtr, sizeof(uint32_t));
-                *readStreamPtrPtr += sizeof(uint32_t);
-                if (((eventCount)) <= MAX_STACK_ITEMS)
-                {
-                    pEvents = (VkEvent*)stack_pEvents;
-                }
-                else
-                {
-                    readStream->alloc((void**)&pEvents, ((eventCount)) * sizeof(const VkEvent));
-                }
-                if (((eventCount)))
-                {
-                    uint8_t* cgen_var_0_ptr = (uint8_t*)(*readStreamPtrPtr);
-                    *readStreamPtrPtr += 8 * ((eventCount));
-                    for (uint32_t k = 0; k < ((eventCount)); ++k)
-                    {
-                        uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
-                        *(((VkEvent*)pEvents) + k) = (VkEvent)unbox_VkEvent((VkEvent)tmpval);
-                    }
-                }
-                if (((eventCount)) <= MAX_STACK_ITEMS)
-                {
-                    pDependencyInfos = (VkDependencyInfoKHR*)stack_pDependencyInfos;
-                }
-                else
-                {
-                    readStream->alloc((void**)&pDependencyInfos, ((eventCount)) * sizeof(const VkDependencyInfoKHR));
-                }
-                for (uint32_t i = 0; i < (uint32_t)((eventCount)); ++i)
-                {
-                    reservedunmarshal_VkDependencyInfoKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkDependencyInfoKHR*)(pDependencyInfos + i), readStreamPtrPtr);
-                }
-                if (pDependencyInfos)
-                {
-                    for (uint32_t i = 0; i < (uint32_t)((eventCount)); ++i)
-                    {
-                        transform_tohost_VkDependencyInfoKHR(globalstate, (VkDependencyInfoKHR*)(pDependencyInfos + i));
-                    }
-                }
-                vk->vkCmdWaitEvents2KHR((VkCommandBuffer)dispatchHandle, eventCount, pEvents, pDependencyInfos);
-                android::base::endTrace();
-                break;
-            }
-            case OP_vkCmdPipelineBarrier2KHR:
-            {
-                android::base::beginTrace("vkCmdPipelineBarrier2KHR subdecode");
-                const VkDependencyInfoKHR* pDependencyInfo;
-                VkDependencyInfoKHR stack_pDependencyInfo[1];
-                pDependencyInfo = (VkDependencyInfoKHR*)stack_pDependencyInfo;
-                reservedunmarshal_VkDependencyInfoKHR(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkDependencyInfoKHR*)(pDependencyInfo), readStreamPtrPtr);
-                if (pDependencyInfo)
-                {
-                    transform_tohost_VkDependencyInfoKHR(globalstate, (VkDependencyInfoKHR*)(pDependencyInfo));
-                }
-                vk->vkCmdPipelineBarrier2KHR((VkCommandBuffer)dispatchHandle, pDependencyInfo);
-                android::base::endTrace();
-                break;
-            }
-            case OP_vkCmdWriteTimestamp2KHR:
-            {
-                android::base::beginTrace("vkCmdWriteTimestamp2KHR subdecode");
-                VkPipelineStageFlags2KHR stage;
-                VkQueryPool queryPool;
-                uint32_t query;
-                memcpy((VkPipelineStageFlags2KHR*)&stage, *readStreamPtrPtr, sizeof(VkPipelineStageFlags2KHR));
-                *readStreamPtrPtr += sizeof(VkPipelineStageFlags2KHR);
-                uint64_t cgen_var_0;
-                memcpy((uint64_t*)&cgen_var_0, *readStreamPtrPtr, 1 * 8);
-                *readStreamPtrPtr += 1 * 8;
-                *(VkQueryPool*)&queryPool = (VkQueryPool)unbox_VkQueryPool((VkQueryPool)(*&cgen_var_0));
-                memcpy((uint32_t*)&query, *readStreamPtrPtr, sizeof(uint32_t));
-                *readStreamPtrPtr += sizeof(uint32_t);
-                vk->vkCmdWriteTimestamp2KHR((VkCommandBuffer)dispatchHandle, stage, queryPool, query);
-                android::base::endTrace();
-                break;
-            }
-            case OP_vkCmdWriteBufferMarker2AMD:
-            {
-                android::base::beginTrace("vkCmdWriteBufferMarker2AMD subdecode");
-                VkPipelineStageFlags2KHR stage;
-                VkBuffer dstBuffer;
-                VkDeviceSize dstOffset;
-                uint32_t marker;
-                memcpy((VkPipelineStageFlags2KHR*)&stage, *readStreamPtrPtr, sizeof(VkPipelineStageFlags2KHR));
-                *readStreamPtrPtr += sizeof(VkPipelineStageFlags2KHR);
-                uint64_t cgen_var_0;
-                memcpy((uint64_t*)&cgen_var_0, *readStreamPtrPtr, 1 * 8);
-                *readStreamPtrPtr += 1 * 8;
-                *(VkBuffer*)&dstBuffer = (VkBuffer)unbox_VkBuffer((VkBuffer)(*&cgen_var_0));
-                memcpy((VkDeviceSize*)&dstOffset, *readStreamPtrPtr, sizeof(VkDeviceSize));
-                *readStreamPtrPtr += sizeof(VkDeviceSize);
-                memcpy((uint32_t*)&marker, *readStreamPtrPtr, sizeof(uint32_t));
-                *readStreamPtrPtr += sizeof(uint32_t);
-                vk->vkCmdWriteBufferMarker2AMD((VkCommandBuffer)dispatchHandle, stage, dstBuffer, dstOffset, marker);
-                android::base::endTrace();
-                break;
-            }
-#endif
-#ifdef VK_KHR_shader_subgroup_uniform_control_flow
-#endif
-#ifdef VK_KHR_zero_initialize_workgroup_memory
-#endif
-#ifdef VK_KHR_workgroup_memory_explicit_layout
 #endif
 #ifdef VK_KHR_copy_commands2
             case OP_vkCmdCopyBuffer2KHR:
@@ -2285,10 +2019,6 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 android::base::endTrace();
                 break;
             }
-#endif
-#ifdef VK_KHR_format_feature_flags2
-#endif
-#ifdef VK_KHR_maintenance4
 #endif
 #ifdef VK_ANDROID_native_buffer
 #endif
@@ -2599,23 +2329,6 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 break;
             }
 #endif
-#ifdef VK_NVX_binary_import
-            case OP_vkCmdCuLaunchKernelNVX:
-            {
-                android::base::beginTrace("vkCmdCuLaunchKernelNVX subdecode");
-                const VkCuLaunchInfoNVX* pLaunchInfo;
-                VkCuLaunchInfoNVX stack_pLaunchInfo[1];
-                pLaunchInfo = (VkCuLaunchInfoNVX*)stack_pLaunchInfo;
-                reservedunmarshal_VkCuLaunchInfoNVX(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkCuLaunchInfoNVX*)(pLaunchInfo), readStreamPtrPtr);
-                if (pLaunchInfo)
-                {
-                    transform_tohost_VkCuLaunchInfoNVX(globalstate, (VkCuLaunchInfoNVX*)(pLaunchInfo));
-                }
-                vk->vkCmdCuLaunchKernelNVX((VkCommandBuffer)dispatchHandle, pLaunchInfo);
-                android::base::endTrace();
-                break;
-            }
-#endif
 #ifdef VK_NVX_image_view_handle
 #endif
 #ifdef VK_AMD_draw_indirect_count
@@ -2683,12 +2396,6 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
 #ifdef VK_AMD_gpu_shader_half_float
 #endif
 #ifdef VK_AMD_shader_ballot
-#endif
-#ifdef VK_EXT_video_encode_h264
-#endif
-#ifdef VK_EXT_video_encode_h265
-#endif
-#ifdef VK_EXT_video_decode_h264
 #endif
 #ifdef VK_AMD_texture_gather_bias_lod
 #endif
@@ -3234,8 +2941,6 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
 #endif
 #ifdef VK_AMD_shader_core_properties
 #endif
-#ifdef VK_EXT_video_decode_h265
-#endif
 #ifdef VK_AMD_memory_overallocation_behavior
 #endif
 #ifdef VK_EXT_vertex_attribute_divisor
@@ -3472,8 +3177,6 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
 #endif
 #ifdef VK_EXT_ycbcr_image_arrays
 #endif
-#ifdef VK_EXT_provoking_vertex
-#endif
 #ifdef VK_EXT_full_screen_exclusive
 #endif
 #ifdef VK_EXT_headless_surface
@@ -3609,29 +3312,22 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 *readStreamPtrPtr += sizeof(uint32_t);
                 memcpy((uint32_t*)&bindingCount, *readStreamPtrPtr, sizeof(uint32_t));
                 *readStreamPtrPtr += sizeof(uint32_t);
-                // WARNING PTR CHECK
-                memcpy((VkBuffer**)&pBuffers, (*readStreamPtrPtr), 8);
-                android::base::Stream::fromBe64((uint8_t*)&pBuffers);
-                *readStreamPtrPtr += 8;
-                if (pBuffers)
+                if (((bindingCount)) <= MAX_STACK_ITEMS)
                 {
-                    if (((bindingCount)) <= MAX_STACK_ITEMS)
+                    pBuffers = (VkBuffer*)stack_pBuffers;
+                }
+                else
+                {
+                    readStream->alloc((void**)&pBuffers, ((bindingCount)) * sizeof(const VkBuffer));
+                }
+                if (((bindingCount)))
+                {
+                    uint8_t* cgen_var_0_ptr = (uint8_t*)(*readStreamPtrPtr);
+                    *readStreamPtrPtr += 8 * ((bindingCount));
+                    for (uint32_t k = 0; k < ((bindingCount)); ++k)
                     {
-                        pBuffers = (VkBuffer*)stack_pBuffers;
-                    }
-                    else
-                    {
-                        readStream->alloc((void**)&pBuffers, ((bindingCount)) * sizeof(const VkBuffer));
-                    }
-                    if (((bindingCount)))
-                    {
-                        uint8_t* cgen_var_0_0_ptr = (uint8_t*)(*readStreamPtrPtr);
-                        *readStreamPtrPtr += 8 * ((bindingCount));
-                        for (uint32_t k = 0; k < ((bindingCount)); ++k)
-                        {
-                            uint64_t tmpval; memcpy(&tmpval, cgen_var_0_0_ptr + k * 8, sizeof(uint64_t));
-                            *(((VkBuffer*)pBuffers) + k) = (VkBuffer)unbox_VkBuffer((VkBuffer)tmpval);
-                        }
+                        uint64_t tmpval; memcpy(&tmpval, cgen_var_0_ptr + k * 8, sizeof(uint64_t));
+                        *(((VkBuffer*)pBuffers) + k) = (VkBuffer)unbox_VkBuffer((VkBuffer)tmpval);
                     }
                 }
                 if (((bindingCount)) <= MAX_STACK_ITEMS)
@@ -3755,8 +3451,6 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 break;
             }
 #endif
-#ifdef VK_EXT_shader_atomic_float2
-#endif
 #ifdef VK_EXT_shader_demote_to_helper_invocation
 #endif
 #ifdef VK_NV_device_generated_commands
@@ -3812,15 +3506,11 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 break;
             }
 #endif
-#ifdef VK_NV_inherited_viewport_scissor
-#endif
 #ifdef VK_EXT_texel_buffer_alignment
 #endif
 #ifdef VK_QCOM_render_pass_transform
 #endif
 #ifdef VK_EXT_device_memory_report
-#endif
-#ifdef VK_EXT_acquire_drm_display
 #endif
 #ifdef VK_EXT_robustness2
 #endif
@@ -3851,10 +3541,6 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 break;
             }
 #endif
-#ifdef VK_NV_ray_tracing_motion_blur
-#endif
-#ifdef VK_EXT_ycbcr_2plane_444_formats
-#endif
 #ifdef VK_EXT_fragment_density_map2
 #endif
 #ifdef VK_QCOM_rotated_copy_commands
@@ -3863,186 +3549,7 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
 #endif
 #ifdef VK_EXT_4444_formats
 #endif
-#ifdef VK_EXT_rgba10x6_formats
-#endif
-#ifdef VK_NV_acquire_winrt_display
-#endif
 #ifdef VK_EXT_directfb_surface
-#endif
-#ifdef VK_VALVE_mutable_descriptor_type
-#endif
-#ifdef VK_EXT_vertex_input_dynamic_state
-            case OP_vkCmdSetVertexInputEXT:
-            {
-                android::base::beginTrace("vkCmdSetVertexInputEXT subdecode");
-                uint32_t vertexBindingDescriptionCount;
-                const VkVertexInputBindingDescription2EXT* pVertexBindingDescriptions;
-                VkVertexInputBindingDescription2EXT stack_pVertexBindingDescriptions[MAX_STACK_ITEMS];
-                uint32_t vertexAttributeDescriptionCount;
-                const VkVertexInputAttributeDescription2EXT* pVertexAttributeDescriptions;
-                VkVertexInputAttributeDescription2EXT stack_pVertexAttributeDescriptions[MAX_STACK_ITEMS];
-                memcpy((uint32_t*)&vertexBindingDescriptionCount, *readStreamPtrPtr, sizeof(uint32_t));
-                *readStreamPtrPtr += sizeof(uint32_t);
-                if (((vertexBindingDescriptionCount)) <= MAX_STACK_ITEMS)
-                {
-                    pVertexBindingDescriptions = (VkVertexInputBindingDescription2EXT*)stack_pVertexBindingDescriptions;
-                }
-                else
-                {
-                    readStream->alloc((void**)&pVertexBindingDescriptions, ((vertexBindingDescriptionCount)) * sizeof(const VkVertexInputBindingDescription2EXT));
-                }
-                for (uint32_t i = 0; i < (uint32_t)((vertexBindingDescriptionCount)); ++i)
-                {
-                    reservedunmarshal_VkVertexInputBindingDescription2EXT(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkVertexInputBindingDescription2EXT*)(pVertexBindingDescriptions + i), readStreamPtrPtr);
-                }
-                memcpy((uint32_t*)&vertexAttributeDescriptionCount, *readStreamPtrPtr, sizeof(uint32_t));
-                *readStreamPtrPtr += sizeof(uint32_t);
-                if (((vertexAttributeDescriptionCount)) <= MAX_STACK_ITEMS)
-                {
-                    pVertexAttributeDescriptions = (VkVertexInputAttributeDescription2EXT*)stack_pVertexAttributeDescriptions;
-                }
-                else
-                {
-                    readStream->alloc((void**)&pVertexAttributeDescriptions, ((vertexAttributeDescriptionCount)) * sizeof(const VkVertexInputAttributeDescription2EXT));
-                }
-                for (uint32_t i = 0; i < (uint32_t)((vertexAttributeDescriptionCount)); ++i)
-                {
-                    reservedunmarshal_VkVertexInputAttributeDescription2EXT(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkVertexInputAttributeDescription2EXT*)(pVertexAttributeDescriptions + i), readStreamPtrPtr);
-                }
-                if (pVertexBindingDescriptions)
-                {
-                    for (uint32_t i = 0; i < (uint32_t)((vertexBindingDescriptionCount)); ++i)
-                    {
-                        transform_tohost_VkVertexInputBindingDescription2EXT(globalstate, (VkVertexInputBindingDescription2EXT*)(pVertexBindingDescriptions + i));
-                    }
-                }
-                if (pVertexAttributeDescriptions)
-                {
-                    for (uint32_t i = 0; i < (uint32_t)((vertexAttributeDescriptionCount)); ++i)
-                    {
-                        transform_tohost_VkVertexInputAttributeDescription2EXT(globalstate, (VkVertexInputAttributeDescription2EXT*)(pVertexAttributeDescriptions + i));
-                    }
-                }
-                vk->vkCmdSetVertexInputEXT((VkCommandBuffer)dispatchHandle, vertexBindingDescriptionCount, pVertexBindingDescriptions, vertexAttributeDescriptionCount, pVertexAttributeDescriptions);
-                android::base::endTrace();
-                break;
-            }
-#endif
-#ifdef VK_EXT_physical_device_drm
-#endif
-#ifdef VK_EXT_primitive_topology_list_restart
-#endif
-#ifdef VK_FUCHSIA_external_memory
-#endif
-#ifdef VK_FUCHSIA_external_semaphore
-#endif
-#ifdef VK_FUCHSIA_buffer_collection
-#endif
-#ifdef VK_HUAWEI_subpass_shading
-            case OP_vkCmdSubpassShadingHUAWEI:
-            {
-                android::base::beginTrace("vkCmdSubpassShadingHUAWEI subdecode");
-                vk->vkCmdSubpassShadingHUAWEI((VkCommandBuffer)dispatchHandle);
-                android::base::endTrace();
-                break;
-            }
-#endif
-#ifdef VK_HUAWEI_invocation_mask
-            case OP_vkCmdBindInvocationMaskHUAWEI:
-            {
-                android::base::beginTrace("vkCmdBindInvocationMaskHUAWEI subdecode");
-                VkImageView imageView;
-                VkImageLayout imageLayout;
-                uint64_t cgen_var_0;
-                memcpy((uint64_t*)&cgen_var_0, *readStreamPtrPtr, 1 * 8);
-                *readStreamPtrPtr += 1 * 8;
-                *(VkImageView*)&imageView = (VkImageView)unbox_VkImageView((VkImageView)(*&cgen_var_0));
-                memcpy((VkImageLayout*)&imageLayout, *readStreamPtrPtr, sizeof(VkImageLayout));
-                *readStreamPtrPtr += sizeof(VkImageLayout);
-                vk->vkCmdBindInvocationMaskHUAWEI((VkCommandBuffer)dispatchHandle, imageView, imageLayout);
-                android::base::endTrace();
-                break;
-            }
-#endif
-#ifdef VK_NV_external_memory_rdma
-#endif
-#ifdef VK_EXT_extended_dynamic_state2
-            case OP_vkCmdSetPatchControlPointsEXT:
-            {
-                android::base::beginTrace("vkCmdSetPatchControlPointsEXT subdecode");
-                uint32_t patchControlPoints;
-                memcpy((uint32_t*)&patchControlPoints, *readStreamPtrPtr, sizeof(uint32_t));
-                *readStreamPtrPtr += sizeof(uint32_t);
-                vk->vkCmdSetPatchControlPointsEXT((VkCommandBuffer)dispatchHandle, patchControlPoints);
-                android::base::endTrace();
-                break;
-            }
-            case OP_vkCmdSetRasterizerDiscardEnableEXT:
-            {
-                android::base::beginTrace("vkCmdSetRasterizerDiscardEnableEXT subdecode");
-                VkBool32 rasterizerDiscardEnable;
-                memcpy((VkBool32*)&rasterizerDiscardEnable, *readStreamPtrPtr, sizeof(VkBool32));
-                *readStreamPtrPtr += sizeof(VkBool32);
-                vk->vkCmdSetRasterizerDiscardEnableEXT((VkCommandBuffer)dispatchHandle, rasterizerDiscardEnable);
-                android::base::endTrace();
-                break;
-            }
-            case OP_vkCmdSetDepthBiasEnableEXT:
-            {
-                android::base::beginTrace("vkCmdSetDepthBiasEnableEXT subdecode");
-                VkBool32 depthBiasEnable;
-                memcpy((VkBool32*)&depthBiasEnable, *readStreamPtrPtr, sizeof(VkBool32));
-                *readStreamPtrPtr += sizeof(VkBool32);
-                vk->vkCmdSetDepthBiasEnableEXT((VkCommandBuffer)dispatchHandle, depthBiasEnable);
-                android::base::endTrace();
-                break;
-            }
-            case OP_vkCmdSetLogicOpEXT:
-            {
-                android::base::beginTrace("vkCmdSetLogicOpEXT subdecode");
-                VkLogicOp logicOp;
-                memcpy((VkLogicOp*)&logicOp, *readStreamPtrPtr, sizeof(VkLogicOp));
-                *readStreamPtrPtr += sizeof(VkLogicOp);
-                vk->vkCmdSetLogicOpEXT((VkCommandBuffer)dispatchHandle, logicOp);
-                android::base::endTrace();
-                break;
-            }
-            case OP_vkCmdSetPrimitiveRestartEnableEXT:
-            {
-                android::base::beginTrace("vkCmdSetPrimitiveRestartEnableEXT subdecode");
-                VkBool32 primitiveRestartEnable;
-                memcpy((VkBool32*)&primitiveRestartEnable, *readStreamPtrPtr, sizeof(VkBool32));
-                *readStreamPtrPtr += sizeof(VkBool32);
-                vk->vkCmdSetPrimitiveRestartEnableEXT((VkCommandBuffer)dispatchHandle, primitiveRestartEnable);
-                android::base::endTrace();
-                break;
-            }
-#endif
-#ifdef VK_QNX_screen_surface
-#endif
-#ifdef VK_EXT_color_write_enable
-            case OP_vkCmdSetColorWriteEnableEXT:
-            {
-                android::base::beginTrace("vkCmdSetColorWriteEnableEXT subdecode");
-                uint32_t attachmentCount;
-                const VkBool32* pColorWriteEnables;
-                VkBool32 stack_pColorWriteEnables[MAX_STACK_ITEMS];
-                memcpy((uint32_t*)&attachmentCount, *readStreamPtrPtr, sizeof(uint32_t));
-                *readStreamPtrPtr += sizeof(uint32_t);
-                if (((attachmentCount)) <= MAX_STACK_ITEMS)
-                {
-                    pColorWriteEnables = (VkBool32*)stack_pColorWriteEnables;
-                }
-                else
-                {
-                    readStream->alloc((void**)&pColorWriteEnables, ((attachmentCount)) * sizeof(const VkBool32));
-                }
-                memcpy((VkBool32*)pColorWriteEnables, *readStreamPtrPtr, ((attachmentCount)) * sizeof(const VkBool32));
-                *readStreamPtrPtr += ((attachmentCount)) * sizeof(const VkBool32);
-                vk->vkCmdSetColorWriteEnableEXT((VkCommandBuffer)dispatchHandle, attachmentCount, pColorWriteEnables);
-                android::base::endTrace();
-                break;
-            }
 #endif
 #ifdef VK_GOOGLE_gfxstream
             case OP_vkBeginCommandBufferAsyncGOOGLE:
@@ -4090,122 +3597,6 @@ size_t subDecode(VulkanMemReadingStream* readStream, VulkanDispatch* vk, void* b
                 android::base::endTrace();
                 break;
             }
-#endif
-#ifdef VK_EXT_global_priority_query
-#endif
-#ifdef VK_EXT_multi_draw
-            case OP_vkCmdDrawMultiEXT:
-            {
-                android::base::beginTrace("vkCmdDrawMultiEXT subdecode");
-                uint32_t drawCount;
-                const VkMultiDrawInfoEXT* pVertexInfo;
-                VkMultiDrawInfoEXT stack_pVertexInfo[MAX_STACK_ITEMS];
-                uint32_t instanceCount;
-                uint32_t firstInstance;
-                uint32_t stride;
-                memcpy((uint32_t*)&drawCount, *readStreamPtrPtr, sizeof(uint32_t));
-                *readStreamPtrPtr += sizeof(uint32_t);
-                // WARNING PTR CHECK
-                memcpy((VkMultiDrawInfoEXT**)&pVertexInfo, (*readStreamPtrPtr), 8);
-                android::base::Stream::fromBe64((uint8_t*)&pVertexInfo);
-                *readStreamPtrPtr += 8;
-                if (pVertexInfo)
-                {
-                    if (((drawCount)) <= MAX_STACK_ITEMS)
-                    {
-                        pVertexInfo = (VkMultiDrawInfoEXT*)stack_pVertexInfo;
-                    }
-                    else
-                    {
-                        readStream->alloc((void**)&pVertexInfo, ((drawCount)) * sizeof(const VkMultiDrawInfoEXT));
-                    }
-                    for (uint32_t i = 0; i < (uint32_t)((drawCount)); ++i)
-                    {
-                        reservedunmarshal_VkMultiDrawInfoEXT(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkMultiDrawInfoEXT*)(pVertexInfo + i), readStreamPtrPtr);
-                    }
-                }
-                memcpy((uint32_t*)&instanceCount, *readStreamPtrPtr, sizeof(uint32_t));
-                *readStreamPtrPtr += sizeof(uint32_t);
-                memcpy((uint32_t*)&firstInstance, *readStreamPtrPtr, sizeof(uint32_t));
-                *readStreamPtrPtr += sizeof(uint32_t);
-                memcpy((uint32_t*)&stride, *readStreamPtrPtr, sizeof(uint32_t));
-                *readStreamPtrPtr += sizeof(uint32_t);
-                if (pVertexInfo)
-                {
-                    for (uint32_t i = 0; i < (uint32_t)((drawCount)); ++i)
-                    {
-                        transform_tohost_VkMultiDrawInfoEXT(globalstate, (VkMultiDrawInfoEXT*)(pVertexInfo + i));
-                    }
-                }
-                vk->vkCmdDrawMultiEXT((VkCommandBuffer)dispatchHandle, drawCount, pVertexInfo, instanceCount, firstInstance, stride);
-                android::base::endTrace();
-                break;
-            }
-            case OP_vkCmdDrawMultiIndexedEXT:
-            {
-                android::base::beginTrace("vkCmdDrawMultiIndexedEXT subdecode");
-                uint32_t drawCount;
-                const VkMultiDrawIndexedInfoEXT* pIndexInfo;
-                VkMultiDrawIndexedInfoEXT stack_pIndexInfo[MAX_STACK_ITEMS];
-                uint32_t instanceCount;
-                uint32_t firstInstance;
-                uint32_t stride;
-                const int32_t* pVertexOffset;
-                int32_t stack_pVertexOffset[1];
-                memcpy((uint32_t*)&drawCount, *readStreamPtrPtr, sizeof(uint32_t));
-                *readStreamPtrPtr += sizeof(uint32_t);
-                // WARNING PTR CHECK
-                memcpy((VkMultiDrawIndexedInfoEXT**)&pIndexInfo, (*readStreamPtrPtr), 8);
-                android::base::Stream::fromBe64((uint8_t*)&pIndexInfo);
-                *readStreamPtrPtr += 8;
-                if (pIndexInfo)
-                {
-                    if (((drawCount)) <= MAX_STACK_ITEMS)
-                    {
-                        pIndexInfo = (VkMultiDrawIndexedInfoEXT*)stack_pIndexInfo;
-                    }
-                    else
-                    {
-                        readStream->alloc((void**)&pIndexInfo, ((drawCount)) * sizeof(const VkMultiDrawIndexedInfoEXT));
-                    }
-                    for (uint32_t i = 0; i < (uint32_t)((drawCount)); ++i)
-                    {
-                        reservedunmarshal_VkMultiDrawIndexedInfoEXT(readStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkMultiDrawIndexedInfoEXT*)(pIndexInfo + i), readStreamPtrPtr);
-                    }
-                }
-                memcpy((uint32_t*)&instanceCount, *readStreamPtrPtr, sizeof(uint32_t));
-                *readStreamPtrPtr += sizeof(uint32_t);
-                memcpy((uint32_t*)&firstInstance, *readStreamPtrPtr, sizeof(uint32_t));
-                *readStreamPtrPtr += sizeof(uint32_t);
-                memcpy((uint32_t*)&stride, *readStreamPtrPtr, sizeof(uint32_t));
-                *readStreamPtrPtr += sizeof(uint32_t);
-                // WARNING PTR CHECK
-                memcpy((int32_t**)&pVertexOffset, (*readStreamPtrPtr), 8);
-                android::base::Stream::fromBe64((uint8_t*)&pVertexOffset);
-                *readStreamPtrPtr += 8;
-                if (pVertexOffset)
-                {
-                    pVertexOffset = (int32_t*)stack_pVertexOffset;
-                    memcpy((int32_t*)pVertexOffset, *readStreamPtrPtr, sizeof(const int32_t));
-                    *readStreamPtrPtr += sizeof(const int32_t);
-                }
-                if (pIndexInfo)
-                {
-                    for (uint32_t i = 0; i < (uint32_t)((drawCount)); ++i)
-                    {
-                        transform_tohost_VkMultiDrawIndexedInfoEXT(globalstate, (VkMultiDrawIndexedInfoEXT*)(pIndexInfo + i));
-                    }
-                }
-                vk->vkCmdDrawMultiIndexedEXT((VkCommandBuffer)dispatchHandle, drawCount, pIndexInfo, instanceCount, firstInstance, stride, pVertexOffset);
-                android::base::endTrace();
-                break;
-            }
-#endif
-#ifdef VK_EXT_load_store_op_none
-#endif
-#ifdef VK_EXT_border_color_swizzle
-#endif
-#ifdef VK_EXT_pageable_device_local_memory
 #endif
 #ifdef VK_KHR_acceleration_structure
             case OP_vkCmdBuildAccelerationStructuresKHR:
