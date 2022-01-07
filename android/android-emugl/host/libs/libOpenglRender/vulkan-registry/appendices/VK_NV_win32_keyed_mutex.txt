@@ -1,4 +1,10 @@
-include::meta/VK_NV_win32_keyed_mutex.txt[]
+// Copyright (c) 2016-2020 NVIDIA Corporation
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_NV_win32_keyed_mutex.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2016-08-19
@@ -8,6 +14,8 @@ include::meta/VK_NV_win32_keyed_mutex.txt[]
   - James Jones, NVIDIA
   - Carsten Rohde, NVIDIA
 
+=== Description
+
 Applications that wish to import Direct3D 11 memory objects into the Vulkan
 API may wish to use the native keyed mutex mechanism to synchronize access
 to the memory between Vulkan and Direct3D.
@@ -15,31 +23,7 @@ This extension provides a way for an application to access the keyed mutex
 associated with an imported Vulkan memory object when submitting command
 buffers to a queue.
 
-=== New Object Types
-
-None.
-
-=== New Enum Constants
-
-  * Extending elink:VkStructureType:
-  ** ename:VK_STRUCTURE_TYPE_WIN32_KEYED_MUTEX_ACQUIRE_RELEASE_INFO_NV
-
-=== New Enums
-
-None.
-
-=== New Structures
-
-  * Extending slink:VkSubmitInfo:
-  ** slink:VkWin32KeyedMutexAcquireReleaseInfoNV
-
-=== New Functions
-
-None.
-
-=== Issues
-
-None.
+include::{generated}/interfaces/VK_NV_win32_keyed_mutex.txt[]
 
 === Examples
 

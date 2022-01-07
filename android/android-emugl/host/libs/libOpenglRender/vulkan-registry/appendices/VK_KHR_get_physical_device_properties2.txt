@@ -1,8 +1,10 @@
-// Copyright (c) 2016-2018 Khronos Group. This work is licensed under a
-// Creative Commons Attribution 4.0 International License; see
-// http://creativecommons.org/licenses/by/4.0/
+// Copyright 2016-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
-include::meta/VK_KHR_get_physical_device_properties2.txt[]
+include::{generated}/meta/{refprefix}VK_KHR_get_physical_device_properties2.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2017-09-05
@@ -13,6 +15,8 @@ include::meta/VK_KHR_get_physical_device_properties2.txt[]
 *Contributors*::
   - Jeff Bolz, NVIDIA
   - Ian Elliott, Google
+
+=== Description
 
 This extension provides new entry points to query device features, device
 properties, and format properties in a way that can be easily extended by
@@ -25,54 +29,11 @@ structures by constructing the chain and letting the implementation fill
 them in.
 A new command is added for each ftext:vkGetPhysicalDevice* command in core
 Vulkan 1.0.
-The new feature structure (and a chain of extension structures) can also be
-passed in to device creation to enable features.
+The new feature structure (and a pname:pNext chain of extending structures)
+can also be passed in to device creation to enable features.
 
 This extension also allows applications to use the physical-device
 components of device extensions before flink:vkCreateDevice is called.
-
-=== New Object Types
-
-None.
-
-=== New Enum Constants
-
-  * Extending elink:VkStructureType:
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR
-  ** ename:VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_2_KHR
-  ** ename:VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2_KHR
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2_KHR
-  ** ename:VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2_KHR
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2_KHR
-  ** ename:VK_STRUCTURE_TYPE_SPARSE_IMAGE_FORMAT_PROPERTIES_2_KHR
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SPARSE_IMAGE_FORMAT_INFO_2_KHR
-
-=== New Enums
-
-None.
-
-=== New Structures
-
-  * slink:VkPhysicalDeviceFeatures2KHR
-  * slink:VkPhysicalDeviceProperties2KHR
-  * slink:VkFormatProperties2KHR
-  * slink:VkImageFormatProperties2KHR
-  * slink:VkPhysicalDeviceImageFormatInfo2KHR
-  * slink:VkQueueFamilyProperties2KHR
-  * slink:VkPhysicalDeviceMemoryProperties2KHR
-  * slink:VkSparseImageFormatProperties2KHR
-  * slink:VkPhysicalDeviceSparseImageFormatInfo2KHR
-
-=== New Functions
-
-  * flink:vkGetPhysicalDeviceFeatures2KHR
-  * flink:vkGetPhysicalDeviceProperties2KHR
-  * flink:vkGetPhysicalDeviceFormatProperties2KHR
-  * flink:vkGetPhysicalDeviceImageFormatProperties2KHR
-  * flink:vkGetPhysicalDeviceQueueFamilyProperties2KHR
-  * flink:vkGetPhysicalDeviceMemoryProperties2KHR
-  * flink:vkGetPhysicalDeviceSparseImageFormatProperties2KHR
 
 === Promotion to Vulkan 1.1
 
@@ -81,9 +42,7 @@ KHR suffix omitted.
 The original type, enum and command names are still available as aliases of
 the core functionality.
 
-=== Issues
-
-None.
+include::{generated}/interfaces/VK_KHR_get_physical_device_properties2.txt[]
 
 === Examples
 
@@ -93,14 +52,14 @@ None.
     // Get features with a hypothetical future extension.
     VkHypotheticalExtensionFeaturesKHR hypotheticalFeatures =
     {
-        VK_STRUCTURE_TYPE_HYPOTHETICAL_FEATURES_KHR,                            // sType
-        NULL,                                                                   // pNext
+        VK_STRUCTURE_TYPE_HYPOTHETICAL_FEATURES_KHR,                // sType
+        NULL,                                                       // pNext
     };
 
     VkPhysicalDeviceFeatures2KHR features =
     {
-        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR,                       // sType
-        &hypotheticalFeatures,                                                  // pNext
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR,           // sType
+        &hypotheticalFeatures,                                      // pNext
     };
 
     // After this call, features and hypotheticalFeatures have been filled out.
@@ -111,14 +70,14 @@ None.
     // Enable some features:
     VkHypotheticalExtensionFeaturesKHR enabledHypotheticalFeatures =
     {
-        VK_STRUCTURE_TYPE_HYPOTHETICAL_FEATURES_KHR,                            // sType
-        NULL,                                                                   // pNext
+        VK_STRUCTURE_TYPE_HYPOTHETICAL_FEATURES_KHR,                // sType
+        NULL,                                                       // pNext
     };
 
     VkPhysicalDeviceFeatures2KHR enabledFeatures =
     {
-        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR,                       // sType
-        &enabledHypotheticalFeatures,                                           // pNext
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR,           // sType
+        &enabledHypotheticalFeatures,                               // pNext
     };
 
     enabledFeatures.features.xyz = VK_TRUE;
@@ -126,11 +85,11 @@ None.
 
     VkDeviceCreateInfo deviceCreateInfo =
     {
-        VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,                                   // sType
-        &enabledFeatures,                                                       // pNext
+        VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,                       // sType
+        &enabledFeatures,                                           // pNext
         ...
-        NULL,                                                                   // pEnabledFeatures
-    }
+        NULL,                                                       // pEnabledFeatures
+    };
 
     VkDevice device;
     vkCreateDevice(physicalDevice, &deviceCreateInfo, NULL, &device);

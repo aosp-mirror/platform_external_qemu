@@ -1,6 +1,6 @@
-// Copyright (c) 2016-2018 Google Inc. This work is licensed under a
-// Creative Commons Attribution 4.0 International License; see
-// http://creativecommons.org/licenses/by/4.0/
+// Copyright (c) 2016-2018 Google LLC.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
 == Display Timing Queries
 
@@ -12,7 +12,7 @@ This avoids the visual anomaly known as tearing.
 
 However, synchronizing the presentation of images with the RC does not
 prevent all forms of visual anomalies.
-Stuttering occurs when the geometry for each presentable image isn't
+Stuttering occurs when the geometry for each presentable image is not
 accurately positioned for when that image will be displayed.
 The geometry may appear to move too little some RCs, and too much for
 others.
@@ -44,32 +44,29 @@ This extension treats VRR displays as if they are FRR.
 
 [open,refpage='vkGetRefreshCycleDurationGOOGLE',desc='Obtain the RC duration of the PE\'s display',type='protos']
 --
-
 To query the duration of a refresh cycle (RC) for the presentation engine's
 display, call:
 
-include::../../api/protos/vkGetRefreshCycleDurationGOOGLE.txt[]
+include::{generated}/api/protos/vkGetRefreshCycleDurationGOOGLE.txt[]
 
   * pname:device is the device associated with pname:swapchain.
   * pname:swapchain is the swapchain to obtain the refresh duration for.
-  * pname:pDisplayTimingProperties is a pointer to an instance of the
+  * pname:pDisplayTimingProperties is a pointer to a
     sname:VkRefreshCycleDurationGOOGLE structure.
 
-include::../../validity/protos/vkGetRefreshCycleDurationGOOGLE.txt[]
+include::{generated}/validity/protos/vkGetRefreshCycleDurationGOOGLE.txt[]
 --
 
 [open,refpage='VkRefreshCycleDurationGOOGLE',desc='Structure containing the RC duration of a display',type='structs']
 --
-
 The sname:VkRefreshCycleDurationGOOGLE structure is defined as:
 
-include::../../api/structs/VkRefreshCycleDurationGOOGLE.txt[]
+include::{generated}/api/structs/VkRefreshCycleDurationGOOGLE.txt[]
 
   * pname:refreshDuration is the number of nanoseconds from the start of one
     refresh cycle to the next.
 
-include::../../validity/structs/VkRefreshCycleDurationGOOGLE.txt[]
-
+include::{generated}/validity/structs/VkRefreshCycleDurationGOOGLE.txt[]
 --
 
 [NOTE]
@@ -96,8 +93,8 @@ It will therefore position the geometry of a new image 16.67ms later than
 the previous image.
 Let's say that this application is running on slower hardware, so that it
 actually takes 20ms to render each new image.
-This will create visual anomalies, because the images won't be displayed to
-the user every 16.67ms, nor every 20ms.
+This will create visual anomalies, because the images will not be displayed
+to the user every 16.67ms, nor every 20ms.
 In this case, it is better for the application to adjust its target IPD to
 33.33ms (i.e. a 2X multiplier of pname:refreshDuration), and tell the
 presentation engine to not present images any sooner than every 33.33ms.
@@ -119,7 +116,6 @@ and if pname:presentMargin is consistently large, over multiple images.
 
 [open,refpage='vkGetPastPresentationTimingGOOGLE',desc='Obtain timing of a previously-presented image',type='protos']
 --
-
 The implementation will maintain a limited amount of history of timing
 information about previous presents.
 Because of the asynchronous nature of the presentation engine, the timing
@@ -133,7 +129,7 @@ clock (e.g. `CLOCK_MONOTONIC` (see clock_gettime(2)) on Android and Linux).
 To asynchronously query the presentation engine, for newly-available timing
 information about one or more previous presents to a given swapchain, call:
 
-include::../../api/protos/vkGetPastPresentationTimingGOOGLE.txt[]
+include::{generated}/api/protos/vkGetPastPresentationTimingGOOGLE.txt[]
 
   * pname:device is the device associated with pname:swapchain.
   * pname:swapchain is the swapchain to obtain presentation timing
@@ -153,21 +149,18 @@ and on return the variable is overwritten with the number of structures
 actually written to pname:pPresentationTimings.
 If the value of pname:pPresentationTimingCount is less than the number of
 newly-available timing records, at most pname:pPresentationTimingCount
-structures will be written.
-If pname:pPresentationTimingCount is smaller than the number of
-newly-available timing records for the given pname:swapchain,
-ename:VK_INCOMPLETE will be returned instead of ename:VK_SUCCESS to indicate
-that not all the available values were returned.
+structures will be written, and ename:VK_INCOMPLETE will be returned instead
+of ename:VK_SUCCESS, to indicate that not all the available timing records
+were returned.
 
-include::../../validity/protos/vkGetPastPresentationTimingGOOGLE.txt[]
+include::{generated}/validity/protos/vkGetPastPresentationTimingGOOGLE.txt[]
 --
 
 [open,refpage='VkPastPresentationTimingGOOGLE',desc='Structure containing timing information about a previously-presented image',type='structs']
 --
-
 The sname:VkPastPresentationTimingGOOGLE structure is defined as:
 
-include::../../api/structs/VkPastPresentationTimingGOOGLE.txt[]
+include::{generated}/api/structs/VkPastPresentationTimingGOOGLE.txt[]
 
   * pname:presentID is an application-provided value that was given to a
     previous fname:vkQueuePresentKHR command via
@@ -194,7 +187,7 @@ include::../../api/structs/VkPastPresentationTimingGOOGLE.txt[]
 The results for a given pname:swapchain and pname:presentID are only
 returned once from fname:vkGetPastPresentationTimingGOOGLE.
 
-The application can: use the fname:VkPastPresentationTimingGOOGLE values to
+The application can: use the sname:VkPastPresentationTimingGOOGLE values to
 occasionally adjust its timing.
 For example, if pname:actualPresentTime is later than expected (e.g. one
 pname:refreshDuration late), the application may increase its target IPD to
@@ -213,11 +206,10 @@ An application that desires its target IPD to always be the same as
 pname:refreshDuration, can also adjust features until
 pname:actualPresentTime is never late and pname:presentMargin is
 satisfactory.
-
 --
 
-The full `VK_GOOGLE_display_timing` extension semantics are described for
-swapchains created with ename:VK_PRESENT_MODE_FIFO_KHR.
+The full `apiext:VK_GOOGLE_display_timing` extension semantics are described
+for swapchains created with ename:VK_PRESENT_MODE_FIFO_KHR.
 For example, non-zero values of
 sname:VkPresentTimeGOOGLE::pname:desiredPresentTime must: be honored, and
 fname:vkGetPastPresentationTimingGOOGLE should: return a

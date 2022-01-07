@@ -1,16 +1,23 @@
-// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
-// Creative Commons Attribution 4.0 International License; see
-// http://creativecommons.org/licenses/by/4.0/
+// Copyright 2015-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
 // The asciidoc [glossary] template cannot contain subsections.
 // The abbreviations and prefixes probably belong in the upcoming
 // API/extension-writing-guidelines appendix, anyway.
 
-[glossary]
-[[glossary]]
-= Glossary
+[appendix]
+[[lexicon]]
+= Lexicon
 
-The terms defined in this section are used consistently throughout this
+This appendix defines terms, abbreviations, and API prefixes used in the
+Specification.
+
+
+[[glossary]]
+== Glossary
+
+The terms defined in this section are used consistently throughout the
 Specification and may be used with or without capitalization.
 
 Accessible (Descriptor Binding)::
@@ -23,16 +30,52 @@ Acquire Operation (Resource)::
     An operation that acquires ownership of an image subresource or buffer
     range.
 
+ifdef::VK_VALVE_mutable_descriptor_type[]
+Active (Descriptor Type)::
+    When a descriptor with _mutable_ type is updated with
+    flink:vkUpdateDescriptorSets, the active descriptor type changes.
+    When the descriptor is consumed by shaders, it is the active descriptor
+    type which determines validity, i.e.
+    sname:VkDescriptorSetLayoutBinding::pname:descriptorType is replaced
+    with the active descriptor type.
+    A mismatch in active descriptor type and consumption by shader is
+    considered an undefined: descriptor.
+endif::VK_VALVE_mutable_descriptor_type[]
+
+ifdef::VK_EXT_transform_feedback[]
+Active (Transform Feedback)::
+    Transform feedback is made active after
+    flink:vkCmdBeginTransformFeedbackEXT executes and remains active until
+    flink:vkCmdEndTransformFeedbackEXT executes.
+    While transform feedback is active, data written to variables in the
+    output interface of the last
+    <<pipeline-graphics-subsets-pre-rasterization,pre-rasterization shader
+    stage>> of the graphics pipeline are captured to the bound transform
+    feedback buffers if those variables are decorated for transform
+    feedback.
+endif::VK_EXT_transform_feedback[]
+
 Adjacent Vertex::
     A vertex in an adjacency primitive topology that is not part of a given
     primitive, but is accessible in geometry shaders.
 
+ifdef::VK_NV_ray_tracing,VK_KHR_acceleration_structure[]
+Active Object (Ray Tracing)::
+    A primitive or instance in a ray tracing acceleration structure which
+    has a corresponding ID, and is not _inactive_ (meaning that it is
+    visible to rays).
+endif::VK_NV_ray_tracing,VK_KHR_acceleration_structure[]
+
 ifdef::VK_EXT_blend_operation_advanced[]
 Advanced Blend Operation::
     Blending performed using one of the blend operation enums introduced by
-    the `<<VK_EXT_blend_operation_advanced>>` extension.
+    the `apiext:VK_EXT_blend_operation_advanced` extension.
     See <<framebuffer-blend-advanced, Advanced Blending Operations>>.
 endif::VK_EXT_blend_operation_advanced[]
+
+Alias (API type/command)::
+    An identical definition of another API type/command with the same
+    behavior but a different name.
 
 Aliased Range (Memory)::
     A range of a device memory allocation that is bound to multiple
@@ -52,8 +95,6 @@ Aspect (Image)::
     aspect of the image, and may: be used as a framebuffer color attachment.
     Some operations, like depth testing, operate only on specific aspects of
     an image.
-    Others operations, like image/buffer copies, only operate on one aspect
-    at a time.
 
 Attachment (Render Pass)::
     A zero-based integer index name used in render pass creation to refer to
@@ -68,6 +109,13 @@ Availability Operation::
 
 Available::
     A state of values written to memory that allows them to be made visible.
+
+ifdef::VK_NV_ray_tracing,VK_KHR_acceleration_structure[]
+Axis-aligned Bounding Box::
+    A box bounding a region in space defined by extents along each axis and
+    thus representing a box where each edge is aligned to one of the major
+    axes.
+endif::VK_NV_ray_tracing,VK_KHR_acceleration_structure[]
 
 Back-Facing::
     See Facingness.
@@ -85,13 +133,14 @@ Backwards Compatibility::
     This assumes no active attempt by that application to not run when it
     detects a different version.
 
-Full Compatibility::
-    A given version of the API is fully compatible with another version if
-    an application, relying only on valid behavior and functionality defined
-    by either of those specifications, is able to correctly run against each
-    version without any modification.
-    This assumes no active attempt by that application to not run when it
-    detects a different version.
+Binary Semaphore::
+    A semaphore with a boolean payload indicating whether the semaphore is
+    signaled or unsignaled.
+    Represented by a slink:VkSemaphore object
+ifdef::VK_VERSION_1_2,VK_KHR_timeline_semaphore[]
+    created with a semaphore type of ename:VK_SEMAPHORE_TYPE_BINARY
+endif::VK_VERSION_1_2,VK_KHR_timeline_semaphore[]
+    .
 
 Binding (Memory)::
     An association established between a range of a resource object and a
@@ -115,6 +164,12 @@ Buffer::
     A resource that represents a linear array of data in device memory.
     Represented by a slink:VkBuffer object.
 
+ifdef::VK_VERSION_1_2,VK_EXT_buffer_device_address,VK_KHR_buffer_device_address[]
+Buffer Device Address::
+    A 64-bit value used in a shader to access buffer memory through the
+    code:PhysicalStorageBuffer storage class.
+endif::VK_VERSION_1_2,VK_EXT_buffer_device_address,VK_KHR_buffer_device_address[]
+
 Buffer View::
     An object that represents a range of a specific buffer, and state that
     controls how the contents are interpreted.
@@ -131,11 +186,15 @@ Built-In Interface Block::
 
 Clip Coordinates::
     The homogeneous coordinate space that vertex positions (code:Position
-    decoration) are written in by vertex processing stages.
+    decoration) are written in by
+    <<pipeline-graphics-subsets-pre-rasterization,pre-rasterization shader
+    stages>>.
 
 Clip Distance::
-    A built-in output from vertex processing stages that defines a clip
-    half-space against which the primitive is clipped.
+    A built-in output from
+    <<pipeline-graphics-subsets-pre-rasterization,pre-rasterization shader
+    stages>> that defines a clip half-space against which the primitive is
+    clipped.
 
 Clip Volume::
     The intersection of the view volume with all clip half-spaces.
@@ -152,16 +211,12 @@ endif::VK_AMD_shader_fragment_mask[]
 
 Color Renderable Format::
     A elink:VkFormat where ename:VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT is
-    set in the pname:optimalTilingFeatures or pname:linearTilingFeatures
-    member of slink:VkFormatProperties returned by
-    flink:vkGetPhysicalDeviceFormatProperties, depending on the tiling used.
-
-Color Sample Mask::
-    A bitfield associated with a fragment, with one bit for each sample in
-    the color attachment(s).
-    Samples are considered to be covered based on the result of the Coverage
-    Reduction stage.
-    Uncovered samples do not write to color attachments.
+    set in one of the following, depending on the image's tiling:
+    * slink:VkFormatProperties::pname:linearTilingFeatures
+    * slink:VkFormatProperties::pname:optimalTilingFeatures
+ifdef::VK_EXT_image_drm_format_modifier[]
+    * slink:VkDrmFormatModifierPropertiesEXT::pname:drmFormatModifierTilingFeatures
+endif::VK_EXT_image_drm_format_modifier[]
 
 Combined Image Sampler::
     A descriptor type that includes both a sampled image and a sampler.
@@ -191,10 +246,26 @@ Compatible Queues::
     Queues within a queue family.
     Compatible queues have identical properties.
 
+Complete Mipmap Chain::
+    The entire set of miplevels that can be provided for an image, from the
+    largest application specified miplevel size down to the _minimum
+    miplevel size_.
+    See <<resources-image-miplevel-sizing, Image Miplevel Sizing>>.
+
+ifdef::VK_KHR_deferred_host_operations[]
+Completed Operation::
+    A deferred operation whose corresponding command has been executed to
+    completion.
+    See <<deferred-host-operations, Deferred Host Operations>>
+endif::VK_KHR_deferred_host_operations[]
+
 Component (Format)::
     A distinct part of a format.
-    Depth, stencil, and color channels (e.g. R, G, B, A), are all separate
-    components.
+    Color components are represented with `R`, `G`, `B`, and `A`.
+    Depth and stencil components are represented with `D` and `S`.
+    Formats can: have multiple instances of the same component.
+    Some formats have other notations such as `E` or `X` which are not
+    considered a component of the format.
 
 Compressed Texel Block::
     An element of an image having a block-compressed format, comprising a
@@ -205,18 +276,38 @@ Compressed Texel Block::
     these elements in units of texels, and a size in bytes of the encoding
     in memory.
 
-Coverage::
-    A bitfield associated with a fragment, where each bit is associated to a
-    rasterization sample.
-    Samples are initially considered to be covered based on the result of
-    rasterization, and then coverage can subsequently be turned on or off by
-    other fragment operations or the fragment shader.
-    Uncovered samples do not write to framebuffer attachments.
+Constant Integral Expressions::
+    A SPIR-V constant instruction whose type is code:OpTypeInt.
+    See _Constant Instruction_ in section 2.2.1 "`Instructions`" of the
+    <<spirv-spec,Khronos SPIR-V Specification>>.
+
+ifdef::VK_NV_cooperative_matrix[]
+Cooperative Matrix::
+    A SPIR-V type where the storage for and computations performed on the
+    matrix are spread across a set of invocations such as a subgroup.
+endif::VK_NV_cooperative_matrix[]
+
+ifdef::VK_NV_corner_sampled_image[]
+Corner-Sampled Image::
+    A slink:VkImage where unnormalized texel coordinates are centered on
+    integer values instead of half-integer values.
+    Specified by setting the ename:VK_IMAGE_CREATE_CORNER_SAMPLED_BIT_NV bit
+    on slink:VkImageCreateInfo::pname:flags at image creation.
+endif::VK_NV_corner_sampled_image[]
+
+Coverage Index::
+    The index of a sample in the coverage mask.
+
+Coverage Mask::
+    A bitfield associated with a fragment representing the samples that were
+    determined to be covered based on the result of rasterization, and then
+    subsequently modified by fragment operations or the fragment shader.
 
 Cull Distance::
-    A built-in output from vertex processing stages that defines a cull
-    half-space where the primitive is rejected if all vertices have a
-    negative value for the same cull distance.
+    A built-in output from
+    <<pipeline-graphics-subsets-pre-rasterization,pre-rasterization shader
+    stages>> that defines a cull half-space where the primitive is rejected
+    if all vertices have a negative value for the same cull distance.
 
 Cull Volume::
     The intersection of the view volume with all cull half-spaces.
@@ -226,12 +317,20 @@ Decoration (SPIR-V)::
     invariance, interpolation type, relaxed precision, etc., added to
     variables or structure-type members through decorations.
 
-Deprecated::
+ifdef::VK_KHR_deferred_host_operations[]
+Deferrable Command::
+    A command which allows deferred execution of host-side work.
+    See <<deferred-host-operations,Deferred Host Operations>>.
+
+Deferrable Operation::
+    A single logical item of host-side work which can be deferred.
+    Represented by the slink:VkDeferredOperationKHR object.
+    See <<deferred-host-operations,Deferred Host Operations>>.
+endif::VK_KHR_deferred_host_operations[]
+
+Deprecated (feature)::
     A feature is deprecated if it is no longer recommended as the correct or
     best way to achieve its intended purpose.
-    Generally a newer feature will have been created that solves the same
-    problem - in cases where no newer alternative feature exists,
-    justification should be provided.
 
 Depth/Stencil Attachment::
     A subpass attachment point, or image view, that is the target of depth
@@ -243,10 +342,20 @@ Depth/Stencil Format::
 Depth/Stencil Image (or ImageView)::
     A slink:VkImage (or slink:VkImageView) with a depth/stencil format.
 
+ifdef::VK_VERSION_1_2,VK_KHR_depth_stencil_resolve[]
+Depth/Stencil Resolve Attachment::
+    A subpass attachment point, or image view, that is the target of a
+    multisample resolve operation from the corresponding depth/stencil
+    attachment at the end of the subpass.
+endif::VK_VERSION_1_2,VK_KHR_depth_stencil_resolve[]
+
 Derivative Group::
-    A set of fragment shader invocations that cooperate to compute
-    derivatives, including implicit derivatives for sampled image
-    operations.
+    A set of fragment
+ifdef::VK_NV_compute_shader_derivatives[]
+    or compute
+endif::VK_NV_compute_shader_derivatives[]
+    shader invocations that cooperate to compute derivatives, including
+    implicit derivatives for sampled image operations.
 
 Descriptor::
     Information about a resource or resource view written into a descriptor
@@ -325,7 +434,14 @@ Direct Drawing Commands::
     _Drawing commands_ that take all their parameters as direct arguments to
     the command (and not sourced via structures in buffer memory as the
     _indirect drawing commands_).
-    Includes flink:vkCmdDraw, and flink:vkCmdDrawIndexed.
+    Includes
+ifdef::VK_EXT_multi_draw[]
+    flink:vkCmdDrawMultiIndexedEXT, flink:vkCmdDrawMultiEXT,
+endif::VK_EXT_multi_draw[]
+ifdef::VK_NV_mesh_shader[]
+    flink:vkCmdDrawMeshTasksNV,
+endif::VK_NV_mesh_shader[]
+    flink:vkCmdDraw, and flink:vkCmdDrawIndexed.
 
 ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 Disjoint::
@@ -335,10 +451,14 @@ Disjoint::
     created with the ename:VK_IMAGE_CREATE_DISJOINT_BIT bit set.
 endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 
+Dispatchable Command::
+    A non-global command.
+    The first argument to each dispatchable command is a dispatchable handle
+    type.
+
 Dispatchable Handle::
     A handle of a pointer handle type which may: be used by layers as part
     of intercepting API commands.
-    The first argument to each Vulkan command is a dispatchable handle type.
 
 Dispatching Commands::
     Commands that provoke work using a compute pipeline.
@@ -347,14 +467,23 @@ Dispatching Commands::
 Drawing Commands::
     Commands that provoke work using a graphics pipeline.
     Includes flink:vkCmdDraw, flink:vkCmdDrawIndexed,
-    flink:vkCmdDrawIndirect,
+ifdef::VK_VERSION_1_2[]
+    flink:vkCmdDrawIndirectCount, flink:vkCmdDrawIndexedIndirectCount,
+endif::VK_VERSION_1_2[]
 ifdef::VK_KHR_draw_indirect_count[]
     flink:vkCmdDrawIndirectCountKHR, flink:vkCmdDrawIndexedIndirectCountKHR,
 endif::VK_KHR_draw_indirect_count[]
 ifdef::VK_AMD_draw_indirect_count[]
     flink:vkCmdDrawIndirectCountAMD, flink:vkCmdDrawIndexedIndirectCountAMD,
 endif::VK_AMD_draw_indirect_count[]
-    and flink:vkCmdDrawIndexedIndirect.
+ifdef::VK_EXT_multi_draw[]
+    flink:vkCmdDrawMultiIndexedEXT, flink:vkCmdDrawMultiEXT,
+endif::VK_EXT_multi_draw[]
+ifdef::VK_NV_mesh_shader[]
+    flink:vkCmdDrawMeshTasksNV, flink:vkCmdDrawMeshTasksIndirectNV,
+    flink:vkCmdDrawMeshTasksIndirectCountNV,
+endif::VK_NV_mesh_shader[]
+    flink:vkCmdDrawIndirect, and flink:vkCmdDrawIndexedIndirect.
 
 Duration (Command)::
     The _duration_ of a Vulkan command refers to the interval between
@@ -372,10 +501,11 @@ Dynamically Uniform::
     See _Dynamically Uniform_ in section 2.2 "`Terms`" of the
     <<spirv-spec,Khronos SPIR-V Specification>>.
 
-Element Size::
-    The size (in bytes) used to store one element of an uncompressed format
-    or the size (in bytes) used to store one block of a block-compressed
-    format.
+Element::
+    Arrays are composed of multiple elements, where each element exists at a
+    unique index within that array.
+    Used primarily to describe data passed to or returned from the Vulkan
+    API.
 
 Explicitly-Enabled Layer::
     A layer enabled by the application by adding it to the enabled layer
@@ -383,7 +513,7 @@ Explicitly-Enabled Layer::
 
 Event::
     A synchronization primitive that is signaled when execution of previous
-    commands complete through a specified set of pipeline stages.
+    commands completes through a specified set of pipeline stages.
     Events can be waited on by the device and polled by the host.
     Represented by a slink:VkEvent object.
 
@@ -404,7 +534,7 @@ Execution Dependency Chain::
 
 ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 Explicit chroma reconstruction::
-    An implementation of sampler Y'C~B~C~R~ conversion which reconstructs
+    An implementation of sampler {YCbCr} conversion which reconstructs
     reduced-resolution chroma samples to luma resolution and then separately
     performs texture sample interpolation.
     This is distinct from an implicit implementation, which incorporates
@@ -414,6 +544,12 @@ endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 Extension Scope::
     The set of objects and commands that can: be affected by an extension.
     Extensions are either device scope or instance scope.
+
+Extending Structure::
+    A structure type which may appear in the _pname:pNext chain_ of another
+    structure, extending the functionality of the other structure.
+    Extending structures may be defined by either core API versions or
+    extensions.
 
 ifdef::VK_VERSION_1_1,VK_KHR_external_memory_capabilities,VK_KHR_external_semaphore_capabilities,VK_KHR_external_fence_capabilities[]
 External Handle::
@@ -455,6 +591,31 @@ Flat Shading::
     vertex (the provoking vertex) to be used for all vertices in a
     primitive, and for interpolation of that attribute to return that single
     value unaltered.
+
+Format Features::
+    A set of features from elink:VkFormatFeatureFlagBits that a
+    elink:VkFormat is capable of using for various commands.
+    The list is determined by factors such as elink:VkImageTiling.
+
+Fragment::
+    A rectangular framebuffer region with associated data produced by
+    <<primsrast,rasterization>> and processed by <<fragops,fragment
+    operations>> including the fragment shader.
+
+[[glossary-fragment-area]]
+Fragment Area::
+    The width and height, in pixels, of a fragment.
+
+ifdef::VK_EXT_fragment_density_map[]
+[[glossary-fragment-density]]
+Fragment Density::
+    The ratio of fragments per framebuffer area in the x and y direction.
+
+[[glossary-fragment-density-texel-size]]
+Fragment Density Texel Size::
+    The [eq]#(w,h)# framebuffer region in pixels that each texel in a
+    fragment density map applies to.
+endif::VK_EXT_fragment_density_map[]
 
 Fragment Input Attachment Interface::
     Variables with code:UniformConstant storage class and a decoration of
@@ -504,22 +665,35 @@ Framebuffer Region::
 Front-Facing::
     See Facingness.
 
+Full Compatibility::
+    A given version of the API is fully compatible with another version if
+    an application, relying only on valid behavior and functionality defined
+    by either of those specifications, is able to correctly run against each
+    version without any modification.
+    This assumes no active attempt by that application to not run when it
+    detects a different version.
+
+Global Command::
+    A Vulkan command for which the first argument is not a dispatchable
+    handle type.
+
 Global Workgroup::
-    A collection of local workgroups dispatched by a single dispatch
+    A collection of local workgroups dispatched by a single dispatching
+ifdef::VK_NV_mesh_shader[or single mesh task drawing]
     command.
 
 Handle::
     An opaque integer or pointer value used to refer to a Vulkan object.
     Each object type has a unique handle type.
 
-Happen-after::
+Happen-after, happens-after::
     A transitive, irreflexive and antisymmetric ordering relation between
     operations.
     An execution dependency with a source of *A* and a destination of *B*
     enforces that *B* happens-after *A*.
     The inverse relation of happens-before.
 
-Happen-before::
+Happen-before, happens-before::
     A transitive, irreflexive and antisymmetric ordering relation between
     operations.
     An execution dependency with a source of *A* and a destination of *B*
@@ -534,6 +708,9 @@ Helper Invocation::
 Host::
     The processor(s) and execution environment that the application runs on,
     and that the Vulkan API is exposed on.
+
+Host Mapped Device Memory::
+    Device memory that is mapped for host access using flink:vkMapMemory.
 
 ifdef::VK_EXT_external_memory_host[]
 Host Mapped Foreign Memory::
@@ -591,9 +768,9 @@ Immutable Sampler::
 
 ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 Implicit chroma reconstruction::
-    An implementation of sampler Y'C~B~C~R~ conversion which reconstructs
-    the reduced-resolution chroma samples directly at the sample point, as
-    part of the normal texture sampling operation.
+    An implementation of sampler {YCbCr} conversion which reconstructs the
+    reduced-resolution chroma samples directly at the sample point, as part
+    of the normal texture sampling operation.
     This is distinct from an _explicit chroma reconstruction_
     implementation, which reconstructs the reduced-resolution chroma samples
     to the resolution of the luma samples, then filters the result as part
@@ -605,6 +782,13 @@ Implicitly-Enabled Layer::
     rather than explicitly by the application during instance or device
     creation.
 
+ifdef::VK_NV_ray_tracing,VK_KHR_acceleration_structure[]
+Inactive Object (Ray Tracing)::
+    A primitive or instance in a ray tracing acceleration structure which
+    has a corresponding ID, but which will never report an intersection with
+    any ray.
+endif::VK_NV_ray_tracing,VK_KHR_acceleration_structure[]
+
 Index Buffer::
     A buffer bound via flink:vkCmdBindIndexBuffer which is the source of
     index values used to fetch vertex attributes for a
@@ -614,51 +798,78 @@ Indexed Drawing Commands::
     _Drawing commands_ which use an _index buffer_ as the source of index
     values used to fetch vertex attributes for a drawing command.
     Includes flink:vkCmdDrawIndexed,
+ifdef::VK_VERSION_1_2[]
+    flink:vkCmdDrawIndexedIndirectCount,
+endif::VK_VERSION_1_2[]
 ifdef::VK_KHR_draw_indirect_count[]
     flink:vkCmdDrawIndexedIndirectCountKHR,
 endif::VK_KHR_draw_indirect_count[]
 ifdef::VK_AMD_draw_indirect_count[]
     flink:vkCmdDrawIndexedIndirectCountAMD,
 endif::VK_AMD_draw_indirect_count[]
+ifdef::VK_EXT_multi_draw[]
+    flink:vkCmdDrawMultiIndexedEXT,
+endif::VK_EXT_multi_draw[]
     and flink:vkCmdDrawIndexedIndirect.
 
 Indirect Commands::
     Drawing or dispatching commands that source some of their parameters
     from structures in buffer memory.
     Includes flink:vkCmdDrawIndirect, flink:vkCmdDrawIndexedIndirect,
+ifdef::VK_VERSION_1_2[]
+    flink:vkCmdDrawIndirectCount, flink:vkCmdDrawIndexedIndirectCount,
+endif::VK_VERSION_1_2[]
 ifdef::VK_KHR_draw_indirect_count[]
     flink:vkCmdDrawIndirectCountKHR, flink:vkCmdDrawIndexedIndirectCountKHR,
 endif::VK_KHR_draw_indirect_count[]
 ifdef::VK_AMD_draw_indirect_count[]
     flink:vkCmdDrawIndirectCountAMD, flink:vkCmdDrawIndexedIndirectCountAMD,
 endif::VK_AMD_draw_indirect_count[]
+ifdef::VK_NV_mesh_shader[]
+    flink:vkCmdDrawMeshTasksIndirectNV,
+    flink:vkCmdDrawMeshTasksIndirectCountNV,
+endif::VK_NV_mesh_shader[]
     and flink:vkCmdDispatchIndirect.
 
-ifdef::VK_NVX_device_generated_commands[]
+ifdef::VK_NV_device_generated_commands[]
 Indirect Commands Layout::
     A definition of a sequence of commands, that are generated on the device
-    via flink:vkCmdProcessCommandsNVX.
+    via flink:vkCmdPreprocessGeneratedCommandsNV and
+    flink:vkCmdExecuteGeneratedCommandsNV.
     Each sequence is comprised of multiple
-    elink:VkIndirectCommandsTokenTypeNVX, which represent a subset of
+    elink:VkIndirectCommandsTokenTypeNV, which represent a subset of
     traditional command buffer commands.
-    Represented as slink:VkIndirectCommandsLayoutNVX.
-endif::VK_NVX_device_generated_commands[]
+    Represented as slink:VkIndirectCommandsLayoutNV.
+endif::VK_NV_device_generated_commands[]
 
 Indirect Drawing Commands::
     _Drawing commands_ that source some of their parameters from structures
     in buffer memory.
     Includes flink:vkCmdDrawIndirect,
+ifdef::VK_VERSION_1_2[]
+    flink:vkCmdDrawIndirectCount, flink:vkCmdDrawIndexedIndirectCount,
+endif::VK_VERSION_1_2[]
 ifdef::VK_KHR_draw_indirect_count[]
     flink:vkCmdDrawIndirectCountKHR, flink:vkCmdDrawIndexedIndirectCountKHR,
 endif::VK_KHR_draw_indirect_count[]
 ifdef::VK_AMD_draw_indirect_count[]
     flink:vkCmdDrawIndirectCountAMD, flink:vkCmdDrawIndexedIndirectCountAMD,
 endif::VK_AMD_draw_indirect_count[]
+ifdef::VK_NV_mesh_shader[]
+    flink:vkCmdDrawMeshTasksIndirectNV,
+    flink:vkCmdDrawMeshTasksIndirectCountNV,
+endif::VK_NV_mesh_shader[]
     and flink:vkCmdDrawIndexedIndirect.
 
 Initial State (Command Buffer)::
     A command buffer that has not begun recording commands.
-    See also Recorded State and Executable State.
+    See also Recording State and Executable State.
+
+ifdef::VK_EXT_inline_uniform_block[]
+Inline Uniform Block::
+    A descriptor type that represents uniform data stored directly in
+    descriptor sets, and supports read-only access in a shader.
+endif::VK_EXT_inline_uniform_block[]
 
 Input Attachment::
     A descriptor type that represents an image view, and supports unfiltered
@@ -712,17 +923,72 @@ Invocation Group::
     execute the same control flow path in order for control flow to be
     considered dynamically uniform.
 
+ifdef::VK_KHR_ray_tracing_pipeline,VK_NV_ray_tracing[]
+Invocation Repack Instruction::
+    A ray tracing shader call <<ray-tracing-repack,instruction>> where the
+    implementation may: change the set of invocations that are executing.
+endif::VK_KHR_ray_tracing_pipeline,VK_NV_ray_tracing[]
+
+ifdef::VK_KHR_deferred_host_operations[]
+Join (Deferred Host Operations)::
+    The act of instructing a thread to participate in the execution of a
+    deferred operation.
+    See <<deferred-host-operations, Deferred Host Operations>>.
+endif::VK_KHR_deferred_host_operations[]
+
 [[glossary-linear-resource]]
 Linear Resource::
-    A resource is _linear_ if it is a slink:VkBuffer, or a slink:VkImage
-    created with ename:VK_IMAGE_TILING_LINEAR.
-    A resource is _non-linear_ if it is a slink:VkImage created with
-    ename:VK_IMAGE_TILING_OPTIMAL.
++
+--
+A resource is _linear_ if it is one of the following:
+
+  * a slink:VkBuffer
+  * a slink:VkImage created with ename:VK_IMAGE_TILING_LINEAR
+ifdef::VK_EXT_image_drm_format_modifier[]
+  * a slink:VkImage created with
+    ename:VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT and whose
+    <<glossary-drm-format-modifier,Linux DRM format modifier>> is
+    code:DRM_FORMAT_MOD_LINEAR
+endif::VK_EXT_image_drm_format_modifier[]
+ifdef::VK_NV_ray_tracing[]
+  * a slink:VkAccelerationStructureNV
+endif::VK_NV_ray_tracing[]
+ifdef::VK_KHR_acceleration_structure[]
+
+Because a slink:VkAccelerationStructureKHR resource does not have memory
+bound to it directly, it is considered neither linear nor non-linear.
+However, the slink:VkBuffer on which a slink:VkAccelerationStructureKHR
+resource is placed is a linear resource.
+endif::VK_KHR_acceleration_structure[]
+
+A resource is _non-linear_ if it is one of the following:
+
+  * a slink:VkImage created with ename:VK_IMAGE_TILING_OPTIMAL
+ifdef::VK_EXT_image_drm_format_modifier[]
+  * a slink:VkImage created with
+    ename:VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT and whose
+    <<glossary-drm-format-modifier,Linux DRM format modifier>> is not
+    code:DRM_FORMAT_MOD_LINEAR
+endif::VK_EXT_image_drm_format_modifier[]
+--
+
+ifdef::VK_EXT_image_drm_format_modifier[]
+[[glossary-drm-format-modifier,Linux DRM format modifier]]
+Linux DRM Format Modifier::
+    A 64-bit, vendor-prefixed, semi-opaque unsigned integer describing
+    vendor-specific details of an image's memory layout.
+    In Linux graphics APIs, _modifiers_ are commonly used to specify the
+    memory layout of externally shared images.
+    An image has a _modifier_ if and only if it is created with pname:tiling
+    equal to ename:VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT.
+    For more details, refer to the appendix for extension
+    `apiext:VK_EXT_image_drm_format_modifier`.
+endif::VK_EXT_image_drm_format_modifier[]
 
 Local Workgroup::
-    A collection of compute shader invocations invoked by a single dispatch
-    command, which share data via code:WorkgroupLocal variables and can
-    synchronize with each other.
+    A collection of compute shader invocations invoked by a single
+    dispatching command, which share data via code:WorkgroupLocal variables
+    and can synchronize with each other.
 
 Logical Device::
     An object that represents the application's interface to the physical
@@ -750,12 +1016,50 @@ Memory Dependency::
   * The availability operation happens-before the visibility operation
   * The visibility operation happens-before the second set of operations
 
+Memory Domain::
+    A memory domain is an abstract place to which memory writes are made
+    available by availability operations and memory domain operations.
+    The memory domains correspond to the set of agents that the write can:
+    then be made visible to.
+    The memory domains are _host_, _device_, _shader_, _workgroup instance_
+    (for workgroup instance there is a unique domain for each compute
+    workgroup) and _subgroup instance_ (for subgroup instance there is a
+    unique domain for each subgroup).
+
+Memory Domain Operation::
+    An operation that makes the writes that are available to one memory
+    domain available to another memory domain.
+
 Memory Heap::
     A region of memory from which device memory allocations can: be made.
 
 Memory Type::
     An index used to select a set of memory properties (e.g. mappable,
     cached) for a device memory allocation.
+
+ifdef::VK_NV_mesh_shader[]
+Mesh Shading Pipeline::
+    A graphics pipeline where the primitives are assembled explicitly in the
+    shader stages.
+    In contrast to the primitive shading pipeline where input primitives are
+    assembled by fixed function processing.
+endif::VK_NV_mesh_shader[]
+
+ifdef::VK_NV_mesh_shader[]
+Mesh Tasks Drawing Commands::
+    _Drawing commands_ which create shader invocations organized in
+    workgroups for drawing mesh tasks.
+    Includes flink:vkCmdDrawMeshTasksNV, flink:vkCmdDrawMeshTasksIndirectNV,
+    and flink:vkCmdDrawMeshTasksIndirectCountNV.
+endif::VK_NV_mesh_shader[]
+
+Minimum Miplevel Size::
+    The smallest size that is permitted for a miplevel.
+    For conventional images this is 1x1x1.
+ifdef::VK_NV_corner_sampled_image[]
+    For corner-sampled images, this is 2x2x2.
+endif::VK_NV_corner_sampled_image[]
+    See <<resources-image-miplevel-sizing, Image Miplevel Sizing>>.
 
 Mip Tail Region::
     The set of mipmap levels of a sparse residency texture that are too
@@ -767,7 +1071,7 @@ Multi-planar::
     A _multi-planar format_ (or "`planar format`") is an image format
     consisting of more than one _plane_, identifiable with a etext:_2PLANE
     or etext:_3PLANE component to the format name and listed in
-    <<features-formats-requiring-sampler-ycbcr-conversion>>.
+    <<formats-requiring-sampler-ycbcr-conversion>>.
     A _multi-planar image_ (or "`planar image`") is an image of a
     multi-planar format.
 endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
@@ -781,12 +1085,18 @@ Non-Indexed Drawing Commands::
     order from the vertex input attributes for a drawing command (i.e. they
     do not use an _index buffer_).
     Includes flink:vkCmdDraw,
+ifdef::VK_VERSION_1_2[]
+    flink:vkCmdDrawIndirectCount,
+endif::VK_VERSION_1_2[]
 ifdef::VK_KHR_draw_indirect_count[]
     flink:vkCmdDrawIndirectCountKHR,
 endif::VK_KHR_draw_indirect_count[]
 ifdef::VK_AMD_draw_indirect_count[]
     flink:vkCmdDrawIndirectCountAMD,
 endif::VK_AMD_draw_indirect_count[]
+ifdef::VK_EXT_multi_draw[]
+    flink:vkCmdDrawMultiEXT,
+endif::VK_EXT_multi_draw[]
     and flink:vkCmdDrawIndirect.
 
 Normalized::
@@ -798,21 +1108,16 @@ Normalized Device Coordinates::
     coordinates, and before the viewport transformation converts to
     framebuffer coordinates.
 
-ifdef::VK_NVX_device_generated_commands[]
-Object Table::
-    A binding table for various resources (slink:VkPipeline, slink:VkBuffer,
-    slink:VkDescriptorSet), so that they can be referenced in
-    device-generated command processing.
-    Represented as slink:VkObjectTableNVX.
-    Entries are registered or unregistered via code:uint32_t indices.
-endif::VK_NVX_device_generated_commands[]
-
-Obsoleted::
+Obsoleted (feature)::
     A feature is obsolete if it can no longer be used.
-    For core features, making one obsolete would be in violation of the
-    <<fundamentals-versionnum, compatibility rules>>, so must not be done.
-    However extensions do not have these guarantees, and can be made
-    obsolete by a newer core version or extension.
+
+ifdef::VK_VERSION_1_2,VK_KHR_buffer_device_address[]
+Opaque Capture Address::
+    A 64-bit value representing the device address of a buffer or memory
+    object that is expected to be used by trace capture/replay tools in
+    combination with the
+    <<features-bufferDeviceAddress,bufferDeviceAddress>> feature.
+endif::VK_VERSION_1_2,VK_KHR_buffer_device_address[]
 
 Overlapped Range (Aliased Range)::
     The aliased range of a device memory allocation that intersects a given
@@ -823,7 +1128,7 @@ Ownership (Resource)::
     to that resource is well-defined for access by that entity.
 
 Packed Format::
-    A format whose components are stored as a single data element in memory,
+    A format whose components are stored as a single texel block in memory,
     with their relative locations defined within that element.
 
 ifdef::VK_NV_geometry_shader_passthrough[]
@@ -840,6 +1145,14 @@ Payload::
     Importable or exportable reference to the internal data of an object in
     Vulkan.
 endif::VK_VERSION_1_1,VK_KHR_external_semaphore,VK_KHR_external_fence[]
+
+ifdef::VK_NV_mesh_shader[]
+Per-View::
+    A variable that has an array of values which are output, one for each
+    view that is being generated.
+    A mesh shader which uses the code:PerViewNV decoration on a variable in
+    its output interface.
+endif::VK_NV_mesh_shader[]
 
 ifdef::VK_VERSION_1_1,VK_KHR_device_group[]
 Peer Memory::
@@ -889,9 +1202,27 @@ Pipeline Layout::
     setting push constant values.
     Represented by a slink:VkPipelineLayout object.
 
+ifdef::VK_KHR_pipeline_library[]
+Pipeline Library::
+    A pipeline that cannot be directly used, instead defining a set of
+    shaders and shader groups which will be <<pipeline-library,linked into
+    other pipelines>>.
+endif::VK_KHR_pipeline_library[]
+
 Pipeline Stage::
     A logically independent execution unit that performs some of the
     operations defined by an action command.
+
+ifdef::VK_KHR_ray_tracing_pipeline,VK_NV_ray_tracing[]
+Pipeline Trace Ray Instruction::
+    A ray tracing instruction which traces a ray into an acceleration
+    structure when using ray tracing pipelines.
+    One of
+ifdef::VK_NV_ray_tracing[code:OpTraceNV,]
+ifdef::VK_NV_ray_tracing_motion_blur[code:OpTraceRayMotionNV, code:OpTraceMotionNV,]
+ifdef::VK_KHR_ray_tracing_pipeline[code:OpTraceRayKHR]
+    .
+endif::VK_KHR_ray_tracing_pipeline,VK_NV_ray_tracing[]
 
 pname:pNext Chain::
     A set of structures <<fundamentals-validusage-pNext,chained together>>
@@ -903,16 +1234,15 @@ Planar::
 
 Plane::
     An _image plane_ is part of the representation of an image, containing a
-    subset of the color channels required to represent the texels in the
+    subset of the color components required to represent the texels in the
     image and with a contiguous mapping of coordinates to bound memory.
     Most images consist only of a single plane, but some formats spread the
-    channels across multiple image planes.
+    components across multiple image planes.
     The host-accessible properties of each image plane are accessed in a
     linear layout using flink:vkGetImageSubresourceLayout.
     If a multi-planar image is created with the
     ename:VK_IMAGE_CREATE_DISJOINT_BIT bit set, the image is described as
-    _disjoint_, and its planes are therefore are bound to memory
-    independently.
+    _disjoint_, and its planes are therefore bound to memory independently.
 endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 
 Point Sampling (Rasterization)::
@@ -920,6 +1250,20 @@ Point Sampling (Rasterization)::
     a polygon primitive by testing whether the sample location is in the
     interior of the polygon in framebuffer-space, or on the boundary of the
     polygon according to the tie-breaking rules.
+
+Potential Format Features::
+    The union of all elink:VkFormatFeatureFlagBits that the implementation
+    supports for a specified elink:VkFormat, over all supported image
+    tilings.
+ifdef::VK_ANDROID_external_memory_android_hardware_buffer[]
+    For <<memory-external-android-hardware-buffer-external-formats,external
+    formats>> the elink:VkFormatFeatureFlagBits is provided by the
+    implementation.
+endif::VK_ANDROID_external_memory_android_hardware_buffer[]
+
+Pre-rasterization::
+    Operations that execute before <<primsrast,rasterization>>, and any
+    state associated with those operations.
 
 ifdef::VK_KHR_swapchain[]
 Presentable image::
@@ -937,21 +1281,21 @@ Primary Command Buffer::
     A command buffer that can: execute secondary command buffers, and can:
     be submitted directly to a queue.
 
+ifdef::VK_NV_mesh_shader[]
+Primitive Shading Pipeline::
+    A graphics pipeline where input primitives are assembled by fixed
+    function processing.
+    It is the counterpart to mesh shading.
+endif::VK_NV_mesh_shader[]
+
 Primitive Topology::
     State that controls how vertices are assembled into primitives, e.g. as
     lists of triangles, strips of lines, etc..
 
-Promoted::
-    A feature is promoted if it is taken from an older extension and made
-    available as part of a new <<versions,core version of the API>>, or a
-    newer extension that is considered to be either as widely supported or
-    more so.
-    A promoted feature may have minor differences from the original such as:
-      * It may be renamed
-      * A small number of non-intrusive parameters may have been added
-      * The feature may be advertised differently by
-        <<features-features,device features>>
-      * The author ID suffixes will be changed or removed as appropriate
+Promoted (feature)::
+    A feature from an older extension is considered promoted if it is made
+    available as part of a new core version or newer extension with wider
+    support.
 
 ifdef::VK_VERSION_1_1[]
 Protected Buffer::
@@ -971,6 +1315,13 @@ Protected Device Memory::
 Protected Image::
     An image to which protected device memory can: be bound.
 endif::VK_VERSION_1_1[]
+
+Provisional::
+    A feature is released provisionally in order to get wider feedback on
+    the functionality before it is finalized.
+    Provisional features may change in ways that break backwards
+    compatibility, and thus are not recommended for use in production
+    applications.
 
 Provoking Vertex::
     The vertex in a primitive from which flat shaded attribute values are
@@ -1006,7 +1357,7 @@ Descriptor Update Template::
 endif::VK_VERSION_1_1,VK_KHR_descriptor_update_template[]
 
 Query Pool::
-    An object that contains a number of query entries and their associated
+    An object containing a number of query entries and their associated
     state and results.
     Represented by a slink:VkQueryPool object.
 
@@ -1033,6 +1384,15 @@ Queue Submission::
     See the <<devsandqueues-submission, Devices and Queues chapter>> for
     more information.
 
+ifdef::VK_KHR_ray_tracing_pipeline,VK_NV_ray_tracing[]
+Ray Tracing Command::
+    Commands that provoke work using a ray tracing pipeline.
+    Includes
+ifdef::VK_NV_ray_tracing[flink:vkCmdTraceRaysNV,]
+ifdef::VK_KHR_ray_tracing_pipeline[flink:vkCmdTraceRaysKHR, and flink:vkCmdTraceRaysIndirectKHR]
+    .
+endif::VK_KHR_ray_tracing_pipeline,VK_NV_ray_tracing[]
+
 Recording State (Command Buffer)::
     A command buffer that is ready to record commands.
     See also Initial State and Executable State.
@@ -1051,7 +1411,7 @@ Render Pass Instance::
 
 Required Extensions::
     Extensions that must: be enabled alongside extensions dependent on them
-    (see <<extended-functionality-extensions-dependencies, Extension
+    (see <<extendingvulkan-extensions-extensiondependencies, Extension
     Dependencies>>).
 
 Reset (Command Buffer)::
@@ -1076,12 +1436,20 @@ Retired Swapchain::
     be presented.
 endif::VK_KHR_swapchain[]
 
+Sample Index::
+    The index of a sample within a <<primsrast-multisampling-coverage-mask,
+    single set of samples>>.
+
+Sample Shading::
+    Invoking the fragment shader multiple times per fragment, with the
+    covered samples partitioned among the invocations.
+
 Sampled Image::
     A descriptor type that represents an image view, and supports filtered
     (sampled) and unfiltered read-only access in a shader.
 
 Sampler::
-    An object that contains state that controls how sampled image data is
+    An object containing state that controls how sampled image data is
     sampled (or filtered) when accessed in a shader.
     Also a descriptor type describing the object.
     Represented by a slink:VkSampler object.
@@ -1107,8 +1475,22 @@ Shader::
     Instructions selected (via an entry point) from a shader module, which
     are executed in a shader stage.
 
+ifdef::VK_KHR_ray_tracing_pipeline,VK_NV_ray_tracing[]
+Shader Call::
+    An <<ray-tracing-shader-call,instruction>> which may: cause execution to
+    continue in a different shader stage.
+endif::VK_KHR_ray_tracing_pipeline,VK_NV_ray_tracing[]
+
 Shader Code::
     A stream of instructions used to describe the operation of a shader.
+
+ifdef::VK_NV_device_generated_commands,VK_NV_ray_tracing,VK_KHR_ray_tracing_pipeline[]
+Shader Group::
+    A set of Shader Stages that are part of a slink:VkPipeline which
+    contains multiple of such sets.
+    This allows the device to make use of all the shader groups from the
+    bound pipeline independently.
+endif::VK_NV_device_generated_commands,VK_NV_ray_tracing,VK_KHR_ray_tracing_pipeline[]
 
 Shader Module::
     A collection of shader code, potentially including several functions and
@@ -1117,6 +1499,21 @@ Shader Module::
 
 Shader Stage::
     A stage of the graphics or compute pipeline that executes shader code.
+
+ifdef::VK_KHR_fragment_shading_rate,VK_NV_shading_rate_image[]
+[[glossary-shading-rate]]
+Shading Rate::
+    The ratio of the number of fragment shader invocations generated in a
+    fully covered framebuffer region to the size (in pixels) of that region.
+endif::VK_KHR_fragment_shading_rate,VK_NV_shading_rate_image[]
+
+ifdef::VK_NV_shading_rate_image[]
+[[glossary-shading-rate-image]]
+Shading Rate Image::
+    An image used to establish the shading rate for a framebuffer region,
+    where each pixel controls the shading rate for a corresponding
+    framebuffer region.
+endif::VK_NV_shading_rate_image[]
 
 ifdef::VK_KHR_shared_presentable_image[]
 Shared presentable image::
@@ -1136,9 +1533,8 @@ endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
 
 Size-Compatible Image Formats::
     When a compressed image format and an uncompressed image format are
-    size-compatible, it means that the element size of the uncompressed
-    format must: equal the element size (compressed texel block size) of the
-    compressed format.
+    size-compatible, it means that the texel block size of the uncompressed
+    format must: equal the texel block size of the compressed format.
 
 Sparse Block::
     An element of a sparse resource that can be independently bound to
@@ -1156,6 +1552,13 @@ Sparse Image Block::
 Sparse Unbound Texel::
     A texel read from a region of a sparse texture that does not have memory
     bound to it.
+
+ifdef::VK_NV_ray_tracing_motion_blur[]
+SRT::
+   A decomposition of a spatial transform separating out scale, rotation,
+   and translation which has better linear interpolation properties for
+   representing motion.
+endif::VK_NV_ray_tracing_motion_blur[]
 
 Static Use::
     An object in a shader is statically used by a shader entry point if any
@@ -1176,20 +1579,20 @@ Storage Texel Buffer::
     A descriptor type that represents a buffer view, and supports
     unfiltered, formatted reads, writes, and atomics in a shader.
 
-ifdef::VK_EXT_shader_subgroup_vote,VK_VERSION_1_1[]
+ifdef::VK_VERSION_1_1,VK_EXT_shader_subgroup_vote[]
 Subgroup::
     A set of shader invocations that can: synchronize and share data with
     each other efficiently.
     In compute shaders, the _local workgroup_ is a superset of the subgroup.
-endif::VK_EXT_shader_subgroup_vote,VK_VERSION_1_1[]
+endif::VK_VERSION_1_1,VK_EXT_shader_subgroup_vote[]
 
-ifdef::VK_EXT_shader_subgroup_ballot,VK_VERSION_1_1[]
+ifdef::VK_VERSION_1_1,VK_EXT_shader_subgroup_ballot[]
 Subgroup Mask::
     A bitmask for all invocations in the current subgroup with one bit per
     invocation, starting with the least significant bit in the first vector
     component, continuing to the last bit (less than code:SubgroupSize) in
     the last required vector component.
-endif::VK_EXT_shader_subgroup_ballot,VK_VERSION_1_1[]
+endif::VK_VERSION_1_1,VK_EXT_shader_subgroup_ballot[]
 
 Subpass::
     A phase of rendering within a render pass, that reads and writes a
@@ -1205,8 +1608,11 @@ Subpass Dependency::
 
 Subpass Description::
     Lists of attachment indices for input attachments, color attachments,
-    depth/stencil attachment, resolve attachments, and preserve attachments
-    used by the subpass in a render pass.
+    depth/stencil attachment, resolve attachments,
+ifdef::VK_VERSION_1_2,VK_KHR_depth_stencil_resolve[]
+    depth/stencil resolve,
+endif::VK_VERSION_1_2,VK_KHR_depth_stencil_resolve[]
+    and preserve attachments used by the subpass in a render pass.
 
 Subset (Self-Dependency)::
     A subset of a self-dependency is a pipeline barrier performed during the
@@ -1214,10 +1620,28 @@ Subset (Self-Dependency)::
     each contain a subset of the bits set in the identically named mask in
     the self-dependency.
 
+Texel Block::
+    A single addressable element of an image with an uncompressed
+    elink:VkFormat, or a single compressed block of an image with a
+    compressed elink:VkFormat.
+
+Texel Block Size::
+    The size (in bytes) used to store a texel block of a compressed or
+    uncompressed image.
+
 Texel Coordinate System::
     One of three coordinate systems (normalized, unnormalized, integer) that
     define how texel coordinates are interpreted in an image or a specific
     mipmap level of an image.
+
+ifdef::VK_VERSION_1_2,VK_KHR_timeline_semaphore[]
+Timeline Semaphore::
+    A semaphore with a strictly increasing 64-bit unsigned integer payload
+    indicating whether the semaphore is signaled with respect to a
+    particular reference value.
+    Represented by a slink:VkSemaphore object created with a semaphore type
+    of ename:VK_SEMAPHORE_TYPE_TIMELINE.
+endif::VK_VERSION_1_2,VK_KHR_timeline_semaphore[]
 
 Uniform Texel Buffer::
     A descriptor type that represents a buffer view, and supports
@@ -1231,9 +1655,9 @@ Units in the Last Place (ULP)::
     A measure of floating-point error loosely defined as the smallest
     representable step in a floating-point format near a given value.
     For the precise definition see <<spirvenv-precision-operation, Precision
-    and Operation of SPIR-V instructions>> or Jean-Michel Muller, "On the
-    definition of ulp(x).", RR-5504, INRIA.
-    Other sources may also use the term "unit of least precision".
+    and Operation of SPIR-V instructions>> or Jean-Michel Muller, "`On the
+    definition of ulp(x)`", RR-5504, INRIA.
+    Other sources may also use the term "`unit of least precision`".
 
 Unnormalized::
     A value that is interpreted according to its conventional
@@ -1264,6 +1688,18 @@ Vertex Input Attribute::
     shader by reading data from a vertex input binding and converting it to
     the attribute's format.
 
+ifdef::VK_EXT_transform_feedback[]
+Vertex Stream::
+    A vertex stream is where the last
+    <<pipeline-graphics-subsets-pre-rasterization,pre-rasterization shader
+    stages>> outputs vertex data, which then goes to the rasterizer, is
+    captured to a transform feedback buffer, or both.
+    Geometry shaders can: emit primitives to multiple independent vertex
+    streams.
+    Each vertex emitted by the geometry shader is directed at one of the
+    vertex streams.
+endif::VK_EXT_transform_feedback[]
+
 ifdef::VK_EXT_validation_cache[]
 Validation Cache::
     An object that can: be used to collect and retrieve validation results
@@ -1279,11 +1715,6 @@ Vertex Input Binding::
 Vertex Input Interface::
     A vertex shader entry point's variables with code:Input storage class,
     which receive values from vertex input attributes.
-
-Vertex Processing Stages::
-    A set of shader stages that comprises the vertex shader, tessellation
-    control shader, tessellation evaluation shader, and geometry shader
-    stages.
 
 ifdef::VK_VERSION_1_1,VK_KHR_multiview[]
 View Mask::
@@ -1319,11 +1750,12 @@ Visible::
 // Binding Range <<sparsemem-memory-binding>>
 
 
-[glossary]
-= Common Abbreviations
+[[lexicon-common-abbreviations]]
+== Common Abbreviations
 
-Abbreviations and acronyms are sometimes used in the Specification and the
-API where they are considered clear and commonplace, and are defined here:
+The abbreviations and acronyms defined in this section are sometimes used in
+the Specification and the API where they are considered clear and
+commonplace.
 
 Src::
     Source
@@ -1367,9 +1799,15 @@ B::
 A::
     Alpha color component
 
+RTZ::
+    Round towards zero
 
-[glossary]
-= Prefixes
+RTE::
+    Round to nearest even
+
+
+[[lexicon-prefixes]]
+== Prefixes
 
 Prefixes are used in the API to denote specific semantic meaning of Vulkan
 names, or as a label to avoid name clashes, and are explained here:

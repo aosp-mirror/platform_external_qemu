@@ -1,0 +1,194 @@
+// Copyright 2020-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+// Common Valid Usage
+// Common to VkCmdBlitImage* commands
+  * [[VUID-{refpage}-pRegions-00215]]
+    The source region specified by each element of pname:pRegions must: be a
+    region that is contained within pname:srcImage
+  * [[VUID-{refpage}-pRegions-00216]]
+    The destination region specified by each element of pname:pRegions must:
+    be a region that is contained within pname:dstImage
+  * [[VUID-{refpage}-pRegions-00217]]
+    The union of all destination regions, specified by the elements of
+    pname:pRegions, must: not overlap in memory with any texel that may: be
+    sampled during the blit operation
+  * [[VUID-{refpage}-srcImage-01999]]
+    The <<resources-image-format-features,format features>> of
+    pname:srcImage must: contain ename:VK_FORMAT_FEATURE_BLIT_SRC_BIT
+ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-{refpage}-srcImage-06421]]
+    pname:srcImage must: not use a
+    <<formats-requiring-sampler-ycbcr-conversion, format that requires a
+    sampler Y'C~B~C~R~ conversion>>
+endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-{refpage}-srcImage-00219]]
+    pname:srcImage must: have been created with
+    ename:VK_IMAGE_USAGE_TRANSFER_SRC_BIT usage flag
+  * [[VUID-{refpage}-srcImage-00220]]
+    If pname:srcImage is non-sparse then it must: be bound completely and
+    contiguously to a single sname:VkDeviceMemory object
+  * [[VUID-{refpage}-srcImageLayout-00221]]
+    pname:srcImageLayout must: specify the layout of the image subresources
+    of pname:srcImage specified in pname:pRegions at the time this command
+    is executed on a sname:VkDevice
+ifndef::VK_KHR_shared_presentable_image[]
+  * [[VUID-{refpage}-srcImageLayout-00222]]
+    pname:srcImageLayout must: be ename:VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
+    or ename:VK_IMAGE_LAYOUT_GENERAL
+endif::VK_KHR_shared_presentable_image[]
+ifdef::VK_KHR_shared_presentable_image[]
+  * [[VUID-{refpage}-srcImageLayout-01398]]
+    pname:srcImageLayout must: be ename:VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR,
+    ename:VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL or
+    ename:VK_IMAGE_LAYOUT_GENERAL
+endif::VK_KHR_shared_presentable_image[]
+  * [[VUID-{refpage}-dstImage-02000]]
+    The <<resources-image-format-features,format features>> of
+    pname:dstImage must: contain ename:VK_FORMAT_FEATURE_BLIT_DST_BIT
+ifdef::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-{refpage}-dstImage-06422]]
+    pname:dstImage must: not use a
+    <<formats-requiring-sampler-ycbcr-conversion, format that requires a
+    sampler Y'C~B~C~R~ conversion>>
+endif::VK_VERSION_1_1,VK_KHR_sampler_ycbcr_conversion[]
+  * [[VUID-{refpage}-dstImage-00224]]
+    pname:dstImage must: have been created with
+    ename:VK_IMAGE_USAGE_TRANSFER_DST_BIT usage flag
+  * [[VUID-{refpage}-dstImage-00225]]
+    If pname:dstImage is non-sparse then it must: be bound completely and
+    contiguously to a single sname:VkDeviceMemory object
+  * [[VUID-{refpage}-dstImageLayout-00226]]
+    pname:dstImageLayout must: specify the layout of the image subresources
+    of pname:dstImage specified in pname:pRegions at the time this command
+    is executed on a sname:VkDevice
+ifndef::VK_KHR_shared_presentable_image[]
+  * [[VUID-{refpage}-dstImageLayout-00227]]
+    pname:dstImageLayout must: be ename:VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+    or ename:VK_IMAGE_LAYOUT_GENERAL
+endif::VK_KHR_shared_presentable_image[]
+ifdef::VK_KHR_shared_presentable_image[]
+  * [[VUID-{refpage}-dstImageLayout-01399]]
+    pname:dstImageLayout must: be ename:VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR,
+    ename:VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL or
+    ename:VK_IMAGE_LAYOUT_GENERAL
+endif::VK_KHR_shared_presentable_image[]
+  * [[VUID-{refpage}-srcImage-00229]]
+    If either of pname:srcImage or pname:dstImage was created with a signed
+    integer elink:VkFormat, the other must: also have been created with a
+    signed integer elink:VkFormat
+  * [[VUID-{refpage}-srcImage-00230]]
+    If either of pname:srcImage or pname:dstImage was created with an
+    unsigned integer elink:VkFormat, the other must: also have been created
+    with an unsigned integer elink:VkFormat
+  * [[VUID-{refpage}-srcImage-00231]]
+    If either of pname:srcImage or pname:dstImage was created with a
+    depth/stencil format, the other must: have exactly the same format
+  * [[VUID-{refpage}-srcImage-00232]]
+    If pname:srcImage was created with a depth/stencil format, pname:filter
+    must: be ename:VK_FILTER_NEAREST
+  * [[VUID-{refpage}-srcImage-00233]]
+    pname:srcImage must: have been created with a pname:samples value of
+    ename:VK_SAMPLE_COUNT_1_BIT
+  * [[VUID-{refpage}-dstImage-00234]]
+    pname:dstImage must: have been created with a pname:samples value of
+    ename:VK_SAMPLE_COUNT_1_BIT
+  * [[VUID-{refpage}-filter-02001]]
+    If pname:filter is ename:VK_FILTER_LINEAR, then the
+    <<resources-image-format-features,format features>> of pname:srcImage
+    must: contain ename:VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT
+ifdef::VK_IMG_filter_cubic,VK_EXT_filter_cubic[]
+  * [[VUID-{refpage}-filter-02002]]
+    If pname:filter is ename:VK_FILTER_CUBIC_EXT, then the
+    <<resources-image-format-features,format features>> of pname:srcImage
+    must: contain ename:VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_CUBIC_BIT_EXT
+  * [[VUID-{refpage}-filter-00237]]
+    If pname:filter is ename:VK_FILTER_CUBIC_EXT, pname:srcImage must: be of
+    type ename:VK_IMAGE_TYPE_2D
+endif::VK_IMG_filter_cubic,VK_EXT_filter_cubic[]
+  * [[VUID-{refpage}-srcSubresource-01705]]
+    The pname:srcSubresource.mipLevel member of each element of
+    pname:pRegions must: be less than the pname:mipLevels specified in
+    slink:VkImageCreateInfo when pname:srcImage was created
+  * [[VUID-{refpage}-dstSubresource-01706]]
+    The pname:dstSubresource.mipLevel member of each element of
+    pname:pRegions must: be less than the pname:mipLevels specified in
+    slink:VkImageCreateInfo when pname:dstImage was created
+  * [[VUID-{refpage}-srcSubresource-01707]]
+    The [eq]#pname:srcSubresource.baseArrayLayer {plus}
+    pname:srcSubresource.layerCount# of each element of pname:pRegions must:
+    be less than or equal to the pname:arrayLayers specified in
+    slink:VkImageCreateInfo when pname:srcImage was created
+  * [[VUID-{refpage}-dstSubresource-01708]]
+    The [eq]#pname:dstSubresource.baseArrayLayer {plus}
+    pname:dstSubresource.layerCount# of each element of pname:pRegions must:
+    be less than or equal to the pname:arrayLayers specified in
+    slink:VkImageCreateInfo when pname:dstImage was created
+ifdef::VK_EXT_fragment_density_map[]
+  * [[VUID-{refpage}-dstImage-02545]]
+    pname:dstImage and pname:srcImage must: not have been created with
+    pname:flags containing ename:VK_IMAGE_CREATE_SUBSAMPLED_BIT_EXT
+endif::VK_EXT_fragment_density_map[]
+// Common Valid Usage
+  * [[VUID-{refpage}-srcImage-00240]]
+    If either pname:srcImage or pname:dstImage is of type
+    ename:VK_IMAGE_TYPE_3D, then for each element of pname:pRegions,
+    pname:srcSubresource.baseArrayLayer and
+    pname:dstSubresource.baseArrayLayer must: each be `0`, and
+    pname:srcSubresource.layerCount and pname:dstSubresource.layerCount
+    must: each be `1`
+  * [[VUID-{refpage}-aspectMask-00241]]
+    For each element of pname:pRegions, pname:srcSubresource.aspectMask
+    must: specify aspects present in pname:srcImage
+  * [[VUID-{refpage}-aspectMask-00242]]
+    For each element of pname:pRegions, pname:dstSubresource.aspectMask
+    must: specify aspects present in pname:dstImage
+  * [[VUID-{refpage}-srcOffset-00243]]
+    For each element of pname:pRegions, pname:srcOffsets[0].x and
+    pname:srcOffsets[1].x must: both be greater than or equal to `0` and
+    less than or equal to the width of the specified pname:srcSubresource of
+    pname:srcImage
+  * [[VUID-{refpage}-srcOffset-00244]]
+    For each element of pname:pRegions, pname:srcOffsets[0].y and
+    pname:srcOffsets[1].y must: both be greater than or equal to `0` and
+    less than or equal to the height of the specified pname:srcSubresource
+    of pname:srcImage
+  * [[VUID-{refpage}-srcImage-00245]]
+    If pname:srcImage is of type ename:VK_IMAGE_TYPE_1D, then for each
+    element of pname:pRegions, pname:srcOffsets[0].y must: be `0` and
+    pname:srcOffsets[1].y must: be `1`
+  * [[VUID-{refpage}-srcOffset-00246]]
+    For each element of pname:pRegions, pname:srcOffsets[0].z and
+    pname:srcOffsets[1].z must: both be greater than or equal to `0` and
+    less than or equal to the depth of the specified pname:srcSubresource of
+    pname:srcImage
+  * [[VUID-{refpage}-srcImage-00247]]
+    If pname:srcImage is of type ename:VK_IMAGE_TYPE_1D or
+    ename:VK_IMAGE_TYPE_2D, then for each element of pname:pRegions,
+    pname:srcOffsets[0].z must: be `0` and pname:srcOffsets[1].z must: be
+    `1`
+  * [[VUID-{refpage}-dstOffset-00248]]
+    For each element of pname:pRegions, pname:dstOffsets[0].x and
+    pname:dstOffsets[1].x must: both be greater than or equal to `0` and
+    less than or equal to the width of the specified pname:dstSubresource of
+    pname:dstImage
+  * [[VUID-{refpage}-dstOffset-00249]]
+    For each element of pname:pRegions, pname:dstOffsets[0].y and
+    pname:dstOffsets[1].y must: both be greater than or equal to `0` and
+    less than or equal to the height of the specified pname:dstSubresource
+    of pname:dstImage
+  * [[VUID-{refpage}-dstImage-00250]]
+    If pname:dstImage is of type ename:VK_IMAGE_TYPE_1D, then for each
+    element of pname:pRegions, pname:dstOffsets[0].y must: be `0` and
+    pname:dstOffsets[1].y must: be `1`
+  * [[VUID-{refpage}-dstOffset-00251]]
+    For each element of pname:pRegions, pname:dstOffsets[0].z and
+    pname:dstOffsets[1].z must: both be greater than or equal to `0` and
+    less than or equal to the depth of the specified pname:dstSubresource of
+    pname:dstImage
+  * [[VUID-{refpage}-dstImage-00252]]
+    If pname:dstImage is of type ename:VK_IMAGE_TYPE_1D or
+    ename:VK_IMAGE_TYPE_2D, then for each element of pname:pRegions,
+    pname:dstOffsets[0].z must: be `0` and pname:dstOffsets[1].z must: be
+    `1`

@@ -1,0 +1,62 @@
+// Copyright (c) 2018-2020 NVIDIA Corporation
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_NV_compute_shader_derivatives.txt[]
+
+=== Other Extension Metadata
+
+*Last Modified Date*::
+    2018-07-19
+*IP Status*::
+    No known IP claims.
+*Interactions and External Dependencies*::
+  - This extension requires
+    {spirv}/NV/SPV_NV_compute_shader_derivatives.html[`SPV_NV_compute_shader_derivatives`]
+  - This extension provides API support for
+    https://github.com/KhronosGroup/GLSL/blob/master/extensions/nv/GLSL_NV_compute_shader_derivatives.txt[`GL_NV_compute_shader_derivatives`]
+*Contributors*::
+  - Pat Brown, NVIDIA
+
+=== Description
+
+This extension adds Vulkan support for the
+{spirv}/NV/SPV_NV_compute_shader_derivatives.html[`SPV_NV_compute_shader_derivatives`]
+SPIR-V extension.
+
+The SPIR-V extension provides two new execution modes, both of which allow
+compute shaders to use built-ins that evaluate compute derivatives
+explicitly or implicitly.
+Derivatives will be computed via differencing over a 2x2 group of shader
+invocations.
+The code:DerivativeGroupQuadsNV execution mode assembles shader invocations
+into 2x2 groups, where each group has x and y coordinates of the local
+invocation ID of the form (2m+{0,1}, 2n+{0,1}).
+The code:DerivativeGroupLinearNV execution mode assembles shader invocations
+into 2x2 groups, where each group has local invocation index values of the
+form 4m+{0,1,2,3}.
+
+include::{generated}/interfaces/VK_NV_compute_shader_derivatives.txt[]
+
+=== New SPIR-V Capability
+
+  * <<spirvenv-capabilities-table-ComputeDerivativeGroupQuadsNV,ComputeDerivativeGroupQuadsNV>>
+  * <<spirvenv-capabilities-table-ComputeDerivativeGroupLinearNV,ComputeDerivativeGroupLinearNV>>
+
+=== Issues
+
+(1) Should we specify that the groups of four shader invocations used for
+derivatives in a compute shader are the same groups of four invocations that
+form a "`quad`" in shader subgroups?
+
+*RESOLVED*: Yes.
+
+
+=== Examples
+
+None.
+
+=== Version History
+
+ * Revision 1, 2018-07-19 (Pat Brown)
+   - Initial draft
