@@ -1,0 +1,32 @@
+// Copyright (c) 2019-2020 Advanced Micro Devices, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_AMD_shader_core_properties2.txt[]
+
+=== Other Extension Metadata
+
+*Last Modified Date*::
+    2019-07-26
+*IP Status*::
+    No known IP claims.
+*Contributors*::
+  - Matthaeus G. Chajdas, AMD
+  - Tobias Hector, AMD
+
+=== Description
+
+This extension exposes additional shader core properties for a target
+physical device through the `apiext:VK_KHR_get_physical_device_properties2`
+extension.
+
+include::{generated}/interfaces/VK_AMD_shader_core_properties2.txt[]
+
+=== Examples
+
+None.
+
+=== Version History
+
+  * Revision 1, 2019-07-26 (Matthaeus G. Chajdas)
+    - Initial draft.

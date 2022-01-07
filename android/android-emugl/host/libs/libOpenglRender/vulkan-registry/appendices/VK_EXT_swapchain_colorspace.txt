@@ -1,45 +1,23 @@
-include::meta/VK_EXT_swapchain_colorspace.txt[]
+// Copyright 2016-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_EXT_swapchain_colorspace.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
-    2017-03-15
+    2019-04-26
 *IP Status*::
     No known IP claims.
 *Contributors*::
   - Courtney Goeltzenleuchter, Google
 
-=== New Enum Constants
+=== Description
 
-  * Extending elink:VkColorSpaceKHR:
-  ** ename:VK_COLOR_SPACE_DISPLAY_P3_NONLINEAR_EXT - supports the Display-P3
-     color space and applies an sRGB-like transfer function.
-  ** ename:VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT - supports the extended
-     sRGB color space and applies a linear transfer function.
-  ** ename:VK_COLOR_SPACE_EXTENDED_SRGB_NONLINEAR_EXT - supports the
-     extended sRGB color space with an sRGB nonlinear transfer function.
-  ** ename:VK_COLOR_SPACE_DCI_P3_LINEAR_EXT - supports the DCI-P3 color
-     space and applies a linear OETF.
-  ** ename:VK_COLOR_SPACE_DCI_P3_NONLINEAR_EXT - supports the DCI-P3 color
-     space and applies the Gamma 2.6 OETF.
-  ** ename:VK_COLOR_SPACE_BT709_LINEAR_EXT - supports the BT709 color space
-     and applies a linear transfer function.
-  ** ename:VK_COLOR_SPACE_BT709_NONLINEAR_EXT - supports the BT709 color
-     space and applies the SMPTE 170M OETF.
-  ** ename:VK_COLOR_SPACE_BT2020_LINEAR_EXT - supports the BT2020 color
-     space and applies a linear OETF.
-  ** ename:VK_COLOR_SPACE_HDR10_ST2084_EXT - supports HDR10 (BT2020 color
-     space and applies the SMPTE ST2084 Perceptual Quantizer (PQ) OETF).
-  ** ename:VK_COLOR_SPACE_DOLBYVISION_EXT - supports Dolby Vision (BT2020
-     color space, proprietary encoding, and applies the SMPTE ST2084 OETF).
-  ** ename:VK_COLOR_SPACE_HDR10_HLG_EXT - supports HDR10 (BT2020 color space
-     and applies the Hybrid Log Gamma (HLG) OETF).
-  ** ename:VK_COLOR_SPACE_ADOBERGB_LINEAR_EXT - supports the AdobeRGB color
-     space and applies a linear OETF.
-  ** ename:VK_COLOR_SPACE_ADOBERGB_NONLINEAR_EXT - supports the AdobeRGB
-     color space and applies the Gamma 2.2 OETF.
-  ** ename:VK_COLOR_SPACE_PASS_THROUGH_EXT - color components used "`as
-     is`".
-     Intended to allow application to supply data for color spaces not
-     described here.
+To be done.
+
+include::{generated}/interfaces/VK_EXT_swapchain_colorspace.txt[]
 
 === Issues
 
@@ -73,3 +51,8 @@ described by separate extension.
 
   * Revision 3, 2017-06-23 (Courtney Goeltzenleuchter)
     - Add extended sRGB non-linear enum.
+
+  * Revision 4, 2019-04-26 (Graeme Leese)
+    - Clarify colorspace transfer function usage.
+    - Refer to normative definitions in the Data Format Specification.
+    - Clarify DCI-P3 and Display P3 usage.

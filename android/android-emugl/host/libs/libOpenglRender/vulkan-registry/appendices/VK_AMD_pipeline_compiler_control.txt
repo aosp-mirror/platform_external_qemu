@@ -1,0 +1,38 @@
+// Copyright (c) 2019-2020 Advanced Micro Devices, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_AMD_pipeline_compiler_control.txt[]
+
+=== Other Extension Metadata
+
+*Last Modified Date*::
+    2019-07-26
+*IP Status*::
+    No known IP claims.
+*Contributors*::
+  - Matthaeus G. Chajdas, AMD
+  - Daniel Rakos, AMD
+  - Maciej Jesionowski, AMD
+  - Tobias Hector, AMD
+
+=== Description
+
+This extension introduces slink:VkPipelineCompilerControlCreateInfoAMD
+structure that can be chained to a pipeline's creation information to
+specify additional flags that affect pipeline compilation.
+
+include::{generated}/interfaces/VK_AMD_pipeline_compiler_control.txt[]
+
+=== Issues
+
+None.
+
+=== Examples
+
+None.
+
+=== Version History
+
+  * Revision 1, 2019-07-26 (Tobias Hector)
+    - Initial revision.

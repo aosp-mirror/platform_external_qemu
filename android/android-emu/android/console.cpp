@@ -1928,7 +1928,7 @@ do_sms_send( ControlClient  client, char*  args )
     }
 
     if ( sms_address_from_str( &sender, args, p - args ) < 0 ) {
-        control_write( client, "KO: bad phone number format, must be [+](0-9)*\r\n" );
+        control_write( client, "KO: bad phone number format, must be [+](0-9)* or [a-zA-Z0-9]+\r\n" );
         return -1;
     }
 
@@ -2521,29 +2521,34 @@ static int do_snapshot_pull(ControlClient client, char* args) {
         return -1;
     }
     std::string& filename = arg_strings[1];
+    const char* directory = nullptr;
     std::unique_ptr<std::ofstream> dstFile;
-    dstFile.reset(new std::ofstream(
-            android::base::PathUtils::asUnicodePath(filename).c_str(),
-            std::ios::binary | std::ios::out));
-    if (!dstFile->is_open()) {
-        control_write(client, "KO: Failed to write to %s\r\n",
-                      filename.c_str());
-        return -1;
-    }
     android::emulation::control::FileFormat format =
             android::emulation::control::TAR;
     const char* kTarGzExt = ".tar.gz";
     const char* kTarExt = ".tar";
     if (android::base::EndsWith(filename, kTarGzExt)) {
         format = android::emulation::control::TARGZ;
-    } else if (!android::base::EndsWith(filename, kTarExt)) {
-        // Unknown format. Print a warning and treat it as tar.
-        control_write(client, "WARNING: unrecognized file format %s\r\n",
-                      filename.c_str());
+    } else if (android::base::EndsWith(filename, kTarExt)) {
+        format = android::emulation::control::TAR;
+    } else {
+        format = android::emulation::control::DIRECTORY;
+        directory = filename.c_str();
     }
+    if (format != android::emulation::control::DIRECTORY) {
+        dstFile.reset(new std::ofstream(
+                android::base::PathUtils::asUnicodePath(filename).c_str(),
+                std::ios::binary | std::ios::out));
+        if (!dstFile->is_open()) {
+            control_write(client, "KO: Failed to write to %s\r\n",
+                          filename.c_str());
+            return -1;
+        }
+    }
+
     bool succeed = android::emulation::control::pullSnapshot(
-            arg_strings[0].c_str(), dstFile->rdbuf(), false, format, client,
-            control_write_err_cb);
+            arg_strings[0].c_str(), dstFile->rdbuf(), directory, false, format,
+            false, client, control_write_err_cb);
     return succeed ? 0 : -1;
 }
 
@@ -2565,27 +2570,32 @@ static int do_snapshot_push(ControlClient client, char* args) {
         return -1;
     }
     std::string& filename = arg_strings[1];
-    std::unique_ptr<std::ifstream> srcFile(new std::ifstream(
-            android::base::PathUtils::asUnicodePath(filename).c_str(),
-            std::ios::binary | std::ios::in));
-    if (!srcFile->is_open()) {
-        control_write(client, "KO: Failed to write to %s\r\n",
-                      filename.c_str());
-        return -1;
-    }
-    android::emulation::control::FileFormat format =
-            android::emulation::control::TAR;
+    const char* directory = nullptr;
+    android::emulation::control::FileFormat format;
     const char* kTarGzExt = ".tar.gz";
     const char* kTarExt = ".tar";
     if (android::base::EndsWith(filename, kTarGzExt)) {
         format = android::emulation::control::TARGZ;
-    } else if (!android::base::EndsWith(filename, kTarExt)) {
-        // Unknown format. Print a warning and treat it as tar.
-        control_write(client, "WARNING: unrecognized file format %s\r\n",
-                      filename.c_str());
+    } else if (android::base::EndsWith(filename, kTarExt)) {
+        format = android::emulation::control::TAR;
+    } else {
+        directory = filename.c_str();
+        format = android::emulation::control::DIRECTORY;
     }
+    std::unique_ptr<std::ifstream> srcFile;
+    if (format != android::emulation::control::DIRECTORY) {
+        srcFile.reset(new std::ifstream(
+                android::base::PathUtils::asUnicodePath(filename).c_str(),
+                std::ios::binary | std::ios::in));
+        if (!srcFile->is_open()) {
+            control_write(client, "KO: Failed to write to %s\r\n",
+                          filename.c_str());
+            return -1;
+        }
+    }
+
     bool succeed = android::emulation::control::pushSnapshot(
-            arg_strings[0].c_str(), srcFile.get(), format, client,
+            arg_strings[0].c_str(), srcFile.get(), directory, format, client,
             control_write_err_cb);
     return succeed ? 0 : -1;
 }

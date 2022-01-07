@@ -1,8 +1,10 @@
-// Copyright (c) 2016-2018 Khronos Group. This work is licensed under a
-// Creative Commons Attribution 4.0 International License; see
-// http://creativecommons.org/licenses/by/4.0/
+// Copyright 2016-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
-include::meta/VK_KHR_external_semaphore_fd.txt[]
+include::{generated}/meta/{refprefix}VK_KHR_external_semaphore_fd.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2016-10-21
@@ -14,33 +16,14 @@ include::meta/VK_KHR_external_semaphore_fd.txt[]
   - Jeff Juliano, NVIDIA
   - Carsten Rohde, NVIDIA
 
+=== Description
+
 An application using external memory may wish to synchronize access to that
 memory using semaphores.
 This extension enables an application to export semaphore payload to and
 import semaphore payload from POSIX file descriptors.
 
-=== New Object Types
-
-None.
-
-=== New Enum Constants
-
-  * ename:VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR
-  * ename:VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR
-
-=== New Enums
-
-None.
-
-=== New Structs
-
-  * slink:VkImportSemaphoreFdInfoKHR
-  * slink:VkSemaphoreGetFdInfoKHR
-
-=== New Functions
-
-  * flink:vkImportSemaphoreFdKHR
-  * flink:vkGetSemaphoreFdKHR
+include::{generated}/interfaces/VK_KHR_external_semaphore_fd.txt[]
 
 === Issues
 
@@ -54,3 +37,8 @@ application, and a successful import transfers it back to the driver.
 Destroying the original semaphore object will not close the file descriptor
 or remove its reference to the underlying semaphore resource associated with
 it.
+
+=== Version History
+
+  * Revision 1, 2016-10-21 (Jesse Hall)
+    - Initial revision

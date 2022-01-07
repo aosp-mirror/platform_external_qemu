@@ -97,36 +97,60 @@ public:
                         ServerWriter<SnapshotPackage>* writer) override {
         SnapshotPackage result;
         SnapshotLineConsumer errorConsumer(&result);
+        FileFormat format;
+        switch (request->format()) {
+            case SnapshotPackage::TAR:
+                format = TAR;
+                break;
+            case SnapshotPackage::TARGZ:
+                format = TARGZ;
+                break;
+            case SnapshotPackage::DIRECTORY:
+                format = DIRECTORY;
+                break;
+            default:
+                result.set_success(false);
+                result.set_err("Unknown snapshot output format");
+                return Status::OK;
+        }
         std::unique_ptr<CallbackStreambufWriter> csb;
         std::unique_ptr<std::ofstream> dstFile;
         std::streambuf* streamBufPtr = nullptr;
-        if (request->path() == "") {
-            csb.reset(new CallbackStreambufWriter(
-                    k256KB, [writer](char* bytes, std::size_t len) {
-                        SnapshotPackage msg;
-                        msg.set_payload(std::string(bytes, len));
-                        msg.set_success(true);
-                        return writer->Write(msg);
-                    }));
-            streamBufPtr = csb.get();
-        } else {
-            dstFile.reset(new std::ofstream(
-                    android::base::PathUtils::asUnicodePath(request->path())
-                            .c_str(),
-                    std::ios::binary | std::ios::out));
-            if (!dstFile->is_open()) {
+        if (request->format() == SnapshotPackage::DIRECTORY) {
+            if (request->path() == "") {
                 result.set_success(false);
-                result.set_err("Failed to write to " + request->path());
-                writer->Write(result);
+                result.set_err("Output path not provided");
                 return Status::OK;
             }
-            streamBufPtr = dstFile->rdbuf();
+        } else {
+            if (request->path() == "") {
+                csb.reset(new CallbackStreambufWriter(
+                        k256KB, [writer](char* bytes, std::size_t len) {
+                            SnapshotPackage msg;
+                            msg.set_payload(std::string(bytes, len));
+                            msg.set_success(true);
+                            return writer->Write(msg);
+                        }));
+                streamBufPtr = csb.get();
+            } else {
+                dstFile.reset(new std::ofstream(
+                        android::base::PathUtils::asUnicodePath(request->path())
+                                .c_str(),
+                        std::ios::binary | std::ios::out));
+                if (!dstFile->is_open()) {
+                    result.set_success(false);
+                    result.set_err("Failed to write to " + request->path());
+                    writer->Write(result);
+                    return Status::OK;
+                }
+                streamBufPtr = dstFile->rdbuf();
+            }
         }
 
-        result.set_success(pullSnapshot(
-                request->snapshot_id().c_str(), streamBufPtr, false,
-                request->format() == SnapshotPackage::TARGZ ? TARGZ : TAR,
-                errorConsumer.opaque(), LineConsumer::Callback));
+        result.set_success(
+                pullSnapshot(request->snapshot_id().c_str(), streamBufPtr,
+                             request->path().c_str(), false, format, false,
+                             errorConsumer.opaque(), LineConsumer::Callback));
         writer->Write(result);
         return Status::OK;
     }
@@ -157,21 +181,38 @@ public:
         if (msg.snapshot_id().size() > 0) {
             id = msg.snapshot_id();
         }
+        FileFormat format;
+        const char* directory = nullptr;
+        switch (msg.format()) {
+            case SnapshotPackage::TAR:
+                format = TAR;
+                break;
+            case SnapshotPackage::TARGZ:
+                format = TARGZ;
+                break;
+            case SnapshotPackage::DIRECTORY:
+                format = DIRECTORY;
+                directory = msg.path().c_str();
+                break;
+            default:
+                reply->set_success(false);
+                reply->set_err("Unknown snapshot format");
+                return Status::OK;
+        }
 
         std::unique_ptr<CallbackStreambufReader> csr;
         std::unique_ptr<std::istream> stream;
         if (msg.path() == "") {
             csr.reset(new CallbackStreambufReader(cb));
             stream = std::make_unique<std::istream>(csr.get());
-        } else {
-                stream = std::make_unique<std::ifstream>(
-                        msg.path().c_str(),
-                        std::ios_base::in | std::ios_base::binary);
+        } else if (format != DIRECTORY) {
+            stream = std::make_unique<std::ifstream>(
+                    msg.path().c_str(),
+                    std::ios_base::in | std::ios_base::binary);
         }
 
         SnapshotLineConsumer errorConsumer(reply);
-        pushSnapshot(id.c_str(), stream.get(),
-                     msg.format() == SnapshotPackage::TARGZ ? TARGZ : TAR,
+        pushSnapshot(id.c_str(), stream.get(), directory, format,
                      errorConsumer.opaque(), LineConsumer::Callback);
         return Status::OK;
     }

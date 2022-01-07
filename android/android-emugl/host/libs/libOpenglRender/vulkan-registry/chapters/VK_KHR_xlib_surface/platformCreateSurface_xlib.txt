@@ -1,30 +1,28 @@
-// Copyright (c) 2014-2018 Khronos Group. This work is licensed under a
-// Creative Commons Attribution 4.0 International License; see
-// http://creativecommons.org/licenses/by/4.0/
+// Copyright 2014-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
 [[platformCreateSurface_xlib,platformCreateSurface_xlib]]
-
 === Xlib Platform
 
 [open,refpage='vkCreateXlibSurfaceKHR',desc='Create a slink:VkSurfaceKHR object for an X11 window, using the Xlib client-side library',type='protos']
 --
-
 To create a sname:VkSurfaceKHR object for an X11 window, using the Xlib
 client-side library, call:
 
-include::../../api/protos/vkCreateXlibSurfaceKHR.txt[]
+include::{generated}/api/protos/vkCreateXlibSurfaceKHR.txt[]
 
   * pname:instance is the instance to associate the surface with.
-  * pname:pCreateInfo is a pointer to an instance of the
-    sname:VkXlibSurfaceCreateInfoKHR structure containing the parameters
-    affecting the creation of the surface object.
+  * pname:pCreateInfo is a pointer to a sname:VkXlibSurfaceCreateInfoKHR
+    structure containing the parameters affecting the creation of the
+    surface object.
   * pname:pAllocator is the allocator used for host memory allocated for the
     surface object when there is no more specific allocator available (see
     <<memory-allocation,Memory Allocation>>).
-  * pname:pSurface points to a slink:VkSurfaceKHR handle in which the
+  * pname:pSurface is a pointer to a slink:VkSurfaceKHR handle in which the
     created surface object is returned.
 
-include::../../validity/protos/vkCreateXlibSurfaceKHR.txt[]
+include::{generated}/validity/protos/vkCreateXlibSurfaceKHR.txt[]
 --
 
 [open,refpage='VkXlibSurfaceCreateInfoKHR',desc='Structure specifying parameters of a newly created Xlib surface object',type='structs']
@@ -32,10 +30,11 @@ include::../../validity/protos/vkCreateXlibSurfaceKHR.txt[]
 
 The sname:VkXlibSurfaceCreateInfoKHR structure is defined as:
 
-include::../../api/structs/VkXlibSurfaceCreateInfoKHR.txt[]
+include::{generated}/api/structs/VkXlibSurfaceCreateInfoKHR.txt[]
 
   * pname:sType is the type of this structure.
-  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:pNext is `NULL` or a pointer to a structure extending this
+    structure.
   * pname:flags is reserved for future use.
   * pname:dpy is a pointer to an Xlib code:Display connection to the X
     server.
@@ -44,12 +43,12 @@ include::../../api/structs/VkXlibSurfaceCreateInfoKHR.txt[]
 .Valid Usage
 ****
   * [[VUID-VkXlibSurfaceCreateInfoKHR-dpy-01313]]
-    pname:dpy must: point to a valid Xlib code:Display.
+    pname:dpy must: point to a valid Xlib code:Display
   * [[VUID-VkXlibSurfaceCreateInfoKHR-window-01314]]
-    pname:window must: be a valid Xlib code:Window.
+    pname:window must: be a valid Xlib code:Window
 ****
 
-include::../../validity/structs/VkXlibSurfaceCreateInfoKHR.txt[]
+include::{generated}/validity/structs/VkXlibSurfaceCreateInfoKHR.txt[]
 --
 
 With Xlib, pname:minImageExtent, pname:maxImageExtent, and
@@ -87,3 +86,11 @@ Specifically, applications using Vulkan with Xlib-based swapchains must:
 Some implementations may require threads to implement some presentation
 modes so applications must: call code:XInitThreads() before calling any
 other Xlib functions.
+
+[open,refpage='VkXlibSurfaceCreateFlagsKHR',desc='Reserved for future use',type='flags']
+--
+include::{generated}/api/flags/VkXlibSurfaceCreateFlagsKHR.txt[]
+
+tname:VkXlibSurfaceCreateFlagsKHR is a bitmask type for setting a mask, but
+is currently reserved for future use.
+--

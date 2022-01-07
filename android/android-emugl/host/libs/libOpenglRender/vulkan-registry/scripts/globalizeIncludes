@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# Copyright 2019-2021 The Khronos Group Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# globalizeIncludes - rewrites generated include::, and image:/image::
+# asciidoctor directives in specified Vulkan specification source files to
+# be relative to specified attributes {generated} and {images}, ensuring
+# they work properly when extracted to reference pages.
+#
+# usage: globalizeIncludes filenames
+# Updates specified files in-place, so make sure they're backed up first.
+
+sed -i -E \
+    -e 's#image:images/#image:{images}/#g' \
+    -e 's#image::images/#image::{images}/#g' \
+    -e 's#include::(\.\./)*(api|validity|hostsynctable)#include::{generated}/\2#g' \
+    $*
+
+# Not yet:
+#   -e 's#include::meta/#include::{generated}/meta/#g' \
