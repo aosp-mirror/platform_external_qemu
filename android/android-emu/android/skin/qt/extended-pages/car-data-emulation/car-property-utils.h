@@ -35,7 +35,6 @@ using android::base::FunctorThread;
 namespace carpropertyutils {
     struct PropertyDescription {
         QString label;
-        bool writable;
         std::map<int32_t, QString>* lookupTable;
         QString (*int32ToString)(int32_t val);
         QString (*int32VecToString)(std::vector<int32_t> vals);
@@ -62,6 +61,7 @@ namespace carpropertyutils {
     QString apPowerStateReqToString(std::vector<int32_t> vals);
     QString apPowerStateReportToString(std::vector<int32_t> vals);
     QString vendorIdToString(int32_t val);
+    QString changeModeToString(int32_t val);
     bool isVendor(int32_t val);
 
 }  // namespace carpropertyutils
