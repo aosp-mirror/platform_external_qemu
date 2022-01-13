@@ -13,11 +13,12 @@
 
 #include <errno.h>                       // for errno
 #include <stdio.h>                       // for size_t, EOF
+#include <string.h>                      // for strcmp
 #include <iostream>                      // for ostream, operator<<, streambuf
 #include <vector>                        // for vector
 
 #include "android/utils/debug.h"         // for VERBOSE_CHECK
-#include "android/utils/log_severity.h"  // for LogSeverity, LOG_VERBOSE
+#include "android/utils/log_severity.h"  // for LogSeverity, EMULATOR_LOG_VE...
 
 namespace android {
 namespace base {
@@ -29,6 +30,9 @@ class StringView;
 // Returns the minimal log level.
 ::LogSeverity getMinLogLevel();
 void setMinLogLevel(::LogSeverity level);
+
+class LogFormatter;
+void setLogFormatter(LogFormatter* fmt);
 
 // Convert a log level name (e.g. 'INFO') into the equivalent
 // ::android::base LOG_<name> constant.
@@ -261,6 +265,13 @@ struct LogParams {
               LogSeverity a_severity,
               bool quiet = false)
         : file(a_file), lineno(a_lineno), severity(a_severity), quiet(quiet) {}
+
+    friend bool operator==(const LogParams &s1, const LogParams &s2) {
+        return s1.lineno == s2.lineno && s1.severity == s2.severity && s1.quiet == s2.quiet && (
+            (s1.file == nullptr && s2.file == nullptr) || // both null..
+            (s1.file != nullptr && s2.file != nullptr && (s1.file == s2.file || strcmp(s1.file, s2.file) == 0)) // or the same
+        );
+    }
 
     const char* file = nullptr;
     int lineno = -1;

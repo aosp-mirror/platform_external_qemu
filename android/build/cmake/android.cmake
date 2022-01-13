@@ -305,6 +305,7 @@ function(android_yacc_compile)
   # Make the library available
   if(yacc_GENERATED)
     set(${yacc_GENERATED} "${YACC_GEN}" PARENT_SCOPE)
+    message(STATUS "These were the generated files: ${YACC_GEN}")
   endif()
 endfunction()
 

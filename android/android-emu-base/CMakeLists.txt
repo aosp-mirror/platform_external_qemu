@@ -48,6 +48,7 @@ android_add_library(
       android/base/IOVector.cpp
       android/base/JsonWriter.cpp
       android/base/Log.cpp
+      android/base/LogFormatter.cpp
       android/base/memory/LazyInstance.cpp
       android/base/memory/MemoryHints.cpp
       android/base/memory/MemoryTracker.cpp
@@ -131,7 +132,7 @@ target_include_directories(android-emu-base
 # against the base you will link against LZ4 & UUID
 target_link_libraries(
   android-emu-base PRIVATE lz4 UUID::UUID perfetto-tracing-only
-  PUBLIC libprotobuf Threads::Threads)
+  PUBLIC libprotobuf Threads::Threads absl::str_format)
 
 if(OPTION_TCMALLOC)
   android_target_link_libraries(
@@ -218,6 +219,7 @@ android_add_test(
       android/base/FunctionView_unittest.cpp
       android/base/JsonWriter_unittest.cpp
       android/base/Log_unittest.cpp
+      android/base/LogFormatter_unittest.cpp
       android/base/memory/LazyInstance_unittest.cpp
       android/base/memory/MallocUsableSize_unittest.cpp
       android/base/memory/MemoryHints_unittest.cpp
@@ -290,5 +292,5 @@ android_add_executable(
       android/base/Log_benchmark.cpp
       android/base/synchronization/Lock_benchmark.cpp
       android/base/TranslateBenchmark.cpp)
-target_link_libraries(android-emu_benchmark PRIVATE android-emu-base
+target_link_libraries(android-emu_benchmark PRIVATE android-emu-base absl::strings absl::str_format
                                                     emulator-gbench)

@@ -121,6 +121,7 @@ OPT_FLAG ( no_jni, "deprecated, see dalvik_vm_checkjni" )
 OPT_FLAG ( nojni, "deprecated, see dalvik_vm_checkjni" )
 OPT_FLAG ( dalvik_vm_checkjni, "Enable dalvik.vm.checkjni" )
 OPT_PARAM( logcat, "<tags>", "enable logcat output with given tags" )
+OPT_FLAG( log_nofilter, "Disable the duplicate log filter")
 
 #ifdef __linux__
 OPT_FLAG ( use_system_libs, "Use system libstdc++ instead of bundled one" )
