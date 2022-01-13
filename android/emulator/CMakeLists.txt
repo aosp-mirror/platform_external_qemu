@@ -112,6 +112,11 @@ android_install_dependency(all SWIFTSHADER_DEPENDENCIES)
 if (NOT LINUX_AARCH64)
   android_install_dependency(all ANGLE_DEPENDENCIES)
 endif()
+# TODO: add DARWIN_AARCH64 support
+if (DARWIN_X86_64)
+  android_install_dependency(all ANGLE_RENDERER_DEPENDENCIES)
+endif()
+
 android_install_dependency(all RUNTIME_OS_DEPENDENCIES)
 android_install_dependency_force_exec(all E2FSPROGS_DEPENDENCIES)
 android_install_dependency(all CERT_DEPEPENDENCIES)
