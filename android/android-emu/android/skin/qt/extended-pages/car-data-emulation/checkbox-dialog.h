@@ -39,7 +39,8 @@ public:
     CheckboxDialog(QWidget* parent = 0,
                    std::map<int32_t, QString>* lookupTable = 0,
                    QSet<QString>* checkedTitleSet = 0,
-                   const QString& label = "null");
+                   const QString& label = "null",
+                   const QString& tip = nullptr);
     const std::vector<int32_t>* getVec();
 
 public slots:

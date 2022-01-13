@@ -340,6 +340,18 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->next_layout_button->setHidden(true);
         mToolsUi->volume_up_button->setHidden(true);
         mToolsUi->volume_down_button->setHidden(true);
+
+        if(avdInfo_getApiLevel(android_avdInfo) >= 30) {
+          mToolsUi->overview_button->setHidden(true);
+          mToolsUi->power_button->setHidden(true);
+          mToolsUi->home_button->setHidden(true);
+
+          mToolsUi->controlsLayout->removeWidget(mToolsUi->back_button);
+          mToolsUi->controlsLayout->insertWidget(0, mToolsUi->back_button);
+
+          mToolsUi->wear_button_1->setHidden(false);
+          mToolsUi->wear_button_2->setHidden(false);
+        }
     }
 
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
@@ -749,6 +761,12 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) 
             break;
         case QtUICommand::OVERVIEW:
             forwardKeyToEmulator(KEY_APPSWITCH, down);
+            break;
+        case QtUICommand::WEAR_1:
+            forwardKeyToEmulator(KEY_HOME, down);
+            break;
+        case QtUICommand::WEAR_2:
+            forwardKeyToEmulator(KEY_POWER, down);
             break;
         case QtUICommand::ROTATE_RIGHT:
         case QtUICommand::ROTATE_LEFT:
@@ -1330,6 +1348,26 @@ void ToolWindow::on_overview_button_pressed() {
 void ToolWindow::on_overview_button_released() {
     mEmulatorWindow->activateWindow();
     handleUICommand(QtUICommand::OVERVIEW, false);
+}
+
+void ToolWindow::on_wear_button_1_pressed() {
+    mEmulatorWindow->raise();
+    handleUICommand(QtUICommand::WEAR_1, true);
+}
+
+void ToolWindow::on_wear_button_1_released() {
+    mEmulatorWindow->activateWindow();
+    handleUICommand(QtUICommand::WEAR_1, false);
+}
+
+void ToolWindow::on_wear_button_2_pressed() {
+    mEmulatorWindow->raise();
+    handleUICommand(QtUICommand::WEAR_2, true);
+}
+
+void ToolWindow::on_wear_button_2_released() {
+    mEmulatorWindow->activateWindow();
+    handleUICommand(QtUICommand::WEAR_2, false);
 }
 
 void ToolWindow::on_prev_layout_button_clicked() {

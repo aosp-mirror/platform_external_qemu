@@ -142,23 +142,23 @@
         <string>Property</string>
       </property>
     </widget>
-    <widget class="QLabel" name="editable">
+    <widget class="QLabel" name="change_mode">
       <property name="geometry">
         <rect>
           <x>320</x>
           <y>140</y>
-          <width>59</width>
+          <width>70</width>
           <height>15</height>
         </rect>
       </property>
       <property name="text">
-        <string>Editable?</string>
+        <string>Change mode</string>
       </property>
       <property name="ColorGroup" stdset="0">
         <string>Title</string>
       </property>
     </widget>
-    <widget class="QLabel" name="editable_value">
+    <widget class="QLabel" name="change_mode_value">
       <property name="geometry">
         <rect>
           <x>320</x>
@@ -339,8 +339,8 @@
     <zorder>title</zorder>
     <zorder>property_name</zorder>
     <zorder>property_name_value</zorder>
-    <zorder>editable</zorder>
-    <zorder>editable_value</zorder>
+    <zorder>change_mode</zorder>
+    <zorder>change_mode_value</zorder>
     <zorder>value</zorder>
     <zorder>value_value</zorder>
     <zorder>editButton</zorder>
