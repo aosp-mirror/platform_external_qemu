@@ -228,6 +228,20 @@ static void delete_adbCmds_at(const char* content) {
     }
 }
 
+static void delete_modem_simulator_at(const char* content) {
+    if (char* const folder =
+            path_join(
+                content,
+                "modem_simulator")) {
+        if (!path_delete_dir(folder)) {
+            D("Removed modem simulator directory '%s'", folder);
+        } else {
+            D("Failed to remove modem simulator directory '%s'", folder);
+        }
+        free(folder);
+    }
+}
+
 static bool checkOsVersion() {
 #ifndef _WIN32
     return true;
@@ -818,6 +832,8 @@ int main(int argc, char** argv)
             if (avd_folder) {
                 clean_up_avd_contents_except_config_ini(avd_folder);
                 delete_snapshots_at(avd_folder);
+                // Bug: 214140573 Unable to sign into Google Apps since GmsCore v21.42.18
+                delete_modem_simulator_at(avd_folder);
                 delete_adbCmds_at(avd_folder);
                 free(avd_folder);
             }

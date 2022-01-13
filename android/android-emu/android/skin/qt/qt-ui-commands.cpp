@@ -88,6 +88,8 @@ constexpr CommandInfo kCommands[] = {
                      "Enable virtual scene camera controls"),
         INIT_COMMAND(FOLD, "Fold"),
         INIT_COMMAND(UNFOLD, "Unfold"),
+        INIT_COMMAND(WEAR_1, "Wear OS Button 1"),
+        INIT_COMMAND(WEAR_2, "Wear OS Button 2"),
 };
 
 bool parseQtUICommand(const QString& string, QtUICommand* command) {
