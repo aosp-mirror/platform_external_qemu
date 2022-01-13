@@ -70,6 +70,24 @@ android_target_compile_definitions(
 
 android_target_compile_definitions(
   flex
+  linux-x86_64
+  PRIVATE -DHAVE_ALLOCA=1
+          -DHAVE_LIMITS_H=1
+          -DHAVE_UNISTD_H=1
+          -DHAVE_NETINET_IN_H=1
+          -DHAVE_SYS_WAIT_H=1
+          -DHAVE_STDBOOL_H=1
+          -DHAVE_REGEX_H=1
+          -DSTDC_HEADERS=1
+          -DVERSION="2.6.4"
+          # TODO: This should use a hermetic m4 -- this is a default that can be
+          # overwritten overwritten with the M4 environment variable, which may
+          # be simpler within the build.
+          -DM4="m4")
+
+
+android_target_compile_definitions(
+  flex
   windows
   PRIVATE -DHAVE_ALLOCA=1
           -DHAVE_LIMITS_H=1
@@ -81,7 +99,8 @@ android_target_compile_definitions(
           # overwritten overwritten with the M4 environment variable, which may
           # be simpler within the build.
           -DM4="m4")
-target_compile_options(flex PRIVATE -std=c99)
+target_compile_options(flex PRIVATE -std=c99 -Wno-error)
+target_link_libraries(flex PRIVATE m)
 
 android_target_include_directories(flex windows PRIVATE msvc)
 target_include_directories(flex PRIVATE ${FLEX_ROOT}
