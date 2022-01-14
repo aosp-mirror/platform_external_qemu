@@ -1,6 +1,6 @@
-#line 1 "/Users/jansene/src/emu/external/qemu/objs/android/third_party/bluetooth/packet_gen/flex//language_l.cpp"
+#line 1 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/flex//language_l.cpp"
 
-#line 3 "/Users/jansene/src/emu/external/qemu/objs/android/third_party/bluetooth/packet_gen/flex//language_l.cpp"
+#line 3 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/flex//language_l.cpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -689,8 +689,8 @@ static const flex_int16_t yy_rule_linenum[41] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
-#line 2 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 1 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
+#line 2 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 
 #include <string>
 #include <map>
@@ -711,10 +711,10 @@ using token = yy::parser::token;
 
 #define YY_USER_ACTION yylloc->step(); yylloc->columns(yyleng);
 
-#line 714 "/Users/jansene/src/emu/external/qemu/objs/android/third_party/bluetooth/packet_gen/flex//language_l.cpp"
+#line 714 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/flex//language_l.cpp"
 #define YY_NO_INPUT 1
 
-#line 717 "/Users/jansene/src/emu/external/qemu/objs/android/third_party/bluetooth/packet_gen/flex//language_l.cpp"
+#line 717 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/flex//language_l.cpp"
 
 #define INITIAL 0
 #define COMMENT_STATE 1
@@ -1065,9 +1065,9 @@ YY_DECL
 
 	{
 /* %% [7.0] user's declarations go here */
-#line 42 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 42 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 
-#line 44 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 44 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
   /* NOTE:
    * Rule ordering is important in order to establist priority. Some
    * rules are a superset of other rules and will cause the sub rules to
@@ -1076,7 +1076,7 @@ YY_DECL
    */
 
   /* Block Comment */
-#line 1079 "/Users/jansene/src/emu/external/qemu/objs/android/third_party/bluetooth/packet_gen/flex//language_l.cpp"
+#line 1079 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/flex//language_l.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1170,112 +1170,112 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 52 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 52 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { BEGIN(COMMENT_STATE); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 53 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 53 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { BEGIN(INITIAL); }
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 54 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 54 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { yylloc->lines(yyleng); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 55 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 55 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { /* do nothing */ }
 	YY_BREAK
 /* Line Comment */
 case 5:
 YY_RULE_SETUP
-#line 58 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 58 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { /* do nothing */ }
 	YY_BREAK
 /* Begin reserved keyword definitions */
 /* Fields */
 case 6:
 YY_RULE_SETUP
-#line 62 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 62 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(token::BODY); }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 63 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 63 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(token::PAYLOAD); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 64 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 64 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(token::SIZE); }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 65 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 65 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(token::COUNT); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 66 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 66 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(token::FIXED); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 67 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 67 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(token::RESERVED); }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 68 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 68 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(token::CHECKSUM_START); }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 69 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 69 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(token::PADDING); }
 	YY_BREAK
 /* Types */
 case 14:
 YY_RULE_SETUP
-#line 71 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 71 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(token::CHECKSUM); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 72 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 72 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(token::CUSTOM_FIELD); }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 73 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 73 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(token::ENUM); }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 74 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 74 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(token::GROUP); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 75 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 75 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(token::PACKET); }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 76 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 76 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(token::TEST); }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 77 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 77 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(token::STRUCT); }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 78 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 78 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 {
                           yylval->integer = 1;
                           return token::IS_LITTLE_ENDIAN;
@@ -1283,7 +1283,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 82 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 82 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 {
                           yylval->integer = 0;
                           return token::IS_LITTLE_ENDIAN;
@@ -1292,7 +1292,7 @@ YY_RULE_SETUP
 /* Begin identifier definitions */
 case 23:
 YY_RULE_SETUP
-#line 88 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 88 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 {
                           std::string with_quotes = std::string(yytext);
                           yylval->string = new std::string(with_quotes.begin() + 1, with_quotes.end() - 1);
@@ -1301,7 +1301,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 94 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 94 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 {
                           yylval->string = new std::string(yytext);
                           return token::SIZE_MODIFIER;
@@ -1309,7 +1309,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 99 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 99 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 {
                           yylval->string = new std::string(yytext);
                           return token::IDENTIFIER;
@@ -1317,93 +1317,93 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 104 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 104 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 {
-                          yylval->integer = std::stoi(std::string(yytext), nullptr, 10);
+                          yylval->integer = std::stoull(std::string(yytext), nullptr, 10);
                           return token::INTEGER;
                         }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 109 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 109 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 {
-                          yylval->integer = std::stoi(std::string(yytext), nullptr, 16);
+                          yylval->integer = std::stoull(std::string(yytext), nullptr, 16);
                           return token::INTEGER;
                         }
 	YY_BREAK
 /* Begin token definitions */
 case 28:
 YY_RULE_SETUP
-#line 115 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 115 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(':'); }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 116 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 116 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return('{'); }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 117 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 117 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return('}'); }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 118 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 118 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return('['); }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 119 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 119 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(']'); }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 120 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 120 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return('('); }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 121 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 121 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(')'); }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 122 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 122 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return('<'); }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 123 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 123 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return('>'); }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 124 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 124 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return('='); }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 125 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 125 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { return(','); }
 	YY_BREAK
 case 39:
 /* rule 39 can match eol */
 YY_RULE_SETUP
-#line 127 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 127 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { yylloc->lines(yyleng); }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 128 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 128 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 { /* Ignore all other whitespace */ }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 130 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 130 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 ECHO;
 	YY_BREAK
-#line 1406 "/Users/jansene/src/emu/external/qemu/objs/android/third_party/bluetooth/packet_gen/flex//language_l.cpp"
+#line 1406 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/flex//language_l.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT_STATE):
 	yyterminate();
@@ -2707,7 +2707,7 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 /* %ok-for-header */
 
-#line 130 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_l.ll"
+#line 130 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_l.ll"
 
 
 

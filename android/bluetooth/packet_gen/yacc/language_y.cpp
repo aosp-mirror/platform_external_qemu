@@ -53,7 +53,7 @@
 
 
 // First part of user prologue.
-#line 12 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 12 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
 
   #include "language_y.h"
   extern int yylex(yy::parser::semantic_type*, yy::parser::location_type*, void *);
@@ -63,7 +63,7 @@
   }
   #define LOC toParseLocation(yylloc)
 
-#line 67 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 67 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -108,9 +108,9 @@ static YYLTYPE yyloc_default
 ;
 
 // Second part of user prologue.
-#line 112 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 112 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
 static void yyerror (const yy::parser::location_type *yylocationp, yy::parser& yyparser, void* scanner, Declarations* decls, const char* msg);
-#line 114 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 114 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
 
 
 #include <stddef.h>
@@ -1166,7 +1166,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
   switch (yyn)
     {
   case 2:
-#line 112 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 112 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
   {
     decls->is_little_endian = ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.integer) == 1);
     if (decls->is_little_endian) {
@@ -1175,70 +1175,70 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
       DEBUG() << "BIG ENDIAN ";
     }
   }
-#line 1179 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1179 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 5:
-#line 127 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 127 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "FOUND ENUM\n\n";
       decls->AddTypeDef((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.enum_definition)->name_, (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.enum_definition));
     }
-#line 1188 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1188 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 6:
-#line 132 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 132 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "FOUND PACKET\n\n";
       decls->AddPacketDef((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.packet_definition_value)->name_, (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.packet_definition_value));
     }
-#line 1197 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1197 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 7:
-#line 137 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 137 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "FOUND STRUCT\n\n";
       decls->AddTypeDef((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.struct_definition_value)->name_, (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.struct_definition_value));
     }
-#line 1206 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1206 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 8:
-#line 142 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 142 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       // All actions are handled in group_definition
     }
-#line 1214 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1214 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 9:
-#line 146 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 146 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       // All actions are handled in checksum_definition
     }
-#line 1222 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1222 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 10:
-#line 150 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 150 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       // All actions are handled in custom_field_definition
     }
-#line 1230 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1230 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 11:
-#line 154 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 154 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       // All actions are handled in test_definition
     }
-#line 1238 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1238 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 12:
-#line 160 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 160 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Enum Declared: name=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-6)].yystate.yysemantics.yysval.string)
                 << " size=" << (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.integer) << "\n";
@@ -1250,84 +1250,84 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-6)].yystate.yysemantics.yysval.string);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.enumeration_values);
     }
-#line 1254 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1254 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 13:
-#line 174 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 174 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Enumerator with comma\n";
-      ((*yyvalp).enumeration_values) = new std::map<int, std::string>();
+      ((*yyvalp).enumeration_values) = new std::map<uint64_t, std::string>();
       ((*yyvalp).enumeration_values)->insert(std::move(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.enumeration_value)));
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.enumeration_value);
     }
-#line 1265 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1265 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 14:
-#line 181 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 181 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Enumerator with list\n";
       ((*yyvalp).enumeration_values) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.enumeration_values);
       ((*yyvalp).enumeration_values)->insert(std::move(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.enumeration_value)));
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.enumeration_value);
     }
-#line 1276 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1276 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 15:
-#line 190 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 190 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Enumerator: name=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string)
                 << " value=" << (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.integer) << "\n";
       ((*yyvalp).enumeration_value) = new std::pair((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.integer), std::move(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string)));
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string);
     }
-#line 1287 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1287 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 16:
-#line 199 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 199 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       decls->AddGroupDef(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string), (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.packet_field_definitions));
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string);
     }
-#line 1296 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1296 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 17:
-#line 206 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 206 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Checksum field defined\n";
       decls->AddTypeDef(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string), new ChecksumDef(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string), *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.string), (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.integer)));
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.string);
     }
-#line 1307 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1307 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 18:
-#line 215 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 215 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       decls->AddTypeDef(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string), new CustomFieldDef(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string), *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.string), (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.integer)));
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.string);
     }
-#line 1317 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1317 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 19:
-#line 221 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 221 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       decls->AddTypeDef(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.string), new CustomFieldDef(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.string), *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.string)));
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.string);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.string);
     }
-#line 1327 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1327 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 20:
-#line 229 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 229 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       auto&& packet_name = *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.string);
       DEBUG() << "Test Declared: name=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.string) << "\n";
@@ -1342,40 +1342,40 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.string);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.test_cases_t);
     }
-#line 1346 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1346 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 21:
-#line 246 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 246 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Test case with comma\n";
       ((*yyvalp).test_cases_t) = new std::set<std::string*>();
       ((*yyvalp).test_cases_t)->insert((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.test_case_t));
     }
-#line 1356 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1356 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 22:
-#line 252 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 252 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Test case with list\n";
       ((*yyvalp).test_cases_t) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.test_cases_t);
       ((*yyvalp).test_cases_t)->insert((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.test_case_t));
     }
-#line 1366 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1366 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 23:
-#line 260 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 260 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Test Case: name=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.string) << "\n";
       ((*yyvalp).test_case_t) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.string);
     }
-#line 1375 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1375 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 24:
-#line 267 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 267 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       auto&& struct_name = *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string);
       auto&& field_definition_list = *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.packet_field_definitions);
@@ -1389,11 +1389,11 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.packet_field_definitions);
     }
-#line 1393 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1393 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 25:
-#line 281 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 281 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       auto&& struct_name = *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-5)].yystate.yysemantics.yysval.string);
       auto&& parent_struct_name = *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string);
@@ -1419,11 +1419,11 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.packet_field_definitions);
     }
-#line 1423 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1423 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 26:
-#line 307 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 307 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       auto&& struct_name = *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-8)].yystate.yysemantics.yysval.string);
       auto&& parent_struct_name = *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-6)].yystate.yysemantics.yysval.string);
@@ -1457,11 +1457,11 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.constraint_list_t);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.packet_field_definitions);
     }
-#line 1461 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1461 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 27:
-#line 343 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 343 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       auto&& packet_name = *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string);
       auto&& field_definition_list = *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.packet_field_definitions);
@@ -1475,11 +1475,11 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.packet_field_definitions);
     }
-#line 1479 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1479 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 28:
-#line 357 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 357 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       auto&& packet_name = *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-5)].yystate.yysemantics.yysval.string);
       auto&& parent_packet_name = *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string);
@@ -1503,11 +1503,11 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.packet_field_definitions);
     }
-#line 1507 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1507 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 29:
-#line 381 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 381 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       auto&& packet_name = *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-8)].yystate.yysemantics.yysval.string);
       auto&& parent_packet_name = *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-6)].yystate.yysemantics.yysval.string);
@@ -1541,20 +1541,20 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.constraint_list_t);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.packet_field_definitions);
     }
-#line 1545 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1545 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 30:
-#line 417 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 417 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Empty Field definition\n";
       ((*yyvalp).packet_field_definitions) = new FieldList();
     }
-#line 1554 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1554 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 31:
-#line 422 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 422 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Field definition\n";
       ((*yyvalp).packet_field_definitions) = new FieldList();
@@ -1571,11 +1571,11 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
       ((*yyvalp).packet_field_definitions)->PrependField((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.packet_field_type));
     }
-#line 1575 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1575 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 32:
-#line 439 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 439 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Field definition with list\n";
       ((*yyvalp).packet_field_definitions) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.packet_field_definitions);
@@ -1592,110 +1592,110 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
       ((*yyvalp).packet_field_definitions)->PrependField((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.packet_field_type));
     }
-#line 1596 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1596 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 33:
-#line 458 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 458 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Group Field";
       ((*yyvalp).packet_field_type) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.packet_field_type);
     }
-#line 1605 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1605 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 34:
-#line 463 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 463 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Field with a pre-defined type\n";
       ((*yyvalp).packet_field_type) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.packet_field_type);
     }
-#line 1614 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1614 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 35:
-#line 468 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 468 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Scalar field\n";
       ((*yyvalp).packet_field_type) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.packet_field_type);
     }
-#line 1623 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1623 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 36:
-#line 473 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 473 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Checksum start field\n";
       ((*yyvalp).packet_field_type) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.packet_field_type);
     }
-#line 1632 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1632 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 37:
-#line 478 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 478 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Padding field\n";
       ((*yyvalp).packet_field_type) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.packet_field_type);
     }
-#line 1641 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1641 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 38:
-#line 483 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 483 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Size field\n";
       ((*yyvalp).packet_field_type) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.packet_field_type);
     }
-#line 1650 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1650 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 39:
-#line 488 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 488 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Body field\n";
       ((*yyvalp).packet_field_type) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.packet_field_type);
     }
-#line 1659 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1659 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 40:
-#line 493 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 493 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Payload field\n";
       ((*yyvalp).packet_field_type) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.packet_field_type);
     }
-#line 1668 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1668 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 41:
-#line 498 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 498 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Fixed field\n";
       ((*yyvalp).packet_field_type) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.packet_field_type);
     }
-#line 1677 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1677 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 42:
-#line 503 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 503 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Reserved field\n";
       ((*yyvalp).packet_field_type) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.packet_field_type);
     }
-#line 1686 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1686 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 43:
-#line 508 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 508 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "ARRAY field\n";
       ((*yyvalp).packet_field_type) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.packet_field_type);
     }
-#line 1695 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1695 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 44:
-#line 515 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 515 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       auto group = decls->GetGroupDef(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.string));
       if (group == nullptr) {
@@ -1707,11 +1707,11 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
       ((*yyvalp).packet_field_type) = new GroupField(LOC, expanded_fields);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.string);
     }
-#line 1711 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1711 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 45:
-#line 527 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 527 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Group with fixed field(s) " << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string) << "\n";
       auto group = decls->GetGroupDef(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string));
@@ -1755,44 +1755,44 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.constraint_list_t);
     }
-#line 1759 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1759 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 46:
-#line 573 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 573 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Group field value list\n";
       (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.constraint_list_t)->insert(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.constraint_t));
       ((*yyvalp).constraint_list_t) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.constraint_list_t);
       delete((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.constraint_t));
     }
-#line 1770 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1770 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 47:
-#line 580 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 580 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Group field value\n";
       ((*yyvalp).constraint_list_t) = new std::map<std::string, std::variant<int64_t, std::string>>();
       ((*yyvalp).constraint_list_t)->insert(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.constraint_t));
       delete((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.constraint_t));
     }
-#line 1781 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1781 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 48:
-#line 589 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 589 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Group with a fixed integer value=" << (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string) << " value=" << (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.integer) << "\n";
 
-      ((*yyvalp).constraint_t) = new std::pair(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string), std::variant<int64_t,std::string>((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.integer)));
+      ((*yyvalp).constraint_t) = new std::pair(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string), std::variant<int64_t,std::string>((int64_t)(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.integer)));
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string);
     }
-#line 1792 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1792 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 49:
-#line 596 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 596 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Group with a fixed enum field value=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.string) << " enum=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string);
 
@@ -1800,11 +1800,11 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.string);
     }
-#line 1804 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1804 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 50:
-#line 606 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 606 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Predefined type field " << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string) << " : " << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.string) << "\n";
       if (auto type_def = decls->GetTypeDef(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.string))) {
@@ -1815,115 +1815,115 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.string);
     }
-#line 1819 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1819 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 51:
-#line 619 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 619 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Scalar field " << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string) << " : " << (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.integer) << "\n";
       ((*yyvalp).packet_field_type) = new ScalarField(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string), (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.integer), LOC);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string);
     }
-#line 1829 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1829 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 52:
-#line 627 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 627 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Body field\n";
       ((*yyvalp).packet_field_type) = new BodyField(LOC);
     }
-#line 1838 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1838 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 53:
-#line 634 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 634 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Payload field with modifier " << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.string) << "\n";
       ((*yyvalp).packet_field_type) = new PayloadField(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.string), LOC);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.string);
     }
-#line 1848 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1848 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 54:
-#line 640 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 640 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Payload field\n";
       ((*yyvalp).packet_field_type) = new PayloadField("", LOC);
     }
-#line 1857 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1857 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 55:
-#line 647 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 647 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "ChecksumStart field defined\n";
       ((*yyvalp).packet_field_type) = new ChecksumStartField(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.string), LOC);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.string);
     }
-#line 1867 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1867 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 56:
-#line 655 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 655 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Padding field defined\n";
       ((*yyvalp).packet_field_type) = new PaddingField((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.integer), LOC);
     }
-#line 1876 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1876 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 57:
-#line 662 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 662 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Size field defined\n";
       ((*yyvalp).packet_field_type) = new SizeField(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string), (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.integer), LOC);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string);
     }
-#line 1886 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1886 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 58:
-#line 668 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 668 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Size for payload defined\n";
       ((*yyvalp).packet_field_type) = new SizeField("payload", (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.integer), LOC);
     }
-#line 1895 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1895 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 59:
-#line 673 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 673 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Size for body defined\n";
       ((*yyvalp).packet_field_type) = new SizeField("body", (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.integer), LOC);
     }
-#line 1904 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1904 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 60:
-#line 678 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 678 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Count field defined\n";
       ((*yyvalp).packet_field_type) = new CountField(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string), (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.integer), LOC);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string);
     }
-#line 1914 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1914 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 61:
-#line 686 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 686 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Fixed field defined value=" << (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.integer) << " size=" << (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.integer) << "\n";
       ((*yyvalp).packet_field_type) = new FixedScalarField((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.integer), (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.integer), LOC);
     }
-#line 1923 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1923 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 62:
-#line 691 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 691 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Fixed enum field defined value=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string) << " enum=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.string);
       auto type_def = decls->GetTypeDef(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.string));
@@ -1941,30 +1941,30 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.string);
     }
-#line 1945 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1945 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 63:
-#line 711 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 711 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Reserved field of size=" << (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.integer) << "\n";
       ((*yyvalp).packet_field_type) = new ReservedField((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.integer), LOC);
     }
-#line 1954 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1954 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 64:
-#line 718 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 718 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Vector field defined name=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.string) << " element_size=" << (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.integer);
       ((*yyvalp).packet_field_type) = new VectorField(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.string), (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.integer), "", LOC);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.string);
     }
-#line 1964 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1964 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 65:
-#line 724 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 724 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Vector field defined name=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-5)].yystate.yysemantics.yysval.string) << " element_size=" << (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.integer)
              << " size_modifier=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.string);
@@ -1972,22 +1972,22 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-5)].yystate.yysemantics.yysval.string);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.string);
     }
-#line 1976 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1976 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 66:
-#line 732 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 732 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Array field defined name=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-5)].yystate.yysemantics.yysval.string) << " element_size=" << (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.integer)
              << " fixed_size=" << (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.integer);
       ((*yyvalp).packet_field_type) = new ArrayField(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-5)].yystate.yysemantics.yysval.string), (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.integer), (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.integer), LOC);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-5)].yystate.yysemantics.yysval.string);
     }
-#line 1987 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 1987 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 67:
-#line 739 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 739 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Vector field defined name=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.string) << " type=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string);
       if (auto type_def = decls->GetTypeDef(*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string))) {
@@ -1998,11 +1998,11 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.string);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.string);
     }
-#line 2002 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 2002 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 68:
-#line 750 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 750 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Vector field defined name=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-5)].yystate.yysemantics.yysval.string) << " type=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string)
              << " size_modifier=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.string);
@@ -2015,11 +2015,11 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.string);
     }
-#line 2019 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 2019 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
   case 69:
-#line 763 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 763 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
     {
       DEBUG() << "Array field defined name=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-5)].yystate.yysemantics.yysval.string) << " type=" << *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string)
              << " fixed_size=" << (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.integer);
@@ -2031,11 +2031,11 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-5)].yystate.yysemantics.yysval.string);
       delete (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.string);
     }
-#line 2035 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 2035 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
     break;
 
 
-#line 2039 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 2039 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
 
       default: break;
     }
@@ -2096,21 +2096,21 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocatio
   switch (yytype)
     {
     case 5: // IDENTIFIER
-#line 106 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 106 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
             { std::cout << "DESTROYING STRING " << *((*yyvaluep).string) << "\n"; delete ((*yyvaluep).string); }
-#line 2102 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 2102 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
         break;
 
     case 6: // SIZE_MODIFIER
-#line 106 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 106 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
             { std::cout << "DESTROYING STRING " << *((*yyvaluep).string) << "\n"; delete ((*yyvaluep).string); }
-#line 2108 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 2108 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
         break;
 
     case 7: // STRING
-#line 106 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 106 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
             { std::cout << "DESTROYING STRING " << *((*yyvaluep).string) << "\n"; delete ((*yyvaluep).string); }
-#line 2114 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 2114 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
         break;
 
       default:
@@ -3519,7 +3519,7 @@ yyparse (yy::parser& yyparser, void* scanner, Declarations* decls)
 
   // User initialization code.
 yylloc.initialize ();
-#line 3523 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 3523 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
 
 
   if (! yyinitGLRStack (yystackp, YYINITDEPTH))
@@ -3807,7 +3807,7 @@ yypdumpstack (yyGLRStack* yystackp)
 
 
 
-#line 775 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 775 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
 
 
 
@@ -3815,7 +3815,7 @@ void yy::parser::error(const yy::parser::location_type& loc, const std::string& 
   ERROR() << error << " at location " << loc << "\n";
   abort();
 }
-#line 3819 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 3819 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
 
 /*------------------.
 | Report an error.  |
@@ -3832,7 +3832,7 @@ yyerror (const yy::parser::location_type *yylocationp, yy::parser& yyparser, voi
 
 
 namespace yy {
-#line 3836 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 3836 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
 
   /// Build a parser object.
   parser::parser (void* scanner_yyarg, Declarations* decls_yyarg)
@@ -3921,4 +3921,4 @@ namespace yy {
 
 #endif
 } // yy
-#line 3925 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
+#line 3925 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.cpp"
