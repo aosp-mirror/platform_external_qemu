@@ -351,8 +351,10 @@ def launch():
 
     set_aosp_root(args.aosp)
 
-    main(args)
-
+    try:
+        main(args)
+    except (Exception, KeyboardInterrupt) as exc:
+        sys.exit(exc)
 
 if __name__ == "__main__":
     launch()
