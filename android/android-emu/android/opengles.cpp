@@ -236,6 +236,16 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
             goldfish_sync_destroy_timeline,
             goldfish_sync_register_trigger_wait,
             goldfish_sync_device_exists);
+#if defined(AEMU_GFXSTREAM_BACKEND)
+    sRenderLib->setGrallocImplementation(MINIGBM);
+#else
+    sRenderLib->setGrallocImplementation(
+            android::featurecontrol::isEnabled(
+                    android::featurecontrol::Minigbm) ||
+                            is_fuchsia
+                    ? MINIGBM
+                    : GOLDFISH_GRALLOC);
+#endif
 
     emugl_logger_struct logfuncs;
     logfuncs.coarse = android_opengl_logger_write;

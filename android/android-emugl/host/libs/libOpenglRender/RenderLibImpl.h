@@ -52,6 +52,8 @@ public:
 
     virtual void setUsageTracker(android::base::CpuUsage* cpuUsage,
                                  android::base::MemoryTracker* memUsage) override;
+    virtual void setGrallocImplementation(
+            GrallocImplementation gralloc) override;
 
     virtual void* getGLESv2Dispatch(void) override;
 
