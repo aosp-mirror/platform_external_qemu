@@ -31,12 +31,12 @@
 // version 2.2 of Bison.
 
 /**
- ** \file /Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//location.hh
+ ** \file /Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//location.hh
  ** Define the yy::location class.
  */
 
-#ifndef YY_YY_USERS_JANSENE_SRC_EMU_EXTERNAL_QEMU_OBJS_ANDROID_BLUETOOTH_ROOTCANAL_BLUETOOTH_PACKETGEN_EXT_YACC_LOCATION_HH_INCLUDED
-# define YY_YY_USERS_JANSENE_SRC_EMU_EXTERNAL_QEMU_OBJS_ANDROID_BLUETOOTH_ROOTCANAL_BLUETOOTH_PACKETGEN_EXT_YACC_LOCATION_HH_INCLUDED
+#ifndef YY_YY_USERS_LICORNE_DOCUMENTS_SUPERPROJECT_EXTERNAL_QEMU_OBJS_ANDROID_BLUETOOTH_ROOTCANAL_BLUETOOTH_PACKETGEN_EXT_YACC_LOCATION_HH_INCLUDED
+# define YY_YY_USERS_LICORNE_DOCUMENTS_SUPERPROJECT_EXTERNAL_QEMU_OBJS_ANDROID_BLUETOOTH_ROOTCANAL_BLUETOOTH_PACKETGEN_EXT_YACC_LOCATION_HH_INCLUDED
 
 # include <iostream>
 # include <string>
@@ -54,7 +54,7 @@
 # endif
 
 namespace yy {
-#line 58 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//location.hh"
+#line 58 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//location.hh"
 
   /// A point in a source file.
   class position
@@ -296,6 +296,6 @@ namespace yy {
   }
 
 } // yy
-#line 300 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//location.hh"
+#line 300 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//location.hh"
 
-#endif // !YY_YY_USERS_JANSENE_SRC_EMU_EXTERNAL_QEMU_OBJS_ANDROID_BLUETOOTH_ROOTCANAL_BLUETOOTH_PACKETGEN_EXT_YACC_LOCATION_HH_INCLUDED
+#endif // !YY_YY_USERS_LICORNE_DOCUMENTS_SUPERPROJECT_EXTERNAL_QEMU_OBJS_ANDROID_BLUETOOTH_ROOTCANAL_BLUETOOTH_PACKETGEN_EXT_YACC_LOCATION_HH_INCLUDED

@@ -35,10 +35,10 @@
 // Undocumented macros, especially those whose name start with YY_,
 // are private implementation details.  Do not rely on them.
 
-#ifndef YY_YY_USERS_JANSENE_SRC_EMU_EXTERNAL_QEMU_OBJS_ANDROID_BLUETOOTH_ROOTCANAL_BLUETOOTH_PACKETGEN_EXT_YACC_LANGUAGE_Y_H_INCLUDED
-# define YY_YY_USERS_JANSENE_SRC_EMU_EXTERNAL_QEMU_OBJS_ANDROID_BLUETOOTH_ROOTCANAL_BLUETOOTH_PACKETGEN_EXT_YACC_LANGUAGE_Y_H_INCLUDED
+#ifndef YY_YY_USERS_LICORNE_DOCUMENTS_SUPERPROJECT_EXTERNAL_QEMU_OBJS_ANDROID_BLUETOOTH_ROOTCANAL_BLUETOOTH_PACKETGEN_EXT_YACC_LANGUAGE_Y_H_INCLUDED
+# define YY_YY_USERS_LICORNE_DOCUMENTS_SUPERPROJECT_EXTERNAL_QEMU_OBJS_ANDROID_BLUETOOTH_ROOTCANAL_BLUETOOTH_PACKETGEN_EXT_YACC_LANGUAGE_Y_H_INCLUDED
 // "%code requires" blocks.
-#line 1 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 1 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
 
   #include <iostream>
   #include <vector>
@@ -50,7 +50,7 @@
   #include "field_list.h"
   #include "fields/all_fields.h"
 
-#line 54 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.h"
+#line 54 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -190,7 +190,7 @@
 #endif
 
 namespace yy {
-#line 194 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.h"
+#line 194 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.h"
 
 
 
@@ -203,14 +203,14 @@ namespace yy {
     /// Symbol semantic values.
     union semantic_type
     {
-#line 36 "/Users/jansene/src/emu/system/bt/gd/packet/parser/language_y.yy"
+#line 36 "/Users/licorne/Documents/superproject/packages/modules/Bluetooth/system/gd/packet/parser/language_y.yy"
 
-  int integer;
+  uint64_t integer;
   std::string* string;
 
   EnumDef* enum_definition;
-  std::map<int, std::string>* enumeration_values;
-  std::pair<int, std::string>* enumeration_value;
+  std::map<uint64_t, std::string>* enumeration_values;
+  std::pair<uint64_t, std::string>* enumeration_value;
 
   PacketDef* packet_definition_value;
   FieldList* packet_field_definitions;
@@ -224,7 +224,7 @@ namespace yy {
   std::map<std::string, std::variant<int64_t, std::string>>* constraint_list_t;
   std::pair<std::string, std::variant<int64_t, std::string>>* constraint_t;
 
-#line 228 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.h"
+#line 228 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.h"
 
     };
 #else
@@ -360,8 +360,8 @@ namespace yy {
 #endif
 
 } // yy
-#line 364 "/Users/jansene/src/emu/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.h"
+#line 364 "/Users/licorne/Documents/superproject/external/qemu/objs/android/bluetooth/rootcanal/bluetooth_packetgen_ext/yacc//language_y.h"
 
 
 
-#endif // !YY_YY_USERS_JANSENE_SRC_EMU_EXTERNAL_QEMU_OBJS_ANDROID_BLUETOOTH_ROOTCANAL_BLUETOOTH_PACKETGEN_EXT_YACC_LANGUAGE_Y_H_INCLUDED
+#endif // !YY_YY_USERS_LICORNE_DOCUMENTS_SUPERPROJECT_EXTERNAL_QEMU_OBJS_ANDROID_BLUETOOTH_ROOTCANAL_BLUETOOTH_PACKETGEN_EXT_YACC_LANGUAGE_Y_H_INCLUDED

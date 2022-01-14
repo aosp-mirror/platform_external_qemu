@@ -41,13 +41,13 @@ else()
     # Sha validation only works on posix for some reason.
     android_validate_sha(
       FILE ${PACKET_GEN_ROOT}/language_y.yy
-      EXPECTED 764c1f7cda8c6eb6aa80cb6634b9fe0351218d0fa21ec1e845d1c2c826c07958
+      EXPECTED babcc990e9ffbce28821a0451e98370e219ad0fb761047720d33fba625e12135
       ERROR
         "Please regenerate the precompiled yacc files, rebuild with --cmake_option OPTIONS_BUILD_PACKET_GEN=TRUE, update the SHA, and commit the created files."
     )
     android_validate_sha(
       FILE ${PACKET_GEN_ROOT}/language_l.ll
-      EXPECTED 413371e663251db9fe9f64bbe06c29db0b64a4298f1adeba3542d831a423b78e
+      EXPECTED 9dd4fe0748c25024db18e82ca1995f5d745ce227e6ca763d6c1e73e6001a0075
       ERROR
         "Please regenerate the precompiled flex files, rebuild with --cmake_option OPTIONS_BUILD_PACKET_GEN=TRUE, update the SHA, and commit the created files."
     )
