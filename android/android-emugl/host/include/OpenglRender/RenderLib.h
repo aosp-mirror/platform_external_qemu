@@ -87,6 +87,8 @@ public:
     virtual void setUsageTracker(android::base::CpuUsage* cpuUsage,
                                  android::base::MemoryTracker* memUsage) = 0;
 
+    virtual void setGrallocImplementation(GrallocImplementation gralloc) = 0;
+
     virtual void* getGLESv2Dispatch(void) = 0;
 
     virtual void* getEGLDispatch(void) = 0;

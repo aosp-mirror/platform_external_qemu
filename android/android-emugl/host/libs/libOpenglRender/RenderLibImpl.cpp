@@ -101,6 +101,10 @@ void RenderLibImpl::setUsageTracker(android::base::CpuUsage* cpuUsage,
     emugl::setMemoryTracker(memUsage);
 }
 
+void RenderLibImpl::setGrallocImplementation(GrallocImplementation gralloc) {
+    emugl::setGrallocImplementation(gralloc);
+}
+
 void* RenderLibImpl::getGLESv2Dispatch(void) {
     return &s_gles2;
 }

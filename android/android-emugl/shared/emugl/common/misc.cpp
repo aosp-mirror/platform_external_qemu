@@ -31,6 +31,7 @@ android::base::GLObjectCounter* s_default_gl_object_counter = nullptr;
 android::base::GLObjectCounter* s_gl_object_counter = nullptr;
 android::base::CpuUsage* s_cpu_usage = nullptr;
 android::base::MemoryTracker* s_mem_usage = nullptr;
+static GrallocImplementation s_gralloc_implementation = MINIGBM;
 
 static SelectedRenderer s_renderer =
     SELECTED_RENDERER_HOST;
@@ -102,4 +103,12 @@ void emugl::setMemoryTracker(android::base::MemoryTracker* usage) {
 
 android::base::MemoryTracker* emugl::getMemoryTracker() {
     return s_mem_usage;
+}
+
+void emugl::setGrallocImplementation(GrallocImplementation gralloc) {
+    s_gralloc_implementation = gralloc;
+}
+
+GrallocImplementation emugl::getGrallocImplementation() {
+    return s_gralloc_implementation;
 }
