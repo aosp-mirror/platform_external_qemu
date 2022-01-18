@@ -66,6 +66,11 @@ namespace emugl {
     EMUGL_COMMON_API void setCpuUsage(android::base::CpuUsage* usage);
     EMUGL_COMMON_API android::base::CpuUsage* getCpuUsage();
 
+    // Gralloc implementation get/set
+    EMUGL_COMMON_API void setGrallocImplementation(
+            GrallocImplementation gralloc);
+    EMUGL_COMMON_API GrallocImplementation getGrallocImplementation();
+
     // Memory usage get/set
     EMUGL_COMMON_API void setMemoryTracker(android::base::MemoryTracker* usage);
     EMUGL_COMMON_API android::base::MemoryTracker* getMemoryTracker();
