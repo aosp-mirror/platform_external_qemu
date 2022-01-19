@@ -985,17 +985,6 @@ function(android_add_protobuf name protofiles)
                                                             ${PROTO_SRCS})
   target_link_libraries(${name} PUBLIC libprotobuf)
   target_include_directories(${name} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
-  # Disable generation of information about every class with virtual functions
-  # for use by the C++ runtime type identification features (dynamic_cast and
-  # typeid). If you don't use those parts of the language, you can save some
-  # space by using this flag. Note that exception handling uses the same
-  # information, but it will generate it as needed. The  dynamic_cast operator
-  # can still be used for casts that do not require runtime type information,
-  # i.e. casts to void * or to unambiguous base classes.
-  target_compile_options(${name} PRIVATE -fno-rtti)
-  # This needs to be public, as we don't want the headers to start exposing
-  # exceptions.
-  target_compile_definitions(${name} PUBLIC -DGOOGLE_PROTOBUF_NO_RTTI)
   android_clang_tidy(${name})
 endfunction()
 
@@ -1155,10 +1144,6 @@ function(protobuf_generate_with_plugin)
   if(protobuf_generate_with_plugin_TARGET)
     target_sources(${protobuf_generate_with_plugin_TARGET}
                    PRIVATE ${_generated_srcs_all})
-    target_compile_options(${protobuf_generate_with_plugin_TARGET}
-                           PRIVATE -fno-rtti)
-    target_compile_definitions(${protobuf_generate_with_plugin_TARGET}
-                               PUBLIC -DGOOGLE_PROTOBUF_NO_RTTI)
   endif()
 
 endfunction()
@@ -1242,17 +1227,6 @@ function(
                                                             ${PROTO_HDRS})
   target_link_libraries(${name} PUBLIC ${protolib})
   target_include_directories(${name} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
-  # Disable generation of information about every class with virtual functions
-  # for use by the C++ runtime type identification features (dynamic_cast and
-  # typeid). If you don't use those parts of the language, you can save some
-  # space by using this flag. Note that exception handling uses the same
-  # information, but it will generate it as needed. The  dynamic_cast operator
-  # can still be used for casts that do not require runtime type information,
-  # i.e. casts to void * or to unambiguous base classes.
-  target_compile_options(${name} PRIVATE -fno-rtti)
-  # This needs to be public, as we don't want the headers to start exposing
-  # exceptions.
-  target_compile_definitions(${name} PUBLIC -DGOOGLE_PROTOBUF_NO_RTTI)
   android_clang_tidy(${name})
 endfunction()
 

@@ -466,10 +466,6 @@ if(NOT LINUX_AARCH64)
   android_target_properties(emulator-libui_unittests all
                             "${QT5_SHARED_PROPERTIES}")
 
-  # Make sure we disable rtti in gtest
-  target_compile_definitions(emulator-libui_unittests
-                             PRIVATE -DGTEST_HAS_RTTI=0)
-
   target_link_libraries(
     emulator-libui_unittests PRIVATE emulator-libui android-emu FFMPEG::FFMPEG
                                      gmock_main)

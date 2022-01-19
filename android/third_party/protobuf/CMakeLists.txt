@@ -9,8 +9,7 @@ if(NOT TARGET zlib)
   add_subdirectory(../zlib zlib)
 endif()
 
-set(protobuf_PUBLIC_COMPILE_DEFS -DGOOGLE_PROTOBUF_CMAKE_BUILD
-                                 -DGOOGLE_PROTOBUF_NO_RTTI)
+set(protobuf_PUBLIC_COMPILE_DEFS -DGOOGLE_PROTOBUF_CMAKE_BUILD)
 list(APPEND protobuf_PUBLIC_COMPILE_DEFS -DHAVE_ZLIB)
 if(NOT WINDOWS_MSVC_X86_64)
   list(APPEND protobuf_PRIVATE_COMPILE_DEFS -DHAVE_PTHREAD)

@@ -32,7 +32,6 @@ if(LINUX_X86_64)
   target_compile_options(darwinn_unittests PRIVATE -O0)
   android_target_compile_options(darwinn_unittests Clang
                                  PRIVATE -Wno-invalid-constexpr)
-  target_compile_definitions(darwinn_unittests PRIVATE -DGTEST_HAS_RTTI=0)
   target_link_libraries(darwinn_unittests PRIVATE android-emu libqemu2-glue
                                                   gmock_main)
 
