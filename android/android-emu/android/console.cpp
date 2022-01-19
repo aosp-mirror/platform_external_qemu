@@ -3533,7 +3533,7 @@ do_fingerprint_touch(ControlClient client, char* args )
     if (args) {
         char *endptr;
         int fingerid = strtol(args, &endptr, 0);
-        if (endptr != args) {
+        if (endptr != args && *endptr == 0) {
             client->global->finger_agent->setTouch(true, fingerid);
             return 0;
         }
