@@ -1664,10 +1664,9 @@ void pc_basic_device_init(ISABus *isa_bus, qemu_irq *gsi,
     }
 
     i8257_dma_init(isa_bus, 0);
-#ifndef CONFIG_ANDROID
+
     /* Super I/O */
     pc_superio_init(isa_bus, create_fdctrl, no_vmport);
-#endif
 }
 
 void pc_nic_init(PCMachineClass *pcmc, ISABus *isa_bus, PCIBus *pci_bus)
