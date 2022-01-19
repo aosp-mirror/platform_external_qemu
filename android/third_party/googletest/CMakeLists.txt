@@ -29,6 +29,7 @@ android_add_library(
 
 set_target_properties(gtest PROPERTIES VERSION ${GOOGLETEST_VERSION})
 target_include_directories(gtest PUBLIC ${gtest_build_include_dirs})
+target_link_libraries(gtest PRIVATE Threads::Threads)
 
 android_add_library(
   TARGET gtest_main

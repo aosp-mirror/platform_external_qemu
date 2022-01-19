@@ -48,7 +48,10 @@ def configure(args, target):
     if args.clean:
         if os.path.exists(args.out):
             logging.info("Clearing out %s", args.out)
-            shutil.rmtree(args.out)
+            if platform.system() == "Windows":
+                run(['rmdir','/S', '/Q', args.out])
+            else:
+                shutil.rmtree(args.out)
         if not os.path.exists(args.out):
             os.makedirs(args.out)
 
