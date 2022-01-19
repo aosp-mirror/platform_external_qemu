@@ -201,6 +201,7 @@ const struct NonPrintableCodeEntry {
         {DomCode::GO_HOME, DomKey::GO_HOME},        // Same as HOME
         {DomCode::APP_SWITCH, DomKey::APP_SWITCH},  // "Overview"
         // {DomCode::CAMERA, DomKey::CAMERA},          // Camera
+        {DomCode::SLEEP, DomKey::STANDBY},        // Sleep
 };
 
 const size_t kDomKeyMapEntries = ARRAY_SIZE(dom_key_map);
