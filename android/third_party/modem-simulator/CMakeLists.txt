@@ -50,7 +50,7 @@ target_include_directories(
 target_compile_definitions(modem_simulator_lib PRIVATE -DGOLDFISH_SPECIFIC)
 
 # Exceptions and typeinfo for this target.
-target_compile_options(modem_simulator_lib PRIVATE "-fexceptions" "-frtti")
+target_compile_options(modem_simulator_lib PRIVATE "-fexceptions")
 
 if(WINDOWS_MSVC_X86_64 AND CROSSCOMPILE)
   # Workaround for the clang-cl driver
