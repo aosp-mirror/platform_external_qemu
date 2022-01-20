@@ -99,6 +99,7 @@ android_add_executable(
       gen_rust.cc
       main.cc
       packet_def.cc
+      packet_dependency.cc
       parent_def.cc
       struct_def.cc
       struct_parser_generator.cc)
