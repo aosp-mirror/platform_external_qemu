@@ -15,7 +15,9 @@
       "type": "cppvsdbg",
       "request": "launch",
       "program": "${command:cmake.launchTargetPath}",
-      "args": ["--gtest_break_on_failure"],
+      "args": ["--gtest_break_on_failure",
+
+        "--gtest_filter=FileSystemWatcherTest.file_change"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [
@@ -68,8 +70,8 @@
         //"--emulator" ,"localhost:9554" ,"--fwd", "--adb", "7555"
 
         // "--verbose"
-        "--port", "13121",
-        "--gtest_filter=GrpcServiceTest.AsyncBidiServerWorks",
+        // "--port", "13121",
+        "--gtest_filter=FileSystemWatcherTest.file_change",
         // "--gtest_repeat=-1",
         // // "--gtest_break_on_failure",
         // "--gtest_filter=GrpcServiceTest.AsyncBidiServerWorks"
