@@ -3270,7 +3270,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 *(VkImage*)pImage = (VkImage)(VkImage)((VkImage)(*&cgen_var_2));
                 if (pCreateInfo)
                 {
-                    m_state->transformImpl_VkImageCreateInfo_tohost(pCreateInfo, 1);
                     transform_tohost_VkImageCreateInfo(m_state, (VkImageCreateInfo*)(pCreateInfo));
                 }
                 if (pAllocator)
@@ -26848,7 +26847,6 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 reservedunmarshal_VkMemoryRequirements(vkReadStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkMemoryRequirements*)(pMemoryRequirements), readStreamPtrPtr);
                 if (pCreateInfo)
                 {
-                    m_state->transformImpl_VkImageCreateInfo_tohost(pCreateInfo, 1);
                     transform_tohost_VkImageCreateInfo(m_state, (VkImageCreateInfo*)(pCreateInfo));
                 }
                 if (pAllocator)
