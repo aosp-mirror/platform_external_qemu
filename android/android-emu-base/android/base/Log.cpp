@@ -11,24 +11,21 @@
 
 #include "android/base/Log.h"
 
-#include <stdarg.h>                        // for va_end, va_list, va_start
-#include <stdio.h>                         // for fprintf, size_t, fflush
-#include <stdlib.h>                        // for abort
-#include <string.h>                        // for memcpy, strerror
-#include <string>                          // for basic_string
+#include <stdarg.h>                     // for va_end, va_list, va_start
+#include <stdio.h>                      // for size_t, fflush, vsnprintf
+#include <stdlib.h>                     // for abort
+#include <string.h>                     // for memcpy, strerror
+#include <memory>                       // for make_unique, unique_ptr
 
-#include "android/base/ArraySize.h"        // for arraySize
-#include "android/base/Debug.h"            // for DebugBreak, IsDebuggerAtta...
-#include "android/base/StringFormat.h"     // for StringFormat
-#include "android/base/StringView.h"       // for StringView, c_str, CStrWra...
-#include "android/base/files/PathUtils.h"  // for PathUtils
-#include "android/base/threads/Thread.h"   // for getCurrentThreadId
-#include "android/utils/debug.h"           // for VERBOSE_CHECK, VERBOSE_log
+#include "absl/strings/str_format.h"    // for FPrintF
+#include "android/base/ArraySize.h"     // for arraySize
+#include "android/base/Debug.h"         // for DebugBreak, IsDebuggerAttached
+#include "android/base/LogFormatter.h"  // for SimpleLogFormatter, LogFormatter
+#include "android/base/StringView.h"    // for StringView
+#include "android/utils/debug.h"        // for __emu_log_print
 #ifdef _MSC_VER
 #include "msvc-posix.h"
 #else
-#include <sys/time.h>                      // for gettimeofday, timeval
-#include <time.h>                          // for localtime, tm, time_t
 #endif
 
 #define ENABLE_THREAD_ID 0
@@ -44,46 +41,9 @@ testing::LogOutput* gLogOutput = NULL;
 bool gDcheckLevel = false;
 LogSeverity gMinLogLevel = EMULATOR_LOG_INFO;
 
-// Set to one to see fancy colors. Beware of the unexpected side effects!
-// #define PRINT_WITH_COLOR 0
+SimpleLogFormatter defaultFormatter;
+LogFormatter* gFormatter = &defaultFormatter;
 
-inline static const char* translate_sev(LogSeverity value) {
-#define SEV(p, str)        \
-    case (LogSeverity::p): \
-        return str;        \
-        break;
-
-    switch (value) {
-        SEV(EMULATOR_LOG_VERBOSE, "VERBOSE")
-        SEV(EMULATOR_LOG_DEBUG, "DEBUG  ")
-        SEV(EMULATOR_LOG_INFO, "INFO   ")
-        SEV(EMULATOR_LOG_WARNING, "WARNING")
-        SEV(EMULATOR_LOG_ERROR, "ERROR  ")
-        SEV(EMULATOR_LOG_FATAL, "FATAL  ")
-        default:
-            return "UNKWOWN";
-    }
-#undef SEV
-}
-
-inline static const char* translate_color(LogSeverity value) {
-#define SEV(p, col)           \
-    case (LogSeverity::p):    \
-        return col "\x1b[0m"; \
-        break;
-
-    switch (value) {
-        SEV(EMULATOR_LOG_VERBOSE, "\x1b[94mVERBOSE")
-        SEV(EMULATOR_LOG_DEBUG, "\x1b[36mDEBUG  ")
-        SEV(EMULATOR_LOG_INFO, "\x1b[32mINFO   ")
-        SEV(EMULATOR_LOG_WARNING, "\x1b[33mWARNING")
-        SEV(EMULATOR_LOG_ERROR, "\x1b[31mERROR  ")
-        SEV(EMULATOR_LOG_FATAL, "\x1b[35mFATAL  ")
-        default:
-            return "\x1b[94mUNKNOWN";
-    }
-#undef SEV
-}
 
 extern "C" void __emu_log_print(LogSeverity prio,
                                 const char* file,
@@ -92,44 +52,14 @@ extern "C" void __emu_log_print(LogSeverity prio,
                                 ...) {
     FILE* fp = prio >= LOG_SEVERITY_FROM(WARNING) ? stderr : stdout;
 
-    if (VERBOSE_CHECK(log) || VERBOSE_CHECK(time)) {
-        struct timeval tv;
-        gettimeofday(&tv, 0);
-        time_t now = tv.tv_sec;
-        struct tm* time = localtime(&now);
-        fprintf(fp, "%02d:%02d:%02d.%06ld ", time->tm_hour, time->tm_min,
-                time->tm_sec, tv.tv_usec);
-    }
-
-    if (VERBOSE_CHECK(log)) {
-        fprintf(fp, "%-15lu ", android::base::getCurrentThreadId());
-    }
-
-#ifdef PRINT_WITH_COLOR
-    // Warning! This looks cool and all, but likely has all sorts
-    // of unexpected side effects. Handy during debugging of prints though.
-    fprintf(fp, "%s ", translate_color(prio));
-#else
-    fprintf(fp, "%s ", translate_sev(prio));
-#endif
-
-    // Always log the location for errors, so someone can follow up if needed.
-    if (VERBOSE_CHECK(log) || prio >= LOG_SEVERITY_FROM(FATAL)) {
-        StringView path = file;
-        StringView filename;
-        if (!PathUtils::split(path, nullptr, &filename)) {
-            filename = path;
-        }
-        auto location = android::base::StringFormat("%s:%d ", c_str(filename).get(), line);
-        fprintf(fp, "%-34s ", location.c_str());
-    }
-
-    fprintf(fp, "| ");
     va_list args;
     va_start(args, fmt);
-    vfprintf(fp, fmt, args);
+    std::string msg = gFormatter->format({file, line, prio}, fmt, args);
     va_end(args);
-    fprintf(fp, "\n");
+
+    if (!msg.empty()) {
+        absl::FPrintF(fp, "%s\n", msg);
+    }
 
     if (prio >= LOG_SEVERITY_FROM(FATAL)) {
         fflush(stderr);
@@ -173,6 +103,10 @@ LogSeverity getMinLogLevel() {
 
 void setMinLogLevel(LogSeverity level) {
     gMinLogLevel = level;
+}
+
+void setLogFormatter(LogFormatter* fmt) {
+    gFormatter = fmt;
 }
 
 // LogString

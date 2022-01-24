@@ -319,6 +319,7 @@ int main(int argc, char** argv)
     bool doDeleteTempDir = false;
     bool checkLoadable = false;
     bool use_virtio_console = false;
+    LoggingFlags logFlags = kLogEnableDuplicateFilter;
 
 #ifdef __APPLE__
     if (processIsTranslated()) {
@@ -365,6 +366,7 @@ int main(int argc, char** argv)
             }
         }
     }
+
     if (qemu_top_dir) {
         char mybuf[1024];
         char* c_argv0_dir_name = path_dirname(argv[0]);
@@ -619,7 +621,15 @@ int main(int argc, char** argv)
         if (!strcmp(opt, "-check-snapshot-loadable")) {
             checkLoadable = true;
         }
+
+        if (!strcmp(opt, "-log-nofilter")) {
+            logFlags = static_cast<LoggingFlags>(logFlags & ~kLogEnableDuplicateFilter);
+        }
     }
+
+    // Parsing complete, initialize the proper logging config.
+    base_configure_logs(logFlags);
+
     if (checkLoadable) {
         cleanUpAvdContent = false;
     }
