@@ -155,8 +155,8 @@ std::string VerboseLogFormatter::format(const LogParams& params,
     auto location = absl::StrFormat(
                     location_format_string, c_str(filename).get(), params.lineno);
 
-    w = snprintf(log, cLog, "%02d:%02d:%02d.%06ld %-15lu %s %-34s | ",
-                 time->tm_hour, time->tm_min, time->tm_sec, tv.tv_usec,
+    w = snprintf(log, cLog, "%02d:%02d:%02d.%06d %-15lu %s %-34s | ",
+                 time->tm_hour, time->tm_min, time->tm_sec, static_cast<uint32_t>(tv.tv_usec),
                  android::base::getCurrentThreadId(),
                  translate_sev(params.severity), location.c_str());
     if (w > 0 && w < cLog) {
