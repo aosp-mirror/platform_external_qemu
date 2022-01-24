@@ -94,6 +94,8 @@ android_add_library(
       android/emulation/control/logcat/LogcatParser.cpp
       android/emulation/control/logcat/RingStreambuf.cpp
       android/emulation/control/secure/BasicTokenAuth.cpp
+      android/emulation/control/secure/JwkDirectoryObserver.cpp
+      android/emulation/control/secure/JwtTokenAuth.cpp
       android/emulation/control/snapshot/SnapshotService.cpp
       android/emulation/control/utils/AudioUtils.cpp
       android/emulation/control/utils/EventWaiter.cpp
@@ -102,8 +104,17 @@ android_add_library(
       android/emulation/control/utils/SharedMemoryLibrary.cpp
       android/emulation/control/waterfall/WaterfallFactory.cpp)
 
-target_link_libraries(android-grpc PRIVATE png PUBLIC libprotobuf android-emu
-                                                      android-net grpc++)
+target_link_libraries(
+  android-grpc
+  PRIVATE png
+  PUBLIC libprotobuf
+         android-emu
+         android-net
+         grpc++
+         tink::config::tink_config
+         tink::jwt::jwt_public_key_verify
+         tink::jwt::jwk_set_converter
+         nlohmann_json::nlohmann_json)
 target_include_directories(android-grpc PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
                                                ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_options(android-grpc PRIVATE -Wno-return-type-c-linkage)
@@ -161,12 +172,16 @@ android_add_test(
       android/emulation/control/GrpcServices_unittest.cpp
       android/emulation/control/logcat/LogcatParser_unittest.cpp
       android/emulation/control/logcat/RingStreambuf_unittest.cpp
+      android/emulation/control/secure/JwkDirectoryObserver_unittest.cpp
+      android/emulation/control/secure/JwtTokenAuth_unittest.cpp
       android/emulation/control/utils/EventWaiter_unittest.cpp
   DARWIN android/emulation/control/interceptor/LoggingInterceptor_unittest.cpp
   LINUX android/emulation/control/interceptor/LoggingInterceptor_unittest.cpp)
 target_link_libraries(
-  android-grpc_unittest PRIVATE android-grpc android-grpc-test-services grpc++
-                                gmock_main)
+  android-grpc_unittest
+  PRIVATE android-grpc android-grpc-test-services grpc++
+          tink::jwt::jwt_key_templates tink::jwt::jwt_signature_config
+          gmock_main)
 android_target_dependency(android-grpc_unittest linux-x86_64
                           TCMALLOC_OS_DEPENDENCIES)
 set_property(TARGET android-grpc_unittest PROPERTY CXX_STANDARD 17)
