@@ -1519,6 +1519,12 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         return false;
     }
 
+    base_configure_logs(opts->log_nofilter ? kLogDefaultOptions : kLogEnableDuplicateFilter);
+
+    if (!opts->log_nofilter) {
+        dinfo("Duplicate loglines will be removed, if you wish to see each indiviudal line launch with the -log-nofilter flag.");
+    }
+
     android_cmdLineOptions = opts;
 
     // BUG: 143949261

@@ -5,117 +5,117 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "(Windows) Attach",
-      "type": "cppvsdbg",
-      "request": "attach",
-      "processId": "${command:pickProcess}"
-    },
-    {
-      "name": "(Windows) Unit Test Launch",
-      "type": "cppvsdbg",
-      "request": "launch",
-      "program": "${command:cmake.launchTargetPath}",
-      "args": ["--gtest_break_on_failure"],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}",
-      "environment": [
-        {
-          // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
-          "name": "ASAN_OPTIONS",
-          "value": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
-        },
-
-        {
-          "name": "PATH",
-          "value": "${workspaceFolder}\\build\\lib64;${workspaceFolder}\\build\\lib64\\qt\\lib;;${workspaceFolder}\\build\\lib64\\gles_swiftshaders;"
-        }
-      ],
-      "externalConsole": true
-    },
-    {
-      "name": "(Windows) Emulator Launch",
-      "type": "cppvsdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/build/qemu/windows-x86_64/qemu-system-x86_64",
-      "args": ["@P_64", "-verbose", "-show-kernel"],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}\\build",
-      "environment": [
-        {
-          "name": "ANDROID_SDK_ROOT",
-          "value": "C:\\Users\\EmuTest2\\AppData\\Local\\Android\\Sdk"
-        },
-        // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
-        {
-          "name": "ASAN_OPTIONS",
-          "value": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
-        },
-        {
-          "name": "PATH",
-          "value": "${workspaceFolder}\\build\\lib64;${workspaceFolder}\\build\\lib64\\qt\\lib;;${workspaceFolder}\\build\\lib64\\gles_swiftshaders;"
-        }
-      ],
-      "externalConsole": false
-    },
-    {
-      "name": "(lldb) Debug Cmake Target",
+      "name": "Launch cmake binary",
       "type": "lldb",
       "request": "launch",
-      // Resolved by CMake Tools:
       "program": "${command:cmake.launchTargetPath}",
-      "cwd": "${workspaceFolder}",
       "args": [
-        //"--emulator" ,"localhost:9554" ,"--fwd", "--adb", "7555"
-
-        // "--verbose"
-        "--port", "13121",
-        "--gtest_filter=GrpcServiceTest.AsyncBidiServerWorks",
-        // "--gtest_repeat=-1",
-        // // "--gtest_break_on_failure",
-        // "--gtest_filter=GrpcServiceTest.AsyncBidiServerWorks"
-        // "--benchmark_filter=BM_cnv.*"
+        // "--gtest_filter=foo.bar",
       ],
-      "env": {
-        // Make sure we suppress the standard asan warnings, otherwise we will crash fast.
-        "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
+      "cwd": "${workspaceFolder}",
+      "stopAtEntry": false,
+      "windows": {
+        "type": "cppvsdbg",
+        "environment": [
+          {
+            "name": "ASAN_OPTIONS",
+            "value": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
+          },
+          {
+            "name": "PATH",
+            "value": "${workspaceFolder}\\build\\lib64;${workspaceFolder}\\build\\lib64\\qt\\lib;;${workspaceFolder}\\build\\lib64\\gles_swiftshaders;"
+          }
+        ],
+        "program": "${command:cmake.launchTargetPath}",
+        "externalConsole": true
+      },
+      "osx": {
+        "env": {
+          "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
+        },
+        "postRunCommands": [
+          "pro hand -p true -s false SIGUSR1",
+          "pro hand -p true -s false SIGUSR2"
+        ],
+      },
+      "linux": {
+        "env": {
+          "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
+        },
+        "postRunCommands": [
+          "pro hand -p true -s false SIGUSR1",
+          "pro hand -p true -s false SIGUSR2"
+        ],
       }
     },
     {
-      "name": "(lldb) Debug Emulator",
+      "name": "Launch Emulator",
       "type": "lldb",
       "request": "launch",
-      // Resolved by CMake Tools, but likely should point to qemu-system-i386, or qemu-system-x86_64
-      // As there lldb is not capable of following child processes (like gdb can with follow-fork-mode)
       "program": "${workspaceFolder}/build/emulator",
       "args": [
-        "@31", // Pick the image you would like to use
-        "-no-snapshot"
+        "@31",
       ],
-      "postRunCommands": [
-        "pro handle -p true -s false SIGUSR1",
-        "pro handle -p true -s false SIGUSR2",
-      ],
-      "stopOnEntry": false,
-      "cwd": "${workspaceFolder}/build"
+      "cwd": "${workspaceFolder}/build",
+      "stopAtEntry": false,
+      "windows": {
+        "type": "cppvsdbg",
+        "environment": [
+          {
+            "name": "ANDROID_SDK_ROOT",
+            "value": "C:\\Users\\EmuTest2\\AppData\\Local\\Android\\Sdk"
+          },
+          {
+            "name": "ASAN_OPTIONS",
+            "value": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
+          },
+          {
+            "name": "PATH",
+            "value": "${workspaceFolder}\\build\\lib64;${workspaceFolder}\\build\\lib64\\qt\\lib;;${workspaceFolder}\\build\\lib64\\gles_swiftshaders;"
+          }
+        ],
+        "externalConsole": false
+      },
+      "osx": {
+        "env": {
+          "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
+        },
+        "postRunCommands": [
+          "pro hand -p true -s false SIGUSR1",
+          "pro hand -p true -s false SIGUSR2"
+        ],
+      },
+      "linux": {
+        "env": {
+          "ASAN_OPTIONS": "detect_leaks=0:detect_container_overflow=0:detect_odr_violation=0:symbolize=1"
+        },
+        "postRunCommands": [
+          "pro hand -p true -s false SIGUSR1",
+          "pro hand -p true -s false SIGUSR2"
+        ],
+      }
     },
     {
       // You need root access to attach debugger
-      "name": "(lldb) Debug attach Emulator",
+      "name": "Attach process (requires root)",
       "type": "lldb",
       "request": "attach",
-      // Replace this with the process executable you want to attach to
-      "pid": 94625, // replace pid with your real pid
-      // Ignore signal SIGUSR1
-      "postRunCommands": [
-        "pro hand -p true -s false SIGUSR1",
-        "pro hand -p true -s false SIGUSR2"
-      ]
+      "processId": "${command:pickProcess}",
+      "windows": {
+        "type": "cppvsdbg",
+      },
+      "osx": {
+        "postRunCommands": [
+          "pro hand -p true -s false SIGUSR1",
+          "pro hand -p true -s false SIGUSR2"
+        ]
+      },
+      "linux": {
+        "postRunCommands": [
+          "pro hand -p true -s false SIGUSR1",
+          "pro hand -p true -s false SIGUSR2"
+        ]
+      }
     },
-    {
-      "name": "(lldb) Debug core dump",
-      "type": "lldb",
-      "request": "custom",
-      "targetCreateCommands": ["target create -c ${workspaceFolder}/core"]
-    }
   ]
 }

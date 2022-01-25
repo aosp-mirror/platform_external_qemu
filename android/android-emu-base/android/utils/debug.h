@@ -94,9 +94,18 @@ extern uint64_t android_verbose;
 static_assert(VERBOSE_MAX <= (sizeof(android_verbose) * 8));
 #endif
 
+typedef enum {
+    kLogDefaultOptions = 0,
+    kLogEnableDuplicateFilter = 1
+} LoggingFlags;
+
+
 // Enable/disable verbose logs from the base/* family.
 extern void base_enable_verbose_logs();
 extern void base_disable_verbose_logs();
+// Configure the logging framework.
+extern void base_configure_logs(LoggingFlags flags);
+
 #define VERBOSE_ENABLE(tag) android_verbose |= (1ULL << VERBOSE_##tag)
 
 #define VERBOSE_DISABLE(tag) android_verbose &= (1ULL << VERBOSE_##tag)

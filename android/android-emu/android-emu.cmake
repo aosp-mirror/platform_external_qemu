@@ -970,9 +970,6 @@ if(NOT LINUX_AARCH64)
   target_include_directories(android-emu_unittests
                              PRIVATE ../android-emugl/host/include/)
 
-  target_compile_definitions(android-emu_unittests PRIVATE -DGTEST_HAS_RTTI=0)
-
-
   # Sign unit test if needed.
   android_sign(TARGET android-emu_unittests)
 

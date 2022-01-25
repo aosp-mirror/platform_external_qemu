@@ -109,6 +109,7 @@
       ],
       "kwargs": {
         "TARGET": "*",
+        "ALIAS" : "*",
         "LIBNAME": "*",
         "REPO": "*",
         "LICENSE": "*",
@@ -251,6 +252,27 @@
         "LINUX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
         "POSIX": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
         "SRC": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
+      }
+    },
+    "tink_cc_library": {
+      "flags": [
+        "PUBLIC"
+      ],
+      "kwargs": {
+        "NAME": "*",
+        "SRCS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "DEPS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
+      }
+    },
+    "tink_cc_test": {
+      "flags": [
+        "PUBLIC"
+      ],
+      "kwargs": {
+        "NAME": "*",
+        "SRCS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "DEPS": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } },
+        "DATA": { "pargs": { "nargs": "*" , "tags": ["file-list"], "sortable" : "True" } }
       }
     }
   },

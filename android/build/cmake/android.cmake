@@ -305,6 +305,7 @@ function(android_yacc_compile)
   # Make the library available
   if(yacc_GENERATED)
     set(${yacc_GENERATED} "${YACC_GEN}" PARENT_SCOPE)
+    message(STATUS "These were the generated files: ${YACC_GEN}")
   endif()
 endfunction()
 
@@ -618,6 +619,7 @@ endfunction()
 # Registers the given library, by calculating the source set and setting licensens.
 #
 # ``SHARED``  Option indicating that this is a shared library.
+# ``ALIAS``   The library is an alias for another
 # ``TARGET``  The library/executable target. For example emulatory-libyuv
 # ``LIBNAME`` Public library name, this is how it is known in the world. For example libyuv.
 # ``SRC``     List of source files to be compiled, part of every target.
@@ -631,18 +633,25 @@ endfunction()
 # ``NOTICE``  Location where the NOTICE can be found
 # ~~~
 function(android_add_library)
-  _register_target(${ARGN})
   set(options SHARED)
-  set(oneValueArgs TARGET)
+  set(oneValueArgs TARGET ALIAS)
   set(multiValueArgs "")
   cmake_parse_arguments(build "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN})
   if(${build_SHARED})
-    add_library(${build_TARGET} SHARED ${REGISTERED_SRC})
+    add_library(${build_TARGET} SHARED "")
+  elseif((DEFINED build_ALIAS))
+    set_property(GLOBAL APPEND PROPERTY ALIAS_LST
+                                        "${build_TARGET}|${build_ALIAS}\n")
+    add_library(${build_TARGET} ALIAS ${build_ALIAS})
+    return()
   else()
-    add_library(${build_TARGET} ${REGISTERED_SRC})
+    add_library(${build_TARGET} "")
   endif()
 
+  _register_target(${ARGN})
+
+  target_sources(${build_TARGET} PRIVATE ${REGISTERED_SRC})
   if(WINDOWS_MSVC_X86_64 AND NOT ${build_TARGET} STREQUAL "msvc-posix-compat")
     target_link_libraries(${build_TARGET} PRIVATE msvc-posix-compat)
   endif()
@@ -762,10 +771,15 @@ define_property(
   FULL_DOCS "Global list of license definitions")
 define_property(
   GLOBAL PROPERTY INSTALL_TARGETS_LST
-  BRIEF_DOCS "GLobal list of targets that are installed."
-  FULL_DOCS "GLobal list of targets that are installed.")
+  BRIEF_DOCS "Global list of targets that are installed."
+  FULL_DOCS "Global list of targets that are installed.")
+define_property(
+  GLOBAL PROPERTY ALIAS_LST
+  BRIEF_DOCS "Global list of targets that are an alias for another."
+  FULL_DOCS "Global list of targets that are an alias for another.")
 set_property(GLOBAL PROPERTY LICENSES_LST " ")
 set_property(GLOBAL PROPERTY INSTALL_TARGETS_LST " ")
+set_property(GLOBAL PROPERTY ALIAS_LST " ")
 
 # ~~~
 # ! android_license: Registers the given license, ands adds it to LICENSES_LST for post processing !
@@ -807,9 +821,12 @@ function(finalize_all_licenses)
   android_discover_targets(ALL_TARGETS ${ANDROID_QEMU2_TOP_DIR})
   get_property(LICENSES GLOBAL PROPERTY LICENSES_LST)
   get_property(TARGETS GLOBAL PROPERTY INSTALL_TARGETS_LST)
+  get_property(ALIAS GLOBAL PROPERTY ALIAS_LST)
+
   file(REMOVE ${CMAKE_BINARY_DIR}/TARGET_DEPS.LST)
   file(WRITE ${CMAKE_BINARY_DIR}/LICENSES.LST "${LICENSES}")
   file(WRITE ${CMAKE_BINARY_DIR}/INSTALL_TARGETS.LST "${TARGETS}")
+  file(WRITE ${CMAKE_BINARY_DIR}/ALIAS.LST "${ALIAS}")
   foreach(tgt ${ALL_TARGETS})
     get_target_property(target_type "${tgt}" TYPE)
     set(DEPS "")
@@ -820,6 +837,7 @@ function(finalize_all_licenses)
          ";${tgt}|${target_type}|${DEPS}\n")
   endforeach()
 
+  message(STATUS "Validating liceneses..")
   execute_process(
     COMMAND "python" "android/build/python/aemu/licensing.py"
             "${PROJECT_BINARY_DIR}" WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
@@ -985,17 +1003,6 @@ function(android_add_protobuf name protofiles)
                                                             ${PROTO_SRCS})
   target_link_libraries(${name} PUBLIC libprotobuf)
   target_include_directories(${name} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
-  # Disable generation of information about every class with virtual functions
-  # for use by the C++ runtime type identification features (dynamic_cast and
-  # typeid). If you don't use those parts of the language, you can save some
-  # space by using this flag. Note that exception handling uses the same
-  # information, but it will generate it as needed. The  dynamic_cast operator
-  # can still be used for casts that do not require runtime type information,
-  # i.e. casts to void * or to unambiguous base classes.
-  target_compile_options(${name} PRIVATE -fno-rtti)
-  # This needs to be public, as we don't want the headers to start exposing
-  # exceptions.
-  target_compile_definitions(${name} PUBLIC -DGOOGLE_PROTOBUF_NO_RTTI)
   android_clang_tidy(${name})
 endfunction()
 
@@ -1155,10 +1162,6 @@ function(protobuf_generate_with_plugin)
   if(protobuf_generate_with_plugin_TARGET)
     target_sources(${protobuf_generate_with_plugin_TARGET}
                    PRIVATE ${_generated_srcs_all})
-    target_compile_options(${protobuf_generate_with_plugin_TARGET}
-                           PRIVATE -fno-rtti)
-    target_compile_definitions(${protobuf_generate_with_plugin_TARGET}
-                               PUBLIC -DGOOGLE_PROTOBUF_NO_RTTI)
   endif()
 
 endfunction()
@@ -1242,17 +1245,6 @@ function(
                                                             ${PROTO_HDRS})
   target_link_libraries(${name} PUBLIC ${protolib})
   target_include_directories(${name} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
-  # Disable generation of information about every class with virtual functions
-  # for use by the C++ runtime type identification features (dynamic_cast and
-  # typeid). If you don't use those parts of the language, you can save some
-  # space by using this flag. Note that exception handling uses the same
-  # information, but it will generate it as needed. The  dynamic_cast operator
-  # can still be used for casts that do not require runtime type information,
-  # i.e. casts to void * or to unambiguous base classes.
-  target_compile_options(${name} PRIVATE -fno-rtti)
-  # This needs to be public, as we don't want the headers to start exposing
-  # exceptions.
-  target_compile_definitions(${name} PUBLIC -DGOOGLE_PROTOBUF_NO_RTTI)
   android_clang_tidy(${name})
 endfunction()
 

@@ -15,13 +15,25 @@
 // A small benchmark used to compare the performance of android::base::Lock
 // with other mutex implementions.
 
-#include "android/base/Log.h"
-#include "android/utils/debug.h"
-#include "benchmark/benchmark_api.h"
+#include <ostream>                       // for operator<<, basic_ostream
+#include <string>                        // for allocator, operator+, char_t...
+
+#include "absl/strings/str_format.h"     // for StrFormat, ParsedFormat
+#include "absl/strings/string_view.h"    // for string_view
+#include "android/base/Log.h"            // for setMinLogLevel, LogParams
+#include "android/base/LogFormatter.h"   // for SimpleLogFormatter, LogForma...
+#include "android/base/StringFormat.h"   // for StringFormat
+#include "android/utils/debug.h"         // for VERBOSE_virtualscene, VERBOS...
+#include "android/utils/log_severity.h"  // for EMULATOR_LOG_INFO, EMULATOR_...
+#include "benchmark/benchmark_api.h"     // for State, BENCHMARK, Benchmark ...
 
 #define BASIC_BENCHMARK_TEST(x) BENCHMARK(x)->Arg(8)->Arg(512)->Arg(8192)
 
+using android::base::LogParams;
+using android::base::NoDuplicateLinesFormatter;
 using android::base::setMinLogLevel;
+using android::base::SimpleLogFormatter;
+using android::base::VerboseLogFormatter;
 
 void BM_LG_Log_simple_string(benchmark::State& state) {
     setMinLogLevel(EMULATOR_LOG_INFO);
@@ -76,10 +88,102 @@ void BM_LG_Log_complex_msg(benchmark::State& state) {
     int i = 0;
     int j = 0;
     while (state.KeepRunning()) {
-        LOG(INFO) << "Hello, i: " << i++ << ", with: " << j << ", and that's all!";
+        LOG(INFO) << "Hello, i: " << i++ << ", with: " << j
+                  << ", and that's all!";
         j = 2 * i;
     }
 }
+
+void BM_FMT_SimpleLogFormatter(benchmark::State& state) {
+    SimpleLogFormatter sf;
+    while (state.KeepRunning()) {
+        LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
+        sf.LogFormatter::format(lg, "Hello World");
+    }
+}
+
+void BM_FMT_VerboseLogFormatter(benchmark::State& state) {
+    VerboseLogFormatter sf;
+    while (state.KeepRunning()) {
+        LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
+        sf.LogFormatter::format(lg, "Hello World");
+    }
+}
+
+void BM_FMT_DuplicateLogFormatter(benchmark::State& state) {
+    NoDuplicateLinesFormatter ndlf(std::make_shared<SimpleLogFormatter>());
+    while (state.KeepRunning()) {
+        LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
+        ndlf.LogFormatter::format(lg, "Hello World");
+    }
+}
+
+void BM_FMT_DuplicateLogFormatterNoDupes(benchmark::State& state) {
+    NoDuplicateLinesFormatter ndlf(std::make_shared<SimpleLogFormatter>());
+    int i = 0;
+    while (state.KeepRunning()) {
+        LogParams lg = {"filename.c", i++, EMULATOR_LOG_INFO};
+        ndlf.LogFormatter::format(lg, "Hello World");
+    }
+}
+
+void BM_FMT_DuplicateLogFormatterNoDupesStr(benchmark::State& state) {
+    NoDuplicateLinesFormatter ndlf(std::make_shared<SimpleLogFormatter>());
+    int i = 0;
+    while (state.KeepRunning()) {
+        LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
+        i++;
+        ndlf.LogFormatter::format(lg,
+                                  i % 2 == 0 ? "Hello World" : "Hello Friend");
+    }
+}
+
+void BM_FMT_AbslStringFormat(benchmark::State& state) {
+    SimpleLogFormatter sf;
+    int i = 0;
+    auto format_string =
+            absl::ParsedFormat<'s', 'd', 's'>("%s (%d)\n%s");
+
+    while (state.KeepRunning()) {
+        LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
+        auto res = absl::StrFormat(
+                format_string, sf.LogFormatter::format(lg, "Hello World"), i++,
+                sf.LogFormatter::format(lg, "Hello World"));
+    }
+}
+
+void BM_FMT_AndroidStringFormat(benchmark::State& state) {
+    SimpleLogFormatter sf;
+    int i = 0;
+    while (state.KeepRunning()) {
+        LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
+        auto res = android::base::StringFormat(
+                "%s (%dx)\n%s", sf.LogFormatter::format(lg, "Hello World"), i++,
+                sf.LogFormatter::format(lg, "Hello World"));
+    }
+}
+
+void BM_FMT_StringConcatFormat(benchmark::State& state) {
+    SimpleLogFormatter sf;
+    int i = 0;
+    while (state.KeepRunning()) {
+        LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
+        auto res = sf.LogFormatter::format(lg, "Hello World") + "(" +
+                   std::to_string(i++) + "x)\n" +
+                   sf.LogFormatter::format(lg, "Hello World");
+    }
+}
+
+BENCHMARK(BM_FMT_SimpleLogFormatter);
+BENCHMARK(BM_FMT_VerboseLogFormatter);
+BENCHMARK(BM_FMT_DuplicateLogFormatter);
+BENCHMARK(BM_FMT_DuplicateLogFormatterNoDupes);
+BENCHMARK(BM_FMT_DuplicateLogFormatterNoDupesStr);
+
+// Lets see who's the fastest.
+BENCHMARK(BM_FMT_AbslStringFormat);
+BENCHMARK(BM_FMT_AndroidStringFormat);
+BENCHMARK(BM_FMT_StringConcatFormat);
 
 BENCHMARK(BM_LG_Log_simple_string);
 BENCHMARK(BM_LG_Log_simple_string_logging_off);
