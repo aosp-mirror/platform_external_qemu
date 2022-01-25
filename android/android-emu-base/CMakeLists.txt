@@ -6,8 +6,8 @@
 prebuilt(UUID)
 prebuilt(GLIB2) # Acts as windows stdio compatibility layer.
 prebuilt(LIBUNWIND)
-if (NOT DARWIN_AARCH64)
-    prebuilt(TCMALLOC)
+if(NOT DARWIN_AARCH64)
+  prebuilt(TCMALLOC)
 endif()
 prebuilt(Threads)
 
@@ -106,12 +106,15 @@ android_add_library(
       android/utils/system.c
       android/utils/tempfile.c
       android/utils/x86_cpuid.cpp
-  LINUX android/base/memory/SharedMemory_posix.cpp
+  LINUX android/base/files/FileSystemWatcherPosix.cpp
+        android/base/memory/SharedMemory_posix.cpp
         android/base/threads/Thread_pthread.cpp
-  DARWIN android/base/memory/SharedMemory_posix.cpp
+  DARWIN android/base/files/FileSystemWatcherDarwin.cpp
+         android/base/memory/SharedMemory_posix.cpp
          android/base/system/system-native-mac.mm
          android/base/threads/Thread_pthread.cpp
-  WINDOWS android/base/files/preadwrite.cpp
+  WINDOWS android/base/files/FileSystemWatcherWindows.cpp
+          android/base/files/preadwrite.cpp
           android/base/memory/SharedMemory_win32.cpp
           android/base/system/Win32UnicodeString.cpp
           android/base/system/Win32Utils.cpp
@@ -170,7 +173,7 @@ android_target_link_libraries(
 
 android_target_compile_definitions(
   android-emu-base darwin-x86_64 PRIVATE "-D_DARWIN_C_SOURCE=1"
-  "-Dftello64=ftell" "-Dfseeko64=fseek")
+                                         "-Dftello64=ftell" "-Dfseeko64=fseek")
 
 android_target_link_libraries(
   android-emu-base darwin-aarch64
@@ -179,7 +182,7 @@ android_target_link_libraries(
 
 android_target_compile_definitions(
   android-emu-base darwin-aarch64 PRIVATE "-D_DARWIN_C_SOURCE=1"
-  "-Dftello64=ftell" "-Dfseeko64=fseek")
+                                          "-Dftello64=ftell" "-Dfseeko64=fseek")
 
 # Compiler flags, note that these should never propagate (i.e. set to public) as
 # we really want to limit the usage of these flags.
@@ -206,6 +209,7 @@ android_add_test(
       android/base/EintrWrapper_unittest.cpp
       android/base/EventNotificationSupport_unittest.cpp
       android/base/files/FileShareOpen_unittest.cpp
+      android/base/files/FileSystemWatcher_unittest.cpp
       android/base/files/GzipStreambuf_unittest.cpp
       android/base/files/IniFile_unittest.cpp
       android/base/files/InplaceStream_unittest.cpp
