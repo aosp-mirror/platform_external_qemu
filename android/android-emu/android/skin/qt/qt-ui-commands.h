@@ -69,6 +69,8 @@ enum class QtUICommand {
     UPDATE_FOLDABLE_POSTURE_INDICATOR,
     WEAR_1,
     WEAR_2,
+    PALM,
+    TILT,
 };
 
 enum class QtKeyEventSource {
