@@ -1168,6 +1168,14 @@ help_modem_simulator_port(stralloc_t*  out)
 }
 
 static void
+help_log_nofilter(stralloc_t*  out)
+{
+    PRINTF(
+    "  Disables the duplicate logline filter.\n\n");
+}
+
+
+static void
 help_grpc(stralloc_t*  out)
 {
     PRINTF(

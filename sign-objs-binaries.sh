@@ -25,6 +25,10 @@
 ./sign-vm-entitlement.sh objs/lib64/gles_swiftshader/libEGL.dylib
 ./sign-vm-entitlement.sh objs/lib64/gles_swiftshader/libGLES_CM.dylib
 ./sign-vm-entitlement.sh objs/lib64/gles_swiftshader/libGLESv2.dylib
+./sign-vm-entitlement.sh objs/lib64/gles_angle/libEGL.dylib
+./sign-vm-entitlement.sh objs/lib64/gles_angle/libGLESv2.dylib
+./sign-vm-entitlement.sh objs/lib64/gles_angle/libabsl.dylib
+./sign-vm-entitlement.sh objs/lib64/gles_angle/libchrome_zlib.dylib
 ./sign-vm-entitlement.sh objs/lib64/libshadertranslator.dylib
 ./sign-vm-entitlement.sh objs/lib64/OpenglRender.dylib
 ./sign-vm-entitlement.sh objs/lib64/libandroid-emu-shared.dylib

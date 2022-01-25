@@ -17,7 +17,6 @@
 #define unlink(path) android_unlink((path))
 #define chmod(path, mode) android_chmod( (path), (mode))
 #define rmdir(path) android_rmdir((path))
-
 #else
 // So we are in the qemu build..
 #endif

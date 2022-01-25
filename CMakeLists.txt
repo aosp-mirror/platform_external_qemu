@@ -343,9 +343,7 @@ if(WINDOWS_MSVC_X86_64)
   if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     # Disable security checks, "we know what we are doing"
     add_c_flag("-GS-")
-    # Disable rtti, we are not going to be needing it, this is the msvc
-    # equivalent of -fno-rtti
-    add_c_flag("-GR-")
+    add_c_flag("-GR")
   endif()
 endif()
 
@@ -369,16 +367,7 @@ if(OPTION_CLANG_TIDY)
 endif()
 
 add_c_flag("-g")
-# Disable generation of information about every class with virtual functions for
-# use by the C++ runtime type identification features (dynamic_cast and typeid).
-# If you don't use those parts of the language, you can save some space by using
-# this flag. Note that exception handling uses the same information, but it will
-# generate it as needed. The  dynamic_cast operator can still be used for casts
-# that do not require runtime type information, i.e. casts to void * or to
-# unambiguous base classes.
-if(NOT WINDOWS_MSVC_X86_64)
-  add_cxx_flag("-fno-rtti")
-endif()
+
 
 # Compiling with -fno-exceptions disables exceptions support and uses the
 # variant of C++ libraries without exceptions. Use of try, catch, or throw

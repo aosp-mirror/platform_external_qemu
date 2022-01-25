@@ -20,13 +20,15 @@ set(CMAKE_CXX_STANDARD 17)
 if(OPTIONS_BUILD_PACKET_GEN)
   android_yacc_compile(
     GENERATED blueotooth_packetgen_yacc SRC ${PACKET_GEN_ROOT}/language_y.yy
-    SOURCE_DIR ${PACKET_GEN_ROOT})
+    SOURCE_DIR ${PACKET_GEN_ROOT}
+    OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/yacc)
   android_flex_compile(
     GENERATED blueotooth_packetgen_flex SRC ${PACKET_GEN_ROOT}/language_l.ll
-    SOURCE_DIR ${PACKET_GEN_ROOT})
+    SOURCE_DIR ${PACKET_GEN_ROOT}
+    OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/flex)
   message(
     STATUS
-      "Generating ${blueotooth_packetgen_yacc} and ${blueotooth_packetgen_flex}"
+      "Generating ${blueotooth_packetgen_yacc} and ${blueotooth_packetgen_flex}, these are places in the SOURCE TREE!"
   )
   android_add_library(
     TARGET bluetooth_packetgen_parser NODISTRIBUTE
@@ -39,15 +41,15 @@ else()
     # Sha validation only works on posix for some reason.
     android_validate_sha(
       FILE ${PACKET_GEN_ROOT}/language_y.yy
-      EXPECTED 764c1f7cda8c6eb6aa80cb6634b9fe0351218d0fa21ec1e845d1c2c826c07958
+      EXPECTED babcc990e9ffbce28821a0451e98370e219ad0fb761047720d33fba625e12135
       ERROR
-        "Please regenerate the precompiled yacc files, rebuild with --cmake_option OPTIONS_BUILD_PACKET_GEN=TRUE and update the files in ${CMAKE_CURRENT_LIST_DIR}/yacc"
+        "Please regenerate the precompiled yacc files, rebuild with --cmake_option OPTIONS_BUILD_PACKET_GEN=TRUE, update the SHA, and commit the created files."
     )
     android_validate_sha(
       FILE ${PACKET_GEN_ROOT}/language_l.ll
-      EXPECTED 413371e663251db9fe9f64bbe06c29db0b64a4298f1adeba3542d831a423b78e
+      EXPECTED 9dd4fe0748c25024db18e82ca1995f5d745ce227e6ca763d6c1e73e6001a0075
       ERROR
-        "Please regenerate the precompiled flex files, rebuild with --cmake_option OPTIONS_BUILD_PACKET_GEN=TRUE and update the files in ${CMAKE_CURRENT_LIST_DIR}/flex"
+        "Please regenerate the precompiled flex files, rebuild with --cmake_option OPTIONS_BUILD_PACKET_GEN=TRUE, update the SHA, and commit the created files."
     )
   endif()
   android_add_library(TARGET bluetooth_packetgen_parser NODISTRIBUTE
@@ -97,6 +99,7 @@ android_add_executable(
       gen_rust.cc
       main.cc
       packet_def.cc
+      packet_dependency.cc
       parent_def.cc
       struct_def.cc
       struct_parser_generator.cc)
