@@ -2151,3 +2151,15 @@ bool avdInfo_skinHasOverlay(const char* skinName) {
     }
     return false;
 }
+
+/* for api >= S, turns off screen after 30 minutes to save battery
+   b/216165503; leave the older api behavor unchanged for now.
+*/
+
+const char* avdInfo_screen_off_timeout(int apiLevel) {
+    if (apiLevel >= 31) {
+        return "1800000"; // 30 minutes
+    } else {
+        return "2147483647"; // 576 hours
+    }
+}
