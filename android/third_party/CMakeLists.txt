@@ -78,6 +78,7 @@ add_subdirectory(mksdcard)
 add_subdirectory(breakpad)
 add_subdirectory(boringssl)
 add_subdirectory(hostapd)
+add_subdirectory(tink)
 
 if(DARWIN_X86_64 OR DARWIN_AARCH64)
   find_program(MIG_EXE "mig")

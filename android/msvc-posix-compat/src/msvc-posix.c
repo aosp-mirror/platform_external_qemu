@@ -79,3 +79,4 @@ static int vasprintf(char** buf, const char* format, va_list args) {
     // Note: vsprintf is deprecated; consider using vsprintf_s instead
     return len;
 }
+

@@ -95,11 +95,15 @@ class Licensing(object):
         notices = os.path.join(build_dir, "LICENSES.LST")
         dependencies = os.path.join(build_dir, "TARGET_DEPS.LST")
         installed_targets = os.path.join(build_dir, "INSTALL_TARGETS.LST")
+        alias_targets = os.path.join(build_dir, "ALIAS.LST")
 
         self.qemu = qemu_root
         self.public_libs, self.internal_libs = self._parse_notices(notices)
         self.deps = self._parse_dependencies(dependencies)
 
+        aliases = self._parse_aliases(alias_targets)
+        for fst, snd in aliases.items():
+            self.internal_libs[fst] = self.internal_libs[snd]
         # Mapping from target --> shipped binaries.
         self.target_exes = self._parse_installed_targets(installed_targets)
 
@@ -152,6 +156,13 @@ class Licensing(object):
             for line in nfile.readlines():
                 line = line.strip()[1:]
                 yield [x.strip() for x in line.split("|")]
+
+    def _parse_aliases(self, alias):
+        aliases = {}
+        for line in self._read_cmake_file(alias):
+            fst, snd = line
+            aliases[fst] = snd
+        return aliases
 
     def _parse_notices(self, notice):
         public_libs = {}
