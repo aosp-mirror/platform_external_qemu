@@ -2305,7 +2305,7 @@ static void virtio_vsock_pci_class_init(ObjectClass *klass, void *data) {
 static const TypeInfo virtio_vsock_pci_info = {
     .name          = TYPE_VIRTIO_VSOCK_PCI,
     .parent        = TYPE_VIRTIO_PCI,
-    .instance_size = sizeof(VirtIOCryptoPCI),
+    .instance_size = sizeof(VirtIOVSockPCI),
     .instance_init = &virtio_vsock_pci_instance_init,
     .class_init    = &virtio_vsock_pci_class_init,
 };
