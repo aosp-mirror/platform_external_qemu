@@ -112,8 +112,11 @@ target_link_libraries(
          android-net
          grpc++
          tink::config::tink_config
-         tink::jwt::jwt_public_key_verify
          tink::jwt::jwk_set_converter
+         tink::jwt::jwt_public_key_verify
+         tink::jwt::jwt_signature_config
+         tink::jwt::jwt_validator
+         tink::jwt::verified_jwt
          nlohmann_json::nlohmann_json)
 target_include_directories(android-grpc PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
                                                ${CMAKE_CURRENT_SOURCE_DIR})

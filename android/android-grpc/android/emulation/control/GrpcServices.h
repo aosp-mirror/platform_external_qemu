@@ -58,7 +58,8 @@ public:
     // are configured with the builder.
     //
     // The service will return a nullptr when no more queue's are available.
-    virtual std::vector<ServerCompletionQueue*> newCompletionQueue(size_t nr) = 0;
+    virtual std::vector<ServerCompletionQueue*> newCompletionQueue(
+            size_t nr) = 0;
 };
 
 // A Factory class that is capable of constructing a proper gRPC service that
@@ -66,6 +67,7 @@ public:
 class EmulatorControllerService::Builder {
 public:
     enum class Security { Insecure = 0, Tls, Local };
+    enum class Authorization { None = 0, StaticToken = 1, JwtToken = 2 };
     enum class IpMode { Ipv4, Ipv6 };
 
     Builder();
@@ -86,6 +88,20 @@ public:
     //
     // |token| Token to use.
     Builder& withAuthToken(std::string token);
+
+    // Reject any request with the status UNAUTHORIZED if the following header
+    // is not present: Authorization: Bearer <token>
+    //
+    // If the header is present it must contain a valid JWT token with:
+    //
+    // aud: Set to the path of the gRPC request, and it must be signed
+    // with a key that can be found in the jwk Directory.
+    //
+    // |jwks| Directory where .jwk files can be written that contain
+    // valid JSON web keys used to validate the JWT.
+    // |jwkLoadedPath| The path to a file where the emulator will write the
+    // set of loaded public web keys.
+    Builder& withJwtAuthDiscoveryDir(std::string jwks, std::string jwkLoadedPath);
 
     // True to enable verbose logging.
     // Verbose logging will connect the gRPC logging engine to the
@@ -143,6 +159,9 @@ private:
     std::string mBindAddress{"127.0.0.1"};
     std::string mCertfile;
     std::string mAuthToken;
+    std::string mJwkPath;
+    std::string mJwkLoadedPath;
+    Authorization mAuthMode{Authorization::None};
     bool mValid{true};
     bool mVerbose{false};
     bool mLogging{true};

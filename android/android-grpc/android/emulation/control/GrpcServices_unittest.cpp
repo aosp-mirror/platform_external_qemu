@@ -25,6 +25,7 @@
 #include "android/base/system/System.h"        // for System
 #include "android/base/testing/TestSystem.h"   // for TestS...
 #include "android/base/testing/TestTempDir.h"  // for TestT...
+#include "android/base/testing/TestTempDir.h"  // for TestTempDir
 #include "android/emulation/control/GrpcServices.h"
 #include "android/emulation/control/async/AsyncGrcpStream.h"
 #include "android/emulation/control/test/BasicTokenAuthenticator.h"
@@ -43,6 +44,7 @@ namespace control {
 using android::base::PathUtils;
 using android::base::System;
 using android::base::TestSystem;
+using android::base::TestTempDir;
 
 using android::base::pj;
 using grpc::Service;
@@ -50,9 +52,9 @@ using grpc::Service;
 class GrpcServiceTest : public ::testing::Test {
 protected:
     GrpcServiceTest() : mTestSystem("/", System::kProgramBitness) {
-        auto testDir = mTestSystem.getTempRoot();
-        EXPECT_TRUE(testDir->makeSubDir("home"));
-        mTestSystem.setHomeDirectory(testDir->makeSubPath("home"));
+        mTempDir = mTestSystem.getTempRoot();
+        EXPECT_TRUE(mTempDir->makeSubDir("home"));
+        mTestSystem.setHomeDirectory(mTempDir->makeSubPath("home"));
     }
 
     void writeToken(std::string fname) {
@@ -110,6 +112,11 @@ protected:
                 std::make_unique<BasicTokenAuthenticator>(mToken));
     }
 
+    std::shared_ptr<grpc::CallCredentials> getJwtCredentials() {
+        return grpc::MetadataCredentialsFromPlugin(
+                std::make_unique<JwtTokenAuthenticator>(mTempDir->path()));
+    }
+
     AsyncTestEchoService* mEchoService;
     TestSystem mTestSystem;
     Msg mHelloWorld;
@@ -119,7 +126,7 @@ protected:
     std::string mToken{"super_secret_token"};
 
     const std::string HELLO{"Hello World"};
-
+    TestTempDir* mTempDir;
 };
 
 TEST_F(GrpcServiceTest, BasicRegistrationSucceeds) {
@@ -296,6 +303,27 @@ TEST_F(GrpcServiceTest, InsecureWithNoTokenRejects) {
     EXPECT_EQ(invocations, mEchoService->invocations());
 }
 
+TEST_F(GrpcServiceTest, InsecureWithNoJwtRejects) {
+    auto invocations = mEchoService->invocations();
+    auto keyfile = pj(mTempDir->path(), "keys.jwk");
+    EXPECT_FALSE(System::get()->pathExists(keyfile));
+
+    mBuilder.withService(mEchoService)
+            .withPortRange(0, 1)
+            .withJwtAuthDiscoveryDir(mTempDir->path(), keyfile);
+    EXPECT_TRUE(construct());
+
+    auto [msg, status] = sayHello(::grpc::InsecureChannelCredentials());
+    EXPECT_NE(HELLO, msg.msg());
+    EXPECT_EQ(grpc::StatusCode::UNAUTHENTICATED, status.error_code());
+
+    // Underlying service method was not called
+    EXPECT_EQ(invocations, mEchoService->invocations());
+
+    // The keys.jwk file was written
+    EXPECT_TRUE(System::get()->pathExists(keyfile));
+}
+
 TEST_F(GrpcServiceTest, InsecureWithGoodTokenAccepts) {
     auto invocations = mEchoService->invocations();
     mBuilder.withService(mEchoService)
@@ -313,6 +341,36 @@ TEST_F(GrpcServiceTest, InsecureWithGoodTokenAccepts) {
 
     // Underlying service method was called
     EXPECT_EQ(invocations + 1, mEchoService->invocations());
+}
+
+TEST_F(GrpcServiceTest, InsecureWithGoodJwtAccepts) {
+    auto credentials = getJwtCredentials();
+
+    EXPECT_TRUE(
+            System::get()->pathExists(pj(mTempDir->path(), "unittest.jwk")));
+
+    auto invocations = mEchoService->invocations();
+    auto keyfile = pj(mTempDir->path(), "keys.jwk");
+    EXPECT_FALSE(System::get()->pathExists(keyfile));
+
+    mBuilder.withService(mEchoService)
+            .withPortRange(0, 1)
+            .withJwtAuthDiscoveryDir(mTempDir->path(),
+                                     keyfile);
+
+    EXPECT_TRUE(construct());
+
+    // Note! ::grpc::InsecureChannel WILL NOT INJECT HEADERS!
+    auto [msg, status] =
+            sayHello(::grpc::experimental::LocalCredentials(LOCAL_TCP), true,
+                     credentials);
+    EXPECT_EQ(HELLO, msg.msg());
+    EXPECT_EQ(grpc::StatusCode::OK, status.error_code())
+            << "Failure message: " << status.error_message();
+
+    // Underlying service method was called
+    EXPECT_EQ(invocations + 1, mEchoService->invocations());
+    EXPECT_TRUE(System::get()->pathExists(keyfile));
 }
 
 TEST_F(GrpcServiceTest, SecureWithBadTokenRejects) {

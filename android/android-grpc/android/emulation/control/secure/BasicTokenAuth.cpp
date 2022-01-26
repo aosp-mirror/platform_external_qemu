@@ -18,6 +18,7 @@
 #include <utility>                    // for move, pair
 
 #include "absl/strings/str_format.h"  // for StrFormat
+#include "android/utils/debug.h"
 
 namespace android {
 namespace emulation {
@@ -60,7 +61,9 @@ grpc::Status BasicTokenAuth::Process(const InputMetadata& auth_metadata,
 };
 
 StaticTokenAuth::StaticTokenAuth(std::string token)
-    : BasicTokenAuth(DEFAULT_HEADER, DEFAULT_BEARER), mStaticToken(token){};
+    : BasicTokenAuth(DEFAULT_HEADER, DEFAULT_BEARER), mStaticToken(token){
+        dwarning("*** Basic token auth will be deprecated soon, please migrate to using -grpc-use-jwt ***");
+    };
 
 absl::Status StaticTokenAuth::isTokenValid(grpc::string_ref url,
                                            grpc::string_ref token) {

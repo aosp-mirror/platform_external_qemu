@@ -95,6 +95,47 @@ protected:
     absl::StatusOr<tink::JwtValidator> mSampleValidator;
 };
 
+// Reads a file into a string.
+static std::string readFile(Path fname) {
+    std::ifstream fstream(fname);
+    std::string contents((std::istreambuf_iterator<char>(fstream)),
+                         std::istreambuf_iterator<char>());
+    fstream.close();
+    return contents;
+}
+
+TEST_F(JwkTokenAuthTest, writes_a_discovery_file) {
+    auto private_handle = writeEs512("valid.jwk");
+    auto sign = private_handle->GetPrimitive<tink::JwtPublicKeySign>();
+    auto token = (*sign)->SignAndEncode(*mSampleJwt);
+
+    auto discover_file = pj(mTempDir->path(), "loaded.jwk");
+    JwtTokenAuth jwt(mTempDir->path(), discover_file);
+
+    EXPECT_TRUE(base::System::get()->pathExists(discover_file));
+}
+
+
+TEST_F(JwkTokenAuthTest, discovery_file_contains_our_key) {
+    auto private_handle = writeEs512("valid.jwk");
+    auto sign = private_handle->GetPrimitive<tink::JwtPublicKeySign>();
+    auto token = (*sign)->SignAndEncode(*mSampleJwt);
+
+    auto discover_file = pj(mTempDir->path(), "loaded.jwk");
+    JwtTokenAuth jwt(mTempDir->path(), discover_file);
+
+    EXPECT_TRUE(base::System::get()->pathExists(discover_file));
+    auto discoverd_json = readFile(discover_file);
+    auto discovered_handle = crypto::tink::JwkSetToPublicKeysetHandle(discoverd_json);
+    auto public_handle = private_handle->GetPublicKeysetHandle();
+
+    EXPECT_TRUE(discovered_handle.ok()) << public_handle.status().message();
+    auto ours = crypto::tink::JwkSetFromPublicKeysetHandle(*public_handle->get());
+    auto loaded = crypto::tink::JwkSetFromPublicKeysetHandle(*discovered_handle->get());
+    EXPECT_EQ(json::parse(ours.ValueOrDie()), json::parse(loaded.ValueOrDie()));
+}
+
+
 TEST_F(JwkTokenAuthTest, create_and_validate) {
     auto private_handle = writeEs512("valid.jwk");
     auto sign = private_handle->GetPrimitive<tink::JwtPublicKeySign>();
@@ -149,12 +190,18 @@ TEST_F(JwkTokenAuthTest, deleted_jwks_is_rejected) {
     auto private_handle = writeEs512("valid.jwk");
     auto sign = private_handle->GetPrimitive<tink::JwtPublicKeySign>();
     auto token = (*sign)->SignAndEncode(*mSampleJwt);
+    auto discover_file = pj(mTempDir->path(), "loaded.jwk");
 
-    JwtTokenAuth jwt(mTempDir->path());
-    base::System::get()->deleteFile(pj(mTempDir->path(), "valid.jwk"));
+    JwtTokenAuth jwt(mTempDir->path(), discover_file);
+    EXPECT_TRUE(base::System::get()->deleteFile(pj(mTempDir->path(), "valid.jwk")));
 
-    // Sadly we need to allow some time for the detector to register the deleted key.
-    base::System::get()->sleepMs(50);
+    // We have to wait until the discovery file becomes empty, indicating that the emulator
+    // activated a new keyset.
+    auto json = readFile(discover_file);
+    for(int i = 0; json != "" && i < 10; i++) {
+        base::System::get()->sleepMs(100);
+        json = readFile(discover_file);
+    }
 
     EXPECT_FALSE(jwt.isTokenValid("c", *token).ok());
 }
