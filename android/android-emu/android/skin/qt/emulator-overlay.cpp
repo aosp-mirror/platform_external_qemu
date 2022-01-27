@@ -334,7 +334,7 @@ void EmulatorOverlay::showForMultitouch(bool centerTouches,
 void EmulatorOverlay::showForResize(int whichCorner) {
     QRect screenGeo;
 #if QT_VERSION >= 0x060000
-    auto newScreen = window()->windowHandle()->screen();
+    auto newScreen = window()->windowHandle() ? window()->windowHandle()->screen() : nullptr;
     if (!newScreen) {
         // No active screen!
         return;
