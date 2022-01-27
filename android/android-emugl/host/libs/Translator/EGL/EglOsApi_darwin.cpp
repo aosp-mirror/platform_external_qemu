@@ -20,9 +20,9 @@
 #include "android/base/containers/Lookup.h"
 
 #include "emugl/common/lazy_instance.h"
+#include "emugl/common/logging.h"
 #include "emugl/common/shared_library.h"
 #include "GLcommon/GLLibrary.h"
-#include "OpenglCodecCommon/ErrorLog.h"
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>

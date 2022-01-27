@@ -1,8 +1,10 @@
-// Copyright (c) 2014-2018 Khronos Group. This work is licensed under a
-// Creative Commons Attribution 4.0 International License; see
-// http://creativecommons.org/licenses/by/4.0/
+// Copyright 2014-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
-include::meta/VK_KHR_android_surface.txt[]
+include::{generated}/meta/{refprefix}VK_KHR_android_surface.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2016-01-14
@@ -26,36 +28,19 @@ include::meta/VK_KHR_android_surface.txt[]
   - Jeff Vigil, Qualcomm
   - Chia-I Wu, LunarG
 
+=== Description
+
 The `VK_KHR_android_surface` extension is an instance extension.
 It provides a mechanism to create a slink:VkSurfaceKHR object (defined by
-the `<<VK_KHR_surface>>` extension) that refers to an code:ANativeWindow,
-Android's native surface type.
-The code:ANativeWindow represents the producer endpoint of any buffer queue,
-regardless of consumer endpoint.
+the `apiext:VK_KHR_surface` extension) that refers to an
+basetype:ANativeWindow, Android's native surface type.
+The basetype:ANativeWindow represents the producer endpoint of any buffer
+queue, regardless of consumer endpoint.
 Common consumer endpoints for code:ANativeWindows are the system window
 compositor, video encoders, and application-specific compositors importing
 the images through a code:SurfaceTexture.
 
-=== New Object Types
-
-None
-
-=== New Enum Constants
-
-  * Extending elink:VkStructureType:
-  ** ename:VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR
-
-=== New Enums
-
-None
-
-=== New Structures
-
-  * slink:VkAndroidSurfaceCreateInfoKHR
-
-=== New Functions
-
-  * flink:vkCreateAndroidSurfaceKHR
+include::{generated}/interfaces/VK_KHR_android_surface.txt[]
 
 === Issues
 

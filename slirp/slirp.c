@@ -30,6 +30,7 @@
 #include "slirp.h"
 #include "hw/hw.h"
 #include "qemu/cutils.h"
+#include "dhcpv6.h"
 
 #ifndef _WIN32
 #include <net/if.h>
@@ -999,6 +1000,40 @@ void slirp_block_src_ethaddr(const uint8_t* ethaddr, bool enable) {
     }
 }
 
+/* Note: block internet access based on request.
+ * To assign IP address to the guest, ARP and DHCP
+ * packets are NOT blocked.
+*/
+bool should_block_packets(const uint8_t *pkt, int pkt_len) {
+    if (!enable_block_src_ethaddr)
+        return 0;
+    struct eth_header* eth_hdr = (struct eth_header*)pkt;
+    if (memcmp(eth_hdr->h_source, blocked_ethaddr, ETH_ALEN))
+        return 0;
+    int proto = ntohs(*(uint16_t *)(pkt + 12));
+    if (proto == ETH_P_IP) {
+        struct ip* ip = (struct ip*) (pkt + ETH_HLEN);
+        if (ip->ip_p == IPPROTO_UDP) {
+            size_t iphlen = sizeof(struct ip);
+            struct udphdr *uh = (struct udphdr *) (pkt + ETH_HLEN + iphlen);
+            if (ntohs(uh->uh_dport) == BOOTP_SERVER) {
+                return 0;
+            }
+        }
+    }
+    if (proto == ETH_P_IPV6) {
+        struct ip6* ip6 = (struct ip6*) (pkt + ETH_HLEN);
+        if (ip6->ip_nh == IPPROTO_UDP) {
+            size_t iphlen = sizeof(struct ip6);
+            struct udphdr *uh = (struct udphdr *) (pkt + ETH_HLEN + iphlen);
+            if (ntohs(uh->uh_dport) == DHCPV6_SERVER_PORT) {
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
+
 void slirp_input(Slirp *slirp, const uint8_t *pkt, int pkt_len)
 {
     struct mbuf *m;
@@ -1017,14 +1052,8 @@ void slirp_input(Slirp *slirp, const uint8_t *pkt, int pkt_len)
         m = m_get(slirp);
         if (!m)
             return;
-        /* Note: block internet access for destination ethernet address
-         * on request. ARP packets are NOT blocked.
-         */
-        if (enable_block_src_ethaddr) {
-            struct eth_header* eth_hdr = (struct eth_header*)pkt;
-            if (!memcmp(eth_hdr->h_source, blocked_ethaddr, ETH_ALEN)) {
-                return;
-            }
+        if (should_block_packets(pkt, pkt_len)) {
+            return;
         }
         /* Note: we add 2 to align the IP header on 4 bytes,
          * and add the margin for the tcpiphdr overhead  */

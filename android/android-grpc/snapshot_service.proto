@@ -143,6 +143,7 @@ message SnapshotPackage {
   enum Format {
     TARGZ = 0;
     TAR = 1;
+    DIRECTORY = 2;
   }
   // The identifier to the snapshot, only required for request messages. For
   // streaming service, only used in the first stream message of a gRPC call

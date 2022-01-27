@@ -40,15 +40,13 @@
 
 #define FAIL_IF(condition, description)                                    \
     if ((condition)) {                                                     \
-        VERBOSE_PRINT(gles, "%s:%s:%d error %s\n", __FILE__, __FUNCTION__, \
-                      __LINE__, description);                              \
+        VERBOSE_PRINT(gles, "error %s",  description);                     \
         return;                                                            \
     }
 
 #define RET_AND_FAIL_IF(condition, description, ret)                       \
     if ((condition)) {                                                     \
-        VERBOSE_PRINT(gles, "%s:%s:%d error %s\n", __FILE__, __FUNCTION__, \
-                      __LINE__, description);                              \
+        VERBOSE_PRINT(gles, "error %s", description);                      \
         return ret;                                                        \
     }
 

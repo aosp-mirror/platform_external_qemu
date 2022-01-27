@@ -51,16 +51,17 @@ EGLNativeWindowType createSubWindow(FBNativeWindowType p_window,
     NSRect contentRect = NSMakeRect(x, cocoa_y, width, height);
 
     NSView *glView = [[EmuGLView alloc] initWithFrame:contentRect];
-    if (glView) {
-        [glView setWantsBestResolutionOpenGLSurface:YES];
-        [[win contentView] addSubview:glView];
-        [win makeKeyAndOrderFront:nil];
-        if (hideWindow) {
-            [glView setHidden:YES];
-        }
+    if (!glView) {
+        return NULL;
     }
-
-    return (EGLNativeWindowType)glView;
+    [glView setWantsBestResolutionOpenGLSurface:YES];
+    [glView setWantsLayer:YES];
+    [[win contentView] addSubview:glView];
+    [win makeKeyAndOrderFront:nil];
+    if (hideWindow) {
+        [glView setHidden:YES];
+    }
+    return (EGLNativeWindowType)(glView);
 }
 
 void destroySubWindow(EGLNativeWindowType win) {

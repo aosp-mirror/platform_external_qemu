@@ -17,10 +17,10 @@
 #include "EglOsApi.h"
 
 #include "GLcommon/GLLibrary.h"
-#include "OpenglCodecCommon/ErrorLog.h"
 #include "ShaderCache.h"
 #include "android/base/system/System.h"
 #include "emugl/common/lazy_instance.h"
+#include "emugl/common/logging.h"
 #include "emugl/common/misc.h"
 #include "emugl/common/shared_library.h"
 
@@ -574,8 +574,12 @@ Surface* EglOsEglDisplay::createWindowSurface(PixelFormat* pf,
         surface_attribs.push_back(EGL_TRUE);
     }
     surface_attribs.push_back(EGL_NONE);
+#ifdef __APPLE__
+    win = nsGetLayer(win);
+#endif
     EGLSurface surface = mDispatcher.eglCreateWindowSurface(
-            mDisplay, ((EglOsEglPixelFormat*)pf)->mConfigId, win, surface_attribs.data());
+            mDisplay, ((EglOsEglPixelFormat*)pf)->mConfigId, win, surface_attribs.data()
+    );
     CHECK_EGL_ERR
     if (surface == EGL_NO_SURFACE) {
         D("create window surface failed\n");
@@ -630,8 +634,9 @@ void EglOsEglDisplay::swapBuffers(Surface* surface) {
 }
 
 bool EglOsEglDisplay::isValidNativeWin(Surface* win) {
-    if (!win)
+    if (!win) {
         return false;
+    }
     EglOsEglSurface* surface = (EglOsEglSurface*)win;
     return surface->type() == EglOsEglSurface::WINDOW &&
            isValidNativeWin(surface->getWin());

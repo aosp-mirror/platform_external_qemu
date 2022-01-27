@@ -23,6 +23,7 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/globals.h"
+#include "android/utils/GfxstreamFatalError.h"
 
 #include <memory>
 
@@ -349,7 +350,7 @@ public:
                 fillAllocFromLoad(mCombinedBlocks[alloc.blockIndex], alloc);
                 break;
             default:
-                abort();
+                GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER));
                 break;
         }
     }

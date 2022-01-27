@@ -411,7 +411,12 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
 
     if (config->use_host_vulkan) {
         system->envSet("ANDROID_EMU_VK_ICD", NULL);
-    } else if (sCurrentRenderer == SELECTED_RENDERER_SWIFTSHADER_INDIRECT) {
+    } else
+#ifndef __APPLE__
+    // Default to swiftshader vk on mac
+    if  (sCurrentRenderer == SELECTED_RENDERER_SWIFTSHADER_INDIRECT)
+#endif
+    {
         // Use Swiftshader vk icd if using swiftshader_indirect
         system->envSet("ANDROID_EMU_VK_ICD", "swiftshader");
     }

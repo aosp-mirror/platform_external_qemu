@@ -1,4 +1,10 @@
-include::meta/VK_EXT_queue_family_foreign.txt[]
+// Copyright 2017-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_EXT_queue_family_foreign.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2017-11-01
@@ -12,11 +18,13 @@ include::meta/VK_EXT_queue_family_foreign.txt[]
   - Daniel Rakos, AMD
   - Ray Smith, ARM
 
+=== Description
+
 This extension defines a special queue family,
 ename:VK_QUEUE_FAMILY_FOREIGN_EXT, which can be used to transfer ownership
 of resources backed by external memory to foreign, external queues.
 This is similar to ename:VK_QUEUE_FAMILY_EXTERNAL_KHR, defined in
-`<<VK_KHR_external_memory>>`.
+`apiext:VK_KHR_external_memory`.
 The key differences between the two are:
 
   * The queues represented by ename:VK_QUEUE_FAMILY_EXTERNAL_KHR must share
@@ -32,10 +40,7 @@ The key differences between the two are:
     ename:VK_QUEUE_FAMILY_FOREIGN_EXT to be more expensive than transitions
     to/from ename:VK_QUEUE_FAMILY_EXTERNAL_KHR.
 
-=== New Enum Constants
-
-  * Special constants:
-  ** ename:VK_QUEUE_FAMILY_FOREIGN_EXT
+include::{generated}/interfaces/VK_EXT_queue_family_foreign.txt[]
 
 === Version History
 

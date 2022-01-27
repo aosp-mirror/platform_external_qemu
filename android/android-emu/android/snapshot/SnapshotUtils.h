@@ -23,12 +23,15 @@ namespace control {
 enum FileFormat {
     TAR,
     TARGZ,
+    DIRECTORY,
 };
 
 // Exports a snapshot.
 // Args:
 //   snapshotName: snapshot ID.
-//   output: output streambuf, usually points to a file, or gRPC buffer.
+//   output: output streambuf, usually points to a file, or gRPC buffer. Only
+//           used if format is not DIRECTORY.
+//   outputDirectory: output directory used when format is DIRECTORY.
 //   selfContained: TODO(b/196863626) set to true to export a self-contained
 //                  snapshot which wraps up an SDK downloader and setup
 //                  script.
@@ -37,13 +40,16 @@ enum FileFormat {
 //   errConsumer: consumes error messages.
 bool pullSnapshot(const char* snapshotName,
                   std::streambuf* output,
+                  const char* outputDirectory,
                   bool selfContained,
                   FileFormat format,
+                  bool deleteSnapshotAfterPull,
                   void* opaque,
                   LineConsumerCallback errConsumer);
 
 bool pushSnapshot(const char* snapshotName,
                   std::istream* input,
+                  const char* inputDirectory,
                   FileFormat format,
                   void* opaque,
                   LineConsumerCallback errConsumer);

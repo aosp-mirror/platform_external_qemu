@@ -1,6 +1,6 @@
-// Copyright (c) 2015-2018 Khronos Group. This work is licensed under a
-// Creative Commons Attribution 4.0 International License; see
-// http://creativecommons.org/licenses/by/4.0/
+// Copyright 2015-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
 [appendix]
 [[appendix-vuid]]
@@ -8,11 +8,13 @@
 
 Valid usage statements in the published Vulkan Specification must all be
 given _Valid Usage ID_ or _VUID_ tags.
-These tags are asciidoc anchors, intended for use by the validation layer to
-provide unique names for each validation condition, and a way to link from
-validation layer reports into the corresponding parts of the Specification.
+These tags are asciidoctor anchors, intended for use by the validation layer
+to provide unique names for each validation condition, and a way to link
+from validation layer reports into the corresponding parts of the
+Specification.
 
 
+[[appendix-vuid-format]]
 == Format of VUID Tags
 
 For implicit valid usage statements, the tags are formatted like this:
@@ -51,7 +53,18 @@ portion of the tag is replaced by `-None-`
 _number_ is a unique five digit, zero-filled number used to disambiguate
 similar tag names.
 
+[NOTE]
+.Note
+====
+The _blockname_, _paramname_, and _category_ portions of a VUID tag name
+must each be composed only of the alphanumeric characters A-Z, a-z, and 0-9,
+and the ':' character.
+In general only the alphabetic subset of these characters is used, but there
+are a few exceptions.
+====
 
+
+[[appendix-vuid-creating]]
 == Creating VUID Tags
 
 For implicit valid usage statements generated automatically from `vk.xml`,
@@ -70,37 +83,38 @@ publishing updates.
 For reference purposes, this process is described below:
 
 First, after integrating all new specification language into the internal
-gitlab branch which contains the canonical Specification source, invoke the
-following command:
+gitlab default branch (currently `main`) which contains the canonical
+Specification source, invoke the following command:
 
 [source,sh]
 ----
 python3 reflow.py -overwrite -noflow -tagvu chapters/*.txt chapters/*/*.txt
 ----
 
-This will add VUID tags to all statements in valid usage blocks which don't
+This will add VUID tags to all statements in valid usage blocks which do not
 already have them.
 Some diagnostics will be reported, but these are do not in general require
 any action.
-After updating all files, the script will print out a final line like:
 
-[source,sh]
-----
-WARN:  You must now edit the value of reflow.py:startVUID to 1376 so that future runs will not overwrite existing VUID tags
-----
+After updating all files, the script will update the file
+`scripts/vuidCounts.py`, which contains reserved ranges of VUIDs for the
+default branch and certain other development branches.
 
-Second, after verifying the updates are correct using e.g. `git diff`, edit
-`reflow.py` and edit the definition of the variable startVUID as directed:
-
-[source,python]
-----
-# The value to start tagging VU statements at, unless overridden by -nextvu
-startVUID = 1376
-----
-
-Commit the updated source files and `reflow.py` together.
+Commit the updated source files and `vuidCounts.py` together.
 The next time the script is run, VUID tags will be assigned numbers starting
-from the current startVUID value.
+from the next free value in the range available to default branch.
+
+In-development Vulkan extensions are kept in their own branches, with the
+branch name the same as the name of the extension being developed.
+VUID tags may be assigned in these branches in the same fashion as in
+default branch.
+To enable this, each development branch must be assigned its own independent
+VUID range in the default branch copy of `vuidCounts.py`, to prevent
+collisions.
+In the event that default branch or any development branch exhausts the
+available VUID range, `reflow.py` will report this and stop assigning VUIDs.
+At that point, a new range must be assigned to the branch in the default
+branch copy of `vuidCounts.py`, as well as in the per-branch copy.
 
 
 == Updating VUID Tags When Valid Usage Statements Change
@@ -117,8 +131,10 @@ cases:
 
   * The changes are non-semantic, such as using consistent phrasing or
     markup.
-  * The changes consist of changing `KHX` to `KHR` suffixes when promoting a
-    Khronos-defined extension.
+  * The changes consist of removing or changing extension suffixes when
+    promoting an extension to `EXT`, `KHR`, or core status.
+  * The valid usage statement has not yet been implemented in the validation
+    layers.
 
 [NOTE]
 .Note

@@ -28,14 +28,15 @@ if(APPLE)
   set(ANDROID_XCODE_SIGN_ADHOC TRUE)
 endif()
 
-
 # Checks to make sure the TAG is valid.
 function(_check_target_tag TAG)
   set(VALID_TARGETS
       windows
       windows_msvc-x86_64
+      linux
       linux-x86_64
       linux-aarch64
+      darwin
       darwin-x86_64
       darwin-aarch64
       all
@@ -127,8 +128,7 @@ function(android_bluetooth_packet_gen)
 
   # Configure packet_gen
   android_compile_for_host(
-    bluetooth_packetgen
-    ${ANDROID_QEMU2_TOP_DIR}/android/bluetooth/packet_gen
+    bluetooth_packetgen ${ANDROID_QEMU2_TOP_DIR}/android/bluetooth/packet_gen
     bluetooth_packetgen_EXECUTABLE)
 
   set(BLUE_GEN "")
@@ -315,6 +315,7 @@ endfunction()
 # The following parameters are accepted
 #
 # ``TARGET`` The library target to generate.
+# ``FLAGS`` Additional flags to pass to nasm
 # ``INCLUDES`` Optional list of include paths to pass to nasm
 # ``SRC`` List of source files to be compiled.
 #
@@ -328,7 +329,7 @@ function(android_nasm_compile)
   # Parse arguments
   set(options)
   set(oneValueArgs TARGET)
-  set(multiValueArgs INCLUDES SRC)
+  set(multiValueArgs INCLUDES SRC FLAGS)
   cmake_parse_arguments(android_nasm_compile "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN})
 
@@ -354,11 +355,14 @@ function(android_nasm_compile)
     set(DST ${CMAKE_CURRENT_BINARY_DIR}/${asm_base}.o)
     add_custom_command(
       OUTPUT ${DST}
-      COMMAND ${NO_ASAN} ${nasm_EXECUTABLE} -f ${ANDROID_ASM_TYPE} -o ${DST}
-              ${asm} ${ASM_INC}
+      COMMAND ${NO_ASAN} ${nasm_EXECUTABLE} ${android_nasm_compile_FLAGS} -f
+              ${ANDROID_ASM_TYPE} -o ${DST} ${asm} ${ASM_INC}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       VERBATIM
-      DEPENDS ${nasm_EXECUTABLE} ${asm})
+      DEPENDS ${nasm_EXECUTABLE} ${asm}
+      COMMENT
+        "nasm  ${android_nasm_compile_FLAGS} -f ${ANDROID_ASM_TYPE} -o ${DST} ${asm} ${ASM_INC}"
+    )
     list(APPEND ${LIBNAME}_asm_o ${DST})
   endforeach()
 
@@ -472,7 +476,7 @@ endfunction()
 # ``TARGET``     The library/executable target. For example emulatory-libyuv
 # ``LIBNAME``    Public library name, this is how it is known in the world.
 #                 For example libyuv.
-# ``SOURCES``    List of source files to be compiled, part of every target.
+# ``SRC``    List of source files to be compiled, part of every target.
 # ``LINUX``      LINUX_X86_64 only sources.
 # ``DARWIN``     DARWIN_X86_64 only sources.
 # ``WINDOWS``    WINDOWS_MSVC_X86_64 only sources.
@@ -568,7 +572,6 @@ function(_register_target)
   endif()
 endfunction()
 
-
 # ~~~
 # Sign the given binary when using MacOS. This signs the binary
 # wtih the entitlements.plist, which is needed to get HVF access.
@@ -579,24 +582,25 @@ endfunction()
 # ``TARGET`   Sign the given target as a post build step.
 # ~~~
 function(android_sign)
-  if (NOT APPLE)
+  if(NOT APPLE)
     return()
   endif()
   set(options "")
   set(oneValueArgs INSTALL TARGET)
   set(multiValueArgs "")
-  cmake_parse_arguments(sign "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(sign "${options}" "${oneValueArgs}" "${multiValueArgs}"
+                        ${ARGN})
   if(sign_INSTALL)
     install(
       CODE "message(STATUS \"Signing   : ${sign_INSTALL}\")\nexecute_process(COMMAND codesign --deep -s - --entitlements ${ANDROID_QEMU2_TOP_DIR}/entitlements.plist ${sign_INSTALL})"
     )
   else()
-    # Code signing cannot be done when cross compiling, unless we port
-    # something like https://github.com/thefloweringash/sigtool
-    if (DARWIN_X86_64 AND CROSSCOMPILE)
+    # Code signing cannot be done when cross compiling, unless we port something
+    # like https://github.com/thefloweringash/sigtool
+    if(DARWIN_X86_64 AND CROSSCOMPILE)
       return()
     endif()
-    if (DARWIN_AARCH64 AND CROSSCOMPILE)
+    if(DARWIN_AARCH64 AND CROSSCOMPILE)
       return()
     endif()
     add_custom_command(
@@ -616,7 +620,7 @@ endfunction()
 # ``SHARED``  Option indicating that this is a shared library.
 # ``TARGET``  The library/executable target. For example emulatory-libyuv
 # ``LIBNAME`` Public library name, this is how it is known in the world. For example libyuv.
-# ``SOURCES`` List of source files to be compiled, part of every target.
+# ``SRC``     List of source files to be compiled, part of every target.
 # ``LINUX``   List of source files to be compiled if the current target is LINUX_X86_64
 # ``DARWIN``  List of source files to be compiled if the current target is DARWIN_X86_64
 # ``WINDOWS`` List of source files to be compiled if the current target is WINDOWS_MSVC_X86_64
@@ -866,27 +870,31 @@ endfunction()
 # Test targets are marked as NODISTRIBUTE and hence cannot be installed
 #
 # ``TARGET``  The library/executable target. For example emulatory-libyuv
-# ``SOURCES`` List of source files to be compiled, part of every target.
+# ``SRC``     List of source files to be compiled, part of every target.
+# ``SOURCE_DIR`` Root source directory. This will be prepended to every source file.
 # ``LINUX``   List of source files to be compiled if the current target is LINUX_X86_64
 # ``DARWIN``  List of source files to be compiled if the current target is DARWIN_X86_64
 # ``WINDOWS`` List of source files to be compiled if the current target is WINDOWS_MSVC_X86_64
-# ``MSVC``    List of source files to be compiled if the current target is  WINDOWS_MSVC_X86_64
+# ``TEST_PARAMS``  Additional parameters for the test executable
 # ~~~
 function(android_add_test)
-  android_add_executable(${ARGN} NODISTRIBUTE)
-
   set(options "")
-  set(oneValueArgs TARGET)
-  set(multiValueArgs "")
+  set(oneValueArgs TARGET SOURCE_DIR)
+  set(multiValueArgs TEST_PARAMS SRC LINUX DARWIN WINDOWS)
   cmake_parse_arguments(build "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN})
+
+  android_add_executable(
+    TARGET ${build_TARGET} SOURCE_DIR ${build_SOURCE_DIR} SRC ${build_SRC}
+    LINUX ${build_LINUX} DARWIN ${build_DARWIN} WINDOWS ${build_WINDOWS}
+    NODISTRIBUTE)
 
   add_test(
     NAME ${build_TARGET}
     COMMAND
       $<TARGET_FILE:${build_TARGET}>
       --gtest_output=xml:$<TARGET_FILE_NAME:${build_TARGET}>.xml
-      --gtest_catch_exceptions=0
+      --gtest_catch_exceptions=0 ${build_TEST_PARAMS}
     WORKING_DIRECTORY $<TARGET_FILE_DIR:${build_TARGET}>)
 
   android_install_as_debug_info(${build_TARGET})
@@ -919,7 +927,7 @@ endfunction()
 # ``INSTALL`` Location where this executable should be installed if needed.
 # ``TARGET``  The library/executable target. For example emulatory-libyuv
 # ``LIBNAME`` Public library name, this is how it is known in the world. For example libyuv.
-# ``SOURCES`` List of source files to be compiled, part of every target.
+# ``SRC``     List of source files to be compiled, part of every target.
 # ``LINUX``   List of source files to be compiled if the current target is LINUX_X86_64
 # ``DARWIN``  List of source files to be compiled if the current target is DARWIN_X86_64
 # ``WINDOWS`` List of source files to be compiled if the current target is WINDOWS_MSVC_X86_64
@@ -1435,16 +1443,16 @@ function(android_build_qemu_variant)
       "https://android.googlesource.com/platform/external/qemu/+/refs/heads/emu-master-dev"
     REPO "${ANDROID_QEMU2_TOP_DIR}"
     NOTICE "REPO/LICENSES/LICENSE.APACHE2"
-    SRC ${qemu-system-${QEMU_AARCH}_generated_sources}
-        ${qemu-system-${QEMU_AARCH}_sources} ${qemu_build_SOURCES}
-        # These are autogenerated.
-        ${ANDROID_AUTOGEN}/trace/generated-helpers-wrappers.h
+    SRC ${ANDROID_AUTOGEN}/trace/generated-helpers-wrappers.h
         ${ANDROID_AUTOGEN}/trace/generated-tcg-tracers.h
-        )
+        ${qemu-system-${QEMU_AARCH}_generated_sources}
+        ${qemu-system-${QEMU_AARCH}_sources}
+        ${qemu_build_SOURCES}
+        # These are autogenerated.
+  )
   target_include_directories(
     ${qemu_build_EXE} PRIVATE android-qemu2-glue/config/target-${CONFIG_AARCH}
-                              target/${CPU}
-                              ${ANDROID_AUTOGEN})
+                              target/${CPU} ${ANDROID_AUTOGEN})
   target_compile_definitions(${qemu_build_EXE}
                              PRIVATE ${qemu_build_DEFINITIONS})
   target_link_libraries(${qemu_build_EXE} PRIVATE ${QEMU_COMPLETE_LIB}
@@ -1634,7 +1642,8 @@ function(android_install_exe TGT DST)
   android_extract_symbols(${TGT})
   android_upload_symbols(${TGT})
   android_install_license(${TGT} ${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
-  android_sign(INSTALL ${CMAKE_INSTALL_PREFIX}/${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
+  android_sign(
+    INSTALL ${CMAKE_INSTALL_PREFIX}/${DST}/${TGT}${CMAKE_EXECUTABLE_SUFFIX})
 endfunction()
 
 # Installs the given shared library. The shared library will end up in ../lib64
@@ -1648,7 +1657,9 @@ function(android_install_shared TGT)
   android_upload_symbols(${TGT})
   android_install_license(${TGT} ${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
   # Account for lib prefix when signing
-  android_sign(INSTALL ${CMAKE_INSTALL_PREFIX}/lib64/lib${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
+  android_sign(
+    INSTALL
+      ${CMAKE_INSTALL_PREFIX}/lib64/lib${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
 endfunction()
 
 # Strips the given prebuilt executable during install..

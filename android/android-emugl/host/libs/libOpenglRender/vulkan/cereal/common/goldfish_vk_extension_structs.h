@@ -70,6 +70,12 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_KHR_sampler_mirror_clamp_to_edge
 #endif
+#ifdef VK_KHR_video_queue
+#endif
+#ifdef VK_KHR_video_decode_queue
+#endif
+#ifdef VK_KHR_dynamic_rendering
+#endif
 #ifdef VK_KHR_multiview
 #endif
 #ifdef VK_KHR_get_physical_device_properties2
@@ -184,6 +190,8 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_KHR_separate_depth_stencil_layouts
 #endif
+#ifdef VK_KHR_present_wait
+#endif
 #ifdef VK_KHR_uniform_buffer_standard_layout
 #endif
 #ifdef VK_KHR_buffer_device_address
@@ -192,11 +200,29 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_KHR_pipeline_executable_properties
 #endif
+#ifdef VK_KHR_shader_integer_dot_product
+#endif
 #ifdef VK_KHR_pipeline_library
 #endif
 #ifdef VK_KHR_shader_non_semantic_info
 #endif
+#ifdef VK_KHR_present_id
+#endif
+#ifdef VK_KHR_video_encode_queue
+#endif
+#ifdef VK_KHR_synchronization2
+#endif
+#ifdef VK_KHR_shader_subgroup_uniform_control_flow
+#endif
+#ifdef VK_KHR_zero_initialize_workgroup_memory
+#endif
+#ifdef VK_KHR_workgroup_memory_explicit_layout
+#endif
 #ifdef VK_KHR_copy_commands2
+#endif
+#ifdef VK_KHR_format_feature_flags2
+#endif
+#ifdef VK_KHR_maintenance4
 #endif
 #ifdef VK_ANDROID_native_buffer
 #endif
@@ -222,6 +248,8 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_EXT_transform_feedback
 #endif
+#ifdef VK_NVX_binary_import
+#endif
 #ifdef VK_NVX_image_view_handle
 #endif
 #ifdef VK_AMD_draw_indirect_count
@@ -231,6 +259,12 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #ifdef VK_AMD_gpu_shader_half_float
 #endif
 #ifdef VK_AMD_shader_ballot
+#endif
+#ifdef VK_EXT_video_encode_h264
+#endif
+#ifdef VK_EXT_video_encode_h265
+#endif
+#ifdef VK_EXT_video_decode_h264
 #endif
 #ifdef VK_AMD_texture_gather_bias_lod
 #endif
@@ -368,6 +402,8 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_AMD_shader_core_properties
 #endif
+#ifdef VK_EXT_video_decode_h265
+#endif
 #ifdef VK_AMD_memory_overallocation_behavior
 #endif
 #ifdef VK_EXT_vertex_attribute_divisor
@@ -440,6 +476,8 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_EXT_ycbcr_image_arrays
 #endif
+#ifdef VK_EXT_provoking_vertex
+#endif
 #ifdef VK_EXT_full_screen_exclusive
 #endif
 #ifdef VK_EXT_headless_surface
@@ -454,15 +492,21 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_EXT_extended_dynamic_state
 #endif
+#ifdef VK_EXT_shader_atomic_float2
+#endif
 #ifdef VK_EXT_shader_demote_to_helper_invocation
 #endif
 #ifdef VK_NV_device_generated_commands
+#endif
+#ifdef VK_NV_inherited_viewport_scissor
 #endif
 #ifdef VK_EXT_texel_buffer_alignment
 #endif
 #ifdef VK_QCOM_render_pass_transform
 #endif
 #ifdef VK_EXT_device_memory_report
+#endif
+#ifdef VK_EXT_acquire_drm_display
 #endif
 #ifdef VK_EXT_robustness2
 #endif
@@ -480,6 +524,10 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_NV_fragment_shading_rate_enums
 #endif
+#ifdef VK_NV_ray_tracing_motion_blur
+#endif
+#ifdef VK_EXT_ycbcr_2plane_444_formats
+#endif
 #ifdef VK_EXT_fragment_density_map2
 #endif
 #ifdef VK_QCOM_rotated_copy_commands
@@ -488,9 +536,49 @@ size_t goldfish_vk_extension_struct_size_with_stream_features(
 #endif
 #ifdef VK_EXT_4444_formats
 #endif
+#ifdef VK_EXT_rgba10x6_formats
+#endif
+#ifdef VK_NV_acquire_winrt_display
+#endif
 #ifdef VK_EXT_directfb_surface
 #endif
+#ifdef VK_VALVE_mutable_descriptor_type
+#endif
+#ifdef VK_EXT_vertex_input_dynamic_state
+#endif
+#ifdef VK_EXT_physical_device_drm
+#endif
+#ifdef VK_EXT_primitive_topology_list_restart
+#endif
+#ifdef VK_FUCHSIA_external_memory
+#endif
+#ifdef VK_FUCHSIA_external_semaphore
+#endif
+#ifdef VK_FUCHSIA_buffer_collection
+#endif
+#ifdef VK_HUAWEI_subpass_shading
+#endif
+#ifdef VK_HUAWEI_invocation_mask
+#endif
+#ifdef VK_NV_external_memory_rdma
+#endif
+#ifdef VK_EXT_extended_dynamic_state2
+#endif
+#ifdef VK_QNX_screen_surface
+#endif
+#ifdef VK_EXT_color_write_enable
+#endif
 #ifdef VK_GOOGLE_gfxstream
+#endif
+#ifdef VK_EXT_global_priority_query
+#endif
+#ifdef VK_EXT_multi_draw
+#endif
+#ifdef VK_EXT_load_store_op_none
+#endif
+#ifdef VK_EXT_border_color_swizzle
+#endif
+#ifdef VK_EXT_pageable_device_local_memory
 #endif
 #ifdef VK_KHR_acceleration_structure
 #endif

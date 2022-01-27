@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+#
+# Modified from the htmldiff script developed by Dominique Hazael-Massieux
+# for the http://services.w3.org/htmldiff website.
+# License information found at https://github.com/w3c/htmldiff-ui/blob/master/LICENSE
+# for "htmldiffy.py".
+#
+# Copyright (c) 2008-2020 w3c
+# Copyright (c) 2016-2021, The Khronos Group Inc.
+# SPDX-License-Identifier: MIT
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+import atexit
+import os
+import re
+import sys
+import tempfile
+import tidy
+
+from subprocess import Popen, PIPE
+
+def tidyFile(filename):
+    ifp = open(filename, 'r')
+
+    # option for tidy
+    options = dict(tidy_mark=0,show_warnings=0,quiet=1,char_encoding='utf8')
+    html5 = re.search(r"<!doctype\s+html\s*>", ifp.read(4096),
+                      re.IGNORECASE)
+    ifp.seek(0)
+    html5_options = {'add_xml_space': 'no',
+                     'output_xhtml': 'no',
+                     'tidy_mark': 'no',
+                     'new_blocklevel_tags': 'article,aside,canvas,dialog,details,figcaption,figure,footer,header,hgroup,menu,nav,section,main,summary,math,semantics,mrow,mfenced,mtable,mtr,mtd,mi,mn,msub,mo,mfrac,munderover,mtext,svg,g,image,rect,text,desc,line,path,polygon,ellipse,tspan,defs,feoffset,fecolormatrix,filter,fegaussianblur,feblend,marker,circle',
+                     'new_inline_tags': 'video,audio,canvas,ruby,rt,rp,time,meter,progress,track,source,emu-val,emu-nt,emu-t,mark',
+                     'break_before_br': 'no',
+                     'vertical_space': 'no',
+                     'enclose_text': 'no',
+                     'numeric_entities': 'yes',
+                     'wrap': '1000',
+                     'wrap_attributes': 'no',
+                     'drop_empty_paras': 'no'
+                     }
+    if html5:
+        options.update(html5_options)
+    newtidy = tidy.parseString(ifp.read(), **options)
+    if len(newtidy.errors) > 0:
+        if not html5:
+            ifp.seek(0)
+            options.update(html5_options)
+            newtidy = tidy.parseString(ifp.read(), **options)
+    ifp.close()
+
+    fp = tempfile.NamedTemporaryFile(
+           mode='w+', prefix='htmldiff-', suffix='.html')
+    atexit.register(fp.close)
+    fp.write(str(newtidy))
+    fp.flush()
+    fp.seek(0)
+
+    # sys.stderr.write('tidyFile: tempfile name %s\n' % fp.name)
+
+    if (newtidy.errors):
+        sys.stderr.write('tidyFile: tidy.parseString error: %s\n' % str(newtidy.errors))
+    return fp
+
+def call_perl(args):
+
+    scriptdir = os.path.abspath(os.path.dirname(sys.argv[0]))
+    perlscript = os.path.join(scriptdir, 'htmldiff.pl')
+    cmd = [perlscript]
+    cmd.extend(args)
+    p = Popen(cmd,
+              text=True,
+              stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    sys.stdout.flush()
+    sys.stderr.flush()
+    (out, err) = p.communicate()
+    p.stdin.close()
+    if err:
+        print(out)
+        sys.stderr.write('htmldiff: An error occurred when running htmldiff.pl on the documents: %s\n'% str(err))
+        exit(1)
+    else:
+        print(out)
+        exit(0)
+
+def usage():
+    # didn't investigate fully what -c does - something about mhtml comments?
+    sys.stderr.write("""htmldiff: need two filename args file1 file2
+
+May also pass arguments:
+    -l  Make diff highlights links that jump to the following diff
+    -t  Add a script to optionally hide old text via button
+    -o  Complete omit old text
+    -h  show this text
+""")
+    sys.exit(1)
+
+if __name__ == '__main__':
+
+    docs = []
+    passthru_args = []
+    for arg in sys.argv[1:]:
+        if arg in ('-c', '-l', '-t', '-o'):
+            passthru_args.append(arg)
+        elif arg == '-h':
+            usage()
+        else:
+            docs.append(arg)
+
+    if (len(docs) != 2):
+        usage()
+    refdoc = tidyFile(docs[0])
+
+    newdoc = tidyFile(docs[1])
+    passthru_args.append(refdoc.name)
+    passthru_args.append(newdoc.name)
+    call_perl(passthru_args)

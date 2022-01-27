@@ -86,8 +86,6 @@ public:
         }
         android_setOpenglesDisplayActiveConfig(mActiveConfigId);
         mTypeCount[mActiveConfigId]++;
-
-        registerMetrics();
     }
 
     void updateAndroidDisplayConfigPath(enum PresetEmulatorSizeType configId) {
@@ -149,6 +147,8 @@ public:
 
         // tablet setting
         updateAndroidDisplayConfigPath(configId);
+
+        registerMetrics();
     }
 
     bool shouldApplyLargeDisplaySetting(enum PresetEmulatorSizeType id) {
@@ -160,8 +160,12 @@ public:
     }
 
     void registerMetrics() {
+        if (mMetricsRegistered || !MetricsReporter::get().isReportingEnabled()) {
+            return;
+        }
         MetricsReporter::get().reportOnExit(
             [&](android_studio::AndroidStudioEvent* event) {
+              LOG(VERBOSE) << "Send resizable metrics";
               android_studio::EmulatorResizableDisplay metrics;
               metrics.set_display_phone_count(mTypeCount[PRESET_SIZE_PHONE]);
               metrics.set_display_foldable_count(mTypeCount[PRESET_SIZE_UNFOLDED]);
@@ -172,12 +176,14 @@ public:
                    ->CopyFrom(metrics);
             }
         );
+        mMetricsRegistered = true;
     }
 
 private:
     std::map<PresetEmulatorSizeType, PresetEmulatorSizeInfo> mConfigs;
     PresetEmulatorSizeType mActiveConfigId = PRESET_SIZE_MAX;
     std::map<PresetEmulatorSizeType, uint32_t> mTypeCount;
+    bool mMetricsRegistered = false;
 };
 
 static android::base::LazyInstance<ResizableConfig> sResizableConfig =

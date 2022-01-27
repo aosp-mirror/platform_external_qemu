@@ -128,8 +128,8 @@ android_add_library(TARGET OpenglRender_vulkan_cereal_dispatch LICENSE Apache-2.
 )
 target_compile_definitions(OpenglRender_vulkan_cereal_dispatch PRIVATE -DVK_ANDROID_native_buffer -DVK_GOOGLE_gfxstream)
 android_target_compile_definitions(OpenglRender_vulkan_cereal_dispatch windows PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
-android_target_compile_definitions(OpenglRender_vulkan_cereal_dispatch linux-x86_64 PRIVATE -DVK_USE_PLATFORM_XCB_KHR)
-android_target_compile_definitions(OpenglRender_vulkan_cereal_dispatch linux-aarch64 PRIVATE -DVK_USE_PLATFORM_XCB_KHR)
+android_target_compile_definitions(OpenglRender_vulkan_cereal_dispatch linux PRIVATE -DVK_USE_PLATFORM_XCB_KHR)
+android_target_compile_definitions(OpenglRender_vulkan_cereal_dispatch darwin PRIVATE -DVK_USE_PLATFORM_METAL_EXT)
 target_include_directories(OpenglRender_vulkan_cereal_dispatch
                            PUBLIC
                            ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/vulkan/cereal
@@ -372,6 +372,7 @@ class BumpPool;
 #include "android/base/BumpPool.h"
 #include "android/base/system/System.h"
 #include "android/base/Tracing.h"
+#include "android/utils/GfxstreamFatalError.h"
 
 #include "IOStream.h"
 #include "emugl/common/feature_control.h"

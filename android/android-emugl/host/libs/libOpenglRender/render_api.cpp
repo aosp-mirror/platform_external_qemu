@@ -16,7 +16,7 @@
 #include "OpenglRender/render_api.h"
 
 #include "emugl/common/OpenGLDispatchLoader.h"
-#include "ErrorLog.h"
+#include "emugl/common/logging.h"
 #include "OpenGLESDispatch/DispatchTables.h"
 #include "RenderLibImpl.h"
 

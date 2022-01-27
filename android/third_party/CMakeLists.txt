@@ -79,6 +79,21 @@ add_subdirectory(breakpad)
 add_subdirectory(boringssl)
 add_subdirectory(hostapd)
 
+if(DARWIN_X86_64 OR DARWIN_AARCH64)
+  find_program(MIG_EXE "mig")
+  if(NOT MIG_EXE)
+    message(
+      WARNING
+        "Crashpad requires gnu/mig, which we do not have for our cross compile toolchain. Dropping support"
+    )
+    set(DISABLE_CRASHPAD TRUE)
+  endif()
+endif()
+
+if(NOT DISABLE_CRASHPAD)
+  add_subdirectory(crashpad)
+endif()
+
 if(NOT OPTION_GFXSTREAM_BACKEND)
   add_subdirectory(modem-simulator)
 endif()
@@ -114,9 +129,8 @@ else()
   add_subdirectory(perfetto-tracing-only-stub)
 endif()
 
-
 add_subdirectory(mynewt-nimble)
-if (WEBRTC OR BLUETOOTH_EMULATION)
+if(WEBRTC OR BLUETOOTH_EMULATION)
   add_subdirectory(abseil-cpp)
 endif()
 

@@ -1,9 +1,18 @@
-include::meta/VK_AMD_shader_explicit_vertex_parameter.txt[]
+// Copyright (c) 2016-2020 Advanced Micro Devices, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_AMD_shader_explicit_vertex_parameter.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2016-05-10
 *IP Status*::
     No known IP claims.
+*Interactions and External Dependencies*::
+  - This extension requires
+    {spirv}/AMD/SPV_AMD_shader_explicit_vertex_parameter.html[`SPV_AMD_shader_explicit_vertex_parameter`]
 *Contributors*::
   - Matthaeus G. Chajdas, AMD
   - Qun Lin, AMD
@@ -11,18 +20,13 @@ include::meta/VK_AMD_shader_explicit_vertex_parameter.txt[]
   - Graham Sellers, AMD
   - Rex Xu, AMD
 
+=== Description
+
 This extension adds support for the following SPIR-V extension in Vulkan:
 
-  * https://www.khronos.org/registry/spir-v/extensions/AMD/SPV_AMD_shader_explicit_vertex_parameter.html[+SPV_AMD_shader_explicit_vertex_parameter+]
+  * {spirv}/AMD/SPV_AMD_shader_explicit_vertex_parameter.html[`SPV_AMD_shader_explicit_vertex_parameter`]
 
-ifdef::editing-notes[]
-[NOTE]
-.editing-note
-====
-Shouldn't the SPV extension be in the Interactions and External Dependencies
-block?
-====
-endif::editing-notes[]
+include::{generated}/interfaces/VK_AMD_shader_explicit_vertex_parameter.txt[]
 
 === Version History
 

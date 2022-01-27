@@ -120,6 +120,12 @@ void deepcopy_VkMemoryBarrier(
     const VkMemoryBarrier* from,
     VkMemoryBarrier* to);
 
+void deepcopy_VkPipelineCacheHeaderVersionOne(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPipelineCacheHeaderVersionOne* from,
+    VkPipelineCacheHeaderVersionOne* to);
+
 void deepcopy_VkAllocationCallbacks(
     Allocator* alloc,
     VkStructureType rootType,
@@ -920,7 +926,7 @@ void deepcopy_VkPhysicalDeviceVariablePointersFeatures(
     const VkPhysicalDeviceVariablePointersFeatures* from,
     VkPhysicalDeviceVariablePointersFeatures* to);
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceVariablePointersFeatures, deepcopy_VkPhysicalDeviceVariablePointerFeatures);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceVariablePointersFeatures, deepcopy_VkPhysicalDeviceVariablePointerFeatures)
 
 void deepcopy_VkPhysicalDeviceProtectedMemoryFeatures(
     Allocator* alloc,
@@ -1102,7 +1108,7 @@ void deepcopy_VkPhysicalDeviceShaderDrawParametersFeatures(
     const VkPhysicalDeviceShaderDrawParametersFeatures* from,
     VkPhysicalDeviceShaderDrawParametersFeatures* to);
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceShaderDrawParametersFeatures, deepcopy_VkPhysicalDeviceShaderDrawParameterFeatures);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceShaderDrawParametersFeatures, deepcopy_VkPhysicalDeviceShaderDrawParameterFeatures)
 
 #endif
 #ifdef VK_VERSION_1_2
@@ -1571,48 +1577,212 @@ void deepcopy_VkWin32SurfaceCreateInfoKHR(
 #endif
 #ifdef VK_KHR_sampler_mirror_clamp_to_edge
 #endif
+#ifdef VK_KHR_video_queue
+void deepcopy_VkVideoQueueFamilyProperties2KHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoQueueFamilyProperties2KHR* from,
+    VkVideoQueueFamilyProperties2KHR* to);
+
+void deepcopy_VkVideoProfileKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoProfileKHR* from,
+    VkVideoProfileKHR* to);
+
+void deepcopy_VkVideoProfilesKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoProfilesKHR* from,
+    VkVideoProfilesKHR* to);
+
+void deepcopy_VkVideoCapabilitiesKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoCapabilitiesKHR* from,
+    VkVideoCapabilitiesKHR* to);
+
+void deepcopy_VkPhysicalDeviceVideoFormatInfoKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceVideoFormatInfoKHR* from,
+    VkPhysicalDeviceVideoFormatInfoKHR* to);
+
+void deepcopy_VkVideoFormatPropertiesKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoFormatPropertiesKHR* from,
+    VkVideoFormatPropertiesKHR* to);
+
+void deepcopy_VkVideoPictureResourceKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoPictureResourceKHR* from,
+    VkVideoPictureResourceKHR* to);
+
+void deepcopy_VkVideoReferenceSlotKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoReferenceSlotKHR* from,
+    VkVideoReferenceSlotKHR* to);
+
+void deepcopy_VkVideoGetMemoryPropertiesKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoGetMemoryPropertiesKHR* from,
+    VkVideoGetMemoryPropertiesKHR* to);
+
+void deepcopy_VkVideoBindMemoryKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoBindMemoryKHR* from,
+    VkVideoBindMemoryKHR* to);
+
+void deepcopy_VkVideoSessionCreateInfoKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoSessionCreateInfoKHR* from,
+    VkVideoSessionCreateInfoKHR* to);
+
+void deepcopy_VkVideoSessionParametersCreateInfoKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoSessionParametersCreateInfoKHR* from,
+    VkVideoSessionParametersCreateInfoKHR* to);
+
+void deepcopy_VkVideoSessionParametersUpdateInfoKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoSessionParametersUpdateInfoKHR* from,
+    VkVideoSessionParametersUpdateInfoKHR* to);
+
+void deepcopy_VkVideoBeginCodingInfoKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoBeginCodingInfoKHR* from,
+    VkVideoBeginCodingInfoKHR* to);
+
+void deepcopy_VkVideoEndCodingInfoKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEndCodingInfoKHR* from,
+    VkVideoEndCodingInfoKHR* to);
+
+void deepcopy_VkVideoCodingControlInfoKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoCodingControlInfoKHR* from,
+    VkVideoCodingControlInfoKHR* to);
+
+#endif
+#ifdef VK_KHR_video_decode_queue
+void deepcopy_VkVideoDecodeInfoKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoDecodeInfoKHR* from,
+    VkVideoDecodeInfoKHR* to);
+
+#endif
+#ifdef VK_KHR_dynamic_rendering
+void deepcopy_VkRenderingAttachmentInfoKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkRenderingAttachmentInfoKHR* from,
+    VkRenderingAttachmentInfoKHR* to);
+
+void deepcopy_VkRenderingInfoKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkRenderingInfoKHR* from,
+    VkRenderingInfoKHR* to);
+
+void deepcopy_VkPipelineRenderingCreateInfoKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPipelineRenderingCreateInfoKHR* from,
+    VkPipelineRenderingCreateInfoKHR* to);
+
+void deepcopy_VkPhysicalDeviceDynamicRenderingFeaturesKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceDynamicRenderingFeaturesKHR* from,
+    VkPhysicalDeviceDynamicRenderingFeaturesKHR* to);
+
+void deepcopy_VkCommandBufferInheritanceRenderingInfoKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkCommandBufferInheritanceRenderingInfoKHR* from,
+    VkCommandBufferInheritanceRenderingInfoKHR* to);
+
+void deepcopy_VkRenderingFragmentShadingRateAttachmentInfoKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkRenderingFragmentShadingRateAttachmentInfoKHR* from,
+    VkRenderingFragmentShadingRateAttachmentInfoKHR* to);
+
+void deepcopy_VkRenderingFragmentDensityMapAttachmentInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkRenderingFragmentDensityMapAttachmentInfoEXT* from,
+    VkRenderingFragmentDensityMapAttachmentInfoEXT* to);
+
+void deepcopy_VkAttachmentSampleCountInfoAMD(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkAttachmentSampleCountInfoAMD* from,
+    VkAttachmentSampleCountInfoAMD* to);
+
+DEFINE_ALIAS_FUNCTION(deepcopy_VkAttachmentSampleCountInfoAMD, deepcopy_VkAttachmentSampleCountInfoNV)
+
+void deepcopy_VkMultiviewPerViewAttributesInfoNVX(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkMultiviewPerViewAttributesInfoNVX* from,
+    VkMultiviewPerViewAttributesInfoNVX* to);
+
+#endif
 #ifdef VK_KHR_multiview
-DEFINE_ALIAS_FUNCTION(deepcopy_VkRenderPassMultiviewCreateInfo, deepcopy_VkRenderPassMultiviewCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkRenderPassMultiviewCreateInfo, deepcopy_VkRenderPassMultiviewCreateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceMultiviewFeatures, deepcopy_VkPhysicalDeviceMultiviewFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceMultiviewFeatures, deepcopy_VkPhysicalDeviceMultiviewFeaturesKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceMultiviewProperties, deepcopy_VkPhysicalDeviceMultiviewPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceMultiviewProperties, deepcopy_VkPhysicalDeviceMultiviewPropertiesKHR)
 
 #endif
 #ifdef VK_KHR_get_physical_device_properties2
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceFeatures2, deepcopy_VkPhysicalDeviceFeatures2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceFeatures2, deepcopy_VkPhysicalDeviceFeatures2KHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceProperties2, deepcopy_VkPhysicalDeviceProperties2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceProperties2, deepcopy_VkPhysicalDeviceProperties2KHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkFormatProperties2, deepcopy_VkFormatProperties2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkFormatProperties2, deepcopy_VkFormatProperties2KHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkImageFormatProperties2, deepcopy_VkImageFormatProperties2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkImageFormatProperties2, deepcopy_VkImageFormatProperties2KHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceImageFormatInfo2, deepcopy_VkPhysicalDeviceImageFormatInfo2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceImageFormatInfo2, deepcopy_VkPhysicalDeviceImageFormatInfo2KHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkQueueFamilyProperties2, deepcopy_VkQueueFamilyProperties2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkQueueFamilyProperties2, deepcopy_VkQueueFamilyProperties2KHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceMemoryProperties2, deepcopy_VkPhysicalDeviceMemoryProperties2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceMemoryProperties2, deepcopy_VkPhysicalDeviceMemoryProperties2KHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkSparseImageFormatProperties2, deepcopy_VkSparseImageFormatProperties2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkSparseImageFormatProperties2, deepcopy_VkSparseImageFormatProperties2KHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceSparseImageFormatInfo2, deepcopy_VkPhysicalDeviceSparseImageFormatInfo2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceSparseImageFormatInfo2, deepcopy_VkPhysicalDeviceSparseImageFormatInfo2KHR)
 
 #endif
 #ifdef VK_KHR_device_group
-DEFINE_ALIAS_FUNCTION(deepcopy_VkMemoryAllocateFlagsInfo, deepcopy_VkMemoryAllocateFlagsInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkMemoryAllocateFlagsInfo, deepcopy_VkMemoryAllocateFlagsInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkDeviceGroupRenderPassBeginInfo, deepcopy_VkDeviceGroupRenderPassBeginInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkDeviceGroupRenderPassBeginInfo, deepcopy_VkDeviceGroupRenderPassBeginInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkDeviceGroupCommandBufferBeginInfo, deepcopy_VkDeviceGroupCommandBufferBeginInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkDeviceGroupCommandBufferBeginInfo, deepcopy_VkDeviceGroupCommandBufferBeginInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkDeviceGroupSubmitInfo, deepcopy_VkDeviceGroupSubmitInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkDeviceGroupSubmitInfo, deepcopy_VkDeviceGroupSubmitInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkDeviceGroupBindSparseInfo, deepcopy_VkDeviceGroupBindSparseInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkDeviceGroupBindSparseInfo, deepcopy_VkDeviceGroupBindSparseInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkBindBufferMemoryDeviceGroupInfo, deepcopy_VkBindBufferMemoryDeviceGroupInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkBindBufferMemoryDeviceGroupInfo, deepcopy_VkBindBufferMemoryDeviceGroupInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkBindImageMemoryDeviceGroupInfo, deepcopy_VkBindImageMemoryDeviceGroupInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkBindImageMemoryDeviceGroupInfo, deepcopy_VkBindImageMemoryDeviceGroupInfoKHR)
 
 #endif
 #ifdef VK_KHR_shader_draw_parameters
@@ -1620,31 +1790,31 @@ DEFINE_ALIAS_FUNCTION(deepcopy_VkBindImageMemoryDeviceGroupInfo, deepcopy_VkBind
 #ifdef VK_KHR_maintenance1
 #endif
 #ifdef VK_KHR_device_group_creation
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceGroupProperties, deepcopy_VkPhysicalDeviceGroupPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceGroupProperties, deepcopy_VkPhysicalDeviceGroupPropertiesKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkDeviceGroupDeviceCreateInfo, deepcopy_VkDeviceGroupDeviceCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkDeviceGroupDeviceCreateInfo, deepcopy_VkDeviceGroupDeviceCreateInfoKHR)
 
 #endif
 #ifdef VK_KHR_external_memory_capabilities
-DEFINE_ALIAS_FUNCTION(deepcopy_VkExternalMemoryProperties, deepcopy_VkExternalMemoryPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkExternalMemoryProperties, deepcopy_VkExternalMemoryPropertiesKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceExternalImageFormatInfo, deepcopy_VkPhysicalDeviceExternalImageFormatInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceExternalImageFormatInfo, deepcopy_VkPhysicalDeviceExternalImageFormatInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkExternalImageFormatProperties, deepcopy_VkExternalImageFormatPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkExternalImageFormatProperties, deepcopy_VkExternalImageFormatPropertiesKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceExternalBufferInfo, deepcopy_VkPhysicalDeviceExternalBufferInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceExternalBufferInfo, deepcopy_VkPhysicalDeviceExternalBufferInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkExternalBufferProperties, deepcopy_VkExternalBufferPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkExternalBufferProperties, deepcopy_VkExternalBufferPropertiesKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceIDProperties, deepcopy_VkPhysicalDeviceIDPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceIDProperties, deepcopy_VkPhysicalDeviceIDPropertiesKHR)
 
 #endif
 #ifdef VK_KHR_external_memory
-DEFINE_ALIAS_FUNCTION(deepcopy_VkExternalMemoryImageCreateInfo, deepcopy_VkExternalMemoryImageCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkExternalMemoryImageCreateInfo, deepcopy_VkExternalMemoryImageCreateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkExternalMemoryBufferCreateInfo, deepcopy_VkExternalMemoryBufferCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkExternalMemoryBufferCreateInfo, deepcopy_VkExternalMemoryBufferCreateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkExportMemoryAllocateInfo, deepcopy_VkExportMemoryAllocateInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkExportMemoryAllocateInfo, deepcopy_VkExportMemoryAllocateInfoKHR)
 
 #endif
 #ifdef VK_KHR_external_memory_win32
@@ -1702,13 +1872,13 @@ void deepcopy_VkWin32KeyedMutexAcquireReleaseInfoKHR(
 
 #endif
 #ifdef VK_KHR_external_semaphore_capabilities
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceExternalSemaphoreInfo, deepcopy_VkPhysicalDeviceExternalSemaphoreInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceExternalSemaphoreInfo, deepcopy_VkPhysicalDeviceExternalSemaphoreInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkExternalSemaphoreProperties, deepcopy_VkExternalSemaphorePropertiesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkExternalSemaphoreProperties, deepcopy_VkExternalSemaphorePropertiesKHR)
 
 #endif
 #ifdef VK_KHR_external_semaphore
-DEFINE_ALIAS_FUNCTION(deepcopy_VkExportSemaphoreCreateInfo, deepcopy_VkExportSemaphoreCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkExportSemaphoreCreateInfo, deepcopy_VkExportSemaphoreCreateInfoKHR)
 
 #endif
 #ifdef VK_KHR_external_semaphore_win32
@@ -1760,13 +1930,13 @@ void deepcopy_VkPhysicalDevicePushDescriptorPropertiesKHR(
 
 #endif
 #ifdef VK_KHR_shader_float16_int8
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceShaderFloat16Int8Features, deepcopy_VkPhysicalDeviceShaderFloat16Int8FeaturesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceShaderFloat16Int8Features, deepcopy_VkPhysicalDeviceShaderFloat16Int8FeaturesKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceShaderFloat16Int8Features, deepcopy_VkPhysicalDeviceFloat16Int8FeaturesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceShaderFloat16Int8Features, deepcopy_VkPhysicalDeviceFloat16Int8FeaturesKHR)
 
 #endif
 #ifdef VK_KHR_16bit_storage
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDevice16BitStorageFeatures, deepcopy_VkPhysicalDevice16BitStorageFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDevice16BitStorageFeatures, deepcopy_VkPhysicalDevice16BitStorageFeaturesKHR)
 
 #endif
 #ifdef VK_KHR_incremental_present
@@ -1790,35 +1960,35 @@ void deepcopy_VkPresentRegionsKHR(
 
 #endif
 #ifdef VK_KHR_descriptor_update_template
-DEFINE_ALIAS_FUNCTION(deepcopy_VkDescriptorUpdateTemplateEntry, deepcopy_VkDescriptorUpdateTemplateEntryKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkDescriptorUpdateTemplateEntry, deepcopy_VkDescriptorUpdateTemplateEntryKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkDescriptorUpdateTemplateCreateInfo, deepcopy_VkDescriptorUpdateTemplateCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkDescriptorUpdateTemplateCreateInfo, deepcopy_VkDescriptorUpdateTemplateCreateInfoKHR)
 
 #endif
 #ifdef VK_KHR_imageless_framebuffer
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceImagelessFramebufferFeatures, deepcopy_VkPhysicalDeviceImagelessFramebufferFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceImagelessFramebufferFeatures, deepcopy_VkPhysicalDeviceImagelessFramebufferFeaturesKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkFramebufferAttachmentsCreateInfo, deepcopy_VkFramebufferAttachmentsCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkFramebufferAttachmentsCreateInfo, deepcopy_VkFramebufferAttachmentsCreateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkFramebufferAttachmentImageInfo, deepcopy_VkFramebufferAttachmentImageInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkFramebufferAttachmentImageInfo, deepcopy_VkFramebufferAttachmentImageInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkRenderPassAttachmentBeginInfo, deepcopy_VkRenderPassAttachmentBeginInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkRenderPassAttachmentBeginInfo, deepcopy_VkRenderPassAttachmentBeginInfoKHR)
 
 #endif
 #ifdef VK_KHR_create_renderpass2
-DEFINE_ALIAS_FUNCTION(deepcopy_VkRenderPassCreateInfo2, deepcopy_VkRenderPassCreateInfo2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkRenderPassCreateInfo2, deepcopy_VkRenderPassCreateInfo2KHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkAttachmentDescription2, deepcopy_VkAttachmentDescription2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkAttachmentDescription2, deepcopy_VkAttachmentDescription2KHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkAttachmentReference2, deepcopy_VkAttachmentReference2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkAttachmentReference2, deepcopy_VkAttachmentReference2KHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkSubpassDescription2, deepcopy_VkSubpassDescription2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkSubpassDescription2, deepcopy_VkSubpassDescription2KHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkSubpassDependency2, deepcopy_VkSubpassDependency2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkSubpassDependency2, deepcopy_VkSubpassDependency2KHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkSubpassBeginInfo, deepcopy_VkSubpassBeginInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkSubpassBeginInfo, deepcopy_VkSubpassBeginInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkSubpassEndInfo, deepcopy_VkSubpassEndInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkSubpassEndInfo, deepcopy_VkSubpassEndInfoKHR)
 
 #endif
 #ifdef VK_KHR_shared_presentable_image
@@ -1830,13 +2000,13 @@ void deepcopy_VkSharedPresentSurfaceCapabilitiesKHR(
 
 #endif
 #ifdef VK_KHR_external_fence_capabilities
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceExternalFenceInfo, deepcopy_VkPhysicalDeviceExternalFenceInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceExternalFenceInfo, deepcopy_VkPhysicalDeviceExternalFenceInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkExternalFenceProperties, deepcopy_VkExternalFencePropertiesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkExternalFenceProperties, deepcopy_VkExternalFencePropertiesKHR)
 
 #endif
 #ifdef VK_KHR_external_fence
-DEFINE_ALIAS_FUNCTION(deepcopy_VkExportFenceCreateInfo, deepcopy_VkExportFenceCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkExportFenceCreateInfo, deepcopy_VkExportFenceCreateInfoKHR)
 
 #endif
 #ifdef VK_KHR_external_fence_win32
@@ -1924,15 +2094,15 @@ void deepcopy_VkPerformanceQuerySubmitInfoKHR(
 
 #endif
 #ifdef VK_KHR_maintenance2
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDevicePointClippingProperties, deepcopy_VkPhysicalDevicePointClippingPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDevicePointClippingProperties, deepcopy_VkPhysicalDevicePointClippingPropertiesKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkRenderPassInputAttachmentAspectCreateInfo, deepcopy_VkRenderPassInputAttachmentAspectCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkRenderPassInputAttachmentAspectCreateInfo, deepcopy_VkRenderPassInputAttachmentAspectCreateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkInputAttachmentAspectReference, deepcopy_VkInputAttachmentAspectReferenceKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkInputAttachmentAspectReference, deepcopy_VkInputAttachmentAspectReferenceKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkImageViewUsageCreateInfo, deepcopy_VkImageViewUsageCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkImageViewUsageCreateInfo, deepcopy_VkImageViewUsageCreateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPipelineTessellationDomainOriginStateCreateInfo, deepcopy_VkPipelineTessellationDomainOriginStateCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPipelineTessellationDomainOriginStateCreateInfo, deepcopy_VkPipelineTessellationDomainOriginStateCreateInfoKHR)
 
 #endif
 #ifdef VK_KHR_get_surface_capabilities2
@@ -1956,9 +2126,9 @@ void deepcopy_VkSurfaceFormat2KHR(
 
 #endif
 #ifdef VK_KHR_variable_pointers
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceVariablePointersFeatures, deepcopy_VkPhysicalDeviceVariablePointerFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceVariablePointersFeatures, deepcopy_VkPhysicalDeviceVariablePointerFeaturesKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceVariablePointersFeatures, deepcopy_VkPhysicalDeviceVariablePointersFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceVariablePointersFeatures, deepcopy_VkPhysicalDeviceVariablePointersFeaturesKHR)
 
 #endif
 #ifdef VK_KHR_get_display_properties2
@@ -1994,9 +2164,9 @@ void deepcopy_VkDisplayPlaneCapabilities2KHR(
 
 #endif
 #ifdef VK_KHR_dedicated_allocation
-DEFINE_ALIAS_FUNCTION(deepcopy_VkMemoryDedicatedRequirements, deepcopy_VkMemoryDedicatedRequirementsKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkMemoryDedicatedRequirements, deepcopy_VkMemoryDedicatedRequirementsKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkMemoryDedicatedAllocateInfo, deepcopy_VkMemoryDedicatedAllocateInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkMemoryDedicatedAllocateInfo, deepcopy_VkMemoryDedicatedAllocateInfoKHR)
 
 #endif
 #ifdef VK_KHR_storage_buffer_storage_class
@@ -2004,39 +2174,39 @@ DEFINE_ALIAS_FUNCTION(deepcopy_VkMemoryDedicatedAllocateInfo, deepcopy_VkMemoryD
 #ifdef VK_KHR_relaxed_block_layout
 #endif
 #ifdef VK_KHR_get_memory_requirements2
-DEFINE_ALIAS_FUNCTION(deepcopy_VkBufferMemoryRequirementsInfo2, deepcopy_VkBufferMemoryRequirementsInfo2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkBufferMemoryRequirementsInfo2, deepcopy_VkBufferMemoryRequirementsInfo2KHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkImageMemoryRequirementsInfo2, deepcopy_VkImageMemoryRequirementsInfo2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkImageMemoryRequirementsInfo2, deepcopy_VkImageMemoryRequirementsInfo2KHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkImageSparseMemoryRequirementsInfo2, deepcopy_VkImageSparseMemoryRequirementsInfo2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkImageSparseMemoryRequirementsInfo2, deepcopy_VkImageSparseMemoryRequirementsInfo2KHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkMemoryRequirements2, deepcopy_VkMemoryRequirements2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkMemoryRequirements2, deepcopy_VkMemoryRequirements2KHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkSparseImageMemoryRequirements2, deepcopy_VkSparseImageMemoryRequirements2KHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkSparseImageMemoryRequirements2, deepcopy_VkSparseImageMemoryRequirements2KHR)
 
 #endif
 #ifdef VK_KHR_image_format_list
-DEFINE_ALIAS_FUNCTION(deepcopy_VkImageFormatListCreateInfo, deepcopy_VkImageFormatListCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkImageFormatListCreateInfo, deepcopy_VkImageFormatListCreateInfoKHR)
 
 #endif
 #ifdef VK_KHR_sampler_ycbcr_conversion
-DEFINE_ALIAS_FUNCTION(deepcopy_VkSamplerYcbcrConversionCreateInfo, deepcopy_VkSamplerYcbcrConversionCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkSamplerYcbcrConversionCreateInfo, deepcopy_VkSamplerYcbcrConversionCreateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkSamplerYcbcrConversionInfo, deepcopy_VkSamplerYcbcrConversionInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkSamplerYcbcrConversionInfo, deepcopy_VkSamplerYcbcrConversionInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkBindImagePlaneMemoryInfo, deepcopy_VkBindImagePlaneMemoryInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkBindImagePlaneMemoryInfo, deepcopy_VkBindImagePlaneMemoryInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkImagePlaneMemoryRequirementsInfo, deepcopy_VkImagePlaneMemoryRequirementsInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkImagePlaneMemoryRequirementsInfo, deepcopy_VkImagePlaneMemoryRequirementsInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceSamplerYcbcrConversionFeatures, deepcopy_VkPhysicalDeviceSamplerYcbcrConversionFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceSamplerYcbcrConversionFeatures, deepcopy_VkPhysicalDeviceSamplerYcbcrConversionFeaturesKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkSamplerYcbcrConversionImageFormatProperties, deepcopy_VkSamplerYcbcrConversionImageFormatPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkSamplerYcbcrConversionImageFormatProperties, deepcopy_VkSamplerYcbcrConversionImageFormatPropertiesKHR)
 
 #endif
 #ifdef VK_KHR_bind_memory2
-DEFINE_ALIAS_FUNCTION(deepcopy_VkBindBufferMemoryInfo, deepcopy_VkBindBufferMemoryInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkBindBufferMemoryInfo, deepcopy_VkBindBufferMemoryInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkBindImageMemoryInfo, deepcopy_VkBindImageMemoryInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkBindImageMemoryInfo, deepcopy_VkBindImageMemoryInfoKHR)
 
 #endif
 #ifdef VK_KHR_portability_subset
@@ -2054,23 +2224,23 @@ void deepcopy_VkPhysicalDevicePortabilitySubsetPropertiesKHR(
 
 #endif
 #ifdef VK_KHR_maintenance3
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceMaintenance3Properties, deepcopy_VkPhysicalDeviceMaintenance3PropertiesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceMaintenance3Properties, deepcopy_VkPhysicalDeviceMaintenance3PropertiesKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkDescriptorSetLayoutSupport, deepcopy_VkDescriptorSetLayoutSupportKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkDescriptorSetLayoutSupport, deepcopy_VkDescriptorSetLayoutSupportKHR)
 
 #endif
 #ifdef VK_KHR_draw_indirect_count
 #endif
 #ifdef VK_KHR_shader_subgroup_extended_types
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures, deepcopy_VkPhysicalDeviceShaderSubgroupExtendedTypesFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures, deepcopy_VkPhysicalDeviceShaderSubgroupExtendedTypesFeaturesKHR)
 
 #endif
 #ifdef VK_KHR_8bit_storage
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDevice8BitStorageFeatures, deepcopy_VkPhysicalDevice8BitStorageFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDevice8BitStorageFeatures, deepcopy_VkPhysicalDevice8BitStorageFeaturesKHR)
 
 #endif
 #ifdef VK_KHR_shader_atomic_int64
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceShaderAtomicInt64Features, deepcopy_VkPhysicalDeviceShaderAtomicInt64FeaturesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceShaderAtomicInt64Features, deepcopy_VkPhysicalDeviceShaderAtomicInt64FeaturesKHR)
 
 #endif
 #ifdef VK_KHR_shader_clock
@@ -2082,39 +2252,39 @@ void deepcopy_VkPhysicalDeviceShaderClockFeaturesKHR(
 
 #endif
 #ifdef VK_KHR_driver_properties
-DEFINE_ALIAS_FUNCTION(deepcopy_VkConformanceVersion, deepcopy_VkConformanceVersionKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkConformanceVersion, deepcopy_VkConformanceVersionKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceDriverProperties, deepcopy_VkPhysicalDeviceDriverPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceDriverProperties, deepcopy_VkPhysicalDeviceDriverPropertiesKHR)
 
 #endif
 #ifdef VK_KHR_shader_float_controls
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceFloatControlsProperties, deepcopy_VkPhysicalDeviceFloatControlsPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceFloatControlsProperties, deepcopy_VkPhysicalDeviceFloatControlsPropertiesKHR)
 
 #endif
 #ifdef VK_KHR_depth_stencil_resolve
-DEFINE_ALIAS_FUNCTION(deepcopy_VkSubpassDescriptionDepthStencilResolve, deepcopy_VkSubpassDescriptionDepthStencilResolveKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkSubpassDescriptionDepthStencilResolve, deepcopy_VkSubpassDescriptionDepthStencilResolveKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceDepthStencilResolveProperties, deepcopy_VkPhysicalDeviceDepthStencilResolvePropertiesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceDepthStencilResolveProperties, deepcopy_VkPhysicalDeviceDepthStencilResolvePropertiesKHR)
 
 #endif
 #ifdef VK_KHR_swapchain_mutable_format
 #endif
 #ifdef VK_KHR_timeline_semaphore
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceTimelineSemaphoreFeatures, deepcopy_VkPhysicalDeviceTimelineSemaphoreFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceTimelineSemaphoreFeatures, deepcopy_VkPhysicalDeviceTimelineSemaphoreFeaturesKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceTimelineSemaphoreProperties, deepcopy_VkPhysicalDeviceTimelineSemaphorePropertiesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceTimelineSemaphoreProperties, deepcopy_VkPhysicalDeviceTimelineSemaphorePropertiesKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkSemaphoreTypeCreateInfo, deepcopy_VkSemaphoreTypeCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkSemaphoreTypeCreateInfo, deepcopy_VkSemaphoreTypeCreateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkTimelineSemaphoreSubmitInfo, deepcopy_VkTimelineSemaphoreSubmitInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkTimelineSemaphoreSubmitInfo, deepcopy_VkTimelineSemaphoreSubmitInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkSemaphoreWaitInfo, deepcopy_VkSemaphoreWaitInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkSemaphoreWaitInfo, deepcopy_VkSemaphoreWaitInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkSemaphoreSignalInfo, deepcopy_VkSemaphoreSignalInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkSemaphoreSignalInfo, deepcopy_VkSemaphoreSignalInfoKHR)
 
 #endif
 #ifdef VK_KHR_vulkan_memory_model
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceVulkanMemoryModelFeatures, deepcopy_VkPhysicalDeviceVulkanMemoryModelFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceVulkanMemoryModelFeatures, deepcopy_VkPhysicalDeviceVulkanMemoryModelFeaturesKHR)
 
 #endif
 #ifdef VK_KHR_shader_terminate_invocation
@@ -2168,27 +2338,35 @@ void deepcopy_VkSurfaceProtectedCapabilitiesKHR(
 
 #endif
 #ifdef VK_KHR_separate_depth_stencil_layouts
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures, deepcopy_VkPhysicalDeviceSeparateDepthStencilLayoutsFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures, deepcopy_VkPhysicalDeviceSeparateDepthStencilLayoutsFeaturesKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkAttachmentReferenceStencilLayout, deepcopy_VkAttachmentReferenceStencilLayoutKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkAttachmentReferenceStencilLayout, deepcopy_VkAttachmentReferenceStencilLayoutKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkAttachmentDescriptionStencilLayout, deepcopy_VkAttachmentDescriptionStencilLayoutKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkAttachmentDescriptionStencilLayout, deepcopy_VkAttachmentDescriptionStencilLayoutKHR)
+
+#endif
+#ifdef VK_KHR_present_wait
+void deepcopy_VkPhysicalDevicePresentWaitFeaturesKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDevicePresentWaitFeaturesKHR* from,
+    VkPhysicalDevicePresentWaitFeaturesKHR* to);
 
 #endif
 #ifdef VK_KHR_uniform_buffer_standard_layout
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceUniformBufferStandardLayoutFeatures, deepcopy_VkPhysicalDeviceUniformBufferStandardLayoutFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceUniformBufferStandardLayoutFeatures, deepcopy_VkPhysicalDeviceUniformBufferStandardLayoutFeaturesKHR)
 
 #endif
 #ifdef VK_KHR_buffer_device_address
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceBufferDeviceAddressFeatures, deepcopy_VkPhysicalDeviceBufferDeviceAddressFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceBufferDeviceAddressFeatures, deepcopy_VkPhysicalDeviceBufferDeviceAddressFeaturesKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkBufferDeviceAddressInfo, deepcopy_VkBufferDeviceAddressInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkBufferDeviceAddressInfo, deepcopy_VkBufferDeviceAddressInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkBufferOpaqueCaptureAddressCreateInfo, deepcopy_VkBufferOpaqueCaptureAddressCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkBufferOpaqueCaptureAddressCreateInfo, deepcopy_VkBufferOpaqueCaptureAddressCreateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkMemoryOpaqueCaptureAddressAllocateInfo, deepcopy_VkMemoryOpaqueCaptureAddressAllocateInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkMemoryOpaqueCaptureAddressAllocateInfo, deepcopy_VkMemoryOpaqueCaptureAddressAllocateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkDeviceMemoryOpaqueCaptureAddressInfo, deepcopy_VkDeviceMemoryOpaqueCaptureAddressInfoKHR);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkDeviceMemoryOpaqueCaptureAddressInfo, deepcopy_VkDeviceMemoryOpaqueCaptureAddressInfoKHR)
 
 #endif
 #ifdef VK_KHR_deferred_host_operations
@@ -2237,6 +2415,20 @@ void deepcopy_VkPipelineExecutableInternalRepresentationKHR(
     VkPipelineExecutableInternalRepresentationKHR* to);
 
 #endif
+#ifdef VK_KHR_shader_integer_dot_product
+void deepcopy_VkPhysicalDeviceShaderIntegerDotProductFeaturesKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceShaderIntegerDotProductFeaturesKHR* from,
+    VkPhysicalDeviceShaderIntegerDotProductFeaturesKHR* to);
+
+void deepcopy_VkPhysicalDeviceShaderIntegerDotProductPropertiesKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceShaderIntegerDotProductPropertiesKHR* from,
+    VkPhysicalDeviceShaderIntegerDotProductPropertiesKHR* to);
+
+#endif
 #ifdef VK_KHR_pipeline_library
 void deepcopy_VkPipelineLibraryCreateInfoKHR(
     Allocator* alloc,
@@ -2246,6 +2438,120 @@ void deepcopy_VkPipelineLibraryCreateInfoKHR(
 
 #endif
 #ifdef VK_KHR_shader_non_semantic_info
+#endif
+#ifdef VK_KHR_present_id
+void deepcopy_VkPresentIdKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPresentIdKHR* from,
+    VkPresentIdKHR* to);
+
+void deepcopy_VkPhysicalDevicePresentIdFeaturesKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDevicePresentIdFeaturesKHR* from,
+    VkPhysicalDevicePresentIdFeaturesKHR* to);
+
+#endif
+#ifdef VK_KHR_video_encode_queue
+void deepcopy_VkVideoEncodeInfoKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeInfoKHR* from,
+    VkVideoEncodeInfoKHR* to);
+
+void deepcopy_VkVideoEncodeRateControlInfoKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeRateControlInfoKHR* from,
+    VkVideoEncodeRateControlInfoKHR* to);
+
+#endif
+#ifdef VK_KHR_synchronization2
+void deepcopy_VkMemoryBarrier2KHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkMemoryBarrier2KHR* from,
+    VkMemoryBarrier2KHR* to);
+
+void deepcopy_VkBufferMemoryBarrier2KHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkBufferMemoryBarrier2KHR* from,
+    VkBufferMemoryBarrier2KHR* to);
+
+void deepcopy_VkImageMemoryBarrier2KHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkImageMemoryBarrier2KHR* from,
+    VkImageMemoryBarrier2KHR* to);
+
+void deepcopy_VkDependencyInfoKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkDependencyInfoKHR* from,
+    VkDependencyInfoKHR* to);
+
+void deepcopy_VkSemaphoreSubmitInfoKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkSemaphoreSubmitInfoKHR* from,
+    VkSemaphoreSubmitInfoKHR* to);
+
+void deepcopy_VkCommandBufferSubmitInfoKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkCommandBufferSubmitInfoKHR* from,
+    VkCommandBufferSubmitInfoKHR* to);
+
+void deepcopy_VkSubmitInfo2KHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkSubmitInfo2KHR* from,
+    VkSubmitInfo2KHR* to);
+
+void deepcopy_VkPhysicalDeviceSynchronization2FeaturesKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceSynchronization2FeaturesKHR* from,
+    VkPhysicalDeviceSynchronization2FeaturesKHR* to);
+
+void deepcopy_VkQueueFamilyCheckpointProperties2NV(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkQueueFamilyCheckpointProperties2NV* from,
+    VkQueueFamilyCheckpointProperties2NV* to);
+
+void deepcopy_VkCheckpointData2NV(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkCheckpointData2NV* from,
+    VkCheckpointData2NV* to);
+
+#endif
+#ifdef VK_KHR_shader_subgroup_uniform_control_flow
+void deepcopy_VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR* from,
+    VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR* to);
+
+#endif
+#ifdef VK_KHR_zero_initialize_workgroup_memory
+void deepcopy_VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR* from,
+    VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR* to);
+
+#endif
+#ifdef VK_KHR_workgroup_memory_explicit_layout
+void deepcopy_VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR* from,
+    VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR* to);
+
 #endif
 #ifdef VK_KHR_copy_commands2
 void deepcopy_VkBufferCopy2KHR(
@@ -2313,6 +2619,40 @@ void deepcopy_VkResolveImageInfo2KHR(
     VkStructureType rootType,
     const VkResolveImageInfo2KHR* from,
     VkResolveImageInfo2KHR* to);
+
+#endif
+#ifdef VK_KHR_format_feature_flags2
+void deepcopy_VkFormatProperties3KHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkFormatProperties3KHR* from,
+    VkFormatProperties3KHR* to);
+
+#endif
+#ifdef VK_KHR_maintenance4
+void deepcopy_VkPhysicalDeviceMaintenance4FeaturesKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceMaintenance4FeaturesKHR* from,
+    VkPhysicalDeviceMaintenance4FeaturesKHR* to);
+
+void deepcopy_VkPhysicalDeviceMaintenance4PropertiesKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceMaintenance4PropertiesKHR* from,
+    VkPhysicalDeviceMaintenance4PropertiesKHR* to);
+
+void deepcopy_VkDeviceBufferMemoryRequirementsKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkDeviceBufferMemoryRequirementsKHR* from,
+    VkDeviceBufferMemoryRequirementsKHR* to);
+
+void deepcopy_VkDeviceImageMemoryRequirementsKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkDeviceImageMemoryRequirementsKHR* from,
+    VkDeviceImageMemoryRequirementsKHR* to);
 
 #endif
 #ifdef VK_ANDROID_native_buffer
@@ -2411,6 +2751,26 @@ void deepcopy_VkPipelineRasterizationStateStreamCreateInfoEXT(
     VkPipelineRasterizationStateStreamCreateInfoEXT* to);
 
 #endif
+#ifdef VK_NVX_binary_import
+void deepcopy_VkCuModuleCreateInfoNVX(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkCuModuleCreateInfoNVX* from,
+    VkCuModuleCreateInfoNVX* to);
+
+void deepcopy_VkCuFunctionCreateInfoNVX(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkCuFunctionCreateInfoNVX* from,
+    VkCuFunctionCreateInfoNVX* to);
+
+void deepcopy_VkCuLaunchInfoNVX(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkCuLaunchInfoNVX* from,
+    VkCuLaunchInfoNVX* to);
+
+#endif
 #ifdef VK_NVX_image_view_handle
 void deepcopy_VkImageViewHandleInfoNVX(
     Allocator* alloc,
@@ -2432,6 +2792,174 @@ void deepcopy_VkImageViewAddressPropertiesNVX(
 #ifdef VK_AMD_gpu_shader_half_float
 #endif
 #ifdef VK_AMD_shader_ballot
+#endif
+#ifdef VK_EXT_video_encode_h264
+void deepcopy_VkVideoEncodeH264CapabilitiesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH264CapabilitiesEXT* from,
+    VkVideoEncodeH264CapabilitiesEXT* to);
+
+void deepcopy_VkVideoEncodeH264SessionCreateInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH264SessionCreateInfoEXT* from,
+    VkVideoEncodeH264SessionCreateInfoEXT* to);
+
+void deepcopy_VkVideoEncodeH264SessionParametersAddInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH264SessionParametersAddInfoEXT* from,
+    VkVideoEncodeH264SessionParametersAddInfoEXT* to);
+
+void deepcopy_VkVideoEncodeH264SessionParametersCreateInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH264SessionParametersCreateInfoEXT* from,
+    VkVideoEncodeH264SessionParametersCreateInfoEXT* to);
+
+void deepcopy_VkVideoEncodeH264DpbSlotInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH264DpbSlotInfoEXT* from,
+    VkVideoEncodeH264DpbSlotInfoEXT* to);
+
+void deepcopy_VkVideoEncodeH264NaluSliceEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH264NaluSliceEXT* from,
+    VkVideoEncodeH264NaluSliceEXT* to);
+
+void deepcopy_VkVideoEncodeH264VclFrameInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH264VclFrameInfoEXT* from,
+    VkVideoEncodeH264VclFrameInfoEXT* to);
+
+void deepcopy_VkVideoEncodeH264EmitPictureParametersEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH264EmitPictureParametersEXT* from,
+    VkVideoEncodeH264EmitPictureParametersEXT* to);
+
+void deepcopy_VkVideoEncodeH264ProfileEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH264ProfileEXT* from,
+    VkVideoEncodeH264ProfileEXT* to);
+
+#endif
+#ifdef VK_EXT_video_encode_h265
+void deepcopy_VkVideoEncodeH265CapabilitiesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH265CapabilitiesEXT* from,
+    VkVideoEncodeH265CapabilitiesEXT* to);
+
+void deepcopy_VkVideoEncodeH265SessionCreateInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH265SessionCreateInfoEXT* from,
+    VkVideoEncodeH265SessionCreateInfoEXT* to);
+
+void deepcopy_VkVideoEncodeH265SessionParametersAddInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH265SessionParametersAddInfoEXT* from,
+    VkVideoEncodeH265SessionParametersAddInfoEXT* to);
+
+void deepcopy_VkVideoEncodeH265SessionParametersCreateInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH265SessionParametersCreateInfoEXT* from,
+    VkVideoEncodeH265SessionParametersCreateInfoEXT* to);
+
+void deepcopy_VkVideoEncodeH265DpbSlotInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH265DpbSlotInfoEXT* from,
+    VkVideoEncodeH265DpbSlotInfoEXT* to);
+
+void deepcopy_VkVideoEncodeH265ReferenceListsEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH265ReferenceListsEXT* from,
+    VkVideoEncodeH265ReferenceListsEXT* to);
+
+void deepcopy_VkVideoEncodeH265NaluSliceEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH265NaluSliceEXT* from,
+    VkVideoEncodeH265NaluSliceEXT* to);
+
+void deepcopy_VkVideoEncodeH265VclFrameInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH265VclFrameInfoEXT* from,
+    VkVideoEncodeH265VclFrameInfoEXT* to);
+
+void deepcopy_VkVideoEncodeH265EmitPictureParametersEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH265EmitPictureParametersEXT* from,
+    VkVideoEncodeH265EmitPictureParametersEXT* to);
+
+void deepcopy_VkVideoEncodeH265ProfileEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoEncodeH265ProfileEXT* from,
+    VkVideoEncodeH265ProfileEXT* to);
+
+#endif
+#ifdef VK_EXT_video_decode_h264
+void deepcopy_VkVideoDecodeH264ProfileEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoDecodeH264ProfileEXT* from,
+    VkVideoDecodeH264ProfileEXT* to);
+
+void deepcopy_VkVideoDecodeH264CapabilitiesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoDecodeH264CapabilitiesEXT* from,
+    VkVideoDecodeH264CapabilitiesEXT* to);
+
+void deepcopy_VkVideoDecodeH264SessionCreateInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoDecodeH264SessionCreateInfoEXT* from,
+    VkVideoDecodeH264SessionCreateInfoEXT* to);
+
+void deepcopy_VkVideoDecodeH264SessionParametersAddInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoDecodeH264SessionParametersAddInfoEXT* from,
+    VkVideoDecodeH264SessionParametersAddInfoEXT* to);
+
+void deepcopy_VkVideoDecodeH264SessionParametersCreateInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoDecodeH264SessionParametersCreateInfoEXT* from,
+    VkVideoDecodeH264SessionParametersCreateInfoEXT* to);
+
+void deepcopy_VkVideoDecodeH264PictureInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoDecodeH264PictureInfoEXT* from,
+    VkVideoDecodeH264PictureInfoEXT* to);
+
+void deepcopy_VkVideoDecodeH264MvcEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoDecodeH264MvcEXT* from,
+    VkVideoDecodeH264MvcEXT* to);
+
+void deepcopy_VkVideoDecodeH264DpbSlotInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoDecodeH264DpbSlotInfoEXT* from,
+    VkVideoDecodeH264DpbSlotInfoEXT* to);
+
 #endif
 #ifdef VK_AMD_texture_gather_bias_lod
 void deepcopy_VkTextureLODGatherFormatPropertiesAMD(
@@ -2836,11 +3364,17 @@ void deepcopy_VkExternalFormatANDROID(
     const VkExternalFormatANDROID* from,
     VkExternalFormatANDROID* to);
 
+void deepcopy_VkAndroidHardwareBufferFormatProperties2ANDROID(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkAndroidHardwareBufferFormatProperties2ANDROID* from,
+    VkAndroidHardwareBufferFormatProperties2ANDROID* to);
+
 #endif
 #ifdef VK_EXT_sampler_filter_minmax
-DEFINE_ALIAS_FUNCTION(deepcopy_VkSamplerReductionModeCreateInfo, deepcopy_VkSamplerReductionModeCreateInfoEXT);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkSamplerReductionModeCreateInfo, deepcopy_VkSamplerReductionModeCreateInfoEXT)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceSamplerFilterMinmaxProperties, deepcopy_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceSamplerFilterMinmaxProperties, deepcopy_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT)
 
 #endif
 #ifdef VK_AMD_gpu_shader_int16
@@ -3018,6 +3552,18 @@ void deepcopy_VkImageDrmFormatModifierPropertiesEXT(
     const VkImageDrmFormatModifierPropertiesEXT* from,
     VkImageDrmFormatModifierPropertiesEXT* to);
 
+void deepcopy_VkDrmFormatModifierProperties2EXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkDrmFormatModifierProperties2EXT* from,
+    VkDrmFormatModifierProperties2EXT* to);
+
+void deepcopy_VkDrmFormatModifierPropertiesList2EXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkDrmFormatModifierPropertiesList2EXT* from,
+    VkDrmFormatModifierPropertiesList2EXT* to);
+
 #endif
 #ifdef VK_EXT_validation_cache
 void deepcopy_VkValidationCacheCreateInfoEXT(
@@ -3034,15 +3580,15 @@ void deepcopy_VkShaderModuleValidationCacheCreateInfoEXT(
 
 #endif
 #ifdef VK_EXT_descriptor_indexing
-DEFINE_ALIAS_FUNCTION(deepcopy_VkDescriptorSetLayoutBindingFlagsCreateInfo, deepcopy_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkDescriptorSetLayoutBindingFlagsCreateInfo, deepcopy_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceDescriptorIndexingFeatures, deepcopy_VkPhysicalDeviceDescriptorIndexingFeaturesEXT);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceDescriptorIndexingFeatures, deepcopy_VkPhysicalDeviceDescriptorIndexingFeaturesEXT)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceDescriptorIndexingProperties, deepcopy_VkPhysicalDeviceDescriptorIndexingPropertiesEXT);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceDescriptorIndexingProperties, deepcopy_VkPhysicalDeviceDescriptorIndexingPropertiesEXT)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkDescriptorSetVariableDescriptorCountAllocateInfo, deepcopy_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkDescriptorSetVariableDescriptorCountAllocateInfo, deepcopy_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkDescriptorSetVariableDescriptorCountLayoutSupport, deepcopy_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkDescriptorSetVariableDescriptorCountLayoutSupport, deepcopy_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT)
 
 #endif
 #ifdef VK_EXT_shader_viewport_index_layer
@@ -3170,7 +3716,7 @@ void deepcopy_VkTransformMatrixKHR(
     const VkTransformMatrixKHR* from,
     VkTransformMatrixKHR* to);
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkTransformMatrixKHR, deepcopy_VkTransformMatrixNV);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkTransformMatrixKHR, deepcopy_VkTransformMatrixNV)
 
 void deepcopy_VkAabbPositionsKHR(
     Allocator* alloc,
@@ -3178,7 +3724,7 @@ void deepcopy_VkAabbPositionsKHR(
     const VkAabbPositionsKHR* from,
     VkAabbPositionsKHR* to);
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkAabbPositionsKHR, deepcopy_VkAabbPositionsNV);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkAabbPositionsKHR, deepcopy_VkAabbPositionsNV)
 
 void deepcopy_VkAccelerationStructureInstanceKHR(
     Allocator* alloc,
@@ -3186,7 +3732,7 @@ void deepcopy_VkAccelerationStructureInstanceKHR(
     const VkAccelerationStructureInstanceKHR* from,
     VkAccelerationStructureInstanceKHR* to);
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkAccelerationStructureInstanceKHR, deepcopy_VkAccelerationStructureInstanceNV);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkAccelerationStructureInstanceKHR, deepcopy_VkAccelerationStructureInstanceNV)
 
 #endif
 #ifdef VK_NV_representative_fragment_test
@@ -3271,6 +3817,50 @@ void deepcopy_VkPhysicalDeviceShaderCorePropertiesAMD(
     VkStructureType rootType,
     const VkPhysicalDeviceShaderCorePropertiesAMD* from,
     VkPhysicalDeviceShaderCorePropertiesAMD* to);
+
+#endif
+#ifdef VK_EXT_video_decode_h265
+void deepcopy_VkVideoDecodeH265ProfileEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoDecodeH265ProfileEXT* from,
+    VkVideoDecodeH265ProfileEXT* to);
+
+void deepcopy_VkVideoDecodeH265CapabilitiesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoDecodeH265CapabilitiesEXT* from,
+    VkVideoDecodeH265CapabilitiesEXT* to);
+
+void deepcopy_VkVideoDecodeH265SessionCreateInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoDecodeH265SessionCreateInfoEXT* from,
+    VkVideoDecodeH265SessionCreateInfoEXT* to);
+
+void deepcopy_VkVideoDecodeH265SessionParametersAddInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoDecodeH265SessionParametersAddInfoEXT* from,
+    VkVideoDecodeH265SessionParametersAddInfoEXT* to);
+
+void deepcopy_VkVideoDecodeH265SessionParametersCreateInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoDecodeH265SessionParametersCreateInfoEXT* from,
+    VkVideoDecodeH265SessionParametersCreateInfoEXT* to);
+
+void deepcopy_VkVideoDecodeH265PictureInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoDecodeH265PictureInfoEXT* from,
+    VkVideoDecodeH265PictureInfoEXT* to);
+
+void deepcopy_VkVideoDecodeH265DpbSlotInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVideoDecodeH265DpbSlotInfoEXT* from,
+    VkVideoDecodeH265DpbSlotInfoEXT* to);
 
 #endif
 #ifdef VK_AMD_memory_overallocation_behavior
@@ -3436,7 +4026,7 @@ void deepcopy_VkQueryPoolPerformanceQueryCreateInfoINTEL(
     const VkQueryPoolPerformanceQueryCreateInfoINTEL* from,
     VkQueryPoolPerformanceQueryCreateInfoINTEL* to);
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkQueryPoolPerformanceQueryCreateInfoINTEL, deepcopy_VkQueryPoolCreateInfoINTEL);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkQueryPoolPerformanceQueryCreateInfoINTEL, deepcopy_VkQueryPoolCreateInfoINTEL)
 
 void deepcopy_VkPerformanceMarkerInfoINTEL(
     Allocator* alloc,
@@ -3522,7 +4112,7 @@ void deepcopy_VkRenderPassFragmentDensityMapCreateInfoEXT(
 
 #endif
 #ifdef VK_EXT_scalar_block_layout
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceScalarBlockLayoutFeatures, deepcopy_VkPhysicalDeviceScalarBlockLayoutFeaturesEXT);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceScalarBlockLayoutFeatures, deepcopy_VkPhysicalDeviceScalarBlockLayoutFeaturesEXT)
 
 #endif
 #ifdef VK_GOOGLE_hlsl_functionality1
@@ -3610,9 +4200,9 @@ void deepcopy_VkPhysicalDeviceBufferDeviceAddressFeaturesEXT(
     const VkPhysicalDeviceBufferDeviceAddressFeaturesEXT* from,
     VkPhysicalDeviceBufferDeviceAddressFeaturesEXT* to);
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceBufferDeviceAddressFeaturesEXT, deepcopy_VkPhysicalDeviceBufferAddressFeaturesEXT);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceBufferDeviceAddressFeaturesEXT, deepcopy_VkPhysicalDeviceBufferAddressFeaturesEXT)
 
-DEFINE_ALIAS_FUNCTION(deepcopy_VkBufferDeviceAddressInfo, deepcopy_VkBufferDeviceAddressInfoEXT);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkBufferDeviceAddressInfo, deepcopy_VkBufferDeviceAddressInfoEXT)
 
 void deepcopy_VkBufferDeviceAddressCreateInfoEXT(
     Allocator* alloc,
@@ -3630,7 +4220,7 @@ void deepcopy_VkPhysicalDeviceToolPropertiesEXT(
 
 #endif
 #ifdef VK_EXT_separate_stencil_usage
-DEFINE_ALIAS_FUNCTION(deepcopy_VkImageStencilUsageCreateInfo, deepcopy_VkImageStencilUsageCreateInfoEXT);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkImageStencilUsageCreateInfo, deepcopy_VkImageStencilUsageCreateInfoEXT)
 
 #endif
 #ifdef VK_EXT_validation_features
@@ -3697,6 +4287,26 @@ void deepcopy_VkPhysicalDeviceYcbcrImageArraysFeaturesEXT(
     VkPhysicalDeviceYcbcrImageArraysFeaturesEXT* to);
 
 #endif
+#ifdef VK_EXT_provoking_vertex
+void deepcopy_VkPhysicalDeviceProvokingVertexFeaturesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceProvokingVertexFeaturesEXT* from,
+    VkPhysicalDeviceProvokingVertexFeaturesEXT* to);
+
+void deepcopy_VkPhysicalDeviceProvokingVertexPropertiesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceProvokingVertexPropertiesEXT* from,
+    VkPhysicalDeviceProvokingVertexPropertiesEXT* to);
+
+void deepcopy_VkPipelineRasterizationProvokingVertexStateCreateInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPipelineRasterizationProvokingVertexStateCreateInfoEXT* from,
+    VkPipelineRasterizationProvokingVertexStateCreateInfoEXT* to);
+
+#endif
 #ifdef VK_EXT_full_screen_exclusive
 void deepcopy_VkSurfaceFullScreenExclusiveInfoEXT(
     Allocator* alloc,
@@ -3754,7 +4364,7 @@ void deepcopy_VkPhysicalDeviceShaderAtomicFloatFeaturesEXT(
 
 #endif
 #ifdef VK_EXT_host_query_reset
-DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceHostQueryResetFeatures, deepcopy_VkPhysicalDeviceHostQueryResetFeaturesEXT);
+DEFINE_ALIAS_FUNCTION(deepcopy_VkPhysicalDeviceHostQueryResetFeatures, deepcopy_VkPhysicalDeviceHostQueryResetFeaturesEXT)
 
 #endif
 #ifdef VK_EXT_index_type_uint8
@@ -3771,6 +4381,14 @@ void deepcopy_VkPhysicalDeviceExtendedDynamicStateFeaturesEXT(
     VkStructureType rootType,
     const VkPhysicalDeviceExtendedDynamicStateFeaturesEXT* from,
     VkPhysicalDeviceExtendedDynamicStateFeaturesEXT* to);
+
+#endif
+#ifdef VK_EXT_shader_atomic_float2
+void deepcopy_VkPhysicalDeviceShaderAtomicFloat2FeaturesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceShaderAtomicFloat2FeaturesEXT* from,
+    VkPhysicalDeviceShaderAtomicFloat2FeaturesEXT* to);
 
 #endif
 #ifdef VK_EXT_shader_demote_to_helper_invocation
@@ -3861,6 +4479,20 @@ void deepcopy_VkGeneratedCommandsMemoryRequirementsInfoNV(
     VkGeneratedCommandsMemoryRequirementsInfoNV* to);
 
 #endif
+#ifdef VK_NV_inherited_viewport_scissor
+void deepcopy_VkPhysicalDeviceInheritedViewportScissorFeaturesNV(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceInheritedViewportScissorFeaturesNV* from,
+    VkPhysicalDeviceInheritedViewportScissorFeaturesNV* to);
+
+void deepcopy_VkCommandBufferInheritanceViewportScissorInfoNV(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkCommandBufferInheritanceViewportScissorInfoNV* from,
+    VkCommandBufferInheritanceViewportScissorInfoNV* to);
+
+#endif
 #ifdef VK_EXT_texel_buffer_alignment
 void deepcopy_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT(
     Allocator* alloc,
@@ -3908,6 +4540,8 @@ void deepcopy_VkDeviceDeviceMemoryReportCreateInfoEXT(
     const VkDeviceDeviceMemoryReportCreateInfoEXT* from,
     VkDeviceDeviceMemoryReportCreateInfoEXT* to);
 
+#endif
+#ifdef VK_EXT_acquire_drm_display
 #endif
 #ifdef VK_EXT_robustness2
 void deepcopy_VkPhysicalDeviceRobustness2FeaturesEXT(
@@ -4009,6 +4643,70 @@ void deepcopy_VkPipelineFragmentShadingRateEnumStateCreateInfoNV(
     VkPipelineFragmentShadingRateEnumStateCreateInfoNV* to);
 
 #endif
+#ifdef VK_NV_ray_tracing_motion_blur
+void deepcopy_VkDeviceOrHostAddressConstKHR(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkDeviceOrHostAddressConstKHR* from,
+    VkDeviceOrHostAddressConstKHR* to);
+
+void deepcopy_VkAccelerationStructureGeometryMotionTrianglesDataNV(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkAccelerationStructureGeometryMotionTrianglesDataNV* from,
+    VkAccelerationStructureGeometryMotionTrianglesDataNV* to);
+
+void deepcopy_VkAccelerationStructureMotionInfoNV(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkAccelerationStructureMotionInfoNV* from,
+    VkAccelerationStructureMotionInfoNV* to);
+
+void deepcopy_VkAccelerationStructureMatrixMotionInstanceNV(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkAccelerationStructureMatrixMotionInstanceNV* from,
+    VkAccelerationStructureMatrixMotionInstanceNV* to);
+
+void deepcopy_VkSRTDataNV(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkSRTDataNV* from,
+    VkSRTDataNV* to);
+
+void deepcopy_VkAccelerationStructureSRTMotionInstanceNV(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkAccelerationStructureSRTMotionInstanceNV* from,
+    VkAccelerationStructureSRTMotionInstanceNV* to);
+
+void deepcopy_VkAccelerationStructureMotionInstanceDataNV(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkAccelerationStructureMotionInstanceDataNV* from,
+    VkAccelerationStructureMotionInstanceDataNV* to);
+
+void deepcopy_VkAccelerationStructureMotionInstanceNV(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkAccelerationStructureMotionInstanceNV* from,
+    VkAccelerationStructureMotionInstanceNV* to);
+
+void deepcopy_VkPhysicalDeviceRayTracingMotionBlurFeaturesNV(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceRayTracingMotionBlurFeaturesNV* from,
+    VkPhysicalDeviceRayTracingMotionBlurFeaturesNV* to);
+
+#endif
+#ifdef VK_EXT_ycbcr_2plane_444_formats
+void deepcopy_VkPhysicalDeviceYcbcr2Plane444FormatsFeaturesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceYcbcr2Plane444FormatsFeaturesEXT* from,
+    VkPhysicalDeviceYcbcr2Plane444FormatsFeaturesEXT* to);
+
+#endif
 #ifdef VK_EXT_fragment_density_map2
 void deepcopy_VkPhysicalDeviceFragmentDensityMap2FeaturesEXT(
     Allocator* alloc,
@@ -4047,12 +4745,246 @@ void deepcopy_VkPhysicalDevice4444FormatsFeaturesEXT(
     VkPhysicalDevice4444FormatsFeaturesEXT* to);
 
 #endif
+#ifdef VK_EXT_rgba10x6_formats
+void deepcopy_VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT* from,
+    VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT* to);
+
+#endif
+#ifdef VK_NV_acquire_winrt_display
+#endif
 #ifdef VK_EXT_directfb_surface
 void deepcopy_VkDirectFBSurfaceCreateInfoEXT(
     Allocator* alloc,
     VkStructureType rootType,
     const VkDirectFBSurfaceCreateInfoEXT* from,
     VkDirectFBSurfaceCreateInfoEXT* to);
+
+#endif
+#ifdef VK_VALVE_mutable_descriptor_type
+void deepcopy_VkPhysicalDeviceMutableDescriptorTypeFeaturesVALVE(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceMutableDescriptorTypeFeaturesVALVE* from,
+    VkPhysicalDeviceMutableDescriptorTypeFeaturesVALVE* to);
+
+void deepcopy_VkMutableDescriptorTypeListVALVE(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkMutableDescriptorTypeListVALVE* from,
+    VkMutableDescriptorTypeListVALVE* to);
+
+void deepcopy_VkMutableDescriptorTypeCreateInfoVALVE(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkMutableDescriptorTypeCreateInfoVALVE* from,
+    VkMutableDescriptorTypeCreateInfoVALVE* to);
+
+#endif
+#ifdef VK_EXT_vertex_input_dynamic_state
+void deepcopy_VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT* from,
+    VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT* to);
+
+void deepcopy_VkVertexInputBindingDescription2EXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVertexInputBindingDescription2EXT* from,
+    VkVertexInputBindingDescription2EXT* to);
+
+void deepcopy_VkVertexInputAttributeDescription2EXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkVertexInputAttributeDescription2EXT* from,
+    VkVertexInputAttributeDescription2EXT* to);
+
+#endif
+#ifdef VK_EXT_physical_device_drm
+void deepcopy_VkPhysicalDeviceDrmPropertiesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceDrmPropertiesEXT* from,
+    VkPhysicalDeviceDrmPropertiesEXT* to);
+
+#endif
+#ifdef VK_EXT_primitive_topology_list_restart
+void deepcopy_VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT* from,
+    VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT* to);
+
+#endif
+#ifdef VK_FUCHSIA_external_memory
+void deepcopy_VkImportMemoryZirconHandleInfoFUCHSIA(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkImportMemoryZirconHandleInfoFUCHSIA* from,
+    VkImportMemoryZirconHandleInfoFUCHSIA* to);
+
+void deepcopy_VkMemoryZirconHandlePropertiesFUCHSIA(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkMemoryZirconHandlePropertiesFUCHSIA* from,
+    VkMemoryZirconHandlePropertiesFUCHSIA* to);
+
+void deepcopy_VkMemoryGetZirconHandleInfoFUCHSIA(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkMemoryGetZirconHandleInfoFUCHSIA* from,
+    VkMemoryGetZirconHandleInfoFUCHSIA* to);
+
+#endif
+#ifdef VK_FUCHSIA_external_semaphore
+void deepcopy_VkImportSemaphoreZirconHandleInfoFUCHSIA(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkImportSemaphoreZirconHandleInfoFUCHSIA* from,
+    VkImportSemaphoreZirconHandleInfoFUCHSIA* to);
+
+void deepcopy_VkSemaphoreGetZirconHandleInfoFUCHSIA(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkSemaphoreGetZirconHandleInfoFUCHSIA* from,
+    VkSemaphoreGetZirconHandleInfoFUCHSIA* to);
+
+#endif
+#ifdef VK_FUCHSIA_buffer_collection
+void deepcopy_VkBufferCollectionCreateInfoFUCHSIA(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkBufferCollectionCreateInfoFUCHSIA* from,
+    VkBufferCollectionCreateInfoFUCHSIA* to);
+
+void deepcopy_VkImportMemoryBufferCollectionFUCHSIA(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkImportMemoryBufferCollectionFUCHSIA* from,
+    VkImportMemoryBufferCollectionFUCHSIA* to);
+
+void deepcopy_VkBufferCollectionImageCreateInfoFUCHSIA(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkBufferCollectionImageCreateInfoFUCHSIA* from,
+    VkBufferCollectionImageCreateInfoFUCHSIA* to);
+
+void deepcopy_VkBufferCollectionConstraintsInfoFUCHSIA(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkBufferCollectionConstraintsInfoFUCHSIA* from,
+    VkBufferCollectionConstraintsInfoFUCHSIA* to);
+
+void deepcopy_VkBufferConstraintsInfoFUCHSIA(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkBufferConstraintsInfoFUCHSIA* from,
+    VkBufferConstraintsInfoFUCHSIA* to);
+
+void deepcopy_VkBufferCollectionBufferCreateInfoFUCHSIA(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkBufferCollectionBufferCreateInfoFUCHSIA* from,
+    VkBufferCollectionBufferCreateInfoFUCHSIA* to);
+
+void deepcopy_VkSysmemColorSpaceFUCHSIA(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkSysmemColorSpaceFUCHSIA* from,
+    VkSysmemColorSpaceFUCHSIA* to);
+
+void deepcopy_VkBufferCollectionPropertiesFUCHSIA(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkBufferCollectionPropertiesFUCHSIA* from,
+    VkBufferCollectionPropertiesFUCHSIA* to);
+
+void deepcopy_VkImageFormatConstraintsInfoFUCHSIA(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkImageFormatConstraintsInfoFUCHSIA* from,
+    VkImageFormatConstraintsInfoFUCHSIA* to);
+
+void deepcopy_VkImageConstraintsInfoFUCHSIA(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkImageConstraintsInfoFUCHSIA* from,
+    VkImageConstraintsInfoFUCHSIA* to);
+
+#endif
+#ifdef VK_HUAWEI_subpass_shading
+void deepcopy_VkSubpassShadingPipelineCreateInfoHUAWEI(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkSubpassShadingPipelineCreateInfoHUAWEI* from,
+    VkSubpassShadingPipelineCreateInfoHUAWEI* to);
+
+void deepcopy_VkPhysicalDeviceSubpassShadingFeaturesHUAWEI(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceSubpassShadingFeaturesHUAWEI* from,
+    VkPhysicalDeviceSubpassShadingFeaturesHUAWEI* to);
+
+void deepcopy_VkPhysicalDeviceSubpassShadingPropertiesHUAWEI(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceSubpassShadingPropertiesHUAWEI* from,
+    VkPhysicalDeviceSubpassShadingPropertiesHUAWEI* to);
+
+#endif
+#ifdef VK_HUAWEI_invocation_mask
+void deepcopy_VkPhysicalDeviceInvocationMaskFeaturesHUAWEI(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceInvocationMaskFeaturesHUAWEI* from,
+    VkPhysicalDeviceInvocationMaskFeaturesHUAWEI* to);
+
+#endif
+#ifdef VK_NV_external_memory_rdma
+void deepcopy_VkMemoryGetRemoteAddressInfoNV(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkMemoryGetRemoteAddressInfoNV* from,
+    VkMemoryGetRemoteAddressInfoNV* to);
+
+void deepcopy_VkPhysicalDeviceExternalMemoryRDMAFeaturesNV(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceExternalMemoryRDMAFeaturesNV* from,
+    VkPhysicalDeviceExternalMemoryRDMAFeaturesNV* to);
+
+#endif
+#ifdef VK_EXT_extended_dynamic_state2
+void deepcopy_VkPhysicalDeviceExtendedDynamicState2FeaturesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceExtendedDynamicState2FeaturesEXT* from,
+    VkPhysicalDeviceExtendedDynamicState2FeaturesEXT* to);
+
+#endif
+#ifdef VK_QNX_screen_surface
+void deepcopy_VkScreenSurfaceCreateInfoQNX(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkScreenSurfaceCreateInfoQNX* from,
+    VkScreenSurfaceCreateInfoQNX* to);
+
+#endif
+#ifdef VK_EXT_color_write_enable
+void deepcopy_VkPhysicalDeviceColorWriteEnableFeaturesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceColorWriteEnableFeaturesEXT* from,
+    VkPhysicalDeviceColorWriteEnableFeaturesEXT* to);
+
+void deepcopy_VkPipelineColorWriteCreateInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPipelineColorWriteCreateInfoEXT* from,
+    VkPipelineColorWriteCreateInfoEXT* to);
 
 #endif
 #ifdef VK_GOOGLE_gfxstream
@@ -4075,18 +5007,76 @@ void deepcopy_VkImportPhysicalAddressGOOGLE(
     VkImportPhysicalAddressGOOGLE* to);
 
 #endif
+#ifdef VK_EXT_global_priority_query
+void deepcopy_VkPhysicalDeviceGlobalPriorityQueryFeaturesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceGlobalPriorityQueryFeaturesEXT* from,
+    VkPhysicalDeviceGlobalPriorityQueryFeaturesEXT* to);
+
+void deepcopy_VkQueueFamilyGlobalPriorityPropertiesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkQueueFamilyGlobalPriorityPropertiesEXT* from,
+    VkQueueFamilyGlobalPriorityPropertiesEXT* to);
+
+#endif
+#ifdef VK_EXT_multi_draw
+void deepcopy_VkPhysicalDeviceMultiDrawFeaturesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceMultiDrawFeaturesEXT* from,
+    VkPhysicalDeviceMultiDrawFeaturesEXT* to);
+
+void deepcopy_VkPhysicalDeviceMultiDrawPropertiesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceMultiDrawPropertiesEXT* from,
+    VkPhysicalDeviceMultiDrawPropertiesEXT* to);
+
+void deepcopy_VkMultiDrawInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkMultiDrawInfoEXT* from,
+    VkMultiDrawInfoEXT* to);
+
+void deepcopy_VkMultiDrawIndexedInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkMultiDrawIndexedInfoEXT* from,
+    VkMultiDrawIndexedInfoEXT* to);
+
+#endif
+#ifdef VK_EXT_load_store_op_none
+#endif
+#ifdef VK_EXT_border_color_swizzle
+void deepcopy_VkPhysicalDeviceBorderColorSwizzleFeaturesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDeviceBorderColorSwizzleFeaturesEXT* from,
+    VkPhysicalDeviceBorderColorSwizzleFeaturesEXT* to);
+
+void deepcopy_VkSamplerBorderColorComponentMappingCreateInfoEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkSamplerBorderColorComponentMappingCreateInfoEXT* from,
+    VkSamplerBorderColorComponentMappingCreateInfoEXT* to);
+
+#endif
+#ifdef VK_EXT_pageable_device_local_memory
+void deepcopy_VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT(
+    Allocator* alloc,
+    VkStructureType rootType,
+    const VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT* from,
+    VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT* to);
+
+#endif
 #ifdef VK_KHR_acceleration_structure
 void deepcopy_VkDeviceOrHostAddressKHR(
     Allocator* alloc,
     VkStructureType rootType,
     const VkDeviceOrHostAddressKHR* from,
     VkDeviceOrHostAddressKHR* to);
-
-void deepcopy_VkDeviceOrHostAddressConstKHR(
-    Allocator* alloc,
-    VkStructureType rootType,
-    const VkDeviceOrHostAddressConstKHR* from,
-    VkDeviceOrHostAddressConstKHR* to);
 
 void deepcopy_VkAccelerationStructureBuildRangeInfoKHR(
     Allocator* alloc,

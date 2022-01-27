@@ -23,9 +23,8 @@ if(OPTION_GFXSTREAM_BACKEND)
       ${ANDROID_EMUGL_DIR}/host/libs/libOpenglRender/standalone_common/angle-util
   )
 
-  android_target_properties(gfxstream_backend linux-x86_64 "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN'")
-  android_target_properties(gfxstream_backend darwin-x86_64 "INSTALL_RPATH>=@loader_path")
-  android_target_properties(gfxstream_backend darwin-aarch64 "INSTALL_RPATH>=@loader_path")
+  android_target_properties(gfxstream_backend linux "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN'")
+  android_target_properties(gfxstream_backend darwin "INSTALL_RPATH>=@loader_path")
 
   if (BUILDING_FOR_AARCH64)
     target_link_libraries(
@@ -75,10 +74,10 @@ if(OPTION_GFXSTREAM_BACKEND)
   )
 
   android_target_properties(
-    gfxstream_unittests darwin-x86_64
+    gfxstream_unittests darwin
     "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
   android_target_properties(
-    gfxstream_unittests linux-x86_64
+    gfxstream_unittests linux
     "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
 endif()
 
@@ -148,10 +147,10 @@ if(NOT WINDOWS AND NOT BUILDING_FOR_AARCH64)
   android_target_dependency(emugl_combined_unittests all
                             SWIFTSHADER_DEPENDENCIES)
   android_target_properties(
-    emugl_combined_unittests darwin-x86_64
+    emugl_combined_unittests darwin
     "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
   android_target_properties(
-    emugl_combined_unittests linux-x86_64
+    emugl_combined_unittests linux
     "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
 
   # Toplevel unit tests
@@ -174,10 +173,10 @@ if(NOT WINDOWS AND NOT BUILDING_FOR_AARCH64)
   android_target_dependency(aemugraphics_toplevel_unittests all
                             EMULATOR_FEATURE_DEPENDENCIES)
   android_target_properties(
-    aemugraphics_toplevel_unittests darwin-x86_64
+    aemugraphics_toplevel_unittests darwin
     "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
   android_target_properties(
-    aemugraphics_toplevel_unittests linux-x86_64
+    aemugraphics_toplevel_unittests linux
     "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
 
   # Vulkan encoder unit tests

@@ -58,6 +58,7 @@ using emulator::VehiclePropValue;
 
 using carpropertyutils::PropertyDescription;
 using carpropertyutils::propMap;
+using carpropertyutils::changeModeToString;
 
 static constexpr int REFRESH_START = 1;
 static constexpr int REFRESH_STOP = 2;
@@ -91,7 +92,8 @@ VhalTable::~VhalTable() {
 void VhalTable::initVhalPropertyTableRefreshThread() {
     int msg;
     while (true) {
-        mRefreshMsg.tryReceive(&msg);
+        // Receive only the last message (bug :210075881)
+        while(mRefreshMsg.tryReceive(&msg));
         if (msg == REFRESH_STOP) {
             break;
         }
@@ -145,16 +147,21 @@ void VhalTable::on_property_list_currentItemChanged(QListWidgetItem* current,
 }
 
 void VhalTable::on_editButton_clicked() {
-    if(mVHalpropertyMap.count(mSelectedKey)){
-        showEditableArea(mVHalpropertyMap[mSelectedKey]);
+    if(mVHalPropValuesMap.count(mSelectedKey)){
+        showEditableArea(mVHalPropValuesMap[mSelectedKey]);
     }
 }
 
 void VhalTable::sendGetAllPropertiesRequest() {
+    EmulatorMessage getAllConfigsMsg;
+    getAllConfigsMsg.set_msg_type(MsgType::GET_CONFIG_ALL_CMD);
+    getAllConfigsMsg.set_status(Status::RESULT_OK);
+    mSendEmulatorMsg(getAllConfigsMsg, "Requesting all configs");
+
     EmulatorMessage emulatorMsg;
     emulatorMsg.set_msg_type(MsgType::GET_PROPERTY_ALL_CMD);
     emulatorMsg.set_status(Status::RESULT_OK);
-    mSendEmulatorMsg(emulatorMsg, "Requesting all properties");
+    mSendEmulatorMsg(emulatorMsg, "Requesting all values");
 }
 
 EmulatorMessage VhalTable::makeGetPropMsg(int32_t prop, int areaId) {
@@ -176,7 +183,7 @@ void VhalTable::showEvent(QShowEvent* event) {
     // clear old property list and map
     // ask for new data.
     mUi->property_list->clear();
-    mVHalpropertyMap.clear();
+    mVHalPropValuesMap.clear();
     mSelectedKey = QString();
     sendGetAllPropertiesRequest();
     setVhalPropertyTableRefreshThread();
@@ -201,47 +208,63 @@ void VhalTable::updateTable(QString label,
 }
 
 void VhalTable::processMsg(EmulatorMessage emulatorMsg) {
-    if (emulatorMsg.prop_size() > 0 || emulatorMsg.value_size() > 0) {
-        QStringList sl;
-        for (int valIndex = 0; valIndex < emulatorMsg.value_size();
-             valIndex++) {
-            VehiclePropValue val = emulatorMsg.value(valIndex);
+    switch (emulatorMsg.msg_type()) {
+        case (int32_t)MsgType::GET_PROPERTY_RESP:
+        case (int32_t)MsgType::GET_PROPERTY_ALL_RESP:
+            if (emulatorMsg.value_size() > 0) {
+                QStringList sl;
+                for (int valIndex = 0; valIndex < emulatorMsg.value_size();
+                    valIndex++) {
+                    VehiclePropValue val = emulatorMsg.value(valIndex);
 
-            QString key = getPropKey(val);
+                    QString key = getPropKey(val);
 
-            // if the return value contains new property
-            // like new sensors start during runtime
-            if (!mVHalpropertyMap.count(key)) {
-                sl << key;
+                    // if the return value contains new property
+                    // like new sensors start during runtime
+                    if (!mVHalPropValuesMap.count(key)) {
+                        sl << key;
+                    }
+                    mVHalPropValuesMap[key] = val;
+                    // if the return val is the selected property
+                    // update the description board
+                    if (QString::compare(key, mSelectedKey, Qt::CaseSensitive) == 0) {
+                        showPropertyDescription(val);
+                    }
+                }
+
+                // Sort the keys and emit the output based on keys
+                // only delta property will be rendered here
+                sl.sort();
+                for (int i = 0; i < sl.size(); i++) {
+                    QString key = sl.at(i);
+                    VehiclePropValue currVal = mVHalPropValuesMap[key];
+                    PropertyDescription currPropDesc = propMap[currVal.prop()];
+                    QString label = currPropDesc.label;
+                    QString id = QString::number(currVal.prop());
+                    QString areaId = QString::number(currVal.area_id());
+
+                    emit updateData(label, id, areaId, key);
+                }
+
+                // set mSelectedKey to the first key if mSelectedKey is empty
+                // This should only happen at the first time table is opened
+                if (mSelectedKey.isEmpty() && sl.size() > 0) {
+                    mSelectedKey = sl.at(0);
+                    showPropertyDescription(mVHalPropValuesMap[mSelectedKey]);
+                }
             }
-            mVHalpropertyMap[key] = val;
-            // if the return val is the selected property
-            // update the description board
-            if (QString::compare(key, mSelectedKey, Qt::CaseSensitive) == 0) {
-                showPropertyDescription(val);
+            break;
+        case (int32_t)MsgType::GET_CONFIG_ALL_RESP:
+            for (int configIndex = 0; configIndex < emulatorMsg.config_size();
+                    configIndex++) {
+                emulator::VehiclePropConfig config = 
+                                              emulatorMsg.config(configIndex);
+                mVHalPropConfigMap[config.prop()] = config;
             }
-        }
-
-        // Sort the keys and emit the output based on keys
-        // only delta property will be rendered here
-        sl.sort();
-        for (int i = 0; i < sl.size(); i++) {
-            QString key = sl.at(i);
-            VehiclePropValue currVal = mVHalpropertyMap[key];
-            PropertyDescription currPropDesc = propMap[currVal.prop()];
-            QString label = currPropDesc.label;
-            QString id = QString::number(currVal.prop());
-            QString areaId = QString::number(currVal.area_id());
-
-            emit updateData(label, id, areaId, key);
-        }
-
-        // set mSelectedKey to the first key if mSelectedKey is empty
-        // This should only happen at the first time table is opened
-        if (mSelectedKey.isEmpty() && sl.size() > 0) {
-            mSelectedKey = sl.at(0);
-            showPropertyDescription(mVHalpropertyMap[mSelectedKey]);
-        }
+            break;
+        default:
+            // Unexpected message type, ignore it
+            break;
     }
 }
 
@@ -268,6 +291,7 @@ QString VhalTable::getPropKey(VehiclePropValue val) {
 
 void VhalTable::showPropertyDescription(VehiclePropValue val) {
     PropertyDescription propDesc = propMap[val.prop()];
+    emulator::VehiclePropConfig propConfig = mVHalPropConfigMap[val.prop()];
     QString label = propDesc.label;
     QString area = carpropertyutils::getAreaString(val);
     QString id = QString::number(val.prop());
@@ -277,11 +301,10 @@ void VhalTable::showPropertyDescription(VehiclePropValue val) {
     setPropertyText(mUi->property_name_value, label);
     setPropertyText(mUi->area_value, area);
     setPropertyText(mUi->property_id_value, id);
-    setPropertyText(mUi->editable_value,
-                    propDesc.writable ? QString::fromStdString("Yes")
-                                      : QString::fromStdString("No"));
+    setPropertyText(mUi->change_mode_value,
+                   changeModeToString(propConfig.change_mode()));
     setPropertyText(mUi->value_value, value);
-    mUi->editButton->setEnabled(propDesc.writable);
+    mUi->editButton->setEnabled(propConfig.access() != emulator::VehiclePropertyAccess::WRITE);
 }
 
 void VhalTable::setPropertyText(QLabel* label, QString text) {
@@ -292,23 +315,34 @@ void VhalTable::setPropertyText(QLabel* label, QString text) {
 }
 
 void VhalTable::showEditableArea(VehiclePropValue val) {
+    static const QString editingStaticWarning = 
+        tr("WARNING: static properties cannot be subscribed to,\n"
+           "so clients need a get() call to fetch an updated value.\n"
+           "This can be achieved, e.g. by restarting the client.");
+
     int prop = val.prop();
     int type = val.value_type();
     int areaId = val.area_id();
     PropertyDescription propDesc = propMap[prop];
+    emulator::VehiclePropConfig propConfig = mVHalPropConfigMap[val.prop()];
     QString value = carpropertyutils::getValueString(val);
     QString label = propDesc.label;
+    QString tip = nullptr;
+    if (propConfig.change_mode() == (int32_t)emulator::VehiclePropertyChangeMode::STATIC) {
+        tip = editingStaticWarning;
+    }
 
     bool pressedOk;
     int32_t int32Value;
     float floatValue;
+    std::string stringValue;
 
     EmulatorMessage writeMsg;
     string writeLog;
 
     switch (type) {
         case (int32_t)VehiclePropertyType::BOOLEAN:
-            int32Value = getUserBoolValue(propDesc, value, &pressedOk);
+            int32Value = getUserBoolValue(propDesc, value, tip, &pressedOk);
             if (!pressedOk) {
                 return;
             }
@@ -318,7 +352,7 @@ void VhalTable::showEditableArea(VehiclePropValue val) {
             break;
 
         case (int32_t)VehiclePropertyType::INT32:
-            int32Value = getUserInt32Value(propDesc, value, &pressedOk);
+            int32Value = getUserInt32Value(propDesc, value, tip, &pressedOk);
             if (!pressedOk) {
                 return;
             }
@@ -328,7 +362,7 @@ void VhalTable::showEditableArea(VehiclePropValue val) {
             break;
 
         case (int32_t)VehiclePropertyType::FLOAT:
-            floatValue = getUserFloatValue(propDesc, value, &pressedOk);
+            floatValue = getUserFloatValue(propDesc, value, tip, &pressedOk);
             if (!pressedOk) {
                 return;
             }
@@ -336,9 +370,20 @@ void VhalTable::showEditableArea(VehiclePropValue val) {
             writeLog = "Setting value for " + label.toStdString();
             mSendEmulatorMsg(writeMsg, writeLog);
             break;
+
+        case (int32_t)VehiclePropertyType::STRING:
+            stringValue = getUserStringValue(propDesc, value, tip, &pressedOk).toStdString();
+            if (!pressedOk) {
+                return;
+            }
+            writeMsg = makeSetPropMsgString(prop, stringValue, areaId);
+            writeLog = "Setting string value for " + label.toStdString();
+            mSendEmulatorMsg(writeMsg, writeLog);
+            break;
+
         case (int32_t)VehiclePropertyType::INT32_VEC:
             const std::vector<int32_t>* int32VecValue =
-                    getUserInt32VecValue(propDesc, value, &pressedOk);
+                    getUserInt32VecValue(propDesc, value, tip, &pressedOk);
             if (!pressedOk) {
                 return;
             }
@@ -350,23 +395,23 @@ void VhalTable::showEditableArea(VehiclePropValue val) {
 }
 
 int32_t VhalTable::getUserBoolValue(PropertyDescription propDesc, QString oldValueString,
-                                            bool* pressedOk) {
+                                            QString tip, bool* pressedOk) {
     QStringList items;
     items << tr("True") << tr("False");
-    QString item = QInputDialog::getItem(this, propDesc.label, nullptr,
+    QString item = QInputDialog::getItem(this, propDesc.label, tip,
                                           items, items.indexOf(oldValueString), false, pressedOk);
     return (item == "True") ? 1 : 0;
 }
 
-int32_t VhalTable::getUserInt32Value(PropertyDescription propDesc, QString oldValueString,
-                                             bool* pressedOk) {
+int32_t VhalTable::getUserInt32Value(PropertyDescription propDesc, QString oldValueString, 
+                                            QString tip, bool* pressedOk) {
     int32_t value;
     if (propDesc.lookupTable != nullptr) {
         QStringList items;
         for (const auto &detail : *(propDesc.lookupTable)) {
             items << detail.second;
         }
-        QString item = QInputDialog::getItem(this, propDesc.label, nullptr, items,
+        QString item = QInputDialog::getItem(this, propDesc.label, tip, items,
                                               items.indexOf(oldValueString), false, pressedOk);
         for (const auto &detail : *(propDesc.lookupTable)) {
             if (item == detail.second) {
@@ -376,7 +421,7 @@ int32_t VhalTable::getUserInt32Value(PropertyDescription propDesc, QString oldVa
         }
     } else {
         int32_t oldValue = oldValueString.toInt();
-        value = QInputDialog::getInt(this, propDesc.label, nullptr, oldValue,
+        value = QInputDialog::getInt(this, propDesc.label, tip, oldValue,
                                       INT_MIN, INT_MAX, 1, pressedOk);
     }
     return value;
@@ -385,12 +430,18 @@ int32_t VhalTable::getUserInt32Value(PropertyDescription propDesc, QString oldVa
 const std::vector<int32_t>* VhalTable::getUserInt32VecValue(
         carpropertyutils::PropertyDescription propDesc,
         QString oldValueString,
+        QString tip,
         bool* pressedOk) {
-    QStringList valueStringList= oldValueString.split("; ");
+    QStringList valueStringList = oldValueString.split("; ");
+#if QT_VERSION >= 0x060000
+    QSet<QString> oldStringSet(valueStringList.constBegin(), valueStringList.constEnd());
+#else
     QSet<QString> oldStringSet = QSet<QString>::fromList(valueStringList);
+#endif
 
     if (propDesc.lookupTable != nullptr) {
-        CheckboxDialog checkboxDialog(this, propDesc.lookupTable, &oldStringSet, propDesc.label);
+        CheckboxDialog checkboxDialog(this, propDesc.lookupTable, &oldStringSet,
+                                            propDesc.label, tip);
         if(checkboxDialog.exec() == QDialog::Accepted) {
             *pressedOk = true;
             return checkboxDialog.getVec();
@@ -402,11 +453,19 @@ const std::vector<int32_t>* VhalTable::getUserInt32VecValue(
 }
 
 float VhalTable::getUserFloatValue(PropertyDescription propDesc, QString oldValueString,
-                                           bool* pressedOk) {
+                                           QString tip, bool* pressedOk) {
     // No property interprets floats with table, so we only deal with raw numbers.
     double oldValue = oldValueString.toDouble();
-    double value = QInputDialog::getDouble(this, propDesc.label, nullptr, oldValue,
+    double value = QInputDialog::getDouble(this, propDesc.label, tip, oldValue,
                                             FLT_MIN, FLT_MAX, 3, pressedOk);
+    return value;
+}
+
+QString VhalTable::getUserStringValue(PropertyDescription propDesc, QString oldValueString,
+                                           QString tip, bool* pressedOk) {
+    QString value = QInputDialog::getText(this, propDesc.label, tip,
+                                            QLineEdit::EchoMode::Normal, oldValueString,
+                                            pressedOk);
     return value;
 }
 
@@ -421,6 +480,13 @@ EmulatorMessage VhalTable::makeSetPropMsgFloat(int32_t propId, float val, int ar
     VehiclePropValue* value;
     EmulatorMessage emulatorMsg = makeSetPropMsg(propId, &value, areaId);
     value->add_float_values(val);
+    return emulatorMsg;
+}
+
+EmulatorMessage VhalTable::makeSetPropMsgString(int32_t propId, const std::string val, int areaId) {
+    VehiclePropValue* value;
+    EmulatorMessage emulatorMsg = makeSetPropMsg(propId, &value, areaId);
+    value->set_string_value(val);
     return emulatorMsg;
 }
 

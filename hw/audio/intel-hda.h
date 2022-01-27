@@ -72,9 +72,7 @@ bool hda_codec_xfer(HDACodecDevice *dev, uint32_t stnr, bool output,
 // AEMU
 // These are some AEMU extensions to handle injection of new voice.in into the hardware.
 typedef struct SWVoiceIn SWVoiceIn;
-typedef struct audsettings audsettings;
-SWVoiceIn* set_hda_voice_in(SWVoiceIn *voice, struct audsettings *as);
+SWVoiceIn* set_hda_voice_in(SWVoiceIn *voice);
 SWVoiceIn* get_hda_voice_in();
-struct audsettings* get_hda_aud_settings();
 // AEMU
 #endif

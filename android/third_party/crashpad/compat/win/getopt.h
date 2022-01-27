@@ -15,6 +15,7 @@
 #ifndef CRASHPAD_COMPAT_WIN_GETOPT_H_
 #define CRASHPAD_COMPAT_WIN_GETOPT_H_
 
+
 #include "third_party/getopt/getopt.h"
 
 #endif  // CRASHPAD_COMPAT_WIN_GETOPT_H_

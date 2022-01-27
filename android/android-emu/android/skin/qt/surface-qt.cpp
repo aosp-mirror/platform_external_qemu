@@ -179,7 +179,7 @@ extern void skin_surface_update(SkinSurface *surface, SkinRect *rect)
 extern void skin_surface_blit(SkinSurface *dst, SkinPos *pos, SkinSurface *src, SkinRect *rect, SkinBlitOp op)
 {
 #if 0
-    D("skin_surface_blit from %d (%d, %d, %d, %d) to %d: %d,%d", src->id, rect->pos.x, rect->pos.y, rect->size.w, rect->size, dst->id, pos->x, pos->y);
+    D("skin_surface_blit from %d (%d, %d, %d, %d) to %d: %d,%d, op %s", src->id, rect->pos.x, rect->pos.y, rect->size.w, rect->size.h, dst->id, pos->x, pos->y, (op == SKIN_BLIT_COPY) ? "SKIN_BLIT_COPY" : "SKIN_BLIT_SRCOVER");
 #endif
     QRect qrect(rect->pos.x, rect->pos.y, rect->size.w, rect->size.h);
     QPoint qpos(pos->x, pos->y);

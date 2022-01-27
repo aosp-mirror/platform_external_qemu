@@ -166,46 +166,6 @@ typedef VkResult (VKAPI_PTR *PFN_vkGetMemoryHostAddressInfoGOOGLE)(VkDevice devi
 
 typedef VkResult (VKAPI_PTR *PFN_vkFreeMemorySyncGOOGLE)(VkDevice device, VkDeviceMemory memory, const VkAllocationCallbacks* pAllocator);
 
-#ifndef VK_FUCHSIA_external_memory
-#define VK_FUCHSIA_external_memory 1
-#define VK_FUCHSIA_EXTERNAL_MEMORY_SPEC_VERSION 1
-#define VK_FUCHSIA_EXTERNAL_MEMORY_EXTENSION_NAME "VK_FUCHSIA_external_memory"
-
-typedef struct VkImportMemoryZirconHandleInfoFUCHSIA {
-    VkStructureType                       sType;
-    const void*                           pNext;
-    VkExternalMemoryHandleTypeFlagBits    handleType;
-    uint32_t                              handle;
-} VkImportMemoryZirconHandleInfoFUCHSIA;
-
-typedef struct VkMemoryZirconHandlePropertiesFUCHSIA {
-    VkStructureType    sType;
-    void*              pNext;
-    uint32_t           memoryTypeBits;
-} VkMemoryZirconHandlePropertiesFUCHSIA;
-
-typedef struct VkMemoryGetZirconHandleInfoFUCHSIA {
-    VkStructureType                       sType;
-    const void*                           pNext;
-    VkDeviceMemory                        memory;
-    VkExternalMemoryHandleTypeFlagBits    handleType;
-} VkMemoryGetZirconHandleInfoFUCHSIA;
-
-// Deprecated
-#define VK_STRUCTURE_TYPE_TEMP_IMPORT_MEMORY_ZIRCON_HANDLE_INFO_FUCHSIA \
-    ((VkStructureType)1001005000)
-#define VK_STRUCTURE_TYPE_TEMP_MEMORY_ZIRCON_HANDLE_PROPERTIES_FUCHSIA \
-    ((VkStructureType)1001005001)
-#define VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA \
-    ((VkExternalMemoryHandleTypeFlagBits)0x00100000)
-#endif  // VK_FUCHSIA_external_memory
-
-// To be moved inside the ifdef above once spec is updated
-#define VK_STRUCTURE_TYPE_IMPORT_MEMORY_ZIRCON_HANDLE_INFO_FUCHSIA \
-    ((VkStructureType)1000364000)
-#define VK_EXTERNAL_MEMORY_HANDLE_TYPE_ZIRCON_VMO_BIT_FUCHSIA \
-    ((VkExternalMemoryHandleTypeFlagBits)0x00000800)
-
 #ifndef VK_MVK_moltenvk
 #define VK_MVK_moltenvk 1
 #define VK_MVK_MOLTENVK_SPEC_VERSION            3

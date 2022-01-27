@@ -1,0 +1,30 @@
+// Copyright 2019-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_EXT_texel_buffer_alignment.txt[]
+
+=== Other Extension Metadata
+
+*Last Modified Date*::
+    2019-06-06
+*IP Status*::
+    No known IP claims.
+*Interactions and External Dependencies*::
+*Contributors*::
+  - Jeff Bolz, NVIDIA
+
+=== Description
+
+This extension adds more expressive alignment requirements for uniform and
+storage texel buffers.
+Some implementations have single texel alignment requirements that cannot be
+expressed via
+slink:VkPhysicalDeviceLimits::pname:minTexelBufferOffsetAlignment.
+
+include::{generated}/interfaces/VK_EXT_texel_buffer_alignment.txt[]
+
+=== Version History
+
+  * Revision 1, 2019-06-06 (Jeff Bolz)
+    - Initial draft

@@ -46,9 +46,9 @@ void net_slirp_receive_raw(void* opaque, const uint8_t *buf, size_t size);
 /* Return a Slirp instance, or NULL if the network stack is not initialized */
 void* net_slirp_state(void);
 
-typedef void (*SlirpShaperSendFunc)(void* opaque, const void* data, int len);
+typedef void (*SlirpShaperSendFunc)(void* opaque, const void* data, int len, void* slirp_state);
 
-void* net_slirp_set_shapers(void* out_opaque,
+void net_slirp_set_shapers(void* out_opaque,
                             SlirpShaperSendFunc out_send,
                             void* in_opaque,
                             SlirpShaperSendFunc in_send);

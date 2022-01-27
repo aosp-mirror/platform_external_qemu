@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
+#include "android/utils/debug.h"
 
 // setGles2Gles(true) when mounting GLES translator on top of another
 // GLES library;
@@ -56,8 +57,7 @@ inline unsigned int SafeUIntFromPointerFileLine(const void* ptr,
     // system images, which might have buggy encoder libraries. Print
     // an error message though.
     if ((uintptr_t)(ptr) != (unsigned int)(uintptr_t)(ptr)) {
-        fprintf(stderr, "(%s:%d) EmuGL:WARNING: bad generic pointer %p\n",
-                file, line, ptr);
+        dwarning("EmuGL: bad generic pointer %p", ptr);
     }
 #else
     // Assertion error if the pointer contains a value that does not fit

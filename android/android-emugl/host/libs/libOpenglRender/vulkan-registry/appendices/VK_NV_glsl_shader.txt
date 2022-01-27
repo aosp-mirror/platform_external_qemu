@@ -1,4 +1,10 @@
-include::meta/VK_NV_glsl_shader.txt[]
+// Copyright (c) 2016-2020 NVIDIA Corporation
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_NV_glsl_shader.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2016-02-14
@@ -7,29 +13,26 @@ include::meta/VK_NV_glsl_shader.txt[]
 *Contributors*::
   - Piers Daniell, NVIDIA
 
-This extension allows GLSL shaders written to the +GL_KHR_vulkan_glsl+
+=== Description
+
+This extension allows GLSL shaders written to the `GL_KHR_vulkan_glsl`
 extension specification to be used instead of SPIR-V.
 The implementation will automatically detect whether the shader is SPIR-V or
 GLSL, and compile it appropriately.
 
-=== New Object Types
+=== Deprecation
 
-=== New Enum Constants
+Functionality in this extension is outside of the scope of Vulkan and is
+better served by a compiler library such as
+https://github.com/KhronosGroup/glslang[glslang].
+No new implementations will support this extension, so applications should:
+not use it.
 
-  * Extending elink:VkResult:
-  ** ename:VK_ERROR_INVALID_SHADER_NV
-
-=== New Enums
-
-=== New Structures
-
-=== New Functions
-
-=== Issues
+include::{generated}/interfaces/VK_NV_glsl_shader.txt[]
 
 === Examples
 
-**Example 1**
+*Example 1*
 
 Passing in GLSL code
 

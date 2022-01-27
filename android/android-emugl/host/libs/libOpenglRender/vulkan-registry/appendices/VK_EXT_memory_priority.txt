@@ -1,0 +1,32 @@
+// Copyright 2018-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_EXT_memory_priority.txt[]
+
+=== Other Extension Metadata
+
+*Last Modified Date*::
+    2018-10-08
+*Contributors*::
+  - Jeff Bolz, NVIDIA
+  - Jeff Juliano, NVIDIA
+
+=== Description
+
+This extension adds a pname:priority value specified at memory allocation
+time.
+On some systems with both device-local and non-device-local memory heaps,
+the implementation may transparently move memory from one heap to another
+when a heap becomes full (for example, when the total memory used across all
+processes exceeds the size of the heap).
+In such a case, this priority value may be used to determine which
+allocations are more likely to remain in device-local memory.
+
+include::{generated}/interfaces/VK_EXT_memory_priority.txt[]
+
+=== Version History
+
+ * Revision 1, 2018-10-08 (Jeff Bolz)
+   - Initial revision
+

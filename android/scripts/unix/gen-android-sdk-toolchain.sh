@@ -379,9 +379,9 @@ gen_dbg_splitter() {
 $EXTRA_ENV_SETUP
 target=\$(basename \$1)
 mkdir -p build/debug_info
-${DST_PREFIX}objcopy --only-keep-debug  "\$1" "build/debug_info/\$target.debug"
-${DST_PREFIX}objcopy --strip-unneeded  "\$1"
-${DST_PREFIX}objcopy --add-gnu-debuglink="build/debug_info/\$target.debug" "\$1"
+${DST_PREFIX}/llvm-objcopy --only-keep-debug  "\$1" "build/debug_info/\$target.debug"
+${DST_PREFIX}/llvm-objcopy --strip-unneeded  "\$1"
+${DST_PREFIX}/llvm-objcopy --add-gnu-debuglink="build/debug_info/\$target.debug" "\$1"
 
 EOF
  chmod +x "$DST_FILE"
@@ -431,8 +431,8 @@ gen_wrapper_toolchain () {
           local PROGRAMS="as ar ranlib strings nm objdump objcopy dlltool install_name_tool"
           ;;
         *)
-          local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy"
-          local PROGRAMS="as ar ranlib strings nm objdump objcopy dlltool"
+          local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld clang-tidy as ar ranlib strings nm objdump"
+          local PROGRAMS=""
     esac
 
     if [ "$CROSSCOMPILE_DARWIN" ]; then
@@ -485,7 +485,7 @@ gen_wrapper_toolchain () {
     if [ -z "$OPT_NOSTRIP" ]; then
       case "$CURRENT_HOST" in
         linux-x86_64)
-          gen_dbg_splitter "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR"
+          gen_dbg_splitter "$SRC_PREFIX" "$CLANG_BINDIR" "$DST_DIR"
           ;;
         darwin-x86_64)
           gen_dbg_splitter_darwin "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR" "$CLANG_BINDIR"

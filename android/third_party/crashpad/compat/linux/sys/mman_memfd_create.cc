@@ -28,7 +28,7 @@ int memfd_create(const char* name, unsigned int flags) __THROW {
   static const crashpad::NoCfiIcall<decltype(memfd_create)*> next_memfd_create(
       dlsym(RTLD_NEXT, "memfd_create"));
   return next_memfd_create ? next_memfd_create(name, flags)
-                           : syscall(SYS_memfd_create, name, flags);
+                           : memfd_create(name, flags);
 }
 
 }  // extern "C"

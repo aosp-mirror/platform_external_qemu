@@ -151,9 +151,15 @@ service EmulatorController {
   // A new frame will be delivered whenever the emulated device
   // requests a new audio frame. Audio is usually delivered at a rate
   // that the emulator is requesting frames. Audio will be stored in a
-  // temporary buffer that can hold 500ms of audio.
+  // temporary buffer that can hold 300ms of audio.
   //
-  // Note: Currently the emulator will only accept samples between 44 - 48 khz.
+  // Notes:
+  //  - Only the first audio format packet that is delivered will be
+  // honored. There is no need to send the audio format multiple times.
+  //  - Real time audio currently immediately overrides the buffer. This
+  // means you must provide a constant rate of audio packets. The real
+  // time mode is experimental. Timestamps of audio packets might be
+  // used in the future to improve synchronization.
   //
   // -  INVALID_ARGUMENT (code 3) The sampling rate was too high/low
   // -  INVALID_ARGUMENT (code 3) The audio packet was too large to handle.
@@ -339,6 +345,9 @@ message PhysicalModelValue {
     // Ambient RGBC light intensity. Values are in order (Red, Green, Blue,
     // Clear).
     RGBC_LIGHT = 18;
+
+    // Wrist tilt gesture (1 = gaze, 0 = ungaze)
+    WRIST_TILT = 19;
   }
   PhysicalType target = 1;
 
@@ -398,6 +407,8 @@ message SensorValue {
     // Measures the ambient RGBC light intensity.
     // Values are in order (Red, Green, Blue, Clear).
     RGBC_LIGHT = 15;
+    // WIRST_TILT (16) is skipped; clients should use get/setPhysicalModel()
+    // instead.
   }
 
   // Type of sensor
@@ -1006,12 +1017,27 @@ message AudioFormat {
     Stereo = 1;
   }
 
+  enum DeliveryMode {
+      // The audio queue will block and wait until the emulator requests packets.
+      // The client does not have to throttle and can push packets at will.
+      // This can result in the client falling behind.
+      MODE_UNSPECIFIED = 0;
+      // Audio packets will be delivered in real time (when possible). The audio queue
+      // will be overwritten with incoming data if data is made available.
+      // This means the client needs to control timing properly, or packets will get
+      // overwritten.
+      MODE_REAL_TIME = 1; //
+  }
   // Sampling rate to use, defaulting to 44100 if this is not set.
   // Note, that android devices typically will not use a sampling
   // rate higher than 48kHz. See https://developer.android.com/ndk/guides/audio.
   uint64 samplingRate = 1;
   Channels channels = 2;
   SampleFormat format = 3;
+
+  // [Input Only]
+  // The mode used when delivering audio packets.
+  DeliveryMode mode = 4;
 }
 
 message AudioPacket {

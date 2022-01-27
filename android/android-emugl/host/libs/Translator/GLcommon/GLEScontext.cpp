@@ -19,6 +19,7 @@
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
 #include "emugl/common/feature_control.h"
+#include "emugl/common/logging.h"
 
 #include <GLcommon/GLconversion_macros.h>
 #include <GLcommon/GLSnapshotSerializers.h>
@@ -30,7 +31,6 @@
 #include <GLES2/gl2ext.h>
 #include <GLES3/gl3.h>
 #include <GLES3/gl31.h>
-#include <OpenglCodecCommon/ErrorLog.h>
 #include <GLcommon/GLESvalidate.h>
 #include <GLcommon/TextureUtils.h>
 #include <GLcommon/FramebufferData.h>
@@ -291,7 +291,7 @@ static GLuint getIndex(GLenum indices_type, const GLvoid* indices, unsigned int 
         case GL_UNSIGNED_INT:
             return static_cast<const GLuint*>(indices)[i];
         default:
-            ERR("**** ERROR unknown type 0x%x (%s,%d)\n", indices_type, __FUNCTION__,__LINE__);
+            ERR("**** ERROR unknown type 0x%x", indices_type);
             return 0;
     }
 }
@@ -919,9 +919,7 @@ void GLEScontext::postLoadRestoreCtx() {
         err = dispatcher.glGetError();
 #ifdef _DEBUG
         if (err) {
-            fprintf(stderr,
-                    "warning: get GL error %d while restoring a snapshot\n",
-                    err);
+            ERR("warning: get GL error %d while restoring a snapshot", err);
         }
 #endif
     } while (err != 0);
@@ -967,7 +965,7 @@ const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsi
                                         bufferName));
         if(offset >= vbo->getSize() || vbo->getSize() - offset < size) {
 #ifdef _DEBUG
-            fprintf(stderr, "Warning: Invalid pointer offset %u, arrType %d, type %d\n", offset, arrType, type);
+            ERR("Warning: Invalid pointer offset %u, arrType %d, type %d", offset, arrType, type);
 #endif
             return nullptr;
         }
@@ -1760,11 +1758,11 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
                 hasEtc2Support = true; // Supports ETC2 underneath
             } else {
                 // It is unusual to support only some. Record what happened.
-                fprintf(stderr, "%s: Not supporting etc2: %d vs %d\n", __func__,
-                        numEtc2FormatsSupported, numEtc2Formats);
+                ERR("Not supporting etc2: %d vs %d",
+                    numEtc2FormatsSupported, numEtc2Formats);
                 for (auto it : found) {
                     if (!it.second) {
-                        fprintf(stderr, "%s: Not found: 0x%x\n", __func__, it.first);
+                        ERR("Not found: 0x%x", it.first);
                     }
                 }
             }
@@ -1773,11 +1771,11 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
                 hasAstcSupport = true; // Supports ASTC underneath
             } else {
                 // It is unusual to support only some. Record what happened.
-                fprintf(stderr, "%s: Not supporting astc: %d vs %d\n", __func__,
-                        numAstcFormatsSupported, numAstcFormats);
+                ERR("Not supporting astc: %d vs %d",
+                    numAstcFormatsSupported, numAstcFormats);
                 for (auto it : found) {
                     if (!it.second) {
-                        fprintf(stderr, "%s: Not found: 0x%x\n", __func__, it.first);
+                        ERR("Not found: 0x%x", it.first);
                     }
                 }
             }
@@ -2130,7 +2128,7 @@ void GLEScontext::initEmulatedEGLSurface(GLint width, GLint height,
         dispatcher().glRenderbufferStorageMultisample(GL_RENDERBUFFER, multisamples, colorFormat, width, height);
         GLint err = dispatcher().glGetError();
         if (err != GL_NO_ERROR) {
-            fprintf(stderr, "%s: error setting up multisampled RBO! 0x%x\n", __func__, err);
+            ERR("error setting up multisampled RBO! 0x%x", err);
         }
     } else {
         dispatcher().glRenderbufferStorage(GL_RENDERBUFFER, colorFormat, width, height);
@@ -2141,7 +2139,7 @@ void GLEScontext::initEmulatedEGLSurface(GLint width, GLint height,
         dispatcher().glRenderbufferStorageMultisample(GL_RENDERBUFFER, multisamples, depthstencilFormat, width, height);
         GLint err = dispatcher().glGetError();
         if (err != GL_NO_ERROR) {
-            fprintf(stderr, "%s: error setting up multisampled RBO! 0x%x\n", __func__, err);
+            ERR("error setting up multisampled RBO! 0x%x", err);
         }
     } else {
         dispatcher().glRenderbufferStorage(GL_RENDERBUFFER, depthstencilFormat, width, height);
@@ -2607,7 +2605,7 @@ GLuint GLEScontext::compileAndValidateCoreShader(GLenum shaderType, const char* 
         gl.glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
         std::vector<char> infoLog(infoLogLength + 1, 0);
         gl.glGetShaderInfoLog(shader, infoLogLength, nullptr, &infoLog[0]);
-        fprintf(stderr, "%s: fail to compile. infolog %s\n", __func__, &infoLog[0]);
+        ERR("fail to compile. infolog %s", &infoLog[0]);
     }
 
     return shader;
@@ -2630,9 +2628,7 @@ GLuint GLEScontext::linkAndValidateProgram(GLuint vshader, GLuint fshader) {
         gl.glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
         std::vector<char> infoLog(infoLogLength + 1, 0);
         gl.glGetProgramInfoLog(program, infoLogLength, nullptr, &infoLog[0]);
-
-        fprintf(stderr, "%s: fail to link program. infolog: %s\n", __func__,
-                &infoLog[0]);
+        ERR("fail to link program. infolog: %s", &infoLog[0]);
     }
 
     gl.glDeleteShader(vshader);

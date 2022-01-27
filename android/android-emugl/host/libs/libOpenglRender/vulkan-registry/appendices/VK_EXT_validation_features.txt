@@ -1,0 +1,54 @@
+// Copyright 2018-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_EXT_validation_features.txt[]
+
+=== Other Extension Metadata
+
+*Last Modified Date*::
+    2018-11-14
+*IP Status*::
+    No known IP claims.
+*Contributors*::
+  - Karl Schultz, LunarG
+  - Dave Houlton, LunarG
+  - Mark Lobodzinski, LunarG
+  - Camden Stocker, LunarG
+  - Tony Barbour, LunarG
+  - John Zulauf, LunarG
+
+=== Description
+
+This extension provides the slink:VkValidationFeaturesEXT struct that can be
+included in the pname:pNext chain of the slink:VkInstanceCreateInfo
+structure passed as the pname:pCreateInfo parameter of
+flink:vkCreateInstance.
+The structure contains an array of elink:VkValidationFeatureEnableEXT enum
+values that enable specific validation features that are disabled by
+default.
+The structure also contains an array of elink:VkValidationFeatureDisableEXT
+enum values that disable specific validation layer features that are enabled
+by default.
+
+[NOTE]
+.Note
+====
+The `apiext:VK_EXT_validation_features` extension subsumes all the
+functionality provided in the `apiext:VK_EXT_validation_flags` extension.
+====
+
+include::{generated}/interfaces/VK_EXT_validation_features.txt[]
+
+=== Version History
+
+ * Revision 1, 2018-11-14 (Karl Schultz)
+   - Initial revision
+ * Revision 2, 2019-08-06 (Mark Lobodzinski)
+   - Add Best Practices enable
+ * Revision 3, 2020-03-04 (Tony Barbour)
+   - Add Debug Printf enable
+ * Revision 4, 2020-07-29 (John Zulauf)
+   - Add Synchronization Validation enable
+ * Revision 5, 2021-05-18 (Tony Barbour)
+   - Add Shader Validation Cache disable

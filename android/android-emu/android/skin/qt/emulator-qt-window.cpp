@@ -74,7 +74,10 @@
 #include <QBitmap>
 #include <QCheckBox>
 #include <QCursor>
+#if QT_VERSION >= 0x060000
+#else
 #include <QDesktopWidget>
+#endif  // QT_VERSION
 #include <QFileDialog>
 #include <QIcon>
 #include <QLabel>
@@ -249,7 +252,11 @@ void SkinSurfaceBitmap::applyPendingTransformations() {
             image = image.mirrored(true, true);
         } else {
             // a simple transformation is still enough here
+#if QT_VERSION >= 0x060000
+            QTransform transform;
+#else
             QMatrix transform;
+#endif
             transform.rotate(pendingRotation * 90);
             image = image.transformed(transform);
         }
@@ -1424,8 +1431,37 @@ void EmulatorQtWindow::getSkinPixmap() {
     QString skinPath = QString(skinDir) + QDir::separator()
                        + skinName + QDir::separator()
                        + skinFileName;
-
-    mRawSkinPixmap = new QPixmap(skinPath);
+    // Emulator UI hides the border of the skin image (frameless style), which
+    // is done by mask off the transparent pixels of the skin image.
+    // But from pixel4_a, the skin image also sets transparent pixels for the
+    // display. To avoid masking off the display, we replace the alpha vaule of
+    // these pixels as 255 (opage).
+    QImage img(skinPath);
+    for (int row = 0; row < img.height(); row++) {
+        int left = -1, right = -1;
+        for (int col = 0; col < img.width(); col++) {
+            if (qAlpha(img.pixel(col, row)) != 0) {
+                left = col;
+                break;
+            }
+        }
+        for (int col = img.width(); col >= 0; col--) {
+            if (qAlpha(img.pixel(col, row)) != 0) {
+                right = col;
+                break;
+            }
+        }
+        if (left == -1 || right == -1 || left == right) {
+            continue;
+        }
+        for (int col = left; col <= right; col++) {
+            QRgb pixel = img.pixel(col, row);
+            if (qAlpha(pixel) == 0) {
+                img.setPixel(col, row, qRgba(qRed(pixel), qGreen(pixel), qBlue(pixel), 255));
+            }
+        }
+    }
+    mRawSkinPixmap = new QPixmap(QPixmap::fromImage(img));
 }
 
 void EmulatorQtWindow::paintEvent(QPaintEvent*) {
@@ -1473,6 +1509,14 @@ void EmulatorQtWindow::show() {
 
     QObject::connect(window()->windowHandle(), &QWindow::screenChanged, this,
                      &EmulatorQtWindow::onScreenChanged);
+#if QT_VERSION >= 0x060000
+    QObject::connect(qGuiApp, &QGuiApplication::primaryScreenChanged, this,
+                     &EmulatorQtWindow::onScreenConfigChanged);
+    QObject::connect(qGuiApp, &QGuiApplication::screenAdded,
+            this, &EmulatorQtWindow::onScreenConfigChanged);
+    QObject::connect(qGuiApp, &QGuiApplication::screenRemoved,
+            this, &EmulatorQtWindow::onScreenConfigChanged);
+#else
     // On Mac, the above function won't be triggered when you plug in a new
     // monitor and the OS moves the emulator to the new screen. In such
     // situation, it will trigger screenCountChanged.
@@ -1482,6 +1526,7 @@ void EmulatorQtWindow::show() {
             this, &EmulatorQtWindow::onScreenConfigChanged);
     QObject::connect(qApp->desktop(), &QDesktopWidget::workAreaResized,
             this, &EmulatorQtWindow::onScreenConfigChanged);
+#endif
 }
 
 void EmulatorQtWindow::setOnTop(bool onTop) {
@@ -1728,9 +1773,17 @@ void EmulatorQtWindow::slot_getScreenDimensions(QRect* out_rect,
     out_rect->setRect(0, 0, 1920, 1080); // Arbitrary default
 
     D("slot_getScreenDimensions: Getting screen geometry");
+#if QT_VERSION >= 0x060000
+    auto newScreen = window()->windowHandle()->screen();
+    if (!newScreen) {
+        D("Can't get screen geometry. Window is off screen.");
+    }
+    QRect rect = newScreen->geometry();
+#else
     QRect rect = ((QApplication*)QApplication::instance())
                          ->desktop()
                          ->screenGeometry();
+#endif
     D("slot_getScreenDimensions: Getting screen geometry (done)");
     out_rect->setX(rect.x());
     out_rect->setY(rect.y());
@@ -1800,6 +1853,16 @@ void EmulatorQtWindow::slot_getFramePos(int* xx,
 void EmulatorQtWindow::slot_isWindowFullyVisible(bool* out_value,
                                                  QSemaphore* semaphore) {
     QSemaphoreReleaser semReleaser(semaphore);
+#if QT_VERSION >= 0x060000
+    auto newScreen = mContainer.window()->windowHandle()->screen();
+    if (!newScreen) {
+        // Window is not on any screen
+        *out_value = false;
+    } else {
+        QRect screenGeo = newScreen->geometry();
+        *out_value = screenGeo.contains(mContainer.geometry());
+    }
+#else
     QDesktopWidget* desktop =
             ((QApplication*)QApplication::instance())->desktop();
     int screenNum =
@@ -1812,17 +1875,23 @@ void EmulatorQtWindow::slot_isWindowFullyVisible(bool* out_value,
         QRect screenGeo = desktop->screenGeometry(screenNum);
         *out_value = screenGeo.contains(mContainer.geometry());
     }
+#endif
 }
 
 void EmulatorQtWindow::slot_isWindowOffScreen(bool* out_value,
                                               QSemaphore* semaphore) {
     QSemaphoreReleaser semReleaser(semaphore);
+#if QT_VERSION >= 0x060000
+    auto newScreen = mContainer.window()->windowHandle()->screen();
+    *out_value = (newScreen == nullptr);
+#else
     QDesktopWidget* desktop =
             ((QApplication*)QApplication::instance())->desktop();
     int screenNum =
             desktop->screenNumber(&mContainer);  // Screen holding the app
 
     *out_value = (screenNum < 0);
+#endif  // QT_VERSION
 }
 
 void EmulatorQtWindow::pollEvent(SkinEvent* event,
@@ -2559,11 +2628,21 @@ SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
     }
 }
 
+#if QT_VERSION >= 0x060000
+void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
+                                        SkinMouseButtonType button,
+                                        const QPointF& posF,
+                                        const QPointF& gPosF,
+                                        bool skipSync) {
+    QPoint pos((int) posF.x(), (int) posF.y());
+    QPoint gPos((int) gPosF.x(), (int) gPosF.y());
+#else
 void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
                                         SkinMouseButtonType button,
                                         const QPoint& pos,
                                         const QPoint& gPos,
                                         bool skipSync) {
+#endif  // QT_VERSION
     if (type == kEventMouseButtonDown) {
         mToolWindow->reportMouseButtonDown();
     }
@@ -2596,8 +2675,13 @@ void EmulatorQtWindow::handlePenEvent(SkinEventType type,
                 penOrientation(tiltToRotation(event->xTilt(), event->yTilt()));
     skin_event->u.pen.button_pressed =
                     ((event->buttons() & Qt::RightButton) == Qt::RightButton);
+#if QT_VERSION >= 0x060000
+    skin_event->u.pen.rubber_pointer =
+                            (event->pointerType() == QPointingDevice::PointerType::Eraser);
+#else
     skin_event->u.pen.rubber_pointer =
                             (event->pointerType() == QTabletEvent::Eraser);
+#endif  // QT_VERSION
     skin_event->u.pen.x = event->pos().x();
     skin_event->u.pen.y = event->pos().y();
     skin_event->u.pen.x_global = event->globalPos().x();
@@ -3057,24 +3141,42 @@ void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
     } else if (android::featurecontrol::isEnabled(
                        android::featurecontrol::VirtioMouse)) {
         if (mMouseGrabbed) {
+#if QT_VERSION >= 0x060000
+            handleMouseWheelEvent(event->angleDelta().y() / 8, Qt::Orientation::Vertical);
+            handleMouseWheelEvent(event->angleDelta().x() / 8, Qt::Orientation::Horizontal);
+#else
             handleMouseWheelEvent(event->delta() / 8, event->orientation());
+#endif  // QT_VERSION
         }
     } else {
         if (!mWheelScrollTimer.isActive()) {
+#if QT_VERSION >= 0x060000
+            handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft,
+                             event->position(), QPointF(0.0, 0.0));
+            mWheelScrollPos = event->position();
+            mWheelScrollTimer.start();
+            mWheelScrollPos.setY(mWheelScrollPos.y() + event->angleDelta().y() / 8);
+            handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mWheelScrollPos,
+                             QPointF(0.0, 0.0));
+#else
             handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft,
                              event->pos(), QPoint(0, 0));
             mWheelScrollPos = event->pos();
+            mWheelScrollTimer.start();
+            mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
+            handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mWheelScrollPos,
+                             QPoint(0, 0));
+#endif  // QT_VERSION
         }
-
-        mWheelScrollTimer.start();
-        mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
-        handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mWheelScrollPos,
-                         QPoint(0, 0));
     }
 }
 
 void EmulatorQtWindow::wheelScrollTimeout() {
+#if QT_VERSION >= 0x060000
+    handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft, mWheelScrollPos, QPointF(0.0 ,0.0));
+#else
     handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft, mWheelScrollPos, QPoint(0,0));
+#endif  // QT_VERSION
 }
 
 void EmulatorQtWindow::checkAdbVersionAndWarn() {
