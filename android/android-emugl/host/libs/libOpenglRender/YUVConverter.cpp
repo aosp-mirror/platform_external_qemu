@@ -18,6 +18,8 @@
 
 #include "DispatchTables.h"
 #include "emugl/common/feature_control.h"
+#include "emugl/common/misc.h"
+
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -58,8 +60,9 @@ static void getYUVOffsets(int width, int height, FrameworkFormat format,
     uint32_t totalSize, yStride, cStride, cHeight, cSize, align;
     switch (format) {
     case FRAMEWORK_FORMAT_YV12:
-        // Luma stride is 32 bytes aligned.
-        align = 32;
+        // Luma stride is 32 bytes aligned in minigbm, 16 in goldfish
+        // gralloc.
+        align = emugl::getGrallocImplementation() == MINIGBM ? 32 : 16;
         yStride = (width + (align - 1)) & ~(align - 1);
         // Chroma stride is 16 bytes aligned.
         align = 16;

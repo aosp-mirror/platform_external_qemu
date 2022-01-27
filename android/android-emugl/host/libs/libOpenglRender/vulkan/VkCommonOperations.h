@@ -15,7 +15,6 @@
 
 #include <vulkan/vulkan.h>
 
-#include <memory>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -351,11 +350,6 @@ bool importExternalMemoryDedicatedImage(
 // ColorBuffer operations
 
 bool isColorBufferVulkanCompatible(uint32_t colorBufferHandle);
-
-std::unique_ptr<VkImageCreateInfo> generateColorBufferVkImageCreateInfo(VkFormat format,
-                                                                        uint32_t width,
-                                                                        uint32_t height,
-                                                                        VkImageTiling tiling);
 
 bool setupVkColorBuffer(uint32_t colorBufferHandle,
                         bool vulkanOnly = false,

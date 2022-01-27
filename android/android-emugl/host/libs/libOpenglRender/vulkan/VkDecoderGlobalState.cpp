@@ -51,7 +51,6 @@
 #include "emugl/common/logging.h"
 #include "emugl/common/vm_operations.h"
 #include "vk_util.h"
-#include "vulkan/vk_enum_string_helper.h"
 
 #ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
@@ -4869,76 +4868,6 @@ public:
         for (uint32_t i = 0; i < count; ++i) {
             mut[i] = transformExternalMemoryProperties_fromhost(mut[i], GUEST_EXTERNAL_MEMORY_HANDLE_TYPES);
         }
-    }
-
-    void transformImpl_VkImageCreateInfo_tohost(const VkImageCreateInfo* pImageCreateInfos,
-                                                uint32_t count) {
-        for (uint32_t i = 0; i < count; i++) {
-            VkImageCreateInfo& imageCreateInfo =
-                const_cast<VkImageCreateInfo&>(pImageCreateInfos[i]);
-            const VkExternalMemoryImageCreateInfo* pExternalMemoryImageCi =
-                vk_find_struct<VkExternalMemoryImageCreateInfo>(&imageCreateInfo);
-
-            if (pExternalMemoryImageCi &&
-                (pExternalMemoryImageCi->handleTypes &
-                 VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID)) {
-                std::unique_ptr<VkImageCreateInfo> colorBufferVkImageCi =
-                    goldfish_vk::generateColorBufferVkImageCreateInfo(
-                        imageCreateInfo.format, imageCreateInfo.extent.width,
-                        imageCreateInfo.extent.height, imageCreateInfo.tiling);
-                if (imageCreateInfo.flags & (~colorBufferVkImageCi->flags)) {
-                    ERR("The VkImageCreateInfo to import AHardwareBuffer contains unsupported "
-                        "VkImageCreateFlags. All supported VkImageCreateFlags are %s, the input "
-                        "VkImageCreateInfo requires support for %s.",
-                        string_VkImageCreateFlags(colorBufferVkImageCi->flags).c_str(),
-                        string_VkImageCreateFlags(imageCreateInfo.flags).c_str());
-                }
-                imageCreateInfo.flags |= colorBufferVkImageCi->flags;
-                if (imageCreateInfo.imageType != colorBufferVkImageCi->imageType) {
-                    ERR("The VkImageCreateInfo to import AHardwareBuffer has an unexpected "
-                        "VkImageType: %s, %s expected.",
-                        string_VkImageType(imageCreateInfo.imageType),
-                        string_VkImageType(colorBufferVkImageCi->imageType));
-                }
-                // VkImageCreateInfo::extent::{width, height} are guaranteed to match.
-                if (imageCreateInfo.extent.depth != colorBufferVkImageCi->extent.depth) {
-                    ERR("The VkImageCreateInfo to import AHardwareBuffer has an unexpected "
-                        "VkExtent::depth: %" PRIu32 ", %" PRIu32 " expected.",
-                        imageCreateInfo.extent.depth, colorBufferVkImageCi->extent.depth);
-                }
-                if (imageCreateInfo.mipLevels != colorBufferVkImageCi->mipLevels) {
-                    ERR("The VkImageCreateInfo to import AHardwareBuffer has an unexpected "
-                        "mipLevels: %" PRIu32 ", %" PRIu32 " expected.",
-                        imageCreateInfo.mipLevels, colorBufferVkImageCi->mipLevels);
-                }
-                if (imageCreateInfo.arrayLayers != colorBufferVkImageCi->arrayLayers) {
-                    ERR("The VkImageCreateInfo to import AHardwareBuffer has an unexpected "
-                        "arrayLayers: %" PRIu32 ", %" PRIu32 " expected.",
-                        imageCreateInfo.arrayLayers, colorBufferVkImageCi->arrayLayers);
-                }
-                if (imageCreateInfo.samples != colorBufferVkImageCi->samples) {
-                    ERR("The VkImageCreateInfo to import AHardwareBuffer has an unexpected "
-                        "VkSampleCountFlagBits: %s, %s expected.",
-                        string_VkSampleCountFlagBits(imageCreateInfo.samples),
-                        string_VkSampleCountFlagBits(colorBufferVkImageCi->samples));
-                }
-                // VkImageCreateInfo::tiling is guaranteed to match.
-                if (imageCreateInfo.usage & (~colorBufferVkImageCi->usage)) {
-                    ERR("The VkImageCreateInfo to import AHardwareBuffer contains unsupported "
-                        "VkImageUsageFlags. All supported VkImageUsageFlags are %s, the input "
-                        "VkImageCreateInfo requires support for %s.",
-                        string_VkImageUsageFlags(imageCreateInfo.usage).c_str(),
-                        string_VkImageUsageFlags(colorBufferVkImageCi->usage).c_str());
-                }
-                imageCreateInfo.usage |= colorBufferVkImageCi->usage;
-                // VkImageCreateInfo::{sharingMode, queueFamilyIndexCount, pQueueFamilyIndices,
-                // initialLayout} aren't filled in generateColorBufferVkImageCreateInfo.
-            }
-        }
-    }
-
-    void transformImpl_VkImageCreateInfo_fromhost(const VkImageCreateInfo*, uint32_t) {
-        GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER)) << "Not yet implemented.";
     }
 
 #define DEFINE_EXTERNAL_HANDLE_TYPE_TRANSFORM(type, field) \
