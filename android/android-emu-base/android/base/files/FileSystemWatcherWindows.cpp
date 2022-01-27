@@ -66,12 +66,12 @@ public:
         bool expected = true;
         if (mRunning.compare_exchange_strong(expected, false)) {
             CancelIoEx(mDirHandle, NULL);
-            CloseHandle(mDirHandle);
             mWatcherThread.join();
         }
     }
 
 private:
+
     bool watchForChanges() {
         const Win32UnicodeString szDirectory(mPath.c_str());
         mDirHandle = CreateFileW(
@@ -93,6 +93,7 @@ private:
                                               FILE_NOTIFY_CHANGE_ATTRIBUTES,
                                       &dwBytesReturned, NULL, NULL) == 0) {
                 CloseHandle(mDirHandle);
+                mDirHandle = INVALID_HANDLE_VALUE;
                 return false;
             }
             for (FILE_NOTIFY_INFORMATION* info =
@@ -123,6 +124,8 @@ private:
             }
         }
 
+        CloseHandle(mDirHandle);
+        mDirHandle = INVALID_HANDLE_VALUE;
         return true;
     }
 

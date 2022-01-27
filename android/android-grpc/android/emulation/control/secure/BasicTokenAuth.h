@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include <grpcpp/grpcpp.h>  // for Status
+#include <grpcpp/grpcpp.h>                                 // for string_ref
+#include <memory>                                          // for unique_ptr
+#include <string>                                          // for string
+#include <vector>                                          // for vector
 
-#include <string>  // for string
-
+#include "absl/status/status.h"                            // for Status
 #include "grpcpp/security/auth_metadata_processor_impl.h"  // for AuthMetada...
 
 namespace android {
@@ -59,8 +61,10 @@ public:
                          OutputMetadata* consumed_auth_metadata,
                          OutputMetadata* response_metadata) override;
 
-    // This method should return true if the given token is valid.
-    virtual bool isTokenValid(grpc::string_ref token) = 0;
+    // This method should return true if the given token is valid for the
+    // provided path.
+    virtual absl::Status isTokenValid(grpc::string_ref path,
+                                      grpc::string_ref token) = 0;
 
     // Note that the header should be in lower case (gRPC uses HTTP/2)
     //
@@ -72,6 +76,9 @@ public:
     // However, header field names MUST be converted to lowercase
     // prior to their encoding in HTTP/2.
     const static inline std::string DEFAULT_HEADER{"authorization"};
+
+    // The metada that contains the path of the method that is being invoked.
+    const static inline std::string PATH{":path"};
 
 private:
     std::string mHeader;
@@ -88,12 +95,30 @@ class StaticTokenAuth : public BasicTokenAuth {
 public:
     StaticTokenAuth(std::string token);
     ~StaticTokenAuth() = default;
-    bool isTokenValid(grpc::string_ref token) override;
+    absl::Status isTokenValid(grpc::string_ref path,
+                              grpc::string_ref token) override;
 
     const static inline std::string DEFAULT_BEARER{"Bearer "};
 
 private:
     std::string mStaticToken;
+};
+
+// A class that will validate that any of the provided validatores
+// can validate the header:
+//
+// authorization: Bearer <token>
+//
+// Only one of the validators has to succeed.
+class AnyTokenAuth : public BasicTokenAuth {
+public:
+    AnyTokenAuth(std::vector<std::unique_ptr<BasicTokenAuth>> validators);
+    ~AnyTokenAuth() = default;
+    absl::Status isTokenValid(grpc::string_ref path,
+                              grpc::string_ref token) override;
+
+private:
+    std::vector<std::unique_ptr<BasicTokenAuth>> mValidators;
 };
 }  // namespace control
 }  // namespace emulation
