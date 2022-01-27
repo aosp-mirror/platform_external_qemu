@@ -15,6 +15,7 @@
 
 #include <stdint.h>                         // for uint8_t
 #include <fstream>                          // for basic_istream, basic_stre...
+#include <initializer_list>                 // for initializer_list
 #include <iterator>                         // for istreambuf_iterator
 #include <tuple>                            // for tuple_element<>::type
 #include <utility>                          // for move
@@ -25,7 +26,7 @@
 #include "absl/strings/string_view.h"       // for string_view
 #include "android/base/misc/StringUtils.h"  // for EndsWith
 #include "android/base/system/System.h"     // for System
-#include "android/utils/debug.h"            // for derror, dwarning
+#include "android/utils/debug.h"            // for VERBOSE_INFO, VERBOSE_grpc
 #include "tink/jwt/jwk_set_converter.h"     // for JwkSetToPublicKeysetHandle
 #include "tink/util/statusor.h"             // for StatusOr
 
@@ -48,8 +49,9 @@ using base::System;
 
 JwkDirectoryObserver::JwkDirectoryObserver(Path jwksDir,
                                            KeysetUpdatedCallback callback,
+                                           PathFilterPredicate filter,
                                            bool startImmediately)
-    : mJwkPath(jwksDir), mCallback(callback) {
+    : mPathFilter(filter), mJwkPath(jwksDir), mCallback(callback) {
     mWatcher = FileSystemWatcher::getFileSystemWatcher(
             jwksDir,
             [=](auto change, auto path) { fileChangeHandler(change, path); });
@@ -63,7 +65,6 @@ JwkDirectoryObserver::JwkDirectoryObserver(Path jwksDir,
         }
     }
 }
-
 
 bool JwkDirectoryObserver::start() {
     bool expected = false;
@@ -90,6 +91,13 @@ void JwkDirectoryObserver::stop() {
 void JwkDirectoryObserver::fileChangeHandler(
         FileSystemWatcher::WatcherChangeType change,
         Path path) {
+    DD("Filechange handler %d for %s", change, path.c_str());
+    if (!mPathFilter(path)) {
+        // Ignore files of the given type.
+        DD("Ignoring %s", path.c_str());
+        return;
+    }
+
     switch (change) {
         case FileSystemWatcher::WatcherChangeType::Created:
             [[fallthrough]];
@@ -99,13 +107,18 @@ void JwkDirectoryObserver::fileChangeHandler(
             if (!maybeJson.ok()) {
                 derror("Failed to extract keys: %s",
                        maybeJson.status().message().data());
+                return;
             }
             mPublicKeys[path] = maybeJson.value();
             break;
         }
         case FileSystemWatcher::WatcherChangeType::Deleted:
-            DD("Deleted %s (in set: %s)", path.c_str(), mPublicKeys.count(path) ? "yes" : "no");
-            mPublicKeys.erase(path);
+            DD("Deleted %s (in set: %s)", path.c_str(),
+               mPublicKeys.count(path) ? "yes" : "no");
+            if (mPublicKeys.erase(path)) {
+                VERBOSE_INFO(grpc, "Removed JSON Web Key Sets from %s",
+                             path.c_str());
+            }
     };
 
     constructHandleAndNotify();
@@ -151,13 +164,11 @@ static std::string readFile(Path fname) {
     return contents;
 }
 
-absl::StatusOr<json> JwkDirectoryObserver::extractKeys(Path fname) {
-    if (!android::base::EndsWith(fname, kJwkExt)) {
-        // Only accept jwk files.
-        return absl::InvalidArgumentError(
-                absl::StrFormat("Ignoring: %s, incorrect extension.", fname));
-    }
+bool JwkDirectoryObserver::acceptJwkExtOnly(Path path) {
+    return android::base::EndsWith(path, kJwkExt);
+}
 
+absl::StatusOr<json> JwkDirectoryObserver::extractKeys(Path fname) {
     auto jsonFile = readFile(fname);
     DD("Loaded %s, the json is %s.", jsonFile.c_str(),
        json::jsonaccept(jsonFile) ? "valid" : "invalid");
@@ -175,7 +186,8 @@ absl::StatusOr<json> JwkDirectoryObserver::extractKeys(Path fname) {
                 jsonFile));
     }
 
-    DD("Loaded  JWK %s.", fname.c_str());
+    VERBOSE_INFO(grpc, "Loaded  JSON Web Key Sets from %s", fname.c_str());
+
     // We should have a "keys" array (see:
     // https://datatracker.ietf.org/doc/html/rfc7517)
     return json::parse(*jsonSnippet)["keys"];

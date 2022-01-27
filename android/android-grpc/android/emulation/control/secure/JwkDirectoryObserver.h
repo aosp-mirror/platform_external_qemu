@@ -60,13 +60,21 @@ public:
     using KeysetUpdatedCallback =
             std::function<void(std::unique_ptr<KeysetHandle>)>;
 
+    using PathFilterPredicate = std::function<bool(Path)>;
+
     // Observe the given directory for jwk files, calling
     // the given callback when keyset changes are detected.
     // Set startImmediately to true if start should be called.
     //
-
+    // \jwksDir| Path to observe for file changes
+    // \callback| callback to invoke whenever we detect changes
+    // |filter| Filter to use, when this predicate return true the file will be processed.
+    // |startImmediately| True if we immediately should attemp to observe file changes.
+    //
+    // Note: setting startImmediately to true means you will not detect failures in the watcher.
     JwkDirectoryObserver(Path jwksDir,
                          KeysetUpdatedCallback callback,
+                         PathFilterPredicate filter = JwkDirectoryObserver::acceptJwkExtOnly,
                          bool startImmediately = true);
     ~JwkDirectoryObserver() = default;
 
@@ -81,6 +89,7 @@ public:
     void stop();
 
 private:
+    static bool acceptJwkExtOnly(Path path);
     void fileChangeHandler(FileSystemWatcher::WatcherChangeType change,
                            Path path);
 
@@ -88,11 +97,13 @@ private:
     std::string mergeKeys();
     static ::absl::StatusOr<json> extractKeys(Path file);
 
+    PathFilterPredicate mPathFilter;
     std::unordered_map<Path, json> mPublicKeys;
     Path mJwkPath;
     KeysetUpdatedCallback mCallback;
     std::unique_ptr<FileSystemWatcher> mWatcher;
     std::atomic_bool mRunning{false};
+
 
     static constexpr const std::string_view kJwkExt{".jwk"};
 };

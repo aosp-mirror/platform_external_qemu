@@ -36,6 +36,7 @@
 #include "android/emulation/control/interceptor/LoggingInterceptor.h"
 #include "android/emulation/control/interceptor/MetricsInterceptor.h"
 #include "android/emulation/control/secure/BasicTokenAuth.h"
+#include "android/emulation/control/secure/JwtTokenAuth.h"
 #include "android/emulation/control/utils/GrpcAndroidLogAdapter.h"
 #include "grpc/grpc_security_constants.h"
 #include "grpcpp/server_builder_impl.h"
@@ -52,14 +53,26 @@ using grpc::ServerBuilder;
 using grpc::ServerCompletionQueue;
 using grpc::Service;
 
+std::ostream& operator<<(
+        std::ostream& os,
+        const EmulatorControllerService::Builder::Authorization& a) {
+    if (a == EmulatorControllerService::Builder::Authorization::None) {
+        os << "none";
+    } else if ((int)a & (int)EmulatorControllerService::Builder::Authorization::
+                                StaticToken) {
+        os << "+token";
+    } else if ((int)a & (int)EmulatorControllerService::Builder::Authorization::
+                                JwtToken) {
+        os << "+jwt";
+    }
+    return os;
+}
+
 // This class owns all the created resources, and is responsible for stopping
 // and properly releasing resources.
 class EmulatorControllerServiceImpl : public EmulatorControllerService {
 public:
-
-    ~EmulatorControllerServiceImpl() {
-        stop();
-    }
+    ~EmulatorControllerServiceImpl() { stop(); }
 
     void stop() override {
         LOG(INFO) << "Shutting down gRPC endpoint";
@@ -93,13 +106,13 @@ public:
     void wait() override { mServer->Wait(); }
 
     // Returns a new completionQueue if possible.
-    std::vector<ServerCompletionQueue*> newCompletionQueue(size_t nr)  override {
-        if (queueidx + nr  > mCompletionQueues.size()) {
+    std::vector<ServerCompletionQueue*> newCompletionQueue(size_t nr) override {
+        if (queueidx + nr > mCompletionQueues.size()) {
             LOG(ERROR) << "Too many queues requested, no new queues available";
             return {};
         }
         std::vector<ServerCompletionQueue*> queues;
-        for(int i = 0; i < nr; i++) {
+        for (int i = 0; i < nr; i++) {
             queues.push_back(mCompletionQueues[queueidx++].get());
         }
         return queues;
@@ -170,6 +183,15 @@ Builder& Builder::withSecureService(Service* service) {
 Builder& Builder::withAuthToken(std::string token) {
     mAuthToken = token;
     mValid = !token.empty();
+    mAuthMode = mAuthMode | Authorization::StaticToken;
+    return *this;
+}
+
+Builder& Builder::withJwtAuthDiscoveryDir(std::string jwks, std::string jwkLoadedPath) {
+    mJwkPath = jwks;
+    mJwkLoadedPath = jwkLoadedPath;
+    mValid = System::get()->pathExists(jwks) && System::get()->pathCanRead(jwks);
+    mAuthMode = mAuthMode | Authorization::JwtToken;
     return *this;
 }
 
@@ -301,18 +323,33 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
         }
     }
 
-    if (!mAuthToken.empty()) {
+    if (!mAuthToken.empty() || !mJwkPath.empty()) {
         if (mSecurity == Security::Insecure) {
             mBindAddress = "[::1]";
             mCredentials = LocalServerCredentials(LOCAL_TCP);
             mSecurity = Security::Local;
-            LOG(WARNING) << "Token auth requested without tls, restricting "
+            LOG(WARNING) << "Token/JWT auth requested without tls, restricting "
                             "access to localhost.";
         }
-        mCredentials->SetAuthMetadataProcessor(
-                std::make_shared<StaticTokenAuth>(mAuthToken));
-    }
 
+        std::vector<BasicTokenAuth> protectors;
+        if (!mAuthToken.empty() && !mJwkPath.empty()) {
+            auto anyauth = std::vector<std::unique_ptr<BasicTokenAuth>>();
+            anyauth.emplace_back(std::make_unique<StaticTokenAuth>(mAuthToken));
+            anyauth.emplace_back(std::make_unique<JwtTokenAuth>(mJwkPath, mJwkLoadedPath));
+            mCredentials->SetAuthMetadataProcessor(
+                    std::make_shared<AnyTokenAuth>(std::move(anyauth)));
+        } else if (!mAuthToken.empty()) {
+            mCredentials->SetAuthMetadataProcessor(
+                    std::make_shared<StaticTokenAuth>(mAuthToken));
+        } else if (!mJwkPath.empty()) {
+            mCredentials->SetAuthMetadataProcessor(
+                    std::make_shared<JwtTokenAuth>(mJwkPath, mJwkLoadedPath));
+        }
+    } else {
+        dwarning("*** No gRPC protection active, consider launching with the -grpc-use-jwt flag.***");
+
+    }
     // Translate loopback Ipv4/Ipv6 preference ourselves. gRPC resolver can
     // do it slightly differently than us, leading to unexpected results.
     if (mBindAddress == "[::1]" || mBindAddress == "127.0.0.1" ||
@@ -360,8 +397,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
         return nullptr;
 
     LOG(INFO) << "Started GRPC server at " << server_address.c_str()
-              << ", security: " << mSecurity
-              << (mAuthToken.empty() ? "" : "+token");
+              << ", security: " << mSecurity << mAuthMode;
     return std::unique_ptr<EmulatorControllerService>(
             new EmulatorControllerServiceImpl(mPort, std::move(mServices),
                                               service.release(),

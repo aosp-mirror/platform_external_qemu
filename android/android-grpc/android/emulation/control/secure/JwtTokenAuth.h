@@ -16,6 +16,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <string_view>
 
 #include "absl/status/status.h"
 #include "android/emulation/control/secure/BasicTokenAuth.h"
@@ -45,7 +46,7 @@ using Path = std::string;
 //
 class JwtTokenAuth : public BasicTokenAuth {
 public:
-    JwtTokenAuth(Path jwksPath);
+    JwtTokenAuth(Path jwksPath, Path jwksLoadedPath = "");
     ~JwtTokenAuth() = default;
      absl::Status isTokenValid(grpc::string_ref path, grpc::string_ref token) override;
 
@@ -54,6 +55,8 @@ private:
             std::unique_ptr<crypto::tink::KeysetHandle> incomingHandle);
 
     const static inline std::string DEFAULT_BEARER{"Bearer "};
+    static constexpr const std::string_view kJwkExt{".jwk"};
+    Path mJwksLoadedPath;
     std::mutex mKeyhandleAccess;
     absl::Status mTinkInitialized;
     std::unique_ptr<crypto::tink::KeysetHandle> mActiveKeyset;

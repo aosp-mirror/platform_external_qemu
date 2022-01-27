@@ -246,6 +246,7 @@ OPT_PARAM(grpc_tls_key, "<pem>", "File with the private key used to enable gRPC 
 OPT_PARAM(grpc_tls_cer, "<pem>", "File with the public X509 certificate used to enable gRPC TLS.")
 OPT_PARAM(grpc_tls_ca, "<pem>", "File with the Certificate Authorities used to validate client certificates.")
 OPT_FLAG(grpc_use_token, "Use the emulator console token for gRPC authentication.")
+OPT_FLAG(grpc_use_jwt, "Use a signed JWT token for gRPC authentication.")
 OPT_PARAM(idle_grpc_timeout, "<timeout>", "Terminate the emulator if there is no gRPC activity within <timeout> seconds.")
 OPT_PARAM(waterfall, "<mode>", "Mode in which to run waterfall.")
 
