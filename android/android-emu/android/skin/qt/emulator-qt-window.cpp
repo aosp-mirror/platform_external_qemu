@@ -1774,7 +1774,7 @@ void EmulatorQtWindow::slot_getScreenDimensions(QRect* out_rect,
 
     D("slot_getScreenDimensions: Getting screen geometry");
 #if QT_VERSION >= 0x060000
-    auto newScreen = window()->windowHandle()->screen();
+    auto newScreen = window()->windowHandle() ? window()->windowHandle()->screen() : nullptr;
     if (!newScreen) {
         D("Can't get screen geometry. Window is off screen.");
     }
@@ -1854,7 +1854,8 @@ void EmulatorQtWindow::slot_isWindowFullyVisible(bool* out_value,
                                                  QSemaphore* semaphore) {
     QSemaphoreReleaser semReleaser(semaphore);
 #if QT_VERSION >= 0x060000
-    auto newScreen = mContainer.window()->windowHandle()->screen();
+    auto newScreen = mContainer.window()->windowHandle() ?
+            mContainer.window()->windowHandle()->screen() : nullptr;
     if (!newScreen) {
         // Window is not on any screen
         *out_value = false;
@@ -1882,7 +1883,8 @@ void EmulatorQtWindow::slot_isWindowOffScreen(bool* out_value,
                                               QSemaphore* semaphore) {
     QSemaphoreReleaser semReleaser(semaphore);
 #if QT_VERSION >= 0x060000
-    auto newScreen = mContainer.window()->windowHandle()->screen();
+    auto newScreen = mContainer.window()->windowHandle() ?
+            mContainer.window()->windowHandle()->screen() : nullptr;
     *out_value = (newScreen == nullptr);
 #else
     QDesktopWidget* desktop =
@@ -2148,7 +2150,8 @@ void EmulatorQtWindow::onScreenChanged(QScreen* newScreen) {
 }
 
 void EmulatorQtWindow::onScreenConfigChanged() {
-    auto newScreen = window()->windowHandle()->screen();
+    auto newScreen = window()->windowHandle() ?
+            window()->windowHandle()->screen() : nullptr;
     if (newScreen != mCurrentScreen) {
         D("%s: kEventScreenChanged", __FUNCTION__);
         queueSkinEvent(createSkinEvent(kEventScreenChanged));
