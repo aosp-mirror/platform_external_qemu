@@ -1458,7 +1458,7 @@ void ToolWindow::paintEvent(QPaintEvent*) {
 
     double dpr = 1.0;
 #if QT_VERSION >= 0x060000
-    auto newScreen = window()->windowHandle()->screen();
+    auto newScreen = window()->windowHandle() ? window()->windowHandle()->screen() : nullptr;
     if (!newScreen) {
         newScreen = qGuiApp->primaryScreen();
     }
