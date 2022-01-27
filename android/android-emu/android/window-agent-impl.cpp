@@ -274,11 +274,16 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                 },
         .changeResizableDisplay =
                 [](int presetSize) {
+                   if (!resizableEnabled()) {
+                        return false;
+                   }
                     if (const auto win = EmulatorQtWindow::getInstance()) {
                         win->runOnUiThread([win, presetSize]() {
                             win->toolWindow()->presetSizeAdvance((PresetEmulatorSizeType)presetSize);
                         });
+                        return true;
                     }
+                    return false;
                 },
 };
 

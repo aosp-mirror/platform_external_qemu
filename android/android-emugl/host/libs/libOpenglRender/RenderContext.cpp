@@ -23,10 +23,10 @@
 #include "android/base/containers/SmallVector.h"
 
 #include "emugl/common/feature_control.h"
+#include "emugl/common/logging.h"
 #include "emugl/common/misc.h"
 
 #include <assert.h>
-#include <OpenglCodecCommon/ErrorLog.h>
 
 RenderContext* RenderContext::create(EGLDisplay display,
                                      EGLConfig config,
@@ -76,7 +76,7 @@ RenderContext* RenderContext::createImpl(EGLDisplay display,
             display, config, sharedContext, &contextAttribs[0]);
     }
     if (context == EGL_NO_CONTEXT) {
-        fprintf(stderr, "%s: failed to create context (EGL_NO_CONTEXT result)\n", __func__);
+        ERR("Failed to create context (EGL_NO_CONTEXT result)");
         return NULL;
     }
 

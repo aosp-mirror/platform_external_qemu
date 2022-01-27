@@ -1,0 +1,26 @@
+// Copyright 2019-2021 The Khronos Group Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+// Common Valid Usage
+// Common to indirect drawing commands with a pname:countBuffer parameter
+  * [[VUID-{refpage}-countBuffer-02714]]
+    If pname:countBuffer is non-sparse then it must: be bound completely and
+    contiguously to a single sname:VkDeviceMemory object
+  * [[VUID-{refpage}-countBuffer-02715]]
+    pname:countBuffer must: have been created with the
+    ename:VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT bit set
+  * [[VUID-{refpage}-countBufferOffset-02716]]
+    pname:countBufferOffset must: be a multiple of `4`
+  * [[VUID-{refpage}-countBuffer-02717]]
+    The count stored in pname:countBuffer must: be less than or equal to
+    sname:VkPhysicalDeviceLimits::pname:maxDrawIndirectCount
+  * [[VUID-{refpage}-countBufferOffset-04129]]
+    [eq]#(pname:countBufferOffset {plus} code:sizeof(uint32_t))# must: be
+    less than or equal to the size of pname:countBuffer
+ifdef::VK_VERSION_1_2[]
+  * [[VUID-{refpage}-None-04445]]
+    If <<features-drawIndirectCount,drawIndirectCount>> is not enabled this
+    function must: not be used
+endif::VK_VERSION_1_2[]
+// Common Valid Usage

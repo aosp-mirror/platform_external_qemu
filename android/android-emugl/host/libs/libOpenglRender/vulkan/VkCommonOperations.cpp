@@ -19,12 +19,14 @@
 #include "android/base/containers/StaticMap.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/utils/GfxstreamFatalError.h"
 
 #include "FrameBuffer.h"
 #include "VulkanDispatch.h"
 
 #include "common/goldfish_vk_dispatch.h"
 #include "emugl/common/crash_reporter.h"
+#include "emugl/common/logging.h"
 #include "emugl/common/vm_operations.h"
 
 #include <GLES2/gl2.h>
@@ -381,6 +383,7 @@ static std::vector<VkEmulation::ImageSupportInfo> getBasicImageSupportList() {
 
         VK_FORMAT_A2R10G10B10_UINT_PACK32,
         VK_FORMAT_A2R10G10B10_UNORM_PACK32,
+        VK_FORMAT_A2B10G10R10_UNORM_PACK32,
 
         // Compressed texture formats
         VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK,
@@ -778,7 +781,6 @@ VkEmulation* createOrGetGlobalVkEmulation(VulkanDispatch* vk) {
 
     sVkEmulation->physdev = physdevs[maxScoringIndex];
     sVkEmulation->deviceInfo = deviceInfos[maxScoringIndex];
-
     // Postcondition: sVkEmulation has valid device support info
 
     // Ask about image format support here.
@@ -1388,6 +1390,80 @@ static uint32_t lastGoodTypeIndexWithMemoryProperties(
     return 0;
 }
 
+// pNext, sharingMode, queueFamilyIndexCount, pQueueFamilyIndices, and initialLayout won't be
+// filled.
+static std::unique_ptr<VkImageCreateInfo> generateColorBufferVkImageCreateInfo_locked(
+    VkFormat format, uint32_t width, uint32_t height, VkImageTiling tiling) {
+    const VkFormatProperties* maybeFormatProperties = nullptr;
+    for (const auto& supportInfo : sVkEmulation->imageSupportInfo) {
+        if (supportInfo.format == format && supportInfo.supported) {
+            maybeFormatProperties = &supportInfo.formatProps2.formatProperties;
+            break;
+        }
+    }
+    if (!maybeFormatProperties) {
+        ERR("Format %s is not supported.", string_VkFormat(format));
+        return nullptr;
+    }
+    const VkFormatProperties& formatProperties = *maybeFormatProperties;
+
+    constexpr std::pair<VkFormatFeatureFlags, VkImageUsageFlags> formatUsagePairs[] = {
+        {VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT},
+        {VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT, VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT},
+        {VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT, VK_IMAGE_USAGE_SAMPLED_BIT},
+        {VK_FORMAT_FEATURE_TRANSFER_SRC_BIT, VK_IMAGE_USAGE_TRANSFER_SRC_BIT},
+        {VK_FORMAT_FEATURE_TRANSFER_DST_BIT, VK_IMAGE_USAGE_TRANSFER_DST_BIT},
+        {VK_FORMAT_FEATURE_BLIT_SRC_BIT, VK_IMAGE_USAGE_TRANSFER_SRC_BIT},
+    };
+    VkFormatFeatureFlags tilingFeatures = (tiling == VK_IMAGE_TILING_OPTIMAL)
+                                              ? formatProperties.optimalTilingFeatures
+                                              : formatProperties.linearTilingFeatures;
+
+    VkImageUsageFlags usage = 0;
+    for (const auto& formatUsage : formatUsagePairs) {
+        usage |= (tilingFeatures & formatUsage.first) ? formatUsage.second : 0u;
+    }
+
+    return std::make_unique<VkImageCreateInfo>(VkImageCreateInfo{
+        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        // The caller is responsible to fill pNext.
+        .pNext = nullptr,
+        .flags = 0,
+        .imageType = VK_IMAGE_TYPE_2D,
+        .format = format,
+        .extent =
+            {
+                .width = width,
+                .height = height,
+                .depth = 1,
+            },
+        .mipLevels = 1,
+        .arrayLayers = 1,
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .tiling = tiling,
+        .usage = usage,
+        // The caller is responsible to fill sharingMode.
+        .sharingMode = VK_SHARING_MODE_MAX_ENUM,
+        // The caller is responsible to fill queueFamilyIndexCount.
+        .queueFamilyIndexCount = 0,
+        // The caller is responsible to fill pQueueFamilyIndices.
+        .pQueueFamilyIndices = nullptr,
+        // The caller is responsible to fill initialLayout.
+        .initialLayout = VK_IMAGE_LAYOUT_MAX_ENUM,
+    });
+}
+
+std::unique_ptr<VkImageCreateInfo> generateColorBufferVkImageCreateInfo(VkFormat format,
+                                                                        uint32_t width,
+                                                                        uint32_t height,
+                                                                        VkImageTiling tiling) {
+    if (!sVkEmulation || !sVkEmulation->live) {
+        GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER)) << "Host Vulkan device lost";
+    }
+    AutoLock lock(sVkEmulationLock);
+    return generateColorBufferVkImageCreateInfo_locked(format, width, height, tiling);
+}
+
 // TODO(liyl): Currently we can only specify required memoryProperty
 // for a color buffer.
 //
@@ -1475,45 +1551,24 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
     res.frameworkFormat = frameworkFormat;
     res.frameworkStride = 0;
 
-    res.extent = { (uint32_t)width, (uint32_t)height, 1 };
-    res.format = vkFormat;
-    res.type = VK_IMAGE_TYPE_2D;
+    VkImageTiling tiling = (memoryProperty & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
+                               ? VK_IMAGE_TILING_LINEAR
+                               : VK_IMAGE_TILING_OPTIMAL;
+    std::unique_ptr<VkImageCreateInfo> imageCi =
+        generateColorBufferVkImageCreateInfo_locked(vkFormat, width, height, tiling);
+    // pNext will be filled later.
+    imageCi->sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    imageCi->queueFamilyIndexCount = 0;
+    imageCi->pQueueFamilyIndices = nullptr;
+    imageCi->initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-    res.tiling = (memoryProperty & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
-                         ? VK_IMAGE_TILING_LINEAR
-                         : VK_IMAGE_TILING_OPTIMAL;
-
-    VkFormatProperties formatProperties = {};
-    for (const auto& supportInfo : sVkEmulation->imageSupportInfo) {
-        if (supportInfo.format == vkFormat && supportInfo.supported) {
-            formatProperties = supportInfo.formatProps2.formatProperties;
-            break;
-        }
-    }
-
-    constexpr std::pair<VkFormatFeatureFlags, VkImageUsageFlags>
-            formatUsagePairs[] = {
-                    {VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT,
-                     VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT},
-                    {VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT,
-                     VK_IMAGE_USAGE_SAMPLED_BIT},
-                    {VK_FORMAT_FEATURE_TRANSFER_SRC_BIT,
-                     VK_IMAGE_USAGE_TRANSFER_SRC_BIT},
-                    {VK_FORMAT_FEATURE_TRANSFER_DST_BIT,
-                     VK_IMAGE_USAGE_TRANSFER_DST_BIT},
-            };
-    VkFormatFeatureFlags tilingFeatures =
-            (res.tiling == VK_IMAGE_TILING_OPTIMAL)
-                    ? formatProperties.optimalTilingFeatures
-                    : formatProperties.linearTilingFeatures;
-    res.usageFlags = 0u;
-    for (const auto& formatUsage : formatUsagePairs) {
-        res.usageFlags |=
-                (tilingFeatures & formatUsage.first) ? formatUsage.second : 0u;
-    }
-    res.createFlags = 0;
-
-    res.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    res.extent = imageCi->extent;
+    res.format = imageCi->format;
+    res.type = imageCi->imageType;
+    res.tiling = imageCi->tiling;
+    res.usageFlags = imageCi->usage;
+    res.createFlags = imageCi->flags;
+    res.sharingMode = imageCi->sharingMode;
 
     // Create the image. If external memory is supported, make it external.
     VkExternalMemoryImageCreateInfo extImageCi = {
@@ -1527,22 +1582,10 @@ bool setupVkColorBuffer(uint32_t colorBufferHandle,
         extImageCiPtr = &extImageCi;
     }
 
-    VkImageCreateInfo imageCi = {
-         VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, extImageCiPtr,
-         res.createFlags,
-         res.type,
-         res.format,
-         res.extent,
-         1, 1,
-         VK_SAMPLE_COUNT_1_BIT,
-         res.tiling,
-         res.usageFlags,
-         VK_SHARING_MODE_EXCLUSIVE, 0, nullptr,
-         VK_IMAGE_LAYOUT_UNDEFINED,
-    };
+    imageCi->pNext = extImageCiPtr;
 
-    VkResult createRes = vk->vkCreateImage(sVkEmulation->device, &imageCi,
-                                           nullptr, &res.image);
+    VkResult createRes =
+        vk->vkCreateImage(sVkEmulation->device, imageCi.get(), nullptr, &res.image);
     if (createRes != VK_SUCCESS) {
         LOG(VERBOSE) << "Failed to create Vulkan image for ColorBuffer "
                      << colorBufferHandle;
@@ -1851,7 +1894,6 @@ bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle) {
     bool readRes = FrameBuffer::getFB()->
         readColorBufferContents(
             colorBufferHandle, &cbNumBytes, nullptr);
-
     if (!readRes) {
         fprintf(stderr, "%s: Failed to read color buffer 0x%x\n",
                 __func__, colorBufferHandle);
@@ -1983,7 +2025,7 @@ bool updateVkImageFromColorBuffer(uint32_t colorBufferHandle) {
             });
         }
     }
-        
+
     vk->vkCmdCopyBufferToImage(
         sVkEmulation->commandBuffer,
         sVkEmulation->staging.buffer,
@@ -2358,11 +2400,6 @@ transformExternalMemoryHandleTypeFlags_tohost(
 
     if (bits & VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID) {
         res &= ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID;
-        res |= VK_EXT_MEMORY_HANDLE_TYPE_BIT;
-    }
-
-    if (bits & VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA) {
-        res &= ~VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA;
         res |= VK_EXT_MEMORY_HANDLE_TYPE_BIT;
     }
 

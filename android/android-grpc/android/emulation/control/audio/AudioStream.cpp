@@ -30,7 +30,7 @@ AudioStream::AudioStream(const AudioFormat fmt,
                          milliseconds blockingTime,
                          milliseconds bufferSize)
     : mFormat(fmt),
-      mAudioBuffer(bytesPerMillisecond(fmt) * bufferSize.count(),
+      mAudioBuffer(bytesPerMillisecond(fmt) * bufferSize.count() * 2,
                    blockingTime) {}
 
 uint32_t AudioStream::bytesPerMillisecond(const AudioFormat fmt) const {
@@ -86,6 +86,9 @@ void QemuAudioInputStream::write(const AudioPacket* pkt) {
 }
 
 size_t QemuAudioInputStream::write(const char* buffer, size_t cBuffer) {
+    if (mFormat.mode() == AudioFormat::MODE_REAL_TIME) {
+        return mAudioBuffer.sputn(buffer, cBuffer);
+    }
     size_t toWrite = mAudioBuffer.waitForAvailableSpace(cBuffer);
     toWrite = std::min(toWrite, cBuffer);
     return mAudioBuffer.sputn(buffer, toWrite);

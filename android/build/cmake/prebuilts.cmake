@@ -214,7 +214,7 @@ endfunction()
 
 # Installs the given dependency, this will make it part of the final release.
 function(android_install_dependency TARGET_TAG INSTALL_DEPENDENCIES)
-  if(TARGET_TAG STREQUAL "${ANDROID_TARGET_TAG}" OR TARGET_TAG STREQUAL "all")
+  if(ANDROID_TARGET_TAG MATCHES "${TARGET_TAG}.*" OR TARGET_TAG STREQUAL "all")
     # Link to existing target if there.
     if(NOT TARGET ${INSTALL_DEPENDENCIES})
       message(
@@ -235,7 +235,7 @@ function(android_install_dependency TARGET_TAG INSTALL_DEPENDENCIES)
 endfunction()
 
 function(android_install_dependency_force_exec TARGET_TAG INSTALL_DEPENDENCIES)
-  if(TARGET_TAG STREQUAL "${ANDROID_TARGET_TAG}" OR TARGET_TAG STREQUAL "all")
+  if(ANDROID_TARGET_TAG MATCHES "${TARGET_TAG}.*" OR TARGET_TAG STREQUAL "all")
     # Link to existing target if there.
     if(NOT TARGET ${INSTALL_DEPENDENCIES})
       message(
@@ -309,7 +309,7 @@ endfunction()
 # the xcode generator.
 function(android_target_dependency RUN_TARGET TARGET_TAG
          RUN_TARGET_DEPENDENCIES)
-  if(TARGET_TAG STREQUAL "${ANDROID_TARGET_TAG}" OR TARGET_TAG STREQUAL "all")
+  if(ANDROID_TARGET_TAG MATCHES "${TARGET_TAG}.*" OR TARGET_TAG STREQUAL "all")
 
     # Link to existing target if there.
     if(TARGET ${RUN_TARGET_DEPENDENCIES})
@@ -372,7 +372,7 @@ endfunction()
 # order for it to properly link and run with the prebuilt dependency. For
 # example LINK=--nmagic. Will set the linker flag --nmagic during compilation.
 function(android_target_properties RUN_TARGET TARGET_TAG RUN_TARGET_PROPERTIES)
-  if(TARGET_TAG STREQUAL "${ANDROID_TARGET_TAG}" OR TARGET_TAG STREQUAL "all")
+  if(ANDROID_TARGET_TAG MATCHES "${TARGET_TAG}.*" OR TARGET_TAG STREQUAL "all")
     foreach(PROP ${RUN_TARGET_PROPERTIES})
       if(PROP MATCHES ".*>=.*")
         # We are appending

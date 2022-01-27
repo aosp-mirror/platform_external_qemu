@@ -1,8 +1,10 @@
-// Copyright (c) 2014-2018 Khronos Group. This work is licensed under a
-// Creative Commons Attribution 4.0 International License; see
-// http://creativecommons.org/licenses/by/4.0/
+// Copyright 2014-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
-include::meta/VK_KHR_shared_presentable_image.txt[]
+include::{generated}/meta/{refprefix}VK_KHR_shared_presentable_image.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2017-03-20
@@ -23,41 +25,15 @@ include::meta/VK_KHR_shared_presentable_image.txt[]
   - Cass Everitt, Oculus
   - Johannes Van Waveren, Oculus
 
-This extension extends `<<VK_KHR_swapchain>>` to enable creation of a shared
-presentable image.
+=== Description
+
+This extension extends `apiext:VK_KHR_swapchain` to enable creation of a
+shared presentable image.
 This allows the application to use the image while the presention engine is
 accessing it, in order to reduce the latency between rendering and
 presentation.
 
-=== New Object Types
-
-None.
-
-=== New Enum Constants
-
-  * Extending elink:VkPresentModeKHR:
-  ** ename:VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR
-  ** ename:VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR
-
-  * Extending elink:VkImageLayout:
-  ** ename:VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR
-
-  * Extending elink:VkStructureType:
-  ** ename:VK_STRUCTURE_TYPE_SHARED_PRESENT_SURFACE_CAPABILITIES_KHR
-
-
-=== New Enums
-
-None.
-
-=== New Structures
-
-  * slink:VkSharedPresentSurfaceCapabilitiesKHR
-
-=== New Functions
-
-  * flink:vkGetSwapchainStatusKHR
-
+include::{generated}/interfaces/VK_KHR_shared_presentable_image.txt[]
 
 === Issues
 
@@ -101,7 +77,7 @@ ename:VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR.
 *RESOLVED*: After acquiring the shared presentable image, the application
 must transition it to the ename:VK_IMAGE_LAYOUT_SHARED_PRESENT_KHR layout
 prior to it being used.
-After this intial transition, any image usage that was requested during
+After this initial transition, any image usage that was requested during
 swapchain creation can: be performed on the image without layout transitions
 being performed.
 
@@ -134,7 +110,7 @@ obtained from a swapchain created using ename:VK_SHARING_MODE_EXCLUSIVE
 after it has been presented.
 
 11) How should flink:vkQueueSubmit behave if a command buffer uses an image
-from an ename:VK_ERROR_OUT_OF_DATE_KHR swapchain?
+from a ename:VK_ERROR_OUT_OF_DATE_KHR swapchain?
 
 *RESOLVED*: flink:vkQueueSubmit is expected to return the
 ename:VK_ERROR_DEVICE_LOST error.

@@ -40,6 +40,7 @@
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/Tracing.h"
+#include "android/utils/GfxstreamFatalError.h"
 #include "common/goldfish_vk_marshaling.h"
 #include "common/goldfish_vk_reserved_marshaling.h"
 #include "common/goldfish_vk_deepcopy.h"
@@ -47,8 +48,10 @@
 #include "emugl/common/address_space_device_control_ops.h"
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/feature_control.h"
+#include "emugl/common/logging.h"
 #include "emugl/common/vm_operations.h"
 #include "vk_util.h"
+#include "vulkan/vk_enum_string_helper.h"
 
 #ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
@@ -96,11 +99,7 @@ kEmulatedExtensions[] = {
     "VK_EXT_device_memory_report",
 };
 
-#if defined(__APPLE__) || defined(__MACOSX)
-static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 0, 0);
-#else
 static constexpr uint32_t kMaxSafeVersion = VK_MAKE_VERSION(1, 1, 0);
-#endif
 static constexpr uint32_t kMinVersion = VK_MAKE_VERSION(1, 0, 0);
 
 #define DEFINE_BOXED_HANDLE_TYPE_TAG(type) \
@@ -482,8 +481,8 @@ public:
 
         if (m_emu->instanceSupportsMoltenVK) {
             if (!m_vk->vkSetMTLTextureMVK) {
-                fprintf(stderr, "Cannot find vkSetMTLTextureMVK\n");
-                abort();
+                GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER)) <<
+                        "Cannot find vkSetMTLTextureMVK";
             }
         }
 
@@ -2232,7 +2231,7 @@ public:
             } else {
                 for (auto poolId : info->poolIds) {
                     auto handleInfo = sBoxedHandleManager.get(poolId);
-                    if (handleInfo) handleInfo->underlying = VK_NULL_HANDLE;
+                    if (handleInfo) handleInfo->underlying = reinterpret_cast<uint64_t>(VK_NULL_HANDLE);
                 }
             }
         }
@@ -2375,7 +2374,7 @@ public:
                 auto handleInfo = sBoxedHandleManager.get((uint64_t)*descSetAllocedEntry);
                 if (handleInfo) {
                     if (emugl::emugl_feature_is_enabled(android::featurecontrol::VulkanBatchedDescriptorSetUpdate)) {
-                        handleInfo->underlying = VK_NULL_HANDLE;
+                        handleInfo->underlying = reinterpret_cast<uint64_t>(VK_NULL_HANDLE);
                     } else {
                         delete_VkDescriptorSet(*descSetAllocedEntry);
                     }
@@ -2995,7 +2994,11 @@ public:
 
         info->guestPhysAddr = physAddr;
 
+#if defined(__APPLE__) && defined(__aarch64__)
+        constexpr size_t kPageBits = 14;
+#else
         constexpr size_t kPageBits = 12;
+#endif
         constexpr size_t kPageSize = 1u << kPageBits;
         constexpr size_t kPageOffsetMask = kPageSize - 1;
 
@@ -3138,11 +3141,8 @@ public:
             vk_find_struct<VkExportMemoryAllocateInfo>(pAllocateInfo);
 
         if (exportAllocInfoPtr) {
-            fprintf(stderr,
-                    "%s: Fatal: Export allocs are to be handled "
-                    "on the guest side / VkCommonOperations.\n",
-                    __func__);
-            abort();
+            GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER)) <<
+                "Export allocs are to be handled on the guest side / VkCommonOperations.";
         }
 
         const VkMemoryDedicatedAllocateInfo* dedicatedAllocInfoPtr =
@@ -3678,7 +3678,11 @@ public:
         uint64_t hva = (uint64_t)(uintptr_t)(info->ptr);
         uint64_t size = (uint64_t)(uintptr_t)(info->size);
 
+#if defined(__APPLE__) && defined(__aarch64__)
+        constexpr size_t kPageBits = 14;
+#else
         constexpr size_t kPageBits = 12;
+#endif
         constexpr size_t kPageSize = 1u << kPageBits;
         constexpr size_t kPageOffsetMask = kPageSize - 1;
 
@@ -4639,8 +4643,8 @@ public:
 
         auto poolInfo = android::base::find(mDescriptorPoolInfo, pool);
         if (!poolInfo) {
-            fprintf(stderr, "%s: FATAL: descriptor pool %p not found\n", __func__, pool);
-            abort();
+            GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER))
+                << "descriptor pool " << pool << " not found ";
         }
 
         DispatchableHandleInfo<uint64_t>* setHandleInfo = sBoxedHandleManager.get(poolId);
@@ -4679,9 +4683,10 @@ public:
                 *didAlloc = true;
                 return allocedSet;
             } else {
-                fprintf(stderr, "%s: FATAL: descriptor pool %p wanted to get set with id 0x%llx but it wasn't allocated\n", __func__,
-                        pool, (unsigned long long)poolId);
-                abort();
+                GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER))
+                        << "descriptor pool " << pool << " wanted to get set with id 0x" <<
+                        std::hex << poolId;
+                return nullptr;
             }
         }
     }
@@ -4711,9 +4716,8 @@ public:
         if (queueInfo) {
             device = queueInfo->device;
         } else {
-            fprintf(stderr, "%s: FATAL: queue %p (boxed: %p) with no device registered\n", __func__,
-                    queue, boxed_queue);
-            abort();
+            GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER))
+                << "queue " << queue << "(boxed: " << boxed_queue << ") with no device registered";
         }
 
         std::vector<VkDescriptorSet> setsToUpdate(descriptorSetCount, nullptr);
@@ -4846,7 +4850,6 @@ public:
 
 #define GUEST_EXTERNAL_MEMORY_HANDLE_TYPES                                \
     (VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID | \
-     VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA |         \
      VK_EXTERNAL_MEMORY_HANDLE_TYPE_ZIRCON_VMO_BIT_FUCHSIA)
 
     // Transforms
@@ -4866,6 +4869,76 @@ public:
         for (uint32_t i = 0; i < count; ++i) {
             mut[i] = transformExternalMemoryProperties_fromhost(mut[i], GUEST_EXTERNAL_MEMORY_HANDLE_TYPES);
         }
+    }
+
+    void transformImpl_VkImageCreateInfo_tohost(const VkImageCreateInfo* pImageCreateInfos,
+                                                uint32_t count) {
+        for (uint32_t i = 0; i < count; i++) {
+            VkImageCreateInfo& imageCreateInfo =
+                const_cast<VkImageCreateInfo&>(pImageCreateInfos[i]);
+            const VkExternalMemoryImageCreateInfo* pExternalMemoryImageCi =
+                vk_find_struct<VkExternalMemoryImageCreateInfo>(&imageCreateInfo);
+
+            if (pExternalMemoryImageCi &&
+                (pExternalMemoryImageCi->handleTypes &
+                 VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID)) {
+                std::unique_ptr<VkImageCreateInfo> colorBufferVkImageCi =
+                    goldfish_vk::generateColorBufferVkImageCreateInfo(
+                        imageCreateInfo.format, imageCreateInfo.extent.width,
+                        imageCreateInfo.extent.height, imageCreateInfo.tiling);
+                if (imageCreateInfo.flags & (~colorBufferVkImageCi->flags)) {
+                    ERR("The VkImageCreateInfo to import AHardwareBuffer contains unsupported "
+                        "VkImageCreateFlags. All supported VkImageCreateFlags are %s, the input "
+                        "VkImageCreateInfo requires support for %s.",
+                        string_VkImageCreateFlags(colorBufferVkImageCi->flags).c_str(),
+                        string_VkImageCreateFlags(imageCreateInfo.flags).c_str());
+                }
+                imageCreateInfo.flags |= colorBufferVkImageCi->flags;
+                if (imageCreateInfo.imageType != colorBufferVkImageCi->imageType) {
+                    ERR("The VkImageCreateInfo to import AHardwareBuffer has an unexpected "
+                        "VkImageType: %s, %s expected.",
+                        string_VkImageType(imageCreateInfo.imageType),
+                        string_VkImageType(colorBufferVkImageCi->imageType));
+                }
+                // VkImageCreateInfo::extent::{width, height} are guaranteed to match.
+                if (imageCreateInfo.extent.depth != colorBufferVkImageCi->extent.depth) {
+                    ERR("The VkImageCreateInfo to import AHardwareBuffer has an unexpected "
+                        "VkExtent::depth: %" PRIu32 ", %" PRIu32 " expected.",
+                        imageCreateInfo.extent.depth, colorBufferVkImageCi->extent.depth);
+                }
+                if (imageCreateInfo.mipLevels != colorBufferVkImageCi->mipLevels) {
+                    ERR("The VkImageCreateInfo to import AHardwareBuffer has an unexpected "
+                        "mipLevels: %" PRIu32 ", %" PRIu32 " expected.",
+                        imageCreateInfo.mipLevels, colorBufferVkImageCi->mipLevels);
+                }
+                if (imageCreateInfo.arrayLayers != colorBufferVkImageCi->arrayLayers) {
+                    ERR("The VkImageCreateInfo to import AHardwareBuffer has an unexpected "
+                        "arrayLayers: %" PRIu32 ", %" PRIu32 " expected.",
+                        imageCreateInfo.arrayLayers, colorBufferVkImageCi->arrayLayers);
+                }
+                if (imageCreateInfo.samples != colorBufferVkImageCi->samples) {
+                    ERR("The VkImageCreateInfo to import AHardwareBuffer has an unexpected "
+                        "VkSampleCountFlagBits: %s, %s expected.",
+                        string_VkSampleCountFlagBits(imageCreateInfo.samples),
+                        string_VkSampleCountFlagBits(colorBufferVkImageCi->samples));
+                }
+                // VkImageCreateInfo::tiling is guaranteed to match.
+                if (imageCreateInfo.usage & (~colorBufferVkImageCi->usage)) {
+                    ERR("The VkImageCreateInfo to import AHardwareBuffer contains unsupported "
+                        "VkImageUsageFlags. All supported VkImageUsageFlags are %s, the input "
+                        "VkImageCreateInfo requires support for %s.",
+                        string_VkImageUsageFlags(imageCreateInfo.usage).c_str(),
+                        string_VkImageUsageFlags(colorBufferVkImageCi->usage).c_str());
+                }
+                imageCreateInfo.usage |= colorBufferVkImageCi->usage;
+                // VkImageCreateInfo::{sharingMode, queueFamilyIndexCount, pQueueFamilyIndices,
+                // initialLayout} aren't filled in generateColorBufferVkImageCreateInfo.
+            }
+        }
+    }
+
+    void transformImpl_VkImageCreateInfo_fromhost(const VkImageCreateInfo*, uint32_t) {
+        GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER)) << "Not yet implemented.";
     }
 
 #define DEFINE_EXTERNAL_HANDLE_TYPE_TRANSFORM(type, field) \
@@ -6022,14 +6095,11 @@ private:
     void maskFormatPropertiesForEmulatedEtc2(
             VkFormatProperties* pFormatProperties) {
         pFormatProperties->bufferFeatures &= kEmulatedEtc2BufferFeatureMask;
-        pFormatProperties->optimalTilingFeatures &= kEmulatedEtc2BufferFeatureMask;
     }
 
     void maskFormatPropertiesForEmulatedEtc2(
             VkFormatProperties2* pFormatProperties) {
         pFormatProperties->formatProperties.bufferFeatures &=
-            kEmulatedEtc2BufferFeatureMask;
-        pFormatProperties->formatProperties.optimalTilingFeatures &=
             kEmulatedEtc2BufferFeatureMask;
     }
 
@@ -6336,8 +6406,8 @@ private:
             } else if (isDescriptorTypeBufferView(type)) {
                 numBufferViews += count;
             } else {
-                fprintf(stderr, "%s: fatal: unknown descriptor type 0x%x\n", __func__, type);
-                abort();
+                GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER))
+                    << "unknown descriptor type 0x" << std::hex << type;
             }
         }
 
@@ -6381,8 +6451,8 @@ private:
                 entryForHost.stride = sizeof(VkBufferView);
                 ++bufferViewCount;
             } else {
-                fprintf(stderr, "%s: fatal: unknown descriptor type 0x%x\n", __func__, type);
-                abort();
+                GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER))
+                    << "unknown descriptor type 0x" << std::hex << type;
             }
 
             res.linearizedTemplateEntries.push_back(entryForHost);

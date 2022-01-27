@@ -133,24 +133,40 @@ if(NOT WINDOWS_MSVC_X86_64)
   target_link_libraries(android-grpc PRIVATE android-waterfall)
 endif()
 
+# Set of test services.
 protobuf_generate_grpc_cpp(
   SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR} SOURCES test_echo_service.proto
   OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR} GENERATED ECHO_SERVICE_GRPC_SRC)
 
+protobuf_generate_grpc_cpp(
+  SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR} SOURCES ipc_test_service.proto
+  OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR} GENERATED IPC_SERVICE_GRPC_SRC)
+
+android_add_library(
+  TARGET android-grpc-test-services
+  NODISTRIBUTE
+  SRC # cmake-format: sortable
+      ${ECHO_SERVICE_GRPC_SRC}
+      ${IPC_SERVICE_GRPC_SRC}
+      android/emulation/control/test/CertificateFactory.cpp
+      android/emulation/control/test/HeartbeatService.cpp
+      android/emulation/control/test/TestEchoService.cpp)
+target_link_libraries(android-grpc-test-services PUBLIC android-grpc grpc++)
+target_include_directories(android-grpc-test-services
+                           PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+
 android_add_test(
   TARGET android-grpc_unittest
   SRC # cmake-format: sortable
-      ${ECHO_SERVICE_GRPC_SRC}
       android/emulation/control/GrpcServices_unittest.cpp
       android/emulation/control/logcat/LogcatParser_unittest.cpp
       android/emulation/control/logcat/RingStreambuf_unittest.cpp
-      android/emulation/control/test/CertificateFactory.cpp
-      android/emulation/control/test/TestEchoService.cpp
       android/emulation/control/utils/EventWaiter_unittest.cpp
   DARWIN android/emulation/control/interceptor/LoggingInterceptor_unittest.cpp
   LINUX android/emulation/control/interceptor/LoggingInterceptor_unittest.cpp)
-target_link_libraries(android-grpc_unittest PRIVATE android-grpc grpc++
-                                                    gmock_main)
+target_link_libraries(
+  android-grpc_unittest PRIVATE android-grpc android-grpc-test-services grpc++
+                                gmock_main)
 android_target_dependency(android-grpc_unittest linux-x86_64
                           TCMALLOC_OS_DEPENDENCIES)
 set_property(TARGET android-grpc_unittest PROPERTY CXX_STANDARD 17)
@@ -180,27 +196,19 @@ android_add_executable(
 target_link_libraries(grpc_benchmark PRIVATE android-grpc android-emu-base
                                              emulator-gbench)
 
-# Add the benchmark
-protobuf_generate_grpc_cpp(
-  SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR} SOURCES ipc_test_service.proto
-  OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR} GENERATED IPC_SERVICE_GRPC_SRC)
-
 # IPC benchmarks
 android_add_executable(
-  TARGET ipc_benchmark
-  NODISTRIBUTE
+  TARGET ipc_benchmark NODISTRIBUTE
   SRC # cmake-format: sortable
-      ${ECHO_SERVICE_GRPC_SRC} ${IPC_SERVICE_GRPC_SRC}
       android/emulation/control/test/IPC_benchmark.cpp)
 target_link_libraries(ipc_benchmark PRIVATE android-emu emulator-gbench
-                                            android-grpc)
+                                            android-grpc-test-services)
 
 android_add_executable(
   TARGET ipc_reader
   NODISTRIBUTE
   SRC # cmake-format: sortable
-      ${ECHO_SERVICE_GRPC_SRC} ${IPC_SERVICE_GRPC_SRC}
       android/emulation/control/test/IPC_reader.cpp
       android/emulation/control/test/TestEchoService.cpp)
-target_link_libraries(ipc_reader PRIVATE android-emu android-grpc)
+target_link_libraries(ipc_reader PRIVATE android-emu android-grpc-test-services)
 add_dependencies(ipc_benchmark ipc_reader)

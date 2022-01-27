@@ -1,3 +1,7 @@
+// Copyright (c) 2018-2020 NVIDIA Corporation
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
 When allocating memory that may: be exported to another process or Vulkan
 instance, add a slink:VkExportMemoryAllocateInfoNV structure to the
 pname:pNext chain of the slink:VkMemoryAllocateInfo structure, specifying
@@ -7,10 +11,11 @@ the handle types that may: be exported.
 --
 The slink:VkExportMemoryAllocateInfoNV structure is defined as:
 
-include::../../api/structs/VkExportMemoryAllocateInfoNV.txt[]
+include::{generated}/api/structs/VkExportMemoryAllocateInfoNV.txt[]
 
   * pname:sType is the type of this structure.
-  * pname:pNext is `NULL` or a pointer to an extension-specific structure.
+  * pname:pNext is `NULL` or a pointer to a structure extending this
+    structure.
   * pname:handleTypes is a bitmask of
     elink:VkExternalMemoryHandleTypeFlagBitsNV specifying one or more memory
     handle types that may: be exported.
@@ -18,5 +23,5 @@ include::../../api/structs/VkExportMemoryAllocateInfoNV.txt[]
     as they are compatible, as reported by
     flink:vkGetPhysicalDeviceExternalImageFormatPropertiesNV.
 
-include::../../validity/structs/VkExportMemoryAllocateInfoNV.txt[]
+include::{generated}/validity/structs/VkExportMemoryAllocateInfoNV.txt[]
 --

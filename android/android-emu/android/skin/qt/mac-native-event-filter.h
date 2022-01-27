@@ -20,7 +20,13 @@
 
 class NativeEventFilter : public QAbstractNativeEventFilter {
 public:
+#if QT_VERSION >= 0x060000
+    bool nativeEventFilter(const QByteArray& eventType,
+                           void* message,
+                           qintptr*) override;
+#else
     bool nativeEventFilter(const QByteArray& eventType,
                            void* message,
                            long*) override;
+#endif  // QT_VERSION
 };

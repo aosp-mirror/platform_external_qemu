@@ -46,8 +46,9 @@
 #include "android/base/testing/TestLooper.h"                 // for TestLooper
 #include "android/emulation/control/GrpcServices.h"          // for Emulator...
 #include "android/emulation/control/test/TestEchoService.h"  // for TestEcho...
-#include "ipc_test_service.grpc.pb.h"                        // for TestRunner
-#include "ipc_test_service.pb.h"                             // for Test
+#include "android/utils/debug.h"
+#include "ipc_test_service.grpc.pb.h"  // for TestRunner
+#include "ipc_test_service.pb.h"       // for Test
 
 using namespace android::base;
 using namespace android::emulation::control;
@@ -92,7 +93,8 @@ public:
         ScopedSocket scopedSocket(socket);
         // Surprise! We stop listening on socket accept..
         mServer->startListening();
-        while (socketSendAll(scopedSocket.get(), mData.data(), mData.size()));
+        while (socketSendAll(scopedSocket.get(), mData.data(), mData.size()))
+            ;
         return true;
     }
 
@@ -118,8 +120,12 @@ public:
     Status runTest(ServerContext* context,
                    const Test* request,
                    Test* response) override {
+        // VERBOSE_ENABLE(grpc);  Very noisy!
         // Note: Might not be perfect way of measuring cpu time.
         std::clock_t c_start = std::clock();
+        if (mService) {
+            mService->stop();
+        }
         switch (request->target()) {
             case Test::Nothing:
                 response->set_chksum(request->chksum());
@@ -136,6 +142,14 @@ public:
                 response->set_chksum(prepare_socket(request->size()));
                 response->set_port(mSrs->port());
                 break;
+            case Test::SyncStreamPerf:
+                prepare_sync_heartbeat();
+                response->set_port(mService->port());
+                break;
+            case Test::AsyncStreamPerf:
+                prepare_async_heartbeat();
+                response->set_port(mService->port());
+                break;
             default:
                 LOG(ERROR) << "Unknown test type.";
         }
@@ -148,6 +162,7 @@ private:
     std::unique_ptr<SimpleReplySocket> mSrs;
     std::unique_ptr<SharedMemory> mWriter;
     std::unique_ptr<EmulatorControllerService> mService;
+    std::unique_ptr<AsyncGrpcHandler<Msg, Msg>> mHeartBeatHandler;
 
     // Calculate a simple hash of the memory region.
     // This forces a memory read on the region.
@@ -198,6 +213,28 @@ private:
                            .withLogging(false)
                            .build();
         return chk;
+    }
+
+    void prepare_sync_heartbeat() {
+        EmulatorControllerService::Builder builder;
+        HeartbeatService* heartBeat = new HeartbeatService();
+        mService = builder.withService(heartBeat)
+                           .withPortRange(0, 1)
+                           .withLogging(false)
+                           .build();
+    }
+
+    void prepare_async_heartbeat() {
+        EmulatorControllerService::Builder builder;
+        AsyncHeartbeatService* heartBeat = new AsyncHeartbeatService();
+        mService = builder.withService(heartBeat)
+                           .withPortRange(0, 1)
+                           .withLogging(false)
+                           .withCompletionQueues(8)
+                           .build();
+        mHeartBeatHandler =
+                asyncHeartBeat(heartBeat, mService->newCompletionQueue(8));
+        mHeartBeatHandler->start();
     }
 };
 }  // namespace control

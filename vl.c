@@ -5390,6 +5390,13 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     migration_object_init();
 
 #if defined(CONFIG_ANDROID)
+    if (android_qemu_mode || is_fuchsia) {
+        if (!qemu_android_ports_setup()) {
+            // Errors have already been reported inside this function
+            return 1;
+        }
+    }
+
     if (android_qemu_mode) {
 
         /* Configure goldfish events device */
@@ -5501,13 +5508,6 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
             g_free(current_machine->kernel_cmdline);
             current_machine->kernel_cmdline = combined;
-        }
-    }
-
-    if (android_qemu_mode || is_fuchsia) {
-        if (!qemu_android_ports_setup()) {
-            // Errors have already been reported inside this function
-            return 1;
         }
     }
 #endif  // CONFIG_ANDROID

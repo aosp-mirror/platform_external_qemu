@@ -93,6 +93,12 @@ public:
     void setTargetAmbientMotion(float bounds, PhysicalInterpolation mode);
 
     /*
+     * Set the value reported by WRIST_TILT_GESTURE sensor. 1 means GAZE and 
+     * 0 means UNGAZE.
+     */
+    void setWristTilt(float value, PhysicalInterpolation mode);
+
+    /*
      * Gets current simulated state and sensor values of the modeled object at
      * the most recently set current time (from setCurrentTime).
      */
@@ -114,6 +120,9 @@ public:
      * Gets half the width of the ambient motion bounding box.
      */
     float getAmbientMotion(
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+
+    float getWristTilt(
             ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
 
 private:
@@ -207,6 +216,8 @@ private:
     glm::vec2 mAmbientMotionSecondDerivQuintic = glm::vec2(0.f);
     glm::vec4 mAmbientMotionSecondDerivCubic = glm::vec4(0.f);
     uint64_t mAmbientMotionChangeEndTime = 0UL;
+
+    float mWristTilt = 0.f;
 
     /* The time to use as current in this model */
     uint64_t mModelTimeNs = 0UL;

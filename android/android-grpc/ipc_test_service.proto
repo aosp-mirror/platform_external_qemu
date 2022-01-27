@@ -32,6 +32,8 @@ message Test {
     SharedMemory = 1; // Run a SharedMemory IPC test
     Grpc = 2; // Run a gRPC based IPC test.
     RawSocket = 3; // Run a raw socket based ipc test.
+    AsyncStreamPerf = 4; // Run an async stream perf test.
+    SyncStreamPerf = 5; // Run a sync stream perf test.
   }
 
   enum SharedMemoryMode {

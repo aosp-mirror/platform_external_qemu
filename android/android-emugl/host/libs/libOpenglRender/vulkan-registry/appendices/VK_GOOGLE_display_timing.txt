@@ -1,8 +1,10 @@
-// Copyright (c) 2014-2018 Khronos Group. This work is licensed under a
-// Creative Commons Attribution 4.0 International License; see
-// http://creativecommons.org/licenses/by/4.0/
+// Copyright 2014-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
-include::meta/VK_GOOGLE_display_timing.txt[]
+include::{generated}/meta/{refprefix}VK_GOOGLE_display_timing.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2017-02-14
@@ -12,8 +14,10 @@ include::meta/VK_GOOGLE_display_timing.txt[]
   - Ian Elliott, Google
   - Jesse Hall, Google
 
+=== Description
+
 This device extension allows an application that uses the
-`<<VK_KHR_swapchain>>` extension to obtain information about the
+`apiext:VK_KHR_swapchain` extension to obtain information about the
 presentation engine's display, to obtain timing information about each
 present, and to schedule a present to happen no earlier than a desired time.
 An application can use this to minimize various visual anomalies (e.g.
@@ -34,44 +38,17 @@ smooth to the user.
 This extension treats variable-refresh-rate (VRR) displays as if they are
 fixed-refresh-rate (FRR) displays.
 
-=== New Object Types
-
-None.
-
-=== New Enum Constants
-
-  * Extending elink:VkStructureType:
-  ** ename:VK_STRUCTURE_TYPE_PRESENT_TIMES_INFO_GOOGLE
-
-=== New Enums
-
-None.
-
-=== New Structures
-
-  * slink:VkRefreshCycleDurationGOOGLE
-  * slink:VkPastPresentationTimingGOOGLE
-  * slink:VkPresentTimesInfoGOOGLE
-  * slink:VkPresentTimeGOOGLE
-
-=== New Functions
-
-  * flink:vkGetRefreshCycleDurationGOOGLE
-  * flink:vkGetPastPresentationTimingGOOGLE
-
-=== Issues
-
-None.
+include::{generated}/interfaces/VK_GOOGLE_display_timing.txt[]
 
 === Examples
 
 [NOTE]
 .Note
 ====
-The example code for the this extension (like the `<<VK_KHR_surface>>` and
-`VK_GOOGLE_display_timing` extensions) is contained in the cube demo that is
-shipped with the official Khronos SDK, and is being kept up-to-date in that
-location (see:
+The example code for the this extension (like the `apiext:VK_KHR_surface`
+and `VK_GOOGLE_display_timing` extensions) is contained in the cube demo
+that is shipped with the official Khronos SDK, and is being kept up-to-date
+in that location (see:
 https://github.com/KhronosGroup/Vulkan-Tools/blob/master/cube/cube.c ).
 ====
 

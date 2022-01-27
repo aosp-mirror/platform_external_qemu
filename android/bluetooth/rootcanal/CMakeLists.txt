@@ -104,6 +104,7 @@ android_add_library(
       model/controller/isochronous_connection_handler.cc
       model/controller/le_advertiser.cc
       model/controller/link_layer_controller.cc
+      model/controller/sco_connection.cc
       model/controller/security_manager.cc
       model/devices/beacon.cc
       model/devices/beacon_swarm.cc

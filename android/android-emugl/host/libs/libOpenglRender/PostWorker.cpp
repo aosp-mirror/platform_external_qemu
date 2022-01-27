@@ -23,8 +23,6 @@
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "emugl/common/misc.h"
 
-#include "emugl/common/misc.h"
-
 #define POST_DEBUG 0
 #if POST_DEBUG >= 1
 #define DD(fmt, ...) \

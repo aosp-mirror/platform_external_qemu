@@ -1,20 +1,27 @@
-// Copyright (c) 2017-2018 Khronos Group. This work is licensed under a
-// Creative Commons Attribution 4.0 International License; see
-// http://creativecommons.org/licenses/by/4.0/
+// Copyright 2017-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
-include::meta/VK_KHR_8bit_storage.txt[]
+include::{generated}/meta/{refprefix}VK_KHR_8bit_storage.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2018-02-05
+*Interactions and External Dependencies*::
+  - Promoted to Vulkan 1.2 Core
+  - This extension requires
+    {spirv}/KHR/SPV_KHR_8bit_storage.html[`SPV_KHR_8bit_storage`]
+  - This extension provides API support for
+    https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_shader_16bit_storage.txt[`GL_EXT_shader_16bit_storage`]
 *IP Status*::
     No known IP claims.
-*Interactions and External Dependencies*::
-  - This extension requires
-    https://www.khronos.org/registry/spir-v/extensions/KHR/SPV_KHR_8bit_storage.html[+SPV_KHR_8bit_storage+]
 *Contributors*::
   - Alexander Galazin, Arm
 
-The +VK_KHR_8bit_storage+ extension allows use of 8-bit types in uniform and
+=== Description
+
+The `VK_KHR_8bit_storage` extension allows use of 8-bit types in uniform and
 storage buffers, and push constant blocks.
 This extension introduces several new optional features which map to SPIR-V
 capabilities and allow access to 8-bit data in code:Block-decorated objects
@@ -25,22 +32,25 @@ The code:StorageBuffer8BitAccess capability must: be supported by all
 implementations of this extension.
 The other capabilities are optional.
 
-=== New Enum Constants
+=== Promotion to Vulkan 1.2
 
-  * Extending elink:VkStructureType:
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_8BIT_STORAGE_FEATURES_KHR
+Functionality in this extension is included in core Vulkan 1.2, with the KHR
+suffix omitted.
+However, if Vulkan 1.2 is supported and this extension is not, the
+code:StorageBuffer8BitAccess capability is optional.
+The original type, enum and command names are still available as aliases of
+the core functionality.
 
-=== New Structures
-
-  * slink:VkPhysicalDevice8BitStorageFeaturesKHR
+include::{generated}/interfaces/VK_KHR_8bit_storage.txt[]
 
 === New SPIR-V Capabilities
 
-  * <<spirvenv-capabilities-table-8bitstorage,code:StorageBuffer8BitAccess>>
-  * <<spirvenv-capabilities-table-8bitstorage,code:UniformAndStorageBuffer8BitAccess>>
-  * <<spirvenv-capabilities-table-8bitstorage,code:StoragePushConstant8>>
-
-=== Issues
+  * <<spirvenv-capabilities-table-StorageBuffer8BitAccess,
+    code:StorageBuffer8BitAccess>>
+  * <<spirvenv-capabilities-table-UniformAndStorageBuffer8BitAccess,
+    code:UniformAndStorageBuffer8BitAccess>>
+  * <<spirvenv-capabilities-table-StoragePushConstant8,
+    code:StoragePushConstant8>>
 
 === Version History
 

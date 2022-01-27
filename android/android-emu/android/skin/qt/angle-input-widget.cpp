@@ -17,8 +17,11 @@
 #include <qstring.h>     // for operator+, QString (ptr only)
 #include <qvalidator.h>  // for QDoubleValidator::StandardNotation, QValidat...
 #include <stdlib.h>      // for abs
+#if QT_VERSION >= 0x060000
+#else
 #include <QChar>         // for QChar
 #include <QCharRef>      // for QCharRef
+#endif
 #include <QKeyEvent>     // for QKeyEvent
 #include <QLocale>       // for QLocale
 #include <QValidator>    // for QValidator

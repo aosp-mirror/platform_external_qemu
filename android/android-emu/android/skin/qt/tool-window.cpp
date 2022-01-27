@@ -29,7 +29,11 @@
 #include <QByteArray>                                     // for QByteArray
 #include <QClipboard>                                     // for QClipboard
 #include <QCloseEvent>                                    // for QCloseEvent
+#if QT_VERSION >= 0x060000
+#include <QWindow>                                        // for QWindow
+#else
 #include <QDesktopWidget>                                 // for QDesktopWidget
+#endif  // QT_VERSION
 #include <QEvent>                                         // for QEvent
 #include <QFlags>                                         // for QFlags
 #include <QFrame>                                         // for QFrame
@@ -106,7 +110,10 @@ class QPaintEvent;
 class QPushButton;
 class QScreen;
 class QWidget;
+#if QT_VERSION >= 0x060000
+#else
 template <typename T> class QVector;
+#endif  // QT_VERSION
 
 
 namespace {
@@ -333,6 +340,18 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->next_layout_button->setHidden(true);
         mToolsUi->volume_up_button->setHidden(true);
         mToolsUi->volume_down_button->setHidden(true);
+
+        if(avdInfo_getApiLevel(android_avdInfo) >= 30) {
+          mToolsUi->overview_button->setHidden(true);
+          mToolsUi->power_button->setHidden(true);
+          mToolsUi->home_button->setHidden(true);
+
+          mToolsUi->controlsLayout->removeWidget(mToolsUi->back_button);
+          mToolsUi->controlsLayout->insertWidget(0, mToolsUi->back_button);
+
+          mToolsUi->wear_button_1->setHidden(false);
+          mToolsUi->wear_button_2->setHidden(false);
+        }
     }
 
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
@@ -743,6 +762,12 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) 
         case QtUICommand::OVERVIEW:
             forwardKeyToEmulator(KEY_APPSWITCH, down);
             break;
+        case QtUICommand::WEAR_1:
+            forwardKeyToEmulator(KEY_HOME, down);
+            break;
+        case QtUICommand::WEAR_2:
+            forwardKeyToEmulator(KEY_POWER, down);
+            break;
         case QtUICommand::ROTATE_RIGHT:
         case QtUICommand::ROTATE_LEFT:
             if (down) {
@@ -932,8 +957,13 @@ bool ToolWindow::handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source) {
 
     // We don't care about the keypad modifier for anything, and it gets added
     // to the arrow keys of OSX by default, so remove it.
+#if QT_VERSION >= 0x060000
+    QKeySequence event_key_sequence(event->key() |
+                                    (event->modifiers() & ~Qt::KeypadModifier));
+#else
     QKeySequence event_key_sequence(event->key() +
                                     (event->modifiers() & ~Qt::KeypadModifier));
+#endif  // QT_VERSION
     bool down = event->type() == QEvent::KeyPress;
     bool h = mShortcutKeyStore.handle(event_key_sequence,
                                       [this, down](QtUICommand cmd) {
@@ -1264,6 +1294,12 @@ void ToolWindow::on_change_posture_button_clicked() {
         handleUICommand(QtUICommand::SHOW_PANE_VIRTSENSORS, true);
     }
     mPostureSelectionDialog->show();
+    // Align pop-up posture selction dialog to the right of posture button
+    QRect geoTool = this->geometry();
+    mPostureSelectionDialog->move(geoTool.right(),
+                                  geoTool.top() +
+                                  mToolsUi->change_posture_button->geometry().top());
+
 }
 
 void ToolWindow::on_dismiss_posture_selection_dialog() {
@@ -1275,10 +1311,11 @@ void ToolWindow::on_dismiss_resizable_dialog() {
 }
 
 void ToolWindow::on_resizable_button_clicked() {
-    // ChangeIcon(mToolsUi->tablet_mode_button,
-    //            tablet_mode ? "laptop_mode" : "tablet_mode",
-    //            tablet_mode ? "Switch to laptop mode" : "Switch to tablet mode");
     mResizableDialog->show();
+    // Align pop-up resizableDialog to the right of resizable button
+    QRect geoTool = this->geometry();
+    mResizableDialog->move(geoTool.right(),
+                           geoTool.top() + mToolsUi->resizable_button->geometry().top());
 }
 
 void ToolWindow::on_new_resizable_requested(PresetEmulatorSizeType newSize) {
@@ -1311,6 +1348,26 @@ void ToolWindow::on_overview_button_pressed() {
 void ToolWindow::on_overview_button_released() {
     mEmulatorWindow->activateWindow();
     handleUICommand(QtUICommand::OVERVIEW, false);
+}
+
+void ToolWindow::on_wear_button_1_pressed() {
+    mEmulatorWindow->raise();
+    handleUICommand(QtUICommand::WEAR_1, true);
+}
+
+void ToolWindow::on_wear_button_1_released() {
+    mEmulatorWindow->activateWindow();
+    handleUICommand(QtUICommand::WEAR_1, false);
+}
+
+void ToolWindow::on_wear_button_2_pressed() {
+    mEmulatorWindow->raise();
+    handleUICommand(QtUICommand::WEAR_2, true);
+}
+
+void ToolWindow::on_wear_button_2_released() {
+    mEmulatorWindow->activateWindow();
+    handleUICommand(QtUICommand::WEAR_2, false);
 }
 
 void ToolWindow::on_prev_layout_button_clicked() {
@@ -1400,6 +1457,13 @@ void ToolWindow::paintEvent(QPaintEvent*) {
     p.setPen(pen);
 
     double dpr = 1.0;
+#if QT_VERSION >= 0x060000
+    auto newScreen = window()->windowHandle()->screen();
+    if (!newScreen) {
+        newScreen = qGuiApp->primaryScreen();
+    }
+    dpr = newScreen->devicePixelRatio();
+#else
     int primary_screen_idx = qApp->desktop()->screenNumber(this);
     if (primary_screen_idx < 0) {
         primary_screen_idx = qApp->desktop()->primaryScreen();
@@ -1411,6 +1475,7 @@ void ToolWindow::paintEvent(QPaintEvent*) {
             dpr = primary_screen->devicePixelRatio();
         }
     }
+#endif  // QT_VERSION
 
     if (dpr > 1.0) {
         // Normally you'd draw the border with a (0, 0, w-1, h-1) rectangle.

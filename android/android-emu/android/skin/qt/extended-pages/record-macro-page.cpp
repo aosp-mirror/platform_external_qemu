@@ -36,7 +36,11 @@
 #include <QMessageBox>
 #include <QObject>
 #include <QPushButton>
+#if QT_VERSION >= 0x060000
+#include <QRegularExpression>
+#else
 #include <QRegExp>
+#endif  // QT_VERSION
 #include <QSize>
 #include <QStackedWidget>
 #include <QStandardPaths>
@@ -822,7 +826,11 @@ std::string RecordMacroPage::displayNameMacroBox() {
 
     int selection;
     QString newName;
+#if QT_VERSION >= 0x060000
+    QRegularExpression re(QRegularExpression::anchoredPattern("\\w+"));
+#else
     QRegExp re("\\w+");
+#endif  // QT_VERSION
     // Check that name is [a-zA-Z0-9_] after trimming.
     do {
         selection = nameDialog.exec();
@@ -830,7 +838,11 @@ std::string RecordMacroPage::displayNameMacroBox() {
         newName.replace("_", " ");
         newName = newName.simplified();
         newName.replace(" ", "_");
+#if QT_VERSION >= 0x060000
+    } while (selection == QDialog::Accepted && !re.match(newName).hasMatch());
+#else
     } while (selection == QDialog::Accepted && !re.exactMatch(newName));
+#endif  // QT_VERSION
 
     if (selection == QDialog::Rejected) {
         return "";

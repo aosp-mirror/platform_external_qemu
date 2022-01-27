@@ -118,7 +118,8 @@ static char* getQemuExecutablePath(const char* programPath,
 static void updateLibrarySearchPath(bool isHeadless,
                                     int wantedBitness,
                                     bool useSystemLibs,
-                                    const char* launcherDir);
+                                    const char* launcherDir,
+                                    const char* gpu);
 
 static bool is32bitImageOn64bitRanchuKernel(const char* avdName,
                                              const char* avdArch,
@@ -227,6 +228,20 @@ static void delete_adbCmds_at(const char* content) {
     }
 }
 
+static void delete_modem_simulator_at(const char* content) {
+    if (char* const folder =
+            path_join(
+                content,
+                "modem_simulator")) {
+        if (!path_delete_dir(folder)) {
+            D("Removed modem simulator directory '%s'", folder);
+        } else {
+            D("Failed to remove modem simulator directory '%s'", folder);
+        }
+        free(folder);
+    }
+}
+
 static bool checkOsVersion() {
 #ifndef _WIN32
     return true;
@@ -301,6 +316,7 @@ int main(int argc, char** argv)
     const char* avdArch = NULL;
     const char* engine = NULL;
     const char* sysDir = NULL;
+    const char* gpu = NULL;
     bool doAccelCheck = false;
     bool doListAvds = false;
     bool doListUSB = false;
@@ -514,6 +530,7 @@ int main(int argc, char** argv)
          }
 
         if (!strcmp(opt,"-gpu") && nn + 1 < argc) {
+            gpu = argv[nn + 1];
             nn++;
             continue;
         }
@@ -815,6 +832,8 @@ int main(int argc, char** argv)
             if (avd_folder) {
                 clean_up_avd_contents_except_config_ini(avd_folder);
                 delete_snapshots_at(avd_folder);
+                // Bug: 214140573 Unable to sign into Google Apps since GmsCore v21.42.18
+                delete_modem_simulator_at(avd_folder);
                 delete_adbCmds_at(avd_folder);
                 free(avd_folder);
             }
@@ -893,7 +912,6 @@ int main(int argc, char** argv)
       {
           char* avdarch = avdInfo_getTargetCpuArch(myavdinfo);
           const std::string sarch(avdarch);
-          free(avdarch);
 #ifdef __x86_64__
           if (sarch == "arm64" && apiLevel >=28) {
               APANIC("Avd's CPU Architecture '%s' is not supported by the QEMU2 emulator on x86_64 host.\n", avdarch);
@@ -904,6 +922,7 @@ int main(int argc, char** argv)
               APANIC("Avd's CPU Architecture '%s' is not supported by the QEMU2 emulator on aarch64 host.\n", avdarch);
           }
 #endif
+          free(avdarch);
       }
     }
 
@@ -953,7 +972,7 @@ int main(int argc, char** argv)
      * up by the re-exec'ed emulator
      */
     updateLibrarySearchPath(isHeadless, wantedBitness, useSystemLibs,
-                            progDir.data());
+                            progDir.data(), gpu);
 
     /* We need to find the location of the GLES emulation shared libraries
      * and modify either LD_LIBRARY_PATH or PATH accordingly
@@ -1194,7 +1213,8 @@ static void appendPreloadLib(const char* fullLibPath) {
 static void updateLibrarySearchPath(bool isHeadless,
                                     int wantedBitness,
                                     bool useSystemLibs,
-                                    const char* launcherDir) {
+                                    const char* launcherDir,
+                                    const char* gpu) {
     const char* libSubDir = (wantedBitness == 64) ? "lib64" : "lib";
     char fullPath[PATH_MAX];
     char* tail = fullPath;
@@ -1211,23 +1231,24 @@ static void updateLibrarySearchPath(bool isHeadless,
     D("Adding library search path: '%s'", fullPath);
     add_library_search_dir(fullPath);
 
+    if (gpu && strstr(gpu, "angle") != NULL) {
+        bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_angle");
+        D("Adding library search path: '%s'", fullPath);
+        add_library_search_dir(fullPath);
 
-    bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_angle");
-    D("Adding library search path: '%s'", fullPath);
-    add_library_search_dir(fullPath);
+        bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_angle9");
+        D("Adding library search path: '%s'", fullPath);
+        add_library_search_dir(fullPath);
 
-    bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_angle9");
-    D("Adding library search path: '%s'", fullPath);
-    add_library_search_dir(fullPath);
-
-    bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_angle11");
-    D("Adding library search path: '%s'", fullPath);
-    add_library_search_dir(fullPath);
-
-    // We add this last so Win32 can resolve LIBGLESV2 from swiftshader for QT5GUI
-    bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_swiftshader");
-    D("Adding library search path: '%s'", fullPath);
-    add_library_search_dir(fullPath);
+        bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_angle11");
+        D("Adding library search path: '%s'", fullPath);
+        add_library_search_dir(fullPath);
+    } else  {
+        // We add this last so Win32 can resolve LIBGLESV2 from swiftshader for QT5GUI
+        bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_swiftshader");
+        D("Adding library search path: '%s'", fullPath);
+        add_library_search_dir(fullPath);
+    }
 
 #ifdef __linux__
     if (!useSystemLibs) {

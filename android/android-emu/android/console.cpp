@@ -1928,7 +1928,7 @@ do_sms_send( ControlClient  client, char*  args )
     }
 
     if ( sms_address_from_str( &sender, args, p - args ) < 0 ) {
-        control_write( client, "KO: bad phone number format, must be [+](0-9)*\r\n" );
+        control_write( client, "KO: bad phone number format, must be [+](0-9)* or [a-zA-Z0-9]+\r\n" );
         return -1;
     }
 
@@ -2315,7 +2315,7 @@ static int do_event_mouse(ControlClient client, char* args) {
         return -1;
     }
 
-    client->global->user_event_agent->sendMouseEvent(x, y, dev, btn, 0);
+    client->global->user_event_agent->sendMouseEvent(x, y, 0, btn, dev);
     return 0;
 }
 
@@ -2521,29 +2521,34 @@ static int do_snapshot_pull(ControlClient client, char* args) {
         return -1;
     }
     std::string& filename = arg_strings[1];
+    const char* directory = nullptr;
     std::unique_ptr<std::ofstream> dstFile;
-    dstFile.reset(new std::ofstream(
-            android::base::PathUtils::asUnicodePath(filename).c_str(),
-            std::ios::binary | std::ios::out));
-    if (!dstFile->is_open()) {
-        control_write(client, "KO: Failed to write to %s\r\n",
-                      filename.c_str());
-        return -1;
-    }
     android::emulation::control::FileFormat format =
             android::emulation::control::TAR;
     const char* kTarGzExt = ".tar.gz";
     const char* kTarExt = ".tar";
     if (android::base::EndsWith(filename, kTarGzExt)) {
         format = android::emulation::control::TARGZ;
-    } else if (!android::base::EndsWith(filename, kTarExt)) {
-        // Unknown format. Print a warning and treat it as tar.
-        control_write(client, "WARNING: unrecognized file format %s\r\n",
-                      filename.c_str());
+    } else if (android::base::EndsWith(filename, kTarExt)) {
+        format = android::emulation::control::TAR;
+    } else {
+        format = android::emulation::control::DIRECTORY;
+        directory = filename.c_str();
     }
+    if (format != android::emulation::control::DIRECTORY) {
+        dstFile.reset(new std::ofstream(
+                android::base::PathUtils::asUnicodePath(filename).c_str(),
+                std::ios::binary | std::ios::out));
+        if (!dstFile->is_open()) {
+            control_write(client, "KO: Failed to write to %s\r\n",
+                          filename.c_str());
+            return -1;
+        }
+    }
+
     bool succeed = android::emulation::control::pullSnapshot(
-            arg_strings[0].c_str(), dstFile->rdbuf(), false, format, client,
-            control_write_err_cb);
+            arg_strings[0].c_str(), dstFile->rdbuf(), directory, false, format,
+            false, client, control_write_err_cb);
     return succeed ? 0 : -1;
 }
 
@@ -2565,27 +2570,32 @@ static int do_snapshot_push(ControlClient client, char* args) {
         return -1;
     }
     std::string& filename = arg_strings[1];
-    std::unique_ptr<std::ifstream> srcFile(new std::ifstream(
-            android::base::PathUtils::asUnicodePath(filename).c_str(),
-            std::ios::binary | std::ios::in));
-    if (!srcFile->is_open()) {
-        control_write(client, "KO: Failed to write to %s\r\n",
-                      filename.c_str());
-        return -1;
-    }
-    android::emulation::control::FileFormat format =
-            android::emulation::control::TAR;
+    const char* directory = nullptr;
+    android::emulation::control::FileFormat format;
     const char* kTarGzExt = ".tar.gz";
     const char* kTarExt = ".tar";
     if (android::base::EndsWith(filename, kTarGzExt)) {
         format = android::emulation::control::TARGZ;
-    } else if (!android::base::EndsWith(filename, kTarExt)) {
-        // Unknown format. Print a warning and treat it as tar.
-        control_write(client, "WARNING: unrecognized file format %s\r\n",
-                      filename.c_str());
+    } else if (android::base::EndsWith(filename, kTarExt)) {
+        format = android::emulation::control::TAR;
+    } else {
+        directory = filename.c_str();
+        format = android::emulation::control::DIRECTORY;
     }
+    std::unique_ptr<std::ifstream> srcFile;
+    if (format != android::emulation::control::DIRECTORY) {
+        srcFile.reset(new std::ifstream(
+                android::base::PathUtils::asUnicodePath(filename).c_str(),
+                std::ios::binary | std::ios::in));
+        if (!srcFile->is_open()) {
+            control_write(client, "KO: Failed to write to %s\r\n",
+                          filename.c_str());
+            return -1;
+        }
+    }
+
     bool succeed = android::emulation::control::pushSnapshot(
-            arg_strings[0].c_str(), srcFile.get(), format, client,
+            arg_strings[0].c_str(), srcFile.get(), directory, format, client,
             control_write_err_cb);
     return succeed ? 0 : -1;
 }
@@ -3287,10 +3297,14 @@ do_sensors_set( ControlClient client, char* args )
             }
             size_t actual_size = 0;
 
-            status = android_sensors_get(sensor_id, ptr.data(), ptr.size());
+            status = android_sensors_get_size(sensor_id, &actual_size);
             if (status != SENSOR_STATUS_OK)
                 goto SENSOR_STATUS_ERROR;
             fvalues.resize(actual_size);
+
+            status = android_sensors_get(sensor_id, ptr.data(), ptr.size());
+            if (status != SENSOR_STATUS_OK)
+                goto SENSOR_STATUS_ERROR;
 
             {
                 /* Parsing the value part to get the sensor values(a, b, c) */
@@ -3477,12 +3491,20 @@ static const CommandDefRec automation_commands[] = {
 
 // Start recording of ground truth to the given file.
 static int do_physics_record_ground_truth(ControlClient client, char* args) {
-    return android_physical_model_record_ground_truth(args);
+    int res = android_physical_model_record_ground_truth(args);
+    if (res < 0) {
+        control_write( client, "KO: failed to record to file %s\r\n", args);
+    }
+    return res;
 }
 
 // Stop the current recording or playback of physical state changes.
 static int do_physics_stop(ControlClient client, char* args) {
-    return android_physical_model_stop_recording();
+    int res = android_physical_model_stop_recording();
+    if (res < 0) {
+        control_write( client, "KO: failed to stop recording\r\n");
+    }
+    return res;
 }
 
 // Physics commands for record/playback physics state.
@@ -4287,6 +4309,26 @@ static int do_no_draw(ControlClient client, char* args) {
     return 0;
 }
 
+static int do_resize_display(ControlClient client, char* args) {
+    if (args) {
+        int newSize;
+        if (sscanf(args, "%d", &newSize) == 1) {
+           if (newSize < 0 || newSize > 3) {
+                control_write(client, "KO: size index %d not supported\n", newSize);
+                return -1;
+           }
+           if (!client->global->emu_agent->changeResizableDisplay(newSize)) {
+                control_write(client, "KO: Failed to resize display\n");
+                return -1;
+           }
+           return 0;
+        }
+    }
+    control_write(client, "KO usage: \"resize-display <index>\" "
+                  "0: phone\t1: unfolded\t2: tablet\t3: desktop\n");
+    return -1;
+}
+
 /* NOTE: The names of all commands are listed when the 'help' command
  *       is received.
  *       Android Studio uses the 'help' command and requires that the
@@ -4418,6 +4460,16 @@ extern const CommandDefRec main_commands[] = {
 
         {"nodraw", "turn on/off NoDraw mode. (experimental)",
          NULL, NULL, do_no_draw, NULL},
+
+        {"resize-display", "resize the display resolution to the preset size",
+          "Allows you to resize the default display resolution to the following preset sizes\n"
+          "\tindex: size type, width-height-dpi\n"
+          "\t0: phone size, 1080-2340-420\n"
+          "\t1: unfolded size, 1768-2208-420\n"
+          "\t2: tablet size, 1920-1200-240\n"
+          "\t3: desktop size, 1920-1080-160\n"
+          "As an example: 'resize-display 2' resizes the default display to the size of tablet",
+          NULL, do_resize_display, NULL},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 

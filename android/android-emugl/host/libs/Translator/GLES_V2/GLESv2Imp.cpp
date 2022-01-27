@@ -29,7 +29,6 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
 #include "android/base/synchronization/Lock.h"
-#include "OpenglCodecCommon/ErrorLog.h"
 #include "GLESv2Context.h"
 #include "GLESv2Validate.h"
 #include "GLcommon/FramebufferData.h"
@@ -38,13 +37,13 @@
 #include "GLcommon/TextureData.h"
 #include "GLcommon/TextureUtils.h"
 #include "GLcommon/TranslatorIfaces.h"
-#include "OpenglCodecCommon/ErrorLog.h"
 #include "ProgramData.h"
 #include "SamplerData.h"
 #include "ShaderParser.h"
 #include "TransformFeedbackData.h"
 
 #include "emugl/common/crash_reporter.h"
+#include "emugl/common/logging.h"
 #include "emugl/common/metrics.h"
 
 #include "ANGLEShaderParser.h"

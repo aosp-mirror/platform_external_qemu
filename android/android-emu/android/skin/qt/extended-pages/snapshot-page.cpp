@@ -814,6 +814,7 @@ void SnapshotPage::updateAfterSelectionChanged() {
 
         if (theItem->isValid()) {
             selectedItemStatus = SelectionStatus::Valid;
+            QLocale locale;
             selectionInfoString =
                       tr("<big><b>%1</b></big><br>"
                          "%2, captured %3<br>"
@@ -822,7 +823,7 @@ void SnapshotPage::updateAfterSelectionChanged() {
                               .arg(logicalName,
                                    formattedSize(snapSize),
                                    theItem->dateTime().isValid() ?
-                                       theItem->dateTime().toString(Qt::SystemLocaleShortDate) :
+                                       locale.toString(theItem->dateTime(), QLocale::FormatType::ShortFormat) :
                                        tr("(unknown)"),
                                    simpleName,
                                    descriptionString);

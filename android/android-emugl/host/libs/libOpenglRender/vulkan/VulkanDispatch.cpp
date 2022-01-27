@@ -50,6 +50,18 @@ static std::string icdJsonNameToProgramAndLauncherPaths(
            pj(System::get()->getLauncherDirectory(), suffix);
 }
 
+static const char* getTestIcdFilename() {
+#if defined(__APPLE__)
+    return "libvk_swiftshader.dylib";
+#elif defined(__linux__)
+    return "libvk_swiftshader.so";
+#elif defined(_WIN32) || defined(_MSC_VER)
+    return "vk_swiftshader.dll";
+#else
+#error Host operating system not supported
+#endif
+}
+
 static void initIcdPaths(bool forTesting) {
     auto androidIcd = System::get()->envGet("ANDROID_EMU_VK_ICD");
     if (System::get()->envGet("ANDROID_EMU_SANDBOX") == "1") {
@@ -59,13 +71,15 @@ static void initIcdPaths(bool forTesting) {
         if (forTesting || androidIcd == "swiftshader") {
             auto res = pj(System::get()->getProgramDirectory(), "lib64", "vulkan");
             LOG(VERBOSE) << "In test environment or ICD set to swiftshader, using "
-                            "Swiftshader ICD";
-            auto libPath = pj(System::get()->getProgramDirectory(), "lib64", "vulkan", "libvk_swiftshader.so");;
+                         << "Swiftshader ICD " << getTestIcdFilename();
+            auto libPath = pj(System::get()->getProgramDirectory(), "lib64", "vulkan",
+                              getTestIcdFilename());
             if (path_exists(libPath.c_str())) {
                 LOG(VERBOSE) << "Swiftshader library exists";
             } else {
                 LOG(VERBOSE) << "Swiftshader library doesn't exist, trying launcher path";
-                libPath = pj(System::get()->getLauncherDirectory(), "lib64", "vulkan", "libvk_swiftshader.so");;
+                libPath = pj(System::get()->getLauncherDirectory(), "lib64", "vulkan",
+                             getTestIcdFilename());
                 if (path_exists(libPath.c_str())) {
                     LOG(VERBOSE) << "Swiftshader library found in launcher path";
                 } else {
@@ -147,6 +161,7 @@ static std::string getMoltenVkPath(const std::string& directory, bool forTesting
         LOG(VERBOSE) << "Skipping loader and using ICD directly: " << path;
         return path;
     }
+
 #endif
     return "";
 }
@@ -229,14 +244,16 @@ public:
                     success = mVulkanLibs.addLibrary(loaderPath);
                 }
 
-#ifdef __linux__
+                if (!success) {
                 // On Linux, it might not be called libvulkan.so.
                 // Try libvulkan.so.1 if that doesn't work.
-                if (!success) {
+#ifdef __linux__
                     loaderPath = pj(System::get()->getLauncherDirectory(), "lib64", "vulkan", "libvulkan.so.1");
+#elif defined _WIN32
+                    loaderPath = pj(System::get()->getLauncherDirectory(), "lib64", "vulkan", "vulkan-1.dll");
+#endif // __linux__
                     success = mVulkanLibs.addLibrary(loaderPath);
                 }
-#endif // __linux__
 #ifdef __APPLE__
                 // On macOS it is possible that we are using MoltenVK as the
                 // ICD. In that case we need to add MoltenVK libraries to

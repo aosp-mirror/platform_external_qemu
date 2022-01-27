@@ -53,7 +53,6 @@
 #include "android/console.h"
 #include "android/emulation/LogcatPipe.h"
 #include "android/emulation/MultiDisplay.h"
-#include "android/emulation/resizable_display_config.h"
 #include "android/emulation/control/RtcBridge.h"
 #include "android/emulation/control/ScreenCapturer.h"
 #include "android/emulation/control/ServiceUtils.h"
@@ -79,6 +78,7 @@
 #include "android/emulation/control/utils/SharedMemoryLibrary.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/control/window_agent.h"
+#include "android/emulation/resizable_display_config.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/featurecontrol/Features.h"
 #include "android/globals.h"
@@ -456,8 +456,7 @@ public:
                           ::google::protobuf::Empty* reply) override {
         if (!resizableEnabled()) {
             return Status(::grpc::StatusCode::FAILED_PRECONDITION,
-                          ":setDisplayMode the AVD is not resizable.",
-                          "");
+                          ":setDisplayMode the AVD is not resizable.", "");
         }
         auto agent = mAgents->emu;
         if (agent == nullptr || agent->changeResizableDisplay == nullptr) {
@@ -466,7 +465,8 @@ public:
                           "available.",
                           "");
         }
-        agent->changeResizableDisplay(static_cast<PresetEmulatorSizeType>(requestPtr->value()));
+        agent->changeResizableDisplay(
+                static_cast<PresetEmulatorSizeType>(requestPtr->value()));
         return Status::OK;
     }
 
@@ -475,10 +475,10 @@ public:
                           DisplayMode* reply) override {
         if (!resizableEnabled()) {
             return Status(::grpc::StatusCode::FAILED_PRECONDITION,
-                          ":getDisplayMode the AVD is not resizable.",
-                          "");
+                          ":getDisplayMode the AVD is not resizable.", "");
         }
-        reply->set_value(static_cast<DisplayModeValue>(getResizableActiveConfigId()));
+        reply->set_value(
+                static_cast<DisplayModeValue>(getResizableActiveConfigId()));
         return Status::OK;
     }
 
@@ -557,6 +557,22 @@ public:
     Status injectAudio(ServerContext* context,
                        ::grpc::ServerReader<AudioPacket>* reader,
                        ::google::protobuf::Empty* reply) override {
+        // We currently only support one microphone, so make sure we
+        // don't have multiple microphones registered.
+        int8_t expectActive = 0;
+        if (!mInjectAudioCount.compare_exchange_strong(expectActive, 1)) {
+            return Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                          "There can be only one microphone active", "");
+        }
+
+        // Make sure we decrement the active microphone counter.
+        assert(mInjectAudioCount == 1);
+        auto decrementActiveCount = android::base::makeCustomScopedPtr(
+                &mInjectAudioCount, [](auto counter) {
+                    assert(*counter == 1);
+                    counter->fetch_sub(1);
+                    assert(*counter == 0); });
+
         AudioPacket pkt;
         if (!reader->Read(&pkt)) {
             return Status::OK;
@@ -565,12 +581,6 @@ public:
         if (pkt.format().samplingrate() > 48000) {
             return Status(::grpc::StatusCode::INVALID_ARGUMENT,
                           "The desired sampling rate is too high (>48khz) ",
-                          "");
-        }
-
-        if (pkt.format().samplingrate() < 44000) {
-            return Status(::grpc::StatusCode::INVALID_ARGUMENT,
-                          "Upsampling is not yet supported (b/195497352) ",
                           "");
         }
 
@@ -588,7 +598,9 @@ public:
             if (pkt.audio().size() > aos.capacity()) {
                 return Status(::grpc::StatusCode::INVALID_ARGUMENT,
                               "The audio buffer can store at most " +
-                                      std::to_string(aos.capacity()) + " bytes",
+                                      std::to_string(aos.capacity()) +
+                                      " bytes, not: " +
+                                      std::to_string(pkt.audio().size()),
                               "");
             }
 
@@ -615,7 +627,7 @@ public:
         // 2 cases:
         // - The emulator is requesting audio, we deliver the whole queue
         // - The emulator is not requesting audio, we time out.
-        while(toWrite > 0 && std::chrono::system_clock::now() < timeout) {
+        while (toWrite > 0 && std::chrono::system_clock::now() < timeout) {
             toWrite -= aos.write(silence, sizeof(silence));
         }
 
@@ -826,7 +838,8 @@ public:
         }
         if (resizableEnabled()) {
             reply->mutable_format()->set_displaymode(
-                static_cast<DisplayModeValue>(getResizableActiveConfigId()));
+                    static_cast<DisplayModeValue>(
+                            getResizableActiveConfigId()));
         }
 
         reply->set_timestampus(System::get()->getUnixTimeUs());
@@ -1387,7 +1400,6 @@ public:
         return Status::OK;
     }
 
-
 private:
     const AndroidConsoleAgents* mAgents;
     keyboard::EmulatorKeyEventSender mKeyEventSender;
@@ -1401,6 +1413,7 @@ private:
     RingStreambuf
             mLogcatBuffer;  // A ring buffer that tracks the logcat output.
 
+    std::atomic_int8_t mInjectAudioCount{0}; // # of active inject audio.
     static constexpr uint32_t k128KB = (128 * 1024) - 1;
     static constexpr std::chrono::milliseconds k5SecondsWait = 5s;
     const std::chrono::milliseconds kNoWait = 0ms;

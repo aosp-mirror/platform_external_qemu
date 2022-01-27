@@ -1,17 +1,18 @@
-// Copyright (c) 2016-2018 Khronos Group. This work is licensed under a
-// Creative Commons Attribution 4.0 International License; see
-// http://creativecommons.org/licenses/by/4.0/
+// Copyright 2016-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
 
-include::meta/VK_KHR_variable_pointers.txt[]
+include::{generated}/meta/{refprefix}VK_KHR_variable_pointers.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
     2017-09-05
 *IP Status*::
     No known IP claims.
 *Interactions and External Dependencies*::
-  - Requires the
-    https://www.khronos.org/registry/spir-v/extensions/KHR/SPV_KHR_variable_pointers.html[+SPV_KHR_variable_pointers+]
-    SPIR-V extension.
+  - This extension requires
+    {spirv}/KHR/SPV_KHR_variable_pointers.html[`SPV_KHR_variable_pointers`]
   - Promoted to Vulkan 1.1 Core
 *Contributors*::
   - John Kessenich, Google
@@ -24,39 +25,34 @@ include::meta/VK_KHR_variable_pointers.txt[]
   - Jason Ekstrand, Intel
   - Jesse Hall, Google
 
+=== Description
+
 The `VK_KHR_variable_pointers` extension allows implementations to indicate
-their level of support for the +SPV_KHR_variable_pointers+ SPIR-V extension.
+their level of support for the `SPV_KHR_variable_pointers` SPIR-V extension.
 The SPIR-V extension allows shader modules to use invocation-private
 pointers into uniform and/or storage buffers, where the pointer values can
 be dynamic and non-uniform.
 
-The +SPV_KHR_variable_pointers+ extension introduces two capabilities.
+The `SPV_KHR_variable_pointers` extension introduces two capabilities.
 The first, code:VariablePointersStorageBuffer, must: be supported by all
 implementations of this extension.
 The second, code:VariablePointers, is optional.
-
-=== New Enum Constants
-
-  * Extending elink:VkStructureType:
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VARIABLE_POINTER_FEATURES_KHR
-
-=== New Structures
-
-  * slink:VkPhysicalDeviceVariablePointerFeaturesKHR
-
-=== New SPIR-V Capabilities
-
-  * <<spirvenv-capabilities-table-variablepointers,VariablePointersStorageBuffer>>
-  * <<spirvenv-capabilities-table-variablepointers,VariablePointers>>
 
 === Promotion to Vulkan 1.1
 
 All functionality in this extension is included in core Vulkan 1.1, with the
 KHR suffix omitted, however support for the
-<<features-features-variablePointersStorageBuffer,
+<<features-variablePointersStorageBuffer,
 pname:variablePointersStorageBuffer>> feature is made optional.
 The original type, enum and command names are still available as aliases of
 the core functionality.
+
+include::{generated}/interfaces/VK_KHR_variable_pointers.txt[]
+
+=== New SPIR-V Capabilities
+
+  * <<spirvenv-capabilities-table-VariablePointers,VariablePointers>>
+  * <<spirvenv-capabilities-table-VariablePointersStorageBuffer,VariablePointersStorageBuffer>>
 
 === Issues
 

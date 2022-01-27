@@ -61,6 +61,8 @@
         <file alias="minimize">images/light/ic_remove_678_48dp.svg</file>
         <file alias="more">images/light/ic_more_horiz_678_48dp.svg</file>
         <file alias="overview">images/light/System_Overview_678.svg</file>
+        <file alias="wear_button_1">images/light/wear_button1.svg</file>
+        <file alias="wear_button_2">images/light/wear_button2.svg</file>
         <file alias="power_settings">images/light/ic_power_settings_new_678_48px.svg</file>
         <file alias="screen_rotation">images/light/ic_screen_rotation_678_48dp.svg</file>
         <file alias="screen_rotation_left">images/light/Rotate_Left_678.svg</file>
@@ -246,6 +248,8 @@
         <file alias="minimize">images/dark/ic_remove_white_48dp.svg</file>
         <file alias="more">images/dark/ic_more_horiz_white_48dp.svg</file>
         <file alias="overview">images/dark/System_Overview_white.svg</file>
+        <file alias="wear_button_1">images/dark/wear_button1.svg</file>
+        <file alias="wear_button_2">images/dark/wear_button2.svg</file>
         <file alias="power_settings">images/dark/ic_power_settings_new_48px.svg</file>
         <file alias="screen_rotation">images/dark/ic_screen_rotation_white_48dp.svg</file>
         <file alias="screen_rotation_left">images/dark/Rotate_Left_white.svg</file>

@@ -70,7 +70,7 @@ def configure(args, target):
     cmake_cmd += ENUMS["Crash"][args.crash]
     cmake_cmd += ENUMS["BuildConfig"][args.config]
 
-    # Make darwin and msvc builds have QtWebEngine support for the default
+    # Make darwin (x86_64 and aarch64) and msvc builds have QtWebEngine support for the default
     # build.
     build_qtwebengine = False
     if args.qtwebengine and args.no_qtwebengine:
@@ -78,7 +78,7 @@ def configure(args, target):
             "--qtwebengine and --no-qtwebengine cannot be set at the same time!"
         )
         sys.exit(1)
-    if args.qtwebengine or args.target == "darwin" or args.target == "windows":
+    if args.qtwebengine or args.target == "darwin" or args.target == "darwin_aarch64" or args.target == "windows":
         build_qtwebengine = True
     if args.no_qtwebengine:
         build_qtwebengine = False

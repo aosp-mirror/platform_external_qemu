@@ -23,7 +23,11 @@
 #include <QLabel>                                    // for QLabel
 #include <QPropertyAnimation>                        // for QPropertyAnimation
 #include <QSettings>                                 // for QSettings
+#if QT_VERSION >= 0x060000
+#include <QtSvgWidgets/QSvgWidget>                                // for QSvgWidget
+#else
 #include <QSvgWidget>                                // for QSvgWidget
+#endif  // QT_VERSION
 #include <algorithm>                                 // for min
 
 #include "android/cmdline-option.h"  // for android_cmdLineOptions

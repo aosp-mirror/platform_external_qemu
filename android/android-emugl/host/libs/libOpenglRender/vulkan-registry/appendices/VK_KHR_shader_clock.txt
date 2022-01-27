@@ -1,0 +1,46 @@
+// Copyright 2017-2021 The Khronos Group, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_KHR_shader_clock.txt[]
+
+=== Other Extension Metadata
+
+*Last Modified Date*::
+    2019-4-25
+*IP Status*::
+    No known IP claims.
+*Interactions and External Dependencies*::
+  - This extension requires
+    {spirv}/KHR/SPV_KHR_shader_clock.html[`SPV_KHR_shader_clock`].
+  - This extension provides API support for
+    https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_shader_clock.txt[`ARB_shader_clock`]
+    and
+    https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_shader_realtime_clock.txt[`EXT_shader_realtime_clock`]
+*Contributors*::
+  - Aaron Hagan, AMD
+  - Daniel Koch, NVIDIA
+
+=== Description
+
+This extension advertises the SPIR-V code:ShaderClockKHR capability for
+Vulkan, which allows a shader to query a real-time or monotonically
+incrementing counter at the subgroup level or across the device level.
+The two valid SPIR-V scopes for code:OpReadClockKHR are code:Subgroup and
+code:Device.
+
+When using GLSL source-based shading languages, the code:clockRealtime*EXT()
+timing functions map to the code:OpReadClockKHR instruction with a scope of
+code:Device, and the code:clock*ARB() timing functions map to the
+code:OpReadClockKHR instruction with a scope of code:Subgroup.
+
+include::{generated}/interfaces/VK_KHR_shader_clock.txt[]
+
+=== New SPIR-V Capabilities
+
+  * <<spirvenv-capabilities-table-ShaderClockKHR,ShaderClockKHR>>
+
+=== Version History
+
+  * Revision 1, 2019-4-25 (Aaron Hagan)
+    - Initial revision

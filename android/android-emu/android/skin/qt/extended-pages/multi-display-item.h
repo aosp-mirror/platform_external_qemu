@@ -12,7 +12,7 @@
 #pragma once
 
 #include <stdint.h>                 // for uint32_t
-#include <QByteArrayData>           // for Q_OBJECT, signals, slots
+#include <QObject>                  // for Q_OBJECT, signals, slots
 #include <QString>                  // for QString
 #include <QWidget>                  // for QWidget
 #include <memory>                   // for shared_ptr, unique_ptr

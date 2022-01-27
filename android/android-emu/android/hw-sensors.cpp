@@ -300,26 +300,26 @@ static void _hwSensorClient_sanitizeSensorString(char* string, int maxlen) {
 
 static void serializeValue_float(Sensor* sensor,
                                  const char* format,
-                                 float value) {
+                                 float value, long measurement_id) {
     sensor->serialized.length =
             snprintf(sensor->serialized.value, sizeof(sensor->serialized.value),
-                     format, value);
+                     format, value, measurement_id);
 }
 
 static void serializeValue_vec3(Sensor* sensor,
                                 const char* format,
-                                vec3 value) {
+                                vec3 value, long measurement_id) {
     sensor->serialized.length =
             snprintf(sensor->serialized.value, sizeof(sensor->serialized.value),
-                     format, value.x, value.y, value.z);
+                     format, value.x, value.y, value.z, measurement_id);
 }
 
 static void serializeValue_vec4(Sensor* sensor,
                                 const char* format,
-                                vec4 value) {
+                                vec4 value, long measurement_id) {
     sensor->serialized.length =
             snprintf(sensor->serialized.value, sizeof(sensor->serialized.value),
-                     format, value.x, value.y, value.z, value.w);
+                     format, value.x, value.y, value.z, value.w, measurement_id);
 }
 
 // a function to serialize the sensor value based on its ID
@@ -337,7 +337,8 @@ static void serializeSensorValue(PhysicalModel* physical_model,
         const v current_value =                                        \
                 GET_FUNCTION_NAME(z)(physical_model, &measurement_id); \
         if (measurement_id != sensor->serialized.measurement_id) {     \
-            SERIALIZE_VALUE_NAME(v)(sensor, w, current_value);         \
+            SERIALIZE_VALUE_NAME(v)(sensor, w":%ld", current_value,    \
+            measurement_id);                                           \
         }                                                              \
         break;                                                         \
     }
@@ -993,6 +994,12 @@ static void _hwSensors_init(HwSensors* h) {
         (avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR
          && avdInfo_getApiLevel(android_avdInfo) >= 28)) {
         h->sensors[ANDROID_SENSOR_HEART_RATE].enabled = true;
+    }
+
+    if (android_hw->hw_sensors_wrist_tilt ||
+        (avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR
+         && avdInfo_getApiLevel(android_avdInfo) >= 28)) {
+        h->sensors[ANDROID_SENSOR_WRIST_TILT].enabled = true;
     }
 
     /* XXX: TODO: Add other tests when we add the corresponding

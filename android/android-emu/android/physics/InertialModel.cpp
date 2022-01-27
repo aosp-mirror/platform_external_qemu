@@ -655,6 +655,10 @@ void InertialModel::setTargetAmbientMotion(float bounds,
     }
 }
 
+void InertialModel::setWristTilt(float value, PhysicalInterpolation mode) {
+    mWristTilt = value;
+}
+
 glm::vec3 InertialModel::getPosition(
         ParameterValueType parameterValueType) const {
     if (parameterValueType == PARAMETER_VALUE_TYPE_DEFAULT) {
@@ -824,6 +828,11 @@ glm::vec3 InertialModel::getRotationalVelocity(
 float InertialModel::getAmbientMotion(
         ParameterValueType parameterValueType) const {
     return getAmbientMotionBoundsValue(parameterValueType);
+}
+
+float InertialModel::getWristTilt(
+        ParameterValueType parameterValueType) const {
+    return mWristTilt;
 }
 
 void InertialModel::setInertialTransforms(

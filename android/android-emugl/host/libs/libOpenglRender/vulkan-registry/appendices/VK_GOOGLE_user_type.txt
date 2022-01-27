@@ -1,0 +1,30 @@
+// Copyright (c) 2019-2020 Google LLC
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_GOOGLE_user_type.txt[]
+
+=== Other Extension Metadata
+
+*Last Modified Date*::
+    2019-07-09
+*IP Status*::
+    No known IP claims.
+*Interactions and External Dependencies*::
+  - This extension requires
+    {spirv}/GOOGLE/SPV_GOOGLE_user_type.asciidoc[`SPV_GOOGLE_user_type`]
+*Contributors*::
+  - Kaye Mason, Google
+  - Hai Nguyen, Google
+
+=== Description
+
+The `VK_GOOGLE_user_type` extension allows use of the `SPV_GOOGLE_user_type`
+extension in SPIR-V shader modules.
+
+include::{generated}/interfaces/VK_GOOGLE_user_type.txt[]
+
+=== Version History
+
+  * Revision 1, 2019-09-07 (Kaye Mason)
+    - Initial draft

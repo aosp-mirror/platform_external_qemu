@@ -23,8 +23,6 @@ extern "C" {
 #include "net/slirp.h"
 }
 
-static void* s_opaque = nullptr;
-
 void android_qemu_init_slirp_shapers(void)
 {
     if (net_slirp_state() == nullptr) {
@@ -34,7 +32,7 @@ void android_qemu_init_slirp_shapers(void)
     }
     android_net_delay_in = netdelay_create(
             [](void* data, size_t size, void* opaque) {
-                net_slirp_receive_raw(s_opaque,
+                net_slirp_receive_raw(opaque,
                                       static_cast<const uint8_t*>(data),
                                       static_cast<int>(size));
             });
@@ -57,23 +55,22 @@ void android_qemu_init_slirp_shapers(void)
     netshaper_set_rate(android_net_shaper_out, android_net_download_speed);
     netshaper_set_rate(android_net_shaper_in, android_net_upload_speed);
 
-    s_opaque = net_slirp_set_shapers(
+    net_slirp_set_shapers(
             android_net_shaper_out,
-            [](void* opaque, const void* data, int len) {
+            [](void* opaque, const void* data, int len, void* slirp_state) {
                 if (qemu_tcpdump_active) {
                     qemu_tcpdump_packet(data, len);
                 }
-
                 netshaper_send_aux(static_cast<NetShaper>(opaque),
-                                   (char*)data, len, s_opaque);
+                                   (char*)data, len, slirp_state);
             },
             android_net_shaper_in,
-            [](void* opaque, const void* data, int len) {
+            [](void* opaque, const void* data, int len, void* slirp_state) {
                 if (qemu_tcpdump_active) {
                     qemu_tcpdump_packet(data, len);
                 }
 
                 netshaper_send_aux(static_cast<NetShaper>(opaque),
-                                   (void*)data, len, s_opaque);
+                                   (void*)data, len, slirp_state);
             });
 }

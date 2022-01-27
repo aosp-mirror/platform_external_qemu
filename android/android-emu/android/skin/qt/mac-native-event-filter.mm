@@ -23,9 +23,15 @@
 
 #import <AppKit/AppKit.h>
 
+#if QT_VERSION >= 0x060000
 bool NativeEventFilter::nativeEventFilter(const QByteArray& eventType,
-                                             void* message,
-                                             long*) {
+                                          void* message,
+                                          qintptr*) {
+#else
+bool NativeEventFilter::nativeEventFilter(const QByteArray& eventType,
+                                          void* message,
+                                          long*) {
+#endif  // QT_VERSION
     if (eventType.compare("mac_generic_NSEvent") == 0) {
         NSEvent* event = static_cast<NSEvent*>(message);
         if ([event type] == NSKeyDown) {

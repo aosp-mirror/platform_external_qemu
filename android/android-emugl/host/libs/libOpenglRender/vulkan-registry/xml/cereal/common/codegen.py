@@ -369,7 +369,7 @@ class CodeGen(object):
         return protoBegin + protoParams
 
     def makeFuncAlias(self, nameDst, nameSrc):
-        return "DEFINE_ALIAS_FUNCTION({}, {});\n\n".format(nameSrc, nameDst)
+        return "DEFINE_ALIAS_FUNCTION({}, {})\n\n".format(nameSrc, nameDst)
 
     def makeFuncDecl(self, vulkanApi):
         return self.makeFuncProto(vulkanApi) + ";\n\n"

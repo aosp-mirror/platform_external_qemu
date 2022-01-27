@@ -275,7 +275,7 @@ OPT_PARAM(record_session, "<file>,<delay>[,<duration>]", "Screen record the emul
 
 OPT_FLAG(legacy_fake_camera, "Use legacy camera HAL for the emulated fake camera.")
 
-OPT_FLAG(no_camera_hq_edge, "Disable high qualify edge processing for emulated camera.")
+OPT_FLAG(camera_hq_edge, "Enable high qualify edge processing for emulated camera.")
 
 OPT_FLAG(no_direct_adb, "Use external adb executable for internal communication.")
 

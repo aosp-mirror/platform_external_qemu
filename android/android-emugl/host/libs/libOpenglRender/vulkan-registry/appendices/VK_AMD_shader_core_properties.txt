@@ -1,37 +1,26 @@
-include::meta/VK_AMD_shader_core_properties.txt[]
+// Copyright (c) 2018-2020 Advanced Micro Devices, Inc.
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
+include::{generated}/meta/{refprefix}VK_AMD_shader_core_properties.txt[]
+
+=== Other Extension Metadata
 
 *Last Modified Date*::
-    2018-02-15
+    2019-06-25
 *IP Status*::
     No known IP claims.
 *Contributors*::
   - Martin Dinkov, AMD
-  - Matthaeus Chajdas, AMD
+  - Matthaeus G. Chajdas, AMD
+
+=== Description
 
 This extension exposes shader core properties for a target physical device
-through the VK_KHR_get_physical_device_properties2 extension.
+through the `apiext:VK_KHR_get_physical_device_properties2` extension.
 Please refer to the example below for proper usage.
 
-=== New Object Types
-
-None.
-
-=== New Enum Constants
-
-  * Extending ename:VkStructureType:
-  ** ename:VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CORE_PROPERTIES_AMD
-
-=== New Enums
-
-None.
-
-=== New Structures
-
-  * slink:VkPhysicalDeviceShaderCorePropertiesAMD
-
-=== New Functions
-
-None.
+include::{generated}/interfaces/VK_AMD_shader_core_properties.txt[]
 
 === Examples
 
@@ -104,5 +93,7 @@ printf("VGPRs are allocated in groups of this size: %d\n",
 
 === Version History
 
+  * Revision 2, 2019-06-25 (Matthaeus G. Chajdas)
+    - Clarified the meaning of a few fields.
   * Revision 1, 2018-02-15 (Martin Dinkov)
     - Initial draft.

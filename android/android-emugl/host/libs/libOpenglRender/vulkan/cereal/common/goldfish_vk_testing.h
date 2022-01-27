@@ -106,6 +106,11 @@ void checkEqual_VkMemoryBarrier(
     const VkMemoryBarrier* b,
     OnFailCompareFunc onFail);
 
+void checkEqual_VkPipelineCacheHeaderVersionOne(
+    const VkPipelineCacheHeaderVersionOne* a,
+    const VkPipelineCacheHeaderVersionOne* b,
+    OnFailCompareFunc onFail);
+
 void checkEqual_VkAllocationCallbacks(
     const VkAllocationCallbacks* a,
     const VkAllocationCallbacks* b,
@@ -773,7 +778,7 @@ void checkEqual_VkPhysicalDeviceVariablePointersFeatures(
     const VkPhysicalDeviceVariablePointersFeatures* b,
     OnFailCompareFunc onFail);
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceVariablePointersFeatures, checkEqual_VkPhysicalDeviceVariablePointerFeatures);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceVariablePointersFeatures, checkEqual_VkPhysicalDeviceVariablePointerFeatures)
 
 void checkEqual_VkPhysicalDeviceProtectedMemoryFeatures(
     const VkPhysicalDeviceProtectedMemoryFeatures* a,
@@ -925,7 +930,7 @@ void checkEqual_VkPhysicalDeviceShaderDrawParametersFeatures(
     const VkPhysicalDeviceShaderDrawParametersFeatures* b,
     OnFailCompareFunc onFail);
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceShaderDrawParametersFeatures, checkEqual_VkPhysicalDeviceShaderDrawParameterFeatures);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceShaderDrawParametersFeatures, checkEqual_VkPhysicalDeviceShaderDrawParameterFeatures)
 
 #endif
 #ifdef VK_VERSION_1_2
@@ -1320,48 +1325,186 @@ void checkEqual_VkWin32SurfaceCreateInfoKHR(
 #endif
 #ifdef VK_KHR_sampler_mirror_clamp_to_edge
 #endif
+#ifdef VK_KHR_video_queue
+void checkEqual_VkVideoQueueFamilyProperties2KHR(
+    const VkVideoQueueFamilyProperties2KHR* a,
+    const VkVideoQueueFamilyProperties2KHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoProfileKHR(
+    const VkVideoProfileKHR* a,
+    const VkVideoProfileKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoProfilesKHR(
+    const VkVideoProfilesKHR* a,
+    const VkVideoProfilesKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoCapabilitiesKHR(
+    const VkVideoCapabilitiesKHR* a,
+    const VkVideoCapabilitiesKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPhysicalDeviceVideoFormatInfoKHR(
+    const VkPhysicalDeviceVideoFormatInfoKHR* a,
+    const VkPhysicalDeviceVideoFormatInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoFormatPropertiesKHR(
+    const VkVideoFormatPropertiesKHR* a,
+    const VkVideoFormatPropertiesKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoPictureResourceKHR(
+    const VkVideoPictureResourceKHR* a,
+    const VkVideoPictureResourceKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoReferenceSlotKHR(
+    const VkVideoReferenceSlotKHR* a,
+    const VkVideoReferenceSlotKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoGetMemoryPropertiesKHR(
+    const VkVideoGetMemoryPropertiesKHR* a,
+    const VkVideoGetMemoryPropertiesKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoBindMemoryKHR(
+    const VkVideoBindMemoryKHR* a,
+    const VkVideoBindMemoryKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoSessionCreateInfoKHR(
+    const VkVideoSessionCreateInfoKHR* a,
+    const VkVideoSessionCreateInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoSessionParametersCreateInfoKHR(
+    const VkVideoSessionParametersCreateInfoKHR* a,
+    const VkVideoSessionParametersCreateInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoSessionParametersUpdateInfoKHR(
+    const VkVideoSessionParametersUpdateInfoKHR* a,
+    const VkVideoSessionParametersUpdateInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoBeginCodingInfoKHR(
+    const VkVideoBeginCodingInfoKHR* a,
+    const VkVideoBeginCodingInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEndCodingInfoKHR(
+    const VkVideoEndCodingInfoKHR* a,
+    const VkVideoEndCodingInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoCodingControlInfoKHR(
+    const VkVideoCodingControlInfoKHR* a,
+    const VkVideoCodingControlInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_KHR_video_decode_queue
+void checkEqual_VkVideoDecodeInfoKHR(
+    const VkVideoDecodeInfoKHR* a,
+    const VkVideoDecodeInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_KHR_dynamic_rendering
+void checkEqual_VkRenderingAttachmentInfoKHR(
+    const VkRenderingAttachmentInfoKHR* a,
+    const VkRenderingAttachmentInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkRenderingInfoKHR(
+    const VkRenderingInfoKHR* a,
+    const VkRenderingInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPipelineRenderingCreateInfoKHR(
+    const VkPipelineRenderingCreateInfoKHR* a,
+    const VkPipelineRenderingCreateInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPhysicalDeviceDynamicRenderingFeaturesKHR(
+    const VkPhysicalDeviceDynamicRenderingFeaturesKHR* a,
+    const VkPhysicalDeviceDynamicRenderingFeaturesKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkCommandBufferInheritanceRenderingInfoKHR(
+    const VkCommandBufferInheritanceRenderingInfoKHR* a,
+    const VkCommandBufferInheritanceRenderingInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkRenderingFragmentShadingRateAttachmentInfoKHR(
+    const VkRenderingFragmentShadingRateAttachmentInfoKHR* a,
+    const VkRenderingFragmentShadingRateAttachmentInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkRenderingFragmentDensityMapAttachmentInfoEXT(
+    const VkRenderingFragmentDensityMapAttachmentInfoEXT* a,
+    const VkRenderingFragmentDensityMapAttachmentInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkAttachmentSampleCountInfoAMD(
+    const VkAttachmentSampleCountInfoAMD* a,
+    const VkAttachmentSampleCountInfoAMD* b,
+    OnFailCompareFunc onFail);
+
+DEFINE_ALIAS_FUNCTION(checkEqual_VkAttachmentSampleCountInfoAMD, checkEqual_VkAttachmentSampleCountInfoNV)
+
+void checkEqual_VkMultiviewPerViewAttributesInfoNVX(
+    const VkMultiviewPerViewAttributesInfoNVX* a,
+    const VkMultiviewPerViewAttributesInfoNVX* b,
+    OnFailCompareFunc onFail);
+
+#endif
 #ifdef VK_KHR_multiview
-DEFINE_ALIAS_FUNCTION(checkEqual_VkRenderPassMultiviewCreateInfo, checkEqual_VkRenderPassMultiviewCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkRenderPassMultiviewCreateInfo, checkEqual_VkRenderPassMultiviewCreateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceMultiviewFeatures, checkEqual_VkPhysicalDeviceMultiviewFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceMultiviewFeatures, checkEqual_VkPhysicalDeviceMultiviewFeaturesKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceMultiviewProperties, checkEqual_VkPhysicalDeviceMultiviewPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceMultiviewProperties, checkEqual_VkPhysicalDeviceMultiviewPropertiesKHR)
 
 #endif
 #ifdef VK_KHR_get_physical_device_properties2
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceFeatures2, checkEqual_VkPhysicalDeviceFeatures2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceFeatures2, checkEqual_VkPhysicalDeviceFeatures2KHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceProperties2, checkEqual_VkPhysicalDeviceProperties2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceProperties2, checkEqual_VkPhysicalDeviceProperties2KHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkFormatProperties2, checkEqual_VkFormatProperties2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkFormatProperties2, checkEqual_VkFormatProperties2KHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkImageFormatProperties2, checkEqual_VkImageFormatProperties2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkImageFormatProperties2, checkEqual_VkImageFormatProperties2KHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceImageFormatInfo2, checkEqual_VkPhysicalDeviceImageFormatInfo2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceImageFormatInfo2, checkEqual_VkPhysicalDeviceImageFormatInfo2KHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkQueueFamilyProperties2, checkEqual_VkQueueFamilyProperties2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkQueueFamilyProperties2, checkEqual_VkQueueFamilyProperties2KHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceMemoryProperties2, checkEqual_VkPhysicalDeviceMemoryProperties2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceMemoryProperties2, checkEqual_VkPhysicalDeviceMemoryProperties2KHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkSparseImageFormatProperties2, checkEqual_VkSparseImageFormatProperties2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSparseImageFormatProperties2, checkEqual_VkSparseImageFormatProperties2KHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceSparseImageFormatInfo2, checkEqual_VkPhysicalDeviceSparseImageFormatInfo2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceSparseImageFormatInfo2, checkEqual_VkPhysicalDeviceSparseImageFormatInfo2KHR)
 
 #endif
 #ifdef VK_KHR_device_group
-DEFINE_ALIAS_FUNCTION(checkEqual_VkMemoryAllocateFlagsInfo, checkEqual_VkMemoryAllocateFlagsInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkMemoryAllocateFlagsInfo, checkEqual_VkMemoryAllocateFlagsInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkDeviceGroupRenderPassBeginInfo, checkEqual_VkDeviceGroupRenderPassBeginInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDeviceGroupRenderPassBeginInfo, checkEqual_VkDeviceGroupRenderPassBeginInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkDeviceGroupCommandBufferBeginInfo, checkEqual_VkDeviceGroupCommandBufferBeginInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDeviceGroupCommandBufferBeginInfo, checkEqual_VkDeviceGroupCommandBufferBeginInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkDeviceGroupSubmitInfo, checkEqual_VkDeviceGroupSubmitInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDeviceGroupSubmitInfo, checkEqual_VkDeviceGroupSubmitInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkDeviceGroupBindSparseInfo, checkEqual_VkDeviceGroupBindSparseInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDeviceGroupBindSparseInfo, checkEqual_VkDeviceGroupBindSparseInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkBindBufferMemoryDeviceGroupInfo, checkEqual_VkBindBufferMemoryDeviceGroupInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkBindBufferMemoryDeviceGroupInfo, checkEqual_VkBindBufferMemoryDeviceGroupInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkBindImageMemoryDeviceGroupInfo, checkEqual_VkBindImageMemoryDeviceGroupInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkBindImageMemoryDeviceGroupInfo, checkEqual_VkBindImageMemoryDeviceGroupInfoKHR)
 
 #endif
 #ifdef VK_KHR_shader_draw_parameters
@@ -1369,31 +1512,31 @@ DEFINE_ALIAS_FUNCTION(checkEqual_VkBindImageMemoryDeviceGroupInfo, checkEqual_Vk
 #ifdef VK_KHR_maintenance1
 #endif
 #ifdef VK_KHR_device_group_creation
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceGroupProperties, checkEqual_VkPhysicalDeviceGroupPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceGroupProperties, checkEqual_VkPhysicalDeviceGroupPropertiesKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkDeviceGroupDeviceCreateInfo, checkEqual_VkDeviceGroupDeviceCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDeviceGroupDeviceCreateInfo, checkEqual_VkDeviceGroupDeviceCreateInfoKHR)
 
 #endif
 #ifdef VK_KHR_external_memory_capabilities
-DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalMemoryProperties, checkEqual_VkExternalMemoryPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalMemoryProperties, checkEqual_VkExternalMemoryPropertiesKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceExternalImageFormatInfo, checkEqual_VkPhysicalDeviceExternalImageFormatInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceExternalImageFormatInfo, checkEqual_VkPhysicalDeviceExternalImageFormatInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalImageFormatProperties, checkEqual_VkExternalImageFormatPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalImageFormatProperties, checkEqual_VkExternalImageFormatPropertiesKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceExternalBufferInfo, checkEqual_VkPhysicalDeviceExternalBufferInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceExternalBufferInfo, checkEqual_VkPhysicalDeviceExternalBufferInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalBufferProperties, checkEqual_VkExternalBufferPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalBufferProperties, checkEqual_VkExternalBufferPropertiesKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceIDProperties, checkEqual_VkPhysicalDeviceIDPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceIDProperties, checkEqual_VkPhysicalDeviceIDPropertiesKHR)
 
 #endif
 #ifdef VK_KHR_external_memory
-DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalMemoryImageCreateInfo, checkEqual_VkExternalMemoryImageCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalMemoryImageCreateInfo, checkEqual_VkExternalMemoryImageCreateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalMemoryBufferCreateInfo, checkEqual_VkExternalMemoryBufferCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalMemoryBufferCreateInfo, checkEqual_VkExternalMemoryBufferCreateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkExportMemoryAllocateInfo, checkEqual_VkExportMemoryAllocateInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExportMemoryAllocateInfo, checkEqual_VkExportMemoryAllocateInfoKHR)
 
 #endif
 #ifdef VK_KHR_external_memory_win32
@@ -1443,13 +1586,13 @@ void checkEqual_VkWin32KeyedMutexAcquireReleaseInfoKHR(
 
 #endif
 #ifdef VK_KHR_external_semaphore_capabilities
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceExternalSemaphoreInfo, checkEqual_VkPhysicalDeviceExternalSemaphoreInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceExternalSemaphoreInfo, checkEqual_VkPhysicalDeviceExternalSemaphoreInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalSemaphoreProperties, checkEqual_VkExternalSemaphorePropertiesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalSemaphoreProperties, checkEqual_VkExternalSemaphorePropertiesKHR)
 
 #endif
 #ifdef VK_KHR_external_semaphore
-DEFINE_ALIAS_FUNCTION(checkEqual_VkExportSemaphoreCreateInfo, checkEqual_VkExportSemaphoreCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExportSemaphoreCreateInfo, checkEqual_VkExportSemaphoreCreateInfoKHR)
 
 #endif
 #ifdef VK_KHR_external_semaphore_win32
@@ -1494,13 +1637,13 @@ void checkEqual_VkPhysicalDevicePushDescriptorPropertiesKHR(
 
 #endif
 #ifdef VK_KHR_shader_float16_int8
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceShaderFloat16Int8Features, checkEqual_VkPhysicalDeviceShaderFloat16Int8FeaturesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceShaderFloat16Int8Features, checkEqual_VkPhysicalDeviceShaderFloat16Int8FeaturesKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceShaderFloat16Int8Features, checkEqual_VkPhysicalDeviceFloat16Int8FeaturesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceShaderFloat16Int8Features, checkEqual_VkPhysicalDeviceFloat16Int8FeaturesKHR)
 
 #endif
 #ifdef VK_KHR_16bit_storage
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDevice16BitStorageFeatures, checkEqual_VkPhysicalDevice16BitStorageFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDevice16BitStorageFeatures, checkEqual_VkPhysicalDevice16BitStorageFeaturesKHR)
 
 #endif
 #ifdef VK_KHR_incremental_present
@@ -1521,35 +1664,35 @@ void checkEqual_VkPresentRegionsKHR(
 
 #endif
 #ifdef VK_KHR_descriptor_update_template
-DEFINE_ALIAS_FUNCTION(checkEqual_VkDescriptorUpdateTemplateEntry, checkEqual_VkDescriptorUpdateTemplateEntryKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDescriptorUpdateTemplateEntry, checkEqual_VkDescriptorUpdateTemplateEntryKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkDescriptorUpdateTemplateCreateInfo, checkEqual_VkDescriptorUpdateTemplateCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDescriptorUpdateTemplateCreateInfo, checkEqual_VkDescriptorUpdateTemplateCreateInfoKHR)
 
 #endif
 #ifdef VK_KHR_imageless_framebuffer
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceImagelessFramebufferFeatures, checkEqual_VkPhysicalDeviceImagelessFramebufferFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceImagelessFramebufferFeatures, checkEqual_VkPhysicalDeviceImagelessFramebufferFeaturesKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkFramebufferAttachmentsCreateInfo, checkEqual_VkFramebufferAttachmentsCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkFramebufferAttachmentsCreateInfo, checkEqual_VkFramebufferAttachmentsCreateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkFramebufferAttachmentImageInfo, checkEqual_VkFramebufferAttachmentImageInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkFramebufferAttachmentImageInfo, checkEqual_VkFramebufferAttachmentImageInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkRenderPassAttachmentBeginInfo, checkEqual_VkRenderPassAttachmentBeginInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkRenderPassAttachmentBeginInfo, checkEqual_VkRenderPassAttachmentBeginInfoKHR)
 
 #endif
 #ifdef VK_KHR_create_renderpass2
-DEFINE_ALIAS_FUNCTION(checkEqual_VkRenderPassCreateInfo2, checkEqual_VkRenderPassCreateInfo2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkRenderPassCreateInfo2, checkEqual_VkRenderPassCreateInfo2KHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkAttachmentDescription2, checkEqual_VkAttachmentDescription2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkAttachmentDescription2, checkEqual_VkAttachmentDescription2KHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkAttachmentReference2, checkEqual_VkAttachmentReference2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkAttachmentReference2, checkEqual_VkAttachmentReference2KHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkSubpassDescription2, checkEqual_VkSubpassDescription2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSubpassDescription2, checkEqual_VkSubpassDescription2KHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkSubpassDependency2, checkEqual_VkSubpassDependency2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSubpassDependency2, checkEqual_VkSubpassDependency2KHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkSubpassBeginInfo, checkEqual_VkSubpassBeginInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSubpassBeginInfo, checkEqual_VkSubpassBeginInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkSubpassEndInfo, checkEqual_VkSubpassEndInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSubpassEndInfo, checkEqual_VkSubpassEndInfoKHR)
 
 #endif
 #ifdef VK_KHR_shared_presentable_image
@@ -1560,13 +1703,13 @@ void checkEqual_VkSharedPresentSurfaceCapabilitiesKHR(
 
 #endif
 #ifdef VK_KHR_external_fence_capabilities
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceExternalFenceInfo, checkEqual_VkPhysicalDeviceExternalFenceInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceExternalFenceInfo, checkEqual_VkPhysicalDeviceExternalFenceInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalFenceProperties, checkEqual_VkExternalFencePropertiesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExternalFenceProperties, checkEqual_VkExternalFencePropertiesKHR)
 
 #endif
 #ifdef VK_KHR_external_fence
-DEFINE_ALIAS_FUNCTION(checkEqual_VkExportFenceCreateInfo, checkEqual_VkExportFenceCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkExportFenceCreateInfo, checkEqual_VkExportFenceCreateInfoKHR)
 
 #endif
 #ifdef VK_KHR_external_fence_win32
@@ -1641,15 +1784,15 @@ void checkEqual_VkPerformanceQuerySubmitInfoKHR(
 
 #endif
 #ifdef VK_KHR_maintenance2
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDevicePointClippingProperties, checkEqual_VkPhysicalDevicePointClippingPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDevicePointClippingProperties, checkEqual_VkPhysicalDevicePointClippingPropertiesKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkRenderPassInputAttachmentAspectCreateInfo, checkEqual_VkRenderPassInputAttachmentAspectCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkRenderPassInputAttachmentAspectCreateInfo, checkEqual_VkRenderPassInputAttachmentAspectCreateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkInputAttachmentAspectReference, checkEqual_VkInputAttachmentAspectReferenceKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkInputAttachmentAspectReference, checkEqual_VkInputAttachmentAspectReferenceKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkImageViewUsageCreateInfo, checkEqual_VkImageViewUsageCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkImageViewUsageCreateInfo, checkEqual_VkImageViewUsageCreateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPipelineTessellationDomainOriginStateCreateInfo, checkEqual_VkPipelineTessellationDomainOriginStateCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPipelineTessellationDomainOriginStateCreateInfo, checkEqual_VkPipelineTessellationDomainOriginStateCreateInfoKHR)
 
 #endif
 #ifdef VK_KHR_get_surface_capabilities2
@@ -1670,9 +1813,9 @@ void checkEqual_VkSurfaceFormat2KHR(
 
 #endif
 #ifdef VK_KHR_variable_pointers
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceVariablePointersFeatures, checkEqual_VkPhysicalDeviceVariablePointerFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceVariablePointersFeatures, checkEqual_VkPhysicalDeviceVariablePointerFeaturesKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceVariablePointersFeatures, checkEqual_VkPhysicalDeviceVariablePointersFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceVariablePointersFeatures, checkEqual_VkPhysicalDeviceVariablePointersFeaturesKHR)
 
 #endif
 #ifdef VK_KHR_get_display_properties2
@@ -1703,9 +1846,9 @@ void checkEqual_VkDisplayPlaneCapabilities2KHR(
 
 #endif
 #ifdef VK_KHR_dedicated_allocation
-DEFINE_ALIAS_FUNCTION(checkEqual_VkMemoryDedicatedRequirements, checkEqual_VkMemoryDedicatedRequirementsKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkMemoryDedicatedRequirements, checkEqual_VkMemoryDedicatedRequirementsKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkMemoryDedicatedAllocateInfo, checkEqual_VkMemoryDedicatedAllocateInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkMemoryDedicatedAllocateInfo, checkEqual_VkMemoryDedicatedAllocateInfoKHR)
 
 #endif
 #ifdef VK_KHR_storage_buffer_storage_class
@@ -1713,39 +1856,39 @@ DEFINE_ALIAS_FUNCTION(checkEqual_VkMemoryDedicatedAllocateInfo, checkEqual_VkMem
 #ifdef VK_KHR_relaxed_block_layout
 #endif
 #ifdef VK_KHR_get_memory_requirements2
-DEFINE_ALIAS_FUNCTION(checkEqual_VkBufferMemoryRequirementsInfo2, checkEqual_VkBufferMemoryRequirementsInfo2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkBufferMemoryRequirementsInfo2, checkEqual_VkBufferMemoryRequirementsInfo2KHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkImageMemoryRequirementsInfo2, checkEqual_VkImageMemoryRequirementsInfo2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkImageMemoryRequirementsInfo2, checkEqual_VkImageMemoryRequirementsInfo2KHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkImageSparseMemoryRequirementsInfo2, checkEqual_VkImageSparseMemoryRequirementsInfo2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkImageSparseMemoryRequirementsInfo2, checkEqual_VkImageSparseMemoryRequirementsInfo2KHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkMemoryRequirements2, checkEqual_VkMemoryRequirements2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkMemoryRequirements2, checkEqual_VkMemoryRequirements2KHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkSparseImageMemoryRequirements2, checkEqual_VkSparseImageMemoryRequirements2KHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSparseImageMemoryRequirements2, checkEqual_VkSparseImageMemoryRequirements2KHR)
 
 #endif
 #ifdef VK_KHR_image_format_list
-DEFINE_ALIAS_FUNCTION(checkEqual_VkImageFormatListCreateInfo, checkEqual_VkImageFormatListCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkImageFormatListCreateInfo, checkEqual_VkImageFormatListCreateInfoKHR)
 
 #endif
 #ifdef VK_KHR_sampler_ycbcr_conversion
-DEFINE_ALIAS_FUNCTION(checkEqual_VkSamplerYcbcrConversionCreateInfo, checkEqual_VkSamplerYcbcrConversionCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSamplerYcbcrConversionCreateInfo, checkEqual_VkSamplerYcbcrConversionCreateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkSamplerYcbcrConversionInfo, checkEqual_VkSamplerYcbcrConversionInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSamplerYcbcrConversionInfo, checkEqual_VkSamplerYcbcrConversionInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkBindImagePlaneMemoryInfo, checkEqual_VkBindImagePlaneMemoryInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkBindImagePlaneMemoryInfo, checkEqual_VkBindImagePlaneMemoryInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkImagePlaneMemoryRequirementsInfo, checkEqual_VkImagePlaneMemoryRequirementsInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkImagePlaneMemoryRequirementsInfo, checkEqual_VkImagePlaneMemoryRequirementsInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceSamplerYcbcrConversionFeatures, checkEqual_VkPhysicalDeviceSamplerYcbcrConversionFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceSamplerYcbcrConversionFeatures, checkEqual_VkPhysicalDeviceSamplerYcbcrConversionFeaturesKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkSamplerYcbcrConversionImageFormatProperties, checkEqual_VkSamplerYcbcrConversionImageFormatPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSamplerYcbcrConversionImageFormatProperties, checkEqual_VkSamplerYcbcrConversionImageFormatPropertiesKHR)
 
 #endif
 #ifdef VK_KHR_bind_memory2
-DEFINE_ALIAS_FUNCTION(checkEqual_VkBindBufferMemoryInfo, checkEqual_VkBindBufferMemoryInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkBindBufferMemoryInfo, checkEqual_VkBindBufferMemoryInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkBindImageMemoryInfo, checkEqual_VkBindImageMemoryInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkBindImageMemoryInfo, checkEqual_VkBindImageMemoryInfoKHR)
 
 #endif
 #ifdef VK_KHR_portability_subset
@@ -1761,23 +1904,23 @@ void checkEqual_VkPhysicalDevicePortabilitySubsetPropertiesKHR(
 
 #endif
 #ifdef VK_KHR_maintenance3
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceMaintenance3Properties, checkEqual_VkPhysicalDeviceMaintenance3PropertiesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceMaintenance3Properties, checkEqual_VkPhysicalDeviceMaintenance3PropertiesKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkDescriptorSetLayoutSupport, checkEqual_VkDescriptorSetLayoutSupportKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDescriptorSetLayoutSupport, checkEqual_VkDescriptorSetLayoutSupportKHR)
 
 #endif
 #ifdef VK_KHR_draw_indirect_count
 #endif
 #ifdef VK_KHR_shader_subgroup_extended_types
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures, checkEqual_VkPhysicalDeviceShaderSubgroupExtendedTypesFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceShaderSubgroupExtendedTypesFeatures, checkEqual_VkPhysicalDeviceShaderSubgroupExtendedTypesFeaturesKHR)
 
 #endif
 #ifdef VK_KHR_8bit_storage
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDevice8BitStorageFeatures, checkEqual_VkPhysicalDevice8BitStorageFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDevice8BitStorageFeatures, checkEqual_VkPhysicalDevice8BitStorageFeaturesKHR)
 
 #endif
 #ifdef VK_KHR_shader_atomic_int64
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceShaderAtomicInt64Features, checkEqual_VkPhysicalDeviceShaderAtomicInt64FeaturesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceShaderAtomicInt64Features, checkEqual_VkPhysicalDeviceShaderAtomicInt64FeaturesKHR)
 
 #endif
 #ifdef VK_KHR_shader_clock
@@ -1788,39 +1931,39 @@ void checkEqual_VkPhysicalDeviceShaderClockFeaturesKHR(
 
 #endif
 #ifdef VK_KHR_driver_properties
-DEFINE_ALIAS_FUNCTION(checkEqual_VkConformanceVersion, checkEqual_VkConformanceVersionKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkConformanceVersion, checkEqual_VkConformanceVersionKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceDriverProperties, checkEqual_VkPhysicalDeviceDriverPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceDriverProperties, checkEqual_VkPhysicalDeviceDriverPropertiesKHR)
 
 #endif
 #ifdef VK_KHR_shader_float_controls
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceFloatControlsProperties, checkEqual_VkPhysicalDeviceFloatControlsPropertiesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceFloatControlsProperties, checkEqual_VkPhysicalDeviceFloatControlsPropertiesKHR)
 
 #endif
 #ifdef VK_KHR_depth_stencil_resolve
-DEFINE_ALIAS_FUNCTION(checkEqual_VkSubpassDescriptionDepthStencilResolve, checkEqual_VkSubpassDescriptionDepthStencilResolveKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSubpassDescriptionDepthStencilResolve, checkEqual_VkSubpassDescriptionDepthStencilResolveKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceDepthStencilResolveProperties, checkEqual_VkPhysicalDeviceDepthStencilResolvePropertiesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceDepthStencilResolveProperties, checkEqual_VkPhysicalDeviceDepthStencilResolvePropertiesKHR)
 
 #endif
 #ifdef VK_KHR_swapchain_mutable_format
 #endif
 #ifdef VK_KHR_timeline_semaphore
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceTimelineSemaphoreFeatures, checkEqual_VkPhysicalDeviceTimelineSemaphoreFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceTimelineSemaphoreFeatures, checkEqual_VkPhysicalDeviceTimelineSemaphoreFeaturesKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceTimelineSemaphoreProperties, checkEqual_VkPhysicalDeviceTimelineSemaphorePropertiesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceTimelineSemaphoreProperties, checkEqual_VkPhysicalDeviceTimelineSemaphorePropertiesKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkSemaphoreTypeCreateInfo, checkEqual_VkSemaphoreTypeCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSemaphoreTypeCreateInfo, checkEqual_VkSemaphoreTypeCreateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkTimelineSemaphoreSubmitInfo, checkEqual_VkTimelineSemaphoreSubmitInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkTimelineSemaphoreSubmitInfo, checkEqual_VkTimelineSemaphoreSubmitInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkSemaphoreWaitInfo, checkEqual_VkSemaphoreWaitInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSemaphoreWaitInfo, checkEqual_VkSemaphoreWaitInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkSemaphoreSignalInfo, checkEqual_VkSemaphoreSignalInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSemaphoreSignalInfo, checkEqual_VkSemaphoreSignalInfoKHR)
 
 #endif
 #ifdef VK_KHR_vulkan_memory_model
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceVulkanMemoryModelFeatures, checkEqual_VkPhysicalDeviceVulkanMemoryModelFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceVulkanMemoryModelFeatures, checkEqual_VkPhysicalDeviceVulkanMemoryModelFeaturesKHR)
 
 #endif
 #ifdef VK_KHR_shader_terminate_invocation
@@ -1867,27 +2010,34 @@ void checkEqual_VkSurfaceProtectedCapabilitiesKHR(
 
 #endif
 #ifdef VK_KHR_separate_depth_stencil_layouts
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures, checkEqual_VkPhysicalDeviceSeparateDepthStencilLayoutsFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceSeparateDepthStencilLayoutsFeatures, checkEqual_VkPhysicalDeviceSeparateDepthStencilLayoutsFeaturesKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkAttachmentReferenceStencilLayout, checkEqual_VkAttachmentReferenceStencilLayoutKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkAttachmentReferenceStencilLayout, checkEqual_VkAttachmentReferenceStencilLayoutKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkAttachmentDescriptionStencilLayout, checkEqual_VkAttachmentDescriptionStencilLayoutKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkAttachmentDescriptionStencilLayout, checkEqual_VkAttachmentDescriptionStencilLayoutKHR)
+
+#endif
+#ifdef VK_KHR_present_wait
+void checkEqual_VkPhysicalDevicePresentWaitFeaturesKHR(
+    const VkPhysicalDevicePresentWaitFeaturesKHR* a,
+    const VkPhysicalDevicePresentWaitFeaturesKHR* b,
+    OnFailCompareFunc onFail);
 
 #endif
 #ifdef VK_KHR_uniform_buffer_standard_layout
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceUniformBufferStandardLayoutFeatures, checkEqual_VkPhysicalDeviceUniformBufferStandardLayoutFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceUniformBufferStandardLayoutFeatures, checkEqual_VkPhysicalDeviceUniformBufferStandardLayoutFeaturesKHR)
 
 #endif
 #ifdef VK_KHR_buffer_device_address
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceBufferDeviceAddressFeatures, checkEqual_VkPhysicalDeviceBufferDeviceAddressFeaturesKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceBufferDeviceAddressFeatures, checkEqual_VkPhysicalDeviceBufferDeviceAddressFeaturesKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkBufferDeviceAddressInfo, checkEqual_VkBufferDeviceAddressInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkBufferDeviceAddressInfo, checkEqual_VkBufferDeviceAddressInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkBufferOpaqueCaptureAddressCreateInfo, checkEqual_VkBufferOpaqueCaptureAddressCreateInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkBufferOpaqueCaptureAddressCreateInfo, checkEqual_VkBufferOpaqueCaptureAddressCreateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkMemoryOpaqueCaptureAddressAllocateInfo, checkEqual_VkMemoryOpaqueCaptureAddressAllocateInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkMemoryOpaqueCaptureAddressAllocateInfo, checkEqual_VkMemoryOpaqueCaptureAddressAllocateInfoKHR)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkDeviceMemoryOpaqueCaptureAddressInfo, checkEqual_VkDeviceMemoryOpaqueCaptureAddressInfoKHR);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDeviceMemoryOpaqueCaptureAddressInfo, checkEqual_VkDeviceMemoryOpaqueCaptureAddressInfoKHR)
 
 #endif
 #ifdef VK_KHR_deferred_host_operations
@@ -1929,6 +2079,18 @@ void checkEqual_VkPipelineExecutableInternalRepresentationKHR(
     OnFailCompareFunc onFail);
 
 #endif
+#ifdef VK_KHR_shader_integer_dot_product
+void checkEqual_VkPhysicalDeviceShaderIntegerDotProductFeaturesKHR(
+    const VkPhysicalDeviceShaderIntegerDotProductFeaturesKHR* a,
+    const VkPhysicalDeviceShaderIntegerDotProductFeaturesKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPhysicalDeviceShaderIntegerDotProductPropertiesKHR(
+    const VkPhysicalDeviceShaderIntegerDotProductPropertiesKHR* a,
+    const VkPhysicalDeviceShaderIntegerDotProductPropertiesKHR* b,
+    OnFailCompareFunc onFail);
+
+#endif
 #ifdef VK_KHR_pipeline_library
 void checkEqual_VkPipelineLibraryCreateInfoKHR(
     const VkPipelineLibraryCreateInfoKHR* a,
@@ -1937,6 +2099,103 @@ void checkEqual_VkPipelineLibraryCreateInfoKHR(
 
 #endif
 #ifdef VK_KHR_shader_non_semantic_info
+#endif
+#ifdef VK_KHR_present_id
+void checkEqual_VkPresentIdKHR(
+    const VkPresentIdKHR* a,
+    const VkPresentIdKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPhysicalDevicePresentIdFeaturesKHR(
+    const VkPhysicalDevicePresentIdFeaturesKHR* a,
+    const VkPhysicalDevicePresentIdFeaturesKHR* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_KHR_video_encode_queue
+void checkEqual_VkVideoEncodeInfoKHR(
+    const VkVideoEncodeInfoKHR* a,
+    const VkVideoEncodeInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEncodeRateControlInfoKHR(
+    const VkVideoEncodeRateControlInfoKHR* a,
+    const VkVideoEncodeRateControlInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_KHR_synchronization2
+void checkEqual_VkMemoryBarrier2KHR(
+    const VkMemoryBarrier2KHR* a,
+    const VkMemoryBarrier2KHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkBufferMemoryBarrier2KHR(
+    const VkBufferMemoryBarrier2KHR* a,
+    const VkBufferMemoryBarrier2KHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkImageMemoryBarrier2KHR(
+    const VkImageMemoryBarrier2KHR* a,
+    const VkImageMemoryBarrier2KHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkDependencyInfoKHR(
+    const VkDependencyInfoKHR* a,
+    const VkDependencyInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkSemaphoreSubmitInfoKHR(
+    const VkSemaphoreSubmitInfoKHR* a,
+    const VkSemaphoreSubmitInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkCommandBufferSubmitInfoKHR(
+    const VkCommandBufferSubmitInfoKHR* a,
+    const VkCommandBufferSubmitInfoKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkSubmitInfo2KHR(
+    const VkSubmitInfo2KHR* a,
+    const VkSubmitInfo2KHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPhysicalDeviceSynchronization2FeaturesKHR(
+    const VkPhysicalDeviceSynchronization2FeaturesKHR* a,
+    const VkPhysicalDeviceSynchronization2FeaturesKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkQueueFamilyCheckpointProperties2NV(
+    const VkQueueFamilyCheckpointProperties2NV* a,
+    const VkQueueFamilyCheckpointProperties2NV* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkCheckpointData2NV(
+    const VkCheckpointData2NV* a,
+    const VkCheckpointData2NV* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_KHR_shader_subgroup_uniform_control_flow
+void checkEqual_VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR(
+    const VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR* a,
+    const VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_KHR_zero_initialize_workgroup_memory
+void checkEqual_VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR(
+    const VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR* a,
+    const VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_KHR_workgroup_memory_explicit_layout
+void checkEqual_VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR(
+    const VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR* a,
+    const VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR* b,
+    OnFailCompareFunc onFail);
+
 #endif
 #ifdef VK_KHR_copy_commands2
 void checkEqual_VkBufferCopy2KHR(
@@ -1992,6 +2251,35 @@ void checkEqual_VkImageResolve2KHR(
 void checkEqual_VkResolveImageInfo2KHR(
     const VkResolveImageInfo2KHR* a,
     const VkResolveImageInfo2KHR* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_KHR_format_feature_flags2
+void checkEqual_VkFormatProperties3KHR(
+    const VkFormatProperties3KHR* a,
+    const VkFormatProperties3KHR* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_KHR_maintenance4
+void checkEqual_VkPhysicalDeviceMaintenance4FeaturesKHR(
+    const VkPhysicalDeviceMaintenance4FeaturesKHR* a,
+    const VkPhysicalDeviceMaintenance4FeaturesKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPhysicalDeviceMaintenance4PropertiesKHR(
+    const VkPhysicalDeviceMaintenance4PropertiesKHR* a,
+    const VkPhysicalDeviceMaintenance4PropertiesKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkDeviceBufferMemoryRequirementsKHR(
+    const VkDeviceBufferMemoryRequirementsKHR* a,
+    const VkDeviceBufferMemoryRequirementsKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkDeviceImageMemoryRequirementsKHR(
+    const VkDeviceImageMemoryRequirementsKHR* a,
+    const VkDeviceImageMemoryRequirementsKHR* b,
     OnFailCompareFunc onFail);
 
 #endif
@@ -2079,6 +2367,23 @@ void checkEqual_VkPipelineRasterizationStateStreamCreateInfoEXT(
     OnFailCompareFunc onFail);
 
 #endif
+#ifdef VK_NVX_binary_import
+void checkEqual_VkCuModuleCreateInfoNVX(
+    const VkCuModuleCreateInfoNVX* a,
+    const VkCuModuleCreateInfoNVX* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkCuFunctionCreateInfoNVX(
+    const VkCuFunctionCreateInfoNVX* a,
+    const VkCuFunctionCreateInfoNVX* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkCuLaunchInfoNVX(
+    const VkCuLaunchInfoNVX* a,
+    const VkCuLaunchInfoNVX* b,
+    OnFailCompareFunc onFail);
+
+#endif
 #ifdef VK_NVX_image_view_handle
 void checkEqual_VkImageViewHandleInfoNVX(
     const VkImageViewHandleInfoNVX* a,
@@ -2098,6 +2403,147 @@ void checkEqual_VkImageViewAddressPropertiesNVX(
 #ifdef VK_AMD_gpu_shader_half_float
 #endif
 #ifdef VK_AMD_shader_ballot
+#endif
+#ifdef VK_EXT_video_encode_h264
+void checkEqual_VkVideoEncodeH264CapabilitiesEXT(
+    const VkVideoEncodeH264CapabilitiesEXT* a,
+    const VkVideoEncodeH264CapabilitiesEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEncodeH264SessionCreateInfoEXT(
+    const VkVideoEncodeH264SessionCreateInfoEXT* a,
+    const VkVideoEncodeH264SessionCreateInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEncodeH264SessionParametersAddInfoEXT(
+    const VkVideoEncodeH264SessionParametersAddInfoEXT* a,
+    const VkVideoEncodeH264SessionParametersAddInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEncodeH264SessionParametersCreateInfoEXT(
+    const VkVideoEncodeH264SessionParametersCreateInfoEXT* a,
+    const VkVideoEncodeH264SessionParametersCreateInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEncodeH264DpbSlotInfoEXT(
+    const VkVideoEncodeH264DpbSlotInfoEXT* a,
+    const VkVideoEncodeH264DpbSlotInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEncodeH264NaluSliceEXT(
+    const VkVideoEncodeH264NaluSliceEXT* a,
+    const VkVideoEncodeH264NaluSliceEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEncodeH264VclFrameInfoEXT(
+    const VkVideoEncodeH264VclFrameInfoEXT* a,
+    const VkVideoEncodeH264VclFrameInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEncodeH264EmitPictureParametersEXT(
+    const VkVideoEncodeH264EmitPictureParametersEXT* a,
+    const VkVideoEncodeH264EmitPictureParametersEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEncodeH264ProfileEXT(
+    const VkVideoEncodeH264ProfileEXT* a,
+    const VkVideoEncodeH264ProfileEXT* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_EXT_video_encode_h265
+void checkEqual_VkVideoEncodeH265CapabilitiesEXT(
+    const VkVideoEncodeH265CapabilitiesEXT* a,
+    const VkVideoEncodeH265CapabilitiesEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEncodeH265SessionCreateInfoEXT(
+    const VkVideoEncodeH265SessionCreateInfoEXT* a,
+    const VkVideoEncodeH265SessionCreateInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEncodeH265SessionParametersAddInfoEXT(
+    const VkVideoEncodeH265SessionParametersAddInfoEXT* a,
+    const VkVideoEncodeH265SessionParametersAddInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEncodeH265SessionParametersCreateInfoEXT(
+    const VkVideoEncodeH265SessionParametersCreateInfoEXT* a,
+    const VkVideoEncodeH265SessionParametersCreateInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEncodeH265DpbSlotInfoEXT(
+    const VkVideoEncodeH265DpbSlotInfoEXT* a,
+    const VkVideoEncodeH265DpbSlotInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEncodeH265ReferenceListsEXT(
+    const VkVideoEncodeH265ReferenceListsEXT* a,
+    const VkVideoEncodeH265ReferenceListsEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEncodeH265NaluSliceEXT(
+    const VkVideoEncodeH265NaluSliceEXT* a,
+    const VkVideoEncodeH265NaluSliceEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEncodeH265VclFrameInfoEXT(
+    const VkVideoEncodeH265VclFrameInfoEXT* a,
+    const VkVideoEncodeH265VclFrameInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEncodeH265EmitPictureParametersEXT(
+    const VkVideoEncodeH265EmitPictureParametersEXT* a,
+    const VkVideoEncodeH265EmitPictureParametersEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoEncodeH265ProfileEXT(
+    const VkVideoEncodeH265ProfileEXT* a,
+    const VkVideoEncodeH265ProfileEXT* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_EXT_video_decode_h264
+void checkEqual_VkVideoDecodeH264ProfileEXT(
+    const VkVideoDecodeH264ProfileEXT* a,
+    const VkVideoDecodeH264ProfileEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoDecodeH264CapabilitiesEXT(
+    const VkVideoDecodeH264CapabilitiesEXT* a,
+    const VkVideoDecodeH264CapabilitiesEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoDecodeH264SessionCreateInfoEXT(
+    const VkVideoDecodeH264SessionCreateInfoEXT* a,
+    const VkVideoDecodeH264SessionCreateInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoDecodeH264SessionParametersAddInfoEXT(
+    const VkVideoDecodeH264SessionParametersAddInfoEXT* a,
+    const VkVideoDecodeH264SessionParametersAddInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoDecodeH264SessionParametersCreateInfoEXT(
+    const VkVideoDecodeH264SessionParametersCreateInfoEXT* a,
+    const VkVideoDecodeH264SessionParametersCreateInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoDecodeH264PictureInfoEXT(
+    const VkVideoDecodeH264PictureInfoEXT* a,
+    const VkVideoDecodeH264PictureInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoDecodeH264MvcEXT(
+    const VkVideoDecodeH264MvcEXT* a,
+    const VkVideoDecodeH264MvcEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoDecodeH264DpbSlotInfoEXT(
+    const VkVideoDecodeH264DpbSlotInfoEXT* a,
+    const VkVideoDecodeH264DpbSlotInfoEXT* b,
+    OnFailCompareFunc onFail);
+
 #endif
 #ifdef VK_AMD_texture_gather_bias_lod
 void checkEqual_VkTextureLODGatherFormatPropertiesAMD(
@@ -2448,11 +2894,16 @@ void checkEqual_VkExternalFormatANDROID(
     const VkExternalFormatANDROID* b,
     OnFailCompareFunc onFail);
 
+void checkEqual_VkAndroidHardwareBufferFormatProperties2ANDROID(
+    const VkAndroidHardwareBufferFormatProperties2ANDROID* a,
+    const VkAndroidHardwareBufferFormatProperties2ANDROID* b,
+    OnFailCompareFunc onFail);
+
 #endif
 #ifdef VK_EXT_sampler_filter_minmax
-DEFINE_ALIAS_FUNCTION(checkEqual_VkSamplerReductionModeCreateInfo, checkEqual_VkSamplerReductionModeCreateInfoEXT);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkSamplerReductionModeCreateInfo, checkEqual_VkSamplerReductionModeCreateInfoEXT)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceSamplerFilterMinmaxProperties, checkEqual_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceSamplerFilterMinmaxProperties, checkEqual_VkPhysicalDeviceSamplerFilterMinmaxPropertiesEXT)
 
 #endif
 #ifdef VK_AMD_gpu_shader_int16
@@ -2605,6 +3056,16 @@ void checkEqual_VkImageDrmFormatModifierPropertiesEXT(
     const VkImageDrmFormatModifierPropertiesEXT* b,
     OnFailCompareFunc onFail);
 
+void checkEqual_VkDrmFormatModifierProperties2EXT(
+    const VkDrmFormatModifierProperties2EXT* a,
+    const VkDrmFormatModifierProperties2EXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkDrmFormatModifierPropertiesList2EXT(
+    const VkDrmFormatModifierPropertiesList2EXT* a,
+    const VkDrmFormatModifierPropertiesList2EXT* b,
+    OnFailCompareFunc onFail);
+
 #endif
 #ifdef VK_EXT_validation_cache
 void checkEqual_VkValidationCacheCreateInfoEXT(
@@ -2619,15 +3080,15 @@ void checkEqual_VkShaderModuleValidationCacheCreateInfoEXT(
 
 #endif
 #ifdef VK_EXT_descriptor_indexing
-DEFINE_ALIAS_FUNCTION(checkEqual_VkDescriptorSetLayoutBindingFlagsCreateInfo, checkEqual_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDescriptorSetLayoutBindingFlagsCreateInfo, checkEqual_VkDescriptorSetLayoutBindingFlagsCreateInfoEXT)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceDescriptorIndexingFeatures, checkEqual_VkPhysicalDeviceDescriptorIndexingFeaturesEXT);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceDescriptorIndexingFeatures, checkEqual_VkPhysicalDeviceDescriptorIndexingFeaturesEXT)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceDescriptorIndexingProperties, checkEqual_VkPhysicalDeviceDescriptorIndexingPropertiesEXT);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceDescriptorIndexingProperties, checkEqual_VkPhysicalDeviceDescriptorIndexingPropertiesEXT)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkDescriptorSetVariableDescriptorCountAllocateInfo, checkEqual_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDescriptorSetVariableDescriptorCountAllocateInfo, checkEqual_VkDescriptorSetVariableDescriptorCountAllocateInfoEXT)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkDescriptorSetVariableDescriptorCountLayoutSupport, checkEqual_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkDescriptorSetVariableDescriptorCountLayoutSupport, checkEqual_VkDescriptorSetVariableDescriptorCountLayoutSupportEXT)
 
 #endif
 #ifdef VK_EXT_shader_viewport_index_layer
@@ -2735,21 +3196,21 @@ void checkEqual_VkTransformMatrixKHR(
     const VkTransformMatrixKHR* b,
     OnFailCompareFunc onFail);
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkTransformMatrixKHR, checkEqual_VkTransformMatrixNV);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkTransformMatrixKHR, checkEqual_VkTransformMatrixNV)
 
 void checkEqual_VkAabbPositionsKHR(
     const VkAabbPositionsKHR* a,
     const VkAabbPositionsKHR* b,
     OnFailCompareFunc onFail);
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkAabbPositionsKHR, checkEqual_VkAabbPositionsNV);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkAabbPositionsKHR, checkEqual_VkAabbPositionsNV)
 
 void checkEqual_VkAccelerationStructureInstanceKHR(
     const VkAccelerationStructureInstanceKHR* a,
     const VkAccelerationStructureInstanceKHR* b,
     OnFailCompareFunc onFail);
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkAccelerationStructureInstanceKHR, checkEqual_VkAccelerationStructureInstanceNV);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkAccelerationStructureInstanceKHR, checkEqual_VkAccelerationStructureInstanceNV)
 
 #endif
 #ifdef VK_NV_representative_fragment_test
@@ -2822,6 +3283,43 @@ void checkEqual_VkCalibratedTimestampInfoEXT(
 void checkEqual_VkPhysicalDeviceShaderCorePropertiesAMD(
     const VkPhysicalDeviceShaderCorePropertiesAMD* a,
     const VkPhysicalDeviceShaderCorePropertiesAMD* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_EXT_video_decode_h265
+void checkEqual_VkVideoDecodeH265ProfileEXT(
+    const VkVideoDecodeH265ProfileEXT* a,
+    const VkVideoDecodeH265ProfileEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoDecodeH265CapabilitiesEXT(
+    const VkVideoDecodeH265CapabilitiesEXT* a,
+    const VkVideoDecodeH265CapabilitiesEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoDecodeH265SessionCreateInfoEXT(
+    const VkVideoDecodeH265SessionCreateInfoEXT* a,
+    const VkVideoDecodeH265SessionCreateInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoDecodeH265SessionParametersAddInfoEXT(
+    const VkVideoDecodeH265SessionParametersAddInfoEXT* a,
+    const VkVideoDecodeH265SessionParametersAddInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoDecodeH265SessionParametersCreateInfoEXT(
+    const VkVideoDecodeH265SessionParametersCreateInfoEXT* a,
+    const VkVideoDecodeH265SessionParametersCreateInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoDecodeH265PictureInfoEXT(
+    const VkVideoDecodeH265PictureInfoEXT* a,
+    const VkVideoDecodeH265PictureInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVideoDecodeH265DpbSlotInfoEXT(
+    const VkVideoDecodeH265DpbSlotInfoEXT* a,
+    const VkVideoDecodeH265DpbSlotInfoEXT* b,
     OnFailCompareFunc onFail);
 
 #endif
@@ -2965,7 +3463,7 @@ void checkEqual_VkQueryPoolPerformanceQueryCreateInfoINTEL(
     const VkQueryPoolPerformanceQueryCreateInfoINTEL* b,
     OnFailCompareFunc onFail);
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkQueryPoolPerformanceQueryCreateInfoINTEL, checkEqual_VkQueryPoolCreateInfoINTEL);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkQueryPoolPerformanceQueryCreateInfoINTEL, checkEqual_VkQueryPoolCreateInfoINTEL)
 
 void checkEqual_VkPerformanceMarkerInfoINTEL(
     const VkPerformanceMarkerInfoINTEL* a,
@@ -3039,7 +3537,7 @@ void checkEqual_VkRenderPassFragmentDensityMapCreateInfoEXT(
 
 #endif
 #ifdef VK_EXT_scalar_block_layout
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceScalarBlockLayoutFeatures, checkEqual_VkPhysicalDeviceScalarBlockLayoutFeaturesEXT);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceScalarBlockLayoutFeatures, checkEqual_VkPhysicalDeviceScalarBlockLayoutFeaturesEXT)
 
 #endif
 #ifdef VK_GOOGLE_hlsl_functionality1
@@ -3116,9 +3614,9 @@ void checkEqual_VkPhysicalDeviceBufferDeviceAddressFeaturesEXT(
     const VkPhysicalDeviceBufferDeviceAddressFeaturesEXT* b,
     OnFailCompareFunc onFail);
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceBufferDeviceAddressFeaturesEXT, checkEqual_VkPhysicalDeviceBufferAddressFeaturesEXT);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceBufferDeviceAddressFeaturesEXT, checkEqual_VkPhysicalDeviceBufferAddressFeaturesEXT)
 
-DEFINE_ALIAS_FUNCTION(checkEqual_VkBufferDeviceAddressInfo, checkEqual_VkBufferDeviceAddressInfoEXT);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkBufferDeviceAddressInfo, checkEqual_VkBufferDeviceAddressInfoEXT)
 
 void checkEqual_VkBufferDeviceAddressCreateInfoEXT(
     const VkBufferDeviceAddressCreateInfoEXT* a,
@@ -3134,7 +3632,7 @@ void checkEqual_VkPhysicalDeviceToolPropertiesEXT(
 
 #endif
 #ifdef VK_EXT_separate_stencil_usage
-DEFINE_ALIAS_FUNCTION(checkEqual_VkImageStencilUsageCreateInfo, checkEqual_VkImageStencilUsageCreateInfoEXT);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkImageStencilUsageCreateInfo, checkEqual_VkImageStencilUsageCreateInfoEXT)
 
 #endif
 #ifdef VK_EXT_validation_features
@@ -3192,6 +3690,23 @@ void checkEqual_VkPhysicalDeviceYcbcrImageArraysFeaturesEXT(
     OnFailCompareFunc onFail);
 
 #endif
+#ifdef VK_EXT_provoking_vertex
+void checkEqual_VkPhysicalDeviceProvokingVertexFeaturesEXT(
+    const VkPhysicalDeviceProvokingVertexFeaturesEXT* a,
+    const VkPhysicalDeviceProvokingVertexFeaturesEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPhysicalDeviceProvokingVertexPropertiesEXT(
+    const VkPhysicalDeviceProvokingVertexPropertiesEXT* a,
+    const VkPhysicalDeviceProvokingVertexPropertiesEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPipelineRasterizationProvokingVertexStateCreateInfoEXT(
+    const VkPipelineRasterizationProvokingVertexStateCreateInfoEXT* a,
+    const VkPipelineRasterizationProvokingVertexStateCreateInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+#endif
 #ifdef VK_EXT_full_screen_exclusive
 void checkEqual_VkSurfaceFullScreenExclusiveInfoEXT(
     const VkSurfaceFullScreenExclusiveInfoEXT* a,
@@ -3241,7 +3756,7 @@ void checkEqual_VkPhysicalDeviceShaderAtomicFloatFeaturesEXT(
 
 #endif
 #ifdef VK_EXT_host_query_reset
-DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceHostQueryResetFeatures, checkEqual_VkPhysicalDeviceHostQueryResetFeaturesEXT);
+DEFINE_ALIAS_FUNCTION(checkEqual_VkPhysicalDeviceHostQueryResetFeatures, checkEqual_VkPhysicalDeviceHostQueryResetFeaturesEXT)
 
 #endif
 #ifdef VK_EXT_index_type_uint8
@@ -3255,6 +3770,13 @@ void checkEqual_VkPhysicalDeviceIndexTypeUint8FeaturesEXT(
 void checkEqual_VkPhysicalDeviceExtendedDynamicStateFeaturesEXT(
     const VkPhysicalDeviceExtendedDynamicStateFeaturesEXT* a,
     const VkPhysicalDeviceExtendedDynamicStateFeaturesEXT* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_EXT_shader_atomic_float2
+void checkEqual_VkPhysicalDeviceShaderAtomicFloat2FeaturesEXT(
+    const VkPhysicalDeviceShaderAtomicFloat2FeaturesEXT* a,
+    const VkPhysicalDeviceShaderAtomicFloat2FeaturesEXT* b,
     OnFailCompareFunc onFail);
 
 #endif
@@ -3332,6 +3854,18 @@ void checkEqual_VkGeneratedCommandsMemoryRequirementsInfoNV(
     OnFailCompareFunc onFail);
 
 #endif
+#ifdef VK_NV_inherited_viewport_scissor
+void checkEqual_VkPhysicalDeviceInheritedViewportScissorFeaturesNV(
+    const VkPhysicalDeviceInheritedViewportScissorFeaturesNV* a,
+    const VkPhysicalDeviceInheritedViewportScissorFeaturesNV* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkCommandBufferInheritanceViewportScissorInfoNV(
+    const VkCommandBufferInheritanceViewportScissorInfoNV* a,
+    const VkCommandBufferInheritanceViewportScissorInfoNV* b,
+    OnFailCompareFunc onFail);
+
+#endif
 #ifdef VK_EXT_texel_buffer_alignment
 void checkEqual_VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT(
     const VkPhysicalDeviceTexelBufferAlignmentFeaturesEXT* a,
@@ -3372,6 +3906,8 @@ void checkEqual_VkDeviceDeviceMemoryReportCreateInfoEXT(
     const VkDeviceDeviceMemoryReportCreateInfoEXT* b,
     OnFailCompareFunc onFail);
 
+#endif
+#ifdef VK_EXT_acquire_drm_display
 #endif
 #ifdef VK_EXT_robustness2
 void checkEqual_VkPhysicalDeviceRobustness2FeaturesEXT(
@@ -3459,6 +3995,60 @@ void checkEqual_VkPipelineFragmentShadingRateEnumStateCreateInfoNV(
     OnFailCompareFunc onFail);
 
 #endif
+#ifdef VK_NV_ray_tracing_motion_blur
+void checkEqual_VkDeviceOrHostAddressConstKHR(
+    const VkDeviceOrHostAddressConstKHR* a,
+    const VkDeviceOrHostAddressConstKHR* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkAccelerationStructureGeometryMotionTrianglesDataNV(
+    const VkAccelerationStructureGeometryMotionTrianglesDataNV* a,
+    const VkAccelerationStructureGeometryMotionTrianglesDataNV* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkAccelerationStructureMotionInfoNV(
+    const VkAccelerationStructureMotionInfoNV* a,
+    const VkAccelerationStructureMotionInfoNV* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkAccelerationStructureMatrixMotionInstanceNV(
+    const VkAccelerationStructureMatrixMotionInstanceNV* a,
+    const VkAccelerationStructureMatrixMotionInstanceNV* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkSRTDataNV(
+    const VkSRTDataNV* a,
+    const VkSRTDataNV* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkAccelerationStructureSRTMotionInstanceNV(
+    const VkAccelerationStructureSRTMotionInstanceNV* a,
+    const VkAccelerationStructureSRTMotionInstanceNV* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkAccelerationStructureMotionInstanceDataNV(
+    const VkAccelerationStructureMotionInstanceDataNV* a,
+    const VkAccelerationStructureMotionInstanceDataNV* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkAccelerationStructureMotionInstanceNV(
+    const VkAccelerationStructureMotionInstanceNV* a,
+    const VkAccelerationStructureMotionInstanceNV* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPhysicalDeviceRayTracingMotionBlurFeaturesNV(
+    const VkPhysicalDeviceRayTracingMotionBlurFeaturesNV* a,
+    const VkPhysicalDeviceRayTracingMotionBlurFeaturesNV* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_EXT_ycbcr_2plane_444_formats
+void checkEqual_VkPhysicalDeviceYcbcr2Plane444FormatsFeaturesEXT(
+    const VkPhysicalDeviceYcbcr2Plane444FormatsFeaturesEXT* a,
+    const VkPhysicalDeviceYcbcr2Plane444FormatsFeaturesEXT* b,
+    OnFailCompareFunc onFail);
+
+#endif
 #ifdef VK_EXT_fragment_density_map2
 void checkEqual_VkPhysicalDeviceFragmentDensityMap2FeaturesEXT(
     const VkPhysicalDeviceFragmentDensityMap2FeaturesEXT* a,
@@ -3492,10 +4082,210 @@ void checkEqual_VkPhysicalDevice4444FormatsFeaturesEXT(
     OnFailCompareFunc onFail);
 
 #endif
+#ifdef VK_EXT_rgba10x6_formats
+void checkEqual_VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT(
+    const VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT* a,
+    const VkPhysicalDeviceRGBA10X6FormatsFeaturesEXT* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_NV_acquire_winrt_display
+#endif
 #ifdef VK_EXT_directfb_surface
 void checkEqual_VkDirectFBSurfaceCreateInfoEXT(
     const VkDirectFBSurfaceCreateInfoEXT* a,
     const VkDirectFBSurfaceCreateInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_VALVE_mutable_descriptor_type
+void checkEqual_VkPhysicalDeviceMutableDescriptorTypeFeaturesVALVE(
+    const VkPhysicalDeviceMutableDescriptorTypeFeaturesVALVE* a,
+    const VkPhysicalDeviceMutableDescriptorTypeFeaturesVALVE* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkMutableDescriptorTypeListVALVE(
+    const VkMutableDescriptorTypeListVALVE* a,
+    const VkMutableDescriptorTypeListVALVE* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkMutableDescriptorTypeCreateInfoVALVE(
+    const VkMutableDescriptorTypeCreateInfoVALVE* a,
+    const VkMutableDescriptorTypeCreateInfoVALVE* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_EXT_vertex_input_dynamic_state
+void checkEqual_VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT(
+    const VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT* a,
+    const VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVertexInputBindingDescription2EXT(
+    const VkVertexInputBindingDescription2EXT* a,
+    const VkVertexInputBindingDescription2EXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkVertexInputAttributeDescription2EXT(
+    const VkVertexInputAttributeDescription2EXT* a,
+    const VkVertexInputAttributeDescription2EXT* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_EXT_physical_device_drm
+void checkEqual_VkPhysicalDeviceDrmPropertiesEXT(
+    const VkPhysicalDeviceDrmPropertiesEXT* a,
+    const VkPhysicalDeviceDrmPropertiesEXT* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_EXT_primitive_topology_list_restart
+void checkEqual_VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT(
+    const VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT* a,
+    const VkPhysicalDevicePrimitiveTopologyListRestartFeaturesEXT* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_FUCHSIA_external_memory
+void checkEqual_VkImportMemoryZirconHandleInfoFUCHSIA(
+    const VkImportMemoryZirconHandleInfoFUCHSIA* a,
+    const VkImportMemoryZirconHandleInfoFUCHSIA* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkMemoryZirconHandlePropertiesFUCHSIA(
+    const VkMemoryZirconHandlePropertiesFUCHSIA* a,
+    const VkMemoryZirconHandlePropertiesFUCHSIA* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkMemoryGetZirconHandleInfoFUCHSIA(
+    const VkMemoryGetZirconHandleInfoFUCHSIA* a,
+    const VkMemoryGetZirconHandleInfoFUCHSIA* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_FUCHSIA_external_semaphore
+void checkEqual_VkImportSemaphoreZirconHandleInfoFUCHSIA(
+    const VkImportSemaphoreZirconHandleInfoFUCHSIA* a,
+    const VkImportSemaphoreZirconHandleInfoFUCHSIA* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkSemaphoreGetZirconHandleInfoFUCHSIA(
+    const VkSemaphoreGetZirconHandleInfoFUCHSIA* a,
+    const VkSemaphoreGetZirconHandleInfoFUCHSIA* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_FUCHSIA_buffer_collection
+void checkEqual_VkBufferCollectionCreateInfoFUCHSIA(
+    const VkBufferCollectionCreateInfoFUCHSIA* a,
+    const VkBufferCollectionCreateInfoFUCHSIA* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkImportMemoryBufferCollectionFUCHSIA(
+    const VkImportMemoryBufferCollectionFUCHSIA* a,
+    const VkImportMemoryBufferCollectionFUCHSIA* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkBufferCollectionImageCreateInfoFUCHSIA(
+    const VkBufferCollectionImageCreateInfoFUCHSIA* a,
+    const VkBufferCollectionImageCreateInfoFUCHSIA* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkBufferCollectionConstraintsInfoFUCHSIA(
+    const VkBufferCollectionConstraintsInfoFUCHSIA* a,
+    const VkBufferCollectionConstraintsInfoFUCHSIA* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkBufferConstraintsInfoFUCHSIA(
+    const VkBufferConstraintsInfoFUCHSIA* a,
+    const VkBufferConstraintsInfoFUCHSIA* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkBufferCollectionBufferCreateInfoFUCHSIA(
+    const VkBufferCollectionBufferCreateInfoFUCHSIA* a,
+    const VkBufferCollectionBufferCreateInfoFUCHSIA* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkSysmemColorSpaceFUCHSIA(
+    const VkSysmemColorSpaceFUCHSIA* a,
+    const VkSysmemColorSpaceFUCHSIA* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkBufferCollectionPropertiesFUCHSIA(
+    const VkBufferCollectionPropertiesFUCHSIA* a,
+    const VkBufferCollectionPropertiesFUCHSIA* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkImageFormatConstraintsInfoFUCHSIA(
+    const VkImageFormatConstraintsInfoFUCHSIA* a,
+    const VkImageFormatConstraintsInfoFUCHSIA* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkImageConstraintsInfoFUCHSIA(
+    const VkImageConstraintsInfoFUCHSIA* a,
+    const VkImageConstraintsInfoFUCHSIA* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_HUAWEI_subpass_shading
+void checkEqual_VkSubpassShadingPipelineCreateInfoHUAWEI(
+    const VkSubpassShadingPipelineCreateInfoHUAWEI* a,
+    const VkSubpassShadingPipelineCreateInfoHUAWEI* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPhysicalDeviceSubpassShadingFeaturesHUAWEI(
+    const VkPhysicalDeviceSubpassShadingFeaturesHUAWEI* a,
+    const VkPhysicalDeviceSubpassShadingFeaturesHUAWEI* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPhysicalDeviceSubpassShadingPropertiesHUAWEI(
+    const VkPhysicalDeviceSubpassShadingPropertiesHUAWEI* a,
+    const VkPhysicalDeviceSubpassShadingPropertiesHUAWEI* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_HUAWEI_invocation_mask
+void checkEqual_VkPhysicalDeviceInvocationMaskFeaturesHUAWEI(
+    const VkPhysicalDeviceInvocationMaskFeaturesHUAWEI* a,
+    const VkPhysicalDeviceInvocationMaskFeaturesHUAWEI* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_NV_external_memory_rdma
+void checkEqual_VkMemoryGetRemoteAddressInfoNV(
+    const VkMemoryGetRemoteAddressInfoNV* a,
+    const VkMemoryGetRemoteAddressInfoNV* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPhysicalDeviceExternalMemoryRDMAFeaturesNV(
+    const VkPhysicalDeviceExternalMemoryRDMAFeaturesNV* a,
+    const VkPhysicalDeviceExternalMemoryRDMAFeaturesNV* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_EXT_extended_dynamic_state2
+void checkEqual_VkPhysicalDeviceExtendedDynamicState2FeaturesEXT(
+    const VkPhysicalDeviceExtendedDynamicState2FeaturesEXT* a,
+    const VkPhysicalDeviceExtendedDynamicState2FeaturesEXT* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_QNX_screen_surface
+void checkEqual_VkScreenSurfaceCreateInfoQNX(
+    const VkScreenSurfaceCreateInfoQNX* a,
+    const VkScreenSurfaceCreateInfoQNX* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_EXT_color_write_enable
+void checkEqual_VkPhysicalDeviceColorWriteEnableFeaturesEXT(
+    const VkPhysicalDeviceColorWriteEnableFeaturesEXT* a,
+    const VkPhysicalDeviceColorWriteEnableFeaturesEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPipelineColorWriteCreateInfoEXT(
+    const VkPipelineColorWriteCreateInfoEXT* a,
+    const VkPipelineColorWriteCreateInfoEXT* b,
     OnFailCompareFunc onFail);
 
 #endif
@@ -3516,15 +4306,65 @@ void checkEqual_VkImportPhysicalAddressGOOGLE(
     OnFailCompareFunc onFail);
 
 #endif
+#ifdef VK_EXT_global_priority_query
+void checkEqual_VkPhysicalDeviceGlobalPriorityQueryFeaturesEXT(
+    const VkPhysicalDeviceGlobalPriorityQueryFeaturesEXT* a,
+    const VkPhysicalDeviceGlobalPriorityQueryFeaturesEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkQueueFamilyGlobalPriorityPropertiesEXT(
+    const VkQueueFamilyGlobalPriorityPropertiesEXT* a,
+    const VkQueueFamilyGlobalPriorityPropertiesEXT* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_EXT_multi_draw
+void checkEqual_VkPhysicalDeviceMultiDrawFeaturesEXT(
+    const VkPhysicalDeviceMultiDrawFeaturesEXT* a,
+    const VkPhysicalDeviceMultiDrawFeaturesEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkPhysicalDeviceMultiDrawPropertiesEXT(
+    const VkPhysicalDeviceMultiDrawPropertiesEXT* a,
+    const VkPhysicalDeviceMultiDrawPropertiesEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkMultiDrawInfoEXT(
+    const VkMultiDrawInfoEXT* a,
+    const VkMultiDrawInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkMultiDrawIndexedInfoEXT(
+    const VkMultiDrawIndexedInfoEXT* a,
+    const VkMultiDrawIndexedInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_EXT_load_store_op_none
+#endif
+#ifdef VK_EXT_border_color_swizzle
+void checkEqual_VkPhysicalDeviceBorderColorSwizzleFeaturesEXT(
+    const VkPhysicalDeviceBorderColorSwizzleFeaturesEXT* a,
+    const VkPhysicalDeviceBorderColorSwizzleFeaturesEXT* b,
+    OnFailCompareFunc onFail);
+
+void checkEqual_VkSamplerBorderColorComponentMappingCreateInfoEXT(
+    const VkSamplerBorderColorComponentMappingCreateInfoEXT* a,
+    const VkSamplerBorderColorComponentMappingCreateInfoEXT* b,
+    OnFailCompareFunc onFail);
+
+#endif
+#ifdef VK_EXT_pageable_device_local_memory
+void checkEqual_VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT(
+    const VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT* a,
+    const VkPhysicalDevicePageableDeviceLocalMemoryFeaturesEXT* b,
+    OnFailCompareFunc onFail);
+
+#endif
 #ifdef VK_KHR_acceleration_structure
 void checkEqual_VkDeviceOrHostAddressKHR(
     const VkDeviceOrHostAddressKHR* a,
     const VkDeviceOrHostAddressKHR* b,
-    OnFailCompareFunc onFail);
-
-void checkEqual_VkDeviceOrHostAddressConstKHR(
-    const VkDeviceOrHostAddressConstKHR* a,
-    const VkDeviceOrHostAddressConstKHR* b,
     OnFailCompareFunc onFail);
 
 void checkEqual_VkAccelerationStructureBuildRangeInfoKHR(
