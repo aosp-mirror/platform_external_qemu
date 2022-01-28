@@ -11,8 +11,10 @@
 
 #include "android/base/async/ThreadLooper.h"
 #include "android/emulation/AdbHub.h"
+#include "android/emulation/AdbMessageSniffer.h"
 #include "android/emulation/AdbVsockPipe.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/globals.h"
 
 #include <algorithm>
 #include <chrono>
@@ -64,6 +66,11 @@ namespace emulation {
 namespace {
 
 struct VsockAdbProxy : public AdbVsockPipe::Proxy {
+    VsockAdbProxy(const int snifferLogLevel, std::ostream* oStream)
+        : mReceivedMesg(AdbMessageSniffer::create("HOST==>GUEST",  snifferLogLevel, oStream))
+        , mSendingMesg(AdbMessageSniffer::create("HOST<==GUEST",  snifferLogLevel, oStream))
+    {}
+
     AdbPortType portType() const override { return AdbPortType::RegularAdb; }
 
     EventBits onHostSocketEvent(const int hostFd,
@@ -84,6 +91,8 @@ struct VsockAdbProxy : public AdbVsockPipe::Proxy {
                 if (received > sizeof(buf)) {
                     break; // retry later
                 }
+
+                logToAdbSniffer(mReceivedMesg.get(), buf, received);
 
                 const size_t sent = (*g_vsock_ops->send)(guestKey, buf, received);
                 if (sent != received) {
@@ -115,6 +124,8 @@ struct VsockAdbProxy : public AdbVsockPipe::Proxy {
                     break;
                 }
 
+                logToAdbSniffer(mSendingMesg.get(), buf, sent);
+
                 std::lock_guard<std::mutex> guard(mGuestToHostMutex);
                 mGuestToHost.consume(sent);
             }
@@ -129,11 +140,20 @@ struct VsockAdbProxy : public AdbVsockPipe::Proxy {
         return EventBits::WantWrite;
     }
 
+    void logToAdbSniffer(AdbMessageSniffer* sniffer, const void* data, size_t size) {
+        AndroidPipeBuffer buf;
+        buf.data = static_cast<uint8_t*>(const_cast<void*>(data));
+        buf.size = size;
+        sniffer->read(&buf, 1, size);
+    }
+
     static std::unique_ptr<VsockAdbProxy> load(base::Stream* stream) {
         return nullptr;  // not supported
     }
 
     SocketBuffer mGuestToHost;
+    std::unique_ptr<AdbMessageSniffer> mReceivedMesg;
+    std::unique_ptr<AdbMessageSniffer> mSendingMesg;
     mutable std::mutex mGuestToHostMutex;
 };
 
@@ -485,7 +505,7 @@ AdbVsockPipe::AdbVsockPipe(AdbVsockPipe::Service *service,
 
     switch (portType) {
     case AdbPortType::RegularAdb:
-        mProxy = std::make_unique<VsockAdbProxy>();
+        mProxy = std::make_unique<VsockAdbProxy>(android_hw->test_monitorAdb, &std::cout);
         break;
 
     case AdbPortType::Jdwp:
