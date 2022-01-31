@@ -341,7 +341,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->volume_up_button->setHidden(true);
         mToolsUi->volume_down_button->setHidden(true);
 
-        if(avdInfo_getApiLevel(android_avdInfo) >= 30) {
+        if(avdInfo_getApiLevel(android_avdInfo) >= 28) {
           mToolsUi->overview_button->setHidden(true);
           mToolsUi->power_button->setHidden(true);
           mToolsUi->home_button->setHidden(true);
@@ -350,9 +350,12 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
           mToolsUi->controlsLayout->insertWidget(0, mToolsUi->back_button);
 
           mToolsUi->wear_button_1->setHidden(false);
-          mToolsUi->wear_button_2->setHidden(false);
           mToolsUi->palm_button->setHidden(false);
           mToolsUi->tilt_button->setHidden(false);
+
+          if(avdInfo_getApiLevel(android_avdInfo) >= 30) {
+            mToolsUi->wear_button_2->setHidden(false);
+          }
         }
     }
 
