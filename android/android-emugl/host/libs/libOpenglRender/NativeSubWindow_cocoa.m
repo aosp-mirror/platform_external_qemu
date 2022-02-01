@@ -13,6 +13,10 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+#import <QuartzCore/CALayer.h>
+#import <QuartzCore/CAMetalLayer.h>
+
+
 #include "NativeSubWindow.h"
 #include <Cocoa/Cocoa.h>
 
@@ -28,6 +32,16 @@
 
   - (BOOL)isOpaque {
       return YES;
+  }
+
+  + (Class) layerClass {
+    return [CAMetalLayer class];
+  }
+
+  - (CALayer *)makeBackingLayer {
+    CALayer * layer = [CAMetalLayer layer];
+    [layer setContentsScale:2.0f]; // Required for ANGLE backend
+    return layer;
   }
 
 @end
