@@ -79,6 +79,36 @@ static void setElidedText(QLineEdit* line_edit, const QString& text) {
             font_metrics.elidedText(text, Qt::ElideRight, line_edit->width() * 0.9));
 }
 
+static void savePauseAvdWhenMinimized(bool pause) {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        avdSpecificSettings.setValue(Ui::Settings::PER_AVD_PAUSE_AVD_WHEN_MINIMIZED, pause);
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        settings.setValue(Ui::Settings::PER_AVD_PAUSE_AVD_WHEN_MINIMIZED, pause);
+    }
+}
+
+bool SettingsPage::getPauseAvdWhenMinimized() {
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    bool pause = false;
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+        pause = avdSpecificSettings.value(Ui::Settings::PER_AVD_PAUSE_AVD_WHEN_MINIMIZED,
+                                         false).toBool();
+    } else {
+        // Use the global settings if no AVD.
+        QSettings settings;
+        pause = settings.value(Ui::Settings::CELLULAR_METER_STATUS, false).toInt();
+    }
+    return pause;
+}
+
+
 SettingsPage::SettingsPage(QWidget* parent)
     : QWidget(parent), mAdb(nullptr), mUi(new Ui::SettingsPage()),
      mSettingsTracker(new UiEventTracker(
@@ -317,6 +347,10 @@ SettingsPage::SettingsPage(QWidget* parent)
         settings.value(Ui::Settings::DISABLE_MOUSE_WHEEL, false).toBool();
     mUi->set_disableMouseWheel->setChecked(disableMouseWheel);
     on_set_disableMouseWheel_toggled(disableMouseWheel);
+
+    const auto pauseAvdWhenMinimized = getPauseAvdWhenMinimized();
+    mUi->set_pauseAvdWhenMinimized->setChecked(pauseAvdWhenMinimized);
+    on_set_pauseAvdWhenMinimized_toggled(pauseAvdWhenMinimized);
 
     // Connect the tab signaling
     connect(mUi->set_tabs, SIGNAL(currentChanged(int)), this, SLOT(on_tabChanged()));
@@ -699,6 +733,13 @@ void SettingsPage::on_set_disableMouseWheel_toggled(bool checked) {
     QSettings settings;
     settings.setValue(Ui::Settings::DISABLE_MOUSE_WHEEL, checked);
     emit disableMouseWheelChanged(checked);
+}
+
+void SettingsPage::on_set_pauseAvdWhenMinimized_toggled(bool checked) {
+    //QSettings settings;
+    //settings.setValue(Ui::Settings::PAUSE_AVD_WHEN_MINIMIZED, checked);
+    savePauseAvdWhenMinimized(checked);
+    emit pauseAvdWhenMinimizedChanged(checked);
 }
 
 void SettingsPage::disableForEmbeddedEmulator() {

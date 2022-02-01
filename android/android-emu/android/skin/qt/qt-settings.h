@@ -58,6 +58,7 @@ constexpr char FRAME_ALWAYS[] = "set/frameAlways4"; // Do not use "set/frameAlwa
 constexpr char SAVE_PATH[] = "set/savePath";
 constexpr char UI_THEME[] = "set/theme";
 constexpr char DISABLE_MOUSE_WHEEL[] = "set/disableMouseWheel";
+constexpr char PAUSE_AVD_WHEN_MINIMIZED[] = "set/pauseAvdWhenMinimized";
 
 constexpr char BATTERY_CHARGE_LEVEL[]  = "battery/charge_level";
 constexpr char BATTERY_CHARGER_TYPE[]  = "battery/charger_type";
@@ -154,6 +155,8 @@ constexpr char PER_AVD_CELLULAR_SIGNAL_STRENGTH[] = "perAvd/cell/signal_strength
 constexpr char PER_AVD_CELLULAR_VOICE_STATUS[]    = "perAvd/cell/voice_status";
 constexpr char PER_AVD_CELLULAR_METER_STATUS[]    = "perAvd/cell/meter_status";
 constexpr char PER_AVD_CELLULAR_DATA_STATUS[]     = "perAvd/cell/data_status";
+
+constexpr char PER_AVD_PAUSE_AVD_WHEN_MINIMIZED[] = "perAvd/set/pauseAvdWhenMinimized";
 
 constexpr char PER_AVD_RESIZABLE_SIZE[]     = "perAvd/resizable/size";
 }  // namespace Settings
