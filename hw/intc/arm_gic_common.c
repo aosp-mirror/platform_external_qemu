@@ -360,6 +360,8 @@ static Property arm_gic_common_properties[] = {
     /* True if the GIC should implement the virtualization extensions */
     DEFINE_PROP_BOOL("has-virtualization-extensions", GICState, virt_extn, 0),
     DEFINE_PROP_UINT32("num-priority-bits", GICState, n_prio_bits, 8),
+    /* True if we want to directly booting a kernel into NonSecure */
+    DEFINE_PROP_BOOL("irq-reset-nonsecure", GICState, irq_reset_nonsecure, 0),
     DEFINE_PROP_END_OF_LIST(),
 };
 
