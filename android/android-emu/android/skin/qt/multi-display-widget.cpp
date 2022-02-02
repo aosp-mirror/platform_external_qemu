@@ -278,3 +278,58 @@ void MultiDisplayWidget::paintWindow(uint32_t colorBufferId) {
     mColorBufferId = colorBufferId;
     renderFrame();
 }
+
+void MultiDisplayWidget::mousePressEvent(QMouseEvent* event) {
+    // Pen long press generates synthesized mouse events,
+    // which need to be filtered out
+    if (event->source() == Qt::MouseEventNotSynthesized) {
+        SkinEventType eventType = mMouseEvHandler.translateMouseEventType(
+                    kEventMouseButtonDown, event->button(), event->buttons());
+        mMouseEvHandler.handleMouseEvent(eventType, mMouseEvHandler.getSkinMouseButton(event),
+                         event->pos(), event->globalPos(), false, mDisplayId);
+    }
+}
+
+void MultiDisplayWidget::mouseMoveEvent(QMouseEvent* event) {
+    // Pen long press generates synthesized mouse events,
+    // which need to be filtered out
+    if (event->source() == Qt::MouseEventNotSynthesized) {
+        SkinEventType eventType = mMouseEvHandler.translateMouseEventType(
+                kEventMouseMotion, event->button(), event->buttons());
+
+        mMouseEvHandler.handleMouseEvent(eventType, mMouseEvHandler.getSkinMouseButton(event),
+                         event->pos(), event->globalPos(), false, mDisplayId);
+    }
+}
+
+void MultiDisplayWidget::mouseReleaseEvent(QMouseEvent* event) {
+    // Pen long press generates synthesized mouse events,
+    // which need to be filtered out
+    if (event->source() == Qt::MouseEventNotSynthesized) {
+        SkinEventType eventType = mMouseEvHandler.translateMouseEventType(
+                    kEventMouseButtonUp, event->button(), event->buttons());
+        mMouseEvHandler.handleMouseEvent(eventType, mMouseEvHandler.getSkinMouseButton(event),
+                         event->pos(), event->globalPos(), false, mDisplayId);
+    }
+}
+
+bool MultiDisplayWidget::event(QEvent* ev) {
+    if (ev->type() == QEvent::TouchBegin || ev->type() == QEvent::TouchUpdate ||
+        ev->type() == QEvent::TouchEnd) {
+        QTouchEvent* touchEvent = static_cast<QTouchEvent*>(ev);
+        auto win = EmulatorQtWindow::getInstance();
+        win->handleTouchPoints(*touchEvent, mDisplayId);
+        return true;
+    }
+    return QWidget::event(ev);
+}
+
+void MultiDisplayWidget::keyPressEvent(QKeyEvent* event) {
+    auto win = EmulatorQtWindow::getInstance();
+    win->handleKeyEvent(kEventKeyDown, event);
+}
+
+void MultiDisplayWidget::keyReleaseEvent(QKeyEvent* event) {
+    auto win = EmulatorQtWindow::getInstance();
+    win->handleKeyEvent(kEventKeyUp, event);
+}

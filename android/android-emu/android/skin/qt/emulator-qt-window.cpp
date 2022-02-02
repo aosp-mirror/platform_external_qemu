@@ -1113,6 +1113,7 @@ void EmulatorQtWindow::mouseMoveEvent(QMouseEvent* event) {
     if (android::featurecontrol::isEnabled(
                 android::featurecontrol::VirtioMouse) &&
         !android_cmdLineOptions->no_mouse_reposition) {
+
         // Block all the incoming mouse events if mouse is being moved to
         // center of the screen.
         if (!mMouseRepositioning &&
@@ -1605,7 +1606,7 @@ void EmulatorQtWindow::showMinimized() {
     }
 }
 
-void EmulatorQtWindow::handleTouchPoints(const QTouchEvent& touch) {
+void EmulatorQtWindow::handleTouchPoints(const QTouchEvent& touch, uint32_t displayId) {
     unsigned char nrOfPoints = 0;
     unsigned char lastValidTouchPointIndex = 0;
     for(int i=touch.touchPoints().count()-1;i>=0;--i)
@@ -1657,6 +1658,7 @@ void EmulatorQtWindow::handleTouchPoints(const QTouchEvent& touch) {
             {
                 skin_event->u.multi_touch_point.skip_sync=true;
             }
+            skin_event->u.multi_touch_point.display_id = displayId;
             queueSkinEvent(skin_event);
             if(lasElementFound)
             {
@@ -2690,6 +2692,7 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
 
     skin_event->u.mouse.xrel = pos.x() - mPrevMousePosition.x();
     skin_event->u.mouse.yrel = pos.y() - mPrevMousePosition.y();
+    skin_event->u.mouse.display_id = 0;
     mPrevMousePosition = pos;
 
     queueSkinEvent(skin_event);
@@ -3524,12 +3527,17 @@ void EmulatorQtWindow::setUIDisplayRegion(int x, int y, int w, int h, bool ignor
 }
 
 bool EmulatorQtWindow::addMultiDisplayWindow(uint32_t id, bool add, uint32_t w, uint32_t h) {
+    SkinEvent* skin_event = nullptr;
     if (add) {
         QRect windowGeo = this->geometry();
         if (!mBackingSurface) {
             LOG(ERROR) << "backing surface not ready, cancel window creation";
             return false;
         }
+        skin_event = createSkinEvent(kEventAddDisplay);
+        skin_event->u.add_display.width = w;
+        skin_event->u.add_display.height = h;
+        skin_event->u.add_display.id = id;
         QSize backingSize = mBackingSurface->bitmap->size();
         float scale = (float)windowGeo.width() / (float)backingSize.width();
         if (mMultiDisplayWindow[id] == nullptr) {
@@ -3542,14 +3550,18 @@ bool EmulatorQtWindow::addMultiDisplayWindow(uint32_t id, bool add, uint32_t w, 
             mMultiDisplayWindow[id]->move(geoTool.right() + (mMultiDisplayWindow.size() - 1) * 100,
                                           geoTool.top());
         }
+        mMultiDisplayWindow[id]->setMouseTracking(true);
         mMultiDisplayWindow[id]->setFixedSize(QSize((int)(w * scale), (int)(h * scale)));
         mMultiDisplayWindow[id]->show();
     } else {
+        skin_event = createSkinEvent(kEventRemoveDisplay);
+        skin_event->u.remove_display.id = id;
         auto iter = mMultiDisplayWindow.find(id);
         if (iter != mMultiDisplayWindow.end()) {
             mMultiDisplayWindow.erase(iter);
         }
     }
+    queueSkinEvent(skin_event);
     return true;
 }
 

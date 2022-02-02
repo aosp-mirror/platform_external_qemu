@@ -211,7 +211,7 @@ signals:
     void updateMultiDisplayPage(int id);
 
 public:
-    void handleTouchPoints(const QTouchEvent& touchEvents);
+    void handleTouchPoints(const QTouchEvent& touchEvents, uint32_t displayId = 0);
     void pollEvent(SkinEvent* event, bool* hasEvent);
 
     WId getWindowId();
@@ -249,6 +249,7 @@ public:
                         const QTabletEvent* event,
                         bool skipSync = false);
     void handleMouseWheelEvent(int delta, Qt::Orientation orientation);
+    void handleKeyEvent(SkinEventType type, QKeyEvent* event);
     void panHorizontal(bool left);
     void panVertical(bool up);
     SkinEvent* createSkinEvent(SkinEventType type);
@@ -428,7 +429,6 @@ private:
 
     void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
     void forwardGenericEventToEmulator(int type, int code, int value);
-    void handleKeyEvent(SkinEventType type, QKeyEvent* event);
 
     void maskWindowFrame();
     bool hasFrame() const;

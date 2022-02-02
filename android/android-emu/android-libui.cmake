@@ -88,6 +88,7 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/common-controls/cc-list-item.cpp
     android/skin/qt/device-3d-widget.cpp
     android/skin/qt/multi-display-widget.cpp
+    android/skin/qt/mouse-event-handler.cpp
     android/skin/qt/editable-slider-widget.cpp
     android/skin/qt/emulator-container.cpp
     android/skin/qt/emulator-no-qt-no-window.cpp
