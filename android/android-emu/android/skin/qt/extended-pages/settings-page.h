@@ -49,6 +49,7 @@ public:
 
     void setAdbInterface(android::emulation::AdbInterface* adb);
     static void setHttpProxyAgent(const QAndroidHttpProxyAgent* agent);
+    static bool getPauseAvdWhenMinimized();
 
 public slots:
     void setHaveClipboardSharing(bool haveSharing);
@@ -60,6 +61,7 @@ signals:
     void themeChanged(SettingsTheme new_theme);
     void enableClipboardSharingChanged(bool enabled);
     void disableMouseWheelChanged(bool disabled);
+    void pauseAvdWhenMinimizedChanged(bool pause);
 
 private slots:
     void on_set_forwardShortcutsToDevice_currentIndexChanged(int index);
@@ -99,6 +101,7 @@ private slots:
 
     void on_set_clipboardSharing_toggled(bool checked);
     void on_set_disableMouseWheel_toggled(bool checked);
+    void on_set_pauseAvdWhenMinimized_toggled(bool checked);
 
 private:
     bool eventFilter(QObject* object, QEvent* event) override;
