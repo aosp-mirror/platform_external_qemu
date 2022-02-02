@@ -759,35 +759,30 @@ static void enter_qemu_main_loop(int argc, char** argv) {
 #endif // windows
 #endif // !CONFIG_HEADLESS
 
-// create the modem_simulator sub folder on the host
+
+// create the modem_simulator sub folder on the host.
 // the radio configs come from the image/<arch>/data/misc/modem_simulator
-// folder, make a copy of that folder to avd/modem_simulator/ and create
-// the necessary dir strucutres that modem simulator expects
-static bool create_modem_simulator_configs_if_needed(AndroidHwConfig* hw, const char* opticcprofile) {
+// folder, always make a copy of that folder to avd/modem_simulator/ and create
+// the necessary dir strucutres that modem simulator expects.
+static bool create_modem_simulator_configs(AndroidHwConfig* hw, const char* opticcprofile) {
     ScopedCPtr<char> avd_dir(path_dirname(hw->disk_dataPartition_path));
     if (!avd_dir) {
         return false;
     }
-
     std::string modem_config_dir = PathUtils::join(avd_dir.get(), "modem_simulator");
     std::string iccprofile_path = PathUtils::join(modem_config_dir.c_str(), "iccprofile_for_sim0.xml");
     if (android_op_wipe_data) {
-        path_delete_file(iccprofile_path.c_str());
+        path_delete_dir(modem_config_dir.c_str());
     }
 
-
-    const bool need_overwrite_iccprofile = opticcprofile && path_exists(opticcprofile);
-    if (path_exists(iccprofile_path.c_str())) {
-        if (need_overwrite_iccprofile) {
-            path_copy_file(iccprofile_path.c_str(), opticcprofile);
-        }
-        return true;
-    }
 
     ScopedCPtr<char> sysimg_dir(path_dirname(hw->disk_ramdisk_path));
     std::string org_modem_config_dir = PathUtils::join(sysimg_dir.get(), "data", "misc", "modem_simulator");
-
+    // Bug: 214140573 Unable to sign into Google Apps since GmsCore v21.42.18
+    // Always make a new copy so that the timestamp of modem_simulator will be
+    // newer than userdata-qemu.img. Otherwise, Google auth would fail.
     path_copy_dir(modem_config_dir.c_str(), org_modem_config_dir.c_str());
+    const bool need_overwrite_iccprofile = opticcprofile && path_exists(opticcprofile);
     if (need_overwrite_iccprofile) {
         // need to overwite as the copy dir will copy everything
         path_copy_file(iccprofile_path.c_str(), opticcprofile);
@@ -2217,7 +2212,7 @@ extern "C" int main(int argc, char** argv) {
     }
 
     if (feature_is_enabled(kFeature_ModemSimulator)) {
-        if (create_modem_simulator_configs_if_needed(hw, opts->icc_profile)) {
+        if (create_modem_simulator_configs(hw, opts->icc_profile)) {
             init_modem_simulator();
             bool isIpv4 = false;
             int modem_simulator_port = 0;
