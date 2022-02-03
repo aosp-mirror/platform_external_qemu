@@ -58,6 +58,10 @@ void amodem_set_signal_strength_profile_vx(AModem modem, int quality) {
     s_modem->set_signal_strength_profile(modem, quality);
 }
 
+void amodem_update_time(AModem modem) {
+    s_modem->update_time(modem);
+}
+
 void amodem_set_data_registration_vx(AModem modem, ARegistrationState state) {
     s_modem->set_data_registration(modem, state);
 }

@@ -173,6 +173,15 @@ void set_signal_strength_profile(int quality) {
     s_msg_channel.send(mymsg);
 }
 
+void update_time() {
+    ModemMessage mymsg;
+    mymsg.type = MODEM_MSG_TIME_UPDATE;
+    std::string ss("AT+REMOTETIMEUPDATE: ");
+    ss += "\r";
+    mymsg.sdata = ss;
+    s_msg_channel.send(mymsg);
+}
+
 void set_data_registration(int state) {
     ModemMessage mymsg;
     mymsg.type = MODEM_MSG_DATA_REG;
@@ -307,6 +316,7 @@ void process_msgs() {
             }
         } else if (msg.type == MODEM_MSG_CTEC || msg.type == MODEM_MSG_SIGNAL ||
                    msg.type == MODEM_MSG_DATA_REG ||
+                   msg.type == MODEM_MSG_TIME_UPDATE||
                    msg.type == MODEM_MSG_RADIO_STATE ||
                    msg.type == MODEM_MSG_VOICE_REG) {
             if (!s_one_shot_monitor_sock->IsOpen()) {
