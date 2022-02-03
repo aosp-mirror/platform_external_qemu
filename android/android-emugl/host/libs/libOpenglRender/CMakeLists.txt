@@ -275,7 +275,7 @@ if(NOT LINUX_AARCH64)
     android_add_test(
       TARGET OpenglRender_vulkan_unittests
       SRC # cmake-format: sortable
-          tests/Vulkan_unittest.cpp vulkan/VulkanStream_unittest.cpp)
+          tests/Vulkan_unittest.cpp vulkan/VulkanStream_unittest.cpp vulkan/vk_util_unittest.cpp)
     add_opengl_dependencies(OpenglRender_vulkan_unittests)
     target_link_libraries(OpenglRender_vulkan_unittests
                           PRIVATE android-emu-test-launcher android-emu)
