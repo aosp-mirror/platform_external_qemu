@@ -103,7 +103,7 @@ bool SettingsPage::getPauseAvdWhenMinimized() {
     } else {
         // Use the global settings if no AVD.
         QSettings settings;
-        pause = settings.value(Ui::Settings::CELLULAR_METER_STATUS, false).toInt();
+        pause = settings.value(Ui::Settings::PER_AVD_PAUSE_AVD_WHEN_MINIMIZED, false).toInt();
     }
     return pause;
 }

@@ -45,6 +45,7 @@
 #include "android/skin/qt/event-serializer.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/multi-display-page.h"
+#include "android/skin/qt/extended-pages/settings-page.h"
 #include "android/skin/qt/extended-pages/snapshot-page.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/screen-mask.h"
@@ -677,6 +678,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     }
 
 
+    mPauseAvdWhenMinimized = SettingsPage::getPauseAvdWhenMinimized();
 
     ScreenMask::loadMask();
 
