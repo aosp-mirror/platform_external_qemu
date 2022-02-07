@@ -46,6 +46,7 @@
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/extended-pages/multi-display-page.h"
 #include "android/skin/qt/extended-pages/snapshot-page.h"
+#include "android/skin/qt/extended-pages/telephony-page.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/screen-mask.h"
 #include "android/skin/qt/winsys-qt.h"
@@ -60,6 +61,7 @@
 #include "android/utils/x86_cpuid.h"
 #include "android/virtualscene/TextureUtils.h"
 #include "studio_stats.pb.h"
+#include "android_modem_v2.h"
 
 #define DEBUG 1
 
@@ -1670,6 +1672,7 @@ bool EmulatorQtWindow::event(QEvent* ev) {
                     [this](const android::emulation::OptionalAdbCommandResult&) { ; }, 5000);
             (*mAdbInterface)->runAdbCommand( {"shell", "input", "keyevent", "KEYCODE_WAKEUP"},
                     [this](const android::emulation::OptionalAdbCommandResult&) { ; }, 5000);
+            TelephonyPage::updateModemTime();
         }
 #ifndef _WIN32
         // When we minimized, we re-enabled the window frame (because Mac won't un-minimize

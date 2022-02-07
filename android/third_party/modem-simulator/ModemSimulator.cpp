@@ -69,6 +69,11 @@ void ModemSimulator::set_signal_strength_profile(AModem modem, int quality) {
     cuttlefish::set_signal_strength_profile(quality);
 }
 
+void ModemSimulator::update_time(AModem modem) {
+    (void)modem;
+    cuttlefish::update_time();
+}
+
 void ModemSimulator::set_data_registration(AModem modem,
                                            ARegistrationState state) {
     (void)modem;
