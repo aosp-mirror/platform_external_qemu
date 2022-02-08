@@ -55,19 +55,27 @@ using Path = FileSystemWatcher::Path;
 // };
 
 // Maps the path to the actual file stat.
-using PathMap =
-        std::unordered_map<Path, struct stat>;
+using PathMap = std::unordered_map<Path, struct stat>;
 
 static PathMap scanDir(Path scanPath) {
     PathMap paths;
-    for (auto strPath :
-         System::get()->scanDirEntries(scanPath.c_str(), true)) {
+    for (auto strPath : System::get()->scanDirEntries(scanPath.c_str(), true)) {
         struct stat fstat;
         stat(strPath.c_str(), &fstat);
         paths[strPath] = fstat;
         DD("Added %s (%d)", strPath.c_str(), fstat.st_size);
     }
     return paths;
+}
+
+bool statEqual(struct stat lhs, struct stat rhs) {
+    return lhs.st_dev == rhs.st_dev && lhs.st_ino == rhs.st_ino &&
+           lhs.st_mode == rhs.st_mode && lhs.st_nlink == rhs.st_nlink &&
+           lhs.st_uid == rhs.st_uid && lhs.st_gid == rhs.st_gid &&
+           lhs.st_rdev == rhs.st_rdev && lhs.st_size == rhs.st_size &&
+           lhs.st_flags == rhs.st_flags &&
+           lhs.st_mtimespec.tv_sec == rhs.st_mtimespec.tv_sec &&
+           lhs.st_mtimespec.tv_nsec == rhs.st_mtimespec.tv_nsec;
 }
 
 // Scan's the given path, invoking the callback if the current scan state
@@ -78,14 +86,13 @@ static PathMap scanAndNotify(
         FileSystemWatcher::FileSystemWatcherCallback callback) {
     // dir add/remove
     auto currentState = scanDir(scanPath);
-    for (auto& [name, state] : oldState) {
+    for (const auto& [name, state] : oldState) {
         if (currentState.count(name) == 0) {
             // name got deleted.
             callback(FileSystemWatcher::WatcherChangeType::Deleted, name);
-        } else if (memcmp(&currentState[name], &state, sizeof(struct stat)) !=
-                   0) {
+        } else if (!statEqual(currentState[name], state)) {
             // name changed
-            DD("Name change due to stat mismatch");
+            DD("Name change due to stat mismatch for %s", name.c_str());
             callback(FileSystemWatcher::WatcherChangeType::Changed, name);
         }
     }
@@ -283,7 +290,8 @@ private:
     int mPipe[2];
 };
 
-// Filesystem watcher based on https://developer.apple.com/documentation/coreservices/file_system_events
+// Filesystem watcher based on
+// https://developer.apple.com/documentation/coreservices/file_system_events
 // api.
 class FileSystemWatcherFS : public FileSystemWatcher {
 public:

@@ -233,6 +233,10 @@ private slots:
     void on_wear_button_1_released();
     void on_wear_button_2_pressed();
     void on_wear_button_2_released();
+    void on_palm_button_pressed();
+    void on_palm_button_released();
+    void on_tilt_button_pressed();
+    void on_tilt_button_released();
     void on_prev_layout_button_clicked();
     void on_next_layout_button_clicked();
     void on_scrShot_button_clicked();

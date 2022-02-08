@@ -13,11 +13,11 @@
 // limitations under the License.
 #include "android/emulation/control/EmulatorAdvertisement.h"
 
-#include <stdio.h>                         // for sscanf
-#include <sys/stat.h>                      // for chmod
-#include <fstream>                         // for operator<<, basic_ofstream
-#include <utility>                         // for pair
-#include <vector>                          // for vector
+#include <stdio.h>     // for sscanf
+#include <sys/stat.h>  // for chmod
+#include <fstream>     // for operator<<, basic_ofstream
+#include <utility>     // for pair
+#include <vector>      // for vector
 
 #include "android/base/Log.h"              // for LOG, LogMessage, LogStream
 #include "android/base/StringFormat.h"     // for StringFormat
@@ -25,15 +25,15 @@
 #include "android/base/system/System.h"    // for System, System::WaitExitRe...
 #include "android/emulation/ConfigDirs.h"  // for ConfigDirs
 #include "android/globals.h"
+#include "android/utils/path.h"
 
 namespace android {
 namespace emulation {
 namespace control {
 
-using android::base::System;
 using android::base::PathUtils;
+using android::base::System;
 static const char* location_format = "pid_%d.ini";
-
 
 EmulatorAdvertisement::EmulatorAdvertisement(EmulatorProperties&& config)
     : mStudioConfig(config) {
@@ -52,6 +52,16 @@ int EmulatorAdvertisement::garbageCollect() const {
     int collected = 0;
     for (auto entry : System::get()->scanDirEntries(mSharedDirectory)) {
         int pid = 0;
+        if (sscanf(entry.c_str(), "%d", &pid) == 1) {
+            auto status = System::get()->waitForProcessExit(pid, 0);
+            if (status != System::WaitExitResult::Timeout) {
+                collected++;
+                auto loc = android::base::pj(mSharedDirectory,
+                                             std::to_string(pid));
+                printf("Deleting %s\n", loc.c_str());
+                path_delete_dir(loc.c_str());
+            }
+        }
         if (sscanf(entry.c_str(), location_format, &pid) == 1) {
             auto status = System::get()->waitForProcessExit(pid, 0);
             if (status != System::WaitExitResult::Timeout) {
@@ -81,11 +91,12 @@ std::string EmulatorAdvertisement::location() const {
 // True if a advertisement exists for the given pid.
 bool EmulatorAdvertisement::exists(System::Pid pid) {
     std::string pidfile = android::base::StringFormat(location_format, pid);
-    std::string pidPath = android::base::pj(android::ConfigDirs::getDiscoveryDirectory(), pidfile);
+    std::string pidPath = android::base::pj(
+            android::ConfigDirs::getDiscoveryDirectory(), pidfile);
     return System::get()->pathIsFile(pidPath);
 }
 
-bool EmulatorAdvertisement::write()  const {
+bool EmulatorAdvertisement::write() const {
     auto pidFile = location();
     if (System::get()->pathExists(pidFile)) {
         LOG(WARNING) << "Overwriting existing discovery file: " << pidFile;

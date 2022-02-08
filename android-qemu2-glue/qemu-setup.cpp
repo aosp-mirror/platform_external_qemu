@@ -19,6 +19,8 @@ extern "C" {
 #endif
 
 #include "android-qemu2-glue/qemu-setup.h"
+#include "android/base/system/System.h"
+#include "android/utils/log_severity.h"
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
@@ -29,16 +31,18 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <algorithm>
 #include <chrono>
+#include <cstdlib>
 #include <functional>
 #include <memory>
+#include <ostream>
 #include <random>
 #include <string>
 #include <unordered_map>
 #include <utility>
 
+#include "absl/strings/str_format.h"
 #include "android-qemu2-glue/android_qemud.h"
 #include "android-qemu2-glue/audio-capturer.h"
 #include "android-qemu2-glue/audio-output.h"
@@ -60,7 +64,9 @@ extern "C" {
 #include "android/base/CpuUsage.h"
 #include "android/base/Log.h"
 #include "android/base/Tracing.h"
+#include "android/base/Uuid.h"
 #include "android/base/files/MemStream.h"
+#include "android/base/files/PathUtils.h"  // for pj
 #include "android/base/memory/ScopedPtr.h"
 #include "android/cmdline-option.h"
 #include "android/console.h"
@@ -70,6 +76,7 @@ extern "C" {
 #include "android/crashreport/detectors/CrashDetectors.h"
 #include "android/emulation/AudioCaptureEngine.h"
 #include "android/emulation/AudioOutputEngine.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/emulation/DmaMap.h"
 #include "android/emulation/QemuMiscPipe.h"
 #include "android/emulation/VmLock.h"
@@ -94,6 +101,7 @@ extern "C" {
 #include "android/snapshot/interface.h"
 #include "android/utils/Random.h"
 #include "android/utils/debug.h"
+#include "android/utils/path.h"
 #include "snapshot_service.grpc.pb.h"
 
 #ifdef ANDROID_WEBRTC
@@ -110,12 +118,6 @@ extern "C" {
 #include "qemu/thread.h"
 #include "sysemu/device_tree.h"
 #include "sysemu/sysemu.h"
-
-namespace android {
-namespace base {
-class PathUtils;
-}  // namespace base
-}  // namespace android
 
 extern char* android_op_ports;
 
@@ -244,7 +246,8 @@ bool qemu_android_emulation_early_setup() {
             new android::qemu::QemuAudioCaptureEngine());
 
     android::emulation::AudioCaptureEngine::set(
-            new android::qemu::QemuAudioInputEngine(), android::emulation::AudioCaptureEngine::AudioMode::AUDIO_INPUT);
+            new android::qemu::QemuAudioInputEngine(),
+            android::emulation::AudioCaptureEngine::AudioMode::AUDIO_INPUT);
 
     android::emulation::AudioOutputEngine::set(
             new android::qemu::QemuAudioOutputEngine());
@@ -344,6 +347,27 @@ int qemu_setup_grpc() {
         builder.withAuthToken(token);
         props["grpc.token"] = token;
     }
+    if (android_cmdLineOptions->grpc_use_jwt) {
+        auto jwkDir = android::base::pj(
+                android::ConfigDirs::getDiscoveryDirectory(),
+                std::to_string(
+                        android::base::System::get()->getCurrentProcessId()),
+                "jwks", android::base::Uuid::generate().toString());
+        auto jwkLoadedFile = android::base::pj(jwkDir, "active.jwk");
+        if (path_mkdir_if_needed(jwkDir.c_str(), 0700) != 0) {
+            dfatal("Failed to create jwk directory %s", jwkDir.c_str());
+        }
+        props["grpc.jwks"] = jwkDir;
+        props["grpc.jwk_active"] = jwkLoadedFile;
+        builder.withJwtAuthDiscoveryDir(jwkDir, jwkLoadedFile);
+        if (!android_cmdLineOptions->grpc_use_token) {
+            dwarning(
+                    "The emulator now requires a signed jwt token for gRPC "
+                    "access! Use the -grpc flag if you really want an open "
+                    "grpc port");
+        }
+    }
+
 #ifdef ANDROID_WEBRTC
     if (android_cmdLineOptions->turncfg &&
         !android::emulation::control::TurnConfig::producesValidTurn(
@@ -377,9 +401,8 @@ int qemu_setup_grpc() {
                          android_cmdLineOptions->grpc_tls_ca ||
                          android_cmdLineOptions->grpc_use_token;
     if (!grpcService && userWantsGrpc) {
-        derror(
-                "Failed to start grpc service, even though it was explicitly "
-                "requested.");
+        derror("Failed to start grpc service, even though it was explicitly "
+               "requested.");
         exit(1);
     }
 

@@ -304,9 +304,10 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             dinfo("Increasing screen off timeout, "
                     "logcat buffer size to 2M.");
 
+            const char* pTimeout = avdInfo_screen_off_timeout(avdInfo_getApiLevel(android_avdInfo));
             adbInterface->enqueueCommand(
                 { "shell", "settings", "put", "system",
-                  "screen_off_timeout", "2147483647" });
+                  "screen_off_timeout", pTimeout});
             adbInterface->enqueueCommand(
                 { "shell", "logcat", "-G", "2M" });
 

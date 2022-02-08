@@ -11,6 +11,7 @@ include(${TINK_DIR}/cmake/TinkUtil.cmake)
 set(TINK_CXX_STANDARD 17)
 list(APPEND TINK_INCLUDE_DIRS "${TINK_GENFILE_DIR}")
 set(TINK_IDE_FOLDER "Tink")
+set(TINK_TARGET_EXCLUDE_IF_OPENSSL "exclude_if_openssl")
 
 android_add_library(TARGET protobuf::libprotobuf-lite ALIAS libprotobuf_lite)
 android_add_library(TARGET protobuf::libprotobuf ALIAS libprotobuf)
@@ -57,8 +58,11 @@ endmacro()
 # dependencies are explicitly specified.
 #
 function(tink_cc_library)
-  cmake_parse_arguments(PARSE_ARGV 0 tink_cc_library "PUBLIC" "NAME"
-                        "SRCS;DEPS")
+  cmake_parse_arguments(PARSE_ARGV 0 tink_cc_library
+    "PUBLIC"
+    "NAME"
+    "SRCS;DEPS;TAGS"
+  )
 
   if(NOT DEFINED TINK_MODULE)
     message(
@@ -66,6 +70,15 @@ function(tink_cc_library)
         "TINK_MODULE not defined, perhaps you are missing a tink_module() statement?"
     )
   endif()
+
+  # Check if this target must be skipped. Currently the only reason for this to
+  # happen is incompatibility with OpenSSL, when used.
+  foreach(_tink_cc_library_tag ${tink_cc_library_TAGS})
+    if (${_tink_cc_library_tag} STREQUAL ${TINK_TARGET_EXCLUDE_IF_OPENSSL} AND TINK_USE_SYSTEM_OPENSSL)
+      return()
+    endif()
+  endforeach()
+
 
   # We replace :: with __ in targets, because :: may not appear in target names.
   # However, the module name should still span multiple name spaces.
@@ -162,7 +175,11 @@ endif()
 # build target named tink_test_<MODULE>_<NAME>.
 #
 function(tink_cc_test)
-  cmake_parse_arguments(PARSE_ARGV 0 tink_cc_test "" "NAME" "SRCS;DEPS;DATA")
+  cmake_parse_arguments(PARSE_ARGV 0 tink_cc_test
+    ""
+    "NAME"
+    "SRCS;DEPS;DATA;TAGS"
+  )
 
   if(NOT TINK_BUILD_TESTS)
     return()
@@ -171,6 +188,14 @@ function(tink_cc_test)
   if(NOT DEFINED TINK_MODULE)
     message(FATAL_ERROR "TINK_MODULE not defined")
   endif()
+
+  # Check if this target must be skipped. Currently the only reason for this to
+  # happen is incompatibility with OpenSSL, when used.
+  foreach(_tink_cc_test_tag ${tink_cc_test_TAGS})
+    if (${_tink_cc_test_tag} STREQUAL ${TINK_TARGET_EXCLUDE_IF_OPENSSL} AND TINK_USE_SYSTEM_OPENSSL)
+      return()
+    endif()
+  endforeach()
 
   # We replace :: with __ in targets, because :: may not appear in target names.
   # However, the module name should still span multiple name spaces.

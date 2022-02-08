@@ -149,12 +149,11 @@ hmp.c
 hw/acpi/acpi_interface.c
 hw/acpi/aml-build.c
 hw/acpi/bios-linker-loader.c
-hw/audio/ac97.c
-hw/audio/es1370.c
 hw/audio/goldfish_audio.c
 hw/audio/hda-codec.c
 hw/audio/intel-hda.c
 hw/audio/soundhw.c
+hw/audio/virtio-snd.c
 hw/block/block.c
 hw/block/cdrom.c
 hw/block/hd-geometry.c
@@ -1133,6 +1132,7 @@ hw/virtio/vhost.c
 hw/virtio/virtio-balloon.c
 hw/virtio/virtio-crypto-pci.c
 hw/virtio/virtio-crypto.c
+hw/virtio/virtio-snd-pci.c
 hw/virtio/virtio.c
 hw/watchdog/wdt_aspeed.c
 ioport.c
@@ -1480,6 +1480,7 @@ hw/virtio/vhost.c
 hw/virtio/virtio-balloon.c
 hw/virtio/virtio-crypto-pci.c
 hw/virtio/virtio-crypto.c
+hw/virtio/virtio-snd-pci.c
 hw/virtio/virtio.c
 hw/watchdog/wdt_aspeed.c
 ioport.c
@@ -1551,14 +1552,7 @@ hw/acpi/pcihp.c
 hw/acpi/piix4.c
 hw/acpi/tco.c
 hw/acpi/vmgenid.c
-hw/audio/adlib.c
-hw/audio/cs4231a.c
-hw/audio/fmopl.c
-hw/audio/gus.c
-hw/audio/gusemu_hal.c
-hw/audio/gusemu_mixer.c
 hw/audio/pcspk.c
-hw/audio/sb16.c
 hw/block/dataplane/virtio-blk.c
 hw/block/fdc.c
 hw/block/vhost-user-blk.c
@@ -1656,6 +1650,7 @@ hw/virtio/vhost.c
 hw/virtio/virtio-balloon.c
 hw/virtio/virtio-crypto-pci.c
 hw/virtio/virtio-crypto.c
+hw/virtio/virtio-snd-pci.c
 hw/virtio/virtio.c
 hw/watchdog/wdt_ib700.c
 ioport.c
@@ -1733,14 +1728,7 @@ hw/acpi/pcihp.c
 hw/acpi/piix4.c
 hw/acpi/tco.c
 hw/acpi/vmgenid.c
-hw/audio/adlib.c
-hw/audio/cs4231a.c
-hw/audio/fmopl.c
-hw/audio/gus.c
-hw/audio/gusemu_hal.c
-hw/audio/gusemu_mixer.c
 hw/audio/pcspk.c
-hw/audio/sb16.c
 hw/block/dataplane/virtio-blk.c
 hw/block/fdc.c
 hw/block/vhost-user-blk.c
@@ -1838,6 +1826,7 @@ hw/virtio/vhost.c
 hw/virtio/virtio-balloon.c
 hw/virtio/virtio-crypto-pci.c
 hw/virtio/virtio-crypto.c
+hw/virtio/virtio-snd-pci.c
 hw/virtio/virtio.c
 hw/watchdog/wdt_ib700.c
 ioport.c
@@ -1968,7 +1957,7 @@ PROPERTIES COMPILE_FLAGS " -I ${ANDROID_AUTOGEN}/hw/adc")
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/hw/arm/allwinner-a10.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/armv7m.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/aspeed.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/aspeed_soc.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/bcm2835_peripherals.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/bcm2836.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/boot.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/collie.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/cubieboard.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/digic.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/digic_boards.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/exynos4210.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/exynos4_boards.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/fsl-imx25.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/fsl-imx31.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/fsl-imx6.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/fsl-imx7.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/gumstix.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/highbank.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/imx25_pdk.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/integratorcp.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/iotkit.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/kzm.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/mainstone.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/mcimx7d-sabre.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/mps2-tz.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/mps2.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/msf2-soc.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/msf2-som.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/musicpal.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/netduino2.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/nseries.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/omap1.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/omap2.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/omap_sx1.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/palm.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/pxa2xx.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/pxa2xx_gpio.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/pxa2xx_pic.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/ranchu.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/raspi.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/realview.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/sabrelite.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/spitz.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/stellaris.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/stm32f205_soc.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/strongarm.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/sysbus-fdt.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/tosa.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/versatilepb.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/vexpress.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/virt-acpi-build.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/virt.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/xilinx_zynq.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/xlnx-zcu102.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/xlnx-zynqmp.c ${ANDROID_QEMU2_TOP_DIR}/hw/arm/z2.c
 ${ANDROID_AUTOGEN}/hw/arm/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_AUTOGEN}/hw/arm")
 
-set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/hw/audio/ac97.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/adlib.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/cs4231a.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/es1370.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/fmopl.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/goldfish_audio.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/gus.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/gusemu_hal.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/gusemu_mixer.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/hda-codec.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/intel-hda.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/lm4549.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/marvell_88w8618.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/pcspk.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/pl041.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/sb16.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/soundhw.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/wm8750.c
+set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/hw/audio/goldfish_audio.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/hda-codec.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/intel-hda.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/lm4549.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/marvell_88w8618.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/pcspk.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/pl041.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/soundhw.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/virtio-snd.c ${ANDROID_QEMU2_TOP_DIR}/hw/audio/wm8750.c
 ${ANDROID_AUTOGEN}/hw/audio/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_AUTOGEN}/hw/audio")
 
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/hw/block/block.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/cdrom.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/ecc.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/fdc.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/hd-geometry.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/m25p80.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/nand.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/nvme.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/onenand.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/pflash_cfi01.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/pflash_cfi02.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/vhost-user-blk.c ${ANDROID_QEMU2_TOP_DIR}/hw/block/virtio-blk.c
@@ -2076,7 +2065,7 @@ ${ANDROID_AUTOGEN}/hw/usb/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_AUTOGE
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/hw/vfio/amd-xgbe.c ${ANDROID_QEMU2_TOP_DIR}/hw/vfio/calxeda-xgmac.c ${ANDROID_QEMU2_TOP_DIR}/hw/vfio/common.c ${ANDROID_QEMU2_TOP_DIR}/hw/vfio/display.c ${ANDROID_QEMU2_TOP_DIR}/hw/vfio/pci-quirks.c ${ANDROID_QEMU2_TOP_DIR}/hw/vfio/pci.c ${ANDROID_QEMU2_TOP_DIR}/hw/vfio/platform.c ${ANDROID_QEMU2_TOP_DIR}/hw/vfio/spapr.c
 ${ANDROID_AUTOGEN}/hw/vfio/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_AUTOGEN}/hw/vfio")
 
-set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/hw/virtio/vhost-backend.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/vhost-user.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/vhost.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/virtio-balloon.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/virtio-bus.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/virtio-crypto-pci.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/virtio-crypto.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/virtio-mmio.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/virtio-pci.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/virtio-rng.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/virtio.c
+set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/hw/virtio/vhost-backend.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/vhost-user.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/vhost.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/virtio-balloon.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/virtio-bus.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/virtio-crypto-pci.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/virtio-crypto.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/virtio-mmio.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/virtio-pci.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/virtio-rng.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/virtio-snd-pci.c ${ANDROID_QEMU2_TOP_DIR}/hw/virtio/virtio.c
 ${ANDROID_AUTOGEN}/hw/virtio/trace.c PROPERTIES COMPILE_FLAGS " -I ${ANDROID_AUTOGEN}/hw/virtio")
 
 set_source_files_properties(${ANDROID_QEMU2_TOP_DIR}/hw/watchdog/watchdog.c ${ANDROID_QEMU2_TOP_DIR}/hw/watchdog/wdt_aspeed.c ${ANDROID_QEMU2_TOP_DIR}/hw/watchdog/wdt_i6300esb.c ${ANDROID_QEMU2_TOP_DIR}/hw/watchdog/wdt_ib700.c

@@ -341,7 +341,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->volume_up_button->setHidden(true);
         mToolsUi->volume_down_button->setHidden(true);
 
-        if(avdInfo_getApiLevel(android_avdInfo) >= 30) {
+        if(avdInfo_getApiLevel(android_avdInfo) >= 28) {
           mToolsUi->overview_button->setHidden(true);
           mToolsUi->power_button->setHidden(true);
           mToolsUi->home_button->setHidden(true);
@@ -350,7 +350,12 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
           mToolsUi->controlsLayout->insertWidget(0, mToolsUi->back_button);
 
           mToolsUi->wear_button_1->setHidden(false);
-          mToolsUi->wear_button_2->setHidden(false);
+          mToolsUi->palm_button->setHidden(false);
+          mToolsUi->tilt_button->setHidden(false);
+
+          if(avdInfo_getApiLevel(android_avdInfo) >= 30) {
+            mToolsUi->wear_button_2->setHidden(false);
+          }
         }
     }
 
@@ -767,6 +772,17 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) 
             break;
         case QtUICommand::WEAR_2:
             forwardKeyToEmulator(KEY_POWER, down);
+            break;
+        case QtUICommand::PALM:
+            forwardKeyToEmulator(KEY_SLEEP, down);
+            break;
+        case QtUICommand::TILT:
+          if (down) {
+            float tilt = 1.0f;
+                sUiEmuAgent->sensors->setPhysicalParameterTarget(
+                    PHYSICAL_PARAMETER_WRIST_TILT, &tilt, 1,
+                    PHYSICAL_INTERPOLATION_SMOOTH);
+            }
             break;
         case QtUICommand::ROTATE_RIGHT:
         case QtUICommand::ROTATE_LEFT:
@@ -1368,6 +1384,26 @@ void ToolWindow::on_wear_button_2_pressed() {
 void ToolWindow::on_wear_button_2_released() {
     mEmulatorWindow->activateWindow();
     handleUICommand(QtUICommand::WEAR_2, false);
+}
+
+void ToolWindow::on_palm_button_pressed() {
+    mEmulatorWindow->raise();
+    handleUICommand(QtUICommand::PALM, true);
+}
+
+void ToolWindow::on_palm_button_released() {
+    mEmulatorWindow->activateWindow();
+    handleUICommand(QtUICommand::PALM, false);
+}
+
+void ToolWindow::on_tilt_button_pressed() {
+    mEmulatorWindow->raise();
+    handleUICommand(QtUICommand::TILT, true);
+}
+
+void ToolWindow::on_tilt_button_released() {
+    mEmulatorWindow->activateWindow();
+    handleUICommand(QtUICommand::TILT, false);
 }
 
 void ToolWindow::on_prev_layout_button_clicked() {

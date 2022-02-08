@@ -15,6 +15,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <functional>
 
 #include "android/base/Compiler.h"
 #include "android/base/system/System.h"
@@ -62,7 +63,8 @@ public:
     // True if a advertisement exists for the given pid.
     static bool exists(base::System::Pid pid);
 
-    // Deletes all ini files in <user-specific_tmp_directory>/avd/running  for
+    // Deletes all ini files in <user-specific_tmp_directory>/avd/running and
+    // directories <user-specific_tmp_directory>/avd/running/<pid> for
     // which no corresponding process exists. returns the number of files
     // deleted.
     int garbageCollect() const;

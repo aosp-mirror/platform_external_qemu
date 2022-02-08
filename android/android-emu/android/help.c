@@ -1190,7 +1190,7 @@ help_grpc_tls_key(stralloc_t*  out)
     PRINTF(
     "  Use the PEM file containing a private key for TLS.\n\n"
     "    <pem> a PEM file containing a private key used for TLS.\n\n"
-    "  You must provide the -grpc-pem flag as well.\n\n"
+    "  You must provide the -grpc-tls-cer flag as well.\n\n"
     );
 }
 
@@ -1201,7 +1201,7 @@ help_grpc_tls_cer(stralloc_t*  out)
     "  Use the given file containing a X509 certificate for TLS.\n\n"
     "    <pem> a PEM file with a X.509 public key certificate.\n\n"
     "  The X509 certificate can be self signed.\n\n"
-    "  You must provide the -grpc-key flag as well.\n\n"
+    "  You must provide the -grpc-tls-key flag as well.\n\n"
     );
 }
 
@@ -1224,11 +1224,62 @@ help_grpc_use_token(stralloc_t*  out)
 {
     PRINTF(
     "  Require an authorization header with a valid token for every grpc call.\n\n"
-    "  Every grpc request expects the following header:\n"
+    "  Every grpc request expects the following header:\n\n"
     "    authorization: Bearer <token>\n\n"
-    "  The token can be found in the android studio discovery file "
+    "  The token can be found in the android studio discovery file under the key: grpc.token.\n"
     "  If an incorrect token is present the status UNAUTHORIZED will be returned.\n\n"
-    "  Note: Token based security can only be installed if you are using localhost or TLS.\n\n");
+    "  The location of the discovery directory is %s/avd/running\n"
+    "  The file will be named `pid_%%d_info.ini` where %%d is the process id of the emulator. \n\n"
+    "  Note: Token based security can only be installed if you are using localhost or TLS.\n\n",
+#ifdef __linux__
+    "$XDG_RUNTIME_DIR"
+#endif
+#ifdef __APPLE__
+    "$HOME/Library/Caches/TemporaryItems"
+#endif
+#ifdef _WIN32
+    "\%LOCALAPPDATA\%/Temp"
+#endif
+    );
+}
+
+
+static void
+help_grpc_use_jwt(stralloc_t*  out)
+{
+    PRINTF(
+    "  Require an authorization header with a valid jwt token for every grpc call.\n\n"
+    "  Every grpc request expects the following header:\n\n"
+    "    authorization: Bearer <token>\n\n"
+    "  Where token is a valid signed JSON Web Token (JWT)\n\n"
+    "  If an incorrect token is present the status UNAUTHORIZED will be returned.\n\n"
+    "  In order to make a succesful call a JWT token must be presented with the following fields:\n\n"
+    "  - aud: must contain a list of allowed methods. \n"
+    "  - iat: must have an issue in the past. \n"
+    "  - exp: must have an expiration date. \n\n"
+    "  In order to validate tokens the emulator will load all JSON Web Key (JWK) files from\n"
+    "  a directory that is only accessible by the user who launched the emulator.\n"
+    "  The location of this directory is defined in the emulator discovery file under the key grpc.jwks\n"
+    "  Placing a valid JWK file with the name ${grpc.jwks}/my_filename.jwk will result in the JWK \n"
+    "  being made available to the emulator. Note that `my_filename` can be an arbitrary file name.\n\n"
+    "  The emulator will merge all discovered keys and write them to the file in the JWK format. The file\n"
+    "  is defined in the emulator discovery file under the key grpc.jwk_active.\n\n"
+    "  Developers can use this to make sure that the key they generated has been picked up by the emulator.\n\n"
+    "  The location of the discovery file can be found in the directory is %s/avd/running\n"
+    "  The file will be named `pid_%%d_info.ini` where %%d is the process id of the emulator. \n\n"
+    "  Notes\n"
+    "   - Tokens must be signed with one of the following algorithms: ES256, ES384, ES512, RS256, RS384, RS512\n"
+    "   - Token based security can only be installed if you are using localhost or TLS.\n\n",
+#ifdef __linux__
+    "$XDG_RUNTIME_DIR"
+#endif
+#ifdef __APPLE__
+    "$HOME/Library/Caches/TemporaryItems"
+#endif
+#ifdef _WIN32
+    "\%LOCALAPPDATA\%/Temp"
+#endif
+    );
 }
 
 

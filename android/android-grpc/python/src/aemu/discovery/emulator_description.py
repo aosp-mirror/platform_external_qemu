@@ -14,15 +14,15 @@
 import logging
 
 import grpc
-
 from aemu.discovery.header_manipulator_client_interceptor import (
     header_adder_interceptor,
+    jwt_header_inceptor,
 )
 from aemu.proto.emulator_controller_pb2_grpc import EmulatorControllerStub
-from aemu.proto.snapshot_service_pb2_grpc import SnapshotServiceStub
-from aemu.proto.waterfall_pb2_grpc import WaterfallStub
 from aemu.proto.rtc_service_pb2_grpc import RtcStub
+from aemu.proto.snapshot_service_pb2_grpc import SnapshotServiceStub
 from aemu.proto.ui_controller_service_pb2_grpc import UiControllerStub
+from aemu.proto.waterfall_pb2_grpc import WaterfallStub
 
 
 class EmulatorDescription(dict):
@@ -68,6 +68,14 @@ class EmulatorDescription(dict):
             return grpc.intercept_channel(
                 channel, header_adder_interceptor("authorization", bearer)
             )
+
+        if ("grpc.jwks" in self._description) and (
+            "grpc.jwk_active" in self._description
+        ):
+            # We need to create jwks..
+            key_path = self._description["grpc.jwks"]
+            active_path =  self._description["grpc.jwk_active"]
+            return grpc.intercept_channel(channel, jwt_header_inceptor(key_path, active_path))
 
         logging.debug("Insecure channel to %s", addr)
         return channel

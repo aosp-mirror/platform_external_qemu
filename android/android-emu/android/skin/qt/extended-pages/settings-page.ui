@@ -609,6 +609,58 @@
       <bool>false</bool>
      </property>
     </widget>
+    <widget class="QGroupBox" name="set_PauseAvdWhenMinimizedTitle">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>314</y>
+       <width>211</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Pause AVD when minimized</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="set_pauseAvdWhenMinimized">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>334</y>
+       <width>211</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="accessibleDescription">
+      <string>Pause AVD when minimized</string>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Toggle</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
     <widget class="RaisedMaterialButton" name="set_resetNotifications">
      <property name="geometry">
       <rect>
