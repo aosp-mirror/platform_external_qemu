@@ -123,6 +123,7 @@ target_link_libraries(
          OpenglRender_vulkan
          OpenGLESDispatch
          GLSnapshot)
+android_target_link_libraries(OpenglRender darwin PUBLIC "-framework AppKit -framework QuartzCore")
 target_compile_definitions(OpenglRender PRIVATE -DVK_ANDROID_native_buffer)
 android_target_compile_definitions(OpenglRender windows PRIVATE
                                    -DVK_USE_PLATFORM_WIN32_KHR)
