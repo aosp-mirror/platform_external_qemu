@@ -1555,6 +1555,10 @@ void EmulatorQtWindow::setIgnoreWheelEvent(bool ignore) {
     mIgnoreWheelEvent = ignore;
 }
 
+void EmulatorQtWindow::setPauseAvdWhenMinimized(bool pause) {
+    mPauseAvdWhenMinimized = pause;
+}
+
 void EmulatorQtWindow::showMinimized() {
 #ifndef _WIN32
     // For Mac and Linux, ensure that the window has a frame and
@@ -1581,6 +1585,11 @@ void EmulatorQtWindow::showMinimized() {
 #endif // !_WIN32
     mContainer.showMinimized();
     mWindowIsMinimized = true;
+
+    if (mPauseAvdWhenMinimized) {
+        (*mAdbInterface)->runAdbCommand( {"emu", "avd", "pause"},
+                [this](const android::emulation::OptionalAdbCommandResult&) { ; }, 5000);
+    }
 }
 
 void EmulatorQtWindow::handleTouchPoints(const QTouchEvent& touch) {
@@ -1654,7 +1663,14 @@ bool EmulatorQtWindow::event(QEvent* ev) {
     }
     if (ev->type() == QEvent::WindowActivate && mWindowIsMinimized) {
         mWindowIsMinimized = false;
-
+        // note: this is intentional, as user could pause the avd throu console
+        // and we want to make the avd usable.
+        if(true) {
+            (*mAdbInterface)->runAdbCommand( {"emu", "avd", "resume"},
+                    [this](const android::emulation::OptionalAdbCommandResult&) { ; }, 5000);
+            (*mAdbInterface)->runAdbCommand( {"shell", "input", "keyevent", "KEYCODE_WAKEUP"},
+                    [this](const android::emulation::OptionalAdbCommandResult&) { ; }, 5000);
+        }
 #ifndef _WIN32
         // When we minimized, we re-enabled the window frame (because Mac won't un-minimize
         // a frameless window). Disable the window frame now, if it should be disabled.

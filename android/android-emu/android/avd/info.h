@@ -468,4 +468,9 @@ int avdInfo_maxMultiDisplayEntries();
 /* Whether the skin has corresponding system overlay */
 bool avdInfo_skinHasOverlay(const char* skinName);
 
+/* the screen off timeout in miliseconds, after which the screen will be turned off
+   do not delete the returned string.
+ */
+const char* avdInfo_screen_off_timeout(int apiLevel);
+
 ANDROID_END_HEADER

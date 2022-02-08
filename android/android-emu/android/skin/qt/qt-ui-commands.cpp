@@ -90,6 +90,8 @@ constexpr CommandInfo kCommands[] = {
         INIT_COMMAND(UNFOLD, "Unfold"),
         INIT_COMMAND(WEAR_1, "Wear OS Button 1"),
         INIT_COMMAND(WEAR_2, "Wear OS Button 2"),
+        INIT_COMMAND(PALM, "Palm gesture"),
+        INIT_COMMAND(TILT, "Tilt gesture"),
 };
 
 bool parseQtUICommand(const QString& string, QtUICommand* command) {

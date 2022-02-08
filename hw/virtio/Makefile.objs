@@ -10,6 +10,7 @@ obj-$(CONFIG_VHOST_VSOCK) += vhost-vsock.o
 obj-y += virtio-vsock-stub.o
 obj-y += virtio-crypto.o
 obj-$(CONFIG_VIRTIO_PCI) += virtio-crypto-pci.o
+obj-$(CONFIG_VIRTIO_PCI) += virtio-snd-pci.o
 endif
 
 common-obj-$(call lnot,$(CONFIG_LINUX)) += vhost-stub.o

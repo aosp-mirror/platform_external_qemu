@@ -132,7 +132,8 @@ TEST_F(Ieee80211FrameTest, conversionTest) {
     EXPECT_TRUE(frame2.get() == nullptr);
 }
 
-TEST_F(Ieee80211FrameTest, EncryptionDecryptionTest) {
+//TODO(wdu@) b/216352528 Re-enable this test after a test has been fixed. 
+/*TEST_F(Ieee80211FrameTest, EncryptionDecryptionTest) {
     auto dataFrame = buildDataFrame();
     // Set up GTK and PTK for testing.
     std::vector<uint8_t> gtk(kGTK, kGTK + sizeof(kGTK));
@@ -175,4 +176,4 @@ TEST_F(Ieee80211FrameTest, EncryptionDecryptionTest) {
     EXPECT_FALSE(dataFrame.isProtected());
     // Test if unprotected frame return false.
     EXPECT_FALSE(dataFrame.decrypt(CipherScheme::CCMP));
-}
+}*/

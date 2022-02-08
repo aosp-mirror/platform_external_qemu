@@ -261,6 +261,7 @@ public:
     void setFrameAlways(bool showFrame);
     void setOnTop(bool onTop);
     void setIgnoreWheelEvent(bool ignore);
+    void setPauseAvdWhenMinimized(bool ignore);
     void simulateKeyPress(int keyCode, int modifiers);
     void simulateScrollBarChanged(int x, int y);
     void setDisplayRegion(int xOffset, int yOffset, int width, int height);
@@ -560,6 +561,7 @@ private:
     OnDemandProgressDialog mPushDialog;
 
     bool mIgnoreWheelEvent = false;
+    bool mPauseAvdWhenMinimized = false;
     QTimer mWheelScrollTimer;
 #if QT_VERSION >= 0x060000
     QPointF mWheelScrollPos;

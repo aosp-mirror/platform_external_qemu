@@ -156,6 +156,9 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     connect(mExtendedUi->settingsPage, SIGNAL(disableMouseWheelChanged(bool)),
         this, SLOT(disableMouseWheel(bool)));
 
+    connect(mExtendedUi->settingsPage, SIGNAL(pauseAvdWhenMinimizedChanged(bool)),
+        this, SLOT(pauseAvdWhenMinimized(bool)));
+
     connect(
         mExtendedUi->settingsPage, SIGNAL(enableClipboardSharingChanged(bool)),
         mToolWindow, SLOT(switchClipboardSharing(bool)));
@@ -342,6 +345,8 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     const auto enableClipboardSharing =
             settings.value(Ui::Settings::CLIPBOARD_SHARING, true).toBool();
     mToolWindow->switchClipboardSharing(enableClipboardSharing);
+
+    mEmulatorWindow->setPauseAvdWhenMinimized(SettingsPage::getPauseAvdWhenMinimized());
 }
 
 ExtendedWindow::~ExtendedWindow() {
@@ -615,6 +620,10 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme) {
 
 void ExtendedWindow::disableMouseWheel(bool disabled) {
     mEmulatorWindow->setIgnoreWheelEvent(disabled);
+}
+
+void ExtendedWindow::pauseAvdWhenMinimized(bool pause) {
+    mEmulatorWindow->setPauseAvdWhenMinimized(pause);
 }
 
 void ExtendedWindow::showEvent(QShowEvent* e) {
