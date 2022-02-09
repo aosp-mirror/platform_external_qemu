@@ -912,7 +912,7 @@ int main(int argc, char** argv)
           }
 #endif
 #if defined(__aarch64__)
-          if (sarch != "arm64") {
+          if (sarch != "arm64" && sarch != "arm") {
               APANIC("Avd's CPU Architecture '%s' is not supported by the QEMU2 emulator on aarch64 host.\n", avdarch);
           }
 #endif
