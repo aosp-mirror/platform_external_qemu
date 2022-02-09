@@ -19,6 +19,9 @@ target_compile_definitions(
 # Make sure we have the qemu dependencies available
 if(BUILDING_FOR_AARCH64)
   add_dependencies(emulator qemu-system-aarch64 qemu-system-aarch64-headless)
+  if(NOT OPTION_MINBUILD)
+    add_dependencies(emulator qemu-system-armel qemu-system-armel-headless)
+  endif()
 elseif(OPTION_MINBUILD)
   add_dependencies(emulator qemu-system-x86_64 qemu-system-aarch64
                    qemu-system-x86_64-headless qemu-system-aarch64-headless)
