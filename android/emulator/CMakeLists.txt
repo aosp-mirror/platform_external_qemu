@@ -96,6 +96,8 @@ android_target_dependency(emulator windows_msvc-x86_64
                           ANGLE_RENDERER_DEPENDENCIES)
 android_target_dependency(emulator darwin-x86_64
                           ANGLE_RENDERER_DEPENDENCIES)
+android_target_dependency(emulator darwin-aarch64
+                          ANGLE_RENDERER_DEPENDENCIES)
 android_target_dependency(emulator windows_msvc-x86_64 MSVC_DEPENDENCIES)
 # And install them for a release.
 # TODO(b/141205876): prebuilt executables are losing their execute permission on
@@ -112,8 +114,7 @@ android_install_dependency(all SWIFTSHADER_DEPENDENCIES)
 if (NOT LINUX_AARCH64)
   android_install_dependency(all ANGLE_DEPENDENCIES)
 endif()
-# TODO: add DARWIN_AARCH64 support
-if (DARWIN_X86_64)
+if (DARWIN_X86_64 OR DARWIN_AARCH64)
   android_install_dependency(all ANGLE_RENDERER_DEPENDENCIES)
 endif()
 
