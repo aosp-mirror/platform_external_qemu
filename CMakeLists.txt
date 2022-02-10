@@ -125,10 +125,6 @@ if(GFXSTREAM_ONLY)
   set(GFXSTREAM TRUE)
 endif()
 
-if(BUILDING_FOR_AARCH64)
-  set(OPTION_MINBUILD TRUE)
-endif()
-
 if (LINUX_AARCH64)
   set(QTWEBENGINE FALSE)
 endif()
@@ -920,12 +916,14 @@ if(NOT OPTION_AEMU_LIBS_ONLY)
       aarch64 "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
 
   if(NOT OPTION_MINBUILD)
-    android_add_qemu_executable(
-      i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+    if(NOT BUILDING_FOR_AARCH64)
+      android_add_qemu_executable(
+        i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+      android_add_qemu_headless_executable(
+        i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
+    endif()
     android_add_qemu_executable(
       armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
-    android_add_qemu_headless_executable(
-      i386 "${ANDROID_QEMU_i386_DEVICES_${ANDROID_TARGET_TAG}}")
     android_add_qemu_headless_executable(
       armel "${ANDROID_QEMU_arm_DEVICES_${ANDROID_TARGET_TAG}}")
   endif()
