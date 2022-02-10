@@ -1294,20 +1294,35 @@ static void updateLibrarySearchPath(bool isHeadless,
 static std::string getAvdSystemPath(const char* avdName, const char* optionalSysPath) {
     std::string result;
     if (!avdName) {
+        printf("emulator: WARN: AVD name is empty\n");
+        fflush(stdout);
         return result;
     }
     if (optionalSysPath) {
         result = optionalSysPath;
+        printf("emulator: INFO: Use user provided system path %s\n",
+               optionalSysPath);
+        fflush(stdout);
         return result;
     }
     char* sdkRootPath = path_getSdkRoot();
     if (!sdkRootPath) {
+        // do a verbose probe to help debug
+        android::ConfigDirs::getSdkRootDirectory(true);
+        printf("emulator: WARN: Cannot find valid sdk root path.\n");
+        fflush(stdout);
         return result;
     }
-    char* systemPath = path_getAvdSystemPath(avdName, sdkRootPath);
+
+    char* systemPath = path_getAvdSystemPath(avdName, sdkRootPath, false);
     if (systemPath != nullptr) {
-         result = systemPath;
-         AFREE(systemPath);
+        printf("emulator: INFO: Found systemPath %s\n", systemPath);
+        fflush(stdout);
+        result = systemPath;
+        AFREE(systemPath);
+    } else {
+        // debug print why it is not found
+        systemPath = path_getAvdSystemPath(avdName, sdkRootPath, true);
     }
     AFREE(sdkRootPath);
     return result;
