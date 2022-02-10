@@ -24,6 +24,7 @@ import "google/protobuf/empty.proto";
 // some of the grpc behavior.
 service TestEcho {
   rpc streamEcho(stream Msg) returns (stream Msg) {}
+  rpc anotherStreamEcho(stream Msg) returns (stream Msg) {}
   rpc echo(Msg) returns (Msg) {}
   rpc data(google.protobuf.Empty) returns (Msg) {}
   rpc streamData(google.protobuf.Empty) returns (stream Msg) {}

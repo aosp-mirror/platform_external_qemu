@@ -124,6 +124,7 @@ public:
 }
 
 // The async version.
+template <class Connection>
 class AsyncHeartbeatReceiver {
 public:
     AsyncHeartbeatReceiver() : mRunner([this]() { deliveryLoop(); }) {
@@ -153,12 +154,12 @@ public:
         }
     }
 
-    void addListener(BidiGrpcConnection<Msg, Msg>* waiter) {
+    void addListener(Connection waiter) {
         const std::lock_guard<std::mutex> lock(mListenerLock);
         mListeners.insert(waiter);
     }
 
-    void removeListener(BidiGrpcConnection<Msg, Msg>* waiter) {
+    void removeListener(Connection waiter) {
         const std::lock_guard<std::mutex> lock(mListenerLock);
         mListeners.erase(waiter);
     }
@@ -171,33 +172,26 @@ private:
     std::mutex mListenerLock;
 
     SyncHeartbeatReceiver mReceiver;
-    std::unordered_set<BidiGrpcConnection<Msg, Msg>*> mListeners;
+    std::unordered_set<Connection> mListeners;
 };
 
-std::unique_ptr<AsyncHeartbeatReceiver> s_global_async_heartbeat_handler =
-        std::make_unique<AsyncHeartbeatReceiver>();
+void registerAsyncHeartBeat(AsyncGrpcHandler* handler,
+                            AsyncHeartbeatService* testService) {
+    handler->registerConnectionHandler(
+                   testService, &AsyncHeartbeatService::RequeststreamEcho)
+            .withCallback(
 
-std::unique_ptr<AsyncGrpcHandler<Msg, Msg>> asyncHeartBeat(
-        AsyncHeartbeatService* testService,
-        const std::vector<::grpc::ServerCompletionQueue*>& cqs) {
-    return std::make_unique<AsyncGrpcHandler<Msg, Msg>>(
-            cqs,
-            [testService](ServerContext* context,
-                          ServerAsyncReaderWriter<Msg, Msg>* stream,
-                          ::grpc::CompletionQueue* new_call_cq,
-                          ::grpc::ServerCompletionQueue* notification_cq,
-                          void* tag) {
-                testService->RequeststreamEcho(context, stream, new_call_cq,
-                                               notification_cq, tag);
-            },
-            [testService](auto connection) {
-                s_global_async_heartbeat_handler->addListener(connection);
-                connection->setCloseCallback([testService](auto connection) {
-                    s_global_async_heartbeat_handler->removeListener(
-                            connection);
-                });
-            });
+                    [testService](auto connection) {
+                        static AsyncHeartbeatReceiver<decltype(connection)>
+                                s_global_handler;
+                        s_global_handler.addListener(connection);
+                        connection->setCloseCallback(
+                                [testService](auto connection) {
+                                    s_global_handler.removeListener(connection);
+                                });
+                    });
 }
+
 }  // namespace control
 }  // namespace emulation
 }  // namespace android
