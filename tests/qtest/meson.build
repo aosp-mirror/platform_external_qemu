@@ -251,6 +251,7 @@ qos_test_ss.add(
   'lsm303dlhc-mag-test.c',
   'isl_pmbus_vr-test.c',
   'max16600-test.c',
+  'max20730-test.c',
   'max34451-test.c',
   'max31790_fan_ctrl-test.c',
   'megasas-test.c',

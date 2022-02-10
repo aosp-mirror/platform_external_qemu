@@ -55,3 +55,7 @@ config MAX_16600
 config MAX31790
     bool
     depends on I2C
+
+config MAX20730
+    bool
+    depends on I2C
