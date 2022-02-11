@@ -187,6 +187,27 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                         win->updateUIMultiDisplayPage(id);
                     }
                 },
+        .addMultiDisplayWindow =
+                [](uint32_t id, bool add, uint32_t w, uint32_t h) {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        win->runOnUiThread([win, id, add, w, h]() {
+                            win->addMultiDisplayWindow(id, add, w, h);
+                            return;
+                        });
+                        return true;
+                    }
+                    return false;
+                },
+        .paintMultiDisplayWindow =
+                [](uint32_t id, uint32_t texture) {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        win->runOnUiThread([win, id, texture]() {
+                            win->paintMultiDisplayWindow(id, texture);
+                        });
+                        return true;
+                    }
+                    return false;
+                },
         .getMonitorRect =
                 [](uint32_t* w, uint32_t* h) -> bool {
                     if (const auto win = EmulatorQtWindow::getInstance()) {

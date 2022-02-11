@@ -87,6 +87,8 @@ set(ANDROID_LIBUI_SRC_FILES
     android/skin/qt/car-cluster-window.cpp
     android/skin/qt/common-controls/cc-list-item.cpp
     android/skin/qt/device-3d-widget.cpp
+    android/skin/qt/multi-display-widget.cpp
+    android/skin/qt/mouse-event-handler.cpp
     android/skin/qt/editable-slider-widget.cpp
     android/skin/qt/emulator-container.cpp
     android/skin/qt/emulator-no-qt-no-window.cpp
@@ -227,6 +229,7 @@ set(ANDROID_SKIN_QT_MOC_SRC_FILES
     android/skin/qt/angle-input-widget.h
     android/skin/qt/common-controls/cc-list-item.h
     android/skin/qt/device-3d-widget.h
+    android/skin/qt/multi-display-widget.h
     android/skin/qt/editable-slider-widget.h
     android/skin/qt/emulator-container.h
     android/skin/qt/emulator-no-qt-no-window.h
