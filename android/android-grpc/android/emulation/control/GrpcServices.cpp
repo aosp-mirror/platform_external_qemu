@@ -75,20 +75,9 @@ public:
     ~EmulatorControllerServiceImpl() { stop(); }
 
     void stop() override {
-        LOG(INFO) << "Shutting down gRPC endpoint";
         auto deadline = std::chrono::system_clock::now() +
                         std::chrono::milliseconds(500);
         mServer->Shutdown(deadline);
-
-        VERBOSE_PRINT(grpc, "Taking down server queues");
-        // Shutdown the completion queues.
-        void* ignored_tag;
-        bool ignored_ok;
-        for (auto& queue : mCompletionQueues) {
-            queue->Shutdown();
-            while (queue->Next(&ignored_tag, &ignored_ok))
-                ;
-        }
     }
 
     EmulatorControllerServiceImpl(
@@ -96,32 +85,21 @@ public:
             std::vector<std::shared_ptr<Service>> services,
             grpc::Server* server,
             std::vector<std::unique_ptr<ServerCompletionQueue>> queue)
-        : mPort(port),
-          mRegisteredServices(services),
-          mServer(server),
-          mCompletionQueues(std::move(queue)) {}
+        : mPort(port), mRegisteredServices(services), mServer(server) {
+        mHandler = std::make_unique<AsyncGrpcHandler>(std::move(queue));
+    }
 
     int port() override { return mPort; }
 
     void wait() override { mServer->Wait(); }
 
     // Returns a new completionQueue if possible.
-    std::vector<ServerCompletionQueue*> newCompletionQueue(size_t nr) override {
-        if (queueidx + nr > mCompletionQueues.size()) {
-            LOG(ERROR) << "Too many queues requested, no new queues available";
-            return {};
-        }
-        std::vector<ServerCompletionQueue*> queues;
-        for (int i = 0; i < nr; i++) {
-            queues.push_back(mCompletionQueues[queueidx++].get());
-        }
-        return queues;
-    }
+    AsyncGrpcHandler* asyncHandler() override { return mHandler.get(); }
 
 private:
     std::unique_ptr<grpc::Server> mServer;
     std::vector<std::shared_ptr<Service>> mRegisteredServices;
-    std::vector<std::unique_ptr<ServerCompletionQueue>> mCompletionQueues;
+    std::unique_ptr<AsyncGrpcHandler> mHandler;
     int mPort;
     int queueidx = 0;
     std::string mCert;
@@ -187,10 +165,12 @@ Builder& Builder::withAuthToken(std::string token) {
     return *this;
 }
 
-Builder& Builder::withJwtAuthDiscoveryDir(std::string jwks, std::string jwkLoadedPath) {
+Builder& Builder::withJwtAuthDiscoveryDir(std::string jwks,
+                                          std::string jwkLoadedPath) {
     mJwkPath = jwks;
     mJwkLoadedPath = jwkLoadedPath;
-    mValid = System::get()->pathExists(jwks) && System::get()->pathCanRead(jwks);
+    mValid =
+            System::get()->pathExists(jwks) && System::get()->pathCanRead(jwks);
     mAuthMode = mAuthMode | Authorization::JwtToken;
     return *this;
 }
@@ -272,7 +252,7 @@ Builder& Builder::withPortRange(int start, int end) {
     return *this;
 }
 
-Builder& Builder::withCompletionQueues(int count) {
+Builder& Builder::withAsyncServerThreads(int count) {
     mCompletionQueueCount = count;
     return *this;
 }
@@ -336,7 +316,8 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
         if (!mAuthToken.empty() && !mJwkPath.empty()) {
             auto anyauth = std::vector<std::unique_ptr<BasicTokenAuth>>();
             anyauth.emplace_back(std::make_unique<StaticTokenAuth>(mAuthToken));
-            anyauth.emplace_back(std::make_unique<JwtTokenAuth>(mJwkPath, mJwkLoadedPath));
+            anyauth.emplace_back(
+                    std::make_unique<JwtTokenAuth>(mJwkPath, mJwkLoadedPath));
             mCredentials->SetAuthMetadataProcessor(
                     std::make_shared<AnyTokenAuth>(std::move(anyauth)));
         } else if (!mAuthToken.empty()) {
@@ -347,8 +328,9 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
                     std::make_shared<JwtTokenAuth>(mJwkPath, mJwkLoadedPath));
         }
     } else {
-        dwarning("*** No gRPC protection active, consider launching with the -grpc-use-jwt flag.***");
-
+        dwarning(
+                "*** No gRPC protection active, consider launching with the "
+                "-grpc-use-jwt flag.***");
     }
     // Translate loopback Ipv4/Ipv6 preference ourselves. gRPC resolver can
     // do it slightly differently than us, leading to unexpected results.
@@ -397,7 +379,7 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
         return nullptr;
 
     LOG(INFO) << "Started GRPC server at " << server_address.c_str()
-              << ", security: " << mSecurity << mAuthMode;
+              << ", security: " << mSecurity << ":" << mAuthMode;
     return std::unique_ptr<EmulatorControllerService>(
             new EmulatorControllerServiceImpl(mPort, std::move(mServices),
                                               service.release(),

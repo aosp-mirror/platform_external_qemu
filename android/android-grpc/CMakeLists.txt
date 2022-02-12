@@ -81,6 +81,7 @@ android_add_library(
   SRC # cmake-format: sortable
       ${EMULATOR_GRPC_SRC}
       android/emulation/control/adb/AdbService.cpp
+      android/emulation/control/async/AsyncGrpcStream.cpp
       android/emulation/control/audio/AudioStream.cpp
       android/emulation/control/camera/VirtualSceneCamera.cpp
       android/emulation/control/clipboard/Clipboard.cpp
@@ -146,6 +147,13 @@ target_link_libraries(android-ui-controller PUBLIC libprotobuf android-emu
 if(NOT WINDOWS_MSVC_X86_64)
   target_link_libraries(android-grpc PRIVATE android-waterfall)
 endif()
+
+# Header only library..
+add_library(android-grpc-headers INTERFACE)
+target_include_directories(android-grpc-headers INTERFACE .)
+android_license(
+  TARGET "libbt-rootcanal.headers" LIBNAME None SPDX Apache-2.0
+  LICENSE Apache-2.0 LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.APACHE2")
 
 # Set of test services.
 protobuf_generate_grpc_cpp(
