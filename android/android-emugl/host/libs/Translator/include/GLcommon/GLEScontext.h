@@ -280,6 +280,7 @@ public:
     const char * getVendorString(bool isGles1) const;
     const char * getRendererString(bool isGles1) const;
     const char * getVersionString(bool isGles1) const;
+    bool isAngleBackend() const;
     void getGlobalLock();
     void releaseGlobalLock();
     virtual GLSupport*  getCaps(){return &s_glSupport;};
@@ -480,6 +481,7 @@ public:
     void blitFromReadBufferToEGLImage(EGLImage image, GLint internalFormat, int width, int height);
 
     bool drawDisabled() const;
+    void flushForAngleMetal();
 
 protected:
     void initDefaultFboImpl(
@@ -641,7 +643,6 @@ protected:
             };
 
     GLuint m_useProgram = 0;
-
 private:
 
     GLenum                m_glError = GL_NO_ERROR;
@@ -661,6 +662,8 @@ private:
     static std::string    s_glVendor;
     static std::string    s_glRenderer;
     static std::string    s_glVersion;
+
+    static bool           s_isAngleBackend;
 
     NameSpace* m_fboNameSpace = nullptr;
     // m_vaoNameSpace is an empty shell that holds the names but not the data
