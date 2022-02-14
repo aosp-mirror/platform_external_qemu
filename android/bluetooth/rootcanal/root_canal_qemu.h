@@ -19,18 +19,29 @@
 // Connects and activates the root canal module, returns true if
 // the activation succeeded.
 namespace android {
+
+namespace net {
+
+class HciDataChannelServer;
+}
+
 namespace bluetooth {
 class Rootcanal {
 public:
     class Builder;
-    virtual ~Rootcanal() {};
+    virtual ~Rootcanal(){};
 
     // Starts the root canal service.
     virtual bool start() = 0;
 
     // Closes the root canal service
     virtual void close() = 0;
+
+    // Access to the /dev/vhci through qemu.
+    virtual net::HciDataChannelServer* qemuHciServer() = 0;
 };
+
+static std::unique_ptr<Rootcanal> sRootcanal;
 
 class Rootcanal::Builder {
 public:
@@ -44,7 +55,10 @@ public:
     Builder& withLinkBlePort(const char* portStr);
     Builder& withControllerProperties(const char* props);
     Builder& withCommandFile(const char* cmdFile);
-    std::unique_ptr<Rootcanal> build();
+    void buildSingleton();
+
+
+static std::shared_ptr<Rootcanal> getInstance();
 
 private:
     int mHci = -1;

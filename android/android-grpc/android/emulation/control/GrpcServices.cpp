@@ -99,9 +99,9 @@ public:
     AsyncGrpcHandler* asyncHandler() override { return mHandler.get(); }
 
 private:
+    std::unique_ptr<AsyncGrpcHandler> mHandler;
     std::unique_ptr<grpc::Server> mServer;
     std::vector<std::shared_ptr<Service>> mRegisteredServices;
-    std::unique_ptr<AsyncGrpcHandler> mHandler;
     int mPort;
     int queueidx = 0;
     std::string mCert;

@@ -153,8 +153,8 @@ endif()
 add_library(android-grpc-headers INTERFACE)
 target_include_directories(android-grpc-headers INTERFACE .)
 android_license(
-  TARGET "libbt-rootcanal.headers" LIBNAME None SPDX Apache-2.0
-  LICENSE Apache-2.0 LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.APACHE2")
+  TARGET "android-grpc-headers " LIBNAME None SPDX Apache-2.0 LICENSE Apache-2.0
+  LOCAL "${ANDROID_QEMU2_TOP_DIR}/LICENSES/LICENSE.APACHE2")
 
 # Set of test services.
 protobuf_generate_grpc_cpp(
@@ -246,3 +246,24 @@ android_add_executable(
   SRC # cmake-format: sortable
       android/emulation/control/test/StreamScreenPerf.cpp)
 target_link_libraries(grpc_stream_screen_benchmark PRIVATE android-grpc android-emu-base android-emu emulator-gbench)
+
+# Rootcanal service endpoints.
+if(BLUETOOTH_EMULATION)
+  protobuf_generate_grpc_cpp(
+    SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}
+    SOURCES emulated_bluetooth_packets.proto emulated_bluetooth_vhci.proto
+    OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR} GENERATED BLUETOOTH_SERVICE_GRPC_SRC)
+
+  android_add_library(
+    TARGET grpc-vhci-forwarder
+    LICENSE Apache-2.0
+    SRC ${BLUETOOTH_SERVICE_GRPC_SRC}
+        android/emulation/bluetooth/HciAsyncDataChannelAdapter.cpp
+        android/emulation/bluetooth/VhciService.cpp)
+
+  target_link_libraries(
+    grpc-vhci-forwarder PRIVATE libbt-rootcanal libbt-rootcanal-qemu
+                                android-grpc)
+  target_include_directories(grpc-vhci-forwarder
+                             PUBLIC . ${CMAKE_CURRENT_BINARY_DIR})
+endif()

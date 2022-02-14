@@ -1427,6 +1427,23 @@ help_rootcanal_default_commands_file(stralloc_t*  out)
 }
 
 static void
+help_forward_vhci(stralloc_t*  out)
+{
+    PRINTF(
+    "  Enables the gRPC service that gives access to /dev/vhci\n\n"
+    "  This allows you to provide your own virtual bluetooth chip.\n"
+    "  This will disable rootcanal and any service that relies on it.\n\n"
+    "  Some things to be aware of:\n"
+    "    - The system image must have support for /dev/vhci\n"
+    "    - You usually want to register when bluetooth is not active, otherwise there is the potential for failures"
+    "    - Only one client can be attached at the time.\n"
+    "    - Rootcanal will be restarted when a client disconnects, but might not behave as expected\n\n"
+    "  This is not officially supported, and is for internal testing only. \n\n"
+    );
+}
+
+
+static void
 help_onion(stralloc_t*  out)
 {
     PRINTF(
