@@ -33,6 +33,7 @@ public:
     virtual int update_call(AModem, const char*, int) override;
     virtual void set_data_network_type(AModem, ADataNetworkType) override;
     virtual void set_signal_strength_profile(AModem, int) override;
+    virtual void update_time(AModem) override;
     virtual void set_data_registration(AModem, ARegistrationState) override;
     virtual void set_voice_registration(AModem, ARegistrationState) override;
     virtual ARegistrationState get_data_registration(AModem) override;

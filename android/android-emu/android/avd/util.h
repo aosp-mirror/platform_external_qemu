@@ -58,7 +58,8 @@ char* path_getAvdSnapshotPresent( const char* avdName );
  * root SDK path. Caller must free() the result.
  */
 char* path_getAvdSystemPath(const char* avdName,
-                            const char* sdkRootPath);
+                            const char* sdkRootPath,
+                            bool verbose);
 
 /* Return the value of hw.gpu.mode for a given AVD.
  * Caller must free() returned string.

@@ -21,6 +21,7 @@
 #include "android/console.h"                     // for AndroidConsoleAgents
 #include "grpcpp/impl/codegen/service_type.h"    // IWYU pragma: keep
 #include "grpcpp/security/server_credentials.h"  // for ServerCredentials
+#include "android/emulation/control/async/AsyncGrcpStream.h"
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
@@ -38,7 +39,7 @@ class EmulatorControllerService {
 public:
     class Builder;
 
-    virtual ~EmulatorControllerService() {}
+    virtual ~EmulatorControllerService() = default;
 
     // Stops the gRPC service, this will gracefully close all the
     // incoming/outgoing connections. Closing of connections is not
@@ -51,15 +52,8 @@ public:
     // Block and wait until the server is completed.
     virtual void wait() = 0;
 
-    // Returns a new completionQueue, for those services that
-    // wish to do their own async processing.
-    //
-    // Note: You can never request more completion queues than there
-    // are configured with the builder.
-    //
-    // The service will return a nullptr when no more queue's are available.
-    virtual std::vector<ServerCompletionQueue*> newCompletionQueue(
-            size_t nr) = 0;
+    // You can register your asynchronous bidi connections on this.
+    virtual AsyncGrpcHandler* asyncHandler() = 0;
 };
 
 // A Factory class that is capable of constructing a proper gRPC service that
@@ -126,13 +120,10 @@ public:
     // Add a service only if tls and client-ca is enabled.
     Builder& withSecureService(::grpc::Service* service);
 
-    // Register count number of completion queues.
+    // Register count number of threads to handle async
+    // requests.
     //
-    // Completion queues are needed if you wish to host
-    // async services that require a completion queue.
-    //
-    // One thread should use one completion queue.
-    Builder& withCompletionQueues(int count);
+    Builder& withAsyncServerThreads(int count);
 
     // Shutdown the emulator after timeout seconds of gRPC inactivity.
     // The timeout should be at least 1 second, otherwise it will

@@ -111,6 +111,13 @@ extern void             skin_window_zoomed_window_resized( SkinWindow*  window,
                                                            int dx, int dy, int w, int h,
                                                            int scroll_h);
 
+extern int              skin_window_add_display( SkinWindow* window,
+                                                 uint32_t id,
+                                                 uint32_t w,
+                                                 uint32_t h);
+
+extern int              skin_window_remove_display( SkinWindow* window, uint32_t id);
+
 /* change the brightness of the emulator LCD screen. 'brightness' will be clamped to 0..255 */
 extern void             skin_window_set_lcd_brightness( SkinWindow*  window, int  brightness );
 

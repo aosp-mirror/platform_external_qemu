@@ -334,6 +334,7 @@ bool skin_ui_process_events(SkinUI* ui) {
         case kEventTouchBegin:
         case kEventTouchEnd:
         case kEventTouchUpdate:
+
             DE("EVENT: kEventMultiTouch x=%f y=%f id=%d", ev.u.multi_touch_point.x,
                ev.u.multi_touch_point.y, ev.u.multi_touch_point.id);
             skin_window_process_touch_event(ui->window, &ev);
@@ -463,6 +464,14 @@ bool skin_ui_process_events(SkinUI* ui) {
             break;
         case kEventSetDisplayActiveConfig:
             emulator_window_opengles_set_display_active_config(ev.u.display_active_config);
+            break;
+        case kEventAddDisplay:
+            DE("EVENT: kEventAddDisplay");
+            skin_window_add_display(ui->window, ev.u.add_display.id, ev.u.add_display.width, ev.u.add_display.height);
+            break;
+        case kEventRemoveDisplay:
+            DE("EVENT: kEventRemoveDisplay");
+            skin_window_remove_display(ui->window, ev.u.remove_display.id);
             break;
         default: ;
         }

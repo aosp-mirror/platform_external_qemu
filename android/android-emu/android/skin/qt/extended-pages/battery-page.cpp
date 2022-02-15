@@ -338,11 +338,10 @@ static BatteryCharger getSavedCharger() {
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
 
         int noMiscPipe = avdInfo_getApiLevel(android_avdInfo) < 26;
-        const bool isWear = avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR;
 
         BatteryCharger defaultCharger = BATTERY_CHARGER_NONE;
 
-        if (noMiscPipe || isWear) {
+        if (noMiscPipe) {
             defaultCharger = BATTERY_CHARGER_AC;
         }
 

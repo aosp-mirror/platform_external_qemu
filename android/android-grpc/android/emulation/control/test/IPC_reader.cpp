@@ -162,7 +162,6 @@ private:
     std::unique_ptr<SimpleReplySocket> mSrs;
     std::unique_ptr<SharedMemory> mWriter;
     std::unique_ptr<EmulatorControllerService> mService;
-    std::unique_ptr<AsyncGrpcHandler<Msg, Msg>> mHeartBeatHandler;
 
     // Calculate a simple hash of the memory region.
     // This forces a memory read on the region.
@@ -230,11 +229,11 @@ private:
         mService = builder.withService(heartBeat)
                            .withPortRange(0, 1)
                            .withLogging(false)
-                           .withCompletionQueues(8)
+                           .withAsyncServerThreads(8)
                            .build();
-        mHeartBeatHandler =
-                asyncHeartBeat(heartBeat, mService->newCompletionQueue(8));
-        mHeartBeatHandler->start();
+
+        auto heartBeatHandler = mService->asyncHandler();
+        registerAsyncHeartBeat(heartBeatHandler, heartBeat);
     }
 };
 }  // namespace control

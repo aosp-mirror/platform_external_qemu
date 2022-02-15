@@ -489,11 +489,9 @@ void tcg_region_init(void)
     /* set guard pages */
     for (i = 0; i < region.n; i++) {
         void *start, *end;
-        int rc;
 
         tcg_region_bounds(i, &start, &end);
-        rc = qemu_mprotect_none(end, page_size);
-        g_assert(!rc);
+        (void)qemu_mprotect_none(end, page_size);
     }
 
     /* In user-mode we support only one ctx, so do the initial allocation now */
