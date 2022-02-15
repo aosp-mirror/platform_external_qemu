@@ -160,7 +160,8 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
                                     uint32_t colorBuffer) -> int {
             mMultiDisplay[displayId].cb = colorBuffer;
             return 0;
-        }
+        },
+        .isMultiDisplayWindow = []() { return false; },
 };
 extern "C" const QAndroidMultiDisplayAgent* const
         gMockQAndroidMultiDisplayAgent = &sMultiDisplayAgent;

@@ -95,38 +95,60 @@ void PostWorker::postImpl(HandleType cbHandle) {
     float dy = py * fy;
 
     if (emugl::get_emugl_multi_display_operations().isMultiDisplayEnabled()) {
-        uint32_t combinedW, combinedH;
-        emugl::get_emugl_multi_display_operations().getCombinedDisplaySize(&combinedW, &combinedH);
-        mFb->getTextureDraw()->prepareForDrawLayer();
-        int32_t start_id = -1, x, y;
-        uint32_t id, w, h, c;
-        while(emugl::get_emugl_multi_display_operations().getNextMultiDisplay(start_id, &id,
-                                                                              &x, &y, &w, &h,
-                                                                              nullptr, nullptr,
-                                                                              &c)) {
-            if ((id != 0) && (w == 0 || h == 0 || c == 0)) {
+        if (emugl::get_emugl_multi_display_operations().isMultiDisplayWindow()) {
+            uint32_t start_id = 0, id, c;
+            bool paintMultiDisplayWindow = false;
+            while(emugl::get_emugl_multi_display_operations().getNextMultiDisplay(start_id, &id,
+                                                                                  nullptr, nullptr,
+                                                                                  nullptr, nullptr,
+                                                                                  nullptr, nullptr,
+                                                                                  &c)) {
                 start_id = id;
-                continue;
+                if (c == 0) {
+                    continue;
+                }
+                emugl::get_emugl_window_operations().paintMultiDisplayWindow(id, c);
+                paintMultiDisplayWindow = true;
             }
-            ColorBuffer* multiDisplayCb = id == 0 ? cb : mFb->findColorBuffer(c).get();
-            if (multiDisplayCb == nullptr) {
-                start_id = id;
-                continue;
+            if (m_mainThreadPostingOnly && paintMultiDisplayWindow) {
+                mBindSubwin();
             }
-            ComposeLayer l;
-            hwc_rect_t displayArea = { .left = (int)x,
-                                       .top = (int)y,
-                                       .right = (int)(x + w),
-                                       .bottom = (int)(y + h) };
-            hwc_frect_t cropArea = { .left = 0.0,
-                                     .top = (float)multiDisplayCb->getHeight(),
-                                     .right = (float)multiDisplayCb->getWidth(),
-                                     .bottom = 0.0 };
-            fillMultiDisplayPostStruct(&l, displayArea, cropArea, rotation);
-            multiDisplayCb->postLayer(&l, combinedW, combinedH);
-            start_id = id;
+            cb->postWithOverlay(cb->getTexture(), zRot, dx, dy);
         }
-        mFb->getTextureDraw()->cleanupForDrawLayer();
+        else {
+            uint32_t combinedW, combinedH;
+            emugl::get_emugl_multi_display_operations().getCombinedDisplaySize(&combinedW, &combinedH);
+            mFb->getTextureDraw()->prepareForDrawLayer();
+            int32_t start_id = -1, x, y;
+            uint32_t id, w, h, c;
+            while(emugl::get_emugl_multi_display_operations().getNextMultiDisplay(start_id, &id,
+                                                                                  &x, &y, &w, &h,
+                                                                                  nullptr, nullptr,
+                                                                                  &c)) {
+                if ((id != 0) && (w == 0 || h == 0 || c == 0)) {
+                    start_id = id;
+                    continue;
+                }
+                ColorBuffer* multiDisplayCb = id == 0 ? cb : mFb->findColorBuffer(c).get();
+                if (multiDisplayCb == nullptr) {
+                    start_id = id;
+                    continue;
+                }
+                ComposeLayer l;
+                hwc_rect_t displayArea = { .left = (int)x,
+                                           .top = (int)y,
+                                           .right = (int)(x + w),
+                                           .bottom = (int)(y + h) };
+                hwc_frect_t cropArea = { .left = 0.0,
+                                         .top = (float)multiDisplayCb->getHeight(),
+                                         .right = (float)multiDisplayCb->getWidth(),
+                                         .bottom = 0.0 };
+                fillMultiDisplayPostStruct(&l, displayArea, cropArea, rotation);
+                multiDisplayCb->postLayer(&l, combinedW, combinedH);
+                start_id = id;
+            }
+            mFb->getTextureDraw()->cleanupForDrawLayer();
+        }
     }
     else if (emugl::get_emugl_window_operations().isFolded()) {
         mFb->getTextureDraw()->prepareForDrawLayer();

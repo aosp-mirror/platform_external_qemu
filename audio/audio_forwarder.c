@@ -120,10 +120,15 @@ void disable_forwarder()
     g_prev_hw->info = g_prev_info;
 
     // Disable us if we were active.
-    if (g_active_sw)
+
+    SWVoiceIn* active = get_hda_voice_in();
+    if (active && active != g_prev_sw)
     {
-        AUD_set_active_in(g_active_sw, 0);
-        AUD_close_in(g_active_sw->card, g_active_sw);
+        if (active != g_active_sw) {
+            AUD_log(AUDIO_CAP, "Warning! Unexpected active device!");
+        }
+        AUD_set_active_in(active, 0);
+        AUD_close_in(active->card, active);
         g_active_sw = NULL;
         g_active_opaque = NULL;
     }

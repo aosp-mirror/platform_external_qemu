@@ -77,6 +77,16 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .restoreSkin = [](void) {},
         .updateUIMultiDisplayPage =
                 [](uint32_t id) { printf("updateMultiDisplayPage\n"); },
+        .addMultiDisplayWindow =
+                [](uint32_t id, bool add, uint32_t w, uint32_t h) {
+                    printf("addMultiDisplayWindow\n");
+                    return true;
+                },
+        .paintMultiDisplayWindow =
+                [](uint32_t id, uint32_t texture) {
+                    printf("paintMultiDisplayWindow\n");
+                    return true;
+                },
         .getMonitorRect =
                 [](uint32_t* w, uint32_t* h) {
                     if (w)

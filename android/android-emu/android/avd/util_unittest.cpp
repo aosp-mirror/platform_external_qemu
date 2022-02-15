@@ -56,7 +56,7 @@ TEST(AvdUtil, path_getAvdSystemPath) {
     // A relative path should be resolved from ANRDOID_AVD_HOME
     writeToFile(avdConfig, "image.sysdir.1=sysimg");
 
-    ScopedCPtr<char> path(path_getAvdSystemPath("q", sdkRoot.c_str()));
+    ScopedCPtr<char> path(path_getAvdSystemPath("q", sdkRoot.c_str(), false));
 
     auto sysimgPath = pj(sdkRoot, "sysimg");
     EXPECT_STREQ(sysimgPath.c_str(), path.get());
@@ -68,7 +68,7 @@ TEST(AvdUtil, path_getAvdSystemPath) {
                     tmp->pathString(),
                     "nothome"));
 
-    path.reset(path_getAvdSystemPath("q", sdkRoot.c_str()));
+    path.reset(path_getAvdSystemPath("q", sdkRoot.c_str(), false));
 
     auto notHomePath = pj(tmp->pathString(), "nothome");
     EXPECT_STREQ(notHomePath.c_str(), path.get());
@@ -76,7 +76,7 @@ TEST(AvdUtil, path_getAvdSystemPath) {
     std::string noBufferOverflow(MAX_PATH * 2, 'Z');
     writeToFile(avdConfig, "image.sysdir.1=" + noBufferOverflow);
 
-    path.reset(path_getAvdSystemPath("q", sdkRoot.c_str()));
+    path.reset(path_getAvdSystemPath("q", sdkRoot.c_str(), false));
 
     EXPECT_EQ(nullptr, path.get());
 }

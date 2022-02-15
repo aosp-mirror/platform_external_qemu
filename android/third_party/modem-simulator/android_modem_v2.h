@@ -37,6 +37,8 @@ extern void amodem_set_data_network_type_vx(AModem modem,
 
 extern void amodem_set_signal_strength_profile_vx(AModem modem, int quality);
 
+extern void amodem_update_time(AModem modem);
+
 extern void amodem_set_data_registration_vx(AModem modem,
                                             ARegistrationState state);
 extern void amodem_set_voice_registration_vx(AModem modem,

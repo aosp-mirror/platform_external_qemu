@@ -166,11 +166,19 @@ static const QAndroidMultiDisplayAgent sMultiDisplayAgent = {
         },
         .setDisplayColorBuffer = [](uint32_t displayId,
                                     uint32_t colorBuffer) -> int {
-                        auto instance = MultiDisplay::getInstance();
+            auto instance = MultiDisplay::getInstance();
             if (instance) {
                 return instance->setDisplayColorBuffer(displayId, colorBuffer);
             } else {
                 return -1;
+            }
+        },
+        .isMultiDisplayWindow = []() -> bool {
+            auto instance = MultiDisplay::getInstance();
+            if (instance) {
+                return instance->isMultiDisplayWindow();
+            } else {
+                return false;
             }
         },
 };

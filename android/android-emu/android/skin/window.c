@@ -31,6 +31,7 @@
 #include "android/skin/winsys.h"                // for skin_winsys_set_windo...
 #include "android/utils/debug.h"                // for derror, dprint, VERBO...
 #include "android/utils/duff.h"                 // for DUFF4
+#include "android/utils/intmap.h"               // for AIntMap
 #include "android/utils/system.h"               // for AFREE, AARRAY_NEW0
 
 /* default id of free slot in multitouch_fingers_ids vector*/
@@ -39,6 +40,8 @@
 /* when shrinking, we reduce the pixel ratio by this fixed amount */
 #define  SHRINK_SCALE  0.6
 
+/* maxinum number of additional displays that can be added*/
+#define MAX_DISPLAY_NUM 10
 /* maximum value of LCD brighness */
 #define  LCD_BRIGHTNESS_MIN      0
 #define  LCD_BRIGHTNESS_DEFAULT  128
@@ -111,6 +114,7 @@ typedef struct ADisplay {
     int            brightness;
     void*          gpu_frame;   /* GL_RGBA, datasize.w * datasize.h * 4 bytes */
     SkinSurface*   surface;     /* displayed surface after rotation + onion */
+    uint32_t id;
 } ADisplay;
 
 static void adisplay_done(ADisplay* disp) {
@@ -118,7 +122,6 @@ static void adisplay_done(ADisplay* disp) {
         free(disp->gpu_frame);
         disp->gpu_frame = NULL;
     }
-
     skin_surface_unrefp(&disp->surface);
     disp->data = NULL;
     skin_image_unref(&disp->onion);
@@ -161,6 +164,7 @@ static int adisplay_init(ADisplay* disp,
                     disp->rect.size.w, disp->rect.size.h,
                     disp->datasize.w, disp->datasize.h);
 #endif
+    disp->id = 0;
     disp->data = NULL;
     disp->bits_per_pixel = 0;
     if (sdisp->framebuffer_funcs) {
@@ -825,6 +829,8 @@ finger_state_reset( FingerState*  finger )
     finger->tracking  = 0;
     finger->inside    = 0;
     finger->at_corner = 0;
+    finger->pos.x = 0;
+    finger->pos.y = 0;
 }
 
 typedef struct {
@@ -915,6 +921,8 @@ typedef struct Layout {
     Button*      buttons;
     Background*  backgrounds;
     ADisplay*    displays;
+    //Used for additional displays that can be added/removed on demand
+    AIntMap* multi_displays;
     SkinRect     rect;
     SkinLayout*  slayout;
 } Layout;
@@ -941,7 +949,6 @@ typedef struct Layout {
         }                         \
     } while (0);
 
-
 static void
 layout_done( Layout*  layout )
 {
@@ -956,6 +963,17 @@ layout_done( Layout*  layout )
     for (nn = 0; nn < layout->num_displays; nn++)
         adisplay_done( &layout->displays[nn] );
 
+    if (layout->multi_displays) {
+        AIntMapIterator  iter[1];
+        aintMapIterator_init(iter, layout->multi_displays);
+        while (aintMapIterator_next(iter)) {
+            adisplay_done(iter->value);
+        }
+        aintMapIterator_done(iter);
+        aintMap_free(layout->multi_displays);
+        layout->multi_displays = NULL;
+    }
+
     AFREE( layout->buttons );
     layout->buttons = NULL;
 
@@ -964,7 +982,6 @@ layout_done( Layout*  layout )
 
     AFREE( layout->displays );
     layout->displays = NULL;
-
     layout->num_buttons     = 0;
     layout->num_backgrounds = 0;
     layout->num_displays    = 0;
@@ -1006,6 +1023,7 @@ layout_init( Layout*  layout, SkinLayout*  slayout )
     AARRAY_NEW0(layout->backgrounds, n_backgrounds);
     AARRAY_NEW0(layout->displays,    n_displays);
 
+    layout->multi_displays = aintMap_new();
     if (layout->buttons == NULL && n_buttons > 0) goto Fail;
     if (layout->backgrounds == NULL && n_backgrounds > 0) goto Fail;
     if (layout->displays == NULL && n_displays > 0) goto Fail;
@@ -1057,6 +1075,9 @@ struct SkinWindow {
     FingerState   pen;
     FingerState   multitouch_fingers[MTS_POINTERS_NUM];
     int           multitouch_fingers_ids[MTS_POINTERS_NUM ];
+    //Map from display ID to FingerState.
+    //Used for additional displays that can be added/removed on demand
+    AIntMap*      multi_display_fingers;
     MouseState    mouse;
     ButtonState   button;
     BallState     ball;
@@ -1126,8 +1147,6 @@ static int addMultitouchFinger(int idOfTouchPoint, SkinWindow* const data) {
     return -1;
 }
 
-
-
 static void add_mouse_event(SkinWindow* window, int32_t rel_x, int32_t rel_y) {
     uint32_t id = 0;
     // TODO(liyl): handle multi-display and display rotation.
@@ -1147,10 +1166,10 @@ static  void
 generate_touch_event(FingerState* finger,
                                  int* x,
                                  int* y,
-                                 int* device_id) {
+                                 int* device_id,
+                                 uint32_t display_id) {
     unsigned posX = *x;
     unsigned posY = *y;
-    uint32_t id = 0;
     if (finger->display) {
         if (android_foldable_is_folded()) {
             int fx, fy, fw, fh;
@@ -1176,12 +1195,14 @@ generate_touch_event(FingerState* finger,
         } else {
             const QAndroidMultiDisplayAgent* const multiDisplayAgent =
                     emulator_window_get()->uiEmuAgent->multiDisplay;
-            multiDisplayAgent->translateCoordination(&posX, &posY, &id);
+            if (!multiDisplayAgent->isMultiDisplayWindow()) {
+                multiDisplayAgent->translateCoordination(&posX, &posY, &display_id);
+            }
         }
     }
     *x = posX;
     *y = posY;
-    *device_id = id;
+    *device_id = display_id;
 }
 
 static void
@@ -1189,11 +1210,11 @@ add_finger_event(SkinWindow* window,
                  FingerState* finger,
                  unsigned x,
                  unsigned y,
-                 unsigned state)
+                 unsigned state,
+                 uint32_t displayId)
 {
     unsigned posX = x;
     unsigned posY = y;
-    uint32_t id = 0;
 
     if (finger->display) {
         if (android_foldable_is_folded()) {
@@ -1220,10 +1241,12 @@ add_finger_event(SkinWindow* window,
         } else {
             const QAndroidMultiDisplayAgent* const multiDisplayAgent =
                 emulator_window_get()->uiEmuAgent->multiDisplay;
-            multiDisplayAgent->translateCoordination(&posX, &posY, &id);
+            if (!multiDisplayAgent->isMultiDisplayWindow()) {
+                multiDisplayAgent->translateCoordination(&posX, &posY, &displayId);
+            }
         }
     }
-    window->win_funcs->mouse_event(posX, posY, state, id);
+    window->win_funcs->mouse_event(posX, posY, state, displayId);
 }
 
 static void
@@ -1274,8 +1297,10 @@ static void
 skin_window_find_finger( SkinWindow*  window,
                          FingerState* finger,
                          int          x,
-                         int          y )
+                         int          y,
+                         int displayId)
 {
+    ADisplay* multi_display = NULL;
     /* find the display that contains this movement */
     finger->display = NULL;
     finger->inside = 0;
@@ -1284,70 +1309,82 @@ skin_window_find_finger( SkinWindow*  window,
     if (!window->enable_touch)
         return;
 
-    bool roundDevice = skin_surface_is_round(window->surface);
-
-    LAYOUT_LOOP_DISPLAYS(&window->layout,disp)
-        if (roundDevice) {
-            // The device's center is at (x + w/2, y + w/2),
-            // (assuming w==h). To be on the screen, the touch
-            // must be within w/2 of the center. Or d^2 < w^2/4.
-            int xDist = disp->rect.pos.x + disp->rect.size.w/2 - x;
-            int yDist = disp->rect.pos.y + disp->rect.size.w/2 - y;
-            int distSquared = xDist*xDist + yDist*yDist;
-            // On circular devices with a chin, the bottom of the screen is cut off,
-            // so check to make sure that the touch is about the chin.
-            if (y >= disp->rect.pos.y + disp->rect.size.h) {
-                finger->inside = false;
-            } else {
-                finger->inside = distSquared <= (disp->rect.size.w * disp->rect.size.w)/4;
-            }
-        } else {
-            // Rectangular device
-            finger->inside = skin_rect_contains( &disp->rect, x, y );
-        }
+    // First check multi display is available.
+    multi_display = aintMap_get(window->layout.multi_displays, displayId);
+    if (multi_display) {
+        finger->inside = skin_rect_contains( &multi_display->rect, x, y );
         if (finger->inside) {
-            finger->display = disp;
-            finger->pos.x   = x - disp->origin.x;
-            finger->pos.y   = y - disp->origin.y;
-
-            skin_pos_rotate( &finger->pos, &finger->pos, disp->rotation );
+            finger->display = multi_display;
+            finger->pos.x   = x - multi_display->origin.x;
+            finger->pos.y   = y - multi_display->origin.y;
+            skin_pos_rotate( &finger->pos, &finger->pos, multi_display->rotation );
             skin_winsys_set_window_cursor_normal();
-            break;
         }
+        return;
+    }
 
-        int roundAdjustment = 0;
-        if (roundDevice) {
-            // Round image
-            // For rectangular images, the touch targets for resizing
-            // include anything outsize the display's bounding rectangle.
-            // This doesn't work for round devices because the frame
-            // itself is inside that rectangle. Adjusting by 0.2 gives
-            // an intuitive "corner" target.
-            roundAdjustment = 0.2 * disp->rect.size.w;
-        }
-        int leftEdge   = disp->rect.pos.x                     + roundAdjustment;
-        int rightEdge  = disp->rect.pos.x + disp->rect.size.w - roundAdjustment;
-        int topEdge    = disp->rect.pos.y                     + roundAdjustment;
-        int bottomEdge = disp->rect.pos.y + disp->rect.size.h - roundAdjustment;
-        if (   (x < leftEdge || x >= rightEdge)
-            && (y < topEdge  || y >= bottomEdge)
-            && !skin_winsys_window_has_frame()                                     )
-        {
-            finger->at_corner = 1;
-            // Which corner are we at?
-            if (x < leftEdge) {
-                finger->which_corner = (y < topEdge) ? CORNER_TOP_LEFT : CORNER_BOTTOM_LEFT;
-            } else {
-                finger->which_corner = (y < topEdge) ? CORNER_TOP_RIGHT : CORNER_BOTTOM_RIGHT;
-            }
-            skin_winsys_set_window_cursor_resize(finger->which_corner == CORNER_BOTTOM_LEFT ||
-                                                 finger->which_corner == CORNER_TOP_RIGHT     );
-            break;
+    bool roundDevice = skin_surface_is_round(window->surface);
+LAYOUT_LOOP_DISPLAYS(&window->layout,disp)
+    if (roundDevice) {
+        // The device's center is at (x + w/2, y + w/2),
+        // (assuming w==h). To be on the screen, the touch
+        // must be within w/2 of the center. Or d^2 < w^2/4.
+        int xDist = disp->rect.pos.x + disp->rect.size.w/2 - x;
+        int yDist = disp->rect.pos.y + disp->rect.size.w/2 - y;
+        int distSquared = xDist*xDist + yDist*yDist;
+        // On circular devices with a chin, the bottom of the screen is cut off,
+        // so check to make sure that the touch is about the chin.
+        if (y >= disp->rect.pos.y + disp->rect.size.h) {
+            finger->inside = false;
         } else {
-            skin_winsys_set_window_cursor_normal();
-            break;
+            finger->inside = distSquared <= (disp->rect.size.w * disp->rect.size.w)/4;
         }
-    LAYOUT_LOOP_END_DISPLAYS
+    } else {
+        // Rectangular device
+        finger->inside = skin_rect_contains( &disp->rect, x, y );
+    }
+    if (finger->inside) {
+        finger->display = disp;
+        finger->pos.x   = x - disp->origin.x;
+        finger->pos.y   = y - disp->origin.y;
+        skin_pos_rotate( &finger->pos, &finger->pos, disp->rotation );
+        skin_winsys_set_window_cursor_normal();
+        break;
+    }
+
+    int roundAdjustment = 0;
+    if (roundDevice) {
+        // Round image
+        // For rectangular images, the touch targets for resizing
+        // include anything outsize the display's bounding rectangle.
+        // This doesn't work for round devices because the frame
+        // itself is inside that rectangle. Adjusting by 0.2 gives
+        // an intuitive "corner" target.
+        roundAdjustment = 0.2 * disp->rect.size.w;
+    }
+    int leftEdge   = disp->rect.pos.x                     + roundAdjustment;
+    int rightEdge  = disp->rect.pos.x + disp->rect.size.w - roundAdjustment;
+    int topEdge    = disp->rect.pos.y                     + roundAdjustment;
+    int bottomEdge = disp->rect.pos.y + disp->rect.size.h - roundAdjustment;
+    if (   (x < leftEdge || x >= rightEdge)
+        && (y < topEdge  || y >= bottomEdge)
+        && !skin_winsys_window_has_frame()                                     )
+    {
+        finger->at_corner = 1;
+        // Which corner are we at?
+        if (x < leftEdge) {
+            finger->which_corner = (y < topEdge) ? CORNER_TOP_LEFT : CORNER_BOTTOM_LEFT;
+        } else {
+            finger->which_corner = (y < topEdge) ? CORNER_TOP_RIGHT : CORNER_BOTTOM_RIGHT;
+        }
+        skin_winsys_set_window_cursor_resize(finger->which_corner == CORNER_BOTTOM_LEFT ||
+                                             finger->which_corner == CORNER_TOP_RIGHT     );
+        break;
+    } else {
+        skin_winsys_set_window_cursor_normal();
+        break;
+    }
+LAYOUT_LOOP_END_DISPLAYS
 }
 
 static void
@@ -1574,7 +1611,6 @@ static void
 skin_window_show_opengles(SkinWindow* window, bool deleteExisting)
 {
     ADisplay* disp = window->layout.displays;
-
     gles_show_data* data = NULL;
     ANEW0(data);
     skin_window_setup_opengles_subwindow(window, data);
@@ -1935,12 +1971,14 @@ static int
 skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
 {
     Layout         layout;
+
     ADisplay*      disp;
 
     if ( layout_init( &layout, slayout ) < 0 )
         return -1;
 
     layout_done( &window->layout );
+
     window->layout = layout;
 
     // Reset viewport parameters
@@ -1960,6 +1998,7 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
     window->subwindow.size.h = 0;
 
     disp = window->layout.displays;
+
     if (disp != NULL) {
         if (slayout->onion_image) {
             // Onion was specified in layout file.
@@ -2000,6 +2039,10 @@ skin_window_reset_internal ( SkinWindow*  window, SkinLayout*  slayout )
          window->multitouch_fingers_ids[i] = FINGER_SLOT_FREE;
          window->multitouch_fingers[i] = empty_touch_point_state;
     }
+    if (window->multi_display_fingers) {
+        aintMap_free(window->multi_display_fingers);
+    }
+    window->multi_display_fingers = aintMap_new();
     return 0;
 }
 
@@ -2096,6 +2139,7 @@ void
 skin_window_set_display_region_and_update(SkinWindow* window, int xOffset,
                                           int yOffset, int width, int height)
 {
+
     int displayIdx;
     for (displayIdx = 0; displayIdx < window->layout.num_displays; displayIdx++) {
         ADisplay* disp = &(window->layout.displays[displayIdx]);
@@ -2216,6 +2260,7 @@ skin_window_process_touch_event(SkinWindow*  window, SkinEvent* ev){
     int      mx, my;
     int button_state = 0;
     int deviceId = 0;
+    int displayId = ev->u.multi_touch_point.display_id;
     FingerState* touchFinger = NULL;
     if (ev->type == kEventTouchBegin || ev->type == kEventTouchEnd ||
         ev->type == kEventTouchUpdate) {
@@ -2248,11 +2293,11 @@ skin_window_process_touch_event(SkinWindow*  window, SkinEvent* ev){
             my = ev->u.multi_touch_point.y;
             skin_window_map_to_scale(window, &mx, &my);
             skin_window_move_mouse(window, touchFinger, mx, my);
-            skin_window_find_finger(window, touchFinger, mx, my);
+            skin_window_find_finger(window, touchFinger, mx, my, displayId);
             if (touchFinger->inside) {
                 touchFinger->tracking = 1;
                 generate_touch_event(touchFinger, &touchFinger->pos.x,
-                                     &touchFinger->pos.y, &deviceId);
+                                     &touchFinger->pos.y, &deviceId, displayId);
                 ev->u.multi_touch_point.x = touchFinger->pos.x;
                 ev->u.multi_touch_point.y = touchFinger->pos.y;
                 window->win_funcs->touch_events(ev, deviceId);
@@ -2353,7 +2398,7 @@ skin_window_process_touch_event(SkinWindow*  window, SkinEvent* ev){
                 touchFinger->tracking = 0;
                 skin_window_move_mouse(window, touchFinger, mx, my);
                 generate_touch_event(touchFinger, &touchFinger->pos.x,
-                                     &touchFinger->pos.y, &deviceId);
+                                     &touchFinger->pos.y, &deviceId, displayId);
                 ev->u.multi_touch_point.x = touchFinger->pos.x;
                 ev->u.multi_touch_point.y = touchFinger->pos.y;
                 removeMultitouchFinger(ev->u.multi_touch_point.id,window);
@@ -2368,7 +2413,7 @@ skin_window_process_touch_event(SkinWindow*  window, SkinEvent* ev){
             skin_window_map_to_scale(window, &mx, &my);
             skin_window_move_mouse(window, touchFinger, mx, my);
             if (window->drag_x_start == 0 && window->drag_y_start == 0) {
-                skin_window_find_finger(window, touchFinger, mx, my);
+                skin_window_find_finger(window, touchFinger, mx, my, displayId);
             } else {
                 if (touchFinger->at_corner) {
                     skin_winsys_paint_overlay_for_resize(mx, my);
@@ -2390,7 +2435,7 @@ skin_window_process_touch_event(SkinWindow*  window, SkinEvent* ev){
                 skin_window_move_mouse(window, touchFinger, mx, my);
                 if (touchFinger->tracking) {
                     generate_touch_event(touchFinger, &touchFinger->pos.x,
-                                         &touchFinger->pos.y, &deviceId);
+                                         &touchFinger->pos.y, &deviceId, displayId);
                     ev->u.multi_touch_point.x = touchFinger->pos.x;
                     ev->u.multi_touch_point.y = touchFinger->pos.y;
                     window->win_funcs->touch_events(ev, deviceId);
@@ -2410,18 +2455,26 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
 {
     Button*  button;
     int      mx, my;
-
+    uint32_t displayId = ev->u.mouse.display_id;
     // This button state set will still be interpreted correctly for
     // single-touch, which only uses the first bit.
     int button_state = multitouch_create_buttons_state(
             ev->type != kEventMouseButtonUp, ev->u.mouse.skip_sync,
             ev->u.mouse.button == kMouseButtonSecondaryTouch);
 
-    FingerState* finger;
-    if (ev->u.mouse.button == kMouseButtonSecondaryTouch) {
-        finger = &window->secondary_finger;
+    FingerState* finger = NULL;
+    if (displayId == 0) {
+        if (ev->u.mouse.button == kMouseButtonSecondaryTouch) {
+            finger = &window->secondary_finger;
+        } else {
+            finger = &window->finger;
+        }
     } else {
-        finger = &window->finger;
+        finger = aintMap_get(window->multi_display_fingers, displayId);
+        if (!finger) {
+            derror("ERROR: display with id %u is not found.\n", displayId);
+            return;
+        }
     }
 
     MouseState* mouse = &window->mouse;
@@ -2440,7 +2493,7 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         my = ev->u.mouse.y;
         skin_window_map_to_scale( window, &mx, &my );
         skin_window_move_mouse( window, finger, mx, my );
-        skin_window_find_finger( window, finger, mx, my );
+        skin_window_find_finger( window, finger, mx, my, displayId);
 #if 0
         printf("down: x=%d y=%d fx=%d fy=%d fis=%d\n",
                ev->u.mouse.x, ev->u.mouse.y, window->finger.pos.x,
@@ -2464,7 +2517,8 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
                              finger,
                              finger->pos.x,
                              finger->pos.y,
-                             button_state);
+                             button_state,
+                             displayId);
         } else if (!multitouch_should_skip_sync(button_state) &&
                    !multitouch_is_second_finger(button_state)) {
             // This is a single click outside the touch screen
@@ -2491,7 +2545,6 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         break;
 
     case kEventMouseButtonUp:
-
         if (window->drag_x_start != 0  &&  window->drag_y_start != 0) {
             if (!finger->at_corner) {
                 // Finished moving the window. If updates got backed up,
@@ -2589,12 +2642,11 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
                              finger,
                              finger->pos.x,
                              finger->pos.y,
-                             button_state);
+                             button_state, displayId);
         }
         break;
 
     case kEventMouseMotion:
-
         mx = ev->u.mouse.x;
         my = ev->u.mouse.y;
         skin_window_map_to_scale( window, &mx, &my );
@@ -2602,7 +2654,7 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
 
         if (window->drag_x_start == 0  &&  window->drag_y_start == 0) {
             // Button is not pressed. Check the position and set the cursor.
-            skin_window_find_finger( window, finger, mx, my);
+            skin_window_find_finger( window, finger, mx, my, displayId);
         } else {
             if (finger->at_corner) {
                 // Resize: just update the overlay until the mouse button is released
@@ -2640,7 +2692,8 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
                                  finger,
                                  finger->pos.x,
                                  finger->pos.y,
-                                 button_state);
+                                 button_state,
+                                 displayId);
             }
         }
         break;
@@ -2693,7 +2746,7 @@ skin_window_process_pen_event(SkinWindow* window, SkinEvent* ev)
 {
     Button* button;
     int     mx, my;
-
+    uint32_t displayId = 0;
     int button_state = multitouch_create_buttons_state(
                 ev->type != kEventPenRelease, ev->u.pen.skip_sync, false);
     FingerState* pen = &window->pen;
@@ -2712,7 +2765,7 @@ skin_window_process_pen_event(SkinWindow* window, SkinEvent* ev)
         my = ev->u.pen.y;
         skin_window_map_to_scale( window, &mx, &my );
         skin_window_move_mouse( window, pen, mx, my );
-        skin_window_find_finger( window, pen, mx, my );
+        skin_window_find_finger( window, pen, mx, my, displayId);
 
         if (pen->inside) {
             // The click is inside the touch screen
@@ -2836,7 +2889,7 @@ skin_window_process_pen_event(SkinWindow* window, SkinEvent* ev)
 
         if (window->drag_x_start == 0  &&  window->drag_y_start == 0) {
             // Button is not pressed. Check the position and set the cursor.
-            skin_window_find_finger( window, pen, mx, my);
+            skin_window_find_finger( window, pen, mx, my, displayId);
         } else {
             if (pen->at_corner) {
                 // Resize: just update the overlay until the mouse button is released
@@ -2943,4 +2996,43 @@ void skin_window_update_rotation(SkinWindow* window, SkinRotation rotation) {
         return;
 
     skin_winsys_update_rotation(rotation);
+}
+
+int skin_window_add_display(SkinWindow* window, uint32_t id, uint32_t w, uint32_t h) {
+    FingerState* fs = NULL;
+    ANEW0(fs);
+    finger_state_reset(fs);
+    aintMap_set(window->multi_display_fingers, id, fs);
+    ADisplay* disp = NULL;
+    ANEW0(disp);
+    disp->id = id;
+    disp->rect.size.w = w;
+    disp->rect.size.h = h;
+    disp->rect.pos.x = 0;
+    disp->rect.pos.y = 0;
+    disp->rotation = SKIN_ROTATION_0;
+    disp->origin = disp->rect.pos;
+    disp->onion  = NULL;
+    disp->brightness = LCD_BRIGHTNESS_DEFAULT;
+    disp->gpu_frame = NULL;
+    disp->surface = skin_surface_create(disp->rect.size.w,
+                                        disp->rect.size.h,
+                                        disp->rect.size.w,
+                                        disp->rect.size.h);
+    aintMap_set(window->layout.multi_displays, id, disp);
+    return 0;
+}
+
+int skin_window_remove_display(SkinWindow* window, uint32_t id) {
+    ADisplay* disp = NULL;
+    FingerState* fs = NULL;
+    disp = aintMap_del(window->layout.multi_displays, id);
+    if (disp) {
+        AFREE(disp);
+    }
+    fs = aintMap_del(window->multi_display_fingers, id);
+    if (fs) {
+        AFREE(fs);
+    }
+    return 0;
 }

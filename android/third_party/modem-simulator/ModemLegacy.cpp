@@ -43,6 +43,10 @@ void ModemLegacy::set_signal_strength_profile(AModem modem, int quality) {
     amodem_set_signal_strength_profile(modem, quality);
 }
 
+void ModemLegacy::update_time(AModem modem) {
+    amodem_addTimeUpdate(modem);
+}
+
 void ModemLegacy::set_data_registration(AModem modem,
                                         ARegistrationState state) {
     amodem_set_data_registration(modem, state);

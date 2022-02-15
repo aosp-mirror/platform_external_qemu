@@ -64,9 +64,7 @@ protected:
 
     void SetUp() {
         mTestSystem.host()->setEnvironmentVariable("GRPC_VERBOSITY", "DEBUG");
-        // mTestSystem.host()->setEnvironmentVariable("GRPC_VERBOSITY",
-        // "DEBUG");
-        mEchoService = new AsyncTestEchoService();
+        mEchoService = new AsyncAnotherTestEchoService();
         mHelloWorld.set_msg(HELLO);
     }
 
@@ -117,11 +115,11 @@ protected:
                 std::make_unique<JwtTokenAuthenticator>(mTempDir->path()));
     }
 
-    AsyncTestEchoService* mEchoService;
+    AsyncAnotherTestEchoService* mEchoService;
     TestSystem mTestSystem;
     Msg mHelloWorld;
     EmulatorControllerService::Builder mBuilder;
-    std::unique_ptr<AsyncGrpcHandler<Msg, Msg>> mAsyncHandler;
+    std::unique_ptr<AsyncGrpcHandler> mAsyncHandler;
     std::unique_ptr<EmulatorControllerService> mEmuController;
     std::string mToken{"super_secret_token"};
 
@@ -355,8 +353,7 @@ TEST_F(GrpcServiceTest, InsecureWithGoodJwtAccepts) {
 
     mBuilder.withService(mEchoService)
             .withPortRange(0, 1)
-            .withJwtAuthDiscoveryDir(mTempDir->path(),
-                                     keyfile);
+            .withJwtAuthDiscoveryDir(mTempDir->path(), keyfile);
 
     EXPECT_TRUE(construct());
 
@@ -445,12 +442,11 @@ TEST_F(GrpcServiceTest, AsyncBidiServerWorks) {
     VERBOSE_ENABLE(grpc);
     mBuilder.withService(mEchoService)
             .withPortRange(0, 1)
-            .withCompletionQueues(1);
+            .withAsyncServerThreads(1);
 
     EXPECT_TRUE(construct());
-    mAsyncHandler = asyncStreamEcho(mEchoService,
-                                    mEmuController->newCompletionQueue(1));
-    mAsyncHandler->start();
+    auto handler = mEmuController->asyncHandler();
+    registerAsyncStreamEcho(handler, mEchoService);
 
     // Let's send and receive just one thing..
     auto creds = ::grpc::experimental::LocalCredentials(LOCAL_TCP);
@@ -475,6 +471,60 @@ TEST_F(GrpcServiceTest, AsyncBidiServerWorks) {
     // Give our server a chance to close down.
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
     EXPECT_EQ(1, mEchoService->invocations());
+    mEmuController->stop();
+}
+
+TEST_F(GrpcServiceTest, AsyncBidiServerHostsManyWorks) {
+    VERBOSE_ENABLE(grpc);
+    mBuilder.withService(mEchoService)
+            .withPortRange(0, 1)
+            .withAsyncServerThreads(1);
+
+    EXPECT_TRUE(construct());
+    auto handler = mEmuController->asyncHandler();
+
+    // Let's see if we can handle two..
+    registerAsyncStreamEcho(handler, mEchoService);
+    registerAsyncAnotherTestEchoService(handler, mEchoService);
+
+    // Let's send and receive just one thing..
+    auto creds = ::grpc::experimental::LocalCredentials(LOCAL_TCP);
+    auto channel = grpc::CreateChannel(address(), creds);
+    auto client = TestEcho::NewStub(channel);
+    grpc::ClientContext ctx;
+    Msg response;
+    auto thingie = client->streamEcho(&ctx);
+    Msg hello;
+    hello.set_counter(1);
+    hello.set_data("Hello World!");
+    thingie->Write(hello);
+    thingie->Read(&response);
+    thingie->WritesDone();
+
+    // Our server should have replied.
+    EXPECT_EQ(1, response.counter());
+
+    // Now let's just cancel the whole thing.
+    ctx.TryCancel();
+
+    grpc::ClientContext ctx2;
+    auto thingie2 = client->anotherStreamEcho(&ctx2);
+    Msg hello2;
+    hello.set_counter(1);
+    hello.set_data("Hello Earth!");
+    thingie2->Write(hello);
+    thingie2->Read(&response);
+    thingie2->WritesDone();
+
+    // Our server should have replied, and flipped our counter.
+    EXPECT_EQ(-1, response.counter());
+
+    ctx2.TryCancel();
+
+    // Give our server a chance to close down.
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    EXPECT_EQ(2, mEchoService->invocations());
+    mEmuController->stop();
 }
 
 }  // namespace control

@@ -1978,7 +1978,9 @@ extern "C" int main(int argc, char** argv) {
             handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
     if (accel_ok) {
 #ifdef __APPLE__
-        args.add("-enable-hvf");
+        if (avd && avdInfo_getApiLevel(avd) >= 28
+            && !strcmp(avdInfo_getTargetAbi(avd), "arm64-v8a"))
+            args.add("-enable-hvf");
 #else
         args.add("-enable-kvm");
 #endif

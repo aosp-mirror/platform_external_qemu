@@ -56,6 +56,8 @@ typedef enum {
     kEventTouchUpdate,
     kEventSetDisplayConfigs,
     kEventSetDisplayActiveConfig,
+    kEventAddDisplay,
+    kEventRemoveDisplay,
 } SkinEventType;
 
 // The numeric values represent the bit positions in the button state
@@ -93,6 +95,7 @@ typedef struct {
     int y_global;
     int button;
     bool skip_sync;
+    uint32_t display_id;
 } SkinEventMouseData;
 
 typedef struct {
@@ -119,6 +122,7 @@ typedef struct {
     int touch_major;
     int touch_minor;
     bool skip_sync;
+    uint32_t display_id;
 } SkinEventTouchData;
 
 typedef struct {
@@ -174,6 +178,16 @@ typedef struct {
 } SkinEventSetDisplayConfigs;
 
 typedef struct {
+    uint32_t id;
+    uint32_t width;
+    uint32_t height;
+} SkinEventAddDisplay;
+
+typedef struct {
+    uint32_t id;
+} SkinEventRemoveDisplay;
+
+typedef struct {
     SkinEventType type;
     union {
         SkinEventKeyData key;
@@ -191,6 +205,8 @@ typedef struct {
         SkinEventTouchData multi_touch_point;
         SkinEventSetDisplayConfigs display_configs;
         int display_active_config;
+        SkinEventAddDisplay add_display;
+        SkinEventRemoveDisplay remove_display;
     } u;
 } SkinEvent;
 

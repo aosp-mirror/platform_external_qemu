@@ -12,29 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
+#include <google/protobuf/message.h>
 #include <grpcpp/alarm.h>
 #include <grpcpp/grpcpp.h>  // for ServerCompletionQueue, ServerContext
 #include <grpcpp/support/async_stream.h>
-#include <stdint.h>       // for intptr_t, uint64_t
-#include <atomic>         // for atomic_uint64_t, __atomic_base
-#include <cassert>        // for assert
-#include <functional>     // for function, bind
-#include <memory>         // for shared_ptr, make_shared
-#include <mutex>          // for mutex, lock_guard
-#include <queue>          // for queue
-#include <thread>         // for thread
-#include <unordered_map>  // for unordered_map, unordered_map<>::map...
-
-#include "android/utils/debug.h"  // for VERBOSE_INFO, VERBOSE_PRINT
-
-#define DEBUG 0
-
-#if DEBUG >= 1
-// This is *very* noisy.
-#define DD(...) VERBOSE_PRINT(grpc, __VA_ARGS__)
-#else
-#define DD(...) (void)0
-#endif
+#include <functional>  // for function, bind
+#include <mutex>       // for mutex, lock_guard
+#include <queue>       // for queue
+#include <thread>      // for thread
 
 namespace android {
 namespace emulation {
@@ -47,89 +32,33 @@ using grpc::ServerCompletionQueue;
 using grpc::ServerContext;
 using grpc::Status;
 
-template <class R, class W>
 class AsyncGrpcHandler;
 
 // A Bidirectional Asynchronous gRPC connection.
 //
-// This can be used to make the writing of "partial" async services easier.
+// This can be used to make the writing of "partial" async services easier, this
+// is the base class that handles all the refcounting, queue management and
+// state transitions.
 //
-// An example of this can be found in the TestEchoService.cpp class.
-//
-// The basic idea is that you:
-//
-// Provide the following set of callbacks:
-//
-// A callback for receiving reads
-// A callback that is used to accept incoming connections, this
-// usually does nothing more than calling:
-//   myService->RequestXXXX(context, stream, cq, cq, tag);
-// where XXXX is the method of interest.
-// A callback for close notifications.
-//
-template <class R, class W>
-class BidiGrpcConnection {
-    friend AsyncGrpcHandler<R, W>;
+class BaseAsyncGrpcConnection {
+    friend AsyncGrpcHandler;
 
 public:
-    // Callback that will be invoked when an object has arrived at the
-    // connection.
-    using ReadCallback =
-            std::function<void(BidiGrpcConnection<R, W>*, const R& received)>;
+    virtual ~BaseAsyncGrpcConnection();
+    std::string peer();
 
-    // Callback that will be called when this connection has closed. No more
-    // events will be delivered, and writes will no longer be possible.
-    // Upon return of this callback the object will be deleted.
-    using CloseCallback = std::function<void(BidiGrpcConnection<R, W>*)>;
+protected:
+    enum class WriteState { BEGIN, COMPLETE };
 
-    // Callback that will be called to get the AsyncRequest.
-    // usually this calls the generated Requestxxxx method on the generated
-    // server class.
-    //
-    // TODO(jansene): There must be a magic template way to use std::bind in the
-    // constructor.
-    using RequestMethodFn = std::function<void(ServerContext*,
-                                               ServerAsyncReaderWriter<R, W>*,
-                                               CompletionQueue*,
-                                               ServerCompletionQueue*,
-                                               void*)>;
+    BaseAsyncGrpcConnection(ServerCompletionQueue* cq);
+    virtual void initialize() = 0;
+    virtual void notifyRead() = 0;
+    virtual void notifyConnect() = 0;
+    virtual void notifyClose() = 0;
+    virtual void scheduleRead() = 0;
+    virtual void scheduleWrite(WriteState state) = 0;
+    virtual BaseAsyncGrpcConnection* clone() = 0;
 
-    BidiGrpcConnection(ServerCompletionQueue* cq, RequestMethodFn requestFn)
-        : mCq(cq), mStream(&mContext), mRequestMethodFn(requestFn) {}
-
-    ~BidiGrpcConnection() {
-        DD("Completed interaction with (%p) %s", this, mContext.peer().c_str());
-    }
-
-    // Places this object in the write queue, and schedules it for writing.
-    void write(const W& toWrite) {
-        const std::lock_guard<std::mutex> lock(mWriteQueueAccess);
-        mWriteQueue.push(toWrite);
-        if (mWriteQueue.size() == 1) {
-            mWriteAlarm.Set(mCq, gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME),
-                            new CompletionQueueTask(this, QueueState::WRITE));
-        }
-    }
-
-    // Number of elements that are scheduled to be written.
-    size_t writeQueueSize() {
-        const std::lock_guard<std::mutex> lock(mWriteQueueAccess);
-        return mWriteQueue.size();
-    }
-
-    // Closes this connection, this will write the given status code to the
-    // receiving endpoint.
-    void close(Status status) {
-        mStream.Finish(status,
-                       new CompletionQueueTask(this, QueueState::FINISHED));
-    }
-
-    void setReadCallback(ReadCallback onRead) { mOnReadCallback = onRead; }
-    void setCloseCallback(CloseCallback onClose) { mOnCloseCallback = onClose; }
-
-    std::string peer() { return mContext.peer(); }
-
-private:
     // The state in which this connection can be.
     // The connection has an independent read state and write state.
     enum class QueueState {
@@ -142,277 +71,275 @@ private:
         FINISHED
     };
 
-    static const char* queueStateStr(QueueState state) {
-        static const char* queueStateStr[] = {
-                "CREATED",        "INCOMING_CONNECTION", "READ",    "WRITE",
-                "WRITE_COMPLETE", "CANCELLED",           "FINISHED"};
-        return queueStateStr[(int)state];
-    }
-
-    // These are tasks that are placed on the ServerCompletionQueue
-    // the task encapsulates the connection, and which state we should
-    // execute.
-    //
-    // We have the following set of invariants on the ordering in the
-    // CompletionQueue of a given connection:
-    //
-    // incoming_connection < write
-    // incoming_connection < read
-    // write < write_complete
-    // created < incoming_connection
-    // created < cancelled
-    //
-    // Note in theory  writes can preempt reads and placed in the front of the
-    // queue. We do our best to make sure this never happens.
     class CompletionQueueTask {
-        using Connection = BidiGrpcConnection<R, W>;
-
     public:
-        CompletionQueueTask(Connection* con, QueueState state)
-            : mConnection(con), mState(state) {
-            mConnection->mRefcount++;
-            DD("Registered %p (%p,%d:%s)", this, mConnection,
-               mConnection->mRefcount, queueStateStr(mState));
-        }
-
-        ~CompletionQueueTask() {
-            int count = mConnection->mRefcount--;
-            DD("Completed %p (%p,%d:%s)", this, mConnection, count,
-               queueStateStr(mState));
-            if (count == 0) {
-                // We can now safely  delete the connection.
-                delete mConnection;
-            }
-        }
-
-        void execute() { mConnection->execute(mState); }
-
-        QueueState getState() { return mState; }
-        const char* getStateStr() { return queueStateStr(mState); }
-        Connection* connection() { return mConnection; }
+        CompletionQueueTask(BaseAsyncGrpcConnection* con, QueueState state);
+        ~CompletionQueueTask();
+        void execute();
+        QueueState getState();
+        const char* getStateStr();
+        BaseAsyncGrpcConnection* connection();
+        static const char* queueStateStr(QueueState state);
 
     private:
-        Connection* mConnection;
+        BaseAsyncGrpcConnection* mConnection;
         QueueState mState;
     };
 
-    void start() {}
+    void execute(QueueState state);
 
-    // This function drives the actual state machine, and makes the appropriate
-    // callbacks to a listener.
-    //
-    // We have the following states:
-    //
-    // created -> first_read -> read -------------->  closed
-    //     |                       ^   |        ^
-    //     |                       |---|        |
-    //     |----> write --> write_complete -----|
-    //               ^                     |
-    //               |---------------------|
-    //
-    //
-    void execute(QueueState state) {
-        switch (state) {
-            case QueueState::CREATED: {
-                // We now need to actually register the proper stream endpoint.
-                // The callback is used to setup the actual call.
-                //
-                // TODO(jansene): figure out how to use std::bind, so users
-                // don't have to implement this.
-                mRequestMethodFn(
-                        &mContext, &mStream, mCq, mCq,
-                        new CompletionQueueTask(
-                                this, QueueState::INCOMING_CONNECTION));
-                mContext.AsyncNotifyWhenDone(
-                        new CompletionQueueTask(this, QueueState::CANCELLED));
-                mOpen = true;
-                break;
-            }
-            case QueueState::INCOMING_CONNECTION:
-                if (mOpen) {
-                    // Create another handler for a connection that can become
-                    // active. This is the first time we are actually getting
-                    // data from a connection, which means it actually becomes
-                    // "alive".
-                    //
-                    // Ownership is transferred to the queue.
-                    auto nxt =
-                            new BidiGrpcConnection<R, W>(mCq, mRequestMethodFn);
-                    mConnectAlarm.Set(
-                            mCq, gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME),
-                            new CompletionQueueTask(nxt, QueueState::CREATED));
-
-                    mStream.Read(&mIncoming, new CompletionQueueTask(
-                                                     this, QueueState::READ));
-                }
-                break;
-            case QueueState::READ: {
-                // The actual message has arrived, notify the listener of the
-                // incoming message and get ready to listen for the next
-                // message.
-                if (mOpen) {
-                    if (mOnReadCallback) {
-                        mOnReadCallback(this, mIncoming);
-                    }
-
-                    mStream.Read(&mIncoming, new CompletionQueueTask(
-                                                     this, QueueState::READ));
-                }
-                break;
-            }
-            case QueueState::WRITE: {
-                // Note: Writes are scheduled at the head, so this is going to
-                // be the first task that will be picked up.
-                const std::lock_guard<std::mutex> lock(mWriteQueueAccess);
-                if (mOpen && !mWriteQueue.empty()) {
-                    // Write out the actual object.
-                    assert(mCanWrite);
-                    mCanWrite = false;
-                    mStream.Write(std::move(mWriteQueue.front()),
-                                  new CompletionQueueTask(
-                                          this, QueueState::WRITE_COMPLETE));
-                    // Element will be popped once the write has completed..
-                }
-                break;
-            }
-
-            case QueueState::WRITE_COMPLETE: {
-                // If we have more things to write we will schedule another
-                // write at the end of our processing queue. This will make sure
-                // writes do not starve reads.
-                const std::lock_guard<std::mutex> lock(mWriteQueueAccess);
-                mCanWrite = true;
-                mWriteQueue.pop();
-                if (mOpen && !mWriteQueue.empty()) {
-                    mWriteAlarm.Set(
-                            mCq, gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME),
-                            new CompletionQueueTask(this, QueueState::WRITE));
-                }
-                break;
-            }
-
-            case QueueState::CANCELLED: [[fallthrough]];
-            case QueueState::FINISHED: {
-                // Notify listeners of closing. TODO(jansene): Do we care about
-                // finsihed/cancelled in bidi?
-                mOpen = false;
-                if (mOnCloseCallback) {
-                    mOnCloseCallback(this);
-                }
-                break;
-            }
-        }
-    }
-
-private:
     ServerContext mContext;
     ServerCompletionQueue* mCq;
 
-    RequestMethodFn mRequestMethodFn;
-
-    // Generic..
-    ServerAsyncReaderWriter<R, W> mStream;
-
-    // The incoming object, this will be filled out in an async fashion.
-    R mIncoming;
-
-    // Set of objects to be written out.
-    std::queue<W> mWriteQueue;
-    CloseCallback mOnCloseCallback;
-    ReadCallback mOnReadCallback;
-
-    std::mutex mWriteQueueAccess;
     bool mWriteRequested{false};
-    Alarm mWriteAlarm;
     Alarm mConnectAlarm;
-
+    Alarm mWriteAlarm;
     bool mOpen{false};
+
+private:
     bool mCanWrite{true};
     int mRefcount{-1};  // Number of times we are in the queue.
 };
 
-// A handler for async grpc connections.
-//
-// See android/android-grpc/android/emulation/control/test/TestEchoService.cpp
-// for an example of how to implement an async streamEcho method
-//
-// Note, you want to keep this handler alive for as long you have your service
-// up, otherwise you will not be processing events for the endpoint.
-//
-// Keep in mind that you will likely have to play with the number of threads.
-// Incoming connections for example can only be processed by the INCOMING_STATE,
-// of which there is usually only one per queue.
-//
-//
-// TODO(jansene): Apply magic to generalize to unary, and non bidi connections.
-template <class R, class W>
-class AsyncGrpcHandler {
-    using Connection = BidiGrpcConnection<R, W>;
-    using QueueState = typename Connection::QueueState;
-    using QueueTask = typename Connection::CompletionQueueTask;
-    using OnConnectCallback = std::function<void(Connection*)>;
-    using RequestFn = typename Connection::RequestMethodFn;
+// Some template magic to extract type signatures.
+template <typename S>
+struct grpc_bidi_signature;
+
+// This extracts the read and write type out of the "requestXXXX" method on
+// gRPC async methods.
+template <class S, class R, class W>
+struct grpc_bidi_signature<void (S::*)(::grpc::ServerContext*,
+                                       ::grpc::ServerAsyncReaderWriter<R, W>*,
+                                       ::grpc::CompletionQueue*,
+                                       ::grpc::ServerCompletionQueue*,
+                                       void*)> {
+    using read_type = R;
+    using write_type = W;
+};
+
+// The BidiAsyncGrpcConnection object is what you will interact with.
+template <class Service, class RequestStreamFunction>
+class BidiAsyncGrpcConnection : public BaseAsyncGrpcConnection {
+    friend AsyncGrpcHandler;
 
 public:
-    AsyncGrpcHandler(std::vector<ServerCompletionQueue*> queues,
-                     RequestFn callback,
-                     OnConnectCallback connectCb)
-        : mCompletionQueues(queues),
-          mOnConnect(connectCb),
-          mRequestFn(callback) {}
+    using R = typename grpc_bidi_signature<RequestStreamFunction>::read_type;
+    using W = typename grpc_bidi_signature<RequestStreamFunction>::write_type;
+    using OnConnect = std::function<void(
+            BidiAsyncGrpcConnection<Service, RequestStreamFunction>*)>;
 
-    ~AsyncGrpcHandler() {
-        for (auto& t : mRunners) {
-            t.join();
+    // Callback that will be called when this connection has closed. No more
+    // events will be delivered, and writes will no longer be possible.
+    // Upon return of this callback the object will be deleted.
+    using CloseCallback = std::function<void(
+            BidiAsyncGrpcConnection<Service, RequestStreamFunction>*)>;
+
+    // Callback that will be invoked when an object has arrived at the
+    // connection.
+    using ReadCallback = std::function<void(
+            BidiAsyncGrpcConnection<Service, RequestStreamFunction>*,
+            const R& received)>;
+
+    void write(const W& toWrite) {
+        const std::lock_guard<std::mutex> lock(mWriteQueueAccess);
+        mWriteQueue.push(toWrite);
+        if (mWriteQueue.size() == 1) {
+            mWriteAlarm.Set(mCq, gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME),
+                            new CompletionQueueTask(this, QueueState::WRITE));
         }
     }
 
-    void start() {
-        for (auto queue : mCompletionQueues) {
-            mRunners.emplace_back(
-                    std::thread([&, queue]() { runQueue(queue); }));
+    // Closes this connection, this will write the given status code to the
+    // receiving endpoint.
+    void close(Status status) {
+        mStream.Finish(status,
+                       new CompletionQueueTask(this, QueueState::FINISHED));
+    }
+
+    void setReadCallback(ReadCallback onRead) { mOnReadCallback = onRead; }
+    void setCloseCallback(CloseCallback onClose) { mOnCloseCallback = onClose; }
+
+protected:
+    BidiAsyncGrpcConnection(
+            ServerCompletionQueue* cq,
+            Service* s,               // The actual Async Service you are using
+            RequestStreamFunction f,  // Function pointer to the
+                                      // Requestxxxx function.
+            OnConnect connect)
+        : BaseAsyncGrpcConnection(cq),
+          mService(s),
+          mInitRequest(f),
+          mStream(&mContext),
+          mOnConnectCallback(connect) {}
+
+    BaseAsyncGrpcConnection* clone() override {
+        return new BidiAsyncGrpcConnection(mCq, mService, mInitRequest,
+                                           mOnConnectCallback);
+    }
+
+    void initialize() override {
+        using namespace std::placeholders;
+        // Bind the function to the active service function and invoke it.
+        // The end result is that we can schedule a listener.
+        auto initFunc = std::bind(mInitRequest, mService, _1, _2, _3, _4, _5);
+        initFunc(
+                &mContext, &mStream, mCq, mCq,
+                new CompletionQueueTask(this, QueueState::INCOMING_CONNECTION));
+    }
+
+    void notifyRead() override {
+        if (mOnReadCallback) {
+            mOnReadCallback(this, mIncomingReadObject);
+        }
+    }
+
+    void notifyConnect() override {
+        if (mOnConnectCallback) {
+            mOnConnectCallback(this);
+        }
+    }
+
+    void notifyClose() override {
+        if (mOnCloseCallback) {
+            mOnCloseCallback(this);
+        }
+    }
+
+    void scheduleRead() override {
+        mStream.Read(&mIncomingReadObject,
+                     new CompletionQueueTask(this, QueueState::READ));
+    }
+
+    void scheduleWrite(WriteState state) override {
+        const std::lock_guard<std::mutex> lock(mWriteQueueAccess);
+
+        if (!mOpen || mWriteQueue.empty()) {
+            // Nothing to do!
+            return;
+        }
+
+        // Write out the actual object.
+        switch (state) {
+            case WriteState::BEGIN:
+                mStream.Write(mWriteQueue.front(),
+                              new CompletionQueueTask(
+                                      this, QueueState::WRITE_COMPLETE));
+
+                break;
+            case WriteState::COMPLETE:
+                mWriteQueue.pop();
+                mWriteAlarm.Set(
+                        mCq, gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME),
+                        new CompletionQueueTask(this, QueueState::WRITE));
+                break;
         }
     }
 
 private:
-    void runQueue(ServerCompletionQueue* queue) {
-        // Ownership will be transferred to a queuetask..
-        auto initialHandler = new Connection(queue, mRequestFn);
-        initialHandler->execute(QueueState::CREATED);
+    std::mutex mWriteQueueAccess;
+    RequestStreamFunction mInitRequest;
+    OnConnect mOnConnectCallback;
+    R mIncomingReadObject;
+    std::queue<W> mWriteQueue;
+    Service* mService;
+    ReadCallback mOnReadCallback;
+    CloseCallback mOnCloseCallback;
+    ServerAsyncReaderWriter<R, W> mStream;
+};
 
-        void* tag;  // uniquely identifies a request.
-        bool ok;
-        while (queue->Next(&tag, &ok)) {
-            QueueTask* task = static_cast<QueueTask*>(tag);
-            // 2 cases, it's ok to handle this request.
-            // or we are done with it..
-            if (ok) {
-                DD("Ok for %p (%p:%s)", task, task->connection(),
-                   task->getStateStr());
-                // We now have an actual incoming connection, and we will start
-                // scheduling incoming reads. We will notify listeners of the
-                // new connection that we have.
-                if (task->getState() == QueueState::INCOMING_CONNECTION) {
-                    mOnConnect(task->connection());
-                }
-                task->execute();
-            } else {
-                // TODO(jansene): We could also immediately notify the connection
-                // of a connection issues. Note: this happens very frequently, for example
-                // when a client prematurely disconnects, it is too common to consider logging
-                // it as an error.
-                VERBOSE_PRINT(grpc, "Not ok (disconnected?) for %p (%p:%s)", task, task->connection(),
-                   task->getStateStr());
+// template <class Service, class RequestStreamFunction>
+// class CallbackBuilder;
+
+// A handler for async grpc connections.
+//
+// Note, you want to keep this handler alive for as long you have your
+// service up, otherwise you will not be processing events for the endpoint.
+//
+//
+// A Handler will spin up one thread for each completion queue that it is
+// supporting.
+// Keep in mind that you will likely have to play with the number of
+// queues. Incoming connections for example can only be processed by the
+// INCOMING_STATE, of which there is usually only one per queue.
+//
+// IMPORTANT: This object needs to be alive destroyed AFTER the service has
+// shutdown
+//
+//
+// You usually want to do something like this:
+//
+// AsyncGrpcHandler handler{vector_of_queues};
+// handler.registerConnectionHandler(
+//   myAsyncService,
+//   &MyClassDefintion::Requestxxxxx
+//  ).withCallback([](auto connection) {
+//    std::cout << "Received a connection from: " << connection->peer() <<
+//    std::endl; connection->setReadCallback([](auto from, auto received) {
+//       std::cout << "Received: " << received.DebugString();
+//       from->write(received);
+//     });
+//     connection->setCloseCallback([testService](auto connection) {
+//           std::cout << "Closed: " << connection->peer();
+//     });
+//  })
+//
+// // Process events on vector_of_queues.size() threads.
+//  handler.start()
+//
+// TODO(jansene): Apply magic to generalize to unary connections.
+class AsyncGrpcHandler {
+public:
+    // The number of completion queues you wish to use. Each queue is handled
+    // by a single thread.
+    AsyncGrpcHandler(
+            std::vector<std::unique_ptr<ServerCompletionQueue>> queues);
+    ~AsyncGrpcHandler();
+
+    // Inner builder class to facilitate deriving of the callback method.
+    template <class Service, class RequestStreamFunction>
+    class CallbackBuilder {
+    public:
+        CallbackBuilder(AsyncGrpcHandler* handler,
+                        Service* s,
+                        RequestStreamFunction f)
+            : mHandler(handler), mService(s), mFunction(f){};
+        using callback = std::function<void(
+                BidiAsyncGrpcConnection<Service, RequestStreamFunction>*)>;
+
+        void withCallback(callback cb) {
+            // Register and schedule the callbacks.
+            for (const auto& queue : mHandler->mCompletionQueues) {
+                auto initialHandler =
+                        new BidiAsyncGrpcConnection<Service,
+                                                    RequestStreamFunction>(
+                                queue.get(), mService, mFunction, cb);
+                initialHandler->execute(
+                        BaseAsyncGrpcConnection::QueueState::CREATED);
             }
-            delete task;
         }
 
-        DD("Completed async queue.");
+    private:
+        Service* mService;
+        RequestStreamFunction mFunction;
+        AsyncGrpcHandler* mHandler;
+    };
+
+    // Registers a connection handler, we use the builder pattern
+    // otherwise typing is becoming pretty outrageous fast.
+    //
+    // The builder pattern allows us to use C++ template deduction rules.
+    // This is mainly to facilate lambda functions that get auto deduced.
+    template <class Service, class RequestStreamFunction>
+    auto registerConnectionHandler(Service* s, RequestStreamFunction f)
+            -> CallbackBuilder<Service, RequestStreamFunction> {
+        return CallbackBuilder<Service, RequestStreamFunction>(this, s, f);
     }
 
-    const std::vector<ServerCompletionQueue*> mCompletionQueues;
-    OnConnectCallback mOnConnect;
-    RequestFn mRequestFn;
+private:
+    void start();
+    void runQueue(ServerCompletionQueue* queue);
+
+    const std::vector<std::unique_ptr<ServerCompletionQueue>> mCompletionQueues;
     std::vector<std::thread> mRunners;
 };
 
