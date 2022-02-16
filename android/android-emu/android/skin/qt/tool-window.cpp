@@ -349,18 +349,19 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
           mToolsUi->controlsLayout->removeWidget(mToolsUi->back_button);
           mToolsUi->controlsLayout->insertWidget(0, mToolsUi->back_button);
 
-          mToolsUi->wear_button_1->setHidden(false);
-          mToolsUi->palm_button->setHidden(false);
-          mToolsUi->tilt_button->setHidden(false);
-
-          if(avdInfo_getApiLevel(android_avdInfo) >= 30) {
-            mToolsUi->wear_button_2->setHidden(false);
+          if(avdInfo_getApiLevel(android_avdInfo) == 28) {
+            mToolsUi->wear_button_2->setHidden(true);
           }
         }
+    } else {
+        mToolsUi->wear_button_1->setHidden(true);
+        mToolsUi->wear_button_2->setHidden(true);
+        mToolsUi->palm_button->setHidden(true);
+        mToolsUi->tilt_button->setHidden(true);
     }
 
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
-        // Android Auto doesn't supoort rotate, home, back, recent
+        // Android Auto doesn't support rotate, home, back, recent
         mToolsUi->prev_layout_button->setHidden(true);
         mToolsUi->next_layout_button->setHidden(true);
         mToolsUi->back_button->setHidden(true);
