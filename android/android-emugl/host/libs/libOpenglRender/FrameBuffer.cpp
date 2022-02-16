@@ -3190,6 +3190,7 @@ bool FrameBuffer::onLoad(Stream* stream,
 
     }
 
+    repost(false);
     return true;
     // TODO: restore memory management
 }
