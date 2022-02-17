@@ -521,7 +521,7 @@ void GLESv2Context::drawWithEmulations(
     bool needPointEmulation = mode == GL_POINTS && !isGles2Gles();
 
 #ifdef __APPLE__
-    if (primitiveRestartEnabled() && type) {
+    if (!isGles2Gles() && primitiveRestartEnabled() && type) {
         updatePrimitiveRestartIndex(type);
     }
 #endif
