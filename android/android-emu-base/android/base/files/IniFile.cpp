@@ -238,8 +238,13 @@ bool IniFile::writeCommon(bool discardEmpty) {
         return false;
     }
 
-    std::ofstream outFile(mBackingFilePath,
-                          std::ios_base::out | std::ios_base::trunc);
+#ifdef _MSC_VER
+    Win32UnicodeString wBackingFilePath(mBackingFilePath);
+    std::ofstream outFile(wBackingFilePath.c_str(), ios_base::out | ios_base::trunc);
+#else
+
+    std::ofstream outFile(mBackingFilePath, std::ios_base::out | std::ios_base::trunc);
+#endif
     if (!outFile) {
         LOG(WARNING) << "Failed to open .ini file " << mBackingFilePath
                      << " for writing.";
