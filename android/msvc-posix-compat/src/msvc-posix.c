@@ -10,9 +10,8 @@
 // GNU General Public License for more details.
 
 #include "msvc-posix.h"
+#include "android/utils/win32_unicode.h"
 
-// TODO(joshuaduong): Support unicode (b/117322783)
-//#include "android/base/system/Win32UnicodeString.h"
 
 #include <io.h>
 
@@ -20,7 +19,6 @@
 #include <stdlib.h>
 
 int mkstemp(char* t) {
-    // TODO(joshuaduong): Support unicode (b/117322783)
     int len = strlen(t) + 1;
     errno_t err = _mktemp_s(t, len);
 
@@ -28,8 +26,11 @@ int mkstemp(char* t) {
         return -1;
     }
 
-    return _sopen(t, _O_RDWR | _O_CREAT | _O_EXCL | _O_BINARY, _SH_DENYRW,
+    wchar_t* wt = win32_utf8_to_utf16_str(t);
+    int fd = _wsopen(wt, _O_RDWR | _O_CREAT | _O_EXCL | _O_BINARY, _SH_DENYRW,
                   _S_IREAD | _S_IWRITE);
+    free(wt);
+    return fd;
 }
 
 // From https://msdn.microsoft.com/en-us/library/28d5ce15.aspx
