@@ -27,15 +27,19 @@ service TestEcho {
   rpc anotherStreamEcho(stream Msg) returns (stream Msg) {}
   rpc echo(Msg) returns (Msg) {}
   rpc data(google.protobuf.Empty) returns (Msg) {}
-  rpc streamData(google.protobuf.Empty) returns (stream Msg) {}
+
+  // The caller will load a msg, the responder should send counter replies.
+  rpc serverStreamData(Msg) returns (stream Msg) {}
+  rpc clientStreamData(stream Msg) returns(Msg) {}
 }
+
 
 // A simple message that can be send back and forth.
 message Msg {
   // A message that you wish to send.
   string msg = 1;
 
-  // A counter that the server will increment.
+  // A counter that the server will increment, or use pending the method.
   uint64 counter = 2;
 
   bytes data = 3;

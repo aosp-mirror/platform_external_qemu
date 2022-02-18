@@ -21,7 +21,7 @@
 #include <utility>          // for move
 #include <vector>           // for vector
 
-#include "android/emulation/control/async/AsyncGrcpStream.h"  // for ServerC...
+#include "android/emulation/control/async/AsyncGrpcStream.h"  // for ServerC...
 #include "grpcpp/impl/codegen/completion_queue.h"             // for ServerC...
 #include "grpcpp/impl/codegen/server_context.h"               // for ServerC...
 #include "grpcpp/impl/codegen/status.h"                       // for Status
@@ -80,10 +80,15 @@ using AsyncAnotherTestEchoService =
 using AsyncHeartbeatService =
         TestEcho::WithAsyncMethod_streamEcho<HeartbeatService>;
 
+using AsyncServerStreamingEchoService =  TestEcho::WithAsyncMethod_serverStreamData<AsyncAnotherTestEchoService>;
+
+
 void registerAsyncStreamEcho(AsyncGrpcHandler* handler,
                              AsyncTestEchoService* testService);
 void registerAsyncAnotherTestEchoService(AsyncGrpcHandler* handler,
                              AsyncAnotherTestEchoService* testService);
+void registerAsyncServerStreamingEchoService(AsyncGrpcHandler* handler,
+                             AsyncServerStreamingEchoService* testService);
 void registerAsyncHeartBeat(AsyncGrpcHandler* handler,
                             AsyncHeartbeatService* testService);
 }  // namespace control
