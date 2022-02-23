@@ -534,6 +534,9 @@ TEST_F(GrpcServiceTest, AsyncBidiServerHostsManyWorks) {
 }
 
 TEST_F(GrpcServiceTest, AsyncServerStreamingWorks) {
+#ifdef WIN32
+    GTEST_SKIP();
+#endif
     VERBOSE_ENABLE(grpc);
     mBuilder.withService(mEchoService)
             .withPortRange(0, 1)
