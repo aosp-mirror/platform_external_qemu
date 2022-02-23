@@ -22,5 +22,7 @@ if(NOT TARGET msvc-posix-compat)
   )
   target_include_directories(
     msvc-posix-compat PUBLIC include/
-                             ${ANDROID_QEMU2_TOP_DIR}/android/android-emu)
+                             ${ANDROID_QEMU2_TOP_DIR}/include
+                             ${ANDROID_QEMU2_TOP_DIR}/android/android-base
+                             ${ANDROID_QEMU2_TOP_DIR}/android/android-emu-base)
 endif()

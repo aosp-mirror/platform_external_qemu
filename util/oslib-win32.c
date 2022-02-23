@@ -1322,8 +1322,11 @@ int qemu_mkstemp(char* t) {
         return -1;
     }
 
-    return _sopen(t, _O_RDWR | _O_CREAT | _O_EXCL | _O_BINARY, _SH_DENYRW,
+    wchar_t* wt = g_utf8_to_utf16(t, -1, NULL, NULL, NULL);
+    int fd = _wsopen(wt, _O_RDWR | _O_CREAT | _O_EXCL | _O_BINARY, _SH_DENYRW,
                   _S_IREAD | _S_IWRITE);
+    g_free(wt);
+    return fd;
 }
 
 #endif  // _MSC_VER
