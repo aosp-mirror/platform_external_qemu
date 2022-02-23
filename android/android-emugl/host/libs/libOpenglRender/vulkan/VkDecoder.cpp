@@ -27313,6 +27313,54 @@ size_t VkDecoder::Impl::decode(void* buf, size_t len, IOStream* ioStream, uint32
                 android::base::endTrace();
                 break;
             }
+            case OP_vkGetLinearImageLayout2GOOGLE:
+            {
+                android::base::beginTrace("vkGetLinearImageLayout2GOOGLE decode");
+                VkDevice device;
+                const VkImageCreateInfo* pCreateInfo;
+                VkDeviceSize* pOffset;
+                VkDeviceSize* pRowPitchAlignment;
+                // Begin global wrapped dispatchable handle unboxing for device;
+                uint64_t cgen_var_0;
+                memcpy((uint64_t*)&cgen_var_0, *readStreamPtrPtr, 1 * 8);
+                *readStreamPtrPtr += 1 * 8;
+                *(VkDevice*)&device = (VkDevice)(VkDevice)((VkDevice)(*&cgen_var_0));
+                vkReadStream->alloc((void**)&pCreateInfo, sizeof(const VkImageCreateInfo));
+                reservedunmarshal_VkImageCreateInfo(vkReadStream, VK_STRUCTURE_TYPE_MAX_ENUM, (VkImageCreateInfo*)(pCreateInfo), readStreamPtrPtr);
+                // Begin manual dispatchable handle unboxing for pOffset;
+                vkReadStream->unsetHandleMapping();
+                vkReadStream->alloc((void**)&pOffset, sizeof(VkDeviceSize));
+                memcpy((VkDeviceSize*)pOffset, *readStreamPtrPtr, sizeof(VkDeviceSize));
+                *readStreamPtrPtr += sizeof(VkDeviceSize);
+                // Begin manual dispatchable handle unboxing for pRowPitchAlignment;
+                vkReadStream->unsetHandleMapping();
+                vkReadStream->alloc((void**)&pRowPitchAlignment, sizeof(VkDeviceSize));
+                memcpy((VkDeviceSize*)pRowPitchAlignment, *readStreamPtrPtr, sizeof(VkDeviceSize));
+                *readStreamPtrPtr += sizeof(VkDeviceSize);
+                if (pCreateInfo)
+                {
+                    transform_tohost_VkImageCreateInfo(m_state, (VkImageCreateInfo*)(pCreateInfo));
+                }
+                if (m_logCalls)
+                {
+                    fprintf(stderr, "stream %p: call vkGetLinearImageLayout2GOOGLE 0x%llx 0x%llx 0x%llx 0x%llx \n", ioStream, (unsigned long long)device, (unsigned long long)pCreateInfo, (unsigned long long)pOffset, (unsigned long long)pRowPitchAlignment);
+                }
+                m_state->on_vkGetLinearImageLayout2GOOGLE(&m_pool, device, pCreateInfo, pOffset, pRowPitchAlignment);
+                vkStream->unsetHandleMapping();
+                vkStream->write((VkDeviceSize*)pOffset, sizeof(VkDeviceSize));
+                vkStream->write((VkDeviceSize*)pRowPitchAlignment, sizeof(VkDeviceSize));
+                vkStream->commitWrite();
+                vkReadStream->setReadPos((uintptr_t)(*readStreamPtrPtr) - (uintptr_t)snapshotTraceBegin);
+                size_t snapshotTraceBytes = vkReadStream->endTrace();
+                if (m_state->snapshotsEnabled())
+                {
+                    m_state->snapshot()->vkGetLinearImageLayout2GOOGLE(snapshotTraceBegin, snapshotTraceBytes, &m_pool, device, pCreateInfo, pOffset, pRowPitchAlignment);
+                }
+                vkReadStream->clearPool();
+                if (queueSubmitWithCommandsEnabled) __atomic_fetch_add(seqnoPtr, 1, __ATOMIC_SEQ_CST);
+                android::base::endTrace();
+                break;
+            }
             case OP_vkQueueFlushCommandsGOOGLE:
             {
                 android::base::beginTrace("vkQueueFlushCommandsGOOGLE decode");

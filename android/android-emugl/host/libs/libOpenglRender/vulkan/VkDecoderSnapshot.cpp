@@ -6636,6 +6636,17 @@ void vkGetLinearImageLayoutGOOGLE(
 {
     // TODO: Implement
 }
+void vkGetLinearImageLayout2GOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::BumpPool* pool,
+    VkDevice device,
+    const VkImageCreateInfo* pCreateInfo,
+    VkDeviceSize* pOffset,
+    VkDeviceSize* pRowPitchAlignment)
+{
+    // TODO: Implement
+}
 void vkQueueFlushCommandsGOOGLE(
     const uint8_t* snapshotTraceBegin,
     size_t snapshotTraceBytes,
@@ -13598,6 +13609,19 @@ void VkDecoderSnapshot::vkGetLinearImageLayoutGOOGLE(
     VkDeviceSize* pRowPitchAlignment)
 {
     mImpl->vkGetLinearImageLayoutGOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, device, format, pOffset, pRowPitchAlignment);
+}
+#endif
+#ifdef VK_GOOGLE_gfxstream
+void VkDecoderSnapshot::vkGetLinearImageLayout2GOOGLE(
+    const uint8_t* snapshotTraceBegin,
+    size_t snapshotTraceBytes,
+    android::base::BumpPool* pool,
+    VkDevice device,
+    const VkImageCreateInfo* pCreateInfo,
+    VkDeviceSize* pOffset,
+    VkDeviceSize* pRowPitchAlignment)
+{
+    mImpl->vkGetLinearImageLayout2GOOGLE(snapshotTraceBegin, snapshotTraceBytes, pool, device, pCreateInfo, pOffset, pRowPitchAlignment);
 }
 #endif
 #ifdef VK_GOOGLE_gfxstream

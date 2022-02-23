@@ -42482,6 +42482,12 @@ const char* api_opcode_to_string(
             return "OP_vkGetPhysicalDeviceToolPropertiesEXT";
         }
 #endif
+#ifdef VK_GOOGLE_gfxstream
+        case OP_vkGetLinearImageLayout2GOOGLE:
+        {
+            return "OP_vkGetLinearImageLayout2GOOGLE";
+        }
+#endif
 #ifdef VK_EXT_acquire_drm_display
         case OP_vkGetDrmDisplayEXT:
         {
