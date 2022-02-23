@@ -736,6 +736,11 @@ public:
         VkFormat format,
         VkDeviceSize* pOffset,
         VkDeviceSize* pRowPitchAlignment);
+    void on_vkGetLinearImageLayout2GOOGLE(android::base::BumpPool* pool,
+                                          VkDevice device,
+                                          const VkImageCreateInfo* pCreateInfo,
+                                          VkDeviceSize* pOffset,
+                                          VkDeviceSize* pRowPitchAlignment);
 
     // VK_GOOGLE_gfxstream
     void on_vkQueueFlushCommandsGOOGLE(

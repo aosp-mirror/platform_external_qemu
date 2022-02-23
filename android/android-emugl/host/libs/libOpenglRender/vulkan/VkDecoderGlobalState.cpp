@@ -4538,27 +4538,66 @@ public:
         VkFormat format,
         VkDeviceSize* pOffset,
         VkDeviceSize* pRowPitchAlignment) {
+        if (mPerFormatLinearImageProperties.find(format) ==
+            mPerFormatLinearImageProperties.end()) {
+            VkDeviceSize offset = 0u;
+            VkDeviceSize rowPitchAlignment = UINT_MAX;
 
-        if (!mLinearImageProperties.hasValue()) {
+            for (uint32_t width = 64; width <= 256; width++) {
+                LinearImageCreateInfo linearImageCreateInfo = {
+                        .extent =
+                                {
+                                        .width = width,
+                                        .height = 64,
+                                        .depth = 1,
+                                },
+                        .format = format,
+                        .usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
+                                 VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+                };
+
+                VkDeviceSize currOffset = 0u;
+                VkDeviceSize currRowPitchAlignment = UINT_MAX;
+
+                VkImageCreateInfo defaultVkImageCreateInfo =
+                        linearImageCreateInfo.toDefaultVk();
+                on_vkGetLinearImageLayout2GOOGLE(
+                        pool, boxed_device, &defaultVkImageCreateInfo,
+                        &currOffset, &currRowPitchAlignment);
+
+                offset = currOffset;
+                rowPitchAlignment =
+                        std::min(currRowPitchAlignment, rowPitchAlignment);
+            }
+            mPerFormatLinearImageProperties[format] = LinearImageProperties{
+                    .offset = offset,
+                    .rowPitchAlignment = rowPitchAlignment,
+            };
+        }
+
+        if (pOffset) {
+            *pOffset = mPerFormatLinearImageProperties[format].offset;
+        }
+        if (pRowPitchAlignment) {
+            *pRowPitchAlignment =
+                    mPerFormatLinearImageProperties[format].rowPitchAlignment;
+        }
+    }
+
+    void on_vkGetLinearImageLayout2GOOGLE(android::base::BumpPool* pool,
+                                          VkDevice boxed_device,
+                                          const VkImageCreateInfo* pCreateInfo,
+                                          VkDeviceSize* pOffset,
+                                          VkDeviceSize* pRowPitchAlignment) {
+        LinearImageCreateInfo linearImageCreateInfo = {
+                .extent = pCreateInfo->extent,
+                .format = pCreateInfo->format,
+                .usage = pCreateInfo->usage,
+        };
+        if (mLinearImageProperties.find(linearImageCreateInfo) ==
+            mLinearImageProperties.end()) {
             auto device = unbox_VkDevice(boxed_device);
             auto vk = dispatch_VkDevice(boxed_device);
-
-            VkImageCreateInfo createInfo;
-            createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-            createInfo.pNext = nullptr;
-            createInfo.flags = {};
-            createInfo.imageType = VK_IMAGE_TYPE_2D;
-            createInfo.format = format;
-            createInfo.extent = {/*width*/ 1, /*height*/ 64, 1};
-            createInfo.mipLevels = 1;
-            createInfo.arrayLayers = 1;
-            createInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-            createInfo.tiling = VK_IMAGE_TILING_LINEAR;
-            createInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-            createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-            createInfo.queueFamilyIndexCount = 0;
-            createInfo.pQueueFamilyIndices = nullptr;
-            createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
             VkImageSubresource subresource = {
                 .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -4569,49 +4608,37 @@ public:
             VkImage image;
             VkSubresourceLayout subresourceLayout;
 
-            VkDeviceSize offset = 0u;
-            VkDeviceSize rowPitchAlignment = UINT_MAX;
-
-            constexpr VkDeviceSize kMinWidth = 64;
-            constexpr VkDeviceSize kMaxWidth = 2048;
-            for (VkDeviceSize width = kMinWidth; width <= kMaxWidth; ++width) {
-                createInfo.extent.width = width;
-                VkResult result =
-                        vk->vkCreateImage(device, &createInfo, nullptr, &image);
-                if (result != VK_SUCCESS) {
-                    LOG(ERROR) << "vkCreateImage failed. width: " << width
-                               << " result: " << result;
-                    continue;
-                }
-                vk->vkGetImageSubresourceLayout(device, image, &subresource, &subresourceLayout);
-                vk->vkDestroyImage(device, image, nullptr);
-
-                if (width > kMinWidth && subresourceLayout.offset != offset) {
-                    LOG(WARNING) << "Image size " << width << " x 1 has a different "
-                                 << "offset (offset = " << subresourceLayout.offset
-                                 << ", offset of other images = " << offset
-                                 << "), returned pOffset might be invalid.";
-                }
-                offset = subresourceLayout.offset;
-
-                uint64_t rowPitch = subresourceLayout.rowPitch;
-                uint64_t currentAlignment = rowPitch & (~rowPitch + 1);
-                if (currentAlignment < rowPitchAlignment) {
-                    rowPitchAlignment = currentAlignment;
-                }
+            VkImageCreateInfo defaultVkImageCreateInfo =
+                    linearImageCreateInfo.toDefaultVk();
+            VkResult result = vk->vkCreateImage(
+                    device, &defaultVkImageCreateInfo, nullptr, &image);
+            if (result != VK_SUCCESS) {
+                LOG(ERROR) << "vkCreateImage failed. size: ("
+                           << linearImageCreateInfo.extent.width << "x"
+                           << linearImageCreateInfo.extent.height << ")"
+                           << " result: " << result;
+                return;
             }
+            vk->vkGetImageSubresourceLayout(device, image, &subresource,
+                                            &subresourceLayout);
+            vk->vkDestroyImage(device, image, nullptr);
 
-            mLinearImageProperties.emplace(LinearImageProperties {
-                .offset = offset,
-                .rowPitchAlignment = rowPitchAlignment,
-            });
+            VkDeviceSize offset = subresourceLayout.offset;
+            uint64_t rowPitch = subresourceLayout.rowPitch;
+            VkDeviceSize rowPitchAlignment = rowPitch & (~rowPitch + 1);
+
+            mLinearImageProperties[linearImageCreateInfo] = {
+                    .offset = offset,
+                    .rowPitchAlignment = rowPitchAlignment,
+            };
         }
 
         if (pOffset != nullptr) {
-            *pOffset = mLinearImageProperties->offset;
+            *pOffset = mLinearImageProperties[linearImageCreateInfo].offset;
         }
         if (pRowPitchAlignment != nullptr) {
-            *pRowPitchAlignment = mLinearImageProperties->rowPitchAlignment;
+            *pRowPitchAlignment = mLinearImageProperties[linearImageCreateInfo]
+                                          .rowPitchAlignment;
         }
     }
 
@@ -6790,11 +6817,72 @@ private:
     };
     std::unordered_map<uint64_t, OccupiedGpaInfo> mOccupiedGpas;
 
+    struct LinearImageCreateInfo {
+        VkExtent3D extent;
+        VkFormat format;
+        VkImageUsageFlags usage;
+
+        VkImageCreateInfo toDefaultVk() const {
+            return VkImageCreateInfo{
+                    .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+                    .pNext = nullptr,
+                    .flags = {},
+                    .imageType = VK_IMAGE_TYPE_2D,
+                    .format = format,
+                    .extent = extent,
+                    .mipLevels = 1,
+                    .arrayLayers = 1,
+                    .samples = VK_SAMPLE_COUNT_1_BIT,
+                    .tiling = VK_IMAGE_TILING_LINEAR,
+                    .usage = usage,
+                    .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+                    .queueFamilyIndexCount = 0,
+                    .pQueueFamilyIndices = nullptr,
+                    .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            };
+        }
+
+        struct Hash {
+            std::size_t operator()(const LinearImageCreateInfo& ci) const {
+                std::size_t s = 0;
+                // Magic number used in boost::hash_combine().
+                constexpr size_t kHashMagic = 0x9e3779b9;
+                s ^= std::hash<uint32_t>{}(ci.extent.width) + kHashMagic +
+                     (s << 6) + (s >> 2);
+                s ^= std::hash<uint32_t>{}(ci.extent.height) + kHashMagic +
+                     (s << 6) + (s >> 2);
+                s ^= std::hash<uint32_t>{}(ci.extent.depth) + kHashMagic +
+                     (s << 6) + (s >> 2);
+                s ^= std::hash<VkFormat>{}(ci.format) + kHashMagic + (s << 6) +
+                     (s >> 2);
+                s ^= std::hash<VkImageUsageFlags>{}(ci.usage) + kHashMagic +
+                     (s << 6) + (s >> 2);
+                return s;
+            }
+        };
+    };
+
+    friend bool operator==(const LinearImageCreateInfo& a,
+                           const LinearImageCreateInfo& b) {
+        return a.extent.width == b.extent.width &&
+               a.extent.height == b.extent.height &&
+               a.extent.depth == b.extent.depth && a.format == b.format &&
+               a.usage == b.usage;
+    }
+
     struct LinearImageProperties {
         VkDeviceSize offset;
         VkDeviceSize rowPitchAlignment;
     };
-    android::base::Optional<LinearImageProperties> mLinearImageProperties;
+
+    // TODO(liyl): Remove after removing the old vkGetLinearImageLayoutGOOGLE.
+    std::unordered_map<VkFormat, LinearImageProperties>
+            mPerFormatLinearImageProperties;
+
+    std::unordered_map<LinearImageCreateInfo,
+                       LinearImageProperties,
+                       LinearImageCreateInfo::Hash>
+            mLinearImageProperties;
 };
 
 VkDecoderGlobalState::VkDecoderGlobalState()
@@ -7783,6 +7871,16 @@ void VkDecoderGlobalState::on_vkGetLinearImageLayoutGOOGLE(
     VkDeviceSize* pOffset,
     VkDeviceSize* pRowPitchAlignment) {
     mImpl->on_vkGetLinearImageLayoutGOOGLE(pool, device, format, pOffset, pRowPitchAlignment);
+}
+
+void VkDecoderGlobalState::on_vkGetLinearImageLayout2GOOGLE(
+        android::base::BumpPool* pool,
+        VkDevice device,
+        const VkImageCreateInfo* pCreateInfo,
+        VkDeviceSize* pOffset,
+        VkDeviceSize* pRowPitchAlignment) {
+    mImpl->on_vkGetLinearImageLayout2GOOGLE(pool, device, pCreateInfo, pOffset,
+                                            pRowPitchAlignment);
 }
 
 void VkDecoderGlobalState::on_vkQueueFlushCommandsGOOGLE(

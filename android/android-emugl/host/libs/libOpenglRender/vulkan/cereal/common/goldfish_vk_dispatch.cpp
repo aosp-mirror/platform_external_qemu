@@ -1333,6 +1333,7 @@ void init_vulkan_dispatch_from_system_loader(
     out->vkQueueWaitIdleAsyncGOOGLE = (PFN_vkQueueWaitIdleAsyncGOOGLE)dlSymFunc(lib, "vkQueueWaitIdleAsyncGOOGLE");
     out->vkQueueBindSparseAsyncGOOGLE = (PFN_vkQueueBindSparseAsyncGOOGLE)dlSymFunc(lib, "vkQueueBindSparseAsyncGOOGLE");
     out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)dlSymFunc(lib, "vkGetLinearImageLayoutGOOGLE");
+    out->vkGetLinearImageLayout2GOOGLE = (PFN_vkGetLinearImageLayout2GOOGLE)dlSymFunc(lib, "vkGetLinearImageLayout2GOOGLE");
     out->vkQueueFlushCommandsGOOGLE = (PFN_vkQueueFlushCommandsGOOGLE)dlSymFunc(lib, "vkQueueFlushCommandsGOOGLE");
     out->vkQueueCommitDescriptorSetUpdatesGOOGLE = (PFN_vkQueueCommitDescriptorSetUpdatesGOOGLE)dlSymFunc(lib, "vkQueueCommitDescriptorSetUpdatesGOOGLE");
     out->vkCollectDescriptorPoolIdsGOOGLE = (PFN_vkCollectDescriptorPoolIdsGOOGLE)dlSymFunc(lib, "vkCollectDescriptorPoolIdsGOOGLE");
@@ -2137,6 +2138,7 @@ void init_vulkan_dispatch_from_instance(
     out->vkQueueWaitIdleAsyncGOOGLE = (PFN_vkQueueWaitIdleAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueWaitIdleAsyncGOOGLE");
     out->vkQueueBindSparseAsyncGOOGLE = (PFN_vkQueueBindSparseAsyncGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueBindSparseAsyncGOOGLE");
     out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkGetLinearImageLayoutGOOGLE");
+    out->vkGetLinearImageLayout2GOOGLE = (PFN_vkGetLinearImageLayout2GOOGLE)vk->vkGetInstanceProcAddr(instance, "vkGetLinearImageLayout2GOOGLE");
     out->vkQueueFlushCommandsGOOGLE = (PFN_vkQueueFlushCommandsGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueFlushCommandsGOOGLE");
     out->vkQueueCommitDescriptorSetUpdatesGOOGLE = (PFN_vkQueueCommitDescriptorSetUpdatesGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkQueueCommitDescriptorSetUpdatesGOOGLE");
     out->vkCollectDescriptorPoolIdsGOOGLE = (PFN_vkCollectDescriptorPoolIdsGOOGLE)vk->vkGetInstanceProcAddr(instance, "vkCollectDescriptorPoolIdsGOOGLE");
@@ -2933,6 +2935,7 @@ void init_vulkan_dispatch_from_device(
     out->vkQueueWaitIdleAsyncGOOGLE = (PFN_vkQueueWaitIdleAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueWaitIdleAsyncGOOGLE");
     out->vkQueueBindSparseAsyncGOOGLE = (PFN_vkQueueBindSparseAsyncGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueBindSparseAsyncGOOGLE");
     out->vkGetLinearImageLayoutGOOGLE = (PFN_vkGetLinearImageLayoutGOOGLE)vk->vkGetDeviceProcAddr(device, "vkGetLinearImageLayoutGOOGLE");
+    out->vkGetLinearImageLayout2GOOGLE = (PFN_vkGetLinearImageLayout2GOOGLE)vk->vkGetDeviceProcAddr(device, "vkGetLinearImageLayout2GOOGLE");
     out->vkQueueFlushCommandsGOOGLE = (PFN_vkQueueFlushCommandsGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueFlushCommandsGOOGLE");
     out->vkQueueCommitDescriptorSetUpdatesGOOGLE = (PFN_vkQueueCommitDescriptorSetUpdatesGOOGLE)vk->vkGetDeviceProcAddr(device, "vkQueueCommitDescriptorSetUpdatesGOOGLE");
     out->vkCollectDescriptorPoolIdsGOOGLE = (PFN_vkCollectDescriptorPoolIdsGOOGLE)vk->vkGetDeviceProcAddr(device, "vkCollectDescriptorPoolIdsGOOGLE");
