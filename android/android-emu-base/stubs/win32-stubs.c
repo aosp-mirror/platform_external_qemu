@@ -4,6 +4,7 @@
 #include <direct.h>
 #include <windows.h>
 
+#include "android/utils/path.h"
 #include "android/utils/win32_unicode.h"
 
 HANDLE win32CreateFile(
@@ -70,3 +71,8 @@ int win32_lstat(const char* filepath, struct stat* st) {
     // Windows doesn't seem to have an lstat function so just use regular stat
     return win32_stat(filepath, st);
 }
+
+int win32_path_open(const char* filepath, int oflag, int pmode) {
+    return path_open(filepath, oflag, pmode);
+}
+

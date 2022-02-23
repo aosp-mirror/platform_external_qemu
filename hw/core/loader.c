@@ -56,6 +56,12 @@
 #include "hw/boards.h"
 #include "qemu/cutils.h"
 
+#ifdef _MSC_VER
+#define path_open win32_path_open
+#else
+#define path_open open
+#endif
+
 #include <zlib.h>
 
 static int roms_loaded;
@@ -64,9 +70,10 @@ static int roms_loaded;
 int get_image_size(const char *filename)
 {
     int fd, size;
-    fd = open(filename, O_RDONLY | O_BINARY);
-    if (fd < 0)
+    fd = path_open(filename, O_RDONLY | O_BINARY, O_RDONLY);
+    if (fd < 0) {
         return -1;
+    }
     size = lseek(fd, 0, SEEK_END);
     close(fd);
     return size;
@@ -77,7 +84,7 @@ int get_image_size(const char *filename)
 int load_image(const char *filename, uint8_t *addr)
 {
     int fd, size;
-    fd = open(filename, O_RDONLY | O_BINARY);
+    fd = path_open(filename, O_RDONLY | O_BINARY, O_RDONLY);
     if (fd < 0)
         return -1;
     size = lseek(fd, 0, SEEK_END);
@@ -103,7 +110,7 @@ ssize_t load_image_size(const char *filename, void *addr, size_t size)
     int fd;
     ssize_t actsize;
 
-    fd = open(filename, O_RDONLY | O_BINARY);
+    fd = path_open(filename, O_RDONLY | O_BINARY, O_RDONLY);
     if (fd < 0) {
         return -1;
     }
@@ -250,7 +257,7 @@ int load_aout(const char *filename, hwaddr addr, int max_sz,
     struct exec e;
     uint32_t magic;
 
-    fd = open(filename, O_RDONLY | O_BINARY);
+    fd = path_open(filename, O_RDONLY | O_BINARY, O_RDONLY);
     if (fd < 0)
         return -1;
 
@@ -378,7 +385,7 @@ void load_elf_hdr(const char *filename, void *hdr, bool *is64, Error **errp)
     }
     e_ident = hdr;
 
-    fd = open(filename, O_RDONLY | O_BINARY);
+    fd = path_open(filename, O_RDONLY | O_BINARY, O_RDONLY);
     if (fd < 0) {
         error_setg_errno(errp, errno, "Failed to open file: %s", filename);
         return;
@@ -468,7 +475,7 @@ int load_elf_ram_sym(const char *filename,
     int fd, data_order, target_data_order, must_swab, ret = ELF_LOAD_FAILED;
     uint8_t e_ident[EI_NIDENT];
 
-    fd = open(filename, O_RDONLY | O_BINARY);
+    fd = path_open(filename, O_RDONLY | O_BINARY, O_RDONLY);
     if (fd < 0) {
         perror(filename);
         return -1;
@@ -623,7 +630,7 @@ static int load_uboot_image(const char *filename, hwaddr *ep, hwaddr *loadaddr,
     int ret = -1;
     int do_uncompress = 0;
 
-    fd = open(filename, O_RDONLY | O_BINARY);
+    fd = path_open(filename, O_RDONLY | O_BINARY, O_RDONLY);
     if (fd < 0)
         return -1;
 
@@ -928,7 +935,7 @@ int rom_add_file(const char *file, const char *fw_dir,
         rom->path = g_strdup(file);
     }
 
-    fd = open(rom->path, O_RDONLY | O_BINARY);
+    fd = path_open(rom->path, O_RDONLY | O_BINARY, O_RDONLY);
     if (fd == -1) {
         fprintf(stderr, "**********Couldd not open option rom '%s': %s\n",
                 rom->path, strerror(errno));
