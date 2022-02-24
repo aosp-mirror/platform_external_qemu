@@ -586,7 +586,7 @@ void Snapshot::loadProtobufOnce() {
         return;
     }
     const auto file = ScopedFd(
-            ::open(PathUtils::join(mDataDir, kSnapshotProtobufName).c_str(),
+            path_open(PathUtils::join(mDataDir, kSnapshotProtobufName).c_str(),
                    O_RDONLY | O_BINARY | O_CLOEXEC, 0755));
     System::FileSize size;
     if (!System::get()->fileSize(file.get(), &size)) {
