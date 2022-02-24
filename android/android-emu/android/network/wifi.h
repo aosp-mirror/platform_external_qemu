@@ -33,4 +33,5 @@ int android_wifi_add_ssid(const char* ssid, const char* password);
 // usual.
 int android_wifi_set_ssid_block_on(const char* ssid, bool blocked);
 
+const char* android_wifi_default_dns_address();
 ANDROID_END_HEADER
