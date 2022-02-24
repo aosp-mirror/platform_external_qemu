@@ -3558,7 +3558,7 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
             &format, &type, &internalformat);
 
     if (!isCompressedFormat && ctx->getMajorVersion() < 3 && !isGles2Gles()) {
-        if (type==GL_HALF_FLOAT_OES)
+        if (type==GL_HALF_FLOAT_OES && !isGles2Gles())
             type = GL_HALF_FLOAT_NV;
         if (pixels==NULL && type==GL_UNSIGNED_SHORT_5_5_5_1)
             type = GL_UNSIGNED_BYTE;
