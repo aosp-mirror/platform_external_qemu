@@ -29,25 +29,6 @@ target_include_directories(
 
 target_link_libraries(libscriptedbeaconpayload-protos-lite PRIVATE libprotobuf)
 
-android_add_library(
-  TARGET libbt-rootcanal-types
-  LICENSE Apache-2.0
-  SOURCE_DIR ${BT_ROOT}/vendor_libs/test_vendor_lib/types/
-  SRC # cmake-format: sortable
-      "bluetooth/uuid.cc")
-target_include_directories(
-  libbt-rootcanal-types PUBLIC . ${BT_ROOT}/vendor_libs/test_vendor_lib/types)
-
-if(NOT LINUX_AARCH64)
-  android_add_test(
-    TARGET rootcanal-test_types
-    SOURCE_DIR ${BT_ROOT}/vendor_libs/test_vendor_lib/types/
-    SRC # cmake-format: sortable
-        test/bluetooth/uuid_unittest.cc)
-  target_link_libraries(rootcanal-test_types PRIVATE libbt-rootcanal-types
-                                                     gtest gtest_main)
-endif()
-
 add_library(libbt-rootcanal.headers INTERFACE)
 target_include_directories(libbt-rootcanal.headers INTERFACE . ${VL_LIB})
 android_license(TARGET "libbt-rootcanal.headers" LIBNAME None SPDX Apache-2.0
@@ -183,5 +164,5 @@ target_compile_definitions(test-vendor_test_host PRIVATE -DLOG_NDEBUG=1)
 target_include_directories(test-vendor_test_host PRIVATE .)
 target_link_libraries(
   test-vendor_test_host
-  PRIVATE libbt-rootcanal libbt-rootcanal-qemu libbt-rootcanal-types
+  PRIVATE libbt-rootcanal libbt-rootcanal-qemu
           android-emu gtest gtest_main)

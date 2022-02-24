@@ -425,9 +425,6 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         (emugl::getRenderer() == SELECTED_RENDERER_HOST ||
          emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
          emugl::getRenderer() == SELECTED_RENDERER_ANGLE_INDIRECT);
-#ifdef __APPLE__
-    fb->m_fastBlitSupported &= emugl::getRenderer() != SELECTED_RENDERER_ANGLE_INDIRECT;
-#endif
 
     fb->m_guestUsesAngle =
         emugl::emugl_feature_is_enabled(
@@ -3190,6 +3187,7 @@ bool FrameBuffer::onLoad(Stream* stream,
 
     }
 
+    repost(false);
     return true;
     // TODO: restore memory management
 }

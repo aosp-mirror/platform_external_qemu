@@ -13,6 +13,9 @@
 
 #include "android/base/Log.h"
 #include "android/base/system/System.h"
+#ifdef _MSC_VER
+#include "android/base/system/Win32UnicodeString.h"
+#endif
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
@@ -172,9 +175,15 @@ bool IniFile::read(bool keepComments) {
         return false;
     }
 
+#ifdef _MSC_VER
+    Win32UnicodeString wBackingFilePath(mBackingFilePath);
+    ifstream inFile(wBackingFilePath.c_str(), ios_base::in | ios_base::ate);
+#else
     ifstream inFile(mBackingFilePath, ios_base::in | ios_base::ate);
+#endif
+
     if (!inFile) {
-        VLOG(ini) << "Failed to process .ini file " << mBackingFilePath
+        LOG(WARNING) << "Failed to process .ini file " << mBackingFilePath
                          << " for reading.";
         return false;
     }
@@ -229,8 +238,13 @@ bool IniFile::writeCommon(bool discardEmpty) {
         return false;
     }
 
-    std::ofstream outFile(mBackingFilePath,
-                          std::ios_base::out | std::ios_base::trunc);
+#ifdef _MSC_VER
+    Win32UnicodeString wBackingFilePath(mBackingFilePath);
+    std::ofstream outFile(wBackingFilePath.c_str(), ios_base::out | ios_base::trunc);
+#else
+
+    std::ofstream outFile(mBackingFilePath, std::ios_base::out | std::ios_base::trunc);
+#endif
     if (!outFile) {
         LOG(WARNING) << "Failed to open .ini file " << mBackingFilePath
                      << " for writing.";

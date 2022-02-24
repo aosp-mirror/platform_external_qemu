@@ -42,6 +42,8 @@
 #include "sysemu/os-win32.h"
 #endif
 
+#include "android/utils/path.h"
+
 #define FTYPE_FILE 0
 #define FTYPE_CD     1
 #define FTYPE_HARDDISK 2
@@ -615,7 +617,7 @@ static int raw_co_create(BlockdevCreateOptions *options, Error **errp)
         return -EINVAL;
     }
 
-    fd = qemu_open(file_opts->filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY,
+    fd = path_open(file_opts->filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY,
                    0644);
     if (fd < 0) {
         error_setg_errno(errp, errno, "Could not create file");

@@ -2075,7 +2075,7 @@ bool System::pathCanExecInternal(StringView path) {
 // static
 int System::pathOpenInternal(const char *filename, int oflag, int perm) {
 #ifdef _WIN32
-    return _wopen(win32Path(filename).c_str(), GetWin32Mode(oflag), perm);
+    return _wopen(win32Path(filename).c_str(), oflag, perm);
 #else   // !_WIN32
     return ::open(filename, oflag, perm);
 #endif  // !_WIN32

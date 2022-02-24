@@ -38,6 +38,7 @@
 #include <sys/types.h>
 
 #include "android/utils/file_io.h"
+#include "android/utils/path.h"
 #if defined(USE_MINGW) || defined(_MSC_VER)
 
 #include <winsock2.h>
@@ -473,7 +474,7 @@ int make_ext4fs_from_dir(const char *filename, const char *dirname,
     reset_ext4fs_info();
     info.len = len;
 
-    fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0644);
+    fd = path_open(filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0644);
     if (fd < 0) {
         error_errno("open");
         return EXIT_FAILURE;
