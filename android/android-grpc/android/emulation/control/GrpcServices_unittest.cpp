@@ -534,9 +534,6 @@ TEST_F(GrpcServiceTest, AsyncBidiServerHostsManyWorks) {
 }
 
 TEST_F(GrpcServiceTest, AsyncServerStreamingWorks) {
-#ifdef WIN32
-    GTEST_SKIP();
-#endif
     VERBOSE_ENABLE(grpc);
     mBuilder.withService(mEchoService)
             .withPortRange(0, 1)
@@ -568,7 +565,7 @@ TEST_F(GrpcServiceTest, AsyncServerStreamingWorks) {
 
     // Our server should have replied 5 times
     EXPECT_EQ(hello.counter(), responses);
-
+    ctx.TryCancel();
     mEmuController->stop();
 }
 }  // namespace control
