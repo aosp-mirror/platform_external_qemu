@@ -1728,11 +1728,12 @@ static int file_ram_open(const char *path,
 #ifdef _WIN32
         // CreateFile on a nonexistent file in Windows returns EBADF.
         if (errno == ENOENT || errno == EBADF) {
+            fd = win32_path_open(path, O_RDWR | O_CREAT | O_EXCL, 0644);
 #else
         if (errno == ENOENT) {
-#endif
             /* @path names a file that doesn't exist, create it */
             fd = open(path, O_RDWR | O_CREAT | O_EXCL, 0644);
+#endif
             if (fd >= 0) {
                 *created = true;
                 break;
