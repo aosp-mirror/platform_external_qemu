@@ -5,6 +5,7 @@
 #include <string_view>
 #include <stdio.h>
 #include "android/utils/debug.h"
+#include "android/utils/file_io.h"
 
 namespace {
 using namespace std::literals;
@@ -103,13 +104,13 @@ int createRamdiskWithBootconfig(const char* srcRamdiskPath,
         }
     };
 
-    std::unique_ptr<FILE, FILE_deleter> srcRamdisk(::fopen(srcRamdiskPath, "rb"));
+    std::unique_ptr<FILE, FILE_deleter> srcRamdisk(android_fopen(srcRamdiskPath, "rb"));
     if (!srcRamdisk) {
         derror("%s Can't open '%s' for reading\n", __func__, srcRamdiskPath);
         return 1;
     }
 
-    std::unique_ptr<FILE, FILE_deleter> dstRamdisk(::fopen(dstRamdiskPath, "wb"));
+    std::unique_ptr<FILE, FILE_deleter> dstRamdisk(android_fopen(dstRamdiskPath, "wb"));
     if (!dstRamdisk) {
         derror("%s:  Can't open '%s' for writing", __func__, dstRamdiskPath);
         return 1;
