@@ -3361,10 +3361,6 @@ static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLsizei width,
         GLsizei height, GLint samples, GLint* err) {
     GET_CTX_V2_RET(GL_NONE);
     GLenum internal = internalformat;
-    // HACK: angle does not like GL_DEPTH_COMPONENT24_OES
-    if (isGles2Gles() && internalformat == GL_DEPTH_COMPONENT24_OES) {
-        internal = GL_DEPTH_COMPONENT16;
-    }
     if (!isGles2Gles() && ctx->getMajorVersion() < 3) {
         switch (internalformat) {
             case GL_RGB565:
