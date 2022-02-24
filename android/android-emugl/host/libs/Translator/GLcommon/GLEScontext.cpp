@@ -188,6 +188,7 @@ std::string    GLEScontext::s_glVendor;
 std::string    GLEScontext::s_glRenderer;
 std::string    GLEScontext::s_glVersion;
 GLSupport      GLEScontext::s_glSupport;
+bool           GLEScontext::s_isAngleBackend = false;
 
 Version::Version(int major,int minor,int release):m_major(major),
                                                   m_minor(minor),
@@ -1685,6 +1686,10 @@ const char * GLEScontext::getVersionString(bool isGles1) const {
     return isGles1 ? s_glVersionGles1.c_str() : s_glVersion.c_str();
 }
 
+bool GLEScontext::isAngleBackend() const {
+    return s_isAngleBackend;
+}
+
 void GLEScontext::getGlobalLock() {
     s_lock.lock();
 }
@@ -1907,6 +1912,10 @@ void GLEScontext::buildStrings(bool isGles1, const char* baseVendor,
         version = "N/A";
     }
 
+    const char* kAngleString = "ANGLE";
+    if (0 == strncmp(baseRenderer, kAngleString, strlen(kAngleString))) {
+        s_isAngleBackend = true;
+    }
     std::string& vendorString = isGles1 ? s_glVendorGles1 : s_glVendor;
     std::string& rendererString = isGles1 ? s_glRendererGles1 : s_glRenderer;
     std::string& versionString = isGles1 ? s_glVersionGles1 : s_glVersion;
@@ -3085,4 +3094,12 @@ void GLEScontext::setDefaultFBODrawBuffer(GLenum buffer) {
 
 void GLEScontext::setDefaultFBOReadBuffer(GLenum buffer) {
     m_defaultFBOReadBuffer = buffer;
+}
+
+void GLEScontext::flushForAngleMetal() {
+#ifdef __APPLE__
+    if (isAngleBackend()) {
+        dispatcher().glFlush();
+    }
+#endif
 }

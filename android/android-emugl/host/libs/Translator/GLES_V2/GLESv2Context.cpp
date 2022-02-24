@@ -521,7 +521,7 @@ void GLESv2Context::drawWithEmulations(
     bool needPointEmulation = mode == GL_POINTS && !isGles2Gles();
 
 #ifdef __APPLE__
-    if (primitiveRestartEnabled() && type) {
+    if (!isGles2Gles() && primitiveRestartEnabled() && type) {
         updatePrimitiveRestartIndex(type);
     }
 #endif
@@ -619,6 +619,8 @@ void GLESv2Context::drawWithEmulations(
             s_glDispatch.glEnableVertexAttribArray(i);
         }
     }
+
+    flushForAngleMetal();
 }
 
 void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct, bool* needEnablingPostDraw) {

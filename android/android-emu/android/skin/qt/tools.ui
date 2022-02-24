@@ -215,9 +215,6 @@ color: #f0f0f0</string>
      </item>
      <item>
       <widget class="QPushButton" name="wear_button_1">
-       <property name="visible">
-         <bool>false</bool>
-       </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -265,9 +262,6 @@ color: #f0f0f0</string>
      </item>
      <item>
       <widget class="QPushButton" name="wear_button_2">
-       <property name="visible">
-         <bool>false</bool>
-       </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -315,9 +309,6 @@ color: #f0f0f0</string>
      </item>
      <item>
       <widget class="QPushButton" name="palm_button">
-       <property name="visible">
-         <bool>false</bool>
-       </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -365,9 +356,6 @@ color: #f0f0f0</string>
      </item>
      <item>
       <widget class="QPushButton" name="tilt_button">
-       <property name="visible">
-         <bool>false</bool>
-       </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
