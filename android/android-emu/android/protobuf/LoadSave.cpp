@@ -37,7 +37,7 @@ ProtobufLoadResult loadProtobufFileImpl(android::base::StringView fileName,
                                         System::FileSize* bytesUsed,
                                         ProtobufLoadCallback loadCb) {
     const auto file = ScopedFd(
-            ::open(c_str(fileName), O_RDONLY | O_BINARY | O_CLOEXEC, 0644));
+            path_open(c_str(fileName), O_RDONLY | O_BINARY | O_CLOEXEC, 0644));
 
     System::FileSize size;
     if (!System::get()->fileSize(file.get(), &size)) {
@@ -64,7 +64,7 @@ ProtobufSaveResult saveProtobufFileImpl(android::base::StringView fileName,
     if (bytesUsed) *bytesUsed = 0;
 
     google::protobuf::io::FileOutputStream stream(
-            ::open(c_str(fileName),
+            path_open(c_str(fileName),
                    O_WRONLY | O_BINARY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644));
 
     stream.SetCloseOnDelete(true);
