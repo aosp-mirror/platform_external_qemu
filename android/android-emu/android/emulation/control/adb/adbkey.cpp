@@ -103,7 +103,7 @@ bool calculate_public_key(std::string* out, RSA* private_key) {
 }
 
 static std::shared_ptr<RSA> read_key_file(const std::string& file) {
-    std::unique_ptr<FILE, decltype(&fclose)> fp(fopen(file.c_str(), "r"),
+    std::unique_ptr<FILE, decltype(&fclose)> fp(android_fopen(file.c_str(), "r"),
                                                 fclose);
     if (!fp) {
         LOG(ERROR) << "Failed to open rsa file: " << file;
@@ -139,7 +139,7 @@ static bool generate_key(const std::string& file) {
     RSA_generate_key_ex(rsa, 2048, exponent, nullptr);
     EVP_PKEY_set1_RSA(pkey, rsa);
 
-    f = fopen(file.c_str(), "w");
+    f = android_fopen(file.c_str(), "w");
     if (!f) {
         dwarning("Failed to open %s", file.c_str());
         goto out;
