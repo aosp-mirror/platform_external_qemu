@@ -17,7 +17,7 @@
 #include <QImageReader>                              // for QImageReader
 #include <QString>                                   // for QString
 #include <string>                                    // for basic_string
-
+                                                     //
 #include "android/avd/info.h"                        // for avdInfo_getSkinInfo
 #include "android/base/files/PathUtils.h"            // for PathUtils
 #include "android/base/memory/LazyInstance.h"        // for LazyInstance
@@ -35,6 +35,18 @@ struct ScreenMaskGlobals {
 static LazyInstance<ScreenMaskGlobals> sGlobals = LAZY_INSTANCE_INIT;
 
 namespace ScreenMask {
+
+// Force the rgb as '0' if alpha is '0'
+static void processMask(QImage& image) {
+    for (int row = 0; row < image.height() - 1; row++) {
+        for (int col = 0; col < image.width() - 1; col++) {
+            QRgb p = image.pixel(col, row);
+            if (!qAlpha(p)) {
+                image.setPixel(col, row, qRgba(0, 0, 0, 0));
+            }
+        }
+    }
+}
 
 // Load the image of the mask and set it for use on the
 // AVD's display
@@ -55,6 +67,7 @@ static void loadMaskImage(AConfig* config, char* skinDir, char* skinName) {
     if (sGlobals->screenMaskImage.isNull()) {
         return;
     }
+    processMask(sGlobals->screenMaskImage);
     emulator_window_set_screen_mask(sGlobals->screenMaskImage.width(),
                                     sGlobals->screenMaskImage.height(),
                                     sGlobals->screenMaskImage.bits());
