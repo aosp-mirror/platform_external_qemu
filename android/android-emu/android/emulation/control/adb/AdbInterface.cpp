@@ -651,7 +651,7 @@ AdbCommandResult::AdbCommandResult(System::ProcessExitCode exitCode,
                                    const std::string& outputName)
     : exit_code(exitCode),
       output(outputName.empty() ? nullptr
-                                : new std::ifstream(outputName.c_str())),
+                                : new std::ifstream(PathUtils::asUnicodePath(outputName).c_str())),
       output_name(outputName) {}
 
 AdbCommandResult::AdbCommandResult(

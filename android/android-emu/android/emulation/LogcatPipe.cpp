@@ -15,9 +15,12 @@
 #include <iostream>
 #include <memory>
 
+#include "android/base/files/PathUtils.h"      // for PathUtils
 #include "android/globals.h"
 #include "android/logcat-pipe.h"
 #include "android/utils/debug.h"
+
+using android::base::PathUtils;
 
 namespace android {
 namespace emulation {
@@ -76,7 +79,7 @@ void registerLogcatPipeService() {
     if (android_hw->hw_logcatOutput_path &&
         *android_hw->hw_logcatOutput_path != '\0') {
         std::unique_ptr<std::ofstream> outputfile(new std::ofstream(
-                android_hw->hw_logcatOutput_path, std::ios_base::app));
+                PathUtils::asUnicodePath(android_hw->hw_logcatOutput_path).c_str(), std::ios_base::app));
         if (outputfile->good()) {
             sLogcatOutputStreams.push_back(std::move(outputfile));
         } else {

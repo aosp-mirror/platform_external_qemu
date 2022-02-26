@@ -26,6 +26,7 @@
 #include "android/base/Stopwatch.h"
 #include "android/base/StringView.h"                          // for StringView
 #include "android/base/files/IniFile.h"                       // for IniFile
+#include "android/base/files/PathUtils.h"                       // for IniFile
 #include "android/emulation/control/secure/BasicTokenAuth.h"  // for BasicTo...
 #include "emulator/net/EmulatorGrcpClient.h"                  // for Emulato...
 #include "emulator_controller.grpc.pb.h"                      // for Emulato...
@@ -37,6 +38,7 @@
 namespace emulator {
 namespace webrtc {
 
+using android::base::PathUtils;
 using android::base::Stopwatch;
 
 // A plugin that inserts the basic auth headers into a gRPC request
@@ -101,7 +103,7 @@ EmulatorGrpcClient::rtcStub() {
 }
 
 static std::string readFile(std::string fname) {
-    std::ifstream fstream(fname);
+    std::ifstream fstream(PathUtils::asUnicodePath(fname).c_str());
     std::string contents((std::istreambuf_iterator<char>(fstream)),
                          std::istreambuf_iterator<char>());
     return contents;

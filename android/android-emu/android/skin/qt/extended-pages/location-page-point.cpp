@@ -507,7 +507,7 @@ void LocationPage::writePointProtobufFullPath(
         const QString& protoFullPath,
         const emulator_location::PointMetadata& protobuf)
 {
-    std::ofstream outStream(protoFullPath.toStdString().c_str(), std::ofstream::binary);
+    std::ofstream outStream(android::base::PathUtils::asUnicodePath(protoFullPath.toStdString()).c_str(), std::ofstream::binary);
     protobuf.SerializeToOstream(&outStream);
 }
 

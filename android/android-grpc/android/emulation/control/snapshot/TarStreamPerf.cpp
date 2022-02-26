@@ -29,6 +29,7 @@
 #define BASIC_BENCHMARK_TEST(x) \
     BENCHMARK(x)->RangeMultiplier(2)->Range(1 << 10, 1 << 20)
 
+using android::base::PathUtils;
 using android::base::System;
 using android::base::TarWriter;
 
@@ -39,7 +40,7 @@ void SetUp() {
     if (!System::get()->pathExists(tstfile)) {
         std::cout << "Test file in: " << tstfile << std::endl;
 
-        std::ofstream rnd(tstfile, std::ios::binary);
+        std::ofstream rnd(PathUtils::asUnicodePath(tstfile).c_str(), std::ios::binary);
         char sz[4096];
         for (int i = 0; i < 25600; i++) {
             android::generateRandomBytes(sz, sizeof(sz));
@@ -51,7 +52,7 @@ void SetUp() {
 std::ostream* nullstream() {
     static std::ofstream os;
     if (!os.is_open())
-        os.open("/dev/null", std::ofstream::out | std::ofstream::app);
+        os.open(PathUtils::asUnicodePath("/dev/null").c_str(), std::ofstream::out | std::ofstream::app);
     return &os;
 }
 

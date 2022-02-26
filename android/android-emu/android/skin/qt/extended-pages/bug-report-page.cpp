@@ -503,7 +503,7 @@ void BugreportPage::loadScreenshotImage() {
 bool BugreportPage::saveToFile(StringView filePath,
                                const char* content,
                                size_t length) {
-    std::ofstream outFile(c_str(filePath),
+    std::ofstream outFile(PathUtils::asUnicodePath(filePath).c_str(),
                           std::ios_base::out | std::ios_base::binary);
     if (!outFile.is_open() || !outFile.good())
         return false;
