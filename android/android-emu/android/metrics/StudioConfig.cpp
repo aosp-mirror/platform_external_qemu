@@ -369,7 +369,7 @@ static Optional<ValueType> getStudioConfigJsonValue(
         StringView name,
         ValueExtractor extractValue) {
     const std::string configPath = android::metrics::getSettingsFilePath();
-    std::ifstream in(configPath.c_str());
+    std::ifstream in(PathUtils::asUnicodePath(configPath).c_str());
     if (!in) {
         return {};
     }

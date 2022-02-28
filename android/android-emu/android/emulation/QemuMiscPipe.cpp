@@ -57,6 +57,7 @@ static int64_t s_reset_request_uptime_ms;
 extern "C" int get_host_cts_heart_beat_count(void);
 extern "C" bool android_op_wipe_data;
 
+using android::base::PathUtils;
 namespace fc = android::featurecontrol;
 
 namespace android {
@@ -256,7 +257,7 @@ static void runAdbScripts(emulation::AdbInterface* adbInterface,
 
     auto list = base::System::get()->scanDirEntries(adbScriptsDir, true);
     for (auto filepath : list) {
-        std::ifstream inFile(filepath, std::ios_base::in);
+        std::ifstream inFile(PathUtils::asUnicodePath(filepath).c_str(), std::ios_base::in);
         if (!inFile.is_open()) {
             continue;
         }

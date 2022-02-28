@@ -25,6 +25,8 @@
 #include "android/base/process-control.h"      // for handle_emulator_restart
 #include "android/base/system/System.h"        // for System
 
+using android::base::PathUtils;
+
 namespace android {
 namespace base {
 
@@ -170,7 +172,7 @@ ProcessLaunchParameters createLaunchParametersForCurrentProcess(int argc,
 
 void saveLaunchParameters(const ProcessLaunchParameters& launchParams,
                           StringView filename) {
-    std::ofstream file(c_str(filename));
+    std::ofstream file(PathUtils::asUnicodePath(filename).c_str());
 
     file << launchParams.workingDirectory << std::endl;
     file << launchParams.programPath << std::endl;
@@ -185,7 +187,7 @@ void saveLaunchParameters(const ProcessLaunchParameters& launchParams,
 ProcessLaunchParameters loadLaunchParameters(StringView filename) {
     ProcessLaunchParameters res;
 
-    std::ifstream file(filename);
+    std::ifstream file(PathUtils::asUnicodePath(filename).c_str());
 
     std::string line;
 

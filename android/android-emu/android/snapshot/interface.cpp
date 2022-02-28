@@ -26,6 +26,7 @@
 #include <fstream>
 
 using android::base::pj;
+using android::base::PathUtils;
 using android::base::System;
 using android::snapshot::FailureReason;
 using android::snapshot::OperationStatus;
@@ -177,7 +178,7 @@ void androidSnapshot_setRamFileDirty(const char* _name, bool setDirty) {
             dir, android::snapshot::kMappedRamFileDirtyName);
 
     if (setDirty) {
-        std::ofstream file(dirtyPath.c_str(), std::ios::trunc);
+        std::ofstream file(PathUtils::asUnicodePath(dirtyPath).c_str(), std::ios::trunc);
         file << "1";
     } else {
         path_delete_file(dirtyPath.c_str());

@@ -33,6 +33,7 @@
 
 using android::base::Optional;
 using android::base::pj;
+using android::base::PathUtils;
 using android::base::System;
 
 #define DEBUG 0
@@ -171,7 +172,7 @@ Optional<std::string> compileSpirvFromGLSL(const std::string& shaderType,
 }
 
 Optional<std::vector<char> > readSpirv(const char* path) {
-    std::ifstream in(path, std::ios::ate | std::ios::binary);
+    std::ifstream in(PathUtils::asUnicodePath(path).c_str(), std::ios::ate | std::ios::binary);
 
     if (!in) return {};
 

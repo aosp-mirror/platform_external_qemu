@@ -70,6 +70,7 @@ using android::AndroidPipe;
 using android::HostAddressSpaceDevice;
 using android::HostGoldfishPipeDevice;
 using android::base::pj;
+using android::base::PathUtils;
 using android::base::System;
 
 using android::emulation::asg::AddressSpaceGraphicsContext;
@@ -256,7 +257,7 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     avdInfo_setCustomContentPath(android_avdInfo, sTestContentDir->path());
     auto customHwIniPath = pj(sTestContentDir->path(), "hardware.ini");
 
-    std::ofstream hwIniPathTouch(customHwIniPath, std::ios::out);
+    std::ofstream hwIniPathTouch(PathUtils::asUnicodePath(customHwIniPath).c_str(), std::ios::out);
     hwIniPathTouch << "test ini";
     hwIniPathTouch.close();
 

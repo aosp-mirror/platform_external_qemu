@@ -51,6 +51,7 @@
 #endif
 
 using android::base::LazyInstance;
+using android::base::PathUtils;
 using android::base::OsType;
 using android::base::StringView;
 using android::base::System;
@@ -86,7 +87,7 @@ static const char kBackupPatternsFilename[] =
 static bool tryParseFeaturePatternsProtobuf(
         const std::string& filename,
         emulator_features::EmulatorFeaturePatterns* out_patterns) {
-    std::ifstream in(filename, std::ios::binary);
+    std::ifstream in(PathUtils::asUnicodePath(filename).c_str(), std::ios::binary);
 
     if (out_patterns->ParseFromIstream(&in)) {
         D("successfully parsed as binary.");
@@ -154,7 +155,7 @@ public:
 
         {
             std::ofstream outFile(
-                    mFilename,
+                    PathUtils::asUnicodePath(mFilename).c_str(),
                     std::ios_base::binary | std::ios_base::trunc);
 
             if (!outFile) {

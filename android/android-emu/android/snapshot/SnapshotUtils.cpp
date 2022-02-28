@@ -39,6 +39,8 @@
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
 
+using android::base::PathUtils;
+
 namespace android {
 namespace emulation {
 namespace control {
@@ -180,7 +182,7 @@ bool pullSnapshot(const char* snapshotName,
                     // Use of  a 64 KB  buffer gives good performance (see
                     // performance tests.)
                     std::ifstream ifs(
-                            fname, std::ios_base::in | std::ios_base::binary);
+                            PathUtils::asUnicodePath(fname).c_str(), std::ios_base::in | std::ios_base::binary);
                     ifs.rdbuf()->pubsetbuf(buf, sizeof(buf));
                     LOG(VERBOSE) << "Zipping " << name;
                     if (android_stat(fname.c_str(), &sb) != 0 ||
