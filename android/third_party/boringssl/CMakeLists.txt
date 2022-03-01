@@ -54,7 +54,7 @@ elseif(DARWIN_X86_64)
     NOTICE "REPO/NOTICE"
     LICENSE "OpenSSL"
     SRC # cmake-format: sortable
-        ${crypto_sources_mac_x86_64} ${crypto_sources})
+        ${crypto_sources_apple_x86_64} ${crypto_sources})
 elseif(DARWIN_AARCH64)
   android_add_library(
     TARGET crypto
@@ -66,7 +66,7 @@ elseif(DARWIN_AARCH64)
     NOTICE "REPO/NOTICE"
     LICENSE "OpenSSL"
     SRC # cmake-format: sortable
-        ${crypto_sources} ${crypto_sources_ios_aarch64})
+        ${crypto_sources} ${crypto_sources_apple_aarch64})
 else()
   android_add_library(
     TARGET crypto
