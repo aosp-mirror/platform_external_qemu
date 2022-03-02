@@ -20,6 +20,7 @@
 #include <tuple>
 
 namespace vk_util {
+namespace vk_fn_info {
 
 // Register a fake Vulkan function for testing.
 using PFN_vkGfxstreamTestFunc = PFN_vkCreateDevice;
@@ -132,4 +133,5 @@ TEST(getVkInstanceProcAddrWithFallbackTest, firstNameShouldTakeThePriority) {
               validFps[0]);
 }
 }  // namespace
+}  // namespace vk_fn_info
 }  // namespace vk_util
