@@ -25,7 +25,6 @@
 #include "android/main-emugl.h"
 #include "android/main-help.h"
 #include "android/network/control.h"
-#include "android/network/wifi.h"
 #include "android/opengles.h"
 #include "android/resource.h"
 #include "android/snapshot.h"
@@ -1938,15 +1937,6 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         }
     }
 
-    // When the dns server is loopback, override to default google public DNS
-    // to avoid unstable DNS lookup.
-    if (!strcmp(opts->dns_server, "127.0.0.1")) {
-        const char* default_dns_addrs = android_wifi_default_dns_address();
-        dprint("The DNS supplied by user or host system is loopback. To avoid unstable connection, "
-          "override DNS to default value %s \n", default_dns_addrs);
-        str_reset(&opts->dns_server, default_dns_addrs);
-
-    }
     // Virtual CPU core count.
     if (opts->cores) {
         if (is_qemu2) {
