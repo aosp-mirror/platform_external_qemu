@@ -498,17 +498,10 @@ _avdInfo_getContentPath( AvdInfo*  i )
 
     char temp[PATH_MAX], *p=temp, *end=p+sizeof(temp);
 
-    i->contentPath = iniFile_getString(i->rootIni, ROOT_ABS_PATH_KEY, NULL);
+    i->contentPath = NULL;
 
-    if (i->contentPath == NULL) {
-        derror("bad config: %s",
-               "virtual device file lacks a "ROOT_ABS_PATH_KEY" entry");
-        return -1;
-    }
-
-    if (!path_is_dir(i->contentPath)) {
-        // If the absolute path doesn't match an actual directory, try
-        // the relative path if present.
+    /* try relatvie path first */
+    {
         const char* relPath = iniFile_getString(i->rootIni, ROOT_REL_PATH_KEY, NULL);
         if (relPath != NULL) {
             p = bufprint_config_path(temp, end);
@@ -517,6 +510,18 @@ _avdInfo_getContentPath( AvdInfo*  i )
                 str_reset(&i->contentPath, temp);
             }
         }
+    }
+
+    if (!path_is_dir(i->contentPath)) {
+        /* try absolute path if present */
+        i->contentPath = iniFile_getString(i->rootIni, ROOT_ABS_PATH_KEY, NULL);
+    }
+
+    if (!path_is_dir(i->contentPath)) {
+        derror("bad config: %s",
+               "virtual device file has no valid " ROOT_REL_PATH_KEY
+               " entry nor " ROOT_ABS_PATH_KEY " entry");
+        return -1;
     }
 
     D("virtual device content at %s", i->contentPath);

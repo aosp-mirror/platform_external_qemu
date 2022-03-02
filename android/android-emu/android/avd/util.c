@@ -75,11 +75,8 @@ path_getAvdContentPath(const char* avdName)
     }
     AFREE(iniPath);
 
-    avdPath = iniFile_getString(ini, ROOT_ABS_PATH_KEY, NULL);
-
+    // try relative path first
     if (!path_is_dir(avdPath)) {
-        // If the absolute path doesn't match an actual directory, try
-        // the relative path if present.
         const char* relPath = iniFile_getString(ini, ROOT_REL_PATH_KEY, NULL);
         if (relPath != NULL) {
             p = bufprint_config_path(temp, end);
@@ -89,6 +86,11 @@ path_getAvdContentPath(const char* avdName)
                 avdPath = ASTRDUP(temp);
             }
         }
+    }
+
+    // try absolute path second
+    if (!path_is_dir(avdPath)) {
+        avdPath = iniFile_getString(ini, ROOT_ABS_PATH_KEY, NULL);
     }
 
     iniFile_free(ini);
