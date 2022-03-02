@@ -661,7 +661,9 @@ static const struct {
     { 29, "Q", "10.0 (Q) - API 29" },
     { 30, "R", "11.0 (R) - API 30"},
     { 31, "S", "12.0 (S) - API 31"},
-    { 32, "Sv2", "12.0 (S) - API 32"}
+    { 32, "Sv2", "12.0 (S) - API 32"},
+    //Change to "13.0 (T) - API 33" once SDK is finalized.
+    { 33, "Tiramisu", "Tiramisu Preview - API Tiramisu"},
 };
 
 const char* avdInfo_getApiDessertName(int apiLevel) {
