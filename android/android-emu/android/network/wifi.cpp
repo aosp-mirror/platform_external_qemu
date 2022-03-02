@@ -64,9 +64,3 @@ int android_wifi_set_ssid_block_on(const char* ssid, bool blocked) {
     return send_command("wifi %s %s\n", blocked ? "block" : "unblock", ssid);
 }
 
-
-extern "C"
-const char* android_wifi_default_dns_address() {
-    // Reference: https://developers.google.com/speed/public-dns/docs/using
-    return "2001:4860:4860::8844,2001:4860:4860::8888,8.8.8.8,8.8.4.4";
-}
