@@ -83,8 +83,10 @@ std::string DeviceConfig::ril_gateway() {
 }
 
 std::string DeviceConfig::ril_dns() {
-    // the slirp default dns address used in guest.
-    return "10.0.2.3";
+    // Note: the android_cmdLineOptions->dns_server sometimes is just
+    // 127.0.0.1 and it does not work
+    // TODO: improve it
+    return "8.8.8.8";
 }
 
 std::ifstream DeviceConfig::open_ifstream_crossplat(const char* filename) {
