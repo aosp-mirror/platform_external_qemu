@@ -1697,6 +1697,29 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         return false;
     }
 
+    // Update server-based hw config / feature flags.
+    // Must be done after createAVD,  which sets up critical info needed
+    // by featurecontrol component itself.
+#if (SNAPSHOT_PROFILE > 1)
+    dprint("Starting feature flag application and host hw query with uptime "
+           "%" PRIu64 " ms",
+           get_uptime_ms());
+#endif
+    feature_initialize();
+    feature_update_from_server();
+#if (SNAPSHOT_PROFILE > 1)
+    dprint("Finished feature flag application and host hw query with uptime "
+           "%" PRIu64 " ms",
+           get_uptime_ms());
+#endif
+
+    if (feature_is_enabled(kFeature_Minigbm) &&
+        strcmp(hw->hw_gltransport, "virtio-gpu-asg") &&
+        strcmp(hw->hw_gltransport, "virtio-gpu-pipe")) {
+        str_reset(&hw->hw_gltransport, "virtio-gpu-asg");
+        D("force gltransport to virtio-gpu-asg\n");
+    }
+
     if (opts->acpi_config != NULL) {
         if (!path_exists(opts->acpi_config)) {
             derror("Invalid ACPI config file path: %s", opts->acpi_config);
