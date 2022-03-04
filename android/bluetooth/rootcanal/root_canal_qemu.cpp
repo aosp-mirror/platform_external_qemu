@@ -59,8 +59,14 @@ public:
 
     // Closes the root canal service
     void close() override {
-        mRootcanal->close();
-        mRootcanal = nullptr;
+        mAsyncManager.reset(nullptr);
+        // the following has memory double free problem
+        // and often crashes upon exit mostly on M1; so
+        // just let the
+        // object fall out of scope and be cleaned up
+        // b/203795141
+        // mRootcanal->close();
+        mRootcanal.reset(nullptr);
     }
 
 private:
