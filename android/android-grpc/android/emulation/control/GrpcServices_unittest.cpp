@@ -27,7 +27,7 @@
 #include "android/base/testing/TestTempDir.h"  // for TestT...
 #include "android/base/testing/TestTempDir.h"  // for TestTempDir
 #include "android/emulation/control/GrpcServices.h"
-#include "android/emulation/control/async/AsyncGrcpStream.h"
+#include "android/emulation/control/async/AsyncGrpcStream.h"
 #include "android/emulation/control/test/BasicTokenAuthenticator.h"
 #include "android/emulation/control/test/CertificateFactory.h"  // for Certi...
 #include "android/emulation/control/test/TestEchoService.h"     // for getTe...
@@ -64,7 +64,7 @@ protected:
 
     void SetUp() {
         mTestSystem.host()->setEnvironmentVariable("GRPC_VERBOSITY", "DEBUG");
-        mEchoService = new AsyncAnotherTestEchoService();
+        mEchoService = new AsyncServerStreamingEchoService();
         mHelloWorld.set_msg(HELLO);
     }
 
@@ -115,7 +115,7 @@ protected:
                 std::make_unique<JwtTokenAuthenticator>(mTempDir->path()));
     }
 
-    AsyncAnotherTestEchoService* mEchoService;
+    AsyncServerStreamingEchoService* mEchoService;
     TestSystem mTestSystem;
     Msg mHelloWorld;
     EmulatorControllerService::Builder mBuilder;
@@ -453,6 +453,8 @@ TEST_F(GrpcServiceTest, AsyncBidiServerWorks) {
     auto channel = grpc::CreateChannel(address(), creds);
     auto client = TestEcho::NewStub(channel);
     grpc::ClientContext ctx;
+    ctx.set_deadline(std::chrono::system_clock::now() +
+                      std::chrono::seconds(15));
     Msg response;
     auto thingie = client->streamEcho(&ctx);
     Msg hello;
@@ -492,6 +494,8 @@ TEST_F(GrpcServiceTest, AsyncBidiServerHostsManyWorks) {
     auto channel = grpc::CreateChannel(address(), creds);
     auto client = TestEcho::NewStub(channel);
     grpc::ClientContext ctx;
+    ctx.set_deadline(std::chrono::system_clock::now() +
+                      std::chrono::seconds(15));
     Msg response;
     auto thingie = client->streamEcho(&ctx);
     Msg hello;
@@ -508,6 +512,8 @@ TEST_F(GrpcServiceTest, AsyncBidiServerHostsManyWorks) {
     ctx.TryCancel();
 
     grpc::ClientContext ctx2;
+    ctx2.set_deadline(std::chrono::system_clock::now() +
+                      std::chrono::seconds(15));
     auto thingie2 = client->anotherStreamEcho(&ctx2);
     Msg hello2;
     hello.set_counter(1);
@@ -527,6 +533,41 @@ TEST_F(GrpcServiceTest, AsyncBidiServerHostsManyWorks) {
     mEmuController->stop();
 }
 
+TEST_F(GrpcServiceTest, AsyncServerStreamingWorks) {
+    VERBOSE_ENABLE(grpc);
+    mBuilder.withService(mEchoService)
+            .withPortRange(0, 1)
+            .withAsyncServerThreads(1);
+
+    EXPECT_TRUE(construct());
+    auto handler = mEmuController->asyncHandler();
+
+    // Let's see if we can handle two..
+    registerAsyncServerStreamingEchoService(handler, mEchoService);
+
+    // Let's send and receive just one thing..
+    auto creds = ::grpc::experimental::LocalCredentials(LOCAL_TCP);
+    auto channel = grpc::CreateChannel(address(), creds);
+    auto client = TestEcho::NewStub(channel);
+    grpc::ClientContext ctx;
+    ctx.set_deadline(std::chrono::system_clock::now() +
+                      std::chrono::seconds(15));
+    Msg response;
+    Msg hello;
+    hello.set_counter(5);
+    hello.set_data("Hello World!");
+
+    int responses = 0;
+    auto reader = client->serverStreamData(&ctx, hello);
+    while (response.counter() < hello.counter() && reader->Read(&response)) {
+        responses++;
+    }
+
+    // Our server should have replied 5 times
+    EXPECT_EQ(hello.counter(), responses);
+    ctx.TryCancel();
+    mEmuController->stop();
+}
 }  // namespace control
 }  // namespace emulation
 }  // namespace android

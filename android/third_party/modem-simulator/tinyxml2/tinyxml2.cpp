@@ -22,6 +22,7 @@ distribution.
 */
 
 #include "tinyxml2.h"
+#include "android/utils/file_io.h"
 
 #include <new>		// yes, this one new style header, is in the Android SDK.
 #if defined(ANDROID_NDK) || defined(__BORLANDC__) || defined(__QNXNTO__)
@@ -2251,15 +2252,7 @@ static FILE* callfopen( const char* filepath, const char* mode )
 {
     TIXMLASSERT( filepath );
     TIXMLASSERT( mode );
-#if defined(_MSC_VER) && (_MSC_VER >= 1400 ) && (!defined WINCE)
-    FILE* fp = 0;
-    const errno_t err = fopen_s( &fp, filepath, mode );
-    if ( err ) {
-        return 0;
-    }
-#else
-    FILE* fp = fopen( filepath, mode );
-#endif
+    FILE* fp = android_fopen( filepath, mode );
     return fp;
 }
 

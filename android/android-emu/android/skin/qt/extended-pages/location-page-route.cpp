@@ -38,6 +38,8 @@
 
 #include <fstream>
 
+using android::base::PathUtils;
+
 static const char JSON_FILE_NAME[]  = "route.json";
 static const char PROTO_FILE_NAME[] = "route_metadata.pb";
 
@@ -548,7 +550,7 @@ void LocationPage::writeRouteProtobufFullPath(
         const QString& protoFullPath,
         const emulator_location::RouteMetadata& protobuf)
 {
-    std::ofstream outStream(protoFullPath.toStdString().c_str(), std::ofstream::binary);
+    std::ofstream outStream(PathUtils::asUnicodePath(protoFullPath.toStdString()).c_str(), std::ofstream::binary);
     protobuf.SerializeToOstream(&outStream);
 }
 

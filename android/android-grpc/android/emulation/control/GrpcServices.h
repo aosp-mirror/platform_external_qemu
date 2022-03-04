@@ -21,7 +21,7 @@
 #include "android/console.h"                     // for AndroidConsoleAgents
 #include "grpcpp/impl/codegen/service_type.h"    // IWYU pragma: keep
 #include "grpcpp/security/server_credentials.h"  // for ServerCredentials
-#include "android/emulation/control/async/AsyncGrcpStream.h"
+#include "android/emulation/control/async/AsyncGrpcStream.h"
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"

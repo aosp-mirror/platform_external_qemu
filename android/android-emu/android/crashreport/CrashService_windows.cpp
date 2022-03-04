@@ -165,7 +165,7 @@ bool HostCrashService::getHWInfo() {
                     {"dxdiag", "/dontskip", "/whql:off", "/t", utf8Path},
                     System::RunOptions::WaitForCompletion, System::kInfinite)){
             E("dxdiag command failed to run");
-            std::ofstream out(utf8Path.c_str());
+            std::ofstream out(PathUtils::asUnicodePath(utf8Path).c_str());
             out << "dxdiag command failed to run\n";
             return false;
         }
@@ -173,7 +173,7 @@ bool HostCrashService::getHWInfo() {
 
     if (!System::get()->pathExists(utf8Path)) {
         E("No output file from dxdiag command");
-        std::ofstream out(utf8Path.c_str());
+        std::ofstream out(PathUtils::asUnicodePath(utf8Path).c_str());
         out << "No output file from dxdiag command\n";
         return false;
     }
@@ -184,7 +184,7 @@ bool HostCrashService::getHWInfo() {
     const auto now = System::get()->getHighResTimeUs();
     do {
         if (System::get()->pathCanRead(utf8Path)) {
-            std::ifstream in(utf8Path.c_str());
+            std::ifstream in(PathUtils::asUnicodePath(utf8Path).c_str());
             if (in) {
                 return true;
             }
@@ -193,7 +193,7 @@ bool HostCrashService::getHWInfo() {
     } while (System::get()->getHighResTimeUs() < now + kMaxWaitTimeUs);
 
     E("Unable to read output file");
-    std::ofstream out(utf8Path.c_str());
+    std::ofstream out(PathUtils::asUnicodePath(utf8Path).c_str());
     out << "Unable to read output file\n";
     return false;
 }
@@ -211,7 +211,7 @@ bool HostCrashService::getMemInfo() {
     }
     std::string path = PathUtils::join(data_directory, kMemInfoName);
     // TODO: Replace ofstream when we have a good way of handling UTF-8 paths
-    std::ofstream fout(path.c_str());
+    std::ofstream fout(PathUtils::asUnicodePath(path).c_str());
     if (!fout) {
         E("Unable to open '%s' to write crash report attachment", path.c_str());
         return false;

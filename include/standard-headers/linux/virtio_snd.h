@@ -5,23 +5,18 @@
 #ifndef VIRTIO_SND_IF_H
 #define VIRTIO_SND_IF_H
 
-#include "standard-headers/linux/virtio_ids.h"
 #include "standard-headers/linux/virtio_types.h"
-
-typedef uint64_t __le64;
-typedef uint32_t __le32;
-typedef uint8_t __u8;
 
 /*******************************************************************************
  * CONFIGURATION SPACE
  */
 struct virtio_snd_config {
 	/* # of available physical jacks */
-	__le32 jacks;
+	uint32_t jacks;
 	/* # of available PCM streams */
-	__le32 streams;
+	uint32_t streams;
 	/* # of available channel maps */
-	__le32 chmaps;
+	uint32_t chmaps;
 };
 
 enum {
@@ -77,7 +72,7 @@ enum {
 
 /* common header */
 struct virtio_snd_hdr {
-	__le32 code;
+	uint32_t code;
 };
 
 /* event notification */
@@ -85,7 +80,7 @@ struct virtio_snd_event {
 	/* VIRTIO_SND_EVT_XXX */
 	struct virtio_snd_hdr hdr;
 	/* optional event data */
-	__le32 data;
+	uint32_t data;
 };
 
 /* common control request to query an item information */
@@ -93,17 +88,17 @@ struct virtio_snd_query_info {
 	/* VIRTIO_SND_R_XXX_INFO */
 	struct virtio_snd_hdr hdr;
 	/* item start identifier */
-	__le32 start_id;
+	uint32_t start_id;
 	/* item count to query */
-	__le32 count;
+	uint32_t count;
 	/* item information size in bytes */
-	__le32 size;
+	uint32_t size;
 };
 
 /* common item information header */
 struct virtio_snd_info {
 	/* function group node id (High Definition Audio Specification 7.1.2) */
-	__le32 hda_fn_nid;
+	uint32_t hda_fn_nid;
 };
 
 /*******************************************************************************
@@ -113,7 +108,7 @@ struct virtio_snd_jack_hdr {
 	/* VIRTIO_SND_R_JACK_XXX */
 	struct virtio_snd_hdr hdr;
 	/* 0 ... virtio_snd_config::jacks - 1 */
-	__le32 jack_id;
+	uint32_t jack_id;
 };
 
 /* supported jack features */
@@ -125,15 +120,15 @@ struct virtio_snd_jack_info {
 	/* common header */
 	struct virtio_snd_info hdr;
 	/* supported feature bit map (1 << VIRTIO_SND_JACK_F_XXX) */
-	__le32 features;
+	uint32_t features;
 	/* pin configuration (High Definition Audio Specification 7.3.3.31) */
-	__le32 hda_reg_defconf;
+	uint32_t hda_reg_defconf;
 	/* pin capabilities (High Definition Audio Specification 7.3.4.9) */
-	__le32 hda_reg_caps;
+	uint32_t hda_reg_caps;
 	/* current jack connection status (0: disconnected, 1: connected) */
-	__u8 connected;
+	uint8_t connected;
 
-	__u8 padding[7];
+	uint8_t padding[7];
 };
 
 /* jack remapping control request */
@@ -141,9 +136,9 @@ struct virtio_snd_jack_remap {
 	/* .code = VIRTIO_SND_R_JACK_REMAP */
 	struct virtio_snd_jack_hdr hdr;
 	/* selected association number */
-	__le32 association;
+	uint32_t association;
 	/* selected sequence number */
-	__le32 sequence;
+	uint32_t sequence;
 };
 
 /*******************************************************************************
@@ -153,7 +148,7 @@ struct virtio_snd_pcm_hdr {
 	/* VIRTIO_SND_R_PCM_XXX */
 	struct virtio_snd_hdr hdr;
 	/* 0 ... virtio_snd_config::streams - 1 */
-	__le32 stream_id;
+	uint32_t stream_id;
 };
 
 /* supported PCM stream features */
@@ -218,19 +213,19 @@ struct virtio_snd_pcm_info {
 	/* common header */
 	struct virtio_snd_info hdr;
 	/* supported feature bit map (1 << VIRTIO_SND_PCM_F_XXX) */
-	__le32 features;
+	uint32_t features;
 	/* supported sample format bit map (1 << VIRTIO_SND_PCM_FMT_XXX) */
-	__le64 formats;
+	uint64_t formats;
 	/* supported frame rate bit map (1 << VIRTIO_SND_PCM_RATE_XXX) */
-	__le64 rates;
+	uint64_t rates;
 	/* dataflow direction (VIRTIO_SND_D_XXX) */
-	__u8 direction;
+	uint8_t direction;
 	/* minimum # of supported channels */
-	__u8 channels_min;
+	uint8_t channels_min;
 	/* maximum # of supported channels */
-	__u8 channels_max;
+	uint8_t channels_max;
 
-	__u8 padding[5];
+	uint8_t padding[5];
 };
 
 /* set PCM stream format */
@@ -238,19 +233,19 @@ struct virtio_snd_pcm_set_params {
 	/* .code = VIRTIO_SND_R_PCM_SET_PARAMS */
 	struct virtio_snd_pcm_hdr hdr;
 	/* size of the hardware buffer */
-	__le32 buffer_bytes;
+	uint32_t buffer_bytes;
 	/* size of the hardware period */
-	__le32 period_bytes;
+	uint32_t period_bytes;
 	/* selected feature bit map (1 << VIRTIO_SND_PCM_F_XXX) */
-	__le32 features;
+	uint32_t features;
 	/* selected # of channels */
-	__u8 channels;
+	uint8_t channels;
 	/* selected sample format (VIRTIO_SND_PCM_FMT_XXX) */
-	__u8 format;
+	uint8_t format;
 	/* selected frame rate (VIRTIO_SND_PCM_RATE_XXX) */
-	__u8 rate;
+	uint8_t rate;
 
-	__u8 padding;
+	uint8_t padding;
 };
 
 /*******************************************************************************
@@ -260,15 +255,15 @@ struct virtio_snd_pcm_set_params {
 /* I/O request header */
 struct virtio_snd_pcm_xfer {
 	/* 0 ... virtio_snd_config::streams - 1 */
-	__le32 stream_id;
+	uint32_t stream_id;
 };
 
 /* I/O request status */
 struct virtio_snd_pcm_status {
 	/* VIRTIO_SND_S_XXX */
-	__le32 status;
+	uint32_t status;
 	/* current device latency */
-	__le32 latency_bytes;
+	uint32_t latency_bytes;
 };
 
 /*******************************************************************************
@@ -278,7 +273,7 @@ struct virtio_snd_chmap_hdr {
 	/* VIRTIO_SND_R_CHMAP_XXX */
 	struct virtio_snd_hdr hdr;
 	/* 0 ... virtio_snd_config::chmaps - 1 */
-	__le32 chmap_id;
+	uint32_t chmap_id;
 };
 
 /* standard channel position definition */
@@ -329,11 +324,11 @@ struct virtio_snd_chmap_info {
 	/* common header */
 	struct virtio_snd_info hdr;
 	/* dataflow direction (VIRTIO_SND_D_XXX) */
-	__u8 direction;
+	uint8_t direction;
 	/* # of valid channel position values */
-	__u8 channels;
+	uint8_t channels;
 	/* channel position values (VIRTIO_SND_CHMAP_XXX) */
-	__u8 positions[VIRTIO_SND_CHMAP_MAX_SIZE];
+	uint8_t positions[VIRTIO_SND_CHMAP_MAX_SIZE];
 };
 
 #endif /* VIRTIO_SND_IF_H */

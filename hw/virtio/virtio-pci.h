@@ -44,6 +44,8 @@
 #include "hw/virtio/virtio-vsock.h"
 #endif
 
+#include "hw/virtio/virtio-snd.h"
+
 #include "android-qemu2-glue/emulation/virtio-wifi.h"
 
 typedef struct VirtIOPCIProxy VirtIOPCIProxy;
@@ -63,6 +65,7 @@ typedef struct VirtIOGPUPCI VirtIOGPUPCI;
 typedef struct VHostVSockPCI VHostVSockPCI;
 typedef struct VirtIOVSockPCI VirtIOVSockPCI;
 typedef struct VirtIOCryptoPCI VirtIOCryptoPCI;
+typedef struct VirtIOSoundPCI VirtIOSoundPCI;
 typedef struct VirtIOWifiPCI VirtIOWifiPCI;
 
 /* virtio-pci-bus */
@@ -447,6 +450,19 @@ struct VirtIOCryptoPCI {
 struct VirtIOWifiPCI {
     VirtIOPCIProxy parent_obj;
     VirtIOWifi vdev;
+};
+
+/*
+ * virtio-snd-pci
+ */
+
+#define TYPE_VIRTIO_SND_PCI "virtio-snd-pci"
+#define VIRTIO_SND_PCI(obj) \
+        OBJECT_CHECK(VirtIOSoundPCI, (obj), TYPE_VIRTIO_SND_PCI)
+
+struct VirtIOSoundPCI {
+    VirtIOPCIProxy parent;
+    VirtIOSound vdev;
 };
 
 /* Virtio ABI version, if we increment this, we break the guest driver. */

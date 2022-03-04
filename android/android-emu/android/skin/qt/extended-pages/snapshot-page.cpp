@@ -1597,7 +1597,7 @@ void SnapshotPage::writeProtobuf(const QString& fileName,
     std::string protoFileName = PathUtils::join(getSnapshotBaseDir().c_str(),
                                                 fileName.toStdString().c_str(),
                                                 android::snapshot::kSnapshotProtobufName);
-    std::ofstream outStream(protoFileName.c_str(), std::ofstream::binary);
+    std::ofstream outStream(PathUtils::asUnicodePath(protoFileName).c_str(), std::ofstream::binary);
 
     protobuf->SerializeToOstream(&outStream);
 }

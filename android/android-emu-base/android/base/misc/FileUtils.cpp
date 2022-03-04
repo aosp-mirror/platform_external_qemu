@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/base/misc/FileUtils.h"
+#include "android/base/files/PathUtils.h"      // for PathUtils
 #include "android/utils/eintr_wrapper.h"
 
 #include <assert.h>
@@ -30,6 +31,8 @@
 #include <sstream>
 #include <string>
 #include <utility>
+
+using android::base::PathUtils;
 
 namespace android {
 
@@ -74,7 +77,7 @@ bool writeStringToFile(int fd, const std::string& file_contents) {
 }
 
 base::Optional<std::string> readFileIntoString(base::StringView name) {
-    std::ifstream is(base::c_str(name), std::ios_base::binary);
+    std::ifstream is(PathUtils::asUnicodePath(name).c_str(), std::ios_base::binary);
     if (!is) {
         return {};
     }

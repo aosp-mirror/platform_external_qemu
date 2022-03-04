@@ -33,6 +33,7 @@
 #define D(...)
 #endif
 
+using android::base::PathUtils;
 using android::base::StringView;
 using android::base::System;
 
@@ -106,7 +107,7 @@ bool StudioMapsKeyImpl::downloadMapsFile() {
 
     D("got: %s", res.c_str());
 
-    std::ofstream outFile(mMapsFile, std::ios_base::trunc);
+    std::ofstream outFile(PathUtils::asUnicodePath(mMapsFile).c_str(), std::ios_base::trunc);
     if (!outFile) {
         D("not valid file: %s\n", mMapsFile.c_str());
         return false;

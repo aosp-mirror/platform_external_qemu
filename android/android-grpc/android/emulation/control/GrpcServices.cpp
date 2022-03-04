@@ -28,6 +28,7 @@
 #include <utility>
 #include <vector>
 
+#include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketUtils.h"
@@ -49,6 +50,7 @@ namespace control {
 using Builder = EmulatorControllerService::Builder;
 using namespace android::base;
 using namespace android::control::interceptor;
+using android::base::PathUtils;
 using grpc::ServerBuilder;
 using grpc::ServerCompletionQueue;
 using grpc::Service;
@@ -119,7 +121,7 @@ std::string Builder::readSecrets(const char* fname) {
         mValid = false;
         return "";
     }
-    std::ifstream fstream(fname);
+    std::ifstream fstream(PathUtils::asUnicodePath(fname).c_str());
     auto contents = std::string(std::istreambuf_iterator<char>(fstream),
                                 std::istreambuf_iterator<char>());
 

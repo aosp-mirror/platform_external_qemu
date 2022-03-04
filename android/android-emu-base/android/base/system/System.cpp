@@ -2086,7 +2086,12 @@ bool System::deleteFileInternal(StringView path) {
         return false;
     }
 
+#ifdef _WIN32
+    Win32UnicodeString path_unicode(path);
+    int remove_res = _wremove(path_unicode.c_str());
+#else
     int remove_res = remove(c_str(path));
+#endif
 
 #ifdef _WIN32
     if (remove_res < 0) {
@@ -2094,7 +2099,7 @@ bool System::deleteFileInternal(StringView path) {
         // on the first try.
         // Sleep a little bit and try again here.
         System::get()->sleepMs(1);
-        remove_res = remove(c_str(path));
+        remove_res = _wremove(path_unicode.c_str());
     }
 #endif
 

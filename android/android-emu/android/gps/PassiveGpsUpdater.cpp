@@ -14,6 +14,8 @@
 
 #include "android/gps/PassiveGpsUpdater.h"
 
+#include "android/base/files/PathUtils.h"      // for PathUtils
+
 #include <fstream>
 #include <istream>
 #include <sstream>
@@ -22,6 +24,7 @@
 
 using namespace std::chrono_literals;
 
+using android::base::PathUtils;
 namespace android {
 namespace emulation {
 
@@ -52,7 +55,7 @@ void PassiveGpsUpdater::parseLocationConf(const std::string& AVDconf,
                                           double& paltitude,
                                           double& pvelocity,
                                           double& pheading) {
-    std::ifstream inFile(AVDconf);
+    std::ifstream inFile(PathUtils::asUnicodePath(AVDconf).c_str());
     if (!inFile)
         return;
 

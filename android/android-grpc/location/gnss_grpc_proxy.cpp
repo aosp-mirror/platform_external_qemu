@@ -24,6 +24,7 @@
 #include "grpcpp.h"
 
 #include <android-base/logging.h>
+#include <android/base/files/PathUtils.h>
 #include <common/libs/fs/shared_select.h>
 #include "gnss_grpc_proxy.grpc.pb.h"
 
@@ -42,6 +43,7 @@ using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
+using android::base::PathUtils;
 
 namespace cuttlefish {
 
@@ -93,7 +95,7 @@ void GnssGrpcProxyServiceImpl::StartReadFileThread() {
 }
 
 void GnssGrpcProxyServiceImpl::ReadNmeaFromLocalFile() {
-    std::ifstream file(gnss_file_path_);
+    std::ifstream file(PathUtils::asUnicodePath(gnss_file_path_).c_str());
     if (file.is_open()) {
         std::string line;
         std::string lastLine;

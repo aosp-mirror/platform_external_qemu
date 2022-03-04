@@ -13,6 +13,7 @@
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/files/PathUtils.h"
 #include "android/cmdline-option.h"
 #include "android/telephony/SimAccessRules.h"
 #include "android/telephony/TagLengthValue.h"
@@ -28,6 +29,7 @@
 
 using ::google::protobuf::TextFormat;
 using ::google::protobuf::io::IstreamInputStream;
+using android::base::PathUtils;
 
 namespace android {
 
@@ -101,7 +103,7 @@ std::unordered_map<std::string, AllRefArDo> parseSimAccessRules(
 SimAccessRules::SimAccessRules() : mHasCustomRules(false) {
     if (android_cmdLineOptions &&
         android_cmdLineOptions->sim_access_rules_file != nullptr) {
-        std::ifstream file(android_cmdLineOptions->sim_access_rules_file);
+        std::ifstream file(PathUtils::asUnicodePath(android_cmdLineOptions->sim_access_rules_file).c_str());
         if (file.is_open()) {
             IstreamInputStream istream(&file);
             android_emulator::SimAccessRules sim_access_rules_proto;

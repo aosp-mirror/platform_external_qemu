@@ -16,6 +16,9 @@
 
 #include "android/avd/util.h"
 #include "android/base/files/PathUtils.h"
+#ifdef _WIN32
+#include "android/base/system/Win32UnicodeString.h"
+#endif
 #include "android/cmdline-option.h"
 #include "android/avd/info.h"
 #include "android/avd/hw-config.h"
@@ -25,6 +28,8 @@
 #include "android/utils/path.h"
 #include "android/utils/system.h"
 #include "device_config.h"
+
+#include <fstream>
 
 //extern AndroidHwConfig   android_hw[1];
 
@@ -82,6 +87,28 @@ std::string DeviceConfig::ril_dns() {
     // 127.0.0.1 and it does not work
     // TODO: improve it
     return "8.8.8.8";
+}
+
+std::ifstream DeviceConfig::open_ifstream_crossplat(const char* filename) {
+#ifdef _WIN32
+    android::base::Win32UnicodeString wfilename(filename);
+    std::ifstream ifs(wfilename.c_str());
+    return ifs;
+#else
+    std::ifstream ifs(filename);
+    return ifs;
+#endif
+}
+
+std::ofstream DeviceConfig::open_ofstream_crossplat(const char* filename, std::ios_base::openmode mode) {
+#ifdef _WIN32
+    android::base::Win32UnicodeString wfilename(filename);
+    std::ofstream of(wfilename.c_str(), mode);
+    return of;
+#else
+    std::ofstream of(filename, mode);
+    return of;
+#endif
 }
 
 }  // namespace modem

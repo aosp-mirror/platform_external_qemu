@@ -61,7 +61,7 @@ FILE* android_fopen(const char* path, const char* mode) {
     FILE* res = NULL;
     int err = _wfopen_s(&res, wide_path, wide_mode);
     if (err != 0) {
-        derror("Failed to open %s, err: %d", path, err);
+        dprint("%s: Failed to open %s, err: %d", __func__, path, err);
     }
     return res;
 #else

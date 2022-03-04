@@ -24,7 +24,7 @@ using android::base::StringView;
 static Version parseVersionFromSourceProperties(
         const std::string& propertiesPath) {
     Version version = Version::invalid();
-    std::ifstream propertiesFile(propertiesPath.c_str());
+    std::ifstream propertiesFile(PathUtils::asUnicodePath(propertiesPath).c_str());
     if (propertiesFile.is_open()) {
         // Find the line containing "Pkg.Revision".
         std::string line;
