@@ -24,17 +24,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "android/emulation/control/async/AsyncGrcpStream.h"
+#include "android/emulation/control/async/AsyncGrpcStream.h"
 
-#include <grpcpp/grpcpp.h>  // for ServerC...
+#include <grpcpp/grpcpp.h>  // for ServerCompletionQueue, Serv...
+#include <algorithm>        // for max
 #include <string>           // for string
 #include <thread>           // for thread
+#include <utility>          // for move
 #include <vector>           // for vector
 
-#include "android/utils/debug.h"                              // for VERBOSE...
-#include "grpc/impl/codegen/gpr_types.h"                      // for gpr_clo...
-#include "grpc/support/time.h"                                // for gpr_now
-#include "grpcpp/alarm.h"                                     // for Alarm
+#include "android/utils/debug.h"          // for VERBOSE_PRINT, VERBOSE_grpc
+#include "grpc/impl/codegen/gpr_types.h"  // for gpr_clock_type
+#include "grpc/support/time.h"            // for gpr_now
+#include "grpcpp/alarm.h"                 // for Alarm
 
 #define DEBUG 0
 
@@ -48,7 +50,8 @@ namespace android {
 namespace emulation {
 namespace control {
 
-BaseAsyncGrpcConnection::BaseAsyncGrpcConnection(ServerCompletionQueue* cq) : mCq(cq) {}
+BaseAsyncGrpcConnection::BaseAsyncGrpcConnection(ServerCompletionQueue* cq)
+    : mCq(cq) {}
 
 BaseAsyncGrpcConnection::~BaseAsyncGrpcConnection() {
     DD("Completed interaction with (%p) %s", this, mContext.peer().c_str());
@@ -89,10 +92,10 @@ void BaseAsyncGrpcConnection::execute(QueueState state) {
                 //
                 // Ownership is transferred to the queue.
                 auto nxt = clone();
-                mConnectAlarm.Set(mCq,
-                                  gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME),
-                                  new BaseAsyncGrpcConnection::CompletionQueueTask(
-                                          nxt, QueueState::CREATED));
+                mConnectAlarm.Set(
+                        mCq, gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME),
+                        new BaseAsyncGrpcConnection::CompletionQueueTask(
+                                nxt, QueueState::CREATED));
 
                 scheduleRead();
             }
@@ -192,7 +195,8 @@ const char* BaseAsyncGrpcConnection::CompletionQueueTask::getStateStr() {
     return queueStateStr(mState);
 }
 
-BaseAsyncGrpcConnection* BaseAsyncGrpcConnection::CompletionQueueTask::connection() {
+BaseAsyncGrpcConnection*
+BaseAsyncGrpcConnection::CompletionQueueTask::connection() {
     return mConnection;
 }
 
@@ -226,22 +230,22 @@ void AsyncGrpcHandler::runQueue(ServerCompletionQueue* queue) {
     DD("Completed async queue.");
 }
 
-AsyncGrpcHandler::AsyncGrpcHandler(std::vector<std::unique_ptr<ServerCompletionQueue>> queues)
+AsyncGrpcHandler::AsyncGrpcHandler(
+        std::vector<std::unique_ptr<ServerCompletionQueue>> queues)
     : mCompletionQueues(std::move(queues)) {
-        start();
-    }
+    start();
+}
 
 AsyncGrpcHandler::~AsyncGrpcHandler() {
-      VERBOSE_PRINT(grpc, "Taking down server queues");
-        // Shutdown the completion queues.
-        void* ignored_tag;
-        bool ignored_ok;
-        for (const auto& queue : mCompletionQueues) {
-            queue->Shutdown();
-            while (queue->Next(&ignored_tag, &ignored_ok))
-                ;
-        }
+    VERBOSE_PRINT(grpc, "Taking down server queues");
+    // Shutdown the completion queues.
+    void* ignored_tag;
+    bool ignored_ok;
+    for (const auto& queue : mCompletionQueues) {
+        queue->Shutdown();
+    }
 
+    // And wait for the threads to complete.
     for (auto& t : mRunners) {
         t.join();
     }

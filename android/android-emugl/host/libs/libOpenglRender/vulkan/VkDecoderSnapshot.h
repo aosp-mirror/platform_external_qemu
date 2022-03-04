@@ -4610,6 +4610,14 @@ public:
         VkFormat format,
         VkDeviceSize* pOffset,
         VkDeviceSize* pRowPitchAlignment);
+    void vkGetLinearImageLayout2GOOGLE(
+    const uint8_t* snapshotTraceBegin,
+        size_t snapshotTraceBytes,
+        android::base::BumpPool* pool,
+        VkDevice device,
+        const VkImageCreateInfo* pCreateInfo,
+        VkDeviceSize* pOffset,
+        VkDeviceSize* pRowPitchAlignment);
     void vkQueueFlushCommandsGOOGLE(
     const uint8_t* snapshotTraceBegin,
         size_t snapshotTraceBytes,

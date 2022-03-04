@@ -18,6 +18,7 @@
 #include <utility>     // for move
 
 #include "absl/strings/string_view.h"       // for string_view
+#include "android/base/files/PathUtils.h"
 #include "android/base/misc/StringUtils.h"  // for EndsWith
 #include "android/utils/debug.h"            // for derror
 #include "tink/config/tink_config.h"        // for TinkConfig
@@ -41,6 +42,7 @@
 namespace android {
 namespace emulation {
 namespace control {
+using android::base::PathUtils;
 
 namespace tink = crypto::tink;
 
@@ -90,7 +92,7 @@ void JwtTokenAuth::updateKeysetHandle(
             }
         }
 
-        std::ofstream out(mJwksLoadedPath, std::ios::trunc);
+        std::ofstream out(PathUtils::asUnicodePath(mJwksLoadedPath).c_str(), std::ios::trunc);
         out << jsonSnippet;
         out.close();
         DD("Updated %s with latest loaded keys to: %s", mJwksLoadedPath.c_str(),

@@ -273,6 +273,7 @@ ssize_t qemu_recvfrom_wrap(int sockfd, void *buf, size_t len, int flags,
 #ifdef QEMU_BASE_BUILD
 
 // We are building plain qemu
+#define win32_path_open open
 #define win32_stat _stati64
 #define win32_lstat _stati64
 #define win32CreateFile CreateFile
@@ -281,6 +282,8 @@ ssize_t qemu_recvfrom_wrap(int sockfd, void *buf, size_t len, int flags,
 #else
 
 // We are not building base qemu
+
+int win32_path_open(const char* filepath, int oflag, int pmode);
 
 int win32_stat(const char* filepath, struct _stati64* st);
 int win32_lstat(const char* filepath, struct _stati64* st);

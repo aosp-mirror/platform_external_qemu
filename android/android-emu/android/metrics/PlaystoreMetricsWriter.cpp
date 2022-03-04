@@ -22,6 +22,7 @@
 #include "android/base/Log.h"                                 // for LOG
 #include "android/base/Uuid.h"                                // for Uuid
 #include "android/base/files/GzipStreambuf.h"                 // for GzipOut...
+#include "android/base/files/PathUtils.h"      // for PathUtils
 #include "android/base/system/System.h"                       // for System
 #include "android/curl-support.h"                             // for curl_post
 #include "android/metrics/MetricsLogging.h"                   // for D
@@ -36,6 +37,7 @@ namespace metrics {
 using namespace wireless_android_play_playlog;
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
+using android::base::PathUtils;
 
 static milliseconds epoch_time_in_ms() {
     std::chrono::microseconds nowUs(base::System::get()->getUnixTimeUs());
@@ -46,7 +48,7 @@ PlaystoreMetricsWriter::PlaystoreMetricsWriter(const std::string& sessionId,
                                                const std::string& cookieFile,
                                                std::string url)
     : MetricsWriter(sessionId), mUrl(std::move(url)), mCookieFile(cookieFile) {
-    std::ifstream cookieResponse(cookieFile, std::ios::in | std::ios::binary);
+    std::ifstream cookieResponse(PathUtils::asUnicodePath(cookieFile).c_str(), std::ios::in | std::ios::binary);
     if (cookieResponse.good()) {
         LogResponse response;
         response.ParseFromIstream(&cookieResponse);
@@ -145,7 +147,7 @@ void PlaystoreMetricsWriter::writeCookie(std::string proto) {
         mSendAfterMs = milliseconds(response.next_request_wait_millis()) + epoch_time_in_ms();
 
         response.set_next_request_wait_millis(mSendAfterMs.count());
-        std::ofstream cookieResponse(mCookieFile, std::ios::out |
+        std::ofstream cookieResponse(PathUtils::asUnicodePath(mCookieFile).c_str(), std::ios::out |
                                                           std::ios::binary |
                                                           std::ios::trunc);
         response.SerializeToOstream(&cookieResponse);

@@ -166,8 +166,8 @@ static bool sGetFormatParameters(GLint* internalFormat,
             return true;
         case GL_LUMINANCE:
             *texFormat = GL_LUMINANCE;
-            *pixelType = GL_UNSIGNED_SHORT;
-            *bytesPerPixel = 2;
+            *pixelType = GL_UNSIGNED_BYTE;
+            *bytesPerPixel = 1;
             *sizedInternalFormat = GL_R8;
             *isBlob = true;
             return true;

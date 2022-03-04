@@ -10334,6 +10334,13 @@ typedef void <name>CAMetalLayer</name>;
             <param><type>VkDeviceSize</type>* <name>pRowPitchAlignment</name></param>
         </command>
         <command>
+            <proto><type>void</type> <name>vkGetLinearImageLayout2GOOGLE</name></proto>
+            <param><type>VkDevice</type> <name>device</name></param>
+            <param>const <type>VkImageCreateInfo</type>* <name>pCreateInfo</name></param>
+            <param><type>VkDeviceSize</type>* <name>pOffset</name></param>
+            <param><type>VkDeviceSize</type>* <name>pRowPitchAlignment</name></param>
+        </command>
+        <command>
             <proto><type>void</type> <name>vkQueueFlushCommandsGOOGLE</name></proto>
             <param externsync="true"><type>VkQueue</type> <name>queue</name></param>
             <param externsync="true"><type>VkCommandBuffer</type> <name>commandBuffer</name></param>
@@ -17661,6 +17668,7 @@ typedef void <name>CAMetalLayer</name>;
                 <command name="vkQueueWaitIdleAsyncGOOGLE"/>
                 <command name="vkQueueBindSparseAsyncGOOGLE"/>
                 <command name="vkGetLinearImageLayoutGOOGLE"/>
+                <command name="vkGetLinearImageLayout2GOOGLE"/>
                 <command name="vkQueueFlushCommandsGOOGLE"/>
                 <command name="vkQueueCommitDescriptorSetUpdatesGOOGLE"/>
                 <command name="vkCollectDescriptorPoolIdsGOOGLE"/>
@@ -18286,3 +18294,4 @@ typedef void <name>CAMetalLayer</name>;
         </spirvcapability>
     </spirvcapabilities>
 </registry>
+

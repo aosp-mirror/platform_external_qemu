@@ -146,7 +146,7 @@ void asyncTraceSaveFunc() {
         fprintf(stderr, "%s: Waiting for 1 second...\n", __func__);
         std::this_thread::sleep_for(std::chrono::seconds(kWaitSecondsPerIteration));
         fprintf(stderr, "%s: Querying file size of guest trace...\n", __func__);
-        std::ifstream guestFile(guestFilename, std::ios::in | std::ios::binary | std::ios::ate);
+        std::ifstream guestFile(PathUtils::asUnicodePath(guestFilename).c_str(), std::ios::in | std::ios::binary | std::ios::ate);
         std::streampos size = guestFile.tellg();
 
         if (!size) {
@@ -175,9 +175,9 @@ void asyncTraceSaveFunc() {
         return;
     }
 
-    std::ifstream hostFile(hostFilename, std::ios_base::binary);
-    std::ifstream guestFile(guestFilename, std::ios_base::binary);
-    std::ofstream combinedFile(combinedFilename, std::ios::out | std::ios_base::binary);
+    std::ifstream hostFile(PathUtils::asUnicodePath(hostFilename).c_str(), std::ios_base::binary);
+    std::ifstream guestFile(PathUtils::asUnicodePath(guestFilename).c_str(), std::ios_base::binary);
+    std::ofstream combinedFile(PathUtils::asUnicodePath(combinedFilename).c_str(), std::ios::out | std::ios_base::binary);
 
     combinedFile << guestFile.rdbuf() << hostFile.rdbuf();
 
@@ -293,7 +293,7 @@ PERFETTO_TRACING_ONLY_EXPORT void disableTracing() {
 
         // Write the trace into a file.
         std::ofstream output;
-        output.open(sTraceConfig.hostFilename, std::ios::out | std::ios::binary);
+        output.open(PathUtils::asUnicodePath(sTraceConfig.hostFilename).c_str(), std::ios::out | std::ios::binary);
         output.write(&processed[0], processed.size());
         output.close();
         sTracingSession.reset();

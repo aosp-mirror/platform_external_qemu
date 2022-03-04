@@ -586,7 +586,7 @@ void Snapshot::loadProtobufOnce() {
         return;
     }
     const auto file = ScopedFd(
-            ::open(PathUtils::join(mDataDir, kSnapshotProtobufName).c_str(),
+            path_open(PathUtils::join(mDataDir, kSnapshotProtobufName).c_str(),
                    O_RDONLY | O_BINARY | O_CLOEXEC, 0755));
     System::FileSize size;
     if (!System::get()->fileSize(file.get(), &size)) {
@@ -1065,7 +1065,7 @@ extern "C" int android_check_snapshot_loadable(const char* snapshot_name) {
         if (0 == strcmp(format, ".tar.gz")) {
             stream.reset(new android::base::GzipInputStream(snapshot_name));
         } else {
-            stream.reset(new std::ifstream(snapshot_name));
+            stream.reset(new std::ifstream(PathUtils::asUnicodePath(snapshot_name).c_str()));
             if (!static_cast<std::ifstream*>(stream.get())->is_open()) {
                 printf("Not loadable\n");
                 printf("Reason: File not exist: %s\n", snapshot_name);

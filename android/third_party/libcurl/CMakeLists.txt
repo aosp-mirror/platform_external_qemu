@@ -170,6 +170,7 @@ android_target_compile_definitions(
   -DHAVE_LIBZ
   -DHAVE_WINDOWS_H
   -DUSE_WIN32_IDN
+  -DUNICODE
   -DWANT_IDN_PROTOTYPES
   -DUSE_IPV6
   -DUSE_WINDOWS_SSPI

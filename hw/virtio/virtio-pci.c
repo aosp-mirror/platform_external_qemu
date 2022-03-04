@@ -2718,6 +2718,54 @@ static const TypeInfo virtio_host_pci_info = {
 };
 #endif
 
+/* virtio-snd-pci */
+
+static Property virtio_snd_pci_properties[] = {
+    DEFINE_PROP_UINT32("class", VirtIOPCIProxy, class_code, 0),
+    DEFINE_PROP_END_OF_LIST(),
+};
+
+static void virtio_snd_pci_realize(VirtIOPCIProxy *vpci_dev, Error **errp)
+{
+    VirtIOSoundPCI *vsnd = VIRTIO_SND_PCI(vpci_dev);
+    DeviceState *vdev = DEVICE(&vsnd->vdev);
+
+    qdev_set_parent_bus(vdev, BUS(&vpci_dev->bus));
+    object_property_set_bool(OBJECT(vdev), true, "realized", errp);
+}
+
+static void virtio_snd_pci_instance_init(Object *obj)
+{
+    VirtIOSoundPCI *vsnd = VIRTIO_SND_PCI(obj);
+
+    virtio_instance_init_common(obj, &vsnd->vdev, sizeof(vsnd->vdev),
+                                TYPE_VIRTIO_SND);
+}
+
+static void virtio_snd_pci_class_init(ObjectClass *klass, void *data)
+{
+    DeviceClass *dc = DEVICE_CLASS(klass);
+    dc->desc = "Virtio sound (virtio-snd-pci)";
+    VirtioPCIClass *k = VIRTIO_PCI_CLASS(klass);
+    PCIDeviceClass *pcidev_k = PCI_DEVICE_CLASS(klass);
+
+    k->realize = virtio_snd_pci_realize;
+    set_bit(DEVICE_CATEGORY_SOUND, dc->categories);
+    dc->props = virtio_snd_pci_properties;
+    pcidev_k->vendor_id = PCI_VENDOR_ID_REDHAT_QUMRANET;
+    pcidev_k->device_id = PCI_DEVICE_ID_VIRTIO_SND;
+    pcidev_k->revision = VIRTIO_PCI_ABI_VERSION;
+    pcidev_k->class_id = PCI_CLASS_MULTIMEDIA_AUDIO;
+}
+
+static const TypeInfo virtio_snd_pci_info = {
+    .name          = TYPE_VIRTIO_SND_PCI,
+    .parent        = TYPE_VIRTIO_PCI,
+    .instance_size = sizeof(VirtIOSoundPCI),
+    .instance_init = virtio_snd_pci_instance_init,
+    .class_init    = virtio_snd_pci_class_init,
+};
+
 /* virtio-pci-bus */
 
 static void virtio_pci_bus_new(VirtioBusState *bus, size_t bus_size,
@@ -2800,6 +2848,7 @@ static void virtio_pci_register_types(void)
         type_register_static(&virtio_vsock_pci_info);
     }
 #endif
+    /*type_register_static(&virtio_snd_pci_info);*/
     type_register_static(&virtio_wifi_pci_info);
 }
 
