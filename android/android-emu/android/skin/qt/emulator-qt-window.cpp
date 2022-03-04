@@ -95,6 +95,7 @@
 #include <QSettings>
 #include <QTabletEvent>
 #include <QToolTip>
+#include <QTouchDevice>
 #include <QTouchEvent>
 #include <QWindow>
 #include <QtCore>
@@ -1673,8 +1674,12 @@ bool EmulatorQtWindow::event(QEvent* ev) {
     if (ev->type() == QEvent::TouchBegin || ev->type() == QEvent::TouchUpdate ||
         ev->type() == QEvent::TouchEnd) {
         QTouchEvent* touchEvent = static_cast<QTouchEvent*>(ev);
-        handleTouchPoints(*touchEvent);
-        return true;
+        // b/216383452 Only process multitouch events generated from touch
+        // screen.
+        if (touchEvent->device()->type() == QTouchDevice::QTouchDevice::TouchScreen) {
+            handleTouchPoints(*touchEvent);
+            return true;
+        }
     }
     if (ev->type() == QEvent::WindowActivate && mWindowIsMinimized) {
         mWindowIsMinimized = false;
