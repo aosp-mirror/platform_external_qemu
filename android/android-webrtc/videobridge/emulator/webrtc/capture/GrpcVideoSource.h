@@ -25,7 +25,7 @@
 #include <mutex>                              // for mutex
 #include <thread>                             // for thread
 #include <rtc_base/ref_counted_object.h>    // for RefCountedObject
-#include "emulator/net/EmulatorGrcpClient.h"  // for EmulatorGrpcClient
+#include "android/emulation/control/utils/EmulatorGrcpClient.h"  // for EmulatorGrpcClient
 #include "emulator/webrtc/capture/MediaSource.h"
 
 namespace rtc {
@@ -50,6 +50,7 @@ namespace emulator {
 namespace webrtc {
 
 using ::android::emulation::control::Image;
+using android::emulation::control::EmulatorGrpcClient;
 class GrpcVideoSource
     : public ::webrtc::Notifier<::webrtc::VideoTrackSourceInterface> {
 public:

@@ -11,8 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <grpcpp/grpcpp.h>     // for ClientC...
-#include <rtc_base/logging.h>  // for RTC_LOG
+#include <grpcpp/grpcpp.h>  // for ClientC
 
 #include <fstream>   // for ifstream
 #include <iterator>  // for istre...
@@ -26,18 +25,19 @@
 #include "android/base/Stopwatch.h"
 #include "android/base/StringView.h"                          // for StringView
 #include "android/base/files/IniFile.h"                       // for IniFile
-#include "android/base/files/PathUtils.h"                       // for IniFile
+#include "android/base/files/PathUtils.h"                     // for IniFile
 #include "android/emulation/control/secure/BasicTokenAuth.h"  // for BasicTo...
-#include "emulator/net/EmulatorGrcpClient.h"                  // for Emulato...
-#include "emulator_controller.grpc.pb.h"                      // for Emulato...
-#include "grpc/grpc_security_constants.h"                     // for LOCAL_TCP
-#include "grpc/impl/codegen/connectivity_state.h"             // for (anonym...
-#include "grpcpp/channel_impl.h"                              // for Channel
+#include "android/emulation/control/utils/EmulatorGrcpClient.h"  // for Emulato...
+#include "emulator_controller.grpc.pb.h"           // for Emulato...
+#include "grpc/grpc_security_constants.h"          // for LOCAL_TCP
+#include "grpc/impl/codegen/connectivity_state.h"  // for (anonym...
+#include "grpcpp/channel_impl.h"                   // for Channel
 #include "grpcpp/security/credentials.h"
+#include "android/utils/debug.h"
 
-namespace emulator {
-namespace webrtc {
-
+namespace android {
+namespace emulation {
+namespace control {
 using android::base::PathUtils;
 using android::base::Stopwatch;
 
@@ -76,31 +76,14 @@ bool EmulatorGrpcClient::hasOpenChannel(bool tryConnect) {
         auto waitUntil = gpr_time_add(gpr_now(GPR_CLOCK_REALTIME),
                                       gpr_time_from_seconds(5, GPR_TIMESPAN));
         bool connect = mChannel->WaitForConnected(waitUntil);
-        RTC_LOG(INFO) << (connect ? "Connected" : "Not connected")
-                      << " to emulator: " << mAddress
-                      << ", after: " << Stopwatch::sec(sw.elapsedUs()) << " s";
+        dinfo("%s to emulator: %s, after %d s",
+              connect ? "Connected" : "Not connected", mAddress.c_str(),
+              Stopwatch::sec(sw.elapsedUs()));
     }
     auto state = mChannel->GetState(tryConnect);
     return state == GRPC_CHANNEL_READY || state == GRPC_CHANNEL_IDLE;
 }
 
-std::unique_ptr<android::emulation::control::EmulatorController::Stub>
-EmulatorGrpcClient::stub() {
-    if (!mChannel) {
-        initializeChannel();
-    }
-
-    return android::emulation::control::EmulatorController::NewStub(mChannel);
-}
-
-std::unique_ptr<android::emulation::control::Rtc::Stub>
-EmulatorGrpcClient::rtcStub() {
-    if (!mChannel) {
-        initializeChannel();
-    }
-
-    return android::emulation::control::Rtc::NewStub(mChannel);
-}
 
 static std::string readFile(std::string fname) {
     std::ifstream fstream(PathUtils::asUnicodePath(fname).c_str());
@@ -139,7 +122,7 @@ bool EmulatorGrpcClient::initializeChannel() {
     android::base::IniFile iniFile(mDiscoveryFile);
     iniFile.read();
     if (!iniFile.hasKey("grpc.port") || iniFile.hasKey("grpc.server_cert")) {
-        RTC_LOG(LERROR) << "No grpc port, or tls enabled. gRPC disabled.";
+        derror("No grpc port, or tls enabled. gRPC disabled.");
         return false;
     }
     mAddress = "localhost:" + iniFile.getString("grpc.port", "8554");
@@ -153,8 +136,9 @@ bool EmulatorGrpcClient::initializeChannel() {
                 std::make_unique<BasicTokenAuthenticator>(token));
     }
 
-    RTC_LOG(INFO) << "Initialized grpc Stub.";
+    dinfo("Initialized grpc Stub.");
     return true;
 }
-}  // namespace webrtc
-}  // namespace emulator
+}  // namespace control
+}  // namespace emulation
+}  // namespace android

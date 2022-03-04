@@ -99,6 +99,7 @@ android_add_library(
       android/emulation/control/secure/JwtTokenAuth.cpp
       android/emulation/control/snapshot/SnapshotService.cpp
       android/emulation/control/utils/AudioUtils.cpp
+      android/emulation/control/utils/EmulatorGrpcClient.cpp
       android/emulation/control/utils/EventWaiter.cpp
       android/emulation/control/utils/GrpcAndroidLogAdapter.cpp
       android/emulation/control/utils/ScreenshotUtils.cpp

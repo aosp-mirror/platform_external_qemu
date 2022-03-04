@@ -19,29 +19,41 @@
 #include <string>  // for string
 
 #include "emulator_controller.grpc.pb.h"  // for EmulatorController
-#include "rtc_service.grpc.pb.h"                     // for Rtc, Rtc::Stub
 
+namespace android {
+namespace emulation {
+namespace control {
 
-namespace emulator {
-namespace webrtc {
-
-// An EmulatorGrpcClient manages the configuration to the emulator grpc endpoint.
-// Through this method you can get a properly configured stub, and context , that
-// will inject proper credentials when needed.
+// An EmulatorGrpcClient manages the configuration to the emulator grpc
+// endpoint. Through this method you can get a properly configured stub, and
+// context , that will inject proper credentials when needed.
 //
-// The Client is initialized by giving it the proper emulator discovery file, or by
-// providing it a set of SSL credentials if you wish to use tls.
+// The Client is initialized by giving it the proper emulator discovery file, or
+// by providing it a set of SSL credentials if you wish to use tls.
 class EmulatorGrpcClient {
 public:
-    explicit EmulatorGrpcClient(std::string discovery_file) : mDiscoveryFile(discovery_file) {};
-    EmulatorGrpcClient(std::string address, std::string ca, std::string key, std::string cer);
-    std::unique_ptr<android::emulation::control::EmulatorController::Stub> stub();
-    std::unique_ptr<android::emulation::control::Rtc::Stub> rtcStub();
+    explicit EmulatorGrpcClient(std::string discovery_file)
+        : mDiscoveryFile(discovery_file){};
+    EmulatorGrpcClient(std::string address,
+                       std::string ca,
+                       std::string key,
+                       std::string cer);
+    ~EmulatorGrpcClient() = default;
+
+    template <class stub>
+    auto stub() {
+        if (!mChannel) {
+            initializeChannel();
+        }
+
+        return stub::NewStub(mChannel);
+    }
+
     std::unique_ptr<grpc::ClientContext> newContext();
     bool hasOpenChannel(bool tryConnect = true);
     std::string address() { return mAddress; }
 
-private:
+protected:
     bool initializeChannel();
 
     std::shared_ptr<::grpc::Channel> mChannel;
@@ -50,5 +62,6 @@ private:
     std::string mAddress;
 };
 
-}  // namespace webrtc
-}  // namespace emulator
+}  // namespace control
+}  // namespace emulation
+}  // namespace android

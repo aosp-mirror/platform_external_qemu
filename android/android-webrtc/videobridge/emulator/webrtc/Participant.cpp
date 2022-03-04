@@ -34,7 +34,7 @@
 #include <utility>        // for pair
 #include <vector>         // for vector
 
-#include "emulator/net/EmulatorGrcpClient.h"             // for EmulatorGrpc...
+#include "android/emulation/control/utils/EmulatorGrcpClient.h"             // for EmulatorGrpc...
 #include "emulator/net/SocketForwarder.h"                // for AdbPortForwa...
 #include "emulator/webrtc/RtcConnection.h"               // for json, RtcCon...
 #include "emulator/webrtc/Switchboard.h"                 // for Switchboard
@@ -194,7 +194,7 @@ void EventForwarder::OnStateChange() {}
 
 void EventForwarder::OnMessage(const ::webrtc::DataBuffer& buffer) {
     if (!mEmulatorGrpc) {
-        mEmulatorGrpc = mClient->stub();
+        mEmulatorGrpc = mClient->stub<android::emulation::control::EmulatorController>();
     }
     ::google::protobuf::Empty nullResponse;
     std::unique_ptr<grpc::ClientContext> context = mClient->newContext();

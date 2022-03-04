@@ -34,11 +34,6 @@
 #include "emulator/webrtc/RtcConnection.h"        // for json, RtcConnection
 #include "nlohmann/json.hpp"                      // for basic_json<>::value...
 
-namespace emulator {
-namespace webrtc {
-class EmulatorGrpcClient;
-}  // namespace webrtc
-}  // namespace emulator
 
 using namespace android::base;
 

@@ -27,13 +27,13 @@
 #include "android/base/async/AsyncSocketServer.h"
 #include "android/emulation/control/EmulatorAdvertisement.h"  // for Emulato...
 #include "android/emulation/control/GrpcServices.h"           // for Emulato...
+#include "android/emulation/control/utils/EmulatorGrcpClient.h"  // for Emulato...
 #include "android/emulation/control/utils/ScreenshotUtils.h"
 #include "android/emulation/control/utils/SharedMemoryLibrary.h"
 #include "android/utils/Random.h"  // for generat...
 #include "api/video/i420_buffer.h"
-#include "emulator/net/EmulatorGrcpClient.h"  // for Emulato...
-#include "emulator_controller.grpc.pb.h"      // for Emulato...
-#include "emulator_controller.pb.h"           // for AudioPa...
+#include "emulator_controller.grpc.pb.h"  // for Emulato...
+#include "emulator_controller.pb.h"       // for AudioPa...
 #ifdef _WIN32
 #include <windows.h>
 
@@ -76,7 +76,7 @@ class Empty;
 
 using android::base::PathUtils;
 using android::base::System;
-using emulator::webrtc::EmulatorGrpcClient;
+using android::emulation::control::EmulatorGrpcClient;
 using ::google::protobuf::Empty;
 using grpc::ClientContext;
 using grpc::ClientReader;
@@ -85,21 +85,25 @@ using grpc::ServerWriter;
 using grpc::Status;
 using grpc::StatusCode;
 
-#define fwdOne(fn, in, out)                                                 \
-    Status fn(ServerContext* context, const in* request, out* reply)        \
-            override {                                                      \
-        auto ctx = mClient->newContext();                                   \
-        ctx->set_deadline(std::chrono::system_clock::now() +                \
-                          std::chrono::seconds(1));                         \
-        return checkAlive(mClient->stub()->fn(ctx.get(), *request, reply)); \
+#define fwdOne(fn, in, out)                                           \
+    Status fn(ServerContext* context, const in* request, out* reply)  \
+            override {                                                \
+        auto ctx = mClient->newContext();                             \
+        ctx->set_deadline(std::chrono::system_clock::now() +          \
+                          std::chrono::seconds(1));                   \
+        return checkAlive(mClient->stub<android::emulation::control:: \
+                                                EmulatorController>() \
+                                  ->fn(ctx.get(), *request, reply));  \
     }
 
-#define fwdMany(fn, in, out)                                    \
-    Status fn(ServerContext* context, const in* request,        \
-              ServerWriter<out>* writer) override {             \
-        auto ctx = mClient->newContext();                       \
-        auto stream = mClient->stub()->fn(ctx.get(), *request); \
-        return forwardCall(writer, stream.get());               \
+#define fwdMany(fn, in, out)                                      \
+    Status fn(ServerContext* context, const in* request,          \
+              ServerWriter<out>* writer) override {               \
+        auto ctx = mClient->newContext();                         \
+        auto stream = mClient->stub<android::emulation::control:: \
+                                            EmulatorController>() \
+                              ->fn(ctx.get(), *request);          \
+        return forwardCall(writer, stream.get());                 \
     }
 namespace android {
 namespace emulation {
@@ -391,8 +395,12 @@ void EmulatorForwarder::wait() {
     }
 }
 
-EmulatorForwarder::EmulatorForwarder(EmulatorGrpcClient* client, int adbPort, TurnConfig turnConfig)
-    : mClient(client), mWebRtcConnection(client, adbPort, turnConfig), mAvd(client){};
+EmulatorForwarder::EmulatorForwarder(EmulatorGrpcClient* client,
+                                     int adbPort,
+                                     TurnConfig turnConfig)
+    : mClient(client),
+      mWebRtcConnection(client, adbPort, turnConfig),
+      mAvd(client){};
 
 EmulatorForwarder::~EmulatorForwarder() {}
 

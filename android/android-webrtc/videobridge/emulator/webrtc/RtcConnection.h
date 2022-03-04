@@ -27,7 +27,6 @@
 namespace emulator {
 namespace webrtc {
 
-class EmulatorGrpcClient;
 using json = nlohmann::json;
 using android::base::Looper;
 using android::base::RecurrentTask;

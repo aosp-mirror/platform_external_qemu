@@ -4,7 +4,6 @@ android_add_library(
   SRC # cmake-format: sortable
       emulator/avd/FakeAvd.cpp
       emulator/net/EmulatorForwarder.cpp
-      emulator/net/EmulatorGrpcClient.cpp
       emulator/net/SocketForwarder.cpp
       emulator/webrtc/capture/AudioSource.cpp
       emulator/webrtc/capture/GrpcAudioSource.cpp
@@ -22,22 +21,22 @@ android_add_library(
 
 target_link_libraries(
   goldfish-webrtc
-  PUBLIC  webrtc_platform_defs
-          webrtc_api_libjingle_peerconnection_api.headers
-          webrtc_api_libjingle_peerconnection_api
-          webrtc_pc_peerconnection
-          webrtc_api_create_peerconnection_factory
-          webrtc_api_audio_codecs_builtin_audio_decoder_factory
-          webrtc_api_audio_codecs_builtin_audio_encoder_factory
-          webrtc_api_video_codecs_builtin_video_decoder_factory
-          webrtc_api_video_codecs_builtin_video_encoder_factory
-          Threads::Threads
-          android-net
-          android-emu
-          android-grpc
-          android-webrtc
-          nlohmann_json::nlohmann_json
-          ssl)
+  PUBLIC webrtc_platform_defs
+         webrtc_api_libjingle_peerconnection_api.headers
+         webrtc_api_libjingle_peerconnection_api
+         webrtc_pc_peerconnection
+         webrtc_api_create_peerconnection_factory
+         webrtc_api_audio_codecs_builtin_audio_decoder_factory
+         webrtc_api_audio_codecs_builtin_audio_encoder_factory
+         webrtc_api_video_codecs_builtin_video_decoder_factory
+         webrtc_api_video_codecs_builtin_video_encoder_factory
+         Threads::Threads
+         android-net
+         android-emu
+         android-grpc
+         android-webrtc
+         nlohmann_json::nlohmann_json
+         ssl)
 target_include_directories(goldfish-webrtc PUBLIC . ${CMAKE_CURRENT_BINARY_DIR})
 
 android_add_executable(

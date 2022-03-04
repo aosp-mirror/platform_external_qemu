@@ -19,7 +19,7 @@
 #include <memory>           // for unique_ptr, operator==
 #include <string>           // for string, basic_string<>:...
 
-#include "emulator/net/EmulatorGrcpClient.h"  // for EmulatorGrpcClient
+#include "android/emulation/control/utils/EmulatorGrcpClient.h"  // for EmulatorGrpcClient
 #include "emulator_controller.grpc.pb.h"      // for EmulatorController::Stub
 #include "emulator_controller.pb.h"           // for AudioPacket, AudioFormat
 
@@ -75,7 +75,7 @@ void GrpcAudioSource::StreamAudio() {
     request.set_channels(AudioFormat::Stereo);
     request.set_samplingrate(kBitRateHz);
     std::unique_ptr<grpc::ClientReaderInterface<AudioPacket>> stream =
-            mClient->stub()->streamAudio(context.get(), request);
+            mClient->stub<android::emulation::control::EmulatorController>()->streamAudio(context.get(), request);
     if (stream == nullptr) {
         return;
     }

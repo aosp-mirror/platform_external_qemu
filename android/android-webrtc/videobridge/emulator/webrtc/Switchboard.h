@@ -30,7 +30,6 @@
 
 namespace emulator {
 namespace webrtc {
-class EmulatorGrpcClient;
 class Participant;
 
 using android::emulation::control::RtcBridge;
