@@ -1161,7 +1161,13 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
     // previous saves were known to be slow, or the system has low RAM.
     bool savesWereSlow = androidSnapshot_areSavesSlow(
             android::snapshot::kDefaultBootSnapshot);
+
+#if defined(__APPLE__) && defined(__aarch64__)
+    // bug: 222536052
+    bool hasLowRam = false;
+#else
     bool hasLowRam = System::isUnderMemoryPressure();
+#endif
 
     if (saveOnExitChoice == SaveSnapshotOnExit::Always &&
         (fc::isEnabled(fc::QuickbootFileBacked) ||
