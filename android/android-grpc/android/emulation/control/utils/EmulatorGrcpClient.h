@@ -40,13 +40,13 @@ public:
                        std::string cer);
     ~EmulatorGrpcClient() = default;
 
-    template <class stub>
+    template <class T>
     auto stub() {
         if (!mChannel) {
             initializeChannel();
         }
 
-        return stub::NewStub(mChannel);
+        return T::NewStub(mChannel);
     }
 
     std::unique_ptr<grpc::ClientContext> newContext();

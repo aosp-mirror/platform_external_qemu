@@ -28,12 +28,12 @@
 #include "android/base/files/PathUtils.h"                     // for IniFile
 #include "android/emulation/control/secure/BasicTokenAuth.h"  // for BasicTo...
 #include "android/emulation/control/utils/EmulatorGrcpClient.h"  // for Emulato...
+#include "android/utils/debug.h"
 #include "emulator_controller.grpc.pb.h"           // for Emulato...
 #include "grpc/grpc_security_constants.h"          // for LOCAL_TCP
 #include "grpc/impl/codegen/connectivity_state.h"  // for (anonym...
 #include "grpcpp/channel_impl.h"                   // for Channel
 #include "grpcpp/security/credentials.h"
-#include "android/utils/debug.h"
 
 namespace android {
 namespace emulation {
@@ -76,14 +76,13 @@ bool EmulatorGrpcClient::hasOpenChannel(bool tryConnect) {
         auto waitUntil = gpr_time_add(gpr_now(GPR_CLOCK_REALTIME),
                                       gpr_time_from_seconds(5, GPR_TIMESPAN));
         bool connect = mChannel->WaitForConnected(waitUntil);
-        dinfo("%s to emulator: %s, after %d s",
-              connect ? "Connected" : "Not connected", mAddress.c_str(),
-              Stopwatch::sec(sw.elapsedUs()));
+        double time = Stopwatch::sec(sw.elapsedUs());
+        dprint("%s to emulator: %s, after %f us",
+               connect ? "Connected" : "Not connected", mAddress.c_str(), time);
     }
     auto state = mChannel->GetState(tryConnect);
     return state == GRPC_CHANNEL_READY || state == GRPC_CHANNEL_IDLE;
 }
-
 
 static std::string readFile(std::string fname) {
     std::ifstream fstream(PathUtils::asUnicodePath(fname).c_str());
@@ -107,7 +106,10 @@ EmulatorGrpcClient::EmulatorGrpcClient(std::string address,
         sslOpts.pem_cert_chain = readFile(cer);
         call_creds = grpc::SslCredentials(sslOpts);
     }
-    mChannel = grpc::CreateChannel(address, call_creds);
+
+    grpc::ChannelArguments maxSize;
+    maxSize.SetMaxReceiveMessageSize(-1);
+    mChannel = grpc::CreateCustomChannel(address, call_creds, maxSize);
 }
 
 std::unique_ptr<grpc::ClientContext> EmulatorGrpcClient::newContext() {
@@ -126,8 +128,12 @@ bool EmulatorGrpcClient::initializeChannel() {
         return false;
     }
     mAddress = "localhost:" + iniFile.getString("grpc.port", "8554");
-    mChannel = grpc::CreateChannel(
-            mAddress, ::grpc::experimental::LocalCredentials(LOCAL_TCP));
+
+    grpc::ChannelArguments maxSize;
+    maxSize.SetMaxReceiveMessageSize(-1);
+    mChannel = grpc::CreateCustomChannel(
+            mAddress, ::grpc::experimental::LocalCredentials(LOCAL_TCP),
+            maxSize);
 
     // Install token authenticator if needed.
     if (iniFile.hasKey("grpc.token")) {
