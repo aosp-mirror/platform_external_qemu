@@ -400,7 +400,14 @@ struct TextureDataReader {
 
         if (!shouldUseReadPixels(target, level, format, type)) {
             D("with underlying glGetTexImage");
-            gl.glGetTexImage(target, level, format, type, data);
+            bool isAppleM1 = false;
+#if (defined(__APPLE__) && defined(__aarch64__))
+            isAppleM1 = true;
+#endif
+            // glGetTexImage on Mac M1 swiftshader/ANGLE is not there yet
+            if (!isAppleM1 || !isGles2Gles()) {
+                gl.glGetTexImage(target, level, format, type, data);
+            }
             return;
         }
 
