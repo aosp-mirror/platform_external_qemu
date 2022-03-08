@@ -1434,23 +1434,6 @@ extern "C" int main(int argc, char** argv) {
         filelock_release(snapshotLock);
     }
 
-    // Update server-based hw config / feature flags.
-    // Must be done after emulator_parseCommonCommandLineOptions,
-    // since that calls createAVD which sets up critical info needed
-    // by featurecontrol component itself.
-#if (SNAPSHOT_PROFILE > 1)
-    dprint("Starting feature flag application and host hw query with uptime "
-           "%" PRIu64 " ms",
-           get_uptime_ms());
-#endif
-    feature_initialize();
-    feature_update_from_server();
-#if (SNAPSHOT_PROFILE > 1)
-    dprint("Finished feature flag application and host hw query with uptime "
-           "%" PRIu64 " ms",
-           get_uptime_ms());
-#endif
-
     if (!emulator_parseFeatureCommandLineOptions(opts, avd, hw)) {
         return 1;
     }
