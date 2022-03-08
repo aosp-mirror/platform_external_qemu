@@ -27,8 +27,17 @@ logging.basicConfig(level=logging.INFO)
 
 def setup_build_env():
     system = platform.system()
+    machine = platform.machine()
     if system == "Linux":
             return "linux-x86_64"
+    elif system == "Darwin":
+        if machine == "x86_64":
+            return "darwin-x86_64"
+        elif machine == "arm64":
+            return "darwin-aarch64"
+        else:
+            logging.critical("Unknown machine [%s, %s]" % (system, machine))
+            sys.exit(1)
     else:
             logging.critical("Unknown host OS: " + platform.system())
             sys.exit(1)
@@ -41,44 +50,47 @@ def clone_repo(dir):
 
     logging.info("Cloning swiftshader repo at " + git_sha1)
     print(subprocess.run(["git", "clone", "https://swiftshader.googlesource.com/SwiftShader", "-b", git_branch,
-                          "--single-branch", "--no-checkout"], cwd=dir, check=True, capture_output=False).stdout)
+                          "--single-branch", "--no-checkout"], cwd=dir, check=True).stdout)
     logging.info("Checking out at " + git_sha1)
-    print(subprocess.run(["git", "checkout", git_sha1], cwd=git_repo_dir, check=True, capture_output=False))
+    print(subprocess.run(["git", "checkout", git_sha1], cwd=git_repo_dir, check=True))
 
     logging.info("Applying patch https://swiftshader-review.googlesource.com/c/SwiftShader/+/62228")
     print(subprocess.run(["git", "fetch", "https://swiftshader.googlesource.com/SwiftShader",
-                          "refs/changes/28/62228/2"], cwd=git_repo_dir, check=True, capture_output=False))
+                          "refs/changes/28/62228/2"], cwd=git_repo_dir, check=True))
     print(subprocess.run(["git", "cherry-pick", "FETCH_HEAD"],
-                         cwd=git_repo_dir, check=True, capture_output=False))
+                         cwd=git_repo_dir, check=True))
     return git_repo_dir
 
 def build_repo(dir, target):
     logging.info("Building " + dir)
     print(subprocess.run(["git", "submodule", "update", "--init", "--recursive", "third_party/git-hooks"],
-                         cwd=dir, check=True, capture_output=False))
+                         cwd=dir, check=True))
     print(subprocess.run(["./third_party/git-hooks/install_hooks.sh"],
-                         cwd=dir, check=True, capture_output=False))
+                         cwd=dir, check=True))
     build_dir = dir + os.path.sep + "build"
-    toolchain_file = os.path.join(os.path.dirname(__file__), "..", "build", "cmake",
+    toolchain_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "build", "cmake",
                                   "toolchain-%s.cmake" % target)
     # -Wno-deprecated-declarations because swiftshader is still depending on c++17-deprecated operations, and the
     # compiler we use (clang-14) enforces it.
     print(subprocess.run(["cmake", "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
                           "-DCMAKE_CXX_FLAGS=-Wno-deprecated-declarations",
-                          "-DCMAKE_TOOLCHAIN_FILE=%s" % toolchain_file, ".", ".."], cwd=build_dir, check=True,
-                         capture_output=False))
+                          "-DCMAKE_TOOLCHAIN_FILE=%s" % toolchain_file, ".", ".."], cwd=build_dir, check=True))
     print(subprocess.run(["cmake", "--build", ".", "--target", "vk_swiftshader", "--", "-j16"],
-                         cwd=build_dir, check=True, capture_output=False))
+                         cwd=build_dir, check=True))
 
     logging.info("Done building vk_swiftshader.")
     prebuilts_dir = os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "prebuilts",
                                  "android-emulator-build", "common", "vulkan", target, "icds")
 
     if platform.system() == "Linux":
-        out_dir = build_dir + os.path.sep + "Linux"
-        out_files = ["libvk_swiftshader.so", "vk_swiftshader_icd.json"]
-    else:
-        logging.critical("Unknown system. Please implement this for system=" + platform.system())
+        shared_lib_suffix = ".so"
+    elif platform.system() == "Darwin":
+        shared_lib_suffix = ".dylib"
+    elif platform.system() == "Windows":
+        shared_lib_suffix = ".dll"
+
+    out_dir = build_dir + os.path.sep + platform.system()
+    out_files = ["libvk_swiftshader" + shared_lib_suffix, "vk_swiftshader_icd.json"]
 
     for f in out_files:
         logging.info("Copying " + os.path.join(out_dir, f) + " ==> " + prebuilts_dir)
