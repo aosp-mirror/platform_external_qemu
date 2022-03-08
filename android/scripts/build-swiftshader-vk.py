@@ -28,30 +28,6 @@ logging.basicConfig(level=logging.INFO)
 def setup_build_env():
     system = platform.system()
     if system == "Linux":
-            # Make sure clang (clang-11 known to work) is the compiler used. gcc doesn't work
-            search_path = "/usr/bin/"
-            preferred_version = "11"
-            preferred_cxx = search_path + "clang++-" + preferred_version;
-            clang_bins = glob.glob(search_path + "/clang++-*", recursive=False)
-            if not clang_bins:
-                logging.critical("Unable to locate clang in " + search_path)
-                sys.exit(1)
-
-            # use clang-11 if available
-            if preferred_cxx in clang_bins:
-                cxx = preferred_cxx
-            else:
-                # Use latest version
-                latest_version = 0
-                for c in clang_bins:
-                    v = int(c.split("++-")[1])
-                    if v > latest_version:
-                        latest_version = v
-                        cxx = c
-            cc = cxx.replace("+", "")
-            logging.info("Using compiler CXX=" + cxx + " CC=" + cc)
-            os.environ['CC'] = cc;
-            os.environ['CXX'] = cxx;
             return "linux-x86_64"
     else:
             logging.critical("Unknown host OS: " + platform.system())
@@ -83,7 +59,14 @@ def build_repo(dir, target):
     print(subprocess.run(["./third_party/git-hooks/install_hooks.sh"],
                          cwd=dir, check=True, capture_output=False))
     build_dir = dir + os.path.sep + "build"
-    print(subprocess.run(["cmake", ".."], cwd=build_dir, check=True, capture_output=False))
+    toolchain_file = os.path.join(os.path.dirname(__file__), "..", "build", "cmake",
+                                  "toolchain-%s.cmake" % target)
+    # -Wno-deprecated-declarations because swiftshader is still depending on c++17-deprecated operations, and the
+    # compiler we use (clang-14) enforces it.
+    print(subprocess.run(["cmake", "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                          "-DCMAKE_CXX_FLAGS=-Wno-deprecated-declarations",
+                          "-DCMAKE_TOOLCHAIN_FILE=%s" % toolchain_file, ".", ".."], cwd=build_dir, check=True,
+                         capture_output=False))
     print(subprocess.run(["cmake", "--build", ".", "--target", "vk_swiftshader", "--", "-j16"],
                          cwd=build_dir, check=True, capture_output=False))
 
