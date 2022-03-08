@@ -78,8 +78,10 @@
 #include <QCheckBox>
 #include <QCursor>
 #if QT_VERSION >= 0x060000
+#include <QInputDevice>
 #else
 #include <QDesktopWidget>
+#include <QTouchDevice>
 #endif  // QT_VERSION
 #include <QFileDialog>
 #include <QIcon>
@@ -95,7 +97,6 @@
 #include <QSettings>
 #include <QTabletEvent>
 #include <QToolTip>
-#include <QTouchDevice>
 #include <QTouchEvent>
 #include <QWindow>
 #include <QtCore>
@@ -1676,7 +1677,11 @@ bool EmulatorQtWindow::event(QEvent* ev) {
         QTouchEvent* touchEvent = static_cast<QTouchEvent*>(ev);
         // b/216383452 Only process multitouch events generated from touch
         // screen.
+#if QT_VERSION >= 0x060000
+        if (touchEvent->device()->type() == QInputDevice::DeviceType::TouchScreen) {
+#else
         if (touchEvent->device()->type() == QTouchDevice::QTouchDevice::TouchScreen) {
+#endif
             handleTouchPoints(*touchEvent);
             return true;
         }
