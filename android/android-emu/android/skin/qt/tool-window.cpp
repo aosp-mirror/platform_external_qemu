@@ -368,6 +368,12 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->overview_button->setHidden(true);
     }
 
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_DESKTOP) {
+        // Desktop device does not rotate
+        mToolsUi->prev_layout_button->setHidden(true);
+        mToolsUi->next_layout_button->setHidden(true);
+    }
+
     if (android_cmdLineOptions->fuchsia) {
         // These don't apply to Fuchsia
         mToolsUi->prev_layout_button->setHidden(true);
