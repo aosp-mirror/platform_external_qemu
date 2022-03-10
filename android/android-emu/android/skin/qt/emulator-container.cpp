@@ -269,6 +269,15 @@ void EmulatorContainer::changeEvent(QEvent* event) {
 }
 
 void EmulatorContainer::closeEvent(QCloseEvent* event) {
+    if (mEmulatorWindow->isMainThreadRunning()) {
+        // when the qt main thread that runs qemu
+        // main loop is still running, we need to ask
+        // it to exit first, and then come back to
+        // this function again to exit UI thread
+        mEmulatorWindow->requestClose();
+        event->ignore();
+        return;
+    }
     slot_hideModalOverlay();
     slot_hideVirtualSceneInfoDialog();
     mEmulatorWindow->closeEvent(event);

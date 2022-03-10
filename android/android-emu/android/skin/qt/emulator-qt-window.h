@@ -404,6 +404,11 @@ public slots:
 
     bool event(QEvent* ev) override;  // Used to resume the MV on un-minimize
 
+public:
+    bool isMainThreadRunning() const {
+        return mMainLoopThread && mMainLoopThread->isRunning();
+    }
+
 private:
     static const android::base::StringView kRemoteDownloadsDir;
     static const android::base::StringView kRemoteDownloadsDirApi10;

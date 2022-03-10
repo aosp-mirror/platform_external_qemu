@@ -472,12 +472,7 @@ extern void skin_winsys_quit_request()
 {
     D(__FUNCTION__);
     if (auto window = EmulatorQtWindow::getInstance()) {
-        // Note: requestClose() sometimes crashes emulator with the following message
-        // Fatal: QThread: Destroyed while thread is still running.
-        // change it to just mimic the close "x" button behavior
-        // b/223088237
-        //window->requestClose();
-        window->queueQuitEvent();
+        window->requestClose();
     } else if (auto nowindow = EmulatorNoQtNoWindow::getInstance()){
         sMainLoopShouldExit = true;
 #ifdef _WIN32
