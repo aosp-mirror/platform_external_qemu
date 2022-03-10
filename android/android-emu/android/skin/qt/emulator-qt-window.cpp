@@ -2022,8 +2022,10 @@ void EmulatorQtWindow::slot_releaseBitmap(SkinSurface* s,
 
 void EmulatorQtWindow::slot_requestClose(QSemaphore* semaphore) {
     QSemaphoreReleaser semReleaser(semaphore);
-    crashhandler_exitmode(__FUNCTION__);
-    mContainer.close();
+    mToolWindow->shouldClose();
+    if (isMainThreadRunning()) {
+        queueQuitEvent();
+    }
 }
 
 void EmulatorQtWindow::slot_requestUpdate(QRect rect,
