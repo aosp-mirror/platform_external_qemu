@@ -55,6 +55,10 @@ public:
     // receiving endpoint.
     virtual void close(Status status) = 0;
 
+    bool isClosed() { return !mOpen; };
+    bool isClientFinishedWriting() { return mWritesDone; }
+    bool isCancelled() { return mCancelled; };
+
 protected:
     enum class WriteState { BEGIN, COMPLETE };
 
@@ -124,6 +128,8 @@ protected:
 
     Alarm mWriteAlarm;
     bool mOpen{false};
+    bool mCancelled{false};
+    bool mWritesDone{false};
 
 private:
     ServerContext mContext;
@@ -176,7 +182,7 @@ struct grpc_async_signature<void (S::*)(ServerContext*,
 // This is the general connection object that consumers will use
 // to interact with an async connection.
 // You can basically listen for:
-// - Close, when the connection disappears.
+// - Close, when the connection is (partially) closed.
 // - OnRead, invoked when an object was read
 // - Write, call this to place an object on the write queue.
 //  (Note that this is async! It merely schedules the write to be performed.)
@@ -186,11 +192,20 @@ struct grpc_async_signature<void (S::*)(ServerContext*,
 template <class R, class W>
 class AsyncGrpcConnection : public BaseAsyncGrpcConnection {
 public:
-    // Callback that will be called when this connection has closed. No more
-    // events will be delivered, and writes will no longer be possible.
-    // Upon return of this callback the object will be deleted.
+    // Callback that will be called when this connection has (partially) closed.
+    // This can be called multiple times! You should only clean up the connection
+    // once isClose returns true!
     //
-    // TODO(jansene): Do we care about the Status object that might be there?
+    // The connection can now be in one of the following states:
+    //
+    // Partially closed: The client has called WritesDone, no more future read
+    //                   events will be delivered.
+    // Cancelled:        The client cancelled the connection, it is now dead.
+    // Closed:           The server closed the connection and a status was sent,
+    //                   it is now dead.
+    //
+    // You can check the actual status of the connection by calling
+    // isCancelled, isClosed, isClientFinishedWriting
     using CloseCallback = std::function<void(AsyncGrpcConnection<R, W>*)>;
 
     // Callback that will be invoked when an object has arrived at the
