@@ -340,8 +340,11 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->next_layout_button->setHidden(true);
         mToolsUi->volume_up_button->setHidden(true);
         mToolsUi->volume_down_button->setHidden(true);
+    }
 
-        if(avdInfo_getApiLevel(android_avdInfo) >= 28) {
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR &&
+        avdInfo_getApiLevel(android_avdInfo) >= 28) {
+      // Use new button layout for >= API 28 wear emulators
           mToolsUi->overview_button->setHidden(true);
           mToolsUi->power_button->setHidden(true);
           mToolsUi->home_button->setHidden(true);
@@ -352,7 +355,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
           if(avdInfo_getApiLevel(android_avdInfo) == 28) {
             mToolsUi->wear_button_2->setHidden(true);
           }
-        }
     } else {
         mToolsUi->wear_button_1->setHidden(true);
         mToolsUi->wear_button_2->setHidden(true);
