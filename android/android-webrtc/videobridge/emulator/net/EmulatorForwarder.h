@@ -20,11 +20,6 @@
 #include "emulator/avd/FakeAvd.h"
 #include "emulator/webrtc/StandaloneConnection.h"
 #include "android/base/async/AsyncSocketServer.h"
-namespace emulator {
-namespace webrtc {
-class EmulatorGrpcClient;
-}  // namespace webrtc
-}  // namespace emulator
 
 namespace android {
 namespace emulation {
@@ -32,7 +27,7 @@ namespace control {
 class EmulatorAdvertisement;
 class EmulatorControllerService;
 
-using emulator::webrtc::EmulatorGrpcClient;
+using android::emulation::control::EmulatorGrpcClient;
 using Properties = std::unordered_map<std::string, std::string>;
 using emulator::webrtc::StandaloneConnection;
 using android::emulation::control::TurnConfig;

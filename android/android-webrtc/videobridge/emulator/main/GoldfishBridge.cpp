@@ -26,7 +26,7 @@
 #include "android/emulation/control/TurnConfig.h"    // for TurnConfig
 #include "android/utils/debug.h"                     // for android_verbose
 #include "emulator/net/EmulatorForwarder.h"          // for EmulatorForwarder
-#include "emulator/net/EmulatorGrcpClient.h"         // for EmulatorGrpcClient
+#include "android/emulation/control/utils/EmulatorGrcpClient.h"         // for EmulatorGrpcClient
 #include "emulator/webrtc/Switchboard.h"             // for Switchboard
 #include "nlohmann/json.hpp"                         // for json
 
@@ -75,7 +75,7 @@ using android::base::testing::LogOutput;
 using android::emulation::control::EmulatorControllerService;
 using android::emulation::control::EmulatorForwarder;
 using android::emulation::control::TurnConfig;
-using emulator::webrtc::EmulatorGrpcClient;
+using android::emulation::control::EmulatorGrpcClient;
 using emulator::webrtc::Switchboard;
 
 static void printUsage() {
