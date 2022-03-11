@@ -29,8 +29,7 @@
 #include "android/emulation/control/secure/BasicTokenAuth.h"  // for BasicTo...
 #include "android/emulation/control/utils/EmulatorGrcpClient.h"  // for Emulato...
 #include "android/utils/debug.h"
-#include "emulator_controller.grpc.pb.h"           // for Emulato...
-
+#include "emulator_controller.grpc.pb.h"  // for Emulato...
 
 namespace android {
 namespace emulation {
@@ -74,8 +73,9 @@ bool EmulatorGrpcClient::hasOpenChannel(bool tryConnect) {
                                       gpr_time_from_seconds(5, GPR_TIMESPAN));
         bool connect = mChannel->WaitForConnected(waitUntil);
         double time = Stopwatch::sec(sw.elapsedUs());
-        dprint("%s to emulator: %s, after %f us",
-               connect ? "Connected" : "Not connected", mAddress.c_str(), time);
+        VERBOSE_PRINT(grpc, "%s to emulator: %s, after %f us",
+                      connect ? "Connected" : "Not connected", mAddress.c_str(),
+                      time);
     }
     auto state = mChannel->GetState(tryConnect);
     return state == GRPC_CHANNEL_READY || state == GRPC_CHANNEL_IDLE;
@@ -138,8 +138,6 @@ bool EmulatorGrpcClient::initializeChannel() {
         mCredentials = grpc::MetadataCredentialsFromPlugin(
                 std::make_unique<BasicTokenAuthenticator>(token));
     }
-
-    dinfo("Initialized grpc Stub.");
     return true;
 }
 }  // namespace control

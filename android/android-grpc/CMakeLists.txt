@@ -253,25 +253,44 @@ android_add_executable(
   TARGET grpc_stream_screen_benchmark NODISTRIBUTE
   SRC # cmake-format: sortable
       android/emulation/control/test/StreamScreenPerf.cpp)
-target_link_libraries(grpc_stream_screen_benchmark PRIVATE android-grpc android-emu-base android-emu emulator-gbench)
+target_link_libraries(
+  grpc_stream_screen_benchmark PRIVATE android-grpc android-emu-base
+                                       android-emu emulator-gbench)
 
 # Rootcanal service endpoints.
 if(BLUETOOTH_EMULATION)
   protobuf_generate_grpc_cpp(
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}
-    SOURCES emulated_bluetooth_packets.proto emulated_bluetooth_vhci.proto
-    OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR} GENERATED BLUETOOTH_SERVICE_GRPC_SRC)
+    SOURCES emulated_bluetooth.proto emulated_bluetooth_packets.proto
+            emulated_bluetooth_vhci.proto
+    OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
+    GENERATED BLUETOOTH_SERVICE_GRPC_SRC)
 
   android_add_library(
-    TARGET grpc-vhci-forwarder
+    TARGET grpc-emulated-bluetooth
     LICENSE Apache-2.0
     SRC ${BLUETOOTH_SERVICE_GRPC_SRC}
+        android/emulation/bluetooth/BufferedAsyncDataChannelAdapter.cpp
+        android/emulation/bluetooth/EmulatedBluetoothService.cpp
+        android/emulation/bluetooth/PhyConnectionClient.cpp
+        android/emulation/bluetooth/GrpcLinkChannelServer.cpp
         android/emulation/bluetooth/HciAsyncDataChannelAdapter.cpp
         android/emulation/bluetooth/VhciService.cpp)
 
   target_link_libraries(
-    grpc-vhci-forwarder PRIVATE libbt-rootcanal libbt-rootcanal-qemu
-                                android-grpc)
-  target_include_directories(grpc-vhci-forwarder
+    grpc-emulated-bluetooth PRIVATE libbt-rootcanal libbt-rootcanal-qemu
+                                    android-grpc android-emu-base)
+  target_include_directories(grpc-emulated-bluetooth
                              PUBLIC . ${CMAKE_CURRENT_BINARY_DIR})
+
+  android_add_test(
+    TARGET android-grpc-emulated-bluetooth_unittest
+    SRC # cmake-format: sortable
+        android/emulation/bluetooth/BufferedAsyncDataChannelAdapter_unittest.cpp
+        android/emulation/bluetooth/PhyConnectionClient_unittest.cpp
+        android/emulation/bluetooth/GrpcLinkChannelServer_unittest.cpp)
+  target_link_libraries(
+    android-grpc-emulated-bluetooth_unittest
+    PRIVATE grpc-emulated-bluetooth libbt-rootcanal libbt-rootcanal-qemu
+            android-grpc android-emu-base gmock_main)
 endif()

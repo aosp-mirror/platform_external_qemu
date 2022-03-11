@@ -12,17 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "net/multi_datachannel_server.h"
+#include <mutex>          // for mutex, unique_lock
+#include <type_traits>    // for remove_extent_t
+#include <unordered_set>  // for unordered_set
+#include <vector>         // for vector
 
-#include <functional>  // for __base, function
+#include "android/utils/debug.h"
+#include "net/async_data_channel_server.h"  // for AsyncDataChannelServer (p...
+#include "net/multi_datachannel_server.h"   // for MultiDataChannelServer
+
+// #define DEBUG 1
+/* set  for very verbose debugging */
+#ifndef DEBUG
+#define DD(...) (void)0
+#else
+#define DD(...) dinfo(__VA_ARGS__)
+#endif
 
 namespace android {
 namespace net {
 
 MultiDataChannelServer::MultiDataChannelServer(
-        std::vector<std::shared_ptr<AsyncDataChannelServer>> servers)
-    : mServers(servers) {
-    for (auto& channel : mServers) {
+        const DataChannelServerList& servers) {
+    for (auto& channel : servers) {
+        mServers.insert(channel);
         channel->SetOnConnectCallback([&](auto channel, auto server) {
             if (callback_) {
                 callback_(channel, this);
@@ -31,27 +44,39 @@ MultiDataChannelServer::MultiDataChannelServer(
     }
 }
 
+MultiDataChannelServer::MultiDataChannelServer(
+        std::shared_ptr<AsyncDataChannelServer> oneServer)
+    : MultiDataChannelServer(
+              std::vector<std::shared_ptr<AsyncDataChannelServer>>(
+                      {oneServer})) {}
+
 bool MultiDataChannelServer::StartListening() {
-    bool listening = false;
+    std::unique_lock<std::mutex> guard(mServerAccess);
+    bool listening = true;
     for (auto& channel : mServers) {
-        listening = channel->StartListening() || listening;
+        listening = channel->StartListening() && listening;
     }
+    mIsListening = listening;
     return listening;
 }
 
 void MultiDataChannelServer::StopListening() {
+    std::unique_lock<std::mutex> guard(mServerAccess);
     for (auto& channel : mServers) {
         channel->StopListening();
     }
+    mIsListening = false;
 }
 
 void MultiDataChannelServer::Close() {
+    std::unique_lock<std::mutex> guard(mServerAccess);
     for (auto& channel : mServers) {
         channel->Close();
     }
 }
 
 bool MultiDataChannelServer::Connected() {
+    std::unique_lock<std::mutex> guard(mServerAccess);
     for (auto& channel : mServers) {
         if (!channel->Connected()) {
             return false;
@@ -60,5 +85,27 @@ bool MultiDataChannelServer::Connected() {
     return true;
 }
 
+void MultiDataChannelServer::add(
+        std::shared_ptr<AsyncDataChannelServer> server) {
+    DD("Registering %p on %p, --> %s", server.get(), this,
+       (callback_ ? "has callback" : "no callback"));
+    server->SetOnConnectCallback([&](auto channel, auto server) {
+        DD("Forwarding callback from %p -> %p ", server, this);
+        if (callback_) {
+            callback_(channel, this);
+        }
+    });
+    std::unique_lock<std::mutex> guard(mServerAccess);
+    mServers.insert(server);
+    if (mIsListening) {
+        server->StartListening();
+    }
+}
+
+void MultiDataChannelServer::remove(
+        std::shared_ptr<AsyncDataChannelServer> server) {
+    std::unique_lock<std::mutex> guard(mServerAccess);
+    mServers.erase(server);
+}
 }  // namespace net
 }  // namespace android

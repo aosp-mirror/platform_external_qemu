@@ -19,6 +19,7 @@
 #include <string>  // for string
 
 #include "emulator_controller.grpc.pb.h"  // for EmulatorController
+#include "android/utils/debug.h"
 
 namespace android {
 namespace emulation {
@@ -42,8 +43,8 @@ public:
 
     template <class T>
     auto stub() {
-        if (!mChannel) {
-            initializeChannel();
+        if (!hasOpenChannel()) {
+            derror("Channel is not open!");
         }
 
         return T::NewStub(mChannel);

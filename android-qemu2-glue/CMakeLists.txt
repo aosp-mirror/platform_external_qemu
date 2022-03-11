@@ -67,7 +67,7 @@ if(WEBRTC)
   target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
 endif()
 if(BLUETOOTH_EMULATION)
-  target_link_libraries(libqemu2-glue PRIVATE  grpc-vhci-forwarder libbt-rootcanal-qemu)
+  target_link_libraries(libqemu2-glue PRIVATE  grpc-emulated-bluetooth libbt-rootcanal-qemu)
 endif()
 
 target_link_libraries(

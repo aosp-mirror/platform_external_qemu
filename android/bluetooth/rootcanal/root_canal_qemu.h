@@ -20,10 +20,14 @@
 // the activation succeeded.
 namespace android {
 
+namespace base {
+class Looper;
+}
 namespace net {
 
 class HciDataChannelServer;
-}
+class MultiDataChannelServer;
+}  // namespace net
 
 namespace bluetooth {
 class Rootcanal {
@@ -39,12 +43,17 @@ public:
 
     // Access to the /dev/vhci through qemu.
     virtual net::HciDataChannelServer* qemuHciServer() = 0;
+
+    virtual net::MultiDataChannelServer* linkClassicServer() = 0;
+
+    virtual net::MultiDataChannelServer* linkBleServer() = 0;
 };
 
 static std::unique_ptr<Rootcanal> sRootcanal;
 
 class Rootcanal::Builder {
 public:
+    Builder();
     Builder& withHciPort(int port);
     Builder& withHciPort(const char* portStr);
     Builder& withTestPort(int port);
@@ -55,10 +64,10 @@ public:
     Builder& withLinkBlePort(const char* portStr);
     Builder& withControllerProperties(const char* props);
     Builder& withCommandFile(const char* cmdFile);
+    Builder& withLooper(android::base::Looper* looper);
     void buildSingleton();
 
-
-static std::shared_ptr<Rootcanal> getInstance();
+    static std::shared_ptr<Rootcanal> getInstance();
 
 private:
     int mHci = -1;
@@ -67,6 +76,7 @@ private:
     int mLinkBle = -1;
     std::string mDefaultControllerProperties;
     std::string mCmdFile;
+    android::base::Looper* mLooper;
 };
 }  // namespace bluetooth
 }  // namespace android
