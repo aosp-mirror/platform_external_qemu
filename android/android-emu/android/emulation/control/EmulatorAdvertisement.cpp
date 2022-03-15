@@ -76,6 +76,23 @@ int EmulatorAdvertisement::garbageCollect() const {
     return collected;
 }
 
+std::vector<std::string> EmulatorAdvertisement::discoverRunningEmulators(std::string sharedDirectory) {
+    std::vector<std::string> discovered;
+    std::string prefix = PathUtils::addTrailingDirSeparator(sharedDirectory);
+
+    for (auto entry : System::get()->scanDirEntries(sharedDirectory)) {
+        int pid = 0;
+        if (sscanf(entry.c_str(), "%d", &pid) == 1) {
+            auto status = System::get()->waitForProcessExit(pid, 0);
+            if (status == System::WaitExitResult::Timeout) {
+                discovered.push_back(PathUtils::join(prefix, entry));
+            }
+        }
+    }
+
+    return discovered;
+}
+
 void EmulatorAdvertisement::remove() const {
     System::get()->deleteFile(location());
 }
