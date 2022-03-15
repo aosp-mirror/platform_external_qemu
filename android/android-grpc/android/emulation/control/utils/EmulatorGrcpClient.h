@@ -57,7 +57,7 @@ protected:
     bool initializeChannel();
 
     std::shared_ptr<::grpc::Channel> mChannel;
-    std::shared_ptr<grpc_impl::CallCredentials> mCredentials;
+    std::shared_ptr<grpc::CallCredentials> mCredentials;
     std::string mDiscoveryFile;
     std::string mAddress;
 };
