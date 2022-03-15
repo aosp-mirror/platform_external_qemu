@@ -11,12 +11,17 @@
 
 #include "android/base/async/DefaultLooper.h"
 
-#include "android/base/Log.h"
-#include "android/base/system/System.h"
-#include "android/base/sockets/SocketErrors.h"
+#include <errno.h>                              // for ETIMEDOUT, EWOULDBLOCK
+#include <stdint.h>                             // for INT64_MAX, uint64_t
+#include <algorithm>                            // for find_if
+#include <iterator>                             // for prev
+#include <utility>                              // for move, pair
 
-#include <algorithm>
-#include <utility>
+#include "android/base/Log.h"                   // for DCHECK, LogMessage
+#include "android/base/files/Stream.h"          // for Stream
+#include "android/base/sockets/SocketWaiter.h"  // for SocketWaiter
+#include "android/base/system/System.h"         // for System
+#include "android/utils/log_severity.h"         // for EMULATOR_LOG_FATAL
 
 namespace android {
 namespace base {
@@ -75,9 +80,10 @@ void DefaultLooper::updateFdWatch(int fd, unsigned wantedEvents) {
     mWaiter->update(fd, wantedEvents);
 }
 
-Looper::FdWatch* DefaultLooper::createFdWatch(int fd,
-                                          Looper::FdWatch::Callback callback,
-                                          void* opaque) {
+Looper::FdWatch* DefaultLooper::createFdWatch(
+        int fd,
+        Looper::FdWatch::Callback callback,
+        void* opaque) {
     return new FdWatch(this, fd, callback, opaque);
 }
 
@@ -119,10 +125,12 @@ Looper::Timer* DefaultLooper::createTimer(Looper::Timer::Callback callback,
 }
 
 void DefaultLooper::addTask(DefaultLooper::Task* task) {
+    std::unique_lock<std::mutex> guard(mScheduledTasksAccess);
     mScheduledTasks.insert(task);
 }
 
 void DefaultLooper::delTask(DefaultLooper::Task* task) {
+    std::unique_lock<std::mutex> guard(mScheduledTasksAccess);
     mScheduledTasks.erase(task);
 }
 
@@ -140,9 +148,12 @@ int DefaultLooper::runWithDeadlineMs(Looper::Duration deadlineMs) {
     while (!mForcedExit) {
         // Return immediately with EWOULDBLOCK if there are no
         // more timers or watches registered.
-        if (mFdWatches.empty() && mActiveTimers.empty() &&
-            mScheduledTasks.empty()) {
-            return EWOULDBLOCK;
+
+        if (mFdWatches.empty() && mActiveTimers.empty()) {
+            std::unique_lock<std::mutex> guard(mScheduledTasksAccess);
+            if (mScheduledTasks.empty()) {
+                return EWOULDBLOCK;
+            }
         }
 
         // Return immediately with ETIMEDOUT if we've overrun the deadline.
@@ -183,13 +194,17 @@ bool DefaultLooper::runOneIterationWithDeadlineMs(Looper::Duration deadlineMs) {
             timeOut = 0;
     }
 
-    if (!mScheduledTasks.empty()) {
-        timeOut = 0;
-    }
+    TaskSet tasks;
+    {
+        std::unique_lock<std::mutex> guard(mScheduledTasksAccess);
+        if (!mScheduledTasks.empty()) {
+            timeOut = 0;
+        }
 
-    // Run all scheduled tasks, and make sure we remove them from the scheduled
-    // collection.
-    const TaskSet tasks = std::move(mScheduledTasks);
+        // Run all scheduled tasks, and make sure we remove them from the
+        // scheduled collection.
+        tasks = std::move(mScheduledTasks);
+    }
     for (const auto& task : tasks) {
         task->run();
     }
@@ -264,9 +279,9 @@ bool DefaultLooper::runOneIterationWithDeadlineMs(Looper::Duration deadlineMs) {
 }
 
 DefaultLooper::FdWatch::FdWatch(DefaultLooper* looper,
-                            int fd,
-                            Looper::FdWatch::Callback callback,
-                            void* opaque)
+                                int fd,
+                                Looper::FdWatch::Callback callback,
+                                void* opaque)
     : Looper::FdWatch(looper, fd, callback, opaque),
       mWantedEvents(0U),
       mLastEvents(0U),
@@ -337,9 +352,9 @@ void DefaultLooper::FdWatch::fire() {
 }
 
 DefaultLooper::Timer::Timer(DefaultLooper* looper,
-                        Looper::Timer::Callback callback,
-                        void* opaque,
-                        Looper::ClockType clock)
+                            Looper::Timer::Callback callback,
+                            void* opaque,
+                            Looper::ClockType clock)
     : Looper::Timer(looper, callback, opaque, clock),
       mDeadline(kDurationInfinite),
       mPending(false) {
