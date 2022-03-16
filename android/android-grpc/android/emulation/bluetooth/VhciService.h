@@ -23,12 +23,10 @@ class AsyncGrpcHandler;
 namespace bluetooth {
 
 using AsyncVhciForwardingService =
-        bluetooth::VhciForwardingService::WithAsyncMethod_attachVhci<
+        bluetooth::VhciForwardingService::WithCallbackMethod_attachVhci<
                 bluetooth::VhciForwardingService::Service>;
 
 AsyncVhciForwardingService* getVhciForwarder();
-void registerAsyncVhciForwardingService(control::AsyncGrpcHandler* handler,
-                                        AsyncVhciForwardingService* service);
 
 }  // namespace bluetooth
 }  // namespace emulation

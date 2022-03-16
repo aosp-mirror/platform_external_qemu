@@ -86,7 +86,6 @@ android_add_library(
   SRC # cmake-format: sortable
       ${EMULATOR_GRPC_SRC}
       android/emulation/control/adb/AdbService.cpp
-      android/emulation/control/async/AsyncGrpcStream.cpp
       android/emulation/control/audio/AudioStream.cpp
       android/emulation/control/camera/VirtualSceneCamera.cpp
       android/emulation/control/clipboard/Clipboard.cpp
