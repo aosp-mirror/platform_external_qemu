@@ -100,6 +100,8 @@ protected:
         ctx.set_wait_for_ready(wait_for_ready);
         if (call_creds)
             ctx.set_credentials(call_creds);
+        ctx.set_deadline(std::chrono::system_clock::now() +
+                      std::chrono::seconds(15));
         Msg response;
         auto status = client->echo(&ctx, mHelloWorld, &response);
         return std::make_tuple(response, status);
@@ -438,6 +440,7 @@ TEST_F(GrpcServiceTest, SecureWithGoodTokenAccepts) {
     EXPECT_EQ(invocations + 1, mEchoService->invocations());
 }
 
+#ifdef DEPRECATED_ASYNC
 TEST_F(GrpcServiceTest, AsyncBidiServerWorks) {
     VERBOSE_ENABLE(grpc);
     mBuilder.withService(mEchoService)
@@ -599,6 +602,7 @@ TEST_F(GrpcServiceTest, AsyncWritesDoneCallsClose) {
     EXPECT_EQ(2, mEchoService->invocations());
     mEmuController->stop();
 }
+#endif
 }  // namespace control
 }  // namespace emulation
 }  // namespace android

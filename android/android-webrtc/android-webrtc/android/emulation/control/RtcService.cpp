@@ -32,12 +32,6 @@
 #include "android/console.h"                         // for AndroidConsoleAg...
 #include "android/emulation/control/RtcBridge.h"     // for RtcBridge, System
 #include "android/emulation/control/WebRtcBridge.h"  // for WebRtcBridge
-#include "grpc/grpc_security_constants.h"            // for LOCAL_TCP
-#include "grpc/impl/codegen/connectivity_state.h"    // for GRPC_CHANNEL_IDLE
-#include "grpc/impl/codegen/gpr_types.h"             // for gpr_timespec
-#include "grpc/support/time.h"                       // for gpr_now, gpr_tim...
-#include "grpcpp/channel_impl.h"                     // for Channel
-#include "grpcpp/security/credentials.h"             // for LocalCredentials
 #include "rtc_service.grpc.pb.h"                     // for Rtc, Rtc::Stub
 #include "rtc_service.pb.h"                          // for JsepMsg, RtcId
 

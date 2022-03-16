@@ -1,4 +1,10 @@
 # Let's bring the grpc module.
+cmake_policy(SET CMP0079 NEW)
+
+set(_gRPC_RE2_LIBRARIES re2)
+set(_gRPC_RE2_INCLUDE_DIR "${ANDROID_QEMU2_TOP_DIR}/android/third_party/re2")
+
+add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../cares cares)
 add_subdirectory(${ANDROID_QEMU2_TOP_DIR}/../grpc/emulator grpc)
 
 if(LINUX_X86_64)
@@ -6,7 +12,6 @@ if(LINUX_X86_64)
   # (b/156635589)
   target_compile_options(grpc PRIVATE -DSO_REUSEPORT=15)
   target_compile_options(grpc_unsecure PRIVATE -DSO_REUSEPORT=15)
-  target_compile_options(grpc_cronet PRIVATE -DSO_REUSEPORT=15)
 endif()
 
 # Add waterfall only for posix, as there are some issues around

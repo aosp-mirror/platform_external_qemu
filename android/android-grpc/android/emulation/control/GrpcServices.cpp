@@ -19,7 +19,6 @@
 #endif
 #include <assert.h>
 #include <grpcpp/grpcpp.h>
-#include <grpcpp/security/server_credentials_impl.h>
 #include <chrono>
 #include <fstream>
 #include <iterator>
@@ -39,9 +38,6 @@
 #include "android/emulation/control/secure/BasicTokenAuth.h"
 #include "android/emulation/control/secure/JwtTokenAuth.h"
 #include "android/emulation/control/utils/GrpcAndroidLogAdapter.h"
-#include "grpc/grpc_security_constants.h"
-#include "grpcpp/server_builder_impl.h"
-#include "grpcpp/server_impl.h"
 
 namespace android {
 namespace emulation {
