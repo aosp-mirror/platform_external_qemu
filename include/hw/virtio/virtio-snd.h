@@ -15,9 +15,11 @@
 #include "hw/virtio/virtio.h"
 #include "audio/audio.h"
 
-#define VIRTIO_SND_NUM_JACKS        2   /* speaker, mic */
-#define VIRTIO_SND_NUM_PCM_STREAMS  2
-#define VIRTIO_SND_NUM_CHMAPS       2   /* output, input */
+#define VIRTIO_SND_NUM_JACKS           2    /* speaker, mic */
+#define VIRTIO_SND_NUM_PCM_TX_STREAMS  1    /* driver -> device */
+#define VIRTIO_SND_NUM_PCM_RX_STREAMS  1    /* device -> driver */
+#define VIRTIO_SND_NUM_PCM_STREAMS     (VIRTIO_SND_NUM_PCM_TX_STREAMS + VIRTIO_SND_NUM_PCM_RX_STREAMS)
+#define VIRTIO_SND_NUM_CHMAPS          2    /* output, input */
 
 #define TYPE_VIRTIO_SND "virtio-snd"
 #define VIRTIO_SND(obj) \
