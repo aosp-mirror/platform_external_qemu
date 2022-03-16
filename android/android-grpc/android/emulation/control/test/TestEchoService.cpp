@@ -62,7 +62,11 @@ void registerAsyncStreamEcho(AsyncGrpcHandler* handler,
                     from->write(received);
                 });
                 connection->setCloseCallback([testService](auto connection) {
-                    std::cout << "Closed: " << connection->peer();
+                    std::cout << "RequeststreamEcho: " << connection->peer()
+                              << " is "
+                              << (connection->isClosed() ? "completely"
+                                                         : "partially")
+                              << " closed" << std::endl;
                     testService->plusOne();
                 });
             });
@@ -84,8 +88,11 @@ void registerAsyncAnotherTestEchoService(
                     from->write(received);
                 });
                 connection->setCloseCallback([testService](auto connection) {
-                    std::cout << "RequestanotherStreamEcho Closed: "
-                              << connection->peer();
+                    std::cout << "RequestanotherStreamEcho: "
+                              << connection->peer() << " is "
+                              << (connection->isClosed() ? "completely"
+                                                         : "partially")
+                              << " closed" << std::endl;
                     testService->plusOne();
                 });
             });
@@ -112,8 +119,12 @@ void registerAsyncServerStreamingEchoService(
                     }
                 });
                 connection->setCloseCallback([testService](auto connection) {
-                    std::cout << "RequestserverStreamData Closed: "
-                              << connection->peer();
+                    std::cout
+                            << "RequestserverStreamData: " << connection->peer()
+                            << " is "
+                            << (connection->isClosed() ? "completely"
+                                                       : "partially")
+                            << " closed" << std::endl;
                     testService->plusOne();
                 });
             });

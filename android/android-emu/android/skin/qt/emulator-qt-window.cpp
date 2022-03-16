@@ -78,8 +78,10 @@
 #include <QCheckBox>
 #include <QCursor>
 #if QT_VERSION >= 0x060000
+#include <QInputDevice>
 #else
 #include <QDesktopWidget>
+#include <QTouchDevice>
 #endif  // QT_VERSION
 #include <QFileDialog>
 #include <QIcon>
@@ -1673,8 +1675,16 @@ bool EmulatorQtWindow::event(QEvent* ev) {
     if (ev->type() == QEvent::TouchBegin || ev->type() == QEvent::TouchUpdate ||
         ev->type() == QEvent::TouchEnd) {
         QTouchEvent* touchEvent = static_cast<QTouchEvent*>(ev);
-        handleTouchPoints(*touchEvent);
-        return true;
+        // b/216383452 Only process multitouch events generated from touch
+        // screen.
+#if QT_VERSION >= 0x060000
+        if (touchEvent->device()->type() == QInputDevice::DeviceType::TouchScreen) {
+#else
+        if (touchEvent->device()->type() == QTouchDevice::QTouchDevice::TouchScreen) {
+#endif
+            handleTouchPoints(*touchEvent);
+            return true;
+        }
     }
     if (ev->type() == QEvent::WindowActivate && mWindowIsMinimized) {
         mWindowIsMinimized = false;
@@ -2012,8 +2022,10 @@ void EmulatorQtWindow::slot_releaseBitmap(SkinSurface* s,
 
 void EmulatorQtWindow::slot_requestClose(QSemaphore* semaphore) {
     QSemaphoreReleaser semReleaser(semaphore);
-    crashhandler_exitmode(__FUNCTION__);
-    mContainer.close();
+    mToolWindow->shouldClose();
+    if (isMainThreadRunning()) {
+        queueQuitEvent();
+    }
 }
 
 void EmulatorQtWindow::slot_requestUpdate(QRect rect,

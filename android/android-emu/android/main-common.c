@@ -1716,8 +1716,8 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     if (feature_is_enabled(kFeature_Minigbm) &&
         strcmp(hw->hw_gltransport, "virtio-gpu-asg") &&
         strcmp(hw->hw_gltransport, "virtio-gpu-pipe")) {
-        str_reset(&hw->hw_gltransport, "virtio-gpu-asg");
-        D("force gltransport to virtio-gpu-asg\n");
+        str_reset(&hw->hw_gltransport, "virtio-gpu-pipe");
+        D("force gltransport to virtio-gpu-pipe\n");
     }
 
     if (opts->acpi_config != NULL) {

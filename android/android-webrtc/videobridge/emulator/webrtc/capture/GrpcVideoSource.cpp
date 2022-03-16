@@ -61,7 +61,7 @@ std::tuple<int, int> getScreenDimensions(EmulatorGrpcClient* client) {
     auto context = client->newContext();
     int w = 1080, h = 1920;
     EmulatorStatus emuState;
-    auto status = client->stub()->getStatus(context.get(), empty, &emuState);
+    auto status = client->stub<android::emulation::control::EmulatorController>()->getStatus(context.get(), empty, &emuState);
     if (emuState.has_hardwareconfig()) {
         for (int i = 0; i < emuState.hardwareconfig().entry_size(); i++) {
             auto entry = emuState.hardwareconfig().entry(i);
@@ -125,7 +125,7 @@ void GrpcVideoSource::captureFrames() {
     ::grpc::Status status;
     bool warned = false;
     void *got_tag, *my_tag = this;
-    auto rpc = mClient->stub()->PrepareAsyncstreamScreenshot(context.get(),
+    auto rpc = mClient->stub<android::emulation::control::EmulatorController>()->PrepareAsyncstreamScreenshot(context.get(),
                                                              request, &cq);
 
     // Start the async rpc.

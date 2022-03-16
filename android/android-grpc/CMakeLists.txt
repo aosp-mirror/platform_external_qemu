@@ -99,6 +99,7 @@ android_add_library(
       android/emulation/control/secure/JwtTokenAuth.cpp
       android/emulation/control/snapshot/SnapshotService.cpp
       android/emulation/control/utils/AudioUtils.cpp
+      android/emulation/control/utils/EmulatorGrpcClient.cpp
       android/emulation/control/utils/EventWaiter.cpp
       android/emulation/control/utils/GrpcAndroidLogAdapter.cpp
       android/emulation/control/utils/ScreenshotUtils.cpp
@@ -238,3 +239,10 @@ android_add_executable(
       android/emulation/control/test/TestEchoService.cpp)
 target_link_libraries(ipc_reader PRIVATE android-emu android-grpc-test-services)
 add_dependencies(ipc_benchmark ipc_reader)
+
+# Add the benchmark for streaming screenshots
+android_add_executable(
+  TARGET grpc_stream_screen_benchmark NODISTRIBUTE
+  SRC # cmake-format: sortable
+      android/emulation/control/test/StreamScreenPerf.cpp)
+target_link_libraries(grpc_stream_screen_benchmark PRIVATE android-grpc android-emu-base android-emu emulator-gbench)
