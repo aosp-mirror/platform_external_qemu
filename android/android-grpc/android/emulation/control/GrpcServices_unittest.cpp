@@ -466,13 +466,6 @@ TEST_F(GrpcServiceTest, AsyncBidiServerWorks) {
 
     // Our server should have replied.
     EXPECT_EQ(1, response.counter());
-
-    // Now let's just cancel the whole thing.
-    ctx.TryCancel();
-
-    // Give our server a chance to close down.
-    std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    EXPECT_EQ(1, mEchoService->invocations());
     mEmuController->stop();
 }
 
@@ -524,12 +517,8 @@ TEST_F(GrpcServiceTest, AsyncBidiServerHostsManyWorks) {
 
     // Our server should have replied, and flipped our counter.
     EXPECT_EQ(-1, response.counter());
-
     ctx2.TryCancel();
 
-    // Give our server a chance to close down.
-    std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    EXPECT_EQ(2, mEchoService->invocations());
     mEmuController->stop();
 }
 
@@ -566,6 +555,48 @@ TEST_F(GrpcServiceTest, AsyncServerStreamingWorks) {
     // Our server should have replied 5 times
     EXPECT_EQ(hello.counter(), responses);
     ctx.TryCancel();
+    mEmuController->stop();
+}
+
+
+TEST_F(GrpcServiceTest, AsyncWritesDoneCallsClose) {
+    VERBOSE_ENABLE(grpc);
+    mBuilder.withService(mEchoService)
+            .withPortRange(0, 1)
+            .withAsyncServerThreads(1);
+
+    EXPECT_TRUE(construct());
+    auto handler = mEmuController->asyncHandler();
+    registerAsyncStreamEcho(handler, mEchoService);
+
+    // Let's send and receive just one thing..
+    auto creds = ::grpc::experimental::LocalCredentials(LOCAL_TCP);
+    auto channel = grpc::CreateChannel(address(), creds);
+    auto client = TestEcho::NewStub(channel);
+    grpc::ClientContext ctx;
+    ctx.set_deadline(std::chrono::system_clock::now() +
+                      std::chrono::seconds(15));
+    Msg response;
+    auto thingie = client->streamEcho(&ctx);
+    Msg hello;
+    hello.set_counter(1);
+    hello.set_data("Hello World!");
+    thingie->Write(hello);
+    thingie->Read(&response);
+    thingie->WritesDone();
+
+
+    // The invcocation of writes done called the close callback.
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    EXPECT_EQ(1, mEchoService->invocations());
+
+    // Now let's just cancel the whole thing, which completeley
+    // closes the connection, and should result in another close callback
+    ctx.TryCancel();
+
+    // Give our server a chance to close down.
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    EXPECT_EQ(2, mEchoService->invocations());
     mEmuController->stop();
 }
 }  // namespace control

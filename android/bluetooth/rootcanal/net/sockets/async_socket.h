@@ -19,14 +19,14 @@
 
 #include "net/async_data_channel.h"  // for AsyncDataChannel, ReadCallback
 
-namespace test_vendor_lib {
+namespace rootcanal {
 class AsyncManager;
-}  // namespace test_vendor_lib
+}  // namespace rootcanal
 
 namespace android {
 namespace net {
 
-using test_vendor_lib::AsyncManager;
+using rootcanal::AsyncManager;
 
 // A socket based implementation of the AsyncDataChannel interface.
 //

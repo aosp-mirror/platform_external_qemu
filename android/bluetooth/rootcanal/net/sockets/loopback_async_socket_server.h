@@ -19,11 +19,11 @@
 #include "net/async_data_channel_server.h"  // for AsyncDataChannelServer
 #include "net/sockets/async_socket.h"   // for AsyncManager, PosixAsyncS...
 
-namespace test_vendor_lib {
+namespace rootcanal {
 class AsyncManager;
-}  // namespace test_vendor_lib
+}  // namespace rootcanal
 
-using test_vendor_lib::AsyncManager;
+using rootcanal::AsyncManager;
 
 namespace android {
 namespace net {

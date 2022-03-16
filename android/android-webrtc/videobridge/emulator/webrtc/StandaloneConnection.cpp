@@ -22,7 +22,7 @@
 
 #include "android/base/Log.h"                 // for LogStreamVoidify, LOG
 #include "android/base/async/AsyncSocket.h"   // for AsyncSocket
-#include "emulator/net/EmulatorGrcpClient.h"  // for EmulatorGrpcClient
+#include "android/emulation/control/utils/EmulatorGrcpClient.h"  // for EmulatorGrpcClient
 #include "emulator/webrtc/Participant.h"      // for Participant, DataChanne...
 #include "emulator_controller.pb.h"           // for KeyboardEvent, MouseEvent
 #include "google/protobuf/empty.pb.h"         // for Empty
@@ -75,7 +75,7 @@ void StandaloneConnection::connect() {
 
 void StandaloneConnection::send(std::string to, json msg) {
     auto ctx = getEmulatorClient()->newContext();
-    auto rtc = getEmulatorClient()->rtcStub();
+    auto rtc = getEmulatorClient()->stub<android::emulation::control::Rtc>();
     JsepMsg reply;
     reply.mutable_id()->set_guid(mGuid.guid());
     reply.set_message(msg.dump());
@@ -139,7 +139,7 @@ void StandaloneConnection::driveJsep() {
     std::shared_ptr<Participant> participant;
     std::shared_ptr<AsyncSocketServer> socketServer;
 
-    auto rtc = getEmulatorClient()->rtcStub();
+    auto rtc = getEmulatorClient()->stub<android::emulation::control::Rtc>();
     Status status = rtc->requestRtcStream(
             getEmulatorClient()->newContext().get(), Empty(), &mGuid);
     if (status.error_code() != StatusCode::OK) {

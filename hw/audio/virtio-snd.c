@@ -111,7 +111,7 @@ const static struct virtio_snd_pcm_info pcm_infos[VIRTIO_SND_NUM_PCM_STREAMS] = 
                  | (1u << VIRTIO_SND_PCM_RATE_48000),
         .direction = VIRTIO_SND_D_INPUT,
         .channels_min = 1,
-        .channels_max = 2,
+        .channels_max = VIRTIO_SND_PCM_MIC_NUM_CHANNELS,
     },
     {
         .hdr = {
@@ -128,7 +128,7 @@ const static struct virtio_snd_pcm_info pcm_infos[VIRTIO_SND_NUM_PCM_STREAMS] = 
                  | (1u << VIRTIO_SND_PCM_RATE_48000),
         .direction = VIRTIO_SND_D_OUTPUT,
         .channels_min = 1,
-        .channels_max = 5,
+        .channels_max = VIRTIO_SND_PCM_SPEAKERS_NUM_CHANNELS,
     },
 };
 
@@ -138,7 +138,7 @@ const struct virtio_snd_chmap_info chmap_infos[VIRTIO_SND_NUM_CHMAPS] = {
             .hda_fn_nid = VIRTIO_SND_NID_MIC,
         },
         .direction = VIRTIO_SND_D_INPUT,
-        .channels = 2,
+        .channels = VIRTIO_SND_PCM_MIC_NUM_CHANNELS,
         .positions = {
             VIRTIO_SND_CHMAP_FL,
             VIRTIO_SND_CHMAP_FR

@@ -23,7 +23,7 @@
 # Gets the desired clang version used by the various toolchains. Update this if
 # you need to change the compiler
 function(get_clang_version RET_VAL)
-  set(${RET_VAL} "clang-r437112b" PARENT_SCOPE)
+  set(${RET_VAL} "clang-r445002" PARENT_SCOPE)
 endfunction()
 
 # This invokes the toolchain generator HOST The host to use PARAM1, PARAM2
@@ -179,7 +179,7 @@ function(_get_host_tag RET_VAL)
     execute_process(COMMAND sysctl -n sysctl.proc_translated
                     OUTPUT_VARIABLE IS_ARM_TRANSLATED
                     RESULT_VARIABLE SYSCTL_RESULT)
-    if(CPU_ARCH MATCHES ".*x86_64.*" AND NOT (SYSCL_RESULT EQUAL 0 AND IS_ARM_TRANSLATED MATCHES "1*"))
+    if(CPU_ARCH MATCHES ".*x86_64.*" AND NOT (SYSCTL_RESULT EQUAL 0 AND IS_ARM_TRANSLATED MATCHES "1*"))
       set(${RET_VAL} "darwin-x86_64" PARENT_SCOPE)
     else()
       set(${RET_VAL} "darwin-aarch64" PARENT_SCOPE)

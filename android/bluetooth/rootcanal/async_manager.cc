@@ -35,7 +35,7 @@
 #include "android/base/sockets/SocketWaiter.h"  // for SocketWaiter, SocketW...
 #include "android/utils/debug.h"
 
-namespace test_vendor_lib {
+namespace rootcanal {
 // Implementation of AsyncManager is divided between two classes, three if
 // AsyncManager itself is taken into account, but its only responsability
 // besides being a proxy for the other two classes is to provide a global
@@ -544,7 +544,7 @@ bool AsyncManager::CancelAsyncTask(AsyncTaskId async_task_id) {
 }
 
 bool AsyncManager::CancelAsyncTasksFromUser(
-    test_vendor_lib::AsyncUserId user_id) {
+    rootcanal::AsyncUserId user_id) {
   return taskManager_p_->CancelAsyncTasksFromUser(user_id);
 }
 
@@ -552,4 +552,4 @@ void AsyncManager::Synchronize(const CriticalCallback& critical) {
   std::unique_lock<std::mutex> guard(synchronization_mutex_);
   critical();
 }
-}  // namespace test_vendor_lib
+}  // namespace rootcanal

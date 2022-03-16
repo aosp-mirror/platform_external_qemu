@@ -105,8 +105,16 @@ void BaseAsyncGrpcConnection::execute(QueueState state) {
             // the incoming message and get ready to listen for the next
             // message.
             if (mOpen) {
-                notifyRead();
-                scheduleRead();
+                if (isClientFinishedWriting()) {
+                    // the client completed writing and has called writes
+                    // done on the client stream. Inform listeners of partial
+                    // closure. (No future reads are coming).
+                    notifyClose();
+                } else {
+                    // The client is still actively writing data to the stream.
+                    notifyRead();
+                    scheduleRead();
+                }
             }
             break;
         }
@@ -126,10 +134,10 @@ void BaseAsyncGrpcConnection::execute(QueueState state) {
         }
 
         case QueueState::CANCELLED:
+            mCancelled = mContext.IsCancelled();
             [[fallthrough]];
         case QueueState::FINISHED: {
-            // Notify listeners of closing. TODO(jansene): Do we care
-            // about finsihed/cancelled in bidi?
+            // Notify listeners of closing.
             mOpen = false;
             notifyClose();
             break;
@@ -161,8 +169,8 @@ BaseAsyncGrpcConnection::CompletionQueueTask::CompletionQueueTask(
         QueueState state)
     : mConnection(con), mState(state) {
     mConnection->mRefcount++;
-    DD("Registered %p (%p,%d:%s)", this, mConnection, mConnection->mRefcount,
-       queueStateStr(mState));
+    DD("Registered %p (%s,%d:%s)", this, mConnection->peer().c_str(),
+       mConnection->mRefcount, queueStateStr(mState));
 }
 
 const char* BaseAsyncGrpcConnection::CompletionQueueTask::queueStateStr(
@@ -175,7 +183,7 @@ const char* BaseAsyncGrpcConnection::CompletionQueueTask::queueStateStr(
 
 BaseAsyncGrpcConnection::CompletionQueueTask::~CompletionQueueTask() {
     int count = mConnection->mRefcount--;
-    DD("Completed %p (%p,%d:%s)", this, mConnection, count,
+    DD("Completed %p (%s,%d:%s)", this, mConnection->peer().c_str(), count,
        queueStateStr(mState));
     if (count == 0) {
         // We can now safely  delete the connection.
@@ -212,17 +220,20 @@ void AsyncGrpcHandler::runQueue(ServerCompletionQueue* queue) {
         // 2 cases, it's ok to handle this request.
         // or we are done with it..
         if (ok) {
-            DD("Ok for %p (%p:%s)", task, task->connection(),
-               task->getStateStr());
+            DD("Ok for %p (%p:%s:%s)", task, task->connection(),
+               task->connection()->peer().c_str(), task->getStateStr());
             task->execute();
         } else {
-            // TODO(jansene): We could also immediately notify the
-            // connection of a connection issues. Note: this happens
-            // very frequently, for example when a client prematurely
-            // disconnects, it is too common to consider logging it as
-            // an error.
-            VERBOSE_PRINT(grpc, "Not ok (disconnected?) for %p (%p:%s)", task,
-                          task->connection(), task->getStateStr());
+            // This client has completed writing
+            if (task->getState() == BaseAsyncGrpcConnection::QueueState::READ) {
+                task->connection()->mWritesDone = true;
+                task->execute();
+            } else {
+                VERBOSE_PRINT(grpc, "Not ok (disconnected?) for %p (%p:%s:%s)",
+                              task, task->connection(),
+                              task->connection()->peer().c_str(),
+                              task->getStateStr());
+            }
         }
         delete task;
     }

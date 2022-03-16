@@ -624,6 +624,10 @@ target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN
 
 target_link_libraries(android-qemu-deps INTERFACE virglrenderer-headers)
 
+if (LINUX_AARCH64)
+    message(STATUS "Suprressing all warnings as gcc has too many too count.")
+    add_c_flag("-w")
+endif()
 # Now we add the normal android libs, so we can use them
 add_subdirectory(android)
 add_subdirectory(android-qemu2-glue)

@@ -15,11 +15,6 @@
 #include "emulator/webrtc/capture/GrpcAudioSource.h"
 #include "emulator/webrtc/capture/GrpcVideoSource.h"
 
-namespace emulator {
-namespace webrtc {
-class EmulatorGrpcClient;
-}  // namespace webrtc
-}  // namespace emulator
 namespace webrtc {
 class PeerConnectionFactoryInterface;
 }  // namespace webrtc

@@ -30,7 +30,7 @@
 #include "android/emulation/control/EmulatorAdvertisement.h"  // for Emulato...
 #include "android/utils/file_io.h"                            // for android...
 #include "android/utils/path.h"                               // for path_mk...
-#include "emulator/net/EmulatorGrcpClient.h"                  // for Emulato...
+#include "android/emulation/control/utils/EmulatorGrcpClient.h"                  // for Emulato...
 #include "emulator_controller.grpc.pb.h"                      // for Emulato...
 #include "emulator_controller.pb.h"                           // for Emulato...
 #include "google/protobuf/empty.pb.h"                         // for Empty
@@ -50,7 +50,7 @@
 
 using android::base::PathUtils;
 using android::base::System;
-using emulator::webrtc::EmulatorGrpcClient;
+using android::emulation::control::EmulatorGrpcClient;
 using ::google::protobuf::Empty;
 using grpc::Status;
 
@@ -162,7 +162,7 @@ bool FakeAvd::create() {
 }
 
 bool FakeAvd::retrieveRemoteProperties() {
-    auto stub = mClient->stub();
+    auto stub = mClient->stub<android::emulation::control::EmulatorController>();
     auto ctx = mClient->newContext();
     Empty empty;
     EmulatorStatus response;
