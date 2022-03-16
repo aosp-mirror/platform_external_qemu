@@ -262,6 +262,7 @@ OPT_PARAM(rootcanal_link_port, "<port>", "Rootcanal link layer port.")
 OPT_PARAM(rootcanal_link_ble_port, "<port>", "Rootcanal link ble layer port.")
 OPT_PARAM(rootcanal_controller_properties_file, "<file>", "Rootcanal controller_properties.json file.")
 OPT_PARAM(rootcanal_default_commands_file, "<file>", "Rootcanal commands file to run on launch.")
+OPT_FLAG(forward_vhci, "Enable the VHCI grpc forwarding service.")
 #endif
 
 OPT_PARAM(multidisplay, "index width height dpi flag", "config multiple displays.")

@@ -18,22 +18,24 @@
 #include <thread>
 #include "android/utils/debug.h"
 
+//#define DEBUG 1
 /* set  for very verbose debugging */
 #ifndef DEBUG
-#define DD(...) (void)0
+#define DD(...) (void)1
 #define DD_BUF(buf, len) (void)0
 #else
 #define DD(...) dinfo(__VA_ARGS__)
 #define DD_BUF(buf, len)                                \
     do {                                                \
-        printf("QemuChannel %s (qemu):", __func__);     \
+        dprint("QemuChannel %s (qemu):", __func__);     \
         for (int x = 0; x < len; x++) {                 \
-            if (isprint((int)buf[x]))                   \
-                printf("%c", buf[x]);                   \
-            else                                        \
-                printf("[0x%02x]", 0xff & (int)buf[x]); \
+            if (isprint((int)buf[x])) {                 \
+                dprint("%c", buf[x]);                   \
+            } else {                                    \
+                dprint("[0x%02x]", 0xff & (int)buf[x]); \
+            }                                           \
         }                                               \
-        printf("\n");                                   \
+        dprint("\n");                                   \
     } while (0)
 
 #endif
@@ -41,8 +43,7 @@
 namespace android {
 namespace net {
 
-QemuDataChannel::QemuDataChannel(QAndroidHciAgent const* agent,
-                                 Looper* looper)
+QemuDataChannel::QemuDataChannel(QAndroidHciAgent const* agent, Looper* looper)
     : mAgent(agent), mLooper(looper) {
     mAgent->registerDataAvailableCallback(this, [](void* opaque) {
         QemuDataChannel* pThis = reinterpret_cast<QemuDataChannel*>(opaque);
@@ -51,6 +52,10 @@ QemuDataChannel::QemuDataChannel(QAndroidHciAgent const* agent,
 }
 
 ssize_t QemuDataChannel::Recv(uint8_t* buffer, uint64_t bufferSize) {
+    if (!mOpen) {
+        errno = EBADF;
+        return 0;
+    }
     ssize_t res = mAgent->recv(buffer, bufferSize);
     if (res < 0) {
         DD("Recv < 0: %s (qemu)", strerror(errno));
@@ -66,6 +71,10 @@ ssize_t QemuDataChannel::Recv(uint8_t* buffer, uint64_t bufferSize) {
 }
 
 ssize_t QemuDataChannel::Send(const uint8_t* buffer, uint64_t bufferSize) {
+    if (!mOpen) {
+        errno = EBADF;
+        return 0;
+    }
     ssize_t res = mAgent->send(buffer, bufferSize);
     DD_BUF(buffer, res);
     DD("Send: %zd bytes (qemu)", res);
@@ -90,11 +99,15 @@ void QemuDataChannel::StopWatching() {
 using namespace std::chrono_literals;
 
 void QemuDataChannel::ReadReady() {
+    DD("ReadReady");
     if (mCallback) {
-        mLooper->scheduleCallback([&]() {
-            mCallback(this);
-        });
+        mLooper->scheduleCallback([&]() { mCallback(this); });
     }
+}
+
+void QemuDataChannel::Close() {
+    mOpen = false;
+    ReadReady();
 }
 
 }  // namespace net
