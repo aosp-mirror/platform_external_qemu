@@ -922,10 +922,14 @@ static void virtio_snd_device_realize(DeviceState *dev, Error **errp) {
 
     virtio_init(vdev, TYPE_VIRTIO_SND, VIRTIO_ID_SOUND,
                 sizeof(struct virtio_snd_config));
-    snd->ctl_vq = virtio_add_queue(vdev, 16, virtio_snd_handle_ctl);
-    snd->event_vq = virtio_add_queue(vdev, 4, virtio_snd_handle_event);
-    snd->tx_vq = virtio_add_queue(vdev, 128, virtio_snd_handle_tx);
-    snd->rx_vq = virtio_add_queue(vdev, 128, virtio_snd_handle_rx);
+    snd->ctl_vq = virtio_add_queue(vdev, VIRTIO_SND_NUM_PCM_STREAMS * 4,
+                                   virtio_snd_handle_ctl);
+    snd->event_vq = virtio_add_queue(vdev, VIRTIO_SND_NUM_PCM_STREAMS * 2,
+                                   virtio_snd_handle_event);
+    snd->tx_vq = virtio_add_queue(vdev, VIRTIO_SND_NUM_PCM_TX_STREAMS * 8,
+                                  virtio_snd_handle_tx);
+    snd->rx_vq = virtio_add_queue(vdev, VIRTIO_SND_NUM_PCM_RX_STREAMS * 8,
+                                  virtio_snd_handle_rx);
 }
 
 static void virtio_snd_device_unrealize(DeviceState *dev, Error **errp) {
