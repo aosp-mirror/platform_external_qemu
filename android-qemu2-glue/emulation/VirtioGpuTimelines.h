@@ -27,7 +27,7 @@
 class VirtioGpuTimelines {
    public:
     using FenceId = uint64_t;
-    using CtxId = VirglCtxId;
+    using CtxId = VirtioGpuCtxId;
     using TaskId = uint64_t;
     VirtioGpuTimelines();
 
