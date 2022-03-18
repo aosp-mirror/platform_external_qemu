@@ -27,7 +27,7 @@ option java_multiple_files = true;
 option java_package = "com.android.emulator.bluetooth";
 
 package android.emulation.bluetooth;
-
+import "emulated_bluetooth_packets.proto";
 // An Emulated Bluetoot Service exposes the emulated bluetooth chip from the android
 // emulator. It allows you to register emulated bluetooth devices and control
 // the packets that are exchanged between the device and the world.
@@ -64,6 +64,19 @@ service EmulatedBluetoothService {
     // For example a wear device can connect to an android emulator through
     // this.
     rpc registerBlePhy(stream RawData) returns (stream RawData);
+
+    // Connect the device to the emulated bluetooth chip. The device will
+    // participate in the network. You can configure the chip to scan, advertise
+    // and setup connections with other devices that are connected to the
+    // network.
+    //
+    // This is usually used when you have a need for an emulated bluetooth chip
+    // and have a bluetooth stack that can interpret and handle the packets
+    // correctly.
+    //
+    // For example the apache nimble stack can use this endpoint as the
+    // transport layer.
+    rpc registerHCIDevice(stream HCIPacket) returns (stream HCIPacket);
 };
 
 message RawData {

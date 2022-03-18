@@ -47,6 +47,8 @@ public:
     virtual net::MultiDataChannelServer* linkClassicServer() = 0;
 
     virtual net::MultiDataChannelServer* linkBleServer() = 0;
+
+    virtual net::MultiDataChannelServer* hciServer() = 0;
 };
 
 static std::unique_ptr<Rootcanal> sRootcanal;

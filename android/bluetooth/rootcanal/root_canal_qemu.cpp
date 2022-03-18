@@ -47,12 +47,14 @@ public:
             std::unique_ptr<AsyncManager> am,
             std::shared_ptr<net::HciDataChannelServer> qemuHciServer,
             std::shared_ptr<net::MultiDataChannelServer> linkBleServer,
-            std::shared_ptr<net::MultiDataChannelServer> linkClassicServer)
+            std::shared_ptr<net::MultiDataChannelServer> linkClassicServer,
+            std::shared_ptr<net::MultiDataChannelServer> hciServer)
         : mRootcanal(std::move(rootcanal)),
           mAsyncManager(std::move(am)),
           mQemuHciServer(std::move(qemuHciServer)),
           mLinkBleServer(linkBleServer),
-          mLinkClassicServer(linkClassicServer) {}
+          mLinkClassicServer(linkClassicServer),
+          mHciServer(hciServer) {}
     ~RootcanalImpl() {}
 
     // Starts the root canal service.
@@ -77,11 +79,16 @@ public:
         return mLinkClassicServer.get();
     }
 
+    net::MultiDataChannelServer* hciServer() override {
+        return mHciServer.get();
+    }
+
 private:
     std::unique_ptr<AsyncManager> mAsyncManager;
     std::shared_ptr<net::HciDataChannelServer> mQemuHciServer;
     std::shared_ptr<net::MultiDataChannelServer> mLinkBleServer;
     std::shared_ptr<net::MultiDataChannelServer> mLinkClassicServer;
+    std::shared_ptr<net::MultiDataChannelServer> mHciServer;
     std::unique_ptr<TestEnvironment> mRootcanal;
 };
 
@@ -196,7 +203,8 @@ void RootcanalBuilder::buildSingleton() {
 
     sRootcanalImpl = std::make_shared<RootcanalImpl>(
             std::move(testEnv), std::move(asyncManager), qemuHciServer,
-            std::move(linkBleServer), std::move(linkServer));
+            std::move(linkBleServer), std::move(linkServer),
+            std::move(hciServer));
 }
 }  // namespace bluetooth
 }  // namespace android
