@@ -37,6 +37,14 @@
 #define VIRTIO_SND_NID_MIC                      0
 #define VIRTIO_SND_NID_SPEAKERS                 0
 
+union VirtIOSoundCtlRequest {
+    struct virtio_snd_hdr hdr;
+    struct virtio_snd_query_info r1;
+    struct virtio_snd_jack_remap r2;
+    struct virtio_snd_pcm_set_params r3;
+    struct virtio_snd_pcm_hdr r4;
+};
+
 static const VMStateDescription virtio_snd_vmstate = {
     .name = TYPE_VIRTIO_SND,
     .minimum_version_id = 0,
@@ -834,8 +842,9 @@ virtio_snd_process_ctl_chmap_info(VirtQueueElement *e,
 }
 
 static size_t virtio_snd_process_ctl(VirtQueueElement *e, VirtIOSound *snd) {
-    const size_t req_size = MIN(iov_size(e->out_sg, e->out_num), sizeof(snd->ctl_req_buf));
-    struct virtio_snd_hdr *hdr = &snd->ctl_req_buf.hdr;
+    union VirtIOSoundCtlRequest ctl_req_buf;
+    const size_t req_size = MIN(iov_size(e->out_sg, e->out_num), sizeof(ctl_req_buf));
+    struct virtio_snd_hdr *hdr = &ctl_req_buf.hdr;
 
     if (req_size < sizeof(*hdr)) {
         return 0;
