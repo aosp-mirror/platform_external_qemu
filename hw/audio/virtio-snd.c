@@ -209,6 +209,10 @@ const char *stream_state_str(const int state) {
     }
 }
 
+static bool is_output_stream(const VirtIOSoundPCMStream *stream) {
+    return pcm_infos[stream->id].direction == VIRTIO_SND_D_OUTPUT;
+}
+
 static void vq_consume_element(VirtQueue *vq, VirtQueueElement *e, size_t size) {
     virtqueue_push(vq, e, size);
     g_free(e);
@@ -333,10 +337,12 @@ uint32_t update_latency_bytes(VirtIOSoundPCMStream *stream, int x) {
     return val;
 }
 
-static void virtio_snd_stream_init(VirtIOSoundPCMStream *stream,
+static void virtio_snd_stream_init(const unsigned stream_id,
+                                   VirtIOSoundPCMStream *stream,
                                    VirtIOSound *snd) {
     memset(stream, 0, sizeof(*stream));
 
+    stream->id = stream_id;
     stream->snd = snd;
     stream->voice.raw = NULL;
     ring_buffer_init(&stream->pcm_buf);
@@ -345,7 +351,7 @@ static void virtio_snd_stream_init(VirtIOSoundPCMStream *stream,
 }
 
 static void virtio_snd_process_ctl_stream_stop_impl(VirtIOSoundPCMStream *stream) {
-    if (stream->direction == VIRTIO_SND_D_OUTPUT) {
+    if (is_output_stream(stream)) {
         SWVoiceOut *out = stream->voice.out;
         AUD_set_active_out(out, 0);
     } else {
@@ -359,7 +365,7 @@ static void virtio_snd_process_ctl_stream_unprepare_locked(VirtIOSoundPCMStream 
     VirtQueue *tx_vq = snd->tx_vq;
 
     if (stream->voice.raw) {
-        if (stream->direction == VIRTIO_SND_D_OUTPUT) {
+        if (is_output_stream(stream)) {
             AUD_close_out(&stream->snd->card, stream->voice.out);
         } else {
             AUD_close_in(&stream->snd->card, stream->voice.in);
@@ -531,7 +537,6 @@ virtio_snd_process_ctl_pcm_set_params_impl(const struct virtio_snd_pcm_set_param
     stream->as.fmt = virtio_snd_fmt_to_aud(req->format);
     stream->as.nchannels = req->channels;
     stream->as.endianness = AUDIO_HOST_ENDIANNESS;
-    stream->direction = pcm_infos[stream_id].direction;
     stream->frame_size = get_frame_size(&stream->as);
     stream->buffer_frames = stream->buffer_bytes / stream->frame_size;
 
@@ -757,7 +762,7 @@ virtio_snd_process_ctl_pcm_start_impl(unsigned stream_id, VirtIOSound* snd) {
     stream->frames_sent = 0;
     stream->frames_skipped = 0;
 
-    if (stream->direction == VIRTIO_SND_D_OUTPUT) {
+    if (is_output_stream(stream)) {
         SWVoiceOut *voice = stream->voice.out;
         AUD_set_active_out(voice, 1);
         AUD_init_time_stamp_out(voice, &stream->start_timestamp);
@@ -931,7 +936,7 @@ static void virtio_snd_device_realize(DeviceState *dev, Error **errp) {
     AUD_register_card(TYPE_VIRTIO_SND, &snd->card);
 
     for (i = 0; i < VIRTIO_SND_NUM_PCM_STREAMS; ++i) {
-        virtio_snd_stream_init(&snd->streams[i], snd);
+        virtio_snd_stream_init(i, &snd->streams[i], snd);
     }
 
     virtio_init(vdev, TYPE_VIRTIO_SND, VIRTIO_ID_SOUND,

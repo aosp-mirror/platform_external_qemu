@@ -75,8 +75,8 @@ struct VirtIOSoundPCMStream {
     int period_bytes;
     int buffer_frames;
 
-    uint8_t direction;
     uint8_t state;
+    uint8_t id;
     uint8_t frame_size;
 };
 
