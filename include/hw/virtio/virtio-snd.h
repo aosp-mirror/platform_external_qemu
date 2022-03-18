@@ -88,14 +88,6 @@ typedef struct VirtIOSound {
     VirtQueue *rx_vq;
     VirtIOSoundPCMStream streams[VIRTIO_SND_NUM_PCM_STREAMS];
     QEMUSoundCard card;
-
-    union {
-        struct virtio_snd_hdr hdr;
-        struct virtio_snd_query_info r1;
-        struct virtio_snd_jack_remap r2;
-        struct virtio_snd_pcm_set_params r3;
-        struct virtio_snd_pcm_hdr r4;
-    } ctl_req_buf;
 } VirtIOSound;
 
 #endif /* QEMU_VIRTIO_SND_H */
