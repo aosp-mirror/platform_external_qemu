@@ -12,20 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "android/emulation/control/test/TestEchoService.h"  // for Service
+#include "android/emulation/control/test/TestEchoService.h"
 
-#include <functional>  // for __base
-#include <iostream>    // for operator<<
-
-#include "android/emulation/control/async/AsyncGrpcStream.h"  // for AsyncGr...
-#include "grpcpp/impl/codegen/async_stream.h"                 // for ServerA...
-#include "test_echo_service.pb.h"                             // for Msg
-
-namespace google {
-namespace protobuf {
-class Empty;
-}  // namespace protobuf
-}  // namespace google
+#include <grpcpp/grpcpp.h>
+#include "android/emulation/control/utils/SimpleAsyncGrpc.h"
+#include "test_echo_service.pb.h"
 
 using grpc::ServerContext;
 using grpc::Status;
@@ -50,84 +41,54 @@ Status TestEchoServiceImpl::data(ServerContext* context,
     return Status::OK;
 }
 
-void registerAsyncStreamEcho(AsyncGrpcHandler* handler,
-                             AsyncTestEchoService* testService) {
-    handler->registerConnectionHandler(testService,
-                                       &AsyncTestEchoService::RequeststreamEcho)
-            .withCallback([testService](auto connection) {
-                std::cout << "Received a connection from: "
-                          << connection->peer() << std::endl;
-                connection->setReadCallback([](auto from, auto received) {
-                    std::cout << "Received: " << received.DebugString();
-                    from->write(received);
-                });
-                connection->setCloseCallback([testService](auto connection) {
-                    std::cout << "RequeststreamEcho: " << connection->peer()
-                              << " is "
-                              << (connection->isClosed() ? "completely"
-                                                         : "partially")
-                              << " closed" << std::endl;
-                    testService->plusOne();
-                });
-            });
+grpc::ServerBidiReactor<Msg, Msg>* AsyncTestEchoService::streamEcho(
+        ::grpc::CallbackServerContext* context) {
+    class StreamEchoHandler : public SimpleBidiStream<Msg, Msg> {
+    public:
+        StreamEchoHandler(AsyncTestEchoService* parent) : mParent(parent) {}
+        void Read(const Msg* msg) override { Write(*msg); }
+
+        void OnDone() override {
+            mParent->plusOne();
+            delete this;
+        }
+
+        void OnCancel() override { Finish(grpc::Status::CANCELLED); }
+
+    private:
+        AsyncTestEchoService* mParent;
+    };
+
+    return new StreamEchoHandler(this);
 }
 
-void registerAsyncAnotherTestEchoService(
-        AsyncGrpcHandler* handler,
-        AsyncAnotherTestEchoService* testService) {
-    handler->registerConnectionHandler(
-                   testService,
-                   &AsyncAnotherTestEchoService::RequestanotherStreamEcho)
-            .withCallback([testService](auto connection) {
-                std::cout << "RequestanotherStreamEcho incoming: "
-                          << connection->peer() << std::endl;
-                connection->setReadCallback([](auto from, auto received) {
-                    std::cout << "RequestanotherStreamEcho received: "
-                              << received.DebugString();
-                    received.set_counter(-received.counter());
-                    from->write(received);
-                });
-                connection->setCloseCallback([testService](auto connection) {
-                    std::cout << "RequestanotherStreamEcho: "
-                              << connection->peer() << " is "
-                              << (connection->isClosed() ? "completely"
-                                                         : "partially")
-                              << " closed" << std::endl;
-                    testService->plusOne();
-                });
-            });
-}
+::grpc::ServerWriteReactor<Msg>* AsyncTestEchoService::serverStreamData(
+        ::grpc::CallbackServerContext* context,
+        const Msg* request) {
+    class StreamDataHandler : public SimpleWriter<Msg> {
+    public:
+        StreamDataHandler(AsyncTestEchoService* parent, const Msg* received)
+            : mParent(parent) {
+            Msg reply;
+            reply.set_msg("Hello!");
+            for (int i = 0; i < received->counter(); i++) {
+                reply.set_counter(i + 1);
+                Write(reply);
+            }
+        }
 
-void registerAsyncServerStreamingEchoService(
-        AsyncGrpcHandler* handler,
-        AsyncServerStreamingEchoService* testService) {
-    handler->registerConnectionHandler(
-                   testService,
-                   &AsyncServerStreamingEchoService::RequestserverStreamData)
-            .withCallback([testService](auto connection) {
-                std::cout << "RequestserverStreamData incoming: "
-                          << connection->peer() << std::endl;
-                connection->setReadCallback([](auto from, auto received) {
-                    std::cout << "RequestserverStreamData received: "
-                              << received.DebugString();
-                    Msg reply;
-                    reply.set_msg("Hello!");
-                    for (int i = 0; i < received.counter(); i++) {
-                        reply.set_counter(i + 1);
-                        std::cout << "Writing " << reply.DebugString();
-                        from->write(reply);
-                    }
-                });
-                connection->setCloseCallback([testService](auto connection) {
-                    std::cout
-                            << "RequestserverStreamData: " << connection->peer()
-                            << " is "
-                            << (connection->isClosed() ? "completely"
-                                                       : "partially")
-                            << " closed" << std::endl;
-                    testService->plusOne();
-                });
-            });
+        void OnDone() override {
+            mParent->plusOne();
+            delete this;
+        }
+
+        void OnCancel() override { Finish(grpc::Status::CANCELLED); }
+
+    private:
+        AsyncTestEchoService* mParent;
+    };
+
+    return new StreamDataHandler(this, request);
 }
 
 }  // namespace control

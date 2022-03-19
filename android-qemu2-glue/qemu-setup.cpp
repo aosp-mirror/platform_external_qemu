@@ -337,14 +337,12 @@ int qemu_setup_grpc() {
                            .withService(h2o)
                            .withService(snapshot)
                            .withService(uiController)
-                           .withSecureService(adb)
-                           .withAsyncServerThreads(1);
+                           .withSecureService(adb);
 
 #ifdef ANDROID_BLUETOOTH
-    android::emulation::bluetooth::AsyncVhciForwardingService* vhciFwd = nullptr;
     if (android_cmdLineOptions->forward_vhci) {
-        vhciFwd = android::emulation::bluetooth::getVhciForwarder();
-        builder.withService(vhciFwd);
+        dinfo("Enabling vhci forwarding");
+        builder.withService(android::emulation::bluetooth::getVhciForwarder());
     }
 #endif
 
@@ -408,12 +406,6 @@ int qemu_setup_grpc() {
         }
     }
 
-#ifdef ANDROID_BLUETOOTH
-     if (android_cmdLineOptions->forward_vhci && vhciFwd) {
-        dinfo("Enabling vhci forwarding")
-        registerAsyncVhciForwardingService(grpcService->asyncHandler(), vhciFwd);
-    }
-#endif
 
     bool userWantsGrpc = android_cmdLineOptions->grpc ||
                          android_cmdLineOptions->grpc_tls_ca ||

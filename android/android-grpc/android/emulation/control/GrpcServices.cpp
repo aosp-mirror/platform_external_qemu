@@ -81,21 +81,15 @@ public:
     EmulatorControllerServiceImpl(
             int port,
             std::vector<std::shared_ptr<Service>> services,
-            grpc::Server* server,
-            std::vector<std::unique_ptr<ServerCompletionQueue>> queue)
+            grpc::Server* server)
         : mPort(port), mRegisteredServices(services), mServer(server) {
-        mHandler = std::make_unique<AsyncGrpcHandler>(std::move(queue));
-    }
+     }
 
     int port() override { return mPort; }
 
     void wait() override { mServer->Wait(); }
 
-    // Returns a new completionQueue if possible.
-    AsyncGrpcHandler* asyncHandler() override { return mHandler.get(); }
-
 private:
-    std::unique_ptr<AsyncGrpcHandler> mHandler;
     std::unique_ptr<grpc::Server> mServer;
     std::vector<std::shared_ptr<Service>> mRegisteredServices;
     int mPort;
@@ -250,10 +244,6 @@ Builder& Builder::withPortRange(int start, int end) {
     return *this;
 }
 
-Builder& Builder::withAsyncServerThreads(int count) {
-    mCompletionQueueCount = count;
-    return *this;
-}
 
 //  Human readable logging.
 template <typename tstream>
@@ -366,22 +356,15 @@ std::unique_ptr<EmulatorControllerService> Builder::build() {
     }
     builder.experimental().SetInterceptorCreators(std::move(creators));
 
-    // Create a separate cq for each potential handler.
-    std::vector<std::unique_ptr<ServerCompletionQueue>> cqs;
-    for (int i = 0; i < mCompletionQueueCount; i++) {
-        cqs.push_back(builder.AddCompletionQueue(false));
-    }
-
     auto service = builder.BuildAndStart();
     if (!service)
         return nullptr;
 
     LOG(INFO) << "Started GRPC server at " << server_address.c_str()
-              << ", security: " << mSecurity << ":" << mAuthMode;
+              << ", security: " << mSecurity << ", auth: " << mAuthMode;
     return std::unique_ptr<EmulatorControllerService>(
             new EmulatorControllerServiceImpl(mPort, std::move(mServices),
-                                              service.release(),
-                                              std::move(cqs)));
+                                              service.release()));
 }
 }  // namespace control
 }  // namespace emulation
