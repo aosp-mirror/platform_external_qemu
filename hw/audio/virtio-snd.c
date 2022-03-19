@@ -31,11 +31,18 @@
 #define VIRTIO_SND_QUEUE_TX     2
 #define VIRTIO_SND_QUEUE_RX     3
 
-#define VIRTIO_SND_PCM_MIC_NUM_CHANNELS         2
-#define VIRTIO_SND_PCM_SPEAKERS_NUM_CHANNELS    5
+#define VIRTIO_SND_PCM_MIC_NUM_CHANNELS         1
+#define VIRTIO_SND_PCM_MIC_FREQ             44100
+#define VIRTIO_SND_PCM_MIC_FORMAT             S16
+#define VIRTIO_SND_PCM_SPEAKERS_NUM_CHANNELS    2
+#define VIRTIO_SND_PCM_SPEAKERS_FREQ        44100
+#define VIRTIO_SND_PCM_SPEAKERS_FORMAT        S16
 
 #define VIRTIO_SND_NID_MIC                      0
 #define VIRTIO_SND_NID_SPEAKERS                 0
+
+#define GLUE(A, B) A##B
+#define GLUE2(A, B) GLUE(A, B)
 
 union VirtIOSoundCtlRequest {
     struct virtio_snd_hdr hdr;
@@ -106,16 +113,10 @@ const static struct virtio_snd_pcm_info pcm_infos[VIRTIO_SND_NUM_PCM_STREAMS] = 
             .hda_fn_nid = VIRTIO_SND_NID_MIC,
         },
         .features = 0,
-        .formats = (1u << VIRTIO_SND_PCM_FMT_S16),
-        .rates = (1u << VIRTIO_SND_PCM_RATE_8000)
-                 | (1u << VIRTIO_SND_PCM_RATE_11025)
-                 | (1u << VIRTIO_SND_PCM_RATE_16000)
-                 | (1u << VIRTIO_SND_PCM_RATE_22050)
-                 | (1u << VIRTIO_SND_PCM_RATE_32000)
-                 | (1u << VIRTIO_SND_PCM_RATE_44100)
-                 | (1u << VIRTIO_SND_PCM_RATE_48000),
+        .formats = (1u << GLUE2(VIRTIO_SND_PCM_FMT_, VIRTIO_SND_PCM_MIC_FORMAT)),
+        .rates = (1u << GLUE2(VIRTIO_SND_PCM_RATE_, VIRTIO_SND_PCM_MIC_FREQ)),
         .direction = VIRTIO_SND_D_INPUT,
-        .channels_min = 1,
+        .channels_min = VIRTIO_SND_PCM_MIC_NUM_CHANNELS,
         .channels_max = VIRTIO_SND_PCM_MIC_NUM_CHANNELS,
     },
     {
@@ -123,16 +124,10 @@ const static struct virtio_snd_pcm_info pcm_infos[VIRTIO_SND_NUM_PCM_STREAMS] = 
             .hda_fn_nid = VIRTIO_SND_NID_SPEAKERS,
         },
         .features = 0,
-        .formats = (1u << VIRTIO_SND_PCM_FMT_S16),
-        .rates = (1u << VIRTIO_SND_PCM_RATE_8000)
-                 | (1u << VIRTIO_SND_PCM_RATE_11025)
-                 | (1u << VIRTIO_SND_PCM_RATE_16000)
-                 | (1u << VIRTIO_SND_PCM_RATE_22050)
-                 | (1u << VIRTIO_SND_PCM_RATE_32000)
-                 | (1u << VIRTIO_SND_PCM_RATE_44100)
-                 | (1u << VIRTIO_SND_PCM_RATE_48000),
+        .formats = (1u << GLUE2(VIRTIO_SND_PCM_FMT_, VIRTIO_SND_PCM_SPEAKERS_FORMAT)),
+        .rates = (1u << GLUE2(VIRTIO_SND_PCM_RATE_, VIRTIO_SND_PCM_SPEAKERS_FREQ)),
         .direction = VIRTIO_SND_D_OUTPUT,
-        .channels_min = 1,
+        .channels_min = VIRTIO_SND_PCM_SPEAKERS_NUM_CHANNELS,
         .channels_max = VIRTIO_SND_PCM_SPEAKERS_NUM_CHANNELS,
     },
 };
@@ -145,22 +140,32 @@ const struct virtio_snd_chmap_info chmap_infos[VIRTIO_SND_NUM_CHMAPS] = {
         .direction = VIRTIO_SND_D_INPUT,
         .channels = VIRTIO_SND_PCM_MIC_NUM_CHANNELS,
         .positions = {
+#if VIRTIO_SND_PCM_MIC_NUM_CHANNELS == 1
+            VIRTIO_SND_CHMAP_MONO
+#else
             VIRTIO_SND_CHMAP_FL,
-            VIRTIO_SND_CHMAP_FR
-        },
+            VIRTIO_SND_CHMAP_FR,
+            VIRTIO_SND_CHMAP_RL,
+            VIRTIO_SND_CHMAP_RR,
+#endif
+            },
     },
-        {
+    {
         .hdr = {
             .hda_fn_nid = VIRTIO_SND_NID_SPEAKERS,
         },
         .direction = VIRTIO_SND_D_OUTPUT,
         .channels = VIRTIO_SND_PCM_SPEAKERS_NUM_CHANNELS,
         .positions = {
+#if VIRTIO_SND_PCM_SPEAKERS_NUM_CHANNELS == 1
+            VIRTIO_SND_CHMAP_MONO
+#else
             VIRTIO_SND_CHMAP_FL,
             VIRTIO_SND_CHMAP_FR,
             VIRTIO_SND_CHMAP_RL,
             VIRTIO_SND_CHMAP_RR,
             VIRTIO_SND_CHMAP_LFE,
+#endif
         },
     },
 };
