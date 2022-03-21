@@ -199,7 +199,7 @@ static size_t get_frame_size(const struct audsettings *as) {
     return as->nchannels * sizeof(int16_t);
 }
 
-const char *stream_state_str(const int state) {
+static const char *stream_state_str(const int state) {
     switch (state) {
     case VIRTIO_PCM_STREAM_STATE_DISABLED:  return "disabled";
     case VIRTIO_PCM_STREAM_STATE_ENABLED:   return "enabled";
@@ -290,7 +290,7 @@ static void ring_buffer_free(VirtIOSoundRingBuffer *rb) {
 };
 
 static bool ring_buffer_push(VirtIOSoundRingBuffer *rb,
-                                        const VirtIOSoundRingBufferItem *item) {
+                             const VirtIOSoundRingBufferItem *item) {
     const int capacity = rb->capacity;
     const int size = rb->size;
     int w;
@@ -352,10 +352,9 @@ static void virtio_snd_stream_init(const unsigned stream_id,
 
 static void virtio_snd_process_ctl_stream_stop_impl(VirtIOSoundPCMStream *stream) {
     if (is_output_stream(stream)) {
-        SWVoiceOut *out = stream->voice.out;
-        AUD_set_active_out(out, 0);
+        AUD_set_active_out(stream->voice.out, 0);
     } else {
-        /* TODO */
+        AUD_set_active_in(stream->voice.in, 0);
     }
 }
 
@@ -954,7 +953,7 @@ static void virtio_snd_device_realize(DeviceState *dev, Error **errp) {
 static void virtio_snd_device_unrealize(DeviceState *dev, Error **errp) {
     VirtIOSound *snd = VIRTIO_SND(dev);
     VirtIODevice *vdev = &snd->parent;
-    int i;
+    unsigned i;
 
     for (i = 0; i < VIRTIO_SND_NUM_PCM_STREAMS; ++i) {
         virtio_snd_stream_disable(&snd->streams[i]);
@@ -983,9 +982,9 @@ static void virtio_snd_get_config(VirtIODevice *vdev, uint8_t *raw) {
     config->chmaps = VIRTIO_SND_NUM_CHMAPS;
 }
 
-void virtio_snd_set_status(VirtIODevice *vdev, uint8_t status) {
-    int i;
+static void virtio_snd_set_status(VirtIODevice *vdev, const uint8_t status) {
     VirtIOSound *snd = VIRTIO_SND(vdev);
+    unsigned i;
 
     for (i = 0; i < VIRTIO_SND_NUM_PCM_STREAMS; ++i) {
         VirtIOSoundPCMStream *stream = &snd->streams[i];
