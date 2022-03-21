@@ -30,10 +30,7 @@
 #include "android/emulation/control/utils/EmulatorGrcpClient.h"  // for Emulato...
 #include "android/utils/debug.h"
 #include "emulator_controller.grpc.pb.h"           // for Emulato...
-#include "grpc/grpc_security_constants.h"          // for LOCAL_TCP
-#include "grpc/impl/codegen/connectivity_state.h"  // for (anonym...
-#include "grpcpp/channel_impl.h"                   // for Channel
-#include "grpcpp/security/credentials.h"
+
 
 namespace android {
 namespace emulation {

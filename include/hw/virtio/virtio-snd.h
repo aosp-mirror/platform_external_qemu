@@ -15,9 +15,11 @@
 #include "hw/virtio/virtio.h"
 #include "audio/audio.h"
 
-#define VIRTIO_SND_NUM_JACKS        2   /* speaker, mic */
-#define VIRTIO_SND_NUM_PCM_STREAMS  2
-#define VIRTIO_SND_NUM_CHMAPS       2   /* output, input */
+#define VIRTIO_SND_NUM_JACKS           2    /* speaker, mic */
+#define VIRTIO_SND_NUM_PCM_TX_STREAMS  1    /* driver -> device */
+#define VIRTIO_SND_NUM_PCM_RX_STREAMS  1    /* device -> driver */
+#define VIRTIO_SND_NUM_PCM_STREAMS     (VIRTIO_SND_NUM_PCM_TX_STREAMS + VIRTIO_SND_NUM_PCM_RX_STREAMS)
+#define VIRTIO_SND_NUM_CHMAPS          2    /* output, input */
 
 #define TYPE_VIRTIO_SND "virtio-snd"
 #define VIRTIO_SND(obj) \
@@ -86,14 +88,6 @@ typedef struct VirtIOSound {
     VirtQueue *rx_vq;
     VirtIOSoundPCMStream streams[VIRTIO_SND_NUM_PCM_STREAMS];
     QEMUSoundCard card;
-
-    union {
-        struct virtio_snd_hdr hdr;
-        struct virtio_snd_query_info r1;
-        struct virtio_snd_jack_remap r2;
-        struct virtio_snd_pcm_set_params r3;
-        struct virtio_snd_pcm_hdr r4;
-    } ctl_req_buf;
 } VirtIOSound;
 
 #endif /* QEMU_VIRTIO_SND_H */

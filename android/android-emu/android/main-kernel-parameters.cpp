@@ -43,7 +43,6 @@ std::string emulator_getKernelParameters(const AndroidOptions* opts,
                                          bool isQemu2,
                                          bool isCros,
                                          std::vector<std::string> userspaceBootProps) {
-    android::ParameterList params;
     if (isCros) {
       std::string cmdline(StringFormat(
           "ro noresume noswap loglevel=7 noinitrd root=/dev/sda3 no_timer_check"
@@ -52,23 +51,27 @@ std::string emulator_getKernelParameters(const AndroidOptions* opts,
       return strdup(cmdline.c_str());
     }
 
+    KernelVersion kernelVersion = KERNEL_VERSION_0;
+    if (!android_getKernelVersion(kernelPath, &kernelVersion)) {
+        derror("Can't get kernel version from the kernel image file: '%s'",
+               kernelPath);
+    }
+
     bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
 
+    android::ParameterList params;
     // Disable apic timer check. b/33963880
     params.add("no_timer_check");
+
+    if (kernelVersion >= KERNEL_VERSION_5_10_103) {
+        params.add("8250.nr_uarts=1");  // disabled by default for security reasons
+    }
 
     // TODO: enable this with option
     // params.addFormat("androidboot.logcat=*:D");
 
     if (isX86ish) {
         params.add("clocksource=pit");
-
-        KernelVersion kernelVersion = KERNEL_VERSION_0;
-        if (!android_getKernelVersion(kernelPath, &kernelVersion)) {
-            derror("Can't get kernel version from the kernel image file: '%s'",
-                   kernelPath);
-        }
-
         // b/67565886, when cpu core is set to 2, clock_gettime() function hangs
         // in goldfish kernel which caused surfaceflinger hanging in the guest
         // system. To workaround, start the kernel with no kvmclock. Currently,

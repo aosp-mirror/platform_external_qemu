@@ -21,7 +21,6 @@
 #include "android/console.h"                     // for AndroidConsoleAgents
 #include "grpcpp/impl/codegen/service_type.h"    // IWYU pragma: keep
 #include "grpcpp/security/server_credentials.h"  // for ServerCredentials
-#include "android/emulation/control/async/AsyncGrpcStream.h"
 
 #ifdef _MSC_VER
 #include "msvc-posix.h"
@@ -51,9 +50,6 @@ public:
 
     // Block and wait until the server is completed.
     virtual void wait() = 0;
-
-    // You can register your asynchronous bidi connections on this.
-    virtual AsyncGrpcHandler* asyncHandler() = 0;
 };
 
 // A Factory class that is capable of constructing a proper gRPC service that
@@ -120,11 +116,6 @@ public:
     // Add a service only if tls and client-ca is enabled.
     Builder& withSecureService(::grpc::Service* service);
 
-    // Register count number of threads to handle async
-    // requests.
-    //
-    Builder& withAsyncServerThreads(int count);
-
     // Shutdown the emulator after timeout seconds of gRPC inactivity.
     // The timeout should be at least 1 second, otherwise it will
     // be ignored.
@@ -157,7 +148,6 @@ private:
     bool mVerbose{false};
     bool mLogging{true};
     bool mCaCerts{false};
-    int mCompletionQueueCount{0};
     IpMode mIpMode{IpMode::Ipv4};
 };
 

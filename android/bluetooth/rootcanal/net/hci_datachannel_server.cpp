@@ -14,7 +14,7 @@
 
 #include "net/hci_datachannel_server.h"
 
-#include <functional>                   // for __base, function
+#include <functional>  // for __base, function
 
 #include "android/base/async/Looper.h"  // for Looper
 #include "android/console.h"            // for getConsoleAgents, AndroidCons...
@@ -26,15 +26,34 @@ HciDataChannelServer::HciDataChannelServer(base::Looper* looper)
     : mLooper(looper) {}
 
 bool HciDataChannelServer::StartListening() {
+    mListening = true;
     if (!mQemuChannel && callback_) {
-        mQemuChannel =
-                std::make_shared<QemuDataChannel>(getConsoleAgents()->rootcanal,
-                                                  mLooper);
-        mLooper->scheduleCallback(
-                [&]() { callback_(mQemuChannel, this); });
+        injectQemuChannel();
+    }
+    return true;
+}
+
+void HciDataChannelServer::StopListening() {
+    mListening = false;
+}
+
+// Injects a new qemu channel.
+std::shared_ptr<AsyncDataChannel> HciDataChannelServer::injectQemuChannel() {
+    dinfo("injectedQemuChannel!");
+    mQemuChannel = std::make_shared<QemuDataChannel>(
+            getConsoleAgents()->rootcanal, mLooper);
+
+
+    if (callback_ && mListening) {
+        dinfo("Informing listeners of injection.");
+        mLooper->scheduleCallback([&]() { callback_(mQemuChannel, this); });
     }
 
-    return true;
+    return mQemuChannel;
+}
+
+std::shared_ptr<AsyncDataChannel> HciDataChannelServer::qemuChannel() {
+    return mQemuChannel;
 }
 
 }  // namespace net

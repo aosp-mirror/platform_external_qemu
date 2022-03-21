@@ -14,7 +14,7 @@
 // limitations under the License.
 #pragma once
 
-#include <memory>                           // for shared_ptr
+#include <memory>  // for shared_ptr
 
 #include "net/async_data_channel_server.h"  // for AsyncDataChannelServer
 
@@ -26,23 +26,32 @@ class Looper;
 namespace net {
 class AsyncDataChannel;
 
-// A Datachannel server that will provide a single qemu connection on first listen.
+// A Datachannel server that will provide a qemu connection if it is being
+// injected
 class HciDataChannelServer : public AsyncDataChannelServer {
 public:
     HciDataChannelServer(base::Looper* looper);
 
     bool StartListening() override;
 
-    void StopListening() override{};
+    void StopListening() override;
 
-    // The qemu connection cannot be closed.
+    // The qemu channel server cannot be closed.
     void Close() override{};
 
     // The qemu connection is always open.
     bool Connected() { return true; }
 
+    // Injects a new qemu channel, returning the newly created channel.
+    // This re-initializes the channel to /dev/vhci in qemu.
+    std::shared_ptr<AsyncDataChannel> injectQemuChannel();
+
+    // The currently active data channel to /dev/vhci in qemu
+    std::shared_ptr<AsyncDataChannel> qemuChannel();
+
 private:
     std::shared_ptr<AsyncDataChannel> mQemuChannel;
+    bool mListening{true};
     base::Looper* mLooper;
 };
 

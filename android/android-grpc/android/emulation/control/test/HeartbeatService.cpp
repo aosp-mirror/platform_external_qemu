@@ -12,22 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <chrono>         // for millise...
-#include <functional>     // for __base
-#include <memory>         // for make_un...
-#include <mutex>          // for mutex...
+#include <chrono>      // for millise...
+#include <functional>  // for __base
+#include <memory>      // for make_un...
+#include <mutex>       // for mutex...
+#include <queue>
 #include <thread>         // for sleep_for
 #include <unordered_set>  // for unorder...
 
-#include "android/emulation/control/async/AsyncGrpcStream.h"  // for AsyncGr...
-#include "android/emulation/control/test/TestEchoService.h"   // for AsyncHe...
-#include "android/emulation/control/utils/EventWaiter.h"      // for EventWa...
-#include "grpcpp/impl/codegen/async_stream.h"                 // for ServerA...
-#include "grpcpp/impl/codegen/completion_queue.h"             // for ServerC...
-#include "grpcpp/impl/codegen/server_context.h"               // for ServerC...
-#include "grpcpp/impl/codegen/status.h"                       // for Status
-#include "grpcpp/impl/codegen/sync_stream.h"                  // for ServerR...
-#include "test_echo_service.pb.h"                             // for Msg
+#include "android/emulation/control/test/TestEchoService.h"  // for AsyncHe...
+#include "android/emulation/control/utils/EventWaiter.h"     // for EventWa...
+#include "grpcpp/impl/codegen/async_stream.h"                // for ServerA...
+#include "grpcpp/impl/codegen/completion_queue.h"            // for ServerC...
+#include "grpcpp/impl/codegen/server_context.h"              // for ServerC...
+#include "grpcpp/impl/codegen/status.h"                      // for Status
+#include "grpcpp/impl/codegen/sync_stream.h"                 // for ServerR...
+#include "test_echo_service.pb.h"                            // for Msg
 
 using grpc::ServerContext;
 using grpc::Status;
@@ -175,21 +175,50 @@ private:
     std::unordered_set<Connection> mListeners;
 };
 
-void registerAsyncHeartBeat(AsyncGrpcHandler* handler,
-                            AsyncHeartbeatService* testService) {
-    handler->registerConnectionHandler(
-                   testService, &AsyncHeartbeatService::RequeststreamEcho)
-            .withCallback(
+grpc::ServerBidiReactor<::android::emulation::control::Msg,
+                        ::android::emulation::control::Msg>*
+AsyncHeartbeatService::streamEcho(::grpc::CallbackServerContext* context) {
+    class HeartbeatHandler
+        : public grpc::ServerBidiReactor<::android::emulation::control::Msg,
+                                         ::android::emulation::control::Msg> {
+    public:
+        HeartbeatHandler(AsyncHeartbeatReceiver<HeartbeatHandler*>* listener)
+            : mHandler(listener) {
+            mHandler->addListener(this);
+        }
+        ~HeartbeatHandler() { mHandler->removeListener(this); }
+        void OnDone() override { delete this; }
+        void OnWriteDone(bool /*ok*/) override {
+            {
+                const std::lock_guard<std::mutex> lock(mWritelock);
+                mWriteQueue.pop();
+            }
+            NextWrite();
+        }
 
-                    [testService](auto connection) {
-                        static AsyncHeartbeatReceiver<decltype(connection)>
-                                s_global_handler;
-                        s_global_handler.addListener(connection);
-                        connection->setCloseCallback(
-                                [testService](auto connection) {
-                                    s_global_handler.removeListener(connection);
-                                });
-                    });
+        void write(android::emulation::control::Msg& msg) {
+            {
+                const std::lock_guard<std::mutex> lock(mWritelock);
+                mWriteQueue.push(msg);
+            }
+            NextWrite();
+        }
+
+    private:
+        void NextWrite() {
+            {
+                const std::lock_guard<std::mutex> lock(mWritelock);
+                StartWrite(&mWriteQueue.front());
+            }
+        }
+
+        std::queue<Msg> mWriteQueue;
+        std::mutex mWritelock;
+        AsyncHeartbeatReceiver<HeartbeatHandler*>* mHandler;
+    };
+    static AsyncHeartbeatReceiver<HeartbeatHandler*> s_global_handler;
+    auto handler = new HeartbeatHandler(&s_global_handler);
+    return handler;
 }
 
 }  // namespace control

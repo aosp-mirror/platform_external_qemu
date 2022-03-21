@@ -229,11 +229,7 @@ private:
         mService = builder.withService(heartBeat)
                            .withPortRange(0, 1)
                            .withLogging(false)
-                           .withAsyncServerThreads(8)
                            .build();
-
-        auto heartBeatHandler = mService->asyncHandler();
-        registerAsyncHeartBeat(heartBeatHandler, heartBeat);
     }
 };
 }  // namespace control

@@ -453,6 +453,9 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
     if (!strcmp(config->backend, "angle_indirect")) {
         system->envSet("ANGLE_DEFAULT_PLATFORM", "metal");
     }
+    if (!strcmp(config->backend, "swiftshader_indirect")) {
+        system->envSet("ANGLE_DEFAULT_PLATFORM", "swiftshader");
+    }
 #endif
 
     if (!strcmp(config->backend, "angle_indirect")
