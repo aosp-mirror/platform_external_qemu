@@ -19,8 +19,8 @@
 #include <sys/types.h>  // for ssize_t
 #include <algorithm>    // for min
 #include <cstdint>      // for uint8_t
-#include <mutex>        // for mutex
 #include <memory>       // for unique_ptr
+#include <mutex>        // for mutex
 #include <ostream>      // for char_traits
 #include <vector>       // for vector
 
@@ -46,23 +46,25 @@ extern "C" {
 #undef recv
 #endif
 
+// #define DEBUG 1
 /* set  for very verbose debugging */
 #ifndef DEBUG
 #define DD(...) (void)0
 #define DD_BUF(buf, len) (void)0
 #else
 #define DD(...) dinfo(__VA_ARGS__)
-#define DD_BUF(buf, len)                                \
-    do {                                                \
-        dprint("chardev-rootcanal %s:", __func__);      \
-        for (int x = 0; x < len; x++) {                 \
-            if (isprint((int)buf[x]))                   \
-                dprint("%c", buf[x]);                   \
-            else                                        \
-                dprint("[0x%02x]", 0xff & (int)buf[x]); \
-        }                                               \
-    } while (0)
-
+#define DD_BUF(buf, len)                               \
+    do {                                               \
+        printf("chardev-rootcanal %s:", __func__);     \
+        for (int x = 0; x < len; x++) {                \
+            if (isprint((int)buf[x])) {                \
+                printf("%c", buf[x]);                  \
+            } else {                                   \
+                printf("[0x%02x]", 0xff & (int)buf[x]); \
+            }                                          \
+        }                                              \
+    } while (0);                                       \
+    printf("\n");
 #endif
 
 #define TYPE_CHARDEV_ROOTCANAL "chardev-rootcanal"
@@ -75,10 +77,6 @@ static dataAvailableCallback sHciCallback = nullptr;
 static void* sOpaque = nullptr;
 Chardev* sChrRootcanal;
 
-#ifdef ANDROID_BLUETOOTH
-std::unique_ptr<android::bluetooth::Rootcanal> sRootcanal;
-#endif
-
 ssize_t rootcanal_recv(uint8_t* buffer, uint64_t bufferSize) {
     errno = 0;
     std::unique_lock<std::mutex> guard(sHciMutex);
@@ -90,6 +88,7 @@ ssize_t rootcanal_recv(uint8_t* buffer, uint64_t bufferSize) {
     auto readCount = std::min<uint64_t>(sIncomingHciBuffer.size(), bufferSize);
     memcpy(buffer, sIncomingHciBuffer.data(), readCount);
 
+    DD("rootcanal_recv: %d", bufferSize);
     DD_BUF(buffer, bufferSize);
     sIncomingHciBuffer.erase(sIncomingHciBuffer.begin(),
                              sIncomingHciBuffer.begin() + readCount);
@@ -97,17 +96,20 @@ ssize_t rootcanal_recv(uint8_t* buffer, uint64_t bufferSize) {
 }
 
 ssize_t rootcanal_send(const uint8_t* buffer, uint64_t bufferSize) {
+    DD("rootcanal_send %d", bufferSize);
     qemu_chr_be_write(sChrRootcanal, (uint8_t*)buffer, bufferSize);
     return bufferSize;
 };
 
 void rootcanal_register_callback(void* opaque, dataAvailableCallback callback) {
+    DD("Registering callback: %p - %p", opaque, callback);
     sOpaque = opaque;
     sHciCallback = callback;
 }
 
 size_t rootcanal_available() {
     std::unique_lock<std::mutex> guard(sHciMutex);
+    DD("rootcanal_available: %d", sIncomingHciBuffer.size());
     return sIncomingHciBuffer.size();
 }
 
@@ -127,6 +129,7 @@ static int rootcanal_chr_write(Chardev* chr, const uint8_t* buf, int len) {
     }
 
     if (sHciCallback) {
+        DD("Notify listener!");
         (*sHciCallback)(sOpaque);
     }
     return len;
@@ -149,8 +152,8 @@ static void rootcanal_chr_open(Chardev* chr,
                             ->rootcanal_controller_properties_file)
             .withCommandFile(
                     android_cmdLineOptions->rootcanal_default_commands_file);
-    sRootcanal = builder.build();
-    *be_opened = sRootcanal->start();
+    builder.buildSingleton();
+    *be_opened = android::bluetooth::Rootcanal::Builder::getInstance()->start();
 #endif
     LOG(INFO) << "Rootcanal has " << (*be_opened ? "" : "**NOT**")
               << " been activated.";
@@ -159,7 +162,7 @@ static void rootcanal_chr_open(Chardev* chr,
 static void rootcanal_chr_cleanup(Object* o) {
 #ifdef ANDROID_BLUETOOTH
     LOG(INFO) << "Closing down rootcanal.";
-    sRootcanal->close();
+    android::bluetooth::Rootcanal::Builder::getInstance()->close();
 #endif
 }
 

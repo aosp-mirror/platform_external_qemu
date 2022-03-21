@@ -31,7 +31,7 @@ android_add_library(
 if(LINUX)
   android_target_include_directories(OSWindow linux PUBLIC ${X11_XCB_INCLUDE_DIRS})
   android_target_link_libraries(OSWindow linux PUBLIC "-lX11" "-lrt"
-                                                      ${X11_XCB_LIBRARIES}
+                                                      X11_XCB::X11_XCB
                                                       android-emu-shared)
 endif()
 

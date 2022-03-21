@@ -497,6 +497,10 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libchrome_zlib${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libchrome_zlib${CMAKE_SHARED_LIBRARY_SUFFIX}"
       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libabsl${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libabsl${CMAKE_SHARED_LIBRARY_SUFFIX}"
+      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libvk_swiftshader${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libvk_swiftshader${CMAKE_SHARED_LIBRARY_SUFFIX}"
+      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libswiftshader_libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libswiftshader_libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
+      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libswiftshader_libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libswiftshader_libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
+      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/vk_swiftshader_icd.json>lib64/gles_angle/vk_swiftshader_icd.json"
   )
   # Angle executables licensing information.
   android_license(

@@ -20,12 +20,12 @@
 #include <utility>  // for move
 #include <vector>   // for vector
 
-// Include first! Windows will be unlhappy!
-#include "root_canal_qemu.h"                              // for Rootcanal::...
-#include "test_environment.h"                             // for TestEnviron...
-
+// These must be included first due to some windows header issues.
+#include "root_canal_qemu.h"   // for Rootcanal::...
+#include "test_environment.h"  // for TestEnviron...
 
 #include "android/base/async/ThreadLooper.h"              // for ThreadLooper
+#include "android/utils/debug.h"                          // for derror
 #include "model/setup/async_manager.h"                    // for AsyncManager
 #include "net/hci_datachannel_server.h"                   // for HciDataChan...
 #include "net/multi_datachannel_server.h"                 // for MultiDataCh...
@@ -34,9 +34,6 @@
 #include "net/sockets/loopback_async_socket_server.h"     // for LoopbackAsy...
 
 namespace android {
-namespace net {
-class AsyncDataChannelServer;
-}  // namespace net
 
 namespace bluetooth {
 
@@ -46,8 +43,11 @@ using RootcanalBuilder = Rootcanal::Builder;
 class RootcanalImpl : public Rootcanal {
 public:
     RootcanalImpl(std::unique_ptr<TestEnvironment> rootcanal,
-                  std::unique_ptr<AsyncManager> am)
-        : mRootcanal(std::move(rootcanal)), mAsyncManager(std::move(am)) {}
+                  std::unique_ptr<AsyncManager> am,
+                  std::shared_ptr<net::HciDataChannelServer> qemuHciServer)
+        : mRootcanal(std::move(rootcanal)),
+          mAsyncManager(std::move(am)),
+          mQemuHciServer(std::move(qemuHciServer)) {}
     ~RootcanalImpl() {}
 
     // Starts the root canal service.
@@ -59,16 +59,16 @@ public:
 
     // Closes the root canal service
     void close() override {
-        // the following has memory double free problem
-        // and often crashes upon exit mostly on M1; so
-        // just let the
-        // object fall out of scope and be cleaned up
-        // b/203795141
         mRootcanal.reset(nullptr);
+    }
+
+    net::HciDataChannelServer* qemuHciServer() override {
+        return mQemuHciServer.get();
     }
 
 private:
     std::unique_ptr<AsyncManager> mAsyncManager;
+    std::shared_ptr<net::HciDataChannelServer> mQemuHciServer;
     std::unique_ptr<TestEnvironment> mRootcanal;
 };
 
@@ -116,7 +116,6 @@ RootcanalBuilder& RootcanalBuilder::withLinkBlePort(const char* portStr) {
     return withLinkBlePort(getPortNumber(portStr));
 }
 
-
 RootcanalBuilder& RootcanalBuilder::withControllerProperties(
         const char* props) {
     if (props)
@@ -139,12 +138,23 @@ static std::shared_ptr<net::AsyncDataChannelServer> getChannelServer(
     return std::make_shared<net::NullDataChannelServer>();
 }
 
-std::unique_ptr<Rootcanal> RootcanalBuilder::build() {
+std::shared_ptr<RootcanalImpl> sRootcanalImpl;
+
+std::shared_ptr<Rootcanal> RootcanalBuilder::getInstance() {
+    if (!sRootcanalImpl) {
+        derror("Rootcanal has not yet been initialized..");
+    }
+    return sRootcanalImpl;
+}
+
+void RootcanalBuilder::buildSingleton() {
     auto asyncManager = std::make_unique<AsyncManager>();
 
+    auto qemuHciServer = std::make_shared<net::HciDataChannelServer>(
+            base::ThreadLooper::get());
     std::vector<std::shared_ptr<net::AsyncDataChannelServer>> hciServers{
-            std::make_shared<net::HciDataChannelServer>(
-                    base::ThreadLooper::get())};
+            qemuHciServer};
+
     if (mHci > 0) {
         hciServers.push_back(std::make_shared<net::LoopbackAsyncSocketServer>(
                 mHci, asyncManager.get()));
@@ -161,8 +171,9 @@ std::unique_ptr<Rootcanal> RootcanalBuilder::build() {
             testServer, hciServer, linkServer, linkBleServer, localConnector,
             mDefaultControllerProperties, mCmdFile);
 
-    return std::make_unique<RootcanalImpl>(std::move(testEnv),
-                                           std::move(asyncManager));
+    sRootcanalImpl = std::make_shared<RootcanalImpl>(std::move(testEnv),
+                                                     std::move(asyncManager),
+                                                     std::move(qemuHciServer));
 }
 }  // namespace bluetooth
 }  // namespace android

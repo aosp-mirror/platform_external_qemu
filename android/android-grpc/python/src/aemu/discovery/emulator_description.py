@@ -23,6 +23,7 @@ from aemu.proto.rtc_service_pb2_grpc import RtcStub
 from aemu.proto.snapshot_service_pb2_grpc import SnapshotServiceStub
 from aemu.proto.ui_controller_service_pb2_grpc import UiControllerStub
 from aemu.proto.waterfall_pb2_grpc import WaterfallStub
+from aemu.proto.emulated_bluetooth_vhci_pb2_grpc import VhciForwardingServiceStub
 
 
 class EmulatorDescription(dict):
@@ -74,8 +75,10 @@ class EmulatorDescription(dict):
         ):
             # We need to create jwks..
             key_path = self._description["grpc.jwks"]
-            active_path =  self._description["grpc.jwk_active"]
-            return grpc.intercept_channel(channel, jwt_header_inceptor(key_path, active_path))
+            active_path = self._description["grpc.jwk_active"]
+            return grpc.intercept_channel(
+                channel, jwt_header_inceptor(key_path, active_path)
+            )
 
         logging.debug("Insecure channel to %s", addr)
         return channel
@@ -120,6 +123,11 @@ class EmulatorDescription(dict):
         """Returns a stub to the Ui Controller service."""
         channel = self.get_grpc_channel(use_async)
         return UiControllerStub(channel)
+
+    def get_vhci_forwarder_service(self, use_async=False):
+        """Returns a stub to the Vhci Forwarding  service."""
+        channel = self.get_grpc_channel(use_async)
+        return VhciForwardingServiceStub(channel)
 
     def name(self):
         """Returns the name of the emulator.

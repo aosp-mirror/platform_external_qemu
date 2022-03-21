@@ -26,7 +26,8 @@ namespace net {
 using android::base::Looper;
 
 // An implementation of the AsyncDataChannel interface that talks
-// to QAndroidHciAgent to send and receive data.
+// to QAndroidHciAgent to send and receive data. Usually
+// QAndroidHciAgent is connected to /dev/vhci inside the guest (android)
 //
 // This channel can deliver spurious receive events.
 class QemuDataChannel : public AsyncDataChannel {
@@ -51,8 +52,9 @@ public:
     // This is always connected.
     bool Connected() override { return true; };
 
-    // This cannot be closed.
-    void Close() override{};
+    // Closing will detach the socket from the underlying qemu port.
+    // **Note: the /dev/vhci driver in qemu will still operate.**
+    void Close() override;
 
     // Registers the given callback to be invoked when a recv call can be made
     // to read data from this socket.
@@ -67,6 +69,7 @@ private:
     ReadCallback mCallback;
     QAndroidHciAgent const* mAgent;
     Looper* mLooper;
+    bool mOpen{true};
 };
 }  // namespace net
 }  // namespace android

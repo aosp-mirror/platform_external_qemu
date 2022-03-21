@@ -21,12 +21,11 @@
 #include <utility>          // for move
 #include <vector>           // for vector
 
-#include "android/emulation/control/async/AsyncGrpcStream.h"  // for ServerC...
-#include "grpcpp/impl/codegen/completion_queue.h"             // for ServerC...
-#include "grpcpp/impl/codegen/server_context.h"               // for ServerC...
-#include "grpcpp/impl/codegen/status.h"                       // for Status
-#include "grpcpp/impl/codegen/sync_stream.h"                  // for ServerR...
-#include "test_echo_service.grpc.pb.h"                        // for TestEcho
+#include "grpcpp/impl/codegen/completion_queue.h"  // for ServerC...
+#include "grpcpp/impl/codegen/server_context.h"    // for ServerC...
+#include "grpcpp/impl/codegen/status.h"            // for Status
+#include "grpcpp/impl/codegen/sync_stream.h"       // for ServerR...
+#include "test_echo_service.grpc.pb.h"             // for TestEcho
 
 namespace google {
 namespace protobuf {
@@ -67,30 +66,26 @@ class HeartbeatService : public TestEcho::Service {
 public:
     ::grpc::Status streamEcho(
             ::grpc::ServerContext* /*context*/,
-            ::grpc::ServerReaderWriter<
-                    ::android::emulation::control::Msg,
-                    ::android::emulation::control::Msg>* /*stream*/) override;
+            ::grpc::ServerReaderWriter<Msg, Msg>* /*stream*/) override;
 };
 
-using AsyncTestEchoService =
-        TestEcho::WithAsyncMethod_streamEcho<TestEchoServiceImpl>;
-using AsyncAnotherTestEchoService =
-        TestEcho::WithAsyncMethod_anotherStreamEcho<AsyncTestEchoService>;
+class AsyncHeartbeatService
+    : public TestEcho::WithCallbackMethod_streamEcho<HeartbeatService> {
+    grpc::ServerBidiReactor<Msg, Msg>* streamEcho(
+            ::grpc::CallbackServerContext* context) override;
+};
 
-using AsyncHeartbeatService =
-        TestEcho::WithAsyncMethod_streamEcho<HeartbeatService>;
+class AsyncTestEchoService
+    : public TestEcho::WithCallbackMethod_serverStreamData<
+              TestEcho::WithCallbackMethod_streamEcho<TestEchoServiceImpl>> {
+public:
+    grpc::ServerBidiReactor<Msg, Msg>* streamEcho(
+            ::grpc::CallbackServerContext* context) override;
+    ::grpc::ServerWriteReactor<Msg>* serverStreamData(
+            ::grpc::CallbackServerContext* context,
+            const Msg* request) override;
+};
 
-using AsyncServerStreamingEchoService =  TestEcho::WithAsyncMethod_serverStreamData<AsyncAnotherTestEchoService>;
-
-
-void registerAsyncStreamEcho(AsyncGrpcHandler* handler,
-                             AsyncTestEchoService* testService);
-void registerAsyncAnotherTestEchoService(AsyncGrpcHandler* handler,
-                             AsyncAnotherTestEchoService* testService);
-void registerAsyncServerStreamingEchoService(AsyncGrpcHandler* handler,
-                             AsyncServerStreamingEchoService* testService);
-void registerAsyncHeartBeat(AsyncGrpcHandler* handler,
-                            AsyncHeartbeatService* testService);
 }  // namespace control
 }  // namespace emulation
 }  // namespace android

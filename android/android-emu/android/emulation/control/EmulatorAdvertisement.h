@@ -13,12 +13,13 @@
 // limitations under the License.
 #pragma once
 
+#include <functional>
 #include <string>
 #include <unordered_map>
-#include <functional>
 
 #include "android/base/Compiler.h"
 #include "android/base/system/System.h"
+#include "android/emulation/ConfigDirs.h"
 
 namespace android {
 namespace emulation {
@@ -68,6 +69,11 @@ public:
     // which no corresponding process exists. returns the number of files
     // deleted.
     int garbageCollect() const;
+
+    // Discovers all the advertisement files of active emulators.
+    static std::vector<std::string> discoverRunningEmulators(
+            std::string sharedDirectory =
+                    android::ConfigDirs::getDiscoveryDirectory());
 
 private:
     DISALLOW_COPY_AND_ASSIGN(EmulatorAdvertisement);

@@ -62,12 +62,12 @@ target_include_directories(
           ${VIRGLRENDERER_INCLUDE_DIR}
           ${ANDROID_QEMU2_TOP_DIR}/android/third_party/libdtb/include/)
 
-target_link_libraries(libqemu2-glue PRIVATE android-grpc android-ui-controller)
+target_link_libraries(libqemu2-glue PRIVATE  android-grpc android-ui-controller)
 if(WEBRTC)
   target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
 endif()
 if(BLUETOOTH_EMULATION)
-  target_link_libraries(libqemu2-glue PRIVATE libbt-rootcanal-qemu)
+  target_link_libraries(libqemu2-glue PRIVATE  grpc-vhci-forwarder libbt-rootcanal-qemu)
 endif()
 
 target_link_libraries(

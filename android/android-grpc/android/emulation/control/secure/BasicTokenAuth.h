@@ -18,7 +18,6 @@
 #include <vector>                                          // for vector
 
 #include "absl/status/status.h"                            // for Status
-#include "grpcpp/security/auth_metadata_processor_impl.h"  // for AuthMetada...
 
 namespace android {
 namespace emulation {
@@ -35,7 +34,7 @@ namespace control {
 //
 // Make sure to use lower-case headers. The gRPC engine will reject headers that
 // are not conform to the HTTP/2 standard, with an UNAVAILABLE status.
-class BasicTokenAuth : public grpc_impl::AuthMetadataProcessor {
+class BasicTokenAuth : public grpc::AuthMetadataProcessor {
 public:
     // Creates a AuthMetadataProcesser that looks for the given
     // header and removes the given prefix before invoking
