@@ -13,13 +13,13 @@
 // limitations under the License.
 #pragma once
 
-#include <functional>
-#include <string>
-#include <unordered_map>
+#include <memory>                        // for make_unique, unique_ptr
+#include <string>                        // for string, hash, operator==
+#include <unordered_map>                 // for unordered_map
+#include <vector>                        // for vector
 
-#include "android/base/Compiler.h"
-#include "android/base/system/System.h"
-#include "android/emulation/ConfigDirs.h"
+#include "android/base/Compiler.h"       // for DISALLOW_COPY_AND_ASSIGN
+#include "android/base/system/System.h"  // for System, System::Pid
 
 namespace android {
 namespace emulation {
@@ -29,6 +29,24 @@ namespace control {
 // Properties are simple string pairs that are written to disk as ini files with
 // "key=value" entries.
 using EmulatorProperties = std::unordered_map<std::string, std::string>;
+
+// Strategy pattern for checking if the emulator corresponding
+// the discovery file is actually alive.
+//
+// Mainly here so you can write proper unit tests.
+class EmulatorLivenessStrategy {
+public:
+    virtual ~EmulatorLivenessStrategy(){};
+    virtual bool isAlive(std::string myFile,
+                         std::string discoveryFile) const = 0;
+};
+
+// Liveness checker that tries to load the discovery file
+// and tries to see if any of the declared ports are accessible
+class OpenPortChecker : public EmulatorLivenessStrategy {
+public:
+    bool isAlive(std::string myFile, std::string discoveryFile) const override;
+};
 
 // External services might need to know where to find information about
 // running emulators. An EmulatorAdvertisement can write an
@@ -47,9 +65,15 @@ using EmulatorProperties = std::unordered_map<std::string, std::string>;
 // the process id of the emulator.
 class EmulatorAdvertisement {
 public:
-    explicit EmulatorAdvertisement(EmulatorProperties&& config);
-    EmulatorAdvertisement(EmulatorProperties&& config,
-                          std::string sharedDirectory);
+    explicit EmulatorAdvertisement(
+            EmulatorProperties&& config,
+            std::unique_ptr<EmulatorLivenessStrategy> livenessChecker =
+                    std::make_unique<OpenPortChecker>());
+    EmulatorAdvertisement(
+            EmulatorProperties&& config,
+            std::string sharedDirectory,
+            std::unique_ptr<EmulatorLivenessStrategy> livenessChecker =
+                    std::make_unique<OpenPortChecker>());
     ~EmulatorAdvertisement();
 
     // The location where the .ini file will be written to.
@@ -70,16 +94,15 @@ public:
     // deleted.
     int garbageCollect() const;
 
-    // Discovers all the advertisement files of active emulators.
-    static std::vector<std::string> discoverRunningEmulators(
-            std::string sharedDirectory =
-                    android::ConfigDirs::getDiscoveryDirectory());
+    // Discovers all the advertisement files of active emulators, excluding us.
+    std::vector<std::string> discoverRunningEmulators();
 
 private:
     DISALLOW_COPY_AND_ASSIGN(EmulatorAdvertisement);
 
     EmulatorProperties mStudioConfig;
     std::string mSharedDirectory;
+    std::unique_ptr<EmulatorLivenessStrategy> mLivenessChecker;
 };
 
 }  // namespace control
