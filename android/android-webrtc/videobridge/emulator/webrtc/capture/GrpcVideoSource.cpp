@@ -26,6 +26,7 @@
 #include <thread>  // for thread
 #include <tuple>   // for make_tuple, tuple_elem...
 
+#include "android/base/Log.h"
 #include "android/base/StringView.h"           // for StringView
 #include "android/base/memory/SharedMemory.h"  // for SharedMemory, StringView
 #include "android/utils/tempfile.h"            // for tempfile_close, tempfi...
@@ -107,7 +108,7 @@ void GrpcVideoSource::captureFrames() {
 
     std::shared_ptr<grpc::ClientContext> context = mClient->newContext();
     mContext = context;
-    RTC_LOG(INFO) << "Requesting video stream " << w << "x" << h
+    LOG(INFO) << "Requesting video stream " << w << "x" << h
                   << ", from:" << handle;
 
 
@@ -140,14 +141,14 @@ void GrpcVideoSource::captureFrames() {
         auto state =
                 cq.AsyncNext(&got_tag, &ok,
                              grpc_timeout_to_deadline(std::chrono::milliseconds(500)));
-        // RTC_LOG(INFO) << "Got state: " << state << " tag " << (uint64_t) got_tag << " == " << (uint64_t) my_tag;
+        // LOG(INFO) << "Got state: " << state << " tag " << (uint64_t) got_tag << " == " << (uint64_t) my_tag;
         switch (state) {
             case ::grpc::CompletionQueue::NextStatus::GOT_EVENT:
                 if (ok && got_tag == my_tag) {
                     if (img.format().rotation().rotation() !=
                                 Rotation::PORTRAIT &&
                         !warned) {
-                        RTC_LOG(WARNING)
+                        LOG(WARNING)
                                 << "Rotation not yet properly supported.";
                         warned = true;
                     };
@@ -194,7 +195,7 @@ void GrpcVideoSource::captureFrames() {
         }
     } while (mCaptureVideo && !completed && ok);
 
-    RTC_LOG(INFO) << "Completed video stream.";
+    LOG(INFO) << "Completed video stream.";
     tempfile_close(tmp);
 }
 
@@ -241,7 +242,7 @@ void GrpcVideoSource::RemoveSink(
 
 void GrpcVideoSource::OnSinkWantsChanged(const rtc::VideoSinkWants& wants) {
     // TODO(jansene): Set the desired pixel count based on wants.
-    RTC_LOG(WARNING) << "OnSinkWantsChanged desired pixels: "
+    LOG(WARNING) << "OnSinkWantsChanged desired pixels: "
                      << wants.target_pixel_count.value_or(0)
                      << ", max: " << wants.max_pixel_count
                      << ", fps: " << wants.max_framerate_fps

@@ -13,6 +13,8 @@
 // limitations under the License.
 #include "emulator/net/SocketForwarder.h"
 
+#include "android/base/Log.h"
+
 #include <rtc_base/copy_on_write_buffer.h>  // for CopyOnWriteBuffer
 #include <rtc_base/logging.h>               // for RTC_LOG
 #include <type_traits>                      // for remove_extent_t
@@ -34,7 +36,7 @@ void SocketForwarder::sendMessage(const rtc::CopyOnWriteBuffer dataBuffer) {
     }
 
     if (!mDataChannel->Send(::webrtc::DataBuffer(dataBuffer, true))) {
-        RTC_LOG(LS_ERROR)
+        LOG(ERROR)
                 << "Failed to forward datapacket.. Closing down connection!";
         mSocket->close();
     }
@@ -72,7 +74,7 @@ void SocketForwarder::onClose(AsyncSocketAdapter* socket, int err) {
 // Called when this socket (re) established a connection.
 void SocketForwarder::onConnected(AsyncSocketAdapter* socket) {
     // Nop
-    RTC_LOG(INFO) << "Connection to socket established.";
+    LOG(INFO) << "Connection to socket established.";
 };
 
 void SocketForwarder::OnStateChange() {

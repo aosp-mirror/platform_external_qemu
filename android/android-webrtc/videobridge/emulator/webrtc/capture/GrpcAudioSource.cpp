@@ -19,6 +19,7 @@
 #include <memory>           // for unique_ptr, operator==
 #include <string>           // for string, basic_string<>:...
 
+#include "android/base/Log.h"
 #include "android/emulation/control/utils/EmulatorGrcpClient.h"  // for EmulatorGrpcClient
 #include "emulator_controller.grpc.pb.h"      // for EmulatorController::Stub
 #include "emulator_controller.pb.h"           // for AudioPacket, AudioFormat
@@ -45,7 +46,7 @@ GrpcAudioSource::GrpcAudioSource(EmulatorGrpcClient* client)
 
 void GrpcAudioSource::setAudioDumpFile(const std::string & audioDumpFile) {
     if (mAudioDump.is_open()) {
-        RTC_LOG(INFO) << "Already dumpping, ignoring the request";
+        LOG(INFO) << "Already dumpping, ignoring the request";
         return;
     }
     if (audioDumpFile.empty()) {
@@ -53,7 +54,7 @@ void GrpcAudioSource::setAudioDumpFile(const std::string & audioDumpFile) {
     }
     mAudioDump.open(audioDumpFile.c_str(), std::ios::out|std::ios::binary);
     if (!mAudioDump.is_open()) {
-        RTC_LOG(WARNING) << "Could not open " << audioDumpFile << " for write. Ignoring the audio dump request";
+        LOG(WARNING) << "Could not open " << audioDumpFile << " for write. Ignoring the audio dump request";
     }
 }
 void GrpcAudioSource::run() {

@@ -34,6 +34,7 @@
 #include <utility>        // for pair
 #include <vector>         // for vector
 
+#include "android/base/Log.h"
 #include "android/emulation/control/utils/EmulatorGrcpClient.h"             // for EmulatorGrpc...
 #include "emulator/net/SocketForwarder.h"                // for AdbPortForwa...
 #include "emulator/webrtc/RtcConnection.h"               // for json, RtcCon...
@@ -122,7 +123,7 @@ static std::string asString(
 
 void logRtcError(::webrtc::RTCError error) {
     if (!error.ok())
-        RTC_LOG(LS_ERROR) << error.message();
+        LOG(ERROR) << error.message();
 }
 
 class SetRemoteDescriptionCallback
@@ -232,7 +233,7 @@ Participant::Participant(RtcConnection* board,
       mVideoReceiver(vtr) {}
 
 Participant::~Participant() {
-    RTC_LOG(INFO) << "Participant " << mPeerId << ", completed.";
+    LOG(INFO) << "Participant " << mPeerId << ", completed.";
     if (mLocalAdbSocket) {
         // There's a corner case where we never established a local adb
         // connection and we could be spinning in a connect loop.
@@ -243,13 +244,13 @@ Participant::~Participant() {
 void Participant::OnAddStream(
         rtc::scoped_refptr<::webrtc::MediaStreamInterface> stream) {
     if (mVideoReceiver == nullptr) {
-        RTC_LOG(WARNING) << "No receivers available!";
+        LOG(WARNING) << "No receivers available!";
         return;
     }
     auto tracks = stream->GetVideoTracks();
     for (const auto& track : tracks) {
         // TODO(jansene): Here we should include multi display settings.
-        RTC_LOG(INFO) << "Connecting track: " << track->id();
+        LOG(INFO) << "Connecting track: " << track->id();
         track->set_enabled(true);
         track->AddOrUpdateSink(mVideoReceiver, rtc::VideoSinkWants());
     }
@@ -259,13 +260,13 @@ using ::webrtc::PeerConnectionInterface;
 
 void Participant::OnIceConnectionChange(
         PeerConnectionInterface::IceConnectionState new_state) {
-    RTC_LOG(INFO) << "OnIceConnectionChange: Participant: " << mPeerId << ": "
+    LOG(INFO) << "OnIceConnectionChange: Participant: " << mPeerId << ": "
                   << asString(new_state);
 }
 
 void Participant::OnConnectionChange(
         PeerConnectionInterface::PeerConnectionState new_state) {
-    RTC_LOG(INFO) << "OnConnectionChange: Participant: " << mPeerId << ": "
+    LOG(INFO) << "OnConnectionChange: Participant: " << mPeerId << ": "
                   << asString(new_state);
     bool closed = false;
     switch (new_state) {
@@ -283,7 +284,7 @@ void Participant::OnConnectionChange(
 }
 
 void Participant::DoClose() {
-    RTC_LOG(INFO) << "Closing peer connection.";
+    LOG(INFO) << "Closing peer connection.";
     std::unique_lock<std::mutex> lock(mClosedMutex);
     if (mPeerConnection) {
         mPeerConnection->Close();
@@ -318,7 +319,7 @@ void Participant::OnIceCandidate(
     // We discovered a candidate, now we just send it over.
     std::string sdp;
     if (!candidate->ToString(&sdp)) {
-        RTC_LOG(LS_ERROR) << "Failed to serialize candidate";
+        LOG(ERROR) << "Failed to serialize candidate";
         return;
     }
 
@@ -330,7 +331,7 @@ void Participant::OnIceCandidate(
 }
 
 void Participant::SendMessage(json msg) {
-    RTC_LOG(INFO) << "Send: " << mPeerId << ", :" << msg;
+    LOG(INFO) << "Send: " << mPeerId << ", :" << msg;
     mRtcConnection->send(mPeerId, msg);
 }
 
@@ -350,13 +351,13 @@ void Participant::SendToDataChannel(DataChannelLabel label, std::string data) {
                 ::webrtc::DataBuffer(::rtc::CopyOnWriteBuffer(data), true);
         fwd->second->Send(buffer);
     } else {
-        RTC_LOG(INFO) << "Dropping message to " << asString(label)
+        LOG(INFO) << "Dropping message to " << asString(label)
                       << ", no such datachannel present";
     }
 }
 
 void Participant::IncomingMessage(json msg) {
-    RTC_LOG(INFO) << "IncomingMessage: " << msg.dump();
+    LOG(INFO) << "IncomingMessage: " << msg.dump();
     if (msg.count("candidate")) {
         if (msg["candidate"].count("candidate")) {
             // Old JS clients wrap this message.
@@ -382,7 +383,7 @@ void Participant::IncomingMessage(json msg) {
 void Participant::HandleCandidate(const json& msg) {
     if (!msg.count("sdpMid") || !msg.count("sdpMLineIndex") ||
         !msg.count("candidate")) {
-        RTC_LOG(WARNING) << "Missing required properties!";
+        LOG(WARNING) << "Missing required properties!";
         return;
     }
     std::string sdp_mid = msg["sdpMid"];
@@ -393,7 +394,7 @@ void Participant::HandleCandidate(const json& msg) {
     std::unique_ptr<::webrtc::IceCandidateInterface> candidate(
             CreateIceCandidate(sdp_mid, sdp_mlineindex, sdp, &error));
     if (!candidate) {
-        RTC_LOG(WARNING) << "Can't parse received candidate message. "
+        LOG(WARNING) << "Can't parse received candidate message. "
                          << "SdpParseError was: " << error.description;
         return;
     }
@@ -403,11 +404,11 @@ void Participant::HandleCandidate(const json& msg) {
 void Participant::HandleOffer(const json& msg) {
     std::string type = msg["type"];
     if (type == "offer-loopback") {
-        RTC_LOG(LS_ERROR) << "We are not doing loopbacks";
+        LOG(ERROR) << "We are not doing loopbacks";
         return;
     }
     if (!msg.count("sdp")) {
-        RTC_LOG(WARNING) << "Message doesn't contain session description";
+        LOG(WARNING) << "Message doesn't contain session description";
         return;
     }
 
@@ -416,7 +417,7 @@ void Participant::HandleOffer(const json& msg) {
     std::unique_ptr<::webrtc::SessionDescriptionInterface> session_description(
             CreateSessionDescription(type, sdp, &error));
     if (!session_description) {
-        RTC_LOG(WARNING) << "Can't parse received session description message. "
+        LOG(WARNING) << "Can't parse received session description message. "
                          << "SdpParseError was: " << error.description;
         return;
     }
@@ -448,10 +449,10 @@ void Participant::ReceivedSessionDescription(
 bool Participant::AddVideoTrack(int displayId) {
     std::string handle = kVideoTrack + std::to_string(displayId);
     if (mActiveTracks.count(handle) != 0) {
-        RTC_LOG(LS_ERROR) << "Track " << handle
+        LOG(ERROR) << "Track " << handle
                           << " already active, not adding again.";
     }
-    RTC_LOG(INFO) << "Adding video track: [" << handle << "]";
+    LOG(INFO) << "Adding video track: [" << handle << "]";
     auto track =
             mRtcConnection->getMediaSourceLibrary()->getVideoSource(displayId);
     scoped_refptr<::webrtc::VideoTrackInterface> video_track(
@@ -460,7 +461,7 @@ bool Participant::AddVideoTrack(int displayId) {
 
     auto result = mPeerConnection->AddTrack(video_track, {handle});
     if (!result.ok()) {
-        RTC_LOG(LS_ERROR) << "Failed to add track to video: "
+        LOG(ERROR) << "Failed to add track to video: "
                           << result.error().message();
         return false;
     }
@@ -471,10 +472,10 @@ bool Participant::AddVideoTrack(int displayId) {
 
 bool Participant::AddAudioTrack(const std::string& audioDumpFile) {
     if (mActiveTracks.count(kAudioTrack) != 0) {
-        RTC_LOG(LS_ERROR) << "Track " << kAudioTrack
+        LOG(ERROR) << "Track " << kAudioTrack
                           << " already active, not adding again.";
     }
-    RTC_LOG(INFO) << "Adding audio track: [" << kAudioTrack << "]";
+    LOG(INFO) << "Adding audio track: [" << kAudioTrack << "]";
     auto track = mRtcConnection->getMediaSourceLibrary()->getAudioSource();
     track->setAudioDumpFile(audioDumpFile);
 
@@ -484,7 +485,7 @@ bool Participant::AddAudioTrack(const std::string& audioDumpFile) {
 
     auto result = mPeerConnection->AddTrack(audio_track, {kAudioTrack});
     if (!result.ok()) {
-        RTC_LOG(LS_ERROR) << "Failed to add audio track: "
+        LOG(ERROR) << "Failed to add audio track: "
                           << result.error().message();
         return false;
     }
@@ -502,7 +503,7 @@ void Participant::CreateOffer() {
 
 void Participant::OnDataChannel(
         rtc::scoped_refptr<::webrtc::DataChannelInterface> channel) {
-    RTC_LOG(INFO) << "Registering data channel: " << channel->label();
+    LOG(INFO) << "Registering data channel: " << channel->label();
     if (channel->label() == "adb" && mLocalAdbSocket) {
         mSocketForwarder =
                 std::make_unique<SocketForwarder>(mLocalAdbSocket, channel);
@@ -512,7 +513,7 @@ void Participant::OnDataChannel(
 
 bool Participant::RegisterLocalAdbForwarder(
         std::shared_ptr<android::base::AsyncSocket> adbSocket) {
-    RTC_LOG(INFO) << "Registering adb forwarding channel.";
+    LOG(INFO) << "Registering adb forwarding channel.";
     mLocalAdbSocket = adbSocket;
     auto channel = mPeerConnection->CreateDataChannel("adb", nullptr);
     if (!channel) {

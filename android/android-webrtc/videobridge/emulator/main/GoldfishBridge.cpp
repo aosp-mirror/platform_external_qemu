@@ -276,7 +276,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (!client->hasOpenChannel()) {
-        RTC_LOG(LERROR) << "Unable to open gRPC channel to the emulator.";
+        LOG(ERROR) << "Unable to open gRPC channel to the emulator.";
         return -1;
     }
 
@@ -315,7 +315,7 @@ int main(int argc, char* argv[]) {
         if (controller) {
             controller->wait();
         } else {
-            RTC_LOG(LS_ERROR) << "FATAL! Unable to configure gRPC RTC service "
+            LOG(ERROR) << "FATAL! Unable to configure gRPC RTC service "
                                  "(port in use?)";
         }
     }
