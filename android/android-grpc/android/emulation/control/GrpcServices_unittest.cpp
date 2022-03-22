@@ -438,8 +438,6 @@ TEST_F(GrpcServiceTest, SecureWithGoodTokenAccepts) {
     EXPECT_EQ(invocations + 1, mEchoService->invocations());
 }
 
-#ifndef _WIN32
-// Bug: 225895409
 TEST_F(GrpcServiceTest, AsyncServerStreamingWorks) {
     VERBOSE_ENABLE(grpc);
     mBuilder.withService(mEchoService).withPortRange(0, 1);
@@ -459,8 +457,9 @@ TEST_F(GrpcServiceTest, AsyncServerStreamingWorks) {
     hello.set_data("Hello World!");
 
     int responses = 0;
-    auto reader = client->serverStreamData(&ctx, hello);
-    while (response.counter() < hello.counter() && reader->Read(&response)) {
+    auto bidistream = client->streamEcho(&ctx);
+    bidistream->Write(hello);
+    while (response.counter() < hello.counter() && bidistream->Read(&response)) {
         responses++;
         printf("Got responses: %d\n", responses);
     }
@@ -470,7 +469,6 @@ TEST_F(GrpcServiceTest, AsyncServerStreamingWorks) {
     ctx.TryCancel();
     mEmuController->stop();
 }
-#endif
 }  // namespace control
 }  // namespace emulation
 }  // namespace android
