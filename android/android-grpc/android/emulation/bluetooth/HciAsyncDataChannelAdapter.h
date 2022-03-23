@@ -15,8 +15,8 @@
 #include <functional>  // for function
 #include <memory>      // for shared_ptr
 
-#include "emulated_bluetooth_packets.pb.h"             // for HCIPacket
-#include "model/devices/h4_data_channel_packetizer.h"  // for H4DataChannelP...
+#include "emulated_bluetooth_packets.pb.h"         // for HCIPacket
+#include "model/hci/h4_data_channel_packetizer.h"  // for H4DataChannelP...
 #include "net/async_data_channel.h"
 
 namespace android {
