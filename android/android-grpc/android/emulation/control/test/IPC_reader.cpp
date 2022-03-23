@@ -203,7 +203,7 @@ private:
         std::vector<uint8_t> wri(size);
         auto chk = fill_region(wri.data(), wri.size());
 
-        TestEchoServiceImpl* echoService = new TestEchoServiceImpl();
+        TestEchoServiceBase* echoService = new TestEchoServiceBase();
         echoService->moveData(wri);
 
         EmulatorControllerService::Builder builder;

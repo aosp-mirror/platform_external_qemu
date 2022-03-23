@@ -127,6 +127,10 @@ target_link_libraries(
 target_include_directories(android-grpc PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
                                                ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_options(android-grpc PRIVATE -Wno-return-type-c-linkage)
+if(WINDOWS_MSVC_X86_64)
+  message(STATUS "Using async<->sync bridge until Win32 gRPC is properly supported b/225895409,")
+  target_compile_definitions(android-grpc PUBLIC DISABLE_ASYNC_GRPC)
+endif()
 set_target_properties(android-grpc PROPERTIES CXX_STANDARD 17)
 
 protobuf_generate_grpc_cpp(

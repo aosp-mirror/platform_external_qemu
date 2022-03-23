@@ -23,13 +23,18 @@
 #include <vector>       // for vector
 
 #include "android/emulation/bluetooth/HciAsyncDataChannelAdapter.h"
-#include "android/emulation/control/utils/SimpleAsyncGrpc.h"
 #include "android/utils/debug.h"         // for dwarning
 #include "grpc/support/time.h"           // for gpr_now
 #include "net/hci_datachannel_server.h"  // for HciData...
 #include "root_canal_qemu.h"             // for Rootcanal
 
-#define DEBUG 1
+#ifndef DISABLE_ASYNC_GRPC
+#include "android/emulation/control/utils/SimpleAsyncGrpc.h"
+#else
+#include "android/emulation/control/utils/SyncToAsyncAdapter.h"
+#endif
+
+// #define DEBUG 1
 /* set  for very verbose debugging */
 #ifndef DEBUG
 #define DD(...) (void)0
@@ -44,84 +49,87 @@ namespace bluetooth {
 // True if a connection over gRPC <-> /dev/vhci is active
 static std::atomic_bool sHijacked{false};
 
+class HciHandler : public SimpleServerBidiStream<HCIPacket, HCIPacket> {
+public:
+    HciHandler() {
+        bool expected = false;
+        if (!sHijacked.compare_exchange_strong(expected, true)) {
+            // Bad news, we've already been hijacked.
+            Finish(::grpc::Status(::grpc::StatusCode::FAILED_PRECONDITION,
+                                  "Another client is already controlling "
+                                  "/dev/vhci",
+                                  ""));
+        }
+
+        auto qemuHciServer =
+                android::bluetooth::Rootcanal::Builder::getInstance()
+                        ->qemuHciServer();
+
+        // Let's not fire any new events to anyone, we are hijacking
+        // this connection.
+        qemuHciServer->StopListening();
+
+        // Close down the HCI connection to rootcanal.
+        qemuHciServer->qemuChannel()->Close();
+
+        // Create a new transport.
+        mQemuChannel = qemuHciServer->injectQemuChannel();
+
+        mHciChannel = std::make_unique<HciAsyncDataChannelAdapter>(
+                mQemuChannel, [this](auto packet) { this->Write(packet); },
+                [this](auto) {
+                    // This would be a big surprise..
+                    dwarning("Qemu channel unexpectedly closed down.");
+                    this->Finish(::grpc::Status::CANCELLED);
+                });
+
+        hijacked = true;
+
+        // Serious hackers are taking control! BEWARE!
+        dwarning(
+                "You have taken over /dev/vhci, rootcanal is now "
+                "disabled.");
+    }
+
+    void Read(const HCIPacket* packet) override { mHciChannel->send(*packet); }
+
+    void OnDone() override {
+        if (hijacked) {
+            auto qemuHciServer =
+                    android::bluetooth::Rootcanal::Builder::getInstance()
+                            ->qemuHciServer();
+            qemuHciServer->StartListening();
+            qemuHciServer->injectQemuChannel();
+            sHijacked = false;
+        }
+        delete this;
+    }
+
+    void OnCancel() override { Finish(grpc::Status::CANCELLED); }
+
+private:
+    std::unique_ptr<HciAsyncDataChannelAdapter> mHciChannel;
+    std::shared_ptr<AsyncDataChannel> mQemuChannel;
+
+    bool hijacked{false};
+};
+
+#ifndef DISABLE_ASYNC_GRPC
 class AsyncVhciForwardingServiceImpl : public AsyncVhciForwardingService {
     ::grpc::ServerBidiReactor<HCIPacket, HCIPacket>* attachVhci(
             ::grpc::CallbackServerContext* context) override {
-        class HciHandler
-            : public SimpleBidiStream<HCIPacket, HCIPacket> {
-        public:
-            HciHandler(::grpc::CallbackServerContext* context)
-                : mContext(context) {
-                bool expected = false;
-                if (!sHijacked.compare_exchange_strong(expected, true)) {
-                    // Bad news, we've already been hijacked.
-                    Finish(::grpc::Status(
-                            ::grpc::StatusCode::FAILED_PRECONDITION,
-                            "Another client is already controlling "
-                            "/dev/vhci",
-                            ""));
-                }
-
-                auto qemuHciServer =
-                        android::bluetooth::Rootcanal::Builder::getInstance()
-                                ->qemuHciServer();
-
-                // Let's not fire any new events to anyone, we are hijacking
-                // this connection.
-                qemuHciServer->StopListening();
-
-                // Close down the HCI connection to rootcanal.
-                qemuHciServer->qemuChannel()->Close();
-
-                // Create a new transport.
-                mQemuChannel = qemuHciServer->injectQemuChannel();
-
-                mHciChannel = std::make_unique<HciAsyncDataChannelAdapter>(
-                        mQemuChannel,
-                        [this](auto packet) { this->Write(packet); },
-                        [this](auto) {
-                            // This would be a big surprise..
-                            dwarning("Qemu channel unexpectedly closed down.");
-                            this->Finish(::grpc::Status::CANCELLED);
-                        });
-
-                hijacked = true;
-
-                // Serious hackers are taking control! BEWARE!
-                dwarning(
-                        "You have taken over /dev/vhci, rootcanal is now "
-                        "disabled.");
-            }
-
-            void Read(const HCIPacket* packet) override {
-                mHciChannel->send(*packet);
-            }
-
-            void OnDone() override {
-                if (hijacked) {
-                    auto qemuHciServer = android::bluetooth::Rootcanal::
-                                                 Builder::getInstance()
-                                                         ->qemuHciServer();
-                    qemuHciServer->StartListening();
-                    qemuHciServer->injectQemuChannel();
-                    sHijacked = false;
-                }
-                delete this;
-            }
-
-            void OnCancel() override { Finish(grpc::Status::CANCELLED); }
-
-        private:
-            ::grpc::CallbackServerContext* mContext;
-            std::unique_ptr<HciAsyncDataChannelAdapter> mHciChannel;
-            std::shared_ptr<AsyncDataChannel> mQemuChannel;
-
-            bool hijacked{false};
-        };
-
-        return new HciHandler(context);
+        return new HciHandler();
     }
 };
+#else
+class AsyncVhciForwardingServiceImpl : public AsyncVhciForwardingService {
+    ::grpc::Status attachVhci(
+            ::grpc::ServerContext* context,
+            ::grpc::ServerReaderWriter<HCIPacket, HCIPacket>* stream) override {
+        return BidiRunner<HciHandler>(stream).status();
+    }
+};
+#endif
 
 AsyncVhciForwardingService* getVhciForwarder() {
     return new AsyncVhciForwardingServiceImpl();

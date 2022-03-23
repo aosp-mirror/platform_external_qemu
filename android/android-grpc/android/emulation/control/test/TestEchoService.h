@@ -41,8 +41,9 @@ class Msg;
 using grpc::ServerContext;
 using grpc::Status;
 
-class TestEchoServiceImpl : public TestEcho::Service {
+class TestEchoServiceBase : public TestEcho::Service {
 public:
+    virtual ~TestEchoServiceBase() = default;
     Status echo(ServerContext* context,
                 const Msg* request,
                 Msg* response) override;
@@ -57,7 +58,7 @@ public:
 
     void plusOne() { mCounter++; }
 
-private:
+protected:
     int mCounter{0};
     std::vector<uint8_t> mData;
 };
@@ -69,22 +70,38 @@ public:
             ::grpc::ServerReaderWriter<Msg, Msg>* /*stream*/) override;
 };
 
+#ifndef DISABLE_ASYNC_GRPC
 class AsyncHeartbeatService
     : public TestEcho::WithCallbackMethod_streamEcho<HeartbeatService> {
     grpc::ServerBidiReactor<Msg, Msg>* streamEcho(
             ::grpc::CallbackServerContext* context) override;
 };
+#else
+class AsyncHeartbeatService : public TestEcho::Service {
+public:
+    ~AsyncHeartbeatService() = default;
+    ::grpc::Status streamEcho(
+            ::grpc::ServerContext* /*context*/,
+            ::grpc::ServerReaderWriter<Msg, Msg>* /*stream*/) override;
+};
+#endif
 
+#ifndef DISABLE_ASYNC_GRPC
 class AsyncTestEchoService
-    : public TestEcho::WithCallbackMethod_serverStreamData<
-              TestEcho::WithCallbackMethod_streamEcho<TestEchoServiceImpl>> {
+    : public TestEcho::WithCallbackMethod_streamEcho<TestEchoServiceBase> {
 public:
     grpc::ServerBidiReactor<Msg, Msg>* streamEcho(
             ::grpc::CallbackServerContext* context) override;
-    ::grpc::ServerWriteReactor<Msg>* serverStreamData(
-            ::grpc::CallbackServerContext* context,
-            const Msg* request) override;
 };
+#else
+class AsyncTestEchoService : public TestEchoServiceBase {
+public:
+    ~AsyncTestEchoService() = default;
+    virtual ::grpc::Status streamEcho(
+            ::grpc::ServerContext* context,
+            ::grpc::ServerReaderWriter<Msg, Msg>* stream) override;
+};
+#endif
 
 }  // namespace control
 }  // namespace emulation
