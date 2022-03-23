@@ -24,6 +24,7 @@ from aemu.proto.snapshot_service_pb2_grpc import SnapshotServiceStub
 from aemu.proto.ui_controller_service_pb2_grpc import UiControllerStub
 from aemu.proto.waterfall_pb2_grpc import WaterfallStub
 from aemu.proto.emulated_bluetooth_vhci_pb2_grpc import VhciForwardingServiceStub
+from aemu.proto.emulated_bluetooth_pb2_grpc import EmulatedBluetoothServiceStub
 
 
 class EmulatorDescription(dict):
@@ -128,6 +129,12 @@ class EmulatorDescription(dict):
         """Returns a stub to the Vhci Forwarding  service."""
         channel = self.get_grpc_channel(use_async)
         return VhciForwardingServiceStub(channel)
+
+    def get_emulated_bluetooth_service(self, use_async=False):
+        """Returns a stub to the emulated bluetooth service."""
+        channel = self.get_grpc_channel(use_async)
+        return EmulatedBluetoothServiceStub(channel)
+
 
     def name(self):
         """Returns the name of the emulator.

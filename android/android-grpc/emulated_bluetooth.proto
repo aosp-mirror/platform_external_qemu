@@ -28,9 +28,11 @@ option java_package = "com.android.emulator.bluetooth";
 
 package android.emulation.bluetooth;
 import "emulated_bluetooth_packets.proto";
-// An Emulated Bluetoot Service exposes the emulated bluetooth chip from the android
-// emulator. It allows you to register emulated bluetooth devices and control
-// the packets that are exchanged between the device and the world.
+import "emulated_bluetooth_device.proto";
+
+// An Emulated Bluetooth Service exposes the emulated bluetooth chip from the
+// android emulator. It allows you to register emulated bluetooth devices and
+// control the packets that are exchanged between the device and the world.
 //
 // This service enables you to establish a "virtual network" of emulated
 // bluetooth devices that can interact with each other.
@@ -50,7 +52,6 @@ service EmulatedBluetoothService {
     // For example a wear device can connect to an android emulator through
     // this.
     rpc registerClassicPhy(stream RawData) returns (stream RawData);
-
 
     // Connect device to link layer. This will establish a direct connection
     // to root canal and execute the following:
@@ -77,9 +78,27 @@ service EmulatedBluetoothService {
     // For example the apache nimble stack can use this endpoint as the
     // transport layer.
     rpc registerHCIDevice(stream HCIPacket) returns (stream HCIPacket);
+
+    // Registers an emulated bluetooth device. The emulator will reach out to
+    // the emulated device to read/write and subscribe to properties.
+    //
+    // The following gRPC error codes can be returned:
+    // -  FAILED_PRECONDITION (code 9):
+    //      - root canal is not available on this device
+    //      - unable to reach the endpoint for the GattDevice
+    // -  INTERNAL (code 13) if there was an internal emulator failure.
+    //
+    // The device will not be discoverable in case of an error.
+    rpc registerGattDevice(GattDevice) returns (RegistrationStatus);
 };
 
 message RawData {
     // A packet of raw bytes that should be delivered.
     bytes packet = 1;
 };
+
+message RegistrationStatus {
+    // The identity of the registered device. The emulator will provide this
+    // when executing a request for a CharacteristicValueRequest
+    CallbackIdentifier callback_device_id = 1;
+}
