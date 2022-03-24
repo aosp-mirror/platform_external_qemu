@@ -371,6 +371,39 @@ uint32_t update_latency_bytes(VirtIOSoundPCMStream *stream, int x) {
     return val;
 }
 
+static void virtio_snd_out_cb(void *opaque, int avail);
+static void virtio_snd_in_cb(void *opaque, int avail);
+
+static void virtio_snd_voice_open(VirtIOSound *snd, VirtIOSoundPCMStream *stream) {
+    struct audsettings as = virtio_snd_unpack_format(stream->format);
+
+    if (is_output_stream(stream)) {
+        stream->voice.out = AUD_open_out(&snd->card,
+                                         NULL,
+                                         stream_name[stream->id],
+                                         stream,
+                                         &virtio_snd_out_cb,
+                                         &as);
+    } else {
+        stream->voice.in = AUD_open_in(&snd->card,
+                                       NULL,
+                                       stream_name[stream->id],
+                                       stream,
+                                       &virtio_snd_in_cb,
+                                       &as);
+    }
+}
+
+static void virtio_snd_voice_close(VirtIOSound *snd, VirtIOSoundPCMStream *stream) {
+    if (stream->voice.raw) {
+        if (is_output_stream(stream)) {
+            AUD_close_out(&snd->card, stream->voice.out);
+        } else {
+            AUD_close_in(&snd->card, stream->voice.in);
+        }
+    }
+}
+
 static void virtio_snd_stream_init(const unsigned stream_id,
                                    VirtIOSoundPCMStream *stream,
                                    VirtIOSound *snd) {
@@ -380,32 +413,28 @@ static void virtio_snd_stream_init(const unsigned stream_id,
     stream->snd = snd;
     stream->format = stream_formats[stream_id];
     stream->voice.raw = NULL;
+    virtio_snd_voice_open(snd, stream);
     ring_buffer_init(&stream->pcm_buf);
     qemu_mutex_init(&stream->mtx);
     stream->state = VIRTIO_PCM_STREAM_STATE_DISABLED;
 }
 
 static void virtio_snd_process_ctl_stream_stop_impl(VirtIOSoundPCMStream *stream) {
-    if (is_output_stream(stream)) {
-        AUD_set_active_out(stream->voice.out, 0);
-    } else {
-        AUD_set_active_in(stream->voice.in, 0);
+    if (stream->voice.raw) {
+        if (is_output_stream(stream)) {
+            AUD_set_active_out(stream->voice.out, 0);
+        } else {
+            AUD_set_active_in(stream->voice.in, 0);
+        }
+        stream->voice.raw = NULL;
     }
 }
+
 
 static void virtio_snd_process_ctl_stream_unprepare_locked(VirtIOSoundPCMStream *stream) {
     VirtIOSoundRingBuffer *pcm_buf = &stream->pcm_buf;
     VirtIOSound *snd = stream->snd;
     VirtQueue *tx_vq = snd->tx_vq;
-
-    if (stream->voice.raw) {
-        if (is_output_stream(stream)) {
-            AUD_close_out(&stream->snd->card, stream->voice.out);
-        } else {
-            AUD_close_in(&stream->snd->card, stream->voice.in);
-        }
-        stream->voice.raw = NULL;
-    }
 
     while (true) {
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
@@ -669,6 +698,10 @@ static void virtio_snd_out_cb(void *opaque, int avail) {
     qemu_mutex_unlock(&stream->mtx);
 }
 
+static void virtio_snd_in_cb(void *opaque, int avail) {
+    /* TODO */
+}
+
 static void virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSound *snd) {
     VirtIOSoundRingBufferItem item;
     struct virtio_snd_pcm_xfer xfer;
@@ -706,7 +739,7 @@ static void virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
 static uint32_t
 virtio_snd_process_ctl_pcm_prepare_impl(unsigned stream_id, VirtIOSound* snd) {
     VirtIOSoundPCMStream *stream;
-    struct audsettings as;
+    uint32_t r;
 
     if (stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
         return VIRTIO_SND_S_BAD_MSG;
@@ -715,27 +748,23 @@ virtio_snd_process_ctl_pcm_prepare_impl(unsigned stream_id, VirtIOSound* snd) {
     stream = &snd->streams[stream_id];
 
     qemu_mutex_lock(&stream->mtx);
+
+    if (!stream->voice.raw) {
+        r = VIRTIO_SND_S_IO_ERR;
+        goto done;
+    }
+
     if (!stream->buffer_bytes) {
-        return VIRTIO_SND_S_BAD_MSG;
+        r = VIRTIO_SND_S_BAD_MSG;
+        goto done;
     }
 
     switch (stream->state) {
     case VIRTIO_PCM_STREAM_STATE_ENABLED:
         if (!ring_buffer_alloc(&stream->pcm_buf,
-                                          2 * stream->buffer_bytes / stream->period_bytes)) {
-            qemu_mutex_unlock(&stream->mtx);
-            return VIRTIO_SND_S_BAD_MSG;
-        }
-
-        as = virtio_snd_unpack_format(stream->format);
-
-        stream->voice.out =
-            AUD_open_out(&snd->card, NULL, stream_name[stream_id],
-                         stream, &virtio_snd_out_cb, &as);
-        if (!stream->voice.out) {
-            ring_buffer_free(&stream->pcm_buf);
-            qemu_mutex_unlock(&stream->mtx);
-            return VIRTIO_SND_S_BAD_MSG;
+                               2 * stream->buffer_bytes / stream->period_bytes)) {
+            r = VIRTIO_SND_S_BAD_MSG;
+            goto done;
         }
 
         stream->freq_hz = format16_get_freq_hz(stream->format);
@@ -743,17 +772,23 @@ virtio_snd_process_ctl_pcm_prepare_impl(unsigned stream_id, VirtIOSound* snd) {
         stream->buffer_frames = stream->buffer_bytes / stream->frame_size;
         stream->latency_bytes = 0;
         stream->state = VIRTIO_PCM_STREAM_STATE_PREPARED;
+        r = VIRTIO_SND_S_OK;
+        goto done;
 
     case VIRTIO_PCM_STREAM_STATE_PREPARED:
-        qemu_mutex_unlock(&stream->mtx);
-        return VIRTIO_SND_S_OK;
+        r = VIRTIO_SND_S_OK;
+        goto done;
 
     default:
         derror("%s:%d stream_id=%u state=%s(%d)", __func__, __LINE__,
                stream_id, stream_state_str(stream->state), stream->state);
-        qemu_mutex_unlock(&stream->mtx);
-        return VIRTIO_SND_S_BAD_MSG;
+        r = VIRTIO_SND_S_BAD_MSG;
+        goto done;
     }
+
+done:
+    qemu_mutex_unlock(&stream->mtx);
+    return r;
 }
 
 static uint32_t
@@ -781,23 +816,26 @@ virtio_snd_process_ctl_pcm_release_impl(unsigned stream_id, VirtIOSound* snd) {
 static uint32_t
 virtio_snd_process_ctl_pcm_start_impl(unsigned stream_id, VirtIOSound* snd) {
     VirtIOSoundPCMStream *stream;
+    uint32_t r;
 
     if (stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
         return VIRTIO_SND_S_BAD_MSG;
     }
 
-    stream = &snd->streams[stream_id];
 
-    if (stream->state != VIRTIO_PCM_STREAM_STATE_PREPARED) {
-        return VIRTIO_SND_S_BAD_MSG;
-    }
+    stream = &snd->streams[stream_id];
 
     qemu_mutex_lock(&stream->mtx);
 
-    stream->frames_sent = 0;
-    stream->frames_skipped = 0;
+    if (stream->state != VIRTIO_PCM_STREAM_STATE_PREPARED) {
+        r = VIRTIO_SND_S_BAD_MSG;
+        goto done;
+    }
 
-    if (is_output_stream(stream)) {
+    if (!stream->voice.raw) {
+        r = VIRTIO_SND_S_IO_ERR;
+        goto done;
+    } else if (is_output_stream(stream)) {
         SWVoiceOut *voice = stream->voice.out;
         AUD_set_active_out(voice, 1);
         AUD_init_time_stamp_out(voice, &stream->start_timestamp);
@@ -807,11 +845,14 @@ virtio_snd_process_ctl_pcm_start_impl(unsigned stream_id, VirtIOSound* snd) {
         AUD_init_time_stamp_in(voice, &stream->start_timestamp);
     }
 
+    stream->frames_sent = 0;
+    stream->frames_skipped = 0;
     stream->state = VIRTIO_PCM_STREAM_STATE_RUNNING;
+    r = VIRTIO_SND_S_OK;
 
+done:
     qemu_mutex_unlock(&stream->mtx);
-
-    return VIRTIO_SND_S_OK;
+    return r;
 }
 
 static uint32_t
@@ -992,7 +1033,10 @@ static void virtio_snd_device_unrealize(DeviceState *dev, Error **errp) {
     unsigned i;
 
     for (i = 0; i < VIRTIO_SND_NUM_PCM_STREAMS; ++i) {
-        virtio_snd_stream_disable(&snd->streams[i]);
+        VirtIOSoundPCMStream *stream = &snd->streams[i];
+
+        virtio_snd_stream_disable(stream);
+        virtio_snd_voice_close(snd, stream);
     }
 
     AUD_remove_card(&snd->card);
