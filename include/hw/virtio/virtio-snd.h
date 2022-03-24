@@ -54,6 +54,8 @@ struct VirtIOSoundRingBuffer {
 };
 
 struct VirtIOSoundPCMStream {
+    uint32_t buffer_bytes;
+    uint16_t format;
     VirtIOSound *snd;
     union {
         SWVoiceIn *in;
@@ -62,7 +64,6 @@ struct VirtIOSoundPCMStream {
     } voice;
 
     VirtIOSoundRingBuffer pcm_buf;
-    struct audsettings as;
     QemuMutex mtx;
 
     QEMUAudioTimeStamp start_timestamp;
@@ -71,11 +72,11 @@ struct VirtIOSoundPCMStream {
 
     uint32_t latency_bytes;
     uint32_t features;
-    int buffer_bytes;
     int period_bytes;
-    int buffer_frames;
 
     uint8_t state;
+    uint32_t buffer_frames;
+    uint32_t freq_hz;
     uint8_t id;
     uint8_t frame_size;
 };
