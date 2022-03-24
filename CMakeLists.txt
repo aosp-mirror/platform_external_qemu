@@ -495,8 +495,6 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
   set(ANGLE_RENDERER_DEPENDENCIES
       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
-      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libchrome_zlib${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libchrome_zlib${CMAKE_SHARED_LIBRARY_SUFFIX}"
-      "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libabsl${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libabsl${CMAKE_SHARED_LIBRARY_SUFFIX}"
       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libvk_swiftshader${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libvk_swiftshader${CMAKE_SHARED_LIBRARY_SUFFIX}"
       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libswiftshader_libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libswiftshader_libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/common/ANGLE/${ANDROID_TARGET_OS_FLAVOR}-${ANDROID_TARGET_ARCH}/lib/libswiftshader_libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}>lib64/gles_angle/libswiftshader_libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
@@ -509,8 +507,6 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
     EXECUTABLES
       "gles_angle/libEGL${CMAKE_SHARED_LIBRARY_SUFFIX}"
       "gles_angle/libGLESv2${CMAKE_SHARED_LIBRARY_SUFFIX}"
-      "gles_angle/libabsl${CMAKE_SHARED_LIBRARY_SUFFIX}"
-      "gles_angle/libchrome_zlib${CMAKE_SHARED_LIBRARY_SUFFIX}"
     URL "https://chromium.googlesource.com/angle/angle"
     SPDX "BSD-3-Clause"
     LICENSE "https://chromium.googlesource.com/angle/angle/LICENSE"
