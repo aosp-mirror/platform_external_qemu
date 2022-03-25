@@ -52,6 +52,55 @@ union VirtIOSoundCtlRequest {
     struct virtio_snd_pcm_hdr r4;
 };
 
+/*
+ * aaaaaaa bbbbb cccc
+ *               frequency (VIRTIO_SND_PCM_RATE_x)
+           format (VIRTIO_SND_PCM_FMT_x)
+ * nchannels - 1
+ */
+#define VIRTIO_SND_PACK_FORMAT(nchannels, fmt, freq) (freq | (fmt << 4) | ((nchannels - 1) << 9))
+
+static int format16_get_freq_hz(uint16_t format16) {
+    switch (format16 & 0xF) {
+    case VIRTIO_SND_PCM_RATE_8000:  return 8000;
+    case VIRTIO_SND_PCM_RATE_11025: return 11025;
+    case VIRTIO_SND_PCM_RATE_16000: return 16000;
+    case VIRTIO_SND_PCM_RATE_22050: return 22050;
+    case VIRTIO_SND_PCM_RATE_32000: return 32000;
+    case VIRTIO_SND_PCM_RATE_44100: return 44100;
+    case VIRTIO_SND_PCM_RATE_48000: return 48000;
+    default:                        return -1;
+    }
+}
+
+static int format16_get_nchannels(uint16_t format16) {
+    return (format16 >> 9) + 1;
+}
+
+static int format16_get_frame_size(uint16_t format16) {
+    return format16_get_nchannels(format16) * sizeof(int16_t);
+}
+
+struct audsettings virtio_snd_unpack_format(uint16_t format16) {
+    struct audsettings as;
+
+    as.freq = format16_get_freq_hz(format16);
+
+    switch ((format16 >> 4) & 0x1F) {
+    case VIRTIO_SND_PCM_FMT_S16:
+        as.fmt = AUD_FMT_S16;
+        break;
+
+    default:
+        as.fmt = -1;
+        break;
+    }
+
+    as.nchannels = format16_get_nchannels(format16);
+    as.endianness = AUDIO_HOST_ENDIANNESS;
+
+    return as;
+}
 static const VMStateDescription virtio_snd_vmstate = {
     .name = TYPE_VIRTIO_SND,
     .minimum_version_id = 0,
@@ -106,6 +155,15 @@ static const struct virtio_snd_jack_info jack_infos[VIRTIO_SND_NUM_JACKS] = {
 };
 
 #undef HDA_REG_DEFCONF
+
+const uint16_t stream_formats[VIRTIO_SND_NUM_PCM_STREAMS] = {
+    VIRTIO_SND_PACK_FORMAT(VIRTIO_SND_PCM_MIC_NUM_CHANNELS,
+                           GLUE2(VIRTIO_SND_PCM_FMT_, VIRTIO_SND_PCM_MIC_FORMAT),
+                           GLUE2(VIRTIO_SND_PCM_RATE_, VIRTIO_SND_PCM_MIC_FREQ)),
+    VIRTIO_SND_PACK_FORMAT(VIRTIO_SND_PCM_SPEAKERS_NUM_CHANNELS,
+                           GLUE2(VIRTIO_SND_PCM_FMT_, VIRTIO_SND_PCM_SPEAKERS_FORMAT),
+                           GLUE2(VIRTIO_SND_PCM_RATE_, VIRTIO_SND_PCM_SPEAKERS_FREQ)),
+};
 
 const static struct virtio_snd_pcm_info pcm_infos[VIRTIO_SND_NUM_PCM_STREAMS] = {
     {
@@ -174,30 +232,6 @@ static const char *const stream_name[VIRTIO_SND_NUM_PCM_STREAMS] = {
     "virtio-snd-mic",
     "virtio-snd-speakers",
 };
-
-static int virtio_snd_get_freq_hz(int vfreq) {
-    switch (vfreq) {
-    case VIRTIO_SND_PCM_RATE_8000:  return 8000;
-    case VIRTIO_SND_PCM_RATE_11025: return 11025;
-    case VIRTIO_SND_PCM_RATE_16000: return 16000;
-    case VIRTIO_SND_PCM_RATE_22050: return 22050;
-    case VIRTIO_SND_PCM_RATE_32000: return 32000;
-    case VIRTIO_SND_PCM_RATE_44100: return 44100;
-    case VIRTIO_SND_PCM_RATE_48000: return 48000;
-    default:                        return -1;
-    }
-}
-
-static audfmt_e virtio_snd_fmt_to_aud(int vfmt) {
-    switch (vfmt) {
-    case VIRTIO_SND_PCM_FMT_S16:    return AUD_FMT_S16;
-    default:                        return -1;
-    }
-}
-
-static size_t get_frame_size(const struct audsettings *as) {
-    return as->nchannels * sizeof(int16_t);
-}
 
 static const char *stream_state_str(const int state) {
     switch (state) {
@@ -344,6 +378,7 @@ static void virtio_snd_stream_init(const unsigned stream_id,
 
     stream->id = stream_id;
     stream->snd = snd;
+    stream->format = stream_formats[stream_id];
     stream->voice.raw = NULL;
     ring_buffer_init(&stream->pcm_buf);
     qemu_mutex_init(&stream->mtx);
@@ -532,12 +567,7 @@ virtio_snd_process_ctl_pcm_set_params_impl(const struct virtio_snd_pcm_set_param
     stream->features = req->features;
     stream->buffer_bytes = req->buffer_bytes;
     stream->period_bytes = req->period_bytes;
-    stream->as.freq = virtio_snd_get_freq_hz(req->rate);
-    stream->as.fmt = virtio_snd_fmt_to_aud(req->format);
-    stream->as.nchannels = req->channels;
-    stream->as.endianness = AUDIO_HOST_ENDIANNESS;
-    stream->frame_size = get_frame_size(&stream->as);
-    stream->buffer_frames = stream->buffer_bytes / stream->frame_size;
+    stream->format = VIRTIO_SND_PACK_FORMAT(req->channels, req->format, req->rate);
 
     qemu_mutex_unlock(&stream->mtx);
     return VIRTIO_SND_S_OK;
@@ -626,7 +656,7 @@ static int calc_drop_bytes_out(VirtIOSoundPCMStream *stream) {
     const int frame_size = stream->frame_size;
     const uint64_t elapsed_usec = AUD_get_elapsed_usec_out(stream->voice.out,
                                                            &stream->start_timestamp);
-    const uint64_t elapsed_nf = elapsed_usec * stream->as.freq / 1000000ul;
+    const uint64_t elapsed_nf = elapsed_usec * stream->freq_hz / 1000000ul;
     const uint64_t consumed_nf = stream->frames_sent + stream->frames_skipped;
     return (consumed_nf < elapsed_nf) ? (frame_size * (elapsed_nf - consumed_nf)) : 0;
 }
@@ -676,6 +706,7 @@ static void virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
 static uint32_t
 virtio_snd_process_ctl_pcm_prepare_impl(unsigned stream_id, VirtIOSound* snd) {
     VirtIOSoundPCMStream *stream;
+    struct audsettings as;
 
     if (stream_id >= VIRTIO_SND_NUM_PCM_STREAMS) {
         return VIRTIO_SND_S_BAD_MSG;
@@ -696,15 +727,20 @@ virtio_snd_process_ctl_pcm_prepare_impl(unsigned stream_id, VirtIOSound* snd) {
             return VIRTIO_SND_S_BAD_MSG;
         }
 
+        as = virtio_snd_unpack_format(stream->format);
+
         stream->voice.out =
             AUD_open_out(&snd->card, NULL, stream_name[stream_id],
-                         stream, &virtio_snd_out_cb, &stream->as);
+                         stream, &virtio_snd_out_cb, &as);
         if (!stream->voice.out) {
             ring_buffer_free(&stream->pcm_buf);
             qemu_mutex_unlock(&stream->mtx);
             return VIRTIO_SND_S_BAD_MSG;
         }
 
+        stream->freq_hz = format16_get_freq_hz(stream->format);
+        stream->frame_size = format16_get_frame_size(stream->format);
+        stream->buffer_frames = stream->buffer_bytes / stream->frame_size;
         stream->latency_bytes = 0;
         stream->state = VIRTIO_PCM_STREAM_STATE_PREPARED;
 
