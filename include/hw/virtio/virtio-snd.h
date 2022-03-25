@@ -69,6 +69,7 @@ struct VirtIOSoundPCMStream {
     QEMUAudioTimeStamp start_timestamp;
     uint64_t frames_sent;
     uint64_t frames_skipped;
+    uint32_t frames_wasted;
 
     uint32_t latency_bytes;
     uint32_t features;
