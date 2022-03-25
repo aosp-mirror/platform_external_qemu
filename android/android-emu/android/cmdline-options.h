@@ -314,6 +314,10 @@ OPT_PARAM( wifi_tap_script_down, "<script>", "script to run when the TAP interfa
 
 OPT_PARAM(wifi_vmnet,
           "<interface>",
+          " This option is alias to vmnet, it is used for backward compatibility.")
+
+OPT_PARAM(vmnet,
+          "<interface>",
           " Use this network <interface> and enable vmnet framework as the "
           "backend of tap netdev on MacOS.")
 

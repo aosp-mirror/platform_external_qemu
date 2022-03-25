@@ -2205,7 +2205,7 @@ help_wifi_tap_script_down(stralloc_t*  out)
 }
 
 static void
-help_wifi_vmnet(stralloc_t*  out)
+help_vmnet(stralloc_t*  out)
 {
     PRINTF(" Enable vmnet framework as the backend for tap network on MacOS\n"
            " <interface> is the name of the host network interface that QEMU "
@@ -2251,6 +2251,7 @@ help_wifi_vmnet(stralloc_t*  out)
 #define help_perf_stat NULL
 #define help_append_userspace_opt NULL
 #define help_no_nested_warnings NULL
+#define help_wifi_vmnet NULL
 
 typedef struct {
     const char*  name;
