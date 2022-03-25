@@ -57,3 +57,7 @@ elroy_pci_config_data_read(uint64_t addr, int size, uint64_t val) "addr 0x%"PRIx
 elroy_pci_config_data_write(uint64_t addr, int size, uint64_t val) "addr 0x%"PRIx64" size %d val 0x%"PRIx64
 iosapic_reg_write(uint64_t reg_select, int size, uint64_t val) "reg_select 0x%"PRIx64" size %d val 0x%"PRIx64
 iosapic_reg_read(uint64_t reg_select, int size, uint64_t val) "reg_select 0x%"PRIx64" size %d val 0x%"PRIx64
+
+# npmc_pcierc.c
+npcm_pcierc_read(uint64_t offset, uint32_t size, uint64_t data) "offset: 0x%" PRIx64 " size: %d data: 0x%" PRIx64
+npcm_pcierc_write(uint64_t offset, uint32_t size, uint64_t data) "offset: 0x%" PRIx64 " size: %d data: 0x%" PRIx64

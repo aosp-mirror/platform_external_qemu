@@ -27,6 +27,7 @@ pci_ss.add(when: 'CONFIG_MV64361', if_true: files('mv64361.c'))
 
 # ARM devices
 pci_ss.add(when: 'CONFIG_VERSATILE_PCI', if_true: files('versatile.c'))
+pci_ss.add(when: 'CONFIG_NPCM_PCIERC', if_true: files('npcm_pcierc.c'))
 
 # HPPA devices
 specific_ss.add(when: 'CONFIG_ASTRO', if_true: files('astro.c'))
