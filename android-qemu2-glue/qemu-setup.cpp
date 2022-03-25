@@ -110,6 +110,7 @@ extern "C" {
 #endif
 
 #ifdef ANDROID_BLUETOOTH
+#include "android/bluetooth/rootcanal/root_canal_qemu.h"
 #include "android/emulation/bluetooth/VhciService.h"
 #endif
 
@@ -212,6 +213,20 @@ bool qemu_android_emulation_early_setup() {
     // Setup qemud and register qemud-related snapshot callbacks.
     android_qemu2_qemud_init();
 
+#ifdef ANDROID_BLUETOOTH
+    // Activate the virtual bluetooth chip.
+    android::bluetooth::Rootcanal::Builder builder;
+    builder.withHciPort(android_cmdLineOptions->rootcanal_hci_port)
+            .withTestPort(android_cmdLineOptions->rootcanal_test_port)
+            .withLinkPort(android_cmdLineOptions->rootcanal_link_port)
+            .withLinkBlePort(android_cmdLineOptions->rootcanal_link_ble_port)
+            .withControllerProperties(
+                    android_cmdLineOptions
+                            ->rootcanal_controller_properties_file)
+            .withCommandFile(
+                    android_cmdLineOptions->rootcanal_default_commands_file);
+    builder.buildSingleton();
+#endif
     // Ensure the VmLock implementation is setup.
     VmLock* vmLock = new qemu2::VmLock();
     VmLock* prevVmLock = VmLock::set(vmLock);
