@@ -34,6 +34,7 @@
 #include "hw/net/npcm7xx_emc.h"
 #include "hw/nvram/npcm7xx_otp.h"
 #include "hw/peci/npcm7xx_peci.h"
+#include "hw/pci-host/npcm_pcierc.h"
 #include "hw/sd/npcm7xx_sdhci.h"
 #include "hw/timer/npcm7xx_timer.h"
 #include "hw/ssi/npcm7xx_fiu.h"
@@ -85,6 +86,7 @@ typedef struct NPCM8xxState {
     NPCM7xxPCIMBoxState pci_mbox[2];
     NPCM7xxSDHCIState   mmc;
     NPCM7xxPECIState    peci;
+    NPCMPCIERCState     pcierc;
 } NPCM8xxState;
 
 typedef struct NPCM8xxClass {

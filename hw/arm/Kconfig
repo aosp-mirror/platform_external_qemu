@@ -522,7 +522,7 @@ config NPCM8XX
     select SERIAL
     select SSI
     select UNIMP
-
+    select NPCM_PCIERC
 
 config FSL_IMX25
     bool
