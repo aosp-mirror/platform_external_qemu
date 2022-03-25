@@ -3748,8 +3748,9 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
                    GLESv2Validate::pixelType(ctx,type)),GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelOp(format,type),GL_INVALID_OPERATION);
     SET_ERROR_IF(!pixels && !ctx->isBindedBuffer(GL_PIXEL_UNPACK_BUFFER),GL_INVALID_OPERATION);
-    if (type==GL_HALF_FLOAT_OES)
+    if (type == GL_HALF_FLOAT_OES && !isGles2Gles()) {
         type = GL_HALF_FLOAT_NV;
+    }
 
     if (isCoreProfile() &&
         isCoreProfileEmulatedFormat(format)) {
