@@ -156,7 +156,7 @@ static const struct virtio_snd_jack_info jack_infos[VIRTIO_SND_NUM_JACKS] = {
 
 #undef HDA_REG_DEFCONF
 
-const uint16_t stream_formats[VIRTIO_SND_NUM_PCM_STREAMS] = {
+const uint16_t g_stream_formats[VIRTIO_SND_NUM_PCM_STREAMS] = {
     VIRTIO_SND_PACK_FORMAT(VIRTIO_SND_PCM_MIC_NUM_CHANNELS,
                            GLUE2(VIRTIO_SND_PCM_FMT_, VIRTIO_SND_PCM_MIC_FORMAT),
                            GLUE2(VIRTIO_SND_PCM_RATE_, VIRTIO_SND_PCM_MIC_FREQ)),
@@ -165,7 +165,7 @@ const uint16_t stream_formats[VIRTIO_SND_NUM_PCM_STREAMS] = {
                            GLUE2(VIRTIO_SND_PCM_RATE_, VIRTIO_SND_PCM_SPEAKERS_FREQ)),
 };
 
-const static struct virtio_snd_pcm_info pcm_infos[VIRTIO_SND_NUM_PCM_STREAMS] = {
+const static struct virtio_snd_pcm_info g_pcm_infos[VIRTIO_SND_NUM_PCM_STREAMS] = {
     {
         .hdr = {
             .hda_fn_nid = VIRTIO_SND_NID_MIC,
@@ -190,7 +190,7 @@ const static struct virtio_snd_pcm_info pcm_infos[VIRTIO_SND_NUM_PCM_STREAMS] = 
     },
 };
 
-const struct virtio_snd_chmap_info chmap_infos[VIRTIO_SND_NUM_CHMAPS] = {
+const struct virtio_snd_chmap_info g_chmap_infos[VIRTIO_SND_NUM_CHMAPS] = {
     {
         .hdr = {
             .hda_fn_nid = VIRTIO_SND_NID_MIC,
@@ -228,7 +228,7 @@ const struct virtio_snd_chmap_info chmap_infos[VIRTIO_SND_NUM_CHMAPS] = {
     },
 };
 
-static const char *const stream_name[VIRTIO_SND_NUM_PCM_STREAMS] = {
+static const char *const g_stream_name[VIRTIO_SND_NUM_PCM_STREAMS] = {
     "virtio-snd-mic",
     "virtio-snd-speakers",
 };
@@ -244,7 +244,7 @@ static const char *stream_state_str(const int state) {
 }
 
 static bool is_output_stream(const VirtIOSoundPCMStream *stream) {
-    return pcm_infos[stream->id].direction == VIRTIO_SND_D_OUTPUT;
+    return g_pcm_infos[stream->id].direction == VIRTIO_SND_D_OUTPUT;
 }
 
 static void vq_consume_element(VirtQueue *vq, VirtQueueElement *e, size_t size) {
@@ -382,14 +382,14 @@ static void virtio_snd_voice_open(VirtIOSound *snd, VirtIOSoundPCMStream *stream
     if (is_output_stream(stream)) {
         stream->voice.out = AUD_open_out(&snd->card,
                                          NULL,
-                                         stream_name[stream->id],
+                                         g_stream_name[stream->id],
                                          stream,
                                          &stream_out_cb,
                                          &as);
     } else {
         stream->voice.in = AUD_open_in(&snd->card,
                                        NULL,
-                                       stream_name[stream->id],
+                                       g_stream_name[stream->id],
                                        stream,
                                        &stream_in_cb,
                                        &as);
@@ -413,7 +413,7 @@ static void virtio_snd_stream_init(const unsigned stream_id,
 
     stream->id = stream_id;
     stream->snd = snd;
-    stream->format = stream_formats[stream_id];
+    stream->format = g_stream_formats[stream_id];
     stream->voice.raw = NULL;
     virtio_snd_voice_open(snd, stream);
     ring_buffer_init(&stream->pcm_buf);
@@ -565,8 +565,8 @@ virtio_snd_process_ctl_pcm_info(VirtQueueElement *e,
                 && ((req->start_id + req->count) <= VIRTIO_SND_NUM_PCM_STREAMS)
                 && ((req->start_id + req->count) > req->start_id)) {
             return el_send_status_data(e, VIRTIO_SND_S_OK,
-                &pcm_infos[req->start_id],
-                sizeof(pcm_infos[0]) * req->count);
+                &g_pcm_infos[req->start_id],
+                sizeof(g_pcm_infos[0]) * req->count);
         }
     }
 
@@ -585,7 +585,7 @@ virtio_snd_process_ctl_pcm_set_params_impl(const struct virtio_snd_pcm_set_param
         return VIRTIO_SND_S_BAD_MSG;
     }
 
-    pcm_info = &pcm_infos[stream_id];
+    pcm_info = &g_pcm_infos[stream_id];
 
     if (!(pcm_info->rates & (1u << req->rate))) {
         return VIRTIO_SND_S_BAD_MSG;
@@ -1099,8 +1099,8 @@ virtio_snd_process_ctl_chmap_info(VirtQueueElement *e,
                 && ((req->start_id + req->count) <= VIRTIO_SND_NUM_CHMAPS)
                 && ((req->start_id + req->count) > req->start_id)) {
             return el_send_status_data(e, VIRTIO_SND_S_OK,
-                &chmap_infos[req->start_id],
-                sizeof(chmap_infos[0]) * req->count);
+                &g_chmap_infos[req->start_id],
+                sizeof(g_chmap_infos[0]) * req->count);
         }
     }
 
