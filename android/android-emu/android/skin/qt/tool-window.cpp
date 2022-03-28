@@ -911,6 +911,28 @@ void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
         LOG(ERROR) << "Failed to get size information of resizable type " << newSize;
         return;
     }
+    std::string updateMsg = "Updating device size\n";
+    switch(info.type) {
+        case PRESET_SIZE_PHONE:
+            updateMsg += "Phone\n";
+            break;
+        case PRESET_SIZE_UNFOLDED:
+            updateMsg += "Unfolded\n";
+            break;
+        case PRESET_SIZE_TABLET:
+            updateMsg += "Tablet\n";
+            break;
+        case PRESET_SIZE_DESKTOP:
+            updateMsg += "Desktop\n";
+            break;
+        default: ;
+    }
+    updateMsg += std::to_string(info.width * 160 / info.dpi) +
+                 " x " +
+                 std::to_string(info.height * 160 / info.dpi)+
+                 " dp\n" +
+                 std::to_string(info.dpi) +
+                 " dpi";
 
     LOG(INFO) << "Resizable: change to new size: " << newSize;
     resizableChangeIcon(newSize);
@@ -919,6 +941,7 @@ void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
     skin_event->u.display_active_config = static_cast<int>(newSize);
     mEmulatorWindow->queueSkinEvent(skin_event);
     mEmulatorWindow->resizeAndChangeAspectRatio(0, 0, info.width, info.height);
+    sUiEmuAgent->window->showMessage(updateMsg.c_str(), WINDOW_MESSAGE_GENERIC, 3000);
 }
 
 void ToolWindow::resizableChangeIcon(PresetEmulatorSizeType type) {
