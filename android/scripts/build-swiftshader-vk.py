@@ -96,7 +96,7 @@ def setup_build_env():
 
 
 def clone_repo(dir):
-    git_sha1 = "c239c8beb6795396ef5f74ea1b29703dac92aff7"
+    git_sha1 = "0a1985c2b294e5d6690978bd49eae39042cf52a8"
     git_branch = "master"
     git_dir_name = "SwiftShader"
     git_repo_dir = dir + os.path.sep + git_dir_name
@@ -108,12 +108,6 @@ def clone_repo(dir):
     print(subprocess.run(["git", "checkout", git_sha1],
           cwd=git_repo_dir, check=True))
 
-    logging.info(
-        "Applying patch https://swiftshader-review.googlesource.com/c/SwiftShader/+/62228")
-    print(subprocess.run(["git", "fetch", "https://swiftshader.googlesource.com/SwiftShader",
-                          "refs/changes/28/62228/2"], cwd=git_repo_dir, check=True))
-    print(subprocess.run(["git", "cherry-pick", "FETCH_HEAD"],
-                         cwd=git_repo_dir, check=True))
     return git_repo_dir
 
 
