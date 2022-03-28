@@ -40,7 +40,7 @@ public:
     GLuint getIndexedBuffer(GLuint index);
     void unbindBuffer(GLuint buffer);
     bool mIsActive = false;
-
+    bool mIsPaused = false;
 private:
     std::vector<BufferBinding> m_indexedTransformFeedbackBuffers;
 };

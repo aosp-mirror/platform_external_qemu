@@ -540,7 +540,16 @@ void GLESv2Context::drawWithEmulations(
 
     if (needClientVBOSetup) {
         GLESConversionArrays tmpArrs;
+        bool needPauseTransformFeedback = boundTransformFeedback()
+                && boundTransformFeedback()->mIsActive
+                && !boundTransformFeedback()->mIsPaused;
+        if (needPauseTransformFeedback) {
+            s_glDispatch.glPauseTransformFeedback();
+        }
         setupArraysPointers(tmpArrs, 0, count, type, indices, false, needEnablingPostDraw);
+        if (needPauseTransformFeedback) {
+            s_glDispatch.glResumeTransformFeedback();
+        }
         if (needAtt0PreDrawValidation()) {
             if (indices) {
                 validateAtt0PreDraw(findMaxIndex(count, type, indices));
