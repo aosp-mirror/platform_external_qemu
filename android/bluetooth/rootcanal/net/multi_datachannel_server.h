@@ -14,19 +14,34 @@
 // limitations under the License.
 #pragma once
 
-#include "net/async_data_channel_server.h"  // for AsyncDataChannelServer
-#include "android/base/Log.h"
-#include <vector>
 #include <memory>
 #include <mutex>
+#include <unordered_set>
+#include <vector>
+
+#include "net/async_data_channel_server.h"  // for AsyncDataChannelServer
 
 namespace android {
 namespace net {
 
+using DataChannelServerList =
+        std::vector<std::shared_ptr<AsyncDataChannelServer>>;
+
 // A DataChannelServer that multiplexes several servers.
+//
+// The idea here is that you can provide multiple type of servers
+// and if any of them gets a connection, it is handed off to rootcanal.
+//
+// For example you could have a Socket based server + Grpc based server
+// on the same channel. That way the emulator can serve both grpc
+// and socket connections.
+//
+// Rootcanal will just see a  new incoming connection, without really
+// knowing if it is a grpc or socket channel.
 class MultiDataChannelServer : public AsyncDataChannelServer {
 public:
-    MultiDataChannelServer(std::vector<std::shared_ptr<AsyncDataChannelServer>> servers);
+    MultiDataChannelServer(std::shared_ptr<AsyncDataChannelServer> oneServer);
+    MultiDataChannelServer(const DataChannelServerList& servers);
     virtual ~MultiDataChannelServer() = default;
 
     bool StartListening() override;
@@ -37,12 +52,15 @@ public:
 
     bool Connected() override;
 
+    void add(std::shared_ptr<AsyncDataChannelServer> server);
+
+    void remove(std::shared_ptr<AsyncDataChannelServer> server);
 
 private:
-    std::vector<std::shared_ptr<AsyncDataChannelServer>> mServers;
+    std::unordered_set<std::shared_ptr<AsyncDataChannelServer>> mServers;
+    std::mutex mServerAccess;
+    bool mIsListening;
 };
-
-
 
 }  // namespace net
 }  // namespace android

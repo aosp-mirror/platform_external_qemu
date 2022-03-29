@@ -258,10 +258,11 @@ OPT_PARAM(rtcfps, "<fps>", "The frequency at which frames are delivered to webrt
 #ifdef ANDROID_BLUETOOTH
 OPT_PARAM(rootcanal_hci_port, "<port>", "Rootcanal virtual hci port.")
 OPT_PARAM(rootcanal_test_port, "<port>", "Rootcanal testing port.")
-OPT_PARAM(rootcanal_link_port, "<port>", "Rootcanal link layer port.")
-OPT_PARAM(rootcanal_link_ble_port, "<port>", "Rootcanal link ble layer port.")
+OPT_PARAM(rootcanal_link_port, "<port>", "Rootcanal link layer port. <DEPRECATED>")
+OPT_PARAM(rootcanal_link_ble_port, "<port>", "Rootcanal link ble layer port. <DEPRECATED>")
 OPT_PARAM(rootcanal_controller_properties_file, "<file>", "Rootcanal controller_properties.json file.")
 OPT_PARAM(rootcanal_default_commands_file, "<file>", "Rootcanal commands file to run on launch.")
+OPT_FLAG(rootcanal_no_mesh, "Disable auto discovery and connection bluetooth enabled emulators")
 OPT_FLAG(forward_vhci, "Enable the VHCI grpc forwarding service.")
 #endif
 
