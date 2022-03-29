@@ -401,11 +401,9 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             if (android_foldable_hinge_configured()) {
                 FoldableState state;
                 if (!android_foldable_get_state(&state)) {
-                    if (!featurecontrol::isEnabled(android::featurecontrol::DeviceStateOnBoot)) {
-                        adbInterface->enqueueCommand({ "shell", "settings", "put",
-                                                       "global", "device_posture",
-                                                       std::to_string((int)state.currentPosture).c_str() });
-                    }
+                    adbInterface->enqueueCommand({ "shell", "settings", "put",
+                                                   "global", "device_posture",
+                                                   std::to_string((int)state.currentPosture).c_str() });
                     // Android accepts only one hinge area currently
                     char hingeArea[128];
                     snprintf(hingeArea, 128, "%s-[%d,%d,%d,%d]",
