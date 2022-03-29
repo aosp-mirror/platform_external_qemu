@@ -27,7 +27,6 @@
 #include "android/utils/debug.h"
 #include "emulated_bluetooth.pb.h"
 
-
 #ifdef DISABLE_ASYNC_GRPC
 #include "android/emulation/control/utils/SyncToAsyncAdapter.h"
 #else
@@ -117,6 +116,115 @@ private:
     GrpcLinkChannelServer* mChannelServer;
 };
 
+// This marshalls HCIPackets <--> datachannel that is connected to rootcanal.
+class HCIForwarder : public SimpleServerBidiStream<HCIPacket, HCIPacket> {
+public:
+    HCIForwarder(GrpcLinkChannelServer* server) : mChannelServer(server) {
+        mRootcanalBridge = mChannelServer->createConnection();
+        // todo(jansene): This might be simplified after aosp/2026506 goes in.
+        mH4Parser = std::make_unique<H4Parser>(
+                [this](auto data) {
+                    HCIPacket packet;
+                    packet.set_type(HCIPacket::PACKET_TYPE_HCI_COMMAND);
+                    packet.set_packet(std::string(data.begin(), data.end()));
+                    DD("Sending %s -> ", packet.ShortDebugString().c_str());
+                    this->Write(packet);
+                },
+                [this](auto data) {
+                    HCIPacket packet;
+                    packet.set_type(HCIPacket::PACKET_TYPE_EVENT);
+                    DD("Send dump");
+                    DD_BUF(data.begin(), data.size());
+                    packet.set_packet(std::string(data.begin(), data.end()));
+                    DD_BUF(packet.packet().data(), data.size());
+                    DD("Sending %s -> ", packet.ShortDebugString().c_str());
+                    this->Write(packet);
+                },
+                [this](auto data) {
+                    HCIPacket packet;
+                    packet.set_type(HCIPacket::PACKET_TYPE_ACL);
+                    packet.set_packet(std::string(data.begin(), data.end()));
+                    DD("Sending %s -> ", packet.ShortDebugString().c_str());
+                    this->Write(packet);
+                },
+                [this](auto data) {
+                    HCIPacket packet;
+                    packet.set_type(HCIPacket::PACKET_TYPE_SCO);
+                    packet.set_packet(std::string(data.begin(), data.end()));
+                    DD("Sending %s -> ", packet.ShortDebugString().c_str());
+                    this->Write(packet);
+                },
+                [this](auto data) {
+                    HCIPacket packet;
+                    packet.set_type(HCIPacket::PACKET_TYPE_ISO);
+                    packet.set_packet(std::string(data.begin(), data.end()));
+                    DD("Sending %s -> ", packet.ShortDebugString().c_str());
+                    this->Write(packet);
+                });
+
+        mRootcanalBridge->WatchForNonBlockingSend([this](auto channel) {
+            do {
+                ssize_t bytes_to_read = mH4Parser->BytesRequested();
+                std::vector<uint8_t> buffer(bytes_to_read);
+                ssize_t bytes_read = channel->ReadFromSendBuffer(buffer.data(),
+                                                                 bytes_to_read);
+                if (bytes_read > 0) {
+                    mH4Parser->Consume(buffer.data(), bytes_read);
+                }
+                DD("Read %d/%d", bytes_read, bytes_to_read);
+                DD_BUF(buffer.data(), bytes_read);
+            } while (channel->availableInSendBuffer() > 0);
+        });
+    }
+
+    ~HCIForwarder() {
+        mRootcanalBridge->WatchForNonBlockingRead(nullptr);
+        mRootcanalBridge->WatchForNonBlockingSend(nullptr);
+        mRootcanalBridge->WatchForClose(nullptr);
+    }
+
+    void Read(const HCIPacket* packet) override {
+        using rootcanal::PacketType;
+        DD("Recv: %s", packet->ShortDebugString().c_str());
+        PacketType type;
+        switch (packet->type()) {
+            case HCIPacket::PACKET_TYPE_HCI_COMMAND:
+                type = PacketType::COMMAND;
+                break;
+            case HCIPacket::PACKET_TYPE_ACL:
+                type = PacketType::ACL;
+                break;
+            case HCIPacket::PACKET_TYPE_SCO:
+                type = PacketType::SCO;
+                break;
+            case HCIPacket::PACKET_TYPE_ISO:
+                type = PacketType::ISO;
+                break;
+            case HCIPacket::PACKET_TYPE_EVENT:
+                type = PacketType::EVENT;
+            default:
+                DD("Ignoring unknown packet.");
+                break;
+        }
+
+        // todo(jansene): This might be simplified after aosp/2026506 goes in.
+        mRootcanalBridge->WriteToRecvBuffer((uint8_t*)&type, 1);
+        mRootcanalBridge->WriteToRecvBuffer((uint8_t*)packet->packet().data(),
+                                            packet->packet().size());
+    }
+
+    void OnDone() override {
+        DD("Completed");
+        delete this;
+    }
+
+private:
+    std::shared_ptr<BufferedAsyncDataChannel> mRootcanalBridge;
+    std::unique_ptr<rootcanal::H4DataChannelPacketizer> mPacketizer;
+    GrpcLinkChannelServer* mChannelServer;
+    std::unique_ptr<H4Parser> mH4Parser;
+};
+
 class EmulatedBluetoothServiceBase {
 public:
     EmulatedBluetoothServiceBase(android::bluetooth::Rootcanal* rootcanal,
@@ -124,20 +232,24 @@ public:
         : mRootcanal(rootcanal) {
         mClassicServer = std::make_shared<GrpcLinkChannelServer>(looper);
         mBleServer = std::make_shared<GrpcLinkChannelServer>(looper);
+        mHciServer = std::make_shared<GrpcLinkChannelServer>(looper);
 
         mRootcanal->linkClassicServer()->add(mClassicServer);
         mRootcanal->linkBleServer()->add(mBleServer);
+        mRootcanal->hciServer()->add(mHciServer);
     }
 
     ~EmulatedBluetoothServiceBase() {
         DD("Closing down servers.");
         mRootcanal->linkClassicServer()->remove(mClassicServer);
         mRootcanal->linkBleServer()->remove(mBleServer);
+        mRootcanal->hciServer()->remove(mHciServer);
     }
 
 protected:
     std::shared_ptr<GrpcLinkChannelServer> mClassicServer;
     std::shared_ptr<GrpcLinkChannelServer> mBleServer;
+    std::shared_ptr<GrpcLinkChannelServer> mHciServer;
     android::bluetooth::Rootcanal* mRootcanal;
 };
 
@@ -153,14 +265,18 @@ public:
     ::grpc::Status registerClassicPhy(
             ::grpc::ServerContext* context,
             ::grpc::ServerReaderWriter<RawData, RawData>* stream) override {
-        return BidiRunner<PhyForwarder>(stream, mClassicServer.get())
-                .status();
+        return BidiRunner<PhyForwarder>(stream, mClassicServer.get()).status();
     }
     ::grpc::Status registerBlePhy(
             ::grpc::ServerContext* context,
             ::grpc::ServerReaderWriter<RawData, RawData>* stream) override {
-        return BidiRunner<PhyForwarder>(stream, mBleServer.get())
-                .status();
+        return BidiRunner<PhyForwarder>(stream, mBleServer.get()).status();
+    }
+
+    ::grpc::Status registerHCIDevice(
+            ::grpc::ServerContext* context,
+            ::grpc::ServerReaderWriter<HCIPacket, HCIPacket>* stream) override {
+        return BidiRunner<HCIForwarder>(stream, mHciServer.get()).status();
     }
 };
 #else
@@ -172,8 +288,8 @@ public:
                                       Looper* looper)
         : EmulatedBluetoothServiceBase(rootcanal, looper) {}
 
-    virtual ::grpc::ServerBidiReactor<RawData, RawData>*
-    registerClassicPhy(::grpc::CallbackServerContext* /*context*/) {
+    virtual ::grpc::ServerBidiReactor<RawData, RawData>* registerClassicPhy(
+            ::grpc::CallbackServerContext* /*context*/) {
         return new PhyForwarder(mClassicServer.get());
     }
 
@@ -182,6 +298,10 @@ public:
         return new PhyForwarder(mBleServer.get());
     }
 
+    virtual ::grpc::ServerBidiReactor<HCIPacket, HCIPacket>* registerHCIDevice(
+            ::grpc::CallbackServerContext* /*context*/) {
+        return new HCIForwarder(mHciServer.get());
+    }
 };
 #endif
 

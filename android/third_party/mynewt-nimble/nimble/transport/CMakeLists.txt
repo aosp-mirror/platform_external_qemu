@@ -16,3 +16,14 @@ target_compile_options(_nimble_transport_test
                        PRIVATE -Wno-implicit-function-declaration)
 target_link_libraries(_nimble_transport_test
                       PRIVATE _nimble_os_abstraction_headers)
+
+
+android_add_library(
+  TARGET _nimble_transport_grpc LICENSE Apache-2.0
+  SRC grpc/src/ble_hci_grpc.cc)
+target_include_directories(_nimble_transport_grpc PRIVATE grpc/src
+                           PUBLIC grpc/include)
+target_compile_options(_nimble_transport_grpc
+                       PRIVATE -Wno-implicit-function-declaration)
+target_link_libraries(_nimble_transport_grpc
+                      PRIVATE _nimble_os_abstraction_headers  grpc-emulated-bluetooth grpc++ android-emu)

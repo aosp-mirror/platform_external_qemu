@@ -74,7 +74,8 @@ public:
     using Servers = std::vector<std::shared_ptr<AsyncDataChannelServer>>;
     FakeRootCanal()
         : mLinkBleServer(new net::MultiDataChannelServer(Servers())),
-          mLinkClassicServer(new net::MultiDataChannelServer(Servers())) {}
+          mLinkClassicServer(new net::MultiDataChannelServer(Servers())),
+          mHciServer(new net::MultiDataChannelServer(Servers())) {}
     // Starts the root canal service.
     bool start() override { return true; };
 
@@ -93,10 +94,15 @@ public:
         return mLinkClassicServer.get();
     }
 
+    net::MultiDataChannelServer* hciServer() override {
+        return mHciServer.get();
+    }
+
 private:
     std::shared_ptr<net::HciDataChannelServer> mQemuHciServer;
     std::shared_ptr<net::MultiDataChannelServer> mLinkBleServer;
     std::shared_ptr<net::MultiDataChannelServer> mLinkClassicServer;
+    std::shared_ptr<net::MultiDataChannelServer> mHciServer;
 };
 
 android::base::VerboseLogFormatter s_log;

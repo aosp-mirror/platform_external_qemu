@@ -9,7 +9,31 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 
 #include "android_sockets.h"
+#include <ctype.h>
+#include <stdio.h>
 #include "android/base/sockets/SocketUtils.h"
+
+/* set to 1 for very verbose debugging */
+#define DEBUG 0
+#if DEBUG >= 1
+#include <stdio.h>
+#define DD(fmt, ...) \
+    printf("socket: %s:%d| " fmt "\n", __func__, __LINE__, ##__VA_ARGS__)
+#define DD_BUF(fd, buf, len)                                    \
+    do {                                                        \
+        printf("socket: %s:%d| (%d):", __func__, __LINE__, fd); \
+        for (int x = 0; x < len; x++) {                         \
+            if (isprint((int)(buf)[x]))                         \
+                printf("%c", (buf)[x]);                         \
+            else                                                \
+                printf("[0x%02x]", 0xff & (int)(buf)[x]);       \
+        }                                                       \
+        printf("\n");                                           \
+    } while (0)
+#else
+#define DD(...) (void)0
+#define DD_BUF(...) (void)0
+#endif
 
 extern "C" {
 void socketClose(int socket) {
@@ -17,10 +41,14 @@ void socketClose(int socket) {
 }
 
 ssize_t socketRecv(int socket, void* buffer, size_t bufferLen) {
-    return android::base::socketRecv(socket, buffer, bufferLen);
+    auto res = android::base::socketRecv(socket, buffer, bufferLen);
+    DD_BUF(socket, ((char*)buffer), bufferLen);
+    return res;
 }
 ssize_t socketSend(int socket, const void* buffer, size_t bufferLen) {
-    return android::base::socketSend(socket, buffer, bufferLen);
+    auto res = android::base::socketSend(socket, buffer, bufferLen);
+    DD_BUF(socket, ((char*)buffer), bufferLen);
+    return res;
 }
 
 bool socketSendAll(int socket, const void* buffer, size_t bufferLen) {
