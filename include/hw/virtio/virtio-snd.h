@@ -55,7 +55,7 @@ struct VirtIOSoundRingBuffer {
 
 struct VirtIOSoundPCMStream {
     uint32_t buffer_bytes;
-    uint16_t format;
+    uint16_t driver_format;
     VirtIOSound *snd;
     union {
         SWVoiceIn *in;
@@ -78,8 +78,10 @@ struct VirtIOSoundPCMStream {
     uint8_t state;
     uint32_t buffer_frames;
     uint32_t freq_hz;
+    uint16_t aud_format;
     uint8_t id;
-    uint8_t frame_size;
+    uint8_t driver_frame_size;
+    uint8_t aud_frame_size;
 };
 
 typedef struct VirtIOSound {
