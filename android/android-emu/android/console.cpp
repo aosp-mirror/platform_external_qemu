@@ -4312,6 +4312,14 @@ static int do_no_draw(ControlClient client, char* args) {
 static int do_resize_display(ControlClient client, char* args) {
     if (args) {
         int newSize;
+        if (!args) {
+            control_write(client, "KO: size index cannot be void\n");
+            return -1;
+        }
+        if (strlen(args) > 1) {
+            control_write(client, "KO: wrong size index %s\n", args);
+            return -1;
+        }
         if (sscanf(args, "%d", &newSize) == 1) {
            if (newSize < 0 || newSize > 3) {
                 control_write(client, "KO: size index %d not supported\n", newSize);
