@@ -3366,6 +3366,9 @@ void FrameBuffer::setDisplayConfigs(int configId, int w, int h,
 
 void FrameBuffer::setDisplayActiveConfig(int configId) {
     AutoLock mutex(m_lock);
+    if (mDisplayActiveConfigId == configId) {
+        return;
+    }
     if (mDisplayConfigs.find(configId) == mDisplayConfigs.end()) {
         LOG(ERROR) << "config " << configId << " not set";
         return;
