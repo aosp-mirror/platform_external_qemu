@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 typedef uint32_t VirtioGpuCtxId;
+typedef uint8_t VirtioGpuRingIdx;
 struct virgl_renderer_virtio_interface*
     get_goldfish_pipe_virgl_renderer_virtio_interface(void);
 

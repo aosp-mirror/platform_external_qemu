@@ -18,32 +18,39 @@
 #include <cstdio>
 
 using TaskId = VirtioGpuTimelines::TaskId;
-using CtxId = VirtioGpuTimelines::CtxId;
+using Ring = VirtioGpuTimelines::Ring;
 using FenceId = VirtioGpuTimelines::FenceId;
 using AutoLock = android::base::AutoLock;
 
-VirtioGpuTimelines::VirtioGpuTimelines() : mNextId(0) {}
+std::unique_ptr<VirtioGpuTimelines> VirtioGpuTimelines::create(bool withAsyncCallback) {
+    return std::unique_ptr<VirtioGpuTimelines>(new VirtioGpuTimelines(withAsyncCallback));
+}
 
-TaskId VirtioGpuTimelines::enqueueTask(CtxId ctxId) {
+VirtioGpuTimelines::VirtioGpuTimelines(bool withAsyncCallback)
+    : mNextId(0), mWithAsyncCallback(withAsyncCallback) {}
+
+TaskId VirtioGpuTimelines::enqueueTask(const Ring& ring) {
     AutoLock lock(mLock);
 
     TaskId id = mNextId++;
-    std::shared_ptr<Task> task(new Task(id, ctxId), [this](Task *task) {
+    std::shared_ptr<Task> task(new Task(id, ring), [this](Task* task) {
         mTaskIdToTask.erase(task->mId);
         delete task;
     });
     mTaskIdToTask[id] = task;
-    mTimelineQueues[ctxId].emplace_back(std::move(task));
+    mTimelineQueues[ring].emplace_back(std::move(task));
     return id;
 }
 
-void VirtioGpuTimelines::enqueueFence(
-    CtxId ctxId, FenceId, FenceCompletionCallback fenceCompletionCallback) {
+void VirtioGpuTimelines::enqueueFence(const Ring& ring, FenceId,
+                                      FenceCompletionCallback fenceCompletionCallback) {
     AutoLock lock(mLock);
 
     auto fence = std::make_unique<Fence>(fenceCompletionCallback);
-    mTimelineQueues[ctxId].emplace_back(std::move(fence));
-    poll_locked(ctxId);
+    mTimelineQueues[ring].emplace_back(std::move(fence));
+    if (mWithAsyncCallback) {
+        poll_locked(ring);
+    }
 }
 
 void VirtioGpuTimelines::notifyTaskCompletion(TaskId taskId) {
@@ -68,14 +75,26 @@ void VirtioGpuTimelines::notifyTaskCompletion(TaskId taskId) {
             << "Task(id = " << static_cast<uint64_t>(taskId) << ") has been set to completed.";
     }
     task->mHasCompleted = true;
-    poll_locked(task->mCtxId);
+    if (mWithAsyncCallback) {
+        poll_locked(task->mRing);
+    }
 }
 
-void VirtioGpuTimelines::poll_locked(CtxId ctxId) {
-    auto iTimelineQueue = mTimelineQueues.find(ctxId);
+void VirtioGpuTimelines::poll() {
+    if (mWithAsyncCallback) {
+        GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER))
+            << "Can't call poll with async callback enabled.";
+    }
+    AutoLock lock(mLock);
+    for (const auto& [ring, timeline] : mTimelineQueues) {
+        poll_locked(ring);
+    }
+}
+void VirtioGpuTimelines::poll_locked(const Ring& ring) {
+    auto iTimelineQueue = mTimelineQueues.find(ring);
     if (iTimelineQueue == mTimelineQueues.end()) {
         GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER))
-            << "Context(id = " << ctxId << " doesn't exist";
+            << "Ring(" << to_string(ring) << ") doesn't exist.";
     }
     std::list<TimelineItem> &timelineQueue = iTimelineQueue->second;
     auto i = timelineQueue.begin();

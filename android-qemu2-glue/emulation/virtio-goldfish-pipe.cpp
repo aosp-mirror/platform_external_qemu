@@ -132,16 +132,6 @@ extern "C" {
 // Pipe read() operation corresponds to performing a TRANSFER_FROM_HOST ioctl on
 // the resource created alongside open().
 //
-// A note on synchronization----------------------------------------------------
-//
-// Unlike goldfish-pipe which handles write/read/open/close on the vcpu thread
-// that triggered the particular operation, virtio-gpu handles the
-// corresponding virgl operations in a bottom half that is triggered off the
-// vcpu thread on a timer. This means that in the guest, if we want to ensure
-// that a particular operation such as TRANSFER_TO_HOST completed on the host,
-// we need to call VIRTGPU_WAIT, which ends up polling fences here. This is why
-// we insert a fence after every operation in this code.
-//
 // Details on transfer mechanism: mapping 2D transfer to 1D ones----------------
 //
 // Resource objects are typically 2D textures, while we're wanting to transmit
@@ -551,13 +541,8 @@ public:
             GFXSTREAM_ABORT(FatalError(ABORT_REASON_OTHER))
                 << "Could not get address space device control ops!";
         }
-        if (flags & GFXSTREAM_RENDERER_FLAGS_ASYNC_FENCE_CB) {
-            VGPLOG("Using async fence cb.");
-            mVirtioGpuTimelines = std::make_unique<VirtioGpuTimelines>();
-        } else {
-            VGPLOG("Not using async fence cb.");
-            mVirtioGpuTimelines = nullptr;
-        }
+        mVirtioGpuTimelines =
+            VirtioGpuTimelines::create(flags & GFXSTREAM_RENDERER_FLAGS_ASYNC_FENCE_CB);
         VGPLOG("done");
         return 0;
     }
@@ -810,7 +795,11 @@ public:
     }
 
     int submitCmd(VirtioGpuCtxId ctxId, void* buffer, int dwordCount) {
-        VGPLOG("ctxid: %u buffer: %p dwords: %d", ctxId, buffer, dwordCount);
+        // TODO(kaiyili): embed the ring_idx into the command buffer to make it possible to dispatch
+        // commands on different ring.
+        const VirtioGpuRing ring = VirtioGpuRingGlobal{};
+        VGPLOG("ctx: %" PRIu32 ", ring: %s buffer: %p dwords: %d", ctxId, to_string(ring).c_str(),
+               buffer, dwordCount);
 
         if (!buffer) {
             derror("%s: error: buffer null", __func__);
@@ -839,17 +828,11 @@ public:
                 uint32_t sync_handle_hi = dwords[2];
                 uint64_t sync_handle = convert32to64(sync_handle_lo, sync_handle_hi);
 
-                VGPLOG("wait for gpu ctx id %u", ctxId);
-                if (mVirtioGpuTimelines) {
-                    auto taskId = mVirtioGpuTimelines->enqueueTask(
-                        static_cast<VirtioGpuTimelines::CtxId>(ctxId));
-                    mVirtioGpuOps->async_wait_for_gpu_with_cb(
-                        sync_handle, [this, ctxId, taskId] {
-                            mVirtioGpuTimelines->notifyTaskCompletion(taskId);
-                        });
-                } else {
-                    mVirtioGpuOps->wait_for_gpu(sync_handle);
-                }
+                VGPLOG("wait for gpu ring %s", to_string(ring).c_str());
+                auto taskId = mVirtioGpuTimelines->enqueueTask(ring);
+                mVirtioGpuOps->async_wait_for_gpu_with_cb(sync_handle, [this, taskId] {
+                    mVirtioGpuTimelines->notifyTaskCompletion(taskId);
+                });
                 break;
             }
             case kVirtioGpuNativeSyncVulkanCreateExportFd:
@@ -862,34 +845,23 @@ public:
                 uint32_t fence_handle_hi = dwords[4];
                 uint64_t fence_handle = convert32to64(fence_handle_lo, fence_handle_hi);
 
-                VGPLOG("wait for gpu vk ctx id %u", ctxId);
-                if (mVirtioGpuTimelines) {
-                    auto taskId = mVirtioGpuTimelines->enqueueTask(
-                        static_cast<VirtioGpuTimelines::CtxId>(ctxId));
-                    mVirtioGpuOps->async_wait_for_gpu_vulkan_with_cb(
-                        device_handle, fence_handle, [this, ctxId, taskId] {
-                            mVirtioGpuTimelines->notifyTaskCompletion(taskId);
-                        });
-                } else {
-                    mVirtioGpuOps->wait_for_gpu_vulkan(device_handle, fence_handle);
-                }
+                VGPLOG("wait for gpu ring %s", to_string(ring).c_str());
+                auto taskId = mVirtioGpuTimelines->enqueueTask(ring);
+                mVirtioGpuOps->async_wait_for_gpu_vulkan_with_cb(
+                    device_handle, fence_handle,
+                    [this, taskId] { mVirtioGpuTimelines->notifyTaskCompletion(taskId); });
                 break;
             }
             case kVirtioGpuNativeSyncVulkanQsriExport: {
                 uint64_t image_handle_lo = dwords[1];
                 uint64_t image_handle_hi = dwords[2];
                 uint64_t image_handle = convert32to64(image_handle_lo, image_handle_hi);
-                VGPLOG("wait for gpu vk qsri id %u image 0x%llx", ctxId, (unsigned long long)image_handle);
-                if (mVirtioGpuTimelines) {
-                    auto taskId = mVirtioGpuTimelines->enqueueTask(
-                        static_cast<VirtioGpuTimelines::CtxId>(ctxId));
-                    mVirtioGpuOps->async_wait_for_gpu_vulkan_qsri_with_cb(
-                        image_handle, [this, ctxId, taskId] {
-                            mVirtioGpuTimelines->notifyTaskCompletion(taskId);
-                        });
-                } else {
-                    mVirtioGpuOps->wait_for_gpu_vulkan_qsri(image_handle);
-                }
+                VGPLOG("wait for gpu vk qsri ring %u image 0x%llx", to_string(ring).c_str(),
+                       (unsigned long long)image_handle);
+                auto taskId = mVirtioGpuTimelines->enqueueTask(ring);
+                mVirtioGpuOps->async_wait_for_gpu_vulkan_qsri_with_cb(image_handle, [this, taskId] {
+                    mVirtioGpuTimelines->notifyTaskCompletion(taskId);
+                });
                 break;
             }
             default:
@@ -899,89 +871,46 @@ public:
         return 0;
     }
 
-    enum VirtioGpuFenceType {
-        Global,
-        ContextFence,
-    };
+    int createFence(uint64_t fence_id, const VirtioGpuRing& ring) {
+        VGPLOG("fenceid: %llu ring: %s", (unsigned long long)fence_id, to_string(ring).c_str());
 
-    enum CtxSyncingType {
-        SyncSignal,
-        AsyncSignal,
-    };
-
-    struct CtxPendingFence {
-        VirtioGpuFenceType fenceType;
-        CtxSyncingType syncType;
-        uint64_t fence_value;
-    };
-
-    int createFence(int client_fence_id, uint32_t ctx_id) {
-        AutoLock lock(mLock);
-        VGPLOG("fenceid: %u cmdtype: %u", client_fence_id, ctx_id);
-        if (mVirtioGpuTimelines) {
-            VGPLOG("create fence using async fence cb");
-            if (0 == ctx_id) {
-                VGPLOG("is 0 ctx id, signal right away as everything's serialized to this point");
-                mVirglRendererCallbacks.write_fence(mCookie, (uint32_t)client_fence_id);
-            } else {
-                VGPLOG("is Not 0 ctx id (%u), do not signal right away if async signal on top.. the client fence id was %d", ctx_id, client_fence_id);
-                mVirtioGpuTimelines->enqueueFence(
-                    0,
-                    static_cast<VirtioGpuTimelines::FenceId>(client_fence_id),
-                    [this, client_fence_id]() {
-                        mVirglRendererCallbacks.write_fence(
-                            mCookie, static_cast<uint32_t>(client_fence_id));
-                    });
+        struct {
+            FenceCompletionCallback operator()(const VirtioGpuRingGlobal&) {
+                return [renderer = mRenderer, fenceId = mFenceId] {
+                    renderer->mVirglRendererCallbacks.write_fence(renderer->mCookie, fenceId);
+                };
             }
-        } else {
-            VGPLOG("create fence without async fence cb");
-            mFenceDeque.push_back((uint64_t)client_fence_id);
-        }
-        return 0;
-    }
-
-    int contextCreateFence(uint64_t fence_id, uint32_t ctx_id, uint8_t ring_idx) {
-        AutoLock lock(mLock);
-        VGPLOG("fenceid: %llu cmdtype: %u ring_idx: %u", (unsigned long long)fence_id, ctx_id, ring_idx);
-        if (mVirtioGpuTimelines) {
-            VGPLOG("create fence using async fence cb");
-            if (0 == ctx_id) {
-                VGPLOG("is 0 ctx id, signal right away as everything's serialized to this point");
-                mVirglRendererCallbacks.write_fence(mCookie, (uint32_t)fence_id);
-            } else {
-                VGPLOG("is Not 0 ctx id (%u), do not signal right away if async signal on top.. the client fence id was %llu",
-                       ctx_id, (unsigned long long)fence_id);
+            FenceCompletionCallback operator()(const VirtioGpuRingContextSpecific& ring) {
 #ifdef VIRGL_RENDERER_UNSTABLE_APIS
-                mVirtioGpuTimelines->enqueueFence(
-                    static_cast<VirtioGpuTimelines::CtxId>(ctx_id),
-                    static_cast<VirtioGpuTimelines::FenceId>(fence_id),
-                    [this, fence_id, ctx_id, ring_idx]() {
-                        mVirglRendererCallbacks.write_context_fence(
-                            mCookie, fence_id, ctx_id, ring_idx);
-                    });
+                return [renderer = mRenderer, fenceId = mFenceId, ring] {
+                    renderer->mVirglRendererCallbacks.write_context_fence(
+                        renderer->mCookie, fenceId, ring.mCtxId, ring.mRingIdx);
+                };
 #else
-                VGPLOG("enable unstable apis for this feature");
-                return -EINVAL;
+                VGPLOG("enable unstable apis for the context specific fence feature");
+                return {};
 #endif
             }
-        } else {
-            fprintf(stderr, "%s: create fence without async fence cb\n", __func__);
-            mFenceDeque.push_back(fence_id);
+
+            PipeVirglRenderer* mRenderer;
+            VirtioGpuTimelines::FenceId mFenceId;
+        } visitor{
+            .mRenderer = this,
+            .mFenceId = fence_id,
+        };
+        FenceCompletionCallback callback = std::visit(visitor, ring);
+        if (!callback) {
+            // A context specific ring passed in, but the project is compiled without
+            // VIRGL_RENDERER_UNSTABLE_APIS defined.
+            return -EINVAL;
         }
+        AutoLock lock(mLock);
+        mVirtioGpuTimelines->enqueueFence(ring, fence_id, callback);
+
         return 0;
     }
 
-    void poll() {
-        VGPLOG("start");
-        AutoLock lock(mLock);
-        for (auto fence : mFenceDeque) {
-            VGPLOG("write fence: %llu", (unsigned long long)fence);
-            mVirglRendererCallbacks.write_fence(mCookie, (uint32_t)fence);
-            VGPLOG("write fence: %llu (done with callback)", (unsigned long long)fence);
-        }
-        mFenceDeque.clear();
-        VGPLOG("end");
-    }
+    void poll() { mVirtioGpuTimelines->poll(); }
 
     enum pipe_texture_target {
         PIPE_BUFFER,
@@ -1570,7 +1499,7 @@ public:
             saveResourceContextList(file, it.first, it.second);
         }
 
-        saveFenceDeque(file, mFenceDeque);
+        // TODO(kaiyili): save mVirtioGpuTimelines to the snapshot.
 
         auto ops = ensureAndGetServiceOps();
         ops->guest_post_save(file);
@@ -1589,7 +1518,6 @@ public:
         }
         mContextResources.clear();
         mResourceContexts.clear();
-        mFenceDeque.clear();
     }
 
     void loadSnapshot(void* opaque) {
@@ -1623,7 +1551,7 @@ public:
             mResourceContexts[resId] = ids;
         }
 
-        loadFenceDeque(file);
+        // TODO(kaiyili): load mVirtioGpuTimelines from the snapshot.
         auto ops = ensureAndGetServiceOps();
         ops->guest_post_load(file);
     }
@@ -1803,13 +1731,6 @@ private:
         }
     }
 
-    void saveFenceDeque(QEMUFile* file, const std::deque<uint64_t>& deque) {
-        qemu_put_be32(file, (int)mFenceDeque.size());
-        for (auto val : mFenceDeque) {
-            qemu_put_be64(file, val);
-        }
-    }
-
     void loadContext(QEMUFile* file) {
         auto ops = ensureAndGetServiceOps();
 
@@ -1926,13 +1847,6 @@ private:
         return res;
     }
 
-    void loadFenceDeque(QEMUFile* file) {
-        uint32_t count = qemu_get_be32(file);
-        for (uint32_t i = 0; i < count; ++i) {
-            mFenceDeque.push_back(qemu_get_be64(file));
-        }
-    }
-
     Lock mLock;
 
     void* mCookie = nullptr;
@@ -1950,14 +1864,10 @@ private:
     std::unordered_map<VirtioGpuCtxId, std::vector<VirglResId>> mContextResources;
     std::unordered_map<VirglResId, std::vector<VirtioGpuCtxId>> mResourceContexts;
 
-    // For use with the async fence cb.
     // When we wait for gpu or wait for gpu vulkan, the next (and subsequent)
     // fences created for that context should not be signaled immediately.
     // Rather, they should get in line.
     std::unique_ptr<VirtioGpuTimelines> mVirtioGpuTimelines = nullptr;
-
-    // For use without the async fence cb.
-    std::deque<uint64_t> mFenceDeque;
 };
 
 static LazyInstance<PipeVirglRenderer> sRenderer = LAZY_INSTANCE_INIT;
@@ -1970,9 +1880,7 @@ VG_EXPORT int pipe_virgl_renderer_init(
     return 0;
 }
 
-VG_EXPORT void pipe_virgl_renderer_poll(void) {
-    sRenderer->poll();
-}
+VG_EXPORT void pipe_virgl_renderer_poll(void) { sRenderer->poll(); }
 
 VG_EXPORT void* pipe_virgl_renderer_get_cursor_data(
     uint32_t resource_id, uint32_t *width, uint32_t *height) {
@@ -2045,7 +1953,7 @@ VG_EXPORT void pipe_virgl_renderer_resource_detach_iov(
 
 VG_EXPORT int pipe_virgl_renderer_create_fence(
     int client_fence_id, uint32_t ctx_id) {
-    sRenderer->createFence(client_fence_id, ctx_id);
+    sRenderer->createFence(client_fence_id, VirtioGpuRingGlobal{});
     return 0;
 }
 
@@ -2131,7 +2039,10 @@ VG_EXPORT int pipe_virgl_renderer_resource_attach_iov_with_addrs(int res_handle,
 
 VG_EXPORT int stream_renderer_context_create_fence(
     uint64_t fence_id, uint32_t ctx_id, uint8_t ring_idx) {
-    sRenderer->contextCreateFence(fence_id, ctx_id, ring_idx);
+    sRenderer->createFence(fence_id, VirtioGpuRingContextSpecific{
+                                         .mCtxId = ctx_id,
+                                         .mRingIdx = ring_idx,
+                                     });
     return 0;
 }
 

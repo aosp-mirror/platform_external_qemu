@@ -15,8 +15,11 @@
 #define VIRTIO_GPU_TIMELINES_H
 
 #include <atomic>
+#include <functional>
 #include <list>
 #include <memory>
+#include <sstream>
+#include <string>
 #include <unordered_map>
 #include <variant>
 
@@ -24,18 +27,64 @@
 #include "hw/virtio/virtio-goldfish-pipe.h"
 #include "android/opengl/virtio_gpu_ops.h"
 
+struct VirtioGpuRingGlobal {};
+struct VirtioGpuRingContextSpecific {
+    VirtioGpuCtxId mCtxId;
+    VirtioGpuRingIdx mRingIdx;
+};
+using VirtioGpuRing = std::variant<VirtioGpuRingGlobal, VirtioGpuRingContextSpecific>;
+
+template <>
+struct std::hash<VirtioGpuRingGlobal> {
+    std::size_t operator()(VirtioGpuRingGlobal const&) const noexcept { return 0; }
+};
+
+inline bool operator==(const VirtioGpuRingGlobal&, const VirtioGpuRingGlobal&) { return true; }
+
+template <>
+struct std::hash<VirtioGpuRingContextSpecific> {
+    std::size_t operator()(VirtioGpuRingContextSpecific const& ringContextSpecific) const noexcept {
+        std::size_t ctxHash = std::hash<VirtioGpuCtxId>{}(ringContextSpecific.mCtxId);
+        std::size_t ringHash = std::hash<VirtioGpuRingIdx>{}(ringContextSpecific.mRingIdx);
+        // Use the hash_combine from
+        // https://www.boost.org/doc/libs/1_78_0/boost/container_hash/hash.hpp.
+        std::size_t res = ctxHash;
+        res ^= ringHash + 0x9e3779b9 + (res << 6) + (res >> 2);
+        return res;
+    }
+};
+
+inline bool operator==(const VirtioGpuRingContextSpecific& lhs,
+                       const VirtioGpuRingContextSpecific& rhs) {
+    return lhs.mCtxId == rhs.mCtxId && lhs.mRingIdx == rhs.mRingIdx;
+}
+
+inline std::string to_string(const VirtioGpuRing& ring) {
+    struct {
+        std::string operator()(const VirtioGpuRingGlobal&) { return "global"; }
+        std::string operator()(const VirtioGpuRingContextSpecific& ring) {
+            std::stringstream ss;
+            ss << "context specific {ctx = " << ring.mCtxId << ", ring = " << ring.mRingIdx << "}";
+            return ss.str();
+        }
+    } visitor;
+    return std::visit(visitor, ring);
+}
+
 class VirtioGpuTimelines {
    public:
     using FenceId = uint64_t;
-    using CtxId = VirtioGpuCtxId;
+    using Ring = VirtioGpuRing;
     using TaskId = uint64_t;
-    VirtioGpuTimelines();
 
-    TaskId enqueueTask(CtxId);
-    void enqueueFence(CtxId, FenceId, FenceCompletionCallback);
+    TaskId enqueueTask(const Ring&);
+    void enqueueFence(const Ring&, FenceId, FenceCompletionCallback);
     void notifyTaskCompletion(TaskId);
+    void poll();
+    static std::unique_ptr<VirtioGpuTimelines> create(bool withAsyncCallback);
 
    private:
+    VirtioGpuTimelines(bool withAsyncCallback);
     struct Fence {
         std::unique_ptr<FenceCompletionCallback> mCompletionCallback;
         Fence(FenceCompletionCallback completionCallback)
@@ -44,10 +93,9 @@ class VirtioGpuTimelines {
     };
     struct Task {
         TaskId mId;
-        CtxId mCtxId;
+        Ring mRing;
         std::atomic_bool mHasCompleted;
-        Task(TaskId id, CtxId ctxId)
-            : mId(id), mCtxId(ctxId), mHasCompleted(false) {}
+        Task(TaskId id, const Ring& ring) : mId(id), mRing(ring), mHasCompleted(false) {}
     };
     using TimelineItem =
         std::variant<std::unique_ptr<Fence>, std::shared_ptr<Task>>;
@@ -57,10 +105,11 @@ class VirtioGpuTimelines {
     // mTimelineQueues, is destroyed, because the deleter of Task will
     // automatically remove the entry in mTaskIdToTask.
     std::unordered_map<TaskId, std::weak_ptr<Task>> mTaskIdToTask;
-    std::unordered_map<CtxId, std::list<TimelineItem>> mTimelineQueues;
+    std::unordered_map<Ring, std::list<TimelineItem>> mTimelineQueues;
+    const bool mWithAsyncCallback;
     // Go over the timeline, signal any fences without pending tasks, and remove
     // timeline items that are no longer needed.
-    void poll_locked(CtxId);
+    void poll_locked(const Ring&);
 };
 
 #endif  // VIRTIO_GPU_TIMELINES_H
