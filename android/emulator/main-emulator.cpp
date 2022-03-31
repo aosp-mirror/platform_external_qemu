@@ -275,26 +275,6 @@ static void setupCpuAffinity(
 
 static void doLauncherTest(const char* launcherTestArg);
 
-#if defined(__APPLE__)
-// Use "sysctl.proc_translated" to check if running in Rosetta
-// Returns 1 if running in Rosetta
-static int processIsTranslated() {
-    int ret = 0;
-    size_t size = sizeof(ret);
-    // Call the sysctl and if successful return the result
-    if (sysctlbyname("sysctl.proc_translated", &ret, &size, NULL, 0) != -1) {
-        return ret;
-    }
-    // If "sysctl.proc_translated" is not present then must be native
-    if (errno == ENOENT) {
-        return 0;
-    }
-
-    // Fall back to native
-    return 0;
-}
-#endif
-
 /* Main routine */
 int main(int argc, char** argv)
 {
@@ -320,18 +300,6 @@ int main(int argc, char** argv)
     bool checkLoadable = false;
     bool use_virtio_console = false;
     LoggingFlags logFlags = kLogEnableDuplicateFilter;
-
-#ifdef __APPLE__
-    if (processIsTranslated()) {
-        fprintf(stderr, "emulator: ERROR: process is translated under Rosetta. Attempting to replace emulator installation.\n");
-        const auto progDirSystem = android::base::System::get()->getProgramDirectory();
-        const auto cmd = PathUtils::join(progDirSystem, "darwin-aarch64-replace.sh");
-        fprintf(stderr, "emulator: Replacing via command: %s (downloading ~120 MB)...\n", cmd.c_str());
-        system(cmd.c_str());
-        fprintf(stderr, "emulator: Replacement done. Please relaunch the emulator. You will also need to be using an Apple Silicon-compatible system image. Check the release updates blog (https://androidstudio.googleblog.com/) for more details.\n");
-        return -1;
-    }
-#endif
 
     const char* qemu_top_dir = nullptr;
     for (int nn = 1; nn < argc; nn++) {
