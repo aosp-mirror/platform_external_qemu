@@ -15,7 +15,6 @@
 # limitations under the License.
 
 
-
 import os
 import platform
 import shutil
@@ -46,7 +45,7 @@ class TemporaryDirectory(object):
 
 def run_tests(out_dir, jobs, check_symbols, additional_opts):
     if check_symbols:
-      run_symbols_test(out_dir)
+        run_symbols_test(out_dir)
 
     if platform.system() == "Windows":
 
@@ -78,19 +77,42 @@ def run_tests(out_dir, jobs, check_symbols, additional_opts):
 
 
 def run_symbols_test(out_dir):
-  """Test to make sure we can upload symbols to our symbol server."""
-  API_KEY_FILE = os.path.join(os.path.expanduser("~"), ".emulator_symbol_server_key")
-  small_sym_file = os.path.join(out_dir, "build", "debug_info", "mksdcard.sym");
-  upload_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)), "upload_symbols.py")
-  assert os.path.exists(small_sym_file)
+    """Test to make sure we can upload symbols to our symbol server."""
+    API_KEY_FILE = os.path.join(os.path.expanduser("~"), ".emulator_symbol_server_key")
+    small_sym_file = os.path.join(out_dir, "build", "debug_info", "mksdcard.sym")
+    upload_exe = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "upload_symbols.py"
+    )
+    assert os.path.exists(small_sym_file)
 
-  if not os.path.exists(API_KEY_FILE):
-    logging.error("----------------#### .emulator_symbol_server_key not installed ###--------------------------")
-    logging.error("Unable to validate if symbols are actually processed.")
+    if not os.path.exists(API_KEY_FILE):
+        logging.error(
+            "----------------#### .emulator_symbol_server_key not installed ###--------------------------"
+        )
+        logging.error("Unable to validate if symbols are actually processed.")
 
-  # This will explode if we return a non 0 status
-  subprocess.check_call([sys.executable, upload_exe , "--symbol_file", small_sym_file, "--environment", "prod"])
-  subprocess.check_call([sys.executable, upload_exe , "--symbol_file", small_sym_file, "--environment", "staging"])
+    # This will explode if we return a non 0 status
+    subprocess.check_call(
+        [
+            sys.executable,
+            upload_exe,
+            "--symbol_file",
+            small_sym_file,
+            "--environment",
+            "prod",
+        ]
+    )
+    subprocess.check_call(
+        [
+            sys.executable,
+            upload_exe,
+            "--symbol_file",
+            small_sym_file,
+            "--environment",
+            "staging",
+        ]
+    )
+
 
 def run_binary_exists(out_dir):
     if not os.path.isfile(os.path.join(out_dir, "emulator%s" % EXE_POSTFIX)):

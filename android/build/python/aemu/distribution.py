@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import os
 import re
 import zipfile
@@ -82,7 +81,7 @@ def create_distribution(dist_dir, build_dir, data):
     zip_set = zip_sets[data["config"]]
 
     # First we create the individual zip sets using the regular expressions.
-    for zip_fname, params in zip_set.items():
+    for zip_fname, params in list(zip_set.items()):
         zip_fname = os.path.join(dist_dir, zip_fname.format(**data))
         logging.info("Creating %s", zip_fname)
 
@@ -91,8 +90,10 @@ def create_distribution(dist_dir, build_dir, data):
             zip_fname, "w", zipfile.ZIP_DEFLATED, allowZip64=True
         ) as zipf:
             # Include the notice files
-            zipf.writestr("emulator/NOTICE.txt", licensing.notice_file())
-            zipf.writestr("emulator/NOTICE.csv", licensing.to_csv())
+            zipf.writestr(
+                "emulator/NOTICE.txt", licensing.notice_file().encode("utf-8")
+            )
+            zipf.writestr("emulator/NOTICE.csv", licensing.to_csv().encode("utf-8"))
 
             for param in params:
                 start_dir, regex, dest = param
