@@ -75,16 +75,25 @@ target_link_libraries(gnss_proxy_lib PRIVATE modem_simulator_lib)
 protobuf_generate_grpc_cpp(
   SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}
   INCLUDES ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/snapshot/proto
-  SOURCES adb_service.proto emulator_controller.proto snapshot_service.proto
+  SOURCES adb_service.proto emulator_controller.proto
+          grpc_endpoint_description.proto snapshot_service.proto
   OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
   GENERATED EMULATOR_GRPC_SRC)
+
+android_add_library(
+  TARGET android-grpc-services LICENSE Apache-2.0 SRC # cmake-format: sortable
+                                                      ${EMULATOR_GRPC_SRC})
+target_include_directories(
+  android-grpc-services PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
+                               ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(android-grpc-services PUBLIC libprotobuf grpc++
+                                                   android-emu)
 
 # Let's add in the library
 android_add_library(
   TARGET android-grpc
   LICENSE Apache-2.0
   SRC # cmake-format: sortable
-      ${EMULATOR_GRPC_SRC}
       android/emulation/control/adb/AdbService.cpp
       android/emulation/control/audio/AudioStream.cpp
       android/emulation/control/camera/VirtualSceneCamera.cpp
@@ -113,7 +122,8 @@ android_add_library(
 target_link_libraries(
   android-grpc
   PRIVATE png
-  PUBLIC libprotobuf
+  PUBLIC android-grpc-services
+         libprotobuf
          android-emu
          android-net
          grpc++
