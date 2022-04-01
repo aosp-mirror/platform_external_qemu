@@ -948,19 +948,19 @@ void ToolWindow::resizableChangeIcon(PresetEmulatorSizeType type) {
     switch(type) {
         case PRESET_SIZE_PHONE:
             ChangeIcon(mToolsUi->resizable_button,
-                       "display_mode_phone_expand", "Display mode: phone");
+                       "display_mode_phone_expand", "Display mode: Phone");
             break;
         case PRESET_SIZE_UNFOLDED:
             ChangeIcon(mToolsUi->resizable_button,
-                       "display_mode_foldable_expand", "Display mode: foldable");
+                       "display_mode_foldable_expand", "Display mode: Foldable");
             break;
         case PRESET_SIZE_TABLET:
             ChangeIcon(mToolsUi->resizable_button,
-                       "display_mode_tablet_expand", "Display mode: tablet");
+                       "display_mode_tablet_expand", "Display mode: Tablet");
             break;
         case PRESET_SIZE_DESKTOP:
             ChangeIcon(mToolsUi->resizable_button,
-                       "display_mode_desktop_expand", "Display mode: desktop");
+                       "display_mode_desktop_expand", "Display mode: Desktop");
             break;
         default:
             LOG(ERROR) << "Invalid display mode " << type;
