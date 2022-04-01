@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright 2018 - The Android Open Source Project
 #
@@ -23,9 +23,16 @@ import platform
 import shutil
 import sys
 
-from aemu.definitions import (ENUMS, find_aosp_root, get_aosp_root, get_cmake,
-                              get_qemu_root, infer_target,
-                              read_simple_properties, set_aosp_root)
+from aemu.definitions import (
+    ENUMS,
+    find_aosp_root,
+    get_aosp_root,
+    get_cmake,
+    get_qemu_root,
+    infer_target,
+    read_simple_properties,
+    set_aosp_root,
+)
 from aemu.distribution import create_distribution
 from aemu.process import run
 from aemu.run_tests import run_tests
@@ -38,6 +45,7 @@ class LogBelowLevel(logging.Filter):
 
     def filter(self, record):
         return True if record.levelno < self.max_level else False
+
 
 def ensure_requests():
     """Make sure the requests package is availabe."""
@@ -57,7 +65,7 @@ def configure(args, target):
         if os.path.exists(args.out):
             logging.info("Clearing out %s", args.out)
             if platform.system() == "Windows":
-                run(['rmdir','/S', '/Q', args.out])
+                run(["rmdir", "/S", "/Q", args.out])
             else:
                 shutil.rmtree(args.out)
         if not os.path.exists(args.out):
@@ -89,7 +97,12 @@ def configure(args, target):
             "--qtwebengine and --no-qtwebengine cannot be set at the same time!"
         )
         sys.exit(1)
-    if args.qtwebengine or args.target == "darwin" or args.target == "darwin_aarch64" or args.target == "windows":
+    if (
+        args.qtwebengine
+        or args.target == "darwin"
+        or args.target == "darwin_aarch64"
+        or args.target == "windows"
+    ):
         build_qtwebengine = True
     if args.no_qtwebengine:
         build_qtwebengine = False
@@ -165,17 +178,18 @@ def main(args):
         return
 
     # Build
-    run(get_build_cmd(args), None, {'NINJA_STATUS' : "[ninja] "})
+    run(get_build_cmd(args), None, {"NINJA_STATUS": "[ninja] "})
 
     # Test.
     if args.tests:
         cross_compile = platform.system().lower() != args.target
-        if not cross_compile or target == 'darwin_aarch64':
+        if not cross_compile or target == "darwin_aarch64":
             run_tests_opts = []
             if args.gfxstream or args.crosvm or args.gfxstream_only:
                 run_tests_opts.append("--skip-emulator-check")
 
             run_tests(args.out, args.test_jobs, args.crash != "none", run_tests_opts)
+            logging.info("Completed testing.")
         else:
             logging.info("Not running tests for cross compile or darwin aarch64.")
 
@@ -187,7 +201,7 @@ def main(args):
             "sdk_build_number": args.sdk_build_number,
             "config": args.config,
         }
-
+        logging.info("Creating distribution.")
         create_distribution(args.dist, args.out, data)
 
     if platform.system() != "Windows" and args.config == "debug":
@@ -373,6 +387,7 @@ def launch():
         main(args)
     except (Exception, KeyboardInterrupt) as exc:
         sys.exit(exc)
+
 
 if __name__ == "__main__":
     launch()
