@@ -31,15 +31,17 @@
 #define VIRTIO_SND_QUEUE_TX     2
 #define VIRTIO_SND_QUEUE_RX     3
 
-#define VIRTIO_SND_PCM_MIC_NUM_CHANNELS         1
-#define VIRTIO_SND_PCM_MIC_FREQ             44100
-#define VIRTIO_SND_PCM_MIC_FORMAT             S16
-#define VIRTIO_SND_PCM_SPEAKERS_NUM_CHANNELS    2
-#define VIRTIO_SND_PCM_SPEAKERS_FREQ        44100
-#define VIRTIO_SND_PCM_SPEAKERS_FORMAT        S16
+#define VIRTIO_SND_PCM_NUM_MIN_CHANNELS             1
+#define VIRTIO_SND_PCM_AUD_NUM_MAX_CHANNELS         2
+#define VIRTIO_SND_PCM_MIC_NUM_MAX_CHANNELS         2
+#define VIRTIO_SND_PCM_MIC_FREQ                     44100
+#define VIRTIO_SND_PCM_MIC_FORMAT                   S16
+#define VIRTIO_SND_PCM_SPEAKERS_NUM_MAX_CHANNELS    5
+#define VIRTIO_SND_PCM_SPEAKERS_FREQ                44100
+#define VIRTIO_SND_PCM_SPEAKERS_FORMAT              S16
 
-#define VIRTIO_SND_NID_MIC                      0
-#define VIRTIO_SND_NID_SPEAKERS                 0
+#define VIRTIO_SND_NID_MIC                          0
+#define VIRTIO_SND_NID_SPEAKERS                     0
 
 #define GLUE(A, B) A##B
 #define GLUE2(A, B) GLUE(A, B)
@@ -58,10 +60,22 @@ union VirtIOSoundCtlRequest {
            format (VIRTIO_SND_PCM_FMT_x)
  * nchannels - 1
  */
-#define VIRTIO_SND_PACK_FORMAT(nchannels, fmt, freq) (freq | (fmt << 4) | ((nchannels - 1) << 9))
+#define VIRTIO_SND_PACK_FORMAT(nchannels, fmt, freq) (freq | (fmt << 4) | (nchannels << 9))
 
-static int format16_get_freq_hz(uint16_t format16) {
-    switch (format16 & 0xF) {
+static unsigned format16_get_freq(uint16_t format16) {
+    return format16 & 0xF;
+}
+
+static unsigned format16_get_format(uint16_t format16) {
+    return (format16 >> 4) & 0x1F;
+}
+
+static unsigned format16_get_nchannels(uint16_t format16) {
+    return format16 >> 9;
+}
+
+static unsigned format16_get_freq_hz(uint16_t format16) {
+    switch (format16_get_freq(format16)) {
     case VIRTIO_SND_PCM_RATE_8000:  return 8000;
     case VIRTIO_SND_PCM_RATE_11025: return 11025;
     case VIRTIO_SND_PCM_RATE_16000: return 16000;
@@ -73,11 +87,7 @@ static int format16_get_freq_hz(uint16_t format16) {
     }
 }
 
-static int format16_get_nchannels(uint16_t format16) {
-    return (format16 >> 9) + 1;
-}
-
-static int format16_get_frame_size(uint16_t format16) {
+static unsigned format16_get_frame_size(uint16_t format16) {
     return format16_get_nchannels(format16) * sizeof(int16_t);
 }
 
@@ -86,7 +96,7 @@ struct audsettings virtio_snd_unpack_format(uint16_t format16) {
 
     as.freq = format16_get_freq_hz(format16);
 
-    switch ((format16 >> 4) & 0x1F) {
+    switch (format16_get_format(format16)) {
     case VIRTIO_SND_PCM_FMT_S16:
         as.fmt = AUD_FMT_S16;
         break;
@@ -157,10 +167,10 @@ static const struct virtio_snd_jack_info jack_infos[VIRTIO_SND_NUM_JACKS] = {
 #undef HDA_REG_DEFCONF
 
 const uint16_t g_stream_formats[VIRTIO_SND_NUM_PCM_STREAMS] = {
-    VIRTIO_SND_PACK_FORMAT(VIRTIO_SND_PCM_MIC_NUM_CHANNELS,
+    VIRTIO_SND_PACK_FORMAT(VIRTIO_SND_PCM_MIC_NUM_MAX_CHANNELS,
                            GLUE2(VIRTIO_SND_PCM_FMT_, VIRTIO_SND_PCM_MIC_FORMAT),
                            GLUE2(VIRTIO_SND_PCM_RATE_, VIRTIO_SND_PCM_MIC_FREQ)),
-    VIRTIO_SND_PACK_FORMAT(VIRTIO_SND_PCM_SPEAKERS_NUM_CHANNELS,
+    VIRTIO_SND_PACK_FORMAT(VIRTIO_SND_PCM_SPEAKERS_NUM_MAX_CHANNELS,
                            GLUE2(VIRTIO_SND_PCM_FMT_, VIRTIO_SND_PCM_SPEAKERS_FORMAT),
                            GLUE2(VIRTIO_SND_PCM_RATE_, VIRTIO_SND_PCM_SPEAKERS_FREQ)),
 };
@@ -174,8 +184,8 @@ const static struct virtio_snd_pcm_info g_pcm_infos[VIRTIO_SND_NUM_PCM_STREAMS] 
         .formats = (1u << GLUE2(VIRTIO_SND_PCM_FMT_, VIRTIO_SND_PCM_MIC_FORMAT)),
         .rates = (1u << GLUE2(VIRTIO_SND_PCM_RATE_, VIRTIO_SND_PCM_MIC_FREQ)),
         .direction = VIRTIO_SND_D_INPUT,
-        .channels_min = VIRTIO_SND_PCM_MIC_NUM_CHANNELS,
-        .channels_max = VIRTIO_SND_PCM_MIC_NUM_CHANNELS,
+        .channels_min = VIRTIO_SND_PCM_NUM_MIN_CHANNELS,
+        .channels_max = VIRTIO_SND_PCM_MIC_NUM_MAX_CHANNELS,
     },
     {
         .hdr = {
@@ -185,8 +195,8 @@ const static struct virtio_snd_pcm_info g_pcm_infos[VIRTIO_SND_NUM_PCM_STREAMS] 
         .formats = (1u << GLUE2(VIRTIO_SND_PCM_FMT_, VIRTIO_SND_PCM_SPEAKERS_FORMAT)),
         .rates = (1u << GLUE2(VIRTIO_SND_PCM_RATE_, VIRTIO_SND_PCM_SPEAKERS_FREQ)),
         .direction = VIRTIO_SND_D_OUTPUT,
-        .channels_min = VIRTIO_SND_PCM_SPEAKERS_NUM_CHANNELS,
-        .channels_max = VIRTIO_SND_PCM_SPEAKERS_NUM_CHANNELS,
+        .channels_min = VIRTIO_SND_PCM_NUM_MIN_CHANNELS,
+        .channels_max = VIRTIO_SND_PCM_SPEAKERS_NUM_MAX_CHANNELS,
     },
 };
 
@@ -196,16 +206,10 @@ const struct virtio_snd_chmap_info g_chmap_infos[VIRTIO_SND_NUM_CHMAPS] = {
             .hda_fn_nid = VIRTIO_SND_NID_MIC,
         },
         .direction = VIRTIO_SND_D_INPUT,
-        .channels = VIRTIO_SND_PCM_MIC_NUM_CHANNELS,
+        .channels = VIRTIO_SND_PCM_MIC_NUM_MAX_CHANNELS,
         .positions = {
-#if VIRTIO_SND_PCM_MIC_NUM_CHANNELS == 1
-            VIRTIO_SND_CHMAP_MONO
-#else
             VIRTIO_SND_CHMAP_FL,
             VIRTIO_SND_CHMAP_FR,
-            VIRTIO_SND_CHMAP_RL,
-            VIRTIO_SND_CHMAP_RR,
-#endif
             },
     },
     {
@@ -213,17 +217,13 @@ const struct virtio_snd_chmap_info g_chmap_infos[VIRTIO_SND_NUM_CHMAPS] = {
             .hda_fn_nid = VIRTIO_SND_NID_SPEAKERS,
         },
         .direction = VIRTIO_SND_D_OUTPUT,
-        .channels = VIRTIO_SND_PCM_SPEAKERS_NUM_CHANNELS,
+        .channels = VIRTIO_SND_PCM_SPEAKERS_NUM_MAX_CHANNELS,
         .positions = {
-#if VIRTIO_SND_PCM_SPEAKERS_NUM_CHANNELS == 1
-            VIRTIO_SND_CHMAP_MONO
-#else
             VIRTIO_SND_CHMAP_FL,
             VIRTIO_SND_CHMAP_FR,
             VIRTIO_SND_CHMAP_RL,
             VIRTIO_SND_CHMAP_RR,
             VIRTIO_SND_CHMAP_LFE,
-#endif
         },
     },
 };
@@ -376,24 +376,39 @@ static uint32_t update_output_latency_bytes(VirtIOSoundPCMStream *stream, int x)
 static void stream_out_cb(void *opaque, int avail);
 static void stream_in_cb(void *opaque, int avail);
 
-static void virtio_snd_voice_open(VirtIOSound *snd, VirtIOSoundPCMStream *stream) {
-    struct audsettings as = virtio_snd_unpack_format(stream->format);
+static uint16_t virtio_snd_voice_open(VirtIOSound *snd,
+                                      VirtIOSoundPCMStream *stream,
+                                      const char *stream_name,
+                                      const uint16_t format16) {
+    struct audsettings as = virtio_snd_unpack_format(format16);
 
-    if (is_output_stream(stream)) {
-        stream->voice.out = AUD_open_out(&snd->card,
-                                         NULL,
-                                         g_stream_name[stream->id],
-                                         stream,
-                                         &stream_out_cb,
-                                         &as);
-    } else {
-        stream->voice.in = AUD_open_in(&snd->card,
-                                       NULL,
-                                       g_stream_name[stream->id],
-                                       stream,
-                                       &stream_in_cb,
-                                       &as);
+    for (as.nchannels = VIRTIO_SND_PCM_AUD_NUM_MAX_CHANNELS;
+         as.nchannels >= VIRTIO_SND_PCM_NUM_MIN_CHANNELS;
+         --as.nchannels) {
+        if (is_output_stream(stream)) {
+            stream->voice.out = AUD_open_out(&snd->card,
+                                             NULL,
+                                             stream_name,
+                                             stream,
+                                             &stream_out_cb,
+                                             &as);
+        } else {
+            stream->voice.in = AUD_open_in(&snd->card,
+                                           NULL,
+                                           stream_name,
+                                           stream,
+                                           &stream_in_cb,
+                                           &as);
+        }
+
+        if (stream->voice.raw) {
+            const unsigned fmt = format16_get_format(format16);
+            const unsigned freq = format16_get_freq(format16);
+            return VIRTIO_SND_PACK_FORMAT(as.nchannels, fmt, freq);
+        }
     }
+
+    return 0;
 }
 
 static void virtio_snd_voice_close(VirtIOSound *snd, VirtIOSoundPCMStream *stream) {
@@ -413,9 +428,11 @@ static void virtio_snd_stream_init(const unsigned stream_id,
 
     stream->id = stream_id;
     stream->snd = snd;
-    stream->format = g_stream_formats[stream_id];
     stream->voice.raw = NULL;
-    virtio_snd_voice_open(snd, stream);
+    stream->aud_format = virtio_snd_voice_open(snd, stream,
+                                               g_stream_name[stream->id],
+                                               g_stream_formats[stream_id]);
+    stream->aud_frame_size = format16_get_frame_size(stream->aud_format);
     ring_buffer_init(&stream->pcm_buf);
     qemu_mutex_init(&stream->mtx);
     stream->state = VIRTIO_PCM_STREAM_STATE_DISABLED;
@@ -625,10 +642,332 @@ virtio_snd_process_ctl_pcm_set_params_impl(const struct virtio_snd_pcm_set_param
 
     stream->buffer_bytes = req->buffer_bytes;
     stream->period_bytes = req->period_bytes;
-    stream->format = VIRTIO_SND_PACK_FORMAT(req->channels, req->format, req->rate);
+    stream->driver_format = VIRTIO_SND_PACK_FORMAT(req->channels, req->format, req->rate);
 
     qemu_mutex_unlock(&stream->mtx);
     return VIRTIO_SND_S_OK;
+}
+
+static int clamp_s16(int s) {
+    s -= (s > 32767) * (s - 32767);
+    s += (s < -32768) * (-32768 - s);
+    return s;
+}
+
+static int convert_channels_1_to_2(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = in_end - 1;
+    int16_t *out_end = buffer + (in_end - buffer) * 2;
+    int16_t *out = out_end - 2;
+
+    for (; in >= buffer; in -= 1, out -= 2) {
+        out[0] = in[0];
+        out[1] = in[0];
+    }
+
+    return sizeof(*buffer) * (out_end - buffer);
+}
+
+static int convert_channels_1_to_3(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = in_end - 1;
+    int16_t *out_end = buffer + (in_end - buffer) * 3;
+    int16_t *out = out_end - 3;
+
+    for (; in >= buffer; in -= 1, out -= 3) {
+        out[0] = in[0];
+        out[1] = in[0];
+        out[2] = in[0];
+    }
+
+    return sizeof(*buffer) * (out_end - buffer);
+}
+
+static int convert_channels_1_to_4(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = in_end - 1;
+    int16_t *out_end = buffer + (in_end - buffer) * 4;
+    int16_t *out = out_end - 4;
+
+    for (; in >= buffer; in -= 1, out -= 4) {
+        out[0] = in[0];
+        out[1] = in[0];
+        out[2] = in[0];
+        out[3] = in[0];
+    }
+
+    return sizeof(*buffer) * (out_end - buffer);
+}
+
+static int convert_channels_1_to_5(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = in_end - 1;
+    int16_t *out_end = buffer + (in_end - buffer) * 5;
+    int16_t *out = out_end - 5;
+
+    for (; in >= buffer; in -= 1, out -= 5) {
+        out[0] = in[0];
+        out[1] = in[0];
+        out[2] = in[0];
+        out[3] = in[0];
+        out[4] = in[0];
+    }
+
+    return sizeof(*buffer) * (out_end - buffer);
+}
+
+static int convert_channels_2_to_1(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = buffer;
+    int16_t *out = buffer;
+
+    for (; in < in_end; in += 2, out += 1) {
+        out[0] = ((int)in[0] + (int)in[1]) / 2;
+    }
+
+    return sizeof(*buffer) * (out - buffer);
+}
+
+static int convert_channels_2_to_3(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = in_end - 2;
+    int16_t *out_end = buffer + (in_end - buffer) / 2 * 3;
+    int16_t *out = out_end - 3;
+
+    for (; in >= buffer; in -= 2, out -= 3) {
+        out[0] = in[0];
+        out[1] = in[1];
+        out[2] = clamp_s16(((int)in[0] + (int)in[1]) / 2);
+    }
+
+    return sizeof(*buffer) * (out_end - buffer);
+}
+
+static int convert_channels_2_to_4(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = in_end - 2;
+    int16_t *out_end = buffer + (in_end - buffer) / 2 * 4;
+    int16_t *out = out_end - 4;
+
+    for (; in >= buffer; in -= 2, out -= 4) {
+        out[0] = in[0];
+        out[1] = in[1];
+        out[2] = in[0];
+        out[3] = in[1];
+    }
+
+    return sizeof(*buffer) * (out_end - buffer);
+}
+
+static int convert_channels_2_to_5(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = in_end - 2;
+    int16_t *out_end = buffer + (in_end - buffer) / 2 * 5;
+    int16_t *out = out_end - 4;
+
+    for (; in >= buffer; in -= 2, out -= 4) {
+        out[0] = in[0];
+        out[1] = in[1];
+        out[2] = in[0];
+        out[3] = in[1];
+        out[4] = clamp_s16(((int)in[0] + (int)in[1]) / 2);
+    }
+
+    return sizeof(*buffer) * (out_end - buffer);
+}
+
+static int convert_channels_3_to_1(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = buffer;
+    int16_t *out = buffer;
+
+    for (; in < in_end; in += 3, out += 1) {
+        out[0] = clamp_s16((85 * ((int)in[0] + (int)in[1] + (int)in[2])) / 256);
+    }
+
+    return sizeof(*buffer) * (out - buffer);
+}
+
+static int convert_channels_3_to_2(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = buffer;
+    int16_t *out = buffer;
+
+    for (; in < in_end; in += 3, out += 2) {
+        const int in22 = in[2] / 2;
+
+        out[0] = clamp_s16((170 * ((int)in[0] + in22)) / 256);
+        out[1] = clamp_s16((170 * ((int)in[1] + in22)) / 256);
+    }
+
+    return sizeof(*buffer) * (out - buffer);
+}
+
+static int convert_channels_3_to_4(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = in_end - 3;
+    int16_t *out_end = buffer + (in_end - buffer) / 3 * 4;
+    int16_t *out = out_end - 4;
+
+    for (; in >= buffer; in -= 3, out -= 4) {
+        out[0] = in[0];
+        out[1] = in[1];
+        out[2] = in[2];
+        out[3] = clamp_s16(((int)in[1] + (int)in[2]) / 2);
+    }
+
+    return sizeof(*buffer) * (out_end - buffer);
+}
+
+static int convert_channels_3_to_5(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = in_end - 3;
+    int16_t *out_end = buffer + (in_end - buffer) / 3 * 5;
+    int16_t *out = out_end - 5;
+
+    for (; in >= buffer; in -= 3, out -= 5) {
+        out[0] = in[0];
+        out[1] = in[1];
+        out[2] = in[2];
+        out[3] = in[2];
+        out[4] = in[2];
+    }
+
+    return sizeof(*buffer) * (out_end - buffer);
+}
+
+static int convert_channels_4_to_1(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = buffer;
+    int16_t *out = buffer;
+
+    for (; in < in_end; in += 4, out += 1) {
+        out[0] = clamp_s16(((int)in[0] + (int)in[1] + (int)in[2] + (int)in[3]) / 4);
+    }
+
+    return sizeof(*buffer) * (out - buffer);
+}
+
+static int convert_channels_4_to_2(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = buffer;
+    int16_t *out = buffer;
+
+    for (; in < in_end; in += 4, out += 2) {
+        out[0] = clamp_s16(((int)in[0] + (int)in[2]) / 2);
+        out[1] = clamp_s16(((int)in[1] + (int)in[3]) / 2);
+    }
+
+    return sizeof(*buffer) * (out - buffer);
+}
+
+static int convert_channels_4_to_3(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = buffer;
+    int16_t *out = buffer;
+
+    for (; in < in_end; in += 4, out += 3) {
+        out[0] = in[0];
+        out[1] = in[1];
+        out[2] = clamp_s16(((int)in[2] + (int)in[3]) / 2);
+    }
+
+    return sizeof(*buffer) * (out - buffer);
+}
+
+static int convert_channels_4_to_5(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = in_end - 4;
+    int16_t *out_end = buffer + (in_end - buffer) / 4 * 5;
+    int16_t *out = out_end - 5;
+
+    for (; in >= buffer; in -= 4, out -= 5) {
+        out[0] = in[0];
+        out[1] = in[1];
+        out[2] = in[2];
+        out[3] = in[3];
+        out[4] = clamp_s16(((int)in[2] + (int)in[3]) / 2);
+    }
+
+    return sizeof(*buffer) * (out_end - buffer);
+}
+
+static int convert_channels_5_to_1(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = buffer;
+    int16_t *out = buffer;
+
+    for (; in < in_end; in += 5, out += 1) {
+        out[0] = clamp_s16(
+            (51 * ((int)in[0] + (int)in[1] + (int)in[2] + (int)in[3] + (int)in[4])) / 256);
+    }
+
+    return sizeof(*buffer) * (out - buffer);
+}
+
+static int convert_channels_5_to_2(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = buffer;
+    int16_t *out = buffer;
+
+    for (; in < in_end; in += 5, out += 2) {
+        const int in44 = in[4] / 4;
+
+        out[0] = clamp_s16(((int)in[0] / 2) + ((int)in[2] / 4) + in44);
+        out[1] = clamp_s16(((int)in[1] / 2) + ((int)in[3] / 4) + in44);
+    }
+
+    return sizeof(*buffer) * (out - buffer);
+}
+
+static int convert_channels_5_to_3(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = buffer;
+    int16_t *out = buffer;
+
+    for (; in < in_end; in += 5, out += 3) {
+        out[0] = in[0];
+        out[1] = in[1];
+        out[2] = clamp_s16((85 * ((int)in[2] + (int)in[3] + (int)in[4])) / 256);
+    }
+
+    return sizeof(*buffer) * (out - buffer);
+}
+
+static int convert_channels_5_to_4(int16_t *buffer, int16_t *in_end) {
+    int16_t *in = buffer;
+    int16_t *out = buffer;
+
+    for (; in < in_end; in += 5, out += 4) {
+        const int in42 = in[4] / 2;
+
+        out[0] = in[0];
+        out[1] = in[1];
+        out[2] = clamp_s16((170 * ((int)in[2] + in42)) / 256);
+        out[3] = clamp_s16((170 * ((int)in[3] + in42)) / 256);
+    }
+
+    return sizeof(*buffer) * (out - buffer);
+}
+
+static int convert_channels(int16_t *buffer, const int in_sz,
+                            const int in_fs, const int out_fs) {
+    if (out_fs == in_fs) {
+        return in_sz;
+    } else {
+        int16_t *buffer_end = buffer + in_sz / sizeof(*buffer);
+
+        switch (((in_fs << 4) + out_fs) / sizeof(*buffer)) {
+        case 0x12: return convert_channels_1_to_2(buffer, buffer_end);
+        case 0x13: return convert_channels_1_to_3(buffer, buffer_end);
+        case 0x14: return convert_channels_1_to_4(buffer, buffer_end);
+        case 0x15: return convert_channels_1_to_5(buffer, buffer_end);
+
+        case 0x21: return convert_channels_2_to_1(buffer, buffer_end);
+        case 0x23: return convert_channels_2_to_3(buffer, buffer_end);
+        case 0x24: return convert_channels_2_to_4(buffer, buffer_end);
+        case 0x25: return convert_channels_2_to_5(buffer, buffer_end);
+
+        case 0x31: return convert_channels_3_to_1(buffer, buffer_end);
+        case 0x32: return convert_channels_3_to_2(buffer, buffer_end);
+        case 0x34: return convert_channels_3_to_4(buffer, buffer_end);
+        case 0x35: return convert_channels_3_to_5(buffer, buffer_end);
+
+        case 0x41: return convert_channels_4_to_1(buffer, buffer_end);
+        case 0x42: return convert_channels_4_to_2(buffer, buffer_end);
+        case 0x43: return convert_channels_4_to_3(buffer, buffer_end);
+        case 0x45: return convert_channels_4_to_5(buffer, buffer_end);
+
+        case 0x51: return convert_channels_5_to_1(buffer, buffer_end);
+        case 0x52: return convert_channels_5_to_2(buffer, buffer_end);
+        case 0x53: return convert_channels_5_to_3(buffer, buffer_end);
+        case 0x54: return convert_channels_5_to_4(buffer, buffer_end);
+
+        default:
+            abort();
+        }
+    }
 }
 
 static int calc_stream_adjustment_bytes(const VirtIOSoundPCMStream *stream,
@@ -636,7 +975,7 @@ static int calc_stream_adjustment_bytes(const VirtIOSoundPCMStream *stream,
     const uint64_t elapsed_nf = elapsed_usec * (uint64_t)stream->freq_hz / 1000000ul;
     const uint64_t consumed_nf = stream->frames_sent + stream->frames_skipped;
 
-    return (consumed_nf < elapsed_nf) ? (stream->frame_size * (elapsed_nf - consumed_nf)) : 0;
+    return (consumed_nf < elapsed_nf) ? (stream->driver_frame_size * (elapsed_nf - consumed_nf)) : 0;
 }
 
 static int calc_drop_bytes_out(VirtIOSoundPCMStream *stream) {
@@ -656,38 +995,44 @@ static void stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     VirtIOSoundRingBuffer *const pcm_buf = &stream->pcm_buf;
     VirtIOSound *const snd = stream->snd;
     VirtQueue *const tx_vq = snd->tx_vq;
-    const int frame_size = stream->frame_size;
+    const int aud_fs = stream->aud_frame_size;
+    const int driver_fs = stream->driver_frame_size;
     bool notify_vq = false;
     int drop_bytes;
-    uint8_t scratch[2048];
+    int16_t scratch[1024];
 
-    while (avail >= frame_size) {
+    while (avail >= aud_fs) {
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
         if (item) {
             VirtQueueElement *const e = item->el;
             uint32_t latency_bytes = 0;
-            int sz = MIN(avail, item->size);
 
-            while (sz >= frame_size) {
-                const int nf = MIN(sz, sizeof(scratch)) / frame_size;
-                const int nb = nf * frame_size;
-                int sent_bytes;
+            while (true) {
+                const int nf = MIN(avail / aud_fs,
+                                   MIN(item->size, sizeof(scratch)) / driver_fs);
+                if (!nf) {
+                    break;
+                }
 
-                iov_to_buf(e->out_sg, e->out_num, item->pos, scratch, nb);
-                sent_bytes = AUD_write(voice, scratch, nb);
-                if (sent_bytes <= 0) {
+                const int driver_nb = nf * driver_fs;
+                iov_to_buf(e->out_sg, e->out_num, item->pos, scratch, driver_nb);
+                const int aud_nb = convert_channels(scratch, driver_nb, driver_fs, aud_fs);
+                const int aud_sent_nb = AUD_write(voice, scratch, aud_nb);
+                if (aud_sent_nb <= 0) {
                     goto done;
                 }
 
-                item->pos += sent_bytes;
-                item->size -= sent_bytes;
-                avail -= sent_bytes;
-                sz -= sent_bytes;
-                latency_bytes = update_output_latency_bytes(stream, -sent_bytes);
-                stream->frames_sent += (sent_bytes / frame_size);
+                const int sent_fn = aud_sent_nb / aud_fs;
+                const int driver_sent_nb = sent_fn * driver_fs;
+
+                item->pos += driver_sent_nb;
+                item->size -= driver_sent_nb;
+                avail -= aud_sent_nb;
+                latency_bytes = update_output_latency_bytes(stream, -driver_sent_nb);
+                stream->frames_sent += sent_fn;
             }
 
-            if (item->size < frame_size) {
+            if (item->size < driver_fs) {
                 vq_consume_element(
                     tx_vq, e,
                     el_send_pcm_status(e, VIRTIO_SND_S_OK, latency_bytes));
@@ -696,24 +1041,24 @@ static void stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
             }
         } else {
             memset(scratch, 0, MIN(avail, sizeof(scratch)));
-            while (avail > frame_size) {
-                const int32_t nf = MIN(avail, sizeof(scratch)) / frame_size;
-                const int32_t nb = nf * frame_size;
+            while (avail > aud_fs) {
+                const int32_t nf = MIN(avail, sizeof(scratch)) / aud_fs;
+                const int32_t nb = nf * aud_fs;
                 const int32_t sent_bytes = AUD_write(voice, scratch, nb);
 
                 avail -= sent_bytes;
-                stream->frames_wasted += (sent_bytes / frame_size);
+                stream->frames_wasted += (sent_bytes / aud_fs);
             }
             goto done;
         }
     }
 
     drop_bytes = calc_drop_bytes_out(stream);
-    while (drop_bytes >= frame_size) {
+    while (drop_bytes >= driver_fs) {
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
         if (item) {
-            const int nf = MIN(drop_bytes, item->size) / frame_size;
-            const int nb = nf * frame_size;
+            const int nf = MIN(drop_bytes, item->size) / driver_fs;
+            const int nb = nf * driver_fs;
             uint32_t latency_bytes;
             drop_bytes -= nb;
             item->pos += nb;
@@ -721,7 +1066,7 @@ static void stream_out_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
             latency_bytes = update_output_latency_bytes(stream, -nb);
             stream->frames_skipped += nf;
 
-            if (item->size < frame_size) {
+            if (item->size < driver_fs) {
                 VirtQueueElement *const e = item->el;
                 vq_consume_element(
                     tx_vq, e,
@@ -788,7 +1133,8 @@ static void virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
 
 static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     SWVoiceIn *const voice = stream->voice.in;
-    const int frame_size = stream->frame_size;
+    const int aud_fs = stream->aud_frame_size;
+    const int driver_fs = stream->driver_frame_size;
     const int period_bytes = stream->period_bytes;
     const int item_size_bytes = period_bytes + sizeof(struct virtio_snd_pcm_status);
     VirtIOSoundRingBuffer *const pcm_buf = &stream->pcm_buf;
@@ -796,27 +1142,32 @@ static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     VirtQueue *const rx_vq = snd->rx_vq;
     bool notify_vq = false;
     int insert_bytes;
-    char scratch[2048];
+    int16_t scratch[1024];
 
-    while (avail >= frame_size) {
+    while (avail >= aud_fs) {
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
         if (item) {
             VirtQueueElement *const e = item->el;
-            int sz = MIN(avail, item_size_bytes - item->pos);
 
-            while (sz >= frame_size) {
-                const int nf = MIN(sz, sizeof(scratch)) / frame_size;
-                const int nb = nf * frame_size;
-                const int read_bytes = AUD_read(voice, scratch, nb);
-                if (read_bytes <= 0) {
+            while (true) {
+                const int nf = MIN(avail / aud_fs,
+                                   MIN(item_size_bytes - item->pos,
+                                       sizeof(scratch)) / driver_fs);
+                if (!nf) {
+                    break;
+                }
+
+                const int aud_read_nb = AUD_read(voice, scratch, nf * aud_fs);
+                if (aud_read_nb <= 0) {
                     goto done;
                 }
 
-                iov_from_buf(e->in_sg, e->in_num, item->pos, scratch, read_bytes);
-                sz -= read_bytes;
-                avail -= read_bytes;
-                item->pos += read_bytes;
-                stream->frames_sent += (read_bytes / frame_size);
+                const int driver_read_nb = convert_channels(scratch, aud_read_nb, aud_fs, driver_fs);
+
+                iov_from_buf(e->in_sg, e->in_num, item->pos, scratch, driver_read_nb);
+                avail -= aud_read_nb;
+                item->pos += driver_read_nb;
+                stream->frames_sent += (driver_read_nb / driver_fs);
 
                 if (item->pos == item_size_bytes) {
                     el_send_pcm_status(e, VIRTIO_SND_S_OK, avail);
@@ -826,15 +1177,15 @@ static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
                 }
             }
         } else {
-            while (avail >= frame_size) {
-                const int nf = MIN(avail, sizeof(scratch)) / frame_size;
-                const int nb = nf * frame_size;
+            while (avail >= aud_fs) {
+                const int nf = MIN(avail, sizeof(scratch)) / aud_fs;
+                const int nb = nf * aud_fs;
                 const int read_bytes = AUD_read(voice, scratch, nb);
                 if (read_bytes <= 0) {
                     goto done;
                 }
                 avail -= read_bytes;
-                stream->frames_wasted += (read_bytes / frame_size);
+                stream->frames_wasted += (read_bytes / aud_fs);
             }
             goto done;
         }
@@ -842,12 +1193,12 @@ static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
 
     insert_bytes = calc_insert_bytes_in(stream);
     memset(scratch, 0, MIN(insert_bytes, sizeof(scratch)));
-    while (insert_bytes >= frame_size) {
+    while (insert_bytes >= driver_fs) {
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
         if (item) {
             VirtQueueElement *const e = item->el;
-            const int nf = MIN(insert_bytes, item_size_bytes - item->pos) / frame_size;
-            const int nb = nf * frame_size;
+            const int nf = MIN(insert_bytes, item_size_bytes - item->pos) / driver_fs;
+            const int nb = nf * driver_fs;
             iov_from_buf(e->in_sg, e->in_num, item->pos, scratch, nb);
             insert_bytes -= nb;
             item->pos += nb;
@@ -941,9 +1292,9 @@ virtio_snd_process_ctl_pcm_prepare_impl(unsigned stream_id, VirtIOSound* snd) {
             goto done;
         }
 
-        stream->freq_hz = format16_get_freq_hz(stream->format);
-        stream->frame_size = format16_get_frame_size(stream->format);
-        stream->buffer_frames = stream->buffer_bytes / stream->frame_size;
+        stream->freq_hz = format16_get_freq_hz(stream->driver_format);
+        stream->driver_frame_size = format16_get_frame_size(stream->driver_format);
+        stream->buffer_frames = stream->buffer_bytes / stream->driver_frame_size;
         stream->latency_bytes = 0;
         stream->state = VIRTIO_PCM_STREAM_STATE_PREPARED;
         r = VIRTIO_SND_S_OK;
