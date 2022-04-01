@@ -1317,6 +1317,8 @@ extern "C" int main(int argc, char** argv) {
                 fc::setIfNotOverriden(fc::KeycodeForwarding, true);
                 fc::setIfNotOverriden(fc::VulkanQueueSubmitWithCommands, true);
                 fc::setIfNotOverriden(fc::VulkanBatchedDescriptorSetUpdate, true);
+                fc::setIfNotOverriden(fc::HostComposition, true);
+                fc::setIfNotOverriden(fc::AsyncComposeSupport, true);
 
                 int lcdWidth = 1280;
                 int lcdHeight = 720;
