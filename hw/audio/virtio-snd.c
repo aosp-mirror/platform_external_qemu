@@ -24,8 +24,6 @@
 #include "hw/pci/pci.h"
 #include "intel-hda-defs.h"
 
-#define derror(fmt, ...) fprintf(stderr, "rkir555 " fmt "\n", ##__VA_ARGS__)
-
 #define VIRTIO_SND_QUEUE_CTL    0
 #define VIRTIO_SND_QUEUE_EVENT  1
 #define VIRTIO_SND_QUEUE_TX     2
@@ -42,6 +40,10 @@
 
 #define VIRTIO_SND_NID_MIC                          0
 #define VIRTIO_SND_NID_SPEAKERS                     0
+
+#define RING_BUFFER_BAD_SIZE                        111111111
+#define RING_BUFFER_BAD_R                           222222222
+#define RING_BUFFER_BAD_W                           333333333
 
 #define GLUE(A, B) A##B
 #define GLUE2(A, B) GLUE(A, B)
@@ -283,9 +285,9 @@ static size_t el_send_pcm_status(VirtQueueElement *e, unsigned status, unsigned 
 static void ring_buffer_init(VirtIOSoundRingBuffer *rb) {
     rb->buf = NULL;
     rb->capacity = 0;
-    rb->size = 111111111;
-    rb->r = 222222222;
-    rb->w = 333333333;
+    rb->size = RING_BUFFER_BAD_SIZE;
+    rb->r = RING_BUFFER_BAD_R;
+    rb->w = RING_BUFFER_BAD_W;
 };
 
 static bool ring_buffer_alloc(VirtIOSoundRingBuffer *rb, size_t capacity) {
@@ -316,11 +318,7 @@ static void ring_buffer_free(VirtIOSoundRingBuffer *rb) {
     }
 
     g_free(rb->buf);
-    rb->buf = NULL;
-    rb->capacity = 0;
-    rb->size = 111111111;
-    rb->r = 222222222;
-    rb->w = 333333333;
+    ring_buffer_init(rb);
 };
 
 static bool ring_buffer_push(VirtIOSoundRingBuffer *rb,
@@ -361,7 +359,6 @@ static bool ring_buffer_pop(VirtIOSoundRingBuffer *rb) {
 
     rb->r = (rb->r + 1) % rb->capacity;
     rb->size = size - 1;
-
 
     return true;
 }
@@ -515,7 +512,6 @@ static void virtio_snd_stream_enable(VirtIOSoundPCMStream *stream) {
         break;
 
     default:
-        derror("%s:%d unexpected state, %d", __func__, __LINE__, stream->state);
         break;
     }
     qemu_mutex_unlock(&stream->mtx);
@@ -543,7 +539,6 @@ static void virtio_snd_stream_disable(VirtIOSoundPCMStream *stream) {
         break;
 
     default:
-        derror("%s:%d unexpected state, %d", __func__, __LINE__, stream->state);
         break;
     }
     qemu_mutex_unlock(&stream->mtx);
@@ -1093,10 +1088,6 @@ static void stream_out_cb(void *opaque, int avail) {
     qemu_mutex_unlock(&stream->mtx);
 }
 
-static void virtio_snd_in_cb(void *opaque, int avail) {
-    /* TODO */
-}
-
 static void virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSound *snd) {
     VirtIOSoundRingBufferItem item;
     struct virtio_snd_pcm_xfer xfer;
@@ -1305,8 +1296,6 @@ virtio_snd_process_ctl_pcm_prepare_impl(unsigned stream_id, VirtIOSound* snd) {
         goto done;
 
     default:
-        derror("%s:%d stream_id=%u state=%s(%d)", __func__, __LINE__,
-               stream_id, stream_state_str(stream->state), stream->state);
         r = VIRTIO_SND_S_BAD_MSG;
         goto done;
     }
@@ -1488,7 +1477,6 @@ static size_t virtio_snd_process_ctl(VirtQueueElement *e, VirtIOSound *snd) {
     HANDLE_CTL(CHMAP_INFO, virtio_snd_query_info, virtio_snd_process_ctl_chmap_info)
 #undef HANDLE_CTL
     default:
-        derror("%s:%d unexpected ctl=%u", __func__, __LINE__, hdr->code);
         return el_send_status(e, VIRTIO_SND_S_NOT_SUPP);
     }
 
@@ -1514,6 +1502,7 @@ static void virtio_snd_handle_ctl(VirtIODevice *vdev, VirtQueue *vq) {
 
 /* device -> driver */
 static void virtio_snd_handle_event(VirtIODevice *vdev, VirtQueue *vq) {
+    /* nothing so far */
 }
 
 /* device <- driver */
