@@ -110,7 +110,7 @@ static const MemMapEntry virt_memmap[] = {
 #define VIRT32_HIGH_PCIE_MMIO_SIZE  (4 * GiB)
 
 /* PCIe high mmio for RV64, size is fixed but base depends on top of RAM */
-#define VIRT64_HIGH_PCIE_MMIO_SIZE  (16 * GiB)
+#define VIRT64_HIGH_PCIE_MMIO_SIZE  (128 * GiB)
 
 static MemMapEntry virt_high_pcie_memmap;
 
