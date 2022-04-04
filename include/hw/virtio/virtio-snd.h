@@ -92,6 +92,8 @@ typedef struct VirtIOSound {
     VirtQueue *rx_vq;
     VirtIOSoundPCMStream streams[VIRTIO_SND_NUM_PCM_STREAMS];
     QEMUSoundCard card;
+    bool enable_input_prop;
+    bool enable_output_prop;
 } VirtIOSound;
 
 #endif /* QEMU_VIRTIO_SND_H */
