@@ -383,19 +383,27 @@ static uint16_t virtio_snd_voice_open(VirtIOSound *snd,
          as.nchannels >= VIRTIO_SND_PCM_NUM_MIN_CHANNELS;
          --as.nchannels) {
         if (is_output_stream(stream)) {
-            stream->voice.out = AUD_open_out(&snd->card,
-                                             NULL,
-                                             stream_name,
-                                             stream,
-                                             &stream_out_cb,
-                                             &as);
+            if (snd->enable_output_prop) {
+                stream->voice.out = AUD_open_out(&snd->card,
+                                                 NULL,
+                                                 stream_name,
+                                                 stream,
+                                                 &stream_out_cb,
+                                                 &as);
+            } else {
+                return 0;
+            }
         } else {
-            stream->voice.in = AUD_open_in(&snd->card,
-                                           NULL,
-                                           stream_name,
-                                           stream,
-                                           &stream_in_cb,
-                                           &as);
+            if (snd->enable_input_prop) {
+                stream->voice.in = AUD_open_in(&snd->card,
+                                               NULL,
+                                               stream_name,
+                                               stream,
+                                               &stream_in_cb,
+                                               &as);
+            } else {
+                return 0;
+            }
         }
 
         if (stream->voice.raw) {
@@ -1606,8 +1614,15 @@ static void virtio_snd_set_status(VirtIODevice *vdev, const uint8_t status) {
     }
 }
 
+static const Property virtio_snd_properties[] = {
+    DEFINE_PROP_BOOL("input", VirtIOSound, enable_input_prop, true),
+    DEFINE_PROP_BOOL("output", VirtIOSound, enable_output_prop, true),
+    DEFINE_PROP_END_OF_LIST(),
+};
+
 static void virtio_snd_class_init(ObjectClass *klass, void *data) {
     DeviceClass *dc = DEVICE_CLASS(klass);
+    dc->props = (Property*)virtio_snd_properties;
     set_bit(DEVICE_CATEGORY_SOUND, dc->categories);
     dc->vmsd = &virtio_snd_vmstate;
 
