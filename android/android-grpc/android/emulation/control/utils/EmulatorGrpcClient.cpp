@@ -184,7 +184,7 @@ bool EmulatorGrpcClient::initializeChannel() {
     return true;
 }
 
-std::optional<EmulatorGrpcClient> EmulatorGrpcClient::loadFromProto(
+std::unique_ptr<EmulatorGrpcClient> EmulatorGrpcClient::loadFromProto(
         std::string_view pathToEndpointProto) {
     // Read the existing address book.
     std::fstream input(PathUtils::asUnicodePath(pathToEndpointProto).c_str(),
@@ -193,14 +193,14 @@ std::optional<EmulatorGrpcClient> EmulatorGrpcClient::loadFromProto(
     if (!input) {
         derror("File %s not found",
                PathUtils::asUnicodePath(pathToEndpointProto).c_str());
-        return {};
+        return nullptr;
     } else if (!endpoint.ParseFromIstream(&input)) {
         derror("File %s does not contain a valid endpoint",
                PathUtils::asUnicodePath(pathToEndpointProto).c_str());
-        return {};
+        return nullptr;
     }
 
-    return EmulatorGrpcClient(endpoint);
+    return std::make_unique<EmulatorGrpcClient>(endpoint);
 }
 }  // namespace control
 }  // namespace emulation
