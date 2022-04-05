@@ -1191,13 +1191,18 @@ constexpr bool targetIsX86 = true;
 constexpr bool targetIsX86 = false;
 #endif
 
-static std::string buildSoundhwParam(const int apiLevel, const AndroidHwConfig* hw) {
+static std::string buildSoundhwParam(const int apiLevel,
+                                     const AndroidHwConfig* hw) {
     std::string param;
     std::string props;
 
-    if (apiLevel >= 26 || targetIsX86) {
+    if (feature_is_enabled(kFeature_VirtioSndCard)) {
+        param = "virtio-snd-pci";
+    } else if (apiLevel >= 26 || targetIsX86) {
         /* for those system images that don't have the virtio-snd driver yet. */
         param = "hda";
+    } else {
+        return "";
     }
 
     if (!hw->hw_audioInput) {
@@ -1211,7 +1216,7 @@ static std::string buildSoundhwParam(const int apiLevel, const AndroidHwConfig* 
         props += "output=off";
     }
 
-    if (!param.empty() && !props.empty()) {
+    if (!props.empty()) {
         param += ":";
         param += props;
     }

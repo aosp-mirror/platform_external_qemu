@@ -13,12 +13,20 @@
 // limitations under the License.
 #include "audio/audio.h"
 
+typedef SWVoiceIn *(*audio_forwarder_set_voice_cb)(SWVoiceIn *voice);
+typedef SWVoiceIn *(*audio_forwarder_get_voice_cb)();
 
-typedef int (*read_available)(void* opaque);
+void audio_forwarder_register_card(audio_forwarder_set_voice_cb set,
+                                   audio_forwarder_get_voice_cb get);
+
+typedef int (*audio_forwarder_read_available)(void* opaque);
 // Note, the audio_capture_ops struct should provide the
 // capture function that will be called whenever a new sample
 // is being requested.
 //
 // Only one forwarder can be active.
-int enable_forwarder(struct audsettings* as, struct audio_capture_ops* ops, read_available available_fn, void* opaque);
-void disable_forwarder();
+int audio_forwarder_enable(const struct audsettings* as,
+                           struct audio_capture_ops* ops,
+                           audio_forwarder_read_available available_fn,
+                           void* opaque);
+void audio_forwarder_disable();
