@@ -11,7 +11,20 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <string>
+#pragma once
 
+// Undo some nimble madness.
+#ifdef min
+#undef min
+#endif
 
-void injectGrpcClient(EmulatorGrpcClient client);
+#ifdef max
+#undef max
+#endif
+
+#include <memory>
+#include "android/emulation/control/utils/EmulatorGrcpClient.h"
+
+// Injects the given grpc client into the ble_transport stack.
+// The gRPC client will be used to establish the hci transport.
+void injectGrpcClient(std::unique_ptr<android::emulation::control::EmulatorGrpcClient> client);

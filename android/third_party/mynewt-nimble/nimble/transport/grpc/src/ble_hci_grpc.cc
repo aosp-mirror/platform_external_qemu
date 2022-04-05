@@ -13,6 +13,7 @@
 // limitations under the License.
 
 /* BLE */
+#include "transport/ble_hci_grpc.h"
 #include "nimble/ble.h"            // for BLE_...
 #include "nimble/ble_hci_trans.h"  // for ble_...
 #include "nimble/hci_common.h"     // for BLE_...
@@ -219,32 +220,37 @@ private:
     bool mDone = false;
 };
 
-std::optional<EmulatorGrpcClient> firstEmulatorOrNone() {
+std::unique_ptr<EmulatorGrpcClient> firstEmulatorOrNone() {
     auto emulators = EmulatorAdvertisement({}).discoverRunningEmulators();
     for (const auto& discovered : emulators) {
-        EmulatorGrpcClient client(discovered);
-        if (client.hasOpenChannel()) {
+        auto client = std::make_unique<EmulatorGrpcClient>(discovered);
+        if (client->hasOpenChannel()) {
             return client;
         }
     }
-    return {};
+    return nullptr;
 }
 
 std::unique_ptr<HciTransport> sTransport;
 std::unique_ptr<EmulatedBluetoothService::Stub> sTransportStub;
+std::unique_ptr<EmulatorGrpcClient> sClient;
+
+void injectGrpcClient(std::unique_ptr<EmulatorGrpcClient> client) {
+    sClient = std::move(client);
+}
 
 int ble_hci_grpc_open_connection() {
-    // TODO(jansene): This needs to come from parameters somehow.
     using namespace std::chrono_literals;
-    auto connection = firstEmulatorOrNone();
-    while (!connection.has_value()) {
-        dinfo("Waiting for emulator..");
+
+    // This only happens if we didn't inject a client.
+    while (!sClient) {
+        dinfo("Waiting for first emulator..");
         std::this_thread::sleep_for(1s);
-        connection = firstEmulatorOrNone();
+        sClient = firstEmulatorOrNone();
     }
 
-    sTransportStub = connection->stub<EmulatedBluetoothService>();
-    sTransport = std::make_unique<HciTransport>(connection->newContext());
+    sTransportStub = sClient->stub<EmulatedBluetoothService>();
+    sTransport = std::make_unique<HciTransport>(sClient->newContext());
     sTransport->startCall(sTransportStub.get());
     return 0;
 }
@@ -568,15 +574,12 @@ void ble_hci_trans_buf_free(uint8_t* buf) {
  */
 int ble_hci_trans_reset(void) {
     /* Close the connection. */
-    dwarning(
-            "The stack is performing a reset.. this is not (yet?) "
-            "supported") if (sTransport) {
+    if (sTransport) {
         dinfo("Cancelling the transport.");
         sTransport->cancel();
     }
 
-    dinfo("Restarting gRPC connection.");
-    ble_hci_grpc_open_connection();
-
+    dfatal("The stack is performing a reset.. this is not (yet?) "
+           "supported");
     return 0;
 }
