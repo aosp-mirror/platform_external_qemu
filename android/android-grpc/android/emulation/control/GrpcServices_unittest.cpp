@@ -457,8 +457,9 @@ TEST_F(GrpcServiceTest, AsyncServerStreamingWorks) {
     hello.set_data("Hello World!");
 
     int responses = 0;
-    auto reader = client->serverStreamData(&ctx, hello);
-    while (response.counter() < hello.counter() && reader->Read(&response)) {
+    auto bidistream = client->streamEcho(&ctx);
+    bidistream->Write(hello);
+    while (response.counter() < hello.counter() && bidistream->Read(&response)) {
         responses++;
         printf("Got responses: %d\n", responses);
     }
@@ -468,7 +469,6 @@ TEST_F(GrpcServiceTest, AsyncServerStreamingWorks) {
     ctx.TryCancel();
     mEmuController->stop();
 }
-
 }  // namespace control
 }  // namespace emulation
 }  // namespace android

@@ -142,17 +142,6 @@ static void rootcanal_chr_open(Chardev* chr,
     sChrRootcanal = chr;
     *be_opened = false;
 #ifdef ANDROID_BLUETOOTH
-    android::bluetooth::Rootcanal::Builder builder;
-    builder.withHciPort(android_cmdLineOptions->rootcanal_hci_port)
-            .withTestPort(android_cmdLineOptions->rootcanal_test_port)
-            .withLinkPort(android_cmdLineOptions->rootcanal_link_port)
-            .withLinkBlePort(android_cmdLineOptions->rootcanal_link_ble_port)
-            .withControllerProperties(
-                    android_cmdLineOptions
-                            ->rootcanal_controller_properties_file)
-            .withCommandFile(
-                    android_cmdLineOptions->rootcanal_default_commands_file);
-    builder.buildSingleton();
     *be_opened = android::bluetooth::Rootcanal::Builder::getInstance()->start();
 #endif
     LOG(INFO) << "Rootcanal has " << (*be_opened ? "" : "**NOT**")

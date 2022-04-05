@@ -15,14 +15,20 @@
 
 #include <grpcpp/grpcpp.h>  // for ClientContext
 
-#include <memory>  // for unique_ptr
-#include <string>  // for string
+#include <memory>       // for unique_ptr
+#include <optional>     // for optional
+#include <string>       // for string
+#include <string_view>  // for string_view
 
+#include "android/utils/debug.h"
 #include "emulator_controller.grpc.pb.h"  // for EmulatorController
+#include "grpc_endpoint_description.pb.h"
 
 namespace android {
 namespace emulation {
 namespace control {
+
+using ::android::emulation::remote::Endpoint;
 
 // An EmulatorGrpcClient manages the configuration to the emulator grpc
 // endpoint. Through this method you can get a properly configured stub, and
@@ -32,18 +38,19 @@ namespace control {
 // by providing it a set of SSL credentials if you wish to use tls.
 class EmulatorGrpcClient {
 public:
-    explicit EmulatorGrpcClient(std::string discovery_file)
+    explicit EmulatorGrpcClient(const std::string_view discovery_file)
         : mDiscoveryFile(discovery_file){};
-    EmulatorGrpcClient(std::string address,
-                       std::string ca,
-                       std::string key,
-                       std::string cer);
+    EmulatorGrpcClient(const std::string_view address,
+                       const std::string_view ca,
+                       const std::string_view key,
+                       const std::string_view cer);
+    EmulatorGrpcClient(const Endpoint& dest);
     ~EmulatorGrpcClient() = default;
 
     template <class T>
     auto stub() {
-        if (!mChannel) {
-            initializeChannel();
+        if (!hasOpenChannel()) {
+            derror("Channel is not open!");
         }
 
         return T::NewStub(mChannel);
@@ -51,7 +58,10 @@ public:
 
     std::unique_ptr<grpc::ClientContext> newContext();
     bool hasOpenChannel(bool tryConnect = true);
-    std::string address() { return mAddress; }
+    std::string address() const { return mAddress; }
+
+    static std::optional<EmulatorGrpcClient> loadFromProto(
+            std::string_view patToEndpointProto);
 
 protected:
     bool initializeChannel();

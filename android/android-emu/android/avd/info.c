@@ -2165,7 +2165,11 @@ bool avdInfo_skinHasOverlay(const char* skinName) {
 
 const char* avdInfo_screen_off_timeout(int apiLevel) {
     if (apiLevel >= 31) {
-        return "1800000"; // 30 minutes
+        /* BUG: 226124519
+           TODO: need to have better indicator that screen is off due to
+           inactivity
+         */
+        return "2147483647";  // 576 hours
     } else {
         return "2147483647"; // 576 hours
     }

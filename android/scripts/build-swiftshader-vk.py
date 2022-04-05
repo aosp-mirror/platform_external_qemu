@@ -96,7 +96,7 @@ def setup_build_env():
 
 
 def clone_repo(dir):
-    git_sha1 = "ae82a91bf47a9c4baa36a423057ddbcfb032beb6"
+    git_sha1 = "0a1985c2b294e5d6690978bd49eae39042cf52a8"
     git_branch = "master"
     git_dir_name = "SwiftShader"
     git_repo_dir = dir + os.path.sep + git_dir_name
@@ -108,12 +108,6 @@ def clone_repo(dir):
     print(subprocess.run(["git", "checkout", git_sha1],
           cwd=git_repo_dir, check=True))
 
-    logging.info(
-        "Applying patch https://swiftshader-review.googlesource.com/c/SwiftShader/+/62228")
-    print(subprocess.run(["git", "fetch", "https://swiftshader.googlesource.com/SwiftShader",
-                          "refs/changes/28/62228/2"], cwd=git_repo_dir, check=True))
-    print(subprocess.run(["git", "cherry-pick", "FETCH_HEAD"],
-                         cwd=git_repo_dir, check=True))
     return git_repo_dir
 
 
@@ -138,7 +132,7 @@ def build_repo(dir, build_config):
         # -Wno-deprecated-declarations because swiftshader is still depending on
         # c++17-deprecated operations, and the compiler we use (clang-14) enforces it.
         cmake_cxx_flags = "-DCMAKE_CXX_FLAGS=-Wno-deprecated-declarations"
-        num_jobs = "-j"
+        num_jobs = "-j16"
         lib_prefix = "lib"
 
     print(subprocess.run(["cmake", "-DCMAKE_BUILD_TYPE=RelWithDebInfo", cmake_cxx_flags,

@@ -19,8 +19,8 @@
 #include <type_traits>                      // for remove_extent_t
 
 #include "emulated_bluetooth_packets.pb.h"  // for HCIPacket, HCIPacket::PAC...
-#include "model/devices/h4_parser.h"        // for PacketType, ClientDisconn...
-#include "model/devices/hci_protocol.h"     // for PacketReadCallback
+#include "model/hci/h4_parser.h"            // for PacketType, ClientDisconn...
+#include "model/hci/hci_protocol.h"         // for PacketReadCallback
 
 // #define DEBUG 1
 /* set  for very verbose debugging */

@@ -915,7 +915,6 @@ function(android_add_test)
       --gtest_catch_exceptions=0 ${build_TEST_PARAMS}
     WORKING_DIRECTORY $<TARGET_FILE_DIR:${build_TARGET}>)
 
-  android_install_as_debug_info(${build_TARGET})
   # Let's not optimize our tests.
   target_compile_options(${build_TARGET} PRIVATE -O0)
 

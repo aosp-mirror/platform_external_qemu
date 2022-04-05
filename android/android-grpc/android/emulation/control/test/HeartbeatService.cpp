@@ -29,6 +29,12 @@
 #include "grpcpp/impl/codegen/sync_stream.h"                 // for ServerR...
 #include "test_echo_service.pb.h"                            // for Msg
 
+#ifdef DISABLE_ASYNC_GRPC
+#include "android/emulation/control/utils/SyncToAsyncAdapter.h"
+#else
+#include "android/emulation/control/utils/SimpleAsyncGrpc.h"
+#endif
+
 using grpc::ServerContext;
 using grpc::Status;
 
@@ -101,9 +107,7 @@ public:
 // The synchronous version of or our Heartbeat service.
 ::grpc::Status HeartbeatService::streamEcho(
         ::grpc::ServerContext* context,
-        ::grpc::ServerReaderWriter<::android::emulation::control::Msg,
-                                   ::android::emulation::control::Msg>*
-                stream) {
+        ::grpc::ServerReaderWriter<Msg, Msg>* stream) {
     bool clientAvailable = !context->IsCancelled();
     auto frameEvent = std::make_unique<SyncHeartbeatReceiver>();
     s_global_beat->addListener(frameEvent.get());
@@ -147,7 +151,7 @@ public:
                 {
                     const std::lock_guard<std::mutex> lock(mListenerLock);
                     for (auto waiter : mListeners) {
-                        waiter->write(next);
+                        waiter->Write(next);
                     }
                 }
             }
@@ -175,51 +179,35 @@ private:
     std::unordered_set<Connection> mListeners;
 };
 
-grpc::ServerBidiReactor<::android::emulation::control::Msg,
-                        ::android::emulation::control::Msg>*
-AsyncHeartbeatService::streamEcho(::grpc::CallbackServerContext* context) {
-    class HeartbeatHandler
-        : public grpc::ServerBidiReactor<::android::emulation::control::Msg,
-                                         ::android::emulation::control::Msg> {
-    public:
-        HeartbeatHandler(AsyncHeartbeatReceiver<HeartbeatHandler*>* listener)
-            : mHandler(listener) {
-            mHandler->addListener(this);
-        }
-        ~HeartbeatHandler() { mHandler->removeListener(this); }
-        void OnDone() override { delete this; }
-        void OnWriteDone(bool /*ok*/) override {
-            {
-                const std::lock_guard<std::mutex> lock(mWritelock);
-                mWriteQueue.pop();
-            }
-            NextWrite();
-        }
+class HeartbeatHandler : public SimpleServerBidiStream<Msg, Msg> {
+public:
+    HeartbeatHandler(AsyncHeartbeatReceiver<HeartbeatHandler*>* listener)
+        : mHandler(listener) {
+        mHandler->addListener(this);
+    }
+    ~HeartbeatHandler() { mHandler->removeListener(this); }
+    void Read(const Msg* msg) override {};
+       void OnDone() override { delete this; }
 
-        void write(android::emulation::control::Msg& msg) {
-            {
-                const std::lock_guard<std::mutex> lock(mWritelock);
-                mWriteQueue.push(msg);
-            }
-            NextWrite();
-        }
+private:
+    AsyncHeartbeatReceiver<HeartbeatHandler*>* mHandler;
+};
 
-    private:
-        void NextWrite() {
-            {
-                const std::lock_guard<std::mutex> lock(mWritelock);
-                StartWrite(&mWriteQueue.front());
-            }
-        }
-
-        std::queue<Msg> mWriteQueue;
-        std::mutex mWritelock;
-        AsyncHeartbeatReceiver<HeartbeatHandler*>* mHandler;
-    };
+#ifndef DISABLE_ASYNC_GRPC
+grpc::ServerBidiReactor<Msg, Msg>* AsyncHeartbeatService::streamEcho(
+        ::grpc::CallbackServerContext* context) {
     static AsyncHeartbeatReceiver<HeartbeatHandler*> s_global_handler;
     auto handler = new HeartbeatHandler(&s_global_handler);
     return handler;
 }
+#else
+::grpc::Status AsyncHeartbeatService::streamEcho(
+        ::grpc::ServerContext* /*context*/,
+        ::grpc::ServerReaderWriter<Msg, Msg>* stream) {
+    static AsyncHeartbeatReceiver<HeartbeatHandler*> s_global_handler;
+    return BidiRunner<HeartbeatHandler>(stream, &s_global_handler).status();
+}
+#endif
 
 }  // namespace control
 }  // namespace emulation

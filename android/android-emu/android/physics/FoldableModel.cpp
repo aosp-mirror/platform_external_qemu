@@ -529,9 +529,6 @@ float FoldableModel::getPosture(ParameterValueType parameterValueType) const {
 void FoldableModel::sendPostureToSystem(enum FoldablePostures p) {
     auto adbInterface = emulation::AdbInterface::getGlobal();
     if (!adbInterface) return;
-    if (featurecontrol::isEnabled(android::featurecontrol::DeviceStateOnBoot)) {
-        return;
-    }
     adbInterface->enqueueCommand({ "shell", "settings", "put",
                                     "global", "device_posture",
                                     std::to_string((int)p).c_str() });

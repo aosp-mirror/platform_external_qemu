@@ -1,0 +1,85 @@
+// Copyright (C) 2022 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Note that if you add/remove methods in this file you must update
+// the metrics sql as well ./android/scripts/gen-grpc-sql.py
+//
+// Please group deleted methods in a block including the date (MM/DD/YY)
+// it was removed. This enables us to easily keep metrics around after removal
+//
+// List of deleted methods
+// rpc iWasDeleted (03/12/12)
+// ...
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.android.emulator.bluetooth";
+
+package android.emulation.bluetooth;
+import "emulated_bluetooth_packets.proto";
+// An Emulated Bluetoot Service exposes the emulated bluetooth chip from the android
+// emulator. It allows you to register emulated bluetooth devices and control
+// the packets that are exchanged between the device and the world.
+//
+// This service enables you to establish a "virtual network" of emulated
+// bluetooth devices that can interact with each other.
+//
+// Note: This is not yet finalized, it is likely that these definitions will
+// evolve.
+service EmulatedBluetoothService {
+    // Connect device to link layer. This will establish a direct connection
+    // to the emulated bluetooth chip and configure the following:
+    //
+    // - Each connection creates a new device and attaches it to the link layer
+    // - Link Layer packets are transmitted directly to the phy
+    //
+    // This should be used for classic connections.
+    //
+    // This is used to directly connect various android emulators together.
+    // For example a wear device can connect to an android emulator through
+    // this.
+    rpc registerClassicPhy(stream RawData) returns (stream RawData);
+
+
+    // Connect device to link layer. This will establish a direct connection
+    // to root canal and execute the following:
+    //
+    // - Each connection creates a new device and attaches it to the link layer
+    // - Link Layer packets are transmitted directly to the phy
+    //
+    // This should be used for BLE connections.
+    //
+    // This is used to directly connect various android emulators together.
+    // For example a wear device can connect to an android emulator through
+    // this.
+    rpc registerBlePhy(stream RawData) returns (stream RawData);
+
+    // Connect the device to the emulated bluetooth chip. The device will
+    // participate in the network. You can configure the chip to scan, advertise
+    // and setup connections with other devices that are connected to the
+    // network.
+    //
+    // This is usually used when you have a need for an emulated bluetooth chip
+    // and have a bluetooth stack that can interpret and handle the packets
+    // correctly.
+    //
+    // For example the apache nimble stack can use this endpoint as the
+    // transport layer.
+    rpc registerHCIDevice(stream HCIPacket) returns (stream HCIPacket);
+};
+
+message RawData {
+    // A packet of raw bytes that should be delivered.
+    bytes packet = 1;
+};

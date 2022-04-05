@@ -314,9 +314,18 @@ emulator_window_setup( EmulatorWindow*  emulator )
         VERBOSE_PRINT(gles, "Using guest rendering for display");
     }
 
-    // pre-set display configs for resizable AVD
-    if (s_use_emugl_subwindow && resizableEnabled()) {
-        resizableInit();
+    if (s_use_emugl_subwindow) {
+        if (resizableEnabled()) {
+            // pre-set display configs for resizable AVD
+            resizableInit();
+        } else {
+            // only one display setting
+            android_setOpenglesDisplayConfigs(0, android_hw->hw_lcd_width,
+                                              android_hw->hw_lcd_height,
+                                              android_hw->hw_lcd_density,
+                                              android_hw->hw_lcd_density);
+            android_setOpenglesDisplayActiveConfig(0);
+        }
     }
 
     emulator->ui = skin_ui_create(

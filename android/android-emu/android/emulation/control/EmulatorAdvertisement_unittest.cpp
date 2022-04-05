@@ -19,11 +19,14 @@
 #include <functional>     // for function, __base
 #include <vector>         // for vector
 
-#include "android/base/EnumFlags.h"            // for operator|
-#include "android/base/Log.h"                  // for LogStream, LOG, LogMes...
-#include "android/base/Optional.h"             // for Optional
-#include "android/base/StringView.h"           // for StringView
-#include "android/base/files/PathUtils.h"      // for pj, PathUtils (ptr only)
+#include "android/base/EnumFlags.h"   // for operator|
+#include "android/base/Log.h"         // for LogStream, LOG, LogMes...
+#include "android/base/Optional.h"    // for Optional
+#include "android/base/StringView.h"  // for StringView
+#include "android/base/files/IniFile.h"
+#include "android/base/files/PathUtils.h"  // for pj, PathUtils (ptr only)
+#include "android/base/sockets/ScopedSocket.h"
+#include "android/base/sockets/SocketUtils.h"
 #include "android/base/system/System.h"        // for System, System::Pid
 #include "android/base/testing/TestTempDir.h"  // for TestTempDir
 #include "android/emulation/ConfigDirs.h"      // for ConfigDirs
@@ -172,24 +175,45 @@ TEST_F(EmulatorAdvertisementTest, pid_file_is_written) {
     }
 }
 
-// Very flaky on windows/linux.
-TEST_F(EmulatorAdvertisementTest, DISABLED_pid_file_is_discoverd) {
-    auto pid = launchInBackground(mTempDir.path());
-    EXPECT_TRUE(pid);
-    if (pid) {
-        EXPECT_TRUE(waitForPid(mTempDir.path(), *pid));
-
-        // At least one discovery file should be found,.
-        EXPECT_FALSE(
-                EmulatorAdvertisement::discoverRunningEmulators(mTempDir.path())
-                        .empty());
-        System::get()->killProcess(*pid);
-    }
+TEST_F(EmulatorAdvertisementTest, no_pid_no_discovery) {
+    EmulatorAdvertisement testCfg({}, mTempDir.path());
+    EXPECT_TRUE(testCfg.discoverRunningEmulators().empty());
 }
 
-TEST_F(EmulatorAdvertisementTest, no_pid_no_discovery) {
-    EXPECT_TRUE(EmulatorAdvertisement::discoverRunningEmulators(mTempDir.path())
-                        .empty());
+TEST_F(EmulatorAdvertisementTest, my_file_is_alive) {
+    auto tst1 = pj(mTempDir.path(), "tst1.ini");
+    EXPECT_TRUE(OpenPortChecker().isAlive(tst1, tst1));
+}
+
+TEST_F(EmulatorAdvertisementTest, open_port_is_alive) {
+    auto tst1 = pj(mTempDir.path(), "tst1.ini");
+    base::IniFile ini(tst1);
+    auto socket = base::ScopedSocket(base::socketTcp4LoopbackServer(0));
+    EXPECT_TRUE(socket.valid());
+
+    ini.setInt64("grpc.port", base::socketGetPort(socket.get()));
+    ini.write();
+    EXPECT_TRUE(OpenPortChecker().isAlive("foo", tst1));
+}
+
+TEST_F(EmulatorAdvertisementTest, open_port_different_file_is_dead) {
+    // Validate the case where my discoery file mentions
+    // the same ports as another (which is impossible).
+    // This can happen if the old emulator crashed with the default ports in pid_file_old
+    // and we wrote out pid_file_new talking the same default ports.
+    auto tst1 = pj(mTempDir.path(), "tst1.ini");
+    auto tst2 = pj(mTempDir.path(), "tst2.ini");
+    base::IniFile ini(tst1);
+    base::IniFile ini2(tst2);
+    auto socket = base::ScopedSocket(base::socketTcp4LoopbackServer(0));
+    EXPECT_TRUE(socket.valid());
+
+    ini.setInt64("grpc.port", base::socketGetPort(socket.get()));
+    ini2.setInt64("grpc.port", base::socketGetPort(socket.get()));
+    ini.write();
+    ini2.write();
+
+    EXPECT_FALSE(OpenPortChecker().isAlive(tst1, tst2));
 }
 
 TEST_F(EmulatorAdvertisementTest, DISABLED_pid_file_is_cleaned_in_shared_dir) {

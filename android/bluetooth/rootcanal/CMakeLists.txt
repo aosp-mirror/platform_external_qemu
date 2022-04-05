@@ -94,16 +94,17 @@ android_add_library(
       model/devices/classic.cc
       model/devices/device.cc
       model/devices/device_properties.cc
-      model/devices/h4_data_channel_packetizer.cc
-      model/devices/h4_parser.cc
-      model/devices/hci_protocol.cc
-      model/devices/hci_socket_device.cc
+      model/devices/hci_device.cc
       model/devices/keyboard.cc
       model/devices/link_layer_socket_device.cc
       model/devices/loopback.cc
       model/devices/remote_loopback_device.cc
       model/devices/scripted_beacon.cc
       model/devices/sniffer.cc
+      model/hci/h4_data_channel_packetizer.cc
+      model/hci/h4_parser.cc
+      model/hci/hci_protocol.cc
+      model/hci/hci_socket_transport.cc
       model/setup/device_boutique.cc
       model/setup/phy_layer_factory.cc
       model/setup/test_channel_transport.cc

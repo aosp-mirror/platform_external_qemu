@@ -73,7 +73,6 @@ CONFIG_MAKE=${OPT_OUT}/target.tag
 echo "current_dir=$PWD"
 TARGET_OS=$(cat ${CONFIG_MAKE})
 FAILURES=""
-EXE_SUFFIX=
 OSX_DEPLOYMENT_TARGET=10.11
 RUN_EMUGEN_TESTS=true
 RUN_GEN_ENTRIES_TESTS=true
@@ -126,28 +125,11 @@ darwin_min_version () {
 
 # List all executables to check later.
 EXECUTABLES="emulator"
-case $TARGET_OS in
-    windows*)
-        EXE_SUFFIX=.exe
-        ;;
-esac
 
 # Define EXPECTED_32BIT_FILE_TYPE and EXPECTED_64BIT_FILE_TYPE depending
 # on the current target platform. Then EXPECTED_EMULATOR_BITNESS and
 # EXPECTED_EMULATOR_FILE_TYPE accordingly.
 case $TARGET_OS in
-    windows_msvc*)
-        EXPECTED_64BIT_FILE_TYPE="PE32\+ executable \(console\) x86-64"
-        EXPECTED_EMULATOR_BITNESS=64
-        EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
-        EMUGEN_DIR=android/android-emugl/emugen/src/emugen-build/
-        ;;
-    windows*)
-        EXPECTED_64BIT_FILE_TYPE="PE32\+ executable \(console\) x86-64"
-        EXPECTED_EMULATOR_BITNESS=64
-        EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_32BIT_FILE_TYPE
-        EMUGEN_DIR=android/android-emugl/emugen/src/emugen-build/
-        ;;
     darwin*)
         EXPECTED_64BIT_FILE_TYPE="Mach-O 64-bit executable x86_64"
         EXPECTED_EMULATOR_BITNESS=64
@@ -159,26 +141,25 @@ case $TARGET_OS in
         EXPECTED_EMULATOR_FILE_TYPE=$EXPECTED_64BIT_FILE_TYPE
         ;;
     *)
-        echo "FAIL: Unsupported target platform: [$TARGET_OS]"
-        FAILURES="$FAILURES out-dir-config-make"
+        panic "FAIL: Unsupported target platform: [$TARGET_OS]"
         ;;
 esac
 
 
 export CTEST_OUTPUT_ON_FAILURE=1
+export CTEST_PROGRESS_OUTPUT=1
 OLD_DIR=$PWD
 cd $OPT_OUT
-${CTEST} -j ${NUM_JOBS}  --output-on-failure || ${CTEST} --rerun-failed --output-on-failure || FAILURES="$FAILURES unittests"
-cd ..
+${CTEST} -j ${NUM_JOBS} --output-on-failure || ${CTEST} --rerun-failed --output-on-failure 1>&2 || panic "Failures in unittests"
+cd $OLD_DIR
 
 if [ "$OPT_SKIP_EMULATOR_CHECK" ] ; then
     log "Skipping check for 'emulator' launcher program."
 else
     log "Checking for 'emulator' launcher program."
-    EMULATOR=$OPT_OUT/emulator$EXE_SUFFIX
+    EMULATOR=$OPT_OUT/emulator
     if [ ! -f "$EMULATOR" ]; then
-        warn "    - FAIL: $EMULATOR is missing!"
-        FAILURES="$FAILURES emulator"
+        panic "    - FAIL: $EMULATOR is missing!"
     fi
 
     log "Checking that 'emulator' is a $EXPECTED_EMULATOR_BITNESS-bit program."
@@ -187,64 +168,33 @@ else
         warn "    - FAIL: $EMULATOR is not a 32-bit executable!"
         warn "        File type: $EMULATOR_FILE_TYPE"
         warn "        Expected : $EXPECTED_EMULATOR_FILE_TYPE"
-        FAILURES="$FAILURES emulator-bitness-check"
+       paninc "emulator-bitness-check failed"
     fi
 fi
 
 if [ "$TARGET_OS" = "darwin-x86_64" ]; then
-#   log "Checking that darwin binaries target OSX $OSX_DEPLOYMENT_TARGET"
-#   for EXEC in $EXECUTABLES; do
-#       MIN_VERSION=$(darwin_min_version "$OPT_OUT/$EXEC")
-#       if [ "$MIN_VERSION" != "$OSX_DEPLOYMENT_TARGET" ]; then
-#           echo "   - WARN: $EXEC targets [$MIN_VERSION], expected [$OSX_DEPLOYMENT_TARGET]"
-#           FAILURES="$FAILURES $EXEC-darwin-target"
-#       fi
-#   done
-    # Let's make sure all our dependencies exist in a release.. So we don't fall over
-    # during launch.
-    if [ -d $OPT_OUT/gradle-release ]; then
-        log "Checking that darwin binaries have all needed dependencies in the lib64 dir"
-        # Make sure we can load all dependencies of every dylib/executable we have.
-        find $OPT_OUT/gradle-release \( -type f -and \( -perm +111 -or -name '*.dylib' \) \) -print0 | while read -d $'\0' file; do
-            log2 "Checking $file for dependencies"
-            # We start looking at the 3rd line, as we
-            needed=$(otool -L $file | tail -n +3 | awk '{print $1}')
-            for need in $needed; do
-                log2 "  Looking for $need"
-                case $need in
-                    @rpath/*)
-                        # We will accept an rpath it if we can find it under lib64/
-                        dylib="${need#@rpath/}"
-                        libs=$(find $OPT_OUT/gradle-release/lib64 -name $dylib);
-                        # Xcode interjects a bogus path, so we skip that one
-                        if [ -z $libs ] && [ ! $dylib = "libclang_rt.asan_osx_dynamic.dylib" ]; then
-                            panic "Unable to locate $need [$dylib], needed by $file"
-                        fi
-                        ;;
-                    *)
-                        # Should be on the system path..
-                        test -f $need || panic "Unable to locate $need, needed by $file"
-                        ;;
-                esac
-            done
-        done
-    else
-        log "$OPT_OUT/gradle-release not found, not checking dependencies"
-    fi
+    log "*** Skipping library presence check ***"
+    log2 "In macOS Big Sur >11.0.1, the system ships with a built-in dynamic
+          linker cache of all system-provided libraries. As part of this change,
+          copies of dynamic libraries are no longer present on the filesystem.
+          Code that attempts to check for dynamic library presence by looking for a
+          file at a path or enumerating a directory will fail. Instead, check for
+          library presence by attempting to dlopen() the path, which will correctly check
+          for the library in the cache."
 fi
 
 if [ "$TARGET_OS" = "linux-x86_64" ]; then
    log "Checking that all the .so dependencies are met"
-   if [ -d $OPT_OUT/gradle-release ]; then
+   if [ -d $OPT_OUT/distribution ]; then
         log "Checking that linux binaries have all needed dependencies in the lib64 dir"
         # Make sure we can load all dependencies of every dylib/executable we have.
         cache=$(ldconfig --print-cache | awk '{ print $1; }')
-        files=$(find $OPT_OUT/gradle-release \( -type f -and \( -executable -or -name '*.so.*' \) \))
+        files=$(find $OPT_OUT/distribution \( -type f -and \( -executable -or -name '*.so.*' \) \))
         for file in $files; do
             log2 "Checking $file for dependencies on ld path, or our tree.."
             needed=$(readelf -d $file | grep "Shared" | cut -d "[" -f2 | cut -d "]" -f1)
             for need in $needed; do
-                libs=$(find $OPT_OUT/gradle-release/lib64 -name $need);
+                libs=$(find $OPT_OUT/distribution/emulator/lib64 -name $need);
                 if [ $libs ]; then
                   log2 "  Found $need in our release"
                 else
@@ -276,43 +226,6 @@ if [ "$RUN_GEN_ENTRIES_TESTS" ]; then
     log "Running gen-entries.py test suite."
     cd ${QEMU2_TOP_DIR}
     run ./android/scripts/tests/gen-entries/run-tests.sh ||
-        FAILURES="$FAILURES gen-entries_tests"
+        panic "Failed gen-entries_tests"
     cd $OLD_DIR
 fi
-
-case "TARGET_OS" in
-
-    windows*)
-        # Check that the windows executables all have icons.
-        # First need to locate the windres tool.
-        log "Checking windows executables icons."
-        if [ ! -f "$CONFIG_MAKE" ]; then
-            echo "FAIL: Could not find \$CONFIG_MAKE !?"
-            FAILURES="$FAILURES out-dir-config-make"
-        else
-            WINDRES=$SDK_TOOLCHAIN_DIR/${BINPREFIX}windres
-            if [ ! -f $WINRES ]; then
-                echo "FAIL: Could not find host 'windres' program"
-                FAILURES="$FAILURES host-windres"
-            fi
-            EXPECTED_ICONS=14
-            for EXEC in $EXECUTABLES; do
-                EXEC=${EXEC}.exe
-                if [ ! -f "$OPT_OUT"/$EXEC ]; then
-                    warn "FAIL: Missing windows executable: $EXEC"
-                    FAILURES="$FAILURES $TARGET_OS-$EXEC"
-                else
-                    NUM_ICONS=$($WINDRES --input-format=coff --output-format=rc $OPT_OUT/$EXEC | grep RT_ICON | wc -l)
-                    if [ "$NUM_ICONS" != "$EXPECTED_ICONS" ]; then
-                        warn "FAIL: Invalid icon count in $EXEC ($NUM_ICONS, expected $EXPECTED_ICONS)"
-                        FAILURES="$FAILURES $TARGET_OS-$EXEC-icons"
-                    fi
-                fi
-            done
-        fi
-        ;;
-esac
-if [ "$FAILURES" ]; then
-    panic "Unit test failures: ${RED}$FAILURES${RESET}"
-fi
-
