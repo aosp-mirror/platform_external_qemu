@@ -1317,6 +1317,8 @@ extern "C" int main(int argc, char** argv) {
                 fc::setIfNotOverriden(fc::KeycodeForwarding, true);
                 fc::setIfNotOverriden(fc::VulkanQueueSubmitWithCommands, true);
                 fc::setIfNotOverriden(fc::VulkanBatchedDescriptorSetUpdate, true);
+                fc::setIfNotOverriden(fc::HostComposition, true);
+                fc::setIfNotOverriden(fc::AsyncComposeSupport, true);
 
                 int lcdWidth = 1280;
                 int lcdHeight = 720;
@@ -2108,7 +2110,11 @@ extern "C" int main(int argc, char** argv) {
 
     // Network
     args.add("-netdev");
-    if (opts->net_tap) {
+    // Configure the tap device to use vmnet
+    if (opts->vmnet || opts->wifi_vmnet) {
+            args.addFormat("tap,id=mynet,ifname=%s,vmnet=on",
+                           opts->vmnet? opts->vmnet : opts->wifi_vmnet);
+    } else if (opts->net_tap) {
         const char* upScript =
                 opts->net_tap_script_up ? opts->net_tap_script_up : "no";
         const char* downScript =
@@ -2282,9 +2288,9 @@ extern "C" int main(int argc, char** argv) {
     initialize_virtio_input_devs(args, hw);
     if (feature_is_enabled(kFeature_VirtioWifi)) {
         args.add("-netdev");
-        if (opts->wifi_vmnet) {
+        if (opts->vmnet || opts->wifi_vmnet) {
             args.addFormat("tap,id=virtio-wifi,ifname=%s,vmnet=on",
-                           opts->wifi_vmnet);
+                           opts->vmnet ? opts->vmnet : opts->wifi_vmnet);
         } else if (opts->wifi_tap) {
             const char* upScript =
                     opts->wifi_tap_script_up ? opts->wifi_tap_script_up : "no";
@@ -2343,7 +2349,7 @@ extern "C" int main(int argc, char** argv) {
     bool targetIsX86 = false;
 #endif
 
-    if (apiLevel >= 28 || targetIsX86) {
+    if (apiLevel >= 26 || targetIsX86) {
         args.add2("-soundhw", "hda");
     }
 

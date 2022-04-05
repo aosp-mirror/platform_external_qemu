@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cstring>
 #include <string>
+#include <string_view>
 
 namespace android {
 namespace base {
@@ -109,6 +110,9 @@ public:
 
     StringView(const std::string& str) :
         mString(str.c_str()), mSize(str.size()) {}
+
+    StringView(const std::string_view& str) :
+        mString(str.data()), mSize(str.size()) {}
 
     constexpr StringView(const char* str, size_t len)
         : mString(str ? str : ""), mSize(len) {}

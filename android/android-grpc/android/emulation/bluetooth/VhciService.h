@@ -16,15 +16,13 @@
 
 namespace android {
 namespace emulation {
-namespace control {
-class AsyncGrpcHandler;
-}  // namespace control
-
 namespace bluetooth {
 
-using AsyncVhciForwardingService =
-        bluetooth::VhciForwardingService::WithCallbackMethod_attachVhci<
-                bluetooth::VhciForwardingService::Service>;
+#ifndef DISABLE_ASYNC_GRPC
+using AsyncVhciForwardingService = VhciForwardingService::CallbackService;
+#else
+using AsyncVhciForwardingService = VhciForwardingService::Service;
+#endif
 
 AsyncVhciForwardingService* getVhciForwarder();
 

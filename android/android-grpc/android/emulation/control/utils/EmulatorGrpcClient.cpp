@@ -11,26 +11,31 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <grpcpp/grpcpp.h>  // for ClientC
+#include "android/emulation/control/utils/EmulatorGrcpClient.h"
 
-#include <fstream>   // for ifstream
-#include <iterator>  // for istre...
-#include <map>       // for multimap
-#include <memory>    // for shared_ptr
-#include <memory>    // for alloc...
-#include <string>    // for operator+
-#include <string>    // for char_...
-#include <utility>   // for __unwra...
+#include <grpcpp/grpcpp.h>  // for Clie...
+#include <fstream>          // for basi...
+#include <iostream>         // for ios::
+#include <map>              // for mult...
+#include <memory>           // for shar......
+#include <string>           // for string
+#include <type_traits>      // for remo...
+#include <unordered_map>    // for __ha...
+#include <utility>          // for move
 
-#include "android/base/Stopwatch.h"
-#include "android/base/StringView.h"                          // for StringView
+#include "android/base/Stopwatch.h"                           // for Stop...
+#include "android/base/StringView.h"                          // for CStr...
 #include "android/base/files/IniFile.h"                       // for IniFile
-#include "android/base/files/PathUtils.h"                     // for IniFile
-#include "android/emulation/control/secure/BasicTokenAuth.h"  // for BasicTo...
-#include "android/emulation/control/utils/EmulatorGrcpClient.h"  // for Emulato...
-#include "android/utils/debug.h"
-#include "emulator_controller.grpc.pb.h"           // for Emulato...
-
+#include "android/base/files/PathUtils.h"                     // for Path...
+#include "android/emulation/control/secure/BasicTokenAuth.h"  // for Basi...
+#include "android/utils/debug.h"                              // for VERB...
+#include "grpc/grpc_security_constants.h"                     // for LOCA...
+#include "grpc/impl/codegen/connectivity_state.h"             // for GRPC...
+#include "grpc/impl/codegen/gpr_types.h"                      // for gpr_...
+#include "grpc/support/time.h"                                // for gpr_now
+#include "grpc_endpoint_description.pb.h"                     // for Endp...
+#include "grpcpp/security/credentials.h"                      // for Meta...
+#include "grpcpp/support/channel_arguments.h"                 // for Chan...
 
 namespace android {
 namespace emulation {
@@ -61,6 +66,28 @@ private:
     grpc::string mToken;
 };
 
+using HeaderMap = std::unordered_map<std::string, std::string>;
+
+// A plugin that inserts a set of headers.
+class HeaderInjector : public grpc::MetadataCredentialsPlugin {
+public:
+    HeaderInjector(HeaderMap&& headers) : mHeaders(headers) {}
+    ~HeaderInjector() = default;
+
+    grpc::Status GetMetadata(
+            grpc::string_ref service_url,
+            grpc::string_ref method_name,
+            const grpc::AuthContext& channel_auth_context,
+            std::multimap<grpc::string, grpc::string>* metadata) override {
+        for (const auto& v : mHeaders)
+            metadata->insert(std::make_pair(v.first, v.second));
+        return grpc::Status::OK;
+    }
+
+private:
+    HeaderMap mHeaders;
+};
+
 bool EmulatorGrpcClient::hasOpenChannel(bool tryConnect) {
     if (!mChannel) {
         initializeChannel();
@@ -74,24 +101,25 @@ bool EmulatorGrpcClient::hasOpenChannel(bool tryConnect) {
                                       gpr_time_from_seconds(5, GPR_TIMESPAN));
         bool connect = mChannel->WaitForConnected(waitUntil);
         double time = Stopwatch::sec(sw.elapsedUs());
-        dprint("%s to emulator: %s, after %f us",
-               connect ? "Connected" : "Not connected", mAddress.c_str(), time);
+        VERBOSE_PRINT(grpc, "%s to emulator: %s, after %f us",
+                      connect ? "Connected" : "Not connected", mAddress.c_str(),
+                      time);
     }
     auto state = mChannel->GetState(tryConnect);
     return state == GRPC_CHANNEL_READY || state == GRPC_CHANNEL_IDLE;
 }
 
-static std::string readFile(std::string fname) {
+static std::string readFile(std::string_view fname) {
     std::ifstream fstream(PathUtils::asUnicodePath(fname).c_str());
     std::string contents((std::istreambuf_iterator<char>(fstream)),
                          std::istreambuf_iterator<char>());
     return contents;
 }
 
-EmulatorGrpcClient::EmulatorGrpcClient(std::string address,
-                                       std::string ca,
-                                       std::string key,
-                                       std::string cer)
+EmulatorGrpcClient::EmulatorGrpcClient(const std::string_view address,
+                                       const std::string_view ca,
+                                       const std::string_view key,
+                                       const std::string_view cer)
     : mAddress(address) {
     std::shared_ptr<grpc::ChannelCredentials> call_creds =
             ::grpc::InsecureChannelCredentials();
@@ -106,7 +134,22 @@ EmulatorGrpcClient::EmulatorGrpcClient(std::string address,
 
     grpc::ChannelArguments maxSize;
     maxSize.SetMaxReceiveMessageSize(-1);
-    mChannel = grpc::CreateCustomChannel(address, call_creds, maxSize);
+    mChannel = grpc::CreateCustomChannel(mAddress, call_creds, maxSize);
+}
+
+EmulatorGrpcClient::EmulatorGrpcClient(const Endpoint& dest)
+    : EmulatorGrpcClient(dest.target(),
+                         dest.tls_credentials().pem_root_certs(),
+                         dest.tls_credentials().pem_private_key(),
+                         dest.tls_credentials().pem_cert_chain()) {
+    if (!dest.required_headers().empty()) {
+        HeaderMap map;
+        for (const auto& header : dest.required_headers()) {
+            map[header.key()] = header.value();
+        }
+        mCredentials = grpc::MetadataCredentialsFromPlugin(
+                std::make_unique<HeaderInjector>(std::move(map)));
+    }
 }
 
 std::unique_ptr<grpc::ClientContext> EmulatorGrpcClient::newContext() {
@@ -138,9 +181,26 @@ bool EmulatorGrpcClient::initializeChannel() {
         mCredentials = grpc::MetadataCredentialsFromPlugin(
                 std::make_unique<BasicTokenAuthenticator>(token));
     }
-
-    dinfo("Initialized grpc Stub.");
     return true;
+}
+
+std::optional<EmulatorGrpcClient> EmulatorGrpcClient::loadFromProto(
+        std::string_view pathToEndpointProto) {
+    // Read the existing address book.
+    std::fstream input(PathUtils::asUnicodePath(pathToEndpointProto).c_str(),
+                       std::ios::in | std::ios::binary);
+    Endpoint endpoint;
+    if (!input) {
+        derror("File %s not found",
+               PathUtils::asUnicodePath(pathToEndpointProto).c_str());
+        return {};
+    } else if (!endpoint.ParseFromIstream(&input)) {
+        derror("File %s does not contain a valid endpoint",
+               PathUtils::asUnicodePath(pathToEndpointProto).c_str());
+        return {};
+    }
+
+    return EmulatorGrpcClient(endpoint);
 }
 }  // namespace control
 }  // namespace emulation

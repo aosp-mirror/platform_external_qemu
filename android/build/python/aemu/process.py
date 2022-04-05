@@ -36,11 +36,18 @@ def _reader(pipe, logfn):
     finally:
         pass
 
+NINJA_PREFIX="[ninja] "
+
+def ninja_filter(line):
+    if not line.startswith(NINJA_PREFIX):
+        logging.error(line)
+    else:
+        logging.info(line[len(NINJA_PREFIX):])
 
 def _log_proc(proc):
     """Logs the output of the given process."""
     q = Queue()
-    for args in [[proc.stdout, logging.info], [proc.stderr, logging.error]]:
+    for args in [[proc.stdout, ninja_filter], [proc.stderr, logging.error]]:
         Thread(target=_reader, args=args).start()
 
     return q
@@ -65,7 +72,7 @@ def get_system_env():
     if _CACHED_ENV != None:
         return _CACHED_ENV
 
-    local_env = {} 
+    local_env = {}
     if platform.system() == "Windows":
         for key in os.environ:
             local_env[key.upper()] = os.environ[key]

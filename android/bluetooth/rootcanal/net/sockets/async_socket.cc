@@ -24,7 +24,7 @@
 #define DD(...) (void)0
 #define DD_BUF(fd, buf, len) (void)0
 #else
-#define DD(...) DD(__VA_ARGS__)
+#define DD(...) printf(__VA_ARGS__)
 #define DD_BUF(fd, buf, len)                            \
     do {                                                \
         printf("PosixSocket %s (%d):", __func__, fd);   \

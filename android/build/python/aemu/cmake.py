@@ -31,6 +31,14 @@ from aemu.process import run
 from aemu.run_tests import run_tests
 
 
+class LogBelowLevel(logging.Filter):
+    def __init__(self, exclusive_maximum, name=""):
+        super(LogBelowLevel, self).__init__(name)
+        self.max_level = exclusive_maximum
+
+    def filter(self, record):
+        return True if record.levelno < self.max_level else False
+
 def ensure_requests():
     """Make sure the requests package is availabe."""
     try:
@@ -157,7 +165,7 @@ def main(args):
         return
 
     # Build
-    run(get_build_cmd(args))
+    run(get_build_cmd(args), None, {'NINJA_STATUS' : "[ninja] "})
 
     # Test.
     if args.tests:
@@ -345,12 +353,19 @@ def launch():
 
     args, leftover = parser.parse_known_args()
 
-    # Configure logger.
+    # Configure logging, splitting info to stdout, and error to stderr
     lvl = logging.DEBUG if args.verbose else logging.INFO
-    handler = logging.StreamHandler()
+    logging_handler_out = logging.StreamHandler(sys.stdout)
+    logging_handler_out.setLevel(logging.DEBUG)
+    logging_handler_out.addFilter(LogBelowLevel(logging.WARNING))
+
+    logging_handler_err = logging.StreamHandler(sys.stderr)
+    logging_handler_err.setLevel(logging.WARNING)
+
     logging.root = logging.getLogger("root")
-    logging.root.addHandler(handler)
     logging.root.setLevel(lvl)
+    logging.root.addHandler(logging_handler_out)
+    logging.root.addHandler(logging_handler_err)
 
     set_aosp_root(args.aosp)
 

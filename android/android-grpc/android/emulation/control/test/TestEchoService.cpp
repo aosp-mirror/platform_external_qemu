@@ -15,8 +15,13 @@
 #include "android/emulation/control/test/TestEchoService.h"
 
 #include <grpcpp/grpcpp.h>
-#include "android/emulation/control/utils/SimpleAsyncGrpc.h"
 #include "test_echo_service.pb.h"
+
+#ifndef DISABLE_ASYNC_GRPC
+#include "android/emulation/control/utils/SimpleAsyncGrpc.h"
+#else
+#include "android/emulation/control/utils/SyncToAsyncAdapter.h"
+#endif
 
 using grpc::ServerContext;
 using grpc::Status;
@@ -25,7 +30,7 @@ namespace android {
 namespace emulation {
 namespace control {
 
-Status TestEchoServiceImpl::echo(ServerContext* context,
+Status TestEchoServiceBase::echo(ServerContext* context,
                                  const Msg* request,
                                  Msg* response) {
     response->set_counter(mCounter++);
@@ -33,7 +38,7 @@ Status TestEchoServiceImpl::echo(ServerContext* context,
     return Status::OK;
 }
 
-Status TestEchoServiceImpl::data(ServerContext* context,
+Status TestEchoServiceBase::data(ServerContext* context,
                                  const ::google::protobuf::Empty* empty,
                                  Msg* response) {
     response->set_counter(mCounter++);
@@ -41,55 +46,39 @@ Status TestEchoServiceImpl::data(ServerContext* context,
     return Status::OK;
 }
 
+class StreamEchoHandler : public SimpleServerBidiStream<Msg, Msg> {
+public:
+    StreamEchoHandler(TestEchoServiceBase* parent) : mParent(parent) {}
+    void Read(const Msg* msg) override {
+        Msg reply;
+        reply.set_msg("Hello!");
+        for (int i = 0; i < msg->counter(); i++) {
+            reply.set_counter(i + 1);
+            Write(reply);
+        }
+    }
+
+    void OnDone() override {
+        mParent->plusOne();
+        delete this;
+    }
+
+private:
+    TestEchoServiceBase* mParent;
+};
+
+#ifndef DISABLE_ASYNC_GRPC
 grpc::ServerBidiReactor<Msg, Msg>* AsyncTestEchoService::streamEcho(
         ::grpc::CallbackServerContext* context) {
-    class StreamEchoHandler : public SimpleBidiStream<Msg, Msg> {
-    public:
-        StreamEchoHandler(AsyncTestEchoService* parent) : mParent(parent) {}
-        void Read(const Msg* msg) override { Write(*msg); }
-
-        void OnDone() override {
-            mParent->plusOne();
-            delete this;
-        }
-
-        void OnCancel() override { Finish(grpc::Status::CANCELLED); }
-
-    private:
-        AsyncTestEchoService* mParent;
-    };
-
     return new StreamEchoHandler(this);
 }
-
-::grpc::ServerWriteReactor<Msg>* AsyncTestEchoService::serverStreamData(
-        ::grpc::CallbackServerContext* context,
-        const Msg* request) {
-    class StreamDataHandler : public SimpleWriter<Msg> {
-    public:
-        StreamDataHandler(AsyncTestEchoService* parent, const Msg* received)
-            : mParent(parent) {
-            Msg reply;
-            reply.set_msg("Hello!");
-            for (int i = 0; i < received->counter(); i++) {
-                reply.set_counter(i + 1);
-                Write(reply);
-            }
-        }
-
-        void OnDone() override {
-            mParent->plusOne();
-            delete this;
-        }
-
-        void OnCancel() override { Finish(grpc::Status::CANCELLED); }
-
-    private:
-        AsyncTestEchoService* mParent;
-    };
-
-    return new StreamDataHandler(this, request);
-}
+#else
+::grpc::Status AsyncTestEchoService::streamEcho(
+        ::grpc::ServerContext* context,
+        ::grpc::ServerReaderWriter<Msg, Msg>* stream) {
+    return BidiRunner<StreamEchoHandler>(stream, this).status();
+};
+#endif
 
 }  // namespace control
 }  // namespace emulation

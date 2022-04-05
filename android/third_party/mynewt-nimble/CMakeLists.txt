@@ -75,6 +75,7 @@ endif()
 
 add_subdirectory(nimble/host)
 
+# TODO(jansene): It would be nice if could select transport layers at runtime.
 add_library(nimble_bluetooth INTERFACE)
 target_link_libraries(
   nimble_bluetooth
@@ -86,7 +87,9 @@ target_link_libraries(
             _nimble_host_layer
             _nimble_service_layer
             _nimble_os_sysinit
-            _nimble_transport_socket)
+            # _nimble_transport_socket # Use socket transport.
+            _nimble_transport_grpc # Use the grpc transport
+)
 
 # Now include some sample apps
 add_subdirectory(apps)

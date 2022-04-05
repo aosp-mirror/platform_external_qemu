@@ -1391,6 +1391,7 @@ help_rootcanal_link_port(stralloc_t*  out)
     "  WARNING. This is an experimental flag, and might be removed in the future. \n\n"
     "  For example:\n\n"
     "  -rootcanal-link-port 6403\n\n"
+    "  This should not be needed, as the emulator creates a local bluetooth mesh\n\n"
     );
 }
 
@@ -1404,6 +1405,7 @@ help_rootcanal_link_ble_port(stralloc_t*  out)
     "  WARNING. This is an experimental flag, and might be removed in the future. \n\n"
     "  For example:\n\n"
     "  -rootcanal-link-ble-port 6404\n\n"
+    "  This should not be needed, as the emulator creates a local bluetooth mesh\n\n"
     );
 }
 
@@ -1423,6 +1425,18 @@ help_rootcanal_default_commands_file(stralloc_t*  out)
     PRINTF(
     "  Loads the test commands on launch. \n\n"
     "  This is not officially supported, and is for internal testing only. \n\n"
+    );
+}
+
+static void
+help_rootcanal_no_mesh(stralloc_t*  out)
+{
+    PRINTF(
+    "  Disables the disovery of running emulators. \n\n"
+    "  By default the emulator will discover all running emulators and\n"
+    "  establish a connection to the discovered emulated bluetooth chip creating\n"
+    "  a mesh of devices.\n\n"
+    "  Setting this flag will disable the auto discovery.\n\n"
     );
 }
 
@@ -2205,7 +2219,7 @@ help_wifi_tap_script_down(stralloc_t*  out)
 }
 
 static void
-help_wifi_vmnet(stralloc_t*  out)
+help_vmnet(stralloc_t*  out)
 {
     PRINTF(" Enable vmnet framework as the backend for tap network on MacOS\n"
            " <interface> is the name of the host network interface that QEMU "
@@ -2251,6 +2265,7 @@ help_wifi_vmnet(stralloc_t*  out)
 #define help_perf_stat NULL
 #define help_append_userspace_opt NULL
 #define help_no_nested_warnings NULL
+#define help_wifi_vmnet NULL
 
 typedef struct {
     const char*  name;
