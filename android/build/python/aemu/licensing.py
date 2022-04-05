@@ -15,6 +15,7 @@
 # limitations under the License.
 import argparse
 import os
+import codecs
 from collections import defaultdict
 
 
@@ -39,8 +40,8 @@ class License(object):
         if self.text:
             return self.text
         if not os.path.exists(self.local_license):
-            print(self.name, self.spdx)
-        with open(self.local_license, "r") as lfile:
+            print((self.name, self.spdx))
+        with codecs.open(self.local_license, "r", "utf-8") as lfile:
             self.text = lfile.read()
         return self.text
 
@@ -102,7 +103,7 @@ class Licensing(object):
         self.deps = self._parse_dependencies(dependencies)
 
         aliases = self._parse_aliases(alias_targets)
-        for fst, snd in aliases.items():
+        for fst, snd in list(aliases.items()):
             self.internal_libs[fst] = self.internal_libs[snd]
         # Mapping from target --> shipped binaries.
         self.target_exes = self._parse_installed_targets(installed_targets)
@@ -152,7 +153,7 @@ class Licensing(object):
         return [self.license_from_name(x) for x in self.shipped_license_names]
 
     def _read_cmake_file(self, fname):
-        with open(fname, "r") as nfile:
+        with codecs.open(fname, "r", "utf-8") as nfile:
             for line in nfile.readlines():
                 line = line.strip()[1:]
                 yield [x.strip() for x in line.split("|")]
@@ -204,8 +205,8 @@ class Licensing(object):
             and (" " not in target)
             and (not target.startswith("-"))
             and ("NOTFOUND" not in target)
-            and (not target.startswith('webrtc'))
-            and (not target.startswith('absl'))
+            and (not target.startswith("webrtc"))
+            and (not target.startswith("absl"))
             and (target not in Licensing.common_local_libs)
         )
 
@@ -224,7 +225,10 @@ class Licensing(object):
 
     def to_csv(self):
         """Generates a csv file that can be used to export docker files."""
-        csv = "External Library Name, Link to License, License Name, Binaries using the license.\n"
+        csv = (
+            "External Library Name, Link to License, License Name, Binaries "
+            "using the license.\n"
+        )
         for lic in self.licenses():
             if not lic.is_internal():
                 csv += lic.to_csv()
@@ -272,6 +276,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     l = Licensing(args.build, args.qemu)
     if args.notice:
-        print(l.notice_file())
+        print((l.notice_file()))
     if args.csv:
-        print(l.to_csv())
+        print((l.to_csv()))
