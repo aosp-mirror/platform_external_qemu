@@ -60,7 +60,7 @@ public:
     bool hasOpenChannel(bool tryConnect = true);
     std::string address() const { return mAddress; }
 
-    static std::optional<EmulatorGrpcClient> loadFromProto(
+    static std::unique_ptr<EmulatorGrpcClient> loadFromProto(
             std::string_view patToEndpointProto);
 
 protected:
