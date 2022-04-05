@@ -1,1 +1,2 @@
 add_subdirectory(rootcanal)
+add_subdirectory(nimble_bridge)

@@ -14,18 +14,27 @@
 #include "android/emulation/bluetooth/EmulatedBluetoothService.h"
 
 #include <grpcpp/grpcpp.h>
-#include <stdint.h>
+#include <cstdint>
+#include <fstream>
+#include <memory>
 #include <string>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
+#include "android/base/files/PathUtils.h"
+#include "android/base/files/ScopedFd.h"
+#include "android/base/system/System.h"
 #include "android/bluetooth/rootcanal/net/multi_datachannel_server.h"
 #include "android/bluetooth/rootcanal/root_canal_qemu.h"
+#include "android/emulation/ConfigDirs.h"
 #include "android/emulation/bluetooth/BufferedAsyncDataChannelAdapter.h"
 #include "android/emulation/bluetooth/GrpcLinkChannelServer.h"
-#include "android/emulation/bluetooth/HciAsyncDataChannelAdapter.h"
-#include "android/utils/debug.h"
 #include "emulated_bluetooth.pb.h"
+#include "emulated_bluetooth_device.pb.h"
+#include "emulated_bluetooth_packets.pb.h"
+#include "model/hci/h4_data_channel_packetizer.h"
+#include "model/hci/h4_parser.h"
 
 #ifdef DISABLE_ASYNC_GRPC
 #include "android/emulation/control/utils/SyncToAsyncAdapter.h"
@@ -33,6 +42,7 @@
 #include "android/emulation/control/utils/SimpleAsyncGrpc.h"
 #endif
 
+using android::base::System;
 using android::bluetooth::Rootcanal;
 using rootcanal::H4DataChannelPacketizer;
 using rootcanal::H4Parser;
@@ -281,7 +291,11 @@ public:
 };
 #else
 class AsyncEmulatedBluetoothServiceImpl
-    : public EmulatedBluetoothService::CallbackService,
+    : public EmulatedBluetoothService::WithCallbackMethod_registerBlePhy<
+              EmulatedBluetoothService::WithCallbackMethod_registerClassicPhy<
+                      EmulatedBluetoothService::
+                              WithCallbackMethod_registerHCIDevice<
+                                      EmulatedBluetoothService::Service> > >,
       public EmulatedBluetoothServiceBase {
 public:
     AsyncEmulatedBluetoothServiceImpl(android::bluetooth::Rootcanal* rootcanal,
@@ -301,6 +315,63 @@ public:
     virtual ::grpc::ServerBidiReactor<HCIPacket, HCIPacket>* registerHCIDevice(
             ::grpc::CallbackServerContext* /*context*/) {
         return new HCIForwarder(mHciServer.get());
+    }
+
+    ::grpc::Status registerGattDevice(
+            ::grpc::ServerContext* ctx,
+            const ::android::emulation::bluetooth::GattDevice* request,
+            ::android::emulation::bluetooth::RegistrationStatus* response)
+            override {
+        const std::string kNimbleBridgeExe = "nimble_bridge";
+        std::string executable =
+                System::get()->findBundledExecutable(kNimbleBridgeExe);
+
+        // No nimble bridge?
+        if (executable.empty()) {
+            return ::grpc::Status(::grpc::StatusCode::INTERNAL,
+                                  "Nimble bridge executable missing", "");
+        }
+
+        auto tmp_dir = android::base::PathUtils::join(
+                android::ConfigDirs::getDiscoveryDirectory(),
+                std::to_string(
+                        android::base::System::get()->getCurrentProcessId()));
+
+        // Get temporary file path
+        std::string temp_filename_pattern = "nimble_device_XXXXXX";
+        std::string temp_file_path =
+                android::base::PathUtils::join(tmp_dir, temp_filename_pattern);
+
+        auto tmpfd =
+                android::base::ScopedFd(mkstemp((char*)temp_file_path.data()));
+        if (!tmpfd.valid()) {
+            return ::grpc::Status(
+                    ::grpc::StatusCode::INTERNAL,
+                    "Unalbe to create temporary file with device description",
+                    "");
+        }
+
+        std::ofstream out(
+                android::base::PathUtils::asUnicodePath(temp_file_path).c_str(),
+                std::ios::out | std::ios::binary);
+        request->SerializeToOstream(&out);
+        std::vector<std::string> cmdArgs{executable, "--with_device_proto",
+                                         temp_file_path};
+
+        System::Pid bridgePid;
+        if (!System::get()->runCommand(cmdArgs, base::RunOptions::DontWait,
+                                       System::kInfinite, nullptr,
+                                       &bridgePid)) {
+            return ::grpc::Status(::grpc::StatusCode::INTERNAL,
+                                  "Failed to launch nimble bridge", "");
+        }
+
+        response->mutable_callback_device_id()->set_identity(
+                std::to_string(bridgePid));
+
+        VERBOSE_INFO(bluetooth, "Launched nimble bridge with %s",
+                     temp_file_path.c_str());
+        return ::grpc::Status::OK;
     }
 };
 #endif

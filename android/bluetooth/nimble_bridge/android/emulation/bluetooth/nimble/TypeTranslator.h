@@ -12,26 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
-#include "emulated_bluetooth.grpc.pb.h"  // for EmulatedBluetoothService
+#include <cstdint>                         // for uint16_t, uint8_t
+#include <string>                          // for string
+
+#include "host/ble_uuid.h"                 // for ble_uuid_any_t
+
+// nibmle...
+#undef min
+#undef max
+
+#include "emulated_bluetooth_device.pb.h"  // for Advertisement, Advertiseme...
 
 namespace android {
-namespace base {
-class Looper;
-}  // namespace base
-namespace bluetooth {
-class Rootcanal;
-}  // namespace bluetooth
-
 namespace emulation {
 namespace bluetooth {
 
-using AsyncEmulatedBluetoothService = EmulatedBluetoothService::CallbackService;
+DeviceIdentifier lookupDeviceIdentifier(uint16_t conn_handle);
+std::string collectOmChain(struct os_mbuf* om);
+std::string bleErrToString(int rc);
 
-// Initializes the EmulatedBluetooth gRPC service endpoint,
-// backed by rootcanal and provided looper.
-EmulatedBluetoothService::Service* getEmulatedBluetoothService(
-        android::bluetooth::Rootcanal* rootcanal,
-        base::Looper* looper);
+ble_uuid_any_t toNimbleUuid(Uuid uuid);
+uint8_t toNimbleConnectionMode(const Advertisement::ConnectionMode mode);
+uint8_t toNimbleDiscoveryMode(const Advertisement::DiscoveryMode mode);
+uint8_t toNimbleServiceType(GattService::ServiceType type);
+
+
 
 }  // namespace bluetooth
 }  // namespace emulation
