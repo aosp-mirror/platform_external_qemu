@@ -92,7 +92,6 @@ set(android-emu-common
     android/emulation/MediaFfmpegVideoHelper.cpp
     android/emulation/MediaH264Decoder.cpp
     android/emulation/MediaH264DecoderDefault.cpp
-    android/emulation/MediaH264DecoderFfmpeg.cpp
     android/emulation/MediaH264DecoderGeneric.cpp
     android/emulation/MediaHostRenderer.cpp
     android/emulation/MediaSnapshotHelper.cpp
@@ -363,7 +362,6 @@ android_add_library(
           android/emulation/MediaCudaDriverHelper.cpp
           android/emulation/MediaCudaUtils.cpp
           android/emulation/MediaCudaVideoHelper.cpp
-          android/emulation/MediaH264DecoderCuvid.cpp
           android/opengl/NativeGpuInfo_windows.cpp
           android/snapshot/MemoryWatch_windows.cpp
           android/windows_installer.cpp
@@ -375,7 +373,6 @@ android_add_library(
         android/emulation/MediaCudaDriverHelper.cpp
         android/emulation/MediaCudaUtils.cpp
         android/emulation/MediaCudaVideoHelper.cpp
-        android/emulation/MediaH264DecoderCuvid.cpp
         android/opengl/NativeGpuInfo_linux.cpp
         android/snapshot/MemoryWatch_linux.cpp
   DARWIN # cmake-format: sortable
