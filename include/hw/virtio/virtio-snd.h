@@ -49,36 +49,34 @@ struct VirtIOSoundRingBufferItem {
 
 struct VirtIOSoundRingBuffer {
     VirtIOSoundRingBufferItem *buf;
-    int capacity;
-    int size;
-    int r;
-    int w;
+    uint16_t capacity;
+    uint16_t size;
+    uint16_t r;
+    uint16_t w;
 };
 
 struct VirtIOSoundPCMStream {
     uint32_t buffer_bytes;
+    uint32_t period_bytes;
     uint16_t driver_format;
+    uint8_t state;
+
+    /* not saved to snapshots */
     VirtIOSound *snd;
     union {
         SWVoiceIn *in;
         SWVoiceOut *out;
         void *raw;
     } voice;
-
+    QEMUAudioTimeStamp start_timestamp;
     VirtIOSoundRingBuffer pcm_buf;
     QemuMutex mtx;
 
-    QEMUAudioTimeStamp start_timestamp;
     uint64_t frames_sent;
     uint64_t frames_skipped;
     uint32_t frames_wasted;
-
-    uint32_t latency_bytes;
-    uint32_t features;
-    int period_bytes;
-
-    uint8_t state;
     uint32_t buffer_frames;
+    uint32_t latency_bytes;
     uint32_t freq_hz;
     uint16_t aud_format;
     uint8_t id;
@@ -88,11 +86,13 @@ struct VirtIOSoundPCMStream {
 
 typedef struct VirtIOSound {
     VirtIODevice parent;
+    VirtIOSoundPCMStream streams[VIRTIO_SND_NUM_PCM_STREAMS];
+
+    /* not saved to snapshots */
     VirtQueue *ctl_vq;
     VirtQueue *event_vq;
     VirtQueue *tx_vq;
     VirtQueue *rx_vq;
-    VirtIOSoundPCMStream streams[VIRTIO_SND_NUM_PCM_STREAMS];
     QEMUSoundCard card;
     bool enable_input_prop;
     bool enable_output_prop;
