@@ -88,15 +88,7 @@ extern   int guest_boot_completed;
 #include <string>                                     // for string, operator+
 #include <vector>                                     // for vector
 
-/* set to 1 for very verbose debugging */
-#define DEBUG 0
-
-#if DEBUG >= 1
-#define DD(fmt, ...) \
-    dprint("%s| " fmt ,  __func__, ##__VA_ARGS__)
-#else
-#define DD(...) (void)0
-#endif
+#define  DD(...)    VERBOSE_PRINT(snapshot,__VA_ARGS__)
 
 using android::base::PathUtils;
 using android::base::pj;
@@ -476,6 +468,7 @@ static bool qemu_snapshot_load(const char* name,
 
     int loadVmRes =
             qemu_loadvm(name, MessageCallback(opaque, nullptr, errConsumer));
+    DD("Snapshot load vm result %d success %d", loadVmRes, loadVmRes != 0);
 
     bool failed = loadVmRes != 0;
 
@@ -510,6 +503,7 @@ static bool qemu_snapshot_load(const char* name,
         } else {
             // Normal load, resume
             vm_start();
+            DD("Snapshot restarted vm");
         }
     }
 

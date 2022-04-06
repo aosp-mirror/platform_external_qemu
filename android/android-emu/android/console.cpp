@@ -2420,9 +2420,10 @@ static int do_snapshot_save(ControlClient client, char* args) {
                 "KO: Argument missing, try 'avd snapshot save <name>'\r\n");
         return -1;
     }
-
+    D(("Snapshot saving to %s\n", args));
     bool success =
             vmopers(client)->snapshotSave(args, client, control_write_err_cb);
+    D(("Snapshot save to %s, result %d\n", args, success));
     return success ? 0 : -1;
 }
 
@@ -2441,8 +2442,10 @@ static int do_snapshot_load(ControlClient client, char* args) {
         return -1;
     }
 
+    D(("Snapshot loading from %s\n", args));
     bool success =
             vmopers(client)->snapshotLoad(args, client, control_write_err_cb);
+    D(("Snapshot load from %s, result %d\n", args, success));
     return success ? 0 : -1;
 }
 
