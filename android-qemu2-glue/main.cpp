@@ -2352,7 +2352,10 @@ extern "C" int main(int argc, char** argv) {
     bool targetIsX86 = false;
 #endif
 
-    if (apiLevel >= 26 || targetIsX86) {
+    if (feature_is_enabled(kFeature_VirtioSndCard)) {
+        args.add2("-soundhw", "virtio-snd-pci");
+    } else if (apiLevel >= 26 || targetIsX86) {
+        /* older system imaged don't have the virtio-snd driver */
         args.add2("-soundhw", "hda");
     }
 

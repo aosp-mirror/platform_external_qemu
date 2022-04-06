@@ -366,7 +366,7 @@ static uint32_t update_output_latency_bytes(VirtIOSoundPCMStream *stream, int x)
 static void stream_out_cb(void *opaque, int avail);
 static void stream_in_cb(void *opaque, int avail);
 
-VirtIOSoundPCMStream *g_input_stream;
+static VirtIOSoundPCMStream *g_input_stream = NULL;
 
 static SWVoiceIn *virtio_snd_set_voice_in(SWVoiceIn *voice) {
     if (g_input_stream) {
@@ -417,6 +417,7 @@ static uint16_t virtio_snd_voice_open(VirtIOSound *snd,
                                                stream,
                                                &stream_in_cb,
                                                &as);
+                g_input_stream = stream;
             } else {
                 return 0;
             }
