@@ -25,15 +25,21 @@
 #include "log_common/log_common.h"
 #include "log/log.h"
 
-#undef dprint
-#undef dinfo
-#undef dwarning
-#undef derror
-
+#ifndef dprint
 extern void   dprint( const char*  format, ... );
+#endif
+
+#ifndef dinfo
 extern void   dinfo( const char*  format, ... );
+#endif
+
+#ifndef dwarning
 extern void   dwarning( const char*  format, ... );
+#endif
+
+#ifndef derror
 extern void   derror( const char*  format, ... );
+#endif
 
 #define MODLOG_MODULE_DFLT 255
 
