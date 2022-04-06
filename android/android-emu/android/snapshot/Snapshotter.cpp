@@ -421,6 +421,8 @@ void Snapshotter::fillSnapshotMetrics(pb::EmulatorSnapshot* snapshot,
 
 Snapshotter::SnapshotOperationStats Snapshotter::getSaveStats(const char* name,
                                                               System::Duration durationMs) {
+    if (!mSaver ||
+        !mSaver->textureSaver()) return {};
     auto& save = saver();
     const auto compressedRam = save.ramSaver().compressed();
     const auto compressedTextures = save.textureSaver()->compressed();
@@ -453,8 +455,6 @@ Snapshotter::SnapshotOperationStats Snapshotter::getSaveStats(const char* name,
 
 Snapshotter::SnapshotOperationStats Snapshotter::getLoadStats(const char* name,
                                                               System::Duration durationMs) {
-    SnapshotOperationStats defaultStats;
-
     auto& load = loader();
     const auto onDemandRamEnabled = load.ramLoader().onDemandEnabled();
     const auto compressedRam = load.ramLoader().compressed();
