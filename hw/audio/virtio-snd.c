@@ -239,6 +239,7 @@ static const char *stream_state_str(const int state) {
     switch (state) {
     case VIRTIO_PCM_STREAM_STATE_DISABLED:  return "disabled";
     case VIRTIO_PCM_STREAM_STATE_ENABLED:   return "enabled";
+    case VIRTIO_PCM_STREAM_STATE_PARAMS_SET:return "params_set";
     case VIRTIO_PCM_STREAM_STATE_PREPARED:  return "prepared";
     case VIRTIO_PCM_STREAM_STATE_RUNNING:   return "running";
     default:                                return "unknown";
@@ -457,6 +458,10 @@ static bool virtio_snd_stream_start_locked(VirtIOSoundPCMStream *stream) {
         AUD_set_active_in(voice, 1);
         AUD_init_time_stamp_in(voice, &stream->start_timestamp);
     }
+
+    stream->frames_sent = 0;
+    stream->frames_skipped = 0;
+    stream->frames_wasted = 0;
     return true;
 }
 
@@ -532,6 +537,7 @@ static void virtio_snd_stream_enable(VirtIOSoundPCMStream *stream) {
         /* fallthrough */
 
     case VIRTIO_PCM_STREAM_STATE_ENABLED:
+    case VIRTIO_PCM_STREAM_STATE_PARAMS_SET:
     case VIRTIO_PCM_STREAM_STATE_PREPARED:
     case VIRTIO_PCM_STREAM_STATE_RUNNING:
         break;
@@ -553,10 +559,8 @@ static void virtio_snd_stream_disable(VirtIOSoundPCMStream *stream) {
         virtio_snd_stream_unprepare_locked(stream);
         /* fallthrough */
 
+    case VIRTIO_PCM_STREAM_STATE_PARAMS_SET:
     case VIRTIO_PCM_STREAM_STATE_ENABLED:
-        stream->buffer_bytes = 0;
-        stream->period_bytes = 0;
-        stream->buffer_frames = 0;
         stream->state = VIRTIO_PCM_STREAM_STATE_DISABLED;
         /* fallthrough */
 
@@ -648,24 +652,24 @@ virtio_snd_process_ctl_pcm_set_params_impl(const struct virtio_snd_pcm_set_param
 
     qemu_mutex_lock(&stream->mtx);
     switch (stream->state) {
+    case VIRTIO_PCM_STREAM_STATE_RUNNING:
     case VIRTIO_PCM_STREAM_STATE_PREPARED:
-        virtio_snd_stream_unprepare_locked(stream);
-        break;
-
-    case VIRTIO_PCM_STREAM_STATE_ENABLED:
-        break;
-
-    default:
+    case VIRTIO_PCM_STREAM_STATE_DISABLED:
         qemu_mutex_unlock(&stream->mtx);
         return VIRTIO_SND_S_BAD_MSG;
+
+    case VIRTIO_PCM_STREAM_STATE_PARAMS_SET:
+    case VIRTIO_PCM_STREAM_STATE_ENABLED:
+        stream->buffer_bytes = req->buffer_bytes;
+        stream->period_bytes = req->period_bytes;
+        stream->driver_format = VIRTIO_SND_PACK_FORMAT(req->channels, req->format, req->rate);
+        stream->state = VIRTIO_PCM_STREAM_STATE_PARAMS_SET;
+        qemu_mutex_unlock(&stream->mtx);
+        return VIRTIO_SND_S_OK;
+
+    default:
+        abort();
     }
-
-    stream->buffer_bytes = req->buffer_bytes;
-    stream->period_bytes = req->period_bytes;
-    stream->driver_format = VIRTIO_SND_PACK_FORMAT(req->channels, req->format, req->rate);
-
-    qemu_mutex_unlock(&stream->mtx);
-    return VIRTIO_SND_S_OK;
 }
 
 static int clamp_s16(int s) {
@@ -1315,7 +1319,7 @@ virtio_snd_process_ctl_pcm_prepare_impl(unsigned stream_id, VirtIOSound* snd) {
     }
 
     switch (stream->state) {
-    case VIRTIO_PCM_STREAM_STATE_ENABLED:
+    case VIRTIO_PCM_STREAM_STATE_PARAMS_SET:
         if (!virtio_snd_stream_prepare_vars(stream,
                                             2 * stream->buffer_bytes / stream->period_bytes)) {
             r = VIRTIO_SND_S_BAD_MSG;
@@ -1323,8 +1327,7 @@ virtio_snd_process_ctl_pcm_prepare_impl(unsigned stream_id, VirtIOSound* snd) {
         }
 
         stream->state = VIRTIO_PCM_STREAM_STATE_PREPARED;
-        r = VIRTIO_SND_S_OK;
-        goto done;
+        /* fallthrough */
 
     case VIRTIO_PCM_STREAM_STATE_PREPARED:
         r = VIRTIO_SND_S_OK;
@@ -1356,7 +1359,7 @@ virtio_snd_process_ctl_pcm_release_impl(unsigned stream_id, VirtIOSound* snd) {
         return VIRTIO_SND_S_BAD_MSG;
     }
     virtio_snd_stream_unprepare_locked(stream);
-    stream->state = VIRTIO_PCM_STREAM_STATE_ENABLED;
+    stream->state = VIRTIO_PCM_STREAM_STATE_PARAMS_SET;
     qemu_mutex_unlock(&stream->mtx);
 
     return VIRTIO_SND_S_OK;
@@ -1386,9 +1389,6 @@ virtio_snd_process_ctl_pcm_start_impl(unsigned stream_id, VirtIOSound* snd) {
         goto done;
     }
 
-    stream->frames_sent = 0;
-    stream->frames_skipped = 0;
-    stream->frames_wasted = 0;
     stream->state = VIRTIO_PCM_STREAM_STATE_RUNNING;
     r = VIRTIO_SND_S_OK;
 
