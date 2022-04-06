@@ -45,20 +45,20 @@ public:
     static Snapshotter& get();
 
     struct SnapshotOperationStats {
-        bool forSave;
+        bool forSave = false;
         std::string name;
-        base::System::Duration durationMs;
-        bool onDemandRamEnabled;
-        bool incrementallySaved;
-        bool compressedRam;
-        bool compressedTextures;
+        base::System::Duration durationMs = 0;
+        bool onDemandRamEnabled = false;
+        bool incrementallySaved = false;
+        bool compressedRam = false;
+        bool compressedTextures = false;
         base::System::MemUsage memUsage;
-        bool usingHDD;
-        int64_t diskSize;
-        int64_t ramSize;
-        int64_t texturesSize;
-        base::System::Duration ramDurationMs;
-        base::System::Duration texturesDurationMs;
+        bool usingHDD = false;
+        int64_t diskSize = 0;
+        int64_t ramSize = 0;
+        int64_t texturesSize = 0;
+        base::System::Duration ramDurationMs = 0;
+        base::System::Duration texturesDurationMs = 0;
     };
 
     static void fillSnapshotMetrics(android_studio::EmulatorSnapshot* event,
