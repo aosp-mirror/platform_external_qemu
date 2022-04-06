@@ -1654,6 +1654,7 @@ static void virtio_snd_class_init(ObjectClass *klass, void *data) {
 }
 
 static int virtio_snd_and_codec_init(PCIBus *bus) {
+    qdev_init_nofail(DEVICE(pci_create_simple(bus, -1, TYPE_VIRTIO_SND_PCI)));
     return 0;
 }
 
@@ -1666,7 +1667,9 @@ static const TypeInfo virtio_snd_typeinfo = {
 
 static void virtio_snd_register_types(void) {
     type_register_static(&virtio_snd_typeinfo);
-    pci_register_soundhw(TYPE_VIRTIO_SND, "Virtio sound", &virtio_snd_and_codec_init);
+    pci_register_soundhw(TYPE_VIRTIO_SND_PCI,
+                         "Virtio sound",
+                         &virtio_snd_and_codec_init);
 }
 
 type_init(virtio_snd_register_types);
