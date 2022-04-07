@@ -28,7 +28,7 @@ struct GetVkFnInfo;
 #define REGISTER_VK_FN_INFO(coreName, allNames)                 \
     struct coreName;                                            \
     template <>                                                 \
-    struct ::vk_util::vk_fn_info::GetVkFnInfo<coreName> {       \
+    struct GetVkFnInfo<coreName> {                              \
         static constexpr auto names = std::make_tuple allNames; \
         using type = PFN_vk##coreName;                          \
     };
