@@ -22,6 +22,7 @@
 #define VIRTIO_SND_NUM_CHMAPS          2    /* output, input */
 
 #define TYPE_VIRTIO_SND "virtio-snd"
+#define TYPE_VIRTIO_SND_PCI "virtio-snd-pci"
 #define VIRTIO_SND(obj) \
         OBJECT_CHECK(VirtIOSound, (obj), TYPE_VIRTIO_SND)
 
