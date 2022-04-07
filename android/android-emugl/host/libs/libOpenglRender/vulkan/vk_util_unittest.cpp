@@ -20,6 +20,7 @@
 #include <tuple>
 
 namespace vk_util {
+
 namespace vk_fn_info {
 
 // Register a fake Vulkan function for testing.
