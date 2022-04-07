@@ -41,7 +41,7 @@ function(android_mig_lib)
              "${mig_OUTPUT_DIR}/${FIL_WE}.h"
              "${mig_OUTPUT_DIR}/${FIL_WE}Server.h"
       COMMAND
-        python3 mach/mig.py "${ABS_FIL}" "${mig_OUTPUT_DIR}/${FIL_WE}User.c"
+        ${Python_EXECUTABLE} mach/mig.py "${ABS_FIL}" "${mig_OUTPUT_DIR}/${FIL_WE}User.c"
         "${mig_OUTPUT_DIR}/${FIL_WE}Server.c" "${mig_OUTPUT_DIR}/${FIL_WE}.h"
         "${mig_OUTPUT_DIR}/${FIL_WE}Server.h" --sdk ${CMAKE_OSX_SYSROOT}
         --include ../.. --include ../../compat/mac --arch ${mig_AARCH}

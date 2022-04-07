@@ -1,5 +1,19 @@
+cmake_policy(SET CMP0048 NEW)
 project(Android-Emulator)
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
+find_package(Python2 COMPONENTS Interpreter)
+find_package(Python3 COMPONENTS Interpreter)
+
+set(Python_EXECUTABLE ${Python2_EXECUTABLE})
+if (NOT Python2_FOUND)
+    if (NOT Python3_FOUND)
+      message(FATAL_ERROR "A python interpreter is required. ")
+    endif()
+    message(STATUS "Reverting to Python3, this might not work (b/229251286)")
+    set(Python_EXECUTABLE ${Python3_EXECUTABLE})
+endif()
+
+message(STATUS "Using Python: ${Python_EXECUTABLE}")
 if(NOT DEFINED ANDROID_TARGET_TAG)
   message(
     WARNING

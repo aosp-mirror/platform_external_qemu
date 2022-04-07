@@ -138,7 +138,7 @@ function(internal_android_install_file SRC DST_DIR INSTALL_DEPENDENCIES)
       "import os; print os.path.isfile('${REAL_SRC}') and os.access('${REAL_SRC}', os.X_OK)"
   )
   execute_process(
-    COMMAND python -c "${PYTHON_SCRIPT}"
+    COMMAND ${Python_EXECUTABLE} -c "${PYTHON_SCRIPT}"
     WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR} RESULT_VARIABLE SUCCESS
     OUTPUT_VARIABLE STD_OUT ERROR_VARIABLE STD_ERR)
   string(REPLACE "\n" "" STD_OUT "${STD_OUT}")
@@ -193,7 +193,7 @@ function(internal_android_install_file_force_exec SRC DST_DIR)
       "import os; print os.path.isfile('${REAL_SRC}') and os.access('${REAL_SRC}', os.X_OK)"
   )
   execute_process(
-    COMMAND python -c "${PYTHON_SCRIPT}"
+    COMMAND ${Python_EXECUTABLE} -c "${PYTHON_SCRIPT}"
     WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR} RESULT_VARIABLE SUCCESS
     OUTPUT_VARIABLE STD_OUT ERROR_VARIABLE STD_ERR)
   string(REPLACE "\n" "" STD_OUT "${STD_OUT}")
