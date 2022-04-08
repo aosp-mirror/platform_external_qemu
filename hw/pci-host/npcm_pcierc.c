@@ -203,6 +203,7 @@ static void npcm_pcierc_write_window(NPCMPCIERCState *s, hwaddr addr,
     npcm_pcie_update_window_maps(s);
 }
 
+/* read root complex configuration registers */
 static uint64_t npcm_pcierc_cfg_read(void *opaque, hwaddr addr, unsigned size)
 {
     NPCMPCIERCState *s = NPCM_PCIERC(opaque);
@@ -248,6 +249,7 @@ static uint64_t npcm_pcierc_cfg_read(void *opaque, hwaddr addr, unsigned size)
     return ret;
 }
 
+/* write root complex configuration registers */
 static void npcm_pcierc_cfg_write(void *opaque, hwaddr addr, uint64_t data,
                                   unsigned size)
 {
@@ -290,6 +292,53 @@ static void npcm_pcierc_cfg_write(void *opaque, hwaddr addr, uint64_t data,
         break;
     }
 }
+
+/* read PCIe configuration space */
+static uint64_t npcm_pcie_host_config_read(void *opaque, hwaddr addr,
+                                           unsigned size)
+{
+    NPCMPCIERCState *s = NPCM_PCIERC(opaque);
+    PCIHostState *pcih = PCI_HOST_BRIDGE(opaque);
+    int bus = NPCM_PCIE_RCCFGNUM_BUS(s->rccfgnum);
+    uint8_t devfn = NPCM_PCIE_RCCFGNUM_DEVFN(s->rccfgnum);
+    PCIDevice *pcid = pci_find_device(pcih->bus, bus, devfn);
+
+    if (pcid) {
+        return pci_host_config_read_common(pcid, addr,
+                                           pci_config_size(pcid),
+                                           size);
+    }
+    return 0;
+}
+
+/* write PCIe configuration space */
+static void npcm_pcie_host_config_write(void *opaque, hwaddr addr,
+                                        uint64_t data, unsigned size)
+{
+    NPCMPCIERCState *s = NPCM_PCIERC(opaque);
+    PCIHostState *pcih = PCI_HOST_BRIDGE(opaque);
+    int bus = NPCM_PCIE_RCCFGNUM_BUS(s->rccfgnum);
+    uint8_t devfn = NPCM_PCIE_RCCFGNUM_DEVFN(s->rccfgnum);
+    PCIDevice *pcid = pci_find_device(pcih->bus, bus, devfn);
+
+    if (pcid) {
+        pci_host_config_write_common(pcid, addr,
+                                     pci_config_size(pcid),
+                                     data,
+                                     size);
+    }
+}
+
+static AddressSpace *npcm_pcierc_set_iommu(PCIBus *bus, void *opaque, int devfn)
+{
+    NPCMPCIERCState *s = NPCM_PCIERC(opaque);
+
+    return &s->pcie_space;
+}
+
+static const PCIIOMMUOps npcm_pcierc_iommu_ops = {
+    .get_address_space = npcm_pcierc_set_iommu,
+};
 
 static void npcm_pcierc_reset_pcie_windows(NPCMPCIERCState *s)
 {
@@ -338,15 +387,73 @@ static const MemoryRegionOps npcm_pcierc_cfg_ops = {
     },
 };
 
+static const MemoryRegionOps npcm_pcie_cfg_space_ops = {
+    .read       = npcm_pcie_host_config_read,
+    .write      = npcm_pcie_host_config_write,
+    .endianness = DEVICE_LITTLE_ENDIAN,
+    .impl = {
+        .min_access_size = 1,
+        .max_access_size = 4,
+        .unaligned = false,
+    },
+    .valid = {
+        .min_access_size = 1,
+        .max_access_size = 8,
+    }
+};
+
+static void npcm_pcie_set_irq(void *opaque, int irq_num, int level)
+{
+    NPCMPCIERCState *s = NPCM_PCIERC(opaque);
+
+    qemu_set_irq(s->irq, level);
+}
+
 static void npcm_pcierc_realize(DeviceState *dev, Error **errp)
 {
     NPCMPCIERCState *s = NPCM_PCIERC(dev);
     SysBusDevice *sbd = SYS_BUS_DEVICE(dev);
+    PCIHostState *pci = PCI_HOST_BRIDGE(dev);
+    PCIDevice *root = pci_new(PCI_DEVFN(0, 0), TYPE_NPCM_PCIE_ROOT_PORT);
 
     memory_region_init_io(&s->mmio, OBJECT(s), &npcm_pcierc_cfg_ops,
                           s, TYPE_NPCM_PCIERC, 4 * KiB);
     sysbus_init_mmio(sbd, &s->mmio);
     sysbus_init_irq(sbd, &s->irq);
+
+    /* IO memory region is needed to create a PCI bus, but is unused on ARM */
+    memory_region_init(&s->pcie_io, OBJECT(s), "npcm-pcie-io", 16);
+
+    /*
+     * pcie_root is a 128 MiB memory region in the BMC physical address space
+     * in which all PCIe windows must have their programmable source or
+     * destination address
+     */
+    memory_region_init_io(&s->pcie_root, OBJECT(s), &npcm_pcie_cfg_space_ops,
+                          s, "npcm-pcie-config", 128 * MiB);
+    sysbus_init_mmio(sbd, &s->pcie_root);
+
+    pci->bus = pci_register_root_bus(dev, "pcie",
+                                     npcm_pcie_set_irq,
+                                     pci_swizzle_map_irq_fn,
+                                     s, &s->pcie_root, &s->pcie_io,
+                                     0, 4, TYPE_PCIE_BUS);
+
+    address_space_init(&s->pcie_space, &s->pcie_root, "pcie-address-space");
+    pci_realize_and_unref(root, pci->bus, &error_fatal);
+    pci_setup_iommu(pci->bus, &npcm_pcierc_iommu_ops, s);
+}
+
+static void npcm_pcie_root_port_realize(DeviceState *dev, Error **errp)
+{
+    PCIERootPortClass *rpc = PCIE_ROOT_PORT_GET_CLASS(dev);
+    Error *local_err = NULL;
+
+    rpc->parent_realize(dev, &local_err);
+    if (local_err) {
+        error_propagate(errp, local_err);
+        return;
+    }
 }
 
 static void npcm_pcierc_instance_init(Object *obj)
@@ -369,6 +476,28 @@ static void npcm_pcierc_class_init(ObjectClass *klass, void *data)
     dc->fw_name = "pci";
 }
 
+static void npcm_pcie_rp_class_init(ObjectClass *klass, void *data)
+{
+    DeviceClass *dc = DEVICE_CLASS(klass);
+    PCIDeviceClass *pk = PCI_DEVICE_CLASS(klass);
+    PCIERootPortClass *rpc = PCIE_ROOT_PORT_CLASS(klass);
+
+    dc->desc = "Nuvoton PCIe Root Port";
+    dc->user_creatable = false;
+
+    device_class_set_parent_realize(dc,
+                                    npcm_pcie_root_port_realize,
+                                    &rpc->parent_realize);
+
+    /* TODO(b/229132071) replace with real values */
+    pk->vendor_id = PCI_VENDOR_ID_QEMU;
+    pk->device_id = 0;
+    pk->class_id = PCI_CLASS_BRIDGE_PCI;
+
+    rpc->exp_offset = NPCM_PCIE_HEADER_OFFSET; /* Express capabilities offset */
+    rpc->aer_offset = NPCM_PCIE_AER_OFFSET;
+}
+
 static const TypeInfo npcm_pcierc_type_info = {
     .name = TYPE_NPCM_PCIERC,
     .parent = TYPE_PCIE_HOST_BRIDGE,
@@ -377,9 +506,17 @@ static const TypeInfo npcm_pcierc_type_info = {
     .class_init = npcm_pcierc_class_init,
 };
 
+static const TypeInfo npcm_pcie_port_type_info = {
+    .name = TYPE_NPCM_PCIE_ROOT_PORT,
+    .parent = TYPE_PCIE_ROOT_PORT,
+    .instance_size = sizeof(NPCMPCIERootPort),
+    .class_init = npcm_pcie_rp_class_init,
+};
+
 static void npcm_pcierc_register_types(void)
 {
     type_register_static(&npcm_pcierc_type_info);
+    type_register_static(&npcm_pcie_port_type_info);
 }
 
 type_init(npcm_pcierc_register_types)

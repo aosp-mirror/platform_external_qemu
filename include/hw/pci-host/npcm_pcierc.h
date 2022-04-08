@@ -23,11 +23,14 @@
 #include "hw/sysbus.h"
 #include "hw/pci/pci.h"
 #include "hw/pci/pcie_host.h"
+#include "hw/pci/pcie_port.h"
 #include "qom/object.h"
 
 /* PCIe Root Complex Registers */
-#define LINKSTAT                        0x92
+#define NPCM_PCIE_LINK_CTRL             0x90
 #define NPCM_PCIERC_RCCFGNUM            0x140 /* Configuration Number */
+#define     NPCM_PCIE_RCCFGNUM_BUS(a)   (((a) >> 8) & 0xFF)
+#define     NPCM_PCIE_RCCFGNUM_DEVFN(a) ((a) & 0xFF)
 #define NPCM_PCIERC_INTEN               0x180 /* Interrupt Enable */
 #define NPCM_PCIERC_INTST               0x184 /* Interrupt Status */
 #define NPCM_PCIERC_IMSI_ADDR           0x190
@@ -84,6 +87,10 @@
 #define NPCM_PCIERC_NUM_PA_WINDOWS          2
 #define NPCM_PCIERC_NUM_AP_WINDOWS          5
 
+/* PCIe extended config space offsets */
+#define NPCM_PCIE_HEADER_OFFSET             0x80
+#define NPCM_PCIE_AER_OFFSET                0x100
+
 #define TYPE_NPCM_PCIERC "npcm-pcie-root-complex"
 OBJECT_DECLARE_SIMPLE_TYPE(NPCMPCIERCState, NPCM_PCIERC)
 
@@ -105,6 +112,13 @@ typedef struct NPCMPCIEWindow {
     uint8_t id;
 } NPCMPCIEWindow;
 
+#define TYPE_NPCM_PCIE_ROOT_PORT "npcm-pcie-root-port"
+OBJECT_DECLARE_SIMPLE_TYPE(NPCMPCIERootPort, NPCM_PCIE_ROOT_PORT)
+
+struct NPCMPCIERootPort {
+    PCIESlot parent;
+};
+
 struct NPCMPCIERCState {
     PCIExpressHost parent;
 
@@ -118,6 +132,12 @@ struct NPCMPCIERCState {
     uint32_t rcimsiaddr;
     uint32_t rcmsisstat;
     uint32_t axierr;
+
+    /* Address translation state */
+    AddressSpace pcie_space;
+    MemoryRegion pcie_root;
+    MemoryRegion pcie_io; /* unused - but required for IO space PCI */
+    NPCMPCIERootPort port;
     /* PCIe to AXI Windows */
     NPCMPCIEWindow pcie2axi[NPCM_PCIERC_NUM_PA_WINDOWS];
 
