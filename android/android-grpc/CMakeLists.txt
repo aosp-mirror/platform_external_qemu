@@ -138,7 +138,10 @@ target_include_directories(android-grpc PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
                                                ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_options(android-grpc PRIVATE -Wno-return-type-c-linkage)
 if(WINDOWS_MSVC_X86_64)
-  message(STATUS "Using async<->sync bridge until Win32 gRPC is properly supported b/225895409,")
+  message(
+    STATUS
+      "Using async<->sync bridge until Win32 gRPC is properly supported b/225895409,"
+  )
   target_compile_definitions(android-grpc PUBLIC DISABLE_ASYNC_GRPC)
 endif()
 set_target_properties(android-grpc PROPERTIES CXX_STANDARD 17)
@@ -271,8 +274,8 @@ target_link_libraries(
 if(BLUETOOTH_EMULATION)
   protobuf_generate_grpc_cpp(
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}
-    SOURCES emulated_bluetooth.proto emulated_bluetooth_packets.proto
-            emulated_bluetooth_vhci.proto
+    SOURCES emulated_bluetooth.proto emulated_bluetooth_device.proto
+            emulated_bluetooth_packets.proto emulated_bluetooth_vhci.proto
     OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
     GENERATED BLUETOOTH_SERVICE_GRPC_SRC)
 
@@ -282,9 +285,9 @@ if(BLUETOOTH_EMULATION)
     SRC ${BLUETOOTH_SERVICE_GRPC_SRC}
         android/emulation/bluetooth/BufferedAsyncDataChannelAdapter.cpp
         android/emulation/bluetooth/EmulatedBluetoothService.cpp
-        android/emulation/bluetooth/PhyConnectionClient.cpp
         android/emulation/bluetooth/GrpcLinkChannelServer.cpp
         android/emulation/bluetooth/HciAsyncDataChannelAdapter.cpp
+        android/emulation/bluetooth/PhyConnectionClient.cpp
         android/emulation/bluetooth/VhciService.cpp)
 
   target_link_libraries(
@@ -297,8 +300,8 @@ if(BLUETOOTH_EMULATION)
     TARGET android-grpc-emulated-bluetooth_unittest
     SRC # cmake-format: sortable
         android/emulation/bluetooth/BufferedAsyncDataChannelAdapter_unittest.cpp
-        android/emulation/bluetooth/PhyConnectionClient_unittest.cpp
-        android/emulation/bluetooth/GrpcLinkChannelServer_unittest.cpp)
+        android/emulation/bluetooth/GrpcLinkChannelServer_unittest.cpp
+        android/emulation/bluetooth/PhyConnectionClient_unittest.cpp)
   target_link_libraries(
     android-grpc-emulated-bluetooth_unittest
     PRIVATE grpc-emulated-bluetooth libbt-rootcanal libbt-rootcanal-qemu

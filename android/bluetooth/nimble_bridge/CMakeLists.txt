@@ -1,0 +1,23 @@
+# BLE Heart Rate peripheral app.
+android_add_executable(
+  TARGET nimble_bridge
+  LICENSE Apache-2.0
+  SRC # cmake-format: sortable
+      android/emulation/bluetooth/main.cpp
+      android/emulation/bluetooth/nimble/TypeTranslator.cpp
+      android/emulation/bluetooth/nimble/ServiceDefinition.cpp
+      android/emulation/bluetooth/RemoteConnection.cpp
+      android/emulation/bluetooth/RequestForwarder.cpp)
+target_link_libraries(
+  nimble_bridge
+  PUBLIC nimble_bluetooth
+         grpc-emulated-bluetooth
+         grpc++
+         absl::status
+         absl::statusor
+         absl::flags
+         absl::flags_parse
+         android-emu)
+target_include_directories(nimble_bridge PUBLIC .)
+# C++20 re-introduces this support.
+target_compile_options(nimble_bridge PRIVATE -Wno-c99-designator)

@@ -1,0 +1,373 @@
+// Copyright (C) 2022 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// An EmulatedBluetoothService represents a bluetooth Gatt device.
+// The android emulator will connect to this service to read/write and
+// observe characteristics if the emulator establishes a connection
+// to this device.
+//
+// You will need to implement this service and register the endpoint with
+// the emulator to make this device discoverable.
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.android.emulator.bluetooth";
+
+package android.emulation.bluetooth;
+import "grpc_endpoint_description.proto";
+import "google/protobuf/empty.proto";
+
+// You can provide your own GattDevice by implementing this service
+// and registering it with the android emulator.
+//
+// The device will appear as a real bluetooth device, and you will
+// receive callbacks when the bluetooth system wants to
+// read, write or observe a characteristic.
+service GattDeviceService {
+    // A remote client has requested to read a local characteristic.
+    //
+    // Return the current observed value.
+    rpc OnCharacteristicReadRequest(CharacteristicValueRequest)
+            returns (CharacteristicValueResponse);
+
+    // A remote client has requested to write to a local characteristic.
+    //
+    // Return the current observed value.
+    rpc OnCharacteristicWriteRequest(CharacteristicValueRequest)
+            returns (CharacteristicValueResponse);
+
+    // Listens for notifications from the emulated device, the device should
+    // write to the stream with a response when a change has occurred.
+    rpc OnCharacteristicObserveRequest(CharacteristicValueRequest)
+            returns (stream CharacteristicValueResponse);
+
+    // A remote device has been connected or disconnected.
+    rpc OnConnectionStateChange(ConnectionStateChange)
+            returns (google.protobuf.Empty);
+}
+
+// A callback identifier is used by the service to identify
+// who should handle the any of the requests above.
+//
+// This is only relevant if you have a single endpoint that
+// emulates multiple devices.
+message CallbackIdentifier {
+    string identity = 1;
+}
+
+// A Device Identifier is used to uniquely identify an emulated
+// bluetooth device on the rootcanal mesh.
+message DeviceIdentifier {
+    // A string that uniquely identifies this device on the
+    // rootcanal mesh.
+    string address = 1;
+}
+
+message ConnectionStateChange {
+    enum ConnectionState {
+        CONNECTION_STATE_UNDEFINED = 0;
+        // The profile is in disconnected state
+        CONNECTION_STATE_DISCONNECTED = 1;
+        // The profile is in connected state
+        CONNECTION_STATE_CONNECTED = 2;
+    }
+
+    // The identity of the device is receiving the state change.
+    CallbackIdentifier callback_device_id = 1;
+
+    // The identity of the device that is changing state.
+    DeviceIdentifier from_device = 2;
+
+    // The current state of the device
+    ConnectionState new_state = 3;
+}
+
+// A UUID is a universally unique identifier that is guaranteed to be unique
+// across all space and all time. UUIDs can be independently created in a
+// distributed fashion. No central registry of assigned UUIDs is required. A
+// UUID is a 128-bit value.
+//
+// To reduce the burden of storing and transferring 128-bit UUID values, a range
+// of UUID values has been pre-allocated for assignment to often-used,
+// registered purposes.
+//
+// The first UUID in this pre-allocated range is known as
+// the Bluetooth Base UUID and has the value 00000000-0000-1000-8000-
+// 00805F9B34FB, from Assigned Numbers. UUID values in the pre-allocated
+// range have aliases that are represented as 16-bit or 32-bit values.
+//
+// These aliases are often called 16-bit and 32-bit UUIDs, but each actually
+// represents a 128-bit UUID value.
+//
+// The full 128-bit value of a 16-bit or 32-bit
+// UUID may be computed by a simple arithmetic operation:
+//
+// 128_bit_value = 16_bit_value * 2^96 + Bluetooth_Base_UUID
+// 128_bit_value = 32_bit_value * 2^96 + Bluetooth_Base_UUID
+//
+// A 16-bit UUID may be converted to 32-bit UUID format by zero-extending the
+// 16-bit value to 32-bits. An equivalent method is to add the 16-bit UUID value
+// to a zero-valued 32-bit UUID.
+//
+// Note: Two 16-bit UUIDs may be compared
+// directly, as may two 32-bit UUIDs or two 128-bit UUIDs. If two UUIDs of
+// differing sizes are to be compared, the shorter UUID must be converted to the
+// longer UUID format before comparison.
+message Uuid {
+    oneof short_or_long {
+        // The shortened bluetooth uuid, either 16/32 bit.
+        uint32 id = 1;
+
+        // The first 8 hex digits of the guid, if you are using
+        // 128 bit guid.  These are the least significant bits.
+        uint64 lsb = 2;
+    }
+
+    // The next 8 hex digits of the guid, ignored if the lsb value is not set.
+    // These are the most significant bits.
+    int64 msb = 3;
+}
+
+// Data exchanged to read/write bluetooth characteristics
+message CharacteristicValueRequest {
+    // The identity of the device we are making this request to. The gRPC
+    // service for the emulated device must route the request to the actual
+    // device that emulates this identity.
+    //
+    // This is needed if you wish to emulate multipe devices on a single
+    // gRPC endpoint.
+    CallbackIdentifier callback_device_id = 1;
+
+    // The identity of the device that is making this request.
+    DeviceIdentifier from_device = 2;
+
+    // The specific callback id for which this request is. This is the
+    // callback_id used to register the given characteristic. If the value
+    // was not set it will be the uuid of the characteristic.
+    Uuid callback_id = 3;
+
+    // The raw data in the request. The application developer will
+    // need to parse the data and handle it properly.
+    bytes data = 4;
+}
+
+// Data exchanged to read/write bluetooth characteristics
+message CharacteristicValueResponse {
+    enum GattStatus {
+        GATT_STATUS_UNSPECIFIED = 0;
+        // A GATT operation completed successfully
+        GATT_STATUS_SUCCESS = 1;
+        // A GATT operation failed
+        GATT_STATUS_FAILURE = 2;
+    }
+
+    // The status of the request to be sent to the remote devices
+    GattStatus status = 1;
+
+    // The data of interest, this should contain the raw data according
+    // to the bluetooth specification for the requested charactersic uuid.
+    bytes data = 2;
+}
+
+message GattCharacteristic {
+    // The Characteristic Properties bit field determines how the Characteristic
+    // Value can be used, or how the characteristic descriptors can be accessed.
+
+    // Properties Value Description.
+    enum Properties {
+        PROPERTY_UNSPECIFIED = 0;
+
+        // If set, permits broadcasts of the Characteristic
+        // Value using Server Characteristic Configuration Descriptor. If set,
+        // the Server Characteristic Configuration Descriptor shall exist.
+        PROPERTY_BROADCAST = 0x01;
+
+        // If set, permits reads of the Characteristic Value using procedures
+        // defined in Section 4.8
+        PROPERTY_READ = 0x02;
+
+        // If set, permit writes of the Characteristic Value without response
+        // using procedures defined in Section 4.9.1.
+        PROPERTY_WRITE_NO_RESPONSE = 0x04;
+
+        // If set, permits writes of the Characteristic Value with response
+        // using procedures defined in Section 4.9.3 or Section 4.9.4.
+        PROPERTY_WRITE = 0x08;
+
+        // If set, permits notifications of a Characteristic Value without
+        // acknowledgment using the procedure defined in Section 4.10. If
+        // set, the Client Characteristic Configuration Descriptor shall exist.
+        PROPERTY_NOTIFY = 0x10;
+
+        // If set, permits indications of a Characteristic Value with
+        // acknowledgment using the procedure defined in Section 4.11. If set,
+        // the Client Characteristic Configuration Descriptor shall exist.
+        PROPERTY_INDICATE = 0x20;
+
+        // If set, permits signed writes to the Characteristic Value using the
+        // procedure defined in Section 4.9.2.
+        PROPERTY_SIGNED_WRITE = 0x40;
+
+        // If set, additional characteristic properties are defined in the
+        // Characteristic Extended Properties Descriptor defined in Section
+        // 3.3.3.1. If set, the Characteristic Extended Properties Descriptor
+        PROPERTY_EXTENDED_PROPS = 0x80;
+    }
+
+    // An attribute has a set of permission values associated with it. The
+    // permissions associated with an attribute specifies that it may be read
+    // and/or written. The permissions associated with the attribute specifies
+    // the security level required for read and/or write access, as well as
+    // notification and/or indication. The permissions of a given attribute are
+    // defined by a higher layer specification, and are not discoverable using
+    // the Attribute protocol.
+    enum Permissions {
+        PERMISSION_UNSPECIFIED = 0;
+
+        //  Characteristic read permission
+        PERMISSION_READ = 0x01;
+
+        // Characteristic permission: Allow encrypted read operations
+        PERMISSION_READ_ENCRYPTED = 0x02;
+
+        // Characteristic permission: Allow reading with person-in-the-middle
+        // protection
+        PERMISSION_READ_ENCRYPTED_MITM = 0x04;
+
+        // Characteristic write permission
+        PERMISSION_WRITE = 0x10;
+
+        // Characteristic permission: Allow encrypted writes
+        PERMISSION_WRITE_ENCRYPTED = 0x20;
+
+        // Characteristic permission: Allow encrypted writes with
+        // person-in-the-middle protection
+        PERMISSION_WRITE_ENCRYPTED_MITM = 0x40;
+
+        // Characteristic permission: Allow signed write operations
+        PERMISSION_WRITE_SIGNED = 0x80;
+
+        // Characteristic permission: Allow signed write operations with
+        // person-in-the-middle protection
+        PERMISSION_WRITE_SIGNED_MITM = 0x100;
+    }
+
+    // The UUID identifying this characteristic, for a list of UUIDS:
+    // https://www.bluetooth.com/specifications/assigned-numbers/
+    //
+    // Or (the much easier to use) XML definitions:
+    // https://github.com/sputnikdev/bluetooth-gatt-parser/tree/master/src/main/resources/gatt/characteristic
+    //
+    // For example the uuid=0x2A19 indicates the "The current charge level of a
+    // battery."
+    Uuid uuid = 1;
+
+    // Contains a mask of the properties described in the properties enum.
+    // Property definitions are *ONLY* required during device registration.
+    uint32 properties = 2;
+
+    // Contains a mask of the permissions described in the permissions enum.
+    // Permission definitions are *ONLY* required during device registration.
+    uint32 permissions = 3;
+
+    // The callback_id that will be set whenever a bluetooth request
+    // comes in for this characteristic. Defaults to the value in uuid (field 1)
+    // if it is not set. You will only need to set this if the same uuid is
+    // defined multiple defines in your service, and can be used to disambiguate
+    // which characterisic is requested.
+    Uuid callback_id = 4;
+}
+
+// A Gatt service definition.
+message GattService {
+    enum ServiceType {
+        SERVICE_TYPE_UNSPECIFIED = 0;
+
+        // Primary service
+        SERVICE_TYPE_PRIMARY = 0x01;
+
+        // Secondary service (included by primary services)
+        SERVICE_TYPE_SECONDARY = 0x02;
+    }
+
+    // The uuid of this service. This can be a: 16, 32 or 128  bit uuid.  This
+    // is usually a well defined UUID from the bluetooth specification. For
+    // example 0x180D indicates a heart rate monitor. See
+    // https://www.bluetooth.com/specifications/assigned-numbers/service-discovery/
+    // for a list of well known uuid's.
+    Uuid uuid = 1;
+    ServiceType service_type = 2;
+    repeated GattCharacteristic characteristics = 3;
+}
+
+// A Gatt profile consists of a series of services that are offered
+// to clients. Gatt profiles are well defined in the spec. You can find
+// more information about the various profiles in the official specifications:
+// https://www.bluetooth.com/specifications/specs/
+//
+// A concrete example is the Heart Rate Monitor:
+// https://www.bluetooth.com/specifications/specs/heart-rate-service-1-0/
+message GattProfile {
+    repeated GattService services = 1;
+}
+
+// The advertisement definition, this will be used to advertise the
+// bluetooth device to android emulator. Every device that is registered
+// will be discoverable by the emulator.
+message Advertisement {
+    // The name of the device as an UTF-8 string. This is how the device will
+    // show up when android scans for devices. Only the first 29 bytes will show
+    // up on an in initial scan.
+    string device_name = 1;
+
+    enum ConnectionMode {
+        // None specified, defaults to undirected
+        CONNECTION_MODE_UNSPECIFIED = 0;
+        // Non-connectable, as per section 3.C.9.3.2
+        CONNECTION_MODE_NON_CONNECTABLE = 1;
+        // Directed-connectable, as per section 3.C.9.3.3
+        CONNECTION_MODE_DIRECTED = 2;
+        // Undirected-connectable, as per section 3.C.9.3.4
+        CONNECTION_MODE_UNDIRECTED = 3;
+    }
+
+    //  Whether the advertisement type should be connectable or non-connectable.
+    ConnectionMode connection_mode = 2;
+
+    enum DiscoveryMode {
+        // None specified, defaults to general discoverable
+        DISCOVERY_MODE_UNSPECIFIED = 0;
+        // Non-discoverable, as per section 3.C.9.2.2).
+        DISCOVERY_MODE_NON_DISCOVERABLE = 1;
+        // Limited-discoverable, as per section 3.C.9.2.3).
+        DISCOVERY_MODE_LIMITED = 2;
+        // General-discoverable, as per section 3.C.9.2.4).
+        DISCOVERY_MODE_GENERAL = 3;
+    }
+
+    DiscoveryMode discovery_mode = 3;
+}
+
+message GattDevice {
+    // The endpoint where the emulated device can be found. This endpoint should
+    // provide an implementation of the GattDeviceService and must be
+    // reachable through the provided description.
+    android.emulation.remote.Endpoint endpoint = 1;
+
+    // How this device will be advertised.
+    Advertisement advertisement = 2;
+
+    // The bluetooth profile that is made available.
+    GattProfile profile = 3;
+}
