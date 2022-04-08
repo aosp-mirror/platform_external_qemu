@@ -41,12 +41,13 @@
 #define VIRTIO_SND_NID_MIC                          0
 #define VIRTIO_SND_NID_SPEAKERS                     0
 
-#define RING_BUFFER_BAD_SIZE                        111111111
-#define RING_BUFFER_BAD_R                           222222222
-#define RING_BUFFER_BAD_W                           333333333
+#define RING_BUFFER_BAD_SIZE                        11111
+#define RING_BUFFER_BAD_R                           22222
+#define RING_BUFFER_BAD_W                           33333
 
 #define GLUE(A, B) A##B
 #define GLUE2(A, B) GLUE(A, B)
+#define ABORT(why) abort();
 
 union VirtIOSoundCtlRequest {
     struct virtio_snd_hdr hdr;
@@ -113,16 +114,6 @@ struct audsettings virtio_snd_unpack_format(uint16_t format16) {
 
     return as;
 }
-static const VMStateDescription virtio_snd_vmstate = {
-    .name = TYPE_VIRTIO_SND,
-    .minimum_version_id = 0,
-    .version_id = 0,
-    .fields = (VMStateField[]) {
-        VMSTATE_VIRTIO_DEVICE,
-        /* TODO */
-        VMSTATE_END_OF_LIST()
-    },
-};
 
 #define HDA_REG_DEFCONF(CONN, LOC, DEF_DEV, CONN_TYPE, COLOR, DEF_AS, SEQ) \
     (((CONN) << AC_DEFCFG_PORT_CONN_SHIFT) \
@@ -291,13 +282,13 @@ static void ring_buffer_init(VirtIOSoundRingBuffer *rb) {
     rb->w = RING_BUFFER_BAD_W;
 };
 
-static bool ring_buffer_alloc(VirtIOSoundRingBuffer *rb, size_t capacity) {
+static bool ring_buffer_alloc(VirtIOSoundRingBuffer *rb, const size_t capacity) {
     if (rb->buf) {
-        abort();
+        ABORT("rb->buf");
     }
 
     if (rb->capacity) {
-        abort();
+        ABORT("rb->capacity");
     }
 
     rb->buf = g_new0(VirtIOSoundRingBufferItem, capacity);
@@ -315,7 +306,7 @@ static bool ring_buffer_alloc(VirtIOSoundRingBuffer *rb, size_t capacity) {
 
 static void ring_buffer_free(VirtIOSoundRingBuffer *rb) {
     if (rb->size) {
-        abort();
+        ABORT("rb->size");
     }
 
     g_free(rb->buf);
@@ -496,7 +487,6 @@ static void virtio_snd_stream_unprepare_out_locked(VirtIOSoundPCMStream *stream)
         }
     }
 
-    ring_buffer_free(pcm_buf);
     virtio_notify(&snd->parent, tx_vq);
 }
 
@@ -517,7 +507,6 @@ static void virtio_snd_stream_unprepare_in_locked(VirtIOSoundPCMStream *stream) 
         }
     }
 
-    ring_buffer_free(pcm_buf);
     virtio_notify(&snd->parent, rx_vq);
 }
 
@@ -527,6 +516,7 @@ static void virtio_snd_stream_unprepare_locked(VirtIOSoundPCMStream *stream) {
     } else {
         virtio_snd_stream_unprepare_in_locked(stream);
     }
+    ring_buffer_free(&stream->pcm_buf);
 }
 
 static void virtio_snd_stream_enable(VirtIOSoundPCMStream *stream) {
@@ -543,7 +533,7 @@ static void virtio_snd_stream_enable(VirtIOSoundPCMStream *stream) {
         break;
 
     default:
-        abort();
+        ABORT("stream->state");
     }
     qemu_mutex_unlock(&stream->mtx);
 }
@@ -568,7 +558,7 @@ static void virtio_snd_stream_disable(VirtIOSoundPCMStream *stream) {
         break;
 
     default:
-        abort();
+        ABORT("stream->state");
     }
     qemu_mutex_unlock(&stream->mtx);
 }
@@ -668,7 +658,7 @@ virtio_snd_process_ctl_pcm_set_params_impl(const struct virtio_snd_pcm_set_param
         return VIRTIO_SND_S_OK;
 
     default:
-        abort();
+        ABORT("stream->state");
     }
 }
 
@@ -989,7 +979,7 @@ static int convert_channels(int16_t *buffer, const int in_sz,
         case 0x54: return convert_channels_5_to_4(buffer, buffer_end);
 
         default:
-            abort();
+            ABORT("bad");
         }
     }
 }
@@ -1145,7 +1135,7 @@ static void virtio_snd_process_tx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
     if (ring_buffer_push(&stream->pcm_buf, &item)) {
         update_output_latency_bytes(stream, +item.size);
     } else {
-        abort();
+        ABORT("ring_buffer_push");
     }
 
     qemu_mutex_unlock(&stream->mtx);
@@ -1270,12 +1260,12 @@ static void virtio_snd_process_rx(VirtQueue *vq, VirtQueueElement *e, VirtIOSoun
 
     item.el = e;
     item.pos = sizeof(xfer);
-    item.size = 0;  /* not used in RX */
+    item.size = sizeof(xfer);  /* not used in RX but convinient for snapshots */
 
     qemu_mutex_lock(&stream->mtx);
 
     if (!ring_buffer_push(&stream->pcm_buf, &item)) {
-        abort();
+        ABORT("ring_buffer_push");
     }
 
     qemu_mutex_unlock(&stream->mtx);
@@ -1533,9 +1523,7 @@ static void virtio_snd_handle_event(VirtIODevice *vdev, VirtQueue *vq) {
 }
 
 /* device <- driver */
-static void virtio_snd_handle_tx(VirtIODevice *vdev, VirtQueue *vq) {
-    VirtIOSound *snd = VIRTIO_SND(vdev);
-
+static void virtio_snd_handle_tx_impl(VirtIOSound *snd, VirtQueue *vq) {
     while (virtio_queue_ready(vq)) {
         VirtQueueElement *e = (VirtQueueElement *)virtqueue_pop(vq, sizeof(VirtQueueElement));
         if (e) {
@@ -1546,10 +1534,12 @@ static void virtio_snd_handle_tx(VirtIODevice *vdev, VirtQueue *vq) {
     }
 }
 
-/* device -> driver */
-static void virtio_snd_handle_rx(VirtIODevice *vdev, VirtQueue *vq) {
-    VirtIOSound *snd = VIRTIO_SND(vdev);
+static void virtio_snd_handle_tx(VirtIODevice *vdev, VirtQueue *vq) {
+    virtio_snd_handle_tx_impl(VIRTIO_SND(vdev), vq);
+}
 
+/* device -> driver */
+static void virtio_snd_handle_rx_impl(VirtIOSound *snd, VirtQueue *vq) {
     while (virtio_queue_ready(vq)) {
         VirtQueueElement *e = (VirtQueueElement *)virtqueue_pop(vq, sizeof(VirtQueueElement));
         if (e) {
@@ -1558,6 +1548,10 @@ static void virtio_snd_handle_rx(VirtIODevice *vdev, VirtQueue *vq) {
             break;
         }
     }
+}
+
+static void virtio_snd_handle_rx(VirtIODevice *vdev, VirtQueue *vq) {
+    virtio_snd_handle_rx_impl(VIRTIO_SND(vdev), vq);
 }
 
 static void virtio_snd_device_realize(DeviceState *dev, Error **errp) {
@@ -1639,11 +1633,132 @@ static const Property virtio_snd_properties[] = {
     DEFINE_PROP_END_OF_LIST(),
 };
 
+static void virtio_snd_unpop_pcm_buf_back_to_vq(VirtIOSound *snd,
+                                                VirtIOSoundPCMStream *stream) {
+    const bool is_output = is_output_stream(stream);
+    VirtQueue *vq = is_output ? snd->tx_vq : snd->rx_vq;
+    VirtIOSoundRingBuffer *pcm_buf = &stream->pcm_buf;
+    const unsigned capacity = pcm_buf->capacity;
+    const unsigned capacity1 = capacity - 1;
+
+    while (pcm_buf->size > 0) {
+        const unsigned i = (pcm_buf->w + capacity1) % capacity;
+        VirtIOSoundRingBufferItem *const item = &pcm_buf->buf[i];
+
+        virtqueue_unpop(vq, item->el, item->size);
+        pcm_buf->w = i;
+        --pcm_buf->size;
+    }
+
+    stream->latency_bytes = 0;
+}
+
+static int vmstate_VirtIOSound_pre_xyz(void *opaque) {
+    VirtIOSound *snd = (VirtIOSound *)opaque;
+    unsigned i;
+
+    for (i = 0; i < VIRTIO_SND_NUM_PCM_STREAMS; ++i) {
+        VirtIOSoundPCMStream *stream = &snd->streams[i];
+
+        switch (stream->state) {
+        case VIRTIO_PCM_STREAM_STATE_RUNNING:
+            virtio_snd_stream_stop_locked(stream);
+            /* fallthrough */
+
+        case VIRTIO_PCM_STREAM_STATE_PREPARED:
+            virtio_snd_unpop_pcm_buf_back_to_vq(snd, stream);
+            ring_buffer_free(&stream->pcm_buf);
+            /* fallthrough */
+
+        case VIRTIO_PCM_STREAM_STATE_PARAMS_SET:
+        case VIRTIO_PCM_STREAM_STATE_ENABLED:
+        case VIRTIO_PCM_STREAM_STATE_DISABLED:
+            break;
+
+        default:
+            ABORT("stream->state");
+        }
+    }
+
+    return 0;
+}
+
+static int vmstate_VirtIOSound_post_xyz(void *opaque) {
+    VirtIOSound *snd = (VirtIOSound *)opaque;
+    unsigned i;
+
+    for (i = 0; i < VIRTIO_SND_NUM_PCM_STREAMS; ++i) {
+        VirtIOSoundPCMStream *stream = &snd->streams[i];
+
+        if (stream->state >= VIRTIO_PCM_STREAM_STATE_PREPARED) {
+            if (!virtio_snd_stream_prepare_vars(stream,
+                                                stream->pcm_buf.capacity)) {
+                ABORT("virtio_snd_stream_prepare_vars");
+            }
+        }
+    }
+
+    virtio_snd_handle_tx_impl(snd, snd->tx_vq);
+    virtio_snd_handle_rx_impl(snd, snd->tx_vq);
+
+    for (i = 0; i < VIRTIO_SND_NUM_PCM_STREAMS; ++i) {
+        VirtIOSoundPCMStream *stream = &snd->streams[i];
+
+        if (stream->state > VIRTIO_PCM_STREAM_STATE_RUNNING) {
+            ABORT("stream->state");
+        } else if (stream->state == VIRTIO_PCM_STREAM_STATE_RUNNING) {
+            if (!virtio_snd_stream_start_locked(stream)) {
+                ABORT("virtio_snd_stream_start_locked");
+            }
+        }
+    }
+
+    return 0;
+}
+
+static int vmstate_VirtIOSound_post_xyz_ver(void *opaque, int version) {
+    return vmstate_VirtIOSound_post_xyz(opaque);
+}
+
+static const VMStateDescription vmstate_VirtIOSoundPCMStream = {
+    .name = "VirtIOSoundPCMStream",
+    .minimum_version_id = 0,
+    .version_id = 0,
+    .fields = (VMStateField[]) {
+        /* The `pcm_buf` field in not saved. The `buf` elements must be
+         * placed back (in `pre_save`) to the vq before saving
+         * `VirtIOSoundRingBuffer` and restored after loading (in `post_load`).
+         */
+        VMSTATE_UINT32(buffer_bytes, VirtIOSoundPCMStream),
+        VMSTATE_UINT32(period_bytes, VirtIOSoundPCMStream),
+        VMSTATE_UINT32(buffer_frames, VirtIOSoundPCMStream),
+        VMSTATE_UINT16(driver_format, VirtIOSoundPCMStream),
+        VMSTATE_UINT8(state, VirtIOSoundPCMStream),
+        VMSTATE_END_OF_LIST()
+    },
+};
+
+static const VMStateDescription vmstate_VirtIOSound = {
+    .name = TYPE_VIRTIO_SND,
+    .minimum_version_id = 0,
+    .version_id = 0,
+    .pre_load = vmstate_VirtIOSound_pre_xyz,
+    .post_load = vmstate_VirtIOSound_post_xyz_ver,
+    .pre_save = vmstate_VirtIOSound_pre_xyz,
+    .post_save = vmstate_VirtIOSound_post_xyz,
+    .fields = (VMStateField[]) {
+        VMSTATE_VIRTIO_DEVICE,
+        VMSTATE_STRUCT_ARRAY(streams, VirtIOSound, VIRTIO_SND_NUM_PCM_STREAMS, 0,
+                             vmstate_VirtIOSoundPCMStream, VirtIOSoundPCMStream),
+        VMSTATE_END_OF_LIST()
+    },
+};
+
 static void virtio_snd_class_init(ObjectClass *klass, void *data) {
     DeviceClass *dc = DEVICE_CLASS(klass);
     dc->props = (Property*)virtio_snd_properties;
     set_bit(DEVICE_CATEGORY_SOUND, dc->categories);
-    dc->vmsd = &virtio_snd_vmstate;
+    dc->vmsd = &vmstate_VirtIOSound;
 
     VirtioDeviceClass *vdc = VIRTIO_DEVICE_CLASS(klass);
     vdc->realize = &virtio_snd_device_realize;
