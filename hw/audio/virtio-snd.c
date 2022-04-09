@@ -366,6 +366,29 @@ static uint32_t update_output_latency_bytes(VirtIOSoundPCMStream *stream, int x)
 static void stream_out_cb(void *opaque, int avail);
 static void stream_in_cb(void *opaque, int avail);
 
+VirtIOSoundPCMStream *g_input_stream;
+
+static SWVoiceIn *virtio_snd_set_voice_in(SWVoiceIn *voice) {
+    if (g_input_stream) {
+        struct audsettings as = virtio_snd_unpack_format(g_input_stream->aud_format);
+
+        g_input_stream->voice.in = AUD_open_in(&g_input_stream->snd->card,
+                                               voice,
+                                               g_stream_name[g_input_stream->id],
+                                               g_input_stream,
+                                               &stream_in_cb,
+                                               &as);
+
+        return g_input_stream->voice.in;
+    } else {
+        return voice;
+    }
+}
+
+static SWVoiceIn *virtio_snd_get_voice_in() {
+    return g_input_stream ? g_input_stream->voice.in : NULL;
+}
+
 static uint16_t virtio_snd_voice_open(VirtIOSound *snd,
                                       VirtIOSoundPCMStream *stream,
                                       const char *stream_name,
@@ -1553,14 +1576,6 @@ static void virtio_snd_handle_rx_impl(VirtIOSound *snd, VirtQueue *vq) {
 
 static void virtio_snd_handle_rx(VirtIODevice *vdev, VirtQueue *vq) {
     virtio_snd_handle_rx_impl(VIRTIO_SND(vdev), vq);
-}
-
-static SWVoiceIn *virtio_snd_set_voice_in(SWVoiceIn *voice) {
-    return voice;  /* TODO */
-}
-
-static SWVoiceIn *virtio_snd_get_voice_in() {
-    return NULL;  /* TODO */
 }
 
 static void virtio_snd_device_realize(DeviceState *dev, Error **errp) {
