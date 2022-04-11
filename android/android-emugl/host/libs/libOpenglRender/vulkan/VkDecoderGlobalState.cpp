@@ -6027,11 +6027,20 @@ private:
 
     void maskFormatPropertiesForEmulatedEtc2(
             VkFormatProperties* pFormatProperties) {
-        pFormatProperties->bufferFeatures &= kEmulatedEtc2BufferFeatureMask;
+        pFormatProperties->linearTilingFeatures &=
+            kEmulatedEtc2BufferFeatureMask;
+        pFormatProperties->optimalTilingFeatures &=
+            kEmulatedEtc2BufferFeatureMask;
+        pFormatProperties->bufferFeatures &=
+            kEmulatedEtc2BufferFeatureMask;
     }
 
     void maskFormatPropertiesForEmulatedEtc2(
             VkFormatProperties2* pFormatProperties) {
+        pFormatProperties->formatProperties.linearTilingFeatures &=
+            kEmulatedEtc2BufferFeatureMask;
+        pFormatProperties->formatProperties.optimalTilingFeatures &=
+            kEmulatedEtc2BufferFeatureMask;
         pFormatProperties->formatProperties.bufferFeatures &=
             kEmulatedEtc2BufferFeatureMask;
     }
