@@ -366,6 +366,29 @@ static uint32_t update_output_latency_bytes(VirtIOSoundPCMStream *stream, int x)
 static void stream_out_cb(void *opaque, int avail);
 static void stream_in_cb(void *opaque, int avail);
 
+VirtIOSoundPCMStream *g_input_stream;
+
+static SWVoiceIn *virtio_snd_set_voice_in(SWVoiceIn *voice) {
+    if (g_input_stream) {
+        struct audsettings as = virtio_snd_unpack_format(g_input_stream->aud_format);
+
+        g_input_stream->voice.in = AUD_open_in(&g_input_stream->snd->card,
+                                               voice,
+                                               g_stream_name[g_input_stream->id],
+                                               g_input_stream,
+                                               &stream_in_cb,
+                                               &as);
+
+        return g_input_stream->voice.in;
+    } else {
+        return voice;
+    }
+}
+
+static SWVoiceIn *virtio_snd_get_voice_in() {
+    return g_input_stream ? g_input_stream->voice.in : NULL;
+}
+
 static uint16_t virtio_snd_voice_open(VirtIOSound *snd,
                                       VirtIOSoundPCMStream *stream,
                                       const char *stream_name,
@@ -1555,24 +1578,12 @@ static void virtio_snd_handle_rx(VirtIODevice *vdev, VirtQueue *vq) {
     virtio_snd_handle_rx_impl(VIRTIO_SND(vdev), vq);
 }
 
-static SWVoiceIn *virtio_snd_set_voice_in(SWVoiceIn *voice) {
-    return voice;  /* TODO */
-}
-
-static SWVoiceIn *virtio_snd_get_voice_in() {
-    return NULL;  /* TODO */
-}
-
 static void virtio_snd_device_realize(DeviceState *dev, Error **errp) {
     VirtIOSound *snd = VIRTIO_SND(dev);
     VirtIODevice *vdev = &snd->parent;
     int i;
 
     AUD_register_card(TYPE_VIRTIO_SND, &snd->card);
-
-    for (i = 0; i < VIRTIO_SND_NUM_PCM_STREAMS; ++i) {
-        virtio_snd_stream_init(i, &snd->streams[i], snd);
-    }
 
     virtio_init(vdev, TYPE_VIRTIO_SND, VIRTIO_ID_SOUND,
                 sizeof(struct virtio_snd_config));
@@ -1584,6 +1595,10 @@ static void virtio_snd_device_realize(DeviceState *dev, Error **errp) {
                                   virtio_snd_handle_tx);
     snd->rx_vq = virtio_add_queue(vdev, VIRTIO_SND_NUM_PCM_RX_STREAMS * 8,
                                   virtio_snd_handle_rx);
+
+    for (i = 0; i < VIRTIO_SND_NUM_PCM_STREAMS; ++i) {
+        virtio_snd_stream_init(i, &snd->streams[i], snd);
+    }
 
     audio_forwarder_register_card(&virtio_snd_set_voice_in, &virtio_snd_get_voice_in);
 }
@@ -1602,13 +1617,13 @@ static void virtio_snd_device_unrealize(DeviceState *dev, Error **errp) {
         virtio_snd_voice_close(snd, stream);
     }
 
-    AUD_remove_card(&snd->card);
-
     virtio_del_queue(vdev, VIRTIO_SND_QUEUE_RX);
     virtio_del_queue(vdev, VIRTIO_SND_QUEUE_TX);
     virtio_del_queue(vdev, VIRTIO_SND_QUEUE_EVENT);
     virtio_del_queue(vdev, VIRTIO_SND_QUEUE_CTL);
     virtio_cleanup(vdev);
+
+    AUD_remove_card(&snd->card);
 }
 
 static uint64_t virtio_snd_device_get_features(VirtIODevice *vdev,
