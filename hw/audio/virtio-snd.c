@@ -19,6 +19,7 @@
 #include "qemu/typedefs.h"
 #include "qapi/error.h"
 #include "standard-headers/linux/virtio_ids.h"
+#include "audio/audio_forwarder.h"
 #include "hw/audio/soundhw.h"
 #include "hw/virtio/virtio-snd.h"
 #include "hw/pci/pci.h"
@@ -1554,6 +1555,14 @@ static void virtio_snd_handle_rx(VirtIODevice *vdev, VirtQueue *vq) {
     virtio_snd_handle_rx_impl(VIRTIO_SND(vdev), vq);
 }
 
+static SWVoiceIn *virtio_snd_set_voice_in(SWVoiceIn *voice) {
+    return voice;  /* TODO */
+}
+
+static SWVoiceIn *virtio_snd_get_voice_in() {
+    return NULL;  /* TODO */
+}
+
 static void virtio_snd_device_realize(DeviceState *dev, Error **errp) {
     VirtIOSound *snd = VIRTIO_SND(dev);
     VirtIODevice *vdev = &snd->parent;
@@ -1575,12 +1584,16 @@ static void virtio_snd_device_realize(DeviceState *dev, Error **errp) {
                                   virtio_snd_handle_tx);
     snd->rx_vq = virtio_add_queue(vdev, VIRTIO_SND_NUM_PCM_RX_STREAMS * 8,
                                   virtio_snd_handle_rx);
+
+    audio_forwarder_register_card(&virtio_snd_set_voice_in, &virtio_snd_get_voice_in);
 }
 
 static void virtio_snd_device_unrealize(DeviceState *dev, Error **errp) {
     VirtIOSound *snd = VIRTIO_SND(dev);
     VirtIODevice *vdev = &snd->parent;
     unsigned i;
+
+    audio_forwarder_register_card(NULL, NULL);
 
     for (i = 0; i < VIRTIO_SND_NUM_PCM_STREAMS; ++i) {
         VirtIOSoundPCMStream *stream = &snd->streams[i];
