@@ -1585,10 +1585,6 @@ static void virtio_snd_device_realize(DeviceState *dev, Error **errp) {
 
     AUD_register_card(TYPE_VIRTIO_SND, &snd->card);
 
-    for (i = 0; i < VIRTIO_SND_NUM_PCM_STREAMS; ++i) {
-        virtio_snd_stream_init(i, &snd->streams[i], snd);
-    }
-
     virtio_init(vdev, TYPE_VIRTIO_SND, VIRTIO_ID_SOUND,
                 sizeof(struct virtio_snd_config));
     snd->ctl_vq = virtio_add_queue(vdev, VIRTIO_SND_NUM_PCM_STREAMS * 4,
@@ -1599,6 +1595,10 @@ static void virtio_snd_device_realize(DeviceState *dev, Error **errp) {
                                   virtio_snd_handle_tx);
     snd->rx_vq = virtio_add_queue(vdev, VIRTIO_SND_NUM_PCM_RX_STREAMS * 8,
                                   virtio_snd_handle_rx);
+
+    for (i = 0; i < VIRTIO_SND_NUM_PCM_STREAMS; ++i) {
+        virtio_snd_stream_init(i, &snd->streams[i], snd);
+    }
 
     audio_forwarder_register_card(&virtio_snd_set_voice_in, &virtio_snd_get_voice_in);
 }
@@ -1617,13 +1617,13 @@ static void virtio_snd_device_unrealize(DeviceState *dev, Error **errp) {
         virtio_snd_voice_close(snd, stream);
     }
 
-    AUD_remove_card(&snd->card);
-
     virtio_del_queue(vdev, VIRTIO_SND_QUEUE_RX);
     virtio_del_queue(vdev, VIRTIO_SND_QUEUE_TX);
     virtio_del_queue(vdev, VIRTIO_SND_QUEUE_EVENT);
     virtio_del_queue(vdev, VIRTIO_SND_QUEUE_CTL);
     virtio_cleanup(vdev);
+
+    AUD_remove_card(&snd->card);
 }
 
 static uint64_t virtio_snd_device_get_features(VirtIODevice *vdev,
