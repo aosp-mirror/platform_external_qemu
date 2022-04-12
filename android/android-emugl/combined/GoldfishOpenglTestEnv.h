@@ -14,6 +14,7 @@
 #pragma once
 
 #include <vector>
+#include "android/emulation/testing/TemporaryCommandLineOptions.h"
 
 namespace android {
 namespace base {
@@ -47,4 +48,7 @@ public:
     void loadSnapshot(android::base::Stream* stream);
 
     android::base::MemStream* snapshotStream = nullptr;
+private:
+    AndroidOptions mTestEnvCmdLineOptions{};
+    TemporaryCommandLineOptions mTcl{&mTestEnvCmdLineOptions};
 };

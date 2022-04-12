@@ -14,18 +14,18 @@
 
 #include "android/emulation/control/adb/AdbInterface.h"
 
-#include <assert.h>                                        // for assert
-#include <inttypes.h>                                      // for PRId64
-#include <stdint.h>                                        // for int64_t
-#include <cstdio>                                          // for printf
-#include <fstream>                                         // for fstream
-#include <limits>                                          // for numeric_li...
-#include <queue>                                           // for queue
-#include <sstream>                                         // for basic_stri...
-#include <string>                                          // for string
-#include <thread>                                          // for thread
-#include <tuple>                                           // for tie, tuple
-#include <utility>                                         // for pair, move
+#include <assert.h>    // for assert
+#include <inttypes.h>  // for PRId64
+#include <stdint.h>    // for int64_t
+#include <cstdio>      // for printf
+#include <fstream>     // for fstream
+#include <limits>      // for numeric_li...
+#include <queue>       // for queue
+#include <sstream>     // for basic_stri...
+#include <string>      // for string
+#include <thread>      // for thread
+#include <tuple>       // for tie, tuple
+#include <utility>     // for pair, move
 
 #include "android/avd/info.h"                              // for avdInfo_ge...
 #include "android/avd/util.h"                              // for ANDROID_AV...
@@ -351,7 +351,9 @@ class AdbLocatorImpl : public AdbLocator {
 // Gets the reported adb protocol version from the given executable
 // This is the last digit in the adb version string.
 static Optional<int> extractProtocolVersion(StringView adbPath) {
-    if (!android_qemu_mode) return {};
+    if (!android_qemu_mode) {
+        return {};
+    }
     const std::vector<std::string> adbVersion = {adbPath, "version"};
     int protocol = 0;
     // Retrieve the adb version.
@@ -367,7 +369,6 @@ static Optional<int> extractProtocolVersion(StringView adbPath) {
     LOG(VERBOSE) << "Path:" << adbPath << " protocol version: " << protocol;
     return Optional<int>(protocol);
 }
-
 
 // Construct the platform path with adb executable:
 // Returns nothing:
@@ -490,7 +491,9 @@ AdbInterfaceImpl::AdbInterfaceImpl(Looper* looper,
                                    AdbLocator* locator,
                                    AdbDaemon* daemon)
     : mLooper(looper), mLocator(locator), mDaemon(daemon) {
-    if (!android_qemu_mode) return;
+    if (!android_qemu_mode) {
+        return;
+    }
     discoverAdbInstalls();
     selectAdbPath();
 }
@@ -500,16 +503,16 @@ AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         ResultCallback result_callback,
         System::Duration timeout_ms,
         bool want_output) {
-
     if (!android_qemu_mode) {
         return {};
     }
 
     AdbCommandPtr command;
-    if (!(android_cmdLineOptions && android_cmdLineOptions->no_direct_adb) && AdbConnection::failed() &&
+    if (getConsoleAgents()->settings->android_cmdLineOptions()->no_direct_adb &&
+        AdbConnection::failed() &&
         (args[0] == "shell" || args[0] == "logcat")) {
-        command = std::make_shared<AdbDirect>(
-                args, std::move(result_callback), want_output);
+        command = std::make_shared<AdbDirect>(args, std::move(result_callback),
+                                              want_output);
     } else {
         command = std::make_shared<AdbThroughExe>(
                 mLooper, adbPath(), mSerialString, args, want_output,
@@ -650,8 +653,10 @@ void AdbThroughExe::taskFunction(OptionalAdbCommandResult* result) {
 AdbCommandResult::AdbCommandResult(System::ProcessExitCode exitCode,
                                    const std::string& outputName)
     : exit_code(exitCode),
-      output(outputName.empty() ? nullptr
-                                : new std::ifstream(PathUtils::asUnicodePath(outputName).c_str())),
+      output(outputName.empty()
+                     ? nullptr
+                     : new std::ifstream(
+                               PathUtils::asUnicodePath(outputName).c_str())),
       output_name(outputName) {}
 
 AdbCommandResult::AdbCommandResult(
@@ -670,13 +675,13 @@ AdbCommandResult::~AdbCommandResult() {
 }  // namespace android
 
 extern "C" void enqueueAdbCommand(char* channel, char* command) {
-  android::emulation::AdbInterface* interface =
-      android::emulation::AdbInterface::getGlobal();
-  if (!interface) {
-      LOG(WARNING) << "adb interface not available";
-      return;
-  }
-  std::vector<std::string> cmd{channel, command};
-  interface->enqueueCommand(cmd);
-  return;
+    android::emulation::AdbInterface* interface =
+            android::emulation::AdbInterface::getGlobal();
+    if (!interface) {
+        LOG(WARNING) << "adb interface not available";
+        return;
+    }
+    std::vector<std::string> cmd{channel, command};
+    interface->enqueueCommand(cmd);
+    return;
 }

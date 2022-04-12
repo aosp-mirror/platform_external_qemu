@@ -907,6 +907,7 @@ function(android_add_test)
     LINUX ${build_LINUX} DARWIN ${build_DARWIN} WINDOWS ${build_WINDOWS}
     NODISTRIBUTE)
 
+  android_target_dependency(${build_TARGET} linux TCMALLOC_OS_DEPENDENCIES)
   add_test(
     NAME ${build_TARGET}
     COMMAND

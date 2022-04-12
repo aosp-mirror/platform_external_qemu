@@ -14,14 +14,14 @@
 
 #include "android/recording/screen-recorder.h"
 
-#include <assert.h>                                          // for assert
-#include <string.h>                                          // for strlen
-#include <atomic>                                            // for atomic
-#include <functional>                                        // for __base
-#include <memory>                                            // for unique_ptr
-#include <string>                                            // for basic_st...
+#include <assert.h>    // for assert
+#include <string.h>    // for strlen
+#include <atomic>      // for atomic
+#include <functional>  // for __base
+#include <memory>      // for unique_ptr
+#include <string>      // for basic_st...
 #include <thread>
-#include <utility>                                           // for move
+#include <utility>  // for move
 
 #include "android/android.h"                                 // for android_...
 #include "android/base/Log.h"                                // for LOG, Log...
@@ -313,7 +313,10 @@ bool ScreenRecorder::parseRecordingInfo(RecordingInfo& info) {
         D("Defaulting time limit to %d seconds", kDefaultTimeLimit);
         info.timeLimit = kDefaultTimeLimit;
     } else if (info.timeLimit > kMaxTimeLimit &&
-               !(android_cmdLineOptions && android_cmdLineOptions->record_session)) {
+               !(getConsoleAgents()->settings->has_cmdLineOptions() &&
+                 getConsoleAgents()
+                         ->settings->android_cmdLineOptions()
+                         ->record_session)) {
         // Allow indefinite recording for emulator recording sessions.
         D("Defaulting time limit to %d seconds", kMaxTimeLimit);
         info.timeLimit = kMaxTimeLimit;
@@ -348,11 +351,12 @@ static void screen_recorder_record_session(const char* cmdLineArgs) {
     // Format is <filename>,<delay[,<duration>].
     // If no duration, then record until the emulator shuts down.
     std::vector<std::string> tokens;
-    android::base::split(cmdLineArgs, ",", [&tokens](android::base::StringView s) {
-        if (!s.empty()) {
-            tokens.push_back(s);
-        }
-    });
+    android::base::split(cmdLineArgs, ",",
+                         [&tokens](android::base::StringView s) {
+                             if (!s.empty()) {
+                                 tokens.push_back(s);
+                             }
+                         });
 
     if (tokens.size() < 2) {
         derror("Not enough arguments for record-session");
@@ -374,19 +378,23 @@ static void screen_recorder_record_session(const char* cmdLineArgs) {
         duration = atoi(tokens[2].c_str());
     }
 
-    std::thread(std::bind([](std::string filename, int delay, int duration) {
-        RecordingInfo info = {};
-        if (delay > 0) {
-            android::base::Thread::sleepMs(delay * 1000);
-        }
-        info.fileName = filename.c_str();
-        info.timeLimit = duration;
-        // Make the quality and fps low, so we don't have so much cpu usage.
-        info.fps = 3;
-        info.videoBitrate = 500000;
-        info.displayId = 0;
-        screen_recorder_start(&info, true);
-    }, tokens[0], delay, duration)).detach();
+    std::thread(std::bind(
+                        [](std::string filename, int delay, int duration) {
+                            RecordingInfo info = {};
+                            if (delay > 0) {
+                                android::base::Thread::sleepMs(delay * 1000);
+                            }
+                            info.fileName = filename.c_str();
+                            info.timeLimit = duration;
+                            // Make the quality and fps low, so we don't have so
+                            // much cpu usage.
+                            info.fps = 3;
+                            info.videoBitrate = 500000;
+                            info.displayId = 0;
+                            screen_recorder_start(&info, true);
+                        },
+                        tokens[0], delay, duration))
+            .detach();
 }
 void screen_recorder_init(uint32_t w,
                           uint32_t h,
@@ -411,8 +419,14 @@ void screen_recorder_init(uint32_t w,
         }
     }
 
-    if (android_cmdLineOptions && android_cmdLineOptions->record_session) {
-        screen_recorder_record_session(android_cmdLineOptions->record_session);
+    if (getConsoleAgents()->settings->has_cmdLineOptions() &&
+        getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->record_session) {
+        screen_recorder_record_session(
+                getConsoleAgents()
+                        ->settings->android_cmdLineOptions()
+                        ->record_session);
     }
 
     D("%s(w=%d, h=%d, isGuestMode=%d)", __func__, w, h, dpy_agent != nullptr);
@@ -425,8 +439,8 @@ bool screen_recorder_start(const RecordingInfo* info, bool async) {
 
     // Check if the display is created. For guest mode, display 0 return true.
     uint32_t w, h, cb = 0;
-    if (globals.multiDisplayAgent->getMultiDisplay(info->displayId, nullptr, nullptr,
-                                                   &w, &h, nullptr,
+    if (globals.multiDisplayAgent->getMultiDisplay(info->displayId, nullptr,
+                                                   nullptr, &w, &h, nullptr,
                                                    nullptr, nullptr) == false) {
         return false;
     }
@@ -437,7 +451,8 @@ bool screen_recorder_start(const RecordingInfo* info, bool async) {
         }
     }
 
-    globals.recorder.reset(new ScreenRecorder(w, h, info, globals.displayAgent));
+    globals.recorder.reset(
+            new ScreenRecorder(w, h, info, globals.displayAgent));
     return globals.recorder->startRecording(async);
 }
 

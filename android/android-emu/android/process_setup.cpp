@@ -11,8 +11,8 @@
 
 #include "android/process_setup.h"
 
-#include <string>                               // for string
-#include <vector>                               // for vector
+#include <string>  // for string
+#include <vector>  // for vector
 
 #include "android/base/Debug.h"                 // for WaitForDebugger
 #include "android/base/Log.h"                   // for LOG, LogMessage
@@ -62,10 +62,6 @@ void process_early_setup(int argc, char** argv) {
     android_socket_init();
 
     filelock_init();
-
-    // ParameterList params(argc, argv);
-    android_cmdLine = android::base::strDup(
-            android::base::createEscapedLaunchString(argc, argv));
 
     // Catch crashes in everything.
     // This promises to not launch any threads...

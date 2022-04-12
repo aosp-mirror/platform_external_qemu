@@ -134,37 +134,34 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
                 mEmulatorWindow->getAdbInterface());
     }
 
-    connect(
-        mExtendedUi->settingsPage, SIGNAL(frameAlwaysChanged(bool)),
-        this, SLOT(switchFrameAlways(bool)));
+    connect(mExtendedUi->settingsPage, SIGNAL(frameAlwaysChanged(bool)), this,
+            SLOT(switchFrameAlways(bool)));
 
-    connect(
-        mExtendedUi->settingsPage, SIGNAL(onTopChanged(bool)),
-        this, SLOT(switchOnTop(bool)));
+    connect(mExtendedUi->settingsPage, SIGNAL(onTopChanged(bool)), this,
+            SLOT(switchOnTop(bool)));
 
-    connect(
-        mExtendedUi->settingsPage, SIGNAL(onForwardShortcutsToDeviceChanged(int)),
-        mEmulatorWindow, SLOT(setForwardShortcutsToDevice(int)));
+    connect(mExtendedUi->settingsPage,
+            SIGNAL(onForwardShortcutsToDeviceChanged(int)), mEmulatorWindow,
+            SLOT(setForwardShortcutsToDevice(int)));
 
-    connect(
-        mExtendedUi->settingsPage, SIGNAL(themeChanged(SettingsTheme)),
-        this, SLOT(switchToTheme(SettingsTheme)));
+    connect(mExtendedUi->settingsPage, SIGNAL(themeChanged(SettingsTheme)),
+            this, SLOT(switchToTheme(SettingsTheme)));
 
     connect(mToolWindow, SIGNAL(themeChanged(SettingsTheme)), this,
             SLOT(switchToTheme(SettingsTheme)), Qt::DirectConnection);
 
     connect(mExtendedUi->settingsPage, SIGNAL(disableMouseWheelChanged(bool)),
-        this, SLOT(disableMouseWheel(bool)));
+            this, SLOT(disableMouseWheel(bool)));
 
-    connect(mExtendedUi->settingsPage, SIGNAL(pauseAvdWhenMinimizedChanged(bool)),
-        this, SLOT(pauseAvdWhenMinimized(bool)));
+    connect(mExtendedUi->settingsPage,
+            SIGNAL(pauseAvdWhenMinimizedChanged(bool)), this,
+            SLOT(pauseAvdWhenMinimized(bool)));
 
-    connect(
-        mExtendedUi->settingsPage, SIGNAL(enableClipboardSharingChanged(bool)),
-        mToolWindow, SLOT(switchClipboardSharing(bool)));
-    connect(
-        mToolWindow, SIGNAL(haveClipboardSharingKnown(bool)),
-        mExtendedUi->settingsPage, SLOT(setHaveClipboardSharing(bool)));
+    connect(mExtendedUi->settingsPage,
+            SIGNAL(enableClipboardSharingChanged(bool)), mToolWindow,
+            SLOT(switchClipboardSharing(bool)));
+    connect(mToolWindow, SIGNAL(haveClipboardSharingKnown(bool)),
+            mExtendedUi->settingsPage, SLOT(setHaveClipboardSharing(bool)));
 
     connect(mExtendedUi->recordAndPlaybackPage,
             SIGNAL(ensureVirtualSceneWindowCreated()), mToolWindow,
@@ -200,7 +197,9 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
 
     setObjectName("ExtendedControls");
     // Use different title for Embedded Emuator in Studio.
-    if (android_cmdLineOptions->qt_hide_window) {
+    if (getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->qt_hide_window) {
         const auto* cfgIni = reinterpret_cast<const android::base::IniFile*>(
                 avdInfo_getConfigIni(android_avdInfo));
         // If key avd.ini.displayname doesn't exists, use android_hw->avd_name
@@ -210,20 +209,23 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
         setWindowTitle(displayName.c_str() + QString(" - Extended Controls"));
 
     } else {
-        setWindowTitle(QString("Extended Controls - ") + android_hw->avd_name
-                   + ":" + QString::number(android_serial_number_port));
+        setWindowTitle(QString("Extended Controls - ") + android_hw->avd_name +
+                       ":" + QString::number(android_serial_number_port));
     }
-    if (android_cmdLineOptions && android_cmdLineOptions->no_location_ui) {
+    if (getConsoleAgents()->settings->has_cmdLineOptions() &&
+        getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->no_location_ui) {
         mExtendedUi->locationButton->setVisible(false);
     } else {
         mSidebarButtons.addButton(mExtendedUi->locationButton);
     }
 
-    if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay) &&
+    if (android::featurecontrol::isEnabled(
+                android::featurecontrol::MultiDisplay) &&
         !android_foldable_any_folded_area_configured() &&
         !android_foldable_hinge_configured() &&
-        !android_foldable_rollable_configured() &&
-        !resizableEnabled() &&
+        !android_foldable_rollable_configured() && !resizableEnabled() &&
         avdInfo_getAvdFlavor(android_avdInfo) != AVD_TV &&
         avdInfo_getAvdFlavor(android_avdInfo) != AVD_WEAR &&
         avdInfo_getAvdFlavor(android_avdInfo) != AVD_ANDROID_AUTO) {
@@ -246,8 +248,9 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     mSidebarButtons.addButton(mExtendedUi->fingerButton);
 
     // Currently, the camera page only contains options for the virtual scene
-    // camera.  Hide the button if the virtual scene camera is not enabled, or if we are using an Android Auto image because that does not
-    // have camera support at the moment.
+    // camera.  Hide the button if the virtual scene camera is not enabled, or
+    // if we are using an Android Auto image because that does not have camera
+    // support at the moment.
     if (androidHwConfig_hasVirtualSceneCamera(android_hw) &&
         (!android_avdInfo ||
          (avdInfo_getAvdFlavor(android_avdInfo) != AVD_ANDROID_AUTO))) {
@@ -259,8 +262,11 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
 
     mSidebarButtons.addButton(mExtendedUi->virtSensorsButton);
 
-    if (android::featurecontrol::isEnabled(android::featurecontrol::GenericSnapshotsUI) &&
-        !android_cmdLineOptions->qt_hide_window) {
+    if (android::featurecontrol::isEnabled(
+                android::featurecontrol::GenericSnapshotsUI) &&
+        !getConsoleAgents()
+                 ->settings->android_cmdLineOptions()
+                 ->qt_hide_window) {
         mSidebarButtons.addButton(mExtendedUi->snapshotButton);
         mExtendedUi->snapshotButton->setVisible(true);
     } else {
@@ -271,9 +277,9 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
     mSidebarButtons.addButton(mExtendedUi->helpButton);
 
-    if (android::featurecontrol::isEnabled(android::featurecontrol::PlayStoreImage) &&
-        android_hw->PlayStore_enabled)
-    {
+    if (android::featurecontrol::isEnabled(
+                android::featurecontrol::PlayStoreImage) &&
+        android_hw->PlayStore_enabled) {
         mSidebarButtons.addButton(mExtendedUi->googlePlayButton);
         mExtendedUi->googlePlayPage->initialize(
                 mEmulatorWindow->getAdbInterface());
@@ -322,7 +328,8 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
             mExtendedUi->sensorReplayButton->setVisible(false);
         }
 
-        if (android::featurecontrol::isEnabled(android::featurecontrol::CarRotary) &&
+        if (android::featurecontrol::isEnabled(
+                    android::featurecontrol::CarRotary) &&
             avdInfo_getApiLevel(android_avdInfo) >= 30 /* Android 11 */) {
             mSidebarButtons.addButton(mExtendedUi->carRotaryButton);
             mExtendedUi->carRotaryButton->setVisible(true);
@@ -337,8 +344,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     }
 #endif
 
-    connect(mExtendedUi->location_page,
-            SIGNAL(targetHeadingChanged(double)),
+    connect(mExtendedUi->location_page, SIGNAL(targetHeadingChanged(double)),
             mExtendedUi->virtualSensorsPage,
             SLOT(setTargetHeadingDegrees(double)));
 
@@ -346,18 +352,22 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
             settings.value(Ui::Settings::CLIPBOARD_SHARING, true).toBool();
     mToolWindow->switchClipboardSharing(enableClipboardSharing);
 
-    mEmulatorWindow->setPauseAvdWhenMinimized(SettingsPage::getPauseAvdWhenMinimized());
+    mEmulatorWindow->setPauseAvdWhenMinimized(
+            SettingsPage::getPauseAvdWhenMinimized());
 }
 
 ExtendedWindow::~ExtendedWindow() {
     mExtendedUi->location_page->requestStopLoadingGeoData();
-    if (android_cmdLineOptions->qt_hide_window && !mFirstShowEvent) {
+    if (getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->qt_hide_window &&
+        !mFirstShowEvent) {
         auto userConfig = aemu_get_userConfigPtr();
         QRect geom = geometry();
-        auserConfig_setExtendedControlsPos(userConfig, geom.x(), geom.y(), mHAnchor, mVAnchor);
+        auserConfig_setExtendedControlsPos(userConfig, geom.x(), geom.y(),
+                                           mHAnchor, mVAnchor);
     }
 }
-
 
 // Translates an ExtendWindowPane value into a human
 // readable string. Translation is done by
@@ -395,8 +405,8 @@ static std::string translate_idx(ExtendedWindowPane value) {
     }
 #undef PANE
     // Remove _IDX from the string.
-    assert(s.substr(0,8) == "PANE_IDX");
-    return s.replace(4,4,"");
+    assert(s.substr(0, 8) == "PANE_IDX");
+    return s.replace(4, 4, "");
 }
 
 void ExtendedWindow::sendMetricsOnShutDown() {
@@ -410,8 +420,10 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         BatteryPage::setBatteryAgent(agentPtr->battery);
         CellularPage::setCellularAgent(agentPtr->cellular);
         FingerPage::setFingerAgent(agentPtr->finger);
-        if (!android_cmdLineOptions || !android_cmdLineOptions->no_location_ui) {
-          LocationPage::setLocationAgent(agentPtr->location);
+        if (!getConsoleAgents()
+                     ->settings->android_cmdLineOptions()
+                     ->no_location_ui) {
+            LocationPage::setLocationAgent(agentPtr->location);
         }
         SettingsPage::setHttpProxyAgent(agentPtr->proxy);
         TelephonyPage::setTelephonyAgent(agentPtr->telephony);
@@ -421,21 +433,24 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         RecordScreenPage::setRecordScreenAgent(agentPtr->record);
         if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
             CarDataPage::setCarDataAgent(agentPtr->car);
-            SensorReplayPage::setAgent(agentPtr->car, agentPtr->location, agentPtr->sensors);
+            SensorReplayPage::setAgent(agentPtr->car, agentPtr->location,
+                                       agentPtr->sensors);
         }
     }
 }
 
 // static
 void ExtendedWindow::shutDown() {
-    if (!android_cmdLineOptions || !android_cmdLineOptions->no_location_ui) {
-      LocationPage::shutDown();
+    if (!getConsoleAgents()
+                 ->settings->android_cmdLineOptions()
+                 ->no_location_ui) {
+        LocationPage::shutDown();
     }
 }
 
 void ExtendedWindow::show() {
     // bug: 183660415
-    // As reported in KDE desktop environment, a minimize button is shown and 
+    // As reported in KDE desktop environment, a minimize button is shown and
     // we need to show minimized window differently.
     if (isMinimized()) {
         QFrame::showNormal();
@@ -449,9 +464,9 @@ void ExtendedWindow::show() {
 #if QT_VERSION >= 0x060000
     QRect screenGeo = this->screen()->geometry();
 #else
-    QDesktopWidget *desktop = static_cast<QApplication*>(
-                                     QApplication::instance() )->desktop();
-    int screenNum = desktop->screenNumber(this); // Screen holding most of this
+    QDesktopWidget* desktop =
+            static_cast<QApplication*>(QApplication::instance())->desktop();
+    int screenNum = desktop->screenNumber(this);  // Screen holding most of this
     QRect screenGeo = desktop->screenGeometry(screenNum);
 #endif  // QT_VERSION
     QRect myGeo = geometry();
@@ -516,7 +531,7 @@ void ExtendedWindow::connectVirtualSceneWindow(
             SLOT(showMacroRecordPage()));
 }
 
-void ExtendedWindow::closeEvent(QCloseEvent *e) {
+void ExtendedWindow::closeEvent(QCloseEvent* e) {
     // Merely hide the window the widget is closed, do not destroy state.
     e->ignore();
     hide();
@@ -527,34 +542,71 @@ void ExtendedWindow::keyPressEvent(QKeyEvent* e) {
 }
 
 // Tab buttons. Each raises its stacked pane to the top.
-void ExtendedWindow::on_batteryButton_clicked()      { adjustTabs(PANE_IDX_BATTERY); }
-void ExtendedWindow::on_cameraButton_clicked()       { adjustTabs(PANE_IDX_CAMERA); }
-void ExtendedWindow::on_bugreportButton_clicked()    { adjustTabs(PANE_IDX_BUGREPORT); }
-void ExtendedWindow::on_cellularButton_clicked()     { adjustTabs(PANE_IDX_CELLULAR); }
+void ExtendedWindow::on_batteryButton_clicked() {
+    adjustTabs(PANE_IDX_BATTERY);
+}
+void ExtendedWindow::on_cameraButton_clicked() {
+    adjustTabs(PANE_IDX_CAMERA);
+}
+void ExtendedWindow::on_bugreportButton_clicked() {
+    adjustTabs(PANE_IDX_BUGREPORT);
+}
+void ExtendedWindow::on_cellularButton_clicked() {
+    adjustTabs(PANE_IDX_CELLULAR);
+}
 void ExtendedWindow::on_dpadButton_clicked() {
-    if (android::featurecontrol::isEnabled(android::featurecontrol::TvRemote)
-        && avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV) {
+    if (android::featurecontrol::isEnabled(android::featurecontrol::TvRemote) &&
+        avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV) {
         adjustTabs(PANE_IDX_TV_REMOTE);
     } else {
         adjustTabs(PANE_IDX_DPAD);
     }
-
 }
-void ExtendedWindow::on_displaysButton_clicked()     { adjustTabs(PANE_IDX_MULTIDISPLAY); }
-void ExtendedWindow::on_rotaryInputButton_clicked()  { adjustTabs(PANE_IDX_ROTARY); }
-void ExtendedWindow::on_fingerButton_clicked()       { adjustTabs(PANE_IDX_FINGER); }
-void ExtendedWindow::on_helpButton_clicked()         { adjustTabs(PANE_IDX_HELP); }
-void ExtendedWindow::on_locationButton_clicked()     { adjustTabs(PANE_IDX_LOCATION); }
-void ExtendedWindow::on_microphoneButton_clicked()   { adjustTabs(PANE_IDX_MICROPHONE); }
-void ExtendedWindow::on_settingsButton_clicked()     { adjustTabs(PANE_IDX_SETTINGS); }
-void ExtendedWindow::on_telephoneButton_clicked()    { adjustTabs(PANE_IDX_TELEPHONE); }
-void ExtendedWindow::on_virtSensorsButton_clicked()  { adjustTabs(PANE_IDX_VIRT_SENSORS); }
-void ExtendedWindow::on_snapshotButton_clicked()     { adjustTabs(PANE_IDX_SNAPSHOT); }
-void ExtendedWindow::on_recordButton_clicked()       { adjustTabs(PANE_IDX_RECORD); }
-void ExtendedWindow::on_googlePlayButton_clicked()   { adjustTabs(PANE_IDX_GOOGLE_PLAY); }
-void ExtendedWindow::on_carDataButton_clicked()      { adjustTabs(PANE_IDX_CAR); }
-void ExtendedWindow::on_carRotaryButton_clicked()    { adjustTabs(PANE_IDX_CAR_ROTARY); }
-void ExtendedWindow::on_sensorReplayButton_clicked() { adjustTabs(PANE_IDX_SENSOR_REPLAY); }
+void ExtendedWindow::on_displaysButton_clicked() {
+    adjustTabs(PANE_IDX_MULTIDISPLAY);
+}
+void ExtendedWindow::on_rotaryInputButton_clicked() {
+    adjustTabs(PANE_IDX_ROTARY);
+}
+void ExtendedWindow::on_fingerButton_clicked() {
+    adjustTabs(PANE_IDX_FINGER);
+}
+void ExtendedWindow::on_helpButton_clicked() {
+    adjustTabs(PANE_IDX_HELP);
+}
+void ExtendedWindow::on_locationButton_clicked() {
+    adjustTabs(PANE_IDX_LOCATION);
+}
+void ExtendedWindow::on_microphoneButton_clicked() {
+    adjustTabs(PANE_IDX_MICROPHONE);
+}
+void ExtendedWindow::on_settingsButton_clicked() {
+    adjustTabs(PANE_IDX_SETTINGS);
+}
+void ExtendedWindow::on_telephoneButton_clicked() {
+    adjustTabs(PANE_IDX_TELEPHONE);
+}
+void ExtendedWindow::on_virtSensorsButton_clicked() {
+    adjustTabs(PANE_IDX_VIRT_SENSORS);
+}
+void ExtendedWindow::on_snapshotButton_clicked() {
+    adjustTabs(PANE_IDX_SNAPSHOT);
+}
+void ExtendedWindow::on_recordButton_clicked() {
+    adjustTabs(PANE_IDX_RECORD);
+}
+void ExtendedWindow::on_googlePlayButton_clicked() {
+    adjustTabs(PANE_IDX_GOOGLE_PLAY);
+}
+void ExtendedWindow::on_carDataButton_clicked() {
+    adjustTabs(PANE_IDX_CAR);
+}
+void ExtendedWindow::on_carRotaryButton_clicked() {
+    adjustTabs(PANE_IDX_CAR_ROTARY);
+}
+void ExtendedWindow::on_sensorReplayButton_clicked() {
+    adjustTabs(PANE_IDX_SENSOR_REPLAY);
+}
 
 void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
     auto it = mPaneButtonMap.find(thisIndex);
@@ -562,7 +614,8 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
         return;
     }
 
-    if (mExtendedWindowWasShown && mExtendedUi->stackedWidget->currentIndex() != thisIndex) {
+    if (mExtendedWindowWasShown &&
+        mExtendedUi->stackedWidget->currentIndex() != thisIndex) {
         mPaneInvocationTracker->increment(translate_idx(thisIndex));
     }
     QPushButton* thisButton = it->second;
@@ -571,13 +624,14 @@ void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
     mExtendedUi->stackedWidget->setCurrentIndex(static_cast<int>(thisIndex));
 }
 
-void ExtendedWindow::switchFrameAlways(bool showFrame)
-{
+void ExtendedWindow::switchFrameAlways(bool showFrame) {
     mEmulatorWindow->setFrameAlways(showFrame);
 }
 
 void ExtendedWindow::switchOnTop(bool isOnTop) {
-    if (android_cmdLineOptions->qt_hide_window) {
+    if (getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->qt_hide_window) {
         setFrameOnTop(this, isOnTop);
     }
     mEmulatorWindow->setOnTop(isOnTop);
@@ -629,7 +683,9 @@ void ExtendedWindow::pauseAvdWhenMinimized(bool pause) {
 void ExtendedWindow::showEvent(QShowEvent* e) {
     if (mFirstShowEvent && !e->spontaneous()) {
         bool moved = false;
-        if (android_cmdLineOptions->qt_hide_window) {
+        if (getConsoleAgents()
+                    ->settings->android_cmdLineOptions()
+                    ->qt_hide_window) {
             const QIcon icon(":/all/android_studio_icon");
             setWindowIcon(icon);
             auto userConfig = aemu_get_userConfigPtr();
@@ -662,9 +718,11 @@ void ExtendedWindow::showEvent(QShowEvent* e) {
 
         // Set the first tab active
 
-        // Programatically click the top sidebar button to get the correct page to show.
+        // Programatically click the top sidebar button to get the correct page
+        // to show.
         for (int i = 0; i < mExtendedUi->verticalLayout->count(); ++i) {
-            auto* pushBtn = reinterpret_cast<QPushButton*>(mExtendedUi->verticalLayout->itemAt(i)->widget());
+            auto* pushBtn = reinterpret_cast<QPushButton*>(
+                    mExtendedUi->verticalLayout->itemAt(i)->widget());
             if (pushBtn->isVisible()) {
                 pushBtn->click();
                 break;
@@ -699,7 +757,7 @@ void ExtendedWindow::hideEvent(QHideEvent* e) {
 
 void ExtendedWindow::waitForVisibility(bool visible) {
     std::unique_lock lk(mMutexVisible);
-    mCvVisible.wait(lk, [&] { return visible == mVisible;});
+    mCvVisible.wait(lk, [&] { return visible == mVisible; });
 }
 void ExtendedWindow::showMacroRecordPage() {
     show();
@@ -709,5 +767,6 @@ void ExtendedWindow::showMacroRecordPage() {
 
 void ExtendedWindow::hideRotationButtons() {
     mExtendedUi->virtualSensorsPage->hideRotationButtons(
-            mToolWindow->getUiEmuAgent()->multiDisplay->isMultiDisplayEnabled());
+            mToolWindow->getUiEmuAgent()
+                    ->multiDisplay->isMultiDisplayEnabled());
 }

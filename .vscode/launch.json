@@ -10,7 +10,7 @@
       "request": "launch",
       "program": "${command:cmake.launchTargetPath}",
       "args": [
-        // "--gtest_filter=foo.bar",
+         "--gtest_filter=FrameBufferTest.CreateOpenUpdateCloseColorBuffer_ReadYUV420",
       ],
       "cwd": "${workspaceFolder}",
       "stopAtEntry": false,

@@ -395,6 +395,24 @@ function(android_target_properties RUN_TARGET TARGET_TAG RUN_TARGET_PROPERTIES)
             "set_property(TARGET ${RUN_TARGET} PROPERTY '${KEY}' ${CURR_VAL} ${VAL})"
           )
         endif()
+      elseif(PROP MATCHES ".*<=.*")
+        # We are prepending
+        string(REPLACE "<=" ";" KEY_VAL ${PROP})
+        list(GET KEY_VAL 0 KEY)
+        list(GET KEY_VAL 1 VAL)
+        # Note we are not treating the propery as a list!
+        get_property(CURR_VAL TARGET ${RUN_TARGET} PROPERTY ${KEY})
+        # Of course we deal with lists differently on different platforms!
+        if(APPLE)
+          set_property(TARGET ${RUN_TARGET} PROPERTY "${KEY}"
+                                                     ${VAL};${CURR_VAL})
+          android_log(
+            "set_property(TARGET ${RUN_TARGET} PROPERTY '${KEY}' ${VAL};${CURR_VAL})"
+          )
+        else()
+          set_property(TARGET ${RUN_TARGET} PROPERTY "${KEY}"
+                                                     "${VAL} ${CURR_VAL}")
+        endif()
       else()
         # We are replacing
         string(REPLACE "=" ";" KEY_VAL ${PROP})

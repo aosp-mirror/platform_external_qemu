@@ -388,7 +388,7 @@ elseif(LINUX)
       ${PREBUILT_ROOT}/plugins/imageformats/libqwbmp.so>lib64/qt/plugins/imageformats/libqwbmp.so
   )
   set(QT5_SHARED_PROPERTIES
-      "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/lib';LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/lib/plugins'"
+      "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/lib'  -Wl,--disable-new-dtags;LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/lib/plugins'  -Wl,--disable-new-dtags"
   )
   set(QT5_LIBRARIES ${QT5_LIBRARIES} -lQt5Network)
 
@@ -442,7 +442,7 @@ elseif(LINUX)
     )
 
     list(APPEND QT5_SHARED_PROPERTIES
-         "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/libexec'")
+         "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/libexec'  -Wl,--disable-new-dtags")
   endif()
 
   if (LINUX_X86_64)

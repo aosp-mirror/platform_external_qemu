@@ -14,92 +14,92 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-#include <QtCore/qglobal.h>                               // for Q_OS_MAC
-#include <qapplication.h>                                 // for QApplicatio...
-#include <qcoreevent.h>                                   // for QEvent::Key...
-#include <qkeysequence.h>                                 // for QKeySequenc...
-#include <qmessagebox.h>                                  // for operator|
-#include <qnamespace.h>                                   // for AlignCenter
-#include <qobjectdefs.h>                                  // for SIGNAL, SLOT
-#include <qsettings.h>                                    // for QSettings::...
-#include <qstring.h>                                      // for operator+
-#include <stdint.h>                                       // for int64_t
-#include <stdio.h>                                        // for sprintf
-#include <QApplication>                                   // for QApplication
-#include <QByteArray>                                     // for QByteArray
-#include <QClipboard>                                     // for QClipboard
-#include <QCloseEvent>                                    // for QCloseEvent
+#include <QtCore/qglobal.h>  // for Q_OS_MAC
+#include <qapplication.h>    // for QApplicatio...
+#include <qcoreevent.h>      // for QEvent::Key...
+#include <qkeysequence.h>    // for QKeySequenc...
+#include <qmessagebox.h>     // for operator|
+#include <qnamespace.h>      // for AlignCenter
+#include <qobjectdefs.h>     // for SIGNAL, SLOT
+#include <qsettings.h>       // for QSettings::...
+#include <qstring.h>         // for operator+
+#include <stdint.h>          // for int64_t
+#include <stdio.h>           // for sprintf
+#include <QApplication>      // for QApplication
+#include <QByteArray>        // for QByteArray
+#include <QClipboard>        // for QClipboard
+#include <QCloseEvent>       // for QCloseEvent
 #if QT_VERSION >= 0x060000
-#include <QWindow>                                        // for QWindow
+#include <QWindow>  // for QWindow
 #else
-#include <QDesktopWidget>                                 // for QDesktopWidget
-#endif  // QT_VERSION
-#include <QEvent>                                         // for QEvent
-#include <QFlags>                                         // for QFlags
-#include <QFrame>                                         // for QFrame
-#include <QGuiApplication>                                // for QGuiApplica...
-#include <QHBoxLayout>                                    // for QHBoxLayout
-#include <QKeyEvent>                                      // for QKeyEvent
-#include <QKeySequence>                                   // for QKeySequence
-#include <QList>                                          // for QList
-#include <QMessageBox>                                    // for QMessageBox
-#include <QPainter>                                       // for QPainter
-#include <QPen>                                           // for QPen
-#include <QPushButton>                                    // for QPushButton
-#include <QRect>                                          // for QRect
-#include <QScreen>                                        // for QScreen
-#include <QSettings>                                      // for QSettings
-#include <QSignalBlocker>                                 // for QSignalBlocker
-#include <QString>                                        // for QString
-#include <QTextStream>                                    // for QTextStream
-#include <QVBoxLayout>                                    // for QVBoxLayout
-#include <QVariant>                                       // for QVariant
-#include <QVector>                                        // for QVector
-#include <QWidget>                                        // for QWidget
-#include <cassert>                                        // for assert
-#include <functional>                                     // for __base
-#include <memory>                                         // for unique_ptr
-#include <string>                                         // for string
-#include <tuple>                                          // for tuple
+#include <QDesktopWidget>   // for QDesktopWidget
+#endif                      // QT_VERSION
+#include <QEvent>           // for QEvent
+#include <QFlags>           // for QFlags
+#include <QFrame>           // for QFrame
+#include <QGuiApplication>  // for QGuiApplica...
+#include <QHBoxLayout>      // for QHBoxLayout
+#include <QKeyEvent>        // for QKeyEvent
+#include <QKeySequence>     // for QKeySequence
+#include <QList>            // for QList
+#include <QMessageBox>      // for QMessageBox
+#include <QPainter>         // for QPainter
+#include <QPen>             // for QPen
+#include <QPushButton>      // for QPushButton
+#include <QRect>            // for QRect
+#include <QScreen>          // for QScreen
+#include <QSettings>        // for QSettings
+#include <QSignalBlocker>   // for QSignalBlocker
+#include <QString>          // for QString
+#include <QTextStream>      // for QTextStream
+#include <QVBoxLayout>      // for QVBoxLayout
+#include <QVariant>         // for QVariant
+#include <QVector>          // for QVector
+#include <QWidget>          // for QWidget
+#include <cassert>          // for assert
+#include <functional>       // for __base
+#include <memory>           // for unique_ptr
+#include <string>           // for string
+#include <tuple>            // for tuple
 
-#include "android/avd/info.h"                             // for avdInfo_get...
-#include "android/avd/util.h"                             // for path_getAvd...
-#include "android/base/Log.h"                             // for LogMessage
-#include "android/base/memory/OnDemand.h"                 // for OnDemand
-#include "android/base/system/System.h"                   // for System
-#include "android/cmdline-option.h"                       // for AndroidOptions
-#include "android/emulation/control/adb/AdbInterface.h"       // for OptionalAdb...
-#include "android/emulation/control/clipboard_agent.h"    // for QAndroidCli...
-#include "android/emulator-window.h"                      // for emulator_wi...
-#include "android/featurecontrol/FeatureControl.h"        // for isEnabled
-#include "android/featurecontrol/Features.h"              // for QuickbootFi...
-#include "android/globals.h"                              // for android_hw
-#include "android/hw-events.h"                            // for EV_SW, EV_SYN
+#include "android/avd/info.h"                            // for avdInfo_get...
+#include "android/avd/util.h"                            // for path_getAvd...
+#include "android/base/Log.h"                            // for LogMessage
+#include "android/base/memory/OnDemand.h"                // for OnDemand
+#include "android/base/system/System.h"                  // for System
+#include "android/cmdline-option.h"                      // for AndroidOptions
+#include "android/emulation/control/adb/AdbInterface.h"  // for OptionalAdb...
+#include "android/emulation/control/clipboard_agent.h"   // for QAndroidCli...
+#include "android/emulator-window.h"                     // for emulator_wi...
+#include "android/featurecontrol/FeatureControl.h"       // for isEnabled
+#include "android/featurecontrol/Features.h"             // for QuickbootFi...
+#include "android/globals.h"                             // for android_hw
+#include "android/hw-events.h"                           // for EV_SW, EV_SYN
 #include "android/hw-sensors.h"
-#include "android/metrics/MetricsReporter.h"              // for MetricsRepo...
-#include "android/metrics/MetricsWriter.h"                // for android_studio
-#include "studio_stats.pb.h"        // for EmulatorSna...
-#include "android/settings-agent.h"                       // for SettingsTheme
-#include "android/skin/android_keycodes.h"                // for KEY_APPSWITCH
-#include "android/skin/event.h"                           // for SkinEvent
-#include "android/skin/linux_keycodes.h"                  // for LINUX_KEY_BACK
-#include "android/skin/qt/emulator-qt-window.h"           // for EmulatorQtW...
-#include "android/skin/qt/extended-pages/common.h"        // for adjustAllBu...
-#include "android/skin/qt/extended-window-styles.h"       // for PANE_IDX_BA...
-#include "android/skin/qt/extended-window.h"              // for ExtendedWindow
-#include "android/skin/qt/posture-selection-dialog.h"     // for PostureSelectionDialog
-#include "android/skin/qt/qt-settings.h"                  // for SaveSnapsho...
-#include "android/skin/qt/qt-ui-commands.h"               // for QtUICommand
-#include "android/skin/qt/stylesheet.h"                   // for stylesheetF...
-#include "android/skin/qt/tool-window.h"                  // for ToolWindow
-#include "android/skin/qt/ui-event-recorder.h"            // for UIEventReco...
-#include "android/skin/qt/user-actions-counter.h"         // for UserActions...
+#include "android/metrics/MetricsReporter.h"         // for MetricsRepo...
+#include "android/metrics/MetricsWriter.h"           // for android_studio
+#include "android/settings-agent.h"                  // for SettingsTheme
+#include "android/skin/android_keycodes.h"           // for KEY_APPSWITCH
+#include "android/skin/event.h"                      // for SkinEvent
+#include "android/skin/linux_keycodes.h"             // for LINUX_KEY_BACK
+#include "android/skin/qt/emulator-qt-window.h"      // for EmulatorQtW...
+#include "android/skin/qt/extended-pages/common.h"   // for adjustAllBu...
+#include "android/skin/qt/extended-window-styles.h"  // for PANE_IDX_BA...
+#include "android/skin/qt/extended-window.h"         // for ExtendedWindow
+#include "android/skin/qt/posture-selection-dialog.h"  // for PostureSelectionDialog
+#include "android/skin/qt/qt-settings.h"               // for SaveSnapsho...
+#include "android/skin/qt/qt-ui-commands.h"            // for QtUICommand
+#include "android/skin/qt/stylesheet.h"                // for stylesheetF...
+#include "android/skin/qt/tool-window.h"               // for ToolWindow
+#include "android/skin/qt/ui-event-recorder.h"         // for UIEventReco...
+#include "android/skin/qt/user-actions-counter.h"      // for UserActions...
 #include "android/skin/qt/virtualscene-control-window.h"  // for VirtualScen...
 #include "android/snapshot/common.h"                      // for kDefaultBoo...
 #include "android/snapshot/interface.h"                   // for androidSnap...
 #include "android/ui-emu-agent.h"                         // for UiEmuAgent
 #include "android/utils/debug.h"                          // for VERBOSE_fol...
 #include "android/utils/system.h"                         // for get_uptime_ms
+#include "studio_stats.pb.h"                              // for EmulatorSna...
 #include "ui_tools.h"                                     // for ToolControls
 
 class QCloseEvent;
@@ -112,9 +112,9 @@ class QScreen;
 class QWidget;
 #if QT_VERSION >= 0x060000
 #else
-template <typename T> class QVector;
+template <typename T>
+class QVector;
 #endif  // QT_VERSION
-
 
 namespace {
 
@@ -126,11 +126,11 @@ void ChangeIcon(QPushButton* button, const char* icon, const char* tip) {
 
 }  // namespace
 
-using Ui::Settings::SaveSnapshotOnExit;
 using android::base::System;
 using android::base::WorkerProcessingResult;
 using android::emulation::OptionalAdbCommandResult;
 using android::metrics::MetricsReporter;
+using Ui::Settings::SaveSnapshotOnExit;
 
 namespace pb = android_studio;
 namespace fc = android::featurecontrol;
@@ -172,7 +172,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
       mFoldableSyncToAndroid([this](FoldableSyncToAndroidItem&& item) {
           return foldableSyncToAndroidItemFunction(item);
       }) {
-
 // "Tool" type windows live in another layer on top of everything in OSX, which
 // is undesirable because it means the extended window must be on top of the
 // emulator window. However, on Windows and Linux, "Tool" type windows are the
@@ -188,8 +187,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     mToolsUi->mainLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->winButtonsLayout->setAlignment(Qt::AlignCenter);
     mToolsUi->controlsLayout->setAlignment(Qt::AlignCenter);
-    if (android_foldable_any_folded_area_configured() ||
-        resizableEnabled()) {
+    if (android_foldable_any_folded_area_configured() || resizableEnabled()) {
         mToolsUi->zoom_button->hide();
         mToolsUi->zoom_button->setEnabled(false);
     }
@@ -231,8 +229,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 
     if (!android_foldable_any_folded_area_configured() &&
         !android_foldable_hinge_configured() &&
-        !android_foldable_rollable_configured() &&
-        !resizableEnabled()) {
+        !android_foldable_rollable_configured() && !resizableEnabled()) {
         // Zoom is not available for foldable and resizable AVDs
         default_shortcuts += "Ctrl+Z    ENTER_ZOOM\n";
         default_shortcuts += "Ctrl+Up   ZOOM_IN\n";
@@ -250,11 +247,12 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             default_shortcuts += "Ctrl+Shift+T SHOW_PANE_CAR\n";
             default_shortcuts += "Ctrl+Shift+O SHOW_PANE_CAR_ROTARY\n";
             default_shortcuts += "Ctrl+Shift+I SHOW_PANE_SENSOR_REPLAY\n";
-        } else if (android::featurecontrol::isEnabled(android::featurecontrol::MultiDisplay)
-                   && !android_foldable_any_folded_area_configured()
-                   && !android_foldable_hinge_configured()
-                   && !android_foldable_rollable_configured()
-                   && !resizableEnabled()) {
+        } else if (android::featurecontrol::isEnabled(
+                           android::featurecontrol::MultiDisplay) &&
+                   !android_foldable_any_folded_area_configured() &&
+                   !android_foldable_hinge_configured() &&
+                   !android_foldable_rollable_configured() &&
+                   !resizableEnabled()) {
             // Multi display pane should not be available on cars.
             // Multi display pane should not be available on foldable
             // or resizable AVDs
@@ -262,16 +260,14 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         }
     }
 
-    if (fc::isEnabled(fc::TvRemote) &&
-        android_avdInfo &&
+    if (fc::isEnabled(fc::TvRemote) && android_avdInfo &&
         avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV) {
-            default_shortcuts += "Ctrl+Shift+D SHOW_PANE_TV_REMOTE\n";
+        default_shortcuts += "Ctrl+Shift+D SHOW_PANE_TV_REMOTE\n";
     } else {
         default_shortcuts += "Ctrl+Shift+D SHOW_PANE_DPAD\n";
     }
 
-    if (!android_avdInfo ||
-        avdInfo_getAvdFlavor(android_avdInfo) != AVD_TV) {
+    if (!android_avdInfo || avdInfo_getAvdFlavor(android_avdInfo) != AVD_TV) {
         default_shortcuts +=
                 "Ctrl+Shift+L SHOW_PANE_LOCATION\n"
                 "Ctrl+Shift+C SHOW_PANE_CELLULAR\n"
@@ -344,17 +340,17 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR &&
         avdInfo_getApiLevel(android_avdInfo) >= 28) {
-      // Use new button layout for >= API 28 wear emulators
-          mToolsUi->overview_button->setHidden(true);
-          mToolsUi->power_button->setHidden(true);
-          mToolsUi->home_button->setHidden(true);
+        // Use new button layout for >= API 28 wear emulators
+        mToolsUi->overview_button->setHidden(true);
+        mToolsUi->power_button->setHidden(true);
+        mToolsUi->home_button->setHidden(true);
 
-          mToolsUi->controlsLayout->removeWidget(mToolsUi->back_button);
-          mToolsUi->controlsLayout->insertWidget(0, mToolsUi->back_button);
+        mToolsUi->controlsLayout->removeWidget(mToolsUi->back_button);
+        mToolsUi->controlsLayout->insertWidget(0, mToolsUi->back_button);
 
-          if(avdInfo_getApiLevel(android_avdInfo) == 28) {
+        if (avdInfo_getApiLevel(android_avdInfo) == 28) {
             mToolsUi->wear_button_2->setHidden(true);
-          }
+        }
     } else {
         mToolsUi->wear_button_1->setHidden(true);
         mToolsUi->wear_button_2->setHidden(true);
@@ -376,7 +372,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->next_layout_button->setHidden(true);
     }
 
-    if (android_cmdLineOptions->fuchsia) {
+    if (getConsoleAgents()->settings->android_cmdLineOptions()->fuchsia) {
         // These don't apply to Fuchsia
         mToolsUi->prev_layout_button->setHidden(true);
         mToolsUi->next_layout_button->setHidden(true);
@@ -407,8 +403,9 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             SLOT(on_new_posture_requested(int)));
     connect(mPostureSelectionDialog, SIGNAL(finished(int)), this,
             SLOT(on_dismiss_posture_selection_dialog()));
-    connect(mResizableDialog, SIGNAL(newResizableRequested(PresetEmulatorSizeType)),
-            this, SLOT(on_new_resizable_requested(PresetEmulatorSizeType)));
+    connect(mResizableDialog,
+            SIGNAL(newResizableRequested(PresetEmulatorSizeType)), this,
+            SLOT(on_new_resizable_requested(PresetEmulatorSizeType)));
     connect(mResizableDialog, SIGNAL(finished(int)), this,
             SLOT(on_dismiss_resizable_dialog()));
 
@@ -423,7 +420,9 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 
 ToolWindow::~ToolWindow() {
     if (mFoldableSyncToAndroid.isStarted()) {
-        mFoldableSyncToAndroid.enqueue({SEND_EXIT, });
+        mFoldableSyncToAndroid.enqueue({
+                SEND_EXIT,
+        });
     }
     mFoldableSyncToAndroid.join();
 }
@@ -433,13 +432,11 @@ void ToolWindow::updateButtonUiCommand(QPushButton* button,
     button->setProperty("uiCommand", uiCommand);
     QtUICommand cmd;
     if (parseQtUICommand(QString(uiCommand), &cmd)) {
-        QVector<QKeySequence>* shortcuts =
-                mShortcutKeyStore.reverseLookup(cmd);
+        QVector<QKeySequence>* shortcuts = mShortcutKeyStore.reverseLookup(cmd);
         if (shortcuts && shortcuts->length() > 0) {
-            button->setToolTip(getQtUICommandDescription(cmd) + " (" +
-                               shortcuts->at(0).toString(
-                                       QKeySequence::NativeText) +
-                               ")");
+            button->setToolTip(
+                    getQtUICommandDescription(cmd) + " (" +
+                    shortcuts->at(0).toString(QKeySequence::NativeText) + ")");
         }
     }
 }
@@ -490,7 +487,6 @@ void ToolWindow::onExtendedWindowCreated(ExtendedWindow* extendedWindow) {
 
 void ToolWindow::onVirtualSceneWindowCreated(
         VirtualSceneControlWindow* virtualSceneWindow) {
-
     if (auto userActionsCounter = mUserActionsCounter.lock()) {
         userActionsCounter->startCountingForVirtualSceneWindow(
                 virtualSceneWindow);
@@ -535,10 +531,9 @@ void ToolWindow::mousePressEvent(QMouseEvent* event) {
 }
 
 void ToolWindow::hideEvent(QHideEvent*) {
-    mIsExtendedWindowVisibleOnShow =
-            mExtendedWindow.hasInstance() &&
-            mExtendedWindow.get()->isVisible() &&
-            mExtendedWindow.get()->isActiveWindow();
+    mIsExtendedWindowVisibleOnShow = mExtendedWindow.hasInstance() &&
+                                     mExtendedWindow.get()->isVisible() &&
+                                     mExtendedWindow.get()->isActiveWindow();
     mIsVirtualSceneWindowVisibleOnShow =
             mVirtualSceneControlWindow.hasInstance() &&
             mVirtualSceneControlWindow.get()->isVisible();
@@ -596,11 +591,12 @@ void ToolWindow::waitForExtendedWindowVisibility(bool visible) {
 }
 
 void ToolWindow::hideExtendedWindow() {
-        mExtendedWindow.ifExists([&] { mExtendedWindow.get()->hide(); });
+    mExtendedWindow.ifExists([&] { mExtendedWindow.get()->hide(); });
 }
 
-void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) {
-
+void ToolWindow::handleUICommand(QtUICommand cmd,
+                                 bool down,
+                                 std::string extra) {
     // Many UI commands require the extended window
     ensureExtendedWindowExists();
 
@@ -786,11 +782,11 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) 
             forwardKeyToEmulator(KEY_SLEEP, down);
             break;
         case QtUICommand::TILT:
-          if (down) {
-            float tilt = 1.0f;
+            if (down) {
+                float tilt = 1.0f;
                 sUiEmuAgent->sensors->setPhysicalParameterTarget(
-                    PHYSICAL_PARAMETER_WRIST_TILT, &tilt, 1,
-                    PHYSICAL_INTERPOLATION_SMOOTH);
+                        PHYSICAL_PARAMETER_WRIST_TILT, &tilt, 1,
+                        PHYSICAL_INTERPOLATION_SMOOTH);
             }
             break;
         case QtUICommand::ROTATE_RIGHT:
@@ -827,55 +823,72 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down, std::string extra) 
                 sUiEmuAgent->sensors->getPhysicalParameter(
                         PHYSICAL_PARAMETER_POSTURE, &out, 1,
                         PARAMETER_VALUE_TYPE_CURRENT);
-                switch ((enum FoldablePostures) posture) {
+                switch ((enum FoldablePostures)posture) {
                     case POSTURE_OPENED:
                         ChangeIcon(mToolsUi->change_posture_button,
-                                "posture_open", "Change posture");
+                                   "posture_open", "Change posture");
                         break;
                     case POSTURE_CLOSED:
                         ChangeIcon(mToolsUi->change_posture_button,
-                                "posture_closed", "Change posture");
+                                   "posture_closed", "Change posture");
                         break;
                     case POSTURE_HALF_OPENED:
                         ChangeIcon(mToolsUi->change_posture_button,
-                                "posture_half-open", "Change posture");
+                                   "posture_half-open", "Change posture");
                         break;
                     case POSTURE_FLIPPED:
                         ChangeIcon(mToolsUi->change_posture_button,
-                                "posture_flipped", "Change posture");
+                                   "posture_flipped", "Change posture");
                         break;
                     case POSTURE_TENT:
                         ChangeIcon(mToolsUi->change_posture_button,
-                                "posture_tent", "Change posture");
+                                   "posture_tent", "Change posture");
                         break;
-                    default: ;
+                    default:;
                 }
                 if (android_foldable_is_folded()) {
                     int xOffset, yOffset, width, height;
-                    if (android_foldable_get_folded_area(&xOffset, &yOffset, &width, &height)) {
+                    if (android_foldable_get_folded_area(&xOffset, &yOffset,
+                                                         &width, &height)) {
                         mEmulatorWindow->resizeAndChangeAspectRatio(true);
                         if (android_foldable_rollable_configured()) {
-                            // rollable has up to 3 folded-areas, need guarntee the folded-area
-                            // are updated in window manager before sending LID_CLOSE
-                            mFoldableSyncToAndroid.enqueue({SEND_LID_OPEN, });
-                            mFoldableSyncToAndroid.enqueue({SEND_AREA, xOffset, yOffset, width, height});
-                            mFoldableSyncToAndroid.enqueue({CONFIRM_AREA, xOffset, yOffset, width, height});
-                        }
-                        else {
-                            // hinge or legacy foldable has only one folded area. Once configured, no need
-                            // to configure again. Unless explicitly required, e.g., in case of rebooting
-                            // Android itselft only.
-                            if (!mFoldableSyncToAndroidSuccess || extra == "confirmFoldedArea") {
-                                mFoldableSyncToAndroid.enqueue({SEND_AREA, xOffset, yOffset, width, height});
-                                mFoldableSyncToAndroid.enqueue({CONFIRM_AREA, xOffset, yOffset, width, height});
+                            // rollable has up to 3 folded-areas, need guarntee
+                            // the folded-area are updated in window manager
+                            // before sending LID_CLOSE
+                            mFoldableSyncToAndroid.enqueue({
+                                    SEND_LID_OPEN,
+                            });
+                            mFoldableSyncToAndroid.enqueue({SEND_AREA, xOffset,
+                                                            yOffset, width,
+                                                            height});
+                            mFoldableSyncToAndroid.enqueue({CONFIRM_AREA,
+                                                            xOffset, yOffset,
+                                                            width, height});
+                        } else {
+                            // hinge or legacy foldable has only one folded
+                            // area. Once configured, no need to configure
+                            // again. Unless explicitly required, e.g., in case
+                            // of rebooting Android itselft only.
+                            if (!mFoldableSyncToAndroidSuccess ||
+                                extra == "confirmFoldedArea") {
+                                mFoldableSyncToAndroid.enqueue(
+                                        {SEND_AREA, xOffset, yOffset, width,
+                                         height});
+                                mFoldableSyncToAndroid.enqueue(
+                                        {CONFIRM_AREA, xOffset, yOffset, width,
+                                         height});
                             } else {
-                                mFoldableSyncToAndroid.enqueue({SEND_LID_CLOSE, });
+                                mFoldableSyncToAndroid.enqueue({
+                                        SEND_LID_CLOSE,
+                                });
                             }
                         }
                     }
                 } else {
                     mEmulatorWindow->resizeAndChangeAspectRatio(false);
-                    mFoldableSyncToAndroid.enqueue({SEND_LID_OPEN, });
+                    mFoldableSyncToAndroid.enqueue({
+                            SEND_LID_OPEN,
+                    });
                 }
             }
 
@@ -900,19 +913,21 @@ void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
     if (state.displayId == 0 && state.state == RECORDER_RECORDING) {
         // Do not allow resizing when recording is in progress.
         if (sUiEmuAgent && sUiEmuAgent->window) {
-            sUiEmuAgent->window->showMessage("Cannot resize emulator: recording in progress!",
-                                                         WINDOW_MESSAGE_ERROR, 3000);
+            sUiEmuAgent->window->showMessage(
+                    "Cannot resize emulator: recording in progress!",
+                    WINDOW_MESSAGE_ERROR, 3000);
         }
         LOG(ERROR) << "Cannot resize emulator: recording in progress!";
         return;
     }
     PresetEmulatorSizeInfo info;
     if (!getResizableConfig(newSize, &info)) {
-        LOG(ERROR) << "Failed to get size information of resizable type " << newSize;
+        LOG(ERROR) << "Failed to get size information of resizable type "
+                   << newSize;
         return;
     }
     std::string updateMsg = "Updating device size\n";
-    switch(info.type) {
+    switch (info.type) {
         case PRESET_SIZE_PHONE:
             updateMsg += "Phone\n";
             break;
@@ -925,14 +940,11 @@ void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
         case PRESET_SIZE_DESKTOP:
             updateMsg += "Desktop\n";
             break;
-        default: ;
+        default:;
     }
-    updateMsg += std::to_string(info.width * 160 / info.dpi) +
-                 " x " +
-                 std::to_string(info.height * 160 / info.dpi)+
-                 " dp\n" +
-                 std::to_string(info.dpi) +
-                 " dpi";
+    updateMsg += std::to_string(info.width * 160 / info.dpi) + " x " +
+                 std::to_string(info.height * 160 / info.dpi) + " dp\n" +
+                 std::to_string(info.dpi) + " dpi";
 
     LOG(INFO) << "Resizable: change to new size: " << newSize;
     resizableChangeIcon(newSize);
@@ -941,22 +953,24 @@ void ToolWindow::presetSizeAdvance(PresetEmulatorSizeType newSize) {
     skin_event->u.display_active_config = static_cast<int>(newSize);
     mEmulatorWindow->queueSkinEvent(skin_event);
     mEmulatorWindow->resizeAndChangeAspectRatio(0, 0, info.width, info.height);
-    sUiEmuAgent->window->showMessage(updateMsg.c_str(), WINDOW_MESSAGE_GENERIC, 3000);
+    sUiEmuAgent->window->showMessage(updateMsg.c_str(), WINDOW_MESSAGE_GENERIC,
+                                     3000);
 }
 
 void ToolWindow::resizableChangeIcon(PresetEmulatorSizeType type) {
-    switch(type) {
+    switch (type) {
         case PRESET_SIZE_PHONE:
-            ChangeIcon(mToolsUi->resizable_button,
-                       "display_mode_phone_expand", "Display mode: Phone");
+            ChangeIcon(mToolsUi->resizable_button, "display_mode_phone_expand",
+                       "Display mode: Phone");
             break;
         case PRESET_SIZE_UNFOLDED:
             ChangeIcon(mToolsUi->resizable_button,
-                       "display_mode_foldable_expand", "Display mode: Foldable");
+                       "display_mode_foldable_expand",
+                       "Display mode: Foldable");
             break;
         case PRESET_SIZE_TABLET:
-            ChangeIcon(mToolsUi->resizable_button,
-                       "display_mode_tablet_expand", "Display mode: Tablet");
+            ChangeIcon(mToolsUi->resizable_button, "display_mode_tablet_expand",
+                       "Display mode: Tablet");
             break;
         case PRESET_SIZE_DESKTOP:
             ChangeIcon(mToolsUi->resizable_button,
@@ -967,10 +981,8 @@ void ToolWindow::resizableChangeIcon(PresetEmulatorSizeType type) {
     }
 }
 
-//static
-void ToolWindow::forwardGenericEventToEmulator(int type,
-                                               int code,
-                                               int value) {
+// static
+void ToolWindow::forwardGenericEventToEmulator(int type, int code, int value) {
     EmulatorQtWindow* emuQtWindow = EmulatorQtWindow::getInstance();
     if (emuQtWindow == nullptr) {
         VLOG(foldable) << "Error send Event, null emulator qt window";
@@ -1060,10 +1072,10 @@ void ToolWindow::dockMainWindow() {
     mEmulatorWindow->windowHasFrame(&hasFrame);
     int toolGap = hasFrame ? TOOL_GAP_FRAMED : TOOL_GAP_FRAMELESS;
 
-    move(parentWidget()->frameGeometry().right()
-             + toolGap - mEmulatorWindow->getRightTransparency() + 1,
-         parentWidget()->geometry().top()
-             + mEmulatorWindow->getTopTransparency());
+    move(parentWidget()->frameGeometry().right() + toolGap -
+                 mEmulatorWindow->getRightTransparency() + 1,
+         parentWidget()->geometry().top() +
+                 mEmulatorWindow->getTopTransparency());
 
     mVirtualSceneControlWindow.ifExists(
             [&] { mVirtualSceneControlWindow.get()->dockMainWindow(); });
@@ -1092,16 +1104,18 @@ void ToolWindow::earlyInitialization(const UiEmuAgent* agentPtr) {
         return;
     }
 
-    QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+    QString avdSettingsFile =
+            avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
     QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
 
-    SaveSnapshotOnExit saveOnExitChoice =
-        static_cast<SaveSnapshotOnExit>(
-            avdSpecificSettings.value(
-                Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
-                static_cast<int>(SaveSnapshotOnExit::Always)).toInt());
+    SaveSnapshotOnExit saveOnExitChoice = static_cast<SaveSnapshotOnExit>(
+            avdSpecificSettings
+                    .value(Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
+                           static_cast<int>(SaveSnapshotOnExit::Always))
+                    .toInt());
 
-    // Synchronize avdParams right here; avoid tight coupling with whether the settings page is initialized.
+    // Synchronize avdParams right here; avoid tight coupling with whether the
+    // settings page is initialized.
     switch (saveOnExitChoice) {
         case SaveSnapshotOnExit::Always:
             android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
@@ -1169,16 +1183,19 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
         // Can't find the setting! Assume it's not ASK: just return;
         return true;
     }
-    QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+    QString avdSettingsFile =
+            avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
     QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
 
-    SaveSnapshotOnExit saveOnExitChoice =
-        static_cast<SaveSnapshotOnExit>(
-            avdSpecificSettings.value(
-                Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
-                static_cast<int>(SaveSnapshotOnExit::Always)).toInt());
+    SaveSnapshotOnExit saveOnExitChoice = static_cast<SaveSnapshotOnExit>(
+            avdSpecificSettings
+                    .value(Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
+                           static_cast<int>(SaveSnapshotOnExit::Always))
+                    .toInt());
 
-    if (android_cmdLineOptions->no_snapshot_save) {
+    if (getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->no_snapshot_save) {
         // The command line was used, so don't ask. That overrides the UI.
         return true;
     }
@@ -1202,38 +1219,36 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
 
     if (saveOnExitChoice == SaveSnapshotOnExit::Always &&
         (fc::isEnabled(fc::QuickbootFileBacked) ||
-        (!savesWereSlow && !hasLowRam))) {
+         (!savesWereSlow && !hasLowRam))) {
         return true;
     }
 
     // The setting is ASK or we decided to ask anyway.
-    auto askMessageSlow =
-        tr("Do you want to save the current state for the next quick boot?\n\n"
-           "Note: Recent saves seem to have been slow. Save can be skipped "
-           "by selecting 'No'.");
-    auto askMessageLowRam =
-        tr("Do you want to save the current state for the next quick boot?\n\n"
-           "Note: Saving the snapshot may take longer because free RAM is low.");
-    auto askMessageDefault =
-        tr("Do you want to save the current state for the next quick boot?");
+    auto askMessageSlow = tr(
+            "Do you want to save the current state for the next quick boot?\n\n"
+            "Note: Recent saves seem to have been slow. Save can be skipped "
+            "by selecting 'No'.");
+    auto askMessageLowRam = tr(
+            "Do you want to save the current state for the next quick boot?\n\n"
+            "Note: Saving the snapshot may take longer because free RAM is "
+            "low.");
+    auto askMessageDefault = tr(
+            "Do you want to save the current state for the next quick boot?");
 
     auto askMessageNonFileBacked =
-        savesWereSlow ? askMessageSlow :
-        (hasLowRam ? askMessageLowRam : askMessageDefault);
+            savesWereSlow ? askMessageSlow
+                          : (hasLowRam ? askMessageLowRam : askMessageDefault);
 
-    auto askMessage = fc::isEnabled(fc::QuickbootFileBacked) ?
-        tr("In the next emulator session, "
-           "do you want to auto-save emulator state?")
-        : askMessageNonFileBacked;
+    auto askMessage = fc::isEnabled(fc::QuickbootFileBacked)
+                              ? tr("In the next emulator session, "
+                                   "do you want to auto-save emulator state?")
+                              : askMessageNonFileBacked;
 
     int64_t startTime = get_uptime_ms();
-    QMessageBox msgBox(QMessageBox::Question,
-                       tr("Save quick-boot state"),
-                       askMessage,
-                       (QMessageBox::Yes | QMessageBox::No),
-                       this);
+    QMessageBox msgBox(QMessageBox::Question, tr("Save quick-boot state"),
+                       askMessage, (QMessageBox::Yes | QMessageBox::No), this);
     // Add a Cancel button to enable the MessageBox's X.
-    QPushButton *cancelButton = msgBox.addButton(QMessageBox::Cancel);
+    QPushButton* cancelButton = msgBox.addButton(QMessageBox::Cancel);
     // Hide the Cancel button so X is the only way to cancel.
     cancelButton->setHidden(true);
 
@@ -1243,15 +1258,18 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
     uint64_t dialogTime = endTime - startTime;
 
     MetricsReporter::get().report([dialogTime](pb::AndroidStudioEvent* event) {
-        auto counts = event->mutable_emulator_details()->mutable_snapshot_ui_counts();
+        auto counts =
+                event->mutable_emulator_details()->mutable_snapshot_ui_counts();
         counts->set_quickboot_ask_total_time_ms(
-            dialogTime + counts->quickboot_ask_total_time_ms());
+                dialogTime + counts->quickboot_ask_total_time_ms());
     });
 
     if (selection == QMessageBox::Cancel) {
         MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
-            auto counts = event->mutable_emulator_details()->mutable_snapshot_ui_counts();
-            counts->set_quickboot_ask_canceled(1 + counts->quickboot_ask_canceled());
+            auto counts = event->mutable_emulator_details()
+                                  ->mutable_snapshot_ui_counts();
+            counts->set_quickboot_ask_canceled(
+                    1 + counts->quickboot_ask_canceled());
         });
         mAskedWhetherToSaveSnapshot = false;
         return false;
@@ -1259,13 +1277,15 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
 
     if (selection == QMessageBox::Yes) {
         MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
-            auto counts = event->mutable_emulator_details()->mutable_snapshot_ui_counts();
+            auto counts = event->mutable_emulator_details()
+                                  ->mutable_snapshot_ui_counts();
             counts->set_quickboot_ask_yes(1 + counts->quickboot_ask_yes());
         });
         android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
     } else {
         MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
-            auto counts = event->mutable_emulator_details()->mutable_snapshot_ui_counts();
+            auto counts = event->mutable_emulator_details()
+                                  ->mutable_snapshot_ui_counts();
             counts->set_quickboot_ask_no(1 + counts->quickboot_ask_no());
         });
         android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
@@ -1274,7 +1294,8 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
 }
 
 bool ToolWindow::shouldClose() {
-    if (mAskedWhetherToSaveSnapshot) return true;
+    if (mAskedWhetherToSaveSnapshot)
+        return true;
 
     bool actuallyExit = askWhetherToSaveSnapshot();
     if (actuallyExit) {
@@ -1350,10 +1371,9 @@ void ToolWindow::on_change_posture_button_clicked() {
     mPostureSelectionDialog->show();
     // Align pop-up posture selction dialog to the right of posture button
     QRect geoTool = this->geometry();
-    mPostureSelectionDialog->move(geoTool.right(),
-                                  geoTool.top() +
-                                  mToolsUi->change_posture_button->geometry().top());
-
+    mPostureSelectionDialog->move(
+            geoTool.right(),
+            geoTool.top() + mToolsUi->change_posture_button->geometry().top());
 }
 
 void ToolWindow::on_dismiss_posture_selection_dialog() {
@@ -1368,8 +1388,9 @@ void ToolWindow::on_resizable_button_clicked() {
     mResizableDialog->show();
     // Align pop-up resizableDialog to the right of resizable button
     QRect geoTool = this->geometry();
-    mResizableDialog->move(geoTool.right(),
-                           geoTool.top() + mToolsUi->resizable_button->geometry().top());
+    mResizableDialog->move(
+            geoTool.right(),
+            geoTool.top() + mToolsUi->resizable_button->geometry().top());
 }
 
 void ToolWindow::on_new_resizable_requested(PresetEmulatorSizeType newSize) {
@@ -1469,12 +1490,15 @@ void ToolWindow::onGuestClipboardChanged(QString text) {
 void ToolWindow::onHostClipboardChanged() {
     QByteArray bytes = QApplication::clipboard()->text().toUtf8();
     sUiEmuAgent->clipboard->setGuestClipboardContents(
-                (const uint8_t*)bytes.data(), bytes.size());
+            (const uint8_t*)bytes.data(), bytes.size());
 }
 
 static bool isPaneEnabled(ExtendedWindowPane pane) {
     // Snapshot pane is disabled in embedded emulator.
-    if (pane == PANE_IDX_SNAPSHOT && android_cmdLineOptions->qt_hide_window) {
+    if (pane == PANE_IDX_SNAPSHOT &&
+        getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->qt_hide_window) {
         return false;
     }
 
@@ -1532,7 +1556,9 @@ void ToolWindow::paintEvent(QPaintEvent*) {
 
     double dpr = 1.0;
 #if QT_VERSION >= 0x060000
-    auto newScreen = window()->windowHandle() ? window()->windowHandle()->screen() : nullptr;
+    auto newScreen = window()->windowHandle()
+                             ? window()->windowHandle()->screen()
+                             : nullptr;
     if (!newScreen) {
         newScreen = qGuiApp->primaryScreen();
     }
@@ -1591,7 +1617,8 @@ void ToolWindow::on_new_posture_requested(int newPosture) {
     handleUICommand(QtUICommand::CHANGE_FOLDABLE_POSTURE, true);
 }
 
-WorkerProcessingResult ToolWindow::foldableSyncToAndroidItemFunction(const FoldableSyncToAndroidItem& item) {
+WorkerProcessingResult ToolWindow::foldableSyncToAndroidItemFunction(
+        const FoldableSyncToAndroidItem& item) {
     switch (item.op) {
         case SEND_AREA: {
             EmulatorQtWindow* emuQtWindow = EmulatorQtWindow::getInstance();
@@ -1599,18 +1626,17 @@ WorkerProcessingResult ToolWindow::foldableSyncToAndroidItemFunction(const Folda
                 break;
             }
             char foldedArea[64];
-            sprintf(foldedArea, "folded-area %d,%d,%d,%d",
-                    item.x,
-                    item.y,
-                    item.x + item.width,
-                    item.y + item.height);
+            sprintf(foldedArea, "folded-area %d,%d,%d,%d", item.x, item.y,
+                    item.x + item.width, item.y + item.height);
             std::string sendArea(foldedArea);
             emuQtWindow->getAdbInterface()->enqueueCommand(
                     {"shell", "wm", foldedArea},
                     [sendArea](const OptionalAdbCommandResult& result) {
                         if (result && result->exit_code == 0) {
-                            VLOG(foldable) << "foldable-page: 'send " << sendArea <<"' command succeeded";
-                        }});
+                            VLOG(foldable) << "foldable-page: 'send "
+                                           << sendArea << "' command succeeded";
+                        }
+                    });
             break;
         }
         case CONFIRM_AREA: {
@@ -1618,55 +1644,63 @@ WorkerProcessingResult ToolWindow::foldableSyncToAndroidItemFunction(const Folda
             if (emuQtWindow) {
                 mFoldableSyncToAndroidSuccess = false;
                 mFoldableSyncToAndroidTimeout = false;
-                int64_t timeOut = System::get()->getUnixTimeUs() + 30000 * 1000;   // 30 second time out
+                int64_t timeOut = System::get()->getUnixTimeUs() +
+                                  30000 * 1000;  // 30 second time out
                 // Keep on querying folded area through adb,
                 // until query returns the expected values
-                while (!mFoldableSyncToAndroidSuccess && !mFoldableSyncToAndroidTimeout) {
+                while (!mFoldableSyncToAndroidSuccess &&
+                       !mFoldableSyncToAndroidTimeout) {
                     android::base::AutoLock lock(mLock);
                     emuQtWindow->getAdbInterface()->enqueueCommand(
-                        {"shell", "wm", "folded-area"},
-                        [this, item, timeOut](const OptionalAdbCommandResult& result) {
-                            android::base::AutoLock lock(this->mLock);
-                            if (System::get()->getUnixTimeUs() > timeOut) {
-                                LOG(ERROR) << "time out (30 sec) waiting for window manager configuring folded area";
-                                this->mFoldableSyncToAndroidTimeout = true;
-                                this->mCv.signalAndUnlock(&lock);
-                                return;
-                            }
-                            if (!result || !result->output) {
-                                VLOG(foldable) << "Invalid output for wm adb-area, query again";
-                                this->mFoldableSyncToAndroidSuccess = false;
-                                this->mCv.signalAndUnlock(&lock);
-                                return;
-                            }
-                            std::string line;
-                            std::string expectedAdbOutput = "Folded area: " +
-                                                            std::to_string(item.x) +
-                                                            "," +
-                                                            std::to_string(item.y) +
-                                                            "," +
-                                                            std::to_string(item.x + item.width) +
-                                                            "," +
-                                                            std::to_string(item.y + item.height);
-                            while (getline(*(result->output), line)) {
-                                if (line.compare(expectedAdbOutput) == 0) {
-                                    this->mFoldableSyncToAndroidSuccess = true;
-                                    break;
+                            {"shell", "wm", "folded-area"},
+                            [this, item,
+                             timeOut](const OptionalAdbCommandResult& result) {
+                                android::base::AutoLock lock(this->mLock);
+                                if (System::get()->getUnixTimeUs() > timeOut) {
+                                    LOG(ERROR) << "time out (30 sec) waiting "
+                                                  "for window manager "
+                                                  "configuring folded area";
+                                    this->mFoldableSyncToAndroidTimeout = true;
+                                    this->mCv.signalAndUnlock(&lock);
+                                    return;
                                 }
-                            }
-                            this->mCv.signalAndUnlock(&lock);
-                        }
-                    );
+                                if (!result || !result->output) {
+                                    VLOG(foldable) << "Invalid output for wm "
+                                                      "adb-area, query again";
+                                    this->mFoldableSyncToAndroidSuccess = false;
+                                    this->mCv.signalAndUnlock(&lock);
+                                    return;
+                                }
+                                std::string line;
+                                std::string expectedAdbOutput =
+                                        "Folded area: " +
+                                        std::to_string(item.x) + "," +
+                                        std::to_string(item.y) + "," +
+                                        std::to_string(item.x + item.width) +
+                                        "," +
+                                        std::to_string(item.y + item.height);
+                                while (getline(*(result->output), line)) {
+                                    if (line.compare(expectedAdbOutput) == 0) {
+                                        this->mFoldableSyncToAndroidSuccess =
+                                                true;
+                                        break;
+                                    }
+                                }
+                                this->mCv.signalAndUnlock(&lock);
+                            });
                     // block thread until adb query for folded-area return
                     if (!mCv.timedWait(&mLock, timeOut)) {
-                        // Something unexpected along adb communication thread, call back function
-                        // not been called after timeOut
-                        LOG(ERROR) << "adb no response for more than 30 seconds, time out";
+                        // Something unexpected along adb communication thread,
+                        // call back function not been called after timeOut
+                        LOG(ERROR) << "adb no response for more than 30 "
+                                      "seconds, time out";
                         mFoldableSyncToAndroidTimeout = true;
                     }
-                    // send LID_CLOSE when expected folded-area is configured in window manager
+                    // send LID_CLOSE when expected folded-area is configured in
+                    // window manager
                     if (mFoldableSyncToAndroidSuccess) {
-                        VLOG(foldable) << "confirm folded area configured by window manager, send LID close";
+                        VLOG(foldable) << "confirm folded area configured by "
+                                          "window manager, send LID close";
                         forwardGenericEventToEmulator(EV_SW, SW_LID, true);
                         forwardGenericEventToEmulator(EV_SYN, 0, 0);
                     }

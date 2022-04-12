@@ -34,14 +34,14 @@
 #include "android/emulation/MultiDisplayPipe.h"          // for MultiDisplay...
 #include "android/emulation/control/adb/AdbInterface.h"  // for AdbInterface
 #include "android/emulation/resizable_display_config.h"
-#include "android/emulator-window.h"                     // for emulator_win...
-#include "android/featurecontrol/FeatureControl.h"       // for isEnabled
-#include "android/featurecontrol/Features.h"             // for MultiDisplay
-#include "android/globals.h"                             // for android_hw
-#include "android/hw-sensors.h"                          // for android_fold...
-#include "android/recording/screen-recorder.h"           // for RecorderStates
-#include "android/skin/file.h"                           // for SkinLayout
-#include "android/skin/rect.h"                           // for SKIN_ROTATION_0
+#include "android/emulator-window.h"                // for emulator_win...
+#include "android/featurecontrol/FeatureControl.h"  // for isEnabled
+#include "android/featurecontrol/Features.h"        // for MultiDisplay
+#include "android/globals.h"                        // for android_hw
+#include "android/hw-sensors.h"                     // for android_fold...
+#include "android/recording/screen-recorder.h"      // for RecorderStates
+#include "android/skin/file.h"                      // for SkinLayout
+#include "android/skin/rect.h"                      // for SKIN_ROTATION_0
 
 #define MULTI_DISPLAY_DEBUG 0
 
@@ -148,18 +148,18 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
             return -1;
         }
         adbInterface->enqueueCommand({"shell", "am", "broadcast", "-a",
-                                    "com.android.emulator.multidisplay.START",
-                                    "-n",
-                                    "com.android.emulator.multidisplay/"
-                                    ".MultiDisplayServiceReceiver"});
+                                      "com.android.emulator.multidisplay.START",
+                                      "-n",
+                                      "com.android.emulator.multidisplay/"
+                                      ".MultiDisplayServiceReceiver"});
 
         MultiDisplayPipe* pipe = MultiDisplayPipe::getInstance();
         if (pipe) {
             std::vector<uint8_t> data;
             pipe->fillData(data, id, w, h, dpi, flag, add);
             LOG(VERBOSE) << "MultiDisplayPipe send " << (add ? "add" : "del")
-                        << " id " << id << " width " << w << " height " << h
-                        << " dpi " << dpi << " flag " << flag;
+                         << " id " << id << " width " << w << " height " << h
+                         << " dpi " << dpi << " flag " << flag;
             pipe->send(std::move(data));
         }
     }
@@ -502,8 +502,9 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId,
                 recomputeLayoutLocked();
                 getCombinedDisplaySizeLocked(&width, &height);
                 if (getNumberActiveMultiDisplaysLocked() == 2) {
-                    // disable skin when first display set, index 0 is the default
-                   // one.
+                    // disable skin when first display set, index 0 is the
+                    // default
+                    // one.
                     noSkin = true;
                 }
             }
@@ -523,7 +524,8 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId,
             mWindowAgent->setUIDisplayRegion(0, 0, width, height, true);
         }
     }
-    if (needUpdate && featurecontrol::isEnabled(android::featurecontrol::Minigbm)) {
+    if (needUpdate &&
+        featurecontrol::isEnabled(android::featurecontrol::Minigbm)) {
         // b/131884992 b/186124236
         auto adbInterface = emulation::AdbInterface::getGlobal();
         if (!adbInterface) {
@@ -531,10 +533,8 @@ int MultiDisplay::setDisplayColorBuffer(uint32_t displayId,
             return -1;
         }
         adbInterface->enqueueCommand({"shell", "wm", "density",
-                                      std::to_string(dpi),
-                                      "-d",
-                                      std::to_string(displayId)
-                                    });
+                                      std::to_string(dpi), "-d",
+                                      std::to_string(displayId)});
         printf("send adb wm density %d display %d\n", dpi, displayId);
     }
     LOG(VERBOSE) << "setDisplayColorBuffer " << displayId << " cb "
@@ -695,10 +695,12 @@ bool MultiDisplay::multiDisplayParamValidate(uint32_t id,
 
 std::map<uint32_t, MultiDisplayInfo> MultiDisplay::parseConfig() {
     std::map<uint32_t, MultiDisplayInfo> ret;
-    if (!android_cmdLineOptions || !android_cmdLineOptions->multidisplay) {
+    if (!getConsoleAgents()->settings->android_cmdLineOptions()->multidisplay) {
         return ret;
     }
-    std::string s = android_cmdLineOptions->multidisplay;
+    std::string s = getConsoleAgents()
+                            ->settings->android_cmdLineOptions()
+                            ->multidisplay;
     std::vector<uint32_t> params;
     size_t last = 0, next = 0;
     while ((next = s.find(",", last)) != std::string::npos) {
@@ -866,10 +868,8 @@ void MultiDisplay::onLoad(base::Stream* stream) {
         if (activeAfterLoad && isMultiDisplayWindow()) {
             for (auto const& c : mMultiDisplay) {
                 if (c.second.cb > 0) {
-                    mWindowAgent->addMultiDisplayWindow(c.first,
-                                                        true,
-                                                        c.second.width,
-                                                        c.second.height);
+                    mWindowAgent->addMultiDisplayWindow(
+                            c.first, true, c.second.width, c.second.height);
                 }
             }
         }
@@ -901,8 +901,8 @@ void android_init_multi_display(
         const QAndroidRecordScreenAgent* const recordAgent,
         const QAndroidVmOperations* const vmAgent,
         bool isGuestMode) {
-    android::sMultiDisplay =
-            new android::MultiDisplay(windowAgent, recordAgent, vmAgent, isGuestMode);
+    android::sMultiDisplay = new android::MultiDisplay(windowAgent, recordAgent,
+                                                       vmAgent, isGuestMode);
 }
 
 extern "C" {

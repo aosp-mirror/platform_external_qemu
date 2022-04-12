@@ -24,6 +24,10 @@ static AndroidConsoleAgents sConsoleAgents{0};
 static bool isInitialized = false;
 
 
+bool agentsAvailable() {
+    return isInitialized;
+}
+
 const AndroidConsoleAgents* getConsoleAgents() {
     if (!isInitialized) {
         // Let's not get involved with undefined behavior, if this happens the

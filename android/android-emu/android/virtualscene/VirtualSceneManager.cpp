@@ -261,18 +261,22 @@ void VirtualSceneManager::parseCmdline() {
         return;
     }
 
-    if (!android_cmdLineOptions) {
+    if (!getConsoleAgents()->settings->has_cmdLineOptions()) {
         return;
     }
 
     if (!androidHwConfig_hasVirtualSceneCamera(android_hw) &&
-        android_cmdLineOptions->virtualscene_poster) {
+        getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->virtualscene_poster) {
         W("[VirtualScene] Poster parameter ignored, virtual scene is not "
           "enabled.");
         return;
     }
 
-    const ParamList* feature = android_cmdLineOptions->virtualscene_poster;
+    const ParamList* feature = getConsoleAgents()
+                                       ->settings->android_cmdLineOptions()
+                                       ->virtualscene_poster;
     while (feature) {
         sSettings->parseCmdlineParameter(feature->param);
         feature = feature->next;

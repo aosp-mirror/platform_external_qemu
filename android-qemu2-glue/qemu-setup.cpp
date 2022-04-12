@@ -216,16 +216,15 @@ bool qemu_android_emulation_early_setup() {
 
 #ifdef ANDROID_BLUETOOTH
     // Activate the virtual bluetooth chip.
+    auto opts = getConsoleAgents()->settings->android_cmdLineOptions();
     android::bluetooth::Rootcanal::Builder builder;
-    builder.withHciPort(android_cmdLineOptions->rootcanal_hci_port)
-            .withTestPort(android_cmdLineOptions->rootcanal_test_port)
-            .withLinkPort(android_cmdLineOptions->rootcanal_link_port)
-            .withLinkBlePort(android_cmdLineOptions->rootcanal_link_ble_port)
+    builder.withHciPort(opts->rootcanal_hci_port)
+            .withTestPort(opts->rootcanal_test_port)
+            .withLinkPort(opts->rootcanal_link_port)
+            .withLinkBlePort(opts->rootcanal_link_ble_port)
             .withControllerProperties(
-                    android_cmdLineOptions
-                            ->rootcanal_controller_properties_file)
-            .withCommandFile(
-                    android_cmdLineOptions->rootcanal_default_commands_file);
+                    opts->rootcanal_controller_properties_file)
+            .withCommandFile(opts->rootcanal_default_commands_file);
     builder.buildSingleton();
 #endif
     // Ensure the VmLock implementation is setup.
@@ -277,8 +276,7 @@ bool qemu_android_emulation_early_setup() {
 using android::emulation::bluetooth::PhyConnectionClient;
 static std::unique_ptr<EmulatorAdvertisement> advertiser;
 static std::unique_ptr<EmulatorControllerService> grpcService;
-static std::vector<std::unique_ptr<PhyConnectionClient>>
-        phyConnections;
+static std::vector<std::unique_ptr<PhyConnectionClient>> phyConnections;
 
 bool qemu_android_ports_setup() {
     return android_ports_setup(getConsoleAgents(), true);
@@ -323,14 +321,15 @@ int qemu_setup_grpc() {
             {"avd.name", avdInfo_getName(android_avdInfo)},
             {"avd.id", avdInfo_getId(android_avdInfo)},
             {"avd.dir", contentPath ? contentPath : ""},
-            {"cmdline", android_cmdLine}};
+            {"cmdline", getConsoleAgents()->settings->android_cmdLine()}};
 
     int grpc_start = android_serial_number_port + 3000;
     int grpc_end = grpc_start + 1000;
     std::string address = "[::1]";
 
-    if (android_cmdLineOptions->grpc &&
-        sscanf(android_cmdLineOptions->grpc, "%d", &grpc_start) == 1) {
+    if (getConsoleAgents()->settings->android_cmdLineOptions()->grpc &&
+        sscanf(getConsoleAgents()->settings->android_cmdLineOptions()->grpc,
+               "%d", &grpc_start) == 1) {
         grpc_end = grpc_start + 1;
         address = "[::]";
     }
@@ -338,50 +337,63 @@ int qemu_setup_grpc() {
     auto emulator = android::emulation::control::getEmulatorController(
             getConsoleAgents());
     auto h2o = android::emulation::control::getWaterfallService(
-            android_cmdLineOptions->waterfall);
+            getConsoleAgents()->settings->android_cmdLineOptions()->waterfall);
     auto snapshot = android::emulation::control::getSnapshotService();
     auto uiController = android::emulation::control::getUiControllerService(
             getConsoleAgents());
     auto adb = android::emulation::control::getAdbService();
-    auto builder = EmulatorControllerService::Builder()
-                           .withConsoleAgents(getConsoleAgents())
-                           .withLogging(VERBOSE_CHECK(grpc))
-                           .withPortRange(grpc_start, grpc_end)
-                           .withCertAndKey(android_cmdLineOptions->grpc_tls_cer,
-                                           android_cmdLineOptions->grpc_tls_key,
-                                           android_cmdLineOptions->grpc_tls_ca)
-                           .withVerboseLogging(android_verbose)
-                           .withAddress(address)
-                           .withService(emulator)
-                           .withService(h2o)
-                           .withService(snapshot)
-                           .withService(uiController)
-                           .withSecureService(adb);
+    auto builder =
+            EmulatorControllerService::Builder()
+                    .withConsoleAgents(getConsoleAgents())
+                    .withLogging(VERBOSE_CHECK(grpc))
+                    .withPortRange(grpc_start, grpc_end)
+                    .withCertAndKey(getConsoleAgents()
+                                            ->settings->android_cmdLineOptions()
+                                            ->grpc_tls_cer,
+                                    getConsoleAgents()
+                                            ->settings->android_cmdLineOptions()
+                                            ->grpc_tls_key,
+                                    getConsoleAgents()
+                                            ->settings->android_cmdLineOptions()
+                                            ->grpc_tls_ca)
+                    .withVerboseLogging(android_verbose)
+                    .withAddress(address)
+                    .withService(emulator)
+                    .withService(h2o)
+                    .withService(snapshot)
+                    .withService(uiController)
+                    .withSecureService(adb);
 
 #ifdef ANDROID_BLUETOOTH
     auto bluetooth = android::emulation::bluetooth::getEmulatedBluetoothService(
             android::bluetooth::Rootcanal::Builder::getInstance().get(),
             android::base::ThreadLooper::get());
     builder.withService(bluetooth);
-    if (android_cmdLineOptions->forward_vhci) {
+    if (getConsoleAgents()->settings->android_cmdLineOptions()->forward_vhci) {
         dinfo("Enabling vhci forwarding");
         builder.withService(android::emulation::bluetooth::getVhciForwarder());
     }
 #endif
 
     int timeout = 0;
-    if (android_cmdLineOptions->idle_grpc_timeout &&
-        sscanf(android_cmdLineOptions->idle_grpc_timeout, "%d", &timeout) ==
-                1) {
+    if (getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->idle_grpc_timeout &&
+        sscanf(getConsoleAgents()
+                       ->settings->android_cmdLineOptions()
+                       ->idle_grpc_timeout,
+               "%d", &timeout) == 1) {
         builder.withIdleTimeout(std::chrono::seconds(timeout));
     }
-    if (android_cmdLineOptions->grpc_use_token) {
+    if (getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->grpc_use_token) {
         const int of64Bytes = 64;
         auto token = generateToken(of64Bytes);
         builder.withAuthToken(token);
         props["grpc.token"] = token;
     }
-    if (android_cmdLineOptions->grpc_use_jwt) {
+    if (getConsoleAgents()->settings->android_cmdLineOptions()->grpc_use_jwt) {
         auto jwkDir = android::base::pj(
                 android::ConfigDirs::getDiscoveryDirectory(),
                 std::to_string(
@@ -394,7 +406,9 @@ int qemu_setup_grpc() {
         props["grpc.jwks"] = jwkDir;
         props["grpc.jwk_active"] = jwkLoadedFile;
         builder.withJwtAuthDiscoveryDir(jwkDir, jwkLoadedFile);
-        if (!android_cmdLineOptions->grpc_use_token) {
+        if (!getConsoleAgents()
+                     ->settings->android_cmdLineOptions()
+                     ->grpc_use_token) {
             dwarning(
                     "The emulator now requires a signed jwt token for gRPC "
                     "access! Use the -grpc flag if you really want an open "
@@ -403,16 +417,18 @@ int qemu_setup_grpc() {
     }
 
 #ifdef ANDROID_WEBRTC
-    if (android_cmdLineOptions->turncfg &&
+    if (getConsoleAgents()->settings->android_cmdLineOptions()->turncfg &&
         !android::emulation::control::TurnConfig::producesValidTurn(
-                android_cmdLineOptions->turncfg)) {
+                getConsoleAgents()
+                        ->settings->android_cmdLineOptions()
+                        ->turncfg)) {
         derror("command `%s` does not produce a valid turn configuration.",
-               android_cmdLineOptions->turncfg);
+               getConsoleAgents()->settings->android_cmdLineOptions()->turncfg);
         exit(1);
     }
     builder.withService(android::emulation::control::getRtcService(
             getConsoleAgents(), android_adb_port,
-            android_cmdLineOptions->turncfg));
+            getConsoleAgents()->settings->android_cmdLineOptions()->turncfg));
 #endif
     int port = -1;
     grpcService = builder.build();
@@ -421,19 +437,37 @@ int qemu_setup_grpc() {
         port = grpcService->port();
 
         props["grpc.port"] = std::to_string(port);
-        if (android_cmdLineOptions->grpc_tls_cer) {
-            props["grpc.server_cert"] = android_cmdLineOptions->grpc_tls_cer;
+        if (getConsoleAgents()
+                    ->settings->android_cmdLineOptions()
+                    ->grpc_tls_cer) {
+            props["grpc.server_cert"] =
+                    getConsoleAgents()
+                            ->settings->android_cmdLineOptions()
+                            ->grpc_tls_cer;
         }
-        if (android_cmdLineOptions->grpc_tls_ca) {
-            props["grpc.ca_root"] = android_cmdLineOptions->grpc_tls_ca;
+        if (getConsoleAgents()
+                    ->settings->android_cmdLineOptions()
+                    ->grpc_tls_ca) {
+            props["grpc.ca_root"] = getConsoleAgents()
+                                            ->settings->android_cmdLineOptions()
+                                            ->grpc_tls_ca;
         }
     }
 
-    bool userWantsGrpc = android_cmdLineOptions->grpc ||
-                         android_cmdLineOptions->grpc_tls_ca ||
-                         android_cmdLineOptions->grpc_tls_key ||
-                         android_cmdLineOptions->grpc_tls_ca ||
-                         android_cmdLineOptions->grpc_use_token;
+    bool userWantsGrpc =
+            getConsoleAgents()->settings->android_cmdLineOptions()->grpc ||
+            getConsoleAgents()
+                    ->settings->android_cmdLineOptions()
+                    ->grpc_tls_ca ||
+            getConsoleAgents()
+                    ->settings->android_cmdLineOptions()
+                    ->grpc_tls_key ||
+            getConsoleAgents()
+                    ->settings->android_cmdLineOptions()
+                    ->grpc_tls_ca ||
+            getConsoleAgents()
+                    ->settings->android_cmdLineOptions()
+                    ->grpc_use_token;
     if (!grpcService && userWantsGrpc) {
         derror("Failed to start grpc service, even though it was explicitly "
                "requested.");
@@ -448,11 +482,13 @@ int qemu_setup_grpc() {
     // Discover all running emulators and connect the bluetooth channel.
     // This has to happen after advertising so we can properly distinguish
     // ourselves from others.
-    if (android_cmdLineOptions->rootcanal_no_mesh) {
+    if (getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->rootcanal_no_mesh) {
         dinfo("Disabling bluetooth autodiscovery.");
     } else {
-        phyConnections = android::emulation::bluetooth::
-                PhyConnectionClient::connectToAllEmulators(
+        phyConnections = android::emulation::bluetooth::PhyConnectionClient::
+                connectToAllEmulators(
                         android::bluetooth::Rootcanal::Builder::getInstance()
                                 .get(),
                         android::base::ThreadLooper::get());
@@ -482,14 +518,16 @@ bool qemu_android_emulation_setup() {
         // For fuchsia we only enable thr gRPC port if it is explicitly
         // requested.
         int grpc;
-        if (android_cmdLineOptions->grpc &&
-            sscanf(android_cmdLineOptions->grpc, "%d", &grpc) == 1) {
+        if (getConsoleAgents()->settings->android_cmdLineOptions()->grpc &&
+            sscanf(getConsoleAgents()->settings->android_cmdLineOptions()->grpc,
+                   "%d", &grpc) == 1) {
             qemu_setup_grpc();
         }
     } else {
         // If you explicitly request adb & telnet port, you must explicitly
         // set the grpc port.
-        if (android_op_ports == nullptr || android_cmdLineOptions->grpc) {
+        if (android_op_ports == nullptr ||
+            getConsoleAgents()->settings->android_cmdLineOptions()->grpc) {
             qemu_setup_grpc();
         }
     }
@@ -502,7 +540,7 @@ bool qemu_android_emulation_setup() {
     // Note, the webrtc module could have started the shared memory module
     // with a differrent fps suggestion. (Fps is mainly used by clients as a
     // suggestion on how often to check for new frames)
-    if (android_cmdLineOptions->share_vid) {
+    if (getConsoleAgents()->settings->android_cmdLineOptions()->share_vid) {
         if (!getConsoleAgents()->record->startSharedMemoryModule(60)) {
             dwarning(
                     "Unable to setup a shared memory handler, last errno: "
@@ -528,7 +566,10 @@ bool qemu_android_emulation_setup() {
                 (int)android::base::CpuUsage::UsageArea::Vcpu + i, cpuLooper);
     }
 
-    if (android_cmdLineOptions && android_cmdLineOptions->detect_image_hang) {
+    if (getConsoleAgents()->settings->has_cmdLineOptions() &&
+        getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->detect_image_hang) {
         dwarning("Enabled event overflow detection.\n");
         const int kMaxEventsDropped = 1024;
         android::crashreport::CrashReporter::get()

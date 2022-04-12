@@ -20,6 +20,7 @@
 namespace android {
 namespace emulation {
 
+
 // Creates a series of Mock Agents that can be used by the unit tests.
 //
 // Most of the agents are not defined, add your agents here if you need
@@ -36,14 +37,14 @@ public:
     const QAndroidEmulatorWindowAgent* const
     android_get_QAndroidEmulatorWindowAgent() const override;
 
-
+    const QAndroidGlobalVarsAgent* const android_get_QAndroidGlobalVarsAgent()
+            const override;
 };
-
 
 #ifdef _WIN32
 // A set of flags that are only relevant for windows based unit tests
 class WindowsFlags {
- public:
+public:
     static bool sIsParentProcess;
     static HANDLE sChildRead;
     static HANDLE sChildWrite;

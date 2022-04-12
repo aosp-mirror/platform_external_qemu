@@ -14,8 +14,8 @@
 
 #include "android/avd/hw-config.h"
 #include "android/avd/info.h"
-#include "android/cpu_accelerator.h"
 #include "android/cmdline-option.h"
+#include "android/cpu_accelerator.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/opengl/emugl_config.h"
 #include "android/skin/winsys.h"
@@ -27,7 +27,7 @@
 ANDROID_BEGIN_HEADER
 
 // Special value return
-#define EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER  (-1)
+#define EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER (-1)
 
 // Parse command-line options and setups |opt| and |hw| structures.
 // |p_argc| and |p_argv| are pointers to the command-line parameters
@@ -87,18 +87,25 @@ typedef struct {
 // Function itself:
 
 bool configAndStartRenderer(
-         AvdInfo* avd, AndroidOptions* opt, AndroidHwConfig* hw,
-         const struct QAndroidVmOperations *vm_operations,
-         const struct QAndroidEmulatorWindowAgent *window_agent,
-         const struct QAndroidMultiDisplayAgent *multi_display_agent,
-         enum WinsysPreferredGlesBackend uiPreferredBackend,
-         RendererConfig* config_out);
+        AvdInfo* avd,
+        AndroidOptions* opt,
+        AndroidHwConfig* hw,
+        const struct QAndroidVmOperations* vm_operations,
+        const struct QAndroidEmulatorWindowAgent* window_agent,
+        const struct QAndroidMultiDisplayAgent* multi_display_agent,
+        enum WinsysPreferredGlesBackend uiPreferredBackend,
+        RendererConfig* config_out);
 
 // stopRenderer() - stop all the render threads and wait until their exit.
 // NOTE: It is only safe to stop the OpenGL ES renderer after the main loop
 //   has exited. This is not necessarily before |skin_window_free| is called,
 //   especially on Windows!
 void stopRenderer(void);
+
+// Update server-based hw config / feature flags.
+// Must be done after createAVD,  which sets up critical info needed
+// by featurecontrol component itself.
+void initializeFeatures(void);
 
 // After configAndStartRenderer is called, one can query last output values:
 RendererConfig getLastRendererConfig(void);
@@ -110,16 +117,17 @@ RendererConfig getLastRendererConfig(void);
 // TODO: Find a better way to deal with this.
 extern bool emulator_has_network_option;
 
-/* Common routines used by both android-qemu1-glue/main.c and android/main-ui.c */
+/* Common routines used by both android-qemu1-glue/main.c and android/main-ui.c
+ */
 
-unsigned convertBytesToMB( uint64_t  size );
-uint64_t convertMBToBytes( unsigned  megaBytes );
+unsigned convertBytesToMB(uint64_t size);
+uint64_t convertMBToBytes(unsigned megaBytes);
 
-#define NETWORK_SPEED_DEFAULT  "full"
-#define NETWORK_DELAY_DEFAULT  "none"
+#define NETWORK_SPEED_DEFAULT "full"
+#define NETWORK_DELAY_DEFAULT "none"
 
-extern const char*  android_skin_net_speed;
-extern const char*  android_skin_net_delay;
+extern const char* android_skin_net_speed;
+extern const char* android_skin_net_delay;
 
 typedef enum {
     ACCEL_OFF = 0,
@@ -134,24 +142,24 @@ typedef enum {
 // TODO: the accelerator should not be assumed only based on the
 // platform. More than one may be available for each platform.
 #ifdef __linux__
-    static const char kAccelerator[] = "KVM";
-    static const char kEnableAccelerator[] = "-enable-kvm";
-    static const char kDisableAccelerator[] = "-disable-kvm";
+static const char kAccelerator[] = "KVM";
+static const char kEnableAccelerator[] = "-enable-kvm";
+static const char kDisableAccelerator[] = "-disable-kvm";
 #else
 #ifdef _WIN32
-    static const char kAccelerator[] = "Windows Hypervisor Platform (WHPX)";
-    static const char kEnableAccelerator[] = "-enable-whpx";
-    static const char kDisableAccelerator[] = "-disable-whpx";
-    static const char kAcceleratorHAX[] = "Intel HAXM";
-    static const char kEnableAcceleratorHAX[] = "-enable-hax";
-    static const char kDisableAcceleratorHAX[] = "-disable-hax";
+static const char kAccelerator[] = "Windows Hypervisor Platform (WHPX)";
+static const char kEnableAccelerator[] = "-enable-whpx";
+static const char kDisableAccelerator[] = "-disable-whpx";
+static const char kAcceleratorHAX[] = "Intel HAXM";
+static const char kEnableAcceleratorHAX[] = "-enable-hax";
+static const char kDisableAcceleratorHAX[] = "-disable-hax";
 #else
-    static const char kAccelerator[] = "Intel HAXM";
-    static const char kEnableAccelerator[] = "-enable-hax";
-    static const char kDisableAccelerator[] = "-disable-hax";
-    static const char kAcceleratorHVF[] = "Apple Hypervisor.framework";
-    static const char kEnableAcceleratorHVF[] = "-enable-hvf";
-    static const char kDisableAcceleratorHVF[] = "-disable-hvf";
+static const char kAccelerator[] = "Intel HAXM";
+static const char kEnableAccelerator[] = "-enable-hax";
+static const char kDisableAccelerator[] = "-disable-hax";
+static const char kAcceleratorHVF[] = "Apple Hypervisor.framework";
+static const char kEnableAcceleratorHVF[] = "-enable-hvf";
+static const char kDisableAcceleratorHVF[] = "-disable-hvf";
 #endif
 #endif
 
@@ -163,8 +171,10 @@ typedef enum {
  *  status - a string about cpu acceleration status, must be not null.
  * Return: if cpu acceleration is available
  */
-bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
-                           CpuAccelMode* accel_mode, char** accel_status);
+bool handleCpuAcceleration(AndroidOptions* opts,
+                           const AvdInfo* avd,
+                           CpuAccelMode* accel_mode,
+                           char** accel_status);
 
 const char* getAcceleratorEnableParam(AndroidCpuAccelerator accel_type);
 

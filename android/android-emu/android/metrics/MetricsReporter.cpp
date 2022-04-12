@@ -10,32 +10,32 @@
 // GNU General Public License for more details.
 #include "android/metrics/MetricsReporter.h"
 
-#include <assert.h>                                    // for assert
-#include <stdio.h>                                     // for FILE, stdout
-#include <type_traits>                                 // for swap, integral...
-#include <utility>                                     // for move
+#include <assert.h>     // for assert
+#include <stdio.h>      // for FILE, stdout
+#include <type_traits>  // for swap, integral...
+#include <utility>      // for move
 
-#include "android/base/Optional.h"                     // for Optional
-#include "android/base/async/ThreadLooper.h"           // for ThreadLooper
-#include "android/base/files/PathUtils.h"              // for pj
-#include "android/base/files/StdioStream.h"            // for StdioStream
-#include "android/base/memory/LazyInstance.h"          // for LazyInstance
-#include "android/base/threads/Async.h"                // for async
-#include "android/cmdline-option.h"                    // for AndroidOptions
-#include "android/metrics/AsyncMetricsReporter.h"      // for AsyncMetricsRe...
-#include "android/metrics/CrashMetricsReporting.h"     // for reportCrashMet...
-#include "android/metrics/FileMetricsWriter.h"         // for FileMetricsWriter
-#include "android/metrics/MetricsLogging.h"            // for D
-#include "android/metrics/MetricsPaths.h"              // for getSpoolDirectory
-#include "android/metrics/NullMetricsReporter.h"       // for NullMetricsRep...
-#include "android/metrics/PlaystoreMetricsWriter.h"    // for PlaystoreMetri...
-#include "android/metrics/StudioConfig.h"              // for getAnonymizati...
-#include "android/metrics/TextMetricsWriter.h"         // for TextMetricsWriter
-#include "google_logs_publishing.pb.h"                 // for LogEvent
-#include "studio_stats.pb.h"                           // for AndroidStudioE...
-#include "android/utils/debug.h"                       // for dwarning
-#include "android/utils/file_io.h"                     // for android_fopen
-#include "picosha2.h"                                  // for hash256_one_by...
+#include "android/base/Optional.h"                   // for Optional
+#include "android/base/async/ThreadLooper.h"         // for ThreadLooper
+#include "android/base/files/PathUtils.h"            // for pj
+#include "android/base/files/StdioStream.h"          // for StdioStream
+#include "android/base/memory/LazyInstance.h"        // for LazyInstance
+#include "android/base/threads/Async.h"              // for async
+#include "android/cmdline-option.h"                  // for AndroidOptions
+#include "android/metrics/AsyncMetricsReporter.h"    // for AsyncMetricsRe...
+#include "android/metrics/CrashMetricsReporting.h"   // for reportCrashMet...
+#include "android/metrics/FileMetricsWriter.h"       // for FileMetricsWriter
+#include "android/metrics/MetricsLogging.h"          // for D
+#include "android/metrics/MetricsPaths.h"            // for getSpoolDirectory
+#include "android/metrics/NullMetricsReporter.h"     // for NullMetricsRep...
+#include "android/metrics/PlaystoreMetricsWriter.h"  // for PlaystoreMetri...
+#include "android/metrics/StudioConfig.h"            // for getAnonymizati...
+#include "android/metrics/TextMetricsWriter.h"       // for TextMetricsWriter
+#include "android/utils/debug.h"                     // for dwarning
+#include "android/utils/file_io.h"                   // for android_fopen
+#include "google_logs_publishing.pb.h"               // for LogEvent
+#include "picosha2.h"                                // for hash256_one_by...
+#include "studio_stats.pb.h"                         // for AndroidStudioE...
 
 using android::base::System;
 
@@ -89,24 +89,37 @@ void MetricsReporter::start(const std::string& sessionId,
                             base::StringView emulatorFullVersion,
                             base::StringView qemuVersion) {
     MetricsWriter::Ptr writer;
-    if (android_cmdLineOptions->metrics_to_console) {
+    if (getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->metrics_to_console) {
         D("Writing metrics to console");
         writer = TextMetricsWriter::create(base::StdioStream(stdout));
-    } else if (android_cmdLineOptions->metrics_collection) {
+    } else if (getConsoleAgents()
+                       ->settings->android_cmdLineOptions()
+                       ->metrics_collection) {
         D("Writing metrics to play store");
         writer = PlaystoreMetricsWriter::create(
                 sessionId,
                 base::pj(getSpoolDirectory(), "backoff_cookie.proto"));
-    } else if (android_cmdLineOptions->metrics_to_file != nullptr) {
+    } else if (getConsoleAgents()
+                       ->settings->android_cmdLineOptions()
+                       ->metrics_to_file != nullptr) {
         D("Attempting to write metrics to file: %s",
-          android_cmdLineOptions->metrics_to_file);
-        if (FILE* out = ::android_fopen(android_cmdLineOptions->metrics_to_file,
-                                        "w")) {
+          getConsoleAgents()
+                  ->settings->android_cmdLineOptions()
+                  ->metrics_to_file);
+        if (FILE* out =
+                    ::android_fopen(getConsoleAgents()
+                                            ->settings->android_cmdLineOptions()
+                                            ->metrics_to_file,
+                                    "w")) {
             writer = TextMetricsWriter::create(
                     base::StdioStream(out, base::StdioStream::kOwner));
         } else {
             dwarning("Failed to open file '%s', disabling metrics reporting",
-                     android_cmdLineOptions->metrics_to_file);
+                     getConsoleAgents()
+                             ->settings->android_cmdLineOptions()
+                             ->metrics_to_file);
         }
     } else if (studio::getUserMetricsOptIn()) {
         D("Using android-studio for metrics.");

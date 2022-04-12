@@ -214,7 +214,7 @@ if(NOT OPTION_GFXSTREAM_BACKEND AND NOT WINDOWS AND NOT BUILDING_FOR_AARCH64)
     "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
   android_target_properties(
     emugl_combined_unittests linux
-    "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
+    "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader' -Wl,--disable-new-dtags")
 
   # Toplevel unit tests
   android_add_test(
@@ -240,7 +240,7 @@ if(NOT OPTION_GFXSTREAM_BACKEND AND NOT WINDOWS AND NOT BUILDING_FOR_AARCH64)
     "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
   android_target_properties(
     aemugraphics_toplevel_unittests linux
-    "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
+    "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'  -Wl,--disable-new-dtags")
 
   # Vulkan encoder unit tests
   android_add_test(

@@ -20,6 +20,6 @@ ANDROID_BEGIN_HEADER
 // This function should be called as soon as the emulator launches.
 // it is used to configure and initialize the console agents using the
 // provided factory label.
-void injectConsoleAgents(const char* factory);
+void injectQemuConsoleAgents(const char* factory);
 
 ANDROID_END_HEADER

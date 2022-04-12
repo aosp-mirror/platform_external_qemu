@@ -119,6 +119,6 @@ if(NOT BUILDING_FOR_AARCH64)
     "INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
   android_target_properties(
     vulkanhal_unittests linux
-    "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'")
+    "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader'  -Wl,--disable-new-dtags")
 
 endif()

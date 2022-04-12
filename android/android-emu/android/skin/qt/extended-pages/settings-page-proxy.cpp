@@ -12,20 +12,20 @@
 // This file contains the methods for the Proxy
 // tab of the Settings page
 
-#include <qbytearray.h>                                    // for operator==
-#include <qiodevice.h>                                     // for operator|
-#include <qstring.h>                                       // for operator+
-#include <QByteArray>                                      // for QByteArray
-#include <QCheckBox>                                       // for QCheckBox
-#include <QFile>                                           // for QFile
-#include <QLineEdit>                                       // for QLineEdit
-#include <QRadioButton>                                    // for QRadioButton
-#include <QSettings>                                       // for QSettings
-#include <QSpinBox>                                        // for QSpinBox
-#include <QString>                                         // for QString
-#include <QVariant>                                        // for QVariant
-#include <memory>                                          // for unique_ptr
-#include <string>                                          // for string
+#include <qbytearray.h>  // for operator==
+#include <qiodevice.h>   // for operator|
+#include <qstring.h>     // for operator+
+#include <QByteArray>    // for QByteArray
+#include <QCheckBox>     // for QCheckBox
+#include <QFile>         // for QFile
+#include <QLineEdit>     // for QLineEdit
+#include <QRadioButton>  // for QRadioButton
+#include <QSettings>     // for QSettings
+#include <QSpinBox>      // for QSpinBox
+#include <QString>       // for QString
+#include <QVariant>      // for QVariant
+#include <memory>        // for unique_ptr
+#include <string>        // for string
 
 #include "android/emulation/VmLock.h"                      // for RecursiveS...
 #include "android/emulation/control/http_proxy_agent.h"    // for QAndroidHt...
@@ -44,33 +44,40 @@ static const QAndroidHttpProxyAgent* sHttpProxyAgent = nullptr;
 static void getStudioProxyString();
 static void sendProxySettingsToAgent(QString password);
 static QString proxyStringFromParts(QString hostName,
-                                    int     port,
+                                    int port,
                                     QString userName,
                                     QString password);
 
 void SettingsPage::initProxy() {
-
     // Recall the user's previous settings
     QSettings settings;
 
-    bool useStudio = settings.value(Ui::Settings::HTTP_PROXY_USE_STUDIO, true).toBool();
-    bool proxyAuth = settings.value(Ui::Settings::HTTP_PROXY_AUTHENTICATION, false).toBool();
+    bool useStudio =
+            settings.value(Ui::Settings::HTTP_PROXY_USE_STUDIO, true).toBool();
+    bool proxyAuth =
+            settings.value(Ui::Settings::HTTP_PROXY_AUTHENTICATION, false)
+                    .toBool();
     enum Ui::Settings::HTTP_PROXY_TYPE proxyType =
-            (enum Ui::Settings::HTTP_PROXY_TYPE)settings.value(
-                    Ui::Settings::HTTP_PROXY_TYPE,
-                    Ui::Settings::HTTP_PROXY_TYPE_NONE).toInt();
-    QString proxyHost = settings.value(Ui::Settings::HTTP_PROXY_HOST, "").toString();
+            (enum Ui::Settings::HTTP_PROXY_TYPE)settings
+                    .value(Ui::Settings::HTTP_PROXY_TYPE,
+                           Ui::Settings::HTTP_PROXY_TYPE_NONE)
+                    .toInt();
+    QString proxyHost =
+            settings.value(Ui::Settings::HTTP_PROXY_HOST, "").toString();
     int proxyPort = settings.value(Ui::Settings::HTTP_PROXY_PORT, 80).toInt();
-    QString proxyUsername = settings.value(Ui::Settings::HTTP_PROXY_USERNAME, "").toString();
+    QString proxyUsername =
+            settings.value(Ui::Settings::HTTP_PROXY_USERNAME, "").toString();
 
     mUi->set_useStudio->setChecked(useStudio);
-    mUi->set_noProxy->setChecked(proxyType == Ui::Settings::HTTP_PROXY_TYPE_NONE);
-    mUi->set_manualConfig->setChecked(proxyType == Ui::Settings::HTTP_PROXY_TYPE_MANUAL);
+    mUi->set_noProxy->setChecked(proxyType ==
+                                 Ui::Settings::HTTP_PROXY_TYPE_NONE);
+    mUi->set_manualConfig->setChecked(proxyType ==
+                                      Ui::Settings::HTTP_PROXY_TYPE_MANUAL);
     mUi->set_hostName->setText(proxyHost);
     mUi->set_portNumber->setValue(proxyPort);
     mUi->set_proxyAuth->setChecked(proxyAuth);
     mUi->set_loginName->setText(proxyUsername);
-    mUi->set_loginPassword->setText(""); // Password is not saved
+    mUi->set_loginPassword->setText("");  // Password is not saved
     mUi->set_proxyResults->setText(sHttpProxyResults);
 
     disableProxyApply();
@@ -120,13 +127,15 @@ void SettingsPage::on_set_loginName_textChanged(QString /* unused */) {
 }
 void SettingsPage::on_set_loginName_editingFinished() {
     QSettings settings;
-    settings.setValue(Ui::Settings::HTTP_PROXY_USERNAME, mUi->set_loginName->text());
+    settings.setValue(Ui::Settings::HTTP_PROXY_USERNAME,
+                      mUi->set_loginName->text());
 }
 
 void SettingsPage::on_set_manualConfig_toggled(bool checked) {
     if (checked) {
         QSettings settings;
-        settings.setValue(Ui::Settings::HTTP_PROXY_TYPE, Ui::Settings::HTTP_PROXY_TYPE_MANUAL);
+        settings.setValue(Ui::Settings::HTTP_PROXY_TYPE,
+                          Ui::Settings::HTTP_PROXY_TYPE_MANUAL);
         grayOutProxy();
         enableProxyApply();
     }
@@ -134,7 +143,8 @@ void SettingsPage::on_set_manualConfig_toggled(bool checked) {
 void SettingsPage::on_set_noProxy_toggled(bool checked) {
     if (checked) {
         QSettings settings;
-        settings.setValue(Ui::Settings::HTTP_PROXY_TYPE, Ui::Settings::HTTP_PROXY_TYPE_NONE);
+        settings.setValue(Ui::Settings::HTTP_PROXY_TYPE,
+                          Ui::Settings::HTTP_PROXY_TYPE_NONE);
         grayOutProxy();
         enableProxyApply();
     }
@@ -183,7 +193,6 @@ void SettingsPage::grayOutProxy() {
     mUi->set_noProxy->setEnabled(radioEnabled);
     mUi->set_manualConfig->setEnabled(radioEnabled);
 
-
     mUi->set_hostName->setEnabled(manualFieldsEnabled);
     mUi->set_portNumber->setEnabled(manualFieldsEnabled);
     mUi->set_proxyAuth->setEnabled(manualFieldsEnabled);
@@ -200,7 +209,8 @@ void SettingsPage::grayOutProxy() {
 // But only if there is an agent.
 static void sendProxySettingsToAgent(QString password) {
     android::RecursiveScopedVmLock vmlock;
-    if (sHttpProxyAgent == nullptr || sHttpProxyAgent->httpProxySet == nullptr) {
+    if (sHttpProxyAgent == nullptr ||
+        sHttpProxyAgent->httpProxySet == nullptr) {
         return;
     }
 
@@ -219,19 +229,27 @@ static void sendProxySettingsToAgent(QString password) {
 
     QSettings settings;
 
-    bool useStudio = settings.value(Ui::Settings::HTTP_PROXY_USE_STUDIO, true).toBool();
+    bool useStudio =
+            settings.value(Ui::Settings::HTTP_PROXY_USE_STUDIO, true).toBool();
     // When in embedded mode, always use proxy setting from Studio.
-    if (android_cmdLineOptions->qt_hide_window) {
+    if (getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->qt_hide_window) {
         useStudio = true;
     }
-    bool proxyAuth = settings.value(Ui::Settings::HTTP_PROXY_AUTHENTICATION, false).toBool();
+    bool proxyAuth =
+            settings.value(Ui::Settings::HTTP_PROXY_AUTHENTICATION, false)
+                    .toBool();
     enum Ui::Settings::HTTP_PROXY_TYPE proxyType =
-            (enum Ui::Settings::HTTP_PROXY_TYPE)settings.value(
-                    Ui::Settings::HTTP_PROXY_TYPE,
-                    Ui::Settings::HTTP_PROXY_TYPE_NONE).toInt();
-    QString proxyHost = settings.value(Ui::Settings::HTTP_PROXY_HOST, "").toString();
+            (enum Ui::Settings::HTTP_PROXY_TYPE)settings
+                    .value(Ui::Settings::HTTP_PROXY_TYPE,
+                           Ui::Settings::HTTP_PROXY_TYPE_NONE)
+                    .toInt();
+    QString proxyHost =
+            settings.value(Ui::Settings::HTTP_PROXY_HOST, "").toString();
     int proxyPort = settings.value(Ui::Settings::HTTP_PROXY_PORT, 80).toInt();
-    QString proxyUsername = settings.value(Ui::Settings::HTTP_PROXY_USERNAME, "").toString();
+    QString proxyUsername =
+            settings.value(Ui::Settings::HTTP_PROXY_USERNAME, "").toString();
 
     if (useStudio) {
         // Use the settings from Android Studio
@@ -244,22 +262,24 @@ static void sendProxySettingsToAgent(QString password) {
             proxyUsername = "";
             password = "";
         }
-        proxyString = proxyStringFromParts(proxyHost, proxyPort,
-                                           proxyUsername, password);
+        proxyString = proxyStringFromParts(proxyHost, proxyPort, proxyUsername,
+                                           password);
     } else {
         // Should never get here. Default to "no proxy."
         proxyString = "";
     }
 
     // Send the proxy selection to the agent
-    int proxyResultCode = sHttpProxyAgent->httpProxySet(proxyString.toStdString().c_str());
+    int proxyResultCode =
+            sHttpProxyAgent->httpProxySet(proxyString.toStdString().c_str());
 
     // Make the results available to the GUI
     if (proxyString.isEmpty() && proxyResultCode == PROXY_ERR_OK) {
         // Don't say "Success" when we're not using a proxy
         sHttpProxyResults = SettingsPage::tr("No proxy");
     } else {
-        sHttpProxyResults = SettingsPage::tr(proxy_error_string(proxyResultCode));
+        sHttpProxyResults =
+                SettingsPage::tr(proxy_error_string(proxyResultCode));
     }
 }
 
@@ -269,7 +289,6 @@ void SettingsPage::enableProxyApply() {
 void SettingsPage::disableProxyApply() {
     mUi->set_proxyApply->setEnabled(false);
 }
-
 
 // If Android Studio gave us a file with HTTP Proxy
 // settings, read those into memory and delete the
@@ -293,7 +312,7 @@ static void getStudioProxyString() {
     }
 
     QString host;
-    int     port = 0;
+    int port = 0;
     QString username;
     QString password;
 
@@ -303,11 +322,9 @@ static void getStudioProxyString() {
         if (idx > 0) {
             QByteArray key = line.left(idx);
             QByteArray value = line.right(line.length() - 1 - idx);
-            if (key == "http.proxyHost" ||
-                key == "https.proxyHost") {
+            if (key == "http.proxyHost" || key == "https.proxyHost") {
                 host = value;
-            } else if (key == "http.proxyPort" ||
-                       key == "https.proxyPort") {
+            } else if (key == "http.proxyPort" || key == "https.proxyPort") {
                 port = value.toInt();
             } else if (key == "proxy.authentication.username") {
                 username = value;
@@ -325,10 +342,9 @@ static void getStudioProxyString() {
 
 // Construct a string like "myname:password@host.com:80"
 static QString proxyStringFromParts(QString hostName,
-                                    int     port,
+                                    int port,
                                     QString userName,
                                     QString password) {
-
     if (hostName.isEmpty()) {
         // Without a host name, we have nothing
         return "";

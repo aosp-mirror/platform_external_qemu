@@ -47,8 +47,8 @@
 #include "android/base/Log.h"
 #include "android/base/threads/Thread.h"
 #include "android/cmdline-option.h"
-#include "android/emulation/control/multi_display_agent.h"
 #include "android/emulation/MultiDisplay.h"
+#include "android/emulation/control/multi_display_agent.h"
 #include "android/globals.h"
 #include "android/location/MapsKey.h"
 #include "android/qt/qt_path.h"
@@ -102,14 +102,14 @@ using android::base::System;
 using android::base::Win32UnicodeString;
 #endif
 
-#define  DEBUG  1
+#define DEBUG 1
 
 #if DEBUG
 #include "android/utils/debug.h"
 
-#define  D(...)   VERBOSE_PRINT(surface,__VA_ARGS__)
+#define D(...) VERBOSE_PRINT(surface, __VA_ARGS__)
 #else
-#define  D(...)   ((void)0)
+#define D(...) ((void)0)
 #endif
 
 Q_LOGGING_CATEGORY(emu, "android.emu")
@@ -125,12 +125,12 @@ struct GlobalState {
 
 static GlobalState* globalState() {
     static GlobalState sGlobalState = {
-        .argc = 0,
-        .argv = NULL,
-        .app = NULL,
-        .window_pos_saved = false,
-        .window_pos_x = 0,
-        .window_pos_y = 0,
+            .argc = 0,
+            .argv = NULL,
+            .app = NULL,
+            .window_pos_saved = false,
+            .window_pos_x = 0,
+            .window_pos_y = 0,
     };
     return &sGlobalState;
 }
@@ -142,7 +142,7 @@ static HANDLE sWakeEvent;
 #endif
 
 #ifdef Q_OS_LINUX
-static Display *s_display = NULL;
+static Display* s_display = NULL;
 #endif
 
 static void enableSigChild() {
@@ -176,18 +176,18 @@ std::shared_ptr<void> skin_winsys_get_shared_ptr() {
 }
 
 extern void skin_winsys_enter_main_loop(bool no_window) {
-
     if (no_window) {
         D("Starting QEMU main loop\n");
 #ifdef _WIN32
-        sWakeEvent = CreateEvent(NULL,                             // Default security attributes
-                                 TRUE,                             // Manual reset
-                                 FALSE,                            // Initially nonsignaled
-                                 TEXT("winsys-qt::sWakeEvent"));   // Object name
+        sWakeEvent = CreateEvent(NULL,   // Default security attributes
+                                 TRUE,   // Manual reset
+                                 FALSE,  // Initially nonsignaled
+                                 TEXT("winsys-qt::sWakeEvent"));  // Object name
 
         while (1) {
             WaitForSingleObject(sWakeEvent, INFINITE);
-            if (sMainLoopShouldExit) break;
+            if (sMainLoopShouldExit)
+                break;
             // Loop and wait again
         }
 #else
@@ -195,13 +195,15 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
             sigset_t mask;
             sigset_t origMask;
 
-            sigemptyset (&mask);
+            sigemptyset(&mask);
             if (sigprocmask(SIG_BLOCK, &mask, &origMask) < 0) {
-                derror("%s %s: sigprocmask() failed!\n", __FILE__, __FUNCTION__);
+                derror("%s %s: sigprocmask() failed!\n", __FILE__,
+                       __FUNCTION__);
                 break;
             }
             sigsuspend(&mask);
-            if (sMainLoopShouldExit) break;
+            if (sMainLoopShouldExit)
+                break;
             // Loop and wait again
         }
 #endif
@@ -216,9 +218,9 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
         // We're using Qt
         D("Starting QT main loop\n");
         // In order for QProcess to correctly handle processes that exit we need
-        // to enable SIGCHLD. That's how Qt knows to wait for the child process. If
-        // it doesn't wait the process will be left as a zombie and the finished
-        // signal will not be emitted from QProcess.
+        // to enable SIGCHLD. That's how Qt knows to wait for the child process.
+        // If it doesn't wait the process will be left as a zombie and the
+        // finished signal will not be emitted from QProcess.
         enableSigChild();
         GlobalState* g = globalState();
         g->app->installNativeEventFilter(
@@ -229,19 +231,20 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
     }
 }
 
-extern void skin_winsys_get_monitor_rect(SkinRect *rect)
-{
+extern void skin_winsys_get_monitor_rect(SkinRect* rect) {
     D("skin_winsys_get_monitor_rect: begin\n");
     bool haveScreenRect = false;
     D("skin_winsys_get_monitor_rect: get Qt window\n");
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     D("skin_winsys_get_monitor_rect: get Qt window (done)\n");
     // Qt method of getting screen dimensions is unreliable.
     // Use platform-specific queries.
-    if (!rect) return;
+    if (!rect)
+        return;
     rect->pos.x = 0;
     rect->pos.y = 0;
-    D("skin_winsys_get_monitor_rect: Begin calling platform specific display queries.\n");
+    D("skin_winsys_get_monitor_rect: Begin calling platform specific display "
+      "queries.\n");
 #if defined(_WIN32)
     D("skin_winsys_get_monitor_rect: Windows: GetSystemMetrics(SM_CXSCREEN)\n");
     rect->size.w = (int)GetSystemMetrics(SM_CXSCREEN);
@@ -254,7 +257,7 @@ extern void skin_winsys_get_monitor_rect(SkinRect *rect)
     rect->size.w = CGDisplayPixelsWide(displayId);
     D("skin_winsys_get_monitor_rect: macOS: CGDisplayPixelsHigh()\n");
     rect->size.h = CGDisplayPixelsHigh(displayId);
-#else // Linux
+#else  // Linux
     D("skin_winsys_get_monitor_rect: Linux: XOpenDisplay(NULL)\n");
     if (!s_display) {
         s_display = XOpenDisplay(NULL);
@@ -272,14 +275,13 @@ extern void skin_winsys_get_monitor_rect(SkinRect *rect)
         }
     }
 #endif
-    D("%s: (%d,%d) %dx%d", __FUNCTION__, rect->pos.x, rect->pos.y,
-      rect->size.w, rect->size.h);
+    D("%s: (%d,%d) %dx%d", __FUNCTION__, rect->pos.x, rect->pos.y, rect->size.w,
+      rect->size.h);
 }
 
-extern int skin_winsys_get_device_pixel_ratio(double *dpr)
-{
+extern int skin_winsys_get_device_pixel_ratio(double* dpr) {
     D("skin_winsys_get_device_pixel_ratio");
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return -1;
@@ -296,10 +298,9 @@ extern int skin_winsys_get_device_pixel_ratio(double *dpr)
     return 0;
 }
 
-extern void *skin_winsys_get_window_handle()
-{
+extern void* skin_winsys_get_window_handle() {
     D("skin_winsys_get_window_handle");
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return NULL;
@@ -309,15 +310,14 @@ extern void *skin_winsys_get_window_handle()
     return (void*)handle;
 }
 
-extern void skin_winsys_get_window_pos(int *x, int *y)
-{
+extern void skin_winsys_get_window_pos(int* x, int* y) {
     D("skin_winsys_get_window_pos");
     GlobalState* g = globalState();
     if (g->window_pos_saved) {
         *x = g->window_pos_x;
         *y = g->window_pos_y;
     } else {
-        EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+        EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
         if (window == NULL) {
             D("%s: Could not get window handle", __FUNCTION__);
             return;
@@ -334,12 +334,11 @@ extern void skin_winsys_get_window_pos(int *x, int *y)
     D("%s: x=%d y=%d", __FUNCTION__, *x, *y);
 }
 
-extern void skin_winsys_get_window_size(int *w, int *h)
-{
+extern void skin_winsys_get_window_size(int* w, int* h) {
     D("skin_winsys_get_frame_size");
 
     QSemaphore semaphore;
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -350,10 +349,9 @@ extern void skin_winsys_get_window_size(int *w, int *h)
     D("%s: size: %d x %d", __FUNCTION__, *w, *h);
 }
 
-extern void skin_winsys_get_frame_pos(int *x, int *y)
-{
+extern void skin_winsys_get_frame_pos(int* x, int* y) {
     QSemaphore semaphore;
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -364,9 +362,8 @@ extern void skin_winsys_get_frame_pos(int *x, int *y)
     D("%s: x=%d y=%d", __FUNCTION__, *x, *y);
 }
 
-extern bool skin_winsys_window_has_frame()
-{
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+extern bool skin_winsys_window_has_frame() {
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return false;
@@ -381,7 +378,7 @@ extern bool skin_winsys_window_has_frame()
 }
 
 extern void skin_winsys_set_device_geometry(const SkinRect* rect) {
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -399,10 +396,9 @@ extern void skin_winsys_save_window_pos() {
     g->window_pos_y = y;
 }
 
-extern bool skin_winsys_is_window_fully_visible()
-{
+extern bool skin_winsys_is_window_fully_visible() {
     D("skin_winsys_is_window_fully_visible");
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return true;
@@ -419,10 +415,9 @@ extern bool skin_winsys_is_window_fully_visible()
     return value;
 }
 
-extern bool skin_winsys_is_window_off_screen()
-{
+extern bool skin_winsys_is_window_off_screen() {
     D("skin_winsys_is_window_off_screen");
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return true;
@@ -439,49 +434,52 @@ extern bool skin_winsys_is_window_off_screen()
     return value;
 }
 
-WinsysPreferredGlesBackend skin_winsys_override_glesbackend_if_auto(WinsysPreferredGlesBackend backend) {
-    WinsysPreferredGlesBackend currentPreferred = skin_winsys_get_preferred_gles_backend();
+WinsysPreferredGlesBackend skin_winsys_override_glesbackend_if_auto(
+        WinsysPreferredGlesBackend backend) {
+    WinsysPreferredGlesBackend currentPreferred =
+            skin_winsys_get_preferred_gles_backend();
     if (currentPreferred == WINSYS_GLESBACKEND_PREFERENCE_AUTO) {
         return backend;
     }
     return currentPreferred;
 }
 
-extern WinsysPreferredGlesBackend skin_winsys_get_preferred_gles_backend()
-{
+extern WinsysPreferredGlesBackend skin_winsys_get_preferred_gles_backend() {
     D("skin_winsys_get_preferred_gles_backend");
     QSettings settings;
-    return (WinsysPreferredGlesBackend)settings.value(Ui::Settings::GLESBACKEND_PREFERENCE, 0).toInt();
+    return (WinsysPreferredGlesBackend)settings
+            .value(Ui::Settings::GLESBACKEND_PREFERENCE, 0)
+            .toInt();
 }
 
-void skin_winsys_set_preferred_gles_backend(WinsysPreferredGlesBackend backend)
-{
+void skin_winsys_set_preferred_gles_backend(
+        WinsysPreferredGlesBackend backend) {
     D("skin_winsys_set_preferred_gles_backend");
     QSettings settings;
     settings.setValue(Ui::Settings::GLESBACKEND_PREFERENCE, backend);
 }
 
-extern WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel()
-{
+extern WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel() {
     D("skin_winsys_get_preferred_gles_apilevel");
     QSettings settings;
-    return (WinsysPreferredGlesApiLevel)settings.value(Ui::Settings::GLESAPILEVEL_PREFERENCE, 0).toInt();
+    return (WinsysPreferredGlesApiLevel)settings
+            .value(Ui::Settings::GLESAPILEVEL_PREFERENCE, 0)
+            .toInt();
 }
 
-extern void skin_winsys_quit_request()
-{
+extern void skin_winsys_quit_request() {
     D(__FUNCTION__);
     if (auto window = EmulatorQtWindow::getInstance()) {
         window->requestClose();
-    } else if (auto nowindow = EmulatorNoQtNoWindow::getInstance()){
+    } else if (auto nowindow = EmulatorNoQtNoWindow::getInstance()) {
         sMainLoopShouldExit = true;
 #ifdef _WIN32
-        if ( !SetEvent(sWakeEvent) ) {
+        if (!SetEvent(sWakeEvent)) {
             derror("%s %s: SetEvent() failed!\n", __FILE__, __FUNCTION__);
         }
 #else
-        if ( kill(getpid(), SIGUSR1) ) {
-           derror("%s %s: kill() failed!\n", __FILE__, __FUNCTION__);
+        if (kill(getpid(), SIGUSR1)) {
+            derror("%s %s: kill() failed!\n", __FILE__, __FUNCTION__);
         }
 #endif
     } else {
@@ -513,10 +511,10 @@ void skin_winsys_destroy() {
 #endif
 }
 
-extern void skin_winsys_set_window_icon(const unsigned char *data, size_t size)
-{
+extern void skin_winsys_set_window_icon(const unsigned char* data,
+                                        size_t size) {
     D("skin_winsys_set_window_icon");
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -524,10 +522,9 @@ extern void skin_winsys_set_window_icon(const unsigned char *data, size_t size)
     window->setWindowIcon(data, size);
 }
 
-extern void skin_winsys_set_window_pos(int x, int y)
-{
+extern void skin_winsys_set_window_pos(int x, int y) {
     D("skin_winsys_set_window_pos %d, %d", x, y);
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -535,9 +532,8 @@ extern void skin_winsys_set_window_pos(int x, int y)
     window->setWindowPos(x, y, nullptr);
 }
 
-extern void skin_winsys_set_window_size(int w, int h)
-{
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+extern void skin_winsys_set_window_size(int w, int h) {
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -545,9 +541,8 @@ extern void skin_winsys_set_window_size(int w, int h)
     window->setWindowSize(w, h, nullptr);
 }
 
-extern void skin_winsys_set_window_cursor_resize(int which_corner)
-{
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+extern void skin_winsys_set_window_cursor_resize(int which_corner) {
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -555,9 +550,8 @@ extern void skin_winsys_set_window_cursor_resize(int which_corner)
     window->setWindowCursorResize(which_corner, nullptr);
 }
 
-extern void skin_winsys_paint_overlay_for_resize(int mouse_x, int mouse_y)
-{
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+extern void skin_winsys_paint_overlay_for_resize(int mouse_x, int mouse_y) {
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -565,9 +559,8 @@ extern void skin_winsys_paint_overlay_for_resize(int mouse_x, int mouse_y)
     window->paintWindowOverlayForResize(mouse_x, mouse_y, nullptr);
 }
 
-extern void skin_winsys_set_window_overlay_for_resize(int which_corner)
-{
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+extern void skin_winsys_set_window_overlay_for_resize(int which_corner) {
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -575,9 +568,8 @@ extern void skin_winsys_set_window_overlay_for_resize(int which_corner)
     window->setWindowOverlayForResize(which_corner, nullptr);
 }
 
-extern void skin_winsys_clear_window_overlay()
-{
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+extern void skin_winsys_clear_window_overlay() {
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -585,9 +577,8 @@ extern void skin_winsys_clear_window_overlay()
     window->clearWindowOverlay(nullptr);
 }
 
-extern void skin_winsys_set_window_cursor_normal()
-{
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+extern void skin_winsys_set_window_cursor_normal() {
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -595,10 +586,9 @@ extern void skin_winsys_set_window_cursor_normal()
     window->setWindowCursorNormal(nullptr);
 }
 
-extern void skin_winsys_set_window_title(const char *title)
-{
+extern void skin_winsys_set_window_title(const char* title) {
     D("skin_winsys_set_window_title [%s]", title);
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -606,12 +596,11 @@ extern void skin_winsys_set_window_title(const char *title)
     window->setTitle(QString(title), nullptr);
 }
 
-extern void skin_winsys_update_rotation(SkinRotation rotation)
-{
+extern void skin_winsys_update_rotation(SkinRotation rotation) {
     // When running "rotate" command via command line, UI
     // does not know that it has rotate, so notify it.
     D("%s", __FUNCTION__);
-    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
@@ -635,7 +624,8 @@ extern void skin_winsys_spawn_thread(bool no_window,
                                      char** argv) {
     D("skin_spawn_thread");
     if (no_window) {
-        EmulatorNoQtNoWindow* guiless_window = EmulatorNoQtNoWindow::getInstance();
+        EmulatorNoQtNoWindow* guiless_window =
+                EmulatorNoQtNoWindow::getInstance();
         if (guiless_window == NULL) {
             D("%s: Could not get window handle", __FUNCTION__);
             return;
@@ -653,7 +643,8 @@ extern void skin_winsys_spawn_thread(bool no_window,
 
 extern void skin_winsys_touch_qt_extended_virtual_sensors(void) {
     EmulatorQtWindow* qtWindow = EmulatorQtWindow::getInstance();
-    if (qtWindow == nullptr) return;
+    if (qtWindow == nullptr)
+        return;
 
     qtWindow->runOnUiThread([qtWindow]() {
         ToolWindow* toolWindow = qtWindow->toolWindow();
@@ -687,27 +678,34 @@ extern void skin_winsys_init_args(int argc, char** argv) {
     g->argv = argv;
 }
 
-void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
-{
+void myMessageOutput(QtMsgType type,
+                     const QMessageLogContext& context,
+                     const QString& msg) {
     QtLogger* q = QtLogger::get();
     QByteArray localMsg = msg.toLocal8Bit();
     switch (type) {
-    case QtDebugMsg:
-        q->write("Debug: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
-        break;
-    case QtInfoMsg:
-        q->write("Info: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
-        break;
-    case QtWarningMsg:
-        q->write("Warning: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
-        break;
-    case QtCriticalMsg:
-        q->write("Critical: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
-        break;
-    case QtFatalMsg:
-        fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
-        q->write("Fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
-        break;
+        case QtDebugMsg:
+            q->write("Debug: %s (%s:%u, %s)\n", localMsg.constData(),
+                     context.file, context.line, context.function);
+            break;
+        case QtInfoMsg:
+            q->write("Info: %s (%s:%u, %s)\n", localMsg.constData(),
+                     context.file, context.line, context.function);
+            break;
+        case QtWarningMsg:
+            q->write("Warning: %s (%s:%u, %s)\n", localMsg.constData(),
+                     context.file, context.line, context.function);
+            break;
+        case QtCriticalMsg:
+            q->write("Critical: %s (%s:%u, %s)\n", localMsg.constData(),
+                     context.file, context.line, context.function);
+            break;
+        case QtFatalMsg:
+            fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(),
+                    context.file, context.line, context.function);
+            q->write("Fatal: %s (%s:%u, %s)\n", localMsg.constData(),
+                     context.file, context.line, context.function);
+            break;
     }
 }
 
@@ -728,8 +726,14 @@ extern int skin_winsys_snapshot_control_start() {
 static void initUserGoogleMapKeys() {
     auto mapsKeyHolder = android::location::MapsKey::get();
 
-    if (android_cmdLineOptions && android_cmdLineOptions->google_maps_key) {
-        mapsKeyHolder->setUserMapsKey(android_cmdLineOptions->google_maps_key);
+    if (getConsoleAgents()->settings->has_cmdLineOptions() &&
+        getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->google_maps_key) {
+        mapsKeyHolder->setUserMapsKey(
+                getConsoleAgents()
+                        ->settings->android_cmdLineOptions()
+                        ->google_maps_key);
     }
 }
 
@@ -764,24 +768,23 @@ extern void skin_winsys_start(bool no_window) {
         // For that reason, we explicitly create a "Quit" action for Qt to use
         // instead of the auto-generated one, and set it up to correctly quit
         // the emulator.
-        // Note: the objects pointed to by quitMenu, quitAction and mainBar will remain
-        // for the entire lifetime of the application so we don't bother cleaning
-        // them up.
+        // Note: the objects pointed to by quitMenu, quitAction and mainBar will
+        // remain for the entire lifetime of the application so we don't bother
+        // cleaning them up.
         QMenu* quitMenu = new QMenu(nullptr);
-        QAction* quitAction = new QAction(g->app->tr("Quit Emulator"), quitMenu);
+        QAction* quitAction =
+                new QAction(g->app->tr("Quit Emulator"), quitMenu);
         QMenuBar* mainBar = new QMenuBar(nullptr);
 
         // make sure we never try to call into a dangling pointer, and also
         // that we don't hold it alive just because of a signal connection
         const auto winPtr = EmulatorQtWindow::getInstancePtr();
         const auto winWeakPtr = std::weak_ptr<EmulatorQtWindow>(winPtr);
-        QObject::connect(quitAction, &QAction::triggered,
-            [winWeakPtr] {
-                if (const auto win = winWeakPtr.lock()) {
-                    win->requestClose();
-                }
+        QObject::connect(quitAction, &QAction::triggered, [winWeakPtr] {
+            if (const auto win = winWeakPtr.lock()) {
+                win->requestClose();
             }
-        );
+        });
         quitMenu->addAction(quitAction);
         mainBar->addMenu(quitMenu);
 #if QT_VERSION >= 0x060000
@@ -790,14 +793,15 @@ extern void skin_winsys_start(bool no_window) {
         qt_mac_set_dock_menu(quitMenu);
 #endif  // QT_VERSION
         // Hide icon on macOS dock in embedded emulator mode.
-        if (android_cmdLineOptions->qt_hide_window)
+        if (getConsoleAgents()
+                    ->settings->android_cmdLineOptions()
+                    ->qt_hide_window)
             System::get()->hideDockIcon();
 #endif
     }
 }
 
-void skin_winsys_run_ui_update(SkinGenericFunction f, void* data,
-                               bool wait) {
+void skin_winsys_run_ui_update(SkinGenericFunction f, void* data, bool wait) {
     D(__FUNCTION__);
     EmulatorQtWindow* const window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
@@ -806,16 +810,22 @@ void skin_winsys_run_ui_update(SkinGenericFunction f, void* data,
     }
     if (wait) {
         QSemaphore semaphore;
-        window->runOnUiThread([f, data]() {
-            android::base::setUiThreadId(android::base::getCurrentThreadId());
-            f(data);
-        }, &semaphore);
+        window->runOnUiThread(
+                [f, data]() {
+                    android::base::setUiThreadId(
+                            android::base::getCurrentThreadId());
+                    f(data);
+                },
+                &semaphore);
         semaphore.acquire();
     } else {
-        window->runOnUiThread([f, data]() {
-            android::base::setUiThreadId(android::base::getCurrentThreadId());
-            f(data);
-        }, nullptr);
+        window->runOnUiThread(
+                [f, data]() {
+                    android::base::setUiThreadId(
+                            android::base::getCurrentThreadId());
+                    f(data);
+                },
+                nullptr);
     }
 }
 extern void skin_winsys_error_dialog(const char* message, const char* title) {
@@ -852,14 +862,17 @@ void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
             window->toolWindow()->setClipboardCallbacks(agent);
 
             const auto disableMouseWheel =
-                settings.value(Ui::Settings::DISABLE_MOUSE_WHEEL, false).toBool();
+                    settings.value(Ui::Settings::DISABLE_MOUSE_WHEEL, false)
+                            .toBool();
 
             window->setIgnoreWheelEvent(disableMouseWheel);
 
-            if (!window->toolWindow()->clipboardSharingSupported()) return;
+            if (!window->toolWindow()->clipboardSharingSupported())
+                return;
 
             const auto enableClipboard =
-                settings.value(Ui::Settings::CLIPBOARD_SHARING, true).toBool();
+                    settings.value(Ui::Settings::CLIPBOARD_SHARING, true)
+                            .toBool();
 
             window->toolWindow()->switchClipboardSharing(enableClipboard);
         });

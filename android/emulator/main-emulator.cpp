@@ -76,32 +76,38 @@
 #endif
 
 #ifdef __APPLE__
-#include <sys/types.h>
 #include <sys/sysctl.h>
+#include <sys/types.h>
 #endif
 
+using android::ConfigDirs;
 using android::base::PathUtils;
 using android::base::RunOptions;
 using android::base::ScopedCPtr;
 using android::base::StringView;
 using android::base::System;
-using android::ConfigDirs;
 
 #define DEBUG 1
 
 #if DEBUG
-#  define D(...)  do { if (android_verbose) dinfo(__VA_ARGS__); } while (0)
+#define D(...)                  \
+    do {                        \
+        if (android_verbose)    \
+            dinfo(__VA_ARGS__); \
+    } while (0)
 #else
-#  define D(...)  do{}while(0)
+#define D(...) \
+    do {       \
+    } while (0)
 #endif
 
 /* The extension used by dynamic libraries on the host platform */
 #ifdef _WIN32
-#  define DLL_EXTENSION  ".dll"
+#define DLL_EXTENSION ".dll"
 #elif defined(__APPLE__)
-#  define DLL_EXTENSION  ".dylib"
+#define DLL_EXTENSION ".dylib"
 #else
-#  define DLL_EXTENSION  ".so"
+#define DLL_EXTENSION ".so"
 #endif
 
 /* Forward declarations */
@@ -122,11 +128,12 @@ static void updateLibrarySearchPath(bool isHeadless,
                                     const char* gpu);
 
 static bool is32bitImageOn64bitRanchuKernel(const char* avdName,
-                                             const char* avdArch,
-                                             const char* sysDir,
-                                             const char* androidOut);
+                                            const char* avdArch,
+                                            const char* sysDir,
+                                            const char* androidOut);
 
-static std::string getAvdSystemPath(const char* avdName, const char* optionalSysPath);
+static std::string getAvdSystemPath(const char* avdName,
+                                    const char* optionalSysPath);
 
 #ifdef _WIN32
 static const char kExeExtension[] = ".exe";
@@ -151,8 +158,8 @@ static bool isStringInList(const char* str,
 // Return true if the CPU architecture |avdArch| is supported by QEMU2,
 // i.e. the 'ranchu' virtual board.
 static bool isCpuArchSupportedByRanchu(const char* avdArch) {
-    static const char* const kSupported[] =
-            {"arm", "arm64", "mips", "mips64", "x86", "x86_64"};
+    static const char* const kSupported[] = {"arm",    "arm64", "mips",
+                                             "mips64", "x86",   "x86_64"};
     return isStringInList(avdArch, kSupported, ARRAY_SIZE(kSupported));
 }
 
@@ -165,8 +172,9 @@ static std::string emulator_dirname(const std::string& launcherDir) {
     return cppstr;
 }
 
-static void delete_files(const StringView file_dir, const StringView files_to_delete[],
-        unsigned int num_files) {
+static void delete_files(const StringView file_dir,
+                         const StringView files_to_delete[],
+                         unsigned int num_files) {
     for (unsigned int i = 0; i < num_files; ++i) {
         std::string file = PathUtils::join(file_dir, files_to_delete[i]);
         APosixStatus ret = path_delete_file(file.c_str());
@@ -183,12 +191,14 @@ static void clean_up_avd_contents_except_config_ini(const char* avd_folder) {
     // and we dont know how to re-create it from emulator yet
     // TODO: fixit
     static constexpr StringView files_to_delete[] = {
-        "system.img.qcow2", "vendor.img.qcow2", "userdata-qemu.img",
-        "userdata-qemu.img.qcow2", "userdata.img", "userdata.img.qcow2", "cache.img",
-        "cache.img.qcow2", "version_num.cache", "sdcard.img.qcow2", "encryptionkey.img",
-        "encryptionkey.img.qcow2", "hardware-qemu.ini", "emulator-user.ini",
-        "default.dtb"
-    };
+            "system.img.qcow2",  "vendor.img.qcow2",
+            "userdata-qemu.img", "userdata-qemu.img.qcow2",
+            "userdata.img",      "userdata.img.qcow2",
+            "cache.img",         "cache.img.qcow2",
+            "version_num.cache", "sdcard.img.qcow2",
+            "encryptionkey.img", "encryptionkey.img.qcow2",
+            "hardware-qemu.ini", "emulator-user.ini",
+            "default.dtb"};
     delete_files(avd_folder, files_to_delete, ARRAY_SIZE(files_to_delete));
 }
 
@@ -197,9 +207,11 @@ static void clean_up_android_out(const char* android_out) {
     // make again to create it; in avd/ folder, it can be copied from
     // system-images/.../<arch>/ directory.
     static constexpr StringView files_to_delete[] = {
-        "system.img.qcow2", "vendor.img.qcow2", "userdata-qemu.img",
-        "userdata-qemu.img.qcow2", "userdata.img.qcow2", "cache.img.qcow2", "version_num.cache",
-        "hardware-qemu.ini", "emulator-user.ini"};
+            "system.img.qcow2",   "vendor.img.qcow2",
+            "userdata-qemu.img",  "userdata-qemu.img.qcow2",
+            "userdata.img.qcow2", "cache.img.qcow2",
+            "version_num.cache",  "hardware-qemu.ini",
+            "emulator-user.ini"};
     delete_files(android_out, files_to_delete, ARRAY_SIZE(files_to_delete));
 }
 
@@ -216,9 +228,7 @@ static void delete_snapshots_at(const char* content) {
 
 static void delete_adbCmds_at(const char* content) {
     if (char* const cmdFolder =
-            path_join(
-                content,
-                ANDROID_AVD_TMP_ADB_COMMAND_DIR)) {
+                path_join(content, ANDROID_AVD_TMP_ADB_COMMAND_DIR)) {
         if (!path_delete_dir(cmdFolder)) {
             D("Removed ADB command directory '%s'", cmdFolder);
         } else {
@@ -231,23 +241,24 @@ static void delete_adbCmds_at(const char* content) {
 static bool checkOsVersion() {
 #ifndef _WIN32
     return true;
-#else  // _WIN32
+#else   // _WIN32
     // Make sure OS is Win7+ - otherwise the emulation engine just won't start.
     OSVERSIONINFOW ver = {sizeof(ver)};
     if (!::GetVersionExW(&ver)) {
         const auto err = (unsigned)::GetLastError();
         dwarning(
-           "failed to get operating system version.\n"
-           "The Android Emulator may not run properly on Windows Vista and\n"
-           "won't run on Windows XP (error code %d [0x%x]).",
-           err, err);
+                "failed to get operating system version.\n"
+                "The Android Emulator may not run properly on Windows Vista "
+                "and\n"
+                "won't run on Windows XP (error code %d [0x%x]).",
+                err, err);
     } else {
         // Windows 7 is 6.1
         if (ver.dwMajorVersion < 6 ||
             (ver.dwMajorVersion == 6 && ver.dwMinorVersion < 1)) {
-            derror(
-                "Windows 7 or newer is required to run the Android Emulator.\n"
-                "Please upgrade your operating system.");
+            derror("Windows 7 or newer is required to run the Android "
+                   "Emulator.\n"
+                   "Please upgrade your operating system.");
             return false;
         }
     }
@@ -276,8 +287,7 @@ static void setupCpuAffinity(
 static void doLauncherTest(const char* launcherTestArg);
 
 /* Main routine */
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     const char* avdName = NULL;
     const char* avdArch = NULL;
     const char* engine = NULL;
@@ -325,9 +335,10 @@ int main(int argc, char** argv)
             break;
         }
         // quick check for qemu1
-        if (!strcmp(opt, "-engine") && nn + 1 < argc && !strcmp(argv[nn + 1], "classic")) {
-            std::string qemu1path = std::string(path_dirname(argv[0])) + PATH_SEP + "qemu1"
-                + PATH_SEP + "emulator";
+        if (!strcmp(opt, "-engine") && nn + 1 < argc &&
+            !strcmp(argv[nn + 1], "classic")) {
+            std::string qemu1path = std::string(path_dirname(argv[0])) +
+                                    PATH_SEP + "qemu1" + PATH_SEP + "emulator";
             if (path_exists(qemu1path.c_str())) {
                 qemu_top_dir = "qemu1";
                 break;
@@ -339,11 +350,12 @@ int main(int argc, char** argv)
         char mybuf[1024];
         char* c_argv0_dir_name = path_dirname(argv[0]);
         snprintf(mybuf, sizeof(mybuf), "%s" PATH_SEP "%s" PATH_SEP "emulator",
-                c_argv0_dir_name, qemu_top_dir);
+                 c_argv0_dir_name, qemu_top_dir);
         char* emulatorPath = mybuf;
         if (!path_exists(emulatorPath)) {
             // try absolute path
-            snprintf(mybuf, sizeof(mybuf), "%s" PATH_SEP "emulator", qemu_top_dir);
+            snprintf(mybuf, sizeof(mybuf), "%s" PATH_SEP "emulator",
+                     qemu_top_dir);
             emulatorPath = mybuf;
             if (!path_exists(emulatorPath)) {
                 fprintf(stderr, "emulator: Cannot find %s\n", emulatorPath);
@@ -420,12 +432,12 @@ int main(int argc, char** argv)
             continue;
         }
 
-        if (!strcmp(opt,"-qemu")) {
+        if (!strcmp(opt, "-qemu")) {
             forceEngineLaunch = true;
             break;
         }
 
-        if (!strcmp(opt,"-fuchsia")) {
+        if (!strcmp(opt, "-fuchsia")) {
             forceEngineLaunch = true;
             isFuchsia = true;
             break;
@@ -470,36 +482,36 @@ int main(int argc, char** argv)
             continue;
         }
 
-        if (!strcmp(opt,"-verbose") || !strcmp(opt,"-debug-all")
-                 || !strcmp(opt,"-debug-init")) {
+        if (!strcmp(opt, "-verbose") || !strcmp(opt, "-debug-all") ||
+            !strcmp(opt, "-debug-init")) {
             base_enable_verbose_logs();
             continue;
         }
 
-        if (!strcmp(opt,"-debug") && nn + 1 < argc &&
+        if (!strcmp(opt, "-debug") && nn + 1 < argc &&
             (!strcmp(argv[nn + 1], "all") || !strcmp(argv[nn + 1], "init"))) {
             base_enable_verbose_logs();
         }
 
-         if (!strcmp(opt,"-debug-log")) {
-             VERBOSE_ENABLE(log);
-         }
+        if (!strcmp(opt, "-debug-log")) {
+            VERBOSE_ENABLE(log);
+        }
 
-        if (!strcmp(opt,"-gpu") && nn + 1 < argc) {
+        if (!strcmp(opt, "-gpu") && nn + 1 < argc) {
             gpu = argv[nn + 1];
             nn++;
             continue;
         }
 
-        if (!strcmp(opt,"-allow-host-audio")) {
+        if (!strcmp(opt, "-allow-host-audio")) {
             continue;
         }
 
-        if (!strcmp(opt,"-restart-when-stalled")) {
+        if (!strcmp(opt, "-restart-when-stalled")) {
             continue;
         }
 
-        if (!strcmp(opt,"-ranchu")) {
+        if (!strcmp(opt, "-ranchu")) {
             // Nothing: the option is deprecated and defaults to auto-detect.
             continue;
         }
@@ -510,17 +522,17 @@ int main(int argc, char** argv)
             continue;
         }
 
-        if (!strcmp(opt,"-force-32bit")) {
+        if (!strcmp(opt, "-force-32bit")) {
             force32bit = true;
             continue;
         }
 
-        if (!strcmp(opt,"-no-qt")) {
+        if (!strcmp(opt, "-no-qt")) {
             isHeadless = true;
             continue;
         }
 
-        if (!strcmp(opt,"-no-window")) {
+        if (!strcmp(opt, "-no-window")) {
             isHeadless = true;
             continue;
         }
@@ -542,7 +554,7 @@ int main(int argc, char** argv)
             doListUSB = true;
             continue;
         }
-#endif // _WIN32
+#endif  // _WIN32
 
         if (!strcmp(opt, "-launcher-test")) {
             isLauncherTest = true;
@@ -563,22 +575,21 @@ int main(int argc, char** argv)
             continue;
         }
 
-        if (!strcmp(opt, "-sysdir") && nn+1 < argc) {
-            sysDir = argv[nn+1];
+        if (!strcmp(opt, "-sysdir") && nn + 1 < argc) {
+            sysDir = argv[nn + 1];
             continue;
         }
 
-        if (!strcmp(opt, "-avd-arch") && nn+1 < argc) {
-            avdArch = argv[nn+1];
+        if (!strcmp(opt, "-avd-arch") && nn + 1 < argc) {
+            avdArch = argv[nn + 1];
             continue;
         }
 
         if (!avdName) {
-            if (!strcmp(opt,"-avd") && nn+1 < argc) {
-                avdName = argv[nn+1];
-            }
-            else if (opt[0] == '@' && opt[1] != '\0') {
-                avdName = opt+1;
+            if (!strcmp(opt, "-avd") && nn + 1 < argc) {
+                avdName = argv[nn + 1];
+            } else if (opt[0] == '@' && opt[1] != '\0') {
+                avdName = opt + 1;
             }
         }
 
@@ -591,7 +602,8 @@ int main(int argc, char** argv)
         }
 
         if (!strcmp(opt, "-log-nofilter")) {
-            logFlags = static_cast<LoggingFlags>(logFlags & ~kLogEnableDuplicateFilter);
+            logFlags = static_cast<LoggingFlags>(logFlags &
+                                                 ~kLogEnableDuplicateFilter);
         }
     }
 
@@ -604,7 +616,7 @@ int main(int argc, char** argv)
 
 #ifdef __linux__
     if (stdouterr_file) {
-        int myfd = open(stdouterr_file,  O_APPEND | O_WRONLY);
+        int myfd = open(stdouterr_file, O_APPEND | O_WRONLY);
         if (myfd < 0) {
             fprintf(stderr, "cannot open %s\n", stdouterr_file);
             return -1;
@@ -617,7 +629,8 @@ int main(int argc, char** argv)
             fprintf(stderr, "cannot dup stderr\n");
             return -1;
         }
-        fprintf(stderr, "emulator: Redirecting stdout/stderr to %s\n", stdouterr_file);
+        fprintf(stderr, "emulator: Redirecting stdout/stderr to %s\n",
+                stdouterr_file);
     }
 #endif  // __linux__
 
@@ -627,7 +640,7 @@ int main(int argc, char** argv)
         const auto path = sys.findBundledExecutable("emulator-check");
         if (path.empty()) {
             derror("can't find the emulator-check executable "
-                    "(corrupted tools installation?)");
+                   "(corrupted tools installation?)");
             return -1;
         }
 
@@ -657,7 +670,7 @@ int main(int argc, char** argv)
         listUSBDevices();
         return 0;
     }
-#endif //_WIN32
+#endif  //_WIN32
 
     if (isLauncherTest) {
         if (!launcherTestArg) {
@@ -699,7 +712,8 @@ int main(int argc, char** argv)
 #if defined(__linux__)
     // Linux binaries are compiled for 64 bit, so none of the 32 bit settings
     // will make any sense.
-    static_assert(sizeof(void*) == 8, "We only support 64 bit in linux (see: c5a2d4198cb)");
+    static_assert(sizeof(void*) == 8,
+                  "We only support 64 bit in linux (see: c5a2d4198cb)");
     force32bit = false;
     hostBitness = 64;
     wantedBitness = 64;
@@ -715,7 +729,8 @@ int main(int argc, char** argv)
     // https://code.google.com/p/android/issues/detail?id=196779
     if (force32bit) {
         fprintf(stderr,
-"WARNING: 32-bit OSX Android emulator binaries are not supported, use 64bit.\n");
+                "WARNING: 32-bit OSX Android emulator binaries are not "
+                "supported, use 64bit.\n");
     }
     wantedBitness = 64;
 #endif
@@ -726,14 +741,16 @@ int main(int argc, char** argv)
 
     // print a version string and build id for easier debugging
 #if defined ANDROID_SDK_TOOLS_BUILD_NUMBER
-    dinfo("Android emulator version %s (CL:%s)", EMULATOR_VERSION_STRING
-      " (build_id " STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER) ")",
-      EMULATOR_CL_SHA1);
+    dinfo("Android emulator version %s (CL:%s)",
+          EMULATOR_VERSION_STRING
+          " (build_id " STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER) ")",
+          EMULATOR_CL_SHA1);
 #endif
 
     // If this is a restart, wait for the restartPid to exit.
     if (isRestart && restartPid > -1) {
-        System::get()->waitForProcessExit(restartPid, 10000 /* maximum of 10 seconds */);
+        System::get()->waitForProcessExit(restartPid,
+                                          10000 /* maximum of 10 seconds */);
     }
 
     /* If there is an AVD name, we're going to extract its target architecture
@@ -757,10 +774,13 @@ int main(int argc, char** argv)
                 envName = "ANDROID_SDK_HOME";
                 searchDir = kSdkHomeSearchDir;
             }
-            derror("Unknown AVD name [%s], use -list-avds to see valid list.",avdName);
-            derror("%s is defined but there is no file %s.ini in %s", envName, avdName, searchDir);
-            derror("(Note: Directories are searched in the order $ANDROID_AVD_HOME, %s and %s)",
-                    kSdkHomeSearchDir, kHomeSearchDir);
+            derror("Unknown AVD name [%s], use -list-avds to see valid list.",
+                   avdName);
+            derror("%s is defined but there is no file %s.ini in %s", envName,
+                   avdName, searchDir);
+            derror("(Note: Directories are searched in the order "
+                   "$ANDROID_AVD_HOME, %s and %s)",
+                   kSdkHomeSearchDir, kHomeSearchDir);
             return 1;
         }
         avdArch = path_getAvdTargetArch(avdName);
@@ -784,7 +804,8 @@ int main(int argc, char** argv)
         }
     }
 
-    if (!avdName && !avdArch && !androidOut && !forceEngineLaunch && !queryVersion) {
+    if (!avdName && !avdArch && !androidOut && !forceEngineLaunch &&
+        !queryVersion) {
         derror("No AVD specified. Use '@foo' or '-avd foo' to launch a virtual"
                " device named 'foo'\n");
         return 1;
@@ -815,7 +836,8 @@ int main(int argc, char** argv)
     }
 
     /* Find program directory. */
-    const auto progDirSystem = android::base::System::get()->getProgramDirectory();
+    const auto progDirSystem =
+            android::base::System::get()->getProgramDirectory();
     D("argv[0]: '%s'; program directory: '%s'", argv[0], progDirSystem.c_str());
 
     enum RanchuState {
@@ -833,7 +855,8 @@ int main(int argc, char** argv)
     // Sanity checks.
     if (avdName) {
         if (!isCpuArchSupportedByRanchu(avdArch)) {
-            APANIC("CPU Architecture '%s' is not supported by the QEMU2 emulator, (the classic engine is deprecated!)",
+            APANIC("CPU Architecture '%s' is not supported by the QEMU2 "
+                   "emulator, (the classic engine is deprecated!)",
                    avdArch);
         }
         std::string systemPath = getAvdSystemPath(avdName, sysDir);
@@ -861,31 +884,35 @@ int main(int argc, char** argv)
     D("emuDirName: '%s'", emuDirName.c_str());
 
     if (avdName) {
-      AvdInfoParams myparams;
-      AvdInfo *myavdinfo = avdInfo_new(avdName, &myparams);
-      if (avdInfo_getAvdFlavor(myavdinfo) == AVD_ANDROID_AUTO) {
-        const char* forge = getenv("TEST_UNDECLARED_OUTPUTS_DIR");
-        if (forge != NULL && *forge && *forge != '0') {
-          isHeadless = true;
-          D("force headless for auto on forge");
+        AvdInfoParams myparams;
+        AvdInfo* myavdinfo = avdInfo_new(avdName, &myparams);
+        if (avdInfo_getAvdFlavor(myavdinfo) == AVD_ANDROID_AUTO) {
+            const char* forge = getenv("TEST_UNDECLARED_OUTPUTS_DIR");
+            if (forge != NULL && *forge && *forge != '0') {
+                isHeadless = true;
+                D("force headless for auto on forge");
+            }
         }
-      }
-      const int apiLevel = avdInfo_getApiLevel(myavdinfo);
-      {
-          char* avdarch = avdInfo_getTargetCpuArch(myavdinfo);
-          const std::string sarch(avdarch);
+        const int apiLevel = avdInfo_getApiLevel(myavdinfo);
+        {
+            char* avdarch = avdInfo_getTargetCpuArch(myavdinfo);
+            const std::string sarch(avdarch);
 #ifdef __x86_64__
-          if (sarch == "arm64" && apiLevel >=28) {
-              APANIC("Avd's CPU Architecture '%s' is not supported by the QEMU2 emulator on x86_64 host.\n", avdarch);
-          }
+            if (sarch == "arm64" && apiLevel >= 28) {
+                APANIC("Avd's CPU Architecture '%s' is not supported by the "
+                       "QEMU2 emulator on x86_64 host.\n",
+                       avdarch);
+            }
 #endif
 #if defined(__aarch64__)
-          if (sarch != "arm64" && sarch != "arm") {
-              APANIC("Avd's CPU Architecture '%s' is not supported by the QEMU2 emulator on aarch64 host.\n", avdarch);
-          }
+            if (sarch != "arm64" && sarch != "arm") {
+                APANIC("Avd's CPU Architecture '%s' is not supported by the "
+                       "QEMU2 emulator on aarch64 host.\n",
+                       avdarch);
+            }
 #endif
-          free(avdarch);
-      }
+            free(avdarch);
+        }
     }
 
     bool force64bitTarget = is32bitImageOn64bitRanchuKernel(avdName, avdArch,
@@ -897,9 +924,9 @@ int main(int argc, char** argv)
         D("try dir %s", candidates[i].data());
         progDir = candidates[i];
         if (ranchu == RANCHU_ON) {
-            emulatorPath = getQemuExecutablePath(
-                    progDir.data(), avdArch, force64bitTarget,
-                    wantedBitness, isHeadless);
+            emulatorPath = getQemuExecutablePath(progDir.data(), avdArch,
+                                                 force64bitTarget,
+                                                 wantedBitness, isHeadless);
         } else {
             emulatorPath = getClassicEmulatorPath(progDir.data(), avdArch,
                                                   &wantedBitness);
@@ -916,11 +943,13 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    D("Found target-specific %d-bit emulator binary: %s", wantedBitness, emulatorPath);
+    D("Found target-specific %d-bit emulator binary: %s", wantedBitness,
+      emulatorPath);
 
     if (avdName || androidOut) {
         /* Save restart parameters before we modify argv */
-        android::base::initializeEmulatorRestartParameters(argc, argv,
+        android::base::initializeEmulatorRestartParameters(
+                argc, argv,
                 avdName ? path_getAvdContentPath(avdName) : androidOut);
     }
 
@@ -966,7 +995,7 @@ int main(int argc, char** argv)
     if (android_verbose) {
         int i;
         dprint("emulator: Running :%s", emulatorPath);
-        for(i = 0; i < argc; i++) {
+        for (i = 0; i < argc; i++) {
             dprint("qemu backend: argv[%02d] = \"%s\"", i, argv[i]);
         }
         std::string concat;
@@ -980,7 +1009,7 @@ int main(int argc, char** argv)
                 concat += " " + std::string(argv[i]);
             }
         }
-         /* Dump final command-line parameters to make debugging easier */
+        /* Dump final command-line parameters to make debugging easier */
         dprint("Concatenated backend parameters: %s", concat.c_str());
     }
 
@@ -990,7 +1019,8 @@ int main(int argc, char** argv)
     safe_execv(emulatorPath, argv);
 
     /* We could not launch the program ! */
-    fprintf(stderr, "Could not launch '%s': %s\n", emulatorPath, strerror(errno));
+    fprintf(stderr, "Could not launch '%s': %s\n", emulatorPath,
+            strerror(errno));
     return errno;
 }
 
@@ -1029,10 +1059,7 @@ static char* probeTargetEmulatorPath(const char* progDir,
 
     // First search for the 64-bit emulator binary.
     if (*wantedBitness == 64) {
-        p = bufprint_emulatorName(path,
-                                  pathEnd,
-                                  progDir,
-                                  kEmulator64Prefix,
+        p = bufprint_emulatorName(path, pathEnd, progDir, kEmulator64Prefix,
                                   archSuffix);
         D("Probing program: %s", path);
         if (p < pathEnd && path_exists(path)) {
@@ -1041,11 +1068,8 @@ static char* probeTargetEmulatorPath(const char* progDir,
     }
 
     // Then for the 32-bit one.
-    p = bufprint_emulatorName(path,
-                                pathEnd,
-                                progDir,
-                                kEmulatorPrefix,
-                                archSuffix);
+    p = bufprint_emulatorName(path, pathEnd, progDir, kEmulatorPrefix,
+                              archSuffix);
     D("Probing program: %s", path);
     if (p < pathEnd && path_exists(path)) {
         *wantedBitness = 32;
@@ -1055,8 +1079,8 @@ static char* probeTargetEmulatorPath(const char* progDir,
     return NULL;
 }
 
-// Find the absolute path to the classic emulator binary that supports CPU architecture
-// |avdArch|. |progDir| is the program's directory.
+// Find the absolute path to the classic emulator binary that supports CPU
+// architecture |avdArch|. |progDir| is the program's directory.
 static char* getClassicEmulatorPath(const char* progDir,
                                     const char* avdArch,
                                     int* wantedBitness) {
@@ -1064,12 +1088,10 @@ static char* getClassicEmulatorPath(const char* progDir,
     if (!emulatorSuffix) {
         APANIC("This emulator cannot emulate %s CPUs!\n", avdArch);
     }
-    D("Looking for emulator-%s to emulate '%s' CPU", emulatorSuffix,
-      avdArch);
+    D("Looking for emulator-%s to emulate '%s' CPU", emulatorSuffix, avdArch);
 
-    char* result = probeTargetEmulatorPath(progDir,
-                                           emulatorSuffix,
-                                           wantedBitness);
+    char* result =
+            probeTargetEmulatorPath(progDir, emulatorSuffix, wantedBitness);
     if (!result) {
         APANIC("Missing emulator engine program for '%s' CPU.\n", avdArch);
     }
@@ -1084,21 +1106,15 @@ static const char* getQemuArch(const char* avdArch, bool force64bitTarget) {
         const char* arch;
         const char* qemuArch;
     } kQemuArchs[] = {
-        {"arm", "armel"},
-        {"arm64", "aarch64"},
-        {"arm64", "aarch64"},
-        {"mips", "mipsel"},
-        {"mips64", "mips64el"},
-        {"mips64", "mips64el"},
-        {"x86","i386"},
-        {"x86_64","x86_64"},
-        {"x86_64","x86_64"},
+            {"arm", "armel"},   {"arm64", "aarch64"},   {"arm64", "aarch64"},
+            {"mips", "mipsel"}, {"mips64", "mips64el"}, {"mips64", "mips64el"},
+            {"x86", "i386"},    {"x86_64", "x86_64"},   {"x86_64", "x86_64"},
     };
     size_t n;
     for (n = 0; n < ARRAY_SIZE(kQemuArchs); ++n) {
         if (!strcmp(avdArch, kQemuArchs[n].arch)) {
             if (force64bitTarget) {
-                return kQemuArchs[n+1].qemuArch;
+                return kQemuArchs[n + 1].qemuArch;
             } else {
                 return kQemuArchs[n].qemuArch;
             }
@@ -1140,21 +1156,18 @@ static char* getQemuExecutablePath(const char* progDir,
     char fullPath[PATH_MAX];
     char* fullPathEnd = fullPath + sizeof(fullPath);
     const char* qemuStandardPath =
-        "%s" PATH_SEP "qemu" PATH_SEP "%s-%s" PATH_SEP QEMU_BINARY_PATTERN;
+            "%s" PATH_SEP "qemu" PATH_SEP "%s-%s" PATH_SEP QEMU_BINARY_PATTERN;
     const char* qemuHeadlessPath =
-        "%s" PATH_SEP "qemu" PATH_SEP "%s-%s" PATH_SEP QEMU_BINARY_PATTERN_HEADLESS;
+            "%s" PATH_SEP "qemu" PATH_SEP
+            "%s-%s" PATH_SEP QEMU_BINARY_PATTERN_HEADLESS;
 
-    char* tail = bufprint(fullPath,
-                          fullPathEnd,
+    char* tail = bufprint(fullPath, fullPathEnd,
                           isHeadless ? qemuHeadlessPath : qemuStandardPath,
-                          progDir,
-                          kHostOs,
-                          hostArch,
-                          qemuArch,
-                          kExeExtension);
+                          progDir, kHostOs, hostArch, qemuArch, kExeExtension);
     if (tail >= fullPathEnd) {
         APANIC("QEMU executable path too long (clipped) [%s]. "
-               "Can not use QEMU2 emulator. ", fullPath);
+               "Can not use QEMU2 emulator. ",
+               fullPath);
     }
 
     return path_get_absolute(fullPath);
@@ -1181,8 +1194,8 @@ static void updateLibrarySearchPath(bool isHeadless,
     char fullPath[PATH_MAX];
     char* tail = fullPath;
 
-    tail = bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s", launcherDir,
-                    libSubDir);
+    tail = bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s",
+                    launcherDir, libSubDir);
 
     if (tail >= fullPath + sizeof(fullPath)) {
         APANIC("Custom library path too long (clipped) [%s]. "
@@ -1195,24 +1208,33 @@ static void updateLibrarySearchPath(bool isHeadless,
 
     bool useSwAngle = false;
 #ifdef __APPLE__
-    useSwAngle = strstr(gpu, "swiftshader") != NULL;
+    useSwAngle = gpu && strstr(gpu, "swiftshader") != NULL;
 #endif
 
     if (gpu && (strstr(gpu, "angle") != NULL || useSwAngle)) {
-        bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_angle");
+        bufprint(fullPath, fullPath + sizeof(fullPath),
+                 "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir,
+                 "gles_angle");
         D("Adding library search path: '%s'", fullPath);
         add_library_search_dir(fullPath);
 
-        bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_angle9");
+        bufprint(fullPath, fullPath + sizeof(fullPath),
+                 "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir,
+                 "gles_angle9");
         D("Adding library search path: '%s'", fullPath);
         add_library_search_dir(fullPath);
 
-        bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_angle11");
+        bufprint(fullPath, fullPath + sizeof(fullPath),
+                 "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir,
+                 "gles_angle11");
         D("Adding library search path: '%s'", fullPath);
         add_library_search_dir(fullPath);
-    } else  {
-        // We add this last so Win32 can resolve LIBGLESV2 from swiftshader for QT5GUI
-        bufprint(fullPath, fullPath + sizeof(fullPath), "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir, "gles_swiftshader");
+    } else {
+        // We add this last so Win32 can resolve LIBGLESV2 from swiftshader for
+        // QT5GUI
+        bufprint(fullPath, fullPath + sizeof(fullPath),
+                 "%s" PATH_SEP "%s" PATH_SEP "%s", launcherDir, libSubDir,
+                 "gles_swiftshader");
         D("Adding library search path: '%s'", fullPath);
         add_library_search_dir(fullPath);
     }
@@ -1225,8 +1247,8 @@ static void updateLibrarySearchPath(bool isHeadless,
 
         if (tail >= fullPath + sizeof(fullPath)) {
             APANIC("Custom library path too long (clipped) [%s]. "
-                "Can not use bundled libraries. ",
-                fullPath);
+                   "Can not use bundled libraries. ",
+                   fullPath);
         }
 
         D("Adding library search path: '%s'", fullPath);
@@ -1255,7 +1277,7 @@ static void updateLibrarySearchPath(bool isHeadless,
     (void)isHeadless;
 #endif  // !__linux__
 
-#else  // !__linux__
+#else   // !__linux__
     (void)useSystemLibs;
 #endif  // !__linux__
 }
@@ -1264,7 +1286,8 @@ static void updateLibrarySearchPath(bool isHeadless,
 // If |optionalSysPath| is non-null, this simply returns that. Otherwise
 // this searches for a valid path.
 // Return empty string on failure.
-static std::string getAvdSystemPath(const char* avdName, const char* optionalSysPath) {
+static std::string getAvdSystemPath(const char* avdName,
+                                    const char* optionalSysPath) {
     std::string result;
     if (!avdName) {
         printf("emulator: WARN: AVD name is empty\n");
@@ -1303,11 +1326,12 @@ static std::string getAvdSystemPath(const char* avdName, const char* optionalSys
 
 // check for 32bit image running on 64bit ranchu kernel
 static bool is32bitImageOn64bitRanchuKernel(const char* avdName,
-                                               const char* avdArch,
-                                               const char* sysDir,
-                                               const char* androidOut) {
+                                            const char* avdArch,
+                                            const char* sysDir,
+                                            const char* androidOut) {
     // only appliable to 32bit image
-    if (strcmp(avdArch, "x86") && strcmp(avdArch, "arm") && strcmp(avdArch, "mips")) {
+    if (strcmp(avdArch, "x86") && strcmp(avdArch, "arm") &&
+        strcmp(avdArch, "mips")) {
         return false;
     }
 
@@ -1347,10 +1371,10 @@ static void doLauncherTest(const char* launcherTestArg) {
         bool avdRootExists = path_exists(avdRoot.c_str());
 
         printf("Performing SDK check.\n");
-        printf("Android SDK location: %s. %s\n",
-               sdkRoot.c_str(), getExistsStr(sdkRootExists));
-        printf("Android AVD root location: %s. %s\n",
-               avdRoot.c_str(), getExistsStr(avdRootExists));
+        printf("Android SDK location: %s. %s\n", sdkRoot.c_str(),
+               getExistsStr(sdkRootExists));
+        printf("Android AVD root location: %s. %s\n", avdRoot.c_str(),
+               getExistsStr(avdRootExists));
         return;
     }
 

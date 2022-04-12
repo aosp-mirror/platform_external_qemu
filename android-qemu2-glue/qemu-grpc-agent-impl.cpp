@@ -13,7 +13,6 @@
 #include "android/console.h"                       // for AndroidConsoleAgents
 #include "android/emulation/control/grpc_agent.h"  // for QGrpcAgent
 
-extern const AndroidConsoleAgents* getConsoleAgents();
 extern int qemu_setup_grpc(void);
 extern int qemu_grpc_port(void);
 

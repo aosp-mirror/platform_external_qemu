@@ -11,22 +11,21 @@
 
 #include "android/userspace-boot-properties.h"
 
-#include <string.h>                                 // for strcmp, strchr
-#include <algorithm>                                // for replace_if
-#include <ostream>                                  // for operator<<, ostream
-#include <string>                                   // for string, operator+
+#include <string.h>   // for strcmp, strchr
+#include <algorithm>  // for replace_if
+#include <ostream>    // for operator<<, ostream
+#include <string>     // for string, operator+
 
 #include "android/avd/info.h"
-#include "android/base/Log.h"                       // for LOG, LogMessage
-#include "android/base/StringFormat.h"              // for StringFormat
-#include "android/base/misc/StringUtils.h"          // for splitTokens
-#include "android/emulation/control/adb/adbkey.h"   // for getPrivateAdbKeyPath
+#include "android/base/Log.h"                      // for LOG, LogMessage
+#include "android/base/StringFormat.h"             // for StringFormat
+#include "android/base/misc/StringUtils.h"         // for splitTokens
+#include "android/emulation/control/adb/adbkey.h"  // for getPrivateAdbKeyPath
 #include "android/emulation/resizable_display_config.h"
 #include "android/featurecontrol/FeatureControl.h"  // for isEnabled
 #include "android/featurecontrol/Features.h"        // for AndroidbootProps2
 #include "android/hw-sensors.h"                     // for android_foldable_...
 #include "android/utils/debug.h"                    // for dwarning
-#include "android/utils/log_severity.h"             // for EMULATOR_LOG_ERROR
 
 namespace {
 
@@ -39,49 +38,57 @@ static const char kSysfsAndroidDtDirDtb[] =
 
 }  // namespace
 
-using android::base::StringFormat;
 using android::base::splitTokens;
+using android::base::StringFormat;
 
 std::string getDeviceStateString(const AndroidHwConfig* hw) {
     if (android_foldable_hinge_configured()) {
         int numHinges = hw->hw_sensor_hinge_count;
         if (numHinges < 0 || numHinges > ANDROID_FOLDABLE_MAX_HINGES) {
-            LOG(ERROR) << "Incorrect hinge count " <<hw->hw_sensor_hinge_count;
+            derror("Incorrect hinge count %d", hw->hw_sensor_hinge_count);
             return std::string();
         }
-        std::string postureList(hw->hw_sensor_posture_list ? hw->hw_sensor_posture_list : "");
-        std::string postureValues(hw->hw_sensor_hinge_angles_posture_definitions ? hw->hw_sensor_hinge_angles_posture_definitions : "");
+        std::string postureList(
+                hw->hw_sensor_posture_list ? hw->hw_sensor_posture_list : "");
+        std::string postureValues(
+                hw->hw_sensor_hinge_angles_posture_definitions
+                        ? hw->hw_sensor_hinge_angles_posture_definitions
+                        : "");
         std::vector<std::string> postureListTokens, postureValuesTokens;
         splitTokens(postureList, &postureListTokens, ",");
         splitTokens(postureValues, &postureValuesTokens, ",");
         if (postureList.empty() || postureValues.empty() ||
             postureListTokens.size() != postureValuesTokens.size()) {
-            LOG(ERROR) << "Incorrect posture list " << postureList
-                       << " or posture mapping " << postureValues;
+            derror("Incorrect posture list %s or posture mapping %s",
+                   postureList.c_str(), postureValues.c_str());
             return std::string();
         }
-        int foldAtPosture = hw->hw_sensor_hinge_fold_to_displayRegion_0_1_at_posture;
+        int foldAtPosture =
+                hw->hw_sensor_hinge_fold_to_displayRegion_0_1_at_posture;
         std::string ret("<device-state-config>");
         std::vector<std::string> valuesToken;
         for (int i = 0; i < postureListTokens.size(); i++) {
             char name[16];
             ret += "<device-state>";
-            if (foldAtPosture != 1 && postureListTokens[i] == std::to_string(foldAtPosture)) {
+            if (foldAtPosture != 1 &&
+                postureListTokens[i] == std::to_string(foldAtPosture)) {
                 // "device/generic/goldfish/overlay/frameworks/base/core/res/res/values/config.xml"
                 // specified "config_foldedDeviceStates" as "1" (CLOSED).
-                // If foldablbe AVD configs "fold" at other deviceState, rewrite it to "1"
+                // If foldablbe AVD configs "fold" at other deviceState, rewrite
+                // it to "1"
                 postureListTokens[i] = "1";
             }
             ret += "<identifier>" + postureListTokens[i] + "</identifier>";
-            if (!android_foldable_posture_name(std::stoi(postureListTokens[i], nullptr), name)) {
+            if (!android_foldable_posture_name(
+                        std::stoi(postureListTokens[i], nullptr), name)) {
                 return std::string();
             }
             ret += "<name>" + std::string(name) + "</name>";
             ret += "<conditions>";
-            splitTokens(postureValuesTokens[i], &valuesToken,
-                                       "&");
-            if ( valuesToken.size() != numHinges) {
-                LOG(ERROR) << "Incorrect posture mapping " << postureValuesTokens[i];
+            splitTokens(postureValuesTokens[i], &valuesToken, "&");
+            if (valuesToken.size() != numHinges) {
+                derror("Incorrect posture mapping %s",
+                       postureValuesTokens[i].c_str());
                 return std::string();
             }
             std::vector<std::string> values;
@@ -89,11 +96,12 @@ std::string getDeviceStateString(const AndroidHwConfig* hw) {
             for (int j = 0; j < valuesToken.size(); j++) {
                 ret += "<sensor>";
                 ret += "<type>android.sensor.hinge_angle</type>";
-                ret += "<name>Goldfish hinge sensor" + std::to_string(j) + " (in degrees)</name>";
+                ret += "<name>Goldfish hinge sensor" + std::to_string(j) +
+                       " (in degrees)</name>";
                 splitTokens(valuesToken[j], &values, "-");
                 size_t tokenCount = values.size();
                 if (tokenCount != 2 && tokenCount != 3) {
-                    LOG(ERROR) << "Incorrect posture mapping " << valuesToken[j];
+                    derror("Incorrect posture mapping %s", valuesToken[j].c_str());
                     return std::string();
                 }
                 ret += "<value>";
@@ -110,29 +118,31 @@ std::string getDeviceStateString(const AndroidHwConfig* hw) {
     }
 
     if (android_foldable_rollable_configured()) {
-        return std::string("<device-state-config><device-state><identifier>1</identifier>"
-                           "<name>CLOSED</name><conditions><lid-switch><open>false</open>"
-                           "</lid-switch></conditions></device-state><device-state>"
-                           "<identifier>3</identifier><name>OPENED</name><conditions>"
-                           "<lid-switch><open>true</open></lid-switch></conditions>"
-                           "</device-state></device-state-config>");
+        return std::string(
+                "<device-state-config><device-state><identifier>1</identifier>"
+                "<name>CLOSED</name><conditions><lid-switch><open>false</open>"
+                "</lid-switch></conditions></device-state><device-state>"
+                "<identifier>3</identifier><name>OPENED</name><conditions>"
+                "<lid-switch><open>true</open></lid-switch></conditions>"
+                "</device-state></device-state-config>");
     }
 
     return std::string();
 }
 
-std::vector<std::pair<std::string, std::string>>
-getUserspaceBootProperties(const AndroidOptions* opts,
-                           const char* targetArch,
-                           const char* serialno,
-                           const bool isQemu2,
-                           const AndroidGlesEmulationMode glesMode,
-                           const int bootPropOpenglesVersion,
-                           const int apiLevel,
-                           const char* kernelSerialPrefix,
-                           const std::vector<std::string>* verifiedBootParameters,
-                           const AndroidHwConfig* hw) {
-    const bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
+std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
+        const AndroidOptions* opts,
+        const char* targetArch,
+        const char* serialno,
+        const bool isQemu2,
+        const AndroidGlesEmulationMode glesMode,
+        const int bootPropOpenglesVersion,
+        const int apiLevel,
+        const char* kernelSerialPrefix,
+        const std::vector<std::string>* verifiedBootParameters,
+        const AndroidHwConfig* hw) {
+    const bool isX86ish =
+            !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
     const bool hasShellConsole = opts->logcat || opts->shell;
 
     const char* androidbootVerityMode;
@@ -165,18 +175,21 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     const char* qemuCpuVulkanVersionProp;
 
     namespace fc = android::featurecontrol;
-    if (fc::isEnabled(fc::AndroidbootProps) || fc::isEnabled(fc::AndroidbootProps2)) {
+    if (fc::isEnabled(fc::AndroidbootProps) ||
+        fc::isEnabled(fc::AndroidbootProps2)) {
         androidbootVerityMode = "androidboot.veritymode";
         checkjniProp = "androidboot.dalvik.vm.checkjni";
         bootanimProp = "androidboot.debug.sf.nobootanimation";
         bootanimPropValue = "1";
         qemuGlesProp = nullptr;  // deprecated
-        qemuScreenOffTimeoutProp = "androidboot.qemu.settings.system.screen_off_timeout";
-        qemuEncryptProp = nullptr;  // deprecated
+        qemuScreenOffTimeoutProp =
+                "androidboot.qemu.settings.system.screen_off_timeout";
+        qemuEncryptProp = nullptr;            // deprecated
         qemuMediaProfileVideoProp = nullptr;  // deprecated
         qemuVsyncProp = "androidboot.qemu.vsync";
         qemuGltransportNameProp = "androidboot.qemu.gltransport.name";
-        qemuDrawFlushIntervalProp = "androidboot.qemu.gltransport.drawFlushInterval";
+        qemuDrawFlushIntervalProp =
+                "androidboot.qemu.gltransport.drawFlushInterval";
         qemuOpenglesVersionProp = "androidboot.opengles.version";
         qemuUirendererProp = "androidboot.debug.hwui.renderer";
         dalvikVmHeapsizeProp = "androidboot.dalvik.vm.heapsize";
@@ -258,22 +271,24 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     if (qemuGlesProp) {
         int gles;
         switch (glesMode) {
-            case kAndroidGlesEmulationHost: gles = 1; break;
-            case kAndroidGlesEmulationGuest: gles = 2; break;
-            default: gles = 0;
+            case kAndroidGlesEmulationHost:
+                gles = 1;
+                break;
+            case kAndroidGlesEmulationGuest:
+                gles = 2;
+                break;
+            default:
+                gles = 0;
         }
         params.push_back({qemuGlesProp, StringFormat("%d", gles)});
     }
 
-    if (qemuCpuVulkanVersionProp
-            && glesMode == kAndroidGlesEmulationHost) {
+    if (qemuCpuVulkanVersionProp && glesMode == kAndroidGlesEmulationHost) {
         // Put our swiftshader version string there, which is currently
         // Vulkan 1.1 (0x402000)
-        params.push_back({
-            qemuCpuVulkanVersionProp,StringFormat("%d", 0x402000)
-            });
+        params.push_back(
+                {qemuCpuVulkanVersionProp, StringFormat("%d", 0x402000)});
     }
-
 
     const char* pTimeout = avdInfo_screen_off_timeout(apiLevel);
     params.push_back({qemuScreenOffTimeoutProp, pTimeout});
@@ -288,14 +303,16 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     // Android media profile selection
     // 1. If the SelectMediaProfileConfig is on, then select
     // <media_profile_name> if the resolution is above 1080p (1920x1080).
-    if (isQemu2 && fc::isEnabled(fc::DynamicMediaProfile) && qemuMediaProfileVideoProp) {
+    if (isQemu2 && fc::isEnabled(fc::DynamicMediaProfile) &&
+        qemuMediaProfileVideoProp) {
         if ((hw->hw_lcd_width > 1920 && hw->hw_lcd_height > 1080) ||
             (hw->hw_lcd_width > 1080 && hw->hw_lcd_height > 1920)) {
-            dwarning("Display resolution > 1080p. Using different media profile.");
-            params.push_back({
-                qemuMediaProfileVideoProp,
-                "/data/vendor/etc/media_codecs_google_video_v2.xml"
-            });
+            dwarning(
+                    "Display resolution > 1080p. Using different media "
+                    "profile.");
+            params.push_back(
+                    {qemuMediaProfileVideoProp,
+                     "/data/vendor/etc/media_codecs_google_video_v2.xml"});
         }
     }
 
@@ -304,17 +321,15 @@ getUserspaceBootProperties(const AndroidOptions* opts,
 
     // Set gl transport props
     params.push_back({qemuGltransportNameProp, hw->hw_gltransport});
-    params.push_back({
-        qemuDrawFlushIntervalProp,
-        StringFormat("%u", hw->hw_gltransport_drawFlushInterval)});
+    params.push_back(
+            {qemuDrawFlushIntervalProp,
+             StringFormat("%u", hw->hw_gltransport_drawFlushInterval)});
 
     // OpenGL ES related setup
     // 1. Set opengles.version and set Skia as UI renderer if
     // GLESDynamicVersion = on (i.e., is a reasonably good driver)
-    params.push_back({
-        qemuOpenglesVersionProp,
-        StringFormat("%d", bootPropOpenglesVersion)
-    });
+    params.push_back({qemuOpenglesVersionProp,
+                      StringFormat("%d", bootPropOpenglesVersion)});
 
     if (fc::isEnabled(fc::GLESDynamicVersion)) {
         params.push_back({qemuUirendererProp, "skiagl"});
@@ -325,16 +340,19 @@ getUserspaceBootProperties(const AndroidOptions* opts,
             std::string param = opts->logcat;
 
             // Replace any space with a comma.
-            std::replace_if(param.begin(), param.end(), [](char c){
-                switch (c) {
-                case ' ':
-                case '\t':
-                    return true;
+            std::replace_if(
+                    param.begin(), param.end(),
+                    [](char c) {
+                        switch (c) {
+                            case ' ':
+                            case '\t':
+                                return true;
 
-                default:
-                    return false;
-                }
-            }, ',');
+                            default:
+                                return false;
+                        }
+                    },
+                    ',');
 
             params.push_back({androidbootLogcatProp, param});
         } else {
@@ -364,10 +382,8 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     }
 
     if (hw->vm_heapSize > 0) {
-        params.push_back({
-            dalvikVmHeapsizeProp,
-            StringFormat("%dm", hw->vm_heapSize)
-        });
+        params.push_back(
+                {dalvikVmHeapsizeProp, StringFormat("%dm", hw->vm_heapSize)});
     }
 
     if (opts->legacy_fake_camera) {
@@ -386,11 +402,10 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     if (isQemu2 && isX86ish && !isDynamicPartition) {
         // x86 and x86_64 platforms use an alternative Android DT directory that
         // mimics the layout of /proc/device-tree/firmware/android/
-        params.push_back({
-            "androidboot.android_dt_dir",
-            (fc::isEnabled(fc::KernelDeviceTreeBlobSupport) ?
-                kSysfsAndroidDtDirDtb : kSysfsAndroidDtDir)
-            });
+        params.push_back({"androidboot.android_dt_dir",
+                          (fc::isEnabled(fc::KernelDeviceTreeBlobSupport)
+                                   ? kSysfsAndroidDtDirDtb
+                                   : kSysfsAndroidDtDir)});
     }
 
     if (verifiedBootParameters) {
@@ -405,10 +420,10 @@ getUserspaceBootProperties(const AndroidOptions* opts,
     }
 
     // display settings file name
-    if (hw->display_settings_xml &&
-        hw->display_settings_xml[0]
-        && qemuDisplaySettingsXmlProp) {
-        params.push_back({qemuDisplaySettingsXmlProp, hw->display_settings_xml});
+    if (hw->display_settings_xml && hw->display_settings_xml[0] &&
+        qemuDisplaySettingsXmlProp) {
+        params.push_back(
+                {qemuDisplaySettingsXmlProp, hw->display_settings_xml});
     }
 
     if (resizableEnabled()) {
@@ -430,10 +445,8 @@ getUserspaceBootProperties(const AndroidOptions* opts,
 
     if (isQemu2) {
         if (hasShellConsole) {
-            params.push_back({
-                "androidboot.console",
-                StringFormat("%s0", kernelSerialPrefix)
-            });
+            params.push_back({"androidboot.console",
+                              StringFormat("%s0", kernelSerialPrefix)});
         }
 
         if (androidQemudProp) {
@@ -479,7 +492,8 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         int logcatSerial = 1;
         if (apiLevel < 14) {
             if (androidQemudProp) {
-                params.push_back({androidQemudProp, StringFormat("%s1", kernelSerialPrefix)});
+                params.push_back({androidQemudProp,
+                                  StringFormat("%s1", kernelSerialPrefix)});
             }
 
             if (isX86ish) {
@@ -496,20 +510,20 @@ getUserspaceBootProperties(const AndroidOptions* opts,
         }
 
         if (hasShellConsole) {
-            params.push_back({
-                "androidboot.console",
-                StringFormat("%s%d", kernelSerialPrefix, logcatSerial)
-            });
+            params.push_back(
+                    {"androidboot.console",
+                     StringFormat("%s%d", kernelSerialPrefix, logcatSerial)});
         }
     }
 
     params.push_back({avdNameProp, hw->avd_name});
 
     if (deviceStateProp &&
-        android::featurecontrol::isEnabled(android::featurecontrol::DeviceStateOnBoot)) {
+        android::featurecontrol::isEnabled(
+                android::featurecontrol::DeviceStateOnBoot)) {
         std::string deviceState = getDeviceStateString(hw);
         if (deviceState != "") {
-            LOG(INFO) <<" sending device_state_config: " << deviceState;
+            LOG(INFO) << " sending device_state_config: " << deviceState;
             params.push_back({deviceStateProp, deviceState});
         }
     }

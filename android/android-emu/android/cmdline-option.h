@@ -12,41 +12,27 @@
 
 #pragma once
 
-#include "android/utils/compiler.h"
-
 #include <stdbool.h>
+#include "android/cmdline-definitions.h"
+#include "android/console.h"
+#include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
 
-/* a structure used to model a linked list of parameters
- */
-typedef struct ParamList {
-    char*              param;
-    struct ParamList*  next;
-} ParamList;
-
-/* define a structure that will hold all option variables
- */
-typedef struct {
-#define OPT_LIST(n,t,d)    ParamList*  n;
-#define OPT_PARAM(n,t,d)   char*  n;
-#define OPT_FLAG(n,d)      int    n;
-#include "android/cmdline-options.h"
-} AndroidOptions;
-
 /* A global pointer to the current process' parsed options */
-extern const AndroidOptions* android_cmdLineOptions;
+// extern const AndroidOptions* android_cmdLineOptions;
 
 /* Null terminated string of the cmdline, parameters
   are separated as as [v0] [v1] ... */
-extern const char* android_cmdLine;
+// extern const char* android_cmdLine;
 
 /* Parse command-line arguments options and remove them from (argc,argv)
  * 'opt' will be set to the content of parsed options
  * returns 0 on success, -1 on error (unknown option)
  */
-extern int
-android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt );
+extern int android_parse_options(int* pargc,
+                                 char*** pargv,
+                                 AndroidOptions* opt);
 
 /* Parse |port_string| into |console_port| and |adb_port|. Error checking is
  * done and approriate warning or error messages shown if needed. If the
@@ -99,6 +85,6 @@ bool android_parse_debug_tags_option(const char* opt, bool parse_as_suffix);
 
 /* the default device DPI if none is specified by the skin
  */
-#define  DEFAULT_DEVICE_DPI  165
+#define DEFAULT_DEVICE_DPI 165
 
 ANDROID_END_HEADER

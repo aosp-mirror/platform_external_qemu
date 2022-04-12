@@ -13,12 +13,12 @@
 // limitations under the License.
 #include "GoldfishOpenglTestEnv.h"
 
-#include <cutils/properties.h>                               // for property...
-#include <stdint.h>                                          // for uint64_t
-#include <stdio.h>                                           // for fprintf
-#include <fstream>                                           // for ofstream
-#include <functional>                                        // for __base
-#include <string>                                            // for operator==
+#include <cutils/properties.h>  // for property...
+#include <stdint.h>             // for uint64_t
+#include <stdio.h>              // for fprintf
+#include <fstream>              // for ofstream
+#include <functional>           // for __base
+#include <string>               // for operator==
 
 #include "Renderer.h"                                        // for Renderer
 #include "VulkanDispatch.h"                                  // for vkDispatch
@@ -41,16 +41,17 @@
 #include "android/emulation/control/vm_operations.h"         // for Snapshot...
 #include "android/emulation/hostdevices/HostAddressSpace.h"  // for HostAddr...
 #include "android/emulation/hostdevices/HostGoldfishPipe.h"  // for HostGold...
-#include "android/featurecontrol/FeatureControl.h"           // for setEnabl...
-#include "android/featurecontrol/Features.h"                 // for GLAsyncSwap
-#include "android/globals.h"                                 // for android_hw
-#include "android/opengl/emugl_config.h"                     // for emuglCon...
+#include "android/emulation/testing/TemporaryCommandLineOptions.h"
+#include "android/featurecontrol/FeatureControl.h"  // for setEnabl...
+#include "android/featurecontrol/Features.h"        // for GLAsyncSwap
+#include "android/globals.h"                        // for android_hw
 #include "android/opengl/GLProcessPipe.h"
-#include "android/opengles-pipe.h"                           // for android_...
-#include "android/opengles.h"                                // for android_...
-#include "android/refcount-pipe.h"                           // for android_...
-#include "android/skin/winsys.h"                             // for WINSYS_G...
-#include "android/snapshot/interface.h"                      // for androidS...
+#include "android/opengl/emugl_config.h"  // for emuglCon...
+#include "android/opengles-pipe.h"        // for android_...
+#include "android/opengles.h"             // for android_...
+#include "android/refcount-pipe.h"        // for android_...
+#include "android/skin/winsys.h"          // for WINSYS_G...
+#include "android/snapshot/interface.h"   // for androidS...
 
 namespace aemu {
 class AndroidBufferQueue;
@@ -69,8 +70,8 @@ using aemu::Display;
 using android::AndroidPipe;
 using android::HostAddressSpaceDevice;
 using android::HostGoldfishPipeDevice;
-using android::base::pj;
 using android::base::PathUtils;
+using android::base::pj;
 using android::base::System;
 
 using android::emulation::asg::AddressSpaceGraphicsContext;
@@ -83,14 +84,29 @@ static GoldfishOpenglTestEnv* sTestEnv = nullptr;
 
 static android::base::TestTempDir* sTestContentDir = nullptr;
 
-static AndroidOptions sTestEnvCmdLineOptions;
-
 // static
 std::vector<const char*> GoldfishOpenglTestEnv::getTransportsToTest() {
     return {
             "pipe",
     };
 }
+
+AndroidOptions emptyOptions{};
+AndroidOptions* sAndroid_cmdLineOptions = &emptyOptions;
+std::string sCmdlLine;
+
+static const QAndroidGlobalVarsAgent gMockAndroidGlobalVarsAgent = {
+        .android_cmdLineOptions = []() { return sAndroid_cmdLineOptions; },
+        .inject_cmdLineOptions =
+                [](AndroidOptions* opts) { sAndroid_cmdLineOptions = opts; },
+        .has_cmdLineOptions =
+                []() {
+                    return gMockAndroidGlobalVarsAgent
+                                   .android_cmdLineOptions() != nullptr;
+                },
+        .android_cmdLine = []() { return (const char*)sCmdlLine.c_str(); },
+        .inject_android_cmdLine =
+                [](const char* cmdline) { sCmdlLine = cmdline; }};
 
 static const SnapshotCallbacks* sSnapshotCallbacks = nullptr;
 
@@ -242,6 +258,11 @@ class GolfishMockConsoleFactory
             const override {
         return &sQAndroidVmOperations;
     }
+
+    const QAndroidGlobalVarsAgent* const android_get_QAndroidGlobalVarsAgent()
+            const {
+        return &gMockAndroidGlobalVarsAgent;
+    }
 };
 
 GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
@@ -257,7 +278,8 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     avdInfo_setCustomContentPath(android_avdInfo, sTestContentDir->path());
     auto customHwIniPath = pj(sTestContentDir->path(), "hardware.ini");
 
-    std::ofstream hwIniPathTouch(PathUtils::asUnicodePath(customHwIniPath).c_str(), std::ios::out);
+    std::ofstream hwIniPathTouch(
+            PathUtils::asUnicodePath(customHwIniPath).c_str(), std::ios::out);
     hwIniPathTouch << "test ini";
     hwIniPathTouch.close();
 
@@ -363,12 +385,10 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     android_init_refcount_pipe();
 
     // Command line options that enable snapshots
-    sTestEnvCmdLineOptions.read_only = 0;
-    sTestEnvCmdLineOptions.no_snapshot = 0;
-    sTestEnvCmdLineOptions.no_snapshot_save = 0;
-    sTestEnvCmdLineOptions.no_snapshot_load = 0;
-
-    android_cmdLineOptions = &sTestEnvCmdLineOptions;
+    mTestEnvCmdLineOptions.read_only = 0;
+    mTestEnvCmdLineOptions.no_snapshot = 0;
+    mTestEnvCmdLineOptions.no_snapshot_save = 0;
+    mTestEnvCmdLineOptions.no_snapshot_load = 0;
 
     auto openglesRenderer = android_getOpenglesRenderer().get();
 
@@ -387,33 +407,37 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
             },
             // pre save
             [openglesRenderer](void* consumer) {
-               return openglesRenderer->addressSpaceGraphicsConsumerPreSave(consumer);
+                return openglesRenderer->addressSpaceGraphicsConsumerPreSave(
+                        consumer);
             },
             // global presave
             [openglesRenderer]() {
-               return openglesRenderer->pauseAllPreSave();
+                return openglesRenderer->pauseAllPreSave();
             },
             // save
             [openglesRenderer](void* consumer, android::base::Stream* stream) {
-               return openglesRenderer->addressSpaceGraphicsConsumerSave(consumer, stream);
+                return openglesRenderer->addressSpaceGraphicsConsumerSave(
+                        consumer, stream);
             },
             // global postsave
-            [openglesRenderer]() {
-               return openglesRenderer->resumeAll();
-            },
+            [openglesRenderer]() { return openglesRenderer->resumeAll(); },
             // postSave
             [openglesRenderer](void* consumer) {
-                return openglesRenderer->addressSpaceGraphicsConsumerPostSave(consumer);
+                return openglesRenderer->addressSpaceGraphicsConsumerPostSave(
+                        consumer);
             },
             // postLoad
             [openglesRenderer](void* consumer) {
-                openglesRenderer->addressSpaceGraphicsConsumerRegisterPostLoadRenderThread(consumer);
+                openglesRenderer
+                        ->addressSpaceGraphicsConsumerRegisterPostLoadRenderThread(
+                                consumer);
             },
             // global preload
             [openglesRenderer]() {
-                android::opengl::forEachProcessPipeIdRunAndErase([openglesRenderer](uint64_t id) {
-                    openglesRenderer->cleanupProcGLObjects(id);
-                });
+                android::opengl::forEachProcessPipeIdRunAndErase(
+                        [openglesRenderer](uint64_t id) {
+                            openglesRenderer->cleanupProcGLObjects(id);
+                        });
                 openglesRenderer->waitForProcessCleanup();
             },
     };

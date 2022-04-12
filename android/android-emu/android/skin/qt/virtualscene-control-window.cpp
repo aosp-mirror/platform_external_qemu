@@ -23,10 +23,10 @@
 #include <QCoreApplication>
 #include <QCursor>
 #if QT_VERSION >= 0x060000
-#include <QWindow>           // for QWindow
+#include <QWindow>  // for QWindow
 #else
-#include <QDesktopWidget>    // for QDesktopWidget
-#endif  // QT_VERSION
+#include <QDesktopWidget>  // for QDesktopWidget
+#endif                     // QT_VERSION
 #include <QEvent>
 #include <QKeyEvent>
 #include <QLabel>
@@ -96,7 +96,8 @@ static const QColor kHighlightColor = QColor(2, 136, 209);
 static constexpr int kMetricsAggregateIntervalMilliseconds = 1000;
 static constexpr uint64_t kTapAfterHotkeyThresholdMilliseconds = 2000;
 
-static const float kPixelsToRotationRadians = 0.2f * static_cast<float>(M_PI / 180.0f);
+static const float kPixelsToRotationRadians =
+        0.2f * static_cast<float>(M_PI / 180.0f);
 static const float kMovementVelocityMetersPerSecond = 1.0f;
 static const float kMinVerticalRotationDegrees = -80.0f;
 static const float kMaxVerticalRotationDegrees = 80.0f;
@@ -296,7 +297,9 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
 }
 
 void VirtualSceneControlWindow::show() {
-    if (!android_cmdLineOptions->qt_hide_window) {
+    if (!getConsoleAgents()
+                 ->settings->android_cmdLineOptions()
+                 ->qt_hide_window) {
         QFrame::show();
     }
 }
@@ -378,14 +381,13 @@ void VirtualSceneControlWindow::hideEvent(QHideEvent* event) {
 bool VirtualSceneControlWindow::eventFilter(QObject* target, QEvent* event) {
     if (mCaptureMouse) {
         if ((event->type() == QEvent::WindowDeactivate &&
-                       target == parentWidget())
+             target == parentWidget())
 #ifdef __APPLE__
             || !isOptionKeyHeld()
 #endif
         ) {
             setCaptureMouse(false);
-        }
-        else if (event->type() == QEvent::MouseMove) {
+        } else if (event->type() == QEvent::MouseMove) {
             updateMouselook();
             return true;
         } else if (event->type() == QEvent::Wheel) {
@@ -425,7 +427,9 @@ void VirtualSceneControlWindow::keyReleaseEvent(QKeyEvent* event) {
 void VirtualSceneControlWindow::paintEvent(QPaintEvent*) {
     double dpr = 1.0;
 #if QT_VERSION >= 0x060000
-    auto newScreen = window()->windowHandle() ? window()->windowHandle()->screen() : nullptr;
+    auto newScreen = window()->windowHandle()
+                             ? window()->windowHandle()->screen()
+                             : nullptr;
     if (!newScreen) {
         newScreen = qGuiApp->primaryScreen();
     }
@@ -496,8 +500,8 @@ void VirtualSceneControlWindow::setActiveForCamera(bool active) {
         // hidden event before hiding the window so that we don't unset the
         // mShouldShowInfoDialog flag when the window hides.
         disconnect(mEmulatorWindow->containerWindow(),
-                   SIGNAL(hideVirtualSceneInfoDialog()),
-                   this, SLOT(slot_virtualSceneInfoDialogHasBeenSeen()));
+                   SIGNAL(hideVirtualSceneInfoDialog()), this,
+                   SLOT(slot_virtualSceneInfoDialogHasBeenSeen()));
 
         mEmulatorWindow->containerWindow()->hideVirtualSceneInfoDialog();
     }

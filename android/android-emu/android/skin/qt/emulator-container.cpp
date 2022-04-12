@@ -11,28 +11,28 @@
 
 #include "android/skin/qt/emulator-container.h"
 
-#include <qframe.h>                                  // for QFrame::NoFrame
-#include <qglobal.h>                                 // for Q_ASSERT
-#include <qlist.h>                                   // for QList<>::iterator
-#include <qnamespace.h>                              // for WindowMinimized
-#include <qwindowdefs.h>                             // for WId
-#include <QFlags>                                    // for QFlags
-#include <QFrame>                                    // for QFrame
-#include <QMoveEvent>                                // for QMoveEvent
-#include <QObject>                                   // for QObject
-#include <QPoint>                                    // for QPoint
-#include <QScrollBar>                                // for QScrollBar
-#include <QStyle>                                    // for QStyle
-#include <QStyleFactory>                             // for QStyleFactory
-#include <QVector2D>                                 // for QVector2D
-#include <algorithm>                                 // for min, find, max
-#include <functional>                                // for __base
-#include <tuple>                                     // for tuple
-#include <utility>                                   // for move
+#include <qframe.h>       // for QFrame::NoFrame
+#include <qglobal.h>      // for Q_ASSERT
+#include <qlist.h>        // for QList<>::iterator
+#include <qnamespace.h>   // for WindowMinimized
+#include <qwindowdefs.h>  // for WId
+#include <QFlags>         // for QFlags
+#include <QFrame>         // for QFrame
+#include <QMoveEvent>     // for QMoveEvent
+#include <QObject>        // for QObject
+#include <QPoint>         // for QPoint
+#include <QScrollBar>     // for QScrollBar
+#include <QStyle>         // for QStyle
+#include <QStyleFactory>  // for QStyleFactory
+#include <QVector2D>      // for QVector2D
+#include <algorithm>      // for min, find, max
+#include <functional>     // for __base
+#include <tuple>          // for tuple
+#include <utility>        // for move
 
-#include "android/cmdline-option.h"                  // for android_cmdLineOptions
-#include "android/skin/qt/ModalOverlay.h"            // for ModalOverlay
-#include "android/skin/qt/OverlayMessageCenter.h"    // for OverlayMessageCe...
+#include "android/cmdline-option.h"                // for android_cmdLineOptions
+#include "android/skin/qt/ModalOverlay.h"          // for ModalOverlay
+#include "android/skin/qt/OverlayMessageCenter.h"  // for OverlayMessageCe...
 #include "android/skin/qt/VirtualSceneInfoDialog.h"  // for VirtualSceneInfo...
 #include "android/skin/qt/emulator-qt-window.h"      // for EmulatorQtWindow
 #include "android/skin/qt/size-tweaker.h"            // for SizeTweaker
@@ -49,7 +49,7 @@ class QShowEvent;
 class QStyle;
 
 #if defined(__APPLE__)
-#include "android/skin/qt/mac-native-window.h"       // for getNSWindow, nsW...
+#include "android/skin/qt/mac-native-window.h"  // for getNSWindow, nsW...
 #endif
 
 #if defined(_WIN32)
@@ -83,8 +83,8 @@ EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
     // programmatic minimize operation.
     // We add "Minimize" and "Maximize" now, then immediately disable them when
     // the window is first shown.
-    setWindowFlags(this->windowFlags() | Qt::WindowMinimizeButtonHint
-                                       | Qt::WindowMaximizeButtonHint);
+    setWindowFlags(this->windowFlags() | Qt::WindowMinimizeButtonHint |
+                   Qt::WindowMaximizeButtonHint);
 
     // On OS X the native scrollbars disappear when not in use which
     // makes the zoomed-in emulator window look unscrollable. Also, due
@@ -354,7 +354,8 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
     // way to achieve this on OS X is apparently to make the tool window a
     // "child" of the main window (using OS X's native API).
     Q_ASSERT(mEmulatorWindow->toolWindow());
-    mEmulatorWindow->toolWindow()->showNormal();  // force creation of native window id
+    mEmulatorWindow->toolWindow()
+            ->showNormal();  // force creation of native window id
     WId tool_wid = mEmulatorWindow->toolWindow()->effectiveWinId();
     tool_wid = (WId)getNSWindow((void*)tool_wid);
     if (wid && tool_wid) {
@@ -400,7 +401,9 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
 void EmulatorContainer::show() {
     // When emulator is running in embedded mode,
     // hide all windows except for extended controls window.
-    if (android_cmdLineOptions->qt_hide_window) {
+    if (getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->qt_hide_window) {
         return;
     }
     QScrollArea::show();
@@ -478,7 +481,9 @@ void EmulatorContainer::slot_showModalOverlay(QString text) {
     slot_hideVirtualSceneInfoDialog();
     // When emulator is running in embedded mode,
     // hide all windows except for extended controls window.
-    if (android_cmdLineOptions->qt_hide_window) {
+    if (getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->qt_hide_window) {
         return;
     }
     mModalOverlay = new Ui::ModalOverlay(text, this);
@@ -564,7 +569,7 @@ void EmulatorContainer::adjustModalOverlayGeometry() {
     mModalOverlay->resize(overlaySize, size());
     mModalOverlay->move(
             mapToGlobal(QPoint((width() - mModalOverlay->width()) / 2,
-                         (height() - mModalOverlay->height()) / 2)));
+                               (height() - mModalOverlay->height()) / 2)));
 }
 
 void EmulatorContainer::adjustVirtualSceneDialogGeometry() {
@@ -575,7 +580,7 @@ void EmulatorContainer::adjustVirtualSceneDialogGeometry() {
     mVirtualSceneInfo->resize(size());
     mVirtualSceneInfo->move(
             mapToGlobal(QPoint((width() - mVirtualSceneInfo->width()) / 2,
-                         (height() - mVirtualSceneInfo->height()) / 2)));
+                               (height() - mVirtualSceneInfo->height()) / 2)));
 }
 
 void EmulatorContainer::adjustMessagesOverlayGeometry() {
@@ -589,5 +594,6 @@ void EmulatorContainer::adjustMessagesOverlayGeometry() {
                                          (width() - 2 * 150 * scaleFactor)));
     mMessages->setFixedWidth(w);
     mMessages->adjustSize();
-    mMessages->move(mapToGlobal(QPoint()) += {(width() - mMessages->width()) / 2, 0});
+    mMessages->move(mapToGlobal(QPoint()) +=
+                    {(width() - mMessages->width()) / 2, 0});
 }

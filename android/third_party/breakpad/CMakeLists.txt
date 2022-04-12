@@ -575,7 +575,7 @@ if(NOT BUILDING_FOR_AARCH64)
       PRIVATE
         breakpad_common
         Threads::Threads
-        "-Wl,-rpath,'${CMAKE_LIBRARY_OUTPUT_DIRECTORY}'"
+        "-Wl,-rpath,'${CMAKE_LIBRARY_OUTPUT_DIRECTORY}'  -Wl,--disable-new-dtags"
         "-Wl,--build-id=0x000102030405060708090a0b0c0d0e0f101712131415161718191a1b1c1d1e1f"
     )
 
