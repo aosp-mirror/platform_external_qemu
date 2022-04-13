@@ -1097,7 +1097,7 @@ CpuAccelerator GetCurrentCpuAccelerator() {
                 if (status_code != ANDROID_CPU_ACCELERATION_READY) {
                     g->accel = CPU_ACCELERATOR_HVF;
                     status_code = status_code_HVF;
-                    status = std::move(statusHvf);
+                    status = statusHvf;
                 }
             }
         }
@@ -1306,8 +1306,7 @@ std::pair<AndroidCpuInfoFlags, std::string> GetCpuInfo() {
         status += "32-bit CPU\n";
     }
 
-    return std::make_pair(static_cast<AndroidCpuInfoFlags>(flags),
-                          std::move(status));
+    return std::make_pair(static_cast<AndroidCpuInfoFlags>(flags), status);
 }
 
 std::string CpuAcceleratorToString(CpuAccelerator type) {
