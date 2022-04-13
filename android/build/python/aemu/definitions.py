@@ -68,10 +68,6 @@ def get_cmake_dir():
 
 def get_cmake():
     """Return the path of cmake executable."""
-    if platform.system() == "Windows":
-        # Temporary use visual studio cmake until we have upgraded
-        # cmake to 3.12 (see b/121393952)
-        return "cmake.exe"
     return os.path.join(get_cmake_dir(), "cmake%s" % EXE_POSTFIX)
 
 
