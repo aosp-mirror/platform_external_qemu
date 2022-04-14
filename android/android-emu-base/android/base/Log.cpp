@@ -11,11 +11,11 @@
 
 #include "android/base/Log.h"
 
-#include <stdarg.h>                     // for va_end, va_list, va_start
-#include <stdio.h>                      // for size_t, fflush, vsnprintf
-#include <stdlib.h>                     // for abort
-#include <string.h>                     // for memcpy, strerror
-#include <memory>                       // for make_unique, unique_ptr
+#include <stdarg.h>  // for va_end, va_list, va_start
+#include <stdio.h>   // for size_t, fflush, vsnprintf
+#include <stdlib.h>  // for abort
+#include <string.h>  // for memcpy, strerror
+#include <memory>    // for make_unique, unique_ptr
 
 #include "absl/strings/str_format.h"    // for FPrintF
 #include "android/base/ArraySize.h"     // for arraySize
@@ -44,7 +44,6 @@ LogSeverity gMinLogLevel = EMULATOR_LOG_INFO;
 SimpleLogFormatter defaultFormatter;
 LogFormatter* gFormatter = &defaultFormatter;
 
-
 extern "C" void __emu_log_print(LogSeverity prio,
                                 const char* file,
                                 int line,
@@ -58,7 +57,11 @@ extern "C" void __emu_log_print(LogSeverity prio,
     va_end(args);
 
     if (!msg.empty()) {
-        absl::FPrintF(fp, "%s\n", msg);
+        if (msg.back() == '\n') {
+            absl::FPrintF(fp, "%s", msg);
+        } else {
+            absl::FPrintF(fp, "%s\n", msg);
+        }
     }
 
     if (prio >= LOG_SEVERITY_FROM(FATAL)) {
