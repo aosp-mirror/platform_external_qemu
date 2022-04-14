@@ -30,6 +30,7 @@
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/bluetooth/BufferedAsyncDataChannelAdapter.h"
 #include "android/emulation/bluetooth/GrpcLinkChannelServer.h"
+#include "android/utils/path.h"
 #include "emulated_bluetooth.pb.h"
 #include "emulated_bluetooth_device.pb.h"
 #include "emulated_bluetooth_packets.pb.h"
@@ -337,6 +338,7 @@ public:
                 std::to_string(
                         android::base::System::get()->getCurrentProcessId()));
 
+        path_mkdir_if_needed(tmp_dir.c_str(), 0700);
         // Get temporary file path
         std::string temp_filename_pattern = "nimble_device_XXXXXX";
         std::string temp_file_path =
@@ -347,7 +349,8 @@ public:
         if (!tmpfd.valid()) {
             return ::grpc::Status(
                     ::grpc::StatusCode::INTERNAL,
-                    "Unalbe to create temporary file with device description",
+                    "Unable to create temporary file: " + temp_file_path +
+                            " with device description",
                     "");
         }
 
