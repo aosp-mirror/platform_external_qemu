@@ -267,10 +267,17 @@ static void create_fdt(VirtMachineState *vms)
     ms->fdt = fdt;
 
     /* Header */
-    qemu_fdt_setprop_string(fdt, "/", "compatible", "linux,dummy-virt");
+    if (vms->dts_header_machine_override) {
+        qemu_fdt_setprop_string(fdt, "/", "compatible",
+                                vms->dts_header_machine_override);
+        qemu_fdt_setprop_string(fdt, "/", "model",
+                                vms->dts_header_machine_override);
+    } else {
+        qemu_fdt_setprop_string(fdt, "/", "compatible", "linux,dummy-virt");
+        qemu_fdt_setprop_string(fdt, "/", "model", "linux,dummy-virt");
+    }
     qemu_fdt_setprop_cell(fdt, "/", "#address-cells", 0x2);
     qemu_fdt_setprop_cell(fdt, "/", "#size-cells", 0x2);
-    qemu_fdt_setprop_string(fdt, "/", "model", "linux,dummy-virt");
 
     /* /chosen must exist for load_dtb to fill in necessary properties later */
     qemu_fdt_add_subnode(fdt, "/chosen");
@@ -2689,6 +2696,14 @@ static void virt_machine_set_smbus(Object *obj, bool value, Error **errp)
     vms->smbus_enabled = value;
 }
 
+static void virt_machine_set_dts_compat_override(Object *obj, const char* value,
+                                                 Error **errp)
+{
+    VirtMachineState *vms = VIRT_MACHINE(obj);
+
+    vms->dts_header_machine_override = g_strdup_printf("linux,%s", value);
+}
+
 static CpuInstanceProperties
 virt_cpu_index_to_props(MachineState *ms, unsigned cpu_index)
 {
@@ -3149,6 +3164,11 @@ static void virt_machine_class_init(ObjectClass *oc, void *data)
                                    virt_machine_set_smbus);
     object_class_property_set_description(oc, "smbus",
                                           "Enable SMBUS controller. ");
+
+    object_class_property_add_str(oc, "compat", NULL,
+                                  virt_machine_set_dts_compat_override);
+    object_class_property_set_description(oc, "compat",
+                                          "Override the dts compatible string");
 }
 
 static void virt_instance_init(Object *obj)

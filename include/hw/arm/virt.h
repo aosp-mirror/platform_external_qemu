@@ -176,6 +176,7 @@ struct VirtMachineState {
     DeviceState *smbus;
     char *oem_id;
     char *oem_table_id;
+    char *dts_header_machine_override;
 };
 
 #define VIRT_ECAM_ID(high) (high ? VIRT_HIGH_PCIE_ECAM : VIRT_PCIE_ECAM)
