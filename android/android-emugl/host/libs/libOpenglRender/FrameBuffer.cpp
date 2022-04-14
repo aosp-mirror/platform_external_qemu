@@ -2524,7 +2524,7 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer,
 
         Post postCmd;
         postCmd.cmd = PostCmd::Post;
-        postCmd.cb = p_colorbuffer; 
+        postCmd.cb = p_colorbuffer;
         sendPostWorkerCmd(postCmd);
     } else {
         markOpened(&c->second);
@@ -3360,8 +3360,8 @@ void FrameBuffer::setDisplayConfigs(int configId, int w, int h,
                                     int dpiX, int dpiY) {
     AutoLock mutex(m_lock);
     mDisplayConfigs[configId] = {w, h, dpiX, dpiY};
-    LOG(INFO) << "setDisplayConfigs w " << w << " h " << h <<
-              " dpiX " << dpiX << " dpiY " << dpiY;
+    dinfo("Setting display: %d configuration to: %dx%d, dpi: %dx%d ", configId,
+          w, h, dpiX, dpiY);
 }
 
 void FrameBuffer::setDisplayActiveConfig(int configId) {

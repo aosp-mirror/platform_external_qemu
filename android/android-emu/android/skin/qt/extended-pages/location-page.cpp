@@ -296,7 +296,7 @@ void LocationPage::on_tabChanged() {
             mPaneInvocationTracker->increment("ROUTES");
             break;
         default:
-            LOG(WARNING) << "Unknown tab selected.";
+            LOG(DEBUG) << "Unknown location tab selected.";
     }
 }
 

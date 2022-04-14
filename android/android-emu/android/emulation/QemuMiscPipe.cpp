@@ -286,10 +286,11 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
         return;
     } else if (beginWith(input, "bootcomplete")) {
         fillWithOK(output);
-        dinfo("boot completed");
         // bug: 152636877
-#ifndef _WIN32
-        dinfo("boot time %lld ms",
+#ifdef _WIN32
+        dinfo("Boot completed");
+#else
+        dinfo("Boot completed in %lld ms",
             (long long)(get_uptime_ms() - s_reset_request_uptime_ms));
 #endif
         fflush(stdout);

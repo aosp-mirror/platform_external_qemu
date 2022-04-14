@@ -39,13 +39,11 @@ void HciDataChannelServer::StopListening() {
 
 // Injects a new qemu channel.
 std::shared_ptr<AsyncDataChannel> HciDataChannelServer::injectQemuChannel() {
-    dinfo("injectedQemuChannel!");
     mQemuChannel = std::make_shared<QemuDataChannel>(
             getConsoleAgents()->rootcanal, mLooper);
 
 
     if (callback_ && mListening) {
-        dinfo("Informing listeners of injection.");
         mLooper->scheduleCallback([&]() { callback_(mQemuChannel, this); });
     }
 

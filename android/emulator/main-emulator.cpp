@@ -1312,7 +1312,7 @@ static std::string getAvdSystemPath(const char* avdName,
 
     char* systemPath = path_getAvdSystemPath(avdName, sdkRootPath, false);
     if (systemPath != nullptr) {
-        printf("emulator: INFO: Found systemPath %s\n", systemPath);
+        dinfo("Found systemPath %s", systemPath);
         fflush(stdout);
         result = systemPath;
         AFREE(systemPath);
