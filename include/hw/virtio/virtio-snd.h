@@ -58,7 +58,7 @@ struct VirtIOSoundRingBuffer {
 struct VirtIOSoundPCMStream {
     uint32_t buffer_bytes;
     uint32_t period_bytes;
-    uint16_t driver_format;
+    uint16_t guest_format;
     uint8_t state;
 
     /* not saved to snapshots */
