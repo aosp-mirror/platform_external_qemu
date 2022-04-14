@@ -14,11 +14,22 @@
 
 #pragma once
 
+#ifdef _WIN32
+#ifdef CONSOLE_EXPORTS
+#define CONSOLE_API __declspec(dllexport)
+#else
+#define CONSOLE_API __declspec(dllimport)
+#endif
+#else
+#define CONSOLE_API
+#endif
+
 #include "android/emulation/control/battery_agent.h"
 #include "android/emulation/control/car_data_agent.h"
 #include "android/emulation/control/clipboard_agent.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
+#include "android/emulation/control/globals_agent.h"
 #include "android/emulation/control/grpc_agent.h"
 #include "android/emulation/control/http_proxy_agent.h"
 #include "android/emulation/control/hw_control_agent.h"
@@ -67,21 +78,20 @@ typedef struct QAndroidAutomationAgent QAndroidAutomationAgent;
     X(QCarDataAgent, car)                       \
     X(QGrpcAgent, grpc)                         \
     X(QAndroidHciAgent, rootcanal)              \
-    X(QAndroidHwControlAgent, hw_control)
+    X(QAndroidHwControlAgent, hw_control)       \
+    X(QAndroidGlobalVarsAgent, settings)
 
 // A structure used to group pointers to all agent interfaces used by the
 // Android console.
-#define ANDROID_CONSOLE_DEFINE_POINTER(type, name) const type* name;
+#define ANDROID_CONSOLE_DEFINE_POINTER(type, name)  const type* name;
 typedef struct AndroidConsoleAgents {
     ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_DEFINE_POINTER)
 } AndroidConsoleAgents;
 
-// Generic entry point to start an android console.
-// QEMU implementations should populate |*agents| with QEMU specific
-// functions. Takes ownership of |agents|.
-extern int android_console_start(int port, const AndroidConsoleAgents* agents);
+// Accessor for the android console agents. The console agents are used to
+// interact with the actual emulator.
+CONSOLE_API const AndroidConsoleAgents* getConsoleAgents();
 
-
-// Accessor for the android console agents. The console agents are used to interact with the actual emulator.
-const AndroidConsoleAgents* getConsoleAgents();
+// Returns true if the agents are available.
+CONSOLE_API bool agentsAvailable();
 ANDROID_END_HEADER

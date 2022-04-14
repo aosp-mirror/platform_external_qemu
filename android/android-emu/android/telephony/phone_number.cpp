@@ -28,11 +28,19 @@ class PhoneNumberContainer {
 public:
     const std::string& get_phone_number_prefix() {
         if (mPhoneNumberPrefix.empty()) {
-            if (android_cmdLineOptions &&
-                android_cmdLineOptions->phone_number != nullptr) {
+            if (getConsoleAgents()->settings->has_cmdLineOptions() &&
+                getConsoleAgents()
+                                ->settings->android_cmdLineOptions()
+                                ->phone_number != nullptr) {
                 mPhoneNumberPrefix = std::string(
-                        android_cmdLineOptions->phone_number, 0,
-                        strlen(android_cmdLineOptions->phone_number) - 4);
+                        getConsoleAgents()
+                                ->settings->android_cmdLineOptions()
+                                ->phone_number,
+                        0,
+                        strlen(getConsoleAgents()
+                                       ->settings->android_cmdLineOptions()
+                                       ->phone_number) -
+                                4);
             } else {
                 mPhoneNumberPrefix = kDefaultPhonePrefix;
             }
@@ -42,9 +50,13 @@ public:
 
     const std::string& get_phone_number(int port) {
         if (mPhoneNumber.empty()) {
-            if (android_cmdLineOptions &&
-                android_cmdLineOptions->phone_number != nullptr) {
-                mPhoneNumber = android_cmdLineOptions->phone_number;
+            if (getConsoleAgents()->settings->has_cmdLineOptions() &&
+                getConsoleAgents()
+                                ->settings->android_cmdLineOptions()
+                                ->phone_number != nullptr) {
+                mPhoneNumber = getConsoleAgents()
+                                       ->settings->android_cmdLineOptions()
+                                       ->phone_number;
             } else {
                 mPhoneNumber = android::base::StringFormat(
                         "%s%04d", kDefaultPhonePrefix, port % 10000);

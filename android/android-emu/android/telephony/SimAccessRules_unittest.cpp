@@ -3,11 +3,13 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/cmdline-option.h"
-#include "sim_access_rules.pb.h"
 #include "android/telephony/SimAccessRules.h"
+#include "sim_access_rules.pb.h"
 
 #include "google/protobuf/io/zero_copy_stream_impl.h"
 #include "google/protobuf/text_format.h"
+
+#include "android/emulation/testing/TemporaryCommandLineOptions.h"
 
 #include <gtest/gtest.h>
 #include <fstream>
@@ -21,12 +23,6 @@ namespace base {
 static const char kAraAid[] = "A00000015141434C00";
 
 TEST(SimAccessRulesTest, defaultAccessRules) {
-    AndroidOptions options = {};
-    android_cmdLineOptions = &options;
-    auto undoCommandLine = makeCustomScopedPtr(
-            &android_cmdLineOptions,
-            [](const AndroidOptions** opts) { *opts = nullptr; });
-
     SimAccessRules rules;
     ASSERT_STREQ(
             rules.getRule(kAraAid),
@@ -57,10 +53,7 @@ TEST(SimAccessRulesTest, customAccessRules) {
 
     AndroidOptions options = {};
     options.sim_access_rules_file = const_cast<char*>(config_file_path.c_str());
-    android_cmdLineOptions = &options;
-    auto undoCommandLine = makeCustomScopedPtr(
-            &android_cmdLineOptions,
-            [](const AndroidOptions** opts) { *opts = nullptr; });
+    TemporaryCommandLineOptions tmpOptions(&options);
 
     SimAccessRules rules;
     ASSERT_STREQ(

@@ -12,13 +12,13 @@
 #include "sim_access_rules.h"
 
 #include "android/base/containers/Lookup.h"
-#include "android/base/memory/LazyInstance.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/cmdline-option.h"
 #include "android/telephony/SimAccessRules.h"
 #include "android/telephony/TagLengthValue.h"
-#include "sim_access_rules.pb.h"
 #include "android/utils/debug.h"
+#include "sim_access_rules.pb.h"
 
 #include "google/protobuf/io/zero_copy_stream_impl.h"
 #include "google/protobuf/text_format.h"
@@ -27,9 +27,9 @@
 #include <string>
 #include <unordered_map>
 
+using android::base::PathUtils;
 using ::google::protobuf::TextFormat;
 using ::google::protobuf::io::IstreamInputStream;
-using android::base::PathUtils;
 
 namespace android {
 
@@ -49,7 +49,8 @@ RefDo parseRefDo(const android_emulator::RefDo& input) {
 
 ApduArDo parseApduArDo(const android_emulator::ArDo::Apdu& input) {
     if (input.has_general_access_rule()) {
-        return ApduArDo(static_cast<ApduArDo::Allow>(input.general_access_rule()));
+        return ApduArDo(
+                static_cast<ApduArDo::Allow>(input.general_access_rule()));
     } else {
         std::vector<std::string> rules;
         for (auto& rule : input.specific_access_rules().rules()) {
@@ -101,9 +102,15 @@ std::unordered_map<std::string, AllRefArDo> parseSimAccessRules(
 }
 
 SimAccessRules::SimAccessRules() : mHasCustomRules(false) {
-    if (android_cmdLineOptions &&
-        android_cmdLineOptions->sim_access_rules_file != nullptr) {
-        std::ifstream file(PathUtils::asUnicodePath(android_cmdLineOptions->sim_access_rules_file).c_str());
+    if (getConsoleAgents()->settings->has_cmdLineOptions() &&
+        getConsoleAgents()
+                        ->settings->android_cmdLineOptions()
+                        ->sim_access_rules_file != nullptr) {
+        std::ifstream file(PathUtils::asUnicodePath(
+                                   getConsoleAgents()
+                                           ->settings->android_cmdLineOptions()
+                                           ->sim_access_rules_file)
+                                   .c_str());
         if (file.is_open()) {
             IstreamInputStream istream(&file);
             android_emulator::SimAccessRules sim_access_rules_proto;
@@ -112,7 +119,9 @@ SimAccessRules::SimAccessRules() : mHasCustomRules(false) {
             mHasCustomRules = true;
         } else {
             dwarning("Failed to open file '%s', using default SIM access rules",
-                     android_cmdLineOptions->sim_access_rules_file);
+                     getConsoleAgents()
+                             ->settings->android_cmdLineOptions()
+                             ->sim_access_rules_file);
         }
     }
 }
@@ -128,9 +137,7 @@ static android::base::LazyInstance<SimAccessRules> sSimAccessRules = {};
 }  // namespace android
 
 extern "C" char* sim_get_fcp(uint16_t file_id) {
-    if (file_id != 0x2FE2 &&
-        file_id != 0x3F00 &&
-        file_id != 0x2F06) {
+    if (file_id != 0x2FE2 && file_id != 0x3F00 && file_id != 0x2F06) {
         return NULL;
     }
 
@@ -141,6 +148,8 @@ extern "C" char* sim_get_fcp(uint16_t file_id) {
 
 extern "C" char* sim_get_access_rules(const char* name) {
     const char* cstr = android::sSimAccessRules->getRule(name);
-    if (!cstr) return NULL;
+    if (!cstr) {
+        return NULL;
+    }
     return strdup(cstr);
 }

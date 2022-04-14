@@ -11,28 +11,28 @@
 
 #include "android/skin/qt/extended-pages/common.h"
 
-#include <qicon.h>                                   // for QIcon::Disabled
-#include <qnamespace.h>                              // for WindowFlags, Win...
-#include <qobject.h>                                 // for qobject_cast
-#include <qstandardpaths.h>                          // for QStandardPaths::...
-#include <qstring.h>                                 // for operator+, QStri...
-#include <QApplication>                              // for QApplication
-#include <QDir>                                      // for QDir
-#include <QFrame>                                    // for QFrame
-#include <QHash>                                     // for QHash
-#include <QList>                                     // for QList
-#include <QPixmap>                                   // for QPixmap
-#include <QPushButton>                               // for QPushButton
-#include <QSettings>                                 // for QSettings
-#include <QStandardPaths>                            // for QStandardPaths
-#include <QStringList>                               // for QStringList
-#include <QTemporaryFile>                            // for QTemporaryFile
-#include <QVariant>                                  // for QVariant
-#include <QWidget>                                   // for QWidget
-#include <QWidgetList>                               // for QWidgetList
+#include <qicon.h>           // for QIcon::Disabled
+#include <qnamespace.h>      // for WindowFlags, Win...
+#include <qobject.h>         // for qobject_cast
+#include <qstandardpaths.h>  // for QStandardPaths::...
+#include <qstring.h>         // for operator+, QStri...
+#include <QApplication>      // for QApplication
+#include <QDir>              // for QDir
+#include <QFrame>            // for QFrame
+#include <QHash>             // for QHash
+#include <QList>             // for QList
+#include <QPixmap>           // for QPixmap
+#include <QPushButton>       // for QPushButton
+#include <QSettings>         // for QSettings
+#include <QStandardPaths>    // for QStandardPaths
+#include <QStringList>       // for QStringList
+#include <QTemporaryFile>    // for QTemporaryFile
+#include <QVariant>          // for QVariant
+#include <QWidget>           // for QWidget
+#include <QWidgetList>       // for QWidgetList
 
-#include "android/cmdline-option.h"                  // for android_cmdLineOptions
-#include "android/skin/qt/qt-settings.h"             // for SAVE_PATH, SCREE...
+#include "android/cmdline-option.h"       // for android_cmdLineOptions
+#include "android/skin/qt/qt-settings.h"  // for SAVE_PATH, SCREE...
 #include "android/skin/qt/raised-material-button.h"  // for RaisedMaterialBu...
 #include "android/skin/qt/stylesheet.h"              // for stylesheetValues
 
@@ -43,20 +43,22 @@ class QWidget;
 // Only used by embedded emulator because the value is not persisted.
 static SettingsTheme sCurrentTheme = SETTINGS_THEME_STUDIO_LIGHT;
 
-void setButtonEnabled(QPushButton*  button, SettingsTheme theme, bool isEnabled)
-{
+void setButtonEnabled(QPushButton* button,
+                      SettingsTheme theme,
+                      bool isEnabled) {
     button->setEnabled(isEnabled);
     // If this button has icon image properties, reset its
     // image.
-    QString enabledPropStr  = button->property("themeIconName"         ).toString();
-    QString disabledPropStr = button->property("themeIconName_disabled").toString();
+    QString enabledPropStr = button->property("themeIconName").toString();
+    QString disabledPropStr =
+            button->property("themeIconName_disabled").toString();
 
     // Get the resource name based on the light/dark theme
     QString resName = ":/";
     resName += Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR];
     resName += "/";
 
-    if (!isEnabled  &&  !disabledPropStr.isNull()) {
+    if (!isEnabled && !disabledPropStr.isNull()) {
         // The button is disabled and has a specific
         // icon for when it is disabled.
         // Apply this icon and tell Qt to use it
@@ -66,7 +68,7 @@ void setButtonEnabled(QPushButton*  button, SettingsTheme theme, bool isEnabled)
         QIcon icon(resName);
         icon.addPixmap(QPixmap(resName), QIcon::Disabled);
         button->setIcon(icon);
-    } else if ( !enabledPropStr.isNull() ) {
+    } else if (!enabledPropStr.isNull()) {
         // Use the 'enabled' version of the icon
         // (Let Qt grey the icon if it wants to)
         resName += enabledPropStr;
@@ -92,28 +94,27 @@ bool directoryIsWritable(const QString& dirName) {
     return dirIsOK;
 }
 
-QString getScreenshotSaveDirectory()
-{
+QString getScreenshotSaveDirectory() {
     QSettings settings;
     QString savePath;
     // Override savePath if it is set from cmdline option.
-    if (android_cmdLineOptions->save_path) {
-        savePath = android_cmdLineOptions->save_path;
+    if (getConsoleAgents()->settings->android_cmdLineOptions()->save_path) {
+        savePath = getConsoleAgents()
+                           ->settings->android_cmdLineOptions()
+                           ->save_path;
     } else {
         savePath = settings.value(Ui::Settings::SAVE_PATH, "").toString();
     }
-    if ( !directoryIsWritable(savePath) ) {
+    if (!directoryIsWritable(savePath)) {
         // This path is not writable.
         // Clear it, so we'll try the default instead.
         savePath = "";
     }
 
     if (savePath.isEmpty()) {
-
         // We have no path. Try to determine the path to the desktop.
-        QStringList paths =
-                QStandardPaths::standardLocations(
-                    QStandardPaths::DesktopLocation);
+        QStringList paths = QStandardPaths::standardLocations(
+                QStandardPaths::DesktopLocation);
         if (paths.size() > 0) {
             savePath = QDir::toNativeSeparators(paths[0]);
 
@@ -125,23 +126,21 @@ QString getScreenshotSaveDirectory()
     return savePath;
 }
 
-QString getRecordingSaveDirectory()
-{
+QString getRecordingSaveDirectory() {
     QSettings settings;
-    QString savePath = settings.value(Ui::Settings::SCREENREC_SAVE_PATH, "").toString();
+    QString savePath =
+            settings.value(Ui::Settings::SCREENREC_SAVE_PATH, "").toString();
 
-    if ( !directoryIsWritable(savePath) ) {
+    if (!directoryIsWritable(savePath)) {
         // This path is not writable.
         // Clear it, so we'll try the default instead.
         savePath = "";
     }
 
     if (savePath.isEmpty()) {
-
         // We have no path. Try to determine the path to the desktop.
-        QStringList paths =
-                QStandardPaths::standardLocations(
-                    QStandardPaths::DesktopLocation);
+        QStringList paths = QStandardPaths::standardLocations(
+                QStandardPaths::DesktopLocation);
         if (paths.size() > 0) {
             savePath = QDir::toNativeSeparators(paths[0]);
 
@@ -154,12 +153,16 @@ QString getRecordingSaveDirectory()
 }
 
 SettingsTheme getSelectedTheme() {
-    if (android_cmdLineOptions->qt_hide_window) {
+    if (getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->qt_hide_window) {
         return sCurrentTheme;
     } else {
         QSettings settings;
         SettingsTheme theme =
-                (SettingsTheme)settings.value(Ui::Settings::UI_THEME, SETTINGS_THEME_LIGHT).toInt();
+                (SettingsTheme)settings
+                        .value(Ui::Settings::UI_THEME, SETTINGS_THEME_LIGHT)
+                        .toInt();
         if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
             theme = SETTINGS_THEME_LIGHT;
         }
@@ -177,29 +180,28 @@ void setSelectedTheme(SettingsTheme theme, bool persist) {
     }
 }
 
-void adjustAllButtonsForTheme(SettingsTheme theme)
-{
+void adjustAllButtonsForTheme(SettingsTheme theme) {
     // Switch to the icon images that are appropriate for this theme.
     // Examine every widget.
     QWidgetList wList = QApplication::allWidgets();
     for (QWidget* w : wList) {
-        if (QPushButton *pB = qobject_cast<QPushButton*>(w)) {
+        if (QPushButton* pB = qobject_cast<QPushButton*>(w)) {
             if (!pB->icon().isNull()) {
                 setButtonEnabled(pB, theme, pB->isEnabled());
             }
 
             // Adjust shadow color for material buttons depending on theme.
             if (RaisedMaterialButton* material_btn =
-                    qobject_cast<RaisedMaterialButton*>(pB)) {
+                        qobject_cast<RaisedMaterialButton*>(pB)) {
                 material_btn->setTheme(theme);
             }
         }
     }
 }
 
-
 QIcon getIconForCurrentTheme(const QString& icon_name) {
-    QString iconType = Ui::stylesheetValues(getSelectedTheme())[Ui::THEME_PATH_VAR];
+    QString iconType =
+            Ui::stylesheetValues(getSelectedTheme())[Ui::THEME_PATH_VAR];
     return QIcon(":/" + iconType + "/" + icon_name);
 }
 

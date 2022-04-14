@@ -22,12 +22,12 @@
 #include <unordered_map>
 #include <utility>
 
-#include "android/console.h"
 #include "android/avd/info.h"
 #include "android/base/LayoutResolver.h"
 #include "android/base/Log.h"
 #include "android/base/system/System.h"
 #include "android/cmdline-option.h"
+#include "android/console.h"
 #include "android/globals.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/UiEventTracker.h"
@@ -55,16 +55,16 @@ MultiDisplayPage::MultiDisplayPage(QWidget* parent)
     // set default display title
     char* skinDir;
     avdInfo_getSkinInfo(android_avdInfo, &mSkinName, &skinDir);
-    std::string defaultDisplayDisp = std::string(mSkinName) +
-                                     " (" +
-                                     std::to_string(android_hw->hw_lcd_width) +
-                                     'x' +
-                                     std::to_string(android_hw->hw_lcd_height) +
-                                     ')';
+    std::string defaultDisplayDisp =
+            std::string(mSkinName) + " (" +
+            std::to_string(android_hw->hw_lcd_width) + 'x' +
+            std::to_string(android_hw->hw_lcd_height) + ')';
     mUi->defaultDisplayText->setText(defaultDisplayDisp.c_str());
 
     // Do not show layout panel when studio is active.
-    if (android_cmdLineOptions->qt_hide_window)  {
+    if (getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->qt_hide_window) {
         mUi->horizontalLayout_2->removeItem(mUi->verticalLayout_3);
         mUi->multiDisplayArrangement->hide();
         mUi->arrangement->hide();
@@ -76,7 +76,7 @@ MultiDisplayPage::MultiDisplayPage(QWidget* parent)
     uint32_t width, height;
     EmulatorQtWindow::getInstance()->getMonitorRect(&width, &height);
     if (width != 0 && height != 0) {
-        m_monitorAspectRatio = (double) height / (double) width;
+        m_monitorAspectRatio = (double)height / (double)width;
     }
 
     mUi->verticalLayout_5->setAlignment(Qt::AlignTop);
@@ -85,12 +85,12 @@ MultiDisplayPage::MultiDisplayPage(QWidget* parent)
     for (int i = 1; i <= sMaxItem; i++) {
         uint32_t w, h, d;
         bool e;
-        if (EmulatorQtWindow::getInstance()->getMultiDisplay(i, nullptr, nullptr,
-                                                             &w, &h, &d, nullptr,
-                                                             &e)
-            && e && d != 0) {
-            MultiDisplayItem *item = new MultiDisplayItem(i, w, h, d, this);
-            LOG(VERBOSE) << "add MultiDisplayItem " << i << " and insert widget";
+        if (EmulatorQtWindow::getInstance()->getMultiDisplay(
+                    i, nullptr, nullptr, &w, &h, &d, nullptr, &e) &&
+            e && d != 0) {
+            MultiDisplayItem* item = new MultiDisplayItem(i, w, h, d, this);
+            LOG(VERBOSE) << "add MultiDisplayItem " << i
+                         << " and insert widget";
             mUi->verticalLayout_5->insertWidget(i - 1, item);
             mItem[i] = item;
             ++mSecondaryItemCount;
@@ -99,8 +99,9 @@ MultiDisplayPage::MultiDisplayPage(QWidget* parent)
     }
     recomputeLayout();
 
-    connect(EmulatorQtWindow::getInstance(), SIGNAL(updateMultiDisplayPage(int)),
-            this, SLOT(updateSecondaryDisplay(int)));
+    connect(EmulatorQtWindow::getInstance(),
+            SIGNAL(updateMultiDisplayPage(int)), this,
+            SLOT(updateSecondaryDisplay(int)));
 }
 
 void MultiDisplayPage::setSecondaryDisplaysTitle(int count) {
@@ -134,7 +135,7 @@ void MultiDisplayPage::on_addSecondaryDisplay_clicked() {
     if (i < 0) {
         return;
     }
-    MultiDisplayItem *item = new MultiDisplayItem(i, this);
+    MultiDisplayItem* item = new MultiDisplayItem(i, this);
     LOG(VERBOSE) << "add MultiDisplayItem " << i << " and insert widget";
     mUi->verticalLayout_5->insertWidget(i - 1, item);
     mItem[i] = item;
@@ -149,7 +150,7 @@ void MultiDisplayPage::on_addSecondaryDisplay_clicked() {
 
 void MultiDisplayPage::deleteSecondaryDisplay(int id) {
     LOG(VERBOSE) << "deleteSecondaryDisplay " << id;
-    delete(mItem[id]);
+    delete (mItem[id]);
     mItem[id] = nullptr;
     setSecondaryDisplaysTitle(--mSecondaryItemCount);
     recomputeLayout();
@@ -168,10 +169,8 @@ void MultiDisplayPage::changeSecondaryDisplay(int id) {
 void MultiDisplayPage::updateSecondaryDisplay(int i) {
     uint32_t width, height, dpi;
     bool enabled;
-    EmulatorQtWindow::getInstance()->getMultiDisplay(i, nullptr, nullptr,
-                                                     &width, &height,
-                                                     &dpi, nullptr,
-                                                     &enabled);
+    EmulatorQtWindow::getInstance()->getMultiDisplay(
+            i, nullptr, nullptr, &width, &height, &dpi, nullptr, &enabled);
     if (!enabled) {
         if (mItem[i] == nullptr) {
             LOG(VERBOSE) << "already void MultiDisplayItem";
@@ -181,8 +180,10 @@ void MultiDisplayPage::updateSecondaryDisplay(int i) {
         }
     } else {
         if (mItem[i] == nullptr) {
-            LOG(VERBOSE) << "create MultiDisplayItem " << i << " and insert widget";
-            MultiDisplayItem *item = new MultiDisplayItem(i, width, height, dpi, this);
+            LOG(VERBOSE) << "create MultiDisplayItem " << i
+                         << " and insert widget";
+            MultiDisplayItem* item =
+                    new MultiDisplayItem(i, width, height, dpi, this);
             mUi->verticalLayout_5->insertWidget(i - 1, item);
             mItem[i] = item;
             ++mSecondaryItemCount;
@@ -193,11 +194,13 @@ void MultiDisplayPage::updateSecondaryDisplay(int i) {
             mItem[i]->getValues(&w, &h, &d);
             if (width != w || height != h || dpi != d) {
                 LOG(VERBOSE) << "delete MultiDisplayItem " << i;
-                delete(mItem[i]);
+                delete (mItem[i]);
                 mItem[i] = nullptr;
-                MultiDisplayItem *item = new MultiDisplayItem(i, width, height, dpi, this);
+                MultiDisplayItem* item =
+                        new MultiDisplayItem(i, width, height, dpi, this);
                 mItem[i] = item;
-                LOG(VERBOSE) << "add MultiDisplayItem " << i << " and insert widget";
+                LOG(VERBOSE)
+                        << "add MultiDisplayItem " << i << " and insert widget";
                 mUi->verticalLayout_5->insertWidget(i - 1, item);
                 recomputeLayout();
             } else {
@@ -210,20 +213,19 @@ void MultiDisplayPage::updateSecondaryDisplay(int i) {
 void MultiDisplayPage::recomputeLayout() {
     std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles;
     std::unordered_map<uint32_t, std::string> names;
-    rectangles[0] = std::make_pair(android_hw->hw_lcd_width,
-                                   android_hw->hw_lcd_height);
+    rectangles[0] =
+            std::make_pair(android_hw->hw_lcd_width, android_hw->hw_lcd_height);
     names[0] = std::string(mSkinName);
     for (int i = 1; i <= sMaxItem; i++) {
         if (mItem[i] != nullptr) {
             uint32_t width, height;
             mItem[i]->getValues(&width, &height, nullptr);
-            rectangles[i] =
-                std::make_pair(width, height);
+            rectangles[i] = std::make_pair(width, height);
             names[i] = mItem[i]->getName();
         }
     }
     std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> offsets =
-        android::base::resolveLayout(rectangles, m_monitorAspectRatio);
+            android::base::resolveLayout(rectangles, m_monitorAspectRatio);
     mUi->multiDisplayArrangement->setLayout(rectangles, offsets, names);
 }
 
@@ -234,10 +236,8 @@ void MultiDisplayPage::on_applyChanges_clicked() {
     for (int i = 1; i <= sMaxItem; i++) {
         uint32_t width, height, dpi;
         bool enabled;
-        EmulatorQtWindow::getInstance()->getMultiDisplay(i, nullptr, nullptr,
-                                                         &width, &height,
-                                                         &dpi, nullptr,
-                                                         &enabled);
+        EmulatorQtWindow::getInstance()->getMultiDisplay(
+                i, nullptr, nullptr, &width, &height, &dpi, nullptr, &enabled);
         if (mItem[i] != nullptr) {
             numDisplay++;
             uint32_t w, h, d;
@@ -246,24 +246,12 @@ void MultiDisplayPage::on_applyChanges_clicked() {
             if (w == width && h == height && d == dpi && enabled) {
                 continue;
             }
-            EmulatorQtWindow::getInstance()->switchMultiDisplay(true,
-                                                                i,
-                                                                -1,
-                                                                -1,
-                                                                w,
-                                                                h,
-                                                                d,
-                                                                0);
+            EmulatorQtWindow::getInstance()->switchMultiDisplay(true, i, -1, -1,
+                                                                w, h, d, 0);
         } else {
             if (enabled) {
-                EmulatorQtWindow::getInstance()->switchMultiDisplay(false,
-                                                                    i,
-                                                                    0,
-                                                                    0,
-                                                                    0,
-                                                                    0,
-                                                                    0,
-                                                                    0);
+                EmulatorQtWindow::getInstance()->switchMultiDisplay(
+                        false, i, 0, 0, 0, 0, 0, 0);
             }
         }
     }

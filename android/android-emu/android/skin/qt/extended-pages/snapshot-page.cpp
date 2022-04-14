@@ -11,60 +11,60 @@
 
 #include "android/skin/qt/extended-pages/snapshot-page.h"
 
-#include <qbytearray.h>                              // for operator==
-#include <qdialog.h>                                 // for QDialog::Rejected
-#include <qdialogbuttonbox.h>                        // for operator|, QDial...
-#include <qdir.h>                                    // for operator|, QDir:...
-#include <qeasingcurve.h>                            // for QEasingCurve::Ou...
-#include <qheaderview.h>                             // for QHeaderView::Fixed
-#include <qiodevice.h>                               // for operator|, QIODe...
-#include <qmessagebox.h>                             // for operator|, QMess...
-#include <qnamespace.h>                              // for WaitCursor, Asce...
-#include <qsettings.h>                               // for QSettings::IniFo...
-#include <qstring.h>                                 // for operator+, QStri...
-#include <stdio.h>                                   // for fprintf, printf
-#include <string.h>                                  // for strcmp
-#include <QApplication>                              // for QApplication
-#include <QBrush>                                    // for QBrush
-#include <QByteArray>                                // for QByteArray
-#include <QCheckBox>                                 // for QCheckBox
-#include <QComboBox>                                 // for QComboBox
-#include <QDateTime>                                 // for QDateTime
-#include <QDialog>                                   // for QDialog
-#include <QDialogButtonBox>                          // for QDialogButtonBox
-#include <QDir>                                      // for QDir
-#include <QEasingCurve>                              // for QEasingCurve
-#include <QFile>                                     // for QFile
-#include <QFont>                                     // for QFont
-#include <QGraphicsPixmapItem>                       // for QGraphicsPixmapItem
-#include <QGraphicsTextItem>                         // for QGraphicsTextItem
-#include <QGraphicsView>                             // for QGraphicsView
-#include <QHash>                                     // for QHash
-#include <QHeaderView>                               // for QHeaderView
-#include <QIcon>                                     // for QIcon
-#include <QLabel>                                    // for QLabel
-#include <QLineEdit>                                 // for QLineEdit
-#include <QList>                                     // for QList
-#include <QMessageBox>                               // for QMessageBox
-#include <QObject>                                   // for QObject
-#include <QPixmap>                                   // for QPixmap
-#include <QPlainTextEdit>                            // for QPlainTextEdit
-#include <QPropertyAnimation>                        // for QPropertyAnimation
-#include <QPushButton>                               // for QPushButton
-#include <QRectF>                                    // for QRectF
-#include <QSettings>                                 // for QSettings
-#include <QSizeF>                                    // for QSizeF
-#include <QTabWidget>                                // for QTabWidget
-#include <QTextDocument>                             // for QTextDocument
-#include <QTextEdit>                                 // for QTextEdit
-#include <QTreeWidget>                               // for QTreeWidget
-#include <QTreeWidgetItem>                           // for QTreeWidgetItem
-#include <QTreeWidgetItemIterator>                   // for QTreeWidgetItemI...
-#include <QVBoxLayout>                               // for QVBoxLayout
-#include <QVariant>                                  // for QVariant
-#include <fstream>                                   // for ofstream
-#include <functional>                                // for __base
-#include <string>                                    // for string
+#include <qbytearray.h>             // for operator==
+#include <qdialog.h>                // for QDialog::Rejected
+#include <qdialogbuttonbox.h>       // for operator|, QDial...
+#include <qdir.h>                   // for operator|, QDir:...
+#include <qeasingcurve.h>           // for QEasingCurve::Ou...
+#include <qheaderview.h>            // for QHeaderView::Fixed
+#include <qiodevice.h>              // for operator|, QIODe...
+#include <qmessagebox.h>            // for operator|, QMess...
+#include <qnamespace.h>             // for WaitCursor, Asce...
+#include <qsettings.h>              // for QSettings::IniFo...
+#include <qstring.h>                // for operator+, QStri...
+#include <stdio.h>                  // for fprintf, printf
+#include <string.h>                 // for strcmp
+#include <QApplication>             // for QApplication
+#include <QBrush>                   // for QBrush
+#include <QByteArray>               // for QByteArray
+#include <QCheckBox>                // for QCheckBox
+#include <QComboBox>                // for QComboBox
+#include <QDateTime>                // for QDateTime
+#include <QDialog>                  // for QDialog
+#include <QDialogButtonBox>         // for QDialogButtonBox
+#include <QDir>                     // for QDir
+#include <QEasingCurve>             // for QEasingCurve
+#include <QFile>                    // for QFile
+#include <QFont>                    // for QFont
+#include <QGraphicsPixmapItem>      // for QGraphicsPixmapItem
+#include <QGraphicsTextItem>        // for QGraphicsTextItem
+#include <QGraphicsView>            // for QGraphicsView
+#include <QHash>                    // for QHash
+#include <QHeaderView>              // for QHeaderView
+#include <QIcon>                    // for QIcon
+#include <QLabel>                   // for QLabel
+#include <QLineEdit>                // for QLineEdit
+#include <QList>                    // for QList
+#include <QMessageBox>              // for QMessageBox
+#include <QObject>                  // for QObject
+#include <QPixmap>                  // for QPixmap
+#include <QPlainTextEdit>           // for QPlainTextEdit
+#include <QPropertyAnimation>       // for QPropertyAnimation
+#include <QPushButton>              // for QPushButton
+#include <QRectF>                   // for QRectF
+#include <QSettings>                // for QSettings
+#include <QSizeF>                   // for QSizeF
+#include <QTabWidget>               // for QTabWidget
+#include <QTextDocument>            // for QTextDocument
+#include <QTextEdit>                // for QTextEdit
+#include <QTreeWidget>              // for QTreeWidget
+#include <QTreeWidgetItem>          // for QTreeWidgetItem
+#include <QTreeWidgetItemIterator>  // for QTreeWidgetItemI...
+#include <QVBoxLayout>              // for QVBoxLayout
+#include <QVariant>                 // for QVariant
+#include <fstream>                  // for ofstream
+#include <functional>               // for __base
+#include <string>                   // for string
 
 #include "android/avd/info.h"                        // for AVDINFO_NO_SNAPS...
 #include "android/avd/util.h"                        // for path_getAvdConte...
@@ -82,18 +82,18 @@
 #include "android/metrics/MetricsReporter.h"         // for MetricsReporter
 #include "android/metrics/MetricsWriter.h"           // for android_studio
 #include "android/metrics/UiEventTracker.h"          // for UiEventTracker
-#include "studio_stats.pb.h"                         // for EmulatorSnapshot...
 #include "android/settings-agent.h"                  // for SettingsTheme
 #include "android/skin/qt/error-dialog.h"            // for showErrorDialog
 #include "android/skin/qt/extended-pages/common.h"   // for setButtonEnabled
 #include "android/skin/qt/raised-material-button.h"  // for RaisedMaterialBu...
 #include "android/skin/qt/stylesheet.h"              // for stylesheetForTheme
-#include "android/snapshot/common.h"
 #include "android/snapshot/PathUtils.h"              // for getSnapshotBaseDir
 #include "android/snapshot/Quickboot.h"              // for Quickboot, Quick...
 #include "android/snapshot/Snapshot.h"               // for Snapshot
-#include "android/snapshot/interface.h"              // for androidSnapshot_...
-#include "snapshot.pb.h"      // for Snapshot
+#include "android/snapshot/common.h"
+#include "android/snapshot/interface.h"  // for androidSnapshot_...
+#include "snapshot.pb.h"                 // for Snapshot
+#include "studio_stats.pb.h"             // for EmulatorSnapshot...
 
 class QCheckBox;
 class QCloseEvent;
@@ -114,10 +114,10 @@ class QWidget;
 
 using android::metrics::MetricsReporter;
 using android::snapshot::Quickboot;
-using Ui::Settings::SaveSnapshotOnExit;
-using Ui::Settings::SaveSnapshotOnExitUiOrder;
 using Ui::Settings::DeleteInvalidSnapshots;
 using Ui::Settings::DeleteInvalidSnapshotsUiOrder;
+using Ui::Settings::SaveSnapshotOnExit;
+using Ui::Settings::SaveSnapshotOnExitUiOrder;
 
 using namespace android::base;
 using namespace android::snapshot;
@@ -127,12 +127,15 @@ namespace fc = android::featurecontrol;
 using fc::Feature;
 
 static const char CURRENT_SNAPSHOT_ICON_NAME[] = "current_snapshot";
-static const char CURRENT_SNAPSHOT_SELECTED_ICON_NAME[] = "current_snapshot_selected";
+static const char CURRENT_SNAPSHOT_SELECTED_ICON_NAME[] =
+        "current_snapshot_selected";
 static const char INVALID_SNAPSHOT_ICON_NAME[] = "invalid_snapshot";
-static const char INVALID_SNAPSHOT_SELECTED_ICON_NAME[] = "invalid_snapshot_selected";
+static const char INVALID_SNAPSHOT_SELECTED_ICON_NAME[] =
+        "invalid_snapshot_selected";
 
 static constexpr char kDefaultBootItemName[] = "Quickboot";
-static constexpr char kDefaultBootFileBackedTitleName[] = "Quickboot (auto-saved)";
+static constexpr char kDefaultBootFileBackedTitleName[] =
+        "Quickboot (auto-saved)";
 
 static SaveSnapshotOnExit getSaveOnExitChoice();
 static void setSaveOnExitChoice(SaveSnapshotOnExit choice);
@@ -143,97 +146,86 @@ bool userSettingIsDontSaveSnapshot() {
 }
 // A class for items in the QTreeWidget.
 class SnapshotPage::WidgetSnapshotItem : public QTreeWidgetItem {
-    public:
+public:
+    // ctor for a top-level item
+    WidgetSnapshotItem(const QString& fileName,
+                       const QString& logicalName,
+                       const QDateTime& dateTime,
+                       bool isValid,
+                       bool isTheParent)
+        : QTreeWidgetItem((QTreeWidget*)0),
+          mFileName(fileName),
+          mDateTime(dateTime),
+          mIsValid(isValid),
+          mIsTheParent(isTheParent) {
+        setText(COLUMN_NAME, logicalName);
+    }
 
-        // ctor for a top-level item
-        WidgetSnapshotItem(const QString&   fileName,
-                           const QString&   logicalName,
-                           const QDateTime& dateTime,
-                                 bool       isValid,
-                                 bool       isTheParent) :
-            QTreeWidgetItem((QTreeWidget*)0),
-            mFileName(fileName),
-            mDateTime(dateTime),
-            mIsValid(isValid),
-            mIsTheParent(isTheParent)
-        {
-            setText(COLUMN_NAME, logicalName);
-        }
+    // TODO: jameskaye@ Enable this code if we decide to provide a hierarchical
+    //                  display. Remove this code if we decide not to.
+    // // ctor for a subordinate item
+    // // (used only for hierarchical display)
+    // WidgetSnapshotItem(QTreeWidgetItem* parentItem,
+    //                    QString          fileName,
+    //                    QString          logicalName,
+    //                    QDateTime        dateTime) :
+    //     QTreeWidgetItem(parentItem),
+    //     mFileName(fileName),
+    //     mDateTime(dateTime)
+    // {
+    //     mParentName = parentItem->logicalName();
+    //     setText(COLUMN_NAME, logicalName);
+    // }
 
-        // TODO: jameskaye@ Enable this code if we decide to provide a hierarchical
-        //                  display. Remove this code if we decide not to.
-        // // ctor for a subordinate item
-        // // (used only for hierarchical display)
-        // WidgetSnapshotItem(QTreeWidgetItem* parentItem,
-        //                    QString          fileName,
-        //                    QString          logicalName,
-        //                    QDateTime        dateTime) :
-        //     QTreeWidgetItem(parentItem),
-        //     mFileName(fileName),
-        //     mDateTime(dateTime)
-        // {
-        //     mParentName = parentItem->logicalName();
-        //     setText(COLUMN_NAME, logicalName);
-        // }
+    // Customize the sort order: Sort by date
+    // (Put invalid items after valid items. Invalid items
+    // are sorted by name.)
+    bool operator<(const QTreeWidgetItem& other) const {
+        WidgetSnapshotItem& otherItem = (WidgetSnapshotItem&)other;
 
-        // Customize the sort order: Sort by date
-        // (Put invalid items after valid items. Invalid items
-        // are sorted by name.)
-        bool operator<(const QTreeWidgetItem &other)const {
-            WidgetSnapshotItem& otherItem = (WidgetSnapshotItem&)other;
+        if (mIsValid) {
+            if (!otherItem.mIsValid)
+                return true;
+            return mDateTime < otherItem.mDateTime;
+        } else {
+            if (otherItem.mIsValid)
+                return false;
+            return mFileName < otherItem.mFileName;
+        }
+    }
 
-            if (mIsValid) {
-                if (!otherItem.mIsValid) return true;
-                return mDateTime < otherItem.mDateTime;
-            } else {
-                if (otherItem.mIsValid) return false;
-                return mFileName < otherItem.mFileName;
-            }
-        }
+    QString fileName() const { return mFileName; }
+    QString parentName() const { return mParentName; }
+    QDateTime dateTime() const { return mDateTime; }
+    QString logicalName() const {
+        return data(COLUMN_NAME, Qt::DisplayRole).toString();
+    }
 
-        QString fileName() const {
-            return mFileName;
-        }
-        QString parentName() const {
-            return mParentName;
-        }
-        QDateTime dateTime() const {
-            return mDateTime;
-        }
-        QString logicalName() const {
-            return data(COLUMN_NAME, Qt::DisplayRole).toString();
-        }
+    bool isValid() const { return mIsValid; }
+    bool isTheParent() const { return mIsTheParent; }
 
-        bool isValid() const {
-            return mIsValid;
-        }
-        bool isTheParent() const {
-            return mIsTheParent;
-        }
-
-    private:
-        QString   mFileName;
-        QString   mParentName;
-        QDateTime mDateTime;
-        bool      mIsValid = true;
-        bool      mIsTheParent = false;
+private:
+    QString mFileName;
+    QString mParentName;
+    QDateTime mDateTime;
+    bool mIsValid = true;
+    bool mIsTheParent = false;
 };
 
 static SnapshotPage* sInstance = nullptr;
 
-SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
-    QWidget(parent),
-    mIsStandAlone(standAlone),
-    mUi(new Ui::SnapshotPage()),
-    mSnapshotTracker(new UiEventTracker(
-            android_studio::EmulatorUiEvent::BUTTON_PRESS,
-            android_studio::EmulatorUiEvent::EXTENDED_SNAPSHOT_TAB))
-{
+SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone)
+    : QWidget(parent),
+      mIsStandAlone(standAlone),
+      mUi(new Ui::SnapshotPage()),
+      mSnapshotTracker(new UiEventTracker(
+              android_studio::EmulatorUiEvent::BUTTON_PRESS,
+              android_studio::EmulatorUiEvent::EXTENDED_SNAPSHOT_TAB)) {
     mUi->setupUi(this);
 
     mUi->inProgressLabel->hide();
 
-    if (android_cmdLineOptions->read_only) {
+    if (getConsoleAgents()->settings->android_cmdLineOptions()->read_only) {
         // Stand-alone.
         // Overlay a mask and text saying that snapshots are disabled.
         mUi->noSnapshot_mask->raise();
@@ -259,11 +251,10 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
     QRect previewGeo = mUi->preview->geometry();
     // The large Info panel goes from the top of the Preview panel
     // to the bottom of the small Info panel
-    mInfoPanelLargeGeo = QRect(mInfoPanelSmallGeo.x(),
-                               previewGeo.y(),
-                               mInfoPanelSmallGeo.width(),
-                               mInfoPanelSmallGeo.y() + mInfoPanelSmallGeo.height() - previewGeo.y());
-
+    mInfoPanelLargeGeo = QRect(
+            mInfoPanelSmallGeo.x(), previewGeo.y(), mInfoPanelSmallGeo.width(),
+            mInfoPanelSmallGeo.y() + mInfoPanelSmallGeo.height() -
+                    previewGeo.y());
 
     SaveSnapshotOnExit saveOnExitChoice = getSaveOnExitChoice();
     changeUiFromSaveOnExitSetting(saveOnExitChoice);
@@ -274,7 +265,8 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
 
     // In file-backed Quickboot, the 'save now' button is always disabled.
     if (fc::isEnabled(fc::QuickbootFileBacked)) {
-        mUi->saveOnExitTitle->setText(QString(tr("Auto-save current state to Quickboot")));
+        mUi->saveOnExitTitle->setText(
+                QString(tr("Auto-save current state to Quickboot")));
 
         // Migrate "Ask" users to "Always"
         if (saveOnExitChoice == SaveSnapshotOnExit::Ask) {
@@ -284,7 +276,8 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
 
         for (int i = 0; i < mUi->saveQuickBootOnExit->count();) {
             SaveSnapshotOnExitUiOrder uiOrder =
-                static_cast<SaveSnapshotOnExitUiOrder>(mUi->saveQuickBootOnExit->itemData(i).toInt());
+                    static_cast<SaveSnapshotOnExitUiOrder>(
+                            mUi->saveQuickBootOnExit->itemData(i).toInt());
             switch (uiOrder) {
                 case SaveSnapshotOnExitUiOrder::Ask:
                     mUi->saveQuickBootOnExit->removeItem(i);
@@ -309,17 +302,20 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
         }
 
         if (saveOnExitChoice == SaveSnapshotOnExit::Always) {
-            mUi->noneAvailableLabel->setText(QString(tr("Auto-saving Quickboot state...")));
+            mUi->noneAvailableLabel->setText(
+                    QString(tr("Auto-saving Quickboot state...")));
         }
     } else {
         // Save QuickBoot snapshot on exit
         QString avdNameWithUnderscores(android_hw->avd_name);
 
-        mUi->saveOnExitTitle->setText(QString(tr("Save quick-boot state on exit for AVD: "))
-                + avdNameWithUnderscores.replace('_', ' '));
+        mUi->saveOnExitTitle->setText(
+                QString(tr("Save quick-boot state on exit for AVD: ")) +
+                avdNameWithUnderscores.replace('_', ' '));
 
         // Enable SAVE NOW if we won't overwrite the state on exit
-        mUi->saveQuickBootNowButton->setEnabled(saveOnExitChoice != SaveSnapshotOnExit::Always);
+        mUi->saveQuickBootNowButton->setEnabled(saveOnExitChoice !=
+                                                SaveSnapshotOnExit::Always);
 
         // Auto-save not enabled
         mUi->autoSaveNoteLabel->hide();
@@ -327,61 +323,67 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone) :
     }
 
     QSettings settings;
-    DeleteInvalidSnapshots deleteInvalids = static_cast<DeleteInvalidSnapshots>
-                                            (settings.value(Ui::Settings::DELETE_INVALID_SNAPSHOTS,
-                                                            static_cast<int>(DeleteInvalidSnapshots::Ask))
-                                                      .toInt());
+    DeleteInvalidSnapshots deleteInvalids = static_cast<DeleteInvalidSnapshots>(
+            settings.value(Ui::Settings::DELETE_INVALID_SNAPSHOTS,
+                           static_cast<int>(DeleteInvalidSnapshots::Ask))
+                    .toInt());
     DeleteInvalidSnapshotsUiOrder deleteInvalidsUiIdx;
     switch (deleteInvalids) {
         default:
-        case DeleteInvalidSnapshots::Ask:  deleteInvalidsUiIdx = DeleteInvalidSnapshotsUiOrder::Ask;  break;
-        case DeleteInvalidSnapshots::Auto: deleteInvalidsUiIdx = DeleteInvalidSnapshotsUiOrder::Auto; break;
-        case DeleteInvalidSnapshots::No:   deleteInvalidsUiIdx = DeleteInvalidSnapshotsUiOrder::No;   break;
+        case DeleteInvalidSnapshots::Ask:
+            deleteInvalidsUiIdx = DeleteInvalidSnapshotsUiOrder::Ask;
+            break;
+        case DeleteInvalidSnapshots::Auto:
+            deleteInvalidsUiIdx = DeleteInvalidSnapshotsUiOrder::Auto;
+            break;
+        case DeleteInvalidSnapshots::No:
+            deleteInvalidsUiIdx = DeleteInvalidSnapshotsUiOrder::No;
+            break;
     }
-    mUi->deleteInvalidSnapshots->setCurrentIndex(static_cast<int>(deleteInvalidsUiIdx));
+    mUi->deleteInvalidSnapshots->setCurrentIndex(
+            static_cast<int>(deleteInvalidsUiIdx));
 
     if (mIsStandAlone) {
         QRect widgetGeometry = frameGeometry();
-        setFixedHeight(widgetGeometry.height() + 36); // Allow for the title bar
+        setFixedHeight(widgetGeometry.height() +
+                       36);  // Allow for the title bar
         setFixedWidth(widgetGeometry.width());
         setStyleSheet(Ui::stylesheetForTheme(getSelectedTheme()));
         setWindowTitle(tr("Manage snapshots"));
         mUi->loadSnapshot->setVisible(false);
-        mUi->deleteSnapshot->setVisible(false); // Cannot delete without QEMU active
+        mUi->deleteSnapshot->setVisible(
+                false);  // Cannot delete without QEMU active
         mUi->takeSnapshotButton->setText(tr("CHOOSE SNAPSHOT"));
-        mUi->tabWidget->removeTab(1); // Do not show the Settings tab
+        mUi->tabWidget->removeTab(1);  // Do not show the Settings tab
 
         getOutputFileName();
     }
 
-    QObject::connect(this, SIGNAL(deleteCompleted()),
-                     this, SLOT(slot_snapshotDeleteCompleted()));
-    QObject::connect(this, SIGNAL(loadCompleted(int, QString)),
-                     this, SLOT(slot_snapshotLoadCompleted(int, QString)));
-    QObject::connect(this, SIGNAL(saveCompleted(int, QString)),
-                     this, SLOT(slot_snapshotSaveCompleted(int, QString)));
+    QObject::connect(this, SIGNAL(deleteCompleted()), this,
+                     SLOT(slot_snapshotDeleteCompleted()));
+    QObject::connect(this, SIGNAL(loadCompleted(int, QString)), this,
+                     SLOT(slot_snapshotLoadCompleted(int, QString)));
+    QObject::connect(this, SIGNAL(saveCompleted(int, QString)), this,
+                     SLOT(slot_snapshotSaveCompleted(int, QString)));
     // Queue the "ask" signal so the pop-up doesn't appear until the
     // base window has been populated and raised.
-    QObject::connect(this, SIGNAL(askAboutInvalidSnapshots(QStringList)),
-                     this, SLOT(slot_askAboutInvalidSnapshots(QStringList)),
+    QObject::connect(this, SIGNAL(askAboutInvalidSnapshots(QStringList)), this,
+                     SLOT(slot_askAboutInvalidSnapshots(QStringList)),
                      Qt::QueuedConnection);
 
     qRegisterMetaType<Ui::Settings::SaveSnapshotOnExit>();
 
     // Likewise, queue the confirm auto-save setting signal so the base window
     // is populated and raised before the pop-up shows.
-    QObject::connect(
-        this,
-        SIGNAL(
-            confirmAutosaveChoiceAndRestart(
-                Ui::Settings::SaveSnapshotOnExit,
-                Ui::Settings::SaveSnapshotOnExit)),
-        this,
-        SLOT(
-            slot_confirmAutosaveChoiceAndRestart(
-                Ui::Settings::SaveSnapshotOnExit,
-                Ui::Settings::SaveSnapshotOnExit)),
-        Qt::QueuedConnection);
+    QObject::connect(this,
+                     SIGNAL(confirmAutosaveChoiceAndRestart(
+                             Ui::Settings::SaveSnapshotOnExit,
+                             Ui::Settings::SaveSnapshotOnExit)),
+                     this,
+                     SLOT(slot_confirmAutosaveChoiceAndRestart(
+                             Ui::Settings::SaveSnapshotOnExit,
+                             Ui::Settings::SaveSnapshotOnExit)),
+                     Qt::QueuedConnection);
 
     sInstance = this;
 }
@@ -399,13 +401,12 @@ void SnapshotPage::deleteSnapshot(const WidgetSnapshotItem* theItem) {
     QString logicalName = theItem->logicalName();
     QString fileName = theItem->fileName();
 
-    QMessageBox msgBox(QMessageBox::Question,
-                       tr("Delete snapshot"),
-                       tr("Do you want to permanently delete<br>snapshot \"%1\"?")
-                               .arg(logicalName),
-                       QMessageBox::Cancel,
-                       this);
-    QPushButton *deleteButton = msgBox.addButton(QMessageBox::Ok);
+    QMessageBox msgBox(
+            QMessageBox::Question, tr("Delete snapshot"),
+            tr("Do you want to permanently delete<br>snapshot \"%1\"?")
+                    .arg(logicalName),
+            QMessageBox::Cancel, this);
+    QPushButton* deleteButton = msgBox.addButton(QMessageBox::Ok);
     deleteButton->setText(tr("Delete"));
 
     int selection = msgBox.exec();
@@ -435,7 +436,7 @@ void SnapshotPage::editSnapshot(const WidgetSnapshotItem* theItem) {
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
     disableActions();
-    QVBoxLayout *dialogLayout = new QVBoxLayout(this);
+    QVBoxLayout* dialogLayout = new QVBoxLayout(this);
 
     dialogLayout->addWidget(new QLabel(tr("Name")));
     QLineEdit* nameEdit = new QLineEdit(this);
@@ -450,9 +451,8 @@ void SnapshotPage::editSnapshot(const WidgetSnapshotItem* theItem) {
     descriptionEdit->setPlainText(oldDescription);
     dialogLayout->addWidget(descriptionEdit);
 
-    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Save |
-                                                       QDialogButtonBox::Cancel,
-                                                       Qt::Horizontal);
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(
+            QDialogButtonBox::Save | QDialogButtonBox::Cancel, Qt::Horizontal);
     dialogLayout->addWidget(buttonBox);
 
     QDialog editDialog(this);
@@ -476,15 +476,15 @@ void SnapshotPage::editSnapshot(const WidgetSnapshotItem* theItem) {
     QString newDescription = descriptionEdit->toPlainText();
 
     if ((!newName.isEmpty() && newName != oldName) ||
-        newDescription != oldDescription             )
-    {
+        newDescription != oldDescription) {
         // Something changed. Read the existing Protobuf,
         // update it, and write it back out.
         QApplication::setOverrideCursor(Qt::WaitCursor);
         disableActions();
 
         QString fileName = theItem->fileName();
-        std::unique_ptr<emulator_snapshot::Snapshot> protobuf = loadProtobuf(fileName);
+        std::unique_ptr<emulator_snapshot::Snapshot> protobuf =
+                loadProtobuf(fileName);
 
         if (protobuf != nullptr) {
             if (!newName.isEmpty()) {
@@ -503,17 +503,18 @@ void SnapshotPage::editSnapshot(const WidgetSnapshotItem* theItem) {
     }
 }
 
-
 QString SnapshotPage::getDescription(const QString& fileName) {
     Snapshot theSnapshot(fileName.toStdString().c_str());
     const emulator_snapshot::Snapshot* protobuf = theSnapshot.getGeneralInfo();
-    if (protobuf == nullptr) return QString();
+    if (protobuf == nullptr)
+        return QString();
 
     return QString(protobuf->description().c_str());
 }
 
 const SnapshotPage::WidgetSnapshotItem* SnapshotPage::getSelectedSnapshot() {
-    QList<QTreeWidgetItem *> selectedItems = mUi->snapshotDisplay->selectedItems();
+    QList<QTreeWidgetItem*> selectedItems =
+            mUi->snapshotDisplay->selectedItems();
 
     if (selectedItems.size() == 0) {
         // Nothing selected in the main list. Check the default snapshot's list.
@@ -545,7 +546,9 @@ void SnapshotPage::changeUiFromSaveOnExitSetting(SaveSnapshotOnExit choice) {
             android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         default:
-            dwarning("%s: unknown 'Save snapshot on exit' preference value 0x%x. "
+            dwarning(
+                    "%s: unknown 'Save snapshot on exit' preference value "
+                    "0x%x. "
                     "Setting to Always.",
                     __func__, (unsigned int)choice);
             mUi->saveQuickBootOnExit->setCurrentIndex(
@@ -558,12 +561,13 @@ void SnapshotPage::changeUiFromSaveOnExitSetting(SaveSnapshotOnExit choice) {
 void SnapshotPage::on_enlargeInfoButton_clicked() {
     // Make the info window grow
     mSnapshotTracker->increment("ENLARGE");
-    mUi->preview->lower(); // Let the preview window get covered
-    QPropertyAnimation *infoAnimation = new QPropertyAnimation(mUi->selectionInfo, "geometry");
+    mUi->preview->lower();  // Let the preview window get covered
+    QPropertyAnimation* infoAnimation =
+            new QPropertyAnimation(mUi->selectionInfo, "geometry");
 
     infoAnimation->setDuration(500);  // mSec
     infoAnimation->setStartValue(mInfoPanelSmallGeo);
-    infoAnimation->setEndValue  (mInfoPanelLargeGeo);
+    infoAnimation->setEndValue(mInfoPanelLargeGeo);
     infoAnimation->setEasingCurve(QEasingCurve::OutCubic);
     infoAnimation->start();
 
@@ -573,11 +577,12 @@ void SnapshotPage::on_enlargeInfoButton_clicked() {
 
 void SnapshotPage::on_reduceInfoButton_clicked() {
     // Make the info window shrink
-    QPropertyAnimation *infoAnimation = new QPropertyAnimation(mUi->selectionInfo, "geometry");
+    QPropertyAnimation* infoAnimation =
+            new QPropertyAnimation(mUi->selectionInfo, "geometry");
 
     infoAnimation->setDuration(500);  // mSec
     infoAnimation->setStartValue(mInfoPanelLargeGeo);
-    infoAnimation->setEndValue  (mInfoPanelSmallGeo);
+    infoAnimation->setEndValue(mInfoPanelSmallGeo);
     infoAnimation->setEasingCurve(QEasingCurve::OutCubic);
     infoAnimation->start();
 
@@ -598,14 +603,16 @@ void SnapshotPage::on_deleteSnapshot_clicked() {
 void SnapshotPage::on_loadSnapshot_clicked() {
     mSnapshotTracker->increment("LOAD");
     const WidgetSnapshotItem* theItem = getSelectedSnapshot();
-    if (!theItem) return;
+    if (!theItem)
+        return;
 
     QString fileName = theItem->fileName();
     QApplication::setOverrideCursor(Qt::WaitCursor);
     disableActions();
     setOperationInProgress(true);
     android::base::ThreadLooper::runOnMainLooper([fileName, this] {
-        AndroidSnapshotStatus status = androidSnapshot_load(fileName.toStdString().c_str());
+        AndroidSnapshotStatus status =
+                androidSnapshot_load(fileName.toStdString().c_str());
         emit(loadCompleted((int)status, fileName));
     });
 }
@@ -616,9 +623,11 @@ void SnapshotPage::on_saveQuickBootNowButton_clicked() {
     setOperationInProgress(true);
     // Invoke the snapshot save function.
     // But don't run it on the UI thread.
-    android::base::ThreadLooper::runOnMainLooper(
-            [this]() { AndroidSnapshotStatus status = androidSnapshot_save(Quickboot::kDefaultBootSnapshot);
-                       emit(saveCompleted((int)status, Quickboot::kDefaultBootSnapshot)); });
+    android::base::ThreadLooper::runOnMainLooper([this]() {
+        AndroidSnapshotStatus status =
+                androidSnapshot_save(Quickboot::kDefaultBootSnapshot);
+        emit(saveCompleted((int)status, Quickboot::kDefaultBootSnapshot));
+    });
 }
 
 void SnapshotPage::on_loadQuickBootNowButton_clicked() {
@@ -627,12 +636,15 @@ void SnapshotPage::on_loadQuickBootNowButton_clicked() {
     setOperationInProgress(true);
     // Invoke the snapshot load function.
     // But don't run it on the UI thread.
-    android::base::ThreadLooper::runOnMainLooper(
-            [this]() { AndroidSnapshotStatus status = androidSnapshot_load(Quickboot::kDefaultBootSnapshot);
-                       emit(loadCompleted((int)status, Quickboot::kDefaultBootSnapshot)); });
+    android::base::ThreadLooper::runOnMainLooper([this]() {
+        AndroidSnapshotStatus status =
+                androidSnapshot_load(Quickboot::kDefaultBootSnapshot);
+        emit(loadCompleted((int)status, Quickboot::kDefaultBootSnapshot));
+    });
 }
 
-void SnapshotPage::slot_snapshotLoadCompleted(int statusInt, const QString& snapshotFileName) {
+void SnapshotPage::slot_snapshotLoadCompleted(int statusInt,
+                                              const QString& snapshotFileName) {
     AndroidSnapshotStatus status = (AndroidSnapshotStatus)statusInt;
 
     setEnabled(true);
@@ -652,7 +664,8 @@ void SnapshotPage::slot_snapshotLoadCompleted(int statusInt, const QString& snap
 
 void SnapshotPage::on_defaultSnapshotDisplay_itemSelectionChanged() {
     mSnapshotTracker->increment("SELECT_DEFAULT");
-    QList<QTreeWidgetItem *> selectedItems = mUi->defaultSnapshotDisplay->selectedItems();
+    QList<QTreeWidgetItem*> selectedItems =
+            mUi->defaultSnapshotDisplay->selectedItems();
     if (selectedItems.size() > 0) {
         // We have the selection, de-select the other list
         mUi->snapshotDisplay->clearSelection();
@@ -661,7 +674,8 @@ void SnapshotPage::on_defaultSnapshotDisplay_itemSelectionChanged() {
 }
 void SnapshotPage::on_snapshotDisplay_itemSelectionChanged() {
     mSnapshotTracker->increment("SELECT");
-    QList<QTreeWidgetItem *> selectedItems = mUi->snapshotDisplay->selectedItems();
+    QList<QTreeWidgetItem*> selectedItems =
+            mUi->snapshotDisplay->selectedItems();
     if (selectedItems.size() > 0) {
         // We have the selection, de-select the other list
         mUi->defaultSnapshotDisplay->clearSelection();
@@ -674,13 +688,15 @@ static SaveSnapshotOnExit getSaveOnExitChoice() {
     SaveSnapshotOnExit userChoice(SaveSnapshotOnExit::Always);
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
-        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
 
         userChoice = static_cast<SaveSnapshotOnExit>(
-            avdSpecificSettings.value(
-                Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
-                static_cast<int>(SaveSnapshotOnExit::Always)).toInt());
+                avdSpecificSettings
+                        .value(Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
+                               static_cast<int>(SaveSnapshotOnExit::Always))
+                        .toInt());
     }
     return userChoice;
 }
@@ -689,7 +705,8 @@ static void setSaveOnExitChoice(SaveSnapshotOnExit choice) {
     // Save for only this AVD
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (avdPath) {
-        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QString avdSettingsFile =
+                avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
 
         avdSpecificSettings.setValue(Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
@@ -700,19 +717,23 @@ static void setSaveOnExitChoice(SaveSnapshotOnExit choice) {
 void SnapshotPage::on_saveQuickBootOnExit_currentIndexChanged(int uiIndex) {
     mSnapshotTracker->increment("SELECT_BOOT");
     SaveSnapshotOnExit preferenceValue;
-    switch(static_cast<SaveSnapshotOnExitUiOrder>(uiIndex)) {
+    switch (static_cast<SaveSnapshotOnExitUiOrder>(uiIndex)) {
         case SaveSnapshotOnExitUiOrder::Never:
             MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
-                auto counts = event->mutable_emulator_details()->mutable_snapshot_ui_counts();
-                counts->set_quickboot_selection_no(1 + counts->quickboot_selection_no());
+                auto counts = event->mutable_emulator_details()
+                                      ->mutable_snapshot_ui_counts();
+                counts->set_quickboot_selection_no(
+                        1 + counts->quickboot_selection_no());
             });
             preferenceValue = SaveSnapshotOnExit::Never;
             android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         case SaveSnapshotOnExitUiOrder::Ask:
             MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
-                auto counts = event->mutable_emulator_details()->mutable_snapshot_ui_counts();
-                counts->set_quickboot_selection_ask(1 + counts->quickboot_selection_ask());
+                auto counts = event->mutable_emulator_details()
+                                      ->mutable_snapshot_ui_counts();
+                counts->set_quickboot_selection_ask(
+                        1 + counts->quickboot_selection_ask());
             });
             preferenceValue = SaveSnapshotOnExit::Ask;
             android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
@@ -720,8 +741,10 @@ void SnapshotPage::on_saveQuickBootOnExit_currentIndexChanged(int uiIndex) {
         default:
         case SaveSnapshotOnExitUiOrder::Always:
             MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
-                auto counts = event->mutable_emulator_details()->mutable_snapshot_ui_counts();
-                counts->set_quickboot_selection_yes(1 + counts->quickboot_selection_yes());
+                auto counts = event->mutable_emulator_details()
+                                      ->mutable_snapshot_ui_counts();
+                counts->set_quickboot_selection_yes(
+                        1 + counts->quickboot_selection_yes());
             });
             android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             preferenceValue = SaveSnapshotOnExit::Always;
@@ -736,11 +759,13 @@ void SnapshotPage::on_saveQuickBootOnExit_currentIndexChanged(int uiIndex) {
 
         SaveSnapshotOnExit previousChoice = getSaveOnExitChoice();
         if (previousChoice != preferenceValue) {
-            emit(confirmAutosaveChoiceAndRestart(previousChoice, preferenceValue));
+            emit(confirmAutosaveChoiceAndRestart(previousChoice,
+                                                 preferenceValue));
         }
     } else {
         // Enable SAVE STATE NOW if we won't overwrite the state on exit
-        mUi->saveQuickBootNowButton->setEnabled(preferenceValue != SaveSnapshotOnExit::Always);
+        mUi->saveQuickBootNowButton->setEnabled(preferenceValue !=
+                                                SaveSnapshotOnExit::Always);
         setSaveOnExitChoice(preferenceValue);
     }
 }
@@ -748,7 +773,7 @@ void SnapshotPage::on_saveQuickBootOnExit_currentIndexChanged(int uiIndex) {
 void SnapshotPage::on_deleteInvalidSnapshots_currentIndexChanged(int uiIndex) {
     mSnapshotTracker->increment("DELETE_INVALID");
     DeleteInvalidSnapshots preferenceValue;
-    switch(static_cast<DeleteInvalidSnapshotsUiOrder>(uiIndex)) {
+    switch (static_cast<DeleteInvalidSnapshotsUiOrder>(uiIndex)) {
         case DeleteInvalidSnapshotsUiOrder::No:
             preferenceValue = DeleteInvalidSnapshots::No;
             break;
@@ -761,7 +786,8 @@ void SnapshotPage::on_deleteInvalidSnapshots_currentIndexChanged(int uiIndex) {
             break;
     }
     QSettings settings;
-    settings.setValue(Ui::Settings::DELETE_INVALID_SNAPSHOTS, static_cast<int>(preferenceValue));
+    settings.setValue(Ui::Settings::DELETE_INVALID_SNAPSHOTS,
+                      static_cast<int>(preferenceValue));
     // Re-enable our check, so we act on this new setting
     // when the user goes back to look at the list
     mDidInitialInvalidCheck = false;
@@ -804,46 +830,51 @@ void SnapshotPage::updateAfterSelectionChanged() {
         QString logicalName = theItem->logicalName();
         simpleName = theItem->fileName();
 
-        System::FileSize snapSize = android::snapshot::folderSize(simpleName.toStdString());
+        System::FileSize snapSize =
+                android::snapshot::folderSize(simpleName.toStdString());
 
         QString description = getDescription(simpleName);
         if (!description.isEmpty()) {
             descriptionString = QString("<p><big>%1</big>")
-                                    .arg(description.replace('<', "&lt;").replace('\n', "<br>"));
+                                        .arg(description.replace('<', "&lt;")
+                                                     .replace('\n', "<br>"));
         }
 
         if (theItem->isValid()) {
             selectedItemStatus = SelectionStatus::Valid;
             QLocale locale;
             selectionInfoString =
-                      tr("<big><b>%1</b></big><br>"
-                         "%2, captured %3<br>"
-                         "File: %4"
-                         "%5")
-                              .arg(logicalName,
-                                   formattedSize(snapSize),
-                                   theItem->dateTime().isValid() ?
-                                       locale.toString(theItem->dateTime(), QLocale::FormatType::ShortFormat) :
-                                       tr("(unknown)"),
-                                   simpleName,
-                                   descriptionString);
+                    tr("<big><b>%1</b></big><br>"
+                       "%2, captured %3<br>"
+                       "File: %4"
+                       "%5")
+                            .arg(logicalName, formattedSize(snapSize),
+                                 theItem->dateTime().isValid()
+                                         ? locale.toString(theItem->dateTime(),
+                                                           QLocale::FormatType::
+                                                                   ShortFormat)
+                                         : tr("(unknown)"),
+                                 simpleName, descriptionString);
 
-            bool isFileBacked = theItem->logicalName() == kDefaultBootFileBackedTitleName;
+            bool isFileBacked =
+                    theItem->logicalName() == kDefaultBootFileBackedTitleName;
 
             mAllowLoad = !isFileBacked;
             mAllowDelete = !isFileBacked;
             // Cannot edit the default snapshot
-            mAllowEdit = !isFileBacked && (simpleName != Quickboot::kDefaultBootSnapshot);
+            mAllowEdit = !isFileBacked &&
+                         (simpleName != Quickboot::kDefaultBootSnapshot);
             mAllowTake = mAllowEdit || !mIsStandAlone;
         } else {
             // Invalid snapshot directory
             selectedItemStatus = SelectionStatus::Invalid;
             selectionInfoString =
-                      tr("<big><b>%1</b></big><br>"
-                         "%2<br>"
-                         "File: %3"
-                         "<div style=\"color:red\">Invalid snapshot</div> %4")
-                              .arg(logicalName, formattedSize(snapSize), simpleName, descriptionString);
+                    tr("<big><b>%1</b></big><br>"
+                       "%2<br>"
+                       "File: %3"
+                       "<div style=\"color:red\">Invalid snapshot</div> %4")
+                            .arg(logicalName, formattedSize(snapSize),
+                                 simpleName, descriptionString);
             mAllowLoad = false;
             mAllowEdit = false;
             mAllowDelete = true;
@@ -890,7 +921,7 @@ QString SnapshotPage::elideSnapshotInfo(QString fullString) {
     // Bisect to find how much fits in the reduced size.
     int leftLength = 0;
     int rightLength = fullString.size();
-    while(rightLength - leftLength > 1) {
+    while (rightLength - leftLength > 1) {
         int midLength = (leftLength + rightLength) / 2;
         QString midLengthString = fullString.left(midLength) + dotdotdot;
         mUi->selectionInfo->setHtml(midLengthString);
@@ -905,8 +936,7 @@ QString SnapshotPage::elideSnapshotInfo(QString fullString) {
     int lastLessPosition = fullString.lastIndexOf('<', leftLength);
     int lastGreaterPosition = fullString.lastIndexOf('>', leftLength);
     if (lastLessPosition >= 0 && lastGreaterPosition >= 0 &&
-        lastLessPosition > lastGreaterPosition)
-    {
+        lastLessPosition > lastGreaterPosition) {
         leftLength = lastLessPosition;
     }
     // Trim it and add "  ..."
@@ -916,41 +946,51 @@ QString SnapshotPage::elideSnapshotInfo(QString fullString) {
 // Adjust the icons for selected vs non-selected rows
 void SnapshotPage::adjustIcons(QTreeWidget* theDisplayList) {
     QTreeWidgetItemIterator iter(theDisplayList);
-    for ( ; *iter; iter++) {
+    for (; *iter; iter++) {
         WidgetSnapshotItem* item = static_cast<WidgetSnapshotItem*>(*iter);
         QIcon decoration;
         if (!item->isValid()) {
-            decoration = item->isSelected() ? getIconForCurrentTheme(INVALID_SNAPSHOT_SELECTED_ICON_NAME)
-                                            : getIconForCurrentTheme(INVALID_SNAPSHOT_ICON_NAME);
+            decoration = item->isSelected()
+                                 ? getIconForCurrentTheme(
+                                           INVALID_SNAPSHOT_SELECTED_ICON_NAME)
+                                 : getIconForCurrentTheme(
+                                           INVALID_SNAPSHOT_ICON_NAME);
         } else if (item->isTheParent()) {
-            decoration = item->isSelected() ? getIconForCurrentTheme(CURRENT_SNAPSHOT_SELECTED_ICON_NAME)
-                                            : getIconForCurrentTheme(CURRENT_SNAPSHOT_ICON_NAME);
+            decoration = item->isSelected()
+                                 ? getIconForCurrentTheme(
+                                           CURRENT_SNAPSHOT_SELECTED_ICON_NAME)
+                                 : getIconForCurrentTheme(
+                                           CURRENT_SNAPSHOT_ICON_NAME);
         }
         item->setIcon(COLUMN_ICON, decoration);
     }
 }
 
 // Displays the preview image of the selected snapshot
-void SnapshotPage::showPreviewImage(const QString& snapshotName, SelectionStatus itemStatus) {
+void SnapshotPage::showPreviewImage(const QString& snapshotName,
+                                    SelectionStatus itemStatus) {
     static const QString invalidSnapText =
             tr("<div style=\"text-align:center\">"
                "<p style=\"color:red\"><big>Invalid snapshot</big></p>"
-               "<p style=\"color:%1\"><big>Delete this snapshot to free disk space</big></p>"
+               "<p style=\"color:%1\"><big>Delete this snapshot to free disk "
+               "space</big></p>"
                "</div>");
     static const QString noImageText =
             tr("<div style=\"text-align:center\">"
-               "<p style=\"color:%1\"><big>This snapshot does not have a preview image</big></p>"
+               "<p style=\"color:%1\"><big>This snapshot does not have a "
+               "preview image</big></p>"
                "</div>");
 
-    mPreviewScene.clear(); // Frees previewItem
+    mPreviewScene.clear();  // Frees previewItem
 
-    QGraphicsPixmapItem *previewItem;
+    QGraphicsPixmapItem* previewItem;
     bool haveImage = false;
 
     if (!snapshotName.isEmpty()) {
         QPixmap pMap(PathUtils::join(getSnapshotBaseDir(),
                                      snapshotName.toStdString(),
-                                     "screenshot.png").c_str());
+                                     "screenshot.png")
+                             .c_str());
 
         previewItem = new QGraphicsPixmapItem(pMap);
         // Is there really a preview image?
@@ -961,7 +1001,7 @@ void SnapshotPage::showPreviewImage(const QString& snapshotName, SelectionStatus
     if (haveImage) {
         // Display the image
         mPreviewScene.addItem(previewItem);
-        mPreviewScene.setSceneRect(0, 0, 0, 0); // Reset to default
+        mPreviewScene.setSceneRect(0, 0, 0, 0);  // Reset to default
 
         mUi->preview->setScene(&mPreviewScene);
         mUi->preview->fitInView(previewItem, Qt::KeepAspectRatio);
@@ -969,8 +1009,9 @@ void SnapshotPage::showPreviewImage(const QString& snapshotName, SelectionStatus
         // Display some text saying why there is no image
         mUi->preview->items().clear();
 
-        QGraphicsTextItem *textItem = new QGraphicsTextItem;
-        const QString& textColor = Ui::stylesheetValues(getSelectedTheme())[Ui::THEME_TEXT_COLOR];
+        QGraphicsTextItem* textItem = new QGraphicsTextItem;
+        const QString& textColor =
+                Ui::stylesheetValues(getSelectedTheme())[Ui::THEME_TEXT_COLOR];
         switch (itemStatus) {
             case SelectionStatus::NoSelection:
                 textItem->setHtml("");
@@ -984,10 +1025,13 @@ void SnapshotPage::showPreviewImage(const QString& snapshotName, SelectionStatus
         }
         textItem->setTextWidth(mUi->preview->width());
         mPreviewScene.addItem(textItem);
-        int offset = (mUi->preview->height() * 3) / 8; // Put the text near the center, vertically
-        mPreviewScene.setSceneRect(0, -offset, mUi->preview->width(), mUi->preview->height());
+        int offset = (mUi->preview->height() * 3) /
+                     8;  // Put the text near the center, vertically
+        mPreviewScene.setSceneRect(0, -offset, mUi->preview->width(),
+                                   mUi->preview->height());
         mUi->preview->setScene(&mPreviewScene);
-        mUi->preview->fitInView(0, 0, mUi->preview->width(), mUi->preview->height(), Qt::KeepAspectRatio);
+        mUi->preview->fitInView(0, 0, mUi->preview->width(),
+                                mUi->preview->height(), Qt::KeepAspectRatio);
     }
 }
 
@@ -1002,21 +1046,19 @@ void SnapshotPage::on_takeSnapshotButton_clicked() {
     mSnapshotTracker->increment("TAKE_SNAPSHOT");
     setOperationInProgress(true);
 
-
     if (mIsStandAlone) {
         mMadeSelection = true;
         close();
     } else {
-
         setEnabled(false);
-        QString snapshotName("snap_"
-                             + QDateTime::currentDateTime().toString("yyyy-MM-dd_HH-mm-ss"));
+        QString snapshotName("snap_" + QDateTime::currentDateTime().toString(
+                                               "yyyy-MM-dd_HH-mm-ss"));
 
         QApplication::setOverrideCursor(Qt::WaitCursor);
         disableActions();
         android::base::ThreadLooper::runOnMainLooper([snapshotName, this] {
             AndroidSnapshotStatus status =
-            androidSnapshot_save(snapshotName.toStdString().c_str());
+                    androidSnapshot_save(snapshotName.toStdString().c_str());
             emit(saveCompleted((int)status, snapshotName));
         });
     }
@@ -1044,7 +1086,8 @@ void SnapshotPage::closeEvent(QCloseEvent* closeEvent) {
     }
 }
 
-void SnapshotPage::slot_snapshotSaveCompleted(int statusInt, const QString& snapshotName) {
+void SnapshotPage::slot_snapshotSaveCompleted(int statusInt,
+                                              const QString& snapshotName) {
     AndroidSnapshotStatus status = (AndroidSnapshotStatus)statusInt;
 
     setEnabled(true);
@@ -1107,7 +1150,7 @@ void SnapshotPage::setOperationInProgress(bool inProgress) {
 }
 
 void SnapshotPage::populateSnapshotDisplay() {
-    if (android_cmdLineOptions->read_only) {
+    if (getConsoleAgents()->settings->android_cmdLineOptions()->read_only) {
         // Leave the list empty because snapshots
         // are disabled in read-only mode
         return;
@@ -1118,8 +1161,8 @@ void SnapshotPage::populateSnapshotDisplay() {
 
 // Populate the list of snapshot WITHOUT the hierarchy of parentage
 void SnapshotPage::populateSnapshotDisplay_flat() {
-
-    mUi->defaultSnapshotDisplay->setSortingEnabled(false); // Don't sort during modification
+    mUi->defaultSnapshotDisplay->setSortingEnabled(
+            false);  // Don't sort during modification
     mUi->snapshotDisplay->setSortingEnabled(false);
     clearSnapshotDisplay();
 
@@ -1132,10 +1175,10 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
         // Don't auto-delete or ask more than once.
         deleteInvalidsChoice = DeleteInvalidSnapshots::No;
     } else {
-        deleteInvalidsChoice = static_cast<DeleteInvalidSnapshots>
-                                    (settings.value(Ui::Settings::DELETE_INVALID_SNAPSHOTS,
-                                                    static_cast<int>(DeleteInvalidSnapshots::Ask))
-                                             .toInt());
+        deleteInvalidsChoice = static_cast<DeleteInvalidSnapshots>(
+                settings.value(Ui::Settings::DELETE_INVALID_SNAPSHOTS,
+                               static_cast<int>(DeleteInvalidSnapshots::Ask))
+                        .toInt());
     }
 
     // Find all the directories in the snapshot directory
@@ -1150,7 +1193,8 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
     for (const QString& fileName : snapshotList) {
         Snapshot theSnapshot(fileName.toStdString().c_str());
 
-        const emulator_snapshot::Snapshot* protobuf = theSnapshot.getGeneralInfo();
+        const emulator_snapshot::Snapshot* protobuf =
+                theSnapshot.getGeneralInfo();
         bool snapshotIsValid =
             protobuf &&
             (mIsStandAlone || // Don't checkValid in standalone mode
@@ -1166,7 +1210,8 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
             snapshotIsValid = true;
         }
 
-        if (!snapshotIsValid && deleteInvalidsChoice != DeleteInvalidSnapshots::No) {
+        if (!snapshotIsValid &&
+            deleteInvalidsChoice != DeleteInvalidSnapshots::No) {
             invalidSnapshotNames.append(fileName);
         }
         // Decimate the invalid snapshots
@@ -1183,7 +1228,8 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
                 logicalName = protobuf->logical_name().c_str();
             }
             if (protobuf->has_creation_time()) {
-                snapshotDate = QDateTime::fromMSecsSinceEpoch(1000LL * protobuf->creation_time());
+                snapshotDate = QDateTime::fromMSecsSinceEpoch(
+                        1000LL * protobuf->creation_time());
             }
         }
 
@@ -1202,7 +1248,8 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
             displayWidget = mUi->snapshotDisplay;
         }
 
-        bool snapshotIsTheParent = (fileName == androidSnapshot_loadedSnapshotFile());
+        bool snapshotIsTheParent =
+                (fileName == androidSnapshot_loadedSnapshotFile());
 
         WidgetSnapshotItem* thisItem =
                 new WidgetSnapshotItem(fileName, logicalName, snapshotDate,
@@ -1244,7 +1291,8 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
         // There are items, but none is selected.
         // Select the first one.
         mUi->defaultSnapshotDisplay->setSortingEnabled(true);
-        QTreeWidgetItem* itemZero = mUi->defaultSnapshotDisplay->topLevelItem(0);
+        QTreeWidgetItem* itemZero =
+                mUi->defaultSnapshotDisplay->topLevelItem(0);
         if (itemZero != nullptr && !mIsStandAlone) {
             mUi->defaultSnapshotDisplay->setCurrentItem(itemZero);
         } else {
@@ -1260,21 +1308,26 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
     mUi->noneAvailableLabel->setVisible(false);
 
     mUi->defaultSnapshotDisplay->header()->setStretchLastSection(false);
-    mUi->defaultSnapshotDisplay->header()->setSectionResizeMode(COLUMN_ICON, QHeaderView::Fixed);
+    mUi->defaultSnapshotDisplay->header()->setSectionResizeMode(
+            COLUMN_ICON, QHeaderView::Fixed);
     mUi->defaultSnapshotDisplay->header()->resizeSection(COLUMN_ICON, 36);
-    mUi->defaultSnapshotDisplay->header()->setSectionResizeMode(COLUMN_NAME, QHeaderView::Stretch);
+    mUi->defaultSnapshotDisplay->header()->setSectionResizeMode(
+            COLUMN_NAME, QHeaderView::Stretch);
     mUi->defaultSnapshotDisplay->setSortingEnabled(true);
 
     mUi->snapshotDisplay->header()->setStretchLastSection(false);
-    mUi->snapshotDisplay->header()->setSectionResizeMode(COLUMN_ICON, QHeaderView::Fixed);
+    mUi->snapshotDisplay->header()->setSectionResizeMode(COLUMN_ICON,
+                                                         QHeaderView::Fixed);
     mUi->snapshotDisplay->header()->resizeSection(COLUMN_ICON, 36);
-    mUi->snapshotDisplay->header()->setSectionResizeMode(COLUMN_NAME, QHeaderView::Stretch);
+    mUi->snapshotDisplay->header()->setSectionResizeMode(COLUMN_NAME,
+                                                         QHeaderView::Stretch);
     mUi->snapshotDisplay->setSortingEnabled(true);
 
     adjustIcons(mUi->defaultSnapshotDisplay);
     adjustIcons(mUi->snapshotDisplay);
 
-    if (!mIsStandAlone && !mDidInitialInvalidCheck && !invalidSnapshotNames.isEmpty()) {
+    if (!mIsStandAlone && !mDidInitialInvalidCheck &&
+        !invalidSnapshotNames.isEmpty()) {
         if (deleteInvalidsChoice == DeleteInvalidSnapshots::Auto) {
             // Delete the invalid snapshots
             for (int idx = 0; idx < invalidSnapshotNames.size(); idx++) {
@@ -1293,14 +1346,15 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
     mDidInitialInvalidCheck = true;
 }
 
-// TODO: jameskaye@ Enable this code if we decide to provide a hierarchical display.
+// TODO: jameskaye@ Enable this code if we decide to provide a hierarchical
+// display.
 //                  Remove this code if we decide not to.
 // // Populate the list of snapshot with the hierarchy of parentage
 // // (used only for the hierarchical display)
 // void SnapshotPage::populateSnapshotDisplay_hierarchical() {
 //
-//     mUi->snapshotDisplay->setSortingEnabled(false); // Don't sort during modification
-//     mUi->snapshotDisplay->clear();
+//     mUi->snapshotDisplay->setSortingEnabled(false); // Don't sort during
+//     modification mUi->snapshotDisplay->clear();
 //
 //     // Temporary structure for organizing the display of the snapshots
 //     class treeItem {
@@ -1329,8 +1383,8 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
 //
 //         Snapshot theSnapshot(fileName.toStdString().c_str());
 //
-//         const emulator_snapshot::Snapshot* protobuf = theSnapshot.getGeneralInfo();
-//         if (protobuf == nullptr) continue;
+//         const emulator_snapshot::Snapshot* protobuf =
+//         theSnapshot.getGeneralInfo(); if (protobuf == nullptr) continue;
 //         QString logicalName;
 //         if (protobuf->has_logical_name()) {
 //             logicalName = protobuf->logical_name().c_str();
@@ -1345,15 +1399,15 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
 //
 //         QDateTime snapshotDate;
 //         if (protobuf->has_creation_time()) {
-//             snapshotDate = QDateTime::fromMSecsSinceEpoch(1000LL * protobuf->creation_time());
+//             snapshotDate = QDateTime::fromMSecsSinceEpoch(1000LL *
+//             protobuf->creation_time());
 //         }
 //         itemArray[idx].fileName = fileName;
 //         itemArray[idx].logicalName = logicalName;
 //         itemArray[idx].dateTime = snapshotDate;
 //         itemArray[idx].parent = parentName;
-//         itemArray[idx].parentIdx = -1; // Haven't found the parent's item (yet)
-//         itemArray[idx].item = nullptr; // No QTreeWidgetItem yet
-//         idx++;
+//         itemArray[idx].parentIdx = -1; // Haven't found the parent's item
+//         (yet) itemArray[idx].item = nullptr; // No QTreeWidgetItem yet idx++;
 //     }
 //     nItems = idx;
 //
@@ -1401,7 +1455,8 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
 //             } else if (itemArray[itemArray[idx].parentIdx].item != nullptr) {
 //                 // The parent was found and its item was created.
 //                 // Create a child item.
-//                 thisItem = new WidgetSnapshotItem(itemArray[itemArray[idx].parentIdx].item,
+//                 thisItem = new
+//                 WidgetSnapshotItem(itemArray[itemArray[idx].parentIdx].item,
 //                                                   itemArray[idx].fileName,
 //                                                   itemArray[idx].logicalName,
 //                                                   itemArray[idx].dateTime);
@@ -1432,10 +1487,9 @@ void SnapshotPage::populateSnapshotDisplay_flat() {
 //     } while (didSomething);
 //
 //     mUi->snapshotDisplay->header()->setStretchLastSection(false);
-//     mUi->snapshotDisplay->header()->setSectionResizeMode(COLUMN_NAME, QHeaderView::Stretch);
-//     mUi->snapshotDisplay->setSortingEnabled(true);
+//     mUi->snapshotDisplay->header()->setSectionResizeMode(COLUMN_NAME,
+//     QHeaderView::Stretch); mUi->snapshotDisplay->setSortingEnabled(true);
 // }
-
 
 void SnapshotPage::slot_askAboutInvalidSnapshots(QStringList names) {
     if (names.size() <= 0) {
@@ -1445,25 +1499,25 @@ void SnapshotPage::slot_askAboutInvalidSnapshots(QStringList names) {
     System::FileSize totalOccupation = 0;
 
     for (int idx = 0; idx < names.size(); idx++) {
-        System::FileSize snapSize = android::snapshot::folderSize(names.at(idx).toStdString());
+        System::FileSize snapSize =
+                android::snapshot::folderSize(names.at(idx).toStdString());
         totalOccupation += snapSize;
     }
     QString questionString;
     if (names.size() == 1) {
         questionString = tr("You have one invalid snapshot occupying %1 "
                             "disk space. Do you want to permanently delete it?")
-                           .arg(formattedSize(totalOccupation));
+                                 .arg(formattedSize(totalOccupation));
     } else {
-        questionString = tr("You have %1 invalid snapshots occupying %2 "
-                            "disk space. Do you want to permanently delete them?")
-                           .arg(QString::number(names.size()),
-                                formattedSize(totalOccupation));
+        questionString =
+                tr("You have %1 invalid snapshots occupying %2 "
+                   "disk space. Do you want to permanently delete them?")
+                        .arg(QString::number(names.size()),
+                             formattedSize(totalOccupation));
     }
 
-    QMessageBox msgBox(QMessageBox::Question,
-                       tr("Delete invalid snapshots?"),
-                       questionString,
-                       (QMessageBox::Yes | QMessageBox::Cancel),
+    QMessageBox msgBox(QMessageBox::Question, tr("Delete invalid snapshots?"),
+                       questionString, (QMessageBox::Yes | QMessageBox::Cancel),
                        this);
     QCheckBox* goAuto = new QCheckBox(tr("Delete automatically from now on"));
     msgBox.setCheckBox(goAuto);
@@ -1490,16 +1544,13 @@ void SnapshotPage::slot_askAboutInvalidSnapshots(QStringList names) {
 }
 
 void SnapshotPage::slot_confirmAutosaveChoiceAndRestart(
-    SaveSnapshotOnExit previousSetting,
-    SaveSnapshotOnExit nextSetting) {
-
-    QMessageBox msgBox(QMessageBox::Question,
-                       tr("Restart emulator?"),
+        SaveSnapshotOnExit previousSetting,
+        SaveSnapshotOnExit nextSetting) {
+    QMessageBox msgBox(QMessageBox::Question, tr("Restart emulator?"),
                        tr("The emulator needs to restart\n"
                           "for changes to be effected.\n"
                           "Do you wish to proceed?"),
-                       (QMessageBox::Yes | QMessageBox::No),
-                       this);
+                       (QMessageBox::Yes | QMessageBox::No), this);
 
     int selection = msgBox.exec();
 
@@ -1509,10 +1560,11 @@ void SnapshotPage::slot_confirmAutosaveChoiceAndRestart(
             case SaveSnapshotOnExit::Never:
                 break;
             case SaveSnapshotOnExit::Ask:
-                dwarning("%s: previous setting for save on exit was Ask!", __func__);
+                dwarning("%s: previous setting for save on exit was Ask!",
+                         __func__);
             default:
-                dwarning("%s: unknown auto-save setting 0x%x",
-                        __func__, (unsigned int)previousSetting);
+                dwarning("%s: unknown auto-save setting 0x%x", __func__,
+                         (unsigned int)previousSetting);
                 break;
         }
 
@@ -1530,25 +1582,25 @@ void SnapshotPage::slot_confirmAutosaveChoiceAndRestart(
 void SnapshotPage::disableActions() {
     // Disable all the action pushbuttons
     SettingsTheme theme = getSelectedTheme();
-    setButtonEnabled(mUi->deleteSnapshot,     theme, false);
-    setButtonEnabled(mUi->editSnapshot,       theme, false);
-    setButtonEnabled(mUi->loadSnapshot,       theme, false);
+    setButtonEnabled(mUi->deleteSnapshot, theme, false);
+    setButtonEnabled(mUi->editSnapshot, theme, false);
+    setButtonEnabled(mUi->loadSnapshot, theme, false);
     setButtonEnabled(mUi->takeSnapshotButton, theme, false);
 }
 
 void SnapshotPage::enableActions() {
     // Enable the appropriate action pushbuttons
     SettingsTheme theme = getSelectedTheme();
-    setButtonEnabled(mUi->deleteSnapshot,     theme, mAllowDelete);
-    setButtonEnabled(mUi->editSnapshot,       theme, mAllowEdit);
-    setButtonEnabled(mUi->loadSnapshot,       theme, mAllowLoad);
+    setButtonEnabled(mUi->deleteSnapshot, theme, mAllowDelete);
+    setButtonEnabled(mUi->editSnapshot, theme, mAllowEdit);
+    setButtonEnabled(mUi->loadSnapshot, theme, mAllowLoad);
     setButtonEnabled(mUi->takeSnapshotButton, theme, mAllowTake);
 }
 
 void SnapshotPage::highlightItemWithFilename(const QString& fileName) {
     // Try the main list
     QTreeWidgetItemIterator iterMain(mUi->snapshotDisplay);
-    for ( ; *iterMain; iterMain++) {
+    for (; *iterMain; iterMain++) {
         WidgetSnapshotItem* item = static_cast<WidgetSnapshotItem*>(*iterMain);
         if (fileName == item->fileName()) {
             mUi->snapshotDisplay->setCurrentItem(item);
@@ -1557,8 +1609,9 @@ void SnapshotPage::highlightItemWithFilename(const QString& fileName) {
     }
     // Try the default snapshot list
     QTreeWidgetItemIterator iterDefault(mUi->defaultSnapshotDisplay);
-    for ( ; *iterDefault; iterDefault++) {
-        WidgetSnapshotItem* item = static_cast<WidgetSnapshotItem*>(*iterDefault);
+    for (; *iterDefault; iterDefault++) {
+        WidgetSnapshotItem* item =
+                static_cast<WidgetSnapshotItem*>(*iterDefault);
         if (fileName == item->fileName()) {
             mUi->defaultSnapshotDisplay->setCurrentItem(item);
             return;
@@ -1568,8 +1621,8 @@ void SnapshotPage::highlightItemWithFilename(const QString& fileName) {
 
 void SnapshotPage::writeParentToProtobuf(const QString& fileName,
                                          const QString& parentName) {
-
-    std::unique_ptr<emulator_snapshot::Snapshot> protobuf = loadProtobuf(fileName);
+    std::unique_ptr<emulator_snapshot::Snapshot> protobuf =
+            loadProtobuf(fileName);
 
     if (protobuf != nullptr) {
         protobuf->set_parent(parentName.toStdString());
@@ -1577,7 +1630,8 @@ void SnapshotPage::writeParentToProtobuf(const QString& fileName,
     }
 }
 
-std::unique_ptr<emulator_snapshot::Snapshot> SnapshotPage::loadProtobuf(const QString& fileName) {
+std::unique_ptr<emulator_snapshot::Snapshot> SnapshotPage::loadProtobuf(
+        const QString& fileName) {
     Snapshot theSnapshot(fileName.toStdString().c_str());
 
     const emulator_snapshot::Snapshot* protobuf = theSnapshot.getGeneralInfo();
@@ -1592,12 +1646,14 @@ std::unique_ptr<emulator_snapshot::Snapshot> SnapshotPage::loadProtobuf(const QS
     return newProtobuf;
 }
 
-void SnapshotPage::writeProtobuf(const QString& fileName,
-                                 const std::unique_ptr<emulator_snapshot::Snapshot>& protobuf) {
-    std::string protoFileName = PathUtils::join(getSnapshotBaseDir().c_str(),
-                                                fileName.toStdString().c_str(),
-                                                android::snapshot::kSnapshotProtobufName);
-    std::ofstream outStream(PathUtils::asUnicodePath(protoFileName).c_str(), std::ofstream::binary);
+void SnapshotPage::writeProtobuf(
+        const QString& fileName,
+        const std::unique_ptr<emulator_snapshot::Snapshot>& protobuf) {
+    std::string protoFileName = PathUtils::join(
+            getSnapshotBaseDir().c_str(), fileName.toStdString().c_str(),
+            android::snapshot::kSnapshotProtobufName);
+    std::ofstream outStream(PathUtils::asUnicodePath(protoFileName).c_str(),
+                            std::ofstream::binary);
 
     protobuf->SerializeToOstream(&outStream);
 }

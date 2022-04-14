@@ -10,13 +10,13 @@
 ** GNU General Public License for more details.
 */
 
-#include <errno.h>                                            // for errnomv
-#include <stdint.h>                                           // for uint16_t
-#include <stdio.h>                                            // for snprintf
-#include <stdlib.h>                                           // for free
-#include <string.h>                                           // for strlen
-#include <memory>                                             // for shared_ptr
-#include <string>                                             // for string
+#include <errno.h>   // for errnomv
+#include <stdint.h>  // for uint16_t
+#include <stdio.h>   // for snprintf
+#include <stdlib.h>  // for free
+#include <string.h>  // for strlen
+#include <memory>    // for shared_ptr
+#include <string>    // for string
 
 #include "android/adb-server.h"                               // for android...
 #include "android/android.h"                                  // for android...
@@ -296,6 +296,11 @@ static int report_console(const char* proto_port, int console_port) {
     restore_sigalrm(&sigstate);
     return 0;
 }
+
+// Generic entry point to start an android console.
+// QEMU implementations should populate |*agents| with QEMU specific
+// functions. Takes ownership of |agents|.
+extern int android_console_start(int port, const AndroidConsoleAgents* agents);
 
 static int qemu_android_console_start(int port,
                                       const AndroidConsoleAgents* agents) {

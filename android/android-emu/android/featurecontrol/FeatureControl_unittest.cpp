@@ -17,6 +17,8 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/cmdline-option.h"
+#include "android/console.h"
+#include "android/emulation/testing/TemporaryCommandLineOptions.h"
 
 #include <gtest/gtest.h>
 
@@ -150,8 +152,8 @@ TEST_F(FeatureControlTest, stringConversion) {
 #define FEATURE_CONTROL_ITEM(item)           \
     EXPECT_EQ(item, stringToFeature(#item)); \
     EXPECT_STREQ(#item, FeatureControlImpl::toString(item).data());
-#include "FeatureControlDefHost.h"
 #include "FeatureControlDefGuest.h"
+#include "FeatureControlDefHost.h"
 #undef FEATURE_CONTROL_ITEM
 
     EXPECT_EQ(Feature_n_items,
@@ -212,6 +214,7 @@ TEST_F(FeatureControlTest, setNonOverridenGuestFeatureGuestOff) {
     }
 }
 
+
 TEST_F(FeatureControlTest, parseCommandLine) {
     writeDefaultIniHost(mAllOffIni);
     writeDefaultIniGuest(mAllOffIniGuestOnly);
@@ -231,10 +234,7 @@ TEST_F(FeatureControlTest, parseCommandLine) {
     feature3.next = &feature4;
     AndroidOptions options = {};
     options.feature = &feature1;
-    android_cmdLineOptions = &options;
-    auto undoCommandLine = android::base::makeCustomScopedPtr(
-            &android_cmdLineOptions,
-            [](const AndroidOptions** opts) { *opts = nullptr; });
+    TemporaryCommandLineOptions cmldLine(&options);
     loadAllIni();
 
     EXPECT_TRUE(isEnabled(Feature::Wifi));

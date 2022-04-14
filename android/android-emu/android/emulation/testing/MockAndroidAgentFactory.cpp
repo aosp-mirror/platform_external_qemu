@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #include "android/emulation/testing/MockAndroidAgentFactory.h"
-
 #include <stdio.h>
 
 #include "gtest/gtest.h"
@@ -31,6 +30,24 @@ extern "C" const QAndroidEmulatorWindowAgent* const
 extern "C" const QAndroidMultiDisplayAgent* const
         gMockQAndroidMultiDisplayAgent;
 
+AndroidOptions emptyOptions{};
+AndroidOptions* sAndroid_cmdLineOptions = &emptyOptions;
+std::string sCmdlLine;
+
+
+static const QAndroidGlobalVarsAgent gMockAndroidGlobalVarsAgent = {
+        .android_cmdLineOptions = []() { return sAndroid_cmdLineOptions; },
+        .inject_cmdLineOptions =
+                [](AndroidOptions* opts) { sAndroid_cmdLineOptions = opts; },
+        .has_cmdLineOptions =
+                []() {
+                    return gMockAndroidGlobalVarsAgent
+                                   .android_cmdLineOptions() != nullptr;
+                },
+        .android_cmdLine = []() { return (const char*)sCmdlLine.c_str(); },
+        .inject_android_cmdLine =
+                [](const char* cmdline) { sCmdlLine = cmdline; }};
+
 namespace android {
 namespace emulation {
 
@@ -48,9 +65,13 @@ const QAndroidEmulatorWindowAgent* const
 MockAndroidConsoleFactory::android_get_QAndroidEmulatorWindowAgent() const {
     return gMockQAndroidEmulatorWindowAgent;
 }
+
+const QAndroidGlobalVarsAgent* const
+MockAndroidConsoleFactory::android_get_QAndroidGlobalVarsAgent() const {
+    return &gMockAndroidGlobalVarsAgent;
+}
 }  // namespace emulation
 }  // namespace android
-
 
 // The gtest entry point that will configure the mock agents.
 int main(int argc, char** argv) {
@@ -66,8 +87,7 @@ int main(int argc, char** argv) {
         } else if (!strncmp(_WRITE_STR, argv[i], strlen(_WRITE_STR))) {
             sscanf(argv[i], _WRITE_STR "=%p", &WindowsFlags::sChildWrite);
         } else if (!strncmp(_FILE_PATH_STR, argv[i], strlen(_FILE_PATH_STR))) {
-            sscanf(argv[i], _FILE_PATH_STR "=%s",
-                   WindowsFlags::sFileLockPath);
+            sscanf(argv[i], _FILE_PATH_STR "=%s", WindowsFlags::sFileLockPath);
         }
     }
 #endif

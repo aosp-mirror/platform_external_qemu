@@ -13,8 +13,17 @@
 // limitations under the License.
 
 #pragma once
-
 #include "android/console.h"  // for ANDROID_CONSOLE_AGENTS_LIST
+
+#ifdef _WIN32
+#ifdef CONSOLE_EXPORTS
+#define CONSOLE_API __declspec(dllexport)
+#else
+#define CONSOLE_API __declspec(dllimport)
+#endif
+#else
+#define CONSOLE_API
+#endif
 
 struct QAndroidAutomationAgent;
 
@@ -31,11 +40,15 @@ namespace emulation {
 // If you want to override existing agents you can subclass this factory,
 // override the method of interest and call injectConsoleAgents, it will replace
 // the existing agents with the one your factory provides.
-class AndroidConsoleFactory {
+class CONSOLE_API AndroidConsoleFactory {
 public:
     ANDROID_CONSOLE_AGENTS_LIST(ANDROID_DEFINE_CONSOLE_GETTER)
 };
 
+// Returns true if the agents have been injected, false
+// otherwise. This check is only needed if you are doing something
+// before the agents were actually initialized (very early launch)
+bool agentsAvailable();
 
 // Call this method to inject the console agents into the emulator. You usally
 // want to call this function *BEFORE* any calls to getConsoleAgents are made.
@@ -45,8 +58,7 @@ public:
 //
 // Note: It is currently not safe to inject agents after the first injection has
 // taken place.
-void injectConsoleAgents(
-        const AndroidConsoleFactory& factory);
+CONSOLE_API void injectConsoleAgents(const AndroidConsoleFactory& factory);
 
 }  // namespace emulation
 }  // namespace android

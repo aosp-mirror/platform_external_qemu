@@ -11,29 +11,29 @@
 
 #include "android/skin/qt/VirtualSceneInfoDialog.h"
 
-#include <QtCore/qglobal.h>                          // for Q_OS_MAC
-#include <qabstractanimation.h>                      // for QAbstractAnimati...
-#include <qglobal.h>                                 // for Q_ASSERT
-#include <qnamespace.h>                              // for WindowFlags, Dialog
-#include <qsize.h>                                   // for operator!=, QSiz...
-#include <qwindowdefs.h>                             // for WId
-#include <QAbstractAnimation>                        // for QAbstractAnimation
-#include <QCheckBox>                                 // for QCheckBox
-#include <QFlags>                                    // for QFlags
-#include <QLabel>                                    // for QLabel
-#include <QPropertyAnimation>                        // for QPropertyAnimation
-#include <QSettings>                                 // for QSettings
+#include <QtCore/qglobal.h>      // for Q_OS_MAC
+#include <qabstractanimation.h>  // for QAbstractAnimati...
+#include <qglobal.h>             // for Q_ASSERT
+#include <qnamespace.h>          // for WindowFlags, Dialog
+#include <qsize.h>               // for operator!=, QSiz...
+#include <qwindowdefs.h>         // for WId
+#include <QAbstractAnimation>    // for QAbstractAnimation
+#include <QCheckBox>             // for QCheckBox
+#include <QFlags>                // for QFlags
+#include <QLabel>                // for QLabel
+#include <QPropertyAnimation>    // for QPropertyAnimation
+#include <QSettings>             // for QSettings
 #if QT_VERSION >= 0x060000
-#include <QtSvgWidgets/QSvgWidget>                                // for QSvgWidget
+#include <QtSvgWidgets/QSvgWidget>  // for QSvgWidget
 #else
-#include <QSvgWidget>                                // for QSvgWidget
-#endif  // QT_VERSION
-#include <algorithm>                                 // for min
+#include <QSvgWidget>  // for QSvgWidget
+#endif                 // QT_VERSION
+#include <algorithm>   // for min
 
-#include "android/cmdline-option.h"  // for android_cmdLineOptions
-#include "android/settings-agent.h"                  // for SETTINGS_THEME_DARK
-#include "android/skin/qt/emulator-container.h"      // for EmulatorContainer
-#include "android/skin/qt/qt-settings.h"             // for SHOW_VIRTUALSCEN...
+#include "android/cmdline-option.h"              // for android_cmdLineOptions
+#include "android/settings-agent.h"              // for SETTINGS_THEME_DARK
+#include "android/skin/qt/emulator-container.h"  // for EmulatorContainer
+#include "android/skin/qt/qt-settings.h"         // for SHOW_VIRTUALSCEN...
 #include "android/skin/qt/raised-material-button.h"  // for RaisedMaterialBu...
 #include "android/skin/qt/stylesheet.h"              // for stylesheetForTheme
 
@@ -41,7 +41,7 @@ class QKeyEvent;
 class QShowEvent;
 
 #if defined(__APPLE__)
-#include "android/skin/qt/mac-native-window.h"       // for getNSWindow, nsW...
+#include "android/skin/qt/mac-native-window.h"  // for getNSWindow, nsW...
 #endif
 
 static constexpr int kDefaultBorderRadius = 10;
@@ -72,7 +72,7 @@ VirtualSceneInfoDialog::VirtualSceneInfoDialog(EmulatorContainer* parent)
 }
 
 void VirtualSceneInfoDialog::show() {
-    if (android_cmdLineOptions->qt_hide_window)
+    if (getConsoleAgents()->settings->android_cmdLineOptions()->qt_hide_window)
         return;
     setWindowOpacity(0);
     QWidget::show();
@@ -84,7 +84,7 @@ void VirtualSceneInfoDialog::show() {
 }
 
 void VirtualSceneInfoDialog::hide(CompletionFunc onHidden) {
-    if (android_cmdLineOptions->qt_hide_window)
+    if (getConsoleAgents()->settings->android_cmdLineOptions()->qt_hide_window)
         return;
     auto hideAnimation = new QPropertyAnimation(this, "windowOpacity");
     hideAnimation->setStartValue(windowOpacity());

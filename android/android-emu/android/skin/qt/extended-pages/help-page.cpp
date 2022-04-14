@@ -11,36 +11,36 @@
 
 #include "android/skin/qt/extended-pages/help-page.h"
 
-#include <QtCore/qglobal.h>                         // for Q_OS_MAC
-#include <qiodevice.h>                              // for QIODevice::ReadOnly
-#include <qkeysequence.h>                           // for QKeySequence::Nat...
-#include <qmap.h>                                   // for QMap<>::const_ite...
-#include <qstring.h>                                // for operator+, QStrin...
-#include <QDesktopServices>                         // for QDesktopServices
-#include <QFile>                                    // for QFile
-#include <QIODevice>                                // for QIODevice
-#include <QKeySequence>                             // for QKeySequence
-#include <QPlainTextEdit>                           // for QPlainTextEdit
-#include <QTableWidget>                             // for QTableWidget
-#include <QTableWidgetItem>                         // for QTableWidgetItem
-#include <QTextStream>                              // for QTextStream
-#include <QThread>                                  // for QThread
-#include <QUrl>                                     // for QUrl
-#include <string>                                   // for basic_string, ope...
-#include <utility>                                  // for pair
+#include <QtCore/qglobal.h>  // for Q_OS_MAC
+#include <qiodevice.h>       // for QIODevice::ReadOnly
+#include <qkeysequence.h>    // for QKeySequence::Nat...
+#include <qmap.h>            // for QMap<>::const_ite...
+#include <qstring.h>         // for operator+, QStrin...
+#include <QDesktopServices>  // for QDesktopServices
+#include <QFile>             // for QFile
+#include <QIODevice>         // for QIODevice
+#include <QKeySequence>      // for QKeySequence
+#include <QPlainTextEdit>    // for QPlainTextEdit
+#include <QTableWidget>      // for QTableWidget
+#include <QTableWidgetItem>  // for QTableWidgetItem
+#include <QTextStream>       // for QTextStream
+#include <QThread>           // for QThread
+#include <QUrl>              // for QUrl
+#include <string>            // for basic_string, ope...
+#include <utility>           // for pair
 
-#include "android/android.h"                        // for android_serial_nu...
-#include "android/avd/info.h"                       // for avdInfo_getApiLevel
-#include "android/base/Optional.h"                  // for Optional
-#include "android/base/Uri.h"                       // for Uri
-#include "android/base/Version.h"                   // for Version
-#include "android/base/system/System.h"             // for System
-#include "android/cmdline-option.h"                 // for android_cmdLineOptions
-#include "android/globals.h"                        // for android_avdInfo
-#include "android/metrics/StudioConfig.h"           // for UpdateChannel
-#include "android/metrics/UiEventTracker.h"         // for UiEventTr...
-#include "android/skin/qt/shortcut-key-store.h"     // for ShortcutKeyStore
-#include "android/update-check/UpdateChecker.h"     // for UpdateChecker
+#include "android/android.h"                     // for android_serial_nu...
+#include "android/avd/info.h"                    // for avdInfo_getApiLevel
+#include "android/base/Optional.h"               // for Optional
+#include "android/base/Uri.h"                    // for Uri
+#include "android/base/Version.h"                // for Version
+#include "android/base/system/System.h"          // for System
+#include "android/cmdline-option.h"              // for android_cmdLineOptions
+#include "android/globals.h"                     // for android_avdInfo
+#include "android/metrics/StudioConfig.h"        // for UpdateChannel
+#include "android/metrics/UiEventTracker.h"      // for UiEventTr...
+#include "android/skin/qt/shortcut-key-store.h"  // for ShortcutKeyStore
+#include "android/update-check/UpdateChecker.h"  // for UpdateChecker
 #include "android/update-check/VersionExtractor.h"  // for VersionExtractor
 
 class QTableWidget;
@@ -59,18 +59,20 @@ static const char FEATURE_REQUEST_TEMPLATE[] =
         R"(Feature Request:
 
 Use Case or Problem this feature helps you with:)";
-HelpPage::HelpPage(QWidget* parent) : QWidget(parent), mUi(new Ui::HelpPage),  mHelpTracker(new UiEventTracker(
+HelpPage::HelpPage(QWidget* parent)
+    : QWidget(parent),
+      mUi(new Ui::HelpPage),
+      mHelpTracker(new UiEventTracker(
               android_studio::EmulatorUiEvent::BUTTON_PRESS,
-              android_studio::EmulatorUiEvent::EXTENDED_HELP_TAB))
-               {
+              android_studio::EmulatorUiEvent::EXTENDED_HELP_TAB)) {
     mUi->setupUi(this);
     disableForEmbeddedEmulator();
     // Get the version of this code
     android::update_check::VersionExtractor vEx;
 
     android::base::Version curVersion = vEx.getCurrentVersion();
-    auto verStr = curVersion.isValid()
-            ? QString(curVersion.toString().c_str()) : "Unknown";
+    auto verStr = curVersion.isValid() ? QString(curVersion.toString().c_str())
+                                       : "Unknown";
 
     mUi->help_versionBox->setPlainText(verStr);
 
@@ -79,24 +81,30 @@ HelpPage::HelpPage(QWidget* parent) : QWidget(parent), mUi(new Ui::HelpPage),  m
     avdInfo_getFullApiName(apiLevel, versionString, 128);
     mUi->help_androidVersionBox->setPlainText(versionString);
     mUi->help_adbSerialNumberBox->setPlainText(
-            "emulator-" + QString::number(android_serial_number_port) );
+            "emulator-" + QString::number(android_serial_number_port));
 
     // launch the latest version loader in a separate thread
     auto latestVersionThread = new QThread();
     auto latestVersionTask = new LatestVersionLoadTask();
     latestVersionTask->moveToThread(latestVersionThread);
-    connect(latestVersionThread, SIGNAL(started()), latestVersionTask, SLOT(run()));
+    connect(latestVersionThread, SIGNAL(started()), latestVersionTask,
+            SLOT(run()));
     connect(latestVersionTask, SIGNAL(finished(QString)),
             mUi->help_latestVersionBox, SLOT(setPlainText(QString)));
-    connect(latestVersionTask, SIGNAL(finished(QString)), latestVersionThread, SLOT(quit()));
-    connect(latestVersionThread, SIGNAL(finished()), latestVersionTask, SLOT(deleteLater()));
-    connect(latestVersionThread, SIGNAL(finished()), latestVersionThread, SLOT(deleteLater()));
+    connect(latestVersionTask, SIGNAL(finished(QString)), latestVersionThread,
+            SLOT(quit()));
+    connect(latestVersionThread, SIGNAL(finished()), latestVersionTask,
+            SLOT(deleteLater()));
+    connect(latestVersionThread, SIGNAL(finished()), latestVersionThread,
+            SLOT(deleteLater()));
     mUi->help_latestVersionBox->setPlainText(tr("Loading..."));
     latestVersionThread->start();
 }
 
 void HelpPage::initialize(const ShortcutKeyStore<QtUICommand>* key_store) {
-    if (!android_cmdLineOptions->qt_hide_window) {
+    if (!getConsoleAgents()
+                 ->settings->android_cmdLineOptions()
+                 ->qt_hide_window) {
         initializeLicenseText();
         initializeKeyboardShortcutList(key_store);
     }
@@ -106,7 +114,8 @@ void HelpPage::initializeLicenseText() {
     // Read the license text into the display box
     // The file is <SDK path>/tools/NOTICE.txt
 
-    QString lFileName = android::base::System::get()->getLauncherDirectory().c_str();
+    QString lFileName =
+            android::base::System::get()->getLauncherDirectory().c_str();
     lFileName += "/NOTICE.txt";
 
     QFile licenseFile(lFileName);
@@ -119,7 +128,7 @@ void HelpPage::initializeLicenseText() {
         mUi->help_licenseText->setPlainText(
                 tr("Find Android Emulator License NOTICE files here:") +
                 "\n\nhttps://android.googlesource.com/platform/external/"
-                          "qemu/+/emu-master-dev/");
+                "qemu/+/emu-master-dev/");
     }
 }
 
@@ -132,8 +141,8 @@ static void addShortcutsTableRow(QTableWidget* table_widget,
     table_widget->setItem(table_row, 1, new QTableWidgetItem(key_sequence));
 }
 
-void HelpPage::initializeKeyboardShortcutList(const ShortcutKeyStore<QtUICommand>* key_store)
-{
+void HelpPage::initializeKeyboardShortcutList(
+        const ShortcutKeyStore<QtUICommand>* key_store) {
     QTableWidget* table_widget = mUi->shortcutsTableWidget;
     if (key_store) {
         for (auto key_sequence_and_command = key_store->begin();
@@ -148,26 +157,27 @@ void HelpPage::initializeKeyboardShortcutList(const ShortcutKeyStore<QtUICommand
             // string for the "multitouch" key combo.  Similarly with the
             // virtual scene control trigger, we set the key combo directly.
             if (key_sequence_and_command.value() ==
-                       QtUICommand::SHOW_MULTITOUCH) {
+                QtUICommand::SHOW_MULTITOUCH) {
 #ifdef Q_OS_MAC
                 key_combo = "\u2318";  // Cmd
 #else
                 key_combo = "Ctrl";
 #endif
             } else if (key_sequence_and_command.value() ==
-                        QtUICommand::VIRTUAL_SCENE_CONTROL) {
+                       QtUICommand::VIRTUAL_SCENE_CONTROL) {
 #ifdef Q_OS_MAC
                 key_combo = "\u2325 Option";  // Opt
 #else
                 key_combo = "Alt";
 #endif
             } else {
-                key_combo  = key_sequence_and_command.key().toString(QKeySequence::NativeText);
+                key_combo = key_sequence_and_command.key().toString(
+                        QKeySequence::NativeText);
             }
 
-            addShortcutsTableRow(table_widget,
-                                 key_combo,
-                                 getQtUICommandDescription(key_sequence_and_command.value()));
+            addShortcutsTableRow(table_widget, key_combo,
+                                 getQtUICommandDescription(
+                                         key_sequence_and_command.value()));
         }
     }
 
@@ -190,9 +200,11 @@ void HelpPage::on_help_sendFeedback_clicked() {
 }
 
 void HelpPage::disableForEmbeddedEmulator() {
-    if (android_cmdLineOptions->qt_hide_window) {
-        for (auto* w : {mUi->keyboard_shortcuts_tab,
-                mUi->emulator_help_tab, mUi->license_tab}) {
+    if (getConsoleAgents()
+                ->settings->android_cmdLineOptions()
+                ->qt_hide_window) {
+        for (auto* w : {mUi->keyboard_shortcuts_tab, mUi->emulator_help_tab,
+                        mUi->license_tab}) {
             mUi->help_tabs->removeTab(mUi->help_tabs->indexOf(w));
         }
     }

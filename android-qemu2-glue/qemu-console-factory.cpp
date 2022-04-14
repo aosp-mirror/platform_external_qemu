@@ -104,6 +104,9 @@ extern "C" const QAndroidHciAgent* const gQAndroidHciAgent;
 // Defined in android-qemu2-glue/qemu-hw-control-agent-impl.cpp
 extern "C" const QAndroidHwControlAgent* const gQAndroidHwControlAgent;
 
+// Defined in android-qemu2-glue/qemu-globals-agent-impl.cpp
+extern "C" const QAndroidGlobalVarsAgent* const gQAndroidGlobalVarsAgent;
+
 #define ANDROID_DEFINE_CONSOLE_GETTER_IMPL(typ, name) \
     const typ* const android_get_##typ() const override { return g##typ; };
 
@@ -114,10 +117,10 @@ class QemuAndroidConsoleAgentFactory
 
 using android::emulation::AndroidLoggingConsoleFactory;
 
-void injectConsoleAgents(const char* factory) {
-    android::emulation::injectConsoleAgents(QemuAndroidConsoleAgentFactory());
+void injectQemuConsoleAgents(const char* factory) {
+    injectConsoleAgents(QemuAndroidConsoleAgentFactory());
     if (VERBOSE_CHECK(events)) {
         LOG(INFO) << "-- Injecting logging agents for user events.";
-        android::emulation::injectConsoleAgents(AndroidLoggingConsoleFactory());
+        injectConsoleAgents(AndroidLoggingConsoleFactory());
     }
 }

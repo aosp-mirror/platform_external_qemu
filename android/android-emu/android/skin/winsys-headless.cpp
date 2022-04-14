@@ -9,12 +9,12 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include <stdio.h>                                     // for fprintf, stderr
+#include <stdio.h>  // for fprintf, stderr
 
 #include <atomic>
 #include <cstdlib>
-#include <functional>                                  // for __base
-#include <memory>                                      // for static_pointer...
+#include <functional>  // for __base
+#include <memory>      // for static_pointer...
 
 #include "android/cmdline-option.h"
 #include "android/globals.h"                           // for android_hw
@@ -22,7 +22,6 @@
 #include "android/skin/rect.h"                         // for SkinRect, SkinPos
 #include "android/skin/winsys.h"                       // for WinsysPreferre...
 #include "android/ui-emu-agent.h"                      // for UiEmuAgent
-
 
 namespace android {
 namespace base {
@@ -37,20 +36,20 @@ class System;
 using android::base::Win32UnicodeString;
 #else
 #include <pthread.h>
-#include <signal.h>                                    // for kill, pthread_...
-#include <unistd.h>                                    // for getpid
+#include <signal.h>  // for kill, pthread_...
+#include <unistd.h>  // for getpid
 #endif
 
 using android::base::System;
 
-#define  DEBUG  1
+#define DEBUG 1
 
 #if DEBUG
-#include "android/utils/debug.h"                       // for VERBOSE_PRINT
+#include "android/utils/debug.h"  // for VERBOSE_PRINT
 
-#define  D(...)   VERBOSE_PRINT(surface,__VA_ARGS__)
+#define D(...) VERBOSE_PRINT(surface, __VA_ARGS__)
 #else
-#define  D(...)   ((void)0)
+#define D(...) ((void)0)
 #endif
 
 struct QCoreApplication;
@@ -72,18 +71,18 @@ struct GlobalState {
 
 static GlobalState* globalState() {
     static GlobalState sGlobalState = {
-        .argc = 0,
-        .argv = NULL,
-        .app = NULL,
-        .geo_saved = false,
-        .window_geo_x = 0,
-        .window_geo_y = 0,
-        .window_geo_w = 0,
-        .window_geo_h = 0,
-        .frame_geo_x = 0,
-        .frame_geo_y = 0,
-        .frame_geo_w = 0,
-        .frame_geo_h = 0,
+            .argc = 0,
+            .argv = NULL,
+            .app = NULL,
+            .geo_saved = false,
+            .window_geo_x = 0,
+            .window_geo_y = 0,
+            .window_geo_w = 0,
+            .window_geo_h = 0,
+            .frame_geo_x = 0,
+            .frame_geo_y = 0,
+            .frame_geo_w = 0,
+            .frame_geo_h = 0,
     };
     return &sGlobalState;
 }
@@ -121,21 +120,23 @@ static bool onMainQtThread() {
 }
 
 std::shared_ptr<void> skin_winsys_get_shared_ptr() {
-    return std::static_pointer_cast<void>(EmulatorNoQtNoWindow::getInstancePtr());
+    return std::static_pointer_cast<void>(
+            EmulatorNoQtNoWindow::getInstancePtr());
 }
 
 extern void skin_winsys_enter_main_loop(bool no_window) {
     (void)no_window;
 
 #ifdef _WIN32
-    sWakeEvent = CreateEvent(NULL,                             // Default security attributes
-                             TRUE,                             // Manual reset
-                             FALSE,                            // Initially nonsignaled
-                             TEXT("winsys-qt::sWakeEvent"));   // Object name
+    sWakeEvent = CreateEvent(NULL,   // Default security attributes
+                             TRUE,   // Manual reset
+                             FALSE,  // Initially nonsignaled
+                             TEXT("winsys-qt::sWakeEvent"));  // Object name
 
     while (1) {
         WaitForSingleObject(sWakeEvent, INFINITE);
-        if (sMainLoopShouldExit) break;
+        if (sMainLoopShouldExit)
+            break;
         // Loop and wait again
     }
 #else
@@ -143,13 +144,14 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
         sigset_t mask;
         sigset_t origMask;
 
-        sigemptyset (&mask);
+        sigemptyset(&mask);
         if (sigprocmask(SIG_BLOCK, &mask, &origMask) < 0) {
             derror("%s %s: sigprocmask() failed!\n", __FILE__, __FUNCTION__);
             break;
         }
         sigsuspend(&mask);
-        if (sMainLoopShouldExit) break;
+        if (sMainLoopShouldExit)
+            break;
         // Loop and wait again
     }
 #endif
@@ -162,8 +164,7 @@ extern void skin_winsys_enter_main_loop(bool no_window) {
     D("Finished QEMU main loop\n");
 }
 
-extern void skin_winsys_get_monitor_rect(SkinRect *rect)
-{
+extern void skin_winsys_get_monitor_rect(SkinRect* rect) {
     D("skin_winsys_get_monitor_rect: begin\n");
     bool haveScreenRect = false;
 
@@ -171,55 +172,48 @@ extern void skin_winsys_get_monitor_rect(SkinRect *rect)
     rect->pos.y = 0;
     rect->size.w = android_hw->hw_lcd_width;
     rect->size.h = android_hw->hw_lcd_height;
-    D("%s: (%d,%d) %dx%d", __FUNCTION__, rect->pos.x, rect->pos.y,
-      rect->size.w, rect->size.h);
+    D("%s: (%d,%d) %dx%d", __FUNCTION__, rect->pos.x, rect->pos.y, rect->size.w,
+      rect->size.h);
 }
 
-extern int skin_winsys_get_device_pixel_ratio(double *dpr)
-{
+extern int skin_winsys_get_device_pixel_ratio(double* dpr) {
     D("skin_winsys_get_device_pixel_ratio");
     *dpr = 1.0;
     return 0;
 }
 
-extern void *skin_winsys_get_window_handle()
-{
+extern void* skin_winsys_get_window_handle() {
     return nullptr;
 }
 
-extern void skin_winsys_get_window_pos(int *x, int *y)
-{
+extern void skin_winsys_get_window_pos(int* x, int* y) {
     D("skin_winsys_get_window_pos (noqt)");
     *x = 0;
     *y = 0;
 }
 
-extern void skin_winsys_get_window_size(int *w, int *h)
-{
+extern void skin_winsys_get_window_size(int* w, int* h) {
     D("skin_winsys_get_window_size (noqt)");
     *w = android_hw->hw_lcd_width;
     *h = android_hw->hw_lcd_height;
     D("%s: size: %d x %d", __FUNCTION__, *w, *h);
 }
 
-extern void skin_winsys_get_frame_pos(int *x, int *y)
-{
+extern void skin_winsys_get_frame_pos(int* x, int* y) {
     D("skin_winsys_get_frame_pos (noqt)");
     *x = 0;
     *y = 0;
     D("%s: x=%d y=%d", __FUNCTION__, *x, *y);
 }
 
-extern void skin_winsys_get_frame_size(int *w, int *h)
-{
+extern void skin_winsys_get_frame_size(int* w, int* h) {
     D("skin_winsys_get_frame_size (noqt)");
     *w = android_hw->hw_lcd_width;
     *h = android_hw->hw_lcd_height;
     D("%s: size: %d x %d", __FUNCTION__, *w, *h);
 }
 
-extern bool skin_winsys_window_has_frame()
-{
+extern bool skin_winsys_window_has_frame() {
     return false;
 }
 
@@ -254,8 +248,10 @@ extern bool skin_winsys_is_window_off_screen() {
     return false;
 }
 
-WinsysPreferredGlesBackend skin_winsys_override_glesbackend_if_auto(WinsysPreferredGlesBackend backend) {
-    WinsysPreferredGlesBackend currentPreferred = skin_winsys_get_preferred_gles_backend();
+WinsysPreferredGlesBackend skin_winsys_override_glesbackend_if_auto(
+        WinsysPreferredGlesBackend backend) {
+    WinsysPreferredGlesBackend currentPreferred =
+            skin_winsys_get_preferred_gles_backend();
     if (currentPreferred == WINSYS_GLESBACKEND_PREFERENCE_AUTO) {
         return backend;
     }
@@ -267,7 +263,8 @@ extern WinsysPreferredGlesBackend skin_winsys_get_preferred_gles_backend() {
     return WINSYS_GLESBACKEND_PREFERENCE_AUTO;
 }
 
-void skin_winsys_set_preferred_gles_backend(WinsysPreferredGlesBackend backend) {
+void skin_winsys_set_preferred_gles_backend(
+        WinsysPreferredGlesBackend backend) {
     D("skin_winsys_set_preferred_gles_backend");
     (void)backend;
 }
@@ -291,7 +288,9 @@ extern void skin_winsys_quit_request() {
     if (android_avdInfo) {
         auto arch = (avdInfo_getTargetCpuArch(android_avdInfo));
         if (!strcmp(arch, "x86") || !strcmp(arch, "x86_64")) {
-        } else if (!android_cmdLineOptions->no_snapshot_save){
+        } else if (!getConsoleAgents()
+                            ->settings->android_cmdLineOptions()
+                            ->no_snapshot_save) {
             needRequestClose = true;
         }
     }
@@ -303,11 +302,13 @@ extern void skin_winsys_quit_request() {
     if (needRequestClose) {
         printf("saving arm snapshot.... !!!\n\n");
         arm_snapshot_save_completed = 0;
-        EmulatorNoQtNoWindow* guiless_window = EmulatorNoQtNoWindow::getInstance();
+        EmulatorNoQtNoWindow* guiless_window =
+                EmulatorNoQtNoWindow::getInstance();
         guiless_window->requestClose();
-        for (int i=0; i < 60; ++i) {
-            System::get()->sleepMs(1*1000);
-            if (arm_snapshot_save_completed) break;
+        for (int i = 0; i < 60; ++i) {
+            System::get()->sleepMs(1 * 1000);
+            if (arm_snapshot_save_completed)
+                break;
         }
         printf("saving done.... !!!\n\n");
         // We did not exit all threads at this point, thus we should do an
@@ -316,13 +317,13 @@ extern void skin_winsys_quit_request() {
         std::abort();
     } else {
 #ifdef _WIN32
-    if ( !SetEvent(sWakeEvent) ) {
-        derror("%s %s: SetEvent() failed!\n", __FILE__, __FUNCTION__);
-    }
+        if (!SetEvent(sWakeEvent)) {
+            derror("%s %s: SetEvent() failed!\n", __FILE__, __FUNCTION__);
+        }
 #else
-    if ( kill(getpid(), SIGUSR1) ) {
-       derror("%s %s: kill() failed!\n", __FILE__, __FUNCTION__);
-    }
+        if (kill(getpid(), SIGUSR1)) {
+            derror("%s %s: kill() failed!\n", __FILE__, __FUNCTION__);
+        }
 #endif
     }
 }
@@ -331,7 +332,8 @@ void skin_winsys_destroy() {
     D(__FUNCTION__);
 }
 
-extern void skin_winsys_set_window_icon(const unsigned char *data, size_t size) {
+extern void skin_winsys_set_window_icon(const unsigned char* data,
+                                        size_t size) {
     D("skin_winsys_set_window_icon");
     (void)data;
     (void)size;
@@ -361,11 +363,11 @@ extern void skin_winsys_set_window_overlay_for_resize(int which_corner) {
     (void)which_corner;
 }
 
-extern void skin_winsys_clear_window_overlay() { }
+extern void skin_winsys_clear_window_overlay() {}
 
-extern void skin_winsys_set_window_cursor_normal() { }
+extern void skin_winsys_set_window_cursor_normal() {}
 
-extern void skin_winsys_set_window_title(const char *title) { }
+extern void skin_winsys_set_window_title(const char* title) {}
 
 extern void skin_winsys_update_rotation(SkinRotation rotation) {
     (void)rotation;
@@ -389,7 +391,7 @@ extern void skin_winsys_spawn_thread(bool no_window,
     guiless_window->startThread([f, argc, argv] { f(argc, argv); });
 }
 
-void skin_winsys_setup_library_paths() { }
+void skin_winsys_setup_library_paths() {}
 
 extern void skin_winsys_init_args(int argc, char** argv) {
     GlobalState* g = globalState();
@@ -411,8 +413,7 @@ extern void skin_winsys_start(bool no_window) {
     EmulatorNoQtNoWindow::create();
 }
 
-void skin_winsys_run_ui_update(SkinGenericFunction f, void* data,
-                               bool wait) {
+void skin_winsys_run_ui_update(SkinGenericFunction f, void* data, bool wait) {
     D(__FUNCTION__);
     (void)f;
     (void)data;
@@ -420,20 +421,21 @@ void skin_winsys_run_ui_update(SkinGenericFunction f, void* data,
 }
 
 extern void skin_winsys_error_dialog(const char* message, const char* title) {
-    derror("%s: error dialog: title: [%s] msg: [%s]\n", __func__, title, message);
+    derror("%s: error dialog: title: [%s] msg: [%s]\n", __func__, title,
+           message);
 }
 
 void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
     EmulatorNoQtNoWindow::earlyInitialization(agent);
 }
 
-void skin_winsys_report_entering_main_loop(void) { }
+void skin_winsys_report_entering_main_loop(void) {}
 
 extern bool skin_winsys_is_folded() {
     return false;
 }
 
-extern void skin_winsys_touch_qt_extended_virtual_sensors(void) { }
+extern void skin_winsys_touch_qt_extended_virtual_sensors(void) {}
 
 // Other skin functions (Just fix link errors for now)
 

@@ -34,6 +34,7 @@ set(android-qemu2-glue_src
     qemu-clipboard-agent-impl.cpp
     qemu-display-agent-impl.cpp
     qemu-finger-agent-impl.c
+    qemu-globals-agent-impl.cpp
     qemu-grpc-agent-impl.cpp
     qemu-http-proxy-agent-impl.c
     qemu-hw-control-agent-impl.cpp
@@ -62,12 +63,13 @@ target_include_directories(
           ${VIRGLRENDERER_INCLUDE_DIR}
           ${ANDROID_QEMU2_TOP_DIR}/android/third_party/libdtb/include/)
 
-target_link_libraries(libqemu2-glue PRIVATE  android-grpc android-ui-controller)
+target_link_libraries(libqemu2-glue PRIVATE android-grpc android-ui-controller)
 if(WEBRTC)
   target_link_libraries(libqemu2-glue PRIVATE android-webrtc)
 endif()
 if(BLUETOOTH_EMULATION)
-  target_link_libraries(libqemu2-glue PRIVATE  grpc-emulated-bluetooth libbt-rootcanal-qemu)
+  target_link_libraries(libqemu2-glue PRIVATE grpc-emulated-bluetooth
+                                              libbt-rootcanal-qemu)
 endif()
 
 target_link_libraries(
