@@ -839,7 +839,7 @@ function(finalize_all_licenses)
 
   message(STATUS "Validating liceneses..")
   execute_process(
-    COMMAND "python" "android/build/python/aemu/licensing.py"
+    COMMAND "${Python_EXECUTABLE}" "android/build/python/aemu/licensing.py"
             "${PROJECT_BINARY_DIR}" WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR}
     RESULT_VARIABLE LICENSE_RES OUTPUT_VARIABLE STD_OUT ERROR_VARIABLE STD_ERR)
   if(NOT "${LICENSE_RES}" STREQUAL "0")
@@ -1263,7 +1263,7 @@ function(android_generate_hw_config)
   add_custom_command(
     OUTPUT ${ANDROID_HW_CONFIG_H}
     COMMAND
-      python ${ANDROID_QEMU2_TOP_DIR}/android/scripts/gen-hw-config.py
+      ${Python_EXECUTABLE} ${ANDROID_QEMU2_TOP_DIR}/android/scripts/gen-hw-config.py
       ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/avd/hardware-properties.ini
       ${ANDROID_HW_CONFIG_H}
     DEPENDS

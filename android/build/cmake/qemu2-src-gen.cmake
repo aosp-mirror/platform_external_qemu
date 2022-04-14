@@ -32,7 +32,7 @@ function(generate_trace)
   add_custom_command(
     OUTPUT ${trace_DEST}
     COMMAND
-      python ${ANDROID_QEMU2_TOP_DIR}/scripts/tracetool.py
+      ${Python_EXECUTABLE} ${ANDROID_QEMU2_TOP_DIR}/scripts/tracetool.py
       --group=${trace_GROUP} --format=${trace_FORMAT}
       --backends=${trace_BACKEND}
       ${ANDROID_QEMU2_TOP_DIR}/${trace_SRC_DIR}/trace-events ${trace_DEST}
@@ -206,11 +206,11 @@ function(generate_qapi_lib)
   set(multiValueArgs)
   cmake_parse_arguments(gen "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   execute_process(
-    COMMAND python scripts/qapi-gen.py -b qapi/qapi-schema.json -o
+    COMMAND ${Python_EXECUTABLE} scripts/qapi-gen.py -b qapi/qapi-schema.json -o
             ${gen_DEST}/qapi OUTPUT_VARIABLE GEN_SRC
     WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR})
   execute_process(
-    COMMAND python scripts/qapi-gen.py -p "test-" -b
+    COMMAND ${Python_EXECUTABLE} scripts/qapi-gen.py -p "test-" -b
             tests/qapi-schema/qapi-schema-test.json -o ${gen_DEST}/tests/qapi
     OUTPUT_VARIABLE GEN_TEST_SRC WORKING_DIRECTORY ${ANDROID_QEMU2_TOP_DIR})
 endfunction()

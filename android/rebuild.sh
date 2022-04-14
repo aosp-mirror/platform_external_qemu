@@ -16,6 +16,13 @@ exists() {
   command -v "$1" >/dev/null 2>&1
 }
 
-exists python || panic "No python interpreter available, please install python!"
+PYTHON=python
 
-python $PROGDIR/build/python/cmake.py   $*
+# Prefer python3 if it is available.
+if ! exists $PYTHON; then
+    PYTHON=python3 
+    echo "Using python3"
+    echo "This mmight not work with QEMU dependencies (b/229251286)!" 
+fi
+
+$PYTHON $PROGDIR/build/python/cmake.py   $*
