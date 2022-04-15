@@ -347,9 +347,6 @@ set(android_emu_dependent_src
 android_add_library(TARGET android-emu-agents SHARED LICENSE Apache-2.0
                     SRC android/emulation/control/AndroidAgentFactory.cpp)
 
-android_target_properties(
-  android-emu-agents linux
-  "LINK_FLAGS=-Wl,-rpath,'/nope_aents'  -Wl,--disable-new-dtags")
 android_target_properties(android-emu-agents darwin
                           "INSTALL_RPATH>=@loader_path/gles_swiftshader")
 target_include_directories(
@@ -705,9 +702,6 @@ android_add_library(
          android/snapshot/MacSegvHandler.cpp
          android/snapshot/MemoryWatch_darwin.cpp)
 
-android_target_properties(
-  android-emu-shared linux
-  "LINK_FLAGS=-Wl,-rpath,'/nope'  -Wl,--disable-new-dtags")
 # Note that these are basically the same as android-emu-shared. We should clean
 # this up
 target_link_libraries(
