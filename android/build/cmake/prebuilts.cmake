@@ -273,6 +273,26 @@ function(android_binplace TARGET SRC_FILE DEST_FILE)
                                   "${SRC_FILE}" "${DEST_FILE}")
 endfunction()
 
+# Links the destination to the source file.
+#
+# It will be registered as a generated source.
+function(android_binlink TARGET SRC_FILE DEST_FILE)
+  if (WINDOWS_MSVC_X86_64)
+    # No symlinks in windows!
+    android_binplace(${TARGET} ${SRC_FILE} ${DEST_FILE})
+    return()
+  endif()
+  get_filename_component(REL_DIR ${SRC_FILE} DIRECTORY)
+  get_filename_component(FROM_DIR ${DEST_FILE} DIRECTORY)
+  file(RELATIVE_PATH REL_PATH ${FROM_DIR} ${SRC_FILE})
+  target_sources(${TARGET} PRIVATE ${DEST_FILE})
+  set_source_files_properties(${DEST_FILE} PROPERTIES HEADER_FILE_ONLY TRUE)
+  add_custom_command(
+    OUTPUT "${DEST_FILE}" COMMAND ${CMAKE_COMMAND} -E create_symlink
+                                   "${REL_PATH}" "${DEST_FILE}"
+    WORKING_DIRECTORY ${FROM_DIR})
+endfunction()
+
 # Add the runtime dependencies, i.e. the set of libs that need to be copied over
 # to the proper location in order to run the executable.
 #
@@ -346,6 +366,13 @@ function(android_target_dependency RUN_TARGET TARGET_TAG
           string(REPLACE "${SRC_DIR}" "${DEST_DIR}" DEST_FILE "${FNAME}")
           android_binplace(${RUN_TARGET_DEPENDENCIES} ${FNAME} ${DEST_FILE})
         endforeach()
+      elseif(DEP MATCHES ".*>~>.*")
+        string(REPLACE ">~>" ";" SRC_DST ${DEP})
+        list(GET SRC_DST 0 SRC)
+        list(GET SRC_DST 1 DST)
+        set(DEST_FILE "${CMAKE_BINARY_DIR}/${DST}")
+        set(SRC_FILE "${CMAKE_BINARY_DIR}/${SRC}")
+        android_binlink(${RUN_TARGET_DEPENDENCIES} ${SRC_FILE} ${DEST_FILE})
       else()
         # We are doing single file copies. Turns src>dst into a list, so we can
         # split out SRC --> DST

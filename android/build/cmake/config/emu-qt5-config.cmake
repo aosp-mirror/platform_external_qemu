@@ -9,8 +9,8 @@
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-# TODO(joshuaduong): Only mac-aarch64 is using Qt6 at the moment. Remove once all platforms use
-# the same version of Qt.
+# TODO(joshuaduong): Only mac-aarch64 is using Qt6 at the moment. Remove once
+# all platforms use the same version of Qt.
 if(QTWEBENGINE AND (ANDROID_TARGET_TAG MATCHES "darwin-aarch64"))
   set(QT_VERSION_MAJOR 6)
   set(QT_VERSION_MINOR 2)
@@ -21,7 +21,10 @@ endif()
 
 # TODO: Remove this once we have -no-window working with absolutely no Qt
 # dependencies
-if(NOT QTWEBENGINE AND ((ANDROID_TARGET_TAG MATCHES "linux-x86_64") OR (ANDROID_TARGET_TAG MATCHES "darwin-x86_64") OR (ANDROID_TARGET_TAG MATCHES "darwin-aarch64")))
+if(NOT QTWEBENGINE
+   AND ((ANDROID_TARGET_TAG MATCHES "linux-x86_64") OR (ANDROID_TARGET_TAG
+                                                        MATCHES "darwin-x86_64")
+        OR (ANDROID_TARGET_TAG MATCHES "darwin-aarch64")))
   get_filename_component(
     PREBUILT_ROOT
     "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_TARGET_TAG}-nowebengine"
@@ -39,9 +42,10 @@ else()
     ABSOLUTE)
 
   # Use the host compatible moc, rcc and uic
-  if (QTWEBENGINE AND (ANDROID_HOST_TAG MATCHES "darwin-x86_64") AND (ANDROID_TARGET_TAG MATCHES "darwin-aarch64"))
-    # We have Qt6 compiler tools specifically for cross-compiling from darwin-x86_64 to
-    # darwin-aarch64 (with QtWebEngine)
+  if(QTWEBENGINE AND (ANDROID_HOST_TAG MATCHES "darwin-x86_64")
+     AND (ANDROID_TARGET_TAG MATCHES "darwin-aarch64"))
+    # We have Qt6 compiler tools specifically for cross-compiling from
+    # darwin-x86_64 to darwin-aarch64 (with QtWebEngine)
     get_filename_component(
       HOST_PREBUILT_ROOT
       "${ANDROID_QEMU2_TOP_DIR}/../../prebuilts/android-emulator-build/qt/${ANDROID_HOST_TAG}/qt6"
@@ -70,15 +74,17 @@ function(add_qt_target target)
   endif()
 
   if(NOT TARGET Qt${QT_VERSION_MAJOR}::${target})
-    set(QT_EXECUTABLE ${HOST_PREBUILT_ROOT}/${QT_EXE_DIR}/${target}${EXE_SUFFIX})
+    set(QT_EXECUTABLE
+        ${HOST_PREBUILT_ROOT}/${QT_EXE_DIR}/${target}${EXE_SUFFIX})
     if(NOT EXISTS ${QT_EXECUTABLE})
       message(
         FATAL_ERROR
-          "Unable to add Qt${QT_VERSION_MAJOR}::${target} due to missing ${QT_EXECUTABLE}")
+          "Unable to add Qt${QT_VERSION_MAJOR}::${target} due to missing ${QT_EXECUTABLE}"
+      )
     endif()
     add_executable(Qt${QT_VERSION_MAJOR}::${target} IMPORTED GLOBAL)
-    set_property(TARGET Qt${QT_VERSION_MAJOR}::${target} PROPERTY IMPORTED_LOCATION
-                                                ${QT_EXECUTABLE})
+    set_property(TARGET Qt${QT_VERSION_MAJOR}::${target}
+                 PROPERTY IMPORTED_LOCATION ${QT_EXECUTABLE})
   endif()
 endfunction()
 
@@ -132,7 +138,7 @@ set(QT5_DEFINITIONS "-DQT5_STATICLIB")
 set(QT5_FOUND TRUE)
 
 if(DARWIN_X86_64 OR DARWIN_AARCH64)
-  if (DARWIN_AARCH64 AND QTWEBENGINE)
+  if(DARWIN_AARCH64 AND QTWEBENGINE)
     set(QT_MAJOR_VERSION 6)
     set(QT_LIB_VERSION 6.2.1)
   else()
@@ -150,7 +156,7 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
       ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}DBusAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}DBusAndroidEmu.${QT_LIB_VERSION}.dylib
   )
 
-  if (QT_MAJOR_VERSION EQUAL 5)
+  if(QT_MAJOR_VERSION EQUAL 5)
     set(QT5_SHARED_DEPENDENCIES
         ${QT5_SHARED_DEPENDENCIES};
         ${PREBUILT_ROOT}/plugins/bearer/libqgenericbearer.dylib>lib64/qt/plugins/bearer/libqgenericbearer.dylib;
@@ -171,7 +177,7 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
     )
   endif()
 
-  if (QT_MAJOR_VERSION EQUAL 6)
+  if(QT_MAJOR_VERSION EQUAL 6)
     set(QT_LIBINFIX "AndroidEmu")
     set(QT5_SHARED_DEPENDENCIES
         ${QT5_SHARED_DEPENDENCIES};
@@ -194,15 +200,20 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
   endif()
 
   add_qt_shared_lib(Core "-lQt${QT_MAJOR_VERSION}CoreAndroidEmu" "")
-  add_qt_shared_lib(Gui "-lQt${QT_MAJOR_VERSION}GuiAndroidEmu" "Qt${QT_MAJOR_VERSION}::Core")
-  add_qt_shared_lib(Widgets "-lQt${QT_MAJOR_VERSION}WidgetsAndroidEmu" "Qt${QT_MAJOR_VERSION}::Gui")
-  add_qt_shared_lib(Svg "-lQt${QT_MAJOR_VERSION}SvgAndroidEmu" "Qt${QT_MAJOR_VERSION}::Widgets")
-  if (QT_MAJOR_VERSION EQUAL 6)
-    add_qt_shared_lib(SvgWidgets "-lQt${QT_MAJOR_VERSION}SvgWidgetsAndroidEmu" "Qt${QT_MAJOR_VERSION}::Widgets")
+  add_qt_shared_lib(Gui "-lQt${QT_MAJOR_VERSION}GuiAndroidEmu"
+                    "Qt${QT_MAJOR_VERSION}::Core")
+  add_qt_shared_lib(Widgets "-lQt${QT_MAJOR_VERSION}WidgetsAndroidEmu"
+                    "Qt${QT_MAJOR_VERSION}::Gui")
+  add_qt_shared_lib(Svg "-lQt${QT_MAJOR_VERSION}SvgAndroidEmu"
+                    "Qt${QT_MAJOR_VERSION}::Widgets")
+  if(QT_MAJOR_VERSION EQUAL 6)
+    add_qt_shared_lib(SvgWidgets "-lQt${QT_MAJOR_VERSION}SvgWidgetsAndroidEmu"
+                      "Qt${QT_MAJOR_VERSION}::Widgets")
   endif()
 
   if(QTWEBENGINE)
-    add_qt_shared_lib(Network "-lQt${QT_MAJOR_VERSION}NetworkAndroidEmu" "Qt${QT_MAJOR_VERSION}::Core")
+    add_qt_shared_lib(Network "-lQt${QT_MAJOR_VERSION}NetworkAndroidEmu"
+                      "Qt${QT_MAJOR_VERSION}::Core")
 
     list(
       APPEND
@@ -214,13 +225,12 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
       ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/resources/qtwebengine_resources.pak
       ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/resources/qtwebengine_resources_100p.pak
       ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/resources/qtwebengine_resources_200p.pak
-      # TODO: These 6 are copies of the files immediately above. It would be
-      # nice to make these symbolic links rather than copies.
-      ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/libexec/icudtl.dat
-      ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/libexec/qtwebengine_devtools_resources.pak
-      ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/libexec/qtwebengine_resources.pak
-      ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/libexec/qtwebengine_resources_100p.pak
-      ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/libexec/qtwebengine_resources_200p.pak
+      # These are now symlinks
+      lib64/qt/resources/icudtl.dat>~>lib64/qt/libexec/icudtl.dat
+      lib64/qt/resources/qtwebengine_devtools_resources.pak>~>lib64/qt/libexec/qtwebengine_devtools_resources.pak
+      lib64/qt/resources/qtwebengine_resources.pak>~>lib64/qt/libexec/qtwebengine_resources.pak
+      lib64/qt/resources/qtwebengine_resources_100p.pak>~>lib64/qt/libexec/qtwebengine_resources_100p.pak
+      lib64/qt/resources/qtwebengine_resources_200p.pak>~>lib64/qt/libexec/qtwebengine_resources_200p.pak
       # BUG: 143948083 WebEngine expects the locales directory to not be under
       # translations
       ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/libexec/qtwebengine_locales
@@ -230,11 +240,17 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
       ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}WebSocketsAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}WebSocketsAndroidEmu.${QT_LIB_VERSION}.dylib
     )
     if(QT_MAJOR_VERSION EQUAL 5)
-      add_qt_shared_lib(Qml "-lQt${QT_MAJOR_VERSION}QmlAndroidEmu" "Qt${QT_MAJOR_VERSION}::Network")
-      add_qt_shared_lib(WebChannel "-lQt${QT_MAJOR_VERSION}WebChannelAndroidEmu" "Qt${QT_MAJOR_VERSION}::Qml")
-      add_qt_shared_lib(WebSockets "-lQt${QT_MAJOR_VERSION}WebSocketsAndroidEmu" "Qt${QT_MAJOR_VERSION}::Qml")
-      add_qt_shared_lib(WebEngineWidgets "-lQt${QT_MAJOR_VERSION}WebEngineWidgetsAndroidEmu"
-                        "Qt${QT_MAJOR_VERSION}::Qml")
+      add_qt_shared_lib(Qml "-lQt${QT_MAJOR_VERSION}QmlAndroidEmu"
+                        "Qt${QT_MAJOR_VERSION}::Network")
+      add_qt_shared_lib(
+        WebChannel "-lQt${QT_MAJOR_VERSION}WebChannelAndroidEmu"
+        "Qt${QT_MAJOR_VERSION}::Qml")
+      add_qt_shared_lib(
+        WebSockets "-lQt${QT_MAJOR_VERSION}WebSocketsAndroidEmu"
+        "Qt${QT_MAJOR_VERSION}::Qml")
+      add_qt_shared_lib(
+        WebEngineWidgets "-lQt${QT_MAJOR_VERSION}WebEngineWidgetsAndroidEmu"
+        "Qt${QT_MAJOR_VERSION}::Qml")
       list(
         APPEND
         QT5_SHARED_DEPENDENCIES
@@ -254,12 +270,18 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
         ${PREBUILT_ROOT}/lib/libQt${QT_MAJOR_VERSION}QmlModelsAndroidEmu.${QT_LIB_VERSION}.dylib>lib64/qt/lib/libQt${QT_MAJOR_VERSION}QmlModelsAndroidEmu.${QT_LIB_VERSION}.dylib;
       )
       # Qt6 build does not contain Qml library
-      add_qt_shared_lib(WebChannel "-lQt${QT_MAJOR_VERSION}WebChannelAndroidEmu" "Qt${QT_MAJOR_VERSION}::Core")
-      add_qt_shared_lib(WebSockets "-lQt${QT_MAJOR_VERSION}WebSocketsAndroidEmu" "Qt${QT_MAJOR_VERSION}::Core")
-      add_qt_shared_lib(WebEngineWidgets "-lQt${QT_MAJOR_VERSION}WebEngineWidgetsAndroidEmu"
-                        "Qt${QT_MAJOR_VERSION}::Core")
-      add_qt_shared_lib(WebEngineCore "-lQt${QT_MAJOR_VERSION}WebEngineCoreAndroidEmu"
-                        "Qt${QT_MAJOR_VERSION}::Core")
+      add_qt_shared_lib(
+        WebChannel "-lQt${QT_MAJOR_VERSION}WebChannelAndroidEmu"
+        "Qt${QT_MAJOR_VERSION}::Core")
+      add_qt_shared_lib(
+        WebSockets "-lQt${QT_MAJOR_VERSION}WebSocketsAndroidEmu"
+        "Qt${QT_MAJOR_VERSION}::Core")
+      add_qt_shared_lib(
+        WebEngineWidgets "-lQt${QT_MAJOR_VERSION}WebEngineWidgetsAndroidEmu"
+        "Qt${QT_MAJOR_VERSION}::Core")
+      add_qt_shared_lib(
+        WebEngineCore "-lQt${QT_MAJOR_VERSION}WebEngineCoreAndroidEmu"
+        "Qt${QT_MAJOR_VERSION}::Core")
     endif()
   endif()
 
@@ -268,8 +290,11 @@ if(DARWIN_X86_64 OR DARWIN_AARCH64)
       "INSTALL_RPATH>=@loader_path/lib64/qt/libexec;INSTALL_RPATH>=@loader_path/lib64/qt/lib;INSTALL_RPATH>=@loader_path/lib64/qt/plugins"
   )
   set(QT5_LIBRARIES
-      ${QT5_LIBRARIES} -lQt${QT_MAJOR_VERSION}NetworkAndroidEmu -lQt${QT_MAJOR_VERSION}WebChannelAndroidEmu
-      -lQt${QT_MAJOR_VERSION}WebEngineWidgetsAndroidEmu -lQt${QT_MAJOR_VERSION}WebSockets)
+      ${QT5_LIBRARIES}
+      -lQt${QT_MAJOR_VERSION}NetworkAndroidEmu
+      -lQt${QT_MAJOR_VERSION}WebChannelAndroidEmu
+      -lQt${QT_MAJOR_VERSION}WebEngineWidgetsAndroidEmu
+      -lQt${QT_MAJOR_VERSION}WebSockets)
 elseif(WINDOWS_MSVC_X86_64)
   # On Windows, Qt provides us with a qtmain.lib which helps us write a cross-
   # platform main() function (because WinMain() is the entry point to a GUI
@@ -349,7 +374,8 @@ elseif(WINDOWS_MSVC_X86_64)
     ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/resources/qtwebengine_resources_100p.pak
     ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/resources/qtwebengine_resources_200p.pak
     # TODO: These 6 are copies of the files immediately above. It would be nice
-    # to make these symbolic links rather than copies.
+    # to make these symbolic links rather than copies. (Symlins are not really
+    # supported on windows.)
     ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/bin/icudtl.dat
     ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/bin/qtwebengine_devtools_resources.pak
     ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/bin/qtwebengine_resources.pak
@@ -422,13 +448,12 @@ elseif(LINUX)
       ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/resources/qtwebengine_resources.pak
       ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/resources/qtwebengine_resources_100p.pak
       ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/resources/qtwebengine_resources_200p.pak
-      # TODO: These six are copies of the files immediately above. It would be
-      # nice to make these symbolic links rather than copies.
-      ${PREBUILT_ROOT}/resources/icudtl.dat>lib64/qt/libexec/icudtl.dat
-      ${PREBUILT_ROOT}/resources/qtwebengine_devtools_resources.pak>lib64/qt/libexec/qtwebengine_devtools_resources.pak
-      ${PREBUILT_ROOT}/resources/qtwebengine_resources.pak>lib64/qt/libexec/qtwebengine_resources.pak
-      ${PREBUILT_ROOT}/resources/qtwebengine_resources_100p.pak>lib64/qt/libexec/qtwebengine_resources_100p.pak
-      ${PREBUILT_ROOT}/resources/qtwebengine_resources_200p.pak>lib64/qt/libexec/qtwebengine_resources_200p.pak
+      # These are symlinks.
+      lib64/qt/resources/icudtl.dat>~>lib64/qt/bin/icudtl.dat
+      lib64/qt/resources/qtwebengine_devtools_resources.pak>~>lib64/qt/bin/qtwebengine_devtools_resources.pak
+      lib64/qt/resources/qtwebengine_resources.pak>~>lib64/qt/bin/qtwebengine_resources.pak
+      lib64/qt/resources/qtwebengine_resources_100p.pak>~>lib64/qt/bin/qtwebengine_resources_100p.pak
+      lib64/qt/resources/qtwebengine_resources_200p.pak>~>lib64/qt/bin/qtwebengine_resources_200p.pak
       # BUG: 143948083 WebEngine expects the locales directory to not be under
       # translations
       ${PREBUILT_ROOT}/translations/qtwebengine_locales/*.pak>>lib64/qt/libexec/qtwebengine_locales
@@ -441,39 +466,39 @@ elseif(LINUX)
       ${PREBUILT_ROOT}/lib/libQt5WebSocketsAndroidEmu.so.5>lib64/qt/lib/libQt5WebSocketsAndroidEmu.so.5
     )
 
-    list(APPEND QT5_SHARED_PROPERTIES
-         "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/libexec'  -Wl,--disable-new-dtags")
-  endif()
-
-  if (LINUX_X86_64)
     list(
-    APPEND
-    QT5_SHARED_DEPENDENCIES
-    ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so;
-    ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so.0;
-    ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so.0.0.0;
-    ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libX11-xcb.so.1.0.0>lib64/qt/lib/libX11-xcb.so.1;
-    ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libX11-xcb.so.1.0.0>lib64/qt/lib/libX11-xcb.so.1.0;
-    ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libX11-xcb.so.1.0.0>lib64/qt/lib/libX11-xcb.so.1.0.0;
-    ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxcb-xkb.so.1.0.0>lib64/qt/lib/libxcb-xkb.so.1;
-    ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxcb-xkb.so.1.0.0>lib64/qt/lib/libxcb-xkb.so.1.0;
-    ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxcb-xkb.so.1.0.0>lib64/qt/lib/libxcb-xkb.so.1.0.0;
-    ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon-x11.so.0.0.0>lib64/qt/lib/libxkbcommon-x11.so;
-    ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon-x11.so.0.0.0>lib64/qt/lib/libxkbcommon-x11.so.0;
-    ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon-x11.so.0.0.0>lib64/qt/lib/libxkbcommon-x11.so.0.0.0;
-    ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libsoftokn3.so>lib64/qt/lib/libsoftokn3.so;
-    ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libsqlite3.so>lib64/qt/lib/libsqlite3.so;
-    ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6
-    ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfontconfig.so.1.12.0>lib64/qt/lib/libfontconfig.so.1
+      APPEND
+      QT5_SHARED_PROPERTIES
+      "LINK_FLAGS>=-Wl,-rpath,'$ORIGIN/lib64/qt/libexec'  -Wl,--disable-new-dtags"
     )
   endif()
 
-  if (LINUX_AARCH64)
+  if(LINUX_X86_64)
     list(
-    APPEND
-    QT5_SHARED_DEPENDENCIES
-    ${PREBUILT_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6
+      APPEND
+      QT5_SHARED_DEPENDENCIES
+      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so;
+      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so.0;
+      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon.so.0.0.0>lib64/qt/lib/libxkbcommon.so.0.0.0;
+      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libX11-xcb.so.1.0.0>lib64/qt/lib/libX11-xcb.so.1;
+      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libX11-xcb.so.1.0.0>lib64/qt/lib/libX11-xcb.so.1.0;
+      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libX11-xcb.so.1.0.0>lib64/qt/lib/libX11-xcb.so.1.0.0;
+      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxcb-xkb.so.1.0.0>lib64/qt/lib/libxcb-xkb.so.1;
+      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxcb-xkb.so.1.0.0>lib64/qt/lib/libxcb-xkb.so.1.0;
+      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxcb-xkb.so.1.0.0>lib64/qt/lib/libxcb-xkb.so.1.0.0;
+      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon-x11.so.0.0.0>lib64/qt/lib/libxkbcommon-x11.so;
+      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon-x11.so.0.0.0>lib64/qt/lib/libxkbcommon-x11.so.0;
+      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libxkbcommon-x11.so.0.0.0>lib64/qt/lib/libxkbcommon-x11.so.0.0.0;
+      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libsoftokn3.so>lib64/qt/lib/libsoftokn3.so;
+      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libsqlite3.so>lib64/qt/lib/libsqlite3.so;
+      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6
+      ${PREBUILT_WEBENGINE_DEPS_ROOT}/lib/libfontconfig.so.1.12.0>lib64/qt/lib/libfontconfig.so.1
     )
+  endif()
+
+  if(LINUX_AARCH64)
+    list(APPEND QT5_SHARED_DEPENDENCIES
+         ${PREBUILT_ROOT}/lib/libfreetype.so.6>lib64/qt/lib/libfreetype.so.6)
   endif()
 
 endif()
