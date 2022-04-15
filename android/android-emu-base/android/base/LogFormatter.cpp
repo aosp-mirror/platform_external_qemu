@@ -151,12 +151,13 @@ std::string VerboseLogFormatter::format(const LogParams& params,
     }
 
     static const auto location_format_string =
-                    absl::ParsedFormat<'s', 'd'>("%s:%d");
-    auto location = absl::StrFormat(
-                    location_format_string, c_str(filename).get(), params.lineno);
+            absl::ParsedFormat<'s', 'd'>("%s:%d");
+    auto location = absl::StrFormat(location_format_string,
+                                    c_str(filename).get(), params.lineno);
 
     w = snprintf(log, cLog, "%02d:%02d:%02d.%06d %-15lu %s %-34s | ",
-                 time->tm_hour, time->tm_min, time->tm_sec, static_cast<uint32_t>(tv.tv_usec),
+                 time->tm_hour, time->tm_min, time->tm_sec,
+                 static_cast<uint32_t>(tv.tv_usec),
                  android::base::getCurrentThreadId(),
                  translate_sev(params.severity), location.c_str());
     if (w > 0 && w < cLog) {
@@ -168,7 +169,8 @@ std::string VerboseLogFormatter::format(const LogParams& params,
     return logline;
 };
 
-NoDuplicateLinesFormatter::NoDuplicateLinesFormatter(std::shared_ptr<LogFormatter> logger)
+NoDuplicateLinesFormatter::NoDuplicateLinesFormatter(
+        std::shared_ptr<LogFormatter> logger)
     : mInner(logger) {}
 
 std::string NoDuplicateLinesFormatter::format(const LogParams& params,
@@ -181,23 +183,19 @@ std::string NoDuplicateLinesFormatter::format(const LogParams& params,
     char buffer[MAX_LOG_LINE_LENGTH] = {0};
     char* logline = mPrevLog;
 
-    if (!(mPrevParams == params)) {
-        // Definitely not a duplicate..
-        vsnprintf(mPrevLog, sizeof(mPrevLog), fmt, args);
-    } else {
-        // We might have a duplicate, let's format the line and make sure.
-        vsnprintf(buffer, sizeof(buffer), fmt, args);
+    // We might have a duplicate, let's format the line and make sure.
+    vsnprintf(buffer, sizeof(buffer), fmt, args);
 
-        if (strncmp(buffer, mPrevLog, sizeof(buffer)) == 0) {
-            // Yep! it is, just return an empty string and discard this one.
-            mDuplicates++;
-            return kEmpty;
-        }
+    if (mPrevParams == params &&
+        strncmp(buffer, mPrevLog, sizeof(buffer)) == 0) {
+        // Yep! it is, just return an empty string and discard this one.
+        mDuplicates++;
 
-        // Nope it is not a duplicate.
-        logline = buffer;
+        return kEmpty;
     }
 
+    // Nope it is not a duplicate.
+    logline = buffer;
     auto duplicates = mDuplicates;
     mDuplicates = 0;
 

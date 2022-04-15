@@ -150,5 +150,22 @@ TEST(LogFormatter, DuplicatTripleLogsALine) {
             ndlf.LogFormatter::format(lg, "x"));
 }
 
+TEST(LogFormatter, DuplicatTripleWithDiffLocationLogsALine) {
+    NoDuplicateLinesFormatter ndlf(std::make_shared<SimpleLogFormatter>());
+    LogParams lg = {"filename.c", 123, EMULATOR_LOG_INFO};
+    LogParams lg2 = {"other.c", 123, EMULATOR_LOG_INFO};
+    ASSERT_EQ("INFO    | Hello World",
+              ndlf.LogFormatter::format(lg, "Hello World"));
+
+    ndlf.LogFormatter::format(lg, "Hello World");
+    ndlf.LogFormatter::format(lg, "Hello World");
+    ndlf.LogFormatter::format(lg, "Hello World");
+    ASSERT_EQ(
+            "INFO    | Hello World (3x)\n"
+            "INFO    | x",
+            ndlf.LogFormatter::format(lg2, "x"));
+}
+
+
 }  // namespace base
 }  // namespace android
