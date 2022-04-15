@@ -152,6 +152,7 @@ struct HDAAudioStream {
     bool mute_left, mute_right;
     struct audsettings as;
     union {
+        void *raw;
         SWVoiceIn *in;
         SWVoiceOut *out;
     } voice;
@@ -175,6 +176,8 @@ struct HDAAudioState {
     /* properties */
     uint32_t debug;
     bool     mixer;
+    bool     enable_input;
+    bool     enable_output;
 };
 
 static void hda_audio_input_cb(void *opaque, int avail)
@@ -240,10 +243,12 @@ static void hda_audio_set_running(HDAAudioStream *st, bool running)
     st->running = running;
     dprint(st->state, 1, "%s: %s (stream %d)\n", st->node->name,
            st->running ? "on" : "off", st->stream);
-    if (st->output) {
-        AUD_set_active_out(st->voice.out, st->running);
-    } else {
-        AUD_set_active_in(st->voice.in, st->running);
+    if (st->voice.raw) {
+        if (st->output) {
+            AUD_set_active_out(st->voice.out, st->running);
+        } else {
+            AUD_set_active_in(st->voice.in, st->running);
+        }
     }
 }
 
@@ -266,10 +271,12 @@ static void hda_audio_set_amp(HDAAudioStream *st)
     if (!st->state->mixer) {
         return;
     }
-    if (st->output) {
-        AUD_set_volume_out(st->voice.out, muted, left, right);
-    } else {
-        AUD_set_volume_in(st->voice.in, muted, left, right);
+    if (st->voice.raw) {
+        if (st->output) {
+            AUD_set_volume_out(st->voice.out, muted, left, right);
+        } else {
+            AUD_set_volume_in(st->voice.in, muted, left, right);
+        }
     }
 }
 
@@ -312,14 +319,18 @@ static void hda_audio_setup(HDAAudioStream *st)
            fmt2name[st->as.fmt], st->as.freq);
 
     if (st->output) {
-        st->voice.out = AUD_open_out(&st->state->card, st->voice.out,
-                                     st->node->name, st,
-                                     hda_audio_output_cb, &st->as);
+        if (st->state->enable_output) {
+            st->voice.out = AUD_open_out(&st->state->card, st->voice.out,
+                                         st->node->name, st,
+                                         hda_audio_output_cb, &st->as);
+        }
     } else {
-        g_stream = st;
-        st->voice.in = AUD_open_in(&st->state->card, st->voice.in,
-                                   st->node->name, st,
-                                   hda_audio_input_cb, &st->as);
+        if (st->state->enable_input) {
+            st->voice.in = AUD_open_in(&st->state->card, st->voice.in,
+                                       st->node->name, st,
+                                       hda_audio_input_cb, &st->as);
+            g_stream = st;
+        }
     }
 }
 
@@ -567,10 +578,12 @@ static void hda_audio_exit(HDACodecDevice *hda)
         if (st->node == NULL) {
             continue;
         }
-        if (st->output) {
-            AUD_close_out(&a->card, st->voice.out);
-        } else {
-            AUD_close_in(&a->card, st->voice.in);
+        if (st->voice.raw) {
+            if (st->output) {
+                AUD_close_out(&a->card, st->voice.out);
+            } else {
+                AUD_close_in(&a->card, st->voice.in);
+            }
         }
     }
     AUD_remove_card(&a->card);
@@ -650,6 +663,8 @@ static const VMStateDescription vmstate_hda_audio = {
 static Property hda_audio_properties[] = {
     DEFINE_PROP_UINT32("debug", HDAAudioState, debug,   0),
     DEFINE_PROP_BOOL("mixer", HDAAudioState, mixer,  true),
+    DEFINE_PROP_BOOL("input", HDAAudioState, enable_input, true),
+    DEFINE_PROP_BOOL("output", HDAAudioState, enable_output, true),
     DEFINE_PROP_END_OF_LIST(),
 };
 

@@ -1172,6 +1172,42 @@ static std::string getWriteableFilename(const char* disk_dataPartition_path,
     }
 }
 
+#if defined(TARGET_X86_64) || defined(TARGET_I386)
+constexpr bool targetIsX86 = true;
+#else
+constexpr bool targetIsX86 = false;
+#endif
+
+static std::string buildSoundhwParam(const int apiLevel, const AndroidHwConfig* hw) {
+    std::string param;
+    std::string props;
+
+    if (feature_is_enabled(kFeature_VirtioSndCard)) {
+        param = "virtio-snd-pci";
+    } else if (apiLevel >= 26 || targetIsX86) {
+        /* for those system images that don't have the virtio-snd driver yet. */
+        param = "hda";
+    }
+
+    if (!hw->hw_audioInput) {
+        props += "input=off";
+    }
+
+    if (!hw->hw_audioOutput) {
+        if (!props.empty()) {
+            props += ",";
+        }
+        props += "output=off";
+    }
+
+    if (!props.empty()) {
+        param += ":";
+        param += props;
+    }
+
+    return param;
+}
+
 extern "C" AndroidProxyCB* gAndroidProxyCB;
 extern "C" int main(int argc, char** argv) {
     if (argc < 1) {
@@ -2363,20 +2399,7 @@ extern "C" int main(int argc, char** argv) {
     }
     args.add(dataDir);
 
-    // Audio enable hda by default for x86 and x64 platforms
-    // (Or all targets incl. ARM if api level >= 30)
-#if defined(TARGET_X86_64) || defined(TARGET_I386)
-    bool targetIsX86 = true;
-#else
-    bool targetIsX86 = false;
-#endif
-
-    if (feature_is_enabled(kFeature_VirtioSndCard)) {
-        args.add2("-soundhw", "virtio-snd-pci");
-    } else if (apiLevel >= 26 || targetIsX86) {
-        /* older system imaged don't have the virtio-snd driver */
-        args.add2("-soundhw", "hda");
-    }
+    args.add2("-soundhw", buildSoundhwParam(apiLevel, hw).c_str());
 
 // USB
 #define usb_passthrough_driver "Android USB Assistant Driver"
