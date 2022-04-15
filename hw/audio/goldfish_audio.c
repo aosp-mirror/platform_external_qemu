@@ -485,7 +485,7 @@ static void goldfish_audio_realize(DeviceState *dev, Error **errp)
 }
 
 static Property goldfish_audio_properties[] = {
-    DEFINE_PROP_BOOL("input", struct goldfish_audio_state, input, true),
+    DEFINE_PROP_BOOL("input", struct goldfish_audio_state, input, false),
     DEFINE_PROP_BOOL("output", struct goldfish_audio_state, output, true),
     DEFINE_PROP_END_OF_LIST(),
 };
