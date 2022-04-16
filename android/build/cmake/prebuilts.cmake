@@ -12,6 +12,13 @@
 # This contains a set of definitions to make working with prebuilts easier and
 # manageable.
 
+# android_target_dependency fails with gfxstream build because the executables built in
+# device/generic/vulkan-cereal depends on things like swiftshader, but cmake does not allow this
+# (target must be built in the same directory)
+if(OPTION_GFXSTREAM_BACKEND)
+  cmake_policy(SET CMP0079 NEW)
+endif()
+
 function(android_add_prebuilt_library)
   set(options NODISTRIBUTE SHARED)
   set(oneValueArgs
