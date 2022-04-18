@@ -20,7 +20,6 @@ import zipfile
 import logging
 
 from aemu.definitions import get_qemu_root
-from aemu.licensing import Licensing
 
 # These are the set of zip files that will be generated in the distribution directory.
 # You can add additional zip sets here if you need. A file will be added to the given zipfile
@@ -75,8 +74,6 @@ def create_distribution(dist_dir, build_dir, data):
     if not os.path.exists(dist_dir):
         os.makedirs(dist_dir)
 
-    licensing = Licensing(build_dir, get_qemu_root())
-
     # Let's find the set of
     zip_set = zip_sets[data["config"]]
 
@@ -85,16 +82,9 @@ def create_distribution(dist_dir, build_dir, data):
         zip_fname = os.path.join(dist_dir, zip_fname.format(**data))
         logging.info("Creating %s", zip_fname)
 
-        files = []
         with zipfile.ZipFile(
             zip_fname, "w", zipfile.ZIP_DEFLATED, allowZip64=True
         ) as zipf:
-            # Include the notice files
-            zipf.writestr(
-                "emulator/NOTICE.txt", licensing.notice_file().encode("utf-8")
-            )
-            zipf.writestr("emulator/NOTICE.csv", licensing.to_csv().encode("utf-8"))
-
             for param in params:
                 start_dir, regex, dest = param
                 search_dir = os.path.normpath(
@@ -103,5 +93,11 @@ def create_distribution(dist_dir, build_dir, data):
                 for fname in recursive_glob(search_dir, regex.format(data)):
                     arcname = os.path.relpath(fname[len(search_dir) :], "/")
                     arcname = os.path.join(dest, arcname)
-                    files.append(arcname)
-                    zipf.write(fname, arcname)
+                    if os.path.islink(fname):
+                        # http://www.mail-archive.com/python-list@python.org/msg34223.html
+                        zipInfo = zipfile.ZipInfo(arcname)
+                        zipInfo.create_system = 3
+                        zipInfo.external_attr = int("A1ED0000", 16)
+                        zipf.writestr(zipInfo, os.readlink(fname))
+                    else:
+                        zipf.write(fname, arcname)

@@ -47,7 +47,7 @@ target_include_directories(
     ${perfetto}/include)
 
 android_add_executable(
-  TARGET perfetto-protozero-protoc-plugin INSTALL .
+  TARGET perfetto-protozero-protoc-plugin
   LICENSE Apache
   LIBNAME
   libprotozero

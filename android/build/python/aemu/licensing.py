@@ -272,6 +272,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("-n", "--notice", action="store_true")
     parser.add_argument("-c", "--csv", action="store_true")
+    parser.add_argument("-w", "--write", action="store_true")
 
     args = parser.parse_args()
     l = Licensing(args.build, args.qemu)
@@ -279,3 +280,8 @@ if __name__ == "__main__":
         print((l.notice_file()))
     if args.csv:
         print((l.to_csv()))
+    if args.write:
+        with codecs.open(os.path.join(args.build, "NOTICE.txt"), "w", "utf-8") as fn:
+            fn.write(l.notice_file())
+        with codecs.open(os.path.join(args.build, "NOTICE.csv"), "w", "utf-8") as fn:
+            fn.write(l.to_csv())
