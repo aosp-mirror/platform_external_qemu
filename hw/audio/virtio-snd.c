@@ -1858,8 +1858,15 @@ static void virtio_snd_class_init(ObjectClass *klass, void *data) {
     vdc->set_status = &virtio_snd_set_status;
 }
 
-static int virtio_snd_and_codec_init(PCIBus *bus) {
-    qdev_init_nofail(DEVICE(pci_create_simple(bus, -1, TYPE_VIRTIO_SND_PCI)));
+static int virtio_snd_and_codec_init(PCIBus *bus, const char *props) {
+    DeviceState *dev = DEVICE(pci_create(bus, -1, TYPE_VIRTIO_SND_PCI));
+    Error *errp = NULL;
+    object_properties_parse(OBJECT(dev), props, &errp);
+    if (errp) {
+        error_free(errp);
+        abort();
+    }
+    qdev_init_nofail(dev);
     return 0;
 }
 

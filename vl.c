@@ -27,6 +27,7 @@
 #include "qemu-version.h"
 #include "qemu/cutils.h"
 #include "qemu/help_option.h"
+#include "qemu/option.h"
 #include "qemu/uuid.h"
 #include "block/block_int.h"
 #include "sysemu/ranchu.h"
@@ -3384,6 +3385,13 @@ static void register_global_properties(MachineState *ms)
     user_register_global_props();
 }
 
+static const char *parse_soundhw_opt(const char *const optarg) {
+    const char *const end = strchr(optarg, ':');
+    const int len = end ? (end - optarg) : strlen(optarg);
+    select_soundhw(optarg, len);
+    return end ? (end + 1) : NULL;
+}
+
 static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 {
     int i;
@@ -3404,6 +3412,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     bool read_only = false;
 #endif
     MachineClass *machine_class;
+    const char *soundhw_arg = NULL;
     const char *cpu_model;
     const char *vga_model = NULL;
     const char *qtest_chrdev = NULL;
@@ -3764,7 +3773,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 set_audio_drv("none");
                 break;
             case QEMU_OPTION_soundhw:
-                select_soundhw (optarg);
+                soundhw_arg = parse_soundhw_opt(optarg);
                 break;
             case QEMU_OPTION_h:
                 return help(0);
@@ -5551,7 +5560,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         return 1;
     }
 
-    if (!soundhw_init()) {
+    if (!soundhw_init(soundhw_arg)) {
         return 1;
     }
 
