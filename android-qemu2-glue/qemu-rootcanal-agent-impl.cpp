@@ -24,9 +24,9 @@
 #include <ostream>      // for char_traits
 #include <vector>       // for vector
 
-#include "android/base/Log.h"  // for LogStream...
 #include "android/cmdline-option.h"
 #include "android/emulation/control/rootcanal_hci_agent.h"  // for QAndroidH...
+#include "android/utils/debug.h"
 
 #ifdef ANDROID_BLUETOOTH
 #include "root_canal_qemu.h"
@@ -53,17 +53,17 @@ extern "C" {
 #define DD_BUF(buf, len) (void)0
 #else
 #define DD(...) dinfo(__VA_ARGS__)
-#define DD_BUF(buf, len)                               \
-    do {                                               \
-        printf("chardev-rootcanal %s:", __func__);     \
-        for (int x = 0; x < len; x++) {                \
-            if (isprint((int)buf[x])) {                \
-                printf("%c", buf[x]);                  \
-            } else {                                   \
+#define DD_BUF(buf, len)                                \
+    do {                                                \
+        printf("chardev-rootcanal %s:", __func__);      \
+        for (int x = 0; x < len; x++) {                 \
+            if (isprint((int)buf[x])) {                 \
+                printf("%c", buf[x]);                   \
+            } else {                                    \
                 printf("[0x%02x]", 0xff & (int)buf[x]); \
-            }                                          \
-        }                                              \
-    } while (0);                                       \
+            }                                           \
+        }                                               \
+    } while (0);                                        \
     printf("\n");
 #endif
 
@@ -144,13 +144,13 @@ static void rootcanal_chr_open(Chardev* chr,
 #ifdef ANDROID_BLUETOOTH
     *be_opened = android::bluetooth::Rootcanal::Builder::getInstance()->start();
 #endif
-    LOG(INFO) << "Rootcanal has " << (*be_opened ? "" : "**NOT**")
-              << " been activated.";
+    VERBOSE_INFO(bluetooth, "Rootcanal is %s.",
+                 (*be_opened ? "active" : "**NOT** active"));
 }
 
 static void rootcanal_chr_cleanup(Object* o) {
 #ifdef ANDROID_BLUETOOTH
-    LOG(INFO) << "Closing down rootcanal.";
+    VERBOSE_INFO(bluetooth, "Closing down rootcanal.");
     android::bluetooth::Rootcanal::Builder::getInstance()->close();
 #endif
 }

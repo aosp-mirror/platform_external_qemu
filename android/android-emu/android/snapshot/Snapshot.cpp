@@ -821,7 +821,7 @@ const bool Snapshot::checkValid(bool writeFailure) {
     androidHwConfig_stripDefaults(reinterpret_cast<CIniFile*>(&actualConfig),
                                   reinterpret_cast<CIniFile*>(&actualStripped));
     if (!areHwConfigsEqual(expectedStripped, actualStripped)) {
-        derror("%s: Hardware configurations not equal while validating snapshot.", __func__);
+        derror("The emulator hardware cannot load snapshot: %s", mName.c_str());
         if (writeFailure)
             saveFailure(FailureReason::ConfigMismatchAvd);
         return false;

@@ -458,7 +458,8 @@ target_link_libraries(
          lz4
          zlib
          android-hw-config
-         android-emu-agents)
+         android-emu-agents
+         absl::strings)
 
 target_link_libraries(android-emu PRIVATE hostapd)
 
@@ -715,7 +716,8 @@ target_link_libraries(
          png
          lz4
          zlib
-         android-hw-config)
+         android-hw-config
+         absl::strings)
 # Here are the windows library and link dependencies. They are public and will
 # propagate onwards to others that depend on android-emu-shared
 android_target_link_libraries(

@@ -25,6 +25,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/system.h"
+#include "absl/strings/str_join.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -171,14 +172,9 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
                         unexpectedGuestFeatures.insert(guestFeature);
                     }
                 }
-                if (unexpectedGuestFeatures.size()) {
-                    LOG(WARNING) << "unexpected system image feature string, "
-                                    "emulator might not function correctly, "
-                                    "please try updating the emulator.";
-                    LOG(VERBOSE) << "Unexpected feature list:";
-                    for (const auto& guestFeature : unexpectedGuestFeatures) {
-                        LOG(VERBOSE) << guestFeature.c_str();
-                    }
+                if (!unexpectedGuestFeatures.empty()) {
+                    std::string missing = absl::StrJoin(unexpectedGuestFeatures, ", ");
+                    dwarning("Please update the emulator to one that supports the feature(s): %s", missing.c_str());
                 }
 #define FEATURE_CONTROL_ITEM(item)                                         \
     initGuestFeatureAndParseDefault(defaultIniHost, defaultIniGuest, item, \

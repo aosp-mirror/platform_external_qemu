@@ -2325,7 +2325,7 @@ bool configAndStartRenderer(
                         renderer_startup_res);
             }
         } else {
-            dinfo("%s: setting vsync to %d hz", __func__, hw->hw_lcd_vsync);
+            VERBOSE_INFO(init, "Setting vsync to %d hz", hw->hw_lcd_vsync);
             android_setVsyncHz(hw->hw_lcd_vsync);
         }
     }

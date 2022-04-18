@@ -144,7 +144,9 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
         // P.S. guest Service has check to avoid duplication.
         auto adbInterface = emulation::AdbInterface::getGlobal();
         if (!adbInterface) {
-            LOG(ERROR) << "Adb interface unavailable";
+            derror("Adb unavailable, not starting multidisplay "
+                   "service in android. Please install adb and restart the "
+                   "emulator. Multi display might not work as expected.");
             return -1;
         }
         adbInterface->enqueueCommand({"shell", "am", "broadcast", "-a",
