@@ -113,7 +113,7 @@ void PostWorker::postImpl(HandleType cbHandle) {
             if (m_mainThreadPostingOnly && paintMultiDisplayWindow) {
                 mBindSubwin();
             }
-            cb->postWithOverlay(zRot, dx, dy);
+            cb->postWithOverlay(cb->getTexture(), zRot, dx, dy);
         }
         else {
             uint32_t combinedW, combinedH;
@@ -182,7 +182,7 @@ void PostWorker::postImpl(HandleType cbHandle) {
     }
     else {
         // render the color buffer to the window and apply the overlay
-        cb->postWithOverlay(zRot, dx, dy);
+        cb->postWithOverlay(cb->getTexture(), zRot, dx, dy);
         DD("post tex %dx%d to window %dx%d viewport %dx%d fb(%dx%d) dx %f dy %f\n",
             cb->getWidth(), cb->getHeight(), windowWidth, windowHeight,
             m_viewportWidth, m_viewportHeight,
