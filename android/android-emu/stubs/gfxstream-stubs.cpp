@@ -50,9 +50,6 @@ namespace android {
         void applyCachedServerFeaturePatterns() { }
         void asyncUpdateServerFeaturePatterns() { }
     }
-namespace studio {
-    UpdateChannel updateChannel() { return UpdateChannel::Stable; }
-}
 
 namespace crashreport {
 

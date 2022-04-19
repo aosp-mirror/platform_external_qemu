@@ -12,13 +12,13 @@
 
 #include "android/skin/qt/emulator-no-qt-no-window.h"
 
-#include <stdint.h>                                         // for uint32_t
-#include <stdio.h>                                          // for fprintf
-#include <string.h>                                         // for memcpy
+#include <stdint.h>  // for uint32_t
+#include <stdio.h>   // for fprintf
+#include <string.h>  // for memcpy
 #ifdef CONFIG_POSIX
-#include <pthread.h>                                        // for pthread_c...
+#include <pthread.h>  // for pthread_c...
 #endif
-#include <string>                                           // for string
+#include <string>  // for string
 
 #include "android/avd/info.h"                               // for avdInfo_r...
 #include "android/base/async/Looper.h"                      // for Looper
@@ -34,7 +34,7 @@
 #include "android/featurecontrol/Features.h"                // for FastSnaps...
 #include "android/globals.h"                                // for android_hw
 #include "android/hw-events.h"                              // for EV_SW
-#include "android/metrics/metrics.h"                        // for android_m...
+#include "android/metrics/DependentMetrics.h"               // for android_m...
 #include "android/test/checkboot.h"                         // for android_t...
 #include "android/utils/debug.h"                            // for derror
 #include "android/utils/filelock.h"                         // for filelock_...

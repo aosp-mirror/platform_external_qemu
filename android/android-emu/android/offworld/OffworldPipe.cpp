@@ -21,7 +21,6 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/emulation/AndroidAsyncMessagePipe.h"
 #include "android/featurecontrol/FeatureControl.h"
-#include "android/metrics/MetricsLogging.h"
 #include "android/sensor_mock/SensorMockUtils.h"
 #include "android/snapshot/SnapshotAPI.h"
 #include "android/snapshot/common.h"

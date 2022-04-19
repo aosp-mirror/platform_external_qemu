@@ -29,7 +29,6 @@
 #include "android/skin/qt/init-qt.h"
 #include "android/metrics/CrashMetricsReporting.h"
 #include "android/metrics/FileMetricsWriter.h"
-#include "android/metrics/MetricsPaths.h"
 #include "android/metrics/SyncMetricsReporter.h"
 #include "android/utils/debug.h"
 #include "android/version.h"
@@ -76,16 +75,13 @@ static void finalizeMetrics() {
     D("Finalizing the metrics log file");
 
     const auto crashedSessions =
-            FileMetricsWriter::finalizeAbandonedSessionFiles(
-                getSpoolDirectory());
+            FileMetricsWriter::finalizeAbandonedSessionFilesFromDefault();
     D("found %d crashed sessions", (int)crashedSessions.size());
     if (crashedSessions.empty()) {
         return;
     }
 
-    auto writer = FileMetricsWriter::create(
-            getSpoolDirectory(), android::base::Uuid::generate().toString(),
-            0, nullptr, 0);  // No record or time limits for this writer.
+    auto writer = FileMetricsWriter::createDefault();
     const auto reporter =
             MetricsReporter::Ptr(new SyncMetricsReporter(std::move(writer)));
     reportCrashMetrics(*reporter, crashedSessions);

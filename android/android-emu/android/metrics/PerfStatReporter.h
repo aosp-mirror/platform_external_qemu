@@ -35,7 +35,8 @@ namespace metrics {
 // A PerfStatReporter is an object that runs in the background to track
 // usage of various resources such as RAM and CPU usage.
 class PerfStatReporter final
-        : public std::enable_shared_from_this<PerfStatReporter> {
+        : public std::enable_shared_from_this<PerfStatReporter>,
+         public Reporter {
 public:
     using Ptr = std::shared_ptr<PerfStatReporter>;
 
@@ -45,8 +46,8 @@ public:
             android::base::Looper* looper,
             android::base::Looper::Duration checkIntervalMs);
 
-    void start();
-    void stop();
+    void start() override;
+    void stop() override;
 
     ~PerfStatReporter();
 
