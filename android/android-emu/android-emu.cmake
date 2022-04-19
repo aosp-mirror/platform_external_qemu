@@ -62,7 +62,6 @@ set(android-emu-common
     android/emulation/bufprint_config_dirs.cpp
     android/emulation/ClipboardPipe.cpp
     android/emulation/ComponentVersion.cpp
-    android/emulation/ConfigDirs.cpp
     android/emulation/control/adb/AdbConnection.cpp
     android/emulation/control/adb/AdbInterface.cpp
     android/emulation/control/adb/adbkey.cpp
@@ -123,13 +122,6 @@ set(android-emu-common
     android/featurecontrol/FeatureControl.cpp
     android/featurecontrol/FeatureControlImpl.cpp
     android/featurecontrol/HWMatching.cpp
-    android/filesystems/ext4_resize.cpp
-    android/filesystems/ext4_utils.cpp
-    android/filesystems/fstab_parser.cpp
-    android/filesystems/internal/PartitionConfigBackend.cpp
-    android/filesystems/partition_config.cpp
-    android/filesystems/partition_types.cpp
-    android/filesystems/ramdisk_extractor.cpp
     android/framebuffer.c
     android/gps.c
     android/gps/GpxParser.cpp
@@ -209,8 +201,6 @@ set(android-emu-common
     android/proxy/proxy_setup.cpp
     android/proxy/ProxyUtils.cpp
     android/qemu-tcpdump.c
-    android/qt/qt_path.cpp
-    android/qt/qt_setup.cpp
     android/resource.c
     android/sdk-controller-socket.c
     android/sensor_mock/SensorMockUtils.cpp
@@ -252,33 +242,22 @@ set(android-emu-common
     android/telephony/sms.c
     android/telephony/sysdeps.c
     android/telephony/TagLengthValue.cpp
-    android/uncompress.cpp
     android/update-check/UpdateChecker.cpp
     android/update-check/VersionExtractor.cpp
     android/user-config.cpp
     android/userspace-boot-properties.cpp
-    android/utils/aconfig-file.c
     android/utils/assert.c
     android/utils/async.cpp
     android/utils/cbuffer.c
-    android/utils/dll.c
     android/utils/dns.cpp
     android/utils/exec.cpp
-    android/utils/file_data.c
-    android/utils/filelock.cpp
     android/utils/format.cpp
     android/utils/host_bitness.cpp
     android/utils/http_utils.cpp
-    android/utils/ini.cpp
-    android/utils/ini.cpp
     android/utils/intmap.c
     android/utils/iolooper.cpp
     android/utils/ipaddr.cpp
     android/utils/lineinput.c
-    android/utils/lock.cpp
-    android/utils/mapfile.c
-    android/utils/property_file.c
-    android/utils/property_file.c
     android/utils/Random.cpp
     android/utils/reflist.c
     android/utils/refset.c
@@ -357,7 +336,7 @@ target_include_directories(
     # are a lot of externs that are actually defined in qemu2-glue. this has to
     # be sorted out,
     ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG})
-target_link_libraries(android-emu-agents PRIVATE android-emu-base
+target_link_libraries(android-emu-agents PRIVATE android-emu-base android-files
                                                  android-hw-config)
 target_compile_options(android-emu-agents PRIVATE "-Wno-extern-c-compat")
 target_compile_definitions(android-emu-agents PRIVATE "CONSOLE_EXPORTS")
@@ -423,6 +402,7 @@ target_link_libraries(
   PUBLIC FFMPEG::FFMPEG
          VPX::VPX
          emulator-libext4_utils
+         android-files
          android-emu-base
          emulator-libsparse
          emulator-libselinux
@@ -583,9 +563,6 @@ if(OPTION_GFXSTREAM_BACKEND)
   target_compile_definitions(android-emu PUBLIC -DAEMU_GFXSTREAM_BACKEND=1)
 endif()
 
-# Boo, we need the make_ext4fs executable
-add_dependencies(android-emu emulator_make_ext4fs)
-
 # The dependent target os specific sources, they are pretty much the same as
 # above, excluding camera support, because that brings in a whole slew of
 # dependencies Shared version of the library. Note that this only has the set of
@@ -615,7 +592,6 @@ android_add_library(
       android/emulation/bufprint_config_dirs.cpp
       android/emulation/ClipboardPipe.cpp
       android/emulation/ComponentVersion.cpp
-      android/emulation/ConfigDirs.cpp
       android/emulation/control/FilePusher.cpp
       android/emulation/control/LineConsumer.cpp
       android/emulation/control/NopRtcBridge.cpp
@@ -678,12 +654,7 @@ android_add_library(
       android/snapshot/Snapshotter.cpp
       android/snapshot/TextureLoader.cpp
       android/snapshot/TextureSaver.cpp
-      android/uncompress.cpp
       android/user-config.cpp
-      android/utils/dll.c
-      android/utils/file_data.c
-      android/utils/ini.cpp
-      android/utils/property_file.c
       android/utils/Random.cpp
       stubs/gfxstream-stubs.cpp
       stubs/stubs.cpp
@@ -710,6 +681,7 @@ target_link_libraries(
   PUBLIC android-emu-base
          android-emu-agents
          emulator-murmurhash
+         android-files
          # Protobuf dependencies
          snapshot
          # Prebuilt libraries
@@ -875,7 +847,6 @@ if(NOT LINUX_AARCH64)
       android/emulation/AndroidAsyncMessagePipe_unittest.cpp
       android/emulation/bufprint_config_dirs_unittest.cpp
       android/emulation/ComponentVersion_unittest.cpp
-      android/emulation/ConfigDirs_unittest.cpp
       android/emulation/control/adb/AdbConnection_unittest.cpp
       android/emulation/control/adb/AdbInterface_unittest.cpp
       android/emulation/control/adb/adbkey_unittest.cpp
@@ -904,13 +875,6 @@ if(NOT LINUX_AARCH64)
       android/featurecontrol/FeatureControl_unittest.cpp
       android/featurecontrol/HWMatching_unittest.cpp
       android/featurecontrol/testing/FeatureControlTest.cpp
-      android/filesystems/ext4_resize_unittest.cpp
-      android/filesystems/ext4_utils_unittest.cpp
-      android/filesystems/fstab_parser_unittest.cpp
-      android/filesystems/partition_config_unittest.cpp
-      android/filesystems/partition_types_unittest.cpp
-      android/filesystems/ramdisk_extractor_unittest.cpp
-      android/filesystems/testing/TestSupport.cpp
       android/gps/GpxParser_unittest.cpp
       android/gps/KmlParser_unittest.cpp
       android/hw-lcd_unittest.cpp
@@ -939,8 +903,6 @@ if(NOT LINUX_AARCH64)
       android/physics/PhysicalModel_unittest.cpp
       android/proxy/proxy_common_unittest.cpp
       android/proxy/ProxyUtils_unittest.cpp
-      android/qt/qt_path_unittest.cpp
-      android/qt/qt_setup_unittest.cpp
       android/sensor_replay/sensor_session_playback_unittest.cpp
       android/snapshot/RamLoader_unittest.cpp
       android/snapshot/RamSaver_unittest.cpp
@@ -954,14 +916,10 @@ if(NOT LINUX_AARCH64)
       android/update-check/UpdateChecker_unittest.cpp
       android/update-check/VersionExtractor_unittest.cpp
       android/userspace-boot-properties_unittest.cpp
-      android/utils/aconfig-file_unittest.cpp
       android/utils/dns_unittest.cpp
-      android/utils/file_data_unittest.cpp
-      android/utils/filelock_unittest.cpp
       android/utils/format_unittest.cpp
       android/utils/host_bitness_unittest.cpp
       android/utils/path_unittest.cpp
-      android/utils/property_file_unittest.cpp
       android/utils/Random_unittest.cpp
       android/utils/sockets_unittest.cpp
       android/verified-boot/load_config_unittest.cpp
@@ -1063,14 +1021,6 @@ if(NOT LINUX_AARCH64)
     "${CMAKE_CURRENT_SOURCE_DIR}/android/emulation/CpuAccelerator_unittest.dat2"
     "$<TARGET_FILE_DIR:android-emu_unittests>/android/android-emu/android/emulation/CpuAccelerator_unittest.dat2"
   )
-
-  android_target_dependency(android-emu_unittests all E2FSPROGS_DEPENDENCIES)
-
-  # Boo! We depend on makeext
-  add_custom_command(
-    TARGET android-emu_unittests POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:emulator_make_ext4fs>
-            ${CMAKE_CURRENT_BINARY_DIR})
 
   # Unit tests for the protobufs
   android_add_test(
