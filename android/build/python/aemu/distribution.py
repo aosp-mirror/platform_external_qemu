@@ -30,30 +30,30 @@ from aemu.definitions import get_qemu_root
 zip_sets = {
     "debug": {  # Release type..
         # Look for *.gcda files under the build tree
-        "code-coverage-{target}.zip": [("{build_dir}", r".*(gcda|gcno)", "/")],
+        "code-coverage-{target}.zip": [("{build_dir}", r".*(gcda|gcno)")],
         # Look for all files under {out}/distribution
         "sdk-repo-{target}-emulator-full-debug-{sdk_build_number}.zip": [
-            ("{build_dir}/distribution", r".*", "/")
+            ("{build_dir}/distribution", r".*")
         ],
     },
     "release": {
         "sdk-repo-{target}-debug-emulator-{sdk_build_number}.zip": [
             # Look for all files under {out}/build/debug_info/
-            ("{build_dir}/build/debug_info", r".*", "/"),
+            ("{build_dir}/build/debug_info", r".*"),
         ],
         "sdk-repo-{target}-grpc-samples-{sdk_build_number}.zip": [
-            ("{src_dir}/android/android-grpc/docs/grpc-samples/", r".*", "/")
+            ("{src_dir}/android/android-grpc/docs/grpc-samples/", r".*")
         ],
         # Look for all files under {out}/distribution
         "sdk-repo-{target}-emulator-{sdk_build_number}.zip": [
-            ("{build_dir}/distribution", r".*", "/")
+            ("{build_dir}/distribution", r".*")
         ],
         # crosvm/gfxstream build
         "sdk-repo-{target}-crosvm-host-package-x86_64-{sdk_build_number}.zip": [
-            ("{build_dir}/distribution/cf-host-package/x86_64-linux-gnu", r".*", "/")
+            ("{build_dir}/distribution/cf-host-package/x86_64-linux-gnu", r".*")
         ],
         "sdk-repo-{target}-crosvm-host-package-aarch64-{sdk_build_number}.zip": [
-            ("{build_dir}/distribution/cf-host-package/aarch64-linux-gnu", r".*", "/")
+            ("{build_dir}/distribution/cf-host-package/aarch64-linux-gnu", r".*")
         ],
     },
 }
@@ -86,13 +86,12 @@ def create_distribution(dist_dir, build_dir, data):
             zip_fname, "w", zipfile.ZIP_DEFLATED, allowZip64=True
         ) as zipf:
             for param in params:
-                start_dir, regex, dest = param
+                start_dir, regex = param
                 search_dir = os.path.normpath(
                     start_dir.format(build_dir=build_dir, src_dir=get_qemu_root())
                 )
                 for fname in recursive_glob(search_dir, regex.format(data)):
                     arcname = os.path.relpath(fname[len(search_dir) :], "/")
-                    arcname = os.path.join(dest, arcname)
                     if os.path.islink(fname):
                         # http://www.mail-archive.com/python-list@python.org/msg34223.html
                         zipInfo = zipfile.ZipInfo(arcname)
