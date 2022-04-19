@@ -177,6 +177,11 @@ void ClipboardPipe::setGuestClipboardContents(const uint8_t* buf, size_t len) {
     if (!sEnabled) {
         return;  // who cares.
     }
+
+    LOG(VERBOSE) << "Clipboard update, host->guest, value='"
+        << std::string_view(reinterpret_cast<const char*>(buf), len)
+        << "'";
+
     mGuestWriteState.queueContents(buf, len);
     wakeGuestIfNeeded();
 }
