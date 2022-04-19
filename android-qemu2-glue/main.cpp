@@ -1187,6 +1187,8 @@ static std::string buildSoundhwParam(const int apiLevel, const AndroidHwConfig* 
     } else if (apiLevel >= 26 || targetIsX86) {
         /* for those system images that don't have the virtio-snd driver yet. */
         param = "hda";
+    } else {
+        return "";
     }
 
     if (!hw->hw_audioInput) {
@@ -2399,7 +2401,12 @@ extern "C" int main(int argc, char** argv) {
     }
     args.add(dataDir);
 
-    args.add2("-soundhw", buildSoundhwParam(apiLevel, hw).c_str());
+    {
+        const std::string soundhw = buildSoundhwParam(apiLevel, hw);
+        if (!soundhw.empty()) {
+            args.add2("-soundhw", soundhw.c_str());
+        }
+    }
 
 // USB
 #define usb_passthrough_driver "Android USB Assistant Driver"
