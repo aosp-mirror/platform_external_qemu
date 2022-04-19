@@ -87,6 +87,8 @@
 #define NPCM_PCIERC_NUM_PA_WINDOWS          2
 #define NPCM_PCIERC_NUM_AP_WINDOWS          5
 
+#define NPCM_PCIERC_MSI_NR                  32
+#define NPCM_PCIERC_MSI_OFFSET              0x50
 /* PCIe extended config space offsets */
 #define NPCM_PCIE_HEADER_OFFSET             0x80
 #define NPCM_PCIE_AER_OFFSET                0x100

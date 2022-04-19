@@ -10,6 +10,7 @@
 #include "hw/irq.h"
 #include "hw/qdev-properties.h"
 #include "hw/pci-host/npcm_pcierc.h"
+#include "hw/pci/msi.h"
 #include "qapi/error.h"
 #include "qemu/log.h"
 #include "qemu/units.h"
@@ -442,6 +443,10 @@ static void npcm_pcierc_realize(DeviceState *dev, Error **errp)
     address_space_init(&s->pcie_space, &s->pcie_root, "pcie-address-space");
     pci_realize_and_unref(root, pci->bus, &error_fatal);
     pci_setup_iommu(pci->bus, &npcm_pcierc_iommu_ops, s);
+
+    msi_nonbroken = true;
+    msi_init(root, NPCM_PCIERC_MSI_OFFSET, NPCM_PCIERC_MSI_NR,
+             true, true, errp);
 }
 
 static void npcm_pcie_root_port_realize(DeviceState *dev, Error **errp)
