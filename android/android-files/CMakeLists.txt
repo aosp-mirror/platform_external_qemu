@@ -1,7 +1,16 @@
 prebuilt(E2FSPROGS)
+
+# In order for this to be a proper shared library you must:
+#
+# - Figure out which functions in ./include/... need to be made public
+# - Setup an export/import header
+#
+# The library should already be self contained and can be made shared
+# on linux with no changes.
 android_add_library(
   TARGET android-files
   LICENSE Apache-2.0
+  SOURCE_DIR src
   SRC android/emulation/ConfigDirs.cpp
       android/filesystems/ext4_resize.cpp
       android/filesystems/ext4_utils.cpp
@@ -19,18 +28,18 @@ android_add_library(
       android/utils/filelock.cpp
       android/utils/ini.cpp
       android/utils/lock.cpp
-      android/utils/mapfile.c
       android/utils/property_file.c)
 target_link_libraries(
   android-files PRIVATE android-emu-base emulator-libext4_utils
                         android-hw-config)
-target_include_directories(android-files PUBLIC .
-                           PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android/android-emu)
+target_include_directories(android-files PUBLIC include
+                           PRIVATE src ${ANDROID_QEMU2_TOP_DIR}/android/android-emu)
 
 # Boo, we need the make_ext4fs executable
 add_dependencies(android-files emulator_make_ext4fs)
 android_add_test(
   TARGET android-files_unittests
+  SOURCE_DIR test
   SRC # cmake-format: sortable
       android/emulation/ConfigDirs_unittest.cpp
       android/filesystems/ext4_resize_unittest.cpp
@@ -48,6 +57,7 @@ android_add_test(
       android/utils/property_file_unittest.cpp)
 
 target_compile_options(android-files_unittests PRIVATE -O0)
+target_include_directories(android-files_unittests PRIVATE src)
 target_link_libraries(
   android-files_unittests
   PRIVATE gmock_main android-emu android-emu-test-launcher android-files
