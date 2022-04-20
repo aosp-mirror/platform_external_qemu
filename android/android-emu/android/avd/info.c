@@ -740,6 +740,9 @@ static bool _avdInfo_getSearchPaths(AvdInfo* i) {
     if (i->configIni == NULL)
         return true;
 
+#ifndef AEMU_LAUNCHER
+    // This code is unused in the early launcher, but causes linking
+    // all the agents from a shared library.
     // We do a check very early on boot..
     if (agentsAvailable() &&
         getConsoleAgents()->settings->android_cmdLineOptions() &&
@@ -752,6 +755,7 @@ static bool _avdInfo_getSearchPaths(AvdInfo* i) {
         DD("using one search path from the command line for this AVD");
         return true;
     }
+#endif
 
     i->numSearchPaths = _getSearchPaths(i->configIni, i->sdkRootPath,
                                         MAX_SEARCH_PATHS, i->searchPaths);
@@ -1466,9 +1470,12 @@ char* avdInfo_getDynamicPartitionBootDevice(const AvdInfo* i) {
 }
 
 char* avdInfo_getSystemImageDevicePathInGuest(const AvdInfo* i) {
+    // This brings in the feature dependencies, which are large.
+#ifndef AEMU_LAUNCHER
     if (feature_is_enabled(kFeature_SystemAsRoot)) {
         return NULL;
     }
+#endif
     if (is_x86ish(i)) {
         return strdup("/dev/block/pci/pci0000:00/0000:00:03.0/by-name/system");
     } else {

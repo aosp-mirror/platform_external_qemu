@@ -4,12 +4,12 @@ prebuilt(VIRTUALSCENE)
 prebuilt(E2FSPROGS)
 prebuilt(MACROS)
 prebuilt(MSVC)
-set(WINDOWS_ICON ../images/emulator_icon.rc)
-android_add_executable(
-  TARGET emulator INSTALL . LICENSE Apache-2.0
-  SRC # cmake-format: sortable
-      ${WINDOWS_ICON} main-emulator.cpp)
-target_link_libraries(emulator PRIVATE android-emu)
+android_add_executable(TARGET emulator INSTALL . LICENSE Apache-2.0
+                       SRC ../images/emulator_icon.rc main-emulator.cpp)
+target_link_libraries(emulator PRIVATE android-emu-base android-files
+                                       android-hw-config android-emu-launch)
+target_include_directories(emulator
+                           PRIVATE ${ANDROID_QEMU2_TOP_DIR}/android/android-emu)
 target_compile_definitions(
   emulator
   PRIVATE "-DCRASHUPLOAD=${OPTION_CRASHUPLOAD}"
@@ -39,7 +39,7 @@ else()
 endif()
 
 if(WEBRTC)
- add_dependencies(emulator goldfish-webrtc-bridge)
+  add_dependencies(emulator goldfish-webrtc-bridge)
 endif()
 
 set(PC_BIOS "${ANDROID_QEMU2_TOP_DIR}/pc-bios")
@@ -97,10 +97,8 @@ android_target_dependency(emulator windows_msvc-x86_64
                           GLIB2_WINDOWS_DEPENDENCIES)
 android_target_dependency(emulator windows_msvc-x86_64
                           ANGLE_RENDERER_DEPENDENCIES)
-android_target_dependency(emulator darwin-x86_64
-                          ANGLE_RENDERER_DEPENDENCIES)
-android_target_dependency(emulator darwin-aarch64
-                          ANGLE_RENDERER_DEPENDENCIES)
+android_target_dependency(emulator darwin-x86_64 ANGLE_RENDERER_DEPENDENCIES)
+android_target_dependency(emulator darwin-aarch64 ANGLE_RENDERER_DEPENDENCIES)
 android_target_dependency(emulator windows_msvc-x86_64 MSVC_DEPENDENCIES)
 # And install them for a release.
 # TODO(b/141205876): prebuilt executables are losing their execute permission on
@@ -114,10 +112,10 @@ android_install_dependency(all EMULATOR_FEATURE_DEPENDENCIES)
 android_install_dependency(all EMULATOR_KEYMAP_DEPENDENCIES)
 android_install_dependency(all EMULATOR_BIOS_DEPENDENCIES)
 android_install_dependency(all SWIFTSHADER_DEPENDENCIES)
-if (NOT LINUX_AARCH64)
+if(NOT LINUX_AARCH64)
   android_install_dependency(all ANGLE_DEPENDENCIES)
 endif()
-if (DARWIN_X86_64 OR DARWIN_AARCH64)
+if(DARWIN_X86_64 OR DARWIN_AARCH64)
   android_install_dependency(all ANGLE_RENDERER_DEPENDENCIES)
 endif()
 

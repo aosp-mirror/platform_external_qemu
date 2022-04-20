@@ -69,7 +69,6 @@ HostHwInfo::HostHwInfo() {
     info.os_bit_count = System::get()->getHostBitness();
     info.cpu_model_name = model_family_stepping;
     info.os_platform = android::base::toString(System::get()->getOsType());
-    info.gpuinfolist = &globalGpuInfoList();
 
     D("cpu info:\n"
       "    manufacturer %s\n"
@@ -84,6 +83,10 @@ HostHwInfo::HostHwInfo() {
       info.cpu_model_name,
       info.os_platform.c_str());
 
+#ifndef AEMU_LAUNCHER
+    // The launcher does not need gpu info. Gpu info brings
+    // in a lot of extra dependencies.
+    info.gpuinfolist = &globalGpuInfoList();
     for (size_t i = 0; i < info.gpuinfolist->infos.size(); i++) {
         const GpuInfo& gpuinfo = info.gpuinfolist->infos[i];
         D("gpu %zu:\n"
@@ -98,6 +101,7 @@ HostHwInfo::HostHwInfo() {
           gpuinfo.version.c_str(), gpuinfo.renderer.c_str());
         (void)gpuinfo;
     }
+#endif
 
 #if __linux__
 #if defined(__aarch64__)
