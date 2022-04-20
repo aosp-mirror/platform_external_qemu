@@ -2,6 +2,59 @@
 prebuilt(VPX)
 prebuilt(FFMPEG)
 
+# This is a minimal emu-android library needed to start the emulator. - It has a
+# minimal number of dependencies - It should *NEVER* rely on a shared library
+# (binplace issues MSVC) - It is used by the "emulator" launcher binary to
+# provide basic functionality (launch, find avds, list camera's etc.)
+#
+# This allows us to create shared libraries without negatively impacting the
+# launcher.
+android_add_library(
+  TARGET android-emu-launch
+  LICENSE Apache-2.0
+  SRC android/avd/hw-config.c
+      android/avd/info.c
+      android/avd/scanner.c
+      android/avd/util.c
+      android/avd/util_wrapper.cpp
+      android/camera/camera-common.cpp
+      android/camera/camera-format-converters.c
+      android/camera/camera-list.cpp
+      android/emulation/bufprint_config_dirs.cpp
+      android/emulation/CpuAccelerator.cpp
+      android/emulation/launcher/launcher_stub.cpp
+      android/help.c
+      android/HostHwInfo.cpp
+      android/hw-lcd.c
+      android/main-help.cpp
+      android/network/constants.c
+      android/utils/exec.cpp
+      android/utils/host_bitness.cpp
+      android/utils/system_wrapper.cpp
+  WINDOWS android/camera/camera-capture-windows.cpp
+          android/emulation/USBAssist.cpp
+  LINUX android/camera/camera-capture-linux.c
+  DARWIN android/camera/camera-capture-mac.m)
+target_include_directories(android-emu-launch PRIVATE .)
+target_link_libraries(
+  android-emu-launch PRIVATE android-emu-base android-files emulator-libyuv
+                             android-hw-config gtest)
+target_compile_options(android-emu-launch PRIVATE -Wno-extern-c-compat)
+target_compile_definitions(android-emu-launch PRIVATE AEMU_MIN AEMU_LAUNCHER)
+target_include_directories(
+  android-emu-launch
+  PRIVATE
+    ${ANDROID_QEMU2_TOP_DIR}/android-qemu2-glue/config/${ANDROID_TARGET_TAG})
+
+android_target_link_libraries(
+  android-emu-launch darwin
+  PUBLIC "-framework AVFoundation" "-framework CoreMedia"
+         "-framework CoreVideo" "-framework Accelerate")
+
+android_target_link_libraries(
+  android-emu-launch windows PRIVATE emulator-libusb ole32::ole32
+                                     setupapi::setupapi mfuuid::mfuuid)
+
 # This is the set of sources that are common in both the shared libary and the
 # archive. We currently have to split them up due to dependencies on external
 # variables/functions that are implemented in other libraries.
