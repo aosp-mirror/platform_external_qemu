@@ -1,3 +1,17 @@
+prebuilt(ANGLE)
+prebuilt(VULKAN)
+
+function(add_opengl_dependencies TGT)
+    android_target_dependency(${TGT} all SWIFTSHADER_DEPENDENCIES)
+    android_target_dependency(${TGT} all ANGLE_DEPENDENCIES)
+    android_target_dependency(${TGT} all VULKAN_DEPENDENCIES)
+    android_target_dependency(${TGT} all VULKAN_TEST_DEPENDENCIES)
+    android_target_properties(
+        ${TGT} linux "${RUNTIME_OS_PROPERTIES} -Wl,-rpath,'$ORIGIN/lib64/gles_swiftshader' -Wl,--disable-new-dtags")
+    android_target_properties(
+        ${TGT} darwin "${RUNTIME_OS_PROPERTIES} INSTALL_RPATH>=@loader_path/lib64/gles_swiftshader")
+endfunction()
+
 if(OPTION_GFXSTREAM_BACKEND)
     if (WIN32)
         add_definitions("-DUNICODE -D_UNICODE -DNOMINMAX -DEMUGL_BUILD -DVK_USE_PLATFORM_WIN32_KHR -DBUILDING_EMUGL_COMMON_SHARED")
@@ -106,11 +120,11 @@ if(OPTION_GFXSTREAM_BACKEND)
 
     # TODO(joshuaduong): For some reason, our custom rpath is only applied to gfxstream_backend_unittests.
     # for the rest of the unittests below, the rpath is not set, and thus the tests cannot find libc++.
-    android_target_properties(gfxstream-base_unittests all "${RUNTIME_OS_PROPERTIES}")
-    android_target_properties(gfxstream-host-common_unittests all "${RUNTIME_OS_PROPERTIES}")
-    android_target_properties(Vulkan_unittests all "${RUNTIME_OS_PROPERTIES}")
-    android_target_properties(OpenglRender_unittests all "${RUNTIME_OS_PROPERTIES}")
-    android_target_properties(OpenglRender_snapshot_unittests all "${RUNTIME_OS_PROPERTIES}")
+    add_opengl_dependencies(gfxstream-base_unittests)
+    add_opengl_dependencies(gfxstream-host-common_unittests)
+    add_opengl_dependencies(Vulkan_unittests)
+    add_opengl_dependencies(OpenglRender_unittests)
+    add_opengl_dependencies(OpenglRender_snapshot_unittests)
 
     set(GFXSTREAM_DEPENDENCIES
         angle_common
@@ -137,10 +151,10 @@ if(OPTION_GFXSTREAM_BACKEND)
         renderdoc)
    android_license(TARGET "${GFXSTREAM_DEPENDENCIES}"
                    LIBNAME gfxstream
-                   URL "https://android.googlesource.com/platform/device/generic/vulkan-cereal/+/refs/heads/master"
-                   SPDX "Apache-2.0"
-                   LOCAL None
-                   LICENSE None)
+                   URL "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master"
+                   SPDX Apache-2.0
+                   LOCAL "${ANDROID_QEMU2_TOP_DIR}/../../device/generic/vulkan-cereal/third-party/angle/LICENSE"
+                   LICENSE "https://android.googlesource.com/device/generic/vulkan-cereal/+/refs/heads/master/third-party/angle/LICENSE")
 endif()
 
 # TODO(joshuaduong): Make it work for gfxstream build.
