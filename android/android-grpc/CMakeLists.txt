@@ -30,7 +30,7 @@ if(NOT WINDOWS_MSVC_X86_64)
         android/emulation/control/waterfall/SocketController.cpp
         android/emulation/control/waterfall/WaterfallService.cpp)
   target_link_libraries(android-waterfall PRIVATE png
-                        PUBLIC libprotobuf android-emu android-net grpc++)
+                        PUBLIC protobuf::libprotobuf android-emu android-net grpc++)
   target_include_directories(
     android-waterfall PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
                              ${CMAKE_CURRENT_SOURCE_DIR})
@@ -67,7 +67,7 @@ target_include_directories(
   gnss_proxy_lib
   PUBLIC ${ANDROID_QEMU2_TOP_DIR}/android/third_party/modem-simulator)
 target_include_directories(gnss_proxy_lib PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/)
-target_link_libraries(gnss_proxy_lib PRIVATE libprotobuf grpc++)
+target_link_libraries(gnss_proxy_lib PRIVATE protobuf::libprotobuf grpc++)
 target_link_libraries(gnss_proxy_lib PRIVATE android-emu-base)
 target_link_libraries(gnss_proxy_lib PRIVATE android-emu GLIB2::GLIB2)
 target_link_libraries(gnss_proxy_lib PRIVATE modem_simulator_lib)
@@ -86,7 +86,7 @@ android_add_library(
 target_include_directories(
   android-grpc-services PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
                                ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(android-grpc-services PUBLIC libprotobuf grpc++
+target_link_libraries(android-grpc-services PUBLIC protobuf::libprotobuf grpc++
                                                    android-emu)
 
 # Let's add in the library
@@ -123,7 +123,7 @@ target_link_libraries(
   android-grpc
   PRIVATE png
   PUBLIC android-grpc-services
-         libprotobuf
+         protobuf::libprotobuf
          android-emu
          android-net
          grpc++
@@ -163,7 +163,7 @@ target_include_directories(
   android-ui-controller PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
                                 ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(android-ui-controller PUBLIC libprotobuf android-emu
+target_link_libraries(android-ui-controller PUBLIC protobuf::libprotobuf android-emu
                                                    grpc++)
 
 if(NOT WINDOWS_MSVC_X86_64)

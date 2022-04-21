@@ -1003,7 +1003,7 @@ function(android_add_protobuf name protofiles)
   protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${protofiles})
   android_add_library(TARGET ${name} LICENSE Apache-2.0 SRC ${PROTO_HDRS}
                                                             ${PROTO_SRCS})
-  target_link_libraries(${name} PUBLIC libprotobuf)
+  target_link_libraries(${name} PUBLIC protobuf::libprotobuf)
   target_include_directories(${name} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
   android_clang_tidy(${name})
 endfunction()

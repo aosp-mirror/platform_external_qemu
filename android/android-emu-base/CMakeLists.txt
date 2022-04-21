@@ -135,7 +135,7 @@ target_include_directories(android-emu-base
 # against the base you will link against LZ4 & UUID
 target_link_libraries(
   android-emu-base PRIVATE lz4 UUID::UUID perfetto-tracing-only
-  PUBLIC libprotobuf Threads::Threads absl::str_format)
+  PUBLIC protobuf::libprotobuf Threads::Threads absl::str_format zlib)
 
 if(OPTION_TCMALLOC)
   android_target_link_libraries(

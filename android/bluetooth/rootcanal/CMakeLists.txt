@@ -27,7 +27,7 @@ target_include_directories(
   libscriptedbeaconpayload-protos-lite
   PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${AOSP_ROOT}/external/protobuf/src)
 
-target_link_libraries(libscriptedbeaconpayload-protos-lite PRIVATE libprotobuf)
+target_link_libraries(libscriptedbeaconpayload-protos-lite PRIVATE protobuf::libprotobuf)
 
 add_library(libbt-rootcanal.headers INTERFACE)
 target_include_directories(libbt-rootcanal.headers INTERFACE . ${ROOTCANAL_ROOT})
