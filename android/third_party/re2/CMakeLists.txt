@@ -41,17 +41,19 @@ if(WINDOWS_MSVC_X86_64)
     re2 PRIVATE -DUNICODE -D_UNICODE -DSTRICT -DNOMINMAX
                 -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
 
-  # CMake defaults to /W3, but some users like /W4 (or /Wall) and /WX, so we
-  # disable various warnings that aren't particularly helpful.
-  target_compile_options(
-    re2
-    PRIVATE /wd4100
-            /wd4201
-            /wd4456
-            /wd4457
-            /wd4702
-            /wd4815
-            /utf-8)
+  if(NOT CROSSCOMPILE)
+    # CMake defaults to /W3, but some users like /W4 (or /Wall) and /WX, so we
+    # disable various warnings that aren't particularly helpful.
+    target_compile_options(
+      re2
+      PRIVATE /wd4100
+              /wd4201
+              /wd4456
+              /wd4457
+              /wd4702
+              /wd4815
+              /utf-8)
+  endif()
 endif()
 
 target_link_libraries(re2 PUBLIC Threads::Threads)
@@ -59,15 +61,14 @@ target_link_libraries(re2 PUBLIC Threads::Threads)
 android_add_library(
   TARGET testing
   NODISTRIBUTE
-  SRC
-  re2/testing/backtrack.cc
-  re2/testing/dump.cc
-  re2/testing/exhaustive_tester.cc
-  re2/testing/null_walker.cc
-  re2/testing/regexp_generator.cc
-  re2/testing/string_generator.cc
-  re2/testing/tester.cc
-  util/pcre.cc)
+  SRC re2/testing/backtrack.cc
+      re2/testing/dump.cc
+      re2/testing/exhaustive_tester.cc
+      re2/testing/null_walker.cc
+      re2/testing/regexp_generator.cc
+      re2/testing/string_generator.cc
+      re2/testing/tester.cc
+      util/pcre.cc)
 target_link_libraries(testing PUBLIC re2)
 
 set(TEST_TARGETS
@@ -87,16 +88,14 @@ set(TEST_TARGETS
     string_generator_test
     dfa_test
     # These tests can take a looong time, so lets not run them.. (>180s)
-    # exhaustive1_test
-    # exhaustive2_test
-    # exhaustive3_test
-    # exhaustive_test
+    # exhaustive1_test exhaustive2_test exhaustive3_test exhaustive_test
     # random_test
-    )
+)
 
 set(BENCHMARK_TARGETS regexp_benchmark)
 
 foreach(target ${TEST_TARGETS})
   android_add_test(TARGET ${target} SRC re2/testing/${target}.cc util/test.cc)
-  target_link_libraries(${target} PRIVATE testing ${EXTRA_TARGET_LINK_LIBRARIES})
+  target_link_libraries(${target} PRIVATE testing
+                                          ${EXTRA_TARGET_LINK_LIBRARIES})
 endforeach()

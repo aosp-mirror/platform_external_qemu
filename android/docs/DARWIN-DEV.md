@@ -164,13 +164,15 @@ The windows target requires you to install the MSVC libraries. These libraries n
 
 #### I'm within google
 
+Make sure the `AOSP_DIR` variable has been properly set.
+
 - You will have to obtain the windows
 ```sh
 git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git /tmp/depot_tools
 local DEPOT_TOOLS="/tmp/depot_tools"
 # This is the hash of the msvc version we are using (VS 2019)
 local MSVC_HASH="20d5f2553f"
-export PATH=$PATH:$PWD/android/third_party/chromium/$DEPOT_TOOLS/
+export PATH=$PATH:$DEPOT_TOOLS/
 download_from_google_storage --config
 python3 $DEPOT_TOOLS/win_toolchain/get_toolchain_if_necessary.py --toolchain-dir=$AOSP_DIR/prebuilts/android-emulator-build/msvc --force --output-json=res.json $MSVC_HASH
 ln -sf $AOSP_DIR/prebuilts/android-emulator-build/msvc/vs_files/${MSVC_HASH} $AOSP_DIR/prebuilts/android-emulator-build/msvc/win8sdk
@@ -184,7 +186,7 @@ brew install mingw-w64 coreutils
 
 If all went well you can now target windows as follows:
 
-    ./android/rebuild.sh --target windows
+    ./android/rebuild.sh --target windows-x86_64
 
 #### I'm outside Google
 
@@ -213,7 +215,7 @@ If all went well you can now target windows as follows:
 
 If all went well you can now target windows as follows:
 
-    ./android/rebuild.sh --target windows
+    ./android/rebuild.sh --target windows-x86_64
 
 ### Sending patches
 

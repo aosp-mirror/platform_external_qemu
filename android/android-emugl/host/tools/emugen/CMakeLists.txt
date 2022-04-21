@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(emugen)
 
 if(NOT ANDROID_QEMU2_TOP_DIR AND MSVC)
+
   get_filename_component(ANDROID_QEMU2_TOP_DIR
                          "${CMAKE_CURRENT_LIST_DIR}/../../../../../" ABSOLUTE)
   get_filename_component(
@@ -42,3 +43,4 @@ target_include_directories(
 android_add_test(TARGET emugen_unittests SRC # cmake-format: sortable
                                              Parser.cpp Parser_unittest.cpp)
 target_link_libraries(emugen_unittests PRIVATE gmock_main)
+target_compile_features(emugen PRIVATE cxx_std_17)

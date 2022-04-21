@@ -1,9 +1,11 @@
 # We might be running in cross compile build, so setup the required paths and includes..
 cmake_minimum_required(VERSION 3.5)
-project(protobuf)
-include(android)
-include(prebuilts)
-
+if(NOT ANDROID_QEMU2_TOP_DIR)
+  set(CMAKE_CXX_STANDARD 17)
+  project(protobuf)
+  include(android)
+  include(prebuilts)
+endif()
 if(NOT TARGET zlib)
   # Cross build needs zlib for protoc.
   add_subdirectory(../zlib zlib)

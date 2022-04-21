@@ -76,9 +76,6 @@ option_register_var "--ccache=<program>" OPT_CCACHE "Use specific ccache program
 OPT_NO_CCACHE=
 option_register_var "--no-ccache" OPT_NO_CCACHE "Don't try to probe and use ccache."
 
-OPT_CXX11=
-option_register_var "--cxx11" OPT_CXX11 "Enable C++11 features."
-
 OPT_NOSTRIP=
 option_register_var "--nostrip" OPT_NOSTRIP "Do not generate strip, needed for prebuilts only"
 
@@ -853,6 +850,7 @@ prepare_build_for_darwin_aarch64() {
     EXTRA_CFLAGS="$common_FLAGS -B/usr/bin"
     EXTRA_CXXFLAGS="$common_FLAGS -B/usr/bin"
     var_append EXTRA_CXXFLAGS "-stdlib=libc++"
+    var_append EXTRA_CXXFLAGS "--std=c++17"
     EXTRA_LDFLAGS="$common_FLAGS"
     DST_PREFIX=
 }
@@ -1103,7 +1101,7 @@ prepare_build_for_host () {
             fi
             ;;
         windows_msvc-*)
-            if [ "$BUILD_HOST" = "darwin" ]; then
+            if [ "$BUILD_HOST" == "darwin" ]; then
                 which x86_64-w64-mingw32-gcc > /dev/null || panic "No mingw install available!"
                 TOOLCHAIN_PREFIX=x86_64-w64-mingw32-
                 DST_PREFIX=$(dirname $(which x86_64-w64-mingw32-gcc))
