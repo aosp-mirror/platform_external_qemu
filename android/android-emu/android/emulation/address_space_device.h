@@ -21,6 +21,12 @@ extern "C" {
 
 struct AddressSpaceHwFuncs;
 
+struct AddressSpaceCreateInfo {
+    uint32_t type;
+    uint64_t physAddr;
+    bool fromSnapshot;
+};
+
 typedef uint32_t (*address_space_device_gen_handle_t)(void);
 typedef void (*address_space_device_destroy_handle_t)(uint32_t);
 typedef void (*address_space_device_tell_ping_info_t)(uint32_t handle, uint64_t gpa);

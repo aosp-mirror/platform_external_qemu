@@ -27,13 +27,14 @@ namespace emulation {
 
 class AddressSpaceHostMediaContext : public AddressSpaceDeviceContext {
 public:
-    AddressSpaceHostMediaContext(uint64_t phys_addr, const address_space_device_control_ops* ops, bool fromSnapshot);
-    virtual ~AddressSpaceHostMediaContext();
-    void perform(AddressSpaceDevicePingInfo *info) override;
+ AddressSpaceHostMediaContext(const struct AddressSpaceCreateInfo& create,
+                              const address_space_device_control_ops* ops);
+ virtual ~AddressSpaceHostMediaContext();
+ void perform(AddressSpaceDevicePingInfo* info) override;
 
-    AddressSpaceDeviceType getDeviceType() const override;
-    void save(base::Stream* stream) const override;
-    bool load(base::Stream* stream) override;
+ AddressSpaceDeviceType getDeviceType() const override;
+ void save(base::Stream* stream) const override;
+ bool load(base::Stream* stream) override;
 
 private:
     void allocatePages(uint64_t phys_addr, int num_pages);

@@ -33,12 +33,13 @@ enum class DecoderType : uint8_t {
     Hevc = 2,
 };
 
-AddressSpaceHostMediaContext::AddressSpaceHostMediaContext(uint64_t phys_addr, const address_space_device_control_ops* ops,
-        bool fromSnapshot) : mControlOps(ops) {
+AddressSpaceHostMediaContext::AddressSpaceHostMediaContext(
+    const struct AddressSpaceCreateInfo& create, const address_space_device_control_ops* ops)
+    : mControlOps(ops) {
     // The memory is allocated in the snapshot load if called from a snapshot load().
-    if (!fromSnapshot) {
-        mGuestAddr = phys_addr;
-        allocatePages(phys_addr, kNumPages);
+    if (!create.fromSnapshot) {
+        mGuestAddr = create.physAddr;
+        allocatePages(create.physAddr, kNumPages);
     }
 }
 
