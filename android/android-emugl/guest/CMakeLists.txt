@@ -30,7 +30,7 @@ if(NOT BUILDING_FOR_AARCH64)
         androidImpl/Unicode.cpp)
   target_include_directories(cutils PRIVATE ${ANDROID_EMUGL_DIR}/host/include .)
   target_include_directories(cutils PUBLIC .)
-  target_link_libraries(cutils PUBLIC android-emu-base)
+  target_link_libraries(cutils PUBLIC android-emu-base android-emu-tracing)
   target_link_libraries(cutils PRIVATE log emugl_base)
   android_target_compile_options(
       cutils Clang PRIVATE -fvisibility=default -Wno-invalid-constexpr -Wno-format
