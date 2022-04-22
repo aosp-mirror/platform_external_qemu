@@ -172,7 +172,7 @@ int main(int argc, char **argv)
 #include "android/hw-control.h"
 #include "android/hw-qemud.h"
 #include "android/main-common.h"
-#include "android/metrics/metrics.h"
+#include "android/metrics/DependentMetrics.h"
 #include "android/multitouch-port.h"
 #include "android/network/control.h"
 #include "android/network/globals.h"

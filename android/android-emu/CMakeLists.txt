@@ -7,7 +7,6 @@ prebuilt(LIBXML2)
 prebuilt(UUID)
 
 # Add the protobuf dependencies
-add_subdirectory(android/metrics/proto)
 add_subdirectory(android/featurecontrol/proto)
 add_subdirectory(android/snapshot/proto)
 add_subdirectory(android/crashreport/proto)

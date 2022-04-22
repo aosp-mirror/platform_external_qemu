@@ -6,11 +6,13 @@
   "configurations": [
     {
       "name": "Launch cmake binary",
-      "type": "lldb",
+      // "type": "lldb",
+      "type": "cppvsdbg",
+    
       "request": "launch",
       "program": "${command:cmake.launchTargetPath}",
       "args": [
-         "--gtest_filter=FrameBufferTest.CreateOpenUpdateCloseColorBuffer_ReadYUV420",
+       //  "--gtest_filter=FrameBufferTest.CreateOpenUpdateCloseColorBuffer_ReadYUV420",
       ],
       "cwd": "${workspaceFolder}",
       "stopAtEntry": false,

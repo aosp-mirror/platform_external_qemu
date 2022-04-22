@@ -88,7 +88,6 @@ set(android-emu-common
     android/crashreport/detectors/CrashDetectors.cpp
     android/crashreport/HangDetector.cpp
     android/cros.c
-    android/curl-support.c
     android/emulation/AdbDebugPipe.cpp
     android/emulation/AdbGuestPipe.cpp
     android/emulation/AdbHostListener.cpp
@@ -202,23 +201,8 @@ set(android-emu-common
     android/main-help.cpp
     android/main-kernel-parameters.cpp
     android/metrics/AdbLivenessChecker.cpp
-    android/metrics/AsyncMetricsReporter.cpp
-    android/metrics/CrashMetricsReporting.cpp
-    android/metrics/FileMetricsWriter.cpp
-    android/metrics/metrics.cpp
-    android/metrics/MetricsPaths.cpp
-    android/metrics/MetricsReporter.cpp
-    android/metrics/MetricsWriter.cpp
-    android/metrics/NullMetricsReporter.cpp
-    android/metrics/NullMetricsWriter.cpp
-    android/metrics/Percentiles.cpp
+    android/metrics/DependentMetrics.cpp
     android/metrics/PerfStatReporter.cpp
-    android/metrics/PeriodicReporter.cpp
-    android/metrics/PlaystoreMetricsWriter.cpp
-    android/metrics/StudioConfig.cpp
-    android/metrics/SyncMetricsReporter.cpp
-    android/metrics/TextMetricsWriter.cpp
-    android/metrics/UiEventTracker.cpp
     android/multi-instance.cpp
     android/multitouch-port.c
     android/multitouch-screen.c
@@ -242,9 +226,7 @@ set(android-emu-common
     android/opengl/logger.cpp
     android/opengl/OpenglEsPipe.cpp
     android/opengles.cpp
-    android/openssl-support.cpp
     android/process_setup.cpp
-    android/protobuf/DelimitedSerialization.cpp
     android/protobuf/LoadSave.cpp
     android/protobuf/ProtobufLogging.cpp
     android/proxy/proxy_common.c
@@ -450,6 +432,7 @@ target_link_libraries(
          VPX::VPX
          emulator-libext4_utils
          android-files
+         android-metrics
          android-emu-base
          emulator-libsparse
          emulator-libselinux
@@ -461,9 +444,9 @@ target_link_libraries(
          emulator-murmurhash
          emulator-tinyepoxy
          emulator-libyuv
+         android-curl
          picosha2
          # Protobuf dependencies
-         metrics
          featurecontrol
          crashreport
          location
@@ -477,7 +460,6 @@ target_link_libraries(
          android-net
          android-emu-base
          breakpad_client
-         curl
          ssl
          crypto
          LibXml2::LibXml2
@@ -729,6 +711,7 @@ target_link_libraries(
          android-emu-agents
          emulator-murmurhash
          android-files
+         android-metrics
          # Protobuf dependencies
          snapshot
          # Prebuilt libraries
@@ -1068,25 +1051,4 @@ if(NOT LINUX_AARCH64)
     "${CMAKE_CURRENT_SOURCE_DIR}/android/emulation/CpuAccelerator_unittest.dat2"
     "$<TARGET_FILE_DIR:android-emu_unittests>/android/android-emu/android/emulation/CpuAccelerator_unittest.dat2"
   )
-
-  # Unit tests for the protobufs
-  android_add_test(
-    TARGET android-emu-metrics_unittests
-    SRC # cmake-format: sortable
-        android/metrics/StudioConfig_unittest.cpp
-        android/metrics/tests/AsyncMetricsReporter_unittest.cpp
-        android/metrics/tests/FileMetricsWriter_unittest.cpp
-        android/metrics/tests/MetricsReporter_unittest.cpp
-        android/metrics/tests/MockMetricsReporter.cpp
-        android/metrics/tests/MockMetricsWriter.cpp
-        android/metrics/tests/NullMetricsClasses_unittest.cpp
-        android/metrics/tests/Percentiles_unittest.cpp
-        android/metrics/tests/PeriodicReporter_unittest.cpp
-        android/metrics/tests/PlaystoreMetricsWriter_unittest.cpp
-        android/metrics/tests/SyncMetricsReporter_unittest.cpp
-        android/metrics/tests/UiEventTracker_unittest.cpp)
-
-  target_compile_options(android-emu-metrics_unittests PRIVATE -O0)
-  target_link_libraries(android-emu-metrics_unittests PRIVATE gmock_main
-                                                              android-emu)
 endif()

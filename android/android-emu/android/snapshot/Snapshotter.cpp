@@ -22,6 +22,7 @@
 #include "android/metrics/AdbLivenessChecker.h"
 #include "android/metrics/metrics.h"
 #include "android/metrics/MetricsReporter.h"
+#include "android/metrics/DependentMetrics.h"
 
 #if SNAPSHOT_METRICS
 #include "studio_stats.pb.h"

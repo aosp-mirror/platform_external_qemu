@@ -14,10 +14,10 @@
 
 #pragma once
 
-#include "android/base/async/Looper.h"
-#include "android/base/async/RecurrentTask.h"
 #include "android/base/Compiler.h"
 #include "android/base/StringView.h"
+#include "android/base/async/Looper.h"
+#include "android/base/async/RecurrentTask.h"
 #include "android/base/threads/ParallelTask.h"
 #include "android/emulation/control/adb/AdbInterface.h"
 #include "android/metrics/MetricsReporter.h"
@@ -32,25 +32,25 @@ namespace metrics {
 // sure that adb can talk to our emulator process.
 // In case the link fails at some point, a metric is dropped in the usual way.
 class AdbLivenessChecker final
-        : public std::enable_shared_from_this<AdbLivenessChecker> {
+    : public std::enable_shared_from_this<AdbLivenessChecker>,
+      public Reporter {
 public:
     using Ptr = std::shared_ptr<AdbLivenessChecker>;
 
     // Entry point to create an AdbLivenessChecker.
     // Objects of this type are managed via shared_ptr.
-    static Ptr create(
-            android::emulation::AdbInterface* adb,
-            android::base::Looper* looper,
-            MetricsReporter* reporter,
-            android::base::StringView emulatorName,
-            android::base::Looper::Duration checkIntervalMs);
+    static Ptr create(android::emulation::AdbInterface* adb,
+                      android::base::Looper* looper,
+                      MetricsReporter* reporter,
+                      android::base::StringView emulatorName,
+                      android::base::Looper::Duration checkIntervalMs);
 
     // Query online / bootcomplete status of emulator.
     static bool isEmulatorOnline();
     static bool isEmulatorBooted();
 
-    void start();
-    void stop();
+    void start() override;
+    void stop() override;
 
     ~AdbLivenessChecker();
 
@@ -108,5 +108,5 @@ private:
     DISALLOW_COPY_AND_ASSIGN(AdbLivenessChecker);
 };
 
-}  // namespace base
+}  // namespace metrics
 }  // namespace android
