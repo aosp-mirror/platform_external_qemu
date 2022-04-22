@@ -73,6 +73,10 @@ function(add_qt_target target)
     set(QT_EXE_DIR "bin")
   endif()
 
+  if (CROSSCOMPILE AND  (ANDROID_HOST_TAG MATCHES "darwin-aarch64"))
+    set(QT_EXE_DIR "libexec")
+  endif()
+
   if(NOT TARGET Qt${QT_VERSION_MAJOR}::${target})
     set(QT_EXECUTABLE
         ${HOST_PREBUILT_ROOT}/${QT_EXE_DIR}/${target}${EXE_SUFFIX})

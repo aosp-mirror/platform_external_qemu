@@ -32,19 +32,18 @@ android_add_library(
 target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
                                        ${ZLIB_SOURCE_DIR})
 
-android_target_compile_definitions(zlib linux-x86_64 PRIVATE
-                                   -D_LARGEFILE64_SOURCE=1)
-android_target_compile_definitions(zlib darwin-x86_64 PRIVATE
-                                   -D_LARGEFILE64_SOURCE=1)
+android_target_compile_definitions(zlib linux-x86_64
+                                   PRIVATE -D_LARGEFILE64_SOURCE=1)
+android_target_compile_definitions(zlib darwin-x86_64
+                                   PRIVATE -D_LARGEFILE64_SOURCE=1)
+target_compile_options(zlib PRIVATE -Wno-implicit-function-declaration)
 android_target_compile_definitions(
-  zlib
-  windows_msvc-x86_64
-  PRIVATE
-  -DWIN32
-  -D_WIN32
-  -D_CRT_NONSTDC_NO_DEPRECATE
-  -D_CRT_SECURE_NO_DEPRECATE
-  -D_CRT_NONSTDC_NO_WARNINGS
-  -DZLIB_WINAPI
-  -DNDEBUG
-  -DWIN64)
+  zlib windows_msvc-x86_64
+  PRIVATE -DWIN32
+          -D_WIN32
+          -D_CRT_NONSTDC_NO_DEPRECATE
+          -D_CRT_SECURE_NO_DEPRECATE
+          -D_CRT_NONSTDC_NO_WARNINGS
+          -DZLIB_WINAPI
+          -DNDEBUG
+          -DWIN64)

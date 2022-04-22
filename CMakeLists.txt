@@ -186,6 +186,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR OFF)
 # Enable C++17 in C++ (Note, cmake does not set the proper flags when using
 # CXX_STANDARD) with our custom clang.
 add_cxx_flag("-std=c++17")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 
 # Gather compile time statistics
 if(OPTION_TIME_INFO)
