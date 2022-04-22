@@ -1644,10 +1644,8 @@ endfunction()
 # Installs the given shared library. The shared library will end up in ../lib64
 # Symbols will be extracted during build, and uploaded during install.
 function(android_install_shared TGT)
-  install(
-    TARGETS ${TGT} RUNTIME DESTINATION lib64 # We don't want windows to binplace
-                                             # dlls in the exe dir
-    LIBRARY DESTINATION lib64)
+  # We don't want windows to binplace dlls in the exe dir
+  install(TARGETS ${TGT} RUNTIME DESTINATION lib64 LIBRARY DESTINATION lib64)
   android_extract_symbols(${TGT})
   android_upload_symbols(${TGT})
   android_install_license(${TGT} ${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
@@ -1655,6 +1653,14 @@ function(android_install_shared TGT)
   android_sign(
     INSTALL
       ${CMAKE_INSTALL_PREFIX}/lib64/lib${TGT}${CMAKE_SHARED_LIBRARY_SUFFIX})
+
+  # Binplace for unit tests
+  if(WINDOWS_MSVC_X86_64)
+    add_custom_command(
+      TARGET ${TGT} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:${TGT}>"
+              "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+  endif()
 endfunction()
 
 # Strips the given prebuilt executable during install..

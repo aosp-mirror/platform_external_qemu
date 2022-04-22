@@ -183,6 +183,9 @@ endif()
 # Make sure targets have complete control of include order.
 set(CMAKE_INCLUDE_CURRENT_DIR OFF)
 
+# Build protobuf as a shared library.
+set(protobuf_BUILD_SHARED_LIBS TRUE)
+
 # Enable C++17 in C++ (Note, cmake does not set the proper flags when using
 # CXX_STANDARD) with our custom clang.
 add_cxx_flag("-std=c++17")
@@ -637,7 +640,7 @@ target_compile_options(android-qemu-deps INTERFACE "-fno-common")
 
 # Make sure we make our dependent libraries available.
 target_link_libraries(android-qemu-deps INTERFACE GLIB2::GLIB2 PIXMAN::PIXMAN
-                                                  zlib)
+                                                  zlib android-emu-tracing)
 
 target_link_libraries(android-qemu-deps INTERFACE virglrenderer-headers)
 

@@ -12,6 +12,13 @@ endif()
 prebuilt(Threads)
 
 # Let's add in the library
+android_add_library(TARGET android-emu-tracing LICENSE Apache-2.0
+                    SRC android/base/Tracing.cpp)
+
+target_link_libraries(android-emu-tracing PRIVATE perfetto-tracing-only protobuf::libprotobuf)
+target_include_directories(android-emu-tracing PUBLIC .)
+
+# Let's add in the library
 android_add_library(
   TARGET android-emu-base
   LICENSE Apache-2.0
@@ -81,7 +88,6 @@ android_add_library(
       android/base/threads/FunctorThread.cpp
       android/base/threads/internal/ParallelTaskBase.cpp
       android/base/threads/ThreadStore.cpp
-      android/base/Tracing.cpp
       android/base/Uri.cpp
       android/base/Uuid.cpp
       android/base/Version.cpp
@@ -133,9 +139,8 @@ target_include_directories(android-emu-base
 
 # Library dependencies, these are public so they will propagate, if you link
 # against the base you will link against LZ4 & UUID
-target_link_libraries(
-  android-emu-base PRIVATE lz4 UUID::UUID perfetto-tracing-only
-  PUBLIC protobuf::libprotobuf Threads::Threads absl::str_format zlib)
+target_link_libraries(android-emu-base PRIVATE lz4 UUID::UUID
+                      PUBLIC Threads::Threads absl::str_format zlib)
 
 if(OPTION_TCMALLOC)
   android_target_link_libraries(
@@ -296,5 +301,6 @@ android_add_executable(
       android/base/Log_benchmark.cpp
       android/base/synchronization/Lock_benchmark.cpp
       android/base/TranslateBenchmark.cpp)
-target_link_libraries(android-emu_benchmark PRIVATE android-emu-base absl::strings absl::str_format
-                                                    emulator-gbench)
+target_link_libraries(
+  android-emu_benchmark PRIVATE android-emu-base absl::strings absl::str_format
+                                emulator-gbench)

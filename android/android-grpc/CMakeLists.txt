@@ -123,10 +123,11 @@ target_link_libraries(
   android-grpc
   PRIVATE png
   PUBLIC android-grpc-services
-         protobuf::libprotobuf
          android-emu
+         android-emu-tracing
          android-net
          grpc++
+         protobuf::libprotobuf
          tink::config::tink_config
          tink::jwt::jwk_set_converter
          tink::jwt::jwt_public_key_verify

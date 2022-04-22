@@ -395,12 +395,6 @@ target_compile_options(android-emu-agents PRIVATE "-Wno-extern-c-compat")
 target_compile_definitions(android-emu-agents PRIVATE "CONSOLE_EXPORTS")
 android_install_shared(android-emu-agents)
 if(WINDOWS_MSVC_X86_64)
-  add_custom_command(
-    TARGET android-emu-agents
-    POST_BUILD
-    COMMAND
-      ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:android-emu-agents>"
-      "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
   install(TARGETS android-emu-agents DESTINATION .)
 endif()
 
