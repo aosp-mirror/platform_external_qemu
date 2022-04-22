@@ -133,7 +133,7 @@ android_target_compile_definitions(OpenglRender darwin
                                    PRIVATE -DVK_USE_PLATFORM_METAL_EXT)
 target_compile_options(OpenglRender PRIVATE -fvisibility=hidden)
 target_compile_options(OpenglRender PUBLIC -Wno-return-type-c-linkage)
-target_link_libraries(OpenglRender PRIVATE emugl_base)
+target_link_libraries(OpenglRender PRIVATE emugl_base android-emu-tracing)
 target_include_directories(
   OpenglRender
   PUBLIC ${ANDROID_EMUGL_DIR}/host/libs/Translator/include .
@@ -203,6 +203,7 @@ if(NOT LINUX_AARCH64)
     OpenglRender_standalone_common
     PUBLIC OpenglCodecCommon
            emugl_common
+           android-emu-tracing
            OpenglRender
            GLESv1_dec
            GLESv2_dec

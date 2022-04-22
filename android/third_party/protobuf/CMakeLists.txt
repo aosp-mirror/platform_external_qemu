@@ -6,6 +6,7 @@ if(NOT ANDROID_QEMU2_TOP_DIR)
   include(android)
   include(prebuilts)
 endif()
+
 if(NOT TARGET zlib)
   # Cross build needs zlib for protoc.
   add_subdirectory(../zlib zlib)
@@ -50,6 +51,7 @@ set(PROTO_DESC
 )
 
 add_definitions(-DGOOGLE_PROTOBUF_CMAKE_BUILD)
+
 if(protobuf_BUILD_SHARED_LIBS)
   set(protobuf_SHARED_OR_STATIC "SHARED")
 else(protobuf_BUILD_SHARED_LIBS)
@@ -63,6 +65,10 @@ endif()
 
 add_definitions(-DUNICODE -D_UNICODE)
 
+# This definition makes sure we only build C/C++ generators
+# And we can successfully compile as both shared/static library.
+add_definitions(-DANDROID_EMULATOR)
+
 include(${protobuf_source_dir}/cmake/libprotobuf-lite.cmake)
 include(${protobuf_source_dir}/cmake/libprotobuf.cmake)
 
@@ -70,7 +76,7 @@ if(NOT CROSSCOMPILE)
   include(${protobuf_source_dir}/cmake/libprotoc.cmake)
   include(${protobuf_source_dir}/cmake/protoc.cmake)
 
-
+  message("Settings ${protobuf_BUILD_SHARED_LIBS}")
   android_target_dependency(protoc all RUNTIME_OS_DEPENDENCIES)
   android_target_properties(protoc all "${RUNTIME_OS_PROPERTIES}")
 
@@ -105,5 +111,15 @@ if(NOT "${_PROTOBUF_PROTOC_EXECUTABLE_VERSION}" VERSION_EQUAL
   )
 endif()
 
-android_license(TARGET "protobuf::libprotobuf" LIBNAME protobuf SPDX "BSD-3-Clause" LICENSE "BSD-3-Clause" LOCAL "${protobuf_source_dir}/NOTICE")
-android_license(TARGET "libprotobuf" LIBNAME protobuf SPDX "BSD-3-Clause" LICENSE "BSD-3-Clause" LOCAL "${protobuf_source_dir}/NOTICE")
+android_license(
+  TARGET "protobuf::libprotobuf" LIBNAME protobuf SPDX "BSD-3-Clause"
+  LICENSE "BSD-3-Clause" LOCAL "${protobuf_source_dir}/NOTICE")
+android_license(TARGET "libprotobuf" LIBNAME protobuf SPDX "BSD-3-Clause"
+                LICENSE "BSD-3-Clause" LOCAL "${protobuf_source_dir}/NOTICE")
+
+android_license(TARGET "libprotobuf-lite" LIBNAME protobuf SPDX "BSD-3-Clause"
+                LICENSE "BSD-3-Clause" LOCAL "${protobuf_source_dir}/NOTICE")
+if(protobuf_BUILD_SHARED_LIBS)
+  android_install_shared(libprotobuf)
+  android_install_shared(libprotobuf-lite)
+endif()
