@@ -56,7 +56,7 @@ android_add_executable(
   NOTICE "REPO/LICENSE"
   SRC ${perfetto}/src/protozero/protoc_plugin/protozero_plugin.cc)
 
-target_link_libraries(perfetto-protozero-protoc-plugin PRIVATE perfetto-libperfettobase libprotoc libprotobuf)
+target_link_libraries(perfetto-protozero-protoc-plugin PRIVATE perfetto-libperfettobase libprotoc protobuf::libprotobuf)
 
 android_license(
   TARGET perfetto-libprotozero

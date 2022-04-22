@@ -13,8 +13,6 @@ list(APPEND TINK_INCLUDE_DIRS "${TINK_GENFILE_DIR}")
 set(TINK_IDE_FOLDER "Tink")
 set(TINK_TARGET_EXCLUDE_IF_OPENSSL "exclude_if_openssl")
 
-android_add_library(TARGET protobuf::libprotobuf-lite ALIAS libprotobuf_lite)
-android_add_library(TARGET protobuf::libprotobuf ALIAS libprotobuf)
 
 # Rapidjson is a header-only library with no explicit target. Here we create
 # one.

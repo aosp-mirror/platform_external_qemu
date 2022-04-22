@@ -9,7 +9,7 @@ if(LINUX_X86_64)
   android_add_library(darwinn)
   target_compile_options(darwinn PUBLIC ${DARWINN_COMPILE_DEFINITIONS})
   target_link_libraries(darwinn PUBLIC android-emu-base darwinnmodelconfig
-                                       darwinnpipe libprotobuf)
+                                       darwinnpipe protobuf::libprotobuf)
   target_include_directories(
     darwinn PUBLIC ${DARWINN_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}
                    ${CMAKE_CURRENT_BINARY_DIR})
