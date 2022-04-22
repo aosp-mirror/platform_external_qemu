@@ -87,6 +87,12 @@ public:
                          contextDesc.pingInfo);
     }
 
+    void createInstance(const struct AddressSpaceCreateInfo& create) {
+        AutoLock lock(mContextsLock);
+        auto& contextDesc = mContexts[create.handle];
+        contextDesc.device_context = buildAddressSpaceDeviceContext(create);
+    }
+
     void ping(uint32_t handle) {
         AutoLock lock(mContextsLock);
         auto& contextDesc = mContexts[handle];
@@ -448,6 +454,10 @@ static void sAddressSpaceDeviceDestroyHandle(uint32_t handle) {
     sAddressSpaceDeviceState->destroyHandle(handle);
 }
 
+static void sAddressSpaceDeviceCreateInstance(const struct AddressSpaceCreateInfo& create) {
+    sAddressSpaceDeviceState->createInstance(create);
+}
+
 static void sAddressSpaceDeviceTellPingInfo(uint32_t handle, uint64_t gpa) {
     sAddressSpaceDeviceState->tellPingInfo(handle, gpa);
 }
@@ -524,6 +534,7 @@ static struct address_space_device_control_ops sAddressSpaceDeviceOps = {
     &sAddressSpaceDeviceRegisterDeallocationCallback,  // register_deallocation_callback
     &sAddressSpaceDeviceRunDeallocationCallbacks,      // run_deallocation_callbacks
     &sAddressSpaceDeviceControlGetHwFuncs,             // control_get_hw_funcs
+    &sAddressSpaceDeviceCreateInstance,                // create_instance
 };
 
 struct address_space_device_control_ops* get_address_space_device_control_ops(void) {
