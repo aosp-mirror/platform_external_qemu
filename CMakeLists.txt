@@ -419,7 +419,7 @@ add_definitions("-D_GNU_SOURCE=1")
 # Enable large-file support (i.e. make off_t a 64-bit value).
 add_definitions("-D_FILE_OFFSET_BITS=64" "-D_LARGEFILE_SOURCE")
 
-if(OPTION_ASAN AND (LINUX_X86_64 OR DARWIN_X86_64))
+if(OPTION_ASAN AND (LINUX_X86_64 OR DARWIN))
   message(STATUS "Enabling ASAN with: ${OPTION_ASAN}")
   add_c_flag("-fsanitize=${OPTION_ASAN}")
   add_c_flag("-g3")
