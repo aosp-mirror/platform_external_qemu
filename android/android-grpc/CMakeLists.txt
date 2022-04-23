@@ -74,7 +74,7 @@ target_link_libraries(gnss_proxy_lib PRIVATE modem_simulator_lib)
 
 protobuf_generate_grpc_cpp(
   SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}
-  INCLUDES ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/snapshot/proto
+  INCLUDES ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/protos
   SOURCES adb_service.proto emulator_controller.proto
           grpc_endpoint_description.proto snapshot_service.proto
   OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
@@ -225,7 +225,7 @@ install(
     emulator_controller.proto
     snapshot_service.proto
     ui_controller_service.proto
-    ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/android/snapshot/proto/snapshot.proto
+    ${ANDROID_QEMU2_TOP_DIR}/android/android-emu/protos/snapshot.proto
   DESTINATION lib)
 
 android_add_executable(
