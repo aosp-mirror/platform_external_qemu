@@ -2903,7 +2903,7 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
     bool qtEvent = mToolWindow->handleQtKeyEvent(
             event, QtKeyEventSource::EmulatorWindow);
 
-    if (use_keycode_forwarding) {
+    if (getConsoleAgents()->settings->use_keycode_forwarding()) {
         return;
     }
 

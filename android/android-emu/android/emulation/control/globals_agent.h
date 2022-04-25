@@ -21,6 +21,7 @@
 #include "android/constants.h"
 #include "android/user-config.h"
 #include "android/utils/compiler.h"
+#include <stdbool.h>
 
 /** TODO:(jansene): These are the set of global variables that are used
  *throughout the system. Most of these are not yet available and commented out.
@@ -85,7 +86,7 @@ typedef struct QAndroidGlobalVarsAgent {
     // value
     //  * to keycode */
     // /* on emulator host. */
-    // int (*use_keycode_forwarding)(void);
+    bool (*use_keycode_forwarding)(void);
 
      AUserConfig* (*userConfig)(void);
 
@@ -112,5 +113,6 @@ typedef struct QAndroidGlobalVarsAgent {
     void (*inject_language)(char* /*language*/, char* /*country*/, char* /*locale*/);
 
     void (*inject_userConfig)(AUserConfig* /*config*/);
+    void (*set_keycode_forwading)(bool /*enabled */);
 } QAndroidGlobalVarsAgent;
 ANDROID_END_HEADER

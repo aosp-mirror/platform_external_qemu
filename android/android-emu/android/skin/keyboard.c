@@ -16,6 +16,7 @@
 #include <stdio.h>                                   // for fprintf, NULL
 #include <string.h>
 
+#include "android/console.h"
 #include "android/featurecontrol/feature_control.h"  // for feature_is_enabled
 #include "android/globals.h"                         // for android_hw
 #include "android/skin/android_keycodes.h"           // for KEY_APPSWITCH
@@ -276,7 +277,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             mod = sync_modifier_key(LINUX_KEY_LEFTSHIFT, kb, 0, 0, 1);
         }
 
-        if (!use_keycode_forwarding) {
+        if (!getConsoleAgents()->settings->use_keycode_forwarding()) {
             // TODO(digit): For each Unicode value in the input text.
             const uint8_t* text = ev->u.text.text;
             const uint8_t* end = text + sizeof(ev->u.text.text);

@@ -17,10 +17,12 @@ AndroidOptions* sAndroid_cmdLineOptions;
 std::string sCmdlLine;
 LanguageSettings s_languageSettings = {0};
 AUserConfig* s_userConfig = nullptr;
+bool sKeyCodeForwarding = false;
 
 static const QAndroidGlobalVarsAgent globalVarsAgent = {
 
         .language = []() { return &s_languageSettings; },
+        .use_keycode_forwarding = []() { return sKeyCodeForwarding; },
         .userConfig = []() { return s_userConfig; },
         .android_cmdLineOptions = []() { return sAndroid_cmdLineOptions; },
         .inject_cmdLineOptions =
@@ -41,7 +43,9 @@ static const QAndroidGlobalVarsAgent globalVarsAgent = {
                             language || country || locale;
                 },
         .inject_userConfig =
-                [](AUserConfig* config) { s_userConfig = config; }};
+                [](AUserConfig* config) { s_userConfig = config; },
+        .set_keycode_forwading =
+                [](bool enabled) { sKeyCodeForwarding = enabled; }};
 
 extern "C" const QAndroidGlobalVarsAgent* const gQAndroidGlobalVarsAgent =
         &globalVarsAgent;

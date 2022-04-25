@@ -17,6 +17,7 @@
 #include "android/skin/qt/native-event-filter-factory.h"
 
 #include "android/base/memory/LazyInstance.h"         // for LazyInstance
+#include "android/console.h"
 
 class QAbstractNativeEventFilter;
 
@@ -97,7 +98,7 @@ public:
             int evType = (ev->response_type & ~0x80);
             if (evType == XCB_KEY_PRESS) {
                 xcb_key_press_event_t* keyEv = (xcb_key_press_event_t*)ev;
-                if (use_keycode_forwarding) {
+                if (getConsoleAgents()->settings->use_keycode_forwarding()) {
                     if (EmulatorQtWindow::getInstance()->isActiveWindow()) {
                         NativeKeyboardEventHandler::KeyEvent inputEv;
                         inputEv.scancode = keyEv->detail;
@@ -150,7 +151,7 @@ public:
                     scancode = skin_keycode_native_map_keypad(scancode);
                     ev->wParam = MapVirtualKeyA(scancode, MAPVK_VSC_TO_VK);
                 }
-                if (use_keycode_forwarding) {
+                if (getConsoleAgents()->settings->use_keycode_forwarding()) {
                     if (EmulatorQtWindow::getInstance()->isActiveWindow()) {
                         NativeKeyboardEventHandler::KeyEvent keyEv;
                         keyEv.scancode = scancode;

@@ -67,11 +67,6 @@ extern int is_fuchsia;
 
 extern int android_snapshot_update_timer;
 
-/* True if we are using keycode forwarding instead of translating text value to
- * keycode */
-/* on emulator host. */
-extern int use_keycode_forwarding;
-
 extern AEMU_EXPORT AUserConfig* aemu_get_userConfigPtr();
 
 ANDROID_END_HEADER
