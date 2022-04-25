@@ -50,9 +50,6 @@ typedef struct QAndroidGlobalVarsAgent {
     // /* MSVC only exports function pointers */
     // AndroidHwConfig* (*aemu_get_android_hw)(void);
 
-    // /* this is to support snapshot (currently only qemu1+software-renderer)
-    // */ const char* (*savevm_on_exit)(void);
-
     // /* this indicates that guest has mounted data partition */
     // int (*guest_data_partition_mounted)(void);
 
@@ -73,11 +70,6 @@ typedef struct QAndroidGlobalVarsAgent {
     // int (*is_fuchsia)(void);
 
     // int (*android_snapshot_update_timer)(void);
-
-    // /* are we using qemu 2? */
-    // /* remove this flag once we deprecate qemu1 on both dev and release
-    //  * branches. */
-    // int (*engine_supports_snapshot)(void);
 
     // /* are we changing the language, country, or locale? */
     // int (*changing_language_country_locale)(void);

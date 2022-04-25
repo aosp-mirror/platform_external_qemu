@@ -995,7 +995,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
                 }
             }
 
-            if (fastSnapshotV1 || savevm_on_exit) {
+            if (fastSnapshotV1) {
                 queueQuitEvent();
             } else {
                 if (android_hw->hw_arc) {
