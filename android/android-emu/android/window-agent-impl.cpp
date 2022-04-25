@@ -224,7 +224,7 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
                    HorizontalAnchor horizontal,
                    VerticalAnchor vertical) {
                     int unused;
-                    auto userConfig = aemu_get_userConfigPtr();
+                    auto userConfig = getConsoleAgents()->settings->userConfig();
                     if (auserConfig_getExtendedControlsPos(userConfig, &unused,
                                                            &unused, &unused,
                                                            &unused) == 0 ||

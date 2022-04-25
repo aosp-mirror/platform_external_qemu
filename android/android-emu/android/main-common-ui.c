@@ -16,53 +16,40 @@
 #include <ApplicationServices/ApplicationServices.h>
 #endif
 
+#include <assert.h>   // for assert
+#include <ctype.h>    // for isdigit
+#include <signal.h>   // for signal, SIG_DFL
+#include <stdio.h>    // for NULL, snprintf
+#include <stdlib.h>   // for atoi, exit, free
+#include <string.h>   // for strdup, strchr
 
-#include "android/avd/util.h"
-#include "android/boot-properties.h"
-#include "android/cmdline-option.h"
-#include "android/emulation/bufprint_config_dirs.h"
-#include "android/emulator-window.h"
-#include "android/featurecontrol/feature_control.h"
-#include "android/framebuffer.h"
-#include "android/globals.h"
-#include "android/main-common.h"
-#include "android/resource.h"
-#include "android/skin/charmap.h"
-#include "android/skin/file.h"
-#include "android/skin/image.h"
-#include "android/skin/keyboard.h"
-#include "android/skin/resource.h"
-#include "android/skin/trackball.h"
-#include "android/skin/window.h"
-#include "android/skin/winsys.h"
-#include "android/user-config.h"
-#include "android/utils/bufprint.h"
-#include "android/utils/debug.h"
-#include "android/utils/eintr_wrapper.h"
-#include "android/utils/path.h"
-#include "android/utils/string.h"
+#include "android/boot-properties.h"                  // for boot_property_a...
+#include "android/console.h"                          // for getConsoleAgents
+#include "android/emulation/control/globals_agent.h"  // for QAndroidGlobalV...
+#include "android/emulator-window.h"                  // for emulator_window...
+#include "android/featurecontrol/feature_control.h"   // for feature_is_enab...
+#include "android/globals.h"                          // for android_avdInfo
+#include "android/main-common.h"                      // for android_skin_ne...
+#include "android/resource.h"                         // for android_emulato...
+#include "android/skin/charmap.h"                     // for kcm_extract_cha...
+#include "android/skin/image.h"                       // for skin_image_find...
+#include "android/skin/rect.h"                        // for SkinRect, SKIN_...
+#include "android/skin/resource.h"                    // for skin_resource_find
+#include "android/skin/winsys.h"                      // for skin_winsys_des...
+#include "android/user-config.h"                      // for AUserConfig
+#include "android/utils/bufprint.h"                   // for bufprint
+#include "android/utils/debug.h"                      // for VERBOSE_CHECK
+#include "android/utils/path.h"                       // for path_exists
+#include "android/utils/string.h"                     // for str_reset, str_...
 
-#include <assert.h>
-#include <ctype.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#ifndef _MSC_VER
-#include <unistd.h>
-#endif
-
-
-#define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
+#define D(...)                   \
+    do {                         \
+        if (VERBOSE_CHECK(init)) \
+            dprint(__VA_ARGS__); \
+    } while (0)
 
 /***  CONFIGURATION
  ***/
-
-static AUserConfig* userConfig = NULL;
-
-AUserConfig* aemu_get_userConfigPtr() {
-    return userConfig;
-}
 
 static AConfig* s_skinConfig = NULL;
 static char* s_skinPath = NULL;
@@ -71,34 +58,33 @@ static int s_deviceLcdHeight = 0;
 
 int use_keycode_forwarding = 0;
 
-bool emulator_initMinimalSkinConfig(
-    int lcd_width, int lcd_height,
-    const SkinRect* rect,
-    AUserConfig** userConfig_out);
+bool emulator_initMinimalSkinConfig(int lcd_width,
+                                    int lcd_height,
+                                    const SkinRect* rect,
+                                    AUserConfig** userConfig_out);
 
-bool
-user_config_init( void )
-{
+bool user_config_init(void) {
+    AUserConfig* userConfig = NULL;
     SkinRect mmmRect;
     skin_winsys_get_monitor_rect(&mmmRect);
     if (min_config_qemu_mode) {
-        emulator_initMinimalSkinConfig(
-            android_hw->hw_lcd_width,
-            android_hw->hw_lcd_height,
-            &mmmRect,
-            &userConfig);
+        emulator_initMinimalSkinConfig(android_hw->hw_lcd_width,
+                                       android_hw->hw_lcd_height, &mmmRect,
+                                       &userConfig);
     } else {
-        userConfig = auserConfig_new(android_avdInfo, &mmmRect, s_deviceLcdWidth, s_deviceLcdHeight);
+        userConfig = auserConfig_new(android_avdInfo, &mmmRect,
+                                     s_deviceLcdWidth, s_deviceLcdHeight);
     }
+    getConsoleAgents()->settings->inject_userConfig(userConfig);
     return userConfig != NULL;
 }
 
-/* only call this function on normal exits, so that ^C doesn't save the configuration */
-void
-user_config_done( void )
-{
-    int  win_x, win_y;
+/* only call this function on normal exits, so that ^C doesn't save the
+ * configuration */
+void user_config_done(void) {
+    int win_x, win_y;
 
+    AUserConfig* userConfig = getConsoleAgents()->settings->userConfig();
     if (!userConfig) {
         D("no user configuration?");
         return;
@@ -108,14 +94,13 @@ user_config_done( void )
     auserConfig_setWindowPos(userConfig, win_x, win_y);
     auserConfig_save(userConfig);
     auserConfig_free(userConfig);
-    userConfig = NULL;
+    getConsoleAgents()->settings->inject_userConfig(NULL);
 }
 
-void
-user_config_get_window_pos( int *window_x, int *window_y )
-{
+void user_config_get_window_pos(int* window_x, int* window_y) {
     *window_x = *window_y = 10;
 
+    AUserConfig* userConfig = getConsoleAgents()->settings->userConfig();
     if (userConfig)
         auserConfig_getWindowPos(userConfig, window_x, window_y);
 }
@@ -130,30 +115,23 @@ user_config_get_window_pos( int *window_x, int *window_y )
 
 /* list of skin aliases */
 static const struct {
-    const char*  name;
-    const char*  alias;
-} skin_aliases[] = {
-    { "QVGA-L", "320x240" },
-    { "QVGA-P", "240x320" },
-    { "HVGA-L", "480x320" },
-    { "HVGA-P", "320x480" },
-    { "QVGA", "320x240" },
-    { "HVGA", "320x480" },
-    { NULL, NULL }
-};
+    const char* name;
+    const char* alias;
+} skin_aliases[] = {{"QVGA-L", "320x240"}, {"QVGA-P", "240x320"},
+                    {"HVGA-L", "480x320"}, {"HVGA-P", "320x480"},
+                    {"QVGA", "320x240"},   {"HVGA", "320x480"},
+                    {NULL, NULL}};
 
-void
-parse_skin_files(const char*      skinDirPath,
-                 const char*      skinName,
-                 AndroidOptions*  opts,
-                 AndroidHwConfig* hwConfig,
-                 AConfig*        *skinConfig,
-                 char*           *skinPath)
-{
-    char      tmp[1024];
-    AConfig*  root;
+void parse_skin_files(const char* skinDirPath,
+                      const char* skinName,
+                      AndroidOptions* opts,
+                      AndroidHwConfig* hwConfig,
+                      AConfig** skinConfig,
+                      char** skinPath) {
+    char tmp[1024];
+    AConfig* root;
     const char* path = NULL;
-    AConfig*  n;
+    AConfig* n;
 
     root = aconfig_node("", "");
 
@@ -163,10 +141,11 @@ parse_skin_files(const char*      skinDirPath,
     /* Support skin aliases like QVGA-H QVGA-P, etc...
        But first we check if it's a directory that exist before applying
        the alias */
-    int  checkAlias = 1;
+    int checkAlias = 1;
 
     if (skinDirPath != NULL) {
-        bufprint(tmp, tmp+sizeof(tmp), "%s"PATH_SEP"%s", skinDirPath, skinName);
+        bufprint(tmp, tmp + sizeof(tmp), "%s" PATH_SEP "%s", skinDirPath,
+                 skinName);
         if (path_exists(tmp)) {
             checkAlias = 0;
         } else {
@@ -175,16 +154,16 @@ parse_skin_files(const char*      skinDirPath,
     }
 
     if (checkAlias) {
-        int  nn;
+        int nn;
 
-        for (nn = 0; ; nn++ ) {
-            const char*  skin_name  = skin_aliases[nn].name;
-            const char*  skin_alias = skin_aliases[nn].alias;
+        for (nn = 0;; nn++) {
+            const char* skin_name = skin_aliases[nn].name;
+            const char* skin_alias = skin_aliases[nn].alias;
 
             if (!skin_name)
                 break;
 
-            if (!strcasecmp( skin_name, skinName )) {
+            if (!strcasecmp(skin_name, skinName)) {
                 D("skin name '%s' aliased to '%s'", skinName, skin_alias);
                 skinName = skin_alias;
                 break;
@@ -193,23 +172,25 @@ parse_skin_files(const char*      skinDirPath,
     }
 
     /* Magically support skins like "320x240" or "320x240x16" */
-    if(isdigit(skinName[0])) {
-        char *x = strchr(skinName, 'x');
-        if(x && isdigit(x[1])) {
+    if (isdigit(skinName[0])) {
+        char* x = strchr(skinName, 'x');
+        if (x && isdigit(x[1])) {
             int width = atoi(skinName);
-            int height = atoi(x+1);
-            int bpp   = hwConfig->hw_lcd_depth; // respect the depth setting in the config.ini
-            char* y = strchr(x+1, 'x');
+            int height = atoi(x + 1);
+            int bpp = hwConfig->hw_lcd_depth;  // respect the depth setting in
+                                               // the config.ini
+            char* y = strchr(x + 1, 'x');
             if (y && isdigit(y[1])) {
-                bpp = atoi(y+1);
+                bpp = atoi(y + 1);
             }
 
             snprintf(tmp, sizeof tmp,
-                    "display {\n  width %d\n  height %d\n bpp %d}\n",
-                    width, height,bpp);
+                     "display {\n  width %d\n  height %d\n bpp %d}\n", width,
+                     height, bpp);
             aconfig_load(root, strdup(tmp));
             path = ":";
-            D("found magic skin width=%d height=%d bpp=%d\n", width, height, bpp);
+            D("found magic skin width=%d height=%d bpp=%d\n", width, height,
+              bpp);
             goto FOUND_SKIN;
         }
     }
@@ -219,21 +200,23 @@ parse_skin_files(const char*      skinDirPath,
         exit(1);
     }
 
-    snprintf(tmp, sizeof tmp, "%s"PATH_SEP"%s"PATH_SEP"layout", skinDirPath, skinName);
+    snprintf(tmp, sizeof tmp, "%s" PATH_SEP "%s" PATH_SEP "layout", skinDirPath,
+             skinName);
     D("trying to load skin file '%s'", tmp);
 
-    if(aconfig_load_file(root, tmp) < 0) {
-        dwarning("could not load skin file '%s', using built-in one\n",
-                 tmp);
+    if (aconfig_load_file(root, tmp) < 0) {
+        dwarning("could not load skin file '%s', using built-in one\n", tmp);
         goto DEFAULT_SKIN;
     }
 
-    snprintf(tmp, sizeof tmp, "%s"PATH_SEP"%s"PATH_SEP, skinDirPath, skinName);
+    snprintf(tmp, sizeof tmp, "%s" PATH_SEP "%s" PATH_SEP, skinDirPath,
+             skinName);
     path = tmp;
     goto FOUND_SKIN;
 
 FOUND_SKIN:
-    /* the default network speed and latency can now be specified by the device skin */
+    /* the default network speed and latency can now be specified by the device
+     * skin */
     n = aconfig_find(root, "network");
     if (n != NULL) {
         android_skin_net_speed = aconfig_str(n, "speed", 0);
@@ -259,14 +242,14 @@ FOUND_SKIN:
     }
 
     if (n != NULL) {
-        int  width  = aconfig_int(n, "width", hwConfig->hw_lcd_width);
-        int  height = aconfig_int(n, "height", hwConfig->hw_lcd_height);
-        int  depth  = aconfig_int(n, "bpp", hwConfig->hw_lcd_depth);
+        int width = aconfig_int(n, "width", hwConfig->hw_lcd_width);
+        int height = aconfig_int(n, "height", hwConfig->hw_lcd_height);
+        int depth = aconfig_int(n, "bpp", hwConfig->hw_lcd_depth);
 
         if (width > 0 && height > 0) {
             /* The emulated framebuffer wants a width that is a multiple of 2 */
             if ((width & 1) != 0) {
-                width  = (width + 1) & ~1;
+                width = (width + 1) & ~1;
                 D("adjusting LCD dimensions to (%dx%dx)", width, height);
             }
 
@@ -276,66 +259,64 @@ FOUND_SKIN:
                 D("adjusting LCD bit depth to %d", depth);
             }
 
-            hwConfig->hw_lcd_width  = width;
+            hwConfig->hw_lcd_width = width;
             hwConfig->hw_lcd_height = height;
-            hwConfig->hw_lcd_depth  = depth;
-        }
-        else {
-            D("ignoring invalid skin LCD dimensions (%dx%dx%d)",
-              width, height, depth);
+            hwConfig->hw_lcd_depth = depth;
+        } else {
+            D("ignoring invalid skin LCD dimensions (%dx%dx%d)", width, height,
+              depth);
         }
     }
 
     *skinConfig = root;
-    *skinPath   = strdup(path);
+    *skinPath = strdup(path);
     return;
 
-DEFAULT_SKIN:
-    {
-        const unsigned char*  layout_base;
-        size_t                layout_size;
-        char*                 base;
+DEFAULT_SKIN : {
+    const unsigned char* layout_base;
+    size_t layout_size;
+    char* base;
 
-        skinName = "<builtin>";
+    skinName = "<builtin>";
 
-        layout_base = skin_resource_find( "layout", &layout_size );
-        if (layout_base == NULL) {
-            dfatal("Couldn't load builtin skin");
-            exit(1);
-        }
-        base = malloc( layout_size+1 );
-        memcpy( base, layout_base, layout_size );
-        base[layout_size] = 0;
-
-        D("parsing built-in skin layout file (%d bytes)", (int)layout_size);
-        aconfig_load(root, base);
-        path = ":";
+    layout_base = skin_resource_find("layout", &layout_size);
+    if (layout_base == NULL) {
+        dfatal("Couldn't load builtin skin");
+        exit(1);
     }
+    base = malloc(layout_size + 1);
+    memcpy(base, layout_base, layout_size);
+    base[layout_size] = 0;
+
+    D("parsing built-in skin layout file (%d bytes)", (int)layout_size);
+    aconfig_load(root, base);
+    path = ":";
+}
     goto FOUND_SKIN;
 }
 
-void create_minimal_skin_config(
-    int lcd_width, int lcd_height,
-    AConfig** skinConfig,
-    char** skinPath) {
-    char      tmp[1024];
-    AConfig*  root;
+void create_minimal_skin_config(int lcd_width,
+                                int lcd_height,
+                                AConfig** skinConfig,
+                                char** skinPath) {
+    char tmp[1024];
+    AConfig* root;
     const char* path = NULL;
-    AConfig*  n;
+    AConfig* n;
 
     root = aconfig_node("", "");
 
     int width = lcd_width;
     int height = lcd_height;
-    int bpp   = 32;
-    snprintf(tmp, sizeof tmp,
-            "display {\n  width %d\n  height %d\n bpp %d}\n",
-            width, height,bpp);
+    int bpp = 32;
+    snprintf(tmp, sizeof tmp, "display {\n  width %d\n  height %d\n bpp %d}\n",
+             width, height, bpp);
     aconfig_load(root, strdup(tmp));
     path = ":";
     D("found magic skin width=%d height=%d bpp=%d\n", width, height, bpp);
 
-    /* the default network speed and latency can now be specified by the device skin */
+    /* the default network speed and latency can now be specified by the device
+     * skin */
     n = aconfig_find(root, "network");
     if (n != NULL) {
         android_skin_net_speed = aconfig_str(n, "speed", 0);
@@ -361,14 +342,14 @@ void create_minimal_skin_config(
     }
 
     if (n != NULL) {
-        int  width  = aconfig_int(n, "width", lcd_width);
-        int  height = aconfig_int(n, "height", lcd_height);
-        int  depth  = aconfig_int(n, "bpp", 32);
+        int width = aconfig_int(n, "width", lcd_width);
+        int height = aconfig_int(n, "height", lcd_height);
+        int depth = aconfig_int(n, "bpp", 32);
 
         if (width > 0 && height > 0) {
             /* The emulated framebuffer wants a width that is a multiple of 2 */
             if ((width & 1) != 0) {
-                width  = (width + 1) & ~1;
+                width = (width + 1) & ~1;
                 D("adjusting LCD dimensions to (%dx%dx)", width, height);
             }
 
@@ -378,34 +359,29 @@ void create_minimal_skin_config(
                 D("adjusting LCD bit depth to %d", depth);
             }
 
-        }
-        else {
-            D("ignoring invalid skin LCD dimensions (%dx%dx%d)",
-              width, height, depth);
+        } else {
+            D("ignoring invalid skin LCD dimensions (%dx%dx%d)", width, height,
+              depth);
         }
     }
 
     *skinConfig = root;
-    *skinPath   = strdup(path);
+    *skinPath = strdup(path);
     return;
 }
 
-bool emulator_initMinimalSkinConfig(
-    int lcd_width, int lcd_height,
-    const SkinRect* rect,
-    AUserConfig** userConfig_out) {
-
+bool emulator_initMinimalSkinConfig(int lcd_width,
+                                    int lcd_height,
+                                    const SkinRect* rect,
+                                    AUserConfig** userConfig_out) {
     s_deviceLcdWidth = lcd_width;
     s_deviceLcdHeight = lcd_height;
 
-    create_minimal_skin_config(
-        lcd_width, lcd_height,
-        &s_skinConfig, &s_skinPath);
+    create_minimal_skin_config(lcd_width, lcd_height, &s_skinConfig,
+                               &s_skinPath);
 
-    *userConfig_out =
-        auserConfig_new_custom(
-            android_avdInfo, rect,
-            s_deviceLcdWidth, s_deviceLcdHeight);
+    *userConfig_out = auserConfig_new_custom(
+            android_avdInfo, rect, s_deviceLcdWidth, s_deviceLcdHeight);
     return true;
 }
 
@@ -446,8 +422,8 @@ bool emulator_parseUiCommandLineOptions(AndroidOptions* opts,
         return false;
     }
 
-    parse_skin_files(opts->skindir, opts->skin, opts, hw,
-                     &s_skinConfig, &s_skinPath);
+    parse_skin_files(opts->skindir, opts->skin, opts, hw, &s_skinConfig,
+                     &s_skinPath);
 
     if (!opts->charmap) {
         /* Try to find a valid charmap name */
@@ -487,13 +463,11 @@ bool emulator_initUserInterface(const AndroidOptions* opts,
 }
 
 // TODO(digit): Remove once QEMU2 uses emulator_initUserInterface().
-bool
-ui_init(const AConfig* skinConfig,
-        const char*       skinPath,
-        const AndroidOptions*   opts,
-        const UiEmuAgent* uiEmuAgent)
-{
-    int  win_x, win_y;
+bool ui_init(const AConfig* skinConfig,
+             const char* skinPath,
+             const AndroidOptions* opts,
+             const UiEmuAgent* uiEmuAgent) {
+    int win_x, win_y;
 
     signal(SIGINT, SIG_DFL);
 #ifndef _WIN32
@@ -518,32 +492,32 @@ ui_init(const AConfig* skinConfig,
 
     if (opts->no_window) {
 #ifndef _WIN32
-       /* prevent SIGTTIN and SIGTTOUT from stopping us. this is necessary to be
-        * able to run the emulator in the background (e.g. "emulator &").
-        * despite the fact that the emulator should not grab input or try to
-        * write to the output in normal cases, we're stopped on some systems
-        * (e.g. OS X)
-        */
+        /* prevent SIGTTIN and SIGTTOUT from stopping us. this is necessary to
+         * be able to run the emulator in the background (e.g. "emulator &").
+         * despite the fact that the emulator should not grab input or try to
+         * write to the output in normal cases, we're stopped on some systems
+         * (e.g. OS X)
+         */
         signal(SIGTTIN, SIG_IGN);
         signal(SIGTTOU, SIG_IGN);
 #endif
 #ifdef __APPLE__
-    /** Make sure we don't accidentally display an icon b/156675899 */
-    ProcessSerialNumber psn = {0, kCurrentProcess};
-    TransformProcessType(&psn, kProcessTransformToBackgroundApplication);
+        /** Make sure we don't accidentally display an icon b/156675899 */
+        ProcessSerialNumber psn = {0, kCurrentProcess};
+        TransformProcessType(&psn, kProcessTransformToBackgroundApplication);
 #endif
-    /** Do not load emulator icon for embedded emulator. */
+        /** Do not load emulator icon for embedded emulator. */
     } else if (!opts->qt_hide_window) {
         // NOTE: On Windows, the program icon is embedded as a resource inside
-        //       the executable. However, this only changes the icon that appears
-        //       with the executable in a file browser. To change the icon that
-        //       appears both in the application title bar and the taskbar, the
-        //       window icon still must be set.
-#  if defined(__APPLE__) || defined(_WIN32)
+        //       the executable. However, this only changes the icon that
+        //       appears with the executable in a file browser. To change the
+        //       icon that appears both in the application title bar and the
+        //       taskbar, the window icon still must be set.
+#if defined(__APPLE__) || defined(_WIN32)
         static const char kIconFile[] = "emulator_icon_256.png";
-#  else
+#else
         static const char kIconFile[] = "emulator_icon_128.png";
-#  endif
+#endif
         size_t icon_size;
         const unsigned char* icon_data =
                 android_emulator_icon_find(kIconFile, &icon_size);
@@ -557,29 +531,30 @@ ui_init(const AConfig* skinConfig,
 
     user_config_get_window_pos(&win_x, &win_y);
 
-    if (emulator_window_init(emulator_window_get(), skinConfig, skinPath,
-                             win_x, win_y, opts, uiEmuAgent) < 0) {
+    if (emulator_window_init(emulator_window_get(), skinConfig, skinPath, win_x,
+                             win_y, opts, uiEmuAgent) < 0) {
         derror("Could not load emulator skin from '%s'", skinPath);
         return false;
     }
 
     /* add an onion overlay image if needed */
     if (opts->onion) {
-        SkinImage*  onion = skin_image_find_simple( opts->onion );
-        int         alpha, rotate;
+        SkinImage* onion = skin_image_find_simple(opts->onion);
+        int alpha, rotate;
 
-        if ( opts->onion_alpha && 1 == sscanf( opts->onion_alpha, "%d", &alpha ) ) {
-            alpha = (256*alpha)/100;
+        if (opts->onion_alpha && 1 == sscanf(opts->onion_alpha, "%d", &alpha)) {
+            alpha = (256 * alpha) / 100;
         } else
             alpha = 128;
 
-        if ( opts->onion_rotation && 1 == sscanf( opts->onion_rotation, "%d", &rotate ) ) {
+        if (opts->onion_rotation &&
+            1 == sscanf(opts->onion_rotation, "%d", &rotate)) {
             rotate &= 3;
         } else
             rotate = SKIN_ROTATION_0;
 
-        emulator_window_get()->onion          = onion;
-        emulator_window_get()->onion_alpha    = alpha;
+        emulator_window_get()->onion = onion;
+        emulator_window_get()->onion_alpha = alpha;
         emulator_window_get()->onion_rotation = rotate;
     }
 
@@ -598,8 +573,7 @@ void emulator_finiUserInterface(void) {
 }
 
 // TODO(digit): Remove once QEMU2 uses emulator_finiUserInterface().
-void ui_done(void)
-{
+void ui_done(void) {
     user_config_done();
     emulator_window_done(emulator_window_get());
     skin_winsys_destroy();

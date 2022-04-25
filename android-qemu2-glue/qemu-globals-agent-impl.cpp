@@ -16,10 +16,12 @@
 AndroidOptions* sAndroid_cmdLineOptions;
 std::string sCmdlLine;
 LanguageSettings s_languageSettings = {0};
+AUserConfig* s_userConfig = nullptr;
 
 static const QAndroidGlobalVarsAgent globalVarsAgent = {
 
         .language = []() { return &s_languageSettings; },
+        .userConfig = []() { return s_userConfig; },
         .android_cmdLineOptions = []() { return sAndroid_cmdLineOptions; },
         .inject_cmdLineOptions =
                 [](AndroidOptions* opts) { sAndroid_cmdLineOptions = opts; },
@@ -37,6 +39,9 @@ static const QAndroidGlobalVarsAgent globalVarsAgent = {
                     s_languageSettings.locale = locale;
                     s_languageSettings.changing_language_country_locale =
                             language || country || locale;
-                }};
+                },
+        .inject_userConfig =
+                [](AUserConfig* config) { s_userConfig = config; }};
+
 extern "C" const QAndroidGlobalVarsAgent* const gQAndroidGlobalVarsAgent =
         &globalVarsAgent;

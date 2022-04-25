@@ -87,7 +87,7 @@ typedef struct QAndroidGlobalVarsAgent {
     // /* on emulator host. */
     // int (*use_keycode_forwarding)(void);
 
-    // AUserConfig* (*aemu_get_userConfigPtr)(void);
+     AUserConfig* (*userConfig)(void);
 
     // The parsed command line options.
     AndroidOptions* (*android_cmdLineOptions)(void);
@@ -110,5 +110,7 @@ typedef struct QAndroidGlobalVarsAgent {
     // Injects the language settings, this will set the changing_language_country_locale
     // variable if any of the parameters are not null.
     void (*inject_language)(char* /*language*/, char* /*country*/, char* /*locale*/);
+
+    void (*inject_userConfig)(AUserConfig* /*config*/);
 } QAndroidGlobalVarsAgent;
 ANDROID_END_HEADER

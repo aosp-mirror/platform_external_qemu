@@ -12,15 +12,14 @@
 
 #pragma once
 
-#include "android/avd/hw-config.h"
-#include "android/avd/info.h"
-#include "android/cmdline-option.h"
-#include "android/ui-emu-agent.h"
-#include "android/utils/aconfig-file.h"
-#include "android/utils/compiler.h"
+#include <stdbool.h>                      // for bool
 
-
-#include <stdbool.h>
+#include "android/avd/hw-config.h"        // for AndroidHwConfig
+#include "android/avd/info.h"             // for AvdInfo
+#include "android/cmdline-definitions.h"  // for AndroidOptions
+#include "android/ui-emu-agent.h"         // for UiEmuAgent
+#include "android/utils/aconfig-file.h"   // for AConfig
+#include "android/utils/compiler.h"       // for ANDROID_BEGIN_HEADER, ANDRO...
 
 ANDROID_BEGIN_HEADER
 
