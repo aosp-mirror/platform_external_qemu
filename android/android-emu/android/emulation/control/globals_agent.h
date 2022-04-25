@@ -28,6 +28,14 @@
  **/
 
 ANDROID_BEGIN_HEADER
+
+typedef struct LanguageSettings {
+    int changing_language_country_locale;
+    char* language;
+    char* country;
+    char* locale;
+} LanguageSettings;
+
 typedef struct QAndroidGlobalVarsAgent {
     /* this structure is setup when loading the virtual device
      * after that, you can read the 'flags' field to determine
@@ -71,11 +79,7 @@ typedef struct QAndroidGlobalVarsAgent {
 
     // int (*android_snapshot_update_timer)(void);
 
-    // /* are we changing the language, country, or locale? */
-    // int (*changing_language_country_locale)(void);
-    // const char* (*to_set_language)(void);
-    // const char* (*to_set_country)(void);
-    // const char* (*to_set_locale)(void);
+    LanguageSettings* (*language)(void);
 
     // /* True if we are using keycode forwarding instead of translating text
     // value
@@ -102,5 +106,9 @@ typedef struct QAndroidGlobalVarsAgent {
     // Injects the cmdLine, making it available to everyone.
     // You **SHOULD** not really need to call this.
     void (*inject_android_cmdLine)(const char*);
+
+    // Injects the language settings, this will set the changing_language_country_locale
+    // variable if any of the parameters are not null.
+    void (*inject_language)(char* /*language*/, char* /*country*/, char* /*locale*/);
 } QAndroidGlobalVarsAgent;
 ANDROID_END_HEADER

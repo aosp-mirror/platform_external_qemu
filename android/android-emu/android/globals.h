@@ -63,12 +63,6 @@ extern int is_fuchsia;
 
 extern int android_snapshot_update_timer;
 
-/* are we changing the language, country, or locale? */
-extern int changing_language_country_locale;
-extern const char* to_set_language;
-extern const char* to_set_country;
-extern const char* to_set_locale;
-
 /* True if we are using keycode forwarding instead of translating text value to
  * keycode */
 /* on emulator host. */

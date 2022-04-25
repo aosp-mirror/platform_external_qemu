@@ -9,15 +9,17 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include <string>
 #include "android/cmdline-definitions.h"
 #include "android/emulation/control/globals_agent.h"
 
-#include <string>
-
 AndroidOptions* sAndroid_cmdLineOptions;
 std::string sCmdlLine;
+LanguageSettings s_languageSettings = {0};
 
 static const QAndroidGlobalVarsAgent globalVarsAgent = {
+
+        .language = []() { return &s_languageSettings; },
         .android_cmdLineOptions = []() { return sAndroid_cmdLineOptions; },
         .inject_cmdLineOptions =
                 [](AndroidOptions* opts) { sAndroid_cmdLineOptions = opts; },
@@ -27,7 +29,14 @@ static const QAndroidGlobalVarsAgent globalVarsAgent = {
                 },
         .android_cmdLine = []() { return (const char*)sCmdlLine.c_str(); },
         .inject_android_cmdLine =
-                [](const char* cmdline) { sCmdlLine = cmdline; }};
-
+                [](const char* cmdline) { sCmdlLine = cmdline; },
+        .inject_language =
+                [](char* language, char* country, char* locale) {
+                    s_languageSettings.language = language;
+                    s_languageSettings.country = country;
+                    s_languageSettings.locale = locale;
+                    s_languageSettings.changing_language_country_locale =
+                            language || country || locale;
+                }};
 extern "C" const QAndroidGlobalVarsAgent* const gQAndroidGlobalVarsAgent =
         &globalVarsAgent;
