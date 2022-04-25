@@ -471,7 +471,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     qRegisterMetaType<Ui::OverlayMessageType>();
     qRegisterMetaType<Ui::OverlayChildWidget::DismissFunc>();
 
-    mOrientation = !strcmp(android_hw->hw_initialOrientation, "landscape")
+    mOrientation = !strcmp(getConsoleAgents()->settings->hw()->hw_initialOrientation, "landscape")
                            ? SKIN_ROTATION_270
                            : SKIN_ROTATION_0;
 
@@ -998,7 +998,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
             if (fastSnapshotV1) {
                 queueQuitEvent();
             } else {
-                if (android_hw->hw_arc) {
+                if (getConsoleAgents()->settings->hw()->hw_arc) {
                     // Send power key event to guest.
                     // After 10 seconds, we force close it.
                     mToolWindow->forwardKeyToEmulator(LINUX_KEY_POWER, true);
@@ -2261,9 +2261,9 @@ void EmulatorQtWindow::showEvent(QShowEvent* event) {
     if (mFirstShowEvent) {
         // moved from android_metrics_start() in metrics.cpp
         android_metrics_start_adb_liveness_checker((*mAdbInterface));
-        if (android_hw->test_quitAfterBootTimeOut > 0) {
+        if (getConsoleAgents()->settings->hw()->test_quitAfterBootTimeOut > 0) {
             android_test_start_boot_complete_timer(
-                    android_hw->test_quitAfterBootTimeOut);
+                    getConsoleAgents()->settings->hw()->test_quitAfterBootTimeOut);
         }
         mFirstShowEvent = false;
     }
@@ -2524,7 +2524,7 @@ static int convertKeyCode(int sym) {
             return kConvert[nn].keycode;
         }
     }
-    if (!android_hw->hw_arc)
+    if (!getConsoleAgents()->settings->hw()->hw_arc)
         return -1;
     static const struct {
         int qt_sym;
@@ -2618,8 +2618,8 @@ void EmulatorQtWindow::resizeAndChangeAspectRatio(bool isFolded) {
     }
     QSize backingSize = mBackingSurface->bitmap->size();
     float scale = (float)windowGeo.width() / (float)backingSize.width();
-    int displayX = android_hw->hw_lcd_width;
-    int displayY = android_hw->hw_lcd_height;
+    int displayX = getConsoleAgents()->settings->hw()->hw_lcd_width;
+    int displayY = getConsoleAgents()->settings->hw()->hw_lcd_height;
 
     if (isFolded) {
         int displayXFolded;

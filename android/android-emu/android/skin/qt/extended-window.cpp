@@ -202,14 +202,14 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
                 ->qt_hide_window) {
         const auto* cfgIni = reinterpret_cast<const android::base::IniFile*>(
                 avdInfo_getConfigIni(getConsoleAgents()->settings->avdInfo()));
-        // If key avd.ini.displayname doesn't exists, use android_hw->avd_name
+        // If key avd.ini.displayname doesn't exists, use getConsoleAgents()->settings->hw()->avd_name
         // by default
         const auto displayName =
-                cfgIni->getString("avd.ini.displayname", android_hw->avd_name);
+                cfgIni->getString("avd.ini.displayname", getConsoleAgents()->settings->hw()->avd_name);
         setWindowTitle(displayName.c_str() + QString(" - Extended Controls"));
 
     } else {
-        setWindowTitle(QString("Extended Controls - ") + android_hw->avd_name +
+        setWindowTitle(QString("Extended Controls - ") + getConsoleAgents()->settings->hw()->avd_name +
                        ":" + QString::number(android_serial_number_port));
     }
     if (getConsoleAgents()->settings->has_cmdLineOptions() &&
@@ -238,7 +238,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     mSidebarButtons.addButton(mExtendedUi->batteryButton);
     mSidebarButtons.addButton(mExtendedUi->telephoneButton);
     mSidebarButtons.addButton(mExtendedUi->dpadButton);
-    if (android_hw->hw_rotaryInput ||
+    if (getConsoleAgents()->settings->hw()->hw_rotaryInput ||
         avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR) {
         mSidebarButtons.addButton(mExtendedUi->rotaryInputButton);
     } else {
@@ -251,7 +251,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     // camera.  Hide the button if the virtual scene camera is not enabled, or
     // if we are using an Android Auto image because that does not have camera
     // support at the moment.
-    if (androidHwConfig_hasVirtualSceneCamera(android_hw) &&
+    if (androidHwConfig_hasVirtualSceneCamera(getConsoleAgents()->settings->hw()) &&
         (!getConsoleAgents()->settings->avdInfo() ||
          (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) != AVD_ANDROID_AUTO))) {
         mSidebarButtons.addButton(mExtendedUi->cameraButton);
@@ -279,7 +279,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
 
     if (android::featurecontrol::isEnabled(
                 android::featurecontrol::PlayStoreImage) &&
-        android_hw->PlayStore_enabled) {
+        getConsoleAgents()->settings->hw()->PlayStore_enabled) {
         mSidebarButtons.addButton(mExtendedUi->googlePlayButton);
         mExtendedUi->googlePlayPage->initialize(
                 mEmulatorWindow->getAdbInterface());

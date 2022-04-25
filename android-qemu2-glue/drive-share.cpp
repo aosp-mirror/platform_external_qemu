@@ -128,28 +128,28 @@ static bool parseQemuOptForQcow2(bool wipeData) {
 
     /* List of paths to all images that can be mounted.*/
     const DriveBackingPair image_paths[] = {
-            {"system", android_hw->disk_systemPartition_path &&
-                                       android_hw->disk_systemPartition_path[0]
-                               ? android_hw->disk_systemPartition_path
-                               : android_hw->disk_systemPartition_initPath},
-            {"vendor", android_hw->disk_vendorPartition_path &&
-                                       android_hw->disk_vendorPartition_path[0]
-                               ? android_hw->disk_vendorPartition_path
-                               : android_hw->disk_vendorPartition_initPath},
-            {"cache", android_hw->disk_cachePartition_path},
-            {"userdata", android_hw->disk_dataPartition_path},
-            {"sdcard", android_hw->hw_sdCard_path},
-            {"encrypt", android_hw->disk_encryptionKeyPartition_path},
+            {"system", getConsoleAgents()->settings->hw()->disk_systemPartition_path &&
+                                       getConsoleAgents()->settings->hw()->disk_systemPartition_path[0]
+                               ? getConsoleAgents()->settings->hw()->disk_systemPartition_path
+                               : getConsoleAgents()->settings->hw()->disk_systemPartition_initPath},
+            {"vendor", getConsoleAgents()->settings->hw()->disk_vendorPartition_path &&
+                                       getConsoleAgents()->settings->hw()->disk_vendorPartition_path[0]
+                               ? getConsoleAgents()->settings->hw()->disk_vendorPartition_path
+                               : getConsoleAgents()->settings->hw()->disk_vendorPartition_initPath},
+            {"cache", getConsoleAgents()->settings->hw()->disk_cachePartition_path},
+            {"userdata", getConsoleAgents()->settings->hw()->disk_dataPartition_path},
+            {"sdcard", getConsoleAgents()->settings->hw()->hw_sdCard_path},
+            {"encrypt", getConsoleAgents()->settings->hw()->disk_encryptionKeyPartition_path},
     };
     /* List of paths to all images for cros.*/
     const DriveBackingPair image_paths_hw_arc[] = {
-            {"system", android_hw->disk_systemPartition_initPath},
-            {"vendor", android_hw->disk_vendorPartition_initPath},
-            {"userdata", android_hw->disk_dataPartition_path},
+            {"system", getConsoleAgents()->settings->hw()->disk_systemPartition_initPath},
+            {"vendor", getConsoleAgents()->settings->hw()->disk_vendorPartition_initPath},
+            {"userdata", getConsoleAgents()->settings->hw()->disk_dataPartition_path},
     };
     int count = sizeof(image_paths) / sizeof(image_paths[0]);
     const DriveBackingPair* images = image_paths;
-    if (android_hw->hw_arc) {
+    if (getConsoleAgents()->settings->hw()->hw_arc) {
         count = sizeof(image_paths_hw_arc) / sizeof(image_paths_hw_arc[0]);
         images = image_paths_hw_arc;
     }
@@ -172,7 +172,7 @@ static bool parseQemuOptForQcow2(bool wipeData) {
         char* qcow2_path_buffer = nullptr;
         bool need_create_tmp = false;
         // ChromeOS and Android pass parameters differently
-        if (android_hw->hw_arc) {
+        if (getConsoleAgents()->settings->hw()->hw_arc) {
             if (p < 2) {
                 /* System & vendor image are special cases, the backing image is
                  * in the SDK folder, but the QCoW2 image that the emulator
@@ -384,7 +384,7 @@ static void mirrorTmpImg(const char* dst, const char* src) {
         return;
     }
     char* absPath = nullptr;
-    char* backingFile = android_hw->MIRROR_IMG_FIELD;
+    char* backingFile = getConsoleAgents()->settings->hw()->MIRROR_IMG_FIELD;
     if (!android::base::PathUtils::isAbsolute(backingFile)) {
         absPath =
                 path_join(avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo()), backingFile);

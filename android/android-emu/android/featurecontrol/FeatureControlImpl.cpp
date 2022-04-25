@@ -216,8 +216,8 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
     }
 
     // Apply overrides from the hw config.
-    if (android_hw->hw_featureflags) {
-        parseAndApplyOverrides(android_hw->hw_featureflags);
+    if (getConsoleAgents()->settings->hw()->hw_featureflags) {
+        parseAndApplyOverrides(getConsoleAgents()->settings->hw()->hw_featureflags);
     }
 
     // Enumerate the command line and environment variables to add overrides.
@@ -244,8 +244,8 @@ void FeatureControlImpl::initNoFiles() {
            sizeof(FeatureOption) * Feature_n_items);
 
     // Apply overrides from the hw config.
-    if (android_hw->hw_featureflags) {
-        parseAndApplyOverrides(android_hw->hw_featureflags);
+    if (getConsoleAgents()->settings->hw()->hw_featureflags) {
+        parseAndApplyOverrides(getConsoleAgents()->settings->hw()->hw_featureflags);
     }
 
     // Enumerate the command line and environment variables to add overrides.

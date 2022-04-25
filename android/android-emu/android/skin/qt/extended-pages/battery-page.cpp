@@ -124,7 +124,7 @@ BatteryPage::BatteryPage(QWidget* parent)
                             {BATTERY_STATUS_FULL, "Full"},
                     });
 
-    if (android_hw->hw_battery) {
+    if (getConsoleAgents()->settings->hw()->hw_battery) {
         // Update the UI with the saved values
         int chargeLevel = getSavedChargeLevel();
 
@@ -163,7 +163,7 @@ BatteryPage::BatteryPage(QWidget* parent)
 
 // static
 void BatteryPage::setBatteryAgent(const QAndroidBatteryAgent* agent) {
-    if (!android_hw->hw_battery) {
+    if (!getConsoleAgents()->settings->hw()->hw_battery) {
         // This device has no battery. Ignore the agent.
         return;
     }
@@ -255,7 +255,7 @@ void BatteryPage::on_bat_statusBox_activated(int index) {
 }
 
 static void saveChargeLevel(int chargeLevel) {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -270,7 +270,7 @@ static void saveChargeLevel(int chargeLevel) {
 }
 
 static void saveCharger(BatteryCharger charger) {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -285,7 +285,7 @@ static void saveCharger(BatteryCharger charger) {
 }
 
 static void saveHealth(BatteryHealth health) {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -300,7 +300,7 @@ static void saveHealth(BatteryHealth health) {
 }
 
 static void saveStatus(BatteryStatus status) {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -315,7 +315,7 @@ static void saveStatus(BatteryStatus status) {
 }
 
 static int getSavedChargeLevel() {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -331,7 +331,7 @@ static int getSavedChargeLevel() {
 }
 
 static BatteryCharger getSavedCharger() {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -361,7 +361,7 @@ static BatteryCharger getSavedCharger() {
 }
 
 static BatteryHealth getSavedHealth() {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -385,7 +385,7 @@ static BatteryStatus getSavedStatus() {
                                                  ? BATTERY_STATUS_CHARGING
                                                  : BATTERY_STATUS_NOT_CHARGING;
 
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);

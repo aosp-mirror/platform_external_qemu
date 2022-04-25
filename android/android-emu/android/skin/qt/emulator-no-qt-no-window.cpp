@@ -63,9 +63,9 @@ EmulatorNoQtNoWindow::EmulatorNoQtNoWindow()
       mAdbInterface(android::emulation::AdbInterface::createGlobalOwnThread()) {
     android::base::ThreadLooper::setLooper(mLooper, true);
     android_metrics_start_adb_liveness_checker(mAdbInterface);
-    if (android_hw->test_quitAfterBootTimeOut > 0) {
+    if (getConsoleAgents()->settings->hw()->test_quitAfterBootTimeOut > 0) {
         android_test_start_boot_complete_timer(
-                android_hw->test_quitAfterBootTimeOut);
+                getConsoleAgents()->settings->hw()->test_quitAfterBootTimeOut);
     }
 }
 
@@ -151,10 +151,10 @@ void EmulatorNoQtNoWindow::sendFoldedArea() {
     if (notSupoortFold()) {
         return;
     }
-    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
-    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
-    int width = android_hw->hw_displayRegion_0_1_width;
-    int height = android_hw->hw_displayRegion_0_1_height;
+    int xOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_xOffset;
+    int yOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_yOffset;
+    int width = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_width;
+    int height = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_height;
     char foldedArea[64];
     sprintf(foldedArea, "folded-area %d,%d,%d,%d", xOffset, yOffset,
             xOffset + width, yOffset + height);
@@ -168,10 +168,10 @@ void EmulatorNoQtNoWindow::sendFoldedArea() {
 }
 
 bool EmulatorNoQtNoWindow::notSupoortFold() {
-    int xOffset = android_hw->hw_displayRegion_0_1_xOffset;
-    int yOffset = android_hw->hw_displayRegion_0_1_yOffset;
-    int width = android_hw->hw_displayRegion_0_1_width;
-    int height = android_hw->hw_displayRegion_0_1_height;
+    int xOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_xOffset;
+    int yOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_yOffset;
+    int width = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_width;
+    int height = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_height;
 
     if (xOffset < 0 || xOffset > 9999 || yOffset < 0 || yOffset > 9999 ||
         width < 1 || width > 9999 || height < 1 || height > 9999 ||

@@ -64,7 +64,7 @@ PerfStats3DWidget::PerfStats3DWidget(QWidget* parent)
     // CPU usage stats
 
     int numGuestCores = 0;
-    numGuestCores = android_hw->hw_cpu_ncore;
+    numGuestCores = getConsoleAgents()->settings->hw()->hw_cpu_ncore;
 
     float maxCpuPercentScale = 100.0f + 100.0f * numGuestCores;
 
@@ -147,7 +147,7 @@ PerfStats3DWidget::PerfStats3DWidget(QWidget* parent)
 
     currentGraphIndex++;
     float minResMem = 0.0f;
-    float maxResMem = 3.0 * android_hw->hw_ramSize;
+    float maxResMem = 3.0 * getConsoleAgents()->settings->hw()->hw_ramSize;
 
     // Memory Usage Stats
     mDataSources.emplace_back(

@@ -43,7 +43,7 @@ std::unordered_map<std::string, std::string> getQemuConfig() {
     std::unordered_map<std::string, std::string> cfg;
 
     /* use the magic of macros to implement the hardware configuration loaded */
-    AndroidHwConfig* config = android_hw;
+    AndroidHwConfig* config = getConsoleAgents()->settings->hw();
 
 #define HWCFG_BOOL(n, s, d, a, t) cfg[s] = config->n ? "true" : "false";
 #define HWCFG_INT(n, s, d, a, t) cfg[s] = std::to_string(config->n);

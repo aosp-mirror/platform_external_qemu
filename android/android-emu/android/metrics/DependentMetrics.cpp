@@ -229,7 +229,7 @@ static void fillAvdMetrics(android_studio::AndroidStudioEvent* event) {
                     ? android_studio::EmulatorAvdInfo::AOSP_ATD
                     : android_studio::EmulatorAvdInfo::AOSP);
 
-    eventAvdInfo->set_arch(toClearcutLogGuestArch(android_hw->hw_cpu_arch));
+    eventAvdInfo->set_arch(toClearcutLogGuestArch(getConsoleAgents()->settings->hw()->hw_cpu_arch));
     if (avdInfo_inAndroidBuild(getConsoleAgents()->settings->avdInfo())) {
         // no real AVD, so no creation times or file infos.
         return;
@@ -254,20 +254,20 @@ static void fillAvdMetrics(android_studio::AndroidStudioEvent* event) {
 
     fillAvdFileInfo(
             eventAvdInfo, android_studio::EmulatorAvdFile::KERNEL,
-            android_hw->kernel_path,
+            getConsoleAgents()->settings->hw()->kernel_path,
             getConsoleAgents()->settings->android_cmdLineOptions()->kernel !=
                     nullptr);
     fillAvdFileInfo(
             eventAvdInfo, android_studio::EmulatorAvdFile::SYSTEM,
-            (android_hw->disk_systemPartition_path &&
-             android_hw->disk_systemPartition_path[0])
-                    ? android_hw->disk_systemPartition_path
-                    : android_hw->disk_systemPartition_initPath,
+            (getConsoleAgents()->settings->hw()->disk_systemPartition_path &&
+             getConsoleAgents()->settings->hw()->disk_systemPartition_path[0])
+                    ? getConsoleAgents()->settings->hw()->disk_systemPartition_path
+                    : getConsoleAgents()->settings->hw()->disk_systemPartition_initPath,
             (getConsoleAgents()->settings->android_cmdLineOptions()->system ||
              getConsoleAgents()->settings->android_cmdLineOptions()->sysdir));
     fillAvdFileInfo(
             eventAvdInfo, android_studio::EmulatorAvdFile::RAMDISK,
-            android_hw->disk_ramdisk_path,
+            getConsoleAgents()->settings->hw()->disk_ramdisk_path,
             getConsoleAgents()->settings->android_cmdLineOptions()->ramdisk !=
                     nullptr);
 
@@ -527,7 +527,7 @@ void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
             android_studio::EmulatorDetails::RUNNING_GENERAL);
     event->mutable_emulator_details()->set_is_opengl_alive(openglAlive);
     event->mutable_emulator_details()->set_guest_arch(
-            toClearcutLogGuestArch(android_hw->hw_cpu_arch));
+            toClearcutLogGuestArch(getConsoleAgents()->settings->hw()->hw_cpu_arch));
     event->mutable_emulator_details()->set_guest_api_level(
             avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()));
 
@@ -541,12 +541,12 @@ void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
 
     event->mutable_emulator_details()->set_renderer(
             toClearcutLogEmulatorRenderer(
-                    emuglConfig_get_renderer(android_hw->hw_gpu_mode)));
+                    emuglConfig_get_renderer(getConsoleAgents()->settings->hw()->hw_gpu_mode)));
 
     event->mutable_emulator_details()->set_guest_gpu_enabled(
-            android_hw->hw_gpu_enabled);
+            getConsoleAgents()->settings->hw()->hw_gpu_enabled);
 
-    if (android_hw->hw_gpu_enabled) {
+    if (getConsoleAgents()->settings->hw()->hw_gpu_enabled) {
         fillGuestGlMetrics(event);
         if (openglAlive) {
             const emugl::RendererPtr& renderer = android_getOpenglesRenderer();

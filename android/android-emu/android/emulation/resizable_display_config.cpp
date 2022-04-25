@@ -35,7 +35,7 @@ namespace emulation {
 class ResizableConfig {
 public:
     ResizableConfig() {
-        std::string configStr(android_hw->hw_resizable_configs);
+        std::string configStr(getConsoleAgents()->settings->hw()->hw_resizable_configs);
         if (configStr == "") {
             configStr = "phone-0-1080-2340-420, unfolded-1-1768-2208-420,"
                         "tablet-2-1920-1200-240, desktop-3-1920-1080-160";
@@ -70,9 +70,9 @@ public:
                     PresetEmulatorSizeInfo{
                             static_cast<PresetEmulatorSizeType>(id), width,
                             height, dpi};
-            if (width == android_hw->hw_lcd_width &&
-                height == android_hw->hw_lcd_height &&
-                dpi == android_hw->hw_lcd_density) {
+            if (width == getConsoleAgents()->settings->hw()->hw_lcd_width &&
+                height == getConsoleAgents()->settings->hw()->hw_lcd_height &&
+                dpi == getConsoleAgents()->settings->hw()->hw_lcd_density) {
                 mActiveConfigId = static_cast<PresetEmulatorSizeType>(id);
             }
         }
@@ -214,7 +214,7 @@ void updateAndroidDisplayConfigPath(enum PresetEmulatorSizeType id) {
 }
 
 bool resizableEnabled() {
-    return android_hw->hw_device_name &&
-           !strcmp(android_hw->hw_device_name, "resizable") &&
+    return getConsoleAgents()->settings->hw()->hw_device_name &&
+           !strcmp(getConsoleAgents()->settings->hw()->hw_device_name, "resizable") &&
            feature_is_enabled(kFeature_HWCMultiConfigs);
 }

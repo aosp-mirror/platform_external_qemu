@@ -313,8 +313,8 @@ AdbGuestPipe::AdbGuestPipe(void* mHwPipe,
                            AdbHostAgent* hostAgent,
                            android::base::Stream* stream)
     : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent),
-    mReceivedMesg(AdbMessageSniffer::create("HOST==>GUEST",  android_hw->test_monitorAdb, &std::cout)),
-    mSendingMesg(AdbMessageSniffer::create("HOST<==GUEST",  android_hw->test_monitorAdb, &std::cout)) {
+    mReceivedMesg(AdbMessageSniffer::create("HOST==>GUEST",  getConsoleAgents()->settings->hw()->test_monitorAdb, &std::cout)),
+    mSendingMesg(AdbMessageSniffer::create("HOST<==GUEST",  getConsoleAgents()->settings->hw()->test_monitorAdb, &std::cout)) {
     mPlayStoreImage = android::featurecontrol::isEnabled(
             android::featurecontrol::PlayStoreImage);
     if (!stream) {
@@ -488,7 +488,7 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
         int count = needsHubTranslation()
                             ? mAdbHub->onGuestRecvData(buffers, numBuffers)
                             : onGuestRecvData(buffers, numBuffers);
-        if (android_hw->test_monitorAdb> 0) {
+        if (getConsoleAgents()->settings->hw()->test_monitorAdb> 0) {
             mReceivedMesg->read(buffers, numBuffers, count);
         }
         if (needsHubTranslation()) {
@@ -505,7 +505,7 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
             }
         }
         return count;
-    } else if (guest_boot_completed == 0 && android_hw->test_delayAdbTillBootComplete == 1) {
+    } else if (guest_boot_completed == 0 && getConsoleAgents()->settings->hw()->test_delayAdbTillBootComplete == 1) {
         return PIPE_ERROR_AGAIN;
     } else if (guest_data_partition_mounted == 0 && mPlayStoreImage) {
         return PIPE_ERROR_AGAIN;
@@ -535,7 +535,7 @@ int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
         int count = needsHubTranslation()
                             ? mAdbHub->onGuestSendData(buffers, numBuffers)
                             : onGuestSendData(buffers, numBuffers);
-        if (android_hw->test_monitorAdb > 0) {
+        if (getConsoleAgents()->settings->hw()->test_monitorAdb > 0) {
             mSendingMesg->read(buffers, numBuffers, count);
         }
         if (needsHubTranslation()) {

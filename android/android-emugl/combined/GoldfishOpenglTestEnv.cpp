@@ -97,6 +97,7 @@ std::string sCmdlLine;
 
 AvdInfo* sAndroid_avdInfo = nullptr;
 AvdInfoParams sAndroid_avdInfoParams = {0};
+AndroidHwConfig s_hwConfig = {0};
 
 static const QAndroidGlobalVarsAgent gMockAndroidGlobalVarsAgent = {
         .avdParams = []() { return &sAndroid_avdInfoParams; },
@@ -106,6 +107,7 @@ static const QAndroidGlobalVarsAgent gMockAndroidGlobalVarsAgent = {
                     assert(sAndroid_avdInfo != nullptr);
                     return sAndroid_avdInfo;
                 },
+        .hw =[]() { return &s_hwConfig; },
         .android_cmdLineOptions = []() { return sAndroid_cmdLineOptions; },
         .inject_cmdLineOptions =
                 [](AndroidOptions* opts) { sAndroid_cmdLineOptions = opts; },
@@ -341,10 +343,10 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
 
     emugl::vkDispatch(!useHostGpu /* use test ICD if not with host gpu */);
 
-    android_hw->hw_gltransport_asg_writeBufferSize = 262144;
-    android_hw->hw_gltransport_asg_writeStepSize = 8192;
-    android_hw->hw_gltransport_asg_dataRingSize = 131072;
-    android_hw->hw_gltransport_drawFlushInterval = 800;
+    getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeBufferSize = 262144;
+    getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeStepSize = 8192;
+    getConsoleAgents()->settings->hw()->hw_gltransport_asg_dataRingSize = 131072;
+    getConsoleAgents()->settings->hw()->hw_gltransport_drawFlushInterval = 800;
 
     EmuglConfig config;
 

@@ -96,7 +96,7 @@ static bool compareAnglesToPosture(AnglesToPosture v1, AnglesToPosture v2) {
 
 void FoldableModel::initFoldableHinge() {
 
-    if (!android_hw->hw_sensor_hinge) {
+    if (!getConsoleAgents()->settings->hw()->hw_sensor_hinge) {
         mState.config.numHinges = 0;
         return;
     }
@@ -120,35 +120,35 @@ void FoldableModel::initFoldableHinge() {
 
     // hinge type
     enum FoldableDisplayType type =
-            (enum FoldableDisplayType)android_hw->hw_sensor_hinge_type;
+            (enum FoldableDisplayType)getConsoleAgents()->settings->hw()->hw_sensor_hinge_type;
     if (type < 0 || type >= ANDROID_FOLDABLE_TYPE_MAX) {
         type = ANDROID_FOLDABLE_HORIZONTAL_SPLIT;
         W("Incorrect hinge type %d, default to 0\n",
-          android_hw->hw_sensor_hinge_type);
+          getConsoleAgents()->settings->hw()->hw_sensor_hinge_type);
     }
     enum FoldableHingeSubType subType =
-            (enum FoldableHingeSubType)android_hw->hw_sensor_hinge_sub_type;
+            (enum FoldableHingeSubType)getConsoleAgents()->settings->hw()->hw_sensor_hinge_sub_type;
     if (subType < 0 || subType >= ANDROID_FOLDABLE_HINGE_SUB_TYPE_MAX) {
         subType = ANDROID_FOLDABLE_HINGE_FOLD;
         W("Incorrect hinge sub_type %d, default to 0\n",
-          android_hw->hw_sensor_hinge_sub_type);
+          getConsoleAgents()->settings->hw()->hw_sensor_hinge_sub_type);
     }
 
     enum FoldablePostures foldAtPosture =
-            (enum FoldablePostures)android_hw
+            (enum FoldablePostures)getConsoleAgents()->settings->hw()
                     ->hw_sensor_hinge_fold_to_displayRegion_0_1_at_posture;
     if (foldAtPosture < 0 || foldAtPosture >= POSTURE_MAX) {
         foldAtPosture = POSTURE_CLOSED;
         W("Incorrect fold at posture %d, default to 1\n",
-          android_hw->hw_sensor_hinge_fold_to_displayRegion_0_1_at_posture);
+          getConsoleAgents()->settings->hw()->hw_sensor_hinge_fold_to_displayRegion_0_1_at_posture);
     }
 
     // hinge number
-    int numHinge = android_hw->hw_sensor_hinge_count;
+    int numHinge = getConsoleAgents()->settings->hw()->hw_sensor_hinge_count;
     if (numHinge < 0 || numHinge > ANDROID_FOLDABLE_MAX_HINGES) {
         numHinge = 0;
         W("Incorrect hinge count %d, default to 0\n",
-          android_hw->hw_sensor_hinge_count);
+          getConsoleAgents()->settings->hw()->hw_sensor_hinge_count);
     }
 
     struct FoldableConfig& defaultConfig = mState.config;
@@ -158,9 +158,9 @@ void FoldableModel::initFoldableHinge() {
     defaultConfig.numHinges = numHinge;
 
     // hinge angle ranges and defaults
-    std::string hingeAngleRanges(android_hw->hw_sensor_hinge_ranges);
-    std::string hingeAngleDefaults(android_hw->hw_sensor_hinge_defaults);
-    std::string hingeAreas(android_hw->hw_sensor_hinge_areas);
+    std::string hingeAngleRanges(getConsoleAgents()->settings->hw()->hw_sensor_hinge_ranges);
+    std::string hingeAngleDefaults(getConsoleAgents()->settings->hw()->hw_sensor_hinge_defaults);
+    std::string hingeAreas(getConsoleAgents()->settings->hw()->hw_sensor_hinge_areas);
     std::vector<std::string> hingeAngleRangeTokens, hingeAngleDefaultTokens,
             hingeAreaTokens;
     android::base::splitTokens(hingeAngleRanges, &hingeAngleRangeTokens, ",");
@@ -190,9 +190,9 @@ void FoldableModel::initFoldableHinge() {
                             defaultConfig.hingeParams[i] = {
                                     .x = 0,
                                     .y = (int)(std::stof(area[0]) *
-                                               android_hw->hw_lcd_height /
+                                               getConsoleAgents()->settings->hw()->hw_lcd_height /
                                                100.0),
-                                    .width = android_hw->hw_lcd_width,
+                                    .width = getConsoleAgents()->settings->hw()->hw_lcd_width,
                                     .height = std::stoi(area[1]),
                                     .displayId = 0,  // TODO: put 0 for now
                                     .minDegrees = std::stof(angles[0]),
@@ -204,11 +204,11 @@ void FoldableModel::initFoldableHinge() {
                         case ANDROID_FOLDABLE_VERTICAL_SPLIT:
                             defaultConfig.hingeParams[i] = {
                                     .x = (int)(std::stof(area[0]) *
-                                               android_hw->hw_lcd_width /
+                                               getConsoleAgents()->settings->hw()->hw_lcd_width /
                                                100.0),
                                     .y = 0,
                                     .width = std::stoi(area[1]),
-                                    .height = android_hw->hw_lcd_height,
+                                    .height = getConsoleAgents()->settings->hw()->hw_lcd_height,
                                     .displayId = 0,  // TODO: put 0 for now
                                     .minDegrees = std::stof(angles[0]),
                                     .maxDegrees = std::stof(angles[1]),
@@ -244,7 +244,7 @@ void FoldableModel::initFoldableHinge() {
 }
 
 void FoldableModel::initFoldableRoll() {
-    if (!android_hw->hw_sensor_roll) {
+    if (!getConsoleAgents()->settings->hw()->hw_sensor_roll) {
         mState.config.numRolls = 0;
         return;
     }
@@ -252,39 +252,39 @@ void FoldableModel::initFoldableRoll() {
     struct FoldableConfig& config = mState.config;
     // type
     enum FoldableDisplayType type =
-            (enum FoldableDisplayType)android_hw->hw_sensor_hinge_type;
+            (enum FoldableDisplayType)getConsoleAgents()->settings->hw()->hw_sensor_hinge_type;
     if (type < 0 || type >= ANDROID_FOLDABLE_TYPE_MAX) {
         type = ANDROID_FOLDABLE_HORIZONTAL_ROLL;
         W("Incorrect rollable type %d, default to horizontal roll\n",
-          android_hw->hw_sensor_hinge_type);
+          getConsoleAgents()->settings->hw()->hw_sensor_hinge_type);
     }
     config.type = type;
 
     // number
-    int numRolls = android_hw->hw_sensor_roll_count;
+    int numRolls = getConsoleAgents()->settings->hw()->hw_sensor_roll_count;
     if (numRolls < 0 || numRolls > ANDROID_FOLDABLE_MAX_ROLLS) {
         numRolls = 0;
         W("Incorrect roll count %d, default to 0\n",
-          android_hw->hw_sensor_roll_count);
+          getConsoleAgents()->settings->hw()->hw_sensor_roll_count);
     }
     config.numRolls = numRolls;
 
     // resize at postures
     config.resizeAtPosture[0] =
-            (enum FoldablePostures)android_hw
+            (enum FoldablePostures)getConsoleAgents()->settings->hw()
                     ->hw_sensor_roll_resize_to_displayRegion_0_1_at_posture;
     config.resizeAtPosture[1] =
-            (enum FoldablePostures)android_hw
+            (enum FoldablePostures)getConsoleAgents()->settings->hw()
                     ->hw_sensor_roll_resize_to_displayRegion_0_2_at_posture;
     config.resizeAtPosture[2] =
-            (enum FoldablePostures)android_hw
+            (enum FoldablePostures)getConsoleAgents()->settings->hw()
                     ->hw_sensor_roll_resize_to_displayRegion_0_3_at_posture;
 
     // hinge angle ranges and defaults
-    std::string rollRanges(android_hw->hw_sensor_roll_ranges);
-    std::string rollDefaults(android_hw->hw_sensor_roll_defaults);
-    std::string rollRadius(android_hw->hw_sensor_roll_radius);
-    std::string rollDirection(android_hw->hw_sensor_roll_direction);
+    std::string rollRanges(getConsoleAgents()->settings->hw()->hw_sensor_roll_ranges);
+    std::string rollDefaults(getConsoleAgents()->settings->hw()->hw_sensor_roll_defaults);
+    std::string rollRadius(getConsoleAgents()->settings->hw()->hw_sensor_roll_radius);
+    std::string rollDirection(getConsoleAgents()->settings->hw()->hw_sensor_roll_direction);
     std::vector<std::string> rollRangeTokens, rollDefaultTokens,
             rollRadiusTokens, rollDirectionTokens;
     android::base::splitTokens(rollRanges, &rollRangeTokens, ",");
@@ -339,10 +339,10 @@ void FoldableModel::initPostures() {
         mState.config.supportedFoldablePostures[i] = false;
     }
 
-    std::string postureList(android_hw->hw_sensor_posture_list);
+    std::string postureList(getConsoleAgents()->settings->hw()->hw_sensor_posture_list);
     std::string postureValues(
-            isHinge ? android_hw->hw_sensor_hinge_angles_posture_definitions
-                    : android_hw->hw_sensor_roll_percentages_posture_definitions);
+            isHinge ? getConsoleAgents()->settings->hw()->hw_sensor_hinge_angles_posture_definitions
+                    : getConsoleAgents()->settings->hw()->hw_sensor_roll_percentages_posture_definitions);
     std::vector<std::string> postureListTokens, postureValuesTokens;
     android::base::splitTokens(postureList, &postureListTokens, ",");
     android::base::splitTokens(postureValues, &postureValuesTokens, ",");
@@ -580,22 +580,22 @@ bool FoldableModel::getFoldedArea(int* x, int* y, int* w, int* h) {
         }
         switch (displayRegion) {
             case 0:
-                xOffset = android_hw->hw_displayRegion_0_1_xOffset;
-                yOffset = android_hw->hw_displayRegion_0_1_yOffset;
-                width   = android_hw->hw_displayRegion_0_1_width;
-                height  = android_hw->hw_displayRegion_0_1_height;
+                xOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_xOffset;
+                yOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_yOffset;
+                width   = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_width;
+                height  = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_height;
                 break;
             case 1:
-                xOffset = android_hw->hw_displayRegion_0_2_xOffset;
-                yOffset = android_hw->hw_displayRegion_0_2_yOffset;
-                width   = android_hw->hw_displayRegion_0_2_width;
-                height  = android_hw->hw_displayRegion_0_2_height;
+                xOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_2_xOffset;
+                yOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_2_yOffset;
+                width   = getConsoleAgents()->settings->hw()->hw_displayRegion_0_2_width;
+                height  = getConsoleAgents()->settings->hw()->hw_displayRegion_0_2_height;
                 break;
             case 2:
-                xOffset = android_hw->hw_displayRegion_0_3_xOffset;
-                yOffset = android_hw->hw_displayRegion_0_3_yOffset;
-                width   = android_hw->hw_displayRegion_0_3_width;
-                height  = android_hw->hw_displayRegion_0_3_height;
+                xOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_3_xOffset;
+                yOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_3_yOffset;
+                width   = getConsoleAgents()->settings->hw()->hw_displayRegion_0_3_width;
+                height  = getConsoleAgents()->settings->hw()->hw_displayRegion_0_3_height;
                 break;
             default:
                 return false;
@@ -617,10 +617,10 @@ bool FoldableModel::getFoldedArea(int* x, int* y, int* w, int* h) {
     // legacy fold and new hinge model
     if (mState.currentPosture == mState.config.foldAtPosture &&
         android_foldable_folded_area_configured(0)) {
-        xOffset = android_hw->hw_displayRegion_0_1_xOffset;
-        yOffset = android_hw->hw_displayRegion_0_1_yOffset;
-        width   = android_hw->hw_displayRegion_0_1_width;
-        height  = android_hw->hw_displayRegion_0_1_height;
+        xOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_xOffset;
+        yOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_yOffset;
+        width   = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_width;
+        height  = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_height;
     }
     if (x) {
         *x = xOffset;

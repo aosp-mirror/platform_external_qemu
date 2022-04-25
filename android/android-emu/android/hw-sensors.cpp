@@ -931,57 +931,57 @@ static void _hwSensors_init(HwSensors* h) {
     }
     h->physical_model = physicalModel_new();
 
-    if (android_hw->hw_accelerometer) {
+    if (getConsoleAgents()->settings->hw()->hw_accelerometer) {
         h->sensors[ANDROID_SENSOR_ACCELERATION].enabled = true;
     }
 
-    if (android_hw->hw_gyroscope) {
+    if (getConsoleAgents()->settings->hw()->hw_gyroscope) {
         h->sensors[ANDROID_SENSOR_GYROSCOPE].enabled = true;
     }
 
-    if (android_hw->hw_sensors_proximity) {
+    if (getConsoleAgents()->settings->hw()->hw_sensors_proximity) {
         h->sensors[ANDROID_SENSOR_PROXIMITY].enabled = true;
     }
 
-    if (android_hw->hw_sensors_magnetic_field) {
+    if (getConsoleAgents()->settings->hw()->hw_sensors_magnetic_field) {
         h->sensors[ANDROID_SENSOR_MAGNETIC_FIELD].enabled = true;
     }
 
-    if (android_hw->hw_sensors_magnetic_field_uncalibrated) {
+    if (getConsoleAgents()->settings->hw()->hw_sensors_magnetic_field_uncalibrated) {
         h->sensors[ANDROID_SENSOR_MAGNETIC_FIELD_UNCALIBRATED].enabled = true;
     }
 
-    if (android_hw->hw_sensors_gyroscope_uncalibrated) {
+    if (getConsoleAgents()->settings->hw()->hw_sensors_gyroscope_uncalibrated) {
         h->sensors[ANDROID_SENSOR_GYROSCOPE_UNCALIBRATED].enabled = true;
     }
 
-    if (android_hw->hw_sensors_orientation) {
+    if (getConsoleAgents()->settings->hw()->hw_sensors_orientation) {
         h->sensors[ANDROID_SENSOR_ORIENTATION].enabled = true;
     }
 
-    if (android_hw->hw_sensors_temperature) {
+    if (getConsoleAgents()->settings->hw()->hw_sensors_temperature) {
         h->sensors[ANDROID_SENSOR_TEMPERATURE].enabled = true;
     }
 
-    if (android_hw->hw_sensors_light) {
+    if (getConsoleAgents()->settings->hw()->hw_sensors_light) {
         h->sensors[ANDROID_SENSOR_LIGHT].enabled = true;
     }
 
-    if (android_hw->hw_sensors_pressure) {
+    if (getConsoleAgents()->settings->hw()->hw_sensors_pressure) {
         h->sensors[ANDROID_SENSOR_PRESSURE].enabled = true;
     }
 
-    if (android_hw->hw_sensors_humidity) {
+    if (getConsoleAgents()->settings->hw()->hw_sensors_humidity) {
         h->sensors[ANDROID_SENSOR_HUMIDITY].enabled = true;
     }
 
-    if (android_hw->hw_sensors_rgbclight) {
+    if (getConsoleAgents()->settings->hw()->hw_sensors_rgbclight) {
         h->sensors[ANDROID_SENSOR_RGBC_LIGHT].enabled = true;
     }
 
-    if (android_hw->hw_sensor_hinge) {
+    if (getConsoleAgents()->settings->hw()->hw_sensor_hinge) {
         h->sensors[ANDROID_SENSOR_HINGE_ANGLE0].enabled = true;
-        switch (android_hw->hw_sensor_hinge_count) {
+        switch (getConsoleAgents()->settings->hw()->hw_sensor_hinge_count) {
             case 3:
                 h->sensors[ANDROID_SENSOR_HINGE_ANGLE2].enabled = true;
             case 2:
@@ -991,13 +991,13 @@ static void _hwSensors_init(HwSensors* h) {
     }
 
 
-    if (android_hw->hw_sensors_heart_rate ||
+    if (getConsoleAgents()->settings->hw()->hw_sensors_heart_rate ||
         (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR
          && avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >= 28)) {
         h->sensors[ANDROID_SENSOR_HEART_RATE].enabled = true;
     }
 
-    if (android_hw->hw_sensors_wrist_tilt ||
+    if (getConsoleAgents()->settings->hw()->hw_sensors_wrist_tilt ||
         (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR
          && avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >= 28)) {
         h->sensors[ANDROID_SENSOR_WRIST_TILT].enabled = true;
@@ -1298,7 +1298,7 @@ int android_foldable_get_state(struct FoldableState* state) {
 }
 
 bool android_foldable_hinge_configured() {
-    return (android_hw->hw_sensor_hinge && android_hw->hw_sensor_hinge_count > 0);
+    return (getConsoleAgents()->settings->hw()->hw_sensor_hinge && getConsoleAgents()->settings->hw()->hw_sensor_hinge_count > 0);
 }
 
 bool android_foldable_any_folded_area_configured() {
@@ -1317,22 +1317,22 @@ bool android_foldable_folded_area_configured(int area) {
     int xOffset, yOffset, width, height;
     switch (area) {
         case 0:
-            xOffset = android_hw->hw_displayRegion_0_1_xOffset;
-            yOffset = android_hw->hw_displayRegion_0_1_yOffset;
-            width   = android_hw->hw_displayRegion_0_1_width;
-            height  = android_hw->hw_displayRegion_0_1_height;
+            xOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_xOffset;
+            yOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_yOffset;
+            width   = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_width;
+            height  = getConsoleAgents()->settings->hw()->hw_displayRegion_0_1_height;
             break;
         case 1:
-            xOffset = android_hw->hw_displayRegion_0_2_xOffset;
-            yOffset = android_hw->hw_displayRegion_0_2_yOffset;
-            width   = android_hw->hw_displayRegion_0_2_width;
-            height  = android_hw->hw_displayRegion_0_2_height;
+            xOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_2_xOffset;
+            yOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_2_yOffset;
+            width   = getConsoleAgents()->settings->hw()->hw_displayRegion_0_2_width;
+            height  = getConsoleAgents()->settings->hw()->hw_displayRegion_0_2_height;
             break;
         case 2:
-            xOffset = android_hw->hw_displayRegion_0_3_xOffset;
-            yOffset = android_hw->hw_displayRegion_0_3_yOffset;
-            width   = android_hw->hw_displayRegion_0_3_width;
-            height  = android_hw->hw_displayRegion_0_3_height;
+            xOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_3_xOffset;
+            yOffset = getConsoleAgents()->settings->hw()->hw_displayRegion_0_3_yOffset;
+            width   = getConsoleAgents()->settings->hw()->hw_displayRegion_0_3_width;
+            height  = getConsoleAgents()->settings->hw()->hw_displayRegion_0_3_height;
             break;
         default:
             E("Invalid area %d", area);
@@ -1436,7 +1436,7 @@ bool android_foldable_get_folded_area(int* x, int* y, int* w, int* h) {
 }
 
 bool android_foldable_rollable_configured() {
-    return (android_hw->hw_sensor_roll && android_hw->hw_sensor_roll_count > 0);
+    return (getConsoleAgents()->settings->hw()->hw_sensor_roll && getConsoleAgents()->settings->hw()->hw_sensor_roll_count > 0);
 }
 
 bool android_hw_sensors_is_loading_snapshot() {
@@ -1444,5 +1444,5 @@ bool android_hw_sensors_is_loading_snapshot() {
 }
 
 bool android_heart_rate_sensor_configured(){
-  return android_hw->hw_sensors_heart_rate;
+  return getConsoleAgents()->settings->hw()->hw_sensors_heart_rate;
 }

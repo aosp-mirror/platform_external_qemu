@@ -276,13 +276,13 @@ bool Quickboot::load(StringView name) {
     if (getConsoleAgents()
                 ->settings->android_cmdLineOptions()
                 ->no_snapshot_load) {
-        if (!android_hw->fastboot_forceColdBoot) {
+        if (!getConsoleAgents()->settings->hw()->fastboot_forceColdBoot) {
             // Only display a message if this is a one-time-like thing (command
             // line), and not an AVD option.
             mWindow.showMessage("Cold boot: requested by the user",
                                 WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
         }
-        reportFailedLoad(android_hw->fastboot_forceColdBoot
+        reportFailedLoad(getConsoleAgents()->settings->hw()->fastboot_forceColdBoot
                                  ? pb::EmulatorQuickbootLoad::
                                            EMULATOR_QUICKBOOT_LOAD_COLD_AVD
                                  : pb::EmulatorQuickbootLoad::

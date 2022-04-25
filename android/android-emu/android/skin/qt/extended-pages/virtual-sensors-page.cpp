@@ -226,7 +226,7 @@ void VirtualSensorsPage::setupHingeSensorUI() {
 }
 
 void VirtualSensorsPage::setupRgbcLightUI() {
-    if (!android_hw->hw_sensors_rgbclight) {
+    if (!getConsoleAgents()->settings->hw()->hw_sensors_rgbclight) {
         mUi->labelRgbcLight->setHidden(true);
         mUi->tabRgbcSensor->setHidden(true);
     }

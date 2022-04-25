@@ -97,7 +97,7 @@ static int skin_display_init_from(SkinDisplay* display,
     display->rect.size.w = aconfig_int(node, "width", 0);
     display->rect.size.h = aconfig_int(node, "height", 0);
     display->rotation    = aconfig_unsigned(node, "rotation", SKIN_ROTATION_0);
-    display->bpp         = aconfig_int(node, "bpp", android_hw->hw_lcd_depth);
+    display->bpp         = aconfig_int(node, "bpp", getConsoleAgents()->settings->hw()->hw_lcd_depth);
     display->owns_framebuffer = 1;
 
     display->valid = ( display->rect.size.w > 0 && display->rect.size.h > 0 );

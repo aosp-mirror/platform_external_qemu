@@ -57,7 +57,7 @@ DPadPage::DPadPage(QWidget *parent) :
 {
     mUi->setupUi(this);
 
-    if (android_hw->hw_dPad) {
+    if (getConsoleAgents()->settings->hw()->hw_dPad) {
         // This AVD has a D-Pad. Set up the control.
         const struct {
             QPushButton* button;

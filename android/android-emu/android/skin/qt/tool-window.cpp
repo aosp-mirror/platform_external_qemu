@@ -322,7 +322,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         }
     }
 
-    if (android_hw->hw_arc) {
+    if (getConsoleAgents()->settings->hw()->hw_arc) {
         // Chrome OS doesn't support rotation now.
         mToolsUi->prev_layout_button->setHidden(true);
         mToolsUi->next_layout_button->setHidden(true);
@@ -764,7 +764,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd,
             forwardKeyToEmulator(LINUX_KEY_POWER, down);
             break;
         case QtUICommand::TABLET_MODE:
-            if (android_hw->hw_arc) {
+            if (getConsoleAgents()->settings->hw()->hw_arc) {
                 forwardGenericEventToEmulator(EV_SW, SW_TABLET_MODE, down);
                 forwardGenericEventToEmulator(EV_SYN, 0, 0);
             }
@@ -1107,7 +1107,7 @@ void ToolWindow::earlyInitialization(const UiEmuAgent* agentPtr) {
     ExtendedWindow::setAgent(agentPtr);
     VirtualSceneControlWindow::setAgent(agentPtr);
 
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (!avdPath) {
         // Can't find the setting!
         return;
@@ -1191,7 +1191,7 @@ void ToolWindow::on_back_button_released() {
 bool ToolWindow::askWhetherToSaveSnapshot() {
     mAskedWhetherToSaveSnapshot = true;
     // Check the UI setting
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (!avdPath) {
         // Can't find the setting! Assume it's not ASK: just return;
         return true;
@@ -1532,7 +1532,7 @@ void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
             return;
         }
     }
-    if (!androidHwConfig_hasVirtualSceneCamera(android_hw) &&
+    if (!androidHwConfig_hasVirtualSceneCamera(getConsoleAgents()->settings->hw()) &&
         pane == PANE_IDX_CAMERA) {
         return;
     }
@@ -1615,7 +1615,7 @@ void ToolWindow::touchExtendedWindow() {
 void ToolWindow::hideRotationButton(bool hide) {
     if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_TV ||
         avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO ||
-        android_hw->hw_arc) {
+        getConsoleAgents()->settings->hw()->hw_arc) {
         // already hide, do not bother its settings
         return;
     } else {

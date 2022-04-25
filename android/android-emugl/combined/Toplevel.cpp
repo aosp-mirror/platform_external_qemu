@@ -600,10 +600,10 @@ private:
     android::featurecontrol::setEnabledOverride(
             android::featurecontrol::VulkanBatchedDescriptorSetUpdate, true);
 
-        android_hw->hw_gltransport_asg_writeBufferSize = 262144;
-        android_hw->hw_gltransport_asg_writeStepSize = 8192;
-        android_hw->hw_gltransport_asg_dataRingSize = 131072;
-        android_hw->hw_gltransport_drawFlushInterval = 800;
+        getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeBufferSize = 262144;
+        getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeStepSize = 8192;
+        getConsoleAgents()->settings->hw()->hw_gltransport_asg_dataRingSize = 131072;
+        getConsoleAgents()->settings->hw()->hw_gltransport_drawFlushInterval = 800;
 
         EmuglConfig config;
 

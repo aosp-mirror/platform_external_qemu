@@ -291,9 +291,9 @@ bool Device3DWidget::initAbstractDeviceHingeModel(FoldableDisplayType type,
                           ? true
                           : false;
     int32_t displayW =
-            hSplit ? android_hw->hw_lcd_width : android_hw->hw_lcd_height;
+            hSplit ? getConsoleAgents()->settings->hw()->hw_lcd_width : getConsoleAgents()->settings->hw()->hw_lcd_height;
     int32_t displayH =
-            hSplit ? android_hw->hw_lcd_height : android_hw->hw_lcd_width;
+            hSplit ? getConsoleAgents()->settings->hw()->hw_lcd_height : getConsoleAgents()->settings->hw()->hw_lcd_width;
     int32_t centerX = displayW / 2;
     int32_t centerY = displayH / 2;
     if (!hSplit) {
@@ -473,9 +473,9 @@ bool Device3DWidget::initAbstractDeviceRollModel() {
     struct FoldableConfig config = mFoldableState.config;
     bool hRoll = config.type == ANDROID_FOLDABLE_HORIZONTAL_ROLL ? true : false;
     int displayW =
-            hRoll ? android_hw->hw_lcd_width : android_hw->hw_lcd_height;
+            hRoll ? getConsoleAgents()->settings->hw()->hw_lcd_width : getConsoleAgents()->settings->hw()->hw_lcd_height;
     int displayH =
-            hRoll ? android_hw->hw_lcd_height : android_hw->hw_lcd_width;
+            hRoll ? getConsoleAgents()->settings->hw()->hw_lcd_height : getConsoleAgents()->settings->hw()->hw_lcd_width;
 
     struct RollableParameters* p = config.rollableParams;
     // sort the rolls by rolling area low to high

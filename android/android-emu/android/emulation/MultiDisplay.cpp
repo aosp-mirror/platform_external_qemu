@@ -609,7 +609,7 @@ int MultiDisplay::getNumberActiveMultiDisplaysLocked() {
 }
 
 bool MultiDisplay::isMultiDisplayWindow() {
-    return android_hw->hw_multi_display_window;
+    return getConsoleAgents()->settings->hw()->hw_multi_display_window;
 }
 
 /*
@@ -765,43 +765,43 @@ void MultiDisplay::loadConfig() {
         }
     } else {
         LOG(VERBOSE) << "config multidisplay with config.ini "
-                     << android_hw->hw_display1_width << "x"
-                     << android_hw->hw_display1_height << " "
-                     << android_hw->hw_display2_width << "x"
-                     << android_hw->hw_display2_height << " "
-                     << android_hw->hw_display3_width << "x"
-                     << android_hw->hw_display3_height;
-        if (android_hw->hw_display1_width != 0 &&
-            android_hw->hw_display1_height != 0) {
+                     << getConsoleAgents()->settings->hw()->hw_display1_width << "x"
+                     << getConsoleAgents()->settings->hw()->hw_display1_height << " "
+                     << getConsoleAgents()->settings->hw()->hw_display2_width << "x"
+                     << getConsoleAgents()->settings->hw()->hw_display2_height << " "
+                     << getConsoleAgents()->settings->hw()->hw_display3_width << "x"
+                     << getConsoleAgents()->settings->hw()->hw_display3_height;
+        if (getConsoleAgents()->settings->hw()->hw_display1_width != 0 &&
+            getConsoleAgents()->settings->hw()->hw_display1_height != 0) {
             LOG(VERBOSE) << " add display 1";
-            setMultiDisplay(1, android_hw->hw_display1_xOffset,
-                            android_hw->hw_display1_yOffset,
-                            android_hw->hw_display1_width,
-                            android_hw->hw_display1_height,
-                            android_hw->hw_display1_density,
-                            android_hw->hw_display1_flag, true);
+            setMultiDisplay(1, getConsoleAgents()->settings->hw()->hw_display1_xOffset,
+                            getConsoleAgents()->settings->hw()->hw_display1_yOffset,
+                            getConsoleAgents()->settings->hw()->hw_display1_width,
+                            getConsoleAgents()->settings->hw()->hw_display1_height,
+                            getConsoleAgents()->settings->hw()->hw_display1_density,
+                            getConsoleAgents()->settings->hw()->hw_display1_flag, true);
             mWindowAgent->updateUIMultiDisplayPage(1);
         }
-        if (android_hw->hw_display2_width != 0 &&
-            android_hw->hw_display2_height != 0) {
+        if (getConsoleAgents()->settings->hw()->hw_display2_width != 0 &&
+            getConsoleAgents()->settings->hw()->hw_display2_height != 0) {
             LOG(VERBOSE) << " add display 2";
-            setMultiDisplay(2, android_hw->hw_display2_xOffset,
-                            android_hw->hw_display2_yOffset,
-                            android_hw->hw_display2_width,
-                            android_hw->hw_display2_height,
-                            android_hw->hw_display2_density,
-                            android_hw->hw_display2_flag, true);
+            setMultiDisplay(2, getConsoleAgents()->settings->hw()->hw_display2_xOffset,
+                            getConsoleAgents()->settings->hw()->hw_display2_yOffset,
+                            getConsoleAgents()->settings->hw()->hw_display2_width,
+                            getConsoleAgents()->settings->hw()->hw_display2_height,
+                            getConsoleAgents()->settings->hw()->hw_display2_density,
+                            getConsoleAgents()->settings->hw()->hw_display2_flag, true);
             mWindowAgent->updateUIMultiDisplayPage(2);
         }
-        if (android_hw->hw_display3_width != 0 &&
-            android_hw->hw_display3_height != 0) {
+        if (getConsoleAgents()->settings->hw()->hw_display3_width != 0 &&
+            getConsoleAgents()->settings->hw()->hw_display3_height != 0) {
             LOG(VERBOSE) << " add display 3";
-            setMultiDisplay(3, android_hw->hw_display3_xOffset,
-                            android_hw->hw_display3_yOffset,
-                            android_hw->hw_display3_width,
-                            android_hw->hw_display3_height,
-                            android_hw->hw_display3_density,
-                            android_hw->hw_display3_flag, true);
+            setMultiDisplay(3, getConsoleAgents()->settings->hw()->hw_display3_xOffset,
+                            getConsoleAgents()->settings->hw()->hw_display3_yOffset,
+                            getConsoleAgents()->settings->hw()->hw_display3_width,
+                            getConsoleAgents()->settings->hw()->hw_display3_height,
+                            getConsoleAgents()->settings->hw()->hw_display3_density,
+                            getConsoleAgents()->settings->hw()->hw_display3_flag, true);
             mWindowAgent->updateUIMultiDisplayPage(3);
         }
     }

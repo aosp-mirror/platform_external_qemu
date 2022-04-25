@@ -73,9 +73,11 @@ bool user_config_init(void) {
     SkinRect mmmRect;
     skin_winsys_get_monitor_rect(&mmmRect);
     if (min_config_qemu_mode) {
-        emulator_initMinimalSkinConfig(android_hw->hw_lcd_width,
-                                       android_hw->hw_lcd_height, &mmmRect,
-                                       &userConfig);
+        emulator_initMinimalSkinConfig(
+            getConsoleAgents()->settings->hw()->hw_lcd_width,
+            getConsoleAgents()->settings->hw()->hw_lcd_height,
+            &mmmRect,
+            &userConfig);
     } else {
         userConfig = auserConfig_new(getConsoleAgents()->settings->avdInfo(), &mmmRect, s_deviceLcdWidth, s_deviceLcdHeight);
     }

@@ -41,7 +41,7 @@ extern "C" const QAndroidMultiDisplayAgent* const
 AndroidOptions emptyOptions{};
 AndroidOptions* sAndroid_cmdLineOptions = &emptyOptions;
 std::string sCmdlLine;
-
+AndroidHwConfig s_hwConfig = {0};
 AvdInfo* sAndroid_avdInfo = nullptr;
 AvdInfoParams sAndroid_avdInfoParams = {0};
 
@@ -53,7 +53,7 @@ static const QAndroidGlobalVarsAgent gMockAndroidGlobalVarsAgent = {
                     assert(sAndroid_avdInfo != nullptr);
                     return sAndroid_avdInfo;
                 },
-
+        .hw =[]() { return &s_hwConfig; },
         .android_cmdLineOptions = []() { return sAndroid_cmdLineOptions; },
         .inject_cmdLineOptions =
                 [](AndroidOptions* opts) { sAndroid_cmdLineOptions = opts; },

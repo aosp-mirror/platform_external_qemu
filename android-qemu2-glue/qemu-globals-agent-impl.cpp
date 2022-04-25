@@ -18,6 +18,7 @@
 AndroidOptions* sAndroid_cmdLineOptions;
 
 AvdInfo* sAndroid_avdInfo = nullptr;
+AndroidHwConfig s_hwConfig = {0};
 AvdInfoParams sAndroid_avdInfoParams = {0};
 std::string sCmdlLine;
 LanguageSettings s_languageSettings = {0};
@@ -32,6 +33,7 @@ static const QAndroidGlobalVarsAgent globalVarsAgent = {
                     assert(sAndroid_avdInfo != nullptr);
                     return sAndroid_avdInfo;
                 },
+        .hw =[]() { return &s_hwConfig; },
         .language = []() { return &s_languageSettings; },
         .use_keycode_forwarding = []() { return sKeyCodeForwarding; },
         .userConfig = []() { return s_userConfig; },

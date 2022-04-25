@@ -201,8 +201,8 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mUi->rec_timeResLabel->setText(
                          tr("%1s / %2 x %3")
                             .arg(mSec)
-                            .arg(android_hw->hw_lcd_width)
-                            .arg(android_hw->hw_lcd_height));
+                            .arg(getConsoleAgents()->settings->hw()->hw_lcd_width)
+                            .arg(getConsoleAgents()->settings->hw()->hw_lcd_height));
             mUi->rec_recordAgainOverlay->show();
             mUi->rec_playStopButton->setEnabled(true);
             mUi->rec_formatSwitch->setEnabled(true);
@@ -214,8 +214,8 @@ void RecordScreenPage::setRecordUiState(RecordUiState newState) {
             mUi->rec_playStopButton->setAccessibleDescription(
                     tr("Play Stop, %1 seconds, %2 by %3")
                             .arg(mSec)
-                            .arg(android_hw->hw_lcd_width)
-                            .arg(android_hw->hw_lcd_height));
+                            .arg(getConsoleAgents()->settings->hw()->hw_lcd_width)
+                            .arg(getConsoleAgents()->settings->hw()->hw_lcd_height));
             // Display preview frame
             mVideoInfo->show();
             break;

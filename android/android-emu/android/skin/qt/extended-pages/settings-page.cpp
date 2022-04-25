@@ -82,7 +82,7 @@ static void setElidedText(QLineEdit* line_edit, const QString& text) {
 }
 
 static void savePauseAvdWhenMinimized(bool pause) {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -98,7 +98,7 @@ static void savePauseAvdWhenMinimized(bool pause) {
 }
 
 bool SettingsPage::getPauseAvdWhenMinimized() {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     bool pause = false;
     if (avdPath) {
         QString avdSettingsFile =
@@ -232,7 +232,7 @@ SettingsPage::SettingsPage(QWidget* parent)
         // the few snapshots controls on this page.
 
         // Save snapshot on exit
-        QString avdNameWithUnderscores(android_hw->avd_name);
+        QString avdNameWithUnderscores(getConsoleAgents()->settings->hw()->avd_name);
 
         mUi->set_saveOnExitTitle->setText(
                 QString(tr("Save quick-boot state on exit for AVD: ")) +
@@ -663,7 +663,7 @@ void SettingsPage::on_set_saveSnapshotOnExit_currentIndexChanged(int uiIndex) {
                                            SaveSnapshotOnExit::Always);
 
     // Save for only this AVD
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -677,7 +677,7 @@ void SettingsPage::on_set_saveSnapshotOnExit_currentIndexChanged(int uiIndex) {
 static SaveSnapshotOnExit getSaveOnExitChoice() {
     // This setting belongs to the AVD, not to the entire Emulator.
     SaveSnapshotOnExit userChoice(SaveSnapshotOnExit::Always);
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);

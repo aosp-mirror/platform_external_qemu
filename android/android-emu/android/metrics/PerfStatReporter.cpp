@@ -172,8 +172,8 @@ static void fillProtoMemUsage(
     memUsageProto->set_virtual_memory_max(rawMemUsage.virt_max);
     memUsageProto->set_total_phys_memory(rawMemUsage.total_phys_memory);
     memUsageProto->set_total_page_file(rawMemUsage.total_page_file);
-    if (android_hw->hw_ramSize) {
-        memUsageProto->set_total_guest_memory(android_hw->hw_ramSize * 1024 *
+    if (getConsoleAgents()->settings->hw()->hw_ramSize) {
+        memUsageProto->set_total_guest_memory(getConsoleAgents()->settings->hw()->hw_ramSize * 1024 *
                                               1024);
     }
     D("MemoryReport: uptime: %" PRIu64

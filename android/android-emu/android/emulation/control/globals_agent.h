@@ -54,10 +54,7 @@ typedef struct QAndroidGlobalVarsAgent {
     // AvdInfo** (*aemu_get_getConsoleAgents()->settings->avdInfo()Ptr)(void);
 
     // /* the hardware configuration for this specific virtual device */
-    // AndroidHwConfig (*android_hw)(void);
-
-    // /* MSVC only exports function pointers */
-    // AndroidHwConfig* (*aemu_get_android_hw)(void);
+    AndroidHwConfig* (*hw)(void);
 
     // /* this indicates that guest has mounted data partition */
     // int (*guest_data_partition_mounted)(void);

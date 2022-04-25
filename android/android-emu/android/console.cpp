@@ -2726,12 +2726,12 @@ static int do_avd_rewind_audio(ControlClient client, char* args) {
 }
 
 static int do_avd_name(ControlClient client, char* args) {
-    control_write(client, "%s\r\n", android_hw->avd_name);
+    control_write(client, "%s\r\n", getConsoleAgents()->settings->hw()->avd_name);
     return 0;
 }
 
 static int do_avd_id(ControlClient client, char* args) {
-    control_write(client, "%s\r\n", android_hw->avd_id);
+    control_write(client, "%s\r\n", getConsoleAgents()->settings->hw()->avd_id);
     return 0;
 }
 

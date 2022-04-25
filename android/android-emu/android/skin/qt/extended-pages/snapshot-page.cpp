@@ -307,7 +307,7 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone)
         }
     } else {
         // Save QuickBoot snapshot on exit
-        QString avdNameWithUnderscores(android_hw->avd_name);
+        QString avdNameWithUnderscores(getConsoleAgents()->settings->hw()->avd_name);
 
         mUi->saveOnExitTitle->setText(
                 QString(tr("Save quick-boot state on exit for AVD: ")) +
@@ -686,7 +686,7 @@ void SnapshotPage::on_snapshotDisplay_itemSelectionChanged() {
 static SaveSnapshotOnExit getSaveOnExitChoice() {
     // This setting belongs to the AVD, not to the entire Emulator.
     SaveSnapshotOnExit userChoice(SaveSnapshotOnExit::Always);
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -703,7 +703,7 @@ static SaveSnapshotOnExit getSaveOnExitChoice() {
 
 static void setSaveOnExitChoice(SaveSnapshotOnExit choice) {
     // Save for only this AVD
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);

@@ -290,10 +290,10 @@ static void emulator_window_setup(EmulatorWindow* emulator) {
     }
 
     SkinUIParams my_ui_params = {
-            .enable_touch = !androidHwConfig_isScreenNoTouch(android_hw),
-            .enable_dpad = android_hw->hw_dPad != 0,
-            .enable_keyboard = android_hw->hw_keyboard != 0,
-            .enable_trackball = android_hw->hw_trackBall != 0,
+            .enable_touch = !androidHwConfig_isScreenNoTouch(getConsoleAgents()->settings->hw()),
+            .enable_dpad = getConsoleAgents()->settings->hw()->hw_dPad != 0,
+            .enable_keyboard = getConsoleAgents()->settings->hw()->hw_keyboard != 0,
+            .enable_trackball = getConsoleAgents()->settings->hw()->hw_trackBall != 0,
             .enable_scale = !emulator->opts->fixed_scale,
 
             .window_x = emulator->win_x,
@@ -316,8 +316,8 @@ static void emulator_window_setup(EmulatorWindow* emulator) {
     };
 
     // for gpu off or gpu guest, we don't use the subwindow
-    if (!android_hw->hw_gpu_enabled ||
-        !strcmp(android_hw->hw_gpu_mode, "guest")) {
+    if (!getConsoleAgents()->settings->hw()->hw_gpu_enabled ||
+        !strcmp(getConsoleAgents()->settings->hw()->hw_gpu_mode, "guest")) {
         s_use_emugl_subwindow = 0;
     }
     if (getConsoleAgents()
@@ -339,14 +339,14 @@ static void emulator_window_setup(EmulatorWindow* emulator) {
         } else {
             // only one display setting
             android_setOpenglesDisplayConfigs(
-                    0, android_hw->hw_lcd_width, android_hw->hw_lcd_height,
-                    android_hw->hw_lcd_density, android_hw->hw_lcd_density);
+                    0, getConsoleAgents()->settings->hw()->hw_lcd_width, getConsoleAgents()->settings->hw()->hw_lcd_height,
+                    getConsoleAgents()->settings->hw()->hw_lcd_density, getConsoleAgents()->settings->hw()->hw_lcd_density);
             android_setOpenglesDisplayActiveConfig(0);
         }
     }
 
     emulator->ui = skin_ui_create(
-            emulator->layout_file, android_hw->hw_initialOrientation,
+            emulator->layout_file, getConsoleAgents()->settings->hw()->hw_initialOrientation,
             &my_ui_funcs, &my_ui_params, s_use_emugl_subwindow);
     if (!emulator->ui) {
         return;

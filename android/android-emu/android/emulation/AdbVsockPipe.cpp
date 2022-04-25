@@ -505,7 +505,7 @@ AdbVsockPipe::AdbVsockPipe(AdbVsockPipe::Service *service,
 
     switch (portType) {
     case AdbPortType::RegularAdb:
-        mProxy = std::make_unique<VsockAdbProxy>(android_hw->test_monitorAdb, &std::cout);
+        mProxy = std::make_unique<VsockAdbProxy>(getConsoleAgents()->settings->hw()->test_monitorAdb, &std::cout);
         break;
 
     case AdbPortType::Jdwp:

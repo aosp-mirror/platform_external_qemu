@@ -94,7 +94,7 @@ static int _cmp_hw_config(CIniFile* current, CIniFile* saved) {
 static char*
 _build_hwcfg_path(const char* name)
 {
-    const int path_len = strlen(android_hw->disk_snapStorage_path) +
+    const int path_len = strlen(getConsoleAgents()->settings->hw()->disk_snapStorage_path) +
                          strlen(name) + 6;
     char* bkp_path = malloc(path_len);
     if (bkp_path == NULL) {
@@ -103,15 +103,15 @@ _build_hwcfg_path(const char* name)
     }
 
     snprintf(bkp_path, path_len, "%s.%s.ini",
-             android_hw->disk_snapStorage_path, name);
+             getConsoleAgents()->settings->hw()->disk_snapStorage_path, name);
 
     return bkp_path;
 }
 
 int snaphost_match_configs(CIniFile* hw_ini, const char* name) {
     /* Make sure that snapshot storage path is valid. */
-    if (android_hw->disk_snapStorage_path == NULL ||
-        *android_hw->disk_snapStorage_path == '\0') {
+    if (getConsoleAgents()->settings->hw()->disk_snapStorage_path == NULL ||
+        *getConsoleAgents()->settings->hw()->disk_snapStorage_path == '\0') {
         return 1;
     }
 
@@ -148,8 +148,8 @@ void
 snaphost_save_config(const char* name)
 {
     /* Make sure that snapshot storage path is valid. */
-    if (android_hw->disk_snapStorage_path == NULL ||
-        *android_hw->disk_snapStorage_path == '\0') {
+    if (getConsoleAgents()->settings->hw()->disk_snapStorage_path == NULL ||
+        *getConsoleAgents()->settings->hw()->disk_snapStorage_path == '\0') {
         return;
     }
 
@@ -166,7 +166,7 @@ snaphost_save_config(const char* name)
           bkp_path, strerror(errno));
         return;
     }
-    androidHwConfig_write(android_hw, hwcfg_bkp);
+    androidHwConfig_write(getConsoleAgents()->settings->hw(), hwcfg_bkp);
 
     /* Invalidate data partition initialization path in the backup copy of HW
      * config. The reason we need to do this is that we want the system loading

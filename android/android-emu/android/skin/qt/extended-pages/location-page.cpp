@@ -980,7 +980,7 @@ void LocationPage::sendMostRecentUiLocation() {
 // static
 void LocationPage::writeLocationPlaybackFilePathToSettings(
         const QString& file) {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -996,7 +996,7 @@ void LocationPage::writeLocationPlaybackFilePathToSettings(
 
 // static
 QString LocationPage::getLocationPlaybackFilePathFromSettings() {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -1014,7 +1014,7 @@ QString LocationPage::getLocationPlaybackFilePathFromSettings() {
 
 // static
 void LocationPage::writeLocationPlaybackSpeedToSettings(int speed) {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -1030,7 +1030,7 @@ void LocationPage::writeLocationPlaybackSpeedToSettings(int speed) {
 
 // static
 int LocationPage::getLocationPlaybackSpeedFromSettings() {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -1050,7 +1050,7 @@ static void getDeviceLocationFromSettings(double* pOutLatitude,
                                           double* pOutAltitude,
                                           double* pOutVelocity,
                                           double* pOutHeading) {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -1100,7 +1100,7 @@ void LocationPage::writeDeviceLocationToSettings(double lat,
                                                  double alt,
                                                  double velocity,
                                                  double heading) {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);

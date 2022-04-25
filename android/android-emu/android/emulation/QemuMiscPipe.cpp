@@ -297,7 +297,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
 
         guest_boot_completed = 1;
 
-        if (android_hw->test_quitAfterBootTimeOut > 0) {
+        if (getConsoleAgents()->settings->hw()->test_quitAfterBootTimeOut > 0) {
             getConsoleAgents()->vm->vmShutdown();
         } else {
             auto adbInterface = emulation::AdbInterface::getGlobal();
@@ -319,8 +319,8 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                 updateAndroidDisplayConfigPath(getResizableActiveConfigId());
             } else {
                 // If hw.display.settings.xml set as freeform, config guest
-                if ((android_op_wipe_data || !path_exists(android_hw->disk_dataPartition_path))) {
-                    if (!strcmp(android_hw->display_settings_xml, "freeform")) {
+                if ((android_op_wipe_data || !path_exists(getConsoleAgents()->settings->hw()->disk_dataPartition_path))) {
+                    if (!strcmp(getConsoleAgents()->settings->hw()->display_settings_xml, "freeform")) {
                         adbInterface->enqueueCommand(
                             { "shell", "settings", "put", "global", "sf", "1" });
                         adbInterface->enqueueCommand(
@@ -356,7 +356,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                 std::thread{watchDogFunction, 1}.detach();
             }
 
-            if (android_hw->test_monitorAdb && num_hostcts_watchdog == 0) {
+            if (getConsoleAgents()->settings->hw()->test_monitorAdb && num_hostcts_watchdog == 0) {
                 std::thread{watchHostCtsFunction, 30}.detach();
             }
 

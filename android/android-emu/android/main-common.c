@@ -733,7 +733,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     }
 
     if (opts->logcat_output) {
-        str_reset(&android_hw->hw_logcatOutput_path, opts->logcat_output);
+        str_reset(&getConsoleAgents()->settings->hw()->hw_logcatOutput_path, opts->logcat_output);
     }
 
     if (opts->quit_after_boot) {

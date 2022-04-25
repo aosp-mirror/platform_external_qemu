@@ -813,8 +813,8 @@ public:
         // TODO(b/151387266): Use new query that uses a shared state for
         // multidisplay
         if (!multiDisplayQueryWorks) {
-            width = android_hw->hw_lcd_width;
-            height = android_hw->hw_lcd_height;
+            width = getConsoleAgents()->settings->hw()->hw_lcd_width;
+            height = getConsoleAgents()->settings->hw()->hw_lcd_height;
             enabled = true;
         }
 

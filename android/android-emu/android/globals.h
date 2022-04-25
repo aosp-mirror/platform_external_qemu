@@ -19,14 +19,9 @@
 #include "android/constants.h"
 #include "android/user-config.h"
 #include "android/utils/compiler.h"
+#include "android/console.h"
 
 ANDROID_BEGIN_HEADER
-
-/* the hardware configuration for this specific virtual device */
-extern AndroidHwConfig   android_hw[1];
-
-/* MSVC only exports function pointers */
-AEMU_EXPORT AndroidHwConfig* aemu_get_android_hw();
 
 /** PLEASE DO NOT ANY MORE GLOBALS, INSTEAD INJECT THEM FROM 
  *  The agents are defined in console.h 

@@ -1136,15 +1136,15 @@ static void generate_touch_event(FingerState* finger,
                     posY = *y + fy;
                     break;
                 case SKIN_ROTATION_180:
-                    posX = *x + fx + fw - android_hw->hw_lcd_width;
-                    posY = *y + fy + fh - android_hw->hw_lcd_height;
+                    posX = *x + fx + fw - getConsoleAgents()->settings->hw()->hw_lcd_width;
+                    posY = *y + fy + fh - getConsoleAgents()->settings->hw()->hw_lcd_height;
                     break;
                 case SKIN_ROTATION_90:
                     posX = *x + fx;
-                    posY = *y + fy + fh - android_hw->hw_lcd_height;
+                    posY = *y + fy + fh - getConsoleAgents()->settings->hw()->hw_lcd_height;
                     break;
                 case SKIN_ROTATION_270:
-                    posX = *x + fx + fw - android_hw->hw_lcd_width;
+                    posX = *x + fx + fw - getConsoleAgents()->settings->hw()->hw_lcd_width;
                     posY = *y + fy;
                     break;
             }
@@ -1181,15 +1181,15 @@ static void add_finger_event(SkinWindow* window,
                     posY = y + fy;
                     break;
                 case SKIN_ROTATION_180:
-                    posX = x + fx + fw - android_hw->hw_lcd_width;
-                    posY = y + fy + fh - android_hw->hw_lcd_height;
+                    posX = x + fx + fw - getConsoleAgents()->settings->hw()->hw_lcd_width;
+                    posY = y + fy + fh - getConsoleAgents()->settings->hw()->hw_lcd_height;
                     break;
                 case SKIN_ROTATION_90:
                     posX = x + fx;
-                    posY = y + fy + fh - android_hw->hw_lcd_height;
+                    posY = y + fy + fh - getConsoleAgents()->settings->hw()->hw_lcd_height;
                     break;
                 case SKIN_ROTATION_270:
-                    posX = x + fx + fw - android_hw->hw_lcd_width;
+                    posX = x + fx + fw - getConsoleAgents()->settings->hw()->hw_lcd_width;
                     posY = y + fy;
                     break;
             }
@@ -1225,15 +1225,15 @@ static void add_pen_event(SkinWindow* window,
                     posY = y + fy;
                     break;
                 case SKIN_ROTATION_180:
-                    posX = x + fx + fw - android_hw->hw_lcd_width;
-                    posY = y + fy + fh - android_hw->hw_lcd_height;
+                    posX = x + fx + fw - getConsoleAgents()->settings->hw()->hw_lcd_width;
+                    posY = y + fy + fh - getConsoleAgents()->settings->hw()->hw_lcd_height;
                     break;
                 case SKIN_ROTATION_90:
                     posX = x + fx;
-                    posY = y + fy + fh - android_hw->hw_lcd_height;
+                    posY = y + fy + fh - getConsoleAgents()->settings->hw()->hw_lcd_height;
                     break;
                 case SKIN_ROTATION_270:
-                    posX = x + fx + fw - android_hw->hw_lcd_width;
+                    posX = x + fx + fw - getConsoleAgents()->settings->hw()->hw_lcd_width;
                     posY = y + fy;
                     break;
             }

@@ -56,7 +56,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/build/emulator",
       "args": [
-        "@31",
+        "@T",
       ],
       "cwd": "${workspaceFolder}/build",
       "stopAtEntry": false,
