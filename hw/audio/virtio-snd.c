@@ -1229,7 +1229,6 @@ static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
     VirtIOSound *const snd = stream->snd;
     VirtQueue *const rx_vq = snd->rx_vq;
     bool notify_vq = false;
-    int insert_bytes;
     int16_t scratch[1024];
 
     while (avail >= aud_fs) {
@@ -1245,7 +1244,8 @@ static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
                     break;
                 }
 
-                const int aud_read_nb = AUD_read(voice, scratch, nf * aud_fs);
+                const int aud_to_read = nf * aud_fs;
+                const int aud_read_nb = AUD_read(voice, scratch, aud_to_read);
                 if (aud_read_nb <= 0) {
                     goto done;
                 }
@@ -1257,9 +1257,9 @@ static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
                 item->pos += driver_read_nb;
                 stream->frames_sent += (driver_read_nb / driver_fs);
 
-                if (item->pos == item_size_bytes) {
-                    el_send_pcm_status(e, VIRTIO_SND_S_OK, avail);
-                    vq_consume_element(rx_vq, e, item_size_bytes);
+                if (item->pos >= item_size_bytes) {
+                    el_send_pcm_status(e, VIRTIO_SND_S_OK, item->pos);
+                    vq_consume_element(rx_vq, e, item->pos);
                     ring_buffer_pop(pcm_buf);
                     notify_vq = true;
                 }
@@ -1279,7 +1279,7 @@ static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
         }
     }
 
-    insert_bytes = calc_insert_bytes_in(stream);
+    int insert_bytes = calc_insert_bytes_in(stream);
     memset(scratch, 0, MIN(insert_bytes, sizeof(scratch)));
     while (insert_bytes >= driver_fs) {
         VirtIOSoundRingBufferItem *item = ring_buffer_top(pcm_buf);
@@ -1292,9 +1292,9 @@ static void stream_in_cb_locked(VirtIOSoundPCMStream *stream, int avail) {
             item->pos += nb;
             stream->frames_skipped += nf;
 
-            if (item->pos == item_size_bytes) {
-                el_send_pcm_status(e, VIRTIO_SND_S_OK, 0);
-                vq_consume_element(rx_vq, e, item_size_bytes);
+            if (item->pos >= item_size_bytes) {
+                el_send_pcm_status(e, VIRTIO_SND_S_OK, item->pos);
+                vq_consume_element(rx_vq, e, item->pos);
                 ring_buffer_pop(pcm_buf);
                 notify_vq = true;
             }
