@@ -42,16 +42,16 @@ typedef struct QAndroidGlobalVarsAgent {
      * after that, you can read the 'flags' field to determine
      * wether a data or cache wipe has been in effect.
      */
-    // AvdInfoParams (*android_avdParams)(void);
+    AvdInfoParams* (*avdParams)(void);
 
     /* a pointer to the android virtual device information
      * object, which can be queried for the paths of various
      * image files or the skin
      */
-    // AvdInfo* (*android_avdInfo)(void);
+    AvdInfo* (*avdInfo)(void);
 
     // /* MSVC only exports function pointers */
-    // AvdInfo** (*aemu_get_android_avdInfoPtr)(void);
+    // AvdInfo** (*aemu_get_getConsoleAgents()->settings->avdInfo()Ptr)(void);
 
     // /* the hardware configuration for this specific virtual device */
     // AndroidHwConfig (*android_hw)(void);
@@ -114,5 +114,6 @@ typedef struct QAndroidGlobalVarsAgent {
 
     void (*inject_userConfig)(AUserConfig* /*config*/);
     void (*set_keycode_forwading)(bool /*enabled */);
+    void (*inject_AvdInfo)(AvdInfo*);
 } QAndroidGlobalVarsAgent;
 ANDROID_END_HEADER

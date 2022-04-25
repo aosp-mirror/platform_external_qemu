@@ -84,7 +84,6 @@ static const int DEFAULT_PARTITION_SIZE_IN_MB = 800;
 // which is overkill, given this plan.
 bool android_op_wipe_data = false;
 bool android_op_writable_system = false;
-const char* savevm_on_exit = NULL;
 int guest_data_partition_mounted = 0;
 int guest_boot_completed = 0;
 int arm_snapshot_save_completed = 0;
@@ -511,7 +510,7 @@ static AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild) {
      * we are in the Android build system or not
      */
     if (opts->avd != NULL) {
-        ret = avdInfo_new(opts->avd, android_avdParams);
+        ret = avdInfo_new(opts->avd, getConsoleAgents()->settings->avdParams());
         if (ret == NULL) {
             /* an error message has already been printed */
             dprint("could not find virtual device named '%s'", opts->avd);
@@ -527,7 +526,7 @@ static AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild) {
             android_build_out = android_build_root = opts->sysdir;
         }
         ret = avdInfo_newForAndroidBuild(android_build_root, android_build_out,
-                                         android_avdParams);
+                                         getConsoleAgents()->settings->avdParams());
 
         if (ret == NULL) {
             D("could not start virtual device\n");
@@ -1737,6 +1736,9 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         return false;
     }
 
+    // Make the parsed avd globally available, 
+    // The features below sneakily rely on avd info being availalbe)
+    getConsoleAgents()->settings->inject_AvdInfo(avd);
     // Update server-based hw config / feature flags.
     // Must be done after createAVD,  which sets up critical info needed
     // by featurecontrol component itself.

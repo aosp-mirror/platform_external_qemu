@@ -337,7 +337,7 @@ static BatteryCharger getSavedCharger() {
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
         QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
 
-        int noMiscPipe = avdInfo_getApiLevel(android_avdInfo) < 26;
+        int noMiscPipe = avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) < 26;
 
         BatteryCharger defaultCharger = BATTERY_CHARGER_NONE;
 

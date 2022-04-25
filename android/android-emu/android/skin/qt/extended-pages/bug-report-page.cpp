@@ -41,7 +41,7 @@
 #include "android/base/files/PathUtils.h"              // for PathUtils
 #include "android/base/system/System.h"                // for System, System...
 #include "android/emulation/control/ScreenCapturer.h"  // for captureScreenshot
-#include "android/globals.h"                           // for android_avdInfo
+#include "android/globals.h"                           // for getConsoleAgents()->settings->avdInfo()
 #include "android/metrics/AdbLivenessChecker.h"        // for AdbLivenessChecker
 #include "android/metrics/UiEventTracker.h"            // for UiEventTracker
 #include "android/skin/qt/emulator-qt-window.h"        // for EmulatorQtWindow
@@ -382,11 +382,11 @@ void BugreportPage::loadAdbBugreport() {
     // platform/frameworks/native/cmds/dumpstate/bugreport-format.md
     // Issue different command args given the API level
 
-    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
+    int apiLevel = avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo());
     bool isNougatOrHigher =
             (apiLevel != kDefaultUnknownAPILevel && apiLevel > 23);
     if (apiLevel == kDefaultUnknownAPILevel &&
-        avdInfo_isMarshmallowOrHigher(android_avdInfo)) {
+        avdInfo_isMarshmallowOrHigher(getConsoleAgents()->settings->avdInfo())) {
         isNougatOrHigher = true;
     }
 
@@ -445,7 +445,7 @@ void BugreportPage::loadAdbLogcat() {
 
     if (!mAdb) return;
     // After apiLevel 19, buffer "all" become available
-    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
+    int apiLevel = avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo());
     mAdbLogcat = mAdb->runAdbCommand(
             (apiLevel != kDefaultUnknownAPILevel && apiLevel > 19)
                     ? std::vector<std::string>{"logcat", "-b", "all", "-d"}
@@ -521,7 +521,7 @@ bool BugreportPage::eventFilter(QObject* object, QEvent* event) {
 }
 
 std::string BugreportPage::generateUniqueBugreportName() {
-    const char* deviceName = avdInfo_getName(android_avdInfo);
+    const char* deviceName = avdInfo_getName(getConsoleAgents()->settings->avdInfo());
     time_t now = System::get()->getUnixTime();
     char date[80];
     strftime(date, sizeof(date), "%Y-%m-%d-%H-%M-%S", localtime(&now));

@@ -26,7 +26,7 @@
 #include "android/avd/util.h"                           // for AVD_ANDROID_AUTO
 #include "android/emulation/VmLock.h"                   // for RecursiveScop...
 #include "android/emulation/control/telephony_agent.h"  // for QAndroidTelep...
-#include "android/globals.h"                            // for android_avdInfo
+#include "android/globals.h"                            // for getConsoleAgents()->settings->avdInfo()
 #include "android/metrics/UiEventTracker.h"
 #include "android/settings-agent.h"                  // for SettingsTheme
 #include "android/skin/qt/error-dialog.h"            // for showErrorDialog
@@ -82,8 +82,8 @@ TelephonyPage::TelephonyPage(QWidget* parent)
     }
 
     // Disable sms button and box for Automotive, since it's not supported
-    if ((android_avdInfo &&
-         (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO))) {
+    if ((getConsoleAgents()->settings->avdInfo() &&
+         (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO))) {
         SettingsTheme theme = getSelectedTheme();
         setButtonEnabled(mUi->sms_sendButton, theme, false);
         mUi->sms_messageBox->setReadOnly(true);

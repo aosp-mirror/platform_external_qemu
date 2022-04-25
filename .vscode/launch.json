@@ -6,9 +6,9 @@
   "configurations": [
     {
       "name": "Launch cmake binary",
-      // "type": "lldb",
-      "type": "cppvsdbg",
-    
+      "type": "lldb",
+      // "type": "cppvsdbg",
+
       "request": "launch",
       "program": "${command:cmake.launchTargetPath}",
       "args": [

@@ -298,9 +298,9 @@ FeatureControlImpl::FeatureControlImpl() {
     }
 
     ScopedCPtr<char> defaultIniGuestName;
-    if (android_avdInfo) {
+    if (getConsoleAgents()->settings->avdInfo()) {
         defaultIniGuestName.reset(
-                avdInfo_getDefaultSystemFeatureControlPath(android_avdInfo));
+                avdInfo_getDefaultSystemFeatureControlPath(getConsoleAgents()->settings->avdInfo()));
     }
     std::string userIniHostName = base::PathUtils::join(
             ConfigDirs::getUserDirectory(), "advancedFeatures.ini");

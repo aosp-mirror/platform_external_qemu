@@ -990,15 +990,16 @@ static void _hwSensors_init(HwSensors* h) {
         }
     }
 
+
     if (android_hw->hw_sensors_heart_rate ||
-        (avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR
-         && avdInfo_getApiLevel(android_avdInfo) >= 28)) {
+        (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR
+         && avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >= 28)) {
         h->sensors[ANDROID_SENSOR_HEART_RATE].enabled = true;
     }
 
     if (android_hw->hw_sensors_wrist_tilt ||
-        (avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR
-         && avdInfo_getApiLevel(android_avdInfo) >= 28)) {
+        (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR
+         && avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >= 28)) {
         h->sensors[ANDROID_SENSOR_WRIST_TILT].enabled = true;
     }
 
@@ -1341,7 +1342,7 @@ bool android_foldable_folded_area_configured(int area) {
           yOffset < 0 || yOffset > 9999 ||
           width   < 1 || width   > 9999 ||
           height  < 1 || height  > 9999 ||
-          avdInfo_getApiLevel(android_avdInfo) < 28);
+          avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) < 28);
 
     return enableFoldableByDefault;
 }

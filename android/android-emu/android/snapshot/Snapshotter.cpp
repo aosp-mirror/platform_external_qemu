@@ -566,8 +566,8 @@ bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
     // Snapshots vary in size. They can be close to a GB.
     // Rather than taking all the remaining disk space,
     // save only if we have 2 GB of space available.
-    if (mDiskSpaceCheck && android_avdInfo &&
-        System::isUnderDiskPressure(avdInfo_getContentPath(android_avdInfo))) {
+    if (mDiskSpaceCheck && getConsoleAgents()->settings->avdInfo() &&
+        System::isUnderDiskPressure(avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo()))) {
         showError("Not saving snapshot: Disk space < 2 GB");
         if (reportMetrics) {
             appendFailedSave(

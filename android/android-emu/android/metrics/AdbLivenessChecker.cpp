@@ -67,7 +67,7 @@ bool AdbLivenessChecker::isEmulatorBooted() {
 
 static long bootCheckTaskTimeoutMs(
         android::base::Looper::Duration adbTimeoutMs) {
-    if (avdInfo_is_x86ish(android_avdInfo)) {
+    if (avdInfo_is_x86ish(getConsoleAgents()->settings->avdInfo())) {
         return std::max<long>(adbTimeoutMs / 100, 250);
     }
     return std::max<long>(adbTimeoutMs / 10, 5000);

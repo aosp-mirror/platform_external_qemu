@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "android/console.h"
 #include "android/avd/hw-config.h"
 #include "android/avd/info.h"
 #include "android/base/export.h"
@@ -20,21 +21,6 @@
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
-
-/* this structure is setup when loading the virtual device
- * after that, you can read the 'flags' field to determine
- * wether a data or cache wipe has been in effect.
- */
-extern AvdInfoParams     android_avdParams[1];
-
-/* a pointer to the android virtual device information
- * object, which can be queried for the paths of various
- * image files or the skin
- */
-extern AvdInfo*          android_avdInfo;
-
-/* MSVC only exports function pointers */
-extern AEMU_EXPORT AvdInfo** aemu_get_android_avdInfoPtr();
 
 /* the hardware configuration for this specific virtual device */
 extern AndroidHwConfig   android_hw[1];

@@ -19,7 +19,7 @@
 #include "android/avd/info.h"                        // for avdInfo_getApiDe...
 #include "android/emulation/VmLock.h"                // for RecursiveScopedV...
 #include "android/emulation/control/finger_agent.h"  // for QAndroidFingerAgent
-#include "android/globals.h"                         // for android_avdInfo
+#include "android/globals.h"                         // for getConsoleAgents()->settings->avdInfo()
 #include "android/metrics/UiEventTracker.h"          // for UiEventTracker
 #include "studio_stats.pb.h"                         // for EmulatorUiEvent
 
@@ -34,7 +34,7 @@ FingerPage::FingerPage(QWidget *parent) :
 {
     mUi->setupUi(this);
 
-    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
+    int apiLevel = avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo());
 
     if (apiLevel >= 23) {
         // This API level supports fingerprint recognition.

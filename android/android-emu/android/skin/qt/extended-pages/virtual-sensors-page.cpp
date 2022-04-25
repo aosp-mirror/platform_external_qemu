@@ -33,7 +33,7 @@
 #include "android/avd/info.h"                         // for avdInfo_getAvdF...
 #include "android/avd/util.h"                         // for AVD_ANDROID_AUTO
 #include "android/emulation/control/sensors_agent.h"  // for QAndroidSensors...
-#include "android/globals.h"                          // for android_avdInfo
+#include "android/globals.h"                          // for getConsoleAgents()->settings->avdInfo()
 #include "android/hw-sensors.h"                       // for PHYSICAL_PARAME...
 #include "android/metrics/PeriodicReporter.h"         // for PeriodicReporter
 #include "android/physics/GlmHelpers.h"               // for vecNearEqual
@@ -142,12 +142,12 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
 
     updateSensorValuesInUI();
 
-    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO) {
         mUi->tabWidget->removeTab(kAccelerometerTabIndex);
     }
 
-    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR) {
-        if (avdInfo_getApiLevel(android_avdInfo) < 28) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR) {
+        if (avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) < 28) {
             // This feature is currently only available on Wear OS API 28+ emulators.
             disableHeartRateSensor();
         }

@@ -11,27 +11,29 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <stdio.h>                        // for printf
-#include <stdlib.h>                       // for exit, EXIT_FAILURE, NULL
-#include <iostream>                       // for operator<<, endl, basic_ost...
-#include <string>                         // for string
-#include <vector>                         // for vector
+#include <stdio.h>   // for printf
+#include <stdlib.h>  // for exit, EXIT_FAILURE, NULL
+#include <iostream>  // for operator<<, endl, basic_ost...
+#include <string>    // for string
+#include <vector>    // for vector
 
 #ifdef _MSC_VER
-#include "msvc-posix.h"
 #include "msvc-getopt.h"
+#include "msvc-posix.h"
 #else
-#include <getopt.h>                       // for no_argument, getopt_long
+#include <getopt.h>  // for no_argument, getopt_long
 #endif
 
 #include <google/protobuf/text_format.h>  // for TextFormat
 
-#include "android/avd/info.h"             // for avdInfo_new
-#include "android/base/StringView.h"      // for StringView
-#include "android/globals.h"              // for android_avdInfo, android_av...
-#include "android/snapshot/Snapshot.h"    // for Snapshot
-#include "snapshot.pb.h"                  // for Snapshot
-#include "snapshot_service.pb.h"          // for SnapshotDetails, SnapshotList
+#include "android-qemu2-glue/qemu-console-factory.h"
+#include "android/avd/info.h"         // for avdInfo_new
+#include "android/base/StringView.h"  // for StringView
+#include "android/emulation/control/AndroidAgentFactory.h"
+#include "android/globals.h"  // for getConsoleAgents()->settings->avdInfo(), android_av...
+#include "android/snapshot/Snapshot.h"  // for Snapshot
+#include "snapshot.pb.h"                // for Snapshot
+#include "snapshot_service.pb.h"        // for SnapshotDetails, SnapshotList
 
 using android::emulation::control::SnapshotDetails;
 using android::emulation::control::SnapshotList;
@@ -95,12 +97,38 @@ static void parseArgs(int argc, char** argv) {
     }
 }
 
+AndroidOptions* sAndroid_cmdLineOptions;
+
+AvdInfo* sAndroid_avdInfo = nullptr;
+AvdInfoParams sAndroid_avdInfoParams = {0};
+std::string sCmdlLine;
+LanguageSettings s_languageSettings = {0};
+bool sKeyCodeForwarding = false;
+
+static const QAndroidGlobalVarsAgent globalVarsAgent = {
+        .avdParams = []() { return &sAndroid_avdInfoParams; },
+        .avdInfo = []() { return sAndroid_avdInfo; },
+        .inject_AvdInfo = [](AvdInfo* avd) { sAndroid_avdInfo = avd; }};
+
+
+namespace android::emulation {
+class MockAndroidConsoleFactory : public AndroidConsoleFactory {
+public:
+    const QAndroidGlobalVarsAgent* const android_get_QAndroidGlobalVarsAgent()
+            const override {
+        return &globalVarsAgent;
+    };
+};
+}  // namespace android::emulation
+
 int main(int argc, char* argv[]) {
     parseArgs(argc, argv);
-
+   android::emulation::injectConsoleAgents(
+            android::emulation::MockAndroidConsoleFactory());
     // Initialize the avd
-    android_avdInfo = avdInfo_new(FLAG_avd.c_str(), android_avdParams);
-    if (android_avdInfo == NULL) {
+    getConsoleAgents()->settings->inject_AvdInfo(avdInfo_new(
+            FLAG_avd.c_str(), getConsoleAgents()->settings->avdParams()));
+    if (getConsoleAgents()->settings->avdInfo() == NULL) {
         std::cerr << "Could not find virtual device named: " << FLAG_avd
                   << std::endl;
         exit(1);

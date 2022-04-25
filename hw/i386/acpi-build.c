@@ -1079,7 +1079,7 @@ static void build_android_dt_aml(Aml *scope,
 
     aml_append(dev, aml_name_decl("_HID", aml_string(hid_name)));
     aml_append(dev, aml_name_decl("_STR", aml_unicode(str_name)));
-    const char* acpi_ini_file = avdInfo_getAcpiIniPath(android_avdInfo);
+    const char* acpi_ini_file = avdInfo_getAcpiIniPath(getConsoleAgents()->settings->avdInfo());
 
     if (acpi_ini_file) {
         CIniFile* acpiIni = iniFile_newFromFile(acpi_ini_file);
@@ -1101,8 +1101,8 @@ static void build_android_dt_aml(Aml *scope,
         /* 5 properties per partition, plus 2 more "compatible" nodes */
         int nproperties = 2;
         /* All AVDs have a system.img. Some also have a vendor.img. */
-        system_device_in_guest = avdInfo_getSystemImageDevicePathInGuest(android_avdInfo);
-        vendor_device_in_guest = avdInfo_getVendorImageDevicePathInGuest( android_avdInfo);
+        system_device_in_guest = avdInfo_getSystemImageDevicePathInGuest(getConsoleAgents()->settings->avdInfo());
+        vendor_device_in_guest = avdInfo_getVendorImageDevicePathInGuest( getConsoleAgents()->settings->avdInfo());
         if (system_device_in_guest) {
             nproperties += 5;
         }

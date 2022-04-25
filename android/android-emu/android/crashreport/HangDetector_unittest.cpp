@@ -14,14 +14,57 @@
 
 #include "android/crashreport/HangDetector.h"
 
-#include "android/base/async/ThreadLooper.h"
-#include "android/base/testing/TestSystem.h"
-#include "android/globals.h"
+#include <assert.h>                                         // for assert
+#include <gtest/gtest.h>                                    // for SuiteApiR...
+#include <stdio.h>                                          // for printf
 
-#include <gtest/gtest.h>
+#include "android/avd/info.h"                               // for AvdInfo
+#include "android/base/Debug.h"                             // for IsDebugge...
+#include "android/base/Log.h"                               // for base
+#include "android/base/StringView.h"                        // for StringView
+#include "android/base/async/ThreadLooper.h"                // for ThreadLooper
+#include "android/cmdline-definitions.h"                    // for AndroidOp...
+#include "android/console.h"                                // for getConsol...
+#include "android/emulation/control/AndroidAgentFactory.h"  // for injectCon...
+#include "android/emulation/control/globals_agent.h"        // for QAndroidG...
+#include "android/utils/debug.h"                            // for dinfo
+#include "gtest/gtest_pred_impl.h"                          // for Assertion...
+
+struct AvdInfo;
 
 using namespace android::base;
 using namespace android::crashreport;
+
+
+AndroidOptions emptyOptions{};
+AndroidOptions* sAndroid_cmdLineOptions = &emptyOptions;
+std::string sCmdlLine;
+
+AvdInfo* sAndroid_avdInfo = nullptr;
+AvdInfoParams sAndroid_avdInfoParams = {0};
+
+static const QAndroidGlobalVarsAgent gMockAndroidGlobalVarsAgent = {
+        .avdParams = []() { return &sAndroid_avdInfoParams; },
+        .avdInfo =
+                []() {
+                    // Do not access the info before it is injected!
+                    assert(sAndroid_avdInfo != nullptr);
+                    return sAndroid_avdInfo;
+                },
+        .inject_AvdInfo =
+                [](AvdInfo* avd) {
+                    dinfo("Injecting avd info..");
+                    sAndroid_avdInfo = avd;
+                }};
+
+
+class HangDetectorMockConsoleFactory
+    : public android::emulation::AndroidConsoleFactory {
+    const QAndroidGlobalVarsAgent* const android_get_QAndroidGlobalVarsAgent()
+            const {
+        return &gMockAndroidGlobalVarsAgent;
+    }
+};
 
 class HangDetectorTest : public ::testing::Test {
 public:
@@ -37,7 +80,9 @@ public:
                           .taskProcessingTimeoutMs = 10,
                           .hangCheckTimeoutMs = 10,
                   }) {
-        android_avdInfo = nullptr;
+
+        android::emulation::injectConsoleAgents(HangDetectorMockConsoleFactory());
+        getConsoleAgents()->settings->inject_AvdInfo(nullptr);
     }
 
     void TearDown() override { mHangDetector.stop(); }

@@ -98,7 +98,7 @@ static bool parseQemuOptForQcow2(bool wipeData) {
      * the image files, but we go the easier (and faster) route and cache the
      * version number that is specified in build.prop.
      */
-    const char* avd_data_dir = avdInfo_getContentPath(android_avdInfo);
+    const char* avd_data_dir = avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo());
     static const char sysimg_version_number_cache_basename[] =
             "version_num.cache";
     char* sysimg_version_number_cache_path =
@@ -120,7 +120,7 @@ static bool parseQemuOptForQcow2(bool wipeData) {
                 vn_cache_file == NULL ||
                 fscanf(vn_cache_file, "%d", &sysimg_version_number) != 1 ||
                 sysimg_version_number !=
-                        avdInfo_getSysImgIncrementalVersion(android_avdInfo);
+                        avdInfo_getSysImgIncrementalVersion(getConsoleAgents()->settings->avdInfo());
         if (vn_cache_file) {
             fclose(vn_cache_file);
         }
@@ -253,7 +253,7 @@ static bool parseQemuOptForQcow2(bool wipeData) {
         FILE* vn_cache_file = android_fopen(sysimg_version_number_cache_path, "w");
         if (vn_cache_file) {
             fprintf(vn_cache_file, "%d\n",
-                    avdInfo_getSysImgIncrementalVersion(android_avdInfo));
+                    avdInfo_getSysImgIncrementalVersion(getConsoleAgents()->settings->avdInfo()));
             fclose(vn_cache_file);
         }
     }
@@ -387,7 +387,7 @@ static void mirrorTmpImg(const char* dst, const char* src) {
     char* backingFile = android_hw->MIRROR_IMG_FIELD;
     if (!android::base::PathUtils::isAbsolute(backingFile)) {
         absPath =
-                path_join(avdInfo_getContentPath(android_avdInfo), backingFile);
+                path_join(avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo()), backingFile);
         // bug: 130724870
         if (path_exists(absPath)) {
             backingFile = absPath;

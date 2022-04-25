@@ -4612,7 +4612,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
               read_only = true;
               break;
             case QEMU_OPTION_restart_when_stalled:
-                if (avdInfo_getApiLevel(android_avdInfo) >= 30) {
+                if (avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >= 30) {
                     set_restart_when_stalled();
                 }
                 break;
@@ -4736,7 +4736,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
             RendererConfig rendererConfig = getLastRendererConfig();
 
-            if (avdInfo_getApiLevel(android_avdInfo) >= 27) {
+            if (avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >= 27) {
                 // api27 and up hardcoded pixel format ast RGBA8888, so only use 32bit
                 // todo: once api26 is refreshed, force 32bit on it as well. right now
                 // it is using 16bit hardcoded
@@ -5314,7 +5314,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 read_only,
                 loadvm ? loadvm : android_get_quick_boot_name(),
                 machine_class->block_default_type,
-                android_avdInfo)) {
+                getConsoleAgents()->settings->avdInfo())) {
             return 1;
         }
     } else {

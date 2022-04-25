@@ -255,8 +255,8 @@ HangDetector& HangDetector::addPredicateCheck(HangPredicate&& predicate,
 base::System::Duration HangDetector::hangTimeoutMs() {
     // x86 and x64 run pretty fast, but other types of images could be really
     // slow - so let's have a longer timeout for those.
-    // Note that android_avdInfo is not set in unit tests.
-    if (android_avdInfo && avdInfo_is_x86ish(android_avdInfo)) {
+    // Note that getConsoleAgents()->settings->avdInfo() is not set in unit tests.
+    if (getConsoleAgents()->settings->avdInfo() && avdInfo_is_x86ish(getConsoleAgents()->settings->avdInfo())) {
         return mTiming.taskProcessingTimeoutMs;
     }
     // something around 100 seconds should be fine.

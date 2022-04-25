@@ -54,7 +54,7 @@ MultiDisplayPage::MultiDisplayPage(QWidget* parent)
 
     // set default display title
     char* skinDir;
-    avdInfo_getSkinInfo(android_avdInfo, &mSkinName, &skinDir);
+    avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &mSkinName, &skinDir);
     std::string defaultDisplayDisp =
             std::string(mSkinName) + " (" +
             std::to_string(android_hw->hw_lcd_width) + 'x' +

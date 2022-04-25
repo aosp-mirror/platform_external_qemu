@@ -679,8 +679,8 @@ static void initialize_virtio_input_devs(android::ParameterList& args,
         }
 
         if (hw->hw_rotaryInput ||
-            (android_avdInfo &&
-             avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR)) {
+            (getConsoleAgents()->settings->avdInfo() &&
+             avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR)) {
             args.add("-device");
             args.add("virtio_input_rotary_pci");
         }
@@ -1295,7 +1295,7 @@ extern "C" int main(int argc, char** argv) {
     if (!emulator_parseCommonCommandLineOptions(
                 &argc, &argv, kTarget.androidArch,
                 true,  // is_qemu2
-                opts, hw, &android_avdInfo, &exitStatus)) {
+                opts, hw, &avd, &exitStatus)) {
         // Special case for QEMU positional parameters (or Fuchsia path)
         if (exitStatus == EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER) {
             // Copy all QEMU options to |args|, and set |n| to the number
@@ -1382,7 +1382,7 @@ extern "C" int main(int argc, char** argv) {
                         true, AVD_PHONE, opts->gpu ? opts->gpu : "host",
                         opts->no_window, lcdWidth, lcdHeight,
                         // LCD DPI, orientation
-                        96, "landscape", opts, hw, &android_avdInfo);
+                        96, "landscape", opts, hw, &avd);
 
             } else {
                 for (int n = 1; n <= argc; ++n) {
@@ -1407,7 +1407,7 @@ extern "C" int main(int argc, char** argv) {
     // just because we know that we're in the new emulator as we got here
     opts->ranchu = 1;
 
-    avd = android_avdInfo;
+    getConsoleAgents()->settings->inject_AvdInfo(avd);
 
     bool lowDisk = System::isUnderDiskPressure(avdInfo_getContentPath(avd));
     if (lowDisk) {
@@ -1815,9 +1815,9 @@ extern "C" int main(int argc, char** argv) {
             android_hw->disk_dataPartition_size < kMinPlaystoreImageSize) {
             android_hw->disk_dataPartition_size = kMinPlaystoreImageSize;
             // Write it to config.ini as well, or we get all sorts of problems.
-            if (android_avdInfo) {
+            if (getConsoleAgents()->settings->avdInfo()) {
                 avdInfo_replaceDataPartitionSizeInConfigIni(
-                        android_avdInfo, kMinPlaystoreImageSize);
+                        getConsoleAgents()->settings->avdInfo(), kMinPlaystoreImageSize);
             }
         }
     }

@@ -9,18 +9,29 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include <cassert>
 #include <string>
 #include "android/cmdline-definitions.h"
 #include "android/emulation/control/globals_agent.h"
+#include "android/utils/debug.h"
 
 AndroidOptions* sAndroid_cmdLineOptions;
+
+AvdInfo* sAndroid_avdInfo = nullptr;
+AvdInfoParams sAndroid_avdInfoParams = {0};
 std::string sCmdlLine;
 LanguageSettings s_languageSettings = {0};
 AUserConfig* s_userConfig = nullptr;
 bool sKeyCodeForwarding = false;
 
 static const QAndroidGlobalVarsAgent globalVarsAgent = {
-
+        .avdParams = []() { return &sAndroid_avdInfoParams; },
+        .avdInfo =
+                []() {
+                    // Do not access the info before it is injected!
+                    assert(sAndroid_avdInfo != nullptr);
+                    return sAndroid_avdInfo;
+                },
         .language = []() { return &s_languageSettings; },
         .use_keycode_forwarding = []() { return sKeyCodeForwarding; },
         .userConfig = []() { return s_userConfig; },
@@ -42,10 +53,10 @@ static const QAndroidGlobalVarsAgent globalVarsAgent = {
                     s_languageSettings.changing_language_country_locale =
                             language || country || locale;
                 },
-        .inject_userConfig =
-                [](AUserConfig* config) { s_userConfig = config; },
+        .inject_userConfig = [](AUserConfig* config) { s_userConfig = config; },
         .set_keycode_forwading =
-                [](bool enabled) { sKeyCodeForwarding = enabled; }};
+                [](bool enabled) { sKeyCodeForwarding = enabled; },
+        .inject_AvdInfo = [](AvdInfo* avd) { sAndroid_avdInfo = avd; }};
 
 extern "C" const QAndroidGlobalVarsAgent* const gQAndroidGlobalVarsAgent =
         &globalVarsAgent;

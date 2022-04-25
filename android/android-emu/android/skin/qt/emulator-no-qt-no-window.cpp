@@ -176,7 +176,7 @@ bool EmulatorNoQtNoWindow::notSupoortFold() {
     if (xOffset < 0 || xOffset > 9999 || yOffset < 0 || yOffset > 9999 ||
         width < 1 || width > 9999 || height < 1 || height > 9999 ||
         // TODO: need 29
-        avdInfo_getApiLevel(android_avdInfo) < 28) {
+        avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) < 28) {
         return true;
     }
     return false;
@@ -254,11 +254,11 @@ void EmulatorNoQtNoWindow::saveMultidisplayToConfig() {
     for (uint32_t i = 1; i < maxEntries + 1; i++) {
         if (!getMultiDisplay(i, &pos_x, &pos_y, &width, &height, &dpi, &flag,
                              nullptr)) {
-            avdInfo_replaceMultiDisplayInConfigIni(android_avdInfo, i, -1, -1,
+            avdInfo_replaceMultiDisplayInConfigIni(getConsoleAgents()->settings->avdInfo(), i, -1, -1,
                                                    0, 0, 0, 0);
         } else {
             avdInfo_replaceMultiDisplayInConfigIni(
-                    android_avdInfo, i, pos_x, pos_y, width, height, dpi, flag);
+                    getConsoleAgents()->settings->avdInfo(), i, pos_x, pos_y, width, height, dpi, flag);
         }
     }
 }
@@ -274,7 +274,7 @@ void EmulatorNoQtNoWindow::requestClose() {
     if (fastSnapshotV1) {
         // Tell the system that we are in saving; create a file lock.
         auto snapshotFileLock =
-                avdInfo_getSnapshotLockFilePath(android_avdInfo);
+                avdInfo_getSnapshotLockFilePath(getConsoleAgents()->settings->avdInfo());
         if (snapshotFileLock && !filelock_create(snapshotFileLock)) {
             derror("unable to lock snapshot save on exit!\n");
         }

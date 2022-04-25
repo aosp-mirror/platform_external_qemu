@@ -55,7 +55,7 @@
 #endif
 
 /* Camera service version 1 */
-#define V1 ((avdInfo_getApiLevel(android_avdInfo) > 29) && \
+#define V1 ((avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) > 29) && \
             !feature_is_enabled(kFeature_Minigbm))
 
 /* Defines name of the camera service. */

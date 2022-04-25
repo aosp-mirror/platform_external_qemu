@@ -285,8 +285,8 @@ extern void skin_winsys_quit_request() {
     }
     bool needRequestClose = false;
 
-    if (android_avdInfo) {
-        auto arch = (avdInfo_getTargetCpuArch(android_avdInfo));
+    if (getConsoleAgents()->settings->avdInfo()) {
+        auto arch = (avdInfo_getTargetCpuArch(getConsoleAgents()->settings->avdInfo()));
         if (!strcmp(arch, "x86") || !strcmp(arch, "x86_64")) {
         } else if (!getConsoleAgents()
                             ->settings->android_cmdLineOptions()

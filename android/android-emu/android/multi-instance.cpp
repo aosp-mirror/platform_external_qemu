@@ -34,7 +34,7 @@ bool android::multiinstance::initInstanceShareMode(
     if (sMultiInstanceState.hasInstance()) {
         return sMultiInstanceState->shareMode == shareMode;
     }
-    AvdInfo* avd = android_avdInfo;
+    AvdInfo* avd = getConsoleAgents()->settings->avdInfo();
     const char* multiInstanceLock = avdInfo_getMultiInstanceLockFilePath(avd);
     if (!android::base::System::get()->pathIsFile(multiInstanceLock)) {
         android::base::createFileForShare(multiInstanceLock);

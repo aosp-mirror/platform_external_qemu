@@ -77,8 +77,7 @@ bool user_config_init(void) {
                                        android_hw->hw_lcd_height, &mmmRect,
                                        &userConfig);
     } else {
-        userConfig = auserConfig_new(android_avdInfo, &mmmRect,
-                                     s_deviceLcdWidth, s_deviceLcdHeight);
+        userConfig = auserConfig_new(getConsoleAgents()->settings->avdInfo(), &mmmRect, s_deviceLcdWidth, s_deviceLcdHeight);
     }
     getConsoleAgents()->settings->inject_userConfig(userConfig);
     return userConfig != NULL;
@@ -385,8 +384,10 @@ bool emulator_initMinimalSkinConfig(int lcd_width,
     create_minimal_skin_config(lcd_width, lcd_height, &s_skinConfig,
                                &s_skinPath);
 
-    *userConfig_out = auserConfig_new_custom(
-            android_avdInfo, rect, s_deviceLcdWidth, s_deviceLcdHeight);
+    *userConfig_out =
+        auserConfig_new_custom(
+            getConsoleAgents()->settings->avdInfo(), rect,
+            s_deviceLcdWidth, s_deviceLcdHeight);
     return true;
 }
 

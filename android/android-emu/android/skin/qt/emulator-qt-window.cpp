@@ -506,7 +506,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     mToolWindow = new ToolWindow(this, &mContainer, mEventLogger,
                                  mUserActionsCounter);
 
-    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO) {
         mCarClusterWindow = new CarClusterWindow(this, &mContainer);
         mCarClusterConnector = new CarClusterConnector(mCarClusterWindow);
     }
@@ -793,7 +793,7 @@ void EmulatorQtWindow::showWin32DeprecationWarning() {
 }
 
 void EmulatorQtWindow::showAvdArchWarning() {
-    ScopedCPtr<char> arch(avdInfo_getTargetCpuArch(android_avdInfo));
+    ScopedCPtr<char> arch(avdInfo_getTargetCpuArch(getConsoleAgents()->settings->avdInfo()));
 
     // On Apple, we could also be running w/ Virtualization.framework
     // which should also support fast x86 VMs on arm64.
@@ -988,7 +988,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
             if (fastSnapshotV1) {
                 // Tell the system that we are in saving; create a file lock.
                 auto snapshotLockFilePath =
-                        avdInfo_getSnapshotLockFilePath(android_avdInfo);
+                        avdInfo_getSnapshotLockFilePath(getConsoleAgents()->settings->avdInfo());
                 if (snapshotLockFilePath &&
                     !filelock_create(snapshotLockFilePath)) {
                     derror("unable to lock snapshot save on exit!\n");
@@ -1440,7 +1440,7 @@ void EmulatorQtWindow::getSkinPixmap() {
     // Where is the skin?
     char* skinName;
     char* skinDir;
-    avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+    avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName, &skinDir);
     // Parse the 'layout' file in the skin directory
     QString layoutPath = PathUtils::join(skinDir, skinName, "layout").c_str();
     AConfig* skinConfig = aconfig_node("", "");
@@ -2367,7 +2367,7 @@ void EmulatorQtWindow::installDone(ApkInstaller::Result result,
 
 void EmulatorQtWindow::runAdbPush(const QList<QUrl>& urls) {
     std::vector<std::pair<std::string, std::string>> file_paths;
-    StringView remoteDownloadsDir = avdInfo_getApiLevel(android_avdInfo) > 10
+    StringView remoteDownloadsDir = avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) > 10
                                             ? kRemoteDownloadsDir
                                             : kRemoteDownloadsDirApi10;
     for (const auto& url : urls) {
@@ -3061,7 +3061,7 @@ bool EmulatorQtWindow::hasFrame() const {
     }
     // Probably frameless. But framed if there's no skin.
     char *skinName, *skinDir;
-    avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+    avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName, &skinDir);
     return (skinDir == NULL);
 }
 
@@ -3585,7 +3585,7 @@ bool EmulatorQtWindow::getMonitorRect(uint32_t* width, uint32_t* height) {
 void EmulatorQtWindow::setNoSkin() {
     runOnUiThread([this]() {
         char *skinName, *skinDir;
-        avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+        avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName, &skinDir);
         if (skinDir != NULL) {
             SkinEvent* event = new SkinEvent();
             event->type = kEventSetNoSkin;
@@ -3599,7 +3599,7 @@ void EmulatorQtWindow::setNoSkin() {
 void EmulatorQtWindow::restoreSkin() {
     runOnUiThread([this]() {
         char *skinName, *skinDir;
-        avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+        avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName, &skinDir);
         if (skinDir != NULL) {
             SkinEvent* event = new SkinEvent();
             event->type = kEventRestoreSkin;
@@ -3690,11 +3690,11 @@ void EmulatorQtWindow::saveMultidisplayToConfig() {
     for (uint32_t i = 1; i < maxEntries + 1; i++) {
         if (!getMultiDisplay(i, &pos_x, &pos_y, &width, &height, &dpi, &flag,
                              nullptr)) {
-            avdInfo_replaceMultiDisplayInConfigIni(android_avdInfo, i, -1, -1,
+            avdInfo_replaceMultiDisplayInConfigIni(getConsoleAgents()->settings->avdInfo(), i, -1, -1,
                                                    0, 0, 0, 0);
         } else {
             avdInfo_replaceMultiDisplayInConfigIni(
-                    android_avdInfo, i, pos_x, pos_y, width, height, dpi, flag);
+                    getConsoleAgents()->settings->avdInfo(), i, pos_x, pos_y, width, height, dpi, flag);
         }
     }
 }
