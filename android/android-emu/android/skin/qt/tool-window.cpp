@@ -243,7 +243,16 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     }
 
     if (android_avdInfo) {
-        if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+        if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR) {
+            if (avdInfo_getApiLevel(android_avdInfo) >= 28) {
+                default_shortcuts += "Ctrl+Shift+O WEAR_1\n";
+                default_shortcuts += "Ctrl+Shift+T TILT\n";
+                default_shortcuts += "Ctrl+Shift+E PALM\n";
+            }
+            if (avdInfo_getApiLevel(android_avdInfo) > 28) {
+                default_shortcuts += "Ctrl+Shift+I WEAR_2\n";
+            }
+        } else if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
             default_shortcuts += "Ctrl+Shift+T SHOW_PANE_CAR\n";
             default_shortcuts += "Ctrl+Shift+O SHOW_PANE_CAR_ROTARY\n";
             default_shortcuts += "Ctrl+Shift+I SHOW_PANE_SENSOR_REPLAY\n";
