@@ -1182,10 +1182,7 @@ static int startEmulatorWithMinConfig(int argc,
                                getConsoleAgents()->vm);
 
     RendererConfig rendererConfig;
-    configAndStartRenderer(avd, opts, hw, getConsoleAgents()->vm,
-                           getConsoleAgents()->emu,
-                           getConsoleAgents()->multi_display,
-                           uiPreferredGlesBackend, &rendererConfig);
+    configAndStartRenderer(uiPreferredGlesBackend, &rendererConfig);
 
     // Gpu configuration is set, now initialize the multi display, screen
     // recorder and screenshot callback
@@ -3107,10 +3104,7 @@ extern "C" int main(int argc, char** argv) {
         }
 
         RendererConfig rendererConfig;
-        configAndStartRenderer(avd, opts, hw, getConsoleAgents()->vm,
-                               getConsoleAgents()->emu,
-                               getConsoleAgents()->multi_display,
-                               uiPreferredGlesBackend, &rendererConfig);
+        configAndStartRenderer(uiPreferredGlesBackend, &rendererConfig);
 
         // Gpu configuration is set, now initialize the multi display, screen
         // recorder and screenshot callback

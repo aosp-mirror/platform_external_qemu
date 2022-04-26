@@ -110,9 +110,9 @@ int MultiDisplay::setMultiDisplay(uint32_t id,
 
     // fetch rotation from EmulatorWindow
     // TODO: link to libui source code???
-    EmulatorWindow* window = emulator_window_get();
+    EmulatorWindow* window = getConsoleAgents()->emu->getEmulatorWindow();
     if (window) {
-        SkinLayout* layout = emulator_window_get_layout(window);
+        SkinLayout* layout = (SkinLayout*) getConsoleAgents()->emu->getLayout();
         if (layout) {
             rotation = layout->orientation;
         }

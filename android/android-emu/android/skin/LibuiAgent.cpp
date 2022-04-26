@@ -13,6 +13,7 @@
 #include "android/skin/keycode-buffer.h"            // for skin_keycode_buff...
 #include "android/skin/winsys.h"                    // for skin_winsys_quit_...
 
+
 static int utf8_next(const unsigned char** pp, const unsigned char* end) {
     const unsigned char* p = *pp;
     int result = -1;
@@ -79,3 +80,7 @@ static const QAndroidLibuiAgent kLibuiAgent = {
 };
 
 extern "C" const QAndroidLibuiAgent* const gQAndroidLibuiAgent = &kLibuiAgent;
+
+ const QAndroidLibuiAgent* const getQAndroidLibuiAgent() {
+    return gQAndroidLibuiAgent;
+}
