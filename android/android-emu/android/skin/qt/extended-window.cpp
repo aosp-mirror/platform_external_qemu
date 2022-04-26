@@ -362,7 +362,7 @@ ExtendedWindow::~ExtendedWindow() {
                 ->settings->android_cmdLineOptions()
                 ->qt_hide_window &&
         !mFirstShowEvent) {
-        auto userConfig = aemu_get_userConfigPtr();
+        auto userConfig = getConsoleAgents()->settings->userConfig();
         QRect geom = geometry();
         auserConfig_setExtendedControlsPos(userConfig, geom.x(), geom.y(),
                                            mHAnchor, mVAnchor);
@@ -688,7 +688,7 @@ void ExtendedWindow::showEvent(QShowEvent* e) {
                     ->qt_hide_window) {
             const QIcon icon(":/all/android_studio_icon");
             setWindowIcon(icon);
-            auto userConfig = aemu_get_userConfigPtr();
+            auto userConfig = getConsoleAgents()->settings->userConfig();
             int x, y;
             if (auserConfig_getExtendedControlsPos(userConfig, &x, &y,
                                                    &mHAnchor, &mVAnchor)) {

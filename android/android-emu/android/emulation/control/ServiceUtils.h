@@ -13,7 +13,6 @@
 // limitations under the License.
 #pragma once
 #include <chrono>         // for seconds, milliseconds
-#include <ratio>          // for ratio
 #include <string>         // for string
 #include <unordered_map>  // for unordered_map
 

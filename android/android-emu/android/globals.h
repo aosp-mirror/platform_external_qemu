@@ -42,6 +42,10 @@ extern AndroidHwConfig   android_hw[1];
 /* MSVC only exports function pointers */
 AEMU_EXPORT AndroidHwConfig* aemu_get_android_hw();
 
+/** PLEASE DO NOT ANY MORE GLOBALS, INSTEAD INJECT THEM FROM 
+ *  The agents are defined in console.h 
+ */
+
 /* this indicates that guest has mounted data partition */
 extern int guest_data_partition_mounted;
 
