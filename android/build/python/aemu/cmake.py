@@ -187,7 +187,8 @@ def main(args):
             run_tests_opts = []
             if args.gfxstream or args.crosvm or args.gfxstream_only:
                 run_tests_opts.append("--skip-emulator-check")
-
+            if args.gfxstream or args.gfxstream_only:
+                run_tests_opts.append("--gfxstream")
             run_tests(args.out, args.test_jobs, args.crash != "none", run_tests_opts)
             logging.info("Completed testing.")
         else:
