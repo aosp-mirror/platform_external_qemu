@@ -94,7 +94,6 @@ typedef std::unique_ptr<PhysicalModel, PhysicalModelDeleter> PhysicalModelPtr;
 class OffworldPipeTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        engine_supports_snapshot = 1;
         AndroidPipe::Service::resetAll();
         mDevice = HostGoldfishPipeDevice::get();
         mLooper = std::unique_ptr<base::TestLooper>(new base::TestLooper());

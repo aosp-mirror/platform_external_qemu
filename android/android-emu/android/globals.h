@@ -42,9 +42,6 @@ extern AndroidHwConfig   android_hw[1];
 /* MSVC only exports function pointers */
 AEMU_EXPORT AndroidHwConfig* aemu_get_android_hw();
 
-/* this is to support snapshot (currently only qemu1+software-renderer) */
-extern const char* savevm_on_exit;
-
 /* this indicates that guest has mounted data partition */
 extern int guest_data_partition_mounted;
 
@@ -65,10 +62,6 @@ extern int min_config_qemu_mode;
 extern int is_fuchsia;
 
 extern int android_snapshot_update_timer;
-
-/* are we using qemu 2? */
-/* remove this flag once we deprecate qemu1 on both dev and release branches. */
-extern int engine_supports_snapshot;
 
 /* are we changing the language, country, or locale? */
 extern int changing_language_country_locale;

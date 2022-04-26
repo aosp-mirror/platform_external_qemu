@@ -280,7 +280,7 @@ void EmulatorNoQtNoWindow::requestClose() {
         }
     }
 
-    if (fastSnapshotV1 || savevm_on_exit) {
+    if (fastSnapshotV1) {
         qemu_system_shutdown_request(QEMU_SHUTDOWN_CAUSE_HOST_UI);
     } else {
         mAdbInterface->runAdbCommand(
