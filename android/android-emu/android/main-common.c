@@ -11,52 +11,50 @@
 */
 #include "android/main-common.h"
 
-#include "android/avd/info.h"
-#include "android/avd/util.h"
-#include "android/base/gl_object_counter.h"
-#include "android/camera/camera-list.h"
-#include "android/crashreport/crash-handler.h"
-#include "android/emulation/android_pipe_unix.h"
-#include "android/emulation/bufprint_config_dirs.h"
-#include "android/featurecontrol/feature_control.h"
-#include "android/globals.h"
-#include "android/help.h"
-#include "android/kernel/kernel_utils.h"
-#include "android/main-emugl.h"
-#include "android/main-help.h"
-#include "android/network/control.h"
-#include "android/opengles.h"
-#include "android/resource.h"
-#include "android/snapshot.h"
-#include "android/user-config.h"
-#include "android/utils/bufprint.h"
-#include "android/utils/debug.h"
-#include "android/utils/dirscanner.h"
-#include "android/utils/dns.h"
-#include "android/utils/eintr_wrapper.h"
-#include "android/utils/host_bitness.h"
-#include "android/utils/path.h"
-#include "android/utils/stralloc.h"
-#include "android/utils/string.h"
-#include "android/utils/x86_cpuid.h"
-#include "android/version.h"
+#include <assert.h>                                         // for assert
+#include <ctype.h>                                          // for isdigit
+#include <inttypes.h>                                       // for PRIu64
+#include <limits.h>                                         // for PATH_MAX
 
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <limits.h>
+#include "android/avd/info.h"                               // for avdInfo_g...
+#include "android/avd/util.h"                               // for AVD_PHONE
+#include "android/base/gl_object_counter.h"                 // for android_g...
+#include "android/camera/camera-list.h"                     // for android_c...
+#include "android/cmdline-option.h"                         // for android_p...
+#include "android/console.h"                                // for getConsol...
+#include "android/crashreport/crash-handler.h"              // for crashhand...
+#include "android/emulation/android_pipe_unix.h"            // for android_u...
+#include "android/emulation/bufprint_config_dirs.h"         // for bufprint_...
+#include "android/emulation/control/globals_agent.h"        // for QAndroidG...
+#include "android/emulation/control/multi_display_agent.h"  // for QAndroidM...
+#include "android/emulation/control/vm_operations.h"        // for QAndroidV...
+#include "android/featurecontrol/feature_control.h"         // for feature_i...
+#include "android/globals.h"                                // for android_a...
+#include "android/kernel/kernel_utils.h"                    // for KERNEL_VE...
+#include "android/main-emugl.h"                             // for androidEm...
+#include "android/main-help.h"                              // for emulator_...
+#include "android/network/control.h"                        // for android_n...
+#include "android/opengles.h"                               // for android_i...
+#include "android/snapshot.h"                               // for snapshot_...
+#include "android/utils/bufprint.h"                         // for bufprint
+#include "android/utils/debug.h"                            // for dprint
+#include "android/utils/dirscanner.h"                       // for dirScanne...
+#include "android/utils/dns.h"                              // for android_d...
+#include "android/utils/path.h"                             // for path_exists
+#include "android/utils/sockets.h"                          // for sock_addr...
+#include "android/utils/stralloc.h"                         // for stralloc_...
+#include "android/utils/string.h"                           // for str_reset
+#include "android/utils/system.h"                           // for AFREE
+#include "android/utils/x86_cpuid.h"                        // for android_g...
+#include "android/version.h"                                // for EMULATOR_...
+
+struct QAndroidEmulatorWindowAgent;
 #ifdef _WIN32
 #include <process.h>
 #endif
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#ifndef _MSC_VER
-#include <sys/time.h>
-#include <unistd.h>
-#endif
+#include <stdio.h>                                          // for NULL, fpr...
+#include <stdlib.h>                                         // for exit, strtol
+#include <string.h>                                         // for strcmp
 
 const char* android_skin_net_speed = NULL;
 const char* android_skin_net_delay = NULL;
@@ -96,11 +94,6 @@ int min_config_qemu_mode = 0;
 int is_fuchsia = 0;
 
 bool emulator_has_network_option = false;
-
-int changing_language_country_locale = 0;
-const char* to_set_language = 0;
-const char* to_set_country = 0;
-const char* to_set_locale = 0;
 
 #define ONE_MB (1024 * 1024)
 

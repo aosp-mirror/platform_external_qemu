@@ -12,17 +12,20 @@
 
 #pragma once
 
-#include "android/avd/hw-config.h"
-#include "android/avd/info.h"
-#include "android/cmdline-option.h"
-#include "android/cpu_accelerator.h"
-#include "android/emulation/control/vm_operations.h"
-#include "android/opengl/emugl_config.h"
-#include "android/skin/winsys.h"
-#include "android/utils/aconfig-file.h"
-#include "android/utils/compiler.h"
+#include <stdbool.h>                      // for bool
+#include <stdint.h>                       // for uint64_t
 
-#include <stdint.h>
+#include "android/avd/hw-config.h"        // for AndroidHwConfig
+#include "android/avd/info.h"             // for AvdInfo
+#include "android/cmdline-definitions.h"  // for AndroidOptions
+#include "android/cpu_accelerator.h"      // for AndroidCpuAccelerator
+#include "android/opengl/emugl_config.h"  // for AndroidGlesEmulationMode
+#include "android/skin/winsys.h"          // for WinsysPreferredGlesBackend
+#include "android/utils/compiler.h"       // for ANDROID_BEGIN_HEADER, ANDRO...
+
+struct QAndroidEmulatorWindowAgent;
+struct QAndroidMultiDisplayAgent;
+struct QAndroidVmOperations;
 
 ANDROID_BEGIN_HEADER
 

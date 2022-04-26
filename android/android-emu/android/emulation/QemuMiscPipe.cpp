@@ -425,52 +425,53 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                 getConsoleAgents()->emu->updateFoldablePostureIndicator(true);
             }
 
-            if (changing_language_country_locale) {
+            if (getConsoleAgents()->settings->language()->changing_language_country_locale) {
                 dinfo("Changing language, country or locale...");
-                if (to_set_language) {
-                    dinfo("Changing language to %s", to_set_language);
+                auto language = getConsoleAgents()->settings->language();
+                if (language->language) {
+                    dinfo("Changing language to %s", language->language);
                     adbInterface->enqueueCommand(
                         { "shell", "su", "0",
-                          "setprop", "persist.sys.language", to_set_language });
+                          "setprop", "persist.sys.language", language->language });
                 }
 
-                if (to_set_country) {
-                    dinfo("Changing country to %s", to_set_country);
+                if (language->country) {
+                    dinfo("Changing country to %s", language->country);
                     adbInterface->enqueueCommand(
                         { "shell", "su", "0",
-                          "setprop", "persist.sys.country", to_set_country });
+                          "setprop", "persist.sys.country", language->country });
                 }
 
-                if (to_set_locale) {
-                    dinfo("Changing locale to %s", to_set_locale);
+                if (language->locale) {
+                    dinfo("Changing locale to %s", language->locale);
                     adbInterface->enqueueCommand(
                         { "shell", "su", "0",
-                          "setprop", "persist.sys.locale", to_set_locale });
+                          "setprop", "persist.sys.locale", language->locale });
                 }
 
                 // On changing language or country, we need to set locale as well,
                 // otherwise the 2nd time and later after it's done once,
                 // the option has no effect!
-                if (!to_set_locale &&
-                    !to_set_country &&
-                    to_set_language) {
+                if (!language->locale &&
+                    !language->country &&
+                    language->language) {
                     adbInterface->enqueueCommand(
                         { "shell", "su", "0",
-                          "setprop", "persist.sys.locale", to_set_language });
+                          "setprop", "persist.sys.locale", language->language });
                 }
 
-                if (!to_set_locale &&
-                    to_set_country &&
-                    to_set_language) {
-                    std::string languageCountry(to_set_language);
+                if (!language->locale &&
+                    language->country &&
+                    language->language) {
+                    std::string languageCountry(language->language);
                     languageCountry += "-";
-                    languageCountry += to_set_country;
+                    languageCountry += language->country;
                     adbInterface->enqueueCommand(
                         { "shell", "su", "0",
                           "setprop", "persist.sys.locale", languageCountry.c_str() });
                 }
                 restartFrameWork = true;
-                changing_language_country_locale = 0;
+                getConsoleAgents()->settings->inject_language(nullptr, nullptr, nullptr);
             }
 
             if (restartFrameWork) {
