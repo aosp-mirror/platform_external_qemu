@@ -167,6 +167,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
     const char* qemuWifiProp;
     const char* androidQemudProp;
     const char* qemuHwcodecAvcdecProp;
+    const char* qemuHwcodecHevcdecProp;
     const char* qemuHwcodecVpxdecProp;
     const char* androidbootLogcatProp;
     const char* adbKeyProp;
@@ -201,6 +202,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
         qemuWifiProp = "androidboot.qemu.wifi";
         androidQemudProp = nullptr;  // deprecated
         qemuHwcodecAvcdecProp = "androidboot.qemu.hwcodec.avcdec";
+        qemuHwcodecHevcdecProp = "androidboot.qemu.hwcodec.hevcdec";
         qemuHwcodecVpxdecProp = "androidboot.qemu.hwcodec.vpxdec";
         androidbootLogcatProp = "androidboot.logcat";
         adbKeyProp = "androidboot.qemu.adb.pubkey";
@@ -230,6 +232,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
         qemuWifiProp = "qemu.wifi";
         androidQemudProp = "android.qemud";
         qemuHwcodecAvcdecProp = "qemu.hwcodec.avcdec";
+        qemuHwcodecHevcdecProp = "qemu.hwcodec.hevcdec";
         qemuHwcodecVpxdecProp = "qemu.hwcodec.vpxdec";
         androidbootLogcatProp = nullptr;
         adbKeyProp = nullptr;
@@ -440,6 +443,7 @@ std::vector<std::pair<std::string, std::string>> getUserspaceBootProperties(
 
     if (fc::isEnabled(fc::HardwareDecoder)) {
         params.push_back({qemuHwcodecAvcdecProp, "2"});
+        params.push_back({qemuHwcodecHevcdecProp, "2"});
         params.push_back({qemuHwcodecVpxdecProp, "2"});
     }
 

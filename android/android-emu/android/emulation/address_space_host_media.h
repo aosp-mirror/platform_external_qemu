@@ -14,10 +14,11 @@
 #pragma once
 
 #include "android/emulation/AddressSpaceService.h"
-#include "android/emulation/address_space_device.h"
 #include "android/emulation/GoldfishMediaDefs.h"
-#include "android/emulation/MediaVpxDecoder.h"
 #include "android/emulation/MediaH264Decoder.h"
+#include "android/emulation/MediaHevcDecoder.h"
+#include "android/emulation/MediaVpxDecoder.h"
+#include "android/emulation/address_space_device.h"
 
 #include <unordered_map>
 
@@ -54,6 +55,7 @@ private:
     bool isMemoryAllocated = false;
     std::unique_ptr<MediaVpxDecoder> mVpxDecoder;
     std::unique_ptr<MediaH264Decoder> mH264Decoder;
+    std::unique_ptr<MediaHevcDecoder> mHevcDecoder;
     void* mHostBuffer = nullptr;
     const address_space_device_control_ops* mControlOps = 0;
     uint64_t mGuestAddr = 0;

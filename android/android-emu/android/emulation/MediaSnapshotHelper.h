@@ -38,6 +38,7 @@ public:
         H264 = 1,
         VP8 = 2,
         VP9 = 3,
+        HEVC = 4,
     };
 
 public:

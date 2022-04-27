@@ -133,7 +133,9 @@ set(android-emu-common
     android/emulation/GoldfishDma.cpp
     android/emulation/GoldfishSyncCommandQueue.cpp
     android/emulation/H264NaluParser.cpp
+    android/emulation/HevcNaluParser.cpp
     android/emulation/H264PingInfoParser.cpp
+    android/emulation/HevcPingInfoParser.cpp
     android/emulation/HostapdController.cpp
     android/emulation/hostdevices/HostAddressSpace.cpp
     android/emulation/hostdevices/HostGoldfishPipe.cpp
@@ -143,6 +145,9 @@ set(android-emu-common
     android/emulation/MediaH264Decoder.cpp
     android/emulation/MediaH264DecoderDefault.cpp
     android/emulation/MediaH264DecoderGeneric.cpp
+    android/emulation/MediaHevcDecoder.cpp
+    android/emulation/MediaHevcDecoderDefault.cpp
+    android/emulation/MediaHevcDecoderGeneric.cpp
     android/emulation/MediaHostRenderer.cpp
     android/emulation/MediaSnapshotHelper.cpp
     android/emulation/MediaSnapshotState.cpp
@@ -417,6 +422,7 @@ android_add_library(
          android/emulation/MediaH264DecoderVideoToolBox.cpp
          android/emulation/MediaVideoToolBoxUtils.cpp
          android/emulation/MediaVideoToolBoxVideoHelper.cpp
+	 android/emulation/MediaVideoToolBoxHevcVideoHelper.cpp
          android/opengl/macTouchOpenGL.m
          android/opengl/NativeGpuInfo_darwin.cpp
          android/snapshot/MacSegvHandler.cpp
