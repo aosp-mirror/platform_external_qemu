@@ -261,7 +261,7 @@ void CellularPage::on_cell_signalStatusBox_currentIndexChanged(int index) {
 // Local static functions to save and retrieve settings
 
 static void saveDataStatus(int status) {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -276,7 +276,7 @@ static void saveDataStatus(int status) {
 }
 
 static void saveNetworkType(int type) {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -291,7 +291,7 @@ static void saveNetworkType(int type) {
 }
 
 static void saveSignalStrength(int strength) {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -306,7 +306,7 @@ static void saveSignalStrength(int strength) {
 }
 
 static void saveVoiceStatus(int status) {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -321,7 +321,7 @@ static void saveVoiceStatus(int status) {
 }
 
 static void saveMeterStatus(int status) {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -336,7 +336,7 @@ static void saveMeterStatus(int status) {
 }
 
 static int getSavedMeterStatus() {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -355,7 +355,7 @@ static int getSavedMeterStatus() {
 }
 
 static int getSavedDataStatus() {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -374,7 +374,7 @@ static int getSavedDataStatus() {
 }
 
 static int getSavedNetworkType() {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -393,7 +393,7 @@ static int getSavedNetworkType() {
 }
 
 static int getSavedSignalStrength() {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -413,7 +413,7 @@ static int getSavedSignalStrength() {
 }
 
 static int getSavedVoiceStatus() {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);

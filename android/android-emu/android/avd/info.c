@@ -38,14 +38,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* global variables - see android/globals.h */
-AvdInfoParams android_avdParams[1];
-AvdInfo* android_avdInfo;
-
-AEMU_EXPORT AvdInfo** aemu_get_android_avdInfoPtr() {
-    return &android_avdInfo;
-}
-
 /* set to 1 for debugging */
 #define DEBUG 0
 
@@ -927,7 +919,7 @@ static void _avdInfo_getPropertyFile(AvdInfo* i,
     free(filePath);
 }
 
-AvdInfo* avdInfo_new(const char* name, AvdInfoParams* params) {
+AvdInfo* avdInfo_new(const char* name, AvdInfoParams* __unused_params) {
     AvdInfo* i;
 
     if (name == NULL)
@@ -1047,7 +1039,7 @@ int avdInfo_getSkinHardwareIni(AvdInfo* i, char* skinName, char* skinDirPath) {
 
 AvdInfo* avdInfo_newForAndroidBuild(const char* androidBuildRoot,
                                     const char* androidOut,
-                                    AvdInfoParams* params) {
+                                    AvdInfoParams* __unused_params) {
     AvdInfo* i;
 
     ANEW0(i);

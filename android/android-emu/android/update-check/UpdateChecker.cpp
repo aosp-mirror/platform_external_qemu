@@ -260,8 +260,8 @@ void UpdateChecker::asyncWorker() {
                   current.toString().c_str(), last->first.toString().c_str());
 
     bool inAndroidBuild =
-        !android_avdInfo ||
-        avdInfo_inAndroidBuild(android_avdInfo);
+        !getConsoleAgents()->settings->avdInfo() ||
+        avdInfo_inAndroidBuild(getConsoleAgents()->settings->avdInfo());
 
     if (!inAndroidBuild &&
         (current < last->first)) {

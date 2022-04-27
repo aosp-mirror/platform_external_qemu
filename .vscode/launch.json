@@ -6,9 +6,9 @@
   "configurations": [
     {
       "name": "Launch cmake binary",
-      // "type": "lldb",
-      "type": "cppvsdbg",
-    
+      "type": "lldb",
+      // "type": "cppvsdbg",
+
       "request": "launch",
       "program": "${command:cmake.launchTargetPath}",
       "args": [
@@ -56,7 +56,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/build/emulator",
       "args": [
-        "@31",
+        "@T",
       ],
       "cwd": "${workspaceFolder}/build",
       "stopAtEntry": false,

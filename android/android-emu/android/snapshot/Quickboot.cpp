@@ -167,7 +167,7 @@ static int bootTimeoutMs() {
     if (getConsoleAgents()->settings->android_cmdLineOptions()->read_only) {
         return kBootTimeoutMs * 10;
     }
-    if (avdInfo_is_x86ish(android_avdInfo)) {
+    if (avdInfo_is_x86ish(getConsoleAgents()->settings->avdInfo())) {
         return kBootTimeoutMs;
     }
     return kBootTimeoutMs * 5;
@@ -276,13 +276,13 @@ bool Quickboot::load(StringView name) {
     if (getConsoleAgents()
                 ->settings->android_cmdLineOptions()
                 ->no_snapshot_load) {
-        if (!android_hw->fastboot_forceColdBoot) {
+        if (!getConsoleAgents()->settings->hw()->fastboot_forceColdBoot) {
             // Only display a message if this is a one-time-like thing (command
             // line), and not an AVD option.
             mWindow.showMessage("Cold boot: requested by the user",
                                 WINDOW_MESSAGE_OK, kDefaultMessageTimeoutMs);
         }
-        reportFailedLoad(android_hw->fastboot_forceColdBoot
+        reportFailedLoad(getConsoleAgents()->settings->hw()->fastboot_forceColdBoot
                                  ? pb::EmulatorQuickbootLoad::
                                            EMULATOR_QUICKBOOT_LOAD_COLD_AVD
                                  : pb::EmulatorQuickbootLoad::
@@ -434,7 +434,7 @@ bool Quickboot::save(StringView name) {
     }
 
     if (!Snapshotter::get().isRamFileShared() &&
-        android_avdParams->flags & AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT) {
+        getConsoleAgents()->settings->avdParams()->flags & AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT) {
         // UI says not to save, and there's no need to preserve
         // the current 'shared' session
         reportFailedSave(
@@ -552,7 +552,7 @@ bool androidSnapshot_quickbootSave(const char* _name) {
     const bool needsInvalidation =
             !saveResult &&
             (android::snapshot::Snapshotter::get().isRamFileShared() ||
-             android_avdParams->flags & AVDINFO_SNAPSHOT_INVALIDATE);
+             getConsoleAgents()->settings->avdParams()->flags & AVDINFO_SNAPSHOT_INVALIDATE);
 
     if (needsInvalidation) {
         androidSnapshot_quickbootInvalidate(name);
@@ -565,7 +565,7 @@ bool androidSnapshot_quickbootSave(const char* _name) {
     // Write user choice to the ini file if we are using file-backed RAM.
     if (android::snapshot::Snapshotter::get().hasRamFile()) {
         bool wantedSaveOnExit =
-                !(android_avdParams->flags & AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT);
+                !(getConsoleAgents()->settings->avdParams()->flags & AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT);
         androidSnapshot_writeQuickbootChoice(wantedSaveOnExit);
     }
 

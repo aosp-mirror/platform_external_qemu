@@ -43,7 +43,7 @@ std::unordered_map<std::string, std::string> getQemuConfig() {
     std::unordered_map<std::string, std::string> cfg;
 
     /* use the magic of macros to implement the hardware configuration loaded */
-    AndroidHwConfig* config = android_hw;
+    AndroidHwConfig* config = getConsoleAgents()->settings->hw();
 
 #define HWCFG_BOOL(n, s, d, a, t) cfg[s] = config->n ? "true" : "false";
 #define HWCFG_INT(n, s, d, a, t) cfg[s] = std::to_string(config->n);
@@ -94,7 +94,7 @@ bool bootCompleted(std::chrono::milliseconds maxWaitTime) {
     // Older API levels do not have a qemu service reporting
     // to us about boot completion, so we will resort to
     // calling adb in those cases..
-    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
+    int apiLevel = avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo());
     if (!guest_boot_completed && apiLevel < 28) {
         adbInterface->enqueueCommand(
                 {"shell", "getprop", "dev.bootcomplete"},

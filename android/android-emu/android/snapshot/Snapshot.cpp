@@ -47,7 +47,7 @@
 #include "android/emulation/control/window_agent.h"   // for QAndroidEmulato...
 #include "android/featurecontrol/FeatureControl.h"    // for getEnabled, isE...
 #include "android/featurecontrol/Features.h"          // for Feature, AllowS...
-#include "android/globals.h"                          // for android_avdInfo
+#include "android/globals.h"                          // for getConsoleAgents()->settings->avdInfo()
 #include "android/opengl/emugl_config.h"              // for emuglConfig_get...
 #include "android/opengl/gpuinfo.h"                   // for GpuInfo, global...
 #include "android/protobuf/LoadSave.h"                // for ProtobufSaveResult
@@ -476,7 +476,7 @@ bool Snapshot::save() {
 
     auto targetHwIni = PathUtils::join(mDataDir, "hardware.ini");
     if (path_copy_file(targetHwIni.c_str(),
-                       avdInfo_getCoreHwIniPath(android_avdInfo)) != 0) {
+                       avdInfo_getCoreHwIniPath(getConsoleAgents()->settings->avdInfo())) != 0) {
         return false;
     }
 
@@ -496,7 +496,7 @@ bool Snapshot::save() {
     saveEnabledFeatures();
 
     for (const auto& image : kImages) {
-        ScopedCPtr<char> path(image.pathGetter(android_avdInfo));
+        ScopedCPtr<char> path(image.pathGetter(getConsoleAgents()->settings->avdInfo()));
         fillImageInfo(image.type, path.get(), mSnapshotPb.add_images());
     }
 
@@ -523,7 +523,7 @@ bool Snapshot::save() {
         }
     }
 
-    auto path = PathUtils::join(avdInfo_getContentPath(android_avdInfo),
+    auto path = PathUtils::join(avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo()),
                                 base::kLaunchParamsFileName);
     if (System::get()->pathExists(path)) {
         // TODO(yahan@): -read-only emulators might not have this file.
@@ -542,7 +542,7 @@ bool Snapshot::save() {
     mSnapshotPb.set_emulator_build_id(
             STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER));
 #endif
-    const auto buildProps = avdInfo_getBuildProperties(android_avdInfo);
+    const auto buildProps = avdInfo_getBuildProperties(getConsoleAgents()->settings->avdInfo());
     android::base::IniFile ini((const char*)buildProps->data, buildProps->size);
     auto buildId = ini.getString("ro.build.fingerprint", "");
     if (buildId.empty()) {
@@ -658,7 +658,7 @@ const bool Snapshot::checkOfflineValid(bool writeFailure) {
     if (mVerifyQcow) {
         int matchedImages = 0;
         for (const auto& image : kImages) {
-            ScopedCPtr<char> path(image.pathGetter(android_avdInfo));
+            ScopedCPtr<char> path(image.pathGetter(getConsoleAgents()->settings->avdInfo()));
             const auto type = image.type;
             const auto it = std::find_if(
                     mSnapshotPb.images().begin(), mSnapshotPb.images().end(),
@@ -668,7 +668,7 @@ const bool Snapshot::checkOfflineValid(bool writeFailure) {
             if (it != mSnapshotPb.images().end()) {
                 if (!verifyImageInfo(image.type, path.get(), *it)) {
                     // If in build env, nuke the qcow2 as well.
-                    if (avdInfo_inAndroidBuild(android_avdInfo)) {
+                    if (avdInfo_inAndroidBuild(getConsoleAgents()->settings->avdInfo())) {
                         std::string qcow2Path(path.get());
                         qcow2Path += ".qcow2";
                         path_delete_file(qcow2Path.c_str());
@@ -683,7 +683,7 @@ const bool Snapshot::checkOfflineValid(bool writeFailure) {
                 // Should match an empty image info
                 if (!verifyImageInfo(image.type, path.get(), pb::Image())) {
                     // If in build env, nuke the qcow2 as well.
-                    if (avdInfo_inAndroidBuild(android_avdInfo)) {
+                    if (avdInfo_inAndroidBuild(getConsoleAgents()->settings->avdInfo())) {
                         std::string qcow2Path(path.get());
                         qcow2Path += ".qcow2";
                         path_delete_file(qcow2Path.c_str());
@@ -708,7 +708,7 @@ const bool Snapshot::checkOfflineValid(bool writeFailure) {
             saveFailure(FailureReason::CorruptedData);
         return false;
     }
-    IniFile actualConfig(avdInfo_getCoreHwIniPath(android_avdInfo));
+    IniFile actualConfig(avdInfo_getCoreHwIniPath(getConsoleAgents()->settings->avdInfo()));
     if (!actualConfig.read(false)) {
         if (writeFailure)
             saveFailure(FailureReason::InternalError);
@@ -758,7 +758,7 @@ const bool Snapshot::checkValid(bool writeFailure) {
 
     int matchedImages = 0;
     for (const auto& image : kImages) {
-        ScopedCPtr<char> path(image.pathGetter(android_avdInfo));
+        ScopedCPtr<char> path(image.pathGetter(getConsoleAgents()->settings->avdInfo()));
         const auto type = image.type;
         const auto it = std::find_if(
                 mSnapshotPb.images().begin(), mSnapshotPb.images().end(),
@@ -768,7 +768,7 @@ const bool Snapshot::checkValid(bool writeFailure) {
         if (it != mSnapshotPb.images().end()) {
             if (!verifyImageInfo(image.type, path.get(), *it)) {
                 // If in build env, nuke the qcow2 as well.
-                if (avdInfo_inAndroidBuild(android_avdInfo)) {
+                if (avdInfo_inAndroidBuild(getConsoleAgents()->settings->avdInfo())) {
                     std::string qcow2Path(path.get());
                     qcow2Path += ".qcow2";
                     path_delete_file(qcow2Path.c_str());
@@ -783,7 +783,7 @@ const bool Snapshot::checkValid(bool writeFailure) {
             // Should match an empty image info
             if (!verifyImageInfo(image.type, path.get(), pb::Image())) {
                 // If in build env, nuke the qcow2 as well.
-                if (avdInfo_inAndroidBuild(android_avdInfo)) {
+                if (avdInfo_inAndroidBuild(getConsoleAgents()->settings->avdInfo())) {
                     std::string qcow2Path(path.get());
                     qcow2Path += ".qcow2";
                     path_delete_file(qcow2Path.c_str());
@@ -807,7 +807,7 @@ const bool Snapshot::checkValid(bool writeFailure) {
             saveFailure(FailureReason::CorruptedData);
         return false;
     }
-    IniFile actualConfig(avdInfo_getCoreHwIniPath(android_avdInfo));
+    IniFile actualConfig(avdInfo_getCoreHwIniPath(getConsoleAgents()->settings->avdInfo()));
     if (!actualConfig.read(false)) {
         if (writeFailure)
             saveFailure(FailureReason::InternalError);
@@ -948,8 +948,8 @@ bool Snapshot::fixImport() {
         }
     }
     // Fixup names & ids..
-    hwIni.setString("avd.name", avdInfo_getName(android_avdInfo));
-    hwIni.setString("avd.id", avdInfo_getId(android_avdInfo));
+    hwIni.setString("avd.name", avdInfo_getName(getConsoleAgents()->settings->avdInfo()));
+    hwIni.setString("avd.id", avdInfo_getId(getConsoleAgents()->settings->avdInfo()));
 
     // Fix up the protobuf paths..
     for (int i = 0; i < mSnapshotPb.images_size(); i++) {

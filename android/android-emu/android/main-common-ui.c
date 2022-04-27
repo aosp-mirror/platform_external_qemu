@@ -23,24 +23,31 @@
 #include <stdlib.h>   // for atoi, exit, free
 #include <string.h>   // for strdup, strchr
 
-#include "android/boot-properties.h"                  // for boot_property_a...
-#include "android/console.h"                          // for getConsoleAgents
-#include "android/emulation/control/globals_agent.h"  // for QAndroidGlobalV...
-#include "android/emulator-window.h"                  // for emulator_window...
-#include "android/featurecontrol/feature_control.h"   // for feature_is_enab...
-#include "android/globals.h"                          // for android_avdInfo
-#include "android/main-common.h"                      // for android_skin_ne...
-#include "android/resource.h"                         // for android_emulato...
-#include "android/skin/charmap.h"                     // for kcm_extract_cha...
-#include "android/skin/image.h"                       // for skin_image_find...
-#include "android/skin/rect.h"                        // for SkinRect, SKIN_...
-#include "android/skin/resource.h"                    // for skin_resource_find
-#include "android/skin/winsys.h"                      // for skin_winsys_des...
-#include "android/user-config.h"                      // for AUserConfig
-#include "android/utils/bufprint.h"                   // for bufprint
-#include "android/utils/debug.h"                      // for VERBOSE_CHECK
-#include "android/utils/path.h"                       // for path_exists
-#include "android/utils/string.h"                     // for str_reset, str_...
+#include "android/avd/util.h"
+#include "android/boot-properties.h"
+#include "android/cmdline-option.h"
+#include "android/console.h"
+#include "android/emulation/bufprint_config_dirs.h"
+#include "android/emulator-window.h"
+#include "android/featurecontrol/feature_control.h"
+#include "android/framebuffer.h"
+#include "android/globals.h"
+#include "android/main-common.h"
+#include "android/resource.h"
+#include "android/skin/charmap.h"
+#include "android/skin/file.h"
+#include "android/skin/image.h"
+#include "android/skin/keyboard.h"
+#include "android/skin/resource.h"
+#include "android/skin/trackball.h"
+#include "android/skin/window.h"
+#include "android/skin/winsys.h"
+#include "android/user-config.h"
+#include "android/utils/bufprint.h"
+#include "android/utils/debug.h"
+#include "android/utils/eintr_wrapper.h"
+#include "android/utils/path.h"
+#include "android/utils/string.h"
 
 #define D(...)                   \
     do {                         \
@@ -56,24 +63,23 @@ static char* s_skinPath = NULL;
 static int s_deviceLcdWidth = 0;
 static int s_deviceLcdHeight = 0;
 
-int use_keycode_forwarding = 0;
-
-bool emulator_initMinimalSkinConfig(int lcd_width,
-                                    int lcd_height,
-                                    const SkinRect* rect,
-                                    AUserConfig** userConfig_out);
+bool emulator_initMinimalSkinConfig(
+    int lcd_width, int lcd_height,
+    const SkinRect* rect,
+    AUserConfig** userConfig_out);
 
 bool user_config_init(void) {
     AUserConfig* userConfig = NULL;
     SkinRect mmmRect;
     skin_winsys_get_monitor_rect(&mmmRect);
     if (min_config_qemu_mode) {
-        emulator_initMinimalSkinConfig(android_hw->hw_lcd_width,
-                                       android_hw->hw_lcd_height, &mmmRect,
-                                       &userConfig);
+        emulator_initMinimalSkinConfig(
+            getConsoleAgents()->settings->hw()->hw_lcd_width,
+            getConsoleAgents()->settings->hw()->hw_lcd_height,
+            &mmmRect,
+            &userConfig);
     } else {
-        userConfig = auserConfig_new(android_avdInfo, &mmmRect,
-                                     s_deviceLcdWidth, s_deviceLcdHeight);
+        userConfig = auserConfig_new(getConsoleAgents()->settings->avdInfo(), &mmmRect, s_deviceLcdWidth, s_deviceLcdHeight);
     }
     getConsoleAgents()->settings->inject_userConfig(userConfig);
     return userConfig != NULL;
@@ -380,8 +386,10 @@ bool emulator_initMinimalSkinConfig(int lcd_width,
     create_minimal_skin_config(lcd_width, lcd_height, &s_skinConfig,
                                &s_skinPath);
 
-    *userConfig_out = auserConfig_new_custom(
-            android_avdInfo, rect, s_deviceLcdWidth, s_deviceLcdHeight);
+    *userConfig_out =
+        auserConfig_new_custom(
+            getConsoleAgents()->settings->avdInfo(), rect,
+            s_deviceLcdWidth, s_deviceLcdHeight);
     return true;
 }
 
@@ -389,11 +397,11 @@ bool emulator_parseInputCommandLineOptions(AndroidOptions* opts) {
 #ifndef CONFIG_HEADLESS
     if (opts->use_keycode_forwarding ||
         feature_is_enabled(kFeature_KeycodeForwarding)) {
-        use_keycode_forwarding = 1;
+            getConsoleAgents()->settings->set_keycode_forwading(true);
     }
 
     // Set keyboard layout for Android only.
-    if (use_keycode_forwarding && !opts->fuchsia) {
+    if (getConsoleAgents()->settings->use_keycode_forwarding() && !opts->fuchsia) {
         const char* cur_keyboard_layout = skin_keyboard_host_layout_name();
         const char* android_keyboard_layout =
                 skin_keyboard_host_to_guest_layout_name(cur_keyboard_layout);
@@ -405,7 +413,7 @@ bool emulator_parseInputCommandLineOptions(AndroidOptions* opts) {
             D("No matching Android keyboard layout for %s. Fall back to host "
               "translation.",
               cur_keyboard_layout);
-            use_keycode_forwarding = 0;
+            getConsoleAgents()->settings->set_keycode_forwading(false);
 #endif
         }
     }

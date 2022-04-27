@@ -55,7 +55,7 @@
 #endif
 
 /* Camera service version 1 */
-#define V1 ((avdInfo_getApiLevel(android_avdInfo) > 29) && \
+#define V1 ((avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) > 29) && \
             !feature_is_enabled(kFeature_Minigbm))
 
 /* Defines name of the camera service. */
@@ -460,22 +460,22 @@ _camera_service_init(CameraServiceDesc* csd)
     memset(csd->camera_info, 0, sizeof(CameraInfo) * MAX_CAMERA);
     csd->camera_count = 0;
 
-    if (androidHwConfig_hasVirtualSceneCamera(android_hw)) {
+    if (androidHwConfig_hasVirtualSceneCamera(getConsoleAgents()->settings->hw())) {
         /* Set up virtual scene camera emulation. */
         _virtualscenecamera_setup(csd);
     }
 
-    if (androidHwConfig_hasVideoPlaybackBackCamera(android_hw)) {
+    if (androidHwConfig_hasVideoPlaybackBackCamera(getConsoleAgents()->settings->hw())) {
         _videoplaybackcamera_setup(csd, "back");
     }
 
-    if (androidHwConfig_hasVideoPlaybackFrontCamera(android_hw)) {
+    if (androidHwConfig_hasVideoPlaybackFrontCamera(getConsoleAgents()->settings->hw())) {
         _videoplaybackcamera_setup(csd, "front");
     }
 
     /* Lets see if HW config uses emulated cameras. */
-    if (!strncmp(android_hw->hw_camera_back, "webcam", 6) ||
-        !strncmp(android_hw->hw_camera_front, "webcam", 6)) {
+    if (!strncmp(getConsoleAgents()->settings->hw()->hw_camera_back, "webcam", 6) ||
+        !strncmp(getConsoleAgents()->settings->hw()->hw_camera_front, "webcam", 6)) {
         int connected_cnt = 0;
         CameraInfo ci[MAX_CAMERA] = {};
 
@@ -487,14 +487,14 @@ _camera_service_init(CameraServiceDesc* csd)
         }
 
         /* Set up back camera emulation. */
-        if (!strncmp(android_hw->hw_camera_back, "webcam", 6)) {
-            _webcam_setup(csd, android_hw->hw_camera_back, "back", ci,
+        if (!strncmp(getConsoleAgents()->settings->hw()->hw_camera_back, "webcam", 6)) {
+            _webcam_setup(csd, getConsoleAgents()->settings->hw()->hw_camera_back, "back", ci,
                           connected_cnt);
         }
 
         /* Set up front camera emulation. */
-        if (!strncmp(android_hw->hw_camera_front, "webcam", 6)) {
-            _webcam_setup(csd, android_hw->hw_camera_front, "front", ci,
+        if (!strncmp(getConsoleAgents()->settings->hw()->hw_camera_front, "webcam", 6)) {
+            _webcam_setup(csd, getConsoleAgents()->settings->hw()->hw_camera_front, "front", ci,
                           connected_cnt);
         }
 
@@ -2121,16 +2121,16 @@ void android_camera_service_init(void) {
             return;
         }
 
-        if (strcmp(android_hw->hw_camera_back, "emulated") &&
-                strcmp(android_hw->hw_camera_front, "emulated")) {
+        if (strcmp(getConsoleAgents()->settings->hw()->hw_camera_back, "emulated") &&
+                strcmp(getConsoleAgents()->settings->hw()->hw_camera_front, "emulated")) {
             /* Fake camera is not used for camera emulation. */
             boot_property_add_qemu_sf_fake_camera("none");
         } else {
-            if(!strcmp(android_hw->hw_camera_back, "emulated") &&
-                    !strcmp(android_hw->hw_camera_front, "emulated")) {
+            if(!strcmp(getConsoleAgents()->settings->hw()->hw_camera_back, "emulated") &&
+                    !strcmp(getConsoleAgents()->settings->hw()->hw_camera_front, "emulated")) {
                 /* Fake camera is used for both, front and back camera emulation. */
                 boot_property_add_qemu_sf_fake_camera("both");
-            } else if (!strcmp(android_hw->hw_camera_back, "emulated")) {
+            } else if (!strcmp(getConsoleAgents()->settings->hw()->hw_camera_back, "emulated")) {
                 boot_property_add_qemu_sf_fake_camera("back");
             } else {
                 boot_property_add_qemu_sf_fake_camera("front");

@@ -16,6 +16,7 @@
 
 #include "android/skin/qt/mac-native-event-filter.h"
 
+#include "android/console.h"
 #include "android/globals.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
@@ -42,7 +43,7 @@ bool NativeEventFilter::nativeEventFilter(const QByteArray& eventType,
                         skin_keycode_native_is_keypad(keycode)) {
                     keycode = skin_keycode_native_map_keypad(keycode);
                 }
-                if (use_keycode_forwarding) {
+                if (getConsoleAgents()->settings->use_keycode_forwarding()) {
                     if (emuWindow->isActiveWindow()) {
                         NativeKeyboardEventHandler* handler =
                                 NativeKeyboardEventHandler::getInstance();

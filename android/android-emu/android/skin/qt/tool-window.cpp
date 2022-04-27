@@ -242,17 +242,17 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         default_shortcuts += "Ctrl+Shift+R SHOW_PANE_RECORD\n";
     }
 
-    if (android_avdInfo) {
-        if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR) {
-            if (avdInfo_getApiLevel(android_avdInfo) >= 28) {
+    if (getConsoleAgents()->settings->avdInfo()) {
+        if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR) {
+            if (avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >= 28) {
                 default_shortcuts += "Ctrl+Shift+O WEAR_1\n";
                 default_shortcuts += "Ctrl+Shift+T TILT\n";
                 default_shortcuts += "Ctrl+Shift+E PALM\n";
             }
-            if (avdInfo_getApiLevel(android_avdInfo) > 28) {
+            if (avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) > 28) {
                 default_shortcuts += "Ctrl+Shift+I WEAR_2\n";
             }
-        } else if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+        } else if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO) {
             default_shortcuts += "Ctrl+Shift+T SHOW_PANE_CAR\n";
             default_shortcuts += "Ctrl+Shift+O SHOW_PANE_CAR_ROTARY\n";
             default_shortcuts += "Ctrl+Shift+I SHOW_PANE_SENSOR_REPLAY\n";
@@ -269,14 +269,14 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         }
     }
 
-    if (fc::isEnabled(fc::TvRemote) && android_avdInfo &&
-        avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV) {
+    if (fc::isEnabled(fc::TvRemote) && getConsoleAgents()->settings->avdInfo() &&
+        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_TV) {
         default_shortcuts += "Ctrl+Shift+D SHOW_PANE_TV_REMOTE\n";
     } else {
         default_shortcuts += "Ctrl+Shift+D SHOW_PANE_DPAD\n";
     }
 
-    if (!android_avdInfo || avdInfo_getAvdFlavor(android_avdInfo) != AVD_TV) {
+    if (!getConsoleAgents()->settings->avdInfo() || avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) != AVD_TV) {
         default_shortcuts +=
                 "Ctrl+Shift+L SHOW_PANE_LOCATION\n"
                 "Ctrl+Shift+C SHOW_PANE_CELLULAR\n"
@@ -322,7 +322,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         }
     }
 
-    if (android_hw->hw_arc) {
+    if (getConsoleAgents()->settings->hw()->hw_arc) {
         // Chrome OS doesn't support rotation now.
         mToolsUi->prev_layout_button->setHidden(true);
         mToolsUi->next_layout_button->setHidden(true);
@@ -331,7 +331,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->tablet_mode_button->setHidden(true);
     }
 
-    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_TV) {
         // Android TV should not rotate
         // TODO: emulate VESA mounts for use with
         // vertically scrolling arcade games
@@ -339,7 +339,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->next_layout_button->setHidden(true);
     }
 
-    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR) {
         // Wear OS shouldn't get rotate nor volume up/down buttons.
         mToolsUi->prev_layout_button->setHidden(true);
         mToolsUi->next_layout_button->setHidden(true);
@@ -347,8 +347,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->volume_down_button->setHidden(true);
     }
 
-    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR &&
-        avdInfo_getApiLevel(android_avdInfo) >= 28) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR &&
+        avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >= 28) {
         // Use new button layout for >= API 28 wear emulators
         mToolsUi->overview_button->setHidden(true);
         mToolsUi->power_button->setHidden(true);
@@ -357,7 +357,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->controlsLayout->removeWidget(mToolsUi->back_button);
         mToolsUi->controlsLayout->insertWidget(0, mToolsUi->back_button);
 
-        if (avdInfo_getApiLevel(android_avdInfo) == 28) {
+        if (avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) == 28) {
             mToolsUi->wear_button_2->setHidden(true);
         }
     } else {
@@ -367,7 +367,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->tilt_button->setHidden(true);
     }
 
-    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO) {
         // Android Auto doesn't support rotate, home, back, recent
         mToolsUi->prev_layout_button->setHidden(true);
         mToolsUi->next_layout_button->setHidden(true);
@@ -375,7 +375,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         mToolsUi->overview_button->setHidden(true);
     }
 
-    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_DESKTOP) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_DESKTOP) {
         // Desktop device does not rotate
         mToolsUi->prev_layout_button->setHidden(true);
         mToolsUi->next_layout_button->setHidden(true);
@@ -764,7 +764,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd,
             forwardKeyToEmulator(LINUX_KEY_POWER, down);
             break;
         case QtUICommand::TABLET_MODE:
-            if (android_hw->hw_arc) {
+            if (getConsoleAgents()->settings->hw()->hw_arc) {
                 forwardGenericEventToEmulator(EV_SW, SW_TABLET_MODE, down);
                 forwardGenericEventToEmulator(EV_SYN, 0, 0);
             }
@@ -1107,7 +1107,7 @@ void ToolWindow::earlyInitialization(const UiEmuAgent* agentPtr) {
     ExtendedWindow::setAgent(agentPtr);
     VirtualSceneControlWindow::setAgent(agentPtr);
 
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (!avdPath) {
         // Can't find the setting!
         return;
@@ -1127,14 +1127,14 @@ void ToolWindow::earlyInitialization(const UiEmuAgent* agentPtr) {
     // settings page is initialized.
     switch (saveOnExitChoice) {
         case SaveSnapshotOnExit::Always:
-            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            getConsoleAgents()->settings->avdParams()->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         case SaveSnapshotOnExit::Ask:
             // If we can't ask, we'll treat ASK the same as ALWAYS.
-            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            getConsoleAgents()->settings->avdParams()->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         case SaveSnapshotOnExit::Never:
-            android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            getConsoleAgents()->settings->avdParams()->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         default:
             break;
@@ -1191,7 +1191,7 @@ void ToolWindow::on_back_button_released() {
 bool ToolWindow::askWhetherToSaveSnapshot() {
     mAskedWhetherToSaveSnapshot = true;
     // Check the UI setting
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (!avdPath) {
         // Can't find the setting! Assume it's not ASK: just return;
         return true;
@@ -1294,14 +1294,14 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
                                   ->mutable_snapshot_ui_counts();
             counts->set_quickboot_ask_yes(1 + counts->quickboot_ask_yes());
         });
-        android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+        getConsoleAgents()->settings->avdParams()->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
     } else {
         MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
             auto counts = event->mutable_emulator_details()
                                   ->mutable_snapshot_ui_counts();
             counts->set_quickboot_ask_no(1 + counts->quickboot_ask_no());
         });
-        android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+        getConsoleAgents()->settings->avdParams()->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
     }
     return true;
 }
@@ -1329,7 +1329,7 @@ void ToolWindow::on_close_button_clicked() {
         // This counts as us asking and having the user say "don't save"
         mExtendedWindow.get()->sendMetricsOnShutDown();
         mAskedWhetherToSaveSnapshot = true;
-        android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+        getConsoleAgents()->settings->avdParams()->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
         parentWidget()->close();
 
         return;
@@ -1519,20 +1519,20 @@ static bool isPaneEnabled(ExtendedWindowPane pane) {
 }
 
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
-    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO) {
         if (pane == PANE_IDX_DPAD || pane == PANE_IDX_BATTERY ||
             pane == PANE_IDX_FINGER || pane == PANE_IDX_CAMERA ||
             pane == PANE_IDX_MULTIDISPLAY) {
             return;
         }
     }
-    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV ||
-        avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_TV ||
+        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR) {
         if (pane == PANE_IDX_MULTIDISPLAY) {
             return;
         }
     }
-    if (!androidHwConfig_hasVirtualSceneCamera(android_hw) &&
+    if (!androidHwConfig_hasVirtualSceneCamera(getConsoleAgents()->settings->hw()) &&
         pane == PANE_IDX_CAMERA) {
         return;
     }
@@ -1613,9 +1613,9 @@ void ToolWindow::touchExtendedWindow() {
 }
 
 void ToolWindow::hideRotationButton(bool hide) {
-    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV ||
-        avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO ||
-        android_hw->hw_arc) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_TV ||
+        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO ||
+        getConsoleAgents()->settings->hw()->hw_arc) {
         // already hide, do not bother its settings
         return;
     } else {

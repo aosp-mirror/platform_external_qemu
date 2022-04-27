@@ -54,11 +54,11 @@ MultiDisplayPage::MultiDisplayPage(QWidget* parent)
 
     // set default display title
     char* skinDir;
-    avdInfo_getSkinInfo(android_avdInfo, &mSkinName, &skinDir);
+    avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &mSkinName, &skinDir);
     std::string defaultDisplayDisp =
             std::string(mSkinName) + " (" +
-            std::to_string(android_hw->hw_lcd_width) + 'x' +
-            std::to_string(android_hw->hw_lcd_height) + ')';
+            std::to_string(getConsoleAgents()->settings->hw()->hw_lcd_width) + 'x' +
+            std::to_string(getConsoleAgents()->settings->hw()->hw_lcd_height) + ')';
     mUi->defaultDisplayText->setText(defaultDisplayDisp.c_str());
 
     // Do not show layout panel when studio is active.
@@ -214,7 +214,7 @@ void MultiDisplayPage::recomputeLayout() {
     std::unordered_map<uint32_t, std::pair<uint32_t, uint32_t>> rectangles;
     std::unordered_map<uint32_t, std::string> names;
     rectangles[0] =
-            std::make_pair(android_hw->hw_lcd_width, android_hw->hw_lcd_height);
+            std::make_pair(getConsoleAgents()->settings->hw()->hw_lcd_width, getConsoleAgents()->settings->hw()->hw_lcd_height);
     names[0] = std::string(mSkinName);
     for (int i = 1; i <= sMaxItem; i++) {
         if (mItem[i] != nullptr) {

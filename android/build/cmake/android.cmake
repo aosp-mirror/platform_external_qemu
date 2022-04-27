@@ -1134,11 +1134,24 @@ function(protobuf_generate_with_plugin)
     get_filename_component(_basename ${_proto} NAME_WE)
     file(RELATIVE_PATH _rel_dir ${CMAKE_CURRENT_SOURCE_DIR} ${_abs_dir})
 
+    string(FIND "${_proto}" "${_rel_dir}" IDX)
+
     set(_generated_srcs)
     foreach(_ext ${protobuf_generate_with_plugin_GENERATE_EXTENSIONS})
-      list(
-        APPEND _generated_srcs
-        "${protobuf_generate_with_plugin_PROTOC_OUT_DIR}/${_basename}${_ext}")
+      if(IDX EQUAL "0")
+        # The protobuf is in a subdirectory under the current source dir we are processing
+        # Construct a complete path.
+        list(
+          APPEND
+          _generated_srcs
+          "${protobuf_generate_with_plugin_PROTOC_OUT_DIR}/${_rel_dir}/${_basename}${_ext}"
+        )
+      else()
+        # The protobuf is not part of the source directory itself.
+        list(
+          APPEND _generated_srcs
+          "${protobuf_generate_with_plugin_PROTOC_OUT_DIR}/${_basename}${_ext}")
+      endif()
     endforeach()
     list(APPEND _generated_srcs_all ${_generated_srcs})
 

@@ -405,12 +405,12 @@ static bool creatUserDataExt4Img(AndroidHwConfig* hw,
     const bool shouldUseEmptyDataImg = path_exists(empty_data_path.c_str());
     if (shouldUseEmptyDataImg) {
         android_createEmptyExt4Image(hw->disk_dataPartition_path,
-                                     android_hw->disk_dataPartition_size,
+                                     getConsoleAgents()->settings->hw()->disk_dataPartition_size,
                                      "data");
     } else {
         android_createExt4ImageFromDir(
                 hw->disk_dataPartition_path, dataDirectory,
-                android_hw->disk_dataPartition_size, "data");
+                getConsoleAgents()->settings->hw()->disk_dataPartition_size, "data");
     }
     // Check if creating user data img succeed
     System::FileSize diskSize;
@@ -450,8 +450,8 @@ static int createUserData(AvdInfo* avd,
             }
 
             if (!hw->hw_arc) {
-                resizeExt4Partition(android_hw->disk_dataPartition_path,
-                                    android_hw->disk_dataPartition_size);
+                resizeExt4Partition(getConsoleAgents()->settings->hw()->disk_dataPartition_path,
+                                    getConsoleAgents()->settings->hw()->disk_dataPartition_size);
             }
         }
     }
@@ -679,8 +679,8 @@ static void initialize_virtio_input_devs(android::ParameterList& args,
         }
 
         if (hw->hw_rotaryInput ||
-            (android_avdInfo &&
-             avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR)) {
+            (getConsoleAgents()->settings->avdInfo() &&
+             avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR)) {
             args.add("-device");
             args.add("virtio_input_rotary_pci");
         }
@@ -1276,7 +1276,6 @@ extern "C" int main(int argc, char** argv) {
 
     const char* executable = argv[0];
     android::ParameterList args = {executable};
-    AndroidHwConfig* hw = android_hw;
     AvdInfo* avd;
     AndroidOptions opts[1];
     int exitStatus = 0;
@@ -1292,10 +1291,12 @@ extern "C" int main(int argc, char** argv) {
     getConsoleAgents()->settings->inject_android_cmdLine(
             android::base::createEscapedLaunchString(argc, argv).c_str());
 
+
+    AndroidHwConfig* hw = getConsoleAgents()->settings->hw();
     if (!emulator_parseCommonCommandLineOptions(
                 &argc, &argv, kTarget.androidArch,
                 true,  // is_qemu2
-                opts, hw, &android_avdInfo, &exitStatus)) {
+                opts, hw, &avd, &exitStatus)) {
         // Special case for QEMU positional parameters (or Fuchsia path)
         if (exitStatus == EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER) {
             // Copy all QEMU options to |args|, and set |n| to the number
@@ -1307,7 +1308,7 @@ extern "C" int main(int argc, char** argv) {
             // If running Fuchsia, the kernel argument needs to be passed
             // through as when opts->fuchsia is true, since it is not a Linux
             // kernel, we do not run it through the usual parsing scheme that
-            // writes the kernel path to android_hw->kernel_path (android_hw is
+            // writes the kernel path to getConsoleAgents()->settings->hw()->kernel_path (android_hw is
             // currently not used in the Fuchsia path).
             if (opts->fuchsia) {
                 if (opts->kernel) {
@@ -1382,7 +1383,7 @@ extern "C" int main(int argc, char** argv) {
                         true, AVD_PHONE, opts->gpu ? opts->gpu : "host",
                         opts->no_window, lcdWidth, lcdHeight,
                         // LCD DPI, orientation
-                        96, "landscape", opts, hw, &android_avdInfo);
+                        96, "landscape", opts, hw, &avd);
 
             } else {
                 for (int n = 1; n <= argc; ++n) {
@@ -1407,7 +1408,7 @@ extern "C" int main(int argc, char** argv) {
     // just because we know that we're in the new emulator as we got here
     opts->ranchu = 1;
 
-    avd = android_avdInfo;
+    getConsoleAgents()->settings->inject_AvdInfo(avd);
 
     bool lowDisk = System::isUnderDiskPressure(avdInfo_getContentPath(avd));
     if (lowDisk) {
@@ -1812,12 +1813,12 @@ extern "C" int main(int argc, char** argv) {
     constexpr auto kMinPlaystoreImageSize = 6LL * 1024 * 1024 * 1024;
     if (fc::isEnabled(fc::PlayStoreImage)) {
         if (firstTimeSetup &&
-            android_hw->disk_dataPartition_size < kMinPlaystoreImageSize) {
-            android_hw->disk_dataPartition_size = kMinPlaystoreImageSize;
+            getConsoleAgents()->settings->hw()->disk_dataPartition_size < kMinPlaystoreImageSize) {
+            getConsoleAgents()->settings->hw()->disk_dataPartition_size = kMinPlaystoreImageSize;
             // Write it to config.ini as well, or we get all sorts of problems.
-            if (android_avdInfo) {
+            if (getConsoleAgents()->settings->avdInfo()) {
                 avdInfo_replaceDataPartitionSizeInConfigIni(
-                        android_avdInfo, kMinPlaystoreImageSize);
+                        getConsoleAgents()->settings->avdInfo(), kMinPlaystoreImageSize);
             }
         }
     }
@@ -1837,7 +1838,7 @@ extern "C" int main(int argc, char** argv) {
                 constexpr double kDataPartitionSafetyFactor = 1.2;
 
                 double needed = kDataPartitionSafetyFactor *
-                                android_hw->disk_dataPartition_size /
+                                getConsoleAgents()->settings->hw()->disk_dataPartition_size /
                                 (1024.0 * 1024.0);
 
                 double available = (double)availableSpace / (1024.0 * 1024.0);
@@ -1869,19 +1870,19 @@ extern "C" int main(int argc, char** argv) {
         if (System::get()->pathFileSize(hw->disk_dataPartition_path,
                                         &current_data_size)) {
             System::FileSize partition_size = static_cast<System::FileSize>(
-                    android_hw->disk_dataPartition_size);
-            if (android_hw->disk_dataPartition_size > 0 &&
+                    getConsoleAgents()->settings->hw()->disk_dataPartition_size);
+            if (getConsoleAgents()->settings->hw()->disk_dataPartition_size > 0 &&
                 current_data_size < partition_size) {
                 dwarning(
                         "userdata partition is resized from %d M to %d "
                         "M",
                         (int)(current_data_size / (1024 * 1024)),
                         (int)(partition_size / (1024 * 1024)));
-                if (!resizeExt4Partition(android_hw->disk_dataPartition_path,
-                                         android_hw->disk_dataPartition_size)) {
+                if (!resizeExt4Partition(getConsoleAgents()->settings->hw()->disk_dataPartition_path,
+                                         getConsoleAgents()->settings->hw()->disk_dataPartition_size)) {
                     path_delete_file(
                             StringFormat("%s.qcow2",
-                                         android_hw->disk_dataPartition_path)
+                                         getConsoleAgents()->settings->hw()->disk_dataPartition_path)
                                     .c_str());
                 }
             }
@@ -2435,7 +2436,7 @@ extern "C" int main(int argc, char** argv) {
 
     auto battery = getConsoleAgents()->battery;
     if (battery && battery->setHasBattery) {
-        battery->setHasBattery(android_hw->hw_battery);
+        battery->setHasBattery(getConsoleAgents()->settings->hw()->hw_battery);
     }
 
     android_init_multi_display(getConsoleAgents()->emu,

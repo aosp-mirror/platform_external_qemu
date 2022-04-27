@@ -180,8 +180,8 @@ static struct asg_context asg_context_create(
 // The size of the auxiliary buffer and flush interval is defined by
 // the following config.ini android_hw setting:
 //
-// 1) android_hw->hw_gltransport_asg_writeBufferSize
-// 2) android_hw->hw_gltransport_asg_writeStepSize
+// 1) getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeBufferSize
+// 2) getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeStepSize
 //
 // 1) the size for the auxiliary buffer
 // 2) the step size over which commands are flushed to the host

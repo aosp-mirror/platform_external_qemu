@@ -126,7 +126,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
                 mEmulatorWindow->getAdbInterface());
     }
 
-    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO &&
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO &&
         android::featurecontrol::isEnabled(
                 android::featurecontrol::CarRotary) &&
         android_qemu_mode) {
@@ -201,15 +201,15 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
                 ->settings->android_cmdLineOptions()
                 ->qt_hide_window) {
         const auto* cfgIni = reinterpret_cast<const android::base::IniFile*>(
-                avdInfo_getConfigIni(android_avdInfo));
-        // If key avd.ini.displayname doesn't exists, use android_hw->avd_name
+                avdInfo_getConfigIni(getConsoleAgents()->settings->avdInfo()));
+        // If key avd.ini.displayname doesn't exists, use getConsoleAgents()->settings->hw()->avd_name
         // by default
         const auto displayName =
-                cfgIni->getString("avd.ini.displayname", android_hw->avd_name);
+                cfgIni->getString("avd.ini.displayname", getConsoleAgents()->settings->hw()->avd_name);
         setWindowTitle(displayName.c_str() + QString(" - Extended Controls"));
 
     } else {
-        setWindowTitle(QString("Extended Controls - ") + android_hw->avd_name +
+        setWindowTitle(QString("Extended Controls - ") + getConsoleAgents()->settings->hw()->avd_name +
                        ":" + QString::number(android_serial_number_port));
     }
     if (getConsoleAgents()->settings->has_cmdLineOptions() &&
@@ -226,9 +226,9 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
         !android_foldable_any_folded_area_configured() &&
         !android_foldable_hinge_configured() &&
         !android_foldable_rollable_configured() && !resizableEnabled() &&
-        avdInfo_getAvdFlavor(android_avdInfo) != AVD_TV &&
-        avdInfo_getAvdFlavor(android_avdInfo) != AVD_WEAR &&
-        avdInfo_getAvdFlavor(android_avdInfo) != AVD_ANDROID_AUTO) {
+        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) != AVD_TV &&
+        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) != AVD_WEAR &&
+        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) != AVD_ANDROID_AUTO) {
         mSidebarButtons.addButton(mExtendedUi->displaysButton);
         mExtendedUi->displaysButton->setVisible(true);
     } else {
@@ -238,8 +238,8 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     mSidebarButtons.addButton(mExtendedUi->batteryButton);
     mSidebarButtons.addButton(mExtendedUi->telephoneButton);
     mSidebarButtons.addButton(mExtendedUi->dpadButton);
-    if (android_hw->hw_rotaryInput ||
-        avdInfo_getAvdFlavor(android_avdInfo) == AVD_WEAR) {
+    if (getConsoleAgents()->settings->hw()->hw_rotaryInput ||
+        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_WEAR) {
         mSidebarButtons.addButton(mExtendedUi->rotaryInputButton);
     } else {
         mExtendedUi->rotaryInputButton->hide();
@@ -251,9 +251,9 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
     // camera.  Hide the button if the virtual scene camera is not enabled, or
     // if we are using an Android Auto image because that does not have camera
     // support at the moment.
-    if (androidHwConfig_hasVirtualSceneCamera(android_hw) &&
-        (!android_avdInfo ||
-         (avdInfo_getAvdFlavor(android_avdInfo) != AVD_ANDROID_AUTO))) {
+    if (androidHwConfig_hasVirtualSceneCamera(getConsoleAgents()->settings->hw()) &&
+        (!getConsoleAgents()->settings->avdInfo() ||
+         (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) != AVD_ANDROID_AUTO))) {
         mSidebarButtons.addButton(mExtendedUi->cameraButton);
         mExtendedUi->cameraButton->setVisible(true);
     } else {
@@ -279,7 +279,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
 
     if (android::featurecontrol::isEnabled(
                 android::featurecontrol::PlayStoreImage) &&
-        android_hw->PlayStore_enabled) {
+        getConsoleAgents()->settings->hw()->PlayStore_enabled) {
         mSidebarButtons.addButton(mExtendedUi->googlePlayButton);
         mExtendedUi->googlePlayPage->initialize(
                 mEmulatorWindow->getAdbInterface());
@@ -301,7 +301,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
         }
     }
 
-    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_TV) {
         mExtendedUi->locationButton->setVisible(false);
         mExtendedUi->cellularButton->setVisible(false);
         mExtendedUi->virtSensorsButton->setVisible(false);
@@ -312,7 +312,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
 
     mExtendedUi->carRotaryButton->setVisible(false);
 
-    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO) {
         mSidebarButtons.addButton(mExtendedUi->carDataButton);
         mExtendedUi->carDataButton->setVisible(true);
         mExtendedUi->fingerButton->setVisible(false);
@@ -330,7 +330,7 @@ ExtendedWindow::ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW)
 
         if (android::featurecontrol::isEnabled(
                     android::featurecontrol::CarRotary) &&
-            avdInfo_getApiLevel(android_avdInfo) >= 30 /* Android 11 */) {
+            avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >= 30 /* Android 11 */) {
             mSidebarButtons.addButton(mExtendedUi->carRotaryButton);
             mExtendedUi->carRotaryButton->setVisible(true);
         } else {
@@ -431,7 +431,7 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         VirtualSensorsPage::setSensorsAgent(agentPtr->sensors);
         RecordMacroPage::setAutomationAgent(agentPtr->automation);
         RecordScreenPage::setRecordScreenAgent(agentPtr->record);
-        if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+        if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO) {
             CarDataPage::setCarDataAgent(agentPtr->car);
             SensorReplayPage::setAgent(agentPtr->car, agentPtr->location,
                                        agentPtr->sensors);
@@ -556,7 +556,7 @@ void ExtendedWindow::on_cellularButton_clicked() {
 }
 void ExtendedWindow::on_dpadButton_clicked() {
     if (android::featurecontrol::isEnabled(android::featurecontrol::TvRemote) &&
-        avdInfo_getAvdFlavor(android_avdInfo) == AVD_TV) {
+        avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_TV) {
         adjustTabs(PANE_IDX_TV_REMOTE);
     } else {
         adjustTabs(PANE_IDX_DPAD);

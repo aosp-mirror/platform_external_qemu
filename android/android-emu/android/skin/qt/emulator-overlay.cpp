@@ -147,7 +147,7 @@ void EmulatorOverlay::mousePressEvent(QMouseEvent* event) {
         mRubberBand->setGeometry(QRect(mRubberbandOrigin, QSize()));
         mRubberBand->show();
     } else if (mMode == OverlayMode::Multitouch) {
-        if (!androidHwConfig_isScreenMultiTouch(android_hw)) {
+        if (!androidHwConfig_isScreenMultiTouch(getConsoleAgents()->settings->hw())) {
             showErrorDialog(tr("Your virtual device is not configured for "
                                "multi-touch input."),
                             tr("Multi-touch"));

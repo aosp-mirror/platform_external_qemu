@@ -562,8 +562,8 @@ AdbThroughExe::AdbThroughExe(Looper* looper,
 
     std::string outputFolder;
 
-    if (android_avdInfo) {
-        avdContentPath = avdInfo_getContentPath(android_avdInfo);
+    if (getConsoleAgents()->settings->avdInfo()) {
+        avdContentPath = avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo());
     }
 
     if (avdContentPath) {

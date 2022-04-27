@@ -40,11 +40,11 @@ std::vector<std::string> getQcow2Files(std::string avdDir) {
 }
 
 std::string getAvdDir() {
-    return avdInfo_getContentPath(android_avdInfo);
+    return avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo());
 }
 
 std::string getSnapshotBaseDir() {
-    auto avdDir = avdInfo_getContentPath(android_avdInfo);
+    auto avdDir = avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo());
     auto path = base::PathUtils::join(avdDir, "snapshots");
     return path;
 }
@@ -69,7 +69,7 @@ base::System::FileSize folderSize(const std::string& snapshotName) {
 }
 
 std::string getQuickbootChoiceIniPath() {
-    auto avdDir = avdInfo_getContentPath(android_avdInfo);
+    auto avdDir = avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo());
     auto path = base::PathUtils::join(avdDir, "quickbootChoice.ini");
     return path;
 }

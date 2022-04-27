@@ -85,9 +85,9 @@ public:
             auto setVersionResult = ping((uint64_t)ASG_SET_VERSION, mVersion);
             uint32_t hostVersion = setVersionResult.size;
             EXPECT_LE(hostVersion, mVersion);
-            EXPECT_EQ(android_hw->hw_gltransport_asg_writeStepSize,
+            EXPECT_EQ(getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeStepSize,
                       mContext.ring_config->flush_interval);
-            EXPECT_EQ(android_hw->hw_gltransport_asg_writeBufferSize,
+            EXPECT_EQ(getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeBufferSize,
                       mBufferSize);
 
             mContext.ring_config->transfer_mode = 1;
@@ -557,8 +557,8 @@ protected:
     static void TearDownTestCase() { }
 
     void SetUp() override {
-        android_hw->hw_gltransport_asg_writeBufferSize = 524288;
-        android_hw->hw_gltransport_asg_writeStepSize = 1024;
+        getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeBufferSize = 524288;
+        getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeStepSize = 1024;
 
         mDevice = HostAddressSpaceDevice::get();
         ConsumerInterface interface = {
@@ -597,8 +597,8 @@ protected:
     void TearDown() override {
         AddressSpaceGraphicsContext::clear();
         mDevice->clear();
-        android_hw->hw_gltransport_asg_writeBufferSize = 524288;
-        android_hw->hw_gltransport_asg_writeStepSize = 1024;
+        getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeBufferSize = 524288;
+        getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeStepSize = 1024;
         EXPECT_EQ(nullptr, mCurrentConsumer);
     }
 
@@ -622,8 +622,8 @@ protected:
             std::vector<char> expectedRead(trip.readBytes, ASG_TEST_READ_PATTERN);
             std::vector<char> toRead(trip.readBytes, 0);
 
-            size_t stepSize = android_hw->hw_gltransport_asg_writeStepSize;
-            size_t stepSizeRead = android_hw->hw_gltransport_asg_writeBufferSize;
+            size_t stepSize = getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeStepSize;
+            size_t stepSizeRead = getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeBufferSize;
 
             size_t sent = 0;
             while (sent < trip.writeBytes) {
@@ -669,7 +669,7 @@ TEST_F(AddressSpaceGraphicsTest, Basic) {
 // Tests writing via an IOStream-like interface
 // (allocBuffer, then flush)
 TEST_F(AddressSpaceGraphicsTest, BasicWrite) {
-    EXPECT_EQ(1024, android_hw->hw_gltransport_asg_writeStepSize);
+    EXPECT_EQ(1024, getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeStepSize);
     Client client(mDevice);
 
     // Tests that going over the step size results in nullptr
@@ -685,7 +685,7 @@ TEST_F(AddressSpaceGraphicsTest, BasicWrite) {
 
 // Tests that further allocs result in flushing
 TEST_F(AddressSpaceGraphicsTest, FlushFromAlloc) {
-    EXPECT_EQ(1024, android_hw->hw_gltransport_asg_writeStepSize);
+    EXPECT_EQ(1024, getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeStepSize);
     Client client(mDevice);
 
     auto buf = client.allocBuffer(1024);

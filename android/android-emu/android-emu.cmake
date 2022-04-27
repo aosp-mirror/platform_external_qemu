@@ -447,15 +447,8 @@ target_link_libraries(
          android-curl
          picosha2
          # Protobuf dependencies
-         featurecontrol
-         crashreport
-         location
-         emulation
-         snapshot
-         telephony
-         verified-boot
-         automation
-         offworld
+         emulator-protos
+         protobuf::libprotobuf
          # Prebuilt libraries
          android-net
          android-emu-base
@@ -713,7 +706,8 @@ target_link_libraries(
          android-files
          android-metrics
          # Protobuf dependencies
-         snapshot
+         emulator-protos
+         protobuf::libprotobuf
          # Prebuilt libraries
          png
          lz4

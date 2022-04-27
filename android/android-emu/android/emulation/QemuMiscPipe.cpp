@@ -157,7 +157,7 @@ static AConfig* miscPipeGetForegroundConfig() {
     char* skinName;
     char* skinDir;
 
-    avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+    avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName, &skinDir);
     std::string layoutPath = android::base::PathUtils::join(skinDir, skinName, "layout");
     AConfig* rootConfig = aconfig_node("", "");
     aconfig_load_file(rootConfig, layoutPath.c_str());
@@ -222,10 +222,10 @@ static void miscPipeSetPaddingAndCutout(emulation::AdbInterface* adbInterface, A
 void miscPipeSetAndroidOverlay(emulation::AdbInterface* adbInterface) {
     // overlay for pixels with system after O
     if (fc::isEnabled(fc::DeviceSkinOverlay) &&
-        avdInfo_getApiLevel(android_avdInfo) >= 28) {
+        avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >= 28) {
         char* skinName = nullptr;
         char* skinDir = nullptr;
-        avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+        avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName, &skinDir);
         if (avdInfo_skinHasOverlay(skinName)) {
             std::string androidOverlay("com.android.internal.emulation.");
             std::string systemUIOverlay("com.android.systemui.emulation.");
@@ -297,7 +297,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
 
         guest_boot_completed = 1;
 
-        if (android_hw->test_quitAfterBootTimeOut > 0) {
+        if (getConsoleAgents()->settings->hw()->test_quitAfterBootTimeOut > 0) {
             getConsoleAgents()->vm->vmShutdown();
         } else {
             auto adbInterface = emulation::AdbInterface::getGlobal();
@@ -306,7 +306,7 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
             dinfo("Increasing screen off timeout, "
                     "logcat buffer size to 2M.");
 
-            const char* pTimeout = avdInfo_screen_off_timeout(avdInfo_getApiLevel(android_avdInfo));
+            const char* pTimeout = avdInfo_screen_off_timeout(avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()));
             adbInterface->enqueueCommand(
                 { "shell", "settings", "put", "system",
                   "screen_off_timeout", pTimeout});
@@ -319,8 +319,8 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                 updateAndroidDisplayConfigPath(getResizableActiveConfigId());
             } else {
                 // If hw.display.settings.xml set as freeform, config guest
-                if ((android_op_wipe_data || !path_exists(android_hw->disk_dataPartition_path))) {
-                    if (!strcmp(android_hw->display_settings_xml, "freeform")) {
+                if ((android_op_wipe_data || !path_exists(getConsoleAgents()->settings->hw()->disk_dataPartition_path))) {
+                    if (!strcmp(getConsoleAgents()->settings->hw()->display_settings_xml, "freeform")) {
                         adbInterface->enqueueCommand(
                             { "shell", "settings", "put", "global", "sf", "1" });
                         adbInterface->enqueueCommand(
@@ -356,13 +356,13 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                 std::thread{watchDogFunction, 1}.detach();
             }
 
-            if (android_hw->test_monitorAdb && num_hostcts_watchdog == 0) {
+            if (getConsoleAgents()->settings->hw()->test_monitorAdb && num_hostcts_watchdog == 0) {
                 std::thread{watchHostCtsFunction, 30}.detach();
             }
 
-            if (android_avdInfo) {
+            if (getConsoleAgents()->settings->avdInfo()) {
 #ifdef __linux__
-                char* datadir = avdInfo_getDataInitDirPath(android_avdInfo);
+                char* datadir = avdInfo_getDataInitDirPath(getConsoleAgents()->settings->avdInfo());
                 if (datadir) {
                     std::string adbscriptsdir = android::base::PathUtils::join(
                             datadir, "adbscripts");

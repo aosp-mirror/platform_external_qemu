@@ -2726,12 +2726,12 @@ static int do_avd_rewind_audio(ControlClient client, char* args) {
 }
 
 static int do_avd_name(ControlClient client, char* args) {
-    control_write(client, "%s\r\n", android_hw->avd_name);
+    control_write(client, "%s\r\n", getConsoleAgents()->settings->hw()->avd_name);
     return 0;
 }
 
 static int do_avd_id(ControlClient client, char* args) {
-    control_write(client, "%s\r\n", android_hw->avd_id);
+    control_write(client, "%s\r\n", getConsoleAgents()->settings->hw()->avd_id);
     return 0;
 }
 
@@ -2742,7 +2742,7 @@ static int do_avd_windowtype(ControlClient client, char* args) {
 }
 
 static int do_avd_path(ControlClient client, char* args) {
-    auto avdInfo = android_avdInfo;
+    auto avdInfo = getConsoleAgents()->settings->avdInfo();
 
     if (!avdInfo) {
         control_write(client, "NO_AVD_INFO\r\n");
@@ -2762,7 +2762,7 @@ static int do_avd_path(ControlClient client, char* args) {
 }
 
 static int do_avd_discoverypath(ControlClient client, char* args) {
-    auto avdInfo = android_avdInfo;
+    auto avdInfo = getConsoleAgents()->settings->avdInfo();
 
     if (!avdInfo) {
         control_write(client, "NO_AVD_INFO\r\n");
@@ -2776,7 +2776,7 @@ static int do_avd_discoverypath(ControlClient client, char* args) {
 }
 
 static int do_avd_snapshotspath(ControlClient client, char* args) {
-    auto avdInfo = android_avdInfo;
+    auto avdInfo = getConsoleAgents()->settings->avdInfo();
 
     if (!avdInfo) {
         control_write(client, "NO_AVD_INFO\r\n");
@@ -2803,7 +2803,7 @@ static int do_avd_snapshotpath(ControlClient client, char* args) {
         return -1;
     }
 
-    auto avdInfo = android_avdInfo;
+    auto avdInfo = getConsoleAgents()->settings->avdInfo();
 
     if (!avdInfo) {
         control_write(client, "NO_AVD_INFO\r\n");
@@ -4176,8 +4176,8 @@ static int do_kill(ControlClient client, char* args) {
     fflush(stdout);
     bool needRequestClose = false;
 
-    if (host_emulator_is_headless && android_avdInfo) {
-        auto arch = (avdInfo_getTargetCpuArch(android_avdInfo));
+    if (host_emulator_is_headless && getConsoleAgents()->settings->avdInfo()) {
+        auto arch = (avdInfo_getTargetCpuArch(getConsoleAgents()->settings->avdInfo()));
         if (!strcmp(arch, "x86") || !strcmp(arch, "x86_64")) {
         } else if (!getConsoleAgents()
                             ->settings->android_cmdLineOptions()

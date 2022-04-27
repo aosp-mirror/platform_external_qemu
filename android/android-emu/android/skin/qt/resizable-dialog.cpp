@@ -60,7 +60,7 @@ ResizableDialog::~ResizableDialog()
 }
 
 void ResizableDialog::saveSize(PresetEmulatorSizeType sizeType) {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -75,7 +75,7 @@ void ResizableDialog::saveSize(PresetEmulatorSizeType sizeType) {
 }
 
 PresetEmulatorSizeType ResizableDialog::getSize() {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);

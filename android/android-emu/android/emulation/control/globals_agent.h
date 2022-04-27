@@ -21,6 +21,7 @@
 #include "android/constants.h"
 #include "android/user-config.h"
 #include "android/utils/compiler.h"
+#include <stdbool.h>
 
 /** TODO:(jansene): These are the set of global variables that are used
  *throughout the system. Most of these are not yet available and commented out.
@@ -41,22 +42,19 @@ typedef struct QAndroidGlobalVarsAgent {
      * after that, you can read the 'flags' field to determine
      * wether a data or cache wipe has been in effect.
      */
-    // AvdInfoParams (*android_avdParams)(void);
+    AvdInfoParams* (*avdParams)(void);
 
     /* a pointer to the android virtual device information
      * object, which can be queried for the paths of various
      * image files or the skin
      */
-    // AvdInfo* (*android_avdInfo)(void);
+    AvdInfo* (*avdInfo)(void);
 
     // /* MSVC only exports function pointers */
-    // AvdInfo** (*aemu_get_android_avdInfoPtr)(void);
+    // AvdInfo** (*aemu_get_getConsoleAgents()->settings->avdInfo()Ptr)(void);
 
     // /* the hardware configuration for this specific virtual device */
-    // AndroidHwConfig (*android_hw)(void);
-
-    // /* MSVC only exports function pointers */
-    // AndroidHwConfig* (*aemu_get_android_hw)(void);
+    AndroidHwConfig* (*hw)(void);
 
     // /* this indicates that guest has mounted data partition */
     // int (*guest_data_partition_mounted)(void);
@@ -85,7 +83,7 @@ typedef struct QAndroidGlobalVarsAgent {
     // value
     //  * to keycode */
     // /* on emulator host. */
-    // int (*use_keycode_forwarding)(void);
+    bool (*use_keycode_forwarding)(void);
 
      AUserConfig* (*userConfig)(void);
 
@@ -112,5 +110,7 @@ typedef struct QAndroidGlobalVarsAgent {
     void (*inject_language)(char* /*language*/, char* /*country*/, char* /*locale*/);
 
     void (*inject_userConfig)(AUserConfig* /*config*/);
+    void (*set_keycode_forwading)(bool /*enabled */);
+    void (*inject_AvdInfo)(AvdInfo*);
 } QAndroidGlobalVarsAgent;
 ANDROID_END_HEADER

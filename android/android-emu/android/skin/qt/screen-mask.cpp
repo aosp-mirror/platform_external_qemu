@@ -22,7 +22,7 @@
 #include "android/base/files/PathUtils.h"            // for PathUtils
 #include "android/base/memory/LazyInstance.h"        // for LazyInstance
 #include "android/emulator-window.h"                 // for emulator_window_...
-#include "android/globals.h"                         // for android_avdInfo
+#include "android/globals.h"                         // for getConsoleAgents()->settings->avdInfo()
 #include "android/utils/aconfig-file.h"              // for aconfig_str, aco...
 
 using android::base::LazyInstance;
@@ -77,7 +77,7 @@ AConfig* getForegroundConfig() {
     char* skinName;
     char* skinDir;
 
-    avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+    avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName, &skinDir);
     QString layoutPath = PathUtils::join(skinDir, skinName, "layout").c_str();
     AConfig* rootConfig = aconfig_node("", "");
     aconfig_load_file(rootConfig, layoutPath.toStdString().c_str());
@@ -101,7 +101,7 @@ void loadMask() {
     char* skinName;
     char* skinDir;
 
-    avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+    avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName, &skinDir);
     AConfig* foregroundConfig = getForegroundConfig();
     if (foregroundConfig != nullptr) {
         loadMaskImage(foregroundConfig, skinDir, skinName);

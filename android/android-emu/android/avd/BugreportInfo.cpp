@@ -56,21 +56,21 @@ BugreportInfo::BugreportInfo() {
                               accelVersion.toString()));
     }
     char versionString[128];
-    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
+    int apiLevel = avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo());
     avdInfo_getFullApiName(apiLevel, versionString, 128);
     androidVer = versionString;
 
     Version studioVersion = android::studio::lastestAndroidStudioVersion();
     androidStduioVer =
             studioVersion.isValid() ? studioVersion.toString() : "Unknown";
-    deviceName = StringView(avdInfo_getName(android_avdInfo));
+    deviceName = StringView(avdInfo_getName(getConsoleAgents()->settings->avdInfo()));
     hostOsName = System::get()->getOsName();
     sdkToolsVer = android::getCurrentSdkVersion(
                           android::ConfigDirs::getSdkRootDirectory(),
                           android::SdkComponentType::Tools)
                           .toString();
     cpuModel = trim(android::GetCpuInfo().second);
-    const auto buildProps = avdInfo_getBuildProperties(android_avdInfo);
+    const auto buildProps = avdInfo_getBuildProperties(getConsoleAgents()->settings->avdInfo());
     android::base::IniFile ini((const char*)buildProps->data, buildProps->size);
     buildFingerprint = ini.getString("ro.build.fingerprint", "");
     auto usage = System::get()->getMemUsage();
@@ -83,30 +83,30 @@ BugreportInfo::BugreportInfo() {
             SDCARD_SIZE, SDCARD_PATH, IMAGES_2};
 
     if (const auto configIni = reinterpret_cast<const android::base::IniFile*>(
-                avdInfo_getConfigIni(android_avdInfo))) {
+                avdInfo_getConfigIni(getConsoleAgents()->settings->avdInfo()))) {
         StringAppendFormat(&avdDetails, "Name: %s\n", deviceName);
-        auto cpuArch = avdInfo_getTargetCpuArch(android_avdInfo);
+        auto cpuArch = avdInfo_getTargetCpuArch(getConsoleAgents()->settings->avdInfo());
         StringAppendFormat(&avdDetails, "CPU/ABI: %s\n", cpuArch);
         AFREE(cpuArch);
         StringAppendFormat(&avdDetails, "Path: %s\n",
-                           avdInfo_getContentPath(android_avdInfo));
-        auto tag = avdInfo_getTag(android_avdInfo);
+                           avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo()));
+        auto tag = avdInfo_getTag(getConsoleAgents()->settings->avdInfo());
         StringAppendFormat(&avdDetails, "Target: %s (API level %d)\n", tag,
-                           avdInfo_getApiLevel(android_avdInfo));
+                           avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()));
         AFREE((char*)tag);
 
         char* skinName = nullptr;
         char* skinDir = nullptr;
-        avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+        avdInfo_getSkinInfo(getConsoleAgents()->settings->avdInfo(), &skinName, &skinDir);
         if (skinName) {
             StringAppendFormat(&avdDetails, "Skin: %s\n", skinName);
             AFREE(skinName);
         }
         AFREE(skinDir);
 
-        const char* sdcard = avdInfo_getSdCardSize(android_avdInfo);
+        const char* sdcard = avdInfo_getSdCardSize(getConsoleAgents()->settings->avdInfo());
         if (!sdcard) {
-            sdcard = avdInfo_getSdCardPath(android_avdInfo);
+            sdcard = avdInfo_getSdCardPath(getConsoleAgents()->settings->avdInfo());
         }
         if (!sdcard || !*sdcard) {
             sdcard = android::base::strDup("<none>");
@@ -117,7 +117,7 @@ BugreportInfo::BugreportInfo() {
         if (configIni->hasKey(SNAPSHOT_PRESENT)) {
             StringAppendFormat(
                     &avdDetails, "Snapshot: %s",
-                    avdInfo_getSnapshotPresent(android_avdInfo) ? "yes" : "no");
+                    avdInfo_getSnapshotPresent(getConsoleAgents()->settings->avdInfo()) ? "yes" : "no");
         }
 
         for (const std::string& key : *configIni) {

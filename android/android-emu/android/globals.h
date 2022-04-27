@@ -12,35 +12,16 @@
 
 #pragma once
 
+#include "android/console.h"
 #include "android/avd/hw-config.h"
 #include "android/avd/info.h"
 #include "android/base/export.h"
 #include "android/constants.h"
 #include "android/user-config.h"
 #include "android/utils/compiler.h"
+#include "android/console.h"
 
 ANDROID_BEGIN_HEADER
-
-/* this structure is setup when loading the virtual device
- * after that, you can read the 'flags' field to determine
- * wether a data or cache wipe has been in effect.
- */
-extern AvdInfoParams     android_avdParams[1];
-
-/* a pointer to the android virtual device information
- * object, which can be queried for the paths of various
- * image files or the skin
- */
-extern AvdInfo*          android_avdInfo;
-
-/* MSVC only exports function pointers */
-extern AEMU_EXPORT AvdInfo** aemu_get_android_avdInfoPtr();
-
-/* the hardware configuration for this specific virtual device */
-extern AndroidHwConfig   android_hw[1];
-
-/* MSVC only exports function pointers */
-AEMU_EXPORT AndroidHwConfig* aemu_get_android_hw();
 
 /** PLEASE DO NOT ANY MORE GLOBALS, INSTEAD INJECT THEM FROM 
  *  The agents are defined in console.h 
@@ -66,11 +47,6 @@ extern int min_config_qemu_mode;
 extern int is_fuchsia;
 
 extern int android_snapshot_update_timer;
-
-/* True if we are using keycode forwarding instead of translating text value to
- * keycode */
-/* on emulator host. */
-extern int use_keycode_forwarding;
 
 extern AEMU_EXPORT AUserConfig* aemu_get_userConfigPtr();
 

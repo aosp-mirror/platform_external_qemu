@@ -7,15 +7,7 @@ prebuilt(LIBXML2)
 prebuilt(UUID)
 
 # Add the protobuf dependencies
-add_subdirectory(android/featurecontrol/proto)
-add_subdirectory(android/snapshot/proto)
-add_subdirectory(android/crashreport/proto)
-add_subdirectory(android/location/proto)
-add_subdirectory(android/emulation/proto)
-add_subdirectory(android/telephony/proto)
-add_subdirectory(android/verified-boot/proto)
-add_subdirectory(android/automation/proto)
-add_subdirectory(android/offworld/proto)
+add_subdirectory(protos)
 
 # Grab the other libraries.
 include(android-emu)

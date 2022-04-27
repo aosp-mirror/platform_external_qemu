@@ -82,7 +82,7 @@ void CameraVirtualSceneSubpage::on_imageTable_scaleChanged(float value) {
 
 void CameraVirtualSceneSubpage::on_toggleTV_toggled(bool value) {
     // Persist to settings.
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         const QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -112,7 +112,7 @@ void CameraVirtualSceneSubpage::reportInteraction() {
 
 void CameraVirtualSceneSubpage::changePoster(QString name, QString path) {
     // Persist to settings.
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         const QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -146,7 +146,7 @@ void CameraVirtualSceneSubpage::changePoster(QString name, QString path) {
 
 void CameraVirtualSceneSubpage::changePosterScale(QString name, float value) {
     // Persist to settings.
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         const QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -195,7 +195,7 @@ void CameraVirtualSceneSubpage::loadUi() {
 
 // static
 void CameraVirtualSceneSubpage::loadInitialSettings() {
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         const QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);

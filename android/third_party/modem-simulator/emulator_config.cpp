@@ -54,10 +54,10 @@ int DeviceConfig::host_id() {
 }
 
 std::string DeviceConfig::PerInstancePath(const char* file_name) {
-    if (!android_hw->avd_name) {
+    if (!getConsoleAgents()->settings->hw()->avd_name) {
         return std::string{file_name};
     }
-    char* avdPath(path_dirname(android_hw->disk_dataPartition_path));
+    char* avdPath(path_dirname(getConsoleAgents()->settings->hw()->disk_dataPartition_path));
     if (!avdPath) {
         return std::string{file_name};
     }

@@ -216,30 +216,31 @@ static void fillAvdMetrics(android_studio::AndroidStudioEvent* event) {
 
     auto eventAvdInfo = event->mutable_emulator_details()->mutable_avd_info();
     // AVD name is a user-generated data, so won't report it.
-    eventAvdInfo->set_api_level(avdInfo_getApiLevel(android_avdInfo));
+    eventAvdInfo->set_api_level(avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()));
     eventAvdInfo->set_image_kind(
-            avdInfo_isUserBuild(android_avdInfo) &&
+            avdInfo_isUserBuild(getConsoleAgents()->settings->avdInfo()) &&
                             isEnabled(android::featurecontrol::PlayStoreImage)
                     ? android_studio::EmulatorAvdInfo::PLAY_STORE_KIND
-            : avdInfo_isGoogleApis(android_avdInfo)
-                    ? avdInfo_isAtd(android_avdInfo)
+            : avdInfo_isGoogleApis(getConsoleAgents()->settings->avdInfo())
+                    ? avdInfo_isAtd(getConsoleAgents()->settings->avdInfo())
                               ? android_studio::EmulatorAvdInfo::GOOGLE_ATD
                               : android_studio::EmulatorAvdInfo::GOOGLE
-            : avdInfo_isAtd(android_avdInfo)
+            : avdInfo_isAtd(getConsoleAgents()->settings->avdInfo())
                     ? android_studio::EmulatorAvdInfo::AOSP_ATD
                     : android_studio::EmulatorAvdInfo::AOSP);
-    eventAvdInfo->set_arch(toClearcutLogGuestArch(android_hw->hw_cpu_arch));
-    if (avdInfo_inAndroidBuild(android_avdInfo)) {
+
+    eventAvdInfo->set_arch(toClearcutLogGuestArch(getConsoleAgents()->settings->hw()->hw_cpu_arch));
+    if (avdInfo_inAndroidBuild(getConsoleAgents()->settings->avdInfo())) {
         // no real AVD, so no creation times or file infos.
         return;
     }
 
-    if (auto creationTime = getAvdCreationTimeSec(android_avdInfo)) {
+    if (auto creationTime = getAvdCreationTimeSec(getConsoleAgents()->settings->avdInfo())) {
         eventAvdInfo->set_creation_timestamp(*creationTime);
         VERBOSE_PRINT(metrics, "AVD creation timestamp %ld", *creationTime);
     }
 
-    const auto buildProps = avdInfo_getBuildProperties(android_avdInfo);
+    const auto buildProps = avdInfo_getBuildProperties(getConsoleAgents()->settings->avdInfo());
     android::base::IniFile ini((const char*)buildProps->data, buildProps->size);
     if (const int64_t buildTimestamp = ini.getInt64("ro.build.date.utc", 0)) {
         eventAvdInfo->set_build_timestamp(buildTimestamp);
@@ -253,25 +254,25 @@ static void fillAvdMetrics(android_studio::AndroidStudioEvent* event) {
 
     fillAvdFileInfo(
             eventAvdInfo, android_studio::EmulatorAvdFile::KERNEL,
-            android_hw->kernel_path,
+            getConsoleAgents()->settings->hw()->kernel_path,
             getConsoleAgents()->settings->android_cmdLineOptions()->kernel !=
                     nullptr);
     fillAvdFileInfo(
             eventAvdInfo, android_studio::EmulatorAvdFile::SYSTEM,
-            (android_hw->disk_systemPartition_path &&
-             android_hw->disk_systemPartition_path[0])
-                    ? android_hw->disk_systemPartition_path
-                    : android_hw->disk_systemPartition_initPath,
+            (getConsoleAgents()->settings->hw()->disk_systemPartition_path &&
+             getConsoleAgents()->settings->hw()->disk_systemPartition_path[0])
+                    ? getConsoleAgents()->settings->hw()->disk_systemPartition_path
+                    : getConsoleAgents()->settings->hw()->disk_systemPartition_initPath,
             (getConsoleAgents()->settings->android_cmdLineOptions()->system ||
              getConsoleAgents()->settings->android_cmdLineOptions()->sysdir));
     fillAvdFileInfo(
             eventAvdInfo, android_studio::EmulatorAvdFile::RAMDISK,
-            android_hw->disk_ramdisk_path,
+            getConsoleAgents()->settings->hw()->disk_ramdisk_path,
             getConsoleAgents()->settings->android_cmdLineOptions()->ramdisk !=
                     nullptr);
 
     eventAvdInfo->add_properties(
-            toClearcutLogAvdProperty(avdInfo_getAvdFlavor(android_avdInfo)));
+            toClearcutLogAvdProperty(avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo())));
 }
 
 // Update this (and the proto) whenever feature flags change.
@@ -526,9 +527,9 @@ void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
             android_studio::EmulatorDetails::RUNNING_GENERAL);
     event->mutable_emulator_details()->set_is_opengl_alive(openglAlive);
     event->mutable_emulator_details()->set_guest_arch(
-            toClearcutLogGuestArch(android_hw->hw_cpu_arch));
+            toClearcutLogGuestArch(getConsoleAgents()->settings->hw()->hw_cpu_arch));
     event->mutable_emulator_details()->set_guest_api_level(
-            avdInfo_getApiLevel(android_avdInfo));
+            avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()));
 
     // TODO: Check that CpuAccelerator enum +1 is the same
     // as the proto enum.
@@ -540,12 +541,12 @@ void android_metrics_fill_common_info(bool openglAlive, void* opaque) {
 
     event->mutable_emulator_details()->set_renderer(
             toClearcutLogEmulatorRenderer(
-                    emuglConfig_get_renderer(android_hw->hw_gpu_mode)));
+                    emuglConfig_get_renderer(getConsoleAgents()->settings->hw()->hw_gpu_mode)));
 
     event->mutable_emulator_details()->set_guest_gpu_enabled(
-            android_hw->hw_gpu_enabled);
+            getConsoleAgents()->settings->hw()->hw_gpu_enabled);
 
-    if (android_hw->hw_gpu_enabled) {
+    if (getConsoleAgents()->settings->hw()->hw_gpu_enabled) {
         fillGuestGlMetrics(event);
         if (openglAlive) {
             const emugl::RendererPtr& renderer = android_getOpenglesRenderer();

@@ -146,7 +146,7 @@ extern "C" void ranchu_device_tree_setup(void* fdt) {
                             "android,fstab");
 
     char* system_path =
-            avdInfo_getSystemImageDevicePathInGuest(android_avdInfo);
+            avdInfo_getSystemImageDevicePathInGuest(getConsoleAgents()->settings->avdInfo());
     if (system_path) {
         qemu_fdt_add_subnode(fdt, "/firmware/android/fstab/system");
         qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system",
@@ -163,7 +163,7 @@ extern "C" void ranchu_device_tree_setup(void* fdt) {
     }
 
     char* vendor_path =
-            avdInfo_getVendorImageDevicePathInGuest(android_avdInfo);
+            avdInfo_getVendorImageDevicePathInGuest(getConsoleAgents()->settings->avdInfo());
     if (vendor_path) {
         qemu_fdt_add_subnode(fdt, "/firmware/android/fstab/vendor");
         qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor",
@@ -313,13 +313,13 @@ int qemu_setup_grpc() {
     if (grpcService)
         return grpcService->port();
 
-    auto contentPath = avdInfo_getContentPath(android_avdInfo);
+    auto contentPath = avdInfo_getContentPath(getConsoleAgents()->settings->avdInfo());
 
     EmulatorProperties props{
             {"port.serial", std::to_string(android_serial_number_port)},
             {"port.adb", std::to_string(android_adb_port)},
-            {"avd.name", avdInfo_getName(android_avdInfo)},
-            {"avd.id", avdInfo_getId(android_avdInfo)},
+            {"avd.name", avdInfo_getName(getConsoleAgents()->settings->avdInfo())},
+            {"avd.id", avdInfo_getId(getConsoleAgents()->settings->avdInfo())},
             {"avd.dir", contentPath ? contentPath : ""},
             {"cmdline", getConsoleAgents()->settings->android_cmdLine()}};
 
@@ -553,10 +553,10 @@ bool qemu_android_emulation_setup() {
         return true;
 
     android::base::ScopedCPtr<const char> arch(
-            avdInfo_getTargetCpuArch(android_avdInfo));
+            avdInfo_getTargetCpuArch(getConsoleAgents()->settings->avdInfo()));
     const bool isX86 =
             arch && (strstr(arch.get(), "x86") || strstr(arch.get(), "i386"));
-    const int nCores = isX86 ? android_hw->hw_cpu_ncore : 1;
+    const int nCores = isX86 ? getConsoleAgents()->settings->hw()->hw_cpu_ncore : 1;
     for (int i = 0; i < nCores; ++i) {
         auto cpuLooper = new android::qemu::CpuLooper(i);
         android::crashreport::CrashReporter::get()

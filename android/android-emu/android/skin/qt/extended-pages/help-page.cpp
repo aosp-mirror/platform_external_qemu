@@ -36,7 +36,7 @@
 #include "android/base/Version.h"                // for Version
 #include "android/base/system/System.h"          // for System
 #include "android/cmdline-option.h"              // for android_cmdLineOptions
-#include "android/globals.h"                     // for android_avdInfo
+#include "android/globals.h"                     // for getConsoleAgents()->settings->avdInfo()
 #include "android/metrics/StudioConfig.h"        // for UpdateChannel
 #include "android/metrics/UiEventTracker.h"      // for UiEventTr...
 #include "android/skin/qt/shortcut-key-store.h"  // for ShortcutKeyStore
@@ -76,7 +76,7 @@ HelpPage::HelpPage(QWidget* parent)
 
     mUi->help_versionBox->setPlainText(verStr);
 
-    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
+    int apiLevel = avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo());
     char versionString[128];
     avdInfo_getFullApiName(apiLevel, versionString, 128);
     mUi->help_androidVersionBox->setPlainText(versionString);

@@ -95,7 +95,19 @@ AndroidOptions emptyOptions{};
 AndroidOptions* sAndroid_cmdLineOptions = &emptyOptions;
 std::string sCmdlLine;
 
+AvdInfo* sAndroid_avdInfo = nullptr;
+AvdInfoParams sAndroid_avdInfoParams = {0};
+AndroidHwConfig s_hwConfig = {0};
+
 static const QAndroidGlobalVarsAgent gMockAndroidGlobalVarsAgent = {
+        .avdParams = []() { return &sAndroid_avdInfoParams; },
+        .avdInfo =
+                []() {
+                    // Do not access the info before it is injected!
+                    assert(sAndroid_avdInfo != nullptr);
+                    return sAndroid_avdInfo;
+                },
+        .hw =[]() { return &s_hwConfig; },
         .android_cmdLineOptions = []() { return sAndroid_cmdLineOptions; },
         .inject_cmdLineOptions =
                 [](AndroidOptions* opts) { sAndroid_cmdLineOptions = opts; },
@@ -106,7 +118,12 @@ static const QAndroidGlobalVarsAgent gMockAndroidGlobalVarsAgent = {
                 },
         .android_cmdLine = []() { return (const char*)sCmdlLine.c_str(); },
         .inject_android_cmdLine =
-                [](const char* cmdline) { sCmdlLine = cmdline; }};
+                [](const char* cmdline) { sCmdlLine = cmdline; },
+        .inject_AvdInfo =
+                [](AvdInfo* avd) {
+                    dinfo("Injecting avd info..");
+                    sAndroid_avdInfo = avd;
+                }};
 
 static const SnapshotCallbacks* sSnapshotCallbacks = nullptr;
 
@@ -271,11 +288,12 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     sTestContentDir =
             new android::base::TestTempDir("goldfish_opengl_snapshot_test_dir");
 
-    android_avdInfo =
+    getConsoleAgents()->settings->inject_AvdInfo(
             avdInfo_newCustom("goldfish_opengl_test", 28, "x86_64", "x86_64",
-                              true /* is google APIs */, AVD_PHONE);
+                              true /* is google APIs */, AVD_PHONE));
 
-    avdInfo_setCustomContentPath(android_avdInfo, sTestContentDir->path());
+    avdInfo_setCustomContentPath(getConsoleAgents()->settings->avdInfo(),
+                                 sTestContentDir->path());
     auto customHwIniPath = pj(sTestContentDir->path(), "hardware.ini");
 
     std::ofstream hwIniPathTouch(
@@ -283,7 +301,8 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
     hwIniPathTouch << "test ini";
     hwIniPathTouch.close();
 
-    avdInfo_setCustomCoreHwIniPath(android_avdInfo, customHwIniPath.c_str());
+    avdInfo_setCustomCoreHwIniPath(getConsoleAgents()->settings->avdInfo(),
+                                   customHwIniPath.c_str());
 
     System::get()->envSet("ANDROID_EMULATOR_LAUNCHER_DIR",
                           System::get()->getProgramDirectory());
@@ -324,10 +343,10 @@ GoldfishOpenglTestEnv::GoldfishOpenglTestEnv() {
 
     emugl::vkDispatch(!useHostGpu /* use test ICD if not with host gpu */);
 
-    android_hw->hw_gltransport_asg_writeBufferSize = 262144;
-    android_hw->hw_gltransport_asg_writeStepSize = 8192;
-    android_hw->hw_gltransport_asg_dataRingSize = 131072;
-    android_hw->hw_gltransport_drawFlushInterval = 800;
+    getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeBufferSize = 262144;
+    getConsoleAgents()->settings->hw()->hw_gltransport_asg_writeStepSize = 8192;
+    getConsoleAgents()->settings->hw()->hw_gltransport_asg_dataRingSize = 131072;
+    getConsoleAgents()->settings->hw()->hw_gltransport_drawFlushInterval = 800;
 
     EmuglConfig config;
 

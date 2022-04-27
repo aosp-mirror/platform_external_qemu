@@ -106,10 +106,10 @@ void parseRadioConfigForAdbCommands(AdbCommands& cmds) {
     // to figure out how to turn on/off meterness
 
     char* sysPath(path_dirname(
-            android_hw->disk_systemPartition_initPath &&
-                            android_hw->disk_systemPartition_initPath[0]
-                    ? android_hw->disk_systemPartition_initPath
-                    : android_hw->disk_systemPartition_path));
+            getConsoleAgents()->settings->hw()->disk_systemPartition_initPath &&
+                            getConsoleAgents()->settings->hw()->disk_systemPartition_initPath[0]
+                    ? getConsoleAgents()->settings->hw()->disk_systemPartition_initPath
+                    : getConsoleAgents()->settings->hw()->disk_systemPartition_path));
     std::string xmlfile = android::base::PathUtils::join(
             sysPath, "data", "misc", "emulator", "config", "radioconfig.xml");
 

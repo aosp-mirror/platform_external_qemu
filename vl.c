@@ -4612,7 +4612,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
               read_only = true;
               break;
             case QEMU_OPTION_restart_when_stalled:
-                if (avdInfo_getApiLevel(android_avdInfo) >= 30) {
+                if (avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >= 30) {
                     set_restart_when_stalled();
                 }
                 break;
@@ -4701,8 +4701,8 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             return 1;
         }
 
-        androidHwConfig_init(android_hw, 0);
-        androidHwConfig_read(android_hw, hw_ini);
+        androidHwConfig_init(getConsoleAgents()->settings->hw(), 0);
+        androidHwConfig_read(getConsoleAgents()->settings->hw(), hw_ini);
 
         /* If we're loading VM from a snapshot, make sure that the current HW config
          * matches the one with which the VM has been saved. */
@@ -4718,9 +4718,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         // writable ro.opengles.version,
         // opengl_alive
         {
-            int width  = android_hw->hw_lcd_width;
-            int height = android_hw->hw_lcd_height;
-            int depth  = android_hw->hw_lcd_depth;
+            int width  = getConsoleAgents()->settings->hw()->hw_lcd_width;
+            int height = getConsoleAgents()->settings->hw()->hw_lcd_height;
+            int depth  = getConsoleAgents()->settings->hw()->hw_lcd_depth;
 
             /* A bit of sanity checking */
             if (width <= 0 || height <= 0    ||
@@ -4736,7 +4736,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
             RendererConfig rendererConfig = getLastRendererConfig();
 
-            if (avdInfo_getApiLevel(android_avdInfo) >= 27) {
+            if (avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) >= 27) {
                 // api27 and up hardcoded pixel format ast RGBA8888, so only use 32bit
                 // todo: once api26 is refreshed, force 32bit on it as well. right now
                 // it is using 16bit hardcoded
@@ -4766,7 +4766,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         android_camera_service_init();
 
         /* Initialize multi-touch emulation. */
-        if (androidHwConfig_isScreenMultiTouch(android_hw)) {
+        if (androidHwConfig_isScreenMultiTouch(getConsoleAgents()->settings->hw())) {
             mts_port_create(NULL, getConsoleAgents()->user_event, getConsoleAgents()->display);
         }
 
@@ -4776,20 +4776,20 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         }
 
         /* Set the VM's max heap size, passed as a boot property */
-        if (android_hw->vm_heapSize > 0) {
+        if (getConsoleAgents()->settings->hw()->vm_heapSize > 0) {
             char  temp[64];
-            snprintf(temp, sizeof(temp), "%dm", android_hw->vm_heapSize);
+            snprintf(temp, sizeof(temp), "%dm", getConsoleAgents()->settings->hw()->vm_heapSize);
             boot_property_add("dalvik.vm.heapsize",temp);
         }
 
         /* From API 19 and above, the platform provides an explicit property for low memory devices. */
-        if (android_hw->hw_ramSize <= 512) {
+        if (getConsoleAgents()->settings->hw()->hw_ramSize <= 512) {
             boot_property_add("ro.config.low_ram", "true");
         }
 
-        boot_property_add_qemu_hw_mainkeys(android_hw->hw_mainKeys);
+        boot_property_add_qemu_hw_mainkeys(getConsoleAgents()->settings->hw()->hw_mainKeys);
 
-        if (android_hw->hw_gsmModem) {
+        if (getConsoleAgents()->settings->hw()->hw_gsmModem) {
             if (android_qemud_get_channel(ANDROID_QEMUD_GSM,
                                           &android_modem_serial_line) < 0) {
                 error_report("could not initialize qemud 'gsm' channel");
@@ -4797,7 +4797,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             }
         }
 
-        if (android_hw->hw_gps) {
+        if (getConsoleAgents()->settings->hw()->hw_gps) {
             if (android_qemud_get_channel(ANDROID_QEMUD_GPS,
                                           &android_gps_serial_line) < 0) {
                 error_report("could not initialize qemud 'gps' channel");
@@ -4805,7 +4805,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             }
         }
 
-        if (android_hw->hw_arc) {
+        if (getConsoleAgents()->settings->hw()->hw_arc) {
             if (cros_pipe_init() < 0) {
                 error_report("could not initialize qemud 'cros' channel");
                 return 1;
@@ -5314,7 +5314,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 read_only,
                 loadvm ? loadvm : android_get_quick_boot_name(),
                 machine_class->block_default_type,
-                android_avdInfo)) {
+                getConsoleAgents()->settings->avdInfo())) {
             return 1;
         }
     } else {
@@ -5417,10 +5417,10 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
              * to false for goldfish_events.
              */
             bool have_multitouch = !feature_is_enabled(kFeature_VirtioInput) &&
-                                        androidHwConfig_isScreenMultiTouch(android_hw);
+                                        androidHwConfig_isScreenMultiTouch(getConsoleAgents()->settings->hw());
 
             bool have_keyboard = !feature_is_enabled(kFeature_VirtioInput) &&
-                                        android_hw->hw_keyboard;
+                                        getConsoleAgents()->settings->hw()->hw_keyboard;
 
 
             /* TODO(digit): Should we set this up as command-line parameters
@@ -5436,15 +5436,15 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             // have the proper lifecycle. We then initialize the array with
             // values computed dynamically.
 #define LIST_GOLDFISH_EVENT_PROPS(X) \
-    X("have-dpad", android_hw->hw_dPad) \
-    X("have-trackball", android_hw->hw_trackBall) \
+    X("have-dpad", getConsoleAgents()->settings->hw()->hw_dPad) \
+    X("have-trackball", getConsoleAgents()->settings->hw()->hw_trackBall) \
     X("have-camera", \
-            strcmp(android_hw->hw_camera_back, "none") || \
-            strcmp(android_hw->hw_camera_front, "none")) \
+            strcmp(getConsoleAgents()->settings->hw()->hw_camera_back, "none") || \
+            strcmp(getConsoleAgents()->settings->hw()->hw_camera_front, "none")) \
     X("have-keyboard", have_keyboard) \
-    X("have-lidswitch", android_hw->hw_keyboard_lid) \
-    X("have-tabletmode", android_hw->hw_arc) \
-    X("have-touch", androidHwConfig_isScreenTouch(android_hw)) \
+    X("have-lidswitch", getConsoleAgents()->settings->hw()->hw_keyboard_lid) \
+    X("have-tabletmode", getConsoleAgents()->settings->hw()->hw_arc) \
+    X("have-touch", androidHwConfig_isScreenTouch(getConsoleAgents()->settings->hw())) \
     X("have-multitouch", have_multitouch)
 
 #define GOLDFISH_DECLARE_PROP(name, value) \

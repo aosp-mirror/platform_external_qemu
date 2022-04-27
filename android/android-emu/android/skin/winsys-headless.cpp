@@ -170,8 +170,8 @@ extern void skin_winsys_get_monitor_rect(SkinRect* rect) {
 
     rect->pos.x = 0;
     rect->pos.y = 0;
-    rect->size.w = android_hw->hw_lcd_width;
-    rect->size.h = android_hw->hw_lcd_height;
+    rect->size.w = getConsoleAgents()->settings->hw()->hw_lcd_width;
+    rect->size.h = getConsoleAgents()->settings->hw()->hw_lcd_height;
     D("%s: (%d,%d) %dx%d", __FUNCTION__, rect->pos.x, rect->pos.y, rect->size.w,
       rect->size.h);
 }
@@ -194,8 +194,8 @@ extern void skin_winsys_get_window_pos(int* x, int* y) {
 
 extern void skin_winsys_get_window_size(int* w, int* h) {
     D("skin_winsys_get_window_size (noqt)");
-    *w = android_hw->hw_lcd_width;
-    *h = android_hw->hw_lcd_height;
+    *w = getConsoleAgents()->settings->hw()->hw_lcd_width;
+    *h = getConsoleAgents()->settings->hw()->hw_lcd_height;
     D("%s: size: %d x %d", __FUNCTION__, *w, *h);
 }
 
@@ -208,8 +208,8 @@ extern void skin_winsys_get_frame_pos(int* x, int* y) {
 
 extern void skin_winsys_get_frame_size(int* w, int* h) {
     D("skin_winsys_get_frame_size (noqt)");
-    *w = android_hw->hw_lcd_width;
-    *h = android_hw->hw_lcd_height;
+    *w = getConsoleAgents()->settings->hw()->hw_lcd_width;
+    *h = getConsoleAgents()->settings->hw()->hw_lcd_height;
     D("%s: size: %d x %d", __FUNCTION__, *w, *h);
 }
 
@@ -285,8 +285,8 @@ extern void skin_winsys_quit_request() {
     }
     bool needRequestClose = false;
 
-    if (android_avdInfo) {
-        auto arch = (avdInfo_getTargetCpuArch(android_avdInfo));
+    if (getConsoleAgents()->settings->avdInfo()) {
+        auto arch = (avdInfo_getTargetCpuArch(getConsoleAgents()->settings->avdInfo()));
         if (!strcmp(arch, "x86") || !strcmp(arch, "x86_64")) {
         } else if (!getConsoleAgents()
                             ->settings->android_cmdLineOptions()

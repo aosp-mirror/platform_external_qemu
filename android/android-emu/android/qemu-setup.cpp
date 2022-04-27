@@ -366,7 +366,7 @@ bool android_ports_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     int adb_port = -1;
     int base_port = ANDROID_CONSOLE_BASEPORT;
     bool legacy_adb =
-            avdInfo_getAdbdCommunicationMode(android_avdInfo, isQemu2) ==
+            avdInfo_getAdbdCommunicationMode(getConsoleAgents()->settings->avdInfo(), isQemu2) ==
             ADBD_COMMUNICATION_MODE_LEGACY;
     if (android_op_ports) {
         int console_port = -1;
@@ -501,7 +501,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_host_memory_service_init();
 
     if (android_qemu_mode) {
-        AvdFlavor flavor = avdInfo_getAvdFlavor(android_avdInfo);
+        AvdFlavor flavor = avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo());
         /* initialize the car data emulation if the system image is a Android
          * Auto build */
         if (flavor == AVD_ANDROID_AUTO) {

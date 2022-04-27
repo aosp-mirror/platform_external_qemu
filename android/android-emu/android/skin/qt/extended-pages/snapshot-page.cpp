@@ -78,7 +78,7 @@
 #include "android/emulator-window.h"                 // for emulator_window_get
 #include "android/featurecontrol/FeatureControl.h"   // for isEnabled
 #include "android/featurecontrol/Features.h"         // for QuickbootFileBacked
-#include "android/globals.h"                         // for android_avdParams
+#include "android/globals.h"                         // for getConsoleAgents()->settings->avdParams()
 #include "android/metrics/MetricsReporter.h"         // for MetricsReporter
 #include "android/metrics/MetricsWriter.h"           // for android_studio
 #include "android/metrics/UiEventTracker.h"          // for UiEventTracker
@@ -307,7 +307,7 @@ SnapshotPage::SnapshotPage(QWidget* parent, bool standAlone)
         }
     } else {
         // Save QuickBoot snapshot on exit
-        QString avdNameWithUnderscores(android_hw->avd_name);
+        QString avdNameWithUnderscores(getConsoleAgents()->settings->hw()->avd_name);
 
         mUi->saveOnExitTitle->setText(
                 QString(tr("Save quick-boot state on exit for AVD: ")) +
@@ -532,18 +532,18 @@ void SnapshotPage::changeUiFromSaveOnExitSetting(SaveSnapshotOnExit choice) {
         case SaveSnapshotOnExit::Always:
             mUi->saveQuickBootOnExit->setCurrentIndex(
                     static_cast<int>(SaveSnapshotOnExitUiOrder::Always));
-            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            getConsoleAgents()->settings->avdParams()->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         case SaveSnapshotOnExit::Ask:
             mUi->saveQuickBootOnExit->setCurrentIndex(
                     static_cast<int>(SaveSnapshotOnExitUiOrder::Ask));
             // If we can't ask, we'll treat ASK the same as ALWAYS.
-            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            getConsoleAgents()->settings->avdParams()->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         case SaveSnapshotOnExit::Never:
             mUi->saveQuickBootOnExit->setCurrentIndex(
                     static_cast<int>(SaveSnapshotOnExitUiOrder::Never));
-            android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            getConsoleAgents()->settings->avdParams()->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         default:
             dwarning(
@@ -553,7 +553,7 @@ void SnapshotPage::changeUiFromSaveOnExitSetting(SaveSnapshotOnExit choice) {
                     __func__, (unsigned int)choice);
             mUi->saveQuickBootOnExit->setCurrentIndex(
                     static_cast<int>(SaveSnapshotOnExitUiOrder::Always));
-            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            getConsoleAgents()->settings->avdParams()->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
     }
 }
@@ -686,7 +686,7 @@ void SnapshotPage::on_snapshotDisplay_itemSelectionChanged() {
 static SaveSnapshotOnExit getSaveOnExitChoice() {
     // This setting belongs to the AVD, not to the entire Emulator.
     SaveSnapshotOnExit userChoice(SaveSnapshotOnExit::Always);
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -703,7 +703,7 @@ static SaveSnapshotOnExit getSaveOnExitChoice() {
 
 static void setSaveOnExitChoice(SaveSnapshotOnExit choice) {
     // Save for only this AVD
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    const char* avdPath = path_getAvdContentPath(getConsoleAgents()->settings->hw()->avd_name);
     if (avdPath) {
         QString avdSettingsFile =
                 avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
@@ -726,7 +726,7 @@ void SnapshotPage::on_saveQuickBootOnExit_currentIndexChanged(int uiIndex) {
                         1 + counts->quickboot_selection_no());
             });
             preferenceValue = SaveSnapshotOnExit::Never;
-            android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            getConsoleAgents()->settings->avdParams()->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         case SaveSnapshotOnExitUiOrder::Ask:
             MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
@@ -736,7 +736,7 @@ void SnapshotPage::on_saveQuickBootOnExit_currentIndexChanged(int uiIndex) {
                         1 + counts->quickboot_selection_ask());
             });
             preferenceValue = SaveSnapshotOnExit::Ask;
-            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            getConsoleAgents()->settings->avdParams()->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         default:
         case SaveSnapshotOnExitUiOrder::Always:
@@ -746,7 +746,7 @@ void SnapshotPage::on_saveQuickBootOnExit_currentIndexChanged(int uiIndex) {
                 counts->set_quickboot_selection_yes(
                         1 + counts->quickboot_selection_yes());
             });
-            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            getConsoleAgents()->settings->avdParams()->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             preferenceValue = SaveSnapshotOnExit::Always;
             break;
     }

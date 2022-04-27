@@ -16,6 +16,7 @@
 #include <stdio.h>                                   // for fprintf, NULL
 #include <string.h>
 
+#include "android/console.h"
 #include "android/featurecontrol/feature_control.h"  // for feature_is_enabled
 #include "android/globals.h"                         // for android_hw
 #include "android/skin/android_keycodes.h"           // for KEY_APPSWITCH
@@ -262,7 +263,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
 {
     if (ev->type == kEventTextInput) {
         SkinKeyMod mod = 0;
-        if (android_hw->hw_arc) {
+        if (getConsoleAgents()->settings->hw()->hw_arc) {
             /* skin_keyboard_process_unicode_event will generate capslock
              * key events based on text. Since we've already send shift
              * key events to guest in cros case, we have to make sure
@@ -276,7 +277,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             mod = sync_modifier_key(LINUX_KEY_LEFTSHIFT, kb, 0, 0, 1);
         }
 
-        if (!use_keycode_forwarding) {
+        if (!getConsoleAgents()->settings->use_keycode_forwarding()) {
             // TODO(digit): For each Unicode value in the input text.
             const uint8_t* text = ev->u.text.text;
             const uint8_t* end = text + sizeof(ev->u.text.text);
@@ -296,7 +297,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
               ev->u.text.keycode, ev->u.text.mod,
               skin_key_pair_to_string(ev->u.text.keycode, ev->u.text.mod));
 
-            if (android_hw->hw_arc) {
+            if (getConsoleAgents()->settings->hw()->hw_arc) {
                 map_cros_key(&ev->u.text.keycode);
             }
             skin_keyboard_add_key_event(kb, ev->u.text.keycode, 1);
@@ -304,7 +305,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             process_modifier_key(kb, ev, 0);
         }
 
-        if (android_hw->hw_arc && mod) {
+        if (getConsoleAgents()->settings->hw()->hw_arc && mod) {
             /* If the tracked shift status was pressed, restore it by
              * telling sync_modifier_key there is a shift pressed event.
              * Also send out shift pressed event to guest.
@@ -319,7 +320,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
         int keycode = ev->u.key.keycode;
         int mod = ev->u.key.mod;
 
-        if (android_hw->hw_arc) {
+        if (getConsoleAgents()->settings->hw()->hw_arc) {
             sync_modifier_key(LINUX_KEY_LEFTALT, kb, keycode, mod, down);
             sync_modifier_key(LINUX_KEY_LEFTCTRL, kb, keycode, mod, down);
             sync_modifier_key(LINUX_KEY_LEFTSHIFT, kb, keycode, mod, down);

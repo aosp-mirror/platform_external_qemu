@@ -99,7 +99,7 @@ static pixman_image_t* get_pixman_image_from_qframebuffer(QFrameBuffer* qf) {
 static void android_display_switch(DisplayChangeListener* dcl,
                                    DisplaySurface* new_surface) {
     if (QFrameBuffer* qfbuff = asDcl(dcl)->fb) {
-        if (android_hw->hw_arc) {
+        if (getConsoleAgents()->settings->hw()->hw_arc) {
             static pixman_image_t * qfb_image =
                     get_pixman_image_from_qframebuffer(qfbuff);
             pixman_image_composite(PIXMAN_OP_OVER,
@@ -174,7 +174,7 @@ bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
     if (!con) {
         return false;
     }
-    if (android_hw->hw_arc) {
+    if (getConsoleAgents()->settings->hw()->hw_arc) {
         /* We don't use goldfish_fb in cros now. so
          * just pick up last graphic console */
         int index = last_graphic_console_index();
@@ -215,7 +215,7 @@ bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
     dclOps.dpy_gfx_update = &android_display_update;
     dclOps.dpy_gfx_switch = &android_display_switch;
 
-    if (android_hw->hw_arc) {
+    if (getConsoleAgents()->settings->hw()->hw_arc) {
         dclOps.dpy_gl_ctx_create       = &android_gl_create_context;
         dclOps.dpy_gl_ctx_destroy      = &android_gl_destroy_context;
         dclOps.dpy_gl_ctx_make_current = &android_gl_make_context_current;
@@ -234,7 +234,7 @@ bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
 
 #if defined(__APPLE__) && defined(__arm64)
 extern "C" void android_sdl_display_early_init(DisplayOptions* opts) {
-    if (opts->gl && android_hw->hw_arc) {
+    if (opts->gl && getConsoleAgents()->settings->hw()->hw_arc) {
         display_opengl = 1;
     }
 }
@@ -259,7 +259,7 @@ static QemuDisplay qemu_display_android = {
 #else
 
 extern "C" void sdl_display_early_init(DisplayOptions* opts) {
-    if (opts->gl && android_hw->hw_arc) {
+    if (opts->gl && getConsoleAgents()->settings->hw()->hw_arc) {
         display_opengl = 1;
     }
 }

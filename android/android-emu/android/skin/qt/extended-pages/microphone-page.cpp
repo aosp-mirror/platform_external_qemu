@@ -17,7 +17,7 @@
 #include "android/avd/util.h"                         // for AVD_ANDROID_AUTO
 #include "android/console.h"                          // for getConsoleAgents
 #include "android/emulation/control/vm_operations.h"  // for QAndroidVmOpera...
-#include "android/globals.h"                          // for android_avdInfo
+#include "android/globals.h"                          // for getConsoleAgents()->settings->avdInfo()
 #include "android/hw-events.h"                        // for EV_KEY, EV_SW
 #include "android/metrics/UiEventTracker.h"           // for UiEventTracker
 #include "android/skin/event.h"                       // for SkinEvent, Skin...
@@ -40,12 +40,12 @@ MicrophonePage::MicrophonePage(QWidget* parent)
     // Hide it for now.
     mUi->mic_hookButton->hide();
 
-    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
+    if (avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) == AVD_ANDROID_AUTO) {
         // Android Auto doesn't support the key event used in voice assist button
         mUi->mic_voiceAssistButton->setHidden(true);
     }
 
-    if (avdInfo_getApiLevel(android_avdInfo) < 24) {
+    if (avdInfo_getApiLevel(getConsoleAgents()->settings->avdInfo()) < 24) {
         // Older api levels do not support the key event used in
         // voice assist button
         mUi->mic_voiceAssistButton->setHidden(true);
