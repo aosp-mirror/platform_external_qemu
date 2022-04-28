@@ -29,8 +29,9 @@ if(NOT WINDOWS_MSVC_X86_64)
         android/emulation/control/waterfall/AdbWaterfallService.cpp
         android/emulation/control/waterfall/SocketController.cpp
         android/emulation/control/waterfall/WaterfallService.cpp)
-  target_link_libraries(android-waterfall PRIVATE png
-                        PUBLIC protobuf::libprotobuf android-emu android-net grpc++)
+  target_link_libraries(
+    android-waterfall PRIVATE png PUBLIC protobuf::libprotobuf android-emu
+                                         android-net grpc++)
   target_include_directories(
     android-waterfall PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
                              ${CMAKE_CURRENT_SOURCE_DIR})
@@ -164,8 +165,8 @@ target_include_directories(
   android-ui-controller PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
                                 ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(android-ui-controller PUBLIC protobuf::libprotobuf android-emu
-                                                   grpc++)
+target_link_libraries(android-ui-controller PUBLIC protobuf::libprotobuf
+                                                   android-emu grpc++)
 
 if(NOT WINDOWS_MSVC_X86_64)
   target_link_libraries(android-grpc PRIVATE android-waterfall)
@@ -279,6 +280,11 @@ if(BLUETOOTH_EMULATION)
             emulated_bluetooth_packets.proto emulated_bluetooth_vhci.proto
     OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
     GENERATED BLUETOOTH_SERVICE_GRPC_SRC)
+
+  # Lets distribute the proto file
+  install(FILES emulated_bluetooth.proto emulated_bluetooth_device.proto
+                emulated_bluetooth_packets.proto emulated_bluetooth_vhci.proto
+          DESTINATION lib)
 
   android_add_library(
     TARGET grpc-emulated-bluetooth
