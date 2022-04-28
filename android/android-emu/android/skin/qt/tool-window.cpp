@@ -212,8 +212,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             "Ctrl+Shift+Down  PAN_DOWN\n"
             "Ctrl+Shift+Left  PAN_LEFT\n"
             "Ctrl+Shift+Right PAN_RIGHT\n"
-            "Ctrl+=     VOLUME_UP\n"
-            "Ctrl+-     VOLUME_DOWN\n"
             "Ctrl+P     POWER\n"
             "Ctrl+M     MENU\n"
             "Ctrl+T     TOGGLE_TRACKBALL\n"
@@ -223,9 +221,16 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             "Ctrl+Shift+H  HOME\n"
 #endif
             "Ctrl+O     OVERVIEW\n"
-            "Ctrl+Backspace BACK\n"
-            "Ctrl+Left ROTATE_LEFT\n"
-            "Ctrl+Right ROTATE_RIGHT\n";
+            "Ctrl+Backspace BACK\n";
+
+    if (!getConsoleAgents()->settings->avdInfo()
+        || avdInfo_getAvdFlavor(getConsoleAgents()->settings->avdInfo()) != AVD_WEAR) {
+        default_shortcuts += "Ctrl+=     VOLUME_UP\n";
+        default_shortcuts += "Ctrl+-     VOLUME_DOWN\n";
+        default_shortcuts += "Ctrl+Left ROTATE_LEFT\n";
+        default_shortcuts += "Ctrl+Right ROTATE_RIGHT\n";
+
+    }
 
     if (!android_foldable_any_folded_area_configured() &&
         !android_foldable_hinge_configured() &&
