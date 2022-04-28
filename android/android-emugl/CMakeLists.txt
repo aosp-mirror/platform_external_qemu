@@ -55,7 +55,7 @@ function(generate_emugen_lib LIBNAME LOCATION NAME SOURCES)
   else()
     target_link_libraries(${LIBNAME} PUBLIC android-emu GLSnapshot)
   endif()
-  target_link_libraries(${LIBNAME} PRIVATE emugl_base)
+  target_link_libraries(${LIBNAME} PRIVATE emugl_base android-emu-tracing)
 endfunction()
 
 if(NOT OPTION_GFXSTREAM_BACKEND)
