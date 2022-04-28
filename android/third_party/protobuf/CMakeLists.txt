@@ -72,6 +72,9 @@ add_definitions(-DANDROID_EMULATOR)
 include(${protobuf_source_dir}/cmake/libprotobuf-lite.cmake)
 include(${protobuf_source_dir}/cmake/libprotobuf.cmake)
 
+
+target_compile_options(libprotobuf PRIVATE -Wno-invalid-noreturn)
+target_compile_options(libprotobuf-lite PRIVATE -Wno-invalid-noreturn)
 if(NOT CROSSCOMPILE)
   include(${protobuf_source_dir}/cmake/libprotoc.cmake)
   include(${protobuf_source_dir}/cmake/protoc.cmake)
