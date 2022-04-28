@@ -165,6 +165,39 @@ goldfish_audio_buff_available( struct goldfish_audio_buff*  b )
     return b->length - b->offset;
 }
 
+static void goldfish_audio_in_callback(void *opaque, int avail);
+
+SWVoiceIn* goldfish_audio_get_voicein(struct goldfish_audio_state* s)
+{
+    SWVoiceIn* voice = s->voicein;
+    if (!voice && s->input) {
+        struct audsettings as;
+
+        as.freq       = 8000;
+        as.nchannels  = 1;
+        as.fmt        = AUD_FMT_S16;
+        as.endianness = AUDIO_HOST_ENDIANNESS;
+
+        voice = AUD_open_in(
+            &s->card,
+            NULL,
+            "goldfish_audio_in",
+            s,
+            goldfish_audio_in_callback,
+            &as);
+
+        if (voice) {
+            goldfish_audio_buff_init(&s->in_buff);
+        } else {
+            error_report("warning: opening audio input failed");
+        }
+
+        s->voicein = voice;
+    }
+
+    return voice;
+}
+
 static int
 goldfish_audio_buff_recv( struct goldfish_audio_buff*  b, int  avail, struct goldfish_audio_state*  s )
 {
@@ -172,7 +205,7 @@ goldfish_audio_buff_recv( struct goldfish_audio_buff*  b, int  avail, struct gol
     int     avail2 = (avail > missing) ? missing : avail;
     int     read;
 
-    read = AUD_read(s->voicein, b->data + b->offset, avail2 );
+    read = AUD_read(goldfish_audio_get_voicein(s), b->data + b->offset, avail2);
     if (read == 0)
         return 0;
 
@@ -191,13 +224,17 @@ goldfish_audio_buff_recv( struct goldfish_audio_buff*  b, int  avail, struct gol
 
 static void enable_audio(struct goldfish_audio_state *s, int enable)
 {
+    SWVoiceIn* voicein;
+
     if (s->voice != NULL) {
         goldfish_audio_buff_reset( &s->out_buffs[0] );
         goldfish_audio_buff_reset( &s->out_buffs[1] );
     }
 
-    if (s->voicein) {
-        AUD_set_active_in (s->voicein, (enable & AUDIO_INT_READ_BUFFER_FULL) != 0);
+    voicein = goldfish_audio_get_voicein(s);
+
+    if (voicein) {
+        AUD_set_active_in(voicein, (enable & AUDIO_INT_READ_BUFFER_FULL) != 0);
         goldfish_audio_buff_reset( &s->in_buff );
     }
     s->current_buffer = -1;
@@ -224,9 +261,8 @@ static uint64_t goldfish_audio_read(void *opaque, hwaddr offset, unsigned size)
             return ret;
 
 	case AUDIO_READ_SUPPORTED:
-            trace_goldfish_audio_memory_read("AUDIO_READ_SUPPORTED",
-              (s->voicein != NULL));
-            return (s->voicein != NULL);
+            trace_goldfish_audio_memory_read("AUDIO_READ_SUPPORTED", (s->input != 0));
+            return (s->input != 0);
 
 	case AUDIO_READ_BUFFER_AVAILABLE:
             trace_goldfish_audio_memory_read("AUDIO_READ_BUFFER_AVAILABLE",
@@ -424,7 +460,6 @@ static void goldfish_audio_realize(DeviceState *dev, Error **errp)
 {
     SysBusDevice *sbdev = SYS_BUS_DEVICE(dev);
     struct goldfish_audio_state *s = GOLDFISH_AUDIO(dev);
-    struct audsettings as;
 
     /* MMIO must be set up regardless of whether the initialization of input
      * and output voices is successful or not. Otherwise, an assertion error
@@ -443,6 +478,8 @@ static void goldfish_audio_realize(DeviceState *dev, Error **errp)
     AUD_register_card( "goldfish_audio", &s->card);
 
     if (s->output) {
+        struct audsettings as;
+
         as.freq = 44100;
         as.nchannels = 2;
         as.fmt = AUD_FMT_S16;
@@ -460,26 +497,6 @@ static void goldfish_audio_realize(DeviceState *dev, Error **errp)
         } else {
             goldfish_audio_buff_init( &s->out_buffs[0] );
             goldfish_audio_buff_init( &s->out_buffs[1] );
-        }
-    }
-
-    if (s->input) {
-        as.freq       = 8000;
-        as.nchannels  = 1;
-        as.fmt        = AUD_FMT_S16;
-        as.endianness = AUDIO_HOST_ENDIANNESS;
-        s->voicein = AUD_open_in (
-            &s->card,
-            NULL,
-            "goldfish_audio_in",
-            s,
-            goldfish_audio_in_callback,
-            &as
-            );
-        if (!s->voicein) {
-            error_report("warning: opening audio input failed");
-        } else {
-            goldfish_audio_buff_init( &s->in_buff );
         }
     }
 }
