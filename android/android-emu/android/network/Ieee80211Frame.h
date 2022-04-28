@@ -98,6 +98,7 @@ public:
     MacAddress addr3() const;
     MacAddress addr4() const;
     std::string toStr();
+    bool isValid() const;
     bool isData() const;
     bool isMgmt() const;
     bool isRobustMgmt() const;

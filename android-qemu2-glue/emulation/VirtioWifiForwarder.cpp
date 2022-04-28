@@ -222,13 +222,15 @@ int VirtioWifiForwarder::forwardFrame(const IOVector& iov) {
         return 0;
     }
     const MacAddress addr1 = frame->addr1();
-    // Ack every frame from local
-    ackLocalFrame(frame.get());
+
     if (frame->isProtected()) {
         if (!frame->decrypt(mHostapd->getCipherScheme())) {
             LOG(ERROR) << "Unable to decrypt WPA-protected frame.";
             return 0;
         }
+    }
+    if (frame->isValid()) {
+        ackLocalFrame(frame.get());
     }
     // Data frames
     if (frame->isData()) {
