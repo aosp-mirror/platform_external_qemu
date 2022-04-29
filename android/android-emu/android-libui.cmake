@@ -405,6 +405,7 @@ target_link_libraries(
           Qt${QT_MAJOR_VERSION}::Gui
           Qt${QT_MAJOR_VERSION}::Svg
           zlib
+          android-emu-location
           android-hw-config)
 
 if (QT_MAJOR_VERSION EQUAL 6)
@@ -417,9 +418,7 @@ endif()
 android_target_link_libraries(emulator-libui linux-x86_64 PRIVATE -lX11)
 android_target_link_libraries(emulator-libui linux-aarch64 PRIVATE -lpulse -lX11 -lxcb
                                                                    -lXau)
-android_target_link_libraries(emulator-libui darwin-x86_64
-                              PRIVATE "-framework Carbon")
-android_target_link_libraries(emulator-libui darwin-aarch64
+android_target_link_libraries(emulator-libui darwin
                               PRIVATE "-framework Carbon")
 # Windows-msvc specific dependencies. Need these for posix support.
 android_target_link_libraries(emulator-libui windows_msvc-x86_64
