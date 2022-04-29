@@ -394,6 +394,7 @@ typedef enum {
    KEY_CODE(BRL_DOT6    ,0x1f6)  \
    KEY_CODE(BRL_DOT7    ,0x1f7)  \
    KEY_CODE(BRL_DOT8    ,0x1f8)  \
+   KEY_CODE(VOICECOMMAND,0x246)  \
 
 #undef  KEY_CODE
 #define KEY_CODE(n,v)   GLUE(KEY_,n) = v,
