@@ -988,6 +988,8 @@ static int startEmulatorWithMinConfig(int argc,
 
     AvdInfo* avd = *avdInfoToOverride;
 
+    getConsoleAgents()->settings->inject_AvdInfo(avd);
+
     // Initialize the hw config to default values, so that code paths that
     // still rely on android_hw aren't reading uninitialized memory.
     androidHwConfig_init(hw, 0);
