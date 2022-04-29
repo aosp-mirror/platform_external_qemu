@@ -1449,6 +1449,9 @@ public:
         qemu_put_be32(file, mLastSubmitCmdCtx);
 
         saveFenceDeque(file, mFenceDeque);
+
+        auto ops = ensureAndGetServiceOps();
+        ops->guest_post_save(file);
     }
 
     void loadSnapshot(void* opaque) {
@@ -1491,6 +1494,8 @@ public:
         mLastSubmitCmdCtx = qemu_get_be32(file);
 
         loadFenceDeque(file);
+        auto ops = ensureAndGetServiceOps();
+        ops->guest_post_load(file);
     }
 
     void setResourceHvSlot(uint32_t res_handle, uint32_t slot) {
@@ -1693,8 +1698,9 @@ private:
         pipeCtxEntry.hasAddressSpaceHandle = qemu_get_be32(file);
 
         char force_close = 1;
-        void* hwpipe = malloc(sizeof(uint64_t));
-        pipeCtxEntry.hostPipe = ops->guest_load(file, (GoldfishHwPipe*)hwpipe, &force_close);
+        pipeCtxEntry.hostPipe = ops->guest_load(file,
+                                                (GoldfishHwPipe*)(uintptr_t)(pipeCtxEntry.ctxId),
+                                                &force_close);
 
         mContexts[pipeCtxEntry.ctxId] = pipeCtxEntry;
     }
@@ -1747,6 +1753,10 @@ private:
         // No need to save hva itself or its contents, as that should be
         // managed by address space device
         pipeResEntry.ctxId = qemu_get_be32(file);
+        auto context = mContexts.find(pipeResEntry.ctxId);
+        if (context != mContexts.end()) {
+            pipeResEntry.hostPipe = context->second.hostPipe;
+        }
         pipeResEntry.hvaSize = qemu_get_be64(file);
         pipeResEntry.hvaId = qemu_get_be64(file);
         pipeResEntry.hvSlot = qemu_get_be32(file);
