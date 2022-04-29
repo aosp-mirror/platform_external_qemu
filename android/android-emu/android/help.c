@@ -1897,17 +1897,6 @@ help_selinux(stralloc_t* out)
     );
 }
 
-#ifndef __linux__
-static void
-help_force_32bit(stralloc_t* out)
-{
-    PRINTF(
-    "  Use -force-32bit to use 32-bit emulator on 64-bit platforms\n\n"
-
-    );
-}
-#endif  // __linux__
-
 #ifdef __linux__
 static void
 help_use_system_libs(stralloc_t* out)

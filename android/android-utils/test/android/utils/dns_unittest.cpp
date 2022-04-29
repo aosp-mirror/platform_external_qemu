@@ -18,6 +18,7 @@
 #include <string>
 
 TEST(android_dns_parse_servers, IgnoreIpv6) {
+    android_socket_init();
     const int kMaxAddresses = 3;
     SockAddress addresses[kMaxAddresses] = {};
     const char kList[] = "127.0.0.1,::1,127.0.1.1";
@@ -29,6 +30,7 @@ TEST(android_dns_parse_servers, IgnoreIpv6) {
 }
 
 TEST(android_dns_get_system_servers, DumpList) {
+    android_socket_init();
     const size_t kMaxServers = ANDROID_MAX_DNS_SERVERS;
     SockAddress ips[kMaxServers];
     int count = android_dns_get_system_servers(ips, kMaxServers);

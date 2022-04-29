@@ -53,7 +53,6 @@
 #include "android/utils/compiler.h"
 #include "android/utils/debug.h"
 #include "android/utils/exec.h"
-#include "android/utils/host_bitness.h"
 #include "android/utils/panic.h"
 #include "android/utils/path.h"
 #include "android/utils/win32_cmdline_quote.h"
@@ -706,17 +705,14 @@ int main(int argc, char** argv) {
         }
     }
 
-    int hostBitness = android_getHostBitness();
+    static_assert(sizeof(void*) == 8, "We only support 64 bit binaries.");
+    int hostBitness = 64;
     int wantedBitness = hostBitness;
 
 #if defined(__linux__)
     // Linux binaries are compiled for 64 bit, so none of the 32 bit settings
     // will make any sense.
-    static_assert(sizeof(void*) == 8,
-                  "We only support 64 bit in linux (see: c5a2d4198cb)");
     force32bit = false;
-    hostBitness = 64;
-    wantedBitness = 64;
 #endif  // __linux__
 
     if (force32bit) {
