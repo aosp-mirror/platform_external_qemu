@@ -55,7 +55,7 @@ android_add_library(
       vulkan/VulkanStream.cpp)
 
 target_link_libraries(
-  OpenglRender_vulkan PUBLIC emugl_common OpenglRender_vulkan_cereal
+  OpenglRender_vulkan PUBLIC emugl_common OpenglRender_vulkan_cereal android-emu-tracing
   PRIVATE emugl_base GLcommon)
 android_target_compile_definitions(OpenglRender_vulkan windows
                                    PRIVATE -DVK_USE_PLATFORM_WIN32_KHR)
