@@ -43,9 +43,6 @@ typedef enum hwLcd_screenSize {
 
 ANDROID_BEGIN_HEADER
 
-/* Sets the boot property corresponding to the emulated abstract LCD density */
-extern void hwLcd_setBootProperty(int density);
-
 extern hwLcd_screenSize_t hwLcd_getScreenSize(int heightPx,
                                               int widthPx,
                                               int density);

@@ -61,15 +61,6 @@ hwLcd_mapDensity(int density) {
     return density;
 }
 
-
-void
-hwLcd_setBootProperty(int density)
-{
-#ifndef AEMU_MIN
-    boot_property_add_qemu_sf_lcd_density(hwLcd_mapDensity(density));
-#endif
-}
-
 hwLcd_screenSize_t hwLcd_getScreenSize(int heightPx, int widthPx, int density) {
     double screen_inches = sqrt(pow((double)heightPx / density, 2) +
                                pow((double)widthPx / density, 2));
